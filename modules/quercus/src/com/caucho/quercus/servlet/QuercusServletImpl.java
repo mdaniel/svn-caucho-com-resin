@@ -35,6 +35,7 @@ import com.caucho.quercus.QuercusErrorException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRequestAdapter;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.page.QuercusPage;
@@ -79,9 +80,23 @@ public class QuercusServletImpl
     _config = config;
     _servletContext = config.getServletContext();
 
+    checkServletAPIVersion();
+    
     getQuercus().setPwd(new FilePath(_servletContext.getRealPath("/")));
   }
 
+  /*
+   * Makes sure the servlet container supports Servlet API 2.4+.
+   */
+  protected void checkServletAPIVersion()
+  {
+    int major = _servletContext.getMajorVersion();
+    int minor = _servletContext.getMinorVersion();
+
+    if (major < 2 || major == 2 && minor < 4)
+      throw new QuercusRuntimeException(L.l("Quercus requires Servlet API 2.4+."));
+  }
+  
   /**
    * Service.
    */

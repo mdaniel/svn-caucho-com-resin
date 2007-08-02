@@ -481,8 +481,6 @@ public class Quercus
       return def;
 
     try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
       def = getModuleContext().getJavaClassDefinition(className);
 
       addJavaClassWrapper(className, def);
