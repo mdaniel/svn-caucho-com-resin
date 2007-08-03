@@ -90,12 +90,13 @@ public class FileModule extends AbstractQuercusModule {
   public static final int FNM_PERIOD = 4;
   public static final int FNM_CASEFOLD = 16;
 
-  public static final int GLOB_MARK = 2;
-  public static final int GLOB_NOSORT = 4;
-  public static final int GLOB_NOCHECK = 16;
-  public static final int GLOB_NOESCAPE = 64;
-  public static final int GLOB_BRACE = 1024;
-  public static final int GLOB_ONLYDIR = 8192;
+  public static final int GLOB_MARK = 1;
+  public static final int GLOB_NOSORT = 2;
+  public static final int GLOB_NOCHECK = 4;
+  public static final int GLOB_NOESCAPE = 8;
+  public static final int GLOB_BRACE = 16;
+  public static final int GLOB_ONLYDIR = 32;
+  public static final int GLOB_ERR = 64;
 
   public static final int PATHINFO_DIRNAME = 1;
   public static final int PATHINFO_BASENAME = 2;
@@ -1684,8 +1685,9 @@ public class FileModule extends AbstractQuercusModule {
     }
   }
 
-  private static boolean globImpl(Env env, String pattern, int flags, 
-                                  Path path, String prefix, ArrayValue result)
+  private static ArrayValue globImpl(Env env, String pattern, int flags, 
+                                     Path path, String prefix,
+                                     ArrayValue result)
   {
     String cwdPattern;
     String subPattern = null;
@@ -1716,7 +1718,7 @@ public class FileModule extends AbstractQuercusModule {
     String globRegex = globToRegex(cwdPattern, fnmatchFlags, doBraces);
 
     if (globRegex == null)
-      return false;
+      return null;
 
     Pattern compiledGlobRegex;
 
@@ -1725,7 +1727,7 @@ public class FileModule extends AbstractQuercusModule {
     } catch (PatternSyntaxException e) {
       log.log(Level.FINE, e.toString(), e);
 
-      return false;
+      return null;
     }
 
     String [] list;
@@ -1733,7 +1735,9 @@ public class FileModule extends AbstractQuercusModule {
     try {
       list = path.list();
     } catch (IOException e) {
-      return false;
+      log.log(Level.FINE, e.toString(), e);
+      
+      return null;
     }
 
     for (String entry : list) {
@@ -1755,7 +1759,16 @@ public class FileModule extends AbstractQuercusModule {
           if (firstSlash >= 0 && subPattern.length() > 0) {
             // ArrayValue.add only adds values when the argument is an
             // actual array
-            globImpl(env, subPattern, flags, entryPath, sb.toString(), result);
+            
+            boolean isNull = null == globImpl(env,
+                                              subPattern,
+                                              flags,
+                                              entryPath,
+                                              sb.toString(),
+                                              result);
+            
+            if ((flags & GLOB_ERR) != 0 && isNull)
+              return null;
           } else if ((flags & GLOB_MARK) != 0) {
             sb.append("/");
           }
@@ -1769,10 +1782,7 @@ public class FileModule extends AbstractQuercusModule {
       }
     }
 
-    if (result.getSize() == 0)
-      return false;
-
-    return true;
+    return result;
   }
 
   /**
@@ -1800,22 +1810,15 @@ public class FileModule extends AbstractQuercusModule {
 
     ArrayValue result = new ArrayValueImpl();
     
-    boolean success = globImpl(env, trimmedPattern, flags, path, "", result);
+    result = globImpl(env, trimmedPattern, flags, path, "", result);
 
-    if (! success) {
-      if ((flags & GLOB_NOCHECK) != 0) {
-        if (result.getSize() > 0)
-          result = new ArrayValueImpl();
+    if (result == null)
+      return BooleanValue.FALSE;
+    else if (result.getSize() == 0 && (flags & GLOB_NOCHECK) != 0)
+      result.put(pattern);
 
-        result.put(pattern);
-
-        return result;
-      } else
-        return BooleanValue.FALSE;
-    }
-
-    if ((flags & GLOB_NOSORT) == 0 && result.isArray())
-      ((ArrayValue) result).sort(ArrayValue.ValueComparator.CMP, true, true);
+    if ((flags & GLOB_NOSORT) == 0)
+      result.sort(ArrayValue.ValueComparator.CMP, true, true);
 
     return result;
   }
