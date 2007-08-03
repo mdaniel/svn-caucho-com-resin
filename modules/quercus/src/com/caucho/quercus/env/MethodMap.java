@@ -68,6 +68,11 @@ public class MethodMap<V>
 
   }
 
+  public boolean containsKey(String key)
+  {
+    return get(key) != null;
+  }
+
   public V get(int hash, char []buffer, int length)
   {
     int bucket = hash & (_entries.length - 1);

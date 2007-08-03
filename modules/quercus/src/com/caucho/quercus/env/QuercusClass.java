@@ -29,7 +29,9 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.StringLiteralExpr;
@@ -61,11 +63,16 @@ public class QuercusClass {
   private QuercusClass _parent;
 
   private AbstractFunction _constructor;
-  
+
   private AbstractFunction _get;
   private AbstractFunction _set;
   private AbstractFunction _call;
-  
+
+  private String _offsetExists;
+  private String _offsetGet;
+  private String _offsetSet;
+  private String _offsetUnset;
+
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
   
@@ -97,8 +104,17 @@ public class QuercusClass {
   
   private final HashMap<String,Var> _staticFieldMap
     = new HashMap<String,Var>();
-  
+
   public QuercusClass(ClassDef classDef, QuercusClass parent)
+  {
+    this(ModuleContext.getLocalContext(Thread.currentThread().getContextClassLoader()),
+         classDef,
+         parent);
+  }
+
+  public QuercusClass(ModuleContext moduleContext,
+                      ClassDef classDef,
+                      QuercusClass parent)
   {
     _classDef = classDef;
     _parent = parent;
@@ -121,6 +137,19 @@ public class QuercusClass {
 
     for (int i = classDefList.length - 1; i >= 0; i--) {
       classDefList[i].initClass(this);
+    }
+
+    // interfaces XXX: should these be added to _classDefList?
+    for (int i = classDefList.length - 1; i >= 0; i--) {
+
+      String[] ifaceList =  classDefList[i].getInterfaces();
+
+      for (String iface : ifaceList) {
+        ClassDef ifaceDef = moduleContext.findClass(iface);
+
+        if (ifaceDef != null)
+          ifaceDef.initClass(this);
+      }
     }
   }
 
@@ -151,6 +180,38 @@ public class QuercusClass {
   public void setConstructor(AbstractFunction fun)
   {
     _constructor = fun;
+  }
+
+  /**
+   * Set's a function to use for array access.
+   */
+  public void setOffsetExists(String offsetExists)
+  {
+    _offsetExists = offsetExists;
+  }
+
+  /**
+   * Set's a function to use for array access.
+   */
+  public void setOffsetGet(String offsetGet)
+  {
+    _offsetGet = offsetGet;
+  }
+
+  /**
+   * Set's a function to use for array access.
+   */
+  public void setOffsetSet(String offsetSet)
+  {
+    _offsetSet = offsetSet;
+  }
+
+  /**
+   * Set's a function to use for array access.
+   */
+  public void setOffsetUnset(String offsetUnset)
+  {
+    _offsetUnset = offsetUnset;
   }
 
   /**
@@ -251,7 +312,8 @@ public class QuercusClass {
    */
   public void addMethod(String name, AbstractFunction fun)
   {
-    _methodMap.put(name, fun);
+    if (!_methodMap.containsKey(name)) // php/4a20
+      _methodMap.put(name, fun);
   }
 
   /**
@@ -452,6 +514,69 @@ public class QuercusClass {
   public AbstractFunction findConstructor()
   {
     return _constructor;
+  }
+
+
+  //
+  // Array
+  //
+
+  private Value arrayerror(Env env, Location location, ObjectValue obj)
+  {
+    env.error(location, L.l("Can't use object '{0}' as array", obj.getName()));
+
+    return NullValue.NULL;
+  }
+
+  public Value get(Env env, ObjectValue obj, Value key)
+  {
+    return get(env, Location.UNKNOWN, obj, key);
+  }
+
+  public Value get(Env env,
+                   Location location,
+                   ObjectValue obj,
+                   Value key)
+  {
+    if (_offsetGet != null)
+      return obj.findFunction(_offsetGet).callMethod(env, obj, key);
+
+    return arrayerror(env, location, obj);
+  }
+
+  public Value put(Env env, ObjectValue obj, Value key, Value value)
+  {
+    return put(env, Location.UNKNOWN, obj, key, value);
+  }
+
+  public Value put(Env env,
+                   Location location,
+                   ObjectValue obj,
+                   Value key,
+                   Value value)
+  {
+    if (_offsetSet != null)
+      return obj.findFunction(_offsetSet).callMethod(env, obj, key, value);
+
+    return arrayerror(env, location, obj);
+  }
+
+  public Value put(Env env, ObjectValue obj, Value value)
+  {
+    return put(env, Location.UNKNOWN, obj, value);
+  }
+
+  public Value put(Env env, Location location, ObjectValue obj, Value value)
+  {
+    return put(env, location, obj, UnsetValue.UNSET, value);
+  }
+
+  public Value remove(Env env, ObjectValue obj, Value key)
+  {
+    if (_offsetUnset != null)
+      return obj.findFunction(_offsetUnset).callMethod(env, obj, key);
+
+    return arrayerror(env, Location.UNKNOWN, obj);
   }
 
   //

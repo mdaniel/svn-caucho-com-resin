@@ -262,51 +262,50 @@ public class ObjectExtValue extends ObjectValue
     return null;
   }
 
+  @Override
   public Value get(Value key)
   {
-    Env.getInstance().error(L.l("Can't use object '{0}' as array", getName()));
-    
-    return NullValue.NULL;
-    
     // php/066q vs. php/0906
     //return getField(null, key.toString());
+
+    return _cl.get(Env.getInstance(), this, key);
   }
-  
+
+  @Override
   public Value get(Env env, Location location, Value key)
   {
-    env.error(location, L.l("Can't use object '{0}' as array", getName()));
-    
-    return NullValue.NULL;
+    return _cl.get(env, location, this, key);
   }
 
-  public Value put(Value index, Value value)
+  @Override
+  public Value put(Value key, Value value)
   {
     // php/0d94
-    
-    Env.getInstance().error(L.l("Can't use object '{0}' as array", getName()));
-    
-    return NullValue.NULL;
-  }
-  
-  public Value put(Env env, Location location, Value index, Value value)
-  {
-    env.error(location, L.l("Can't use object '{0}' as array", getName()));
-    
-    return NullValue.NULL;
+
+    return _cl.put(Env.getInstance(), this, key, value);
   }
 
+  @Override
+  public Value put(Env env, Location location, Value key, Value value)
+  {
+    return _cl.put(env, location, this, key, value);
+  }
+
+  @Override
   public Value put(Value value)
   {
-    Env.getInstance().error(L.l("Can't use object '{0}' as array", getName()));
-
-    return NullValue.NULL;
+    return _cl.put(Env.getInstance(), this, value);
   }
-  
+
+  @Override
   public Value put(Env env, Location location, Value value)
   {
-    env.error(location, L.l("Can't use object '{0}' as array", getName()));
+    return _cl.put(env, location, this, value);
+  }
 
-    return NullValue.NULL;
+  public Value remove(Value key)
+  {
+    return _cl.remove(Env.getInstance(), this, key);
   }
 
   /**

@@ -32,6 +32,10 @@ package com.caucho.quercus.program;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Construct;
+import com.caucho.quercus.annotation.OffsetGet;
+import com.caucho.quercus.annotation.OffsetUnset;
+import com.caucho.quercus.annotation.OffsetExists;
+import com.caucho.quercus.annotation.OffsetSet;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
@@ -47,6 +51,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -95,6 +100,11 @@ public class JavaClassDef extends ClassDef {
   private JavaMethod __setField = null;
   private JavaMethod __call = null;
 
+  private String _offsetExists;
+  private String _offsetGet;
+  private String _offsetSet;
+  private String _offsetUnset;
+
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
 
@@ -107,7 +117,7 @@ public class JavaClassDef extends ClassDef {
 
   public JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
-    super(name, null, new String[0]);
+    super(name, null, createInterfaceList(moduleContext, type));
 
     _moduleContext = moduleContext;
     _name = name;
@@ -116,6 +126,26 @@ public class JavaClassDef extends ClassDef {
     _isAbstract = Modifier.isAbstract(type.getModifiers());
     _isArray = type.isArray();
     _isInterface = type.isInterface();
+  }
+
+  private static String[] createInterfaceList(ModuleContext moduleContext,
+                                              Class type)
+  {
+    Class[] ifaces = type.getInterfaces();
+
+    if (ifaces == null)
+      return new String[] {};
+
+    ArrayList<String> ifaceNames = new ArrayList<String>();
+
+    for (Class iface : ifaces) {
+
+      JavaClassDef javaClassDef = moduleContext.getJavaClassDefinition(iface);
+      if (javaClassDef != null)
+        ifaceNames.add(javaClassDef.getName());
+    }
+
+    return ifaceNames.toArray(new String[ifaceNames.size()]);
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
@@ -712,21 +742,33 @@ public class JavaClassDef extends ClassDef {
   public void initClass(QuercusClass cl)
   {
     init();
-    
+
     if (_cons != null) {
       cl.setConstructor(_cons);
-      cl.addMethod("__construct", _cons); 
+      cl.addMethod("__construct", _cons);
     }
 
     if (__get != null)
       cl.setGet(__get);
-    
+
     for (AbstractJavaMethod value : _functionMap.values()) {
       cl.addMethod(value.getName(), value);
     }
 
     if (__call != null)
       cl.setCall(__call);
+
+    if (_offsetExists != null)
+      cl.setOffsetExists(_offsetExists);
+
+    if (_offsetGet != null)
+      cl.setOffsetGet(_offsetGet);
+
+    if (_offsetSet != null)
+      cl.setOffsetSet(_offsetSet);
+
+    if (_offsetUnset != null)
+      cl.setOffsetUnset(_offsetUnset);
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
@@ -919,6 +961,21 @@ public class JavaClassDef extends ClassDef {
         } else if ("__setField".equals(methodName)) {
           __setField = new JavaMethod(moduleContext, method);
         }
+      }
+
+      for (Annotation annotation : method.getAnnotations()) {
+        if (annotation.annotationType() == OffsetExists.class)
+          _offsetExists = method.getName();
+
+        if (annotation.annotationType() == OffsetGet.class) {
+          _offsetGet = method.getName();
+        }
+
+        if (annotation.annotationType() == OffsetSet.class)
+          _offsetSet = method.getName();
+
+        if (annotation.annotationType() == OffsetUnset.class)
+          _offsetUnset = method.getName();
       }
     }
 

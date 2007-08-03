@@ -1754,6 +1754,7 @@ public class QuercusParser {
     Scope oldScope = _scope;
 
     try {
+
       _quercusClass = oldScope.addClass(name, parentName, ifaceList);
 
       if ((modifiers & M_ABSTRACT) != 0)

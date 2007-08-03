@@ -33,7 +33,8 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.L10N;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Represents the introspected static function information.

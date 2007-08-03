@@ -3142,7 +3142,7 @@ public class Env {
       }
     }
 
-    qClass = new QuercusClass(def, parent);
+    qClass = new QuercusClass(getModuleContext(), def, parent);
     qClass.validate(this);
 
     _classCache.put(key, new SoftReference<QuercusClass>(qClass));

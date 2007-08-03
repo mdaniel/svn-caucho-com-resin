@@ -43,7 +43,7 @@ public class ObjectMethod extends Function {
   private static final Logger log = Logger.getLogger(ObjectMethod.class.getName());
   private static final L10N L = new L10N(ObjectMethod.class);
 
-  private String _className;
+  private ClassDef _quercusClass;
 
   ObjectMethod(Location location,
                InterpretedClassDef quercusClass,
@@ -54,7 +54,7 @@ public class ObjectMethod extends Function {
   {
     super(location, name, info, args, statements);
 
-    _className = quercusClass.getName();
+    _quercusClass = quercusClass;
   }
 
   public ObjectMethod(ExprFactory exprFactory,
@@ -66,15 +66,16 @@ public class ObjectMethod extends Function {
                       ArrayList<Statement> statementList)
   {
     super(exprFactory, location, name, info, argList, statementList);
-
-    _className = quercusClass.getName();
+    _quercusClass = quercusClass;
   }
 
+  @Override
   public String getClassName()
   {
-    return _className;
+    return _quercusClass.getName();
   }
 
+  @Override
   public boolean isObjectMethod()
   {
     return true;

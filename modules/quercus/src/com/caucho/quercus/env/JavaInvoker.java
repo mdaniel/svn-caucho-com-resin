@@ -31,7 +31,8 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.*;
-import com.caucho.quercus.expr.*;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.module.ModuleContext;
@@ -75,6 +76,7 @@ abstract public class JavaInvoker
   private boolean _isCallUsesVariableArgs;
   private boolean _isCallUsesSymbolTable;
 
+
   /**
    * Creates the statically introspected function.
    */
@@ -109,17 +111,14 @@ abstract public class JavaInvoker
       boolean returnNullAsFalse = false;
 
       for (Annotation ann : _methodAnn) {
-        if (VariableArguments.class.isAssignableFrom(ann.annotationType())) {
+        if (VariableArguments.class.isAssignableFrom(ann.annotationType()))
           callUsesVariableArgs = true;
-        }
 
-        if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType())) {
+        if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType()))
           callUsesSymbolTable = true;
-        }
 
-        if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType())) {
+        if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType()))
           returnNullAsFalse = true;
-        }
       }
 
       _isCallUsesVariableArgs = callUsesVariableArgs;

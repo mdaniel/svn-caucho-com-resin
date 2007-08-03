@@ -45,6 +45,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.logging.*;
 
 /**
@@ -113,7 +114,7 @@ public class ModuleContext
     _exprFactory = new ExprFactory();
     
     _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
-    _stdClass = new QuercusClass(_stdClassDef, null);
+    _stdClass = new QuercusClass(this, _stdClassDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
     _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
@@ -265,7 +266,7 @@ public class ModuleContext
   }
 
   /**
-   * Adds a java class
+   * Gets or creates a JavaClassDef for the given class name.
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
@@ -302,6 +303,20 @@ public class ModuleContext
       throw new QuercusRuntimeException(e);
     }
   }
+
+  /**
+   * Returns a javaClassDef for the given class or null if there is not one.
+   */
+  public JavaClassDef getJavaClassDefinition(Class javaClass)
+  {
+    for (JavaClassDef javaClassDef : _javaClassWrappers.values()) {
+      if (javaClassDef.getType() == javaClass)
+        return javaClassDef;
+    }
+
+    return null;
+  }
+
 
   protected JavaClassDef createDefaultJavaClassDef(String className,
 						   Class type)
