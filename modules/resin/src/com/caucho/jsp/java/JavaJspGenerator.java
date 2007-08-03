@@ -561,8 +561,8 @@ public class JavaJspGenerator extends JspGenerator {
 
     // disable static pages.  No longer needed and complicates
     // precompilation
-    if (isGenerateStatic() &&
-	! _parseState.getJspPropertyGroup().getStaticPageGeneratesClass()) {
+    if (isGenerateStatic()
+        && ! _parseState.getJspPropertyGroup().getStaticPageGeneratesClass()) {
       generateStatic();
     }
     else {

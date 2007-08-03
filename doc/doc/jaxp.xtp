@@ -32,9 +32,11 @@ a different parser than the default one.
 </td></tr></deftable>
 
 <deftable title="Resin XML SAX parsers">
+<tr>
+  <td>javax.xml.parsers.SAXParserFactory</td>
+  <td>com.caucho.xml.parsers.XmlSAXParserFactory</td>
+</tr>
 <tr><td>javax.xml.parsers.SAXParserFactory
-    </td><td>com.caucho.xml.parsers.XmlSAXParserFactory
-</td></tr><tr><td>javax.xml.parsers.SAXParserFactory
     </td><td>com.caucho.xml.parsers.HtmlSAXParserFactory
 </td></tr><tr><td>javax.xml.parsers.SAXParserFactory
     </td><td>com.caucho.xml.parsers.LooseXmlSAXParserFactory
