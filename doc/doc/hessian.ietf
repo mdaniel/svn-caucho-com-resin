@@ -11,7 +11,7 @@
 <?rfc iprnotified="no" ?>
 
   <front>
-    <title>Hessian Web Services Protocol</title>
+    <title>Hessian 2.0 Web Services Protocol</title>
     <author initials="S." surname="Ferguson" fullname="Scott Ferguson">
       <organization>Caucho Technology Inc.</organization>
       <address>
@@ -38,7 +38,7 @@
         <email>emil@caucho.com</email>
       </address>
     </author>
-    <date month="July" year="2007" />
+    <date month="August" year="2007" />
   </front>
   
   <middle>
@@ -284,9 +284,9 @@ binary ::= b b1 b0 &lt;binary-data> binary
           </t>
         </section>
 
-        <figure anchor="binary_examples">
-          <preamble>Binary data examples</preamble>
-          <artwork>
+        <section title="Binary Examples">
+          <figure anchor="binary_examples">
+            <artwork>
 x20               # zero-length binary data
 
 x23 x01 x02 x03   # 3 byte data
@@ -294,8 +294,9 @@ x23 x01 x02 x03   # 3 byte data
 B x10 x00 ....    # 4k final chunk of data
 
 b x04 x00 ....    # 1k non-final chunk of data
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="boolean" anchor="#boolean">
@@ -309,13 +310,14 @@ boolean ::= T
 
         <t>The byte 'F' represents false and the byte 'T' represents true.</t>
 
-        <figure anchor="boolean_examples">
-          <preamble>Boolean data examples</preamble>
-          <artwork>
+        <section title="Boolean Examples">
+          <figure anchor="boolean_examples">
+            <artwork>
 T   # true
 F   # false
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="date" anchor="#date">
@@ -331,12 +333,13 @@ date ::= d b7 b6 b5 b4 b3 b2 b1 b0
           GMT.
         </t>
 
-        <figure anchor="date_examples">
-          <preamble>Date data examples</preamble>
-          <artwork>
+        <section title="Date Examples">
+          <figure anchor="date_examples">
+            <artwork>
 d x00 x00 x00 xd0 x4b x92 x84 xb8   # 2:51:31 May 8, 1998 GMT
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="double" anchor="#double">
@@ -385,9 +388,9 @@ double ::= D b7 b6 b5 b4 b3 b2 b1 b0
           </t>
         </section>
 
-        <figure anchor="double_examples">
-          <preamble>Double data examples</preamble>
-          <artwork>
+        <section title="Double Examples">
+          <figure anchor="double_examples">
+            <artwork>
 x67          # 0.0
 x68          # 1.0
 
@@ -400,8 +403,9 @@ x70 x80 x00  # -32768.0
 x70 xff xff  # 32767.0
 
 D x40 x28 x80 x00 x00 x00 x00 x00  # 12.25
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="int" anchor="#int">
@@ -443,9 +447,9 @@ int ::= 'I' b3 b2 b1 b0
           </t>
         </section>
 
-        <figure anchor="integer_examples">
-          <preamble>Integer data examples</preamble>
-          <artwork>
+        <section title="Integer Examples">
+          <figure anchor="integer_examples">
+            <artwork>
 x90                # 0
 x80                # -16
 xbf                # 47
@@ -461,8 +465,9 @@ xd7 xff xff        # 262143
 
 I x00 x00 x00 x00  # 0
 I x00 x00 x01 x2c  # 300
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="list" anchor="#list">
@@ -601,9 +606,9 @@ long ::= L b7 b6 b5 b4 b3 b2 b1 b0
           </t>
         </section>
 
-        <figure anchor="long_examples">
-          <preamble>Long data examples</preamble>
-          <artwork>
+        <section title="Long Examples">
+          <figure anchor="long_examples">
+            <artwork>
 xe0                  # 0
 xd8                  # -8
 xef                  # 15
@@ -621,8 +626,9 @@ x77 x00 x00 x00 x00  # 0
 x77 x00 x00 x01 x2c  # 300
 
 L x00 x00 x00 x00 x00 x00 x01 x2c  # 300
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="map" anchor="#map">
@@ -861,9 +867,10 @@ ref ::= R b3 b2 b1 b0
           object is numbered '0'.
         </t>
 
-        <figure anchor="ref_examples">
-          <preamble>Ref data example: circular list</preamble>
-          <artwork>
+        <section title="Ref Examples">
+          <figure anchor="ref_examples">
+            <preamble>Circular list</preamble>
+            <artwork>
 list = new LinkedList();
 list.head = 1;
 list.tail = list;
@@ -876,8 +883,9 @@ M t x00 x0a LinkedList
   S x00 x04 tail
   R x00 x00 x00 x00
   z
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
 
         <t>
           ref only refers to list and map elements.  string and binary, in 
@@ -899,13 +907,15 @@ remote ::= r t b1 b0 &lt;type-name> string
           string representing the object's URL.
         </t>
 
-        <figure anchor="remote_examples">
-          <preamble>Remote data example: EJB Session Reference</preamble>
-          <artwork>
+        <section title="Remote Examples">
+          <figure anchor="remote_examples">
+            <preamble>EJB Session Reference</preamble>
+            <artwork>
 r t x00 x0c test.TestObj
   S x00 x24 http://slytherin/ejbhome?id=69Xm8-zW
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="string" anchor="#string">
@@ -938,16 +948,17 @@ string ::= s b1 b0 &lt;utf-8-data> string
           </t>
         </section>
 
-        <figure anchor="string_examples">
-          <preamble>String data examples</preamble>
-          <artwork>
+        <section title="String Examples">
+          <figure anchor="string_examples">
+            <artwork>
 x00             # "", empty string
 x05 hello       # "hello"
 x01 xc3 x83     # "\u00c3"
 
 S x00 x05 hello # "hello"
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
       </section>
 
       <section title="xml" anchor="#xml">
@@ -970,12 +981,13 @@ xml ::= x b1 b0 &lt;utf-8-data> xml
           characters, which may be different than the number of bytes.
         </t>
 
-        <figure anchor="xml_examples">
-          <preamble>XML data examples</preamble>
-          <artwork>
+        <section title="XML Examples">
+          <figure anchor="xml_examples">
+            <artwork>
 X x00 x10 &lt;top&gt;hello&lt;/top&gt;
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
 
         <t>
           Because this document does not define the language mapping,
