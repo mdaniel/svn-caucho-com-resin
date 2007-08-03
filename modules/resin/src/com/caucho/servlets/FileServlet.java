@@ -644,10 +644,7 @@ public class FileServlet extends GenericServlet {
 	    
 	CharBuffer cb = new CharBuffer();
 	cb.append('"');
-	long hash = lastModified;
-	hash = hash * 0x5deece66dl + 0xbl + (hash >>> 32) * 137;
-	hash += length;
-	Base64.encode(cb, hash);
+	Base64.encode(cb, _path.getCrc64());
 	cb.append('"');
 	_etag = cb.close();
 

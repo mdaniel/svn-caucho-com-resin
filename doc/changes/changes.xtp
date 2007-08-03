@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>FileServlet needs to use crc64 as etag (rep by Rafael Munoz)</li>
 <li>Added full-url-regexp to rewrite-dispatch for url+query-string matching (#1833, rep by sf)</li>
 <li>welcome-file-list should not affect getRequestURL (#1848, rep by Yaroslav Sokolov)</li>
 <li>jsp: add support for import="static qa.Foo.*" (#1892, rep by Matthew Schmidt)</li>

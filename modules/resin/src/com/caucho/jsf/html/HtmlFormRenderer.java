@@ -255,6 +255,8 @@ class HtmlFormRenderer extends BaseRenderer
 
     if (title != null)
       out.writeAttribute("title", title, "title");
+    
+    out.write("\n");
 
     int childCount = component.getChildCount();
 
@@ -273,7 +275,7 @@ class HtmlFormRenderer extends BaseRenderer
     out.writeAttribute("name", component.getClientId(context), "name");
     //out.writeAttribute("value", "true", "value");
     out.endElement("input");
-
+    out.write("\n");
   }
 
   /**
@@ -296,5 +298,6 @@ class HtmlFormRenderer extends BaseRenderer
 
     ResponseWriter out = context.getResponseWriter();
     out.endElement("form");
+    out.write("\n");
   }
 }

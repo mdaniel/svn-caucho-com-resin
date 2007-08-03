@@ -147,7 +147,12 @@ public class Taglib extends TagLibraryInfo {
     for (int i = 0; i < tagList.size(); i++) {
       TldTag tag = tagList.get(i);
 
-      TagInfo tagInfo = new TagInfoImpl(tag, this);
+      TagInfo tagInfo;
+      
+      if (tag.getBaseTag() != null)
+	tagInfo = new TagInfoImpl(tag, tag.getBaseTag(), this);
+      else
+	tagInfo = new TagInfoImpl(tag, this);
 
       tags[i] = tagInfo;
     }

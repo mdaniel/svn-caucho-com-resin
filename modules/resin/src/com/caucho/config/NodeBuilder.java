@@ -462,7 +462,9 @@ public class NodeBuilder {
 
       QDocument doc = (QDocument) qelt.getOwnerDocument();
 
-      if (doc == _dependDocument)
+      if (doc == null)
+	return null;
+      else if (doc == _dependDocument)
         return _dependList;
 
       _dependDocument = doc;

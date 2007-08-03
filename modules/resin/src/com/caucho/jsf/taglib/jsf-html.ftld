@@ -1,0 +1,28 @@
+<jsf-taglib xmlns="http://caucho.com/ns/resin">
+  <uri>http://java.sun.com/jsf/html</uri>
+
+  <jsf-tag>
+    <name>form</name>
+    <component-class>javax.faces.component.html.HtmlForm</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>inputText</name>
+    <component-class>javax.faces.component.html.HtmlInputText</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>outputText</name>
+    <component-class>javax.faces.component.html.HtmlOutputText</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>panelGrid</name>
+    <component-class>javax.faces.component.html.HtmlPanelGrid</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>panelGroup</name>
+    <component-class>javax.faces.component.html.HtmlPanelGroup</component-class>
+  </jsf-tag>
+</jsf-taglib>

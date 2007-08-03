@@ -63,7 +63,7 @@ public class RenderKitFactoryImpl extends RenderKitFactory {
       throw new NullPointerException();
     if (renderKit == null)
       throw new NullPointerException();
-    
+
     _renderKitMap.put(name, renderKit);
   }
 

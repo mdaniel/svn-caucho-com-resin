@@ -144,6 +144,11 @@ public class TldPreload {
       listener.register(app);
     }
   }
+  
+  public boolean isJsf()
+  {
+    return false;
+  }
 
   public String toString()
   {

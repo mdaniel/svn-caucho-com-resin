@@ -39,6 +39,7 @@ import javax.faces.render.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.servlet.jsp.jstl.core.*;
 
 import com.caucho.jsf.context.*;
 import com.caucho.util.*;
@@ -91,6 +92,38 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null)
       throw new NullPointerException();
+
+    ExternalContext extContext = context.getExternalContext();
+
+    HttpServletRequest req = (HttpServletRequest) extContext.getRequest();
+
+    String contentType = req.getHeader("Content-Type");
+
+    if (contentType != null) {
+      int p = contentType.indexOf("charset=");
+
+      if (p > 0) {
+	int q = contentType.indexOf(';', p + 1);
+
+	String charset;
+
+	if (q > 0)
+	  charset = contentType.substring(p, q).trim();
+	else
+	  charset = contentType.substring(p).trim();
+
+	return charset;
+      }
+    }
+
+    if (extContext.getSession(false) != null) {
+      Map<String,Object> sessionMap = extContext.getSessionMap();
+
+      Object value = sessionMap.get(CHARACTER_ENCODING_KEY);
+
+      if (value != null)
+	return value.toString();
+    }
     
     return "utf-8";
   }
@@ -100,6 +133,23 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null)
       throw new NullPointerException();
+
+    ExternalContext extContext = context.getExternalContext();
+    Map requestMap = extContext.getRequestMap();
+
+    String id;
+    
+    id = (String) requestMap.get(ResponseStateManager.RENDER_KIT_ID_PARAM);
+
+    if (id != null)
+      return id;
+
+    Application app = context.getApplication();
+
+    id = app.getDefaultRenderKitId();
+
+    if (id != null)
+      return id;
     
     return RenderKitFactory.HTML_BASIC_RENDER_KIT;
   }
@@ -110,15 +160,55 @@ public class JspViewHandler extends ViewHandler
     if (context == null)
       throw new NullPointerException();
     
+    if (viewId != null)
+      viewId = convertViewId(context, viewId);
+    else
+      viewId = createViewId(context);
+
+    ExternalContext extContext = context.getExternalContext();
+    String servletPath = extContext.getRequestServletPath();
+
+    if (viewId == null
+	|| viewId.equals(servletPath)
+	|| (servletPath == null
+	    && viewId.equals(extContext.getRequestPathInfo()))) {
+      try {
+	extContext.redirect(extContext.getRequestContextPath());
+      } catch (IOException e) {
+	throw new FacesException(e);
+      }
+
+      context.renderResponse();
+      context.responseComplete();
+
+      return null;
+    }
+    
     UIViewRoot viewRoot = new UIViewRoot();
 
-    if (viewId != null)
-      viewRoot.setViewId(convertViewId(context, viewId));
-    else
-      viewRoot.setViewId(createViewId(context));
+    viewRoot.setViewId(viewId);
 
-    viewRoot.setRenderKitId(calculateRenderKitId(context));
-    viewRoot.setLocale(calculateLocale(context));
+    UIViewRoot oldView = context.getViewRoot();
+
+    String renderKitId = null;
+
+    if (oldView != null)
+      renderKitId = oldView.getRenderKitId();
+    
+    if (renderKitId == null)
+      renderKitId = calculateRenderKitId(context);
+
+    viewRoot.setRenderKitId(renderKitId);
+    
+    Locale locale = null;
+
+    if (oldView != null)
+      locale = oldView.getLocale();
+
+    if (locale == null)
+      locale = calculateLocale(context);
+    
+    viewRoot.setLocale(locale);
 
     return viewRoot;
   }
@@ -203,6 +293,9 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null || viewId == null)
       throw new NullPointerException();
+
+    if (! viewId.startsWith("/"))
+      throw new IllegalArgumentException();
     
     ExternalContext extContext = context.getExternalContext();
 
@@ -230,15 +323,6 @@ public class JspViewHandler extends ViewHandler
       return (contextPath + viewId.substring(0, lastDot)
               + path.substring(path.indexOf('.')));
     }
-
-    /*
-    if (pathInfo == null)
-      return contextPath + servletPath;
-    else if (servletPath == null)
-      return contextPath + pathInfo;
-    else
-      return contextPath + servletPath + pathInfo;
-    */
     
     return contextPath + viewId;
   }
@@ -246,13 +330,16 @@ public class JspViewHandler extends ViewHandler
   public String getResourceURL(FacesContext context,
 			       String path)
   {
-    
-    ExternalContext extContext = context.getExternalContext();
+    if (path.startsWith("/")) {
+      ExternalContext extContext = context.getExternalContext();
 
-    HttpServletRequest request
-      = (HttpServletRequest) extContext.getRequest();
+      HttpServletRequest request
+	= (HttpServletRequest) extContext.getRequest();
     
-    return request.getContextPath() + path;
+      return request.getContextPath() + path;
+    }
+    else
+      return path;
   }
 
   public void renderView(FacesContext context,
@@ -272,6 +359,8 @@ public class JspViewHandler extends ViewHandler
     HttpServletRequest request
       = (javax.servlet.http.HttpServletRequest) extContext.getRequest();
 
+    Config.set(request, Config.FMT_LOCALE, viewToRender);
+
     response.setContentType("text/html");
 
     RenderKitFactory renderKitFactory
@@ -280,9 +369,14 @@ public class JspViewHandler extends ViewHandler
     RenderKit renderKit = renderKitFactory.getRenderKit(context, renderKitId);
 
     String encoding = request.getCharacterEncoding();
-    ResponseWriter out = renderKit.createResponseWriter(response.getWriter(),
-							null,
-							encoding);
+    
+    ResponseWriter oldOut = context.getResponseWriter();
+
+    ResponseWriter out;
+
+    out = renderKit.createResponseWriter(response.getWriter(),
+					 null,
+					 encoding);
 
     JspResponseWrapper resWrapper = new JspResponseWrapper();
     resWrapper.init(response);
@@ -290,17 +384,27 @@ public class JspViewHandler extends ViewHandler
 
     extContext.dispatch(viewId);
 
+    String tail = resWrapper.complete();
+
     extContext.setResponse(response);
 
     context.setResponseWriter(out);
 
+    // XXX: save view
+
     out.startDocument();
 
     viewToRender.encodeAll(context);
+
+    if (tail != null)
+      out.write(tail);
     
     out.endDocument();
+
+    context.setResponseWriter(oldOut);
   }
 
+  /*
   @Override
   public void initView(FacesContext context)
     throws FacesException
@@ -314,6 +418,7 @@ public class JspViewHandler extends ViewHandler
     if (viewRoot != null)
       context.setViewRoot(viewRoot);
   }
+  */
 
   @Override
   public UIViewRoot restoreView(FacesContext context,
@@ -322,6 +427,11 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null)
       throw new NullPointerException();
+
+    if (viewId != null)
+      viewId = convertViewId(context, viewId);
+    else
+      viewId = createViewId(context);
 
     String renderKitId = calculateRenderKitId(context);
     StateManager stateManager = context.getApplication().getStateManager();

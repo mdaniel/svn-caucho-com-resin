@@ -299,6 +299,14 @@ public class TldTaglib implements DependencyBean
   }
 
   /**
+   * Adds a jsf tag.
+   */
+  public void addJsfTag(JsfTag tag)
+  {
+    _tags.add(tag);
+  }
+
+  /**
    * Adds a function
    */
   public void addFunction(TldFunction function)
@@ -361,6 +369,28 @@ public class TldTaglib implements DependencyBean
       listener.register(app);
     }
   }
+  
+  public void mergeJsf(TldTaglib jsfTaglib)
+  {
+    ArrayList<TldTag> jsfTags = jsfTaglib.getTagList();
+
+    for (int i = 0; i < jsfTags.size(); i++) {
+      JsfTag jsfTag = (JsfTag) jsfTags.get(i);
+
+      int p = _tags.indexOf(jsfTag);
+
+      if (p >= 0) {
+	TldTag tag = _tags.remove(p);
+
+	System.out.println("TAG: " + tag);
+
+	jsfTag.setBaseTag(tag);
+      }
+      
+      _tags.add(jsfTag);
+    }
+  }
+  
 
   /**
    * Checks for modification.

@@ -67,14 +67,11 @@ public class JspResponseWrapper extends ResponseWrapper
    */
   public void init(HttpServletResponse response)
   {
-    /*
     _bodyStream = new BodyResponseStream();
+    _stream = _bodyStream;
     
     _out = new WriteStream(_tempStream);
     _bodyStream.setWriter(_out.getPrintWriter());
-    */
-
-    _stream = ((CauchoResponse) response).getResponseStream();
     
     setResponse(response);
     _response = response;
@@ -161,8 +158,8 @@ public class JspResponseWrapper extends ResponseWrapper
   public void flushBuffer()
     throws IOException
   {
-    if (_flushBuffer != null)
-      _flushBuffer.flushBuffer();
+    //if (_flushBuffer != null)
+    //   _flushBuffer.flushBuffer();
     
     //_stream.flushBuffer();
     
@@ -275,6 +272,40 @@ public class JspResponseWrapper extends ResponseWrapper
   public void close()
     throws IOException
   {
+  }
+
+  public void flushResponse()
+    throws IOException
+  {
+    _out.flush();
+    
+    ReadStream rs = _tempStream.openRead(true);
+    PrintWriter out = _response.getWriter();
+    
+    int ch;
+
+    while ((ch = rs.readChar()) >= 0)
+      out.write((char) ch);
+
+    rs.close();
+  }
+
+  public String complete()
+    throws IOException
+  {
+    _out.flush();
+    
+    ReadStream rs = _tempStream.openRead(true);
+    StringBuilder sb = new StringBuilder();
+    
+    int ch;
+
+    while ((ch = rs.readChar()) >= 0)
+      sb.append((char) ch);
+
+    rs.close();
+
+    return sb.toString();
   }
 }
 

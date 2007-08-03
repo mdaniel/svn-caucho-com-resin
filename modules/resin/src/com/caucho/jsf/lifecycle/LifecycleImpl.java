@@ -33,6 +33,7 @@ import com.caucho.util.*;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.el.*;
 import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.component.*;
@@ -180,7 +181,7 @@ public class LifecycleImpl extends Lifecycle
       
       viewRoot.setLocale(extContext.getRequestLocale());
 
-      // XXX: binding
+      doSetBindings(context.getELContext(), viewRoot);
 
       return;
     }
@@ -199,14 +200,19 @@ public class LifecycleImpl extends Lifecycle
     if (stateManager.isPostback(context)) {
       viewRoot = view.restoreView(context,  viewId);
 
-      if (viewRoot == null) {
+      if (viewRoot != null) {
+	doSetBindings(context.getELContext(), viewRoot);
+      }
+      else {
+	// XXX: backward compat issues with ViewHandler and StateManager
+	
+	// throw new ViewExpiredException(L.l("{0} is an expired view", viewId));
+
 	context.renderResponse();
       
 	viewRoot = view.createView(context, viewId);
 
 	context.setViewRoot(viewRoot);
-	
-	log.info(L.l("{0} is an expired view", viewId));
       }
       
       context.setViewRoot(viewRoot);
@@ -218,6 +224,21 @@ public class LifecycleImpl extends Lifecycle
 
       context.setViewRoot(viewRoot);
     }
+  }
+
+  private void doSetBindings(ELContext elContext, UIComponent component)
+  {
+    if (component == null)
+      return;
+
+    ValueExpression binding = component.getValueExpression("binding");
+
+    if (binding != null)
+      binding.setValue(elContext, component);
+
+    Iterator<UIComponent> iter = component.getFacetsAndChildren();
+    while (iter.hasNext())
+      doSetBindings(elContext, iter.next());
   }
 
   private String calculateViewId(FacesContext context)
@@ -240,9 +261,11 @@ public class LifecycleImpl extends Lifecycle
       view.renderView(context, context.getViewRoot());
     } catch (java.io.IOException e) {
       throw new FacesException(e);
+    } finally {
+      afterPhase(context, PhaseId.RENDER_RESPONSE);
+
+      logMessages(context);
     }
-    
-    afterPhase(context, PhaseId.RENDER_RESPONSE);
   }
 
   private void beforePhase(FacesContext context, PhaseId phase)
@@ -269,6 +292,28 @@ public class LifecycleImpl extends Lifecycle
 	PhaseEvent event = new PhaseEvent(context, phase, this);
 	
 	listener.afterPhase(event);
+      }
+    }
+  }
+
+  private void logMessages(FacesContext context)
+  {
+    UIViewRoot root = context.getViewRoot();
+    String viewId = "";
+
+    if (root != null)
+      viewId = root.getViewId();
+
+    Iterator<FacesMessage> iter = context.getMessages();
+
+    while (iter != null && iter.hasNext()) {
+      FacesMessage msg = iter.next();
+
+      if (log.isLoggable(Level.FINE)) {
+	if (msg.getDetail() != null)
+	  log.fine(viewId + " [ " + msg.getSeverity() + "] " + msg.getSummary() + " " + msg.getDetail());
+	else
+	  log.fine(viewId + " [ " + msg.getSeverity() + "] " + msg.getSummary());
       }
     }
   }

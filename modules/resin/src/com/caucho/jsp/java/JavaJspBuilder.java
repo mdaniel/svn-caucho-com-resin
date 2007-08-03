@@ -28,10 +28,8 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.jsp.JspBuilder;
-import com.caucho.jsp.JspGenerator;
-import com.caucho.jsp.JspLineParseException;
-import com.caucho.jsp.JspParseException;
+import com.caucho.jsp.*;
+import com.caucho.jsp.cfg.*;
 import com.caucho.log.Log;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
@@ -311,6 +309,26 @@ public class JavaJspBuilder extends JspBuilder {
 
       _openNode = customTag;
       _openNode.setStartLocation(_sourcePath, _filename, _line);
+      
+      if (tagInfo instanceof TagInfoImpl) {
+	TldTag tldTag = ((TagInfoImpl) tagInfo).getTldTag();
+
+	if (tldTag instanceof JsfTag) {
+	  JsfTag jsfTag = (JsfTag) tldTag;
+
+	  JsfTagNode jsfTagNode = new JsfTagNode();
+	  jsfTagNode.setGenerator(_gen);
+	  jsfTagNode.setParseState(_parseState);
+	  jsfTagNode.setQName(qname);
+	  jsfTagNode.setParent(_currentNode);
+	  jsfTagNode.setComponentClass(jsfTag.getComponentClass());
+
+	  _openNode = jsfTagNode;
+	  _openNode.setStartLocation(_sourcePath, _filename, _line);
+
+	  return;
+	}
+      }
     }
     else if (SimpleTag.class.isAssignableFrom(tagClass)) {
       CustomSimpleTag customTag = new CustomSimpleTag();

@@ -78,15 +78,12 @@ public class ActionListenerImpl implements ActionListener
     }
     else if (action != null) {
       fromAction = action.getExpressionString();
-      System.out.println("ACTION-INVOKE: " + fromAction);
 	
       Object value = action.invoke(context, NULL_ARG);
 
       if (value != null)
 	logicalOutcome = value.toString();
     }
-    else
-      System.out.println("NO-ACTION: " + comp);
 
     Application app = context.getApplication();
 

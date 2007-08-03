@@ -77,6 +77,8 @@ public class TldTag implements DependencyBean {
   private ArrayList<PersistentDependency> _dependencyList
     = new ArrayList<PersistentDependency>();
 
+  private TldTag _baseTag;
+
   /**
    * Sets the config location.
    */
@@ -517,5 +519,37 @@ public class TldTag implements DependencyBean {
   {
     if (_configException != null)
       throw _configException;
+  }
+
+  public int hashCode()
+  {
+    return _name.hashCode();
+  }
+
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof TldTag))
+      return false;
+
+    TldTag tag = (TldTag) o;
+
+    return _name.equals(tag._name);
+  }
+  
+  public void setBaseTag(TldTag tag)
+  {
+    _baseTag = tag;
+  }
+  
+  public TldTag getBaseTag()
+  {
+    return _baseTag;
+  }
+
+  public String toString()
+  {
+    return getClass().getName() + "[" + getName() + "]";
   }
 }

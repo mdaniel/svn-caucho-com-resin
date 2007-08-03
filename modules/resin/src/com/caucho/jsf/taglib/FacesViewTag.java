@@ -30,6 +30,7 @@
 package com.caucho.jsf.taglib;
 
 import java.io.*;
+import java.util.logging.*;
 
 import javax.el.*;
 
@@ -39,14 +40,20 @@ import javax.faces.component.*;
 import javax.faces.render.*;
 import javax.faces.webapp.*;
 
+import javax.servlet.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
+
+import com.caucho.jsf.context.*;
 
 /**
  * The f:view tag
  */
 public class FacesViewTag extends UIComponentBodyTag
 {
+  private static final Logger log
+    = Logger.getLogger(FacesViewTag.class.getName());
+  
   private ValueExpression _renderKitId;
   private ValueExpression _locale;
   private MethodExpression _beforePhase;
@@ -92,6 +99,23 @@ public class FacesViewTag extends UIComponentBodyTag
   public void setAfterPhase(MethodExpression value)
   {
     _afterPhase = value;
+  }
+
+  public int doStartTag()
+    throws JspException
+  {
+    PageContext pageContext = this.pageContext;
+
+    ServletResponse response = pageContext.getResponse();
+
+    try {
+      if (response instanceof JspResponseWrapper)
+	((JspResponseWrapper) response).flushResponse();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    
+    return super.doStartTag();
   }
 
   public int doEndTag()

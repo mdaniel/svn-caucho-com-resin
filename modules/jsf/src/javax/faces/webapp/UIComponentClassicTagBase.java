@@ -218,7 +218,7 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     throws JspException
   {
     _created = false;
-    
+
     if (_component != null)
       return _component;
 

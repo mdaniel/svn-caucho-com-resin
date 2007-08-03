@@ -973,6 +973,36 @@ public abstract class JspNode {
       return parentId;
   }
 
+  //
+  // JSF functions
+  //
+
+  /**
+   * Returns the variable containing the jsf component
+   */
+  public String getJsfVar()
+  {
+    if (_parent != null)
+      return _parent.getJsfVar();
+    else
+      return null;
+  }
+
+  /**
+   * Returns the variable containing the jsf body
+   */
+  public String getJsfBodyVar()
+  {
+    if (_parent != null)
+      return _parent.getJsfBodyVar();
+    else
+      return null;
+  }
+
+  //
+  // value generation
+  //
+
   /**
    * Generate include params.
    */

@@ -30,6 +30,7 @@ package com.caucho.jsf.application;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.faces.*;
 import javax.faces.application.*;
@@ -46,6 +47,8 @@ import com.caucho.hessian.io.*;
 public class SessionStateManager extends StateManager
 {
   private static final L10N L = new L10N(SessionStateManager.class);
+  private static final Logger log
+    = Logger.getLogger(SessionStateManager.class.getName());
 
   private static final IntMap _typeMap = new IntMap();
   private static final ArrayList<Class> _typeList = new ArrayList();
@@ -69,6 +72,9 @@ public class SessionStateManager extends StateManager
 
       byte []state = bos.toByteArray();
 
+      if (log.isLoggable(Level.FINER))
+	log.finer("JSF[" + root.getViewId() + "] serialize (" + state.length + " bytes)");
+
       debugState(state);
 
       return state;
@@ -91,7 +97,6 @@ public class SessionStateManager extends StateManager
       = context.getExternalContext().getSessionMap();
 
     //sessionMap.put(context.getViewRoot().getViewId(), state);
-    System.out.println("SAVE-SM: " + state);
     
     sessionMap.put("caucho.jsf.view", state);
   }

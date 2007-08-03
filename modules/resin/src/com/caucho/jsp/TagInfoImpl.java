@@ -40,6 +40,16 @@ public class TagInfoImpl extends TagInfoExt {
   /**
    * Creates the tag info.
    */
+  TagInfoImpl(TldTag tag, TldTag baseTag, Taglib taglib)
+  {
+    this(baseTag, taglib);
+
+    _tldTag = tag;
+  }
+  
+  /**
+   * Creates the tag info.
+   */
   TagInfoImpl(TldTag tag, Taglib taglib)
   {
     super(tag.getName(),
@@ -58,6 +68,11 @@ public class TagInfoImpl extends TagInfoExt {
 	  tag.getDependencyList());
 
     _tldTag = tag;
+  }
+
+  public TldTag getTldTag()
+  {
+    return _tldTag;
   }
 
   /**

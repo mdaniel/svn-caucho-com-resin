@@ -221,6 +221,8 @@ class HtmlPanelGridRenderer extends Renderer
     if (width != null)
       out.writeAttribute("width", width, "width");
 
+    out.write("\n");
+
     UIComponent caption = component.getFacet("caption");
     if (caption != null && caption.isRendered()) {
       out.startElement("caption", caption);
@@ -257,6 +259,7 @@ class HtmlPanelGridRenderer extends Renderer
       out.endElement("tr");
       
       out.endElement("thead");
+      out.write("\n");
     }
   }
 
@@ -319,6 +322,7 @@ class HtmlPanelGridRenderer extends Renderer
     int count = 0;
 
     out.startElement("tbody", component);
+    out.write("\n");
 
     for (int i = 0; i < size; i++) {
       UIComponent child = children.get(i);
@@ -332,6 +336,7 @@ class HtmlPanelGridRenderer extends Renderer
       if (column == 0) {
 	if (count > 0) {
 	  out.endElement("tr");
+	  out.write("\n");
 	}
 
 	out.startElement("tr", child);
@@ -367,10 +372,13 @@ class HtmlPanelGridRenderer extends Renderer
       out.endElement("td");
     }
 
-    if (count > 0)
+    if (count > 0) {
       out.endElement("tr");
+      out.write("\n");
+    }
     
     out.endElement("tbody");
+    out.write("\n");
   }
 
   /**
@@ -419,9 +427,11 @@ class HtmlPanelGridRenderer extends Renderer
       out.endElement("tr");
       
       out.endElement("tfoot");
+      out.write("\n");
     }
 
     out.endElement("table");
+    out.write("\n");
   }
 
   public String toString()

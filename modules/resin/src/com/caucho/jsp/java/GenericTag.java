@@ -475,8 +475,8 @@ abstract public class GenericTag extends JspContainerNode
 		      attribute.getTypeName().equals(JspFragment.class.getName()));
       }
 
-      if (value instanceof JspAttribute &&
-	  ((JspAttribute) value).isJspFragment())
+      if (value instanceof JspAttribute
+	  && ((JspAttribute) value).isJspFragment())
 	isFragment = true;
 
       generateSetAttribute(out, name, attrName, value,

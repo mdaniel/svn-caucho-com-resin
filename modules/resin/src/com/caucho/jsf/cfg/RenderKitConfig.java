@@ -45,6 +45,7 @@ import javax.faces.event.*;
 import javax.faces.render.*;
 import javax.faces.validator.*;
 
+import java.lang.reflect.*;
 import javax.xml.bind.annotation.*;
 
 import com.caucho.config.*;
@@ -107,17 +108,44 @@ public class RenderKitConfig extends DescriptionGroupConfig
 
     FacesContext context = new DummyFacesContext();
     
-    RenderKit renderKit = factory.getRenderKit(context, _name);
+    RenderKit oldRenderKit = factory.getRenderKit(context, _name);
+    RenderKit renderKit = oldRenderKit;
 
-    if (renderKit == null) {
-      renderKit = _renderKit;
+    if (_class != null) {
+      if (oldRenderKit != null) {
+	try {
+	  Constructor ctor
+	    = _class.getConstructor(new Class[] { RenderKit.class });
 
-      if (renderKit == null)
+	  renderKit = (RenderKit) ctor.newInstance(oldRenderKit);
+	} catch (NoSuchMethodException e) {
+	} catch (RuntimeException e) {
+	  throw e;
+	} catch (InvocationTargetException e) {
+	  throw new ConfigException(e.getCause());
+	} catch (Exception e) {
+	  throw new ConfigException(e);
+	}
+      }
+
+      try {
+	renderKit = (RenderKit) _class.newInstance();
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
+
+      if (_name == null)
 	throw new ConfigException(L.l("'{0}' is an unknown render-kit-id.",
 				      _name));
-
+	
       factory.addRenderKit(_name, renderKit);
     }
+
+    if (renderKit == null)
+      throw new ConfigException(L.l("'{0}' is an unknown render-kit-id.",
+				    _name));
     
     for (RendererConfig renderer : _rendererList)
       renderer.configure(renderKit);
