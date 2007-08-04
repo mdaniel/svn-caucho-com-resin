@@ -127,11 +127,18 @@ public class JsfTagNode extends JspContainerNode
 
     if (_idAttr != null)
       addJsfId(_parent);
-    else if (EditableValueHolder.class.isAssignableFrom(_componentClass))
+    else if (isJsfIdRequired())
       addJsfId(this);
 
     if (_idAttr == null) {
       _prevJsfId = getPrevJsfId();
+    }
+  }
+
+  public void endElement()
+  {
+    if (isJsfParentRequired()) {
+      addJsfId(this);
     }
   }
 
@@ -143,6 +150,40 @@ public class JsfTagNode extends JspContainerNode
       return null;
   }
 
+  private boolean isJsfIdRequired()
+  {
+    if (EditableValueHolder.class.isAssignableFrom(_componentClass))
+      return true;
+    else if (ActionSource.class.isAssignableFrom(_componentClass))
+      return true;
+    else if (ActionSource2.class.isAssignableFrom(_componentClass))
+      return true;
+    
+    JspNode parent = _parent;
+
+    ArrayList<JspNode> children = parent.getChildren();
+
+    boolean isJsfIdRequired = false;
+      
+    for (int i = 0; i < children.size(); i++) {
+      JspNode child = children.get(i);
+	
+      if (child == this)
+	return isJsfIdRequired;
+      else if (child instanceof JsfTagNode) {
+	JsfTagNode jsfNode = (JsfTagNode) child;
+	String id = jsfNode.getJsfId();
+
+	if (id != null)
+	  isJsfIdRequired = false;
+      }
+      else if (child.isJsfParentRequired())
+	isJsfIdRequired = true;
+    }
+
+    return false;
+  }
+  
   private String getPrevJsfId()
   {
     JspNode parent = _parent;
@@ -290,6 +331,15 @@ public class JsfTagNode extends JspContainerNode
 
     String prevId;
 
+    String oldParentVar = null;
+
+    if (isJsfParentRequired()) {
+      oldParentVar = "_jsp_jsf_parent_" + _gen.uniqueId();
+
+      out.println("Object " + oldParentVar
+		  + " = request.getAttribute(\"caucho.jsf.parent\");");
+    }
+
     if (_prevJsfId != null)
       prevId = "\"" + _prevJsfId + "\"";
     else
@@ -297,7 +347,17 @@ public class JsfTagNode extends JspContainerNode
 
     if (parentBodyVar != null) {
       out.println("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		  + parentVar + ", " + parentBodyVar + ");");
+		  + parentVar
+		  + ", " + prevId
+		  + ", " + parentBodyVar + ");");
+    }
+
+    if (hasBodyContent()) {
+      _bodyVar = "_jsp_body" + _gen.uniqueId();
+
+      out.println("com.caucho.jsp.BodyContentImpl " + _bodyVar
+		  + " = (com.caucho.jsp.BodyContentImpl) pageContext.pushBody();");
+      out.println("out =  " + _bodyVar + ";");
     }
     
     out.println(_componentClass.getName() + " " + _var + ";");
@@ -354,11 +414,33 @@ public class JsfTagNode extends JspContainerNode
     }
 
     if (_idAttr != null) {
+      if (oldParentVar != null)
+	out.println("request.setAttribute(\"caucho.jsf.parent\""
+		    + ", new com.caucho.jsp.jsf.JsfComponentTag("
+		    + _var + ", false, " + _bodyVar + "));");
+      
       out.popDepth();
       out.println("}");
+
+      if (oldParentVar != null) {
+	out.println("else");
+	out.println("  request.setAttribute(\"caucho.jsf.parent\""
+		    + ", new com.caucho.jsp.jsf.JsfComponentTag("
+		    + _var + ", true, " + _bodyVar + "));");
+      }
     }
 
     generateChildren(out);
+
+    if (oldParentVar != null) {
+      out.println("request.setAttribute(\"caucho.jsf.parent\", "
+		  + oldParentVar + ");");
+    }
+
+    if (_bodyVar != null) {
+      out.println("out = pageContext.popBody();");
+      out.println("pageContext.releaseBody(" + _bodyVar + ");");
+    }
   }
 
   /**
@@ -373,7 +455,7 @@ public class JsfTagNode extends JspContainerNode
     if (_children == null)
       return;
 
-    String bodyVar = null;
+    String prevId = null;
     boolean isFirst = true;
     for (int i = 0; i < _children.size(); i++) {
       JspNode child = _children.get(i);
@@ -384,9 +466,20 @@ public class JsfTagNode extends JspContainerNode
 	      || _children.get(i + 1) instanceof JsfTagNode)) {
 	StaticText text = (StaticText) child;
 
-	if (! text.isWhitespace()) {
+	if (text.isWhitespace()) {
+	}
+	else if (i + 1 == _children.size()) {
 	  out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		    + _var + ", \"");
+		    + _var
+		    + ", \"");
+	  out.printJavaString(text.getText());
+	  out.println("\");");
+	}
+	else {
+	  out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
+		    + _var
+		    + ", " + prevId
+		    + ", \"");
 	  out.printJavaString(text.getText());
 	  out.println("\");");
 	}
@@ -394,19 +487,7 @@ public class JsfTagNode extends JspContainerNode
 	continue;
       }
 
-      if (! (child instanceof JsfTagNode)) {
-	if (isFirst) {
-	  isFirst = false;
-
-	  _bodyVar = bodyVar = "_jsp_body" + _gen.uniqueId();
-
-	  out.println("javax.servlet.jsp.tagext.BodyContent " + bodyVar
-		      + " = pageContext.pushBody();");
-	  out.println("out =  " + bodyVar + ";");
-	}
-
-	// push body
-      }
+      isFirst = false;
 
       child.generateStartLocation(out);
       try {
@@ -418,14 +499,56 @@ public class JsfTagNode extends JspContainerNode
           throw child.error(e);
       }
       child.generateEndLocation(out);
+      
+      if (child instanceof JsfTagNode) {
+	JsfTagNode jsfNode = (JsfTagNode) child;
+
+	if (jsfNode.getJsfId() != null)
+	  prevId = "\"" + jsfNode.getJsfId() + "\"";
+
+	isFirst = true;
+      }
     }
 
-    if (! isFirst) {
+    if (_bodyVar != null && ! isFirst)
       out.println("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
 		  + _var + ", " + _bodyVar + ");");
-      
-      out.println("out = pageContext.popBody();");
+  }
+
+  /**
+   * Generates the code for the children.
+   *
+   * @param out the output writer for the generated java.
+   */
+  private boolean hasBodyContent()
+    throws Exception
+  {
+    if (_children == null)
+      return false;
+
+    String bodyVar = null;
+    String prevId = null;
+    boolean isFirst = true;
+    for (int i = 0; i < _children.size(); i++) {
+      JspNode child = _children.get(i);
+
+      if (isFirst
+	  && child instanceof StaticText
+	  && (i + 1 == _children.size()
+	      || _children.get(i + 1) instanceof JsfTagNode)) {
+	continue;
+      }
+
+      if (! (child instanceof JsfTagNode)) {
+	if (isFirst) {
+	  return true;
+	}
+
+	// push body
+      }
     }
+
+    return false;
   }
 
   static class Attr {

@@ -999,6 +999,14 @@ public abstract class JspNode {
       return null;
   }
 
+  /**
+   * True if the jsf-parent setting is required.
+   */
+  public boolean isJsfParentRequired()
+  {
+    return false;
+  }
+
   //
   // value generation
   //
@@ -1151,12 +1159,14 @@ public abstract class JspNode {
         // jsp/1c2m, jsp/1ce8
         return generateELValue(type, value);
       }
+      /* XXX: jsf-cardemo
       else if (! rtexpr
 	       && hasDeferredAttribute(value, isELIgnored)
 	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
 	throw error(L.l("Deferred syntax '{0}' is not allowed as a literal.",
 			value));
       }
+      */
       else if (type.equals(boolean.class))
         return String.valueOf(Boolean.valueOf(isEmpty ? "false" : value));
       else if (type.equals(Boolean.class)) {

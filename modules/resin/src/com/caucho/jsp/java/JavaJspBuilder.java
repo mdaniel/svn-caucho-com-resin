@@ -267,7 +267,7 @@ public class JavaJspBuilder extends JspBuilder {
       throw error(e);
     }
 
-    if (tagInfo == null)
+    if (tagInfo == null || tagClass == null)
       throw _gen.error(L.l("<{0}> is an unknown tag.", qname.getName()));
 
     if (tagInfo instanceof TagInfoExt) {

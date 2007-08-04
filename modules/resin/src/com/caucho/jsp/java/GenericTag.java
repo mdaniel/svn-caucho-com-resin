@@ -253,6 +253,31 @@ abstract public class GenericTag extends JspContainerNode
     
     return false;
   }
+
+  /**
+   * True if the jsf-parent setting is required.
+   */
+  @Override
+  public boolean isJsfParentRequired()
+  {
+    return true;
+  }
+
+  /**
+   * Returns the variable containing the jsf component
+   */
+  public String getJsfVar()
+  {
+    return null;
+  }
+
+  /**
+   * Returns the variable containing the jsf body
+   */
+  public String getJsfBodyVar()
+  {
+    return null;
+  }
   
   /**
    * Generates code before the actual JSP.

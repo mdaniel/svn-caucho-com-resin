@@ -2,8 +2,18 @@
   <uri>http://java.sun.com/jsf/html</uri>
 
   <jsf-tag>
+    <name>commandLink</name>
+    <component-class>javax.faces.component.html.HtmlCommandLink</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
     <name>form</name>
     <component-class>javax.faces.component.html.HtmlForm</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>graphicImage</name>
+    <component-class>javax.faces.component.html.HtmlGraphicImage</component-class>
   </jsf-tag>
 
   <jsf-tag>

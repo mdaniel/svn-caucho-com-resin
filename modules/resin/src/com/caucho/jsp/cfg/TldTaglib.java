@@ -382,8 +382,6 @@ public class TldTaglib implements DependencyBean
       if (p >= 0) {
 	TldTag tag = _tags.remove(p);
 
-	System.out.println("TAG: " + tag);
-
 	jsfTag.setBaseTag(tag);
       }
       

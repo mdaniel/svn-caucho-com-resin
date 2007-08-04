@@ -72,10 +72,12 @@ public class SessionStateManager extends StateManager
 
       byte []state = bos.toByteArray();
 
-      if (log.isLoggable(Level.FINER))
-	log.finer("JSF[" + root.getViewId() + "] serialize (" + state.length + " bytes)");
+      if (log.isLoggable(Level.FINE)) {
+	log.fine("JSF[" + root.getViewId() + "] serialize (" + state.length + " bytes)");
 
-      debugState(state);
+	if (log.isLoggable(Level.FINER))
+	  debugState(state);
+      }
 
       return state;
     } catch (IOException e) {

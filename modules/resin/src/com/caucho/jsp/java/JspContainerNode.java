@@ -205,6 +205,22 @@ public abstract class JspContainerNode extends JspNode {
   }
 
   /**
+   * True if the jsf-parent setting is required.
+   */
+  public boolean isJsfParentRequired()
+  {
+    if (_children == null)
+      return false;
+
+    for (int i = _children.size() - 1; i >= 0; i--) {
+      if (_children.get(i).isJsfParentRequired())
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Returns true if the node is empty
    */
   public boolean isEmpty()

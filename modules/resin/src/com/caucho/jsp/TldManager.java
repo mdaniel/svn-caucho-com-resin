@@ -199,7 +199,10 @@ public class TldManager {
 	continue;
 
       if (subPath instanceof JarPath)
-	loadJarTlds(taglibs, (JarPath) subPath, "META-INF");
+	loadJarTlds(taglibs, ((JarPath) subPath).getContainer(), "META-INF");
+      else if (subPath.getPath().endsWith(".jar")) {
+	loadJarTlds(taglibs, subPath, "META-INF");
+      }
       else
 	loadAllTlds(taglibs, subPath.lookup("META-INF"), 64, "META-INF");
     }
@@ -284,9 +287,7 @@ public class TldManager {
       Path subPath = paths.get(i);
 
       if (subPath.getPath().endsWith(".jar")) {
-	JarPath jarPath = JarPath.create(subPath);
-
-	loadJarTlds(taglibs, jarPath, prefix);
+	loadJarTlds(taglibs, subPath, prefix);
       }
       else if (prefix != null && ! prefix.equals(""))
 	loadAllTlds(taglibs, subPath.lookup(prefix), 64, prefix);
@@ -382,15 +383,16 @@ public class TldManager {
   }
 
   private void loadJarTlds(ArrayList<TldPreload> taglibs,
-			   JarPath jar,
+			   Path jarBacking,
 			   String prefix)
     throws JspParseException, IOException
   {
-    if (! jar.getContainer().canRead())
+    if (! jarBacking.canRead())
       return;
     
-    String nativePath = jar.getContainer().getNativePath();
+    String nativePath = jarBacking.getNativePath();
     ZipFile zipFile;
+    JarPath jar = JarPath.create(jarBacking);
 
     if (nativePath.endsWith(".jar"))
       zipFile = new JarFile(nativePath);
@@ -464,7 +466,6 @@ public class TldManager {
 
     if (jsfTaglib != null && taglib != null) {
       taglib.mergeJsf(jsfTaglib);
-      System.out.println("OOK: " + taglib + " " + jsfTaglib);
 
       return taglib;
     }
@@ -823,8 +824,12 @@ public class TldManager {
         head = tail + 1;
       }
 
-      if (! segment.equals(""))
-        list.add(Vfs.lookup(segment));
+      if (! segment.equals("")) {
+	Path path = Vfs.lookup(segment);
+
+	if (! list.contains(path))
+	  list.add(path);
+      }
     }
 
     return list;

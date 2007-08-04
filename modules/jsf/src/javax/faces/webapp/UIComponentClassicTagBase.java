@@ -62,6 +62,11 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   private UIComponent _component;
   private boolean _created;
 
+  protected UIComponentClassicTagBase()
+  {
+    _facesContext = FacesContext.getCurrentInstance();
+  }
+
   protected String getFacetName()
   {
     return null;
@@ -145,8 +150,6 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     _created = false;
     _component = null;
     
-    _facesContext = FacesContext.getCurrentInstance();
-
     _parentUIComponentTag
       = getParentUIComponentClassicTagBase(pageContext);
 

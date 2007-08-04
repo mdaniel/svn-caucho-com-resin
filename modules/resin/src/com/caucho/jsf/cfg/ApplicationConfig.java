@@ -229,7 +229,7 @@ public class ApplicationConfig
   {
   }
 
-  public void setLocalConfig(LocaleConfig config)
+  public void setLocaleConfig(LocaleConfig config)
   {
     _localeConfig = config;
   }
