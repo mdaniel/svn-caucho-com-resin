@@ -86,6 +86,11 @@ public class EjbConfig {
   private boolean _isAllowPOJO;
   private HashMap<String, MessageDestination> _messageDestinations;
 
+  private ArrayList<Interceptor> _cfgInterceptors = new ArrayList<Interceptor>();
+
+  private ArrayList<InterceptorBinding> _cfgInterceptorBindings =
+    new ArrayList<InterceptorBinding>();
+
   public EjbConfig(EjbServerManager ejbManager)
   {
     _ejbManager = ejbManager;
@@ -239,6 +244,55 @@ public class EjbConfig {
       _pendingBeans.add(bean);
 
     _cfgBeans.put(name, bean);
+  }
+
+  /**
+   * Returns the interceptor with the given class name.
+   */
+  public Interceptor getInterceptor(String className)
+  {
+    assert className != null;
+
+    for (Interceptor interceptor : _cfgInterceptors) {
+      if (interceptor.getInterceptorClass().equals(className))
+        return interceptor;
+    }
+
+    return null;
+  }
+
+  /**
+   * Adds an interceptor.
+   */
+  public void addInterceptor(Interceptor interceptor)
+  {
+    if (interceptor == null)
+      throw new NullPointerException();
+
+    _cfgInterceptors.add(interceptor);
+  }
+
+  /**
+   * Returns the interceptor bindings for a given ejb name.
+   */
+  public InterceptorBinding getInterceptorBinding(String ejbName)
+  {
+    assert ejbName != null;
+
+    for (InterceptorBinding binding : _cfgInterceptorBindings) {
+      if (binding.getEjbName().equals(ejbName))
+        return binding;
+    }
+
+    return null;
+  }
+
+  /**
+   * Binds an interceptor to an ejb.
+   */
+  public void addInterceptorBinding(InterceptorBinding interceptorBinding)
+  {
+    _cfgInterceptorBindings.add(interceptorBinding);
   }
 
   public void addMessageDestination(MessageDestination messageDestination)

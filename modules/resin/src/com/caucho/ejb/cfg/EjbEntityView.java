@@ -54,8 +54,8 @@ public class EjbEntityView extends EjbObjectView {
    * Creates a new entity bean configuration.
    */
   public EjbEntityView(EjbEntityBean bean,
-		       ArrayList<JClass> apiClass,
-		       String prefix)
+                       ArrayList<JClass> apiClass,
+                       String prefix)
     throws ConfigException
   {
     super(bean, apiClass, prefix);
@@ -70,8 +70,8 @@ public class EjbEntityView extends EjbObjectView {
    * Assembles the generator methods.
    */
   protected void assembleMethods(BeanAssembler assembler,
-				 ViewClass viewClass,
-				 String fullClassName)
+                                 ViewClass viewClass,
+                                 String fullClassName)
     throws ConfigException
   {
     super.assembleMethods(assembler, viewClass, fullClassName);
@@ -84,13 +84,16 @@ public class EjbEntityView extends EjbObjectView {
       EntityRemoveMethod removeMethod;
 
       removeMethod = new EntityRemoveMethod(getEntityBean(),
-					    removeApiMethod,
-					    fullClassName);
+                                            removeApiMethod,
+                                            fullClassName);
 
       CallChain call = removeMethod.getCall();
 
       // XXX: can be supports if there's no auto-update
-      call = TransactionChain.create(call, EjbMethod.TRANS_REQUIRED);
+      call = TransactionChain.create(call,
+                                     EjbMethod.TRANS_REQUIRED,
+                                     removeApiMethod,
+                                     removeApiMethod);
 
       removeMethod.setCall(call);
 

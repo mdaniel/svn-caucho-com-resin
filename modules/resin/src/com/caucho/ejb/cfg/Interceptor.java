@@ -54,6 +54,8 @@ public class Interceptor {
   private String _interceptorClass;
   private String _aroundInvokeMethodName;
 
+  private AroundInvokeConfig _aroundInvokeConfig;
+
   private ClassLoader _loader;
   protected JClassLoader _jClassLoader;
 
@@ -81,18 +83,24 @@ public class Interceptor {
 
   public void init()
   {
-    // XXX: EnhancerManager getJavaClassLoader()
-    ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
-    JClassLoader jClassLoader = EnhancerManager.create(parentLoader).getJavaClassLoader();
+    if (_aroundInvokeConfig != null) {
+      // ejb/0fb5
+      _aroundInvokeMethodName = _aroundInvokeConfig.getMethodName();
+    }
+    else {
+      // XXX: EnhancerManager getJavaClassLoader()
+      ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+      JClassLoader jClassLoader = EnhancerManager.create(parentLoader).getJavaClassLoader();
 
-    _interceptorJClass = jClassLoader.forName(_interceptorClass);
+      _interceptorJClass = jClassLoader.forName(_interceptorClass);
 
-    for (JMethod method : _interceptorJClass.getMethods()) {
-      if (method.isAnnotationPresent(AroundInvoke.class)) {
-        _aroundInvokeMethodName = method.getName();
+      for (JMethod method : _interceptorJClass.getMethods()) {
+        if (method.isAnnotationPresent(AroundInvoke.class)) {
+          _aroundInvokeMethodName = method.getName();
 
-        // XXX: check invalid duplicated @AroundInvoke methods.
-        break;
+          // XXX: check invalid duplicated @AroundInvoke methods.
+          break;
+        }
       }
     }
   }
@@ -115,5 +123,15 @@ public class Interceptor {
   public String getAroundInvokeMethodName()
   {
     return _aroundInvokeMethodName;
+  }
+
+  public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
+  {
+    _aroundInvokeConfig = aroundInvoke;
+  }
+
+  public String toString()
+  {
+    return "Interceptor[" + _interceptorClass + "]";
   }
 }

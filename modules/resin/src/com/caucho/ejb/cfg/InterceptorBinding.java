@@ -31,6 +31,8 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
+
 /**
  * Configuration for interceptor-binding.
  */
@@ -40,6 +42,8 @@ public class InterceptorBinding {
   private String _ejbName;
 
   private InterceptorOrder _interceptorOrder;
+
+  private ArrayList<String> _interceptors = new ArrayList<String>();
 
   public InterceptorBinding()
   {
@@ -55,6 +59,11 @@ public class InterceptorBinding {
     return _interceptorOrder;
   }
 
+  public ArrayList<String> getInterceptors()
+  {
+    return _interceptors;
+  }
+
   public void setEjbName(String ejbName)
   {
     _ejbName = ejbName;
@@ -63,5 +72,10 @@ public class InterceptorBinding {
   public void setInterceptorOrder(InterceptorOrder interceptorOrder)
   {
     _interceptorOrder = interceptorOrder;
+  }
+
+  public void addInterceptorClass(String interceptorClass)
+  {
+    _interceptors.add(interceptorClass);
   }
 }

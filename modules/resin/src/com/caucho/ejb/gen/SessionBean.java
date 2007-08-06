@@ -101,7 +101,7 @@ public class SessionBean extends ClassComponent {
     out.println("  if (bean != null) {");
     out.println("    _freeBean = null;");
     if (_ejbClass.isAssignableTo(javax.ejb.SessionSynchronization.class))
-      out.println("      trans.addSession(bean);");
+      out.println("    trans.addSession(bean);");
     out.println("    return bean;");
     out.println("  }");
     out.println("}");
@@ -289,7 +289,7 @@ public class SessionBean extends ClassComponent {
 
     // XXX: invocation context pool ???
     out.println();
-    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl(target, methodName, paramTypes);");
+    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl(this, target, methodName, paramTypes);");
     out.println("invocationContext.setParameters(args);");
 
     out.println();
@@ -320,6 +320,14 @@ public class SessionBean extends ClassComponent {
 
       out.println();
       out.println("method" + j + ".invoke(_interceptor" + j + ", new Object[] { invocationContext });");
+    }
+
+    String aroundInvokeMethodName = _bean.getAroundInvokeMethodName();
+
+    // ejb/0fb8
+    if (aroundInvokeMethodName != null) {
+      out.println();
+      out.println(aroundInvokeMethodName + "(invocationContext);");
     }
 
     out.popDepth();

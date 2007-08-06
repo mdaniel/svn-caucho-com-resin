@@ -65,6 +65,7 @@ import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
+import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptors;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -139,7 +140,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private ArrayList<Interceptor> _interceptors
     = new ArrayList<Interceptor>();
 
+  private String _aroundInvokeMethodName;
+
   private long _transactionTimeout;
+
+  private AroundInvokeConfig _aroundInvokeConfig;
 
   /**
    * Creates a new entity bean configuration.
@@ -152,6 +157,19 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _loader = Thread.currentThread().getContextClassLoader();
 
     _jClassLoader = JClassLoaderWrapper.create(_loader);
+  }
+
+  public String getAroundInvokeMethodName()
+  {
+    return _aroundInvokeMethodName;
+  }
+
+  public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
+  {
+    _aroundInvokeConfig = aroundInvoke;
+
+    // ejb/0fbb
+    _aroundInvokeMethodName = aroundInvoke.getMethodName();
   }
 
   /**
@@ -173,16 +191,24 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Returns true if the interceptor is already configured.
    */
-  public boolean containsInterceptor(Class interceptorClass)
+  public boolean containsInterceptor(String interceptorClassName)
+  {
+    return getInterceptor(interceptorClassName) != null;
+  }
+
+  /**
+   * Returns the interceptor for a given class name.
+   */
+  public Interceptor getInterceptor(String interceptorClassName)
   {
     for (Interceptor interceptor : _interceptors) {
       String className = interceptor.getInterceptorClass();
 
-      if (className.equals(interceptorClass.getName()))
-        return true;
+      if (className.equals(interceptorClassName))
+        return interceptor;
     }
 
-    return false;
+    return null;
   }
 
   /**
@@ -883,8 +909,40 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (interceptorsAnn != null) {
       for (Class cl : (Class []) interceptorsAnn.get("value")) {
         // XXX: ejb/0fb0
-        if (! containsInterceptor(cl)) {
+        if (! containsInterceptor(cl.getName())) {
           addInterceptor(configureInterceptor(cl));
+        }
+      }
+    }
+
+    // ejb/0fb5
+    InterceptorBinding binding =
+      _ejbConfig.getInterceptorBinding(getEJBName()); // _ejbClass.getName());
+
+    if (binding != null) {
+      ArrayList<String> interceptorClasses = binding.getInterceptors();
+
+      // ejb/0fb7
+      if (interceptorClasses.isEmpty()) {
+        InterceptorOrder interceptorOrder = binding.getInterceptorOrder();
+        interceptorClasses = interceptorOrder.getInterceptorClasses();
+      }
+
+      for (String className : interceptorClasses) {
+        Interceptor interceptor = getInterceptor(className);
+
+        // ejb/0fb5 vs ejb/0fb6
+        if (interceptor != null) {
+          _interceptors.remove(interceptor);
+
+          addInterceptor(interceptor);
+        }
+        else {
+          interceptor = _ejbConfig.getInterceptor(className);
+
+          interceptor.init();
+
+          addInterceptor(interceptor);
         }
       }
     }
@@ -1460,7 +1518,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
         CallChain call = new MethodCallChain(beanMethod);
         call = view.createPoolChain(call, null);
-        call = getTransactionChain(call, beanMethod, prefix);
+        call = getTransactionChain(call, beanMethod, methods[i], prefix);
         call = getSecurityChain(call, beanMethod, prefix);
 
         view.addMethod(new BaseMethod(methods[i], call));
@@ -1533,7 +1591,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
         }
 
         CallChain call = new MethodCallChain(beanMethod);
-        call = getTransactionChain(call, beanMethod, prefix);
+        call = getTransactionChain(call, beanMethod, methods[i], prefix);
         call = getSecurityChain(call, beanMethod, prefix);
 
         baseClass.addMethod(new BaseMethod(methods[i], call));
@@ -1542,10 +1600,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
 
   protected CallChain getTransactionChain(CallChain next,
-                                          JMethod method,
+                                          JMethod apiMethod,
+                                          JMethod implMethod,
                                           String prefix)
   {
-    return TransactionChain.create(next, getTransactionAttribute(method, prefix));
+    return TransactionChain.create(next, getTransactionAttribute(implMethod, prefix), apiMethod, implMethod);
   }
 
   protected CallChain getSecurityChain(CallChain next,
@@ -2184,6 +2243,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
         EjbMethodPattern pattern = createMethod(getSignature(method));
 
         setPatternTransaction(pattern, xa);
+      }
+
+      JAnnotation aroundInvoke = method.getAnnotation(AroundInvoke.class);
+
+      // ejb/0fb8
+      if (aroundInvoke != null) {
+        _aroundInvokeMethodName = method.getName();
       }
     }
   }

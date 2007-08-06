@@ -41,6 +41,7 @@ import java.io.IOException;
 public class MethodCallChain extends CallChain {
   private static L10N L = new L10N(MethodCallChain.class);
 
+  private JMethod _method;
   private String _methodName;
   private JClass []_parameterTypes;
   private JClass _returnType;
@@ -57,6 +58,7 @@ public class MethodCallChain extends CallChain {
    */
   public MethodCallChain(JMethod method)
   {
+    _method = method;
     _methodName = method.getName();
     _parameterTypes = method.getParameterTypes();
     _returnType = method.getReturnType();
@@ -70,6 +72,14 @@ public class MethodCallChain extends CallChain {
     _methodName = methodName;
     _parameterTypes = params;
     _returnType = returnType;
+  }
+
+  /**
+   * Returns the method.
+   */
+  public JMethod getMethod()
+  {
+    return _method;
   }
 
   /**
@@ -87,7 +97,7 @@ public class MethodCallChain extends CallChain {
   {
     return _returnType;
   }
-  
+
   /**
    * Generates the code for the method call.
    *
@@ -97,7 +107,7 @@ public class MethodCallChain extends CallChain {
    * @param args the method arguments
    */
   public void generateCall(JavaWriter out, String retVar,
-			   String var, String []args)
+                           String var, String []args)
     throws IOException
   {
     if (getReturnType().getName().equals("void")) {
@@ -111,16 +121,16 @@ public class MethodCallChain extends CallChain {
       out.print(var + ".");
     else
       out.print("super.");
-    
+
     out.print(_methodName + "(");
-    
+
     for (int i = 0; i < args.length; i++) {
       if (i != 0)
         out.print(", ");
-      
+
       out.print(args[i]);
     }
-    
+
     out.println(");");
   }
 }

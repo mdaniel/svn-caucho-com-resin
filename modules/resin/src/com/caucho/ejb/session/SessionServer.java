@@ -84,7 +84,7 @@ public class SessionServer extends AbstractServer
 
     try {
       thread.setContextClassLoader(_loader);
-    
+
       super.init();
 
       // XXX: from TCK, s/b local or remote?
@@ -93,17 +93,17 @@ public class SessionServer extends AbstractServer
       // JNDI is a resin-specific implementation
       // This needs to match InjectIntrospector
       /*
-      String prefix = getServerManager().getLocalJndiPrefix();
-      if (prefix != null)
-	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
-      
-      prefix = getServerManager().getRemoteJndiPrefix();
-      if (prefix != null)
-	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
+        String prefix = getServerManager().getLocalJndiPrefix();
+        if (prefix != null)
+        Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
+
+        prefix = getServerManager().getRemoteJndiPrefix();
+        if (prefix != null)
+        Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
       */
       Jndi.rebindDeep("java:comp/env/ejbContext", getSessionContext());
       Jndi.rebindDeep("java:comp/env/sessionContext", getSessionContext());
-      
+
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();
 
@@ -164,7 +164,7 @@ public class SessionServer extends AbstractServer
     }
     else {
       _isInitRemote = true;
-      
+
       _remoteObject = _homeContext._caucho_newRemoteInstance();
 
       _isInitRemote = false;
@@ -199,8 +199,8 @@ public class SessionServer extends AbstractServer
       SessionObject obj = null;
 
       /*
-      obj = (SessionObject) bean.getLocal();
-      obj._setObject(bean);
+        obj = (SessionObject) bean.getLocal();
+        obj._setObject(bean);
       */
       if (obj == null)
         throw new IllegalStateException("bean has no local interface");
@@ -232,7 +232,7 @@ public class SessionServer extends AbstractServer
   AbstractHandle createHandle(AbstractContext context)
   {
     String key = ((AbstractSessionContext) context).getPrimaryKey();
-    
+
     return getHandleEncoder().createHandle(key);
   }
 
@@ -242,12 +242,12 @@ public class SessionServer extends AbstractServer
   public String createSessionKey(AbstractSessionContext context)
   {
     String key = getHandleEncoder().createRandomStringKey();
-    
+
     _sessions.put(key, context);
-    
+
     return key;
   }
-  
+
   /**
    * Finds the remote bean by its key.
    *
@@ -261,7 +261,7 @@ public class SessionServer extends AbstractServer
   {
     if (key == null)
       return null;
-    
+
     AbstractSessionContext cxt = _sessions.get(key);
     if (cxt == null)
       throw new FinderException("no matching object:" + key);
@@ -273,14 +273,14 @@ public class SessionServer extends AbstractServer
   {
     synchronized (this) {
       if (_homeContext == null) {
-	try {
-	  Class []param = new Class[] { SessionServer.class };
-	  Constructor cons = _contextImplClass.getConstructor(param);
+        try {
+          Class []param = new Class[] { SessionServer.class };
+          Constructor cons = _contextImplClass.getConstructor(param);
 
-	  _homeContext = (StatefulContext) cons.newInstance(this);
-	} catch (Exception e) {
-	  throw new EJBExceptionWrapper(e);
-	}
+          _homeContext = (StatefulContext) cons.newInstance(this);
+        } catch (Exception e) {
+          throw new EJBExceptionWrapper(e);
+        }
       }
     }
 
@@ -309,7 +309,18 @@ public class SessionServer extends AbstractServer
     _sessions.remove(handle.getObjectId());
     // _ejbManager.remove(handle);
   }
-  
+
+  /**
+   * Remove an object by its handle and reset this remote object.
+   */
+  public void removeRemote(AbstractHandle handle)
+  {
+    // ejb/0fba
+    remove(handle);
+
+    _remoteObject = null;
+  }
+
   /**
    * Cleans up the entity server nicely.
    */
@@ -332,14 +343,14 @@ public class SessionServer extends AbstractServer
     }
 
     _sessions = null;
-    
+
     log.fine("closing session server " + this);
 
     for (AbstractSessionContext cxt : values) {
       try {
-	cxt.destroy();
+        cxt.destroy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 

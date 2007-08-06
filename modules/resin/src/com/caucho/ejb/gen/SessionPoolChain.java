@@ -28,10 +28,13 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
+import com.caucho.java.gen.MethodCallChain;
 import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
 
@@ -43,13 +46,20 @@ import java.io.IOException;
 public class SessionPoolChain extends FilterCallChain {
   private static L10N L = new L10N(SessionPoolChain.class);
 
-  private BaseMethod _method;
+  private BaseMethod _apiMethod;
+  private JMethod _implMethod;
 
-  public SessionPoolChain(CallChain next, BaseMethod method)
+  public SessionPoolChain(CallChain next, BaseMethod apiMethod)
   {
     super(next);
 
-    _method = method;
+    _apiMethod = apiMethod;
+
+    CallChain callChain = apiMethod.getCall();
+
+    MethodCallChain methodCallChain = (MethodCallChain) callChain;
+
+    _implMethod = methodCallChain.getMethod();
   }
 
   /**
@@ -68,17 +78,23 @@ public class SessionPoolChain extends FilterCallChain {
     out.println("try {");
     out.pushDepth();
 
-    generateCallInterceptors(out, args);
+    // ejb/0fba
+    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class))
+      generateCallInterceptors(out, args);
 
     super.generateCall(out, retVar, "ptr", args);
 
     out.popDepth();
 
-    generateInterceptorExceptionHandling(out);
+    // ejb/0fba
+    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class))
+      generateInterceptorExceptionHandling(out);
 
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();
-    out.println("ptr = null;");
+
+    // Cannot set null since the finally block needs to free up the bean first.
+    // out.println("ptr = null;");
 
     out.println("throw e;");
 
@@ -88,9 +104,24 @@ public class SessionPoolChain extends FilterCallChain {
     out.pushDepth();
 
     out.println("_context._ejb_free(ptr);");
+    out.println("ptr = null;");
+
+    // ejb/0fba
+    if (_implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
+      out.println("_server.removeRemote((com.caucho.ejb.protocol.AbstractHandle) getHandle());");
+    }
 
     out.popDepth();
     out.println("}");
+
+    // ejb/0fba
+    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
+      // generateExceptionHandling(out);
+    }
+    else {
+      out.println("} catch (RuntimeException e) {");
+      out.pushDepth();
+    }
   }
 
   protected void generateFilterCall(JavaWriter out, String retVar,
@@ -103,7 +134,7 @@ public class SessionPoolChain extends FilterCallChain {
   protected void generateCallInterceptors(JavaWriter out, String []args)
     throws IOException
   {
-    if (_method == null)
+    if (_apiMethod == null)
       return;
 
     String argList = "";
@@ -120,10 +151,10 @@ public class SessionPoolChain extends FilterCallChain {
     }
 
 
-    JClass types[] = _method.getParameterTypes();
+    JClass types[] = _apiMethod.getParameterTypes();
 
-    String paramTypes = "";
-    String parametersCasting = "";
+    StringBuilder paramTypes = new StringBuilder();
+    StringBuilder parametersCasting = new StringBuilder();
 
     isFirst = true;
 
@@ -133,50 +164,51 @@ public class SessionPoolChain extends FilterCallChain {
       if (isFirst)
         isFirst = false;
       else
-        paramTypes += ", ";
+        paramTypes.append(", ");
 
-      parametersCasting += args[i] + " = ";
+      parametersCasting.append(args[i]);
+      parametersCasting.append(" = ");
 
       String s = "parameters[" + i + "]";
 
       if (! types[i].isPrimitive()) {
-        paramTypes += typeName + ".class";
-        parametersCasting += "(" + typeName + ") " + s + ";";
+        paramTypes.append(typeName + ".class");
+        parametersCasting.append("(" + typeName + ") " + s + ";");
       }
       else {
         Class primitiveType = (Class) types[i].getJavaClass();
 
         if (primitiveType == Boolean.TYPE) {
-          paramTypes += "Boolean.TYPE";
-          parametersCasting += "((Boolean) " + s + ").booleanValue();";
+          paramTypes.append("Boolean.TYPE");
+          parametersCasting.append("((Boolean) " + s + ").booleanValue();");
         }
         else if (primitiveType == Byte.TYPE) {
-          paramTypes += "Byte.TYPE";
-          parametersCasting += "((Byte) " + s + ").byteValue();";
+          paramTypes.append("Byte.TYPE");
+          parametersCasting.append("((Byte) " + s + ").byteValue();");
         }
         else if (primitiveType == Character.TYPE) {
-          paramTypes += "Character.TYPE";
-          parametersCasting += "((Character) " + s + ").charValue();";
+          paramTypes.append("Character.TYPE");
+          parametersCasting.append("((Character) " + s + ").charValue();");
         }
         else if (primitiveType == Double.TYPE) {
-          paramTypes += "Double.TYPE";
-          parametersCasting += "((Double) " + s + ").doubleValue();";
+          paramTypes.append("Double.TYPE");
+          parametersCasting.append("((Double) " + s + ").doubleValue();");
         }
         else if (primitiveType == Float.TYPE) {
-          paramTypes += "Float.TYPE";
-          parametersCasting += "((Float) " + s + ").floatValue();";
+          paramTypes.append("Float.TYPE");
+          parametersCasting.append("((Float) " + s + ").floatValue();");
         }
         else if (primitiveType == Integer.TYPE) {
-          paramTypes += "Integer.TYPE";
-          parametersCasting += "((Integer) " + s + ").intValue();";
+          paramTypes.append("Integer.TYPE");
+          parametersCasting.append("((Integer) " + s + ").intValue();");
         }
         else if (primitiveType == Long.TYPE) {
-          paramTypes += "Long.TYPE";
-          parametersCasting += "((Long) " + s + ").longValue();";
+          paramTypes.append("Long.TYPE");
+          parametersCasting.append("((Long) " + s + ").longValue();");
         }
         else if (primitiveType == Short.TYPE) {
-          paramTypes += "Short.TYPE";
-          parametersCasting += "((Short) " + s + ").shortValue();";
+          paramTypes.append("Short.TYPE");
+          parametersCasting.append("((Short) " + s + ").shortValue();");
         }
       }
     }
@@ -186,13 +218,13 @@ public class SessionPoolChain extends FilterCallChain {
 
     out.print("invocationContext = ptr.__caucho_callInterceptors(this, ");
     out.print("new Object[] {" + argList + "}, ");
-    out.println("\"" + _method.getMethodName() + "\", new Class[] {" + paramTypes + "});");
+    out.println("\"" + _apiMethod.getMethodName() + "\", new Class[] {" + paramTypes + "});");
     out.println();
 
     out.println("Object parameters[] = invocationContext.getParameters();");
     out.println();
 
-    if (! "".equals(parametersCasting)) {
+    if (parametersCasting.length() > 0) {
       out.println(parametersCasting);
       out.println();
     }
@@ -205,11 +237,12 @@ public class SessionPoolChain extends FilterCallChain {
     out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
     out.pushDepth();
 
-    for (JClass cl : _method.getExceptionTypes()) {
+    for (JClass cl : _apiMethod.getExceptionTypes()) {
       out.println("if (e.getCause() instanceof " + cl.getName() + ")");
       out.println("  throw (" + cl.getName() + ") e.getCause();");
     }
 
     out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
+    out.popDepth();
   }
 }

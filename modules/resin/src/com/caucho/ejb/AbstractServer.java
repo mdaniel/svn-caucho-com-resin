@@ -31,6 +31,7 @@ package com.caucho.ejb;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.bytecode.JClass;
+import com.caucho.ejb.cfg.AroundInvokeConfig;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
@@ -110,6 +111,8 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected BuilderProgram _initProgram;
 
+  private AroundInvokeConfig _aroundInvokeConfig;
+
   /**
    * Creates a new server container
    *
@@ -129,7 +132,12 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     return "" + getModuleName() + "#" + getEJBName();
   }
-  
+
+  public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
+  {
+    _aroundInvokeConfig = aroundInvoke;
+  }
+
   /**
    * Sets the ejb name.
    */
@@ -389,15 +397,15 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     try {
       if (_jndiEnv == null)
-	_jndiEnv = (Context) new InitialContext().lookup("java:comp/env");
-      
+        _jndiEnv = (Context) new InitialContext().lookup("java:comp/env");
+
       // XXX: not tested
       return _jndiEnv.lookup(jndiName);
     } catch (NamingException e) {
       throw new IllegalArgumentException(e);
     }
   }
-  
+
 
   public UserTransaction getUserTransaction()
   {
@@ -652,10 +660,10 @@ abstract public class AbstractServer implements EnvironmentBean {
    * Returns the UserTransaction for the request.
    */
   /*
-  public UserTransaction getUserTransaction()
-  {
+    public UserTransaction getUserTransaction()
+    {
     return _ejbManager.getUserTransaction();
-  }
+    }
   */
 
   /**
@@ -721,12 +729,12 @@ abstract public class AbstractServer implements EnvironmentBean {
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(_loader);
+        thread.setContextClassLoader(_loader);
 
-	_initProgram.configure(instance);
+        _initProgram.configure(instance);
 
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     }
   }
@@ -748,7 +756,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public boolean isLocal()
   {
     return (_localHome != null
-	    || _localApiList != null && _localApiList.size() > 0);
+            || _localApiList != null && _localApiList.size() > 0);
   }
 
   /**

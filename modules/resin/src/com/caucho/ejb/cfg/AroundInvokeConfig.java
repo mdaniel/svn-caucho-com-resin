@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,46 +19,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.j2ee.cfg.J2eeSecurityRole;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
-public class AssemblyDescriptor {
-  private EjbConfig _config;
+/**
+ * Configuration for around-invoke.
+ */
+public class AroundInvokeConfig {
+  private static final L10N L = new L10N(AroundInvokeConfig.class);
 
-  AssemblyDescriptor(EjbConfig config)
-  {
-    _config = config;
-  }
+  private String _methodName;
 
-  public ContainerTransaction createContainerTransaction()
-  {
-    return new ContainerTransaction(_config);
-  }
-
-  public EjbJar.MethodPermission createMethodPermission()
-  {
-    return new EjbJar.MethodPermission(_config);
-  }
-
-  public void addSecurityRole(J2eeSecurityRole securityRole)
+  public AroundInvokeConfig()
   {
   }
 
-  public void addInterceptorBinding(InterceptorBinding interceptorBinding)
+  public String getMethodName()
   {
-    _config.addInterceptorBinding(interceptorBinding);
+    return _methodName;
   }
 
-  public void addMessageDestination(MessageDestination messageDestination)
+  public void setMethodName(String methodName)
   {
-    _config.addMessageDestination(messageDestination);
+    _methodName = methodName;
   }
 }

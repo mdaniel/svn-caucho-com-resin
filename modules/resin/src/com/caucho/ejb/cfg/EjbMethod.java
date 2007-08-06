@@ -45,7 +45,7 @@ import java.io.IOException;
  */
 public class EjbMethod {
   private static final L10N L = new L10N(EjbMethod.class);
-  
+
   public static final int TRANS_BEAN = 0;
   public static final int TRANS_NOT_SUPPORTED = TRANS_BEAN + 1;
   public static final int TRANS_SUPPORTS = TRANS_NOT_SUPPORTED + 1;
@@ -75,7 +75,7 @@ public class EjbMethod {
   {
     if (apiMethod == null)
       throw new NullPointerException();
-    
+
     _view = view;
     _apiMethod = apiMethod;
     _implMethod = implMethod;
@@ -133,7 +133,7 @@ public class EjbMethod {
     BaseMethod method = viewAssembler.createBusinessMethod(this);
 
     method.setCall(assembleCallChain(method.getCall()));
-    
+
     return method;
   }
 
@@ -143,12 +143,13 @@ public class EjbMethod {
   protected CallChain assembleCallChain(CallChain call)
   {
     call = getView().getTransactionChain(call,
-					 getApiMethod(),
-					 getViewPrefix());
-    
+                                         getApiMethod(),
+                                         getImplMethod(),
+                                         getViewPrefix());
+
     call = getView().getSecurityChain(call,
-				      getApiMethod(),
-				      getViewPrefix());
+                                      getApiMethod(),
+                                      getViewPrefix());
 
     return call;
   }

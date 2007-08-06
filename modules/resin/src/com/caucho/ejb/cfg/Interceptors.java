@@ -41,16 +41,15 @@ public class Interceptors {
   private final EjbConfig _config;
   private final String _ejbModuleName;
 
-  private ArrayList<Interceptor> _interceptors = new ArrayList<Interceptor>();
-
   public Interceptors(EjbConfig config, String ejbModuleName)
   {
     _config = config;
+
     _ejbModuleName = ejbModuleName;
   }
 
   public void addInterceptor(Interceptor interceptor)
   {
-    _interceptors.add(interceptor);
+    _config.addInterceptor(interceptor);
   }
 }
