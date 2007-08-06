@@ -59,7 +59,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   protected static final L10N L = new L10N(IiopReader.class);
   protected static final Logger log
     = Logger.getLogger(IiopReader.class.getName());
-  
+
   public static final int MSG_REQUEST = 0;
   public static final int MSG_REPLY = 1;
   public static final int MSG_CANCEL_REQUEST = 2;
@@ -68,7 +68,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public static final int MSG_CLOSE_CONNECTION = 5;
   public static final int MSG_ERROR = 6;
   public static final int MSG_FRAGMENT = 7;
-  
+
   public static final int SERVICE_TRANSACTION = 0;
   public static final int SERVICE_CODE_SET = 1;
   public static final int SERVICE_CHAIN_BYPASS_CHECK = 2;
@@ -92,7 +92,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public static final int STATUS_USER_EXCEPTION = 1;
   public static final int STATUS_SYSTEM_EXCEPTION = 2;
   public static final int STATUS_LOCATION_FORWARD = 3;
-  
+
   private IiopSocketPool _pool;
   private ReadWritePair _pair;
   private ReadStream _rs;
@@ -101,16 +101,16 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
   private ReaderContext _context;
   /*
-  private IntArray _refOffsets = new IntArray();
-  private ArrayList<String> _refIds = new ArrayList<String>();
-  private ArrayList<Class> _refClasses = new ArrayList<Class>();
-  private ArrayList<Serializable> _refValues = new ArrayList<Serializable>();
+    private IntArray _refOffsets = new IntArray();
+    private ArrayList<String> _refIds = new ArrayList<String>();
+    private ArrayList<Class> _refClasses = new ArrayList<Class>();
+    private ArrayList<Serializable> _refValues = new ArrayList<Serializable>();
 
-  private HashMap<Integer,String> _savedStrings = new HashMap<Integer,String>();
+    private HashMap<Integer,String> _savedStrings = new HashMap<Integer,String>();
   */
 
   private MessageReader _in;
-  
+
   private int _major;
   private int _minor;
   private boolean _isBigEndian;
@@ -118,9 +118,9 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private int _flags;
 
   private int _type;
-  
+
   private int _fragmentOffset;
-  
+
   private int _chunkEnd = -1;
   private int _chunkDepth = 0;
 
@@ -133,7 +133,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private XidImpl _xid;
 
   private char []_cb = new char[256];
-  
+
   private ValueHandler _valueHandler = Util.createValueHandler();
   private RunTime runTime = _valueHandler.getRunTimeCodeBase();
 
@@ -154,7 +154,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     _pool = pool;
     _pair = pair;
-    
+
     init(pair.getReadStream());
   }
 
@@ -231,7 +231,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return _operation;
   }
-  
+
   public XidImpl getXid()
   {
     return _xid;
@@ -250,10 +250,10 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
         _header[2] != 'O' ||
         _header[3] != 'P') {
       throw new IOException(L.l("unknown request {0}, {1}, {2}, {3}",
-				"" + toCh(_header[0]),
-				"" + toCh(_header[1]),
-				"" + toCh(_header[2]),
-				"" + toCh(_header[3])));
+                                "" + toCh(_header[0]),
+                                "" + toCh(_header[1]),
+                                "" + toCh(_header[2]),
+                                "" + toCh(_header[3])));
     }
 
     _major = _header[4];
@@ -265,12 +265,12 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     _flags = _header[6];
     _isBigEndian = (_flags & 1) == 0;
     _hasMoreFragments = (_flags & 2) == 2;
-    
+
     _type = _header[7];
 
     _in = new InputStreamMessageReader(_rs,
-				       ! _hasMoreFragments,
-				       0);
+                                       ! _hasMoreFragments,
+                                       0);
 
     // debug
     //System.out.println("---");
@@ -285,7 +285,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
         readReply10();
         break;
       case MSG_CLOSE_CONNECTION:
-	return false;
+        return false;
       case MSG_ERROR:
         throw new RuntimeException("MSG_ERROR: unknown protocol error");
       default:
@@ -301,7 +301,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
         readReply10();
         break;
       case MSG_CLOSE_CONNECTION:
-	return false;
+        return false;
       case MSG_ERROR:
         throw new RuntimeException("MSG_ERROR: unknown protocol error");
       default:
@@ -317,7 +317,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
         readReply12();
         break;
       case MSG_CLOSE_CONNECTION:
-	return false;
+        return false;
       case MSG_ERROR:
         throw new RuntimeException("MSG_ERROR: unknown protocol error");
       default:
@@ -336,11 +336,11 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     readServiceContextList();
     requestId = _in.read_long();
     responseExpected = _in.read() != 0;
-    
+
     readOctetSequence(_objectKey);
 
     readString(_operation);
-    
+
     readOctetSequence(principal);
   }
 
@@ -356,30 +356,30 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     case STATUS_NO_EXCEPTION:
       //debugTail();
       return;
-        
+
     case STATUS_SYSTEM_EXCEPTION:
       String exceptionId = readString();
       int minorStatus = _in.read_long();
       int completionStatus = _in.read_long();
 
       if (_unknownExn instanceof RuntimeException)
-	throw (RuntimeException) _unknownExn;
+        throw (RuntimeException) _unknownExn;
       else if (_unknownExn instanceof Throwable)
-	throw new RemoteUserException((Throwable) _unknownExn);
-      
+        throw new RemoteUserException((Throwable) _unknownExn);
+
       throw new RuntimeException("exception: " + exceptionId);
-        
+
     case STATUS_USER_EXCEPTION:
       String type = read_string();
       Object value = read_value();
 
       if (value instanceof RuntimeException)
-	throw (RuntimeException) value;
+        throw (RuntimeException) value;
       else if (value instanceof Throwable)
-	throw new RemoteUserException((Throwable) value);
-      
+        throw new RemoteUserException((Throwable) value);
+
       throw new IOException("user exception: " + value);
-        
+
     default:
       throw new IOException("unknown status: " + status);
     }
@@ -415,28 +415,40 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     case STATUS_NO_EXCEPTION:
       //debugTail();
       return;
-        
+
     case STATUS_SYSTEM_EXCEPTION:
       String exceptionId = readString();
       int minorStatus = _in.read_long();
       int completionStatus = _in.read_long();
 
-      if (_unknownExn != null)
-	throw new RemoteUserException(_unknownExn);
-      
+      // ejb/0fbc, TCK: ejb30/bb/session/stateful/interceptor/method/annotated/runtimeExceptionTest
+      if (_unknownExn != null) {
+        if (_unknownExn instanceof java.rmi.RemoteException) {
+          Throwable cause = _unknownExn.getCause();
+
+          if (cause instanceof RuntimeException) {
+            throw (RuntimeException) cause;
+          }
+        }
+
+        throw new RemoteUserException(_unknownExn);
+      }
+
       throw new IOException("exception: " + exceptionId);
-        
+
     case STATUS_USER_EXCEPTION:
       Object value = read_value();
 
       if (value instanceof RuntimeException)
-	throw (RuntimeException) value;
+        throw (RuntimeException) value;
+      else if (value instanceof Throwable)
+        throw new RemoteUserException((Throwable) value);
 
       if (value != null)
-	throw new IOException("user exception: " + value + " " + value.getClass().getName());
+        throw new IOException("user exception: " + value + " " + value.getClass().getName());
       else
-	throw new IOException("null user exception");
-        
+        throw new IOException("null user exception");
+
     default:
       throw new IOException("unknown status: " + status);
     }
@@ -446,7 +458,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     throws IOException
   {
     _xid = null;
-    
+
     int length = _in.read_long();
 
     for (int i = 0; i < length; i++) {
@@ -454,7 +466,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       int dataLength = _in.read_long();
 
       int startOffset = _in.setOffset(0);
-      
+
       if (serviceId == SERVICE_CODE_SET) {
         int endian = _in.read();
         int charSet = _in.read_long();
@@ -463,26 +475,26 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       else if (serviceId == SERVICE_UNKNOWN_EXCEPTION_INFO) {
         int endian = _in.read();
 
-	_unknownExn = (Throwable) read_value();
+        _unknownExn = (Throwable) read_value();
       }
       else if (serviceId == SERVICE_TRANSACTION) {
-	int endian = _in.read();
+        int endian = _in.read();
 
-	int timeout = _in.read_long();
-	int coord = _in.read_long();
-	int term = _in.read_long();
-	int format = _in.read_long();
-	int bqualLength = _in.read_long();
-	int xidLength = _in.read_long();
-	byte []local = new byte[bqualLength];
-	byte []global = new byte[xidLength - bqualLength];
-	_in.read(global, 0, global.length);
-	_in.read(local, 0, local.length);
-	int parents = _in.read_long();
+        int timeout = _in.read_long();
+        int coord = _in.read_long();
+        int term = _in.read_long();
+        int format = _in.read_long();
+        int bqualLength = _in.read_long();
+        int xidLength = _in.read_long();
+        byte []local = new byte[bqualLength];
+        byte []global = new byte[xidLength - bqualLength];
+        _in.read(global, 0, global.length);
+        _in.read(local, 0, local.length);
+        int parents = _in.read_long();
 
-	XidImpl xid = new XidImpl(global, local);
+        XidImpl xid = new XidImpl(global, local);
 
-	_xid = xid;
+        _xid = xid;
       }
       else {
         _in.skip(dataLength);
@@ -499,7 +511,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     return ior.read(this);
   }
-    
+
   public Object readObject(Class cl)
     throws IOException
   {
@@ -524,19 +536,19 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return read_value((Class) null);
   }
-    
+
   public Serializable read_value(Class type)
   {
     try {
       // ejb/114o tests for chunking
       int oldChunkEnd = _chunkEnd;
-      
+
       // writeHexGroup(16);
 
       _chunkEnd = -1;
       _in.align(4);
       int startOffset = _in.getOffset();
-      
+
       int code = read_long();
 
       String repId = "";
@@ -544,125 +556,125 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       Serializable value = null;
 
       if (code == 0)
-	return null;
+        return null;
       else if (code == 0xffffffff) {
-	_chunkEnd = oldChunkEnd;
-	
-	int start = _in.getOffset();
-	int delta = read_long();
-	int target = start + delta;
-	
-	log.fine("INDIRECT:" + delta);
+        _chunkEnd = oldChunkEnd;
 
-	value = _context.getRef(target);
+        int start = _in.getOffset();
+        int delta = read_long();
+        int target = start + delta;
 
-	if (value != null)
-	  return value;
+        log.fine("INDIRECT:" + delta);
 
-	throw new IndirectionException(target);
+        value = _context.getRef(target);
+
+        if (value != null)
+          return value;
+
+        throw new IndirectionException(target);
       }
       else if ((code & 0x7fffff00) != 0x7fffff00) {
-	repId = readString(code);
+        repId = readString(code);
       }
       else {
-	isChunked = (code & 8) == 8;
-	boolean hasCodeBase = (code & 1) == 1;
-	int repository = (code & 6);
-      
-	if (hasCodeBase) {
-	  readCodeBase();
-	}
+        isChunked = (code & 8) == 8;
+        boolean hasCodeBase = (code & 1) == 1;
+        int repository = (code & 6);
 
-	if (repository == 2) {
-	  repId = read_string();
-	}
-	else {
-	  throw new RuntimeException("Can't cope with repository=" + repository);
-	}
+        if (hasCodeBase) {
+          readCodeBase();
+        }
+
+        if (repository == 2) {
+          repId = read_string();
+        }
+        else {
+          throw new RuntimeException("Can't cope with repository=" + repository);
+        }
       }
 
       try {
-	if (isChunked) {
-	  // writeHexGroup(16);
+        if (isChunked) {
+          // writeHexGroup(16);
 
-	  int chunkLength = _in.read_long();
+          int chunkLength = _in.read_long();
 
-	  _chunkEnd = chunkLength + _in.getOffset();
-	  _chunkDepth++;
-	}
+          _chunkEnd = chunkLength + _in.getOffset();
+          _chunkDepth++;
+        }
 
-	// XXX: assume ucs-16
-	if (repId.equals("IDL:omg.org/CORBA/WStringValue:1.0")) {
-	  value = read_wstring();
-	}
-	else if (! repId.startsWith("RMI:") && ! repId.startsWith("IDL:")) {
-	  log.warning("unknown rep: " + repId + " " + Integer.toHexString(code));
-	  throw new UnsupportedOperationException("problem parsing repid: '" + repId + "'");
-	}
-	else {
-	  int p = repId.indexOf(':', 4);
-	  if (p < 0)
-	    throw new RuntimeException("unknown RMI: " + repId);
+        // XXX: assume ucs-16
+        if (repId.equals("IDL:omg.org/CORBA/WStringValue:1.0")) {
+          value = read_wstring();
+        }
+        else if (! repId.startsWith("RMI:") && ! repId.startsWith("IDL:")) {
+          log.warning("unknown rep: " + repId + " " + Integer.toHexString(code));
+          throw new UnsupportedOperationException("problem parsing repid: '" + repId + "'");
+        }
+        else {
+          int p = repId.indexOf(':', 4);
+          if (p < 0)
+            throw new RuntimeException("unknown RMI: " + repId);
 
-	  String className;
+          String className;
 
-	  if (repId.startsWith("IDL:omg.org")) {
-	    className = "org.omg" + repId.substring(11, p).replace('/', '.');
+          if (repId.startsWith("IDL:omg.org")) {
+            className = "org.omg" + repId.substring(11, p).replace('/', '.');
 
-	    int tail = className.lastIndexOf('.');
-	    className = (className.substring(0, tail) + "Package"
-			 + className.substring(tail));
-	  }
-	  else
-	    className = repId.substring(4, p);
-	  
-	  // log.fine("CLASS-NAME: " + className);
-	  if (className.equals("javax.rmi.CORBA.ClassDesc")) {
-	    return readClass();
-	  }
-	  else {
-	    Class cl = null;
+            int tail = className.lastIndexOf('.');
+            className = (className.substring(0, tail) + "Package"
+                         + className.substring(tail));
+          }
+          else
+            className = repId.substring(4, p);
 
-	    try {
-	      cl = CauchoSystem.loadClass(className);
-	    } catch (ClassNotFoundException e) {
-	      e.printStackTrace();
-	      throw new RuntimeException(e);
-	    }
+          // log.fine("CLASS-NAME: " + className);
+          if (className.equals("javax.rmi.CORBA.ClassDesc")) {
+            return readClass();
+          }
+          else {
+            Class cl = null;
 
-	    value = _valueHandler.readValue(this, startOffset,
-					    cl, repId, runTime);
-	  }
-	}
+            try {
+              cl = CauchoSystem.loadClass(className);
+            } catch (ClassNotFoundException e) {
+              e.printStackTrace();
+              throw new RuntimeException(e);
+            }
 
-	_context.addRef(startOffset, value);
+            value = _valueHandler.readValue(this, startOffset,
+                                            cl, repId, runTime);
+          }
+        }
 
-	return value;
+        _context.addRef(startOffset, value);
+
+        return value;
       } finally {
-	if (_chunkDepth > 0) {
-	  _chunkDepth--;
+        if (_chunkDepth > 0) {
+          _chunkDepth--;
 
-	  int delta = _chunkEnd - _in.getOffset();
-	  _chunkEnd = -1;
-	  
-	  if (delta > 0) {
-	    _in.skip(delta);
-	  }
-	  
-	  int newChunk = _in.read_long();
+          int delta = _chunkEnd - _in.getOffset();
+          _chunkEnd = -1;
 
-	  if (newChunk >= 0)
-	    throw new IllegalStateException(L.l("{0}: expected end of chunk {1}",
-					    getOffset(), newChunk));
-	  
-	  _chunkDepth = - (newChunk + 1);
+          if (delta > 0) {
+            _in.skip(delta);
+          }
 
-	  if (_chunkDepth > 0) {
-	    newChunk = _in.read_long();
-	    //System.out.println("REDO:" + newChunk + " D:" + _chunkDepth);
-	    _chunkEnd = _in.getOffset() + newChunk;
-	  }
-	}
+          int newChunk = _in.read_long();
+
+          if (newChunk >= 0)
+            throw new IllegalStateException(L.l("{0}: expected end of chunk {1}",
+                                                getOffset(), newChunk));
+
+          _chunkDepth = - (newChunk + 1);
+
+          if (_chunkDepth > 0) {
+            newChunk = _in.read_long();
+            //System.out.println("REDO:" + newChunk + " D:" + _chunkDepth);
+            _chunkEnd = _in.getOffset() + newChunk;
+          }
+        }
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -701,12 +713,12 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     if ("javax.rmi.CORBA.ClassDesc".equals(className))
       return Class.class;
-	  
+
     Class cl = null;
 
     try {
       Thread thread = Thread.currentThread();
-	
+
       return Class.forName(className, false, thread.getContextClassLoader());
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
@@ -723,15 +735,15 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     int startOffset = _in.getOffset();
     int originalOffset = startOffset;
-      
+
     String repId = read_string();
-        
+
     // XXX: assume ucs-16
     if (repId.equals("IDL:omg.org/CORBA/WStringValue:1.0"))
       return read_wstring();
 
     Class cl = null;
-    
+
     if (repId.startsWith("RMI:")) {
       int p = repId.indexOf(':', 4);
       if (p < 0)
@@ -744,7 +756,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(e);
       }
-      
+
       return _valueHandler.readValue(this, _in.getOffset(), cl, repId, runTime);
     }
 
@@ -763,7 +775,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     }
     else
       className = repId;
-    
+
     String handler = className + "Handler";
 
     Class handlerClass = null;
@@ -779,33 +791,33 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       handler = className + "Helper";
 
       try {
-	cl = CauchoSystem.loadClass(className);
-	handlerClass = CauchoSystem.loadClass(handler);
+        cl = CauchoSystem.loadClass(className);
+        handlerClass = CauchoSystem.loadClass(handler);
       } catch (ClassNotFoundException e) {
       }
     }
 
     if (cl != null && handlerClass != null) {
       java.lang.reflect.Method readHelper = null;
-        
+
       try {
-	readHelper = handlerClass.getMethod("read", new Class[] {
-	  org.omg.CORBA.portable.InputStream.class
-	});
+        readHelper = handlerClass.getMethod("read", new Class[] {
+          org.omg.CORBA.portable.InputStream.class
+        });
       } catch (Exception e) {
       }
 
       if (readHelper != null) {
-	try {
-	  _in.setOffset(startOffset);
-	  _rs.setOffset(originalOffset);
-            
-	  return readHelper.invoke(null, new Object[] { this });
-	} catch (java.lang.reflect.InvocationTargetException e) {
-	  e.printStackTrace();
-	} catch (Exception e) {
-	  throw new RuntimeException(String.valueOf(e));
-	}
+        try {
+          _in.setOffset(startOffset);
+          _rs.setOffset(originalOffset);
+
+          return readHelper.invoke(null, new Object[] { this });
+        } catch (java.lang.reflect.InvocationTargetException e) {
+          e.printStackTrace();
+        } catch (Exception e) {
+          throw new RuntimeException(String.valueOf(e));
+        }
       }
     }
 
@@ -835,13 +847,13 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     if (_minor == 2) {
       _in.read();
-      
+
       return (char) _in.read_short();
     }
     else
       return (char) read_short();
   }
-  
+
   /**
    * Reads an 16-bit short from the input stream.
    */
@@ -849,7 +861,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return read_short();
   }
-  
+
   /**
    * Reads a 32-bit integer from the input stream.
    */
@@ -857,7 +869,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return _in.read_long();
   }
-  
+
   /**
    * Reads a 32-bit integer from the input stream.
    */
@@ -865,7 +877,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return read_long();
   }
-  
+
   /**
    * Reads a 64-bit integer from the input stream.
    */
@@ -873,7 +885,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return readLong();
   }
-  
+
   /**
    * Reads a 64-bit integer from the input stream.
    */
@@ -889,7 +901,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return (byte) _in.read();
   }
-  
+
   /**
    * Reads a 32-bit float from the input stream.
    */
@@ -899,7 +911,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     return Float.intBitsToFloat(v);
   }
-  
+
   /**
    * Reads a 64-bit double from the input stream.
    */
@@ -939,7 +951,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     if (len < 0) {
       // ejb/114o
-   
+
       int delta = read_long();
 
       String v = _context.getString(offset + delta);
@@ -1012,8 +1024,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     if (_minor >= 2) {
       int sublen = len / 2;
       if (cb.length < sublen) {
-	_cb = new char[sublen + (1024 - sublen % 1024) % 1024];
-	cb = _cb;
+        _cb = new char[sublen + (1024 - sublen % 1024) % 1024];
+        cb = _cb;
       }
 
       for (int i = 0; i < sublen; i++) {
@@ -1026,10 +1038,10 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     }
     else {
       if (cb.length < len) {
-	_cb = new char[len + (1024 - len % 1024) % 1024];
-	cb = _cb;
+        _cb = new char[len + (1024 - len % 1024) % 1024];
+        cb = _cb;
       }
-      
+
       for (int i = 0; i < len - 1; i++) {
         cb[i] = (char) read_short();
       }
@@ -1136,7 +1148,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   }
 
   @Override
-  public org.omg.CORBA.Object read_Object(Class cl)
+    public org.omg.CORBA.Object read_Object(Class cl)
   {
     return read_Object();
   }
@@ -1145,16 +1157,16 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
    * Reads a CORBA object from the input stream.
    */
   @Override
-  public org.omg.CORBA.Object read_Object()
+    public org.omg.CORBA.Object read_Object()
   {
     try {
       IOR ior = readIOR();
-      
+
       if (_orb != null) {
-	return new StubImpl(_orb, ior);
+        return new StubImpl(_orb, ior);
       }
       else
-	return new DummyObjectImpl(ior);
+        return new DummyObjectImpl(ior);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -1170,66 +1182,66 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     //System.out.println("KIND: " + Integer.toHexString(kind) + " " + kind);
 
     try {
-    switch (kind) {
-    case TCKind._tk_null:
-      return TypeCodeImpl.TK_NULL;
-      
-    case TCKind._tk_boolean:
-      return BooleanTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_wchar:
-      return WcharTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_octet:
-      return OctetTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_short:
-      return ShortTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_long:
-      return LongTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_longlong:
-      return LongLongTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_float:
-      return FloatTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_double:
-      return DoubleTypeCode.TYPE_CODE;
-      
-    case TCKind._tk_string:
-      {
-	TypeCodeImpl typeCode = new TypeCodeImpl(TCKind.tk_string);
-	typeCode.setLength(read_ulong());
-	
-	return typeCode;
+      switch (kind) {
+      case TCKind._tk_null:
+        return TypeCodeImpl.TK_NULL;
+
+      case TCKind._tk_boolean:
+        return BooleanTypeCode.TYPE_CODE;
+
+      case TCKind._tk_wchar:
+        return WcharTypeCode.TYPE_CODE;
+
+      case TCKind._tk_octet:
+        return OctetTypeCode.TYPE_CODE;
+
+      case TCKind._tk_short:
+        return ShortTypeCode.TYPE_CODE;
+
+      case TCKind._tk_long:
+        return LongTypeCode.TYPE_CODE;
+
+      case TCKind._tk_longlong:
+        return LongLongTypeCode.TYPE_CODE;
+
+      case TCKind._tk_float:
+        return FloatTypeCode.TYPE_CODE;
+
+      case TCKind._tk_double:
+        return DoubleTypeCode.TYPE_CODE;
+
+      case TCKind._tk_string:
+        {
+          TypeCodeImpl typeCode = new TypeCodeImpl(TCKind.tk_string);
+          typeCode.setLength(read_ulong());
+
+          return typeCode;
+        }
+
+      case TCKind._tk_wstring:
+        {
+          TypeCodeImpl typeCode = new TypeCodeImpl(TCKind.tk_wstring);
+          typeCode.setLength(read_ulong());
+
+          return typeCode;
+        }
+
+      case TCKind._tk_sequence:
+        return SequenceTypeCode.readTypeCode(this);
+
+      case TCKind._tk_value:
+        return ValueTypeCode.readTypeCode(this);
+
+      case TCKind._tk_value_box:
+        return ValueBoxTypeCode.readTypeCode(this);
+
+      case TCKind._tk_abstract_interface:
+        return AbstractInterfaceTypeCode.readTypeCode(this);
+
+      default:
+        System.out.println("UNKNOWN:" + kind);
+        throw new UnsupportedOperationException("unknown typecode kind: " + kind);
       }
-      
-    case TCKind._tk_wstring:
-      {
-	TypeCodeImpl typeCode = new TypeCodeImpl(TCKind.tk_wstring);
-	typeCode.setLength(read_ulong());
-	
-	return typeCode;
-      }
-      
-    case TCKind._tk_sequence:
-      return SequenceTypeCode.readTypeCode(this);
-      
-    case TCKind._tk_value:
-      return ValueTypeCode.readTypeCode(this);
-      
-    case TCKind._tk_value_box:
-      return ValueBoxTypeCode.readTypeCode(this);
-      
-    case TCKind._tk_abstract_interface:
-      return AbstractInterfaceTypeCode.readTypeCode(this);
-	
-    default:
-      System.out.println("UNKNOWN:" + kind);
-      throw new UnsupportedOperationException("unknown typecode kind: " + kind);
-    }
     } finally {
       //System.out.println("DONE:" + kind);
     }
@@ -1266,10 +1278,10 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public int read_sequence_length()
   {
     int length = read_long();
-    
+
     if (length < 0 || length > 65536)
       throw new RuntimeException("sequence too long:" + length);
-    
+
     return length;
   }
 
@@ -1277,10 +1289,10 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     throws IOException
   {
     int len = _in.read_long();
-    
+
     if (len > 65536)
       throw new IOException("too large chunk " + len);
-    
+
     bb.ensureCapacity(len);
     _in.read(bb.getBuffer(), 0, len);
     bb.setLength(len);
@@ -1292,7 +1304,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     if (len < 1 || len > 65536)
       throw new IllegalStateException("string length problems: " + len);
-    
+
     char []cb = _cb;
 
     if (cb.length < len) {
@@ -1321,10 +1333,10 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       int ch = read();
       cb.append((char) ch);
     }
-    
+
     int ch = read();
   }
-  
+
   /**
    * Reads an 16-bit short from the input stream.
    */
@@ -1332,7 +1344,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return (short) _in.read_short();
   }
-  
+
   /**
    * Reads a 32-bit integer from the input stream.
    */
@@ -1340,7 +1352,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     return _in.read_long();
   }
-  
+
   /**
    * Reads a 32-bit integer from the input stream.
    */
@@ -1356,7 +1368,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
             ((ch3 & 0xff) << 8) +
             ((ch4 & 0xff)));
   }
-  
+
   /**
    * Reads a 64-bit integer from the input stream.
    */
@@ -1420,15 +1432,15 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     if (pair != null) {
       if (_pool != null) {
-	_pool.free(pair);
+        _pool.free(pair);
       }
       else {
-	try {
-	  pair.getWriteStream().close();
-	} catch (IOException e) {
-	}
-      
-	pair.getReadStream().close();
+        try {
+          pair.getWriteStream().close();
+        } catch (IOException e) {
+        }
+
+        pair.getReadStream().close();
       }
     }
   }
@@ -1436,22 +1448,22 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private void writeHexGroup(byte []buffer, int offset, int length)
   {
     int end = offset + length;
-      
+
     while (offset < end) {
       int chunkLength = 16;
-	
+
       for (int j = 0; j < chunkLength; j++) {
-	System.out.print(" ");
-	printHex(buffer[offset + j]);
+        System.out.print(" ");
+        printHex(buffer[offset + j]);
       }
 
       System.out.print(" ");
       for (int j = 0; j < chunkLength; j++) {
-	printCh(buffer[offset + j]);
+        printCh(buffer[offset + j]);
       }
 
       offset += chunkLength;
-	
+
       System.out.println();
     }
   }
@@ -1465,7 +1477,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       System.out.print((char) ('a' + ch1 - 10));
     else
       System.out.print((char) ('0' + ch1));
-    
+
     if (ch2 >= 10)
       System.out.print((char) ('a' + ch2 - 10));
     else

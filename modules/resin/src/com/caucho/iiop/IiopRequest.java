@@ -82,7 +82,7 @@ public class IiopRequest implements ServerRequest {
 
   TransactionManagerImpl _tm;
   UserTransaction _ut;
-  
+
   IiopRequest(IiopProtocol server, Connection conn)
   {
     _server = server;
@@ -93,14 +93,14 @@ public class IiopRequest implements ServerRequest {
     _reader = new IiopReader();
 
     _messageWriter = new StreamMessageWriter();
-    
+
     _writer10 = new Iiop10Writer();
     _writer10.init(_messageWriter);
     _writer11 = new Iiop11Writer();
     _writer11.init(_messageWriter);
     _writer12 = new Iiop12Writer();
     _writer12.init(_messageWriter);
-    
+
     _cos = _server.getCos();
     _utm = UserTransactionProxy.getInstance();
 
@@ -118,10 +118,10 @@ public class IiopRequest implements ServerRequest {
   {
     return true;
   }
-  
+
   /**
    * Handles a new connection.  The controlling TcpServer may call
-   * handleConnection again after the connection completes, so 
+   * handleConnection again after the connection completes, so
    * the implementation must initialize any variables for each connection.
    *
    * @param conn Information about the connection, including buffered
@@ -134,37 +134,37 @@ public class IiopRequest implements ServerRequest {
 
     try {
       thread.setContextClassLoader(_loader);
-    
+
       log.finer("IIOP[" + _conn.getId() + "]: handle request");
-    
+
       _readStream = _conn.getReadStream();
       _writeStream = _conn.getWriteStream();
 
       if (_orb == null) {
-	InetAddress local = _conn.getLocalAddress();
-	_orb = _server.getOrb(local.getHostName(), _conn.getLocalPort());
+        InetAddress local = _conn.getLocalAddress();
+        _orb = _server.getOrb(local.getHostName(), _conn.getLocalPort());
 
-	_reader.setOrb(_orb);
-	_writer10.setOrb(_orb);
-	_writer11.setOrb(_orb);
-	_writer12.setOrb(_orb);
+        _reader.setOrb(_orb);
+        _writer10.setOrb(_orb);
+        _writer11.setOrb(_orb);
+        _writer12.setOrb(_orb);
       }
 
       if (_cosSkel != null) {
       }
       else {
-	InetAddress local = _conn.getLocalAddress();
-	_hostName = local.getHostName();
-	_port = _conn.getLocalPort();
+        InetAddress local = _conn.getLocalAddress();
+        _hostName = local.getHostName();
+        _port = _conn.getLocalPort();
 
-	_cos.setHost(_hostName);
-	_cos.setPort(_port);
+        _cos.setHost(_hostName);
+        _cos.setPort(_port);
 
-	ArrayList<Class> apiList = new ArrayList<Class>();
-	apiList.add(_cos.getClass());
+        ArrayList<Class> apiList = new ArrayList<Class>();
+        apiList.add(_cos.getClass());
 
-	_cosSkel = new IiopSkeleton(_cos, apiList, _loader,
-				    _hostName, _port, "/NameService");
+        _cosSkel = new IiopSkeleton(_cos, apiList, _loader,
+                                    _hostName, _port, "/NameService");
       }
 
       _reader.init(_readStream);
@@ -173,23 +173,23 @@ public class IiopRequest implements ServerRequest {
       IiopWriter writer = _writer10;
 
       if (! _reader.readRequest())
-	return false;
+        return false;
 
       switch (_reader.getMinorVersion()) {
       case 0:
-	writer = _writer10;
-	break;
+        writer = _writer10;
+        break;
       case 1:
-	writer = _writer11;
-	break;
+        writer = _writer11;
+        break;
       case 2:
-	writer = _writer12;
-	break;
+        writer = _writer12;
+        break;
       default:
-	writer = _writer10;
-	break;
+        writer = _writer10;
+        break;
       }
-      
+
       writer.init();
       writer.setHost(_hostName);
       writer.setPort(_port);
@@ -197,136 +197,139 @@ public class IiopRequest implements ServerRequest {
       String oid = _reader.getObjectKey().toString();
 
       if (log.isLoggable(Level.FINER))
-	log.finer("IIOP[" + _conn.getId() + "] OID: " + oid);
+        log.finer("IIOP[" + _conn.getId() + "] OID: " + oid);
 
       XidImpl xid = _reader.getXid();
 
       try {
-	if (xid != null)
-	  beginTransaction(xid);
-	
-	if (oid.equals("INIT")) {
-	  String str = _reader.readString();
+        if (xid != null)
+          beginTransaction(xid);
 
-	  writer.startReplyOk(_reader.getRequestId());
+        if (oid.equals("INIT")) {
+          String str = _reader.readString();
 
-	  if (str.equals("NameService")) {
-	    String nameService = "IDL:omg.org/CosNaming/NamingContext:1.0";
+          writer.startReplyOk(_reader.getRequestId());
 
-	    IOR ior = new IOR(nameService, _hostName, _port, "/NameService");
-	    byte []bytes = ior.getByteArray();
-	    writer.write(bytes, 0, bytes.length);
-	  }
-	  else
-	    writer.writeNullIOR();
-	}
-	else if (oid.equals("/NameService")) {
-	  /*
-	    cos.service(reader, writer);
-	  */
-	  _cosSkel.service(_cosSkel.getObject(), _reader, writer);
-	}
-	else {
-	  IiopSkeleton skel = _server.getService(_hostName, _port, oid);
+          if (str.equals("NameService")) {
+            String nameService = "IDL:omg.org/CosNaming/NamingContext:1.0";
 
-	  if (skel != null) {
-	    skel.service(skel.getObject(), _reader, writer);
-	  }
-	  else {
-	    log.fine("IIOP[" + _conn.getId() + "] can't find service: " + oid);
+            IOR ior = new IOR(nameService, _hostName, _port, "/NameService");
+            byte []bytes = ior.getByteArray();
+            writer.write(bytes, 0, bytes.length);
+          }
+          else
+            writer.writeNullIOR();
+        }
+        else if (oid.equals("/NameService")) {
+          /*
+            cos.service(reader, writer);
+          */
+          _cosSkel.service(_cosSkel.getObject(), _reader, writer);
+        }
+        else {
+          IiopSkeleton skel = _server.getService(_hostName, _port, oid);
 
-	    throw new IOException("bad oid: " + oid);
-	  }
+          if (skel != null) {
+            skel.service(skel.getObject(), _reader, writer);
+          }
+          else {
+            log.fine("IIOP[" + _conn.getId() + "] can't find service: " + oid);
 
-	  log.fine("IIOP[" + _conn.getId() + "] complete request");
-	}
+            throw new IOException("bad oid: " + oid);
+          }
+
+          log.fine("IIOP[" + _conn.getId() + "] complete request");
+        }
       } catch (org.omg.CORBA.SystemException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      
-	writer.startReplySystemException(_reader.getRequestId(),
-					 e.toString(),
-					 e.minor,
-					 e.completed.value(),
-					 null);
+        log.log(Level.WARNING, e.toString(), e);
+
+        writer.startReplySystemException(_reader.getRequestId(),
+                                         e.toString(),
+                                         e.minor,
+                                         e.completed.value(),
+                                         null);
       } catch (org.omg.CORBA.UserException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      
-	writer.startReplyUserException(_reader.getRequestId());
+        log.log(Level.WARNING, e.toString(), e);
 
-	try {
-	  Class helperClass =
-	    Class.forName(e.getClass().getName() + "Helper", false,
-			  e.getClass().getClassLoader());
+        writer.startReplyUserException(_reader.getRequestId());
 
-	  Method writeMethod = helperClass.getMethod("write", new Class[] {
-	    org.omg.CORBA.portable.OutputStream.class, e.getClass()
-	  });
+        try {
+          Class helperClass =
+            Class.forName(e.getClass().getName() + "Helper", false,
+                          e.getClass().getClassLoader());
 
-	  writeMethod.invoke(null, writer, e);
-	} catch (Exception e1) {
-	  throw new RuntimeException(e1);
-	}
+          Method writeMethod = helperClass.getMethod("write", new Class[] {
+            org.omg.CORBA.portable.OutputStream.class, e.getClass()
+          });
+
+          writeMethod.invoke(null, writer, e);
+        } catch (Exception e1) {
+          throw new RuntimeException(e1);
+        }
       } catch (java.rmi.RemoteException e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
 
-	String msg = e.toString();
+        String msg = e.toString();
 
-	writer.startReplySystemException(_reader.getRequestId(),
-					 e.toString(),
-					 0,
-					 0,
-					 e);
+        writer.startReplySystemException(_reader.getRequestId(),
+                                         e.toString(),
+                                         0,
+                                         0,
+                                         e);
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
 
-	// ejb/1110 vs ejb/114p
-	//writer.startReplyUserException(_reader.getRequestId(), e.toString());
-	// ejb/1110
+        // ejb/1110 vs ejb/114p
+        //writer.startReplyUserException(_reader.getRequestId(), e.toString());
+        // ejb/1110
 
-	writer.startReplyUserException(_reader.getRequestId());
-	String repId = _reader.getValueHandler().getRMIRepositoryID(e.getClass());
+        writer.startReplyUserException(_reader.getRequestId());
+        String repId = _reader.getValueHandler().getRMIRepositoryID(e.getClass());
 
-	/*
-	String exName = e.getClass().getName().replace('.', '/');
-	if (exName.length() > 20)
-	  exName = exName.substring(0, 20);
-	writer.write_string("IDL:" + exName + ":1.0");
+        /*
+          String exName = e.getClass().getName().replace('.', '/');
+          if (exName.length() > 20)
+            exName = exName.substring(0, 20);
+          writer.write_string("IDL:" + exName + ":1.0");
 
-	//writer.write_string("RMI:" + exName + ":0");
-	*/
-	writer.write_string(repId);
-	writer.write_value(e);
+          //writer.write_string("RMI:" + exName + ":0");
+        */
+
+        // The repId is written in IiopWriter.write_value()
+        // ejb/0fb9 writer.write_string(repId);
+
+        writer.write_value(e);
       } finally {
-	if (xid != null)
-	  endTransaction(xid);
+        if (xid != null)
+          endTransaction(xid);
       }
-      
+
       _messageWriter.close();
 
       _reader.completeRead();
       /*
-      _messageWriter.start10Message(IiopReader.MSG_CLOSE_CONNECTION);
-      _messageWriter.close();
+        _messageWriter.start10Message(IiopReader.MSG_CLOSE_CONNECTION);
+        _messageWriter.close();
       */
 
       return true;
 
       /*
-      if (log.isLoggable(Level.FINER))
-	log.finer("IIOP[" + _conn.getId() + "]: recycle");
+        if (log.isLoggable(Level.FINER))
+          log.finer("IIOP[" + _conn.getId() + "]: recycle");
 
-      return true;
+        return true;
       */
     } catch (Throwable e) {
       log.log(Level.WARNING, "IIOP[" + _conn.getId() + "] " + e.toString(), e);
       return false;
     } finally {
       thread.setContextClassLoader(oldLoader);
-	
+
       try {
-	_utm.abortTransaction();
+        _utm.abortTransaction();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -354,9 +357,9 @@ public class IiopRequest implements ServerRequest {
   {
     if (_ut == null) {
       try {
-	_ut = (UserTransaction) new InitialContext().lookup("java:comp/UserTransaction");
+        _ut = (UserTransaction) new InitialContext().lookup("java:comp/UserTransaction");
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString());
+        log.log(Level.FINER, e.toString());
       }
     }
 
