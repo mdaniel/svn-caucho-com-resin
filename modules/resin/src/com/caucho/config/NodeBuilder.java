@@ -338,58 +338,64 @@ public class NodeBuilder {
 
     AttributeStrategy attrStrategy;
 
-    attrStrategy = typeStrategy.getAttributeStrategy(qName);
+    try {
+      attrStrategy = typeStrategy.getAttributeStrategy(qName);
 
-    if (attrStrategy != null) {
-    }
-    else if (childNode instanceof Element
-             || childNode instanceof Attr) {
-      throw error(L.l("'{0}' is an unknown property of '{1}'.",
-                      qName.getName(), typeStrategy.getTypeName()),
-                  childNode);
-    }
-    else
-      return;
-
-    Object childBean = createResinType(childNode);
-    
-    if (childBean == null
-        && attrStrategy.isBean()
-        && ! hasChildren(childNode)) {
-      String value = textValue(childNode);
-
-      if (isEL() && value != null
-          && value.startsWith("${") && value.endsWith("}")) {
-        childBean = evalObject(value);
-
-        attrStrategy.setAttribute(bean, qName, childBean);
-        
-	return;
+      if (attrStrategy != null) {
       }
-    }
-
-    if (childBean == null)
-      childBean = attrStrategy.create(this, bean);
-
-    if (childBean != null) {
-      TypeStrategy childTypeStrategy
-        = TypeStrategyFactory.getTypeStrategy(childBean.getClass());
-
-      childTypeStrategy.setParent(childBean, bean);
-
-      if (childNode instanceof Element)
-        configureNode(childNode, childBean, childTypeStrategy);
+      else if (childNode instanceof Element
+	       || childNode instanceof Attr) {
+	throw error(L.l("'{0}' is an unknown property of '{1}'.",
+			qName.getName(), typeStrategy.getTypeName()),
+		    childNode);
+      }
       else
-        configureChildNode(childNode, TEXT, childBean, childTypeStrategy);
+	return;
 
-      childTypeStrategy.init(childBean);
+      Object childBean = createResinType(childNode);
+    
+      if (childBean == null
+	  && attrStrategy.isBean()
+	  && ! hasChildren(childNode)) {
+	String value = textValue(childNode);
 
-      childBean = childTypeStrategy.replaceObject(childBean);
+	if (isEL() && value != null
+	    && value.startsWith("${") && value.endsWith("}")) {
+	  childBean = evalObject(value);
 
-      attrStrategy.setAttribute(bean, qName, childBean);
+	  attrStrategy.setAttribute(bean, qName, childBean);
+        
+	  return;
+	}
+      }
+
+      if (childBean == null)
+	childBean = attrStrategy.create(this, bean);
+
+      if (childBean != null) {
+	TypeStrategy childTypeStrategy
+	  = TypeStrategyFactory.getTypeStrategy(childBean.getClass());
+
+	childTypeStrategy.setParent(childBean, bean);
+
+	if (childNode instanceof Element)
+	  configureNode(childNode, childBean, childTypeStrategy);
+	else
+	  configureChildNode(childNode, TEXT, childBean, childTypeStrategy);
+
+	childTypeStrategy.init(childBean);
+
+	childBean = childTypeStrategy.replaceObject(childBean);
+
+	attrStrategy.setAttribute(bean, qName, childBean);
+      }
+      else
+	attrStrategy.configure(this, bean, qName, childNode);
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, childNode);
     }
-    else
-      attrStrategy.configure(this, bean, qName, childNode);
   }
 
   /**

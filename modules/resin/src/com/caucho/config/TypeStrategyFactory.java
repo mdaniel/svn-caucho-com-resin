@@ -43,6 +43,7 @@ import org.w3c.dom.Node;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.InputStream;
 import java.net.URL;
+import java.lang.reflect.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -643,6 +644,26 @@ public class TypeStrategyFactory {
   }
 
   private static class InitProgramTypeStrategy extends TypeStrategy {
+    private AttributeStrategy _builderAttribute;
+
+    InitProgramTypeStrategy()
+    {
+      try {
+	Method method = InitProgram.class.getMethod("addBuilderProgram",
+						    BuilderProgram.class);
+
+	_builderAttribute = new ProgramAttributeStrategy(method);
+      } catch (Exception e) {
+	throw new ConfigException();
+      }
+    }
+
+    public AttributeStrategy getAttributeStrategy(QName attrName)
+      throws Exception
+    {
+      return _builderAttribute;
+    }
+
     /**
      * Configures the node as an init program object
      *
