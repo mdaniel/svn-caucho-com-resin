@@ -2773,7 +2773,7 @@ public class Env {
   }
 
   /**
-   * Returns a Java class defintion.
+   * Returns an introspected Java class defintion.
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
@@ -2785,6 +2785,18 @@ public class Env {
       throw errorException(L.l("'{0}' class definition not found", className));
   }
 
+  /*
+   * Returns an introspected Java class definition.
+   */
+  public JavaClassDef getJavaClassDefinition(Class type)
+  { 
+    JavaClassDef def = _quercus.getJavaClassDefinition(type, type.getName());
+
+    def.init();
+
+    return def;
+  }
+  
   private JavaClassDef getJavaClassDefinition(String className, boolean useImport)
   { 
     JavaClassDef def = null;
@@ -2855,7 +2867,7 @@ public class Env {
   /**
    * Adds a Quercus class import.
    * 
-   * @param name wildcard class import string but without the '*'
+   * @param name wildcard class import string minus '*' at the end (i.e. java.util.)
    */
   public void addWildcardImport(String name)
   {
@@ -2903,11 +2915,11 @@ public class Env {
       return (Value) obj;
 
     if (def == null)
-      def = getJavaClassDefinition(obj.getClass().getName());
+      def = getJavaClassDefinition(obj.getClass());
     else if (def.getType() != obj.getClass()) {
       // XXX: what if types are incompatible, does it matter?
       // if it doesn't matter, simplify this to one if with no else
-      def = getJavaClassDefinition(obj.getClass().getName());
+      def = getJavaClassDefinition(obj.getClass());
     }
 
     if (def.isArray()) {

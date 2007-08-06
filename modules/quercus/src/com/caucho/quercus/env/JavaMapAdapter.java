@@ -53,7 +53,7 @@ public class JavaMapAdapter
 
   public JavaMapAdapter(Env env, Map map)
   {
-    this(env, map, env.getJavaClassDefinition(map.getClass().getName()));
+    this(env, map, env.getJavaClassDefinition(map.getClass()));
   }
   
   public JavaMapAdapter(Env env, Map map, JavaClassDef def)

@@ -473,6 +473,31 @@ public class Quercus
   /**
    * Adds a java class
    */
+  public JavaClassDef getJavaClassDefinition(Class type, String className)
+  {
+    JavaClassDef def = _javaClassWrappers.get(className);
+
+    if (def != null)
+      return def;
+
+    try {
+      def = getModuleContext().getJavaClassDefinition(type, className);
+
+      addJavaClassWrapper(className, def);
+
+      // def.introspect(getModuleContext());
+
+      return def;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new QuercusRuntimeException(e);
+    }
+  }
+  
+  /**
+   * Adds a java class
+   */
   public JavaClassDef getJavaClassDefinition(String className)
   {
     JavaClassDef def = _javaClassWrappers.get(className);

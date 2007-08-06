@@ -268,6 +268,26 @@ public class ModuleContext
   /**
    * Gets or creates a JavaClassDef for the given class name.
    */
+  public JavaClassDef getJavaClassDefinition(Class type, String className)
+  {
+    JavaClassDef def = _javaClassWrappers.get(className);
+
+    if (def != null)
+      return def;
+
+    def = JavaClassDef.create(this, className, type);
+
+    if (def == null)
+      def = createDefaultJavaClassDef(className, type);
+
+    _javaClassWrappers.put(className, def);
+
+    return def;
+  }
+  
+  /**
+   * Adds a java class
+   */
   public JavaClassDef getJavaClassDefinition(String className)
   {
     JavaClassDef def = _javaClassWrappers.get(className);
@@ -289,8 +309,7 @@ public class ModuleContext
       def = JavaClassDef.create(this, className, type);
 
       if (def == null)
-	def = createDefaultJavaClassDef(className, type);
-
+        def = createDefaultJavaClassDef(className, type);
 
       _javaClassWrappers.put(className, def);
 

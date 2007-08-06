@@ -52,7 +52,7 @@ public class JavaListAdapter
 
   public JavaListAdapter(Env env, List list)
   {
-    this(env, list, env.getJavaClassDefinition(list.getClass().getName()));
+    this(env, list, env.getJavaClassDefinition(list.getClass()));
   }
   
   public JavaListAdapter(Env env, List list, JavaClassDef def)

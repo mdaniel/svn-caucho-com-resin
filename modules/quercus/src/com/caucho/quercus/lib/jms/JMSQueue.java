@@ -88,7 +88,7 @@ public class JMSQueue
     }
 
     return new JavaValue(env, queue,
-                         env.getJavaClassDefinition(JMSQueue.class.getName()));
+                         env.getJavaClassDefinition(JMSQueue.class));
   }
 
   public boolean send(@NotNull Value value, @Optional JMSQueue replyTo)
