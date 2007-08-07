@@ -155,8 +155,8 @@ public class TransactionChain extends FilterCallChain {
 
     // TCK: needs QA, ejb30/bb/localaccess/statefulclient/exceptionTest1
     if (_xaType != EjbMethod.TRANS_BEAN) {
-      out.println("if (trans.getTransaction() != oldTrans)");
-      out.println("  trans.commit();");
+      // ejb/0224 out.println("if (trans.getTransaction() != oldTrans)");
+      out.println("trans.commit();");
     }
 
     /*
@@ -179,6 +179,10 @@ public class TransactionChain extends FilterCallChain {
     out.pushDepth();
 
     out.println("if (e instanceof com.caucho.ejb.EJBExceptionWrapper)");
+    out.println("  e = (Exception) e.getCause();");
+    out.println();
+
+    out.println("if (e instanceof java.lang.reflect.InvocationTargetException)");
     out.println("  e = (Exception) e.getCause();");
     out.println();
 
