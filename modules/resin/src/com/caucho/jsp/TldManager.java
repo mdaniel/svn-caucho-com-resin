@@ -97,10 +97,11 @@ public class TldManager {
 
     if (app != null) {
       JspPropertyGroup jsp = app.getJsp();
-      if (jsp != null)
+      if (jsp != null) {
 	_tldFileSet = jsp.getTldFileSet();
 
-      _isFastJsf = jsp.isFastJsf();
+	_isFastJsf = jsp.isFastJsf();
+      }
     }
 
     // JSF has a global listener hidden in one of the *.tld which

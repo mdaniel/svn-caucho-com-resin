@@ -2,8 +2,18 @@
   <uri>http://java.sun.com/jsf/html</uri>
 
   <jsf-tag>
+    <name>column</name>
+    <component-class>javax.faces.component.html.HtmlColumn</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
     <name>commandLink</name>
     <component-class>javax.faces.component.html.HtmlCommandLink</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>dataTable</name>
+    <component-class>javax.faces.component.html.HtmlDataTable</component-class>
   </jsf-tag>
 
   <jsf-tag>
@@ -17,8 +27,23 @@
   </jsf-tag>
 
   <jsf-tag>
+    <name>inputHidden</name>
+    <component-class>javax.faces.component.html.HtmlInputHidden</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>inputSecret</name>
+    <component-class>javax.faces.component.html.HtmlInputSecret</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
     <name>inputText</name>
     <component-class>javax.faces.component.html.HtmlInputText</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>inputTextarea</name>
+    <component-class>javax.faces.component.html.HtmlInputTextarea</component-class>
   </jsf-tag>
 
   <jsf-tag>
@@ -34,5 +59,40 @@
   <jsf-tag>
     <name>panelGroup</name>
     <component-class>javax.faces.component.html.HtmlPanelGroup</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>selectBooleanCheckbox</name>
+    <component-class>javax.faces.component.html.HtmlSelectBooleanCheckbox</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>selectManyCheckbox</name>
+    <component-class>javax.faces.component.html.HtmlSelectManyCheckbox</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>selectManyListbox</name>
+    <component-class>javax.faces.component.html.HtmlSelectManyListbox</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>selectManyMenu</name>
+    <component-class>javax.faces.component.html.HtmlSelectManyMenu</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>selectOneListbox</name>
+    <component-class>javax.faces.component.html.HtmlSelectOneListbox</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>selectOneMenu</name>
+    <component-class>javax.faces.component.html.HtmlSelectOneMenu</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>selectOneRadio</name>
+    <component-class>javax.faces.component.html.HtmlSelectOneRadio</component-class>
   </jsf-tag>
 </jsf-taglib>

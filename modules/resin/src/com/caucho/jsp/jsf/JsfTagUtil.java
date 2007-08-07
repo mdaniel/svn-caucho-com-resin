@@ -55,6 +55,11 @@ public class JsfTagUtil {
 	= (UIComponentClassicTagBase) req.getAttribute("caucho.jsf.parent");
     
       parent = parentTag.getComponentInstance();
+    
+      BodyContent body = parentTag.getBodyContent();
+
+      if (body != null)
+	addVerbatim(parent, body);
     }
 
     UIComponent child = (UIComponent) childClass.newInstance();
@@ -132,8 +137,12 @@ public class JsfTagUtil {
     if (parent == null) {
       UIComponentClassicTagBase parentTag
 	= (UIComponentClassicTagBase) req.getAttribute("caucho.jsf.parent");
-    
+
       parent = parentTag.getComponentInstance();
+      
+      BodyContent body = parentTag.getBodyContent();
+    
+      addVerbatim(parent, body);
     }
 
     UIComponent child = (UIComponent) childClass.newInstance();
@@ -150,23 +159,35 @@ public class JsfTagUtil {
     throws Exception
   {
     FacesContext context = FacesContext.getCurrentInstance();
+    
+    BodyContent body = null;
 
     if (parent == null) {
       UIComponentClassicTagBase parentTag
 	= (UIComponentClassicTagBase) req.getAttribute("caucho.jsf.parent");
     
       parent = parentTag.getComponentInstance();
+      
+      body = parentTag.getBodyContent();
     }
 
     if (parent != null) {
       List<UIComponent> children = parent.getChildren();
       int size = children.size();
 
+      String prevId = null;
       for (int i = 0; i < size; i++) {
 	UIComponent child = children.get(i);
 
-	if (id.equals(child.getId()))
+	if (id.equals(child.getId())) {
+	  if (body != null)
+	    addVerbatim(parent, prevId, body);
+	  
 	  return child;
+	}
+
+	if (child.getId() != null)
+	  prevId = child.getId();
       }
     }
 

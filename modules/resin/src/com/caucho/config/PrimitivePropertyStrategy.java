@@ -53,6 +53,11 @@ public class PrimitivePropertyStrategy extends AttributeStrategy {
     _typeStrategy = TypeStrategyFactory.getTypeStrategy(param[1]);
   }
 
+  public boolean isBean()
+  {
+    return false;
+  }
+
   /**
    * Configures the attribute with the value for the given node.
    *

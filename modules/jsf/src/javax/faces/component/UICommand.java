@@ -285,7 +285,6 @@ public class UICommand extends UIComponentBase
     if (_actionExpr != null)
       actionExprString = _actionExpr.getExpressionString();
 
-    System.out.println("SAVE-ACTION: " + _action);
     return new Object[] {
       super.saveState(context),
       _value,

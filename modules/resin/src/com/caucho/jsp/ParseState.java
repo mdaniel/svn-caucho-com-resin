@@ -612,6 +612,9 @@ public class ParseState {
 
     for (int i = 0; i < imports.length; i++) {
       String value = imports[i];
+
+      if (value.equals(""))
+	continue;
       
       if (value.equals("static") && i + 1 < imports.length) {
         value = "static " + imports[i + 1];

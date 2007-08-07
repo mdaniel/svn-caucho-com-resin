@@ -232,7 +232,7 @@ public class JsfTagNode extends JspContainerNode
 	if (method == null)
 	  throw new IllegalStateException(jsfNode._componentClass + " id");
       
-	String id = "jsp" + jsfNode._gen.generateJspId();
+	String id = "j_id" + jsfNode._gen.generateJspId();
 	
 	jsfNode._idAttr = new Attr("id", method, id);
 
