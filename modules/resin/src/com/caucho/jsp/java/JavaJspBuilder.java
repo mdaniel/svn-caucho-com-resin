@@ -68,6 +68,8 @@ public class JavaJspBuilder extends JspBuilder {
   public static final String JSTL_EL_SQL_URI = "http://java.sun.com/jstl/sql";
   public static final String JSTL_RT_SQL_URI = "http://java.sun.com/jstl/sql_rt";
   
+  public static final String JSF_CORE_URI = "http://java.sun.com/jsf/core";
+  
   private static L10N L = new L10N(JavaJspBuilder.class);
   private static Logger log = Logger.getLogger(JavaJspBuilder.class.getName());
   
@@ -98,6 +100,7 @@ public class JavaJspBuilder extends JspBuilder {
 
   static HashMap<QName,Class> _tagMap;
   static HashMap<QName,Class> _fastTagMap;
+  static HashMap<QName,Class> _jsfTagMap;
   
   private JavaJspGenerator _gen;
   private JspNode _rootNode;
@@ -194,11 +197,15 @@ public class JavaJspBuilder extends JspBuilder {
   public void startElement(QName qname)
     throws JspParseException
   {
-    Class cl;
+    Class cl = null;
 
     if (isFastJstl())
       cl = _fastTagMap.get(qname);
-    else
+
+    if (cl == null && isFastJsf())
+      cl = _jsfTagMap.get(qname);
+
+    if (cl == null)
       cl = _tagMap.get(qname);
     
     if (cl != null) {
@@ -662,5 +669,10 @@ public class JavaJspBuilder extends JspBuilder {
 	   JstlCoreOtherwise.class);
     addMap(_fastTagMap, "resin-xml", "otherwise", JSTL_EL_XML_URI,
 	   JstlCoreOtherwise.class);
+    
+    _jsfTagMap = new HashMap<QName,Class>();
+    
+    addMap(_jsfTagMap, "faces", "facet", JSF_CORE_URI,
+	   JsfFacetNode.class);
   }
 }

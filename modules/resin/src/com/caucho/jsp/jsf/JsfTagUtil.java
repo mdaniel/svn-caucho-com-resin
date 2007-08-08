@@ -33,6 +33,7 @@ import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.jsp.tagext.*;
+import javax.el.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
@@ -62,7 +63,11 @@ public class JsfTagUtil {
 	addVerbatim(parent, body);
     }
 
-    UIComponent child = (UIComponent) childClass.newInstance();
+    UIComponent child = null;;
+
+    if (child == null)
+      child = (UIComponent) childClass.newInstance();
+    
     child.setTransient(true);
 
     addChild(parent, prevId, child);
@@ -127,32 +132,6 @@ public class JsfTagUtil {
     }
   }
   
-  public static UIComponent addPersistent(ServletRequest req,
-					  UIComponent parent,
-					  Class childClass)
-    throws Exception
-  {
-    FacesContext context = FacesContext.getCurrentInstance();
-
-    if (parent == null) {
-      UIComponentClassicTagBase parentTag
-	= (UIComponentClassicTagBase) req.getAttribute("caucho.jsf.parent");
-
-      parent = parentTag.getComponentInstance();
-      
-      BodyContent body = parentTag.getBodyContent();
-    
-      addVerbatim(parent, body);
-    }
-
-    UIComponent child = (UIComponent) childClass.newInstance();
-
-    if (parent != null)
-      parent.getChildren().add(child);
-
-    return child;
-  }
-  
   public static UIComponent findPersistent(ServletRequest req,
 					   UIComponent parent,
 					   String id)
@@ -192,6 +171,42 @@ public class JsfTagUtil {
     }
 
     return null;
+  }
+  
+  public static UIComponent addPersistent(ServletRequest req,
+					  UIComponent parent,
+					  ValueExpression binding,
+					  Class childClass)
+    throws Exception
+  {
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    if (parent == null) {
+      UIComponentClassicTagBase parentTag
+	= (UIComponentClassicTagBase) req.getAttribute("caucho.jsf.parent");
+
+      parent = parentTag.getComponentInstance();
+      
+      BodyContent body = parentTag.getBodyContent();
+    
+      addVerbatim(parent, body);
+    }
+
+    UIComponent child = null;
+
+    if (binding != null)
+      child = (UIComponent) binding.getValue(context.getELContext());
+
+    if (child == null)
+      child = (UIComponent) childClass.newInstance();
+
+    if (parent != null)
+      parent.getChildren().add(child);
+
+    if (binding != null)
+      binding.setValue(context.getELContext(), child);
+
+    return child;
   }
   
   public static UIComponent addVerbatim(UIComponent parent,
@@ -252,5 +267,58 @@ public class JsfTagUtil {
     }
 
     return true;
+  }
+  
+  public static UIComponent findFacet(ServletRequest req,
+				      UIComponent parent,
+				      String facetName)
+    throws Exception
+  {
+    FacesContext context = FacesContext.getCurrentInstance();
+    
+    if (parent == null) {
+      UIComponentClassicTagBase parentTag
+	= (UIComponentClassicTagBase) req.getAttribute("caucho.jsf.parent");
+    
+      parent = parentTag.getComponentInstance();
+    }
+
+    if (parent != null)
+      return parent.getFacet(facetName);
+    else
+      return null;
+  }
+  
+  public static UIComponent addFacet(ServletRequest req,
+				     UIComponent parent,
+				     String facetName,
+				     ValueExpression binding,
+				     Class childClass)
+    throws Exception
+  {
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    if (parent == null) {
+      UIComponentClassicTagBase parentTag
+	= (UIComponentClassicTagBase) req.getAttribute("caucho.jsf.parent");
+
+      parent = parentTag.getComponentInstance();
+    }
+
+    UIComponent child = null;
+
+    if (binding != null)
+      child = (UIComponent) binding.getValue(context.getELContext());
+
+    if (child == null)
+      child = (UIComponent) childClass.newInstance();
+
+    if (parent != null)
+      parent.getFacets().put(facetName, child);
+
+    if (binding != null)
+      binding.setValue(context.getELContext(), child);
+
+    return child;
   }
 }

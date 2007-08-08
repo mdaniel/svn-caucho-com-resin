@@ -50,6 +50,8 @@ public class JsfTagNode extends JspContainerNode
   private JspNode _next;
   private Class _componentClass;
 
+  private String _facetName;
+
   private Attr _idAttr;
   private String _prevJsfId;
   
@@ -128,6 +130,9 @@ public class JsfTagNode extends JspContainerNode
   public void endAttributes()
     throws JspParseException
   {
+    if (_parent instanceof JsfFacetNode)
+      _facetName = ((JsfFacetNode) _parent).getName();
+    
     _idAttr = findAttribute("id");
 
     if (_idAttr != null)
@@ -338,6 +343,8 @@ public class JsfTagNode extends JspContainerNode
 
     String oldParentVar = null;
 
+    String bindingVar = null;
+
     if (isJsfParentRequired()) {
       oldParentVar = "_jsp_jsf_parent_" + _gen.uniqueId();
 
@@ -364,10 +371,26 @@ public class JsfTagNode extends JspContainerNode
 		  + " = (com.caucho.jsp.BodyContentImpl) pageContext.pushBody();");
       out.println("out =  " + _bodyVar + ";");
     }
-    
+
     out.println(_componentClass.getName() + " " + _var + ";");
-    
-    if (_idAttr != null) {
+
+    if (_facetName != null) {
+      out.print(_var + " = (" + _componentClass.getName() + ")");
+      out.println(" com.caucho.jsp.jsf.JsfTagUtil.findFacet(request"
+		  + ", " + parentVar
+		  + ", \"" + _facetName + "\");");
+
+      out.println("if (" + _var + " == null) {");
+      out.pushDepth();
+      
+      out.print(_var + " = (" + _componentClass.getName() + ")");
+      out.println(" com.caucho.jsp.jsf.JsfTagUtil.addFacet(request"
+		  + ", " + parentVar
+		  + ", \"" + _facetName + "\""
+		  + ", " + bindingVar
+		  + ", " + _componentClass.getName() + ".class);");
+    }
+    else if (_idAttr != null) {
       out.print(_var + " = (" + _componentClass.getName() + ")");
       out.println(" com.caucho.jsp.jsf.JsfTagUtil.findPersistent(request"
 		  + ", " + parentVar
@@ -379,6 +402,7 @@ public class JsfTagNode extends JspContainerNode
       out.print(_var + " = (" + _componentClass.getName() + ")");
       out.println(" com.caucho.jsp.jsf.JsfTagUtil.addPersistent(request"
 		  + ", " + parentVar
+		  + ", " + bindingVar
 		  + ", " + _componentClass.getName() + ".class);");
     }
     else {
@@ -420,7 +444,7 @@ public class JsfTagNode extends JspContainerNode
       }
     }
 
-    if (_idAttr != null) {
+    if (_idAttr != null || _facetName != null) {
       if (oldParentVar != null)
 	out.println("request.setAttribute(\"caucho.jsf.parent\""
 		    + ", new com.caucho.jsp.jsf.JsfComponentTag("

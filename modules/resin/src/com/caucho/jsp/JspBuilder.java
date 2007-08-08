@@ -172,6 +172,20 @@ abstract public class JspBuilder {
       return jsp.isFastJstl();
   }
 
+
+  /**
+   * Returns true if fast-jsf is enabled.
+   */
+  public boolean isFastJsf()
+  {
+    JspPropertyGroup jsp = getJspPropertyGroup();
+
+    if (jsp == null)
+      return true;
+    else
+      return jsp.isFastJsf();
+  }
+
   /**
    * Returns true if require source is enabled.
    */
