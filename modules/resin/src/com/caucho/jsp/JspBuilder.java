@@ -269,6 +269,12 @@ abstract public class JspBuilder {
     text(text);
   }
 
+  public void addNamespace(String prefix, String uri)
+  {
+    // getParseState().pushNamespace(prefix, uri);
+    getCurrentNode().addNamespace(prefix, uri);
+  }
+
   /**
    * Returns the current node.
    */

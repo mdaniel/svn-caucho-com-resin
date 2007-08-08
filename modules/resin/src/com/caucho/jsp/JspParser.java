@@ -648,6 +648,17 @@ public class JspParser {
 
     ch = read();
 
+    String prefix = _parseState.findPrefix(JSTL_CORE_URI);
+
+    if (prefix == null) {
+      prefix = "resin-c";
+
+      _jspBuilder.addNamespace(prefix, JSTL_CORE_URI);
+      
+      processTaglib(prefix, JSTL_CORE_URI);
+    }
+
+    /*
     _jspBuilder.startElement(JSP_DIRECTIVE_TAGLIB);
     _jspBuilder.attribute(new QName("prefix"), "resin-c");
     _jspBuilder.attribute(new QName("uri"), JSTL_CORE_URI);
@@ -655,6 +666,7 @@ public class JspParser {
     _jspBuilder.endElement(JSP_DIRECTIVE_TAGLIB.getName());
 
     processTaglib("resin-c", JSTL_CORE_URI);
+    */
     
     setLocation(filename, line);
     _jspBuilder.startElement(JSTL_CORE_OUT);

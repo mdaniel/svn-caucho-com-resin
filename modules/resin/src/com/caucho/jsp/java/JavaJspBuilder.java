@@ -354,6 +354,8 @@ public class JavaJspBuilder extends JspBuilder {
     _currentNode.setNamespace(_parseState.getNamespaces());
     _currentNode.endAttributes();
     _currentNode.setEndAttributeLocation(_filename, _line);
+
+    _openNode = null;
   }
   
   /**

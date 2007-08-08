@@ -673,5 +673,10 @@ public class ParseState {
     else
       throw new IllegalStateException();
   }
+
+  public String findPrefix(String uri)
+  {
+    return Namespace.findPrefix(_namespaces, uri);
+  }
 }
 
