@@ -130,7 +130,7 @@ public class JarCache
 
       node = new JarNode(childName, childName.substring(p + 1));
     }
-
+    
     _map.put(mapName, node);
 
     parent.addChild(node);

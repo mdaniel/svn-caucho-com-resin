@@ -37,6 +37,7 @@ import com.caucho.vfs.*;
 
 import javax.servlet.jsp.tagext.*;
 import javax.faces.component.*;
+import javax.el.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.io.*;
@@ -77,6 +78,10 @@ public class JsfTagNode extends JspContainerNode
 
     String setterName = ("set" + Character.toUpperCase(name.charAt(0))
 			 + name.substring(1));
+
+    if (name.equals("action")
+	&& ActionSource2.class.isAssignableFrom(_componentClass))
+      setterName = "setActionExpression";
 
     Method method = findSetter(_componentClass, setterName);
 
@@ -397,7 +402,9 @@ public class JsfTagNode extends JspContainerNode
 	generateSetParameter(out, _var, jspAttr, method,
 			     true, null, false, null);
       }
-      else if (value.indexOf("#{") >= 0) {
+      else if (value.indexOf("#{") >= 0
+	       && ! ValueExpression.class.isAssignableFrom(type)
+	       && ! MethodExpression.class.isAssignableFrom(type)) {
 	out.print(_var + ".setValueExpression(\"" + attr.getName() + "\", ");
 
 	String exprVar = "_caucho_value_expr_" + _gen.addValueExpr(value, type.getName());
@@ -417,7 +424,7 @@ public class JsfTagNode extends JspContainerNode
       if (oldParentVar != null)
 	out.println("request.setAttribute(\"caucho.jsf.parent\""
 		    + ", new com.caucho.jsp.jsf.JsfComponentTag("
-		    + _var + ", false, " + _bodyVar + "));");
+		    + _var + ", true, " + _bodyVar + "));");
       
       out.popDepth();
       out.println("}");
@@ -426,7 +433,7 @@ public class JsfTagNode extends JspContainerNode
 	out.println("else");
 	out.println("  request.setAttribute(\"caucho.jsf.parent\""
 		    + ", new com.caucho.jsp.jsf.JsfComponentTag("
-		    + _var + ", true, " + _bodyVar + "));");
+		    + _var + ", false, " + _bodyVar + "));");
       }
     }
 

@@ -130,7 +130,6 @@ public class WebAppExpandDeployGenerator
       prefix = prefix.substring(0, prefix.length() - 1);
 
     _urlPrefix = prefix;
-
   }
 
   /**
@@ -247,7 +246,7 @@ public class WebAppExpandDeployGenerator
     ArrayList<String> versionNames = getVersionNames(segmentName);
 
     if (versionNames == null || versionNames.size() == 0)
-      return makeController(name, segmentName);
+      return makeController(name, _urlPrefix + segmentName);
     
     /*
     else if (versionNames.size() == 1) {
@@ -280,10 +279,14 @@ public class WebAppExpandDeployGenerator
 	baseName = versionName.substring(0, p);
       }
     }
-    
-    String expandName = getExpandName(versionName.substring(1));
 
-    String archiveName = versionName + ".war";
+    int p = versionName.lastIndexOf('/');
+
+    String segmentName = versionName.substring(p + 1);
+    
+    String expandName = getExpandName(segmentName);
+
+    String archiveName = segmentName + ".war";
     Path jarPath = getArchiveDirectory().lookup("." + archiveName);
 
     Path rootDirectory;

@@ -156,13 +156,15 @@ public class UICommand extends UIComponentBase
 
     if (event instanceof ActionEvent) {
       ActionEvent actionEvent = (ActionEvent) event;
-      
+
       FacesContext context = FacesContext.getCurrentInstance();
 
+      /* jsf/0235
       ActionListener []listeners = getActionListeners();
 
       for (int i = 0; i < listeners.length; i++)
 	listeners[i].processAction(actionEvent);
+      */
 
       ActionListener listener = context.getApplication().getActionListener();
 

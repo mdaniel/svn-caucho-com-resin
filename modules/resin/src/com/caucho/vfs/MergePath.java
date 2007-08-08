@@ -174,8 +174,9 @@ public class MergePath extends FilesystemPath {
   {
     if (! (path instanceof MergePath)) {
       // Need to normalize so directory paths ends with a "./"
-      if (path.isDirectory())
-	path = path.lookup("./");
+      // XXX:
+      //if (path.isDirectory())
+      //  path = path.lookup("./");
 
       ArrayList<Path> pathList = ((MergePath) _root)._pathList;
 

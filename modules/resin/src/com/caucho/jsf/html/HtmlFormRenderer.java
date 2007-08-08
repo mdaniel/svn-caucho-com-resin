@@ -294,7 +294,7 @@ class HtmlFormRenderer extends BaseRenderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    context.getApplication().getViewHandler().writeState(context);
+    //context.getApplication().getViewHandler().writeState(context);
 
     ResponseWriter out = context.getResponseWriter();
     out.endElement("form");

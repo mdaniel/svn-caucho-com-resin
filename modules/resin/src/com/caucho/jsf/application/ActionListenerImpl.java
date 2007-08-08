@@ -71,7 +71,6 @@ public class ActionListenerImpl implements ActionListener
       fromAction = actionExpr.getExpressionString();
 	
       Object value = actionExpr.invoke(context.getELContext(), NULL_ARG);
-      System.out.println("INVOKE: " + value);
 
       if (value != null)
 	logicalOutcome = value.toString();

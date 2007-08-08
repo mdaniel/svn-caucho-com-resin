@@ -377,6 +377,9 @@ public class TldTaglib implements DependencyBean
     for (int i = 0; i < jsfTags.size(); i++) {
       JsfTag jsfTag = (JsfTag) jsfTags.get(i);
 
+      if (jsfTag.getBaseTag() != null)
+	continue;
+
       int p = _tags.indexOf(jsfTag);
 
       if (p >= 0) {
@@ -384,6 +387,8 @@ public class TldTaglib implements DependencyBean
 
 	jsfTag.setBaseTag(tag);
       }
+      else
+	throw new IllegalStateException("No matching tag for : " + jsfTag);
       
       _tags.add(jsfTag);
     }

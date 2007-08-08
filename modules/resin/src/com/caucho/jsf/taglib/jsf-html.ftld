@@ -7,6 +7,11 @@
   </jsf-tag>
 
   <jsf-tag>
+    <name>commandButton</name>
+    <component-class>javax.faces.component.html.HtmlCommandButton</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
     <name>commandLink</name>
     <component-class>javax.faces.component.html.HtmlCommandLink</component-class>
   </jsf-tag>
@@ -44,6 +49,11 @@
   <jsf-tag>
     <name>inputTextarea</name>
     <component-class>javax.faces.component.html.HtmlInputTextarea</component-class>
+  </jsf-tag>
+
+  <jsf-tag>
+    <name>message</name>
+    <component-class>javax.faces.component.html.HtmlMessage</component-class>
   </jsf-tag>
 
   <jsf-tag>

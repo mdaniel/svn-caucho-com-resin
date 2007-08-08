@@ -312,9 +312,8 @@ public class ServletFacesContextImpl extends FacesContext
     synchronized (_messageMap) {
       ArrayList<FacesMessage> messages = new ArrayList<FacesMessage>();
       
-      for (Map.Entry<String,ArrayList<FacesMessage>> entry
-	     : _messageMap.entrySet()) {
-	messages.addAll(entry.getValue());
+      for (ArrayList<FacesMessage> value : _messageMap.values()) {
+	messages.addAll(value);
       }
 
       // jsf/1403

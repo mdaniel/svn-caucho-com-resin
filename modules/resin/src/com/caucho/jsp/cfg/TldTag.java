@@ -540,6 +540,9 @@ public class TldTag implements DependencyBean {
   
   public void setBaseTag(TldTag tag)
   {
+    if (tag == this)
+      throw new IllegalStateException();
+    
     _baseTag = tag;
   }
   

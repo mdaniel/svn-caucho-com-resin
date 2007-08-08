@@ -184,11 +184,20 @@ public class BeanTypeStrategy extends TypeStrategy {
   /**
    * Called before the children are configured.
    */
-  public void beforeConfigure(NodeBuilder builder, Object bean)
+  @Override
+  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
   {
-    super.beforeConfigure(builder, bean);
+    super.beforeConfigure(builder, bean, node);
 
     try {
+      if (_setLocation != null && node instanceof QAbstractNode) {
+	QAbstractNode qNode = (QAbstractNode) node;
+	String filename = qNode.getFilename();
+	int line = qNode.getLine();
+
+	_setLocation.invoke(bean, filename, line);
+      }
+       
       if (_addDependency != null) {
 	ArrayList<Dependency> list = builder.getDependencyList();
 

@@ -62,6 +62,153 @@ public class JsfTag extends TldTag {
   {
     return _componentClass;
   }
+
+  /**
+   * Returns the dependency.
+   */
+  public ArrayList<PersistentDependency> getDependencyList()
+  {
+    return getBaseTag().getDependencyList();
+  }
+
+  /**
+   * Gets the tag class
+   */
+  @Override
+  public Class getTagClass()
+  {
+    return getBaseTag().getTagClass();
+  }
+
+  /**
+   * Gets the tag class
+   */
+  @Override
+  public String getTagClassName()
+  {
+    return getBaseTag().getTagClassName();
+  }
+
+  /**
+   * Gets the tei class
+   */
+  @Override
+  public String getTeiClassName()
+  {
+    return getBaseTag().getTeiClassName();
+  }
+
+  /**
+   * Gets the tei object
+   */
+  @Override
+  public TagExtraInfo getTagExtraInfo()
+  {
+    return getBaseTag().getTagExtraInfo();
+  }
+
+  /**
+   * Gets the body-content
+   */
+  @Override
+  public String getBodyContent()
+  {
+    return getBaseTag().getBodyContent();
+  }
+
+  /**
+   * Gets the display-name
+   */
+  @Override
+  public String getDisplayName()
+  {
+    return getBaseTag().getDisplayName();
+  }
+
+  /**
+   * Gets the info
+   */
+  @Override
+  public String getInfo()
+  {
+    return getBaseTag().getInfo();
+  }
+
+  /**
+   * Gets the description
+   */
+  @Override
+  public String getDescription()
+  {
+    return getBaseTag().getDescription();
+  }
+
+  /**
+   * Gets the variables
+   */
+  public ArrayList<TagVariableInfo> getVariableList()
+  {
+    return getBaseTag().getVariableList();
+  }
+
+  /**
+   * Returns the variables.
+   */
+  public TagVariableInfo []getVariables()
+  {
+    return getBaseTag().getVariables();
+  }
+
+  /**
+   * Gets the attributes
+   */
+  public ArrayList getAttributeList()
+  {
+    return getBaseTag().getAttributeList();
+  }
+
+  /**
+   * Returns the attributes.
+   */
+  public TagAttributeInfo []getAttributes()
+  {
+    return getBaseTag().getAttributes();
+  }
+
+  /**
+   * Returns the attributes.
+   */
+  public ArrayList getFragmentAttributes()
+  {
+    return getBaseTag().getFragmentAttributes();
+  }
+
+  /**
+   * Gets the dynamic-attributes
+   */
+  @Override
+  public boolean getDynamicAttributes()
+  {
+    return getBaseTag().getDynamicAttributes();
+  }
+
+  /**
+   * Gets the dynamic-attrisavesavebutes
+   */
+  @Override
+  public String getDynamicAttributeName()
+  {
+    return getBaseTag().getDynamicAttributeName();
+  }
+  
+  /**
+   * validates.
+   */
+  public void validate()
+    throws JspParseException
+  {
+    getBaseTag().validate();
+  }
   
   public String toString()
   {

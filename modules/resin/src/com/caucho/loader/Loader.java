@@ -109,7 +109,6 @@ abstract public class Loader {
       try {
         return new URL(path.getURL());
       } catch (Exception e) {
-	e.printStackTrace();
 	log.log(Level.FINER, e.toString(), e);
       }
     }

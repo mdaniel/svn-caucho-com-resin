@@ -264,7 +264,7 @@ public class NodeBuilder {
     ClassLoader oldLoader = thread.getContextClassLoader();
     
     try {
-      typeStrategy.beforeConfigure(this, bean);
+      typeStrategy.beforeConfigure(this, bean, node);
       
       configureNodeAttributes(node, bean, typeStrategy);
 

@@ -333,6 +333,7 @@ public class DirectoryLoader extends Loader implements Dependency
       Path path = jarEntry.getJarPath();
 
       Path filePath = path.lookup(pathName);
+      System.out.println("GP: " + pathName + " " + filePath);
 
       if (filePath.exists())
 	return filePath;

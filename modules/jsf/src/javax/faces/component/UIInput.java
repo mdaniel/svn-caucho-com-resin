@@ -812,9 +812,18 @@ public class UIInput extends UIOutput
 			 Object value)
       throws ValidatorException
     {
-      FacesContext facesContext = FacesContext.getCurrentInstance();
+      try {
+	FacesContext facesContext = FacesContext.getCurrentInstance();
 
-      _binding.invoke(facesContext, new Object[] { context, component, value }); 
+	_binding.invoke(facesContext, new Object[] { context, component, value });
+      } catch (EvaluationException e) {
+	if (e.getCause() instanceof ValidatorException)
+	  throw (ValidatorException) e.getCause();
+	else if (e.getCause() instanceof RuntimeException)
+	  throw (RuntimeException) e.getCause();
+	else
+	  throw e;
+      }
     }
 
     public String toString()

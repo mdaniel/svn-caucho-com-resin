@@ -421,7 +421,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     super.startImpl();
     
-    _alarm.queue(_cronInterval);
+    handleAlarm(_alarm);
   }
 
   /**
@@ -550,7 +550,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
 	_controllerNames.add(name); // server/1d19
       }
-
+      
       return controller;
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -850,7 +850,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    */
   public boolean start(String name)
   {
-    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+    DeployController controller
+      = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))

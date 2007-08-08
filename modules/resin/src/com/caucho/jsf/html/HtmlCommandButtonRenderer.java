@@ -30,6 +30,7 @@ package com.caucho.jsf.html;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.faces.*;
 import javax.faces.application.*;
@@ -44,6 +45,9 @@ import javax.faces.render.*;
  */
 class HtmlCommandButtonRenderer extends Renderer
 {
+  private static final Logger log
+    = Logger.getLogger(HtmlCommandButtonRenderer.class.getName());
+  
   public static final Renderer RENDERER = new HtmlCommandButtonRenderer();
 
   /**
@@ -84,6 +88,9 @@ class HtmlCommandButtonRenderer extends Renderer
 
       if ("reset".equals(type))
 	return;
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(component + " action " + type);
 
       ActionEvent event = new ActionEvent(component);
 

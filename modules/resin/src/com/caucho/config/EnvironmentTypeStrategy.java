@@ -48,9 +48,10 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
   /**
    * Called before the children are configured.
    */
-  public void beforeConfigure(NodeBuilder builder, Object bean)
+  @Override
+  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
   {
-    super.beforeConfigure(builder, bean);
+    super.beforeConfigure(builder, bean, node);
     
     EnvironmentBean envBean = (EnvironmentBean) bean;
     ClassLoader loader = envBean.getClassLoader();

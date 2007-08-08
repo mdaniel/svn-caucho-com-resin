@@ -81,6 +81,15 @@ public class JspInclude extends JspNode {
   }
 
   /**
+   * True if the jsf-parent setting is required.
+   */
+  @Override
+  public boolean isJsfParentRequired()
+  {
+    return true;
+  }
+
+  /**
    * Adds text to the scriptlet.
    */
   public JspNode addText(String text)

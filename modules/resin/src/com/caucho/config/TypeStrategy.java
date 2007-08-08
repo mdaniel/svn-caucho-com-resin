@@ -75,7 +75,7 @@ public abstract class TypeStrategy {
   /**
    * Called before the children are configured.
    */
-  public void beforeConfigure(NodeBuilder builder, Object bean)
+  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
   {
   }
 
