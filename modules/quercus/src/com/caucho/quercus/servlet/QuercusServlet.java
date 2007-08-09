@@ -324,6 +324,9 @@ public class QuercusServlet
     else if ("script-encoding".equals(paramName)) {
       setScriptEncoding(paramValue);
     }
+    else if ("strict".equals(paramName)) {
+      setStrict("true".equals(paramValue));
+    }
     else
       throw new ServletException(L.l("'{0}' is not a recognized init-param", paramName));
   }

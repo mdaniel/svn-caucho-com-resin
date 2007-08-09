@@ -47,7 +47,6 @@ abstract public class Expr {
   private static final Logger log = Logger.getLogger(Expr.class.getName());
 
   public static final int COMPILE_ARG_MAX = 5;
-  private boolean _isParenthesized;
 
   private final Location _location;
 
@@ -105,22 +104,6 @@ abstract public class Expr {
       return _location.getFileName() + ":" + getLine() + ": ";
     else
       return "";
-  }
-  
-  /**
-   *  Returns true if this expr is enclosed inside parentheses.
-   */
-  public boolean getIsParenthesized()
-  {
-    return _isParenthesized;
-  }
-  
-  /*
-   * Sets whether or not this expr is enclosed inside parentheses.
-   */
-  public void setIsParenthesized(boolean val)
-  {
-    _isParenthesized = val;
   }
 
   /**

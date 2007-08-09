@@ -597,6 +597,22 @@ public class Quercus
   }
 
   /**
+   * Returns an ini value.
+   */
+  public boolean getIniBoolean(String name)
+  {
+    return _iniDefinitions.get(name).getAsBoolean(this);
+  }
+  
+  /**
+   * Returns an ini value as a long.
+   */
+  public long getIniLong(String name)
+  {
+    return _iniDefinitions.get(name).getAsLongValue(this).toLong();
+  }
+  
+  /**
    * Sets a server env value.
    */
   public void setServerEnv(String name, String value)

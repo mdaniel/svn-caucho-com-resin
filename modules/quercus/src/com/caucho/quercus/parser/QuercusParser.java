@@ -213,6 +213,7 @@ public class QuercusParser {
   private boolean _isTop;
 
   private boolean _isNewExpr;
+  private boolean _isIfTest;
 
   QuercusParser(Quercus quercus)
   {
@@ -1046,14 +1047,11 @@ public class QuercusParser {
 
       expect('(');
 
+      _isIfTest = true;
       Expr test = parseExpr();
-
-      expect(')');
+      _isIfTest = false;
       
-      if (test.isAssign() && ! test.getIsParenthesized()) { 
-        // php/
-        //XXX: warning
-      }
+      expect(')');
 
       int token = parseToken();
 
@@ -1256,13 +1254,11 @@ public class QuercusParser {
 
       expect('(');
 
+      _isIfTest = true;
       Expr test = parseExpr();
-
+      _isIfTest = false;
+      
       expect(')');
-
-      if (test.isAssign() && ! test.getIsParenthesized()) { 
-        //warning
-      }
       
       Statement block;
 
@@ -1302,14 +1298,11 @@ public class QuercusParser {
       expect(WHILE);
       expect('(');
 
+      _isIfTest = true;
       Expr test = parseExpr();
+      _isIfTest = false;
 
       expect(')');
-      
-      if (test.isAssign() && ! test.getIsParenthesized()) { 
-        // php/
-        //XXX: warning
-      }
     
       return _factory.createDo(location, test, block);
     } finally {
@@ -1345,12 +1338,12 @@ public class QuercusParser {
       token = parseToken();
       if (token != ';') {
         _peekToken = token;
+        
+        _isIfTest = true;
         test = parseTopCommaExpr();
+        _isIfTest = false;
+        
         expect(';');
-    
-        if (test.isAssign() && ! test.getIsParenthesized()) { 
-          //warning
-        }
       }
 
       Expr incr = null;
@@ -2430,6 +2423,11 @@ public class QuercusParser {
 	  }
 	  else {
 	    _peekToken = token;
+
+        if (_isIfTest && _quercus.isStrict()) {
+          throw error("assignment without parentheses inside If/While/For test statement; please make sure whether equality was intended instead");
+        }
+        
 	    expr = expr.createAssign(this, parseConditionalExpr());
 	  }
 	} catch (QuercusParseException e) {
@@ -3043,11 +3041,11 @@ public class QuercusParser {
 
     case '(':
       {
+        _isIfTest = false;
+        
         Expr expr = parseExpr();
 
         expect(')');
-
-        expr.setIsParenthesized(true);
         
         if (expr instanceof ConstExpr) {
           String type = ((ConstExpr) expr).getVar();
