@@ -761,7 +761,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     if (hasLoad) {
-      out.println("__caucho_load_select_" + index + "(aConn);");
+      int group = index / 64;
+      long mask = (1L << (index % 64));
+      
+      out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) == 0)");
+      
+      out.println("  __caucho_load_select_" + index + "(aConn);");
     }
   }
 

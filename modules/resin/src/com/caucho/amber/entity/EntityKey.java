@@ -34,31 +34,31 @@ import com.caucho.amber.type.EntityType;
  * Key to handle the merged identity hash code.
  */
 public class EntityKey {
-  private EntityType _rootType;
+  private Class _type;
   private Object _key;
 
   public EntityKey()
   {
   }
 
-  public EntityKey(EntityType rootType, Object key)
+  public EntityKey(Class type, Object key)
   {
-    _rootType = rootType;
+    _type = type;
     _key = key;
   }
 
-  public void init(EntityType rootType, Object key)
+  public void init(Class type, Object key)
   {
-    _rootType = rootType;
+    _type = type;
     _key = key;
   }
 
   /**
    * Returns the home value.
    */
-  public EntityType getEntityType()
+  public Class getType()
   {
-    return _rootType;
+    return _type;
   }
 
   /**
@@ -74,7 +74,7 @@ public class EntityKey {
    */
   public int hashCode()
   {
-    return 65521 * _rootType.hashCode() + _key.hashCode();
+    return 65521 * _type.hashCode() + _key.hashCode();
   }
 
   /**
@@ -89,11 +89,11 @@ public class EntityKey {
 
     EntityKey key = (EntityKey) o;
 
-    return _rootType == key._rootType && _key.equals(key._key);
+    return _type == key._type && _key.equals(key._key);
   }
     
   public String toString()
   {
-    return "EntityKey[" + _rootType + ", " + _key + "]";
+    return "EntityKey[" + _type.getName() + ", " + _key + "]";
   }
 }

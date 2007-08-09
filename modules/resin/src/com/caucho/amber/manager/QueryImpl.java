@@ -819,7 +819,7 @@ public class QueryImpl implements Query {
 
     String className = entityResult.getEntityClass();
 
-    EntityType entityType = _aConn.getPersistenceUnit().getEntity(className);
+    EntityType entityType = _aConn.getPersistenceUnit().getEntityType(className);
 
     if (entityType == null)
       throw new IllegalStateException(L.l("Unable to locate entity '{0}' for native query.", className));

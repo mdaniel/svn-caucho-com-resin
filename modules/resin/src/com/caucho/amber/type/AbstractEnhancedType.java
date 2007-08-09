@@ -54,6 +54,7 @@ public abstract class AbstractEnhancedType extends Type {
 
   JClass _beanClass;
   private String _className;
+  private Class _javaBeanClass;
 
   private String _name;
 
@@ -154,6 +155,25 @@ public abstract class AbstractEnhancedType extends Type {
   public String getClassName()
   {
     return _className;
+  }
+
+  /**
+   * Returns the java bean class
+   */
+  public Class getJavaBeanClass()
+  {
+    if (_javaBeanClass == null) {
+      try {
+	Thread thread = Thread.currentThread();
+	ClassLoader loader = thread.getContextClassLoader();
+	
+	_javaBeanClass = Class.forName(getClassName(), false, loader);
+      } catch (ClassNotFoundException e) {
+	throw new AmberRuntimeException(e);
+      }
+    }
+    
+    return _javaBeanClass;
   }
 
   /**

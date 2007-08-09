@@ -114,7 +114,7 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
     Type amberType = null;
 
     if (returnEJB != null) {
-      amberType = amberPersistenceUnit.getEntity(retBean.getAbstractSchemaName());
+      amberType = amberPersistenceUnit.getEntityType(retBean.getAbstractSchemaName());
 
       if (amberType == null)
 	throw new NullPointerException("No amber entity for " + returnEJB);
@@ -131,7 +131,7 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
 				      retType.getName(), _query));
       }
 
-      amberType = amberPersistenceUnit.getEntity(targetBean.getAbstractSchemaName());
+      amberType = amberPersistenceUnit.getEntityType(targetBean.getAbstractSchemaName());
     }
     else if (! retType.isAssignableTo(Collection.class))
       amberType = amberPersistenceUnit.createType(retType);

@@ -324,7 +324,7 @@ public class WebApp extends ServletContextImpl
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
 
       // jpa/0s2n (tck: ejb30/persistence/ee/packaging/web/scope)
-      fillDefaultLib();
+      // fillDefaultLib();
 
       // map.put("app", _appVar);
 

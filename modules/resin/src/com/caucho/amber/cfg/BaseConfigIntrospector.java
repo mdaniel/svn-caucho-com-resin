@@ -530,7 +530,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       String className = entityResult.getClass("entityClass").getName();
 
-      EntityType resultType = _persistenceUnit.getEntity(className);
+      EntityType resultType = _persistenceUnit.getEntityType(className);
 
       if (resultType == null)
         throw new ConfigException(L.l("entityClass '{0}' is not an @Entity bean for @SqlResultSetMapping '{1}'. The entityClass of an @EntityResult must be an @Entity bean.",
@@ -1407,7 +1407,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     AbstractStatefulType declaringType;
 
-    declaringType = _persistenceUnit.getEntity(jClass.getName());
+    declaringType = _persistenceUnit.getEntityType(jClass.getName());
 
     if (declaringType == null)
       declaringType = _persistenceUnit.getEmbeddable(jClass.getName());
@@ -2107,7 +2107,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       throw error(field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
                              field.getName()));
 
-    EntityType targetType = _persistenceUnit.getEntity(targetName);
+    EntityType targetType = _persistenceUnit.getEntityType(targetName);
 
     if (targetType == null)
       throw error(field,
@@ -2464,7 +2464,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         throw error(_field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
                                 _field.getName()));
 
-      EntityType targetType = persistenceUnit.getEntity(targetName);
+      EntityType targetType = persistenceUnit.getEntityType(targetName);
       if (targetType == null) {
 
         EntityConfig entityConfig = getEntityConfig(targetName);
@@ -2863,7 +2863,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       RelatedType targetType = null;
 
       if (targetName != null && ! targetName.equals("")) {
-        targetType = persistenceUnit.getEntity(targetName);
+        targetType = persistenceUnit.getEntityType(targetName);
 
         if (targetType == null)
           throw new ConfigException(L.l("{0}: '{1}' is an unknown entity for '{2}'.",
@@ -2872,7 +2872,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                         _field.getName()));
       }
       else {
-        targetType = persistenceUnit.getEntity(_field.getReturnType().getName());
+        targetType = persistenceUnit.getEntityType(_field.getReturnType().getName());
 
         if (targetType == null)
           throw new ConfigException(L.l("{0} can't determine target name for '{1}'",

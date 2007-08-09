@@ -127,6 +127,7 @@ public class AmberConnection
 
   private ArrayList<Statement> _statements = new ArrayList<Statement>();
 
+  private EntityKey _entityKey = new EntityKey();
   private QueryCacheKey _queryKey = new QueryCacheKey();
 
   private ArrayList<Entity> _mergingEntities = new ArrayList<Entity>();
@@ -547,15 +548,6 @@ public class AmberConnection
       // Broken relationships would not pass the flush validation.
       _isFlushAllowed = false;
 
-      AmberEntityHome entityHome
-        = _persistenceUnit.getEntityHome(entityClass.getName());
-
-      if (entityHome == null) {
-        throw new IllegalArgumentException(L.l("'{0}' is an unknown class in persistence-unit '{1}'.  find() operation can only be applied if the entity class is specified in the scope of a persistence unit.",
-                                               entityClass.getName(),
-                                               _persistenceUnit.getName()));
-      }
-
       T entity = (T) load(entityClass, primaryKey, true, 0, 0);
 
       if (! isActiveTransaction()) {
@@ -957,16 +949,33 @@ public class AmberConnection
       return entity;
     }
 
-    AmberEntityHome entityHome = _persistenceUnit.getEntityHome(cl.getName());
+    _entityKey.init(cl, key);
+    EntityItem existingItem = _persistenceUnit.getEntity(_entityKey);
+
+    AmberEntityHome entityHome = null;
+
+    if (existingItem != null)
+      entityHome = existingItem.getEntityHome();
+
+    if (entityHome == null)
+      entityHome = _persistenceUnit.getEntityHome(cl.getName());
+
+    if (entityHome == null) {
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown class in persistence-unit '{1}'.  find() operation can only be applied if the entity class is specified in the scope of a persistence unit.",
+					     cl.getName(),
+					     _persistenceUnit.getName()));
+    }
 
     if (entityHome == null)
       return null;
     else {
+      /*
       try {
         entityHome.init();
       } catch (ConfigException e) {
         throw new AmberException(e);
       }
+      */
 
       boolean isLoad = true;
 
@@ -975,24 +984,13 @@ public class AmberConnection
         isLoad = isEager;
 
       // jpa/0l42, jpa/0l47, jpa/0o03, jpa/0o05
-      entity = entityHome.find(this, key, isLoad,
+      entity = entityHome.find(this, key, existingItem,
+			       isLoad,
                                notExpiringLoadMask,
                                notExpiringGroup);
 
       if (entity == null)
         return null;
-
-      /* XXX: Should not be necessary.
-      // jpa/0o36: eager loading can change the corresponding entity index.
-      index = getEntity(cl.getName(), key);
-
-      if (index >= 0) {
-      // jpa/0ga9: replace with managed entity.
-      _entities.remove(index);
-      }
-
-      addEntity(entity);
-      */
 
       int index = getTransactionEntity(entity.getClass().getName(),
                                        entity.__caucho_getPrimaryKey());
@@ -2898,7 +2896,8 @@ public class AmberConnection
     if (_persistenceUnit.isJPA()) {
       String className = entity.getClass().getName();
 
-      EntityType entityType = (EntityType) _persistenceUnit.getEntity(className);
+      EntityType entityType
+	= (EntityType) _persistenceUnit.getEntityType(className);
 
       // jpa/0m08
       if (entityType == null) {

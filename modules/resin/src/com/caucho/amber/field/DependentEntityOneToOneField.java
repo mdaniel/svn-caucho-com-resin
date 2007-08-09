@@ -651,7 +651,7 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     if (persistenceUnit.isJPA()) {
       String className = getJavaType().getName();
-      EntityType entity = persistenceUnit.getEntity(className);
+      EntityType entity = persistenceUnit.getEntityType(className);
 
       // jpa/0ge4
       table = entity.getTable();

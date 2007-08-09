@@ -346,7 +346,7 @@ public class EnvAmberManager
     SoftReference<EntityItem> ref;
 
     synchronized (_entityKey) {
-      _entityKey.init(rootType, key);
+      _entityKey.init(rootType.getInstanceClass(), key);
       ref = _entityCache.get(_entityKey);
     }
 
@@ -364,7 +364,7 @@ public class EnvAmberManager
                               EntityItem entity)
   {
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
-    EntityKey entityKey = new EntityKey(rootType, key);
+    EntityKey entityKey = new EntityKey(rootType.getInstanceClass(), key);
 
     ref = _entityCache.putIfNew(entityKey, ref);
 
@@ -379,7 +379,7 @@ public class EnvAmberManager
     SoftReference<EntityItem> ref;
 
     synchronized (_entityKey) {
-      _entityKey.init(rootType, key);
+      _entityKey.init(rootType.getInstanceClass(), key);
       ref = _entityCache.remove(_entityKey);
     }
 
@@ -413,7 +413,7 @@ public class EnvAmberManager
         if (value == null)
           continue;
 
-        EntityType entityRoot = key.getEntityType();
+        EntityType entityRoot = value.getEntityHome().getEntityType();
         Object entityKey = key.getKey();
 
         for (int i = 0; i < size; i++) {

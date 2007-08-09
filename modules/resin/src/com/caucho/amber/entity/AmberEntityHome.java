@@ -211,7 +211,9 @@ public class AmberEntityHome {
                      Object key)
     throws AmberException
   {
-    return find(aConn, key, true, 0, 0);
+    EntityItem existingItem = _manager.getEntity(getRootType(), key);
+    
+    return find(aConn, key, existingItem, true, 0, 0);
   }
 
   /**
@@ -223,7 +225,10 @@ public class AmberEntityHome {
                      int notExpiringGroup)
     throws AmberException
   {
-    return find(aConn, key, true, notExpiringLoadMask, notExpiringGroup);
+    EntityItem existingItem = _manager.getEntity(getRootType(), key);
+    
+    return find(aConn, key, existingItem,
+		true, notExpiringLoadMask, notExpiringGroup);
   }
 
   /**
@@ -232,7 +237,9 @@ public class AmberEntityHome {
   public Entity loadLazy(AmberConnection aConn, Object key)
     throws AmberException
   {
-    return find(aConn, key, false, 0, 0);
+    EntityItem existingItem = _manager.getEntity(getRootType(), key);
+    
+    return find(aConn, key, existingItem, false, 0, 0);
   }
 
   /**
@@ -352,7 +359,9 @@ public class AmberEntityHome {
                      boolean isLoad)
     throws AmberException
   {
-    return find(aConn, key, isLoad, 0, 0);
+    EntityItem existingItem = _manager.getEntity(getRootType(), key);
+    
+    return find(aConn, key, existingItem, isLoad, 0, 0);
   }
 
   /**
@@ -364,6 +373,7 @@ public class AmberEntityHome {
    */
   public Entity find(AmberConnection aConn,
                      Object key,
+		     EntityItem existingItem,
                      boolean isLoad,
                      long notExpiringLoadMask,
                      int notExpiringGroup)
@@ -373,7 +383,7 @@ public class AmberEntityHome {
       // jpa/0o01, jpa/0o41
 
       // jpa/0l48: checks if cacheItem is new or existing (below).
-      EntityItem existingItem = _manager.getEntity(getRootType(), key);
+      // EntityItem existingItem = _manager.getEntity(getRootType(), key);
 
       if (log.isLoggable(Level.FINER)) {
         log.log(Level.FINER, L.l("AmberEntityHome.find class: {0} PK: {1} isLoad: {2} xa: {3} notExpiringLoadMask: " + notExpiringLoadMask + " notExpiringGroup: " + notExpiringGroup,
@@ -437,7 +447,8 @@ public class AmberEntityHome {
                                       msg, _entityType.getClassName(), key));
           }
 
-          _manager.copyFromCacheItem(aConn, entity, cacheItem);
+          // _manager.copyFromCacheItem(aConn, entity, cacheItem);
+	  cacheItem.copyTo(entity, aConn);
         }
 
         long loadMask = entity.__caucho_getLoadMask(notExpiringGroup);

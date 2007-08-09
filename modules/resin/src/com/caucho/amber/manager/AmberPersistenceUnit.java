@@ -1137,7 +1137,7 @@ public class AmberPersistenceUnit {
   /**
    * Returns a matching entity.
    */
-  public EntityType getEntity(String className)
+  public EntityType getEntityType(String className)
   {
     Type type = _typeManager.get(className);
 
@@ -1556,7 +1556,7 @@ public class AmberPersistenceUnit {
     SoftReference<EntityItem> ref;
 
     synchronized (_entityKey) {
-      _entityKey.init(rootType, key);
+      _entityKey.init(rootType.getInstanceClass(), key);
       ref = _entityCache.get(_entityKey);
     }
 
@@ -1569,11 +1569,11 @@ public class AmberPersistenceUnit {
   /**
    * Returns the entity with the given key.
    */
-  public EntityItem getEntity(EntityKey key)
+  public EntityItem getEntity(EntityKey entityKey)
   {
     SoftReference<EntityItem> ref;
 
-    ref = _entityCache.get(_entityKey);
+    ref = _entityCache.get(entityKey);
 
     if (ref != null)
       return ref.get();
@@ -1592,11 +1592,13 @@ public class AmberPersistenceUnit {
       throw new IllegalStateException(L.l("Null entity item cannot be added to the persistence unit cache"));
 
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
-    EntityKey entityKey = new EntityKey(rootType, key);
+    EntityKey entityKey = new EntityKey(rootType.getInstanceClass(), key);
 
-    ref = _entityCache.putIfNew(entityKey, ref);
+    // can't use putIfNew because the SoftReference might be empty, i.e.
+    // not "new" but in need of replacement
+    ref = _entityCache.put(entityKey, ref);
 
-    return ref.get();
+    return entity;
   }
 
   /**
@@ -1607,7 +1609,7 @@ public class AmberPersistenceUnit {
     SoftReference<EntityItem> ref;
 
     synchronized (_entityKey) {
-      _entityKey.init(rootType, key);
+      _entityKey.init(rootType.getInstanceClass(), key);
       ref = _entityCache.remove(_entityKey);
     }
 
@@ -1631,7 +1633,7 @@ public class AmberPersistenceUnit {
     SoftReference<EntityItem> ref;
 
     synchronized (_entityKey) {
-      _entityKey.init(rootType, key);
+      _entityKey.init(rootType.getInstanceClass(), key);
       ref = _entityCache.get(_entityKey);
 
       EntityItem oldCacheItem = null;
@@ -1643,7 +1645,7 @@ public class AmberPersistenceUnit {
       // jpa/0q00
       if (oldCacheItem == null) {
         ref = new SoftReference<EntityItem>(cacheItem);
-        EntityKey entityKey = new EntityKey(rootType, key);
+        EntityKey entityKey = new EntityKey(rootType.getInstanceClass(), key);
 
         // ejb/0628, ejb/06d0
         ref = _entityCache.putIfNew(entityKey, ref);
@@ -1701,7 +1703,8 @@ public class AmberPersistenceUnit {
         if (value == null)
           continue;
 
-        EntityType entityRoot = key.getEntityType();
+	AmberEntityHome entityHome = value.getEntityHome();
+        EntityType entityRoot = entityHome.getEntityType();
         Object entityKey = key.getKey();
 
         for (int i = 0; i < size; i++) {

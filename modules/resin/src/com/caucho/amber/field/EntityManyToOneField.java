@@ -1015,7 +1015,7 @@ public class EntityManyToOneField extends CascadableField {
       out.pushDepth();
 
       // jpa/0j5f
-      out.println("child = aConn.load(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey(), true);");
+      out.println("child = aConn.load(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey(), true, 0, 0);");
 
       out.popDepth();
       out.println("} else {");
