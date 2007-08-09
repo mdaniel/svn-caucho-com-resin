@@ -1060,15 +1060,18 @@ public class AmberConnection
       // findEntityItem, but it is still not loaded.
     }
     else {
+      entity = item.getEntityHome().newEntity(pk);
+      /*
       // Create a new entity for the given class and primary key.
       try {
         entity = (Entity) cl.newInstance();
       } catch (Exception e) {
         throw new AmberRuntimeException(e);
       }
+      */
 
       entity.__caucho_setEntityState(EntityState.P_NON_TRANSACTIONAL);
-      entity.__caucho_setPrimaryKey(pk);
+      // entity.__caucho_setPrimaryKey(pk);
 
       // jpa/1000: avoids extra allocations.
       addInternalEntity(entity);
@@ -2414,7 +2417,7 @@ public class AmberConnection
    *
    * @param query a Hibernate query
    */
-  public AbstractQuery parseQuery(String queryString, boolean isLazy)
+  public AbstractQuery parseQuery(String sql, boolean isLazy)
     throws AmberException
   {
     try {
@@ -2423,12 +2426,20 @@ public class AmberConnection
       throw AmberRuntimeException.create(e);
     }
 
-    QueryParser parser = new QueryParser(queryString);
+    AbstractQuery query = _persistenceUnit.getQueryParseCache(sql);
 
-    parser.setPersistenceUnit(_persistenceUnit);
-    parser.setLazyResult(isLazy);
+    if (query == null) {
+      QueryParser parser = new QueryParser(sql);
 
-    return parser.parse();
+      parser.setPersistenceUnit(_persistenceUnit);
+      parser.setLazyResult(isLazy);
+
+      query = parser.parse();
+
+      _persistenceUnit.putQueryParseCache(sql, query);
+    }
+
+    return query;
   }
 
   /**

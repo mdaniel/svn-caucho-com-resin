@@ -48,6 +48,7 @@ import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.gen.AmberGeneratorImpl;
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
+import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.QueryCacheKey;
 import com.caucho.amber.query.ResultSetCacheChunk;
 import com.caucho.amber.table.Table;
@@ -130,6 +131,9 @@ public class AmberPersistenceUnit {
 
   private HashMap<String,SequenceIdGenerator> _sequenceGenMap
     = new HashMap<String,SequenceIdGenerator>();
+
+  private LruCache<String,AbstractQuery> _queryParseCache
+    = new LruCache<String,AbstractQuery>(1024);
 
   private LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>> _queryCache
     = new LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>>(1024);
@@ -1425,6 +1429,22 @@ public class AmberPersistenceUnit {
     return getEntityHome(cl.getName());
   }
 
+  /**
+   * Returns the query cache.
+   */
+  public AbstractQuery getQueryParseCache(String sql)
+  {
+    return _queryParseCache.get(sql);
+  }
+
+  /**
+   * Returns the query cache.
+   */
+  public void putQueryParseCache(String sql, AbstractQuery query)
+  {
+    _queryParseCache.put(sql, query);
+  }
+  
   /**
    * Returns the query result.
    */
