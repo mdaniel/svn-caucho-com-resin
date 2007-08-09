@@ -851,7 +851,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("else if (__caucho_state.isTransactional()) {");
     out.println("}");
     out.println("else if (__caucho_session == null ||");
-    out.println("         ! __caucho_session.isActive()) {");
+    out.println("         ! __caucho_session.isActiveTransaction()) {");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
     out.println("  if (__caucho_cacheItem != null)");
     out.println("    __caucho_cacheItem.save((com.caucho.amber.entity.Entity) this);");
@@ -1016,7 +1016,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // out.println("  return true;");
 
     // jpa/0r10
-    out.println("__caucho_session.preUpdate((com.caucho.amber.entity.Entity) this);");
+    out.println("__caucho_home.preUpdate(this);");
 
     // jpa/0r10
     generateCallbacks(out, "this", _relatedType.getPreUpdateCallbacks());
@@ -1082,7 +1082,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println();
     }
 
-    out.println("__caucho_session.postUpdate((com.caucho.amber.entity.Entity) this);");
+    out.println("__caucho_home.postUpdate(this);");
 
     generateCallbacks(out, "this", _relatedType.getPostUpdateCallbacks());
 
@@ -1447,7 +1447,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_session = aConn;");
       out.println("__caucho_home = home;");
 
-      out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
+      out.println("__caucho_home.prePersist(this);");
 
       // jpa/0r20
       for (JMethod method : _relatedType.getPrePersistCallbacks()) {
@@ -1466,7 +1466,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
         out.println("__caucho_cascadePostPersist(aConn);");
       }
 
-      out.println("aConn.postPersist((com.caucho.amber.entity.Entity) this);");
+      out.println("__caucho_home.postPersist(this);");
 
       for (JMethod method : _relatedType.getPostPersistCallbacks()) {
         out.println(method.getName() + "();");
@@ -1692,7 +1692,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber create \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
     out.println();
-    out.println("if (aConn.isActive()) {");
+    out.println("if (aConn.isActiveTransaction()) {");
 
     // jpa/0i60
     // out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
@@ -1725,8 +1725,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  return;");
     out.println();
 
-    out.println("if (__caucho_session != null)");
-    out.println("  __caucho_session.preRemove((com.caucho.amber.entity.Entity) this);");
+    out.println("if (__caucho_home != null)");
+    out.println("  __caucho_home.preRemove(this);");
     out.println();
 
     generateCallbacks(out, "this", _relatedType.getPreRemoveCallbacks());
@@ -1798,7 +1798,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
     out.println("pstmt.executeUpdate();");
 
-    out.println("__caucho_session.postRemove((com.caucho.amber.entity.Entity) this);");
+    out.println("__caucho_home.postRemove(this);");
 
     generateCallbacks(out, "this", _relatedType.getPostRemoveCallbacks());
 
@@ -1960,10 +1960,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // It will only copyTo() within a transaction if
     // the cache item is new, i.e. the very first load.
     out.println();
-    out.println("if (! aConn.isActive()) {");
+    out.println("if (! aConn.isActiveTransaction()) {");
     out.pushDepth();
 
-    out.println("aConn.postLoad(targetEntity);");
+    out.println("__caucho_home.postLoad(targetEntity);");
 
     // jpa/0r00: @PostLoad, without transaction.
     // When there is no transaction the entity is copied

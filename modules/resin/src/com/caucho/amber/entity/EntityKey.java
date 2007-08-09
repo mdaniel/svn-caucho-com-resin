@@ -74,7 +74,7 @@ public class EntityKey {
    */
   public int hashCode()
   {
-    return 65521 * System.identityHashCode(_rootType) + _key.hashCode();
+    return 65521 * _rootType.hashCode() + _key.hashCode();
   }
 
   /**
@@ -84,8 +84,7 @@ public class EntityKey {
   {
     if (this == o)
       return true;
-
-    if (o == null || getClass() != o.getClass())
+    else if (! (o instanceof EntityKey))
       return false;
 
     EntityKey key = (EntityKey) o;

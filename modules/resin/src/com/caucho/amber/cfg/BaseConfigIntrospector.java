@@ -288,6 +288,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       // java.lang.Object
       return;
     }
+    /*
     else {
       // XXX: entity listener super-classes in a hierarchy might
       // not be annotated as entity listeners but they might have
@@ -297,6 +298,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       introspectEntityListener(parentClass, persistenceUnit,
                                sourceType, sourceClassName);
     }
+    */
 
     // jpa/0r42
 

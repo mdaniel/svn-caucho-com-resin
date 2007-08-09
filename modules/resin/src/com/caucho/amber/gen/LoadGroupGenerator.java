@@ -143,7 +143,7 @@ public class LoadGroupGenerator extends ClassComponent {
       out.pushDepth();
 
       out.println();
-      out.println("aConn.postLoad(this);");
+      out.println("__caucho_home.postLoad(this);");
 
       // jpa/0r01: @PostLoad, with transaction.
       // Within a transaction the entity is not copied
@@ -176,7 +176,7 @@ public class LoadGroupGenerator extends ClassComponent {
   {
     // non-read-only entities must be reread in a transaction
     if (! _relatedType.isReadOnly()) {
-      out.println("if (aConn.isActive()) {");
+      out.println("if (aConn.isActiveTransaction()) {");
       out.pushDepth();
 
       // deleted objects are not reloaded

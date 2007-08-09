@@ -324,7 +324,7 @@ public class UserQuery implements AmberQuery {
 
     if (chunkSize <= _firstResult)
       isCacheable = false;
-    else if (_aConn.isActive() && ! query.isTableReadOnly())
+    else if (_aConn.isActiveTransaction() && ! query.isTableReadOnly())
       isCacheable = false;
     else if (! query.isCacheable())
       isCacheable = false;

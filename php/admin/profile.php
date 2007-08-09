@@ -118,7 +118,7 @@ if ($profile) {
       echo "<td align='right'>";
       printf("%9.3f%%", 100 * $entry->getCount() / $totalTicks);
       echo "</td><td align='right'>";
-      printf("%.4fs", $entry->getCount() * $profile->period * 0.0001);
+      printf("%.3fs", $entry->getCount() * $profile->period * 0.001);
       echo "</td>";
       echo "<td>";
       echo "<a id='s_{$name}_{$i}' href=\"javascript:show('t_{$name}_{$i}');hide('s_{$name}_{$i}');show('h_{$name}_{$i}');\">show</a> ";

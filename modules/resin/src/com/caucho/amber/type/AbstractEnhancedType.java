@@ -53,6 +53,7 @@ public abstract class AbstractEnhancedType extends Type {
   AmberPersistenceUnit _amberPersistenceUnit;
 
   JClass _beanClass;
+  private String _className;
 
   private String _name;
 
@@ -126,6 +127,7 @@ public abstract class AbstractEnhancedType extends Type {
   public void setBeanClass(JClass beanClass)
   {
     _beanClass = beanClass;
+    _className = beanClass.getName();
 
     if (getName() == null) {
       String name = beanClass.getName();
@@ -144,6 +146,14 @@ public abstract class AbstractEnhancedType extends Type {
   public JClass getBeanClass()
   {
     return _beanClass;
+  }
+
+  /**
+   * Returns the class name.
+   */
+  public String getClassName()
+  {
+    return _className;
   }
 
   /**

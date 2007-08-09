@@ -35,6 +35,7 @@ import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.entity.Listener;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.EntityManyToOneField;
 import com.caucho.amber.field.Id;
@@ -47,7 +48,7 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
-import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.lifecycle.Lifecycle;
@@ -55,7 +56,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -80,6 +81,27 @@ abstract public class RelatedType extends AbstractStatefulType {
 
   private ArrayList<ListenerType> _listeners
     = new ArrayList<ListenerType>();
+
+  private ArrayList<ListenerCallback> _postLoadCallbacks
+    = new ArrayList<ListenerCallback>();
+
+  private ArrayList<ListenerCallback> _prePersistCallbacks
+    = new ArrayList<ListenerCallback>();
+
+  private ArrayList<ListenerCallback> _postPersistCallbacks
+    = new ArrayList<ListenerCallback>();
+
+  private ArrayList<ListenerCallback> _preUpdateCallbacks
+    = new ArrayList<ListenerCallback>();
+
+  private ArrayList<ListenerCallback> _postUpdateCallbacks
+    = new ArrayList<ListenerCallback>();
+
+  private ArrayList<ListenerCallback> _preRemoveCallbacks
+    = new ArrayList<ListenerCallback>();
+
+  private ArrayList<ListenerCallback> _postRemoveCallbacks
+    = new ArrayList<ListenerCallback>();
 
   private Id _id;
 
@@ -731,8 +753,76 @@ abstract public class RelatedType extends AbstractStatefulType {
   {
     init();
 
+    startImpl();
+
     if (! _lifecycle.toActive())
       return;
+  }
+
+  private void startImpl()
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      for (ListenerType listenerType : getListeners()) {
+        String listenerClass = listenerType.getBeanClass().getName();
+
+        Class cl = Class.forName(listenerClass, false, loader);
+        Object listener;
+
+        try {
+          listener = cl.newInstance();
+        } catch (InstantiationException e) {
+          throw new ConfigException(L.l("'{0}' could not be instantiated.",
+                                        cl));
+        }
+
+        for (JMethod jMethod : listenerType.getCallbacks(Listener.PRE_PERSIST)) {
+          Method method = getListenerMethod(cl, jMethod.getName());
+
+          if (method != null)
+            _prePersistCallbacks.add(new ListenerCallback(listener, method));
+        }
+
+        for (JMethod jMethod : listenerType.getCallbacks(Listener.POST_PERSIST)) {
+          Method method = getListenerMethod(cl, jMethod.getName());
+
+          if (method != null)
+            _postPersistCallbacks.add(new ListenerCallback(listener, method));
+        }
+
+        for (JMethod jMethod : listenerType.getCallbacks(Listener.POST_LOAD)) {
+          Method method = getListenerMethod(cl, jMethod.getName());
+
+          if (method != null)
+            _postLoadCallbacks.add(new ListenerCallback(listener, method));
+        }
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  private Method getListenerMethod(Class cl, String methodName)
+  {
+    if (cl == null)
+      return null;
+
+    Method []methods = cl.getDeclaredMethods();
+
+    for (int i = 0; i < methods.length; i++) {
+      Class []paramTypes = methods[i].getParameterTypes();
+      
+      if (methods[i].getName().equals(methodName)
+          && paramTypes.length == 1
+          && paramTypes[0].equals(Object.class)) {
+        return methods[i];
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -1513,6 +1603,73 @@ abstract public class RelatedType extends AbstractStatefulType {
   {
     return (getBeanClass() != getProxyClass() &&
             getProxyClass().getName().equals(typeName));
+  }
+
+  //
+  // callbacks
+  //
+
+  /**
+   * Callbacks before an entity is persisted
+   */
+  public void prePersist(Entity entity)
+  {
+    for (int i = 0; i < _prePersistCallbacks.size(); i++)
+      _prePersistCallbacks.get(i).invoke(entity);
+  }
+
+  /**
+   * Callbacks after an entity is persisted
+   */
+  public void postPersist(Entity entity)
+  {
+    for (int i = 0; i < _postPersistCallbacks.size(); i++)
+      _postPersistCallbacks.get(i).invoke(entity);
+  }
+
+  /**
+   * Callbacks before an entity is updateed
+   */
+  public void preUpdate(Entity entity)
+  {
+    for (int i = 0; i < _preUpdateCallbacks.size(); i++)
+      _preUpdateCallbacks.get(i).invoke(entity);
+  }
+
+  /**
+   * Callbacks after an entity is updated
+   */
+  public void postUpdate(Entity entity)
+  {
+    for (int i = 0; i < _postUpdateCallbacks.size(); i++)
+      _postUpdateCallbacks.get(i).invoke(entity);
+  }
+
+  /**
+   * Callbacks before an entity is removeed
+   */
+  public void preRemove(Entity entity)
+  {
+    for (int i = 0; i < _preRemoveCallbacks.size(); i++)
+      _preRemoveCallbacks.get(i).invoke(entity);
+  }
+
+  /**
+   * Callbacks after an entity is removeed
+   */
+  public void postRemove(Entity entity)
+  {
+    for (int i = 0; i < _postRemoveCallbacks.size(); i++)
+      _postRemoveCallbacks.get(i).invoke(entity);
+  }
+
+  /**
+   * Callbacks after an entity is loaded
+   */
+  public void postLoad(Entity entity)
+  {
+    for (int i = 0; i < _postLoadCallbacks.size(); i++)
+      _postLoadCallbacks.get(i).invoke(entity);
   }
 
   /**

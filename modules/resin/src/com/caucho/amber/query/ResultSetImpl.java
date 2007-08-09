@@ -1154,7 +1154,7 @@ public class ResultSetImpl implements ResultSet {
     if (value instanceof Entity) {
       Entity entity = (Entity) value;
 
-      if (_session.isActive())
+      if (_session.isActiveTransaction())
         _session.setTransactionalState(entity);
 
       // jpa/1160

@@ -63,8 +63,8 @@ public class AmberEntityHome {
 
   private Entity _homeBean;
 
-  private ArrayList<SoftReference<CacheUpdate>> _cacheUpdates =
-    new ArrayList<SoftReference<CacheUpdate>>();
+  private ArrayList<SoftReference<CacheUpdate>> _cacheUpdates
+    = new ArrayList<SoftReference<CacheUpdate>>();
 
   private EntityKey _cacheKey = new EntityKey();
 
@@ -308,7 +308,7 @@ public class AmberEntityHome {
 
     Object value = _entityFactory.getEntity(aConn, item);
 
-    if (aConn.isActive()) {
+    if (aConn.isActiveTransaction()) {
       if (value instanceof Entity)
         entity = (Entity) value;
       else if (_cauchoGetBeanMethod != null) {
@@ -375,11 +375,10 @@ public class AmberEntityHome {
       // jpa/0l48: checks if cacheItem is new or existing (below).
       EntityItem existingItem = _manager.getEntity(getRootType(), key);
 
-      String className = _entityType.getBeanClass().getName();
-
       if (log.isLoggable(Level.FINER)) {
         log.log(Level.FINER, L.l("AmberEntityHome.find class: {0} PK: {1} isLoad: {2} xa: {3} notExpiringLoadMask: " + notExpiringLoadMask + " notExpiringGroup: " + notExpiringGroup,
-                                 className, key, isLoad, aConn.isActive()));
+                                 _entityType.getClassName(), key,
+                                 isLoad, aConn.isActiveTransaction()));
 
         String msg;
 
@@ -389,24 +388,25 @@ public class AmberEntityHome {
           msg = "found an existing cache item for class: {0} PK: {1}.";
 
         log.log(Level.FINER, L.l("AmberEntityHome.find: " + msg,
-                                 className, key));
+                                 _entityType.getClassName(), key));
       }
 
       EntityItem cacheItem = findEntityItem(aConn,
                                             key,
                                             isLoad,
                                             notExpiringLoadMask,
-                                            notExpiringGroup);
+                                            notExpiringGroup,
+                                            existingItem);
 
       if (cacheItem == null) {
         if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, L.l("AmberEntityHome.find: no matching object class: {0} PK: {1}", className, key));
+          log.log(Level.FINER, L.l("AmberEntityHome.find: no matching object class: {0} PK: {1}", _entityType.getClassName(), key));
 
         if (_manager.isJPA())
           return null;
 
         // ejb/0604
-        throw new AmberObjectNotFoundException(("amber find: no matching object " + className + "[" + key + "]"));
+        throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getClassName() + "[" + key + "]"));
       }
 
       Entity cacheEntity = cacheItem.getEntity();
@@ -424,7 +424,7 @@ public class AmberEntityHome {
 
         // Copy as much as possible from a new cache item or
         // from the existing cache item if there is no transaction.
-        if (existingItem == null || ! aConn.isActive()) {
+        if (existingItem == null || ! aConn.isActiveTransaction()) {
           if (log.isLoggable(Level.FINER)) {
             String msg;
 
@@ -434,7 +434,7 @@ public class AmberEntityHome {
               msg = "since there is no transaction, the existing cache item";
 
             log.log(Level.FINER, L.l( "AmberEntityHome.find: {0} will be copied to a context object class: {1} PK: {2}.",
-                                      msg, className, key));
+                                      msg, _entityType.getClassName(), key));
           }
 
           _manager.copyFromCacheItem(aConn, entity, cacheItem);
@@ -449,7 +449,7 @@ public class AmberEntityHome {
         if (isLoad) {
           entity.__caucho_retrieve_eager(aConn);
         }
-        else if (aConn.isActive()) {
+        else if (aConn.isActiveTransaction()) {
           // jpa/0v33: within a transaction, cannot copy from cache.
           entity.__caucho_retrieve_self(aConn);
         }
@@ -468,17 +468,6 @@ public class AmberEntityHome {
         throw e;
       }
 
-      /*
-      // Gets the copy object from context.
-      // It was already added in findEntityItem().
-      int index = aConn.getEntity(className, key);
-
-      if (index < 0)
-        throw new IllegalStateException(L.l("AmberEntityHome.find(): unexpected result when trying to get entity class: '{0}' PK: '{1}'. The copy object must be added to the context in findEntityItem()", className, key));
-
-      Entity copy = aConn.getEntity(index);
-      */
-
       return entity;
     } catch (Exception e) {
       // jpa/0u0j
@@ -494,7 +483,7 @@ public class AmberEntityHome {
                                    boolean isLoad)
     throws AmberException
   {
-    return findEntityItem(aConn, key, isLoad, 0, 0);
+    return findEntityItem(aConn, key, isLoad, 0, 0, null);
   }
 
   /**
@@ -508,7 +497,8 @@ public class AmberEntityHome {
                                    Object key,
                                    boolean isLoad,
                                    long notExpiringLoadMask,
-                                   int notExpiringGroup)
+                                   int notExpiringGroup,
+                                   EntityItem item)
     throws AmberException
   {
     if (log.isLoggable(Level.FINER))
@@ -518,11 +508,10 @@ public class AmberEntityHome {
       return null; // ejb/0a06 throw new NullPointerException("primaryKey");
 
     try {
-      EntityItem item = null;
-
       // XXX: ejb/0d01 should not check this.
       // jpa/0y14 if (aConn.shouldRetrieveFromCache())
-      item = _manager.getEntity(getRootType(), key);
+      if (item == null)
+        item = _manager.getEntity(getRootType(), key);
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, "findEntityItem item is null? "+(item == null));
@@ -556,7 +545,7 @@ public class AmberEntityHome {
         item = new CacheableEntityItem(this, cacheEntity);
 
         // The cache entity is added after commit.
-        if (! aConn.isActive()) {
+        if (! aConn.isActiveTransaction()) {
           if (isLoad) {
             if (_manager.isJPA()) {
               // jpa/0o03
@@ -574,7 +563,7 @@ public class AmberEntityHome {
         }
       }
       else if (isLoad) {
-        if (! aConn.isActive()) {
+        if (! aConn.isActiveTransaction()) {
           if (_manager.isJPA()) {
             // jpa/0v33
             item.loadEntity(aConn, 0);
@@ -651,7 +640,7 @@ public class AmberEntityHome {
       item = new CacheableEntityItem(this, cacheEntity);
 
       // The cache entity is added after commit.
-      if (! aConn.isActive()) {
+      if (! aConn.isActiveTransaction()) {
         item = _manager.putEntity(getRootType(), key, item);
       }
     }

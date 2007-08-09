@@ -318,6 +318,9 @@ public class AmberContainer {
    */
   public ListenerType getDefaultListener(String className)
   {
+    if (true)
+      return null;
+    
     Throwable e = _listenerExceptionMap.get(className);
 
     if (e != null)
@@ -334,6 +337,9 @@ public class AmberContainer {
    */
   public ListenerType getEntityListener(String className)
   {
+    if (true)
+      return null;
+    
     Throwable e = _listenerExceptionMap.get(className);
 
     if (e != null)
@@ -366,6 +372,9 @@ public class AmberContainer {
    */
   public ListenerType getListener(String className)
   {
+    if (true)
+      return null;
+    
     ListenerType listener = getDefaultListener(className);
 
     if (listener == null)
@@ -380,7 +389,9 @@ public class AmberContainer {
   public ArrayList<ListenerType>
   getEntityListeners(String entityClassName)
   {
-    return _entityListenerMap.get(entityClassName);
+    return null;
+    
+    // return _entityListenerMap.get(entityClassName);
   }
 
   /**

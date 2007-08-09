@@ -119,44 +119,44 @@ public class AmberPersistenceUnit {
 
   private TypeManager _typeManager = new TypeManager();
 
-  private HashMap<String,Table> _tableMap =
-    new HashMap<String,Table>();
+  private HashMap<String,Table> _tableMap
+    = new HashMap<String,Table>();
 
-  private HashMap<String,AmberEntityHome> _entityHomeMap =
-    new HashMap<String,AmberEntityHome>();
+  private HashMap<String,AmberEntityHome> _entityHomeMap
+    = new HashMap<String,AmberEntityHome>();
 
-  private HashMap<String,IdGenerator> _tableGenMap =
-    new HashMap<String,IdGenerator>();
+  private HashMap<String,IdGenerator> _tableGenMap
+    = new HashMap<String,IdGenerator>();
 
-  private HashMap<String,SequenceIdGenerator> _sequenceGenMap =
-    new HashMap<String,SequenceIdGenerator>();
+  private HashMap<String,SequenceIdGenerator> _sequenceGenMap
+    = new HashMap<String,SequenceIdGenerator>();
 
-  private LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>> _queryCache =
-    new LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>>(1024);
+  private LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>> _queryCache
+    = new LruCache<QueryCacheKey,SoftReference<ResultSetCacheChunk>>(1024);
 
-  private LruCache<QueryCacheKey,SoftReference<ResultSetMetaData>> _queryCacheMetaData =
-    new LruCache<QueryCacheKey,SoftReference<ResultSetMetaData>>(16);
+  private LruCache<QueryCacheKey,SoftReference<ResultSetMetaData>> _queryCacheMetaData
+    = new LruCache<QueryCacheKey,SoftReference<ResultSetMetaData>>(16);
 
-  private LruCache<EntityKey,SoftReference<EntityItem>> _entityCache =
-    new LruCache<EntityKey,SoftReference<EntityItem>>(32 * 1024);
+  private LruCache<EntityKey,SoftReference<EntityItem>> _entityCache
+    = new LruCache<EntityKey,SoftReference<EntityItem>>(32 * 1024);
 
   private EntityKey _entityKey = new EntityKey();
 
   private ArrayList<EntityType> _lazyConfigure = new ArrayList<EntityType>();
 
   private ArrayList<EntityType> _lazyGenerate = new ArrayList<EntityType>();
-  private ArrayList<AmberEntityHome> _lazyHomeInit =
-    new ArrayList<AmberEntityHome>();
+  private ArrayList<AmberEntityHome> _lazyHomeInit
+    = new ArrayList<AmberEntityHome>();
   private ArrayList<Table> _lazyTable = new ArrayList<Table>();
 
-  private HashMap<String,String> _namedQueryMap =
-    new HashMap<String,String>();
+  private HashMap<String,String> _namedQueryMap
+    = new HashMap<String,String>();
 
-  private HashMap<String, SqlResultSetMappingConfig> _sqlResultSetMap =
-    new HashMap<String, SqlResultSetMappingConfig>();
+  private HashMap<String, SqlResultSetMappingConfig> _sqlResultSetMap
+    = new HashMap<String, SqlResultSetMappingConfig>();
 
-  private HashMap<String, NamedNativeQueryConfig> _namedNativeQueryMap =
-    new HashMap<String, NamedNativeQueryConfig>();
+  private HashMap<String, NamedNativeQueryConfig> _namedNativeQueryMap
+    = new HashMap<String, NamedNativeQueryConfig>();
 
   private ArrayList<EntityMappingsConfig> _entityMappingsList;
 
@@ -166,8 +166,8 @@ public class AmberPersistenceUnit {
   private ArrayList<MappedSuperclassType> _mappedSuperclassTypes
     = new ArrayList<MappedSuperclassType>();
 
-  private ArrayList<ListenerType> _defaultListeners =
-    new ArrayList<ListenerType>();
+  private ArrayList<ListenerType> _defaultListeners
+    = new ArrayList<ListenerType>();
 
   private EntityIntrospector _entityIntrospector;
   private EmbeddableIntrospector _embeddableIntrospector;
@@ -1539,6 +1539,21 @@ public class AmberPersistenceUnit {
       _entityKey.init(rootType, key);
       ref = _entityCache.get(_entityKey);
     }
+
+    if (ref != null)
+      return ref.get();
+    else
+      return null;
+  }
+
+  /**
+   * Returns the entity with the given key.
+   */
+  public EntityItem getEntity(EntityKey key)
+  {
+    SoftReference<EntityItem> ref;
+
+    ref = _entityCache.get(_entityKey);
 
     if (ref != null)
       return ref.get();

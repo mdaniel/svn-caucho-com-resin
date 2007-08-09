@@ -117,22 +117,6 @@ public class EnvAmberManager
 
     // _enhancer = new AmberEnhancer(this);
     EnhancerManager.create().addClassEnhancer(_enhancer);
-
-    try {
-      bindProxy();
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-  }
-
-  private void bindProxy()
-    throws Throwable
-  {
-    /*
-      EntityManagerProxy userManager = null;//new EntityManagerProxy(this);
-
-      new InitialContext().rebind("java:comp/EntityManager", userManager);
-    */
   }
 
   public static EnvAmberManager createLocal()
@@ -381,9 +365,6 @@ public class EnvAmberManager
   {
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
     EntityKey entityKey = new EntityKey(rootType, key);
-
-    System.out.println("PUT: " + key + " " + entity);
-    Thread.dumpStack();
 
     ref = _entityCache.putIfNew(entityKey, ref);
 

@@ -385,7 +385,7 @@ public class QueryImpl implements Query {
       }
 
       // jpa/0h19, jpa/1160
-      if (! _aConn.isActive())
+      if (! _aConn.isActiveTransaction())
         _aConn.detach();
 
       return results;
@@ -445,7 +445,7 @@ public class QueryImpl implements Query {
         }
 
         // jpa/0h19
-        if (! _aConn.isActive())
+        if (! _aConn.isActiveTransaction())
           _aConn.detach();
       }
     }
