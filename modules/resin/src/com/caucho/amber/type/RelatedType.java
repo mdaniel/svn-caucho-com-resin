@@ -863,34 +863,41 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Generates loading code after the basic fields.
    */
-  public int generatePostLoadSelect(JavaWriter out, int index, int loadGroupIndex)
+  public int generatePostLoadSelect(JavaWriter out, int index,
+				    int loadGroupIndex)
     throws IOException
   {
     if (loadGroupIndex == 0 && getDiscriminator() != null)
       index++;
 
-    RelatedType parentType = this;
-
     // jpa/0l40
-    do {
-      ArrayList<AmberField> fields = parentType.getMappedSuperclassFields();
+    for (RelatedType type = this; type != null; type = type.getParentType()) {
+      index = generatePostLoadSelect(out, index,
+				     type.getMappedSuperclassFields());
 
-      for (int i = 0; i < 2; i++) {
-        if (fields != null) {
-          for (int j = 0; j < fields.size(); j++) {
-            AmberField field = fields.get(j);
-
-            // jpa/0l40 if (field.getLoadGroupIndex() == loadGroupIndex)
-            index = field.generatePostLoadSelect(out, index);
-          }
-        }
-
-        fields = parentType.getFields();
-      }
-    } while ((parentType = parentType.getParentType()) != null);
+      index = generatePostLoadSelect(out, index, type.getFields());
+    }
 
     return index;
   }
+
+  private int generatePostLoadSelect(JavaWriter out,
+				     int index,
+				     ArrayList<AmberField> fields)
+    throws IOException
+  {
+    if (fields != null) {
+      for (int i = 0; i < fields.size(); i++) {
+	AmberField field = fields.get(i);
+
+	// jpa/0l40 if (field.getLoadGroupIndex() == loadGroupIndex)
+	index = field.generatePostLoadSelect(out, index);
+      }
+    }
+
+    return index;
+  }
+				     
 
   /**
    * Generates a string to set the field.

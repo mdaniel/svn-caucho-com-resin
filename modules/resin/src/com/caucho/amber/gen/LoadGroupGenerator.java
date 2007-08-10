@@ -73,8 +73,8 @@ public class LoadGroupGenerator extends ClassComponent {
     int group = _index / 64;
     long mask = (1L << (_index % 64));
 
-    out.println("boolean isLoaded = (__caucho_loadMask_"
-                + group + " & " + mask + "L) != 0;");
+    out.println("boolean isLoaded = (__caucho_loadMask_" + group
+		+ " & " + mask + "L) != 0;");
 
     // jpa/0ge2: MappedSuperclassType
     if (_relatedType.getTable() != null) {
@@ -139,9 +139,6 @@ public class LoadGroupGenerator extends ClassComponent {
       }
 
       // jpa/0r00 vs. jpa/0r01
-      out.println("if (aConn.contains(this)) {");
-      out.pushDepth();
-
       out.println();
       out.println("__caucho_home.postLoad(this);");
 
@@ -150,9 +147,6 @@ public class LoadGroupGenerator extends ClassComponent {
       // directly from cache, so we need to invoke the
       // callbacks after load. For jpa/0r00, see AmberMappedComponent.
       generateCallbacks(out, _relatedType.getPostLoadCallbacks());
-
-      out.popDepth();
-      out.println("}");
 
       out.popDepth();
       out.println("}");
@@ -404,34 +398,6 @@ public class LoadGroupGenerator extends ClassComponent {
     // jpa/0gg3
     _relatedType.generateLoad(out, "rs", "", 1, _index, null);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
-
-    /* jpa/0l40: inheritance optimization.
-    // jpa/0o01, jpa/0o04
-    // XXX: Should be handled in AmberEntityHome.find()?
-    // XXX: Will this ever add the cache entity to the context?
-    if (_relatedType instanceof EntityType) {
-      // XXX: add isJPA test?
-      out.println("aConn.addEntity(this);");
-    }
-    */
-
-    // XXX: Moved to __caucho_load_0()
-    // _relatedType.generateLoadEager(out, "rs", "", 1, _index);
-
-    // commented out: jpa/0r01
-    // ArrayList<JMethod> postLoadCallbacks = _relatedType.getPostLoadCallbacks();
-    // if (postLoadCallbacks.size() > 0 && _index == 0) {
-    //   out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL) {");
-    //   out.pushDepth();
-    //   generateCallbacks(out, postLoadCallbacks);
-    //   out.popDepth();
-    //   out.println("}");
-    // }
-
-    /* ejb/06j2
-    if (_relatedType.getHasLoadCallback())
-      out.println("__caucho_load_callback();");
-    */
 
     out.popDepth();
     out.println("}");

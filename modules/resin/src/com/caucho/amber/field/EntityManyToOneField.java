@@ -576,6 +576,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates loading code after the basic fields.
    */
+  @Override
   public int generatePostLoadSelect(JavaWriter out, int index)
     throws IOException
   {
@@ -672,66 +673,6 @@ public class EntityManyToOneField extends CascadableField {
     out.popDepth();
     out.println("}");
 
-    /*
-    out.println("return null;");
-
-    out.popDepth();
-    out.println("}");
-
-    String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
-    long dirtyMask = (1L << (getIndex() % 64));
-
-    // jpa/0h08: do not use cached item when field is dirty.
-    out.println("boolean isDirtyField = (" + dirtyVar + " & " + dirtyMask + "L) != 0L;");
-
-    // jpa/0s2d: do not use the cache item when in transaction.
-    // Even if the field is not dirty, it might be that a flush()
-    // already cleaned the dirtyMask but the current transaction changes
-    // should not be overridden with the cache item.
-    out.println("boolean isInTransaction = (__caucho_session != null) && (__caucho_session.isInTransaction());");
-
-    // jpa/0h07: detached entity fields must not be loaded.
-    out.println("if (__caucho_session != null && __caucho_item != null && ! isDirtyField && ! isInTransaction) {");
-    out.pushDepth();
-
-    // ejb/06h0
-    String extClassName = getRelatedType().getInstanceClassName(); // getRelatedType().getName() + "__ResinExt";
-    out.println(extClassName + " item = (" + extClassName + ") __caucho_item.getEntity();");
-
-    // jpa/0o01, jpa/0o04: eagerly loading.
-    // XXX: will this ever add the cached entity?
-    if (getSourceType() instanceof EntityType) {
-      out.println("__caucho_session.addEntity(this);");
-    }
-
-    out.println("item.__caucho_item_" + getGetterName() + "(__caucho_session);");
-
-    generateCopyLoadObject(out, "super", "item", getLoadGroupIndex());
-
-    // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
-    // out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
-
-    out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + " & " + mask + "L;");
-
-    out.popDepth();
-    out.println("}");
-
-    out.println("else");
-    */
-
-    /*
-    out.pushDepth();
-    out.print("if (__caucho_session != null && ");
-    out.println("(" + loadVar + " & " + mask + "L) == 0) {");
-    out.pushDepth();
-
-    out.println("return __caucho_item_" + getGetterName() + "(__caucho_session);");
-
-    out.popDepth();
-    out.println("}");
-    out.popDepth();
-    */
-
     out.println();
     out.println("return " + generateSuperGetter() + ";");
 
@@ -748,14 +689,6 @@ public class EntityManyToOneField extends CascadableField {
     throws IOException
   {
     String javaType = getJavaTypeName();
-
-    /* XXX: jpa/0o01: should be handled in AmberEntityHome.find().
-       Should not add "this" because it could be a cache item.
-    if (getSourceType() instanceof EntityType) {
-      // jpa/0o04
-      out.println(session + ".addEntity(this);");
-    }
-    */
 
     boolean isJPA = getRelatedType().getPersistenceUnit().isJPA();
 

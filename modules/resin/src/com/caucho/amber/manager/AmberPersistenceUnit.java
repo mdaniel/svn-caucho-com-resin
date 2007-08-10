@@ -1545,7 +1545,10 @@ public class AmberPersistenceUnit {
   {
     AmberEntityHome home = getEntityHome(homeName);
 
-    return home.findEntityItem(getCacheConnection(), key, false);
+    // XXX: needs refactoring
+    throw new IllegalStateException("XXXX:");
+
+    // return home.findEntityItem(getCacheConnection(), key, false);
   }
 
   /**
@@ -1593,6 +1596,26 @@ public class AmberPersistenceUnit {
 
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
     EntityKey entityKey = new EntityKey(rootType.getInstanceClass(), key);
+
+    // can't use putIfNew because the SoftReference might be empty, i.e.
+    // not "new" but in need of replacement
+    ref = _entityCache.put(entityKey, ref);
+
+    return entity;
+  }
+
+  /**
+   * Sets the entity result.
+   */
+  public EntityItem putEntity(Class cl,
+                              Object key,
+                              EntityItem entity)
+  {
+    if (entity == null)
+      throw new IllegalStateException(L.l("Null entity item cannot be added to the persistence unit cache"));
+
+    SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
+    EntityKey entityKey = new EntityKey(cl, key);
 
     // can't use putIfNew because the SoftReference might be empty, i.e.
     // not "new" but in need of replacement

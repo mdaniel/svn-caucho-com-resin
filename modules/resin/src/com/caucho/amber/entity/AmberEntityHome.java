@@ -120,6 +120,14 @@ public class AmberEntityHome {
   }
 
   /**
+   * Returns the java class.
+   */
+  public Class getJavaClass()
+  {
+    return _entityType.getInstanceClass();
+  }
+
+  /**
    * Returns the entity factory.
    */
   public EntityFactory getEntityFactory()
@@ -207,7 +215,8 @@ public class AmberEntityHome {
     return _entityType.getId().toObjectKey(key);
   }
 
-  public Entity load(AmberConnection aConn,
+  /*
+  private Entity load(AmberConnection aConn,
                      Object key)
     throws AmberException
   {
@@ -215,11 +224,13 @@ public class AmberEntityHome {
     
     return find(aConn, key, existingItem, true, 0, 0);
   }
+  */
 
   /**
    * Finds by the primary key.
    */
-  public Entity load(AmberConnection aConn,
+  /*
+  private Entity load(AmberConnection aConn,
                      Object key,
                      long notExpiringLoadMask,
                      int notExpiringGroup)
@@ -230,17 +241,20 @@ public class AmberEntityHome {
     return find(aConn, key, existingItem,
 		true, notExpiringLoadMask, notExpiringGroup);
   }
+  */
 
   /**
    * Finds by the primary key.
    */
-  public Entity loadLazy(AmberConnection aConn, Object key)
+  /*
+  private Entity loadLazy(AmberConnection aConn, Object key)
     throws AmberException
   {
     EntityItem existingItem = _manager.getEntity(getRootType(), key);
     
     return find(aConn, key, existingItem, false, 0, 0);
   }
+  */
 
   /**
    * Finds by the primary key.
@@ -252,43 +266,6 @@ public class AmberEntityHome {
     EntityItem item = _homeBean.__caucho_home_find(aConn, this, rs, index);
 
     return item;
-    /*
-    // ejb/0602
-    if (! _manager.isJPA())
-      return item;
-
-    if (item == null)
-      return null;
-
-    // jpa/0l43
-    String className = item.getEntity().getClass().getName();
-
-    // jpa/0i4a
-    Object key = _homeBean.__caucho_load_key(aConn, rs, index); // rs.getObject(index);
-
-    Entity copy;
-
-    try {
-      // Gets the copy object from context.
-      copy = aConn.addNewEntity(item.getEntity().getClass(), key);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new com.caucho.amber.AmberRuntimeException(e);
-    }
-
-    if (copy == null) {
-      // It was already added in findEntityItem().
-      copy = aConn.getEntity(aConn.getEntity(className, key));
-    }
-
-    item.copyTo(copy, aConn);
-
-    // jpa/0l43
-    aConn.setTransactionalState(copy);
-
-    return item;
-    */
   }
 
   /**
@@ -313,7 +290,7 @@ public class AmberEntityHome {
 
     entity = null;
 
-    Object value = _entityFactory.getEntity(aConn, item);
+    Object value = aConn.getEntity(item);
 
     if (aConn.isActiveTransaction()) {
       if (value instanceof Entity)
@@ -351,10 +328,11 @@ public class AmberEntityHome {
     if (item == null)
       return null;
 
-    return _entityFactory.getEntity(aConn, item);
+    return aConn.getEntity(item);
   }
 
-  public Entity find(AmberConnection aConn,
+  /*
+  private Entity find(AmberConnection aConn,
                      Object key,
                      boolean isLoad)
     throws AmberException
@@ -363,6 +341,7 @@ public class AmberEntityHome {
     
     return find(aConn, key, existingItem, isLoad, 0, 0);
   }
+  */
 
   /**
    * Finds an entity based on the primary key.
@@ -371,9 +350,10 @@ public class AmberEntityHome {
    * @param aConn the Amber connection to associate with the loaded item
    * @param isLoad if true, try to load the bean
    */
+  /*
   public Entity find(AmberConnection aConn,
                      Object key,
-		     EntityItem existingItem,
+		     EntityItem cacheItem,
                      boolean isLoad,
                      long notExpiringLoadMask,
                      int notExpiringGroup)
@@ -399,24 +379,6 @@ public class AmberEntityHome {
 
         log.log(Level.FINER, L.l("AmberEntityHome.find: " + msg,
                                  _entityType.getClassName(), key));
-      }
-
-      EntityItem cacheItem = findEntityItem(aConn,
-                                            key,
-                                            isLoad,
-                                            notExpiringLoadMask,
-                                            notExpiringGroup,
-                                            existingItem);
-
-      if (cacheItem == null) {
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, L.l("AmberEntityHome.find: no matching object class: {0} PK: {1}", _entityType.getClassName(), key));
-
-        if (_manager.isJPA())
-          return null;
-
-        // ejb/0604
-        throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getClassName() + "[" + key + "]"));
       }
 
       Entity cacheEntity = cacheItem.getEntity();
@@ -488,14 +450,7 @@ public class AmberEntityHome {
       throw AmberException.create(e);
     }
   }
-
-  public EntityItem findEntityItem(AmberConnection aConn,
-                                   Object key,
-                                   boolean isLoad)
-    throws AmberException
-  {
-    return findEntityItem(aConn, key, isLoad, 0, 0, null);
-  }
+  */
 
   /**
    * Loads an entity based on the primary key.
@@ -504,11 +459,10 @@ public class AmberEntityHome {
    * @param key the primary key
    * @param isLoad if true, try to load the bean
    */
+  /*
   public EntityItem findEntityItem(AmberConnection aConn,
                                    Object key,
                                    boolean isLoad,
-                                   long notExpiringLoadMask,
-                                   int notExpiringGroup,
                                    EntityItem item)
     throws AmberException
   {
@@ -595,6 +549,23 @@ public class AmberEntityHome {
 
       throw AmberException.create(e);
     }
+  }
+  */
+  
+  public EntityItem findEntityItem(AmberConnection aConn, Object key)
+    throws AmberException
+  {
+    if (_homeBean == null && _configException != null)
+      throw _configException;
+
+    Entity cacheEntity;
+
+    cacheEntity = (Entity) _homeBean.__caucho_home_find(aConn, this, key);
+
+    if (cacheEntity != null)
+      return new CacheableEntityItem(this, cacheEntity);
+    else
+      return null;
   }
 
   /**

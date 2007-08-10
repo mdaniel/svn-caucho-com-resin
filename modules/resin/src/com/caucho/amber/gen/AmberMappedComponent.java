@@ -2408,7 +2408,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println(";");
 
     if (_relatedType.getDiscriminator() == null) {
-      out.println("return home.findEntityItem(aConn, key, false);");
+      out.println("return aConn.loadCacheItem(home.getJavaClass(), key, home);");
     }
     else {
       out.println("String discriminator = rs.getString(index + " + index + ");");

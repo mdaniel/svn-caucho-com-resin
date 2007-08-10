@@ -1161,7 +1161,9 @@ public class ResultSetImpl implements ResultSet {
       // Should always add the entity to the context
       // and detach the entities after the result
       // list is fully retrieved. See manager.QueryImpl
-      _session.addEntity(entity);
+
+      // XXX: should already be handled
+      // _session.addEntity(entity);
     }
 
     return value;

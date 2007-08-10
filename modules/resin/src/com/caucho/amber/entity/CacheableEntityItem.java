@@ -154,6 +154,23 @@ public class CacheableEntityItem extends EntityItem {
   }
 
   /**
+   * Creates a new entity instance.
+   */
+  @Override
+  public Entity createEntity(AmberConnection aConn, Object key)
+    throws SQLException
+  {
+    Entity cacheEntity = getEntity();
+    AmberEntityHome home = getEntityHome();
+
+    Entity entity = cacheEntity.__caucho_home_new(home, key);
+    
+    entity.__caucho_makePersistent(aConn, this);
+
+    return entity;
+  }
+
+  /**
    * Saves the item values into the cache.
    */
   public void save(Entity item)

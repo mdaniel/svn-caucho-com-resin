@@ -291,14 +291,6 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       String javaType = getJavaTypeName();
 
-      /* XXX: Should be handled in AmberEntityHome.find().
-         Should not add "this" because it could be a cache item.
-      if (getSourceType() instanceof EntityType) {
-        // jpa/0o01, jpa/0o04
-        out.println("aConn.addEntity(this);");
-      }
-      */
-
       String indexS = "_" + group + "_" + index;
 
       // generateLoadProperty(out, indexS, "aConn");

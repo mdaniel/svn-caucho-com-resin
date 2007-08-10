@@ -63,6 +63,12 @@ abstract public class EntityItem {
     return getEntity();
   }
 
+  public Entity createEntity(AmberConnection aConn, Object key)
+    throws java.sql.SQLException
+  {
+    throw new UnsupportedOperationException();
+  }
+
   public AmberEntityHome getEntityHome()
   {
     return null;
