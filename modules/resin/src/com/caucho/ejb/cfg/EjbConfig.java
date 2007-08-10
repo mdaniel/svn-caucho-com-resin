@@ -91,6 +91,9 @@ public class EjbConfig {
   private ArrayList<InterceptorBinding> _cfgInterceptorBindings =
     new ArrayList<InterceptorBinding>();
 
+  private ArrayList<ApplicationException> _cfgApplicationExceptions
+    = new ArrayList<ApplicationException>();
+
   public EjbConfig(EjbServerManager ejbManager)
   {
     _ejbManager = ejbManager;
@@ -284,7 +287,29 @@ public class EjbConfig {
         return binding;
     }
 
+    // ejb/0fbe vs ejb/0fbf
+    for (InterceptorBinding binding : _cfgInterceptorBindings) {
+      if (binding.getEjbName().equals("*"))
+        return binding;
+    }
+
     return null;
+  }
+
+  /**
+   * Adds an application exception.
+   */
+  public void addApplicationException(ApplicationException applicationException)
+  {
+    _cfgApplicationExceptions.add(applicationException);
+  }
+
+  /**
+   * Returns the application exceptions.
+   */
+  public ArrayList<ApplicationException> getApplicationExceptions()
+  {
+    return _cfgApplicationExceptions;
   }
 
   /**

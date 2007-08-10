@@ -38,15 +38,26 @@ import com.caucho.util.L10N;
 public class AroundInvokeConfig {
   private static final L10N L = new L10N(AroundInvokeConfig.class);
 
+  private String _className;
   private String _methodName;
 
   public AroundInvokeConfig()
   {
   }
 
+  public String getClassName()
+  {
+    return _className;
+  }
+
   public String getMethodName()
   {
     return _methodName;
+  }
+
+  public void setClass(String className)
+  {
+    _className = className;
   }
 
   public void setMethodName(String methodName)

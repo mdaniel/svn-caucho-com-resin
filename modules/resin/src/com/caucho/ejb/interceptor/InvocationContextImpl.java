@@ -30,9 +30,11 @@
 package com.caucho.ejb.interceptor;
 
 import com.caucho.bytecode.JClass;
+import com.caucho.ejb.cfg.Interceptor;
 import com.caucho.util.L10N;
 
 import javax.interceptor.InvocationContext;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,12 +55,32 @@ public class InvocationContextImpl implements InvocationContext {
 
   private HashMap<String, Object> _contextData;
 
-  public InvocationContextImpl(Object target, Object home, String methodName, Class parameterTypes[])
+  private Object _context[];
+
+  // Current interceptor in chain.
+  private int _curr;
+
+  private Object _interceptors[];
+  private Method _methods[];
+
+  private boolean _hasCalledTargetMethod;
+
+  public InvocationContextImpl(Object target,
+                               Object home,
+                               String methodName,
+                               Class parameterTypes[],
+                               Object interceptors[],
+                               Method methods[])
   {
     _target = target;
     _home = home;
     _methodName = methodName;
     _parameterTypes = parameterTypes;
+
+    _interceptors = interceptors;
+    _methods = methods;
+
+    _context = new Object[] { this };
   }
 
   public Object getHome()
@@ -110,6 +132,57 @@ public class InvocationContextImpl implements InvocationContext {
   public Object proceed()
     throws Exception
   {
+    try {
+      if (hasNextInterceptor()) {
+        Object interceptor = nextInterceptor();
+
+        return invokeMethod(getCurrentMethod(), interceptor, _context);
+      }
+      else if (! hasCalledTargetMethod()) {
+        return invokeMethod(getMethod(), getTarget(), getParameters());
+      }
+    } catch (InvocationTargetException e) {
+      throw (Exception) e.getCause();
+    } catch (Exception e) {
+      throw e;
+    }
+
     return null;
+  }
+
+  private Object invokeMethod(Method method, Object obj, Object params[])
+    throws Exception
+  {
+    Interceptor.makeAccessible(method);
+
+    return method.invoke(obj, params);
+  }
+
+  private boolean hasCalledTargetMethod()
+  {
+    return _hasCalledTargetMethod;
+  }
+
+  private void setHasCalledTargetMethod(boolean b)
+  {
+    _hasCalledTargetMethod = b;
+  }
+
+  private boolean hasNextInterceptor()
+  {
+    if (_curr < _interceptors.length)
+      return true;
+
+    return false;
+  }
+
+  private Object nextInterceptor()
+  {
+    return _interceptors[_curr++];
+  }
+
+  private Method getCurrentMethod()
+  {
+    return _methods[_curr - 1];
   }
 }

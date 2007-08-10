@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
 /**
  * The EJB annotation.
  */
-@Target({})
+@Target(TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApplicationException {
   boolean rollback() default false;

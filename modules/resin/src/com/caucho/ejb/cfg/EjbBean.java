@@ -925,7 +925,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       // ejb/0fb7
       if (interceptorClasses.isEmpty()) {
         InterceptorOrder interceptorOrder = binding.getInterceptorOrder();
-        interceptorClasses = interceptorOrder.getInterceptorClasses();
+
+        // ejb/0fbf
+        if (interceptorOrder != null)
+          interceptorClasses = interceptorOrder.getInterceptorClasses();
       }
 
       for (String className : interceptorClasses) {
@@ -1604,7 +1607,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
                                           JMethod implMethod,
                                           String prefix)
   {
-    return TransactionChain.create(next, getTransactionAttribute(implMethod, prefix), apiMethod, implMethod);
+    return TransactionChain.create(next, getTransactionAttribute(implMethod, prefix),
+                                   apiMethod, implMethod, isEJB3(),
+                                   _ejbConfig.getApplicationExceptions());
   }
 
   protected CallChain getSecurityChain(CallChain next,
@@ -1804,6 +1809,21 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     return null;
+  }
+
+  public boolean isCMP()
+  {
+    return false;
+  }
+
+  public boolean isCMP1()
+  {
+    return false;
+  }
+
+  public boolean isEJB3()
+  {
+    return ! (isCMP() || isCMP1());
   }
 
   static boolean isMatch(JMethod methodA, JMethod methodB)

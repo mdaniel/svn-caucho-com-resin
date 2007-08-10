@@ -23,49 +23,58 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.j2ee.cfg.J2eeSecurityRole;
+public class ApplicationException {
+  private String _id;
+  private String _exceptionClass;
+  private String _rollback;
 
-import java.util.ArrayList;
-
-public class AssemblyDescriptor {
-  private EjbConfig _config;
-
-  AssemblyDescriptor(EjbConfig config)
-  {
-    _config = config;
-  }
-
-  public ContainerTransaction createContainerTransaction()
-  {
-    return new ContainerTransaction(_config);
-  }
-
-  public EjbJar.MethodPermission createMethodPermission()
-  {
-    return new EjbJar.MethodPermission(_config);
-  }
-
-  public void addSecurityRole(J2eeSecurityRole securityRole)
+  public ApplicationException()
   {
   }
 
-  public void addInterceptorBinding(InterceptorBinding interceptorBinding)
+  public String getExceptionClass()
   {
-    _config.addInterceptorBinding(interceptorBinding);
+    return _exceptionClass;
   }
 
-  public void addMessageDestination(MessageDestination messageDestination)
+  public String getId()
   {
-    _config.addMessageDestination(messageDestination);
+    return _id;
   }
 
-  public void addApplicationException(ApplicationException applicationException)
+  public String getRollback()
   {
-    _config.addApplicationException(applicationException);
+    return _rollback;
+  }
+
+  public boolean isRollback()
+  {
+    if (_rollback == null)
+      return false;
+
+    if (_rollback.equals("true"))
+      return true;
+
+    return false;
+  }
+
+  public void setExceptionClass(String exceptionClass)
+  {
+    _exceptionClass = exceptionClass;
+  }
+
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
+  public void setRollback(String rollback)
+  {
+    _rollback = rollback;
   }
 }

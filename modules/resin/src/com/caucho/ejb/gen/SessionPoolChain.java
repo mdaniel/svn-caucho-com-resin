@@ -81,8 +81,8 @@ public class SessionPoolChain extends FilterCallChain {
     // ejb/0fba
     if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class))
       generateCallInterceptors(out, args);
-
-    super.generateCall(out, retVar, "ptr", args);
+    else // The interceptor calls ctx.proceed() which invokes the business method.
+      super.generateCall(out, retVar, "ptr", args);
 
     out.popDepth();
 
@@ -154,7 +154,6 @@ public class SessionPoolChain extends FilterCallChain {
     JClass types[] = _apiMethod.getParameterTypes();
 
     StringBuilder paramTypes = new StringBuilder();
-    StringBuilder parametersCasting = new StringBuilder();
 
     isFirst = true;
 
@@ -166,74 +165,46 @@ public class SessionPoolChain extends FilterCallChain {
       else
         paramTypes.append(", ");
 
-      parametersCasting.append(args[i]);
-      parametersCasting.append(" = ");
-
       String s = "parameters[" + i + "]";
 
-      if (! types[i].isPrimitive()) {
+      if (! types[i].isPrimitive())
         paramTypes.append(typeName + ".class");
-        parametersCasting.append("(" + typeName + ") " + s + ";");
-      }
       else {
         Class primitiveType = (Class) types[i].getJavaClass();
 
-        if (primitiveType == Boolean.TYPE) {
+        if (primitiveType == Boolean.TYPE)
           paramTypes.append("Boolean.TYPE");
-          parametersCasting.append("((Boolean) " + s + ").booleanValue();");
-        }
-        else if (primitiveType == Byte.TYPE) {
+        else if (primitiveType == Byte.TYPE)
           paramTypes.append("Byte.TYPE");
-          parametersCasting.append("((Byte) " + s + ").byteValue();");
-        }
-        else if (primitiveType == Character.TYPE) {
+        else if (primitiveType == Character.TYPE)
           paramTypes.append("Character.TYPE");
-          parametersCasting.append("((Character) " + s + ").charValue();");
-        }
-        else if (primitiveType == Double.TYPE) {
+        else if (primitiveType == Double.TYPE)
           paramTypes.append("Double.TYPE");
-          parametersCasting.append("((Double) " + s + ").doubleValue();");
-        }
-        else if (primitiveType == Float.TYPE) {
+        else if (primitiveType == Float.TYPE)
           paramTypes.append("Float.TYPE");
-          parametersCasting.append("((Float) " + s + ").floatValue();");
-        }
-        else if (primitiveType == Integer.TYPE) {
+        else if (primitiveType == Integer.TYPE)
           paramTypes.append("Integer.TYPE");
-          parametersCasting.append("((Integer) " + s + ").intValue();");
-        }
-        else if (primitiveType == Long.TYPE) {
+        else if (primitiveType == Long.TYPE)
           paramTypes.append("Long.TYPE");
-          parametersCasting.append("((Long) " + s + ").longValue();");
-        }
-        else if (primitiveType == Short.TYPE) {
+        else if (primitiveType == Short.TYPE)
           paramTypes.append("Short.TYPE");
-          parametersCasting.append("((Short) " + s + ").shortValue();");
-        }
       }
     }
 
-    out.println("javax.interceptor.InvocationContext invocationContext;");
-    out.println();
+    String s = "ptr.__caucho_callInterceptors(this, new Object[] {" + argList + "}, ";
+    s += "\"" + _apiMethod.getMethodName() + "\", new Class[] {" + paramTypes + "})";
 
-    out.print("invocationContext = ptr.__caucho_callInterceptors(this, ");
-    out.print("new Object[] {" + argList + "}, ");
-    out.println("\"" + _apiMethod.getMethodName() + "\", new Class[] {" + paramTypes + "});");
-    out.println();
+    if (_apiMethod.getReturnType().getPrintName().equals("void"))
+      out.print(s);
+    else
+      out.print("return " + generateTypeCasting(s, _apiMethod.getReturnType()));
 
-    out.println("Object parameters[] = invocationContext.getParameters();");
-    out.println();
-
-    if (parametersCasting.length() > 0) {
-      out.println(parametersCasting);
-      out.println();
-    }
+    out.println(";");
   }
 
   protected void generateInterceptorExceptionHandling(JavaWriter out)
     throws IOException
   {
-    out.popDepth();
     out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
     out.pushDepth();
 
@@ -244,5 +215,31 @@ public class SessionPoolChain extends FilterCallChain {
 
     out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
     out.popDepth();
+  }
+
+  private String generateTypeCasting(String s, JClass type)
+  {
+    if (type.isPrimitive()) {
+      Class primitiveType = (Class) type.getJavaClass();
+
+      if (primitiveType == Boolean.TYPE)
+        return "((Boolean) " + s + ").booleanValue()";
+      else if (primitiveType == Byte.TYPE)
+        return "((Byte) " + s + ").byteValue()";
+      else if (primitiveType == Character.TYPE)
+        return "((Character) " + s + ").charValue()";
+      else if (primitiveType == Double.TYPE)
+        return "((Double) " + s + ").doubleValue()";
+      else if (primitiveType == Float.TYPE)
+        return "((Float) " + s + ").floatValue()";
+      else if (primitiveType == Integer.TYPE)
+        return "((Integer) " + s + ").intValue()";
+      else if (primitiveType == Long.TYPE)
+        return "((Long) " + s + ").longValue()";
+      else if (primitiveType == Short.TYPE)
+        return "((Short) " + s + ").shortValue()";
+    }
+
+    return "(" + type.getPrintName() + ") " + s;
   }
 }

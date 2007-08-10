@@ -142,14 +142,15 @@ public class EjbInjectProgram extends BuilderProgram
         if (manager != null) {
           if (_beanName != null && ! "".equals(_beanName)) {
             try {
-              value = ic.lookup(manager.getRemoteJndiPrefix() + _beanName);
+              value = ic.lookup(manager.getRemoteJndiPrefix() + "/" + _beanName);
             } catch (NamingException e) {
               log.log(Level.FINEST, e.toString(), e);
             }
 
+            //ejb/0f6d
             try {
               if (value == null)
-                value = ic.lookup(manager.getLocalJndiPrefix() + _beanName);
+                value = ic.lookup(manager.getLocalJndiPrefix() + "/" + _beanName);
             } catch (NamingException e) {
               log.log(Level.FINEST, e.toString(), e);
             }
@@ -182,7 +183,26 @@ public class EjbInjectProgram extends BuilderProgram
       }
 
       if (! _type.isAssignableFrom(value.getClass())) {
-        value = PortableRemoteObject.narrow(value, _type);
+        try {
+          value = PortableRemoteObject.narrow(value, _type);
+        } catch (ClassCastException classCastException) {
+          EjbServerManager manager = EjbServerManager.getLocal();
+
+          // ejb/0f6d: bean has local and remote interfaces
+          if (manager != null) {
+            if (_beanName != null && ! "".equals(_beanName)) {
+              try {
+                value = ic.lookup(manager.getLocalJndiPrefix() + "/" + _beanName);
+
+                if (! _type.isAssignableFrom(value.getClass()))
+                  value = PortableRemoteObject.narrow(value, _type);
+              } catch (NamingException e) {
+                log.log(Level.FINEST, e.toString(), e);
+                throw classCastException;
+              }
+            }
+          }
+        }
       }
 
       if (! _type.isAssignableFrom(value.getClass())) {

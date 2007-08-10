@@ -241,8 +241,6 @@ public class SessionBean extends ClassComponent {
     int i = 0;
 
     for (Interceptor interceptor : _bean.getInterceptors()) {
-      String clName = interceptor.getInterceptorClass();
-
       out.println("Object _interceptor" + i++ + ";");
     }
 
@@ -280,21 +278,18 @@ public class SessionBean extends ClassComponent {
     out.println("}");
 
     out.println();
-    out.println("public javax.interceptor.InvocationContext __caucho_callInterceptors(Object target, Object []args, String methodName, Class paramTypes[])");
+    out.println("public Object __caucho_callInterceptors(Object target, Object []args, String methodName, Class paramTypes[])");
     out.println("  throws java.lang.reflect.InvocationTargetException");
     out.println("{");
     out.pushDepth();
 
-    out.println("javax.interceptor.InvocationContext invocationContext;");
-
-    // XXX: invocation context pool ???
-    out.println();
-    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl(this, target, methodName, paramTypes);");
-    out.println("invocationContext.setParameters(args);");
-
     out.println();
     out.println("try {");
     out.pushDepth();
+
+    out.println("Class cl;");
+    out.println("Exception firstException = null;");
+    out.println();
 
     i = 0;
 
@@ -306,29 +301,57 @@ public class SessionBean extends ClassComponent {
 
       out.println("Class cl" + j + " = Class.forName(\"" + clName + "\");");
 
-      out.println();
       out.println("if (_interceptor" + j + " == null) {");
       out.println("  _interceptor" + j + " = cl" + j + ".newInstance();");
       out.println("}");
 
-      out.println();
-      out.println("java.lang.reflect.Method method" + j + " = cl" + j + ".getDeclaredMethod(\"" + aroundInvokeMethodName + "\", new Class[] { javax.interceptor.InvocationContext.class });");
-
-      // XXX: private/protected methods. Restore access after making it accessible?
-      out.println("com.caucho.ejb.cfg.Interceptor.makeAccessible(method" + j + ");");
-      out.println();
+      generateReflectionGetMethod(out, "method" + j, aroundInvokeMethodName, "cl" + j);
 
       out.println();
-      out.println("method" + j + ".invoke(_interceptor" + j + ", new Object[] { invocationContext });");
     }
+
+    StringBuilder interceptors = new StringBuilder();
+    StringBuilder interceptorMethods = new StringBuilder();
+
+    i = 0;
+
+    for (Interceptor interceptor : _bean.getInterceptors()) {
+      if (i > 0) {
+        interceptors.append(", ");
+        interceptorMethods.append(", ");
+      }
+
+      interceptors.append("_interceptor");
+      interceptors.append(i);
+      interceptorMethods.append("method");
+      interceptorMethods.append(i);
+
+      i++;
+    }
+
+    out.println("javax.interceptor.InvocationContext invocationContext;");
 
     String aroundInvokeMethodName = _bean.getAroundInvokeMethodName();
 
     // ejb/0fb8
     if (aroundInvokeMethodName != null) {
-      out.println();
-      out.println(aroundInvokeMethodName + "(invocationContext);");
+      if (i > 0) {
+        interceptors.append(", ");
+        interceptorMethods.append(", ");
+      }
+
+      interceptors.append("this");
+      interceptorMethods.append(aroundInvokeMethodName);
+
+      generateReflectionGetMethod(out, aroundInvokeMethodName, aroundInvokeMethodName, "getClass()");
     }
+
+    // XXX: invocation context pool ???
+    out.println();
+    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl(this, target, methodName, paramTypes, new Object[] { " + interceptors + " }, new java.lang.reflect.Method[] { " + interceptorMethods + " });");
+    out.println("invocationContext.setParameters(args);");
+
+    out.println("return invocationContext.proceed();");
 
     out.popDepth();
 
@@ -345,14 +368,72 @@ public class SessionBean extends ClassComponent {
     out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
     out.println("}");
 
+    // out.println();
+    // out.println("return null;");
+    //out.println("return invocationContext;");
+
+    out.popDepth();
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates reflection to access a class method.
+   */
+  protected void generateReflectionGetMethod(JavaWriter out,
+                                             String methodVar,
+                                             String methodName,
+                                             String classVar)
+    throws IOException
+  {
+    // ejb/0fb0
     out.println();
-    out.println("return invocationContext;");
+    out.print("java.lang.reflect.Method ");
+    out.print(methodVar);
+    out.println(" = null;");
+    out.println();
+
+    out.print("cl = ");
+    out.print(classVar);
+    out.println(";");
+    out.println();
+
+    out.println("do {");
+    out.pushDepth();
+
+    out.println("try {");
+    out.pushDepth();
+
+    out.print(methodVar);
+    out.print(" = cl.getDeclaredMethod(\"");
+    out.print(methodName);
+    out.print("\", ");
+    out.println("new Class[] { javax.interceptor.InvocationContext.class });");
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.pushDepth();
+
+    out.println("if (firstException == null)");
+    out.println("  firstException = e;");
+    out.println();
+    out.println("cl = cl.getSuperclass();");
 
     out.popDepth();
     out.println("}");
 
     out.popDepth();
-    out.println("}");
+    out.print("} while (");
+    out.print(methodVar);
+    out.println(" == null && cl != null);");
+
+    out.println();
+    out.print("if (");
+    out.print(methodVar);
+    out.println(" == null)");
+    out.println("  throw firstException;");
   }
 
   /**

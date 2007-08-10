@@ -41,6 +41,8 @@ public class InterceptorBinding {
 
   private String _ejbName;
 
+  private boolean _isExcludeDefaultInterceptors;
+
   private InterceptorOrder _interceptorOrder;
 
   private ArrayList<String> _interceptors = new ArrayList<String>();
@@ -64,9 +66,19 @@ public class InterceptorBinding {
     return _interceptors;
   }
 
+  public boolean isExcludeDefaultInterceptors()
+  {
+    return _isExcludeDefaultInterceptors;
+  }
+
   public void setEjbName(String ejbName)
   {
     _ejbName = ejbName;
+  }
+
+  public void setExcludeDefaultInterceptors(boolean b)
+  {
+    _isExcludeDefaultInterceptors = b;
   }
 
   public void setInterceptorOrder(InterceptorOrder interceptorOrder)
