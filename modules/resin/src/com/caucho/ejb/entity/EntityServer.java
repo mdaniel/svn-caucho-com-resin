@@ -716,9 +716,9 @@ public class EntityServer extends AbstractServer {
 
     try {
       // ejb/06d3
-      EntityItem amberItem = _amberEntityHome.findEntityItem(aConn,
-							     key,
-							     true);
+      EntityItem amberItem
+	= aConn.loadCacheItem(_amberEntityHome.getJavaClass(),
+			      key, _amberEntityHome);
 
       return amberItem;
     } catch (AmberException e) {
