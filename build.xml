@@ -196,6 +196,14 @@
     </antcall>
   </target>
 
+  <target name="experiment" depends="resin">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="experiment"/>
+      <param name="module.jar" value="experiment.jar"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
   <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util">
 
     <!-- filter to insert version -->

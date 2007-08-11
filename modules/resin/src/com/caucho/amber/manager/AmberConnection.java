@@ -1108,7 +1108,12 @@ public class AmberConnection
       // findEntityItem, but it is still not loaded.
     }
     else {
-      entity = item.getEntityHome().newEntity(pk);
+      try {
+        entity = item.createEntity(this, pk);
+      } catch (SQLException e) {
+        throw new AmberRuntimeException(e);
+      }
+      
       /*
       // Create a new entity for the given class and primary key.
       try {
@@ -1118,7 +1123,7 @@ public class AmberConnection
       }
       */
 
-      entity.__caucho_setEntityState(EntityState.P_NON_TRANSACTIONAL);
+      // entity.__caucho_setEntityState(EntityState.P_NON_TRANSACTIONAL);
       // entity.__caucho_setPrimaryKey(pk);
 
       // jpa/1000: avoids extra allocations.
@@ -1126,7 +1131,9 @@ public class AmberConnection
     }
 
     // jpa/0l43
-    _persistenceUnit.copyFromCacheItem(this, entity, item);
+    //_persistenceUnit.copyFromCacheItem(this, entity, item);
+    // jpa/0l4a
+    entity.__caucho_retrieve_eager(this);
 
     return entity;
   }

@@ -1081,16 +1081,16 @@ public class ResultSetImpl implements ResultSet {
 
     if (cacheChunk != null) {
       if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, L.l("ResultSetImpl.getObject({0}) cache chunk is NOT null", column));
+        log.finer(L.l("amber Query returning cached getObject({0})", column));
 
       Object obj = cacheChunk.getObject(_row - 1, column - 1);
 
       if (obj instanceof EntityItem) {
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, L.l("ResultSetImpl: cache obj is instance of EntityItem"));
-
         EntityItem entityItem = (EntityItem) obj;
 
+        return _session.getEntity(entityItem);
+        
+        /*
         Entity entity = entityItem.getEntity();
 
         int index = getColumn(column);
@@ -1123,18 +1123,13 @@ public class ResultSetImpl implements ResultSet {
         }
 
         _numberOfLoadingColumns = entityItem.getNumberOfLoadingColumns();
+        */
       }
       else {
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, L.l("ResultSetImpl: cache obj is NOT instance of EntityItem"));
-
         value = obj;
       }
     }
     else {
-      if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, L.l("ResultSetImpl.getObject({0}) cache chunk is null", column));
-
       int index = getColumn(column);
 
       AmberExpr expr = _resultList.get(column - 1);
