@@ -2593,8 +2593,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
   {
     out.println();
     out.print("public com.caucho.amber.entity.Entity __caucho_home_new(");
-    out.print("com.caucho.amber.entity.AmberEntityHome home, ");
-    out.println("Object key)");
+    out.print("com.caucho.amber.entity.AmberEntityHome home");
+    out.println(", Object key");
+    out.println(", AmberConnection aConn");
+    out.println(", EntityItem cacheItem");
+    out.println(")");
     out.println("{");
     out.pushDepth();
 
@@ -2609,6 +2612,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("entity.__caucho_home = home.getEntityType();");
     out.println("entity.__caucho_setPrimaryKey(key);");
+    out.println("entity.__caucho_session = aConn;");
+    out.println("entity.__caucho_cacheItem = cacheItem;");
 
     out.println("return entity;");
 
@@ -2643,7 +2648,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     if (_relatedType.isAbstractClass()
         || _relatedType.getId() == null
         || discriminator == null) {
-      out.println("return __caucho_home_new(home, key);");
+      out.println("return __caucho_home_new(home, key, aConn, null);");
       out.popDepth();
       out.println("}");
       return;

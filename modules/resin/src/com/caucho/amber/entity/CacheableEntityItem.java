@@ -163,11 +163,7 @@ public class CacheableEntityItem extends EntityItem {
     Entity cacheEntity = getEntity();
     AmberEntityHome home = getEntityHome();
 
-    Entity entity = cacheEntity.__caucho_home_new(home, key);
-    
-    entity.__caucho_makePersistent(aConn, this);
-
-    return entity;
+    return cacheEntity.__caucho_home_new(home, key, aConn, this);
   }
 
   /**

@@ -290,7 +290,7 @@ public class AmberEntityHome {
 
     entity = null;
 
-    Object value = aConn.getEntity(item);
+    Object value = aConn.getEntityLazy(item);
 
     if (aConn.isActiveTransaction()) {
       if (value instanceof Entity)
@@ -314,7 +314,7 @@ public class AmberEntityHome {
 
     entity.__caucho_load(aConn, rs, index + keyLength);
 
-    return value;
+    return entity;
   }
 
   /**
@@ -635,7 +635,7 @@ public class AmberEntityHome {
    */
   public Entity newEntity(Object key)
   {
-    return (Entity) _homeBean.__caucho_home_new(this, key);
+    return (Entity) _homeBean.__caucho_home_new(this, key, null, null);
   }
 
   /**

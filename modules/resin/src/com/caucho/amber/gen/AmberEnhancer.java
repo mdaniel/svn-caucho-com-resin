@@ -279,6 +279,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       genClass.addInterfaceName(type.getComponentInterfaceName());
 
+      genClass.addImport("java.util.logging.*");
+      genClass.addImport("com.caucho.amber.manager.*");
+      genClass.addImport("com.caucho.amber.entity.*");
+      genClass.addImport("com.caucho.amber.type.*");
+
       AmberMappedComponent componentGenerator = type.getComponentGenerator();
 
       componentGenerator.setRelatedType((RelatedType) type);
@@ -378,6 +383,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     GenClass javaClass = new GenClass(type.getInstanceClassName());
 
     javaClass.setSuperClassName(type.getBeanClass().getName());
+
+    javaClass.addImport("java.util.logging.*");
+    javaClass.addImport("com.caucho.amber.manager.*");
+    javaClass.addImport("com.caucho.amber.entity.*");
+    javaClass.addImport("com.caucho.amber.type.*");
 
     AmberMappedComponent componentGenerator
       = type.getComponentGenerator();

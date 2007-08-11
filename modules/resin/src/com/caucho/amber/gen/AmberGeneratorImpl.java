@@ -94,6 +94,10 @@ public class AmberGeneratorImpl implements AmberGenerator {
     GenClass genClass = new GenClass(type.getInstanceClassName());
 
     genClass.setSuperClassName(type.getBeanClass().getName());
+    
+    genClass.addImport("com.caucho.amber.manager.*");
+    genClass.addImport("com.caucho.amber.entity.*");
+    genClass.addImport("com.caucho.amber.type.*");
 
     AmberMappedComponent componentGenerator = type.getComponentGenerator();
 

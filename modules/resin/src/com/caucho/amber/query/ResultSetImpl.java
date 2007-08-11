@@ -1136,6 +1136,7 @@ public class ResultSetImpl implements ResultSet {
 
       value = expr.getObject(_session, _rs, index);
 
+      /*
       if (expr instanceof LoadEntityExpr) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, L.l("ResultSetImpl expr is instance of LoadEntityExpr"));
@@ -1143,6 +1144,7 @@ public class ResultSetImpl implements ResultSet {
         LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
         _numberOfLoadingColumns = entityExpr.getIndex();
       }
+      */
     }
 
     // jpa/0o40, jpa/1160

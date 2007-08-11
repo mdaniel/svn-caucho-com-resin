@@ -184,7 +184,6 @@ abstract public class CascadableField extends AbstractField {
     throws IOException
   {
     if (isCascade(cascadeType)) {
-
       String getter = generateSuperGetter();
 
       out.println("if (" + getter + " != null) {");

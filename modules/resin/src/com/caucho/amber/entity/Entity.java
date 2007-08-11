@@ -231,7 +231,9 @@ public interface Entity extends MappedSuperclass
    * Returns a new entity.
    */
   public Entity __caucho_home_new(AmberEntityHome home,
-                                  Object key);
+                                  Object key,
+                                  AmberConnection aConn,
+                                  EntityItem cacheItem);
 
   /**
    * Creates a new instance based on the current entity.

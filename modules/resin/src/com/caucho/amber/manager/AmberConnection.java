@@ -319,7 +319,7 @@ public class AmberConnection
 
       checkTransactionRequired("persist");
 
-      persistInternal(entity, false);
+      persistInternal(entity);
 
       // XXX: check spec. for JTA vs. non-JTA behavior and add QA.
       // ejb30/persistence/ee/packaging/ejb/resource_local/test14
@@ -357,19 +357,9 @@ public class AmberConnection
 
       Entity entity = (Entity) o;
 
-      /* XXX: jpa/0h25
-         EntityState state = entity.__caucho_getEntityState();
+      // jpa/0h25
 
-         // XXX: jpa/0i5e
-         if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
-         if (log.isLoggable(Level.FINEST))
-         log.finest(L.l("persistFromCascade is ignoring entity in state {0}", state));
-
-         return;
-         }
-      */
-
-      persistInternal(entity, true);
+      persistInternal(entity);
 
     } catch (EntityExistsException e) {
       log.log(Level.FINER, e.toString(), e);
@@ -1139,6 +1129,51 @@ public class AmberConnection
   }
 
   /**
+   * Returns the entity for the connection.
+   */
+  public Entity getEntityLazy(EntityItem item)
+  {
+    Entity itemEntity = item.getEntity();
+
+    Class cl = itemEntity.getClass();
+    Object pk = itemEntity.__caucho_getPrimaryKey();
+
+    Entity entity = getEntity(cl.getName(), pk);
+
+    if (entity != null) {
+      if (entity.__caucho_getEntityState().isManaged())
+        return entity;
+      // else
+      // jpa/0g40: the copy object was created at some point in
+      // findEntityItem, but it is still not loaded.
+    }
+    else {
+      try {
+        entity = item.createEntity(this, pk);
+      } catch (SQLException e) {
+        throw new AmberRuntimeException(e);
+      }
+      
+      /*
+      // Create a new entity for the given class and primary key.
+      try {
+        entity = (Entity) cl.newInstance();
+      } catch (Exception e) {
+        throw new AmberRuntimeException(e);
+      }
+      */
+
+      // entity.__caucho_setEntityState(EntityState.P_NON_TRANSACTIONAL);
+      // entity.__caucho_setPrimaryKey(pk);
+
+      // jpa/1000: avoids extra allocations.
+      addInternalEntity(entity);
+    }
+
+    return entity;
+  }
+
+  /**
    * Loads the object based on itself.
    */
   public Object makePersistent(Object obj)
@@ -1701,7 +1736,8 @@ public class AmberConnection
 	break;
       }
     }
-    if (contains)
+    
+    if (! contains)
       return false;
 
     EntityState state = entity.__caucho_getEntityState();
@@ -2904,6 +2940,8 @@ public class AmberConnection
     if (_persistenceUnit.isJPA()) {
       // See persistInternal(): entity.__caucho_cascadePrePersist(this);
 
+      addEntity(entity);
+
       // jpa/0ga2
       entity.__caucho_lazy_create(this, home.getEntityType());
 
@@ -2911,8 +2949,6 @@ public class AmberConnection
     }
     else
       home.save(this, entity);
-
-    addEntity(entity);
 
     // jpa/0h25
     // XXX: not correct, since we need to keep the P_PERSIST state around
@@ -3071,18 +3107,16 @@ public class AmberConnection
   /**
    * Persists the entity.
    */
-  private void persistInternal(Object entity, boolean isCascade)
+  private void persistInternal(Entity entity)
     throws Exception
   {
-    Entity instance = (Entity) entity;
-
-    EntityState state = instance.__caucho_getEntityState();
+    EntityState state = entity.__caucho_getEntityState();
 
     switch (state) {
     case TRANSIENT:
       {
-        Entity contextEntity = getEntity(instance.getClass().getName(),
-                                         instance.__caucho_getPrimaryKey());
+        Entity contextEntity = getEntity(entity.getClass().getName(),
+                                         entity.__caucho_getPrimaryKey());
 
         // jpa/0ga3
         if (contextEntity != null) {
@@ -3093,47 +3127,28 @@ public class AmberConnection
           }
           else if (entity != contextEntity) {
             // jpa/0ga1: trying to persist a detached entity that already exists.
-            throw new EntityExistsException(L.l("Trying to persist a detached entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
+            throw new EntityExistsException(L.l("Trying to persist a detached entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), state));
           }
         }
 
         // jpa/0h24
         // Pre-persist child entities.
-        instance.__caucho_cascadePrePersist(this);
+        entity.__caucho_cascadePrePersist(this);
 
-        createInternal(instance);
+        createInternal(entity);
       }
       break;
 
     case P_DELETING:
     case P_DELETED:
       {
-        // jpa/0i60, jpa/1510
-
-        /* jpa/0h25: should always flush from cascade,
-           but only flushes this entity. Related entities
-           are flushed with the cascading operations.
-
-           if (! isCascade) {
-           flushInternal();
-        */
-
-        // jpa/0h25
-	/* XXX:
-        if (_entities.contains(instance))
-          instance.__caucho_flush();
-	*/
-
-        // else
-        // if the entity is not in the context the flush
-        // was already applied to it for deleting.
-
+        // jpa/0i60, jpa/1510, jpa/0h25
         // jpa/0h26
-        instance.__caucho_cascadePrePersist(this);
+        entity.__caucho_cascadePrePersist(this);
 
         // removed entity instance, reset state and persist.
-        instance.__caucho_makePersistent(null, (EntityType) null);
-        createInternal(instance);
+        entity.__caucho_makePersistent(null, (EntityType) null);
+        createInternal(entity);
       }
       break;
 
@@ -3142,12 +3157,12 @@ public class AmberConnection
       {
         // jpa/0h26
         // Pre-persist child entities.
-        instance.__caucho_cascadePrePersist(this);
+        entity.__caucho_cascadePrePersist(this);
       }
       break;
 
     default:
-      if (instance.__caucho_getConnection() == this)
+      if (entity.__caucho_getConnection() == this)
         return;
       else {
         // jpa/0ga5 (tck):
@@ -3158,11 +3173,11 @@ public class AmberConnection
     }
 
     // jpa/0j5e
-    updateFlushPriority(instance);
+    updateFlushPriority(entity);
 
     // jpa/0h27, jpa/0i5c, jpa/0j5g
     // Post-persist child entities.
-    instance.__caucho_cascadePostPersist(this);
+    entity.__caucho_cascadePostPersist(this);
   }
 
   /**
