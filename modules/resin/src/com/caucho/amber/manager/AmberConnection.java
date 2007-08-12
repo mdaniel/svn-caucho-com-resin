@@ -542,7 +542,7 @@ public class AmberConnection
       // Broken relationships would not pass the flush validation.
       _isFlushAllowed = false;
 
-      T entity = (T) load(entityClass, primaryKey, true, 0, 0);
+      T entity = (T) load(entityClass, primaryKey, true);
 
       if (! isActiveTransaction()) {
         // jpa/0o00
@@ -579,13 +579,15 @@ public class AmberConnection
     try {
       // XXX: only needs to get a reference.
 
-      reference = find(entityClass, primaryKey);
+      reference = (T) load(entityClass, primaryKey, false);
 
       if (reference == null)
         throw new EntityNotFoundException(L.l("entity with primary key {0} not found in getReference()", primaryKey));
 
+      /*
       if (! (entityClass.isAssignableFrom(Entity.class)))
         throw new IllegalArgumentException(L.l("getReference() operation can only be applied to an entity class"));
+      */
 
       return reference;
 
@@ -911,9 +913,7 @@ public class AmberConnection
 
   public Object load(Class cl,
                      Object key,
-                     boolean isEager,
-                     long notExpiringLoadMask,
-                     int notExpiringGroup)
+                     boolean isEager)
     throws AmberException
   {
     
@@ -963,12 +963,7 @@ public class AmberConnection
       
       // jpa/0l48: inheritance loading optimization.
       // jpa/0h20: no transaction, copy from the existing cache item.
-
-      // long loadMask = entity.__caucho_getLoadMask(notExpiringGroup);
-      // loadMask |= notExpiringLoadMask;
-
       // jpa/0l42: loading optimization.
-      // entity.__caucho_setLoadMask(loadMask, notExpiringGroup);
 
       if (isLoad) {
 	entity.__caucho_retrieve_eager(this);
@@ -1225,8 +1220,7 @@ public class AmberConnection
 
       home.init();
 
-      Object obj = load(home.getEntityType().getInstanceClass(),
-			key, false, 0, 0);
+      Object obj = load(home.getEntityType().getInstanceClass(), key, false);
 
       Entity entity = (Entity) obj;
 
@@ -1282,12 +1276,6 @@ public class AmberConnection
     }
   }
 
-  public Entity loadFromHome(String name,
-                             Object key)
-  {
-    return loadFromHome(name, key, 0, 0);
-  }
-
   /**
    * Loads the object with the given class.
    *
@@ -1301,9 +1289,7 @@ public class AmberConnection
    * @param notExpiringGroup the corresponding load group.
    */
   public Entity loadFromHome(String name,
-                             Object key,
-                             long notExpiringLoadMask,
-                             int notExpiringGroup)
+                             Object key)
   {
     try {
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
@@ -1315,7 +1301,7 @@ public class AmberConnection
 
       // jpa/0ge4, jpa/0o04, jpa/0o0b, jpa/0o0c: bidirectional optimization.
       return (Entity) load(home.getEntityType().getInstanceClass(),
-			   key, true, notExpiringLoadMask, notExpiringGroup);
+			   key, true);
     } catch (AmberObjectNotFoundException e) {
       if (_persistenceUnit.isJPA()) {
         if (log.isLoggable(Level.FINER))
@@ -1405,7 +1391,7 @@ public class AmberConnection
 
     Object key = entityHome.toObjectKey(intKey);
 
-    return load(cl, key, true, 0, 0);
+    return load(cl, key, true);
   }
 
   /**
@@ -1635,9 +1621,7 @@ public class AmberConnection
    */
   public Entity loadEntity(Class cl,
                            Object key,
-                           boolean isEager,
-                           long notExpiringLoadMask,
-                           int notExpiringGroup)
+                           boolean isEager)
   {
     if (key == null)
       return null;
@@ -1653,9 +1637,7 @@ public class AmberConnection
       // XXX: needs to create based on the discriminator with inheritance.
       // Create a new entity for the given class and primary key.
       try {
-        entity = (Entity) load(cl, key, isEager,
-                               notExpiringLoadMask,
-                               notExpiringGroup);
+        entity = (Entity) load(cl, key, isEager);
       } catch (AmberException e) {
         throw new AmberRuntimeException(e);
       }
@@ -1728,24 +1710,13 @@ public class AmberConnection
     Entity entity = (Entity) obj;
 
     // jpa/11a8
-    boolean contains = false;
-    Entity []entities = _entities;
-    for (int i = _entitiesTop - 1; i >= 0; i--) {
-      if (entities[i] == entity) {
-	contains = true;
-	break;
-      }
-    }
-    
-    if (! contains)
+    if (entity.__caucho_getConnection() != this)
       return false;
 
     EntityState state = entity.__caucho_getEntityState();
-    if (isActiveTransaction()) {
-      if (! state.isTransactional()) {
-        // jpa/11a6
-        return false;
-      }
+    if (isInTransaction() && ! state.isTransactional()) {
+      // jpa/11a6, jpa/1800
+      return false;
     }
 
     // jpa/0j5f
@@ -3274,7 +3245,7 @@ public class AmberConnection
       try {
         boolean isManaged = entity.__caucho_getEntityState().isManaged();
 
-        existingEntity = (Entity) load(entity.getClass(), pk, true, 0, 0);
+        existingEntity = (Entity) load(entity.getClass(), pk, true);
       } catch (AmberObjectNotFoundException e) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, e.toString(), e);

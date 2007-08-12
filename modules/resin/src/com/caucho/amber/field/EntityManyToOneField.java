@@ -609,7 +609,7 @@ public class EntityManyToOneField extends CascadableField {
   {
     // jpa/0h07, jpa/0h08
     // jpa/0o03, jpa/0o05, jpa/0o09
-    // jpa/0s2d
+    // jpa/0s2d, jpa/1810
 
     String javaType = getJavaTypeName();
 
@@ -660,6 +660,7 @@ public class EntityManyToOneField extends CascadableField {
     index += "_" + mask;
 
     if (_aliasField == null) {
+      // XXX: possibly bypassing of caching
       out.println("if ((" + loadVar + " & " + mask + "L) == 0)");
       out.println("  __caucho_load_select_" + getLoadGroupIndex() + "(__caucho_session);");
     }
@@ -773,9 +774,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println(varName + " = (" + targetTypeExt + ") "
                 + session + ".loadEntity("
                 + targetTypeExt + ".class, "
-                + otherKey + ", false, "
-                + targetMask + "L, "
-                + targetGroup + ");");
+                + otherKey + ", true);");
 
     generateSetTargetLoadMask(out, varName);
 
@@ -948,7 +947,7 @@ public class EntityManyToOneField extends CascadableField {
       out.pushDepth();
 
       // jpa/0j5f
-      out.println("child = aConn.load(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey(), true, 0, 0);");
+      out.println("child = aConn.load(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey(), true);");
 
       out.popDepth();
       out.println("} else {");

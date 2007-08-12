@@ -70,9 +70,14 @@ public class CacheableEntityItem extends EntityItem {
     long now = Alarm.getCurrentTime();
 
     if (_expireTime < now) {
-      _expireTime = now + _home.getCacheTimeout();
+      long timeout = _home.getCacheTimeout();
+      
+      boolean isExpired = _expireTime > 0 && timeout > 0;
+      
+      _expireTime = now + timeout;
 
-      _cacheEntity.__caucho_expire();
+      if (isExpired)
+        _cacheEntity.__caucho_expire();
     }
 
     return _cacheEntity;

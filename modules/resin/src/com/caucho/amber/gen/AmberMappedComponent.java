@@ -250,7 +250,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
         out.println("try {");
         out.println("  __caucho_setPrimaryKey(__caucho_getPrimaryKey());");
         out.println("} catch (Exception e) {");
-        out.println("  __caucho_log.fine(\"amber unable to set primary key within argument constructor \" + this.getClass().getName() + \" - PK: unknown\");");
+        out.println("  __caucho_log.fine(\"amber unable to set primary key within argument constructor \" + this.getClass().getName() + \"[PK: unknown]\");");
         out.println("}");
       }
 
@@ -373,11 +373,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE)) {");
     out.pushDepth();
 
-    out.println("try {");
-    out.println("  __caucho_log.fine(\"amber expire \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
-    out.println("} catch (Exception e) {");
-    out.println("  __caucho_log.fine(\"amber expire \" + this.getClass().getName() + \" - PK: unknown\");");
-    out.println("}");
+    out.println("__caucho_log.fine(\"amber expire \" + this.getClass().getName() + \"[\" + __caucho_getPrimaryKey() + \"]\");");
 
     out.popDepth();
     out.println("}");
@@ -855,8 +851,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("}");
     out.println("else if (__caucho_state.isTransactional()) {");
     out.println("}");
-    out.println("else if (__caucho_session == null ||");
-    out.println("         ! __caucho_session.isActiveTransaction()) {");
+    out.println("else if (__caucho_session == null");
+    out.println("         || ! __caucho_session.isActiveTransaction()) {");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
     out.println("  if (__caucho_cacheItem != null)");
     out.println("    __caucho_cacheItem.save((com.caucho.amber.entity.Entity) this);");
@@ -1168,7 +1164,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber update \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
+    out.println("  __caucho_log.fine(\"amber update \" + this.getClass().getName() + \"[\" + __caucho_getPrimaryKey() + \"]\");");
 
     // println();
     // println("pstmt.close();");
@@ -1695,7 +1691,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber create \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
+    out.println("  __caucho_log.fine(\"amber create \" + this.getClass().getName() + \"[\" + __caucho_getPrimaryKey() + \"]\");");
     out.println();
     out.println("if (aConn.isActiveTransaction()) {");
 

@@ -170,7 +170,8 @@ public class LoadGroupGenerator extends ClassComponent {
   {
     // non-read-only entities must be reread in a transaction
     if (! _relatedType.isReadOnly()) {
-      out.println("if (aConn.isActiveTransaction()) {");
+      // jpa/1800
+      out.println("if (aConn.isInTransaction()) {");
       out.pushDepth();
 
       // deleted objects are not reloaded
