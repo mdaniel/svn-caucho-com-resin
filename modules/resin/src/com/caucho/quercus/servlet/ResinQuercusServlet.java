@@ -122,7 +122,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
       env = getQuercus().createEnv(page, ws, request, response);
       try {
         env.setGlobalValue("request", env.wrapJava(request));
-        env.setGlobalValue("response", env.wrapJava(request));
+        env.setGlobalValue("response", env.wrapJava(response));
 
         env.start();
 
