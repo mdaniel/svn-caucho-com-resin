@@ -353,8 +353,9 @@ public class QElement extends QAttributedNode implements CauchoElement {
 
     public boolean isMatch(QAbstractNode node)
     {
-      return (node.getNodeName().equals(_name) ||
-              _name.equals("*") && node instanceof Element);
+      return (node != null
+	      && (node.getNodeName().equals(_name)
+		  || _name.equals("*") && node instanceof Element));
     }
   }
 
@@ -370,8 +371,9 @@ public class QElement extends QAttributedNode implements CauchoElement {
 
     public boolean isMatch(QAbstractNode node)
     {
-      return (_local.equals(node.getLocalName()) &&
-              _uri.equals(node.getNamespaceURI()));
+      return (node != null
+	      && _local.equals(node.getLocalName())
+	      && _uri.equals(node.getNamespaceURI()));
     }
   }
 }
