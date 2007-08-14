@@ -147,6 +147,8 @@ the value of <code>$RESIN_HOME</code></p>
 
 <deftable-parameters>
 <tr><td>executable</td><td>Path to the script program</td><td>default exec
+<tr><td>ignore-exit-code</td><td>If true, do not treat a non-zero exit code as an error</td><td>false
+<tr><td>stderr-is-exception</td><td>If false, ignore output on stderr instead of triggering an exception</td><td>true
 </td></tr></deftable-parameters>
 
 <example title="WEB-INF/resin-web.xml">
