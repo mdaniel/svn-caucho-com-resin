@@ -707,14 +707,14 @@ class HttpStream extends StreamImpl {
       if (log.isLoggable(Level.FINE))
         log.fine(key + ": " + value);
       
-      if (key.matches("content-length")) {
+      if (key.matchesIgnoreCase("content-length")) {
         _contentLength = Integer.parseInt(value);
       }
-      else if (key.matches("connection") &&
+      else if (key.matchesIgnoreCase("connection") &&
                value.equalsIgnoreCase("close")) {
         _isKeepalive = false;
       }
-      else if (key.matches("transfer-encoding") &&
+      else if (key.matchesIgnoreCase("transfer-encoding") &&
                value.equalsIgnoreCase("chunked")) {
         
         _isChunked = true;

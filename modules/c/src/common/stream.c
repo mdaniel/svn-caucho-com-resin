@@ -55,6 +55,7 @@
 
 #include "cse.h"
 
+#define WINDOWS_READ_TIMEOUT 3600
 #define DEFAULT_PORT 6802
 #define DEAD_TIME 120
 #define LIVE_TIME 10
@@ -91,7 +92,7 @@ static int
 std_read(stream_t *s, void *buf, int length)
 {
 #ifdef WIN32
-  if (poll_read(s->socket, 600) <= 0)
+  if (poll_read(s->socket, WINDOWS_READ_TIMEOUT) <= 0)
     return -1;
 #endif
 
