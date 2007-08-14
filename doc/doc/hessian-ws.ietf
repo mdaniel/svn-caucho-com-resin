@@ -1,0 +1,604 @@
+<?xml version="1.0"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+
+<rfc category="std" ipr="full3978" docName="hessian.txt">
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+
+<?rfc toc="yes" ?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no" ?>
+
+  <front>
+    <title>Hessian 2.0 Web Services Protocol</title>
+    <author initials="S." surname="Ferguson" fullname="Scott Ferguson">
+      <organization>Caucho Technology Inc.</organization>
+      <address>
+        <postal>
+          <street>P.O. Box 9001</street>
+          <city>La Jolla</city>
+          <region>CA</region>
+          <code>92038</code>
+          <country>USA</country>
+        </postal>
+        <email>ferg@caucho.com</email>
+      </address>
+    </author>
+    <author initials="E." surname="Ong" fullname="Emil Ong">
+      <organization>Caucho Technology Inc.</organization>
+      <address>
+        <postal>
+          <street>P.O. Box 9001</street>
+          <city>La Jolla</city>
+          <region>CA</region>
+          <code>92038</code>
+          <country>USA</country>
+        </postal>
+        <email>emil@caucho.com</email>
+      </address>
+    </author>
+    <date month="August" year="2007" />
+  </front>
+  
+  <middle>
+    <section title="Design Goals">
+      <t>
+        Unlike older binary protocols, Hessian is both self-describing,
+        compact, and portable across languages.  The wire protocol for web
+        services should be invisible to application writers, it should not 
+        require external schema or IDL.
+      </t>
+      <t>
+      The Hessian protocol has the following design goals:
+      </t>
+      <list style="symbols">
+        <t>
+          It must not require external IDL or schema definitions, i.e. the 
+          protocol should be invisible to application code.
+        </t>
+        <t>
+          It must have sufficient power to serialize Java, including circular 
+          references.
+        </t>
+        <t>
+          It must be language-independent.  In particular, it must allow 
+          non-Java clients to use web services.
+        </t>
+        <t>
+          It must be simple so it can be effectively tested and implemented.
+        </t>
+        <t>It must be as fast as possible.</t>
+        <t>It must be as compact as possible.</t>
+        <t>It must support unicode strings.</t>
+        <t>
+          It must support 8-bit binary data (i.e. without encoding or using 
+          attachments.)
+        </t>
+        <t>It must allow web services to deployed as a Servlet.</t>
+        <t>It must have sufficient power to support EJB.</t>
+        <t>
+          It must support encryption, compression, signature, and
+          transaction context envelopes.
+        </t>
+        <t>
+          Hessian 2.0 must be backwards compatible with Hessian 1.0.
+          Hessian 2.0 parsers must be read Hessian 1.0 messages.
+        </t>
+      </list>
+    </section>
+
+    <section title="Hessian Grammar">
+      <figure anchor="messaging_grammar">
+        <preamble>Envelope/Messaging/RPC Grammar</preamble>
+        <artwork>
+top       ::= call
+          ::= envelope
+          ::= message
+          ::= reply
+
+          # RPC-style call
+call      ::= 'c' x02 x00 method object* 'z'
+
+          # Envelope for encryption/headers
+envelope  ::= 'E' x02 x00 env-chunk* 'z'
+
+          # header, body, footer
+env-chunk ::= int (string object)* binary int (string object)*
+
+fault     ::= 'f' (object object)* 'z'
+
+          # message/streaming message
+message   ::= 'p' x02 x00 object* 'z'
+          ::= 'P' x02 x00 object* 'z'
+
+          # RPC method name (possibly mangled for overloading)
+method    ::= 'm' b1 b0 &lt;method-string>
+
+          # RPC reply
+reply     ::= 'r' x02 x00 object 'z'  # successful message/reply
+          ::= 'r' x02 x00 fault 'z'   # exception/fault reply
+        </artwork>
+      </figure>
+    </section>
+
+    <section title="Messages and Envelopes">
+      <t>
+        Hessian message syntax organizes serialized data for messaging and RPC
+        applications.  The envelope syntax enables compression, encryption, 
+        signatures, and any routing or context headers to wrap a Hessian 
+        message.
+      </t>
+
+      <list style="symbols">
+        <t>
+          Call ('c'): contains a Hessian RPC call, with a method name and 
+          arguments.
+        </t>
+
+        <t>
+          Envelope ('E'): wraps a Hessian message for compression, encryption, 
+          etc.  Envelopes can be nested.
+        </t>
+
+        <t>Message ('p'): contains a sequence of serialized Hessian objects.</t>
+
+        <t>Reply ('r'): contains a reply to a Hessian RPC call.</t>
+      </list>
+
+      <section title="Call">
+
+        <figure anchor="call_grammar">
+          <preamble>Call Grammar</preamble>
+          <artwork>
+call ::= c x02 x00 m b1 b0 &lt;method-string> object* z
+          </artwork>
+        </figure>
+
+        <t>
+          A Hessian call invokes a method on an object with an argument list.  
+          The object is specified by the container, e.g. for a HTTP request, 
+          it's the HTTP URL.  The arguments are specified by Hessian 
+          serialization.
+        </t>
+
+        <section title="Methods and Overloading">
+
+          <t>
+            Method names must be unique.  Two styles of overloading are 
+            supported: overloading by number of argumetns and overloading by 
+            argument types.  Overloading is permitted by encoding the argument 
+            types in the method names.  The types of the actual arguments must 
+            not be used to select the methods.
+          </t>
+
+          <t>Method names beginning with _hessian_ are reserved.</t>
+
+          <t>
+            Servers should accept calls with either the mangled method name
+            or the unmangled method name.  Clients should send the mangled 
+            method name.
+          </t>
+
+          <t>See the Java binding for a possible overloading scheme.</t>
+
+          <section title="Overloading examples">
+            <figure anchor="overloading_examples">
+              <artwork>
+add(int a, int b)  -&gt;  add_int_int
+
+add(double a, double b)  -&gt;  add_double_double
+
+add(shopping.Cart cart, shopping.Item item)  -&gt; 
+  add_shopping.Cart_shopping.Item
+              </artwork>
+            </figure>
+          </section>
+        </section>
+
+        <section title="Arguments">
+          <t>
+            Arguments immediately follow the method in positional order.
+            Argument values use Hessian's serialization.
+          </t>
+
+          <t>
+            All arguments share references, i.e. the reference list starts 
+            with the first argument and continues for all other arguments.
+            This lets two arguments share values.
+          </t>
+
+          <section title="Arguments example">
+            <figure anchor="arguments_examples">
+              <artwork>
+bean = new qa.Bean("foo", 13);
+
+System.out.println(remote.eq(bean, bean));
+
+---
+
+c x02 x00
+  m x00 x02 eq
+  M t x00 x07 qa.Bean
+    S x00 x03 foo
+    I x00 x00 x00 x0d
+    z
+  R x00 x00 x00 x00
+  z
+              </artwork>
+            </figure>
+          </section>
+
+          <t>
+            The number and type of arguments are fixed by the remote method.
+            Variable length arguments are forbidden.  Implementations
+            may take advantage of the expected type to improve performance.
+          </t>
+        </section>
+
+        <section title="Call examples">
+          <figure anchor="call_example">
+            <preamble>obj.add2(2,3) call</preamble>
+            <artwork>
+c x02 x00         # call for Hessian 2.0
+  m x00 x04 add2  # method "add2"
+  x92             # 2 - argument 1
+  x93             # 3 - argument 2
+  z               # end of argument marker
+            </artwork>
+          </figure>
+
+          <figure anchor="reply_example">
+            <preamble>obj.add2(2,3) reply</preamble>
+            <artwork>
+r x02 x00
+  x95
+  z
+            </artwork>
+          </figure>
+        </section>
+      </section>
+      
+      <section title="Envelope">
+
+        <figure anchor="envelope_grammar">
+          <preamble>Envelope Grammar</preamble>
+          <artwork>
+envelope ::= E x02 x00 m b1 b0 &lt;method-string> env-chunk* z
+
+env-chunk ::= int (string object)* binary int (string object)*
+          </artwork>
+        </figure>
+
+        <t>
+          A Hessian envelope wraps a Hessian message, adding headers and 
+          footers and possibly compressing or encrypting the wrapped message.  
+          The envelope type is identified by a method string, e.g.
+          "com.caucho.hessian.io.Deflation" or
+          "com.caucho.hessian.security.X509Encryption".
+        </t>
+
+        <t>
+          Some envelopes may chunk the data, providing multiple header/footer
+          chunks.  For example, a signature envelope might chunk a large
+          streaming message to reduce the amount of buffering required to 
+          validate the signatures.
+        </t>
+
+        <section title="Envelope examples">
+          <figure anchor="identity_envelope_example">
+            <preamble>Identity Envelope</preamble>
+            <artwork>
+E x02 x00
+  m x00 x08 Identity   # "Identity" envelope does nothing to the body
+  x90                  # no headers
+  B x00 x0a            # binary wrapped body (12 bytes)
+    p x02 x00          # wrapped message
+    x05 hello          # "hello"
+    z                  # end of wrapped message
+  x90                  # no footers
+  z                    # end of envelope
+            </artwork>
+          </figure>
+
+          <figure anchor="chunked_identity_envelope_example">
+            <preamble>Chunked Identity Envelope</preamble>
+            <artwork>
+E x02 x00
+  m x00 x08 Identity   # "Identity" envelope does nothing to the body
+  x90                  # no headers
+  B x00 x0c            # binary header for wrapped body (10 bytes)
+    p x02 x00          # wrapped message
+    x07 hello,         # "hello, "
+    z                  # end of wrapped message
+  x90                  # no footers
+
+  x90                  # no headers
+  B x00 x08            # binary wrapped body (10 bytes)
+    p x02 x00          # wrapped message
+    x05 world          # world
+    z
+  x90                  # no footers
+  z                    # end of envelope
+            </artwork>
+          </figure>
+
+          <figure anchor="compression_envelope_example">
+            <preamble>Compression Envelope</preamble>
+            <artwork>
+E x02 x00
+  m x00 x09 Deflation  # "Deflation" envelope compresses the body
+  x90                  # no headers
+  B x00 x0a            # binary wrapped body (32 bytes)
+    x78 x9c x4b...     # compressed message
+  x90                  # no footers
+  z                    # end of envelope
+            </artwork>
+          </figure>
+        </section>
+      </section>
+      
+      <section title="Message">
+        <figure anchor="message_grammar">
+          <preamble>Message Grammar</preamble>
+          <artwork>
+message ::= p x02 x00 object* z
+          </artwork>
+        </figure>
+
+        <t>
+          A Hessian message contains a sequence of Hessian serialized objects.  
+          Messages can be used for multihop data transfer or simply for storing
+          serialized data.
+        </t>
+      </section>
+
+      <section title="Reply">
+        <figure anchor="reply_grammar">
+          <preamble>Reply Grammar</preamble>
+          <artwork>
+valid-reply ::= r x02 x00 header* object z
+fault-reply ::= r x02 x00 header* fault z
+          </artwork>
+        </figure>
+
+        <section title="Value">
+  
+          <t>
+            A successful reply returns a single value and possibly some header 
+            information.  
+          </t>
+  
+          <figure anchor="integer_5_example">
+            <preamble>Integer 5 Envelope</preamble>
+            <artwork>
+r x01 x00
+  I x00 x00 x00 x05
+  z
+            </artwork>
+          </figure>
+        </section>
+
+        <section title="Faults">
+
+          <t>Failed calls return a fault.</t>
+
+          <t>
+            Each fault has a number of informative fields, expressed like
+            &lt;map&gt; entries.  The defined fields are code, message,
+            and detail. code is one of a short list of strings defined below.  
+            message is a user-readable message.  detail is an object 
+            representing the exception.  In Java, detail will be a serialized 
+            exception.
+          </t>
+
+          <figure anchor="remote_call_throws_example">
+            <preamble>Remote Call throws FileNotFoundException</preamble>
+            <artwork>
+r x01 x00
+  f
+  S x00 x04 code
+  S x00 x10 ServiceException
+
+  S x00 x07 message
+  S x00 x0e File Not Found
+
+  S x00 x06 detail
+  M t x00 x1d java.io.FileNotFoundException
+    z
+  z
+            </artwork>
+          </figure>
+
+          <list style="hanging">
+            <t hangText="ProtocolException:">
+              The Hessian request has some sort of syntactic error.
+            </t>
+
+            <t hangText="NoSuchObjectException:">
+              The requested object does not exist.
+            </t>
+
+            <t hangText="NoSuchMethodException:">
+              The requested method does not exist.
+            </t>
+
+            <t hangText="RequireHeaderException:">
+              A required header was not understood by the server.
+            </t>
+
+            <t hangText="ServiceException:">
+              The called method threw an exception.
+            </t>
+          </list>
+        </section>
+      </section>
+
+      <section title="Versioning">
+        <t>
+          The call and response tags include a major and minor byte.  The
+          current version is 2.0.
+        </t>
+      </section>
+
+    </section>
+
+    <section title="Service Location (URLs)">
+
+      <t>
+        Hessian services are identified by URLs.  Typically, these will be
+        HTTP URLs, although protocols would be possible as well.
+      </t>
+
+      <section title="Object Naming (non-normative)">
+
+        <t> 
+          URLs are flexible enough to encode object instances as well as 
+          simple static service locations.  The URL uniquely identifies the
+          Hessian object.  Thus, Hessian can support object-oriented services, 
+          e.g. naming services, entity beans, or session beans, specified by 
+          the URL without requiring extra method parameters or headers.
+        </t>
+
+        <t>
+          Object naming may use the query string convention that "?id=XXX"
+          names the object "XXX" in the given service.  This convention is 
+          recommented, but not required.
+        </t>
+
+        <t>
+          For example, a stock quote service might have a factory interface 
+          like http://foo.com/stock and object instances like 
+          http://foo.com?id=PEET.  The factory interface would return valid
+          object references through the factory methods.
+        </t>
+
+      </section>
+
+      <section title="Object naming (non-normative) Example">
+        <t>As an example, the following format is used for EJB:</t>
+
+        <figure anchor="ejb_url_example">
+          <artwork>
+http://hostname/hessian<var>/ejb-name</var>?id=<var>object-id</var>
+          </artwork>
+        </figure>
+
+        <t>
+          http://hostname/hessian identifies the EJB container.  In Resin-EJB, 
+          this will refer to the EJB Servlet.  "/hessian" is the servlet prefix 
+          (url-pattern.)  HTTP is just used as an example; Hessian does not 
+          require the use of HTTP.
+        </t>
+
+        <t>
+          /ejb-name, the path info of the request, identifies the EJB name,
+          specifically the home interface.  EJB containers can contain several
+          entity and session beans, each with its own EJB home.  The ejb-name
+          corresponds to the ejb-name in the deployment descriptor.
+        </t>
+
+        <t>
+          object-id identifies the specific object.  For entity beans, the
+          object-id encodes the primary key.  For session beans, the object-id 
+          encodes a unique session identifier.  Home interfaces have no 
+          ";ejbid=..." portion.
+        </t>
+
+        <figure anchor="ejb_url_entity_example">
+          <artwork>
+# Example Entity Home Identifier
+http://localhost/hessian/my-entity-bean
+
+# Example Entity Bean Identifier
+http://localhost/hessian/my-entity-bean?ejbid=slytherin
+
+# Example Session Home Identifier
+http://localhost/hessian/my-session-bean
+
+# Example Session Bean Identifier
+http://localhost/hessian/my-session-bean?ejbid=M9Zs1Zm
+          </artwork>
+        </figure>
+      </section>
+    </section>
+
+    <section title="Bytecode map">
+
+      <t>
+        Hessian is organized as a bytecode protocol.  A Hessian implementation 
+        is essentially a big switch statement on the initial bytecode.
+      </t>
+
+      <figure anchor="bytecode_encoding">
+        <preamble>Bytecode Encoding</preamble>
+        <artwork>
+x00 - x1f    # utf-8 string length 0-32
+x20 - x2f    # binary data length 0-16
+x30 - x37    # reserved
+x38 - x3f    # long from -x40000 to x3ffff
+x40 - x41    # reserved
+x42          # 8-bit binary data final chunk ('B')
+x43          # reserved ('C' streaming call)
+x44          # 64-bit IEEE encoded double ('D')
+x45          # reserved ('E' envelope)
+x46          # boolean false ('F')
+x47          # reserved
+x48          # reserved ('H' header)
+x49          # 32-bit signed integer ('I')
+x4a          # reference to 1-256th map/list
+x4b          # reference to 1-65536th map/list
+x4c          # 64-bit signed long integer ('L')
+x4d          # map with optional type ('M')
+x4e          # null ('N')
+x4f          # object definition ('O')
+x50          # reserved ('P' streaming message/post)
+x51          # reserved
+x52          # reference to map/list - integer ('R')
+x53          # utf-8 string final chunk ('S')
+x54          # boolean true ('T')
+x55          # reserved
+x56          # list/vector ('V')
+x57          # reserved
+x58          # utf-8 xml final chunk ('X')
+x59 - x62    # reserved
+x62          # 8-bit binary data non-final chunk ('b')
+x63          # reserved ('c' call for RPC)
+x64          # UTC time encoded as 64-bit long milliseconds since 
+             #  epoch ('d')
+x65          # reserved
+x66          # reserved ('f' for fault for RPC)
+x67          # double 0.0
+x68          # double 1.0
+x69          # double represented as byte (-128.0 to 127.0)
+x6a          # double represented as short (-32768.0 to 327676.0)
+x6b          # double represented as float
+x6c          # list/vector length ('l')
+x6d          # reserved ('m' method for RPC call)
+x6e          # list/vector compact length
+x6f          # object instance ('o')
+x70          # reserved ('p' - message/post)
+x71          # reserved
+x72          # reserved ('r' reply for message/RPC)
+x73          # utf-8 string non-final chunk ('s')
+x74          # map/list type ('t')
+x75          # type-ref
+x76          # compact vector ('v')
+x77          # long encoded as 32-bit int
+x78          # utf-8 XML non-final chunk ('x')
+x79          # reserved
+x7a          # list/map terminator ('z')
+x7b - x7f    # reserved
+x80 - xbf    # one-byte compact int (-x10 to x3f, x90 is 0)
+xc0 - xcf    # two-byte compact int (-x800 to x3ff)
+xd0 - xd7    # three-byte compact int (-x40000 to x3ffff)
+        </artwork>
+      </figure>
+
+    </section>
+  </middle>
+
+  <back>
+  </back>
+ 
+</rfc>
