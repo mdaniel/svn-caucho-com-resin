@@ -927,7 +927,7 @@ public class UrlModule extends AbstractQuercusModule {
     if (d < 10)
       return (char) ('0' + d);
     else
-      return (char) ('a' + d - 10);
+      return (char) ('A' + d - 10);
   }
 }
 
