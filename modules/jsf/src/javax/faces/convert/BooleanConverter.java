@@ -57,11 +57,9 @@ public class BooleanConverter implements Converter
     if (value.length() == 0)
       return null;
 
-    if ("true".equalsIgnoreCase(value))
-      return true;
-    else if ("false".equalsIgnoreCase(value))
-      return false;
-    else {
+    try {
+      return Boolean.valueOf(value);
+    } catch (Exception e) {
       String summary = Util.l10n(context, BOOLEAN_ID,
 				 "{1}: \"{0}\" must be 'true' or 'false'.",
 				 value, 
@@ -74,7 +72,7 @@ public class BooleanConverter implements Converter
 
       FacesMessage msg = new FacesMessage(summary, detail);
       
-      throw new ConverterException(msg);
+      throw new ConverterException(msg, e);
     }
   }
   
@@ -88,10 +86,6 @@ public class BooleanConverter implements Converter
     
     if (value == null)
       return "";
-    else if (value instanceof String)
-      return (String) value;
-    else if (value instanceof Boolean)
-      return value.toString();
     else
       return value.toString();
   }

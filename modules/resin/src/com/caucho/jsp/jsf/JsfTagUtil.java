@@ -203,8 +203,11 @@ public class JsfTagUtil {
     if (parent != null)
       parent.getChildren().add(child);
 
+    // XXX:
+    /*
     if (binding != null)
       binding.setValue(context.getELContext(), child);
+    */
 
     return child;
   }

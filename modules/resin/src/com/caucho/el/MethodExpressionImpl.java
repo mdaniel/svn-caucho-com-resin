@@ -102,7 +102,9 @@ public class MethodExpressionImpl extends MethodExpression
   {
     if (params == null && _expectedArgs.length != 0
 	|| params != null && params.length != _expectedArgs.length) {
-      throw new IllegalArgumentException(L.l("expected arguments do not match actual arguments for '{0}'", _expr.toString()));
+      throw new IllegalArgumentException(L.l("'{0}' expected arguments ({1}) do not match actual arguments ({2})", _expr.toString(),
+					     _expectedArgs.length,
+					     (params != null ? params.length : 0)));
     }
 
     Object value = _expr.invoke(context, _expectedArgs, params);

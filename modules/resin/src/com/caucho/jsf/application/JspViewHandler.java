@@ -366,6 +366,10 @@ public class JspViewHandler extends ViewHandler
     RenderKitFactory renderKitFactory
       = (RenderKitFactory) FactoryFinder.getFactory(FactoryFinder.RENDER_KIT_FACTORY);
     String renderKitId = viewToRender.getRenderKitId();
+
+    if (renderKitId == null)
+      renderKitId = RenderKitFactory.HTML_BASIC_RENDER_KIT;
+    
     RenderKit renderKit = renderKitFactory.getRenderKit(context, renderKitId);
 
     String encoding = request.getCharacterEncoding();

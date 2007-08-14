@@ -69,8 +69,6 @@ public class HeaderValuesFieldExpression extends AbstractValueExpression
     
     ServletELContext servletEnv = (ServletELContext) env;
 
-    System.out.println("GETV: " + servletEnv.getHeaderValues(_field));
-
     return servletEnv.getHeaderValues(_field);
   }
 

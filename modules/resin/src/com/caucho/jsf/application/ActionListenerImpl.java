@@ -70,7 +70,8 @@ public class ActionListenerImpl implements ActionListener
     if (actionExpr != null) {
       fromAction = actionExpr.getExpressionString();
 	
-      Object value = actionExpr.invoke(context.getELContext(), NULL_ARG);
+      Object value = actionExpr.invoke(context.getELContext(),
+				       new Object[] { event });
 
       if (value != null)
 	logicalOutcome = value.toString();
@@ -78,7 +79,8 @@ public class ActionListenerImpl implements ActionListener
     else if (action != null) {
       fromAction = action.getExpressionString();
 	
-      Object value = action.invoke(context, NULL_ARG);
+      Object value = action.invoke(context, 
+				   new Object[] { event });
 
       if (value != null)
 	logicalOutcome = value.toString();

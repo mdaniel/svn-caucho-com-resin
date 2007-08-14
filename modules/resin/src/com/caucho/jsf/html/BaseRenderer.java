@@ -53,6 +53,7 @@ abstract class BaseRenderer extends Renderer
     return true;
   }
 
+  @Override
   public Object getConvertedValue(FacesContext context,
 				  UIComponent component,
 				  Object submittedValue)
@@ -60,10 +61,10 @@ abstract class BaseRenderer extends Renderer
   {
     if (context == null || component == null)
       throw new NullPointerException();
-    
+
     if (component instanceof ValueHolder) {
       Converter converter = ((ValueHolder) component).getConverter();
-
+      
       if (converter != null)
 	return converter.getAsObject(context, component,
 				     (String) submittedValue);

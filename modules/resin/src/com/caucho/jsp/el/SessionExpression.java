@@ -73,8 +73,10 @@ public class SessionExpression extends AbstractValueExpression
 
     HttpServletRequest req = servletEnv.getRequest();
 
-    if (req != null)
-      return req.getSession(false);
+    if (req != null) {
+      // jsf/160b
+      return req.getSession(true);
+    }
     else
       return null;
   }

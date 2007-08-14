@@ -163,8 +163,6 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   {
     Object parent = super.saveState(context);
 
-    Object []converterState = null;
-
     return new Object[] {
       parent,
       _value,
