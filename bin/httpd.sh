@@ -1,5 +1,7 @@
 #! /bin/sh
 #
+# See contrib/init.resin for /etc/rc.d/init.d startup script
+#
 # resin.sh can be called like apachectl
 #
 # resin.sh         -- execs resin in the foreground
@@ -10,25 +12,24 @@
 # resin.sh will return a status code if the wrapper detects an error, but
 # some errors, like bind exceptions or Java errors, are not detected.
 #
-# chkconfig: 345 86 14
-# description: Resin is a Java application server
-# processname: java
-#
 # To install, you'll need to configure JAVA_HOME and RESIN_HOME and
-# copy httpd.sh to /etc/rc.d/init.d as resin.  Then
+# copy contrib/init.resin to /etc/rc.d/init.d/resin.  Then
 # use "unix# /sbin/chkconfig resin on"
-#
-# trace script and simlinks to find thw wrapper
-#
 java=java
 
-script=`/bin/ls -l $0 | awk '{ print $NF; }'`
+#
+# trace script and simlinks to find the wrapper
+#
+if test -z "${RESIN_HOME}"; then
+  script=`/bin/ls -l $0 | awk '{ print $NF; }'`
 
-while test -h "$script"
-do
-  script=`/bin/ls -l $script | awk '{ print $NF; }'`
-done
+  while test -h "$script"
+  do
+    script=`/bin/ls -l $script | awk '{ print $NF; }'`
+  done
 
-bin=`dirname $script`
+  bin=`dirname $script`
+  RESIN_HOME="$bin/../lib"
+fi  
 
-exec $java -jar $bin/../lib/resin.jar $*
+exec $java -jar ${RESIN_HOME}/resin.jar $*

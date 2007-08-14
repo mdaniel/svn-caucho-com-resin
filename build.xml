@@ -196,7 +196,7 @@
     </antcall>
   </target>
 
-  <target name="experiment" depends="resin">
+  <target name="experiment" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="experiment"/>
       <param name="module.jar" value="experiment.jar"/>

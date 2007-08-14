@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # Linux startup script for Resin
-#
 # chkconfig: 345 85 15
 # description: Resin is a Java Web server.
 # processname: wrapper.pl
@@ -11,9 +10,10 @@
 #
 JAVA_HOME=@JAVA_HOME@
 RESIN_HOME=@resin_home@
-PID=$RESIN_HOME/resin.pid
 
 export JAVA_HOME RESIN_HOME
+
+JAVA=$JAVA_HOME/bin/java
 #
 # If you want to start the entire Resin process as a different user,
 # set this to the user name.  If you need to bind to a protected port,
@@ -21,30 +21,62 @@ export JAVA_HOME RESIN_HOME
 #
 USER=
 #
-# You can change this to $RESIN_HOME/bin/resin if you need Resin to
-# bind to port 80, but run as a different user.
+# Set to the server id to start
 #
-EXE=$RESIN_HOME/bin/httpd.sh
+#SERVER="-server app-a"
 #
-# Sets the commandline arguments.
-#
-ARGS="-java_home $JAVA_HOME -resin_home $RESIN_HOME"
+ARGS="-resin_home $RESIN_HOME $SERVER"
+
+if test -x /lib/lsb/init-functions; then
+  . /lib/lsb-init-functions
+else
+
+  log_daemon_msg () {
+      if [ -z "$1" ]; then
+          return 1
+      fi
+
+      if [ -z "$2" ]; then
+          echo -n "$1:"
+          return
+      fi
+    
+      echo -n "$1: $2"
+  }
+  
+  log_end_msg () {
+      [ -z "$1" ] && return 1
+
+      if [ $1 -eq 0 ]; then
+        echo "."
+      else
+        echo " failed!"
+      fi
+    fi
+    
+    return $1
+  }
+
+fi
 
 case "$1" in
   start)
-	echo -n "Starting resin: "
+	log_daemon_msg "Starting resin: "
 	if test -n "$USER"; then
-  	  su $USER -c "$EXE -pid $PID start $ARGS"
+  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start"
 	else
-  	  $EXE -pid $PID start $ARGS
+  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start
         fi
-	echo
+	log_end_msg
 	;;
   stop)
-	echo -n "Shutting down resin: "
-	$EXE -pid $PID stop	
-	echo
-	rm -f $PID
+	log_daemon_msg "Starting resin: "
+	if test -n "$USER"; then
+  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop"
+	else
+  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start
+        fi
+	log_end_msg
 	;;
   restart)
 	$0 stop

@@ -61,7 +61,11 @@ public class QDeepNodeList implements NodeList {
         _changeCount != _top._owner._changeCount) {
       _changeCount = _top._owner._changeCount;
       next = _first;
-      i = _predicate != null && _predicate.isMatch(next) ? 0 : -1;
+
+      if (_predicate != null && next != null && _predicate.isMatch(next))
+	i = 0;
+      else
+	i = -1;
     }
 
     QAbstractNode end = getEnd();

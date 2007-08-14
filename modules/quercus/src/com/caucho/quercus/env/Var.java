@@ -514,6 +514,12 @@ public class Var extends Value
     return _value.toStringBuilder();
   }
 
+  @Override
+  public java.io.InputStream toInputStream()
+  {
+    return _value.toInputStream();
+  }
+
   //
   // Operations
   //
