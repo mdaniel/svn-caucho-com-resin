@@ -731,7 +731,7 @@ public class ApplicationImpl extends Application
       MethodExpression expr
 	= factory.createMethodExpression(elContext, ref, Object.class, param);
 
-      return new MethodBindingAdapter(expr);
+      return new MethodBindingAdapter(expr, param);
     } catch (ELException e) {
       throw new ReferenceSyntaxException(e);
     }

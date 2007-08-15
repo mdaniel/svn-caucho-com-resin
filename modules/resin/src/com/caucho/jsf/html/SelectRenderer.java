@@ -60,10 +60,12 @@ abstract class SelectRenderer extends BaseRenderer
       if (child instanceof UISelectItem) {
 	UISelectItem uiSelectItem = (UISelectItem) child;
 
-	SelectItem item = new SelectItem(uiSelectItem.getItemValue(),
-					 uiSelectItem.getItemLabel(),
-					 uiSelectItem.getItemDescription(),
-					 uiSelectItem.isItemDisabled());
+	SelectItem item = new SelectItem();
+
+	item.setValue(uiSelectItem.getItemValue());
+	item.setLabel(uiSelectItem.getItemLabel());
+	item.setDescription(uiSelectItem.getItemDescription());
+	item.setDisabled(uiSelectItem.isItemDisabled());
 
 	items.add(item);
       }

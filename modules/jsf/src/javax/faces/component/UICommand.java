@@ -159,7 +159,9 @@ public class UICommand extends UIComponentBase
 
       FacesContext context = FacesContext.getCurrentInstance();
 
-      /* jsf/0235
+      // jsf/0235, jsf/31h6
+
+      /*
       ActionListener []listeners = getActionListeners();
 
       for (int i = 0; i < listeners.length; i++)

@@ -37,6 +37,7 @@ import com.caucho.vfs.*;
 
 import javax.servlet.jsp.tagext.*;
 import javax.faces.component.*;
+import javax.faces.event.*;
 import javax.el.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -86,6 +87,9 @@ public class JsfTagNode extends JspContainerNode
     if (name.equals("action")
 	&& ActionSource2.class.isAssignableFrom(_componentClass))
       setterName = "setActionExpression";
+    else if (name.equals("actionListener")
+	     && ActionSource2.class.isAssignableFrom(_componentClass))
+      setterName = "addActionListener";
 
     Method method = findSetter(_componentClass, setterName);
 
@@ -457,6 +461,11 @@ public class JsfTagNode extends JspContainerNode
       if (jspAttr != null) {
 	generateSetParameter(out, _var, jspAttr, method,
 			     true, null, false, null);
+      }
+      else if (ActionListener.class.isAssignableFrom(type)) {
+	String exprVar = "_caucho_method_expr_" + _gen.addMethodExpr(value, "void foo(javax.faces.event.ActionEvent)");
+	
+	out.println(_var + ".addActionListener(new javax.faces.event.MethodExpressionActionListener(" + exprVar + "));");
       }
       else if (_bindingAttr != null && ! "id".equals(attr.getName())
 	       || (value.indexOf("#{") >= 0

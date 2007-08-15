@@ -239,6 +239,8 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     if (disabled)
       out.writeAttribute("disabled", "disabled", "disabled");
 
+    out.write("\n");
+    
     if (! "pageDirection".equals(layout)) {
       out.startElement("tr", component);
     }
@@ -343,35 +345,40 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       
 	out.endElement("input");
 
-	out.startElement("label", child);
-	out.writeAttribute("for", childId, "for");
+	if (selectItem.getItemLabel() != null) {
+	  out.startElement("label", child);
+	  out.writeAttribute("for", childId, "for");
 
-	if (selectItem.isItemDisabled() || disabled) {
-	  if (disabledClass != null)
-	    out.writeAttribute("class", disabledClass, "disabledClass");
-	}
-	else {
-	  if (enabledClass != null)
-	    out.writeAttribute("class", enabledClass, "enabledClass");
-	}
+	  if (selectItem.isItemDisabled() || disabled) {
+	    if (disabledClass != null)
+	      out.writeAttribute("class", disabledClass, "disabledClass");
+	  }
+	  else {
+	    if (enabledClass != null)
+	      out.writeAttribute("class", enabledClass, "enabledClass");
+	  }
 	
-	out.writeText(selectItem.getItemLabel(), "itemLabel");
+	  out.writeText(selectItem.getItemLabel(), "itemLabel");
 	
-	out.endElement("label");
+	  out.endElement("label");
+	}
       }
       
       out.endElement("td");
 
       if ("pageDirection".equals(layout)) {
 	out.endElement("tr");
+	out.write("\n");
       }
     }
 
     if (! "pageDirection".equals(layout)) {
       out.endElement("tr");
+      out.write("\n");
     }
 
     out.endElement("table");
+    out.write("\n");
   }
 
   /**

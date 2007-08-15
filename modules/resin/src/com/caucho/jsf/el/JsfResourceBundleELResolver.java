@@ -134,8 +134,12 @@ public class JsfResourceBundleELResolver extends ELResolver {
 	if (facesContext != null)
 	  locale = facesContext.getViewRoot().getLocale();
 
-	LocalizationContext lc
-	  = _bundleManager.getBundle(bundle.getBaseName(), locale);
+	LocalizationContext lc;
+	
+	lc = _bundleManager.getBundle(bundle.getBaseName(), locale);
+
+	if (lc == null)
+	  lc = _bundleManager.getBundle(bundle.getBaseName());
 
 	if (lc != null)
 	  return lc.getResourceBundle();

@@ -53,7 +53,6 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
       return false;
 
     while (getRow() < row) {
-      System.out.println("ABS:" + getRow() + " " + row);
       if (! next())
 	return false;
     }

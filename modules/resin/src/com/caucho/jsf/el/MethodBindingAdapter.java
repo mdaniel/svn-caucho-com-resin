@@ -37,14 +37,16 @@ import javax.faces.el.*;
 public class MethodBindingAdapter extends MethodBinding implements StateHolder
 {
   private MethodExpression _expr;
+  private Class []_param;
 
   public MethodBindingAdapter()
   {
   }
 
-  public MethodBindingAdapter(MethodExpression expr)
+  public MethodBindingAdapter(MethodExpression expr, Class []param)
   {
     _expr = expr;
+    _param = param;
   }
 
   public String getExpressionString()
@@ -95,9 +97,8 @@ public class MethodBindingAdapter extends MethodBinding implements StateHolder
     ELContext elContext = context.getELContext();
     
     String expr = _expr.getExpressionString();
-    Class []types = _expr.getMethodInfo(elContext).getParamTypes();
 
-    return new Object[] { expr, types };
+    return new Object[] { expr, _param };
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -113,6 +114,7 @@ public class MethodBindingAdapter extends MethodBinding implements StateHolder
 
     _expr = factory.createMethodExpression(context.getELContext(),
 					   expr, Object.class, param);
+    _param = param;
   }
 
   public boolean isTransient()

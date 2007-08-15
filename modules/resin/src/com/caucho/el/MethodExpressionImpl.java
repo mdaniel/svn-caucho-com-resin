@@ -69,7 +69,7 @@ public class MethodExpressionImpl extends MethodExpression
   {
     if (expectedArgs == null)
       throw new NullPointerException();
-    
+
     _expr = expr;
     _expressionString = expressionString;
     _expectedType = expectedType;

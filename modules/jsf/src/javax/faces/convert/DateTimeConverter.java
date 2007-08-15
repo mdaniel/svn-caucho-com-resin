@@ -48,12 +48,14 @@ public class DateTimeConverter implements Converter
   public static final String TIME_ID
     = "javax.faces.converter.DateTimeConverter.TIME";
 
+  private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+
   private String _dateStyle = "default";
   private String _timeStyle = "default";
   private Locale _locale;
 
   private String _pattern;
-  private TimeZone _timeZone = TimeZone.getTimeZone("GMT");
+  private TimeZone _timeZone = GMT;
   private String _type = "date";
 
   private boolean _isTransient;
@@ -158,14 +160,13 @@ public class DateTimeConverter implements Converter
     if (context == null || component == null)
       throw new NullPointerException();
     
-    // XXX: incorrect
     if (value == null)
       return null;
 
+    value = value.trim();
+    
     if (value.length() == 0)
       return null;
-
-    value = value.trim();
 
     DateFormat format = getFormat(context);
 
