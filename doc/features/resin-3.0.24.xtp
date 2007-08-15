@@ -1,0 +1,24 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.24 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="misc bugs">
+
+<ul>
+<li>java:comp/TransactionManager support changes</li>
+<li>SSIServlet updates for includes</li>
+<li>Add port secure="true" (#1801, rep by T Fukuda)</li>
+<li>XML: QDocument needed XmlVersion (#1605)</li>
+<li>EJB collections not closing JDBC connectiond (#1286, rep by plehov)</li>
+</ul>
+
+</section>
+
+</body>
+</document>
