@@ -36,6 +36,7 @@ import com.caucho.quercus.annotation.OffsetGet;
 import com.caucho.quercus.annotation.OffsetUnset;
 import com.caucho.quercus.annotation.OffsetExists;
 import com.caucho.quercus.annotation.OffsetSet;
+import com.caucho.quercus.annotation.ObjectIterator;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
@@ -104,14 +105,15 @@ public class JavaClassDef extends ClassDef {
   private String _offsetGet;
   private String _offsetSet;
   private String _offsetUnset;
+  private ObjectIteratorFactory _iteratorFactory;
 
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
 
   private AbstractJavaMethod _cons;
 
-  private Method _iterator;
-  private Method _keySet;
+  private Method _iteratorMethod;
+  private Method _keySetMethod;
 
   private Marshal _marshal;
 
@@ -665,69 +667,19 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  /**
-   * Returns the field keys.
-   */
-  public Value []getKeyArray(Env env, Object obj)
+  public Iterator<Map.Entry<Value,Value>> getIterator(Env env, Object object)
   {
-    try {
-      if (_keySet == null)
-        return new Value[0];
-      
-      Set set = (Set) _keySet.invoke(obj);
-      Iterator iter = set.iterator();
-
-      ArrayList<Value> values = new ArrayList<Value>();
-      
-      while (iter.hasNext()) {
-        Object objValue = iter.next();
-        
-        if (objValue instanceof Value)
-          values.add((Value) objValue);
-        else
-          values.add(env.wrapJava(objValue));
-      }
-
-      Value []valueArray = new Value[values.size()];
-
-      values.toArray(valueArray);
-
-      return valueArray;
-    } catch (Throwable e) {
-      throw new RuntimeException(e);
-    }
+    return new EntryIterator(env, object);
   }
-  
-  /**
-   * Returns the values for an iterator.
-   */
-  public Value []getValueArray(Env env, Object obj)
+
+  public Iterator<Value> getKeyIterator(Env env, Object object)
   {
-    try {
-      if (_iterator == null)
-        return new Value[0];
+    return new KeyIterator(env, object);
+  }
 
-      Iterator iter = (Iterator) _iterator.invoke(obj);
-
-      ArrayList<Value> values = new ArrayList<Value>();
-
-      while (iter.hasNext()) {
-        Object objValue = iter.next();
-
-        if (objValue instanceof Value)
-          values.add((Value) objValue);
-        else
-          values.add(env.wrapJava(objValue));
-      }
-
-      Value []valueArray = new Value[values.size()];
-
-      values.toArray(valueArray);
-
-      return valueArray;
-    } catch (Throwable e) {
-      throw new RuntimeException(e);
-    }
+  public Iterator<Value> getValueIterator(Env env, Object object)
+  {
+    return new ValueIterator(env, object);
   }
 
   private String toMethod(char []name, int nameLen)
@@ -769,6 +721,9 @@ public class JavaClassDef extends ClassDef {
 
     if (_offsetUnset != null)
       cl.setOffsetUnset(_offsetUnset);
+
+    if (_iteratorFactory != null)
+      cl.setIteratorFactory(_iteratorFactory);
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
@@ -847,12 +802,27 @@ public class JavaClassDef extends ClassDef {
           _cons = null;
       }
 
+
+      for (Annotation annotation : _type.getAnnotations()) {
+        if (annotation.annotationType() == ObjectIterator.class) {
+          Class<? extends ObjectIteratorFactory> cl
+            = ((ObjectIterator) annotation).factory();
+
+          try {
+            _iteratorFactory = cl.newInstance();
+          }
+          catch (Throwable e) {
+            throw new RuntimeException(e);
+          }
+        }
+      }
+
       try {
         Method method = _type.getMethod("iterator", new Class[0]);
 
         if (method != null &&
             Iterator.class.isAssignableFrom(method.getReturnType()))
-          _iterator = method;
+          _iteratorMethod = method;
       } catch (Throwable e) {
       }
       
@@ -861,7 +831,7 @@ public class JavaClassDef extends ClassDef {
 
         if (method != null &&
             Set.class.isAssignableFrom(method.getReturnType()))
-          _keySet = method;
+          _keySetMethod = method;
       } catch (Throwable e) {
       }
       
@@ -967,9 +937,8 @@ public class JavaClassDef extends ClassDef {
         if (annotation.annotationType() == OffsetExists.class)
           _offsetExists = method.getName();
 
-        if (annotation.annotationType() == OffsetGet.class) {
+        if (annotation.annotationType() == OffsetGet.class)
           _offsetGet = method.getName();
-        }
 
         if (annotation.annotationType() == OffsetSet.class)
           _offsetSet = method.getName();
@@ -1113,11 +1082,6 @@ public class JavaClassDef extends ClassDef {
 
   /**
    *
-   * @param env
-   * @param obj
-   * @param out
-   * @param depth
-   * @param valueSet
    * @return false if printRImpl not implemented
    * @throws IOException
    */
@@ -1277,6 +1241,139 @@ public class JavaClassDef extends ClassDef {
     public Value wrap(Env env, Object obj)
     {
       return new JavaURLValue(env, (URL)obj, this);
+    }
+  }
+
+  public class EntryIterator
+    implements Iterator<Map.Entry<Value, Value>>
+  {
+    private final Env _env;
+    private final Object _object;
+
+    private final Iterator<Map.Entry<Value,Value>> _iterator;
+    private final KeyIterator _keyIterator;
+
+    public EntryIterator(Env env, Object object)
+    {
+      _env = env;
+      _object = object;
+
+      if (_iteratorFactory != null)
+        _iterator = getIterator(env, object);
+      else
+        _iterator = null;
+
+      if (_iterator == null)
+        _keyIterator = new KeyIterator(env, object);
+      else
+        _keyIterator = null;
+    }
+
+    public boolean hasNext()
+    {
+      if (_iterator != null)
+        return _iterator.hasNext();
+      else
+        return _keyIterator.hasNext();
+    }
+
+    public Map.Entry<Value, Value> next()
+    {
+      if (_iterator != null)
+        return _iterator.next();
+
+      final Value key = _keyIterator.next();
+      final Value value = getField(_env, _object, key.toString(), false);
+
+      return new Map.Entry<Value, Value>() {
+        public Value getKey() { return key; }
+        public Value getValue() { return value; }
+        public Value setValue(Value value) { throw new UnsupportedOperationException(); }
+      };
+    }
+
+    public void remove()
+    {
+      if (_iterator != null)
+        _iterator.remove();
+      else
+        _keyIterator.remove();
+    }
+  }
+
+  public class KeyIterator
+    implements Iterator<Value>
+  {
+    private final Env _env;
+    private final Iterator<?> _iterator;
+
+    public KeyIterator(Env env, Object object)
+    {
+      _env = env;
+
+      try {
+        if (_iteratorFactory != null)
+          _iterator = getKeyIterator(env, object);
+        else if (_keySetMethod != null)
+          _iterator = ((Set<?>) _keySetMethod.invoke(object)).iterator();
+        else
+          _iterator = Collections.emptyList().iterator();
+      } catch (Throwable e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+
+    public Value next()
+    {
+      return _env.wrapJava(_iterator.next());
+    }
+
+    public void remove()
+    {
+      _iterator.remove();
+    }
+  }
+
+  public class ValueIterator
+    implements Iterator<Value>
+  {
+    private final Env _env;
+    private final Iterator<?> _iterator;
+
+    public ValueIterator(Env env, Object object)
+    {
+      _env = env;
+
+      try {
+        if (_iteratorFactory != null)
+          _iterator = getKeyIterator(env, object);
+        else if (_iteratorMethod != null)
+          _iterator = ((Iterator<?>) _iteratorMethod.invoke(object));
+        else
+          _iterator = Collections.emptyList().iterator();
+      } catch (Throwable e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+
+    public Value next()
+    {
+      return _env.wrapJava(_iterator.next());
+    }
+
+    public void remove()
+    {
+      _iterator.remove();
     }
   }
 }

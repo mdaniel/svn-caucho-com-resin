@@ -35,6 +35,8 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
+import java.util.Iterator;
+
 /**
  * PHP math routines.
  */
@@ -399,15 +401,18 @@ public class MathModule extends AbstractQuercusModule {
     return mt_getrandmax();
   }
 
-  public static Value max(Value []args)
+  public static Value max(Env env, Value []args)
   {
     if (args.length == 1 && args[0] instanceof ArrayValue) {
       Value array = args[0];
       Value max = NullValue.NULL;
       double maxValue = Double.MIN_VALUE;
 
-      for (Value key : array.getIndices()) {
-        Value value = array.get(key);
+      Iterator<Value> iter = array.getValueIterator(env);
+
+      while (iter.hasNext()) {
+        Value value = iter.next();
+
         double dValue = value.toDouble();
 
         if (maxValue < dValue) {
@@ -435,15 +440,18 @@ public class MathModule extends AbstractQuercusModule {
     }
   }
 
-  public static Value min(Value []args)
+  public static Value min(Env env, Value []args)
   {
     if (args.length == 1 && args[0] instanceof ArrayValue) {
       Value array = args[0];
       Value min = NullValue.NULL;
       double minValue = Double.MAX_VALUE;
 
-      for (Value key : array.getIndices()) {
-        Value value = array.get(key);
+      Iterator<Value> iter = array.getValueIterator(env);
+
+      while (iter.hasNext()) {
+        Value value = iter.next();
+
         double dValue = value.toDouble();
 
         if (dValue < minValue) {

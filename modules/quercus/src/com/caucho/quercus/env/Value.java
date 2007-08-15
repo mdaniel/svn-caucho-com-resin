@@ -42,12 +42,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a PHP expression value.
@@ -1600,26 +1595,61 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Returns the field values.
+   * Returns an iterator for the key => value pairs.
    */
-  public Collection<Value> getIndices()
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    return new java.util.ArrayList<Value>();
+    Set<Map.Entry<Value, Value>> emptySet = Collections.emptySet();
+
+    return emptySet.iterator();
+  }
+
+  /**
+   * Returns an iterator for the field keys.
+   * The default implementation uses the Iterator returned
+   * by {@link #getIterator(Env)}; derived classes may override and
+   * provide a more efficient implementation.
+   */
+  public Iterator<Value> getKeyIterator(Env env)
+  {
+    final Iterator<Map.Entry<Value, Value>> iter = getIterator(env);
+
+    return new Iterator<Value>() {
+      public boolean hasNext() { return iter.hasNext(); }
+      public Value next()      { return iter.next().getKey(); }
+      public void remove()     { iter.remove(); }
+    };
   }
 
   /**
    * Returns the field keys.
-   * @param env TODO
    */
-  public Value []getKeyArray(Env env)
+  final public Value []getKeyArray(Env env)
   {
     return NULL_VALUE_ARRAY;
   }
 
   /**
+   * Returns an iterator for the field values.
+   * The default implementation uses the Iterator returned
+   * by {@link #getIterator(Env)}; derived classes may override and
+   * provide a more efficient implementation.
+   */
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    final Iterator<Map.Entry<Value, Value>> iter = getIterator(env);
+
+    return new Iterator<Value>() {
+      public boolean hasNext() { return iter.hasNext(); }
+      public Value next()      { return iter.next().getValue(); }
+      public void remove()     { iter.remove(); }
+    };
+  }
+
+  /**
    * Returns the field values.
    */
-  public Value []getValueArray(Env env)
+  final public Value []getValueArray(Env env)
   {
     return NULL_VALUE_ARRAY;
   }

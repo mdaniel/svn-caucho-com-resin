@@ -35,8 +35,9 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Represents a reference to a PHP variable in a function call.
@@ -54,6 +55,7 @@ public class RefVar extends Value
   /**
    * Returns true for an implementation of a class
    */
+  @Override
   public boolean isA(String name)
   {
     return _var.isA(name);
@@ -62,6 +64,7 @@ public class RefVar extends Value
   /**
    * True for a long
    */
+  @Override
   public boolean isLongConvertible()
   {
     return _var.isLongConvertible();
@@ -70,6 +73,7 @@ public class RefVar extends Value
   /**
    * True to a double.
    */
+  @Override
   public boolean isDoubleConvertible()
   {
     return _var.isDoubleConvertible();
@@ -78,6 +82,7 @@ public class RefVar extends Value
   /**
    * True for a number
    */
+  @Override
   public boolean isNumberConvertible()
   {
     return _var.isNumberConvertible();
@@ -86,6 +91,7 @@ public class RefVar extends Value
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return _var.toBoolean();
@@ -94,6 +100,7 @@ public class RefVar extends Value
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return _var.toLong();
@@ -102,6 +109,7 @@ public class RefVar extends Value
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     return _var.toDouble();
@@ -111,6 +119,7 @@ public class RefVar extends Value
    * Converts to a string.
    * @param env
    */
+  @Override
   public StringValue toString(Env env)
   {
     return _var.toString(env);
@@ -119,6 +128,7 @@ public class RefVar extends Value
   /**
    * Converts to an object.
    */
+  @Override
   public Value toObject(Env env)
   {
     return _var.toObject(env);
@@ -127,6 +137,7 @@ public class RefVar extends Value
   /**
    * Converts to an object.
    */
+  @Override
   public Object toJavaObject()
   {
     return _var.toJavaObject();
@@ -135,6 +146,7 @@ public class RefVar extends Value
   /**
    * Converts to a raw value.
    */
+  @Override
   public Value toValue()
   {
     return _var.toValue();
@@ -143,6 +155,7 @@ public class RefVar extends Value
   /**
    * Returns true for an object.
    */
+  @Override
   public boolean isObject()
   {
     return _var.isObject();
@@ -151,6 +164,7 @@ public class RefVar extends Value
   /**
    * Returns true for an array.
    */
+  @Override
   public boolean isArray()
   {
     return _var.isArray();
@@ -159,6 +173,7 @@ public class RefVar extends Value
   /**
    * Copy the value.
    */
+  @Override
   public Value copy()
   {
     // quercus/0d05
@@ -214,6 +229,7 @@ public class RefVar extends Value
   /**
    * Negates the value.
    */
+  @Override
   public Value neg()
   {
     return _var.neg();
@@ -222,6 +238,7 @@ public class RefVar extends Value
   /**
    * Adds to the following value.
    */
+  @Override
   public Value add(Value rValue)
   {
     return _var.add(rValue);
@@ -230,6 +247,7 @@ public class RefVar extends Value
   /**
    * Adds to the following value.
    */
+  @Override
   public Value add(long rValue)
   {
     return _var.add(rValue);
@@ -238,6 +256,7 @@ public class RefVar extends Value
   /**
    * Pre-increment the following value.
    */
+  @Override
   public Value preincr(int incr)
   {
     return _var.preincr(incr);
@@ -246,6 +265,7 @@ public class RefVar extends Value
   /**
    * Post-increment the following value.
    */
+  @Override
   public Value postincr(int incr)
   {
     return _var.postincr(incr);
@@ -254,6 +274,7 @@ public class RefVar extends Value
   /**
    * Subtracts to the following value.
    */
+  @Override
   public Value sub(Value rValue)
   {
     return _var.sub(rValue);
@@ -262,6 +283,7 @@ public class RefVar extends Value
   /**
    * Subtracts to the following value.
    */
+  @Override
   public Value sub(long rValue)
   {
     return _var.sub(rValue);
@@ -270,6 +292,7 @@ public class RefVar extends Value
   /**
    * Multiplies to the following value.
    */
+  @Override
   public Value mul(Value rValue)
   {
     return _var.mul(rValue);
@@ -278,6 +301,7 @@ public class RefVar extends Value
   /**
    * Multiplies to the following value.
    */
+  @Override
   public Value mul(long lValue)
   {
     return _var.mul(lValue);
@@ -286,6 +310,7 @@ public class RefVar extends Value
   /**
    * Divides the following value.
    */
+  @Override
   public Value div(Value rValue)
   {
     return _var.div(rValue);
@@ -294,6 +319,7 @@ public class RefVar extends Value
   /**
    * Shifts left by the value.
    */
+  @Override
   public Value lshift(Value rValue)
   {
     return _var.lshift(rValue);
@@ -302,6 +328,7 @@ public class RefVar extends Value
   /**
    * Shifts right by the value.
    */
+  @Override
   public Value rshift(Value rValue)
   {
     return _var.rshift(rValue);
@@ -310,46 +337,43 @@ public class RefVar extends Value
   /**
    * Returns true for equality
    */
-  public boolean eql(Value rValue, Env env)
+  @Override
+  public boolean eql(Value rValue)
   {
-    return _var.equals(rValue.toValue());
+    return _var.eql(rValue);
   }
 
   /**
    * Returns the array/object size
    */
+  @Override
   public int getSize()
   {
     return _var.getSize();
   }
 
-  /**
-   * Returns the field values.
-   */
-  public Collection<Value> getIndices()
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    return _var.getIndices();
+    return _var.getIterator(env);
   }
 
-  /**
-   * Returns the array keys.
-   */
-  public Value []getKeyArray(Env env)
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
   {
-    return _var.getKeyArray(env);
+    return _var.getKeyIterator(env);
   }
 
-  /**
-   * Returns the array values.
-   */
-  public Value []getValueArray(Env env)
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
   {
-    return _var.getValueArray(env);
+    return _var.getValueIterator(env);
   }
 
   /**
    * Returns the array ref.
    */
+  @Override
   public Value get(Value index)
   {
     return _var.get(index);
@@ -358,6 +382,7 @@ public class RefVar extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value getRef(Value index)
   {
     return _var.getRef(index);
@@ -366,6 +391,7 @@ public class RefVar extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value put(Value index, Value value)
   {
     return _var.put(index, value);
@@ -374,6 +400,7 @@ public class RefVar extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value put(Value value)
   {
     return _var.put(value);
@@ -564,6 +591,7 @@ public class RefVar extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     return _var.callClassMethod(env, fun, args);
@@ -573,11 +601,13 @@ public class RefVar extends Value
    * Prints the value.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
     _var.print(env);
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -588,6 +618,7 @@ public class RefVar extends Value
     toValue().varDumpImpl(env, out, depth, valueSet);
   }
 
+  @Override
   protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,
@@ -600,7 +631,7 @@ public class RefVar extends Value
   //
   // Java Serialization
   //
-  
+
   public Object writeReplace()
   {
     return _var;

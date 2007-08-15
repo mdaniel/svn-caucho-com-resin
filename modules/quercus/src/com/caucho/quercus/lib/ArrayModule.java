@@ -634,10 +634,10 @@ public class ArrayModule
       }
 
       try {
-        Value []keyArray = array.getKeyArray(env);
+        Iterator<Value> iter = array.getKeyIterator(env);
 
-        for (int i = 0; i < keyArray.length; i++) {
-          Value key = keyArray[i];
+        while (iter.hasNext()) {
+          Value key = iter.next();
           Value val = array.getRaw(key);
 
           boolean isMatch = callback.call(env, array, key, val).toBoolean();
@@ -2600,10 +2600,12 @@ public class ArrayModule
   private static void permute(Env env, ArrayValue array,
 			      LongValue[] permutation)
   {
-    Value[] values = array.getValueArray(env);
-    for (int i = 0; i < permutation.length; i++)
-      array.put(LongValue.create(i),
-		values[(int)permutation[i].toLong()]);
+    Value[] values = array.valuesToArray();
+
+    for (int i = 0; i < permutation.length; i++) {
+      Value value = values[(int)permutation[i].toLong()];
+      array.put(LongValue.create(i), value.toValue().copy());
+    }
   }
 
 

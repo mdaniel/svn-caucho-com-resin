@@ -47,6 +47,7 @@ public class ArgObjectGetValue extends Value {
   /**
    * Returns the value for a get arg.
    */
+  @Override
   public Value getArg(Value index)
   {
     // quercus/3d2u
@@ -56,6 +57,7 @@ public class ArgObjectGetValue extends Value {
   /**
    * Converts to a ref var.
    */
+  @Override
   public Var toRefVar()
   {
     // quercus/3d2t

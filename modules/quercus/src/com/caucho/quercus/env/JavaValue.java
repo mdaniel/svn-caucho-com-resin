@@ -41,6 +41,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
@@ -65,6 +66,7 @@ public class JavaValue extends ResourceValue
     _object = object;
   }
 
+  @Override
   public String getClassName()
   {
     return _classDef.getName();
@@ -129,6 +131,7 @@ public class JavaValue extends ResourceValue
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return "object";
@@ -137,6 +140,7 @@ public class JavaValue extends ResourceValue
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return true;
@@ -145,6 +149,7 @@ public class JavaValue extends ResourceValue
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     String s = toString();
@@ -155,6 +160,7 @@ public class JavaValue extends ResourceValue
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     String s = toString();
@@ -165,11 +171,13 @@ public class JavaValue extends ResourceValue
   /**
    * Converts to a key.
    */
+  @Override
   public Value toKey()
   {
     return new LongValue(System.identityHashCode(this));
   }
 
+  @Override
   public boolean isA(String name)
   {
     return _classDef.isA(name);
@@ -178,6 +186,7 @@ public class JavaValue extends ResourceValue
   /**
    * Returns the method.
    */
+  @Override
   public AbstractFunction findFunction(String methodName)
   {
     return _classDef.findFunction(methodName);
@@ -348,25 +357,28 @@ public class JavaValue extends ResourceValue
                                 a1, a2, a3, a4, a5);
   }
 
-  /**
-   * Returns the field keys.
-   */
-  public Value []getKeyArray(Env env)
+  @Override
+  public Iterator<Map.Entry<Value,Value>> getIterator(Env env)
   {
-    return _classDef.getKeyArray(env, _object);
+    return _classDef.getIterator(env, _object);
   }
-  
-  /**
-   * Returns the iterator values.
-   */
-  public Value []getValueArray(Env env)
+
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
   {
-    return _classDef.getValueArray(env, _object);
+    return _classDef.getKeyIterator(env, _object);
   }
-  
+
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    return _classDef.getValueIterator(env, _object);
+  }
+
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(StringBuilder sb)
   {
     log.fine("Quercus: can't serialize " + _object.getClass());
@@ -377,6 +389,7 @@ public class JavaValue extends ResourceValue
   /**
    * Converts to a string.
    */
+  @Override
   public String toString()
   {
     // php/1x0b

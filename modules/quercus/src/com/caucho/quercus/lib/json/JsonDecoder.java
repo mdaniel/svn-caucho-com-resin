@@ -288,7 +288,7 @@ class JsonDecoder {
       if (ch != ':')
         return errorReturn(env, "expected ':'");
 
-      object.putFieldInit(env, name.toString(), jsonDecodeImpl(env));
+      object.putField(env, name.toString(), jsonDecodeImpl(env));
 
       ch = skipWhitespace();
 

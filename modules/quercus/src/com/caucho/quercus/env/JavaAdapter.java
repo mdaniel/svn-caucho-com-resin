@@ -380,9 +380,7 @@ abstract public class JavaAdapter extends ArrayValue
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * Returns the field keys.
-   */
+  /* XXX:: dead code
   public Value []getKeyArray(Env env)
   {
     int size = getSize();
@@ -400,14 +398,12 @@ abstract public class JavaAdapter extends ArrayValue
     return keys;
   }
 
-  /**
-   * Returns the field values.
-   */
   public Value []getValueArray(Env env)
   {
     //XXX: alias?
     return valuesToArray();
   }
+  */
 
   /**
    * Gets a new value.
@@ -450,7 +446,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns a java object set of all the entries.
    */
-  abstract public Set<Map.Entry> objectEntrySet();
+  abstract public Set<Map.Entry<Object,Object>> objectEntrySet();
   
   /**
    * Returns a collection of the values.

@@ -29,26 +29,24 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.program.JavaClassDef;
 
-import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.UnimplementedException;
-
-import java.util.*;
-import java.util.logging.*;
+import java.util.AbstractCollection;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a marshalled Collection argument.
  */
 public class JavaCollectionAdapter extends JavaAdapter
 {
-  private static final Logger log
-    = Logger.getLogger(JavaCollectionAdapter.class.getName());
+  private Collection<Object> _collection;
 
-  //XXX: parameterized type
-  private Collection _collection;
-
-  public JavaCollectionAdapter(Env env, Collection coll, JavaClassDef def)
+  public JavaCollectionAdapter(Env env, Collection<Object> coll, JavaClassDef def)
   {
     super(env, coll, def);
     
@@ -58,16 +56,12 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Clears the array
    */
+  @Override
   public void clear()
   {
     _collection.clear();
   }
 
-  public int size()
-  {
-    return _collection.size();
-  }
-  
   //
   // Conversions
   //
@@ -75,6 +69,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Copy for assignment.
    */
+  @Override
   public Value copy()
   {
     try {
@@ -94,22 +89,25 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Returns the size.
    */
+  @Override
   public int getSize()
   {
-    return size();
+    return _collection.size();
   }
 
   /**
    * Creatse a tail index.
    */
+  @Override
   public Value createTailKey()
   {
-    return LongValue.create(size());
+    return LongValue.create(getSize());
   }
-  
+
+  @Override
   public Value putImpl(Value key, Value value)
   {
-    if (key.toInt() != size())
+    if (key.toInt() != getSize())
       throw new UnsupportedOperationException("random assignment into Collection");
     
     _collection.add(value.toJavaObject());
@@ -120,6 +118,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Gets a new value.
    */
+  @Override
   public Value get(Value key)
   {
     int pos = key.toInt();
@@ -140,9 +139,9 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Removes a value.
    */
+  @Override
   public Value remove(Value key)
   { 
-    int i = 0;
     int pos = key.toInt();
     
     if (pos < 0)
@@ -164,6 +163,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Returns a set of all the of the entries.
    */
+  @Override
   public Set<Map.Entry<Value,Value>> entrySet()
   {
     return new CollectionValueSet();
@@ -172,7 +172,8 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Returns a collection of the values.
    */
-  public Set<Map.Entry> objectEntrySet()
+  @Override
+  public Set<Map.Entry<Object,Object>> objectEntrySet()
   {
     return new CollectionSet();
   }
@@ -180,51 +181,60 @@ public class JavaCollectionAdapter extends JavaAdapter
   /**
    * Returns a collection of the values.
    */
+  @Override
   public Collection<Value> values()
   {
     return new ValueCollection();
   }
 
-  public Value []getValueArray(Env env)
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    Value[] values = new Value[getSize()];
+    return new CollectionValueIterator();
+  }
 
-    int i = 0;
-    for (Object ob: _collection) {
-      values[i++] = env.wrapJava(ob);
-    }
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
+  {
+    return new KeyIterator();
+  }
 
-    return values;
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    return new ValueIterator();
   }
 
   public class CollectionSet
-    extends AbstractSet<Map.Entry>
+    extends AbstractSet<Map.Entry<Object,Object>>
   {
     CollectionSet()
     {
     }
 
+    @Override
     public int size()
     {
       return getSize();
     }
 
-    public Iterator<Map.Entry> iterator()
+    @Override
+    public Iterator<Map.Entry<Object,Object>> iterator()
     {
-      return new CollectionIterator(_collection);
+      return new CollectionIterator();
     }
   }
   
   public class CollectionIterator
-    implements Iterator
+    implements Iterator<Map.Entry<Object,Object>>
   {
     private int _index;
     private Iterator _iterator;
 
-    public CollectionIterator(Collection collection)
+    public CollectionIterator()
     {
       _index = 0;
-      _iterator = collection.iterator();
+      _iterator = _collection.iterator();
     }
 
     public boolean hasNext()
@@ -232,7 +242,7 @@ public class JavaCollectionAdapter extends JavaAdapter
       return _iterator.hasNext();
     }
 
-    public Map.Entry next()
+    public Map.Entry<Object, Object> next()
     {
       return new CollectionEntry(_index++, _iterator.next());
     }
@@ -244,7 +254,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   }
 
   public static class CollectionEntry
-    implements Map.Entry
+    implements Map.Entry<Object,Object>
   {
     private final int _key;
     private Object _value;
@@ -257,7 +267,7 @@ public class JavaCollectionAdapter extends JavaAdapter
 
     public Object getKey()
     {
-      return Long.valueOf(_key);
+      return _key;
     }
 
     public Object getValue()
@@ -281,15 +291,17 @@ public class JavaCollectionAdapter extends JavaAdapter
     CollectionValueSet()
     {
     }
-  
+
+    @Override
     public int size()
     {
       return getSize();
     }
-  
+
+    @Override
     public Iterator<Map.Entry<Value,Value>> iterator()
     {
-      return new CollectionValueIterator(_collection);
+      return new CollectionValueIterator();
     }
   }
 
@@ -299,10 +311,10 @@ public class JavaCollectionAdapter extends JavaAdapter
     private int _index;
     private Iterator _iterator;
 
-    public CollectionValueIterator(Collection collection)
+    public CollectionValueIterator()
     {
       _index = 0;
-      _iterator = collection.iterator();
+      _iterator = _collection.iterator();
     }
 
     public boolean hasNext()
@@ -362,14 +374,46 @@ public class JavaCollectionAdapter extends JavaAdapter
     {
     }
 
+    @Override
     public int size()
     {
       return getSize();
     }
 
+    @Override
     public Iterator<Value> iterator()
     {
-      return new ValueIterator(_collection);
+      return new ValueIterator();
+    }
+  }
+
+  public class KeyIterator
+    implements Iterator<Value>
+  {
+    private int _index;
+    private Iterator _iterator;
+
+    public KeyIterator()
+    {
+      _index = 0;
+      _iterator = _collection.iterator();
+    }
+
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+
+    public Value next()
+    {
+      _iterator.next();
+
+      return LongValue.create(_index++);
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
     }
   }
 
@@ -378,9 +422,9 @@ public class JavaCollectionAdapter extends JavaAdapter
   {
     private Iterator _iterator;
 
-    public ValueIterator(Collection collection)
+    public ValueIterator()
     {
-      _iterator = collection.iterator();
+      _iterator = _collection.iterator();
     }
 
     public boolean hasNext()

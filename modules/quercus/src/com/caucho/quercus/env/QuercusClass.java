@@ -42,11 +42,7 @@ import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.util.IdentityIntMap;
 import com.caucho.util.L10N;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -72,6 +68,7 @@ public class QuercusClass {
   private String _offsetGet;
   private String _offsetSet;
   private String _offsetUnset;
+  private ObjectIteratorFactory _iteratorFactory;
 
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
@@ -135,10 +132,6 @@ public class QuercusClass {
     
     _classDefList = classDefList;
 
-    for (int i = classDefList.length - 1; i >= 0; i--) {
-      classDefList[i].initClass(this);
-    }
-
     // interfaces XXX: should these be added to _classDefList?
     for (int i = classDefList.length - 1; i >= 0; i--) {
 
@@ -151,6 +144,12 @@ public class QuercusClass {
           ifaceDef.initClass(this);
       }
     }
+
+    // classes initClass() after interfaces, php/4a21
+    for (int i = classDefList.length - 1; i >= 0; i--) {
+      classDefList[i].initClass(this);
+    }
+
   }
 
   /**
@@ -212,6 +211,14 @@ public class QuercusClass {
   public void setOffsetUnset(String offsetUnset)
   {
     _offsetUnset = offsetUnset;
+  }
+
+  /**
+   * Set's a function to use for array access.
+   */
+  public void setIteratorFactory(ObjectIteratorFactory iteratorFactory)
+  {
+    _iteratorFactory = iteratorFactory;
   }
 
   /**
@@ -312,8 +319,7 @@ public class QuercusClass {
    */
   public void addMethod(String name, AbstractFunction fun)
   {
-    if (!_methodMap.containsKey(name)) // php/4a20
-      _methodMap.put(name, fun);
+    _methodMap.put(name, fun);
   }
 
   /**
@@ -526,6 +532,41 @@ public class QuercusClass {
     env.error(location, L.l("Can't use object '{0}' as array", obj.getName()));
 
     return NullValue.NULL;
+  }
+
+  /**
+   * Returns the key => value pairs.
+   */
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
+  {
+    if (_iteratorFactory != null)
+      return _iteratorFactory.getIterator(env, obj);
+    else {
+      env.stub("XXX: unimplemented " + this + " getIterator");
+      return null;
+    }
+  }
+
+  /**
+   * Returns the array keys.
+   */
+  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
+  {
+    if (_iteratorFactory != null)
+      return _iteratorFactory.getKeyIterator(env, obj);
+    else
+      return null;
+  }
+
+  /**
+   * Returns the array values.
+   */
+  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
+  {
+    if (_iteratorFactory != null)
+      return _iteratorFactory.getKeyIterator(env, obj);
+    else
+      return null;
   }
 
   public Value get(Env env, ObjectValue obj, Value key)

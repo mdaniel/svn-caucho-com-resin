@@ -67,7 +67,7 @@ public class JavaListAdapter
   public Value putImpl(Value key, Value value)
   {
     int pos = key.toInt();
-    int size = size();
+    int size = getSize();
     
     if (0 <= pos && pos <= size) {
       if (pos < size)
@@ -92,7 +92,7 @@ public class JavaListAdapter
   { 
     int pos = key.toInt();
     
-    if (0 <= pos && pos < size())
+    if (0 <= pos && pos < getSize())
       return wrapJava(_list.get(pos));
     else
       return UnsetValue.UNSET;
@@ -105,7 +105,7 @@ public class JavaListAdapter
   {
     int pos = key.toInt();
     
-    if (0 <= pos && pos < size())
+    if (0 <= pos && pos < getSize())
       return wrapJava(_list.remove(pos));
     else
       return UnsetValue.UNSET;
@@ -116,7 +116,7 @@ public class JavaListAdapter
    */
   public Value pop()
   {    
-    if (size() == 0)
+    if (getSize() == 0)
       return BooleanValue.FALSE;
     
     return wrapJava(_list.remove(0));

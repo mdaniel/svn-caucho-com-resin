@@ -37,6 +37,9 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.AbstractVarExpr;
 import com.caucho.quercus.expr.Expr;
 
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Represents a foreach statement.
  */
@@ -73,11 +76,17 @@ public class ForeachStatement
   public Value execute(Env env)
   {
     Value origObj = _objExpr.eval(env);
-    Value obj = origObj.copy();
+    Value obj = origObj.copy(); // php/0669
 
     if (_key == null && ! _isRef) {
-      
-      for (Value value : obj.getValueArray(env)) {
+
+      Iterator<Value> iter = obj.getValueIterator(env);
+
+      while (iter.hasNext()) {
+        Value value = iter.next();
+
+        value = value.copy(); // php/0662
+
         _value.evalAssign(env, value);
 
         Value result = _block.execute(env);
@@ -91,51 +100,49 @@ public class ForeachStatement
       }
 
       return null;
-    } else {
-      if (_isRef) {
-        Value []keys = obj.getKeyArray(env);
-        
-        for (int i = 0; i < keys.length; i++) {
-          Value key = keys[i];
+    } else if (_isRef) {
+      Iterator<Value> iter = obj.getKeyIterator(env);
 
-          if (_key != null)
-            _key.evalAssign(env, key);
+      while (iter.hasNext()) {
+        Value key = iter.next();
 
-          Value value = origObj.getRef(key);
+        if (_key != null)
+          _key.evalAssign(env, key);
 
-          _value.evalAssign(env, value);
+        Value value = origObj.getRef(key);
 
-          Value result = _block.execute(env);
+        _value.evalAssign(env, value);
 
-          if (result == null || result instanceof ContinueValue) {
-          } else if (result instanceof BreakValue)
-            return null;
-          else
-            return result;
-        }
+        Value result = _block.execute(env);
+
+        if (result == null || result instanceof ContinueValue) {
+        } else if (result instanceof BreakValue)
+          return null;
+        else
+          return result;
       }
-      else {
-        Value []keys = obj.getKeyArray(env);
-        Value []values = obj.getValueArray(env);
-        
-        for (int i = 0; i < keys.length; i++) {
-          Value key = keys[i];
-          
-          if (_key != null)
-            _key.evalAssign(env, key);
+    }
+    else {
+      Iterator<Map.Entry<Value,Value>> iter = obj.getIterator(env);
 
-          Value value = values[i].toValue();
+      while (iter.hasNext()) {
+        Map.Entry<Value, Value> entry = iter.next();
+        Value key = entry.getKey();
+        Value value = entry.getValue();
 
-          _value.evalAssign(env, value);
+        value = value.copy(); // php/066w
 
-          Value result = _block.execute(env);
+        _key.evalAssign(env, key);
 
-          if (result == null || result instanceof ContinueValue) {
-          } else if (result instanceof BreakValue)
-            return null;
-          else
-            return result;
-        }
+        _value.evalAssign(env, value);
+
+        Value result = _block.execute(env);
+
+        if (result == null || result instanceof ContinueValue) {
+        } else if (result instanceof BreakValue)
+          return null;
+        else
+          return result;
       }
     }
 

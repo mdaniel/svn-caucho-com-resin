@@ -38,6 +38,7 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
 import java.util.Map;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -168,11 +169,14 @@ public class ClassesModule extends AbstractQuercusModule {
    */
   public static Value get_object_vars(Env env, Value obj)
   {
-    //
     ArrayValue result = new ArrayValueImpl();
 
-    for (Value name : obj.getIndices()) {
-      result.put(name, obj.getField(env, name.toString().intern()));
+    Iterator<Map.Entry<Value,Value>> iter = obj.getIterator(env);
+
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+
+      result.put(entry.getKey(), entry.getValue());
     }
 
     return result;

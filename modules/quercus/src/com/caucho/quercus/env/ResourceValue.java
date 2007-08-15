@@ -46,6 +46,7 @@ public class ResourceValue extends Value implements Closeable {
   /**
    * Converts to a key.
    */
+  @Override
   public Value toKey()
   {
     return new LongValue(System.identityHashCode(this));
@@ -54,6 +55,7 @@ public class ResourceValue extends Value implements Closeable {
   /**
    * Converts to a string.
    */
+  @Override
   public String toString()
   {
     return "ResourceValue[]";

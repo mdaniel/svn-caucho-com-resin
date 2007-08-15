@@ -29,13 +29,16 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.program.JavaClassDef;
 
-import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.UnimplementedException;
-
-import java.util.*;
-import java.util.logging.*;
+import java.util.AbstractCollection;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Represents a marshalled Map argument.
@@ -46,8 +49,7 @@ public class JavaMapAdapter
   private static final Logger log
     = Logger.getLogger(JavaMapAdapter.class.getName());
   
-  //XXX: parameterized type
-  private Map _map;
+  private Map<Object,Object> _map;
   
   private long _nextAvailableIndex;
 
@@ -67,6 +69,7 @@ public class JavaMapAdapter
   /**
    * Clears the array
    */
+  @Override
   public void clear()
   {
     _map.clear();
@@ -99,6 +102,7 @@ public class JavaMapAdapter
   /**
    * Copy for assignment.
    */
+  @Override
   public Value copy()
   {
     try {
@@ -118,6 +122,7 @@ public class JavaMapAdapter
   /**
    * Returns the size.
    */
+  @Override
   public int getSize()
   {
     return size();
@@ -126,6 +131,7 @@ public class JavaMapAdapter
   /**
    * Gets a new value.
    */
+  @Override
   public Value get(Value key)
   {
     Object obj = _map.get(key.toJavaObject());
@@ -139,6 +145,7 @@ public class JavaMapAdapter
   /**
    * Removes a value.
    */
+  @Override
   public Value remove(Value key)
   {
     updateNextAvailableIndex();
@@ -169,6 +176,7 @@ public class JavaMapAdapter
   /**
    * Creatse a tail index.
    */
+  @Override
   public Value createTailKey()
   {
     updateNextAvailableIndex();
@@ -178,6 +186,7 @@ public class JavaMapAdapter
   /**
    * Adds a new value.
    */
+  @Override
   public Value putImpl(Value key, Value value)
   {
     Object keyObject;
@@ -195,10 +204,17 @@ public class JavaMapAdapter
     
     return val;
   }
-  
+
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
+  {
+    return new MapIterator();
+  }
+
   /**
    * Returns a set of all the of the entries.
    */
+  @Override
   public Set<Map.Entry<Value,Value>> entrySet()
   {
     return new MapSet();
@@ -207,7 +223,8 @@ public class JavaMapAdapter
   /**
    * Returns a collection of the values.
    */
-  public Set<Map.Entry> objectEntrySet()
+  @Override
+  public Set<Map.Entry<Object, Object>> objectEntrySet()
   {
     return _map.entrySet();
   }
@@ -215,23 +232,12 @@ public class JavaMapAdapter
   /**
    * Returns a collection of the values.
    */
+  @Override
   public Collection<Value> values()
   {
     return new ValueCollection();
   }
 
-  public Value []getValueArray(Env env)
-  {
-    Value[] values = new Value[getSize()];
-
-    int i = 0;
-    for (Object entry: _map.values()) {
-      values[i++] = env.wrapJava(entry);
-    }
-
-    return values;
-  }
-  
   /**
    * Updates _nextAvailableIndex on a remove of the highest value
    */
@@ -264,25 +270,27 @@ public class JavaMapAdapter
     {
     }
 
+    @Override
     public int size()
     {
       return getSize();
     }
 
+    @Override
     public Iterator<Map.Entry<Value,Value>> iterator()
     {
-      return new MapIterator(_map);
+      return new MapIterator();
     }
   }
 
   public class MapIterator
     implements Iterator<Map.Entry<Value,Value>>
   {
-    private Iterator<Map.Entry> _iterator;
+    private Iterator<Map.Entry<Object,Object>> _iterator;
 
-    public MapIterator(Map map)
+    public MapIterator()
     {
-      _iterator = map.entrySet().iterator();
+      _iterator = _map.entrySet().iterator();
     }
 
     public boolean hasNext()
@@ -345,11 +353,13 @@ public class JavaMapAdapter
     {
     }
 
+    @Override
     public int size()
     {
       return getSize();
     }
 
+    @Override
     public Iterator<Value> iterator()
     {
       return new ValueIterator(_map.values());

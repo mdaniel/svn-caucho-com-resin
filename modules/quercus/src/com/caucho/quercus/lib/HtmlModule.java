@@ -40,6 +40,8 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Iterator;
 
 /**
  * PHP functions implementing html code.
@@ -176,31 +178,20 @@ public class HtmlModule extends AbstractQuercusModule {
     if (string.length() == 0)
       return StringValue.EMPTY;
 
-   // StringBuilder result = new StringBuilder();
+    Iterator<Map.Entry<Value,Value>> iter
+      = HTML_SPECIALCHARS_ARRAY.getIterator(env);
 
-   // int i = 0;
-    //int length = string.length();
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      StringValue key = entry.getKey().toStringValue();
+      StringValue value = entry.getValue().toStringValue();
 
-    // generate keys & values for preg_replace
-   // ArrayValue decodedArray = new ArrayValueImpl();
-    //ArrayValue encodedArray = new ArrayValueImpl();
-
-    Value[] keys = HTML_SPECIALCHARS_ARRAY.getKeyArray(env);
-    Value[] values = HTML_SPECIALCHARS_ARRAY.getValueArray(env);
-    int length = keys.length;
-    for (int i = 0; i < length; i++) {
       string = RegexpModule.ereg_replace(env,
-					 values[i].toStringValue(),
-					 keys[i].toStringValue(),
-					 string).toStringValue();
+                                         value,
+                                         key,
+                                         string).toStringValue();
     }
-    /*
-    Value value = QuercusRegexpModule.preg_replace(env,
-                                                   encodedArray,
-                                                   decodedArray,
-                                                   new StringValueImpl(string),
-                                                   -1,
-                                                   null);*/
+
     return string;
   }
 

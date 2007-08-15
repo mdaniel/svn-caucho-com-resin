@@ -774,7 +774,7 @@ public class MiscModule extends AbstractQuercusModule {
 
     ObjectValue object = env.createObject();
     for (Map.Entry<Value,Value> entry : capabilities.entrySet()) {
-      object.putFieldInit(env, entry.getKey().toString(), entry.getValue());
+      object.putField(env, entry.getKey().toString(), entry.getValue());
     }
     
     return object;

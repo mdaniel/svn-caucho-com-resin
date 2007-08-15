@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 /**
  * Represents a compiled object value.
@@ -72,6 +73,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the class name.
    */
+  @Override
   public String getName()
   {
     return _cl.getName();
@@ -80,6 +82,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the parent class
    */
+  @Override
   public String getParentName()
   {
     return _cl.getParentName();
@@ -88,6 +91,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return "object";
@@ -96,6 +100,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return true;
@@ -104,6 +109,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns true for an implementation of a class
    */
+  @Override
   public boolean isA(String name)
   {
     return _cl.isA(name);
@@ -112,6 +118,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns true for an object.
    */
+  @Override
   public boolean isObject()
   {
     return true;
@@ -120,6 +127,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return 1;
@@ -128,11 +136,13 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     return toLong();
   }
 
+  @Override
   public CompiledObjectValue toObjectValue()
   {
     return this;
@@ -141,6 +151,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the number of entries.
    */
+  @Override
   public int getSize()
   {
     int size = 0;
@@ -184,6 +195,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the array ref.
    */
+  @Override
   public Var getFieldRef(Env env, String key)
   {
     if (_fields.length > 0) {
@@ -207,6 +219,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the value as an argument which may be a reference.
    */
+  @Override
   public Value getFieldArg(Env env, String key)
   {
     if (_fields.length > 0) {
@@ -230,6 +243,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the value as an argument which may be a reference.
    */
+  @Override
   public Value getFieldArgRef(Env env, String key)
   {
     if (_fields.length > 0) {
@@ -253,6 +267,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns field as an array.
    */
+  @Override
   public Value getFieldArray(Env env, String key)
   {
     if (_fields.length > 0) {
@@ -274,6 +289,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns field as an object.
    */
+  @Override
   public Value getFieldObject(Env env, String key)
   {
     if (_fields.length > 0) {
@@ -301,6 +317,7 @@ public class CompiledObjectValue extends ObjectValue
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public Value put(Value index, Value value)
   {
     throw new UnsupportedOperationException();
@@ -314,6 +331,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Adds a new value.
    */
+  @Override
   public Value putField(Env env, String key, Value value)
   {
     if (_fields.length > 0) {
@@ -335,6 +353,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Adds a new value.
    */
+  @Override
   public Value putField(String key, String value)
   {
     return putField(null, key, new UnicodeValueImpl(value));
@@ -343,6 +362,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Adds a new value.
    */
+  @Override
   public Value putField(String key, long value)
   {
     return putField(null, key, LongValue.create(value));
@@ -351,6 +371,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Adds a new value.
    */
+  @Override
   public Value putField(String key, double value)
   {
     return putField(null, key, DoubleValue.create(value));
@@ -359,6 +380,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Removes a value.
    */
+  @Override
   public void removeField(String key)
   {
     if (_fields.length > 0) {
@@ -376,42 +398,51 @@ public class CompiledObjectValue extends ObjectValue
   }
 
   /**
-   * Returns the key array
+   * Returns an iterator for the key => value pairs.
    */
-  public Value []getKeyArray(Env env)
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    return new Value[0];
+    Iterator<Map.Entry<Value, Value>> iter =  _cl.getIterator(env, this);
+
+    if (iter != null)
+      return iter;
+
+    throw new UnsupportedOperationException("unimplemented");
   }
 
   /**
-   * Returns the value array
+   * Returns an iterator for the keys.
    */
-  public Value []getValueArray(Env env)
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
   {
-    return new Value[0];
+    Iterator<Value> iter =  _cl.getKeyIterator(env, this);
+
+    if (iter != null)
+      return iter;
+
+    throw new UnsupportedOperationException("unimplemented");
   }
 
   /**
-   * Returns the field values.
+   * Returns an iterator for the values.
    */
-  public Collection<Value> getIndices()
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
   {
-    ArrayList<Value> indices = new ArrayList<Value>();
+    Iterator<Value> iter =  _cl.getValueIterator(env, this);
 
-    for (int i = 0; i < _fields.length; i++) {
-      if (_fields[i] != UnsetValue.UNSET)
-	indices.add(_fields[i]);
-    }
+    if (iter != null)
+      return iter;
 
-    if (_object != null)
-      indices.addAll(_object.getIndices());
-
-    return indices;
+    throw new UnsupportedOperationException("unimplemented");
   }
 
   /**
    * Finds the method name.
    */
+  @Override
   public AbstractFunction findFunction(String methodName)
   {
     return _cl.findFunction(methodName);
@@ -568,6 +599,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     Value oldThis = env.getThis();
@@ -585,6 +617,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns the value for the variable, creating an object if the var
    * is unset.
    */
+  @Override
   public Value getObject(Env env)
   {
     return this;
@@ -593,6 +626,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Copy for assignment.
    */
+  @Override
   public Value copy()
   {
     return this;
@@ -601,6 +635,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Copy for serialization
    */
+  @Override
   public Value copy(Env env, IdentityHashMap<Value,Value> map)
   {
     Value oldValue = map.get(this);
@@ -617,6 +652,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Clone the object
    */
+  @Override
   public Value clone()
   {
     throw new UnsupportedOperationException();
@@ -627,6 +663,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(StringBuilder sb)
   {
     sb.append("O:");
@@ -681,6 +718,7 @@ public class CompiledObjectValue extends ObjectValue
    * Converts to a string.
    * @param env
    */
+  @Override
   public StringValue toString(Env env)
   {
     AbstractFunction fun = _cl.findFunction("__toString");
@@ -695,6 +733,7 @@ public class CompiledObjectValue extends ObjectValue
    * Converts to a string.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
     env.print(toString(env));
@@ -703,6 +742,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Converts to an array.
    */
+  @Override
   public Value toArray()
   {
     ArrayValue array = new ArrayValueImpl();
@@ -717,6 +757,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Converts to an object.
    */
+  @Override
   public Value toObject(Env env)
   {
     return this;
@@ -725,11 +766,13 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Converts to an object.
    */
+  @Override
   public Object toJavaObject()
   {
     return this;
   }
 
+  @Override
   public Set<Map.Entry<String,Value>> entrySet()
   {
     throw new UnsupportedOperationException();
@@ -745,11 +788,13 @@ public class CompiledObjectValue extends ObjectValue
     //return new TreeSet<Map.Entry<String, Value>>(entrySet());
   }
 
+  @Override
   public String toString()
   {
     return "CompiledObjectValue@" + System.identityHashCode(this) +  "[" + _cl.getName() + "]";
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -788,6 +833,7 @@ public class CompiledObjectValue extends ObjectValue
     out.print("}");
   }
 
+  @Override
   protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,

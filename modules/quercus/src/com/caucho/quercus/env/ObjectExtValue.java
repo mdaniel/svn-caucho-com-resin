@@ -337,7 +337,7 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Adds a new value.
    */
-  public Value putFieldInit(Env env, String key, Value value)
+  public Value initField(Env env, String key, Value value)
   {
     createEntry(key);
 
@@ -518,39 +518,106 @@ public class ObjectExtValue extends ObjectValue
   }
 
   /**
-   * Returns the key array
+   * Returns an iterator for the key => value pairs.
    */
-  public Value []getKeyArray(Env env)
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    Value []keys = new Value[getSize()];
+    Iterator<Map.Entry<Value, Value>> iter =  _cl.getIterator(env, this);
 
-    int k = 0;
-    for (int i = 0; i < _entries.length; i++) {
-      Entry entry = _entries[i];
+    if (iter != null)
+      return iter;
 
-      if (entry != null)
-	keys[k++] = new UnicodeValueImpl(entry.getKey());
-    }
+    return new Iterator<Map.Entry<Value,Value>>() {
 
-    return keys;
+      final Iterator<Map.Entry<String,Value>> _iterator = new EntryIterator(_entries);
+
+      public boolean hasNext()
+      {
+        return _iterator.hasNext();
+      }
+
+      public Map.Entry<Value, Value> next()
+      {
+        final Map.Entry<String,Value> next = _iterator.next();
+
+        return new Map.Entry<Value,Value>() {
+
+          public Value getKey() { return new UnicodeValueImpl(next.getKey()); }
+          public Value getValue() { return next.getValue(); }
+          public Value setValue(Value value) { return next.setValue(value); }
+        };
+      }
+
+      public void remove()
+      {
+        _iterator.remove();
+      }
+    };
   }
 
   /**
-   * Returns the value array
+   * Returns an iterator for the keys.
    */
-  public Value []getValueArray(Env env)
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
   {
-    Value []values = new Value[getSize()];
+    Iterator<Value> iter =  _cl.getKeyIterator(env, this);
 
-    int k = 0;
-    for (int i = 0; i < _entries.length; i++) {
-      Entry entry = _entries[i];
+    if (iter != null)
+      return iter;
 
-      if (entry != null)
-	values[k++] = entry.getValue().toValue();
-    }
+    return new Iterator<Value>() {
 
-    return values;
+      final Iterator<Map.Entry<String,Value>> _iterator = new EntryIterator(_entries);
+
+      public boolean hasNext()
+      {
+        return _iterator.hasNext();
+      }
+
+      public Value next()
+      {
+          return new UnicodeValueImpl(_iterator.next().getKey());
+      }
+
+      public void remove()
+      {
+        _iterator.remove();
+      }
+    };
+  }
+
+  /**
+   * Returns an iterator for the values.
+   */
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    Iterator<Value> iter =  _cl.getValueIterator(env, this);
+
+    if (iter != null)
+      return iter;
+
+    return new Iterator<Value>() {
+
+      final Iterator<Map.Entry<String,Value>> _iterator = new EntryIterator(_entries);
+
+      public boolean hasNext()
+      {
+        return _iterator.hasNext();
+      }
+
+      public Value next()
+      {
+        return _iterator.next().getValue();
+      }
+
+      public void remove()
+      {
+        _iterator.remove();
+      }
+    };
   }
 
   /**

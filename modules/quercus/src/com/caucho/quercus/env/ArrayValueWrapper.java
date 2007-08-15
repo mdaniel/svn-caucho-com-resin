@@ -30,6 +30,8 @@
 package com.caucho.quercus.env;
 
 import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Iterator;
 
 /**
  * Represents a PHP array value.
@@ -45,6 +47,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the wrapped array.
    */
+  @Override
   public ArrayValue getArray()
   {
     return _array;
@@ -53,6 +56,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Copy for assignment.
    */
+  @Override
   public Value copy()
   {
     return _array.copy();
@@ -61,6 +65,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Copy for serialization
    */
+  @Override
   public Value copy(Env env, IdentityHashMap<Value,Value> map)
   {
     return _array.copy(env, map);
@@ -69,6 +74,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the size.
    */
+  @Override
   public int getSize()
   {
     return _array.getSize();
@@ -77,6 +83,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Clears the array
    */
+  @Override
   public void clear()
   {
     _array.clear();
@@ -85,6 +92,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Adds a new value.
    */
+  @Override
   public Value put(Value key, Value value)
   {
     return _array.put(key, value);
@@ -93,6 +101,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Add
    */
+  @Override
   public Value put(Value value)
   {
     return _array.put(value);
@@ -101,6 +110,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Add to front.
    */
+  @Override
   public ArrayValue unshift(Value value)
   {
     return _array.unshift(value);
@@ -109,6 +119,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Splices values
    */
+  @Override
   public ArrayValue splice(int start, int end, ArrayValue replace)
   {
     return _array.splice(start, end, replace);
@@ -117,6 +128,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the value as an argument which may be a reference.
    */
+  @Override
   public Value getArg(Value index)
   {
     return _array.getArg(index);
@@ -125,6 +137,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Sets the array ref.
    */
+  @Override
   public Value putRef()
   {
     return _array.putRef();
@@ -133,6 +146,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Creatse a tail index.
    */
+  @Override
   public Value createTailKey()
   {
     return _array.createTailKey();
@@ -141,6 +155,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Gets a new value.
    */
+  @Override
   public Value get(Value key)
   {
     return _array.get(key);
@@ -149,6 +164,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Removes a value.
    */
+  @Override
   public Value remove(Value key)
   {
     return _array.remove(key);
@@ -157,6 +173,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the array ref.
    */
+  @Override
   public Var getRef(Value index)
   {
     return _array.getRef(index);
@@ -165,6 +182,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Pops the top value.
    */
+  @Override
   public Value pop()
   {
     return _array.pop();
@@ -173,6 +191,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Shuffles the array
    */
+  @Override
   public void shuffle()
   {
     _array.shuffle();
@@ -181,6 +200,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the head.
    */
+  @Override
   public Entry getHead()
   {
     return _array.getHead();
@@ -189,6 +209,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the tail.
    */
+  @Override
   protected Entry getTail()
   {
     return _array.getTail();
@@ -197,6 +218,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the current value.
    */
+  @Override
   public Value current()
   {
     return _array.current();
@@ -205,6 +227,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the current key
    */
+  @Override
   public Value key()
   {
     return _array.key();
@@ -213,6 +236,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns true if there are more elements.
    */
+  @Override
   public boolean hasCurrent()
   {
     return _array.hasCurrent();
@@ -221,6 +245,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the next value.
    */
+  @Override
   public Value next()
   {
     return _array.next();
@@ -229,6 +254,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the previous value.
    */
+  @Override
   public Value prev()
   {
     return _array.prev();
@@ -237,6 +263,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * The each iterator
    */
+  @Override
   public Value each()
   {
     return _array.each();
@@ -245,6 +272,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the first value.
    */
+  @Override
   public Value reset()
   {
     return _array.reset();
@@ -253,6 +281,7 @@ public class ArrayValueWrapper extends ArrayValue {
   /**
    * Returns the last value.
    */
+  @Override
   public Value end()
   {
     return _array.end();
@@ -267,9 +296,34 @@ public class ArrayValueWrapper extends ArrayValue {
    * 
    * @throws NullPointerException
    */
+  @Override
   public Value containsKey(Value key)
   {
     return _array.containsKey(key);
+  }
+
+  @Override
+  public Value add(Value rValue)
+  {
+    return _array.add(rValue);
+  }
+
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
+  {
+    return _array.getIterator(env);
+  }
+
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
+  {
+    return _array.getKeyIterator(env);
+  }
+
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    return _array.getValueIterator(env);
   }
 }
 

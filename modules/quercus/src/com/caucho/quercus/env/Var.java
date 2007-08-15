@@ -35,13 +35,8 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Map;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.IdentityHashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a PHP variable value.
@@ -81,6 +76,7 @@ public class Var extends Value
   /**
    * Sets the value.
    */
+  @Override
   public Value set(Value value)
   {
     _value = value.toValue();
@@ -102,6 +98,7 @@ public class Var extends Value
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return _value.getType();
@@ -119,6 +116,7 @@ public class Var extends Value
   /**
    * Returns true for an object.
    */
+  @Override
   public boolean isObject()
   {
     return _value.isObject();
@@ -127,6 +125,7 @@ public class Var extends Value
   /**
    * Returns true for a set type.
    */
+  @Override
   public boolean isset()
   {
     return _value.isset();
@@ -135,6 +134,7 @@ public class Var extends Value
   /**
    * Returns true for an implementation of a class
    */
+  @Override
   public boolean isA(String name)
   {
     return _value.isA(name);
@@ -143,6 +143,7 @@ public class Var extends Value
   /**
    * True for a number
    */
+  @Override
   public boolean isNull()
   {
     return _value.isNull();
@@ -151,6 +152,7 @@ public class Var extends Value
   /**
    * True for a long
    */
+  @Override
   public boolean isLongConvertible()
   {
     return _value.isLongConvertible();
@@ -159,6 +161,7 @@ public class Var extends Value
   /**
    * True to a double.
    */
+  @Override
   public boolean isDoubleConvertible()
   {
     return _value.isDoubleConvertible();
@@ -167,6 +170,7 @@ public class Var extends Value
   /**
    * True for a number
    */
+  @Override
   public boolean isNumberConvertible()
   {
     return _value.isNumberConvertible();
@@ -194,6 +198,7 @@ public class Var extends Value
   /**
    * Returns true for a StringValue.
    */
+  @Override
   public boolean isString()
   {
     return _value.isString();
@@ -202,6 +207,7 @@ public class Var extends Value
   /**
    * Returns true for a BinaryValue.
    */
+  @Override
   public boolean isBinary()
   {
     return _value.isBinary();
@@ -210,6 +216,7 @@ public class Var extends Value
   /**
    * Returns true for a UnicodeValue.
    */
+  @Override
   public boolean isUnicode()
   {
     return _value.isUnicode();
@@ -218,6 +225,7 @@ public class Var extends Value
   /**
    * Returns true for a BooleanValue
    */
+  @Override
   public boolean isBoolean()
   {
     return _value.isBoolean();
@@ -226,6 +234,7 @@ public class Var extends Value
   /**
    * Returns true for a DefaultValue
    */
+  @Override
   public boolean isDefault()
   {
     return _value.isDefault();
@@ -235,6 +244,7 @@ public class Var extends Value
   // Conversions
   //
 
+  @Override
   public String toString()
   {
     return _value.toString();
@@ -243,6 +253,7 @@ public class Var extends Value
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return _value.toBoolean();
@@ -251,6 +262,7 @@ public class Var extends Value
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return _value.toLong();
@@ -259,6 +271,7 @@ public class Var extends Value
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     return _value.toDouble();
@@ -267,6 +280,7 @@ public class Var extends Value
   /**
    * Converts to a long.
    */
+  @Override
   public Value toLongValue()
   {
     return _value.toLongValue();
@@ -275,6 +289,7 @@ public class Var extends Value
   /**
    * Converts to a double.
    */
+  @Override
   public Value toDoubleValue()
   {
     return _value.toDoubleValue();
@@ -284,6 +299,7 @@ public class Var extends Value
    * Converts to a string.
    * @param env
    */
+  @Override
   public StringValue toString(Env env)
   {
     return _value.toString(env);
@@ -292,6 +308,7 @@ public class Var extends Value
   /**
    * Converts to an object.
    */
+  @Override
   public Object toJavaObject()
   {
     return _value.toJavaObject();
@@ -318,6 +335,7 @@ public class Var extends Value
   /**
    * Converts to a java Collection object.
    */
+  @Override
   public Collection toJavaCollection(Env env, Class type)
   {
     return _value.toJavaCollection(env, type);
@@ -326,6 +344,7 @@ public class Var extends Value
   /**
    * Converts to a java List object.
    */
+  @Override
   public List toJavaList(Env env, Class type)
   {
     return _value.toJavaList(env, type);
@@ -334,6 +353,7 @@ public class Var extends Value
   /**
    * Converts to a java map.
    */
+  @Override
   public Map toJavaMap(Env env, Class type)
   {
     return _value.toJavaMap(env, type);
@@ -369,6 +389,7 @@ public class Var extends Value
   /**
    * Converts to an array
    */
+  @Override
   public Value toArray()
   {
     return _value.toArray();
@@ -386,6 +407,7 @@ public class Var extends Value
   /**
    * Converts to an array
    */
+  @Override
   public Value toAutoArray()
   {
     _value = _value.toAutoArray();
@@ -396,6 +418,7 @@ public class Var extends Value
   /**
    * Converts to an object.
    */
+  @Override
   public Value toObject(Env env)
   {
     return _value.toObject(env);
@@ -404,6 +427,7 @@ public class Var extends Value
   /**
    * Append to a string builder.
    */
+  @Override
   public void appendTo(UnicodeBuilderValue sb)
   {
     _value.appendTo(sb);
@@ -412,6 +436,7 @@ public class Var extends Value
   /**
    * Append to a string builder.
    */
+  @Override
   public void appendTo(BytesBuilderValue sb)
   {
     _value.appendTo(sb);
@@ -428,6 +453,8 @@ public class Var extends Value
   /**
    * Converts to a raw value.
    */
+
+  @Override
   public Value toValue()
   {
     return _value;
@@ -475,6 +502,7 @@ public class Var extends Value
   /**
    * Converts to a reference variable
    */
+  @Override
   public Var toRefVar()
   {
     _refCount = 2;
@@ -485,6 +513,7 @@ public class Var extends Value
   /**
    * Converts to a key.
    */
+  @Override
   public Value toKey()
   {
     return _value.toKey();
@@ -527,6 +556,7 @@ public class Var extends Value
   /**
    * Copy the value.
    */
+  @Override
   public Value copy()
   {
     // php/041d
@@ -536,6 +566,7 @@ public class Var extends Value
   /**
    * Copy the value as an array item.
    */
+  @Override
   public Value copyArrayItem()
   {
     _refCount = 2;
@@ -547,6 +578,7 @@ public class Var extends Value
   /**
    * Copy the value as a return value.
    */
+  @Override
   public Value copyReturn()
   {
     if (_refCount < 1)
@@ -558,6 +590,7 @@ public class Var extends Value
   /**
    * Converts to a variable reference (for function  arguments)
    */
+  @Override
   public Value toRef()
   {
     _refCount = 2;
@@ -568,6 +601,7 @@ public class Var extends Value
   /**
    * Returns true for an array.
    */
+  @Override
   public boolean isArray()
   {
     return _value.isArray();
@@ -576,6 +610,7 @@ public class Var extends Value
   /**
    * Negates the value.
    */
+  @Override
   public Value neg()
   {
     return _value.neg();
@@ -584,6 +619,7 @@ public class Var extends Value
   /**
    * Adds to the following value.
    */
+  @Override
   public Value add(Value rValue)
   {
     return _value.add(rValue);
@@ -601,6 +637,7 @@ public class Var extends Value
   /**
    * Pre-increment the following value.
    */
+  @Override
   public Value preincr(int incr)
   {
     _value = _value.preincr(incr);
@@ -611,6 +648,7 @@ public class Var extends Value
   /**
    * Post-increment the following value.
    */
+  @Override
   public Value postincr(int incr)
   {
     Value value = _value;
@@ -623,6 +661,7 @@ public class Var extends Value
   /**
    * Subtracts to the following value.
    */
+  @Override
   public Value sub(Value rValue)
   {
     return _value.sub(rValue);
@@ -640,6 +679,7 @@ public class Var extends Value
   /**
    * Multiplies to the following value.
    */
+  @Override
   public Value mul(Value rValue)
   {
     return _value.mul(rValue);
@@ -648,6 +688,7 @@ public class Var extends Value
   /**
    * Multiplies to the following value.
    */
+  @Override
   public Value mul(long lValue)
   {
     return _value.mul(lValue);
@@ -656,6 +697,7 @@ public class Var extends Value
   /**
    * Divides the following value.
    */
+  @Override
   public Value div(Value rValue)
   {
     return _value.div(rValue);
@@ -664,6 +706,7 @@ public class Var extends Value
   /**
    * Shifts left by the value.
    */
+  @Override
   public Value lshift(Value rValue)
   {
     return _value.lshift(rValue);
@@ -672,6 +715,7 @@ public class Var extends Value
   /**
    * Shifts right by the value.
    */
+  @Override
   public Value rshift(Value rValue)
   {
     return _value.rshift(rValue);
@@ -680,6 +724,7 @@ public class Var extends Value
   /**
    * Returns true for equality
    */
+  @Override
   public boolean eq(Value rValue)
   {
     return _value.eq(rValue);
@@ -688,6 +733,7 @@ public class Var extends Value
   /**
    * Returns true for equality
    */
+  @Override
   public boolean eql(Value rValue)
   {
     return _value.eql(rValue);
@@ -696,6 +742,7 @@ public class Var extends Value
   /**
    * Compares the two values
    */
+  @Override
   public int cmp(Value rValue)
   {
     return _value.cmp(rValue);
@@ -704,6 +751,7 @@ public class Var extends Value
   /**
    * Returns true for less than
    */
+  @Override
   public boolean lt(Value rValue)
   {
     // php/335h
@@ -713,6 +761,7 @@ public class Var extends Value
   /**
    * Returns true for less than or equal to
    */
+  @Override
   public boolean leq(Value rValue)
   {
     // php/335h
@@ -722,6 +771,7 @@ public class Var extends Value
   /**
    * Returns true for greater than
    */
+  @Override
   public boolean gt(Value rValue)
   {
     // php/335h
@@ -731,6 +781,7 @@ public class Var extends Value
   /**
    * Returns true for greater than or equal to
    */
+  @Override
   public boolean geq(Value rValue)
   {
     // php/335h
@@ -740,6 +791,7 @@ public class Var extends Value
   /**
    * Returns the length as a string.
    */
+  @Override
   public int length()
   {
     return _value.length();
@@ -748,38 +800,34 @@ public class Var extends Value
   /**
    * Returns the array/object size
    */
+  @Override
   public int getSize()
   {
     return _value.getSize();
   }
 
-  /**
-   * Returns the field values.
-   */
-  public Collection<Value> getIndices()
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    return _value.getIndices();
+    return _value.getIterator(env);
   }
 
-  /**
-   * Returns the array keys.
-   */
-  public Value []getKeyArray(Env env)
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
   {
-    return _value.getKeyArray(env);
+    return _value.getKeyIterator(env);
   }
 
-  /**
-   * Returns the array values.
-   */
-  public Value []getValueArray(Env env)
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
   {
-    return _value.getValueArray(env);
+    return _value.getValueIterator(env);
   }
 
   /**
    * Returns the array ref.
    */
+  @Override
   public Value getArray()
   {
     if (! _value.isset())
@@ -791,6 +839,7 @@ public class Var extends Value
   /**
    * Returns the value, creating an object if unset.
    */
+  @Override
   public Value getObject(Env env)
   {
     if (! _value.isset())
@@ -802,6 +851,7 @@ public class Var extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value get(Value index)
   {
     return _value.get(index);
@@ -810,6 +860,7 @@ public class Var extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value getRef(Value index)
   {
     // php/3d1a
@@ -822,6 +873,7 @@ public class Var extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value getArg(Value index)
   {
     // php/0921, php/3921
@@ -835,6 +887,7 @@ public class Var extends Value
   /**
    * Returns the value, creating an object if unset.
    */
+  @Override
   public Value getArray(Value index)
   {
     // php/3d11
@@ -846,6 +899,7 @@ public class Var extends Value
   /**
    * Returns the value, doing a copy-on-write if needed.
    */
+  @Override
   public Value getDirty(Value index)
   {
     return _value.getDirty(index);
@@ -854,6 +908,7 @@ public class Var extends Value
   /**
    * Returns the value, creating an object if unset.
    */
+  @Override
   public Value getObject(Env env, Value index)
   {
     // php/3d2p
@@ -865,6 +920,7 @@ public class Var extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value put(Value index, Value value)
   {
     _value = _value.toAutoArray();
@@ -875,6 +931,7 @@ public class Var extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value put(Value value)
   {
     _value = _value.toAutoArray();
@@ -885,6 +942,7 @@ public class Var extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value putRef()
   {
     _value = _value.toAutoArray();
@@ -895,6 +953,7 @@ public class Var extends Value
   /**
    * Return unset the value.
    */
+  @Override
   public Value remove(Value index)
   {
     return _value.remove(index);
@@ -912,6 +971,7 @@ public class Var extends Value
   /**
    * Returns the field ref.
    */
+  @Override
   public Value getFieldRef(Env env, String index)
   {
     // php/3a0r
@@ -923,6 +983,7 @@ public class Var extends Value
   /**
    * Returns the array ref.
    */
+  @Override
   public Value getFieldArg(Env env, String index)
   {
     if (_value.isset())
@@ -936,6 +997,7 @@ public class Var extends Value
   /**
    * Returns the field value as an array
    */
+  @Override
   public Value getFieldArray(Env env, String index)
   {
     // php/3d1q
@@ -947,6 +1009,7 @@ public class Var extends Value
   /**
    * Returns the field value as an object
    */
+  @Override
   public Value getFieldObject(Env env, String index)
   {
     _value = _value.toAutoObject(env);
@@ -957,6 +1020,7 @@ public class Var extends Value
   /**
    * Sets the field.
    */
+  @Override
   public Value putField(Env env, String index, Value value)
   {
     // php/3a0s
@@ -968,6 +1032,7 @@ public class Var extends Value
   /**
    * Sets the field.
    */
+  @Override
   public Value putThisField(Env env, String index, Value value)
   {
     _value = _value.toAutoObject(env);
@@ -978,6 +1043,7 @@ public class Var extends Value
   /**
    * Unsets the field.
    */
+  @Override
   public void removeField(String index)
   {
     _value.removeField(index);
@@ -987,6 +1053,7 @@ public class Var extends Value
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
+  @Override
   public Object valuesToArray(Env env, Class elementType)
   {
     return _value.valuesToArray(env, elementType);
@@ -1013,6 +1080,7 @@ public class Var extends Value
   /**
    * Returns true if there are more elements.
    */
+  @Override
   public boolean hasCurrent()
   {
     return _value.hasCurrent();
@@ -1021,6 +1089,7 @@ public class Var extends Value
   /**
    * Returns the current key
    */
+  @Override
   public Value key()
   {
     return _value.key();
@@ -1029,6 +1098,7 @@ public class Var extends Value
   /**
    * Returns the current value
    */
+  @Override
   public Value current()
   {
     return _value.current();
@@ -1037,6 +1107,7 @@ public class Var extends Value
   /**
    * Returns the current value
    */
+  @Override
   public Value next()
   {
     return _value.next();
@@ -1065,6 +1136,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
     return _value.callMethod(env, hash, name, nameLen);
@@ -1073,6 +1145,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethod(Env env,
                           int hash, char []name, int nameLen,
                           Value a0)
@@ -1083,6 +1156,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethod(Env env,
                           int hash, char []name, int nameLen,
                           Value a0, Value a1)
@@ -1094,6 +1168,7 @@ public class Var extends Value
   /**
    * Evaluates a method with 3 args.
    */
+  @Override
   public Value callMethod(Env env,
                           int hash, char []name, int nameLen,
 			  Value a0, Value a1, Value a2)
@@ -1105,6 +1180,7 @@ public class Var extends Value
   /**
    * Evaluates a method with 4 args.
    */
+  @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen,
 			  Value a0, Value a1, Value a2, Value a3)
   {
@@ -1115,6 +1191,7 @@ public class Var extends Value
   /**
    * Evaluates a method with 5 args.
    */
+  @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
   {
@@ -1125,6 +1202,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethodRef(Env env,
                              int hash, char []name, int nameLen,
                              Expr []args)
@@ -1135,6 +1213,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethodRef(Env env,
                              int hash, char []name, int nameLen,
                              Value []args)
@@ -1145,6 +1224,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
     return _value.callMethodRef(env, hash, name, nameLen);
@@ -1153,6 +1233,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethodRef(Env env,
                              int hash, char []name, int nameLen,
                              Value a0)
@@ -1164,6 +1245,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callMethodRef(Env env,
                              int hash, char []name, int nameLen,
                              Value a0, Value a1)
@@ -1174,6 +1256,7 @@ public class Var extends Value
   /**
    * Evaluates a method with 3 args.
    */
+  @Override
   public Value callMethodRef(Env env,
                              int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2)
@@ -1185,6 +1268,7 @@ public class Var extends Value
   /**
    * Evaluates a method with 4 args.
    */
+  @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2, Value a3)
   {
@@ -1195,6 +1279,7 @@ public class Var extends Value
   /**
    * Evaluates a method with 5 args.
    */
+  @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
@@ -1205,6 +1290,7 @@ public class Var extends Value
   /**
    * Evaluates a method.
    */
+  @Override
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     return _value.callClassMethod(env, fun, args);
@@ -1214,6 +1300,7 @@ public class Var extends Value
    * Prints the value.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
     _value.print(env);
@@ -1222,11 +1309,13 @@ public class Var extends Value
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(StringBuilder sb)
   {
     _value.serialize(sb);
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -1240,7 +1329,7 @@ public class Var extends Value
   //
   // Java Serialization
   //
-  
+
   public Object writeReplace()
   {
     return _value;

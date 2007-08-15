@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.logging.Logger;
+import java.util.Iterator;
 
 /**
  * Quercus session handling
@@ -573,8 +574,12 @@ public class SessionModule extends AbstractQuercusModule
     if (! value.isArray())
       return NullValue.NULL;
 
-    for (Value key : value.getKeyArray(env))
-      value.remove(key);
+    Iterator<Value> iter = value.getKeyIterator(env);
+
+    while (iter.hasNext()) {
+      iter.next();
+      iter.remove();
+    }
 
     return NullValue.NULL;
   }

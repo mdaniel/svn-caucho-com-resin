@@ -63,6 +63,7 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env)
   {
     return _obj.callMethod(env, _hash, _name, _name.length);
@@ -73,6 +74,7 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1)
   {
     return _obj.callMethod(env, _hash, _name, _name.length,
@@ -84,6 +86,7 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2)
   {
     return _obj.callMethod(env, _hash, _name, _name.length,
@@ -95,6 +98,7 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3)
   {
     return _obj.callMethod(env, _hash, _name, _name.length,
@@ -106,6 +110,7 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
   {
@@ -118,6 +123,7 @@ public class CallbackObjectMethod extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
   {
@@ -125,11 +131,13 @@ public class CallbackObjectMethod extends Callback {
                            a1, a2, a3, a4, a5);
   }
 
+  @Override
   public Value call(Env env, Value []args)
   {
     return _obj.callMethod(env, _hash, _name, _name.length, args);
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -143,16 +151,19 @@ public class CallbackObjectMethod extends Callback {
   }
   
   // XXX: just a placeholder, need real implementation here
+  @Override
   public boolean isValid()
   {
     return true;
   }
 
-  public String getCallbackName() 
+  @Override
+  public String getCallbackName()
   {
     return _methodName;
   }
 
+  @Override
   public boolean isInternal()
   {
     return _fun instanceof JavaInvoker;

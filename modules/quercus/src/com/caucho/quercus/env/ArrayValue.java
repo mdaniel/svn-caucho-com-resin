@@ -62,6 +62,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return "array";
@@ -70,6 +71,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return getSize() != 0;
@@ -78,6 +80,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Converts to a string.
    */
+  @Override
   public String toString()
   {
     return "Array";
@@ -107,6 +110,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Converts to an object.
    */
+  @Override
   public Value toArray()
   {
     return this;
@@ -124,6 +128,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Converts to an object.
    */
+  @Override
   public Value toObject(Env env)
   {
     Value obj = env.createObject();
@@ -143,6 +148,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Converts to a java List object.
    */
+  @Override
   public Collection toJavaCollection(Env env, Class type)
   {
     Collection coll = null;
@@ -175,6 +181,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Converts to a java List object.
    */
+  @Override
   public List toJavaList(Env env, Class type)
   {
     List list = null;
@@ -246,6 +253,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns true for an array.
    */
+  @Override
   public boolean isArray()
   {
     return true;
@@ -254,6 +262,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Copy as a return value
    */
+  @Override
   public Value copyReturn()
   {
     return copy(); // php/3a5e
@@ -262,16 +271,19 @@ abstract public class ArrayValue extends Value {
   /**
    * Copy for assignment.
    */
+  @Override
   abstract public Value copy();
 
   /**
    * Copy for serialization
    */
+  @Override
   abstract public Value copy(Env env, IdentityHashMap<Value,Value> map);
 
   /**
    * Returns the size.
    */
+  @Override
   abstract public int getSize();
 
   /**
@@ -279,6 +291,7 @@ abstract public class ArrayValue extends Value {
    */
   abstract public void clear();
 
+  @Override
   public int cmp(Value rValue)
   {
     return cmpImpl(rValue, 1);
@@ -319,6 +332,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns true for less than
    */
+  @Override
   public boolean lt(Value rValue)
   {
     // php/335h
@@ -328,6 +342,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns true for less than or equal to
    */
+  @Override
   public boolean leq(Value rValue)
   {
     // php/335h
@@ -337,6 +352,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns true for greater than
    */
+  @Override
   public boolean gt(Value rValue)
   {
     // php/335h
@@ -346,6 +362,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns true for greater than or equal to
    */
+  @Override
   public boolean geq(Value rValue)
   {
     // php/335h
@@ -355,11 +372,13 @@ abstract public class ArrayValue extends Value {
   /**
    * Adds a new value.
    */
+  @Override
   abstract public Value put(Value key, Value value);
 
   /**
    * Add
    */
+  @Override
   abstract public Value put(Value value);
 
   /**
@@ -375,6 +394,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the value as an array.
    */
+  @Override
   public Value getArray(Value index)
   {
     Value value = get(index);
@@ -393,11 +413,13 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the value as an argument which may be a reference.
    */
+  @Override
   abstract public Value getArg(Value index);
 
   /**
    * Returns the field value, creating an object if it's unset.
    */
+  @Override
   public Value getObject(Env env, Value fieldName)
   {
     Value value = get(fieldName);
@@ -415,6 +437,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Sets the array ref.
    */
+  @Override
   abstract public Value putRef();
 
   /**
@@ -429,6 +452,7 @@ abstract public class ArrayValue extends Value {
    *
    * To append a value to this ArrayValue use the {@link #put(Value)} method.
    */
+  @Override
   public Value add(Value rValue)
   {
     rValue = rValue.toValue();
@@ -447,57 +471,28 @@ abstract public class ArrayValue extends Value {
     return result;
   }
 
-  /**
-   * Returns the field values.
-   */
-  public Collection<Value> getIndices()
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    return new KeySet();
+    return new EntryIterator(getHead());
   }
 
-  /**
-   * Returns the field keys.
-   */
-  public Value []getKeyArray(Env env)
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
   {
-    int size = getSize();
-
-    if (size == 0)
-      return NULL_VALUE_ARRAY;
-
-    Value []keys = new Value[size];
-
-    int i = 0;
-    for (Entry ptr = getHead(); ptr != null; ptr = ptr._next)
-      keys[i++] = ptr.getKey();
-
-    return keys;
+    return new KeyIterator(getHead());
   }
 
-  /**
-   * Returns the field values.
-   */
-  public Value []getValueArray(Env env)
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
   {
-    int size = getSize();
-
-    if (size == 0)
-      return NULL_VALUE_ARRAY;
-
-    Value []values = new Value[size];
-
-    int i = 0;
-    for (Entry ptr = getHead(); ptr != null; ptr = ptr._next) {
-      // XXX: the toValue() needs a test
-      values[i++] = ptr.getValue().toValue().copy();
-    }
-
-    return values;
+    return new ValueIterator(getHead());
   }
 
   /**
    * Gets a new value.
    */
+  @Override
   abstract public Value get(Value key);
 
   /**
@@ -512,11 +507,13 @@ abstract public class ArrayValue extends Value {
   /**
    * Removes a value.
    */
+  @Override
   abstract public Value remove(Value key);
 
   /**
    * Returns the array ref.
    */
+  @Override
   abstract public Var getRef(Value index);
 
   /**
@@ -652,6 +649,7 @@ abstract public class ArrayValue extends Value {
    * Prints the value.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
     env.print("Array");
@@ -680,6 +678,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the current value.
    */
+  @Override
   public Value current()
   {
     if (_current != null)
@@ -691,6 +690,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the current key
    */
+  @Override
   public Value key()
   {
     if (_current != null)
@@ -702,6 +702,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns true if there are more elements.
    */
+  @Override
   public boolean hasCurrent()
   {
     return _current != null;
@@ -710,6 +711,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the next value.
    */
+  @Override
   public Value next()
   {
     if (_current != null)
@@ -879,6 +881,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(StringBuilder sb)
   {
     sb.append("a:");
@@ -896,6 +899,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Exports the value.
    */
+  @Override
   public void varExport(StringBuilder sb)
   {
     sb.append("array(");
@@ -949,6 +953,7 @@ abstract public class ArrayValue extends Value {
    *
    * @return true if this is equal to rValue, false otherwise
    */
+  @Override
   public boolean eq(Value rValue)
   {
     if (rValue == null)
@@ -979,6 +984,7 @@ abstract public class ArrayValue extends Value {
    *
    * @return true if this is equal to rValue, false otherwise
    */
+  @Override
   public boolean eql(Value rValue)
   {
     if (rValue == null)
@@ -1013,6 +1019,7 @@ abstract public class ArrayValue extends Value {
       return true;
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -1034,6 +1041,7 @@ abstract public class ArrayValue extends Value {
     out.print("}");
   }
 
+  @Override
   protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,
@@ -1089,7 +1097,7 @@ abstract public class ArrayValue extends Value {
     {
       return _value;
     }
-    
+
     public Value getValue()
     {
       return _value.toValue();
@@ -1234,6 +1242,7 @@ abstract public class ArrayValue extends Value {
         out.print(' ');
     }
 
+    @Override
     public String toString()
     {
       return "ArrayValue.Entry[" + getKey() + "]";
@@ -1259,6 +1268,7 @@ abstract public class ArrayValue extends Value {
    * Takes the values of this array, unmarshals them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
+  @Override
   public Object valuesToArray(Env env, Class elementType)
   {
     int size = getSize();
@@ -1284,11 +1294,13 @@ abstract public class ArrayValue extends Value {
     {
     }
 
+    @Override
     public int size()
     {
       return ArrayValue.this.getSize();
     }
 
+    @Override
     public Iterator<Map.Entry<Value,Value>> iterator()
     {
       return new EntryIterator(getHead());
@@ -1300,11 +1312,13 @@ abstract public class ArrayValue extends Value {
     {
     }
 
+    @Override
     public int size()
     {
       return ArrayValue.this.getSize();
     }
 
+    @Override
     public Iterator<Value> iterator()
     {
       return new KeyIterator(getHead());
@@ -1316,11 +1330,13 @@ abstract public class ArrayValue extends Value {
     {
     }
 
+    @Override
     public int size()
     {
       return ArrayValue.this.getSize();
     }
 
+    @Override
     public Iterator<Value> iterator()
     {
       return new ValueIterator(getHead());
@@ -1490,7 +1506,8 @@ abstract public class ArrayValue extends Value {
     private GetKey()
     {
     }
-    
+
+    @Override
     public Value get(Map.Entry<Value, Value> entry)
     {
       return entry.getKey();
@@ -1503,7 +1520,8 @@ abstract public class ArrayValue extends Value {
     private GetValue()
     {
     }
-    
+
+    @Override
     public Value get(Map.Entry<Value, Value> entry)
     {
       return entry.getValue();

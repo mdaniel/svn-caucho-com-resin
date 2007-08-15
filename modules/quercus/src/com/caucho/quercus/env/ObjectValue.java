@@ -79,9 +79,9 @@ abstract public class ObjectValue extends Value {
   }
   
   /**
-   * Adds a new value.
+   * Initializes a new field, does not call __set if it is defined.
    */
-  public Value putFieldInit(Env env, String key, Value value)
+  public Value initField(Env env, String key, Value value)
   {
     return putField(env, key, value);
   }
