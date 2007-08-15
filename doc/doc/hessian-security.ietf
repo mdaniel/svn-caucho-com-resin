@@ -57,33 +57,20 @@
           It must not require external IDL or schema definitions, i.e. the 
           protocol should be invisible to application code.
         </t>
-        <t>
-          It must have sufficient power to serialize Java, including circular 
-          references.
-        </t>
-        <t>
-          It must be language-independent.  In particular, it must allow 
-          non-Java clients to use web services.
-        </t>
+        <t>It must be language-independent.</t>
         <t>
           It must be simple so it can be effectively tested and implemented.
         </t>
         <t>It must be as fast as possible.</t>
         <t>It must be as compact as possible.</t>
-        <t>It must support unicode strings.</t>
+        <t>It must support Unicode strings.</t>
         <t>
           It must support 8-bit binary data (i.e. without encoding or using 
           attachments.)
         </t>
-        <t>It must allow web services to deployed as a Servlet.</t>
-        <t>It must have sufficient power to support EJB.</t>
         <t>
           It must support encryption, compression, signature, and
           transaction context envelopes.
-        </t>
-        <t>
-          Hessian 2.0 must be backwards compatible with Hessian 1.0.
-          Hessian 2.0 parsers must be read Hessian 1.0 messages.
         </t>
       </list>
     </section>

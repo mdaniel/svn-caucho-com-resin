@@ -42,6 +42,41 @@
   </front>
   
   <middle>
+    <section title="Introduction">
+      <t>
+        This document describes the portions of the Hessian 2.0
+        protocol concerning web services.  The document is intended to
+        be read by implementors of Hessian 2.0.  Hessian 2.0 supports
+        two types of network communication: remote procedure call (RPC)
+        and message-based.  These may also be viewed as synchronous and
+        asynchronous communication.
+      </t>
+      <t>
+        RPC communication is based on "methods" invoked on a server. The
+        method being invoked is specified in a Hessian 2.0 "call".
+        Arguments to these methods are passed in the call and are
+        serialized using the Hessian 2.0 serialization protocol.  If the
+        method was successfully invoked, the return value of the method
+        is also serialized using Hessian 2.0 and sent to the client.
+        If the method was not successfully invoked, a "fault" is returned
+        to the client.  RPC communication can use any underlying network 
+        protocol for transport such as HTTP or TCP.
+      </t>
+      <t>
+        Message-based communication is asynchronous and does not necessarily
+        involve the use of methods, clients, or servers.  Messages may or
+        may not receive a response message.  Messages simply contain other
+        Hessian 2.0 objects.  These may be simple types, aggregates like a
+        list or map, or an "envelope".  Envelopes may have headers that 
+        specify routing or other special processing information.  They may
+        also contain encrypted, signed, and/or compressed data.  Thus using
+        messages with envelopes can be useful in cases where end-to-end
+        security is necessary.  Message-based communication can also use
+        any underlying network protocol such as HTTP or TCP and may be 
+        especially appropriate in queued message systems.
+      </t>
+    </section>
+
     <section title="Design Goals">
       <t>
         Unlike older binary protocols, Hessian is both self-describing,
@@ -50,61 +85,41 @@
         require external schema or IDL.
       </t>
       <t>
-      The Hessian protocol has the following design goals:
+        The Hessian protocol has the following design goals:
       </t>
       <list style="symbols">
         <t>
           It must not require external IDL or schema definitions, i.e. the 
           protocol should be invisible to application code.
         </t>
-        <t>
-          It must have sufficient power to serialize Java, including circular 
-          references.
-        </t>
-        <t>
-          It must be language-independent.  In particular, it must allow 
-          non-Java clients to use web services.
-        </t>
+        <t>It must be language-independent.</t>
         <t>
           It must be simple so it can be effectively tested and implemented.
         </t>
         <t>It must be as fast as possible.</t>
         <t>It must be as compact as possible.</t>
-        <t>It must support unicode strings.</t>
+        <t>It must support Unicode strings.</t>
         <t>
           It must support 8-bit binary data (i.e. without encoding or using 
           attachments.)
         </t>
-        <t>It must allow web services to deployed as a Servlet.</t>
-        <t>It must have sufficient power to support EJB.</t>
         <t>
           It must support encryption, compression, signature, and
           transaction context envelopes.
-        </t>
-        <t>
-          Hessian 2.0 must be backwards compatible with Hessian 1.0.
-          Hessian 2.0 parsers must be read Hessian 1.0 messages.
         </t>
       </list>
     </section>
 
     <section title="Hessian Grammar">
       <figure anchor="messaging_grammar">
-        <preamble>Envelope/Messaging/RPC Grammar</preamble>
+        <preamble>RPC/Messaging Grammar</preamble>
         <artwork>
 top       ::= call
-          ::= envelope
           ::= message
           ::= reply
 
           # RPC-style call
 call      ::= 'c' x02 x00 method object* 'z'
-
-          # Envelope for encryption/headers
-envelope  ::= 'E' x02 x00 env-chunk* 'z'
-
-          # header, body, footer
-env-chunk ::= int (string object)* binary int (string object)*
 
 fault     ::= 'f' (object object)* 'z'
 
@@ -179,8 +194,6 @@ call ::= c x02 x00 m b1 b0 &lt;method-string> object* z
             or the unmangled method name.  Clients should send the mangled 
             method name.
           </t>
-
-          <t>See the Java binding for a possible overloading scheme.</t>
 
           <section title="Overloading examples">
             <figure anchor="overloading_examples">
@@ -388,8 +401,7 @@ r x01 x00
             &lt;map&gt; entries.  The defined fields are code, message,
             and detail. code is one of a short list of strings defined below.  
             message is a user-readable message.  detail is an object 
-            representing the exception.  In Java, detail will be a serialized 
-            exception.
+            representing the exception.  
           </t>
 
           <figure anchor="remote_call_throws_example">
