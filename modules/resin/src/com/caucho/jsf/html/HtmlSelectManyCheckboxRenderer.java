@@ -231,10 +231,12 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       out.writeAttribute("class", styleClass, "class");
 
     String clientId = component.getClientId(context);
+    /*
     out.writeAttribute("name", clientId, "name");
     
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", clientId, "id");
+    */
 
     if (disabled)
       out.writeAttribute("disabled", "disabled", "disabled");
@@ -243,6 +245,7 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     
     if (! "pageDirection".equals(layout)) {
       out.startElement("tr", component);
+      out.write("\n");
     }
 
     int childCount = component.getChildCount();
@@ -257,7 +260,6 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       }
       
       out.startElement("td", child);
-      out.write("\n");
 
       if (child instanceof UISelectItem) {
 	UISelectItem selectItem = (UISelectItem) child;

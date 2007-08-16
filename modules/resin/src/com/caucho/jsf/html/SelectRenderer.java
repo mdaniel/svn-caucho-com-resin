@@ -126,9 +126,11 @@ abstract class SelectRenderer extends BaseRenderer
 	  childId = child.getClientId(context);
 
 	out.startElement("option", child);
-	
+
+	/*
 	out.writeAttribute("id", childId, "id");
 	out.writeAttribute("name", childId, "name");
+	*/
 
 	if (selectItem.isItemDisabled()) {
 	  out.writeAttribute("disabled", "disabled", "disabled");

@@ -197,6 +197,8 @@ class HtmlInputTextRenderer extends BaseRenderer
 
     out.writeAttribute("name", component.getClientId(context), "name");
 
+    out.writeAttribute("type", "text", "type");
+
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", component.getClientId(context), "id");
 

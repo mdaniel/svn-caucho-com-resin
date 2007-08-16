@@ -243,6 +243,7 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
 
     if (! "pageDirection".equals(layout)) {
       out.startElement("tr", component);
+      out.write("\n");
     }
 
     ArrayList<SelectItem> items = getSelectItems(component);
@@ -254,10 +255,10 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
 	
       if ("pageDirection".equals(layout)) {
 	out.startElement("tr", component);
+	out.write("\n");
       }
       
       out.startElement("td", component);
-      out.write("\n");
       out.startElement("input", component);
       out.writeAttribute("id", childId, "id");
       out.writeAttribute("name", clientId, "name");
