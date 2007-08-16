@@ -100,7 +100,7 @@ public class UIForm extends UIComponentBase implements NamingContainer
   {
     if ("prependId".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_isPrependId = Boolean.valueOf((String) expr.getValue(null));
+	_isPrependId = Util.booleanValueOf(expr.getValue(null));
       else
 	_isPrependIdExpr = expr;
     }

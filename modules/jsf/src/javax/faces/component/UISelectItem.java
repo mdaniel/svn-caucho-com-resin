@@ -213,14 +213,14 @@ public class UISelectItem extends UIComponentBase
 	
       case ITEM_DISABLED:
 	if (expr != null && expr.isLiteralText())
-	  _itemDisabled = Boolean.valueOf((String) expr.getValue(null));
+	  _itemDisabled = Util.booleanValueOf(expr.getValue(null));
 	else
 	  _itemDisabledExpr = expr;
 	return;
 	
       case ITEM_ESCAPED:
 	if (expr != null && expr.isLiteralText())
-	  _itemEscaped = Boolean.valueOf((String) expr.getValue(null));
+	  _itemEscaped = Util.booleanValueOf(expr.getValue(null));
 	else
 	  _itemEscapedExpr = expr;
 	return;

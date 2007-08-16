@@ -139,13 +139,13 @@ public class UIMessage extends UIComponentBase
     }
     else if ("showDetail".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_showDetail = Boolean.valueOf((String) expr.getValue(null));
+	_showDetail = Util.booleanValueOf(expr.getValue(null));
       else
 	_showDetailExpr = expr;
     }
     else if ("showSummary".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_showSummary = Boolean.valueOf((String) expr.getValue(null));
+	_showSummary = Util.booleanValueOf(expr.getValue(null));
       else
 	_showSummaryExpr = expr;
     }
