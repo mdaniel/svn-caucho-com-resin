@@ -64,7 +64,7 @@ public class JspExpressionFactoryImpl extends ExpressionFactory {
 
     switch (type) {
     case BOOLEAN:
-      return Expr.toBoolean(obj, null) ? Boolean.FALSE : Boolean.TRUE;
+      return Expr.toBoolean(obj, null) ? Boolean.TRUE : Boolean.FALSE;
     case CHARACTER:
       return Expr.toCharacter(obj, null);
     case BYTE:

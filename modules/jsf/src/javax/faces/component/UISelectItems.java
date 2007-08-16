@@ -93,10 +93,10 @@ public class UISelectItems extends UIComponentBase
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("value".equals(name)) {
-	if (expr != null && expr.isLiteralText())
-	  _value = expr.getValue(null);
-	else
-	  _valueExpr = expr;
+      if (expr != null && expr.isLiteralText())
+        _value = expr.getValue(null);
+      else
+        _valueExpr = expr;
     }
     else {
       super.setValueExpression(name, expr);

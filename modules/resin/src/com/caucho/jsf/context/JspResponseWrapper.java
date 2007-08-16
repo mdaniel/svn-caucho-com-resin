@@ -272,6 +272,11 @@ public class JspResponseWrapper extends ResponseWrapper
   public void close()
     throws IOException
   {
+    WriteStream out = _out;
+    _out = null;
+
+    if (out != null)
+      out.close();
   }
 
   public void flushResponse()
@@ -293,7 +298,11 @@ public class JspResponseWrapper extends ResponseWrapper
   public String complete()
     throws IOException
   {
-    _out.flush();
+    WriteStream out = _out;
+    _out = null;
+
+    if (out != null)
+      out.flush();
     
     ReadStream rs = _tempStream.openRead(true);
     StringBuilder sb = new StringBuilder();

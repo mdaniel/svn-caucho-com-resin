@@ -133,19 +133,19 @@ public class UIMessages extends UIComponentBase
   {
     if ("globalOnly".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_globalOnly = ! Boolean.FALSE.equals(expr.getValue(null));
+	_globalOnly = Boolean.valueOf((String) expr.getValue(null));
       else
 	_globalOnlyExpr = expr;
     }
     else if ("showDetail".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_showDetail = ! Boolean.FALSE.equals(expr.getValue(null));
+	_showDetail = Boolean.valueOf((String) expr.getValue(null));
       else
 	_showDetailExpr = expr;
     }
     else if ("showSummary".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_showSummary = ! Boolean.FALSE.equals(expr.getValue(null));
+	_showSummary = Boolean.valueOf((String) expr.getValue(null));
       else
 	_showSummaryExpr = expr;
     }

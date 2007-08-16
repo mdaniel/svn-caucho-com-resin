@@ -42,7 +42,7 @@ import javax.faces.render.*;
 /**
  * The HTML selectMany/checkbox renderer
  */
-class HtmlSelectOneListboxRenderer extends Renderer
+class HtmlSelectOneListboxRenderer extends SelectRenderer
 {
   public static final Renderer RENDERER
     = new HtmlSelectOneListboxRenderer();
@@ -281,46 +281,13 @@ class HtmlSelectOneListboxRenderer extends Renderer
     if (title != null)
       out.writeAttribute("title", title, "title");
 
-    int childCount = component.getChildCount();
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = component.getChildren().get(i);
-
-      String childId = clientId + ":" + i;
-      
-      if (child instanceof UISelectItem) {
-	UISelectItem selectItem = (UISelectItem) child;
-
-	String itemLabel = selectItem.getItemLabel();
-	Object itemValue = selectItem.getItemValue();
-	String itemDescription = selectItem.getItemDescription();
-
-	out.startElement("option", child);
-
-	out.writeAttribute("id", childId, "id");
-	out.writeAttribute("name", child.getClientId(context), "name");
-
-	if (value != null && value.equals(itemValue))
-	  out.writeAttribute("selected", "selected", "selected");
-
-	if (selectItem.isItemDisabled()) {
-	  out.writeAttribute("disabled", "disabled", "disabled");
-
-	  if (disabledClass != null)
-	    out.writeAttribute("class", disabledClass, "disabledClass");
-	}
-	else {
-	  if (enabledClass != null)
-	    out.writeAttribute("class", enabledClass, "enabledClass");
-	}
-      
-	String itemValueString = String.valueOf(itemValue); // XXX:
-	out.writeAttribute("value", itemValueString, "value");
-	
-	out.endElement("option");
-      }
-    }
+    out.write("\n");
+    
+    encodeOneChildren(out, context, component, value,
+                      enabledClass, disabledClass);
 
     out.endElement("select");
+    out.write("\n");
   }
 
   /**

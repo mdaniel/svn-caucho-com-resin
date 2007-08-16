@@ -270,43 +270,15 @@ class HtmlSelectOneMenuRenderer extends SelectRenderer
     if (title != null)
       out.writeAttribute("title", title, "title");
 
-    ArrayList<SelectItem> items = getSelectItems(component);
-    for (int i = 0; i < items.size(); i++) {
-      String childId = clientId + ":" + i;
-      
-      SelectItem selectItem = items.get(i);
-
-      String itemLabel = selectItem.getLabel();
-      Object itemValue = selectItem.getValue();
-      String itemDescription = selectItem.getDescription();
-
-      out.startElement("option", component);
-
-      out.writeAttribute("id", childId, "id");
-      //out.writeAttribute("name", child.getClientId(context), "name");
-
-      if (value != null && value.equals(itemValue))
-	out.writeAttribute("selected", "selected", "selected");
-
-      if (selectItem.isDisabled()) {
-	out.writeAttribute("disabled", "disabled", "disabled");
-
-	if (disabledClass != null)
-	  out.writeAttribute("class", disabledClass, "disabledClass");
-      }
-      else {
-	if (enabledClass != null)
-	  out.writeAttribute("class", enabledClass, "enabledClass");
-      }
-      
-      String itemValueString = toString(context, component, itemValue);
-
-      out.writeText(itemValueString, "value");
-	
-      out.endElement("option");
-    }
+    out.writeAttribute("size", "1", "size");
+    
+    out.write("\n");
+    
+    encodeOneChildren(out, context, component, value,
+                      enabledClass, disabledClass);
 
     out.endElement("select");
+    out.write("\n");
   }
 
   /**

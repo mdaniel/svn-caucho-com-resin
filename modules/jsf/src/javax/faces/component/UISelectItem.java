@@ -48,6 +48,9 @@ public class UISelectItem extends UIComponentBase
   private Boolean _itemDisabled;
   private ValueExpression _itemDisabledExpr;
 
+  private Boolean _itemEscaped;
+  private ValueExpression _itemEscapedExpr;
+
   private String _itemLabel;
   private ValueExpression _itemLabelExpr;
 
@@ -101,6 +104,21 @@ public class UISelectItem extends UIComponentBase
   public void setItemDisabled(boolean value)
   {
     _itemDisabled = value;
+  }
+
+  public boolean isItemEscaped()
+  {
+    if (_itemEscaped != null)
+      return _itemEscaped;
+    else if (_itemEscapedExpr != null)
+      return Util.evalBoolean(_itemEscapedExpr, getFacesContext());
+    else
+      return true;
+  }
+
+  public void setItemEscaped(boolean value)
+  {
+    _itemEscaped = value;
   }
 
   public String getItemLabel()
@@ -162,6 +180,8 @@ public class UISelectItem extends UIComponentBase
 	return _itemDescriptionExpr;
       case ITEM_DISABLED:
 	return _itemDisabledExpr;
+      case ITEM_ESCAPED:
+	return _itemEscapedExpr;
       case ITEM_LABEL:
 	return _itemLabelExpr;
       case ITEM_VALUE:
@@ -193,9 +213,16 @@ public class UISelectItem extends UIComponentBase
 	
       case ITEM_DISABLED:
 	if (expr != null && expr.isLiteralText())
-	  _itemDisabled = ! Boolean.FALSE.equals(expr.getValue(null));
+	  _itemDisabled = Boolean.valueOf((String) expr.getValue(null));
 	else
 	  _itemDisabledExpr = expr;
+	return;
+	
+      case ITEM_ESCAPED:
+	if (expr != null && expr.isLiteralText())
+	  _itemEscaped = Boolean.valueOf((String) expr.getValue(null));
+	else
+	  _itemEscapedExpr = expr;
 	return;
 	
       case ITEM_LABEL:
@@ -230,7 +257,7 @@ public class UISelectItem extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[11];
+    Object []state = new Object[13];
 
     state[0] = super.saveState(context);
     
@@ -240,14 +267,17 @@ public class UISelectItem extends UIComponentBase
     state[3] = _itemDisabled;
     state[4] = Util.save(_itemDisabledExpr, context);
     
-    state[5] = _itemLabel;
-    state[6] = Util.save(_itemLabelExpr, context);
+    state[5] = _itemEscaped;
+    state[6] = Util.save(_itemEscapedExpr, context);
     
-    state[7] = _itemValue;
-    state[8] = Util.save(_itemValueExpr, context);
+    state[7] = _itemLabel;
+    state[8] = Util.save(_itemLabelExpr, context);
     
-    state[9] = _value;
-    state[10] = Util.save(_valueExpr, context);
+    state[9] = _itemValue;
+    state[10] = Util.save(_itemValueExpr, context);
+    
+    state[11] = _value;
+    state[12] = Util.save(_valueExpr, context);
 
     return state;
   }
@@ -269,18 +299,24 @@ public class UISelectItem extends UIComponentBase
 				     Boolean.class,
 				     context);
 
-    _itemLabel = (String) state[5];
-    _itemLabelExpr = Util.restore(state[6],
+    if (state[5] != null)
+      _itemEscaped = (Boolean) state[5];
+    _itemEscapedExpr = Util.restore(state[6],
+				     Boolean.class,
+				     context);
+
+    _itemLabel = (String) state[7];
+    _itemLabelExpr = Util.restore(state[8],
 				  String.class,
 				  context);
 
-    _itemValue = state[7];
-    _itemValueExpr = Util.restore(state[8],
+    _itemValue = state[9];
+    _itemValueExpr = Util.restore(state[10],
 				  Object.class,
 				  context);
 
-    _value = state[9];
-    _valueExpr = Util.restore(state[10],
+    _value = state[11];
+    _valueExpr = Util.restore(state[12],
 			      Object.class,
 			      context);
   }
@@ -288,6 +324,7 @@ public class UISelectItem extends UIComponentBase
   private enum PropEnum {
     ITEM_DESCRIPTION,
     ITEM_DISABLED,
+    ITEM_ESCAPED,
     ITEM_LABEL,
     ITEM_VALUE,
     VALUE,
@@ -296,6 +333,7 @@ public class UISelectItem extends UIComponentBase
   static {
     _propMap.put("itemDescription", PropEnum.ITEM_DESCRIPTION);
     _propMap.put("itemDisabled", PropEnum.ITEM_DISABLED);
+    _propMap.put("itemEscaped", PropEnum.ITEM_ESCAPED);
     _propMap.put("itemLabel", PropEnum.ITEM_LABEL);
     _propMap.put("itemValue", PropEnum.ITEM_VALUE);
     _propMap.put("value", PropEnum.VALUE);

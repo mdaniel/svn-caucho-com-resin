@@ -12,6 +12,12 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>jsp: deferred EL handling did not properly detect .tld JSP version (#1909, rep by timur)</li>
+<li>jsp: validation needs to generate page="%= ... %" for page="&lt;%= ... %"> (#1917, rep by Michael Sengbusch)</li>
+<li>jsp: EL toBoolean() was inverting result (#1931, rep by dheggie)</li>
+<li>install: Makefile.in needs to change to $(LIBEXEC) to handle 64-bit installs (#1929, rep by copart)</li>
+<li>Change Content-Length size for POST to 64 bits (rep by Aaron Freeman)</li>
+<li>boot: LD_LIBRARY_PATH needs to be updated from environment (#1928, rep by ekreiser)</li>
 <li>boot: update httpd.sh to support chkconfig (#1863, rep by Eddie Anzalone)</li>
 <li>xml: QDeepNodeList.item needs to check for null (#1916, rep by ccwf)</li>
 <li>FileServlet needs to use crc64 as etag (rep by Rafael Munoz)</li>

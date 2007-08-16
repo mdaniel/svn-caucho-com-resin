@@ -102,4 +102,116 @@ abstract class SelectRenderer extends BaseRenderer
 
     return items;
   }
+
+  protected void encodeChildren(ResponseWriter out,
+                              FacesContext context,
+                              UIComponent component,
+                              Object []values,
+                              String enabledClass,
+                              String disabledClass)
+    throws IOException
+  {
+    String clientId = component.getClientId(context);
+    
+    int childCount = component.getChildCount();
+    for (int i = 0; i < childCount; i++) {
+      UIComponent child = component.getChildren().get(i);
+
+      String childId = clientId + ":" + i;
+      
+      if (child instanceof UISelectItem) {
+	UISelectItem selectItem = (UISelectItem) child;
+
+	if (child.getId() != null)
+	  childId = child.getClientId(context);
+
+	out.startElement("option", child);
+	
+	out.writeAttribute("id", childId, "id");
+	out.writeAttribute("name", childId, "name");
+
+	if (selectItem.isItemDisabled()) {
+	  out.writeAttribute("disabled", "disabled", "disabled");
+
+	  if (disabledClass != null)
+	    out.writeAttribute("class", disabledClass, "disabledClass");
+	}
+	else {
+	  if (enabledClass != null)
+	    out.writeAttribute("class", enabledClass, "enabledClass");
+	}
+
+	if (values != null) {
+	  for (int j = 0; j < values.length; j++) {
+	    if (values[j].equals(selectItem.getItemValue())) {
+	      out.writeAttribute("selected", "selected", "selected");
+	      break;
+	    }
+	  }
+	}
+
+	out.writeAttribute("value",
+                           String.valueOf(selectItem.getItemValue()),
+			   "value");
+      
+	out.endElement("option");
+        out.write("\n");
+      }
+    }
+  }
+
+  protected void encodeOneChildren(ResponseWriter out,
+                                   FacesContext context,
+                                   UIComponent component,
+                                   Object value,
+                                   String enabledClass,
+                                   String disabledClass)
+    throws IOException
+  {
+    String clientId = component.getClientId(context);
+
+    ArrayList<SelectItem> items = getSelectItems(component);
+    for (int i = 0; i < items.size(); i++) {
+      String childId = clientId + ":" + i;
+      
+      SelectItem selectItem = items.get(i);
+
+      String itemLabel = selectItem.getLabel();
+      Object itemValue = selectItem.getValue();
+      String itemDescription = selectItem.getDescription();
+
+      out.startElement("option", component);
+
+      // jsf/31c4
+      /*
+      out.writeAttribute("id", childId, "id");
+      //out.writeAttribute("name", child.getClientId(context), "name");
+      */
+
+      if (value != null && value.equals(itemValue))
+	out.writeAttribute("selected", "selected", "selected");
+
+      if (selectItem.isDisabled()) {
+	out.writeAttribute("disabled", "disabled", "disabled");
+
+	if (disabledClass != null)
+	  out.writeAttribute("class", disabledClass, "disabledClass");
+      }
+      else {
+	if (enabledClass != null)
+	  out.writeAttribute("class", enabledClass, "enabledClass");
+      }
+      
+      String itemValueString = toString(context, component, itemValue);
+      out.writeAttribute("value", itemValueString, "value");
+      
+      if (itemLabel == null)
+        itemLabel = itemValueString;
+
+      out.writeText(itemLabel, "label");
+	
+      out.endElement("option");
+      out.write("\n");
+    }
+  }
 }

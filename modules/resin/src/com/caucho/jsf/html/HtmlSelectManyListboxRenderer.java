@@ -42,7 +42,7 @@ import javax.faces.render.*;
 /**
  * The HTML selectMany/listbox renderer
  */
-class HtmlSelectManyListboxRenderer extends Renderer
+class HtmlSelectManyListboxRenderer extends SelectRenderer
 {
   public static final Renderer RENDERER
     = new HtmlSelectManyListboxRenderer();
@@ -312,52 +312,13 @@ class HtmlSelectManyListboxRenderer extends Renderer
 
     if (title != null)
       out.writeAttribute("title", title, "title");
+    out.write("\n");
 
-    int childCount = component.getChildCount();
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = component.getChildren().get(i);
-
-      String childId = clientId + ":" + i;
-      
-      if (child instanceof UISelectItem) {
-	UISelectItem selectItem = (UISelectItem) child;
-
-	if (child.getId() != null)
-	  childId = child.getClientId(context);
-
-	out.startElement("option", child);
-	
-	out.writeAttribute("id", childId, "id");
-	out.writeAttribute("name", childId, "name");
-
-	if (selectItem.isItemDisabled()) {
-	  out.writeAttribute("disabled", "disabled", "disabled");
-
-	  if (disabledClass != null)
-	    out.writeAttribute("class", disabledClass, "disabledClass");
-	}
-	else {
-	  if (enabledClass != null)
-	    out.writeAttribute("class", enabledClass, "enabledClass");
-	}
-
-	if (values != null) {
-	  for (int j = 0; j < values.length; j++) {
-	    if (values[j].equals(selectItem.getItemValue())) {
-	      out.writeAttribute("selected", "selected", "selected");
-	      break;
-	    }
-	  }
-	}
-
-	out.writeAttribute("value", String.valueOf(selectItem.getItemValue()),
-			   "value");
-      
-	out.endElement("option");
-      }
-    }
+    encodeChildren(out, context, component, values,
+                   enabledClass, disabledClass);
 
     out.endElement("select");
+    out.write("\n");
   }
 
   /**

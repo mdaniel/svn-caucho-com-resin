@@ -29,6 +29,7 @@
 package javax.faces.render;
 
 import java.io.*;
+import java.util.*;
 
 import javax.faces.component.*;
 import javax.faces.convert.*;
@@ -48,6 +49,17 @@ public abstract class Renderer {
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
+    int size = component.getChildCount();
+    
+    if (size > 0) {
+      List<UIComponent> children = component.getChildren();
+
+      for (int i = 0; i < size; i++) {
+        UIComponent child = children.get(i);
+
+        child.encodeAll(context);
+      }
+    }
   }
 
   public void encodeEnd(FacesContext context, UIComponent component)

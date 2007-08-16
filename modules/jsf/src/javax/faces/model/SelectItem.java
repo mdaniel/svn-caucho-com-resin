@@ -32,6 +32,7 @@ public class SelectItem implements java.io.Serializable
 {
   private String description;
   private boolean disabled;
+  private boolean escape;
   private String label;
   private Object value;
 
@@ -41,32 +42,28 @@ public class SelectItem implements java.io.Serializable
 
   public SelectItem(Object value)
   {
-    if (value == null)
-      throw new NullPointerException();
-
-    this.value = value;
+    setValue(value);
+    if (value != null)
+      setLabel(value.toString());
+    setEscape(true);
   }
 
   public SelectItem(Object value,
 		    String label)
   {
-    if (value == null || label == null)
-      throw new NullPointerException();
-
-    this.value = value;
-    this.label = label;
+    setValue(value);
+    setLabel(label);
+    setEscape(true);
   }
 
   public SelectItem(Object value,
 		    String label,
 		    String description)
   {
-    if (value == null || label == null)
-      throw new NullPointerException();
-
-    this.value = value;
-    this.label = label;
-    this.description = description;
+    setValue(value);
+    setLabel(label);
+    setDescription(description);
+    setEscape(true);
   }
 
   public SelectItem(Object value,
@@ -74,13 +71,24 @@ public class SelectItem implements java.io.Serializable
 		    String description,
 		    boolean disabled)
   {
-    if (value == null || label == null)
-      throw new NullPointerException();
+    setValue(value);
+    setLabel(label);
+    setDescription(description);
+    setDisabled(disabled);
+    setEscape(true);
+  }
 
-    this.value = value;
-    this.label = label;
-    this.description = description;
-    this.disabled = disabled;
+  public SelectItem(Object value,
+		    String label,
+		    String description,
+		    boolean disabled,
+		    boolean escape)
+  {
+    setValue(value);
+    setLabel(label);
+    setDescription(description);
+    setDisabled(disabled);
+    setEscape(escape);
   }
 
   public String getDescription()
@@ -101,6 +109,16 @@ public class SelectItem implements java.io.Serializable
   public void setDisabled(boolean disabled)
   {
     this.disabled = disabled;
+  }
+
+  public boolean isEscape()
+  {
+    return this.escape;
+  }
+
+  public void setEscape(boolean escape)
+  {
+    this.escape = escape;
   }
 
   public String getLabel()

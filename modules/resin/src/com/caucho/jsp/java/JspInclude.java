@@ -126,9 +126,11 @@ public class JspInclude extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:include page=\"" + _page + "\">");
+    os.print("<jsp:include");
 
-    os.print("</jsp:include>");
+    printXmlAttribute(os, "page", _page);
+
+    os.print("></jsp:include>");
   }
 
   /**

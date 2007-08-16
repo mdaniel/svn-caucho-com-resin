@@ -60,7 +60,12 @@ public class UISelectMany extends UIInput
 
   public Object []getSelectedValues()
   {
-    return (Object []) super.getValue();
+    Object value = super.getValue();
+
+    if (value instanceof String)
+      return new Object[] { value };
+    else
+      return (Object []) value;
   }
 
   public void setSelectedValues(Object []value)

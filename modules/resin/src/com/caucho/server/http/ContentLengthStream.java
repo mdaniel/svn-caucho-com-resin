@@ -41,9 +41,9 @@ public class ContentLengthStream extends StreamImpl {
   private ReadStream _next;
 
   // bytes available in the post contents
-  private int _length;
+  private long _length;
 
-  void init(ReadStream next, int length)
+  void init(ReadStream next, long length)
   {
     _next = next;
     _length = length;
@@ -66,7 +66,7 @@ public class ContentLengthStream extends StreamImpl {
   public int read(byte []buffer, int offset, int length) throws IOException
   {
     if (_length < length)
-      length = _length;
+      length = (int) _length;
 
     if (length <= 0)
       return -1;
@@ -90,7 +90,7 @@ public class ContentLengthStream extends StreamImpl {
     if (_length <= 0)
       return 0;
     else if (_length < available)
-      return _length;
+      return (int) _length;
     else
       return available;
   }

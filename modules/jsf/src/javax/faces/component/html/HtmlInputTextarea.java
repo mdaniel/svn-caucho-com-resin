@@ -151,7 +151,7 @@ public class HtmlInputTextarea extends UIInput
     else if (_colsExpr != null)
       return Util.evalInt(_colsExpr);
     else
-      return 0;
+      return Integer.MIN_VALUE;
   }
 
   public void setCols(int value)
@@ -451,7 +451,7 @@ public class HtmlInputTextarea extends UIInput
     else if (_rowsExpr != null)
       return Util.evalInt(_rowsExpr);
     else
-      return 0;
+      return Integer.MIN_VALUE;
   }
 
   public void setRows(int value)

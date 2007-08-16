@@ -235,13 +235,11 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
       out.writeAttribute("class", styleClass, "class");
 
     String clientId = component.getClientId(context);
-    out.writeAttribute("name", clientId, "name");
-    
-    if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
-      out.writeAttribute("id", clientId, "id");
 
     if (disabled)
       out.writeAttribute("disabled", "disabled", "disabled");
+
+    out.write("\n");
 
     if (! "pageDirection".equals(layout)) {
       out.startElement("tr", component);
@@ -259,6 +257,7 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
       }
       
       out.startElement("td", component);
+      out.write("\n");
       out.startElement("input", component);
       out.writeAttribute("id", childId, "id");
       out.writeAttribute("name", clientId, "name");
@@ -352,22 +351,30 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
 	if (enabledClass != null)
 	  out.writeAttribute("class", enabledClass, "enabledClass");
       }
-	
-      out.writeText(selectItem.getLabel(), "itemLabel");
+
+      String label = selectItem.getLabel();
+      if (label == null)
+        label = String.valueOf(selectItem.getValue());
+      
+      out.writeText(label, "itemLabel");
       out.endElement("label");
       
       out.endElement("td");
+      out.write("\n");
 
       if ("pageDirection".equals(layout)) {
 	out.endElement("tr");
+        out.write("\n");
       }
     }
 
     if (! "pageDirection".equals(layout)) {
       out.endElement("tr");
+      out.write("\n");
     }
 
     out.endElement("table");
+    out.write("\n");
   }
 
   /**

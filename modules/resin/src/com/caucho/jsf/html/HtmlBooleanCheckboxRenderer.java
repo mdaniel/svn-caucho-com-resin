@@ -56,6 +56,17 @@ class HtmlBooleanCheckboxRenderer extends Renderer
   }
 
   /**
+   * Converts from the string value to a boolean value.
+   */
+  public Object getConvertedValue(FacesContext context,
+                                  UIComponent component,
+                                  Object submittedValue)
+    throws ConverterException
+  {
+    return Boolean.valueOf((String) submittedValue);
+  }
+
+  /**
    * Decodes the data from the form.
    */
   @Override

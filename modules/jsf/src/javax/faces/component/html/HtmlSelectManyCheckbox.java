@@ -158,7 +158,7 @@ public class HtmlSelectManyCheckbox extends UISelectMany
     else if (_borderExpr != null)
       return Util.evalInt(_borderExpr);
     else
-      return 0;
+      return Integer.MIN_VALUE;
   }
 
   public void setBorder(int value)

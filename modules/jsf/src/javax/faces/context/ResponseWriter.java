@@ -69,6 +69,14 @@ public abstract class ResponseWriter extends Writer {
 				 String property)
     throws IOException;
 
+  public void writeText(Object text,
+                        UIComponent component,
+                        String property)
+    throws IOException
+  {
+    writeText(text, property);
+  }
+
   public abstract void writeText(char []text, int offset, int length)
     throws IOException;
 

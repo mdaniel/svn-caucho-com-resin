@@ -56,10 +56,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
+import java.util.logging.*;
+
 /**
  * Serializing an object for known object types.
  */
 public class JavaDeserializer extends AbstractMapDeserializer {
+  private static final Logger log
+    = Logger.getLogger(JavaDeserializer.class.getName());
+  
   private Class _type;
   private HashMap _fieldMap;
   private Method _readResolve;
@@ -376,8 +381,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.set(obj, value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -397,8 +402,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.setBoolean(obj, value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -418,8 +423,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.setByte(obj, (byte) value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -439,8 +444,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.setShort(obj, (short) value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -460,8 +465,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.setInt(obj, value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -481,8 +486,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.setLong(obj, value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -502,8 +507,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.setFloat(obj, (float) value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -523,8 +528,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.setDouble(obj, value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
   }
@@ -544,9 +549,18 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 	
       try {
 	_field.set(obj, value);
-      } catch (IllegalAccessException e) {
-	// XXX: log when available
+      } catch (Exception e) {
+        logDeserializeError(_field, obj, value, e);
       }
     }
+  }
+
+  static void logDeserializeError(Field field, Object obj, Object value,
+                                  Throwable e)
+  {
+    String fieldName = (field.getDeclaringClass().getName()
+                        + "." + field.getName());
+    
+    log.log(Level.WARNING, field + ": deserialize(" + obj + ", " + value + ")\n" + e.toString(), e);
   }
 }

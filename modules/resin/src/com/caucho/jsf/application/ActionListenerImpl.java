@@ -74,7 +74,8 @@ public class ActionListenerImpl implements ActionListener
       
       Object value;
 
-      value = actionExpr.invoke(elContext, new Object[] { event });
+      // jsf/4401
+      value = actionExpr.invoke(elContext, NULL_ARG);
 
       if (value != null)
 	logicalOutcome = value.toString();

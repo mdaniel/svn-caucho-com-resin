@@ -1087,7 +1087,7 @@ public class HttpRequest extends AbstractHttpRequest
   public boolean initStream(ReadStream readStream, ReadStream rawRead)
     throws IOException
   {
-    int contentLength = getContentLength();
+    long contentLength = getLongContentLength();
 
     // needed to avoid auto-flush on read conflicting with partially
     // generated response

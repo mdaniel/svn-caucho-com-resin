@@ -47,11 +47,34 @@ final class Util
       throw new FacesException(e);
     }
   }
+
+  static final Boolean booleanValueOf(Object value)
+  {
+    if (value == null)
+      return Boolean.FALSE;
+    else if (value instanceof Boolean)
+      return (Boolean) value;
+    else if (value instanceof String)
+      return ("true".equalsIgnoreCase((String) value)
+              ? Boolean.TRUE
+              : Boolean.FALSE);
+    else
+      return Boolean.FALSE;
+  }
   
   static final boolean evalBoolean(ValueExpression expr, FacesContext context)
   {
     try {
-      return ! Boolean.FALSE.equals(expr.getValue(context.getELContext()));
+      Object value = expr.getValue(context.getELContext());
+
+      if (value == null)
+        return false;
+      else if (value instanceof Boolean)
+        return ((Boolean) value).booleanValue();
+      else if (value instanceof String)
+        return "true".equalsIgnoreCase((String) value);
+      else
+        return false;
     } catch (ELException e) {
       throw new FacesException(e);
     }

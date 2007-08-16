@@ -163,7 +163,7 @@ public class HtmlPanelGrid extends UIPanel
     else if (_borderExpr != null)
       return Util.evalInt(_borderExpr);
     else
-      return -1;
+      return Integer.MIN_VALUE;
   }
 
   public void setBorder(int value)
@@ -253,7 +253,7 @@ public class HtmlPanelGrid extends UIPanel
     else if (_columnsExpr != null)
       return Util.evalInt(_columnsExpr);
     else
-      return -1;
+      return Integer.MIN_VALUE;
   }
 
   public void setColumns(int value)

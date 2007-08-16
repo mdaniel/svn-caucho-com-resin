@@ -259,7 +259,7 @@ public class JsfTagNode extends JspContainerNode
 	if (method == null)
 	  throw new IllegalStateException(jsfNode._componentClass + " id");
       
-	String id = "j_id" + jsfNode._gen.generateJspId();
+	String id = "j_id_" + jsfNode._gen.generateJspId();
 	
 	jsfNode._idAttr = new Attr("id", method, id);
 
@@ -311,7 +311,8 @@ public class JsfTagNode extends JspContainerNode
   public void printXml(WriteStream os)
     throws IOException
   {
-    _next.printXml(os);
+    if (_next != null)
+      _next.printXml(os);
   }
 
   /**

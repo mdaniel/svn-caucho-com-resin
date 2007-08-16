@@ -60,7 +60,7 @@ public class UISelectBoolean extends UIInput
   {
     Object value = getValue();
 
-    return Boolean.TRUE.equals(value);
+    return Util.booleanValueOf(value);
   }
 
   public void setSelected(boolean value)

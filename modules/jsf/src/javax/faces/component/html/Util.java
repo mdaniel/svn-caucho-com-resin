@@ -65,7 +65,7 @@ final class Util
       if (value instanceof Number)
 	return ((Number) value).intValue();
       else if (value == null)
-	return 0;
+	return Integer.MIN_VALUE;
       else
 	return (Integer) value;
     } catch (ELException e) {

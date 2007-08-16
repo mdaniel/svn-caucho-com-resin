@@ -253,9 +253,11 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
 	
       if ("pageDirection".equals(layout)) {
 	out.startElement("tr", child);
+        out.write("\n");
       }
       
       out.startElement("td", child);
+      out.write("\n");
 
       if (child instanceof UISelectItem) {
 	UISelectItem selectItem = (UISelectItem) child;
@@ -365,6 +367,7 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       }
       
       out.endElement("td");
+      out.write("\n");
 
       if ("pageDirection".equals(layout)) {
 	out.endElement("tr");

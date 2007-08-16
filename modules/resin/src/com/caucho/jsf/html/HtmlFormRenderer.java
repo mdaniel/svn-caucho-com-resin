@@ -257,34 +257,13 @@ class HtmlFormRenderer extends BaseRenderer
       out.writeAttribute("title", title, "title");
     
     out.write("\n");
-
-    int childCount = component.getChildCount();
-
-    if (childCount > 0) {
-      List<UIComponent> children = component.getChildren();
-
-      for (int i = 0; i < childCount; i++) {
-	UIComponent child = children.get(i);
-
-	child.encodeAll(context);
-      }
-    }
-
+    
     out.startElement("input", component);
     out.writeAttribute("type", "hidden", "type");
     out.writeAttribute("name", component.getClientId(context), "name");
     //out.writeAttribute("value", "true", "value");
     out.endElement("input");
     out.write("\n");
-  }
-
-  /**
-   * Renders the content for the component.
-   */
-  @Override
-  public void encodeChildren(FacesContext context, UIComponent component)
-    throws IOException
-  {
   }
 
   /**
@@ -297,6 +276,7 @@ class HtmlFormRenderer extends BaseRenderer
     //context.getApplication().getViewHandler().writeState(context);
 
     ResponseWriter out = context.getResponseWriter();
+
     out.endElement("form");
     out.write("\n");
   }

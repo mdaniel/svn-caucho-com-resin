@@ -12,7 +12,7 @@ install	:
 	if test $(PREFIX) != `pwd`; then \
 	  mkdir -p $(PREFIX)/lib; \
 	  mkdir -p $(PREFIX)/$(LIBEXEC); \
-	  cp -r libexec/* $(PREFIX)/$(LIBEXEC); \
+	  cp -r $(LIBEXEC)/* $(PREFIX)/$(LIBEXEC); \
 	  cp lib/*.jar $(PREFIX)/lib; \
 	  mkdir -p $(PREFIX)/bin; \
 	  cp bin/* $(PREFIX)/bin; \

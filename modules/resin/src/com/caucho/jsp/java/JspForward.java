@@ -85,9 +85,11 @@ public class JspForward extends JspNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<jsp:forward page=\"" + _page + "\">");
+    os.print("<jsp:forward");
 
-    os.print("</jsp:forward>");
+    printXmlAttribute(os, "page", _page);
+
+    os.print("></jsp:forward>");
   }
 
   /**

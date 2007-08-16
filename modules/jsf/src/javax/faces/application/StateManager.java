@@ -80,7 +80,15 @@ public abstract class StateManager
 			 Object state)
     throws IOException
   {
-    throw new UnsupportedOperationException();
+    if (state != null && Object[].class.isAssignableFrom(state.getClass())) {
+      Object []data = (Object []) state;
+
+      if (data.length == 2) {
+        SerializedView view = new SerializedView(data[0], data[1]);
+
+        writeState(context, view);
+      }
+    }
   }
 
   @Deprecated

@@ -908,6 +908,27 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Returns the content length of a post.
+   */
+  public long getLongContentLength()
+  {
+    CharSegment cl = getHeaderBuffer("Content-Length");
+
+    if (cl == null)
+      return -1;
+
+    long value = 0;
+    int i = 0;
+    int ch;
+
+    int length = cl.length();
+    for (; i < length && (ch = cl.charAt(i)) >= '0' && ch <= '9'; i++)
+      value = 10 * value + ch - '0';
+ 
+    return i == 0 ? -1 : value;
+  }
+
+  /**
    * Returns the content-length of a post.
    */
   public String getContentType()
@@ -1972,12 +1993,12 @@ public abstract class AbstractHttpRequest
 	  formUploadMax = ((Number) uploadMax).longValue();
 
         // XXX: should this be an error?
-        if (formUploadMax >= 0 && formUploadMax < getContentLength()) {
+        if (formUploadMax >= 0 && formUploadMax < getLongContentLength()) {
           setAttribute("caucho.multipart.form.error",
-                       L.l("Multipart form upload of `{0}' bytes was too large.",
-                           String.valueOf(getContentLength())));
+                       L.l("Multipart form upload of '{0}' bytes was too large.",
+                           String.valueOf(getLongContentLength())));
           setAttribute("caucho.multipart.form.error.size",
-		       new Integer(getContentLength()));
+		       new Long(getLongContentLength()));
 
           return _form;
         }

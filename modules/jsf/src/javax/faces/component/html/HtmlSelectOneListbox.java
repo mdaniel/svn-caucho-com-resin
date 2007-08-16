@@ -470,7 +470,7 @@ public class HtmlSelectOneListbox extends UISelectOne
     else if (_sizeExpr != null)
       return Util.evalInt(_sizeExpr);
     else
-      return 0;
+      return Integer.MIN_VALUE;
   }
 
   public void setSize(int value)

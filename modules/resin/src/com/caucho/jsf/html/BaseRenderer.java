@@ -37,6 +37,7 @@ import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
 import javax.faces.convert.*;
+import javax.faces.model.*;
 import javax.faces.render.*;
 
 /**

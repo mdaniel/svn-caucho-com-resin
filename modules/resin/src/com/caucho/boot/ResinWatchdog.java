@@ -353,18 +353,28 @@ public class ResinWatchdog extends AbstractManagedObject
 
     env.put("CLASSPATH", classPath);
 
-    if (_is64bit) {
-      env.put("LD_LIBRARY_PATH",
-	      resinHome.lookup("libexec64").getNativePath());
-      env.put("DYLD_LIBRARY_PATH",
-	      resinHome.lookup("libexec64").getNativePath());
-    }
-    else {
-      env.put("LD_LIBRARY_PATH",
-	      resinHome.lookup("libexec").getNativePath());
-      env.put("DYLD_LIBRARY_PATH",
-	      resinHome.lookup("libexec").getNativePath());
-    }
+    String ldLibraryPath = env.get("LD_LIBRARY_PATH");
+    String dyldLibraryPath = env.get("DYLD_LIBRARY_PATH");
+
+    String libexecPath;
+
+    if (_is64bit)
+      libexecPath = resinHome.lookup("libexec64").getNativePath();
+    else
+      libexecPath = resinHome.lookup("libexec").getNativePath();
+
+    if (ldLibraryPath == null || "".equals(ldLibraryPath))
+      ldLibraryPath += libexecPath;
+    else if (ldLibraryPath.indexOf(libexecPath) < 0)
+      ldLibraryPath += File.pathSeparatorChar + libexecPath;
+
+    if (dyldLibraryPath == null || "".equals(dyldLibraryPath))
+      dyldLibraryPath += libexecPath;
+    else if (ldLibraryPath.indexOf(libexecPath) < 0)
+      dyldLibraryPath += File.pathSeparatorChar + libexecPath;
+  
+    env.put("LD_LIBRARY_PATH", ldLibraryPath);
+    env.put("DYLD_LIBRARY_PATH", dyldLibraryPath);
 
     ArrayList<String> list = new ArrayList<String>();
 

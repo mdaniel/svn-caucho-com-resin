@@ -75,6 +75,20 @@ abstract public class GenericTag extends JspContainerNode
     return _tagInfo;
   }
 
+  @Override
+  public boolean isPre21Taglib()
+  {
+    if (_tagInfo == null)
+      return false;
+    
+    TagLibraryInfo library = _tagInfo.getTagLibrary();
+
+    if (library == null)
+      return false;
+
+    return "2.1".compareTo(library.getRequiredVersion()) > 0;
+  }
+
   public TagInstance getTag()
   {
     return _tag;
@@ -431,18 +445,8 @@ abstract public class GenericTag extends JspContainerNode
 
       if (value instanceof String) {
 	String string = (String) value;
-	
-	os.print(" " + attrName.getName() + "=\"");
 
-	if (string.startsWith("<%=") && string.endsWith("%>")) {
-	  os.print("%=");
-	  os.print(xmlAttrText(string.substring(3, string.length() - 2)));
-	  os.print("%");
-	}
-	else
-	  os.print(xmlAttrText(string));
-	
-	os.print("\"");
+	printXmlAttribute(os, attrName.getName(), string);
       }
     }
 
@@ -496,8 +500,8 @@ abstract public class GenericTag extends JspContainerNode
       boolean isFragment = false;
 
       if (attribute != null) {
-	isFragment = (attribute.isFragment() || 
-		      attribute.getTypeName().equals(JspFragment.class.getName()));
+	isFragment = (attribute.isFragment()
+                      || attribute.getTypeName().equals(JspFragment.class.getName()));
       }
 
       if (value instanceof JspAttribute

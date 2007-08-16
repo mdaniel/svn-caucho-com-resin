@@ -510,6 +510,14 @@ public abstract class JspNode {
   }
 
   /**
+   * Return true for pre-21 taglib.
+   */
+  public boolean isPre21Taglib()
+  {
+    return false;
+  }
+
+  /**
    * Generates the XML text representation for the tag validation.
    *
    * @param os write stream to the generated XML.
@@ -535,6 +543,28 @@ public abstract class JspNode {
     throws IOException
   {
     os.print(xmlText(text));
+  }
+
+  /**
+   * Generates the XML text representation for the tag validation.
+   *
+   * @param os write stream to the generated XML.
+   */
+  public void printXmlAttribute(WriteStream os, String name, String text)
+    throws IOException
+  {
+    os.print(" ");
+    os.print(name);
+    os.print("=\"");
+
+    if (text.startsWith("<%=") && text.endsWith("%>")) {
+      os.print("%=");
+      os.print(xmlAttrText(text.substring(3, text.length() - 2)));
+      os.print("%");
+    }
+    else
+      os.print(xmlAttrText(text));
+    os.print("\"");
   }
 
   /**
@@ -1159,14 +1189,12 @@ public abstract class JspNode {
         // jsp/1c2m, jsp/1ce8
         return generateELValue(type, value);
       }
-      /* XXX: jsf-cardemo
       else if (! rtexpr
 	       && hasDeferredAttribute(value, isELIgnored)
 	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
 	throw error(L.l("Deferred syntax '{0}' is not allowed as a literal.",
 			value));
       }
-      */
       else if (type.equals(boolean.class))
         return String.valueOf(Boolean.valueOf(isEmpty ? "false" : value));
       else if (type.equals(Boolean.class)) {
@@ -1519,7 +1547,12 @@ public abstract class JspNode {
    */
   public boolean hasDeferredAttribute(String value)
   {
-    return ! _parseState.isELIgnored() && value.indexOf("#{") >= 0;
+    if (value.indexOf("#{") < 0)
+      return false;
+    else if (isPre21Taglib())
+      return false;
+    else
+      return ! _parseState.isELIgnored();
   }
   
   /**
@@ -1535,7 +1568,14 @@ public abstract class JspNode {
    */
   public boolean hasDeferredAttribute(String value, boolean isELIgnored)
   {
-    return ! isELIgnored && value.indexOf("#{") >= 0;
+    if (isELIgnored)
+      return false;
+    else if (value.indexOf("#{") < 0)
+      return false;
+    else if (isPre21Taglib())
+      return false;
+    else
+      return true;
   }
 
   /**

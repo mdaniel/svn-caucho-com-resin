@@ -155,7 +155,7 @@ public abstract class UIComponentBase extends UIComponent
     
     if ("rendered".equals(name)) {
       if (expr.isLiteralText())
-	_isRendered = ! Boolean.FALSE.equals(expr.getValue(null));
+	_isRendered = Boolean.valueOf((String) expr.getValue(null));
       else
 	_isRenderedExpr = expr;
       return;
