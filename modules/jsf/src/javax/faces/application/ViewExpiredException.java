@@ -32,23 +32,51 @@ import javax.faces.FacesException;
 
 public class ViewExpiredException extends FacesException
 {
+  private String _viewId;
+  
   public ViewExpiredException()
   {
   }
 
-  public ViewExpiredException(String msg)
+  public ViewExpiredException(String viewId)
+  {
+    _viewId = viewId;
+  }
+
+  public ViewExpiredException(String msg, String viewId)
   {
     super(msg);
+    
+    _viewId = viewId;
   }
 
-  public ViewExpiredException(String msg, Throwable cause)
+  public ViewExpiredException(String msg, Throwable cause, String viewId)
   {
     super(msg, cause);
+
+    _viewId = viewId;
   }
 
-  public ViewExpiredException(Throwable cause)
+  public ViewExpiredException(Throwable cause, String viewId)
   {
     super(cause);
+
+    _viewId = viewId;
+  }
+
+  public String getViewId()
+  {
+    return _viewId;
+  }
+
+  public String getMessage()
+  {
+    String msg = super.getMessage();
+
+    if (_viewId != null)
+      return _viewId + ": " + msg;
+    else
+      return msg;
   }
 }
 

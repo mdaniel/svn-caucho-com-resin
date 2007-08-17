@@ -325,6 +325,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     // Notify the attribute listeners
     ArrayList listeners = _manager.getAttributeListeners();
+    
     if (listeners != null && listeners.size() > 0) {
       HttpSessionBindingEvent event;
 

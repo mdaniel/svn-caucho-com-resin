@@ -46,6 +46,23 @@ public abstract class ResponseStateManager
 			 Object state)
     throws IOException
   {
+    StateManager.SerializedView view;
+
+    if (state instanceof StateManager.SerializedView) {
+      view = (StateManager.SerializedView) state;
+    }
+    else if (state instanceof Object[]) {
+      Object []values = (Object []) state;
+
+      Application app = context.getApplication();
+      StateManager manager = app.getStateManager();
+
+      view = manager.new SerializedView(values[0], values[1]);
+    }
+    else
+      throw new IllegalStateException();
+
+    writeState(context, view);
   }
 
   @Deprecated
@@ -61,7 +78,10 @@ public abstract class ResponseStateManager
   public Object getState(FacesContext context,
 			 String viewId)
   {
-    throw new UnsupportedOperationException();
+    return new Object[] {
+      getTreeStructureToRestore(context, viewId),
+      getComponentStateToRestore(context)
+    };
   }
 
   @Deprecated
@@ -82,6 +102,8 @@ public abstract class ResponseStateManager
    */
   public boolean isPostback(FacesContext context)
   {
-    throw new UnsupportedOperationException();
+    ExternalContext extContext = context.getExternalContext();
+    
+    return ! extContext.getRequestParameterMap().isEmpty();
   }
 }

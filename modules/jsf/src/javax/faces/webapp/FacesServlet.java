@@ -134,17 +134,8 @@ public final class FacesServlet implements Servlet
 						     req,
 						     res,
 						     _lifecycle);
-      
-      FacesContext.setCurrentInstance(context);
 
-      try {
-	_lifecycle.execute(context);
-      } catch (ViewExpiredException e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-	log.fine(e.toString());
-      }
-      
+      _lifecycle.execute(context);
       _lifecycle.render(context);
     } catch (FacesException e) {
       throw new ServletException(e);

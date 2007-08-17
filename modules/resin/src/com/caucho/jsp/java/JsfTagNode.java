@@ -185,6 +185,8 @@ public class JsfTagNode extends JspContainerNode
       return true;
     else if (ActionSource2.class.isAssignableFrom(_componentClass))
       return true;
+    else if (_bindingAttr != null)
+      return true;
     
     JspNode parent = _parent;
 

@@ -405,8 +405,8 @@ public final class BTree {
     setPointer(buffer, offset, value);
     setLength(buffer, length + 1);
 
-    if (log.isLoggable(Level.FINER))
-      log.finer("btree insert at " + debugId(blockId) + ":" + offset + " value:" + debugId(value));
+    if (log.isLoggable(Level.FINEST))
+      log.finest("btree insert at " + debugId(blockId) + ":" + offset + " value:" + debugId(value));
 
     if (offset + PTR_SIZE < HEADER_SIZE)
       throw new IllegalStateException();

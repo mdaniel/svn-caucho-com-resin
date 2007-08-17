@@ -197,17 +197,17 @@ public class JsfTagUtil {
     if (binding != null)
       child = (UIComponent) binding.getValue(context.getELContext());
 
-    if (child == null)
+    if (child == null) {
       child = (UIComponent) childClass.newInstance();
+
+      // jsf/3251
+      if (binding != null)
+	binding.setValue(context.getELContext(), child);
+    }
 
     if (parent != null)
       parent.getChildren().add(child);
 
-    // XXX:
-    /*
-    if (binding != null)
-      binding.setValue(context.getELContext(), child);
-    */
 
     return child;
   }

@@ -900,9 +900,6 @@ public abstract class UIComponentBase extends UIComponent
     Object []savedListeners = (Object []) state[9];
 
     restoreListeners(context, savedListeners);
-
-    if (_bindingExpr != null)
-      _bindingExpr.setValue(context.getELContext(), this);
   }
 
   private void restoreListeners(FacesContext context, Object []savedListeners)
