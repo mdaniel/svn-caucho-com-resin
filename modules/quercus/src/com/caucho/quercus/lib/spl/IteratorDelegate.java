@@ -29,33 +29,33 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ObjectIteratorFactory;
+import com.caucho.quercus.env.AbstractDelegate;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AbstractFunction;
 
-import java.util.*;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
- * A factory that returns Java Iterator's for target objects that implement
+ * A delegate that intercepts requests for iterator's and calls methods on
+ * target objects that implement
  * the {@link com.caucho.quercus.lib.spl.Iterator} interface.
  */
-public class ObjectIteratorFactoryImpl
-  implements ObjectIteratorFactory
+public class IteratorDelegate
+  extends AbstractDelegate
 {
-  public java.util.Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, Value obj)
   {
     return new EntryIterator(env, obj);
   }
 
-  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
+  public Iterator<Value> getKeyIterator(Env env, Value obj)
   {
     return new KeyIteratorImpl(env, obj);
   }
 
-  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
+  public Iterator<Value> getValueIterator(Env env, Value obj)
   {
     return new ValueIteratorImpl(env, obj);
   }
@@ -64,7 +64,7 @@ public class ObjectIteratorFactoryImpl
     implements Iterator<T>
   {
     protected final Env _env;
-    protected final ObjectValue _obj;
+    protected final Value _obj;
 
     private final AbstractFunction _nextFun;
     private final AbstractFunction _currentFun;
@@ -73,7 +73,7 @@ public class ObjectIteratorFactoryImpl
     private final AbstractFunction _validFun;
     private boolean _needNext;
 
-    public AbstractIteratorImpl(Env env, ObjectValue obj)
+    public AbstractIteratorImpl(Env env, Value obj)
     {
       _env = env;
       _obj = obj;
@@ -124,7 +124,7 @@ public class ObjectIteratorFactoryImpl
   public static class EntryIterator<T>
     extends AbstractIteratorImpl<Map.Entry<Value, Value>>
   {
-    public EntryIterator(Env env, ObjectValue obj)
+    public EntryIterator(Env env, Value obj)
     {
       super(env, obj);
     }
@@ -171,22 +171,7 @@ public class ObjectIteratorFactoryImpl
   public static class KeyIteratorImpl<T>
     extends AbstractIteratorImpl<Value>
   {
-    public KeyIteratorImpl(Env env, ObjectValue obj)
-    {
-      super(env, obj);
-    }
-
-    @Override
-    protected Value getCurrent()
-    {
-      return getCurrentValue();
-    }
-  }
-
-  public static class ValueIteratorImpl<T>
-    extends AbstractIteratorImpl<Value>
-  {
-    public ValueIteratorImpl(Env env, ObjectValue obj)
+    public KeyIteratorImpl(Env env, Value obj)
     {
       super(env, obj);
     }
@@ -195,6 +180,21 @@ public class ObjectIteratorFactoryImpl
     protected Value getCurrent()
     {
       return getCurrentKey();
+    }
+  }
+
+  public static class ValueIteratorImpl<T>
+    extends AbstractIteratorImpl<Value>
+  {
+    public ValueIteratorImpl(Env env, Value obj)
+    {
+      super(env, obj);
+    }
+
+    @Override
+    protected Value getCurrent()
+    {
+      return getCurrentValue();
     }
   }
 }

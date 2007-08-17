@@ -380,31 +380,6 @@ abstract public class JavaAdapter extends ArrayValue
     throw new UnsupportedOperationException();
   }
 
-  /* XXX:: dead code
-  public Value []getKeyArray(Env env)
-  {
-    int size = getSize();
-
-    if (size == 0)
-      return NULL_VALUE_ARRAY;
-
-    Value []keys = new Value[size];
-
-    int i = 0;
-    for (Map.Entry<Value,Value> entry : entrySet()) {
-      keys[i++] = entry.getKey();
-    }
-
-    return keys;
-  }
-
-  public Value []getValueArray(Env env)
-  {
-    //XXX: alias?
-    return valuesToArray();
-  }
-  */
-
   /**
    * Gets a new value.
    */

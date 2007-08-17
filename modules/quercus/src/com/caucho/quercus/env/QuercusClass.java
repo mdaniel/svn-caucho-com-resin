@@ -31,10 +31,10 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.StringLiteralExpr;
+import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.Function;
@@ -44,6 +44,7 @@ import com.caucho.util.L10N;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Represents a Quercus runtime class.
@@ -64,11 +65,7 @@ public class QuercusClass {
   private AbstractFunction _set;
   private AbstractFunction _call;
 
-  private String _offsetExists;
-  private String _offsetGet;
-  private String _offsetSet;
-  private String _offsetUnset;
-  private ObjectIteratorFactory _iteratorFactory;
+  private AbstractDelegate _delegate = new DefaultDelegate();
 
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
@@ -132,24 +129,25 @@ public class QuercusClass {
     
     _classDefList = classDefList;
 
-    // interfaces XXX: should these be added to _classDefList?
+    HashSet<String> ifaces = new HashSet<String>();
+
     for (int i = classDefList.length - 1; i >= 0; i--) {
+      classDef = classDefList[i];
 
-      String[] ifaceList =  classDefList[i].getInterfaces();
+      classDef.init();
 
-      for (String iface : ifaceList) {
+      for (String iface : classDef.getInterfaces()) {
+        
         ClassDef ifaceDef = moduleContext.findClass(iface);
 
-        if (ifaceDef != null)
-          ifaceDef.initClass(this);
+        if (ifaceDef != null) {
+          if (ifaces.add(iface))
+            ifaceDef.initClass(this);
+        }
       }
-    }
 
-    // classes initClass() after interfaces, php/4a21
-    for (int i = classDefList.length - 1; i >= 0; i--) {
-      classDefList[i].initClass(this);
+      classDef.initClass(this);
     }
-
   }
 
   /**
@@ -182,43 +180,21 @@ public class QuercusClass {
   }
 
   /**
-   * Set's a function to use for array access.
+   * Add's a delegate.
    */
-  public void setOffsetExists(String offsetExists)
+  public void addDelegate(AbstractDelegate delegate)
   {
-    _offsetExists = offsetExists;
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, L.l("{0} adding delegate {1}",this,  delegate));
+
+    delegate.init(_delegate);
+
+    _delegate = delegate;
   }
 
-  /**
-   * Set's a function to use for array access.
-   */
-  public void setOffsetGet(String offsetGet)
+  public AbstractDelegate getDelegate()
   {
-    _offsetGet = offsetGet;
-  }
-
-  /**
-   * Set's a function to use for array access.
-   */
-  public void setOffsetSet(String offsetSet)
-  {
-    _offsetSet = offsetSet;
-  }
-
-  /**
-   * Set's a function to use for array access.
-   */
-  public void setOffsetUnset(String offsetUnset)
-  {
-    _offsetUnset = offsetUnset;
-  }
-
-  /**
-   * Set's a function to use for array access.
-   */
-  public void setIteratorFactory(ObjectIteratorFactory iteratorFactory)
-  {
-    _iteratorFactory = iteratorFactory;
+    return _delegate;
   }
 
   /**
@@ -527,46 +503,33 @@ public class QuercusClass {
   // Array
   //
 
-  private Value arrayerror(Env env, Location location, ObjectValue obj)
+  public LongValue getCount(Env env, Value obj, boolean isRecursive)
   {
-    env.error(location, L.l("Can't use object '{0}' as array", obj.getName()));
-
-    return NullValue.NULL;
+    return _delegate.getCount(env, obj, isRecursive);
   }
 
   /**
-   * Returns the key => value pairs.
+   * Returns the key => value pairs, or null for default behaviour.
    */
-  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, Value obj)
   {
-    if (_iteratorFactory != null)
-      return _iteratorFactory.getIterator(env, obj);
-    else {
-      env.stub("XXX: unimplemented " + this + " getIterator");
-      return null;
-    }
+    return _delegate.getIterator(env, obj);
   }
 
   /**
-   * Returns the array keys.
+   * Returns the array keys, or null for default behaviour.
    */
-  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
+  public Iterator<Value> getKeyIterator(Env env, Value obj)
   {
-    if (_iteratorFactory != null)
-      return _iteratorFactory.getKeyIterator(env, obj);
-    else
-      return null;
+    return _delegate.getKeyIterator(env, obj);
   }
 
   /**
-   * Returns the array values.
+   * Returns the array values, or null for default behaviour.
    */
-  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
+  public Iterator<Value> getValueIterator(Env env, Value obj)
   {
-    if (_iteratorFactory != null)
-      return _iteratorFactory.getKeyIterator(env, obj);
-    else
-      return null;
+    return _delegate.getValueIterator(env, obj);
   }
 
   public Value get(Env env, ObjectValue obj, Value key)
@@ -579,10 +542,7 @@ public class QuercusClass {
                    ObjectValue obj,
                    Value key)
   {
-    if (_offsetGet != null)
-      return obj.findFunction(_offsetGet).callMethod(env, obj, key);
-
-    return arrayerror(env, location, obj);
+    return _delegate.offsetGet(env, obj, key);
   }
 
   public Value put(Env env, ObjectValue obj, Value key, Value value)
@@ -596,10 +556,7 @@ public class QuercusClass {
                    Value key,
                    Value value)
   {
-    if (_offsetSet != null)
-      return obj.findFunction(_offsetSet).callMethod(env, obj, key, value);
-
-    return arrayerror(env, location, obj);
+    return _delegate.offsetSet(env, obj, key, value);
   }
 
   public Value put(Env env, ObjectValue obj, Value value)
@@ -614,10 +571,7 @@ public class QuercusClass {
 
   public Value remove(Env env, ObjectValue obj, Value key)
   {
-    if (_offsetUnset != null)
-      return obj.findFunction(_offsetUnset).callMethod(env, obj, key);
-
-    return arrayerror(env, Location.UNKNOWN, obj);
+    return _delegate.offsetUnset(env, obj, key);
   }
 
   //
@@ -1150,7 +1104,7 @@ public class QuercusClass {
 
   public String toString()
   {
-    return "QuercusClass[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 
   static class StaticField
@@ -1162,6 +1116,82 @@ public class QuercusClass {
     {
       _name = name;
       _expr = expr;
+    }
+  }
+
+  /**
+   * Default implementations for delegated methods.
+   */
+  public class DefaultDelegate
+    extends AbstractDelegate
+  {
+    @Override
+    public LongValue getCount(Env env, Value obj, boolean isRecursive)
+    {
+      return LongValue.ONE;
+    }
+
+    private Value arrayerror(Env env, Location location, Value obj)
+    {
+      String name;
+
+      if (obj instanceof ObjectValue)
+        name = ((ObjectValue) obj).getName();
+      else
+        name = obj.toDebugString();
+
+      env.error(location, L.l("Can't use object '{0}' as array", name));
+
+      return UnsetValue.UNSET;
+    }
+
+    @Override
+    public boolean offsetExists(Env env, Value obj, Value offset)
+    {
+      arrayerror(env, null, obj);
+      return false;
+    }
+
+    @Override
+    public Value offsetGet(Env env, Value obj, Value offset)
+    {
+      return arrayerror(env, null, obj);
+    }
+
+    @Override
+    public Value offsetSet(Env env, Value obj, Value offset, Value value)
+    {
+      return arrayerror(env, null, obj);
+    }
+
+    @Override
+    public Value offsetUnset(Env env, Value obj, Value offset)
+    {
+      return arrayerror(env, null, obj);
+    }
+
+    @Override
+    public Iterator<Map.Entry<Value, Value>> getIterator(Env env, Value obj)
+    {
+      return null;
+    }
+
+    @Override
+    public Iterator<Value> getKeyIterator(Env env, Value obj)
+    {
+      return null;
+    }
+
+    @Override
+    public Iterator<Value> getValueIterator(Env env, Value obj)
+    {
+      return null;
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + QuercusClass.this.getName() + "]";
     }
   }
 }

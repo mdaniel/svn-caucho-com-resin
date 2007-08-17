@@ -10,4 +10,10 @@ com.caucho.quercus.lib.Memcache provides memcache
 com.caucho.quercus.lib.jms.JMSQueue
 com.caucho.quercus.lib.simplexml.SimpleXMLElement
 com.caucho.quercus.lib.spl.ArrayAccess
+com.caucho.quercus.lib.spl.Countable
 com.caucho.quercus.lib.spl.Iterator
+com.caucho.quercus.lib.spl.IteratorAggregate
+com.caucho.quercus.lib.spl.OuterIterator
+com.caucho.quercus.lib.spl.RecursiveIterator
+com.caucho.quercus.lib.spl.RecursiveIteratorIterator
+com.caucho.quercus.lib.spl.SeekableIterator

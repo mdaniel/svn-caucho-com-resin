@@ -47,7 +47,7 @@ public class JavaCollectionClassDef extends JavaClassDef {
 
   public Value wrap(Env env, Object obj)
   {
-    if (! _isInit)
+    if (!_isInit)
       init();
     
     return new JavaCollectionAdapter(env, (Collection)obj, this);

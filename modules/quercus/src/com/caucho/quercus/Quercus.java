@@ -458,6 +458,24 @@ public class Quercus
   }
 
   /**
+   * Adds a java class
+   */
+  public void addJavaClass(String phpName, String className)
+  {
+
+    Class type;
+
+    try {
+      type = Class.forName(className, false, _loader);
+    }
+    catch (ClassNotFoundException e) {
+      throw new QuercusRuntimeException(L.l("`{0}' not valid: {1}", className, e.toString()), e);
+    }
+    
+    addJavaClass(phpName, type);
+  }
+
+  /**
    * Adds a impl class
    */
   public void addImplClass(String name, Class type)

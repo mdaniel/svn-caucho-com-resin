@@ -281,7 +281,7 @@ public class Var extends Value
    * Converts to a long.
    */
   @Override
-  public Value toLongValue()
+  public LongValue toLongValue()
   {
     return _value.toLongValue();
   }
@@ -290,7 +290,7 @@ public class Var extends Value
    * Converts to a double.
    */
   @Override
-  public Value toDoubleValue()
+  public DoubleValue toDoubleValue()
   {
     return _value.toDoubleValue();
   }

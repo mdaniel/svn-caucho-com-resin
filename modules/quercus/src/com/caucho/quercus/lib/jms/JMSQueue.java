@@ -32,8 +32,7 @@ package com.caucho.quercus.lib.jms;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.util.*;
+import com.caucho.util.L10N;
 
 import javax.jms.*;
 import java.io.Serializable;
@@ -87,8 +86,7 @@ public class JMSQueue
       return NullValue.NULL;
     }
 
-    return new JavaValue(env, queue,
-                         env.getJavaClassDefinition(JMSQueue.class));
+    return env.wrapJava(queue);
   }
 
   public boolean send(@NotNull Value value, @Optional JMSQueue replyTo)
@@ -160,13 +158,13 @@ public class JMSQueue
     if (message instanceof ObjectMessage) {
       Object object = ((ObjectMessage) message).getObject();
 
-      return objectToValue(object, env);
+      return env.wrapJava(object);
     } else if (message instanceof TextMessage) {
       return new UnicodeValueImpl(((TextMessage) message).getText());
     } else if (message instanceof StreamMessage) {
       Object object = ((StreamMessage) message).readObject();
 
-      return objectToValue(object, env);
+      return env.wrapJava(object);
     } else if (message instanceof BytesMessage) {
       BytesMessage bytesMessage = (BytesMessage) message;
 
@@ -189,7 +187,7 @@ public class JMSQueue
 
         Object object = mapMessage.getObject(name);
 
-        array.put(new UnicodeValueImpl(name), objectToValue(object, env));
+        array.put(new UnicodeValueImpl(name), env.wrapJava(object));
       }
 
       return array;
@@ -203,22 +201,6 @@ public class JMSQueue
     try {
       _connection.close();
     } catch (JMSException e) {}
-  }
-
-  private static Value objectToValue(Object object, Env env)
-  {
-    JavaClassDef def =
-      env.getQuercus().getJavaClassDefinition(object.getClass().getName());
-
-    if (object instanceof Long) {
-      return LongValue.create(((Long) object).longValue());
-    } else if (object instanceof Integer) {
-      return LongValue.create(((Integer) object).intValue());
-    } else if (object instanceof Double) {
-      return DoubleValue.create(((Double) object).doubleValue());
-    } else {
-      return new JavaValue(env, object, def);
-    }
   }
 }
 

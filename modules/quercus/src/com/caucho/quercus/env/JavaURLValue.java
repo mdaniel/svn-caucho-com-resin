@@ -30,16 +30,11 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**

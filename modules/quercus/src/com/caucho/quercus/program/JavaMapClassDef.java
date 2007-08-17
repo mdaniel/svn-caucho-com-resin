@@ -47,7 +47,7 @@ public class JavaMapClassDef extends JavaClassDef {
 
   public Value wrap(Env env, Object obj)
   {
-    if (! _isInit)
+    if (!_isInit)
       init();
     
     return new JavaMapAdapter(env, (Map) obj, this);

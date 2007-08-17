@@ -19,26 +19,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Sam
  */
 
-
 package com.caucho.quercus.annotation;
 
+import com.caucho.quercus.env.AbstractDelegate;
+
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Mark a method to be used when accessing an object as an array.
- * The method should accept one argument and return true or false.
+ * Mark a class as having a delegate that overrides some or all of the
+ * default behaviour of an object
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OffsetExists {
+public @interface Delegate {
+  public Class<? extends AbstractDelegate> value();
 }

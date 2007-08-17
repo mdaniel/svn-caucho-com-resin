@@ -35,21 +35,69 @@ import java.util.Map;
 /**
  * A factory that produces iterators for Quercus objects.
  */
-public interface ObjectIteratorFactory {
+abstract public class AbstractDelegate {
+  private AbstractDelegate _next;
 
+  public AbstractDelegate()
+  {
+  }
+
+  public void init(AbstractDelegate next)
+  {
+    _next = next;
+  }
+
+  /**
+   * Returns the value for the count() function.
+   */
+  public LongValue getCount(Env env,
+                            Value obj,
+                            boolean isRecursive)
+  {
+    return _next.getCount(env, obj, isRecursive);
+  }
+
+  public boolean offsetExists(Env env, Value obj, Value offset)
+  {
+    return _next.offsetExists(env, obj, offset);
+  }
+
+  public Value offsetSet(Env env, Value obj, Value offset, Value value)
+  {
+    return _next.offsetSet(env, obj, offset, value);
+  }
+
+  public Value offsetGet(Env env, Value obj, Value offset)
+  {
+    return _next.offsetGet(env, obj, offset);
+  }
+
+  public Value offsetUnset(Env env, Value obj, Value offset)
+  {
+    return _next.offsetUnset(env, obj, offset);
+  }
   /**
    * Returns the key => value pairs.
    */
-  public Iterator<Map.Entry<Value,Value>> getIterator(Env env, ObjectValue obj);
+  public Iterator<Map.Entry<Value,Value>> getIterator(Env env, Value obj)
+  {
+    return _next.getIterator(env, obj);
+  }
 
   /**
    * Returns the keys.
    */
-  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj);
+  public Iterator<Value> getKeyIterator(Env env, Value obj)
+  {
+    return _next.getKeyIterator(env, obj);
+  }
 
   /**
    * Returns the values.
    */
-  public Iterator<Value> getValueIterator(Env env, ObjectValue obj);
+  public Iterator<Value> getValueIterator(Env env, Value obj)
+  {
+    return _next.getValueIterator(env, obj);
+  }
 
 }

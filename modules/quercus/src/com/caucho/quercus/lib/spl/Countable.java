@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,33 +24,14 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaListAdapter;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.annotation.Delegate;
 
-import java.util.List;
-
-/**
- * Represents an introspected Java class.
- */
-public class JavaListClassDef extends JavaClassDef {
-  JavaListClassDef(ModuleContext moduleContext, String name, Class type)
-  {
-    super(moduleContext, name, type);
-  }
-
-  public Value wrap(Env env, Object obj)
-  {
-    if (!_isInit)
-      init();
-    
-    return new JavaListAdapter(env, (List)obj, this);
-  }
+@Delegate(CountableDelegate.class)
+public interface Countable {
+  public int count();
 }
-

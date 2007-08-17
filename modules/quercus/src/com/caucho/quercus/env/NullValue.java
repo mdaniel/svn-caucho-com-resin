@@ -65,6 +65,7 @@ public class NullValue extends Value
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return "NULL";
@@ -73,6 +74,7 @@ public class NullValue extends Value
   /**
    * Returns true for a set type.
    */
+  @Override
   public boolean isset()
   {
     return false;
@@ -81,6 +83,7 @@ public class NullValue extends Value
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return false;
@@ -89,6 +92,7 @@ public class NullValue extends Value
   /**
    * Returns true for a null.
    */
+  @Override
   public boolean isNull()
   {
     return true;
@@ -97,6 +101,7 @@ public class NullValue extends Value
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return 0;
@@ -105,6 +110,7 @@ public class NullValue extends Value
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     return 0;
@@ -114,6 +120,7 @@ public class NullValue extends Value
    * Converts to a string.
    * @param env
    */
+  @Override
   public String toString()
   {
     return "";
@@ -122,6 +129,7 @@ public class NullValue extends Value
   /**
    * Converts to an object.
    */
+  @Override
   public Object toJavaObject()
   {
     return null;
@@ -139,6 +147,7 @@ public class NullValue extends Value
   /**
    * Converts to a java object.
    */
+  @Override
   public Object toJavaObjectNotNull(Env env, Class type)
   {
     env.warning(L.l("null is an unexpected argument; expected '{0}'",
@@ -286,6 +295,7 @@ public class NullValue extends Value
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
+  @Override
   public Object valuesToArray(Env env, Class elementType)
   {
     return null;
@@ -294,6 +304,7 @@ public class NullValue extends Value
   /**
    * Converts to an object.
    */
+  @Override
   public Value toObject(Env env)
   {
     return NullValue.NULL;
@@ -302,6 +313,7 @@ public class NullValue extends Value
   /**
    * Converts to an array
    */
+  @Override
   public Value toArray()
   {
     return new ArrayValueImpl();
@@ -310,6 +322,7 @@ public class NullValue extends Value
   /**
    * Converts to an array if null.
    */
+  @Override
   public Value toAutoArray()
   {
     return new ArrayValueImpl();
@@ -324,9 +337,16 @@ public class NullValue extends Value
     return null;
   }
 
+  @Override
+  public LongValue getCount(Env env, boolean isRecursive)
+  {
+    return LongValue.ZERO;
+  }
+
   /**
    * Returns the array size.
    */
+  @Override
   public int getSize()
   {
     return 0;
@@ -335,6 +355,7 @@ public class NullValue extends Value
   /**
    * Converts to an object if null.
    */
+  @Override
   public Value toAutoObject(Env env)
   {
     return env.createObject();
@@ -343,6 +364,7 @@ public class NullValue extends Value
   /**
    * Converts to a key.
    */
+  @Override
   public Value toKey()
   {
     return StringValue.EMPTY;
@@ -351,6 +373,7 @@ public class NullValue extends Value
   /**
    * Returns true for equality
    */
+  @Override
   public boolean eql(Value rValue)
   {
     return rValue.isNull();
@@ -368,6 +391,7 @@ public class NullValue extends Value
   /**
    * Subtracts the following value.
    */
+  @Override
   public Value sub(long rLong)
   {
     return LongValue.create( - rLong);
@@ -376,6 +400,7 @@ public class NullValue extends Value
   /**
    * Returns true for equality
    */
+  @Override
   public boolean eq(Value rValue)
   {
     if (rValue.isString())
@@ -417,6 +442,7 @@ public class NullValue extends Value
    * Prints the value.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
   }
@@ -424,6 +450,7 @@ public class NullValue extends Value
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(StringBuilder sb)
   {
     sb.append("N;");
@@ -432,6 +459,7 @@ public class NullValue extends Value
   /**
    * Exports the value.
    */
+  @Override
   public void varExport(StringBuilder sb)
   {
     sb.append("null");
@@ -440,6 +468,7 @@ public class NullValue extends Value
   /**
    * Returns a new array.
    */
+  @Override
   public Value getArray()
   {
     return new ArrayValueImpl();
@@ -448,6 +477,7 @@ public class NullValue extends Value
   /**
    * Append to a binary builder.
    */
+  @Override
   public void appendTo(BytesBuilderValue sb)
   {
   }
@@ -461,6 +491,7 @@ public class NullValue extends Value
    *
    * @param out the writer to the Java source code.
    */
+  @Override
   public void generate(PrintWriter out)
     throws IOException
   {
@@ -470,16 +501,19 @@ public class NullValue extends Value
   /**
    * Returns a new object.
    */
+  @Override
   public Value getObject(Env env)
   {
     return env.createObject();
   }
 
+  @Override
   public String toDebugString()
   {
     return "null";
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,

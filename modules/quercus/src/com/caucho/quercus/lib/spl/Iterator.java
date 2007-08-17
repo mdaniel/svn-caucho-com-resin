@@ -30,10 +30,9 @@
 package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ObjectIteratorFactory;
-import com.caucho.quercus.annotation.ObjectIterator;
+import com.caucho.quercus.annotation.Delegate;
 
-@ObjectIterator(factory=ObjectIteratorFactoryImpl.class)
+@Delegate(IteratorDelegate.class)
 public interface Iterator {
   /**
    * Returns the current value.

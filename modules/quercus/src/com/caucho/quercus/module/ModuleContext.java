@@ -32,12 +32,13 @@ package com.caucho.quercus.module;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.expr.*;
-import com.caucho.quercus.function.*;
+import com.caucho.quercus.expr.ExprFactory;
+import com.caucho.quercus.function.Marshal;
+import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaImplClassDef;
-import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
@@ -45,8 +46,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class-loader specific context for loaded PHP.
@@ -302,8 +303,7 @@ public class ModuleContext
         type = Class.forName(className, false, _loader);
       }
       catch (ClassNotFoundException e) {
-        throw new ClassNotFoundException(L.l("`{0}' not valid {1}", className, e.toString()));
-
+        throw new ClassNotFoundException(L.l("`{0}' not valid: {1}", className, e.toString()), e);
       }
 
       def = JavaClassDef.create(this, className, type);

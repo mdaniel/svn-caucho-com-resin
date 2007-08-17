@@ -2854,14 +2854,17 @@ public class Env {
   /**
    * Adds a Quercus class import.
    * 
-   * @param name fully qualified class import string
+   * @param javaName fully qualified class import string
    */
-  public void putQualifiedImport(String name)
+  public void putQualifiedImport(String javaName)
   {
     if (_importMap == null)
       _importMap = new ImportMap();
     
-    _importMap.putQualified(name);
+    String phpName = _importMap.putQualified(javaName);
+
+    // php/0cn2
+    _quercus.addJavaClass(phpName, javaName);
   }
   
   /**
@@ -3139,7 +3142,7 @@ public class Env {
       throw errorException(L.l("'{0}' is an unknown class.", name));
   }
 
-  private QuercusClass createQuercusClass(ClassDef def, QuercusClass parent)
+  QuercusClass createQuercusClass(ClassDef def, QuercusClass parent)
   {
     ClassKey key = new ClassKey(def, parent);
 

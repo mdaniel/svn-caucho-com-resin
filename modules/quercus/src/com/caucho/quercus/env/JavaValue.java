@@ -52,8 +52,9 @@ public class JavaValue extends ResourceValue
 {
   private static final Logger log
     = Logger.getLogger(JavaValue.class.getName());
-  
-  private JavaClassDef _classDef;
+
+  private JavaClassDef _classDef; // XXX: s/b replaced by _quercusClass
+  private QuercusClass _quercusClass;
 
   private Object _object;
 
@@ -64,6 +65,14 @@ public class JavaValue extends ResourceValue
     _env = env;
     _classDef = def;
     _object = object;
+  }
+
+  public QuercusClass getQuercusClass()
+  {
+    if (_quercusClass == null)
+      _quercusClass = _env.createQuercusClass(_classDef, null);
+
+    return _quercusClass;
   }
 
   @Override
@@ -360,19 +369,25 @@ public class JavaValue extends ResourceValue
   @Override
   public Iterator<Map.Entry<Value,Value>> getIterator(Env env)
   {
-    return _classDef.getIterator(env, _object);
+    return getQuercusClass().getIterator(env, this);
   }
 
   @Override
   public Iterator<Value> getKeyIterator(Env env)
   {
-    return _classDef.getKeyIterator(env, _object);
+    return getQuercusClass().getKeyIterator(env, this);
   }
 
   @Override
   public Iterator<Value> getValueIterator(Env env)
   {
-    return _classDef.getValueIterator(env, _object);
+    return getQuercusClass().getValueIterator(env, this);
+  }
+
+  @Override
+  public LongValue getCount(Env env,  boolean isRecursive)
+  {
+    return getQuercusClass().getCount(env, this, isRecursive);
   }
 
   /**
@@ -489,5 +504,6 @@ public class JavaValue extends ResourceValue
     
     _object = in.readObject();
   }
+
 }
 

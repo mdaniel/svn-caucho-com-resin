@@ -708,7 +708,9 @@ public class CompilingLoader extends Loader implements Make {
       compiler.compileIfModified(source, null);
     } catch (Exception e) {
       getLoader().addDependency(new Depend(javaSource));
-      
+
+      log.log(Level.FINEST, e.toString(), e);
+
       // Compile errors are wrapped in a special ClassNotFound class
       // so the server can give a nice error message
       throw new CompileClassNotFound(e);
@@ -718,8 +720,6 @@ public class CompilingLoader extends Loader implements Make {
   /**
    * Compile the Java source.  Compile errors are encapsulated in a
    * ClassNotFound wrapper.
-   *
-   * @param javaSource path to the Java source
    */
   void compileBatch(String []files, boolean isMake)
     throws ClassNotFoundException

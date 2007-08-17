@@ -44,11 +44,11 @@ import java.util.Set;
  */
 abstract public class ClassDef {
   private final static L10N L = new L10N(ClassDef.class);
-  
+
   private final String _name;
   private final String _parentName;
 
-  private final String []_ifaceList;
+  private String []_ifaceList;
 
   protected ClassDef(String name, String parentName, String []ifaceList)
   {
@@ -56,7 +56,7 @@ abstract public class ClassDef {
     _parentName = parentName;
     _ifaceList = ifaceList;
   }
-  
+
   /**
    * Returns the name.
    */
@@ -73,6 +73,24 @@ abstract public class ClassDef {
     return _parentName;
   }
 
+  protected void addInterface(String iface)
+  {
+    for (int i = 0; i < _ifaceList.length; i++)
+      if (_ifaceList[i].equals(iface))
+        return;
+
+    String[] ifaceList = new String[_ifaceList.length + 1];
+
+    System.arraycopy(_ifaceList, 0, ifaceList, 0, _ifaceList.length);
+    ifaceList[ifaceList.length - 1] = iface;
+
+    _ifaceList = ifaceList;
+  }
+
+  public void init()
+  {
+  }
+  
   /**
    * Returns the interfaces.
    */

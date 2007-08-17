@@ -763,7 +763,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a long vaule
    */
-  public Value toLongValue()
+  public LongValue toLongValue()
   {
     return new LongValue(toLong());
   }
@@ -771,7 +771,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a double vaule
    */
-  public Value toDoubleValue()
+  public DoubleValue toDoubleValue()
   {
     return new DoubleValue(toDouble());
   }
@@ -1592,6 +1592,14 @@ abstract public class Value implements java.io.Serializable
   public int getSize()
   {
     return 1;
+  }
+
+  /**
+   * Returns the count, as returned by the global php count() function
+   */
+  public LongValue getCount(Env env, boolean isRecursive)
+  {
+    return LongValue.ONE;
   }
 
   /**

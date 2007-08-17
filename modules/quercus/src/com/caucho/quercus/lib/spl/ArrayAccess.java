@@ -30,21 +30,15 @@
 package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.annotation.OffsetGet;
-import com.caucho.quercus.annotation.OffsetUnset;
-import com.caucho.quercus.annotation.OffsetSet;
-import com.caucho.quercus.annotation.OffsetExists;
+import com.caucho.quercus.annotation.Delegate;
 
+@Delegate(ArrayAccessDelegate.class)
 public interface ArrayAccess {
-  @OffsetExists
-  public Value offsetExists(Value offset);
+  public boolean offsetExists(Value offset);
 
-  @OffsetSet
   public Value offsetSet(Value offset, Value value);
 
-  @OffsetGet
   public Value offsetGet(Value offset);
 
-  @OffsetUnset
   public Value offsetUnset(Value offset);
 }

@@ -293,9 +293,11 @@ public class ArrayModule
   /**
    * Returns the size of the array.
    */
-  public static Value count(@ReadOnly Value value)
+  public static Value count(Env env,
+                            @ReadOnly Value value,
+                            @Optional("false") boolean recursive)
   {
-    return new LongValue(value.getSize());
+    return value.getCount(env, recursive);
   }
 
   /**
@@ -3295,9 +3297,11 @@ public class ArrayModule
   /**
    * Returns the size of the array.
    */
-  public static Value sizeof(@ReadOnly Value value)
+  public static Value sizeof(Env env,
+                             @ReadOnly Value value,
+                             @Optional("false") boolean recursive)
   {
-    return count(value);
+    return count(env, value, recursive);
   }
 
   private static class CompareString

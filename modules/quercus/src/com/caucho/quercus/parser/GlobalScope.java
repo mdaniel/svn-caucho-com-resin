@@ -76,7 +76,7 @@ public class GlobalScope extends Scope {
     if (cl == null) {
       String []ifaceArray = new String[ifaceList.size()];
       ifaceList.toArray(ifaceArray);
-      
+
       cl = _exprFactory.createClassDef(name, parentName, ifaceArray);
       
       _classMap.put(name, cl);

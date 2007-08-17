@@ -134,7 +134,7 @@ public class DoubleValue extends NumberValue
   /**
    * Converts to a double.
    */
-  public Value toDoubleValue()
+  public DoubleValue toDoubleValue()
   {
     return this;
   }

@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.L10N;
 
@@ -37,23 +38,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * Represents the introspected static function information.
+ * Represents a function created from a java method.
  */
 public class JavaMethod extends JavaInvoker {
   private static final L10N L = new L10N(JavaMethod.class);
 
   private final Method _method;
-  private final int _argLength;
 
   /**
-   * Creates the statically introspected function.
+   * Creates a function from an introspected java method.
    *
    * @param method the introspected method.
    */
   public JavaMethod(ModuleContext moduleContext, Method method)
   {
     super(moduleContext,
-	  method.getName(),
+	  getName(method),
 	  method.getParameterTypes(),
 	  method.getParameterAnnotations(),
 	  method.getAnnotations(),
@@ -64,8 +64,20 @@ public class JavaMethod extends JavaInvoker {
     // php/069a
     // Java 6 fixes the need to do this for methods of inner classes
     _method.setAccessible(true);
-    
-    _argLength = method.getParameterTypes().length;
+  }
+
+  private static String getName(Method method)
+  {
+    String name;
+
+    Name nameAnn = method.getAnnotation(Name.class);
+
+    if (nameAnn != null)
+      name = nameAnn.value();
+    else
+      name = method.getName();
+
+    return name;
   }
 
   /**
@@ -92,6 +104,7 @@ public class JavaMethod extends JavaInvoker {
     }
   }
 
+  @Override
   public String toString()
   {
     return "JavaMethod[" + _method + "]";

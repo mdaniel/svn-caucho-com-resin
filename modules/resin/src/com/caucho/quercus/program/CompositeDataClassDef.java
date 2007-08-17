@@ -29,36 +29,9 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.annotation.Construct;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.LiteralExpr;
-import com.caucho.quercus.function.JavaMarshal;
-import com.caucho.quercus.function.Marshal;
-import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.module.ModuleContext;
-import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.management.openmbean.*;
 
 /**
@@ -75,7 +48,7 @@ public class CompositeDataClassDef extends JavaClassDef {
   @Override
   public Value wrap(Env env, Object obj)
   {
-    if (! _isInit)
+    if (!_isInit)
       init();
     
     return new CompositeDataValue((CompositeData) obj);

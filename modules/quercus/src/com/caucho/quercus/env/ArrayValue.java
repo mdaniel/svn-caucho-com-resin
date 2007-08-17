@@ -287,6 +287,15 @@ abstract public class ArrayValue extends Value {
   abstract public int getSize();
 
   /**
+   * Returns the count().
+   */
+  @Override
+  public LongValue getCount(Env env, boolean isRecursive)
+  {
+    return LongValue.create(getSize());
+  }
+
+  /**
    * Clears the array
    */
   abstract public void clear();

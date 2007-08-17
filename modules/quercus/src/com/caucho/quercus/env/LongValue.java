@@ -140,7 +140,7 @@ public class LongValue extends NumberValue
   /**
    * Converts to a long value
    */
-  public Value toLongValue()
+  public LongValue toLongValue()
   {
     return this;
   }

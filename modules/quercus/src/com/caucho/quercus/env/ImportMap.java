@@ -31,8 +31,6 @@ package com.caucho.quercus.env;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class ImportMap
 {
@@ -56,7 +54,7 @@ public class ImportMap
     _wildcardPhpList.add(name.replaceAll("\\.", "/"));
   }
   
-  public void putQualified(String name)
+  public String putQualified(String name)
   {
     if (_qualifiedMap == null) {
       _qualifiedMap = new HashMap<String, String>();
@@ -71,6 +69,8 @@ public class ImportMap
       shortName = name;
     
     putQualified(shortName, name);
+
+    return shortName;
   }
   
   public void putQualified(String shortName, String name)

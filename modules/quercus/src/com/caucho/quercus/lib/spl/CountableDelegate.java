@@ -19,25 +19,35 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Sam
  */
 
-package com.caucho.quercus.annotation;
+package com.caucho.quercus.lib.spl;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.caucho.quercus.env.AbstractDelegate;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.Value;
 
 /**
- * Mark a method to be used when accessing an object as an array.
- * The method should accept one argument and return a value.
+ * A delegate that intercepts the global count() function and calls count()
+ * method on target objects that implement
+ * the {@link com.caucho.quercus.lib.spl.Countable} interface.
  */
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface OffsetGet {
+public class CountableDelegate
+  extends AbstractDelegate
+{
+  @Override
+  public LongValue getCount(Env env, Value obj, boolean isRecursive)
+  {
+    Value count = obj.findFunction("count").callMethod(env, obj);
+
+    return count.toLongValue();
+  }
+
 }

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,17 +29,13 @@
 
 package com.caucho.quercus.annotation;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Mark a method to be used when accessing an object as an array.
- * The method should accept two arguments, a key and a value, and return the
- * old value.
+ * Used to indicate the name that should be used in the php namespace.
  */
-@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OffsetSet {
+public @interface Name {
+  String value();
 }

@@ -31,12 +31,8 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.annotation.Construct;
-import com.caucho.quercus.annotation.OffsetGet;
-import com.caucho.quercus.annotation.OffsetUnset;
-import com.caucho.quercus.annotation.OffsetExists;
-import com.caucho.quercus.annotation.OffsetSet;
-import com.caucho.quercus.annotation.ObjectIterator;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.*;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
@@ -101,11 +97,8 @@ public class JavaClassDef extends ClassDef {
   private JavaMethod __setField = null;
   private JavaMethod __call = null;
 
-  private String _offsetExists;
-  private String _offsetGet;
-  private String _offsetSet;
-  private String _offsetUnset;
-  private ObjectIteratorFactory _iteratorFactory;
+  private ArrayList<AbstractDelegate> _delegates
+    = new ArrayList<AbstractDelegate>();
 
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
@@ -119,7 +112,7 @@ public class JavaClassDef extends ClassDef {
 
   public JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
-    super(name, null, createInterfaceList(moduleContext, type));
+    super(name, null, new String[] {});
 
     _moduleContext = moduleContext;
     _name = name;
@@ -128,27 +121,10 @@ public class JavaClassDef extends ClassDef {
     _isAbstract = Modifier.isAbstract(type.getModifiers());
     _isArray = type.isArray();
     _isInterface = type.isInterface();
+
+    _delegates.add(new JavaClassDefDelegate());
   }
 
-  private static String[] createInterfaceList(ModuleContext moduleContext,
-                                              Class type)
-  {
-    Class[] ifaces = type.getInterfaces();
-
-    if (ifaces == null)
-      return new String[] {};
-
-    ArrayList<String> ifaceNames = new ArrayList<String>();
-
-    for (Class iface : ifaces) {
-
-      JavaClassDef javaClassDef = moduleContext.getJavaClassDefinition(iface);
-      if (javaClassDef != null)
-        ifaceNames.add(javaClassDef.getName());
-    }
-
-    return ifaceNames.toArray(new String[ifaceNames.size()]);
-  }
 
   public static JavaClassDef create(ModuleContext moduleContext,
 				    String name, Class type)
@@ -257,7 +233,7 @@ public class JavaClassDef extends ClassDef {
 
   public Value wrap(Env env, Object obj)
   {
-    if (! _isInit)
+    if (!_isInit)
       init();
     
     return new JavaValue(env, obj, this);
@@ -667,21 +643,6 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  public Iterator<Map.Entry<Value,Value>> getIterator(Env env, Object object)
-  {
-    return new EntryIterator(env, object);
-  }
-
-  public Iterator<Value> getKeyIterator(Env env, Object object)
-  {
-    return new KeyIterator(env, object);
-  }
-
-  public Iterator<Value> getValueIterator(Env env, Object object)
-  {
-    return new ValueIterator(env, object);
-  }
-
   private String toMethod(char []name, int nameLen)
   {
     return new String(name, 0, nameLen);
@@ -710,20 +671,9 @@ public class JavaClassDef extends ClassDef {
     if (__call != null)
       cl.setCall(__call);
 
-    if (_offsetExists != null)
-      cl.setOffsetExists(_offsetExists);
-
-    if (_offsetGet != null)
-      cl.setOffsetGet(_offsetGet);
-
-    if (_offsetSet != null)
-      cl.setOffsetSet(_offsetSet);
-
-    if (_offsetUnset != null)
-      cl.setOffsetUnset(_offsetUnset);
-
-    if (_iteratorFactory != null)
-      cl.setIteratorFactory(_iteratorFactory);
+    for (AbstractDelegate delegate : _delegates) {
+      cl.addDelegate(delegate);
+    }
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
@@ -754,90 +704,142 @@ public class JavaClassDef extends ClassDef {
     return null;
   }
 
-  public void init()
-  {
-    introspect();
-  }
-  
-  /**
-   * Introspects the Java class.
-   */
-  public synchronized void introspect()
+  public synchronized void init()
   {
     if (_isInit)
       return;
 
     try {
-      introspectConstants(_type);
-      introspectMethods(_moduleContext, _type);
-      introspectFields(_moduleContext, _type);
-
-      _marshal = new JavaMarshal(this, false);
-
-      Method consMethod = getConsMethod(_type);
-
-      if (consMethod != null)
-        _cons = new JavaMethod(_moduleContext, consMethod);
-      else {
-        Constructor []cons = _type.getConstructors();
-        
-        if (cons.length > 0) {
-          int i;
-          for (i = 0; i < cons.length; i++) {
-            if (cons[i].isAnnotationPresent(Construct.class))
-              break;
-          }
-
-          if (i < cons.length) {
-            _cons = new JavaConstructor(_moduleContext, cons[i]);
-          }
-          else {
-            _cons = new JavaConstructor(_moduleContext, cons[0]);
-            for (i = 1; i < cons.length; i++) {
-              _cons = _cons.overload(new JavaConstructor(_moduleContext, cons[i]));
-            }
-          }
-
-        } else
-          _cons = null;
-      }
-
-
-      for (Annotation annotation : _type.getAnnotations()) {
-        if (annotation.annotationType() == ObjectIterator.class) {
-          Class<? extends ObjectIteratorFactory> cl
-            = ((ObjectIterator) annotation).factory();
-
-          try {
-            _iteratorFactory = cl.newInstance();
-          }
-          catch (Throwable e) {
-            throw new RuntimeException(e);
-          }
-        }
-      }
-
-      try {
-        Method method = _type.getMethod("iterator", new Class[0]);
-
-        if (method != null &&
-            Iterator.class.isAssignableFrom(method.getReturnType()))
-          _iteratorMethod = method;
-      } catch (Throwable e) {
-      }
-      
-      try {
-        Method method = _type.getMethod("keySet", new Class[0]);
-
-        if (method != null &&
-            Set.class.isAssignableFrom(method.getReturnType()))
-          _keySetMethod = method;
-      } catch (Throwable e) {
-      }
-      
-    } finally {
+      initInterfaceList(_type);
+      introspect();
+    }
+    finally {
       _isInit = true;
     }
+  }
+
+  private void initInterfaceList(Class type)
+  {
+    Class[] ifaces = type.getInterfaces();
+
+    if (ifaces == null)
+      return;
+
+    for (Class iface : ifaces) {
+
+      JavaClassDef javaClassDef = _moduleContext.getJavaClassDefinition(iface);
+
+      if (javaClassDef != null)
+        addInterface(javaClassDef.getName());
+
+      // recurse for parent interfaces
+      initInterfaceList(iface);
+    }
+  }
+
+  /**
+   * Introspects the Java class.
+   */
+  private void introspect()
+  {
+    introspectConstants(_type);
+    introspectMethods(_moduleContext, _type);
+    introspectFields(_moduleContext, _type);
+
+    _marshal = new JavaMarshal(this, false);
+
+    Method consMethod = getConsMethod(_type);
+
+    if (consMethod != null)
+      _cons = new JavaMethod(_moduleContext, consMethod);
+    else {
+      Constructor []cons = _type.getConstructors();
+
+      if (cons.length > 0) {
+        int i;
+        for (i = 0; i < cons.length; i++) {
+          if (cons[i].isAnnotationPresent(Construct.class))
+            break;
+        }
+
+        if (i < cons.length) {
+          _cons = new JavaConstructor(_moduleContext, cons[i]);
+        }
+        else {
+          _cons = new JavaConstructor(_moduleContext, cons[0]);
+          for (i = 1; i < cons.length; i++) {
+            _cons = _cons.overload(new JavaConstructor(_moduleContext, cons[i]));
+          }
+        }
+
+      } else
+        _cons = null;
+    }
+
+
+    introspectAnnotations(_type);
+
+    try {
+      Method method = _type.getMethod("iterator", new Class[0]);
+
+      if (method != null &&
+          Iterator.class.isAssignableFrom(method.getReturnType()))
+        _iteratorMethod = method;
+    } catch (Throwable e) {
+    }
+
+    try {
+      Method method = _type.getMethod("keySet", new Class[0]);
+
+      if (method != null &&
+          Set.class.isAssignableFrom(method.getReturnType()))
+        _keySetMethod = method;
+    } catch (Throwable e) {
+    }
+  }
+
+  private void introspectAnnotations(Class type)
+  {
+    if (type == null || type == Object.class)
+      return;
+
+    // interfaces
+    for (Class<?> iface : type.getInterfaces())
+      introspectAnnotations(iface);
+
+    // super-class
+    introspectAnnotations(type.getSuperclass());
+
+    // this
+    for (Annotation annotation : type.getAnnotations()) {
+      if (annotation.annotationType() == Delegate.class) {
+        Class<? extends AbstractDelegate> delegateClass = ((Delegate) annotation).value();
+
+        boolean exists = false;
+
+        for (AbstractDelegate delegate : _delegates) {
+          if (delegate.getClass() == delegateClass) {
+            exists = true;
+            break;
+          }
+        }
+
+        if (exists)
+          continue;
+
+        try {
+          _delegates.add(delegateClass.newInstance());
+        }
+        catch (InstantiationException e) {
+          throw new QuercusModuleException(e);
+        }
+        catch (IllegalAccessException e) {
+          throw new QuercusModuleException(e);
+        }
+      }
+    }
+
+
   }
 
   private Method getConsMethod(Class type)
@@ -931,20 +933,6 @@ public class JavaClassDef extends ClassDef {
         } else if ("__setField".equals(methodName)) {
           __setField = new JavaMethod(moduleContext, method);
         }
-      }
-
-      for (Annotation annotation : method.getAnnotations()) {
-        if (annotation.annotationType() == OffsetExists.class)
-          _offsetExists = method.getName();
-
-        if (annotation.annotationType() == OffsetGet.class)
-          _offsetGet = method.getName();
-
-        if (annotation.annotationType() == OffsetSet.class)
-          _offsetSet = method.getName();
-
-        if (annotation.annotationType() == OffsetUnset.class)
-          _offsetUnset = method.getName();
       }
     }
 
@@ -1047,27 +1035,28 @@ public class JavaClassDef extends ClassDef {
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
 
-      String methodName = method.getName();
-      
-      if ("printRImpl".equals(methodName)) {
+      if (method.getDeclaringClass() == Object.class)
+        continue;
+
+      if ("printRImpl".equals(method.getName())) {
         _printRImpl = method;
-      } else if ("varDumpImpl".equals(methodName)) {
+      } else if ("varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
-      } else if ("__call".equals(methodName)) {
+      } else if ("__call".equals(method.getName())) {
         __call = new JavaMethod(moduleContext, method);
       } else {
-        if (methodName.startsWith("quercus_"))
-          methodName = methodName.substring(8);
-        
-        AbstractJavaMethod fun = _functionMap.get(methodName);
+        if (method.getName().startsWith("quercus_"))
+          throw new UnsupportedOperationException(("XXX: use @Name instead"));
+
         JavaMethod newFun = new JavaMethod(moduleContext, method);
+        AbstractJavaMethod fun = _functionMap.get(newFun.getName());
 
         if (fun != null)
           fun = fun.overload(newFun);
         else
           fun = newFun;
 
-        _functionMap.put(methodName, fun);
+        _functionMap.put(fun.getName(), fun);
       }
     }
 
@@ -1244,46 +1233,66 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  public class EntryIterator
+  public class JavaClassDefDelegate
+    extends AbstractDelegate
+  {
+    @Override
+    public Iterator<Map.Entry<Value,Value>> getIterator(Env env, Value obj)
+    {
+      Iterator<Map.Entry<Value,Value>> iter = super.getIterator(env, obj);
+
+      if (iter == null && _keySetMethod != null)
+        iter = new EntryIterator(env, obj, _keySetMethod);
+
+      return iter;
+    }
+
+    @Override
+    public Iterator<Value> getKeyIterator(Env env, Value obj)
+    {
+      Iterator<Value> iter = super.getKeyIterator(env, obj);
+
+      if (iter == null && _keySetMethod != null)
+        iter = new KeyIterator(env, obj, _keySetMethod);
+
+      return iter;
+    }
+
+    @Override
+    public Iterator<Value> getValueIterator(Env env, Value obj)
+    {
+      Iterator<Value> iter = super.getKeyIterator(env, obj);
+
+      if (iter == null && _iteratorMethod != null)
+        iter = new ValueIterator(env, obj, _iteratorMethod);
+
+      return iter;
+    }
+  }
+
+  public static class EntryIterator
     implements Iterator<Map.Entry<Value, Value>>
   {
-    private final Env _env;
-    private final Object _object;
+    private final Value _obj;
 
-    private final Iterator<Map.Entry<Value,Value>> _iterator;
     private final KeyIterator _keyIterator;
 
-    public EntryIterator(Env env, Object object)
+    private EntryIterator(Env env, Value obj, Method keySetMethod)
     {
-      _env = env;
-      _object = object;
+      _obj = obj;
 
-      if (_iteratorFactory != null)
-        _iterator = getIterator(env, object);
-      else
-        _iterator = null;
-
-      if (_iterator == null)
-        _keyIterator = new KeyIterator(env, object);
-      else
-        _keyIterator = null;
+      _keyIterator = new KeyIterator(env, obj, keySetMethod);
     }
 
     public boolean hasNext()
     {
-      if (_iterator != null)
-        return _iterator.hasNext();
-      else
-        return _keyIterator.hasNext();
+      return _keyIterator.hasNext();
     }
 
     public Map.Entry<Value, Value> next()
     {
-      if (_iterator != null)
-        return _iterator.next();
-
       final Value key = _keyIterator.next();
-      final Value value = getField(_env, _object, key.toString(), false);
+      final Value value = _obj.get(key);
 
       return new Map.Entry<Value, Value>() {
         public Value getKey() { return key; }
@@ -1294,30 +1303,22 @@ public class JavaClassDef extends ClassDef {
 
     public void remove()
     {
-      if (_iterator != null)
-        _iterator.remove();
-      else
-        _keyIterator.remove();
+      _keyIterator.remove();
     }
   }
 
-  public class KeyIterator
+  public static class KeyIterator
     implements Iterator<Value>
   {
     private final Env _env;
     private final Iterator<?> _iterator;
 
-    public KeyIterator(Env env, Object object)
+    private KeyIterator(Env env, Value obj, Method keySetMethod)
     {
       _env = env;
 
       try {
-        if (_iteratorFactory != null)
-          _iterator = getKeyIterator(env, object);
-        else if (_keySetMethod != null)
-          _iterator = ((Set<?>) _keySetMethod.invoke(object)).iterator();
-        else
-          _iterator = Collections.emptyList().iterator();
+        _iterator = ((Set<?>) keySetMethod.invoke(obj.toJavaObject())).iterator();
       } catch (Throwable e) {
         throw new RuntimeException(e);
       }
@@ -1339,23 +1340,18 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  public class ValueIterator
+  public static class ValueIterator
     implements Iterator<Value>
   {
     private final Env _env;
     private final Iterator<?> _iterator;
 
-    public ValueIterator(Env env, Object object)
+    private ValueIterator(Env env, Value obj, Method iteratorMethod)
     {
       _env = env;
 
       try {
-        if (_iteratorFactory != null)
-          _iterator = getKeyIterator(env, object);
-        else if (_iteratorMethod != null)
-          _iterator = ((Iterator<?>) _iteratorMethod.invoke(object));
-        else
-          _iterator = Collections.emptyList().iterator();
+        _iterator = ((Iterator<?>) iteratorMethod.invoke(obj.toJavaObject()));
       } catch (Throwable e) {
         throw new RuntimeException(e);
       }
@@ -1376,5 +1372,6 @@ public class JavaClassDef extends ClassDef {
       _iterator.remove();
     }
   }
+
 }
 

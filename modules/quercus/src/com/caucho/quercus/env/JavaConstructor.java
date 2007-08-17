@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.L10N;
 
@@ -53,7 +54,7 @@ public class JavaConstructor extends JavaInvoker {
 			 Constructor cons)
   {    
     super(moduleContext,
-	  cons.getDeclaringClass().getName(),
+	  getName(cons),
 	  cons.getParameterTypes(),
 	  cons.getParameterAnnotations(),
 	  cons.getAnnotations(),
@@ -61,6 +62,27 @@ public class JavaConstructor extends JavaInvoker {
 
     _constructor = cons;
     _argLength = cons.getParameterTypes().length;
+  }
+
+  private static String getName(Constructor cons)
+  {
+    String name;
+
+    Name nameAnn = (Name) cons.getAnnotation(Name.class);
+
+    if (nameAnn != null)
+      name = nameAnn.value();
+    else {
+      Class cl = cons.getDeclaringClass();
+      Name clNameAnn =  (Name) cl.getAnnotation(Name.class);
+
+      if (clNameAnn != null)
+        name = nameAnn.value();
+      else
+        name = cl.getSimpleName();
+    }
+
+    return name;
   }
 
   public int getArgumentLength()

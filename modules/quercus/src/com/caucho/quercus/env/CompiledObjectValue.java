@@ -38,11 +38,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 /**
  * Represents a compiled object value.
@@ -395,6 +394,12 @@ public class CompiledObjectValue extends ObjectValue
     
     if (_object != null)
       _object.removeField(key);
+  }
+
+  @Override
+  public LongValue getCount(Env env, boolean isRecursive)
+  {
+    return _cl.getCount(env, this, isRecursive);
   }
 
   /**
