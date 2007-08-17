@@ -602,18 +602,26 @@ the following configuration tags are available.
 <parents>rewrite-dispatch, match</parents>
 
 <p>&lt;moved-permanently> sends a HTTP 301 moved permanently
-response to the browser,
-indicating that the resource has moved.</p>
+response to the browser, indicating that the resource has moved.</p>
+
+<p>
+The following example causes all requests to the "old.com" host to be
+immediately redirected to "new.com".  The urls will be maintained, so for
+example a request to <code>http://old.com/hello/world.html?foo=bar</code> will
+get redirected to <code>http://new.com/hello/world.html?foo=bar</code>.
+</p>
 
 <example title="Forwarding to a new virtual host">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;rewrite-dispatch>
-    &lt;moved-permanently regexp="^/(foo)" target="http://$1.bar.com"/>
-  &lt;/rewrite-dispatch>
-
-&lt;/web-app>
+  &lt;host id="old.com"&gt;
+    &lt;web-app id="/"&gt;
+      &lt;rewrite-dispatch&gt;
+        &lt;moved-permanently regexp="^/(.*)$"
+                           target="http://new.com/$1"/&gt;
+      &lt;/rewrite-dispatch&gt;
+    &lt;/web-app&gt;
+  &lt;/host&gt;
 </example>
+
 
 <deftable-childtags>
 <tr><td><a href="#disable-at">disable-at</a></td>
