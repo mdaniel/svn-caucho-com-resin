@@ -35,6 +35,7 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
 import com.caucho.config.types.EjbRef;
@@ -66,6 +67,7 @@ import com.caucho.vfs.Vfs;
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import javax.interceptor.AroundInvoke;
+import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.interceptor.Interceptors;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -140,6 +142,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private ArrayList<Interceptor> _interceptors
     = new ArrayList<Interceptor>();
 
+  private ArrayList<EnvEntry> _envEntries
+    = new ArrayList<EnvEntry>();
+
   private String _aroundInvokeMethodName;
 
   private long _transactionTimeout;
@@ -170,6 +175,22 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     // ejb/0fbb
     _aroundInvokeMethodName = aroundInvoke.getMethodName();
+  }
+
+  /**
+   * Returns the env-entry list.
+   */
+  public ArrayList<EnvEntry> getEnvEntries()
+  {
+    return _envEntries;
+  }
+
+  /**
+   * Adds a new env-entry
+   */
+  public void addEnvEntry(EnvEntry envEntry)
+  {
+    _envEntries.add(envEntry);
   }
 
   /**
@@ -915,9 +936,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       }
     }
 
+    boolean isExcludeDefault = false;
+
+    // ejb/0fbj
+    if (_ejbClass.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+      isExcludeDefault = true;
+
     // ejb/0fb5
     InterceptorBinding binding =
-      _ejbConfig.getInterceptorBinding(getEJBName()); // _ejbClass.getName());
+      _ejbConfig.getInterceptorBinding(getEJBName(), isExcludeDefault);
 
     if (binding != null) {
       ArrayList<String> interceptorClasses = binding.getInterceptors();
@@ -2221,6 +2248,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
           else if (values[i] instanceof Class) {
             setRemote((Class) values[i]);
           }
+        }
+
+        // ejb/0f08: single interface
+        if (values.length == 0) {
+          JClass []ifs = type.getInterfaces();
+
+          if (ifs.length == 1)
+            setRemoteWrapper(ifs[0]);
         }
       }
 

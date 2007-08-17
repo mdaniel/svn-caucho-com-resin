@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.loader.enhancer.EnhancerManager;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
 
@@ -42,6 +43,9 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 
@@ -49,12 +53,18 @@ import javax.interceptor.InvocationContext;
  * Configuration for an interceptor.
  */
 public class Interceptor {
+  private static Logger log = Log.open(Interceptor.class);
   private static final L10N L = new L10N(Interceptor.class);
 
   private String _interceptorClass;
   private String _aroundInvokeMethodName;
 
   private AroundInvokeConfig _aroundInvokeConfig;
+
+  private PreDestroyConfig _preDestroyConfig;
+  private PostConstructConfig _postConstructConfig;
+
+  private String _postConstructMethodName;
 
   private ClassLoader _loader;
   protected JClassLoader _jClassLoader;
@@ -83,25 +93,49 @@ public class Interceptor {
 
   public void init()
   {
-    if (_aroundInvokeConfig != null) {
-      // ejb/0fb5
+    // ejb/0fb5
+    if (_aroundInvokeConfig != null)
       _aroundInvokeMethodName = _aroundInvokeConfig.getMethodName();
-    }
-    else {
+
+    // ejb/0fbi
+    if (_postConstructConfig != null)
+      _postConstructMethodName = _postConstructConfig.getLifecycleCallbackMethod();
+
+
+    if (_aroundInvokeMethodName == null || _postConstructMethodName == null) {
       // XXX: EnhancerManager getJavaClassLoader()
-      ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
-      JClassLoader jClassLoader = EnhancerManager.create(parentLoader).getJavaClassLoader();
+      // ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+      // JClassLoader jClassLoader = EnhancerManager.create(parentLoader).getJavaClassLoader();
 
-      _interceptorJClass = jClassLoader.forName(_interceptorClass);
+      _interceptorJClass = _jClassLoader.forName(_interceptorClass);
 
-      for (JMethod method : _interceptorJClass.getMethods()) {
-        if (method.isAnnotationPresent(AroundInvoke.class)) {
-          _aroundInvokeMethodName = method.getName();
+      JClass cl = _interceptorJClass;
 
-          // XXX: check invalid duplicated @AroundInvoke methods.
-          break;
+      do {
+        for (JMethod method : _interceptorJClass.getDeclaredMethods()) {
+          if (method.isAnnotationPresent(AroundInvoke.class)) {
+            // XXX: throw exception for invalid final or static.
+
+            if (_aroundInvokeMethodName == null)
+              _aroundInvokeMethodName = method.getName();
+            else if (cl == _interceptorJClass) {
+              // XXX: throw exception for invalid duplicated @AroundInvoke methods.
+            }
+          }
+
+          if (method.isAnnotationPresent(PostConstruct.class)) {
+            // XXX: throw exception for invalid final or static.
+
+            if (_postConstructMethodName == null)
+              _postConstructMethodName = method.getName();
+            else if (cl == _interceptorJClass) {
+              // XXX: throw exception for invalid duplicated @PostConstruct methods.
+            } else {
+              // XXX: needs to call superclass lifecycle callback methods.
+            }
+          }
         }
-      }
+      } while ((cl = cl.getSuperClass()) != null);
     }
   }
 
@@ -125,9 +159,34 @@ public class Interceptor {
     return _aroundInvokeMethodName;
   }
 
+  public String getPostConstructMethodName()
+  {
+    return _postConstructMethodName;
+  }
+
+  public PostConstructConfig getPostConstruct()
+  {
+    return _postConstructConfig;
+  }
+
+  public PreDestroyConfig getPreDestroy()
+  {
+    return _preDestroyConfig;
+  }
+
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
   {
     _aroundInvokeConfig = aroundInvoke;
+  }
+
+  public void setPostConstruct(PostConstructConfig postConstruct)
+  {
+    _postConstructConfig = postConstruct;
+  }
+
+  public void setPreDestroy(PreDestroyConfig preDestroy)
+  {
+    _preDestroyConfig = preDestroy;
   }
 
   public String toString()

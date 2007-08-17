@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -26,27 +27,45 @@
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.ejb.cfg;
-
-import com.caucho.util.L10N;
-
-import java.util.ArrayList;
+package com.caucho.config.types;
 
 /**
- * Configuration for interceptors.
+ * Configuration for the injection-target pattern.
  */
-public class Interceptors {
-  private static final L10N L = new L10N(Interceptors.class);
+public class InjectionTarget {
+  private String _injectionTargetClass;
+  private String _injectionTargetName;
 
-  private final EjbConfig _config;
-
-  public Interceptors(EjbConfig config)
+  /**
+   * Gets the injection-target-class.
+   */
+  public String getInjectionTargetClass()
   {
-    _config = config;
+    return _injectionTargetClass;
   }
 
-  public void addInterceptor(Interceptor interceptor)
+  /**
+   * Gets the injection-target-name.
+   */
+  public String getInjectionTargetName()
   {
-    _config.addInterceptor(interceptor);
+    return _injectionTargetName;
+  }
+
+  /**
+   * Sets the injection-target-class.
+   */
+  public void setInjectionTargetClass(String injectionTargetClass)
+  {
+    _injectionTargetClass = injectionTargetClass;
+  }
+
+  /**
+   * Sets the injection-target-name.
+   */
+  public void setInjectionTargetName(String injectionTargetName)
+  {
+    _injectionTargetName = injectionTargetName;
   }
 }
+

@@ -49,16 +49,18 @@ public class EnvEntry implements Validator {
   private static final Logger log = Logger.getLogger(EnvEntry.class.getName());
 
   private String _location = "";
-  
+
   private String _name;
   private Class _type;
   private String _value;
   private String _description;
 
+  private InjectionTarget _injectionTarget;
+
   public void setId(String id)
   {
   }
-  
+
   /**
    * Sets the description.
    */
@@ -81,6 +83,14 @@ public class EnvEntry implements Validator {
   public void setEnvEntryName(String name)
   {
     _name = name;
+  }
+
+  /**
+   * Sets the injection-target
+   */
+  public void setInjectionTarget(InjectionTarget injectionTarget)
+  {
+    _injectionTarget = injectionTarget;
   }
 
   /**
@@ -124,10 +134,18 @@ public class EnvEntry implements Validator {
   }
 
   /**
+   * Gets the injection-target
+   */
+  public InjectionTarget getInjectionTarget()
+  {
+    return _injectionTarget;
+  }
+
+  /**
    * Gets the env-entry-value
    */
   @PostConstruct
-  public void init()
+    public void init()
     throws Exception
   {
     if (_name == null)
@@ -136,8 +154,8 @@ public class EnvEntry implements Validator {
       throw new ConfigException(L.l("env-entry needs `env-entry-type' attribute"));
 
     /*
-    if (_value == null)
-      throw new BeanBuilderException(L.l("env-entry needs `env-entry-value' attribute"));
+      if (_value == null)
+        throw new BeanBuilderException(L.l("env-entry needs `env-entry-value' attribute"));
     */
 
     // actually, should register for validation
@@ -166,9 +184,9 @@ public class EnvEntry implements Validator {
       String v = Expr.toString(_value, null);
 
       if (v == null || v.length() == 0)
-	value = null;
+        value = null;
       else
-	value = new Character(v.charAt(0));
+        value = new Character(v.charAt(0));
     }
 
     if (_name.startsWith("java:comp"))
@@ -185,7 +203,7 @@ public class EnvEntry implements Validator {
     throws ConfigException
   {
     Object obj = null;
-    
+
     try {
       obj = new InitialContext().lookup("java:comp/env/" + _name);
     } catch (NamingException e) {
@@ -194,7 +212,7 @@ public class EnvEntry implements Validator {
 
     if (obj == null)
       throw error(L.l("env-entry '{0}' was not configured.  All resources defined by <env-entry> tags must be defined in a configuration file.",
-		      _name));
+                      _name));
   }
 
   public ConfigException error(String msg)

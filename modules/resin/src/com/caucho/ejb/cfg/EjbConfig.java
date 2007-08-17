@@ -278,7 +278,8 @@ public class EjbConfig {
   /**
    * Returns the interceptor bindings for a given ejb name.
    */
-  public InterceptorBinding getInterceptorBinding(String ejbName)
+  public InterceptorBinding getInterceptorBinding(String ejbName,
+                                                  boolean isExcludeDefault)
   {
     assert ejbName != null;
 
@@ -289,8 +290,12 @@ public class EjbConfig {
 
     // ejb/0fbe vs ejb/0fbf
     for (InterceptorBinding binding : _cfgInterceptorBindings) {
-      if (binding.getEjbName().equals("*"))
+      if (binding.getEjbName().equals("*")) {
+        if (isExcludeDefault)
+          continue;
+
         return binding;
+      }
     }
 
     return null;

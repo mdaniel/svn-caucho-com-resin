@@ -85,7 +85,11 @@ javaee_env-entry = element env-entry {
 
   javaee_env-entry-type,
 
-  javaee_env-entry-value?
+  javaee_env-entry-value?,
+
+  javaee_mapped-name?,
+
+  javaee_injection-target*
 }
 
 javaee_env-entry-name = element env-entry-name {
@@ -106,6 +110,11 @@ javaee_env-entry-type = element env-entry-type {
 
 javaee_env-entry-value = element env-entry-value {
   string
+}
+
+javaee_injection-target = element injection-target {
+  element injection-target-class { string },
+  element injection-target-name { string }
 }
 
 javaee_fully-qualified-class = string

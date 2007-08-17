@@ -84,11 +84,12 @@ public class SessionPoolChain extends FilterCallChain {
     else // The interceptor calls ctx.proceed() which invokes the business method.
       super.generateCall(out, retVar, "ptr", args);
 
-    out.popDepth();
-
     // ejb/0fba
-    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class))
+    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
+      out.popDepth();
+
       generateInterceptorExceptionHandling(out);
+    }
 
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();

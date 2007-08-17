@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -28,25 +29,34 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
-
-import java.util.ArrayList;
-
 /**
- * Configuration for interceptors.
+ * Configuration for pre-destroy.
  */
-public class Interceptors {
-  private static final L10N L = new L10N(Interceptors.class);
+public class PreDestroyConfig {
+  private String _lifecycleCallbackClass;
+  private String _lifecycleCallbackMethod;
 
-  private final EjbConfig _config;
-
-  public Interceptors(EjbConfig config)
+  public PreDestroyConfig()
   {
-    _config = config;
   }
 
-  public void addInterceptor(Interceptor interceptor)
+  public String getLifecycleCallbackClass()
   {
-    _config.addInterceptor(interceptor);
+    return _lifecycleCallbackClass;
+  }
+
+  public String getLifecycleCallbackMethod()
+  {
+    return _lifecycleCallbackMethod;
+  }
+
+  public void setLifecycleCallbackClass(String lifecycleCallbackClass)
+  {
+    _lifecycleCallbackClass = lifecycleCallbackClass;
+  }
+
+  public void setLifecycleCallbackMethod(String lifecycleCallbackMethod)
+  {
+    _lifecycleCallbackMethod = lifecycleCallbackMethod;
   }
 }

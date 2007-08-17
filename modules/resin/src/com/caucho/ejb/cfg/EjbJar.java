@@ -81,7 +81,7 @@ public class EjbJar {
   public Interceptors createInterceptors()
     throws ConfigException
   {
-    return new Interceptors(_config, _ejbModuleName);
+    return new Interceptors(_config);
   }
 
   public Relationships createRelationships()

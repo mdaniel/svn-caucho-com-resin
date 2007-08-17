@@ -254,7 +254,9 @@ public class EjbSessionBean extends EjbBean {
         interfaceList.add(ifs[i]);
     }
 
-    if (getLocalList().size() != 0 || getRemoteList().size() != 0) {
+    // if (getLocalList().size() != 0 || getRemoteList().size() != 0) {
+    if (_localHome != null || _localList.size() != 0
+        || _remoteHome != null || _remoteList.size() != 0) {
     }
     else if (interfaceList.size() == 0)
       throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate.",

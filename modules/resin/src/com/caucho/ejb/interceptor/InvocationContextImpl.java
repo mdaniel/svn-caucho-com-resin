@@ -96,6 +96,9 @@ public class InvocationContextImpl implements InvocationContext {
   public Method getMethod()
   {
     if (_method == null) {
+      if (_methodName == null)
+        return null;
+
       Class cl = _target.getClass();
 
       try {
@@ -150,9 +153,12 @@ public class InvocationContextImpl implements InvocationContext {
     return null;
   }
 
-  private Object invokeMethod(Method method, Object obj, Object params[])
+  public static Object invokeMethod(Method method, Object obj, Object params[])
     throws Exception
   {
+    if (method == null)
+      return null;
+
     Interceptor.makeAccessible(method);
 
     return method.invoke(obj, params);
