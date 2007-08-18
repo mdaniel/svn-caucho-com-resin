@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.annotation;
 
-import com.caucho.quercus.env.ObjectIteratorFactory;
+//import com.caucho.quercus.env.ObjectIteratorFactory;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -41,6 +41,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ObjectIterator {
-  public Class<? extends ObjectIteratorFactory> factory();
+public @interface IteratorDelegate {
+  //  public Class<? extends ObjectIteratorFactory> factory();
 }

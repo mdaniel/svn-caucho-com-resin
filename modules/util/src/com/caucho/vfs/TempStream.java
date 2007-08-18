@@ -28,7 +28,7 @@
 
 package com.caucho.vfs;
 
-import java.io.IOException;
+import java.io.*;
 
 public class TempStream extends StreamImpl
 {
@@ -256,6 +256,14 @@ public class TempStream extends StreamImpl
   public TempBuffer getHead()
   {
     return _head;
+  }
+
+  public void writeToStream(OutputStream os)
+    throws IOException
+  {
+    for (TempBuffer ptr = _head; ptr != null; ptr = ptr._next) {
+      os.write(ptr.getBuffer(), 0, ptr.getLength());
+    }
   }
 
   /**
