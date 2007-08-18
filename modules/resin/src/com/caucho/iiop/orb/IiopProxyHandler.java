@@ -42,10 +42,10 @@ public class IiopProxyHandler implements InvocationHandler {
   private ORBImpl _orb;
   private org.omg.CORBA.portable.ObjectImpl _stub;
   private StubMarshal _stubMarshal;
-  
+
   public IiopProxyHandler(ORBImpl orb,
-			  org.omg.CORBA.portable.ObjectImpl stub,
-			  StubMarshal stubMarshal)
+        org.omg.CORBA.portable.ObjectImpl stub,
+        StubMarshal stubMarshal)
   {
     _orb = orb;
     _stub = stub;
@@ -74,11 +74,22 @@ public class IiopProxyHandler implements InvocationHandler {
     if (marshal != null) {
       return marshal.invoke(_stub, args);
     }
-    
+
     Class []params = method.getParameterTypes();
 
     if (methodName.equals("toString") && params.length == 0)
       return "IiopProxy[" + _orb + "," + _stub + "]";
+
+    // XXX: ejb30/bb/session/stateful/equals/annotated, needs QA
+    if (methodName.equals("equals") && params.length == 1) {
+      IiopProxyHandler otherProxy = (IiopProxyHandler) java.lang.reflect.Proxy.getInvocationHandler(args[0]);
+
+      // XXX: Is the stub enough to be equal ???
+      if (_stub.equals(otherProxy.getStub()))
+        return true;
+
+      return false;
+    }
 
     throw new RuntimeException("method not found: " + methodName);
   }

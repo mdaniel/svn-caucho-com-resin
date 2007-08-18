@@ -173,8 +173,20 @@ public class EjbInjectProgram extends BuilderProgram
       if (value == null) {
         EjbRefContext context = EjbRefContext.getLocal();
 
-        if (context != null)
-          value = context.findByType(_type);
+        if (context != null) {
+          // ejb/0fbe
+          try {
+            value = context.findByBeanName(_field.getDeclaringClass().getName(),
+                                           _field.getName(),
+                                           _type);
+          } catch (NamingException e) {
+            log.log(Level.FINEST, e.toString(), e);
+          }
+
+          if (value == null) {
+            value = context.findByType(_type);
+          }
+        }
       }
 
       if (value == null) {

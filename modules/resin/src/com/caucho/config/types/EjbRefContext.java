@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 public class EjbRefContext
 {
   private static final EnvironmentLocal<EjbRefContext> _local
-     = new EnvironmentLocal<EjbRefContext>();
+    = new EnvironmentLocal<EjbRefContext>();
 
   private ArrayList<EjbRef> _ejbRefList = new ArrayList<EjbRef>();
 
@@ -71,7 +71,7 @@ public class EjbRefContext
       local = new EjbRefContext();
       _local.set(local);
     }
-    
+
     return local;
   }
 
@@ -79,16 +79,34 @@ public class EjbRefContext
   {
     _ejbRefList.add(ejbRef);
   }
-  
+
   public Object findByType(Class type)
   {
     for (int i = 0; i < _ejbRefList.size(); i++) {
       Object value = _ejbRefList.get(i).getByType(type);
 
       if (value != null) {
-	// XXX: should also save on success
-	return value;
+        // XXX: should also save on success
+        return value;
       }
+    }
+
+    return null;
+  }
+
+  public Object findByBeanName(String ownerClassName,
+                               String fieldName,
+                               Class fieldType)
+    throws NamingException
+  {
+    // ejb/0fbe
+    String expected = ownerClassName + "/" + fieldName;
+
+    for (int i = 0; i < _ejbRefList.size(); i++) {
+      String ejbRefName = _ejbRefList.get(i).getEjbRefName();
+
+      if (expected.equals(ejbRefName))
+        return _ejbRefList.get(i).createObject(null);
     }
 
     return null;
