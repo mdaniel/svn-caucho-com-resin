@@ -61,19 +61,21 @@
       </t>
       <list style="symbols">
         <t>
-          It must not require external IDL or schema definitions, i.e. the 
-          protocol should be invisible to application code.
+          It must self-describe the serialized types, i.e. not require
+external schema or interface definitions.
         </t>
-        <t>It must be language-independent.</t>
+        <t>It must be language-independent, including supporting
+scripting languages.</t>
+        <t>It must be readable or writable in a single pass.</t>
+        <t>It must be as compact as possible.</t>
         <t>
           It must be simple so it can be effectively tested and implemented.
         </t>
         <t>It must be as fast as possible.</t>
-        <t>It must be as compact as possible.</t>
         <t>It must support Unicode strings.</t>
         <t>
-          It must support 8-bit binary data (i.e. without encoding or using 
-          attachments.)
+          It must support 8-bit binary data without escaping or using 
+          attachments.
         </t>
         <t>
           It must support encryption, compression, signature, and
@@ -93,7 +95,7 @@ top        ::= object
 binary     ::= 'b' b1 b0 &lt;binary-data> binary # non-final chunk
            ::= 'B' b1 b0 &lt;binary-data>        # final chunk
            ::= [x20-x2f] &lt;binary-data>        # binary data of 
-                                              #  length 0-15
+                                                 #  length 0-15
 
            # boolean true/false
 boolean    ::= 'T'
@@ -152,10 +154,8 @@ object     ::= null
            ::= long
            ::= map
            ::= object-def object
-           ::= remote
            ::= ref
            ::= string
-           ::= xml
 
            # definition for an object (compact map)
 object-def ::= 'O' type int string*
@@ -165,9 +165,6 @@ ref        ::= 'R' b3 b2 b1 b0    # reference to nth map/list in
                                   #  stream
            ::= x4a b0             # reference to 1-255th map/list
            ::= x4b b1 b0          # reference to 1-65535th map/list
-
-           # remote object using URL as locator
-remote     ::= 'r' type? string
 
            # UTF-8 encoded character string split into 64k chunks
 string     ::= 's' b1 b0 &lt;string-data> string  # non-final chunk
@@ -179,10 +176,6 @@ string     ::= 's' b1 b0 &lt;string-data> string  # non-final chunk
            # map/list types for OO languages
 type       ::= 't' b1 b0 &lt;type-string>         # type name
            ::= x75 int                         # type reference
-
-           # UTF-8 encoded XML data
-xml        ::= 'x' b1 b0 &lt;xml-data> xml
-           ::= 'X' b1 b0 &lt;xml-data>
         </artwork>
       </figure>
     </section>
@@ -196,9 +189,7 @@ xml        ::= 'x' b1 b0 &lt;xml-data> xml
         <t>64-bit <xref target="#double">double</xref></t>
         <t>64-bit <xref target="#date">date</xref></t>
         <t>UTF8-encoded <xref target="#string">string</xref></t>
-        <t>UTF8-encoded <xref target="#xml">xml</xref></t>
         <t>raw <xref target="#binary">binary</xref> data</t>
-        <t><xref target="#remote">remote</xref> objects</t>
       </list>
 
       <t>It has 2 combining constructs:</t>
@@ -216,11 +207,11 @@ xml        ::= 'x' b1 b0 &lt;xml-data> xml
         </t>
       </list>
 
-      <t>Hessian 2.0 has 3 reference maps:</t>
+      <t>Hessian 2.0 has 3 implicit reference maps:</t>
       <list style="numbers">
         <t>An object/list reference map.</t>
-        <t>A type (class) reference map.</t>
         <t>An object definition reference map.</t>
+        <t>A type (class) reference map.</t>
       </list>
 
       <section title="binary data" anchor="#binary">
@@ -234,15 +225,23 @@ binary ::= b b1 b0 &lt;binary-data> binary
         </figure>
 
         <t>
-          Binary data is encoded in chunks.  'B' represents the final chunk
-          and 'b' represents any non-final chunk.  Each chunk has a 16-bit
-          length value.
+          Binary data is encoded in chunks.  The octet x42 ('B') encodes
+          the final chunk and x62 ('b') represents any non-final chunk.
+          Each chunk has a 16-bit length value.
+        </t>
+
+        <t>
+          len = 256 * b1 + b0
         </t>
 
         <section title="Compact: short binary">
           <t>
-            Binary data with length less than 15 may be encoded with a single
-            length byte [x20-x2f].
+            Binary data with length less than 15 may be encoded by a single
+            octet length [x20-x2f].
+          </t>
+
+          <t>
+            len = code - 0x20
           </t>
         </section>
 
@@ -251,7 +250,7 @@ binary ::= b b1 b0 &lt;binary-data> binary
             <artwork>
 x20               # zero-length binary data
 
-x23 x01 x02 x03   # 3 byte data
+x23 x01 x02 x03   # 3 octet data
 
 B x10 x00 ....    # 4k final chunk of data
 
@@ -270,7 +269,7 @@ boolean ::= T
           </artwork>
         </figure>
 
-        <t>The byte 'F' represents false and the byte 'T' represents true.</t>
+        <t>The octet 'F' represents false and the octet T represents true.</t>
 
         <section title="Boolean Examples">
           <figure anchor="boolean_examples">
@@ -320,33 +319,41 @@ double ::= D b7 b6 b5 b4 b3 b2 b1 b0
         <t>A 64-bit IEEE floating pointer number.</t>
 
         <section title="Compact: double zero">
-          <t>The double 0.0 can be represented by the byte x67</t>
+          <t>The double 0.0 can be represented by the octet x67</t>
         </section>
 
         <section title="Compact: double one">
-          <t>The double 1.0 can be represented by the byte x68</t>
+          <t>The double 1.0 can be represented by the octet x68</t>
         </section>
 
-        <section title="Compact: double byte">
+        <section title="Compact: double octet">
           <t>
             Doubles between -128.0 and 127.0 with no fractional component
-            can be represented in two bytes by casting the byte value to a 
+            can be represented in two octets by casting the byte value to a 
             double.
+          </t>
+
+          <t>
+            value = (double) b0
           </t>
         </section>
 
         <section title="Compact: double short">
           <t>
             Doubles between -32768.0 and 32767.0 with no fractional component
-            can be represented in three bytes by casting the short value to a 
+            can be represented in three octets by casting the short value to a 
             double.
+          </t>
+
+          <t>
+            value = (double) (256 * b1 + b0)
           </t>
         </section>
 
         <section title="Compact: double float">
           <t>
             Doubles which are equivalent to their 32-bit float representation
-            can be represented as the 4-byte float and then cast to double.
+            can be represented as the 4-octet float and then cast to double.
           </t>
         </section>
 
@@ -383,29 +390,44 @@ int ::= 'I' b3 b2 b1 b0
 
         <t>
           A 32-bit signed integer.  An integer is represented by the
-          byte 'I' followed by the 4-bytes of the integer in big-endian order.
+          octet x49 ('I') followed by the 4 octets of the integer
+          in big-endian order.
+        </t>
+
+        <t>
+          value = (b3 << 24) + (b2 << 16) + (b1 << 8) + b0;
         </t>
 
         <section title="Compact: single octet integers">
           <t>
-            Integers between -16 and 47 can be encoded by a single byte in the
-            range x80 to xbf. The value of the integer is (code - x90).
+            Integers between -16 and 47 can be encoded by a single octet in the
+            range x80 to xbf.
+          </t>
+
+          <t>
+            value = code - 0x90
           </t>
         </section>
 
         <section title="Compact: two octet integers (byte)">
           <t>
-            Integers between -2048 and 2047 can be encoded in two bytes with
-            the leading byte in the range xc0 to xcf. The value of the integer 
-            is (256 * (code - xc8) + b0).
+            Integers between -2048 and 2047 can be encoded in two octets with
+            the leading byte in the range xc0 to xcf.
+          </t>
+
+          <t>
+            value = ((code - 0xc8) << 8) + b0;
           </t>
         </section>
 
         <section title="Compact: three octet integers (short)">
           <t>
             Integers between -262144 and 262143 can be encoded in three bytes 
-            with the leading byte in the range xd0 to xd7.  The value of the 
-            integer is (65536 * (code - xd4) + 256 * b1 + b0).
+            with the leading byte in the range xd0 to xd7.
+          </t>
+
+          <t>
+            value = ((code - 0xd4) << 16) + (b1 << 8) + b0;
           </t>
         </section>
 
@@ -443,9 +465,10 @@ list ::= V type? length? object* z
 
         <t>
           An ordered list, like an array.  All lists have a type string, a 
-          length, a list of objects, and a trailing 'z'.  The type string may 
-          be an arbitrary UTF-8 string understood by the service. The length 
-          may be -1 to indicate that the list is variable length.
+          length, a list of objects, and a trailing octet x7a ('z').
+          The type string may be an arbitrary UTF-8 string understood by
+          the service. The length may be omitted to indicate that
+          the list is variable length.
         </t>
 
         <t>
@@ -536,37 +559,52 @@ long ::= L b7 b6 b5 b4 b3 b2 b1 b0
         </figure>
 
         <t>
-          A 64-bit signed integer.  An long is represented by the byte 'L' 
+          A 64-bit signed integer.  An long is represented by the
+          octet x4c ('L' )
           followed by the 8-bytes of the integer in big-endian order.
         </t>
 
         <section title="Compact: single octet longs">
           <t>
-            Longs between -8 and 15 are represented by a single byte in the
-            range xd8 to xef.  The value of the long is (code - xe0).
+            Longs between -8 and 15 are represented by a single octet in the
+            range xd8 to xef.
+          </t>
+
+          <t>
+             value = (code - 0xe0)
           </t>
         </section>
 
-        <section title="Compact: two octet longs (byte)">
+        <section title="Compact: two octet longs">
           <t>
-            Longs between -2048 and 2047 are encoded in two bytes with
-            the leading byte in the range xf0 to xff.  The value of the long 
-            is (256 * (code - xf8) + b0).
+            Longs between -2048 and 2047 are encoded in two octets with
+            the leading byte in the range xf0 to xff.
+          </t>
+
+          <t>
+             value = ((code - 0xf8) << 8) + b0
           </t>
         </section>
 
-        <section title="Compact: three octet longs (short)">
+        <section title="Compact: three octet longs">
           <t>
-            Longs between -262144 and 262143 are encoded in three bytes with
-            the leading byte in the range x38 to x3f.  The value of the long 
-            is (65536 * (code - x3c) + 256 * b1 + b0).
+            Longs between -262144 and 262143 are encoded in three octets with
+            the leading byte in the range x38 to x3f.
+          </t>
+
+          <t>
+             value = ((code - 0x3c) << 16) + (b1 << 8) + b0
           </t>
         </section>
 
         <section title="Compact: four octet longs (short)">
           <t>
-            Longs between which fit into 32-bits are encoded in five bytes with
+            Longs between which fit into 32-bits are encoded in five octets with
             the leading byte x77.
+          </t>
+
+          <t>
+             value = (b3 << 24) + (b2 << 16) + (b1 << 8) + b0
           </t>
         </section>
 
@@ -783,11 +821,11 @@ null ::= N
 
         <t>Null represents a null pointer.</t>
 
-        <t>The byte 'N' represents the null pointer.</t>
+        <t>The octet 'N' represents the null pointer.</t>
 
         <t>
-          null values are allowed in place of any string, xml, binary, list, 
-          map, or remote.
+          null values are allowed in place of any string, binary, list, 
+          or map.
         </t>
       </section>
 
@@ -796,6 +834,8 @@ null ::= N
           <preamble>Ref Grammar</preamble>
           <artwork>
 ref ::= R b3 b2 b1 b0
+    ::= x4a b0
+    ::= x4b b1 b0
           </artwork>
         </figure>
 
@@ -823,60 +863,58 @@ ref ::= R b3 b2 b1 b0
         </t>
 
         <t>
-          Each &lt;list&gt; or &lt;array&gt; is stored into an array as it is
-          parsed.  &lt;ref&gt; selects one of the stored objects.  The first
+          Each map or list is stored into an array as it is
+          parsed.  ref selects one of the stored objects.  The first
           object is numbered '0'.
         </t>
+
+        <section title="Compact: two octet reference">
+          <t>
+            References between 0 and 255 can be encoded by two octets
+          </t>
+
+          <t>
+            value = b0
+          </t>
+        </section>
+
+        <section title="Compact: three octet reference">
+          <t>
+            References between 0 and 255 can be encoded in three octets
+          </t>
+
+          <t>
+            value = (b1 << 8) + b0
+          </t>
+        </section>
 
         <section title="Ref Examples">
           <figure anchor="ref_examples">
             <preamble>Circular list</preamble>
             <artwork>
 list = new LinkedList();
-list.head = 1;
+list.data = 1;
 list.tail = list;
 
 ---
+O
+  x9a LinkedList
+  x92
+  x04 head
+  x04 tail
 
-M t x00 x0a LinkedList
-  S x00 x04 head
-  I x00 x00 x00 x01
-  S x00 x04 tail
-  R x00 x00 x00 x00
-  z
+o x90      # object stores ref #0
+  x91      # data = 1
+  x4b x00  # next field refers to itself, i.e. ref #0
             </artwork>
           </figure>
         </section>
 
         <t>
-          ref only refers to list and map elements.  string and binary, in 
-          particular, will only share references if they're wrapped in a list 
-          or map.
+          ref only refers to list, map and objects elements.
+          Strings and binary data, in particular, will only share references
+          if they're wrapped in a list or map.
         </t>
-      </section>
-
-      <section title="remote" anchor="#remote">
-        <figure anchor="remote_grammar">
-          <preamble>Remote Grammar</preamble>
-          <artwork>
-remote ::= r t b1 b0 &lt;type-name> string
-          </artwork>
-        </figure>
-
-        <t>
-          A reference to a remote object.  The remote has a type and a utf-8 
-          string representing the object's URL.
-        </t>
-
-        <section title="Remote Examples">
-          <figure anchor="remote_examples">
-            <preamble>EJB Session Reference</preamble>
-            <artwork>
-r t x00 x0c test.TestObj
-  S x00 x24 http://slytherin/ejbhome?id=69Xm8-zW
-            </artwork>
-          </figure>
-        </section>
       </section>
 
       <section title="string" anchor="#string">
@@ -891,8 +929,9 @@ string ::= s b1 b0 &lt;utf-8-data> string
 
         <t> 
           A 16-bit unicode character string encoded in UTF-8.  Strings are 
-          encoded in chunks. 'S' represents the final chunk and 's' represents 
-          any non-final chunk.  Each chunk has a 16-bit length value.
+          encoded in chunks. x53 ('S') represents the final chunk
+          and x73 ('s') represents any non-final chunk.  Each chunk
+          has a 16-bit length value.
         </t>
 
         <t>
@@ -905,64 +944,35 @@ string ::= s b1 b0 &lt;utf-8-data> string
         <section title="Compact: short strings">
           <t>
             Strings with length less than 32 may be encoded with a single
-            byte length [x00-x1f].
+            octet length [x00-x1f].
+          </t>
+
+          <t>
+            value = code
           </t>
         </section>
 
         <section title="String Examples">
           <figure anchor="string_examples">
             <artwork>
-x00             # "", empty string
-x05 hello       # "hello"
-x01 xc3 x83     # "\u00c3"
+x00               # "", empty string
+x05 hello         # "hello"
+x01 xc3 x83       # "\u00c3"
 
-S x00 x05 hello # "hello"
+S x00 x05 hello   # "hello" in long form
+
+s x00 x07 hello,  # "hello, world" split into two chunks
+  x05 world
             </artwork>
           </figure>
         </section>
       </section>
-
-      <section title="xml" anchor="#xml">
-        <figure anchor="xml_grammar">
-          <preamble>XML Grammar</preamble>
-          <artwork>
-xml ::= x b1 b0 &lt;utf-8-data> xml
-    ::= X b1 b0 utf-8-data
-          </artwork>
-        </figure>
-
-        <t>
-          An XML document encoded as a 16-bit unicode character string encoded 
-          in UTF-8.  XML data is encoded in chunks.  'X' represents the final 
-          chunk and 'x' represents any initial chunk.
-        </t>
-
-        <t>
-          Each chunk has a 16-bit length value.  The length is the number of 
-          characters, which may be different than the number of bytes.
-        </t>
-
-        <section title="XML Examples">
-          <figure anchor="xml_examples">
-            <artwork>
-X x00 x10 &lt;top&gt;hello&lt;/top&gt;
-            </artwork>
-          </figure>
-        </section>
-
-        <t>
-          Because this document does not define the language mapping,
-          implementations are free to return a string when reading an xml
-          entity.
-        </t>
-      </section>
-    </section>
 
     <section title="Bytecode map">
 
       <t>
-        Hessian is organized as a bytecode protocol.  A Hessian implementation 
-        is essentially a big switch statement on the initial bytecode.
+        Hessian is organized as a bytecode protocol.  A Hessian reader 
+        is essentially a switch statement on the initial octet.
       </t>
 
       <figure anchor="bytecode_encoding">
@@ -994,9 +1004,7 @@ x53          # utf-8 string final chunk ('S')
 x54          # boolean true ('T')
 x55          # reserved
 x56          # list/vector ('V')
-x57          # reserved
-x58          # utf-8 xml final chunk ('X')
-x59 - x62    # reserved
+x57 - x62    # reserved
 x62          # 8-bit binary data non-final chunk ('b')
 x63          # reserved ('c' call for RPC)
 x64          # UTC time encoded as 64-bit long milliseconds since 
@@ -1020,13 +1028,14 @@ x74          # map/list type ('t')
 x75          # type-ref
 x76          # compact vector ('v')
 x77          # long encoded as 32-bit int
-x78          # utf-8 XML non-final chunk ('x')
-x79          # reserved
+x78 - x79    # reserved
 x7a          # list/map terminator ('z')
 x7b - x7f    # reserved
-x80 - xbf    # one-byte compact int (-x10 to x3f, x90 is 0)
-xc0 - xcf    # two-byte compact int (-x800 to x3ff)
-xd0 - xd7    # three-byte compact int (-x40000 to x3ffff)
+x80 - xbf    # one-octet compact int (-x10 to x3f, x90 is 0)
+xc0 - xcf    # two-octet compact int (-x800 to x3ff)
+xd0 - xd7    # three-octet compact int (-x40000 to x3ffff)
+xd8 - xef    # one-octet compact long (-x8 to x10, xe0 is 0)
+xf0 - xff    # two-octet compact long (-x800 to x3ff, xf8 is 0)
         </artwork>
       </figure>
 

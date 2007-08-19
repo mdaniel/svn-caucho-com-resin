@@ -43,6 +43,7 @@ import java.util.logging.Logger;
  * Implementation of the method expression.
  */
 public class MethodExpressionImpl extends MethodExpression
+  implements java.io.Serializable
 {
   protected static final Logger log
     = Logger.getLogger(MethodExpressionImpl.class.getName());

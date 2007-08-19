@@ -32,8 +32,10 @@ package com.caucho.jsp.jsf;
 import java.util.*;
 
 import javax.servlet.*;
+import javax.servlet.http.*;
 import javax.servlet.jsp.tagext.*;
 import javax.el.*;
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
@@ -43,13 +45,42 @@ import javax.faces.webapp.*;
  * Utilities for JsfTags
  */
 public class JsfTagUtil {
-  public static UIComponent addTransient(ServletRequest req,
+  public static UIViewRoot findRoot(FacesContext context,
+				    ServletRequest req)
+    throws Exception
+  {
+    if (context == null)
+      context = FacesContext.getCurrentInstance();
+
+    UIViewRoot root = context.getViewRoot();
+
+    if (root == null)
+      throw new NullPointerException();
+      
+
+    return root;
+  }
+
+  public static void afterRoot(FacesContext context,
+			       HttpServletRequest req,
+			       HttpServletResponse res)
+  {
+    HttpSession session = ((HttpServletRequest) req).getSession(false);
+    
+    if (session != null)
+      session.setAttribute(ViewHandler.CHARACTER_ENCODING_KEY,
+			   res.getCharacterEncoding());
+  }
+  
+  public static UIComponent addTransient(FacesContext context,
+					 ServletRequest req,
 					 UIComponent parent,
 					 String prevId,
 					 Class childClass)
     throws Exception
   {
-    FacesContext context = FacesContext.getCurrentInstance();
+    if (context == null)
+      context = FacesContext.getCurrentInstance();
 
     if (parent == null) {
       UIComponentClassicTagBase parentTag
@@ -132,12 +163,14 @@ public class JsfTagUtil {
     }
   }
   
-  public static UIComponent findPersistent(ServletRequest req,
+  public static UIComponent findPersistent(FacesContext context,
+					   ServletRequest req,
 					   UIComponent parent,
 					   String id)
     throws Exception
   {
-    FacesContext context = FacesContext.getCurrentInstance();
+    if (context == null)
+      context = FacesContext.getCurrentInstance();
     
     BodyContent body = null;
 
@@ -173,13 +206,15 @@ public class JsfTagUtil {
     return null;
   }
   
-  public static UIComponent addPersistent(ServletRequest req,
+  public static UIComponent addPersistent(FacesContext context,
+					  ServletRequest req,
 					  UIComponent parent,
 					  ValueExpression binding,
 					  Class childClass)
     throws Exception
   {
-    FacesContext context = FacesContext.getCurrentInstance();
+    if (context == null)
+      context = FacesContext.getCurrentInstance();
 
     if (parent == null) {
       UIComponentClassicTagBase parentTag
@@ -272,12 +307,14 @@ public class JsfTagUtil {
     return true;
   }
   
-  public static UIComponent findFacet(ServletRequest req,
+  public static UIComponent findFacet(FacesContext context,
+				      ServletRequest req,
 				      UIComponent parent,
 				      String facetName)
     throws Exception
   {
-    FacesContext context = FacesContext.getCurrentInstance();
+    if (context == null)
+      FacesContext.getCurrentInstance();
     
     if (parent == null) {
       UIComponentClassicTagBase parentTag
@@ -292,14 +329,16 @@ public class JsfTagUtil {
       return null;
   }
   
-  public static UIComponent addFacet(ServletRequest req,
+  public static UIComponent addFacet(FacesContext context,
+				     ServletRequest req,
 				     UIComponent parent,
 				     String facetName,
 				     ValueExpression binding,
 				     Class childClass)
     throws Exception
   {
-    FacesContext context = FacesContext.getCurrentInstance();
+    if (context == null)
+      context = FacesContext.getCurrentInstance();
 
     if (parent == null) {
       UIComponentClassicTagBase parentTag

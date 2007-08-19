@@ -35,11 +35,9 @@ should not require external schema or IDL.</p>
 following requirements:</p>
 
 <ul>
-<li>It must support XML as a first class object.</li>
 <li>It must not require external IDL or schema definitions; it should be
 invisible to application writers.</li>
 <li>It must have sufficient power to serialize Java.</li>
-<li>It must have sufficient power to support EJB.</li>
 <li>It must allow non-Java clients to use web services.</li>
 <li>It must allow web services to deployed as a Servlet.</li>
 <li>It must be simple so it can be effectively tested.</li>
@@ -111,18 +109,13 @@ object  ::= null
         ::= list
         ::= map
         ::= long
-        ::= remote
         ::= ref
         ::= string
-        ::= xml
 
         # Object reference (e.g. circular trees and graphs)
 ref     ::= 'R' b32 b24 b16 b8    # reference to nth map/list in stream
         ::= x4a b8                # reference to 1-255th map/list
         ::= x4b b16 b8            # reference to 1-65535th map/list
-
-        # remote object using URL as locator
-remote  ::= 'r' type? string
 
         # UTF-8 encoded character string split into 64k chunks
 string  ::= ('s' b16 b8 string-data)* 'S' b16 b8 string-data
@@ -131,9 +124,6 @@ string  ::= ('s' b16 b8 string-data)* 'S' b16 b8 string-data
         # map/list types for OO languages
 type    ::= 't' b16 b8 type-string   # type name
         ::= x75 int                  # type reference
-
-        # UTF-8 encoded XML data
-xml     ::= ('x' b16 b8 xml-data)* 'X' b16 b8 xml-data
 </def>
 
 <def title="RPC/Messaging Grammar">
@@ -183,12 +173,11 @@ x53          # utf-8 string final chunk ('S')
 x54          # boolean true ('T')
 x55          # reserved
 x56          # list/vector ('V')
-x57          # reserved
-x58          # utf-8 xml final chunk ('X')
-x59 - x62    # reserved
+x57 - x62    # reserved
 x62          # 8-bit binary data non-final chunk ('b')
 x63          # reserved ('c' call for RPC)
-x64          # UTC time encoded as 64-bit long milliseconds since epoch ('d')
+x64          # UTC time encoded as 64-bit long milliseconds since 
+             #  epoch ('d')
 x65          # reserved
 x66          # reserved ('f' for fault for RPC)
 x67          # double 0.0
@@ -208,13 +197,14 @@ x74          # map/list type ('t')
 x75          # type-ref
 x76          # compact vector ('v')
 x77          # long encoded as 32-bit int
-x78          # utf-8 XML non-final chunk ('x')
-x79          # reserved
+x78 - x79    # reserved
 x7a          # list/map terminator ('z')
 x7b - x7f    # reserved
-x80 - xbf    # one-byte compact int (-x10 to x3f, x90 is 0)
-xc0 - xcf    # two-byte compact int (-x800 to x3ff)
-xd0 - xd7    # three-byte compact int (-x40000 to x3ffff)
+x80 - xbf    # one-octet compact int (-x10 to x3f, x90 is 0)
+xc0 - xcf    # two-octet compact int (-x800 to x3ff)
+xd0 - xd7    # three-octet compact int (-x40000 to x3ffff)
+xd8 - xef    # one-octet compact long (-x8 to x10, xe0 is 0)
+xf0 - xff    # two-octet compact long (-x800 to x3ff, xf8 is 0)
 </def>
 
 </s1>

@@ -46,7 +46,7 @@ import java.io.*;
 /**
  * Represents a custom tag.
  */
-public class JsfTagNode extends JspContainerNode
+public class JsfTagNode extends JsfNode
 {
   private JspNode _next;
   private Class _componentClass;
@@ -57,9 +57,6 @@ public class JsfTagNode extends JspContainerNode
   private String _prevJsfId;
 
   private Attr _bindingAttr;
-  
-  private String _var;
-  private String _bodyVar;
 
   private ArrayList<Attr> _attrList = new ArrayList<Attr>();
 
@@ -282,29 +279,6 @@ public class JsfTagNode extends JspContainerNode
     return null;
   }
 
-  private Method findSetter(Class cl, String name)
-  {
-    Method []methods = cl.getMethods();
-
-    for (int i = 0; i < methods.length; i++) {
-      Method method = methods[i];
-
-      if (! method.getName().equals(name))
-	continue;
-      
-      if (! Modifier.isPublic(method.getModifiers())
-	  || Modifier.isStatic(method.getModifiers()))
-	continue;
-
-      if (method.getParameterTypes().length != 1)
-	continue;
-
-      return method;
-    }
-
-    return null;
-  }
-
   /**
    * Generates the XML text representation for the tag validation.
    *
@@ -315,24 +289,6 @@ public class JsfTagNode extends JspContainerNode
   {
     if (_next != null)
       _next.printXml(os);
-  }
-
-  /**
-   * Returns the variable containing the jsf parent
-   */
-  @Override
-  public String getJsfVar()
-  {
-    return _var;
-  }
-
-  /**
-   * Returns the variable containing the jsf body
-   */
-  @Override
-  public String getJsfBodyVar()
-  {
-    return _bodyVar;
   }
   
   /**
@@ -355,6 +311,11 @@ public class JsfTagNode extends JspContainerNode
   public void generate(JspJavaWriter out)
     throws Exception
   {
+    String contextVar = "null";
+
+    if (_gen.isJsfPrologueInit())
+      contextVar = "_jsp_faces_context";
+    
     String parentVar = _parent.getJsfVar();
 
     String parentBodyVar = _parent.getJsfBodyVar();
@@ -384,7 +345,11 @@ public class JsfTagNode extends JspContainerNode
 		  + ", " + parentBodyVar + ");");
     }
 
-    if (hasBodyContent()) {
+    if (! hasBodyContent()) {
+    }
+    else if (parentBodyVar != null)
+      _bodyVar = parentBodyVar;
+    else {
       _bodyVar = "_jsp_body" + _gen.uniqueId();
 
       out.println("com.caucho.jsp.BodyContentImpl " + _bodyVar
@@ -409,7 +374,9 @@ public class JsfTagNode extends JspContainerNode
 
     if (_facetName != null) {
       out.print(_var + " = (" + className + ")");
-      out.println(" com.caucho.jsp.jsf.JsfTagUtil.findFacet(request"
+      out.println(" com.caucho.jsp.jsf.JsfTagUtil.findFacet("
+		  + contextVar
+		  + ", request"
 		  + ", " + parentVar
 		  + ", \"" + _facetName + "\");");
 
@@ -417,7 +384,9 @@ public class JsfTagNode extends JspContainerNode
       out.pushDepth();
       
       out.print(_var + " = (" + className + ")");
-      out.println(" com.caucho.jsp.jsf.JsfTagUtil.addFacet(request"
+      out.println(" com.caucho.jsp.jsf.JsfTagUtil.addFacet("
+		  + contextVar
+		  + ", request"
 		  + ", " + parentVar
 		  + ", \"" + _facetName + "\""
 		  + ", " + bindingVar
@@ -425,7 +394,9 @@ public class JsfTagNode extends JspContainerNode
     }
     else if (_idAttr != null) {
       out.print(_var + " = (" + className + ")");
-      out.println(" com.caucho.jsp.jsf.JsfTagUtil.findPersistent(request"
+      out.println(" com.caucho.jsp.jsf.JsfTagUtil.findPersistent("
+		  + contextVar
+		  + ", request"
 		  + ", " + parentVar
 		  + ", \"" + _idAttr.getValue() + "\");");
 
@@ -433,7 +404,9 @@ public class JsfTagNode extends JspContainerNode
       out.pushDepth();
       
       out.print(_var + " = (" + className + ")");
-      out.println(" com.caucho.jsp.jsf.JsfTagUtil.addPersistent(request"
+      out.println(" com.caucho.jsp.jsf.JsfTagUtil.addPersistent("
+		  + contextVar
+		  + ", request"
 		  + ", " + parentVar
 		  + ", " + bindingVar
 		  + ", " + _componentClass.getName() + ".class);");
@@ -441,7 +414,9 @@ public class JsfTagNode extends JspContainerNode
     else {
       out.print(_var + " = (" + className + ")");
 
-      out.println(" com.caucho.jsp.jsf.JsfTagUtil.addTransient(request"
+      out.println(" com.caucho.jsp.jsf.JsfTagUtil.addTransient("
+		  + contextVar
+		  + ", request"
 		  + ", " + parentVar
 		  + ", " + prevId
 		  + ", " + _componentClass.getName() + ".class);");
@@ -514,167 +489,9 @@ public class JsfTagNode extends JspContainerNode
 		  + oldParentVar + ");");
     }
 
-    if (_bodyVar != null) {
+    if (_bodyVar != null && parentBodyVar == null) {
       out.println("out = pageContext.popBody();");
       out.println("pageContext.releaseBody(" + _bodyVar + ");");
-    }
-  }
-
-  /**
-   * Generates the code for the children.
-   *
-   * @param out the output writer for the generated java.
-   */
-  @Override
-  public void generateChildren(JspJavaWriter out)
-    throws Exception
-  {
-    if (_children == null)
-      return;
-
-    String prevId = null;
-    boolean isFirst = true;
-    for (int i = 0; i < _children.size(); i++) {
-      JspNode child = _children.get(i);
-
-      if (isFirst
-	  && child instanceof StaticText
-	  && (i + 1 == _children.size()
-	      || _children.get(i + 1) instanceof JsfTagNode)) {
-	StaticText text = (StaticText) child;
-
-	if (isWhitespaceOrComment(text.getText())) {
-	}
-	else if (i + 1 == _children.size()) {
-	  out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		    + _var
-		    + ", \"");
-	  out.printJavaString(text.getText());
-	  out.println("\");");
-	}
-	else {
-	  out.print("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		    + _var
-		    + ", " + prevId
-		    + ", \"");
-	  out.printJavaString(text.getText());
-	  out.println("\");");
-	}
-
-	continue;
-      }
-
-      isFirst = false;
-
-      child.generateStartLocation(out);
-      try {
-        child.generate(out);
-      } catch (Exception e) {
-        if (e instanceof LineCompileException)
-          throw e;
-        else
-          throw child.error(e);
-      }
-      child.generateEndLocation(out);
-      
-      if (child instanceof JsfTagNode) {
-	JsfTagNode jsfNode = (JsfTagNode) child;
-
-	if (jsfNode.getJsfId() != null)
-	  prevId = "\"" + jsfNode.getJsfId() + "\"";
-
-	isFirst = true;
-      }
-    }
-
-    if (_bodyVar != null && ! isFirst)
-      out.println("com.caucho.jsp.jsf.JsfTagUtil.addVerbatim("
-		  + _var + ", " + _bodyVar + ");");
-  }
-
-  private boolean isWhitespaceOrComment(String text)
-  {
-    text = text.trim();
-
-    return (text.equals("")
-	    || text.startsWith("<!--") && text.endsWith("-->"));
-  }
-
-  /**
-   * Generates the code for the children.
-   *
-   * @param out the output writer for the generated java.
-   */
-  private boolean hasBodyContent()
-    throws Exception
-  {
-    if (_children == null)
-      return false;
-
-    String bodyVar = null;
-    String prevId = null;
-    boolean isFirst = true;
-    for (int i = 0; i < _children.size(); i++) {
-      JspNode child = _children.get(i);
-
-      if (isFirst
-	  && child instanceof StaticText
-	  && (i + 1 == _children.size()
-	      || _children.get(i + 1) instanceof JsfTagNode)) {
-	continue;
-      }
-
-      if (! (child instanceof JsfTagNode)) {
-	if (isFirst) {
-	  return true;
-	}
-
-	// push body
-      }
-    }
-
-    return false;
-  }
-
-  static class Attr {
-    private String _name;
-    private Method _method;
-    
-    private String _value;
-    private JspAttribute _attr;
-
-    Attr(String name, Method method, String value)
-    {
-      _name = name;
-      _method = method;
-      _value = value;
-    }
-
-    Attr(String name, Method method, JspAttribute attr)
-    {
-      _name = name;
-      _method = method;
-      _attr = attr;
-    }
-
-    String getName()
-    {
-      return _name;
-    }
-
-    Method getMethod()
-    {
-      return _method;
-    }
-
-    String getValue()
-    {
-      return _value;
-    }
-
-    JspAttribute getAttr()
-    {
-      return _attr;
     }
   }
 }

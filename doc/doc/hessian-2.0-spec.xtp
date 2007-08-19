@@ -122,9 +122,6 @@ ref        ::= 'R' b3 b2 b1 b0    # reference to nth map/list in stream
            ::= x4a b0             # reference to 1-255th map/list
            ::= x4b b1 b0          # reference to 1-65535th map/list
 
-           # remote object using URL as locator
-remote     ::= 'r' type? string
-
            # UTF-8 encoded character string split into 64k chunks
 string     ::= 's' b1 b0 &lt;string-data> string  # non-final chunk
            ::= 'S' b1 b0 &lt;string-data>         # string of length 0-65535

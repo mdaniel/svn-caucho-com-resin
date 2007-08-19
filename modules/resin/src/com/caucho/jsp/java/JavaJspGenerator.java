@@ -175,6 +175,8 @@ public class JavaJspGenerator extends JspGenerator {
   private String _doctypePublic;
   private String _doctypeRootElement;
 
+  private boolean _isJsfPrologueInit;
+
   private boolean _isStatic = false;
 
   protected ArrayList<JspDeclaration> _declarations =
@@ -346,6 +348,16 @@ public class JavaJspGenerator extends JspGenerator {
   public boolean hasScripting()
   {
     return _rootNode.hasScripting();
+  }
+
+  public boolean isJsfPrologueInit()
+  {
+    return _isJsfPrologueInit;
+  }
+
+  public void setJsfPrologueInit(boolean isInit)
+  {
+    _isJsfPrologueInit = isInit;
   }
 
   /**

@@ -674,5 +674,7 @@ public class JavaJspBuilder extends JspBuilder {
     
     addMap(_jsfTagMap, "faces", "facet", JSF_CORE_URI,
 	   JsfFacetNode.class);
+    addMap(_jsfTagMap, "faces", "view", JSF_CORE_URI,
+	   JsfViewRoot.class);
   }
 }

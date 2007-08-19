@@ -32,9 +32,12 @@ import java.util.*;
 
 import javax.el.*;
 
+import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.event.*;
+import javax.faces.webapp.*;
+import javax.faces.lifecycle.*;
 
 public class UIViewRoot extends UIComponentBase
 {
@@ -51,10 +54,14 @@ public class UIViewRoot extends UIComponentBase
   private Locale _locale;
   private ValueExpression _localeExpr;
 
-  private ArrayList<PhaseListener> _phaseListeners
-    = new  ArrayList<PhaseListener>();
+  private ArrayList<PhaseListener> _phaseListeners;
   
   private ArrayList<FacesEvent> _eventList;
+
+  private MethodExpression _beforePhaseListener;
+  private MethodExpression _afterPhaseListener;
+
+  private Lifecycle _lifecycle;
 
   public UIViewRoot()
   {
@@ -63,6 +70,26 @@ public class UIViewRoot extends UIComponentBase
   public String getFamily()
   {
     return COMPONENT_FAMILY;
+  }
+
+  public void setAfterPhaseListener(MethodExpression expr)
+  {
+    _afterPhaseListener = expr;
+  }
+
+  public MethodExpression getAfterPhaseListener()
+  {
+    return _afterPhaseListener;
+  }
+
+  public void setBeforePhaseListener(MethodExpression expr)
+  {
+    _beforePhaseListener = expr;
+  }
+
+  public MethodExpression getBeforePhaseListener()
+  {
+    return _beforePhaseListener;
   }
   
   public String getRenderKitId()
@@ -151,12 +178,16 @@ public class UIViewRoot extends UIComponentBase
 
   public void addPhaseListener(PhaseListener listener)
   {
+    if (_phaseListeners != null)
+      _phaseListeners = new ArrayList<PhaseListener>();
+	
     _phaseListeners.add(listener);
   }
 
   public void removePhaseListener(PhaseListener listener)
   {
-    _phaseListeners.remove(listener);
+    if (_phaseListeners != null)
+      _phaseListeners.remove(listener);
   }
 
   public String createUniqueId()
@@ -172,7 +203,13 @@ public class UIViewRoot extends UIComponentBase
     if (context == null)
       throw new NullPointerException();
 
+    if (_beforePhaseListener != null || _phaseListeners != null)
+      beforePhase(context, PhaseId.INVOKE_APPLICATION);
+
     broadcastEvents(PhaseId.INVOKE_APPLICATION);
+
+    if (_afterPhaseListener != null || _phaseListeners != null)
+      afterPhase(context, PhaseId.INVOKE_APPLICATION);
   }
 
   /**
@@ -180,9 +217,15 @@ public class UIViewRoot extends UIComponentBase
    */
   public void processDecodes(FacesContext context)
   {
+    if (_beforePhaseListener != null || _phaseListeners != null)
+      beforePhase(context, PhaseId.APPLY_REQUEST_VALUES);
+
     super.processDecodes(context);
 
     broadcastEvents(PhaseId.APPLY_REQUEST_VALUES);
+    
+    if (_afterPhaseListener != null || _phaseListeners != null)
+      afterPhase(context, PhaseId.APPLY_REQUEST_VALUES);
   }
 
   /**
@@ -190,9 +233,15 @@ public class UIViewRoot extends UIComponentBase
    */
   public void processUpdates(FacesContext context)
   {
+    if (_beforePhaseListener != null || _phaseListeners != null)
+      beforePhase(context, PhaseId.UPDATE_MODEL_VALUES);
+
     super.processUpdates(context);
 
     broadcastEvents(PhaseId.UPDATE_MODEL_VALUES);
+
+    if (_afterPhaseListener != null || _phaseListeners != null)
+      afterPhase(context, PhaseId.UPDATE_MODEL_VALUES);
   }
 
   /**
@@ -201,10 +250,43 @@ public class UIViewRoot extends UIComponentBase
   @Override
   public void processValidators(FacesContext context)
   {
+    if (_beforePhaseListener != null || _phaseListeners != null)
+      beforePhase(context, PhaseId.PROCESS_VALIDATIONS);
+
     super.processValidators(context);
 
     broadcastEvents(PhaseId.PROCESS_VALIDATIONS);
+    
+    if (_afterPhaseListener != null || _phaseListeners != null)
+      afterPhase(context, PhaseId.PROCESS_VALIDATIONS);
   }
+
+  /**
+   * Begin rendering
+   */
+  @Override
+  public void encodeBegin(FacesContext context)
+    throws java.io.IOException
+  {
+    if (_beforePhaseListener != null || _phaseListeners != null)
+      beforePhase(context, PhaseId.RENDER_RESPONSE);
+
+    super.encodeBegin(context);
+  }
+
+  /**
+   * Begin rendering
+   */
+  @Override
+  public void encodeEnd(FacesContext context)
+    throws java.io.IOException
+  {
+    super.encodeEnd(context);
+    
+    if (_afterPhaseListener != null || _phaseListeners != null)
+      afterPhase(context, PhaseId.RENDER_RESPONSE);
+  }
+
 
   @Override
   public void queueEvent(FacesEvent event)
@@ -232,6 +314,74 @@ public class UIViewRoot extends UIComponentBase
     }
   }
 
+  private void afterPhase(FacesContext context, PhaseId phaseId)
+  {
+    Lifecycle lifecycle = getLifecycle(context);
+    PhaseEvent event = new PhaseEvent(context, phaseId, lifecycle);
+
+    if (_afterPhaseListener != null) {
+      try {
+	_afterPhaseListener.invoke(context.getELContext(),
+				   new Object[] { event });
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new FacesException(e);
+      }
+    }
+
+    if (_phaseListeners != null) {
+      for (int i = 0; i < _phaseListeners.size(); i++) {
+	PhaseListener listener = _phaseListeners.get(i);
+
+	listener.afterPhase(event);
+      }
+    }
+  }
+
+  private void beforePhase(FacesContext context, PhaseId phaseId)
+  {
+    Lifecycle lifecycle = getLifecycle(context);
+    PhaseEvent event = new PhaseEvent(context, phaseId, lifecycle);
+
+    if (_beforePhaseListener != null) {
+      try {
+	_beforePhaseListener.invoke(context.getELContext(),
+				   new Object[] { event });
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new FacesException(e);
+      }
+    }
+
+    if (_phaseListeners != null) {
+      for (int i = 0; i < _phaseListeners.size(); i++) {
+	PhaseListener listener = _phaseListeners.get(i);
+
+	listener.beforePhase(event);
+      }
+    }
+  }
+
+  private Lifecycle getLifecycle(FacesContext context)
+  {
+    if (_lifecycle == null) {
+      LifecycleFactory factory = (LifecycleFactory)
+	FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
+
+      ExternalContext extContext = context.getExternalContext();
+      String id = extContext.getInitParameter(FacesServlet.LIFECYCLE_ID_ATTR);
+    
+      if (id == null)
+	id = LifecycleFactory.DEFAULT_LIFECYCLE;
+    
+      _lifecycle = factory.getLifecycle(id);
+    }
+
+    return _lifecycle;
+  }
+
   //
   // state
   //
@@ -242,10 +392,17 @@ public class UIViewRoot extends UIComponentBase
       super.saveState(context),
       _viewId,
       _renderKitId,
-      Util.save(_renderKitIdExpr, getFacesContext()),
+      Util.save(_renderKitIdExpr, context),
       _locale,
-      Util.save(_localeExpr, getFacesContext()),
-      _unique
+      Util.save(_localeExpr, context),
+      _unique,
+      (_afterPhaseListener != null
+       ? _afterPhaseListener.getExpressionString()
+       : null),
+      (_beforePhaseListener != null
+       ? _beforePhaseListener.getExpressionString()
+       : null),
+      saveAttachedState(context, _phaseListeners),
     };
   }
 
@@ -261,6 +418,35 @@ public class UIViewRoot extends UIComponentBase
     _locale = (Locale) state[4];
     _localeExpr = Util.restore(state[5], Object.class, context);
     _unique = (Integer) state[6];
+    
+    String afterExpr = (String) state[7];
+
+    if (afterExpr != null) {
+      Application app = context.getApplication();
+      ExpressionFactory factory = app.getExpressionFactory();
+      
+      _afterPhaseListener
+	= factory.createMethodExpression(context.getELContext(),
+					 afterExpr,
+					 void.class,
+					 new Class[] { PhaseEvent.class });
+    }
+
+    String beforeExpr = (String) state[8];
+    if (beforeExpr != null) {
+      Application app = context.getApplication();
+      ExpressionFactory factory = app.getExpressionFactory();
+      
+      _beforePhaseListener
+	= factory.createMethodExpression(context.getELContext(),
+					 beforeExpr,
+					 void.class,
+					 new Class[] { PhaseEvent.class });
+    }
+
+    
+    _phaseListeners =
+      (ArrayList) restoreAttachedState(context, state[9]);
   }
   
   private Locale toLocale(Object value)
