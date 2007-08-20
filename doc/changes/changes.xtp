@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>xpath: compatibility issues with Xerces in comparison exprs (#1943, rep by M Thompson)</li>
 <li>jsp: deferred EL handling did not properly detect .tld JSP version (#1909, rep by timur)</li>
 <li>jsp: validation needs to generate page="%= ... %" for page="&lt;%= ... %"> (#1917, rep by Michael Sengbusch)</li>
 <li>jsp: EL toBoolean() was inverting result (#1931, rep by dheggie)</li>

@@ -53,9 +53,9 @@ public class NodeTypePattern extends AbstractPattern {
 
   public static AbstractPattern create(AbstractPattern parent, int nodeType)
   {
-    if (nodeType == NODE &&
-        parent instanceof FromParent &&
-        parent._parent instanceof FromContext) {
+    if (nodeType == NODE
+	&& parent instanceof FromParent
+	&& parent._parent instanceof FromContext) {
       FromContext context = (FromContext) parent._parent;
 
       return new FromContext(context.getCount() + 1);
@@ -69,10 +69,10 @@ public class NodeTypePattern extends AbstractPattern {
    */
   public double getPriority()
   {
-    if (_parent instanceof Axis &&
-	_parent.getParent() != null &&
-	! (_parent.getParent() instanceof FromRoot) &&
-	! (_parent.getParent() instanceof FromAny))
+    if (_parent instanceof Axis
+	&& _parent.getParent() != null
+	&& ! (_parent.getParent() instanceof FromRoot)
+	&& ! (_parent.getParent() instanceof FromAny))
       return 0.5;
     else
       return -0.5;
@@ -132,7 +132,7 @@ public class NodeTypePattern extends AbstractPattern {
   {
     if (node == null)
       return false;
-
+    
     if (_nodeType == Node.ATTRIBUTE_NODE) {
       if (node.getNodeType() != Node.ATTRIBUTE_NODE)
         return false;

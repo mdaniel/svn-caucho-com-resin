@@ -160,6 +160,7 @@ public class BooleanExpr extends Expr {
     case STRING_EQ: 
       String lstr = _left.evalString(node, env);
       String rstr = _right.evalString(node, env);
+
       return lstr.equals(rstr);
 
     case EQ: 
@@ -273,10 +274,13 @@ public class BooleanExpr extends Expr {
   private boolean cmp(Predicate test, Object lobj, Object robj)
     throws XPathException
   {
-    if (lobj instanceof NodeList) {
+    if (lobj instanceof Node) {
+    }
+    else if (lobj instanceof NodeList) {
       NodeList list = (NodeList) lobj;
 
       int length = list.getLength();
+
       for (int i = 0; i < length; i++) {
 	if (cmp(test, list.item(i), robj))
 	  return true;
@@ -305,7 +309,9 @@ public class BooleanExpr extends Expr {
       return false;
     }
 
-    if (robj instanceof NodeList) {
+    if (robj instanceof Node) {
+    }
+    else if (robj instanceof NodeList) {
       NodeList list = (NodeList) robj;
 
       int length = list.getLength();

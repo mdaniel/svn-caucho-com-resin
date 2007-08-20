@@ -69,6 +69,7 @@ public class FromExpr extends AbstractPattern {
 
     while (iter.hasNext()) {
       Node subnode = iter.nextNode();
+      
       if (subnode == node)
 	return true;
     }
