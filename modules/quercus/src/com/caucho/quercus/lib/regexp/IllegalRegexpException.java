@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.regexp;
+package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
 

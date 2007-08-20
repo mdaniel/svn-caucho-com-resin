@@ -27,9 +27,8 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.regexp;
+package com.caucho.quercus.lib.regexp;
 
-import java.util.*;
 import com.caucho.util.*;
 
 class RegexpSet {
@@ -40,14 +39,15 @@ class RegexpSet {
   static RegexpSet WORD = null;
   static RegexpSet DIGIT = null;
   static RegexpSet DOT = null;
-
-  int bitset[];
-  IntSet range;
+  
+  int _bitset[];
+  IntSet _range;
 
   static {
     SPACE = new RegexpSet();
     SPACE.setRange(' ', ' ');
-    SPACE.setRange(0x9, 0xd);
+    SPACE.setRange(0x9, 0xa); //tab to newline
+    SPACE.setRange(0xc, 0xd); //form feed to carriage return
 
     DOT = new RegexpSet();
     DOT.setRange('\n', '\n');
@@ -67,9 +67,9 @@ class RegexpSet {
   void mergeOr(RegexpSet b)
   {
     for (int i = 0; i < BITSET_WIDTH; i++)
-      bitset[i] |= b.bitset[i];
+      _bitset[i] |= b._bitset[i];
 
-    range.union(b.range);
+    _range.union(b._range);
   }
 
   /**
@@ -78,9 +78,9 @@ class RegexpSet {
   void mergeOrInv(RegexpSet b)
   {
     for (int i = 0; i < BITSET_WIDTH; i++)
-      bitset[i] |= ~b.bitset[i];
+      _bitset[i] |= ~b._bitset[i];
 
-    range.unionNegate(b.range, 0, 0xffff);
+    _range.unionNegate(b._range, 0, 0xffff);
   }
 
   /**
@@ -93,7 +93,7 @@ class RegexpSet {
 
     if (low < BITSET_CHARS) {
       for (int i = low; i < Math.min(high + 1, BITSET_CHARS); i++)
-	bitset[i >> 3] |= (1 << (i & 0x7));
+	_bitset[i >> 3] |= (1 << (i & 0x7));
 
       if (high < BITSET_CHARS)
 	return;
@@ -101,7 +101,7 @@ class RegexpSet {
       low = BITSET_CHARS;
     }
 
-    range.union(low, high);
+    _range.union(low, high);
   }
 
   /**
@@ -114,11 +114,11 @@ class RegexpSet {
     boolean isDisjoint = true;
 
     for (int i = 0; i < BITSET_WIDTH; i++) {
-      if ((bitset[i] &= next.bitset[i]) != 0)
+      if ((_bitset[i] &= next._bitset[i]) != 0)
 	isDisjoint = false;
     }
 
-    if (range.intersection(next.range))
+    if (_range.intersection(next._range))
       isDisjoint = false;
 
     return isDisjoint;
@@ -132,10 +132,10 @@ class RegexpSet {
   void difference(RegexpSet next)
   {
     for (int i = 0; i < BITSET_WIDTH; i++) {
-      bitset[i] &= ~next.bitset[i];
+      _bitset[i] &= ~next._bitset[i];
     }
 
-    range.difference(next.range);
+    _range.difference(next._range);
   }
 
   /*
@@ -146,9 +146,9 @@ class RegexpSet {
     if (ch < 0)
       return false;
     else if (ch < BITSET_CHARS)
-      return (bitset[ch >> 3] & (1 << (ch & 7))) != 0;
+      return (_bitset[ch >> 3] & (1 << (ch & 7))) != 0;
     else {
-      return range.contains(ch);
+      return _range.contains(ch);
     }
   }
 
@@ -157,8 +157,8 @@ class RegexpSet {
    */
   RegexpSet()
   {
-    bitset = new int[BITSET_WIDTH];
-    range = new IntSet();
+    _bitset = new int[BITSET_WIDTH];
+    _range = new IntSet();
   }
 
   /**
@@ -166,11 +166,11 @@ class RegexpSet {
    */
   RegexpSet(RegexpSet old)
   {
-    bitset = new int[BITSET_WIDTH];
+    _bitset = new int[BITSET_WIDTH];
 
     for (int i = 0; i < BITSET_WIDTH; i++)
-      bitset[i] = old.bitset[i];
+      _bitset[i] = old._bitset[i];
 
-    range = (IntSet) old.range.clone();
+    _range = (IntSet) old._range.clone();
   }
 }

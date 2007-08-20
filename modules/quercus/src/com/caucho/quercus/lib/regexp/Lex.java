@@ -27,47 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.regexp;
+package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
+import com.caucho.util.*;
 
-class PeekString extends PeekStream {
-  char []string;
-  int length;
-  int index;
+public class Lex {
+  Node _rawProg;
+  Regcomp _comp;
 
-  PeekString(String string)
+  public void addLexeme(String pattern, int value) 
+    throws IllegalRegexpException
   {
-    this.string = string.toCharArray();
-    length = string.length();
-    this.index = 0;
+    _comp._nGroup = 0;
+
+    Node prog = _comp.parse(new PeekString(pattern));
+
+    _rawProg = RegOptim.appendLexeme(_rawProg, prog, value);
   }
 
-  int read() 
-  { 
-    if (index >= length)
-      return -1; 
-    else
-      return string[index++];
+  public Regexp compile()
+  {
+    return new Regexp(_rawProg, _comp);
   }
 
-  int peek() 
-  { 
-    if (index >= length)
-      return -1; 
-    else
-      return string[index];
-  }
+  public Lex(String sflags) 
+  {
+    int flags = 0;
 
-  void ungetc(int ch) { 
-    if (index <= 0)
-      throw new RuntimeException();
+    for (int i = 0; sflags != null && i < sflags.length(); i++) {
+      switch (sflags.charAt(i)) {
+      case 'm': flags |= Regcomp.MULTILINE; break;
+      case 's': flags |= Regcomp.SINGLE_LINE; break;
+      case 'i': flags |= Regcomp.IGNORE_CASE; break;
+      case 'x': flags |= Regcomp.IGNORE_WS; break;
+      }
+    }
 
-    index--;
+    _comp = new Regcomp(flags);
+    _rawProg = null;
   }
 }
-
-
-
-
-

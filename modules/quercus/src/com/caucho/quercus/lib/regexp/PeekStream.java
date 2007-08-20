@@ -27,9 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.regexp;
-
-import java.util.*;
+package com.caucho.quercus.lib.regexp;
 
 class PeekStream {
   int read() { return -1; }

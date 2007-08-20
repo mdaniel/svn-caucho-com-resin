@@ -31,7 +31,7 @@
  * XXX: anchored expressions should have flags for quick matching.
  */
 
-package com.caucho.regexp;
+package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
 import com.caucho.util.*;
@@ -43,23 +43,23 @@ class RegOptim {
    */
   static void ignoreCase(Node node)
   {
-    for (; node != null; node = node.rest) {
-      switch (node.code) {
+    for (; node != null; node = node._rest) {
+      switch (node._code) {
       case Node.RC_SET:
-	node.code = Node.RC_SET_I;
+	node._code = Node.RC_SET_I;
 	break;
       case Node.RC_NSET:
-	node.code = Node.RC_NSET_I;
+	node._code = Node.RC_NSET_I;
 	break;
       case Node.RC_STRING:
-	node.code = Node.RC_STRING_I;
+	node._code = Node.RC_STRING_I;
 	break;
       case Node.RC_GROUP_REF:
-	node.code = Node.RC_GROUP_REF_I;
+	node._code = Node.RC_GROUP_REF_I;
 	break;
       }
 
-      ignoreCase(node.branch);
+      ignoreCase(node._branch);
     }
   }
 
@@ -72,29 +72,29 @@ class RegOptim {
     if (node == null)
       return 0;
 
-    switch (node.code) {
+    switch (node._code) {
     case Node.RC_SET:
     case Node.RC_NSET:
     case Node.RC_SET_I:
     case Node.RC_NSET_I:
-      return 1 + minLength(node.rest);
+      return 1 + minLength(node._rest);
 
     case Node.RC_STRING:
     case Node.RC_STRING_I:
-      return node.string.length() + minLength(node.rest);
+      return node._string.length() + minLength(node._rest);
 
     case Node.RC_OR:
     case Node.RC_OR_UNIQUE:
-      return Math.min(minLength(node.branch), minLength(node.rest));
+      return Math.min(minLength(node._branch), minLength(node._rest));
 
     case Node.RC_LOOP:
     case Node.RC_LOOP_SHORT:
     case Node.RC_LOOP_UNIQUE:
     case Node.RC_LOOP_SHORT_UNIQUE:
-      return (node.min * minLength(node.branch) + minLength(node.rest));
+      return (node._min * minLength(node._branch) + minLength(node._rest));
 
     default:
-      return minLength(node.rest);
+      return minLength(node._rest);
     }
   }
 
@@ -103,7 +103,7 @@ class RegOptim {
     if (node == null)
       return null;
 
-    switch (node.code) {
+    switch (node._code) {
     case Node.RC_BEG_GROUP:
     case Node.RC_END_GROUP:
     case Node.RC_WORD:
@@ -113,21 +113,21 @@ class RegOptim {
     case Node.RC_BSTRING:
     case Node.RC_ESTRING:
     case Node.RC_GSTRING:
-      return prefix(node.rest);
+      return prefix(node._rest);
 
     case Node.RC_POS_PEEK:
-      return prefix(node.branch);
+      return prefix(node._branch);
 
     case Node.RC_STRING:
     case Node.RC_STRING_I:
-      return node.string;
+      return node._string;
 
     case Node.RC_LOOP:
     case Node.RC_LOOP_SHORT:
     case Node.RC_LOOP_UNIQUE:
     case Node.RC_LOOP_SHORT_UNIQUE:
-      if (node.min > 0)
-	return prefix(node.branch);
+      if (node._min > 0)
+	return prefix(node._branch);
       else
 	return null;
 
@@ -150,15 +150,15 @@ class RegOptim {
     if (node == null)
       return null;
 
-    switch (node.code) {
+    switch (node._code) {
     case Node.RC_STRING:
-      string1 = findMust(node.rest);
-      return string1 != null ? string1 : node.string;
+      string1 = findMust(node._rest);
+      return string1 != null ? string1 : node._string;
 
     case Node.RC_OR:
     case Node.RC_OR_UNIQUE:
-      string1 = findMust(node.branch);
-      string2 = findMust(node.rest);
+      string1 = findMust(node._branch);
+      string2 = findMust(node._rest);
 
       if (string1 != null && string2 != null && string1.equals(string2))
 	return string1;
@@ -168,23 +168,23 @@ class RegOptim {
     case Node.RC_LOOP:
     case Node.RC_LOOP_UNIQUE:
     case Node.RC_LOOP_SHORT:
-      string1 = findMust(node.rest);
+      string1 = findMust(node._rest);
       if (string1 != null)
 	return string1;
-      else if (node.min > 0)
-	return findMust(node.branch);
+      else if (node._min > 0)
+	return findMust(node._branch);
       else
 	return null;
 
     case Node.RC_POS_PEEK:
-      string1 = findMust(node.rest);
+      string1 = findMust(node._rest);
       if (string1 != null)
 	return string1;
       else
-	return findMust(node.branch);
+	return findMust(node._branch);
 
     default:
-      return findMust(node.rest);
+      return findMust(node._rest);
     }
   }
 
@@ -194,57 +194,59 @@ class RegOptim {
   static private Node linkLoops(Node node, Node loop, boolean canDeriveNull)
   {
     if (node == null && loop != null && canDeriveNull) {
-      if (loop.min > 0)
-	loop.min = 1;
+      if (loop._min > 0)
+	loop._min = 1;
 
       return loop;
     }
     else if (node == null)
       return loop;
 
-    switch (node.code) {
+    switch (node._code) {
     case Node.RC_END:
     case Node.RC_NULL:
-      return linkLoops(node.rest, loop, canDeriveNull);
+      return linkLoops(node._rest, loop, canDeriveNull);
 
     case Node.RC_OR:
     case Node.RC_OR_UNIQUE:
-      if (node.mark)
+      if (node._mark)
 	return node;
 
-      node.mark = true;
-      node.branch = linkLoops(node.branch, loop, canDeriveNull);
-      node.rest = linkLoops(node.rest, loop, canDeriveNull);
+      node._mark = true;
+      node._branch = linkLoops(node._branch, loop, canDeriveNull);
+      node._rest = linkLoops(node._rest, loop, canDeriveNull);
 
       return node;
 
     case Node.RC_LOOP:
     case Node.RC_LOOP_SHORT:
     case Node.RC_LOOP_UNIQUE:
-      if (node.mark) {
-	if (canDeriveNull && node.min > 0)
-	  node.min = 1;
+      if (node._mark) {
+	if (canDeriveNull && node._min > 0)
+	  node._min = 1;
 
 	return node;
       }
-      node.mark = true;
-      node.branch = linkLoops(node.branch, node, true);
-      node.rest = linkLoops(node.rest, loop, canDeriveNull);
+      node._mark = true;
+      node._branch = linkLoops(node._branch, node, true);
+      node._rest = linkLoops(node._rest, loop, canDeriveNull);
       Node init = new Node(Node.RC_LOOP_INIT);
-      init.rest = node;
+      init._rest = node;
       return init;
 
+    case Node.RC_GROUP_REF:
+    case Node.RC_GROUP_REF_I:
     case Node.RC_STRING:
     case Node.RC_SET:
     case Node.RC_NSET:
     case Node.RC_STRING_I:
     case Node.RC_SET_I:
     case Node.RC_NSET_I:
-      node.rest = linkLoops(node.rest, loop, false);
+      node._rest = linkLoops(node._rest, loop, false);
       return node;
 
     default:
-      node.rest = linkLoops(node.rest, loop, canDeriveNull);
+      node._rest = linkLoops(node._rest, loop, canDeriveNull);
       return node;
     }
   }
@@ -284,30 +286,30 @@ class RegOptim {
     if (node == null)
       return;
 
-    switch (node.code) {
+    switch (node._code) {
     case Node.RC_LOOP_SHORT:
-      eliminateBacktrack(node.branch, node.rest);
-      eliminateBacktrack(node.rest, rest);
+      eliminateBacktrack(node._branch, node._rest);
+      eliminateBacktrack(node._rest, rest);
 
-      if (firstset(node.branch, null)) {
-	if (node.min > 0)
-	  node.min = 1;
+      if (firstset(node._branch, null)) {
+	if (node._min > 0)
+	  node._min = 1;
       }
       return;
 
     case Node.RC_LOOP:
-      eliminateBacktrack(node.branch, node.rest);
-      eliminateBacktrack(node.rest, rest);
+      eliminateBacktrack(node._branch, node._rest);
+      eliminateBacktrack(node._rest, rest);
 
       left = new RegexpSet();
-      if (firstset(node.branch, left)) {
-	if (node.min > 0)
-	  node.min = 0;
+      if (firstset(node._branch, left)) {
+	if (node._min > 0)
+	  node._min = 0;
       }
 
       right = new RegexpSet();
       boolean emptyLast = false;
-      if (firstset(node.rest, right)) {
+      if (firstset(node._rest, right)) {
         emptyLast = true;
 	firstset(rest, right);
       }
@@ -318,44 +320,44 @@ class RegOptim {
         // If the right can derive null, then we can't take a shortcut
       }
       else if (right.mergeOverlap(left)) {
-	node.code = Node.RC_LOOP_UNIQUE;
-	node.set = left;
+	node._code = Node.RC_LOOP_UNIQUE;
+	node._set = left;
       }
       else {
 	left.difference(right);
-	node.set = left;
+	node._set = left;
       }
 
       return;
 
     case Node.RC_OR: 
     case Node.RC_OR_UNIQUE:
-      eliminateBacktrack(node.branch, rest);
-      eliminateBacktrack(node.rest, rest);
+      eliminateBacktrack(node._branch, rest);
+      eliminateBacktrack(node._rest, rest);
 
       boolean emptyFirst = false;
       left = new RegexpSet();
-      if (firstset(node.branch, left))
+      if (firstset(node._branch, left))
 	emptyFirst = firstset(rest, left);
 
       right = new RegexpSet();
-      if (firstset(node.rest, right))
+      if (firstset(node._rest, right))
 	firstset(rest, right);
       
       if (! emptyFirst && right.mergeOverlap(left)) {
-	node.code = Node.RC_OR_UNIQUE;
-	node.set = left;
+	node._code = Node.RC_OR_UNIQUE;
+	node._set = left;
       }
       return;
 
     case Node.RC_POS_PEEK:
     case Node.RC_NEG_PEEK:
-      eliminateBacktrack(node.branch, rest);
-      eliminateBacktrack(node.rest, rest);
+      eliminateBacktrack(node._branch, rest);
+      eliminateBacktrack(node._rest, rest);
       return;
 
     default:
-      eliminateBacktrack(node.rest, rest);
+      eliminateBacktrack(node._rest, rest);
       return;
     }
   }
@@ -374,21 +376,25 @@ class RegOptim {
     if (node == null)
       return true;
 
-    switch (node.code) {
+    switch (node._code) {
+    //XXX: optimize group references
+    case Node.RC_GROUP_REF_I:
+    case Node.RC_GROUP_REF:
+      return false;
     case Node.RC_STRING:
-      int ch = node.string.charAt(0);
+      int ch = node._string.charAt(0);
       if (set != null)
 	set.setRange(ch, ch);
       return false;
 
     case Node.RC_SET:
       if (set != null)
-	set.mergeOr(node.set);
+	set.mergeOr(node._set);
       return false;
 
     case Node.RC_NSET:
       if (set != null) {
-	set.mergeOrInv(node.set);
+	set.mergeOrInv(node._set);
       }
       return false;
 
@@ -396,15 +402,15 @@ class RegOptim {
     case Node.RC_LOOP_SHORT:
     case Node.RC_LOOP_SHORT_UNIQUE:
     case Node.RC_LOOP_UNIQUE:
-      if (firstset(node.branch, set)) {
-	if (node.min > 0)
-	  node.min = 1;
+      if (firstset(node._branch, set)) {
+	if (node._min > 0)
+	  node._min = 1;
 
-	return firstset(node.rest, set);
+	return firstset(node._rest, set);
       }
-      else if (node.min == 0) {
+      else if (node._min == 0) {
 	// XXX: ibm-jdk needs this split
-	boolean isFirst = firstset(node.rest, set);
+	boolean isFirst = firstset(node._rest, set);
 	return isFirst;
       }
       else
@@ -412,18 +418,18 @@ class RegOptim {
 
     case Node.RC_OR:
     case Node.RC_OR_UNIQUE:
-      if (firstset(node.branch, set)) {
-	firstset(node.rest, set);
+      if (firstset(node._branch, set)) {
+	firstset(node._rest, set);
 	return true;
       }
       else
-	return firstset(node.rest, set);
+	return firstset(node._rest, set);
 
     case Node.RC_POS_PEEK:
       RegexpSet lookahead = new RegexpSet();
 
-      boolean result = firstset(node.rest, set);
-      if (set != null && firstset(node.branch, lookahead)) {
+      boolean result = firstset(node._rest, set);
+      if (set != null && firstset(node._branch, lookahead)) {
 	set.mergeOr(lookahead);
       }
       else {
@@ -433,22 +439,22 @@ class RegOptim {
       return result;
 
     default:
-      return firstset(node.rest, set);
+      return firstset(node._rest, set);
     }
   }
 
   static Node appendLexemeValue(Node node, int lexeme)
   {
-    if (node == null || node.code == Node.RC_END || 
-	node.code == Node.RC_LEXEME) {
+    if (node == null || node._code == Node.RC_END || 
+	node._code == Node.RC_LEXEME) {
       node = new Node(Node.RC_LEXEME, lexeme);
-      node.rest = null;
+      node._rest = null;
       return node;
     }
 
-    node.rest = appendLexemeValue(node.rest, lexeme);
-    if (node.code == Node.RC_OR)
-      node.branch = appendLexemeValue(node.branch, lexeme);
+    node._rest = appendLexemeValue(node._rest, lexeme);
+    if (node._code == Node.RC_OR)
+      node._branch = appendLexemeValue(node._branch, lexeme);
 
     return node;
   }
@@ -461,7 +467,7 @@ class RegOptim {
       return child;
     
     parent = new Node(Node.RC_OR, parent);
-    parent.rest = child;
+    parent._rest = child;
 
     return parent;
   }
