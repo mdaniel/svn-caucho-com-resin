@@ -36,7 +36,7 @@ import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.MailModule;
-import com.caucho.quercus.lib.RegexpModule;
+import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;

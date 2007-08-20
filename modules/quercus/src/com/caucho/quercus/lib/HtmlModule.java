@@ -36,6 +36,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
