@@ -270,7 +270,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   public boolean isEOF()
   {
     try {
-      return _stream.getFilePointer() == _stream.getLength() - 1;
+      return _stream.getFilePointer() >= _stream.getLength();
     } catch (IOException e) {
       return true;
     }
