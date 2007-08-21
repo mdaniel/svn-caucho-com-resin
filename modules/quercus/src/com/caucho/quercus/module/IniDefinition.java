@@ -76,6 +76,14 @@ public class IniDefinition {
   {
     return _name;
   }
+  
+  /**
+   * Returns the default value of the ini definition.
+   */
+  protected Value getDefault()
+  {
+    return _deflt;
+  }
 
   /**
    * Returns the scope in which the value of the ini variable can be set.
@@ -353,7 +361,14 @@ public class IniDefinition {
                     int scope,
                     Value value)
     {
-      Env.getInstance().warning(L.l("ini value `{0}' is not supported", getName()));
+      // php/1a0u
+      // don't send a warning if it's being turned off (for Drupal)
+      // XXX: send notice instead?
+      if (value.eq(getDefault()))
+        return;
+        //Env.getInstance().notice(L.l("ini value `{0}' is not supported", getName()));
+      else
+        Env.getInstance().warning(L.l("ini value `{0}' is not supported", getName()));
     }
   }
 
