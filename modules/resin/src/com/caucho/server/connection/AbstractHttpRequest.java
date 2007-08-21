@@ -1462,6 +1462,9 @@ public abstract class AbstractHttpRequest
   {
     SessionManager manager = getSessionManager();
 
+    if (manager == null)
+      return null;
+
     String id = getRequestedSessionId();
 
     long now = Alarm.getCurrentTime();

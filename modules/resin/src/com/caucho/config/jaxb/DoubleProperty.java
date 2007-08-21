@@ -45,6 +45,15 @@ public class DoubleProperty extends JaxbProperty {
   {
     _method = method;
   }
+
+  /**
+   * Primitive values return false.
+   */
+  @Override
+  public boolean isBean()
+  {
+    return false;
+  }
  
   /**
    * Configures the parent object with the given node.

@@ -63,6 +63,7 @@ public class BooleanType extends TypeStrategy {
    * @param node the configuration node
    * @param parent
    */
+  @Override
   public Object configure(NodeBuilder builder, Node node, Object parent)
     throws ConfigException
   {

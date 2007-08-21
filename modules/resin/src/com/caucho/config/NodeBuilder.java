@@ -389,8 +389,9 @@ public class NodeBuilder {
 
 	attrStrategy.setAttribute(bean, qName, childBean);
       }
-      else
+      else {
 	attrStrategy.configure(this, bean, qName, childNode);
+      }
     } catch (LineConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -805,7 +806,7 @@ public class NodeBuilder {
       ELParser parser = new ELParser(getELContext(), exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
-      
+
       return expr.evalBoolean(getELContext());
     }
     else if (exprString.equals("false")

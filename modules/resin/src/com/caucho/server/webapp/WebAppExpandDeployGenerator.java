@@ -236,6 +236,8 @@ public class WebAppExpandDeployGenerator
     else if (segmentName.indexOf('/', 1) > 0)
       return null;
 
+    String contextPath = segmentName;
+
     if (segmentName.equals("")) {
       if (CaseInsensitive.isCaseInsensitive())
         segmentName = "/root";
@@ -245,8 +247,11 @@ public class WebAppExpandDeployGenerator
 
     ArrayList<String> versionNames = getVersionNames(segmentName);
 
-    if (versionNames == null || versionNames.size() == 0)
-      return makeController(name, _urlPrefix + segmentName);
+    if (versionNames == null || versionNames.size() == 0) {
+      return makeController(name,
+			    _urlPrefix + contextPath,
+			    _urlPrefix + segmentName);
+    }
     
     /*
     else if (versionNames.size() == 1) {
@@ -265,10 +270,11 @@ public class WebAppExpandDeployGenerator
     return controller;
   }
 
-  private WebAppController makeController(String name, String versionName)
+  private WebAppController makeController(String name,
+					  String contextPath,
+					  String versionName)
   {
     String version = "";
-    String contextPath = versionName;
     String baseName = contextPath;
 
     if (isVersioning()) {

@@ -46,6 +46,7 @@ public class JaxbProperty extends AttributeStrategy {
    * @param name the name of the property
    * @param node the configuration node for the value
    */
+  @Override
   public void configure(NodeBuilder builder,
                         Object bean,
                         QName name,
