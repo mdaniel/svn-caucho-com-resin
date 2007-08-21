@@ -31,24 +31,43 @@ package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.env.ArrayDelegate;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.Value;
+
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * A delegate that intercepts the global count() function and calls count()
- * method on target objects that implement
- * the {@link com.caucho.quercus.lib.spl.Countable} interface.
+ * A delegate that intercepts requests for iterator's and delegates
+ * them to the iteerator returned by {@link IteratorAggregate@getIterator()}
  */
-public class CountableDelegate
+public class IteratorAggregateDelegate
   extends ArrayDelegate
 {
-  @Override
-  public LongValue getCount(Env env, ObjectValue obj)
-  {
-    Value count = obj.findFunction("count").callMethod(env, obj);
+  private final IteratorDelegate _iteratorDelegate = new IteratorDelegate();
 
-    return count.toLongValue();
+  private ObjectValue getTarget(Env env, ObjectValue obj)
+  {
+    Value iter = obj.findFunction("getIterator").callMethod(env, obj);
+
+    return (ObjectValue) iter;
   }
 
+  @Override
+  public java.util.Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
+  {
+    return _iteratorDelegate.getIterator(env, getTarget(env, obj));
+  }
+
+  @Override
+  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
+  {
+    return _iteratorDelegate.getKeyIterator(env, getTarget(env, obj));
+  }
+
+  @Override
+  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
+  {
+    return _iteratorDelegate.getValueIterator(env, getTarget(env, obj));
+  }
 }

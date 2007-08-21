@@ -29,26 +29,5 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.env.ArrayDelegate;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ObjectValue;
-
-/**
- * A delegate that intercepts the global count() function and calls count()
- * method on target objects that implement
- * the {@link com.caucho.quercus.lib.spl.Countable} interface.
- */
-public class CountableDelegate
-  extends ArrayDelegate
-{
-  @Override
-  public LongValue getCount(Env env, ObjectValue obj)
-  {
-    Value count = obj.findFunction("count").callMethod(env, obj);
-
-    return count.toLongValue();
-  }
-
+public interface Traversable {
 }

@@ -29,9 +29,10 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.env.AbstractDelegate;
+import com.caucho.quercus.env.ArrayDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.program.AbstractFunction;
 
 import java.util.Iterator;
@@ -43,19 +44,24 @@ import java.util.Map;
  * the {@link com.caucho.quercus.lib.spl.Iterator} interface.
  */
 public class IteratorDelegate
-  extends AbstractDelegate
+  extends ArrayDelegate
 {
-  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, Value obj)
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
   {
     return new EntryIterator(env, obj);
   }
 
-  public Iterator<Value> getKeyIterator(Env env, Value obj)
+  @Override
+  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
   {
-    return new KeyIteratorImpl(env, obj);
+    env.error("An iterator cannot be used with foreach by reference");
+
+    return null;
   }
 
-  public Iterator<Value> getValueIterator(Env env, Value obj)
+  @Override
+  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
   {
     return new ValueIteratorImpl(env, obj);
   }
@@ -64,7 +70,7 @@ public class IteratorDelegate
     implements Iterator<T>
   {
     protected final Env _env;
-    protected final Value _obj;
+    protected final ObjectValue _obj;
 
     private final AbstractFunction _nextFun;
     private final AbstractFunction _currentFun;
@@ -73,7 +79,7 @@ public class IteratorDelegate
     private final AbstractFunction _validFun;
     private boolean _needNext;
 
-    public AbstractIteratorImpl(Env env, Value obj)
+    public AbstractIteratorImpl(Env env, ObjectValue obj)
     {
       _env = env;
       _obj = obj;
@@ -124,7 +130,7 @@ public class IteratorDelegate
   public static class EntryIterator<T>
     extends AbstractIteratorImpl<Map.Entry<Value, Value>>
   {
-    public EntryIterator(Env env, Value obj)
+    public EntryIterator(Env env, ObjectValue obj)
     {
       super(env, obj);
     }
@@ -171,7 +177,7 @@ public class IteratorDelegate
   public static class KeyIteratorImpl<T>
     extends AbstractIteratorImpl<Value>
   {
-    public KeyIteratorImpl(Env env, Value obj)
+    public KeyIteratorImpl(Env env, ObjectValue obj)
     {
       super(env, obj);
     }
@@ -186,7 +192,7 @@ public class IteratorDelegate
   public static class ValueIteratorImpl<T>
     extends AbstractIteratorImpl<Value>
   {
-    public ValueIteratorImpl(Env env, Value obj)
+    public ValueIteratorImpl(Env env, ObjectValue obj)
     {
       super(env, obj);
     }

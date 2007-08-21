@@ -41,20 +41,20 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
  * Represents a Quercus java value.
  */
-public class JavaValue extends ResourceValue
+public class JavaValue
+  extends ObjectValue
   implements Serializable
 {
   private static final Logger log
     = Logger.getLogger(JavaValue.class.getName());
 
-  private JavaClassDef _classDef; // XXX: s/b replaced by _quercusClass
-  private QuercusClass _quercusClass;
+  private JavaClassDef _classDef;
 
   private Object _object;
 
@@ -62,23 +62,23 @@ public class JavaValue extends ResourceValue
 
   public JavaValue(Env env, Object object, JavaClassDef def)
   {
+    super(env.createQuercusClass(def, null));
+
     _env = env;
     _classDef = def;
     _object = object;
-  }
-
-  public QuercusClass getQuercusClass()
-  {
-    if (_quercusClass == null)
-      _quercusClass = _env.createQuercusClass(_classDef, null);
-
-    return _quercusClass;
   }
 
   @Override
   public String getClassName()
   {
     return _classDef.getName();
+  }
+
+  public Set<Map.Entry<String, Value>> entrySet()
+  {
+    // XXX:: remove entrySet() method from ObjectValue
+    throw new UnsupportedOperationException("unimplementated");
   }
 
   @Override
@@ -104,18 +104,6 @@ public class JavaValue extends ResourceValue
   }
   
   @Override
-  public Value get(Value name)
-  {
-    return _classDef.get(_env, _object, name);
-  }
-
-  @Override
-  public Value put(Value index, Value value)
-  {
-    return _classDef.put(_env, _object, index, value);
-  }
-
-  @Override
   public Value getField(Env env, String name, boolean create)
   {
     return _classDef.getField(env, _object, name, create);
@@ -130,66 +118,12 @@ public class JavaValue extends ResourceValue
   }
 
   /**
-   * Returns the class name.
-   */
-  public String getName()
-  {
-    return _classDef.getName();
-  }
-
-  /**
-   * Returns the type.
-   */
-  @Override
-  public String getType()
-  {
-    return "object";
-  }
-
-  /**
-   * Converts to a boolean.
-   */
-  @Override
-  public boolean toBoolean()
-  {
-    return true;
-  }
-
-  /**
-   * Converts to a long.
-   */
-  @Override
-  public long toLong()
-  {
-    String s = toString();
-    
-    return StringValue.toLong(s);
-  }
-
-  /**
-   * Converts to a double.
-   */
-  @Override
-  public double toDouble()
-  {
-    String s = toString();
-    
-    return StringValue.toDouble(s);
-  }
-
-  /**
    * Converts to a key.
    */
   @Override
   public Value toKey()
   {
     return new LongValue(System.identityHashCode(this));
-  }
-
-  @Override
-  public boolean isA(String name)
-  {
-    return _classDef.isA(name);
   }
 
   /**
@@ -364,30 +298,6 @@ public class JavaValue extends ResourceValue
   {
     return _classDef.callMethod(env, _object, hash, name, nameLen,
                                 a1, a2, a3, a4, a5);
-  }
-
-  @Override
-  public Iterator<Map.Entry<Value,Value>> getIterator(Env env)
-  {
-    return getQuercusClass().getIterator(env, this);
-  }
-
-  @Override
-  public Iterator<Value> getKeyIterator(Env env)
-  {
-    return getQuercusClass().getKeyIterator(env, this);
-  }
-
-  @Override
-  public Iterator<Value> getValueIterator(Env env)
-  {
-    return getQuercusClass().getValueIterator(env, this);
-  }
-
-  @Override
-  public LongValue getCount(Env env,  boolean isRecursive)
-  {
-    return getQuercusClass().getCount(env, this, isRecursive);
   }
 
   /**

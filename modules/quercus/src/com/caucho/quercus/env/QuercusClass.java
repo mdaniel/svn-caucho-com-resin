@@ -65,7 +65,7 @@ public class QuercusClass {
   private AbstractFunction _set;
   private AbstractFunction _call;
 
-  private AbstractDelegate _delegate = new DefaultDelegate();
+  private ArrayDelegate _arrayDelegate = new DefaultArrayDelegate();
 
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
@@ -182,19 +182,14 @@ public class QuercusClass {
   /**
    * Add's a delegate.
    */
-  public void addDelegate(AbstractDelegate delegate)
+  public void addArrayDelegate(ArrayDelegate delegate)
   {
     if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST, L.l("{0} adding delegate {1}",this,  delegate));
+      log.log(Level.FINEST, L.l("{0} adding delegate {1}", this,  delegate));
 
-    delegate.init(_delegate);
+    delegate.init(_arrayDelegate);
 
-    _delegate = delegate;
-  }
-
-  public AbstractDelegate getDelegate()
-  {
-    return _delegate;
+    _arrayDelegate = delegate;
   }
 
   /**
@@ -503,75 +498,58 @@ public class QuercusClass {
   // Array
   //
 
-  public LongValue getCount(Env env, Value obj, boolean isRecursive)
+  public LongValue getCount(Env env, ObjectValue obj)
   {
-    return _delegate.getCount(env, obj, isRecursive);
+    return _arrayDelegate.getCount(env, obj);
+  }
+
+  public LongValue getCountRecursive(Env env, ObjectValue obj)
+  {
+    return _arrayDelegate.getCountRecursive(env, obj);
   }
 
   /**
    * Returns the key => value pairs, or null for default behaviour.
    */
-  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, Value obj)
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
   {
-    return _delegate.getIterator(env, obj);
+    return _arrayDelegate.getIterator(env, obj);
   }
 
   /**
    * Returns the array keys, or null for default behaviour.
    */
-  public Iterator<Value> getKeyIterator(Env env, Value obj)
+  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
   {
-    return _delegate.getKeyIterator(env, obj);
+    return _arrayDelegate.getKeyIterator(env, obj);
   }
 
   /**
    * Returns the array values, or null for default behaviour.
    */
-  public Iterator<Value> getValueIterator(Env env, Value obj)
+  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
   {
-    return _delegate.getValueIterator(env, obj);
+    return _arrayDelegate.getValueIterator(env, obj);
   }
 
   public Value get(Env env, ObjectValue obj, Value key)
   {
-    return get(env, Location.UNKNOWN, obj, key);
-  }
-
-  public Value get(Env env,
-                   Location location,
-                   ObjectValue obj,
-                   Value key)
-  {
-    return _delegate.offsetGet(env, obj, key);
+    return _arrayDelegate.get(env, obj, key);
   }
 
   public Value put(Env env, ObjectValue obj, Value key, Value value)
   {
-    return put(env, Location.UNKNOWN, obj, key, value);
-  }
-
-  public Value put(Env env,
-                   Location location,
-                   ObjectValue obj,
-                   Value key,
-                   Value value)
-  {
-    return _delegate.offsetSet(env, obj, key, value);
+    return _arrayDelegate.put(env, obj, key, value);
   }
 
   public Value put(Env env, ObjectValue obj, Value value)
   {
-    return put(env, Location.UNKNOWN, obj, value);
-  }
-
-  public Value put(Env env, Location location, ObjectValue obj, Value value)
-  {
-    return put(env, location, obj, UnsetValue.UNSET, value);
+    return _arrayDelegate.put(env, obj, value);
   }
 
   public Value remove(Env env, ObjectValue obj, Value key)
   {
-    return _delegate.offsetUnset(env, obj, key);
+    return _arrayDelegate.remove(env, obj, key);
   }
 
   //
@@ -1122,16 +1100,22 @@ public class QuercusClass {
   /**
    * Default implementations for delegated methods.
    */
-  public class DefaultDelegate
-    extends AbstractDelegate
+  public class DefaultArrayDelegate
+    extends ArrayDelegate
   {
     @Override
-    public LongValue getCount(Env env, Value obj, boolean isRecursive)
+    public LongValue getCount(Env env, ObjectValue obj)
     {
       return LongValue.ONE;
     }
 
-    private Value arrayerror(Env env, Location location, Value obj)
+    @Override
+    public LongValue getCountRecursive(Env env, ObjectValue obj)
+    {
+      return getCount(env, obj);
+    }
+
+    private Value arrayerror(Env env, Location location, ObjectValue obj)
     {
       String name;
 
@@ -1146,44 +1130,43 @@ public class QuercusClass {
     }
 
     @Override
-    public boolean offsetExists(Env env, Value obj, Value offset)
-    {
-      arrayerror(env, null, obj);
-      return false;
-    }
-
-    @Override
-    public Value offsetGet(Env env, Value obj, Value offset)
+    public Value get(Env env, ObjectValue obj, Value offset)
     {
       return arrayerror(env, null, obj);
     }
 
     @Override
-    public Value offsetSet(Env env, Value obj, Value offset, Value value)
+    public Value put(Env env, ObjectValue obj, Value value)
     {
       return arrayerror(env, null, obj);
     }
 
     @Override
-    public Value offsetUnset(Env env, Value obj, Value offset)
+    public Value put(Env env, ObjectValue obj, Value offset, Value value)
     {
       return arrayerror(env, null, obj);
     }
 
     @Override
-    public Iterator<Map.Entry<Value, Value>> getIterator(Env env, Value obj)
+    public Value remove(Env env, ObjectValue obj, Value offset)
+    {
+      return arrayerror(env, null, obj);
+    }
+
+    @Override
+    public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
     {
       return null;
     }
 
     @Override
-    public Iterator<Value> getKeyIterator(Env env, Value obj)
+    public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
     {
       return null;
     }
 
     @Override
-    public Iterator<Value> getValueIterator(Env env, Value obj)
+    public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
     {
       return null;
     }

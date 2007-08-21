@@ -33,7 +33,9 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.annotation.Delegate;
 
 @Delegate(IteratorDelegate.class)
-public interface Iterator {
+public interface Iterator
+  extends Traversable
+{
   /**
    * Returns the current value.
    */

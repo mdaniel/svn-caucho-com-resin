@@ -32,7 +32,6 @@ package com.caucho.quercus.lib.spl;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -49,20 +48,7 @@ public class RecursiveIteratorIterator
 
   public static final int CATCH_GET_CHILD = 16;
 
-  private static final StringValue _GET_CHILDREN
-    = new InternUnicodeValue("getChildren");
-
-  private static final StringValue _HAS_CHILDREN
-    = new InternUnicodeValue("hasChildren");
-
-  private static final StringValue _REWIND
-    = new InternUnicodeValue("rewind");
-
-  private static final StringValue _VALID
-    = new InternUnicodeValue("valid");
-
   private final Env _env;
-  private int _brokenXXX = 10;
 
   private enum Mode { LEAVES_ONLY, SELF_FIRST, CHILD_FIRST }
   private enum Flags { CATCH_GET_CHILD }
@@ -75,7 +61,7 @@ public class RecursiveIteratorIterator
   private Stack _stack = new Stack();
 
   /**
-   * @param it a {@link RecursiveIterator}
+   * @param iter a {@link RecursiveIterator}
    *
    * @param mode
    * <dl>
@@ -95,12 +81,12 @@ public class RecursiveIteratorIterator
    */
   @Name("__construct")
   public RecursiveIteratorIterator(Env env,
-                                   ObjectValue it,
+                                   ObjectValue iter,
                                    @Optional("") int mode,
                                    @Optional("0") int flags)
   {
     _env = env;
-    _stack.add(it);
+    _stack.add(new StackEntry(iter));
 
     switch (mode) {
       case LEAVES_ONLY:
@@ -121,27 +107,6 @@ public class RecursiveIteratorIterator
       _flags = EnumSet.of(Flags.CATCH_GET_CHILD);
     else
       _flags = EnumSet.noneOf(Flags.class);
-  }
-
-  private void advance()
-  {
-    if (valid())
-      nextElement();
-  }
-
-  private void advanceToNextSibling()
-  {
-    if (valid()) {
-      switch (_mode) {
-        case SELF_FIRST:
-          if (callHasChildren())
-            nextElement();
-          break;
-
-        case LEAVES_ONLY:
-          nextElement();
-      }
-    }
   }
 
   /**
@@ -166,12 +131,7 @@ public class RecursiveIteratorIterator
    */
   public Value callGetChildren()
   {
-    ObjectValue last = _stack.getLast();
-
-    if (last instanceof RecursiveIterator)
-      return last.callMethod(_env, _GET_CHILDREN);
-
-    return UnsetValue.UNSET;
+    return _stack.getLast().getChildren();
   }
 
   /**
@@ -179,9 +139,7 @@ public class RecursiveIteratorIterator
    */
   public boolean callHasChildren()
   {
-    ObjectValue last = _stack.getLast();
-
-    return last.callMethod(_env, _HAS_CHILDREN).toBoolean();
+    return _stack.getLast().hasChildren();
   }
 
   public Value current()
@@ -233,11 +191,11 @@ public class RecursiveIteratorIterator
   public Value getSubIterator(@Optional("-1") int depth)
   {
     if (depth == -1)
-      return _stack.getLast();
+      return _stack.getLast().getIterator();
     else if (depth >= _stack.size())
       return UnsetValue.UNSET;
     else
-      return _stack.get(depth);
+      return _stack.get(depth).getIterator();
   }
   
   public Value key()
@@ -247,86 +205,9 @@ public class RecursiveIteratorIterator
 
   public void next()
   {
-    while (!_stack.isEmpty()) {
-      if (_brokenXXX-- <= 0)
-        return;
+    StackEntry last = _stack.getLast();
 
-      ObjectValue iter = _stack.getLast();
-
-      if (iter.callMethod(_env, _VALID).toBoolean()) {
-
-        if (!isRecursed(iter) && callHasChildren()) {
-
-          if (_maxDepth == -1 || _maxDepth > _stack.size() - 1) {
-            setRecursed(iter, true);
-
-            Value sub;
-
-            try {
-              sub = callGetChildren();
-            }
-            catch (RuntimeException ex) {
-              if (!_flags.contains(Flags.CATCH_GET_CHILD)) {
-                throw QuercusModuleException.create(ex);
-              }
-
-              iter.next();
-              continue;
-            }
-
-            if (!sub.isNull()) {
-              setRecursed(sub, false);
-              sub.callMethod(_env, _REWIND);
-
-              if (sub.callMethod(_env, _VALID).toBoolean()) {
-                ObjectValue subObjectValue = (ObjectValue) sub;
-
-                _stack.add(subObjectValue);
-
-                if (!subObjectValue.isA("RecursiveIterator"))
-                  throw new QuercusModuleException(L.l("{0}::getChildren() must return an object that implements RecursiveIterator",
-                                                       subObjectValue.getName()));
-
-                beginChildren();
-                return;
-              }
-            }
-          }
-          else {
-            if (_mode == Mode.LEAVES_ONLY) {
-              iter.next();
-              continue;
-            }
-            else
-              return;
-          }
-
-          iter.next();
-          setRecursed(iter, false);
-
-          if (iter.callMethod(_env, _VALID).toBoolean())
-            return;
-        }
-      }
-      else if (_stack.hasChildren()) {
-        _stack.removeLast();
-        iter = _stack.getLast();
-        endChildren();
-        advance();
-      }
-
-      advanceToNextSibling();
-    }
-  }
-
-  private boolean isRecursed(Value iter)
-  {
-    return iter.getField(_env, "recursed").toBoolean();
-  }
-
-  private void setRecursed(Value iter, boolean isRecursed)
-  {
-    iter.putField(_env, "recursed", BooleanValue.create(isRecursed));
+    last.next();
   }
 
   /**
@@ -338,25 +219,21 @@ public class RecursiveIteratorIterator
   }
 
   /**
-   * Rewind to the first iteratoir, calling endChildren() along the way
+   * Rewind to the first iterator, calling endChildren() along the way
    * as appropriate.
    */
   public void rewind()
   {
-    while (_stack.hasChildren()) {
+    while (_stack.size() > 1) {
       _stack.removeLast();
       endChildren();
     }
 
-    _stack.get(0).callMethod(_env, _REWIND);
-
-    setRecursed(_stack.getLast(), false);
-
-    advanceToNextSibling();
+    _stack.getLast().rewind();
   }
 
   /**
-   * Stes the maximum depth.
+   * Sets the maximum depth.
    */
   public void setMaxDepth(int maxDepth)
   {
@@ -368,11 +245,8 @@ public class RecursiveIteratorIterator
    */
   public boolean valid()
   {
-    if (_brokenXXX <= 0)
-      return false;
-
     for (int i = _stack.size() - 1; i >= 0; i--) {
-      if (_stack.get(i).callMethod(_env, _VALID).toBoolean())
+      if (_stack.get(i).valid())
         return true;
     }
 
@@ -380,21 +254,89 @@ public class RecursiveIteratorIterator
   }
 
   private class Stack
-    extends ArrayList<ObjectValue>
+    extends ArrayList<StackEntry>
   {
-    public ObjectValue getLast()
+    public StackEntry getLast()
     {
       return get(size() - 1);
     }
 
-    public ObjectValue removeLast()
+    public StackEntry removeLast()
     {
       return remove(size() - 1);
+    }
+  }
+
+  private class StackEntry
+  {
+    final ObjectValue _iterator;
+
+
+    public StackEntry(ObjectValue obj)
+    {
+      _iterator = obj;
+    }
+
+    public ObjectValue getIterator()
+    {
+      return _iterator;
+    }
+
+    public Value current()
+    {
+      return _iterator.callMethod(_env, _CURRENT);
+    }
+
+    public Value key()
+    {
+      return _iterator.callMethod(_env, _KEY);
+    }
+
+    public void next()
+    {
+      _iterator.callMethod(_env, _NEXT);
+    }
+
+    public void rewind()
+    {
+      _iterator.callMethod(_env, _REWIND);
+    }
+
+    public boolean valid()
+    {
+      return _iterator.callMethod(_env, _VALID).toBoolean();
     }
 
     public boolean hasChildren()
     {
-      return size() > 1;
+      return _iterator.callMethod(_env, _HAS_CHILDREN).toBoolean();
+    }
+
+    public Value getChildren()
+    {
+      return _iterator.callMethod(_env, _GET_CHILDREN);
     }
   }
+
+  private static final StringValue _GET_CHILDREN
+    = new InternUnicodeValue("getChildren");
+
+  private static final StringValue _HAS_CHILDREN
+    = new InternUnicodeValue("hasChildren");
+
+  private static final StringValue _KEY
+    = new InternUnicodeValue("next");
+
+  private static final StringValue _NEXT
+    = new InternUnicodeValue("next");
+
+  private static final StringValue _CURRENT
+    = new InternUnicodeValue("current");
+
+  private static final StringValue _REWIND
+    = new InternUnicodeValue("rewind");
+
+  private static final StringValue _VALID
+    = new InternUnicodeValue("valid");
+
 }

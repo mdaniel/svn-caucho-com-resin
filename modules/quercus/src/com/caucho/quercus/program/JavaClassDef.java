@@ -97,8 +97,8 @@ public class JavaClassDef extends ClassDef {
   private JavaMethod __setField = null;
   private JavaMethod __call = null;
 
-  private ArrayList<AbstractDelegate> _delegates
-    = new ArrayList<AbstractDelegate>();
+  private ArrayList<ArrayDelegate> _delegates
+    = new ArrayList<ArrayDelegate>();
 
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
@@ -122,7 +122,7 @@ public class JavaClassDef extends ClassDef {
     _isArray = type.isArray();
     _isInterface = type.isInterface();
 
-    _delegates.add(new JavaClassDefDelegate());
+    _delegates.add(new DefaultArrayDelegate());
   }
 
 
@@ -240,30 +240,6 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
-   * For array dereferencing.
-   *
-   * Also designed to call __get()
-   * IE: SimpleXMLElement
-   *
-   * @param name
-   * @return Value
-   */
-  public Value get(Env env, Object obj, Value name)
-  {
-    if (__get != null) {
-      try {
-       //__get needs to handle a Value $foo[5] vs. $foo['bar']
-        return __get.call(env, obj, name);
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    }
-
-    return NullValue.NULL;
-  }
-
-  /**
    * @param name
    * @return Value attained through invoking getter
    */
@@ -302,33 +278,6 @@ public class JavaClassDef extends ClassDef {
 
     if (create)
       env.warning(L.l("field '{0}' is invalid"));
-
-    return NullValue.NULL;
-  }
-
-  /**
-   * specifically designed for __set()
-   *
-   * @param env
-   * @param obj
-   * @param name
-   * @param value
-   * @return value
-   */
-  public Value put(Env env,
-                   Object obj,
-                   Value name,
-                   Value value)
-  {
-    if (__set != null) {
-      try {
-        return __set.call(env, obj, name, value);
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-
-      }
-    }
 
     return NullValue.NULL;
   }
@@ -671,8 +620,8 @@ public class JavaClassDef extends ClassDef {
     if (__call != null)
       cl.setCall(__call);
 
-    for (AbstractDelegate delegate : _delegates) {
-      cl.addDelegate(delegate);
+    for (ArrayDelegate delegate : _delegates) {
+      cl.addArrayDelegate(delegate);
     }
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
@@ -813,11 +762,11 @@ public class JavaClassDef extends ClassDef {
     // this
     for (Annotation annotation : type.getAnnotations()) {
       if (annotation.annotationType() == Delegate.class) {
-        Class<? extends AbstractDelegate> delegateClass = ((Delegate) annotation).value();
+        Class<? extends ArrayDelegate> delegateClass = ((Delegate) annotation).value();
 
         boolean exists = false;
 
-        for (AbstractDelegate delegate : _delegates) {
+        for (ArrayDelegate delegate : _delegates) {
           if (delegate.getClass() == delegateClass) {
             exists = true;
             break;
@@ -955,7 +904,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * helper for introspectFields
    *
-   * @param s (IE: Foo, URL)
+   * @param s (eg: Foo, URL)
    * @return (foo, URL)
    */
   private String javaToQuercusConvert(String s)
@@ -1233,11 +1182,11 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  public class JavaClassDefDelegate
-    extends AbstractDelegate
+  public class DefaultArrayDelegate
+    extends ArrayDelegate
   {
     @Override
-    public Iterator<Map.Entry<Value,Value>> getIterator(Env env, Value obj)
+    public Iterator<Map.Entry<Value,Value>> getIterator(Env env, ObjectValue obj)
     {
       Iterator<Map.Entry<Value,Value>> iter = super.getIterator(env, obj);
 
@@ -1248,7 +1197,7 @@ public class JavaClassDef extends ClassDef {
     }
 
     @Override
-    public Iterator<Value> getKeyIterator(Env env, Value obj)
+    public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
     {
       Iterator<Value> iter = super.getKeyIterator(env, obj);
 
@@ -1259,7 +1208,7 @@ public class JavaClassDef extends ClassDef {
     }
 
     @Override
-    public Iterator<Value> getValueIterator(Env env, Value obj)
+    public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
     {
       Iterator<Value> iter = super.getKeyIterator(env, obj);
 
@@ -1267,6 +1216,41 @@ public class JavaClassDef extends ClassDef {
         iter = new ValueIterator(env, obj, _iteratorMethod);
 
       return iter;
+    }
+
+    @Override
+    public Value get(Env env, ObjectValue obj, Value name)
+    {
+      if (__get != null) {
+        try {
+          //__get needs to handle a Value $foo[5] vs. $foo['bar']
+          return __get.call(env, obj.toJavaObject(), name);
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+        }
+      }
+
+      return NullValue.NULL;
+    }
+
+    @Override
+    public Value put(Env env,
+                     ObjectValue obj,
+                     Value name,
+                     Value value)
+    {
+      if (__set != null) {
+        try {
+          return __set.call(env, obj.toJavaObject(), name, value);
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+
+        }
+      }
+
+      return NullValue.NULL;
     }
   }
 
@@ -1277,7 +1261,7 @@ public class JavaClassDef extends ClassDef {
 
     private final KeyIterator _keyIterator;
 
-    private EntryIterator(Env env, Value obj, Method keySetMethod)
+    private EntryIterator(Env env, ObjectValue obj, Method keySetMethod)
     {
       _obj = obj;
 
@@ -1313,7 +1297,7 @@ public class JavaClassDef extends ClassDef {
     private final Env _env;
     private final Iterator<?> _iterator;
 
-    private KeyIterator(Env env, Value obj, Method keySetMethod)
+    private KeyIterator(Env env, ObjectValue obj, Method keySetMethod)
     {
       _env = env;
 
@@ -1346,7 +1330,7 @@ public class JavaClassDef extends ClassDef {
     private final Env _env;
     private final Iterator<?> _iterator;
 
-    private ValueIterator(Env env, Value obj, Method iteratorMethod)
+    private ValueIterator(Env env, ObjectValue obj, Method iteratorMethod)
     {
       _env = env;
 

@@ -338,7 +338,7 @@ public class NullValue extends Value
   }
 
   @Override
-  public LongValue getCount(Env env, boolean isRecursive)
+  public LongValue getCount(Env env)
   {
     return LongValue.ZERO;
   }

@@ -297,7 +297,10 @@ public class ArrayModule
                             @ReadOnly Value value,
                             @Optional("false") boolean recursive)
   {
-    return value.getCount(env, recursive);
+    if (!recursive)
+      return value.getCount(env);
+    else
+      return value.getCountRecursive(env);
   }
 
   /**

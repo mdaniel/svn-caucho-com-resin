@@ -290,8 +290,19 @@ abstract public class ArrayValue extends Value {
    * Returns the count().
    */
   @Override
-  public LongValue getCount(Env env, boolean isRecursive)
+  public LongValue getCount(Env env)
   {
+    return LongValue.create(getSize());
+  }
+
+  /**
+   * Returns the count().
+   */
+  @Override
+  public LongValue getCountRecursive(Env env)
+  {
+    env.stub("recursive count of array unimplemented");
+
     return LongValue.create(getSize());
   }
 

@@ -190,7 +190,7 @@ public class ClassesModule extends AbstractQuercusModule {
     if (value instanceof ObjectValue) {
       ObjectValue obj = (ObjectValue) value;
 
-      String parent = obj.getParentName();
+      String parent = obj.getParentClassName();
 
       if (parent != null)
         return new UnicodeValueImpl(parent);

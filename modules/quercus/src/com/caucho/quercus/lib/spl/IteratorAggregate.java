@@ -27,20 +27,17 @@
  * @author Sam
  */
 
-package com.caucho.quercus.annotation;
+package com.caucho.quercus.lib.spl;
 
-//import com.caucho.quercus.env.ObjectIteratorFactory;
+import com.caucho.quercus.annotation.Delegate;
+import com.caucho.quercus.env.ObjectValue;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
-
-/**
- * Mark a class as having a factory that produces iterators for the object.
- */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface IteratorDelegate {
-  //  public Class<? extends ObjectIteratorFactory> factory();
+@Delegate(IteratorAggregateDelegate.class)
+public interface IteratorAggregate
+  extends Traversable
+{
+  /**
+   * Returns the iterator.
+   */
+  public ObjectValue getIterator();
 }

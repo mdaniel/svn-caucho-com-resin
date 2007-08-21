@@ -1597,9 +1597,17 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the count, as returned by the global php count() function
    */
-  public LongValue getCount(Env env, boolean isRecursive)
+  public LongValue getCount(Env env)
   {
     return LongValue.ONE;
+  }
+
+  /**
+   * Returns the count, as returned by the global php count() function
+   */
+  public LongValue getCountRecursive(Env env)
+  {
+    return getCount(env);
   }
 
   /**
