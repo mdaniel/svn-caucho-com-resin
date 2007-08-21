@@ -836,7 +836,7 @@ public class OptionsModule extends AbstractQuercusModule {
   static final IniDefinition INI_MAX_INPUT_TIME
     = _iniDefinitions.add("max_input_time", "-1", PHP_INI_PERDIR);
   static final IniDefinition INI_MAGIC_QUOTES_GPC
-    = _iniDefinitions.add("magic_quotes_gpc", true, PHP_INI_PERDIR);
+    = _iniDefinitions.add("magic_quotes_gpc", false, PHP_INI_PERDIR);
 
   static final IniDefinition INI_TRACK_VARS
     = _iniDefinitions.add("track_vars", "On", PHP_INI_ALL);
