@@ -314,6 +314,7 @@ public class RegexpModule
   
   private static boolean useJavaRegexp(Env env)
   {
-    return env.getIniBoolean("caucho.java_regexp");
+    return true;
+    //return env.getIniBoolean("caucho.java_regexp");
   }
 }
