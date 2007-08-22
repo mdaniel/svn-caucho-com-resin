@@ -17,6 +17,7 @@ static char **g_argv;
 extern FILE *err;
 extern FILE *out;
 
+extern int exec_java(char *exe, char **args);
 extern int run_server(char *name, char *class_name, int argc, char **argv, int is_service);
 extern void stop_server();
 
@@ -46,6 +47,28 @@ report_status(int currentState, int exitCode, int waitHint)
     return SetServiceStatus(g_status_handle, &g_status);
 }
 
+void
+stop_resin()
+{
+	char **args = get_server_args(g_name, g_full_name, g_class_name, g_argc, g_argv);
+
+	if (! args)
+		return;
+
+	int len = 0;
+	for (len = 0; args[len]; len++) {
+	}
+
+	char **start_args = (char **) malloc((len + 2) * sizeof(char *));
+	memcpy(start_args, args, len * sizeof(char *));
+	start_args[len] = "stop";
+	start_args[len + 1] = 0;
+
+	int exit_status = exec_java(start_args[0], start_args);
+
+	log("stopping %s (status %d)\n", g_name, exit_status);
+}
+
 /*
  * Callback when the SCM calls ControlService()
  *
@@ -59,6 +82,7 @@ static VOID WINAPI service_ctrl(DWORD dwCtrlCode)
         case SERVICE_CONTROL_STOP:
 			report_status(SERVICE_STOP_PENDING, NO_ERROR, 0);
 			quit_server();
+			//stop_resin();
 			break;
 
         // Update the service status.
@@ -90,11 +114,19 @@ service_main(int argc, char **argv)
 
 	report_status(SERVICE_RUNNING, NO_ERROR, 3000);
 	char **args = get_server_args(g_name, g_full_name, g_class_name, g_argc, g_argv);
+	int len = 0;
+	for (len = 0; args[len]; len++) {
+	}
 
-	exit_status = spawn_java(args[0], args);
+	char **start_args = (char **) malloc((len + 2) * sizeof(char *));
+	memcpy(start_args, args, len * sizeof(char *));
+	start_args[len] = "start";
+	start_args[len + 1] = 0;
 
+	//exit_status = spawn_java(start_args[0], start_args);
+	exit_status = spawn_java(start_args[0], start_args);
 	log("stopping %s (status %d)\n", g_name, exit_status);
-	report_status(SERVICE_STOPPED, NO_ERROR, 0);
+	//report_status(SERVICE_STOPPED, NO_ERROR, 0);
 }
 
 int

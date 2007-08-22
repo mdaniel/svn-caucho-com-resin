@@ -75,6 +75,7 @@ ServerAction(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			Shell_NotifyIcon(NIM_DELETE, &iconData);
 			*/
 			//quit_server();
+			stop_server();
 			EndDialog(hDlg, LOWORD(wParam));
 			return TRUE;
 		}
