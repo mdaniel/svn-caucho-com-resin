@@ -1,4 +1,8 @@
+#ifndef _WINSOCKAPI_
+#define _WINSOCKAPI_
+#endif
 #include <windows.h>
+#include <winsock2.h>
 #include <winsvc.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -11,6 +15,8 @@ static SERVICE_STATUS g_status;
 static char *g_name;       // name of service
 static char *g_full_name; // display name of service
 static char *g_class_name; // name of class
+static char *g_user;
+static char *g_password;
 static int g_argc;
 static char **g_argv;
 
@@ -20,6 +26,8 @@ extern FILE *out;
 extern int exec_java(char *exe, char **args);
 extern int run_server(char *name, char *class_name, int argc, char **argv, int is_service);
 extern void stop_server();
+
+static WSAEVENT wait_event;
 
 
 static int 
@@ -50,23 +58,22 @@ report_status(int currentState, int exitCode, int waitHint)
 void
 stop_resin()
 {
-	char **args = get_server_args(g_name, g_full_name, g_class_name, g_argc, g_argv);
+	/*
+	int len = g_argc;
 
-	if (! args)
-		return;
+	char **stop_args = (char **) malloc((len + 2) * sizeof(char *));
+	memcpy(stop_args, g_argv, len * sizeof(char *));
+	stop_args[len] = "stop";
+	stop_args[len + 1] = 0;
+	char **args = get_server_args(g_name, g_full_name, g_class_name, len + 1, stop_args);
 
-	int len = 0;
-	for (len = 0; args[len]; len++) {
+	log("stopping %s\n", g_name);
+		report_status(SERVICE_STOPPED, NO_ERROR, 0);
+		*/
+
+	if (wait_event) {
+		WSASetEvent(wait_event);
 	}
-
-	char **start_args = (char **) malloc((len + 2) * sizeof(char *));
-	memcpy(start_args, args, len * sizeof(char *));
-	start_args[len] = "stop";
-	start_args[len + 1] = 0;
-
-	int exit_status = exec_java(start_args[0], start_args);
-
-	log("stopping %s (status %d)\n", g_name, exit_status);
 }
 
 /*
@@ -81,8 +88,8 @@ static VOID WINAPI service_ctrl(DWORD dwCtrlCode)
         //
         case SERVICE_CONTROL_STOP:
 			report_status(SERVICE_STOP_PENDING, NO_ERROR, 0);
-			quit_server();
-			//stop_resin();
+			//quit_server();
+			stop_resin();
 			break;
 
         // Update the service status.
@@ -109,24 +116,46 @@ service_main(int argc, char **argv)
 		return;
 	}
 
+	int len = g_argc;
+
+	char **start_args = (char **) malloc((len + 2) * sizeof(char *));
+
+	for (int i = 0; i < len; i++)
+		start_args[i] = g_argv[i];
+
+	start_args[len] = "start";
+	start_args[len + 1] = 0;
+
+	char **stop_args = (char **) malloc((len + 2) * sizeof(char *));
+
+	for (int i = 0; i < len; i++)
+		stop_args[i] = g_argv[i];
+
+	stop_args[len] = "stop";
+	stop_args[len + 1] = 0;
+
+
 	g_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	g_status.dwServiceSpecificExitCode = 0;
 
 	report_status(SERVICE_RUNNING, NO_ERROR, 3000);
-	char **args = get_server_args(g_name, g_full_name, g_class_name, g_argc, g_argv);
-	int len = 0;
-	for (len = 0; args[len]; len++) {
+	char **args = get_server_args(g_name, g_full_name, g_class_name, 
+		                          len + 1, start_args);//len + 1, start_args);
+
+	if (args) {
+		log("couldn't start %s (status %d)\n", g_name, exit_status);
 	}
+	else {
+		log("started %s (status %d)\n", g_name, exit_status);
+		//exit_status = spawn_java(start_args[0], start_args);
+		wait_event = WSACreateEvent();
+		WSAResetEvent(wait_event);
+		WaitForSingleObject(wait_event, INFINITE);
+	}
+	get_server_args(g_name, g_full_name, g_class_name, 
+		                          len + 1, stop_args);//len + 1, start_args);
 
-	char **start_args = (char **) malloc((len + 2) * sizeof(char *));
-	memcpy(start_args, args, len * sizeof(char *));
-	start_args[len] = "start";
-	start_args[len + 1] = 0;
-
-	//exit_status = spawn_java(start_args[0], start_args);
-	exit_status = spawn_java(start_args[0], start_args);
-	log("stopping %s (status %d)\n", g_name, exit_status);
-	//report_status(SERVICE_STOPPED, NO_ERROR, 0);
+	report_status(SERVICE_STOPPED, NO_ERROR, 0);
 }
 
 int
@@ -147,8 +176,6 @@ start_service(char *name, char *full_name, char *class_name, int argc, char **ar
 
 	if (argc > 1 && ! strcmp(argv[1], "-service"))
 		is_service = 1;
-
-	// Win95 doesn't allow service
 
 	if (is_service && ! StartServiceCtrlDispatcher(dispatch))
 		die("Can't start NT service %s.\n", name);
@@ -204,7 +231,8 @@ add_path(char *buf, char *path)
  * @param service_args arguments to the service
  */
 void 
-install_service(char *name, char *full_name, char **service_args)
+install_service(char *name, char *full_name, char *user, char *password, 
+				char **service_args)
 {
     SC_HANDLE   service;
     SC_HANDLE   manager;
@@ -251,6 +279,14 @@ install_service(char *name, char *full_name, char **service_args)
    if (! manager)
        die("Can't open service manager");
 
+   if (! user) {
+	   DWORD len = 256;
+	   char *buf = (char*)malloc(len);
+	   if (GetUserName(buf, &len) == S_OK)
+		   user = buf;
+	   
+   }
+
     service = CreateService(
             manager,     // manager
             name,        // service name
@@ -263,8 +299,8 @@ install_service(char *name, char *full_name, char **service_args)
             NULL,                       // no load ordering group
             NULL,                       // no tag identifier
             NULL,                       // dependencies
-            NULL,                       // LocalSystem account
-            NULL);                      // no password
+            user,                       // LocalSystem account
+            password);                      // no password
 
 	// Don't automatically start the service
  	if (service)

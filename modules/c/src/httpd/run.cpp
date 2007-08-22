@@ -72,7 +72,7 @@ die(char *msg, ...)
 		fflush(err);
 	}
 	else {
-		FILE *file = fopen("d:/temp/foo.log", "a+");
+		FILE *file = fopen("e:/temp/foo.log", "a+");
 		if (file) {
 			fprintf(file, "%s\n", buf);
 			fclose(file);
@@ -285,7 +285,7 @@ set_jdk_args(char *exe, char *cp,
 	args[i++] = strdup(rsprintf(buf, "\"%s\"", exe));
 	for (j = 0; java_argv[j]; j++)
           args[i++] = strdup(rsprintf(buf, "\"%s\"", java_argv[j]));
-	
+	/*
 	args[i++] = "-classpath";
         int k = 0;
         buf[k++] = '\"';
@@ -296,19 +296,25 @@ set_jdk_args(char *exe, char *cp,
         buf[k++] = '\"';
         buf[k++] = 0;
 	args[i++] = strdup(buf);
-	
+	*/
+	/*
 	args[i++] = strdup(rsprintf(buf, "-Dresin.home=\"%s\"", resin_home));
 	args[i++] = strdup(rsprintf(buf, "-Dresin.root=\"%s\"", server_root));
 	args[i++] = strdup(rsprintf(buf, "-Dserver.root=\"%s\"", server_root));
-	
+	*/
 	if (! jit) {
 		//args[i++] = "-nojit";
 		args[i++] = strdup(rsprintf(buf, "-Djava.compiler=NONE"));
 	}
+	/*
         args[i++] = "-Djava.util.logging.manager=com.caucho.log.LogManagerImpl";
         args[i++] = "-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl";
 		args[i++] = "-Djava.system.class.loader=com.caucho.loader.SystemClassLoader";
-	args[i++] = main;
+		*/
+	// args[i++] = main;
+	args[i++] = "-jar";
+	args[i++] = strdup(rsprintf(buf, "\"%s/lib/resin.jar\"", resin_home));
+
 	args[i++] = "--resin-home";
 	args[i++] = strdup(rsprintf(buf, "\"%s\"", resin_home));
 	args[i++] = "--root-directory";
@@ -376,6 +382,9 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	int resin_argc = 0;
 	char *env_classpath = getenv("CLASSPATH");
 	char **initial_argv = argv;
+	char *user = 0;
+	char *password = 0;
+	int is_install = 0;
 
 	if (! GetModuleFileName(NULL, program, sizeof(program))) {
 		die("Can't get module executable");
@@ -407,23 +416,33 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 			putenv(strdup(argv[1] + 2));
 			argc--;
 			argv++;
+		} else if (! strcmp(argv[1], "-user")) {
+			user = argv[2];
+			argc -= 2;
+			argv += 2;
+		} else if (! strcmp(argv[1], "-password")) {
+			password = argv[2];
+			argc -= 2;
+			argv += 2;
+		} else if (! strcmp(argv[1], "-name")) {
+			name = argv[2];
+			argc -= 2;
+			argv += 2;
+		} else if (! strcmp(argv[1], "-display-name")) {
+			full_name = argv[2];
+			argc -= 2;
+			argv += 2;
 		} else if (! strcmp(argv[1], "-install")) {
-			install_service(name, full_name, initial_argv);
-			fprintf(stdout, "Installed %s as an NT service\n", name);
-			/*
-			sprintf(buf, "Installed %s as an NT service", name);
-			MessageBox(0, buf, "Information", MB_OK);
-			*/
-			exit(0);
+			is_install = 1;
+			argv++;
+			argc--;
 		} else if (! strcmp(argv[1], "-install-as") ||
 				   ! strcmp(argv[1], "-install_as")) {
-			install_service(argv[2], argv[2], initial_argv);
-			/*
-			sprintf(buf, "Installed %s as an NT service", argv[2]);
-			MessageBox(0, buf, "Information", MB_OK);
-			*/
-			fprintf(stdout, "Installed %s as an NT service\n", argv[2]);
-			exit(0);
+		   name = argv[2];
+		   full_name = argv[2];
+		   is_install = 1;
+		   argv += 2;
+		   argc -= 2;
 		} else if (! strcmp(argv[1], "-remove")) {
 			remove_service(name);
 			/*
@@ -536,6 +555,17 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 			argv += 1;
 		}
 	}
+
+	if (is_install) {
+			install_service(name, full_name, user, password, initial_argv);
+			fprintf(stdout, "Installed %s as an NT service\n", name);
+			/*
+			sprintf(buf, "Installed %s as an NT service", name);
+			MessageBox(0, buf, "Information", MB_OK);
+			*/
+			exit(0);
+	}
+
 	java_argv[java_argc] = 0;
 	resin_argv[resin_argc] = 0;
 
@@ -635,12 +665,18 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 			fprintf(stdout, "arg %d:      %s\n", i, args[i]);
 	}
 
-	//fflush(out);
+	//fflush(out)
 	//fflush(err);
 
 	if (g_is_standalone) {
 		int result = exec_java(java_exe, args);
-		exit(result);
+		log("exec %s (status %d)\n", java_exe, result);
+		for (int i = 0; args[i]; i++)
+			log("  arg-%d: %s\n", i, args[i]);
+		if (! g_is_service)
+		  exit(result);
+
+		return 0;
 	}
 
 	return args;
