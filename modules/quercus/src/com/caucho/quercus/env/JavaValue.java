@@ -77,7 +77,6 @@ public class JavaValue
 
   public Set<Map.Entry<String, Value>> entrySet()
   {
-    // XXX:: remove entrySet() method from ObjectValue
     throw new UnsupportedOperationException("unimplementated");
   }
 

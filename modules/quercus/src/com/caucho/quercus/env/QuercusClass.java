@@ -138,7 +138,9 @@ public class QuercusClass {
 
       for (String iface : classDef.getInterfaces()) {
         
-        ClassDef ifaceDef = moduleContext.findClass(iface);
+        // XXX: php/0cn2, but this is wrong:
+        ClassDef ifaceDef = Env.getInstance().findClass(iface).getClassDef();
+        // ClassDef ifaceDef = moduleContext.findClass(iface);
 
         if (ifaceDef != null) {
           if (ifaces.add(iface))
@@ -148,6 +150,11 @@ public class QuercusClass {
 
       classDef.initClass(this);
     }
+  }
+
+  public ClassDef getClassDef()
+  {
+    return _classDef;
   }
 
   /**

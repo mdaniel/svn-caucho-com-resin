@@ -38,7 +38,7 @@ import com.caucho.quercus.env.Value;
  * Represents a class definition
  */
 public class ClassDefStatement extends Statement {
-  protected InterpretedClassDef _cl;
+  protected final InterpretedClassDef _cl;
 
   public ClassDefStatement(Location location, InterpretedClassDef cl)
   {
@@ -49,15 +49,29 @@ public class ClassDefStatement extends Statement {
   
   public Value execute(Env env)
   {
+    // php/0cn2 - make sure interfaces have a QuercusClass
+    for (String iface : _cl.getInterfaces()) {
+      QuercusClass cl  = env.findClass(iface);
+    }
+
+    /**
     if (env.findClass(_cl.getName()) == null) {
+
+      // XXX: parent is null?
       QuercusClass qClass = new QuercusClass(_cl, null);
 
       qClass.validate(env);
       //env.addClass(_cl.getName(), qClass);
       throw new UnsupportedOperationException();
     }
+     */
 
     return null;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _cl + "]";
   }
 }
 

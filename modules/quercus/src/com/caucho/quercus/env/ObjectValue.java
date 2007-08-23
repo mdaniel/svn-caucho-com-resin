@@ -61,6 +61,7 @@ abstract public class ObjectValue extends Value {
   /**
    * Returns a Set of entries.
    */
+  // XXX: remove entrySet() and use getIterator() instead
   abstract public Set<Map.Entry<String,Value>> entrySet();
 
   /**

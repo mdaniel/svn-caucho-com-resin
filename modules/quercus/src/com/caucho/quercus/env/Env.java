@@ -2862,9 +2862,6 @@ public class Env {
       _importMap = new ImportMap();
     
     String phpName = _importMap.putQualified(javaName);
-
-    // php/0cn2
-    _quercus.addJavaClass(phpName, javaName);
   }
   
   /**
@@ -3043,10 +3040,10 @@ public class Env {
       }
       else {
         try {
-          ClassDef javaClass = getJavaClassDefinition(name, true);
-          
+          JavaClassDef javaClassDef = getJavaClassDefinition(name, true);
+
           //XXX: do we want to create a QuercusClass for a JavaClassDef?
-          return createQuercusClass(javaClass, null);
+          return createQuercusClass(javaClassDef, null);
         }
         catch (Throwable e) {
         }

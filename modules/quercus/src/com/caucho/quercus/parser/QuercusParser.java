@@ -206,7 +206,7 @@ public class QuercusParser {
   private boolean _returnsReference = false;
 
   private Scope _scope;
-  private InterpretedClassDef _quercusClass;
+  private InterpretedClassDef _classDef;
 
   private FunctionInfo _function;
   
@@ -581,13 +581,13 @@ public class QuercusParser {
 	break;
 
       case CLASS:
-	parseClassDefinition(0);
-	// statements.add(new ClassDefStatement(parseClassDefinition()));
+	// parseClassDefinition(0);
+	statements.add(parseClassDefinition(0));
 	break;
 
       case INTERFACE:
-	parseClassDefinition(M_INTERFACE);
-	// statements.add(new ClassDefStatement(parseClassDefinition()));
+	// parseClassDefinition(M_INTERFACE);
+	statements.add(parseClassDefinition(M_INTERFACE));
 	break;
 
       case IF:
@@ -1511,7 +1511,7 @@ public class QuercusParser {
 
     boolean isAbstract = (modifiers & M_ABSTRACT) != 0;
 
-    if (_quercusClass != null && _quercusClass.isInterface())
+    if (_classDef != null && _classDef.isInterface())
       isAbstract = true;
 
     try {
@@ -1527,16 +1527,16 @@ public class QuercusParser {
       String name = parseIdentifier();
 
       if (isAbstract && ! _scope.isAbstract()) {
-	if (_quercusClass != null)
+	if (_classDef != null)
 	  throw error(L.l("'{0}' may not be abstract because class {1} is not abstract.",
-			  name, _quercusClass.getName()));
+			  name, _classDef.getName()));
 	else
 	  throw error(L.l("'{0}' may not be abstract.  Abstract functions are only allowed in abstract classes.",
 			  name));
       }
 
       _function = new FunctionInfo(_quercus, name);
-      _function.setDeclaringClass(_quercusClass);
+      _function.setDeclaringClass(_classDef);
       _function.setPageStatic(oldTop);
       
       _function.setReturnsReference(_returnsReference);
@@ -1549,12 +1549,12 @@ public class QuercusParser {
       
       expect(')');
       
-      if (_quercusClass != null &&
+      if (_classDef != null &&
           "__call".equals(name) &&
           args.size() != 2)
       {
         throw error(L.l("{0}::{1} must have exactly two arguments defined",
-                        _quercusClass.getName(), name));
+                        _classDef.getName(), name));
       }
 
       Function function;
@@ -1563,7 +1563,7 @@ public class QuercusParser {
 	expect(';');
 
 	function = _factory.createMethodDeclaration(location,
-							_quercusClass, name,
+                                                    _classDef, name,
 							_function, args);
       }
       else {
@@ -1575,9 +1575,9 @@ public class QuercusParser {
     
 	expect('}');
 
-	if (_quercusClass != null)
+	if (_classDef != null)
 	  function = _factory.createObjectMethod(location,
-						     _quercusClass,
+                                                 _classDef,
 						     name, _function,
 						     args, statementList);
 	else
@@ -1743,19 +1743,19 @@ public class QuercusParser {
 
     _peekToken = token;
 
-    InterpretedClassDef oldClass = _quercusClass;
+    InterpretedClassDef oldClass = _classDef;
     Scope oldScope = _scope;
 
     try {
 
-      _quercusClass = oldScope.addClass(name, parentName, ifaceList);
+      _classDef = oldScope.addClass(name, parentName, ifaceList);
 
       if ((modifiers & M_ABSTRACT) != 0)
-	_quercusClass.setAbstract(true);
+	_classDef.setAbstract(true);
       if ((modifiers & M_INTERFACE) != 0)
-	_quercusClass.setInterface(true);
+	_classDef.setInterface(true);
     
-      _scope = new ClassScope(_quercusClass);
+      _scope = new ClassScope(_classDef);
 
       expect('{');
 
@@ -1763,9 +1763,9 @@ public class QuercusParser {
 
       expect('}');
 
-      return _factory.createClassDef(getLocation(), _quercusClass);
+      return _factory.createClassDef(getLocation(), _classDef);
     } finally {
-      _quercusClass = oldClass;
+      _classDef = oldClass;
       _scope = oldScope;
     }
   }
@@ -3007,14 +3007,14 @@ public class QuercusParser {
 
           if (className.equals("self")) {
             isInstantiated = true;
-            className = _quercusClass.getName();
+            className = _classDef.getName();
 
             if (className == null)
               throw error(L.l("cannot access self when not in object scope"));
           }
           else if (className.equals("parent")) {
             isInstantiated = true;
-            className = _quercusClass.getParentName();
+            className = _classDef.getParentName();
 
             if (className == null)
               throw error(L.l("object does not have a parent class"));
@@ -3174,7 +3174,7 @@ public class QuercusParser {
     int token = parseToken();
 
     if (token == THIS) {
-      return _factory.createThis(getLocation(), _quercusClass);
+      return _factory.createThis(getLocation(), _classDef);
     }
     else if (token == '$') {
       _peekToken = token;
@@ -3244,8 +3244,8 @@ public class QuercusParser {
       return _factory.createString(_parserLocation.getFileName());
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
-    else if (name.equals("__CLASS__") && _quercusClass != null)
-      return _factory.createString(_quercusClass.getName());
+    else if (name.equals("__CLASS__") && _classDef != null)
+      return _factory.createString(_classDef.getName());
     else if (name.equals("__FUNCTION__")) {
       if (_isTop)
         return _factory.createString("");
@@ -4276,7 +4276,7 @@ public class QuercusParser {
 	String varName = _sb.toString();
 
 	if (varName.equals("this"))
-	  tail = _factory.createThis(getLocation(), _quercusClass);
+	  tail = _factory.createThis(getLocation(), _classDef);
 	else
 	  tail = _factory.createVar(_function.createVar(varName));
 
@@ -5000,7 +5000,7 @@ public class QuercusParser {
     public Location getLocation()
     {
       String currentFunctionName = _function == null || _function.isPageMain() ? null : _function.getName();
-      String currentClassName = _quercusClass == null ? null : _quercusClass.getName();
+      String currentClassName = _classDef == null ? null : _classDef.getName();
 
       if (_location != null) {
         if (!equals(currentFunctionName, _lastFunctionName))

@@ -253,11 +253,6 @@ public class InterpretedClassDef extends ClassDef
     return _constructor;
   }
 
-  public String toString()
-  {
-    return "Class[" + getName() + "]";
-  }
-  
   public Set<Map.Entry<String, Expr>> fieldSet()
   {
     return _fieldMap.entrySet();

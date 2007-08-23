@@ -186,9 +186,12 @@ abstract public class ClassDef {
 
   public String toString()
   {
-    return "Class[" + getName() + "]";
+    return getClass().getSimpleName()
+           + "@"
+           + System.identityHashCode(this)
+           + "[" + _name + "]";
   }
-  
+
   public Set<Map.Entry<String, Expr>> fieldSet()
   {
     return null;
