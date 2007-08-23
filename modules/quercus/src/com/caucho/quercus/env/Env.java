@@ -60,6 +60,7 @@ import com.caucho.vfs.i18n.EncodingReader;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
+import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -78,6 +79,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.IdentityHashMap;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -279,6 +281,8 @@ public class Env {
   // hold special Quercus php import statements
   private ImportMap _importMap;
 
+  private TimeZone _defaultTimeZone;
+  
   public Env(Quercus quercus,
              QuercusPage page,
              WriteStream out,
@@ -288,7 +292,7 @@ public class Env {
     _quercus = quercus;
 
     _isStrict = quercus.isStrict();
-    _isUnicodeSemantics = getIniBoolean("unicode.semantics");
+    _isUnicodeSemantics = quercus.isUnicodeSemantics();
 
     _page = page;
 
@@ -450,7 +454,33 @@ public class Env {
 
     return encoding;
   }
+  
+  public TimeZone getDefaultTimeZone()
+  {
+    return _defaultTimeZone;
+  }
+  
+  public void setDefaultTimeZone(String id)
+  {
+    _defaultTimeZone = TimeZone.getTimeZone(id);
+  }
+  
+  public void setDefaultTimeZone(TimeZone zone)
+  {
+    _defaultTimeZone = zone;
+  }
 
+  /*
+   * Returns the ServletContext.
+   */
+  public ServletContext getServletContext()
+  {
+    return _quercus.getServletContext();
+  }
+  
+  /*
+   * Sets the ScriptContext.
+   */
   public void setScriptContext(ScriptContext context)
   {
     _scriptContext = context;

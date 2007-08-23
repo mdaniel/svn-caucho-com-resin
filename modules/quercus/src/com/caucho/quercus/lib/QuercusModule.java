@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.AbstractQuercusModule;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -93,5 +94,13 @@ public class QuercusModule extends AbstractQuercusModule
   public static HttpServletRequest quercus_quercus_get_request(Env env)
   {
     return env.getRequest();
+  }
+  
+  /*
+   * Returns the ServletContext.
+   */
+  public static ServletContext quercus_quercus_get_servlet_context(Env env)
+  {
+    return env.getServletContext();
   }
 }

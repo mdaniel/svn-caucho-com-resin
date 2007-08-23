@@ -930,14 +930,27 @@ public class DateModule extends AbstractQuercusModule {
     dateTime.setDate(year, month, day);
   }
   
-  public static String date_default_timezone_get()
+  public static String date_default_timezone_get(Env env)
   {
-    throw new UnimplementedException("date_default_timezone_get");
+    TimeZone timeZone = env.getDefaultTimeZone();
+    String id;
+  
+    if (timeZone != null)
+      return timeZone.getID();
+    
+    id = env.getIniString("date.timezone");
+    
+    if (id != null)
+      return id;
+    
+    return TimeZone.getDefault().getID();
   }
   
-  public static boolean date_default_timezone_set(String id)
+  public static boolean date_default_timezone_set(Env env, String id)
   {
-    throw new UnimplementedException("date_default_timezone_set");
+    env.setDefaultTimeZone(id);
+
+    return true;
   }
   
   public static String date_format(DateTime dateTime, String format) 

@@ -53,6 +53,7 @@ import com.caucho.util.TimedCache;
 import com.caucho.vfs.*;
 
 import javax.sql.DataSource;
+import javax.servlet.ServletContext;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -161,6 +162,10 @@ public class Quercus
 
   private Path _pwd;
   private Path _workDir;
+  
+  private ServletContext _servletContext;
+  
+  private final boolean _isUnicodeSemantics;
 
   /**
    * Constructor.
@@ -182,6 +187,8 @@ public class Quercus
     _workDir = getWorkDir();
 
     _iniDefinitions.addAll(_ini);
+    
+    _isUnicodeSemantics = getIniBoolean("unicode.semantics");
   }
 
   public Env createEnv(QuercusPage page,
@@ -310,6 +317,16 @@ public class Quercus
   }
   
   /**
+   * Returns true if unicode.semantics is on.
+   */
+  public boolean isUnicodeSemantics()
+  {
+    return _isUnicodeSemantics;
+    
+    //return getIniBoolean("unicode.semantics");
+  }
+  
+  /**
    * Set true if pages should be compiled.
    */
   public void setCompile(boolean isCompile)
@@ -353,6 +370,22 @@ public class Quercus
   public void setPhpVersion(String version)
   {
     _phpVersion = version;
+  }
+  
+  /*
+   * Sets the ServletContext.
+   */
+  public void setServletContext(ServletContext servletContext)
+  {
+    _servletContext = servletContext;
+  }
+  
+  /*
+   * Returns the ServletContext.
+   */
+  public ServletContext getServletContext()
+  {
+    return _servletContext;
   }
 
   /**

@@ -67,9 +67,8 @@ public class QuercusServletImpl
     = Logger.getLogger(QuercusServletImpl.class.getName());
 
   protected Quercus _quercus;
-
-  private ServletConfig _config;
-  private ServletContext _servletContext;
+  protected ServletConfig _config;
+  protected ServletContext _servletContext;
 
   /**
    * initialize the script manager.
@@ -138,10 +137,14 @@ public class QuercusServletImpl
       
       ws = new WriteStream(out);
 
-      env = getQuercus().createEnv(page, ws, request, response);
+      Quercus quercus = getQuercus();
+      quercus.setServletContext(_servletContext);
+      
+      env = quercus.createEnv(page, ws, request, response);
       try {
         env.setGlobalValue("request", env.wrapJava(request));
         env.setGlobalValue("response", env.wrapJava(response));
+        env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
 
         env.start();
 
