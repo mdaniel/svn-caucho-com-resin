@@ -132,25 +132,31 @@ public class UIMessages extends UIComponentBase
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("globalOnly".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_globalOnly = Util.booleanValueOf(expr.getValue(null));
+	return;
+      }
       else
 	_globalOnlyExpr = expr;
     }
     else if ("showDetail".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_showDetail = Util.booleanValueOf(expr.getValue(null));
+	return;
+      }
       else
 	_showDetailExpr = expr;
     }
     else if ("showSummary".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_showSummary = Util.booleanValueOf(expr.getValue(null));
+	return;
+      }
       else
 	_showSummaryExpr = expr;
     }
-    else
-      super.setValueExpression(name, expr);
+
+    super.setValueExpression(name, expr);
   }
 
   //
@@ -159,20 +165,12 @@ public class UIMessages extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[7];
-
-    state[0] = super.saveState(context);
-    
-    state[1] = _globalOnly;
-    state[2] = Util.save(_globalOnlyExpr, context);
-    
-    state[3] = _showDetail;
-    state[4] = Util.save(_showDetailExpr, context);
-    
-    state[5] = _showSummary;
-    state[6] = Util.save(_showSummaryExpr, context);
-
-    return state;
+    return new Object[] {
+      super.saveState(context),
+      _globalOnly,
+      _showDetail,
+      _showSummary,
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -182,18 +180,7 @@ public class UIMessages extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _globalOnly = (Boolean) state[1];
-    _globalOnlyExpr = Util.restore(state[2],
-				   Boolean.class,
-				   context);
-
-    _showDetail = (Boolean) state[3];
-    _showDetailExpr = Util.restore(state[4],
-				   Boolean.class,
-				   context);
-
-    _showSummary = (Boolean) state[5];
-    _showSummaryExpr = Util.restore(state[6],
-				    Boolean.class,
-				    context);
+    _showDetail = (Boolean) state[2];
+    _showSummary = (Boolean) state[3];
   }
 }

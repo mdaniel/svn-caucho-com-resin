@@ -193,43 +193,52 @@ public class UIInput extends UIOutput
       case VALUE:
 	if (expr != null && ! expr.isLiteralText())
 	  _valueExpr = expr;
-	super.setValueExpression(name, expr);
-	return;
+	break;
 	
       case IMMEDIATE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _immediate = (Boolean) expr.getValue(null);
+	  return;
+	}
 	else
 	  _immediateExpr = expr;
-	return;
+	break;
 	
       case REQUIRED:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _required = (Boolean) expr.getValue(null);
+	  return;
+	}
 	else
 	  _requiredExpr = expr;
-	return;
+	break;
 	
       case REQUIRED_MESSAGE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _requiredMessage = (String) expr.getValue(null);
+	  return;
+	}
 	else
 	  _requiredMessageExpr = expr;
-	return;
+	break;
 	
       case CONVERTER_MESSAGE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _converterMessage = (String) expr.getValue(null);
+	  return;
+	}
 	else
 	  _converterMessageExpr = expr;
-	return;
+	break;
 	
       case VALIDATOR_MESSAGE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _validatorMessage = (String) expr.getValue(null);
+	  return;
+	}
 	else
 	  _validatorMessageExpr = expr;
-	return;
+	break;
       }
     }
 
@@ -666,40 +675,34 @@ public class UIInput extends UIOutput
 
   public Object saveState(FacesContext context)
   {
-    Object []savedValidators = null;
+    int offset = 6;
+    
+    Object []state = new Object[offset + 2 * _validators.length];
+    
+    state[0] = super.saveState(context);
+    state[1] = _immediate;
+    state[2] = _required;
+    state[3] = _requiredMessage;
+    state[4] = _converterMessage;
+    state[5] = _validatorMessage;
 
     if (_validators.length > 0) {
-      savedValidators = new Object[2 * _validators.length];
-
       for (int i = 0; i < _validators.length; i++) {
 	Validator validator = _validators[i];
 
-	int index = 2 * i;
+	int index = offset + 2 * i;
 	
-	savedValidators[index] = validator.getClass();
+	state[index] = validator.getClass();
 
 	if (validator instanceof StateHolder) {
 	  StateHolder holder = (StateHolder) validator;
 	  
-	  savedValidators[index + 1] = holder.saveState(context);
+	  state[index + 1] = holder.saveState(context);
 	}
       }
     }
-    
-    return new Object[] {
-      super.saveState(context),
-      _immediate,
-      Util.save(_immediateExpr, context),
-      _required,
-      Util.save(_requiredExpr, context),
-      _requiredMessage,
-      Util.save(_requiredMessageExpr, context),
-      _converterMessage,
-      Util.save(_converterMessageExpr, context),
-      _validatorMessage,
-      Util.save(_validatorMessageExpr, context),
-      savedValidators,
-    };
+
+    return state;
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -709,31 +712,22 @@ public class UIInput extends UIOutput
     super.restoreState(context, state[0]);
 
     _immediate = (Boolean) state[1];
-    _immediateExpr = Util.restoreBoolean(state[2], context);
-
-    _required = (Boolean) state[3];
-    _requiredExpr = Util.restoreBoolean(state[4], context);
-
-    _requiredMessage = (String) state[5];
-    _requiredMessageExpr = Util.restoreString(state[6], context);
-
-    _converterMessage = (String) state[7];
-    _converterMessageExpr = Util.restoreString(state[8], context);
-
-    _validatorMessage = (String) state[9];
-    _validatorMessageExpr = Util.restoreString(state[10], context);
+    _required = (Boolean) state[2];
+    _requiredMessage = (String) state[3];
+    _converterMessage = (String) state[4];
+    _validatorMessage = (String) state[5];
     
     _valueExpr = super.getValueExpression("value");
 
-    Object []savedValidators = (Object []) state[11];
+    int offset = 6;
 
-    if (savedValidators != null) {
-      _validators = new Validator[savedValidators.length / 2];
+    if (offset < state.length) {
+      _validators = new Validator[(state.length - offset) / 2];
 
       for (int i = 0; i < _validators.length; i++) {
-	int index = 2 * i;
+	int index = offset + 2 * i;
 	
-	Class cl = (Class) savedValidators[index];
+	Class cl = (Class) state[index];
 
 	try {
 	  Validator validator = (Validator) cl.newInstance();
@@ -741,7 +735,7 @@ public class UIInput extends UIOutput
 	  if (validator instanceof StateHolder) {
 	    StateHolder holder = (StateHolder) validator;
 
-	    holder.restoreState(context, savedValidators[index + 1]);
+	    holder.restoreState(context, state[index + 1]);
 	  }
 
 	  _validators[i] = validator;

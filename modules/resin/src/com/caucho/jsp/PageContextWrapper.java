@@ -52,21 +52,14 @@ import java.io.Writer;
 import java.util.logging.Logger;
 
 public class PageContextWrapper extends PageContextImpl {
-  private static final Logger log = Log.open(PageContextWrapper.class);
+  private static final Logger log
+    = Logger.getLogger(PageContextWrapper.class.getName());
   static final L10N L = new L10N(PageContextWrapper.class);
 
-  private static final FreeList<PageContextWrapper> _freeList =
-    new FreeList<PageContextWrapper>(32);
+  private static final FreeList<PageContextWrapper> _freeList
+    = new FreeList<PageContextWrapper>(32);
 
   private PageContextImpl _parent;
-
-  public void init(PageContextImpl parent)
-  {
-    _parent = parent;
-    clearAttributes();
-    setOut(parent.getOut());
-    _isFilled = true;
-  }
 
   public static PageContextWrapper create(JspContext parent)
   {
@@ -77,6 +70,16 @@ public class PageContextWrapper extends PageContextImpl {
     wrapper.init((PageContextImpl) parent);
 
     return wrapper;
+  }
+
+  public void init(PageContextImpl parent)
+  {
+    //super.init();
+    
+    _parent = parent;
+    clearAttributes();
+    setOut(parent.getOut());
+    _isFilled = true;
   }
 
   /**

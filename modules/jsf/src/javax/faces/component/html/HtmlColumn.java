@@ -33,6 +33,7 @@ import java.util.*;
 import javax.el.*;
 
 import javax.faces.component.*;
+import javax.faces.context.*;
 
 public class HtmlColumn extends UIColumn
 {
@@ -121,22 +122,56 @@ public class HtmlColumn extends UIColumn
     if (prop != null) {
       switch (prop) {
       case HEADER_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _headerClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _headerClassExpr = expr;
-	return;
+	break;
 	
       case FOOTER_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _footerClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _footerClassExpr = expr;
-	return;
+	break;
       }
     }
 
     super.setValueExpression(name, expr);
+  }
+
+  //
+  // state
+  //
+
+  @Override
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      _headerClass,
+      _footerClass,
+    };
+  }
+
+  @Override
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _headerClass = (String) state[i++];
+    _footerClass = (String) state[i++];
   }
 
   //

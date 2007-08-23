@@ -124,11 +124,13 @@ public class UIGraphic extends UIComponentBase
       switch (prop) {
       case URL:
       case VALUE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _url = (String) expr.getValue(null);
+	  return;
+	}
 	else
 	  _urlExpr = expr;
-	return;
+	break;
       }
     }
 
@@ -145,7 +147,6 @@ public class UIGraphic extends UIComponentBase
     return new Object[] {
       super.saveState(context),
       _url,
-      Util.save(_urlExpr, context),
     };
   }
 
@@ -157,7 +158,6 @@ public class UIGraphic extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _url = (String) state[1];
-    _urlExpr = Util.restoreString(state[2], context);
   }
 
   //

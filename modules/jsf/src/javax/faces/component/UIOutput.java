@@ -98,9 +98,8 @@ public class UIOutput extends UIComponentBase implements ValueHolder
       return _valueExpr;
     else if ("converter".equals(name))
       return _converterExpr;
-    else {
+    else
       return super.getValueExpression(name);
-    }
   }
 
   /**
@@ -110,17 +109,18 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("value".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_value = expr.getValue(null);
+	return;
+      }
       else
 	_valueExpr = expr;
     }
     else if ("converter".equals(name)) {
       _converterExpr = expr;
     }
-    else {
-      super.setValueExpression(name, expr);
-    }
+
+    super.setValueExpression(name, expr);
   }
 
   //
@@ -166,8 +166,6 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     return new Object[] {
       parent,
       _value,
-      Util.saveWithType(_valueExpr, context),
-      Util.save(_converterExpr, context),
       saveAttachedState(context, _converter),
     };
   }
@@ -179,9 +177,6 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     super.restoreState(context, state[0]);
 
     _value = state[1];
-    _valueExpr = Util.restoreWithType(state[2], context);
-
-    _converterExpr = Util.restore(state[3], Converter.class, context);
-    _converter = (Converter) restoreAttachedState(context, state[4]);
+    _converter = (Converter) restoreAttachedState(context, state[2]);
   }
 }

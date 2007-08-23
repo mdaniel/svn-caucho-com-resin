@@ -202,46 +202,58 @@ public class HtmlOutputFormat extends UIOutput
     if (prop != null) {
       switch (prop) {
       case DIR:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _dir = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _dirExpr = expr;
-	return;
+	break;
 	
       case ESCAPE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _escape = Util.evalBoolean(expr);
+	  return;
+	}
 	else
 	  _escapeExpr = expr;
-	return;
+	break;
 	
       case LANG:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _lang = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _langExpr = expr;
-	return;
+	break;
 	
       case STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _style = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleExpr = expr;
-	return;
+	break;
 	
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _styleClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleClassExpr = expr;
-	return;
+	break;
 	
       case TITLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _title = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _titleExpr = expr;
-	return;
+	break;
       }
     }
 
@@ -260,18 +272,12 @@ public class HtmlOutputFormat extends UIOutput
       parent,
       
       _dir,
-      Util.save(_dirExpr, context),
       _escape,
-      Util.save(_escapeExpr, context),
       _lang,
-      Util.save(_langExpr, context),
       
       _style,
-      Util.save(_styleExpr, context),
       _styleClass,
-      Util.save(_styleClassExpr, context),
       _title,
-      Util.save(_titleExpr, context),
     };
   }
 
@@ -285,22 +291,11 @@ public class HtmlOutputFormat extends UIOutput
       super.restoreState(context, state[i++]);
 
     _dir = (String) state[i++];
-    _dirExpr = Util.restoreString(state[i++], context);
-
     _escape = (Boolean) state[i++];
-    _escapeExpr = Util.restoreBoolean(state[i++], context);
-
     _lang = (String) state[i++];
-    _langExpr = Util.restoreString(state[i++], context);
-
     _style = (String) state[i++];
-    _styleExpr = Util.restoreString(state[i++], context);
-
     _styleClass = (String) state[i++];
-    _styleClassExpr = Util.restoreString(state[i++], context);
-
     _title = (String) state[i++];
-    _titleExpr = Util.restoreString(state[i++], context);
   }
 
 

@@ -502,151 +502,193 @@ public class HtmlForm extends UIForm
     if (prop != null) {
       switch (prop) {
       case ACCEPT:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _accept = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _acceptExpr = expr;
-	return;
+	break;
 	
       case ACCEPTCHARSET:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _acceptcharset = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _acceptcharsetExpr = expr;
-	return;
+	break;
 
       case DIR:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _dir = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _dirExpr = expr;
-	return;
+	break;
 	
       case ENCTYPE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _enctype = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _enctypeExpr = expr;
-	return;
+	break;
 	
       case LANG:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _lang = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _langExpr = expr;
-	return;
+	break;
 	
       case ONCLICK:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onclick = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onclickExpr = expr;
-	return;
+	break;
 
       case ONDBLCLICK:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _ondblclick = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _ondblclickExpr = expr;
-	return;
+	break;
 
       case ONKEYDOWN:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onkeydown = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onkeydownExpr = expr;
-	return;
+	break;
 	
       case ONKEYPRESS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onkeypress = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onkeypressExpr = expr;
-	return;
+	break;
 
       case ONKEYUP:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onkeyup = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onkeyupExpr = expr;
-	return;
+	break;
 
       case ONMOUSEDOWN:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmousedown = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmousedownExpr = expr;
-	return;
+	break;
 
       case ONMOUSEMOVE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmousemove = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmousemoveExpr = expr;
-	return;
+	break;
 
       case ONMOUSEOUT:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmouseout = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmouseoutExpr = expr;
-	return;
+	break;
 
       case ONMOUSEOVER:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmouseover = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmouseoverExpr = expr;
-	return;
+	break;
 
       case ONMOUSEUP:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmouseup = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmouseupExpr = expr;
-	return;
+	break;
 
       case ONRESET:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onreset = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onresetExpr = expr;
-	return;
+	break;
 
       case ONSUBMIT:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onsubmit = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onsubmitExpr = expr;
-	return;
+	break;
 
       case STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _style = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleExpr = expr;
-	return;
+	break;
 
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _styleClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleClassExpr = expr;
-	return;
+	break;
 
       case TARGET:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _target = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _targetExpr = expr;
-	return;
+	break;
 
       case TITLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _title = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _titleExpr = expr;
-	return;
+	break;
       }
     }
     
@@ -664,51 +706,30 @@ public class HtmlForm extends UIForm
     return new Object[] {
       parent,
       _accept,
-      Util.save(_acceptExpr, context),
       _acceptcharset,
-      Util.save(_acceptcharsetExpr, context),
       _dir,
-      Util.save(_dirExpr, context),
       _enctype,
-      Util.save(_enctypeExpr, context),
       _lang,
-      Util.save(_langExpr, context),
       
       _onclick,
-      Util.save(_onclickExpr, context),
       _ondblclick,
-      Util.save(_ondblclickExpr, context),
       _onkeydown,
-      Util.save(_onkeydownExpr, context),
       _onkeypress,
-      Util.save(_onkeypressExpr, context),
       _onkeyup,
-      Util.save(_onkeyupExpr, context),
       
       _onmousedown,
-      Util.save(_onmousedownExpr, context),
       _onmousemove,
-      Util.save(_onmousemoveExpr, context),
       _onmouseout,
-      Util.save(_onmouseoutExpr, context),
       _onmouseover,
-      Util.save(_onmouseoverExpr, context),
       _onmouseup,
-      Util.save(_onmouseupExpr, context),
       
       _onreset,
-      Util.save(_onresetExpr, context),
       _onsubmit,
-      Util.save(_onsubmitExpr, context),
       
       _style,
-      Util.save(_styleExpr, context),
       _styleClass,
-      Util.save(_styleClassExpr, context),
       _target,
-      Util.save(_targetExpr, context),
       _title,
-      Util.save(_titleExpr, context),
     };
   }
 
@@ -722,67 +743,26 @@ public class HtmlForm extends UIForm
       super.restoreState(context, state[i++]);
 
     _accept = (String) state[i++];
-    _acceptExpr = Util.restoreString(state[i++], context);
-
     _acceptcharset = (String) state[i++];
-    _acceptcharsetExpr = Util.restoreString(state[i++], context);
-
     _dir = (String) state[i++];
-    _dirExpr = Util.restoreString(state[i++], context);
-
     _enctype = (String) state[i++];
-    _enctypeExpr = Util.restoreString(state[i++], context);
-
     _lang = (String) state[i++];
-    _langExpr = Util.restoreString(state[i++], context);
-
     _onclick = (String) state[i++];
-    _onclickExpr = Util.restoreString(state[i++], context);
-
     _ondblclick = (String) state[i++];
-    _ondblclickExpr = Util.restoreString(state[i++], context);
-
     _onkeydown = (String) state[i++];
-    _onkeydownExpr = Util.restoreString(state[i++], context);
-
     _onkeypress = (String) state[i++];
-    _onkeypressExpr = Util.restoreString(state[i++], context);
-
     _onkeyup = (String) state[i++];
-    _onkeyupExpr = Util.restoreString(state[i++], context);
-
     _onmousedown = (String) state[i++];
-    _onmousedownExpr = Util.restoreString(state[i++], context);
-
     _onmousemove = (String) state[i++];
-    _onmousemoveExpr = Util.restoreString(state[i++], context);
-
     _onmouseout = (String) state[i++];
-    _onmouseoutExpr = Util.restoreString(state[i++], context);
-
     _onmouseover = (String) state[i++];
-    _onmouseoverExpr = Util.restoreString(state[i++], context);
-
     _onmouseup = (String) state[i++];
-    _onmouseupExpr = Util.restoreString(state[i++], context);
-
     _onreset = (String) state[i++];
-    _onresetExpr = Util.restoreString(state[i++], context);
-
     _onsubmit = (String) state[i++];
-    _onsubmitExpr = Util.restoreString(state[i++], context);
-
     _style = (String) state[i++];
-    _styleExpr = Util.restoreString(state[i++], context);
-
     _styleClass = (String) state[i++];
-    _styleClassExpr = Util.restoreString(state[i++], context);
-
     _target = (String) state[i++];
-    _targetExpr = Util.restoreString(state[i++], context);
-
     _title = (String) state[i++];
-    _titleExpr = Util.restoreString(state[i++], context);
   }
 
   //

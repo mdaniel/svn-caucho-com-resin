@@ -682,218 +682,368 @@ public class HtmlDataTable extends UIData
     if (prop != null) {
       switch (prop) {
       case BGCOLOR:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _bgcolor = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _bgcolorExpr = expr;
-	return;
+	break;
 	
       case BORDER:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _border = Util.evalInt(expr);
+	  return;
+	}
 	else
 	  _borderExpr = expr;
-	return;
+	break;
 	
       case CAPTION_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _captionClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _captionClassExpr = expr;
-	return;
+	break;
 	
       case CAPTION_STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _captionStyle = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _captionStyleExpr = expr;
-	return;
+	break;
 	
       case CELLPADDING:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _cellpadding = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _cellpaddingExpr = expr;
-	return;
+	break;
 	
       case CELLSPACING:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _cellspacing = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _cellspacingExpr = expr;
-	return;
+	break;
 	
       case COLUMN_CLASSES:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _columnClasses = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _columnClassesExpr = expr;
-	return;
+	break;
 	
       case COLUMNS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _columns = Util.evalInt(expr);
+	  return;
+	}
 	else
 	  _columnsExpr = expr;
-	return;
+	break;
 
       case DIR:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _dir = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _dirExpr = expr;
-	return;
+	break;
 	
       case FOOTER_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _footerClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _footerClassExpr = expr;
-	return;
+	break;
 	
       case FRAME:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _frame = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _frameExpr = expr;
-	return;
+	break;
 	
       case HEADER_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _headerClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _headerClassExpr = expr;
-	return;
+	break;
 	
       case LANG:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _lang = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _langExpr = expr;
-	return;
+	break;
 	
       case ONCLICK:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onclick = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onclickExpr = expr;
-	return;
+	break;
 
       case ONDBLCLICK:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _ondblclick = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _ondblclickExpr = expr;
-	return;
+	break;
 
       case ONKEYDOWN:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onkeydown = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onkeydownExpr = expr;
-	return;
+	break;
 	
       case ONKEYPRESS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onkeypress = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onkeypressExpr = expr;
-	return;
+	break;
 
       case ONKEYUP:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onkeyup = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onkeyupExpr = expr;
-	return;
+	break;
 
       case ONMOUSEDOWN:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmousedown = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmousedownExpr = expr;
-	return;
+	break;
 
       case ONMOUSEMOVE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmousemove = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmousemoveExpr = expr;
-	return;
+	break;
 
       case ONMOUSEOUT:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmouseout = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmouseoutExpr = expr;
-	return;
+	break;
 
       case ONMOUSEOVER:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmouseover = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmouseoverExpr = expr;
-	return;
+	break;
 
       case ONMOUSEUP:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _onmouseup = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _onmouseupExpr = expr;
-	return;
+	break;
 
       case ROW_CLASSES:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _rowClasses = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _rowClassesExpr = expr;
-	return;
+	break;
 
       case RULES:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _rules = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _rulesExpr = expr;
-	return;
+	break;
 
       case STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _style = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleExpr = expr;
-	return;
+	break;
 
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _styleClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleClassExpr = expr;
-	return;
+	break;
 
       case SUMMARY:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _summary = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _summaryExpr = expr;
-	return;
+	break;
 
       case TITLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _title = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _titleExpr = expr;
-	return;
+	break;
 
       case WIDTH:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _width = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _widthExpr = expr;
-	return;
+	break;
       }
     }
     
     super.setValueExpression(name, expr);
+  }
+
+  //
+  // state
+  //
+
+  @Override
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      _bgcolor,
+      _border,
+      _captionClass,
+      _captionStyle,
+      _cellpadding,
+      _cellspacing,
+      _columnClasses,
+      _columns,
+      _dir,
+      _footerClass,
+      _frame,
+      _headerClass,
+      _lang,
+      
+      _onclick,
+      _ondblclick,
+      _onkeydown,
+      _onkeypress,
+      _onkeyup,
+      
+      _onmousedown,
+      _onmousemove,
+      _onmouseout,
+      _onmouseover,
+      _onmouseup,
+      
+      _rowClasses,
+      _rules,
+      
+      _style,
+      _styleClass,
+      _summary,
+      _title,
+      _width,
+    };
+  }
+
+  @Override
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _bgcolor = (String) state[i++];
+    _border = (Integer) state[i++];
+    _captionClass = (String) state[i++];
+    _captionStyle = (String) state[i++];
+    _cellpadding = (String) state[i++];
+    _cellspacing = (String) state[i++];
+    _columnClasses = (String) state[i++];
+    _columns = (Integer) state[i++];
+    _dir = (String) state[i++];
+    _footerClass = (String) state[i++];
+    _frame = (String) state[i++];
+    _headerClass = (String) state[i++];
+    _lang = (String) state[i++];
+    _onclick = (String) state[i++];
+    _ondblclick = (String) state[i++];
+    _onkeydown = (String) state[i++];
+    _onkeypress = (String) state[i++];
+    _onkeyup = (String) state[i++];
+    _onmousedown = (String) state[i++];
+    _onmousemove = (String) state[i++];
+    _onmouseout = (String) state[i++];
+    _onmouseover = (String) state[i++];
+    _onmouseup = (String) state[i++];
+    _rowClasses = (String) state[i++];
+    _rules = (String) state[i++];
+    _style = (String) state[i++];
+    _styleClass = (String) state[i++];
+    _summary = (String) state[i++];
+    _title = (String) state[i++];
+    _width = (String) state[i++];
   }
 
   //

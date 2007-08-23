@@ -112,19 +112,23 @@ public class UIParameter extends UIComponentBase
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("name".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_name = String.valueOf(expr.getValue(null));
+	return;
+      }
       else
 	_nameExpr = expr;
     }
     else if ("value".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_value = String.valueOf(expr.getValue(null));
+	return;
+      }
       else
 	_valueExpr = expr;
     }
-    else
-      super.setValueExpression(name, expr);
+
+    super.setValueExpression(name, expr);
   }
 
   //
@@ -137,10 +141,7 @@ public class UIParameter extends UIComponentBase
       super.saveState(context),
     
       _name,
-      Util.save(_nameExpr, context),
-    
       _value,
-      Util.save(_valueExpr, context)
     };
   }
 
@@ -151,13 +152,6 @@ public class UIParameter extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _name = (String) state[1];
-    _nameExpr = Util.restore(state[2],
-			     String.class,
-			     context);
-
-    _value = (String) state[3];
-    _valueExpr = Util.restore(state[4],
-			      Object.class,
-			      context);
+    _value = (String) state[2];
   }
 }

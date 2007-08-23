@@ -60,9 +60,6 @@ public class JavaMarshal extends Marshal {
     _def = def;
     _isNotNull = isNotNull;
     _isUnmarshalNullAsFalse = isUnmarshalNullAsFalse;
-
-    if (com.caucho.quercus.lib.file.BinaryInput.class.equals(def.getType()))
-      Thread.dumpStack();
   }
 
   public Object marshal(Env env, Expr expr, Class argClass)

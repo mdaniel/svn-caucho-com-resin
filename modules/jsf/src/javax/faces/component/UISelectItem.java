@@ -205,46 +205,58 @@ public class UISelectItem extends UIComponentBase
     if (prop != null) {
       switch (prop) {
       case ITEM_DESCRIPTION:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _itemDescription = String.valueOf(expr.getValue(null));
+	  return;
+	}
 	else
 	  _itemDescriptionExpr = expr;
-	return;
+	break;
 	
       case ITEM_DISABLED:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _itemDisabled = Util.booleanValueOf(expr.getValue(null));
+	  return;
+	}
 	else
 	  _itemDisabledExpr = expr;
-	return;
+	break;
 	
       case ITEM_ESCAPED:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _itemEscaped = Util.booleanValueOf(expr.getValue(null));
+	  return;
+	}
 	else
 	  _itemEscapedExpr = expr;
-	return;
+	break;
 	
       case ITEM_LABEL:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _itemLabel = String.valueOf(expr.getValue(null));
+	  return;
+	}
 	else
 	  _itemLabelExpr = expr;
-	return;
+	break;
 	
       case ITEM_VALUE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _itemValue = expr.getValue(null);
+	  return;
+	}
 	else
 	  _itemValueExpr = expr;
-	return;
+	break;
 	
       case VALUE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _value = expr.getValue(null);
+	  return;
+	}
 	else
 	  _valueExpr = expr;
-	return;
+	break;
       }
     }
     
@@ -257,27 +269,15 @@ public class UISelectItem extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[13];
-
-    state[0] = super.saveState(context);
-    
-    state[1] = _itemDescription;
-    state[2] = Util.save(_itemDescriptionExpr, context);
-    
-    state[3] = _itemDisabled;
-    state[4] = Util.save(_itemDisabledExpr, context);
-    
-    state[5] = _itemEscaped;
-    state[6] = Util.save(_itemEscapedExpr, context);
-    
-    state[7] = _itemLabel;
-    state[8] = Util.save(_itemLabelExpr, context);
-    
-    state[9] = _itemValue;
-    state[10] = Util.save(_itemValueExpr, context);
-    
-    state[11] = _value;
-    state[12] = Util.save(_valueExpr, context);
+    Object []state = new Object[] {
+      super.saveState(context),
+      _itemDescription,
+      _itemDisabled,
+      _itemEscaped,
+      _itemLabel,
+      _itemValue,
+      _value
+    };
 
     return state;
   }
@@ -289,36 +289,11 @@ public class UISelectItem extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _itemDescription = (String) state[1];
-    _itemDescriptionExpr = Util.restore(state[2],
-					String.class,
-					context);
-
-    if (state[3] != null)
-      _itemDisabled = (Boolean) state[3];
-    _itemDisabledExpr = Util.restore(state[4],
-				     Boolean.class,
-				     context);
-
-    if (state[5] != null)
-      _itemEscaped = (Boolean) state[5];
-    _itemEscapedExpr = Util.restore(state[6],
-				     Boolean.class,
-				     context);
-
-    _itemLabel = (String) state[7];
-    _itemLabelExpr = Util.restore(state[8],
-				  String.class,
-				  context);
-
-    _itemValue = state[9];
-    _itemValueExpr = Util.restore(state[10],
-				  Object.class,
-				  context);
-
-    _value = state[11];
-    _valueExpr = Util.restore(state[12],
-			      Object.class,
-			      context);
+    _itemDisabled = (Boolean) state[2];
+    _itemEscaped = (Boolean) state[3];
+    _itemLabel = (String) state[4];
+    _itemValue = state[5];
+    _value = state[6];
   }
 
   private enum PropEnum {

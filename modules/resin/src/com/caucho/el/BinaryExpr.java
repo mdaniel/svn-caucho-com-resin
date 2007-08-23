@@ -54,9 +54,9 @@ public class BinaryExpr extends Expr {
    */
   private BinaryExpr(int op, Expr left, Expr right)
   {
-    this._op = op;
-    this._left = left;
-    this._right = right;
+    _op = op;
+    _left = left;
+    _right = right;
   }
 
   public static Expr create(int op, Expr left, Expr right)

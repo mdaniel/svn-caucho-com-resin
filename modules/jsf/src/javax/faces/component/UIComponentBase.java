@@ -154,22 +154,23 @@ public abstract class UIComponentBase extends UIComponent
       throw new IllegalArgumentException("'parent' is not a valid ValueExpression name.");
     
     if ("rendered".equals(name)) {
-      if (expr.isLiteralText())
+      if (expr.isLiteralText()) {
 	_isRendered = Util.booleanValueOf(expr.getValue(null));
+	return;
+      }
       else
 	_isRenderedExpr = expr;
-      return;
     }
     else if ("rendererType".equals(name)) {
-      if (expr.isLiteralText())
+      if (expr.isLiteralText()) {
 	_rendererType = String.valueOf(expr.getValue(null));
+	return;
+      }
       else
 	_rendererTypeExpr = expr;
-      return;
     }
     else if ("binding".equals(name)) {
       _bindingExpr = expr;
-      return;
     }
 
     try {
@@ -830,13 +831,10 @@ public abstract class UIComponentBase extends UIComponent
     
     return new Object[] {
       _id,
-      saveExprMap(context, _bindings),
+      _bindings,
       _isRendered,
-      Util.save(_isRenderedExpr, context),
       rendererCode,
       rendererString,
-      Util.save(_rendererTypeExpr, context),
-      Util.save(_bindingExpr, context),
       (_attributeMap != null ? _attributeMap.saveState(context) : null),
       savedListeners,
     };
@@ -872,23 +870,25 @@ public abstract class UIComponentBase extends UIComponent
     Object []state = (Object []) stateObj;
 
     _id = (String) state[0];
-    _bindings = restoreExprMap(context, state[1]);
+    _bindings = (Map) state[1];
+
+    if (_bindings != null) {
+      for (Map.Entry<String,ValueExpression> entry : _bindings.entrySet()) {
+	setValueExpression(entry.getKey(), entry.getValue());
+      }
+    }
 
     _isRendered = (Boolean) state[2];
-    _isRenderedExpr = Util.restore(state[3], Boolean.class, context);
 
-    Integer rendererCode = (Integer) state[4];
-    String rendererString = (String) state[5];
-    _rendererTypeExpr = Util.restoreString(state[6], context);
+    Integer rendererCode = (Integer) state[3];
+    String rendererString = (String) state[4];
 
     if (rendererCode != null)
       _rendererType = _codeToRendererMap.get(rendererCode);
     else
       _rendererType = rendererString;
-
-    _bindingExpr = Util.restore(state[7], UIComponent.class, context);
 	
-    Object extMapState = state[8];
+    Object extMapState = state[5];
 
     if (extMapState != null) {
       if (_attributeMap == null)
@@ -897,7 +897,7 @@ public abstract class UIComponentBase extends UIComponent
       _attributeMap.restoreState(context, extMapState);
     }
 
-    Object []savedListeners = (Object []) state[9];
+    Object []savedListeners = (Object []) state[6];
 
     restoreListeners(context, savedListeners);
   }

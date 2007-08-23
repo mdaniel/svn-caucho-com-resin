@@ -33,6 +33,7 @@ import java.util.*;
 import javax.el.*;
 
 import javax.faces.component.*;
+import javax.faces.context.*;
 
 public class HtmlMessage extends UIMessage
 {
@@ -361,106 +362,182 @@ public class HtmlMessage extends UIMessage
     if (prop != null) {
       switch (prop) {
       case DIR:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _dir = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _dirExpr = expr;
-	return;
+	break;
 	
       case ERROR_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _errorClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _errorClassExpr = expr;
-	return;
+	break;
 	
       case ERROR_STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _errorStyle = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _errorStyleExpr = expr;
-	return;
+	break;
 	
       case FATAL_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _fatalClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _fatalClassExpr = expr;
-	return;
+	break;
 	
       case FATAL_STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _fatalStyle = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _fatalStyleExpr = expr;
-	return;
+	break;
 	
       case INFO_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _infoClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _infoClassExpr = expr;
-	return;
+	break;
 	
       case INFO_STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _infoStyle = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _infoStyleExpr = expr;
-	return;
+	break;
 	
       case LANG:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _lang = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _langExpr = expr;
-	return;
+	break;
 	
       case STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _style = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleExpr = expr;
-	return;
+	break;
 	
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _styleClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleClassExpr = expr;
-	return;
+	break;
 	
       case TITLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _title = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _titleExpr = expr;
-	return;
+	break;
 	
       case TOOLTIP:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _tooltip = Util.evalBoolean(expr);
+	  return;
+	}
 	else
 	  _tooltipExpr = expr;
-	return;
+	break;
 	
       case WARN_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _warnClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _warnClassExpr = expr;
-	return;
+	break;
 	
       case WARN_STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _warnStyle = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _warnStyleExpr = expr;
-	return;
+	break;
       }
     }
 
     super.setValueExpression(name, expr);
+  }
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      _dir,
+      _errorClass,
+      _errorStyle,
+      _fatalClass,
+      _fatalStyle,
+      _infoClass,
+      _infoStyle,
+      _lang,
+      _style,
+      _styleClass,
+      _title,
+      _tooltip,
+      _warnClass,
+      _warnStyle,
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    if (state != null) 
+      super.restoreState(context, state[0]);
+
+    int i = 1;
+    
+    _dir = (String) state[i++];
+    _errorClass = (String) state[i++];
+    _errorStyle = (String) state[i++];
+    _fatalClass = (String) state[i++];
+    _fatalStyle = (String) state[i++];
+    _infoClass = (String) state[i++];
+    _infoStyle = (String) state[i++];
+    _lang = (String) state[i++];
+    _style = (String) state[i++];
+    _styleClass = (String) state[i++];
+    _title = (String) state[i++];
+    _tooltip = (Boolean) state[i++];
+    _warnClass = (String) state[i++];
+    _warnStyle = (String) state[i++];
   }
 
   //

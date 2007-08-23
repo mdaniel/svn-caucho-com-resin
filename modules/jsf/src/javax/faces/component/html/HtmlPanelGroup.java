@@ -142,25 +142,31 @@ public class HtmlPanelGroup extends UIPanel
     if (prop != null) {
       switch (prop) {
       case LAYOUT:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _layout = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _layoutExpr = expr;
-	return;
+	break;
 
       case STYLE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _style = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleExpr = expr;
-	return;
+	break;
 
       case STYLE_CLASS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _styleClass = Util.evalString(expr);
+	  return;
+	}
 	else
 	  _styleClassExpr = expr;
-	return;
+	break;
       }
     }
     
@@ -179,12 +185,8 @@ public class HtmlPanelGroup extends UIPanel
       parent,
       
       _layout,
-      Util.save(_layoutExpr, context),
-      
       _style,
-      Util.save(_styleExpr, context),
       _styleClass,
-      Util.save(_styleClassExpr, context),
     };
   }
 
@@ -198,13 +200,8 @@ public class HtmlPanelGroup extends UIPanel
       super.restoreState(context, state[i++]);
 
     _layout = (String) state[i++];
-    _layoutExpr = Util.restoreString(state[i++], context);
-
     _style = (String) state[i++];
-    _styleExpr = Util.restoreString(state[i++], context);
-
     _styleClass = (String) state[i++];
-    _styleClassExpr = Util.restoreString(state[i++], context);
   }
 
   //

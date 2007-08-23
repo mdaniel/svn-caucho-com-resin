@@ -99,8 +99,8 @@ public class PageContextImpl extends PageContext
   static final L10N L = new L10N(PageContextImpl.class);
   
   private JspWriterAdapter _jspAdapter = new JspWriterAdapter();
-  private JspServletOutputStream _jspOutputStream =
-    new JspServletOutputStream(this);
+  private JspServletOutputStream _jspOutputStream
+    = new JspServletOutputStream(this);
 
   private Map<String,Object> _attributes;
   private Servlet _servlet;
@@ -296,6 +296,11 @@ public class PageContextImpl extends PageContext
     }
     else
       _functionMap = null;
+  }
+
+  protected void init()
+  {
+    _elContext = null;
   }
 
   protected void setOut(JspWriter out)

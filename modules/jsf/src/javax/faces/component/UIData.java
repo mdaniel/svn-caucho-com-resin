@@ -264,25 +264,31 @@ public class UIData extends UIComponentBase
     if (prop != null) {
       switch (_propMap.get(name)) {
       case VALUE:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _value = expr.getValue(null);
+	  return;
+	}
 	else
 	  _valueExpr = expr;
-	return;
+	break;
       
       case FIRST:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _first = (Integer) expr.getValue(null);
+	  return;
+	}
 	else
 	  _firstExpr = expr;
-	return;
+	break;
       
       case ROWS:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _rows = (Integer) expr.getValue(null);
+	  return;
+	}
 	else
 	  _rowsExpr = expr;
-	return;
+	break;
       }
     }
 
@@ -323,14 +329,8 @@ public class UIData extends UIComponentBase
       super.saveState(context),
     
       _value, // XXX: stateHolder issues
-      Util.save(_valueExpr, context),
-    
       _first,
-      Util.save(_firstExpr, context),
-    
       _rows,
-      Util.save(_rowsExpr, context),
-    
       _var,
     };
   }
@@ -342,15 +342,9 @@ public class UIData extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _value = state[1];
-    _valueExpr = Util.restore(state[2], Object.class, context);
-
-    _first = (Integer) state[3];
-    _firstExpr = Util.restore(state[4], Integer.class, context);
-
-    _rows = (Integer) state[5];
-    _rowsExpr = Util.restore(state[6], Integer.class, context);
-
-    _var = (String) state[7];
+    _first = (Integer) state[2];
+    _rows = (Integer) state[3];
+    _var = (String) state[4];
   }
 
   //

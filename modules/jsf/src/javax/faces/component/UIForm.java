@@ -99,13 +99,15 @@ public class UIForm extends UIComponentBase implements NamingContainer
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("prependId".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_isPrependId = Util.booleanValueOf(expr.getValue(null));
+	return;
+      }
       else
 	_isPrependIdExpr = expr;
     }
-    else
-      super.setValueExpression(name, expr);
+
+    super.setValueExpression(name, expr);
   }
 
   //
@@ -216,7 +218,6 @@ public class UIForm extends UIComponentBase implements NamingContainer
     return new Object[] {
       super.saveState(context),
       _isPrependId,
-      Util.save(_isPrependIdExpr, context)
     };
   }
 
@@ -227,7 +228,6 @@ public class UIForm extends UIComponentBase implements NamingContainer
     super.restoreState(context, state[0]);
 
     _isPrependId = (Boolean) state[1];
-    _isPrependIdExpr = Util.restoreBoolean(state[2], context);
   }
 
   //

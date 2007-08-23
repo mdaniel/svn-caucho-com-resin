@@ -93,14 +93,15 @@ public class UISelectItems extends UIComponentBase
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("value".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
         _value = expr.getValue(null);
+	return;
+      }
       else
         _valueExpr = expr;
     }
-    else {
-      super.setValueExpression(name, expr);
-    }
+
+    super.setValueExpression(name, expr);
   }
 
   //
@@ -109,14 +110,10 @@ public class UISelectItems extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[3];
-
-    state[0] = super.saveState(context);
-    
-    state[1] = _value;
-    state[2] = Util.save(_valueExpr, context);
-
-    return state;
+    return new Object[] {
+      super.saveState(context),
+      _value
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -126,8 +123,5 @@ public class UISelectItems extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _value = state[1];
-    _valueExpr = Util.restore(state[2],
-			      Object.class,
-			      context);
   }
 }

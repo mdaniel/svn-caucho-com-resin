@@ -132,25 +132,31 @@ public class UIMessage extends UIComponentBase
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("for".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_for = String.valueOf(expr.getValue(null));
+	return;
+      }
       else
 	_forExpr = expr;
     }
     else if ("showDetail".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_showDetail = Util.booleanValueOf(expr.getValue(null));
+	return;
+      }
       else
 	_showDetailExpr = expr;
     }
     else if ("showSummary".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_showSummary = Util.booleanValueOf(expr.getValue(null));
+	return;
+      }
       else
 	_showSummaryExpr = expr;
     }
-    else
-      super.setValueExpression(name, expr);
+
+    super.setValueExpression(name, expr);
   }
 
   //
@@ -163,13 +169,8 @@ public class UIMessage extends UIComponentBase
       super.saveState(context),
     
       _for,
-      Util.save(_forExpr, context),
-    
       _showDetail,
-      Util.save(_showDetailExpr, context),
-    
       _showSummary,
-      Util.save(_showSummaryExpr, context)
     };
   }
 
@@ -180,12 +181,7 @@ public class UIMessage extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _for = (String) state[1];
-    _forExpr = Util.restoreString(state[2], context);
-
-    _showDetail = (Boolean) state[3];
-    _showDetailExpr = Util.restoreBoolean(state[4], context);
-
-    _showSummary = (Boolean) state[5];
-    _showSummaryExpr = Util.restoreBoolean(state[6], context);
+    _showDetail = (Boolean) state[2];
+    _showSummary = (Boolean) state[3];
   }
 }

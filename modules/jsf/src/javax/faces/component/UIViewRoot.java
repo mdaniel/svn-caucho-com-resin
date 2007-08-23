@@ -154,6 +154,8 @@ public class UIViewRoot extends UIComponentBase
   {
     if ("renderKitId".equals(name))
       return _renderKitIdExpr;
+    else if ("locale".equals(name))
+      return _localeExpr;
     else {
       return super.getValueExpression(name);
     }
@@ -166,14 +168,23 @@ public class UIViewRoot extends UIComponentBase
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("renderKitId".equals(name)) {
-      if (expr != null && expr.isLiteralText())
+      if (expr != null && expr.isLiteralText()) {
 	_renderKitId = (String) expr.getValue(null);
+	return;
+      }
       else
 	_renderKitIdExpr = expr;
     }
-    else {
-      super.setValueExpression(name, expr);
+    else if ("locale".equals(name)) {
+      if (expr != null && expr.isLiteralText()) {
+	_locale = toLocale(expr.getValue(null));
+	return;
+      }
+      else
+	_localeExpr = expr;
     }
+
+    super.setValueExpression(name, expr);
   }
 
   public void addPhaseListener(PhaseListener listener)
@@ -392,16 +403,10 @@ public class UIViewRoot extends UIComponentBase
       super.saveState(context),
       _viewId,
       _renderKitId,
-      Util.save(_renderKitIdExpr, context),
       _locale,
-      Util.save(_localeExpr, context),
       _unique,
-      (_afterPhaseListener != null
-       ? _afterPhaseListener.getExpressionString()
-       : null),
-      (_beforePhaseListener != null
-       ? _beforePhaseListener.getExpressionString()
-       : null),
+      _afterPhaseListener,
+      _beforePhaseListener,
       saveAttachedState(context, _phaseListeners),
     };
   }
@@ -414,39 +419,11 @@ public class UIViewRoot extends UIComponentBase
 
     _viewId = (String) state[1];
     _renderKitId = (String) state[2];
-    _renderKitIdExpr = Util.restoreString(state[3], context);
-    _locale = (Locale) state[4];
-    _localeExpr = Util.restore(state[5], Object.class, context);
-    _unique = (Integer) state[6];
-    
-    String afterExpr = (String) state[7];
-
-    if (afterExpr != null) {
-      Application app = context.getApplication();
-      ExpressionFactory factory = app.getExpressionFactory();
-      
-      _afterPhaseListener
-	= factory.createMethodExpression(context.getELContext(),
-					 afterExpr,
-					 void.class,
-					 new Class[] { PhaseEvent.class });
-    }
-
-    String beforeExpr = (String) state[8];
-    if (beforeExpr != null) {
-      Application app = context.getApplication();
-      ExpressionFactory factory = app.getExpressionFactory();
-      
-      _beforePhaseListener
-	= factory.createMethodExpression(context.getELContext(),
-					 beforeExpr,
-					 void.class,
-					 new Class[] { PhaseEvent.class });
-    }
-
-    
-    _phaseListeners =
-      (ArrayList) restoreAttachedState(context, state[9]);
+    _locale = (Locale) state[3];
+    _unique = (Integer) state[4];
+    _afterPhaseListener = (MethodExpression) state[5];
+    _beforePhaseListener = (MethodExpression) state[6];
+    _phaseListeners = (ArrayList) restoreAttachedState(context, state[7]);
   }
   
   private Locale toLocale(Object value)

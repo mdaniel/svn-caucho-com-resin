@@ -141,8 +141,8 @@ public class UICommand extends UIComponentBase
       _valueExpr = expr;
     else if ("immediate".equals(name))
       _immediateExpr = expr;
-    else
-      super.setValueExpression(name, expr);
+
+    super.setValueExpression(name, expr);
   }
 
   //
@@ -284,18 +284,11 @@ public class UICommand extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    String actionExprString = null;
-
-    if (_actionExpr != null)
-      actionExprString = _actionExpr.getExpressionString();
-
     return new Object[] {
       super.saveState(context),
       _value,
-      Util.save(_valueExpr, context),
       _immediate,
-      Util.save(_immediateExpr, context),
-      actionExprString,
+      _actionExpr,
       ((_action instanceof StateHolder)
        ? saveAttachedState(context, _action)
        : null),
@@ -308,28 +301,14 @@ public class UICommand extends UIComponentBase
 
     super.restoreState(context, state[0]);
 
-    _value = state[1];
-    _valueExpr = Util.restore(state[2], String.class, context);
-    
-    _immediate = (Boolean) state[3];
-    _immediateExpr = Util.restore(state[4], Boolean.class, context);
+    int i = 1;
+    _value = state[i++];
+    _immediate = (Boolean) state[i++];
 
     _actionListeners = null;
 
-    String actionExprString = (String) state[5];
-
-    if (actionExprString != null) {
-      Application app = context.getApplication();
-      ExpressionFactory factory = app.getExpressionFactory();
-      
-      _actionExpr = factory.createMethodExpression(context.getELContext(),
-						   actionExprString,
-						   Object.class,
-						   new Class[0]);
-    }
-
-    if (state[6] != null)
-      _action = (MethodBinding) restoreAttachedState(context, state[6]);
+    _actionExpr = (MethodExpression) state[i++];
+    _action = (MethodBinding) restoreAttachedState(context, state[i++]);
   }
 
   //
