@@ -304,9 +304,9 @@ public class HessianInput extends AbstractHessianInput {
       _peek = tag;
     
       Object value = readObject(expectedClass);
-      
+
       completeValueReply();
-      
+
       return value;
     }
   }
@@ -1566,7 +1566,7 @@ public class HessianInput extends AbstractHessianInput {
 	public int read()
 	  throws IOException
 	{
-	  if (_isClosed)
+	  if (_isClosed || _is == null)
 	    return -1;
 
 	  int ch = parseByte();
@@ -1579,7 +1579,7 @@ public class HessianInput extends AbstractHessianInput {
 	public int read(byte []buffer, int offset, int length)
 	  throws IOException
 	{
-	  if (_isClosed)
+	  if (_isClosed || _is == null)
 	    return -1;
 
 	  int len = HessianInput.this.read(buffer, offset, length);
@@ -1594,6 +1594,8 @@ public class HessianInput extends AbstractHessianInput {
 	{
 	  while (read() >= 0) {
 	  }
+
+	  _isClosed = true;
 	}
       };
   }
@@ -1657,6 +1659,11 @@ public class HessianInput extends AbstractHessianInput {
     int ch = _is.read();
       
     return ch;
+  }
+
+  public void close()
+  {
+    _is = null;
   }
 
   public Reader getReader()

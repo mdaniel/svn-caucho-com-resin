@@ -12,7 +12,13 @@
 
 <s2 title="3.1.3 snap">
 <ul>
-<li>xpath: compatibility issues with Xerces in comparison exprs (#1943, rep by M Thompson)</li>
+<li>win32: httpd.exe adds -user, -password, -name, -full-name (#1162, rep by mattp)</li>
+<li>win32: httpd.exe fixes as windows service (#1913, #1804, rep by briandeng, EUgene Kovnatsky)</li>
+<li>jsf: sessionScope EL wasn't working properly with RI (#1928, rep by mypda)</li>
+<li>persistent session load should not trigger valeUnbound (#1820, rep by calmman)</li>
+<li>bind-ports-after-start now enables listen (#1925, rep by M Schmidt)</li>
+<li>hessian: allow InputStream as final argument and as result for file upload/download (#1948, rep by Compl Yue Still)</li>
+<li>xpath: compatibility issues with Xerces in comparison exprs (#1858, #1943, rep by M Thompson, B Au)</li>
 <li>jsp: deferred EL handling did not properly detect .tld JSP version (#1909, rep by timur)</li>
 <li>jsp: validation needs to generate page="%= ... %" for page="&lt;%= ... %"> (#1917, rep by Michael Sengbusch)</li>
 <li>jsp: EL toBoolean() was inverting result (#1931, rep by dheggie)</li>

@@ -173,8 +173,9 @@ public class DependencyContainer implements Dependency
     try {
       long now = Alarm.getCurrentTime();
 
-      if (now < _lastCheckTime + _checkInterval)
+      if (now < _lastCheckTime + _checkInterval) {
 	return _isModified;
+      }
 
       _lastCheckTime = now;
 

@@ -327,6 +327,9 @@ public class ResinBoot {
 	       || arg.startsWith("-D")
 	       || arg.startsWith("-X")) {
       }
+      else if ("-service".equals(arg)) {
+	// windows service
+      }
       else if ("start".equals(arg)) {
 	_startMode = StartMode.START;
       }
@@ -477,11 +480,11 @@ public class ResinBoot {
     } catch (ConfigException e) {
       System.out.println(e.getMessage());
 
-      System.exit(1);
+      System.exit(2);
     } catch (Exception e) {
       e.printStackTrace();
       
-      System.exit(1);
+      System.exit(3);
     }
   }
 

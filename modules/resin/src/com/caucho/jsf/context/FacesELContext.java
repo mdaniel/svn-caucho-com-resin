@@ -71,21 +71,27 @@ public class FacesELContext extends ServletELContext
 
   // ServletELContext
 
+  @Override
   public Object getRequestScope()
   {
     return _facesContext.getExternalContext().getRequestMap();
   }
 
+  @Override
   public Object getSessionScope()
   {
+    System.out.println("SCOPE: " + _facesContext.getExternalContext());
+    
     return _facesContext.getExternalContext().getSessionMap();
   }
 
+  @Override
   public Object getApplicationScope()
   {
     return _facesContext.getExternalContext().getApplicationMap();
   }
 
+  @Override
   public ServletContext getApplication()
   {
     return (ServletContext) _facesContext.getExternalContext().getContext();

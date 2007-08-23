@@ -113,7 +113,7 @@ timeout for Resin standalone.</p>
 setting needs to take into consideration the
 &lt;<a href="server-tags.xtp#load-balance-idle-time">load-balance-idle-time</a>
 setting for mod_caucho or isapi_srun.  <var>load-balance-idle-time</var> is the
-time the plugin will keep a connection open.  <var>read-timeout</var> must
+time the plugin will keep a connection open.  <var>socket-timeout</var> must
 always be larger than <var>load-balance-idle-time</var>, otherwise the plugin
 will try to reuse a closed socket.</p>
 
@@ -125,7 +125,7 @@ will try to reuse a closed socket.</p>
 handling because requests are handled differently in the web server.
 Until the web server sends a request to Resin, it can't tell if Resin
 has closed the other end of the socket.  If the JVM has restarted
-or if closed the socket because of <var>read-timeout</var>,
+or if closed the socket because of <var>socket-timeout</var>,
 mod_caucho will not know about the closed socket.  So mod_caucho needs
 to know how long to consider a connection reusable before closing it.
 <var>load-balance-idle-time</var> tells the plugin how long it should consider a
@@ -136,7 +136,7 @@ the socket will remain half-closed until the next web server request.
 A <var>netstat</var> will show that as a bunch of sockets in the FIN_WAIT_2
 state.  With Apache, there doesn't appear to be a good way around
 this.  If these become a problem, you can increase
-<var>read-timeout</var> and <var>load-balance-idle-time</var> so the JVM won't close the
+<var>socket-timeout</var> and <var>load-balance-idle-time</var> so the JVM won't close the
 keepalive connections as fast.</p>
 
 <example>

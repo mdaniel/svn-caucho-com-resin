@@ -93,7 +93,7 @@ public class JavaModule extends AbstractQuercusModule {
         return null;
       }
       
-      return new JavaValue(env, null, def);
+      return new JavaValue(env, def.getType(), def);
     } catch (Throwable e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);

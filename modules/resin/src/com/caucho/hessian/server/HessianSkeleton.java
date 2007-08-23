@@ -145,10 +145,9 @@ public class HessianSkeleton extends AbstractSkeleton {
     Class []args = method.getParameterTypes();
     Object []values = new Object[args.length];
 
-    for (int i = 0; i < args.length; i++)
+    for (int i = 0; i < args.length; i++) {
       values[i] = in.readObject(args[i]);
-
-    in.completeCall();
+    }
 
     Object result = null;
     
@@ -166,10 +165,15 @@ public class HessianSkeleton extends AbstractSkeleton {
       return;
     }
 
+    // The complete call needs to be after the invoke to handle a
+    // trailing InputStream
+    in.completeCall();
+    
     out.startReply();
 
     out.writeObject(result);
     
     out.completeReply();
+    out.close();
   }
 }

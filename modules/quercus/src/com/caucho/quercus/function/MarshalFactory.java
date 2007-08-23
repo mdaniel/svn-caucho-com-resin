@@ -36,6 +36,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -148,6 +149,9 @@ public class MarshalFactory {
     }
     else if (InputStream.class.equals(argType)) {
       marshal = InputStreamMarshal.MARSHAL;
+    }
+    else if (BinaryInput.class.equals(argType)) {
+      marshal = BinaryInputMarshal.MARSHAL;
     }
     else if (ArrayValue.class.equals(argType)) {
       marshal = ArrayValueMarshal.MARSHAL;

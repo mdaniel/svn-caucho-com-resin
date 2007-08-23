@@ -1079,7 +1079,8 @@ public class SessionImpl implements HttpSession, CacheListener {
     HttpSessionEvent event = null;
     
     synchronized (_values) {
-      unbind();
+      // server/017u, #1820 - load does not trigger callbacks
+      _values.clear();
 
       try {
 	int size = in.readInt();

@@ -44,6 +44,11 @@ public class SessionScopeExpression extends AbstractValueExpression
 {
   public static final ValueExpression EXPR
     = new SessionScopeExpression();
+
+  public ValueExpression createField(String field)
+  {
+    return new SessionFieldExpression(field);
+  }
   
   /**
    * Evaluate the expr as an object.
@@ -55,7 +60,7 @@ public class SessionScopeExpression extends AbstractValueExpression
     throws ELException
   {
     if (! (env instanceof ServletELContext))
-      return env.getELResolver().getValue(env, null, "session");
+      return env.getELResolver().getValue(env, null, "sessionScope");
 
     env.setPropertyResolved(true);
     

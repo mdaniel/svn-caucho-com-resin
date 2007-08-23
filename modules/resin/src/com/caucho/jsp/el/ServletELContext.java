@@ -223,6 +223,7 @@ abstract public class ServletELContext extends ELContext
 
     HashMap<String,Object> map
       = new HashMap<String,Object>();
+    
     Enumeration e = session.getAttributeNames();
 
     while (e.hasMoreElements()) {

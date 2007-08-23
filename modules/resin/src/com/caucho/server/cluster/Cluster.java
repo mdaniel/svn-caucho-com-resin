@@ -123,8 +123,7 @@ public class Cluster
     
   public Cluster()
   {
-    _classLoader = new EnvironmentClassLoader();
-    _classLoader.setId("cluster:??");
+    _classLoader = new EnvironmentClassLoader("cluster:??");
 
     _clusterLocal.set(this, _classLoader);
   

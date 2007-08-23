@@ -420,4 +420,8 @@ abstract public class AbstractHessianInput {
    */
   abstract public void readListEnd()
     throws IOException;
+  
+  public void close()
+  {
+  }
 }

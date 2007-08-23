@@ -233,6 +233,8 @@ public class NodeBuilder {
         = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
       QName qName = ((QAbstractNode) attribute).getQName();
+      
+      typeStrategy.beforeConfigure(this, bean, attribute);
 
       configureChildNode(attribute, qName, bean, typeStrategy);
     }

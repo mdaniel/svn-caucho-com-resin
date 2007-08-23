@@ -176,7 +176,7 @@ than the proxy interface for specialized application protocols.</p>
 Object obj = ...;
 
 OutputStream os = new FileOutputStream("test.xml");
-HessianOutput out = new HessianOutput(os);
+Hessian2Output out = new Hessian2Output(os);
 
 out.writeObject(obj);
 os.close();
@@ -184,7 +184,7 @@ os.close();
 
 <example title="Deserialization">
 InputStream is = new FileInputStream("test.xml");
-HessianInput in = new HessianInput(is);
+Hessian2Input in = new Hessian2Input(is);
 
 Object obj = in.readObject(null);
 is.close();
@@ -200,38 +200,45 @@ java.io.Serializable.</p>
 
 <p>When a distributed application needs to send large amounts of
 binary data, it can be more efficient to
-use <code>InputStream</code> and <code>OutputStream</code> to
-avoid allocating large byte arrays.  For example, a file
+use <code>InputStream</code> to avoid allocating large byte arrays.
+Only the final argument of the method may be an <code>InputStream</code>,
+since the data is read during invocation.  For example, a file
 downloading service could be implemented efficiently using Hessian.</p>
 
 <p>In this example, the client needs to take control of the
 Hessian protocol directly, because the proxy interface would require
 buffering the entire file before the call returns.</p>
 
-<example title="client download code">
-OutputStream os = conn.getOutputStream();
+<example title="file upload API">
+package example;
 
-HessianOutput out = new HessianOutput(os);
-out.startCall("download");
-out.writeString("my-file.txt");
-out.completeCall();
-
-InputStream is = conn.getInputStream();
-
-HessianInput in = new HessianInput(is);
-
-in.startReply();
-
-InputStream is = in.readInputStream();
-
-... // save the input stream data somewhere
-
-in.completeReply();
+public interface Upload {
+  public void upload(String filename, InputStream data);
+}
 </example>
 
-<p>An upload servlet would also take control of the Hessian protocol
-to avoid buffering the data argument.  Like the client, the implementation
-is straightforward, although more complicated than the basic service.</p>
+<p>If the result is an InputStream, it is very important that the
+<code>InputStream.close()</code> be put in an <code>finally</code>
+block, because Hessian will not close the underlying HTTP stream until
+all the data is read and the input stream is closed.</p>
+
+<example title="file download API">
+package example;
+
+public interface Download {
+  public InputStream download(String filename, InputStream data);
+}
+</example>
+
+<example title="Download Java Code">
+InputStream is = fileProxy.download("test.xml");
+
+try {
+  ... // read data here
+} finally {
+  is.close();
+}
+</example>
 
 </s1>
 

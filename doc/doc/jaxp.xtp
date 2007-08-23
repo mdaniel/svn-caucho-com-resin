@@ -11,6 +11,9 @@ system properties.  You can set the properties to select
 a different parser than the default one.
 </p>
 
+<p>By default, Resin will use the JDK's parsers.  Other parsers, including
+Resin's own parsers can be selected with the &lt;system-property> tag.</p>
+
 </description>
 </header>
 

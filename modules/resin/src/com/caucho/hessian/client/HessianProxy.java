@@ -57,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -70,6 +71,9 @@ import java.net.URLConnection;
  * use HessianProxyFactory to create proxy clients.
  */
 public class HessianProxy implements InvocationHandler {
+  private static final Logger log
+    = Logger.getLogger(HessianProxy.class.getName());
+  
   private HessianProxyFactory _factory;
   private WeakHashMap<Method,String> _mangleMap
     = new WeakHashMap<Method,String>();
@@ -192,7 +196,19 @@ public class HessianProxy implements InvocationHandler {
 
       AbstractHessianInput in = _factory.getHessianInput(is);
 
-      return in.readReply(method.getReturnType());
+      in.startReply();
+
+      Object value = in.readObject(method.getReturnType());
+
+      if (value instanceof InputStream) {
+	value = new ResultInputStream(httpConn, is, in, (InputStream) value);
+	is = null;
+	httpConn = null;
+      }
+      else
+	in.completeReply();
+
+      return value;
     } catch (HessianProtocolException e) {
       throw new HessianRuntimeException(e);
     } finally {
@@ -200,12 +216,14 @@ public class HessianProxy implements InvocationHandler {
 	if (is != null)
 	  is.close();
       } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
       }
       
       try {
 	if (httpConn != null)
 	  httpConn.disconnect();
       } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -262,6 +280,102 @@ public class HessianProxy implements InvocationHandler {
 	((HttpURLConnection) conn).disconnect();
 
       throw e;
+    }
+  }
+
+  static class ResultInputStream extends InputStream {
+    private HttpURLConnection _conn;
+    private InputStream _connIs;
+    private AbstractHessianInput _in;
+    private InputStream _hessianIs;
+
+    ResultInputStream(HttpURLConnection conn,
+		      InputStream is,
+		      AbstractHessianInput in,
+		      InputStream hessianIs)
+    {
+      _conn = conn;
+      _connIs = is;
+      _in = in;
+      _hessianIs = hessianIs;
+    }
+
+    public int read()
+      throws IOException
+    {
+      if (_hessianIs != null) {
+	int value = _hessianIs.read();
+
+	if (value < 0)
+	  close();
+
+	return value;
+      }
+      else
+	return -1;
+    }
+
+    public int read(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      if (_hessianIs != null) {
+	int value = _hessianIs.read(buffer, offset, length);
+
+	if (value < 0)
+	  close();
+
+	return value;
+      }
+      else
+	return -1;
+    }
+
+    public void close()
+      throws IOException
+    {
+      HttpURLConnection conn = _conn;
+      _conn = null;
+      
+      InputStream connIs = _connIs;
+      _connIs = null;
+      
+      AbstractHessianInput in = _in;
+      _in = null;
+      
+      InputStream hessianIs = _hessianIs;
+      _hessianIs = null;
+
+      try {
+	if (hessianIs != null)
+	  hessianIs.close();
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      try {
+	if (in != null) {
+	  in.completeReply();
+	  in.close();
+	}
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      try {
+	if (connIs != null) {
+	  connIs.close();
+	}
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      try {
+	if (conn != null) {
+	  conn.disconnect();
+	}
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
     }
   }
 }

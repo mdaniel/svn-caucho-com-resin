@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.file;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.*;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,19 +48,27 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   private static final Logger log
     = Logger.getLogger(ReadStreamInput.class.getName());
 
-  private final LineReader _lineReader;
+  private LineReader _lineReader;
   private ReadStream _is;
 
   public ReadStreamInput(Env env)
   {
-    _lineReader = new LineReader(env);
   }
 
-  public ReadStreamInput(Env env, ReadStream is)
+  public ReadStreamInput(Env env, InputStream is)
   {
-    this(env);
+    if (is instanceof ReadStream)
+      init((ReadStream) is);
+    else if (is != null)
+      init(new ReadStream(new VfsStream(is, null)));
+  }
 
-    init(is);
+  public ReadStreamInput(InputStream is)
+  {
+    if (is instanceof ReadStream)
+      init((ReadStream) is);
+    else if (is != null)
+      init(new ReadStream(new VfsStream(is, null)));
   }
 
   protected ReadStreamInput(LineReader lineReader)
@@ -203,7 +212,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public StringValue readLine(long length)
     throws IOException
   {
-    return _lineReader.readLine(this, length);
+    return getLineReader().readLine(this, length);
   }
 
   /**
@@ -277,6 +286,14 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public Value stat()
   {
     return BooleanValue.FALSE;
+  }
+
+  private LineReader getLineReader()
+  {
+    if (_lineReader == null)
+      _lineReader = new LineReader();
+
+    return _lineReader;
   }
 
   /**

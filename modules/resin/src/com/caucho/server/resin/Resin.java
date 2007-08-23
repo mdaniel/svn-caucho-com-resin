@@ -880,6 +880,10 @@ public class Resin implements EnvironmentBean, SchemaBean
         _configServer = argv[i + 1];
         i += 2;
       }
+      else if (argv[i].equals("-service")) {
+	// windows service
+	i += 1;
+      }
       else if (argv[i].equals("-socketwait") ||
                argv[i].equals("--socketwait") ||
                argv[i].equals("-pingwait") ||

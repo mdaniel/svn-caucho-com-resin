@@ -54,6 +54,11 @@ public class LineReader
     this(FileModule.INI_AUTO_DETECT_LINE_ENDINGS.getAsBoolean(env));
   }
 
+  public LineReader()
+  {
+    this(false);
+  }
+
   /**
    * Reads a line from the BinaryInput, returning null on EOF.
    */

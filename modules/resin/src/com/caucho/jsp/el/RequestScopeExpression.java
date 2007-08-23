@@ -61,7 +61,7 @@ public class RequestScopeExpression extends AbstractValueExpression
     throws ELException
   {
     if (! (env instanceof ServletELContext))
-      return env.getELResolver().getValue(env, null, "headerValues");
+      return env.getELResolver().getValue(env, null, "requestScope");
 
     ServletELContext servletEnv = (ServletELContext) env;
     

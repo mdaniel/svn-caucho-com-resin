@@ -103,6 +103,23 @@ public class StaticFunction extends JavaInvoker {
   {
     try {
       return _method.invoke(_quercusModule, javaArgs);
+    } catch (IllegalArgumentException e) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(_method.getDeclaringClass().getName());
+      sb.append(".");
+      sb.append(_method.getName());
+      sb.append("(");
+
+      for (int i = 0; i < javaArgs.length; i++) {
+	if (i != 0)
+	  sb.append(", ");
+
+	sb.append(javaArgs[i]);
+      }
+      
+      sb.append(")");
+
+      throw new IllegalArgumentException(sb.toString(), e);
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {

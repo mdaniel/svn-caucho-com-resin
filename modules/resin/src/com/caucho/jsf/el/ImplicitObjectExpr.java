@@ -72,7 +72,7 @@ public class ImplicitObjectExpr extends Expr {
     
     if (context == null)
       return null;
-    
+
     switch (_code) {
     case APPLICATION:
       return context.getExternalContext().getContext();

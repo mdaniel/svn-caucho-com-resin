@@ -307,14 +307,16 @@ public class WebApp extends ServletContextImpl
     _appDir = controller.getRootDirectory();
 
     try {
-      _classLoader = new EnvironmentClassLoader(controller.getParentClassLoader());
+      _classLoader
+	= new EnvironmentClassLoader(controller.getParentClassLoader(),
+				     "web-app:" + getURL());
 
       // the JSP servlet needs to initialize the JspFactory
       JspServlet.initStatic();
 
       _classLoader.addParentPriorityPackages(_classLoaderHackPackages);
 
-      _classLoader.setId("web-app:" + getURL());
+      // _classLoader.setId("web-app:" + getURL());
 
       _appLocal.set(this, _classLoader);
 

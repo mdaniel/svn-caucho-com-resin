@@ -145,7 +145,7 @@ public class Server extends ProtocolDispatchServer
   private Alarm _alarm;
   private AbstractCache _cache;
 
-  private boolean _isBindPortsAtEnd;
+  private boolean _isBindPortsAtEnd = true;
   private volatile boolean _isStartedPorts;
 
   private long _startTime;
@@ -1103,6 +1103,7 @@ public class Server extends ProtocolDispatchServer
 
       if (! _isBindPortsAtEnd) {
         bindPorts();
+	startPorts();
       }
 
       _lifecycle.toActive();
@@ -1114,9 +1115,9 @@ public class Server extends ProtocolDispatchServer
       // will only occur if bind-ports-at-end is true
       if (_isBindPortsAtEnd) {
         bindPorts();
+	startPorts();
       }
 
-      startPorts();
 
       _alarm.queue(ALARM_INTERVAL);
     } catch (Throwable e) {

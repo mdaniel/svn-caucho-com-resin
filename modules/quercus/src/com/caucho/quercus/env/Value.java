@@ -748,7 +748,6 @@ abstract public class Value implements java.io.Serializable
    */
   public InputStream toInputStream()
   {
-    System.out.println("TOIS: " + getClass());
     return new StringInputStream(toString());
   }
 
