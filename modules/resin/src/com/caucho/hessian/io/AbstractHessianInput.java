@@ -422,6 +422,7 @@ abstract public class AbstractHessianInput {
     throws IOException;
   
   public void close()
+    throws IOException
   {
   }
 }
