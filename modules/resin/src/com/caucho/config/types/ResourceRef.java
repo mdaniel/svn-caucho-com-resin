@@ -64,6 +64,8 @@ public class ResourceRef implements Validator {
   private BuilderProgram _init;
   private HashMap<String,String> _params = new HashMap<String,String>();
 
+  private InjectionTarget _injectionTarget;
+
   /**
    * Sets the id
    */
@@ -85,6 +87,14 @@ public class ResourceRef implements Validator {
   public void setDescription(String description)
   {
     _description = description;
+  }
+
+  /**
+   * Sets the injection-target
+   */
+  public void setInjectionTarget(InjectionTarget injectionTarget)
+  {
+    _injectionTarget = injectionTarget;
   }
 
   /**
@@ -134,6 +144,14 @@ public class ResourceRef implements Validator {
   }
 
   /**
+   * Gets the injection-target
+   */
+  public InjectionTarget getInjectionTarget()
+  {
+    return _injectionTarget;
+  }
+
+  /**
    * Gets the type;
    */
   public Class getResType()
@@ -175,7 +193,7 @@ public class ResourceRef implements Validator {
     if (_init == null && _params.size() == 0) {
       return;
     }
-    
+
     Class cl = _type;
 
     if (javax.sql.DataSource.class.equals(_type))
@@ -200,7 +218,7 @@ public class ResourceRef implements Validator {
 
     if (obj instanceof ClassLoaderListener) {
       ClassLoaderListener listener = (ClassLoaderListener) obj;
-      
+
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       for (; loader != null; loader = loader.getParent()) {
         if (loader instanceof EnvironmentClassLoader) {
@@ -221,7 +239,7 @@ public class ResourceRef implements Validator {
     throws ConfigException
   {
     Object obj = null;
-    
+
     try {
       obj = new InitialContext().lookup("java:comp/env/" + _name);
     } catch (NamingException e) {
@@ -230,7 +248,7 @@ public class ResourceRef implements Validator {
 
     if (obj == null)
       throw error(L.l("resource-ref '{0}' was not configured.  All resources defined by <resource-ref> tags must be defined in a configuration file.",
-		      _name));
+                      _name));
   }
 
   public ConfigException error(String msg)

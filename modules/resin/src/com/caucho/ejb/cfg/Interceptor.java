@@ -64,6 +64,9 @@ public class Interceptor {
   private PreDestroyConfig _preDestroyConfig;
   private PostConstructConfig _postConstructConfig;
 
+  private PrePassivateConfig _prePassivateConfig;
+  private PostActivateConfig _postActivateConfig;
+
   private String _postConstructMethodName;
 
   private ClassLoader _loader;
@@ -164,6 +167,11 @@ public class Interceptor {
     return _postConstructMethodName;
   }
 
+  public PostActivateConfig getPostActivate()
+  {
+    return _postActivateConfig;
+  }
+
   public PostConstructConfig getPostConstruct()
   {
     return _postConstructConfig;
@@ -174,9 +182,19 @@ public class Interceptor {
     return _preDestroyConfig;
   }
 
+  public PrePassivateConfig getPrePassivate()
+  {
+    return _prePassivateConfig;
+  }
+
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
   {
     _aroundInvokeConfig = aroundInvoke;
+  }
+
+  public void setPostActivate(PostActivateConfig postActivate)
+  {
+    _postActivateConfig = postActivate;
   }
 
   public void setPostConstruct(PostConstructConfig postConstruct)
@@ -187,6 +205,11 @@ public class Interceptor {
   public void setPreDestroy(PreDestroyConfig preDestroy)
   {
     _preDestroyConfig = preDestroy;
+  }
+
+  public void setPrePassivate(PrePassivateConfig prePassivate)
+  {
+    _prePassivateConfig = prePassivate;
   }
 
   public String toString()

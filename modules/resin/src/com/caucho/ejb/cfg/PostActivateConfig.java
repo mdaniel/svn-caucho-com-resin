@@ -30,7 +30,7 @@
 package com.caucho.ejb.cfg;
 
 /**
- * Configuration for pre-destroy.
+ * Configuration for post-activate.
  */
-public class PreDestroyConfig extends LifecycleCallbackType {
+public class PostActivateConfig extends LifecycleCallbackType {
 }

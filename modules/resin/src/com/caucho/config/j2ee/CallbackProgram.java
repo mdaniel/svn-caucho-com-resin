@@ -20,17 +20,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Rodrigo Westrupp
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.config.j2ee;
+
+import com.caucho.config.BuilderProgram;
 
 /**
- * Configuration for pre-destroy.
+ * Base class for callback programs: PostConstructProgram, etc.
  */
-public class PreDestroyConfig extends LifecycleCallbackType {
+public class CallbackProgram extends BuilderProgram
+{
 }

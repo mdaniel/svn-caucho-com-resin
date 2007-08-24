@@ -30,7 +30,7 @@
 package com.caucho.ejb.cfg;
 
 /**
- * Configuration for pre-destroy.
+ * Configuration for pre-passivate.
  */
-public class PreDestroyConfig extends LifecycleCallbackType {
+public class PrePassivateConfig extends LifecycleCallbackType {
 }

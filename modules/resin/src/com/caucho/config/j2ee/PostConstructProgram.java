@@ -40,11 +40,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class PostConstructProgram extends BuilderProgram
+public class PostConstructProgram extends CallbackProgram
 {
   private static final Logger log
-    = Logger.getLogger(JndiFieldInjectProgram.class.getName());
-  private static final L10N L = new L10N(JndiFieldInjectProgram.class);
+    = Logger.getLogger(PostConstructProgram.class.getName());
+  private static final L10N L = new L10N(PostConstructProgram.class);
 
   private Method _init;
 
@@ -64,11 +64,11 @@ public class PostConstructProgram extends BuilderProgram
       throw e;
     } catch (InvocationTargetException e) {
       if (e.getCause() instanceof RuntimeException)
-	throw (RuntimeException) e.getCause();
+        throw (RuntimeException) e.getCause();
       else if (e.getCause() instanceof LineCompileException)
-	throw new LineConfigException(e.getCause().getMessage(), e.getCause());
+        throw new LineConfigException(e.getCause().getMessage(), e.getCause());
       else
-	throw new ConfigException(e.getCause());
+        throw new ConfigException(e.getCause());
     } catch (IllegalAccessException e) {
       throw new ConfigException(e);
     }
@@ -107,7 +107,7 @@ public class PostConstructProgram extends BuilderProgram
 
     for (int i = 0; i < aParam.length; i++) {
       if (! aParam[i].equals(bParam[i]))
-	return false;
+        return false;
     }
 
     return true;

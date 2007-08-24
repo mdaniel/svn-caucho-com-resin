@@ -144,13 +144,16 @@ public class SessionBean extends ClassComponent {
       out.println();
       out.println("try {");
       out.println("  if (ptr != null)");
-      out.println("    ptr.ejbRemove();");
+      // ejb/0fe0: ejbRemove() can be private, out.println("    ptr.ejbRemove();");
+      out.println("    invokeMethod(ptr, \"ejbRemove\", new Class[] {}, new Object[] {});");
       out.println("} catch (Throwable e) {");
       out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
       out.println("}");
     }
     out.popDepth();
     out.println("}");
+
+    generateInvokeMethod(out);
   }
 
   protected void generateNewInstance(JavaWriter out)
@@ -269,10 +272,10 @@ public class SessionBean extends ClassComponent {
     out.println("__caucho_initInjection();");
 
     out.println();
-    out.println("__caucho_callInterceptorsPostConstruct();");
+    out.println("context.getServer().initInstance(this);");
 
     out.println();
-    out.println("context.getServer().initInstance(this);");
+    out.println("__caucho_callInterceptorsPostConstruct();");
 
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
@@ -295,6 +298,7 @@ public class SessionBean extends ClassComponent {
     out.pushDepth();
 
     out.println("Class cl;");
+    out.println("Class methodParamTypes[] = new Class[] { javax.interceptor.InvocationContext.class };");
     out.println();
 
     StringBuilder interceptors = new StringBuilder();
@@ -334,7 +338,7 @@ public class SessionBean extends ClassComponent {
 
       out.println("}");
 
-      generateCallReflectionGetMethod(out, "method" + j, aroundInvokeMethodName, "cl" + j);
+      generateCallReflectionGetMethod(out, "method" + j, aroundInvokeMethodName, "methodParamTypes", "cl" + j);
 
       out.println();
     }
@@ -353,7 +357,7 @@ public class SessionBean extends ClassComponent {
       interceptors.append("this");
       interceptorMethods.append(aroundInvokeMethodName);
 
-      generateCallReflectionGetMethod(out, aroundInvokeMethodName, aroundInvokeMethodName, "getClass()");
+      generateCallReflectionGetMethod(out, aroundInvokeMethodName, aroundInvokeMethodName, "methodParamTypes", "getClass()");
     }
 
     // XXX: invocation context pool ???
@@ -395,6 +399,8 @@ public class SessionBean extends ClassComponent {
     out.println("try {");
     out.pushDepth();
 
+    out.println("Class methodParamTypes[] = new Class[] { javax.interceptor.InvocationContext.class };");
+
     i = 0;
 
     for (Interceptor interceptor : _bean.getInterceptors()) {
@@ -414,7 +420,7 @@ public class SessionBean extends ClassComponent {
 
       out.println("}");
 
-      generateCallReflectionGetMethod(out, "method" + j, postConstructMethodName, "cl" + j);
+      generateCallReflectionGetMethod(out, "method" + j, postConstructMethodName, "methodParamTypes", "cl" + j);
 
       out.println();
     }
@@ -561,6 +567,7 @@ public class SessionBean extends ClassComponent {
   protected void generateCallReflectionGetMethod(JavaWriter out,
                                                  String methodVar,
                                                  String methodName,
+                                                 String paramVar,
                                                  String classVar)
     throws IOException
   {
@@ -570,6 +577,8 @@ public class SessionBean extends ClassComponent {
     out.print(" = __caucho_getMethod(\"");
     out.print(methodName);
     out.print("\", ");
+    out.print(paramVar);
+    out.print(", ");
     out.print(classVar);
     out.println(");");
   }
@@ -582,7 +591,7 @@ public class SessionBean extends ClassComponent {
   {
     // ejb/0fb0
     out.println();
-    out.println("private java.lang.reflect.Method __caucho_getMethod(String methodName, Class cl)");
+    out.println("private java.lang.reflect.Method __caucho_getMethod(String methodName, Class paramTypes[], Class cl)");
     out.println("  throws Exception");
     out.println("{");
     out.pushDepth();
@@ -597,8 +606,7 @@ public class SessionBean extends ClassComponent {
     out.println("try {");
     out.pushDepth();
 
-    out.println("method = cl.getDeclaredMethod(methodName,");
-    out.println("  new Class[] { javax.interceptor.InvocationContext.class });");
+    out.println("method = cl.getDeclaredMethod(methodName, paramTypes);");
 
     out.popDepth();
     out.println("} catch (Exception e) {");
@@ -621,6 +629,38 @@ public class SessionBean extends ClassComponent {
 
     out.println();
     out.println("return method;");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Makes private methods accessible before invoking them.
+   */
+  protected void generateInvokeMethod(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private void invokeMethod(Bean bean, String methodName, Class paramTypes[], Object paramValues[])");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("try {");
+    out.pushDepth();
+
+    out.println("java.lang.reflect.Method m = bean.__caucho_getMethod(methodName, paramTypes, bean.getClass());");
+    out.println("m.setAccessible(true);");
+    out.println("m.invoke(bean, paramValues);");
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.pushDepth();
+
+    out.println("__caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
+    out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
+
+    out.popDepth();
+    out.println("}");
 
     out.popDepth();
     out.println("}");

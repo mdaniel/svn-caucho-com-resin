@@ -32,20 +32,5 @@ package com.caucho.ejb.cfg;
 /**
  * Configuration for post-construct.
  */
-public class PostConstructConfig {
-  private String _lifecycleCallbackMethod;
-
-  public PostConstructConfig()
-  {
-  }
-
-  public String getLifecycleCallbackMethod()
-  {
-    return _lifecycleCallbackMethod;
-  }
-
-  public void setLifecycleCallbackMethod(String lifecycleCallbackMethod)
-  {
-    _lifecycleCallbackMethod = lifecycleCallbackMethod;
-  }
+public class PostConstructConfig extends LifecycleCallbackType {
 }

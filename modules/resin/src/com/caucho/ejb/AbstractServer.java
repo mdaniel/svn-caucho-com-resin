@@ -31,7 +31,7 @@ package com.caucho.ejb;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.bytecode.JClass;
-import com.caucho.ejb.cfg.AroundInvokeConfig;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
@@ -112,6 +112,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected BuilderProgram _initProgram;
 
   private AroundInvokeConfig _aroundInvokeConfig;
+
+  private PreDestroyConfig _preDestroyConfig;
+  private PostConstructConfig _postConstructConfig;
 
   /**
    * Creates a new server container
@@ -787,6 +790,26 @@ abstract public class AbstractServer implements EnvironmentBean {
     throws SQLException
   {
     return getDataSource().getConnection();
+  }
+
+  public PostConstructConfig getPostConstruct()
+  {
+    return _postConstructConfig;
+  }
+
+  public PreDestroyConfig getPreDestroy()
+  {
+    return _preDestroyConfig;
+  }
+
+  public void setPostConstruct(PostConstructConfig postConstruct)
+  {
+    _postConstructConfig = postConstruct;
+  }
+
+  public void setPreDestroy(PreDestroyConfig preDestroy)
+  {
+    _preDestroyConfig = preDestroy;
   }
 
   public String toString()

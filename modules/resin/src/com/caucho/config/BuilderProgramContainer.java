@@ -28,6 +28,7 @@
 
 package com.caucho.config;
 
+import com.caucho.config.j2ee.CallbackProgram;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class BuilderProgramContainer extends BuilderProgram {
   {
     this(NodeBuilder.getCurrentBuilder());
   }
-  
+
   public BuilderProgramContainer(NodeBuilder builder)
   {
     super(builder);
@@ -52,10 +53,12 @@ public class BuilderProgramContainer extends BuilderProgram {
   {
     _programList.add(program);
   }
-  
+
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
+    reorderProgramList();
+
     for (int i = 0; i < _programList.size(); i++) {
       BuilderProgram program = _programList.get(i);
 
@@ -66,17 +69,32 @@ public class BuilderProgramContainer extends BuilderProgram {
   protected Object configureImpl(NodeBuilder builder, Class type)
     throws ConfigException
   {
+    reorderProgramList();
+
     Object bean = null;
-    
+
     for (int i = 0; i < _programList.size(); i++) {
       BuilderProgram program = _programList.get(i);
 
       if (bean == null)
-	bean = program.configureImpl(builder, type);
+        bean = program.configureImpl(builder, type);
       else
-	program.configureImpl(builder, bean);
+        program.configureImpl(builder, bean);
     }
 
     return bean;
+  }
+
+  private void reorderProgramList()
+  {
+    // ejb/4102: callbacks must be called after all field injections.
+    for (int i = 0; i < _programList.size(); i++) {
+      BuilderProgram program = _programList.get(i);
+
+      if (program instanceof CallbackProgram) {
+        _programList.remove(i);
+        _programList.add(program);
+      }
+    }
   }
 }

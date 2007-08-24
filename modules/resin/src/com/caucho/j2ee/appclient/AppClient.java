@@ -31,6 +31,8 @@ package com.caucho.j2ee.appclient;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.types.*;
+import com.caucho.ejb.cfg.PostConstructConfig;
+import com.caucho.ejb.cfg.PreDestroyConfig;
 import com.caucho.el.*;
 import com.caucho.j2ee.J2EEVersion;
 import com.caucho.java.WorkDir;
@@ -95,6 +97,9 @@ public class AppClient implements EnvironmentBean
   private Hashtable _ejbEnv = new Hashtable();
   private Context _ejbContext;
 
+  private PreDestroyConfig _preDestroyConfig;
+  private PostConstructConfig _postConstructConfig;
+
   private AppClient()
   {
     _loader = new EnvironmentClassLoader();
@@ -111,6 +116,16 @@ public class AppClient implements EnvironmentBean
   public static AppClient getLocal()
   {
     return _local.get();
+  }
+
+  public PostConstructConfig getPostConstruct()
+  {
+    return _postConstructConfig;
+  }
+
+  public PreDestroyConfig getPreDestroy()
+  {
+    return _preDestroyConfig;
   }
 
   /**
@@ -186,6 +201,16 @@ public class AppClient implements EnvironmentBean
   public void setMainArgs(String[] mainArgs)
   {
     _mainArgs = mainArgs;
+  }
+
+  public void setPostConstruct(PostConstructConfig postConstruct)
+  {
+    _postConstructConfig = postConstruct;
+  }
+
+  public void setPreDestroy(PreDestroyConfig preDestroy)
+  {
+    _preDestroyConfig = preDestroy;
   }
 
   public void setSchemaLocation(String schemaLocation)

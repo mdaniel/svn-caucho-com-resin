@@ -31,6 +31,7 @@ package com.caucho.ejb.session;
 
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.protocol.AbstractHandle;
@@ -67,6 +68,9 @@ public class SessionServer extends AbstractServer
   private Object _remoteObject;
   private boolean _isInitRemote;
 
+  private PrePassivateConfig _prePassivateConfig;
+  private PostActivateConfig _postActivateConfig;
+
   public SessionServer(EjbServerManager manager)
   {
     super(manager);
@@ -95,11 +99,11 @@ public class SessionServer extends AbstractServer
       /*
         String prefix = getServerManager().getLocalJndiPrefix();
         if (prefix != null)
-        Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
+          Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
 
         prefix = getServerManager().getRemoteJndiPrefix();
         if (prefix != null)
-        Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
+          Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
       */
       Jndi.rebindDeep("java:comp/env/ejbContext", getSessionContext());
       Jndi.rebindDeep("java:comp/env/sessionContext", getSessionContext());
@@ -298,6 +302,26 @@ public class SessionServer extends AbstractServer
   public WebServiceClient createWebServiceClient()
   {
     return new WebServiceClient();
+  }
+
+  public PostActivateConfig getPostActivate()
+  {
+    return _postActivateConfig;
+  }
+
+  public PrePassivateConfig getPrePassivate()
+  {
+    return _prePassivateConfig;
+  }
+
+  public void setPostActivate(PostActivateConfig postActivate)
+  {
+    _postActivateConfig = postActivate;
+  }
+
+  public void setPrePassivate(PrePassivateConfig prePassivate)
+  {
+    _prePassivateConfig = prePassivate;
   }
 
   /**

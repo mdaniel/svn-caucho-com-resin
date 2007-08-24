@@ -41,10 +41,10 @@ import java.io.IOException;
  */
 public class StatelessBean extends SessionBean {
   private static final L10N L = new L10N(StatelessBean.class);
-  
+
   public StatelessBean(EjbSessionBean bean,
-		       JClass ejbClass,
-		       String contextClassName)
+                       JClass ejbClass,
+                       String contextClassName)
   {
     super(bean, ejbClass, contextClassName);
   }
@@ -59,11 +59,11 @@ public class StatelessBean extends SessionBean {
       shortContextName = shortContextName.substring(p + 1);
 
     int freeStackMax = 16;
-    
+
     out.println("protected static final java.util.logging.Logger __caucho_log = com.caucho.log.Log.open(" + _contextClassName + ".class);");
     out.println();
     out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
-    
+
     out.println("private Bean []_freeBeanStack = new Bean[" + freeStackMax + "];");
     out.println("private int _freeBeanTop;");
     out.println();
@@ -72,7 +72,7 @@ public class StatelessBean extends SessionBean {
     out.println("  super(server);");
     out.println("  _xaManager = server.getContainer().getTransactionManager();");
     out.println("}");
-    
+
     out.println();
     out.println("Bean _ejb_begin(com.caucho.ejb.xa.TransactionContext trans)");
     out.println("  throws javax.ejb.EJBException");
@@ -88,18 +88,19 @@ public class StatelessBean extends SessionBean {
     out.println();
     out.println("try {");
     out.println("  bean = new Bean(this);");
-    
+
     if (hasMethod("ejbCreate", new JClass[0])) {
-      out.println("  bean.ejbCreate();");
+      // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");
+      out.println("  invokeMethod(bean, \"ejbCreate\", new Class[] {}, new Object[] {});");
     }
-      
+
     out.println("  return bean;");
     out.println("} catch (Exception e) {");
     out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
     out.println("}");
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("void _ejb_free(Bean bean)");
     out.println("  throws javax.ejb.EJBException");
@@ -114,15 +115,16 @@ public class StatelessBean extends SessionBean {
     out.println("    return;");
     out.println("  }");
     out.println("}");
-    
+
     if (hasMethod("ejbRemove", new JClass[0])) {
       out.println();
-      out.println("bean.ejbRemove();");
+      // ejb/0fe0: ejbRemove() can be private, out.println("bean.ejbRemove();");
+      out.println("invokeMethod(bean, \"ejbRemove\", new Class[] {}, new Object[] {});");
     }
-    
+
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("public void destroy()");
     out.println("{");
@@ -130,22 +132,23 @@ public class StatelessBean extends SessionBean {
     out.println("Bean ptr;");
     out.println("Bean []freeBeanStack;");
     out.println("int freeBeanTop;");
-    
+
     out.println("synchronized (this) {");
     out.println("  freeBeanStack = _freeBeanStack;");
     out.println("  freeBeanTop = _freeBeanTop;");
     out.println("  _freeBeanStack = null;");
     out.println("  _freeBeanTop = 0;");
     out.println("}");
-    
+
     if (hasMethod("ejbRemove", new JClass[0])) {
       out.println();
       out.println("for (int i = 0; i < freeBeanTop; i++) {");
       out.pushDepth();
-      
+
       out.println("try {");
       out.println("  if (freeBeanStack[i] != null)");
-      out.println("    freeBeanStack[i].ejbRemove();");
+      // ejb/0fe0: ejbRemove() can be private out.println("    freeBeanStack[i].ejbRemove();");
+      out.println("    invokeMethod(freeBeanStack[i], \"ejbRemove\", new Class[] {}, new Object[] {});");
       out.println("} catch (Throwable e) {");
       out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
       out.println("}");
@@ -155,6 +158,8 @@ public class StatelessBean extends SessionBean {
     }
     out.popDepth();
     out.println("}");
+
+    generateInvokeMethod(out);
   }
 
   protected void generateNewInstance(JavaWriter out)

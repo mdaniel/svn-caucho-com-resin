@@ -268,6 +268,26 @@ public class EjbSessionBean extends EjbBean {
     else {
       setLocalWrapper(interfaceList.get(0));
     }
+
+    // ejb/0f6f
+    // The session bean might have @RemoteHome for EJB 2.1 and
+    // the @Remote interface for EJB 3.0 (same with @LocalHome and @Local).
+    // TCK: ejb30/bb/session/stateful/sessioncontext/annotated
+
+    JClass ejbClass = getEJBClassWrapper();
+
+    JAnnotation localHomeAnn = ejbClass.getAnnotation(LocalHome.class);
+
+    if (localHomeAnn != null) {
+      setLocalHome((Class) localHomeAnn.get("value"));
+    }
+
+    JAnnotation remoteHomeAnn = ejbClass.getAnnotation(RemoteHome.class);
+
+    // ejb/0f6f
+    if (remoteHomeAnn != null) {
+      setHome((Class) remoteHomeAnn.get("value"));
+    }
   }
 
   /**
@@ -545,11 +565,17 @@ public class EjbSessionBean extends EjbBean {
         if (! isAllowPOJO())
           validateException(method, CreateException.class);
 
+        /* XXX: ejb/0f6f
+
+           The session bean might have @RemoteHome for EJB 2.1 and the @Remote interface for EJB 3.0
+           TCK: ejb30/bb/session/stateful/sessioncontext/annotated
+
         if (! retType.equals(objectClass))
           throw error(L.l("{0}: '{1}' must return {2}.  Create methods must return the local or remote interface.",
                           homeName,
                           method.getFullName(),
                           objectClass.getName()));
+        */
 
         String createName = "ejbC" + name.substring(1);
         JMethod implMethod =

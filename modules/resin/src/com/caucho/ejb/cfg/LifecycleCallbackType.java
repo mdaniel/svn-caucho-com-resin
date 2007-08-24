@@ -30,7 +30,33 @@
 package com.caucho.ejb.cfg;
 
 /**
- * Configuration for pre-destroy.
+ * Generic configuration for callbacks: post-construct, pre-destroy, etc.
  */
-public class PreDestroyConfig extends LifecycleCallbackType {
+public class LifecycleCallbackType {
+  private String _lifecycleCallbackClass;
+  private String _lifecycleCallbackMethod;
+
+  public LifecycleCallbackType()
+  {
+  }
+
+  public String getLifecycleCallbackClass()
+  {
+    return _lifecycleCallbackClass;
+  }
+
+  public String getLifecycleCallbackMethod()
+  {
+    return _lifecycleCallbackMethod;
+  }
+
+  public void setLifecycleCallbackClass(String lifecycleCallbackClass)
+  {
+    _lifecycleCallbackClass = lifecycleCallbackClass;
+  }
+
+  public void setLifecycleCallbackMethod(String lifecycleCallbackMethod)
+  {
+    _lifecycleCallbackMethod = lifecycleCallbackMethod;
+  }
 }
