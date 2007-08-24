@@ -46,6 +46,19 @@ public class ProgramAttributeStrategy extends AttributeStrategy {
   {
     _method = method;
   }
+
+  /**
+   * Returns true for a program, i.e. non-executing strategy.
+   */
+  public boolean isProgram()
+  {
+    return true;
+  }
+
+  public boolean isBean()
+  {
+    return false;
+  }
   
   /**
    * Gets the attribute's method
@@ -61,11 +74,6 @@ public class ProgramAttributeStrategy extends AttributeStrategy {
   public void setMethod(Method method)
   {
     _method = method;
-  }
-
-  public boolean isBean()
-  {
-    return false;
   }
 
   /**

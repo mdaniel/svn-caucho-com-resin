@@ -225,6 +225,8 @@ public class NodeBuilder {
     else if (attrName.startsWith("xmlns"))
       return;
 
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
     NodeBuilder oldBuilder = getCurrentBuilder();
     try {
       setCurrentBuilder(this);
@@ -245,6 +247,7 @@ public class NodeBuilder {
       throw error(e, attribute);
     } finally {
       setCurrentBuilder(oldBuilder);
+      thread.setContextClassLoader(oldLoader);
     }
   }
 
@@ -353,6 +356,11 @@ public class NodeBuilder {
       }
       else
 	return;
+
+      if (attrStrategy.isProgram()) {
+	attrStrategy.configure(this, bean, qName, childNode);
+	return;
+      }
 
       Object childBean = createResinType(childNode);
     

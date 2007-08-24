@@ -45,6 +45,14 @@ public abstract class AttributeStrategy {
   protected AttributeStrategy()
   {
   }
+
+  /**
+   * Returns true for a program, i.e. non-executing strategy.
+   */
+  public boolean isProgram()
+  {
+    return false;
+  }
  
   /**
    * Configures the parent object with the given node.

@@ -51,6 +51,12 @@ public class CollectionProperty extends JaxbProperty {
     
     _getter = getter;
   }
+
+  @Override
+  public boolean isBean()
+  {
+    return false;
+  }
  
   /**
    * Configures the parent object with the given node.

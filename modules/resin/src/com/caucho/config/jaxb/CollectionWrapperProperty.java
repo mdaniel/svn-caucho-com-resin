@@ -51,6 +51,12 @@ public class CollectionWrapperProperty extends JaxbProperty {
   {
     return _wrapperType.getAttributeMap();
   }
+
+  @Override
+  public boolean isBean()
+  {
+    return false;
+  }
  
   /**
    * Configures the parent object with the given node.

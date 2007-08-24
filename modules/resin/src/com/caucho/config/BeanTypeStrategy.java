@@ -112,11 +112,6 @@ public class BeanTypeStrategy extends TypeStrategy {
     _setSystemId = findMethod("setConfigSystemId",
                               new Class[] { String.class  });
 
-    /*
-    _setSystemId = findMethod("setConfigSystemId",
-                              new Class[0] { String.class });
-    */
-
     _setNode = findMethod("setConfigNode", new Class[] { Node.class });
   }
 
@@ -196,6 +191,13 @@ public class BeanTypeStrategy extends TypeStrategy {
 	int line = qNode.getLine();
 
 	_setLocation.invoke(bean, filename, line);
+      }
+      
+      if (_setSystemId != null && node instanceof QAbstractNode) {
+	String systemId = node.getBaseURI();
+
+	if (systemId != null)
+	  _setSystemId.invoke(bean, systemId);
       }
        
       if (_addDependency != null) {
