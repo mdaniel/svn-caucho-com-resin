@@ -55,8 +55,8 @@ public class JavaRegexpModule
 {
   private static final L10N L = new L10N(RegexpModule.class);
 
-  private static final int REGEXP_EVAL = 0x01;
-  private static final int REGEXP_UNICODE = 0x02;
+  public static final int PREG_REPLACE_EVAL = 0x01;
+  public static final int PCRE_UTF8 = 0x02;
 
   public static final int PREG_PATTERN_ORDER = 0x01;
   public static final int PREG_SET_ORDER = 0x02;
@@ -178,7 +178,7 @@ public class JavaRegexpModule
    *
    * @param env the calling environment
    */
-  public static int preg_match(Env env,
+  public static Value preg_match(Env env,
           StringValue regexp,
           StringValue subject,
           @Optional @Reference Value matchRef,
@@ -187,7 +187,7 @@ public class JavaRegexpModule
   {
     if (regexp.length() < 2) {
       env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
-      return 0;
+      return BooleanValue.FALSE;
     }
 
     PCREPattern pcrePattern = _namePatternCache.get(regexp);
@@ -209,7 +209,7 @@ public class JavaRegexpModule
 
     if ((matcher == null) || (! (matcher.find(offset)))) {
       matchRef.set(regs);
-      return 0;
+      return LongValue.ZERO;
     }
 
     boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
@@ -275,7 +275,7 @@ public class JavaRegexpModule
       matchRef.set(regs);
     }
 
-    return 1;
+    return LongValue.ONE;
   }
 
   /**
@@ -283,7 +283,7 @@ public class JavaRegexpModule
    *
    * @param env the calling environment
    */
-  public static int preg_match_all(Env env,
+  public static Value preg_match_all(Env env,
           StringValue regexp,
           StringValue subject,
           @Reference Value matchRef,
@@ -292,7 +292,7 @@ public class JavaRegexpModule
   {
     if (regexp.length() < 2) {
       env.warning(L.l("Pattern must have at least opening and closing delimiters"));
-      return 0;
+      return LongValue.ZERO;
     }
 
     if ((flags & PREG_PATTERN_ORDER) == 0) {
@@ -304,7 +304,7 @@ public class JavaRegexpModule
     else {
       if ((flags & PREG_SET_ORDER) != 0) {
         env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
-        return 0;
+        return LongValue.ZERO;
       }
     }
 
@@ -352,7 +352,7 @@ public class JavaRegexpModule
    *
    * @param env the calling environment
    */
-  public static int pregMatchAllPatternOrder(Env env,
+  public static Value pregMatchAllPatternOrder(Env env,
           PCREPattern pcrePattern,
           StringValue subject,
           ArrayValue matches,
@@ -379,7 +379,7 @@ public class JavaRegexpModule
     }
 
     if (matcher == null || (! (matcher.find()))) {
-      return 0;
+      return LongValue.ZERO;
     }
 
     int count = 0;
@@ -414,7 +414,7 @@ public class JavaRegexpModule
       }
     } while (matcher.find());
 
-    return count;
+    return LongValue.create(count);
   }
 
   /**
@@ -422,7 +422,7 @@ public class JavaRegexpModule
    *
    * @param env the calling environment
    */
-  private static int pregMatchAllSetOrder(Env env,
+  private static Value pregMatchAllSetOrder(Env env,
           PCREPattern pattern,
           StringValue subject,
           ArrayValue matches,
@@ -432,7 +432,7 @@ public class JavaRegexpModule
     Matcher matcher = pattern.matcher(env, subject);
 
     if ((matcher == null) || (! (matcher.find()))) {
-      return 0;
+      return LongValue.ZERO;
     }
 
     int count = 0;
@@ -494,7 +494,7 @@ public class JavaRegexpModule
       }
     } while (matcher.find());
 
-    return count;
+    return LongValue.create(count);
   }
 
   /**
@@ -709,7 +709,7 @@ public class JavaRegexpModule
 
     // check for e modifier in patternString
     int patternFlags = regexpFlags(patternString);
-    boolean isEval = (patternFlags & REGEXP_EVAL) != 0;
+    boolean isEval = (patternFlags & PREG_REPLACE_EVAL) != 0;
 
     ArrayList<Replacement> replacementProgram
     = _replacementCache.get(replacement);
@@ -1343,9 +1343,9 @@ public class JavaRegexpModule
       if (ch == delim)
         break;
       else if (ch == 'e')
-        flags |= REGEXP_EVAL;
+        flags |= PREG_REPLACE_EVAL;
       else if (ch == 'u')
-        flags |= REGEXP_UNICODE;
+        flags |= PCRE_UTF8;
     }
 
     if (tail <= 0)
@@ -2248,7 +2248,7 @@ public class JavaRegexpModule
 
     private boolean isUnicode()
     {
-      return (_flags & REGEXP_UNICODE) != 0;
+      return (_flags & PCRE_UTF8) != 0;
     }
 
     private void add(int group, StringValue name)

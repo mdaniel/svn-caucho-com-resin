@@ -35,6 +35,8 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.JavaModule;
+import com.caucho.quercus.lib.regexp.JavaRegexpModule.GroupNeighborMap;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -53,10 +55,13 @@ import java.util.regex.Pattern;
 public class CauchoRegexpModule
   extends AbstractQuercusModule
 {
+  private static final Logger log =
+    Logger.getLogger(RegexpModule.class.getName());
+  
   private static final L10N L = new L10N(RegexpModule.class);
 
-  private static final int REGEXP_EVAL = 0x01;
-  private static final int REGEXP_UNICODE = 0x02;
+  public static final int PREG_REPLACE_EVAL = 0x01;
+  public static final int PCRE_UTF8 = 0x02;
 
   public static final int PREG_PATTERN_ORDER = 0x01;
   public static final int PREG_SET_ORDER = 0x02;
@@ -69,9 +74,6 @@ public class CauchoRegexpModule
   public static final int PREG_GREP_INVERT = 1;
 
   public static final boolean [] PREG_QUOTE = new boolean[256];
-
-  private static final LruCache<StringValue, PCREPattern> _namePatternCache
-  = new LruCache<StringValue, PCREPattern>(1024);
 
   private static final LruCache<StringValue, Regexp> _regexpCache
   = new LruCache<StringValue, Regexp>(1024);
@@ -97,7 +99,7 @@ public class CauchoRegexpModule
           StringValue string,
           @Optional @Reference Value regsV)
   {
-    return ereg(env, pattern, string, regsV, 0);
+    return eregImpl(env, pattern, string, regsV, false);
   }
 
   /**
@@ -110,7 +112,7 @@ public class CauchoRegexpModule
           StringValue string,
           @Optional @Reference Value regsV)
   {
-    return ereg(env, pattern, string, regsV, Pattern.CASE_INSENSITIVE);
+    return eregImpl(env, pattern, string, regsV, true);
   }
 
   /**
@@ -118,49 +120,60 @@ public class CauchoRegexpModule
    *
    * @param env the calling environment
    */
-  protected static Value ereg(Env env,
-          StringValue rawPattern,
-          StringValue string,
-          Value regsV,
-          int flags)
+  protected static Value eregImpl(Env env,
+                                  StringValue rawPattern,
+                                  StringValue string,
+                                  Value regsV,
+                                  boolean isCaseInsensitive)
   {
-    String cleanPattern = cleanEregRegexp(rawPattern, false);
+    StringValue cleanPattern = cleanEregRegexp(rawPattern, false);
+    
+    if (isCaseInsensitive)
+      cleanPattern = addDelimiters(env, cleanPattern, "/", "/i");
+    else
+      cleanPattern = addDelimiters(env, cleanPattern, "/", "/");
 
-    Pattern pattern = Pattern.compile(cleanPattern, flags);
-    Matcher matcher = pattern.matcher(string);
+    try {
+      Regexp regexp = getRegexp(env, cleanPattern, string);
 
-    if (! (matcher.find())) {
-      return BooleanValue.FALSE;
-    }
-
-    if (regsV != null && ! (regsV instanceof NullValue)) {
-      ArrayValue regs = new ArrayValueImpl();
-      regsV.set(regs);
-
-      regs.put(LongValue.ZERO, new UnicodeValueImpl(matcher.group()));
-      int count = matcher.groupCount();
-
-      for (int i = 1; i <= count; i++) {
-        String group = matcher.group(i);
-
-        Value value;
-        if (group == null)
-          value = BooleanValue.FALSE;
-        else
-          value = new UnicodeValueImpl(group);
-
-        regs.put(new LongValue(i), value);
+      if (! (regexp.find())) {
+        return BooleanValue.FALSE;
       }
 
-      int len = matcher.end() - matcher.start();
+      if (regsV != null && ! (regsV instanceof NullValue)) {
+        ArrayValue regs = new ArrayValueImpl();
+        regsV.set(regs);
 
-      if (len == 0)
+        regs.put(LongValue.ZERO, regexp.group(env));
+        int count = regexp.groupCount();
+
+        for (int i = 1; i <= count; i++) {
+          StringValue group = regexp.group(env, i);
+
+          Value value;
+          if (group == null)
+            value = BooleanValue.FALSE;
+          else
+            value = group;
+
+          regs.put(new LongValue(i), value);
+        }
+
+        int len = regexp.end() - regexp.start();
+
+        if (len == 0)
+          return LongValue.ONE;
+        else
+          return new LongValue(len);
+      }
+      else {
         return LongValue.ONE;
-      else
-        return new LongValue(len);
-    }
-    else {
-      return LongValue.ONE;
+      }
+    } catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
     }
   }
 
@@ -178,108 +191,102 @@ public class CauchoRegexpModule
    *
    * @param env the calling environment
    */
-  public static int preg_match(Env env,
+  public static Value preg_match(Env env,
                                StringValue regexpValue,
                                StringValue subject,
                                @Optional @Reference Value matchRef,
                                @Optional int flags,
                                @Optional int offset)
   {
-    if (regexpValue.length() < 2) {
-      env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
-      return 0;
-    }
-
-    PCREPattern pcrePattern = _namePatternCache.get(regexpValue);
-
-    if (pcrePattern == null) {
-      pcrePattern = new PCREPattern(env, regexpValue);
-
-      _namePatternCache.put(regexpValue, pcrePattern);
-    }
-
-    Regexp regexp = pcrePattern.getRegexp(subject.toString());
-
-    ArrayValue regs;
-
-    if (matchRef instanceof DefaultValue)
-      regs = null;
-    else
-      regs = new ArrayValueImpl();
-
-    if ((regexp == null) || (! (regexp.find(offset)))) {
-      matchRef.set(regs);
-      return 0;
-    }
-
-    boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
-
-    if (regs != null) {
-      if (isOffsetCapture) {
-        ArrayValueImpl part = new ArrayValueImpl();
-        part.append(new UnicodeValueImpl(regexp.group()));
-        part.append(new LongValue(regexp.start()));
-
-        regs.put(LongValue.ZERO, part);
+    try {
+      if (regexpValue.length() < 2) {
+        env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
+        return LongValue.ZERO;
       }
+
+      Regexp regexp = getRegexp(env, regexpValue, subject);
+
+      ArrayValue regs;
+
+      if (matchRef instanceof DefaultValue)
+        regs = null;
       else
-        regs.put(LongValue.ZERO, new UnicodeValueImpl(regexp.group()));
+        regs = new ArrayValueImpl();
 
-      int count = regexp.groupCount();
-
-      for (int i = 1; i <= count; i++) {
-        String group = regexp.group(i);
-
-        if (group == null)
-          continue;
-
-        if (isOffsetCapture) {
-          // php/151u
-          // add unmatched groups first
-          for (int j = regs.getSize(); j < i; j++) {
-            ArrayValue part = new ArrayValueImpl();
-
-            part.append(StringValue.EMPTY);
-            part.append(LongValue.MINUS_ONE);
-
-            regs.put(new LongValue(j), part);
-          }
-
-          ArrayValueImpl part = new ArrayValueImpl();
-          part.append(new UnicodeValueImpl(group));
-          part.append(new LongValue(regexp.start(i)));
-
-          /*
-          Value name = pcrePattern.get(i);
-          if (name != null)
-            regs.put(name, part);
-          */
-
-          regs.put(new LongValue(i), part);
-        }
-        else {
-          // php/151u
-          // add unmatched groups first
-          for (int j = regs.getSize(); j < i; j++) {
-            regs.put(new LongValue(j), StringValue.EMPTY);
-          }
-
-          StringValue match = new UnicodeValueImpl(group);
-
-          /*
-          Value name = pcrePattern.get(i);
-          if (name != null)
-            regs.put(name, match);
-          */
-
-          regs.put(new LongValue(i), match);
-        }
+      if ((regexp == null) || (! (regexp.find(offset)))) {
+        matchRef.set(regs);
+        return LongValue.ZERO;
       }
 
-      matchRef.set(regs);
-    }
+      boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
 
-    return 1;
+      if (regs != null) {
+        if (isOffsetCapture) {
+          ArrayValueImpl part = new ArrayValueImpl();
+          part.append(regexp.group(env));
+          part.append(new LongValue(regexp.start()));
+
+          regs.put(LongValue.ZERO, part);
+        }
+        else
+          regs.put(LongValue.ZERO, regexp.group(env));
+
+        int count = regexp.groupCount();
+
+        for (int i = 1; i <= count; i++) {
+          StringValue group = regexp.group(env, i);
+
+          if (group == null)
+            continue;
+
+          if (isOffsetCapture) {
+            // php/151u
+            // add unmatched groups first
+            for (int j = regs.getSize(); j < i; j++) {
+              ArrayValue part = new ArrayValueImpl();
+
+              part.append(StringValue.EMPTY);
+              part.append(LongValue.MINUS_ONE);
+
+              regs.put(new LongValue(j), part);
+            }
+
+            ArrayValueImpl part = new ArrayValueImpl();
+            part.append(group);
+            part.append(new LongValue(regexp.start(i)));
+
+            StringValue name = regexp.getGroupName(i);
+            if (name != null)
+              regs.put(name, part);
+
+            regs.put(new LongValue(i), part);
+          }
+          else {
+            // php/151u
+            // add unmatched groups first
+            for (int j = regs.getSize(); j < i; j++) {
+              regs.put(new LongValue(j), StringValue.EMPTY);
+            }
+
+            StringValue name = regexp.getGroupName(i);
+            if (name != null)
+              regs.put(name, group);
+
+            regs.put(new LongValue(i), group);
+          }
+        }
+
+        matchRef.set(regs);
+      }
+
+      return LongValue.ONE;
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -287,16 +294,17 @@ public class CauchoRegexpModule
    *
    * @param env the calling environment
    */
-  public static int preg_match_all(Env env,
-          StringValue regexp,
+  public static Value preg_match_all(Env env,
+          StringValue rawRegexp,
           StringValue subject,
           @Reference Value matchRef,
           @Optional("PREG_PATTERN_ORDER") int flags,
           @Optional int offset)
   {
-    if (regexp.length() < 2) {
+    try {
+    if (rawRegexp.length() < 2) {
       env.warning(L.l("Pattern must have at least opening and closing delimiters"));
-      return 0;
+      return BooleanValue.FALSE;
     }
 
     if ((flags & PREG_PATTERN_ORDER) == 0) {
@@ -308,17 +316,11 @@ public class CauchoRegexpModule
     else {
       if ((flags & PREG_SET_ORDER) != 0) {
         env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
-        return 0;
+        return BooleanValue.FALSE;
       }
     }
 
-    PCREPattern pcrePattern = _namePatternCache.get(regexp);
-
-    if (pcrePattern == null) {
-      pcrePattern = new PCREPattern(env, regexp);
-
-      _namePatternCache.put(regexp, pcrePattern);
-    }
+    Regexp regexp = getRegexp(env, rawRegexp, subject);
 
     ArrayValue matches;
 
@@ -333,7 +335,7 @@ public class CauchoRegexpModule
 
     if ((flags & PREG_PATTERN_ORDER) != 0) {
       return pregMatchAllPatternOrder(env,
-              pcrePattern,
+              regexp,
               subject,
               matches,
               flags,
@@ -341,7 +343,7 @@ public class CauchoRegexpModule
     }
     else if ((flags & PREG_SET_ORDER) != 0) {
       return pregMatchAllSetOrder(env,
-              pcrePattern,
+              regexp,
               subject,
               matches,
               flags,
@@ -349,6 +351,13 @@ public class CauchoRegexpModule
     }
     else
       throw new UnsupportedOperationException();
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -356,15 +365,13 @@ public class CauchoRegexpModule
    *
    * @param env the calling environment
    */
-  public static int pregMatchAllPatternOrder(Env env,
-          PCREPattern pcrePattern,
+  public static LongValue pregMatchAllPatternOrder(Env env,
+          Regexp regexp,
           StringValue subject,
           ArrayValue matches,
           int flags,
           int offset)
   {
-    Regexp regexp = pcrePattern.getRegexp(subject.toString());
-
     int groupCount = regexp == null ? 0 : regexp.groupCount();
 
     ArrayValue []matchList = new ArrayValue[groupCount + 1];
@@ -372,19 +379,17 @@ public class CauchoRegexpModule
     for (int j = 0; j <= groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
 
-      /*
-      Value patternName = pcrePattern.get(j);
+      StringValue groupName = regexp.getGroupName(j);
       // XXX: named subpatterns causing conflicts with array indexes?
-      if (patternName != null)
-        matches.put(patternName, values);
-      */
+      if (groupName != null)
+        matches.put(groupName, values);
 
       matches.put(values);
       matchList[j] = values;
     }
 
     if (regexp == null || (! (regexp.find()))) {
-      return 0;
+      return LongValue.ZERO;
     }
 
     int count = 0;
@@ -419,7 +424,7 @@ public class CauchoRegexpModule
       }
     } while (regexp.find());
 
-    return count;
+    return LongValue.create(count);
   }
 
   /**
@@ -427,17 +432,15 @@ public class CauchoRegexpModule
    *
    * @param env the calling environment
    */
-  private static int pregMatchAllSetOrder(Env env,
-          PCREPattern pattern,
+  private static LongValue pregMatchAllSetOrder(Env env,
+          Regexp regexp,
           StringValue subject,
           ArrayValue matches,
           int flags,
           int offset)
   {
-    Regexp regexp = pattern.getRegexp(subject.toString());
-
     if ((regexp == null) || (! (regexp.find()))) {
-      return 0;
+      return LongValue.ZERO;
     }
 
     int count = 0;
@@ -499,7 +502,7 @@ public class CauchoRegexpModule
       }
     } while (regexp.find());
 
-    return count;
+    return LongValue.create(count);
   }
 
   /**
@@ -558,26 +561,36 @@ public class CauchoRegexpModule
           @Optional("-1") long limit,
           @Optional @Reference Value count)
   {
-    if (subject instanceof ArrayValue) {
-      ArrayValue result = new ArrayValueImpl();
+    try {
+      if (subject instanceof ArrayValue) {
+        ArrayValue result = new ArrayValueImpl();
 
-      for (Value value : ((ArrayValue) subject).values()) {
-        result.put(pregReplace(env,
-                pattern,
-                replacement,
-                value.toStringValue(),
-                limit,
-                count));
+        for (Value value : ((ArrayValue) subject).values()) {
+          result.put(pregReplace(env,
+                     pattern,
+                     replacement,
+                     value.toStringValue(),
+                     limit,
+                     count));
+        }
+
+        return result;
+
       }
-
-      return result;
-
+      else if (subject.isset()) {
+        return pregReplace(env, pattern, replacement, subject.toStringValue(),
+                           limit, count);
+      } else
+        return StringValue.EMPTY;
     }
-    else if (subject.isset()) {
-      return pregReplace(env, pattern, replacement, subject.toStringValue(),
-              limit, count);
-    } else
-      return StringValue.EMPTY;
+    catch (IllegalRegexpException e) {
+      e.printStackTrace();
+      
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
+    }
 
   }
 
@@ -590,6 +603,7 @@ public class CauchoRegexpModule
           StringValue subject,
           @Optional("-1") long limit,
           Value countV)
+    throws IllegalRegexpException
   {
     StringValue string = subject;
 
@@ -650,6 +664,7 @@ public class CauchoRegexpModule
           StringValue subject,
           long limit,
           Value countV)
+    throws IllegalRegexpException
   {
 
     long numberOfMatches = 0;
@@ -657,9 +672,7 @@ public class CauchoRegexpModule
     if (limit < 0)
       limit = Long.MAX_VALUE;
 
-    Regexp regexp = compileRegexp(patternString);
-
-    regexp.init(subject.toString());
+    Regexp regexp = getRegexp(env, patternString, subject);
 
     StringValue result = new UnicodeBuilderValue();
     int tail = 0;
@@ -677,10 +690,10 @@ public class CauchoRegexpModule
       ArrayValue regs = new ArrayValueImpl();
 
       for (int i = 0; i <= regexp.groupCount(); i++) {
-        String group = regexp.group(i);
+        StringValue group = regexp.group(env, i);
 
         if (group != null)
-          regs.put(new UnicodeValueImpl(group));
+          regs.put(group);
         else
           regs.put(StringValue.EMPTY);
       }
@@ -709,12 +722,12 @@ public class CauchoRegexpModule
           StringValue subject,
           long limit,
           Value countV)
+    throws IllegalRegexpException
   {
-    Regexp regexp = compileRegexp(patternString);
+    Regexp regexp = getRegexp(env, patternString, subject);
 
     // check for e modifier in patternString
-    int patternFlags = regexpFlags(patternString);
-    boolean isEval = (patternFlags & REGEXP_EVAL) != 0;
+    boolean isEval = regexp.isEval();
 
     ArrayList<Replacement> replacementProgram
     = _replacementCache.get(replacement);
@@ -741,27 +754,34 @@ public class CauchoRegexpModule
           StringValue replacement,
           StringValue subject)
   {
-    /*
-    Regexp regexp = compileRegexp(cleanRegexp(patternString, false));
+    try {
+      patternString = cleanEregRegexp(patternString, false);
+      patternString = addDelimiters(env, patternString, "/", "/");
+      
+      Regexp regexp = getRegexp(env, patternString, subject);
 
-    ArrayList<Replacement> replacementProgram
-    = _replacementCache.get(replacement);
+      ArrayList<Replacement> replacementProgram
+        = _replacementCache.get(replacement);
 
-    if (replacementProgram == null) {
-      replacementProgram = compileReplacement(env, replacement, false);
-      _replacementCache.put(replacement, replacementProgram);
+      if (replacementProgram == null) {
+        replacementProgram = compileReplacement(env, replacement, false);
+        _replacementCache.put(replacement, replacementProgram);
+      }
+
+      return pregReplaceStringImpl(env,
+              regexp,
+              replacementProgram,
+              subject,
+              -1,
+              NullValue.NULL,
+              false);
     }
-
-    return pregReplaceStringImpl(env,
-            pattern,
-            replacementProgram,
-            subject,
-            -1,
-            NullValue.NULL,
-            false);
-    */
-    
-    return null;
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -772,23 +792,29 @@ public class CauchoRegexpModule
           StringValue replacement,
           StringValue subject)
   {
-    /*
-    Pattern pattern = Pattern.compile(cleanRegexp(patternString, false),
-            Pattern.CASE_INSENSITIVE);
+    try {
+      patternString = cleanEregRegexp(patternString, false);
+      patternString = addDelimiters(env, patternString, "/", "/i");
+      
+      Regexp regexp = getRegexp(env, patternString, subject);
 
-    ArrayList<Replacement> replacementProgram
-    = _replacementCache.get(replacement);
+      ArrayList<Replacement> replacementProgram
+        = _replacementCache.get(replacement);
 
-    if (replacementProgram == null) {
-      replacementProgram = compileReplacement(env, replacement, false);
-      _replacementCache.put(replacement, replacementProgram);
+      if (replacementProgram == null) {
+        replacementProgram = compileReplacement(env, replacement, false);
+        _replacementCache.put(replacement, replacementProgram);
+      }
+
+      return pregReplaceStringImpl(env, regexp, replacementProgram,
+          subject, -1, NullValue.NULL, false);
     }
-
-    return pregReplaceStringImpl(env, pattern, replacementProgram,
-            subject, -1, NullValue.NULL, false);
-    */
-    
-    return null;
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -806,8 +832,6 @@ public class CauchoRegexpModule
       limit = Long.MAX_VALUE;
 
     int length = subject.length();
-
-    regexp.init(subject.toString());
 
     UnicodeBuilderValue result = null;
     int tail = 0;
@@ -882,29 +906,37 @@ public class CauchoRegexpModule
           @Optional("-1") long limit,
           @Optional @Reference Value count)
   {
-    if (subject instanceof ArrayValue) {
-      ArrayValue result = new ArrayValueImpl();
+    try {
+      if (subject instanceof ArrayValue) {
+        ArrayValue result = new ArrayValueImpl();
 
-      for (Value value : ((ArrayValue) subject).values()) {
-        result.put(pregReplaceCallback(env,
-                pattern.toStringValue(),
-                fun,
-                value.toStringValue(),
-                limit,
-                count));
-      }
-
-      return result;
-
-    } else if (subject instanceof StringValue) {
-      return pregReplaceCallback(env,
+        for (Value value : ((ArrayValue) subject).values()) {
+          result.put(pregReplaceCallback(env,
               pattern.toStringValue(),
               fun,
-              subject.toStringValue(),
+              value.toStringValue(),
               limit,
-              count);
-    } else {
-      return NullValue.NULL;
+              count));
+        }
+
+        return result;
+
+      } else if (subject instanceof StringValue) {
+        return pregReplaceCallback(env,
+            pattern.toStringValue(),
+            fun,
+            subject.toStringValue(),
+            limit,
+            count);
+      } else {
+        return NullValue.NULL;
+      }
+    }
+    catch (IllegalRegexpException e) { 
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
     }
   }
 
@@ -917,6 +949,7 @@ public class CauchoRegexpModule
           StringValue subject,
           @Optional("-1") long limit,
           @Optional @Reference Value countV)
+    throws IllegalRegexpException
   {
     if (limit < 0)
       limit = Long.MAX_VALUE;
@@ -960,11 +993,12 @@ public class CauchoRegexpModule
           @Optional("-1") long limit,
           @Optional int flags)
   {
+    try {
+    
     if (limit <= 0)
       limit = Long.MAX_VALUE;
 
-    Regexp regexp = compileRegexp(patternString);
-    regexp.init(string.toString());
+    Regexp regexp = getRegexp(env, patternString, string);
 
     ArrayValue result = new ArrayValueImpl();
 
@@ -975,6 +1009,9 @@ public class CauchoRegexpModule
     boolean isCaptureOffset = (flags & PREG_SPLIT_OFFSET_CAPTURE) != 0; 
     boolean isCaptureDelim = (flags & PREG_SPLIT_DELIM_CAPTURE) != 0;
 
+    GroupNeighborMap neighborMap
+      = new GroupNeighborMap(regexp.getPattern(), regexp.groupCount());
+    
     while (regexp.find()) {
       int startPosition = head;
       StringValue unmatched;
@@ -1016,13 +1053,28 @@ public class CauchoRegexpModule
           int end = regexp.end(i);
 
           // Skip empty groups
-          if (start == -1) {
+          if (! regexp.isGroupMatched(i)) {
             continue;
           }
 
           // Append empty OR neighboring groups that were skipped
           // php/152r
           if (allowEmpty) {
+            for (int j = i - 1; j >= 1; j--) {
+              if (regexp.isGroupMatched(j))
+                break;
+
+              if (isCaptureOffset) {
+                ArrayValue part = new ArrayValueImpl();
+
+                part.put(StringValue.EMPTY);
+                part.put(LongValue.create(startPosition));
+
+                result.put(part);
+              }
+              else
+                result.put(StringValue.EMPTY);
+            }
           }
 
           if (end - start <= 0 && ! allowEmpty) {
@@ -1062,6 +1114,13 @@ public class CauchoRegexpModule
     }
 
     return result;
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -1104,39 +1163,46 @@ public class CauchoRegexpModule
           StringValue string,
           @Optional("-1") long limit)
   {
-    if (limit < 0)
-      limit = Long.MAX_VALUE;
+    try {
+      if (limit < 0)
+        limit = Long.MAX_VALUE;
 
-    String cleanRegexp = cleanRegexp(patternString, false);
+      patternString = addDelimiters(env, patternString, "/", "/");
+      
+      Regexp regexp = getRegexp(env, patternString, string);
 
-    Pattern pattern = Pattern.compile(cleanRegexp);
+      ArrayValue result = new ArrayValueImpl();
 
-    ArrayValue result = new ArrayValueImpl();
+      long count = 0;
+      int head = 0;
 
-    Matcher matcher = pattern.matcher(string);
-    long count = 0;
-    int head = 0;
+      while ((regexp.find()) && (count < limit)) {
+        StringValue value;
+        if (count == limit - 1) {
+          value = regexp.substring(env, head);
+          head = string.length();
+        } else {
+          value = regexp.substring(env, head, regexp.start());
+          head = regexp.end();
+        }
 
-    while ((matcher.find()) && (count < limit)) {
-      StringValue value;
-      if (count == limit - 1) {
-        value = string.substring(head);
-        head = string.length();
-      } else {
-        value = string.substring(head, matcher.start());
-        head = matcher.end();
+        result.put(value);
+
+        count++;
       }
 
-      result.put(value);
+      if ((head <= string.length() && (count != limit))) {
+        result.put(regexp.substring(env, head));
+      }
 
-      count++;
+      return result;
+
+    } catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
     }
-
-    if ((head <= string.length() && (count != limit))) {
-      result.put(string.substring(head));
-    }
-
-    return result;
   }
 
   /**
@@ -1154,28 +1220,35 @@ public class CauchoRegexpModule
           ArrayValue input,
           @Optional("0") int flag)
   {
-    if (input == null)
-      return NullValue.NULL;
+    try {
+      if (input == null)
+        return NullValue.NULL;
 
-    Regexp regexp = compileRegexp(patternString);
-    
-    ArrayValue matchArray = new ArrayValueImpl();
+      Regexp regexp = getRegexp(env, patternString);
 
-    for (Map.Entry<Value, Value> entry : input.entrySet()) {
-      Value entryValue = entry.getValue();
-      Value entryKey = entry.getKey();
+      ArrayValue matchArray = new ArrayValueImpl();
 
-      regexp.init(entryValue.toString());
+      for (Map.Entry<Value, Value> entry : input.entrySet()) {
+        Value entryValue = entry.getValue();
+        Value entryKey = entry.getKey();
 
-      boolean found = regexp.find();
+        regexp.init(env, entryValue.toStringValue());
 
-      if (!found && (flag == PREG_GREP_INVERT))
-        matchArray.append(entryKey, entryValue);
-      else if (found && (flag != PREG_GREP_INVERT))
-        matchArray.append(entryKey, entryValue);
+        boolean found = regexp.find();
+
+        if (!found && (flag == PREG_GREP_INVERT))
+          matchArray.append(entryKey, entryValue);
+        else if (found && (flag != PREG_GREP_INVERT))
+          matchArray.append(entryKey, entryValue);
+      }
+
+      return matchArray;
+    } catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
     }
-
-    return matchArray;
   }
 
   /**
@@ -1187,135 +1260,106 @@ public class CauchoRegexpModule
    * @param limit if specified, the maximum number of elements in the array
    * @return an array of strings split around the pattern string
    */
-  public static ArrayValue spliti(Env env,
+  public static Value spliti(Env env,
           StringValue patternString,
           StringValue string,
           @Optional("-1") long limit)
   {
-    if (limit < 0)
-      limit = Long.MAX_VALUE;
+    try {
+      if (limit < 0)
+        limit = Long.MAX_VALUE;
 
-    // php/151c
+      // php/151c
 
-    String cleanRegexp = cleanRegexp(patternString, false);
+      patternString = addDelimiters(env, patternString, "/", "/i");
+      
+      Regexp regexp = getRegexp(env, patternString, string);
 
-    Pattern pattern = Pattern.compile(cleanRegexp, Pattern.CASE_INSENSITIVE);
+      ArrayValue result = new ArrayValueImpl();
 
-    ArrayValue result = new ArrayValueImpl();
+      long count = 0;
+      int head = 0;
 
-    Matcher matcher = pattern.matcher(string);
-    long count = 0;
-    int head = 0;
+      while ((regexp.find()) && (count < limit)) {
+        StringValue value;
+        if (count == limit - 1) {
+          value = string.substring(head);
+          head = string.length();
+        } else {
+          value = string.substring(head, regexp.start());
+          head = regexp.end();
+        }
 
-    while ((matcher.find()) && (count < limit)) {
-      StringValue value;
-      if (count == limit - 1) {
-        value = string.substring(head);
-        head = string.length();
-      } else {
-        value = string.substring(head, matcher.start());
-        head = matcher.end();
+        result.put(value);
+
+        count++;
       }
 
-      result.put(value);
+      if ((head <= string.length()) && (count != limit)) {
+        result.put(string.substring(head));
+      }
 
-      count++;
-    }
+      return result;
 
-    if ((head <= string.length()) && (count != limit)) {
-      result.put(string.substring(head));
-    }
-
-    return result;
-  }
-
-  private static Regexp compileRegexp(StringValue rawRegexp)
-  {
-    return compileRegexp(rawRegexp, 0);
-  }
-
-  private static Regexp compileRegexp(StringValue rawRegexp, int groupCount)
-  {
-    Regexp regexp = _regexpCache.get(rawRegexp);
-
-    if (regexp != null)
-      return regexp;
-
-    if (rawRegexp.length() < 2) {
-      throw new IllegalStateException(L.l(
-              "Can't find delimiters in regexp '{0}'.",
-              rawRegexp));
-    }
-
-    char delim = rawRegexp.charAt(0);
-
-    if (delim == '{')
-      delim = '}';
-    else if (delim == '[')
-      delim = ']';
-    else if (delim == '(')
-      delim = ')';
-    else if (delim == '<')
-      delim = '>';
-
-    int tail = rawRegexp.lastIndexOf(delim);
-
-    if (tail <= 0)
-      throw new IllegalStateException(L.l(
-              "Can't find second {0} in regexp '{1}'.",
-              String.valueOf((char) delim),
-              rawRegexp));
-
-
-    StringValue cleanRegexp = rawRegexp.substring(1, tail);
-    StringValue flags = rawRegexp.substring(tail);
-    
-    try {
-      regexp = new Regexp(cleanRegexp.toString(), flags.toString());
     } catch (IllegalRegexpException e) {
-      throw new QuercusModuleException(e);
-    }
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
       
-    _regexpCache.put(rawRegexp, regexp);
+      return BooleanValue.FALSE;
+    }
+  }
+  
+  private static Regexp getRegexp(Env env,
+                                  StringValue rawRegexp,
+                                  StringValue subject)
+    throws IllegalRegexpException
+  {
+    Regexp regexp = getRegexp(env, rawRegexp);
+
+    regexp.init(env, subject);
 
     return regexp;
   }
 
-  private static int regexpFlags(StringValue rawRegexp)
+  private static Regexp getRegexp(Env env,
+                                  StringValue rawRegexp)
+    throws IllegalRegexpException
   {
-    char delim = rawRegexp.charAt(0);
-    if (delim == '{')
-      delim = '}';
-    else if (delim == '[')
-      delim = ']';
-    else if (delim == '(')
-      delim = ')';
-    else if (delim == '<')
-      delim = '>';
+    Regexp regexp = _regexpCache.get(rawRegexp);
 
-    int len = rawRegexp.length();
+    if (regexp != null)
+      return regexp.clone();
 
-    int flags = 0;
+    regexp = new Regexp(env, rawRegexp);
 
-    int tail = len - 1;
-    for (; tail >= 0; tail--) {
-      char ch = rawRegexp.charAt(tail);
+    _regexpCache.put(rawRegexp, regexp);
 
-      if (ch == delim)
-        break;
-      else if (ch == 'e')
-        flags |= REGEXP_EVAL;
-      else if (ch == 'u')
-        flags |= REGEXP_UNICODE;
+    return regexp;
+  }
+  
+  private static StringValue addDelimiters(Env env,
+                                           StringValue str,
+                                           String startDelim,
+                                           String endDelim)
+  {
+    if (str.isUnicode()) {
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+
+      sb.append(startDelim);
+      sb.append(str);
+      sb.append(endDelim);
+
+      return sb;
     }
+    else {
+      BinaryBuilderValue sb = new BinaryBuilderValue();
 
-    if (tail <= 0)
-      throw new IllegalStateException(L.l(
-              "Can't find second {0} in regexp '{1}'.",
-              String.valueOf((char) delim),
-              rawRegexp));
-
-    return flags;
+      sb.append(startDelim.getBytes());
+      sb.append(str.toBinaryValue(env).toBytes());
+      sb.append(endDelim.getBytes());
+      
+      return sb;
+    }
   }
 
   private static ArrayList<Replacement>
@@ -1340,8 +1384,9 @@ public class CauchoRegexpModule
             i++;
           }
 
-          if (text.length() > 0)
+          if (text.length() > 0) {
             program.add(new TextReplacement(text));
+          }
 
           if (isEval)
             program.add(new GroupEscapeReplacement(group));
@@ -1413,261 +1458,10 @@ public class CauchoRegexpModule
 
   /**
    * Cleans the regexp from valid values that the Java regexps can't handle.
-   */
-  private static String cleanRegexp(StringValue regexp,
-          boolean isComments)
-  {
-    return cleanRegexp(regexp,  isComments, 0);
-  }
-
-  private static String cleanRegexp(StringValue regexp,
-          boolean isComments,
-          int groupCount)
-  {
-    int len = regexp.length();
-
-    StringBuilder sb = new StringBuilder();
-    char quote = 0;
-
-    boolean sawVerticalBar = false;
-
-    for (int i = 0; i < len; i++) {
-      char ch = regexp.charAt(i);
-
-      if (sawVerticalBar) {
-        if ((! Character.isWhitespace(ch)) &&
-                ch != '#' &&
-                ch != '|')
-          sawVerticalBar = false;
-      }
-
-      switch (ch) {
-      case '\\':
-        //sb.append(ch);
-
-        if (i + 1 < len) {
-          i++;
-
-          ch = regexp.charAt(i);
-
-          if (ch == '0') {
-            // Java's regexp requires \0 for octal
-
-            sb.append('\\');
-            sb.append('0'); // php/151l
-            sb.append(ch);
-          }
-          else if ('1' <= ch && ch <= '9') {
-            // parse as int, if is backreference then use it for that, otherwise octal
-            // php/151r, php/1530
-            int backref = 0;
-
-            for (int j = i; j < len && backref <= groupCount; j++)
-            {
-              int digit = regexp.charAt(j);
-
-              if ('0' <= digit && digit <= '9')
-                backref = (backref * 10) + (digit - '0');
-              else
-                break;
-            }
-
-            if (backref <= groupCount)
-              sb.append('\\');
-            else
-              sb.append("\\0");
-
-            sb.append(ch);
-          }
-          else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
-            sb.append('\\');
-
-            int tail = regexp.indexOf('}', i + 1);
-
-            if (tail > 0) {
-              StringValue hex = regexp.substring(i + 2, tail);
-
-              int length = hex.length();
-
-              if (length == 1)
-                sb.append("x0" + hex);
-              else if (length == 2)
-                sb.append("x" + hex);
-              else if (length == 3)
-                sb.append("u0" + hex);
-              else if (length == 4)
-                sb.append("u" + hex);
-              else
-                throw new QuercusRuntimeException(L.l("illegal hex escape"));
-
-              i = tail;
-            }
-            else {
-              sb.append("\\x");
-            }
-          }
-          else if (Character.isLetter(ch)) {
-            switch (ch) {
-            case 'a':
-            case 'c':
-            case 'e':
-            case 'f':
-            case 'n':
-            case 'r':
-            case 't':
-            case 'x':
-            case 'd':
-            case 'D':
-            case 's':
-            case 'S':
-            case 'w':
-            case 'W':
-            case 'b':
-            case 'B':
-            case 'A':
-            case 'Z':
-            case 'z':
-            case 'G':
-            case 'p': //XXX: need to translate PHP properties to Java ones
-            case 'P': //XXX: need to translate PHP properties to Java ones
-            case 'X':
-              //case 'C': byte matching, not supported
-              sb.append('\\');
-              sb.append(ch);
-              break;
-            default:
-              sb.append(ch);
-            }
-          }
-          else {
-            sb.append('\\');
-            sb.append(ch);
-          }
-        }
-        else
-          sb.append('\\');
-        break;
-
-      case '[':
-        if (quote == '[') {
-          if (i + 1 < len && regexp.charAt(i + 1) == ':') {
-            String test = regexp.substring(i).toString();
-            boolean hasMatch = false;
-
-            for (int j = 0; j < POSIX_CLASSES.length; j++) {
-              if (test.startsWith(POSIX_CLASSES[j])) {
-                hasMatch = true;
-
-                sb.append(REGEXP_CLASSES[j]);
-
-                i += POSIX_CLASSES[j].length() - 1;
-              }
-            }
-
-            if (! hasMatch)
-              sb.append("\\[");
-          }
-          else
-            sb.append("\\[");
-        }
-        else if (i + 1 < len && regexp.charAt(i + 1) == '['
-          && ! (i + 2 < len && regexp.charAt(i + 2) == ':')) {
-          // XXX: check regexp grammar
-          // php/151n
-          sb.append("[\\[");
-          i += 1;
-        }
-        else if (i + 2 < len &&
-                regexp.charAt(i + 1) == '^' &&
-                regexp.charAt(i + 2) == ']') {
-          sb.append("[^\\]");
-          i += 2;
-        }
-        else
-          sb.append('[');
-
-        if (quote == 0)
-          quote = '[';
-        break;
-
-      case '#':
-        if (quote == '[') {
-          sb.append("\\#");
-        }
-        else if (isComments) {
-          sb.append(ch);
-
-          for (i++; i < len; i++) {
-            ch = regexp.charAt(i);
-
-            sb.append(ch);
-
-            if (ch == '\n' || ch == '\r')
-              break;
-          }
-        }
-        else {
-          sb.append(ch);
-        }
-
-        break;
-
-      case ']':
-        sb.append(ch);
-
-        if (quote == '[')
-          quote = 0;
-        break;
-
-      case '{':
-        if (i + 1 < len &&
-                ('0' <= (ch = regexp.charAt(i + 1)) && ch <= '9' || ch == ',')) {
-          sb.append("{");
-          for (i++;
-          i < len &&
-          ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
-          i++) {
-            sb.append(ch);
-          }
-
-          if (i < len)
-            sb.append(regexp.charAt(i));
-        }
-        else {
-          sb.append("\\{");
-        }
-        break;
-
-      case '}':
-        sb.append("\\}");
-        break;
-
-      case '|':
-        // php/152o
-        // php ignores subsequent vertical bars
-        //
-        // to accomodate drupal bug http://drupal.org/node/123750
-        if (! sawVerticalBar) {
-          sb.append('|');
-          sawVerticalBar = true; 
-        }
-        break;
-
-      default:
-        sb.append(ch);
-      }
-    }
-
-    return sb.toString();
-  }
-
-  /**
-   * Cleans the regexp from valid values that the Java regexps can't handle.
    * Ereg has a different syntax so need to handle it differently from preg.
-   * XXX: find out how ereg is different from preg.
    */
-  private static String cleanEregRegexp(StringValue regexp,
-          boolean isComments)
+  private static StringValue cleanEregRegexp(StringValue regexp,
+                                             boolean isComments)
   {
     int len = regexp.length();
 
@@ -1886,80 +1680,20 @@ public class CauchoRegexpModule
       }
     }
 
-    return sb.toString();
-  }
+    String cleanPattern = sb.toString();
 
-  /**
-   * Converts to non-greedy.
-   */
-  private static String toNonGreedy(String regexp)
-  {
-    int len = regexp.length();
-
-    StringBuilder sb = new StringBuilder();
-    char quote = 0;
-
-    for (int i = 0; i < len; i++) {
-      char ch = regexp.charAt(i);
-
-      switch (ch) {
-      case '\\':
-        sb.append(ch);
-
-        if (i + 1 < len) {
-          sb.append(regexp.charAt(i + 1));
-          i++;
-        }
-        break;
-
-      case '[':
-        sb.append(ch);
-
-        if (quote == 0)
-          quote = ch;
-        break;
-
-      case ']':
-        sb.append(ch);
-
-        if (quote == '[')
-          quote = 0;
-        break;
-
-        // non-capturing special constructs
-      case '(':
-        sb.append(ch);
-
-        if (i + 1 < len) {
-          ch = regexp.charAt(i + 1);
-
-          if (ch == '?') {
-            sb.append(ch);
-            i++;
-          }
-        }
-        break;
-
-      case '*':
-      case '?':
-      case '+':
-        sb.append(ch);
-
-        if (i + 1 < len && (ch = regexp.charAt(i + 1)) != '?') {
-          sb.append('?');
-        }
-        else {
-          // invert non-greedy to greedy
-          i++;
-        }
-        break;
-
-      default:
-        sb.append(ch);
-      }
+    if (regexp.isUnicode()) {
+      return new UnicodeValueImpl(cleanPattern);
     }
-
-    return sb.toString();
+    else {
+      BinaryBuilderValue bb = new BinaryBuilderValue();
+      
+      for (int i = 0; i < cleanPattern.length(); i++) {
+        bb.appendByte(cleanPattern.charAt(i));
+      }
+      
+      return bb;
+    }
   }
 
   static class Replacement {
@@ -2070,51 +1804,95 @@ public class CauchoRegexpModule
     }
   }
 
-  /*
-   * Holds PCRE named subpatterns.
+  /**
+   * Holds information about the left neighbor of a particular group.
    */
-  static class PCREPattern {
-    private static final Logger log = Logger.getLogger(PCREPattern.class.getName());
+  static class GroupNeighborMap
+  {
+    private int []_neighborMap;
 
-    private final Regexp _regexp;
-    private final StringValue _regexpValue;
-    
-    private final int _flags;
+    private static int UNSET = -1;
 
-    private HashMap<Integer,StringValue> _patternMap;
+    public GroupNeighborMap(CharSequence regexp, int groups)
+    { 
+      _neighborMap = new int[groups + 1];
 
-    PCREPattern(Env env, StringValue regexpValue)
-    {
-      _flags = regexpFlags(regexpValue);
+      for (int i = 1; i <= groups; i++) {
+        _neighborMap[i] = UNSET;
+      }
 
-      _regexpValue = cleanRegexp(regexpValue);
-      
-      _regexp = compileRegexp(_regexpValue);
+      boolean sawEscape = false;
+      boolean sawVerticalBar = false;
+      boolean isLiteral = false;
+
+      int group = 0;
+      int parent = UNSET;
+      int length = regexp.length();
+
+      ArrayList<Boolean> openParenStack = new ArrayList<Boolean>(groups);
+
+      for (int i = 0; i < length; i++) {
+        char ch = regexp.charAt(i);
+
+        if (ch == ' ' || ch == '\t' || ch == '\n' || ch == 'r' || ch == '\f') {
+          continue;
+        }
+        else if (ch == '\\') {
+          sawEscape = ! sawEscape;
+          continue;
+        }
+        else if (ch == '[' && ! sawEscape) {
+          isLiteral = true;
+        }
+        else if (ch == ']' && ! sawEscape) {
+          isLiteral = false;
+        }
+        else if (isLiteral || sawEscape) {
+          sawEscape = false;
+        }
+        else if (ch == '(') {
+          if (i + 1 < length && regexp.charAt(i + 1) == '?') {
+            openParenStack.add(true);
+            continue;
+          }
+
+          openParenStack.add(false);
+          group++;
+
+          if (sawVerticalBar) {
+            sawVerticalBar = false;
+            _neighborMap[group] = group - 1;
+          }
+          else {
+            _neighborMap[group] = parent;
+            parent = group;
+          }
+        }
+        else if (ch == ')') {
+          if (openParenStack.remove(openParenStack.size() - 1))
+            continue;
+
+          sawVerticalBar = false;
+        }
+        else if (ch == '|') {
+          sawVerticalBar = true;
+        }
+        else {
+        }
+      }
     }
 
-    public Regexp getRegexp(String subject)
+    public boolean hasNeighbor(int group)
     {
-      _regexp.init(subject);
-      
-      return _regexp;
-    }
-    
-    public StringValue getCleanedPattern()
-    {
-      return _regexpValue;
+      return _neighborMap[group] != UNSET;
     }
 
-    private boolean isUnicode()
+    public int getNeighbor(int group)
     {
-      return (_flags & REGEXP_UNICODE) != 0;
-    }
-
-    private StringValue cleanRegexp(StringValue pattern)
-    {
-      return pattern;
+      return _neighborMap[group];
     }
   }
-
+  
   static {
     PREG_QUOTE['\\'] = true;
     PREG_QUOTE['+'] = true;

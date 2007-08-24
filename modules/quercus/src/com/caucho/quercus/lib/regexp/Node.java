@@ -64,6 +64,9 @@ class Node {
   // conditionals
   static final int RC_COND = 76;
   
+  static final int RC_POS_PREV = 77;
+  static final int RC_NEG_PREV = 78;
+  
   // ignore case
   static final int RC_STRING_I = 128;
   static final int RC_SET_I = 129;

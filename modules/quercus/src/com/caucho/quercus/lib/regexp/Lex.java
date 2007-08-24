@@ -30,6 +30,8 @@
 package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
+
+import com.caucho.quercus.env.Env;
 import com.caucho.util.*;
 
 public class Lex {
@@ -46,9 +48,9 @@ public class Lex {
     _rawProg = RegOptim.appendLexeme(_rawProg, prog, value);
   }
 
-  public Regexp compile()
+  public Regexp compile(Env env)
   {
-    return new Regexp(_rawProg, _comp);
+    return new Regexp(env, _rawProg, _comp);
   }
 
   public Lex(String sflags) 

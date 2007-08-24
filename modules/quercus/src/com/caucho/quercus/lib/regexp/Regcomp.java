@@ -34,6 +34,9 @@
 package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
+
+import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.util.*;
 
 /**
@@ -46,16 +49,37 @@ class Regcomp {
   static final int IGNORE_WS = 0x8;
   static final int GLOBAL = 0x10;
 
+  static final int ANCHORED = 0x20;
+  static final int END_ONLY = 0x40;
+  static final int UNGREEDY = 0x80;
+  static final int STRICT = 0x100;
+
+  static final int ALNUM = 1;
+  static final int ALPHA = 2;
+  static final int BLANK = 3;
+  static final int CNTRL = 4;
+  static final int DIGIT = 5;
+  static final int GRAPH = 6;
+  static final int LOWER = 7;
+  static final int PRINT = 8;
+  static final int PUNCT = 9;
+  static final int SPACE = 10;
+  static final int UPPER = 11;
+  static final int XDIGIT = 12;
+  
+  static final HashMap<String,Integer> _characterClassMap
+    = new HashMap<String,Integer>();
+  
   int _nGroup;
   int _maxGroup;
   int _nLoop;
   int _flags;
 
-  HashMap<Integer,String> _groupNumberMap
-    = new HashMap<Integer,String>();
+  HashMap<Integer,UnicodeValue> _groupNameMap
+    = new HashMap<Integer,UnicodeValue>();
 
-  HashMap<String,Integer> _groupNameMap
-    = new HashMap<String,Integer>();
+  HashMap<UnicodeValue,Integer> _groupNameReverseMap
+    = new HashMap<UnicodeValue,Integer>();
   
   Regcomp(int flags)
   {
@@ -71,6 +95,13 @@ class Regcomp {
     if (_nGroup > _maxGroup)
       _maxGroup = _nGroup;
 
+    if ((_flags & ANCHORED) != 0) {
+      Node node = new Node(Node.RC_BSTRING);
+      node._rest = value;
+      
+      value = node;
+    }
+    
     return value;
   }
 
@@ -121,14 +152,21 @@ class Regcomp {
 
 	if (pattern.peek() == '?') {
 	  pattern.read();
-	  node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 0, Integer.MAX_VALUE);
+	  
+	  if ((_flags & UNGREEDY) != 0)
+	    node = new Node(Node.RC_LOOP, _nLoop++, 0, Integer.MAX_VALUE);
+	  else
+	    node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 0, Integer.MAX_VALUE);
 	}
     else if (pattern.peek() == '+') {
       pattern.read();
       node = new Node(Node.RC_LOOP_LONG, _nLoop++, 0, Integer.MAX_VALUE);
     }
+	else if ((_flags & UNGREEDY) != 0)
+      node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 0, Integer.MAX_VALUE);
 	else
 	  node = new Node(Node.RC_LOOP, _nLoop++, 0, Integer.MAX_VALUE);
+	
 	node._branch = last;
 	last = node;
 	break;
@@ -141,12 +179,18 @@ class Regcomp {
 
 	if (pattern.peek() == '?') {
 	  pattern.read();
-	  node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 1, Integer.MAX_VALUE);
+	  
+	  if (((_flags & UNGREEDY) != 0))
+	      node = new Node(Node.RC_LOOP, _nLoop++, 1, Integer.MAX_VALUE);
+	  else
+	    node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 1, Integer.MAX_VALUE);
 	}
     else if (pattern.peek() == '+') {
       pattern.read();
       node = new Node(Node.RC_LOOP_LONG, _nLoop++, 1, Integer.MAX_VALUE);
     }
+	else if ((_flags & UNGREEDY) != 0)
+      node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 1, Integer.MAX_VALUE);
 	else
 	  node = new Node(Node.RC_LOOP, _nLoop++, 1, Integer.MAX_VALUE);
 	node._branch = last;
@@ -161,14 +205,21 @@ class Regcomp {
 
 	if (pattern.peek() == '?') {
 	  pattern.read();
-	  node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 0, 1);
+	  
+	  if ((_flags & UNGREEDY) != 0)
+	    node = new Node(Node.RC_LOOP, _nLoop++, 0, 1);
+	  else
+	    node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 0, 1);
 	}
     else if (pattern.peek() == '+') {
       pattern.read();
       node = new Node(Node.RC_LOOP_LONG, _nLoop++, 0, 1);
     }
+	else if ((_flags & UNGREEDY) != 0)
+      node = new Node(Node.RC_LOOP_SHORT, _nLoop++, 0, 1);
 	else
 	  node = new Node(Node.RC_LOOP, _nLoop++, 0, 1);
+
 	node._branch = last;
 	last = node;
 	break;
@@ -253,20 +304,31 @@ class Regcomp {
 	    last = new Node(Node.RC_NEG_PEEK, parseRec(pattern));
 	    break;
 	    
+	  case '<':
+	    ch = pattern.read();
+	    
+	    // (?<=...) Positive lookbehind assertion.
+        if (ch == '=')
+          last = new Node(Node.RC_POS_PREV, parseRec(pattern));
+	    else if (ch == '!')
+          last = new Node(Node.RC_NEG_PREV, parseRec(pattern));
+        else
+          throw new IllegalRegexpException("expected `}' at " +
+                                           badChar(ch));
+        
+	    break;
+	    
 	  case 'P':
 	    // (?P<name>group), (?P=name) named groups
 
-	    String name;
+	    UnicodeBuilderValue name = new UnicodeBuilderValue();
 
 	    if ((ch = pattern.read()) == '<') {
 	      // this is a named group definition
 
-	      StringBuilder sb = new StringBuilder();
 	      while ((ch = pattern.read()) != '>' && ch >= 0) {
-	        sb.append((char)ch);
+	        name.append((char)ch);
 	      }
-	      
-	      name = sb.toString();
 	      
 	      int groupIndex = ++_nGroup;
 
@@ -276,21 +338,18 @@ class Regcomp {
 	      node = new Node(Node.RC_END_GROUP, groupIndex);
 	      last = Node.replaceTail(last, node);
 	      
-	       _groupNumberMap.put(Integer.valueOf(groupIndex), name);
-	       _groupNameMap.put(name, Integer.valueOf(groupIndex));
+	       _groupNameMap.put(Integer.valueOf(groupIndex), name);
+	       _groupNameReverseMap.put(name, Integer.valueOf(groupIndex));
 	    }
 	    else if (ch == '=') {
 	      // this is a named group reference
-	      StringBuilder sb = new StringBuilder();
 
 	      while ((ch = pattern.peek()) != ')' && ch >= 0) {
 	        pattern.read();
-	        sb.append((char)ch);
+	        name.append((char)ch);
 	      }
-
-	      name = sb.toString();
 	      
-	      Integer groupIndex = _groupNameMap.get(name);
+	      Integer groupIndex = _groupNameReverseMap.get(name);
 	      
 	      if (groupIndex == null) {
 	          throw new IllegalRegexpException("undeclared group reference '" +
@@ -391,7 +450,15 @@ class Regcomp {
       case '[':
 	head = Node.concat(head, last);
 
-	last = parseSet(pattern);
+	ch = pattern.peek();
+	
+	if (ch == ':') {
+	  pattern.read();
+	  last = parseCharacterClass(pattern, last);
+	}
+	else {
+	  last = parseSet(pattern);
+	}
 
 	if ((ch = pattern.read()) != ']')
 	  throw new IllegalRegexpException("expected `]' at " + 
@@ -427,8 +494,10 @@ class Regcomp {
 	head = Node.concat(head, last);
 	if ((_flags & MULTILINE) != 0)
 	  last = new Node(Node.RC_ELINE);
-	else
+	else if ((_flags & END_ONLY) != 0)
 	  last = new Node(Node.RC_ESTRING);
+	else
+	  last = new Node(Node.RC_ENSTRING);
 	break;
             
       default:
@@ -626,14 +695,33 @@ class Regcomp {
     return node;
   }
 
+  private Node parseString(int ch,
+                           PeekStream pattern,
+                           Node last)
+    throws IllegalRegexpException
+  {
+    return parseString(ch, pattern, last, false);
+  }
+  
   /**
    * parseString
    */
-  private Node parseString(int ch, PeekStream pattern, Node last)
+  private Node parseString(int ch,
+                           PeekStream pattern,
+                           Node last,
+                           boolean isEscaped)
     throws IllegalRegexpException
   {
-    if ((_flags & IGNORE_WS) != 0 && RegexpSet.SPACE.match(ch))
-      return last;
+    if ((_flags & IGNORE_WS) != 0 && ! isEscaped) {
+      if (RegexpSet.SPACE.match(ch))
+        return last;
+      else if (ch == '#') {
+        while ((ch = pattern.read()) != '\n' && ch >= 0) {
+        }
+        
+        return last;
+      }
+    }
 
     int next = pattern.read();
     if (last == null || last._code != Node.RC_STRING ||
@@ -704,23 +792,23 @@ class Regcomp {
       return parseString(ch, pattern, last);
 
     case 'e':
-      return parseString('\u001B', pattern, last);
+      return parseString('\u001B', pattern, last, true);
     case 'n':
-      return parseString('\n', pattern, last);
+      return parseString('\n', pattern, last, true);
     case 'r':
-      return parseString('\r', pattern, last);
+      return parseString('\r', pattern, last, true);
     case 'f':
-      return parseString('\f', pattern, last);
+      return parseString('\f', pattern, last, true);
     case 't':
-      return parseString('\t', pattern, last);
+      return parseString('\t', pattern, last, true);
 
     case 'x':
       int hex = parseHex(pattern);
-      return parseString(hex, pattern, last);
+      return parseString(hex, pattern, last, true);
     
     case '0':
       int oct = parseOctal(ch, pattern);
-      return parseString(oct, pattern, last);
+      return parseString(oct, pattern, last, true);
 
     case '1': case '2': case '3': case '4': 
     case '5': case '6': case '7': case '8': case '9':
@@ -730,6 +818,7 @@ class Regcomp {
       return parseUnicodeProperty(pattern, last, false);
     case 'P':
       return parseUnicodeProperty(pattern, last, true);
+      
     case 'Q':
       while ((ch = pattern.read()) >= 0) {
         if (ch == '\\' && pattern.peek() == 'E') {
@@ -741,11 +830,71 @@ class Regcomp {
       }
       
       return last;
+      
+    case '#':
+      return parseString('#', pattern, last, true);
+      
     default:
+      if ((_flags & STRICT) != 0)
+        throw new IllegalRegexpException("unrecognized escape at " +
+                                         badChar(ch));
       return parseString(ch, pattern, last);
     }
   }
   
+  /**
+   * Returns a node for sequences starting with a '[:'.
+   */
+  private Node parseCharacterClass(PeekStream pattern, Node last)
+    throws IllegalRegexpException
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    int ch;
+    while ((ch = pattern.peek()) != ':' && ch >= 0) {
+      sb.append((char)ch);
+    }
+
+    String name = sb.toString();
+    
+    Integer i = _characterClassMap.get(name);
+    
+    if (i == null) {
+      throw new IllegalRegexpException("unrecognized POSIX character class " +
+                                       name);
+    }
+    
+    switch (i.intValue()) {
+      case ALNUM:
+        break;
+      case ALPHA:
+        break;
+      case BLANK:
+        break;
+      case CNTRL:
+        break;
+      case DIGIT:
+        break;
+      case GRAPH:
+        break;
+      case LOWER:
+        break;
+      case PRINT:
+        break;
+      case PUNCT:
+        break;
+      case SPACE:
+        break;
+      case UPPER:
+        break;
+      case XDIGIT:
+        break;
+    }
+    
+    return null;
+    
+  }
+
   private int parseHex(PeekStream pattern)
     throws IllegalRegexpException
   {
@@ -835,7 +984,7 @@ class Regcomp {
     
     int oct = parseOctal(ch, pattern);
     
-    return parseString(oct, pattern, last);
+    return parseString(oct, pattern, last, true);
   }
   
   private int parseOctal(int ch,
@@ -1143,5 +1292,20 @@ class Regcomp {
         throw new IllegalRegexpException("invalid Unicode property " +
                 badChar(ch));
     }
+  }
+  
+  static {
+    _characterClassMap.put("alnum", ALNUM);
+    _characterClassMap.put("alpha", ALPHA);
+    _characterClassMap.put("blank", BLANK);
+    _characterClassMap.put("cntrl", CNTRL);
+    _characterClassMap.put("digit", DIGIT);
+    _characterClassMap.put("graph", GRAPH);
+    _characterClassMap.put("lower", LOWER);
+    _characterClassMap.put("print", PRINT);
+    _characterClassMap.put("punct", PUNCT);
+    _characterClassMap.put("space", SPACE);
+    _characterClassMap.put("upper", UPPER);
+    _characterClassMap.put("xdigit", XDIGIT);
   }
 }

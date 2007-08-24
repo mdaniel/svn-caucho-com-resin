@@ -29,11 +29,20 @@
 
 package com.caucho.quercus.lib.regexp;
 
+import com.caucho.quercus.env.UnicodeValue;
+
 class PeekString extends PeekStream {
   char []_string;
   int _length;
   int _index;
 
+  PeekString(UnicodeValue string)
+  {
+    this._string = string.toCharArray();
+    _length = string.length();
+    this._index = 0;
+  }
+  
   PeekString(String string)
   {
     this._string = string.toCharArray();

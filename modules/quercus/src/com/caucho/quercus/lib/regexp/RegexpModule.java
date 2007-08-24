@@ -40,8 +40,8 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 public class RegexpModule
   extends AbstractQuercusModule
 {
-  private static final int REGEXP_EVAL = 0x01;
-  private static final int REGEXP_UNICODE = 0x02;
+  public static final int PREG_REPLACE_EVAL = 0x01;
+  public static final int PCRE_UTF8 = 0x02;
 
   public static final int PREG_PATTERN_ORDER = 0x01;
   public static final int PREG_SET_ORDER = 0x02;
@@ -104,7 +104,7 @@ public class RegexpModule
    *
    * @param env the calling environment
    */
-  public static int preg_match(Env env,
+  public static Value preg_match(Env env,
                                StringValue regexp,
                                StringValue subject,
                                @Optional @Reference Value matchRef,
@@ -122,7 +122,7 @@ public class RegexpModule
    *
    * @param env the calling environment
    */
-  public static int preg_match_all(Env env,
+  public static Value preg_match_all(Env env,
                                    StringValue regexp,
                                    StringValue subject,
                                    @Reference Value matchRef,
@@ -301,7 +301,7 @@ public class RegexpModule
    * @param limit if specified, the maximum number of elements in the array
    * @return an array of strings split around the pattern string
    */
-  public static ArrayValue spliti(Env env,
+  public static Value spliti(Env env,
                                   StringValue patternString,
                                   StringValue string,
                                   @Optional("-1") long limit)
@@ -314,7 +314,7 @@ public class RegexpModule
   
   private static boolean useJavaRegexp(Env env)
   {
-    return true;
-    //return env.getIniBoolean("caucho.java_regexp");
+    //return true;
+    return env.getIniBoolean("caucho.java_regexp");
   }
 }

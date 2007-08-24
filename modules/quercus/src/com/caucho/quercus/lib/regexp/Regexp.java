@@ -32,16 +32,21 @@ package com.caucho.quercus.lib.regexp;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.util.*;
 
 public class Regexp {
   private static final Logger log
     = Logger.getLogger(Regexp.class.getName());
   
+  private static final L10N L = new L10N(Regexp.class);
+  
   public static final int FAIL = -1;
 
-  String _pattern;
-  String _subject;
+  UnicodeValue _pattern;
+  UnicodeValue _subject;
   
   Node _prog;
   boolean _ignoreCase;
@@ -72,52 +77,145 @@ public class Regexp {
   int _lastIndex;
 
   boolean []_isMatchedGroup;
-  String []_groupNames;
+  StringValue []_groupNames;
   
-  public Regexp(String pattern, String sflags) throws IllegalRegexpException
+  boolean _isUnicode;
+  boolean _isUTF8;
+  boolean _isEval;
+  
+  public Regexp(Env env, StringValue rawRegexp)
+    throws IllegalRegexpException
   {
-    this._pattern = pattern;
-    
-    int flags = 0;
-
-    for (int i = 0; sflags != null && i < sflags.length(); i++) {
-      switch (sflags.charAt(i)) {
-      case 'm': flags |= Regcomp.MULTILINE; break;
-      case 's': flags |= Regcomp.SINGLE_LINE; break;
-      case 'i': flags |= Regcomp.IGNORE_CASE; break;
-      case 'x': flags |= Regcomp.IGNORE_WS; break;
-      case 'g': flags |= Regcomp.GLOBAL; break;
-      }
+    if (rawRegexp.length() < 2) {
+      throw new IllegalStateException(L.l(
+          "Can't find delimiters in regexp '{0}'.",
+          rawRegexp));
     }
 
+    char delim = rawRegexp.charAt(0);
+
+    if (delim == '{')
+      delim = '}';
+    else if (delim == '[')
+      delim = ']';
+    else if (delim == '(')
+      delim = ')';
+    else if (delim == '<')
+      delim = '>';
+    else if (delim == '\\' || Character.isLetterOrDigit(delim)) {
+      throw new IllegalStateException(L.l(
+          "Delimiter {0} in regexp '{1}' must not be backslash or alphanumeric.",
+          String.valueOf(delim),
+          rawRegexp));
+    }
+
+    int tail = rawRegexp.lastIndexOf(delim);
+
+    if (tail <= 0)
+      throw new IllegalStateException(L.l(
+          "Can't find second {0} in regexp '{1}'.",
+          String.valueOf(delim),
+          rawRegexp));
+
+    StringValue sflags = rawRegexp.substring(tail);
+    StringValue pattern = rawRegexp.substring(1, tail); 
+    
+    int flags = 0;
+    
+    for (int i = 0; sflags != null && i < sflags.length(); i++) {
+      switch (sflags.charAt(i)) {
+        case 'm': flags |= Regcomp.MULTILINE; break;
+        case 's': flags |= Regcomp.SINGLE_LINE; break;
+        case 'i': flags |= Regcomp.IGNORE_CASE; break;
+        case 'x': flags |= Regcomp.IGNORE_WS; break;
+        case 'g': flags |= Regcomp.GLOBAL; break;
+        
+        case 'A': flags |= Regcomp.ANCHORED; break;
+        case 'D': flags |= Regcomp.END_ONLY; break;
+        case 'U': flags |= Regcomp.UNGREEDY; break;
+        case 'X': flags |= Regcomp.STRICT; break;
+        
+        case 'u': _isUTF8 = true; break;
+        case 'e': _isEval = true; break;
+      }
+    }
+    
+    if (_isUTF8)
+      _pattern = pattern.toUnicodeValue(env, "UTF-8");
+    else
+      _pattern = pattern.toUnicodeValue(env);
+    
     Regcomp comp = new Regcomp(flags);
 
-    _prog = comp.parse(new PeekString(pattern));
+    _prog = comp.parse(new PeekString(_pattern));
 
-    compile(_prog, comp);
-
-    /*
-    if (dbg.canWrite())
-      dbg.log(pattern + " -> " + prog);
-    */
+    compile(env, _prog, comp);
   }
 
-  public Regexp(String pattern) throws IllegalRegexpException
+  protected Regexp(Env env, Node prog, Regcomp comp)
   {
-    this(pattern, null);
+    _prog = prog;
+    
+    compile(env, _prog, comp);
   }
-
+  
+  private Regexp()
+  {
+  }
+  
+  public StringValue substring(Env env, int start)
+  {
+    StringValue result = _subject.substring(start);
+    
+    return convertString(env, result);
+  }
+  
+  public StringValue substring(Env env, int start, int end)
+  {
+    StringValue result = _subject.substring(start, end);
+    
+    return convertString(env, result);
+  }
+  
+  private StringValue convertString(Env env, StringValue str)
+  {
+    if (_isUnicode) {
+      if (_isUTF8)
+        return str.toUnicodeValue(env, "UTF-8");
+      else
+        return str.toUnicodeValue(env);
+    }
+    else {
+      if (_isUTF8)
+        return str.toBinaryValue(env, "UTF-8");
+      else
+        return str.toBinaryValue(env);
+    }
+  }
+  
+  /*
   public Regexp(Node prog, Regcomp comp)
   {
     compile(prog, comp);
   }
+  */
 
-  public String getPattern()
+  public UnicodeValue getPattern()
   {
     return _pattern;
   }
+  
+  public boolean isUTF8()
+  {
+    return _isUTF8;
+  }
+  
+  public boolean isEval()
+  {
+    return _isEval;
+  }
 
-  private void compile(Node prog, Regcomp comp)
+  private void compile(Env env, Node prog, Regcomp comp)
   {
     _ignoreCase = (comp._flags & Regcomp.IGNORE_CASE) != 0;
     _isGlobal = (comp._flags & Regcomp.GLOBAL) != 0;
@@ -135,7 +233,12 @@ public class Regexp {
 
     _nGroup = comp._maxGroup;
     _nLoop = comp._nLoop;
+    
     _groupStart = new int[_nGroup + 1];
+    for (int i = 0; i < _groupStart.length; i++) {
+      _groupStart[i] = -1;
+    }
+
     _loopCount = new int[_nLoop];
     _loopTail = new int[_nLoop];
     _cb = new CharBuffer();
@@ -144,17 +247,41 @@ public class Regexp {
     
     _isMatchedGroup = new boolean[_nGroup + 1];
     
-    _groupNames = new String[_nGroup + 1];
-    for (Map.Entry<Integer,String> entry : comp._groupNumberMap.entrySet()) {
-      _groupNames[entry.getKey().intValue()] = entry.getValue();
+    _groupNames = new StringValue[_nGroup + 1];
+    for (Map.Entry<Integer,UnicodeValue> entry : comp._groupNameMap.entrySet()) {
+      StringValue groupName = entry.getValue();
+      
+      if (_isUnicode) {
+      }
+      else if (_isUTF8) {
+        groupName.toBinaryValue(env, "UTF-8");
+      }
+      else {
+        groupName.toBinaryValue(env);
+      }
+      
+      _groupNames[entry.getKey().intValue()] = groupName;
     }
   }
 
-  public void init(String subject)
+  public void init(Env env, StringValue subject)
   {
-    _stringCursor.init(subject);
+    //System.err.println("Regexp->init(): " + subject.getClass());
+    
+    _isUnicode = subject.isUnicode();
+    
+    if (_isUTF8)
+      _subject = subject.toUnicodeValue(env, "UTF-8");
+    else
+      _subject = subject.toUnicodeValue(env);
+
+    _stringCursor.init(_subject);
     
     _lastIndex = 0;
+    
+    for (int i = 0; i < _groupStart.length; i++) {
+      _groupStart[i] = -1;
+    }
     
     for (int i = 0; i < _isMatchedGroup.length; i++) {
       _isMatchedGroup[i] = false;
@@ -291,7 +418,7 @@ public class Regexp {
     while (prog != null) {
       
       /*
-      System.err.print(prog._code);
+      System.err.print("Regexp->match(): " + prog._code);
       if (prog._branch != null)
         System.err.print(" . " + prog._branch._code);
       if (prog._rest != null)
@@ -556,6 +683,34 @@ public class Regexp {
 	cursor.setIndex(tail);
 	prog = prog._rest;
 	break;
+	
+	   // The previous pattern must match
+      case Node.RC_POS_PREV:
+        tail = cursor.getIndex();
+        
+        Node branch = prog._branch;
+        
+        while (branch._code == Node.RC_OR ||
+               branch._code == Node.RC_OR_UNIQUE)
+        {
+          break;
+        }
+        
+        if (branch._code == Node.RC_OR ||
+            branch._code == Node.RC_OR_UNIQUE) {
+          value = branch._string.length();
+          
+          
+        }
+        else if (false) {
+          
+        }
+        
+        if (match(prog._branch, cursor) == FAIL)
+          return FAIL;
+        cursor.setIndex(tail);
+        prog = prog._rest;
+        break;
 	
 	   // Conditional subpattern
       case Node.RC_COND:
@@ -1084,17 +1239,70 @@ public class Regexp {
   
   public int groupCount()
   {
-    return length();
+    return _nGroup;
   }
   
-  public String group()
+  public boolean isGroupMatched(int i)
   {
-    return _subject.substring(getBegin(0), getEnd(0));
+    return _groupStart[i] != -1;
+  }
+  
+  public StringValue group(Env env)
+  {
+    return group(env, 0);
   }
 
-  public String group(int i)
+  public StringValue group(Env env, int i)
   {
-    return _subject.substring(getBegin(i), getEnd(i));
+    int begin = getBegin(i);
+    int end = getEnd(i);
+    
+    if (_isUnicode)
+      return (UnicodeValue)_subject.substring(begin, end);
+    else if (_isUTF8)
+      return _subject.substring(begin, end).toBinaryValue(env, "UTF-8");
+    else
+      return _subject.substring(begin, end).toBinaryValue(env);
+  }
+  
+  public StringValue getGroupName(int i)
+  {
+    if (i >= _groupNames.length)
+      return null;
+    else
+      return _groupNames[i];
+  }
+  
+  public Regexp clone()
+  {
+    Regexp regexp = new Regexp();
+    
+    regexp._pattern = _pattern;
+    regexp._prog = _prog;
+    
+    regexp._ignoreCase = _ignoreCase;
+    regexp._isGlobal = _isGlobal;
+
+    regexp._minLength = _minLength;
+    regexp._prefix = _prefix;
+
+    regexp._nGroup = _nGroup;
+    regexp._nLoop = _nLoop;
+    regexp._groupStart = new int[_nGroup + 1];
+    regexp._loopCount = new int[_nLoop];
+    regexp._loopTail = new int[_nLoop];
+    regexp._cb = new CharBuffer();
+    regexp._stringCursor = new StringCharCursor("");
+    regexp._group = new IntArray();
+    
+    regexp._isMatchedGroup = new boolean[_nGroup + 1];
+    regexp._groupNames = _groupNames;
+
+    regexp._isUnicode = _isUnicode;
+    regexp._isUTF8 = _isUTF8;
+    regexp._isEval = _isEval;
+    
+    return regexp;
   }
   
   public String toString()
