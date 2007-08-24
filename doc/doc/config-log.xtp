@@ -49,6 +49,13 @@ which process owns the file.</warn>
   <td>optional</td>
 </tr>
 <tr>
+  <td>rollover-count</td>
+  <td>maximum number of rollover files before the oldest ones get overwritten.
+      See <a href="#rollover">Rollovers</a>. 
+    </td>
+ <td>none</td>
+</tr>
+<tr>
   <td>rollover-period</td>
   <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
         months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
@@ -124,6 +131,10 @@ which process owns the file.</warn>
     </td><td>a timestamp <a href="#timestamp">format string</a> 
         to use at the beginning of each log line.
     </td><td>no timestamp
+    </td></tr><tr><td>rollover-count
+    </td><td>maximum number of rollover files before the oldest ones get overwritten.
+        See <a href="#rollover">Rollovers</a>. 
+    </td><td>none
 </td></tr><tr><td>rollover-period
     </td><td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
         months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
@@ -187,6 +198,10 @@ in.</p>
 <tr><td>format
     </td><td>Access log format.
     </td><td>see below
+</td></tr><tr><td>rollover-count
+    </td><td>maximum number of rollover files before the oldest ones get overwritten.
+        See <a href="#rollover">Rollovers</a>. 
+    </td><td>none
 </td></tr><tr><td>rollover-period
     </td><td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
         months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
@@ -320,7 +335,10 @@ java.util.logging.* API.</p>
     </td><td>a <a href="#Format-String">format string</a> to control the 
         output of each log message. Since Resin 3.0.5.
     </td><td>${'${'}log.message}
-
+</td></tr><tr><td>rollover-count
+    </td><td>maximum number of rollover files before the oldest ones get overwritten.
+        See <a href="#rollover">Rollovers</a>. 
+    </td><td>none
 </td></tr><tr><td>rollover-period
     </td><td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
         months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
