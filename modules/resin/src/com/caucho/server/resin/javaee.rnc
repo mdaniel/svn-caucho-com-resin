@@ -137,12 +137,6 @@ javaee_init-param = element init-param {
   javaee_param-value-Type
 }
 
-javaee_injection-target = element injection-target {
-  element injection-target-class { string },
-
-  element injection-target-name { string }
-}
-
 javaee_java-identifier = string
 
 javaee_jndi-environment-refs-Group =
@@ -341,11 +335,15 @@ javaee_resource-ref = element resource-ref {
 
   javaee_res-ref-name,
 
-  javaee_res-type,
+  javaee_res-type?,
 
-  javaee_res-auth,
+  javaee_res-auth?,
 
-  javaee_res-sharing-scope?
+  javaee_res-sharing-scope?,
+
+  javaee_mapped-name?,
+
+  javaee_injection-target*
 }
 
 javaee_res-ref-name = element res-ref-name {

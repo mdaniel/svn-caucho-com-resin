@@ -26,11 +26,15 @@ javaee15_application-client = element application-client {
 
   javaee_resource-env-ref*,
 
+  javaee_message-destination*,
+
   javaee_message-destination-ref*,
 
   javaee_persistence-unit-ref*,
 
-  element callback-handler { javaee_fully-qualified-class }?,
+  javaee_post-construct*,
 
-  javaee_message-destination*
+  javaee_pre-destroy*,
+
+  element callback-handler { javaee_fully-qualified-class }?
 }

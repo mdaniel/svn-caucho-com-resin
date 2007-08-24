@@ -421,11 +421,11 @@ ejb15_persistence-type = element persistence-type {
 }
 
 ejb15_post-activate = element post-activate {
-  ejb15_named-method-Type
+  javaee_lifecycle-callback-Type
 }
 
 ejb15_pre-passivate = element pre-passivate {
-  ejb15_named-method-Type
+  javaee_lifecycle-callback-Type
 }
 
 ejb15_prim-key-class = element prim-key-class {
