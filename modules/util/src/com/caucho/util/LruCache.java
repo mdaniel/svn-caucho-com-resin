@@ -166,7 +166,6 @@ public class LruCache<K,V> {
       okey = NULL;
     
     int hash = okey.hashCode() & _mask;
-    int count = _size1 + _size2 + 1;
 
     synchronized (this) {
       for (CacheItem<K,V> item = _entries[hash];
@@ -243,11 +242,11 @@ public class LruCache<K,V> {
 
     // remove LRU items until we're below capacity
     while (_capacity <= _size1 + _size2) {
-      removeTail();
+      if (! removeTail())
+	throw new IllegalStateException("unable to remove tail from cache");
     }
 
     int hash = okey.hashCode() & _mask;
-    int count = _size1 + _size2 + 1;
 
     V oldValue = null;
 
@@ -365,11 +364,12 @@ public class LruCache<K,V> {
     CacheItem<K,V> tail;
 
     if (_capacity1 <= _size1)
-      tail = _tail1 != null ? _tail1 : _tail2;
+      tail = _tail1;
+    else if (_size2 > 0)
+      tail = _tail2;
+    else if (_size1 > 0)
+      tail = _tail1;
     else
-      tail = _tail2 != null ? _tail2 : _tail1;
-
-    if (tail == null)
       return false;
     
     remove(tail._key);
@@ -415,7 +415,6 @@ public class LruCache<K,V> {
       okey = NULL;
     
     int hash = key.hashCode() & _mask;
-    int count = _size1 + _size2 + 1;
 
     V value = null;
 
@@ -473,9 +472,6 @@ public class LruCache<K,V> {
       if (_isEnableListeners && value instanceof SyncCacheListener)
 	((SyncCacheListener) value).syncRemoveEvent();
     }
-
-    if (count < 0)
-      throw new RuntimeException("internal cache error");
 
     if (_isEnableListeners && value instanceof CacheListener)
       ((CacheListener) value).removeEvent();

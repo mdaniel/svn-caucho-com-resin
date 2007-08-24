@@ -4441,6 +4441,8 @@ public class Env {
     private final WeakReference<ClassDef> _defRef;
     private final WeakReference<QuercusClass> _parentRef;
 
+    private final int _hash;
+
     ClassKey(ClassDef def, QuercusClass parent)
     {
       _defRef = new WeakReference<ClassDef>(def);
@@ -4449,17 +4451,11 @@ public class Env {
 	_parentRef = new WeakReference<QuercusClass>(parent);
       else
 	_parentRef = null;
-    }
 
-    public int hashCode()
-    {
-      int hash = 37;
-
-      ClassDef def = _defRef.get();
+      // hash needs to be precalculated so losing a weak references won't
+      // change the result
       
-      QuercusClass parent = null;
-      if (_parentRef != null)
-	parent = _parentRef.get();
+      int hash = 37;
 
       if (def != null)
 	hash = 65521 * hash + def.hashCode();
@@ -4467,7 +4463,12 @@ public class Env {
       if (parent != null)
 	hash = 65521 * hash + parent.hashCode();
 
-      return hash;
+      _hash = hash;
+    }
+
+    public int hashCode()
+    {
+      return _hash;
     }
 
     public boolean equals(Object o)
