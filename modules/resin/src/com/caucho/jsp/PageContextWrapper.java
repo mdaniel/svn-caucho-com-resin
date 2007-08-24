@@ -74,7 +74,7 @@ public class PageContextWrapper extends PageContextImpl {
 
   public void init(PageContextImpl parent)
   {
-    //super.init();
+    super.init();
     
     _parent = parent;
     clearAttributes();

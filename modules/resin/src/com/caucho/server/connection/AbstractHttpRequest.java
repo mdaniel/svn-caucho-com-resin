@@ -880,7 +880,14 @@ public abstract class AbstractHttpRequest
 
     long date = -1;
     try {
-      return _calendar.parseDate(value);
+      date = _calendar.parseDate(value);
+
+      if (date == Long.MAX_VALUE)
+	throw new IllegalArgumentException("getDateHeader(" + value + ")");
+
+      return date;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new IllegalArgumentException(e);
     }

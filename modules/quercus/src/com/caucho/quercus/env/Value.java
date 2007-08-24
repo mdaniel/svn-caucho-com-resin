@@ -2073,7 +2073,7 @@ abstract public class Value implements java.io.Serializable
                              IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    out.print(toString());
+    out.print("resource(" + toString() + ")");
   }
 
   final public void printR(Env env,

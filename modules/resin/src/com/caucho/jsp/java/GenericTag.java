@@ -83,7 +83,7 @@ abstract public class GenericTag extends JspContainerNode
     
     TagLibraryInfo library = _tagInfo.getTagLibrary();
 
-    if (library == null)
+    if (library == null || library.getRequiredVersion() == null)
       return false;
 
     return "2.1".compareTo(library.getRequiredVersion()) > 0;

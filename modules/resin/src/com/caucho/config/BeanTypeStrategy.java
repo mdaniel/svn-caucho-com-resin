@@ -201,7 +201,7 @@ public class BeanTypeStrategy extends TypeStrategy {
       if (_addDependency != null) {
 	ArrayList<Dependency> list = builder.getDependencyList();
 
-	for (int i = 0; i < list.size(); i++) {
+	for (int i = 0; list != null && i < list.size(); i++) {
 	  Dependency depend = list.get(i);
 
 	  if (depend instanceof PersistentDependency)

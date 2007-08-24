@@ -52,9 +52,9 @@ public class ArrayResolverExpr extends Expr
   private Expr _right;
   
   // cached getter method
-  private Class _lastClass;
-  private String _lastField;
-  private Method _lastMethod;
+  private transient Class _lastClass;
+  private transient String _lastField;
+  private transient Method _lastMethod;
 
   /**
    * Creates a new array expression.

@@ -1054,7 +1054,6 @@ public class JavaClassDef extends ClassDef {
     try {
       if (_varDumpImpl == null) {
 	return false;
-	
       }
       
       _varDumpImpl.invoke(obj, env, out, depth, valueSet);

@@ -98,7 +98,7 @@ public class JavaValue
                             IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    if (!_classDef.varDumpImpl(env, _object, out, depth, valueSet))
+    if (! _classDef.varDumpImpl(env, _object, out, depth, valueSet))
       super.varDumpImpl(env, out, depth, valueSet);
   }
   

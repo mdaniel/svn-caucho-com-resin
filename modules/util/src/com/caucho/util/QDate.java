@@ -1124,9 +1124,9 @@ public class QDate {
       int i = skipWhitespace(string, 0);
 
       int ch = string.charAt(i);
-      if (ch >= '0' && ch <= '9' ||
-          ch == 'T' &&
-          string.charAt(i + 1) >= '0' && string.charAt(i + 1) <= '9')
+      if (ch >= '0' && ch <= '9'
+	  || (ch == 'T'
+	      && string.charAt(i + 1) >= '0' && string.charAt(i + 1) <= '9'))
         return parseISO8601Date(string, i);
 
       CharBuffer cb = new CharBuffer();
@@ -1290,7 +1290,7 @@ public class QDate {
                                day) +
                 timeOfDay);
 
-    if (pos >= length) {
+    if (length <= pos) {
       setLocalTime(time);
       return _localTimeOfEpoch;
     }
