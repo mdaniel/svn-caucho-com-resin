@@ -31,11 +31,7 @@ package com.caucho.jaxb;
 
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
-import com.caucho.util.QDate;
 
-import javax.xml.bind.DatatypeConverterInterface;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.namespace.QName;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -43,25 +39,29 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import javax.xml.bind.DatatypeConverterInterface;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
 
 /**
  */
 public class DatatypeConverterImpl implements DatatypeConverterInterface {
   private static final L10N L = new L10N(DatatypeConverterImpl.class);
+  private static DatatypeFactory _datatypeFactory = null;
 
-  // XXX: Technically, iso8601 allows removing : and -
+  private final char[] hexDigits = { '0', '1', '2', '3', '4',
+                                     '5', '6', '7', '8', '9',
+                                     'A', 'B', 'C', 'D', 'E', 'F'};
+
   private final SimpleDateFormat dateFormat 
     = new SimpleDateFormat("yyyy-MM-dd");
   private final SimpleDateFormat timeFormat 
     = new SimpleDateFormat("HH:mm:ss");
   private final SimpleDateFormat dateTimeFormat
     = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-
-  private final QDate _qdate = new QDate();
-
-  private final char[] hexDigits = { '0', '1', '2', '3', '4',
-                                     '5', '6', '7', '8', '9',
-                                     'A', 'B', 'C', 'D', 'E', 'F'};
 
   public DatatypeConverterImpl()
   {
@@ -98,29 +98,19 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   public Calendar parseDate(String lexicalXSDDate)
     throws IllegalArgumentException
   {
-    try {
-      Date date = dateFormat.parse(lexicalXSDDate);
-      Calendar calendar = (Calendar) dateFormat.getCalendar().clone();
-      calendar.setTime(date);
+    XMLGregorianCalendar xmlCal = 
+      getDatatypeFactory().newXMLGregorianCalendar(lexicalXSDDate);
 
-      return calendar;
-    }
-    catch (ParseException e) {
-      throw new IllegalArgumentException(e);
-    }
+    return xmlCal.toGregorianCalendar();
   }
 
   public Calendar parseDateTime(String lexicalXSDDateTime)
     throws IllegalArgumentException
   {
-    try {
-      _qdate.parseDate(lexicalXSDDateTime);
+    XMLGregorianCalendar xmlCal = 
+      getDatatypeFactory().newXMLGregorianCalendar(lexicalXSDDateTime);
 
-      return (Calendar) _qdate.getCalendar().clone();
-    }
-    catch (Exception e) {
-      throw new IllegalArgumentException(e);
-    }
+    return xmlCal.toGregorianCalendar();
   }
 
   public BigDecimal parseDecimal(String lexicalXSDDecimal)
@@ -148,7 +138,8 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
 
     for (int i = 0; i < buffer.length; i++) {
       buffer[i] = 
-        Byte.parseByte(lexicalXSDHexBinary.substring(2 * i, 2 * i + 2), 16);
+        (byte) Integer.parseInt(lexicalXSDHexBinary.substring(2 * i, 2 * i + 2),
+                                16);
     }
 
     return buffer;
@@ -199,16 +190,10 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   public Calendar parseTime(String lexicalXSDTime)
     throws IllegalArgumentException
   {
-    try {
-      Date date = timeFormat.parse(lexicalXSDTime);
-      Calendar calendar = (Calendar) dateFormat.getCalendar().clone();
-      calendar.setTime(date);
+    XMLGregorianCalendar xmlCal = 
+      getDatatypeFactory().newXMLGregorianCalendar(lexicalXSDTime);
 
-      return calendar;
-    }
-    catch (ParseException e) {
-      throw new IllegalArgumentException(e);
-    }
+    return xmlCal.toGregorianCalendar();
   }
 
   public long parseUnsignedInt(String lexicalXSDUnsignedInt)
@@ -291,7 +276,7 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < val.length; i++) {
-      sb.append(hexDigits[val[i] >>> 4]);
+      sb.append(hexDigits[((int) val[i] & 0xff) >>> 4]);
       sb.append(hexDigits[val[i] & 0x0f]);
     }
 
@@ -315,8 +300,18 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
 
   public String printQName(QName val, NamespaceContext nsc)
   {
-    //  XXX  use context?
-    return val.toString();
+    if (val.getPrefix() != null && ! "".equals(val.getPrefix()))
+      return val.getPrefix() + ":" + val.getLocalPart();
+
+    if (val.getNamespaceURI() == null || "".equals(val.getNamespaceURI()))
+      return val.getLocalPart();
+
+    String prefix = nsc.getPrefix(val.getNamespaceURI());
+
+    if (prefix == null)
+      throw new IllegalArgumentException(L.l("No prefix found for namespace {0}", val.getNamespaceURI()));
+
+    return prefix + ":" + val.getLocalPart();
   }
 
   public String printShort(short val)
@@ -343,5 +338,19 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   public String printUnsignedShort(int val)
   {
     return String.valueOf(val);
+  }
+
+  private static DatatypeFactory getDatatypeFactory()
+  {
+    if (_datatypeFactory == null) {
+      try {
+        _datatypeFactory = DatatypeFactory.newInstance();
+      }
+      catch (DatatypeConfigurationException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    return _datatypeFactory;
   }
 }
