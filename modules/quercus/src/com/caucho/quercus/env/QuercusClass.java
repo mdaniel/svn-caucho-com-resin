@@ -1122,7 +1122,7 @@ public class QuercusClass {
       return getCount(env, obj);
     }
 
-    private Value arrayerror(Env env, Location location, ObjectValue obj)
+    private Value arrayerror(Env env, ObjectValue obj)
     {
       String name;
 
@@ -1131,7 +1131,7 @@ public class QuercusClass {
       else
         name = obj.toDebugString();
 
-      env.error(location, L.l("Can't use object '{0}' as array", name));
+      env.error(L.l("Can't use object '{0}' as array", name));
 
       return UnsetValue.UNSET;
     }
@@ -1139,25 +1139,25 @@ public class QuercusClass {
     @Override
     public Value get(Env env, ObjectValue obj, Value offset)
     {
-      return arrayerror(env, null, obj);
+      return arrayerror(env, obj);
     }
 
     @Override
     public Value put(Env env, ObjectValue obj, Value value)
     {
-      return arrayerror(env, null, obj);
+      return arrayerror(env, obj);
     }
 
     @Override
     public Value put(Env env, ObjectValue obj, Value offset, Value value)
     {
-      return arrayerror(env, null, obj);
+      return arrayerror(env, obj);
     }
 
     @Override
     public Value remove(Env env, ObjectValue obj, Value offset)
     {
-      return arrayerror(env, null, obj);
+      return arrayerror(env, obj);
     }
 
     @Override

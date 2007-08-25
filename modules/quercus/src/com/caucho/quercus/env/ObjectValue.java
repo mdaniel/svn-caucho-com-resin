@@ -40,7 +40,7 @@ import java.util.TreeSet;
  * Represents a Quercus object value.
  */
 abstract public class ObjectValue extends Value {
- private QuercusClass _quercusClass;
+ transient private QuercusClass _quercusClass;
 
   protected ObjectValue(QuercusClass quercusClass)
   {

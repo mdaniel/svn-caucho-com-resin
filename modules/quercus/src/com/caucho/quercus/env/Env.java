@@ -2004,7 +2004,7 @@ public class Env {
   }
   
   /**
-   * Pops the top call.
+   * Peeks at the the top call.
    */
   public Expr peekCall(int depth)
   {
@@ -2015,7 +2015,7 @@ public class Env {
   }
   
   /**
-   * Pops the top call.
+   * Peeks at the the "this" top call.
    */
   public Value peekCallThis(int depth)
   {

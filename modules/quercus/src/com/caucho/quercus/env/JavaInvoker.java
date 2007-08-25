@@ -578,7 +578,7 @@ abstract public class JavaInvoker
                                               _param[k]);
       } else {
         env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-                        _name, _marshalArgs.length, args.length));
+                        _name, _minArgumentLength, args.length));
 
         //return NullValue.NULL;
 

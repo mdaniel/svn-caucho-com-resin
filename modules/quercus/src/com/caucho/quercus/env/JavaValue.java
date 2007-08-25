@@ -88,7 +88,7 @@ public class JavaValue
     throws IOException
   {
     if (! _classDef.printRImpl(env, _object, out, depth, valueSet))
-      super.printRImpl(env, out, depth, valueSet);
+      out.print("resource(" + toString(env) + ")"); // XXX:
   }
   
   @Override
@@ -99,7 +99,7 @@ public class JavaValue
     throws IOException
   {
     if (! _classDef.varDumpImpl(env, _object, out, depth, valueSet))
-      super.varDumpImpl(env, out, depth, valueSet);
+      out.print("resource(" + toString(env) + ")"); // XXX:
   }
   
   @Override
@@ -410,8 +410,11 @@ public class JavaValue
     _env = Env.getInstance();
     
     _classDef = _env.getJavaClassDefinition((String) in.readObject());
-    
+
+    setQuercusClass(_env.createQuercusClass(_classDef, null));
+
     _object = in.readObject();
+
   }
 
 }
