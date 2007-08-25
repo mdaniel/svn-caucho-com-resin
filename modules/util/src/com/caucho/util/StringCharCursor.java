@@ -32,16 +32,16 @@ package com.caucho.util;
  * text, nor does is allow changes.
  */
 public class StringCharCursor extends CharCursor {
-  String string;
+  CharSequence string;
   int pos;
 
-  public StringCharCursor(String string)
+  public StringCharCursor(CharSequence string)
   {
     this.string = string;
     this.pos = 0;
   }
 
-  public StringCharCursor(String string, int offset)
+  public StringCharCursor(CharSequence string, int offset)
   {
     this.string = string;
     this.pos = offset;
@@ -124,7 +124,7 @@ public class StringCharCursor extends CharCursor {
       return string.charAt(pos);
   }
 
-  public void init(String string)
+  public void init(CharSequence string)
   {
     this.string = string;
     this.pos = 0;
