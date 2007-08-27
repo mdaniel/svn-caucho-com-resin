@@ -204,6 +204,7 @@
       <item link="hessian-1.0-spec.xtp" title="Hessian 1.0 spec"/>
       <item link="hessian-2.0-spec.xtp" title="Hessian 2.0 draft spec"/>
       <item link="hessian-serialization.html" title="Hessian 2.0 serialization"/>
+      <item link="hessian-ws.html" title="Hessian 2.0 protocol"/>
       <item link="hessian-java-binding-draft-spec.xtp" title="Java Binding"/>
       <item link="burlap.xtp" title="Burlap"/>
       <item link="burlap-1.0-spec.xtp" title="Burlap 1.0 Spec"/>
