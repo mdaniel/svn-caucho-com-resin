@@ -44,17 +44,14 @@
   <middle>
     <section title="Introduction">
       <t>
-        Hessian is a serialization and Web Services protocol designed for
-        object-oriented transmission.
+        Hessian is a dynamically-typed, binary serialization and Web
+Services protocol designed for object-oriented transmission.
       </t>
     </section>
 
     <section title="Design Goals">
       <t>
-        Unlike older binary protocols, Hessian is both self-describing,
-        compact, and portable across languages.  The wire protocol for web
-        services should be invisible to application writers, it should not 
-        require external schema or IDL.
+        Hessian is dynamically-typed, compact, and portable across languages.
       </t>
       <t>
       The Hessian protocol has the following design goals:
@@ -89,7 +86,7 @@ scripting languages.</t>
         <preamble>Serialization Grammar</preamble>
         <artwork>
            # starting production
-top        ::= object
+top        ::= value
 
            # 8-bit binary data split into 64k chunks
 binary     ::= 'b' b1 b0 &lt;binary-data> binary # non-final chunk
@@ -100,6 +97,9 @@ binary     ::= 'b' b1 b0 &lt;binary-data> binary # non-final chunk
            # boolean true/false
 boolean    ::= 'T'
            ::= 'F'
+
+           # definition for an object (compact map)
+class-def  ::= 'O' type int string*
 
            # time in UTC encoded as 64-bit long milliseconds since 
            #  epoch
@@ -125,8 +125,8 @@ length     ::= 'l' b3 b2 b1 b0
            ::= x6e int
 
            # list/vector
-list       ::= 'V' type? length? object* 'z'
-           ::= 'v' int int object*   # type-ref, length
+list       ::= 'V' type? length? value* 'z'
+           ::= 'v' int int value*    # type-ref, length
 
            # 64-bit signed long integer
 long       ::= 'L' b7 b6 b5 b4 b3 b2 b1 b0
@@ -136,15 +136,33 @@ long       ::= 'L' b7 b6 b5 b4 b3 b2 b1 b0
            ::= x77 b3 b2 b1 b0       # 32-bit integer cast to long
 
            # map/object
-map        ::= 'M' type? (object object)* 'z'  # key, value map pairs
-           ::= 'o' int object*                 # Object instance - 
-                                               #  type-ref
+map        ::= 'M' type? (value value)* 'z'  # key, value map pairs
 
            # null value
 null       ::= 'N'
 
-           # main production for object serialization
-object     ::= null
+           # Object instance
+object     ::= 'o' int value*
+
+           # value reference (e.g. circular trees and graphs)
+ref        ::= 'R' b3 b2 b1 b0    # reference to nth map/list/object in 
+                                  #  stream
+           ::= x4a b0             # reference to 1-255th map/list/object
+           ::= x4b b1 b0          # reference to 1-65535th map/list/object
+
+           # UTF-8 encoded character string split into 64k chunks
+string     ::= 's' b1 b0 &lt;utf8-data> string  # non-final chunk
+           ::= 'S' b1 b0 &lt;utf8-data>         # string of length 
+                                             #  0-65535
+           ::= [x00-x1f] &lt;utf8-data>         # string of length 
+                                             #  0-31
+
+           # map/list types for OO languages
+type       ::= 't' b1 b0 &lt;type-string>         # type name
+           ::= x75 int                         # type reference
+
+           # main production
+value      ::= null
            ::= binary
            ::= boolean
            ::= date
@@ -153,65 +171,46 @@ object     ::= null
            ::= list
            ::= long
            ::= map
-           ::= object-def object
+           ::= class-def value
            ::= ref
            ::= string
-
-           # definition for an object (compact map)
-object-def ::= 'O' type int string*
-
-           # Object reference (e.g. circular trees and graphs)
-ref        ::= 'R' b3 b2 b1 b0    # reference to nth map/list in 
-                                  #  stream
-           ::= x4a b0             # reference to 1-255th map/list
-           ::= x4b b1 b0          # reference to 1-65535th map/list
-
-           # UTF-8 encoded character string split into 64k chunks
-string     ::= 's' b1 b0 &lt;string-data> string  # non-final chunk
-           ::= 'S' b1 b0 &lt;string-data>         # string of length 
-                                               #  0-65535
-           ::= [x00-x1f] &lt;string-data>         # string of length 
-                                               #  0-31
-
-           # map/list types for OO languages
-type       ::= 't' b1 b0 &lt;type-string>         # type name
-           ::= x75 int                         # type reference
         </artwork>
       </figure>
     </section>
 
     <section title="Serialization">
-      <t>Hessian's object serialization has 9 primitive types:</t>
+      <t>Hessian's object serialization has 8 primitive types:</t>
       <list style="numbers">
+        <t>raw <xref target="#binary">binary</xref> data</t>
         <t><xref target="#boolean">boolean</xref></t>
+        <t>64-bit <xref target="#date">date</xref></t>
+        <t>64-bit <xref target="#double">double</xref></t>
         <t>32-bit <xref target="#int">int</xref></t>
         <t>64-bit <xref target="#long">long</xref></t>
-        <t>64-bit <xref target="#double">double</xref></t>
-        <t>64-bit <xref target="#date">date</xref></t>
+        <t><xref target="#null">null</xref></t>
         <t>UTF8-encoded <xref target="#string">string</xref></t>
-        <t>raw <xref target="#binary">binary</xref> data</t>
       </list>
 
-      <t>It has 2 combining constructs:</t>
+      <t>It has 3 recursive types:</t>
       <list style="numbers">
         <t><xref target="#list">list</xref> for lists and arrays</t>
-        <t><xref target="#map">map</xref> for objects and hash tables.</t>
+        <t><xref target="#map">map</xref> for maps and dictionaries</t>
+        <t><xref target="#object">object</xref> for objects</t>
       </list>
 
-      <t>Finally, it has 2 special contructs:</t>
+      <t>Finally, it has one special contruct:</t>
       <list style="numbers">
-        <t><xref target="#null">null</xref> for null values</t>
         <t>
           <xref target="#ref">ref</xref> for shared and circular object 
           references.
         </t>
       </list>
 
-      <t>Hessian 2.0 has 3 implicit reference maps:</t>
+      <t>Hessian 2.0 has 3 internal reference maps:</t>
       <list style="numbers">
         <t>An object/list reference map.</t>
-        <t>An object definition reference map.</t>
-        <t>A type (class) reference map.</t>
+        <t>An class definition reference map.</t>
+        <t>A type (class name) reference map.</t>
       </list>
 
       <section title="binary data" anchor="#binary">
@@ -290,14 +289,14 @@ date ::= d b7 b6 b5 b4 b3 b2 b1 b0
         </figure>
 
         <t>
-          Date represented by a 64-bit long of milliseconds since the epoch, 
-          GMT.
+          Date represented by a 64-bit long of milliseconds since the
+          Jan 1 1970 00:00H, UTC.
         </t>
 
         <section title="Date Examples">
           <figure anchor="date_examples">
             <artwork>
-d x00 x00 x00 xd0 x4b x92 x84 xb8   # 2:51:31 May 8, 1998 GMT
+d x00 x00 x00 xd0 x4b x92 x84 xb8   # 2:51:31 May 8, 1998 UTC
             </artwork>
           </figure>
         </section>
@@ -409,7 +408,7 @@ int ::= 'I' b3 b2 b1 b0
           </t>
         </section>
 
-        <section title="Compact: two octet integers (byte)">
+        <section title="Compact: two octet integers">
           <t>
             Integers between -2048 and 2047 can be encoded in two octets with
             the leading byte in the range xc0 to xcf.
@@ -420,7 +419,7 @@ int ::= 'I' b3 b2 b1 b0
           </t>
         </section>
 
-        <section title="Compact: three octet integers (short)">
+        <section title="Compact: three octet integers">
           <t>
             Integers between -262144 and 262143 can be encoded in three bytes 
             with the leading byte in the range xd0 to xd7.
@@ -458,14 +457,14 @@ I x00 x00 x01 x2c  # 300
         <figure anchor="list_grammar">
           <preamble>List Grammar</preamble>
           <artwork>
-list ::= V type? length? object* z
-     ::= v int int object*
+list ::= V type? length? value* z
+     ::= v int int value*
           </artwork>
         </figure>
 
         <t>
           An ordered list, like an array.  All lists have a type string, a 
-          length, a list of objects, and a trailing octet x7a ('z').
+          length, a list of values, and a trailing octet x7a ('z').
           The type string may be an arbitrary UTF-8 string understood by
           the service. The length may be omitted to indicate that
           the list is variable length.
@@ -597,7 +596,7 @@ long ::= L b7 b6 b5 b4 b3 b2 b1 b0
           </t>
         </section>
 
-        <section title="Compact: four octet longs (short)">
+        <section title="Compact: four octet longs">
           <t>
             Longs between which fit into 32-bits are encoded in five octets with
             the leading byte x77.
@@ -637,17 +636,13 @@ L x00 x00 x00 x00 x00 x00 x01 x2c  # 300
         <figure anchor="map_grammar">
           <preamble>Map Grammar</preamble>
           <artwork>
-map        ::= M type? (object object)* z
-           ::= 'o' int object*
-
-object-def ::= 'O' type int string*
+map        ::= M type? (value value)* z
           </artwork>
         </figure>
 
         <t>
-          Represents serialized objects and Maps. The type element describes 
-          the type of the map.  Objects are represented by a map from field 
-          names to their values and type is the class of the object itself.
+          Represents serialized maps and can represent objects.
+          The type element describes the type of the map.
         </t>
 
         <t>
@@ -662,34 +657,6 @@ object-def ::= 'O' type int string*
         </t>
 
         <t>The type is chosen by the service.</t>
-
-        <section title="Compact: object definition">
-          <t>
-            Hessian 2.0 has a compact object form where the field names
-            are only serialized once.  Following objects only need to serialize
-            their values.
-          </t>
-
-          <t>
-            The object definition includes a mandatory type string, the number 
-            of fields, and the field names.  The object definition is stored in 
-            the object definition map and will be referenced by object 
-            instances with an integer reference.
-          </t>
-        </section>
-
-        <section title="Compact: object instantiation">
-          <t>
-            Hessian 2.0 has a compact object form where the field names
-            are only serialized once.  Following objects only need to serialize
-            their values.
-          </t>
-
-          <t>
-            The object instantiation creates a new object based on a previous
-            definition.  The integer value refers to the object definition.
-          </t>
-        </section>
 
         <section title="Map examples">
           <figure anchor="map_example_1">
@@ -717,7 +684,7 @@ M
           </figure>
 
           <figure anchor="map_example_2">
-            <preamble>Serialization of a Java Object</preamble>
+            <preamble>Map Representation of a Java Object</preamble>
             <artwork>
 public class Car implements Serializable {
   String color = "aquamarine";
@@ -740,9 +707,64 @@ M
   z
             </artwork>
           </figure>
+      </section>
+      </section>
 
-          <figure anchor="map_example_3">
-            <preamble>Compact Object serialization</preamble>
+      <section title="null" anchor="#null">
+        <figure anchor="null_grammar">
+          <preamble>Null Grammar</preamble>
+          <artwork>
+null ::= N
+          </artwork>
+        </figure>
+
+        <t>Null represents a null pointer.</t>
+
+        <t>The octet 'N' represents the null value.</t>
+      </section>
+
+      <section title="object" anchor="#object">
+        <figure anchor="object_grammar">
+          <preamble>Object Grammar</preamble>
+          <artwork>
+object     ::= 'o' int value*
+
+class-def  ::= 'O' type int string*
+          </artwork>
+        </figure>
+
+        <section title="Compact: class definition">
+          <t>
+            Hessian 2.0 has a compact object form where the field names
+            are only serialized once.  Following objects only need to serialize
+            their values.
+          </t>
+
+          <t>
+            The object definition includes a mandatory type string, the number 
+            of fields, and the field names.  The object definition is stored in 
+            the object definition map and will be referenced by object 
+            instances with an integer reference.
+          </t>
+        </section>
+
+        <section title="Compact: object instantiation">
+          <t>
+            Hessian 2.0 has a compact object form where the field names
+            are only serialized once.  Following objects only need to serialize
+            their values.
+          </t>
+
+          <t>
+            The object instantiation creates a new object based on a previous
+            definition.  The integer value refers to the object definition.
+          </t>
+        </section>
+
+        <section title="Object examples">
+
+          <figure anchor="object_example_1">
+            <preamble>Object serialization</preamble>
             <artwork>
 class Car {
   String color;
@@ -772,7 +794,7 @@ o
             </artwork>
           </figure>
 
-          <figure anchor="map_example_4">
+          <figure anchor="object_example_2">
             <preamble></preamble>
             <artwork>
 enum Color {
@@ -811,24 +833,6 @@ x4a x01                   # object ref #1, i.e. Color.GREEN
         </section>
       </section>
 
-      <section title="null" anchor="#null">
-        <figure anchor="null_grammar">
-          <preamble>Null Grammar</preamble>
-          <artwork>
-null ::= N
-          </artwork>
-        </figure>
-
-        <t>Null represents a null pointer.</t>
-
-        <t>The octet 'N' represents the null pointer.</t>
-
-        <t>
-          null values are allowed in place of any string, binary, list, 
-          or map.
-        </t>
-      </section>
-
       <section title="ref" anchor="#ref">
         <figure anchor="ref_grammar">
           <preamble>Ref Grammar</preamble>
@@ -840,11 +844,12 @@ ref ::= R b3 b2 b1 b0
         </figure>
 
         <t>
-          An integer referring to a previous list or map instance.  As each 
-          list or map is read from the input stream, it is assigned the integer 
-          position in the stream, i.e. the first list or map is '0', the next 
+          An integer referring to a previous list, map, or object instance.
+          As each list, map or object is read from the input stream,
+          it is assigned the integer position in the stream, i.e. the first
+          list or map is '0', the next 
           is '1', etc.  A later ref can then use the previous object.  Writers 
-          are not required to generate refs, but parsers must be able to 
+          MAY generate refs.  Parsers MUST be able to 
           recognize them.
         </t>
 
@@ -855,11 +860,11 @@ ref ::= R b3 b2 b1 b0
         </t>
 
         <t>
-          A possible implementation would add each map and list to an array as 
-          it's read.  The ref will return the corresponding object from the 
-          array.  To support circular structures, the implementation would 
-          store the map or list immediately, before filling in the object's 
-          contents.
+          A possible implementation would add each map, list, and object
+          to an array as it is read.  The ref will return the corresponding
+          value from the array.  To support circular structures, the
+          implementation would store the map, list or object immediately,
+          before filling in the contents.
         </t>
 
         <t>
@@ -921,9 +926,9 @@ o x90      # object stores ref #0
         <figure anchor="string_grammar">
           <preamble>String Grammar</preamble>
           <artwork>
-string ::= s b1 b0 &lt;utf-8-data> string
-       ::= S b1 b0 &lt;utf-8-data>
-       ::= [x00-x1f] &lt;utf-8-data>
+string ::= s b1 b0 &lt;utf8-data> string
+       ::= S b1 b0 &lt;utf8-data>
+       ::= [x00-x1f] &lt;utf8-data>
           </artwork>
         </figure>
 

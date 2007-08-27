@@ -221,9 +221,9 @@ int<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor15">4.5.1.</a>&nbsp;
 Compact: single octet integers<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor16">4.5.2.</a>&nbsp;
-Compact: two octet integers (byte)<br />
+Compact: two octet integers<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor17">4.5.3.</a>&nbsp;
-Compact: three octet integers (short)<br />
+Compact: three octet integers<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor18">4.5.4.</a>&nbsp;
 Integer Examples<br />
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="##list">4.6.</a>&nbsp;
@@ -241,34 +241,38 @@ Compact: two octet longs<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor23">4.7.3.</a>&nbsp;
 Compact: three octet longs<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor24">4.7.4.</a>&nbsp;
-Compact: four octet longs (short)<br />
+Compact: four octet longs<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor25">4.7.5.</a>&nbsp;
 Long Examples<br />
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="##map">4.8.</a>&nbsp;
 map<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor26">4.8.1.</a>&nbsp;
-Compact: object definition<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor27">4.8.2.</a>&nbsp;
-Compact: object instantiation<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor28">4.8.3.</a>&nbsp;
 Map examples<br />
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="##null">4.9.</a>&nbsp;
 null<br />
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="##ref">4.10.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="##object">4.10.</a>&nbsp;
+object<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor27">4.10.1.</a>&nbsp;
+Compact: class definition<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor28">4.10.2.</a>&nbsp;
+Compact: object instantiation<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor29">4.10.3.</a>&nbsp;
+Object examples<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="##ref">4.11.</a>&nbsp;
 ref<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor29">4.10.1.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor30">4.11.1.</a>&nbsp;
 Compact: two octet reference<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor30">4.10.2.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor31">4.11.2.</a>&nbsp;
 Compact: three octet reference<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor31">4.10.3.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor32">4.11.3.</a>&nbsp;
 Ref Examples<br />
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="##string">4.11.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="##string">4.12.</a>&nbsp;
 string<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor32">4.11.1.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor33">4.12.1.</a>&nbsp;
 Compact: short strings<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor33">4.11.2.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor34">4.12.2.</a>&nbsp;
 String Examples<br />
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor34">4.12.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor35">4.13.</a>&nbsp;
 Bytecode map<br />
 <a href="#rfc.authors">&#167;</a>&nbsp;
 Authors' Addresses<br />
@@ -283,8 +287,8 @@ Intellectual Property and Copyright Statements<br />
 Introduction</h3>
 
 <p>
-        Hessian is a serialization and Web Services protocol designed for
-        object-oriented transmission.
+        Hessian is a dynamically-typed, binary serialization and Web
+Services protocol designed for object-oriented transmission.
       
 </p>
 <a name="anchor2"></a><br /><hr />
@@ -293,10 +297,7 @@ Introduction</h3>
 Design Goals</h3>
 
 <p>
-        Unlike older binary protocols, Hessian is both self-describing,
-        compact, and portable across languages.  The wire protocol for web
-        services should be invisible to application writers, it should not 
-        require external schema or IDL.
+        Hessian is dynamically-typed, compact, and portable across languages.
       
 </p>
 <p>
@@ -345,7 +346,7 @@ Hessian Grammar</h3>
 <p>Serialization Grammar
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
            # starting production
-top        ::= object
+top        ::= value
 
            # 8-bit binary data split into 64k chunks
 binary     ::= 'b' b1 b0 &lt;binary-data&gt; binary # non-final chunk
@@ -356,6 +357,9 @@ binary     ::= 'b' b1 b0 &lt;binary-data&gt; binary # non-final chunk
            # boolean true/false
 boolean    ::= 'T'
            ::= 'F'
+
+           # definition for an object (compact map)
+class-def  ::= 'O' type int string*
 
            # time in UTC encoded as 64-bit long milliseconds since
            #  epoch
@@ -381,8 +385,8 @@ length     ::= 'l' b3 b2 b1 b0
            ::= x6e int
 
            # list/vector
-list       ::= 'V' type? length? object* 'z'
-           ::= 'v' int int object*   # type-ref, length
+list       ::= 'V' type? length? value* 'z'
+           ::= 'v' int int value*    # type-ref, length
 
            # 64-bit signed long integer
 long       ::= 'L' b7 b6 b5 b4 b3 b2 b1 b0
@@ -392,15 +396,33 @@ long       ::= 'L' b7 b6 b5 b4 b3 b2 b1 b0
            ::= x77 b3 b2 b1 b0       # 32-bit integer cast to long
 
            # map/object
-map        ::= 'M' type? (object object)* 'z'  # key, value map pairs
-           ::= 'o' int object*                 # Object instance -
-                                               #  type-ref
+map        ::= 'M' type? (value value)* 'z'  # key, value map pairs
 
            # null value
 null       ::= 'N'
 
-           # main production for object serialization
-object     ::= null
+           # Object instance
+object     ::= 'o' int value*
+
+           # value reference (e.g. circular trees and graphs)
+ref        ::= 'R' b3 b2 b1 b0    # reference to nth map/list/object in
+                                  #  stream
+           ::= x4a b0             # reference to 1-255th map/list/object
+           ::= x4b b1 b0          # reference to 1-65535th map/list/object
+
+           # UTF-8 encoded character string split into 64k chunks
+string     ::= 's' b1 b0 &lt;utf8-data&gt; string  # non-final chunk
+           ::= 'S' b1 b0 &lt;utf8-data&gt;         # string of length
+                                             #  0-65535
+           ::= [x00-x1f] &lt;utf8-data&gt;         # string of length
+                                             #  0-31
+
+           # map/list types for OO languages
+type       ::= 't' b1 b0 &lt;type-string&gt;         # type name
+           ::= x75 int                         # type reference
+
+           # main production
+value      ::= null
            ::= binary
            ::= boolean
            ::= date
@@ -409,29 +431,9 @@ object     ::= null
            ::= list
            ::= long
            ::= map
-           ::= object-def object
+           ::= class-def value
            ::= ref
            ::= string
-
-           # definition for an object (compact map)
-object-def ::= 'O' type int string*
-
-           # Object reference (e.g. circular trees and graphs)
-ref        ::= 'R' b3 b2 b1 b0    # reference to nth map/list in
-                                  #  stream
-           ::= x4a b0             # reference to 1-255th map/list
-           ::= x4b b1 b0          # reference to 1-65535th map/list
-
-           # UTF-8 encoded character string split into 64k chunks
-string     ::= 's' b1 b0 &lt;string-data&gt; string  # non-final chunk
-           ::= 'S' b1 b0 &lt;string-data&gt;         # string of length
-                                               #  0-65535
-           ::= [x00-x1f] &lt;string-data&gt;         # string of length
-                                               #  0-31
-
-           # map/list types for OO languages
-type       ::= 't' b1 b0 &lt;type-string&gt;         # type name
-           ::= x75 int                         # type reference
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;1&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <a name="anchor4"></a><br /><hr />
@@ -439,51 +441,53 @@ type       ::= 't' b1 b0 &lt;type-string&gt;         # type name
 <a name="rfc.section.4"></a><h3>4.&nbsp;
 Serialization</h3>
 
-<p>Hessian's object serialization has 9 primitive types:
+<p>Hessian's object serialization has 8 primitive types:
 </p>
 <ol class="text">
+<li>raw <a class='info' href='##binary'>binary<span> (</span><span class='info'>binary data</span><span>)</span></a> data
+</li>
 <li><a class='info' href='##boolean'>boolean<span> (</span><span class='info'>boolean</span><span>)</span></a>
+</li>
+<li>64-bit <a class='info' href='##date'>date<span> (</span><span class='info'>date</span><span>)</span></a>
+</li>
+<li>64-bit <a class='info' href='##double'>double<span> (</span><span class='info'>double</span><span>)</span></a>
 </li>
 <li>32-bit <a class='info' href='##int'>int<span> (</span><span class='info'>int</span><span>)</span></a>
 </li>
 <li>64-bit <a class='info' href='##long'>long<span> (</span><span class='info'>long</span><span>)</span></a>
 </li>
-<li>64-bit <a class='info' href='##double'>double<span> (</span><span class='info'>double</span><span>)</span></a>
-</li>
-<li>64-bit <a class='info' href='##date'>date<span> (</span><span class='info'>date</span><span>)</span></a>
+<li><a class='info' href='##null'>null<span> (</span><span class='info'>null</span><span>)</span></a>
 </li>
 <li>UTF8-encoded <a class='info' href='##string'>string<span> (</span><span class='info'>string</span><span>)</span></a>
 </li>
-<li>raw <a class='info' href='##binary'>binary<span> (</span><span class='info'>binary data</span><span>)</span></a> data
-</li>
 </ol>
-<p>It has 2 combining constructs:
+<p>It has 3 recursive types:
 </p>
 <ol class="text">
 <li><a class='info' href='##list'>list<span> (</span><span class='info'>list</span><span>)</span></a> for lists and arrays
 </li>
-<li><a class='info' href='##map'>map<span> (</span><span class='info'>map</span><span>)</span></a> for objects and hash tables.
+<li><a class='info' href='##map'>map<span> (</span><span class='info'>map</span><span>)</span></a> for maps and dictionaries
+</li>
+<li><a class='info' href='##object'>object<span> (</span><span class='info'>object</span><span>)</span></a> for objects
 </li>
 </ol>
-<p>Finally, it has 2 special contructs:
+<p>Finally, it has one special contruct:
 </p>
 <ol class="text">
-<li><a class='info' href='##null'>null<span> (</span><span class='info'>null</span><span>)</span></a> for null values
-</li>
 <li>
           <a class='info' href='##ref'>ref<span> (</span><span class='info'>ref</span><span>)</span></a> for shared and circular object 
           references.
         
 </li>
 </ol>
-<p>Hessian 2.0 has 3 implicit reference maps:
+<p>Hessian 2.0 has 3 internal reference maps:
 </p>
 <ol class="text">
 <li>An object/list reference map.
 </li>
-<li>An object definition reference map.
+<li>An class definition reference map.
 </li>
-<li>A type (class) reference map.
+<li>A type (class name) reference map.
 </li>
 </ol>
 <a name="#binary"></a><br /><hr />
@@ -729,7 +733,7 @@ Compact: single octet integers</h3>
 <a name="anchor16"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4.5.2"></a><h3>4.5.2.&nbsp;
-Compact: two octet integers (byte)</h3>
+Compact: two octet integers</h3>
 
 <p>
             Integers between -2048 and 2047 can be encoded in two octets with
@@ -743,7 +747,7 @@ Compact: two octet integers (byte)</h3>
 <a name="anchor17"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4.5.3"></a><h3>4.5.3.&nbsp;
-Compact: three octet integers (short)</h3>
+Compact: three octet integers</h3>
 
 <p>
             Integers between -262144 and 262143 can be encoded in three bytes 
@@ -787,13 +791,13 @@ list</h3>
 
 <p>List Grammar
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-list ::= V type? length? object* z
-     ::= v int int object*
+list ::= V type? length? value* z
+     ::= v int int value*
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;12&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p>
           An ordered list, like an array.  All lists have a type string, a 
-          length, a list of objects, and a trailing octet x7a ('z').
+          length, a list of values, and a trailing octet x7a ('z').
           The type string may be an arbitrary UTF-8 string understood by
           the service. The length may be omitted to indicate that
           the list is variable length.
@@ -946,7 +950,7 @@ Compact: three octet longs</h3>
 <a name="anchor24"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4.7.4"></a><h3>4.7.4.&nbsp;
-Compact: four octet longs (short)</h3>
+Compact: four octet longs</h3>
 
 <p>
             Longs between which fit into 32-bits are encoded in five octets with
@@ -992,16 +996,12 @@ map</h3>
 
 <p>Map Grammar
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-map        ::= M type? (object object)* z
-           ::= 'o' int object*
-
-object-def ::= 'O' type int string*
+map        ::= M type? (value value)* z
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;18&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p>
-          Represents serialized objects and Maps. The type element describes 
-          the type of the map.  Objects are represented by a map from field 
-          names to their values and type is the class of the object itself.
+          Represents serialized maps and can represent objects.
+          The type element describes the type of the map.
         
 </p>
 <p>
@@ -1020,40 +1020,6 @@ object-def ::= 'O' type int string*
 <a name="anchor26"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4.8.1"></a><h3>4.8.1.&nbsp;
-Compact: object definition</h3>
-
-<p>
-            Hessian 2.0 has a compact object form where the field names
-            are only serialized once.  Following objects only need to serialize
-            their values.
-          
-</p>
-<p>
-            The object definition includes a mandatory type string, the number 
-            of fields, and the field names.  The object definition is stored in 
-            the object definition map and will be referenced by object 
-            instances with an integer reference.
-          
-</p>
-<a name="anchor27"></a><br /><hr />
-<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.8.2"></a><h3>4.8.2.&nbsp;
-Compact: object instantiation</h3>
-
-<p>
-            Hessian 2.0 has a compact object form where the field names
-            are only serialized once.  Following objects only need to serialize
-            their values.
-          
-</p>
-<p>
-            The object instantiation creates a new object based on a previous
-            definition.  The integer value refers to the object definition.
-          
-</p>
-<a name="anchor28"></a><br /><hr />
-<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.8.3"></a><h3>4.8.3.&nbsp;
 Map examples</h3>
 <br /><hr class="insert" />
 <a name="map_example_1"></a>
@@ -1082,7 +1048,7 @@ M
 <br /><hr class="insert" />
 <a name="map_example_2"></a>
 
-<p>Serialization of a Java Object
+<p>Map Representation of a Java Object
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
 public class Car implements Serializable {
   String color = "aquamarine";
@@ -1104,10 +1070,79 @@ M
   I x00 x01 x00 x00
   z
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;20&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
-<br /><hr class="insert" />
-<a name="map_example_3"></a>
 
-<p>Compact Object serialization
+<a name="#null"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.4.9"></a><h3>4.9.&nbsp;
+null</h3>
+<br /><hr class="insert" />
+<a name="null_grammar"></a>
+
+<p>Null Grammar
+</p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+null ::= N
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;21&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+
+<p>Null represents a null pointer.
+</p>
+<p>The octet 'N' represents the null value.
+</p>
+<a name="#object"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.4.10"></a><h3>4.10.&nbsp;
+object</h3>
+<br /><hr class="insert" />
+<a name="object_grammar"></a>
+
+<p>Object Grammar
+</p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+object     ::= 'o' int value*
+
+class-def  ::= 'O' type int string*
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;22&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+
+<a name="anchor27"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.4.10.1"></a><h3>4.10.1.&nbsp;
+Compact: class definition</h3>
+
+<p>
+            Hessian 2.0 has a compact object form where the field names
+            are only serialized once.  Following objects only need to serialize
+            their values.
+          
+</p>
+<p>
+            The object definition includes a mandatory type string, the number 
+            of fields, and the field names.  The object definition is stored in 
+            the object definition map and will be referenced by object 
+            instances with an integer reference.
+          
+</p>
+<a name="anchor28"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.4.10.2"></a><h3>4.10.2.&nbsp;
+Compact: object instantiation</h3>
+
+<p>
+            Hessian 2.0 has a compact object form where the field names
+            are only serialized once.  Following objects only need to serialize
+            their values.
+          
+</p>
+<p>
+            The object instantiation creates a new object based on a previous
+            definition.  The integer value refers to the object definition.
+          
+</p>
+<a name="anchor29"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.4.10.3"></a><h3>4.10.3.&nbsp;
+Object examples</h3>
+<br /><hr class="insert" />
+<a name="object_example_1"></a>
+
+<p>Object serialization
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
 class Car {
   String color;
@@ -1134,9 +1169,9 @@ o
   x90                    # object definition #0
   x05 green              # color field value
   x05 civic              # model field value
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;21&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;23&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 <br /><hr class="insert" />
-<a name="map_example_4"></a>
+<a name="object_example_2"></a>
 
 <p>
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
@@ -1171,32 +1206,11 @@ o                         # object #2
   x04 BLUE                # BLUE value
 
 x4a x01                   # object ref #1, i.e. Color.GREEN
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;22&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;24&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
-<a name="#null"></a><br /><hr />
-<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.9"></a><h3>4.9.&nbsp;
-null</h3>
-<br /><hr class="insert" />
-<a name="null_grammar"></a>
-
-<p>Null Grammar
-</p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-null ::= N
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;23&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
-
-<p>Null represents a null pointer.
-</p>
-<p>The octet 'N' represents the null pointer.
-</p>
-<p>
-          null values are allowed in place of any string, binary, list, 
-          or map.
-        
-</p>
 <a name="#ref"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.10"></a><h3>4.10.&nbsp;
+<a name="rfc.section.4.11"></a><h3>4.11.&nbsp;
 ref</h3>
 <br /><hr class="insert" />
 <a name="ref_grammar"></a>
@@ -1206,14 +1220,15 @@ ref</h3>
 ref ::= R b3 b2 b1 b0
     ::= x4a b0
     ::= x4b b1 b0
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;24&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;25&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p>
-          An integer referring to a previous list or map instance.  As each 
-          list or map is read from the input stream, it is assigned the integer 
-          position in the stream, i.e. the first list or map is '0', the next 
+          An integer referring to a previous list, map, or object instance.
+          As each list, map or object is read from the input stream,
+          it is assigned the integer position in the stream, i.e. the first
+          list or map is '0', the next 
           is '1', etc.  A later ref can then use the previous object.  Writers 
-          are not required to generate refs, but parsers must be able to 
+          MAY generate refs.  Parsers MUST be able to 
           recognize them.
         
 </p>
@@ -1224,11 +1239,11 @@ ref ::= R b3 b2 b1 b0
         
 </p>
 <p>
-          A possible implementation would add each map and list to an array as 
-          it's read.  The ref will return the corresponding object from the 
-          array.  To support circular structures, the implementation would 
-          store the map or list immediately, before filling in the object's 
-          contents.
+          A possible implementation would add each map, list, and object
+          to an array as it is read.  The ref will return the corresponding
+          value from the array.  To support circular structures, the
+          implementation would store the map, list or object immediately,
+          before filling in the contents.
         
 </p>
 <p>
@@ -1237,9 +1252,9 @@ ref ::= R b3 b2 b1 b0
           object is numbered '0'.
         
 </p>
-<a name="anchor29"></a><br /><hr />
+<a name="anchor30"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.10.1"></a><h3>4.10.1.&nbsp;
+<a name="rfc.section.4.11.1"></a><h3>4.11.1.&nbsp;
 Compact: two octet reference</h3>
 
 <p>
@@ -1250,9 +1265,9 @@ Compact: two octet reference</h3>
             value = b0
           
 </p>
-<a name="anchor30"></a><br /><hr />
+<a name="anchor31"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.10.2"></a><h3>4.10.2.&nbsp;
+<a name="rfc.section.4.11.2"></a><h3>4.11.2.&nbsp;
 Compact: three octet reference</h3>
 
 <p>
@@ -1263,9 +1278,9 @@ Compact: three octet reference</h3>
             value = (b1 &lt;&lt; 8) + b0
           
 </p>
-<a name="anchor31"></a><br /><hr />
+<a name="anchor32"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.10.3"></a><h3>4.10.3.&nbsp;
+<a name="rfc.section.4.11.3"></a><h3>4.11.3.&nbsp;
 Ref Examples</h3>
 <br /><hr class="insert" />
 <a name="ref_examples"></a>
@@ -1286,7 +1301,7 @@ O
 o x90      # object stores ref #0
   x91      # data = 1
   x4b x00  # next field refers to itself, i.e. ref #0
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;25&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;26&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p>
           ref only refers to list, map and objects elements.
@@ -1296,17 +1311,17 @@ o x90      # object stores ref #0
 </p>
 <a name="#string"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.11"></a><h3>4.11.&nbsp;
+<a name="rfc.section.4.12"></a><h3>4.12.&nbsp;
 string</h3>
 <br /><hr class="insert" />
 <a name="string_grammar"></a>
 
 <p>String Grammar
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-string ::= s b1 b0 &lt;utf-8-data&gt; string
-       ::= S b1 b0 &lt;utf-8-data&gt;
-       ::= [x00-x1f] &lt;utf-8-data&gt;
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;26&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+string ::= s b1 b0 &lt;utf8-data&gt; string
+       ::= S b1 b0 &lt;utf8-data&gt;
+       ::= [x00-x1f] &lt;utf8-data&gt;
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;27&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p> 
           A 16-bit unicode character string encoded in UTF-8.  Strings are 
@@ -1322,9 +1337,9 @@ string ::= s b1 b0 &lt;utf-8-data&gt; string
 </p>
 <p>String chunks may not split surrogate pairs.
 </p>
-<a name="anchor32"></a><br /><hr />
+<a name="anchor33"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.11.1"></a><h3>4.11.1.&nbsp;
+<a name="rfc.section.4.12.1"></a><h3>4.12.1.&nbsp;
 Compact: short strings</h3>
 
 <p>
@@ -1336,9 +1351,9 @@ Compact: short strings</h3>
             value = code
           
 </p>
-<a name="anchor33"></a><br /><hr />
+<a name="anchor34"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.11.2"></a><h3>4.11.2.&nbsp;
+<a name="rfc.section.4.12.2"></a><h3>4.12.2.&nbsp;
 String Examples</h3>
 <br /><hr class="insert" />
 <a name="string_examples"></a>
@@ -1351,11 +1366,11 @@ S x00 x05 hello   # "hello" in long form
 
 s x00 x07 hello,  # "hello, world" split into two chunks
   x05 world
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;27&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;28&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
-<a name="anchor34"></a><br /><hr />
+<a name="anchor35"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
-<a name="rfc.section.4.12"></a><h3>4.12.&nbsp;
+<a name="rfc.section.4.13"></a><h3>4.13.&nbsp;
 Bytecode map</h3>
 
 <p>
@@ -1425,7 +1440,7 @@ xc0 - xcf    # two-octet compact int (-x800 to x3ff)
 xd0 - xd7    # three-octet compact int (-x40000 to x3ffff)
 xd8 - xef    # one-octet compact long (-x8 to x10, xe0 is 0)
 xf0 - xff    # two-octet compact long (-x800 to x3ff, xf8 is 0)
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;28&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;29&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <a name="rfc.authors"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
