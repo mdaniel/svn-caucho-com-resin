@@ -272,7 +272,19 @@ string<br />
 Compact: short strings<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor34">4.12.2.</a>&nbsp;
 String Examples<br />
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor35">4.13.</a>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="##type">4.13.</a>&nbsp;
+type<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#anchor35">4.14.</a>&nbsp;
+Compact: type references<br />
+<a href="#anchor36">5.</a>&nbsp;
+Reference Maps<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="##ref-map">5.1.</a>&nbsp;
+value reference<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="##class-map">5.2.</a>&nbsp;
+class reference<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="##type-map">5.3.</a>&nbsp;
+type reference<br />
+<a href="#anchor37">6.</a>&nbsp;
 Bytecode map<br />
 <a href="#rfc.authors">&#167;</a>&nbsp;
 Authors' Addresses<br />
@@ -483,11 +495,11 @@ Serialization</h3>
 <p>Hessian 2.0 has 3 internal reference maps:
 </p>
 <ol class="text">
-<li>An object/list reference map.
+<li>An <a class='info' href='##ref-map'>object/list reference map<span> (</span><span class='info'>value reference</span><span>)</span></a>.
 </li>
-<li>An class definition reference map.
+<li>An <a class='info' href='##class-map'>class definition reference map<span> (</span><span class='info'>class reference</span><span>)</span></a>.
 </li>
-<li>A type (class name) reference map.
+<li>A <a class='info' href='##type-map'>type (class name) reference map<span> (</span><span class='info'>type reference</span><span>)</span></a>.
 </li>
 </ol>
 <a name="#binary"></a><br /><hr />
@@ -583,8 +595,8 @@ date ::= d b7 b6 b5 b4 b3 b2 b1 b0
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;6&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p>
-          Date represented by a 64-bit long of milliseconds since the epoch, 
-          GMT.
+          Date represented by a 64-bit long of milliseconds since the
+          Jan 1 1970 00:00H, UTC.
         
 </p>
 <a name="anchor8"></a><br /><hr />
@@ -594,7 +606,7 @@ Date Examples</h3>
 <br /><hr class="insert" />
 <a name="date_examples"></a>
 <div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-d x00 x00 x00 xd0 x4b x92 x84 xb8   # 2:51:31 May 8, 1998 GMT
+d x00 x00 x00 xd0 x4b x92 x84 xb8   # 2:51:31 May 8, 1998 UTC
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;7&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <a name="#double"></a><br /><hr />
@@ -1368,9 +1380,101 @@ s x00 x07 hello,  # "hello, world" split into two chunks
   x05 world
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;28&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
-<a name="anchor35"></a><br /><hr />
+<a name="#type"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
 <a name="rfc.section.4.13"></a><h3>4.13.&nbsp;
+type</h3>
+<br /><hr class="insert" />
+<a name="type_grammar"></a>
+
+<p>Type Grammar
+</p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
+type ::= 't' b1 b0 &lt;type-string&gt;
+     ::= x4a b0
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;29&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+
+<p>A <a class='info' href='##map'>map<span> (</span><span class='info'>map</span><span>)</span></a> or <a class='info' href='##list'>list<span> (</span><span class='info'>list</span><span>)</span></a>
+        MAY include a type attribute indicating the type name of the
+        map or list for object-oriented languages.
+</p>
+<p>Each type is added to the <a class='info' href='##type-map'>type map<span> (</span><span class='info'>type reference</span><span>)</span></a>
+        for future reference.
+</p>
+<a name="anchor35"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.4.14"></a><h3>4.14.&nbsp;
+Compact: type references</h3>
+
+<p>
+            Repeated type strings MAY use the
+            <a class='info' href='##type-map'>type map<span> (</span><span class='info'>type reference</span><span>)</span></a> to refer to a previously
+            used type.  The type reference is zero-based over all the
+            types encountered during parsing.
+          
+</p>
+<a name="anchor36"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.5"></a><h3>5.&nbsp;
+Reference Maps</h3>
+
+<p>Hessian 2.0 has 3 internal reference maps:
+</p>
+<ol class="text">
+<li>An map/object/list reference map.
+</li>
+<li>An class definition map.
+</li>
+<li>A type (class name) map.
+</li>
+</ol>
+<p>The value reference map lets Hessian support arbitrary
+      graphs, and recursive and circular data structures.
+</p>
+<p>The class and type maps improve Hessian efficiency by
+      avoiding repetition of common string data.
+</p>
+<a name="#ref-map"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.5.1"></a><h3>5.1.&nbsp;
+value reference</h3>
+
+<p>Hessian supports arbitrary graphs by
+        adding <a class='info' href='##list'>list<span> (</span><span class='info'>list</span><span>)</span></a>,
+        <a class='info' href='##object'>object<span> (</span><span class='info'>object</span><span>)</span></a>, and 
+        <a class='info' href='##map'>map<span> (</span><span class='info'>map</span><span>)</span></a> as it encounters them in
+        the bytecode stream.
+</p>
+<p>Parsers MUST store each list, object and map in the reference
+        map as they are encountered.
+</p>
+<p>The stored objects can be used with a <a class='info' href='##ref'>ref<span> (</span><span class='info'>ref</span><span>)</span></a>
+        bytecode.
+</p>
+<a name="#class-map"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.5.2"></a><h3>5.2.&nbsp;
+class reference</h3>
+
+<p>Each <a class='info' href='##object'>object definition<span> (</span><span class='info'>object</span><span>)</span></a> is
+        automatically added to the class-map.  Parsers MUST add a
+        class definition to the class map as each is encountered.
+        Following object instances will refer to the defined class.
+</p>
+<a name="#type-map"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.5.3"></a><h3>5.3.&nbsp;
+type reference</h3>
+
+<p>The <a class='info' href='##type'>type<span> (</span><span class='info'>type</span><span>)</span></a> strings for
+        <a class='info' href='##map'>map<span> (</span><span class='info'>map</span><span>)</span></a> and <a class='info' href='##list'>list<span> (</span><span class='info'>list</span><span>)</span></a>
+        values are stored in a type map for reference.
+</p>
+<p>Parsers MUST add a type string to the type map as
+        each is encountered.
+</p>
+<a name="anchor37"></a><br /><hr />
+<table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>
+<a name="rfc.section.6"></a><h3>6.&nbsp;
 Bytecode map</h3>
 
 <p>
@@ -1440,7 +1544,7 @@ xc0 - xcf    # two-octet compact int (-x800 to x3ff)
 xd0 - xd7    # three-octet compact int (-x40000 to x3ffff)
 xd8 - xef    # one-octet compact long (-x8 to x10, xe0 is 0)
 xf0 - xff    # two-octet compact long (-x800 to x3ff, xf8 is 0)
-</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;29&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
+</pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;30&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <a name="rfc.authors"></a><br /><hr />
 <table summary="layout" cellpadding="0" cellspacing="2" class="TOCbug" align="right"><tr><td class="TOCbug"><a href="#toc">&nbsp;TOC&nbsp;</a></td></tr></table>

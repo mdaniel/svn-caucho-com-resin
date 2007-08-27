@@ -208,9 +208,9 @@ value      ::= null
 
       <t>Hessian 2.0 has 3 internal reference maps:</t>
       <list style="numbers">
-        <t>An object/list reference map.</t>
-        <t>An class definition reference map.</t>
-        <t>A type (class name) reference map.</t>
+        <t>An <xref target="#ref-map">object/list reference map</xref>.</t>
+        <t>An <xref target="#class-map">class definition reference map</xref>.</t>
+        <t>A <xref target="#type-map">type (class name) reference map</xref>.</t>
       </list>
 
       <section title="binary data" anchor="#binary">
@@ -973,6 +973,78 @@ s x00 x07 hello,  # "hello, world" split into two chunks
         </section>
       </section>
 
+      <section title="type" anchor="#type">
+        <figure anchor="type_grammar">
+          <preamble>Type Grammar</preamble>
+          <artwork>
+type ::= 't' b1 b0 &lt;type-string>
+     ::= x4a b0
+          </artwork>
+        </figure>
+
+        <t>A <xref target="#map">map</xref> or <xref target="#list">list</xref>
+        MAY include a type attribute indicating the type name of the
+        map or list for object-oriented languages.</t>
+
+        <t>Each type is added to the <xref target="#type-map">type map</xref>
+        for future reference.</t>
+      </section>
+
+        <section title="Compact: type references">
+          <t>
+            Repeated type strings MAY use the
+            <xref target="#type-map">type map</xref> to refer to a previously
+            used type.  The type reference is zero-based over all the
+            types encountered during parsing.
+          </t>
+        </section>
+    </section>
+
+    <section title="Reference Maps">
+      <t>Hessian 2.0 has 3 internal reference maps:</t>
+      <list style="numbers">
+        <t>An map/object/list reference map.</t>
+        <t>An class definition map.</t>
+        <t>A type (class name) map.</t>
+      </list>
+
+      <t>The value reference map lets Hessian support arbitrary
+      graphs, and recursive and circular data structures.</t>
+
+      <t>The class and type maps improve Hessian efficiency by
+      avoiding repetition of common string data.</t>
+
+      <section title="value reference" anchor="#ref-map">
+        <t>Hessian supports arbitrary graphs by
+        adding <xref target="#list">list</xref>,
+        <xref target="#object">object</xref>, and 
+        <xref target="#map">map</xref> as it encounters them in
+        the bytecode stream.</t>
+
+        <t>Parsers MUST store each list, object and map in the reference
+        map as they are encountered.</t>
+
+        <t>The stored objects can be used with a <xref target="#ref">ref</xref>
+        bytecode.</t>
+      </section>
+
+      <section title="class reference" anchor="#class-map">
+        <t>Each <xref target="#object">object definition</xref> is
+        automatically added to the class-map.  Parsers MUST add a
+        class definition to the class map as each is encountered.
+        Following object instances will refer to the defined class.</t>
+      </section>
+
+      <section title="type reference" anchor="#type-map">
+        <t>The <xref target="#type">type</xref> strings for
+        <xref target="#map">map</xref> and <xref target="#list">list</xref>
+        values are stored in a type map for reference.</t>
+
+        <t>Parsers MUST add a type string to the type map as
+        each is encountered.</t>
+    </section>
+    </section>
+
     <section title="Bytecode map">
 
       <t>
@@ -1044,7 +1116,6 @@ xf0 - xff    # two-octet compact long (-x800 to x3ff, xf8 is 0)
         </artwork>
       </figure>
 
-    </section>
     </section>
   </middle>
 
