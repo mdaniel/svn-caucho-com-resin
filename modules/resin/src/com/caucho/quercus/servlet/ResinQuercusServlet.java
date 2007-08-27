@@ -133,16 +133,28 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
         String prepend = env.getIniString("auto_prepend_file");
         if (prepend != null) {
-          QuercusPage prependPage = getQuercus().parse(env.lookup(prepend));
-          prependPage.executeTop(env);
+          Path prependPath = env.lookup(prepend);
+          
+          if (prependPath == null)
+            env.error(L.l("auto_prepend_file '{0}' not found.", prepend));
+          else {
+            QuercusPage prependPage = getQuercus().parse(prependPath);
+            prependPage.executeTop(env);
+          }
         }
 
         page.executeTop(env);
 
         String append = env.getIniString("auto_append_file");
         if (append != null) {
-          QuercusPage appendPage = getQuercus().parse(env.lookup(append));
-          appendPage.executeTop(env);
+          Path appendPath = env.lookup(append);
+          
+          if (appendPath == null)
+            env.error(L.l("auto_append_file '{0}' not found.", append));
+          else {
+            QuercusPage appendPage = getQuercus().parse(appendPath);
+            appendPage.executeTop(env);
+          }
         }
         //   return;
       }
