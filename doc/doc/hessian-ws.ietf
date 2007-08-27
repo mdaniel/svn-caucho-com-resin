@@ -119,19 +119,19 @@ top       ::= call
           ::= reply
 
           # RPC-style call
-call      ::= 'c' x02 x00 method object* 'z'
+call      ::= 'c' x02 x00 method value* 'z'
 
-fault     ::= 'f' (object object)* 'z'
+fault     ::= 'f' (value value)* 'z'
 
           # message/streaming message
-message   ::= 'p' x02 x00 object* 'z'
-          ::= 'P' x02 x00 object* 'z'
+message   ::= 'p' x02 x00 value* 'z'
+          ::= 'P' x02 x00 value* 'z'
 
           # RPC method name (possibly mangled for overloading)
 method    ::= 'm' b1 b0 &lt;method-string>
 
           # RPC reply
-reply     ::= 'r' x02 x00 object 'z'  # successful message/reply
+reply     ::= 'r' x02 x00 value 'z'  # successful message/reply
           ::= 'r' x02 x00 fault 'z'   # exception/fault reply
         </artwork>
       </figure>
@@ -166,7 +166,7 @@ reply     ::= 'r' x02 x00 object 'z'  # successful message/reply
         <figure anchor="call_grammar">
           <preamble>Call Grammar</preamble>
           <artwork>
-call ::= c x02 x00 m b1 b0 &lt;method-string> object* z
+call ::= c x02 x00 m b1 b0 &lt;method-string> value* z
           </artwork>
         </figure>
 
@@ -233,8 +233,8 @@ System.out.println(remote.eq(bean, bean));
 c x02 x00
   m x00 x02 eq
   M t x00 x07 qa.Bean
-    S x00 x03 foo
-    I x00 x00 x00 x0d
+    x03 foo
+    x9d
     z
   R x00 x00 x00 x00
   z
@@ -279,7 +279,7 @@ r x02 x00
           <artwork>
 envelope ::= E x02 x00 m b1 b0 &lt;method-string> env-chunk* z
 
-env-chunk ::= int (string object)* binary int (string object)*
+env-chunk ::= int (string value)* binary int (string value)*
           </artwork>
         </figure>
 
@@ -370,7 +370,7 @@ message ::= p x02 x00 object* z
         <figure anchor="reply_grammar">
           <preamble>Reply Grammar</preamble>
           <artwork>
-valid-reply ::= r x02 x00 header* object z
+valid-reply ::= r x02 x00 header* value z
 fault-reply ::= r x02 x00 header* fault z
           </artwork>
         </figure>
@@ -385,8 +385,8 @@ fault-reply ::= r x02 x00 header* fault z
           <figure anchor="integer_5_example">
             <preamble>Integer 5 Envelope</preamble>
             <artwork>
-r x01 x00
-  I x00 x00 x00 x05
+r x02 x00
+  x95
   z
             </artwork>
           </figure>
@@ -407,15 +407,15 @@ r x01 x00
           <figure anchor="remote_call_throws_example">
             <preamble>Remote Call throws FileNotFoundException</preamble>
             <artwork>
-r x01 x00
+r x02 x00
   f
-  S x00 x04 code
-  S x00 x10 ServiceException
+  x04 code
+  x10 ServiceException
 
-  S x00 x07 message
-  S x00 x0e File Not Found
+  x07 message
+  x0e File Not Found
 
-  S x00 x06 detail
+  x06 detail
   M t x00 x1d java.io.FileNotFoundException
     z
   z

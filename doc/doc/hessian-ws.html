@@ -322,19 +322,19 @@ top       ::= call
           ::= reply
 
           # RPC-style call
-call      ::= 'c' x02 x00 method object* 'z'
+call      ::= 'c' x02 x00 method value* 'z'
 
-fault     ::= 'f' (object object)* 'z'
+fault     ::= 'f' (value value)* 'z'
 
           # message/streaming message
-message   ::= 'p' x02 x00 object* 'z'
-          ::= 'P' x02 x00 object* 'z'
+message   ::= 'p' x02 x00 value* 'z'
+          ::= 'P' x02 x00 value* 'z'
 
           # RPC method name (possibly mangled for overloading)
 method    ::= 'm' b1 b0 &lt;method-string&gt;
 
           # RPC reply
-reply     ::= 'r' x02 x00 object 'z'  # successful message/reply
+reply     ::= 'r' x02 x00 value 'z'  # successful message/reply
           ::= 'r' x02 x00 fault 'z'   # exception/fault reply
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;1&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
@@ -375,7 +375,7 @@ Call</h3>
 
 <p>Call Grammar
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-call ::= c x02 x00 m b1 b0 &lt;method-string&gt; object* z
+call ::= c x02 x00 m b1 b0 &lt;method-string&gt; value* z
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;2&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p>
@@ -453,8 +453,8 @@ System.out.println(remote.eq(bean, bean));
 c x02 x00
   m x00 x02 eq
   M t x00 x07 qa.Bean
-    S x00 x03 foo
-    I x00 x00 x00 x0d
+    x03 foo
+    x9d
     z
   R x00 x00 x00 x00
   z
@@ -502,7 +502,7 @@ Envelope</h3>
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
 envelope ::= E x02 x00 m b1 b0 &lt;method-string&gt; env-chunk* z
 
-env-chunk ::= int (string object)* binary int (string object)*
+env-chunk ::= int (string value)* binary int (string value)*
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;7&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
 <p>
@@ -602,7 +602,7 @@ Reply</h3>
 
 <p>Reply Grammar
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-valid-reply ::= r x02 x00 header* object z
+valid-reply ::= r x02 x00 header* value z
 fault-reply ::= r x02 x00 header* fault z
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;12&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
@@ -620,8 +620,8 @@ Value</h3>
 
 <p>Integer 5 Envelope
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-r x01 x00
-  I x00 x00 x00 x05
+r x02 x00
+  x95
   z
 </pre></div><table border="0" cellpadding="0" cellspacing="2" align="center"><tr><td align="center"><font face="monaco, MS Sans Serif" size="1"><b>&nbsp;Figure&nbsp;13&nbsp;</b></font><br /></td></tr></table><hr class="insert" />
 
@@ -644,15 +644,15 @@ Faults</h3>
 
 <p>Remote Call throws FileNotFoundException
 </p><div style='display: table; width: 0; margin-left: 3em; margin-right: auto'><pre>
-r x01 x00
+r x02 x00
   f
-  S x00 x04 code
-  S x00 x10 ServiceException
+  x04 code
+  x10 ServiceException
 
-  S x00 x07 message
-  S x00 x0e File Not Found
+  x07 message
+  x0e File Not Found
 
-  S x00 x06 detail
+  x06 detail
   M t x00 x1d java.io.FileNotFoundException
     z
   z

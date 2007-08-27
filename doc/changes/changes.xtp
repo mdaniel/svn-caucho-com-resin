@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>(2007-08-27) xpath: compatibility issues with Xerces in comparison exprs (#1943, rep by M Thompson)</li>
 <li>jsp: PageContextWrapper needs to clear the ELContext on reuse (#1908, rep by timur)</li>
 <li>win32: httpd.exe adds -user, -password, -name, -full-name (#1162, rep by mattp)</li>
 <li>win32: httpd.exe fixes as windows service (#1913, #1804, rep by briandeng, EUgene Kovnatsky)</li>

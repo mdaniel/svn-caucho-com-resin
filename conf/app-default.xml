@@ -43,6 +43,7 @@
            servlet-class="com.caucho.jsp.XtpServlet"/>
 
   <servlet-mapping url-pattern="*.jsp" servlet-name="resin-jsp"/>
+  <servlet-mapping url-pattern="*.jspf" servlet-name="resin-jsp"/>
   <servlet-mapping url-pattern="*.jspx" servlet-name="resin-jspx"/>
   
   <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
