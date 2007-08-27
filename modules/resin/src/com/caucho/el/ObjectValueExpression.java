@@ -74,6 +74,16 @@ public class ObjectValueExpression extends ValueExpression
     _expectedType = Object.class;
   }
 
+  /**
+   * For serialization
+   */
+  public ObjectValueExpression()
+  {
+    _expr = null;
+    _expressionString = null;
+    _expectedType = Object.class;
+  }
+
   public boolean isLiteralText()
   {
     return _expr.isLiteralText();

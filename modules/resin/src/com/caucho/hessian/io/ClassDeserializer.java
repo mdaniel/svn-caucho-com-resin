@@ -49,11 +49,15 @@
 package com.caucho.hessian.io;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Deserializing a JDK 1.2 Class.
  */
 public class ClassDeserializer extends AbstractMapDeserializer {
+  private static final HashMap<String,Class> _primClasses
+    = new HashMap<String,Class>();
+  
   public ClassDeserializer()
   {
   }
@@ -115,6 +119,11 @@ public class ClassDeserializer extends AbstractMapDeserializer {
     if (name == null)
       throw new IOException("Serialized Class expects name.");
 
+    Class cl = _primClasses.get(name);
+
+    if (cl != null)
+      return cl;
+
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     try {
@@ -125,5 +134,26 @@ public class ClassDeserializer extends AbstractMapDeserializer {
     } catch (Exception e) {
       throw new IOExceptionWrapper(e);
     }
+  }
+
+  static {
+    _primClasses.put("void", void.class);
+    _primClasses.put("boolean", boolean.class);
+    _primClasses.put("java.lang.Boolean", Boolean.class);
+    _primClasses.put("byte", byte.class);
+    _primClasses.put("java.lang.Byte", Byte.class);
+    _primClasses.put("char", char.class);
+    _primClasses.put("java.lang.Character", Character.class);
+    _primClasses.put("short", short.class);
+    _primClasses.put("java.lang.Short", Short.class);
+    _primClasses.put("int", int.class);
+    _primClasses.put("java.lang.Integer", Integer.class);
+    _primClasses.put("long", long.class);
+    _primClasses.put("java.lang.Long", Long.class);
+    _primClasses.put("float", float.class);
+    _primClasses.put("java.lang.Float", Float.class);
+    _primClasses.put("double", double.class);
+    _primClasses.put("java.lang.Double", Double.class);
+    _primClasses.put("java.lang.String", String.class);
   }
 }

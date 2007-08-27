@@ -51,7 +51,8 @@ public class WebAppExpandDeployGenerator
   extends ExpandDeployGenerator<WebAppController>
   implements EnvironmentListener
 {
-  private static final Logger log = Log.open(WebAppExpandDeployGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(WebAppExpandDeployGenerator.class.getName());
 
   private final WebAppExpandDeployGeneratorAdmin _admin;
 
@@ -293,7 +294,7 @@ public class WebAppExpandDeployGenerator
     String expandName = getExpandName(segmentName);
 
     String archiveName = segmentName + ".war";
-    Path jarPath = getArchiveDirectory().lookup("." + archiveName);
+    Path jarPath = getArchiveDirectory().lookup("./" + archiveName);
 
     Path rootDirectory;
 
