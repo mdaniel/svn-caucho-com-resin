@@ -395,7 +395,7 @@ int ::= 'I' b3 b2 b1 b0
         </t>
 
         <t>
-          value = (b3 << 24) + (b2 << 16) + (b1 << 8) + b0;
+          value = (b3 &lt;&lt; 24) + (b2 &lt;&lt; 16) + (b1 &lt;&lt; 8) + b0;
         </t>
 
         <section title="Compact: single octet integers">
@@ -416,7 +416,7 @@ int ::= 'I' b3 b2 b1 b0
           </t>
 
           <t>
-            value = ((code - 0xc8) << 8) + b0;
+            value = ((code - 0xc8) &lt;&lt; 8) + b0;
           </t>
         </section>
 
@@ -427,7 +427,7 @@ int ::= 'I' b3 b2 b1 b0
           </t>
 
           <t>
-            value = ((code - 0xd4) << 16) + (b1 << 8) + b0;
+            value = ((code - 0xd4) &lt;&lt; 16) + (b1 &lt;&lt; 8) + b0;
           </t>
         </section>
 
@@ -582,7 +582,7 @@ long ::= L b7 b6 b5 b4 b3 b2 b1 b0
           </t>
 
           <t>
-             value = ((code - 0xf8) << 8) + b0
+             value = ((code - 0xf8) &lt;&lt; 8) + b0
           </t>
         </section>
 
@@ -593,7 +593,7 @@ long ::= L b7 b6 b5 b4 b3 b2 b1 b0
           </t>
 
           <t>
-             value = ((code - 0x3c) << 16) + (b1 << 8) + b0
+             value = ((code - 0x3c) &lt;&lt; 16) + (b1 &lt;&lt; 8) + b0
           </t>
         </section>
 
@@ -604,7 +604,7 @@ long ::= L b7 b6 b5 b4 b3 b2 b1 b0
           </t>
 
           <t>
-             value = (b3 << 24) + (b2 << 16) + (b1 << 8) + b0
+             value = (b3 &lt;&lt; 24) + (b2 &lt;&lt; 16) + (b1 &lt;&lt; 8) + b0
           </t>
         </section>
 
@@ -884,7 +884,7 @@ ref ::= R b3 b2 b1 b0
           </t>
 
           <t>
-            value = (b1 << 8) + b0
+            value = (b1 &lt;&lt; 8) + b0
           </t>
         </section>
 
@@ -1039,6 +1039,7 @@ xf0 - xff    # two-octet compact long (-x800 to x3ff, xf8 is 0)
         </artwork>
       </figure>
 
+    </section>
     </section>
   </middle>
 

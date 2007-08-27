@@ -23,29 +23,47 @@ Resin's own parsers can be selected with the &lt;system-property> tag.</p>
 <s1 name="resin" title="The Resin parsers and transformers">
 
 <deftable title="Resin XML DOM parsers">
-<tr><th>JAXP property</th><th>Resin class
-</th></tr><tr><td>javax.xml.parsers.DocumentBuilderFactory
-    </td><td>com.caucho.xml.parsers.XmlDocumentBuilderFactory
-</td></tr><tr><td>javax.xml.parsers.DocumentBuilderFactory
-    </td><td>com.caucho.xml.parsers.HtmlDocumentBuilderFactory
-</td></tr><tr><td>javax.xml.parsers.DocumentBuilderFactory
-    </td><td>com.caucho.xml.parsers.LooseXmlDocumentBuilderFactory
-</td></tr><tr><td>javax.xml.parsers.DocumentBuilderFactory
-    </td><td>com.caucho.xml.parsers.LooseHtmlDocumentBuilderFactory
-</td></tr></deftable>
+<tr>
+  <th>JAXP property</th>
+  <th>Resin class
+</th>
+</tr>
+<tr>
+  <td>javax.xml.parsers.DocumentBuilderFactory</td>
+  <td>com.caucho.xml.parsers.XmlDocumentBuilderFactory</td>
+</tr>
+<tr>
+  <td>javax.xml.parsers.DocumentBuilderFactory</td>
+  <td>com.caucho.xml.parsers.HtmlDocumentBuilderFactory</td>
+</tr>
+<tr>
+  <td>javax.xml.parsers.DocumentBuilderFactory</td>
+  <td>com.caucho.xml.parsers.LooseXmlDocumentBuilderFactory</td>
+</tr>
+<tr>
+  <td>javax.xml.parsers.DocumentBuilderFactory</td>
+  <td>com.caucho.xml.parsers.LooseHtmlDocumentBuilderFactory</td>
+</tr>
+</deftable>
 
 <deftable title="Resin XML SAX parsers">
 <tr>
   <td>javax.xml.parsers.SAXParserFactory</td>
   <td>com.caucho.xml.parsers.XmlSAXParserFactory</td>
 </tr>
-<tr><td>javax.xml.parsers.SAXParserFactory
-    </td><td>com.caucho.xml.parsers.HtmlSAXParserFactory
-</td></tr><tr><td>javax.xml.parsers.SAXParserFactory
-    </td><td>com.caucho.xml.parsers.LooseXmlSAXParserFactory
-</td></tr><tr><td>javax.xml.parsers.SAXParserFactory
-    </td><td>com.caucho.xml.parsers.LooseHtmlSAXParserFactory
-</td></tr></deftable>
+<tr>
+  <td>javax.xml.parsers.SAXParserFactory</td>
+  <td>com.caucho.xml.parsers.HtmlSAXParserFactory</td>
+</tr>
+<tr>
+  <td>javax.xml.parsers.SAXParserFactory</td>
+  <td>com.caucho.xml.parsers.LooseXmlSAXParserFactory</td>
+</tr>
+<tr>
+  <td>javax.xml.parsers.SAXParserFactory</td>
+  <td>com.caucho.xml.parsers.LooseHtmlSAXParserFactory</td>
+</tr>
+</deftable>
 
 <deftable title="Resin XSLT transformer">
 <tr><th>JAXP property</th><th>Resin class
