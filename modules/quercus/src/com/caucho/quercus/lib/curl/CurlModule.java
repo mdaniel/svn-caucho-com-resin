@@ -187,73 +187,93 @@ public class CurlModule
   public static final int CURL_VERSION_SSL                    = 129;
   public static final int CURL_VERSION_LIBZ                   = 130;
   public static final int CURLVERSION_NOW                     = 131;
-  public static final int CURLE_OK                            = 132;
-  public static final int CURLE_UNSUPPORTED_PROTOCOL          = 133;
-  public static final int CURLE_FAILED_INIT                   = 134;
-  public static final int CURLE_URL_MALFORMAT                 = 135;
-  public static final int CURLE_URL_MALFORMAT_USER            = 136;
-  public static final int CURLE_COULDNT_RESOLVE_PROXY         = 137;
-  public static final int CURLE_COULDNT_RESOLVE_HOST          = 138;
-  public static final int CURLE_COULDNT_CONNECT               = 139;
-//  public static final int CURLE_FTP_WEIRD_SERVER_REPLY        = 140;
-//  public static final int CURLE_FTP_ACCESS_DENIED             = 141;
-//  public static final int CURLE_FTP_USER_PASSWORD_INCORRECT   = 142;
-//  public static final int CURLE_FTP_WEIRD_PASS_REPLY          = 143;
-//  public static final int CURLE_FTP_WEIRD_USER_REPLY          = 144;
-//  public static final int CURLE_FTP_WEIRD_PASV_REPLY          = 145;
-//  public static final int CURLE_FTP_WEIRD_227_FORMAT          = 146;
-//  public static final int CURLE_FTP_CANT_GET_HOST             = 147;
-//  public static final int CURLE_FTP_CANT_RECONNECT            = 148;
-//  public static final int CURLE_FTP_COULDNT_SET_BINARY        = 149;
-  public static final int CURLE_PARTIAL_FILE                  = 150;
-//  public static final int CURLE_FTP_COULDNT_RETR_FILE         = 151;
-//  public static final int CURLE_FTP_WRITE_ERROR               = 152;
-//  public static final int CURLE_FTP_QUOTE_ERROR               = 153;
-  public static final int CURLE_HTTP_NOT_FOUND                = 154;
-  public static final int CURLE_WRITE_ERROR                   = 155;
-  public static final int CURLE_MALFORMAT_USER                = 156;
-//  public static final int CURLE_FTP_COULDNT_STOR_FILE         = 157;
-  public static final int CURLE_READ_ERROR                    = 158;
-  public static final int CURLE_OUT_OF_MEMORY                 = 159;
-  public static final int CURLE_OPERATION_TIMEOUTED           = 160;
-//  public static final int CURLE_FTP_COULDNT_SET_ASCII         = 161;
-//  public static final int CURLE_FTP_PORT_FAILED               = 162;
-//  public static final int CURLE_FTP_COULDNT_USE_REST          = 163;
-//  public static final int CURLE_FTP_COULDNT_GET_SIZE          = 164;
-  public static final int CURLE_HTTP_RANGE_ERROR              = 165;
-  public static final int CURLE_HTTP_POST_ERROR               = 166;
-  public static final int CURLE_SSL_CONNECT_ERROR             = 167;
-//  public static final int CURLE_FTP_BAD_DOWNLOAD_RESUME       = 168;
-  public static final int CURLE_FILE_COULDNT_READ_FILE        = 169;
-//  public static final int CURLE_LDAP_CANNOT_BIND              = 170;
-//  public static final int CURLE_LDAP_SEARCH_FAILED            = 171;
-  public static final int CURLE_LIBRARY_NOT_FOUND             = 172;
-  public static final int CURLE_FUNCTION_NOT_FOUND            = 173;
-  public static final int CURLE_ABORTED_BY_CALLBACK           = 174;
-  public static final int CURLE_BAD_FUNCTION_ARGUMENT         = 175;
-  public static final int CURLE_BAD_CALLING_ORDER             = 176;
-  public static final int CURLE_HTTP_PORT_FAILED              = 177;
-  public static final int CURLE_BAD_PASSWORD_ENTERED          = 178;
-  public static final int CURLE_TOO_MANY_REDIRECTS            = 179;
-//  public static final int CURLE_UNKNOWN_TELNET_OPTION         = 180;
-//  public static final int CURLE_TELNET_OPTION_SYNTAX          = 181;
-  public static final int CURLE_OBSOLETE                      = 182;
-//  public static final int CURLE_SSL_PEER_CERTIFICATE          = 183;
-  public static final int CURLE_GOT_NOTHING                   = 184;
-//  public static final int CURLE_SSL_ENGINE_NOTFOUND           = 185;
-//  public static final int CURLE_SSL_ENGINE_SETFAILED          = 186;
-  public static final int CURLE_SEND_ERROR                    = 187;
-  public static final int CURLE_RECV_ERROR                    = 188;
-  public static final int CURLE_SHARE_IN_USE                  = 189;
-//  public static final int CURLE_SSL_CERTPROBLEM               = 190;
-//  public static final int CURLE_SSL_CIPHER                    = 191;
-//  public static final int CURLE_SSL_CACERT                    = 192;
-  public static final int CURLE_BAD_CONTENT_ENCODING          = 193;
-//  public static final int CURLE_LDAP_INVALID_URL              = 194;
-  public static final int CURLE_FILESIZE_EXCEEDED             = 195;
-//  public static final int CURLE_FTP_SSL_FAILED                = 196;
-//  public static final int CURLFTPAUTH_DEFAULT                 = 197;
+  
+  public static final int CURLINFO_PRIVATE                    = 132;
+  
+  public static final int CURLE_OK                            = 0;
+  public static final int CURLE_UNSUPPORTED_PROTOCOL          = 1;
+  public static final int CURLE_FAILED_INIT                   = 2;
+  public static final int CURLE_URL_MALFORMAT                 = 3;
+  public static final int CURLE_URL_MALFORMAT_USER            = 4;
+  public static final int CURLE_COULDNT_RESOLVE_PROXY         = 5;
+  public static final int CURLE_COULDNT_RESOLVE_HOST          = 6;
+  public static final int CURLE_COULDNT_CONNECT               = 7;
+//  public static final int CURLE_FTP_WEIRD_SERVER_REPLY        = 8;
+//  public static final int CURLE_FTP_ACCESS_DENIED             = 9;
+//  public static final int CURLE_FTP_USER_PASSWORD_INCORRECT   = 10;
+//  public static final int CURLE_FTP_WEIRD_PASS_REPLY          = 11;
+//  public static final int CURLE_FTP_WEIRD_USER_REPLY          = 12;
+//  public static final int CURLE_FTP_WEIRD_PASV_REPLY          = 13;
+//  public static final int CURLE_FTP_WEIRD_227_FORMAT          = 14;
+//  public static final int CURLE_FTP_CANT_GET_HOST             = 15;
+//  public static final int CURLE_FTP_CANT_RECONNECT            = 16;
+//  public static final int CURLE_FTP_COULDNT_SET_BINARY        = 17;
+  public static final int CURLE_PARTIAL_FILE                  = 18;
+//  public static final int CURLE_FTP_COULDNT_RETR_FILE         = 19;
+//  public static final int CURLE_FTP_WRITE_ERROR               = 20;
+//  public static final int CURLE_FTP_QUOTE_ERROR               = 21;
+  
+  //also known as CURLE_HTTP_RETURNED_ERROR in C Curl
+  public static final int CURLE_HTTP_NOT_FOUND                = 22;
+  public static final int CURLE_WRITE_ERROR                   = 23;
+  public static final int CURLE_MALFORMAT_USER                = 24;
+  
+  //also know as CURLE_UPLOAD_FAILED in C Curl
+//  public static final int CURLE_FTP_COULDNT_STOR_FILE         = 25;
+  public static final int CURLE_READ_ERROR                    = 26;
+  public static final int CURLE_OUT_OF_MEMORY                 = 27;
+  public static final int CURLE_OPERATION_TIMEOUTED           = 28;
+//  public static final int CURLE_FTP_COULDNT_SET_ASCII         = 29;
+//  public static final int CURLE_FTP_PORT_FAILED               = 30;
+//  public static final int CURLE_FTP_COULDNT_USE_REST          = 31;
+//  public static final int CURLE_FTP_COULDNT_GET_SIZE          = 32;
+  public static final int CURLE_HTTP_RANGE_ERROR              = 33;
+  public static final int CURLE_HTTP_POST_ERROR               = 34;
+  public static final int CURLE_SSL_CONNECT_ERROR             = 35;
+//  public static final int CURLE_FTP_BAD_DOWNLOAD_RESUME       = 36;
+  public static final int CURLE_FILE_COULDNT_READ_FILE        = 37;
+//  public static final int CURLE_LDAP_CANNOT_BIND              = 38;
+//  public static final int CURLE_LDAP_SEARCH_FAILED            = 39;
+  public static final int CURLE_LIBRARY_NOT_FOUND             = 40;
+  public static final int CURLE_FUNCTION_NOT_FOUND            = 41;
+  public static final int CURLE_ABORTED_BY_CALLBACK           = 42;
+  public static final int CURLE_BAD_FUNCTION_ARGUMENT         = 43;
+  public static final int CURLE_BAD_CALLING_ORDER             = 44;
+  
+  //also known as CURLE_INTERFACE_FAILED in C Curl
+  public static final int CURLE_HTTP_PORT_FAILED              = 45;
+  public static final int CURLE_BAD_PASSWORD_ENTERED          = 46;
+  public static final int CURLE_TOO_MANY_REDIRECTS            = 47;
+//  public static final int CURLE_UNKNOWN_TELNET_OPTION         = 48;
+//  public static final int CURLE_TELNET_OPTION_SYNTAX          = 49;
+  public static final int CURLE_OBSOLETE                      = 50;
+//  public static final int CURLE_SSL_PEER_CERTIFICATE          = 51;
+  public static final int CURLE_GOT_NOTHING                   = 52;
+//  public static final int CURLE_SSL_ENGINE_NOTFOUND           = 53;
+//  public static final int CURLE_SSL_ENGINE_SETFAILED          = 54;
+  public static final int CURLE_SEND_ERROR                    = 55;
+  public static final int CURLE_RECV_ERROR                    = 56;
+  public static final int CURLE_SHARE_IN_USE                  = 57;
+//  public static final int CURLE_SSL_CERTPROBLEM               = 58;
+//  public static final int CURLE_SSL_CIPHER                    = 59;
+//  public static final int CURLE_SSL_CACERT                    = 60;
+  public static final int CURLE_BAD_CONTENT_ENCODING          = 61;
+//  public static final int CURLE_LDAP_INVALID_URL              = 62;
+  public static final int CURLE_FILESIZE_EXCEEDED             = 63;
+//  public static final int CURLE_FTP_SSL_FAILED                = 64;
+  
+//  public static final int CURLFTPAUTH_DEFAULT                 = 0;
+  public static final int CURLFTPAUTH_SSL                     = 1;
+  public static final int CURLFTPAUTH_TLS                     = 2;
 
+  public static final int CURLM_CALL_MULTI_PERFORM            = -1;
+  public static final int CURLM_OK                            = 0;
+  public static final int CURLM_BAD_HANDLE                    = 1;
+  public static final int CURLM_BAD_EASY_HANDLE               = 2;
+  public static final int CURLM_OUT_OF_MEMORY                 = 3;
+  public static final int CURLM_INTERNAL_ERROR                = 4;
+  public static final int CURLMSG_DONE                        = 1;
+  
   // Additional constants
   public static final int CURL_TIMECOND_IFMODSINCE            = 198;
   public static final int CURL_TIMECOND_IFUNMODSINCE          = 199;
@@ -863,8 +883,19 @@ public class CurlModule
         ArrayValue array = value.toArrayValue(env);
 
         for (Map.Entry<Value,Value> entry: array.entrySet()) {
-          curl.setRequestProperty(entry.getKey().toString(),
-                                     entry.getValue().toString());
+          String header = entry.getValue().toString();
+          
+          String name = header;
+          String body = "";
+          
+          i = header.indexOf(':');
+          
+          if (i >= 0) {
+            name = header.substring(0, i).trim();
+            body = header.substring(i + 1).trim();
+          }
+
+          curl.setRequestProperty(name, body);
         }
         break;
 
