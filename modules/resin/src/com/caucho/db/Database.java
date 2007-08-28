@@ -98,7 +98,7 @@ public class Database
 
     long minSize = 8 * 1024 * 1024;
 
-    long memorySize = Runtime.getRuntime().maxMemory() / 8;
+    long memorySize = Runtime.getRuntime().maxMemory() / 16;
 
     if (minSize < memorySize)
       minSize = memorySize;
