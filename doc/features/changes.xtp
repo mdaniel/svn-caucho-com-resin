@@ -2,6 +2,13 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
+<s2 title="3.0.snap - Aug 14, 2007">
+<ul>
+<li>windows issues with webapps and trailing dot</li>
+<li>request.getInputStream issues with encodings (#1915, rep by Takahiro Fukuda)</li>
+</ul>
+</s2>
+
 <s2 title="3.0.24 - Aug 14, 2007">
 <ul>
 <li>java:comp/TransactionManager support changes</li>
