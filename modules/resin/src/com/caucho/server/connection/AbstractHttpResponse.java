@@ -1035,16 +1035,22 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setCharacterEncoding(String encoding)
   {
+    if (isCommitted())
+      return;
+    if (_hasWriter)
+      return;
+    
     if (encoding == null ||
 	encoding.equals("ISO-8859-1") ||
 	encoding.equals("")) {
+      encoding = null;
       _charEncoding = null;
     }
     else
       _charEncoding = encoding;
 
     try {
-      _responseStream.setEncoding(_charEncoding);
+      _responseStream.setEncoding(encoding);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

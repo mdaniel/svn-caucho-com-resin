@@ -404,6 +404,11 @@ public class InvocationDecoder {
 	cb.append(ch);
     }
 
+    while (isWindows && cb.getLength() > 0
+	   && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
+      cb.setLength(cb.getLength() - 1);
+    }
+
     return cb.close();
   }
 

@@ -43,6 +43,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.WeakAlarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CauchoSystem;
 
 import com.caucho.log.Log;
 
@@ -588,10 +589,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController> ex
     if (_expandPrefix == null) {
     }
     else if (_expandPrefix.equals("") &&
-	     (name.startsWith("_") ||
-	      name.startsWith(".") ||
-	      name.equalsIgnoreCase("META-INF") ||
-	      name.equalsIgnoreCase("WEB-INF"))) {
+	     (name.startsWith("_")
+	      || name.startsWith(".")
+	      || name.endsWith(".") && CauchoSystem.isWindows()
+	      || name.equalsIgnoreCase("META-INF")
+	      || name.equalsIgnoreCase("WEB-INF"))) {
       return null;
     }
     else if (name.startsWith(_expandPrefix)) {
