@@ -899,6 +899,8 @@
         <include name="WEB-INF/lib/resin-util.jar"/>
         <include name="WEB-INF/lib/script-10.jar"/>
         <include name="WEB-INF/web.xml"/>
+        <include name="images/caucho-white.jpg"/>
+        <include name="images/dragonfly-tiny.png"/>
         <include name="index.php"/>
         <include name="README"/>
       </fileset>
