@@ -192,15 +192,15 @@ public class FileServlet extends GenericServlet {
       // only top-level requests are checked
       if (cauchoReq == null || cauchoReq.getRequestDepth(0) != 0) {
       }
-      else if (relPath.regionMatches(true, 0, "/web-inf", 0, 8) &&
-               (relPath.length() == 8 ||
-                ! Character.isLetterOrDigit(relPath.charAt(8)))) {
+      else if (relPath.regionMatches(true, 0, "/web-inf", 0, 8)
+	       && (relPath.length() == 8
+		   || ! Character.isLetterOrDigit(relPath.charAt(8)))) {
         res.sendError(res.SC_NOT_FOUND);
         return;
       }
-      else if (relPath.regionMatches(true, 0, "/meta-inf", 0, 9) &&
-               (relPath.length() == 9 ||
-                ! Character.isLetterOrDigit(relPath.charAt(9)))) {
+      else if (relPath.regionMatches(true, 0, "/meta-inf", 0, 9)
+	       && (relPath.length() == 9
+		   || ! Character.isLetterOrDigit(relPath.charAt(9)))) {
         res.sendError(res.SC_NOT_FOUND);
         return;
       }
@@ -214,28 +214,10 @@ public class FileServlet extends GenericServlet {
       }
       else if (path.isDirectory()) {
       }
-      else {
-        String lower = path.getPath().toLowerCase();
-        
-        if ((lastCh = relPath.charAt(relPath.length() - 1)) == '.'
-            || lastCh == ' ' || lastCh == '*' || lastCh == '?'
-            || lastCh == '/' || lastCh == '\\'
-            || lower.endsWith("::$data")
-            || isWindowsSpecial(lower, "/con")
-            || isWindowsSpecial(lower, "/aux")
-            || isWindowsSpecial(lower, "/prn")
-            || isWindowsSpecial(lower, "/nul")
-            || isWindowsSpecial(lower, "/com1")
-            || isWindowsSpecial(lower, "/com2")
-            || isWindowsSpecial(lower, "/com3")
-            || isWindowsSpecial(lower, "/com4")
-            || isWindowsSpecial(lower, "/lpt1")
-            || isWindowsSpecial(lower, "/lpt2")
-            || isWindowsSpecial(lower, "/lpt3")) {
-          // Windows security hole with trailing '.'
-          res.sendError(res.SC_NOT_FOUND);
-          return;
-        }
+      else if (path.isWindowsInsecure()) {
+	// Windows security issues with trailing '.'
+	res.sendError(res.SC_NOT_FOUND);
+	return;
       }
 
       // A null will cause problems.

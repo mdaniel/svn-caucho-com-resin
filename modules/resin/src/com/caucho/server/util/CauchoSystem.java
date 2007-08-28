@@ -231,7 +231,7 @@ public class CauchoSystem {
     String workDir;
 
     // Windows uses /temp as a work dir
-    if (CauchoSystem.isWindows())
+    if (isWindows())
       workDir = "file:/c:/tmp/caucho";
     else
       workDir = "file:/tmp/caucho";

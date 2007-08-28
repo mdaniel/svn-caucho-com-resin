@@ -32,6 +32,7 @@ package com.caucho.servlets;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.webapp.Application;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.URLUtil;
 import com.caucho.vfs.Path;
@@ -87,11 +88,6 @@ public class DirectoryServlet extends HttpServlet {
     String uri = req.getRequestURI();
     boolean redirect = false;
  
-    if (uri.length() > 0 && uri.charAt(uri.length() - 1) != '/') {
-      res.sendRedirect(uri + "/");
-      return;
-    }
- 
     String encoding = CharacterEncoding.getLocalEncoding();
     if (encoding == null)
       res.setContentType("text/html");
@@ -140,7 +136,17 @@ public class DirectoryServlet extends HttpServlet {
 
     String filename = getServletContext().getRealPath(relPath);
     Path path = _context.lookupNative(filename);
+
+    if (CauchoSystem.isWindows() && path.isWindowsInsecure()) {
+      res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      return;
+    }
     
+    if (uri.length() > 0 && uri.charAt(uri.length() - 1) != '/') {
+      res.sendRedirect(uri + "/");
+      return;
+    }
+
     String rawpath = java.net.URLDecoder.decode(uri);
 
     PrintWriter pw = res.getWriter();

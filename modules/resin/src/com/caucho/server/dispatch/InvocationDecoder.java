@@ -337,7 +337,7 @@ public class InvocationDecoder {
   public static String normalizeUri(String uri, boolean isWindows)
     throws IOException
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     int len = uri.length();
     
@@ -362,14 +362,14 @@ public class InvocationDecoder {
 	    i++;
 	  else if (ch != '.')
 	    break dots;
-	  else if (i + 2 >= len ||
-                   (ch = uri.charAt(i + 2)) == '/' || ch == '\\') {
+	  else if (len <= i + 2
+		   || (ch = uri.charAt(i + 2)) == '/' || ch == '\\') {
 	    i += 2;
 	  }
 	  else if (ch != '.')
 	    break dots;
-	  else if (i + 3 >= len ||
-                   (ch = uri.charAt(i + 3)) == '/' || ch == '\\') {
+	  else if (len <= i + 3
+		   || (ch = uri.charAt(i + 3)) == '/' || ch == '\\') {
 	    int j;
 	    
 	    for (j = cb.length() - 1; j >= 0; j--) {
@@ -386,8 +386,8 @@ public class InvocationDecoder {
           }
 	}
 
-	while (isWindows && cb.getLength() > 0 &&
-	       ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
+	while (isWindows && cb.getLength() > 0
+	       && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
 	  cb.setLength(cb.getLength() - 1);
 	}
 
@@ -399,7 +399,12 @@ public class InvocationDecoder {
 	cb.append(ch);
     }
 
-    return cb.close();
+    while (isWindows && cb.getLength() > 0
+	   && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
+      cb.setLength(cb.getLength() - 1);
+    }
+
+    return cb.toString();
   }
 
   /**

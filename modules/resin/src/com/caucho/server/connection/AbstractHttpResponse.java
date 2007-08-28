@@ -248,6 +248,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void setRequest(CauchoRequest req)
   {
     _request = req;
+
+    if (_originalRequest == null)
+      _originalRequest = req;
   }
 
   /**

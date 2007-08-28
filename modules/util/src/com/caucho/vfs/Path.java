@@ -446,6 +446,54 @@ public abstract class Path {
   }
 
   /**
+   * Returns true for windows security issues.
+   */
+  public boolean isWindowsInsecure()
+  {
+    String lower = getPath().toLowerCase();
+
+    int lastCh;
+        
+    if ((lastCh = lower.charAt(lower.length() - 1)) == '.'
+	|| lastCh == ' ' || lastCh == '*' || lastCh == '?'
+            || lastCh == '/' || lastCh == '\\'
+            || lower.endsWith("::$data")
+            || isWindowsSpecial(lower, "/con")
+            || isWindowsSpecial(lower, "/aux")
+            || isWindowsSpecial(lower, "/prn")
+            || isWindowsSpecial(lower, "/nul")
+            || isWindowsSpecial(lower, "/com1")
+            || isWindowsSpecial(lower, "/com2")
+            || isWindowsSpecial(lower, "/com3")
+            || isWindowsSpecial(lower, "/com4")
+            || isWindowsSpecial(lower, "/lpt1")
+            || isWindowsSpecial(lower, "/lpt2")
+            || isWindowsSpecial(lower, "/lpt3")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private boolean isWindowsSpecial(String lower, String test)
+  {
+    int p = lower.indexOf(test);
+
+    if (p < 0)
+      return false;
+
+    int lowerLen = lower.length();
+    int testLen = test.length();
+    char ch;
+
+    if (lowerLen == p + testLen
+        || (ch = lower.charAt(p + testLen)) == '/' || ch == '.')
+      return true;
+    else
+      return false;
+  }
+
+  /**
    * Returns any signing certificates, e.g. for jar signing.
    */
   public Certificate []getCertificates()

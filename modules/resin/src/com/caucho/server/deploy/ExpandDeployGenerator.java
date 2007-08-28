@@ -38,6 +38,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
@@ -741,6 +742,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     else if (_expandPrefix.equals("")
 	     && (name.startsWith("_")
 		 || name.startsWith(".")
+		 || name.endsWith(".") && CauchoSystem.isWindows()
 		 || name.equalsIgnoreCase("META-INF")
 		 || name.equalsIgnoreCase("WEB-INF"))) {
       return null;
