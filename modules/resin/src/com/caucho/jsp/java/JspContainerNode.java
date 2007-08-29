@@ -375,8 +375,10 @@ public abstract class JspContainerNode extends JspNode {
   public boolean hasScripting()
   {
     for (int i = 0; _children != null && i < _children.size(); i++) {
-      if (_children.get(i).hasScripting())
+      if (_children.get(i).hasScripting()) {
+        System.out.println("CHILD-SCRIPTING: " + _children.get(i));
 	return true;
+      }
     }
     
     return false;
