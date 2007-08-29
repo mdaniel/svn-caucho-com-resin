@@ -80,6 +80,97 @@ public class JavaValue
     throw new UnsupportedOperationException("unimplementated");
   }
 
+  /**
+   * Converts to a double.
+   */
+  public long toLong()
+  {
+    return toLong(toString());
+  }
+  
+  /**
+   * Converts to a long.
+   */
+  public static long toLong(String string)
+  {
+    int len = string.length();
+
+    long value = 0;
+    long sign = 1;
+
+    int i = 0;
+    char ch = string.charAt(0);
+
+    if (ch == '-') {
+      sign = -1;
+      i = 1;
+    }
+    else if (ch == '+')
+      i = 1;
+
+    for (; i < len; i++) {
+      ch = string.charAt(i);
+
+      if ('0' <= ch && ch <= '9')
+        value = 10 * value + ch - '0';
+      else
+        return 1;
+    }
+
+    return value;
+  }
+
+  /**
+   * Converts to a double.
+   */
+  public double toDouble()
+  {
+    return toDouble(toString());
+  }
+
+  /**
+   * Converts to a double.
+   */
+  public static double toDouble(String s)
+  {
+    int len = s.length();
+    int i = 0;
+    int ch = 0;
+
+    if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {
+      i++;
+    }
+
+    for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+    }
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+      }
+    }
+
+    if (ch == 'e' || ch == 'E') {
+      int e = i++;
+
+      if (i < len && (ch = s.charAt(i)) == '+' || ch == '-') {
+        i++;
+      }
+
+      for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+      }
+
+      if (i == e + 1)
+        i = e;
+    }
+
+    if (i == 0)
+      return 1;
+    else if (i == len)
+      return Double.parseDouble(s);
+    else
+      return Double.parseDouble(s.substring(0, i));
+  }
+  
   @Override
   protected void printRImpl(Env env,
                             WriteStream out,
