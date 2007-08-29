@@ -998,17 +998,27 @@
     <property name="dist.name" value="${shortproduct}-${version}"/>
     <mkdir dir="${dist}/${dist.name}"/>
     
-    <compc output="${dist}/${dist.name}/hessian-${version}.swc">
+    <compc output="${dist}/${dist.name}/hessian-flash-${version}.swc">
+      <source-path path-element="${modules}/flash/src"/>
       <include-sources 
         dir="${modules}/flash/src" 
-        includes="hessian/client/*.as"/>
-      <include-sources 
-        dir="${modules}/flash/src" 
-        includes="hessian/io/*.as"/>
-      <include-sources 
-        dir="${modules}/flash/src" 
-        includes="hessian/mxml*.as"/>
+        includes="hessian/client/*.as hessian/io/*.as hessian/mxml/*.as"/>
     </compc>
+
+    <jar destfile="${dist}/hessian-flash-${version}-src.jar">
+      <fileset dir="${modules}/flash/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+
+        <include name="hessian/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="apache.license"/>
+      </fileset>
+    </jar>
   </target>
 
   <target name="dist.configure.make" depends="dist">
