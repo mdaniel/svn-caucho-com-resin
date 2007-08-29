@@ -28,6 +28,7 @@
 
 package com.caucho.quercus.lib.simplexml;
 
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
@@ -187,7 +188,13 @@ public class SimpleXMLElement
       document = builder.parse(in);
     }
 
-    Node root = document.getChildNodes().item(0);
+    NodeList childList = document.getChildNodes();
+    
+    Node root;
+    if (childList.getLength() == 1)
+      root = document.getChildNodes().item(0);
+    else
+      root = document.getChildNodes().item(1);
 
     return root;
   }
@@ -370,7 +377,8 @@ public class SimpleXMLElement
    * 
    * @return name of the node
    */
-  public String quercus_getName()
+  @Name("getName")
+  public String simplexml_getName()
   {
     return getNode().getName();
   }
