@@ -73,10 +73,10 @@ package hessian.client
       operationClass = HessianOperation;
 
       if (api != null)
-        init();
+        introspect();
     }
 
-    protected function init():void
+    protected function introspect():void
     {
       var type:XML = describeType(_api);
       var factories:XMLList = type.factory;
@@ -109,6 +109,9 @@ package hessian.client
     public function set api(api:String):void
     {
       _api = getDefinitionByName(api) as Class;
+
+      if (api != null)
+        introspect();
     }
   }
 }

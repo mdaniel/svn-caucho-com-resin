@@ -53,6 +53,7 @@ package hessian.client
   import flash.net.URLRequest;
   import flash.net.URLStream;
   import flash.utils.ByteArray;
+  import flash.utils.describeType;
 
   import hessian.io.Hessian2Input;
   import hessian.io.HessianOutput;
@@ -74,7 +75,7 @@ package hessian.client
     private var _uid:String;
 
     public function HessianOperation(service:HessianService, 
-                                     name:String, returnType:Class)
+                                     name:String, returnType:Class = null)
     {
       super(service, name);
 
@@ -96,7 +97,7 @@ package hessian.client
       request.contentType = "binary/octet-stream";
 
       var msg:HessianMessage = new HessianMessage(args, service.destination);
-      var token:AsyncToken = this.invoke(msg); //new AsyncToken(msg);
+      var token:AsyncToken = this.invoke(msg);
       var stream:URLStream = new URLStream();
 
       _tokens[stream] = token;
@@ -129,8 +130,13 @@ package hessian.client
 
       stream.close();
 
-      var resultEvent:ResultEvent = 
-        new ResultEvent(BINDING_RESULT, false, false, ret, token, token.message);
+      var resultEvent:ResultEvent = new ResultEvent(BINDING_RESULT, 
+                                                    false, 
+                                                    false, 
+                                                    ret, 
+                                                    token, 
+                                                    token.message);
+
       token.applyResult(resultEvent);
       mx_internal::_result = ret;
       dispatchEvent(resultEvent);
@@ -144,6 +150,16 @@ package hessian.client
     public function set uid(uid:String):void
     {
       _uid = uid;
+    }
+
+    public function get returnType():Class
+    {
+      return _returnType;
+    }
+
+    public function set returnType(returnType:Class):void
+    {
+      _returnType = returnType;
     }
   }
 }

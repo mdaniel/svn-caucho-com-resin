@@ -1540,8 +1540,12 @@ package hessian.io
       else if (expectedClass != null)
         value = new expectedClass();
 
-      else
+      else {
         value = new Object();
+
+        if (type != null)
+          value.hessianTypeName = type;
+      }
 
       addRef(value);
 
@@ -2035,8 +2039,12 @@ package hessian.io
         obj = new cl();
       else if (expectedClass != null)
         obj = new expectedClass();
-      else
+      else {
         obj = new Object();
+
+        if (type != null)
+          obj.hessianTypeName = type;
+      }
 
       addRef(obj);
 

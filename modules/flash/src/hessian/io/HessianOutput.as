@@ -51,6 +51,7 @@ package hessian.io
 	import flash.errors.IllegalOperationError;
 	import flash.utils.ByteArray;
 	import flash.utils.IDataOutput;
+  import flash.utils.describeType;
   import flash.utils.getQualifiedClassName;
 
   public class HessianOutput extends AbstractHessianOutput
@@ -270,35 +271,45 @@ package hessian.io
         return;
       }
 
+      /* XXX: Figure out how to get a real associative array in AS that 
+         associates objects by their value rather than their toString value
       if (addRef(object))
-        return;
+        return;*/
 
       // writeReplace not supported at this time
       // to save processing time
 
       className = getQualifiedClassName(object) as String;
+
+      if (object.hasOwnProperty("hessianTypeName"))
+        className = object.hessianTypeName;
+
       var ref:int = writeObjectBegin(className);
 
-      // XXX
-      // if (ref < -1) {
-        writeObject10(object);
-      /*
-      }
-      else {
-        if (ref == -1) {
-          writeDefinition20();
-          out.writeObjectBegin(className);
-        }
-
-        writeInstance(object);
-      }*/
+      writeObject10(object);
     }
 
     private function writeObject10(obj:Object):void
     {
-      for (var key:Object in obj) {
-        writeObject(key);
-        writeObject(obj[key]);
+      var type:XML = describeType(obj);
+      var variables:XMLList = type.variable;
+
+      var key:String = null;
+
+      for each(var variable:XML in variables) {
+        key = variable.@name;
+
+        if (key != "hessianTypeName") {
+          writeObject(key);
+          writeObject(obj[key]);
+        }
+      }
+
+      for (key in obj) {
+        if (key != "hessianTypeName") {
+          writeObject(key);
+          writeObject(obj[key]);
+        }
       }
 
       writeMapEnd();

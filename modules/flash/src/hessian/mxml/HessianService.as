@@ -66,7 +66,6 @@ package hessian.mxml
 
     public function initialized(document:Object, id:String):void 
     {
-      init();
     }
 
     public function get concurrency():String
