@@ -36,6 +36,23 @@
 
   <property name="shell" value="bash"/>
 
+  <!--
+    The Adobe Flex SDK can be downloaded from: 
+
+      http://www.adobe.com/products/flex/downloads/
+
+    The Ant tasks for Flex can be downloaded from:
+
+      http://labs.adobe.com/wiki/index.php/Flex_Ant_Tasks
+
+    Unzip the SDK in ${user.home}/flash and the Ant tasks in
+    ${user.home}/flash/flexTasks
+   -->
+  <taskdef resource="flexTasks.tasks" 
+           classpath="${user.home}/flash/flexTasks/lib/flexTasks.jar" />
+  <property name="FLEX_HOME" value="${user.home}/flash"/>
+
+
   <target name="tstamp">
     <tstamp/>
     <tstamp>
@@ -952,6 +969,46 @@
 
     <copy tofile="${dist}/${shortproduct}-3_1-snap-src.tar.gz"
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
+  </target>
+
+  <target name="rest-jar" depends="init, compile">
+    <property name="dist.name" value="${shortproduct}-${version}"/>
+    <mkdir dir="${dist}/${dist.name}"/>
+
+    <jar destfile="${dist}/resin-rest-${version}.jar">
+      <fileset dir="${modules}/resin/classes">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="com/caucho/soa/rest/HessianRestProxy.class"/>
+        <exclude name="com/caucho/soa/rest/HessianRestProtocolServlet.class"/>
+        <exclude name="com/caucho/soa/rest/JAXBRestProxy.class"/>
+        <exclude name="com/caucho/soa/rest/JAXBRestProtocolServlet.class"/>
+        <exclude name="com/caucho/soa/rest/RestProxy*.class"/>
+        <exclude name="com/caucho/soa/rest/RestProtocolServlet.class"/>
+
+        <include name="com/caucho/soa/rest/**"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="hessian-flash" depends="init">
+    <property name="dist.name" value="${shortproduct}-${version}"/>
+    <mkdir dir="${dist}/${dist.name}"/>
+    
+    <compc output="${dist}/${dist.name}/hessian-${version}.swc">
+      <include-sources 
+        dir="${modules}/flash/src" 
+        includes="hessian/client/*.as"/>
+      <include-sources 
+        dir="${modules}/flash/src" 
+        includes="hessian/io/*.as"/>
+      <include-sources 
+        dir="${modules}/flash/src" 
+        includes="hessian/mxml*.as"/>
+    </compc>
   </target>
 
   <target name="dist.configure.make" depends="dist">
