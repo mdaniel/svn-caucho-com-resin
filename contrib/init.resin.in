@@ -25,10 +25,10 @@ USER=
 #
 #SERVER="-server app-a"
 #
-ARGS="-resin_home $RESIN_HOME $SERVER"
+ARGS="-resin-home $RESIN_HOME $SERVER"
 
-if test -x /lib/lsb/init-functions; then
-  . /lib/lsb-init-functions
+if test -r /lib/lsb/init-functions; then
+  . /lib/lsb/init-functions
 else
 
   log_daemon_msg () {
@@ -48,11 +48,10 @@ else
       [ -z "$1" ] && return 1
 
       if [ $1 -eq 0 ]; then
-        echo "."
+        echo " ."
       else
         echo " failed!"
       fi
-    fi
     
     return $1
   }
@@ -61,22 +60,22 @@ fi
 
 case "$1" in
   start)
-	log_daemon_msg "Starting resin: "
+	log_daemon_msg "Starting resin"
 	if test -n "$USER"; then
-  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start"
+  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start" 1>/dev/null 2>/dev/null
 	else
-  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start
+  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start 1>/dev/null 2>/dev/null
         fi
-	log_end_msg
+	log_end_msg $?
 	;;
   stop)
-	log_daemon_msg "Starting resin: "
+	log_daemon_msg "Stopping resin"
 	if test -n "$USER"; then
-  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop"
+  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop" 1>/dev/null 2>/dev/null
 	else
-  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start
+  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop 1>/dev/null 2>/dev/null
         fi
-	log_end_msg
+	log_end_msg $?
 	;;
   restart)
 	$0 stop

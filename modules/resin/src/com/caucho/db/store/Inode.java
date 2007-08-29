@@ -904,7 +904,7 @@ public class Inode {
   {
     long fragCount = fileOffset / MINI_FRAG_SIZE;
     
-    return readLong(inode, (int) (inodeOffset + 8 * (1 + fragCount)));
+    return readLong(inode, (int) (inodeOffset + 8 + 8 * fragCount));
   }
 
   /**
@@ -935,7 +935,7 @@ public class Inode {
     long fragCount = fileOffset / INODE_BLOCK_SIZE;
     
     if (fragCount < DIRECT_BLOCKS)
-      return readLong(inode, (int) (inodeOffset + 8 * (1 + fragCount)));
+      return readLong(inode, (int) (inodeOffset + 8 + 8 * fragCount));
     else if (fragCount < DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS) {
       long indirectAddr;
       indirectAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
@@ -1114,14 +1114,14 @@ public class Inode {
    */
   public static long readLong(byte []buffer, int offset)
   {
-    return (((buffer[offset + 0] & 0xffL) << 56) +
-	    ((buffer[offset + 1] & 0xffL) << 48) +
-	    ((buffer[offset + 2] & 0xffL) << 40) +
-	    ((buffer[offset + 3] & 0xffL) << 32) +
-	    ((buffer[offset + 4] & 0xffL) << 24) +
-	    ((buffer[offset + 5] & 0xffL) << 16) +
-	    ((buffer[offset + 6] & 0xffL) << 8) +
-	    ((buffer[offset + 7] & 0xffL)));
+    return (((buffer[offset + 0] & 0xffL) << 56)
+	    + ((buffer[offset + 1] & 0xffL) << 48)
+	    + ((buffer[offset + 2] & 0xffL) << 40)
+	    + ((buffer[offset + 3] & 0xffL) << 32)
+	    + ((buffer[offset + 4] & 0xffL) << 24)
+	    + ((buffer[offset + 5] & 0xffL) << 16)
+	    + ((buffer[offset + 6] & 0xffL) << 8)
+	    + ((buffer[offset + 7] & 0xffL)));
   }
 
   /**
@@ -1145,8 +1145,8 @@ public class Inode {
    */
   private static int readShort(byte []buffer, int offset)
   {
-    return (((buffer[offset + 0] & 0xff) << 8) +
-	    ((buffer[offset + 1] & 0xff)));
+    return (((buffer[offset + 0] & 0xff) << 8)
+	    + ((buffer[offset + 1] & 0xff)));
   }
 
   /**

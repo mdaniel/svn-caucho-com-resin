@@ -52,8 +52,7 @@ public class SelectResult {
   private static final FreeList<SelectResult> _freeList
     = new FreeList<SelectResult>(32);
 
-  private static final int SIZE_BITS = 13;
-  private static final int SIZE_MASK = 8192 - 1;
+  private static final int SIZE = TempBuffer.SIZE;
   
   private static QDate _date = new QDate();
 
@@ -624,9 +623,8 @@ public class SelectResult {
     blob.setStore(_stores[_column]);
 
     byte []inode = blob.getInode();
-    
-    for (int i = 0; i < 128; i++)
-      inode[i] = (byte) read();
+
+    read(inode, 0, 128);
 
     return blob;
   }
@@ -642,9 +640,8 @@ public class SelectResult {
     clob.setStore(_stores[_column]);
 
     byte []inode = clob.getInode();
-    
-    for (int i = 0; i < 128; i++)
-      inode[i] = (byte) read();
+
+    read(inode, 0, 128);
 
     return clob;
   }
@@ -798,8 +795,8 @@ public class SelectResult {
   {
     int rLength = _length;
     
-    int rOffset = rLength & SIZE_MASK;
-    int rBlockId = rLength >> SIZE_BITS;
+    int rOffset = rLength % SIZE;
+    int rBlockId = rLength / SIZE;
     
     if (_buffers[rBlockId] == null) {
       TempBuffer tempBuffer = TempBuffer.allocate();
@@ -818,7 +815,7 @@ public class SelectResult {
       rBuffer[rOffset + 3] = (byte) (length >> 8);
       rBuffer[rOffset + 4] = (byte) length;
 
-      if (rOffset + 5 + length < rBuffer.length) {
+      if (rOffset + 5 + length < SIZE) {
 	System.arraycopy(buffer, offset, rBuffer, rOffset + 5, length);
 
 	_length = rLength + 5 + length;
@@ -942,9 +939,9 @@ public class SelectResult {
 
     _offset = offset + 1;
     
-    byte []buf = _buffers[offset >> SIZE_BITS];
+    byte []buf = _buffers[offset / SIZE];
 
-    return buf[offset & SIZE_MASK] & 0xff;
+    return buf[offset % SIZE] & 0xff;
   }
 
   /**
@@ -962,9 +959,9 @@ public class SelectResult {
 	return -1;
       }
 
-      byte []buf = buffers[offset >> SIZE_BITS];
+      byte []buf = buffers[offset / SIZE];
 
-      buffer[bufOffset] = buf[offset & SIZE_MASK];
+      buffer[bufOffset] = buf[offset % SIZE];
       
       offset++;
       bufOffset++;
@@ -981,8 +978,8 @@ public class SelectResult {
   public void write(int value)
   {
     int length = _length;
-    int rOffset = length & SIZE_MASK;
-    int blockId = length >> SIZE_BITS;
+    int rOffset = length % SIZE;
+    int blockId = length / SIZE;
     
     byte []buffer = _buffers[blockId];
     
@@ -1007,9 +1004,9 @@ public class SelectResult {
     int rLength = _length;
     
     while (length > 0) {
-      int rOffset = rLength & SIZE_MASK;
+      int rOffset = rLength % SIZE;
 
-      int rBufferId = rLength >> SIZE_BITS;
+      int rBufferId = rLength / SIZE;
       
       if (rOffset == 0) {
 	TempBuffer tempBuffer = TempBuffer.allocate();

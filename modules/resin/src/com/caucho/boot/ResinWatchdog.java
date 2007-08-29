@@ -511,8 +511,7 @@ public class ResinWatchdog extends AbstractManagedObject
       try {
 	watchdogIs = null;
 
-	ServerSocket ss = new ServerSocket(0, 5,
-					   InetAddress.getByName("127.0.0.1"));
+	ServerSocket ss = new ServerSocket(0, 5, InetAddress.getLocalHost());
 	int port = ss.getLocalPort();
 
 	Path resinHome = _cluster.getResin().getResinHome();
