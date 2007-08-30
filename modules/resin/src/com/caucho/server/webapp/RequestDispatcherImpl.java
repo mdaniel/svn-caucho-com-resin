@@ -113,7 +113,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     throws ServletException, IOException
   {
     forward((HttpServletRequest) request, (HttpServletResponse) response,
-	    null, _errorInvocation);
+	    "error", _errorInvocation);
   }
 
   /**
@@ -154,7 +154,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     ServletResponse resPtr = res;
 	  
-    if (method == null)
+    if (method == null || "error".equals(method))
       method = req.getMethod();
 
     subRequest = DispatchRequest.createDispatch();

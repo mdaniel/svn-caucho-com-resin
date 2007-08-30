@@ -12,6 +12,13 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>session: add request attribute caucho.session-server-id as a distributed session owner hint (#1912, rep by Mike Wynholds)</li>
+<li>write error content even if output is flushed, i.e. suppress forward() not allowed error (#1954)</li>
+<li>ssl: cipher string not properly cleared on close (#1927, rep by directi)</li>
+<li>security-manager config was missing @PostConstruct (#1934, rep by norlab)</li>
+<li>admin: resin_admin_localhost changed to resin_admin_external (#1976)</li>
+<li>amber: pstmt.setNull(..., Types.NULL) is not supports by MSSql (#1926, rep by Matt Ledom)</li>
+<li>jsp: rtexprvalue allowed in fragments (#1893, rep by Matthew Schmidt)</li>
 <li>session: cluster store was not updated for new TempBuffer size (#1911, rep by Ethan Larson)</li>
 <li>boot: update init.resin script for ubuntu (#1549)</li>
 <li>jni: ./configure PROXY_LIBS needs -lc for debian (#1806, #1924, rep by engberg, F Caso)</li>

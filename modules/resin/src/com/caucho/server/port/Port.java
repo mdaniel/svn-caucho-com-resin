@@ -387,7 +387,9 @@ public class Port
     throws ConfigException
   {
     try {
-      Class cl = Class.forName("com.caucho.vfs.OpenSSLFactory");
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class cl = Class.forName("com.caucho.vfs.OpenSSLFactory", false, loader);
 
       _sslFactory = (SSLFactory) cl.newInstance();
 

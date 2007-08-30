@@ -72,6 +72,15 @@ public class JspScriptlet extends JspNode {
   }
 
   /**
+   * True if the node has scripting element (i.e. not counting rtexpr values)
+   */
+  @Override
+  public boolean hasScriptingElement()
+  {
+    return true;
+  }
+
+  /**
    * Generates the XML text representation for the tag validation.
    *
    * @param os write stream to the generated XML.

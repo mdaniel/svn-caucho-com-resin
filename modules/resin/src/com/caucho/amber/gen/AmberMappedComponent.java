@@ -2769,7 +2769,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
     out.println("if (s == null)");
-    out.println("  pstmt.setNull(index, java.sql.Types.NULL);");
+    out.println("  pstmt.setNull(index, java.sql.Types.VARCHAR);");
     out.println("else");
     out.println("  pstmt.setString(index, s);");
     out.popDepth();

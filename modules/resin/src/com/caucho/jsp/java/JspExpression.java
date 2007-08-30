@@ -66,6 +66,16 @@ public class JspExpression extends JspNode {
   {
     return true;
   }
+  
+  /**
+   * True if the node has scripting element (i.e. not counting rtexpr values)
+   */
+  @Override
+  public boolean hasScriptingElement()
+  {
+    System.out.println("TXT: " + _text);
+    return true;
+  }
 
   /**
    * Generates the XML text representation for the tag validation.

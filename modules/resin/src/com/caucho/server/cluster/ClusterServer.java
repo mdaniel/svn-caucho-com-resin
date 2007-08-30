@@ -461,13 +461,21 @@ public class ClusterServer {
    */
   public long generateBackupCode()
   {
+    return generateBackupCode(_index);
+  }
+
+  /**
+   * Generate the primary, secondary, tertiary, returning the value encoded
+   * in a long.
+   */
+  public long generateBackupCode(int index)
+  {
     Cluster cluster = getCluster();
     ClusterServer []srunList = cluster.getServerList();
     int srunLength = srunList.length;
     ArrayList<Machine> machineList = cluster.getMachineList();
     int machineLength = machineList.size();
 
-    long index = _index;
     long backupCode = index;
 
     long backupLength = srunLength;

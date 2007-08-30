@@ -242,11 +242,30 @@ public abstract class JspNode {
   }
   
   /**
-   * True if the node has scripting
+   * True if the node has scripting (counting rtexpr)
    */
   public boolean hasScripting()
   {
     return false;
+  }
+  
+  /**
+   * True if the node has scripting element (i.e. not counting rtexpr values)
+   */
+  public boolean hasScriptingElement()
+  {
+    return false;
+  }
+  
+  /**
+   * Finds the first scripting node
+   */
+  public JspNode findScriptingNode()
+  {
+    if (hasScripting())
+      return this;
+    else
+      return null;
   }
 
   /**

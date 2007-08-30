@@ -18,6 +18,17 @@
 
   <login-config auth-method="basic"/>
 
+  <resin:if test="${! resin_admin_external}">
+    <security-constraint>
+      <web-resource-collection url-pattern="*.php"/>
+      
+      <ip-constraint>
+        <allow>127.0.0.1</allow>
+        <allow>192.168/16</allow>
+      </ip-constraint>
+    </security-constraint>
+  </resin:if>
+
   <servlet servlet-name="resin-php"
            servlet-class="com.caucho.quercus.servlet.QuercusServlet">
   </servlet>

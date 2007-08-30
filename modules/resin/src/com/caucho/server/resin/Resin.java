@@ -1642,7 +1642,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   class SecurityManagerConfig {
-    private boolean _isEnable;
+    private boolean _isEnable = true;
 
     SecurityManagerConfig()
     {
@@ -1669,6 +1669,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     }
 
+    @PostConstruct
     public void init()
     {
       if (_isEnable)

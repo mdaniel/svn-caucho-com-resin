@@ -1150,8 +1150,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     String id = oldId;
 
-    if (id == null || id.length() < 4 ||
-	! isInSessionGroup(id) || ! reuseSessionId(fromCookie)) {
+    if (id == null || id.length() < 4
+	|| ! isInSessionGroup(id) || ! reuseSessionId(fromCookie)) {
       id = createSessionId(request, true);
     }
 
@@ -1204,7 +1204,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     String id;
 
     do {
-      id = createSessionIdImpl();
+      id = createSessionIdImpl(request);
     } while (create && getSession(id, 0, create, true) != null);
 
     if (id == null || id.equals(""))
@@ -1213,12 +1213,28 @@ public final class SessionManager implements ObjectManager, AlarmListener
     return id;
   }
 
-  public String createSessionIdImpl()
+  public String createSessionIdImpl(HttpServletRequest request)
   {
     StringBuffer cb = new StringBuffer();
     // this section is the host specific session index
     // the most random bit is the high bit
     int index = _srunIndex;
+
+    // look at caucho.session-server-id for a hint of the owner
+    Object owner = request.getAttribute("caucho.session-server-id");
+    if (owner == null) {
+    }
+    else if (owner instanceof Number) {
+      index = ((Number) owner).intValue();
+      if (_srunLength <= index)
+	index = _srunIndex;
+    }
+    else if (owner instanceof String) {
+      ClusterServer server = _cluster.getServer((String) owner);
+
+      if (server != null)
+	index = server.getIndex();
+    }
 
     if (index < 0)
       index = 0;
@@ -1267,9 +1283,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     long backupCode;
 
-    if (_selfServer != null) {
-      backupCode = _selfServer.generateBackupCode();
-    }
+    if (_selfServer != null)
+      backupCode = _selfServer.generateBackupCode(index);
     else
       backupCode = 0x000200010000L;
     

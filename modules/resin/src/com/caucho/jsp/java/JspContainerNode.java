@@ -383,6 +383,40 @@ public abstract class JspContainerNode extends JspNode {
     
     return false;
   }
+  
+  /**
+   * True if the node has scripting element (i.e. not counting rtexpr values)
+   */
+  @Override
+  public boolean hasScriptingElement()
+  {
+    for (int i = 0; _children != null && i < _children.size(); i++) {
+      if (_children.get(i).hasScriptingElement()) {
+	return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Finds the first scripting node
+   */
+  @Override
+  public JspNode findScriptingNode()
+  {
+    for (int i = 0; _children != null && i < _children.size(); i++) {
+      JspNode node = _children.get(i).findScriptingNode();
+
+      if (node != null)
+	return node;
+    }
+
+    if (hasScripting())
+      return this;
+    else
+      return null;
+  }
 
   /**
    * Returns true if the children are static.
