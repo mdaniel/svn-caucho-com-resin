@@ -436,7 +436,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
     // XXX: needs invalidation on DROP or ALTER
     JdbcTableMetaData tableMd = _tableMetadataMap.get(key);
-
+    
     if (tableMd != null && tableMd.isValid())
       return tableMd;
     
@@ -505,48 +505,59 @@ public abstract class JdbcConnectionResource implements Closeable {
 
     Statement stmt = null;
 
-    int ch;
+    char ch;
 
-    if (sql != null && sql.length() > 2) {
-      ch = sql.charAt(0);
-
-      switch (ch) {
-      case 'a': case 'A':
-        // drop/alter clears metadata cache
-        _tableMetadataMap.clear();
-        break;
-      case 'd': case 'D':
-        if ((ch = sql.charAt(1)) == 'r' || ch == 'R') {
+    // clear table metadata cache if tables are deleted/altered
+    if (sql != null) {
+      int i = 0;
+      int len = sql.length();
+      
+      while (i < len &&
+          Character.isWhitespace(sql.charAt(i))) {
+        i++;
+      }
+      
+      if (i + 1 < len) {
+        ch = sql.charAt(i);
+        
+        switch (ch) {
+        case 'a': case 'A':
           // drop/alter clears metadata cache
           _tableMetadataMap.clear();
+          break;
+        case 'd': case 'D':
+          if ((ch = sql.charAt(i + 1)) == 'r' || ch == 'R') {
+            // drop/alter clears metadata cache
+            _tableMetadataMap.clear();
+          }
+          break;
+          /*
+        case 'b': case 'B':
+          // convert "begin" to begin
+          // Test for mediawiki performance
+          if (sql.equalsIgnoreCase("begin")) {
+            setAutoCommit(false);
+            return null;
+          }
+          break;
+        case 'c': case 'C':
+          // convert "commit" to begin
+          if (sql.equalsIgnoreCase("commit")) {
+            commit();
+            setAutoCommit(true);
+            return null;
+          }
+          break;
+        case 'r': case 'R':
+          // convert "rollback" to begin
+          if (sql.equalsIgnoreCase("rollback")) {
+            rollback();
+            setAutoCommit(true);
+            return null;
+          }
+          break;
+          */
         }
-        break;
-        /*
-      case 'b': case 'B':
-        // convert "begin" to begin
-        // Test for mediawiki performance
-        if (sql.equalsIgnoreCase("begin")) {
-          setAutoCommit(false);
-          return null;
-        }
-        break;
-      case 'c': case 'C':
-        // convert "commit" to begin
-        if (sql.equalsIgnoreCase("commit")) {
-          commit();
-          setAutoCommit(true);
-          return null;
-        }
-        break;
-      case 'r': case 'R':
-        // convert "rollback" to begin
-        if (sql.equalsIgnoreCase("rollback")) {
-          rollback();
-          setAutoCommit(true);
-          return null;
-        }
-        break;
-        */
       }
     }
 
