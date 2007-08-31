@@ -659,8 +659,6 @@ class ResponseStream extends ToByteResponseStream {
   public void finish()
     throws IOException
   {
-    Thread.dumpStack();
-    
     boolean isClosed = _isClosed;
 
     if (_next == null || isClosed) {
