@@ -200,6 +200,15 @@ public class AmqRequest extends AmqConnection implements ServerRequest
     return true;
   }
   
+  /**
+   * Handles a connection resume.
+   */
+  @Override
+  public boolean handleResume() throws IOException
+  {
+    return false;
+  }
+  
   public void protocolCloseEvent()
   {
   }

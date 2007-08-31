@@ -334,6 +334,20 @@ public class IiopRequest implements ServerRequest {
     }
   }
 
+  /**
+   * Handles a new connection.  The controlling TcpServer may call
+   * handleConnection again after the connection completes, so
+   * the implementation must initialize any variables for each connection.
+   *
+   * @param conn Information about the connection, including buffered
+   * read and write streams.
+   */
+  @Override
+  public boolean handleResume() throws IOException
+  {
+    return false;
+  }
+
   private void beginTransaction(XidImpl xid)
     throws Exception
   {
