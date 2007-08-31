@@ -330,6 +330,8 @@ ejb15_message-destination-ref = element message-destination-ref {
 
   element message-destination-link { string }?,
 
+  javaee_resource-Group,
+
   ejb15_deployment-extension*
 }
 

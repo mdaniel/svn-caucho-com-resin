@@ -33,6 +33,7 @@ import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.InjectionTarget;
+import com.caucho.config.types.ResourceRef;
 import com.caucho.ejb.cfg.EjbSessionBean;
 import com.caucho.ejb.cfg.Interceptor;
 import com.caucho.java.JavaWriter;
@@ -265,7 +266,9 @@ public class SessionBean extends ClassComponent {
     out.println("_ejb_context = context;");
 
     if (hasMethod("setSessionContext", new JClass[] { JClassLoader.systemForName(SessionContext.class.getName()) })) {
-      out.println("setSessionContext(context);");
+      // TCK: ejb30/bb/session/stateless/annotation/resource/dataSourceTest
+      // ejb/0f55 setSessionContext() can be private, out.println("setSessionContext(context);");
+      out.println("invokeMethod(this, \"setSessionContext\", new Class[] { javax.ejb.SessionContext.class }, new Object[] { context });");
     }
 
     out.println();
@@ -469,6 +472,20 @@ public class SessionBean extends ClassComponent {
     out.popDepth();
     out.println("}");
 
+    generateInitInjection(out);
+
+    generateReflectionGetMethod(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates injection initialization.
+   */
+  protected void generateInitInjection(JavaWriter out)
+    throws IOException
+  {
     // ejb/0fd0
     out.println();
     out.println("private void __caucho_initInjection()");
@@ -496,54 +513,24 @@ public class SessionBean extends ClassComponent {
 
       Class cl = envEntry.getEnvEntryType();
 
-      // ejb/0fd1, ejb/0fd3
-      value = generateTypeCasting(value, cl);
+      generateInjection(out, injectionTarget, value, cl, true);
+    }
 
-      String s = injectionTarget.getInjectionTargetName();
+    // ejb/0f54
+    for (ResourceRef resourceRef : _bean.getResourceRefs()) {
+      InjectionTarget injectionTarget = resourceRef.getInjectionTarget();
 
-      out.println("try {");
-      out.pushDepth();
+      if (injectionTarget == null)
+        continue;
 
-      out.print("method  = getClass().getSuperclass().getDeclaredMethod(\"set");
-      out.print(Character.toUpperCase(s.charAt(0)));
+      String value = "com.caucho.naming.Jndi.lookup(\"java:comp/env/" + resourceRef.getResRefName() + "\")";
 
-      if (s.length() > 1) {
-        out.print(s.substring(1));
-      }
+      if (value == null)
+        continue;
 
-      out.print("\", new Class[] { ");
-      out.print(cl.getName());
+      Class cl = resourceRef.getResType();
 
-      // ejb/0fd2 vs ejb/0fd3
-      if (cl.equals(String.class))
-        out.print(".class");
-      else
-        out.print(".TYPE");
-
-      out.println(" });");
-
-      out.println("method.setAccessible(true);");
-
-      out.print("method.invoke(this, ");
-      out.print(value);
-      out.println(");");
-
-      out.popDepth();
-      out.println("} catch (NoSuchMethodException e) {");
-      out.pushDepth();
-
-      out.print("field  = getClass().getSuperclass().getDeclaredField(\"");
-      out.print(s);
-      out.println("\");");
-
-      out.println("field.setAccessible(true);");
-
-      out.print("field.set(this, ");
-      out.print(value);
-      out.println(");");
-
-      out.popDepth();
-      out.println("}");
+      generateInjection(out, injectionTarget, value, cl, false);
     }
 
     out.popDepth();
@@ -554,8 +541,63 @@ public class SessionBean extends ClassComponent {
 
     out.popDepth();
     out.println("}");
+  }
 
-    generateReflectionGetMethod(out);
+  /**
+   * Generates an individual injection.
+   */
+  protected void generateInjection(JavaWriter out,
+                                   InjectionTarget injectionTarget,
+                                   String value,
+                                   Class cl,
+                                   boolean isEscapeString)
+    throws IOException
+  {
+    // ejb/0fd1, ejb/0fd3
+    value = generateTypeCasting(value, cl, isEscapeString);
+
+    String s = injectionTarget.getInjectionTargetName();
+
+    out.println("try {");
+    out.pushDepth();
+
+    out.print("method  = getClass().getSuperclass().getDeclaredMethod(\"set");
+    out.print(Character.toUpperCase(s.charAt(0)));
+
+    if (s.length() > 1) {
+      out.print(s.substring(1));
+    }
+
+    out.print("\", new Class[] { ");
+    out.print(cl.getName());
+
+    // ejb/0fd2 vs ejb/0fd3
+    if (cl.isPrimitive())
+      out.print(".TYPE");
+    else
+      out.print(".class");
+
+    out.println(" });");
+
+    out.println("method.setAccessible(true);");
+
+    out.print("method.invoke(this, ");
+    out.print(value);
+    out.println(");");
+
+    out.popDepth();
+    out.println("} catch (NoSuchMethodException e) {");
+    out.pushDepth();
+
+    out.print("field  = getClass().getSuperclass().getDeclaredField(\"");
+    out.print(s);
+    out.println("\");");
+
+    out.println("field.setAccessible(true);");
+
+    out.print("field.set(this, ");
+    out.print(value);
+    out.println(");");
 
     out.popDepth();
     out.println("}");
@@ -641,7 +683,7 @@ public class SessionBean extends ClassComponent {
     throws IOException
   {
     out.println();
-    out.println("private void invokeMethod(Bean bean, String methodName, Class paramTypes[], Object paramValues[])");
+    out.println("private static void invokeMethod(Bean bean, String methodName, Class paramTypes[], Object paramValues[])");
     out.println("{");
     out.pushDepth();
 
@@ -674,11 +716,12 @@ public class SessionBean extends ClassComponent {
     return BeanAssembler.hasMethod(_ejbClass, methodName, paramTypes);
   }
 
-  private String generateTypeCasting(String value, Class cl)
+  private String generateTypeCasting(String value, Class cl, boolean isEscapeString)
   {
-    if (cl.equals(String.class))
-      value = "\"" + value + "\"";
-    else if (cl.equals(Character.class))
+    if (cl.equals(String.class)) {
+      if (isEscapeString)
+        value = "\"" + value + "\"";
+    } else if (cl.equals(Character.class))
       value = "'" + value + "'";
     else if (cl.equals(Byte.class))
       value = "(byte) " + value;

@@ -60,6 +60,8 @@ public class MessageDestinationRef
 
   private Object _target;
 
+  private InjectionTarget _injectionTarget;
+
   public MessageDestinationRef()
   {
     _modulePath = Vfs.lookup();
@@ -80,6 +82,14 @@ public class MessageDestinationRef
 
   public void setDescription(String description)
   {
+  }
+
+  /**
+   * Sets the injection-target
+   */
+  public void setInjectionTarget(InjectionTarget injectionTarget)
+  {
+    _injectionTarget = injectionTarget;
   }
 
   public void setMessageDestinationRefName(String refName)
@@ -141,11 +151,19 @@ public class MessageDestinationRef
       log.log(Level.FINER, L.l("{0} init", this));
   }
 
+  /**
+   * Gets the injection-target
+   */
+  public InjectionTarget getInjectionTarget()
+  {
+    return _injectionTarget;
+  }
+
   protected String getTagName()
   {
     return "<message-destination-ref>";
   }
-  
+
   /**
    * Creates the object from the proxy.
    *

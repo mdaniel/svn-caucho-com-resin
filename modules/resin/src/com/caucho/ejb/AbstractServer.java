@@ -235,7 +235,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Sets the remote object class.
+   * Sets the remote object list.
    */
   public void setRemoteObjectList(ArrayList<JClass> list)
   {
@@ -248,7 +248,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Sets the remote object class.
+   * Returns the remote object list.
    */
   public ArrayList<Class> getRemoteObjectList()
   {

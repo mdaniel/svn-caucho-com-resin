@@ -35,11 +35,12 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.types.EjbRef;
 import com.caucho.config.types.EnvEntry;
+import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
-import com.caucho.config.types.EjbRef;
-import com.caucho.config.types.MessageDestinationRef;
+import com.caucho.config.types.ResourceRef;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
@@ -145,6 +146,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private ArrayList<EnvEntry> _envEntries
     = new ArrayList<EnvEntry>();
 
+  private ArrayList<ResourceRef> _resourceRefs
+    = new ArrayList<ResourceRef>();
+
   private String _aroundInvokeMethodName;
 
   private long _transactionTimeout;
@@ -191,6 +195,22 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void addEnvEntry(EnvEntry envEntry)
   {
     _envEntries.add(envEntry);
+  }
+
+  /**
+   * Returns the resource-ref list.
+   */
+  public ArrayList<ResourceRef> getResourceRefs()
+  {
+    return _resourceRefs;
+  }
+
+  /**
+   * Adds a new resource-ref.
+   */
+  public void addResourceRef(ResourceRef resourceRef)
+  {
+    _resourceRefs.add(resourceRef);
   }
 
   /**
@@ -497,8 +517,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     if (! remoteHome.isAssignableTo(EJBHome.class) && ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBHome.  <home> interfaces must extend javax.ejb.EJBHome.", remoteHome.getName()));
-
   }
+
   /**
    * Gets the ejb implementation class.
    */

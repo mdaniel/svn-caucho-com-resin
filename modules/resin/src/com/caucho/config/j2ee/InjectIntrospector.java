@@ -628,7 +628,7 @@ public class InjectIntrospector {
     else if (resourceType.startsWith("javax.ejb."))
       prefix = "ejb/";
 
-    // ejb/0ff0: @Resource(name="null"). TCK: ejb30/bb/session/stateful/sessioncontext/annotated
+    // ejb/0f53: @Resource(name="null"). TCK: ejb30/bb/session/stateful/sessioncontext/annotated
     if (! jndiName.equals("") && ! jndiName.equals("null")) {
     }
     else if (UserTransaction.class.equals(fieldType)) {

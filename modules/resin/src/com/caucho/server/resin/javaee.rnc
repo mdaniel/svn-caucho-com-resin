@@ -206,11 +206,13 @@ javaee_message-destination-ref = element message-destination-ref {
 
   javaee_message-destination-ref-name,
 
-  javaee_message-destination-type,
+  javaee_message-destination-type?,
 
-  javaee_message-destination-usage,
+  javaee_message-destination-usage?,
 
-  javaee_message-destination-link?
+  javaee_message-destination-link?,
+
+  javaee_resource-Group
 }
 
 javaee_message-destination-ref-name = element message-destination-ref-name {

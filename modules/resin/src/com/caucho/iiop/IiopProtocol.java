@@ -126,7 +126,7 @@ public class IiopProtocol extends Protocol {
 
     return _orb;
   }
-  
+
   /**
    * Returns the service with the given URL.
    */
@@ -151,11 +151,15 @@ public class IiopProtocol extends Protocol {
     if (service == null)
       return null;
     else if (local == null) {
-      ArrayList<Class> apiList = new ArrayList<Class>();
-      apiList.add(service.getHomeAPI());
-      
+      // ArrayList<Class> apiList = new ArrayList<Class>();
+      // apiList.add(service.getHomeAPI());
+
+      // TCK: ejb30/bb/session/stateful/busifacedd/multipleInterfacesTest2
+      // ejb/4012: multiple <business-remote> interfaces
+      ArrayList<Class> apiList = service.getObjectAPI();
+
       return new IiopSkeleton(service.getHome(),
-			      apiList,
+                              apiList,
                               service.getClassLoader(),
                               host, port, url);
     }
@@ -164,7 +168,7 @@ public class IiopProtocol extends Protocol {
 
       if (obj == null)
         return null;
-      
+
       ArrayList<Class> apiList = service.getObjectAPI();
 
       return new IiopSkeleton(obj, apiList,

@@ -63,7 +63,9 @@ public class EjbSessionBean extends EjbBean {
   private static final L10N L = new L10N(EjbSessionBean.class);
 
   private boolean _isStateless;
-  private boolean _isContainerTransaction;
+
+  // Default is container managed transaction.
+  private boolean _isContainerTransaction = true;
 
   /**
    * Creates a new session bean configuration.
@@ -268,6 +270,9 @@ public class EjbSessionBean extends EjbBean {
     else {
       setLocalWrapper(interfaceList.get(0));
     }
+
+    // XXX: Check ejb30/bb/session/stateless/migration/twothree/annotated
+    // There is a conflict between 2.1 and 3.0 interfaces.
 
     // ejb/0f6f
     // The session bean might have @RemoteHome for EJB 2.1 and
