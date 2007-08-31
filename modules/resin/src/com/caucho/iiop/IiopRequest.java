@@ -342,7 +342,6 @@ public class IiopRequest implements ServerRequest {
    * @param conn Information about the connection, including buffered
    * read and write streams.
    */
-  @Override
   public boolean handleResume() throws IOException
   {
     return false;

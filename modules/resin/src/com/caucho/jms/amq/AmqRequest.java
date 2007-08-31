@@ -203,7 +203,6 @@ public class AmqRequest extends AmqConnection implements ServerRequest
   /**
    * Handles a connection resume.
    */
-  @Override
   public boolean handleResume() throws IOException
   {
     return false;
