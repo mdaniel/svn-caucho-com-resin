@@ -174,7 +174,7 @@ public class EjbInjectProgram extends BuilderProgram
         EjbRefContext context = EjbRefContext.getLocal();
 
         if (context != null) {
-          // ejb/0fbe
+          // ejb/0f6e
           try {
             value = context.findByBeanName(_field.getDeclaringClass().getName(),
                                            _field.getName(),
