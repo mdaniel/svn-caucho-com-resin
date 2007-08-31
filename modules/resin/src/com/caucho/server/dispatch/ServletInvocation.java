@@ -44,7 +44,8 @@ import java.util.logging.Logger;
  * A repository for request information gleaned from the uri.
  */
 public class ServletInvocation {
-  static final Logger log = Logger.getLogger(ServletInvocation.class.getName());
+  static final Logger log
+    = Logger.getLogger(ServletInvocation.class.getName());
   static final L10N L = new L10N(ServletInvocation.class);
 
   private ClassLoader _classLoader;
@@ -238,6 +239,25 @@ public class ServletInvocation {
     }
 
     _filterChain.doFilter(request, response);
+  }
+
+  /**
+   * Resume a request.
+   *
+   * @param request the servlet request
+   * @param response the servlet response
+   */
+  public boolean resume(ServletRequest request, ServletResponse response)
+    throws IOException, ServletException
+  {
+    if (_filterChain instanceof AbstractFilterChain) {
+      AbstractFilterChain filterChain
+	= (AbstractFilterChain) _filterChain;
+
+      return filterChain.resume(request, response);
+    }
+    else
+      return false;
   }
 
   /**

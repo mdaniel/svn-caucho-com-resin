@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>jstl: add filter to x:parse (#1944, rep by M Thompson)</li>
 <li>session: add request attribute caucho.session-server-id as a distributed session owner hint (#1912, rep by Mike Wynholds)</li>
 <li>write error content even if output is flushed, i.e. suppress forward() not allowed error (#1954)</li>
 <li>ssl: cipher string not properly cleared on close (#1927, rep by directi)</li>

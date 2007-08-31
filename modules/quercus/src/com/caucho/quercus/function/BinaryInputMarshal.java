@@ -62,7 +62,9 @@ public class BinaryInputMarshal extends Marshal
 
     Object javaObj = value.toJavaObject();
 
-    if (javaObj instanceof InputStream)
+    if (javaObj instanceof BinaryInput)
+      return (BinaryInput) javaObj;
+    else if (javaObj instanceof InputStream)
       return new ReadStreamInput((InputStream) javaObj);
     else
       return new ReadStreamInput(value.toInputStream());
@@ -77,7 +79,9 @@ public class BinaryInputMarshal extends Marshal
 
     Object javaObj = value.toJavaObject();
 
-    if (javaObj instanceof InputStream)
+    if (javaObj instanceof BinaryInput)
+      return (BinaryInput) javaObj;
+    else if (javaObj instanceof InputStream)
       return new ReadStreamInput((InputStream) javaObj);
     else
       return new ReadStreamInput(value.toInputStream());

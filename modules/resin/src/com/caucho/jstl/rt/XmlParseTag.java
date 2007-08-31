@@ -37,7 +37,7 @@ import com.caucho.xml.Xml;
 import com.caucho.xml.XmlParser;
 
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
+import org.xml.sax.*;
 
 import javax.xml.parsers.*;
 import javax.servlet.jsp.JspException;
@@ -50,6 +50,7 @@ public class XmlParseTag extends BodyTagSupport {
   private Object _xml;
   private String _systemId;
   private Object _filter;
+  private XMLReader _saxReader;
   
   private String _var;
   private String _scope;
@@ -87,6 +88,14 @@ public class XmlParseTag extends BodyTagSupport {
   public void setFilter(Object filter)
   {
     _filter = filter;
+  }
+
+  /**
+   * Sets the sax reader
+   */
+  public void setSaxReader(XMLReader reader)
+  {
+    _saxReader = reader;
   }
 
   /**
@@ -156,24 +165,41 @@ public class XmlParseTag extends BodyTagSupport {
 	throw new JspException(L.l("doc attribute must be a Reader or String at `{0}'",
 				   null));
 
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder parser = factory.newDocumentBuilder();
-
       InputSource is = new InputSource(reader);
 
       if (_systemId != null)
         is.setSystemId(_systemId);
 
-      Document doc  = parser.parse(is);
+      Document doc = null;
 
-      reader.close();
+      XMLFilter filter = (XMLFilter) _filter;
 
-      if (_var != null)
-        CoreSetTag.setValue(pageContext, _var, _scope, doc);
-      else if (_varDom != null)
-        CoreSetTag.setValue(pageContext, _varDom, _scopeDom, doc);
-      else
-        throw new JspException(L.l("x:parse needs either var or varDom"));
+      if (_filter != null && _var == null && _varDom == null) {
+	SAXParserFactory factory = SAXParserFactory.newInstance();
+	SAXParser saxParser = factory.newSAXParser();
+	XMLReader parser = saxParser.getXMLReader();
+
+	filter.setParent(parser);
+	
+	filter.parse(is);
+	
+	reader.close();
+      }
+      else {
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder parser = factory.newDocumentBuilder();
+
+	doc = parser.parse(is);
+
+	reader.close();
+
+	if (_var != null)
+	  CoreSetTag.setValue(pageContext, _var, _scope, doc);
+	else if (_varDom != null)
+	  CoreSetTag.setValue(pageContext, _varDom, _scopeDom, doc);
+	else
+	  throw new JspException(L.l("x:parse needs either var or varDom"));
+      }
     } catch (JspException e) {
       throw e;
     } catch (Exception e) {

@@ -32,6 +32,7 @@ import com.caucho.jca.UserTransactionProxy;
 import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.dispatch.AbstractFilterChain;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.transaction.TransactionManagerImpl;
 
@@ -52,8 +53,9 @@ import java.util.logging.Logger;
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
  */
-public class WebAppFilterChain implements FilterChain {
-  private static final Logger log = Log.open(WebAppFilterChain.class);
+public class WebAppFilterChain extends AbstractFilterChain {
+  private static final Logger log
+    = Logger.getLogger(WebAppFilterChain.class.getName());
   
   // Next filter chain
   private FilterChain _next;
@@ -214,6 +216,76 @@ public class WebAppFilterChain implements FilterChain {
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       }
+      
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
+  /**
+   * Resumes the request for comet-style.
+   *
+   * @param request the servlet request
+   * @param response the servlet response
+   * @since Resin 3.1.3
+   */
+  @Override
+  public boolean resume(ServletRequest request,
+			ServletResponse response)
+    throws ServletException, IOException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    WebApp app = _app;
+    
+    try {
+      thread.setContextClassLoader(app.getClassLoader());
+
+      if (! app.enterWebApp())
+	return false;
+
+      if (_next instanceof AbstractFilterChain) {
+	AbstractFilterChain next = (AbstractFilterChain) _next;
+
+	return next.resume(request, response);
+      }
+      else
+	return false;
+    } catch (Throwable e) {
+      _errorPageManager.sendServletError(e, request, response);
+
+      return false;
+    } finally {
+      app.exitWebApp();
+
+      if (_isTop) {
+	((AbstractHttpResponse) response).close();
+	
+	try {
+	  _utm.abortTransaction();
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+
+      // put finish() before access log so the session isn't tied up while
+      // logging
+
+      // needed for things like closing the session
+      if (request instanceof AbstractHttpRequest)
+        ((AbstractHttpRequest) request).finish();
+
+      /*
+      try {
+	if (_accessLog != null) {
+	  _accessLog.log((HttpServletRequest) request,
+			 (HttpServletResponse) response,
+			 _app);
+	}
+      } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+      */
       
       thread.setContextClassLoader(oldLoader);
     }

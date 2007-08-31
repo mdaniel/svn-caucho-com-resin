@@ -2345,6 +2345,17 @@ public abstract class AbstractHttpRequest
   {
     return 0;
   }
+  
+  /**
+   * Handles a comet-style resume.
+   *
+   * @return true if the connection should stay open (keepalive)
+   */
+  public boolean handleResume()
+    throws IOException
+  {
+    return false;
+  }
 
   /**
    * Kills the keepalive.
@@ -2352,6 +2363,10 @@ public abstract class AbstractHttpRequest
   public void killKeepalive()
   {
     _keepalive = false;
+
+    ConnectionController controller = _conn.getController();
+    if (controller != null)
+      controller.close();
   }
 
   /**
@@ -2422,14 +2437,14 @@ public abstract class AbstractHttpRequest
     try {
       SecurityContextProvider oldProvider = _oldProvider;
       _oldProvider = null;
+      
+      SecurityContext.setProvider(oldProvider);
 
       SessionImpl session = _session;
       _session = null;
 
       // server/0219
       // _invocation = null;
-      
-      SecurityContext.setProvider(oldProvider);
       
       if (session != null)
         session.finish();

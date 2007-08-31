@@ -39,40 +39,8 @@ import java.io.IOException;
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
  */
-public class FilterFilterChain extends AbstractFilterChain
+abstract public class AbstractFilterChain implements FilterChain
 {
-  // Next filter chain
-  private FilterChain _next;
-  
-  // filter
-  private Filter _filter;
-
-  /**
-   * Creates a new FilterChainFilter.
-   *
-   * @param next the next filterChain
-   * @param filter the user's filter
-   */
-  public FilterFilterChain(FilterChain next, Filter filter)
-  {
-    _next = next;
-    _filter = filter;
-  }
-  
-  /**
-   * Invokes the next filter in the chain or the final servlet at
-   * the end of the chain.
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   * @since Servlet 2.3
-   */
-  public void doFilter(ServletRequest request,
-                       ServletResponse response)
-    throws ServletException, IOException
-  {
-    _filter.doFilter(request, response, _next);
-  }
   /**
    * Resumes the request.
    *
@@ -81,17 +49,10 @@ public class FilterFilterChain extends AbstractFilterChain
    *
    * @since Resin 3.1.3
    */
-  @Override
   public boolean resume(ServletRequest request,
 			ServletResponse response)
     throws ServletException, IOException
   {
-    if (_next instanceof AbstractFilterChain) {
-      AbstractFilterChain next = (AbstractFilterChain) _next;
-
-      return next.resume(request, response);
-    }
-    else
-      return false;
+    return false;
   }
 }

@@ -59,8 +59,9 @@ import java.util.logging.Logger;
  * Handles a new request from an HTTP connection.
  */
 public class HttpRequest extends AbstractHttpRequest
-  implements ServerRequest {
-  static final Logger log = Log.open(HttpRequest.class);
+  implements ServerRequest
+{
+  static final Logger log = Logger.getLogger(HttpRequest.class.getName());
 
   static final int HTTP_0_9 = 0x0009;
   static final int HTTP_1_0 = 0x0100;
@@ -281,6 +282,53 @@ public class HttpRequest extends AbstractHttpRequest
       } catch (Throwable e1) {
         log.log(Level.FINE, e1.toString(), e1);
       }
+
+      return false;
+    } finally {
+      if (hasRequest)
+        _response.finish();
+      else
+	super.finish();
+    }
+
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(dbgId() +
+               (isKeepalive() ? "keepalive" : "no-keepalive"));
+    }
+
+    return isKeepalive();
+  }
+  
+  /**
+   * Handles a comet-style resume.
+   *
+   * @return true if the connection should stay open (keepalive)
+   */
+  @Override
+  public boolean handleResume()
+    throws IOException
+  {
+    boolean hasRequest = false;
+    try {
+      try {
+	setStartTime();
+
+	hasRequest = true;
+
+	if (! _invocation.resume(this, _response))
+	  killKeepalive();
+      } finally {
+	finish();
+      }
+    } catch (ClientDisconnectException e) {
+      _response.killCache();
+
+      throw e;
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      _response.killCache();
+      killKeepalive();
 
       return false;
     } finally {

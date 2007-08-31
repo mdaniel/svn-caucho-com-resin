@@ -1,0 +1,120 @@
+/*
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.servlets.comet;
+
+import com.caucho.server.port.*;
+import com.caucho.server.connection.*;
+
+/**
+ * Public API to control a comet connection.
+ */
+public class CometController extends ConnectionController {
+  private AbstractHttpRequest _request;
+  
+  private long _maxIdleTime;
+
+  CometController(AbstractHttpRequest request)
+  {
+    super(request.getConnection());
+    
+    _request = request;
+  }
+  
+  /**
+   * Sets the max idle time.
+   */
+  public void setMaxIdleTime(long idleTime)
+  {
+    _maxIdleTime = idleTime;
+  }
+  
+  /**
+   * Gets the max idle time.
+   */
+  public long getMaxIdleTime()
+  {
+    return _maxIdleTime;
+  }
+  
+  /**
+   * Gets a request attribute.
+   */
+  public Object getAttribute(String name)
+  {
+    AbstractHttpRequest request = _request;
+
+    if (request != null)
+      return request.getAttribute(name);
+    else
+      return null;
+  }
+  
+  /**
+   * Sets a request attribute.
+   */
+  public void setAttribute(String name, Object value)
+  {
+    AbstractHttpRequest request = _request;
+
+    if (request != null)
+      request.setAttribute(name, value);
+  }
+  
+  /**
+   * Remove a request attribute.
+   */
+  public void removeAttribute(String name)
+  {
+    AbstractHttpRequest request = _request;
+
+    if (request != null)
+      request.removeAttribute(name);
+  }
+  
+  /**
+   * Closes the connection.
+   */
+  public void close()
+  {
+    _request = null;
+    
+    super.close();
+  }
+
+  public String toString()
+  {
+    AbstractHttpRequest request = _request;
+
+    if (request != null && request.getConnection() != null)
+      return "CometController[" + request.getConnection().getId() + "]";
+    else
+      return "CometController[closed]";
+  }
+}

@@ -39,9 +39,10 @@ import java.util.logging.Logger;
 /**
  * A repository for request information gleaned from the uri.
  */
-public class Invocation extends ServletInvocation implements Dependency {
+public class Invocation extends ServletInvocation implements Dependency
+{
   static final L10N L = new L10N(Invocation.class);
-  static final Logger log = Log.open(Invocation.class);
+  static final Logger log = Logger.getLogger(Invocation.class.getName());
 
   private String _rawHost;
 

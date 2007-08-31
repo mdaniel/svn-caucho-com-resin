@@ -39,6 +39,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
 import com.caucho.management.server.PortMXBean;
+import com.caucho.server.connection.ConnectionController;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.FreeList;
@@ -58,6 +59,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 
 /**
  * Represents a protocol connection.
@@ -129,6 +131,9 @@ public class Port
 
   // the selection manager
   private AbstractSelectManager _selectManager;
+
+  private ArrayList<ConnectionController> _suspendList
+    = new ArrayList<ConnectionController>();
 
   private volatile int _threadCount;
   private final Object _threadCountLock = new Object();
@@ -1140,6 +1145,41 @@ public class Port
         log.warning("internal error: negative keepalive count " + count);
       }
     }
+  }
+
+  /**
+   * Suspends the controller (for comet-style ajax)
+   */
+  boolean suspend(ConnectionController conn)
+  {
+    synchronized (_suspendList) {
+      _suspendList.add(conn);
+    }
+
+    return true;
+  }
+
+  /**
+   * Suspends the controller (for comet-style ajax)
+   */
+  boolean resume(ConnectionController controller)
+  {
+    TcpConnection conn = null;
+    
+    synchronized (_suspendList) {
+      if (! _suspendList.remove(controller))
+	return false;
+
+      conn = (TcpConnection) controller.getConnection();
+
+      if (conn != null)
+	conn.setResume();
+    }
+
+    if (conn != null)
+      ThreadPool.getThreadPool().schedule(conn);
+
+    return true;
   }
 
   /**

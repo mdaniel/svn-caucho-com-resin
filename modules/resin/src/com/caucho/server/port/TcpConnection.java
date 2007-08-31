@@ -32,7 +32,7 @@ package com.caucho.server.port;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
-import com.caucho.server.connection.BroadcastTask;
+import com.caucho.server.connection.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.ThreadPool;
 import com.caucho.util.ThreadTask;
@@ -63,6 +63,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private boolean _isClosed;
 
   private boolean _isKeepalive;
+  private boolean _isResume;
   private boolean _isDead;
 
   private final Object _requestLock = new Object();
@@ -379,8 +380,20 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private void keepalive()
   {
     Port port = getPort();
-
-    if (! port.keepaliveBegin(this)) {
+    
+    ConnectionController controller = getController();
+    
+    if (controller != null) {
+      if (port.suspend(controller)) {
+        log.fine("[" + getId() + "] suspend");
+      }
+      else {
+        log.fine("[" + getId() + "] suspend fail");
+	
+	free();
+      }
+    }
+    else if (! port.keepaliveBegin(this)) {
       if (log.isLoggable(Level.FINE))
         log.fine("[" + getId() + "] failed keepalive");
 
@@ -392,7 +405,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
         // setKeepalive();
         // ThreadPool.schedule(this);
         if (log.isLoggable(Level.FINE))
-          log.fine("[" + getId() + "] FAILED keepalive (select)");
+          log.fine("[" + getId() + "] failed keepalive (select)");
 
         port.keepaliveEnd(this);
 	free();
@@ -409,6 +422,26 @@ public class TcpConnection extends PortConnection implements ThreadTask
       setKeepalive();
       ThreadPool.getThreadPool().schedule(this);
     }
+  }
+
+  void setResume()
+  {
+    _isResume = true;
+  }
+
+  /**
+   * Wakes the connection (comet-style).
+   */
+  protected boolean wake()
+  {
+    ConnectionController controller = getController();
+
+    if (controller != null) {
+      _isResume = true;
+      return getPort().resume(controller);
+    }
+    else
+      return false;
   }
 
   /**
@@ -429,6 +462,9 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     boolean isKeepalive = _isKeepalive;
     _isKeepalive = false;
+
+    boolean isResume = _isResume;
+    _isResume = false;
 
     boolean isFirst = ! isKeepalive;
     
@@ -455,6 +491,22 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     try {
       _thread = thread;
+
+      if (isResume) {
+	ConnectionController controller = getController();
+
+	if (request.handleResume()) {
+	  isKeepalive = true;
+	}
+	else {
+	  if (controller != null)
+	    controller.close();
+
+	  isKeepalive = false;
+	}
+
+	return;
+      }
       
       while (! _isDead) {
 	if (isKeepalive) {
@@ -480,6 +532,14 @@ public class TcpConnection extends PortConnection implements ThreadTask
               synchronized (_requestLock) {
 		isKeepalive = request.handleRequest();
 	      }
+
+	      ConnectionController controller = getController();
+	      if (controller == null) {
+	      }
+	      else if (isKeepalive)
+		return;
+	      else
+		controller.close();
 	    }
 	  } while (isKeepalive && waitForKeepalive() && ! port.isClosed());
 
@@ -571,6 +631,10 @@ public class TcpConnection extends PortConnection implements ThreadTask
       isClosed = _isClosed;
       _isClosed = true;
     }
+
+    ConnectionController controller = getController();
+    if (controller != null)
+      controller.close();
 
     if (! isClosed) {
       _isActive = false;

@@ -28,6 +28,7 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -41,9 +42,14 @@ import java.net.InetAddress;
  * <p>TcpConnection is the most common implementation.  The test harness
  * provides a string based Connection.
  */
-public abstract class Connection {
+public abstract class Connection
+{
+  private static final L10N L = new L10N(Connection.class);
+  
   private final ReadStream _readStream;
   private final WriteStream _writeStream;
+
+  protected ConnectionController _controller;
 
   public Connection()
   {
@@ -139,6 +145,55 @@ public abstract class Connection {
    * Sends a broadcast request.
    */
   public void sendBroadcast(BroadcastTask task)
+  {
+  }
+
+  /**
+   * Connection controller.
+   */
+  void setController(ConnectionController controller)
+  {
+    synchronized (this) {
+      if (_controller != null)
+	throw new IllegalStateException(L.l("ConnectionController is already set."));
+
+      _controller = controller;
+    }
+  }
+
+  /**
+   * Connection controller.
+   */
+  public ConnectionController getController()
+  {
+    return _controller;
+  }
+
+  /**
+   * Wake the controller.
+   */
+  protected boolean wake()
+  {
+    return false;
+  }
+
+  /**
+   * Connection controller.
+   */
+  void closeController(ConnectionController controller)
+  {
+    synchronized (this) {
+      if (_controller == controller)
+	_controller = null;
+      else
+	controller = null;
+    }
+
+    if (controller != null)
+      closeControllerImpl();
+  }
+
+  protected void closeControllerImpl()
   {
   }
 }

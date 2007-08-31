@@ -124,9 +124,9 @@ public class SocketInputOutput
   public String toString()
   {
     if (_socket != null)
-      return "SocketReadWrite[" + _socket.getInetAddress() + "," + _socket.getPort() + "]";
+      return "SocketInputOutput[" + _socket.getInetAddress() + "," + _socket.getPort() + "]";
     else
-      return "SocketReadWrite[closed]";
+      return "SocketInputOutput[closed]";
   }
 }
 

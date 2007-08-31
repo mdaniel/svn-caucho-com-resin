@@ -40,7 +40,7 @@ import java.util.HashMap;
 /**
  * Represents the final servlet in a filter chain.
  */
-public class ServletFilterChain implements FilterChain {
+public class ServletFilterChain extends AbstractFilterChain {
   public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
   
   // servlet config
@@ -101,6 +101,55 @@ public class ServletFilterChain implements FilterChain {
     
     try {
       _servlet.service(request, response);
+    } catch (UnavailableException e) {
+      _servlet = null;
+      _config.setInitException(e);
+      _config.killServlet();
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } catch (ServletException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } catch (IOException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } catch (RuntimeException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    }
+  }
+  
+  /**
+   * Resumes the final servlet for a comet request.
+   *
+   * @param request the servlet request
+   * @param response the servlet response
+   *
+   * @since Resin 3.1.3
+   */
+  @Override
+  public boolean resume(ServletRequest request,
+                       ServletResponse response)
+    throws ServletException, IOException
+  {
+    if (_servlet == null) {
+      try {
+        _servlet = (Servlet) _config.createServlet(false);
+      } catch (ServletException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new ServletException(e);
+      }
+    }
+    
+    try {
+      if (_servlet instanceof CometServlet) {
+	CometServlet servlet = (CometServlet) _servlet;
+
+	return servlet.resume(request, response);
+      }
+      else
+	return false;
     } catch (UnavailableException e) {
       _servlet = null;
       _config.setInitException(e);

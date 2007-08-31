@@ -2020,9 +2020,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_isClosed)
       return;
 
+    ConnectionController controller = null;
+    
     try {
       if (_originalRequest instanceof AbstractHttpRequest) {
 	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
+	
+	Connection conn = request.getConnection();
+	controller = conn.getController();
 
 	try {
 	  request.skip();
@@ -2037,23 +2042,31 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       if (_statusCode == SC_NOT_MODIFIED) {
 	handleNotModified(_isTopCache);
       }
+
+      if (controller != null)
+	isClose = false;
     
       // include() files finish too, but shouldn't force a flush, hence
       // flush is false
       // Never send flush?
       if (isClose)
 	_responseStream.close();
-      else
+      else if (_responseStream != _originalResponseStream)
 	_responseStream.finish();
+      else if (controller == null)
+	_responseStream.finish();
+      else
+	_responseStream.flush();
 
       if (_responseStream != _originalResponseStream) {
 	if (isClose)
 	  _originalResponseStream.close();
-	else
+	else if (controller == null)
 	  _originalResponseStream.finish();
       }
 
-      _isClosed = true;
+      if (controller == null)
+	_isClosed = true;
 
       if (_rawWrite == null) {
       }
@@ -2085,7 +2098,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       
       throw e;
     } finally {
-      _isClosed = true;
+      if (controller == null)
+	_isClosed = true;
+
       _cacheStream = null;
       _cacheWriter = null;
       _cacheInvocation = null;

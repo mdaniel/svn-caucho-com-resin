@@ -54,11 +54,13 @@ public interface ServerRequest {
    * Handles a new connection.  The controlling TcpServer may call
    * handleConnection again after the connection completes, so 
    * the implementation must initialize any variables for each connection.
-   *
-   * @param conn Information about the connection, including buffered
-   * read and write streams.
    */
   public boolean handleRequest() throws IOException;
+  
+  /**
+   * Resumes processing after a wair.
+   */
+  public boolean handleResume() throws IOException;
 
   /**
    * Handles a close event when the connection is closed.

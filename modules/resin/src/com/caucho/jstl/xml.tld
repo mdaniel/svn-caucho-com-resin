@@ -46,6 +46,12 @@
     </attribute>
 
     <attribute>
+      <name>saxReader</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+
+    <attribute>
       <name>systemId</name>
       <required>false</required>
       <rtexprvalue>true</rtexprvalue>
