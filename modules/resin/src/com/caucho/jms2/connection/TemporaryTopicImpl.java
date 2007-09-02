@@ -31,7 +31,7 @@ package com.caucho.jms2.connection;
 
 import com.caucho.jms2.memory.MemoryTopic;
 
-import javax.jms.TemporaryTopic;
+import javax.jms.*;
 
 /**
  * A basic topic.
@@ -39,17 +39,31 @@ import javax.jms.TemporaryTopic;
 public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
 {
   private static int _idCount;
+
+  private SessionImpl _session;
   
-  TemporaryTopicImpl()
+  TemporaryTopicImpl(SessionImpl session)
   {
+    _session = session;
+    
     setName("TemporaryTopic-" + _idCount++);
+  }
+
+  SessionImpl getSession()
+  {
+    return _session;
   }
 
   /**
    * Deletes the temporary topic.
    */
   public void delete()
+    throws JMSException
   {
+    /*
+    if (hasListener())
+      throw new javax.jms.IllegalStateException(L.l("queue is still active"));
+    */
   }
 }
 

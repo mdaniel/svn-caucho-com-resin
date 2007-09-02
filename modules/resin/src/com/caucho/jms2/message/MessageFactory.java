@@ -108,8 +108,10 @@ public class MessageFactory
     else if (msg instanceof ObjectMessage) {
       return new ObjectMessageImpl((ObjectMessage) msg);
     }
+    else if (msg != null)
+      return new MessageImpl(msg);
     else
-      throw new UnsupportedOperationException(String.valueOf(msg));
+      throw new NullPointerException();
   }
 
   /**

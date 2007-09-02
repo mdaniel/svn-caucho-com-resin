@@ -81,6 +81,15 @@ public class QueueSessionImpl extends SessionImpl implements QueueSession
 
     AbstractQueue dest = (AbstractQueue) queue;
 
+    if (dest instanceof TemporaryQueueImpl) {
+      TemporaryQueueImpl temp = (TemporaryQueueImpl) dest;
+
+      if (temp.getSession() != this) {
+        throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' does not belong to this session '{1}'",
+                                                      queue, this));
+      }
+    }
+
     QueueReceiver receiver
       = new QueueReceiverImpl(this, dest, messageSelector);
     
@@ -109,6 +118,74 @@ public class QueueSessionImpl extends SessionImpl implements QueueSession
 
     AbstractQueue dest = (AbstractQueue) queue;
 
+    if (dest instanceof TemporaryQueueImpl) {
+      TemporaryQueueImpl temp = (TemporaryQueueImpl) dest;
+
+      if (temp.getSession() != this) {
+        throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' does not belong to this session '{1}'",
+                                                      queue, this));
+      }
+    }
+
     return new QueueSenderImpl(this, dest);
+  }
+
+  /**
+   * Creates a new topic.
+   */
+  @Override
+  public Topic createTopic(String topicName)
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("QueueSession: createTopic() is invalid."));
+  }
+
+  /**
+   * Creates a temporary topic.
+   */
+  @Override
+  public TemporaryTopic createTemporaryTopic()
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("QueueSession: createTemporaryTopic() is invalid."));
+  }
+
+  /**
+   * Creates a durable subscriber to receive messages.
+   *
+   * @param topic the topic to receive messages from.
+   */
+  @Override
+  public TopicSubscriber createDurableSubscriber(Topic topic, String name)
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("QueueSession: createDurableSubscriber() is invalid."));
+  }
+
+  /**
+   * Creates a subscriber to receive messages.
+   *
+   * @param topic the topic to receive messages from.
+   * @param messageSelector topic to restrict the messages.
+   * @param noLocal if true, don't receive messages we've sent
+   */
+  @Override
+  public TopicSubscriber createDurableSubscriber(Topic topic,
+                                                 String name,
+                                                 String messageSelector,
+                                                 boolean noLocal)
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("QueueSession: createDurableSubscriber() is invalid."));
+  }
+
+  /**
+   * Unsubscribe from a durable subscription.
+   */
+  @Override
+  public void unsubscribe(String name)
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("QueueSession: unsubscribe() is invalid."));
   }
 }

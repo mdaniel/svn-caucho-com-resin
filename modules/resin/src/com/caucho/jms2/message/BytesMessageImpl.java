@@ -31,9 +31,7 @@ package com.caucho.jms2.message;
 
 import com.caucho.jms.JMSExceptionWrapper;
 import com.caucho.util.CharBuffer;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -61,12 +59,24 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 
     bytes.reset();
 
-    long length = bytes.getBodyLength();
+    checkBodyWriteable();
 
-    for (int i = 0; i < length; i++) {
-      int ch = bytes.readUnsignedByte();
+    try {
+      TempBuffer tempBuf = TempBuffer.allocate();
+      byte []buffer = tempBuf.getBuffer();
+      WriteStream out = getWriteStream();
 
-      writeByte((byte) ch);
+      int sublen;
+    
+      while ((sublen = bytes.readBytes(buffer, buffer.length)) > 0) {
+        out.write(buffer, 0, sublen);
+      }
+
+      TempBuffer.free(tempBuf);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      throw new JMSException(e.toString());
     }
 
     reset();
@@ -340,30 +350,37 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     CharBuffer cb = new CharBuffer();
 
     try {
+      int len = readShort();
+      
       int d1;
       
-      while ((d1 = is.read()) > 0) {
-        if (d1 < 0x80)
+      while (len > 0) {
+        d1 = is.read();
+        
+        if (d1 < 0x80) {
           cb.append((char) d1);
+          len -= 1;
+        }
         else if ((d1 & 0xe0) == 0xc0) {
           int d2 = is.read();
 
           cb.append((char) (((d1 & 0x1f) << 6) + (d2 & 0x3f)));
+
+          len -= 2;
         }
         else if ((d1 & 0xf0) == 0xe0) {
           int d2 = is.read();
           int d3 = is.read();
 
-          cb.append((char) (((d1 & 0xf) << 12) +
-                            ((d2 & 0x3f) << 6) +
-                            (d3 & 0x3f)));
+          cb.append((char) (((d1 & 0xf) << 12)
+                            + ((d2 & 0x3f) << 6)
+                            + (d3 & 0x3f)));
+
+          len -= 3;
         }
 	else
 	  throw new MessageFormatException(L.l("invalid UTF-8 in bytes message"));
       }
-
-      if (d1 < 0)
-	throw new MessageEOFException("end of message in byte stream");
     } catch (JMSException e) {
       throw e;
     } catch (RuntimeException e) {
@@ -540,30 +557,47 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     throws JMSException
   {
     try {
-      WriteStream ws = getWriteStream();
+      WriteStream out = getWriteStream();
 
       int len = s.length();
+      
+      int byteLength = 0;
+
+      for (int i = 0; i < byteLength; i++) {
+        int ch = s.charAt(0);
+
+        if (ch == 0)
+          byteLength += 2;
+        else if (ch < 0x80)
+          byteLength += 1;
+        else if (ch < 0x800)
+          byteLength += 2;
+        else
+          byteLength += 3;
+      }
+
+      out.write(byteLength >> 8);
+      out.write(byteLength);
+
       for (int i = 0; i < len; i++) {
         int ch = s.charAt(i);
 
         if (ch == 0) {
-          ws.write(0xc0);
-          ws.write(0x80);
+          out.write(0xc0);
+          out.write(0x80);
         }
         else if (ch < 0x80)
-          ws.write(ch);
+          out.write(ch);
         else if (ch < 0x800) {
-          ws.write(0xc0 + ((ch >> 6) & 0x1f));
-          ws.write(0x80 + (ch & 0x3f));
+          out.write(0xc0 + ((ch >> 6) & 0x1f));
+          out.write(0x80 + (ch & 0x3f));
         }
         else if (ch < 0x8000) {
-          ws.write(0xe0 + ((ch >> 12) & 0x0f));
-          ws.write(0x80 + ((ch >> 6) & 0x3f));
-          ws.write(0x80 + (ch & 0x3f));
+          out.write(0xe0 + ((ch >> 12) & 0x0f));
+          out.write(0x80 + ((ch >> 6) & 0x3f));
+          out.write(0x80 + (ch & 0x3f));
         }
       }
-      
-      ws.write(0);
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -644,6 +678,8 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
   public long getBodyLength()
     throws JMSException
   {
+    checkBodyReadable();
+    
     if (_tempStream == null)
       return 0;
     else

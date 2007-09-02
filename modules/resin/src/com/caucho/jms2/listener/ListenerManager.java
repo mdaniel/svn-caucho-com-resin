@@ -45,19 +45,58 @@ public class ListenerManager
   private static final Logger log
     = Logger.getLogger(ListenerManager.class.getName());
 
+  private ArrayList<MessageListener> _listenerList
+    = new ArrayList<MessageListener>();
+  
   private ListenerEntry []_idleStack = new ListenerEntry[0];
   private int _idleTop;
 
   public void addListener(MessageListener listener)
   {
     synchronized (this) {
-      ListenerEntry []newIdle = new ListenerEntry[_idleStack.length + 1];
+      _listenerList.add(listener);
+      
+      ListenerEntry []newIdle;
 
-      System.arraycopy(_idleStack, 0, newIdle, 0, _idleStack.length);
+      if (_idleStack.length < _listenerList.size()) {
+        newIdle = new ListenerEntry[_idleStack.length + 1];
 
-      _idleStack = newIdle;
+        System.arraycopy(_idleStack, 0, newIdle, 0, _idleStack.length);
+        
+        _idleStack = newIdle;
+      }
 
       _idleStack[_idleTop++] = new ListenerEntry(listener);
+    }
+  }
+
+  /**
+   * Returns true if the manager has at least one listener.
+   */
+  public boolean hasListener()
+  {
+    return _listenerList.size() > 0;
+  }
+
+  /**
+   * Removes the listener from the list.
+   */
+  public void removeListener(MessageListener listener)
+  {
+    synchronized (this) {
+      _listenerList.remove(listener);
+
+      for (int i = 0; i < _idleTop; i++) {
+        ListenerEntry entry = _idleStack[i];
+
+        if (entry.getListener() == listener) {
+          System.arraycopy(_idleStack, i + 1, _idleStack, i,
+                           _idleStack.length - i - 1);
+
+          _idleTop--;
+          break;
+        }
+      }
     }
   }
 
@@ -96,13 +135,18 @@ public class ListenerManager
   }
 
   class ListenerEntry implements Runnable {
-    private MessageListener _listener;
+    private final MessageListener _listener;
     
     private Message _msg;
 
     ListenerEntry(MessageListener listener)
     {
       _listener = listener;
+    }
+
+    MessageListener getListener()
+    {
+      return _listener;
     }
 
     /**

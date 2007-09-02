@@ -440,7 +440,7 @@ public class SessionImpl implements Session, ThreadTask {
   {
     checkOpen();
     
-    return new TemporaryQueueImpl();
+    return new TemporaryQueueImpl(this);
   }
 
   /**
@@ -462,7 +462,7 @@ public class SessionImpl implements Session, ThreadTask {
   {
     checkOpen();
     
-    return new TemporaryTopicImpl();
+    return new TemporaryTopicImpl(this);
   }
 
   /**
@@ -538,7 +538,8 @@ public class SessionImpl implements Session, ThreadTask {
     TopicSubscriber subscriber = _connection.removeDurableSubscriber(name);
 
     if (subscriber == null)
-      throw new InvalidDestinationException(L.l("'{0}' is an unknown subscriber for Session.unsubscribe"));
+      throw new IllegalStateException(L.l("'{0}' is an unknown subscriber for Session.unsubscribe",
+                                          name));
   }
 
   /**
@@ -760,10 +761,13 @@ public class SessionImpl implements Session, ThreadTask {
     
     assert message != null;
 
+    if (queue == null)
+      throw new UnsupportedOperationException(L.l("empty queue is not allowed for this session."));
+
     message.setJMSMessageID(queue.generateMessageID());
     message.setJMSDestination(queue);
     message.setJMSDeliveryMode(deliveryMode);
-    message.setJMSTimestamp(Alarm.getCurrentTime());
+    message.setJMSTimestamp(Alarm.getExactTime());
     message.setJMSExpiration(expiration);
     message.setJMSPriority(priority);
     

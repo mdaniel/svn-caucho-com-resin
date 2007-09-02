@@ -31,22 +31,39 @@ package com.caucho.jms2.connection;
 
 import com.caucho.jms2.memory.MemoryQueue;
 
-import javax.jms.TemporaryQueue;
+import com.caucho.util.L10N;
+
+import javax.jms.*;
 
 /**
  * A temporary queue
  */
 public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
 {
-  private static int _idCount;
+  private static final L10N L = new L10N(TemporaryQueueImpl.class);
   
-  TemporaryQueueImpl()
+  private static int _idCount;
+
+  private SessionImpl _session;
+  private boolean _isClosed;
+  
+  TemporaryQueueImpl(SessionImpl session)
   {
+    _session = session;
     setName("TemporaryQueue-" + _idCount++);
   }
 
-  public void delete()
+  SessionImpl getSession()
   {
+    return _session;
+  }
+
+  @Override
+  public void delete()
+    throws JMSException
+  {
+    if (hasListener())
+      throw new javax.jms.IllegalStateException(L.l("queue is still active"));
   }
 }
 

@@ -101,4 +101,45 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession
 
     return subscriber;
   }
+
+  /**
+   * Creates a QueueBrowser to browse messages in the queue.
+   *
+   * @param queue the queue to send messages to.
+   */
+  @Override
+  public QueueBrowser createBrowser(Queue queue)
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("TopicSession: createBrowser() is invalid."));
+  }
+
+  /**
+   * Creates a QueueBrowser to browse messages in the queue.
+   *
+   * @param queue the queue to send messages to.
+   */
+  public QueueBrowser createBrowser(Queue queue, String messageSelector)
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("TopicSession: createBrowser() is invalid."));
+  }
+
+  /**
+   * Creates a new queue.
+   */
+  public Queue createQueue(String queueName)
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("TopicSession: createQueue() is invalid."));
+  }
+
+  /**
+   * Creates a temporary queue.
+   */
+  public TemporaryQueue createTemporaryQueue()
+    throws JMSException
+  {
+    throw new javax.jms.IllegalStateException(L.l("TopicSession: createTemporaryQueue() is invalid."));
+  }
 }

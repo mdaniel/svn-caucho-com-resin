@@ -71,6 +71,16 @@ public class MemoryQueue extends AbstractQueue
     _listenerManager.addListener(listener);
   }
 
+  public void removeListener(MessageListener listener)
+  {
+    _listenerManager.removeListener(listener);
+  }
+
+  public boolean hasListener()
+  {
+    return _listenerManager.hasListener();
+  }
+
   public void send(Message msg, long timeout)
     throws JMSException
   {

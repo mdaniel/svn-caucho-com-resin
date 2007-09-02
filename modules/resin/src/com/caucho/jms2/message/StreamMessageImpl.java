@@ -57,9 +57,14 @@ public class StreamMessageImpl extends MessageImpl implements StreamMessage
   {
     super(stream);
 
-    Object value;
-    while ((value = stream.readObject()) != null) {
-      writeObject(value);
+    try {
+      stream.reset();
+      
+      Object value;
+      while (true) {
+        writeObject(stream.readObject());
+      }
+    } catch (MessageEOFException e) {
     }
 
     reset();

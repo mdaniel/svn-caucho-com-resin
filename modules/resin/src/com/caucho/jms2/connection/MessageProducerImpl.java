@@ -46,7 +46,7 @@ import javax.jms.MessageProducer;
 public class MessageProducerImpl implements MessageProducer {
   static final L10N L = new L10N(MessageProducer.class);
 
-  private int _deliveryMode = DeliveryMode.NON_PERSISTENT;
+  private int _deliveryMode = DeliveryMode.PERSISTENT;
   private boolean _disableMessageId = true;
   private boolean _disableMessageTimestamp = true;
   private int _priority = 4;
@@ -258,8 +258,14 @@ public class MessageProducerImpl implements MessageProducer {
                    long timeToLive)
     throws JMSException
   {
-    assert destination != null;
-    assert message != null;
+    if (destination == null)
+      destination = _queue;
+    else if (_queue != null && destination != _queue)
+      throw new UnsupportedOperationException(L.l("MessageProducer: '{0}' does not match the queue '{1}'",
+                                                  destination, _queue));
+
+    if (destination == null)
+      throw new UnsupportedOperationException(L.l("MessageProducer: null destination is not supported."));
 
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));

@@ -35,12 +35,7 @@ import com.caucho.vfs.*;
 import com.caucho.util.L10N;
 import com.caucho.util.NullEnumeration;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageNotReadableException;
-import javax.jms.MessageNotWriteableException;
+import javax.jms.*;
 import java.lang.ref.WeakReference;
 import java.io.*;
 import java.util.*;
@@ -69,7 +64,7 @@ public class MessageImpl implements Message
   private Destination _destination;
   private Destination _replyTo;
 
-  private int _deliveryMode;
+  private int _deliveryMode = DeliveryMode.PERSISTENT;
   private boolean _isRedelivered;
 
   private String _messageType;
@@ -97,6 +92,9 @@ public class MessageImpl implements Message
 
       setObjectProperty(name, msg.getObjectProperty(name));
     }
+
+    _isHeaderWriteable = false;
+    _isBodyWriteable = false;
   }
   
   public MessageImpl(MessageImpl msg)
@@ -119,6 +117,9 @@ public class MessageImpl implements Message
     
     _messageType = msg._messageType;
     _priority = msg._priority;
+    
+    _isHeaderWriteable = false;
+    _isBodyWriteable = false;
   }
 
   /**
