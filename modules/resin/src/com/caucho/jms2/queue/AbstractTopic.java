@@ -37,12 +37,16 @@ import com.caucho.jms2.message.*;
 import com.caucho.jms2.listener.*;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * Implements an abstract topic.
  */
-abstract public class AbstractTopic
+abstract public class AbstractTopic extends AbstractDestination
+  implements javax.jms.Topic
 {
+  public static final L10N L = new L10N(AbstractTopic.class);
+  
   private String _name;
   
   public void setName(String name)
@@ -59,6 +63,19 @@ abstract public class AbstractTopic
   {
     return getName();
   }
+  
+  /**
+   * Polls the next message from the store.  If no message is available,
+   * wait for the timeout.
+   */
+  public MessageImpl receive(long timeout)
+  {
+    throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
+  }
+
+  public abstract AbstractQueue createSubscriber(String name);
+
+  public abstract void closeSubscriber(AbstractQueue subscriber);
   
   public String toString()
   {

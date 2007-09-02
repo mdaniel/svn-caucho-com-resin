@@ -499,29 +499,27 @@ public class SessionImpl implements Session, ThreadTask {
     if (topic == null)
       throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.createDurableSubscriber"));
     
-    if (! (topic instanceof AbstractQueue))
+    if (! (topic instanceof AbstractTopic))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
 						topic));
     
-    AbstractQueue topicImpl = (AbstractQueue) topic;
+    AbstractTopic topicImpl = (AbstractTopic) topic;
 
     if (_connection.getDurableSubscriber(name) != null)
       throw new JMSException(L.l("'{0}' is already an active durable subscriber",
 				 name));
 
-    /*
+    AbstractQueue queue = topicImpl.createSubscriber(name);
+
     TopicSubscriber consumer;
-    consumer = topicImpl.createDurableSubscriber(this, messageSelector,
-						 noLocal, name);
+    consumer = new TopicSubscriberImpl(this, topicImpl, queue,
+				       messageSelector, noLocal);
     
     _connection.putDurableSubscriber(name, consumer);
     
-    addConsumer((MessageConsumerImpl) consumer);
+    // addConsumer((MessageConsumerImpl) consumer);
 
     return consumer;
-    */
-
-    throw new UnsupportedOperationException();
   }
 
   /**
@@ -540,6 +538,8 @@ public class SessionImpl implements Session, ThreadTask {
     if (subscriber == null)
       throw new IllegalStateException(L.l("'{0}' is an unknown subscriber for Session.unsubscribe",
                                           name));
+
+    subscriber.close();
   }
 
   /**
@@ -750,7 +750,7 @@ public class SessionImpl implements Session, ThreadTask {
   /**
    * Adds a message to the session message queue.
    */
-  public void send(AbstractQueue queue,
+  public void send(AbstractDestination queue,
                    Message message,
                    int deliveryMode,
                    int priority,
@@ -943,10 +943,10 @@ public class SessionImpl implements Session, ThreadTask {
   }
 
   static class TransactedMessage {
-    private AbstractQueue _queue;
+    private AbstractDestination _queue;
     private Message _message;
 
-    TransactedMessage(AbstractQueue queue, Message message)
+    TransactedMessage(AbstractDestination queue, Message message)
     {
       _queue = queue;
       _message = message;

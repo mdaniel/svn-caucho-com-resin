@@ -55,7 +55,7 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession
   {
     checkOpen();
 
-    return new TopicPublisherImpl(this, (AbstractQueue) topic);
+    return new TopicPublisherImpl(this, (AbstractTopic) topic);
   }
 
   /**
@@ -88,11 +88,11 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession
     if (topic == null)
       throw new InvalidDestinationException(L.l("topic is null.  Destination may not be null for Session.createSubscriber"));
     
-    if (! (topic instanceof AbstractQueue))
+    if (! (topic instanceof AbstractTopic))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
 						topic));
 
-    AbstractQueue dest = (AbstractQueue) topic;
+    AbstractTopic dest = (AbstractTopic) topic;
 
     TopicSubscriber subscriber
       = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);

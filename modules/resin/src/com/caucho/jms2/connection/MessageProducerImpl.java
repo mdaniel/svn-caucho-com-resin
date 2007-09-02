@@ -53,9 +53,9 @@ public class MessageProducerImpl implements MessageProducer {
   private long _timeToLive = 30 * 24 * 3600 * 1000L;
 
   protected SessionImpl _session;
-  protected AbstractQueue _queue;
+  protected AbstractDestination _queue;
 
-  public MessageProducerImpl(SessionImpl session, AbstractQueue queue)
+  public MessageProducerImpl(SessionImpl session, AbstractDestination queue)
   {
     _session = session;
     _queue = queue;
@@ -270,7 +270,7 @@ public class MessageProducerImpl implements MessageProducer {
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));
     
-    _session.send((AbstractQueue) destination,
+    _session.send((AbstractDestination) destination,
 		  message,
 		  deliveryMode, priority,
 		  calculateExpiration(timeToLive));

@@ -50,20 +50,49 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 {
   private static final Logger log = Log.open(TopicSubscriberImpl.class);
   private static final L10N L = new L10N(TopicSubscriberImpl.class);
+
+  private AbstractTopic _topic;
+  private AbstractQueue _subscription;
   
   TopicSubscriberImpl(SessionImpl session,
-		      AbstractQueue topic,
+		      AbstractTopic topic,
 		      String messageSelector,
 		      boolean noLocal)
     throws JMSException
   {
-    super(session, topic, messageSelector, noLocal);
+    super(session, topic.createSubscriber(null), messageSelector, noLocal);
+
+    _topic = topic;
+    _subscription = (AbstractQueue) getDestination();
+  }
+  
+  TopicSubscriberImpl(SessionImpl session,
+		      AbstractTopic topic,
+		      AbstractQueue subscription,
+		      String messageSelector,
+		      boolean noLocal)
+    throws JMSException
+  {
+    super(session, subscription, messageSelector, noLocal);
+
+    _topic = topic;
+    _subscription = subscription;
   }
 
   public Topic getTopic()
     throws JMSException
   {
-    return (Topic) getDestination();
+    return _topic;
+  }
+
+  @Override
+  public void close()
+  {
+    AbstractQueue subscription = _subscription;
+    _subscription = null;
+
+    if (subscription != null)
+      _topic.closeSubscriber(subscription);
   }
 }
 

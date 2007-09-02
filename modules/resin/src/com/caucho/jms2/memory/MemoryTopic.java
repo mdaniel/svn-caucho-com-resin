@@ -29,6 +29,8 @@
 
 package com.caucho.jms2.memory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.*;
 
 import javax.jms.*;
@@ -44,6 +46,58 @@ public class MemoryTopic extends AbstractTopic
 {
   private static final Logger log
     = Logger.getLogger(MemoryTopic.class.getName());
+
+  private HashMap<String,MemoryQueue> _durableSubscriptionMap
+    = new HashMap<String,MemoryQueue>();
+    
+  private ArrayList<AbstractQueue> _subscriptionList
+    = new ArrayList<AbstractQueue>();
+
+  private int _id;
+
+  @Override
+  public AbstractQueue createSubscriber(String name)
+  {
+    MemoryQueue queue;
+
+    if (name != null) {
+      queue = _durableSubscriptionMap.get(name);
+
+      if (queue == null) {
+	queue = new MemoryQueue();
+	queue.setName(getName() + ":sub-" + name);
+
+	_subscriptionList.add(queue);
+	_durableSubscriptionMap.put(name, queue);
+      }
+
+      return queue;
+    }
+    else {
+      queue = new MemoryQueue();
+      queue.setName(getName() + ":sub-" + _id++);
+
+      _subscriptionList.add(queue);
+    }
+
+    return queue;
+  }
+
+  @Override
+  public void closeSubscriber(AbstractQueue queue)
+  {
+    _subscriptionList.remove(queue);
+  }
+  
+  public void send(Message msg, long timeout)
+    throws JMSException
+  {
+    System.out.println("SEND: " + msg + " " + _subscriptionList);
+    
+    for (int i = 0; i < _subscriptionList.size(); i++) {
+      _subscriptionList.get(i).send(msg, timeout);
+    }
+  }
 
   public String toString()
   {

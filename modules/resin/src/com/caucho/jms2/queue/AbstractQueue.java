@@ -42,48 +42,20 @@ import com.caucho.util.Alarm;
 /**
  * Implements an abstract queue.
  */
-abstract public class AbstractQueue
+abstract public class AbstractQueue extends AbstractDestination
   implements javax.jms.Queue
 {
   private static final Logger log
     = Logger.getLogger(AbstractQueue.class.getName());
 
-  private String _name = "default";
-
-  protected MessageFactory _messageFactory = new MessageFactory();
   private ListenerManager _listenerManager = new ListenerManager();
-
-  public void setName(String name)
-  {
-    _name = name;
-  }
-  
-  public String getName()
-  {
-    return _name;
-  }
-
-  public String getQueueName()
-  {
-    return getName();
-  }
-  
-  public String getTopicName()
-  {
-    return getName();
-  }
-
-  public TextMessage createTextMessage(String msg)
-    throws JMSException
-  {
-    return _messageFactory.createTextMessage(msg);
-  }
 
   public void addListener(MessageListener listener)
   {
     _listenerManager.addListener(listener);
   }
 
+  @Override
   public void send(Message msg, long timeout)
     throws JMSException
   {
@@ -110,6 +82,7 @@ abstract public class AbstractQueue
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.
    */
+  @Override
   public MessageImpl receive(long timeout)
   {
     return null;
@@ -117,16 +90,13 @@ abstract public class AbstractQueue
 
   public void close()
   {
+    super.close();
+    
     ListenerManager listenerManager = _listenerManager;
     _listenerManager = null;
 
     if (listenerManager != null)
       listenerManager.close();
-  }
-
-  public String generateMessageID()
-  {
-    return "ook";
   }
   
   /**

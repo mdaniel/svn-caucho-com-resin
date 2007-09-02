@@ -52,7 +52,8 @@ import java.util.logging.Level;
 public class MessageConsumerImpl
   implements MessageConsumer, MessageAvailableListener
 {
-  static final Logger log = Log.open(MessageConsumerImpl.class);
+  static final Logger log
+    = Logger.getLogger(MessageConsumerImpl.class.getName());
   static final L10N L = new L10N(MessageConsumerImpl.class);
 
   private final Object _consumerLock = new Object();
@@ -89,7 +90,7 @@ public class MessageConsumerImpl
   /**
    * Returns the destination
    */
-  protected AbstractQueue getDestination()
+  protected AbstractDestination getDestination()
     throws JMSException
   {
     if (_isClosed || _session.isClosed())

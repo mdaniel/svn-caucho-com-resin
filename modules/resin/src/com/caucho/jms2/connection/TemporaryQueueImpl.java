@@ -58,7 +58,6 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
     return _session;
   }
 
-  @Override
   public void delete()
     throws JMSException
   {

@@ -28,6 +28,7 @@
 
 package com.caucho.jms2.memory;
 
+import java.util.ArrayList;
 import java.util.logging.*;
 
 import javax.jms.*;
@@ -44,49 +45,29 @@ public class MemoryQueue extends AbstractQueue
   private static final Logger log
     = Logger.getLogger(MemoryQueue.class.getName());
 
-  private String _name = "default";
+  private ArrayList<MessageImpl> _queueList = new ArrayList<MessageImpl>();
 
-  private MessageFactory _messageFactory = new MessageFactory();
-  private ListenerManager _listenerManager = new ListenerManager();
-
-  public String getName()
+  /**
+   * Adds the message to the persistent store.  Called if there are no
+   * active listeners.
+   */
+  @Override
+  protected void enqueue(MessageImpl msg, long expires)
   {
-    return _name;
-  }
-  /*
-  public TextMessage createTextMessage()
-  {
-    return _messageFactory.createTextMessage();
-  }
-  */
-
-  public TextMessage createTextMessage(String msg)
-    throws JMSException
-  {
-    return _messageFactory.createTextMessage(msg);
+    _queueList.add(msg);
   }
 
-  public void addListener(MessageListener listener)
+  /**
+   * Polls the next message from the store.  If no message is available,
+   * wait for the timeout.
+   */
+  @Override
+  public MessageImpl receive(long timeout)
   {
-    _listenerManager.addListener(listener);
-  }
-
-  public void removeListener(MessageListener listener)
-  {
-    _listenerManager.removeListener(listener);
-  }
-
-  public boolean hasListener()
-  {
-    return _listenerManager.hasListener();
-  }
-
-  public void send(Message msg, long timeout)
-    throws JMSException
-  {
-    MessageImpl msgCopy = _messageFactory.copy(msg);
-    
-    _listenerManager.send(msgCopy);
+    if (_queueList.size() > 0)
+      return _queueList.remove(0);
+    else
+      return null;
   }
 
   public String toString()
