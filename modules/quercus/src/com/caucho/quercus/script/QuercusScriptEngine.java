@@ -72,7 +72,9 @@ public class QuercusScriptEngine
     throws ScriptException
   {
     try {
-      QuercusProgram program = QuercusParser.parse(_quercus, null, script);
+      ReadStream reader = ReaderStream.open(script);
+      
+      QuercusProgram program = QuercusParser.parse(_quercus, null, reader);
 
       Writer writer = cxt.getWriter();
       
@@ -144,7 +146,9 @@ public class QuercusScriptEngine
     throws ScriptException
   {
     try {
-      QuercusProgram program = QuercusParser.parse(_quercus, null, script);
+      ReadStream reader = ReaderStream.open(script);
+      
+      QuercusProgram program = QuercusParser.parse(_quercus, null, reader);
 
       return new QuercusCompiledScript(this, program);
     } catch (RuntimeException e) {

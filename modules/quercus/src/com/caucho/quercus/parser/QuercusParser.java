@@ -192,7 +192,7 @@ public class QuercusParser {
   private boolean _hasCr;
 
   private int _peek = -1;
-  private Reader _is;
+  private ReadStream _is;
   private String _encoding;
 
   private CharBuffer _sb = new CharBuffer();
@@ -223,7 +223,7 @@ public class QuercusParser {
     _scope = _globalScope;
   }
 
-  public QuercusParser(Quercus quercus, Path sourceFile, Reader is)
+  public QuercusParser(Quercus quercus, Path sourceFile, ReadStream is)
   {
     this(quercus);
 
@@ -233,10 +233,10 @@ public class QuercusParser {
   private void init(Path sourceFile)
     throws IOException
   {
-    init(sourceFile, sourceFile.openRead().getReader(), "UTF-8");
+    init(sourceFile, sourceFile.openRead(), "UTF-8");
   }
 
-  private void init(Path sourceFile, Reader is, String encoding)
+  private void init(Path sourceFile, ReadStream is, String encoding)
   {
     _is = is;
     _encoding = encoding;
@@ -275,7 +275,7 @@ public class QuercusParser {
       is.setEncoding(encoding);
       
       QuercusParser parser;
-      parser = new QuercusParser(quercus, path, is.getReader());
+      parser = new QuercusParser(quercus, path, is);
 
       return parser.parse();
     } finally {
@@ -296,7 +296,7 @@ public class QuercusParser {
       is.setEncoding(encoding);
       
       QuercusParser parser;
-      parser = new QuercusParser(quercus, path, is.getReader());
+      parser = new QuercusParser(quercus, path, is);
 
       if (fileName != null && line >= 0)
 	parser.setLocation(fileName, line);
@@ -312,13 +312,13 @@ public class QuercusParser {
     throws IOException
   {
     QuercusParser parser;
-    parser = new QuercusParser(quercus, is.getPath(), is.getReader());
+    parser = new QuercusParser(quercus, is.getPath(), is);
 
     return parser.parse();
   }
   
   public static QuercusProgram parse(Quercus quercus,
-				     Path path, Reader is)
+				     Path path, ReadStream is)
     throws IOException
   {
     return new QuercusParser(quercus, path, is).parse();
@@ -329,7 +329,7 @@ public class QuercusParser {
   {
     Path path = new StringPath(str);
 
-    QuercusParser parser = new QuercusParser(quercus, path, path.openRead().getReader());
+    QuercusParser parser = new QuercusParser(quercus, path, path.openRead());
 
     return parser.parseCode();
   }
@@ -339,7 +339,7 @@ public class QuercusParser {
   {
     Path path = new StringPath(str);
 
-    QuercusParser parser = new QuercusParser(quercus, path, path.openRead().getReader());
+    QuercusParser parser = new QuercusParser(quercus, path, path.openRead());
 
     return parser.parseCode().createExprReturn();
   }
@@ -362,7 +362,7 @@ public class QuercusParser {
   {
       Path path = new StringPath(str);
     
-    return new QuercusParser(quercus, path, new java.io.StringReader(str)).parseExpr();
+    return new QuercusParser(quercus, path, path.openRead()).parseExpr();
   }
   
   public static Expr parseDefault(String str)
@@ -370,7 +370,7 @@ public class QuercusParser {
     try {
       Path path = new StringPath(str);
     
-      return new QuercusParser(null, path, new java.io.StringReader(str)).parseExpr();
+      return new QuercusParser(null, path, path.openRead()).parseExpr();
     } catch (IOException e) {
       e.printStackTrace();
       
@@ -3633,18 +3633,18 @@ public class QuercusParser {
 	break;
 
       case '#':
-	while ((ch = read()) != '\n' && ch != '\r' && ch >= 0) {
+	while ((ch = readByte()) != '\n' && ch != '\r' && ch >= 0) {
 	  if (ch != '?') {
 	  }
-	  else if ((ch = read()) != '>') {
-	    _peek = ch;
+	  else if ((ch = readByte()) != '>') {
+	    _is.unread();
 	  }
 	  else {
-	    ch = read();
+	    ch = readByte();
 	    if (ch == '\r')
-	      ch = read();
+	      ch = readByte();
 	    if (ch != '\n')
-	      _peek = ch;
+	      _is.unread();
     
 	    return parsePhpText();
 	  }
@@ -3722,19 +3722,21 @@ public class QuercusParser {
 	      break;
 	    }
 	    else if (ch == '?') {
-	      ch = read();
+	      ch = readByte();
 
 	      if (ch == '>') {
-		if ((ch = read()) != '\r')
-		  _peek = ch;
-		else if ((ch = read()) != '\n')
-		  _peek = ch;
+	        ch = readByte();
+	        
+	        if (ch == '\r')
+	          ch = readByte();
+	        if (ch != '\n')
+	          _is.unread();
 		
 		return parsePhpText();
 	      }
 	    }
 	    else
-	      ch = read();
+	      ch = readByte();
 	  }
 	  break;
 	}
@@ -3996,13 +3998,13 @@ public class QuercusParser {
   {
     int ch;
 
-    while ((ch = read()) >= 0) {
+    while ((ch = readByte()) >= 0) {
       if (ch != '*') {
       }
-      else if ((ch = read()) == '/')
-	return;
+      else if ((ch = readByte()) == '/')
+        return;
       else
-	_peek = ch;
+	    _is.unread();
     }
   }
 
@@ -4782,7 +4784,7 @@ public class QuercusParser {
     }
 
     try {
-      int ch = _is.read();
+      int ch = _is.readChar();
 
       if (ch == '\r') {
 	_parserLocation.incrementLineNumber();
@@ -4797,6 +4799,37 @@ public class QuercusParser {
     } catch (CharConversionException e) {
       throw new QuercusParseException(getFileName() + ":" + getLine() + ": " + e + "\nCheck that the script-encoding setting matches the source file's encoding",
 				   e);
+    } catch (IOException e) {
+      throw new IOExceptionWrapper(getFileName() + ":" + getLine() + ":" + e, e);
+    }
+  }
+  
+  /*
+   * Reads the next byte.
+   */
+  private int readByte()
+    throws IOException
+  {
+    int peek = _peek;
+
+    if (peek >= 0) {
+      _peek = -1;
+      return peek;
+    }
+
+    try {
+      int ch = _is.read();
+
+      if (ch == '\r') {
+        _parserLocation.incrementLineNumber();
+        _hasCr = true;
+      }
+      else if (ch == '\n' && ! _hasCr)
+        _parserLocation.incrementLineNumber();
+      else
+        _hasCr = false;
+
+      return ch;
     } catch (IOException e) {
       throw new IOExceptionWrapper(getFileName() + ":" + getLine() + ":" + e, e);
     }
