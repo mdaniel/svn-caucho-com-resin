@@ -111,7 +111,7 @@ public class SoapEncoding implements ServiceEncoding {
   {
     if (_skeleton == null) {
       _skeleton = 
-        new WebServiceIntrospector().introspect(_class, _wsdlLocation);
+        WebServiceIntrospector.introspect(_class, _wsdlLocation, null);
     }
 
     return _skeleton;
