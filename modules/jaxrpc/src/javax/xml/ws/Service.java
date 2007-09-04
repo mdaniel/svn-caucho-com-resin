@@ -28,6 +28,7 @@
 */
 
 package javax.xml.ws;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.handler.HandlerResolver;
@@ -37,7 +38,6 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
-/** XXX */
 public class Service {
   private final transient ServiceDelegate _delegate;
 
@@ -53,7 +53,6 @@ public class Service {
     _delegate.addPort(portName, bindingId, endpointAddress);
   }
 
-
   public static Service create(QName serviceName)
   {
     return new Service(null, serviceName);
@@ -64,13 +63,11 @@ public class Service {
     return new Service(wsdlDocumentLocation, serviceName);
   }
 
-
   public <T> Dispatch<T> createDispatch(QName portName, Class<T> type,
                                         Mode mode)
   {
     return _delegate.createDispatch(portName, type, mode);
   }
-
 
   public Dispatch<Object> createDispatch(QName portName,
                                          JAXBContext context, Mode mode)
@@ -103,7 +100,6 @@ public class Service {
     return _delegate.getPorts();
   }
 
-
   public QName getServiceName()
   {
     return _delegate.getServiceName();
@@ -125,7 +121,7 @@ public class Service {
   }
 
   public static enum Mode {
-      MESSAGE, PAYLOAD;
+    MESSAGE, PAYLOAD;
   }
 }
 

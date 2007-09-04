@@ -36,6 +36,8 @@ public class SOAPFaultException extends ProtocolException {
 
   public SOAPFaultException(SOAPFault fault)
   {
+    super(fault.getFaultString());
+
     _fault = fault;
   }
 
