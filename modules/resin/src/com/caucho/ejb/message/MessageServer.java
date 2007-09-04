@@ -40,6 +40,7 @@ import com.caucho.naming.Jndi;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 import javax.jms.*;
+import javax.naming.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -150,6 +151,13 @@ public class MessageServer extends AbstractServer {
 
     if (_destination == null && _messageDestinationLink != null) {
       _destination = getContainer().getMessageDestination(_messageDestinationLink).getResolvedDestination();
+    }
+
+    if (_destination == null) {
+      try {
+        _destination = (Destination) new InitialContext().lookup("java:comp/env/" + getMappedName());
+      } catch (Exception e) {
+      }
     }
 
     if (_destination == null)

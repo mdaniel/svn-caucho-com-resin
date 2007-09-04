@@ -60,10 +60,13 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 		      boolean noLocal)
     throws JMSException
   {
-    super(session, topic.createSubscriber(null), messageSelector, noLocal);
+    super(session, topic.createSubscriber(session, messageSelector, noLocal),
+          messageSelector, noLocal);
 
     _topic = topic;
     _subscription = (AbstractQueue) getDestination();
+
+    _topic.addConsumer(this);
   }
   
   TopicSubscriberImpl(SessionImpl session,
@@ -77,6 +80,8 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 
     _topic = topic;
     _subscription = subscription;
+    
+    _topic.addConsumer(this);
   }
 
   public Topic getTopic()
@@ -91,8 +96,13 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
     AbstractQueue subscription = _subscription;
     _subscription = null;
 
-    if (subscription != null)
+    if (subscription != null) {
       _topic.closeSubscriber(subscription);
+
+      subscription.close();
+    }
+    
+    _topic.removeConsumer(this);
   }
 }
 

@@ -29,53 +29,62 @@
 
 package com.caucho.jms2.connection;
 
-import com.caucho.jms2.memory.MemoryTopic;
+import com.caucho.jms2.message.*;
+import com.caucho.jms2.queue.*;
+import com.caucho.jms.selector.Selector;
+import com.caucho.jms.selector.SelectorParser;
+import com.caucho.log.Log;
+import com.caucho.util.*;
 
-import java.util.ArrayList;
 import javax.jms.*;
+import java.util.Enumeration;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
- * A basic topic.
+ * A basic message consumer.
  */
-public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
+public class MessageBrowserImpl
+  implements QueueBrowser
 {
-  private static int _idCount;
+  static final Logger log
+    = Logger.getLogger(MessageBrowserImpl.class.getName());
+  static final L10N L = new L10N(MessageBrowserImpl.class);
 
-  private SessionImpl _session;
+  private AbstractQueue _queue;
+  private String _messageSelector;
 
-  private ArrayList<MessageConsumer> _consumerList
-    = new ArrayList<MessageConsumer>();
+  public MessageBrowserImpl(AbstractQueue queue, String messageSelector)
+  {
+    _queue = queue;
+  }
   
-  TemporaryTopicImpl(SessionImpl session)
-  {
-    _session = session;
-    
-    setName("TemporaryTopic-" + _idCount++);
-  }
-
-  SessionImpl getSession()
-  {
-    return _session;
-  }
-
-  @Override
-  public void addConsumer(MessageConsumer consumer)
-  {
-    if (! _consumerList.contains(consumer))
-      _consumerList.add(consumer);
-  }
-
-  @Override
-  public void removeConsumer(MessageConsumer consumer)
-  {
-    _consumerList.remove(consumer);
-  }
-
-  public void delete()
+  public Queue getQueue()
     throws JMSException
   {
-    if (_consumerList.size() > 0)
-      throw new javax.jms.IllegalStateException(L.l("temporary topic is still active"));
+    return _queue;
+  }
+  
+  public String getMessageSelector()
+    throws JMSException
+  {
+    return _messageSelector;
+  }
+
+  public Enumeration getEnumeration()
+    throws JMSException
+  {
+    return NullEnumeration.create();
+  }
+
+  public void close()
+    throws JMSException
+  {
+  }
+
+  public String toString()
+  {
+    return "MessageBrowserImpl[" + _queue + "]";
   }
 }
 

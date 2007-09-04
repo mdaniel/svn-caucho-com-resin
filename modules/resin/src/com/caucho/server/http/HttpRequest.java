@@ -1448,9 +1448,9 @@ public class HttpRequest extends AbstractHttpRequest
   String dbgId()
   {
     if ("".equals(_server.getServerId()))
-      return "[" + _conn.getId() + "] ";
+      return "Http[" + _conn.getId() + "] ";
     else
-      return "[" + _server.getServerId() + ", " + _conn.getId() + "] ";
+      return "Http[" + _server.getServerId() + ", " + _conn.getId() + "] ";
   }
 
   public String toString()

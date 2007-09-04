@@ -37,7 +37,7 @@ import com.caucho.jms2.message.*;
 import com.caucho.jms2.listener.*;
 import com.caucho.jms2.connection.*;
 
-import com.caucho.util.Alarm;
+import com.caucho.util.*;
 
 /**
  * Implements an abstract queue.
@@ -45,28 +45,69 @@ import com.caucho.util.Alarm;
 abstract public class AbstractQueue extends AbstractDestination
   implements javax.jms.Queue
 {
+  private static final L10N L = new L10N(AbstractQueue.class);
   private static final Logger log
     = Logger.getLogger(AbstractQueue.class.getName());
 
-  private ListenerManager _listenerManager = new ListenerManager();
+  private ListenerManager _listenerManager;
+  private int _enqueueCount;
 
+  protected AbstractQueue()
+  {
+    _listenerManager = new ListenerManager(this);
+  }
+  
   public void addListener(MessageListener listener)
   {
     _listenerManager.addListener(listener);
   }
 
+  public void removeListener(MessageListener listener)
+  {
+    _listenerManager.removeListener(listener);
+  }
+
   @Override
-  public void send(Message msg, long timeout)
+  public void send(SessionImpl session, Message msg, long timeout)
     throws JMSException
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(L.l("{0}: sending message {1}", this, msg));
+    
     long expires = Alarm.getCurrentTime() + timeout;
     
     MessageImpl queueMsg = _messageFactory.copy(msg);
 
-    SendStatus status = _listenerManager.send(queueMsg);
+    SendStatus status;
 
-    if (status == SendStatus.FAIL) {
-      enqueue(queueMsg, timeout);
+    ListenerManager listenerManager = _listenerManager;
+
+    try {
+      synchronized (listenerManager) {
+        _enqueueCount++;
+        
+        if (_enqueueCount > 1)
+          status = SendStatus.FAIL;
+        else
+          status = listenerManager.send(queueMsg);
+      }
+
+      if (status == SendStatus.FAIL) {
+        enqueue(queueMsg, timeout);
+      
+        synchronized (listenerManager) {
+          if (listenerManager.hasIdle()) {
+            MessageImpl oldMsg = receive(0);
+
+            if (oldMsg != null)
+              listenerManager.send(oldMsg);
+          }
+        }
+      }
+    } finally {
+      synchronized (listenerManager) {
+        _enqueueCount--;
+      }
     }
   }
 
@@ -108,12 +149,16 @@ abstract public class AbstractQueue extends AbstractDestination
 				    String messageSelector)
     throws JMSException
   {
-    return null;
+    return new MessageBrowserImpl(this, messageSelector);
   }
 
   public String toString()
   {
-    return getClass().getName() + "[" + getName() + "]";
+    String className = getClass().getName();
+
+    int p = className.lastIndexOf('.');
+    
+    return className.substring(p + 1) + "[" + getName() + "]";
   }
 }
 

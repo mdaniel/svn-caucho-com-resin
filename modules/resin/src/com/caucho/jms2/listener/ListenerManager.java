@@ -29,12 +29,14 @@
 
 package com.caucho.jms2.listener;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.logging.*;
 
 import javax.jms.*;
 
 import com.caucho.jms2.message.*;
+import com.caucho.jms2.queue.*;
+
 import com.caucho.util.ThreadPool;
 
 /**
@@ -45,14 +47,22 @@ public class ListenerManager
   private static final Logger log
     = Logger.getLogger(ListenerManager.class.getName());
 
+  private AbstractQueue _queue;
+  
   private ArrayList<MessageListener> _listenerList
     = new ArrayList<MessageListener>();
   
   private ListenerEntry []_idleStack = new ListenerEntry[0];
   private int _idleTop;
 
+  public ListenerManager(AbstractQueue queue)
+  {
+    _queue = queue;
+  }
+
   public void addListener(MessageListener listener)
   {
+    System.out.println("ADD: "+ this + " " + listener);
     synchronized (this) {
       _listenerList.add(listener);
       
@@ -67,7 +77,19 @@ public class ListenerManager
       }
 
       _idleStack[_idleTop++] = new ListenerEntry(listener);
+
+      try {
+        // lock should be okay, since _queue.receive won't lock listener
+        
+        MessageImpl msg;
+        while (_idleTop > 0 && (msg = _queue.receive(0)) != null) {
+          send(msg);
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString());
+      }
     }
+
   }
 
   /**
@@ -107,6 +129,7 @@ public class ListenerManager
 
   public SendStatus send(MessageImpl msg)
   {
+    System.out.println("SEND: " + _idleTop + " " + msg);
     ListenerEntry entry = null;
     
     synchronized (this) {
@@ -126,6 +149,17 @@ public class ListenerManager
   void toIdle(ListenerEntry entry)
   {
     synchronized (this) {
+      try {
+        MessageImpl msg = _queue.receive(0);
+
+        if (msg != null) {
+          entry.send(msg);
+          return;
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString());
+      }
+      
       _idleStack[_idleTop++] = entry;
     }
   }
@@ -155,6 +189,7 @@ public class ListenerManager
     void send(MessageImpl msg)
     {
       _msg = msg;
+      System.out.println("LISTENER-SENDND: " + msg + " "+ _listener);
 
       ThreadPool.getThreadPool().schedule(this);
     }

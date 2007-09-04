@@ -84,6 +84,15 @@ public class SessionImpl implements Session, ThreadTask {
     _classLoader = Thread.currentThread().getContextClassLoader();
     
     _connection = connection;
+
+    // XXX: temp
+    /*
+    if (isTransacted) {
+      isTransacted = false;
+      ackMode = AUTO_ACKNOWLEDGE;
+    }
+    */
+      
     _isTransacted = isTransacted;
     if (isTransacted)
       _acknowledgeMode = SESSION_TRANSACTED;
@@ -350,19 +359,29 @@ public class SessionImpl implements Session, ThreadTask {
 
     if (destination == null)
       throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.createConsumer"));
-    
-    if (! (destination instanceof AbstractQueue))
+
+    if (destination instanceof AbstractQueue) {
+      AbstractQueue dest = (AbstractQueue) destination;
+
+      MessageConsumer consumer
+        = new MessageConsumerImpl(this, dest, messageSelector, noLocal);
+
+      return consumer;
+    }
+    else if (destination instanceof AbstractTopic) {
+      AbstractTopic dest = (AbstractTopic) destination;
+
+      MessageConsumer consumer
+        = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);
+
+      return consumer;
+    }
+    else
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
 						destination));
 
-    AbstractQueue dest = (AbstractQueue) destination;
-
-    MessageConsumer consumer
-      = new MessageConsumerImpl(this, dest, messageSelector, noLocal);
     
     // addConsumer((MessageConsumerImpl) consumer);
-
-    return consumer;
   }
 
   /**
@@ -379,11 +398,11 @@ public class SessionImpl implements Session, ThreadTask {
       return new MessageProducerImpl(this, null);
     }
     
-    if (! (destination instanceof AbstractQueue))
+    if (! (destination instanceof AbstractDestination))
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS destination for Session.createProducer.",
 						destination));
 
-    AbstractQueue dest = (AbstractQueue) destination;
+    AbstractDestination dest = (AbstractDestination) destination;
 
     return new MessageProducerImpl(this, dest);
   }
@@ -505,11 +524,16 @@ public class SessionImpl implements Session, ThreadTask {
     
     AbstractTopic topicImpl = (AbstractTopic) topic;
 
-    if (_connection.getDurableSubscriber(name) != null)
+    if (_connection.getDurableSubscriber(name) != null) {
+      // jms/2130
+      // unsubscribe(name);
+      /*
       throw new JMSException(L.l("'{0}' is already an active durable subscriber",
 				 name));
+      */
+    }
 
-    AbstractQueue queue = topicImpl.createSubscriber(name);
+    AbstractQueue queue = topicImpl.createSubscriber(this, name, noLocal);
 
     TopicSubscriber consumer;
     consumer = new TopicSubscriberImpl(this, topicImpl, queue,
@@ -683,6 +707,13 @@ public class SessionImpl implements Session, ThreadTask {
       return;
 
     try {
+      if (_isTransacted)
+        commit();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    try {
       stop();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -780,7 +811,7 @@ public class SessionImpl implements Session, ThreadTask {
       _transactedMessages.add(transMsg);
     }
     else
-      queue.send(message, 0);
+      queue.send(this, message, 0);
   }
 
   /**
@@ -942,7 +973,7 @@ public class SessionImpl implements Session, ThreadTask {
     }
   }
 
-  static class TransactedMessage {
+  class TransactedMessage {
     private AbstractDestination _queue;
     private Message _message;
 
@@ -955,7 +986,7 @@ public class SessionImpl implements Session, ThreadTask {
     void send()
       throws JMSException
     {
-      _queue.send(_message, 0);
+      _queue.send(SessionImpl.this, _message, 0);
     }
   }
 }

@@ -77,8 +77,16 @@ abstract public class AbstractDestination
   {
     return _messageFactory.createTextMessage(msg);
   }
+  
+  public void addConsumer(MessageConsumer consumer)
+  {
+  }
+  
+  public void removeConsumer(MessageConsumer consumer)
+  {
+  }
 
-  abstract public void send(Message msg, long timeout)
+  abstract public void send(SessionImpl session, Message msg, long timeout)
     throws JMSException;
   
   /**

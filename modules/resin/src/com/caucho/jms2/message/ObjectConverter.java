@@ -65,7 +65,7 @@ public class ObjectConverter  {
     throws JMSException
   {
     // jms/2252
-    if (obj instanceof Number)
+    if (obj instanceof Byte)
       return ((Number) obj).byteValue();
     else if (obj == null || obj instanceof String)
       return (byte) Long.parseLong((String) obj);
@@ -81,7 +81,7 @@ public class ObjectConverter  {
     throws JMSException
   {
     // jms/2252
-    if (obj instanceof Number)
+    if (obj instanceof Short || obj instanceof Byte)
       return ((Number) obj).shortValue();
     else if (obj == null || obj instanceof String)
       return (short) Long.parseLong((String) obj);

@@ -38,6 +38,7 @@ import javax.jms.*;
 import com.caucho.jms2.message.*;
 import com.caucho.jms2.listener.*;
 import com.caucho.jms2.queue.*;
+import com.caucho.jms2.connection.*;
 
 /**
  * Implements a memory topic.
@@ -56,7 +57,9 @@ public class MemoryTopic extends AbstractTopic
   private int _id;
 
   @Override
-  public AbstractQueue createSubscriber(String name)
+  public AbstractQueue createSubscriber(SessionImpl session,
+                                        String name,
+                                        boolean noLocal)
   {
     MemoryQueue queue;
 
@@ -64,7 +67,7 @@ public class MemoryTopic extends AbstractTopic
       queue = _durableSubscriptionMap.get(name);
 
       if (queue == null) {
-	queue = new MemoryQueue();
+	queue = new MemorySubscriberQueue(session, noLocal);
 	queue.setName(getName() + ":sub-" + name);
 
 	_subscriptionList.add(queue);
@@ -74,7 +77,7 @@ public class MemoryTopic extends AbstractTopic
       return queue;
     }
     else {
-      queue = new MemoryQueue();
+      queue = new MemorySubscriberQueue(session, noLocal);
       queue.setName(getName() + ":sub-" + _id++);
 
       _subscriptionList.add(queue);
@@ -86,16 +89,17 @@ public class MemoryTopic extends AbstractTopic
   @Override
   public void closeSubscriber(AbstractQueue queue)
   {
-    _subscriptionList.remove(queue);
+    if (! _durableSubscriptionMap.values().contains(queue))
+      _subscriptionList.remove(queue);
   }
   
-  public void send(Message msg, long timeout)
+  public void send(SessionImpl session, Message msg, long timeout)
     throws JMSException
   {
     System.out.println("SEND: " + msg + " " + _subscriptionList);
     
     for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(msg, timeout);
+      _subscriptionList.get(i).send(session, msg, timeout);
     }
   }
 

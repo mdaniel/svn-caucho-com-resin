@@ -1298,9 +1298,9 @@ public class HmuxRequest extends AbstractHttpRequest
     String id = _server.getServerId();
 
     if (id.equals(""))
-      return "[" + getConnection().getId() + "] ";
+      return "Hmux[" + getConnection().getId() + "] ";
     else
-      return "[" + id + ":" + getConnection().getId() + "] ";
+      return "Hmux[" + id + ":" + getConnection().getId() + "] ";
   }
 
   public String toString()

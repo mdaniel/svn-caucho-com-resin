@@ -209,8 +209,7 @@ public class FileQueueStore
 	  long expire = rs.getLong(2);
 	  MessageType type = MESSAGE_TYPE[rs.getInt(3)];
 	  
-	  FileQueueEntry entry = fileQueue.addEntry(id, expire);
-	  entry.setType(type);
+	  FileQueueEntry entry = fileQueue.addEntry(id, expire, type);
 	}
 
 	rs.close();
@@ -233,6 +232,8 @@ public class FileQueueStore
 
 	if (rs.next()) {
 	  MessageImpl msg;
+
+          type = MESSAGE_TYPE[rs.getInt(1)];
 
 	  switch (type) {
 	  case NULL:
@@ -258,14 +259,14 @@ public class FileQueueStore
 	    break;
 	  }
 
-	  InputStream is = rs.getBinaryStream(1);
+	  InputStream is = rs.getBinaryStream(2);
 	  if (is != null) {
 	    msg.readProperties(is);
 
 	    is.close();
 	  }
 
-	  is = rs.getBinaryStream(2);
+	  is = rs.getBinaryStream(3);
 	  if (is != null) {
 	    msg.readBody(is);
 
@@ -421,7 +422,7 @@ public class FileQueueStore
     
     _receiveStmt = _conn.prepareStatement(sql);
     
-    sql = ("select header,body from " + _messageTable
+    sql = ("select type,header,body from " + _messageTable
 	   + " WHERE id=?");
     
     _readStmt = _conn.prepareStatement(sql);

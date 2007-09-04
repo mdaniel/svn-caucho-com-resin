@@ -94,6 +94,15 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession
 
     AbstractTopic dest = (AbstractTopic) topic;
 
+    if (dest instanceof TemporaryTopicImpl) {
+      TemporaryTopicImpl temp = (TemporaryTopicImpl) dest;
+
+      if (temp.getSession() != this) {
+        throw new javax.jms.IllegalStateException(L.l("temporary topic '{0}' does not belong to this session '{1}'",
+                                                      topic, this));
+      }
+    }
+
     TopicSubscriber subscriber
       = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);
     

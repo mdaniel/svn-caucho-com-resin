@@ -233,12 +233,12 @@ public class IiopRequest implements ServerRequest {
             skel.service(skel.getObject(), _reader, writer);
           }
           else {
-            log.fine("IIOP[" + _conn.getId() + "] can't find service: " + oid);
+            log.fine(dbgId() + "can't find service: " + oid);
 
             throw new IOException("bad oid: " + oid);
           }
 
-          log.fine("IIOP[" + _conn.getId() + "] complete request");
+          log.fine(dbgId() + "complete request");
         }
       } catch (org.omg.CORBA.SystemException e) {
         log.log(Level.WARNING, e.toString(), e);
@@ -316,12 +316,12 @@ public class IiopRequest implements ServerRequest {
 
       /*
         if (log.isLoggable(Level.FINER))
-          log.finer("IIOP[" + _conn.getId() + "]: recycle");
+          log.finer(dbgId() + ": recycle");
 
         return true;
       */
     } catch (Throwable e) {
-      log.log(Level.WARNING, "IIOP[" + _conn.getId() + "] " + e.toString(), e);
+      log.log(Level.WARNING, dbgId() + e.toString(), e);
       return false;
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -332,6 +332,11 @@ public class IiopRequest implements ServerRequest {
         log.log(Level.WARNING, e.toString(), e);
       }
     }
+  }
+
+  String dbgId()
+  {
+    return "Iiop[" + _conn.getId() + "] ";
   }
 
   /**

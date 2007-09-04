@@ -33,6 +33,7 @@ import com.caucho.jms2.memory.MemoryQueue;
 
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
 import javax.jms.*;
 
 /**
@@ -46,6 +47,9 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
 
   private SessionImpl _session;
   private boolean _isClosed;
+
+  private ArrayList<MessageConsumer> _consumerList
+    = new ArrayList<MessageConsumer>();
   
   TemporaryQueueImpl(SessionImpl session)
   {
@@ -58,11 +62,24 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
     return _session;
   }
 
+  @Override
+  public void addConsumer(MessageConsumer consumer)
+  {
+    if (! _consumerList.contains(consumer))
+      _consumerList.add(consumer);
+  }
+
+  @Override
+  public void removeConsumer(MessageConsumer consumer)
+  {
+    _consumerList.remove(consumer);
+  }
+
   public void delete()
     throws JMSException
   {
-    if (hasListener())
-      throw new javax.jms.IllegalStateException(L.l("queue is still active"));
+    if (_consumerList.size() > 0)
+      throw new javax.jms.IllegalStateException(L.l("temporary queue is still active"));
   }
 }
 

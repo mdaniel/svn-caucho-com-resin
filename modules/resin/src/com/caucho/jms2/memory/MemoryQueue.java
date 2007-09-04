@@ -54,6 +54,7 @@ public class MemoryQueue extends AbstractQueue
   @Override
   protected void enqueue(MessageImpl msg, long expires)
   {
+    System.out.println("ENQUEUE: " + msg + " " + _queueList);
     _queueList.add(msg);
   }
 

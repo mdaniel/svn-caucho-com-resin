@@ -60,6 +60,13 @@ public class FileQueueEntry
     _expiresTime = expiresTime;
   }
 
+  public FileQueueEntry(long id, long expiresTime, MessageType type)
+  {
+    _id = id;
+    _expiresTime = expiresTime;
+    _type = type;
+  }
+
   public FileQueueEntry(long id, long expiresTime, MessageImpl msg)
   {
     _id = id;

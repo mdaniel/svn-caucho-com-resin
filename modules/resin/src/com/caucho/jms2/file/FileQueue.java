@@ -97,10 +97,10 @@ public class FileQueue extends AbstractQueue implements Topic
   /**
    * Adds a message entry from startup.
    */
-  FileQueueEntry addEntry(long id, long expire)
+  FileQueueEntry addEntry(long id, long expire, MessageType type)
   {
     synchronized (_queueLock) {
-      FileQueueEntry entry = new FileQueueEntry(id, expire);
+      FileQueueEntry entry = new FileQueueEntry(id, expire, type);
       
       entry._prev = _tail;
 
@@ -128,7 +128,7 @@ public class FileQueue extends AbstractQueue implements Topic
     synchronized (_queueLock) {
       long id = _store.send(msg, expires);
 
-      FileQueueEntry entry = addEntry(id, expires);
+      FileQueueEntry entry = addEntry(id, expires, null);
 
       entry.setMessage(msg);
     }

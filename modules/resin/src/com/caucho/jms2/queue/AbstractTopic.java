@@ -35,6 +35,7 @@ import javax.jms.*;
 
 import com.caucho.jms2.message.*;
 import com.caucho.jms2.listener.*;
+import com.caucho.jms2.connection.*;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -73,7 +74,9 @@ abstract public class AbstractTopic extends AbstractDestination
     throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
   }
 
-  public abstract AbstractQueue createSubscriber(String name);
+  public abstract AbstractQueue createSubscriber(SessionImpl session,
+                                                 String name,
+                                                 boolean noLocal);
 
   public abstract void closeSubscriber(AbstractQueue subscriber);
   

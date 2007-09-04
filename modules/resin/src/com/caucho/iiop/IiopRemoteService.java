@@ -40,7 +40,7 @@ abstract public class IiopRemoteService {
   /**
    * Returns the home API class.
    */
-  abstract public Class getHomeAPI();
+  abstract public ArrayList<Class> getHomeAPI();
 
   /**
    * Returns the object API class.

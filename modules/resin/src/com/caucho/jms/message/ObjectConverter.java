@@ -94,9 +94,9 @@ public class ObjectConverter  {
   public static int toInt(Object obj)
     throws JMSException
   {
-    if (obj instanceof Integer ||
-	obj instanceof Short ||
-	obj instanceof Byte)
+    if (obj instanceof Integer
+        || obj instanceof Short
+        || obj instanceof Byte)
       return ((Number) obj).intValue();
     else if (obj == null || obj instanceof String)
       return (int) Long.parseLong((String) obj);

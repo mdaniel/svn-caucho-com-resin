@@ -156,10 +156,5 @@ public class TextMessageImpl extends MessageImpl implements TextMessage  {
 
     in.close();
   }
-
-  public String toString()
-  {
-    return "TextMessageImpl[]";
-  }
 }
 

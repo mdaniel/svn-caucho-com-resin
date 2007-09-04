@@ -85,6 +85,8 @@ public class MessageConsumerImpl
 
     // XXX:
     // _queue.addListener(this);
+
+    _queue.addConsumer(this);
   }
 
   /**
@@ -141,17 +143,11 @@ public class MessageConsumerImpl
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("setMessageListener(): MessageConsumer is closed."));
 
-    if (_pollAlarm != null) {
-      _pollAlarm.dequeue();
-      _pollAlarm = null;
-    }
+    if (_messageListener != null)
+      _queue.removeListener(_messageListener);
 
     _messageListener = listener;
-    _session.setAsynchronous();
-
-    if (_messageListener != null && pollInterval > -1) {
-      _pollAlarm = new Alarm(new PollAlarmListener(pollInterval), pollInterval);
-    }
+    _queue.addListener(listener);
   }
 
   /**
@@ -223,8 +219,9 @@ public class MessageConsumerImpl
 
     while (! isClosed()) {
       Message msg = receiveNoWait();
+
       if (msg != null)
-	return msg;
+        return msg;
       
       long delta = expireTime - Alarm.getCurrentTime();
 
@@ -254,27 +251,36 @@ public class MessageConsumerImpl
     if (! _session.isActive())
       return null;
 
-    MessageImpl msg = receiveImpl();
+    while (true) {
+      MessageImpl msg = receiveImpl();
 
-    if (msg == null)
-      return null;
+      if (msg == null)
+        return null;
+    
+      else if (_selector != null && ! _selector.isMatch(msg)) {
+        msg.acknowledge();
+        continue;
+      }
 
-    switch (_session.getAcknowledgeMode()) {
-    case Session.CLIENT_ACKNOWLEDGE:
-      msg.setSession(_session);
-      break;
+      else {
+        switch (_session.getAcknowledgeMode()) {
+        case Session.CLIENT_ACKNOWLEDGE:
+          msg.setSession(_session);
+          break;
 	
-    case Session.AUTO_ACKNOWLEDGE:
-    case Session.DUPS_OK_ACKNOWLEDGE:
-      acknowledge();
-      break;
+        case Session.AUTO_ACKNOWLEDGE:
+        case Session.DUPS_OK_ACKNOWLEDGE:
+          acknowledge();
+          break;
 
-    default:
-      // transacted
-      break;
+        default:
+          // transacted
+          break;
+        }
+
+        return msg;
+      }
     }
-
-    return msg;
   }
 
   /**
@@ -313,6 +319,11 @@ public class MessageConsumerImpl
     // _queue.removeListener(this);
     // XXX: remove session?
     // _session.removeListener(this);
+
+    _queue.removeConsumer(this);
+
+    if (_messageListener != null)
+      _queue.removeListener(_messageListener);
   }
 
   /**

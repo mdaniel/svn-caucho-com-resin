@@ -29,7 +29,7 @@
 
 package com.caucho.iiop;
 
-import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
 import org.omg.CORBA.NO_IMPLEMENT;
 
@@ -40,7 +40,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class IiopSkeleton extends DummyObjectImpl {
-  private static final Logger log = Log.open(IiopSkeleton.class);
+  private static final L10N L = new L10N(IiopSkeleton.class);
+  private static final Logger log
+    = Logger.getLogger(IiopSkeleton.class.getName());
   
   private static HashMap<String,String> _knownClasses;
 
@@ -102,7 +104,8 @@ public class IiopSkeleton extends DummyObjectImpl {
     else if (serviceSystemMethod(obj, op, reader, writer)) {
     }
     else {
-      throw new NO_IMPLEMENT("no such method: " + op + " for " + _remoteClass.getName());
+      throw new NO_IMPLEMENT(L.l("{0}: '{1}' is an unknown method.",
+                                 _remoteClass.getName(), op));
     }
   }
 

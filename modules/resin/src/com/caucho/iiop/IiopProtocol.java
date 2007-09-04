@@ -156,7 +156,7 @@ public class IiopProtocol extends Protocol {
 
       // TCK: ejb30/bb/session/stateful/busifacedd/multipleInterfacesTest2
       // ejb/4012: multiple <business-remote> interfaces
-      ArrayList<Class> apiList = service.getObjectAPI();
+      ArrayList<Class> apiList = service.getHomeAPI();
 
       return new IiopSkeleton(service.getHome(),
                               apiList,

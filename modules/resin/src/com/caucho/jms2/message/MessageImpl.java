@@ -803,10 +803,15 @@ public class MessageImpl implements Message
 
   public String toString()
   {
+    String className = getClass().getName();
+
+    int p = className.lastIndexOf('.');
+    className = className.substring(p + 1);
+    
     if (_messageId != null)
-      return getClass().getName() + "[" + _messageId + "]";
+      return className + "[" + _messageId + "]";
     else
-      return getClass().getName() + "@" + System.identityHashCode(this);
+      return className + "@" + System.identityHashCode(this);
   }
 
   public static boolean isReserved(String name)

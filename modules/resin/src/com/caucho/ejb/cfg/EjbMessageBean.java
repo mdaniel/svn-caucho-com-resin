@@ -62,7 +62,8 @@ import java.util.ArrayList;
  * Configuration for an ejb entity bean.
  */
 public class EjbMessageBean extends EjbBean {
-  private static final Logger log = Logger.getLogger(EjbMessageBean.class.getName());
+  private static final Logger log
+    = Logger.getLogger(EjbMessageBean.class.getName());
   private static final L10N L = new L10N(EjbMessageBean.class);
 
   private ConnectionFactory _connectionFactory;
@@ -115,7 +116,7 @@ public class EjbMessageBean extends EjbBean {
 		      ejbClass.getName()));
 
     // ejb 3.0 simplified section 10.1.3
-    // The name annotation element defaults to the unqualiï¬ed name of the bean
+    // The name annotation element defaults to the unqualified name of the bean
     // class.
 
     if (getEJBName() == null) {
@@ -407,7 +408,6 @@ public class EjbMessageBean extends EjbBean {
     server.setEJBName(getEJBName());
     server.setMappedName(getMappedName());
 
-
     //Class contextImplClass = javaGen.loadClass(getSkeletonName());
     //server.setContextImplClass(contextImplClass);
     
@@ -511,5 +511,4 @@ public class EjbMessageBean extends EjbBean {
       setDestination(destination);
     }
   }
-
 }

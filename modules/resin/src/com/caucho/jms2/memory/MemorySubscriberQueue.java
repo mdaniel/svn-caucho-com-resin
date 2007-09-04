@@ -19,63 +19,53 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jms2.connection;
-
-import com.caucho.jms2.memory.MemoryTopic;
+package com.caucho.jms2.memory;
 
 import java.util.ArrayList;
+import java.util.logging.*;
+
 import javax.jms.*;
 
+import com.caucho.jms2.message.*;
+import com.caucho.jms2.listener.*;
+import com.caucho.jms2.queue.*;
+import com.caucho.jms2.connection.*;
+
 /**
- * A basic topic.
+ * Implements a memory queue.
  */
-public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
+public class MemorySubscriberQueue extends MemoryQueue
 {
-  private static int _idCount;
-
   private SessionImpl _session;
-
-  private ArrayList<MessageConsumer> _consumerList
-    = new ArrayList<MessageConsumer>();
+  private boolean _isNoLocal;
   
-  TemporaryTopicImpl(SessionImpl session)
+  MemorySubscriberQueue(SessionImpl session, boolean noLocal)
   {
     _session = session;
-    
-    setName("TemporaryTopic-" + _idCount++);
+    _isNoLocal = noLocal;
   }
 
-  SessionImpl getSession()
-  {
-    return _session;
-  }
 
   @Override
-  public void addConsumer(MessageConsumer consumer)
-  {
-    if (! _consumerList.contains(consumer))
-      _consumerList.add(consumer);
-  }
-
-  @Override
-  public void removeConsumer(MessageConsumer consumer)
-  {
-    _consumerList.remove(consumer);
-  }
-
-  public void delete()
+  public void send(SessionImpl session, Message msg, long timeout)
     throws JMSException
   {
-    if (_consumerList.size() > 0)
-      throw new javax.jms.IllegalStateException(L.l("temporary topic is still active"));
+    if (_isNoLocal && _session == session)
+      return;
+    else
+      super.send(session, msg, timeout);
+  }
+
+  public String toString()
+  {
+    return "MemorySubscriberQueue[" + getName() + "]";
   }
 }
 
