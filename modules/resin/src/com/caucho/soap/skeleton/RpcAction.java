@@ -30,7 +30,16 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
+
+import com.caucho.soap.wsdl.MIMEContentType;
+import com.caucho.soap.wsdl.MIMEMultipartRelated;
+import com.caucho.soap.wsdl.MIMEPart;
+import com.caucho.soap.wsdl.WSDLBindingOperationMessage;
+import com.caucho.soap.wsdl.WSDLDefinitions;
+
 import com.caucho.util.L10N;
+
+import javax.jws.WebParam;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -45,7 +54,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Behaves like a DocumentWrappedAction most of the time... except for the WSDL?
+ * Behaves like a DocumentWrappedAction most of the time, but also allows
+ * attachments.
  */
 public class RpcAction extends DocumentWrappedAction {
   private final static Logger log = Logger.getLogger(RpcAction.class.getName());
@@ -54,14 +64,66 @@ public class RpcAction extends DocumentWrappedAction {
   public RpcAction(Method method, Method eiMethod,
                    JAXBContextImpl jaxbContext, 
                    String targetNamespace,
-                   String wsdlLocation,
+                   WSDLDefinitions wsdl,
                    Marshaller marshaller,
                    Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
     super(method, eiMethod, 
-          jaxbContext, targetNamespace, wsdlLocation, 
+          jaxbContext, targetNamespace, wsdl, 
           marshaller, unmarshaller);
   }
   
+  protected String attachmentContentType(WebParam webParam)
+  {
+    if (_bindingOperation == null)
+      return null;
+
+    WSDLBindingOperationMessage message = null;
+
+    if (webParam.mode() == WebParam.Mode.IN ||
+        webParam.mode() == WebParam.Mode.INOUT) {
+      String contentType = attachmentContentType(_bindingOperation.getInput(), 
+                                                 webParam.partName());
+
+      if (contentType != null)
+        return contentType;
+    }
+
+    if (webParam.mode() == WebParam.Mode.OUT ||
+        webParam.mode() == WebParam.Mode.INOUT) {
+      String contentType = attachmentContentType(_bindingOperation.getOutput(),
+                                                 webParam.partName());
+
+      if (contentType != null)
+        return contentType;
+    }
+
+    return null;
+  }
+
+  private String attachmentContentType(WSDLBindingOperationMessage message,
+                                       String partName)
+  {
+    for (Object o : _bindingOperation.getInput().getAny()) {
+      if (o instanceof MIMEMultipartRelated) {
+        MIMEMultipartRelated related = (MIMEMultipartRelated) o;
+
+        for (MIMEPart part : related.getParts()) {
+
+          for (Object subpart : part.getAny()) {
+            if (subpart instanceof MIMEContentType) {
+              MIMEContentType content = (MIMEContentType) subpart;
+
+              if (partName.equals(content.getPart()))
+                return content.getType();
+            }
+          }
+
+        }
+      }
+    }
+
+    return null;
+  }
 }

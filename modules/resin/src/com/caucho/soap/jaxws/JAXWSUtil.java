@@ -33,10 +33,12 @@ import java.io.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.jws.HandlerChain;
+import javax.jws.WebService;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -177,5 +179,54 @@ public class JAXWSUtil {
     }
 
     return list;
+  }
+
+  public static Class getEndpointInterface(Class type)
+  {
+    WebService webService = (WebService) type.getAnnotation(WebService.class);
+
+    if (webService != null && ! "".equals(webService.endpointInterface())) {
+      try {
+        ClassLoader loader = type.getClassLoader();
+        return loader.loadClass(webService.endpointInterface());
+      }
+      catch (ClassNotFoundException e) {
+        throw new WebServiceException(e);
+      }
+    }
+
+    return type;
+  }
+
+  public static String getTargetNamespace(Class type, Class api)
+  {
+    WebService webService = (WebService) type.getAnnotation(WebService.class);
+
+    // try to get the namespace from the annotation first...
+    if (webService != null) {
+      if (! "".equals(webService.targetNamespace()))
+        return webService.targetNamespace();
+
+      else if (! api.equals(type)) {
+        webService = (WebService) api.getAnnotation(WebService.class);
+
+        if (! "".equals(webService.targetNamespace()))
+          return webService.targetNamespace();
+      }
+    }
+
+    // get the namespace from the package name
+    String namespace = null;
+    String packageName = type.getPackage().getName();
+    StringTokenizer st = new StringTokenizer(packageName, ".");
+
+    while (st.hasMoreTokens()) { 
+      if (namespace == null) 
+        namespace = st.nextToken();
+      else
+        namespace = st.nextToken() + "." + namespace;
+    }
+
+    return "http://"+namespace+"/";
   }
 }

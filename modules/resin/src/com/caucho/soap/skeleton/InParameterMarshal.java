@@ -29,7 +29,10 @@
 
 package com.caucho.soap.skeleton;
 
+import com.caucho.jaxb.skeleton.AttachmentProperty;
 import com.caucho.jaxb.skeleton.Property;
+
+import com.caucho.util.Attachment;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
@@ -39,8 +42,13 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
+import java.util.UUID;
 import java.util.logging.Logger;
+
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 public class InParameterMarshal extends ParameterMarshal {
   public static final L10N L = new L10N(InParameterMarshal.class);
@@ -63,6 +71,25 @@ public class InParameterMarshal extends ParameterMarshal {
     _property.write(_marshaller, out, args[_arg], _namer);
   }
 
+  public void serializeCall(PrintWriter writer, OutputStream out, 
+                            UUID uuid, Object []args)
+    throws IOException
+  {
+    AttachmentProperty attachmentProperty = (AttachmentProperty) _property;
+    Object arg = args[_arg];
+    String contentType = attachmentProperty.getMimeType(arg);
+
+    writer.print("--uuid:" + uuid + "\r\n");
+    writer.print("Content-Type: " + contentType + "\r\n");
+    writer.print("\r\n");
+    writer.flush();
+
+    attachmentProperty.writeAsAttachment(arg, out);
+
+    writer.print("\r\n");
+    writer.flush();
+  }
+
   //
   // server
   //
@@ -71,5 +98,20 @@ public class InParameterMarshal extends ParameterMarshal {
     throws IOException, XMLStreamException, JAXBException
   {
     args[_arg] = _property.read(_unmarshaller, in, args[_arg]);
+  }
+
+  public void deserializeCall(Attachment attachment, Object []args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    AttachmentProperty attachmentProperty = (AttachmentProperty) _property;
+    args[_arg] = attachmentProperty.readFromAttachment(attachment);
+  }
+
+  public String toString()
+  {
+    return "InParameterMarshal[arg=" + _arg + 
+                             ",property=" + _property + 
+                             ",name=" + _name + 
+                             ",namer=" + _namer + "]";
   }
 }

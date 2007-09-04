@@ -279,7 +279,11 @@ public class WSDLDefinitions extends WSDLExtensibleDocumented {
     return _endpointAddress;
   }
 
+  /**
+   * Sets up the cached, transient data.
+   **/
   public void afterUnmarshal(Unmarshaller u, Object o)
+    throws JAXBException, WSDLValidationException
   {
     if (_messages != null) {
       for (WSDLMessage message : _messages) {
@@ -319,69 +323,7 @@ public class WSDLDefinitions extends WSDLExtensibleDocumented {
         _bindingMap.put(name, binding);
       }
     }
-  }
 
-  public WSDLMessage getMessage(QName name)
-  {
-    return _messageMap.get(name);
-  }
-
-  public WSDLPortType getPortType(QName name)
-  {
-    return _portTypeMap.get(name);
-  }
-
-  public WSDLBinding getBinding(QName name)
-  {
-    return _bindingMap.get(name);
-  }
-
-  public Type getType(QName typeName)
-  {
-    if (_types == null)
-      return null;
-
-    for (int i = 0; i < _types.size(); i++) {
-      WSDLTypes types = _types.get(i);
-
-      Type type = types.getType(typeName);
-       
-      if (type != null)
-        return type;
-    }
-
-    return null;
-  }
-
-  public void resolveImports(Unmarshaller u)
-    throws JAXBException
-  {
-    if (_types == null)
-      return;
-
-    for (int i = 0; i < _types.size(); i++) {
-      WSDLTypes types = _types.get(i);
-      types.resolveImports(u);
-    }
-  }
-
-  public void writeJAXBClasses(File outputDirectory, String pkg)
-    throws IOException
-  {
-    if (_types == null)
-      return;
-
-    for (int i = 0; i < _types.size(); i++) {
-      WSDLTypes types = _types.get(i);
-      types.writeJAXBClasses(outputDirectory, pkg);
-    }
-  }
-  
-  public void generateJava(Unmarshaller u, 
-                           File sourceDir, File classDir, 
-                           String pkg)
-    throws WSDLValidationException, JAXBException, IOException
-  {
     resolveImports(u);
 
     for (WSDLMessage message : getMessages()) {
@@ -450,7 +392,69 @@ public class WSDLDefinitions extends WSDLExtensibleDocumented {
         bindingOp.setOperation(operation);
       }
     }
+  }
 
+  public WSDLMessage getMessage(QName name)
+  {
+    return _messageMap.get(name);
+  }
+
+  public WSDLPortType getPortType(QName name)
+  {
+    return _portTypeMap.get(name);
+  }
+
+  public WSDLBinding getBinding(QName name)
+  {
+    return _bindingMap.get(name);
+  }
+
+  public Type getType(QName typeName)
+  {
+    if (_types == null)
+      return null;
+
+    for (int i = 0; i < _types.size(); i++) {
+      WSDLTypes types = _types.get(i);
+
+      Type type = types.getType(typeName);
+       
+      if (type != null)
+        return type;
+    }
+
+    return null;
+  }
+
+  public void resolveImports(Unmarshaller u)
+    throws JAXBException
+  {
+    if (_types == null)
+      return;
+
+    for (int i = 0; i < _types.size(); i++) {
+      WSDLTypes types = _types.get(i);
+      types.resolveImports(u);
+    }
+  }
+
+  public void writeJAXBClasses(File outputDirectory, String pkg)
+    throws IOException
+  {
+    if (_types == null)
+      return;
+
+    for (int i = 0; i < _types.size(); i++) {
+      WSDLTypes types = _types.get(i);
+      types.writeJAXBClasses(outputDirectory, pkg);
+    }
+  }
+  
+  public void generateJava(Unmarshaller u, 
+                           File sourceDir, File classDir, 
+                           String pkg)
+    throws WSDLValidationException, JAXBException, IOException
+  {
     for (WSDLService service : getServices()) { 
       for (WSDLPort port : service.getPorts()) {
         WSDLBinding binding = getBinding(port.getBinding());

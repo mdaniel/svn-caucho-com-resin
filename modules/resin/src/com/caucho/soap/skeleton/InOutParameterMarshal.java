@@ -30,6 +30,9 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.skeleton.Property;
+import com.caucho.jaxb.skeleton.AttachmentProperty;
+
+import com.caucho.util.Attachment;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
@@ -40,7 +43,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
+
+import java.util.UUID;
+
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 public class InOutParameterMarshal extends ParameterMarshal {
   public static final L10N L = new L10N(InParameterMarshal.class);
@@ -59,6 +67,26 @@ public class InOutParameterMarshal extends ParameterMarshal {
     throws IOException, XMLStreamException, JAXBException
   {
     _property.write(_marshaller, out, ((Holder) args[_arg]).value, _namer);
+  }
+
+  public void serializeCall(PrintWriter writer, OutputStream out, 
+                            UUID uuid, Object []args)
+    throws IOException
+  {
+    AttachmentProperty attachmentProperty = (AttachmentProperty) _property;
+    Holder holder = (Holder) args[_arg];
+    Object arg = holder.value;
+    String contentType = attachmentProperty.getMimeType(arg);
+
+    writer.print("--uuid:" + uuid + "\r\n");
+    writer.print("Content-Type: " + contentType + "\r\n");
+    writer.print("\r\n");
+    writer.flush();
+
+    attachmentProperty.writeAsAttachment(arg, out);
+
+    writer.print("\r\n");
+    writer.flush();
   }
 
   public void deserializeReply(XMLStreamReader in, Object[] args)
@@ -91,6 +119,14 @@ public class InOutParameterMarshal extends ParameterMarshal {
 
     h.value = _property.read(_unmarshaller, in, previous);
   }
+
+  public void deserializeCall(Attachment attachment, Object []args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    AttachmentProperty attachmentProperty = (AttachmentProperty) _property;
+    args[_arg] = attachmentProperty.readFromAttachment(attachment);
+  }
+
 
   public void serializeReply(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException

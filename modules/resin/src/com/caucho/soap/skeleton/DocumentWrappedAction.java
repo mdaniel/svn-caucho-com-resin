@@ -33,6 +33,7 @@ import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.skeleton.Property;
 import static com.caucho.soap.wsdl.WSDLConstants.*;
+import com.caucho.soap.wsdl.WSDLDefinitions;
 
 import com.caucho.util.L10N;
 
@@ -76,13 +77,13 @@ public class DocumentWrappedAction extends AbstractAction {
   public DocumentWrappedAction(Method method, Method eiMethod,
                                JAXBContextImpl jaxbContext, 
                                String targetNamespace,
-                               String wsdlLocation,
+                               WSDLDefinitions wsdl,
                                Marshaller marshaller,
                                Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
     super(method, eiMethod, 
-          jaxbContext, targetNamespace, wsdlLocation,
+          jaxbContext, targetNamespace, wsdl,
           marshaller, unmarshaller);
   }
 

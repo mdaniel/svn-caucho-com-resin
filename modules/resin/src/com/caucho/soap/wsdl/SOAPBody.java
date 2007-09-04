@@ -32,6 +32,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import javax.xml.namespace.QName;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +55,10 @@ public class SOAPBody extends WSDLExtensibilityElement {
 
   @XmlAttribute(name="use")
   private SOAPUseChoice _use;
+
+  // XXX Added to accommodate WSDL given in TCK, but not in schema!
+  @XmlAttribute(name="message")
+  private QName _message;
 
   public void addPart(String part)
   {

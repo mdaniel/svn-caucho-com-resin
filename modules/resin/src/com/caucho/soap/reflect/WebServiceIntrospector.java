@@ -31,8 +31,10 @@ package com.caucho.soap.reflect;
 
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
+import com.caucho.soap.jaxws.JAXWSUtil;
 import com.caucho.soap.skeleton.DirectSkeleton;
 import com.caucho.soap.skeleton.AbstractAction;
+import com.caucho.soap.wsdl.WSDLDefinitions;
 import com.caucho.util.L10N;
 
 import org.w3c.dom.Node;
@@ -49,8 +51,10 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -65,19 +69,19 @@ public class WebServiceIntrospector {
   /**
    * Introspects the class
    */
-  public DirectSkeleton introspect(Class type)
-    //throws ConfigException
+  public static DirectSkeleton introspect(Class type)
     throws JAXBException, WebServiceException
   {
     // matches RI stub for the WSDL location
-    return introspect(type, "REPLACE_WITH_ACTUAL_URL");
+    return introspect(type, "REPLACE_WITH_ACTUAL_URL", null);
   }
 	   
   /**
    * Introspects the class
    */
-  public DirectSkeleton introspect(Class type, String wsdlLocation)
-    //throws ConfigException
+  public static DirectSkeleton introspect(Class type, 
+                                          String wsdlLocation,
+                                          WSDLDefinitions wsdl)
     throws JAXBException, WebServiceException
   {
     // server/4221 vs soap/0301
@@ -97,20 +101,41 @@ public class WebServiceIntrospector {
     Class[] jaxbClassArray = new Class[jaxbClasses.size()];
     jaxbClasses.toArray(jaxbClassArray);
 
-    JAXBContextImpl jaxbContext = new JAXBContextImpl(jaxbClassArray, null);
+    Class api = JAXWSUtil.getEndpointInterface(type);
+    String namespace = JAXWSUtil.getTargetNamespace(type, api);
+
+    Map<String,Object> properties = new HashMap<String,Object>();
+    properties.put(JAXBContextImpl.TARGET_NAMESPACE, namespace);
+
+    JAXBContextImpl jaxbContext = 
+      new JAXBContextImpl(jaxbClassArray, properties);
     Marshaller marshaller = jaxbContext.createMarshaller();
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-    DirectSkeleton skel = new DirectSkeleton(type, jaxbContext, wsdlLocation);
-    String namespace = skel.getNamespace();
+    DirectSkeleton skel = 
+      new DirectSkeleton(type, api, jaxbContext, wsdlLocation, namespace, wsdl);
 
     Method[] methods = type.getMethods();
+
+    boolean excludeIfNoWebMethod = false;
+
+    for (int i = 0; i < methods.length; i++) {
+      WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
+
+      if (webMethod != null && ! webMethod.exclude()) {
+        excludeIfNoWebMethod = true;
+        break;
+      }
+    }
 
     for (int i = 0; i < methods.length; i++) {
       if ((methods[i].getModifiers() & Modifier.PUBLIC) == 0)
         continue;
 
       WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
+
+      if (excludeIfNoWebMethod && webMethod == null)
+        continue;
 
       if (webService == null && webMethod == null && ! isInterface)
         continue;
@@ -122,8 +147,7 @@ public class WebServiceIntrospector {
         continue;
 
       AbstractAction action = 
-        AbstractAction.createAction(methods[i], jaxbContext, namespace,
-                                    skel.getWsdlLocation(),
+        AbstractAction.createAction(methods[i], jaxbContext, namespace, wsdl,
                                     marshaller, unmarshaller);
 
       skel.addAction(methods[i], action);

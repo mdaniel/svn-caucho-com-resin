@@ -226,16 +226,28 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     throws WebServiceException
   {
     try {
-      Skeleton skeleton = new WebServiceIntrospector().introspect(api, null);
-
       WSDLDefinitions definitions = WSDLParser.parse(api);
 
-      /*
-      if (definitions == null)
-        definitions = WSDLParser.parse(getWSDLDocumentLocation());
+      if (definitions == null && _wsdl != null) {
+        try {
+          definitions = WSDLParser.parse(_wsdl);
+        }
+        catch (WebServiceException e) {}
 
-      if (definitions == null)
-        throw new WebServiceException(L.l("Unable to parse WSDL"));*/
+        /*
+        if (definitions == null)
+          throw new WebServiceException(L.l("Unable to parse WSDL"));*/
+      }
+
+      String wsdlLocation = null;
+
+      if (_wsdl != null)
+        wsdlLocation = _wsdl.toString();
+      else
+        wsdlLocation = null;
+
+      Skeleton skeleton = 
+        WebServiceIntrospector.introspect(api, wsdlLocation, definitions);
 
       String endpointAddress = findEndpointAddress();
       String bindingId = SOAPBinding.SOAP11HTTP_BINDING;

@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong, Scott Ferguson
  */
 
 package com.caucho.soap.skeleton;
@@ -32,11 +32,19 @@ package com.caucho.soap.skeleton;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.skeleton.Property;
+import com.caucho.jaxb.skeleton.AttachmentProperty;
 
 import com.caucho.soap.jaxws.HandlerChainInvoker;
+
 import static com.caucho.soap.wsdl.WSDLConstants.*;
+import com.caucho.soap.wsdl.WSDLBinding;
+import com.caucho.soap.wsdl.WSDLBindingOperation;
 import com.caucho.soap.wsdl.WSDLDefinitions;
 import com.caucho.soap.wsdl.WSDLParser;
+import com.caucho.soap.wsdl.WSDLPortType;
+
+import com.caucho.util.Attachment;
+import com.caucho.util.AttachmentReader;
 import com.caucho.util.L10N;
 
 import javax.activation.DataHandler;
@@ -74,6 +82,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -90,6 +99,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -125,6 +135,7 @@ public abstract class AbstractAction {
 
   protected String _responseName;
   protected String _operationName;
+  protected String _portName;
   protected String _inputName;
   protected QName _requestName;
   protected QName _resultName;
@@ -162,6 +173,9 @@ public abstract class AbstractAction {
   protected final String _targetNamespace;
   protected final String _soapAction;
 
+  protected WSDLDefinitions _wsdl;
+  protected WSDLBindingOperation _bindingOperation;
+
   protected static XMLOutputFactory getXMLOutputFactory()
   {
     if (_xmlOutputFactory == null) {
@@ -190,7 +204,7 @@ public abstract class AbstractAction {
   protected AbstractAction(Method method, Method eiMethod,
                            JAXBContextImpl jaxbContext, 
                            String targetNamespace,
-                           String wsdlLocation,
+                           WSDLDefinitions wsdl,
                            Marshaller marshaller,
                            Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
@@ -204,6 +218,7 @@ public abstract class AbstractAction {
     // set the names for the input/output messages, portType/operation, and
     // binding/operation.
     _operationName = getWebMethodName(method, eiMethod);
+    _portName = getPortName(method, eiMethod);
     _inputName = _operationName;
     _responseName = _operationName + "Response";
     _soapAction = getSOAPAction(method, eiMethod);
@@ -212,17 +227,23 @@ public abstract class AbstractAction {
     // Arguments
     //
     
-    WSDLDefinitions wsdl = null;
+    _wsdl = wsdl;
 
-    try {
-      if (wsdlLocation != null) 
-        wsdl = WSDLParser.parse(wsdlLocation);
+    if (_wsdl != null) {
+      for (WSDLBinding binding : _wsdl.getBindings()) {
+        WSDLPortType portType = binding.getPortType();
+
+        if (portType != null && portType.getName().equals(_portName)) {
+          for (WSDLBindingOperation operation : binding.getOperations()) {
+            if (operation.getName().equals(_operationName)) {
+              _bindingOperation = operation;
+              break;
+            }
+          }
+        }
+      }
     }
-    catch (WebServiceException e) {
-      log.fine(L.l("Unable to read WSDL from location {0}: {1}", 
-                   wsdlLocation, e));
-    }
-    
+
     Class[] params = method.getParameterTypes();
     Type[] genericParams = method.getGenericParameterTypes();
     Annotation[][] paramAnn = method.getParameterAnnotations();
@@ -241,6 +262,7 @@ public abstract class AbstractAction {
     
     for (int i = 0; i < params.length; i++) {
       boolean isHeader = false;
+      boolean isAttachment = false;
 
       String localName = "arg" + i; // As per JAX-WS spec
 
@@ -282,6 +304,9 @@ public abstract class AbstractAction {
         }
 
         isHeader = webParam.header();
+
+        if (! isHeader)
+          isAttachment = isAttachment(webParam);
       }
       else if (params[i].equals(Holder.class)) {
         mode = WebParam.Mode.INOUT;
@@ -310,7 +335,10 @@ public abstract class AbstractAction {
         headerList.add(pMarshal);
         _headerArguments.put(localName, pMarshal);
       }
-      else if (DataHandler.class.equals(type)) {
+      else if (isAttachment) {
+        if (! (property instanceof AttachmentProperty))
+          throw new WebServiceException(L.l("Argument {0} of method {1} is of type {2}: Attachment argument types must map to base64Binary", i, method.getName(), params[i]));
+
         if (pMarshal instanceof InParameterMarshal)
           _attachmentInputs++;
         else if (pMarshal instanceof OutParameterMarshal)
@@ -422,7 +450,7 @@ public abstract class AbstractAction {
   public static AbstractAction createAction(Method method, 
                                             JAXBContextImpl jaxbContext, 
                                             String targetNamespace,
-                                            String wsdlLocation,
+                                            WSDLDefinitions wsdl,
                                             Marshaller marshaller,
                                             Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
@@ -497,8 +525,8 @@ public abstract class AbstractAction {
     // Document wrapped is the default for methods w/o a @SOAPBinding
     if (soapBinding == null)
       return new DocumentWrappedAction(method, eiMethod, 
-                                       jaxbContext, targetNamespace,
-                                       wsdlLocation, marshaller, unmarshaller);
+                                       jaxbContext, targetNamespace, wsdl, 
+                                       marshaller, unmarshaller);
 
     if (soapBinding.use() == SOAPBinding.Use.ENCODED)
       throw new UnsupportedOperationException(L.l("SOAP encoded style is not supported by JAX-WS"));
@@ -506,13 +534,11 @@ public abstract class AbstractAction {
     if (soapBinding.style() == SOAPBinding.Style.DOCUMENT) {
       if (soapBinding.parameterStyle() == SOAPBinding.ParameterStyle.WRAPPED)
         return new DocumentWrappedAction(method, eiMethod, 
-                                         jaxbContext, targetNamespace,
-                                         wsdlLocation,
+                                         jaxbContext, targetNamespace, wsdl,
                                          marshaller, unmarshaller);
       else {
         return new DocumentBareAction(method, eiMethod, 
-                                      jaxbContext, targetNamespace,
-                                      wsdlLocation,
+                                      jaxbContext, targetNamespace, wsdl,
                                       marshaller, unmarshaller);
       }
     }
@@ -520,9 +546,14 @@ public abstract class AbstractAction {
       if (soapBinding.parameterStyle() != SOAPBinding.ParameterStyle.WRAPPED)
         throw new UnsupportedOperationException(L.l("SOAP RPC bare style not supported"));
 
-      return new RpcAction(method, eiMethod, jaxbContext, targetNamespace,
-                           wsdlLocation, marshaller, unmarshaller);
+      return new RpcAction(method, eiMethod, jaxbContext, targetNamespace, wsdl,
+                           marshaller, unmarshaller);
     }
+  }
+
+  protected boolean isAttachment(WebParam webParam)
+  {
+    return webParam.name().startsWith("attach");
   }
 
   /**
@@ -552,9 +583,30 @@ public abstract class AbstractAction {
       httpConnection.setDoInput(true);
       httpConnection.setDoOutput(true);
 
-      OutputStream httpOut = httpConnection.getOutputStream();
+      OutputStream httpOut = null;
       XMLStreamWriter out = null;
       DOMResult dom = null;
+
+      UUID uuid = UUID.randomUUID();
+
+      if (_attachmentInputs > 0) {
+        // note that we have to add the request property (header) before
+        // we get the output stream
+        httpConnection.addRequestProperty("Content-Type", 
+                                          "multipart/related; " + 
+                                          "type=\"text/xml\"; " + 
+                                          "boundary=\"uuid:" + uuid + "\"");
+
+        httpOut = httpConnection.getOutputStream();
+
+        PrintWriter writer = new PrintWriter(httpOut);
+        writer.print("--uuid:" + uuid + "\r\n");
+        writer.print("Content-Type: text/xml\r\n");
+        writer.print("\r\n");
+        writer.flush();
+      }
+      else
+        httpOut = httpConnection.getOutputStream();
 
       if (handlerChain != null) {
         dom = new DOMResult();
@@ -566,6 +618,11 @@ public abstract class AbstractAction {
 
       writeRequest(out, args);
       out.flush();
+
+      if (_attachmentInputs > 0) {
+        httpOut.write("\r\n".getBytes());
+        writeAttachments(httpOut, uuid, args);
+      }
 
       if (handlerChain != null) {
         Source source = new DOMSource(dom.getNode());
@@ -583,16 +640,33 @@ public abstract class AbstractAction {
       // 
 
       httpConnection.getResponseCode();
-      
-      if (handlerChain != null) {
-        InputStream is = handlerChain.invokeClientInbound(httpConnection);
+      InputStream is = httpConnection.getInputStream();
 
-        in = _xmlInputFactory.createXMLStreamReader(is);
+      if (handlerChain != null)
+        is = handlerChain.invokeClientInbound(httpConnection);
+
+      String contentType = httpConnection.getHeaderField("Content-Type");
+
+      if (contentType != null && contentType.startsWith("multipart/related")) {
+        String[] tokens = contentType.split(";");
+
+        String boundary = null;
+
+        for (int i = 0; i < tokens.length; i++) {
+          int start = tokens[i].indexOf("boundary=");
+          
+          if (start >= 0) {
+            boundary = tokens[i].substring(start + "boundary=".length() + 1,
+                                           tokens[i].lastIndexOf('"'));
+            break;
+          }
+        }
+
+        if (boundary == null)
+          return null; // XXX throw something about malformed response
       }
-      else {
-        InputStream httpIn = httpConnection.getInputStream();
-        in = _xmlInputFactory.createXMLStreamReader(httpIn);
-      }
+ 
+      in = _xmlInputFactory.createXMLStreamReader(is);
 
       if (httpConnection.getResponseCode() != 200)
         return null; // XXX more meaningful error
@@ -636,6 +710,15 @@ public abstract class AbstractAction {
     out.writeEndElement(); // Envelope
   }
 
+  protected void writeAttachments(OutputStream out, UUID uuid, Object[] args)
+    throws IOException
+  {
+    PrintWriter writer = new PrintWriter(out);
+
+    for (int i = 0; i < _attachmentArgs.length; i++)
+      _attachmentArgs[i].serializeCall(writer, out, uuid, args);
+  }
+
   abstract protected void writeMethodInvocation(XMLStreamWriter out, 
                                                 Object []args)
     throws IOException, XMLStreamException, JAXBException;
@@ -647,7 +730,8 @@ public abstract class AbstractAction {
    * Invokes the request for a call.
    */
   public int invoke(Object service, XMLStreamReader header,
-                     XMLStreamReader in, XMLStreamWriter out)
+                    XMLStreamReader in, XMLStreamWriter out,
+                    List<Attachment> attachments)
     throws IOException, XMLStreamException, Throwable
   {
     // We're starting out at the point in the input stream where the 
@@ -655,6 +739,7 @@ public abstract class AbstractAction {
     // point in the output stream where the results are to be written.
     
     Object[] args = readMethodInvocation(header, in);
+    readAttachments(attachments, args);
 
     Object value = null;
 
@@ -730,6 +815,25 @@ public abstract class AbstractAction {
         else {
           arg.deserializeCall(header, args);
         }
+      }
+    }
+  }
+
+  protected void readAttachments(List<Attachment> attachments, Object[] args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    for (int i = 0; i < _attachmentArgs.length; i++) {
+      if (_attachmentArgs[i] instanceof OutParameterMarshal)
+        continue;
+
+      _attachmentArgs[i].prepareArgument(args);
+
+      if (attachments != null) {
+        if (i < attachments.size())
+          _attachmentArgs[i].deserializeCall(attachments.get(i), args);
+        
+        else
+          log.fine(L.l("Received unexpected attachment"));
       }
     }
   }
@@ -892,6 +996,22 @@ public abstract class AbstractAction {
       name = webMethod.operationName();
     
     return name;
+  }
+
+  public static String getPortName(Method method, Method eiMethod)
+  {
+    Class cl = method.getDeclaringClass();
+    WebService webService = (WebService) cl.getAnnotation(WebService.class);
+
+    if (webService == null && eiMethod != null) {
+      cl = eiMethod.getDeclaringClass();
+      webService = (WebService) cl.getAnnotation(WebService.class);
+    }
+
+    if (webService != null && ! "".equals(webService.portName()))
+      return webService.portName();
+    
+    return null;
   }
 
   public static String getSOAPAction(Method method, Method eiMethod)

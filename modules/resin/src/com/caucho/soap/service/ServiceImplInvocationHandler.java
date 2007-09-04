@@ -54,7 +54,7 @@ public class ServiceImplInvocationHandler implements InvocationHandler
     _url = url;
 
     try {
-      _skeleton = new WebServiceIntrospector().introspect(api, url);
+      _skeleton = WebServiceIntrospector.introspect(api, url, null);
     }
     catch (WebServiceException e) {
       throw new RuntimeException(e);

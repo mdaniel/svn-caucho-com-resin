@@ -33,6 +33,10 @@ import com.caucho.jaxb.skeleton.ConstantNamer;
 import com.caucho.jaxb.skeleton.Namer;
 import com.caucho.jaxb.skeleton.Property;
 
+import com.caucho.util.Attachment;
+
+import com.caucho.xml.stream.StaxUtil;
+
 import javax.jws.WebParam;
 import static javax.xml.XMLConstants.*;
 import javax.xml.bind.JAXBException;
@@ -42,7 +46,12 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
+import java.util.UUID;
+
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 public abstract class ParameterMarshal {
   protected static final String TARGET_NAMESPACE_PREFIX = "m";
@@ -123,6 +132,12 @@ public abstract class ParameterMarshal {
   {
   }
 
+  public void serializeCall(PrintWriter writer, OutputStream out, 
+                            UUID uuid, Object []args)
+    throws IOException
+  {
+  }
+
   public Object deserializeReply(XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -142,10 +157,17 @@ public abstract class ParameterMarshal {
   {
   }
 
+  public void deserializeCall(Attachment attachment, Object []args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+  }
+
   public void deserializeCall(XMLStreamReader in, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
   }
+
+
 
   public void serializeReply(XMLStreamWriter out, Object ret)
     throws IOException, XMLStreamException, JAXBException
@@ -163,13 +185,19 @@ public abstract class ParameterMarshal {
     out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
     out.writeAttribute("name", _name.getLocalPart());
 
+    /* XXX I'm pretty sure this will now be taken care of by the
+     *  default targetNamespace in JAXBContextImpl
+     *
     int colon = _property.getSchemaType().indexOf(':');
 
     if (colon < 0)
       out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + 
                                  _property.getSchemaType());
     else 
-      out.writeAttribute("type", _property.getSchemaType());
+      out.writeAttribute("type", _property.getSchemaType());*/
+
+    String type = StaxUtil.qnameToString(out, _property.getSchemaType());
+    out.writeAttribute("type", type);
 
     // XXX list?
     if (_property.getMaxOccurs() != null) {

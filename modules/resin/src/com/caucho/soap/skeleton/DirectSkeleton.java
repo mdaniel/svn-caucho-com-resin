@@ -35,6 +35,9 @@ import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.soap.jaxws.HandlerChainInvoker;
 import com.caucho.soap.jaxws.JAXWSUtil;
 import com.caucho.soap.jaxws.PortInfoImpl;
+import com.caucho.soap.wsdl.WSDLDefinitions;
+import com.caucho.util.Attachment;
+import com.caucho.util.AttachmentReader;
 import com.caucho.util.L10N;
 import com.caucho.xml.XmlPrinter;
 import com.caucho.xml.stream.StaxUtil;
@@ -70,6 +73,7 @@ import javax.xml.ws.handler.PortInfo;
 import static javax.xml.ws.handler.MessageContext.*;
 import javax.xml.ws.soap.SOAPBinding;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
@@ -89,7 +93,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -125,6 +128,7 @@ public class DirectSkeleton extends Skeleton {
   private String _serviceName;
   private String _wsdlLocation = "REPLACE_WITH_ACTUAL_URL";
   private PortInfo _portInfo;
+  private WSDLDefinitions _wsdl;
 
   // The URI in SOAPBinding is wrong, but matches that of JAVAEE
   private String _soapNamespaceURI = "http://schemas.xmlsoap.org/wsdl/soap/";
@@ -161,26 +165,17 @@ public class DirectSkeleton extends Skeleton {
     return _outputFactory;
   }
 
-  public DirectSkeleton(Class type, 
+  public DirectSkeleton(Class type, Class api,
                         JAXBContextImpl context, 
-                        String wsdlLocation)
+                        String wsdlLocation,
+                        String targetNamespace,
+                        WSDLDefinitions wsdl)
     throws WebServiceException
   {
     WebService webService = (WebService) type.getAnnotation(WebService.class);
-    _api = type;
 
-    if (webService != null && ! "".equals(webService.endpointInterface())) {
-      try {
-        ClassLoader loader = type.getClassLoader();
-        _api = loader.loadClass(webService.endpointInterface());
-      }
-      catch (ClassNotFoundException e) {
-        throw new WebServiceException(e);
-      }
-    }
-
-    setNamespace(type, _api);
-
+    _api = api;
+    _namespace = targetNamespace;
     _portType = getWebServiceName(type);
 
     if (webService != null && ! "".equals(webService.portName()))
@@ -197,6 +192,8 @@ public class DirectSkeleton extends Skeleton {
       _wsdlLocation = webService.wsdlLocation();
     else
       _wsdlLocation = wsdlLocation;
+
+    _wsdl = wsdl;
 
     _bindingId = SOAPBinding.SOAP11HTTP_BINDING;
     
@@ -248,41 +245,6 @@ public class DirectSkeleton extends Skeleton {
   public String getNamespace()
   {
     return _namespace;
-  }
-
-  private void setNamespace(Class type, Class api) 
-  {
-    WebService webService = (WebService) type.getAnnotation(WebService.class);
-
-    // try to get the namespace from the annotation first...
-    if (webService != null) {
-      if (! "".equals(webService.targetNamespace())) {
-        _namespace = webService.targetNamespace();
-        return;
-      }
-      else if (! api.equals(type)) {
-        webService = (WebService) api.getAnnotation(WebService.class);
-
-        if (! "".equals(webService.targetNamespace())) {
-          _namespace = webService.targetNamespace();
-          return;
-        }
-      }
-    }
-
-    // get the namespace from the package name
-    _namespace = null;
-    String packageName = type.getPackage().getName();
-    StringTokenizer st = new StringTokenizer(packageName, ".");
-
-    while (st.hasMoreTokens()) { 
-      if (_namespace == null) 
-        _namespace = st.nextToken();
-      else
-        _namespace = st.nextToken() + "." + _namespace;
-    }
-
-    _namespace = "http://"+_namespace+"/";
   }
 
   static String getWebServiceName(Class type) 
@@ -345,6 +307,13 @@ public class DirectSkeleton extends Skeleton {
     XMLStreamWriter out = null;
     DOMResult domResult = null;
 
+    String contentType = request.getHeader("Content-Type");
+
+    List<Attachment> attachments = null;
+
+    if (contentType != null && contentType.startsWith("multipart/related"))
+      attachments = AttachmentReader.read(is, contentType);
+
     if (_handlerChain != null) {
       is = _handlerChain.invokeServerInbound(request, os);
 
@@ -356,11 +325,30 @@ public class DirectSkeleton extends Skeleton {
       in = getXMLInputFactory().createXMLStreamReader(is);
       out = getXMLOutputFactory().createXMLStreamWriter(domResult);
     }
+    else if (attachments != null && attachments.size() > 0) {
+      Attachment body = attachments.get(0);
+      ByteArrayInputStream bais = new ByteArrayInputStream(body.getContents());
+
+      in = getXMLInputFactory().createXMLStreamReader(bais);
+      out = getXMLOutputFactory().createXMLStreamWriter(os);
+    }
     else {
       in = getXMLInputFactory().createXMLStreamReader(is);
       out = getXMLOutputFactory().createXMLStreamWriter(os);
     }
 
+    response.setStatus(invoke(service, in, out, attachments));
+
+    if (_handlerChain != null) {
+      Source source = new DOMSource(domResult.getNode());
+      _handlerChain.invokeServerOutbound(source, os);
+    }
+  }
+
+  private int invoke(Object service, XMLStreamReader in, XMLStreamWriter out,
+                     List<Attachment> attachments)
+    throws IOException, XMLStreamException, Throwable
+  {
     in.nextTag();
 
     // XXX Namespace
@@ -409,8 +397,11 @@ public class DirectSkeleton extends Skeleton {
     AbstractAction action = _actionNames.get(actionName);
 
     // XXX: exceptions<->faults
+    int responseCode = 500;
+
     if (action != null)
-      response.setStatus(action.invoke(service, header, in, out));
+      responseCode = action.invoke(service, header, in, out, attachments);
+
     else {
       // skip the unknown action
       while (in.getEventType() != in.END_ELEMENT ||
@@ -429,10 +420,7 @@ public class DirectSkeleton extends Skeleton {
 
     out.flush();
 
-    if (_handlerChain != null) {
-      Source source = new DOMSource(domResult.getNode());
-      _handlerChain.invokeServerOutbound(source, os);
-    }
+    return responseCode;
   }
 
   public void setSeparateSchema(boolean separateSchema) 

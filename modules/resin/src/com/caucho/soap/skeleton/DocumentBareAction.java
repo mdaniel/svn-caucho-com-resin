@@ -33,6 +33,7 @@ import com.caucho.jaxb.skeleton.Property;
 import com.caucho.jaxb.skeleton.WrapperProperty;
 import com.caucho.jaxb.JAXBContextImpl;
 import static com.caucho.soap.wsdl.WSDLConstants.*;
+import com.caucho.soap.wsdl.WSDLDefinitions;
 import com.caucho.util.L10N;
 import com.caucho.xml.stream.StaxUtil;
 
@@ -79,13 +80,13 @@ public class DocumentBareAction extends AbstractAction {
   public DocumentBareAction(Method method, Method eiMethod,
                             JAXBContextImpl jaxbContext, 
                             String targetNamespace,
-                            String wsdlLocation,
+                            WSDLDefinitions wsdl,
                             Marshaller marshaller,
                             Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
     super(method, eiMethod, 
-          jaxbContext, targetNamespace, wsdlLocation,
+          jaxbContext, targetNamespace, wsdl,
           marshaller, unmarshaller);
 
     _messageName = _operationName;
@@ -371,7 +372,10 @@ public class DocumentBareAction extends AbstractAction {
       out.writeAttribute("name", _operationName);
 
       Property property = _bodyArgs[_inputArgument].getProperty();
-      out.writeAttribute("type", property.getSchemaType());
+
+      String type = StaxUtil.qnameToString(out, property.getSchemaType());
+
+      out.writeAttribute("type", type);
     }
 
     if (_returnMarshal != null) {
@@ -379,7 +383,11 @@ public class DocumentBareAction extends AbstractAction {
                             "element", 
                             W3C_XML_SCHEMA_NS_URI);
       out.writeAttribute("name", _responseName);
-      out.writeAttribute("type", _returnMarshal.getProperty().getSchemaType());
+
+      QName schemaType = _returnMarshal.getProperty().getSchemaType();
+      String type = StaxUtil.qnameToString(out, schemaType);
+
+      out.writeAttribute("type", type);
     }
   }
 
