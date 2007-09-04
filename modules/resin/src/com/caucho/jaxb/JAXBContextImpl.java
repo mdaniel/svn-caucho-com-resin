@@ -67,6 +67,10 @@ import java.util.*;
  */
 public class JAXBContextImpl extends JAXBContext {
   public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
+
+  public static final String TARGET_NAMESPACE = 
+    "com.caucho.jaxb.targetNamespace";
+
   static final ValidationEventHandler DEFAULT_VALIDATION_EVENT_HANDLER
     = new DefaultValidationEventHandler();
 
@@ -96,8 +100,9 @@ public class JAXBContextImpl extends JAXBContext {
     _specialClasses.add(DataHandler.class);
   }
 
+  private String _targetNamespace = null;
+
   private String[] _packages;
-  private ClassLoader _classLoader;
   private JAXBIntrospector _jaxbIntrospector;
 
   private XMLInputFactory _staxInputFactory;
@@ -143,9 +148,10 @@ public class JAXBContextImpl extends JAXBContext {
     throws JAXBException
   {
     _jaxbIntrospector = new JAXBIntrospectorImpl(this);
-    _classLoader = classLoader;
-
     StringTokenizer st = new StringTokenizer(contextPath, ":");
+
+    if (properties != null)
+      _targetNamespace = (String) properties.get(TARGET_NAMESPACE);
 
     do {
       String packageName = st.nextToken(); 
@@ -153,18 +159,7 @@ public class JAXBContextImpl extends JAXBContext {
     } 
     while (st.hasMoreTokens());
 
-    if (properties != null)
-      for(Map.Entry<String,?> e : properties.entrySet())
-        setProperty(e.getKey(), e.getValue());
-
-    DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
-    
-    _dynamicSkeleton = new DynamicJAXBElementSkeleton(this);
-
-    _isDiscoveryFinished = true;
-
-    for (ClassSkeleton skeleton : _classSkeletons.values())
-      skeleton.postProcess();
+    init(properties);
   }
 
   public static JAXBContext createContext(Class []classes, 
@@ -179,7 +174,9 @@ public class JAXBContextImpl extends JAXBContext {
   {
     _jaxbIntrospector = new JAXBIntrospectorImpl(this);
     _packages = new String[0];
-    _classLoader = null;
+
+    if (properties != null)
+      _targetNamespace = (String) properties.get(TARGET_NAMESPACE);
 
     for(Class c : classes) {
       if (c.getName().endsWith(".ObjectFactory"))
@@ -190,6 +187,12 @@ public class JAXBContextImpl extends JAXBContext {
         createSkeleton(c);
     }
 
+    init(properties);
+  }
+
+  private void init(Map<String,?> properties)
+    throws JAXBException
+  {
     if (properties != null) {
       for(Map.Entry<String,?> e : properties.entrySet())
         setProperty(e.getKey(), e.getValue());
@@ -254,6 +257,11 @@ public class JAXBContextImpl extends JAXBContext {
     }
 
     return _staxOutputFactory;
+  }
+
+  public String getTargetNamespace()
+  {
+    return _targetNamespace;
   }
 
   public String toString() 
@@ -526,7 +534,7 @@ public class JAXBContextImpl extends JAXBContext {
       }
 
       if (cl.isEnum()) {
-        EnumProperty enumProperty = new EnumProperty(cl);
+        EnumProperty enumProperty = new EnumProperty(cl, this);
         _enums.add(enumProperty);
 
         return enumProperty;

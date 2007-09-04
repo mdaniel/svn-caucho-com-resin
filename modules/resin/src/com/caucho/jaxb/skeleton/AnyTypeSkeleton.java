@@ -189,8 +189,8 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
       Property property = _context.getSimpleTypeProperty(obj.getClass());
 
       if (property != null) {
-        XmlInstanceWrapper instanceWrapper = 
-          new XmlInstanceWrapper(property.getSchemaType());
+        String typeName = StaxUtil.qnameToString(out, property.getSchemaType());
+        XmlInstanceWrapper instanceWrapper = new XmlInstanceWrapper(typeName);
 
         Iterator extendedAttributes = instanceWrapper.getExtendedIterator();
 

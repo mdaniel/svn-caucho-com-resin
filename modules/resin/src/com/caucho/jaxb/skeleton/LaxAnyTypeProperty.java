@@ -34,6 +34,7 @@ import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -45,6 +46,7 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 import org.w3c.dom.Node;
@@ -53,6 +55,9 @@ import org.w3c.dom.Node;
  * a property referencing some other Skeleton
  */
 public class LaxAnyTypeProperty extends Property {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "anyType", "xsd");
+
   private static final L10N L = new L10N(LaxAnyTypeProperty.class);
 
   private LaxAnyTypeSkeleton _skeleton;
@@ -99,9 +104,9 @@ public class LaxAnyTypeProperty extends Property {
     return _skeleton.bindTo(binder, node, obj, namer, null);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:anyType";
+    return SCHEMA_TYPE;
   }
 
   public boolean isXmlPrimitiveType()

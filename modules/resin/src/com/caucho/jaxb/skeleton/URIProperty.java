@@ -29,9 +29,12 @@
 
 package com.caucho.jaxb.skeleton;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,6 +43,9 @@ import java.net.URISyntaxException;
  * URI property
  */
 public class URIProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "anyURI", "xsd");
+
   public static final URIProperty PROPERTY = new URIProperty();
 
   protected String write(Object in)
@@ -60,8 +66,8 @@ public class URIProperty extends CDataProperty {
     }
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:anyURI";
+    return SCHEMA_TYPE;
   }
 }

@@ -219,7 +219,7 @@ public class MapProperty extends Property {
     throw new UnsupportedOperationException();
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     throw new UnsupportedOperationException();
   }

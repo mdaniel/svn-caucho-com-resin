@@ -29,10 +29,13 @@
 
 package com.caucho.jaxb.skeleton;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.datatype.Duration;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,6 +46,9 @@ import com.caucho.jaxb.JAXBUtil;
  * Duration property
  */
 public class DurationProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "duration", "xsd");
+
   public static final DurationProperty PROPERTY = new DurationProperty();
 
   protected String write(Object in)
@@ -58,8 +64,8 @@ public class DurationProperty extends CDataProperty {
     return JAXBUtil.getDatatypeFactory().newDuration(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:duration";
+    return SCHEMA_TYPE;
   }
 }

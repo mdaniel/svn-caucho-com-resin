@@ -405,23 +405,21 @@ public class JAXBUtil {
       return toUpperCase(name.charAt(0)) + "";
   }
 
-  public static QName getXmlSchemaDatatype(Class cl)
+  public static QName getXmlSchemaDatatype(Class cl, JAXBContextImpl context)
   {
     if (_datatypeMap.containsKey(cl))
       return _datatypeMap.get(cl);
 
     String name = null;
-    String namespace = null;
+    String namespace = context.getTargetNamespace();
 
     Package pkg = cl.getPackage();
 
     // look at package defaults first...
-    if (pkg.isAnnotationPresent(XmlSchema.class)) {
-      XmlSchema schema = (XmlSchema) pkg.getAnnotation(XmlSchema.class);
+    XmlSchema schema = (XmlSchema) pkg.getAnnotation(XmlSchema.class);
 
-      if (! "".equals(schema.namespace()))
-        namespace = schema.namespace();
-    }
+    if (schema != null && ! "".equals(schema.namespace()))
+      namespace = schema.namespace();
 
     if (cl.isAnnotationPresent(XmlType.class)) {
       XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
@@ -430,7 +428,7 @@ public class JAXBUtil {
         name = xmlType.name();
 
       if (! "##default".equals(xmlType.namespace()))
-        namespace = xmlType.name();
+        namespace = xmlType.namespace();
     }
 
     if (name == null)

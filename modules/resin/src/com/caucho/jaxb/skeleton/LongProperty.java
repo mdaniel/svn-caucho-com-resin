@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -36,12 +37,16 @@ import javax.xml.bind.UnmarshalException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a Long Property
  */
 public class LongProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "long", "xsd");
+
   public static final LongProperty OBJECT_PROPERTY = new LongProperty(true);
   public static final LongProperty PRIMITIVE_PROPERTY = new LongProperty(false);
 
@@ -68,9 +73,9 @@ public class LongProperty extends CDataProperty {
     return Long.valueOf(DatatypeConverter.parseLong(in));
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:long";
+    return SCHEMA_TYPE;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, long l, QName qname)

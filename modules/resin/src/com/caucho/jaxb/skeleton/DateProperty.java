@@ -28,8 +28,12 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -37,6 +41,9 @@ import java.util.Calendar;
  * a Date Property
  */
 public class DateProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "date", "xsd");
+
   public static final DateProperty PROPERTY = new DateProperty();
 
   protected String write(Object in)
@@ -49,8 +56,8 @@ public class DateProperty extends CDataProperty {
     return DatatypeConverter.parseDate(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:date";
+    return SCHEMA_TYPE;
   }
 }

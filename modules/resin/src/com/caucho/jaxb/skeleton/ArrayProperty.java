@@ -87,7 +87,7 @@ public abstract class ArrayProperty extends IterableProperty {
                                 type));
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     return _componentProperty.getSchemaType();
   }

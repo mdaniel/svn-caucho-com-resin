@@ -29,42 +29,21 @@
 
 package com.caucho.jaxb.skeleton;
 
-import javax.xml.XMLConstants;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import java.io.IOException;
-import java.math.BigInteger;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import com.caucho.util.Attachment;
 
 /**
- * a BigInteger Property
- */
-public class BigIntegerProperty extends CDataProperty {
-  public static final QName SCHEMA_TYPE = 
-    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "integer", "xsd");
+ * Implemented by Properties that can be written and read as attachments.
+ **/
+public interface AttachmentProperty {
+  public String getMimeType(Object obj);
 
-  public static final BigIntegerProperty PROPERTY = new BigIntegerProperty();
+  public void writeAsAttachment(Object obj, OutputStream out)
+    throws IOException;
 
-  protected String write(Object in)
-  {
-    return DatatypeConverter.printInteger((BigInteger) in);
-  }
-
-  protected Object read(String in)
-  {
-    return DatatypeConverter.parseInteger(in);
-  }
-
-  public QName getSchemaType()
-  {
-    return SCHEMA_TYPE;
-  }
-
-  public boolean isXmlPrimitiveType()
-  {
-    return true;
-  }
+  public Object readFromAttachment(Attachment attachment)
+    throws IOException;
 }
-
-

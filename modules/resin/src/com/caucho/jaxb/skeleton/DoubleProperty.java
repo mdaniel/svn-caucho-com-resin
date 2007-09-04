@@ -28,18 +28,24 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a Double Property
  */
 public class DoubleProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "double", "xsd");
+
   public static final DoubleProperty OBJECT_PROPERTY 
     = new DoubleProperty(true);
   public static final DoubleProperty PRIMITIVE_PROPERTY 
@@ -60,9 +66,9 @@ public class DoubleProperty extends CDataProperty {
     return DatatypeConverter.parseDouble(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:double";
+    return SCHEMA_TYPE;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, double d, QName qname)

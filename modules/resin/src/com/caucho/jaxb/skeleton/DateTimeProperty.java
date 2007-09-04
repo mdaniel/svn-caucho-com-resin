@@ -28,22 +28,22 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-import java.text.*;
 
-import java.lang.reflect.*;
-import java.io.*;
+import javax.xml.XMLConstants;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.namespace.QName;
 
-import com.caucho.vfs.WriteStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * a Date Property
  */
 public class DateTimeProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "dateTime", "xsd");
+
   public static final DateTimeProperty PROPERTY = new DateTimeProperty();
 
   protected String write(Object in)
@@ -59,9 +59,9 @@ public class DateTimeProperty extends CDataProperty {
     return DatatypeConverter.parseDateTime(in).getTime();
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:dateTime";
+    return SCHEMA_TYPE;
   }
 }
 

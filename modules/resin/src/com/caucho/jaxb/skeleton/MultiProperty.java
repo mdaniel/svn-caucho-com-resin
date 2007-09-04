@@ -155,10 +155,10 @@ public class MultiProperty extends Property {
     return null;
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     // XXX
-    return "";
+    return null;
   }
 
   public boolean isXmlPrimitiveType()

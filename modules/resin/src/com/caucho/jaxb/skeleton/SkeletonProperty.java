@@ -108,9 +108,9 @@ public class SkeletonProperty extends Property {
     return _skeleton.bindTo(binder, node, obj, namer, null);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return JAXBUtil.qNameToString(_skeleton.getTypeName());
+    return _skeleton.getTypeName();
   }
 
   public boolean isXmlPrimitiveType()

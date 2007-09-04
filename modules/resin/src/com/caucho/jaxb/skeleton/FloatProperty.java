@@ -28,18 +28,24 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a Float Property
  */
 public class FloatProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "float", "xsd");
+
   public static final FloatProperty OBJECT_PROPERTY 
     = new FloatProperty(true);
   public static final FloatProperty PRIMITIVE_PROPERTY 
@@ -60,9 +66,9 @@ public class FloatProperty extends CDataProperty {
     return DatatypeConverter.parseFloat(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:float";
+    return SCHEMA_TYPE;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, float f, QName qname)

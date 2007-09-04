@@ -28,23 +28,23 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.datatype.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-import java.text.*;
 
-import java.lang.reflect.*;
-import java.io.*;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBException;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 
-import com.caucho.vfs.WriteStream;
+import java.util.Calendar;
+
+import com.caucho.jaxb.JAXBUtil;
 
 /**
  * a Date Property
  */
 public class XMLGregorianCalendarProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "anySimpleType", "xsd");
+
   public static final XMLGregorianCalendarProperty PROPERTY 
     = new XMLGregorianCalendarProperty();
 
@@ -59,9 +59,9 @@ public class XMLGregorianCalendarProperty extends CDataProperty {
     return JAXBUtil.getDatatypeFactory().newXMLGregorianCalendar(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:anySimpleType";
+    return SCHEMA_TYPE;
   }
 }
 

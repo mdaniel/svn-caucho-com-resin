@@ -129,7 +129,7 @@ public class XmlListCollectionProperty extends CDataProperty {
     }
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     return _componentProperty.getSchemaType();
   }

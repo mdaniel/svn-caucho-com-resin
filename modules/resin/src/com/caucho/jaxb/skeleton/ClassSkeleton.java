@@ -35,6 +35,8 @@ import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.annotation.XmlLocation;
 import com.caucho.util.L10N;
 
+import com.caucho.xml.stream.StaxUtil;
+
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBException;
@@ -188,7 +190,7 @@ public class ClassSkeleton<C> extends Skeleton {
         }
       }
 
-      _typeName = JAXBUtil.getXmlSchemaDatatype(_class);
+      _typeName = JAXBUtil.getXmlSchemaDatatype(_class, _context);
 
       // Special case: when name="", this is an "anonymous" type, bound
       // exclusively to a particular element name
@@ -196,7 +198,7 @@ public class ClassSkeleton<C> extends Skeleton {
         _context.addXmlType(_typeName, this);
 
       // Check for the complete name of the element...
-      String namespace = null;
+      String namespace = _context.getTargetNamespace();
 
       // look at package defaults first...
       XmlSchema schema = (XmlSchema) _package.getAnnotation(XmlSchema.class);
@@ -687,6 +689,9 @@ public class ClassSkeleton<C> extends Skeleton {
       return ret;
     }
     catch (InvocationTargetException e) {
+      if (e.getTargetException() != null)
+        throw new UnmarshalException(e.getTargetException());
+
       throw new UnmarshalException(e);
     }
     catch (IllegalAccessException e) {
@@ -1089,11 +1094,17 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if (Collection.class.isAssignableFrom(_value.getType())) {
         out.writeEmptyElement(XML_SCHEMA_PREFIX, "list", XML_SCHEMA_NS);
-        out.writeAttribute("itemType", _value.getSchemaType());
+
+        String itemType = StaxUtil.qnameToString(out, _value.getSchemaType());
+
+        out.writeAttribute("itemType", itemType);
       }
       else {
         out.writeEmptyElement(XML_SCHEMA_PREFIX, "restriction", XML_SCHEMA_NS);
-        out.writeAttribute("base", _value.getSchemaType());
+
+        String base = StaxUtil.qnameToString(out, _value.getSchemaType());
+
+        out.writeAttribute("base", base);
       }
 
       for (Accessor accessor : _attributeAccessors)

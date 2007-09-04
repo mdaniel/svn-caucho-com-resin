@@ -143,7 +143,7 @@ public class WrapperProperty extends Property {
     return false;
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     return _property.getSchemaType(); // XXX
   }

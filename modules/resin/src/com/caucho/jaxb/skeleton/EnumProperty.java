@@ -48,6 +48,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 
 import com.caucho.util.L10N;
@@ -68,16 +69,16 @@ public class EnumProperty<E extends Enum<E>> extends CDataProperty {
     = new LinkedHashMap<E,String>();
   private final QName _typeName;
 
-  public EnumProperty(Class<E> e)
+  public EnumProperty(Class<E> e, JAXBContextImpl context)
     throws JAXBException
   {
     _enum = e;
-    _typeName = JAXBUtil.getXmlSchemaDatatype(_enum);
+    _typeName = JAXBUtil.getXmlSchemaDatatype(_enum, context);
 
     try {
       XmlEnum xmlEnum = _enum.getAnnotation(XmlEnum.class);
       _base = xmlEnum.value();
-      _baseName = JAXBUtil.getXmlSchemaDatatype(_base);
+      _baseName = JAXBUtil.getXmlSchemaDatatype(_base, context);
 
       // XXX check that base is an XML simple type
 
@@ -131,9 +132,9 @@ public class EnumProperty<E extends Enum<E>> extends CDataProperty {
     return obj;
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return JAXBUtil.qNameToString(_typeName);
+    return _typeName;
   }
 
   public void generateSchema(XMLStreamWriter out)

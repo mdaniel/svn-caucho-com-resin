@@ -29,13 +29,19 @@
 
 package com.caucho.jaxb.skeleton;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.*;
 
 /**
  * a string property
  */
 public class StringProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string", "xsd");
+
   public static final StringProperty PROPERTY = new StringProperty();
 
   protected String write(Object in)
@@ -48,8 +54,8 @@ public class StringProperty extends CDataProperty {
     return in;
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:string";
+    return SCHEMA_TYPE;
   }
 }

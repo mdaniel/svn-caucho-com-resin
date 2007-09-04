@@ -28,15 +28,29 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+
+import com.caucho.util.Attachment;
 
 // XXX hexBinary
 /**
  * a ByteArray Property
  */
-public class ByteArrayProperty extends CDataProperty {
+public class ByteArrayProperty extends CDataProperty 
+                               implements AttachmentProperty
+{
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "base64Binary", "xsd");
+
   public static final ByteArrayProperty PROPERTY = new ByteArrayProperty();
 
   protected String write(Object in)
@@ -49,8 +63,29 @@ public class ByteArrayProperty extends CDataProperty {
     return DatatypeConverter.parseBase64Binary(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:base64Binary";
+    return SCHEMA_TYPE;
+  }
+
+  public String getMimeType(Object obj)
+  {
+    return "application/octet-stream";
+  }
+
+  public void writeAsAttachment(Object obj, OutputStream out)
+    throws IOException
+  {
+    byte[] buffer = (byte []) obj;
+
+    out.write(buffer);
+
+    out.flush();
+  }
+
+  public Object readFromAttachment(Attachment attachment)
+    throws IOException
+  {
+    return attachment.getRawContents();
   }
 }

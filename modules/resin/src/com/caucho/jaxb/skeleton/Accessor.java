@@ -886,7 +886,10 @@ public abstract class Accessor implements Namer {
             out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
                                   XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
-            out.writeAttribute("type", property.getSchemaType());
+            String type = 
+              StaxUtil.qnameToString(out, _property.getSchemaType());
+
+            out.writeAttribute("type", type);
 
             if ("##default".equals(elements[i].name()))
               out.writeAttribute("name", getName());
@@ -930,8 +933,12 @@ public abstract class Accessor implements Namer {
 
           if (xmlID != null)
             out.writeAttribute("type", "xsd:ID"); // jaxb/22d0
-          else
-            out.writeAttribute("type", _property.getSchemaType());
+          else {
+            String type = 
+              StaxUtil.qnameToString(out, _property.getSchemaType());
+
+            out.writeAttribute("type", type);
+          }
 
           out.writeAttribute("name", getName());
         }
@@ -972,6 +979,7 @@ public abstract class Accessor implements Namer {
           if (_property.getMaxOccurs() != null)
             out.writeAttribute("maxOccurs", _property.getMaxOccurs());
 
+          // XXX
           out.writeAttribute("ref", "XXX");
         }
       
@@ -990,7 +998,11 @@ public abstract class Accessor implements Namer {
 
             out.writeEmptyElement(XML_SCHEMA_PREFIX, "list", 
                                   XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            out.writeAttribute("itemType", _property.getSchemaType());
+
+            String itemType = 
+              StaxUtil.qnameToString(out, _property.getSchemaType());
+            
+            out.writeAttribute("itemType", itemType);
 
             out.writeEndElement(); // simpleType
 
@@ -1023,8 +1035,8 @@ public abstract class Accessor implements Namer {
                  ! byte.class.equals(getType().getComponentType())))
               out.writeAttribute("nillable", "true");
 
-
-            String typeName = _property.getSchemaType();
+            String typeName = 
+              StaxUtil.qnameToString(out, _property.getSchemaType());
 
             // jaxb/22d0
             if (getAnnotation(XmlID.class) != null)
@@ -1094,7 +1106,7 @@ public abstract class Accessor implements Namer {
     return _property.isNillable();
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     // XXX propertyMap
     return _property.getSchemaType();

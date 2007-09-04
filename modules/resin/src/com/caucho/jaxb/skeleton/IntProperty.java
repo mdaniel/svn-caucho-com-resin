@@ -28,18 +28,24 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a Int Property
  */
 public class IntProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "int", "xsd");
+
   public static final IntProperty OBJECT_PROPERTY = new IntProperty(true);
   public static final IntProperty PRIMITIVE_PROPERTY = new IntProperty(false);
 
@@ -58,9 +64,9 @@ public class IntProperty extends CDataProperty {
     return DatatypeConverter.parseInt(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:int";
+    return SCHEMA_TYPE;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, int i, QName qname)

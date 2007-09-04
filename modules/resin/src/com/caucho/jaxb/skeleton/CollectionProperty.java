@@ -166,7 +166,7 @@ public class CollectionProperty extends IterableProperty {
     return node;
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     return _componentProperty.getSchemaType();
   }

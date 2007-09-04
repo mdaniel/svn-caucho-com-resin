@@ -89,7 +89,7 @@ public abstract class Property {
     return false;
   }
 
-  public abstract String getSchemaType();
+  public abstract QName getSchemaType();
 
   //
   // R/W methods

@@ -29,18 +29,23 @@
 
 package com.caucho.jaxb.skeleton;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a short property
  */
 public class ShortProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "short", "xsd");
+
   public static final ShortProperty OBJECT_PROPERTY 
     = new ShortProperty(true);
   public static final ShortProperty PRIMITIVE_PROPERTY 
@@ -61,9 +66,9 @@ public class ShortProperty extends CDataProperty {
     return Short.valueOf(DatatypeConverter.parseShort(in));
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:short";
+    return SCHEMA_TYPE;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, short s, QName qname)

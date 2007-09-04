@@ -33,6 +33,8 @@ import java.awt.Image;
 import java.awt.image.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -43,22 +45,31 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import java.util.HashMap;
 import java.util.Iterator;
 
+import com.caucho.util.Attachment;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 
 /**
  * an Image Property
  */
-public class ImageProperty extends CDataProperty {
+public class ImageProperty extends CDataProperty 
+                           implements AttachmentProperty 
+{
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "base64Binary", "xsd");
+
   private static final L10N L = new L10N(ImageProperty.class);
   private static final String DEFAULT_IMAGE_MIME_TYPE = "image/png";
   private static final HashMap<String,ImageProperty> _mimeTypePropertyMap
     = new HashMap<String,ImageProperty>();
 
+  private String _mimeType;
   private ImageReader _imageReader;
   private ImageWriter _imageWriter;
 
@@ -96,6 +107,7 @@ public class ImageProperty extends CDataProperty {
     if (! writers.hasNext())
       throw new JAXBException(L.l("Unrecognized MIME type : {0}", mimeType));
 
+    _mimeType = mimeType;
     _imageWriter = (ImageWriter) writers.next();
     _imageReader = ImageIO.getImageReader(_imageWriter);
 
@@ -125,11 +137,39 @@ public class ImageProperty extends CDataProperty {
     MemoryCacheImageInputStream is = new MemoryCacheImageInputStream(bais);
 
     _imageReader.setInput(is);
+
     return _imageReader.read(0);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:base64Binary";
+    return SCHEMA_TYPE;
+  }
+
+  public String getMimeType(Object obj)
+  {
+    return _mimeType;
+  }
+
+  public void writeAsAttachment(Object obj, OutputStream out)
+    throws IOException
+  {
+    MemoryCacheImageOutputStream iout = new MemoryCacheImageOutputStream(out);
+
+    _imageWriter.setOutput(iout);
+    _imageWriter.write((RenderedImage) obj);
+
+    iout.flush();
+  }
+
+  public Object readFromAttachment(Attachment attachment)
+    throws IOException
+  {
+    InputStream is = new ByteArrayInputStream(attachment.getRawContents());
+    MemoryCacheImageInputStream iis = new MemoryCacheImageInputStream(is);
+
+    _imageReader.setInput(iis);
+
+    return _imageReader.read(0);
   }
 }

@@ -28,8 +28,12 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 
@@ -37,6 +41,9 @@ import java.math.BigDecimal;
  * a BigDecimal Property
  */
 public class BigDecimalProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "decimal", "xsd");
+
   public static final BigDecimalProperty PROPERTY = new BigDecimalProperty();
 
   protected String write(Object in)
@@ -49,9 +56,9 @@ public class BigDecimalProperty extends CDataProperty {
     return DatatypeConverter.parseDecimal(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:decimal";
+    return SCHEMA_TYPE;
   }
 
   public boolean isXmlPrimitiveType()

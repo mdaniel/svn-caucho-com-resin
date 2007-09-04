@@ -28,18 +28,24 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a Boolean Property
  */
 public class BooleanProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "boolean", "xsd");
+
   public static final BooleanProperty OBJECT_PROPERTY 
     = new BooleanProperty(true);
   public static final BooleanProperty PRIMITIVE_PROPERTY 
@@ -60,9 +66,9 @@ public class BooleanProperty extends CDataProperty {
     return Boolean.valueOf(DatatypeConverter.parseBoolean(in));
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:boolean";
+    return SCHEMA_TYPE;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, boolean b, QName qname)

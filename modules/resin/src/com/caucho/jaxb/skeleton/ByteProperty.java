@@ -28,17 +28,24 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a Byte Property
  */
 public class ByteProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "byte", "xsd");
+
   public static final ByteProperty OBJECT_PROPERTY = new ByteProperty(true);
   public static final ByteProperty PRIMITIVE_PROPERTY = new ByteProperty(false);
 
@@ -57,8 +64,8 @@ public class ByteProperty extends CDataProperty {
     return DatatypeConverter.parseByte(in);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:byte";
+    return SCHEMA_TYPE;
   }
 }

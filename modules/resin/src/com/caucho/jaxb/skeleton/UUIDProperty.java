@@ -28,23 +28,21 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.datatype.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-import java.text.*;
 
-import java.lang.reflect.*;
-import java.io.*;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
+import javax.xml.namespace.QName;
 
-import com.caucho.vfs.WriteStream;
+import java.util.UUID;
 
 /**
  * a UUID Property
  */
 public class UUIDProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string", "xsd");
+
   public static final UUIDProperty PROPERTY = new UUIDProperty();
 
   protected String write(Object in)
@@ -63,9 +61,9 @@ public class UUIDProperty extends CDataProperty {
     }
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:string";
+    return SCHEMA_TYPE;
   }
 }
 

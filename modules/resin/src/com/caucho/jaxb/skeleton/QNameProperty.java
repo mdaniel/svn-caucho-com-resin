@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -56,6 +57,9 @@ import com.caucho.xml.stream.StaxUtil;
  * a qname property
  */
 public class QNameProperty extends Property {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "QName", "xsd");
+
   private static final L10N L = new L10N(QNameProperty.class);
 
   public static final QNameProperty PROPERTY = new QNameProperty();
@@ -314,8 +318,8 @@ public class QNameProperty extends Property {
     }
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:QName";
+    return SCHEMA_TYPE;
   }
 }

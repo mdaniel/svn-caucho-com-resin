@@ -115,7 +115,7 @@ public class XmlListArrayProperty<T> extends CDataProperty {
     return array;
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
     return _componentProperty.getSchemaType();
   }

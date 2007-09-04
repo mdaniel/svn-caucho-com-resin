@@ -28,18 +28,24 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
 
 /**
  * a Character Property
  */
 public class CharacterProperty extends CDataProperty {
+  public static final QName SCHEMA_TYPE = 
+    new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "unsignedShort", "xsd");
+
   public static final CharacterProperty OBJECT_PROPERTY 
     = new CharacterProperty(true);
   public static final CharacterProperty PRIMITIVE_PROPERTY 
@@ -65,9 +71,9 @@ public class CharacterProperty extends CDataProperty {
     return new Character((char) i);
   }
 
-  public String getSchemaType()
+  public QName getSchemaType()
   {
-    return "xsd:unsignedShort";
+    return SCHEMA_TYPE;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, char c, QName qname)
