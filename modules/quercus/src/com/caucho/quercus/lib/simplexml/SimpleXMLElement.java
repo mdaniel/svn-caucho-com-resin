@@ -189,14 +189,14 @@ public class SimpleXMLElement
     }
 
     NodeList childList = document.getChildNodes();
-    
-    Node root;
-    if (childList.getLength() == 1)
-      root = document.getChildNodes().item(0);
-    else
-      root = document.getChildNodes().item(1);
 
-    return root;
+    // php/1x70
+    for (int i = 0; i < childList.getLength(); i++) {
+      if (childList.item(i).getNodeType() == Node.ELEMENT_NODE)
+        return childList.item(i);
+    }
+    
+    return childList.item(0);
   }
   
   private static SimpleNode buildNode(Env env,
