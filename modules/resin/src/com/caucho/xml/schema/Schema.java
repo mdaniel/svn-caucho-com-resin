@@ -62,6 +62,14 @@ public class Schema {
   @XmlAttribute(name="version")
   private String _version;
 
+  @XmlAttribute(name="elementFormDefault")
+  private String _elementFormDefault;
+
+  public String getElementFormDefault()
+  {
+    return _elementFormDefault;
+  }
+
   public String getTargetNamespace()
   {
     return _targetNamespace;

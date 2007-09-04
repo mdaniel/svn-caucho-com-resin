@@ -47,7 +47,10 @@ public class Sequence {
   @XmlElements({
       @XmlElement(name="element", 
                   namespace=W3C_XML_SCHEMA_NS_URI,
-                  type=com.caucho.xml.schema.Element.class)})
+                  type=com.caucho.xml.schema.Element.class),
+      @XmlElement(name="annotation",
+                  namespace=W3C_XML_SCHEMA_NS_URI,
+                  type=com.caucho.xml.schema.Annotation.class)})
   private List<Object> _contents;
 
   public List<Object> getContents()
@@ -70,8 +73,12 @@ public class Sequence {
 
     if (_contents != null) {
       for (int i = 0; i < _contents.size(); i++) { 
-        Element element = (Element) _contents.get(i);
-        element.setSchema(_schema);
+        Object content = _contents.get(i);
+
+        if (content instanceof Element) {
+          Element element = (Element) content;
+          element.setSchema(_schema);
+        }
       }
     }
   }

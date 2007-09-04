@@ -375,6 +375,11 @@ public class StaxUtil {
     return sb.toString();
   }
 
+  /**
+   * Converts a QName to a String using the context of a XMLStreamWriter.
+   * Intended for writing QNames as attributes or text in a XMLStreamWriter
+   * that's passed in.
+   **/
   public static String qnameToString(XMLStreamWriter out, QName qname)
     throws XMLStreamException
   {
