@@ -1630,6 +1630,9 @@ public class Env {
 
       _globalMap.put(name, var);
 
+      if (_request == null)
+        return var;
+      
       try {
 	_request.setCharacterEncoding(getHttpInputEncoding().toString());
       } catch (Exception e) {
@@ -1699,6 +1702,9 @@ public class Env {
       var = new Var();
       _globalMap.put(name, var);
 
+      if (_request == null)
+        return var;
+      
       ArrayValue array = new ArrayValueImpl();
 
       Cookie []cookies = _request.getCookies();
@@ -1718,8 +1724,6 @@ public class Env {
       }
 
       var.set(array);
-
-      _globalMap.put(name, var);
 
       return var;
     }
@@ -3725,7 +3729,7 @@ public class Env {
     
     String fullMsg = prefix + msg + getFunctionLocation();
 
-    error(B_ERROR, "", fullMsg);
+    error(B_ERROR, location, msg);
 
     throw new QuercusRuntimeException(fullMsg);
   }

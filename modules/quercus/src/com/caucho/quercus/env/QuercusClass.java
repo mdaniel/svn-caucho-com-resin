@@ -113,6 +113,14 @@ public class QuercusClass {
     _classDef = classDef;
     _parent = parent;
 
+    for (QuercusClass cls = parent; cls != null; cls = cls.getParent()) {
+      AbstractFunction cons = cls.getConstructor();
+      
+      if (cons != null) {
+        addMethod(cls.getName(), cons);
+      }
+    }
+    
     ClassDef []classDefList;
     
     if (_parent != null) {
@@ -150,6 +158,9 @@ public class QuercusClass {
 
       classDef.initClass(this);
     }
+    
+    if (_constructor == null && parent != null)
+      _constructor = parent.getConstructor();
   }
 
   public ClassDef getClassDef()
@@ -186,6 +197,14 @@ public class QuercusClass {
     _constructor = fun;
   }
 
+  /**
+   * Gets the constructor.
+   */
+  public AbstractFunction getConstructor()
+  {
+    return _constructor;
+  }
+  
   /**
    * Add's a delegate.
    */
@@ -592,22 +611,6 @@ public class QuercusClass {
     int hash = MethodMap.hash(key, key.length);
 
     AbstractFunction fun = _methodMap.get(hash, key, key.length);
-    /*
-    AbstractFunction fun = _methodMap.get(name);
-
-    if (fun == null)
-      fun = _lowerMethodMap.get(name.toLowerCase());
-    */
-
-    /* XXX: this either needs to be special cased in the actual
-     * constructor or put into a map.
-    // php/0949
-    if (fun == null) {
-      if (name.equalsIgnoreCase("__construct")) {
-        fun = _constructor;
-      }
-    }
-    */
 
     return fun;
   }

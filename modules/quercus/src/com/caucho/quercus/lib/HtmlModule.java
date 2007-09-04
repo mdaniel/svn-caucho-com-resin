@@ -69,9 +69,6 @@ public class HtmlModule extends AbstractQuercusModule {
   private final static HashMap<String,String> HTML_DECODE
     = new HashMap<String,String>();
 
-  private final ArrayValue _htmlQuotesArray = new ConstArrayValue();
-  private final ArrayValue _htmlNoQuotesArray = new ConstArrayValue();
-
   public HtmlModule()
   {
   }

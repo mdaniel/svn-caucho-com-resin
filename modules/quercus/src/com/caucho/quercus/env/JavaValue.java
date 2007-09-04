@@ -163,12 +163,10 @@ public class JavaValue
         i = e;
     }
 
-    if (i == 0)
+    if (i != len)
       return 1;
-    else if (i == len)
-      return Double.parseDouble(s);
     else
-      return Double.parseDouble(s.substring(0, i));
+      return Double.parseDouble(s);
   }
   
   @Override

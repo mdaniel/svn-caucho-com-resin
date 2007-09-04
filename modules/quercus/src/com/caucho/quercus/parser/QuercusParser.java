@@ -3032,9 +3032,18 @@ public class QuercusParser {
 	      _peekToken = token;
 
 	    }
-	  
-        if (token == '(')
-          return parseFunction(className, name, isInstantiated);
+	    
+        if (token == '(') {
+          if (_isNewExpr && className == null
+              && ("self".equals(name) || "parent".equals(name))) {
+            if ("self".equals(name))
+              return _factory.createString(_classDef.getName());
+            else
+              return _factory.createString(_classDef.getParentName());
+          }
+          else
+            return parseFunction(className, name, isInstantiated);
+        }
         else
           return parseConstant(className, name);
       }
@@ -3330,7 +3339,7 @@ public class QuercusParser {
 
     String name = null;
     Expr nameExpr = null;
-
+    
     if (token == IDENTIFIER
         && !"self".equals(_lexeme) // /php/096i
         && !"parent".equals(_lexeme)) // php/0956

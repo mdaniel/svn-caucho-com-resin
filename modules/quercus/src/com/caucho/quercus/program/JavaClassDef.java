@@ -995,7 +995,7 @@ public class JavaClassDef extends ClassDef {
         __call = new JavaMethod(moduleContext, method);
       } else {
         if (method.getName().startsWith("quercus_"))
-          throw new UnsupportedOperationException(("XXX: use @Name instead"));
+          throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method.getName()));
 
         JavaMethod newFun = new JavaMethod(moduleContext, method);
         AbstractJavaMethod fun = _functionMap.get(newFun.getName());
