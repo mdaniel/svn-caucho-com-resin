@@ -105,7 +105,7 @@ public class MemoryStream extends StreamImpl {
   {
     close();
 
-    TempReadStream read = new TempReadStream(_head, getPath());
+    TempReadStream read = new TempReadStream(_head);
     read.setFreeWhenDone(false);
 
     return new ReadStream(read);

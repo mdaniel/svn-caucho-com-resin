@@ -108,9 +108,7 @@ public class Crc64Stream extends StreamImpl {
   public void write(byte []buffer, int offset, int length, boolean isEnd)
     throws IOException
   {
-    long crc = _crc;
-
-    _crc = Crc64.generate(_crc. buffer, offset, length);
+    _crc = Crc64.generate(_crc, buffer, offset, length);
     
     _next.write(buffer, offset, length, isEnd);
   }
