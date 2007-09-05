@@ -81,14 +81,9 @@ public class Crc64Stream extends StreamImpl {
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
-    long crc = _crc;
-
     int len = _next.read(buffer, offset, length);
-    
-    for (int i = 0; i < len; i++)
-      crc = Crc64.next(crc, buffer[offset + i]);
 
-    _crc = crc;
+    _crc = Crc64.generate(_crc, buffer, offset, len);
 
     return len;
   }
@@ -115,10 +110,7 @@ public class Crc64Stream extends StreamImpl {
   {
     long crc = _crc;
 
-    for (int i = 0; i < length; i++)
-      crc = Crc64.next(crc, buffer[offset + i]);
-
-    _crc = crc;
+    _crc = Crc64.generate(_crc. buffer, offset, length);
     
     _next.write(buffer, offset, length, isEnd);
   }

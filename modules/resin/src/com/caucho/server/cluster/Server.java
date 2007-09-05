@@ -120,6 +120,7 @@ public class Server extends ProtocolDispatchServer
 
   private int _keepaliveMax = 128;
   
+  private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
   private long _keepaliveTimeout = 15000;
   
   private boolean _keepaliveSelectEnable = true;
@@ -334,6 +335,22 @@ public class Server extends ProtocolDispatchServer
   public long getKeepaliveTimeout()
   {
     return _keepaliveTimeout;
+  }
+
+  /**
+   * Sets the keepalive timeout
+   */
+  public void setKeepaliveConnectionTimeMax(Period period)
+  {
+    _keepaliveConnectionTimeMax = period.getPeriod();
+  }
+
+  /**
+   * Sets the keepalive timeout
+   */
+  public long getKeepaliveConnectionTimeMax()
+  {
+    return _keepaliveConnectionTimeMax;
   }
 
   /**

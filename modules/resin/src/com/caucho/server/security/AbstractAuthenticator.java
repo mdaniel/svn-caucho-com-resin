@@ -670,13 +670,17 @@ public class AbstractAuthenticator implements ServletAuthenticator {
       SessionManager manager = app.getSessionManager();
 
       if (manager != null) {
-	SessionImpl session = manager.getSession(sessionId,
-						 Alarm.getCurrentTime(),
-						 false, true);
+	try {
+	  SessionImpl session = manager.getSession(sessionId,
+						   Alarm.getCurrentTime(),
+						   false, true);
 
-	if (session != null) {
-	  session.finish();
-	  session.logout();
+	  if (session != null) {
+	    session.finish();
+	    session.logout();
+	  }
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
 	}
       }
     }
@@ -758,7 +762,7 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 	    sessions.remove(i);
 	  else
 	    isEmpty = false;
-	} catch (Throwable e) {
+	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
       }
@@ -780,7 +784,7 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 	    session.logout();
 	    session.invalidate();  // #599,  server/12i3
 	  }
-	} catch (Throwable e) {
+	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
       }

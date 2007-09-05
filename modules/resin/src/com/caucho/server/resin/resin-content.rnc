@@ -263,6 +263,10 @@ r_keepalive-max =
   attribute keepalive-max { string }
   | element keepalive-max { string }
 
+r_keepalive-connection-time-max =
+  attribute keepalive-connection-time-max { r_period-Type }
+  | element keepalive-connection-time-max { r_period-Type }
+
 r_keepalive-timeout =
   attribute keepalive-timeout { r_period-Type }
   | element keepalive-timeout { r_period-Type }
@@ -390,6 +394,9 @@ r_port-Content =
    & (attribute keepalive-max { r_int-Type }
       | element keepalive-max { r_int-Type })?
 
+   & (attribute keepalive-connection-tmie-max { r_period-Type }
+      | element keepalive-connection-max { r_period-Type })?
+
    & (attribute port { string } | element port { string })
 
    & (attribute secure { r_boolean-Type }
@@ -513,6 +520,8 @@ r_server-Basis =
      | element jvm-arg { string })*
 
   & r_keepalive-max?
+
+  & r_keepalive-connection-time-max?
 
   & r_keepalive-timeout?
 

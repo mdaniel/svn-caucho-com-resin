@@ -12,6 +12,13 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>added keepalive-connection-time-max to limit keepalives (#1830, rep by sf)</li>
+<li>timing issues with session invalidation (#1897, rep by Bradley Van Cleave)</li>
+<li>Path.getURL() on windows needs to convert "/:/" to "//" (#1982, rep by debae)</li>
+<li>session: update invalidation to ensure invalidation drops session (#1951)</li>
+<li>session: cluster session load on startup needs to detect invalidations (#1544, rep by Jacky)</li>
+<li>access-log missing rollover-count setter (#1985, rep by stbu)</li>
+<li>change build.xml to -Xmx512m (#1986, rep by chris_se)</li>
 <li>jstl: add filter to x:parse (#1944, rep by M Thompson)</li>
 <li>session: add request attribute caucho.session-server-id as a distributed session owner hint (#1912, rep by Mike Wynholds)</li>
 <li>write error content even if output is flushed, i.e. suppress forward() not allowed error (#1954)</li>

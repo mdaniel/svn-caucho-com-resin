@@ -34,38 +34,22 @@ public class TempReadStream extends StreamImpl {
   private TempBuffer _cursor;
 
   private int _offset;
-  private Path _backingDir;
-  private Path _backingFile;
-  private ReadStream _backingStream;
   private boolean _freeWhenDone = true;
 
   public TempReadStream(TempBuffer cursor)
   {
-    init(cursor, null);
+    init(cursor);
   }
 
   public TempReadStream()
   {
   }
 
-  TempReadStream(TempBuffer cursor, Path path)
-  {
-    init(cursor, path);
-  }
-
   public void init(TempBuffer cursor)
   {
-    init(cursor, null);
-  }
-
-  public void init(TempBuffer cursor, Path path)
-  {
-    setPath(path);
     _cursor = cursor;
     _offset = 0;
     _freeWhenDone = true;
-    _backingFile = null;
-    _backingStream = null;
   }
 
   public void setFreeWhenDone(boolean free)
@@ -86,7 +70,7 @@ public class TempReadStream extends StreamImpl {
 
     System.arraycopy(_cursor._buf, _offset, buf, offset, length);
 
-    if (_offset + length >= _cursor._length) {
+    if (_cursor._length <= _offset + length) {
       TempBuffer next = _cursor._next;
       if (_freeWhenDone)
         TempBuffer.free(_cursor);

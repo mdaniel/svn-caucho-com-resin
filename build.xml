@@ -21,7 +21,7 @@
   <property name="javac.optimize" value="off"/>
   <property name="javac.deprecation" value="off"/>
   <property name="javac.nowarn" value="on"/>
-  <property name="javac.memoryMaximumSize" value="256m"/>
+  <property name="javac.memoryMaximumSize" value="512m"/>
 
   <property name="javac.source" value="1.5"/>
 

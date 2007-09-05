@@ -1649,6 +1649,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	SessionImpl session = _sessionList.get(i);
 
 	try {
+	  if (! session.isValid())
+	    continue;
+	  
 	  long maxIdleTime = session._maxInactiveInterval;
 
 	  if (_storeManager == null) {

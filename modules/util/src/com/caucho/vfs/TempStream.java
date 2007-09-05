@@ -35,17 +35,8 @@ public class TempStream extends StreamImpl
   private String _encoding;
   private TempBuffer _head;
   private TempBuffer _tail;
-  private Path _backingDir;
-  private Path _backingFile;
-  private TempFile _tempBackingFile;
-  private WriteStream _backingStream;
   private boolean _useBackingFile;
   private TempReadStream _tempReadStream;
-
-  public TempStream(Path backingDir)
-  {
-    _backingDir = backingDir;
-  }
 
   public TempStream()
   {
@@ -64,41 +55,11 @@ public class TempStream extends StreamImpl
     _encoding = null;
 
     TempBuffer.freeAll(ptr);
-
-    _useBackingFile = false;
-
-    if (_backingStream != null) {
-      try {
-	_backingStream.close();
-      } catch (IOException e) {
-      }
-      _backingStream = null;
-    }
   }
 
   public byte []getTail()
   {
     return _tail.getBuffer();
-  }
-
-  public void changeToBackingFile(int index)
-    throws IOException
-  {
-    if (_backingFile == null) {
-      _backingFile = _backingDir.createTempFile("tmp", ".tmp");
-      _tempBackingFile = new TempFile(_backingFile);
-    }
-    
-    _backingStream = _backingFile.openWrite();
-    _useBackingFile = true;
-
-    TempBuffer next;
-    for (; _head != null; _head = next) {
-      next = _head._next;
-
-      _backingStream.write(_head._buf, 0, _head._length);
-      TempBuffer.free(_head);
-    }
   }
 
   /**
@@ -118,37 +79,28 @@ public class TempStream extends StreamImpl
   }
 
   public boolean canWrite() { return true; }
-	   
+
+  /**
+   * Writes a chunk of data to the temp stream.
+   */
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
-    if (_backingStream != null) {
-      _backingStream.write(buf, offset, length);
-    }
-    else {
-      int index = 0;
-      while (index < length) {
-	if (_tail == null)
-	  addBuffer(TempBuffer.allocate());
-	else if (_tail._length >= _tail._buf.length) {
-	  if (_head._bufferCount < 8 || _backingDir == null)
-	    addBuffer(TempBuffer.allocate());
-	  else {
-	    changeToBackingFile(index);
-	    _backingStream.write(buf, offset, length);
-	    return;
-	  }
-	}
+    while (length > 0) {
+      if (_tail == null)
+	addBuffer(TempBuffer.allocate());
+      else if (_tail._buf.length <= _tail._length)
+	addBuffer(TempBuffer.allocate());
 
-	int sublen = _tail._buf.length - _tail._length;
-	if (length - index < sublen)
-	  sublen = length - index;
+      int sublen = _tail._buf.length - _tail._length;
+      if (length < sublen)
+	sublen = length;
 
-	System.arraycopy(buf, index + offset, _tail._buf, _tail._length, sublen);
+      System.arraycopy(buf, offset, _tail._buf, _tail._length, sublen);
 
-	index += sublen;
-	_tail._length += sublen;
-      }
+      length -= sublen;
+      offset += sublen;
+      _tail._length += sublen;
     }
   }
 
@@ -169,19 +121,6 @@ public class TempStream extends StreamImpl
   public void flush()
     throws IOException
   {
-    if (_backingStream != null)
-      _backingStream.flush();
-  }
-
-  public void close()
-    throws IOException
-  {
-    if (_backingStream != null) {
-      _backingStream.close();
-      _backingStream = null;
-    }
-
-    super.close();
   }
 
   /**
@@ -203,18 +142,14 @@ public class TempStream extends StreamImpl
   {
     close();
 
-    if (_useBackingFile)
-      return _backingFile.openRead();
-    else {
-      TempReadStream read = new TempReadStream(_head);
-      read.setFreeWhenDone(free);
-      if (free) {
-        _head = null;
-        _tail = null;
-      }
-      read.setPath(getPath());
-      return new ReadStream(read);
+    TempReadStream read = new TempReadStream(_head);
+    read.setFreeWhenDone(free);
+    if (free) {
+      _head = null;
+      _tail = null;
     }
+
+    return new ReadStream(read);
   }
 
   /**
@@ -227,27 +162,20 @@ public class TempStream extends StreamImpl
   {
     close();
 
-    if (_useBackingFile) {
-      StreamImpl impl = _backingFile.openReadImpl();
-
-      rs.init(impl, null);
+    if (_tempReadStream == null) {
+      _tempReadStream = new TempReadStream();
+      _tempReadStream.setPath(getPath());
     }
-    else {
-      if (_tempReadStream == null) {
-	_tempReadStream = new TempReadStream();
-	_tempReadStream.setPath(getPath());
-      }
 
-      _tempReadStream.init(_head);
+    _tempReadStream.init(_head);
 
-      _tempReadStream.setFreeWhenDone(free);
-      if (free) {
-        _head = null;
-        _tail = null;
-      }
-
-      rs.init(_tempReadStream, null);
+    _tempReadStream.setFreeWhenDone(free);
+    if (free) {
+      _head = null;
+      _tail = null;
     }
+
+    rs.init(_tempReadStream, null);
   }
 
   /**
@@ -285,15 +213,11 @@ public class TempStream extends StreamImpl
   {
     close();
 
-    if (_useBackingFile)
-      return _backingFile.openRead();
-    else {
-      TempReadStream read = new TempReadStream(_head);
-      read.setFreeWhenDone(false);
-      read.setPath(getPath());
-      s.init(read, null);
-      return s;
-    }
+    TempReadStream read = new TempReadStream(_head);
+    read.setFreeWhenDone(false);
+    read.setPath(getPath());
+    s.init(read, null);
+    return s;
   }
 
   public void clearWrite()
@@ -304,30 +228,12 @@ public class TempStream extends StreamImpl
     _tail = null;
 
     TempBuffer.freeAll(ptr);
-
-    if (_backingStream != null) {
-      try {
-	_backingStream.close();
-	_backingStream = _backingFile.openWrite();
-      } catch (Exception e) {
-      }
-    }
-    _useBackingFile = false;
   }
 
   public void discard()
   {
     _head = null;
     _tail = null;
-
-    if (_backingStream != null) {
-      try {
-	_backingStream.close();
-	_backingStream = _backingFile.openWrite();
-      } catch (Exception e) {
-      }
-    }
-    _useBackingFile = false;
   }
 
   /**
@@ -362,15 +268,6 @@ public class TempStream extends StreamImpl
     try {
       close();
     } catch (IOException e) {
-    }
-
-    try {
-      TempFile tempBackingFile = _tempBackingFile;
-      _tempBackingFile = tempBackingFile;
-      
-      if (tempBackingFile != null)
-	tempBackingFile.remove();
-    } catch (Throwable e) {
     }
 
     TempBuffer ptr = _head;

@@ -44,6 +44,7 @@ import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
@@ -108,6 +109,7 @@ public class Port
 
   private int _keepaliveMax = DEFAULT;
   
+  private long _keepaliveTimeMax = DEFAULT;
   private long _keepaliveTimeout = DEFAULT;
   private long _keepaliveSelectThreadTimeout = DEFAULT;
 
@@ -200,6 +202,9 @@ public class Port
 
       if (_keepaliveMax == DEFAULT)
 	_keepaliveMax = server.getKeepaliveMax();
+
+      if (_keepaliveTimeMax == DEFAULT)
+	_keepaliveTimeMax = server.getKeepaliveConnectionTimeMax();
 
       if (_keepaliveTimeout == DEFAULT)
 	_keepaliveTimeout = server.getKeepaliveTimeout();
@@ -685,6 +690,22 @@ public class Port
     return _keepaliveMax;
   }
 
+  /**
+   * Sets the keepalive max.
+   */
+  public void setKeepaliveConnectionTimeMax(Period period)
+  {
+    _keepaliveTimeMax = period.getPeriod();
+  }
+
+  /**
+   * Gets the keepalive max.
+   */
+  public long getKeepaliveConnectionTimeMax()
+  {
+    return _keepaliveTimeMax;
+  }
+
   public void setKeepaliveTimeout(Period period)
   {
     _keepaliveTimeout = period.getPeriod();
@@ -1114,11 +1135,13 @@ public class Port
   /**
    * Marks a keepalive as starting running.  Called only from TcpConnection.
    */
-  boolean keepaliveBegin(TcpConnection conn)
+  boolean keepaliveBegin(TcpConnection conn, long acceptStartTime)
   {
     synchronized (_keepaliveCountLock) {
       if (! _lifecycle.isActive())
         return false;
+      else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
+	return false;
       else if (_keepaliveMax <= _keepaliveCount)
         return false;
       else if (_connectionMax <= _connectionCount + _minSpareConnection)

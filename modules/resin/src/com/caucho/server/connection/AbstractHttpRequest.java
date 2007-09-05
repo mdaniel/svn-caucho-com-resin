@@ -2464,7 +2464,7 @@ public abstract class AbstractHttpRequest
       _closeOnExit.clear();
       
       if (_tcpConn != null)
-	_tcpConn.beginActive();
+	_tcpConn.endActive();
     }
   }
 

@@ -76,7 +76,10 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private final Admin _admin = new Admin();
   
   private String _state = "unknown";
-  private long _startTime;
+  
+  private long _connectionStartTime;
+  private long _requestStartTime;
+  
   private Thread _thread;
 
   /**
@@ -333,7 +336,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   public final void beginActive()
   {
     _state = "active";
-    _startTime = Alarm.getCurrentTime();
+    _requestStartTime = Alarm.getCurrentTime();
   }
 
   /**
@@ -342,7 +345,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   public final void endActive()
   {
     _state = "idle";
-    _startTime = 0;
+    _requestStartTime = 0;
   }
 
   /**
@@ -363,8 +366,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
    */
   public final long getRequestActiveTime()
   {
-    if (_startTime > 0)
-      return Alarm.getCurrentTime() - _startTime;
+    if (_requestStartTime > 0)
+      return Alarm.getCurrentTime() - _requestStartTime;
     else
       return -1;
   }
@@ -393,7 +396,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	free();
       }
     }
-    else if (! port.keepaliveBegin(this)) {
+    else if (! port.keepaliveBegin(this, _connectionStartTime)) {
       if (log.isLoggable(Level.FINE))
         log.fine("[" + getId() + "] failed keepalive");
 
@@ -511,9 +514,10 @@ public class TcpConnection extends PortConnection implements ThreadTask
       while (! _isDead) {
 	if (isKeepalive) {
 	}
-	else if (! port.accept(this, isFirst)) {
+	else if (port.accept(this, isFirst))
+	  _connectionStartTime = Alarm.getCurrentTime();
+	else
 	  return;
-	}
 
         isFirst = false;
 	

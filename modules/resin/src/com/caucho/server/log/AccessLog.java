@@ -138,6 +138,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   }
 
   /**
+   * Sets the maximum number of rolled logs.
+   *
+   * @param count maximum count of the log file
+   */
+  public void setRolloverCount(int count)
+  {
+    _logWriter.setRolloverCount(count);
+  }
+
+  /**
    * Sets the log rollover period, rounded up to the nearest hour.
    *
    * @param period the new rollover period in milliseconds.

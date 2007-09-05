@@ -36,11 +36,11 @@ import java.util.Hashtable;
  * Manages the object backing for a context.
  */
 public class BackingManager {
-  private Hashtable<String,BackingContext> _contextMap =
-    new Hashtable<String,BackingContext>();
+  private Hashtable<String,BackingContext> _contextMap
+    = new Hashtable<String,BackingContext>();
   
-  private LruCache<BackingKey,ObjectBacking> _backingCache =
-    new LruCache<BackingKey,ObjectBacking>(1024);
+  private LruCache<BackingKey,ObjectBacking> _backingCache
+    = new LruCache<BackingKey,ObjectBacking>(1024);
   
   private BackingKey _key = new BackingKey();
 

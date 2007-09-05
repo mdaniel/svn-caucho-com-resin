@@ -52,7 +52,8 @@ import java.util.logging.Logger;
  * Implements a HTTP session.
  */
 public class SessionImpl implements HttpSession, CacheListener {
-  static protected final Logger log = Log.open(SessionImpl.class);
+  static protected final Logger log
+    = Logger.getLogger(SessionImpl.class.getName());
   static final L10N L = new L10N(SessionImpl.class);
 
   static final String LOGIN = "caucho.login";
@@ -532,42 +533,27 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void invalidate(Logout logout)
   {
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("invalidate session " + _id);
-    }
-
     if (! _isValid)
       throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
 
-    ServletAuthenticator auth = getAuthenticator();
-    if (! (auth instanceof AbstractAuthenticator)
-	|| logout == Logout.INVALIDATE
-	|| (logout == Logout.TIMEOUT
-	    && ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout())) {
-      // server/12i1, 12ch
-      logout(logout == Logout.TIMEOUT ? this : null);
-    }
-
-    /*
-    boolean invalidateAfterListener = _manager.isInvalidateAfterListener();
-    if (! invalidateAfterListener)
-      _isValid = false;
-    */
-
     try {
-      // server/017s
-      /*
-      if (_clusterObject != null) {
-	_clusterObject.remove();
-	notifyDestroy();
+      if (log.isLoggable(Level.FINE)) {
+	log.fine("HttpSession[" + _id + "] invalidate");
       }
-      */
+
+      // server/017s
+      ServletAuthenticator auth = getAuthenticator();
+      if (! (auth instanceof AbstractAuthenticator)
+	  || logout == Logout.INVALIDATE
+	  || (logout == Logout.TIMEOUT
+	      && ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout())) {
+	// server/12i1, 12ch
+	logout(logout == Logout.TIMEOUT ? this : null);
+      }
 
       _manager.removeSession(this);
 
       invalidateImpl(logout);
-
-      _isValid = false;
     } finally {
       _isValid = false;
     }
@@ -622,7 +608,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       if (clusterObject != null && _isInvalidating)
 	clusterObject.remove();
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
 
@@ -641,7 +627,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
 	try {
 	  clusterObject.store(this);
-	} catch (Throwable e) {
+	} catch (Exception e) {
 	  log.log(Level.WARNING, "Can't serialize session", e);
 	}
       }
@@ -725,6 +711,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public boolean load()
   {
+    if (! _isValid)
+      return false;
+    
     boolean isValid;
 
     // server/01k0

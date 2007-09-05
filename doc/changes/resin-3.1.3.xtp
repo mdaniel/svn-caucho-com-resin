@@ -24,6 +24,13 @@ use the Resin 3.0.x branch.</p>
 
 </s1>
 
+<s1 title="Config">
+
+<p>Added keepalive-connection-time-max, limiting the total time
+connections can live with keepalives.</p>
+
+</s1>
+
 <s1 title="Session Generation">
 
 <p>Applications can now give a hint to the SessionManager about which

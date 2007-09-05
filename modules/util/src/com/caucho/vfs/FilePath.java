@@ -200,7 +200,41 @@ public class FilePath extends FilesystemPath {
    */
   public String getURL()
   {
-    return escapeURL("file:" + getFullPath());
+    if (! isWindows())
+      return escapeURL("file:" + getFullPath());
+    
+    String path = getFullPath();
+    int length = path.length();
+    CharBuffer cb = new CharBuffer();
+    cb.append("file:");
+    
+    char ch;
+    int offset = 0;
+    // For windows, convert /c: to c:
+    if (isWindows()) {
+      if (length >= 3
+	  && path.charAt(0) == '/'
+	  && path.charAt(2) == ':'
+	  && ((ch = path.charAt(1)) >= 'a' && ch <= 'z'
+	      || ch >= 'A' && ch <= 'Z')) {
+        offset = 1;
+      }
+      else if (length >= 3
+	       && path.charAt(0) == '/'
+	       && path.charAt(1) == ':'
+	       && path.charAt(2) == '/') {
+        cb.append('/');
+        cb.append('/');
+        offset = 3;
+      }
+    }
+
+    for (; offset < length; offset++) {
+      cb.append(path.charAt(offset));
+    }
+
+    return escapeURL("file:" + cb.toString());
+        
   }
 
   /**
@@ -208,7 +242,7 @@ public class FilePath extends FilesystemPath {
    */
   public String getNativePath()
   {
-    if (_separatorChar == '/' && ! isWindows())
+    if (! isWindows())
       return getFullPath();
     
     String path = getFullPath();
@@ -218,17 +252,17 @@ public class FilePath extends FilesystemPath {
     int offset = 0;
     // For windows, convert /c: to c:
     if (isWindows()) {
-      if (length >= 3 &&
-          path.charAt(0) == '/' &&
-          path.charAt(2) == ':' &&
-          ((ch = path.charAt(1)) >= 'a' && ch <= 'z' ||
-           ch >= 'A' && ch <= 'Z')) {
+      if (length >= 3
+	  && path.charAt(0) == '/'
+	  && path.charAt(2) == ':'
+	  && ((ch = path.charAt(1)) >= 'a' && ch <= 'z'
+	      || ch >= 'A' && ch <= 'Z')) {
         offset = 1;
       }
-      else if (length >= 3 &&
-               path.charAt(0) == '/' &&
-               path.charAt(1) == ':' &&
-               path.charAt(2) == '/') {
+      else if (length >= 3
+	       && path.charAt(0) == '/'
+	       && path.charAt(1) == ':'
+	       && path.charAt(2) == '/') {
         cb.append('\\');
         cb.append('\\');
         offset = 3;

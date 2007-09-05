@@ -56,7 +56,8 @@ import java.util.logging.Logger;
  */
 public class FileBacking {
   private static final L10N L = new L10N(FileBacking.class);
-  private static final Logger log = Log.open(FileBacking.class);
+  private static final Logger log
+    = Logger.getLogger(FileBacking.class.getName());
   
   private FreeList<ClusterConnection> _freeConn
     = new FreeList<ClusterConnection>(32);
@@ -116,20 +117,23 @@ public class FileBacking {
     if (length <= 0)
       length = 1;
     
-    _loadQuery = "SELECT access_time,data FROM " + _tableName + " WHERE id=?";
-    _insertQuery = ("INSERT into " + _tableName + " (id,data,mod_time,access_time,expire_interval,server1,server2,server3) " +
-		    "VALUES(?,?,?,?,?,?,?,?)");
-    _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=? WHERE id=?";
+    _loadQuery = "SELECT access_time,data FROM " + _tableName + " WHERE id=? AND is_valid=1";
+    _insertQuery = ("INSERT into " + _tableName
+		    + " (id,is_valid,data,mod_time,access_time,expire_interval,server1,server2,server3) "
+		    + "VALUES(?,1,?,?,?,?,?,?,?)");
+    _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=?,is_valid=1 WHERE id=?";
     _accessQuery = "UPDATE " + _tableName + " SET access_time=? WHERE id=?";
     _setExpiresQuery = "UPDATE " + _tableName + " SET expire_interval=? WHERE id=?";
-    _invalidateQuery = "DELETE FROM " + _tableName + " WHERE id=?";
+    _invalidateQuery = "UPDATE " + _tableName + " SET is_valid=0 WHERE id=?";
 
     // access window is 1/4 the expire interval
-    _timeoutQuery = "DELETE FROM " + _tableName + " WHERE access_time + 5 * expire_interval / 4 < ?";
+    _timeoutQuery = ("DELETE FROM " + _tableName
+		     + " WHERE access_time + 5 * expire_interval / 4 < ?");
 
-    _dumpQuery = ("SELECT id, expire_interval, data FROM " + _tableName +
-		  " WHERE ? <= mod_time AND " +
-		  "   (?=server1 OR ?=server2 OR ?=server3)");
+    _dumpQuery = ("SELECT id, is_valid, expire_interval, data"
+		  + " FROM " + _tableName
+		  + " WHERE ? <= mod_time AND "
+		  + "   (?=server1 OR ?=server2 OR ?=server3)");
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
     
@@ -191,6 +195,7 @@ public class FileBacking {
 
       String sql = ("CREATE TABLE " + _tableName + " (\n" +
 		    "  id VARBINARY(64) PRIMARY KEY,\n" +
+		    "  is_valid BIT,\n" +
 		    "  data BLOB,\n" +
 		    "  expire_interval INTEGER,\n" +
 		    "  access_time INTEGER,\n" +
@@ -289,9 +294,10 @@ public class FileBacking {
 
       if (rs.next()) {
 	//System.out.println("LOAD: " + uniqueId);
-	long accessTime = rs.getInt(1) * 60000L;
+	boolean isValid = rs.getBoolean(1);
+	long accessTime = rs.getInt(2) * 60000L;
 	
-        InputStream is = rs.getBinaryStream(2);
+        InputStream is = rs.getBinaryStream(3);
 
         if (log.isLoggable(Level.FINE))
           log.fine("load local object: " + uniqueId);
