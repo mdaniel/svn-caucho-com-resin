@@ -393,7 +393,7 @@ public class ClusterObject {
 
     _isChanged = false;
 
-    TempStream tempStream = new TempStream(null);
+    TempStream tempStream = new TempStream();
     Crc64Stream crcStream = new Crc64Stream(tempStream);
 
     try {

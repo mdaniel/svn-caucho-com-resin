@@ -54,7 +54,7 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage  {
   {
     checkBodyWriteable();
     
-    _tempStream = new TempStream(null);
+    _tempStream = new TempStream();
     
     try {
       WriteStream ws = new WriteStream(_tempStream);

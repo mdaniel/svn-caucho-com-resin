@@ -44,7 +44,9 @@ import com.caucho.tools.profiler.DriverWrapper;
 import com.caucho.tools.profiler.ProfilerPoint;
 import com.caucho.tools.profiler.ProfilerPointConfig;
 import com.caucho.tools.profiler.XADataSourceWrapper;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.lifecycle.Lifecycle;
 
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
@@ -62,8 +64,10 @@ import java.util.logging.Logger;
 /**
  * Configures the database driver.
  */
-public class DriverConfig {
-  protected static final Logger log = Log.open(DriverConfig.class);
+public class DriverConfig
+{
+  protected static final Logger log
+    = Logger.getLogger(DriverConfig.class.getName());
   private static final L10N L = new L10N(DriverConfig.class);
 
   private static final int TYPE_UNKNOWN = 0;
@@ -108,10 +112,16 @@ public class DriverConfig {
   private XADataSource _xaDataSource;
   private Driver _driver;
 
-  private ProfilerPoint _profilerPoint;
 
-  private boolean _isInit;
-  private boolean _isStarted;
+  private Lifecycle _lifecycle = new Lifecycle();
+  private DriverAdmin _admin = new DriverAdmin(this);
+
+  // statistics
+  private long _connectionCountTotal;
+  private long _connectionFailCountTotal;
+  private long _lastFailTime;
+
+  private ProfilerPoint _profilerPoint;
 
   /**
    * Null constructor for the Driver interface; called by the JNDI
@@ -174,7 +184,7 @@ public class DriverConfig {
     else if (dataSource instanceof ManagedConnectionFactory)
       _jcaDataSource = (ManagedConnectionFactory) dataSource;
     else
-      throw new ConfigException(L.l("data-source `{0}' is of type `{1}' which does not implement XADataSource or ConnectionPoolDataSource.",
+      throw new ConfigException(L.l("data-source '{0}' is of type '{1}' which does not implement XADataSource or ConnectionPoolDataSource.",
                                     dataSource,
                                     dataSource.getClass().getName()));
   }
@@ -195,14 +205,19 @@ public class DriverConfig {
   {
     _driverClass = driverClass;
 
-    if (! Driver.class.isAssignableFrom(driverClass) &&
-        ! XADataSource.class.isAssignableFrom(driverClass) &&
-        ! ConnectionPoolDataSource.class.isAssignableFrom(driverClass) &&
-        ! ManagedConnectionFactory.class.isAssignableFrom(driverClass))
-      throw new ConfigException(L.l("`{0}' is not a valid database type.",
+    if (! Driver.class.isAssignableFrom(driverClass)
+	&& ! XADataSource.class.isAssignableFrom(driverClass)
+	&& ! ConnectionPoolDataSource.class.isAssignableFrom(driverClass)
+	&& ! ManagedConnectionFactory.class.isAssignableFrom(driverClass))
+      throw new ConfigException(L.l("'{0}' is not a valid database type.",
                                     driverClass.getName()));
 
     Config.checkCanInstantiate(driverClass);
+  }
+
+  public String getType()
+  {
+    return _driverClass.getName();
   }
 
   /**
@@ -219,6 +234,8 @@ public class DriverConfig {
   public void setURL(String url)
   {
     _driverURL = url;
+
+    _lifecycle.setName("JdbcDriver[" + url + "]");
   }
 
   /**
@@ -423,10 +440,8 @@ public class DriverConfig {
   synchronized void initDataSource(boolean isTransactional, boolean isSpy)
     throws SQLException
   {
-    if (_isStarted)
+    if (! _lifecycle.toActive())
       return;
-
-    _isStarted = true;
 
     if (_xaDataSource == null && _poolDataSource == null) {
       initDriver();
@@ -434,7 +449,7 @@ public class DriverConfig {
       Object driverObject = getDriverObject();
 
       if (driverObject == null) {
-        throw new SQLExceptionWrapper(L.l("driver `{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
+        throw new SQLExceptionWrapper(L.l("driver '{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
                                           _driverClass, getDBPool().getName()));
       }
 
@@ -453,16 +468,18 @@ public class DriverConfig {
       else if (_driverObject instanceof Driver)
         _driver = (Driver) _driverObject;
       else
-        throw new SQLExceptionWrapper(L.l("driver `{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
+        throw new SQLExceptionWrapper(L.l("driver '{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
                                           _driverClass, getDBPool().getName()));
 
       /*
       if (! isTransactional && _xaDataSource != null) {
-	throw new SQLExceptionWrapper(L.l("XADataSource `{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
+	throw new SQLExceptionWrapper(L.l("XADataSource '{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
 					  _xaDataSource));
       }
       */
     }
+
+    _admin.register();
 
     if (_profilerPoint != null) {
       if (log.isLoggable(Level.FINE))
@@ -481,6 +498,21 @@ public class DriverConfig {
     }
 
     J2EEManagedObject.register(new JDBCDriver(this));
+  }
+
+  Lifecycle getLifecycle()
+  {
+    return _lifecycle;
+  }
+
+  boolean start()
+  {
+    return _lifecycle.toActive();
+  }
+
+  boolean stop()
+  {
+    return _lifecycle.toStop();
   }
 
   private void validateInitParam()
@@ -534,7 +566,7 @@ public class DriverConfig {
 
       /*
       if (! _isTransactional) {
-	throw new SQLExceptionWrapper(L.l("XADataSource `{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
+	throw new SQLExceptionWrapper(L.l("XADataSource '{0}' must be configured as transactional.  Either configure it with <xa>true</xa> or use the database's ConnectionPoolDataSource driver or the old java.sql.Driver driver.",
 					  _xaDataSource));
       }
       */
@@ -542,7 +574,7 @@ public class DriverConfig {
     else if (_poolDataSource != null) {
       /*
       if (_isTransactional) {
-	throw new SQLExceptionWrapper(L.l("ConnectionPoolDataSource `{0}' can not be configured as transactional.  Either use the database's XADataSource driver or the old java.sql.Driver driver.",
+	throw new SQLExceptionWrapper(L.l("ConnectionPoolDataSource '{0}' can not be configured as transactional.  Either use the database's XADataSource driver or the old java.sql.Driver driver.",
 					  _poolDataSource));
       }
       */
@@ -563,6 +595,9 @@ public class DriverConfig {
   Connection createDriverConnection(String user, String password)
     throws SQLException
   {
+    if (! _lifecycle.isActive())
+      return null;
+    
     if (_xaDataSource != null || _poolDataSource != null)
       throw new IllegalStateException();
 
@@ -575,26 +610,39 @@ public class DriverConfig {
     if (url == null)
       throw new SQLException(L.l("can't create connection with null url"));
 
-    Properties properties = new Properties();
-    properties.putAll(getInfo());
+    try {
+      Properties properties = new Properties();
+      properties.putAll(getInfo());
 
-    if (user != null)
-      properties.put("user", user);
-    else
-      properties.put("user", "");
+      if (user != null)
+	properties.put("user", user);
+      else
+	properties.put("user", "");
 
-    if (password != null)
-      properties.put("password", password);
-    else
-      properties.put("password", "");
+      if (password != null)
+	properties.put("password", password);
+      else
+	properties.put("password", "");
 
-    Connection conn;
-    if (driver != null)
-      conn = driver.connect(url, properties);
-    else
-      conn = java.sql.DriverManager.getConnection(url, properties);
+      Connection conn;
+      if (driver != null)
+	conn = driver.connect(url, properties);
+      else
+	conn = java.sql.DriverManager.getConnection(url, properties);
 
-    return conn;
+      synchronized (this) {
+	_connectionCountTotal++;
+      }
+
+      return conn;
+    } catch (SQLException e) {
+      synchronized (this) {
+	_connectionFailCountTotal++;
+	_lastFailTime = Alarm.getCurrentTime();
+      }
+      
+      throw e;
+    }
   }
 
   /**
@@ -603,10 +651,8 @@ public class DriverConfig {
   public void initDriver()
     throws SQLException
   {
-    if (_isInit)
+    if (! _lifecycle.toInit())
       return;
-
-    _isInit = true;
 
     Object driverObject = getDriverObject();
 
@@ -615,7 +661,7 @@ public class DriverConfig {
     else if (_xaDataSource != null || _poolDataSource != null)
       return;
     else {
-      throw new SQLExceptionWrapper(L.l("driver `{0}' has not been configured for pool {1}.  <database> needs either a <data-source> or a <type>.",
+      throw new SQLExceptionWrapper(L.l("driver '{0}' has not been configured for pool {1}.  <database> needs either a <data-source> or a <type>.",
                                         _driverClass, getDBPool().getName()));
     }
 
@@ -672,11 +718,39 @@ public class DriverConfig {
     }
   }
 
+  //
+  // statistics
+  //
+  
+  /**
+   * Returns the total number of connections made.
+   */
+  public long getConnectionCountTotal()
+  {
+    return _connectionCountTotal;
+  }
+  
+  /**
+   * Returns the total number of failing connections
+   */
+  public long getConnectionFailCountTotal()
+  {
+    return _connectionFailCountTotal;
+  }
+  
+  /**
+   * Returns the time of the last connection
+   */
+  public long getLastFailTime()
+  {
+    return _lastFailTime;
+  }
+
   /**
    * Returns a string description of the pool.
    */
   public String toString()
   {
-    return "Driver[" + _driverURL + "]";
+    return "JdbcDriver[" + _driverURL + "]";
   }
 }

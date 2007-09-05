@@ -62,6 +62,11 @@ abstract public class AbstractQueue extends AbstractDestination
     _listenerManager.addListener(listener);
   }
 
+  public boolean hasListener()
+  {
+    return _listenerManager.hasListener();
+  }
+
   public void removeListener(MessageListener listener)
   {
     _listenerManager.removeListener(listener);

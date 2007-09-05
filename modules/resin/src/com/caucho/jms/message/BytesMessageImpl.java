@@ -581,7 +581,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage  {
     checkBodyWriteable();
 
     if (_tempStream == null)
-      _tempStream = new TempStream(null);
+      _tempStream = new TempStream();
     
     if (_ws == null)
       _ws = new WriteStream(_tempStream);

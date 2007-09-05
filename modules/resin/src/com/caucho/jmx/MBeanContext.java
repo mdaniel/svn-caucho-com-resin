@@ -168,17 +168,31 @@ public class MBeanContext
   public ObjectName getObjectName(String name)
     throws MalformedObjectNameException
   {
-    if (name.indexOf(':') < 0) {
-      LinkedHashMap<String,String> properties;
-      properties = new LinkedHashMap<String,String>();
+    int len = name.length();
+    boolean isAbsolute = false;
 
-      properties.putAll(_properties);
-      Jmx.parseProperties(properties, name);
+    for (int i = 0; i < len; i++) {
+      char ch = name.charAt(i);
 
-      return Jmx.getObjectName(_domain, properties);
+      if (ch == ':')
+	return new ObjectName(name);
+      else if ('a' <= ch && ch <= 'z'
+	       || 'A' <= ch && ch <= 'Z'
+	       || '0' <= ch && ch <= '9'
+	       || ch == '-' || ch == '_' || ch == '.') {
+	continue;
+      }
+      else
+	break;
     }
-    else
-      return new ObjectName(name);
+    
+    LinkedHashMap<String,String> properties;
+    properties = new LinkedHashMap<String,String>();
+
+    properties.putAll(_properties);
+    Jmx.parseProperties(properties, name);
+
+    return Jmx.getObjectName(_domain, properties);
   }
 
   /**

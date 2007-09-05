@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.*;
 
 /**
  * Static convenience methods.
@@ -456,7 +457,7 @@ public class Jmx {
 	else if (ch == '"' || ch == '\'') {
 	  int end = ch;
 	  cb.clear();
-	  
+
 	  for (i++; i < len && (ch = name.charAt(i)) != end; i++) {
 	    if (ch == '\\') {
 	      ch = name.charAt(++i);
@@ -469,6 +470,8 @@ public class Jmx {
 	  if (ch != end)
 	    throw new IllegalArgumentException(L.l("`{0}' is an illegal name syntax.",
 						   name));
+
+	  i++;
 
 	  String value = cb.toString();
 
@@ -512,12 +515,14 @@ public class Jmx {
 
     boolean isFirst = true;
 
+    Pattern escapePattern = Pattern.compile("[,=:\"*?]");
+
     // sort type first
 
     String type = properties.get("type");
     if (type != null) {
       cb.append("type=");
-      if (type.matches("[,=:\"*?]"))
+      if (escapePattern.matcher(type).find())
 	type = ObjectName.quote(type);
       cb.append(type);
 
@@ -537,8 +542,11 @@ public class Jmx {
 
       String value = properties.get(key);
 
-      if (value.length() == 0 || value.matches("[,=:\"*?]"))
+      if (value.length() == 0
+	  || (escapePattern.matcher(value).find()
+	      && ! (value.startsWith("\"") && value.endsWith("\"")))) {
 	value = ObjectName.quote(value);
+      }
       
       cb.append(value);
     }

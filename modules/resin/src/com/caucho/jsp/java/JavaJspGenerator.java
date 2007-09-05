@@ -501,7 +501,7 @@ public class JavaJspGenerator extends JspGenerator {
     if (_pageData != null)
       return _pageData;
     
-    TempStream ts = new TempStream(null);
+    TempStream ts = new TempStream();
 
     ts.openWrite();
     WriteStream ws = new WriteStream(ts);

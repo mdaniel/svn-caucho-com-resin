@@ -65,7 +65,7 @@ public class SelfSerializer {
     throws RemoteException
   {
     try {
-      trs = new TempStream(null);
+      trs = new TempStream();
       os = new WriteStream(trs);
       oos = new ObjectOutputStream(os);
       is = null;

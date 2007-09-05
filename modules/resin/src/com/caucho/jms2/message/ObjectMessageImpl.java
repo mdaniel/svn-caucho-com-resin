@@ -80,7 +80,7 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
   {
     checkBodyWriteable();
     
-    _tempStream = new TempStream(null);
+    _tempStream = new TempStream();
     
     try {
       OutputStream ws = new StreamImplOutputStream(_tempStream);

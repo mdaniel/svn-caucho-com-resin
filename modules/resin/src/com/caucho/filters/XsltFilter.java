@@ -413,7 +413,7 @@ public class XsltFilter implements Filter {
       if (_os != null)
         throw new IllegalStateException(L.l("setContentType for XSLT chaining must be before any data."));
       
-      _tempStream = new TempStream(null);
+      _tempStream = new TempStream();
       _tempStream.openWrite();
 
       _os = new WriteStream(_tempStream);
