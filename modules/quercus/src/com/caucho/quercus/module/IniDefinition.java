@@ -112,7 +112,8 @@ public class IniDefinition {
 
     String valueAsString = value.toString().trim();
 
-    if (valueAsString.equalsIgnoreCase("false")
+    if (valueAsString.length() == 0
+        || valueAsString.equalsIgnoreCase("false")
         || valueAsString.equalsIgnoreCase("off")
         || valueAsString.equalsIgnoreCase("0"))
       return BooleanValue.FALSE;

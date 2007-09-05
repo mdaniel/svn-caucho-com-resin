@@ -3729,7 +3729,7 @@ public class Env {
     
     String fullMsg = prefix + msg + getFunctionLocation();
 
-    error(B_ERROR, location, msg);
+    error(B_ERROR, location, fullMsg);
 
     throw new QuercusRuntimeException(fullMsg);
   }
