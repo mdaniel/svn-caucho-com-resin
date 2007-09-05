@@ -49,6 +49,10 @@
 
 package hessian.io 
 {
+  /**
+   * Constants used in the Hessian 2.0 protocol.
+   *
+   */
   public class Hessian2Constants
   {
     public static const INT_DIRECT_MIN:int = -0x10;

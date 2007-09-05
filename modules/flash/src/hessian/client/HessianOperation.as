@@ -68,12 +68,18 @@ package hessian.client
 
   use namespace mx_internal;
 
+  /**
+   * The HessianOperation class is an AbstractOperation used exclusively
+   * by HessianServices.
+   *
+   * @see hessian.client.HessianService
+   */
   public class HessianOperation extends AbstractOperation         
   {
     private var _returnType:Class;
     private var _tokens:Object = new Object();
-    private var _uid:String;
 
+    /** @private */
     public function HessianOperation(service:HessianService, 
                                      name:String, returnType:Class = null)
     {
@@ -82,6 +88,16 @@ package hessian.client
       _returnType = returnType;
     }
 
+    /** 
+     * Invokes the operation on the remote service.  The return value is
+     * an AsyncToken which can be used to retrieve the result of the 
+     * invocation.  The lastResult property may also be used.
+     *
+     * @param args The arguments to be sent.
+     *
+     * @return The AsyncToken that may be used to retrieve the result of
+     * the invocation.
+     */
     public override function send(...args):AsyncToken
     {
       var data:ByteArray = new ByteArray();
@@ -112,6 +128,7 @@ package hessian.client
       return token;
     }
 
+    /** @private */
     public function handleComplete(event:Event):void
     {
       var stream:URLStream = event.target as URLStream;
@@ -142,16 +159,9 @@ package hessian.client
       dispatchEvent(resultEvent);
     }
 
-    public function get uid():String
-    {
-      return _uid;
-    }
-
-    public function set uid(uid:String):void
-    {
-      _uid = uid;
-    }
-
+    /**
+     * The return type to which results will be cast.  Optional.
+     */
     public function get returnType():Class
     {
       return _returnType;

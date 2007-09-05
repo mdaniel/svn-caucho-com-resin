@@ -58,24 +58,39 @@ package hessian.client
   import mx.rpc.AbstractService;
 
   import mx.core.mx_internal;
+
 	use namespace mx_internal;
 
   [Bindable]
+  /**
+   * The HessianService class provides access to Hessian-based web services
+   * on remote servers.
+   *
+   * @see hessian.client.HessianOperation
+   * @see hessian.mxml.HessianService
+   */
   public class HessianService extends AbstractService
   {
     private var _api:Class;
 
+    /**
+     * Constructor.
+     *
+     * @param destination The URL of the destination service.
+     * @param api The API associated with this HessianService, if any.
+     *
+     */
     public function HessianService(destination:String = null, api:Class = null)
     {
       super(destination);
 
       _api = api;
-      operationClass = HessianOperation;
 
       if (api != null)
         introspect();
     }
 
+    /** @private */
     protected function introspect():void
     {
       var type:XML = describeType(_api);
@@ -98,6 +113,26 @@ package hessian.client
       }
     }
 
+    /**
+     * Retrieves a HessianOperation by name, creating one if it does not
+     * already exist.
+     *
+     * @param name The name of the operation
+     *
+     * @return The HessianOperation named by <code>name</code>.
+     *
+     */
+    public override function getOperation(name:String):AbstractOperation
+    {
+      if (operations[name] == null)
+        operations[name] = new HessianOperation(this, name);
+
+      return operations[name];
+    }
+
+    /**
+     * The API associated with this HessianService, if any.
+     */
     public function get api():String
     {
       if (_api == null)

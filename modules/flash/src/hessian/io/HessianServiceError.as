@@ -49,11 +49,21 @@
 
 package hessian.io 
 {
+  /**
+   * An Error thrown if a Hessian service error is experienced.
+   */
   public class HessianServiceError extends Error
   {
     private var _code:String;
     private var _detail:Object;
 
+    /**
+     * Creates a new HessianServiceError.
+     *
+     * @param msg A message associated with the error.
+     * @param code A code associated with the error.
+     * @param detail A detailed message associated with the error.
+     */
     public function HessianServiceError(msg:String = "", 
                                         code:String = "", 
                                         detail:Object = null)
@@ -64,12 +74,18 @@ package hessian.io
       _detail = detail;
     }
 
-    public function getCode():String
+    /**
+     * A code associated with the error.
+     */
+    public function get code():String
     {
       return _code;
     }
 
-    public function getDetail():Object
+    /**
+     * A detailed message associated with the error.
+     */
+    public function get detail():Object
     {
       return _detail;
     }

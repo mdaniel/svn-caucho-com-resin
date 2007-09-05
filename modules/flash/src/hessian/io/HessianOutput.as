@@ -54,6 +54,11 @@ package hessian.io
   import flash.utils.describeType;
   import flash.utils.getQualifiedClassName;
 
+  /**
+   * A writer for the Hessian 1.0 protocol.  A Hessian 2.0 compatible reader
+   * must be able to read the output of this implementation.
+   *
+   */
   public class HessianOutput extends AbstractHessianOutput
   {
     private var _out:IDataOutput;
@@ -61,13 +66,25 @@ package hessian.io
     private var _refs:Object;
     private var _numRefs:int = 0;
 
+    /**
+     * Creates a new HessianOutput.
+     *
+     * @param out The IDataOutput to which this HessianOutput will write.
+     *
+     * @see #init(IDataOutput)
+     *
+     */
     public function HessianOutput(out:IDataOutput = null)
     {
       init(out);
     }
 
     /**
-     * Initialize the Hessian stream with the underlying input stream.
+     * Initialize the Hessian stream with the underlying IDataOutput.  This
+     * method will reset the internal data of this instance, meaning this
+     * HessianOutput may be reused.
+     *
+     * @param out The IDataOutput to which this HessianOutput will write.
      */
     public override function init(out:IDataOutput):void
     {
@@ -76,14 +93,16 @@ package hessian.io
     }
 
     /**
-     * Starts the method call:
+     * Starts the method call.
      *
-     * <code><pre>
-     * c major minor
-     * m b16 b8 method-namek
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   c major minor
+     *   m b16 b8 method-namek
+     *   </pre></code>
+     * </p>
      *
-     * @param method the method name to call.
+     * @param method The method name to call.
      */
     public override function startCall(method:String = null):void
     {
@@ -108,11 +127,13 @@ package hessian.io
     /**
      * Writes the method tag.
      *
-     * <code><pre>
-     * m b16 b8 method-name
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   m b16 b8 method-name
+     *   </pre></code>
+     * </p>
      *
-     * @param method the method name to call.
+     * @param method The method name to call.
      */
     public override function writeMethod(method:String):void
     {
@@ -124,11 +145,14 @@ package hessian.io
     }
 
     /**
-     * Completes the method call:
+     * Completes the method call.
      *
-     * <code><pre>
-     * z
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   z
+     *   </pre></code>
+     * </p>
+     *
      */
     public override function completeCall():void
     {
@@ -136,13 +160,13 @@ package hessian.io
     }
 
     /**
-     * Starts the reply
+     * Starts the reply.
      *
      * <p>A successful completion will have a single value:
-     *
-     * <pre>
-     * r
-     * </pre>
+     *   <pre>
+     *   r
+     *   </pre>
+     * </p>
      */
     public override function startReply():void
     {
@@ -152,13 +176,13 @@ package hessian.io
     }
 
     /**
-     * Completes reading the reply
+     * Completes reading the reply.
      *
      * <p>A successful completion will have a single value:
-     *
-     * <pre>
-     * z
-     * </pre>
+     *   <pre>
+     *   z
+     *   </pre>
+     * </p>
      */
     public override function completeReply():void
     {
@@ -168,9 +192,13 @@ package hessian.io
     /**
      * Writes a header name.  The header value must immediately follow.
      *
-     * <code><pre>
-     * H b16 b8 foo <em>value</em>
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   H b16 b8 foo <em>value</em>
+     *   </pre></code>
+     * </p>
+     *
+     * @param name The header name.
      */
     public override function writeHeader(name:String):void
     {
@@ -184,25 +212,30 @@ package hessian.io
     }
 
     /**
-     * Writes a fault.  The fault will be written
-     * as a descriptive string followed by an object:
+     * Writes a fault.  
      *
-     * <code><pre>
-     * f
-     * &lt;string>code
-     * &lt;string>the fault code
+     * <p>
+     *   The fault will be written
+     *   as a descriptive string followed by an object:
+     *   <code><pre>
+     *   f
+     *   &lt;string>code
+     *   &lt;string>the fault code
      *
-     * &lt;string>message
-     * &lt;string>the fault mesage
+     *   &lt;string>message
+     *   &lt;string>the fault mesage
      *
-     * &lt;string>detail
-     * mt\x00\xnnjavax.ejb.FinderException
-     *     ...
-     * z
-     * z
-     * </pre></code>
+     *   &lt;string>detail
+     *   mt\x00\xnnjavax.ejb.FinderException
+     *       ...
+     *   z
+     *   z
+     *   </pre></code>
+     * </p>
      *
-     * @param code the fault code, a three digit
+     * @param code The fault code, a three digit number.
+     * @param message The fault message.
+     * @param detail The fault detail.
      */
     public override function writeFault(code:String, 
                                         message:String, 
@@ -224,6 +257,10 @@ package hessian.io
 
     /**
      * Writes a generic object to the output stream.
+     *
+     * @param object The object to write.
+     * @param className The name of the class to write to the stream.
+     *                  May be the name of a primitive or user created class.
      */
     public override function writeObject(object:Object, 
                                          className:String = null):void
@@ -320,15 +357,22 @@ package hessian.io
      * <code>writeListBegin</code> followed by the list contents and then
      * call <code>writeListEnd</code>.
      *
-     * <code><pre>
-     * &lt;list>
-     *   &lt;type>java.util.ArrayList&lt;/type>
-     *   &lt;length>3&lt;/length>
-     *   &lt;int>1&lt;/int>
-     *   &lt;int>2&lt;/int>
-     *   &lt;int>3&lt;/int>
-     * &lt;/list>
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   &lt;list>
+     *     &lt;type>java.util.ArrayList&lt;/type>
+     *     &lt;length>3&lt;/length>
+     *     &lt;int>1&lt;/int>
+     *     &lt;int>2&lt;/int>
+     *     &lt;int>3&lt;/int>
+     *   &lt;/list>
+     *   </pre></code>
+     * </p>
+     * 
+     * @param length The length of the list.
+     * @param type The type of the elements in the list.
+     *
+     * @return If this list will have an end.
      */
     public override function writeListBegin(length:int, 
                                             type:String = null):Boolean
@@ -364,9 +408,13 @@ package hessian.io
      * <code>writeMapBegin</code> followed by the map contents and then
      * call <code>writeMapEnd</code>.
      *
-     * <code><pre>
-     * Mt b16 b8 type (<key> <value>)z
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   Mt b16 b8 type (<key> <value>)z
+     *   </pre></code>
+     * </p>
+     *
+     * @param type The type of the map to write.
      */
     public override function writeMapBegin(type:String):void
     {
@@ -391,12 +439,14 @@ package hessian.io
      * Writes a boolean value to the stream.  The boolean will be written
      * with the following syntax:
      *
-     * <code><pre>
-     * T
-     * F
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   T
+     *   F
+     *   </pre></code>
+     * </p>
      *
-     * @param value the boolean value to write.
+     * @param value The boolean value to write.
      */
     public override function writeBoolean(value:Boolean):void
     {
@@ -410,11 +460,13 @@ package hessian.io
      * Writes an integer value to the stream.  The integer will be written
      * with the following syntax:
      *
-     * <code><pre>
-     * I b32 b24 b16 b8
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   I b32 b24 b16 b8
+     *   </pre></code>
+     * </p>
      *
-     * @param value the integer value to write.
+     * @param value The integer value to write.
      */
     public override function writeInt(value:int):void
     {
@@ -429,11 +481,13 @@ package hessian.io
      * Writes a long value to the stream.  The long will be written
      * with the following syntax:
      *
-     * <code><pre>
-     * L b64 b56 b48 b40 b32 b24 b16 b8
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   L b64 b56 b48 b40 b32 b24 b16 b8
+     *   </pre></code>
+     * </p>
      *
-     * @param value the long value to write.
+     * @param value The long value to write.
      */
     public override function writeLong(value:Number):void
     {
@@ -452,11 +506,13 @@ package hessian.io
      * Writes a double value to the stream.  The double will be written
      * with the following syntax:
      *
-     * <code><pre>
-     * D b64 b56 b48 b40 b32 b24 b16 b8
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   D b64 b56 b48 b40 b32 b24 b16 b8
+     *   </pre></code>
+     * </p>
      *
-     * @param value the double value to write.
+     * @param value The double value to write.
      */
     public override function writeDouble(value:Number):void
     {
@@ -469,11 +525,13 @@ package hessian.io
     /**
      * Writes a date to the stream.
      *
-     * <code><pre>
-     * T  b64 b56 b48 b40 b32 b24 b16 b8
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   T  b64 b56 b48 b40 b32 b24 b16 b8
+     *   </pre></code>
+     * </p>
      *
-     * @param time the date in milliseconds from the epoch in UTC
+     * @param time The date in milliseconds from the epoch in UTC
      */
     public override function writeUTCDate(time:Number):void
     {
@@ -492,11 +550,11 @@ package hessian.io
      * Writes a null value to the stream.
      * The null will be written with the following syntax
      *
-     * <code><pre>
-     * N
-     * </pre></code>
-     *
-     * @param value the string value to write.
+     * <p>
+     *   <code><pre>
+     *   N
+     *   </pre></code>
+     * </p>
      */
     public override function writeNull():void
     {
@@ -507,17 +565,23 @@ package hessian.io
      * Writes a string value to the stream using UTF-8 encoding.
      * The string will be written with the following syntax:
      *
-     * <code><pre>
-     * S b16 b8 string-value
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   S b16 b8 string-value
+     *   </pre></code>
+     * </p>
      *
-     * If the value is null, it will be written as
+     * <p>
+     *   If the value is null, it will be written as
      *
-     * <code><pre>
-     * N
-     * </pre></code>
+     *   <code><pre>
+     *   N
+     *   </pre></code>
+     * </p>
      *
-     * @param value the string value to write.
+     * @param value The string value to write.
+     * @param offset The offset in the string of where to start.
+     * @param length The length in the string to write.
      */
     public override function writeString(value:*, 
                                          offset:int = 0, 
@@ -564,17 +628,23 @@ package hessian.io
      * Writes a string value to the stream using UTF-8 encoding.
      * The string will be written with the following syntax:
      *
-     * <code><pre>
-     * S b16 b8 string-value
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   S b16 b8 string-value
+     *   </pre></code>
+     * </p>
      *
-     * If the value is null, it will be written as
+     * <p>
+     *   If the value is null, it will be written as
      *
-     * <code><pre>
-     * N
-     * </pre></code>
+     *   <code><pre>
+     *   N
+     *   </pre></code>
+     * </p>
      *
-     * @param value the string value to write.
+     * @param buffer The character buffer value to write.
+     * @param offset The offset in the array of where to start.
+     * @param length The length in the array to write.
      */
     private function writeCharArray(buffer:Array, offset:int, length:int):void
     {
@@ -608,17 +678,23 @@ package hessian.io
      * Writes a byte array to the stream.
      * The array will be written with the following syntax:
      *
-     * <code><pre>
-     * B b16 b18 bytes
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   B b16 b18 bytes
+     *   </pre></code>
+     * </p>
      *
-     * If the value is null, it will be written as
+     * <p>
+     *   If the value is null, it will be written as
      *
-     * <code><pre>
-     * N
-     * </pre></code>
+     *   <code><pre>
+     *   N
+     *   </pre></code>
+     * </p>
      *
-     * @param value the string value to write.
+     * @param buffer The byte buffer value to write.
+     * @param offset The offset in the array of where to start.
+     * @param length The length in the array to write.
      */
     public override function writeBytes(buffer:ByteArray, 
                                         offset:int = 0, 
@@ -661,11 +737,15 @@ package hessian.io
     /**
      * Writes a byte buffer to the stream.
      *
-     * <code><pre>
-     * b b16 b18 bytes
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   b b16 b18 bytes
+     *   </pre></code>
+     * </p>
      *
-     * @param value the string value to write.
+     * @param buffer The byte buffer value to write.
+     * @param offset The offset in the array of where to start.
+     * @param length The length in the array to write.
      */
     public override function writeByteBufferPart(buffer:ByteArray,
                                                  offset:int,
@@ -691,11 +771,15 @@ package hessian.io
     /**
      * Writes the last chunk of a byte buffer to the stream.
      *
-     * <code><pre>
-     * b b16 b18 bytes
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   b b16 b18 bytes
+     *   </pre></code>
+     * </p>
      *
-     * @param value the string value to write.
+     * @param buffer The byte buffer value to write.
+     * @param offset The offset in the array of where to start.
+     * @param length The length in the array to write.
      */
     public override function writeByteBufferEnd(buffer:ByteArray,
                                                 offset:int,
@@ -707,11 +791,13 @@ package hessian.io
     /**
      * Writes a reference.
      *
-     * <code><pre>
-     * R b32 b24 b16 b8
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   R b32 b24 b16 b8
+     *   </pre></code>
+     * </p>
      *
-     * @param value the integer value to write.
+     * @param value The integer value to write.
      */
     public override function writeRef(value:int):void
     {
@@ -727,11 +813,13 @@ package hessian.io
      * writes the reference, otherwise, the caller is responsible for
      * the serialization.
      *
-     * <code><pre>
-     * R b32 b24 b16 b8
-     * </pre></code>
+     * <p>
+     *   <code><pre>
+     *   R b32 b24 b16 b8
+     *   </pre></code>
+     * </p>
      *
-     * @param object the object to add as a reference.
+     * @param object The object to add as a reference.
      *
      * @return true if the object has already been written.
      */
@@ -768,6 +856,10 @@ package hessian.io
 
     /**
      * Removes a reference.
+     *
+     * @param obj The object which has a reference.
+     * 
+     * @return true if a reference was present for the given object.
      */
     public override function removeRef(obj:Object):Boolean
     {
@@ -783,6 +875,11 @@ package hessian.io
 
     /**
      * Replaces a reference from one object to another.
+     * 
+     * @param oldObj The object which has a reference to replace.
+     * @param newObj The object to which to assign the reference.
+     *
+     * @return true if a reference was present for the given object.
      */
     public override function replaceRef(oldRef:Object, newRef:Object):Boolean
     {
@@ -798,37 +895,43 @@ package hessian.io
     }
 
     /**
-     * Prints a string to the stream, encoded as UTF-8 with preceeding length
+     * Prints a string to the stream, encoded as UTF-8 with preceeding length.
      *
-     * @param v the string to print.
+     * @param value The string value to write.
+     * @param offset The offset in the string of where to start.
+     * @param length The length in the string to write.
      */
-    public function printLenString(v:String):void
+    public function printLenString(value:String):void
     {
-      if (v == null) {
+      if (value == null) {
         _out.writeByte(0);
         _out.writeByte(0);
       }
       else {
-        var len:int = v.length;
+        var len:int = value.length;
         _out.writeByte(len >> 8);
         _out.writeByte(len);
 
-        printString(v, 0, len);
+        printString(value, 0, len);
       }
     }
 
     /**
-     * Prints a string to the stream, encoded as UTF-8
+     * Prints a string to the stream, encoded as UTF-8.
      *
-     * @param v the string to print.
+     * @param value The string value to write.
+     * @param offset The offset in the string of where to start.
+     * @param length The length in the string to write.
      */
-    public function printString(v:String, offset:int = 0, length:int = -1):void
+    public function printString(value:String, 
+                                offset:int = 0, 
+                                length:int = -1):void
     {
       if (length < 0)
-        length = v.length;
+        length = value.length;
 
       for (var i:int = 0; i < length; i++) {
-        var ch:int = v.charCodeAt(i + offset);
+        var ch:int = value.charCodeAt(i + offset);
 
         if (ch < 0x80)
           _out.writeByte(ch);
@@ -847,14 +950,16 @@ package hessian.io
     }
 
     /**
-     * Prints a string to the stream, encoded as UTF-8
+     * Prints a character array to the stream, encoded as UTF-8.
      *
-     * @param v the string to print.
+     * @param value The character array value to write.
+     * @param offset The offset in the string of where to start.
+     * @param length The length in the string to write.
      */
-    public function printCharArray(v:Array, offset:int, length:int):void
+    public function printCharArray(value:Array, offset:int, length:int):void
     {
       for (var i:int = 0; i < length; i++) {
-        var ch:int = v[i + offset];
+        var ch:int = value[i + offset];
 
         if (ch < 0x80)
           _out.writeByte(ch);

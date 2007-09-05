@@ -52,7 +52,7 @@ package hessian.io
 	import flash.utils.ByteArray;
 	import flash.utils.IDataInput;
 
-  public class AbstractHessianInput 
+  internal class AbstractHessianInput 
   {
     /**
      * Initialize the Hessian stream with the underlying input stream.
@@ -91,9 +91,11 @@ package hessian.io
     /**
      * Reads a header, returning null if there are no headers.
      *
-     * <pre>
-     * H b16 b8 value
-     * </pre>
+     * <p>
+     *   <pre>
+     *   H b16 b8 value
+     *   </pre>
+     * </p>
      */
     public function readHeader():String 
     {
@@ -105,9 +107,10 @@ package hessian.io
      *
      * <p>A successful completion will have a single value:
      *
-     * <pre>
-     * m b16 b8 method
-     * </pre>
+     *   <pre>
+     *   m b16 b8 method
+     *   </pre>
+     * </p>
      */
     public function readMethod():String 
     {
@@ -119,10 +122,11 @@ package hessian.io
      *
      * <p>The call expects the following protocol data
      *
-     * <pre>
-     * c major minor
-     * m b16 b8 method
-     * </pre>
+     *   <pre>
+     *   c major minor
+     *   m b16 b8 method
+     *   </pre>
+     * </p>
      */
     public function startCall():void
     {
@@ -132,11 +136,13 @@ package hessian.io
     /**
      * Completes reading the call
      *
-     * <p>The call expects the following protocol data
+     * <p>
+     *   The call expects the following protocol data
      *
-     * <pre>
-     * Z
-     * </pre>
+     *   <pre>
+     *   Z
+     *   </pre>
+     * </p>
      */
     public function completeCall():void
     {

@@ -52,7 +52,7 @@ package hessian.io
 	import flash.utils.ByteArray;
 	import flash.utils.IDataOutput;
 
-  public class AbstractHessianOutput 
+  internal class AbstractHessianOutput 
   {
     /**
      * Initialize the Hessian stream with the underlying input stream.

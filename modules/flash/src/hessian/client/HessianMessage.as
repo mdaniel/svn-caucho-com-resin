@@ -51,7 +51,7 @@ package hessian.client
 {
   import mx.messaging.messages.IMessage;
 
-  public class HessianMessage implements IMessage
+  internal class HessianMessage implements IMessage
   {
     private var _body:Object;
     private var _clientId:String;

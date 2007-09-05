@@ -58,16 +58,24 @@ package hessian.mxml
   import mx.rpc.mxml.IMXMLSupport;
 
   [Bindable]
+  /**
+   * The HessianService class provides access to Hessian-based web services
+   * on remote servers.  This class implements the MXML tag.
+   *
+   * @see hessian.client.HessianService
+   */
   public dynamic class HessianService extends hessian.client.HessianService
                                       implements IMXMLObject,IMXMLSupport
   {
     private var _concurrency:String;
     private var _showBusyCursor:Boolean;
 
+    /** @private */
     public function initialized(document:Object, id:String):void 
     {
     }
 
+    /** @private */
     public function get concurrency():String
     {
       return _concurrency;
@@ -78,6 +86,7 @@ package hessian.mxml
       _concurrency = value;
     }
 
+    /** @private */
     public function get showBusyCursor():Boolean
     {
       return _showBusyCursor;

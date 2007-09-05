@@ -55,37 +55,76 @@ package hessian.io
 	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput;
 
+  /**
+   * A reader for the Hessian 2.0 protocol.
+   *
+   */
   public class Hessian2Input extends AbstractHessianInput 
   {
     private static const END_OF_DATA:int = -2;
     private static const SIZE:int = 256;
 
+    /** @private */
     protected var _di:IDataInput;
+
+    /** @private */
     protected var _method:String;
+
+    /** @private */
     protected var _offset:int = 0;
+
+    /** @private */
     protected var _length:int = 0;
+
+    /** @private */
     protected var _buffer:ByteArray;
+
+    /** @private */
     protected var _isLastChunk:Boolean;
+
+    /** @private */
     protected var _isStreaming:Boolean;
+
+    /** @private */
     protected var _chunkLength:int;
+
+    /** @private */
     protected var _sbuf:String;
+
+    /** @private */
     protected var _replyFault:Error;
 
     [ArrayElementType("hessian.io::ObjectDefinition")]
+    /** @private */
     protected var _classDefs:Array;
 
     [ArrayElementType("String")]
+    /** @private */
     protected var _types:Array;
 
+    /** @private */
     protected var _refs:Array;
 
+    /**
+     * Creates a new Hessian2Input.
+     *
+     * @param di The IDataInput from which this Hessian2Input will read.
+     *
+     * @see #init(IDataInput)
+     *
+     */
     public function Hessian2Input(di:IDataInput = null)
     {
       init(di);
     }
 
     /**
-     * Initialize the Hessian stream with the underlying input stream.
+     * Initialize the Hessian stream with the underlying IDataInput.  This
+     * method will reset the internal data of this instance, meaning this
+     * Hessian2Input may be reused.
+     *
+     * @param di The IDataInput from which this Hessian2Input will read.
+     * 
      */
     public override function init(di:IDataInput):void
     {
@@ -96,7 +135,7 @@ package hessian.io
     }
 
     /**
-     * Returns the call's method
+     * Returns the call's method.
      */
     public override function getMethod():String
     {
@@ -105,6 +144,8 @@ package hessian.io
 
     /**
      * Returns any reply fault.
+     *
+     * @return The reply fault, if available.
      */
     public function getReplyFault():Error
     {
@@ -112,11 +153,15 @@ package hessian.io
     }
 
     /**
-     * Reads the call
+     * Reads the call.
      *
-     * <pre>
-     * c major minor
-     * </pre>
+     * <p>
+     *   <pre>
+     *   c major minor
+     *   </pre>
+     * </p>
+     *
+     * @param The version of the call.
      */
     public override function readCall():int
     {
@@ -132,11 +177,15 @@ package hessian.io
     }
 
     /**
-     * Starts reading the envelope
+     * Starts reading the envelope.
      *
-     * <pre>
-     * E major minor
-     * </pre>
+     * <p>
+     *   <pre>
+     *   E major minor
+     *   </pre>
+     * </p>
+     * 
+     * @param The version of the envelope.
      */
     public function readEnvelope():int
     {
@@ -152,13 +201,13 @@ package hessian.io
     }
 
     /**
-     * Completes reading the envelope
+     * Completes reading the envelope.
      *
      * <p>A successful completion will have a single value:
-     *
-     * <pre>
-     * z
-     * </pre>
+     *   <pre>
+     *   z
+     *   </pre>
+     * </p>
      */
     public function completeEnvelope():void
     {
@@ -169,13 +218,16 @@ package hessian.io
     }
 
     /**
-     * Starts reading the call
+     * Starts reading the call.
      *
      * <p>A successful completion will have a single value:
      *
-     * <pre>
-     * m b16 b8 method
-     * </pre>
+     *   <pre>
+     *   m b16 b8 method
+     *   </pre>
+     * </p>
+     *
+     * @return The method name as read.
      */
     public override function readMethod():String 
     {
@@ -206,10 +258,11 @@ package hessian.io
      *
      * <p>The call expects the following protocol data
      *
-     * <pre>
-     * c major minor
-     * m b16 b8 method
-     * </pre>
+     *   <pre>
+     *   c major minor
+     *   m b16 b8 method
+     *   </pre>
+     * </p>
      */
     public override function startCall():void
     {
@@ -222,13 +275,14 @@ package hessian.io
     }
 
     /**
-     * Completes reading the call
+     * Completes reading the call.
      *
      * <p>The call expects the following protocol data
      *
-     * <pre>
-     * Z
-     * </pre>
+     *   <pre>
+     *   z
+     *   </pre>
+     * </p>
      */
     public override function completeCall():void
     {
@@ -247,6 +301,10 @@ package hessian.io
     /**
      * Reads a reply as an object.
      * If the reply has a fault, throws the exception.
+     *
+     * @param expectedClass The expected class of the reply.
+     * 
+     * @return The reply value.
      */
     public override function readReply(expectedClass:Class):Object 
     {
@@ -276,14 +334,15 @@ package hessian.io
     }
 
     /**
-     * Starts reading the reply
+     * Starts reading the reply.
      *
      * <p>A successful completion will have a single value:
      *
-     * <pre>
-     * r
-     * v
-     * </pre>
+     *   <pre>
+     *   r
+     *   v
+     *   </pre>
+     * </p>
      */
     public override function startReply():void
     {
@@ -305,7 +364,9 @@ package hessian.io
     }
 
     /**
-     * Prepares the fault.
+     * Prepares a fault.
+     * 
+     * @return The fault.
      */
     private function prepareFault():Error
     {
@@ -333,13 +394,13 @@ package hessian.io
     }
 
     /**
-     * Completes reading the call
+     * Completes reading the call.
      *
      * <p>A successful completion will have a single value:
-     *
-     * <pre>
-     * z
-     * </pre>
+     *  <pre>
+     *  z
+     *  </pre>
+     * </p>
      */
     public override function completeReply():void
     {
@@ -350,13 +411,13 @@ package hessian.io
     }
 
     /**
-     * Completes reading the call
+     * Completes reading the call.
      *
      * <p>A successful completion will have a single value:
-     *
-     * <pre>
-     * z
-     * </pre>
+     *   <pre>
+     *   z
+     *   </pre>
+     * </p>
      */
     public function completeValueReply():void
     {
@@ -369,9 +430,13 @@ package hessian.io
     /**
      * Reads a header, returning null if there are no headers.
      *
-     * <pre>
-     * H b16 b8 value
-     * </pre>
+     * <p>
+     *   <pre>
+     *   H b16 b8 value
+     *   </pre>
+     * </p>
+     * 
+     * @return The header if available or null otherwise.
      */
     public override function readHeader():String 
     {
@@ -398,11 +463,15 @@ package hessian.io
     }
 
     /**
-     * Starts reading the message
+     * Starts reading the message.
      *
-     * <pre>
-     * p major minor
-     * </pre>
+     * <p>
+     *   <pre>
+     *   p major minor
+     *   </pre>
+     * </p>
+     *
+     * @return The version of the message.
      */
     public function startMessage():int
     {
@@ -424,13 +493,13 @@ package hessian.io
     }
 
     /**
-     * Completes reading the message
+     * Completes reading the message.
      *
      * <p>A successful completion will have a single value:
-     *
-     * <pre>
-     * z
-     * </pre>
+     *   <pre>
+     *   z
+     *   </pre>
+     * </p>
      */
     public function completeMessage():void
     {
@@ -441,11 +510,13 @@ package hessian.io
     }
 
     /**
-     * Reads a null
+     * Reads a null.
      *
-     * <pre>
-     * N
-     * </pre>
+     * <p>
+     *   <pre>
+     *   N
+     *   </pre>
+     * </p>
      */
     public override function readNull():void
     {
@@ -460,12 +531,16 @@ package hessian.io
     }
 
     /**
-     * Reads a boolean
+     * Reads a boolean.
      *
-     * <pre>
-     * T
-     * F
-     * </pre>
+     * <p>
+     *   <pre>
+     *   T
+     *   F
+     *   </pre>
+     * </p>
+     *
+     * @return The boolean value read.
      */
     public override function readBoolean():Boolean 
     {
@@ -595,11 +670,15 @@ package hessian.io
     }
 
     /**
-     * Reads an integer
+     * Reads an integer.
      *
-     * <pre>
-     * I b32 b24 b16 b8
-     * </pre>
+     * <p>
+     *   <pre>
+     *   I b32 b24 b16 b8
+     *   </pre>
+     * </p>
+     *
+     * @return The integer value read.
      */
     public override function readInt():int
     {
@@ -714,11 +793,15 @@ package hessian.io
     }
 
     /**
-     * Reads a long
+     * Reads a long.
      *
-     * <pre>
-     * L b64 b56 b48 b40 b32 b24 b16 b8
-     * </pre>
+     * <p>
+     *   <pre>
+     *   L b64 b56 b48 b40 b32 b24 b16 b8
+     *   </pre>
+     * </p>
+     *
+     * @return The long value read as a Number.
      */
     public override function readLong():Number
     {
@@ -833,9 +916,13 @@ package hessian.io
     /**
      * Reads a double.
      *
-     * <pre>
-     * D b64 b56 b48 b40 b32 b24 b16 b8
-     * </pre>
+     * <p>
+     *   <pre>
+     *   D b64 b56 b48 b40 b32 b24 b16 b8
+     *   </pre>
+     * </p>
+     *
+     * @return The double value read as a Number.
      */
     public override function readDouble():Number
     {
@@ -947,9 +1034,13 @@ package hessian.io
     /**
      * Reads a date.
      *
-     * <pre>
-     * T b64 b56 b48 b40 b32 b24 b16 b8
-     * </pre>
+     * <p>
+     *   <pre>
+     *   T b64 b56 b48 b40 b32 b24 b16 b8
+     *   </pre>
+     * </p>
+     * 
+     * @return The date value read as a Number (milliseconds since the epoch).
      */
     public override function readUTCDate():Number
     {
@@ -981,7 +1072,9 @@ package hessian.io
     }
 
     /**
-     * Reads a byte from the stream.
+     * Reads a character from the stream.
+     *
+     * @return The UTF8 character value read as an integer.
      */
     public function readChar():int
     {
@@ -1031,11 +1124,15 @@ package hessian.io
     }
 
     /**
-     * Reads a string
+     * Reads a string.
      *
-     * <pre>
-     * S b16 b8 string value
-     * </pre>
+     * <p>
+     *   <pre>
+     *   S b16 b8 string value
+     *   </pre>
+     * </p>
+     *
+     * @return The string value read.
      */
     public override function readString():String
     {
@@ -1096,10 +1193,14 @@ package hessian.io
     /**
      * Reads a byte array.
      *
-     * <pre>
-     * b b16 b8 non-final binary chunk
-     * B b16 b8 final binary chunk
-     * </pre>
+     * <p>
+     *   <pre>
+     *   b b16 b8 non-final binary chunk
+     *   B b16 b8 final binary chunk
+     *   </pre>
+     * </p>
+     *
+     * @return A ByteArray with the bytes that were read.
      */
     public override function readBytes():ByteArray
     {
@@ -1148,6 +1249,8 @@ package hessian.io
 
     /**
      * Reads a fault.
+     *
+     * @return The fault value read.
      */
     private function readFault():Object
     {
@@ -1174,6 +1277,8 @@ package hessian.io
      * Reads an arbitrary object from the input stream.
      *
      * @param cl the expected class if the protocol doesn't supply it.
+     *
+     * @return The object value read.
      */
     public override function readObject(cl:Class = null):Object
     {
@@ -1256,6 +1361,8 @@ package hessian.io
 
     /**
      * Reads an arbitrary object from the input stream.
+     *
+     * @return The object value read.
      */
     private function readArbitraryObject():Object
     {
@@ -1501,12 +1608,13 @@ package hessian.io
     }
 
     /**
-     * Reads an object definition:
+     * Reads an object definition.
      *
-     * <pre>
-     * O type <int> (string)* <value>*
-     * </pre>
-     *
+     * <p>
+     *   <pre>
+     *   O type <int> (string)* <value>*
+     *   </pre>
+     * </p>
      */
     private function readObjectDefinition():void
     {
@@ -1525,6 +1633,15 @@ package hessian.io
       _classDefs.push(def);
     }
 
+    /**
+     * Reads an object instance.
+     *
+     * @param def The ObjectDefinition on which to base the read.
+     * @param expectedClass A class to instantiate.
+     *
+     * @return The object instance as read.
+     *
+     */
     private function readObjectInstance(def:ObjectDefinition,
                                         expectedClass:Class = null):Object
     {
@@ -1574,11 +1691,15 @@ package hessian.io
     }
 
     /**
-     * Reads a reference
+     * Reads a reference.
      *
-     * <pre>
-     * R b32 b24 b16 b8
-     * </pre>
+     * <p>
+     *   <pre>
+     *   R b32 b24 b16 b8
+     *   </pre>
+     * </p>
+     * 
+     * @return The object to which the read reference refers.
      */
     public override function readRef():Object
     {
@@ -1586,7 +1707,7 @@ package hessian.io
     }
 
     /**
-     * Reads the start of a list
+     * Reads the start of a list.
      */
     public override function readListStart():int
     {
@@ -1594,7 +1715,7 @@ package hessian.io
     }
 
     /**
-     * Reads the start of a map
+     * Reads the start of a map.
      */
     public override function readMapStart():int
     {
@@ -1603,6 +1724,8 @@ package hessian.io
 
     /**
      * Returns true if the data has ended.
+     *
+     * @return Whether the data has ended.
      */
     public override function isEnd():Boolean
     {
@@ -1621,7 +1744,7 @@ package hessian.io
     }
 
     /**
-     * Read the end byte
+     * Read the end byte.
      */
     public override function readEnd():void
     {
@@ -1632,7 +1755,7 @@ package hessian.io
     }
 
     /**
-     * Read the end byte
+     * Read the end byte.
      */
     public override function readMapEnd():void
     {
@@ -1643,7 +1766,7 @@ package hessian.io
     }
 
     /**
-     * Read the end byte
+     * Read the end byte.
      */
     public override function readListEnd():void
     {
@@ -1656,6 +1779,11 @@ package hessian.io
 
     /**
      * Adds an object reference.
+     *
+     * @param obj The object to which to add the reference.
+     *
+     * @return The reference number.
+     *
      */
     public override function addRef(obj:Object):int
     {
@@ -1669,6 +1797,9 @@ package hessian.io
 
     /**
      * Sets an object reference.
+     *
+     * @param i The reference number.
+     * @param obj The object to which to add the reference.
      */
     public override function setRef(i:int, obj:Object):void
     {
@@ -1686,6 +1817,8 @@ package hessian.io
 
     /**
      * Reads an object type.
+     *
+     * @return The type value read as a String.
      */
     public override function readType():String
     {
@@ -1722,11 +1855,15 @@ package hessian.io
     }
 
     /**
-     * Parses the length for an array
+     * Parses the length for an array.
      *
-     * <pre>
-     * l b32 b24 b16 b8
-     * </pre>
+     * <p>
+     *   <pre>
+     *   l b32 b24 b16 b8
+     *   </pre>
+     * </p>
+     *
+     * @return The length value read as an int.
      */
     public override function readLength():int
     {
@@ -1953,6 +2090,11 @@ package hessian.io
       return read();
     }
 
+    /**
+     * Reads a byte from the stream.
+     *
+     * @return The byte read as a uint.
+     */
     public final function read():uint
     {
       if (_length <= _offset && ! readBuffer())
@@ -2003,6 +2145,7 @@ package hessian.io
       return true;
     }
 
+    /** @private */
     protected function expect(expect:String, ch:int):IOError
     {
       if (ch < 0)
@@ -2011,6 +2154,7 @@ package hessian.io
         return error("expected " + expect + " at " + ch);
     }
   
+    /** @private */
     protected function error(msg:String):IOError
     {
       if (_method != null)

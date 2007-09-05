@@ -51,10 +51,19 @@ package hessian.io
 {
 	import flash.errors.IOError;
 
+  /**
+   * An IOError thrown if a Hessian protocol error is experienced.
+   */
   public class HessianProtocolError extends IOError
   {
     private var _rootCause:Error;
 
+    /**
+     * Creates a new HessianProtocolError.
+     *
+     * @param msg A message associated with the error.
+     * @param rootCause An Error that caused this error.
+     */
     public function HessianProtocolError(msg:String = "", 
                                          rootCause:Error = null)
     {
@@ -63,7 +72,10 @@ package hessian.io
       _rootCause = rootCause;
     }
 
-    public function getRootCause():Error
+    /**
+      * An Error that caused this error.
+      */
+    public function get rootCause():Error
     {
       return _rootCause;
     }
