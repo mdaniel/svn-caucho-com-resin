@@ -63,7 +63,7 @@ public class MappedSuperIntrospector extends BaseConfigIntrospector {
    */
   public boolean isMappedSuper(JClass type)
   {
-    getInternalMappedSuperclassConfig(type);
+    getInternalMappedSuperclassConfig(type, _annotationCfg);
     JAnnotation mappedSuperAnn = _annotationCfg.getAnnotation();
     MappedSuperclassConfig mappedSuperConfig
       = _annotationCfg.getMappedSuperclassConfig();

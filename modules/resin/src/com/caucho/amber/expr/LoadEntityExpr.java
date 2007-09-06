@@ -172,7 +172,6 @@ public class LoadEntityExpr extends LoadExpr {
       offset++;
     }
     */
-
     _index = entity.__caucho_load(aConn, rs, index + offset);
 
     item.setNumberOfLoadingColumns(_index);

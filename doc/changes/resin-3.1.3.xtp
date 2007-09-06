@@ -18,6 +18,20 @@ use the Resin 3.0.x branch.</p>
 
 </s1>
 
+<s1 title="HttpProxyServlet">
+
+<p>Added fail-recover-time and connection load balancing for
+HttpProxyServlet.</p>
+
+</s1>
+
+<s1 title="Admin">
+
+<p>Added JdbcDriverMXBean with start()/stop() to allow control of
+load-balanced database drivers.</p>
+
+</s1>
+
 <s1 title="JSF">
 
 <p>Resin 3.1.3 introduces out JSF implementation.</p>

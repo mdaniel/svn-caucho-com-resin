@@ -51,7 +51,6 @@ import java.util.Map;
  * An embedded expression which should be loaded.
  */
 public class LoadEmbeddedExpr extends LoadExpr {
-
   LoadEmbeddedExpr(PathExpr expr)
   {
     super(expr);

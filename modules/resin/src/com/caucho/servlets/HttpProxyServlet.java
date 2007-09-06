@@ -35,6 +35,7 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.ReadWritePair;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+import com.caucho.config.types.*;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
@@ -67,17 +68,15 @@ public class HttpProxyServlet extends GenericServlet {
   static protected final Logger log =
     Logger.getLogger(HttpProxyServlet.class.getName());
   static final L10N L = new L10N(HttpProxyServlet.class);
-  
-  private ArrayList<String> _hosts = new ArrayList<String>();
-  private Path []_urlPaths;
-  private int _roundRobin;
+
+  private TcpPool _tcpPool = new TcpPool();
 
   /**
    * Adds an address
    */
   public void addAddress(String address)
   {
-    _hosts.add(address);
+    _tcpPool.addHost(address);
   }
 
   /**
@@ -85,7 +84,15 @@ public class HttpProxyServlet extends GenericServlet {
    */
   public void addHost(String host)
   {
-    _hosts.add(host);
+    _tcpPool.addHost(host);
+  }
+
+  /**
+   * Sets the fail recover time.
+   */
+  public void setFailRecoverTime(Period period)
+  {
+    _tcpPool.setFailRecoverTime(period);
   }
 
   /**
@@ -94,19 +101,7 @@ public class HttpProxyServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    if (_hosts.size() == 0)
-      throw new ServletException(L.l("HttpProxyServlet needs at least one host."));
-
-    _urlPaths = new Path[_hosts.size()];
-
-    for (int i = 0; i < _hosts.size(); i++) {
-      String host = _hosts.get(i);
-
-      if (host.startsWith("http"))
-	_urlPaths[i] = Vfs.lookup(host);
-      else
-	_urlPaths[i] = Vfs.lookup("http://" + host);
-    }
+    _tcpPool.init();
   }
 
   /**
@@ -119,26 +114,6 @@ public class HttpProxyServlet extends GenericServlet {
     HttpServletResponse res = (HttpServletResponse) response;
 
     PrintWriter out = res.getWriter();
-
-    int startIndex = _roundRobin;
-    _roundRobin = (_roundRobin + 1) % _urlPaths.length;
-
-    for (int i = 0; i < _urlPaths.length; i++) {
-      int index = (startIndex + i) % _urlPaths.length;
-	
-      if (handleRequest(req, res, _urlPaths[index]))
-	return;
-    }
-      
-    res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-  }
-
-  private boolean handleRequest(HttpServletRequest req,
-				HttpServletResponse res,
-				Path path)
-    throws ServletException, IOException
-  {
-    String hostURL = path.getURL();
     
     String uri;
     if (req.isRequestedSessionIdFromUrl()) {
@@ -151,24 +126,58 @@ public class HttpProxyServlet extends GenericServlet {
     if (req.getQueryString() != null)
       uri += '?' + req.getQueryString();
 
-    path = path.lookup(uri);
 
-    ReadWritePair pair = path.openReadWrite();
+    int count = _tcpPool.getServerCount();
+
+    for (int i = 0; i < count; i++) {
+      TcpPool.Server server = _tcpPool.nextServer();
+	
+      ReadWritePair pair = null;
+      
+      try {
+	pair = server.open(uri);
+      } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      if (pair == null)
+	continue;
+
+      try {
+	if (handleRequest(req, res, server, pair))
+	  return;
+
+	server.fail();
+      } finally {
+	server.close();
+      }
+    }
+      
+    res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+  }
+
+  private boolean handleRequest(HttpServletRequest req,
+				HttpServletResponse res,
+				TcpPool.Server server,
+				ReadWritePair pair)
+    throws ServletException, IOException
+  {
+    String hostURL = server.getURL();
 
     ReadStream rs = pair.getReadStream();
     WriteStream ws = pair.getWriteStream();
 
-    ws.setAttribute("method", req.getMethod());
+    try {
+      ws.setAttribute("method", req.getMethod());
 
-    Enumeration e = req.getHeaderNames();
-    while (e.hasMoreElements()) {
-      String name = (String) e.nextElement();
-      String value = req.getHeader(name);
+      Enumeration e = req.getHeaderNames();
+      while (e.hasMoreElements()) {
+	String name = (String) e.nextElement();
+	String value = req.getHeader(name);
 
-      ws.setAttribute(name, value);
-    }
-
-     try {
+	ws.setAttribute(name, value);
+      }
+      
       InputStream is = req.getInputStream();
       ws.writeStream(is);
 

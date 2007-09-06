@@ -425,7 +425,8 @@ public class EntityManyToOneField extends CascadableField {
   public void generatePostConstructor(JavaWriter out)
     throws IOException
   {
-    out.println(getSetterName() + "(" + generateSuperGetter() + ");");
+    if (_aliasField == null)
+      out.println(getSetterName() + "(" + generateSuperGetter() + ");");
   }
 
   /**
@@ -1231,7 +1232,10 @@ public class EntityManyToOneField extends CascadableField {
       out.println("}");
     }
     else {
-      out.println("throw new IllegalStateException(\"aliased field cannot be set\");");
+      out.println("if (__caucho_session != null)");
+      out.println("  throw new IllegalStateException(\"aliased field cannot be set\");");
+
+      out.println(generateSuperSetter("v") + ";");
     }
 
     out.popDepth();

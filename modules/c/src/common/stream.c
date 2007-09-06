@@ -1289,8 +1289,11 @@ select_host(cluster_t *cluster, time_t now)
 
     if (! srun)
       continue;
-    
+
     cost = srun->active_sockets;
+    
+    if (cluster_srun->is_backup)
+      cost += 10000;
     
     if (srun->is_dead && now < srun->fail_time + srun->dead_time)
       continue;
@@ -1298,21 +1301,6 @@ select_host(cluster_t *cluster, time_t now)
       best_srun = index;
       best_cost = cost;
     }
-
-    /* Close idle connections. */
-    /* XXX: moved to the close
-    for (tail = srun->conn_tail;
-         tail != srun->conn_head;
-         tail = (tail + 1) % CONN_POOL_SIZE) {
-      struct conn_t *conn = &srun->conn_pool[tail];
-      
-      if (now < conn->last_time + srun->live_time)
-        break;
-      
-      srun->close(conn->socket, conn->ssl);
-      srun->conn_tail = (tail + 1) % CONN_POOL_SIZE;
-    }
-    */
   }
 
   return best_srun;

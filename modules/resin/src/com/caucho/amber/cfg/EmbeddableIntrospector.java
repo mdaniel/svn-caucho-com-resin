@@ -64,7 +64,7 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
    */
   public boolean isEmbeddable(JClass type)
   {
-    getInternalEmbeddableConfig(type);
+    getInternalEmbeddableConfig(type, _annotationCfg);
     JAnnotation embeddableAnn = _annotationCfg.getAnnotation();
     EmbeddableConfig embeddableConfig = _annotationCfg.getEmbeddableConfig();
 
@@ -77,7 +77,7 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
   public EmbeddableType introspect(JClass type)
     throws ConfigException, SQLException
   {
-    getInternalEmbeddableConfig(type);
+    getInternalEmbeddableConfig(type, _annotationCfg);
     JAnnotation embeddableAnn = _annotationCfg.getAnnotation();
     EmbeddableConfig embeddableConfig = _annotationCfg.getEmbeddableConfig();
 
@@ -119,11 +119,13 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
                           type, embeddableConfig);
 
     } catch (ConfigException e) {
-      embeddableType.setConfigException(e);
+      if (embeddableType != null)
+	embeddableType.setConfigException(e);
 
       throw e;
     } catch (RuntimeException e) {
-      embeddableType.setConfigException(e);
+      if (embeddableType != null)
+	embeddableType.setConfigException(e);
 
       throw e;
     }

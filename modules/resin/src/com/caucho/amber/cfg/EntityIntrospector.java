@@ -79,7 +79,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
    */
   public boolean isEntity(JClass type)
   {
-    getInternalEntityConfig(type);
+    getInternalEntityConfig(type, _annotationCfg);
     JAnnotation entityAnn = _annotationCfg.getAnnotation();
     EntityConfig entityConfig = _annotationCfg.getEntityConfig();
 
@@ -95,7 +95,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     RelatedType entityType = null;
 
     try {
-      getInternalEntityConfig(type);
+      getInternalEntityConfig(type, _annotationCfg);
       JAnnotation entityAnn = _annotationCfg.getAnnotation();
       EntityConfig entityConfig = _annotationCfg.getEntityConfig();
 
@@ -118,7 +118,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
           typeName = entityAnn.getString("name");
       }
       else {
-        getInternalMappedSuperclassConfig(type);
+        getInternalMappedSuperclassConfig(type, _annotationCfg);
         mappedSuperAnn = _annotationCfg.getAnnotation();
         mappedSuperConfig = _annotationCfg.getMappedSuperclassConfig();
 
@@ -157,7 +157,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         // on the entity class that is the root of the entity
         // class hierarachy.
 
-        getInternalInheritanceConfig(type);
+        getInternalInheritanceConfig(type, _annotationCfg);
         inheritanceAnn = _annotationCfg.getAnnotation();
         inheritanceConfig = _annotationCfg.getInheritanceConfig();
 
@@ -167,7 +167,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
              parentClass != null;
              parentClass = parentClass.getSuperClass()) {
 
-          getInternalEntityConfig(parentClass);
+          getInternalEntityConfig(parentClass, _annotationCfg);
 
           if (_annotationCfg.isNull())
             break;
@@ -181,7 +181,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
             throw new ConfigException(L.l("'{0}' cannot have @Inheritance. It must be specified on the entity class that is the root of the entity class hierarchy.",
                                           type));
 
-          getInternalInheritanceConfig(rootClass);
+          getInternalInheritanceConfig(rootClass, _annotationCfg);
           inheritanceAnn = _annotationCfg.getAnnotation();
           inheritanceConfig = _annotationCfg.getInheritanceConfig();
 
@@ -195,7 +195,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
              parentClass != null;
              parentClass = parentClass.getSuperClass()) {
 
-          getInternalEntityConfig(parentClass);
+          getInternalEntityConfig(parentClass, _annotationCfg);
 
           if (! _annotationCfg.isNull()) {
             parentType = introspect(parentClass);
@@ -209,7 +209,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
           }
 
           // jpa/0ge2
-          getInternalMappedSuperclassConfig(parentClass);
+          getInternalMappedSuperclassConfig(parentClass, _annotationCfg);
 
           if (! _annotationCfg.isNull()) {
             parentType = introspect(parentClass);
@@ -284,7 +284,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       Table table = null;
 
-      getInternalTableConfig(type);
+      getInternalTableConfig(type, _annotationCfg);
       JAnnotation tableAnn = _annotationCfg.getAnnotation();
       TableConfig tableConfig = _annotationCfg.getTableConfig();
 
@@ -326,7 +326,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         else if (strategy == InheritanceType.JOINED) {
           entityType.setTable(_persistenceUnit.createTable(tableName));
 
-          getInternalTableConfig(rootClass);
+          getInternalTableConfig(rootClass, _annotationCfg);
           JAnnotation rootTableAnn = _annotationCfg.getAnnotation();
           TableConfig rootTableConfig = _annotationCfg.getTableConfig();
 
@@ -379,7 +379,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         entityType.getTable().setCacheTimeout(cacheTimeout);
       }
 
-      getInternalSecondaryTableConfig(type);
+      getInternalSecondaryTableConfig(type, _annotationCfg);
       JAnnotation secondaryTableAnn = _annotationCfg.getAnnotation();
       SecondaryTableConfig secondaryTableConfig = _annotationCfg.getSecondaryTableConfig();
 
@@ -404,7 +404,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         // XXX: pk
       }
 
-      getInternalIdClassConfig(type);
+      getInternalIdClassConfig(type, _annotationCfg);
       JAnnotation idClassAnn = _annotationCfg.getAnnotation();
       IdClassConfig idClassConfig = _annotationCfg.getIdClassConfig();
 

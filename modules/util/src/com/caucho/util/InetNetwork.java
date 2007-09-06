@@ -38,6 +38,7 @@ public class InetNetwork {
   private static final Logger log
     = Logger.getLogger(InetNetwork.class.getName());
   
+  private long _hiAddress;
   private long _address;
   private long _mask;
   private int _maskIndex;
@@ -70,6 +71,17 @@ public class InetNetwork {
     _maskIndex = maskIndex;
     _mask = -1L << (32 - maskIndex);
   }
+  
+  /**
+   * Creates an inet network with a mask.
+   */
+  public InetNetwork(long hiAddress, long address, int maskIndex)
+  {
+    _hiAddress = hiAddress;
+    _address = address;
+    _maskIndex = maskIndex;
+    _mask = -1L << (64 - maskIndex);
+  }
 
   public static InetNetwork create(String network)
   {
@@ -78,6 +90,9 @@ public class InetNetwork {
     
     int i = 0;
     int len = network.length();
+
+    if (network.indexOf(':') >= 0)
+      return createIPv6(network);
     
     long address = 0;
     int digits = 0;
@@ -97,6 +112,10 @@ public class InetNetwork {
 
       if (i < len && ch == '.')
         i++;
+      else if (i < len && ch == '/')
+        i++;
+      else if (i < len)
+	break;
     }
 
     int mask = 8 * digits;
@@ -114,6 +133,104 @@ public class InetNetwork {
     return new InetNetwork(address, mask);
   }
 
+  public static InetNetwork createIPv6(String network)
+  {
+    
+    int i = 0;
+    int len = network.length();
+    
+    long hi = 0;
+    long lo = 0;
+    long topHi = 0;
+    long topLo = 0;
+    int digits = 0;
+    boolean isIPv4 = false;
+
+    int ch = 0;
+    while (i < len) {
+      ch = network.charAt(i);
+      
+      if (ch == '/')
+        break;
+
+      int digit = 0;
+      for (; i < len; i++) {
+	ch = network.charAt(i);
+	int v = 0;
+
+	if ('0' <= ch && ch <= '9')
+	  v = ch - '0';
+	else if ('a' <= ch && ch <= 'f')
+	  v = ch - 'a';
+	else if ('A' <= ch && ch <= 'F')
+	  v = ch - 'A';
+	else
+	  break;
+
+	if (isIPv4)
+	  digit = 10 * digit + v;
+	else
+	  digit = 16 * digit + v;
+      }
+
+      if (ch == '.' && ! isIPv4) {
+	digit = (digit / 256) * 100 + (digit / 16 % 16) * 10 + digit % 16;
+	isIPv4 = true;
+      }
+
+      if (isIPv4) {
+	hi = (hi << 8) + (lo >> 56);
+	lo = (lo << 8) + digit;
+	digits++;
+      }
+      else {
+	hi = (hi << 16) + (lo >> 48);
+	lo = (lo << 16) + digit;
+	
+	digits += 2;
+      }
+
+      if (len <= i)
+	break;
+      else if (ch == '/')
+        break;
+      else if (ch == '.')
+        i++;
+      else if (ch == ':' && i + 1 < len && network.charAt(i + 1) == ':') {
+	i += 2;
+
+	int shift = 16 - digits;
+
+	topHi += hi << (8 * shift);
+
+	if (shift < 8)
+	  topHi += lo >> (8 * (8 - shift));
+	else
+	  topHi += lo << 8 * (shift - 8);
+
+	hi = 0;
+	lo = 0;
+      }
+      else if (ch == ':')
+	i++;
+      else
+	break;
+    }
+
+    hi += topHi;
+    lo += topLo;
+
+    int mask = 64;
+
+    if (i < len && network.charAt(i) == '/') {
+      mask = 0;
+      for (i++; i < len && (ch = network.charAt(i)) >= '0' && ch <= '9'; i++)
+        mask = 10 * mask + ch - '0';
+    }
+
+    return new InetNetwork(hi, lo, mask);
+  }
+
   /**
    * Returns true if the address is in this network.
    */
@@ -124,6 +241,8 @@ public class InetNetwork {
     long address = 0;
     for (int i = 0; i < bytes.length; i++)
       address = 256 * address + (bytes[i] & 0xff);
+
+    System.out.println("ADDR: " + address + " " + _address + " " + _mask);
 
     return (_address & _mask) == (address & _mask);
   }

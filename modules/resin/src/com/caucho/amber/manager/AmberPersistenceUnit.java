@@ -676,9 +676,15 @@ public class AmberPersistenceUnit {
   public EmbeddableType createEmbeddable(String name,
                                          JClass beanClass)
   {
+    Type type = _typeManager.get(name);
+
+    if (type != null && ! (type instanceof EmbeddableType))
+      throw new ConfigException(L.l("'{0}' is not a valid embeddable type",
+				    name));
+    
     EmbeddableType embeddableType;
 
-    embeddableType = (EmbeddableType) _typeManager.get(name);
+    embeddableType = (EmbeddableType) type;
 
     if (embeddableType != null)
       return embeddableType;
