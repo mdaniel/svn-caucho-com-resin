@@ -63,6 +63,9 @@ public class ClassSerializer extends AbstractSerializer {
 
     if (cl == null)
       out.writeNull();
+    else if (out.addRef(obj)) {
+      return;
+    }
     else {
       int ref = out.writeObjectBegin("java.lang.Class");
 

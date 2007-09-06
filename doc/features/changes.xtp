@@ -4,6 +4,7 @@
 
 <s2 title="3.0.snap - Aug 14, 2007">
 <ul>
+<li>hessian: issue with class serialization (#1988, rep by ngiudici)</li>
 <li>windows issues with webapps and trailing dot</li>
 <li>request.getInputStream issues with encodings (#1915, rep by Takahiro Fukuda)</li>
 </ul>

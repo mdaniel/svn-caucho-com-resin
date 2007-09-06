@@ -10,7 +10,7 @@ PROXY_LIBS=-lpthread
 APACHE_INC=-I
 resin_conf=
 resin_libexec=
-resin_home=/home/ferg/ws30/test-resin
+resin_home=/home/ferg/ws30/resin
 JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
 INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
 CFLAGS = -g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI  -D_FILE_OFFSET_BITS=64 -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS) -fpic

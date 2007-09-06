@@ -521,22 +521,15 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (log.isLoggable(Level.FINE))
       log.fine("invalidate session " + _id);
 
-    ServletAuthenticator auth = getAuthenticator();
-    if (! isLRU
-	|| ! (auth instanceof AbstractAuthenticator)
-	|| ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout()) {
-      // server/12i1
-      logout(isLRU ? this : null);
-    }
-
-
-    /*
-    boolean invalidateAfterListener = _manager.isInvalidateAfterListener();
-    if (! invalidateAfterListener)
-      _isValid = false;
-    */
-
     try {
+      ServletAuthenticator auth = getAuthenticator();
+      if (! isLRU
+	  || ! (auth instanceof AbstractAuthenticator)
+	  || ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout()) {
+	// server/12i1
+	logout(isLRU ? this : null);
+      }
+
       // server/017s
       /*
       if (_clusterObject != null) {
@@ -548,8 +541,6 @@ public class SessionImpl implements HttpSession, CacheListener {
       _manager.removeSession(this);
 
       invalidateImpl();
-
-      _isValid = false;
     } finally {
       _isValid = false;
     }
@@ -571,20 +562,20 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void logout(SessionImpl timeoutSession)
   {
-    if (_user != null) {
-      if (_isValid)
-        removeAttribute(LOGIN);
-      Principal user = _user;
-      _user = null;
+    try {
+      if (_user != null) {
+	if (_isValid)
+	  removeAttribute(LOGIN);
+	Principal user = _user;
+	_user = null;
 
-      try {
 	ServletAuthenticator auth = getAuthenticator();
 
 	if (auth != null)
 	  auth.logout(_manager.getApplication(), timeoutSession, _id, user);
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
       }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 
