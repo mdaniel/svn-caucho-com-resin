@@ -33,63 +33,59 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
-public class TableRow {
-  private Document _document;
-  private ArrayList<TableCell> _cells = new ArrayList<TableCell>();
+public class Object extends ContainerNode {
+  private int _height = -1;
+  private int _width = -1;
 
-  public TableRow(Document document)
+  public Object(Document document)
   {
-    _document = document;
+    super(document);
   }
 
-  public int getNumberOfColumns()
+  public void setHeight(int height)
   {
-    return _cells.size();
+    _height = height;
   }
 
-  public TableData createTd()
+  public void setWidth(int width)
   {
-    TableData data = new TableData(_document);
-    _cells.add(data);
-    return data;
+    _width = width;
   }
 
-  public TableHeader createTh()
+  public Param createParam()
   {
-    TableHeader header = new TableHeader(_document);
-    _cells.add(header);
-    return header;
+    Param param = new Param(getDocument());
+    addItem(param);
+    return param;
   }
 
-  public void setOccur(String occur)
+  public Embed createEmbed()
   {
+    Embed embed = new Embed(getDocument());
+    addItem(embed);
+    return embed;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("tr");
+    out.writeStartElement("object");
 
-    for (TableCell cell : _cells)
-      cell.writeHtml(out);
+    if (_height >= 0)
+      out.writeAttribute("height", Integer.toString(_height));
 
-    out.writeEndElement(); // tr
+    if (_width >= 0)
+      out.writeAttribute("width", Integer.toString(_width));
+
+    super.writeHtml(out);
+
+    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    for (int i = 0; i < _cells.size(); i++) {
-      _cells.get(i).writeLaTeX(out);
-
-      if (i < _cells.size() - 1)
-        out.print("&");
-      else
-        out.println("\\\\");
-
-      out.flush();
-    }
+    throw new UnsupportedOperationException();
   }
 }

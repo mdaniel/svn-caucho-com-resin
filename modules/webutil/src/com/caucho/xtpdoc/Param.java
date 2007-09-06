@@ -33,63 +33,45 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
-public class TableRow {
-  private Document _document;
-  private ArrayList<TableCell> _cells = new ArrayList<TableCell>();
+public class Param extends ContainerNode {
+  private String _name;
+  private String _value;
 
-  public TableRow(Document document)
+  public Param(Document document)
   {
-    _document = document;
+    super(document);
   }
 
-  public int getNumberOfColumns()
+  public void setName(String name)
   {
-    return _cells.size();
+    _name = name;
   }
 
-  public TableData createTd()
+  public void setValue(String value)
   {
-    TableData data = new TableData(_document);
-    _cells.add(data);
-    return data;
-  }
-
-  public TableHeader createTh()
-  {
-    TableHeader header = new TableHeader(_document);
-    _cells.add(header);
-    return header;
-  }
-
-  public void setOccur(String occur)
-  {
+    _value = value;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("tr");
+    out.writeStartElement("param");
 
-    for (TableCell cell : _cells)
-      cell.writeHtml(out);
+    if (_name != null)
+      out.writeAttribute("name", _name);
 
-    out.writeEndElement(); // tr
+    if (_value != null)
+      out.writeAttribute("value", _value);
+
+    super.writeHtml(out);
+
+    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    for (int i = 0; i < _cells.size(); i++) {
-      _cells.get(i).writeLaTeX(out);
-
-      if (i < _cells.size() - 1)
-        out.print("&");
-      else
-        out.println("\\\\");
-
-      out.flush();
-    }
+    throw new UnsupportedOperationException();
   }
 }

@@ -165,6 +165,13 @@ public abstract class Section extends ContainerNode {
     return blockQuote;
   }
 
+  public Center createCenter()
+  {
+    Center center = new Center(getDocument());
+    addItem(center);
+    return center;
+  }
+
   public Paragraph createP()
   {
     Paragraph paragraph = new Paragraph(getDocument());

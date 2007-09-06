@@ -33,63 +33,30 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
-public class TableRow {
-  private Document _document;
-  private ArrayList<TableCell> _cells = new ArrayList<TableCell>();
-
-  public TableRow(Document document)
+public class Center extends FormattedTextWithAnchors {
+  public Center(Document document)
   {
-    _document = document;
-  }
-
-  public int getNumberOfColumns()
-  {
-    return _cells.size();
-  }
-
-  public TableData createTd()
-  {
-    TableData data = new TableData(_document);
-    _cells.add(data);
-    return data;
-  }
-
-  public TableHeader createTh()
-  {
-    TableHeader header = new TableHeader(_document);
-    _cells.add(header);
-    return header;
-  }
-
-  public void setOccur(String occur)
-  {
+    super(document);
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("tr");
+    out.writeStartElement("div");
+    out.writeAttribute("style", "text-align: center;");
 
-    for (TableCell cell : _cells)
-      cell.writeHtml(out);
+    super.writeHtml(out);
 
-    out.writeEndElement(); // tr
+    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    for (int i = 0; i < _cells.size(); i++) {
-      _cells.get(i).writeLaTeX(out);
+    out.println();
+    out.println();
 
-      if (i < _cells.size() - 1)
-        out.print("&");
-      else
-        out.println("\\\\");
-
-      out.flush();
-    }
+    super.writeLaTeX(out);
   }
 }

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
@@ -33,63 +34,54 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
-public class TableRow {
-  private Document _document;
-  private ArrayList<TableCell> _cells = new ArrayList<TableCell>();
+public class Embed extends ContainerNode {
+  private String _source;
+  private int _height = -1;
+  private int _width = -1;
 
-  public TableRow(Document document)
+  public Embed(Document document)
   {
-    _document = document;
+    super(document);
   }
 
-  public int getNumberOfColumns()
+  public void setSrc(String source)
   {
-    return _cells.size();
+    _source = source;
   }
 
-  public TableData createTd()
+  public void setHeight(int height)
   {
-    TableData data = new TableData(_document);
-    _cells.add(data);
-    return data;
+    _height = height;
   }
 
-  public TableHeader createTh()
+  public void setWidth(int width)
   {
-    TableHeader header = new TableHeader(_document);
-    _cells.add(header);
-    return header;
-  }
-
-  public void setOccur(String occur)
-  {
+    _width = width;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("tr");
+    out.writeStartElement("embed");
 
-    for (TableCell cell : _cells)
-      cell.writeHtml(out);
+    if (_source != null)
+      out.writeAttribute("src", _source);
 
-    out.writeEndElement(); // tr
+    if (_height >= 0)
+      out.writeAttribute("height", Integer.toString(_height));
+
+    if (_width >= 0)
+      out.writeAttribute("width", Integer.toString(_width));
+
+    super.writeHtml(out);
+
+    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    for (int i = 0; i < _cells.size(); i++) {
-      _cells.get(i).writeLaTeX(out);
-
-      if (i < _cells.size() - 1)
-        out.print("&");
-      else
-        out.println("\\\\");
-
-      out.flush();
-    }
+    throw new UnsupportedOperationException();
   }
 }

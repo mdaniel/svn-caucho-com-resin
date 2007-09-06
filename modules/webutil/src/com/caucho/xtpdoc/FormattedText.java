@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -49,6 +49,13 @@ public class FormattedText extends ContainerNode {
   public void addG(GlossaryText text)
   {
     addItem(text);
+  }
+
+  public Object createObject()
+  {
+    Object object = new Object(getDocument());
+    addItem(object);
+    return object;
   }
 
   public LineBreak createBr()
