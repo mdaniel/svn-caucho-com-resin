@@ -208,11 +208,11 @@ j2ee_param-value = element param-value {
 }
 
 j2ee_param-value-Type =
-  j2ee_description*,
+  j2ee_description*
 
-  j2ee_param-name,
+  & j2ee_param-name
 
-  j2ee_param-value
+  & j2ee_param-value
 
 j2ee_path = string
 
