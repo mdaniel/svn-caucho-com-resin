@@ -134,8 +134,11 @@ class Regcomp {
       case '*':
 	if (last == null)
 	  throw new IllegalRegexpException("`*' must follow content expression");
+	
+	/*
 	if (last._code == last.RC_LOOP)
 	  throw new IllegalRegexpException("nested *?+");
+    */
 
 	if (pattern.peek() == '?') {
 	  pattern.read();
@@ -161,8 +164,12 @@ class Regcomp {
       case '+':
 	if (last == null)
 	  throw new IllegalRegexpException("`+' must follow content expression");
+	
+	// php/4e59
+	/*
 	if (last._code == last.RC_LOOP)
 	  throw new IllegalRegexpException("nested *?+");
+    */
 
 	if (pattern.peek() == '?') {
 	  pattern.read();

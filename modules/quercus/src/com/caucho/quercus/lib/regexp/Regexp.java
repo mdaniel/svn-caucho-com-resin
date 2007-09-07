@@ -1097,7 +1097,7 @@ public class Regexp {
         return 0;
         
       default:
-	throw new RuntimeException("Internal error");
+        throw new RuntimeException("Internal error: " + prog._code);
       }
     }
 
