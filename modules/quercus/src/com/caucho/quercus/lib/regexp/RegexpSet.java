@@ -29,8 +29,12 @@
 
 package com.caucho.quercus.lib.regexp;
 
+import java.util.HashMap;
+
 import com.caucho.util.*;
 
+// XXX: non-ascii range not quite correct for unicode, and neither is
+// PHP's /u unicode option
 class RegexpSet {
   static final int BITSET_CHARS = 0x80;
   static final int BITSET_WIDTH = 16;
@@ -39,6 +43,23 @@ class RegexpSet {
   static RegexpSet WORD = null;
   static RegexpSet DIGIT = null;
   static RegexpSet DOT = null;
+  
+  // POSIX character classes
+  static RegexpSet PALNUM = null;
+  static RegexpSet PALPHA = null;
+  static RegexpSet PASCII = null;
+  static RegexpSet PBLANK = null;
+  static RegexpSet PCNTRL = null;
+  static RegexpSet PDIGIT = null;
+  static RegexpSet PGRAPH = null;
+  static RegexpSet PLOWER = null;
+  static RegexpSet PPRINT = null;
+  static RegexpSet PPUNCT = null;
+  static RegexpSet PSPACE = null;
+  static RegexpSet PUPPER = null;
+  static RegexpSet PXDIGIT = null;
+  
+  static HashMap<String,RegexpSet> CLASS_MAP = null;
   
   int _bitset[];
   IntSet _range;
@@ -60,6 +81,110 @@ class RegexpSet {
     WORD.setRange('A', 'Z');
     WORD.setRange('0', '9');
     WORD.setRange('_', '_');
+    
+    PASCII = new RegexpSet();
+    PASCII.setRange(0, 0x7F);
+    PASCII.setRange(0x81, 0x87);
+    PASCII.setRange(0x89, 0x97);
+    PASCII.setRange(0x9A, 0xFF);
+    
+    PBLANK = new RegexpSet();
+    PBLANK.setRange(' ', ' ');
+    PBLANK.setRange('\t', '\t');
+    PBLANK.setRange(0xA0, 0xA0);
+    
+    PCNTRL = new RegexpSet();
+    PCNTRL.setRange(0, 0x1F);
+    PCNTRL.setRange(0x7F, 0x7F);
+    PCNTRL.setRange(0x81, 0x81);
+    PCNTRL.setRange(0x8D, 0x8D);
+    PCNTRL.setRange(0x8F, 0x90);
+    PCNTRL.setRange(0x9D, 0x9D);
+
+    PDIGIT = new RegexpSet();
+    PDIGIT.setRange('0', '9');
+    PDIGIT.setRange(0xB2, 0xB3);
+    PDIGIT.setRange(0xB9, 0xB9);
+    
+    PLOWER = new RegexpSet();
+    PLOWER.setRange('a', 'z');
+    PLOWER.setRange(0x83, 0x83);
+    PLOWER.setRange(0x9A, 0x9A);
+    PLOWER.setRange(0x9C, 0x9C);
+    PLOWER.setRange(0x9E, 0x9E);
+    PLOWER.setRange(0xAA, 0xAA);
+    PLOWER.setRange(0xB5, 0xB5);
+    PLOWER.setRange(0xBA, 0xBA);
+    PLOWER.setRange(0xDF, 0xF6);
+    PLOWER.setRange(0xF8, 0xFF);
+    
+    PSPACE = new RegexpSet();
+    PSPACE.setRange(' ', ' ');
+    PSPACE.setRange(0x09, 0x0D);
+    PSPACE.setRange(0xA0, 0xA0);
+    
+    PUPPER = new RegexpSet();
+    PUPPER.setRange('A', 'Z');
+    PUPPER.setRange(0x8A, 0x8A);
+    PUPPER.setRange(0x8C, 0x8C);
+    PUPPER.setRange(0x8E, 0x8E);
+    PUPPER.setRange(0x9F, 0x9F);
+    PUPPER.setRange(0xC0, 0xD6);
+    PUPPER.setRange(0xD8, 0xDE);
+    
+    PXDIGIT = new RegexpSet();
+    PXDIGIT.setRange('0', '9');
+    PXDIGIT.setRange('A', 'F');
+    PXDIGIT.setRange('a', 'f');
+    
+    PALPHA = new RegexpSet();
+    PALPHA.mergeOr(PLOWER);
+    PALPHA.mergeOr(PUPPER);
+    
+    PALNUM = new RegexpSet();
+    PALNUM.mergeOr(PALPHA);
+    PALNUM.mergeOr(PDIGIT);
+    
+    PPUNCT = new RegexpSet();
+    PPUNCT.setRange(0x21, 0x2F);
+    PPUNCT.setRange(0x3A, 0x40);
+    PPUNCT.setRange(0x5B, 0x60);
+    PPUNCT.setRange(0x7B, 0x7E);
+    PPUNCT.setRange(0x82, 0x82);
+    PPUNCT.setRange(0x84, 0x87);
+    PPUNCT.setRange(0x89, 0x89);
+    PPUNCT.setRange(0x8B, 0x8B);
+    PPUNCT.setRange(0x91, 0x97);
+    PPUNCT.setRange(0x9B, 0x9B);
+    PPUNCT.setRange(0xA1, 0xBF);
+    PPUNCT.setRange(0xD7, 0xD7);
+    PPUNCT.setRange(0xF7, 0xF7);
+    
+    PGRAPH = new RegexpSet();
+    PGRAPH.mergeOr(PALNUM);
+    PGRAPH.mergeOr(PPUNCT);
+    
+    PPRINT = new RegexpSet();
+    PPRINT.mergeOr(PGRAPH);
+    PPRINT.setRange(' ', ' ');
+    PPRINT.setRange(0x09, 0x09);
+    PPRINT.setRange(0xA0, 0xA0);
+    
+    CLASS_MAP = new HashMap<String,RegexpSet>();
+    CLASS_MAP.put("alnum", PALNUM); //php/4ek0
+    CLASS_MAP.put("alpha", PALPHA); //php/4ek1
+    CLASS_MAP.put("ascii", PASCII); //php/4ek2
+    CLASS_MAP.put("blank", PBLANK); //php/4ek3
+    CLASS_MAP.put("cntrl", PCNTRL); //php/4ek4
+    CLASS_MAP.put("digit", PDIGIT); //php/4ek5
+    CLASS_MAP.put("graph", PGRAPH); //php/4ek6
+    CLASS_MAP.put("lower", PLOWER); //php/4ek7
+    CLASS_MAP.put("print", PPRINT); //php/4ek8
+    CLASS_MAP.put("punct", PPUNCT); //php/4ek9
+    CLASS_MAP.put("space", PSPACE); //php/4eka
+    CLASS_MAP.put("upper", PUPPER); //php/4ekb
+    CLASS_MAP.put("xdigit", PXDIGIT); //php/4ekc
+    
   }
   /**
    * Ors two character sets.

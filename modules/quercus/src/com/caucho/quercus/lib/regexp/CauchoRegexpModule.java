@@ -151,7 +151,7 @@ public class CauchoRegexpModule
           StringValue group = regexp.group(env, i);
 
           Value value;
-          if (group == null)
+          if (group == null || group.length() == 0)
             value = BooleanValue.FALSE;
           else
             value = group;
@@ -232,12 +232,12 @@ public class CauchoRegexpModule
           regs.put(LongValue.ZERO, regexp.group(env));
 
         int count = regexp.groupCount();
-
+        
         for (int i = 1; i <= count; i++) {
-          StringValue group = regexp.group(env, i);
-
-          if (group == null)
+          if (! regexp.isMatchedGroup(i))
             continue;
+          
+          StringValue group = regexp.group(env, i);
 
           if (isOffsetCapture) {
             // php/151u
@@ -379,10 +379,11 @@ public class CauchoRegexpModule
     for (int j = 0; j <= groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
 
-      StringValue groupName = regexp.getGroupName(j);
+      Value patternName = regexp.getGroupName(j);
+
       // XXX: named subpatterns causing conflicts with array indexes?
-      if (groupName != null)
-        matches.put(groupName, values);
+      if (patternName != null)
+        matches.put(patternName, values);
 
       matches.put(values);
       matchList[j] = values;
@@ -399,11 +400,24 @@ public class CauchoRegexpModule
 
       for (int j = 0; j <= groupCount; j++) {
         ArrayValue values = matchList[j];
+        
+        if (! regexp.isMatchedGroup(j)) {
 
-        int start = regexp.start(j);
-        int end = regexp.end(j);
+          if (j == groupCount || ((flags & PREG_OFFSET_CAPTURE) == 0))
+            values.put(StringValue.EMPTY);
+          else {
+            Value result = new ArrayValueImpl();
+            
+            result.put(StringValue.EMPTY);
+            result.put(LongValue.MINUS_ONE);
+            
+            values.put(result);
+          }
+            
+          continue;
+        }
 
-        StringValue groupValue = subject.substring(start, end);
+        StringValue groupValue = regexp.group(env, j);
 
         if (groupValue != null)
           groupValue = groupValue.toUnicodeValue(env);
@@ -414,7 +428,8 @@ public class CauchoRegexpModule
           if ((flags & PREG_OFFSET_CAPTURE) != 0) {
             result = new ArrayValueImpl();
             result.put(groupValue);
-            result.put(LongValue.create(start));
+
+            result.put(LongValue.create(regexp.getBegin(j)));
           } else {
             result = groupValue;
           }
@@ -481,13 +496,10 @@ public class CauchoRegexpModule
               matchResult.put(LongValue.create(j), part);
             }
 
-
             result = new ArrayValueImpl();
             result.put(groupValue);
             result.put(LongValue.create(start));
           } else {
-
-
             // php/
             // add unmatched groups that was skipped
             for (int j = matchResult.getSize(); j < i; j++) {
@@ -1053,15 +1065,18 @@ public class CauchoRegexpModule
           int end = regexp.end(i);
 
           // Skip empty groups
-          if (! regexp.isGroupMatched(i)) {
+          if (! regexp.isMatchedGroup(i)) {
             continue;
           }
 
           // Append empty OR neighboring groups that were skipped
           // php/152r
           if (allowEmpty) {
-            for (int j = i - 1; j >= 1; j--) {
-              if (regexp.isGroupMatched(j))
+            int group = i;
+            while (neighborMap.hasNeighbor(group)) {
+              group = neighborMap.getNeighbor(group);
+
+              if (regexp.isMatchedGroup(group))
                 break;
 
               if (isCaptureOffset) {
@@ -1444,18 +1459,6 @@ public class CauchoRegexpModule
     return program;
   }
 
-  private static final String [] POSIX_CLASSES = {
-    "[:alnum:]", "[:alpha:]", "[:blank:]", "[:cntrl:]",
-    "[:digit:]", "[:graph:]", "[:lower:]", "[:print:]",
-    "[:punct:]", "[:space:]", "[:upper:]", "[:xdigit:]"
-  };
-
-  private static final String [] REGEXP_CLASSES = {
-    "\\p{Alnum}", "\\p{Alpha}", "\\p{Blank}", "\\p{Cntrl}",
-    "\\p{Digit}", "\\p{Graph}", "\\p{Lower}", "\\p{Print}",
-    "\\p{Punct}", "\\p{Space}", "\\p{Upper}", "\\p{XDigit}"
-  };
-
   /**
    * Cleans the regexp from valid values that the Java regexps can't handle.
    * Ereg has a different syntax so need to handle it differently from preg.
@@ -1573,21 +1576,7 @@ public class CauchoRegexpModule
       case '[':
         if (quote == '[') {
           if (i + 1 < len && regexp.charAt(i + 1) == ':') {
-            String test = regexp.substring(i).toString();
-            boolean hasMatch = false;
-
-            for (int j = 0; j < POSIX_CLASSES.length; j++) {
-              if (test.startsWith(POSIX_CLASSES[j])) {
-                hasMatch = true;
-
-                sb.append(REGEXP_CLASSES[j]);
-
-                i += POSIX_CLASSES[j].length() - 1;
-              }
-            }
-
-            if (! hasMatch)
-              sb.append("\\[");
+            sb.append('[');
           }
           else
             sb.append("\\[");
@@ -1599,12 +1588,14 @@ public class CauchoRegexpModule
           sb.append("[\\[");
           i += 1;
         }
+        /*
         else if (i + 2 < len &&
                 regexp.charAt(i + 1) == '^' &&
                 regexp.charAt(i + 2) == ']') {
           sb.append("[^\\]");
           i += 2;
         }
+        */
         else
           sb.append('[');
 

@@ -97,6 +97,20 @@ class Node {
   static final int RC_NS = 1036;
   static final int RC_NZ = 1037;
   
+  static final int RC_CHAR_CLASS = 2048;
+  static final int RC_ALNUM = 1;
+  static final int RC_ALPHA = 2;
+  static final int RC_BLANK = 3;
+  static final int RC_CNTRL = 4;
+  static final int RC_DIGIT = 5;
+  static final int RC_GRAPH = 6;
+  static final int RC_LOWER = 7;
+  static final int RC_PRINT = 8;
+  static final int RC_PUNCT = 9;
+  static final int RC_SPACE = 10;
+  static final int RC_UPPER = 11;
+  static final int RC_XDIGIT = 12;
+  
   /*
   static final int RC_C = 512;
   static final int RC_CC = 513;
@@ -157,6 +171,47 @@ class Node {
   boolean _printMark;
 
   byte _unicodeCategory;
+  
+  public static String code(int code)
+  {
+    switch (code) {
+      case RC_END: return "RC_END";
+      case RC_NULL: return "RC_NULL";
+      case RC_STRING: return "RC_STRING";
+      case RC_SET: return "RC_SET";
+      case RC_NSET: return "RC_NSET";
+      case RC_BEG_GROUP: return "RC_BEG_GROUP";
+      case RC_END_GROUP: return "RC_END_GROUP";
+      case RC_GROUP_REF: return "RC_GROUP_REF";
+      case RC_LOOP: return "RC_LOOP";
+      case RC_LOOP_INIT: return "RC_LOOP_INIT";
+      case RC_LOOP_SHORT: return "RC_LOOP_SHORT";
+      case RC_LOOP_UNIQUE: return "RC_LOOP_UNIQUE";
+      case RC_LOOP_SHORT_UNIQUE: return "RC_LOOP_SHORT_UNIQUE";
+      case RC_LOOP_LONG: return "RC_LOOP_LONG";
+      case RC_OR: return "RC_OR";
+      case RC_OR_UNIQUE: return "RC_OR_UNIQUE";
+      case RC_POS_PEEK: return "RC_POS_PEEK";
+      case RC_NEG_PEEK: return "RC_NEG_PEEK";
+      case RC_WORD: return "RC_WORD";
+      case RC_NWORD: return "RC_NWORD";
+      case RC_BLINE: return "RC_BLINE";
+      case RC_ELINE: return "RC_ELINE";
+      case RC_BSTRING: return "RC_BSTRING";
+      case RC_ESTRING: return "RC_ESTRING";
+      case RC_ENSTRING: return "RC_ENSTRING";
+      case RC_GSTRING: return "RC_GSTRING";
+      case RC_COND: return "RC_COND";
+      case RC_POS_PREV: return "RC_POS_PREV";
+      case RC_NEG_PREV: return "RC_NEG_PREV";
+      case RC_STRING_I: return "RC_STRING_I";
+      case RC_SET_I: return "RC_SET_I";
+      case RC_NSET_I: return "RC_NSET_I";
+      case RC_GROUP_REF_I: return "RC_GROUP_REF_I";
+      case RC_LEXEME: return "RC_LEXEME";
+      default: return "unknown(" + code + ")";
+    }
+  }
   
   /**
    * Creates a node with a code

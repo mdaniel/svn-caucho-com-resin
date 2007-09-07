@@ -92,7 +92,6 @@ class RegOptim {
     case Node.RC_LOOP_UNIQUE:
     case Node.RC_LOOP_SHORT_UNIQUE:
       return (node._min * minLength(node._branch) + minLength(node._rest));
-
     default:
       return minLength(node._rest);
     }
@@ -298,6 +297,11 @@ class RegOptim {
       return;
 
     case Node.RC_LOOP:
+      //XXX: disable loop optimizations for now
+      // php/4ebc
+      if (true)
+        break;
+      
       eliminateBacktrack(node._branch, node._rest);
       eliminateBacktrack(node._rest, rest);
 

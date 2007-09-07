@@ -53,19 +53,6 @@ class Regcomp {
   static final int END_ONLY = 0x40;
   static final int UNGREEDY = 0x80;
   static final int STRICT = 0x100;
-
-  static final int ALNUM = 1;
-  static final int ALPHA = 2;
-  static final int BLANK = 3;
-  static final int CNTRL = 4;
-  static final int DIGIT = 5;
-  static final int GRAPH = 6;
-  static final int LOWER = 7;
-  static final int PRINT = 8;
-  static final int PUNCT = 9;
-  static final int SPACE = 10;
-  static final int UPPER = 11;
-  static final int XDIGIT = 12;
   
   static final HashMap<String,Integer> _characterClassMap
     = new HashMap<String,Integer>();
@@ -449,20 +436,18 @@ class Regcomp {
 
       case '[':
 	head = Node.concat(head, last);
-
-	ch = pattern.peek();
 	
-	if (ch == ':') {
-	  pattern.read();
-	  last = parseCharacterClass(pattern, last);
+	if (pattern.peek() == ':') {
+      throw new IllegalRegexpException("POSIX [::] class outside []");
 	}
 	else {
 	  last = parseSet(pattern);
 	}
 
-	if ((ch = pattern.read()) != ']')
+	if ((ch = pattern.read()) != ']') {
 	  throw new IllegalRegexpException("expected `]' at " + 
 					   badChar(ch));
+	}
 	break;
 
       case '.':
@@ -583,7 +568,9 @@ class Regcomp {
     throws IllegalRegexpException
   {
     Node node;
-    if (pattern.peek() == '^') {
+    int first = pattern.peek();
+    
+    if (first == '^') {
       pattern.read();
       node = new Node(Node.RC_NSET);
     }
@@ -591,13 +578,31 @@ class Regcomp {
       node = new Node(Node.RC_SET);
     }
 
+
+    
     RegexpSet set = new RegexpSet();
     node._set = set;
 
     int last = -1;
     int lastdash = -1;
     int ch;
-    while ((ch = pattern.read()) != ']' && ch >= 0) {
+
+    int charRead = 0;
+    
+    while ((ch = pattern.read()) >= 0) {
+      charRead++;
+
+      // php/4e3o
+      // first literal closing bracket need not be escaped
+      if (ch == ']') {
+        if (charRead == 1 && first == '^') {
+          pattern.ungetc(ch);
+          ch = '\\';
+        }
+        else
+          break;
+      }
+      
       boolean isChar = true;
       boolean isDash = ch == '-';
 
@@ -649,6 +654,13 @@ class Regcomp {
 	  isChar = true;
 	}
       }
+	else if (ch == '[') {
+      if (pattern.peek() == ':') {
+        isChar = false;
+        pattern.read();   
+        set.mergeOr(parseCharacterClass(pattern));
+      }
+    }
 
       if (isDash && last != -1 && lastdash == -1) {
 	lastdash = last;
@@ -688,7 +700,7 @@ class Regcomp {
     }
     else if (last != -1)
       set.setRange(last, last);
-
+    
     if (ch == ']')
       pattern.ungetc(ch);
 
@@ -845,54 +857,34 @@ class Regcomp {
   /**
    * Returns a node for sequences starting with a '[:'.
    */
-  private Node parseCharacterClass(PeekStream pattern, Node last)
+  private RegexpSet parseCharacterClass(PeekStream pattern)
     throws IllegalRegexpException
   {
     StringBuilder sb = new StringBuilder();
     
     int ch;
-    while ((ch = pattern.peek()) != ':' && ch >= 0) {
+    while ((ch = pattern.read()) != ':' && ch >= 0) {
       sb.append((char)ch);
+    }
+    
+    if (ch != ':') {
+      throw new IllegalRegexpException("expected character class closing colon ':' at " + badChar(ch));
+    }  
+     
+    if ((ch = pattern.read()) != ']') {
+      throw new IllegalRegexpException("expected character class closing bracket ']' at " + badChar(ch));
     }
 
     String name = sb.toString();
     
-    Integer i = _characterClassMap.get(name);
+    RegexpSet set = RegexpSet.CLASS_MAP.get(name);
     
-    if (i == null) {
+    if (set == null) {
       throw new IllegalRegexpException("unrecognized POSIX character class " +
                                        name);
     }
-    
-    switch (i.intValue()) {
-      case ALNUM:
-        break;
-      case ALPHA:
-        break;
-      case BLANK:
-        break;
-      case CNTRL:
-        break;
-      case DIGIT:
-        break;
-      case GRAPH:
-        break;
-      case LOWER:
-        break;
-      case PRINT:
-        break;
-      case PUNCT:
-        break;
-      case SPACE:
-        break;
-      case UPPER:
-        break;
-      case XDIGIT:
-        break;
-    }
-    
-    return null;
-    
+ 
+    return set;
   }
 
   private int parseHex(PeekStream pattern)
@@ -1294,18 +1286,20 @@ class Regcomp {
     }
   }
   
+  /*
   static {
-    _characterClassMap.put("alnum", ALNUM);
-    _characterClassMap.put("alpha", ALPHA);
-    _characterClassMap.put("blank", BLANK);
-    _characterClassMap.put("cntrl", CNTRL);
-    _characterClassMap.put("digit", DIGIT);
-    _characterClassMap.put("graph", GRAPH);
-    _characterClassMap.put("lower", LOWER);
-    _characterClassMap.put("print", PRINT);
-    _characterClassMap.put("punct", PUNCT);
-    _characterClassMap.put("space", SPACE);
-    _characterClassMap.put("upper", UPPER);
-    _characterClassMap.put("xdigit", XDIGIT);
+    _characterClassMap.put("alnum", Node.RC_ALNUM);
+    _characterClassMap.put("alpha", Node.RC_ALPHA);
+    _characterClassMap.put("blank", Node.RC_BLANK);
+    _characterClassMap.put("cntrl", Node.RC_CNTRL);
+    _characterClassMap.put("digit", Node.RC_DIGIT);
+    _characterClassMap.put("graph", Node.RC_GRAPH);
+    _characterClassMap.put("lower", Node.RC_LOWER);
+    _characterClassMap.put("print", Node.RC_PRINT);
+    _characterClassMap.put("punct", Node.RC_PUNCT);
+    _characterClassMap.put("space", Node.RC_SPACE);
+    _characterClassMap.put("upper", Node.RC_UPPER);
+    _characterClassMap.put("xdigit", Node.RC_XDIGIT);
   }
+  */
 }

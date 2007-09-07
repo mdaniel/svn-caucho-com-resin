@@ -98,7 +98,7 @@ public abstract class CharCursor implements CharacterIterator {
     char ch = setIndex(begin);
     for (int i = begin; i < end; i++) {
       if (ch != DONE)
-	cb.append(ch);
+        cb.append(ch);
       ch = next();
     }
 
