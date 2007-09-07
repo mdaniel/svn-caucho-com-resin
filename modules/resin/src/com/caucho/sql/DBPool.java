@@ -385,6 +385,23 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Get the maximum number of connections in the idle pool.
+   */
+  public int getMaxIdleCount()
+  {
+    return _connectionPool.getMaxIdleCount();
+  }
+
+  /**
+   * Set the maximum number of connections in the idle pool.
+   * being closed.
+   */
+  public void setMaxIdleCount(int count)
+  {
+    _connectionPool.setMaxIdleCount(count);
+  }
+
+  /**
    * Get the time in milliseconds a connection will remain in the pool before
    * being closed.
    */

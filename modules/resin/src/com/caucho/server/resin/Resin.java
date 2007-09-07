@@ -808,9 +808,9 @@ public class Resin implements EnvironmentBean, SchemaBean
     while (i < len) {
       RandomUtil.addRandom(argv[i]);
 
-      if (i + 1 < len &&
-          (argv[i].equals("-stdout") ||
-           argv[i].equals("--stdout"))) {
+      if (i + 1 < len
+	  && (argv[i].equals("-stdout")
+	      || argv[i].equals("--stdout"))) {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
@@ -822,9 +822,9 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 	i += 2;
       }
-      else if (i + 1 < len &&
-               (argv[i].equals("-stderr") ||
-                argv[i].equals("--stderr"))) {
+      else if (i + 1 < len
+	       && (argv[i].equals("-stderr")
+		   || argv[i].equals("--stderr"))) {
         Path path = Vfs.lookup(argv[i + 1]);
 
         RotateStream stream = RotateStream.create(path);
@@ -836,9 +836,9 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 	i += 2;
       }
-      else if (i + 1 < len &&
-               (argv[i].equals("-conf") ||
-                argv[i].equals("--conf"))) {
+      else if (i + 1 < len
+	       && (argv[i].equals("-conf")
+		   || argv[i].equals("--conf"))) {
         _configFile = argv[i + 1];
 	i += 2;
       }
@@ -884,10 +884,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 	// windows service
 	i += 1;
       }
-      else if (argv[i].equals("-socketwait") ||
-               argv[i].equals("--socketwait") ||
-               argv[i].equals("-pingwait") ||
-               argv[i].equals("--pingwait")) {
+      else if (argv[i].equals("-socketwait")
+	       || argv[i].equals("--socketwait")
+	       || argv[i].equals("-pingwait")
+	       || argv[i].equals("--pingwait")) {
         int socketport = Integer.parseInt(argv[i + 1]);
 
         Socket socket = null;

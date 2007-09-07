@@ -12,6 +12,12 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>multiple access-logs were causing rollover issues (#1947, rep by brianb08)</li>
+<li>db-pool: add max-idle-count to connection pool (#1891, rep by Matthew Schmidt)</li>
+<li>db-pool: idle cleanup and additional ConnectionPoolMXBean atributes (#1891, rep by Matthew Schmidt)</li>
+<li>load-balance: update retry and failover logic (#1939, rep by Bradley Van Cleave)</li>
+<li>session: cleanup TempStream for session serialization (#1764, rep by Jan Kriesten)</li>
+<li>hessian: hessianlib.py update (#1880, rep by jboulon)</li>
 <li>mod_caucho: add backup costs to the round robin selection (rep by Katrin Koppert)</li>
 <li>HttpProxyServlet now checks failRecoverTime and connection count (#1158, rep by S Nagar)</li>
 <li>jdbc-pool: add JdbcDriver with start()/stop() to allow database backup rollover (#1604, rep by Rich Dredge)</li>

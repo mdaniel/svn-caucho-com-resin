@@ -86,7 +86,8 @@ public class AbstractRolloverLog {
   private long _rolloverSize = DEFAULT_ROLLOVER_SIZE;
 
   // How often the rolloverSize should be checked
-  private long _rolloverCheckPeriod = DEFAULT_ROLLOVER_CHECK_PERIOD;
+  //private long _rolloverCheckPeriod = DEFAULT_ROLLOVER_CHECK_PERIOD;
+  private long _rolloverCheckPeriod = 120 * 1000;
 
   // How many archives are allowed.
   private int _rolloverCount;

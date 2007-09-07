@@ -52,6 +52,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,7 +82,7 @@ public class ConnectionPool extends AbstractManagedObject
   private int _maxCreateConnections = 5;
 
   // max idle size
-  private int _idleMax = 32;
+  private int _maxIdleCount = 1024;
 
   // time before an idle connection is closed (30s default)
   private long _maxIdleTime = 30000L;
@@ -134,6 +135,15 @@ public class ConnectionPool extends AbstractManagedObject
   private int _idCount;
 
   private int _createCount;
+
+  //
+  // statistics
+  //
+
+  private long _connectionCountTotal;
+  private long _connectionCreateCountTotal;
+  private long _connectionFailCountTotal;
+  private long _lastFailTime;
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -300,6 +310,25 @@ public class ConnectionPool extends AbstractManagedObject
   }
 
   /**
+   * Returns the max idle count.
+   */
+  public int getMaxIdleCount()
+  {
+    return _maxIdleCount;
+  }
+
+  /**
+   * Sets the max idle count.
+   */
+  public void setMaxIdleCount(int maxIdleCount)
+  {
+    if (maxIdleCount < 0)
+      _maxIdleCount = 0;
+    else
+      _maxIdleCount = maxIdleCount;
+  }
+
+  /**
    * Returns the max active time.
    */
   public long getMaxActiveTime()
@@ -451,7 +480,7 @@ public class ConnectionPool extends AbstractManagedObject
     if (_tm == null)
       throw new ConfigException(L.l("the connection manager needs a transaction manager."));
 
-    _idlePool = new IdlePoolSet(_idleMax);
+    _idlePool = new IdlePoolSet(_maxIdleCount);
 
     registerSelf();
 
@@ -519,7 +548,13 @@ public class ConnectionPool extends AbstractManagedObject
   {
     Subject subject = null;
 
-    return allocate(mcf, subject, info);
+    Object conn = allocate(mcf, subject, info);
+
+    synchronized (this) {
+      _connectionCountTotal++;
+    }
+
+    return conn;
   }
 
   /**
@@ -582,6 +617,10 @@ public class ConnectionPool extends AbstractManagedObject
     return null;
   }
 
+  //
+  // statistics
+  //
+
   /**
    * Returns the total connections.
    */
@@ -604,6 +643,38 @@ public class ConnectionPool extends AbstractManagedObject
   public int getConnectionActiveCount()
   {
     return _pool.size() - _idlePool.size();
+  }
+
+  /**
+   * Returns the total connections.
+   */
+  public long getConnectionCountTotal()
+  {
+    return _connectionCountTotal;
+  }
+
+  /**
+   * Returns the total connections.
+   */
+  public long getConnectionCreateCountTotal()
+  {
+    return _connectionCreateCountTotal;
+  }
+
+  /**
+   * Returns the total failed connections.
+   */
+  public long getConnectionFailCountTotal()
+  {
+    return _connectionFailCountTotal;
+  }
+
+  /**
+   * Returns the last fail time
+   */
+  public Date getLastFailTime()
+  {
+    return new Date(_lastFailTime);
   }
 
   /**
@@ -848,11 +919,30 @@ public class ConnectionPool extends AbstractManagedObject
 
       // Ensure the connection is still valid
       userPoolItem = poolItem.toActive(subject, info, oldUserItem);
-      if (userPoolItem != null)
+      if (userPoolItem != null) {
+	synchronized (this) {
+	  _connectionCreateCountTotal++;
+	}
+	
         return userPoolItem;
+      }
 
       throw new IllegalStateException(L.l("Connection '{0}' was not valid on creation",
                                           poolItem));
+    } catch (RuntimeException e) {
+      synchronized (this) {
+	_connectionFailCountTotal++;
+	_lastFailTime = Alarm.getCurrentTime();
+      }
+      
+      throw e;
+    } catch (ResourceException e) {
+      synchronized (this) {
+	_connectionFailCountTotal++;
+	_lastFailTime = Alarm.getCurrentTime();
+      }
+      
+      throw e;
     } finally {
       synchronized (_pool) {
         _createCount--;

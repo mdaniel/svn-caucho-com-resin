@@ -65,12 +65,14 @@ public class TempReadStream extends StreamImpl {
     if (_cursor == null)
       return -1;
 
-    if (_cursor._length - _offset < length)
-      length = _cursor._length - _offset;
+    int sublen = _cursor._length - _offset;
 
-    System.arraycopy(_cursor._buf, _offset, buf, offset, length);
+    if (length < sublen)
+      sublen = length;
 
-    if (_cursor._length <= _offset + length) {
+    System.arraycopy(_cursor._buf, _offset, buf, offset, sublen);
+
+    if (_cursor._length <= _offset + sublen) {
       TempBuffer next = _cursor._next;
       if (_freeWhenDone)
         TempBuffer.free(_cursor);
@@ -78,9 +80,9 @@ public class TempReadStream extends StreamImpl {
       _offset = 0;
     }
     else
-      _offset += length;
+      _offset += sublen;
 
-    return length > 0 ? length : -1;
+    return sublen;
   }
 
   public int getAvailable() throws IOException

@@ -32,6 +32,8 @@ package com.caucho.management.server;
 import com.caucho.jmx.Description;
 import com.caucho.jmx.Units;
 
+import java.util.Date;
+
 /**
  * MBean API for the JCA connection pool.
  *
@@ -69,6 +71,12 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
   @Units("milliseconds")
   @Description("The configured maximum time in milliseconds that a connection remains in the idle pool before it is closed")
   public long getMaxIdleTime();
+  
+  /**
+   * Returns the maximum number of idle connections
+   */
+  @Description("The configured maximum number of idle connections")
+  public int getMaxIdleCount();
   
   /**
    * Returns the pool active time in milliseconds.
@@ -122,6 +130,30 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
    */
   @Description("The current number of idle connections")
   public int getConnectionIdleCount();
+
+  /**
+   * Returns the total number of connections.
+   */
+  @Description("The current number of connections")
+  public long getConnectionCountTotal();
+
+  /**
+   * Returns the total number of created connections.
+   */
+  @Description("The current number of created connections")
+  public long getConnectionCreateCountTotal();
+
+  /**
+   * Returns the total number of failed connections.
+   */
+  @Description("The current number of failed connections")
+  public long getConnectionFailCountTotal();
+
+  /**
+   * Returns the last failed connection time.
+   */
+  @Description("The last time of connection failure")
+  public Date getLastFailTime();
 
   //
   // Operations

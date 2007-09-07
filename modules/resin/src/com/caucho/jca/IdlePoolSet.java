@@ -195,7 +195,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
     int j = 0;
 
     for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
-      values[j] = _entries[i];
+      values[j++] = _entries[i];
     }
     
     return values;
@@ -209,7 +209,7 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
     int j = 0;
 
     for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
-      values[j] = _entries[i];
+      values[j++] = _entries[i];
     }
 
     return values;
@@ -298,7 +298,6 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
       removeEntry(i);
 
       _tail = IdlePoolSet.this._tail;
-      _head = IdlePoolSet.this._head;
     }
   }
 }

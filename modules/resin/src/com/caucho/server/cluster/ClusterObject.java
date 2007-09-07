@@ -394,18 +394,17 @@ public class ClusterObject {
     _isChanged = false;
 
     TempStream tempStream = new TempStream();
-    Crc64Stream crcStream = new Crc64Stream(tempStream);
 
     try {
+      Crc64Stream crcStream = new Crc64Stream(tempStream);
       WriteStream os = new WriteStream(crcStream);
 
       _objectManager.store(os, obj);
 
-      os.flush();
-      long crc = crcStream.getCRC();
-
       os.close();
       os = null;
+
+      long crc = crcStream.getCRC();
 
       if (crc == _crc) {
 	tempStream.destroy();

@@ -25,6 +25,12 @@ HttpProxyServlet.</p>
 
 </s1>
 
+<s1 title="Jdbc Pooling">
+
+<p>Added max-idle-count to limit the idle connection size (default 1024).</p>
+
+</s1>
+
 <s1 title="Admin">
 
 <p>Added JdbcDriverMXBean with start()/stop() to allow control of

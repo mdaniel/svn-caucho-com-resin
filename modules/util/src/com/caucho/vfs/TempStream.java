@@ -268,13 +268,13 @@ public class TempStream extends StreamImpl
     try {
       close();
     } catch (IOException e) {
-    }
-
-    TempBuffer ptr = _head;
+    } finally {
+      TempBuffer ptr = _head;
     
-    _head = null;
-    _tail = null;
+      _head = null;
+      _tail = null;
 
-    TempBuffer.freeAll(ptr);
+      TempBuffer.freeAll(ptr);
+    }
   }
 }

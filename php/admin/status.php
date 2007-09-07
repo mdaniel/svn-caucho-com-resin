@@ -302,14 +302,15 @@ if ($db_pools) {
 <table class="data">
   <tr>
     <th>&nbsp;</th>
-    <th colspan='3'>Connections</th>
+    <th colspan='4'>Connections</th>
     <th colspan='2'>Config</th>
   </tr>
   <tr>
     <th>Name</th>
-    <th>Active count</th>
-    <th>Idle count</th>
-    <th>Total count</th>
+    <th>Active</th>
+    <th>Idle</th>
+    <th>Created</th>
+    <th>Failed</th>
     <th>max-connections</th>
     <th>idle-time</th>
   </tr>
@@ -323,11 +324,12 @@ if ($db_pools) {
     <td><?= $pool->Name ?></td>
     <td><?= $pool->ConnectionActiveCount ?></td>
     <td><?= $pool->ConnectionIdleCount ?></td>
-    <td><?= $pool->ConnectionCount ?></td>
+    <td><?= format_miss_ratio($pool->ConnectionCountTotal,
+                              $pool->ConnectionCreateCountTotal) ?></td>
+    <td><?= $pool->ConnectionFailCountTotal ?></td>
     <td><?= $pool->MaxConnections ?></td>
     <td><?= $pool->MaxIdleTime ?></td>
   </tr>
-
 <?php
   }
 ?>

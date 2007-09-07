@@ -402,6 +402,7 @@ public class ResinWatchdog extends AbstractManagedObject
           || argv[i].equals("--conf")) {
         list.add(argv[i]);
         list.add(resinHome.lookup(argv[i + 1]).getNativePath());
+	i++;
       }
       else
         list.add(argv[i]);

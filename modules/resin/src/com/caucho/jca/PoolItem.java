@@ -227,9 +227,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
     if (_hasConnectionError)
       return null;
-    else if (0 < maxIdleTime && _poolEventTime + maxIdleTime < now) {
+    else if (0 < maxIdleTime && _poolEventTime + maxIdleTime < now)
       return null;
-    }
     else if (0 < maxPoolTime && _poolStartTime + maxPoolTime < now)
       return null;
     else if (_shareHead != null)

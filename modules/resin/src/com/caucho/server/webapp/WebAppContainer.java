@@ -273,7 +273,10 @@ public class WebAppContainer
    */
   public AbstractAccessLog createAccessLog()
   {
-    return new AccessLog();
+    if (_accessLog == null)
+      _accessLog = new AccessLog();
+
+    return _accessLog;
   }
 
   /**
