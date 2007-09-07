@@ -40,6 +40,9 @@ import com.caucho.util.ThreadTask;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
+import javax.naming.*;
+import javax.transaction.*;
+import javax.transaction.xa.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -48,12 +51,17 @@ import java.util.logging.Logger;
 /**
  * Manages the JMS session.
  */
-public class SessionImpl implements Session, ThreadTask {
-  protected static final Logger log = Log.open(SessionImpl.class);
+public class SessionImpl implements XASession, ThreadTask, XAResource
+{
+  protected static final Logger log
+    = Logger.getLogger(SessionImpl.class.getName());
   protected static final L10N L = new L10N(SessionImpl.class);
 
   private static final long SHUTDOWN_WAIT_TIME = 10000;
 
+  private boolean _isXA;
+  private TransactionManager _tm;
+  
   private boolean _isTransacted;
   private int _acknowledgeMode;
 
@@ -78,22 +86,28 @@ public class SessionImpl implements Session, ThreadTask {
   private volatile boolean _hasMessage;
 
   public SessionImpl(ConnectionImpl connection,
-		     boolean isTransacted, int ackMode)
+		     boolean isTransacted, int ackMode,
+                     boolean isXA)
     throws JMSException
   {
     _classLoader = Thread.currentThread().getContextClassLoader();
     
     _connection = connection;
 
-    // XXX: temp
-    /*
+    _isXA = isXA;
+
     if (isTransacted) {
-      isTransacted = false;
-      ackMode = AUTO_ACKNOWLEDGE;
+      try {
+        InitialContext ic = new InitialContext();
+        
+        _tm = (TransactionManager) ic.lookup("java:comp/TransactionManager");
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
     }
-    */
-      
+    
     _isTransacted = isTransacted;
+    
     if (isTransacted)
       _acknowledgeMode = SESSION_TRANSACTED;
     else {
@@ -610,7 +624,17 @@ public class SessionImpl implements Session, ThreadTask {
   public void commit()
     throws JMSException
   {
-    checkOpen();
+    commit(false);
+  }
+  
+  /**
+   * Commits the messages.
+   */
+  private void commit(boolean isXA)
+    throws JMSException
+  {
+    if (! isXA)
+      checkOpen();
 
     if (! _isTransacted)
       throw new IllegalStateException(L.l("commit() can only be called on a transacted session."));
@@ -627,7 +651,8 @@ public class SessionImpl implements Session, ThreadTask {
       }
     }
 
-    acknowledge();
+    if (! isXA)
+      acknowledge();
   }
   
   /**
@@ -796,7 +821,7 @@ public class SessionImpl implements Session, ThreadTask {
       throw new UnsupportedOperationException(L.l("empty queue is not allowed for this session."));
 
     message.setJMSMessageID(queue.generateMessageID());
-    message.setJMSDestination(queue);
+    message.setJMSDestination(queue.getJMSDestination());
     message.setJMSDeliveryMode(deliveryMode);
     message.setJMSTimestamp(Alarm.getExactTime());
     message.setJMSExpiration(expiration);
@@ -809,6 +834,17 @@ public class SessionImpl implements Session, ThreadTask {
       TransactedMessage transMsg = new TransactedMessage(queue, message);
       
       _transactedMessages.add(transMsg);
+
+      if (_tm != null && _transactedMessages.size() == 1) {
+        try {
+          Transaction trans = _tm.getTransaction();
+
+          if (trans != null)
+            trans.enlistResource(this);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
     }
     else
       queue.send(this, message, 0);
@@ -870,6 +906,115 @@ public class SessionImpl implements Session, ThreadTask {
 
     return null;
     */
+  }
+
+  //
+  // XA
+  //
+
+  public Session getSession()
+  {
+    return this;
+  }
+  
+  public XAResource getXAResource()
+  {
+    return this;
+  }
+  
+  /**
+   * Returns true if the specified resource has the same RM.
+   */
+  public boolean isSameRM(XAResource xa)
+    throws XAException
+  {
+    return this == xa;
+  }
+  
+  /**
+   * Sets the transaction timeout in seconds.
+   */
+  public boolean setTransactionTimeout(int timeout)
+    throws XAException
+  {
+    return true;
+  }
+  
+  /**
+   * Gets the transaction timeout in seconds.
+   */
+  public int getTransactionTimeout()
+    throws XAException
+  {
+    return 0;
+  }
+  
+  /**
+   * Called when the resource is associated with a transaction.
+   */
+  public void start(Xid xid, int flags)
+    throws XAException
+  {
+  }
+  
+  /**
+   * Called when the resource is is done with a transaction.
+   */
+  public void end(Xid xid, int flags)
+    throws XAException
+  {
+  }
+  
+  /**
+   * Called to start the first phase of the commit.
+   */
+  public int prepare(Xid xid)
+    throws XAException
+  {
+    return 0;
+  }
+  
+  /**
+   * Called to commit.
+   */
+  public void commit(Xid xid, boolean onePhase)
+    throws XAException
+  {
+    try {
+      commit(true);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
+   * Called to roll back.
+   */
+  public void rollback(Xid xid)
+    throws XAException
+  {
+    try {
+      rollback();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
+   * Called to forget an Xid that had a heuristic commit.
+   */
+  public void forget(Xid xid)
+    throws XAException
+  {
+  }
+  
+  /**
+   * Called to find Xid's that need recovery.
+   */
+  public Xid[] recover(int flag)
+    throws XAException
+  {
+    return null;
   }
 
   /**

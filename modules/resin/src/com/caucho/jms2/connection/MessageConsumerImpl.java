@@ -196,47 +196,7 @@ public class MessageConsumerImpl
   public Message receive()
     throws JMSException
   {
-    return receive(Long.MAX_VALUE);
-  }
-
-  /**
-   * Called to synchronously receive a message.
-   */
-  public Message receive(long timeout)
-    throws JMSException
-  {
-    if (_isClosed || _session.isClosed())
-      throw new javax.jms.IllegalStateException(L.l("receive(): MessageConsumer is closed."));
-    
-    if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
-      timeout = Long.MAX_VALUE / 2;
-    
-    long now = Alarm.getCurrentTime();
-    long expireTime = Alarm.getCurrentTime() + timeout;
-    
-    // 4.4.1 user's reponsibility
-    // checkThread();
-
-    while (! isClosed()) {
-      Message msg = receiveNoWait();
-
-      if (msg != null)
-        return msg;
-      
-      long delta = expireTime - Alarm.getCurrentTime();
-
-      if (delta <= 0 || _isClosed || Alarm.isTest())
-	return null;
-
-      synchronized (_consumerLock) {
-	try {
-	  _consumerLock.wait(delta);
-	} catch (Throwable e) {
-	}
-      }
-    }
-
-    return null;
+    return receive(Long.MAX_VALUE / 2);
   }
 
   /**
@@ -245,14 +205,29 @@ public class MessageConsumerImpl
   public Message receiveNoWait()
     throws JMSException
   {
+    return receive(0);
+  }
+
+  /**
+   * Receives a message from the queue.
+   */
+  public Message receive(long timeout)
+    throws JMSException
+  {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("receiveNoWait(): MessageConsumer is closed."));
+    
+    if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
+      timeout = Long.MAX_VALUE / 2;
+    
+    long now = Alarm.getCurrentTime();
+    long expireTime = timeout > 0 ? now + timeout : 0;
     
     if (! _session.isActive())
       return null;
 
     while (true) {
-      MessageImpl msg = receiveImpl();
+      MessageImpl msg = _queue.receive(expireTime);
 
       if (msg == null)
         return null;
@@ -286,10 +261,10 @@ public class MessageConsumerImpl
   /**
    * Receives the next message, if one is available
    */
-  protected MessageImpl receiveImpl()
+  protected MessageImpl receiveImpl(long expires)
     throws JMSException
   {
-    return _queue.receive(0);
+    return _queue.receive(expires);
   }
 
   /**

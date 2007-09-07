@@ -38,6 +38,7 @@ import com.caucho.jms2.listener.*;
 import com.caucho.jms2.connection.*;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.Base64;
 
 /**
  * Implements an abstract queue.
@@ -49,8 +50,14 @@ abstract public class AbstractDestination
     = Logger.getLogger(AbstractDestination.class.getName());
 
   private String _name = "default";
+  private long _count;
 
   protected MessageFactory _messageFactory = new MessageFactory();
+
+  protected AbstractDestination()
+  {
+    _count = Alarm.getCurrentTime() << 16;
+  }
 
   public void setName(String name)
   {
@@ -97,7 +104,22 @@ abstract public class AbstractDestination
 
   public String generateMessageID()
   {
-    return "ook";
+    StringBuilder cb = new StringBuilder();
+
+    long id;
+    
+    synchronized (this) {
+      id = _count++;
+    }
+
+    Base64.encode(cb, id);
+
+    return cb.toString();
+  }
+
+  public Destination getJMSDestination()
+  {
+    return new DestinationHandle(toString());
   }
 
   public void close()

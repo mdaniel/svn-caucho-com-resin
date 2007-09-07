@@ -62,7 +62,6 @@ public class ListenerManager
 
   public void addListener(MessageListener listener)
   {
-    System.out.println("ADD: "+ this + " " + listener);
     synchronized (this) {
       _listenerList.add(listener);
       
@@ -129,7 +128,6 @@ public class ListenerManager
 
   public SendStatus send(MessageImpl msg)
   {
-    System.out.println("SEND: " + _idleTop + " " + msg);
     ListenerEntry entry = null;
     
     synchronized (this) {
@@ -189,7 +187,6 @@ public class ListenerManager
     void send(MessageImpl msg)
     {
       _msg = msg;
-      System.out.println("LISTENER-SENDND: " + msg + " "+ _listener);
 
       ThreadPool.getThreadPool().schedule(this);
     }

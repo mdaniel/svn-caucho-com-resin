@@ -36,13 +36,15 @@ import com.caucho.jms2.queue.*;
 /**
  * A sample topic session.  Lets the client create topics, browsers, etc.
  */
-public class TopicSessionImpl extends SessionImpl implements TopicSession
+public class TopicSessionImpl extends SessionImpl
+  implements XATopicSession, TopicSession
 {
   public TopicSessionImpl(ConnectionImpl conn,
-			  boolean isTransacted, int ackMode)
+			  boolean isTransacted, int ackMode,
+                          boolean isXA)
     throws JMSException
   {
-    super(conn, isTransacted, ackMode);
+    super(conn, isTransacted, ackMode, isXA);
   }
 
   /**
@@ -150,5 +152,10 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession
     throws JMSException
   {
     throw new javax.jms.IllegalStateException(L.l("TopicSession: createTemporaryQueue() is invalid."));
+  }
+
+  public TopicSession getTopicSession()
+  {
+    return this;
   }
 }

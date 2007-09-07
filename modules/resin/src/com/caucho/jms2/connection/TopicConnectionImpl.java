@@ -36,8 +36,16 @@ import javax.jms.IllegalStateException;
  * A sample queue connection factory.
  */
 public class TopicConnectionImpl extends ConnectionImpl
-  implements TopicConnection
+  implements XATopicConnection
 {
+  /**
+   * Create a new topic connection.
+   */
+  public TopicConnectionImpl(ConnectionFactoryImpl factory, boolean isXA)
+  {
+    super(factory, isXA);
+  }
+  
   /**
    * Create a new topic connection.
    */
@@ -84,6 +92,19 @@ public class TopicConnectionImpl extends ConnectionImpl
 
     checkOpen();
     
-    return new TopicSessionImpl(this, transacted, acknowledgeMode);
+    return new TopicSessionImpl(this, transacted, acknowledgeMode, isXA());
+  }
+
+  /**
+   * Creates a new connection session.
+   */
+  public XATopicSession createXATopicSession()
+    throws JMSException
+  {
+    checkOpen();
+
+    assignClientID();
+    
+    return new TopicSessionImpl(this, true, 0, true);
   }
 }

@@ -37,6 +37,8 @@ import com.caucho.jms2.message.*;
 import com.caucho.jms2.listener.*;
 import com.caucho.jms2.queue.*;
 
+import com.caucho.util.Alarm;
+
 /**
  * Implements a memory queue.
  */
@@ -54,8 +56,10 @@ public class MemoryQueue extends AbstractQueue
   @Override
   protected void enqueue(MessageImpl msg, long expires)
   {
-    System.out.println("ENQUEUE: " + msg + " " + _queueList);
-    _queueList.add(msg);
+    synchronized (_queueList) {
+      _queueList.add(msg);
+      _queueList.notifyAll();
+    }
   }
 
   /**
@@ -63,12 +67,26 @@ public class MemoryQueue extends AbstractQueue
    * wait for the timeout.
    */
   @Override
-  public MessageImpl receive(long timeout)
+  public MessageImpl receive(long expires)
   {
-    if (_queueList.size() > 0)
-      return _queueList.remove(0);
-    else
-      return null;
+    while (true) {
+      synchronized (_queueList) {
+        if (_queueList.size() > 0)
+          return _queueList.remove(0);
+
+        long now = Alarm.getCurrentTime();
+
+        if (expires <= now || Alarm.isTest()) {
+          return null;
+        }
+
+        try {
+          _queueList.wait(expires - now);
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
+    }
   }
 
   public String toString()

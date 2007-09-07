@@ -36,16 +36,18 @@ import com.caucho.jms2.queue.*;
 /**
  * A sample queue session.  Lets the client create queues, browsers, etc.
  */
-public class QueueSessionImpl extends SessionImpl implements QueueSession
+public class QueueSessionImpl extends SessionImpl
+  implements XAQueueSession, QueueSession
 {
   /**
    * Creates the session
    */
   public QueueSessionImpl(ConnectionImpl connection,
-			  boolean isTransacted, int ackMode)
+			  boolean isTransacted, int ackMode,
+                          boolean isXA)
     throws JMSException
   {
-    super(connection, isTransacted, ackMode);
+    super(connection, isTransacted, ackMode, isXA);
   }
 
   /**
@@ -187,5 +189,10 @@ public class QueueSessionImpl extends SessionImpl implements QueueSession
     throws JMSException
   {
     throw new javax.jms.IllegalStateException(L.l("QueueSession: unsubscribe() is invalid."));
+  }
+
+  public QueueSession getQueueSession()
+  {
+    return this;
   }
 }

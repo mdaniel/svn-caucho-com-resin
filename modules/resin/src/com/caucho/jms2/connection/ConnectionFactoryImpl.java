@@ -369,7 +369,7 @@ public class ConnectionFactoryImpl
   {
     authenticate(username, password);
 
-    TopicConnectionImpl conn = new TopicConnectionImpl(this);
+    TopicConnectionImpl conn = new TopicConnectionImpl(this, true);
 
     addConnection(conn);
 
@@ -379,38 +379,63 @@ public class ConnectionFactoryImpl
   public XAConnection createXAConnection()
     throws JMSException
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return createXAConnection(null, null);
   }
 
-  public XAConnection createXAConnection(String userName, String password)
+  public XAConnection createXAConnection(String username, String password)
     throws JMSException
   {
-    throw new UnsupportedOperationException("unimplemented");
+    authenticate(username, password);
+
+    ConnectionImpl conn = new ConnectionImpl(this, true);
+
+    if (_clientID != null) {
+      if (findByClientID(_clientID) != null)
+	throw new JMSException(L.l("ClientID[{0}] is only allowed for a single connection.",
+				   _clientID));
+      conn.setClientID(_clientID);
+    }
+
+    addConnection(conn);
+    
+    return conn;
   }
 
   public XAQueueConnection createXAQueueConnection()
     throws JMSException
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return createXAQueueConnection(null, null);
   }
 
-  public XAQueueConnection createXAQueueConnection(String userName,
+  public XAQueueConnection createXAQueueConnection(String username,
                                                    String password)
     throws JMSException
   {
-    throw new UnsupportedOperationException("unimplemented");
+    authenticate(username, password);
+
+    QueueConnectionImpl conn = new QueueConnectionImpl(this, true);
+
+    addConnection(conn);
+
+    return conn;
   }
 
   public XATopicConnection createXATopicConnection()
     throws JMSException
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return createXATopicConnection(null, null);
   }
 
-  public XATopicConnection createXATopicConnection(String userName,
+  public XATopicConnection createXATopicConnection(String username,
                                                    String password)
     throws JMSException
   {
-    throw new UnsupportedOperationException("unimplemented");
+    authenticate(username, password);
+
+    TopicConnectionImpl conn = new TopicConnectionImpl(this, true);
+
+    addConnection(conn);
+
+    return conn;
   }
 }

@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 /**
  * A connection.
  */
-public class ConnectionImpl implements Connection
+public class ConnectionImpl implements XAConnection
 {
   static final Logger log
     = Logger.getLogger(ConnectionImpl.class.getName());
@@ -50,6 +50,7 @@ public class ConnectionImpl implements Connection
   private static int _clientIdGenerator;
 
   private ConnectionFactoryImpl _factory;
+  private boolean _isXA;
   
   private String _clientId;
   private boolean _isClientIdSet;
@@ -65,9 +66,24 @@ public class ConnectionImpl implements Connection
   private volatile boolean _isStopping;
   protected volatile boolean _isClosed;
 
+  public ConnectionImpl(ConnectionFactoryImpl factory, boolean isXA)
+  {
+    this(factory);
+
+    _isXA = isXA;
+  }
+
   public ConnectionImpl(ConnectionFactoryImpl factory)
   {
     _factory = factory;
+  }
+
+  /**
+   * Returns true for an XA connection.
+   */
+  public boolean isXA()
+  {
+    return _isXA;
   }
 
   /**
@@ -230,7 +246,20 @@ public class ConnectionImpl implements Connection
     
     assignClientID();
     
-    return new SessionImpl(this, transacted, acknowledgeMode);
+    return new SessionImpl(this, transacted, acknowledgeMode, isXA());
+  }
+
+  /**
+   * Creates a new connection session.
+   */
+  public XASession createXASession()
+    throws JMSException
+  {
+    checkOpen();
+    
+    assignClientID();
+    
+    return new SessionImpl(this, true, 0, true);
   }
 
   /**

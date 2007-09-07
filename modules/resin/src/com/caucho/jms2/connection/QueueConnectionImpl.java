@@ -33,15 +33,25 @@ import javax.jms.ConnectionConsumer;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
+import javax.jms.XAQueueConnection;
 import javax.jms.QueueSession;
+import javax.jms.XAQueueSession;
 import javax.jms.ServerSessionPool;
 
 /**
  * A sample queue connection factory.
  */
 public class QueueConnectionImpl extends ConnectionImpl
-  implements QueueConnection
+  implements XAQueueConnection
 {
+  /**
+   * Create a new queue connection.
+   */
+  public QueueConnectionImpl(ConnectionFactoryImpl factory, boolean isXA)
+  {
+    super(factory, isXA);
+  }
+  
   /**
    * Create a new queue connection.
    */
@@ -72,6 +82,19 @@ public class QueueConnectionImpl extends ConnectionImpl
 
     assignClientID();
     
-    return new QueueSessionImpl(this, transacted, acknowledgeMode);
+    return new QueueSessionImpl(this, transacted, acknowledgeMode, isXA());
+  }
+
+  /**
+   * Creates a new connection session.
+   */
+  public XAQueueSession createXAQueueSession()
+    throws JMSException
+  {
+    checkOpen();
+
+    assignClientID();
+    
+    return new QueueSessionImpl(this, true, 0, true);
   }
 }

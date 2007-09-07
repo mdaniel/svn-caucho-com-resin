@@ -96,8 +96,6 @@ public class MemoryTopic extends AbstractTopic
   public void send(SessionImpl session, Message msg, long timeout)
     throws JMSException
   {
-    System.out.println("SEND: " + msg + " " + _subscriptionList);
-    
     for (int i = 0; i < _subscriptionList.size(); i++) {
       _subscriptionList.get(i).send(session, msg, timeout);
     }
