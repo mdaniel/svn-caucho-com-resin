@@ -80,6 +80,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private long _connectionStartTime;
   private long _requestStartTime;
   
+  private long _suspendTime;
+  
   private Thread _thread;
 
   /**
@@ -115,6 +117,11 @@ public class TcpConnection extends PortConnection implements ThreadTask
   public String getName()
   {
     return _name;
+  }
+
+  public long getSuspendTime()
+  {
+    return _suspendTime;
   }
 
   /**
@@ -387,7 +394,9 @@ public class TcpConnection extends PortConnection implements ThreadTask
     ConnectionController controller = getController();
     
     if (controller != null) {
-      if (port.suspend(controller)) {
+      _suspendTime = Alarm.getCurrentTime();
+      
+      if (port.suspend(this)) {
         log.fine("[" + getId() + "] suspend");
       }
       else {
@@ -430,6 +439,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   void setResume()
   {
     _isResume = true;
+    _suspendTime = 0;
   }
 
   /**
@@ -441,7 +451,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     if (controller != null) {
       _isResume = true;
-      return getPort().resume(controller);
+      return getPort().resume(this);
     }
     else
       return false;
@@ -628,13 +638,14 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private void closeImpl()
   {
     QSocket socket = _socket;
-
     boolean isClosed;
 
     synchronized (this) {
       isClosed = _isClosed;
       _isClosed = true;
     }
+
+    getPort().detach(this);
 
     ConnectionController controller = getController();
     if (controller != null)

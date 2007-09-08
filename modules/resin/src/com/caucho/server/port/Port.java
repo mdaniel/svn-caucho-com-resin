@@ -42,10 +42,7 @@ import com.caucho.management.server.PortMXBean;
 import com.caucho.server.connection.ConnectionController;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.FreeList;
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.ThreadPool;
+import com.caucho.util.*;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
@@ -70,7 +67,8 @@ public class Port
 {
   private static final L10N L = new L10N(Port.class);
 
-  private static final Logger log = Log.open(Port.class);
+  private static final Logger log
+    = Logger.getLogger(Port.class.getName());
 
   private static final int DEFAULT = -0xcafe;
 
@@ -113,6 +111,8 @@ public class Port
   private long _keepaliveTimeout = DEFAULT;
   private long _keepaliveSelectThreadTimeout = DEFAULT;
 
+  private long _suspendTimeMax = DEFAULT;
+
   private int _acceptThreadMin = DEFAULT;
   private int _acceptThreadMax = DEFAULT;
 
@@ -134,8 +134,8 @@ public class Port
   // the selection manager
   private AbstractSelectManager _selectManager;
 
-  private ArrayList<ConnectionController> _suspendList
-    = new ArrayList<ConnectionController>();
+  private ArrayList<TcpConnection> _suspendList
+    = new ArrayList<TcpConnection>();
 
   private volatile int _threadCount;
   private final Object _threadCountLock = new Object();
@@ -212,6 +212,10 @@ public class Port
       if (_keepaliveSelectThreadTimeout == DEFAULT) {
 	_keepaliveSelectThreadTimeout
 	  = server.getKeepaliveSelectThreadTimeout();
+      }
+
+      if (_suspendTimeMax == DEFAULT) {
+	_keepaliveSelectThreadTimeout = server.getSuspendTimeMax();
       }
 
       if (_socketTimeout == DEFAULT)
@@ -731,6 +735,19 @@ public class Port
     }
   }
 
+  /**
+   * Gets the suspend max.
+   */
+  public long getSuspendTimeMax()
+  {
+    return _suspendTimeMax;
+  }
+
+  public void setSuspendTimeMax(Period period)
+  {
+    _suspendTimeMax = period.getPeriod();
+  }
+
   public Lifecycle getLifecycleState()
   {
     return _lifecycle;
@@ -1173,7 +1190,7 @@ public class Port
   /**
    * Suspends the controller (for comet-style ajax)
    */
-  boolean suspend(ConnectionController conn)
+  boolean suspend(TcpConnection conn)
   {
     synchronized (_suspendList) {
       _suspendList.add(conn);
@@ -1183,20 +1200,25 @@ public class Port
   }
 
   /**
+   * Remove from suspend list.
+   */
+  boolean detach(TcpConnection conn)
+  {
+    synchronized (_suspendList) {
+      return _suspendList.remove(conn);
+    }
+  }
+
+  /**
    * Suspends the controller (for comet-style ajax)
    */
-  boolean resume(ConnectionController controller)
+  boolean resume(TcpConnection conn)
   {
-    TcpConnection conn = null;
-    
     synchronized (_suspendList) {
-      if (! _suspendList.remove(controller))
+      if (! _suspendList.remove(conn))
 	return false;
-
-      conn = (TcpConnection) controller.getConnection();
-
-      if (conn != null)
-	conn.setResume();
+      
+      conn.setResume();
     }
 
     if (conn != null)
@@ -1415,5 +1437,41 @@ public class Port
   public String toString()
   {
     return "Port[" + getAddress() + ":" + getPort() + "]";
+  }
+
+  class SuspendReaper implements AlarmListener {
+    public void handleAlarm(Alarm alarm)
+    {
+      try {
+	ArrayList<TcpConnection> oldList = null;
+
+	long now = Alarm.getCurrentTime();
+	synchronized (_suspendList) {
+	  for (int i = _suspendList.size(); i >=0; i--) {
+	    TcpConnection conn = _suspendList.get(i);
+
+	    if (conn.getSuspendTime() + _suspendTimeMax < now) {
+	      _suspendList.remove(i);
+	      
+	      if (oldList == null)
+		oldList = new ArrayList<TcpConnection>();
+
+	      oldList.add(conn);
+	    }
+	  }
+	}
+
+	if (oldList != null) {
+	  for (int i = 0; i < oldList.size(); i++) {
+	    TcpConnection conn = oldList.get(i);
+	    
+	    conn.destroy();
+	  }
+	}
+      } finally {
+	if (! isClosed())
+	  alarm.queue(60000);
+      }
+    }
   }
 }

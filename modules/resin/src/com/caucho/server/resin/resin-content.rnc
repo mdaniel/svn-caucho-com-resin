@@ -405,6 +405,9 @@ r_port-Content =
    & (attribute socket-timeout { r_period-Type }
       | element socket-timeout { r_period-Type })?
 
+   & (attribute suspend-time-max { r_period-Type }
+      | element suspend-time-max { r_period-Type })?
+
    & (attribute tcp-no-delay { string }
       | element tcp-no-delay { string })?
 

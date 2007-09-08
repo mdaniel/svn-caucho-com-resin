@@ -69,6 +69,7 @@ typedef struct srun_t {
   int connect_timeout;       /* time the connect() call should wait  */
   int live_time;             /* time an idle socket should live      */
   int dead_time;             /* time a dead srun stays dead          */
+  int read_timeout;          /* how long to wait for a read (iis)    */
   int send_buffer_size;      /* how big the send buffer is           */
   
   void *lock;                /* lock specific to the srun            */

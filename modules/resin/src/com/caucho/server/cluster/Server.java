@@ -125,6 +125,8 @@ public class Server extends ProtocolDispatchServer
   
   private boolean _keepaliveSelectEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
+  
+  private long _suspendTimeMax = 60000;
 
   private long _memoryFreeMin = 1024 * 1024;
   
@@ -391,6 +393,22 @@ public class Server extends ProtocolDispatchServer
   public void setShutdownWaitMax(Period waitTime)
   {
     _shutdownWaitMax = waitTime.getPeriod();
+  }
+
+  /**
+   * Sets the suspend timeout
+   */
+  public void setSuspendTimeMax(Period period)
+  {
+    _suspendTimeMax = period.getPeriod();
+  }
+
+  /**
+   * Sets the suspend timeout
+   */
+  public long getSuspendTimeMax()
+  {
+    return _suspendTimeMax;
   }
 
   /**

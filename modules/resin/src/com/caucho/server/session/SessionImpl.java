@@ -271,7 +271,9 @@ public class SessionImpl implements HttpSession, CacheListener {
       throw new IllegalStateException(L.l("Can't call getAttribute() when session is no longer valid."));
 
     synchronized (_values) {
-      return _values.get(name);
+      Object value = _values.get(name);
+
+      return value;
     }
   }
 

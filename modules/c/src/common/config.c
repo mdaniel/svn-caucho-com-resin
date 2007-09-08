@@ -486,6 +486,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   cluster_t cluster;
   int max_idle_time = -1;
   int fail_recover_time = -1;
+  int read_timeout = -1;
   char error_page[1024];
   char etag[sizeof(host->etag)];
   int is_valid = 0; /* true if the request completed */
@@ -655,6 +656,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  max_idle_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  fail_recover_time = resin_atoi(value);
+	else if (! strcmp(buffer, "read-timeout"))
+	  read_timeout = resin_atoi(value);
 	else if (! strcmp(buffer, "last-update")) {
 	  int last_update = resin_atoi(value);
 
@@ -713,6 +716,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	      srun->srun->live_time = max_idle_time;
 	    if (fail_recover_time > 0)
 	      srun->srun->dead_time = fail_recover_time;
+	    if (read_timeout > 0)
+	      srun->srun->read_timeout = read_timeout;
 	  }
 	}
       }

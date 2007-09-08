@@ -94,7 +94,7 @@ std_read(stream_t *s, void *buf, int length)
 #ifdef WIN32
   {
     /* windows can hang the socket even when the opposite side has closed */
-    int timeout = WINDOWS_READ_TIMEOUT;
+    int timeout = s->srun->read_timeout;
 	
     if (poll_read(s->socket, timeout) <= 0)
       return -1;
@@ -945,6 +945,7 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
     srun->connect_timeout = CONNECT_TIMEOUT;
     srun->live_time = LIVE_TIME;
     srun->dead_time = DEAD_TIME;
+    srun->read_timeout = WINDOWS_READ_TIMEOUT;
 
     srun->open = std_open;
     srun->read = std_read;

@@ -75,6 +75,14 @@ public class JarCache
 
   JarNode get(String name)
   {
+    JarNode node = _map.get(name);
+
+    if (node != null)
+      return node;
+
+    if (name.endsWith("/"))
+      name = name.substring(0, name.length() - 1);
+
     return _map.get(name);
   }
 
