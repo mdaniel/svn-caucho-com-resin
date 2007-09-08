@@ -294,10 +294,9 @@ public class FileBacking {
 
       if (rs.next()) {
 	//System.out.println("LOAD: " + uniqueId);
-	boolean isValid = rs.getBoolean(1);
-	long accessTime = rs.getInt(2) * 60000L;
+	long accessTime = rs.getInt(1) * 60000L;
 	
-        InputStream is = rs.getBinaryStream(3);
+        InputStream is = rs.getBinaryStream(2);
 
         if (log.isLoggable(Level.FINE))
           log.fine("load local object: " + uniqueId);
