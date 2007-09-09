@@ -73,7 +73,6 @@ public class JspExpression extends JspNode {
   @Override
   public boolean hasScriptingElement()
   {
-    System.out.println("TXT: " + _text);
     return true;
   }
 

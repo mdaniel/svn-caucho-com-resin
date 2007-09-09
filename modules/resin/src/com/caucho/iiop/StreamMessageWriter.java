@@ -228,7 +228,6 @@ public class StreamMessageWriter extends MessageWriter
   public void flushBuffer()
   {
     try {
-      System.out.println("FLUSH:");
       int size = _length - 12;
 
       _buffer[6] = 2; // fragmented
