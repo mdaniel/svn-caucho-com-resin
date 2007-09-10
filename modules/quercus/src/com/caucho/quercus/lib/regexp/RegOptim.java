@@ -245,13 +245,10 @@ class RegOptim {
       node._rest = linkLoops(node._rest, loop, false);
       return node;
 
-      
     case Node.RC_POS_LOOKBEHIND:
     case Node.RC_NEG_LOOKBEHIND:
-    case Node.RC_LOOKBEHIND_LOOP:
       node._branch = linkLoops(node._branch, loop, canDeriveNull);
       return node;
-      
       
     default:
       node._rest = linkLoops(node._rest, loop, canDeriveNull);
