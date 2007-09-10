@@ -863,12 +863,18 @@ public class ArrayModule
                             @ReadOnly ArrayValue array,
                             @Optional("false") boolean strict)
   {
+    // php/171i
+    // php/172y
+    
     if (array == null)
       return BooleanValue.FALSE;
 
-    for (Map.Entry<Value, Value> entry : array.entrySet()) {
-      Value entryValue = entry.getValue();
+    Iterator<Map.Entry<Value, Value>> iterator = array.getIterator(env);
 
+    while (iterator.hasNext()) {
+      Map.Entry<Value, Value> entry = iterator.next();
+
+      Value entryValue = entry.getValue();
       Value entryKey = entry.getKey();
 
       if (needle.eq(entryValue)) {

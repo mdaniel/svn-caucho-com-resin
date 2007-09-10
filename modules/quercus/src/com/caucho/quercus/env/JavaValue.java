@@ -214,6 +214,24 @@ public class JavaValue
     return new LongValue(System.identityHashCode(this));
   }
 
+  @Override
+  public int cmpObject(ObjectValue rValue)
+  {
+    // php/172z
+    
+    if (rValue == this)
+      return 0;
+
+    if (!(rValue instanceof JavaValue))
+      return -1;
+
+    Object rObject = rValue.toJavaObject();
+
+    return _classDef.cmpObject(_object,
+                               rObject,
+                               ((JavaValue) rValue)._classDef);
+  }
+
   /**
    * Returns the method.
    */

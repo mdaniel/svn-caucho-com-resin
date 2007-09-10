@@ -181,8 +181,11 @@ abstract public class ObjectValue extends Value {
   /**
    * Compare two objects
    */
-  public final int cmpObject(ObjectValue rValue)
+  public int cmpObject(ObjectValue rValue)
   {
+    if (rValue == this)
+      return 0;
+
     // if objects are not equal, then which object is greater is undefined
 
     int result = getName().compareTo(rValue.getName());

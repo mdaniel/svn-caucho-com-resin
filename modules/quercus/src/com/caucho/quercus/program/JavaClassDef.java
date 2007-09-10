@@ -239,6 +239,74 @@ public class JavaClassDef extends ClassDef {
     return new JavaValue(env, obj, this);
   }
 
+  private int cmpObject(Object lValue, Object rValue)
+  {
+    if (lValue == rValue)
+      return 0;
+
+    if (lValue == null)
+      return -1;
+
+    if (rValue == null)
+      return 1;
+
+    if (lValue instanceof Comparable) {
+      if (!(rValue instanceof Comparable))
+        return -1;
+
+      return ((Comparable) lValue).compareTo(rValue);
+    }
+    else if (rValue instanceof Comparable) {
+      return 1;
+    }
+
+    if (lValue.equals(rValue))
+      return 0;
+
+    String lName = lValue.getClass().getName();
+    String rName = rValue.getClass().getName();
+
+    return lName.compareTo(rName);
+  }
+
+  public int cmpObject(Object lValue, Object rValue, JavaClassDef rClassDef)
+  {
+    int cmp = cmpObject(lValue, rValue);
+
+    if (cmp != 0)
+        return cmp;
+
+    // attributes
+    // XX: not sure how to do this, to imitate PHP objects,
+    // should getters be involved as well?
+
+    for (Map.Entry<String, FieldMarshalPair> lEntry : _fieldMap.entrySet()) {
+      String lFieldName = lEntry.getKey();
+      FieldMarshalPair rFieldPair = rClassDef._fieldMap.get(lFieldName);
+
+      if (rFieldPair == null)
+        return 1;
+
+      FieldMarshalPair lFieldPair = lEntry.getValue();
+
+      try {
+        Object lResult = lFieldPair._field.get(lValue);
+        Object rResult = rFieldPair._field.get(lValue);
+
+        int resultCmp = cmpObject(lResult, rResult);
+
+        if (resultCmp != 0)
+          return resultCmp;
+      }
+      catch (IllegalAccessException e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return 0;
+      }
+    }
+
+    return 0;
+  }
+
   /**
    * @param name
    * @return Value attained through invoking getter
