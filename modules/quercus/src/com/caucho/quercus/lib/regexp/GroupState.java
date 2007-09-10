@@ -29,19 +29,41 @@
 
 package com.caucho.quercus.lib.regexp;
 
+/*
+ * Represents
+ */
 class GroupState
 {
-  int BIT_WIDTH = 32;
+  // number of items to store per long
+  static final int BIT_WIDTH = 32;
   
-  private long []_set = new long[4];
-  private GroupState _next;
+  // maximum number of groups
+  static final int MAX_SIZE = 99;
   
-  public boolean isSet(int group)
+  private long []_set;
+  //private GroupState _next;
+  
+  public GroupState()
+  {
+    int arraySize = MAX_SIZE / BIT_WIDTH;
+    
+    if (MAX_SIZE % BIT_WIDTH != 0)
+      arraySize++;
+    
+    _set = new long[arraySize];
+  }
+  
+  private GroupState(int arraySize)
+  {
+    _set = new long[arraySize];
+  }
+  
+  public boolean isMatched(int group)
   {
     int i = group / BIT_WIDTH;
     
-    if (i >= _set.length)
-      throw new RuntimeException("out of range: " + group + " >= " + (BIT_WIDTH * _set.length));
+    if (group > MAX_SIZE)
+      throw new RuntimeException("out of range: " + group + " >= " + MAX_SIZE);
     
     int shift = group - i * BIT_WIDTH;
     int bit = 1 << shift;
@@ -49,12 +71,12 @@ class GroupState
     return (_set[i] & bit) != 0; 
   }
 
-  public void set(int group)
+  public void setMatched(int group)
   {
     int i = group / BIT_WIDTH;
     
-    if (i >= _set.length)
-      throw new RuntimeException("out of range: " + group + " >= " + (BIT_WIDTH * _set.length));
+    if (group > MAX_SIZE)
+      throw new RuntimeException("out of range: " + group + " >= " + MAX_SIZE);
     
     int shift = group - i * BIT_WIDTH;
     int bit = 1 << shift;
@@ -62,9 +84,22 @@ class GroupState
     _set[i] |= bit;
   }
   
+  public GroupState copy()
+  {
+    GroupState state = new GroupState(_set.length);
+
+    for (int i = 0; i < _set.length; i++) {
+      state._set[i] = _set[i];
+    }
+    
+    return state;
+  }
+  
+  /*
   public void save()
   {
-    GroupState state = new GroupState();
+    GroupState state = new GroupState(_set.length);
+
     for (int i = 0; i < _set.length; i++) {
       state._set[i] = _set[i];
     }
@@ -85,13 +120,14 @@ class GroupState
     _next = _next._next;
   }
   
-  public void pop()
+  public void discardLastSave()
   {
     if (_next == null)
-      throw new RuntimeException("cannot pop an empty state stack");
+      throw new RuntimeException("cannot discard from an empty state stack");
     
     _next = _next._next;
   }
+  */
   
   public void clear()
   {

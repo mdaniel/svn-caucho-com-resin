@@ -68,6 +68,8 @@ class Regcomp {
   HashMap<UnicodeValue,Integer> _groupNameReverseMap
     = new HashMap<UnicodeValue,Integer>();
   
+  boolean _isLookbehind;
+  
   Regcomp(int flags)
   {
     this._flags = flags;
@@ -238,12 +240,13 @@ class Regcomp {
 	node = new Node(Node.RC_LOOP);
 	node._index = _nLoop++;
 	node._branch = last;
+	node._length = node._branch._length * node._min;
 
 	parseBrace(pattern, node);
 	if ((ch = pattern.read()) != '}')
 	  throw new IllegalRegexpException("expected `}' at " +
 					   badChar(ch));
-
+	  
 	if (pattern.peek() == '?') {
 	  pattern.read();
 	  node._code = Node.RC_LOOP_SHORT;
@@ -253,6 +256,15 @@ class Regcomp {
       node._code = Node.RC_LOOP_LONG;
     }
 
+	if (_isLookbehind) {
+	  if (node._min != node._max)
+	    throw new IllegalRegexpException("lookbehind strings must be fixed length: "
+	                                     + node._min + " != " + node._max);
+	}
+	
+    int length = node._branch._length * node._min;
+    node._length = length;
+	
 	last = node;
 	break;
 
@@ -262,8 +274,18 @@ class Regcomp {
           
           return last;
         }
-        
-	head = new Node(Node.RC_OR, Node.concat(head, last));
+    
+        node = Node.concat(head, last);
+	head = new Node(Node.RC_OR, node);
+	
+	if (_isLookbehind) {
+	  head._code = Node.RC_LOOKBEHIND_OR;
+	  //head = new Node(Node.RC_LOOKBEHIND_OR, head);
+	}
+	
+
+	head._length = node._length;
+	
 	last = null;
 	break;
 
@@ -290,12 +312,12 @@ class Regcomp {
 
 	  case '=':
 	    // (?=...) Positive lookahead assertion.
-	    last = new Node(Node.RC_POS_PEEK, parseRec(pattern));
+	    last = new Node(Node.RC_POS_LOOKAHEAD, parseRec(pattern));
 	    break;
 
 	  case '!':
 	    // (?!...) Negative lookahead assertion.
-	    last = new Node(Node.RC_NEG_PEEK, parseRec(pattern));
+	    last = new Node(Node.RC_NEG_LOOKAHEAD, parseRec(pattern));
 	    break;
 	    
 	  case '<':
@@ -303,13 +325,22 @@ class Regcomp {
 	    
 	    // (?<=...) Positive lookbehind assertion.
         if (ch == '=')
-          last = new Node(Node.RC_POS_PREV, parseRec(pattern));
+          last = new Node(Node.RC_POS_LOOKBEHIND);
+        // (?<!...) Negative lookbehind assertion.
 	    else if (ch == '!')
-          last = new Node(Node.RC_NEG_PREV, parseRec(pattern));
+          last = new Node(Node.RC_NEG_LOOKBEHIND);
         else
           throw new IllegalRegexpException("expected `}' at " +
                                            badChar(ch));
         
+        _isLookbehind = true;
+        node = parseRec(pattern);
+        _isLookbehind = false;
+        
+        last._branch = node;
+        
+        if (node != null)
+          last._length = node._length;
 	    break;
 	    
 	  case 'P':
@@ -328,6 +359,7 @@ class Regcomp {
 
 	      last = new Node(Node.RC_BEG_GROUP, groupIndex);
 	      last._rest = parseRec(pattern);
+	      last._length = last._rest._length;
 
 	      node = new Node(Node.RC_END_GROUP, groupIndex);
 	      last = Node.replaceTail(last, node);
@@ -425,6 +457,9 @@ class Regcomp {
 
 	  last = new Node(Node.RC_BEG_GROUP, groupIndex);
 	  last._rest = parseRec(pattern);
+	  
+	  if (last._rest != null)
+        last._length = last._rest._length;
 
 	  node = new Node(Node.RC_END_GROUP, groupIndex);
 	  last = Node.replaceTail(last, node);
@@ -580,12 +615,12 @@ class Regcomp {
     if (first == '^') {
       pattern.read();
       node = new Node(Node.RC_NSET);
+      node._length = 1;
     }
     else {
       node = new Node(Node.RC_SET);
+      node._length = 1;
     }
-
-
     
     RegexpSet set = new RegexpSet();
     node._set = set;
@@ -664,7 +699,7 @@ class Regcomp {
 	else if (ch == '[') {
       if (pattern.peek() == ':') {
         isChar = false;
-        pattern.read();   
+        pattern.read();
         set.mergeOr(parseCharacterClass(pattern));
       }
     }
@@ -743,12 +778,17 @@ class Regcomp {
     }
 
     int next = pattern.read();
-    if (last == null || last._code != Node.RC_STRING ||
-	next == '*' || next == '?' || next == '{' || next == '+') {
+    if (last == null
+        || last._code != Node.RC_STRING
+        || next == '*'
+        || next == '?'
+        || next == '{'
+        || next == '+') {
       last = new Node(new CharBuffer());
     }
     last._string.append((char) ch);
-
+    last._length++;
+    
     if (next != -1)
       pattern.ungetc(next);
 
@@ -1080,7 +1120,8 @@ class Regcomp {
       default:
         throw new IllegalRegexpException("invalid Unicode category " +
                 badChar(ch) + "" + badChar(ch2));
-    }
+      }
+      break;
     case 'L':
       switch (ch2) {
         case 'l':
@@ -1127,7 +1168,8 @@ class Regcomp {
       default:
         throw new IllegalRegexpException("invalid Unicode category " +
                 badChar(ch) + "" + badChar(ch2));
-    }
+      }
+      break;
     case 'N':
       switch (ch2) {
       case 'd':
@@ -1147,7 +1189,7 @@ class Regcomp {
       default:
         throw new IllegalRegexpException("invalid Unicode category " +
                 badChar(ch) + "" + badChar(ch2));
-    }
+      }
       break;
     case 'P':
       switch (ch2) {
@@ -1180,7 +1222,7 @@ class Regcomp {
       default:
         throw new IllegalRegexpException("invalid Unicode category " +
                 badChar(ch) + "" + badChar(ch2));
-    }
+      }
       break;
     case 'S':
       switch (ch2) {
@@ -1204,7 +1246,7 @@ class Regcomp {
       default:
         throw new IllegalRegexpException("invalid Unicode category " +
                 badChar(ch) + "" + badChar(ch2));
-    }
+      }
       break;
     case 'Z':
       switch (ch2) {
@@ -1227,7 +1269,7 @@ class Regcomp {
                   badChar(ch) + "" + badChar(ch2));
       }
       break;
-  }
+    }
 
     if ((ch = pattern.read()) != '}')
       throw new IllegalRegexpException("expected '}' at " +

@@ -50,22 +50,23 @@ class Node {
   
   static final int RC_OR = 64;
   static final int RC_OR_UNIQUE = 65;
-  static final int RC_POS_PEEK = 66;
-  static final int RC_NEG_PEEK = 67;
-  static final int RC_WORD = 68;
-  static final int RC_NWORD = 69;
-  static final int RC_BLINE = 70;
-  static final int RC_ELINE = 71;
-  static final int RC_BSTRING = 72;
-  static final int RC_ESTRING = 73;
-  static final int RC_ENSTRING = 74;
-  static final int RC_GSTRING = 75;
+  static final int RC_POS_LOOKAHEAD = 66;
+  static final int RC_NEG_LOOKAHEAD = 67;
+  static final int RC_POS_LOOKBEHIND = 68;
+  static final int RC_NEG_LOOKBEHIND = 69;
+  static final int RC_LOOKBEHIND_OR = 70;
+  
+  static final int RC_WORD = 73;
+  static final int RC_NWORD = 74;
+  static final int RC_BLINE = 75;
+  static final int RC_ELINE = 76;
+  static final int RC_BSTRING = 77;
+  static final int RC_ESTRING = 78;
+  static final int RC_ENSTRING = 79;
+  static final int RC_GSTRING = 80;
   
   // conditionals
-  static final int RC_COND = 76;
-  
-  static final int RC_POS_PREV = 77;
-  static final int RC_NEG_PREV = 78;
+  static final int RC_COND = 81;
   
   // ignore case
   static final int RC_STRING_I = 128;
@@ -79,7 +80,7 @@ class Node {
   static final int RC_UNICODE = 512;
   static final int RC_NUNICODE = 513;
   
-  // unicode properties set
+  // unicode properties sets
   static final int RC_C = 1024;
   static final int RC_L = 1025;
   static final int RC_M = 1026;
@@ -88,7 +89,7 @@ class Node {
   static final int RC_S = 1029;
   static final int RC_Z = 1030;
   
-  // negated unicode properties set
+  // negated unicode properties sets
   static final int RC_NC = 1031;
   static final int RC_NL = 1032;
   static final int RC_NM = 1033;
@@ -97,6 +98,7 @@ class Node {
   static final int RC_NS = 1036;
   static final int RC_NZ = 1037;
   
+  // POSIX character classes
   static final int RC_CHAR_CLASS = 2048;
   static final int RC_ALNUM = 1;
   static final int RC_ALPHA = 2;
@@ -167,6 +169,9 @@ class Node {
   Node _condition;
   Node _nBranch;
 
+  //for lookbehind
+  int _length;
+  
   boolean _mark;
   boolean _printMark;
 
@@ -191,8 +196,8 @@ class Node {
       case RC_LOOP_LONG: return "RC_LOOP_LONG";
       case RC_OR: return "RC_OR";
       case RC_OR_UNIQUE: return "RC_OR_UNIQUE";
-      case RC_POS_PEEK: return "RC_POS_PEEK";
-      case RC_NEG_PEEK: return "RC_NEG_PEEK";
+      case RC_POS_LOOKAHEAD: return "RC_POS_PEEK";
+      case RC_NEG_LOOKAHEAD: return "RC_NEG_PEEK";
       case RC_WORD: return "RC_WORD";
       case RC_NWORD: return "RC_NWORD";
       case RC_BLINE: return "RC_BLINE";
@@ -202,8 +207,9 @@ class Node {
       case RC_ENSTRING: return "RC_ENSTRING";
       case RC_GSTRING: return "RC_GSTRING";
       case RC_COND: return "RC_COND";
-      case RC_POS_PREV: return "RC_POS_PREV";
-      case RC_NEG_PREV: return "RC_NEG_PREV";
+      case RC_POS_LOOKBEHIND: return "RC_POS_LOOKBEHIND";
+      case RC_NEG_LOOKBEHIND: return "RC_NEG_LOOKBEHIND";
+      case RC_LOOKBEHIND_OR: return "RC_LOOKBEHIND_OR";
       case RC_STRING_I: return "RC_STRING_I";
       case RC_SET_I: return "RC_SET_I";
       case RC_NSET_I: return "RC_NSET_I";
@@ -218,8 +224,8 @@ class Node {
    */
   Node(int code)
   {
-    this._rest = END;
-    this._code = code;
+    _rest = END;
+    _code = code;
   }
 
   /**
@@ -229,7 +235,7 @@ class Node {
   {
     this(code);
 
-    this._index = index;
+    _index = index;
   }
 
   /**
@@ -239,7 +245,7 @@ class Node {
   {
     this(code);
 
-    this._branch = branch;
+    _branch = branch;
   }
 
   /**
@@ -249,9 +255,9 @@ class Node {
   {
     this(code);
 
-    this._index = index;
-    this._min = min;
-    this._max = max;
+    _index = index;
+    _min = min;
+    _max = max;
   }
 
   /**
@@ -261,7 +267,8 @@ class Node {
   {
     this(code);
 
-    this._set = set;
+    _set = set;
+    _length = 1;
   }
 
   /**
@@ -271,7 +278,7 @@ class Node {
   {
     this(RC_STRING);
 
-    this._string = buf;
+    _string = buf;
   }
 
   /**
@@ -295,7 +302,6 @@ class Node {
    */
   static Node concat(Node head, Node tail)
   {
-
     if (head == null || head._code == RC_END)
       return tail;
 
@@ -319,6 +325,7 @@ class Node {
     node._max = _max;
     node._branch = _branch;
     
+    node._length = _length;
     node._unicodeCategory = _unicodeCategory;
 
     return node;

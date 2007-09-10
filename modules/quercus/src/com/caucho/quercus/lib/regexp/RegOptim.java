@@ -114,7 +114,7 @@ class RegOptim {
     case Node.RC_GSTRING:
       return prefix(node._rest);
 
-    case Node.RC_POS_PEEK:
+    case Node.RC_POS_LOOKAHEAD:
       return prefix(node._branch);
 
     case Node.RC_STRING:
@@ -175,7 +175,7 @@ class RegOptim {
       else
 	return null;
 
-    case Node.RC_POS_PEEK:
+    case Node.RC_POS_LOOKAHEAD:
       string1 = findMust(node._rest);
       if (string1 != null)
 	return string1;
@@ -220,6 +220,7 @@ class RegOptim {
     case Node.RC_LOOP:
     case Node.RC_LOOP_SHORT:
     case Node.RC_LOOP_UNIQUE:
+
       if (node._mark) {
 	if (canDeriveNull && node._min > 0)
 	  node._min = 1;
@@ -244,6 +245,14 @@ class RegOptim {
       node._rest = linkLoops(node._rest, loop, false);
       return node;
 
+      
+    case Node.RC_POS_LOOKBEHIND:
+    case Node.RC_NEG_LOOKBEHIND:
+    case Node.RC_LOOKBEHIND_LOOP:
+      node._branch = linkLoops(node._branch, loop, canDeriveNull);
+      return node;
+      
+      
     default:
       node._rest = linkLoops(node._rest, loop, canDeriveNull);
       return node;
@@ -354,8 +363,8 @@ class RegOptim {
       }
       return;
 
-    case Node.RC_POS_PEEK:
-    case Node.RC_NEG_PEEK:
+    case Node.RC_POS_LOOKAHEAD:
+    case Node.RC_NEG_LOOKAHEAD:
       eliminateBacktrack(node._branch, rest);
       eliminateBacktrack(node._rest, rest);
       return;
@@ -429,7 +438,7 @@ class RegOptim {
       else
 	return firstset(node._rest, set);
 
-    case Node.RC_POS_PEEK:
+    case Node.RC_POS_LOOKAHEAD:
       RegexpSet lookahead = new RegexpSet();
 
       boolean result = firstset(node._rest, set);

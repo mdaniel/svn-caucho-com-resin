@@ -168,17 +168,17 @@ public class Regexp {
   {
     StringValue result = _subject.substring(start);
     
-    return convertString(env, result);
+    return encodeResultString(env, result);
   }
   
   public StringValue substring(Env env, int start, int end)
   {
     StringValue result = _subject.substring(start, end);
     
-    return convertString(env, result);
+    return encodeResultString(env, result);
   }
   
-  private StringValue convertString(Env env, StringValue str)
+  private StringValue encodeResultString(Env env, StringValue str)
   {
     if (_isUnicode) {
       if (_isUTF8)
@@ -264,9 +264,7 @@ public class Regexp {
   }
 
   public void init(Env env, StringValue subject)
-  {
-    //System.err.println("Regexp->init(): " + subject.getClass());
-    
+  {    
     _isUnicode = subject.isUnicode();
     
     if (_isUTF8)
@@ -336,7 +334,7 @@ public class Regexp {
     _group.set(0, begin);
     _group.set(1, pos);
     
-    _groupState.set(0);
+    _groupState.setMatched(0);
 
     return value;
   }
@@ -413,14 +411,15 @@ public class Regexp {
     char ch;
     int value;
     
+    GroupState oldState;
+    
     while (prog != null) {
-      
       /*
       System.err.print("Regexp->match(): " + Node.code(prog._code));
       if (prog._branch != null)
-        System.err.print(" . " + Node.code(prog._branch._code));
+        System.err.print(" . " + Node.code(prog._branch._code) + " " + prog._branch._string);
       if (prog._rest != null)
-        System.err.print(" : " + Node.code(prog._rest._code));
+        System.err.print(" : " + Node.code(prog._rest._code) + " " + prog._rest._string);
       
       System.err.println();
       */
@@ -496,8 +495,6 @@ public class Regexp {
 
 	// '('
       case Node.RC_BEG_GROUP:
-        //System.err.println("Node.RC_BEG_GROUP: " + prog._index);
-        
 	_groupStart[prog._index] = cursor.getIndex();
 	
 	prog = prog._rest;
@@ -512,18 +509,14 @@ public class Regexp {
 	_group.set(2 * prog._index, _groupStart[prog._index]);
 	_group.set(2 * prog._index + 1, cursor.getIndex());
 	
-	_groupState.set(prog._index);
-	
-    //System.err.println("Node.RC_END_GROUP: " + prog._index + " . END");
+	_groupState.setMatched(prog._index);
 	
 	prog = prog._rest;
 	break;
 
 	// '\nn'
       case Node.RC_GROUP_REF:
-        //System.err.println("1 . " + isGroupMatched(prog._index));
-        
-        if (! _groupState.isSet(prog._index))
+        if (! _groupState.isMatched(prog._index))
           return FAIL;
         else {
           int begin = _group.get(2 * prog._index);
@@ -540,9 +533,7 @@ public class Regexp {
 
 	// '\nn'
       case Node.RC_GROUP_REF_I:
-        //System.err.println("2 . " + isGroupMatched(prog._index));
-        
-        if (! _groupState.isSet(prog._index))
+        if (! _groupState.isMatched(prog._index))
           return FAIL;
         else {
           int begin = _group.get(2 * prog._index);
@@ -583,14 +574,13 @@ public class Regexp {
 	  else if (prog._set != null && prog._set.match(ch))
 	    prog = prog._branch;
 	  else {
-	     _groupState.save();
+	     oldState = _groupState.copy();
 
 	    if ((value = match(prog._branch, cursor)) != FAIL) {
-	      _groupState.pop();
 	      return value;
 	    }
         else {
-          _groupState.restore();
+          _groupState = oldState;
           
           cursor.setIndex(tail);
           _group.setLength(match);
@@ -612,15 +602,13 @@ public class Regexp {
           _loopTail[prog._index] = tail;
           int match = _group.size();
 
-          _groupState.save();
+          oldState = _groupState.copy();
           
           if (match(prog._branch, cursor) != FAIL) {
-            _groupState.pop();
-            
             cursor.setIndex(tail);
           }
           else {
-            _groupState.restore();
+            _groupState = oldState;
             
             if ((ch = cursor.current()) == cursor.DONE)
               prog = prog._rest;
@@ -643,14 +631,13 @@ public class Regexp {
 	else if (_loopCount[prog._index] > prog._max)
 	  prog = prog._rest;
 	else {
-	  _groupState.save();
+	  oldState = _groupState.copy();
 	  
 	  if ((value = match(prog._rest, cursor)) != FAIL) {
-	      _groupState.pop();
 	      return value;
       }
 
-	  _groupState.restore();
+	  _groupState = oldState;
 	  
       if (_loopTail[prog._index] == tail)
         return FAIL;
@@ -705,7 +692,7 @@ public class Regexp {
 	break;
 
 	// The peek pattern must match but isn't included in the real match
-      case Node.RC_POS_PEEK:
+      case Node.RC_POS_LOOKAHEAD:
 	tail = cursor.getIndex();
 	if (match(prog._branch, cursor) == FAIL)
 	  return FAIL;
@@ -714,52 +701,108 @@ public class Regexp {
 	break;
 
 	// The peek pattern must not match and isn't included in the real match
-      case Node.RC_NEG_PEEK:
+      case Node.RC_NEG_LOOKAHEAD:
 	tail = cursor.getIndex();
 	if (match(prog._branch, cursor) != FAIL)
 	  return FAIL;
 	cursor.setIndex(tail);
 	prog = prog._rest;
 	break;
-	
-	   // The previous pattern must match
-      case Node.RC_POS_PREV:
+
+	 // The previous pattern must match and isn't included in the real match
+      case Node.RC_POS_LOOKBEHIND:
         tail = cursor.getIndex();
+        oldState = _groupState.copy();
         
-        Node branch = prog._branch;
+        length = prog._length;
         
-        while (branch._code == Node.RC_OR ||
-               branch._code == Node.RC_OR_UNIQUE)
-        {
-          break;
-        }
-        
-        if (branch._code == Node.RC_OR ||
-            branch._code == Node.RC_OR_UNIQUE) {
-          value = branch._string.length();
-          
-          
-        }
-        else if (false) {
-          
-        }
-        
-        if (match(prog._branch, cursor) == FAIL)
+        if (tail < length)
           return FAIL;
+        
+        cursor.setIndex(tail - length);
+        
+        if (match(prog._branch, cursor) == FAIL) {
+          cursor.setIndex(tail);
+          _groupState = oldState;
+
+          return FAIL;
+        }
+
         cursor.setIndex(tail);
+        _groupState = oldState;
+
         prog = prog._rest;
         break;
-	
+        
+      // The previous pattern must not match and isn't included in the real match
+      case Node.RC_NEG_LOOKBEHIND:
+        tail = cursor.getIndex();
+        oldState = _groupState.copy();
+        
+        length = prog._branch._length;
+        
+        if (tail >= length) {
+          cursor.setIndex(tail - length);
+          
+          if (match(prog._branch, cursor) != FAIL) {
+            cursor.setIndex(tail);
+            _groupState = oldState;
+            
+            return FAIL;
+          }
+        }
+        
+        cursor.setIndex(tail);
+        _groupState = oldState;
+
+        prog = prog._rest;
+        break;
+        
+      case Node.RC_LOOKBEHIND_OR:
+        tail = cursor.getIndex();
+        oldState = _groupState.copy();
+        
+        int defaultLength = prog._length;
+        boolean isMatched = false;
+        
+        Node node = prog._branch;
+
+        if ((value = match(node, cursor)) != FAIL) {
+          return value;
+        }
+        else {
+          _groupState = oldState;
+          
+          for (node = prog._rest; node != null && node._code != Node.RC_END; node = node._rest) {
+            cursor.setIndex(tail);
+            oldState = _groupState.copy();
+            
+            cursor.setIndex(tail + defaultLength - node._length);
+            
+            if (match(node, cursor) != FAIL) {
+              cursor.setIndex(tail);
+              _groupState = oldState;
+              
+              isMatched = true;
+              break;
+            }
+            
+            cursor.setIndex(tail);
+            _groupState = oldState;
+          }
+        }
+        
+        if (! isMatched)
+          return FAIL;
+
+        prog = node._rest;
+        break;
+
 	   // Conditional subpattern
       case Node.RC_COND:
         tail = cursor.getIndex();
 
-        int start = getBegin(prog._index);
-        int end = getEnd(prog._index);
-
-        //System.err.println("Node.RC_COND match: " + prog._index + " . " + isMatchedGroup(prog._index));
-        
-        if (_groupState.isSet(prog._index)) {
+        if (_groupState.isMatched(prog._index)) {
           if (match(prog._branch, cursor) == FAIL)
             return FAIL;
         }
@@ -1097,7 +1140,7 @@ public class Regexp {
         return 0;
         
       default:
-        throw new RuntimeException("Internal error: " + prog._code);
+        throw new RuntimeException("Internal error: " + Node.code(prog._code));
       }
     }
 
@@ -1297,7 +1340,7 @@ public class Regexp {
   
   public boolean isMatchedGroup(int i)
   {
-    return _groupState.isSet(i);
+    return _groupState.isMatched(i);
   }
   
   public StringValue group(Env env)
