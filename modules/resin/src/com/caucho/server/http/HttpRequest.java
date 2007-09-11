@@ -256,8 +256,11 @@ public class HttpRequest extends AbstractHttpRequest
 	    return false;
 	  }
 
-	  _server.buildInvocation(_invocationKey.clone(), invocation);
+	  invocation = _server.buildInvocation(_invocationKey.clone(),
+					       invocation);
 	}
+
+	invocation = invocation.getRequestInvocation(this);
 
 	setInvocation(invocation);
 

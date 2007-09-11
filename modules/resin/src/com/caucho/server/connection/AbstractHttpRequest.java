@@ -1477,7 +1477,7 @@ public abstract class AbstractHttpRequest
     long now = Alarm.getCurrentTime();
 
     SessionImpl session;
-    
+
     if (id != null && id.length() > 6) {
       session = manager.getSession(id, now, create, _isSessionIdFromCookie);
 

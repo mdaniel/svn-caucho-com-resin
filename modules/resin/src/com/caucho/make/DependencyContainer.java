@@ -183,7 +183,7 @@ public class DependencyContainer implements Dependency
 	Dependency dependency = _dependencyList.get(i);
 	
 	if (dependency.isModified()) {
-	  log().fine(dependency + " is modified");
+	  dependency.logModified(log());
 
 	  _isModified = true;
         
@@ -227,7 +227,7 @@ public class DependencyContainer implements Dependency
   private Logger log()
   {
     if (_log == null)
-      _log = Log.open(DependencyContainer.class);
+      _log = Logger.getLogger(DependencyContainer.class.getName());
 
     return _log;
   }

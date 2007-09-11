@@ -106,7 +106,7 @@ public class WebApp extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
              EnvironmentDeployInstance
 {
-  private static final String DEFAULT_VERSION = "2.4";
+  private static final String DEFAULT_VERSION = "2.5";
 
   private static final L10N L = new L10N(WebApp.class);
   private static final Logger log
@@ -131,6 +131,10 @@ public class WebApp extends ServletContextImpl
 
   // The parent
   private WebAppContainer _parent;
+
+  // Any old version web-app
+  private WebApp _oldWebApp;
+  private long _oldWebAppExpireTime;
 
   // The webApp entry
   private WebAppController _controller;
@@ -325,9 +329,6 @@ public class WebApp extends ServletContextImpl
       Vfs.setPwd(_appDir, _classLoader);
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
 
-      // jpa/0s2n (tck: ejb30/persistence/ee/packaging/web/scope)
-      // fillDefaultLib();
-
       // map.put("app", _appVar);
 
       if (CauchoSystem.isTesting()) {
@@ -454,29 +455,6 @@ public class WebApp extends ServletContextImpl
    */
   public void setId(String id)
   {
-  }
-
-  private void fillDefaultLib()
-    throws IOException
-  {
-    Path lib = _appDir.lookup("WEB-INF/lib");
-
-    // jpa/0g00 vs. jpa/0s2n (tck: ejb30/persistence/ee/packaging/web/scope)
-    if (lib.canRead()) {
-      Environment.addChildLoaderListener(new com.caucho.amber.manager.PersistenceEnvironmentListener());
-
-      // jpa/0s2n
-      _classLoader.addURL(lib);
-
-      for (String file : lib.list()) {
-        if (file.endsWith(".jar")) {
-          Path path = lib.lookup(file);
-          Path jar = JarPath.create(path);
-
-          _classLoader.addJar(jar);
-        }
-      }
-    }
   }
 
   /**
@@ -712,6 +690,15 @@ public class WebApp extends ServletContextImpl
   public void setDisableCrossContext(boolean isDisable)
   {
     _isDisableCrossContext = isDisable;
+  }
+
+  /**
+   * Sets the old version web-app.
+   */
+  public void setOldWebApp(WebApp oldWebApp, long expireTime)
+  {
+    _oldWebApp = oldWebApp;
+    _oldWebAppExpireTime = expireTime;
   }
 
   /**
@@ -1681,9 +1668,6 @@ public class WebApp extends ServletContextImpl
 
       setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
 
-      // jpa/0s2n
-      fillDefaultLib();
-
       FilterChainBuilder securityBuilder = _constraintManager.getFilterBuilder();
 
       if (securityBuilder != null)
@@ -1951,7 +1935,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Fills the servlet instance.  (Generalize?)
    */
-  public void buildInvocation(Invocation invocation)
+  public Invocation buildInvocation(Invocation invocation)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -1964,14 +1948,16 @@ public class WebApp extends ServletContextImpl
         chain = new ExceptionFilterChain(_configException);
         invocation.setFilterChain(chain);
         invocation.setDependency(AlwaysModified.create());
-        return;
+	
+        return invocation;
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
         int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         chain = new ErrorFilterChain(code);
         invocation.setFilterChain(chain);
         invocation.setDependency(AlwaysModified.create());
-        return;
+	
+        return invocation;
       }
       else {
         FilterChainEntry entry = null;
@@ -2028,11 +2014,29 @@ public class WebApp extends ServletContextImpl
         invocation.setPathInfo(entry.getPathInfo());
         invocation.setServletPath(entry.getServletPath());
       }
+
+      if (_oldWebApp != null
+	  && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
+	Invocation oldInvocation = new Invocation();
+	oldInvocation.copyFrom(invocation);
+	oldInvocation.setWebApp(_oldWebApp);
+
+	_oldWebApp.buildInvocation(oldInvocation);
+	
+	invocation = new VersionInvocation(invocation, this,
+					   oldInvocation,
+					   oldInvocation.getWebApp(),
+					   _oldWebAppExpireTime);
+      }
+
+      return invocation;
     } catch (Throwable e) {
       FilterChain chain = new ExceptionFilterChain(e);
       chain = new WebAppFilterChain(chain, this);
       invocation.setDependency(AlwaysModified.create());
       invocation.setFilterChain(chain);
+
+      return invocation;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

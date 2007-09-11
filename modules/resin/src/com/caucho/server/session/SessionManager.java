@@ -1138,6 +1138,14 @@ public final class SessionManager implements ObjectManager, AlarmListener
   }
 
   /**
+   * Returns true if the session exists in this manager.
+   */
+  public boolean containsSession(String id)
+  {
+    return _sessions.get(id) != null;
+  }
+
+  /**
    * Create a new session.
    *
    * @param oldId the id passed to the request.  Reuse if possible.
@@ -1741,6 +1749,14 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (_clusterManager != null)
       _clusterManager.removeContext(_distributionId);
     */
+  }
+
+  public String toString()
+  {
+    if (_webApp != null)
+      return "SessionManager[" + _webApp.getContextPath() + "]";
+    else
+      return "SessionManager[]";
   }
 
   static class DistributedObjectInputStream extends ObjectInputStream {

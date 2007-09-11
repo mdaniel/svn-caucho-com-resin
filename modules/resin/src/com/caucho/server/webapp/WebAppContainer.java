@@ -692,14 +692,15 @@ public class WebAppContainer
   /**
    * Creates the invocation.
    */
-  public void buildInvocation(Invocation invocation)
+  public Invocation buildInvocation(Invocation invocation)
     throws Exception
   {
     if (_configException != null) {
       FilterChain chain = new ExceptionFilterChain(_configException);
       invocation.setFilterChain(chain);
       invocation.setDependency(AlwaysModified.create());
-      return;
+      
+      return invocation;
     }
     else if (! _lifecycle.waitForActive(_startWaitTime)) {
       int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
@@ -712,7 +713,8 @@ public class WebAppContainer
       }
 
       invocation.setDependency(AlwaysModified.create());
-      return;
+      
+      return invocation ;
     }
 
     FilterChain chain;
@@ -722,7 +724,7 @@ public class WebAppContainer
     boolean isAlwaysModified;
 
     if (app != null) {
-      app.buildInvocation(invocation);
+      invocation = app.buildInvocation(invocation);
       chain = invocation.getFilterChain();
       isAlwaysModified = false;
     }
@@ -755,6 +757,8 @@ public class WebAppContainer
 
     if (isAlwaysModified)
       invocation.setDependency(AlwaysModified.create());
+
+    return invocation;
   }
 
   /**
@@ -983,6 +987,9 @@ public class WebAppContainer
    */
   public WebAppController findByURI(String uri)
   {
+    if (_appDeploy.isModified())
+      _uriToAppCache.clear();
+    
     WebAppController controller = _uriToAppCache.get(uri);
 
     if (controller != null)

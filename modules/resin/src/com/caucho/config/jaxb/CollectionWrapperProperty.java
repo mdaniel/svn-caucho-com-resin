@@ -55,7 +55,13 @@ public class CollectionWrapperProperty extends JaxbProperty {
   @Override
   public boolean isBean()
   {
-    return false;
+    return true;
+  }
+
+  @Override
+  public Object create(NodeBuilder builder, Object parent)
+  {
+    return null;
   }
  
   /**

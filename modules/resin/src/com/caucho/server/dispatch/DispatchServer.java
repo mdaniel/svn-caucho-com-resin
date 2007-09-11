@@ -206,7 +206,7 @@ public class DispatchServer implements Dependency {
   public Invocation buildInvocation(Object protocolKey, Invocation invocation)
     throws Throwable
   {
-    buildInvocation(invocation);
+    invocation = buildInvocation(invocation);
 
     // XXX: see if can remove this, and rely on the invocation cache existing
     LruCache<Object,Invocation> invocationCache = _invocationCache;
@@ -231,10 +231,10 @@ public class DispatchServer implements Dependency {
   /**
    * Builds the invocation.
    */
-  public void buildInvocation(Invocation invocation)
+  public Invocation buildInvocation(Invocation invocation)
     throws Throwable
   {
-    getDispatchBuilder().buildInvocation(invocation);
+    return getDispatchBuilder().buildInvocation(invocation);
   }
 
   /**

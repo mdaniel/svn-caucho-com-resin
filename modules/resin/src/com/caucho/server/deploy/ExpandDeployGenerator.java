@@ -376,10 +376,15 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     if (_digest != digest) {
       String reason = "";
+      
+      String name = getClass().getName();
+      int p = name.lastIndexOf('.');
+      if (p > 0)
+	name = name.substring(p + 1);
     
       Path archiveDirectory = getArchiveDirectory();
       if (archiveDirectory != null)
-	reason = archiveDirectory.getNativePath() + " has changed";
+	reason = name + "[" + archiveDirectory.getNativePath() + "] is modified";
     
       Path expandDirectory = getExpandDirectory();
       if (expandDirectory != null
@@ -387,7 +392,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 	if (! "".equals(reason))
 	  reason = reason + " or ";
 	
-	reason = expandDirectory.getNativePath() + " has changed";
+	reason = name + "[" + expandDirectory.getNativePath() + "] is modified";
       }
 
       log.info(reason);

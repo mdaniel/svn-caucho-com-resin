@@ -39,6 +39,7 @@ import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.host.Host;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
 
 import javax.servlet.jsp.el.ELException;
@@ -47,21 +48,29 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 /**
- * A configuration entry for a web-app.
+ * A configuration entry for a versioning web-app.
  */
 public class WebAppVersioningController extends WebAppController {
   private static final L10N L = new L10N(WebAppVersioningController.class);
   private static final Logger log
     = Logger.getLogger(WebAppController.class.getName());
 
+  private static final long EXPIRE_PERIOD = 3600 * 1000L;
+
+  private long _versionRolloverTime = EXPIRE_PERIOD;
+  
   private ArrayList<WebAppController> _controllerList
     = new ArrayList<WebAppController>();
 
   private final WebAppExpandDeployGenerator _generator;
+
+  private long _restartTime;
   
   private WebAppController _primaryController;
   private boolean _isModified = true;
+
 
   public WebAppVersioningController(String contextPath,
 				    WebAppExpandDeployGenerator generator,
@@ -190,31 +199,32 @@ public class WebAppVersioningController extends WebAppController {
       ArrayList<String> versionNames = _generator.getVersionNames(getId());
 
       if (versionNames != null) {
-	for (int i = 0; i < versionNames.size(); i++) {
+	Collections.sort(versionNames, new VersionNameComparator());
+	
+	for (int i = 0; i < versionNames.size() && i < 2; i++) {
 	  String versionName = versionNames.get(i);
 
 	  WebAppController newController
 	    = _container.getWebAppGenerator().findController(versionName);
 
-	  addNewVersion(newController);
+	  _controllerList.add(newController);
 	}
+
+	//Collections.sort(_controllerList, new VersionComparator());
+    
+	_primaryController = _controllerList.get(0);
+
+	if (_restartTime > 0 && _controllerList.size() > 1) {
+	  long expireTime = Alarm.getCurrentTime() + _versionRolloverTime;
+
+	  _primaryController.setOldWebApp(_controllerList.get(1),
+					  expireTime);
+	  
+	}
+
+	_restartTime = Alarm.getCurrentTime();
       }
     }
-  }
-
-  /**
-   * Adds a version to the controller list.
-   */
-  private void addNewVersion(WebAppController controller)
-  {
-    if (controller == null)
-      throw new NullPointerException();
-    
-    _controllerList.add(controller);
-
-    Collections.sort(_controllerList, new VersionComparator());
-    
-    _primaryController = _controllerList.get(0);
   }
   
   /**
@@ -225,12 +235,14 @@ public class WebAppVersioningController extends WebAppController {
     return "WebAppVersioningController" +  "[" + getId() + "]";
   }
 
-  static class VersionComparator implements Comparator<WebAppController>
+  static class VersionNameComparator implements Comparator<String>
   {
-    public int compare(WebAppController a, WebAppController b)
+    public int compare(String versionA, String versionB)
     {
+      /*
       String versionA = a.getVersion();
       String versionB = b.getVersion();
+      */
 
       int lengthA = versionA.length();
       int lengthB = versionB.length();

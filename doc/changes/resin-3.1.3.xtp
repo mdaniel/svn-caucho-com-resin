@@ -25,6 +25,19 @@ HttpProxyServlet.</p>
 
 </s1>
 
+<s1 title="Versioning">
+
+<p>&lt;web-app-deploy> now supports a "versioning" attribute.  If true,
+multiple .war files with version numbers will be resolved to the most
+recent version, e.g. the url /foo would choose webapps/foo-1.1
+over webapps/foo-1.0.</p>
+
+<p>After deployment, old sessions will stay with the old version for a
+period of time.  New sessions will migrate to the new version.  This
+will simplify application version upgrades.</p>
+
+</s1>
+
 <s1 title="Jdbc Pooling">
 
 <p>Added max-idle-count to limit the idle connection size (default 1024).</p>

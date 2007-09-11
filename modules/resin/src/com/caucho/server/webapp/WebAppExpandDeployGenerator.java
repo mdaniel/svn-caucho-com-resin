@@ -335,7 +335,7 @@ public class WebAppExpandDeployGenerator
     if (! baseName.equals(contextPath)) {
       WebAppController versionController
 	= _container.getWebAppGenerator().findController(baseName);
-
+      
       if (versionController instanceof WebAppVersioningController) {
 	((WebAppVersioningController) versionController).setModified(true);
       }

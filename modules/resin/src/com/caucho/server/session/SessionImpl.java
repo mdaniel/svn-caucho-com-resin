@@ -31,6 +31,7 @@ package com.caucho.server.session;
 
 import com.caucho.log.Log;
 import com.caucho.hessian.io.*;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.cluster.ClusterObject;
 import com.caucho.server.cluster.Store;
 import com.caucho.server.security.AbstractAuthenticator;
@@ -121,7 +122,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     _values = createValueMap();
 
     if (log.isLoggable(Level.FINE))
-      log.fine("create session " + id);
+      log.fine(this + " create");
   }
 
   /**
@@ -644,7 +645,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   void create(long now)
   {
     if (log.isLoggable(Level.FINE)) {
-      log.fine("create session " + _id);
+      log.fine(_manager + " create session " + _id);
     }
 
     // e.g. server 'C' when 'A' and 'B' have no record of session
@@ -1213,7 +1214,17 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   public String toString()
   {
-    return "SessionImpl[" + getId() + "]";
+    String contextPath = "";
+    
+    SessionManager manager = _manager;
+    if (manager != null) {
+      WebApp webApp = manager.getWebApp();
+
+      if (webApp != null)
+	contextPath = "," + webApp.getContextPath();
+    }
+    
+    return "SessionImpl[" + getId() + contextPath + "]";
   }
 
   enum Logout {

@@ -460,7 +460,7 @@ public class Host extends WebAppContainer
   /**
    * Builds the invocation for the host.
    */
-  public void buildInvocation(Invocation invocation)
+  public Invocation buildInvocation(Invocation invocation)
     throws Exception
   {
     invocation.setHostName(_serverName);
@@ -473,10 +473,12 @@ public class Host extends WebAppContainer
       thread.setContextClassLoader(getClassLoader());
 
       if (_configException == null)
-        super.buildInvocation(invocation);
+        return super.buildInvocation(invocation);
       else {
         invocation.setFilterChain(new ExceptionFilterChain(_configException));
 	invocation.setDependency(AlwaysModified.create());
+
+	return invocation;
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

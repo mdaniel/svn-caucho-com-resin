@@ -416,8 +416,11 @@ public class HmuxRequest extends AbstractHttpRequest
 					_uri.getBuffer(),
 					_uri.getLength());
 
-          _server.buildInvocation(_invocationKey.clone(), invocation);
+          invocation = _server.buildInvocation(_invocationKey.clone(),
+					       invocation);
         }
+
+	invocation = invocation.getRequestInvocation(this);
 
 	setInvocation(invocation);
       

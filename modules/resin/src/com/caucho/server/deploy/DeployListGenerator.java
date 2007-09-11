@@ -88,6 +88,19 @@ public class DeployListGenerator<E extends DeployController>
   }
 
   /**
+   * Logs the modified location.
+   */
+  public boolean logModified(Logger log)
+  {
+    for (int i = _generatorList.size() - 1; i >= 0; i--) {
+      if (_generatorList.get(i).logModified(log))
+	return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Redeploy if the deployment is modified.
    *
    * XXX:

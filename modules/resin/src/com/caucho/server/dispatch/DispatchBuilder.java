@@ -37,6 +37,6 @@ public interface DispatchBuilder {
   /**
    * Builds the invocation values.
    */
-  public void buildInvocation(Invocation invocation)
+  public Invocation buildInvocation(Invocation invocation)
     throws Throwable;
 }

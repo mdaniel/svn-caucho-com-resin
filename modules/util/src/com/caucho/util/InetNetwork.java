@@ -75,10 +75,10 @@ public class InetNetwork {
   /**
    * Creates an inet network with a mask.
    */
-  public InetNetwork(long hiAddress, long address, int maskIndex)
+  public InetNetwork(long hiAddress, long loAddress, int maskIndex)
   {
     _hiAddress = hiAddress;
-    _address = address;
+    _address = loAddress;
     _maskIndex = maskIndex;
     _mask = -1L << (64 - maskIndex);
   }
@@ -103,7 +103,7 @@ public class InetNetwork {
         break;
 
       int digit = 0;
-      for (; i < len && (ch = network.charAt(i)) >= '0' && ch <= '9'; i++)
+      for (; i < len && '0' <= (ch = network.charAt(i)) && ch <= '9'; i++)
         digit = 10 * digit + ch - '0';
 
       address = 256 * address + digit;
@@ -111,8 +111,6 @@ public class InetNetwork {
       digits++;
 
       if (i < len && ch == '.')
-        i++;
-      else if (i < len && ch == '/')
         i++;
       else if (i < len)
 	break;
@@ -126,7 +124,7 @@ public class InetNetwork {
 
     if (i < len && network.charAt(i) == '/') {
       mask = 0;
-      for (i++; i < len && (ch = network.charAt(i)) >= '0' && ch <= '9'; i++)
+      for (i++; i < len && '0' <= (ch = network.charAt(i)) && ch <= '9'; i++)
         mask = 10 * mask + ch - '0';
     }
 
@@ -241,8 +239,6 @@ public class InetNetwork {
     long address = 0;
     for (int i = 0; i < bytes.length; i++)
       address = 256 * address + (bytes[i] & 0xff);
-
-    System.out.println("ADDR: " + address + " " + _address + " " + _mask);
 
     return (_address & _mask) == (address & _mask);
   }

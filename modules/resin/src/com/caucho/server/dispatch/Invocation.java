@@ -31,6 +31,7 @@ package com.caucho.server.dispatch;
 
 import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 
@@ -272,6 +273,16 @@ public class Invocation extends ServletInvocation implements Dependency
   }
 
   /**
+   * Returns the versioned invocation based on this request.
+   *
+   * @param request the servlet request
+   */
+  public Invocation getRequestInvocation(AbstractHttpRequest request)
+  {
+    return this;
+  }
+
+  /**
    * Copies from the invocation.
    */
   public void copyFrom(Invocation invocation)
@@ -284,6 +295,9 @@ public class Invocation extends ServletInvocation implements Dependency
     _hostName = invocation._hostName;
     _port = invocation._port;
     _uri = invocation._uri;
+
+    // server/1h25
+    _sessionId = invocation._sessionId;
 
     _webApp = invocation._webApp;
     _dependency = invocation._dependency;

@@ -314,13 +314,42 @@ use web-app-deploy to allow servlet/tutorial/helloworld to be an
 independent war file.</p>
 
 <deftable-childtags>
-<tr><td>path</td><td>The path to the webapps directory</td><td>required
-</td></tr><tr><td>url-prefix</td><td>url-prefix added to all expanded webapps</td><td>""
-</td></tr><tr><td>expand-path</td><td>directory where wars should be expanded</td><td>value of path
-</td></tr><tr><td>lazy-init</td><td>true if web-apps should only be initialized when first used</td><td>false
-</td></tr><tr><td>web-app-default</td><td>defaults to be applied to expaned web-apps</td><td>
-</td></tr><tr><td>web-app</td><td>overriding configuration for specific web-apps</td><td>
-</td></tr></deftable-childtags>
+<tr>
+  <td>path</td>
+  <td>The path to the webapps directory</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>url-prefix</td>
+  <td>url-prefix added to all expanded webapps</td>
+  <td>""</td>
+</tr>
+<tr>
+  <td>expand-path</td>
+  <td>directory where wars should be expanded</td>
+  <td>value of path</td>
+</tr>
+<tr>
+  <td>lazy-init</td>
+  <td>true if web-apps should only be initialized when first used</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>versioning</td>
+  <td>if true, versioned applications are served according to the base-name, e.g. webapps/foo-1.1 is served as /foo.</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>web-app-default</td>
+  <td>defaults to be applied to expaned web-apps</td>
+  <td></td>
+</tr>
+<tr>
+  <td>web-app</td>
+  <td>overriding configuration for specific web-apps</td>
+  <td></td>
+</tr>
+</deftable-childtags>
 
 <p>The web-app-deploy can override configuration for an expanded war with
 a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The

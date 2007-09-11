@@ -39,6 +39,7 @@ import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.host.Host;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
 
 import javax.servlet.jsp.el.ELException;
@@ -64,6 +65,10 @@ public class WebAppController
   // The context path is the URL prefix for the web-app
   private String _contextPath;
   private String _version = "";
+  
+  // Any old version web-app
+  private WebAppController _oldWebAppController;
+  private long _oldWebAppExpireTime;
 
   private String _warName;
 
@@ -316,6 +321,20 @@ public class WebAppController
   {
     return _version;
   }
+
+  /**
+   * Sets the old version web-app.
+   */
+  public void setOldWebApp(WebAppController oldWebApp, long expireTime)
+  {
+    _oldWebAppController = oldWebApp;
+    _oldWebAppExpireTime = expireTime;
+
+    WebApp webApp = getDeployInstance();
+
+    if (webApp != null)
+      webApp.setOldWebApp(oldWebApp.request(), expireTime);
+  }
   
   /**
    * Adds a version to the controller list.
@@ -346,7 +365,7 @@ public class WebAppController
   protected void initEnd()
   {
     super.initEnd();
-    
+
     J2EEManagedObject.register(new WebModule(this));
   }
 
@@ -483,6 +502,12 @@ public class WebAppController
   {
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());
+
+    if (_oldWebAppController != null
+	&& Alarm.getCurrentTime() < _oldWebAppExpireTime) {
+      app.setOldWebApp(_oldWebAppController.request(),
+		       _oldWebAppExpireTime);
+    }
 
     super.configureInstanceVariables(app);
   }

@@ -870,17 +870,18 @@ public class Server extends ProtocolDispatchServer
   /**
    * Sets the invocation
    */
-  public void buildInvocation(Invocation invocation)
+  public Invocation buildInvocation(Invocation invocation)
     throws Throwable
   {
     if (_configException != null) {
       invocation.setFilterChain(new ExceptionFilterChain(_configException));
       invocation.setWebApp(getErrorWebApp());
       invocation.setDependency(AlwaysModified.create());
-      return;
+      
+      return invocation;
     }
     else if (_lifecycle.waitForActive(_waitForActiveTime)) {
-      _hostContainer.buildInvocation(invocation);
+      return _hostContainer.buildInvocation(invocation);
     }
     else {
       int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
@@ -888,6 +889,8 @@ public class Server extends ProtocolDispatchServer
       invocation.setFilterChain(new ErrorFilterChain(code));
       invocation.setWebApp(getErrorWebApp());
       invocation.setDependency(AlwaysModified.create());
+
+      return invocation;
     }
   }
 

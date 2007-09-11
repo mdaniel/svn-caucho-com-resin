@@ -291,7 +291,7 @@ public class HostContainer implements DispatchBuilder {
   /**
    * Creates the invocation.
    */
-  public void buildInvocation(Invocation invocation)
+  public Invocation buildInvocation(Invocation invocation)
     throws Throwable
   {
     String rawHost = invocation.getHost();
@@ -311,7 +311,7 @@ public class HostContainer implements DispatchBuilder {
     Host host = getHost(hostName, rawPort);
 
     if (host != null) {
-      host.buildInvocation(invocation);
+      invocation = host.buildInvocation(invocation);
       isAlwaysModified = false;
     }
     else {
@@ -346,6 +346,8 @@ public class HostContainer implements DispatchBuilder {
 
     if (isAlwaysModified)
       invocation.setDependency(AlwaysModified.create());
+
+    return invocation;
   }
 
   public ArrayList<HostController> getHostList()
