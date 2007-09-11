@@ -753,6 +753,16 @@ public class JAXBContextImpl extends JAXBContext {
     _roots.put(s.getElementName(), s);
   }
 
+  public boolean hasXmlType(QName typeName)
+  {
+    return _types.containsKey(typeName);
+  }
+
+  public boolean hasRootElement(QName elementName)
+  {
+    return _roots.containsKey(elementName);
+  }
+
   public Skeleton getRootElement(QName q)
   {
     return _roots.get(q);
