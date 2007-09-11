@@ -616,7 +616,7 @@ public class DirectSkeleton extends Skeleton {
     _context.generateSchemaWithoutHeader(out);
 
     for (AbstractAction action : _actionNames.values())
-      action.writeSchema(out, _soapNamespaceURI);
+      action.writeSchema(out, _namespace, _context);
 
     out.writeEndElement(); // schema
 

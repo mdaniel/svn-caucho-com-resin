@@ -152,6 +152,16 @@ public class DocumentBareAction extends AbstractAction {
       if (webResult == null || "".equals(webResult.name()))
         _returnMarshal.setName(new QName(_targetNamespace, _responseName));
 
+      // services/144[01]
+
+      else if (webResult.targetNamespace() == null || 
+               "".equals(webResult.targetNamespace()))
+        _returnMarshal.setName(new QName(_targetNamespace, webResult.name()));
+
+      else 
+        _returnMarshal.setName(new QName(webResult.targetNamespace(), 
+                                         webResult.name()));
+
       Class returnType = method.getReturnType();
 
       if ((returnType.isArray() &&
@@ -171,13 +181,8 @@ public class DocumentBareAction extends AbstractAction {
   protected void writeMethodInvocation(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (_bodyInputs == 0) {
-      out.writeEmptyElement(TARGET_NAMESPACE_PREFIX, 
-                            _inputName, 
-                            _targetNamespace);
-      out.writeNamespace(TARGET_NAMESPACE_PREFIX, _targetNamespace);
-    }
-    else {
+    // services/1308
+    if (_bodyInputs > 0) {
       for (int i = 0; i < _bodyArgs.length; i++)
         _bodyArgs[i].serializeCall(out, args);
     }
@@ -362,23 +367,36 @@ public class DocumentBareAction extends AbstractAction {
     out.writeEndElement(); // operation
   }
 
-  public void writeSchema(XMLStreamWriter out, String namespace)
-    throws XMLStreamException
+  public void writeSchema(XMLStreamWriter out, 
+                          String namespace, 
+                          JAXBContextImpl context)
+    throws XMLStreamException, WebServiceException
   {
     if (_bodyInputs > 0) {
+      QName elementName = new QName(namespace, _operationName);
+
+      if (context.hasRootElement(elementName))
+        throw new WebServiceException(L.l("Duplicate element {0}", 
+                                          elementName));
+
       out.writeEmptyElement(XML_SCHEMA_PREFIX, 
                             "element", 
                             W3C_XML_SCHEMA_NS_URI);
       out.writeAttribute("name", _operationName);
 
       Property property = _bodyArgs[_inputArgument].getProperty();
-
       String type = StaxUtil.qnameToString(out, property.getSchemaType());
 
       out.writeAttribute("type", type);
     }
 
     if (_returnMarshal != null) {
+      QName elementName = new QName(namespace, _responseName);
+
+      if (context.hasRootElement(elementName))
+        throw new WebServiceException(L.l("Duplicate element {0}", 
+                                          elementName));
+
       out.writeEmptyElement(XML_SCHEMA_PREFIX, 
                             "element", 
                             W3C_XML_SCHEMA_NS_URI);

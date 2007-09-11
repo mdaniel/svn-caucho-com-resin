@@ -294,9 +294,19 @@ public class DocumentWrappedAction extends AbstractAction {
     out.writeEndElement(); // operation
   }
 
-  public void writeSchema(XMLStreamWriter out, String namespace)
-    throws XMLStreamException
+  public void writeSchema(XMLStreamWriter out, 
+                          String namespace,
+                          JAXBContextImpl context)
+    throws XMLStreamException, WebServiceException
   {
+    QName qname = new QName(namespace, _operationName);
+
+    if (context.hasRootElement(qname))
+      throw new WebServiceException(L.l("Duplicate element {0} (This method's name conflicts with an XML root element name)", qname));
+
+    if (context.hasXmlType(qname))
+      throw new WebServiceException(L.l("Duplicate type {0} (This method's name conflicts with the XML type name of a class)", qname));
+
     // XXX header arguments
     
     out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
@@ -330,6 +340,14 @@ public class DocumentWrappedAction extends AbstractAction {
     }
 
     if (! _isOneway) {
+      QName responseQName = new QName(namespace, _operationName);
+
+      if (context.hasRootElement(responseQName))
+        throw new WebServiceException(L.l("Duplicate element {0} (This method's name conflicts with an XML root element name)", responseQName));
+
+      if (context.hasXmlType(responseQName))
+        throw new WebServiceException(L.l("Duplicate type {0} (This method's name conflicts with the XML type name of a class)", responseQName));
+
       out.writeEmptyElement(XML_SCHEMA_PREFIX, 
                             "element", 
                             W3C_XML_SCHEMA_NS_URI);

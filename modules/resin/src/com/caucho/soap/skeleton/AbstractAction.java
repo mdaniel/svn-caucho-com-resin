@@ -427,7 +427,6 @@ public abstract class AbstractAction {
     // Exceptions
     //
 
-    /*
     Class[] exceptions = method.getExceptionTypes();
 
     for (Class exception : exceptions) {
@@ -444,7 +443,7 @@ public abstract class AbstractAction {
 
       _faults.put(exception, marshal);
       _faultNames.put(faultName, marshal);
-    }*/
+    }
   }
 
   public static AbstractAction createAction(Method method, 
@@ -1059,8 +1058,10 @@ public abstract class AbstractAction {
                                          String soapNamespaceURI)
     throws XMLStreamException;
 
-  public abstract void writeSchema(XMLStreamWriter out, String namespace)
-    throws XMLStreamException;
+  public abstract void writeSchema(XMLStreamWriter out, 
+                                   String namespace,
+                                   JAXBContextImpl context)
+    throws XMLStreamException, WebServiceException;
   
   public abstract void writeWSDLBindingOperation(XMLStreamWriter out, 
                                                  String soapNamespaceURI)
