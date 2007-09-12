@@ -63,4 +63,9 @@ public class ListProperty extends CollectionProperty {
     if (! (obj instanceof List))
       throw new ClassCastException(L.l("Argument is not a List: {0}", obj));
   }
+
+  public String toString()
+  {
+    return "ListProperty[" + _componentProperty + "]";
+  }
 }

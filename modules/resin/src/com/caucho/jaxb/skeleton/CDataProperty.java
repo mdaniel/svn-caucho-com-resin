@@ -189,7 +189,7 @@ public abstract class CDataProperty extends Property {
     if (obj != null) {
       QName qname = namer.getQName(value);
 
-      writeQNameStartElement(out, qname);
+      StaxUtil.writeStartElement(out, qname);
 
       if (attributes != null) {
         while (attributes.hasNext()) {
@@ -199,7 +199,7 @@ public abstract class CDataProperty extends Property {
       }
 
       out.writeCharacters(write(value));
-      writeQNameEndElement(out, qname);
+      StaxUtil.writeEndElement(out, qname);
     }
   }
 
@@ -217,9 +217,9 @@ public abstract class CDataProperty extends Property {
     if (value != null) {
       QName qname = namer.getQName(value);
 
-      writeQNameStartElement(out, qname);
+      StaxUtil.writeStartElement(out, qname);
       out.writeCharacters(write(value));
-      writeQNameEndElement(out, qname);
+      StaxUtil.writeEndElement(out, qname);
     }
   }
 
@@ -260,5 +260,10 @@ public abstract class CDataProperty extends Property {
     binder.bind(value, node);
 
     return node;
+  }
+
+  public String toString()
+  {
+    return this.getClass().getSimpleName();
   }
 }

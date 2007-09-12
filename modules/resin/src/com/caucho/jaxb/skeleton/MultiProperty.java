@@ -176,4 +176,21 @@ public class MultiProperty extends Property {
   {
     return _qnameToPropertyMap.values();
   }
+
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder("MultiProperty[");
+
+    for (Map.Entry<QName,Property> entry : _qnameToPropertyMap.entrySet()) {
+      sb.append(entry.getKey() + " -> " + entry.getValue());
+      sb.append(',');
+    }
+
+    if (_qnameToPropertyMap.size() > 0)
+      sb.deleteCharAt(sb.length() - 1);
+
+    sb.append(']');
+
+    return sb.toString();
+  }
 }

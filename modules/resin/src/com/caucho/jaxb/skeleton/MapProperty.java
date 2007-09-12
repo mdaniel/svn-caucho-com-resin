@@ -28,6 +28,7 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.bind.JAXBException;
@@ -40,6 +41,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.*;
+
 import java.io.IOException;
 
 import org.w3c.dom.Document;
@@ -47,6 +49,8 @@ import org.w3c.dom.Node;
 
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
+import com.caucho.xml.stream.StaxUtil;
+
 
 /**
  * a Map property
@@ -176,14 +180,14 @@ public class MapProperty extends Property {
       Map<Object,Object> map = (Map<Object,Object>) obj;
       QName qname = namer.getQName(obj);
 
-      writeQNameStartElement(out, qname);
+      StaxUtil.writeStartElement(out, qname);
 
       for (Map.Entry<Object,Object> entry : map.entrySet()) {
         _keyProperty.write(m, out, entry.getKey(), _keyNamer);
         _valueProperty.write(m, out, entry.getValue(), _valueNamer);
       }
 
-      writeQNameEndElement(out, qname);
+      StaxUtil.writeEndElement(out, qname);
     }
   }
 

@@ -39,6 +39,8 @@ import javax.xml.stream.XMLStreamWriter;
 
 import java.io.IOException;
 
+import com.caucho.xml.stream.StaxUtil;
+
 /**
  * a Int Property
  */
@@ -72,9 +74,9 @@ public class IntProperty extends CDataProperty {
   public void write(Marshaller m, XMLStreamWriter out, int i, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    writeQNameStartElement(out, qname);
+    StaxUtil.writeStartElement(out, qname);
     out.writeCharacters(DatatypeConverter.printInt(i));
-    writeQNameEndElement(out, qname);
+    StaxUtil.writeEndElement(out, qname);
   }
 }
 

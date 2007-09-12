@@ -93,6 +93,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /** an Accessor is either a getter/setter pair or a field */
@@ -129,6 +130,8 @@ public abstract class Accessor implements Namer {
 
   protected QName _typeQName = null;
   protected AccessorType _accessorType = AccessorType.UNSET;
+
+  protected boolean _nillable = false;
 
   public static void setGenerateRICompatibleSchema(boolean compatible)
   {
@@ -182,8 +185,10 @@ public abstract class Accessor implements Namer {
           _property = 
             _context.createProperty(getGenericType(), false, mimeType, xmlList);
 
-          if (element != null)
+          if (element != null) {
             _qname = qnameFromXmlElement(element);
+            _nillable = element.nillable();
+          }
           else {
             XmlSchema xmlSchema = getPackageAnnotation(XmlSchema.class);
 
@@ -442,17 +447,7 @@ public abstract class Accessor implements Namer {
       QName name = getQName(value);
       String output = ((CDataProperty) _property).write(value);
 
-      if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
-        out.writeAttribute(name.getLocalPart(), output);
-      else if (name.getPrefix() == null || "".equals(name.getPrefix())) {
-        out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), output);
-      }
-      else {
-        out.writeAttribute(name.getPrefix(), 
-                           name.getNamespaceURI(), 
-                           name.getLocalPart(), 
-                           output);
-      }
+      StaxUtil.writeAttribute(out, name, output);
     }
   }
 
@@ -464,18 +459,7 @@ public abstract class Accessor implements Namer {
         QName name = (QName) entry.getKey();
         String value = (String) entry.getValue();
 
-        if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
-          out.writeAttribute(name.getLocalPart(), value.toString());
-        else if (name.getPrefix() == null || "".equals(name.getPrefix())) {
-          out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), 
-                             value.toString());
-        }
-        else {
-          out.writeAttribute(name.getPrefix(), 
-                             name.getNamespaceURI(), 
-                             name.getLocalPart(), 
-                             value.toString());
-        }
+        StaxUtil.writeAttribute(out, name, value);
       }
     }
   }
@@ -495,7 +479,8 @@ public abstract class Accessor implements Namer {
         break;
 
       default:
-        _property.write(m, out, value, this, obj);
+        Iterator attributes = addNil(null, value);
+        _property.write(m, out, value, this, obj, attributes);
         break;
     }
   }
@@ -506,6 +491,7 @@ public abstract class Accessor implements Namer {
   {
     Object value = get(obj);
 
+    attributes = addNil(attributes, value);
     _property.write(m, out, value, this, obj, attributes);
   }
 
@@ -544,6 +530,14 @@ public abstract class Accessor implements Namer {
     Object value = get(obj);
 
     return _property.bindTo(binder, node, value, this);
+  }
+
+  private Iterator addNil(Iterator existing, Object obj)
+  {
+    if (obj != null || ! _nillable)
+      return existing;
+
+    return new ExtendedIterator(existing, NilWrapper.INSTANCE);
   }
 
   // Input methods.  Contract: input stream or node iterator will be at
@@ -603,155 +597,6 @@ public abstract class Accessor implements Namer {
     throws IOException, JAXBException
   {
     return _property.bindFrom(binder, node, get(parent));
-  }
-
-  protected void writeStartElement(XMLStreamWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    // XXX
-    XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
-    XmlElement element = getAnnotation(XmlElement.class);
-
-    if (wrapper != null) {
-      if (obj == null && ! wrapper.nillable())
-        return;
-
-      if (wrapper.name().equals("##default"))
-        out.writeStartElement(getName());
-      else if (wrapper.namespace().equals("##default"))
-        out.writeStartElement(wrapper.name());
-      else
-        out.writeStartElement(wrapper.namespace(), wrapper.name());
-
-      if (obj == null) {
-        out.writeAttribute(XML_INSTANCE_PREFIX, 
-                           XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-                           "nil", "true");
-      }
-    }
-    else if (element != null) {
-      if (obj == null && ! element.nillable())
-        return;
-
-      if (element.name().equals("##default"))
-        out.writeStartElement(getName());
-      else if (element.namespace().equals("##default"))
-        out.writeStartElement(element.name());
-      else
-        out.writeStartElement(element.namespace(), element.name());
-
-      if (obj == null) {
-        out.writeAttribute(XML_INSTANCE_PREFIX, 
-                           XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-                           "nil", "true");
-      }
-    }
-    else {
-      if (obj == null) return;
-
-      QName qname = getQName(obj);
-
-      if (qname.getNamespaceURI() == null || "".equals(qname.getNamespaceURI()))
-        out.writeStartElement(qname.getLocalPart());
-      else
-        out.writeStartElement(qname.getNamespaceURI(), qname.getLocalPart());
-    }
-  }
-
-  protected void writeEndElement(XMLStreamWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
-    XmlElement element = getAnnotation(XmlElement.class);
-
-    if (wrapper != null) {
-      if (obj == null && !wrapper.nillable())
-        return;
-    } 
-    else if (element != null) {
-      if (obj == null && !element.nillable())
-        return;
-    } 
-    else {
-      if (obj == null) return;
-    }
-
-    out.writeEndElement();
-  }
-
-  protected void writeStartElement(XMLEventWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    /* XXX convert to event based
-    XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
-    XmlElement element = getAnnotation(XmlElement.class);
-
-    if (wrapper != null) {
-      if (obj == null && ! wrapper.nillable())
-        return;
-
-      if (wrapper.name().equals("##default"))
-        out.writeStartElement(getName());
-      else if (wrapper.namespace().equals("##default"))
-        out.writeStartElement(wrapper.name());
-      else
-        out.writeStartElement(wrapper.namespace(), wrapper.name());
-
-      if (obj == null) {
-        out.writeAttribute(XML_INSTANCE_PREFIX, 
-                           XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-                           "nil", "true");
-      }
-    }
-    else if (element != null) {
-      if (obj == null && ! element.nillable())
-        return;
-
-      if (element.name().equals("##default"))
-        out.writeStartElement(getName());
-      else if (element.namespace().equals("##default"))
-        out.writeStartElement(element.name());
-      else
-        out.writeStartElement(element.namespace(), element.name());
-
-      if (obj == null) {
-        out.writeAttribute(XML_INSTANCE_PREFIX, 
-                           XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-                           "nil", "true");
-      }
-    }
-    else {
-      if (obj == null) return;
-
-      QName qname = getQName();
-
-      if (qname.getNamespaceURI() == null || "".equals(qname.getNamespaceURI()))
-        out.writeStartElement(qname.getLocalPart());
-      else
-        out.writeStartElement(qname.getNamespaceURI(), qname.getLocalPart());
-    }*/
-  }
-
-  protected void writeEndElement(XMLEventWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    /* XXX convert to event based
-    XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
-    XmlElement element = getAnnotation(XmlElement.class);
-
-    if (wrapper != null) {
-      if (obj == null && !wrapper.nillable())
-        return;
-    } 
-    else if (element != null) {
-      if (obj == null && !element.nillable())
-        return;
-    } 
-    else {
-      if (obj == null) return;
-    }
-
-    out.writeEndElement();*/
   }
 
   private QName getTypeQName()
@@ -887,7 +732,7 @@ public abstract class Accessor implements Namer {
                                   XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
             String type = 
-              StaxUtil.qnameToString(out, _property.getSchemaType());
+              StaxUtil.qnameToString(out, property.getSchemaType());
 
             out.writeAttribute("type", type);
 
@@ -982,6 +827,8 @@ public abstract class Accessor implements Namer {
           // XXX
           out.writeAttribute("ref", "XXX");
         }
+
+        break;
       
       case ELEMENT:
         {
@@ -1199,4 +1046,41 @@ public abstract class Accessor implements Namer {
   public abstract Package getPackage();
   public abstract <A extends Annotation> A getAnnotation(Class<A> c);
   public abstract <A extends Annotation> A getPackageAnnotation(Class<A> c);
+
+  protected class ExtendedIterator implements Iterator
+  {
+    private final Object _extra;
+    private final Iterator _base;
+    private boolean _givenExtra = false;
+
+    public ExtendedIterator(Iterator base, Object extra)
+    {
+      _base = base;
+      _extra = extra;
+    }
+
+    public boolean hasNext()
+    {
+      return (_base != null && _base.hasNext()) || ! _givenExtra;
+    }
+
+    public Object next()
+    {
+      if (_base != null && _base.hasNext())
+        return _base.next();
+
+      if (! _givenExtra) {
+        _givenExtra = true;
+
+        return _extra;
+      }
+
+      throw new NoSuchElementException();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
 }

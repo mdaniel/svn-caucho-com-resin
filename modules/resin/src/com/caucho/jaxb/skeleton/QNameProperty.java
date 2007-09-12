@@ -71,7 +71,7 @@ public class QNameProperty extends Property {
     throws IOException, XMLStreamException, JAXBException
   {
     QName qname = namer.getQName(obj);
-    writeQNameStartElement(out, qname);
+    StaxUtil.writeStartElement(out, qname);
 
     if (obj != null) {
       QName name = (QName) obj;
@@ -128,7 +128,7 @@ public class QNameProperty extends Property {
         out.writeCharacters(prefix + ":" + name.getLocalPart());
     }
 
-    writeQNameEndElement(out, qname);
+    StaxUtil.writeEndElement(out, qname);
   }
 
   public void write(Marshaller m, XMLEventWriter out, 

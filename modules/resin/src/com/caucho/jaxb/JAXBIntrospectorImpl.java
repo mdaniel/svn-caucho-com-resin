@@ -28,9 +28,13 @@
 */
 
 package com.caucho.jaxb;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBIntrospector;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import javax.xml.namespace.QName;
 
 class JAXBIntrospectorImpl extends JAXBIntrospector {
@@ -60,10 +64,18 @@ class JAXBIntrospectorImpl extends JAXBIntrospector {
 
   public boolean isElement(Object object)
   {
-    return (object != null) && 
-           ((object instanceof JAXBElement) || 
-            _context.hasSkeleton(object.getClass()));
-  }
+    if (object == null)
+      return false;
 
+    if (object instanceof JAXBElement)
+      return true;
+
+    Class cl = object.getClass();
+
+    if (! cl.isAnnotationPresent(XmlRootElement.class))
+      return false;
+
+    return _context.hasSkeleton(cl);
+  }
 }
 

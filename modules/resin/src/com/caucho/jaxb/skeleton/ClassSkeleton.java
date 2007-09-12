@@ -483,6 +483,9 @@ public class ClassSkeleton<C> extends Skeleton {
         }
       }
     }
+    catch (JAXBException e) {
+      throw e;
+    }
     catch (Exception e) {
       throw new JAXBException(L.l("{0}: Initialization error", 
                                   _class.getName()), e);
@@ -1029,37 +1032,6 @@ public class ClassSkeleton<C> extends Skeleton {
       return _elementName;
     else
       return _typeName;
-    /*
-    QName tagName = null;
-
-    if (tagName==null && _class.isAnnotationPresent(XmlRootElement.class)) {
-      XmlRootElement annotation = _class.getAnnotation(XmlRootElement.class);
-      String localname = annotation.name();
-      String namespace = annotation.namespace();
-
-      if (localname.equals("##default"))
-        tagName = null;
-      else if (namespace.equals("##default"))
-        tagName = new QName(localname);
-      else
-        tagName = new QName(namespace, localname);
-    }
-
-    if (tagName == null && _class.isAnnotationPresent(XmlElement.class)) {
-      XmlElement annotation = _class.getAnnotation(XmlElement.class);
-      String localname = annotation.name();
-      String namespace = annotation.namespace();
-
-      if (localname.equals("##default"))
-        tagName = null;
-      else if (namespace.equals("##default"))
-        tagName = new QName(localname);
-      else
-        tagName = new QName(namespace, localname);
-    }
-
-    return tagName;
-    */
   }
 
   public void generateSchema(XMLStreamWriter out)
@@ -1069,6 +1041,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if ("".equals(_typeName.getLocalPart()))
         out.writeStartElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
+
       else {
         out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
         out.writeAttribute("type", _typeName.getLocalPart());

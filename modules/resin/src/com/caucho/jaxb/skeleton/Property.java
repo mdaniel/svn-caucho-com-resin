@@ -184,30 +184,4 @@ public abstract class Property {
   {
     return bindTo(binder, node, value, namer);
   }
-
-  protected void writeQNameStartElement(XMLStreamWriter out, QName name)
-    throws IOException, XMLStreamException
-  {
-    if (name == null)
-      return;
-
-    if (name.getPrefix() != null && ! "".equals(name.getPrefix()))
-      out.writeStartElement(name.getPrefix(), 
-                            name.getLocalPart(), 
-                            name.getNamespaceURI());
-    else if (name.getNamespaceURI() != null && 
-             ! "".equals(name.getNamespaceURI()))
-      out.writeStartElement(name.getNamespaceURI(), name.getLocalPart());
-    else
-      out.writeStartElement(name.getLocalPart());
-  }
-
-  protected void writeQNameEndElement(XMLStreamWriter out, QName name)
-    throws IOException, XMLStreamException
-  {
-    if (name == null)
-      return;
-
-    out.writeEndElement();
-  }
 }

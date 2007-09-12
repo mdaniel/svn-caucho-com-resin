@@ -404,4 +404,47 @@ public class StaxUtil {
 
     return prefix + ':' + qname.getLocalPart();
   }
+
+  public static void writeStartElement(XMLStreamWriter out, QName name)
+    throws XMLStreamException
+  {
+    if (name == null)
+      return;
+
+    if (name.getPrefix() != null && ! "".equals(name.getPrefix()))
+      out.writeStartElement(name.getPrefix(), 
+                            name.getLocalPart(), 
+                            name.getNamespaceURI());
+    else if (name.getNamespaceURI() != null && 
+             ! "".equals(name.getNamespaceURI()))
+      out.writeStartElement(name.getNamespaceURI(), name.getLocalPart());
+    else
+      out.writeStartElement(name.getLocalPart());
+  }
+
+  public static void writeEndElement(XMLStreamWriter out, QName name)
+    throws XMLStreamException
+  {
+    if (name == null)
+      return;
+
+    out.writeEndElement();
+  }
+
+  public static void writeAttribute(XMLStreamWriter out, 
+                                    QName name, String value)
+    throws XMLStreamException
+  {
+    if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
+      out.writeAttribute(name.getLocalPart(), value);
+
+    else if (name.getPrefix() == null || "".equals(name.getPrefix()))
+      out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), value);
+    
+    else
+      out.writeAttribute(name.getPrefix(), 
+                         name.getNamespaceURI(), 
+                         name.getLocalPart(), 
+                         value);
+  }
 }

@@ -40,6 +40,8 @@ import javax.xml.stream.XMLStreamWriter;
 
 import java.io.IOException;
 
+import com.caucho.xml.stream.StaxUtil;
+
 /**
  * a Long Property
  */
@@ -81,8 +83,8 @@ public class LongProperty extends CDataProperty {
   public void write(Marshaller m, XMLStreamWriter out, long l, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    writeQNameStartElement(out, qname);
+    StaxUtil.writeStartElement(out, qname);
     out.writeCharacters(DatatypeConverter.printLong(l));
-    writeQNameEndElement(out, qname);
+    StaxUtil.writeEndElement(out, qname);
   }
 }

@@ -178,10 +178,10 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
 
         // XXX if (typeName == null) {}
 
-        XmlInstanceWrapper instanceWrapper = 
-          new XmlInstanceWrapper(typeName, attributes);
+        XmlInstanceWrapper instanceWrapper = new XmlInstanceWrapper(typeName);
 
-        Iterator extendedAttributes = instanceWrapper.getExtendedIterator();
+        attributes = instanceWrapper.getExtendedIterator(attributes);
+
         skeleton.write(m, out, obj, null, attributes);
         return;
       }
@@ -192,12 +192,12 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
         String typeName = StaxUtil.qnameToString(out, property.getSchemaType());
         XmlInstanceWrapper instanceWrapper = new XmlInstanceWrapper(typeName);
 
-        Iterator extendedAttributes = instanceWrapper.getExtendedIterator();
+        attributes = instanceWrapper.getExtendedIterator(attributes);
 
         // XXX the second obj here is a hack: we just need it not to be null.
         // Figure out if the api is wrong or there is a reasonable value for
         // the fifth argument instead of this second obj.
-        property.write(m, out, obj, namer, obj, extendedAttributes);
+        property.write(m, out, obj, namer, obj, attributes);
         return;
       }
 

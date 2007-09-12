@@ -79,11 +79,10 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
     Class c = skeleton.getType();
     writer = StaxUtil.toRepairingXMLStreamWriter(writer);
 
-    /* tck/JAXBMarshall
+    // tck/JAXBMarshall
     if (! _context.createJAXBIntrospector().isElement(jaxbElement) &&
         ! c.isAnnotationPresent(XmlRootElement.class))
       throw new MarshalException("JAXBIntrospector.isElement()==false");
-    */
 
     /*
     String name = null;

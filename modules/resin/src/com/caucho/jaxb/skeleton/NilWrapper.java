@@ -68,29 +68,18 @@ import java.util.logging.Logger;
 /**
  *
  **/
-public class XmlInstanceWrapper extends Accessor {
+public class NilWrapper extends Accessor {
   private static final Logger log 
-    = Logger.getLogger(XmlInstanceWrapper.class.getName());
-  private static final L10N L = new L10N(XmlInstanceWrapper.class);
-  private static final QName XSI_TYPE_NAME 
-    = new QName(W3C_XML_SCHEMA_INSTANCE_NS_URI, "type", "xsi");
+    = Logger.getLogger(NilWrapper.class.getName());
+  private static final L10N L = new L10N(NilWrapper.class);
+  private static final QName XSI_NIL_NAME 
+    = new QName(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "xsi");
 
-  private final String _type;
+  public static final NilWrapper INSTANCE = new NilWrapper();
 
-  public XmlInstanceWrapper(String type)
+  private NilWrapper()
   {
-    _type = type;
     _property = StringProperty.PROPERTY;
-  }
-
-  // XXX this is an ugly hack
-  public void writeAttribute(Marshaller m, XMLStreamWriter out, Object value)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    super.writeAttribute(m, out, value);
-
-    if (_type.startsWith("xsd:"))
-      out.writeNamespace("xsd", W3C_XML_SCHEMA_NS_URI);
   }
 
   public AccessorType getAccessorType()
@@ -102,7 +91,7 @@ public class XmlInstanceWrapper extends Accessor {
   public Object get(Object o) 
     throws JAXBException
   {
-    return _type;
+    return "true";
   }
 
   public void set(Object o, Object value) 
@@ -113,7 +102,7 @@ public class XmlInstanceWrapper extends Accessor {
   public QName getQName(Object obj)
     throws JAXBException
   {
-    return XSI_TYPE_NAME;
+    return XSI_NIL_NAME;
   }
 
   public String getName()
@@ -146,8 +135,8 @@ public class XmlInstanceWrapper extends Accessor {
     return null;
   }
 
-  public Iterator getExtendedIterator(Iterator base)
+  public String toString()
   {
-    return new ExtendedIterator(base, this);
+    return "NilWrapper";
   }
 }

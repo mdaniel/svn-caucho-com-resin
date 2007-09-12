@@ -39,6 +39,8 @@ import javax.xml.stream.XMLStreamWriter;
 
 import java.io.IOException;
 
+import com.caucho.xml.stream.StaxUtil;
+
 /**
  * a short property
  */
@@ -74,8 +76,8 @@ public class ShortProperty extends CDataProperty {
   public void write(Marshaller m, XMLStreamWriter out, short s, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    writeQNameStartElement(out, qname);
+    StaxUtil.writeStartElement(out, qname);
     out.writeCharacters(DatatypeConverter.printShort(s));
-    writeQNameEndElement(out, qname);
+    StaxUtil.writeEndElement(out, qname);
   }
 }
