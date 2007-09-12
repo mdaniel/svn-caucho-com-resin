@@ -923,6 +923,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public static String mysqli_real_escape_string(Mysqli conn,
                                                  String unescapedString)
   {
+    if (unescapedString == null)
+      return "";
+    
     StringBuilder buf = new StringBuilder();
 
     escapeString(buf, unescapedString);
