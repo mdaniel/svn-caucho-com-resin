@@ -574,12 +574,9 @@ public class SessionModule extends AbstractQuercusModule
     if (! value.isArray())
       return NullValue.NULL;
 
-    Iterator<Value> iter = value.getKeyIterator(env);
-
-    while (iter.hasNext()) {
-      iter.next();
-      iter.remove();
-    }
+    ArrayValue array = value.toArrayValue(env);
+    
+    array.clear();
 
     return NullValue.NULL;
   }
