@@ -30,6 +30,8 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.JavaCollectionAdapter.KeyIterator;
+import com.caucho.quercus.env.JavaCollectionAdapter.ValueIterator;
 import com.caucho.quercus.program.JavaClassDef;
 
 import java.util.AbstractCollection;
@@ -205,6 +207,19 @@ public class JavaMapAdapter
     return val;
   }
 
+  
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
+  {
+    return new KeyIterator();
+  }
+
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    return new ValueIterator();
+  }
+  
   @Override
   public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
@@ -362,7 +377,7 @@ public class JavaMapAdapter
     @Override
     public Iterator<Value> iterator()
     {
-      return new ValueIterator(_map.values());
+      return new ValueIterator();
     }
   }
 
@@ -371,9 +386,9 @@ public class JavaMapAdapter
   {
     private Iterator _iterator;
 
-    public ValueIterator(Collection collection)
+    public ValueIterator()
     {
-      _iterator = collection.iterator();
+      _iterator = _map.values().iterator();
     }
 
     public boolean hasNext()
@@ -391,4 +406,31 @@ public class JavaMapAdapter
       throw new UnsupportedOperationException();
     }
   }
+  
+  public class KeyIterator
+    implements Iterator<Value>
+  {
+    private Iterator _iterator;
+
+    public KeyIterator()
+    {
+      _iterator = _map.keySet().iterator();
+    }
+
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+
+    public Value next()
+    {
+      return wrapJava(_iterator.next());
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
 }

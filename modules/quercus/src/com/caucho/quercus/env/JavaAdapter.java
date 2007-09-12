@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.vfs.WriteStream;
 
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.env.ArrayValue.KeyIterator;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
@@ -408,9 +409,10 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns an iterator of the entries.
    */
+  @Override
   public Set<Value> keySet()
   {
-    throw new UnsupportedOperationException();
+    return new KeySet(_env);
   }
 
   /**
@@ -1006,6 +1008,27 @@ abstract public class JavaAdapter extends ArrayValue
   public String toString()
   {
     return String.valueOf(_object);
+  }
+  
+  public class KeySet extends AbstractSet<Value> {
+    Env _env;
+    
+    KeySet(Env env)
+    {
+      _env = env;
+    }
+
+    @Override
+    public int size()
+    {
+      return getSize();
+    }
+
+    @Override
+    public Iterator<Value> iterator()
+    {
+      return getKeyIterator(_env);
+    }
   }
 }
 
