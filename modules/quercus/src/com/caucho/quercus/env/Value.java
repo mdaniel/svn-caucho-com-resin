@@ -705,6 +705,14 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a UnicodeValue.
    */
+  public UnicodeValue toUnicodeValue()
+  {
+    return toUnicodeValue(Env.getInstance());
+  }
+
+  /**
+   * Converts to a UnicodeValue.
+   */
   public UnicodeValue toUnicodeValue(Env env)
   {
     return new UnicodeValueImpl(toString());
@@ -713,16 +721,19 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a BinaryValue.
    */
-  public BytesValue toBinaryValue(Env env)
+  public BinaryValue toBinaryValue(Env env)
   {
+      BinaryBuilderValue bb = new BinaryBuilderValue();
+
+      bb.append(this);
+
+      return bb;
+      
+      /*
     try {
-      InputStream is = toInputStream();
-
-      BytesBuilderValue bb = new BytesBuilderValue();
-
       int length = 0;
       while (true) {
-        bb.prepareReadBuffer();
+        bb.ensureCapacity(bb.getLength() + 256);
 
         int sublen = is.read(bb.getBuffer(),
                              bb.getOffset(),
@@ -738,6 +749,7 @@ abstract public class Value implements java.io.Serializable
     } catch (IOException e) {
       throw new QuercusException(e);
     }
+      */
   }
 
   /**
@@ -791,9 +803,17 @@ abstract public class Value implements java.io.Serializable
   /**
    * Append to a binary builder.
    */
-  public void appendTo(BytesBuilderValue sb)
+  public void appendTo(StringBuilderValue sb)
   {
-    sb.appendBytes(toString());
+    sb.append(toString());
+  }
+
+  /**
+   * Append to a binary builder.
+   */
+  public void appendTo(BinaryBuilderValue sb)
+  {
+    sb.append(toString());
   }
 
   /**

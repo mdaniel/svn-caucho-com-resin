@@ -29,7 +29,8 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.env.BytesBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -41,7 +42,16 @@ public class JavaByteObjectArrayMarshal extends JavaArrayMarshal
   @Override
   public Value unmarshal(Env env, Object value)
   {
-    return new BytesBuilderValue((Byte[]) value);
+    Byte []byteValue = (Byte []) value;
+
+    if (byteValue == null)
+      return NullValue.NULL;
+
+    byte []data = new byte[byteValue.length];
+    for (int i = 0; i < data.length; i++)
+      data[i] = byteValue[i];
+    
+    return env.createBinaryBuilder(data);
   }
   
   @Override

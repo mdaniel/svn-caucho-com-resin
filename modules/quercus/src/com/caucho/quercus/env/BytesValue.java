@@ -43,15 +43,14 @@ import java.util.IdentityHashMap;
  * Represents a 8-bit binary string value.
  */
 abstract public class BytesValue
-  extends StringValue
+  extends BinaryValue
 {
-  public static final StringValue EMPTY = new BytesBuilderValue();
+  //public static final StringValue EMPTY = new BytesBuilderValue();
 
   /**
    * Convert to a binary value.
    */
-  @Override
-  public BytesValue toBinaryValue(Env env)
+  public BinaryValue toBinaryValue(Env env)
   {
     return this;
   }
@@ -136,7 +135,7 @@ abstract public class BytesValue
      * */
     int length = length();
     
-    out.print("binary(" + length() + ") \"");
+    out.print("string(" + length() + ") \"");
 
     for (int i = 0; i < length; i++) {
       char ch = charAt(i);
@@ -180,11 +179,14 @@ abstract public class BytesValue
   @Override
   public StringValue toStringBuilder()
   {
+    throw new UnsupportedOperationException();
+    /*
     BytesBuilderValue bb = new BytesBuilderValue();
     
     bb.append(this);
     
     return bb;
+    */
   }
 
   /**

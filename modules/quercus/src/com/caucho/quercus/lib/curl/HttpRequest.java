@@ -30,8 +30,6 @@
 package com.caucho.quercus.lib.curl;
 
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.BytesBuilderValue;
-import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
@@ -169,8 +167,8 @@ public class HttpRequest
   {
     _curl.setResponseCode(_conn.getResponseCode());
 
-    _curl.setHeader(getHeader(new BytesBuilderValue()));
-    _curl.setBody(getBody(new BytesBuilderValue()));
+    _curl.setHeader(getHeader(env.createBinaryBuilder()));
+    _curl.setBody(getBody(env.createBinaryBuilder()));
 
     _curl.setContentLength(_conn.getContentLength());
 
@@ -270,24 +268,24 @@ public class HttpRequest
   /**
    * Returns the server response header.
    */
-  private final BytesValue getHeader(BytesBuilderValue bb)
+  private final StringValue getHeader(StringValue bb)
   {
     // Append server response to the very top
-    bb.appendBytes(_conn.getHeaderField(0));
-    bb.appendBytes("\r\n");
+    bb.append(_conn.getHeaderField(0));
+    bb.append("\r\n");
 
     String key;
     int i = 1;
 
     while ((key = _conn.getHeaderFieldKey(i)) != null) {
-      bb.appendBytes(key);
-      bb.appendBytes(": ");
-      bb.appendBytes(_conn.getHeaderField(i));
-      bb.appendBytes("\r\n");
+      bb.append(key);
+      bb.append(": ");
+      bb.append(_conn.getHeaderField(i));
+      bb.append("\r\n");
       i++;
     }
 
-    bb.appendBytes("\r\n");
+    bb.append("\r\n");
 
     return bb;
   }
@@ -295,7 +293,7 @@ public class HttpRequest
   /**
    * Returns the server response body.
    */
-  private final StringValue getBody(BytesBuilderValue bb)
+  private final StringValue getBody(StringValue bb)
     throws SocketTimeoutException, IOException
   {
     InputStream in;
@@ -324,16 +322,7 @@ public class HttpRequest
       }
     }
 
-    int len;
-    do {
-      bb.prepareReadBuffer();
-
-      len = in.read(bb.getBuffer(), bb.getOffset(),
-          bb.getLength() - bb.getOffset());
-
-      if (len > 0)
-        bb.setOffset(bb.getOffset() + len);
-    } while (len > 0);
+    bb.append(in);
 
     return bb;
   }

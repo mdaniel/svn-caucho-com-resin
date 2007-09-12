@@ -841,19 +841,15 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         return null;
 
-      BytesBuilderValue bytesBuilder = new BytesBuilderValue();
+      StringBuilderValue bb = new StringBuilderValue();
 
-      int nbytes;
-      byte buffer[] = new byte[128];
-      while ((nbytes = is.read(buffer, 0, 128)) > 0) {
-        bytesBuilder.append(buffer, 0, nbytes);
-      }
+      bb.append(is);
 
       Class cl = Class.forName("org.postgresql.util.PGbytea");
 
       Method method = cl.getDeclaredMethod("toPGString", new Class[] {byte[].class});
 
-      String s = (String) method.invoke(cl, new Object[] {bytesBuilder.toBytes()});
+      String s = (String) method.invoke(cl, new Object[] { bb.toBytes()});
 
       return conn.realEscapeString((StringValue) StringValue.create(s));
 
@@ -2179,8 +2175,8 @@ public class PostgresModule extends AbstractQuercusModule {
                                          Object largeObject)
   {
     try {
-
-      String contents = pg_lo_read(env, largeObject, -1);
+      StringValue contents = pg_lo_read(env, largeObject, -1);
+      
       if (contents != null) {
         env.getOut().print(contents);
       }
@@ -2206,9 +2202,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * Read a large object
    */
   @ReturnNullAsFalse
-  public static String pg_lo_read(Env env,
-                                  Object largeObject,
-                                  @Optional("-1") int len)
+  public static StringValue pg_lo_read(Env env,
+				       Object largeObject,
+				       @Optional("-1") int len)
   {
     try {
 
@@ -2222,22 +2218,15 @@ public class PostgresModule extends AbstractQuercusModule {
 
       InputStream is = (InputStream) method.invoke(largeObject, new Object[] {});
 
-      BytesBuilderValue bytesBuilder = new BytesBuilderValue();
+      try {
+	StringValue bb = env.createBinaryBuilder();
 
-      int nbytes;
-      byte buffer[] = new byte[128];
-      while ((len > 0) && ((nbytes = is.read(buffer, 0, 128)) > 0)) {
-        if (nbytes > len) {
-          nbytes = len;
-        }
-        bytesBuilder.append(buffer, 0, nbytes);
-        len -= nbytes;
+	bb.append(is, len);
+
+	return bb;
+      } finally {
+	is.close();
       }
-
-      is.close();
-
-      return bytesBuilder.toString();
-
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;
@@ -2248,9 +2237,9 @@ public class PostgresModule extends AbstractQuercusModule {
    * pg_lo_read() alias.
    */
   @ReturnNullAsFalse
-  public static String pg_loread(Env env,
-                                 Object largeObject,
-                                 @Optional("-1") int len)
+  public static StringValue pg_loread(Env env,
+				      Object largeObject,
+				      @Optional("-1") int len)
   {
     return pg_lo_read(env, largeObject, len);
   }

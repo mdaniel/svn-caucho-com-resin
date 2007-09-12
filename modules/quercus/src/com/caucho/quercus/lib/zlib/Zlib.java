@@ -296,28 +296,17 @@ public class Zlib {
    * @throws IOException
    * @throws DataFormatException
    */
-  public BytesValue gzread(int length)
+  public StringValue gzread(Env env, int length)
   {
-    BytesBuilderValue sbv = new BytesBuilderValue();
+    StringValue sb = env.createBinaryBuilder();
     int readChar;
 
     if (_in == null)
-      return sbv;
+      return sb;
 
-    try {
-      for (int i = 0; i < length; i++) {
-        readChar = _in.read();
-	
-        if (readChar >= 0) {
-          sbv.append(readChar);
-        } else
-          break;
-      }
-    } catch (Exception e) {
-      throw QuercusModuleException.create(e);
-    }
+    sb.append(_in, length);
 
-    return sbv;
+    return sb;
   }
 
   /**

@@ -266,24 +266,6 @@ public class DoubleValue extends NumberValue
   }
 
   /**
-   * Append to a string builder.
-   */
-  @Override
-  public void appendTo(UnicodeBuilderValue sb)
-  {
-    sb.append(toString());
-  }
-
-  /**
-   * Append to a binary builder.
-   */
-  @Override
-  public void appendTo(BytesBuilderValue sb)
-  {
-    sb.append(toString());
-  }
-
-  /**
    * Serializes the value.
    */
   public void serialize(StringBuilder sb)

@@ -693,28 +693,16 @@ public class JdbcResultResource {
       case Types.VARBINARY:
       case Types.BINARY:
         {
-          BytesBuilderValue bb = new BytesBuilderValue();
+          StringValue bb = env.createBinaryBuilder();
 
           InputStream is = rs.getBinaryStream(column);
 
           if (is == null || rs.wasNull())
             return NullValue.NULL;
 
-          try {
-            while (true) {
-              bb.prepareReadBuffer();
-
-              int len = is.read(bb.getBuffer(),
-                                bb.getOffset(),
-                                bb.getLength() - bb.getOffset());
-
-              if (len > 0) {
-                bb.setOffset(bb.getOffset() + len);
-              }
-              else
-                break;
-            }
-          } catch (IOException e) {
+	  try {
+	    bb.append(is);
+          } catch (RuntimeException e) {
             log.log(Level.WARNING, e.toString(), e);
 
             return NullValue.NULL;
@@ -730,7 +718,7 @@ public class JdbcResultResource {
           if (strValue == null || rs.wasNull())
             return NullValue.NULL;
           else
-            return StringValue.create(strValue);
+            return env.createString(strValue);
         }
       }
     } catch (SQLException e) {

@@ -65,12 +65,12 @@ public class BinaryInputMarshal extends Marshal
     if (javaObj instanceof BinaryInput)
       return (BinaryInput) javaObj;
     else if (javaObj instanceof InputStream)
-      return new ReadStreamInput((InputStream) javaObj);
+      return new ReadStreamInput(env, (InputStream) javaObj);
     else
-      return new ReadStreamInput(value.toInputStream());
+      return new ReadStreamInput(env, value.toInputStream());
   }
 
-  public static BinaryInput marshal(Value value)
+  public static BinaryInput marshal(Env env, Value value)
   {
     if (value == null)
       return null;
@@ -82,9 +82,9 @@ public class BinaryInputMarshal extends Marshal
     if (javaObj instanceof BinaryInput)
       return (BinaryInput) javaObj;
     else if (javaObj instanceof InputStream)
-      return new ReadStreamInput((InputStream) javaObj);
+      return new ReadStreamInput(env, (InputStream) javaObj);
     else
-      return new ReadStreamInput(value.toInputStream());
+      return new ReadStreamInput(env, value.toInputStream());
   }
 
   public Value unmarshal(Env env, Object value)

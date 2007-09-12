@@ -131,7 +131,7 @@ public class OutputBuffer {
       _out.flush();
 
       ReadStream rs = _tempStream.openRead(false);
-      BytesBuilderValue bb = new BytesBuilderValue();
+      StringValue bb = _env.createBinaryBuilder();
       int ch;
 
       // XXX: encoding

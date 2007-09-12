@@ -30,25 +30,29 @@
 package com.caucho.quercus.env;
 
 import java.io.*;
+import java.util.*;
+
+import com.caucho.vfs.*;
 
 /**
- * Represents a 8-bit PHP 5 style binary builder
+ * Represents a 8-bit PHP 5 style binary builder (unicode.semantics = off)
  */
-public class BytesBuilderValue
-  extends BytesValue
-  implements Serializable
+public class StringBuilderValue
+  extends BinaryValue
 {
+  public static final StringBuilderValue EMPTY = new StringBuilderValue("");
+  
   protected byte []_buffer;
   protected int _length;
 
   private String _value;
 
-  public BytesBuilderValue()
+  public StringBuilderValue()
   {
     _buffer = new byte[128];
   }
 
-  public BytesBuilderValue(int capacity)
+  public StringBuilderValue(int capacity)
   {
     if (capacity < 64)
       capacity = 128;
@@ -58,7 +62,7 @@ public class BytesBuilderValue
     _buffer = new byte[capacity];
   }
 
-  public BytesBuilderValue(byte []buffer, int offset, int length)
+  public StringBuilderValue(byte []buffer, int offset, int length)
   {
     _buffer = new byte[length];
     _length = length;
@@ -66,12 +70,12 @@ public class BytesBuilderValue
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
-  public BytesBuilderValue(byte []buffer)
+  public StringBuilderValue(byte []buffer)
   {
     this(buffer, 0, buffer.length);
   }
   
-  public BytesBuilderValue(Byte []buffer)
+  public StringBuilderValue(Byte []buffer)
   {
     int length = buffer.length;
     
@@ -83,27 +87,15 @@ public class BytesBuilderValue
     }
   }
 
-  /**
-   * @param string the value as a Java string
-   * @param encoding the original encoding of the binary data
-   */
-  public BytesBuilderValue(String string, String encoding)
+  public StringBuilderValue(String s)
   {
-    // XXX: encoding
+    int len = s.length();
+    
+    _buffer = new byte[len];
+    _length = len;
 
-    int length = string.length();
-
-    _buffer = new byte[length];
-    _length = length;
-
-    for (int i = 0; i < length; i++) {
-      _buffer[i] = (byte) string.charAt(i);
-    }
-  }
-
-  protected BytesValue copy(byte[] buffer, int offset, int length)
-  {
-    return new BytesBuilderValue(buffer, offset, length);
+    for (int i = 0; i < len; i++)
+      _buffer[i] = (byte) s.charAt(i);
   }
 
   /**
@@ -177,54 +169,7 @@ public class BytesBuilderValue
   @Override
   protected int getNumericType()
   {
-    byte []buffer = _buffer;
-    int len = _length;
-
-    if (len == 0)
-      return IS_STRING;
-
-    int i = 0;
-    int ch = 0;
-    boolean hasPoint = false;
-
-    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
-      i++;
-    }
-
-    if (len <= i)
-      return IS_STRING;
-
-    ch = buffer[i];
-
-    if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-        return IS_DOUBLE;
-      }
-
-      return IS_STRING;
-    }
-    else if (! ('0' <= ch && ch <= '9'))
-      return IS_STRING;
-
-    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-    }
-
-    if (len <= i)
-      return IS_LONG;
-    else if (ch == '.' || ch == 'e' || ch == 'E') {
-      for (i++;
-           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
-                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
-           i++) {
-      }
-
-      if (i < len)
-        return IS_STRING;
-      else
-        return IS_DOUBLE;
-    }
-    else
-      return IS_STRING;
+    return getNumericType(_buffer, 0, _length);
   }
 
   /**
@@ -256,51 +201,7 @@ public class BytesBuilderValue
   @Override
   public double toDouble()
   {
-    byte []buffer = _buffer;
-    int len = _length;
-    int i = 0;
-    int ch = 0;
-
-    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
-      i++;
-    }
-
-    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-    }
-
-    if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-      }
-
-      if (i == 1)
-	return 0;
-    }
-
-    if (ch == 'e' || ch == 'E') {
-      int e = i++;
-
-      if (i < len && (ch = buffer[i]) == '+' || ch == '-') {
-        i++;
-      }
-
-      for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-      }
-
-      if (i == e + 1)
-        i = e;
-    }
-
-    if (i == 0)
-      return 0;
-
-    try {
-      if (i == len)
-	return Double.parseDouble(toString());
-      else
-	return Double.parseDouble(new String(_buffer, 0, i));
-    } catch (NumberFormatException e) {
-      return 0;
-    }
+    return toDouble(_buffer, 0, _length);
   }
 
   /**
@@ -344,14 +245,13 @@ public class BytesBuilderValue
   public StringValue toStringBuilder()
   {
     // XXX: can this just return this, or does it need to return a copy?
-    return copy(_buffer, 0, _length);
+    return new StringBuilderValue(_buffer, 0, _length);
   }
   
   /**
    * Append to a string builder.
    */
-  @Override
-  public void appendTo(BytesBuilderValue bb)
+  public void appendTo(StringValue bb)
   {
     bb.append(_buffer, 0, _length);
   }
@@ -434,7 +334,7 @@ public class BytesBuilderValue
     if (index < 0 || len <= index)
       return UnsetUnicodeValue.UNSET;
     else
-      return StringValue.create((char) (_buffer[(int) index] & 0xff));
+      return StringBuilderValue.create((char) (_buffer[(int) index] & 0xff));
   }
 
   /**
@@ -488,32 +388,7 @@ public class BytesBuilderValue
     if (end <= start)
       return StringValue.EMPTY;
 
-    return copy(_buffer, start, end - start);
-  }
-
-  //
-  // Java generator code
-  //
-
-  /**
-   * Prints the value.
-   * @param env
-   */
-  public void print(Env env)
-  {
-    env.write(_buffer, 0, _length);
-  }
-
-  /**
-   * Serializes the value.
-   */
-  public void serialize(StringBuilder sb)
-  {
-    sb.append("s:");
-    sb.append(_length);
-    sb.append(":\"");
-    sb.append(toString());
-    sb.append("\";");
+    return new StringBuilderValue(_buffer, start, end - start);
   }
 
   //
@@ -587,8 +462,8 @@ public class BytesBuilderValue
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
-    if (buf instanceof BytesBuilderValue) {
-      BytesBuilderValue sb = (BytesBuilderValue) buf;
+    if (buf instanceof StringBuilderValue) {
+      StringBuilderValue sb = (StringBuilderValue) buf;
       
       System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
 
@@ -597,12 +472,16 @@ public class BytesBuilderValue
       return this;
     }
     else {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      byte []buffer = _buffer;
+      int bufferLength = _length;
+      
+      for (; head < tail; head++) {
+	buffer[bufferLength++] = (byte) buf.charAt(head);
+      }
 
-      appendTo(sb);
-      sb.append(buf, head, tail);
+      _length = bufferLength;
 
-      return sb;
+      return this;
     }
   }
 
@@ -610,7 +489,7 @@ public class BytesBuilderValue
    * Append a Java buffer to the value.
    */
   // @Override
-  public final StringValue append(BytesBuilderValue sb, int head, int tail)
+  public final StringValue append(StringBuilderValue sb, int head, int tail)
   {
     int length = tail - head;
     
@@ -632,22 +511,6 @@ public class BytesBuilderValue
   {
     if (v.length() == 0)
       return this;
-    else if (v.isBinary()) {
-      v.appendTo(this);
-      
-      return this;
-    }
-    else if (v.isUnicode()) {
-      // php/033c
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
-      
-      appendTo(sb);
-      v.appendTo(sb);
-
-      return sb;
-    }
-    else if (_length == 0)
-      return v.toStringBuilder();
     else {
       // php/033a
       v.appendTo(this);
@@ -683,25 +546,12 @@ public class BytesBuilderValue
    * Append a byte to the value.
    */
   @Override
-  public final StringValue append(byte v)
+  public final StringValue appendByte(int v)
   {
     int length = _length + 1;
 
     if (_buffer.length < length)
       ensureCapacity(length);
-
-    _buffer[_length++] = v;
-
-    return this;
-  }
-
-  /**
-   * Append a byte to the value.
-   */
-  public final StringValue appendByte(int v)
-  {
-    if (_buffer.length < _length + 1)
-      ensureCapacity(_length + 1);
 
     _buffer[_length++] = (byte) v;
 
@@ -714,7 +564,7 @@ public class BytesBuilderValue
   @Override
   public final StringValue append(boolean v)
   {
-    return appendBytes(v ? "true" : "false");
+    return append(v ? "true" : "false");
   }
 
   /**
@@ -723,7 +573,9 @@ public class BytesBuilderValue
   @Override
   public StringValue append(long v)
   {
-    return appendBytes(String.valueOf(v));
+    // XXX: this probably is frequent enough to special-case
+    
+    return append(String.valueOf(v));
   }
 
   /**
@@ -752,14 +604,6 @@ public class BytesBuilderValue
     }
 
     return this;
-  }
-
-  /**
-   * Prepares for reading.
-   */
-  public void prepareReadBuffer()
-  {
-    ensureCapacity(_buffer.length + 1);
   }
 
   /**
@@ -794,12 +638,88 @@ public class BytesBuilderValue
     return _buffer.length;
   }
 
+  //
+  // Java generator code
+  //
+
+  /**
+   * Prints the value.
+   * @param env
+   */
+  public void print(Env env)
+  {
+    env.write(_buffer, 0, _length);
+  }
+
+  /**
+   * Serializes the value.
+   */
+  public void serialize(StringBuilder sb)
+  {
+    sb.append("s:");
+    sb.append(_length);
+    sb.append(":\"");
+    sb.append(toString());
+    sb.append("\";");
+  }
+
+  @Override
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int length = length();
+
+    sb.append("binary(");
+    sb.append(length);
+    sb.append(") \"");
+
+    int appendLength = length > 256 ? 256 : length;
+
+    for (int i = 0; i < appendLength; i++)
+      sb.append(charAt(i));
+
+    if (length > 256)
+      sb.append(" ...");
+
+    sb.append('"');
+
+    return sb.toString();
+  }
+
+  @Override
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    int length = length();
+
+    if (length < 0)
+        length = 0;
+    
+    out.print("string(");
+    out.print(length);
+    out.print(") \"");
+
+    for (int i = 0; i < length; i++)
+      out.print(charAt(i));
+
+    out.print("\"");
+  }
+
   /**
    * Returns an OutputStream.
    */
   public OutputStream getOutputStream()
   {
     return new BuilderOutputStream();
+  }
+
+  public void ensureAppendCapacity(int newCapacity)
+  {
+    ensureCapacity(_length + newCapacity);
   }
 
   private void ensureCapacity(int newCapacity)
@@ -838,8 +758,8 @@ public class BytesBuilderValue
   @Override
   public boolean equals(Object o)
   {
-    if (o instanceof BytesBuilderValue) {
-      BytesBuilderValue value = (BytesBuilderValue) o;
+    if (o instanceof StringBuilderValue) {
+      StringBuilderValue value = (StringBuilderValue) o;
 
       int length = _length;
       
@@ -880,9 +800,9 @@ public class BytesBuilderValue
   public void generate(PrintWriter out)
     throws IOException
   {
-    out.print("new InternBytesValue(\"");
+    out.print("new StringBuilderValue(\"");
     printJavaString(out, this);
-    out.print("\", \"UTF-8\")");
+    out.print("\")");
   }
   
   //
@@ -903,6 +823,134 @@ public class BytesBuilderValue
     _buffer = new byte[_length];
     
     in.read(_buffer, 0, _length);
+  }
+
+  //
+  // static helper functions
+  //
+
+  public static int getNumericType(byte []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return IS_STRING;
+
+    int i = offset;
+    int ch = 0;
+    boolean hasPoint = false;
+
+    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
+      i++;
+    }
+
+    if (len <= i)
+      return IS_STRING;
+
+    ch = buffer[i];
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+        return IS_DOUBLE;
+      }
+
+      return IS_STRING;
+    }
+    else if (! ('0' <= ch && ch <= '9'))
+      return IS_STRING;
+
+    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+    }
+
+    if (len <= i)
+      return IS_LONG;
+    else if (ch == '.' || ch == 'e' || ch == 'E') {
+      for (i++;
+           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
+      }
+
+      if (i < len)
+        return IS_STRING;
+      else
+        return IS_DOUBLE;
+    }
+    else
+      return IS_STRING;
+  }
+
+  /**
+   * Converts to a long.
+   */
+  public static long toLong(byte []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return 0;
+
+    long value = 0;
+    long sign = 1;
+
+    int i = 0;
+    int end = offset + len;
+
+    if (buffer[offset] == '-') {
+      sign = -1;
+      offset++;
+    }
+
+    while (offset < end) {
+      int ch = buffer[offset++];
+
+      if ('0' <= ch && ch <= '9')
+        value = 10 * value + ch - '0';
+      else
+        return sign * value;
+    }
+
+    return value;
+  }
+
+  public static double toDouble(byte []buffer, int offset, int len)
+  {
+    int i = offset;
+    int ch = 0;
+
+    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
+      i++;
+    }
+
+    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+    }
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+      }
+
+      if (i == 1)
+	return 0;
+    }
+
+    if (ch == 'e' || ch == 'E') {
+      int e = i++;
+
+      if (i < len && (ch = buffer[i]) == '+' || ch == '-') {
+        i++;
+      }
+
+      for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+      }
+
+      if (i == e + 1)
+        i = e;
+    }
+
+    if (i == 0)
+      return 0;
+
+    try {
+      return Double.parseDouble(new String(buffer, 0, i));
+    } catch (NumberFormatException e) {
+      return 0;
+    }
   }
 
   class BinaryInputStream extends InputStream {

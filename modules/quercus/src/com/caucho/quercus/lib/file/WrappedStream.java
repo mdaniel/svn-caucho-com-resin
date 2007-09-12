@@ -198,7 +198,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   /**
    * Reads a Binary string.
    */
-  public BytesValue read(int length)
+  public StringValue read(int length)
     throws IOException
   {
     Value output = _wrapper.callMethod(_env, STREAM_READ, 
@@ -230,13 +230,13 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   public StringValue readLine(long length)
     throws IOException
   {
-    return _lineReader.readLine(this, length);
+    return _lineReader.readLine(_env, this, length);
   }
   
   public void write(byte []buffer, int offset, int length)
     throws IOException
   {
-    BytesBuilderValue bb = new BytesBuilderValue(buffer, offset, length);
+    StringValue bb = _env.createBinaryBuilder(buffer, offset, length);
 
     Value output = _wrapper.callMethod(_env, STREAM_WRITE, bb);
 

@@ -192,7 +192,7 @@ public class RecursiveIteratorIterator
   {
     if (depth == -1)
       return _stack.getLast().getIterator();
-    else if (depth >= _stack.size())
+    else if (_stack.size() <= depth)
       return UnsetValue.UNSET;
     else
       return _stack.get(depth).getIterator();
@@ -319,24 +319,23 @@ public class RecursiveIteratorIterator
   }
 
   private static final StringValue _GET_CHILDREN
-    = new InternUnicodeValue("getChildren");
+    = new StringBuilderValue("getChildren");
 
   private static final StringValue _HAS_CHILDREN
-    = new InternUnicodeValue("hasChildren");
+    = new StringBuilderValue("hasChildren");
 
   private static final StringValue _KEY
-    = new InternUnicodeValue("next");
+    = new StringBuilderValue("next");
 
   private static final StringValue _NEXT
-    = new InternUnicodeValue("next");
+    = new StringBuilderValue("next");
 
   private static final StringValue _CURRENT
-    = new InternUnicodeValue("current");
+    = new StringBuilderValue("current");
 
   private static final StringValue _REWIND
-    = new InternUnicodeValue("rewind");
+    = new StringBuilderValue("rewind");
 
   private static final StringValue _VALID
-    = new InternUnicodeValue("valid");
-
+    = new StringBuilderValue("valid");
 }

@@ -87,7 +87,7 @@ public class CurlResource
 
   private StringValue _header;
   private StringValue _body;
-  private BytesValue _postBody;
+  private StringValue _postBody;
 
   private String _contentType;
   private int _contentLength;
@@ -401,7 +401,7 @@ public class CurlResource
   /**
    * Sets the body to POST to the server.
    */
-  public BytesValue getPostBody()
+  public StringValue getPostBody()
   {
     return _postBody;
   }
@@ -409,7 +409,7 @@ public class CurlResource
   /**
    * Sets the body to POST to the server.
    */
-  public void setPostBody(BytesValue body)
+  public void setPostBody(StringValue body)
   {
     _postBody = body;
   }
@@ -545,18 +545,18 @@ public class CurlResource
   /**
    * Returns all the request properties as a String.
    */
-  public Value getRequestProperties()
+  public Value getRequestProperties(Env env)
   {
-    BytesBuilderValue bb = new BytesBuilderValue();
+    StringValue bb = env.createBinaryBuilder();
 
     for (Map.Entry<String,String> entry: _requestProperties.entrySet()) {
-      bb.appendBytes(entry.getKey());
-      bb.appendBytes(": ");
-      bb.appendBytes(entry.getValue());
-      bb.appendBytes("\r\n");
+      bb.append(entry.getKey());
+      bb.append(": ");
+      bb.append(entry.getValue());
+      bb.append("\r\n");
     }
 
-    bb.appendBytes("\r\n");
+    bb.append("\r\n");
 
     return bb;
   }
@@ -729,13 +729,13 @@ public class CurlResource
         return BooleanValue.TRUE;
     }
     else {
-      BytesBuilderValue bb = new BytesBuilderValue();
+      StringValue bb = env.createBinaryBuilder();
 
       if (_isReturningHeader)
-        _header.appendTo(bb);
+        bb.append(_header);
 
       if (_isReturningBody)
-        _body.appendTo(bb);
+        bb.append(_body);
 
       data = bb;
     }

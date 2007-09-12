@@ -258,7 +258,7 @@ public class ZlibModule extends AbstractQuercusModule {
   /**
    * Reads a character from the stream.
    */
-  public static Value gzgetc(@NotNull BinaryInput is)
+  public static Value gzgetc(Env env, @NotNull BinaryInput is)
   {
     if (is == null)
       return BooleanValue.FALSE;
@@ -268,8 +268,13 @@ public class ZlibModule extends AbstractQuercusModule {
 
       if (ch < 0)
         return BooleanValue.FALSE;
-      else
-        return new BytesBuilderValue(new byte[] { (byte) ch });
+      else {
+	StringValue sb = env.createBinaryBuilder(1);
+
+	sb.appendByte(ch);
+	
+        return sb;
+      }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

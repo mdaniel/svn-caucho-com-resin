@@ -76,7 +76,7 @@ public interface BinaryInput extends BinaryStream {
   /**
    * Reads a Binary string.
    */
-  public BytesValue read(int length)
+  public StringValue read(int length)
     throws IOException;
 
   /**

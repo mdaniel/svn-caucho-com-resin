@@ -425,7 +425,7 @@ public class Var extends Value
   }
 
   /**
-   * Append to a string builder.
+   * Append to a unicode builder.
    */
   @Override
   public void appendTo(UnicodeBuilderValue sb)
@@ -434,10 +434,19 @@ public class Var extends Value
   }
 
   /**
+   * Append to a binary builder.
+   */
+  @Override
+  public void appendTo(BinaryBuilderValue sb)
+  {
+    _value.appendTo(sb);
+  }
+
+  /**
    * Append to a string builder.
    */
   @Override
-  public void appendTo(BytesBuilderValue sb)
+  public void appendTo(StringBuilderValue sb)
   {
     _value.appendTo(sb);
   }
@@ -526,7 +535,7 @@ public class Var extends Value
   }
 
   @Override
-  public BytesValue toBinaryValue(Env env)
+  public BinaryValue toBinaryValue(Env env)
   {
     return _value.toBinaryValue(env);
   }

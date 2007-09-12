@@ -48,37 +48,34 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   private static final Logger log
     = Logger.getLogger(ReadStreamInput.class.getName());
 
+  private Env _env;
   private LineReader _lineReader;
   private ReadStream _is;
 
   public ReadStreamInput(Env env)
   {
+    _env = env;
   }
 
   public ReadStreamInput(Env env, InputStream is)
   {
+    _env = env;
+    
     if (is instanceof ReadStream)
       init((ReadStream) is);
     else if (is != null)
       init(new ReadStream(new VfsStream(is, null)));
   }
 
-  public ReadStreamInput(InputStream is)
+  protected ReadStreamInput(Env env, LineReader lineReader)
   {
-    if (is instanceof ReadStream)
-      init((ReadStream) is);
-    else if (is != null)
-      init(new ReadStream(new VfsStream(is, null)));
-  }
-
-  protected ReadStreamInput(LineReader lineReader)
-  {
+    _env = env;
     _lineReader = lineReader;
   }
 
-  protected ReadStreamInput(LineReader lineReader, ReadStream is)
+  protected ReadStreamInput(Env env, LineReader lineReader, ReadStream is)
   {
-    this(lineReader);
+    this(env, lineReader);
     init(is);
   }
 
@@ -101,7 +98,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public BinaryInput openCopy()
     throws IOException
   {
-    return new ReadStreamInput(_lineReader, _is.getPath().openRead());
+    return new ReadStreamInput(_env, _lineReader, _is.getPath().openRead());
   }
 
   public void setEncoding(String encoding)
@@ -149,31 +146,15 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   /**
    * Reads into a binary builder.
    */
-  public BytesValue read(int length)
+  public StringValue read(int length)
     throws IOException
     {
       if (_is == null)
         return null;
 
-      BytesBuilderValue bb = new BytesBuilderValue();
+      StringValue bb = _env.createBinaryBuilder();
 
-      while (length > 0) {
-        bb.prepareReadBuffer();
-
-        int sublen = bb.getLength() - bb.getOffset();
-
-        if (length < sublen)
-          sublen = length;
-
-        sublen = read(bb.getBuffer(), bb.getOffset(), sublen);
-
-        if (sublen > 0) {
-          bb.setOffset(bb.getOffset() + sublen);
-          length -= sublen;
-        }
-        else
-          return bb;
-      }
+      bb.append(_is, length);
 
       return bb;
     }
@@ -212,7 +193,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public StringValue readLine(long length)
     throws IOException
   {
-    return getLineReader().readLine(this, length);
+    return getLineReader().readLine(_env, this, length);
   }
 
   /**

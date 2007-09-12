@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.BytesBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 
@@ -62,10 +61,10 @@ public class LineReader
   /**
    * Reads a line from the BinaryInput, returning null on EOF.
    */
-  public StringValue readLine(BinaryInput input, long length)
+  public StringValue readLine(Env env, BinaryInput input, long length)
     throws IOException
   {
-    BytesBuilderValue sb = new BytesBuilderValue();
+    StringValue sb = env.createBinaryBuilder();
 
     int ch;
 

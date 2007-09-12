@@ -384,9 +384,9 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     ArrayValue directives = new ArrayValueImpl();
 
-    Value global = new InternUnicodeValue("global_value");
-    Value local = new InternUnicodeValue("local_value");
-    Value access = new InternUnicodeValue("access");
+    Value global = env.createString("global_value");
+    Value local = env.createString("local_value");
+    Value access = env.createString("access");
 
     IniDefinitions iniDefinitions = env.getQuercus().getIniDefinitions();
 
@@ -407,7 +407,7 @@ public class OptionsModule extends AbstractQuercusModule {
           inner.put(local, iniDefinition.getAsStringValue(env));
           inner.put(access, LongValue.create(iniDefinition.getScope()));
 
-          directives.put(new InternUnicodeValue(name), inner);
+          directives.put(env.createString(name), inner);
         }
       }
     }

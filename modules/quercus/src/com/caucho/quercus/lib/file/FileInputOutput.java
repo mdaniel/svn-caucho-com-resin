@@ -29,16 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.BytesBuilderValue;
-import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
+import com.caucho.vfs.TempBuffer;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -211,28 +209,30 @@ public class FileInputOutput extends AbstractBinaryOutput
   /**
    * Reads a Binary string.
    */
-  public BytesValue read(int length)
+  public StringValue read(int length)
     throws IOException
   {
-    BytesBuilderValue bb = new BytesBuilderValue();
+    StringValue bb = _env.createBinaryBuilder();
+    TempBuffer temp = TempBuffer.allocate();
+    byte []buffer = temp.getBuffer();
 
     while (length > 0) {
-      bb.prepareReadBuffer();
-
-      int sublen = bb.getLength() - bb.getOffset();
+      int sublen = buffer.length;
 
       if (length < sublen)
         sublen = length;
 
-      sublen = read(bb.getBuffer(), bb.getOffset(), sublen);
+      sublen = read(buffer, 0, sublen);
 
       if (sublen > 0) {
-        bb.setOffset(bb.getOffset() + sublen);
+	bb.append(buffer, 0, sublen);
         length -= sublen;
       }
       else
-        return bb;
+        break;
     }
+
+    TempBuffer.free(temp);
 
     return bb;
   }
@@ -261,7 +261,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   public StringValue readLine(long length)
     throws IOException
   {
-    return _lineReader.readLine(this, length);
+    return _lineReader.readLine(_env, this, length);
   }
 
   /**
@@ -270,7 +270,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   public boolean isEOF()
   {
     try {
-      return _stream.getFilePointer() >= _stream.getLength();
+      return _stream.getLength() <= _stream.getFilePointer();
     } catch (IOException e) {
       return true;
     }

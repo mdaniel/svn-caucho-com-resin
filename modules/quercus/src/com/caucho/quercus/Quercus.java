@@ -85,8 +85,8 @@ public class Quercus
   
   private ModuleContext _moduleContext;
 
-  private HashMap<String, InternUnicodeValue> _internMap
-    = new HashMap<String, InternUnicodeValue>();
+  private HashMap<String, StringValue> _internMap
+    = new HashMap<String, StringValue>();
 
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
@@ -1034,15 +1034,15 @@ public class Quercus
   /**
    * Interns a string.
    */
-  public InternUnicodeValue intern(String name)
+  public StringValue intern(String name)
   {
     synchronized (_internMap) {
-      InternUnicodeValue value = _internMap.get(name);
+      StringValue value = _internMap.get(name);
 
       if (value == null) {
         name = name.intern();
 
-        value = new InternUnicodeValue(name);
+        value = new StringBuilderValue(name);
         _internMap.put(name, value);
       }
 
@@ -1551,7 +1551,7 @@ public class Quercus
   public static final IniDefinition INI_REGISTER_LONG_ARRAYS
     = _ini.add("register_long_arrays", true, IniDefinition.PHP_INI_PERDIR);
   public static final IniDefinition INI_UNICODE_SEMANTICS
-    = _ini.add("unicode.semantics", true, IniDefinition.PHP_INI_SYSTEM);
+    = _ini.add("unicode.semantics", false, IniDefinition.PHP_INI_SYSTEM);
   public static final IniDefinition INI_UNICODE_FALLBACK_ENCODING
     = _ini.add("unicode.fallback_encoding", "utf-8", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_FROM_ERROR_MODE

@@ -219,7 +219,7 @@ public final class UnserializeReader {
             StringKey key = new StringKey(_buffer, _index, len);
 
             String s = readString(len);
-            v = new InternUnicodeValue(s);
+            v = env.createString(s);
 
             _keyCache.put(key, v);
           }

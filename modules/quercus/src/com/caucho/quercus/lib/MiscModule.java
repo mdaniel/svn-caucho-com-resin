@@ -173,7 +173,7 @@ public class MiscModule extends AbstractQuercusModule {
     try {
       ArrayList<PackSegment> segments = parsePackFormat(format);
 
-      BytesBuilderValue bb = new BytesBuilderValue();
+      StringValue bb = env.createBinaryBuilder();
 
       int i = 0;
       for (PackSegment segment : segments) {
@@ -1065,7 +1065,7 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   abstract static class PackSegment {
-    abstract public int pack(Env env, BytesBuilderValue bb,
+    abstract public int pack(Env env, StringValue bb,
 			      int i, Value []args)
       throws IOException;
     
@@ -1090,7 +1090,8 @@ public class MiscModule extends AbstractQuercusModule {
       _pad = pad;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -1123,10 +1124,12 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      BytesBuilderValue bb = new BytesBuilderValue();
+      StringValue bb = env.createBinaryBuilder();
+      
       for (int i = 0; i < _length; i++) {
 	int ch = is.read();
 
@@ -1157,7 +1160,8 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -1210,10 +1214,11 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      StringValue sb = new StringBuilderValue();
       for (int i = _length / 2 - 1; i >= 0; i--) {
 	int ch = is.read();
 
@@ -1236,11 +1241,12 @@ public class MiscModule extends AbstractQuercusModule {
 
     RevHexPackSegment(String name, int length)
     {
-      _name = new UnicodeValueImpl(name);
+      _name = new StringBuilderValue(name);
       _length = length;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -1293,10 +1299,11 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      StringValue sb = new StringBuilderValue();
       for (int i = _length / 2 - 1; i >= 0; i--) {
 	int ch = is.read();
 
@@ -1330,7 +1337,8 @@ public class MiscModule extends AbstractQuercusModule {
       _isSigned = isSigned;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1358,18 +1366,21 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
 	Value key;
 
+	// XXX: check key type with unicode semantics
+
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new UnicodeValueImpl(_name);
+	  key = new StringBuilderValue(_name);
 	else {
-	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
+	  StringValue sb = new StringBuilderValue();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1422,7 +1433,8 @@ public class MiscModule extends AbstractQuercusModule {
       _bytes = bytes;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1450,6 +1462,7 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
@@ -1459,9 +1472,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new UnicodeValueImpl(_name);
+	  key = new StringBuilderValue(_name);
 	else {
-	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
+	  StringBuilderValue sb = new StringBuilderValue();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1496,7 +1509,8 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1525,6 +1539,7 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
@@ -1534,9 +1549,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new UnicodeValueImpl(_name);
+	  key = env.createString(_name);
 	else {
-	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
+	  StringValue sb = env.createBinaryBuilder();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1570,8 +1585,9 @@ public class MiscModule extends AbstractQuercusModule {
       _name = name;
       _length = length;
     }
-    
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1600,6 +1616,7 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
@@ -1609,9 +1626,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new UnicodeValueImpl(_name);
+	  key = env.createString(_name);
 	else {
-	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
+	  StringValue sb = env.createBinaryBuilder();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1650,7 +1667,8 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1660,6 +1678,7 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
@@ -1684,7 +1703,8 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
     {
       while (bb.length() < _length) {
@@ -1694,6 +1714,7 @@ public class MiscModule extends AbstractQuercusModule {
       return i;
     }
     
+    @Override
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {

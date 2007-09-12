@@ -167,9 +167,9 @@ public class JMSQueue
       return env.wrapJava(object);
     } else if (message instanceof BytesMessage) {
       BytesMessage bytesMessage = (BytesMessage) message;
+      int length = (int) bytesMessage.getBodyLength();
 
-      BytesBuilderValue bb =
-        new BytesBuilderValue((int) bytesMessage.getBodyLength());
+      BinaryValue bb = env.createBinaryBuilder(length);
 
       bytesMessage.readBytes(bb.getBuffer());
       bb.setOffset((int) bytesMessage.getBodyLength());

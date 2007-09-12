@@ -213,7 +213,6 @@ abstract public class StringValue extends Value implements CharSequence {
   public int cmpString(StringValue rValue)
   {
     if (isNumberConvertible() && rValue.isNumberConvertible()) {
-      
       double thisDouble = toDouble();
       
       double rDouble = rValue.toDouble();
@@ -711,9 +710,9 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
-   * Append a Java long to the value.
+   * Append a Java byte to the value.
    */
-  public StringValue append(byte v)
+  public StringValue appendByte(int v)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -759,6 +758,22 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Ensure enough append capacity.
+   */
+  public void ensureAppendCapacity(int size)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Append a byte buffer to the value.
+   */
+  public StringValue append(byte []buf, int offset, int length)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Append from a read stream
    */
   public StringValue append(Reader reader)
@@ -771,6 +786,57 @@ abstract public class StringValue extends Value implements CharSequence {
     }
 
     return this;
+  }
+
+  /**
+   * Append from a read stream
+   */
+  public StringValue append(Reader reader, long length)
+    throws IOException
+  {
+    int ch;
+    
+    while (length-- > 0 && (ch = reader.read()) >= 0) {
+      append((char) ch);
+    }
+
+    return this;
+  }
+
+  /**
+   * Append from an input stream
+   */
+  public StringValue append(InputStream is)
+  {
+    try {
+      int ch;
+    
+      while ((ch = is.read()) >= 0) {
+	appendByte(ch);
+      }
+
+      return this;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Append from an input stream
+   */
+  public StringValue append(InputStream is, long length)
+  {
+    try {
+      int ch;
+    
+      while (length-- > 0 && (ch = is.read()) >= 0) {
+	appendByte(ch);
+      }
+
+      return this;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
   
   /**
@@ -815,7 +881,7 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Interns the string.
    */
-  public InternUnicodeValue intern(Quercus quercus)
+  public StringValue intern(Quercus quercus)
   {
     return quercus.intern(toString());
   }

@@ -32,10 +32,9 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.BytesBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -879,66 +878,47 @@ public class OracleOciLob {
     }
   }
 
-  private BytesBuilderValue readInternalBlob(Env env,
-                                              long length)
+  private StringValue readInternalBlob(Env env, long length)
   {
     try {
-
-      BytesBuilderValue contents = new BytesBuilderValue();
+      StringValue bb = env.createBinaryBuilder();
 
       Blob blob = (Blob) _lob;
       InputStream is = blob.getBinaryStream();
       is.skip(_currentPointer);
 
-      long remaining = length < 0 ? Integer.MAX_VALUE : length;
-
-      long nbytes;
-      byte buffer[] = new byte[128];
-      while ( (remaining > 0) &&
-              ((nbytes = is.read(buffer)) > 0) ) {
-        if (nbytes > remaining)
-          nbytes = remaining;
-        contents.append(buffer, 0, (int) nbytes);
-        remaining -= nbytes;
-      }
+      if (length < 0)
+	length = Integer.MAX_VALUE;
+      
+      bb.append(is, length);
 
       is.close();
 
-      return contents;
-
+      return bb;
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;
     }
   }
 
-  private UnicodeBuilderValue readInternalClob(Env env,
-                                              long length)
+  private StringValue readInternalClob(Env env,
+				       long length)
   {
     try {
-
-      UnicodeBuilderValue contents = new UnicodeBuilderValue();
+      StringValue sb = env.createUnicodeBuilder();
 
       Clob clob = (Clob) _lob;
       Reader reader = clob.getCharacterStream();
       reader.skip(_currentPointer);
 
-      long remaining = length < 0 ? Integer.MAX_VALUE : length;
+      if (length < 0)
+	length = Integer.MAX_VALUE;
 
-      long nchars;
-      char buffer[] = new char[128];
-      while ( (remaining > 0) &&
-              ((nchars = reader.read(buffer)) > 0) ) {
-        if (nchars > remaining)
-          nchars = remaining;
-        contents.append(buffer, 0, (int) nchars);
-        remaining -= nchars;
-      }
+      sb.append(reader, length);
 
       reader.close();
 
-      return contents;
-
+      return sb;
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;

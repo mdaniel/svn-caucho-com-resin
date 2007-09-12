@@ -75,8 +75,7 @@ abstract public class UnicodeValue extends StringValue {
     if (length < 0)
         length = 0;
     
-    // XXX: out.print("unicode("); // XXX: less impact on current qa
-    out.print("string(");
+    out.print("unicode(");
     out.print(length);
     out.print(") \"");
 
@@ -84,6 +83,15 @@ abstract public class UnicodeValue extends StringValue {
       out.print(charAt(i));
 
     out.print("\"");
+  }
+
+  /**
+   * Convert to a unicode value.
+   */
+  @Override
+  public UnicodeValue toUnicodeValue()
+  {
+    return this;
   }
 
   /**

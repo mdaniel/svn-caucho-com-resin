@@ -491,8 +491,13 @@ public class FileModule extends AbstractQuercusModule {
       // php/1612
       int ch = is.read();
 
-      if (ch >= 0)
-	return new BytesBuilderValue(new byte[] { (byte) ch });
+      if (ch >= 0) {
+	StringValue v = env.createBinaryBuilder(1);
+	
+	v.append((byte) ch);
+	
+	return v;
+      }
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {
@@ -555,7 +560,7 @@ public class FileModule extends AbstractQuercusModule {
 	    break;
 	}
 
-	UnicodeBuilderValue sb = new UnicodeBuilderValue();
+	StringValue sb = env.createBinaryBuilder();
 
 	if (ch == quote) {
 	  for (ch = is.read(); ch >= 0; ch = is.read()) {
@@ -683,7 +688,7 @@ public class FileModule extends AbstractQuercusModule {
 
       try {
         while (true) {
-          BytesBuilderValue bb = new BytesBuilderValue();
+          StringValue bb = env.createBinaryBuilder();
 
           for (int ch = is.read(); ch >= 0; ch = is.read()) {
             if (ch == '\n') {
@@ -902,14 +907,14 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   /**
-   * Parses the file, returning it in an array.
+   * Parses the file, returning it as a string array.
    *
    * @param filename the file's name
    * @param useIncludePath if true, use the include path
    * @param context the resource context
    */
   @ReturnNullAsFalse
-  public static BytesValue
+  public static StringValue
                 file_get_contents(Env env,
 		      String filename,
 		      @Optional boolean useIncludePath,
@@ -922,36 +927,18 @@ public class FileModule extends AbstractQuercusModule {
       return null;
     }
 
-    try {
-      BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
+    BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
 
-      if (! (s instanceof BinaryInput))
-	return null;
+    if (! (s instanceof BinaryInput))
+      return null;
 
-      BinaryInput is = (BinaryInput) s;
+    BinaryInput is = (BinaryInput) s;
 
-      try {
-	BytesBuilderValue bb = new BytesBuilderValue();
+    StringValue bb = env.createBinaryBuilder();
 
-	int len;
+    bb.append(is);
 
-	do {
-	  bb.prepareReadBuffer();
-
-	  len = is.read(bb.getBuffer(), bb.getOffset(),
-			bb.getLength() - bb.getOffset());
-
-	  if (len > 0)
-	    bb.setOffset(bb.getOffset() + len);
-	} while (len > 0);
-
-	return bb;
-      } finally {
-	is.close();
-      }
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
+    return bb;
   }
 
   /**
@@ -1567,8 +1554,7 @@ public class FileModule extends AbstractQuercusModule {
       length = is.read(buffer, 0, length);
 
       if (length > 0) {
-        BytesBuilderValue bb = new BytesBuilderValue(buffer, 0, length);
-        return bb;
+        return env.createBinaryBuilder(buffer, 0, length);
       }
       else {
         return BytesValue.EMPTY;

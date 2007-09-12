@@ -28,9 +28,10 @@
 
 package com.caucho.quercus.lib.zip;
 
+import com.caucho.quercus.*;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.BytesBuilderValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.util.L10N;
@@ -120,38 +121,20 @@ public class QuercusZipEntry {
    * @return decompressed BinaryValue or FALSE on error
    */
   @ReturnNullAsFalse
-  public BytesBuilderValue zip_entry_read(Env env,
-                                           @Optional("1024") int length)
+    public StringValue zip_entry_read(Env env,
+				      @Optional("1024") int length)
   {
     if (_in == null)
       return null;
 
-    BytesBuilderValue bbv = new BytesBuilderValue();
-    TempBuffer tb = TempBuffer.allocate();
-    byte[] buffer = tb.getBuffer();
+    StringValue bb = env.createBinaryBuilder();
 
-    int sublen;
-    try {
-      while (length > 0) {
-        sublen = _in.read(buffer, 0, Math.min(length, buffer.length));
-        if (sublen <= 0)
-          break;
-        bbv.append(buffer, 0, sublen);
-        length -= sublen;
-      }
+    bb.append(_in, length);
 
-      if (bbv.length() < 0)
-        return null;
-
-      return bbv;
-
-    } catch (IOException e) {
-      env.warning(L.l(e.toString()));
-
+    if (bb.length() > 0)
+      return bb;
+    else
       return null;
-    } finally {
-      TempBuffer.free(tb);
-    }
   }
 
   /**

@@ -49,6 +49,7 @@ public class ArrayFunExpr extends Expr {
 		      ArrayList<Expr> valueList)
   {
     super(location);
+    
     _keys = new Expr[keyList.size()];
     keyList.toArray(_keys);
 

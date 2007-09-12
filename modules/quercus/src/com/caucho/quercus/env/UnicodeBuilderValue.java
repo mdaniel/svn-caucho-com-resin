@@ -45,6 +45,8 @@ public class UnicodeBuilderValue
   extends UnicodeValue
   implements Serializable
 {
+  public static final UnicodeBuilderValue EMPTY = new UnicodeBuilderValue("");
+  
   private char []_buffer;
   private int _length;
   private boolean _isCopy;
@@ -172,7 +174,7 @@ public class UnicodeBuilderValue
   /**
    * Interns the string.
    */
-  public InternUnicodeValue intern(Quercus quercus)
+  public StringValue intern(Quercus quercus)
   {
     return quercus.intern(toString());
   }

@@ -52,6 +52,7 @@ public class AbstractBinaryInputOutput
   private static final Logger log
     = Logger.getLogger(AbstractBinaryInputOutput.class.getName());
 
+  private Env _env;
   private final LineReader _lineReader;
 
   private ReadStream _is;
@@ -59,6 +60,7 @@ public class AbstractBinaryInputOutput
 
   protected AbstractBinaryInputOutput(Env env)
   {
+    _env = env;
     _lineReader = new LineReader(env);
   }
 
@@ -140,31 +142,15 @@ public class AbstractBinaryInputOutput
   /**
    * Reads into a binary builder.
    */
-  public BytesValue read(int length)
+  public StringValue read(int length)
     throws IOException
   {
     if (_is == null)
       return null;
 
-    BytesBuilderValue bb = new BytesBuilderValue();
+    StringValue bb = _env.createBinaryBuilder();
 
-    while (length > 0) {
-      bb.prepareReadBuffer();
-
-      int sublen = bb.getLength() - bb.getOffset();
-
-      if (length < sublen)
-	sublen = length;
-
-      sublen = read(bb.getBuffer(), bb.getOffset(), sublen);
-
-      if (sublen > 0) {
-	bb.setOffset(bb.getOffset() + sublen);
-	length -= sublen;
-      }
-      else
-	return bb;
-    }
+    bb.append(_is, length);
 
     return bb;
   }
@@ -203,7 +189,7 @@ public class AbstractBinaryInputOutput
   public StringValue readLine(long length)
     throws IOException
   {
-    return _lineReader.readLine(this, length);
+    return _lineReader.readLine(_env, this, length);
   }
 
   /**

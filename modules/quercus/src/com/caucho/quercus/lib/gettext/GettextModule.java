@@ -446,11 +446,11 @@ public class GettextModule
       return formatBinary(env, msg, args);
   }
 
-  private static BytesValue formatBinary(Env env,
-                              StringValue msg,
-                              Value []args)
+  private static StringValue formatBinary(Env env,
+					  StringValue msg,
+					  Value []args)
   {
-    BytesBuilderValue sb = new BytesBuilderValue();
+    StringValue sb = env.createBinaryBuilder();
 
     int i = 0;
     int length = msg.length();
@@ -476,7 +476,7 @@ public class GettextModule
         int argIndex = ch - '0';
 
         if (0 <= argIndex && argIndex < args.length) {
-          args[argIndex].appendTo(sb);
+          sb.append(args[argIndex]);
           i += 4;
         }
         else {

@@ -454,6 +454,61 @@ public class Env {
 
     return encoding;
   }
+
+  /**
+   * Creates a binary builder.
+   */
+  public BinaryValue createBinaryBuilder()
+  {
+    if (_isUnicodeSemantics)
+      return new BinaryBuilderValue();
+    else
+      return new StringBuilderValue();
+  }
+
+  /**
+   * Creates a binary builder.
+   */
+  public BinaryValue createBinaryBuilder(int length)
+  {
+    if (_isUnicodeSemantics)
+      return new BinaryBuilderValue(length);
+    else
+      return new StringBuilderValue(length);
+  }
+
+  /**
+   * Creates a binary builder.
+   */
+  public BinaryValue createBinaryBuilder(byte []buffer, int offset, int length)
+  {
+    if (_isUnicodeSemantics)
+      return new BinaryBuilderValue(buffer, offset, length);
+    else
+      return new StringBuilderValue(buffer, offset, length);
+  }
+
+  /**
+   * Creates a binary builder.
+   */
+  public BinaryValue createBinaryBuilder(byte []buffer)
+  {
+    if (_isUnicodeSemantics)
+      return new BinaryBuilderValue(buffer, 0, buffer.length);
+    else
+      return new StringBuilderValue(buffer, 0, buffer.length);
+  }
+
+  /**
+   * Creates a unicode builder.
+   */
+  public StringValue createUnicodeBuilder()
+  {
+    if (_isUnicodeSemantics)
+      return new UnicodeBuilderValue();
+    else
+      return new StringBuilderValue();
+  }
   
   public TimeZone getDefaultTimeZone()
   {
@@ -2764,7 +2819,7 @@ public class Env {
     try {
       return (ObjectValue) _quercus.getStdClass().newInstance(this);
     }
-    catch (Throwable e) {
+    catch (Exception e) {
       throw new QuercusModuleException(e);
     }
   }
@@ -2772,9 +2827,23 @@ public class Env {
   /**
    * Creates a string from a byte.
    */
-  public Value createString(byte []buffer, int offset, int length)
+  public StringValue createString(byte []buffer, int offset, int length)
   {
-    return new UnicodeValueImpl(new String(buffer, offset, length));
+    if (_isUnicodeSemantics)
+      return new UnicodeValueImpl(new String(buffer, offset, length));
+    else
+      return new StringBuilderValue(buffer, offset, length);
+  }
+
+  /**
+   * Creates a string from a byte.
+   */
+  public StringValue createString(String s)
+  {
+    if (_isUnicodeSemantics)
+      return new UnicodeValueImpl(s);
+    else
+      return new StringBuilderValue(s);
   }
 
   /**
@@ -2784,14 +2853,14 @@ public class Env {
   {
     QuercusClass cls = findClass("Exception");
     
-    StringValue message = new UnicodeValueImpl(e.getMessage());
+    StringValue message = createString(e.getMessage());
     Value []args = { message };
 
     Value value = cls.callNew(this, args);
 
     StackTraceElement elt = e.getStackTrace()[0];
 
-    value.putField(this, "file", StringValue.create(elt.getFileName()));
+    value.putField(this, "file", createString(elt.getFileName()));
     value.putField(this, "line", LongValue.create(elt.getLineNumber()));
     value.putField(this, "trace", ErrorModule.debug_backtrace(this));
 

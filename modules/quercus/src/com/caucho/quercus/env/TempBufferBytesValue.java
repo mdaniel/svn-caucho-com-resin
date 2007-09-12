@@ -218,7 +218,7 @@ public class TempBufferBytesValue
   
   public Object writeReplace()
   {
-    return new BytesBuilderValue(toBytes());
+    return new BinaryBuilderValue(toBytes());
   }
 }
 
