@@ -71,7 +71,7 @@ public class ConstExpr extends Expr {
     Value value = env.getConstant(_var);
 
     if (value == null)
-      value = new UnicodeValueImpl(_var);
+      value = env.createString(_var);
 
     return value;
   }

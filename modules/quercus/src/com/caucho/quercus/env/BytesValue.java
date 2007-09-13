@@ -219,10 +219,10 @@ abstract public class BytesValue
   /**
    * Append to a string builder.
    */
-  public void appendTo(UnicodeBuilderValue sb)
+  public StringValue appendTo(UnicodeBuilderValue sb)
   {
     if (length() == 0)
-      return;
+      return sb;
     
     Env env = Env.getInstance();
 
@@ -234,6 +234,8 @@ abstract public class BytesValue
 
         reader.close();
       }
+
+      return sb;
     } catch (IOException e) {
       throw new QuercusRuntimeException(e);
     }

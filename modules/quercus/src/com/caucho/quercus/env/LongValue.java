@@ -295,27 +295,27 @@ public class LongValue extends NumberValue
    * Append to a unicode builder.
    */
   @Override
-  public void appendTo(UnicodeBuilderValue sb)
+  public StringValue appendTo(UnicodeBuilderValue sb)
   {
-    sb.append(_value);
+    return sb.append(_value);
   }
 
   /**
    * Append to a binary builder.
    */
   @Override
-  public void appendTo(BinaryBuilderValue sb)
+  public StringValue appendTo(BinaryBuilderValue sb)
   {
-    sb.append(_value);
+    return sb.append(_value);
   }
 
   /**
    * Append to a string builder.
    */
   @Override
-  public void appendTo(StringBuilderValue sb)
+  public StringValue appendTo(StringBuilderValue sb)
   {
-    sb.append(_value);
+    return sb.append(_value);
   }
 
   /**

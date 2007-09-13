@@ -401,12 +401,16 @@ public class StringBuilderValue
   @Override
   public final StringValue append(String s)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    int sublen = s.length();
 
-    appendTo(sb);
-    sb.append(s);
+    if (_buffer.length < _length + sublen)
+      ensureCapacity(_length + sublen);
 
-    return sb;
+    for (int i = 0; i < sublen; i++) {
+      _buffer[_length++] = (byte) s.charAt(i);
+    }
+
+    return this;
   }
 
   /**
@@ -415,12 +419,20 @@ public class StringBuilderValue
   @Override
   public final StringValue append(String s, int start, int end)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    int sublen = end - start;
 
-    appendTo(sb);
-    sb.append(s, start, end);
+    if (_buffer.length < _length + sublen)
+      ensureCapacity(_length + sublen);
 
-    return sb;
+    byte []buffer = _buffer;
+    int length = _length;
+
+    for (; start < end; start++)
+      buffer[length++] = (byte) s.charAt(start);
+
+    _length = length;
+
+    return this;
   }
 
   /**
@@ -429,12 +441,12 @@ public class StringBuilderValue
   @Override
   public final StringValue append(char ch)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    if (_buffer.length < _length + 1)
+      ensureCapacity(_length + 1);
 
-    appendTo(sb);
-    sb.append(ch);
-
-    return sb;
+    _buffer[_length++] = (byte) ch;
+    
+    return this;
   }
 
   /**
@@ -443,12 +455,19 @@ public class StringBuilderValue
   @Override
   public final StringValue append(char []buf, int offset, int length)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
 
-    appendTo(sb);
-    sb.append(buf, offset, length);
+    byte []buffer = _buffer;
+    int bufferLength = _length;
 
-    return sb;
+    for (; length > 0; length--)
+      buffer[bufferLength++] = (byte) buf[offset--];
+
+    _buffer = buffer;
+    _length = bufferLength;
+
+    return this;
   }
 
   /**
@@ -509,6 +528,7 @@ public class StringBuilderValue
   @Override
   public final StringValue append(Value v)
   {
+    /*
     if (v.length() == 0)
       return this;
     else {
@@ -517,6 +537,11 @@ public class StringBuilderValue
 
       return this;
     }
+    */
+    
+    v.appendTo(this);
+
+    return this;
   }
 
   /**
@@ -584,7 +609,7 @@ public class StringBuilderValue
   @Override
   public StringValue append(double v)
   {
-    return appendBytes(String.valueOf(v));
+    return append(String.valueOf(v));
   }
 
   /**
@@ -592,8 +617,6 @@ public class StringBuilderValue
    */
   public StringValue appendBytes(String s)
   {
-    //XXX: encoding?
-
     int sublen = s.length();
 
     if (_buffer.length < _length + sublen)

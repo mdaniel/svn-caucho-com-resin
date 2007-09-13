@@ -478,24 +478,27 @@ public class NullValue extends Value
    * Append to a binary builder.
    */
   @Override
-  public void appendTo(BinaryBuilderValue sb)
+  public StringValue appendTo(BinaryBuilderValue sb)
   {
+    return sb;
   }
 
   /**
    * Append to a unicode builder.
    */
   @Override
-  public void appendTo(UnicodeBuilderValue sb)
+  public StringValue appendTo(UnicodeBuilderValue sb)
   {
+    return sb;
   }
 
   /**
    * Append to a string builder.
    */
   @Override
-  public void appendTo(StringBuilderValue sb)
+  public StringValue appendTo(StringBuilderValue sb)
   {
+    return sb;
   }
 
   //

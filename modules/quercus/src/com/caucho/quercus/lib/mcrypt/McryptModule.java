@@ -150,7 +150,7 @@ public class McryptModule extends AbstractQuercusModule {
     StringValue bb = env.createBinaryBuilder(size);
 
     for (int i = 0; i < size; i++)
-      bb.append((byte) RandomUtil.nextInt(256));
+      bb.appendByte((byte) RandomUtil.nextInt(256));
 
     return bb;
   }

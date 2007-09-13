@@ -2193,7 +2193,7 @@ public class Env {
        name));
     */
 
-    value = new UnicodeValueImpl(name);
+    value = createString(name);
 
     return value;
   }

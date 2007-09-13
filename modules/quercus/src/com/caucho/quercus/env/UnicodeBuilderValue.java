@@ -436,9 +436,11 @@ public class UnicodeBuilderValue
    * Append to a string builder.
    */
   @Override
-  public void appendTo(UnicodeBuilderValue sb)
+  public StringValue appendTo(UnicodeBuilderValue sb)
   {
     sb.append(_buffer, 0, _length);
+
+    return sb;
   }
 
   /**

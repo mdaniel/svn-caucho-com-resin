@@ -107,7 +107,9 @@ public class AppendExpr extends Expr
     StringValue sb = value.toStringBuilder();
 
     for (AppendExpr ptr = next; ptr != null; ptr = ptr._next) {
-      sb = sb.append(ptr._value.eval(env));
+      Value ptrValue = ptr._value.eval(env);
+      
+      sb = sb.append(ptrValue);
     }
 
     return sb;

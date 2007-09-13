@@ -66,7 +66,7 @@ public class StringMarshal extends Marshal {
     if (value == null)
       return NullValue.NULL;
     else
-      return new UnicodeValueImpl((String) value);
+      return env.createString((String) value);
   }
   
   @Override

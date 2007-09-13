@@ -428,27 +428,27 @@ public class Var extends Value
    * Append to a unicode builder.
    */
   @Override
-  public void appendTo(UnicodeBuilderValue sb)
+  public StringValue appendTo(UnicodeBuilderValue sb)
   {
-    _value.appendTo(sb);
+    return _value.appendTo(sb);
   }
 
   /**
    * Append to a binary builder.
    */
   @Override
-  public void appendTo(BinaryBuilderValue sb)
+  public StringValue appendTo(BinaryBuilderValue sb)
   {
-    _value.appendTo(sb);
+    return _value.appendTo(sb);
   }
 
   /**
    * Append to a string builder.
    */
   @Override
-  public void appendTo(StringBuilderValue sb)
+  public StringValue appendTo(StringBuilderValue sb)
   {
-    _value.appendTo(sb);
+    return _value.appendTo(sb);
   }
 
   /**

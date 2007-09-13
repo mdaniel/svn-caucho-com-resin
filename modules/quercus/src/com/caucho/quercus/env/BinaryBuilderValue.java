@@ -33,6 +33,7 @@ import java.io.*;
 import java.util.*;
 
 import com.caucho.vfs.*;
+import com.caucho.util.*;
 
 /**
  * Represents a 8-bit PHP 6 style binary builder (unicode.semantics = on)
@@ -509,6 +510,7 @@ public class BinaryBuilderValue
   @Override
   public final StringValue append(Value v)
   {
+    /*
     if (v.length() == 0)
       return this;
     else {
@@ -517,6 +519,9 @@ public class BinaryBuilderValue
 
       return this;
     }
+    */
+
+    return v.appendTo(this);
   }
 
   /**
@@ -564,7 +569,7 @@ public class BinaryBuilderValue
   @Override
   public final StringValue append(boolean v)
   {
-    return append(v ? "true" : "false");
+    return appendBytes(v ? "true" : "false");
   }
 
   /**
@@ -575,7 +580,7 @@ public class BinaryBuilderValue
   {
     // XXX: this probably is frequent enough to special-case
     
-    return append(String.valueOf(v));
+    return appendBytes(String.valueOf(v));
   }
 
   /**
@@ -592,8 +597,6 @@ public class BinaryBuilderValue
    */
   public StringValue appendBytes(String s)
   {
-    //XXX: encoding?
-
     int sublen = s.length();
 
     if (_buffer.length < _length + sublen)
@@ -798,8 +801,14 @@ public class BinaryBuilderValue
 
     if (length < 0)
         length = 0;
+
+    // QA needs to distinguish php5 string from php6 binary
+    if (Alarm.isTest())
+      out.print("binary");
+    else
+      out.print("string");
     
-    out.print("string(");
+    out.print("(");
     out.print(length);
     out.print(") \"");
 

@@ -4400,7 +4400,8 @@ public class QuercusParser {
 
   private Expr createString(String lexeme)
   {
-    if (_quercus.isUnicodeSemantics())
+    // XXX: see QuercusParser.parseDefault for _quercus == null
+    if (_quercus != null && _quercus.isUnicodeSemantics())
       return _factory.createUnicode(lexeme);
     else
       return _factory.createString(lexeme);
@@ -4408,7 +4409,8 @@ public class QuercusParser {
 
   private Expr createBinary(byte []bytes)
   {
-    if (_quercus.isUnicodeSemantics())
+    // XXX: see QuercusParser.parseDefault for _quercus == null
+    if (_quercus != null && _quercus.isUnicodeSemantics())
       return _factory.createBinary(bytes);
     else
       return _factory.createString(new String(bytes));

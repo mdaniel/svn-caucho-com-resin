@@ -794,26 +794,25 @@ abstract public class Value implements java.io.Serializable
   /**
    * Append to a string builder.
    */
-  public void appendTo(UnicodeBuilderValue sb)
+  public StringValue appendTo(UnicodeBuilderValue sb)
   {
-    //System.out.println("APPEND: " + toString());
-    sb.append(toString());
+    return sb.append(toString());
   }
 
   /**
    * Append to a binary builder.
    */
-  public void appendTo(StringBuilderValue sb)
+  public StringValue appendTo(StringBuilderValue sb)
   {
-    sb.append(toString());
+    return sb.append(toString());
   }
 
   /**
    * Append to a binary builder.
    */
-  public void appendTo(BinaryBuilderValue sb)
+  public StringValue appendTo(BinaryBuilderValue sb)
   {
-    sb.append(toString());
+    return sb.appendBytes(toString());
   }
 
   /**

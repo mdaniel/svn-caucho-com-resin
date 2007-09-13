@@ -845,12 +845,14 @@ abstract public class StringValue extends Value implements CharSequence {
    * Append to a string builder.
    */
   @Override
-  public void appendTo(UnicodeBuilderValue sb)
+  public StringValue appendTo(UnicodeBuilderValue sb)
   {
     int length = length();
 
     for (int i = 0; i < length; i++)
       sb.append(charAt(i));
+
+    return this;
   }
 
   /**
