@@ -34,6 +34,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -100,7 +101,12 @@ public class JsonModule
   private void encodeArray(Env env, UnicodeBuilderValue sb, ArrayValue val)
   {
     long length = 0;
-    for (Value key : val.keySet()) {
+    
+    Iterator<Value> keyIter = val.getKeyIterator(env);
+    
+    while (keyIter.hasNext()) {
+      Value key = keyIter.next();
+      
       if ((! key.isLongConvertible()) || key.toLong() != length) {
         encodeArrayToObject(env, sb, val);
         return;

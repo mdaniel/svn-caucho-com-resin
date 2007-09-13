@@ -69,6 +69,7 @@ class Regcomp {
     = new HashMap<UnicodeValue,Integer>();
   
   boolean _isLookbehind;
+  boolean _isOr;
   
   Regcomp(int flags)
   {
@@ -101,6 +102,8 @@ class Regcomp {
   }
   
   /**
+   * @param isConditional true is parsing for (?(cond)yes|no)
+   * 
    *   Recursively compile a Node.
    *
    * first      -- The first node of this sub-Node
@@ -131,7 +134,15 @@ class Regcomp {
     last = null;
 
     int ch;
+    int lastNonWhitespaceChar = -1;
+    
     while ((ch = pattern.read()) >= 0) {
+      if ((_flags & IGNORE_WS) != 0 &&
+          (RegexpSet.SPACE.match(ch) || ch == '#')) {
+      }
+      else
+        lastNonWhitespaceChar = ch;
+      
       switch (ch) {
       case '*':
 	if (last == null)
@@ -269,12 +280,32 @@ class Regcomp {
 	break;
 
       case '|':
+
+        
         if (isConditional) {
           pattern.ungetc(ch);
           
           return last;
         }
-    
+        
+        /*
+        //php/152o
+        if ((_flags & IGNORE_WS) != 0) {
+          while ((ch = pattern.peek()) == '|' || RegexpSet.SPACE.match(ch)) {
+            pattern.read();
+          }
+        }
+        else {
+          while ((ch = pattern.peek()) == '|') {
+            pattern.read();
+          }
+        }
+        */
+
+        if (last == null && head != null
+            && (head._code == Node.RC_OR || head._code == Node.RC_LOOKBEHIND_OR))
+          break;
+        
         node = Node.concat(head, last);
 	head = new Node(Node.RC_OR, node);
 	

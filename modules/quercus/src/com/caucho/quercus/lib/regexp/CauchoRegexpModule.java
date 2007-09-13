@@ -850,7 +850,7 @@ public class CauchoRegexpModule
 
     int replacementLen = replacementProgram.size();
 
-    while (regexp.find() && limit-- > 0) {
+    while (limit-- > 0 && regexp.find()) {
       if (result == null)
         result = new UnicodeBuilderValue();
 

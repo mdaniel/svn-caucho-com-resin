@@ -29,8 +29,10 @@
 
 package com.caucho.quercus.lib.regexp;
 
+import com.caucho.util.IntArray;
+
 /*
- * Represents
+ * Represents the state of groups in the regexp.
  */
 class GroupState
 {
@@ -39,9 +41,11 @@ class GroupState
   
   // maximum number of groups
   static final int MAX_SIZE = 99;
-  
+
   private long []_set;
-  //private GroupState _next;
+
+  private IntArray _group;
+  private GroupState _freeList;
   
   public GroupState()
   {
@@ -51,11 +55,19 @@ class GroupState
       arraySize++;
     
     _set = new long[arraySize];
+    
+    _group = new IntArray();
   }
   
-  private GroupState(int arraySize)
+  private GroupState(GroupState src)
   {
-    _set = new long[arraySize];
+    _set = new long[src._set.length];
+    _group = new IntArray();
+    _group.add(src._group);
+
+    for (int i = 0; i < src._set.length; i++) {
+      _set[i] = src._set[i];
+    }
   }
   
   public boolean isMatched(int group)
@@ -86,53 +98,61 @@ class GroupState
   
   public GroupState copy()
   {
-    GroupState state = new GroupState(_set.length);
-
-    for (int i = 0; i < _set.length; i++) {
-      state._set[i] = _set[i];
-    }
+    GroupState state;
     
+    if (_freeList != null) {
+      state = _freeList;
+      _freeList = _freeList._freeList;
+      state._freeList = null;
+
+      state._group.clear();
+      state._group.add(_group);
+
+      for (int i = 0; i < _set.length; i++) {
+        state._set[i] = _set[i];
+      }
+    }
+    else {
+      state = new GroupState(this);
+    }
+
     return state;
   }
   
-  /*
-  public void save()
+  public void free(GroupState state)
   {
-    GroupState state = new GroupState(_set.length);
-
-    for (int i = 0; i < _set.length; i++) {
-      state._set[i] = _set[i];
+    if (state != null && state != this) {
+      state._freeList = _freeList;
+      _freeList = state;
     }
-
-    if (_next != null)
-      state._next = _next;
-
-    _next = state;
   }
-  
-  public void restore()
-  {
-    if (_next == null)
-      throw new RuntimeException("cannot restore without a saved state");
-
-    _set = _next._set;
-    
-    _next = _next._next;
-  }
-  
-  public void discardLastSave()
-  {
-    if (_next == null)
-      throw new RuntimeException("cannot discard from an empty state stack");
-    
-    _next = _next._next;
-  }
-  */
   
   public void clear()
   {
+    _group.clear();
+    
     for (int i = 0; i < _set.length; i++) {
       _set[i] = 0;
     }
+  }
+  
+  public int size()
+  {
+    return _group.size();
+  }
+  
+  public int get(int i)
+  {
+    return _group.get(i);
+  }
+  
+  public void set(int i, int val)
+  {
+    _group.set(i, val);
+  }
+  
+  public void setLength(int len)
+  {
+    _group.setLength(len);
   }
 }
