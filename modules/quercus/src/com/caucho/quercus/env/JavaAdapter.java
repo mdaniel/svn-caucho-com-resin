@@ -61,18 +61,20 @@ abstract public class JavaAdapter extends ArrayValue
   
   private JavaClassDef _classDef;
   private Env _env;
-  
+  private QuercusClass _quercusClass;
+
   // Vars to update when matching array item is modified
   private HashMap<Value,Value> _refs;
-  
+
   protected JavaAdapter(Env env, Object object, JavaClassDef def)
   {
     _env = env;
     _object = object;
     _classDef = def;
 
+    _quercusClass = env.createQuercusClass(def, null);
   }
-  
+
   public Env getEnv()
   {
     return _env;
@@ -707,7 +709,7 @@ abstract public class JavaAdapter extends ArrayValue
   @Override
   public Value getField(Env env, String name, boolean create)
   {
-    return _classDef.getField(env, _object, name, create);
+    return _quercusClass.getField(env, this, name, create);
   }
 
   @Override
@@ -715,7 +717,7 @@ abstract public class JavaAdapter extends ArrayValue
                         String name,
                         Value value)
   {
-    return _classDef.putField(env, _object, name, value);
+    return _quercusClass.putField(env, this, name, value);
   }
 
   /**

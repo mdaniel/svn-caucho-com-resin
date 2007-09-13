@@ -338,9 +338,9 @@ public class NullValue extends Value
   }
 
   @Override
-  public LongValue getCount(Env env)
+  public int getCount(Env env)
   {
-    return LongValue.ZERO;
+    return 0;
   }
 
   /**

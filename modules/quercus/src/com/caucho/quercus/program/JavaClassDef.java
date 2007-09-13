@@ -30,9 +30,10 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.*;
+import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.annotation.Construct;
+import com.caucho.quercus.annotation.Delegates;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
@@ -44,11 +45,11 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -97,11 +98,17 @@ public class JavaClassDef extends ClassDef {
   private JavaMethod __setField = null;
   private JavaMethod __call = null;
 
-  private ArrayList<ArrayDelegate> _delegates
-    = new ArrayList<ArrayDelegate>();
-
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
+
+  private ArrayList<ArrayDelegate> _arrayDelegates
+    = new ArrayList<ArrayDelegate>();
+
+  private ArrayList<FieldDelegate> _fieldDelegates
+    = new ArrayList<FieldDelegate>();
+
+  private ArrayList<PrintDelegate> _printDelegates
+    = new ArrayList<PrintDelegate>();
 
   private AbstractJavaMethod _cons;
 
@@ -122,7 +129,9 @@ public class JavaClassDef extends ClassDef {
     _isArray = type.isArray();
     _isInterface = type.isInterface();
 
-    _delegates.add(new DefaultArrayDelegate());
+    _arrayDelegates.add(new DefaultArrayDelegate());
+    _fieldDelegates.add(new DefaultFieldDelegate());
+    _printDelegates.add(new DefaultPrintDelegate());
   }
 
 
@@ -308,94 +317,6 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
-   * @param name
-   * @return Value attained through invoking getter
-   */
-  public Value getField(Env env, Object obj, String name, boolean create)
-  {
-    AbstractJavaMethod get = _getMap.get(name);
-    
-    if (get != null) {
-      try {
-        return get.call(env, obj);
-      } catch (Throwable e) {
-        log.log(Level.FINE, L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    }
-
-    FieldMarshalPair fieldPair = _fieldMap.get(name);
-    if (fieldPair != null) {
-      try {
-        Object result = fieldPair._field.get(obj);
-        return fieldPair._marshal.unmarshal(env, result);
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    }
-    
-    if (__getField != null) {
-      try {
-        return __getField.call(env, obj, new UnicodeValueImpl(name));
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    }
-
-    if (create)
-      env.warning(L.l("field '{0}' is invalid"));
-
-    return NullValue.NULL;
-  }
-
-  public Value putField(Env env,
-                        Object obj,
-                        String name,
-                        Value value)
-  {
-    AbstractJavaMethod setter = _setMap.get(name);
-    
-    if (setter != null) {
-      try {
-        return setter.call(env, obj, value);
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    }
-    
-    FieldMarshalPair fieldPair = _fieldMap.get(name);
-
-    if (fieldPair != null) {
-      try {
-        Class type = fieldPair._field.getType();
-        Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
-        fieldPair._field.set(obj, marshaledValue);
-
-        return value;
-
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    }
-    
-    if (__setField != null) {
-      try {
-        return __setField.call(env, obj, new UnicodeValueImpl(name), value);
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-
-      }
-    }
-
-    return NullValue.NULL;
-  }
-
-  /**
    * Returns the marshal instance.
    */
   public Marshal getMarshal()
@@ -407,7 +328,7 @@ public class JavaClassDef extends ClassDef {
    * Creates a new instance.
    */
   @Override
-  public Value newInstance(Env env, QuercusClass qClass)
+  public ObjectValue newInstance(Env env, QuercusClass qClass)
   {
     // return newInstance();
     return null;
@@ -688,9 +609,14 @@ public class JavaClassDef extends ClassDef {
     if (__call != null)
       cl.setCall(__call);
 
-    for (ArrayDelegate delegate : _delegates) {
+    for (ArrayDelegate delegate : _arrayDelegates)
       cl.addArrayDelegate(delegate);
-    }
+
+    for (FieldDelegate delegate : _fieldDelegates)
+      cl.addFieldDelegate(delegate);
+
+    for (PrintDelegate delegate : _printDelegates)
+      cl.addPrintDelegate(delegate);
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
@@ -829,34 +755,48 @@ public class JavaClassDef extends ClassDef {
 
     // this
     for (Annotation annotation : type.getAnnotations()) {
-      if (annotation.annotationType() == Delegate.class) {
-        Class<? extends ArrayDelegate> delegateClass = ((Delegate) annotation).value();
+      if (annotation.annotationType() == Delegates.class) {
+        Class<? extends Object>[] delegateClasses = ((Delegates) annotation).value();
 
-        boolean exists = false;
-
-        for (ArrayDelegate delegate : _delegates) {
-          if (delegate.getClass() == delegateClass) {
-            exists = true;
-            break;
+        for (Class<? extends Object> delegateClass : delegateClasses) {
+          if (addDelegate(ArrayDelegate.class, _arrayDelegates, delegateClass)) {
           }
-        }
-
-        if (exists)
-          continue;
-
-        try {
-          _delegates.add(delegateClass.newInstance());
-        }
-        catch (InstantiationException e) {
-          throw new QuercusModuleException(e);
-        }
-        catch (IllegalAccessException e) {
-          throw new QuercusModuleException(e);
+          else if (addDelegate(FieldDelegate.class, _fieldDelegates, delegateClass)) {
+          }
+          else if (addDelegate(PrintDelegate.class, _printDelegates, delegateClass)) {
+          }
+          else
+            throw new IllegalArgumentException(L.l("unknown @Delegate class '{0}'",
+                                                   delegateClass));
         }
       }
     }
+  }
 
+  private <T> boolean addDelegate(Class<T> cl,
+                                  ArrayList<T> delegates,
+                                  Class<? extends Object> delegateClass)
+  {
+    if (!cl.isAssignableFrom(delegateClass))
+      return false;
 
+    for (T delegate : delegates) {
+      if (delegate.getClass() == delegateClass) {
+        return true;
+      }
+    }
+
+    try {
+      delegates.add((T) delegateClass.newInstance());
+    }
+    catch (InstantiationException e) {
+      throw new QuercusModuleException(e);
+    }
+    catch (IllegalAccessException e) {
+      throw new QuercusModuleException(e);
+    }
+    
+    return true;
   }
 
   private Method getConsMethod(Class type)
@@ -1086,51 +1026,6 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  /**
-   *
-   * @return false if printRImpl not implemented
-   * @throws IOException
-   */
-  public boolean printRImpl(Env env,
-                               Object obj,
-                               WriteStream out,
-                               int depth,
-                               IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-
-    try {
-      if (_printRImpl == null) {
-        return false;
-	
-      }
-      
-      _printRImpl.invoke(obj, env, out, depth, valueSet);
-      return true;
-    } catch (Exception e) {
-      throw new QuercusException(e);
-    }
-  }
-
-  public boolean varDumpImpl(Env env,
-                             Object obj,
-                             WriteStream out,
-                             int depth,
-                             IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    try {
-      if (_varDumpImpl == null) {
-	return false;
-      }
-      
-      _varDumpImpl.invoke(obj, env, out, depth, valueSet);
-      return true;
-    } catch (Exception e) {
-      throw new QuercusException(e);
-    }
-  }
-
   private class MethodMarshalPair {
     public Method _method;
     public Marshal _marshal;
@@ -1318,6 +1213,130 @@ public class JavaClassDef extends ClassDef {
       }
 
       return NullValue.NULL;
+    }
+  }
+
+  public class DefaultFieldDelegate
+    extends FieldDelegate
+  {
+    @Override
+    public Value getField(Env env, Value obj, String name, boolean create)
+    {
+      AbstractJavaMethod get = _getMap.get(name);
+
+      if (get != null) {
+        try {
+          return get.call(env, obj);
+        } catch (Throwable e) {
+          log.log(Level.FINE, L.l(e.getMessage()), e);
+          return NullValue.NULL;
+        }
+      }
+
+      FieldMarshalPair fieldPair = _fieldMap.get(name);
+      if (fieldPair != null) {
+        try {
+          Object result = fieldPair._field.get(obj);
+          return fieldPair._marshal.unmarshal(env, result);
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+        }
+      }
+
+      if (__getField != null) {
+        try {
+          return __getField.call(env, obj, new UnicodeValueImpl(name));
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+          return NullValue.NULL;
+        }
+      }
+
+      if (create)
+        env.warning(L.l("field '{0}' is invalid"));
+
+      return NullValue.NULL;
+    }
+
+    @Override
+    public void putField(Env env, Value obj, String name, Value value)
+    {
+      AbstractJavaMethod setter = _setMap.get(name);
+
+      if (setter != null) {
+        try {
+          setter.call(env, obj, value);
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+        }
+      }
+
+      FieldMarshalPair fieldPair = _fieldMap.get(name);
+
+      if (fieldPair != null) {
+        try {
+          Class type = fieldPair._field.getType();
+          Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
+          fieldPair._field.set(obj, marshaledValue);
+
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+        }
+      }
+
+      if (__setField != null) {
+        try {
+          __setField.call(env, obj, new UnicodeValueImpl(name), value);
+        } catch (Throwable e) {
+          log.log(Level.FINE,  L.l(e.getMessage()), e);
+        }
+      }
+    }
+  }
+
+  public class DefaultPrintDelegate
+    extends PrintDelegate
+  {
+    @Override
+    public void printRImpl(Env env,
+                           ObjectValue obj,
+                           WriteStream out,
+                           int depth,
+                           IdentityHashMap<Value, String> valueSet)
+      throws IOException
+    {
+      try {
+        if (_printRImpl != null)
+          _printRImpl.invoke(obj, env, out, depth, valueSet);
+        else
+          out.print("resource(" + obj.toString(env) + ")"); // XXX:
+      } catch (Exception e) {
+        throw new QuercusException(e);
+      }
+    }
+
+    @Override
+    public void varDumpImpl(Env env,
+                            ObjectValue obj,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+      throws IOException
+    {
+      try {
+        if (_varDumpImpl != null)
+          _varDumpImpl.invoke(obj, env, out, depth, valueSet);
+        else
+          out.print("resource(" + obj.toString(env) + ")"); // XXX:
+      } catch (Exception e) {
+        throw new QuercusException(e);
+      }
+    }
+
+    public void varExport(Env env, ObjectValue obj, StringBuilder sb)
+    {
+      if (true) throw new UnsupportedOperationException("unimplemented");
     }
   }
 

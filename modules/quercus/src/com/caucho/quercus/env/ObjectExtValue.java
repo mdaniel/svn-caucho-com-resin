@@ -113,7 +113,7 @@ public class ObjectExtValue extends ObjectValue
         if (create)
           return createEntry(key).getValue();
         else
-          return getQuercusClass().getField(env, this, key);
+          return getQuercusClass().getField(env, this, key, create);
       }
       else if (key.equals(entry.getKey())) {
         return entry.getValue();
@@ -122,7 +122,7 @@ public class ObjectExtValue extends ObjectValue
       hash = (hash + 1) & hashMask;
     }
 
-    return getQuercusClass().getField(env, this, key);
+    return getQuercusClass().getField(env, this, key, create);
   }
 
   /**
@@ -237,6 +237,7 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Adds a new value.
    */
+  /**  XXX: dead code, now handles by super, which may end up in a call to putThisField
   @Override
   public Value putField(Env env, String key, Value value)
   {
@@ -270,6 +271,7 @@ public class ObjectExtValue extends ObjectValue
 
     return value;
   }
+*/
 
   /**
    * Adds a new value.
@@ -875,49 +877,6 @@ public class ObjectExtValue extends ObjectValue
   public String toString()
   {
     return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + getQuercusClass().getName() + "]";
-  }
-
-  @Override
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    out.println("object(" + getName() + ") (" + getSize() + ") {");
-
-    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
-      ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
-
-      entry.varDumpImpl(env, out, depth + 1, valueSet);
-    }
-
-    printDepth(out, 2 * depth);
-
-    out.print("}");
-  }
-
-  @Override
-  protected void printRImpl(Env env,
-                            WriteStream out,
-                            int depth,
-                            IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    out.print(getQuercusClass().getName());
-    out.print(' ');
-    out.println("Object");
-    printDepth(out, 4 * depth);
-    out.println("(");
-
-    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
-      ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
-
-      entry.printRImpl(env, out, depth + 1, valueSet);
-    }
-
-    printDepth(out, 4 * depth);
-    out.println(")");
   }
 
   //

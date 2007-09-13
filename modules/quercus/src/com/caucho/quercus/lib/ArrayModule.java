@@ -298,9 +298,9 @@ public class ArrayModule
                             @Optional("false") boolean recursive)
   {
     if (!recursive)
-      return value.getCount(env);
+      return LongValue.create(value.getCount(env));
     else
-      return value.getCountRecursive(env);
+      return LongValue.create(value.getCountRecursive(env));
   }
 
   /**
@@ -1331,8 +1331,8 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean asort(Env env, ArrayValue array,
-                       @Optional long sortFlag)
+  static public boolean asort(Env env, ArrayValue array,
+                              @Optional long sortFlag)
   {
     if (array == null)
       return false;
@@ -1366,8 +1366,8 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean ksort(Env env, ArrayValue array,
-                       @Optional long sortFlag)
+  static public boolean ksort(Env env, ArrayValue array,
+                              @Optional long sortFlag)
   {
     if (array == null)
       return false;
@@ -1436,7 +1436,7 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public Value natsort(ArrayValue array)
+  static public Value natsort(ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -1456,7 +1456,7 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public Value natcasesort(ArrayValue array)
+  static public Value natcasesort(ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -1474,7 +1474,7 @@ public class ArrayModule
    *
    * @param array the array to trim strings from
    */
-  private void trimArrayStrings(ArrayValue array)
+  static private void trimArrayStrings(ArrayValue array)
   {
     if (array != null) {
 
@@ -1621,10 +1621,10 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean uasort(Env env,
-                        ArrayValue array,
-                        Callback func,
-                        @Optional long sortFlag)
+  static public boolean uasort(Env env,
+                               ArrayValue array,
+                               Callback func,
+                               @Optional long sortFlag)
   {
     if (array == null)
       return false;
@@ -1651,10 +1651,10 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean uksort(Env env,
-                        ArrayValue array,
-                        Callback func,
-                        @Optional long sortFlag)
+  static public boolean uksort(Env env,
+                               ArrayValue array,
+                               Callback func,
+                               @Optional long sortFlag)
   {
     if (array == null)
       return false;

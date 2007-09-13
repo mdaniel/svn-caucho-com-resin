@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
@@ -41,10 +40,12 @@ import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.util.IdentityIntMap;
 import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
 
+import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a Quercus runtime class.
@@ -66,6 +67,8 @@ public class QuercusClass {
   private AbstractFunction _call;
 
   private ArrayDelegate _arrayDelegate = new DefaultArrayDelegate();
+  private FieldDelegate _fieldDelegate = new DefaultFieldDelegate();
+  private PrintDelegate _printDelegate = new DefaultPrintDelegate();
 
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
@@ -219,6 +222,32 @@ public class QuercusClass {
   }
 
   /**
+   * Add's a delegate.
+   */
+  public void addFieldDelegate(FieldDelegate delegate)
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, L.l("{0} adding delegate {1}", this,  delegate));
+
+    delegate.init(_fieldDelegate);
+
+    _fieldDelegate = delegate;
+  }
+
+  /**
+   * Add's a delegate.
+   */
+  public void addPrintDelegate(PrintDelegate delegate)
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, L.l("{0} adding delegate {1}", this,  delegate));
+
+    delegate.init(_printDelegate);
+
+    _printDelegate = delegate;
+  }
+
+  /**
    * Sets the __get
    */
   public void setGet(AbstractFunction fun)
@@ -232,14 +261,6 @@ public class QuercusClass {
   public void setSet(AbstractFunction fun)
   {
     _set = fun;
-  }
-
-  /**
-   * Sets the __set
-   */
-  public AbstractFunction getSetField()
-  {
-    return _set;
   }
 
   /**
@@ -500,9 +521,9 @@ public class QuercusClass {
   /**
    * Creates a new instance.
    */
-  public Value newInstance(Env env)
+  public ObjectValue newInstance(Env env)
   {
-    Value obj = _classDef.newInstance(env, this);
+    ObjectValue obj = _classDef.newInstance(env, this);
     
     for (int i = 0; i < _initializers.size(); i++) {
       _initializers.get(i).initInstance(env, obj);
@@ -524,12 +545,12 @@ public class QuercusClass {
   // Array
   //
 
-  public LongValue getCount(Env env, ObjectValue obj)
+  public int getCount(Env env, ObjectValue obj)
   {
     return _arrayDelegate.getCount(env, obj);
   }
 
-  public LongValue getCountRecursive(Env env, ObjectValue obj)
+  public int getCountRecursive(Env env, ObjectValue obj)
   {
     return _arrayDelegate.getCountRecursive(env, obj);
   }
@@ -579,27 +600,53 @@ public class QuercusClass {
   }
 
   //
+  // Print
+  //
+
+  public void printRImpl(Env env,
+                         ObjectValue obj,
+                         WriteStream out,
+                         int depth, IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    _printDelegate.printRImpl(env, obj, out, depth, valueSet);
+  }
+
+  public void varDumpImpl(Env env,
+                          ObjectValue obj,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    _printDelegate.varDumpImpl(env, obj, out, depth, valueSet);
+  }
+
+  public void varExport(Env env, ObjectValue obj, StringBuilder sb)
+  {
+    _printDelegate.varExport(env, obj, sb);
+  }
+
+  //
   // Fields
   //
 
   /**
    * Implements the __get method call.
    */
-  public Value getField(Env env, Value qThis, String field)
+  public Value getField(Env env, Value obj, String name, boolean create)
   {
-    if (_get != null)
-      return _get.callMethod(env, qThis, new UnicodeBuilderValue(field));
-    else
-      return UnsetValue.UNSET;
+    return _fieldDelegate.getField(env, obj, name, create);
   }
 
   /**
    * Implements the __set method call.
    */
-  public void setField(Env env, Value qThis, String field, Value value)
+  public Value putField(Env env, Value obj, String name, Value value)
   {
-    if (_set != null)
-      _set.callMethod(env, qThis, new UnicodeBuilderValue(field), value);
+    _fieldDelegate.putField(env, obj, name, value);
+
+    return value;
   }
 
   /**
@@ -1114,13 +1161,13 @@ public class QuercusClass {
     extends ArrayDelegate
   {
     @Override
-    public LongValue getCount(Env env, ObjectValue obj)
+    public int getCount(Env env, ObjectValue obj)
     {
-      return LongValue.ONE;
+      return 1;
     }
 
     @Override
-    public LongValue getCountRecursive(Env env, ObjectValue obj)
+    public int getCountRecursive(Env env, ObjectValue obj)
     {
       return getCount(env, obj);
     }
@@ -1185,6 +1232,109 @@ public class QuercusClass {
     public String toString()
     {
       return getClass().getSimpleName() + "[" + QuercusClass.this.getName() + "]";
+    }
+  }
+
+  /**
+   * Default implementations for delegated methods.
+   */
+  public class DefaultFieldDelegate
+    extends FieldDelegate
+  {
+    public DefaultFieldDelegate()
+    {
+    }
+
+    @Override
+    public Value getField(Env env, Value obj, String name, boolean create)
+    {
+      if (_get != null)
+        return _get.callMethod(env, obj, new UnicodeBuilderValue(name));
+
+      return UnsetValue.UNSET;
+    }
+
+    @Override
+    public void putField(Env env, Value obj, String name, Value value)
+    {
+      if (_set != null)
+        _set.callMethod(env, obj, new UnicodeBuilderValue(name), value);
+      else
+        obj.putThisField(env, name, value);
+    }
+  }
+
+  /**
+   * Default implementations for delegated methods.
+   */
+  public class DefaultPrintDelegate
+    extends PrintDelegate
+  {
+    @Override
+    public void printRImpl(Env env,
+                           ObjectValue obj,
+                           WriteStream out,
+                           int depth,
+                           IdentityHashMap<Value, String> valueSet)
+      throws IOException
+    {
+      out.print(getName());
+      out.print(' ');
+      out.println("Object");
+
+      for (int i = 0; i < 4 * depth; i++)
+        out.print(' ');
+
+      out.println("(");
+
+      for (Map.Entry<String,Value> entry : sortedEntrySet(env, obj)) {
+        entry.getValue().printRImpl(env, out, depth + 1, valueSet);
+      }
+
+      for (int i = 0; i < 4 * depth; i++)
+        out.print(' ');
+
+      out.println(")");
+    }
+
+    private Set<Map.Entry<String, Value>> sortedEntrySet(Env env, ObjectValue obj)
+    {
+      TreeMap<String, Value> sorted = new TreeMap<String, Value>();
+
+      Iterator<Map.Entry<Value,Value>> iterator = obj.getIterator(env);
+
+      while (iterator.hasNext()) {
+        Map.Entry<Value, Value> entry = iterator.next();
+        sorted.put(entry.getKey().toString(), entry.getValue());
+      }
+
+      return sorted.entrySet();
+    }
+
+    @Override
+    public void varDumpImpl(Env env,
+                            ObjectValue obj,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+      throws IOException
+    {
+      out.println("object(" + getName() + ") (" + obj.getSize() + ") {");
+
+      for (Map.Entry<String,Value> entry : sortedEntrySet(env, obj)) {
+        entry.getValue().varDumpImpl(env, out, depth + 1, valueSet);
+      }
+
+      for (int i = 0; i < 2 * depth; i++)
+        out.print(' ');
+
+      out.print("}");
+    }
+
+    @Override
+    public void varExport(Env env, ObjectValue obj, StringBuilder sb)
+    {
+      if (true) throw new UnsupportedOperationException("unimplemented");
     }
   }
 }

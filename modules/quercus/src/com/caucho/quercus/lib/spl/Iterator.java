@@ -30,9 +30,9 @@
 package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.annotation.Delegate;
+import com.caucho.quercus.annotation.Delegates;
 
-@Delegate(IteratorDelegate.class)
+@Delegates(IteratorDelegate.class)
 public interface Iterator
   extends Traversable
 {

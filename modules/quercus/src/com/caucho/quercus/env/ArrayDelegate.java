@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Iterator;
 
 /**
- * A factory that produces iterators for Quercus objects.
+ * A delegate that performs Array operations for Quercus objects.
  */
 abstract public class ArrayDelegate {
   private ArrayDelegate _next;
@@ -84,7 +84,7 @@ abstract public class ArrayDelegate {
   /**
    * Returns the value for the count() function.
    */
-  public LongValue getCount(Env env, ObjectValue obj)
+  public int getCount(Env env, ObjectValue obj)
   {
     return _next.getCount(env, obj);
   }
@@ -92,7 +92,7 @@ abstract public class ArrayDelegate {
   /**
    * Returns the value for the count() function.
    */
-  public LongValue getCountRecursive(Env env, ObjectValue obj)
+  public int getCountRecursive(Env env, ObjectValue obj)
   {
     return _next.getCountRecursive(env, obj);
   }

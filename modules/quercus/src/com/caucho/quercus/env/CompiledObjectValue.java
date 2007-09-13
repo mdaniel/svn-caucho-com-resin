@@ -31,7 +31,6 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -656,70 +655,6 @@ public class CompiledObjectValue extends ObjectValue
     return "CompiledObjectValue@" + System.identityHashCode(this) +  "[" + getQuercusClass().getName() + "]";
   }
 
-  @Override
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    out.println("object(" + getName() + ") (" + getSize() + ") {");
-
-    ArrayList<String> names = getQuercusClass().getFieldNames();
-    
-    if (names != null) {
-      int index = 0;
-
-      for (int i = 0; i < names.size(); i++) {
-	if (_fields[i] == UnsetValue.UNSET)
-	  continue;
-
-	printDepth(out, 2 * depth + 2);
-	out.println("[\"" + names.get(i) + "\"]=>");
-	printDepth(out, 2 * depth + 2);
-	_fields[i].varDumpImpl(env, out, depth + 1, valueSet);
-	out.println();
-      }
-    }
-
-    if (_object != null) {
-      for (Map.Entry<String,Value> mapEntry : _object.sortedEntrySet()) {
-	ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
-
-	entry.varDumpImpl(env, out, depth + 1, valueSet);
-      }
-    }
-
-    printDepth(out, 2 * depth);
-
-    out.print("}");
-  }
-
-  @Override
-  protected void printRImpl(Env env,
-                            WriteStream out,
-                            int depth,
-                            IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    out.print(getQuercusClass().getName());
-    out.print(' ');
-    out.println("Object");
-    printDepth(out, 4 * depth);
-    out.println("(");
-
-    /*
-    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
-      ObjectValue.Entry entry = (ObjectValue.Entry) mapEntry;
-
-      entry.printRImpl(env, out, depth + 1, valueSet);
-    }
-    */
-
-    printDepth(out, 4 * depth);
-    out.println(")");
-  }
-  
   //
   // Java Serialization
   //

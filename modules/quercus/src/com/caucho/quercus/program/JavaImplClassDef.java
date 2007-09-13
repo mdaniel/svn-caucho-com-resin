@@ -30,14 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.env.AbstractJavaMethod;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.FunctionMap;
-import com.caucho.quercus.env.JavaMethod;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.ObjectExtValue;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
 import com.caucho.quercus.function.Marshal;
@@ -104,7 +97,7 @@ public class JavaImplClassDef extends ClassDef {
   /**
    * Creates a new instance.
    */
-  public Value newInstance(Env env, QuercusClass qClass)
+  public ObjectValue newInstance(Env env, QuercusClass qClass)
   {
     return new ObjectExtValue(qClass);
   }

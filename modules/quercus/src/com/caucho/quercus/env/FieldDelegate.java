@@ -27,21 +27,36 @@
  * @author Sam
  */
 
-package com.caucho.quercus.annotation;
-
-import com.caucho.quercus.env.ArrayDelegate;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
+package com.caucho.quercus.env;
 
 /**
- * Mark a class as having a delegate that overrides some or all of the
- * default behaviour of an object
+ * A delegate that performs Field operations for Quercus objects.
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Delegate {
-  public Class<? extends ArrayDelegate> value();
+abstract public class FieldDelegate {
+  private FieldDelegate _next;
+
+  public FieldDelegate()
+  {
+  }
+
+  public void init(FieldDelegate next)
+  {
+    _next = next;
+  }
+
+  public Value getField(Env env,
+                        Value obj,
+                        String name, boolean create)
+  {
+    return _next.getField(env, obj, name, create);
+  }
+
+  public void putField(Env env,
+                       Value obj,
+                       String name,
+                       Value value)
+  {
+    _next.putField(env, obj, name, value);
+  }
+
 }

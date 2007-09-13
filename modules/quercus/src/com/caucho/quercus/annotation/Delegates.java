@@ -27,18 +27,23 @@
  * @author Sam
  */
 
-package com.caucho.quercus.lib.spl;
+package com.caucho.quercus.annotation;
 
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.annotation.Delegates;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Delegates(ArrayAccessDelegate.class)
-public interface ArrayAccess {
-  public boolean offsetExists(Value offset);
-
-  public Value offsetSet(Value offset, Value value);
-
-  public Value offsetGet(Value offset);
-
-  public Value offsetUnset(Value offset);
+/**
+ * Mark a class as having a delegate that overrides some or all of the
+ * default behaviour of an object.
+ *
+ * @see com.caucho.quercus.env.ArrayDelegate
+ * @see com.caucho.quercus.env.PrintDelegate
+ * @see com.caucho.quercus.env.FieldDelegate
+ */
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Delegates {
+  public Class<?>[] value();
 }

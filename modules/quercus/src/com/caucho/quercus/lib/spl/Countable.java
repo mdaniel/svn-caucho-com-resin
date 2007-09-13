@@ -29,9 +29,9 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.annotation.Delegate;
+import com.caucho.quercus.annotation.Delegates;
 
-@Delegate(CountableDelegate.class)
+@Delegates(CountableDelegate.class)
 public interface Countable {
   public int count();
 }

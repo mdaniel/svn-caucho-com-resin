@@ -33,6 +33,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectExtValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.util.L10N;
 
@@ -125,7 +126,7 @@ abstract public class ClassDef {
   /**
    * Creates a new instance.
    */
-  public Value newInstance(Env env, QuercusClass qcl)
+  public ObjectValue newInstance(Env env, QuercusClass qcl)
   {
     if (isAbstract()) {
       throw env.errorException(L.l("abstract class '{0}' cannot be instantiated.",

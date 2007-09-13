@@ -2911,6 +2911,9 @@ public class Env {
       if (useImport) {
         def = importJavaClass(className);
       }
+      else
+        log.log(Level.FINER, e.toString(), e);
+
     }
 
     if (def != null)
@@ -3124,6 +3127,7 @@ public class Env {
     }
 
     ClassDef staticClass = _quercus.findClass(name);
+
     if (staticClass != null)
       return createQuercusClass(staticClass, null); // XXX: cache
 
@@ -3148,7 +3152,8 @@ public class Env {
           //XXX: do we want to create a QuercusClass for a JavaClassDef?
           return createQuercusClass(javaClassDef, null);
         }
-        catch (Throwable e) {
+        catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
         }
       }
     }

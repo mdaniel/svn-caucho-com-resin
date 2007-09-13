@@ -31,9 +31,8 @@ package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.env.ArrayDelegate;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.Value;
 
 /**
  * A delegate that intercepts the global count() function and calls count()
@@ -44,11 +43,11 @@ public class CountableDelegate
   extends ArrayDelegate
 {
   @Override
-  public LongValue getCount(Env env, ObjectValue obj)
+  public int getCount(Env env, ObjectValue obj)
   {
     Value count = obj.findFunction("count").callMethod(env, obj);
 
-    return count.toLongValue();
+    return count.toInt();
   }
 
 }

@@ -1615,15 +1615,15 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the count, as returned by the global php count() function
    */
-  public LongValue getCount(Env env)
+  public int getCount(Env env)
   {
-    return LongValue.ONE;
+    return 1;
   }
 
   /**
    * Returns the count, as returned by the global php count() function
    */
-  public LongValue getCountRecursive(Env env)
+  public int getCountRecursive(Env env)
   {
     return getCount(env);
   }
@@ -1693,7 +1693,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value get(Value index)
   {
-    return NullValue.NULL;
+    return UnsetValue.UNSET;
   }
   
   /**
