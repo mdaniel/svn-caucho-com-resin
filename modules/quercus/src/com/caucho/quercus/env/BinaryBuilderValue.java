@@ -737,6 +737,33 @@ public class BinaryBuilderValue
   }
 
   @Override
+  public boolean eql(Value o)
+  {
+    o = o.toValue();
+    
+    if (o instanceof BinaryBuilderValue) {
+      BinaryBuilderValue value = (BinaryBuilderValue) o;
+
+      int length = _length;
+      
+      if (length != value._length)
+        return false;
+
+      byte []bufferA = _buffer;
+      byte []bufferB = value._buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (bufferA[i] != bufferB[i])
+          return false;
+      }
+
+      return true;
+    }
+    else
+      return false;
+  }
+
+  @Override
   public String toDebugString()
   {
     StringBuilder sb = new StringBuilder();

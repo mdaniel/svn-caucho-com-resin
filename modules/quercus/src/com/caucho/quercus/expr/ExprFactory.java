@@ -74,11 +74,19 @@ public class ExprFactory {
   }
 
   /**
-   * Creates a string literal expression.
+   * Creates a string (php5) literal expression.
    */
   public Expr createString(String lexeme)
   {
     return new StringLiteralExpr(lexeme);
+  }
+
+  /**
+   * Creates a string literal expression.
+   */
+  public Expr createUnicode(String lexeme)
+  {
+    return new UnicodeLiteralExpr(lexeme);
   }
 
   /**
@@ -558,7 +566,17 @@ public class ExprFactory {
       StringLiteralExpr rightString = (StringLiteralExpr) tail.getValue();
 
       Expr value = createString(leftString.evalConstant().toString()
-                + rightString.evalConstant().toString());
+				+ rightString.evalConstant().toString());
+
+      return createAppendImpl(value, tail.getNext());
+    }
+    else if (left.getValue() instanceof UnicodeLiteralExpr
+             && tail.getValue() instanceof UnicodeLiteralExpr) {
+      UnicodeLiteralExpr leftString = (UnicodeLiteralExpr) left.getValue();
+      UnicodeLiteralExpr rightString = (UnicodeLiteralExpr) tail.getValue();
+
+      Expr value = createUnicode(leftString.evalConstant().toString()
+				 + rightString.evalConstant().toString());
 
       return createAppendImpl(value, tail.getNext());
     }

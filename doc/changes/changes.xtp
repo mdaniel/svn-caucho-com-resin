@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>quercus: i18n unicode.semantics updates</li>
 <li>added web-app-deploy versioning for session hot-deploy improvements (#1058)</li>
 <li>(2007-09-10) isapi: pass client-read-timeout to isapi_srun.dll (#1862, rep by Takahiro Fukuda)</li>
 <li>multiple access-logs were causing rollover issues (#1947, rep by brianb08)</li>

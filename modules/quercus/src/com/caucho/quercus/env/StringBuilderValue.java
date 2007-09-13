@@ -787,6 +787,33 @@ public class StringBuilderValue
       return false;
   }
 
+  @Override
+  public boolean eql(Value o)
+  {
+    o = o.toValue();
+    
+    if (o instanceof StringBuilderValue) {
+      StringBuilderValue value = (StringBuilderValue) o;
+
+      int length = _length;
+      
+      if (length != value._length)
+        return false;
+
+      byte []bufferA = _buffer;
+      byte []bufferB = value._buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (bufferA[i] != bufferB[i])
+          return false;
+      }
+
+      return true;
+    }
+    else
+      return false;
+  }
+
   //
   // Java generator code
   //

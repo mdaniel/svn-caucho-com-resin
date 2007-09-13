@@ -140,6 +140,7 @@ abstract public class UnicodeValue extends StringValue {
   /**
    * Returns true for equality
    */
+  /*
   @Override
   public boolean eq(Value rValue)
   {
@@ -168,6 +169,6 @@ abstract public class UnicodeValue extends StringValue {
     else
       return equals(rValue.toStringValue());
   }
-
+  */
 }
 

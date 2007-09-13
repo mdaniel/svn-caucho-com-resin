@@ -107,8 +107,273 @@ public class UrlModule extends AbstractQuercusModule {
   }
 
   /**
+   * Connects to the given URL using a HEAD request to retreive
+   * the headers sent in the response.
+   */
+  public static Value get_headers(Env env, String urlString,
+                                  @Optional Value format)
+  {
+    Socket socket = null;
+
+    try {
+      URL url = new URL(urlString);
+
+      if (! url.getProtocol().equals("http") &&
+          ! url.getProtocol().equals("https")) {
+        env.warning(L.l("Not an HTTP URL"));
+        return null;
+      }
+
+      int port = 80;
+
+      if (url.getPort() < 0) {
+        if (url.getProtocol().equals("http"))
+          port = 80;
+        else if (url.getProtocol().equals("https"))
+          port = 443;
+      } else {
+        port = url.getPort();
+      }
+
+      socket = new Socket(url.getHost(), port);
+
+      OutputStream out = socket.getOutputStream();
+      InputStream in = socket.getInputStream();
+
+      StringBuilder request = new StringBuilder();
+
+      request.append("HEAD ");
+
+      if (url.getPath() != null)
+        request.append(url.getPath());
+
+      if (url.getQuery() != null)
+        request.append("?" + url.getQuery());
+
+      if (url.getRef() != null)
+        request.append("#" + url.getRef());
+
+      request.append(" HTTP/1.0\r\n");
+
+      if (url.getHost() != null)
+        request.append("Host: " + url.getHost() + "\r\n");
+
+      request.append("\r\n");
+
+      OutputStreamWriter writer = new OutputStreamWriter(out);
+      writer.write(request.toString());
+      writer.flush();
+
+      LineNumberReader reader = new LineNumberReader(new InputStreamReader(in));
+
+      ArrayValue result = new ArrayValueImpl();
+
+      if (format.toBoolean()) {
+        for (String line = reader.readLine();
+             line != null;
+             line = reader.readLine()) {
+          line = line.trim();
+
+          if (line.length() == 0)
+            continue;
+
+          int colon = line.indexOf(':');
+
+          ArrayValue values;
+
+          if (colon < 0)
+            result.put(new UnicodeValueImpl(line.trim()));
+          else {
+            UnicodeValueImpl key =
+              new UnicodeValueImpl(line.substring(0, colon).trim());
+
+            UnicodeValueImpl value;
+
+            if (colon < line.length())
+              value = new UnicodeValueImpl(line.substring(colon + 1).trim());
+            else
+              value = new UnicodeValueImpl("");
+
+
+            if (result.get(key) != UnsetValue.UNSET)
+              values = (ArrayValue)result.get(key);
+            else {
+              values = new ArrayValueImpl();
+
+              result.put(key, values);
+            }
+
+            values.put(value);
+          }
+        }
+
+        // collapse single entries
+        for (Value key : result.keySet()) {
+          Value value = result.get(key);
+
+          if (value.isArray() && ((ArrayValue)value).getSize() == 1)
+            result.put(key, ((ArrayValue)value).get(LongValue.ZERO));
+        }
+      } else {
+        for (String line = reader.readLine();
+             line != null;
+             line = reader.readLine()) {
+          line = line.trim();
+
+          if (line.length() == 0)
+            continue;
+
+          result.put(new UnicodeValueImpl(line.trim()));
+        }
+      }
+
+      return result;
+    } catch (Exception e) {
+      env.warning(e);
+
+      return BooleanValue.FALSE;
+    } finally {
+      try {
+        if (socket != null)
+          socket.close();
+      } catch (IOException e) {
+        env.warning(e);
+      }
+    }
+  }
+
+  /**
+   * Extracts the meta tags from a file and returns them as an array.
+   */
+  public static Value get_meta_tags(Env env, String filename,
+                                    @Optional("false") boolean use_include_path)
+  {
+    InputStream in = null;
+
+    ArrayValue result = new ArrayValueImpl();
+
+    try {
+      BinaryStream stream =
+        FileModule.fopen(env, filename, "r", use_include_path, null);
+
+      if (stream == null || ! (stream instanceof BinaryInput))
+        return result;
+
+      BinaryInput input = (BinaryInput) stream;
+
+      while (! input.isEOF()) {
+        String tag = getNextTag(input);
+
+        if (tag.equalsIgnoreCase("meta")) {
+          String name = null;
+          String content = null;
+
+          String [] attr;
+
+          while ((attr = getNextAttribute(input)) != null) {
+            if (name == null && attr[0].equalsIgnoreCase("name")) {
+              if (attr.length > 1)
+                name = attr[1];
+            } else if (content == null && attr[0].equalsIgnoreCase("content")) {
+              if (attr.length > 1)
+                content = attr[1];
+            }
+
+            if (name != null && content != null) {
+              result.put(new UnicodeValueImpl(name),
+                         new UnicodeValueImpl(content));
+              break;
+            }
+          }
+        } else if (tag.equalsIgnoreCase("/head"))
+          break;
+      }
+    } catch (IOException e) {
+      env.warning(e);
+    } finally {
+      try {
+        if (in != null)
+          in.close();
+      } catch (IOException e) {
+        env.warning(e);
+      }
+    }
+
+    return result;
+  }
+  
+  public static Value http_build_query(Env env, Value formdata,
+                                       @Optional String numeric_prefix)
+  {
+    String result =
+      httpBuildQueryImpl(env, "", formdata, numeric_prefix).toString();
+
+    return new UnicodeValueImpl(result);
+  }
+
+  public static StringBuilder httpBuildQueryImpl(Env env, String path,
+                                                 Value formdata,
+                                                 String numeric_prefix)
+  {
+    StringBuilder result = new StringBuilder();
+
+    Set<Map.Entry<Value,Value>> entrySet;
+
+    if (formdata.isArray())
+      entrySet = ((ArrayValue)formdata).entrySet();
+    else if (formdata.isObject()) {
+      Set<Map.Entry<String,Value>> stringEntrySet
+        = ((ObjectValue)formdata).entrySet();
+
+      LinkedHashMap<Value,Value> valueMap = new LinkedHashMap<Value,Value>();
+
+      for (Map.Entry<String,Value> entry : stringEntrySet)
+        valueMap.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
+
+      entrySet = valueMap.entrySet();
+    } else {
+      env.warning(L.l("formdata must be an array or object"));
+
+      return result;
+    }
+
+    for (Map.Entry<Value,Value> entry : entrySet) {
+      String newPath = makeNewPath(path, entry.getKey(), numeric_prefix);
+
+      if (entry.getValue().isArray() || entry.getValue().isObject()) {
+        // can always throw away the numeric prefix on recursive calls
+        result.append(httpBuildQueryImpl(env, newPath, entry.getValue(), null));
+        result.append("&");
+      } else {
+        result.append(newPath + "=");
+        result.append(urlencode(entry.getValue().toString()));
+        result.append("&");
+      }
+    }
+
+    // trim any trailing &'s
+    if (result.length() > 0)
+      result.deleteCharAt(result.length() - 1);
+
+    return result;
+  }
+
+  private static String makeNewPath(String oldPath, Value key,
+                                    String numeric_prefix)
+  {
+    if (oldPath.length() == 0) {
+      if (key.isLongConvertible() && numeric_prefix != null)
+        return urlencode(numeric_prefix + key.toString());
+      else
+        return urlencode(key.toString());
+    } else
+      return oldPath + "[" + urlencode(key.toString()) + "]";
+  }
+
+  /**
    * Creates a http string.
    */
+  /*
   public String http_build_query(Value value,
                                  @Optional String prefix)
   {
@@ -144,10 +409,12 @@ public class UrlModule extends AbstractQuercusModule {
 
     return sb.toString();
   }
+  */
 
   /**
    * Creates a http string.
    */
+  /*
   private void http_build_query(StringBuilder sb,
                                 String prefix,
                                 ArrayValue array)
@@ -170,185 +437,7 @@ public class UrlModule extends AbstractQuercusModule {
       }
     }
   }
-
-  /**
-   * Gets the magic quotes value.
-   */
-  public static String urlencode(String str)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    urlencode(sb, str);
-
-    return sb.toString();
-  }
-
-  /**
-   * Gets the magic quotes value.
-   */
-  private static void urlencode(StringBuilder sb, String str)
-  {
-    int len = str.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = str.charAt(i);
-
-      if ('a' <= ch && ch <= 'z')
-        sb.append(ch);
-      else if ('A' <= ch && ch <= 'Z')
-        sb.append(ch);
-      else if ('0' <= ch && ch <= '9')
-        sb.append(ch);
-      else if (ch == '-' || ch == '_' || ch == '.')
-        sb.append(ch);
-      else if (ch == ' ')
-        sb.append('+');
-      else {
-        sb.append('%');
-        sb.append(toHexDigit(ch / 16));
-        sb.append(toHexDigit(ch));
-      }
-    }
-  }
-
-  /**
-   * Returns the decoded string.
-   */
-  public static String urldecode(String s)
-  {
-    if (s == null)
-      return "";
-  
-    int len = s.length();
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < len; i++) {
-      char ch = s.charAt(i);
-
-      if (ch == '%' && i + 2 < len) {
-        int d1 = s.charAt(i + 1);
-        int d2 = s.charAt(i + 2);
-
-        int v = 0;
-
-        if ('0' <= d1 && d1 <= '9')
-          v = 16 * (d1 - '0');
-        else if ('a' <= d1 && d1 <= 'f')
-          v = 16 * (d1 - 'a' + 10);
-        else if ('A' <= d1 && d1 <= 'F')
-          v = 16 * (d1 - 'A' + 10);
-        else {
-          sb.append('%');
-          continue;
-        }
-
-        if ('0' <= d2 && d2 <= '9')
-          v += (d2 - '0');
-        else if ('a' <= d2 && d2 <= 'f')
-          v += (d2 - 'a' + 10);
-        else if ('A' <= d2 && d2 <= 'F')
-          v += (d2 - 'A' + 10);
-        else {
-          sb.append('%');
-          continue;
-        }
-
-        i += 2;
-        sb.append((char) v);
-      }
-      else if (ch == '+')
-        sb.append(' ');
-      else
-        sb.append(ch);
-    }
-
-    return sb.toString();
-  }
-
-  /**
-   * Returns the decoded string.
-   */
-  public static String rawurldecode(String s)
-  {
-    if (s == null)
-      return "";
-
-    int len = s.length();
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < len; i++) {
-      char ch = s.charAt(i);
-
-      if (ch == '%' && i + 2 < len) {
-        int d1 = s.charAt(i + 1);
-        int d2 = s.charAt(i + 2);
-
-        int v = 0;
-
-        if ('0' <= d1 && d1 <= '9')
-          v = 16 * (d1 - '0');
-        else if ('a' <= d1 && d1 <= 'f')
-          v = 16 * (d1 - 'a' + 10);
-        else if ('A' <= d1 && d1 <= 'F')
-          v = 16 * (d1 - 'A' + 10);
-        else {
-          sb.append('%');
-          continue;
-        }
-
-        if ('0' <= d2 && d2 <= '9')
-          v += (d2 - '0');
-        else if ('a' <= d2 && d2 <= 'f')
-          v += (d2 - 'a' + 10);
-        else if ('A' <= d2 && d2 <= 'F')
-          v += (d2 - 'A' + 10);
-        else {
-          sb.append('%');
-          continue;
-        }
-
-        i += 2;
-        sb.append((char) v);
-      }
-      else
-        sb.append(ch);
-    }
-
-    return sb.toString();
-  }
-
-  /**
-   * Encodes the url
-   */
-  public static String rawurlencode(String str)
-  {
-    if (str == null)
-      return "";
-    
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < str.length(); i++) {
-      char ch = str.charAt(i);
-
-      if ('a' <= ch && ch <= 'z' ||
-          'A' <= ch && ch <= 'Z' ||
-          '0' <= ch && ch <= '9' ||
-          ch == '-' || ch == '_' || ch == '.') {
-        sb.append(ch);
-      }
-      else {
-        sb.append('%');
-        sb.append(toHexDigit(ch >> 4));
-        sb.append(toHexDigit(ch));
-      }
-    }
-
-    return sb.toString();
-  }
-
-  enum ParseUrlState {
-    INIT, USER, PASS, HOST, PORT, PATH, QUERY, FRAGMENT
-  };
+  */
 
   /**
    * Parses the URL into an array.
@@ -548,268 +637,184 @@ public class UrlModule extends AbstractQuercusModule {
     return value;
   }
 
-  public static Value http_build_query(Env env, Value formdata,
-                                       @Optional String numeric_prefix)
+
+  /**
+   * Returns the decoded string.
+   */
+  public static String rawurldecode(String s)
   {
-    String result =
-      httpBuildQueryImpl(env, "", formdata, numeric_prefix).toString();
+    if (s == null)
+      return "";
 
-    return new UnicodeValueImpl(result);
-  }
+    int len = s.length();
+    StringBuilder sb = new StringBuilder();
 
-  public static StringBuilder httpBuildQueryImpl(Env env, String path,
-                                                 Value formdata,
-                                                 String numeric_prefix)
-  {
-    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
 
-    Set<Map.Entry<Value,Value>> entrySet;
+      if (ch == '%' && i + 2 < len) {
+        int d1 = s.charAt(i + 1);
+        int d2 = s.charAt(i + 2);
 
-    if (formdata.isArray())
-      entrySet = ((ArrayValue)formdata).entrySet();
-    else if (formdata.isObject()) {
-      Set<Map.Entry<String,Value>> stringEntrySet
-        = ((ObjectValue)formdata).entrySet();
+        int v = 0;
 
-      LinkedHashMap<Value,Value> valueMap = new LinkedHashMap<Value,Value>();
+        if ('0' <= d1 && d1 <= '9')
+          v = 16 * (d1 - '0');
+        else if ('a' <= d1 && d1 <= 'f')
+          v = 16 * (d1 - 'a' + 10);
+        else if ('A' <= d1 && d1 <= 'F')
+          v = 16 * (d1 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
 
-      for (Map.Entry<String,Value> entry : stringEntrySet)
-        valueMap.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
+        if ('0' <= d2 && d2 <= '9')
+          v += (d2 - '0');
+        else if ('a' <= d2 && d2 <= 'f')
+          v += (d2 - 'a' + 10);
+        else if ('A' <= d2 && d2 <= 'F')
+          v += (d2 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
 
-      entrySet = valueMap.entrySet();
-    } else {
-      env.warning(L.l("formdata must be an array or object"));
-
-      return result;
-    }
-
-    for (Map.Entry<Value,Value> entry : entrySet) {
-      String newPath = makeNewPath(path, entry.getKey(), numeric_prefix);
-
-      if (entry.getValue().isArray() || entry.getValue().isObject()) {
-        // can always throw away the numeric prefix on recursive calls
-        result.append(httpBuildQueryImpl(env, newPath, entry.getValue(), null));
-        result.append("&");
-      } else {
-        result.append(newPath + "=");
-        result.append(urlencode(entry.getValue().toString()));
-        result.append("&");
+        i += 2;
+        sb.append((char) v);
       }
-    }
-
-    // trim any trailing &'s
-    if (result.length() > 0)
-      result.deleteCharAt(result.length() - 1);
-
-    return result;
-  }
-
-  private static String makeNewPath(String oldPath, Value key,
-                                    String numeric_prefix)
-  {
-    if (oldPath.length() == 0) {
-      if (key.isLongConvertible() && numeric_prefix != null)
-        return urlencode(numeric_prefix + key.toString());
       else
-        return urlencode(key.toString());
-    } else
-      return oldPath + "[" + urlencode(key.toString()) + "]";
+        sb.append(ch);
+    }
+
+    return sb.toString();
   }
 
   /**
-   * Connects to the given URL using a HEAD request to retreive
-   * the headers sent in the response.
+   * Encodes the url
    */
-  public static Value get_headers(Env env, String urlString,
-                                  @Optional Value format)
+  public static String rawurlencode(String str)
   {
-    Socket socket = null;
+    if (str == null)
+      return "";
+    
+    StringBuilder sb = new StringBuilder();
 
-    try {
-      URL url = new URL(urlString);
+    for (int i = 0; i < str.length(); i++) {
+      char ch = str.charAt(i);
 
-      if (! url.getProtocol().equals("http") &&
-          ! url.getProtocol().equals("https")) {
-        env.warning(L.l("Not an HTTP URL"));
-        return null;
+      if ('a' <= ch && ch <= 'z' ||
+          'A' <= ch && ch <= 'Z' ||
+          '0' <= ch && ch <= '9' ||
+          ch == '-' || ch == '_' || ch == '.') {
+        sb.append(ch);
       }
-
-      int port = 80;
-
-      if (url.getPort() < 0) {
-        if (url.getProtocol().equals("http"))
-          port = 80;
-        else if (url.getProtocol().equals("https"))
-          port = 443;
-      } else {
-        port = url.getPort();
+      else {
+        sb.append('%');
+        sb.append(toHexDigit(ch >> 4));
+        sb.append(toHexDigit(ch));
       }
+    }
 
-      socket = new Socket(url.getHost(), port);
+    return sb.toString();
+  }
 
-      OutputStream out = socket.getOutputStream();
-      InputStream in = socket.getInputStream();
+  enum ParseUrlState {
+    INIT, USER, PASS, HOST, PORT, PATH, QUERY, FRAGMENT
+  };
 
-      StringBuilder request = new StringBuilder();
+  /**
+   * Gets the magic quotes value.
+   */
+  public static String urlencode(String str)
+  {
+    StringBuilder sb = new StringBuilder();
 
-      request.append("HEAD ");
+    urlencode(sb, str);
 
-      if (url.getPath() != null)
-        request.append(url.getPath());
+    return sb.toString();
+  }
 
-      if (url.getQuery() != null)
-        request.append("?" + url.getQuery());
+  /**
+   * Gets the magic quotes value.
+   */
+  private static void urlencode(StringBuilder sb, String str)
+  {
+    int len = str.length();
 
-      if (url.getRef() != null)
-        request.append("#" + url.getRef());
+    for (int i = 0; i < len; i++) {
+      char ch = str.charAt(i);
 
-      request.append(" HTTP/1.0\r\n");
-
-      if (url.getHost() != null)
-        request.append("Host: " + url.getHost() + "\r\n");
-
-      request.append("\r\n");
-
-      OutputStreamWriter writer = new OutputStreamWriter(out);
-      writer.write(request.toString());
-      writer.flush();
-
-      LineNumberReader reader = new LineNumberReader(new InputStreamReader(in));
-
-      ArrayValue result = new ArrayValueImpl();
-
-      if (format.toBoolean()) {
-        for (String line = reader.readLine();
-             line != null;
-             line = reader.readLine()) {
-          line = line.trim();
-
-          if (line.length() == 0)
-            continue;
-
-          int colon = line.indexOf(':');
-
-          ArrayValue values;
-
-          if (colon < 0)
-            result.put(new UnicodeValueImpl(line.trim()));
-          else {
-            UnicodeValueImpl key =
-              new UnicodeValueImpl(line.substring(0, colon).trim());
-
-            UnicodeValueImpl value;
-
-            if (colon < line.length())
-              value = new UnicodeValueImpl(line.substring(colon + 1).trim());
-            else
-              value = new UnicodeValueImpl("");
-
-
-            if (result.get(key) != UnsetValue.UNSET)
-              values = (ArrayValue)result.get(key);
-            else {
-              values = new ArrayValueImpl();
-
-              result.put(key, values);
-            }
-
-            values.put(value);
-          }
-        }
-
-        // collapse single entries
-        for (Value key : result.keySet()) {
-          Value value = result.get(key);
-
-          if (value.isArray() && ((ArrayValue)value).getSize() == 1)
-            result.put(key, ((ArrayValue)value).get(LongValue.ZERO));
-        }
-      } else {
-        for (String line = reader.readLine();
-             line != null;
-             line = reader.readLine()) {
-          line = line.trim();
-
-          if (line.length() == 0)
-            continue;
-
-          result.put(new UnicodeValueImpl(line.trim()));
-        }
-      }
-
-      return result;
-    } catch (Exception e) {
-      env.warning(e);
-
-      return BooleanValue.FALSE;
-    } finally {
-      try {
-        if (socket != null)
-          socket.close();
-      } catch (IOException e) {
-        env.warning(e);
+      if ('a' <= ch && ch <= 'z')
+        sb.append(ch);
+      else if ('A' <= ch && ch <= 'Z')
+        sb.append(ch);
+      else if ('0' <= ch && ch <= '9')
+        sb.append(ch);
+      else if (ch == '-' || ch == '_' || ch == '.')
+        sb.append(ch);
+      else if (ch == ' ')
+        sb.append('+');
+      else {
+        sb.append('%');
+        sb.append(toHexDigit(ch / 16));
+        sb.append(toHexDigit(ch));
       }
     }
   }
 
   /**
-   * Extracts the meta tags from a file and returns them as an array.
+   * Returns the decoded string.
    */
-  public static Value get_meta_tags(Env env, String filename,
-                                    @Optional("false") boolean use_include_path)
+  public static String urldecode(String s)
   {
-    InputStream in = null;
+    if (s == null)
+      return "";
+  
+    int len = s.length();
+    StringBuilder sb = new StringBuilder();
 
-    ArrayValue result = new ArrayValueImpl();
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
 
-    try {
-      BinaryStream stream =
-        FileModule.fopen(env, filename, "r", use_include_path, null);
+      if (ch == '%' && i + 2 < len) {
+        int d1 = s.charAt(i + 1);
+        int d2 = s.charAt(i + 2);
 
-      if (stream == null || ! (stream instanceof BinaryInput))
-        return result;
+        int v = 0;
 
-      BinaryInput input = (BinaryInput) stream;
+        if ('0' <= d1 && d1 <= '9')
+          v = 16 * (d1 - '0');
+        else if ('a' <= d1 && d1 <= 'f')
+          v = 16 * (d1 - 'a' + 10);
+        else if ('A' <= d1 && d1 <= 'F')
+          v = 16 * (d1 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
 
-      while (! input.isEOF()) {
-        String tag = getNextTag(input);
+        if ('0' <= d2 && d2 <= '9')
+          v += (d2 - '0');
+        else if ('a' <= d2 && d2 <= 'f')
+          v += (d2 - 'a' + 10);
+        else if ('A' <= d2 && d2 <= 'F')
+          v += (d2 - 'A' + 10);
+        else {
+          sb.append('%');
+          continue;
+        }
 
-        if (tag.equalsIgnoreCase("meta")) {
-          String name = null;
-          String content = null;
-
-          String [] attr;
-
-          while ((attr = getNextAttribute(input)) != null) {
-            if (name == null && attr[0].equalsIgnoreCase("name")) {
-              if (attr.length > 1)
-                name = attr[1];
-            } else if (content == null && attr[0].equalsIgnoreCase("content")) {
-              if (attr.length > 1)
-                content = attr[1];
-            }
-
-            if (name != null && content != null) {
-              result.put(new UnicodeValueImpl(name),
-                         new UnicodeValueImpl(content));
-              break;
-            }
-          }
-        } else if (tag.equalsIgnoreCase("/head"))
-          break;
+        i += 2;
+        sb.append((char) v);
       }
-    } catch (IOException e) {
-      env.warning(e);
-    } finally {
-      try {
-        if (in != null)
-          in.close();
-      } catch (IOException e) {
-        env.warning(e);
-      }
+      else if (ch == '+')
+        sb.append(' ');
+      else
+        sb.append(ch);
     }
 
-    return result;
+    return sb.toString();
   }
 
   private static String getNextTag(BinaryInput input)

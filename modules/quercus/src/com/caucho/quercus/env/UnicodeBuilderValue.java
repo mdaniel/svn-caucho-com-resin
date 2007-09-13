@@ -973,6 +973,33 @@ public class UnicodeBuilderValue
     }
   }
 
+  @Override
+  public boolean eql(Value o)
+  {
+    o = o.toValue();
+    
+    if (o instanceof UnicodeBuilderValue) {
+      UnicodeBuilderValue value = (UnicodeBuilderValue) o;
+
+      int length = _length;
+      
+      if (length != value._length)
+        return false;
+
+      char []bufferA = _buffer;
+      char []bufferB = value._buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (bufferA[i] != bufferB[i])
+          return false;
+      }
+
+      return true;
+    }
+    else
+      return false;
+  }
+
   //
   // Java generator code
   //

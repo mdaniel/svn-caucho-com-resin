@@ -195,16 +195,18 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Returns true for equality
    */
-  public boolean eql(Value rValue)
+  @Override
+  public boolean eq(Value rValue)
   {
-    rValue = rValue.toValue();
+    if (isNumberConvertible() || rValue.isNumberConvertible()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
 
-    if (! (rValue instanceof StringValue))
-      return false;
-
-    String rString = rValue.toString();
-
-    return toString().equals(rString);
+      return l == r;
+    }
+    else {
+      return toString().equals(rValue.toString());
+    }
   }
 
   /**

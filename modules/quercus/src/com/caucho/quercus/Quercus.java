@@ -165,8 +165,6 @@ public class Quercus
   
   private ServletContext _servletContext;
   
-  private final boolean _isUnicodeSemantics;
-
   /**
    * Constructor.
    */
@@ -187,8 +185,6 @@ public class Quercus
     _workDir = getWorkDir();
 
     _iniDefinitions.addAll(_ini);
-    
-    _isUnicodeSemantics = getIniBoolean("unicode.semantics");
   }
 
   public Env createEnv(QuercusPage page,
@@ -321,9 +317,7 @@ public class Quercus
    */
   public boolean isUnicodeSemantics()
   {
-    return _isUnicodeSemantics;
-    
-    //return getIniBoolean("unicode.semantics");
+    return getIniBoolean("unicode.semantics");
   }
   
   /**

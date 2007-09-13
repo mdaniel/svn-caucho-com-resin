@@ -2780,12 +2780,12 @@ public class QuercusParser {
 
     switch (token) {
     case STRING:
-      return _factory.createString(_lexeme);
+      return createString(_lexeme);
       
     case SYSTEM_STRING:
       {
 	ArrayList<Expr> args = new ArrayList<Expr>();
-	args.add(_factory.createString(_lexeme));
+	args.add(createString(_lexeme));
 	return _factory.createFunction(getLocation(), "shell_exec", args);
       }
       
@@ -2808,9 +2808,7 @@ public class QuercusParser {
       return parseEscapedString(_lexeme, token, false);
 
     case BINARY:
-      {
-	return _factory.createBinary(_lexeme, _encoding);
-      }
+      return createBinary(_lexeme.getBytes());
 
     case SIMPLE_BINARY_ESCAPE:
     case COMPLEX_BINARY_ESCAPE:
@@ -3037,9 +3035,9 @@ public class QuercusParser {
           if (_isNewExpr && className == null
               && ("self".equals(name) || "parent".equals(name))) {
             if ("self".equals(name))
-              return _factory.createString(_classDef.getName());
+              return createString(_classDef.getName());
             else
-              return _factory.createString(_classDef.getParentName());
+              return createString(_classDef.getParentName());
           }
           else
             return parseFunction(className, name, isInstantiated);
@@ -3250,16 +3248,16 @@ public class QuercusParser {
     if (className != null)
       return _factory.createClassConst(className, name);
     else if (name.equals("__FILE__"))
-      return _factory.createString(_parserLocation.getFileName());
+      return createString(_parserLocation.getFileName());
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
     else if (name.equals("__CLASS__") && _classDef != null)
-      return _factory.createString(_classDef.getName());
+      return createString(_classDef.getName());
     else if (name.equals("__FUNCTION__")) {
       if (_isTop)
-        return _factory.createString("");
+        return createString("");
       else
-        return _factory.createString(_function.getName());
+        return createString(_function.getName());
     }
     else
       return _factory.createConst(name);
@@ -4257,10 +4255,10 @@ public class QuercusParser {
     Expr expr;
 
     if (isUnicode)
-      expr = _factory.createString(prefix);
+      expr = createString(prefix);
     else {
       // XXX: getBytes isn't correct
-      expr = _factory.createBinary(prefix.getBytes());
+      expr = createBinary(prefix.getBytes());
     }
 
     while (true) {
@@ -4300,7 +4298,7 @@ public class QuercusParser {
 	  }
 	  else {
 	    if ((ch = read()) != '>') {
-	      tail = _factory.createAppend(tail, _factory.createString("-"));
+	      tail = _factory.createAppend(tail, createString("-"));
 	    }
 	    else if (isIdentifierPart((char) (ch = read()))) {
 	      _sb.clear();
@@ -4311,7 +4309,7 @@ public class QuercusParser {
 	      tail = tail.createFieldGet(_factory, getLocation(), _sb.toString());
 	    }
 	    else {
-	      tail = _factory.createAppend(tail, _factory.createString("->"));
+	      tail = _factory.createAppend(tail, createString("->"));
 	    }
 
 	    _peek = ch;
@@ -4334,9 +4332,9 @@ public class QuercusParser {
         Expr string;
       
         if (isUnicode)
-          string = _factory.createString(_sb.toString());
+          string = createString(_sb.toString());
         else
-          string = _factory.createBinary(_sb.toString().getBytes());
+          string = createBinary(_sb.toString().getBytes());
         
 	expr = _factory.createAppend(expr, string);
       }
@@ -4398,6 +4396,22 @@ public class QuercusParser {
 		      String.valueOf((char) ch)));
 
     return tail;
+  }
+
+  private Expr createString(String lexeme)
+  {
+    if (_quercus.isUnicodeSemantics())
+      return _factory.createUnicode(lexeme);
+    else
+      return _factory.createString(lexeme);
+  }
+
+  private Expr createBinary(byte []bytes)
+  {
+    if (_quercus.isUnicodeSemantics())
+      return _factory.createBinary(bytes);
+    else
+      return _factory.createString(new String(bytes));
   }
 
   /**
