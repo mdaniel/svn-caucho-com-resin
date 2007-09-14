@@ -15,6 +15,13 @@
 <body>
 <localtoc/>
 
+<s1 name="notneeded" title="Configuration">
+<p>
+The SSL configuration tags are fully described in the
+<a href="port-tags.xtp">Port tag configuration</a>.
+</p>
+</s1>
+
 <s1 name="notneeded" title="Resin is not always responsible for SSL">
 
 <p>When you are using Resin as a servlet runner behind another web

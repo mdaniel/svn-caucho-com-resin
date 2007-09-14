@@ -241,6 +241,10 @@ will use @virtual-host.</p>
 <p>&lt;jsse-ssl> configures the port to use JSSE for SSL
 support.</p>
 
+<p>
+The <a href="ssl.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
+</p>
+
 <deftable-childtags>
 <tr>
   <td>alias</td>
@@ -297,6 +301,10 @@ support (requires Resin Professional).  OpenSSL is a fast C implementation
 of SSL security used by Apache.  Resin's configuration is OpenSSL
 follows Apache's configuration, so any documentation on installing
 SSL certificates can use documentation for Apache.</p>
+
+<p>
+The <a href="ssl.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
+</p>
 
 <deftable-childtags>
 <tr>
@@ -367,7 +375,7 @@ SSL certificates can use documentation for Apache.</p>
 <tr>
   <td>verify-client</td>
   <td>Options for client validation</td>
-  <td>false</td>
+  <td>none</td>
 </tr>
 <tr>
   <td>verify-depth</td>
@@ -477,7 +485,35 @@ connection close.</p>
 <defun title="&lt;verify-client> (OpenSSL)" version="Resin 3.1">
 <parents>openssl</parents>
 
-<p>&lt;verify-client> configures the OpenSSL client verification.</p>
+<p>
+&lt;verify-client> sets the client certificate configuration.  If the
+certificate is available, it will be put in the
+javax.servlet.request.X509Certificate request attribute. 
+</p>
+
+<deftable>
+<tr>
+  <td>none</td>
+  <td>do not ask for a client certificate (default)</td>
+</tr>
+<tr>
+  <td>required</td>
+  <td>require a client certificate</td>
+</tr>
+<tr>
+  <td>optional</td>
+  <td>ask for a client certificate if availiable </td>
+</tr>
+<tr>
+  <td>optional-no-ca</td>
+  <td>ask for a client certificate, but do not validate the Certificate Authority</td>
+</tr>
+</deftable>
+
+<example title="Obtaining the client certificate">
+  X509Certificate []certs = (X509Certificate [])
+       request.getAttribute("javax.servlet.request.X509Certificate");
+</example>
 
 </defun>
 
