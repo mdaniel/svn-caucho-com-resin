@@ -712,11 +712,40 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
-   * Append a Java byte to the value.
+   * Append a Java byte to the value without conversions.
    */
   public StringValue appendByte(int v)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Append a Java String to the value without conversions.
+   */
+  public StringValue appendBytes(String s)
+  {
+    StringValue sb = this;
+    
+    for (int i = 0; i < s.length(); i++) {
+      sb = sb.appendByte(s.charAt(i));
+    }
+    
+    return sb;
+  }
+  
+  /**
+   * Append a Java char[] to the value without conversions.
+   */
+  public StringValue appendBytes(char []buf, int offset, int length)
+  {
+    StringValue sb = this;
+    int end = Math.min(buf.length, offset + length);
+    
+    while (offset < end) {
+      sb = sb.appendByte(buf[offset++]);
+    }
+    
+    return sb;
   }
 
   /**

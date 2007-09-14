@@ -976,6 +976,40 @@ public class UnicodeBuilderValue
       return this;
     }
   }
+  
+  /**
+   * Append a Java byte to the value without conversions.
+   */
+  @Override
+  public final StringValue appendByte(int v)
+  {
+    _value = null;
+    
+    if (_buffer.length < _length + 1)
+      ensureCapacity(_length + 1);
+
+    _buffer[_length++] = (char) v;
+    
+    return this;
+  }
+  
+  /**
+   * Append a Java String to the value without conversions.
+   */
+  @Override
+  public final StringValue appendBytes(String s)
+  {
+    return append(s);
+  }
+  
+  /**
+   * Append a Java char[] to the value without conversions.
+   */
+  @Override
+  public StringValue appendBytes(char []buf, int offset, int length)
+  {
+    return append(buf, offset, length);
+  }
 
   //
   // java.lang.Object methods

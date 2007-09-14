@@ -184,7 +184,7 @@ public class RegexpModule
     if (useJavaRegexp(env))
       return JavaRegexpModule.ereg_replace(env, patternString, replacement, subject);
     else
-      return JavaRegexpModule.ereg_replace(env, patternString, replacement, subject);
+      return CauchoRegexpModule.ereg_replace(env, patternString, replacement, subject);
   }
 
   /**

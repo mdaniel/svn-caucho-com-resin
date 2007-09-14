@@ -1537,7 +1537,7 @@ public class Regexp {
     
     /*
     if (_isUnicode)
-      return (UnicodeValue)_subject.substring(begin, end);
+      return (UnicodeValue) _subject.substring(begin, end);
     else if (_isUTF8)
       return _subject.substring(begin, end).toBinaryValue(env, "UTF-8");
     else

@@ -640,7 +640,7 @@ public class StringBuilderValue
   }
 
   /**
-   * Append a byte to the value.
+   * Append a Java byte to the value without conversions.
    */
   @Override
   public final StringValue appendByte(int v)
@@ -687,6 +687,7 @@ public class StringBuilderValue
   /**
    * Append a bytes to the value.
    */
+  @Override
   public StringValue appendBytes(String s)
   {
     int sublen = s.length();

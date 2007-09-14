@@ -510,6 +510,17 @@ public class Env {
       return new StringBuilderValue();
   }
   
+  /*
+   * Creates a string builder with the same type as refType.
+   */
+  public StringValue createEmptyStringBuilder(Value refType)
+  {
+    if (refType.isBinary())
+      return createBinaryBuilder();
+    else
+      return createUnicodeBuilder();
+  }
+  
   public TimeZone getDefaultTimeZone()
   {
     return _defaultTimeZone;
@@ -2824,10 +2835,28 @@ public class Env {
     }
   }
 
+  /*
+   * Creates an empty string.
+   */
   public StringValue createEmptyString()
   {
     if (_isUnicodeSemantics)
       return UnicodeBuilderValue.EMPTY;
+    else
+      return StringBuilderValue.EMPTY;
+  }
+  
+  /*
+   * Creates an empty with the same type as refType.
+   */
+  public StringValue createEmptyString(Value refType)
+  {
+    if (_isUnicodeSemantics) {
+      if (refType.isUnicode())
+        return UnicodeBuilderValue.EMPTY;
+      else
+        return BinaryBuilderValue.EMPTY;
+    }
     else
       return StringBuilderValue.EMPTY;
   }

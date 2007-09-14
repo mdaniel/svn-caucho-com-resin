@@ -126,7 +126,7 @@ public class CauchoRegexpModule
                                   Value regsV,
                                   boolean isCaseInsensitive)
   {
-    StringValue cleanPattern = cleanEregRegexp(rawPattern, false);
+    StringValue cleanPattern = cleanEregRegexp(env, rawPattern, false);
     
     if (isCaseInsensitive)
       cleanPattern = addDelimiters(env, cleanPattern, "/", "/i");
@@ -204,6 +204,8 @@ public class CauchoRegexpModule
         return LongValue.ZERO;
       }
 
+      StringValue empty = env.createEmptyString(subject);
+      
       Regexp regexp = getRegexp(env, regexpValue, subject);
 
       ArrayValue regs;
@@ -224,7 +226,7 @@ public class CauchoRegexpModule
         if (isOffsetCapture) {
           ArrayValueImpl part = new ArrayValueImpl();
           part.append(regexp.group(env));
-          part.append(new LongValue(regexp.start()));
+          part.append(LongValue.create(regexp.start()));
 
           regs.put(LongValue.ZERO, part);
         }
@@ -245,34 +247,34 @@ public class CauchoRegexpModule
             for (int j = regs.getSize(); j < i; j++) {
               ArrayValue part = new ArrayValueImpl();
 
-              part.append(StringValue.EMPTY);
+              part.append(empty);
               part.append(LongValue.MINUS_ONE);
 
-              regs.put(new LongValue(j), part);
+              regs.put(LongValue.create(j), part);
             }
 
             ArrayValueImpl part = new ArrayValueImpl();
             part.append(group);
-            part.append(new LongValue(regexp.start(i)));
+            part.append(LongValue.create(regexp.start(i)));
 
             StringValue name = regexp.getGroupName(i);
             if (name != null)
               regs.put(name, part);
 
-            regs.put(new LongValue(i), part);
+            regs.put(LongValue.create(i), part);
           }
           else {
             // php/151u
             // add unmatched groups first
             for (int j = regs.getSize(); j < i; j++) {
-              regs.put(new LongValue(j), StringValue.EMPTY);
+              regs.put(LongValue.create(j), empty);
             }
 
             StringValue name = regexp.getGroupName(i);
             if (name != null)
               regs.put(name, group);
 
-            regs.put(new LongValue(i), group);
+            regs.put(LongValue.create(i), group);
           }
         }
 
@@ -376,6 +378,8 @@ public class CauchoRegexpModule
 
     ArrayValue []matchList = new ArrayValue[groupCount + 1];
 
+    StringValue emptyStr = env.createEmptyString(subject);
+    
     for (int j = 0; j <= groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
 
@@ -404,11 +408,11 @@ public class CauchoRegexpModule
         if (! regexp.isMatchedGroup(j)) {
 
           if (j == groupCount || ((flags & PREG_OFFSET_CAPTURE) == 0))
-            values.put(StringValue.EMPTY);
+            values.put(emptyStr);
           else {
             Value result = new ArrayValueImpl();
             
-            result.put(StringValue.EMPTY);
+            result.put(emptyStr);
             result.put(LongValue.MINUS_ONE);
             
             values.put(result);
@@ -418,9 +422,6 @@ public class CauchoRegexpModule
         }
 
         StringValue groupValue = regexp.group(env, j);
-
-        if (groupValue != null)
-          groupValue = groupValue.toUnicodeValue(env);
 
         Value result = NullValue.NULL;
 
@@ -458,6 +459,8 @@ public class CauchoRegexpModule
       return LongValue.ZERO;
     }
 
+    StringValue empty = env.createEmptyString(subject);
+    
     int count = 0;
 
     do {
@@ -476,9 +479,6 @@ public class CauchoRegexpModule
 
         StringValue groupValue = subject.substring(start, end);
 
-        if (groupValue != null)
-          groupValue = groupValue.toUnicodeValue(env);
-
         Value result = NullValue.NULL;
 
         if (groupValue != null) {
@@ -490,7 +490,7 @@ public class CauchoRegexpModule
             for (int j = matchResult.getSize(); j < i; j++) {
               ArrayValue part = new ArrayValueImpl();
 
-              part.append(StringValue.EMPTY);
+              part.append(empty);
               part.append(LongValue.MINUS_ONE);
 
               matchResult.put(LongValue.create(j), part);
@@ -503,7 +503,7 @@ public class CauchoRegexpModule
             // php/
             // add unmatched groups that was skipped
             for (int j = matchResult.getSize(); j < i; j++) {
-              matchResult.put(LongValue.create(j), StringValue.EMPTY);
+              matchResult.put(LongValue.create(j), empty);
             }
 
             result = groupValue;
@@ -593,7 +593,7 @@ public class CauchoRegexpModule
         return pregReplace(env, pattern, replacement, subject.toStringValue(),
                            limit, count);
       } else
-        return StringValue.EMPTY;
+        return env.createEmptyString(subject);
     }
     catch (IllegalRegexpException e) {
       e.printStackTrace();
@@ -678,7 +678,8 @@ public class CauchoRegexpModule
           Value countV)
     throws IllegalRegexpException
   {
-
+    StringValue empty = env.createEmptyString(subject);
+    
     long numberOfMatches = 0;
 
     if (limit < 0)
@@ -686,7 +687,7 @@ public class CauchoRegexpModule
 
     Regexp regexp = getRegexp(env, patternString, subject);
 
-    StringValue result = new UnicodeBuilderValue();
+    StringValue result = env.createEmptyStringBuilder(patternString);
     int tail = 0;
 
     while (regexp.find() && numberOfMatches < limit) {
@@ -697,7 +698,7 @@ public class CauchoRegexpModule
       }
 
       if (tail < regexp.start())
-        result = result.append(subject.substring(tail, regexp.start()));
+        result = result.append(regexp.substring(env, tail, regexp.start()));
 
       ArrayValue regs = new ArrayValueImpl();
 
@@ -707,7 +708,7 @@ public class CauchoRegexpModule
         if (group != null)
           regs.put(group);
         else
-          regs.put(StringValue.EMPTY);
+          regs.put(empty);
       }
 
       Value replacement = fun.call(env, regs);
@@ -720,7 +721,7 @@ public class CauchoRegexpModule
     }
 
     if (tail < subject.length())
-      result = result.append(subject.substring(tail));
+      result = result.append(regexp.substring(env, tail));
 
     return result;
   }
@@ -742,7 +743,7 @@ public class CauchoRegexpModule
     boolean isEval = regexp.isEval();
 
     ArrayList<Replacement> replacementProgram
-    = _replacementCache.get(replacement);
+      = _replacementCache.get(replacement);
 
     if (replacementProgram == null) {
       replacementProgram = compileReplacement(env, replacement, isEval);
@@ -762,12 +763,12 @@ public class CauchoRegexpModule
    * Replaces values using regexps
    */
   public static Value ereg_replace(Env env,
-				   StringValue patternString,
-				   StringValue replacement,
-				   StringValue subject)
+          StringValue patternString,
+          StringValue replacement,
+          StringValue subject)
   {
     try {
-      patternString = cleanEregRegexp(patternString, false);
+      patternString = cleanEregRegexp(env, patternString, false);
       patternString = addDelimiters(env, patternString, "/", "/");
       
       Regexp regexp = getRegexp(env, patternString, subject);
@@ -805,7 +806,7 @@ public class CauchoRegexpModule
           StringValue subject)
   {
     try {
-      patternString = cleanEregRegexp(patternString, false);
+      patternString = cleanEregRegexp(env, patternString, false);
       patternString = addDelimiters(env, patternString, "/", "/i");
       
       Regexp regexp = getRegexp(env, patternString, subject);
@@ -845,15 +846,16 @@ public class CauchoRegexpModule
 
     int length = subject.length();
 
-    StringValue result = null;
-    int tail = 0;
+    StringValue result = env.createEmptyStringBuilder(subject);
 
+    int tail = 0;
+    boolean isMatched = false;
+    
     int replacementLen = replacementProgram.size();
 
     while (limit-- > 0 && regexp.find()) {
-      if (result == null)
-        result = env.createUnicodeBuilder();
-
+      isMatched = true;
+      
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
         countV.set(LongValue.create(countV.toLong() + 1));
@@ -861,41 +863,43 @@ public class CauchoRegexpModule
 
       // append all text up to match
       if (tail < regexp.start())
-        result.append(subject, tail, regexp.start());
-
+        result = result.append(regexp.substring(env, tail, regexp.start()));
+      
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
       if (isEval) {
-        StringValue evalString = env.createUnicodeBuilder();
+        StringValue evalString = env.createEmptyStringBuilder(subject);
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
 
-          replacement.eval(evalString, subject, regexp);
+          evalString = replacement.eval(env, evalString, regexp);
         }
 
         try {
           if (evalString.length() > 0) // php/152z
-            result.append(env.evalCode(evalString.toString()));
+            result = result.append(env.evalCode(evalString.toString()));
+          
         } catch (IOException e) {
           throw new QuercusException(e);
         }
+        
       } else {
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
-
-          replacement.eval(result, subject, regexp);
+          
+          result = replacement.eval(env, result, regexp);
         }
       }
 
       tail = regexp.end();
     }
-
-    if (result == null)
+    
+    if (! isMatched)
       return subject;
-
+    
     if (tail < length)
-      result.append(subject, tail, length);
+      result = result.append(regexp.substring(env, tail));
 
     return result;
   }
@@ -1010,6 +1014,8 @@ public class CauchoRegexpModule
     if (limit <= 0)
       limit = Long.MAX_VALUE;
 
+    StringValue empty = env.createEmptyString(patternString);
+    
     Regexp regexp = getRegexp(env, patternString, string);
 
     ArrayValue result = new ArrayValueImpl();
@@ -1082,13 +1088,13 @@ public class CauchoRegexpModule
               if (isCaptureOffset) {
                 ArrayValue part = new ArrayValueImpl();
 
-                part.put(StringValue.EMPTY);
+                part.put(empty);
                 part.put(LongValue.create(startPosition));
 
                 result.put(part);
               }
               else
-                result.put(StringValue.EMPTY);
+                result.put(empty);
             }
           }
 
@@ -1357,24 +1363,13 @@ public class CauchoRegexpModule
                                            String startDelim,
                                            String endDelim)
   {
-    if (str.isUnicode()) {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-      sb.append(startDelim);
-      sb.append(str);
-      sb.append(endDelim);
-
-      return sb;
-    }
-    else {
-      BinaryBuilderValue sb = new BinaryBuilderValue();
-
-      sb.append(startDelim.getBytes());
-      sb.append(str.toBinaryValue(env).toBytes());
-      sb.append(endDelim.getBytes());
-      
-      return sb;
-    }
+    StringValue sb = env.createEmptyStringBuilder(str);
+    
+    sb = sb.appendBytes(startDelim);
+    sb = sb.append(str);
+    sb = sb.appendBytes(endDelim);
+    
+    return sb;
   }
 
   private static ArrayList<Replacement>
@@ -1463,12 +1458,13 @@ public class CauchoRegexpModule
    * Cleans the regexp from valid values that the Java regexps can't handle.
    * Ereg has a different syntax so need to handle it differently from preg.
    */
-  private static StringValue cleanEregRegexp(StringValue regexp,
+  private static StringValue cleanEregRegexp(Env env,
+                                             StringValue regexp,
                                              boolean isComments)
   {
     int len = regexp.length();
 
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = env.createEmptyStringBuilder(regexp);
     char quote = 0;
 
     boolean sawVerticalBar = false;
@@ -1486,8 +1482,8 @@ public class CauchoRegexpModule
       switch (ch) {
       case '\\':
         if (quote == '[') {
-          sb.append('\\');
-          sb.append('\\');
+          sb = sb.appendByte('\\');
+          sb = sb.appendByte('\\');
           continue;
         }
 
@@ -1500,12 +1496,12 @@ public class CauchoRegexpModule
                   '1' <= ch && ch <= '3' && i + 1 < len && '0' <= regexp.charAt(i + 1) && ch <= '7') {
             // Java's regexp requires \0 for octal
 
-            sb.append('\\');
-            sb.append('0');
-            sb.append(ch);
+            sb = sb.appendByte('\\');
+            sb = sb.appendByte('0');
+            sb = sb.appendByte(ch);
           }
           else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
-            sb.append('\\');
+            sb = sb.appendByte('\\');
 
             int tail = regexp.indexOf('}', i + 1);
 
@@ -1515,20 +1511,21 @@ public class CauchoRegexpModule
               int length = hex.length();
 
               if (length == 1)
-                sb.append("x0" + hex);
+                sb = sb.appendBytes("x0" + hex);
               else if (length == 2)
-                sb.append("x" + hex);
+                sb = sb.appendBytes("x" + hex);
               else if (length == 3)
-                sb.append("u0" + hex);
+                sb = sb.appendBytes("u0" + hex);
               else if (length == 4)
-                sb.append("u" + hex);
+                sb = sb.appendBytes("u" + hex);
               else
                 throw new QuercusRuntimeException(L.l("illegal hex escape"));
 
               i = tail;
             }
             else {
-              sb.append("\\x");
+              sb = sb.appendByte('\\');
+              sb = sb.appendByte('x');
             }
           }
           else if (Character.isLetter(ch)) {
@@ -1557,35 +1554,39 @@ public class CauchoRegexpModule
             case 'P': //XXX: need to translate PHP properties to Java ones
             case 'X':
               //case 'C': byte matching, not supported
-              sb.append('\\');
-              sb.append(ch);
+              sb = sb.appendByte('\\');
+              sb = sb.appendByte(ch);
               break;
             default:
-              sb.append(ch);
+              sb = sb.appendByte(ch);
             }
           }
           else {
-            sb.append('\\');
-            sb.append(ch);
+            sb = sb.appendByte('\\');
+            sb = sb.appendByte(ch);
           }
         }
         else
-          sb.append('\\');
+          sb = sb.appendByte('\\');
         break;
 
       case '[':
         if (quote == '[') {
           if (i + 1 < len && regexp.charAt(i + 1) == ':') {
-            sb.append('[');
+            sb = sb.appendByte('[');
           }
-          else
-            sb.append("\\[");
+          else {
+            sb = sb.appendByte('\\');
+            sb = sb.appendByte('[');
+          }
         }
         else if (i + 1 < len && regexp.charAt(i + 1) == '['
           && ! (i + 2 < len && regexp.charAt(i + 2) == ':')) {
           // XXX: check regexp grammar
           // php/151n
-          sb.append("[\\[");
+          sb = sb.appendByte('[');
+          sb = sb.appendByte('\\');
+          sb = sb.appendByte('[');
           i += 1;
         }
         /*
@@ -1597,7 +1598,7 @@ public class CauchoRegexpModule
         }
         */
         else
-          sb.append('[');
+          sb = sb.appendByte('[');
 
         if (quote == 0)
           quote = '[';
@@ -1605,28 +1606,29 @@ public class CauchoRegexpModule
 
       case '#':
         if (quote == '[') {
-          sb.append("\\#");
+          sb = sb.appendByte('\\');
+          sb = sb.appendByte('#');
         }
         else if (isComments) {
-          sb.append(ch);
+          sb = sb.appendByte(ch);
 
           for (i++; i < len; i++) {
             ch = regexp.charAt(i);
 
-            sb.append(ch);
+            sb = sb.appendByte(ch);
 
             if (ch == '\n' || ch == '\r')
               break;
           }
         }
         else {
-          sb.append(ch);
+          sb = sb.appendByte(ch);
         }
 
         break;
 
       case ']':
-        sb.append(ch);
+        sb = sb.appendByte(ch);
 
         if (quote == '[')
           quote = 0;
@@ -1635,24 +1637,26 @@ public class CauchoRegexpModule
       case '{':
         if (i + 1 < len &&
                 ('0' <= (ch = regexp.charAt(i + 1)) && ch <= '9' || ch == ',')) {
-          sb.append("{");
+          sb = sb.appendByte('{');
           for (i++;
           i < len &&
           ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
           i++) {
-            sb.append(ch);
+            sb = sb.appendByte(ch);
           }
 
           if (i < len)
-            sb.append(regexp.charAt(i));
+            sb = sb.appendByte(regexp.charAt(i));
         }
         else {
-          sb.append("\\{");
+          sb = sb.appendByte('\\');
+          sb = sb.appendByte('{');
         }
         break;
 
       case '}':
-        sb.append("\\}");
+        sb = sb.appendByte('\\');
+        sb = sb.appendByte('}');
         break;
 
       case '|':
@@ -1661,36 +1665,23 @@ public class CauchoRegexpModule
         //
         // to accomodate drupal bug http://drupal.org/node/123750
         if (! sawVerticalBar) {
-          sb.append('|');
+          sb = sb.appendByte('|');
           sawVerticalBar = true; 
         }
         break;
 
       default:
-        sb.append(ch);
+        sb = sb.appendByte(ch);
       }
     }
 
-    String cleanPattern = sb.toString();
-
-    if (regexp.isUnicode()) {
-      return new UnicodeValueImpl(cleanPattern);
-    }
-    else {
-      BinaryBuilderValue bb = new BinaryBuilderValue();
-      
-      for (int i = 0; i < cleanPattern.length(); i++) {
-        bb.appendByte(cleanPattern.charAt(i));
-      }
-      
-      return bb;
-    }
+    return sb;
   }
 
-  static class Replacement {
-    void eval(StringValue sb, StringValue subject, Regexp regexp)
-    {
-    }
+  abstract static class Replacement {
+    abstract StringValue eval(Env env,
+                     StringValue sb,
+                     Regexp regexp);
 
     public String toString()
     {
@@ -1713,9 +1704,11 @@ public class CauchoRegexpModule
     }
 
     @Override
-    void eval(StringValue sb, StringValue subject, Regexp regexp)
+    StringValue eval(Env env,
+                     StringValue sb,
+                     Regexp regexp)
     {
-      sb.append(_text, 0, _text.length);
+      return sb.appendBytes(_text, 0, _text.length);
     }
 
     public String toString()
@@ -1745,11 +1738,14 @@ public class CauchoRegexpModule
     }
 
     @Override
-    void eval(StringValue sb, StringValue subject, Regexp regexp)
+    StringValue eval(Env env,
+                     StringValue sb,
+                     Regexp regexp)
     {
       if (_group <= regexp.groupCount())
-        sb.append(subject.substring(regexp.start(_group),
-				    regexp.end(_group)));
+        sb = sb.append(regexp.group(env, _group));
+      
+      return sb;
     }
 
     public String toString()
@@ -1769,24 +1765,32 @@ public class CauchoRegexpModule
     }
 
     @Override
-    void eval(StringValue sb, StringValue subject, Regexp regexp)
+    StringValue eval(Env env,
+                     StringValue sb,
+                     Regexp regexp)
     {
       if (_group <= regexp.groupCount()) {
-        StringValue group = subject.substring(regexp.start(_group),
-					      regexp.end(_group));;
-	int len = group.length();
+        StringValue group = regexp.group(env, _group);
 
-	for (int i = 0; i < len; i++) {
-	  char ch = group.charAt(i);
+        int len = group.length();
 
-	  if (ch == '\'')
-	    sb.append("\\\'");
-	  else if (ch == '\"')
-	    sb.append("\\\"");
-	  else
-	    sb.append(ch);
-	}
+        for (int i = 0; i < len; i++) {
+          char ch = group.charAt(i);
+
+          if (ch == '\'') {
+            sb = sb.appendByte('\\');
+            sb = sb.appendByte('\'');
+          }
+          else if (ch == '\"') {
+            sb = sb.appendByte('\\');
+            sb = sb.appendByte('\"');
+          }
+          else
+            sb = sb.appendByte(ch);
+        }
       }
+      
+      return sb;
     }
 
     public String toString()
