@@ -310,40 +310,6 @@ public class UnicodeBuilderValue
   }
 
   /**
-   * Converts to a long.
-   */
-  public static long toLong(char []buffer, int offset, int len)
-  {
-    if (len == 0)
-      return 0;
-
-    long value = 0;
-    long sign = 1;
-
-    int i = 0;
-    int end = offset + len;
-
-    char ch = buffer[offset];
-    if (ch == '-') {
-      sign = -1;
-      offset++;
-    }
-    else if (ch == '+')
-      offset++;
-
-    while (offset < end) {
-      ch = buffer[offset++];
-
-      if ('0' <= ch && ch <= '9')
-        value = 10 * value + ch - '0';
-      else
-        return sign * value;
-    }
-
-    return sign * value;
-  }
-
-  /**
    * Converts to a double.
    */
   public double toDouble()
@@ -1187,6 +1153,183 @@ public class UnicodeBuilderValue
     
     for (int i = 0; i < _length; i++) {
       _buffer[i] = in.readChar();
+    }
+  }
+
+  //
+  // static helper functions
+  //
+
+  public static int getNumericType(char []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return IS_STRING;
+
+    int i = offset;
+    int ch = 0;
+    boolean hasPoint = false;
+
+    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
+      i++;
+    }
+
+    if (len <= i)
+      return IS_STRING;
+
+    ch = buffer[i];
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+        return IS_DOUBLE;
+      }
+
+      return IS_STRING;
+    }
+    else if (! ('0' <= ch && ch <= '9'))
+      return IS_STRING;
+
+    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+    }
+
+    if (len <= i)
+      return IS_LONG;
+    else if (ch == '.' || ch == 'e' || ch == 'E') {
+      for (i++;
+           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
+      }
+
+      if (i < len)
+        return IS_STRING;
+      else
+        return IS_DOUBLE;
+    }
+    else
+      return IS_STRING;
+  }
+
+  public static ValueType getValueType(char []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return ValueType.STRING;
+
+    int i = offset;
+    int ch = 0;
+    boolean hasPoint = false;
+
+    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
+      i++;
+    }
+
+    if (len <= i)
+      return ValueType.STRING;
+
+    ch = buffer[i];
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+        return ValueType.DOUBLE_CONVERTABLE;
+      }
+
+      return ValueType.STRING;
+    }
+    else if (! ('0' <= ch && ch <= '9'))
+      return ValueType.STRING;
+
+    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+    }
+
+    if (len <= i)
+      return ValueType.LONG_CONVERTABLE;
+    else if (ch == '.' || ch == 'e' || ch == 'E') {
+      for (i++;
+           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
+      }
+
+      if (i < len)
+        return ValueType.STRING;
+      else
+        return ValueType.DOUBLE_CONVERTABLE;
+    }
+    else
+      return ValueType.STRING;
+  }
+
+  /**
+   * Converts to a long.
+   */
+  public static long toLong(char []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return 0;
+
+    long value = 0;
+    long sign = 1;
+
+    int i = 0;
+    int end = offset + len;
+
+    if (buffer[offset] == '-') {
+      sign = -1;
+      offset++;
+    }
+
+    while (offset < end) {
+      int ch = buffer[offset++];
+
+      if ('0' <= ch && ch <= '9')
+        value = 10 * value + ch - '0';
+      else
+        return sign * value;
+    }
+
+    return value;
+  }
+
+  public static double toDouble(char []buffer, int offset, int len)
+  {
+    int i = offset;
+    int ch = 0;
+
+    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
+      i++;
+    }
+
+    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+    }
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+      }
+
+      if (i == 1)
+	return 0;
+    }
+
+    if (ch == 'e' || ch == 'E') {
+      int e = i++;
+
+      if (i < len && (ch = buffer[i]) == '+' || ch == '-') {
+        i++;
+      }
+
+      for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+      }
+
+      if (i == e + 1)
+        i = e;
+    }
+
+    if (i == 0)
+      return 0;
+
+    try {
+      return Double.parseDouble(new String(buffer, 0, i));
+    } catch (NumberFormatException e) {
+      return 0;
     }
   }
 }

@@ -103,6 +103,15 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return ValueType.STRING;
+  }
+
+  /**
    * Returns true for a long
    */
   public boolean isLongConvertible()
@@ -198,7 +207,19 @@ abstract public class StringValue extends Value implements CharSequence {
   @Override
   public boolean eq(Value rValue)
   {
-    if (isNumberConvertible() || rValue.isNumberConvertible()) {
+    ValueType typeA = getValueType();
+    ValueType typeB = rValue.getValueType();
+
+    if (typeB.isNumber()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      return l == r;
+    }
+    else if (typeB.isBoolean()) {
+      return toBoolean() == rValue.toBoolean();
+    }
+    else if (typeA.isNumberConvertable() && typeB.isNumberConvertable()) {
       double l = toDouble();
       double r = rValue.toDouble();
 

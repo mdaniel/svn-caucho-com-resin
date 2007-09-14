@@ -87,6 +87,15 @@ public class JavaAdapterVar extends Var
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return getValue().getValueType();
+  }
+
+  /**
    * Returns the class name.
    */
   @Override

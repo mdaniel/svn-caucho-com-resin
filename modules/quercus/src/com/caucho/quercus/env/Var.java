@@ -105,6 +105,15 @@ public class Var extends Value
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return _value.getValueType();
+  }
+
+  /**
    * Returns the class name.
    */
   @Override

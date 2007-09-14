@@ -458,7 +458,7 @@ public class Env {
   /**
    * Creates a binary builder.
    */
-  public BinaryValue createBinaryBuilder()
+  public StringValue createBinaryBuilder()
   {
     if (_isUnicodeSemantics)
       return new BinaryBuilderValue();
@@ -469,7 +469,7 @@ public class Env {
   /**
    * Creates a binary builder.
    */
-  public BinaryValue createBinaryBuilder(int length)
+  public StringValue createBinaryBuilder(int length)
   {
     if (_isUnicodeSemantics)
       return new BinaryBuilderValue(length);
@@ -480,7 +480,7 @@ public class Env {
   /**
    * Creates a binary builder.
    */
-  public BinaryValue createBinaryBuilder(byte []buffer, int offset, int length)
+  public StringValue createBinaryBuilder(byte []buffer, int offset, int length)
   {
     if (_isUnicodeSemantics)
       return new BinaryBuilderValue(buffer, offset, length);
@@ -491,7 +491,7 @@ public class Env {
   /**
    * Creates a binary builder.
    */
-  public BinaryValue createBinaryBuilder(byte []buffer)
+  public StringValue createBinaryBuilder(byte []buffer)
   {
     if (_isUnicodeSemantics)
       return new BinaryBuilderValue(buffer, 0, buffer.length);

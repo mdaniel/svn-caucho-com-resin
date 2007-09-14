@@ -75,6 +75,15 @@ public class DoubleValue extends NumberValue
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return ValueType.DOUBLE;
+  }
+
+  /**
    * Returns true for a double.
    */
   public boolean isDoubleConvertible()

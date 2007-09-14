@@ -35,39 +35,46 @@ import java.util.*;
 import com.caucho.vfs.*;
 
 /**
- * Represents a 8-bit PHP 5 style binary builder (unicode.semantics = off)
+ * Represents a PHP 5 style string builder (unicode.semantics = off)
  */
 public class StringBuilderValue
-  extends BinaryValue
+  extends StringValue
 {
   public static final StringBuilderValue EMPTY = new StringBuilderValue("");
   
-  protected byte []_buffer;
+  protected char []_buffer;
   protected int _length;
 
   private String _value;
 
   public StringBuilderValue()
   {
-    _buffer = new byte[128];
+    _buffer = new char[128];
   }
 
   public StringBuilderValue(int capacity)
   {
     if (capacity < 64)
-      capacity = 128;
-    else
-      capacity = 2 * capacity;
+      capacity = 64;
 
-    _buffer = new byte[capacity];
+    _buffer = new char[capacity];
+  }
+
+  public StringBuilderValue(char []buffer, int offset, int length)
+  {
+    _buffer = new char[length];
+    _length = length;
+
+    System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
   public StringBuilderValue(byte []buffer, int offset, int length)
   {
-    _buffer = new byte[length];
+    _buffer = new char[length];
     _length = length;
 
-    System.arraycopy(buffer, offset, _buffer, 0, length);
+    for (int i = 0; i < length; i++)
+      _buffer[i] = (char) buffer[i];
   }
 
   public StringBuilderValue(byte []buffer)
@@ -79,11 +86,11 @@ public class StringBuilderValue
   {
     int length = buffer.length;
     
-    _buffer =  new byte[length];
+    _buffer =  new char[length];
     _length = length;
     
     for (int i = 0; i < length; i++) {
-      _buffer[i] = buffer[i].byteValue();
+      _buffer[i] = (char) buffer[i].byteValue();
     }
   }
 
@@ -91,11 +98,11 @@ public class StringBuilderValue
   {
     int len = s.length();
     
-    _buffer = new byte[len];
+    _buffer = new char[len];
     _length = len;
 
     for (int i = 0; i < len; i++)
-      _buffer[i] = (byte) s.charAt(i);
+      _buffer[i] = s.charAt(i);
   }
 
   /**
@@ -116,12 +123,21 @@ public class StringBuilderValue
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return UnicodeBuilderValue.getValueType(_buffer, 0, _length);
+  }
+
+  /**
    * Returns true for a long
    */
   @Override
   public boolean isLongConvertible()
   {
-    byte []buffer = _buffer;
+    char []buffer = _buffer;
     int len = _length;
 
     if (len == 0)
@@ -169,7 +185,7 @@ public class StringBuilderValue
   @Override
   protected int getNumericType()
   {
-    return getNumericType(_buffer, 0, _length);
+    return UnicodeBuilderValue.getNumericType(_buffer, 0, _length);
   }
 
   /**
@@ -192,7 +208,7 @@ public class StringBuilderValue
   @Override
   public long toLong()
   {
-    return toLong(_buffer, 0, _length);
+    return UnicodeBuilderValue.toLong(_buffer, 0, _length);
   }
 
   /**
@@ -201,7 +217,7 @@ public class StringBuilderValue
   @Override
   public double toDouble()
   {
-    return toDouble(_buffer, 0, _length);
+    return UnicodeBuilderValue.toDouble(_buffer, 0, _length);
   }
 
   /**
@@ -262,7 +278,7 @@ public class StringBuilderValue
   @Override
   public Value toKey()
   {
-    byte []buffer = _buffer;
+    char []buffer = _buffer;
     int len = _length;
 
     if (len == 0)
@@ -401,14 +417,14 @@ public class StringBuilderValue
     
     StringBuilderValue string = new StringBuilderValue(length);
     
-    byte []srcBuffer = _buffer;
-    byte []dstBuffer = string._buffer;
+    char []srcBuffer = _buffer;
+    char []dstBuffer = string._buffer;
 
     for (int i = 0; i < length; i++) {
-      byte ch = srcBuffer[i];
+      char ch = srcBuffer[i];
       
       if ('A' <= ch && ch <= 'Z')
-	dstBuffer[i] = (byte) (ch + 'a' - 'A');
+	dstBuffer[i] = (char) (ch + 'a' - 'A');
       else
 	dstBuffer[i] = ch;
     }
@@ -428,14 +444,14 @@ public class StringBuilderValue
     
     StringBuilderValue string = new StringBuilderValue(_length);
 
-    byte []srcBuffer = _buffer;
-    byte []dstBuffer = string._buffer;
+    char []srcBuffer = _buffer;
+    char []dstBuffer = string._buffer;
 
     for (int i = 0; i < length; i++) {
-      byte ch = srcBuffer[i];
+      char ch = srcBuffer[i];
       
       if ('a' <= ch && ch <= 'z')
-        dstBuffer[i] = (byte) (ch + 'A' - 'a');
+        dstBuffer[i] = (char) (ch + 'A' - 'a');
       else
 	dstBuffer[i] = ch;
     }
@@ -479,7 +495,7 @@ public class StringBuilderValue
       ensureCapacity(_length + sublen);
 
     for (int i = 0; i < sublen; i++) {
-      _buffer[_length++] = (byte) s.charAt(i);
+      _buffer[_length++] = s.charAt(i);
     }
 
     return this;
@@ -496,11 +512,11 @@ public class StringBuilderValue
     if (_buffer.length < _length + sublen)
       ensureCapacity(_length + sublen);
 
-    byte []buffer = _buffer;
+    char []buffer = _buffer;
     int length = _length;
 
     for (; start < end; start++)
-      buffer[length++] = (byte) s.charAt(start);
+      buffer[length++] = s.charAt(start);
 
     _length = length;
 
@@ -516,7 +532,7 @@ public class StringBuilderValue
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
 
-    _buffer[_length++] = (byte) ch;
+    _buffer[_length++] = ch;
     
     return this;
   }
@@ -530,11 +546,11 @@ public class StringBuilderValue
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
-    byte []buffer = _buffer;
+    char []buffer = _buffer;
     int bufferLength = _length;
 
     for (; length > 0; length--)
-      buffer[bufferLength++] = (byte) buf[offset--];
+      buffer[bufferLength++] = buf[offset--];
 
     _buffer = buffer;
     _length = bufferLength;
@@ -563,11 +579,11 @@ public class StringBuilderValue
       return this;
     }
     else {
-      byte []buffer = _buffer;
+      char []buffer = _buffer;
       int bufferLength = _length;
       
       for (; head < tail; head++) {
-	buffer[bufferLength++] = (byte) buf.charAt(head);
+	buffer[bufferLength++] = buf.charAt(head);
       }
 
       _length = bufferLength;
@@ -650,7 +666,7 @@ public class StringBuilderValue
     if (_buffer.length < length)
       ensureCapacity(length);
 
-    _buffer[_length++] = (byte) v;
+    _buffer[_length++] = (char) v;
 
     return this;
   }
@@ -696,7 +712,7 @@ public class StringBuilderValue
       ensureCapacity(_length + sublen);
 
     for (int i = 0; i < sublen; i++) {
-      _buffer[_length++] = (byte) s.charAt(i);
+      _buffer[_length++] = s.charAt(i);
     }
 
     return this;
@@ -705,7 +721,7 @@ public class StringBuilderValue
   /**
    * Returns the buffer.
    */
-  public byte []getBuffer()
+  public char []getBuffer()
   {
     return _buffer;
   }
@@ -744,7 +760,7 @@ public class StringBuilderValue
    */
   public void print(Env env)
   {
-    env.write(_buffer, 0, _length);
+    env.print(_buffer, 0, _length);
   }
 
   /**
@@ -827,7 +843,7 @@ public class StringBuilderValue
     else
       newCapacity = newCapacity + 4096;
 
-    byte []buffer = new byte[newCapacity];
+    char []buffer = new char[newCapacity];
     System.arraycopy(_buffer, 0, buffer, 0, _length);
 
     _buffer = buffer;
@@ -843,12 +859,62 @@ public class StringBuilderValue
 
     int length = _length;
 
-    byte []buffer = _buffer;
+    char []buffer = _buffer;
     for (int i = 0; i < length; i++) {
       hash = 65521 * hash + (buffer[i] & 0xff);
     }
 
     return hash;
+  }
+
+  /**
+   * Returns true for equality
+   */
+  @Override
+  public boolean eq(Value rValue)
+  {
+    ValueType typeA = getValueType();
+    ValueType typeB = rValue.getValueType();
+
+    if (typeB.isNumber()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      return l == r;
+    }
+    else if (typeB.isBoolean()) {
+      return toBoolean() == rValue.toBoolean();
+    }
+    else if (typeA.isNumberConvertable() && typeB.isNumberConvertable()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      return l == r;
+    }
+
+    rValue = rValue.toValue();
+    
+    if (rValue instanceof StringBuilderValue) {
+      StringBuilderValue value = (StringBuilderValue) rValue;
+
+      int length = _length;
+      
+      if (length != value._length)
+        return false;
+
+      char []bufferA = _buffer;
+      char []bufferB = value._buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (bufferA[i] != bufferB[i])
+          return false;
+      }
+
+      return true;
+    }
+    else {
+      return toString().equals(rValue.toString());
+    }
   }
 
   @Override
@@ -862,8 +928,8 @@ public class StringBuilderValue
       if (length != value._length)
         return false;
 
-      byte []bufferA = _buffer;
-      byte []bufferB = value._buffer;
+      char []bufferA = _buffer;
+      char []bufferB = value._buffer;
 
       for (int i = length - 1; i >= 0; i--) {
         if (bufferA[i] != bufferB[i])
@@ -896,8 +962,8 @@ public class StringBuilderValue
       if (length != value._length)
         return false;
 
-      byte []bufferA = _buffer;
-      byte []bufferB = value._buffer;
+      char []bufferA = _buffer;
+      char []bufferB = value._buffer;
 
       for (int i = length - 1; i >= 0; i--) {
         if (bufferA[i] != bufferB[i])
@@ -936,144 +1002,19 @@ public class StringBuilderValue
     throws IOException
   {
     out.writeInt(_length);
-    out.write(_buffer, 0, _length);
+
+    for (int i = 0; i < _length; i++)
+      out.write(_buffer[i]);
   }
   
   private void readObject(ObjectInputStream in)
     throws ClassNotFoundException, IOException
   {
     _length = in.readInt();
-    _buffer = new byte[_length];
-    
-    in.read(_buffer, 0, _length);
-  }
+    _buffer = new char[_length];
 
-  //
-  // static helper functions
-  //
-
-  public static int getNumericType(byte []buffer, int offset, int len)
-  {
-    if (len == 0)
-      return IS_STRING;
-
-    int i = offset;
-    int ch = 0;
-    boolean hasPoint = false;
-
-    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
-      i++;
-    }
-
-    if (len <= i)
-      return IS_STRING;
-
-    ch = buffer[i];
-
-    if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-        return IS_DOUBLE;
-      }
-
-      return IS_STRING;
-    }
-    else if (! ('0' <= ch && ch <= '9'))
-      return IS_STRING;
-
-    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-    }
-
-    if (len <= i)
-      return IS_LONG;
-    else if (ch == '.' || ch == 'e' || ch == 'E') {
-      for (i++;
-           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
-                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
-           i++) {
-      }
-
-      if (i < len)
-        return IS_STRING;
-      else
-        return IS_DOUBLE;
-    }
-    else
-      return IS_STRING;
-  }
-
-  /**
-   * Converts to a long.
-   */
-  public static long toLong(byte []buffer, int offset, int len)
-  {
-    if (len == 0)
-      return 0;
-
-    long value = 0;
-    long sign = 1;
-
-    int i = 0;
-    int end = offset + len;
-
-    if (buffer[offset] == '-') {
-      sign = -1;
-      offset++;
-    }
-
-    while (offset < end) {
-      int ch = buffer[offset++];
-
-      if ('0' <= ch && ch <= '9')
-        value = 10 * value + ch - '0';
-      else
-        return sign * value;
-    }
-
-    return value;
-  }
-
-  public static double toDouble(byte []buffer, int offset, int len)
-  {
-    int i = offset;
-    int ch = 0;
-
-    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
-      i++;
-    }
-
-    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-    }
-
-    if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-      }
-
-      if (i == 1)
-	return 0;
-    }
-
-    if (ch == 'e' || ch == 'E') {
-      int e = i++;
-
-      if (i < len && (ch = buffer[i]) == '+' || ch == '-') {
-        i++;
-      }
-
-      for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-      }
-
-      if (i == e + 1)
-        i = e;
-    }
-
-    if (i == 0)
-      return 0;
-
-    try {
-      return Double.parseDouble(new String(buffer, 0, i));
-    } catch (NumberFormatException e) {
-      return 0;
-    }
+    for (int i = 0; i < _length; i++)
+      _buffer[i] = (char) in.read();
   }
 
   class BinaryInputStream extends InputStream {
@@ -1142,7 +1083,8 @@ public class StringBuilderValue
       if (sublen <= 0)
 	return -1;
 
-      System.arraycopy(_buffer, _index, buffer, offset, sublen);
+      for (int i = 0; i < sublen; i++)
+	buffer[offset + i] = (byte) _buffer[_index + i];
 
       _index += sublen;
 

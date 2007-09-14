@@ -69,6 +69,15 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return ValueType.ARRAY;
+  }
+
+  /**
    * Converts to a boolean.
    */
   @Override

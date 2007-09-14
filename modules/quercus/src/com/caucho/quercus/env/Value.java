@@ -91,6 +91,14 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Returns the ValueType.
+   */
+  public ValueType getValueType()
+  {
+    return ValueType.VALUE;
+  }
+
+  /**
    * Returns true for an array.
    */
   public boolean isArray()

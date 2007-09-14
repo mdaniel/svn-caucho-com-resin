@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.jms;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.util.L10N;
 
 import javax.jms.*;
@@ -169,10 +170,21 @@ public class JMSQueue
       BytesMessage bytesMessage = (BytesMessage) message;
       int length = (int) bytesMessage.getBodyLength();
 
-      BinaryValue bb = env.createBinaryBuilder(length);
+      StringValue bb = env.createBinaryBuilder(length);
 
-      bytesMessage.readBytes(bb.getBuffer());
-      bb.setOffset((int) bytesMessage.getBodyLength());
+      TempBuffer tempBuffer = TempBuffer.allocate();
+      int sublen;
+
+      while (true) {
+	sublen = bytesMessage.readBytes(tempBuffer.getBuffer());
+
+	if (sublen > 0)
+	  bb.append(tempBuffer.getBuffer(), 0, sublen);
+	else
+	  break;
+      }
+
+      TempBuffer.free(tempBuffer);
 
       return bb;
     } else if (message instanceof MapMessage) {

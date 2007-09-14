@@ -78,6 +78,15 @@ public class BooleanValue extends Value
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return ValueType.BOOLEAN;
+  }
+
+  /**
    * Returns true for a BooleanValue
    */
   @Override

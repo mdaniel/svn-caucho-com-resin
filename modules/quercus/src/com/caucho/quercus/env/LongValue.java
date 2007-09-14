@@ -81,6 +81,15 @@ public class LongValue extends NumberValue
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return ValueType.LONG;
+  }
+
+  /**
    * Returns true for a long.
    */
   public boolean isLongConvertible()

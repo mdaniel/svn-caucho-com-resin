@@ -72,6 +72,15 @@ public class NullValue extends Value
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return ValueType.NULL;
+  }
+
+  /**
    * Returns true for a set type.
    */
   @Override

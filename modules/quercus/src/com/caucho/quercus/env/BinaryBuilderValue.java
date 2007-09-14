@@ -933,6 +933,10 @@ public class BinaryBuilderValue
   // static helper functions
   //
 
+  //
+  // static helper functions
+  //
+
   public static int getNumericType(byte []buffer, int offset, int len)
   {
     if (len == 0)
