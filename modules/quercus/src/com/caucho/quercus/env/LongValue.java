@@ -147,6 +147,15 @@ public class LongValue extends NumberValue
   }
 
   /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return env.createUnicodeBuilder().append(_value);
+  }
+
+  /**
    * Converts to a long value
    */
   public LongValue toLongValue()

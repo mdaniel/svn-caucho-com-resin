@@ -776,7 +776,16 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toStringBuilder()
   {
+    // XXX: should be illegal?
     return new UnicodeBuilderValue(toString(), 32);
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  public StringValue toStringBuilder(Env env)
+  {
+    return env.createUnicodeBuilder().appendUnicode(this);
   }
 
   /**

@@ -733,43 +733,6 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
-   * Append a Java byte to the value without conversions.
-   */
-  public StringValue appendByte(int v)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  
-  /**
-   * Append a Java String to the value without conversions.
-   */
-  public StringValue appendBytes(String s)
-  {
-    StringValue sb = this;
-    
-    for (int i = 0; i < s.length(); i++) {
-      sb = sb.appendByte(s.charAt(i));
-    }
-    
-    return sb;
-  }
-  
-  /**
-   * Append a Java char[] to the value without conversions.
-   */
-  public StringValue appendBytes(char []buf, int offset, int length)
-  {
-    StringValue sb = this;
-    int end = Math.min(buf.length, offset + length);
-    
-    while (offset < end) {
-      sb = sb.appendByte(buf[offset++]);
-    }
-    
-    return sb;
-  }
-
-  /**
    * Append a Java boolean to the value.
    */
   public StringValue append(boolean v)
@@ -903,6 +866,115 @@ abstract public class StringValue extends Value implements CharSequence {
       sb.append(charAt(i));
 
     return this;
+  }
+
+  /**
+   * Append a Java boolean to the value.
+   */
+  public StringValue appendUnicode(boolean v)
+  {
+    return append(v ? "true" : "false");
+  }
+
+  /**
+   * Append a Java long to the value.
+   */
+  public StringValue appendUnicode(long v)
+  {
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java double to the value.
+   */
+  public StringValue appendUnicode(double v)
+  {
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java value to the value.
+   */
+  public StringValue appendUnicode(Object v)
+  {
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java char, possibly converting to a unicode string
+   */
+  public StringValue appendUnicode(char v)
+  {
+    return append(v);
+  }
+
+  /**
+   * Append a Java char buffer, possibly converting to a unicode string
+   */
+  public StringValue appendUnicode(char []buffer, int offset, int length)
+  {
+    return append(buffer, offset, length);
+  }
+
+  /**
+   * Append a Java char buffer, possibly converting to a unicode string
+   */
+  public StringValue appendUnicode(String value)
+  {
+    return append(value);
+  }
+
+  /**
+   * Append a Java char buffer, possibly converting to a unicode string
+   */
+  public StringValue appendUnicode(String value, int offset, int length)
+  {
+    return append(value, offset, length);
+  }
+
+  /**
+   * Append a Java char buffer, possibly converting to a unicode string
+   */
+  public StringValue appendUnicode(Value value)
+  {
+    return append(value);
+  }
+
+  /**
+   * Append a Java byte to the value without conversions.
+   */
+  public StringValue appendByte(int v)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Append a Java String to the value without conversions.
+   */
+  public StringValue appendBytes(String s)
+  {
+    StringValue sb = this;
+    
+    for (int i = 0; i < s.length(); i++) {
+      sb = sb.appendByte(s.charAt(i));
+    }
+    
+    return sb;
+  }
+  
+  /**
+   * Append a Java char[] to the value without conversions.
+   */
+  public StringValue appendBytes(char []buf, int offset, int length)
+  {
+    StringValue sb = this;
+    int end = Math.min(buf.length, offset + length);
+    
+    while (offset < end) {
+      sb = sb.appendByte(buf[offset++]);
+    }
+    
+    return sb;
   }
 
   /**
@@ -1322,6 +1394,15 @@ abstract public class StringValue extends Value implements CharSequence {
   public StringValue createStringBuilder(int length)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return createStringBuilder().append(this);
   }
 
   //

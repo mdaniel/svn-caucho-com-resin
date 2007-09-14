@@ -479,6 +479,15 @@ public class StringBuilderValue
     return new StringBuilderValue(length);
   }
 
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return new StringBuilderValue(_buffer, 0, _length);
+  }
+
   //
   // append code
   //

@@ -562,6 +562,12 @@ public class Var extends Value
   }
 
   @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return _value.toStringBuilder(env);
+  }
+
+  @Override
   public java.io.InputStream toInputStream()
   {
     return _value.toInputStream();

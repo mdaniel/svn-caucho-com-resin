@@ -520,6 +520,15 @@ public class JavaAdapterVar extends Var
     return getValue().toStringBuilder();
   }
 
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return getValue().toStringBuilder(env);
+  }
+
   //
   // Operations
   //

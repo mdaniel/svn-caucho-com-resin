@@ -117,6 +117,15 @@ public class BinaryBuilderValue
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return getValueType(_buffer, 0, _length);
+  }
+
+  /**
    * Returns true for a long
    */
   @Override
@@ -469,52 +478,19 @@ public class BinaryBuilderValue
   }
 
   /**
-   * Append a Java string to the value.
+   * Converts to a string builder
    */
   @Override
-  public final StringValue append(String s)
+  public StringValue toStringBuilder(Env env)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-    appendTo(sb);
-    sb.append(s);
-
-    return sb;
-  }
-
-  /**
-   * Append a Java string to the value.
-   */
-  @Override
-  public final StringValue append(String s, int start, int end)
-  {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-    appendTo(sb);
-    sb.append(s, start, end);
-
-    return sb;
-  }
-
-  /**
-   * Append a Java char to the value.
-   */
-  @Override
-  public final StringValue append(char ch)
-  {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-    appendTo(sb);
-    sb.append(ch);
-
-    return sb;
+    return new BinaryBuilderValue(_buffer, 0, _length);
   }
 
   /**
    * Append a Java buffer to the value.
    */
   @Override
-  public final StringValue append(char []buf, int offset, int length)
+  public final StringValue appendUnicode(char []buf, int offset, int length)
   {
     UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
@@ -623,7 +599,7 @@ public class BinaryBuilderValue
    * Append a Java byte to the value without conversions.
    */
   @Override
-  public final StringValue appendByte(int v)
+  public final StringValue append(char v)
   {
     int length = _length + 1;
 
@@ -641,7 +617,7 @@ public class BinaryBuilderValue
   @Override
   public final StringValue append(boolean v)
   {
-    return appendBytes(v ? "true" : "false");
+    return append(v ? "true" : "false");
   }
 
   /**
@@ -652,7 +628,7 @@ public class BinaryBuilderValue
   {
     // XXX: this probably is frequent enough to special-case
     
-    return appendBytes(String.valueOf(v));
+    return append(String.valueOf(v));
   }
 
   /**
@@ -661,14 +637,14 @@ public class BinaryBuilderValue
   @Override
   public StringValue append(double v)
   {
-    return appendBytes(String.valueOf(v));
+    return append(String.valueOf(v));
   }
 
   /**
    * Append a bytes to the value.
    */
   @Override
-  public StringValue appendBytes(String s)
+  public StringValue append(String s)
   {
     int sublen = s.length();
 
@@ -678,6 +654,87 @@ public class BinaryBuilderValue
     for (int i = 0; i < sublen; i++) {
       _buffer[_length++] = (byte) s.charAt(i);
     }
+
+    return this;
+  }
+
+  /**
+   * Append a Java string to the value.
+   */
+  @Override
+  public final StringValue appendUnicode(String s)
+  {
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+
+    appendTo(sb);
+    sb.append(s);
+
+    return sb;
+  }
+
+  /**
+   * Append a Java string to the value.
+   */
+  @Override
+  public final StringValue appendUnicode(String s, int start, int end)
+  {
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+
+    appendTo(sb);
+    sb.append(s, start, end);
+
+    return sb;
+  }
+
+  /**
+   * Append a value to the value.
+   */
+  @Override
+  public final StringValue appendUnicode(Value value)
+  {
+    value = value.toValue();
+
+    if (value instanceof BinaryBuilderValue) {
+      append((BinaryBuilderValue) value);
+
+      return this;
+    }
+    else {
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+
+      appendTo(sb);
+      sb.append(value);
+
+      return sb;
+    }
+  }
+
+  /**
+   * Append a Java char to the value.
+   */
+  @Override
+  public final StringValue appendUnicode(char ch)
+  {
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+
+    appendTo(sb);
+    sb.append(ch);
+
+    return sb;
+  }
+
+  /**
+   * Append a Java byte to the value without conversions.
+   */
+  @Override
+  public final StringValue appendByte(int v)
+  {
+    int length = _length + 1;
+
+    if (_buffer.length < length)
+      ensureCapacity(length);
+
+    _buffer[_length++] = (byte) v;
 
     return this;
   }
@@ -778,6 +835,56 @@ public class BinaryBuilderValue
     }
 
     return hash;
+  }
+
+  /**
+   * Returns true for equality
+   */
+  @Override
+  public boolean eq(Value rValue)
+  {
+    ValueType typeA = getValueType();
+    ValueType typeB = rValue.getValueType();
+
+    if (typeB.isNumber()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      return l == r;
+    }
+    else if (typeB.isBoolean()) {
+      return toBoolean() == rValue.toBoolean();
+    }
+    else if (typeA.isNumberConvertable() && typeB.isNumberConvertable()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      return l == r;
+    }
+
+    rValue = rValue.toValue();
+    
+    if (rValue instanceof BinaryBuilderValue) {
+      BinaryBuilderValue value = (BinaryBuilderValue) rValue;
+
+      int length = _length;
+      
+      if (length != value._length)
+        return false;
+
+      byte []bufferA = _buffer;
+      byte []bufferB = value._buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (bufferA[i] != bufferB[i])
+          return false;
+      }
+
+      return true;
+    }
+    else {
+      return toString().equals(rValue.toString());
+    }
   }
 
   @Override
@@ -936,6 +1043,55 @@ public class BinaryBuilderValue
   //
   // static helper functions
   //
+
+  public static ValueType getValueType(byte []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return ValueType.STRING;
+
+    int i = offset;
+    int ch = 0;
+    boolean hasPoint = false;
+
+    if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
+      i++;
+    }
+
+    if (len <= i)
+      return ValueType.STRING;
+
+    ch = buffer[i];
+
+    if (ch == '.') {
+      for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+        return ValueType.DOUBLE_CONVERTABLE;
+      }
+
+      return ValueType.STRING;
+    }
+    else if (! ('0' <= ch && ch <= '9'))
+      return ValueType.STRING;
+
+    for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
+    }
+
+    if (len <= i)
+      return ValueType.LONG_CONVERTABLE;
+    else if (ch == '.' || ch == 'e' || ch == 'E') {
+      for (i++;
+           i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
+                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
+           i++) {
+      }
+
+      if (i < len)
+        return ValueType.STRING;
+      else
+        return ValueType.DOUBLE_CONVERTABLE;
+    }
+    else
+      return ValueType.STRING;
+  }
 
   public static int getNumericType(byte []buffer, int offset, int len)
   {

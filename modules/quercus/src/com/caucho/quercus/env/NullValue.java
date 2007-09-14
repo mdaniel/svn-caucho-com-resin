@@ -136,6 +136,15 @@ public class NullValue extends Value
   }
 
   /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return env.createUnicodeBuilder();
+  }
+
+  /**
    * Converts to an object.
    */
   @Override

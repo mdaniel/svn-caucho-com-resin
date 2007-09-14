@@ -149,6 +149,15 @@ public class DoubleValue extends NumberValue
   }
 
   /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return env.createUnicodeBuilder().append(_value);
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()

@@ -136,6 +136,15 @@ public class BooleanValue extends Value
   }
 
   /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return env.createUnicodeBuilder().append(_value);
+  }
+
+  /**
    * Converts to an object.
    */
   public Object toObject()

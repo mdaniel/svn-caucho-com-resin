@@ -172,6 +172,15 @@ public class UnicodeBuilderValue
   }
 
   /**
+   * Returns the ValueType.
+   */
+  @Override
+  public ValueType getValueType()
+  {
+    return getValueType(_buffer, 0, _length);
+  }
+
+  /**
    * Interns the string.
    */
   public StringValue intern(Quercus quercus)
@@ -761,6 +770,15 @@ public class UnicodeBuilderValue
   }
 
   /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return new UnicodeBuilderValue(_buffer, 0, _length);
+  }
+
+  /**
    * Append a Java string to the value.
    */
   @Override
@@ -996,6 +1014,56 @@ public class UnicodeBuilderValue
     }
 
     return hash;
+  }
+
+  /**
+   * Returns true for equality
+   */
+  @Override
+  public boolean eq(Value rValue)
+  {
+    ValueType typeA = getValueType();
+    ValueType typeB = rValue.getValueType();
+
+    if (typeB.isNumber()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      return l == r;
+    }
+    else if (typeB.isBoolean()) {
+      return toBoolean() == rValue.toBoolean();
+    }
+    else if (typeA.isNumberConvertable() && typeB.isNumberConvertable()) {
+      double l = toDouble();
+      double r = rValue.toDouble();
+
+      return l == r;
+    }
+
+    rValue = rValue.toValue();
+    
+    if (rValue instanceof UnicodeBuilderValue) {
+      UnicodeBuilderValue value = (UnicodeBuilderValue) rValue;
+
+      int length = _length;
+      
+      if (length != value._length)
+        return false;
+
+      char []bufferA = _buffer;
+      char []bufferB = value._buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (bufferA[i] != bufferB[i])
+          return false;
+      }
+
+      return true;
+    }
+    else {
+      return toString().equals(rValue.toString());
+    }
   }
 
   /**
