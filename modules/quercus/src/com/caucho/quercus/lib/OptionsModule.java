@@ -601,7 +601,7 @@ public class OptionsModule extends AbstractQuercusModule {
     }
     else {
       return HtmlModule.htmlspecialchars(env,
-                                         value,
+                                         value.toStringValue(),
                                          DefaultValue.DEFAULT,
                                          DefaultValue.DEFAULT);
     }
