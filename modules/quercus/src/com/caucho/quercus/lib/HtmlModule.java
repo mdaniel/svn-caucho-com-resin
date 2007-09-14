@@ -76,7 +76,8 @@ public class HtmlModule extends AbstractQuercusModule {
   /**
    * Returns HTML translation tables.
    */
-  public Value get_html_translation_table(@Optional("HTML_SPECIALCHARS") int table,
+  public Value get_html_translation_table(Env env,
+					  @Optional("HTML_SPECIALCHARS") int table,
                                           @Optional("ENT_COMPAT") int quoteStyle)
   {
     Value result;
@@ -87,10 +88,10 @@ public class HtmlModule extends AbstractQuercusModule {
       result = HTML_SPECIALCHARS_ARRAY.copy();
 
     if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
-      result.put(new UnicodeValueImpl("'"), new UnicodeValueImpl("&apos;"));
+      result.put(env.createString("'"), env.createString("&apos;"));
 
     if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
-      result.put(new UnicodeValueImpl("\""), new UnicodeValueImpl("&quot;"));
+      result.put(env.createString("\""), env.createString("&quot;"));
 
     return result;
   }
@@ -105,15 +106,14 @@ public class HtmlModule extends AbstractQuercusModule {
    * @return the trimmed string
    */
   public static Value htmlspecialchars(Env env,
-				       Value stringV,
+				       StringValue string,
                                        @Optional Value quoteStyleV,
                                        @Optional Value charsetV)
   {
-      // XXX: quotestyle and charset
-    String string = stringV.toString();
-    StringBuilder sb = new StringBuilder();
-
     int len = string.length();
+    
+    StringValue sb = string.createStringBuilder(len * 5 / 4);
+
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
 
@@ -139,7 +139,7 @@ public class HtmlModule extends AbstractQuercusModule {
       }
     }
 
-    return new UnicodeValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -152,7 +152,7 @@ public class HtmlModule extends AbstractQuercusModule {
    * @return the trimmed string
    */
   public static Value htmlentities(Env env,
-				   Value stringV,
+				   StringValue stringV,
                                    @Optional Value quoteStyleV,
                                    @Optional Value charsetV)
   {
@@ -174,7 +174,7 @@ public class HtmlModule extends AbstractQuercusModule {
 					       @Optional String charset)
   {
     if (string.length() == 0)
-      return StringValue.EMPTY;
+      return env.createEmptyString();
 
     Iterator<Map.Entry<Value,Value>> iter
       = HTML_SPECIALCHARS_ARRAY.getIterator(env);
@@ -198,13 +198,11 @@ public class HtmlModule extends AbstractQuercusModule {
    *
    * @param env the calling environment
    */
-  public static Value nl2br(Env env, Value stringV)
+  public static Value nl2br(Env env, StringValue string)
   {
-    String string = stringV.toString();
-
     int strLen = string.length();
 
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = string.createStringBuilder(strLen * 5 / 4);
 
     for (int i = 0; i < strLen; i++) {
       char ch = string.charAt(i);
@@ -226,7 +224,7 @@ public class HtmlModule extends AbstractQuercusModule {
       }
     }
 
-    return new UnicodeValueImpl(sb.toString());
+    return sb;
   }
 
   private static void entity(int ch, String entity)

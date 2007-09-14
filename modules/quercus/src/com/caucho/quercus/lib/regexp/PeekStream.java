@@ -29,12 +29,16 @@
 
 package com.caucho.quercus.lib.regexp;
 
+import com.caucho.quercus.env.*;
+
 class PeekStream {
   int read() { return -1; }
 
   int peek() { return -1; }
 
   void ungetc(int ch) { }
+
+  StringValue createStringBuilder() { return new StringBuilderValue(); }
 }
 
 

@@ -35,8 +35,7 @@ package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
 
-import com.caucho.quercus.env.UnicodeBuilderValue;
-import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.util.*;
 
 /**
@@ -62,18 +61,18 @@ class Regcomp {
   int _nLoop;
   int _flags;
 
-  HashMap<Integer,UnicodeValue> _groupNameMap
-    = new HashMap<Integer,UnicodeValue>();
+  HashMap<Integer,StringValue> _groupNameMap
+    = new HashMap<Integer,StringValue>();
 
-  HashMap<UnicodeValue,Integer> _groupNameReverseMap
-    = new HashMap<UnicodeValue,Integer>();
+  HashMap<StringValue,Integer> _groupNameReverseMap
+    = new HashMap<StringValue,Integer>();
   
   boolean _isLookbehind;
   boolean _isOr;
   
   Regcomp(int flags)
   {
-    this._flags = flags;
+    _flags = flags;
   }
 
   Node parse(PeekStream pattern) throws IllegalRegexpException
@@ -377,7 +376,7 @@ class Regcomp {
 	  case 'P':
 	    // (?P<name>group), (?P=name) named groups
 
-	    UnicodeBuilderValue name = new UnicodeBuilderValue();
+	    StringValue name = pattern.createStringBuilder();
 
 	    if ((ch = pattern.read()) == '<') {
 	      // this is a named group definition

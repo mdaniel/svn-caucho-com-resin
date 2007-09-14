@@ -699,7 +699,7 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toStringValue()
   {
-    return new UnicodeValueImpl(toString());
+    return Env.getInstance().createString(toString());
   }
 
   /**

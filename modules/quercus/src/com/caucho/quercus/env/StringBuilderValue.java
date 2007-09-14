@@ -386,9 +386,81 @@ public class StringBuilderValue
   public CharSequence subSequence(int start, int end)
   {
     if (end <= start)
-      return StringValue.EMPTY;
+      return StringBuilderValue.EMPTY;
 
     return new StringBuilderValue(_buffer, start, end - start);
+  }
+
+  /**
+   * Convert to lower case.
+   */
+  @Override
+  public StringValue toLowerCase()
+  {
+    int length = _length;
+    
+    StringBuilderValue string = new StringBuilderValue(length);
+    
+    byte []srcBuffer = _buffer;
+    byte []dstBuffer = string._buffer;
+
+    for (int i = 0; i < length; i++) {
+      byte ch = srcBuffer[i];
+      
+      if ('A' <= ch && ch <= 'Z')
+	dstBuffer[i] = (byte) (ch + 'a' - 'A');
+      else
+	dstBuffer[i] = ch;
+    }
+
+    string._length = length;
+
+    return string;
+  }
+  
+  /**
+   * Convert to lower case.
+   */
+  @Override
+  public StringValue toUpperCase()
+  {
+    int length = _length;
+    
+    StringBuilderValue string = new StringBuilderValue(_length);
+
+    byte []srcBuffer = _buffer;
+    byte []dstBuffer = string._buffer;
+
+    for (int i = 0; i < length; i++) {
+      byte ch = srcBuffer[i];
+      
+      if ('a' <= ch && ch <= 'z')
+        dstBuffer[i] = (byte) (ch + 'A' - 'a');
+      else
+	dstBuffer[i] = ch;
+    }
+
+    string._length = length;
+
+    return string;
+  }
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  @Override
+  public StringValue createStringBuilder()
+  {
+    return new StringBuilderValue();
+  }
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  @Override
+  public StringValue createStringBuilder(int length)
+  {
+    return new StringBuilderValue(length);
   }
 
   //

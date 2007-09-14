@@ -66,6 +66,7 @@ public class JdbcResultResource {
   private ResultSet _rs;
   private int _fieldOffset;
   private JdbcConnectionResource _conn;
+  private Env _env;
 
   private ResultSetMetaData _metaData;
   private Value[] _columnNames;
@@ -89,6 +90,7 @@ public class JdbcResultResource {
     _stmt = stmt;
     _rs = rs;
     _conn = conn;
+    _env = conn.getEnv();
   }
 
   /**
@@ -104,6 +106,7 @@ public class JdbcResultResource {
 
     _metaData = metaData;
     _conn = conn;
+    _env = conn.getEnv();
   }
 
   /**
@@ -116,9 +119,10 @@ public class JdbcResultResource {
         _rs.close();
 
       _stmt = null;
+      _env = null;
+      _conn = null;
 
       _closed = true;
-
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -153,7 +157,7 @@ public class JdbcResultResource {
           _columnNames = new Value[count];
 
           for (int i = 0; i < count; i++)
-            _columnNames[i] = new UnicodeValueImpl(_metaData.getColumnName(i + 1));
+            _columnNames[i] = env.createString(_metaData.getColumnName(i + 1));
         }
 
         for (int i = 0; i < count; i++) {
@@ -212,8 +216,8 @@ public class JdbcResultResource {
 
     try {
       _rs.next();
-      result.putField(env, "name", new UnicodeValueImpl(_rs.getString(1)));
-      result.putField(env, "table", new UnicodeValueImpl(tableName));
+      result.putField(env, "name", env.createString(_rs.getString(1)));
+      result.putField(env, "table", env.createString(tableName));
       result.putField(env, "max_length", new LongValue(maxLength));
 
       if (_rs.getString(4).indexOf("YES") == -1)
@@ -241,7 +245,7 @@ public class JdbcResultResource {
       else
         result.putField(env, "blob", zero);
 
-      result.putField(env, "type", new UnicodeValueImpl(type));
+      result.putField(env, "type", env.createString(type));
 
       if (_rs.getString(2).indexOf("unsigned") != -1)
         result.putField(env, "unsigned", one);
@@ -297,15 +301,15 @@ public class JdbcResultResource {
         _metaData = _rs.getMetaData();
 
       _rs.next();
-      result.putField(env, "name", new UnicodeValueImpl(name));
-      result.putField(env, "orgname", new UnicodeValueImpl(originalName));
-      result.putField(env, "table", new UnicodeValueImpl(table));
+      result.putField(env, "name", env.createString(name));
+      result.putField(env, "orgname", env.createString(originalName));
+      result.putField(env, "table", env.createString(table));
       //XXX: orgtable same as table
-      result.putField(env, "orgtable", new UnicodeValueImpl(table));
+      result.putField(env, "orgtable", env.createString(table));
       if (_rs.getString(6) != null)
-        result.putField(env, "def", new UnicodeValueImpl(_rs.getString(6)));
+        result.putField(env, "def", env.createString(_rs.getString(6)));
       else
-        result.putField(env, "def", new UnicodeValueImpl(""));
+        result.putField(env, "def", env.createString(""));
       result.putField(env, "max_length", new LongValue(maxLength));
 
       //generate flags
@@ -623,7 +627,7 @@ public class JdbcResultResource {
             if (rs.wasNull())
               return NullValue.NULL;
             else
-              return StringValue.create(value);
+              return _env.createString(String.valueOf(value));
           }
           // else fall to boolean
         }
@@ -634,7 +638,7 @@ public class JdbcResultResource {
           if (rs.wasNull())
             return NullValue.NULL;
           else
-            return StringValue.create(b ? "t" : "f");
+            return env.createString(b ? "t" : "f");
         }
 
       case Types.TINYINT:
@@ -647,7 +651,7 @@ public class JdbcResultResource {
           if (rs.wasNull())
             return NullValue.NULL;
           else
-            return StringValue.create(value);
+            return _env.createString(String.valueOf(value));
         }
 
       case Types.DOUBLE:
@@ -657,7 +661,7 @@ public class JdbcResultResource {
           if (rs.wasNull())
             return NullValue.NULL;
           else {
-            UnicodeBuilderValue sb = new UnicodeBuilderValue();
+            StringValue sb = _env.createUnicodeBuilder();
             if (metaData.isCurrency(column)) {
               sb.append("$");
             }
@@ -754,8 +758,7 @@ public class JdbcResultResource {
       if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return new UnicodeValueImpl(_metaData.getCatalogName(fieldOffset + 1));
-
+        return _env.createString(_metaData.getCatalogName(fieldOffset + 1));
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -849,8 +852,7 @@ public class JdbcResultResource {
         flags.append("timestamp");
       }
 
-      return new UnicodeValueImpl(flags.toString());
-
+      return _env.createString(flags.toString());
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -903,7 +905,7 @@ public class JdbcResultResource {
         return BooleanValue.FALSE;
       }
       else
-        return new UnicodeValueImpl(_metaData.getColumnName(fieldOffset + 1));
+        return env.createString(_metaData.getColumnName(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -928,8 +930,7 @@ public class JdbcResultResource {
       if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return new UnicodeValueImpl(_metaData.getColumnLabel(fieldOffset + 1));
-
+        return _env.createString(_metaData.getColumnLabel(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -1021,7 +1022,7 @@ public class JdbcResultResource {
         if (tableName == null || tableName.equals(""))
           return BooleanValue.FALSE;
         else
-          return new UnicodeValueImpl(tableName);
+          return env.createString(tableName);
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -1049,7 +1050,7 @@ public class JdbcResultResource {
         return BooleanValue.FALSE;
       }
       else
-        return new UnicodeValueImpl(getColumnPHPName(_metaData.getColumnType(fieldOffset + 1)));
+        return env.createString(getColumnPHPName(_metaData.getColumnType(fieldOffset + 1)));
 
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -1240,7 +1241,6 @@ public class JdbcResultResource {
       }
 
       return getColumnValue(env, _rs, _metaData, colNumber + 1);
-
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -1354,7 +1354,7 @@ public class JdbcResultResource {
   public Value toKey()
   {
     // XXX: quercusbb seems to want this?
-    return new UnicodeValueImpl("JdbcResultResource$" + System.identityHashCode(this));
+    return _env.createString("JdbcResultResource$" + System.identityHashCode(this));
   }
 
   /**

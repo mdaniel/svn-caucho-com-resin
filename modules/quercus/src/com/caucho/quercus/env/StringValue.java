@@ -1258,6 +1258,22 @@ abstract public class StringValue extends Value implements CharSequence {
     return sb;
   }
 
+  /**
+   * Creates a string builder of the same type.
+   */
+  public StringValue createStringBuilder()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  public StringValue createStringBuilder(int length)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   //
   // java.lang.Object methods
   //

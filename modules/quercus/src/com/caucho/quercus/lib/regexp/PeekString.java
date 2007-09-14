@@ -29,41 +29,34 @@
 
 package com.caucho.quercus.lib.regexp;
 
-import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.StringValue;
 
 class PeekString extends PeekStream {
-  char []_string;
+  CharSequence _string;
   int _length;
   int _index;
 
-  PeekString(UnicodeValue string)
+  PeekString(CharSequence string)
   {
-    this._string = string.toCharArray();
+    _string = string;
     _length = string.length();
-    this._index = 0;
-  }
-  
-  PeekString(String string)
-  {
-    this._string = string.toCharArray();
-    _length = string.length();
-    this._index = 0;
+    _index = 0;
   }
 
   int read() 
   { 
-    if (_index >= _length)
-      return -1; 
+    if (_index < _length)
+      return _string.charAt(_index++);
     else
-      return _string[_index++];
+      return -1; 
   }
 
   int peek() 
-  { 
-    if (_index >= _length)
-      return -1; 
+  {
+    if (_index < _length)
+      return _string.charAt(_index);
     else
-      return _string[_index];
+      return -1; 
   }
 
   void ungetc(int ch) { 
@@ -71,6 +64,11 @@ class PeekString extends PeekStream {
       throw new RuntimeException();
 
     _index--;
+  }
+
+  StringValue createStringBuilder()
+  {
+    return ((StringValue) _string).createStringBuilder();
   }
 }
 

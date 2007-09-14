@@ -796,14 +796,14 @@ public class JavaRegexpModule
 
     Matcher matcher = pattern.matcher(subject);
 
-    UnicodeBuilderValue result = null;
+    StringValue result = null;
     int tail = 0;
 
     int replacementLen = replacementProgram.size();
 
     while (matcher.find() && limit-- > 0) {
       if (result == null)
-        result = new UnicodeBuilderValue();
+        result = subject.createStringBuilder();
 
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
@@ -817,7 +817,7 @@ public class JavaRegexpModule
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
       if (isEval) {
-        UnicodeBuilderValue evalString = new UnicodeBuilderValue();
+        StringValue evalString = subject.createStringBuilder();
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
@@ -2002,7 +2002,7 @@ public class JavaRegexpModule
   }
 
   static class Replacement {
-    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
+    void eval(StringValue sb, StringValue subject, Matcher matcher)
     {
     }
 
@@ -2026,7 +2026,8 @@ public class JavaRegexpModule
       text.getChars(0, length, _text, 0);
     }
 
-    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
+    @Override
+    void eval(StringValue sb, StringValue subject, Matcher matcher)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -2057,11 +2058,12 @@ public class JavaRegexpModule
       _group = group;
     }
 
-    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
+    @Override
+    void eval(StringValue sb, StringValue subject, Matcher matcher)
     {
       if (_group <= matcher.groupCount())
         sb.append(subject.substring(matcher.start(_group),
-                matcher.end(_group)));
+				    matcher.end(_group)));
     }
 
     public String toString()
@@ -2080,23 +2082,24 @@ public class JavaRegexpModule
       _group = group;
     }
 
-    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
+    @Override
+    void eval(StringValue sb, StringValue subject, Matcher matcher)
     {
       if (_group <= matcher.groupCount()) {
         StringValue group = subject.substring(matcher.start(_group),
-                matcher.end(_group));;
-                int len = group.length();
+					      matcher.end(_group));
+	int len = group.length();
 
-                for (int i = 0; i < len; i++) {
-                  char ch = group.charAt(i);
+	for (int i = 0; i < len; i++) {
+	  char ch = group.charAt(i);
 
-                  if (ch == '\'')
-                    sb.append("\\\'");
-                  else if (ch == '\"')
-                    sb.append("\\\"");
-                  else
-                    sb.append(ch);
-                }
+	  if (ch == '\'')
+	    sb.append("\\\'");
+	  else if (ch == '\"')
+	    sb.append("\\\"");
+	  else
+	    sb.append(ch);
+	}
       }
     }
 

@@ -664,6 +664,68 @@ public class UnicodeBuilderValue
   }
 
   /**
+   * Convert to lower case.
+   */
+  @Override
+  public StringValue toLowerCase()
+  {
+    int length = _length;
+    
+    UnicodeBuilderValue string = new UnicodeBuilderValue(length);
+    
+    char []srcBuffer = _buffer;
+    char []dstBuffer = string._buffer;
+
+    for (int i = 0; i < length; i++) {
+      char ch = srcBuffer[i];
+      
+      if ('A' <= ch && ch <= 'Z')
+	dstBuffer[i] = (char) (ch + 'a' - 'A');
+      else if (ch < 0x80)
+	dstBuffer[i] = ch;
+      else if (Character.isUpperCase(ch))
+	dstBuffer[i] = Character.toLowerCase(ch);
+      else
+	dstBuffer[i] = ch;
+    }
+
+    string._length = length;
+
+    return string;
+  }
+  
+  /**
+   * Convert to lower case.
+   */
+  @Override
+  public StringValue toUpperCase()
+  {
+    int length = _length;
+    
+    UnicodeBuilderValue string = new UnicodeBuilderValue(_length);
+
+    char []srcBuffer = _buffer;
+    char []dstBuffer = string._buffer;
+
+    for (int i = 0; i < length; i++) {
+      char ch = srcBuffer[i];
+      
+      if ('a' <= ch && ch <= 'z')
+        dstBuffer[i] = (char) (ch + 'A' - 'a');
+      else if (ch < 0x80)
+	dstBuffer[i] = ch;
+      else if (Character.isLowerCase(ch))
+        dstBuffer[i] = Character.toUpperCase(ch);
+      else
+	dstBuffer[i] = ch;
+    }
+
+    string._length = length;
+
+    return string;
+  }
+
+  /**
    * Returns a character array
    */
   @Override
@@ -713,6 +775,24 @@ public class UnicodeBuilderValue
   //
   // append code
   //
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  @Override
+  public StringValue createStringBuilder()
+  {
+    return new UnicodeBuilderValue();
+  }
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  @Override
+  public StringValue createStringBuilder(int length)
+  {
+    return new UnicodeBuilderValue(length);
+  }
 
   /**
    * Append a Java string to the value.

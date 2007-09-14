@@ -2824,6 +2824,14 @@ public class Env {
     }
   }
 
+  public StringValue createEmptyString()
+  {
+    if (_isUnicodeSemantics)
+      return UnicodeBuilderValue.EMPTY;
+    else
+      return StringBuilderValue.EMPTY;
+  }
+  
   /**
    * Creates a string from a byte.
    */

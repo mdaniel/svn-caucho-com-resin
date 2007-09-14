@@ -337,6 +337,14 @@ public class NullValue extends Value
     return null;
   }
 
+  /**
+   * Converts to a StringValue.
+   */
+  public StringValue toStringValue()
+  {
+    return Env.getInstance().createEmptyString();
+  }
+
   @Override
   public int getCount(Env env)
   {

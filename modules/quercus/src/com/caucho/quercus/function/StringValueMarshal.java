@@ -70,7 +70,7 @@ public class StringValueMarshal extends Marshal
     else if (value instanceof Value)
       return ((Value) value).toStringValue();
     else
-      return new UnicodeValueImpl(String.valueOf(value));
+      return env.createString(String.valueOf(value));
   }
   
   @Override

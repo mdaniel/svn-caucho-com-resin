@@ -762,9 +762,9 @@ public class CauchoRegexpModule
    * Replaces values using regexps
    */
   public static Value ereg_replace(Env env,
-          StringValue patternString,
-          StringValue replacement,
-          StringValue subject)
+				   StringValue patternString,
+				   StringValue replacement,
+				   StringValue subject)
   {
     try {
       patternString = cleanEregRegexp(patternString, false);
@@ -845,14 +845,14 @@ public class CauchoRegexpModule
 
     int length = subject.length();
 
-    UnicodeBuilderValue result = null;
+    StringValue result = null;
     int tail = 0;
 
     int replacementLen = replacementProgram.size();
 
     while (limit-- > 0 && regexp.find()) {
       if (result == null)
-        result = new UnicodeBuilderValue();
+        result = env.createUnicodeBuilder();
 
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
@@ -866,7 +866,7 @@ public class CauchoRegexpModule
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
       if (isEval) {
-        UnicodeBuilderValue evalString = new UnicodeBuilderValue();
+        StringValue evalString = env.createUnicodeBuilder();
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
@@ -1688,7 +1688,7 @@ public class CauchoRegexpModule
   }
 
   static class Replacement {
-    void eval(UnicodeBuilderValue sb, StringValue subject, Regexp regexp)
+    void eval(StringValue sb, StringValue subject, Regexp regexp)
     {
     }
 
@@ -1713,7 +1713,7 @@ public class CauchoRegexpModule
     }
 
     @Override
-    void eval(UnicodeBuilderValue sb, StringValue subject, Regexp regexp)
+    void eval(StringValue sb, StringValue subject, Regexp regexp)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -1745,11 +1745,11 @@ public class CauchoRegexpModule
     }
 
     @Override
-    void eval(UnicodeBuilderValue sb, StringValue subject, Regexp regexp)
+    void eval(StringValue sb, StringValue subject, Regexp regexp)
     {
       if (_group <= regexp.groupCount())
         sb.append(subject.substring(regexp.start(_group),
-                regexp.end(_group)));
+				    regexp.end(_group)));
     }
 
     public String toString()
@@ -1769,23 +1769,23 @@ public class CauchoRegexpModule
     }
 
     @Override
-    void eval(UnicodeBuilderValue sb, StringValue subject, Regexp regexp)
+    void eval(StringValue sb, StringValue subject, Regexp regexp)
     {
       if (_group <= regexp.groupCount()) {
         StringValue group = subject.substring(regexp.start(_group),
-                regexp.end(_group));;
-                int len = group.length();
+					      regexp.end(_group));;
+	int len = group.length();
 
-                for (int i = 0; i < len; i++) {
-                  char ch = group.charAt(i);
+	for (int i = 0; i < len; i++) {
+	  char ch = group.charAt(i);
 
-                  if (ch == '\'')
-                    sb.append("\\\'");
-                  else if (ch == '\"')
-                    sb.append("\\\"");
-                  else
-                    sb.append(ch);
-                }
+	  if (ch == '\'')
+	    sb.append("\\\'");
+	  else if (ch == '\"')
+	    sb.append("\\\"");
+	  else
+	    sb.append(ch);
+	}
       }
     }
 

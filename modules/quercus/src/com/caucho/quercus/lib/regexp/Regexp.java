@@ -34,7 +34,6 @@ import java.util.logging.*;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.util.*;
 
 public class Regexp {
@@ -46,8 +45,8 @@ public class Regexp {
   public static final int FAIL = -1;
   public static final int SUCCESS = 0;
 
-  UnicodeValue _pattern;
-  UnicodeValue _subject;
+  StringValue _pattern;
+  StringValue _subject;
   
   Node _prog;
   boolean _ignoreCase;
@@ -140,11 +139,15 @@ public class Regexp {
         case 'e': _isEval = true; break;
       }
     }
-    
+
+    /*
     if (_isUTF8)
       _pattern = pattern.toUnicodeValue(env, "UTF-8");
     else
       _pattern = pattern.toUnicodeValue(env);
+    */
+
+    _pattern = pattern;
     
     Regcomp comp = new Regcomp(flags);
 
@@ -167,19 +170,25 @@ public class Regexp {
   public StringValue substring(Env env, int start)
   {
     StringValue result = _subject.substring(start);
+
+    return result;
     
-    return encodeResultString(env, result);
+    // return encodeResultString(env, result);
   }
   
   public StringValue substring(Env env, int start, int end)
   {
     StringValue result = _subject.substring(start, end);
+
+    return result;
     
-    return encodeResultString(env, result);
+    // return encodeResultString(env, result);
   }
   
   private StringValue encodeResultString(Env env, StringValue str)
   {
+    return str;
+    /*
     if (_isUnicode) {
       if (_isUTF8)
         return str.toUnicodeValue(env, "UTF-8");
@@ -192,6 +201,7 @@ public class Regexp {
       else
         return str.toBinaryValue(env);
     }
+    */
   }
   
   /*
@@ -201,7 +211,7 @@ public class Regexp {
   }
   */
 
-  public UnicodeValue getPattern()
+  public StringValue getPattern()
   {
     return _pattern;
   }
@@ -246,9 +256,10 @@ public class Regexp {
     _stringCursor = new StringCharCursor("");
     
     _groupNames = new StringValue[_nGroup + 1];
-    for (Map.Entry<Integer,UnicodeValue> entry : comp._groupNameMap.entrySet()) {
+    for (Map.Entry<Integer,StringValue> entry : comp._groupNameMap.entrySet()) {
       StringValue groupName = entry.getValue();
-      
+
+      /*
       if (_isUnicode) {
       }
       else if (_isUTF8) {
@@ -257,6 +268,7 @@ public class Regexp {
       else {
         groupName.toBinaryValue(env);
       }
+      */
       
       _groupNames[entry.getKey().intValue()] = groupName;
     }
@@ -264,12 +276,16 @@ public class Regexp {
 
   public void init(Env env, StringValue subject)
   {
+    /*
     _isUnicode = subject.isUnicode();
     
     if (_isUTF8)
       _subject = subject.toUnicodeValue(env, "UTF-8");
     else
       _subject = subject.toUnicodeValue(env);
+    */
+
+    _subject = subject;
 
     _stringCursor.init(_subject);
     
@@ -526,8 +542,8 @@ public class Regexp {
           return FAIL;
         else {
           int begin = _groupState.get(2 * prog._index);
-          length = (_groupState.get(2 * prog._index + 1) - 
-                   _groupState.get(2 * prog._index));
+          length = (_groupState.get(2 * prog._index + 1)
+		    - _groupState.get(2 * prog._index));
           _cb.setLength(0);
           cursor.subseq(_cb, begin, begin + length);
           if (cursor.regionMatches(_cb.getBuffer(), 0, length)) {
@@ -543,8 +559,8 @@ public class Regexp {
           return FAIL;
         else {
           int begin = _groupState.get(2 * prog._index);
-          length = (_groupState.get(2 * prog._index + 1) - 
-                   _groupState.get(2 * prog._index));
+          length = (_groupState.get(2 * prog._index + 1)
+		    - _groupState.get(2 * prog._index));
 
           _cb.setLength(0);
           cursor.subseq(_cb, begin, begin + length);
@@ -663,7 +679,7 @@ public class Regexp {
         break;
 
     
-    // '*' '{n,m}' '+' '?' possessively matches as much as possible
+	// '*' '{n,m}' '+' '?' possessively matches as much as possible
       case Node.RC_LOOP_LONG:
         oldState = _groupState.copy();
         tail = cursor.getIndex();
@@ -777,7 +793,7 @@ public class Regexp {
 	tail = cursor.getIndex();
 	if (_loopCount[prog._index]++ < prog._min)
 	  prog = prog._branch;
-	else if (_loopCount[prog._index] > prog._max)
+	else if (prog._max < _loopCount[prog._index])
 	  prog = prog._rest;
 	else {
 	  oldState = _groupState.copy();
@@ -1516,18 +1532,22 @@ public class Regexp {
   {
     int begin = getBegin(i);
     int end = getEnd(i);
+
+    return _subject.substring(begin, end);
     
+    /*
     if (_isUnicode)
       return (UnicodeValue)_subject.substring(begin, end);
     else if (_isUTF8)
       return _subject.substring(begin, end).toBinaryValue(env, "UTF-8");
     else
       return _subject.substring(begin, end).toBinaryValue(env);
+    */
   }
   
   public StringValue getGroupName(int i)
   {
-    if (i >= _groupNames.length)
+    if (_groupNames.length <= i)
       return null;
     else
       return _groupNames[i];
@@ -1566,6 +1586,6 @@ public class Regexp {
   
   public String toString()
   {
-    return "[Regexp " + _pattern + "]";
+    return "Regexp[" + _pattern + "]";
   }
 }

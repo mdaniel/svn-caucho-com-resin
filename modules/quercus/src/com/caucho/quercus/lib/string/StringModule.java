@@ -108,7 +108,7 @@ public class StringModule extends AbstractQuercusModule {
 
     int length = source.length();
 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue(length * 5 / 4);
+    StringValue sb = source.createStringBuilder(length * 5 / 4);
 
     for (int i = 0; i < length; i++) {
       char ch = source.charAt(i);
@@ -212,7 +212,7 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static StringValue addslashes(StringValue source)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = source.createStringBuilder(source.length() * 5 / 4);
 
     int length = source.length();
     for (int i = 0; i < length; i++) {
@@ -243,10 +243,10 @@ public class StringModule extends AbstractQuercusModule {
   /**
    * Converts a binary value to a hex value.
    */
-  public static StringValue bin2hex(InputStream is)
+  public static StringValue bin2hex(Env env, InputStream is)
   {
     try {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      StringValue sb = env.createUnicodeBuilder();
 
       int ch;
       while ((ch = is.read()) >= 0) {
@@ -392,7 +392,7 @@ v   *
 	}
       }
 
-      return new UnicodeValueImpl(byteToChar.getConvertedString());
+      return env.createString(byteToChar.getConvertedString());
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -401,12 +401,12 @@ v   *
   /**
    * uuencode a string.
    */
-  public static Value convert_uuencode(String source)
+  public static Value convert_uuencode(StringValue source)
   {
     if (source == null || source.length() == 0)
       return BooleanValue.FALSE;
 
-    UnicodeBuilderValue result = new UnicodeBuilderValue();
+    StringValue result = source.createStringBuilder();
 
     int i = 0;
     int length = source.length();
@@ -498,26 +498,26 @@ v   *
 
     case 3:
       {
-        StringBuilder sb = new StringBuilder();
+        StringValue sb = data.createStringBuilder();
 
         for (int i = 0; i < count.length; i++) {
           if (count[i] > 0)
             sb.append((char) i);
         }
 
-        return new UnicodeValueImpl(sb.toString());
+        return sb;
       }
 
     case 4:
       {
-        StringBuilder sb = new StringBuilder();
+        StringValue sb = data.createStringBuilder();
 
         for (int i = 0; i < count.length; i++) {
           if (count[i] == 0)
             sb.append((char) i);
         }
 
-        return new UnicodeValueImpl(sb.toString());
+        return sb;
       }
 
     default:
@@ -612,7 +612,7 @@ v   *
    */
   public static Value fprintf(Env env,
                               @NotNull BinaryOutput os,
-                              String format,
+                              StringValue format,
                               Value []args)
   {
     Value value = sprintf(format, args);
@@ -651,18 +651,18 @@ v   *
       return NullValue.NULL;
     }
 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = glue.createStringBuilder();
     boolean isFirst = true;
 
     for (ArrayValue.Entry entry = pieces.getHead();
 	 entry != null;
 	 entry = entry.getNext()) {
       if (! isFirst)
-        glue.appendTo(sb);
+        sb = sb.append(glue);
 
       isFirst = false;
 
-      entry.getValue().appendTo(sb);
+      sb = sb.append(entry.getValue());
     }
 
     return sb;
@@ -691,7 +691,8 @@ v   *
    *
    * @return a string of imploded values
    */
-  public static StringValue md5(InputStream is,
+  public static StringValue md5(Env env,
+				InputStream is,
 				@Optional boolean rawOutput)
   {
     try {
@@ -706,7 +707,7 @@ v   *
       
       byte []digest = md.digest();
       
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      StringValue sb = env.createUnicodeBuilder();
       for (int i = 0; i < digest.length; i++) {
         int d1 = (digest[i] >> 4) & 0xf;
         int d2 = (digest[i] & 0xf);
@@ -729,7 +730,8 @@ v   *
    *
    * @return a string of imploded values
    */
-  public static Value md5_file(Path source,
+  public static Value md5_file(Env env,
+			       Path source,
                                @Optional boolean rawOutput)
   {
     try {
@@ -744,7 +746,7 @@ v   *
           md.update((byte) d);
         }
     
-        return digestToString(md.digest());
+        return digestToString(env, md.digest());
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
     
@@ -761,9 +763,9 @@ v   *
     }
   }
 
-  private static StringValue digestToString(byte []digest)
+  private static StringValue digestToString(Env env, byte []digest)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = env.createUnicodeBuilder();
     for (int i = 0; i < digest.length; i++) {
       int d1 = (digest[i] >> 4) & 0xf;
       int d2 = (digest[i] & 0xf);
@@ -1304,9 +1306,10 @@ v   *
    */
   public static Value quotemeta(StringValue string)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
     int len = string.length();
+    
+    StringValue sb = string.createStringBuilder(len * 5 / 4);
+
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
 
@@ -1387,8 +1390,8 @@ v   *
    * @return the trimmed string
    */
   public static StringValue ltrim(Env env,
-                             StringValue string,
-                             @Optional String characters)
+				  StringValue string,
+				  @Optional String characters)
   {
     if (characters == null)
       characters = "";
@@ -1411,7 +1414,7 @@ v   *
       }
     }
 
-    return StringValue.EMPTY;
+    return env.createEmptyString();
   }
 
   /**
@@ -1447,7 +1450,7 @@ v   *
       }
     }
 
-    return StringValue.EMPTY;
+    return env.createEmptyString();
   }
 
   /**
@@ -1465,21 +1468,21 @@ v   *
         Locale locale = setLocale(localeInfo, category, value.toString());
 
         if (locale != null)
-          return new UnicodeValueImpl(locale.toString());
+          return env.createString(locale.toString());
       }
     }
     else {
       Locale locale = setLocale(localeInfo, category, localeArg.toString());
 
       if (locale != null)
-        return new UnicodeValueImpl(locale.toString());
+        return env.createString(locale.toString());
     }
 
     for (int i = 0; i < fallback.length; i++) {
       Locale locale = setLocale(localeInfo, category, fallback[i].toString());
 
       if (locale != null)
-        return new UnicodeValueImpl(locale.toString());
+        return env.createString(locale.toString());
     }
 
     return BooleanValue.FALSE;
@@ -1670,7 +1673,8 @@ v   *
    *
    * @return a string of imploded values
    */
-  public static Value sha1_file(Path source,
+  public static Value sha1_file(Env env,
+				Path source,
                                 @Optional boolean rawOutput)
   {
     try {
@@ -1685,7 +1689,7 @@ v   *
 	  md.update((byte) d);
 	}
 	
-	return digestToString(md.digest());
+	return digestToString(env, md.digest());
       } catch (IOException e) {
 	log.log(Level.FINE, e.toString(), e);
 	
@@ -1799,7 +1803,7 @@ v   *
     if (maxLen < 0)
       maxLen = Integer.MAX_VALUE;
 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = string.createStringBuilder();
 
     for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
       char ch = string.charAt(sIndex);
@@ -1826,7 +1830,7 @@ v   *
    *
    * @return the formatted string
    */
-  public static int printf(Env env, String format, Value []args)
+  public static int printf(Env env, StringValue format, Value []args)
   {
     Value str = sprintf(format, args);
 
@@ -1837,17 +1841,14 @@ v   *
 
   private static final char[] SOUNDEX_VALUES = "01230120022455012623010202".toCharArray();
 
-  public static Value soundex(String string)
+  public static Value soundex(StringValue string)
   {
-    if (string == null)
-      string = "";
-    
     int length = string.length();
 
     if (length == 0)
       return BooleanValue.FALSE;
 
-    StringBuilder result = new StringBuilder(4);
+    StringValue result = string.createStringBuilder();
 
     int count = 0;
     char lastCode = 0;
@@ -1876,7 +1877,7 @@ v   *
       result.append('0');
     }
 
-    return new UnicodeValueImpl(result.toString());
+    return result;
   }
 
   /**
@@ -1887,14 +1888,11 @@ v   *
    *
    * @return the formatted string
    */
-  public static Value sprintf(String format, Value []args)
+  public static Value sprintf(StringValue format, Value []args)
   {
-    if (format == null)
-      format = "";
-    
     ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = format.createStringBuilder();
 
     for (PrintfSegment segment : segments)
       segment.apply(sb, args);
@@ -1902,7 +1900,7 @@ v   *
     return sb;
   }
 
-  private static ArrayList<PrintfSegment> parsePrintfFormat(String format)
+  private static ArrayList<PrintfSegment> parsePrintfFormat(StringValue format)
   { 
     ArrayList<PrintfSegment> segments = new ArrayList<PrintfSegment>();
 
@@ -1985,7 +1983,7 @@ v   *
                                                  isLeft || isAlt,
                                                  isZero,
                                                  ch == 'S',
-                                                 format.substring(head, j),
+                                                 format.substring(head, j).toString(),
                                                  index++));
             sb.setLength(0);
             i = j;
@@ -1997,7 +1995,7 @@ v   *
                                                isLeft || isAlt,
                                                isZero,
                                                ch == 'C',
-                                               format.substring(head, j),
+                                               format.substring(head, j).toString(),
                                                index++));
             sb.setLength(0);
             i = j;
@@ -2121,9 +2119,9 @@ v   *
       break;
     }
 
-    StringValue sb = new UnicodeBuilderValue();
-
     int padStringLen = pad.length();
+    
+    StringValue sb = string.createStringBuilder(string.length() + padLen);
 
     for (int i = 0; i < leftPad; i++)
       sb.append(pad.charAt(i % padStringLen));
@@ -2144,7 +2142,7 @@ v   *
    */
   public static Value str_repeat(StringValue string, int count)
   {
-    StringValue sb = new UnicodeBuilderValue();
+    StringValue sb = string.createStringBuilder(count * string.length());
 
     for (int i = 0; i < count; i++)
       sb = sb.append(string);
@@ -2187,7 +2185,7 @@ v   *
     count.set(LongValue.ZERO);
 
     if (subject.isNull())
-      return StringValue.EMPTY;
+      return env.createEmptyString();
 
     if (search.isNull())
       return subject;
@@ -2213,7 +2211,7 @@ v   *
       StringValue subjectString = subject.toStringValue();
 
       if (subjectString.length() == 0)
-        return StringValue.EMPTY;
+        return env.createEmptyString();
 
       return strReplaceImpl(env,
 			    search,
@@ -2324,7 +2322,7 @@ v   *
 
     while ((next = indexOf(subject, search, head, isInsensitive)) >= head) {
       if (result == null)
-        result = new UnicodeBuilderValue();
+        result = subject.createStringBuilder();
 	
       result = result.append(subject, head, next);
       result = result.append(replace);
@@ -2389,12 +2387,12 @@ v   *
    *
    * @param string string to convert
    */
-  public static Value str_rot13(String string)
+  public static Value str_rot13(StringValue string)
   {
     if (string == null)
-      string = "";
+      return NullValue.NULL;
     
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = string.createStringBuilder(string.length());
 
     int len = string.length();
     for (int i = 0; i < len; i++) {
@@ -2415,7 +2413,7 @@ v   *
       }
     }
 
-    return new UnicodeValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -2447,13 +2445,15 @@ v   *
    * @param string string to split
    * @param chunk chunk size
    */
-  public static Value str_split(String string,
+  public static Value str_split(StringValue string,
                                 @Optional("1") int chunk)
   {
-    if (string == null)
-      string = "";
-    
     ArrayValue array = new ArrayValueImpl();
+
+    if (string.length() == 0) {
+      array.put(string);
+      return array;
+    }
 
     int strLen = string.length();
 
@@ -2461,9 +2461,9 @@ v   *
       Value value;
 
       if (i + chunk <= strLen) {
-        value = new UnicodeValueImpl(string.substring(i, i + chunk));
+        value = string.substring(i, i + chunk);
       } else {
-        value = new UnicodeValueImpl(string.substring(i));
+        value = string.substring(i);
       }
 
       array.put(new LongValue(i), value);
@@ -2472,13 +2472,10 @@ v   *
     return array;
   }
 
-  public static Value str_word_count(String string,
+  public static Value str_word_count(StringValue string,
                                      @Optional int format,
                                      @Optional String additionalWordCharacters)
   {
-    if (string == null)
-      string = "";
-    
     if (format < 0 || format > 2)
       return NullValue.NULL;
 
@@ -2526,7 +2523,7 @@ v   *
           isBetweenWords = true;
 
           if (format > 0) {
-            StringValue word = new UnicodeValueImpl(string.substring(lastWordStart, i));
+            StringValue word = string.substring(lastWordStart, i);
 
             if (format == 1)
               resultArray.append(word);
@@ -2614,7 +2611,7 @@ v   *
    *
    * @param env the calling environment
    */
-  public static Value strchr(Env env, String haystack, Value needle)
+  public static Value strchr(Env env, StringValue haystack, Value needle)
   { 
     return strstr(env, haystack, needle);
   }
@@ -2676,7 +2673,7 @@ v   *
   {
     // XXX: allowTags is stubbed
 
-    UnicodeBuilderValue result = new UnicodeBuilderValue();
+    StringValue result = string.createStringBuilder(string.length());
 
     int len = string.length();
 
@@ -3090,7 +3087,7 @@ v   *
    */
   public static StringValue stripslashes(StringValue string)
   { 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = string.createStringBuilder();
     int len = string.length();
 
     for (int i = 0; i < len; i++) {
@@ -3116,28 +3113,26 @@ v   *
    * @param needleV the string to search for
    * @return the trailing match or FALSE
    */
-  public static Value stristr(String haystack,
+  public static Value stristr(StringValue haystack,
                               Value needleV)
   {
-    if (haystack == null)
-      haystack = "";
-    
-    String needle;
+    CharSequence needleLower;
 
     if (needleV instanceof StringValue) {
-      needle = needleV.toString();
+      needleLower = ((StringValue) needleV).toLowerCase();
     }
     else {
-      needle = String.valueOf((char) needleV.toLong());
+      char lower = Character.toLowerCase((char) needleV.toLong());
+      
+      needleLower = String.valueOf(lower);
     }
 
-    String haystackLower = haystack.toLowerCase();
-    String needleLower = needle.toLowerCase();
+    StringValue haystackLower = haystack.toLowerCase();
 
     int i = haystackLower.indexOf(needleLower);
 
     if (i >= 0)
-      return new UnicodeValueImpl(haystack.substring(i));
+      return haystack.substring(i);
     else
       return BooleanValue.FALSE;
   }
@@ -3149,25 +3144,20 @@ v   *
    * @param needleV the string to search for
    * @return the trailing match or FALSE
    */
-  public static Value strrchr(String haystack,
+  public static Value strrchr(StringValue haystack,
                               Value needleV)
   {
-    if (haystack == null)
-      haystack = "";
-    
-    String needle;
+    CharSequence needle;
 
-    if (needleV instanceof StringValue) {
-      needle = needleV.toString();
-    }
-    else {
+    if (needleV instanceof StringValue)
+      needle = (StringValue) needleV;
+    else
       needle = String.valueOf((char) needleV.toLong());
-    }
 
     int i = haystack.lastIndexOf(needle);
 
     if (i > 0)
-      return new UnicodeValueImpl(haystack.substring(i));
+      return haystack.substring(i);
     else
       return BooleanValue.FALSE;
   }
@@ -3178,7 +3168,7 @@ v   *
    */
   public static Value strrev(StringValue string)
   { 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = string.createStringBuilder(string.length());
 
     for (int i = string.length() - 1; i >= 0; i--) {
       sb.append(string.charAt(i));
@@ -3337,11 +3327,11 @@ v   *
    * @return the trailing match or FALSE if needle is not found
    */
   public static Value strstr(Env env,
-                             String haystack,
+                             StringValue haystackV,
                              Value needleV)
   {
-    if (haystack == null)
-      haystack = "";
+    if (haystackV == null)
+      haystackV = env.createEmptyString();
     
     String needle;
 
@@ -3357,10 +3347,10 @@ v   *
       return BooleanValue.FALSE;
     }
 
-    int i = haystack.indexOf(needle);
+    int i = haystackV.indexOf(needle);
 
     if (i >= 0)
-      return new UnicodeValueImpl(haystack.substring(i));
+      return haystackV.substring(i);
     else
       return BooleanValue.FALSE;
   }
@@ -3405,27 +3395,26 @@ v   *
    *     => false
    * </pre>
    */
-  public static Value strtok(Env env, String string1, @Optional Value string2)
+  public static Value strtok(Env env,
+			     StringValue string1,
+			     @Optional Value string2)
   {
-    if (string1 == null)
-      string1 = "";
-    
-    String string;
-    String characters;
+    StringValue string;
+    StringValue characters;
     int offset;
 
     if (string2.isNull()) {
-      String savedString = (String) env.getSpecialValue("caucho.strtok_string");
+      StringValue savedString = (StringValue) env.getSpecialValue("caucho.strtok_string");
       Integer savedOffset = (Integer) env.getSpecialValue("caucho.strtok_offset");
 
-      string = savedString == null ? "" : savedString;
+      string = savedString == null ? env.createEmptyString() : savedString;
       offset = savedOffset == null ? 0 : savedOffset;
       characters = string1;
     }
     else {
       string = string1;
       offset = 0;
-      characters = string2.toString();
+      characters = string2.toStringValue();
 
       env.setSpecialValue("caucho.strtok_string", string);
     }
@@ -3457,7 +3446,7 @@ v   *
           break;
       }
 
-      result = new UnicodeValueImpl(string.substring(start, offset));
+      result = string.substring(start, offset);
     }
 
     env.setSpecialValue("caucho.strtok_offset", offset);
@@ -3493,9 +3482,9 @@ v   *
    * @param to the to character map
    */
   public static StringValue strtr(Env env,
-                             StringValue string,
-                             Value fromV,
-                             @Optional StringValue to)
+				  StringValue string,
+				  Value fromV,
+				  @Optional StringValue to)
   {
     if (fromV instanceof ArrayValue)
       return strtrArray(string, (ArrayValue) fromV);
@@ -3511,7 +3500,7 @@ v   *
     for (int i = len - 1; i >= 0; i--)
       map[from.charAt(i)] = to.charAt(i);
 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = string.createStringBuilder();
 
     len = string.length();
     for (int i = 0; i < len; i++) {
@@ -3547,7 +3536,7 @@ v   *
       k++;
     }
 
-    StringValue result = new UnicodeBuilderValue();
+    StringValue result = string.createStringBuilder();
     int len = string.length();
     int head = 0;
 
@@ -3559,8 +3548,8 @@ v   *
       for (int i = 0; i < from.length; i++) {
         int p = string.indexOf(from[i], head);
 
-        if (p >= 0 && (p < bestHead ||
-                       p == bestHead && bestLength < from[i].length())) {
+        if (p >= 0 && (p < bestHead
+		       || p == bestHead && bestLength < from[i].length())) {
           bestHead = p;
           bestI = i;
           bestLength = from[i].length();
@@ -3612,7 +3601,7 @@ v   *
         end = start + len;
 
       if (end <= start)
-        return StringValue.EMPTY;
+        return env.createEmptyString();
       else if (strLen <= end)
         return string.substring(start);
       else
@@ -3749,7 +3738,7 @@ v   *
     else
       end = Math.min(start + len, strLen);
 
-    StringValue result = new UnicodeBuilderValue();
+    StringValue result = string.createStringBuilder();
 
     result = result.append(string.substring(0, start));
     result = result.append(replacement);
@@ -3765,7 +3754,9 @@ v   *
    * @param characters optional set of characters to trim
    * @return the trimmed string
    */
-  public static Value trim(StringValue string, @Optional String characters)
+  public static Value trim(Env env,
+			   StringValue string,
+			   @Optional String characters)
   {
     boolean []trim;
 
@@ -3795,7 +3786,7 @@ v   *
     }
 
     if (tail < head)
-      return StringValue.EMPTY;
+      return env.createEmptyString();
     else {
       return (StringValue) string.subSequence(head, tail + 1);
     }
@@ -3860,7 +3851,7 @@ v   *
    * @param array the arguments to apply to the format string
    */
   public static int vprintf(Env env,
-                            String format,
+                            StringValue format,
                             @NotNull ArrayValue array)
   {
     Value []args;
@@ -3883,7 +3874,7 @@ v   *
    * @param format the format string
    * @param array the arguments to apply to the format string
    */
-  public static Value vsprintf(String format,
+  public static Value vsprintf(StringValue format,
 			       @NotNull ArrayValue array)
   {
     Value []args;
@@ -4028,7 +4019,7 @@ v   *
   }
 
   abstract static class PrintfSegment {
-    abstract public void apply(UnicodeBuilderValue sb, Value []args);
+    abstract public void apply(StringValue sb, Value []args);
     
     static boolean hasIndex(String format)
     {
@@ -4069,7 +4060,7 @@ v   *
       text.getChars(0, _text.length, _text, 0);
     }
 
-    public void apply(UnicodeBuilderValue sb, Value []args)
+    public void apply(StringValue sb, Value []args)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -4083,7 +4074,7 @@ v   *
     { 
       if (hasIndex(format)) {
         _index = getIndex(format);
-        format = getIndexFormat(format);
+	format = getIndexFormat(format);
       }
       else {
         format = '%' + format;
@@ -4109,7 +4100,7 @@ v   *
       }
     }
 
-    public void apply(UnicodeBuilderValue sb, Value []args)
+    public void apply(StringValue sb, Value []args)
     {
       long value;
 
@@ -4138,7 +4129,7 @@ v   *
       }
     }
 
-    public void apply(UnicodeBuilderValue sb, Value []args)
+    public void apply(StringValue sb, Value []args)
     {
       double value;
 
@@ -4203,7 +4194,7 @@ v   *
       _index = index;
     }
 
-    public void apply(UnicodeBuilderValue sb, Value []args)
+    public void apply(StringValue sb, Value []args)
     {
       sb.append(_prefix, 0, _prefix.length);
 
