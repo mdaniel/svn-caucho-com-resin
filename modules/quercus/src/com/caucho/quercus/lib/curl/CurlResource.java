@@ -71,6 +71,10 @@ public class CurlResource
   private boolean _isReturningData = false;
   private boolean _isReturningHeader = false;
 
+  private boolean _isVerifySSLPeer = true;
+  private boolean _isVerifySSLCommonName = true;
+  private boolean _isVerifySSLHostname = true;
+  
   private boolean _ifModifiedSince = true;
   private String _modifiedTime;
 
@@ -333,7 +337,37 @@ public class CurlResource
   {
     _isVerbose = verbose;
   }
+  
+  public boolean getIsVerifySSLPeer()
+  {
+    return _isVerifySSLPeer;
+  }
+  
+  public void setIsVerifySSLPeer(boolean isVerify)
+  {
+    _isVerifySSLPeer = isVerify;
+  }
 
+  public boolean getIsVerifySSLCommonName()
+  {
+    return _isVerifySSLCommonName;
+  }
+  
+  public void setIsVerifySSLCommonName(boolean isVerify)
+  {
+    _isVerifySSLCommonName = isVerify;
+  }
+  
+  public boolean getIsVerifySSLHostname()
+  {
+    return _isVerifySSLHostname;
+  }
+  
+  public void setIsVerifySSLHostname(boolean isVerify)
+  {
+    _isVerifySSLHostname = isVerify;
+  }
+  
   /**
    * Sets the modified time request property.
    */
@@ -704,6 +738,8 @@ public class CurlResource
 
     httpRequest.execute(env);
 
+    System.err.println("CurlResource->execute()");
+    
     if (hasError())
       return BooleanValue.FALSE;
 

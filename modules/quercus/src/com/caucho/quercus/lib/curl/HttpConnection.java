@@ -61,16 +61,14 @@ public class HttpConnection
   private String _authorization;
   private String _proxyAuthorization;
 
-  public HttpConnection(URL url,
-                              String username,
-                              String password)
+  protected HttpConnection(URL url,
+                           String username,
+                           String password)
     throws IOException
   {
     _URL = url;
     _username = username;
     _password = password;
-
-    init();
   }
 
   public HttpConnection(URL url,
@@ -90,10 +88,39 @@ public class HttpConnection
     _password = password;
     _proxyUsername = proxyUsername;
     _proxyPassword = proxyPassword;
-
-    init();
   }
 
+  protected void init(CurlResource curl)
+    throws IOException
+  {
+    Proxy proxy = getProxy();
+
+    _conn = (HttpURLConnection)_URL.openConnection(proxy);
+  }
+  
+  public final static HttpConnection createConnection(URL url,
+                                                      String username,
+                                                      String password,
+                                                      CurlResource curl)
+    throws IOException
+  {
+    HttpConnection conn;
+
+    if (url.getProtocol().equals("https")) {
+      HttpsConnection secureConn
+        = new HttpsConnection(url, username, password);
+
+      conn = secureConn;
+    }
+    else {
+      conn = new HttpConnection(url, username, password);
+    }
+
+    conn.init(curl);
+    
+    return conn;
+  }
+  
   public void setConnectTimeout(int time)
   {
     _conn.setConnectTimeout(time);
@@ -124,28 +151,67 @@ public class HttpConnection
   {
     _conn.setRequestProperty(key, value);
   }
-
-  private void init()
-    throws IOException
+  
+  protected final Proxy getProxy()
   {
-    Proxy proxy = Proxy.NO_PROXY;
+    if (_proxyURL == null)
+      return Proxy.NO_PROXY;
 
-    if (_proxyURL != null) {
-      InetSocketAddress address
-          = new InetSocketAddress(_proxyURL.getHost(), _proxyURL.getPort());
+    InetSocketAddress address
+      = new InetSocketAddress(_proxyURL.getHost(), _proxyURL.getPort());
 
-      proxy = new Proxy(Proxy.Type.valueOf(_proxyType), address);
-    }
-
-    _conn = (HttpURLConnection)_URL.openConnection(proxy);
+    return new Proxy(Proxy.Type.valueOf(_proxyType), address);
+  }
+  
+  protected final URL getURL()
+  {
+    return _URL;
+  }
+  
+  protected final HttpURLConnection getConnection()
+  {
+    return _conn;
+  }
+  
+  protected final void setConnection(HttpURLConnection conn)
+  {
+    _conn = conn;
   }
 
+  /**
+   * Connects to the server.
+   */
+  public void connect(CurlResource curl)
+    throws ConnectException, ProtocolException, SocketTimeoutException,
+            IOException
+  {
+    authenticate();
+
+    _conn.connect();
+  }
+  
   /**
    * Handles the authentication for this connection.
    */
   public void authenticate()
     throws ConnectException, ProtocolException, SocketTimeoutException,
-            IOException
+           IOException
+  {
+    if (_username != null || _proxyUsername != null)
+      authenticateImpl();
+
+    if (_proxyAuthorization != null)
+      _conn.setRequestProperty("Proxy-Authorization", _proxyAuthorization);
+    if (_authorization != null)
+      _conn.setRequestProperty("Authorization", _authorization);
+  }
+  
+  /**
+   * Handles the authentication for this connection.
+   */
+  public void authenticateImpl()
+    throws ConnectException, ProtocolException, SocketTimeoutException,
+           IOException
   {
     Proxy proxy = Proxy.NO_PROXY;
 
@@ -180,7 +246,7 @@ public class HttpConnection
                                             "Proxy-Authorization",
                                             _proxyUsername,
                                             _proxyPassword);
-      authenticate();
+      authenticateImpl();
     }
     else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
         && _authorization == null)
@@ -193,28 +259,10 @@ public class HttpConnection
                                        "Authorization",
                                        _username,
                                        _password);
-      authenticate();
+      authenticateImpl();
     }
 
     headConn.disconnect();
-  }
-
-  /**
-   * Connects to the server.
-   */
-  public void connect()
-    throws ConnectException, ProtocolException, SocketTimeoutException,
-            IOException
-  {
-    if (_username != null || _proxyUsername != null)
-      authenticate();
-
-    if (_proxyAuthorization != null)
-      _conn.setRequestProperty("Proxy-Authorization", _proxyAuthorization);
-    if (_authorization != null)
-      _conn.setRequestProperty("Authorization", _authorization);
-
-    _conn.connect();
   }
 
   /**

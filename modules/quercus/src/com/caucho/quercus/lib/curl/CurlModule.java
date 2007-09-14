@@ -98,7 +98,7 @@ public class CurlModule
 //  public static final int CURLOPT_SSLCERT                     = 40;
 //  public static final int CURLOPT_SSLCERTPASSWD               = 41;
   public static final int CURLOPT_WRITEHEADER                 = 42;
-//  public static final int CURLOPT_SSL_VERIFYHOST              = 43;
+  public static final int CURLOPT_SSL_VERIFYHOST              = 43;
   public static final int CURLOPT_COOKIEFILE                  = 44;
 //  public static final int CURLOPT_SSLVERSION                  = 45;
   public static final int CURLOPT_TIMECONDITION               = 46;
@@ -125,7 +125,7 @@ public class CurlModule
 //  public static final int CURLOPT_RANDOM_FILE                 = 67;
 //  public static final int CURLOPT_EGDSOCKET                   = 68;
   public static final int CURLOPT_CONNECTTIMEOUT              = 69;
-//  public static final int CURLOPT_SSL_VERIFYPEER              = 70;
+  public static final int CURLOPT_SSL_VERIFYPEER              = 70;
 //  public static final int CURLOPT_CAINFO                      = 71;
 //  public static final int CURLOPT_CAPATH                      = 72;
   public static final int CURLOPT_COOKIEJAR                   = 73;
@@ -354,7 +354,7 @@ public class CurlModule
    * @param curl
    */
   public static Value curl_exec(Env env,
-                              @NotNull CurlResource curl)
+                                @NotNull CurlResource curl)
   {
     if (curl == null)
       return BooleanValue.FALSE;
@@ -696,6 +696,9 @@ public class CurlModule
       case CURLOPT_UNRESTRICTED_AUTH:
         //XXX
         break;
+      case CURLOPT_SSL_VERIFYPEER:
+        curl.setIsVerifySSLPeer(value.toBoolean());
+        break;
       case CURLOPT_UPLOAD:
         if (value.toBoolean())
           curl.setRequestMethod("PUT");
@@ -762,6 +765,25 @@ public class CurlModule
             break;
           default:
             env.warning(L.l("unknown curl proxy type"));
+        }
+        break;
+      case CURLOPT_SSL_VERIFYHOST:
+        i = value.toInt();
+        switch (i) {
+          case 0:
+            curl.setIsVerifySSLCommonName(false);
+            curl.setIsVerifySSLHostname(false);
+            break;
+          case 1:
+            curl.setIsVerifySSLCommonName(true);
+            curl.setIsVerifySSLHostname(false);
+            break;
+          case 2:
+            curl.setIsVerifySSLCommonName(true);
+            curl.setIsVerifySSLHostname(true);
+            break;
+          default:
+            env.warning(L.l("unknown ssl verify host option '{0}", i));
         }
         break;
       case CURLOPT_TIMECONDITION:

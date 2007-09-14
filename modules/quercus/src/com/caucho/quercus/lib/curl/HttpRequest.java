@@ -108,12 +108,12 @@ public class HttpRequest
                                 _curl.getProxyType());
     }
     else {
-      _conn = new HttpConnection(url,
-                                _curl.getUsername(),
-                                _curl.getPassword());
+      _conn = HttpConnection.createConnection(url,
+                                              _curl.getUsername(),
+                                              _curl.getPassword(),
+                                              _curl);
     }
   }
-
 
   /**
    * Initializes the connection.
@@ -147,7 +147,7 @@ public class HttpRequest
     throws ConnectException, SocketTimeoutException,
            UnknownHostException, IOException
   {
-    _conn.connect();
+    _conn.connect(_curl);
   }
 
   /**
