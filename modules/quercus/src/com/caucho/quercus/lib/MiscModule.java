@@ -171,7 +171,7 @@ public class MiscModule extends AbstractQuercusModule {
   public Value pack(Env env, String format, Value []args)
   {
     try {
-      ArrayList<PackSegment> segments = parsePackFormat(format);
+      ArrayList<PackSegment> segments = parsePackFormat(env, format);
 
       StringValue bb = env.createBinaryBuilder();
 
@@ -192,7 +192,7 @@ public class MiscModule extends AbstractQuercusModule {
   public Value unpack(Env env, String format, InputStream is)
   {
     try {
-      ArrayList<PackSegment> segments = parseUnpackFormat(format);
+      ArrayList<PackSegment> segments = parseUnpackFormat(env, format);
 
       ArrayValue array = new ArrayValueImpl();
 
@@ -288,14 +288,14 @@ public class MiscModule extends AbstractQuercusModule {
             line = sb.toString();
             sb.setLength(0);
             if (output != null)
-              output.put(new UnicodeValueImpl(line));
+              output.put(env.createString(line));
           }
           hasCr = false;
         }
         else if (ch == '\r') {
           line = sb.toString();
           sb.setLength(0);
-          output.put(new UnicodeValueImpl(line));
+          output.put(env.createString(line));
           hasCr = true;
         }
         else
@@ -305,7 +305,7 @@ public class MiscModule extends AbstractQuercusModule {
       if (sb.length() > 0) {
         line = sb.toString();
         sb.setLength(0);
-        output.put(new UnicodeValueImpl(line));
+        output.put(env.createString(line));
       }
 
       is.close();
@@ -352,7 +352,7 @@ public class MiscModule extends AbstractQuercusModule {
       OutputStream os = process.getOutputStream();
       os.close();
 
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      StringValue sb = env.createUnicodeBuilder();
 
       int ch;
       while ((ch = is.read()) >= 0) {
@@ -756,19 +756,19 @@ public class MiscModule extends AbstractQuercusModule {
     ArrayValue capabilities = browsers.get(patternMatched).toArrayValue(env);
 
     if (regExpMatched == null)
-      capabilities.put(
-          new UnicodeValueImpl("browser_name_regex"), patternMatched);
+      capabilities.put(env.createString("browser_name_regex"),
+		       patternMatched);
     else
       capabilities.put("browser_name_regex", regExpMatched);
-    capabilities.put(
-        new UnicodeValueImpl("browser_name_pattern"), patternMatched);
+    capabilities.put(env.createString("browser_name_pattern"), patternMatched);
 
     addBrowserCapabilities(env, browsers,
-        capabilities.get(new UnicodeValueImpl("parent")), capabilities);
+			   capabilities.get(env.createString("parent")),
+			   capabilities);
 
     if (return_array) {
       ArrayValue array = new ArrayValueImpl();
-      array.put(new UnicodeValueImpl(user_agent), capabilities);
+      array.put(env.createString(user_agent), capabilities);
       return array;
     }
 
@@ -794,7 +794,7 @@ public class MiscModule extends AbstractQuercusModule {
       return;
 
     ArrayValue browserCapabilities = field.toArrayValue(env);
-    StringValue parentString = new UnicodeValueImpl("parent");
+    StringValue parentString = env.createString("parent");
     
     for (Map.Entry<Value,Value> entry : browserCapabilities.entrySet()) {
       Value key = entry.getKey();
@@ -892,7 +892,7 @@ public class MiscModule extends AbstractQuercusModule {
     return exec(env, command, null, result);
   }
 
-  private static ArrayList<PackSegment> parsePackFormat(String format)
+  private static ArrayList<PackSegment> parsePackFormat(Env env, String format)
   {
     ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
 
@@ -920,16 +920,16 @@ public class MiscModule extends AbstractQuercusModule {
 
       switch (ch) {
       case 'a':
-	segments.add(new SpacePackSegment(count, (byte) 0));
+	segments.add(new SpacePackSegment(env, count, (byte) 0));
 	break;
       case 'A':
-	segments.add(new SpacePackSegment(count, (byte) 0x20));
+	segments.add(new SpacePackSegment(env, count, (byte) 0x20));
 	break;
       case 'h':
 	segments.add(new RevHexPackSegment(count));
 	break;
       case 'H':
-	segments.add(new HexPackSegment(count));
+	segments.add(new HexPackSegment(env, count));
 	break;
       case 'c':
       case 'C':
@@ -973,7 +973,8 @@ public class MiscModule extends AbstractQuercusModule {
     return segments;
   }
 
-  private static ArrayList<PackSegment> parseUnpackFormat(String format)
+  private static ArrayList<PackSegment> parseUnpackFormat(Env env,
+							  String format)
   {
     ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
 
@@ -1005,16 +1006,16 @@ public class MiscModule extends AbstractQuercusModule {
 
       switch (ch) {
       case 'a':
-	segments.add(new SpacePackSegment(name, count, (byte) 0));
+	segments.add(new SpacePackSegment(env, name, count, (byte) 0));
 	break;
       case 'A':
-	segments.add(new SpacePackSegment(name, count, (byte) 0x20));
+	segments.add(new SpacePackSegment(env, name, count, (byte) 0x20));
 	break;
       case 'h':
 	segments.add(new RevHexPackSegment(name, count));
 	break;
       case 'H':
-	segments.add(new HexPackSegment(name, count));
+	segments.add(new HexPackSegment(env, name, count));
 	break;
       case 'c':
 	segments.add(new BigEndianPackSegment(name, count, 1, true));
@@ -1078,14 +1079,14 @@ public class MiscModule extends AbstractQuercusModule {
     private final int _length;
     private final byte _pad;
 
-    SpacePackSegment(int length, byte pad)
+    SpacePackSegment(Env env, int length, byte pad)
     {
-      this("", length, pad);
+      this(env, "", length, pad);
     }
 
-    SpacePackSegment(String name, int length, byte pad)
+    SpacePackSegment(Env env, String name, int length, byte pad)
     {
-      _name = new UnicodeValueImpl(name);
+      _name = env.createString(name);
       _length = length;
       _pad = pad;
     }
@@ -1149,14 +1150,14 @@ public class MiscModule extends AbstractQuercusModule {
     private final StringValue _name;
     private final int _length;
 
-    HexPackSegment(int length)
+    HexPackSegment(Env env, int length)
     {
-      this("", length);
+      this(env, "", length);
     }
 
-    HexPackSegment(String name, int length)
+    HexPackSegment(Env env, String name, int length)
     {
-      _name = new UnicodeValueImpl(name);
+      _name = env.createString(name);
       _length = length;
     }
     

@@ -66,17 +66,17 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * Returns the object's class name
    */
-  public Value get_class(Value value)
+  public Value get_class(Env env, Value value)
   {
     if (value instanceof ObjectValue) {
       ObjectValue obj = (ObjectValue) value;
 
-      return new UnicodeValueImpl(obj.getName());
+      return env.createString(obj.getName());
     }
     else if (value instanceof JavaValue) {
       JavaValue obj = (JavaValue) value;
 
-      return new UnicodeValueImpl(obj.getClassName());
+      return env.createString(obj.getClassName());
     }
     else
       return BooleanValue.FALSE;
@@ -193,7 +193,7 @@ public class ClassesModule extends AbstractQuercusModule {
       String parent = obj.getParentClassName();
 
       if (parent != null)
-        return new UnicodeValueImpl(parent);
+        return env.createString(parent);
     }
     else if (value instanceof StringValue) {
       String className = value.toString();
@@ -204,7 +204,7 @@ public class ClassesModule extends AbstractQuercusModule {
         String parent = cl.getParentName();
 
         if (parent != null)
-          return new UnicodeValueImpl(parent);
+          return env.createString(parent);
       }
     }
 

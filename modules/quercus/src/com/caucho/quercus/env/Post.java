@@ -139,7 +139,7 @@ public class Post {
           value.append((char) ch);
         }
 
-        addFormValue(post, name, new UnicodeValueImpl(value.toString()), null, addSlashesToValues);
+        addFormValue(env, post, name, new UnicodeValueImpl(value.toString()), null, addSlashesToValues);
       }
       else {
         Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");
@@ -181,7 +181,7 @@ public class Post {
       name = name.substring(0, p);
     }
 
-    StringValue nameValue = new UnicodeValueImpl(name);
+    StringValue nameValue = env.createString(name);
     Value v = files.get(nameValue).toValue();
     ArrayValue entry = null;
     if (v instanceof ArrayValue)
@@ -202,8 +202,8 @@ public class Post {
     else
       error = FileModule.UPLOAD_ERR_OK;
 
-    addFormValue(entry, "name" + index, new UnicodeValueImpl(fileName),
-            null, addSlashesToValues);
+    addFormValue(env, entry, "name" + index, env.createString(fileName),
+		 null, addSlashesToValues);
 
     long size;
 
@@ -217,39 +217,41 @@ public class Post {
     }
 
     if (mimeType != null) {
-      addFormValue(entry, "type" + index, new UnicodeValueImpl(mimeType),
-              null, addSlashesToValues);
+      addFormValue(env, entry, "type" + index, env.createString(mimeType),
+		   null, addSlashesToValues);
 
       entry.put("type", mimeType);
     }
 
-    addFormValue(entry, "tmp_name" + index, new UnicodeValueImpl(tmpName),
-            null, addSlashesToValues);
+    addFormValue(env, entry, "tmp_name" + index, env.createString(tmpName),
+		 null, addSlashesToValues);
 
-    addFormValue(entry, "error" + index, new LongValue(error),
-            null, addSlashesToValues);
+    addFormValue(env, entry, "error" + index, new LongValue(error),
+		 null, addSlashesToValues);
 
-    addFormValue(entry, "size" + index, new LongValue(size),
-            null, addSlashesToValues);
+    addFormValue(env, entry, "size" + index, new LongValue(size),
+		 null, addSlashesToValues);
 
-    addFormValue(files, name, entry, null, addSlashesToValues);
+    addFormValue(env, files, name, entry, null, addSlashesToValues);
   }
   
-  public static void addFormValue(ArrayValue array,
+  public static void addFormValue(Env env,
+				  ArrayValue array,
                                   String key,
                                   String []formValueList,
                                   boolean addSlashesToValues)
   {
     // php/081b
-    Value value = new UnicodeValueImpl(formValueList[formValueList.length - 1]);
+    Value value = env.createString(formValueList[formValueList.length - 1]);
 
-    addFormValue(array, key,
+    addFormValue(env, array, key,
                  value,
                  formValueList,
                  addSlashesToValues);
   }
 
-  public static void addFormValue(ArrayValue array,
+  public static void addFormValue(Env env,
+				  ArrayValue array,
                                   String key,
                                   Value formValue,
                                   String []formValueList,
@@ -267,7 +269,7 @@ public class Post {
       if (p > 0) {
 	key = key.substring(0, p);
 
-	keyValue = new UnicodeValueImpl(key);
+	keyValue = env.createString(key);
 	existingValue = array.get(keyValue);
 
 	if (existingValue == null || ! existingValue.isset()) {
@@ -291,7 +293,7 @@ public class Post {
           array.put(existingValue);
         }
         else {
-          keyValue = new UnicodeValueImpl(key);
+          keyValue = env.createString(key);
           existingValue = array.get(keyValue);
 
           if (existingValue == null || ! existingValue.isset()) {
@@ -318,7 +320,7 @@ public class Post {
       if (index.equals("")) {
         if (formValueList != null) {
           for (int i = 0; i < formValueList.length; i++) {
-            put(array, null, new UnicodeValueImpl(formValueList[i]), addSlashesToValues);
+            put(array, null, env.createString(formValueList[i]), addSlashesToValues);
           }
         }
         else
@@ -327,10 +329,10 @@ public class Post {
       else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
         put(array, new LongValue(StringValue.toLong(index)), formValue, addSlashesToValues);
       else
-        put(array, new UnicodeValueImpl(index), formValue, addSlashesToValues);
+        put(array, env.createString(index), formValue, addSlashesToValues);
     }
     else {
-      put(array, new UnicodeValueImpl(key), formValue, addSlashesToValues);
+      put(array, env.createString(key), formValue, addSlashesToValues);
     }
   }
 
@@ -465,7 +467,7 @@ public class Post {
     for (String key : keys) {   
       String []value = request.getParameterValues(key);
       
-      Post.addFormValue(post, key, value, addSlashesToValues);
+      Post.addFormValue(env, post, key, value, addSlashesToValues);
     }
   }
 }

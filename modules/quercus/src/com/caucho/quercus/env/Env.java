@@ -1715,7 +1715,8 @@ public class Env {
       for (String key : keys) {
         String []value = _request.getParameterValues(key);
 
-        Post.addFormValue(array,
+        Post.addFormValue(this,
+			  array,
                           key,
                           value,
                           isMagicQuotes);
@@ -1729,7 +1730,8 @@ public class Env {
 
       Cookie []cookies = _request.getCookies();
       for (int i = 0; cookies != null && i < cookies.length; i++) {
-        Post.addFormValue(array,
+        Post.addFormValue(this,
+			  array,
                           cookies[i].getName(),
                           new String[] { cookies[i].getValue() },
                           isMagicQuotes);

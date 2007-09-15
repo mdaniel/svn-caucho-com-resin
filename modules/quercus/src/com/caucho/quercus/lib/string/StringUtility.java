@@ -101,7 +101,7 @@ public class StringUtility
           value = "";
 
         if (isRef) {
-          Post.addFormValue(result, key, new String[] { value }, isMagicQuotes);
+          Post.addFormValue(env, result, key, new String[] { value }, isMagicQuotes);
         } else {
           // If key is an exsiting array, then append this value to existing array
           // Only use extract(EXTR_OVERWRITE) on non-array variables or
@@ -123,18 +123,18 @@ public class StringUtility
                 v.put(new UnicodeValueImpl(value));
               }
             } else {
-              Post.addFormValue(result, key, new String[] { value }, isMagicQuotes);
+              Post.addFormValue(env, result, key, new String[] { value }, isMagicQuotes);
             }
           } else {
-            Post.addFormValue(result, key, new String[] { value }, isMagicQuotes);
+            Post.addFormValue(env, result, key, new String[] { value }, isMagicQuotes);
           }
         }
       }
 
       if (! isRef) {
         ArrayModule.extract(env, result,
-                    ArrayModule.EXTR_OVERWRITE,
-                    null);
+			    ArrayModule.EXTR_OVERWRITE,
+			    null);
           }
 
       return NullValue.NULL;

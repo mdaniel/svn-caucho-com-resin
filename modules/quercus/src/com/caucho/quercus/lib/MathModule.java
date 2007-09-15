@@ -151,7 +151,7 @@ public class MathModule extends AbstractQuercusModule {
     }
 
     if (result == 0)
-      return new UnicodeValueImpl("0");
+      return env.createString("0");
 
     StringBuilder sb = new StringBuilder();
 
@@ -167,7 +167,7 @@ public class MathModule extends AbstractQuercusModule {
 
     sb.reverse();
 
-    return new UnicodeValueImpl(sb.toString());
+    return env.createString(sb.toString());
   }
 
   /**

@@ -146,7 +146,8 @@ public class ArrayModule
   /**
    * Changes the key case
    */
-  public Value array_change_key_case(ArrayValue array,
+  public Value array_change_key_case(Env env,
+				     ArrayValue array,
                                      @Optional("CASE_LOWER") int toCase)
   {
     if (array == null)
@@ -165,7 +166,7 @@ public class ArrayModule
         else
           key = key.toLowerCase();
 
-        newArray.put(new UnicodeValueImpl(key), entry.getValue());
+        newArray.put(env.createString(key), entry.getValue());
       }
       else
         newArray.put(keyValue, entry.getValue());
