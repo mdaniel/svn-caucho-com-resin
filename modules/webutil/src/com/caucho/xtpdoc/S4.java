@@ -32,6 +32,9 @@ package com.caucho.xtpdoc;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 public class S4 extends Section {
   public S4(Document document, String parentHref)
   {
@@ -48,6 +51,23 @@ public class S4 extends Section {
       out.println("\\paragraph{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     super.writeLaTeX(out);
+  }
+
+  public void writeHtml(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    out.writeStartElement("a");
+    out.writeAttribute("name", getHref());
+    out.writeEndElement();
+
+    if (_title != null) {
+      out.writeStartElement("h5");
+      out.writeCharacters(_title);
+      out.writeEndElement();
+    }
+    
+    for (ContentItem item : getItems())
+      item.writeHtml(out);
   }
 
   public void writeLaTeX(PrintWriter out)

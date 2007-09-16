@@ -2000,6 +2000,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return true;
   }
 
+  protected ConnectionController getController()
+  {
+    if (_originalRequest instanceof AbstractHttpRequest) {
+      AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
+      Connection conn = request.getConnection();
+      return conn.getController();
+    }
+    else
+      return null;
+  }
+  
   /**
    * Complete the request.  Flushes the streams, completes caching
    * and writes the appropriate logs.

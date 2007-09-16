@@ -354,9 +354,9 @@ public class HttpResponse extends AbstractHttpResponse {
       }
     }
 
-    if (HttpRequest.HTTP_1_1 <= version &&
-	! hasContentLength &&
-	! isHead()) {
+    if (HttpRequest.HTTP_1_1 <= version
+        && ! hasContentLength
+        && ! isHead()) {
       os.print("\r\nTransfer-Encoding: chunked");
       isChunked = true;
 

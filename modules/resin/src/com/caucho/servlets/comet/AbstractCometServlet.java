@@ -70,8 +70,6 @@ abstract public class AbstractCometServlet extends GenericServlet
 			CometController controller)
     throws IOException, ServletException
   {
-    System.out.println("ACS-RESUMING:" + controller);
-    
     return false;
   }
   
@@ -104,9 +102,13 @@ abstract public class AbstractCometServlet extends GenericServlet
     CometController controller
       = (CometController) req.getConnection().getController();
 
-    if (controller != null)
-      return resume(req, res, controller);
-    else
+    if (controller == null)
       return false;
+    else if (resume(req, res, controller))
+      return true;
+    else {
+      controller.close();
+      return false;
+    }
   }
 }
