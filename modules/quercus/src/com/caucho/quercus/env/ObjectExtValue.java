@@ -873,10 +873,49 @@ public class ObjectExtValue extends ObjectValue
     return new TreeSet<Map.Entry<String, Value>>(entrySet());
   }
 
-  @Override
-  public String toString()
+  //
+  // debugging
+  //
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws IOException
   {
-    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + getQuercusClass().getName() + "]";
+    out.println("object(" + getName() + ") (" + getSize() + ") {");
+
+    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
+      ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
+
+      entry.varDumpImpl(env, out, depth + 1, valueSet);
+    }
+
+    printDepth(out, 2 * depth);
+
+    out.print("}");
+  }
+
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    out.print(getName());
+    out.print(' ');
+    out.println("Object");
+    printDepth(out, 4 * depth);
+    out.println("(");
+
+    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
+      ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
+
+      entry.printRImpl(env, out, depth + 1, valueSet);
+    }
+
+    printDepth(out, 4 * depth);
+    out.println(")");
   }
 
   //
@@ -924,6 +963,12 @@ public class ObjectExtValue extends ObjectValue
     for (int i = 0; i < size; i++) {
       putField(env, (String) in.readObject(), (Value) in.readObject());
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + getQuercusClass().getName() + "]";
   }
   
   public class EntrySet extends AbstractSet<Map.Entry<String,Value>> {
