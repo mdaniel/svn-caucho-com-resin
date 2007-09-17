@@ -55,7 +55,6 @@ abstract public class ObjectValue extends Value {
     _quercusClass = cl;
   }
 
-  @Override
   public QuercusClass getQuercusClass()
   {
     return _quercusClass;
