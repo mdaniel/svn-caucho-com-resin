@@ -49,6 +49,8 @@ public class WrappedDirectoryValue extends DirectoryValue {
 
   public WrappedDirectoryValue(Env env, QuercusClass qClass)
   {
+    super(env);
+    
     _env = env;
     _wrapper = qClass.callNew(_env, new Value[0]);
   }

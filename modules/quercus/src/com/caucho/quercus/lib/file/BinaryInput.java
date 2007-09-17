@@ -92,6 +92,12 @@ public interface BinaryInput extends BinaryStream {
     throws IOException;
 
   /**
+   * Appends to a string builder.
+   */
+  public StringValue appendTo(StringValue builder)
+    throws IOException;
+
+  /**
    * Returns the current location in the stream
    */
   public long getPosition();

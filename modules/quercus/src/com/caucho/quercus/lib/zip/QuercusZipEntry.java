@@ -37,7 +37,7 @@ import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
@@ -129,7 +129,7 @@ public class QuercusZipEntry {
 
     StringValue bb = env.createBinaryBuilder();
 
-    bb.append(_in, length);
+    bb.append((InputStream) _in, length);
 
     if (bb.length() > 0)
       return bb;

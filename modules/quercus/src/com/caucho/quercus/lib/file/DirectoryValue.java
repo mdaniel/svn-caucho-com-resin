@@ -42,17 +42,20 @@ import java.io.IOException;
  * Represents a PHP directory listing
  */
 public class DirectoryValue extends ResourceValue {
+  private Env _env;
   private Path _path;
   private String []_list;
   private int _index;
 
-  protected DirectoryValue()
+  protected DirectoryValue(Env env)
   {
+    _env = env;
   }
 
-  public DirectoryValue(Path path)
+  public DirectoryValue(Env env, Path path)
     throws IOException
   {
+    _env = env;
     _path = path;
 
     _list = path.list();
@@ -64,7 +67,7 @@ public class DirectoryValue extends ResourceValue {
   public Value readdir()
   {
     if (_index < _list.length)
-      return new UnicodeValueImpl(_list[_index++]);
+      return _env.createString(_list[_index++]);
     else
       return BooleanValue.FALSE;
   }

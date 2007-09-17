@@ -480,7 +480,7 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the next character as a boolean
+   * Returns the next character as a byte
    */
   public static Value fgetc(Env env, @NotNull BinaryInput is)
   {
@@ -488,13 +488,15 @@ public class FileModule extends AbstractQuercusModule {
       if (is == null)
 	return BooleanValue.FALSE;
 
+      // XXX: char for i18n and mode = "t"
+
       // php/1612
       int ch = is.read();
 
       if (ch >= 0) {
 	StringValue v = env.createBinaryBuilder(1);
 	
-	v.append((byte) ch);
+	v.append((char) ch);
 	
 	return v;
       }
@@ -878,19 +880,19 @@ public class FileModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
     else if (path.isDirectory())
-      return new UnicodeValueImpl("dir");
+      return env.createString("dir");
     else if (path.isFile())
-      return new UnicodeValueImpl("file");
+      return env.createString("file");
     else if (path.isFIFO())
-      return new UnicodeValueImpl("fifo");
+      return env.createString("fifo");
     else if (path.isLink())
-      return new UnicodeValueImpl("link");
+      return env.createString("link");
     else if (path.isBlockDevice())
-      return new UnicodeValueImpl("block");
+      return env.createString("block");
     else if (path.isCharacterDevice())
-      return new UnicodeValueImpl("char");
+      return env.createString("char");
     else
-      return new UnicodeValueImpl("unknown");
+      return env.createString("unknown");
   }
 
   /**
@@ -915,7 +917,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static StringValue
-                file_get_contents(Env env,
+    file_get_contents(Env env,
 		      String filename,
 		      @Optional boolean useIncludePath,
 		      @Optional Value context,
@@ -932,13 +934,17 @@ public class FileModule extends AbstractQuercusModule {
     if (! (s instanceof BinaryInput))
       return null;
 
-    BinaryInput is = (BinaryInput) s;
+    try {
+      BinaryInput is = (BinaryInput) s;
 
-    StringValue bb = env.createBinaryBuilder();
+      StringValue bb = env.createBinaryBuilder();
 
-    bb.append(is);
+      is.appendTo(bb);
 
-    return bb;
+      return bb;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -1288,7 +1294,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     ArrayValue url = (ArrayValue) UrlModule.parse_url(env, pathName);
 
-    Value scheme = url.get(new UnicodeValueImpl("scheme"));
+    Value scheme = url.get(env.createString("scheme"));
 
     if (scheme == UnsetValue.UNSET)
       return null;
@@ -1330,8 +1336,8 @@ public class FileModule extends AbstractQuercusModule {
         if (useIncludePath)
           options = StreamModule.STREAM_USE_PATH;
            
-        return wrapper.fopen(env, new UnicodeValueImpl(filename),
-                                  new UnicodeValueImpl(mode),
+        return wrapper.fopen(env, env.createString(filename),
+                                  env.createString(mode),
                                   LongValue.create(options));
       }
 
@@ -1533,39 +1539,17 @@ public class FileModule extends AbstractQuercusModule {
 			    @NotNull BinaryInput is,
 			    int length)
   {
-    TempBuffer tempBuf = null;
-    
-    try {
-      if (is == null)
-        return BooleanValue.FALSE;
+    if (is == null)
+      return BooleanValue.FALSE;
 
-      if (length < 0)
-        length = Integer.MAX_VALUE;
+    if (length < 0)
+      length = Integer.MAX_VALUE;
 
-      // XXX: should use the buffer directly (?)
+    StringValue sb = env.createBinaryBuilder();
 
-      tempBuf = TempBuffer.allocate();
-      byte []buffer = tempBuf.getBuffer();
+    sb.append(is, length);
 
-      if (buffer.length < length) {
-        buffer = new byte[length];
-      }
-
-      length = is.read(buffer, 0, length);
-
-      if (length > 0) {
-        return env.createBinaryBuilder(buffer, 0, length);
-      }
-      else {
-        return BytesValue.EMPTY;
-      }
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-    finally {
-      if (tempBuf != null)
-        TempBuffer.free(tempBuf);
-    }
+    return sb;
   }
 
   /**
@@ -2047,7 +2031,7 @@ public class FileModule extends AbstractQuercusModule {
       Path path = env.getPwd().lookup(pathName.toString());
 
       if (path.isDirectory())
-        return new DirectoryValue(path);
+        return new DirectoryValue(env, path);
       else {
         env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
@@ -2110,7 +2094,7 @@ public class FileModule extends AbstractQuercusModule {
 
 	if (processSections) {
 	  section = new ArrayValueImpl();
-	  top.put(new UnicodeValueImpl(name), section);
+	  top.put(env.createString(name), section);
 	}
       }
       else if (isValidIniKeyChar((char) ch)) {
@@ -2130,7 +2114,7 @@ public class FileModule extends AbstractQuercusModule {
 
 	Value value = parseIniValue(env, ch, is);
 
-	section.put(new UnicodeValueImpl(key), value);
+	section.put(env.createString(key), value);
       }
     }
 
@@ -2144,7 +2128,7 @@ public class FileModule extends AbstractQuercusModule {
       return NullValue.NULL;
 
     if (ch == '"') {
-      StringBuilder sb = new StringBuilder();
+      StringValue sb = env.createUnicodeBuilder();
       
       for (ch = is.read(); ch >= 0 && ch != '"'; ch = is.read()) {
 	sb.append((char) ch);
@@ -2152,10 +2136,10 @@ public class FileModule extends AbstractQuercusModule {
 
       skipToEndOfLine(ch, is);
 
-      return new UnicodeValueImpl(sb.toString());
+      return sb;
     }
     else if (ch == '\'') {
-      StringBuilder sb = new StringBuilder();
+      StringValue sb = env.createUnicodeBuilder();
       
       for (ch = is.read(); ch >= 0 && ch != '\''; ch = is.read()) {
 	sb.append((char) ch);
@@ -2163,7 +2147,7 @@ public class FileModule extends AbstractQuercusModule {
 
       skipToEndOfLine(ch, is);
 
-      return new UnicodeValueImpl(sb.toString());
+      return sb;
     }
     else {
       StringBuilder sb = new StringBuilder();
@@ -2175,36 +2159,36 @@ public class FileModule extends AbstractQuercusModule {
       String value = sb.toString().trim();
 
       if (value.equalsIgnoreCase("null"))
-	return StringValue.EMPTY;
-      else if (value.equalsIgnoreCase("true") ||
-	       value.equalsIgnoreCase("yes"))
-	return new UnicodeValueImpl("1");
-      else if (value.equalsIgnoreCase("false") ||
-	       value.equalsIgnoreCase("no"))
-	return StringValue.EMPTY;
+	return env.createEmptyString();
+      else if (value.equalsIgnoreCase("true")
+	       || value.equalsIgnoreCase("yes"))
+	return env.createString("1");
+      else if (value.equalsIgnoreCase("false")
+	       || value.equalsIgnoreCase("no"))
+	return env.createEmptyString();
 
       if (env.isDefined(value))
-	return new UnicodeValueImpl(env.getConstant(value).toString());
+	return env.createString(env.getConstant(value).toString());
       else
-	return new UnicodeValueImpl(value);
+	return env.createString(value);
     }
   }
 
   private static boolean isValidIniKeyChar(char ch)
   {
-    if (ch <= 0 ||
-        ch == '=' ||
-        ch == ';' ||
-        ch == '{' ||
-        ch == '}' ||
-        ch == '|' ||
-        ch == '&' ||
-        ch == '~' ||
-        ch == '!' ||
-        ch == '[' ||
-        ch == '(' ||
-        ch == ')' ||
-        ch == '"')
+    if (ch <= 0
+	|| ch == '='
+	|| ch == ';'
+	|| ch == '{'
+	|| ch == '}'
+	|| ch == '|'
+	|| ch == '&'
+	|| ch == '~'
+	|| ch == '!'
+	|| ch == '['
+	|| ch == '('
+	|| ch == ')'
+	|| ch == '"')
       return false;
     else
       return true;
@@ -2221,19 +2205,19 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Parses the path, splitting it into parts.
    */
-  public static Value pathinfo(String path, @Optional Value optionsV)
+  public static Value pathinfo(Env env, String path, @Optional Value optionsV)
   {
     if (optionsV == null)
-      return StringValue.EMPTY;
+      return env.createEmptyString();
     
     if (path == null) {
       if (! (optionsV instanceof DefaultValue)) {
-        return StringValue.EMPTY;
+        return env.createEmptyString();
       }
 
       ArrayValueImpl value = new ArrayValueImpl();
-      value.put("basename", "");
-      value.put("filename", "");
+      value.put(env.createString("basename"), env.createString(""));
+      value.put(env.createString("filename"), env.createString(""));
 
       return value;
     }
@@ -2263,23 +2247,23 @@ public class FileModule extends AbstractQuercusModule {
       int options = optionsV.toInt();
 
       if ((options & PATHINFO_DIRNAME) == PATHINFO_DIRNAME)
-        return new UnicodeValueImpl(dirname);
+        return env.createString(dirname);
       else if ((options & PATHINFO_BASENAME) == PATHINFO_BASENAME)
-        return new UnicodeValueImpl(path);
+        return env.createString(path);
       else if ((options & PATHINFO_EXTENSION) == PATHINFO_EXTENSION)
-        return new UnicodeValueImpl(ext);
+        return env.createString(ext);
       else if ((options & PATHINFO_FILENAME) == PATHINFO_FILENAME)
-        return new UnicodeValueImpl(filename);
+        return env.createString(filename);
       else
-        return StringValue.EMPTY;
+        return env.createEmptyString();
     }
     else {
       ArrayValueImpl value = new ArrayValueImpl();
 
-      value.put("dirname", dirname);
-      value.put("basename", path);
-      value.put("extension", ext);
-      value.put("filename", filename);
+      value.put(env.createString("dirname"), env.createString(dirname));
+      value.put(env.createString("basename"), env.createString(path));
+      value.put(env.createString("extension"), env.createString(ext));
+      value.put(env.createString("filename"), env.createString(filename));
 
       return value;
     }
@@ -2534,12 +2518,12 @@ public class FileModule extends AbstractQuercusModule {
 
       if (order == 1) {
         for (int i = 0; i < values.length; i++)
-          result.append(new LongValue(i), new UnicodeValueImpl(values[i]));
+          result.append(new LongValue(i), env.createString(values[i]));
       }
       else {
         for (int i = values.length - 1; i >= 0; i--) {
           result.append(new LongValue(values.length - i - 1),
-          new UnicodeValueImpl(values[i]));
+          env.createString(values[i]));
         }
       }
 
@@ -2646,7 +2630,7 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       Path path = dir.createTempFile(prefix, ".tmp");
-      return new UnicodeValueImpl(path.getTail());
+      return env.createString(path.getTail());
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -2744,11 +2728,11 @@ public class FileModule extends AbstractQuercusModule {
 
   static {
     ProtocolWrapper zlibProtocolWrapper = new ZlibProtocolWrapper();
-    StreamModule.stream_wrapper_register(new UnicodeValueImpl("compress.zlib"),
+    StreamModule.stream_wrapper_register(new StringBuilderValue("compress.zlib"),
                                          zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new UnicodeValueImpl("zlib"),
+    StreamModule.stream_wrapper_register(new StringBuilderValue("zlib"),
                                          zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new UnicodeValueImpl("php"),
+    StreamModule.stream_wrapper_register(new StringBuilderValue("php"),
                                          new PhpProtocolWrapper());
 
     _constMap.put("SEEK_SET", LongValue.create(BinaryInput.SEEK_SET));

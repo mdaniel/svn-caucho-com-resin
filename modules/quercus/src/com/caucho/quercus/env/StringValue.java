@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.TempStream;
@@ -62,10 +63,12 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public static Value create(String value)
   {
+    // XXX: needs updating for i18n, currently php5 only
+    
     if (value == null)
       return NullValue.NULL;
     else
-      return new UnicodeValueImpl(value);
+      return new StringBuilderValue(value);
   }
 
   /**
@@ -73,10 +76,12 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public static StringValue create(char value)
   {
+    // XXX: needs updating for i18n, currently php5 only
+    
     if (value < CHAR_STRINGS.length)
       return CHAR_STRINGS[value];
     else
-      return new UnicodeValueImpl(String.valueOf(value));
+      return new StringBuilderValue(String.valueOf(value));
   }
 
   /**
@@ -84,10 +89,12 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public static Value create(Object value)
   {
+    // XXX: needs updating for i18n, currently php5 only
+    
     if (value == null)
       return NullValue.NULL;
     else
-      return new UnicodeValueImpl(value.toString());
+      return new StringBuilderValue(value.toString());
   }
 
   //
@@ -853,6 +860,42 @@ abstract public class StringValue extends Value implements CharSequence {
       throw new QuercusModuleException(e);
     }
   }
+
+  /**
+   * Append from an input stream
+   */
+  public StringValue append(BinaryInput is)
+  {
+    try {
+      int ch;
+    
+      while ((ch = is.read()) >= 0) {
+	appendByte(ch);
+      }
+
+      return this;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Append from an input stream
+   */
+  public StringValue append(BinaryInput is, long length)
+  {
+    try {
+      int ch;
+    
+      while (length-- > 0 && (ch = is.read()) >= 0) {
+	appendByte(ch);
+      }
+
+      return this;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
   
   /**
    * Append to a string builder.
@@ -1037,7 +1080,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public CharSequence subSequence(int start, int end)
   {
-    return new UnicodeValueImpl(toString().substring(start, end));
+    return new StringBuilderValue(toString().substring(start, end));
   }
 
   //
@@ -1509,10 +1552,12 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   static {
+    // XXX: need to update for unicode
+    
     CHAR_STRINGS = new StringValue[256];
 
     for (int i = 0; i < CHAR_STRINGS.length; i++)
-      CHAR_STRINGS[i] = new UnicodeValueImpl(String.valueOf((char) i));
+      CHAR_STRINGS[i] = new StringBuilderValue(String.valueOf((char) i));
   }
 }
 

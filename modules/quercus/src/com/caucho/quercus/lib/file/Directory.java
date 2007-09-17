@@ -42,7 +42,7 @@ public class Directory {
   protected Directory(Env env, Path path)
     throws IOException
   {
-    handle = new DirectoryValue(path);
+    handle = new DirectoryValue(env, path);
     env.addClose(handle);
 
     this.path = path.toString();

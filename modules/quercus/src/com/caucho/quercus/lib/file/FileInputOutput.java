@@ -207,6 +207,18 @@ public class FileInputOutput extends AbstractBinaryOutput
   }
 
   /**
+   * Appends to a string builder.
+   */
+  public StringValue appendTo(StringValue builder)
+    throws IOException
+  {
+    if (_stream != null)
+      return builder.append(_stream);
+    else
+      return builder;
+  }
+
+  /**
    * Reads a Binary string.
    */
   public StringValue read(int length)

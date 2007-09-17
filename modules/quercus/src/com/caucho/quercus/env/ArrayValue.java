@@ -47,8 +47,8 @@ abstract public class ArrayValue extends Value {
   private static final Logger log
     = Logger.getLogger(ArrayValue.class.getName());
 
-  protected static final StringValue KEY = new UnicodeValueImpl("key");
-  protected static final StringValue VALUE = new UnicodeValueImpl("value");
+  protected static final StringValue KEY = new StringBuilderValue("key");
+  protected static final StringValue VALUE = new StringBuilderValue("value");
 
   public static final GetKey GET_KEY = new GetKey();
   public static final GetValue GET_VALUE = new GetValue();
@@ -574,7 +574,8 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, String value)
   {
-    put(new UnicodeValueImpl(key), new UnicodeValueImpl(value));
+    // XXX: this needs an Env arg because of i18n
+    put(new StringBuilderValue(key), new StringBuilderValue(value));
   }
 
   /**
@@ -582,7 +583,8 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, char value)
   {
-    put(new UnicodeValueImpl(key), StringValue.create(value));
+    // XXX: this needs an Env arg because of i18n
+    put(new StringBuilderValue(key), StringValue.create(value));
   }
 
   /**
@@ -590,7 +592,8 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, long value)
   {
-    put(new UnicodeValueImpl(key), new LongValue(value));
+    // XXX: this needs an Env arg because of i18n
+    put(new StringBuilderValue(key), new LongValue(value));
   }
   
   /**
@@ -598,7 +601,8 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, double value)
   {
-    put(new UnicodeValueImpl(key), new DoubleValue(value));
+    // XXX: this needs an Env arg because of i18n
+    put(new StringBuilderValue(key), new DoubleValue(value));
   }
 
   /**
@@ -606,7 +610,8 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String key, boolean value)
   {
-    put(new UnicodeValueImpl(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
+    // XXX: this needs an Env arg because of i18n
+    put(new StringBuilderValue(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
   }
 
   /**
@@ -614,7 +619,8 @@ abstract public class ArrayValue extends Value {
    */
   public void put(String value)
   {
-    put(new UnicodeValueImpl(value));
+    // XXX: this needs an Env arg because of i18n
+    put(new StringBuilderValue(value));
   }
 
   /**

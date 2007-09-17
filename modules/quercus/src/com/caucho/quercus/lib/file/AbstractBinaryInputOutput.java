@@ -193,6 +193,18 @@ public class AbstractBinaryInputOutput
   }
 
   /**
+   * Appends to a string builder.
+   */
+  public StringValue appendTo(StringValue builder)
+    throws IOException
+  {
+    if (_is != null)
+      return builder.append(_is);
+    else
+      return builder;
+  }
+
+  /**
    * Returns true on the EOF.
    */
   public boolean isEOF()

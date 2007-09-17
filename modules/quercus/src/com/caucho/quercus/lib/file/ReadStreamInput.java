@@ -188,6 +188,17 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   }
 
   /**
+   * Appends to a string builder.
+   */
+  public StringValue appendTo(StringValue builder)
+  {
+    if (_is != null)
+      return builder.append(_is);
+    else
+      return builder;
+  }
+
+  /**
    * Reads a line from a file, returning null on EOF.
    */
   public StringValue readLine(long length)

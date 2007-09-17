@@ -699,7 +699,7 @@ public class BinaryBuilderValue
 
       return this;
     }
-    else {
+    else if (value.isString()) {
       UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
       appendTo(sb);
@@ -707,6 +707,8 @@ public class BinaryBuilderValue
 
       return sb;
     }
+    else
+      return value.appendTo(this);
   }
 
   /**
@@ -721,6 +723,47 @@ public class BinaryBuilderValue
     sb.append(ch);
 
     return sb;
+  }
+
+  /**
+   * Append a Java boolean to the value.
+   */
+  @Override
+  public final StringValue appendUnicode(boolean v)
+  {
+    return append(v ? "true" : "false");
+  }
+
+  /**
+   * Append a Java long to the value.
+   */
+  @Override
+  public StringValue appendUnicode(long v)
+  {
+    // XXX: this probably is frequent enough to special-case
+    
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java double to the value.
+   */
+  @Override
+  public StringValue appendUnicode(double v)
+  {
+    return append(String.valueOf(v));
+  }
+
+  /**
+   * Append a Java object to the value.
+   */
+  @Override
+  public StringValue appendUnicode(Object v)
+  {
+    if (v instanceof String)
+      return appendUnicode(v.toString());
+    else
+      return append(v.toString());
   }
 
   /**

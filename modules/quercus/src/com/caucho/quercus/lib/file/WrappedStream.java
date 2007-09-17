@@ -187,13 +187,32 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
     byte []outputBytes = output.toString().getBytes();
 
-    if (length > outputBytes.length)
+    if (outputBytes.length < length)
       length = outputBytes.length;
 
     System.arraycopy(outputBytes, 0, buffer, offset, length);
 
     return length;
   }
+
+  /**
+   * Appends to a string builder.
+   */
+  public StringValue appendTo(StringValue builder)
+  {
+    try {
+      int ch;
+    
+      while ((ch = read()) >= 0) {
+	builder.append((char) ch);
+      }
+
+      return builder;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
 
   /**
    * Reads a Binary string.
