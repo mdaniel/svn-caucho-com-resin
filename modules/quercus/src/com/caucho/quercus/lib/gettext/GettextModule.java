@@ -74,7 +74,7 @@ public class GettextModule
                               StringValue domain,
                               StringValue codeset)
   {
-    return new UnicodeValueImpl("UTF-16");
+    return env.createString("UTF-16");
   }
 
   /**
@@ -387,7 +387,7 @@ public class GettextModule
     Object val = env.getSpecialValue("caucho.gettext_current");
 
     if (val == null)
-      return setCurrentDomain(env, new UnicodeValueImpl("messages"));
+      return setCurrentDomain(env, env.createString("messages"));
 
     return (StringValue)val;
   }
@@ -489,11 +489,11 @@ public class GettextModule
     return sb;
   }
 
-  private static UnicodeValue formatUnicode(Env env,
+  private static StringValue formatUnicode(Env env,
                               StringValue msg,
                               Value []args)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = env.createUnicodeBuilder();
 
     int i = 0;
     int length = msg.length();
@@ -518,7 +518,7 @@ public class GettextModule
         int argIndex = ch - '0';
 
         if (0 <= argIndex && argIndex < args.length) {
-          args[argIndex].appendTo(sb);
+          sb.append(args[argIndex]);
           i += 4;
         }
         else {

@@ -562,7 +562,7 @@ public class PDOStatement
         String name = getResultSetMetaData().getColumnName(i);
         Value value = getColumnValue(i);
 
-        array.put(new UnicodeValueImpl(name), value);
+        array.put(_env.createString(name), value);
       }
 
       return array;
@@ -593,7 +593,7 @@ public class PDOStatement
         String name = getResultSetMetaData().getColumnName(i);
         Value value = getColumnValue(i);
 
-        array.put(new UnicodeValueImpl(name), value);
+        array.put(_env.createString(name), value);
         array.put(new LongValue(i - 1), value);
       }
 
@@ -787,7 +787,7 @@ public class PDOStatement
       int columnCount = getResultSetMetaData().getColumnCount();
 
       for (int i = 1; i <= columnCount; i++) {
-        Value name = new UnicodeValueImpl(getResultSetMetaData().getColumnName(i));
+        Value name = _env.createString(getResultSetMetaData().getColumnName(i));
         Value value = getColumnValue(i);
 
         Value existingValue = array.get(name);
@@ -953,7 +953,7 @@ public class PDOStatement
         if (value == null || _resultSet.wasNull())
           return NullValue.NULL;
         else
-          return new UnicodeValueImpl(value);
+          return _env.createString(value);
       }
 
       case Types.DOUBLE:
@@ -975,7 +975,7 @@ public class PDOStatement
         if (value == null || _resultSet.wasNull())
           return NullValue.NULL;
         else
-          return new UnicodeValueImpl(value);
+          return _env.createString(value);
       }
     }
 
@@ -1406,7 +1406,7 @@ public class PDOStatement
 
       if (!_isValid) {
         // this matches php behaviour
-        _var.set(UnicodeValueImpl.EMPTY);
+        _var.set(_env.createEmptyString());
       }
       else {
         Value value = getColumnValue(_column, _jdbcType, _type);

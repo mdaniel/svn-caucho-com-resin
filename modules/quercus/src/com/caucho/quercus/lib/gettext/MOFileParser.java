@@ -29,9 +29,8 @@
 
 package com.caucho.quercus.lib.gettext;
 
-import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -51,6 +50,7 @@ class MOFileParser extends GettextParser
     = Logger.getLogger(MOFileParser.class.getName());
   private static final L10N L = new L10N(MOFileParser.class);
 
+  private Env _env;
   private ReadStream _in;
   private byte[] _tmpBuf = new byte[4];
 
@@ -62,9 +62,11 @@ class MOFileParser extends GettextParser
 
   private String _charset;
 
-  MOFileParser(Path path)
+  MOFileParser(Env env, Path path)
     throws IOException
   {
+    _env = env;
+    
     init(path);
   }
 
@@ -114,13 +116,13 @@ class MOFileParser extends GettextParser
    *
    * @return translations from file, or null on error
    */
-  HashMap<UnicodeValue, ArrayList<UnicodeValue>> readTranslations()
+  HashMap<StringValue, ArrayList<StringValue>> readTranslations()
     throws IOException
   {
     int[] originalOffsets = new int[_numberOfStrings];
     int[] translatedOffsets = new int[_numberOfStrings];
     int[] translatedLengths = new int[_numberOfStrings];
-    UnicodeValue[] originals = new UnicodeValue[_numberOfStrings];
+    StringValue[] originals = new StringValue[_numberOfStrings];
 
     _in.setPosition(_offsetOriginal);
 
@@ -156,8 +158,8 @@ class MOFileParser extends GettextParser
       originals[i] = readOriginalString();
     }
 
-    HashMap<UnicodeValue, ArrayList<UnicodeValue>> map =
-            new HashMap<UnicodeValue, ArrayList<UnicodeValue>>();
+    HashMap<StringValue, ArrayList<StringValue>> map =
+            new HashMap<StringValue, ArrayList<StringValue>>();
 
     // Read translated strings into the HashMap
     for (int i = 0; i < _numberOfStrings; i++) {
@@ -172,10 +174,10 @@ class MOFileParser extends GettextParser
   /**
    * Reads in a string until NULL or EOF encountered.
    */
-  private UnicodeValue readOriginalString()
+  private StringValue readOriginalString()
     throws IOException
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = _env.createUnicodeBuilder();
 
     for (int ch = _in.readChar(); ch > 0; ch = _in.readChar()) {
       sb.append((char)ch);
@@ -187,11 +189,11 @@ class MOFileParser extends GettextParser
   /**
    * Reads in translated plurals forms that are separated by NULL.
    */
-  private ArrayList<UnicodeValue> readPluralForms(int length)
+  private ArrayList<StringValue> readPluralForms(int length)
     throws IOException
   {
-    ArrayList<UnicodeValue> list = new ArrayList<UnicodeValue>();
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    ArrayList<StringValue> list = new ArrayList<StringValue>();
+    StringValue sb = _env.createUnicodeBuilder();
 
     for (; length > 0; length--) {
       int ch = _in.readChar();
@@ -201,7 +203,7 @@ class MOFileParser extends GettextParser
 
       else if (ch == 0) {
         list.add(sb);
-        sb = new UnicodeBuilderValue();
+        sb = _env.createUnicodeBuilder();
       }
       else
         break;

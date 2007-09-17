@@ -30,7 +30,6 @@
 package com.caucho.quercus.lib.gettext;
 
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 
 import java.io.IOException;
@@ -83,7 +82,7 @@ abstract class GettextParser
    *
    * @return translations from file, or null on error
    */
-  abstract HashMap<UnicodeValue, ArrayList<UnicodeValue>> readTranslations()
+  abstract HashMap<StringValue, ArrayList<StringValue>> readTranslations()
     throws IOException;
 
   abstract void close();

@@ -48,6 +48,7 @@ import java.util.Locale;
  */
 class GettextResource
 {
+  private Env _env;
   protected Path _pathPO;
   private Path _pathMO;
   private Path _currentPath;
@@ -56,7 +57,7 @@ class GettextResource
 
   private PluralExpr _pluralExpr;
 
-  private HashMap<UnicodeValue, ArrayList<UnicodeValue>> _translations;
+  private HashMap<StringValue, ArrayList<StringValue>> _translations;
 
   protected GettextResource(Env env,
                               Path root,
@@ -64,6 +65,8 @@ class GettextResource
                               CharSequence category,
                               CharSequence domain)
   {
+    _env = env;
+    
     StringBuilder sb = new StringBuilder(locale.toString());
     sb.append('/');
     sb.append(category);
@@ -102,9 +105,9 @@ class GettextResource
       _depend.add(new Depend(_currentPath));
 
       if (_currentPath == _pathPO)
-        parser = new POFileParser(_currentPath);
+        parser = new POFileParser(_env, _currentPath);
       else
-        parser = new MOFileParser(_currentPath);
+        parser = new MOFileParser(_env, _currentPath);
 
       _pluralExpr = parser.getPluralExpr();
       _translations = parser.readTranslations();
@@ -121,7 +124,7 @@ class GettextResource
    *
    * @param key
    */
-  protected UnicodeValue getTranslation(StringValue key)
+  protected StringValue getTranslation(StringValue key)
   {
     if (isModified())
       init();
@@ -143,7 +146,7 @@ class GettextResource
    * @param key
    * @param quantity
    */
-  protected UnicodeValue getTranslation(StringValue key, int quantity)
+  protected StringValue getTranslation(StringValue key, int quantity)
   {
     if (isModified())
       init();
@@ -162,12 +165,12 @@ class GettextResource
    *
    * @return translated string, else null on error.
    */
-  protected UnicodeValue getTranslationImpl(StringValue key, int index)
+  protected StringValue getTranslationImpl(StringValue key, int index)
   {
     if (_translations == null)
       return null;
 
-    ArrayList<UnicodeValue> pluralForms = _translations.get(key);
+    ArrayList<StringValue> pluralForms = _translations.get(key);
 
     if (pluralForms == null || pluralForms.size() == 0)
       return null;

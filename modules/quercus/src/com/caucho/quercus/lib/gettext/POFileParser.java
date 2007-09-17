@@ -29,9 +29,8 @@
 
 package com.caucho.quercus.lib.gettext;
 
-import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -51,8 +50,6 @@ class POFileParser extends GettextParser
     = Logger.getLogger(POFileParser.class.getName());
   private static final L10N L = new L10N(POFileParser.class);
 
-  private ReadStream _in;
-
   // Parsing constants and variables
   private static final int MSGID = 256;
   private static final int MSGID_PLURAL = 257;
@@ -60,12 +57,17 @@ class POFileParser extends GettextParser
 
   private static final int UNKNOWN = 260;
 
-  private int _peekChar;
-  private UnicodeValue _string;
+  private Env _env;
+  private ReadStream _in;
 
-  POFileParser(Path path)
+  private int _peekChar;
+  private StringValue _string;
+
+  POFileParser(Env env, Path path)
     throws IOException
   {
+    _env = env;
+    
     init(path);
   }
 
@@ -109,11 +111,11 @@ class POFileParser extends GettextParser
    *
    * @return translations from file, or null on error
    */
-  HashMap<UnicodeValue, ArrayList<UnicodeValue>> readTranslations()
+  HashMap<StringValue, ArrayList<StringValue>> readTranslations()
     throws IOException
   {
-    HashMap<UnicodeValue, ArrayList<UnicodeValue>> translations =
-            new HashMap<UnicodeValue, ArrayList<UnicodeValue>>();
+    HashMap<StringValue, ArrayList<StringValue>> translations =
+            new HashMap<StringValue, ArrayList<StringValue>>();
 
     int token = readToken();
 
@@ -121,13 +123,13 @@ class POFileParser extends GettextParser
       if (token != MSGID)
         return null;
 
-      UnicodeValue msgid = _string;
+      StringValue msgid = _string;
 
       token = readToken();
       if (token == MSGID_PLURAL)
         token = readToken();
 
-      ArrayList<UnicodeValue> msgstrs = new ArrayList<UnicodeValue>();
+      ArrayList<StringValue> msgstrs = new ArrayList<StringValue>();
 
       for (; token == MSGSTR; token = readToken()) {
         msgstrs.add(_string);
@@ -245,13 +247,13 @@ class POFileParser extends GettextParser
   private int readString(int token)
     throws IOException
   {
-    return readString(new UnicodeBuilderValue(), token);
+    return readString(_env.createUnicodeBuilder(), token);
   }
 
   /**
    * XXX: any other possible character escapes?
    */
-  private int readString(UnicodeBuilderValue sb, int token)
+  private int readString(StringValue sb, int token)
     throws IOException
   {
     for (int ch = read(); ch != '"'; ch = read()) {

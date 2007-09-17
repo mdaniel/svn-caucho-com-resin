@@ -199,9 +199,9 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @param str a string
    * @return the string escaped for SQL statements
    */
-  protected UnicodeBuilderValue realEscapeString(StringValue str)
+  protected StringValue realEscapeString(StringValue str)
   {
-    UnicodeBuilderValue buf = new UnicodeBuilderValue(str.length());
+    StringValue buf = _env.createString(String.valueOf(str.length()));
 
     final int strLength = str.length();
 
@@ -303,7 +303,7 @@ public abstract class JdbcConnectionResource implements Closeable {
     clearErrors();
 
     try {
-      return new UnicodeValueImpl(_conn.getCatalog());
+      return _env.createString(_conn.getCatalog());
     } catch (SQLException e) {
       saveErrors(e);
       log.log(Level.WARNING, e.toString(), e);

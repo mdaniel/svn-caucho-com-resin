@@ -59,7 +59,7 @@ public class CharacterMarshal extends Marshal
     if (value == null)
       return NullValue.NULL;
     else
-      return new UnicodeValueImpl(value.toString());
+      return env.createString(value.toString());
   }
   
   @Override
