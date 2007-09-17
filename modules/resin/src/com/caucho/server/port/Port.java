@@ -934,7 +934,7 @@ public class Port
       if (ss == null)
 	return null;
 
-      log.fine("watchdog binding to " + _socketAddress.getHostName() + ":" + _port);
+      log.fine(this + " watchdog binding to " + _socketAddress.getHostName() + ":" + _port);
     }
     else {
       ss = QJniServerSocket.createJNI(null, _port);
@@ -942,7 +942,7 @@ public class Port
       if (ss == null)
 	return null;
 
-      log.fine("watchdog binding to *:" + _port);
+      log.fine(this + " watchdog binding to *:" + _port);
     }
 
     if (! ss.isJNI()) {
@@ -1192,11 +1192,27 @@ public class Port
    */
   boolean suspend(TcpConnection conn)
   {
+    boolean isResume = false;
+    
     synchronized (_suspendList) {
-      _suspendList.add(conn);
+      if (conn.isWake()) {
+	isResume = true;
+	conn.setResume();
+      }
+      else if (conn.isComet()) {
+	_suspendList.add(conn);
+	return true;
+      }
+      else
+	return false;
     }
 
-    return true;
+    if (isResume) {
+      ThreadPool.getThreadPool().schedule(conn);
+      return true;
+    }
+    else
+      return false;
   }
 
   /**
@@ -1347,7 +1363,7 @@ public class Port
       return;
 
     if (log.isLoggable(Level.FINE))
-      log.fine("closing " + this);
+      log.fine(this + " closing");
 
     QServerSocket serverSocket = _serverSocket;
     _serverSocket = null;
@@ -1431,7 +1447,7 @@ public class Port
       conn.destroy();
     }
 
-    log.finest("closed " + this);
+    log.finest(this + " closed");
   }
 
   public String toString()

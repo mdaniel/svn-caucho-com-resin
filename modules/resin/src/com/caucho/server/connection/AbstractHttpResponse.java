@@ -2056,7 +2056,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       if (controller != null)
 	isClose = false;
-    
+
       // include() files finish too, but shouldn't force a flush, hence
       // flush is false
       // Never send flush?

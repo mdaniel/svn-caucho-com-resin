@@ -33,6 +33,7 @@ import com.caucho.log.Log;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.ConnectionController;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
@@ -311,15 +312,19 @@ public class HttpRequest extends AbstractHttpRequest
   public boolean handleResume()
     throws IOException
   {
-    boolean hasRequest = false;
     try {
       try {
 	setStartTime();
 
-	hasRequest = true;
+	if (! _invocation.resume(this, _response)) {
+	  Connection conn = getConnection();
+	  ConnectionController controller = conn.getController();
 
-	if (! _invocation.resume(this, _response))
+	  if (controller != null)
+	    controller.close();
+
 	  killKeepalive();
+	}
       } finally {
 	finish();
       }
@@ -335,10 +340,7 @@ public class HttpRequest extends AbstractHttpRequest
 
       return false;
     } finally {
-      if (hasRequest)
-        _response.finish();
-      else
-	super.finish();
+      _response.finish();
     }
 
     if (log.isLoggable(Level.FINE)) {
@@ -1448,7 +1450,7 @@ public class HttpRequest extends AbstractHttpRequest
     skip();
   }
 
-  String dbgId()
+  protected String dbgId()
   {
     if ("".equals(_server.getServerId()))
       return "Http[" + _conn.getId() + "] ";

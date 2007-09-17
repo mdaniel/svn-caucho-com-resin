@@ -31,6 +31,8 @@ package com.caucho.server.cache;
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.CauchoRequest;
 
+import com.caucho.server.dispatch.AbstractFilterChain;
+
 import javax.servlet.FilterChain;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -40,7 +42,8 @@ import java.util.ArrayList;
 /**
  * Represents the final servlet in a filter chain.
  */
-abstract public class AbstractCacheFilterChain implements FilterChain {
+abstract public class AbstractCacheFilterChain
+  extends AbstractFilterChain implements FilterChain {
   /**
    * fillFromCache is called when the client needs the entire result, and
    * the result is already in the cache.

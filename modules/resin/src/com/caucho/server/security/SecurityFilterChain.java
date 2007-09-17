@@ -30,6 +30,7 @@ package com.caucho.server.security;
 
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.dispatch.AbstractFilterChain;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -40,7 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SecurityFilterChain implements FilterChain {
+public class SecurityFilterChain extends AbstractFilterChain {
   private FilterChain _next;
   
   private ServletContext _webApp;
@@ -130,5 +131,27 @@ public class SecurityFilterChain implements FilterChain {
       res.setPrivateCache(true);
     
     _next.doFilter(request, response);
+  }
+  
+  /**
+   * Resumes the request.
+   *
+   * @param request the servlet request
+   * @param response the servlet response
+   *
+   * @since Resin 3.1.3
+   */
+  @Override
+  public boolean resume(ServletRequest request,
+			ServletResponse response)
+    throws ServletException, IOException
+  {
+    if (_next instanceof AbstractFilterChain) {
+      AbstractFilterChain next = (AbstractFilterChain) _next;
+
+      return next.resume(request, response);
+    }
+    else
+      return false;
   }
 }

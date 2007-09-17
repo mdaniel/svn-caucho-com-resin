@@ -559,7 +559,7 @@ public class StringBuilderValue
     int bufferLength = _length;
 
     for (; length > 0; length--)
-      buffer[bufferLength++] = buf[offset--];
+      buffer[bufferLength++] = buf[offset++];
 
     _buffer = buffer;
     _length = bufferLength;

@@ -309,7 +309,7 @@ class ResponseStream extends ToByteResponseStream {
 	buffer = _next.nextBuffer(offset);
 	      
 	if (log.isLoggable(Level.FINE))
-	  log.fine("[" + dbgId() + "] write-chunk(" + offset + ")");
+	  log.fine(dbgId() + "write-chunk(" + offset + ")");
 
 	_bufferStartOffset = 8 + _next.getBufferOffset();
 	_next.setBufferOffset(_bufferStartOffset);
@@ -323,7 +323,7 @@ class ResponseStream extends ToByteResponseStream {
 	byte []buffer = _next.nextBuffer(offset);
 	      
 	if (log.isLoggable(Level.FINE))
-	  log.fine("[" + dbgId() + "] write-chunk(" + offset + ")");
+	  log.fine(dbgId() + "write-chunk(" + offset + ")");
 
 	return buffer;
       }
@@ -452,7 +452,7 @@ class ResponseStream extends ToByteResponseStream {
 	    _next.write(buf, offset, length);
 
 	    if (log.isLoggable(Level.FINE))
-	      log.fine("[" + dbgId() + "] write-data(" + _tailChunkedLength + ")");
+	      log.fine(dbgId() + "write-data(" + _tailChunkedLength + ")");
 	  }
 
 	  if (_cacheStream != null)
@@ -487,7 +487,7 @@ class ResponseStream extends ToByteResponseStream {
 	      buffer = _next.nextBuffer(bufferOffset);
 	      
 	      if (log.isLoggable(Level.FINE))
-		log.fine("[" + dbgId() + "] write-chunk(" + bufferOffset + ")");
+		log.fine(dbgId() + "write-chunk(" + bufferOffset + ")");
 	      
 	      bufferStart = _next.getBufferOffset() + 8;
 	      bufferOffset = bufferStart;
@@ -699,23 +699,13 @@ class ResponseStream extends ToByteResponseStream {
 	_next.write(_tailChunked, 0, _tailChunkedLength);
 
 	if (log.isLoggable(Level.FINE))
-          log.fine("[" + dbgId() + "] write-chunk(" + _tailChunkedLength + ")");
+          log.fine(dbgId() + "write-chunk(" + _tailChunkedLength + ")");
       }
 
       CauchoRequest req = _response.getRequest();
       if (! req.allowKeepalive()) {
         if (log.isLoggable(Level.FINE)) {
-          String id;
-          if (req instanceof AbstractHttpRequest) {
-            Connection conn = ((AbstractHttpRequest) req).getConnection();
-            if (conn != null)
-              id = String.valueOf(conn.getId());
-            else
-              id = "jni";
-          }
-          else
-            id = "inc";
-          log.fine("[" + id + "] close stream");
+          log.fine(dbgId() + "close stream");
         }
       
         _next.close();
@@ -783,14 +773,12 @@ class ResponseStream extends ToByteResponseStream {
 
   private String dbgId()
   {
-    Object req = _response.getRequest();
+    Object request = _response.getRequest();
     
-    if (req instanceof AbstractHttpRequest) {
-      Connection conn = ((AbstractHttpRequest) req).getConnection();
-      if (conn != null)
-	return String.valueOf(conn.getId());
-      else
-	return "jni";
+    if (request instanceof AbstractHttpRequest) {
+      AbstractHttpRequest req = (AbstractHttpRequest) request;
+
+      return req.dbgId();
     }
     else
       return "inc";

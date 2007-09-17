@@ -2468,6 +2468,11 @@ public abstract class AbstractHttpRequest
     }
   }
 
+  protected String dbgId()
+  {
+    return "Tcp[" + _conn.getId() + "] ";
+  }
+
   static {
     _headerCodes = new CaseInsensitiveIntMap();
   }

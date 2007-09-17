@@ -44,8 +44,13 @@ public class TestComet extends AbstractCometServlet implements Runnable {
     // Safari needs at least 1k data before it will start progressive
     // rendering.
     out.print("<!--");
-    for (int i = 0; i < 1024; i++)
+    for (int i = 0; i < 1024; i++) {
+      if (i % 64 == 0)
+	out.println();
+      
       out.print("*");
+    }
+    out.println();
     out.println("-->");
 
     synchronized (_itemList) {
@@ -67,13 +72,7 @@ public class TestComet extends AbstractCometServlet implements Runnable {
     out.println("window.parent.comet_update(" + req.getAttribute("comet.count") + ");");
     out.println("</script>");
 
-    //out.println("<h3>HI</h3>");
-    Integer count = (Integer) req.getAttribute("comet.count");
-
-    if (count != null && count > 5)
-      return false;
-    else
-      return true;
+    return true;
   }
 
   public void run()

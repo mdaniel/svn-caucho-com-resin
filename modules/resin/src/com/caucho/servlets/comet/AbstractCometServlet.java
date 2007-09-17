@@ -102,12 +102,14 @@ abstract public class AbstractCometServlet extends GenericServlet
     CometController controller
       = (CometController) req.getConnection().getController();
 
-    if (controller == null)
+    if (controller == null) {
       return false;
-    else if (resume(req, res, controller))
+    }
+    else if (resume(req, res, controller) && controller.isActive())
       return true;
     else {
       controller.close();
+
       return false;
     }
   }

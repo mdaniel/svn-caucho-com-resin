@@ -19,9 +19,9 @@ public class CometItem {
 
   public boolean wake()
   {
-    _controller.setAttribute("comet.count", _count++);
+    _controller.setAttribute("comet.count", ++_count);
 
-    if (_count < 10) {
+    if (_count <= 10) {
       _controller.wake();
     
       return _controller.isActive();

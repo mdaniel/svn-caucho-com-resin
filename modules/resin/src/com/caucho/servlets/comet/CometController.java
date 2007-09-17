@@ -31,6 +31,7 @@ package com.caucho.servlets.comet;
 
 import com.caucho.server.port.*;
 import com.caucho.server.connection.*;
+import com.caucho.util.*;
 
 /**
  * Public API to control a comet connection.
@@ -70,8 +71,11 @@ public class CometController extends ConnectionController {
   {
     AbstractHttpRequest request = _request;
 
-    if (request != null)
-      return request.getAttribute(name);
+    if (request != null) {
+      synchronized (request) {
+	return request.getAttribute(name);
+      }
+    }
     else
       return null;
   }
@@ -83,8 +87,11 @@ public class CometController extends ConnectionController {
   {
     AbstractHttpRequest request = _request;
 
-    if (request != null)
-      request.setAttribute(name, value);
+    if (request != null) {
+      synchronized (request) {
+	request.setAttribute(name, value);
+      }
+    }
   }
   
   /**
@@ -94,8 +101,11 @@ public class CometController extends ConnectionController {
   {
     AbstractHttpRequest request = _request;
 
-    if (request != null)
-      request.removeAttribute(name);
+    if (request != null) {
+      synchronized (request) {
+	request.removeAttribute(name);
+      }
+    }
   }
   
   /**
@@ -112,9 +122,11 @@ public class CometController extends ConnectionController {
   {
     AbstractHttpRequest request = _request;
 
-    if (request != null && request.getConnection() != null)
-      return "CometController[" + request.getConnection().getId() + "]";
-    else
+    if (request == null || request.getConnection() == null)
       return "CometController[closed]";
+    else if (Alarm.isTest())
+      return "CometController[]";
+    else
+      return "CometController[" + request.getConnection().getId() + "]";
   }
 }
