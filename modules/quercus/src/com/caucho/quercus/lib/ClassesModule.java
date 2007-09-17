@@ -247,17 +247,13 @@ public class ClassesModule extends AbstractQuercusModule {
                                        @ReadOnly Value value,
                                        String name)
   {
-    QuercusClass cl;
+    if (value instanceof StringValue) {
+      QuercusClass cl = env.findClass(value.toString());
 
-    if (value instanceof StringValue)
-      cl = env.findClass(value.toString());
+      return cl.isA(name) && !cl.getName().equalsIgnoreCase(name);
+    }
     else
-      cl = value.getQuercusClass();
-
-    if (cl == null || cl.getName().equalsIgnoreCase(name))
-      return false;
-    else
-      return cl.isA(name);
+      return value.isA(name) && !value.getClassName().equalsIgnoreCase(name);
   }
 
   /**

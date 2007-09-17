@@ -234,7 +234,7 @@ public class ErrorModule extends AbstractQuercusModule {
       call.put("function", callExpr.getName());
 
       call.put("class",
-	       env.peekCallThis(i).getQuercusClass().getName());
+	       env.peekCallThis(i).getClassName());
 
       call.put("type", "->");
 

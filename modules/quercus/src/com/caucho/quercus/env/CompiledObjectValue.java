@@ -97,7 +97,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value getField(Env env, String key, boolean create)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0)
 	return _fields[index].toValue();
@@ -107,7 +107,7 @@ public class CompiledObjectValue extends ObjectValue
       return _object.getField(env, key, create);
     }
     else if (create) {
-      _object = new ObjectExtValue(getQuercusClass());
+      _object = new ObjectExtValue(_quercusClass);
 
       return _object.getField(env, key, create);
     }
@@ -122,7 +122,7 @@ public class CompiledObjectValue extends ObjectValue
   public Var getFieldRef(Env env, String key)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
 	Var var = _fields[index].toRefVar();
@@ -134,7 +134,7 @@ public class CompiledObjectValue extends ObjectValue
     }
 
     if (_object == null)
-      _object = new ObjectExtValue(getQuercusClass());
+      _object = new ObjectExtValue(_quercusClass);
     
     return _object.getFieldRef(env, key);
   }
@@ -146,7 +146,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value getFieldArg(Env env, String key)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
 	Var var = _fields[index].toRefVar();
@@ -158,7 +158,7 @@ public class CompiledObjectValue extends ObjectValue
     }
 
     if (_object == null)
-      _object = new ObjectExtValue(getQuercusClass());
+      _object = new ObjectExtValue(_quercusClass);
     
     return _object.getFieldArg(env, key);
   }
@@ -170,7 +170,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value getFieldArgRef(Env env, String key)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
 	Var var = _fields[index].toRefVar();
@@ -182,7 +182,7 @@ public class CompiledObjectValue extends ObjectValue
     }
 
     if (_object == null)
-      _object = new ObjectExtValue(getQuercusClass());
+      _object = new ObjectExtValue(_quercusClass);
     
     return _object.getFieldArgRef(env, key);
   }
@@ -194,7 +194,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value getFieldArray(Env env, String key)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
 	_fields[index] = _fields[index].toAutoArray();
@@ -204,7 +204,7 @@ public class CompiledObjectValue extends ObjectValue
     }
 
     if (_object == null)
-      _object = new ObjectExtValue(getQuercusClass());
+      _object = new ObjectExtValue(_quercusClass);
     
     return _object.getFieldArray(env, key);
   }
@@ -216,7 +216,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value getFieldObject(Env env, String key)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
 	_fields[index] = _fields[index].toAutoObject(env);
@@ -226,7 +226,7 @@ public class CompiledObjectValue extends ObjectValue
     }
 
     if (_object == null)
-      _object = new ObjectExtValue(getQuercusClass());
+      _object = new ObjectExtValue(_quercusClass);
     
     return _object.getFieldObject(env, key);
   }
@@ -238,7 +238,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value putField(Env env, String key, Value value)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
 	_fields[index] = _fields[index].set(value);
@@ -248,7 +248,7 @@ public class CompiledObjectValue extends ObjectValue
     }
     
     if (_object == null)
-      _object = new ObjectExtValue(getQuercusClass());
+      _object = new ObjectExtValue(_quercusClass);
 
     return _object.putField(env, key, value);
   }
@@ -287,7 +287,7 @@ public class CompiledObjectValue extends ObjectValue
   public void removeField(String key)
   {
     if (_fields.length > 0) {
-      int index = getQuercusClass().findFieldIndex(key);
+      int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
 	_fields[index] = UnsetValue.UNSET;
@@ -306,7 +306,7 @@ public class CompiledObjectValue extends ObjectValue
   @Override
   public AbstractFunction findFunction(String methodName)
   {
-    return getQuercusClass().findFunction(methodName);
+    return _quercusClass.findFunction(methodName);
   }
 
   /**
@@ -314,7 +314,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethod(Env env, String methodName, Expr []args)
   {
-    return getQuercusClass().getFunction(methodName).callMethod(env, this, args);
+    return _quercusClass.getFunction(methodName).callMethod(env, this, args);
   }
 
   /**
@@ -322,13 +322,13 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethod(Env env, String methodName, Value []args)
   {
-    AbstractFunction fun = getQuercusClass().findFunction(methodName);
+    AbstractFunction fun = _quercusClass.findFunction(methodName);
 
     if (fun != null)
       return fun.callMethod(env, this, args);
     else
       return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getQuercusClass().getName(), methodName));
+                           _quercusClass.getName(), methodName));
   }
 
   /**
@@ -336,7 +336,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethod(Env env, String methodName)
   {
-    return getQuercusClass().getFunction(methodName).callMethod(env, this);
+    return _quercusClass.getFunction(methodName).callMethod(env, this);
   }
 
   /**
@@ -344,7 +344,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethod(Env env, String methodName, Value a0)
   {
-    return getQuercusClass().getFunction(methodName).callMethod(env, this, a0);
+    return _quercusClass.getFunction(methodName).callMethod(env, this, a0);
   }
 
   /**
@@ -353,7 +353,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethod(Env env, String methodName,
                           Value a0, Value a1)
   {
-    return getQuercusClass().getFunction(methodName).callMethod(env, this, a0, a1);
+    return _quercusClass.getFunction(methodName).callMethod(env, this, a0, a1);
   }
 
   /**
@@ -362,8 +362,8 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2)
   {
-    return getQuercusClass().getFunction(methodName).callMethod(env, this,
-                                                  a0, a1, a2);
+    return _quercusClass.getFunction(methodName).callMethod(env, this,
+                                                            a0, a1, a2);
   }
 
   /**
@@ -372,8 +372,8 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3)
   {
-    return getQuercusClass().getFunction(methodName).callMethod(env, this,
-                                                  a0, a1, a2, a3);
+    return _quercusClass.getFunction(methodName).callMethod(env, this,
+                                                            a0, a1, a2, a3);
   }
 
   /**
@@ -382,8 +382,8 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethod(Env env, String methodName,
                           Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return getQuercusClass().getFunction(methodName).callMethod(env, this,
-                                                  a0, a1, a2, a3, a4);
+    return _quercusClass.getFunction(methodName).callMethod(env, this,
+                                                            a0, a1, a2, a3, a4);
   }
 
   /**
@@ -391,7 +391,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethodRef(Env env, String methodName, Expr []args)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this, args);
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this, args);
   }
 
   /**
@@ -399,7 +399,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethodRef(Env env, String methodName, Value []args)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this, args);
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this, args);
   }
 
   /**
@@ -407,7 +407,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethodRef(Env env, String methodName)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this);
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this);
   }
 
   /**
@@ -415,7 +415,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value callMethodRef(Env env, String methodName, Value a0)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this, a0);
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this, a0);
   }
 
   /**
@@ -424,7 +424,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this, a0, a1);
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this, a0, a1);
   }
 
   /**
@@ -433,7 +433,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this,
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2);
   }
 
@@ -443,7 +443,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this,
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2, a3);
   }
 
@@ -453,7 +453,7 @@ public class CompiledObjectValue extends ObjectValue
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return getQuercusClass().getFunction(methodName).callMethodRef(env, this,
+    return _quercusClass.getFunction(methodName).callMethodRef(env, this,
                                                      a0, a1, a2, a3, a4);
   }
 
@@ -528,14 +528,14 @@ public class CompiledObjectValue extends ObjectValue
   public void serialize(StringBuilder sb)
   {
     sb.append("O:");
-    sb.append(getQuercusClass().getName().length());
+    sb.append(_quercusClass.getName().length());
     sb.append(":\"");
-    sb.append(getQuercusClass().getName());
+    sb.append(_quercusClass.getName());
     sb.append("\":");
     sb.append(getSize());
     sb.append(":{");
 
-    ArrayList<String> names = getQuercusClass().getFieldNames();
+    ArrayList<String> names = _quercusClass.getFieldNames();
     
     if (names != null) {
       int index = 0;
@@ -582,12 +582,12 @@ public class CompiledObjectValue extends ObjectValue
   @Override
   public StringValue toString(Env env)
   {
-    AbstractFunction fun = getQuercusClass().findFunction("__toString");
+    AbstractFunction fun = _quercusClass.findFunction("__toString");
 
     if (fun != null)
       return fun.callMethod(env, this, new Expr[0]).toString(env);
     else
-      return new UnicodeBuilderValue().append(getQuercusClass().getName()).append("[]");
+      return new UnicodeBuilderValue().append(_quercusClass.getName()).append("[]");
   }
 
   /**
@@ -652,7 +652,7 @@ public class CompiledObjectValue extends ObjectValue
   @Override
   public String toString()
   {
-    return "CompiledObjectValue@" + System.identityHashCode(this) +  "[" + getQuercusClass().getName() + "]";
+    return "CompiledObjectValue@" + System.identityHashCode(this) +  "[" + _quercusClass.getName() + "]";
   }
 
   //
@@ -664,7 +664,7 @@ public class CompiledObjectValue extends ObjectValue
   { 
     out.writeObject(_fields);
     out.writeObject(_object);
-    out.writeObject(getQuercusClass().getName());
+    out.writeObject(_quercusClass.getName());
   }
   
   private void readObject(ObjectInputStream in)

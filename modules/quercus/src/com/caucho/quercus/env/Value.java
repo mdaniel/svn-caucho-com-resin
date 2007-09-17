@@ -60,21 +60,11 @@ abstract public class Value implements java.io.Serializable
   // Properties
   //
   
-  public QuercusClass getQuercusClass()
-  {
-    return null;
-  }
-
   /**
    * Returns the value's class name.
    */
   public String getClassName()
   {
-    QuercusClass qClass = getQuercusClass();
-
-    if (qClass != null)
-      return qClass.getName();
-
     return getType();
   }
 

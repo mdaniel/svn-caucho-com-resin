@@ -43,7 +43,7 @@ import java.io.IOException;
  * Represents a Quercus object value.
  */
 abstract public class ObjectValue extends Value {
- transient private QuercusClass _quercusClass;
+ transient protected QuercusClass _quercusClass;
 
   protected ObjectValue(QuercusClass quercusClass)
   {
@@ -59,6 +59,14 @@ abstract public class ObjectValue extends Value {
   public QuercusClass getQuercusClass()
   {
     return _quercusClass;
+  }
+
+  /**
+   * Returns the value's class name.
+   */
+  public String getClassName()
+  {
+    return _quercusClass.getName();
   }
 
   /**
@@ -116,7 +124,7 @@ abstract public class ObjectValue extends Value {
   @Override
   public boolean isA(String name)
   {
-    return getQuercusClass().isA(name);
+    return _quercusClass.isA(name);
   }
 
   /**

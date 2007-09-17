@@ -113,7 +113,7 @@ public class ObjectExtValue extends ObjectValue
         if (create)
           return createEntry(key).getValue();
         else
-          return getQuercusClass().getField(env, this, key, create);
+          return _quercusClass.getField(env, this, key, create);
       }
       else if (key.equals(entry.getKey())) {
         return entry.getValue();
@@ -122,7 +122,7 @@ public class ObjectExtValue extends ObjectValue
       hash = (hash + 1) & hashMask;
     }
 
-    return getQuercusClass().getField(env, this, key, create);
+    return _quercusClass.getField(env, this, key, create);
   }
 
   /**
@@ -522,7 +522,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public AbstractFunction findFunction(String methodName)
   {
-    return getQuercusClass().findFunction(methodName);
+    return _quercusClass.findFunction(methodName);
   }
 
   /**
@@ -532,7 +532,7 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Expr []args)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen, args);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -542,7 +542,7 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value []args)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen, args);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -551,7 +551,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen);
   }
 
   /**
@@ -561,8 +561,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen,
-                          a0);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen,
+                                    a0);
   }
 
   /**
@@ -572,8 +572,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen,
-                          a0, a1);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen,
+                                    a0, a1);
   }
 
   /**
@@ -583,8 +583,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1, Value a2)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen,
-                          a0, a1, a2);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen,
+                                    a0, a1, a2);
   }
 
   /**
@@ -594,8 +594,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1, Value a2, Value a3)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen,
-                          a0, a1, a2, a3);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen,
+                                    a0, a1, a2, a3);
   }
 
   /**
@@ -605,8 +605,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return getQuercusClass().callMethod(env, this, hash, name, nameLen,
-                          a0, a1, a2, a3, a4);
+    return _quercusClass.callMethod(env, this, hash, name, nameLen,
+                                    a0, a1, a2, a3, a4);
   }
 
   /**
@@ -616,7 +616,7 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Expr []args)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen, args);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -626,7 +626,7 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value []args)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen, args);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -635,7 +635,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen);
   }
 
   /**
@@ -645,8 +645,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen,
-                             a0);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
+                                       a0);
   }
 
   /**
@@ -656,8 +656,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen,
-                             a0, a1);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
+                                       a0, a1);
   }
 
   /**
@@ -667,8 +667,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen,
-                             a0, a1, a2);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
+                                       a0, a1, a2);
   }
 
   /**
@@ -678,8 +678,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2, Value a3)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen,
-                             a0, a1, a2, a3);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
+                                       a0, a1, a2, a3);
   }
 
   /**
@@ -689,8 +689,8 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return getQuercusClass().callMethodRef(env, this, hash, name, nameLen,
-                             a0, a1, a2, a3, a4);
+    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
+                                       a0, a1, a2, a3, a4);
   }
 
   /**
@@ -762,7 +762,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value clone()
   {
-    ObjectExtValue newObject = new ObjectExtValue(getQuercusClass());
+    ObjectExtValue newObject = new ObjectExtValue(_quercusClass);
 
     for (Map.Entry<String,Value> entry : entrySet())
       newObject.putField(null, entry.getKey(), entry.getValue());
@@ -779,9 +779,9 @@ public class ObjectExtValue extends ObjectValue
   public void serialize(StringBuilder sb)
   {
     sb.append("O:");
-    sb.append(getQuercusClass().getName().length());
+    sb.append(_quercusClass.getName().length());
     sb.append(":\"");
-    sb.append(getQuercusClass().getName());
+    sb.append(_quercusClass.getName());
     sb.append("\":");
     sb.append(getSize());
     sb.append(":{");
@@ -808,12 +808,12 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public StringValue toString(Env env)
   {
-    AbstractFunction fun = getQuercusClass().findFunction("__toString");
+    AbstractFunction fun = _quercusClass.findFunction("__toString");
 
     if (fun != null)
       return fun.callMethod(env, this, new Expr[0]).toStringValue();
     else
-      return new UnicodeValueImpl(getQuercusClass().getName() + "[]");
+      return new UnicodeValueImpl(_quercusClass.getName() + "[]");
   }
 
   /**
@@ -925,7 +925,7 @@ public class ObjectExtValue extends ObjectValue
   private void writeObject(ObjectOutputStream out)
     throws IOException
   {
-    out.writeObject(getQuercusClass().getName());
+    out.writeObject(_quercusClass.getName());
 
     out.writeInt(_size);
     
@@ -968,7 +968,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public String toString()
   {
-    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + getQuercusClass().getName() + "]";
+    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + _quercusClass.getName() + "]";
   }
   
   public class EntrySet extends AbstractSet<Map.Entry<String,Value>> {

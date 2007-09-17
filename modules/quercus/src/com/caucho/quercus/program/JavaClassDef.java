@@ -1222,11 +1222,13 @@ public class JavaClassDef extends ClassDef {
     @Override
     public Value getField(Env env, Value obj, String name, boolean create)
     {
+      Object javaObj = obj.toJavaObject();
+
       AbstractJavaMethod get = _getMap.get(name);
 
       if (get != null) {
         try {
-          return get.call(env, obj);
+          return get.call(env, javaObj);
         } catch (Throwable e) {
           log.log(Level.FINE, L.l(e.getMessage()), e);
           return NullValue.NULL;
@@ -1234,9 +1236,10 @@ public class JavaClassDef extends ClassDef {
       }
 
       FieldMarshalPair fieldPair = _fieldMap.get(name);
+
       if (fieldPair != null) {
         try {
-          Object result = fieldPair._field.get(obj);
+          Object result = fieldPair._field.get(javaObj);
           return fieldPair._marshal.unmarshal(env, result);
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
@@ -1246,7 +1249,7 @@ public class JavaClassDef extends ClassDef {
 
       if (__getField != null) {
         try {
-          return __getField.call(env, obj, new UnicodeValueImpl(name));
+          return __getField.call(env, javaObj, new UnicodeValueImpl(name));
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
@@ -1264,9 +1267,11 @@ public class JavaClassDef extends ClassDef {
     {
       AbstractJavaMethod setter = _setMap.get(name);
 
+      Object javaObj = obj.toJavaObject();
+
       if (setter != null) {
         try {
-          setter.call(env, obj, value);
+          setter.call(env, javaObj, value);
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
         }
@@ -1278,7 +1283,7 @@ public class JavaClassDef extends ClassDef {
         try {
           Class type = fieldPair._field.getType();
           Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
-          fieldPair._field.set(obj, marshaledValue);
+          fieldPair._field.set(javaObj, marshaledValue);
 
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
@@ -1287,7 +1292,7 @@ public class JavaClassDef extends ClassDef {
 
       if (__setField != null) {
         try {
-          __setField.call(env, obj, new UnicodeValueImpl(name), value);
+          __setField.call(env, javaObj, new UnicodeValueImpl(name), value);
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
         }
@@ -1308,7 +1313,7 @@ public class JavaClassDef extends ClassDef {
     {
       try {
         if (_printRImpl != null)
-          _printRImpl.invoke(obj, env, out, depth, valueSet);
+          _printRImpl.invoke(obj.toJavaObject(), env, out, depth, valueSet);
         else
           out.print("resource(" + obj.toString(env) + ")"); // XXX:
       } catch (Exception e) {
@@ -1326,7 +1331,7 @@ public class JavaClassDef extends ClassDef {
     {
       try {
         if (_varDumpImpl != null)
-          _varDumpImpl.invoke(obj, env, out, depth, valueSet);
+          _varDumpImpl.invoke(obj.toJavaObject(), env, out, depth, valueSet);
         else
           out.print("resource(" + obj.toString(env) + ")"); // XXX:
       } catch (Exception e) {
