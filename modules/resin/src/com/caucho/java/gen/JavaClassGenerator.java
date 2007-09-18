@@ -44,6 +44,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -227,8 +228,19 @@ public class JavaClassGenerator {
   public Class preload(String fullClassName)
   {
     try {
-      return loadClass(fullClassName, true);
+      Class cl = loadClass(fullClassName, true);
+
+      if (cl != null) {
+        // force validation of the class
+        Constructor []ctors = cl.getConstructors();
+      }
+
+      return cl;
     } catch (ClassNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
+      return null;
+    } catch (ClassFormatError e) {
       log.log(Level.FINEST, e.toString(), e);
       
       return null;
