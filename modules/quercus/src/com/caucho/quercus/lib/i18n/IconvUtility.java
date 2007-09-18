@@ -130,12 +130,12 @@ public class IconvUtility {
   /**
    * Returns decoded Mime header/field.
    */
-  public static BytesValue decodeMime(Env env,
+  public static StringValue decodeMime(Env env,
                               CharSequence word,
                               String charset)
     throws UnsupportedEncodingException
   {
-    StringValue str = new UnicodeValueImpl(
+    StringValue str = env.createString(
             MimeUtility.unfold(MimeUtility.decodeText(word.toString())));
 
     return str.toBinaryValue(env, charset);

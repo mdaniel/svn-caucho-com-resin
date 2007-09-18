@@ -84,9 +84,9 @@ public class UnicodeModule extends AbstractQuercusModule {
     return str.toUnicodeValue(env, encoding);
   }
 
-  public static BytesValue unicode_encode(Env env,
-                              UnicodeValue str,
-                              String encoding)
+  public static StringValue unicode_encode(Env env,
+                                          UnicodeValue str,
+                                          String encoding)
   {
     return str.toBinaryValue(env, encoding);
   }
