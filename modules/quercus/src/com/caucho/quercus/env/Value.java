@@ -1665,11 +1665,19 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the field keys.
    */
-  final public Value []getKeyArray(Env env)
+  public Value []getKeyArray(Env env)
   {
     return NULL_VALUE_ARRAY;
   }
 
+  /**
+   * Returns the field values.
+   */
+  public Value []getValueArray(Env env)
+  {
+    return NULL_VALUE_ARRAY;
+  }
+  
   /**
    * Returns an iterator for the field values.
    * The default implementation uses the Iterator returned
@@ -1685,14 +1693,6 @@ abstract public class Value implements java.io.Serializable
       public Value next()      { return iter.next().getValue(); }
       public void remove()     { iter.remove(); }
     };
-  }
-
-  /**
-   * Returns the field values.
-   */
-  final public Value []getValueArray(Env env)
-  {
-    return NULL_VALUE_ARRAY;
   }
 
   /**

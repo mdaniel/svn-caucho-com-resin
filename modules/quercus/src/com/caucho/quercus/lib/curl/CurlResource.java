@@ -738,8 +738,6 @@ public class CurlResource
 
     httpRequest.execute(env);
 
-    System.err.println("CurlResource->execute()");
-    
     if (hasError())
       return BooleanValue.FALSE;
 

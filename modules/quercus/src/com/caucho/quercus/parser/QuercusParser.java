@@ -2567,18 +2567,18 @@ public class QuercusParser {
       switch (token) {
       case '[':
         {
-	  token = parseToken();
-	  
-	  if (token == ']') {
-	    term = _factory.createArrayTail(getLocation(), term);
-	  }
-	  else {
-	    _peekToken = token;
-	    Expr index = parseExpr();
-	    token = parseToken();
+          token = parseToken();
 
-	    term = _factory.createArrayGet(getLocation(), term, index);
-	  }
+          if (token == ']') {
+            term = _factory.createArrayTail(getLocation(), term);
+          }
+          else {
+            _peekToken = token;
+            Expr index = parseExpr();
+            token = parseToken();
+
+            term = _factory.createArrayGet(getLocation(), term, index);
+          }
 
           if (token != ']')
             throw expect("']'", token);
@@ -3653,8 +3653,15 @@ public class QuercusParser {
 	break;
 
       case '"':
-	return parseEscapedString('"');
-
+      {
+        String heredocEnd = _heredocEnd;
+        _heredocEnd = null;
+        
+        int result = parseEscapedString('"');
+        _heredocEnd = heredocEnd;
+        
+        return result;
+      }
       case '`':
 	{
 	  int token = parseEscapedString('`');
@@ -4269,6 +4276,7 @@ public class QuercusParser {
 
       if (token == COMPLEX_STRING_ESCAPE ||
           token == COMPLEX_BINARY_ESCAPE) {
+
 	tail = parseExpr();
 
 	expect('}');

@@ -1285,6 +1285,40 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Returns the field keys.
+   */
+  public Value []getKeyArray(Env env)
+  {
+    int len = getSize();
+    Value []keys = new Value[len];
+
+    Iterator<Value> iter = getKeyIterator(env);
+    
+    for (int i = 0; i < len; i++) {
+      keys[i] = iter.next();
+    }
+    
+    return keys;
+  }
+  
+  /**
+   * Returns the field values.
+   */
+  public Value []getValueArray(Env env)
+  {
+    int len = getSize();
+    Value []values = new Value[len];
+
+    Iterator<Value> iter = getValueIterator(env);
+    
+    for (int i = 0; i < len; i++) {
+      values[i] = iter.next();
+    }
+    
+    return values;
+  }
+  
+  /**
    * Takes the values of this array and puts them in a java array
    */
   public Value[] valuesToArray()

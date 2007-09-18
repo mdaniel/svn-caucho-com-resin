@@ -2581,25 +2581,48 @@ public class ArrayModule
    *
    * @return true on success, and false on failure
    */
-  static public boolean array_multisort(Env env, Value[] arrays)
+  public static boolean array_multisort(Env env, Value[] arrays)
   {
+    boolean isNewKeys = true;
+    
+    if (arrays.length == 0 || ! arrays[0].isArray()) {
+      env.warning("the first argument must be an array");
+      
+      return false;
+    }
+    
+    Value primary = arrays[0];
+    
+    Iterator<Value> keyIter = primary.getKeyIterator(env);
+    
+    while (keyIter.hasNext()) {
+      if (! (keyIter.next() instanceof LongValue)) {
+        isNewKeys = false;
+        break;
+      }
+    }
+
+    Value []rows = primary.getKeyArray(env);
+    
     int maxsize = 0;
     for (int i = 0; i < arrays.length; i++)
       if (arrays[i] instanceof ArrayValue)
-	maxsize = Math.max(maxsize,
-			   ((ArrayValue)arrays[i]).getSize());
+        maxsize = Math.max(maxsize, arrays[i].getSize());
 
     // create the identity permutation [1..n]
-    LongValue []rows = new LongValue[maxsize];
-    for (int i = 0; i < rows.length; i++)
-      rows[i] = LongValue.create(i);
+    LongValue []p = new LongValue[maxsize];
+    for (int i = 0; i < rows.length; i++) {
+      p[i] = LongValue.create(i);
+    }
 
-    java.util.Arrays.sort(rows, new MultiSortComparator(env, arrays));
+    java.util.Arrays.sort(p, new MultiSortComparator(env, rows, arrays));
 
     // apply the permuation
-    for (int i = 0; i < arrays.length; i++)
-      if (arrays[i] instanceof ArrayValue)
-	permute(env, (ArrayValue)arrays[i], rows);
+    for (int i = 0; i < arrays.length; i++) {
+      if (arrays[i].isArray()) {
+        permute(env, (ArrayValue)arrays[i], p, isNewKeys);
+      }
+    }
 
     return true;
   }
@@ -2609,14 +2632,32 @@ public class ArrayModule
    *  array[i] holds the value that was in array[permutation[i]]
    *  before the call.
    */
-  private static void permute(Env env, ArrayValue array,
-			      LongValue[] permutation)
+  private static void permute(Env env,
+                              ArrayValue array,
+                              Value[] permutation,
+                              boolean isNewKeys)
   {
-    Value[] values = array.valuesToArray();
+    Value[] keys = array.getKeyArray(env);
+    Value[] values = array.getValueArray(env);
 
-    for (int i = 0; i < permutation.length; i++) {
-      Value value = values[(int)permutation[i].toLong()];
-      array.put(LongValue.create(i), value.toValue().copy());
+    array.clear();
+    
+    if (isNewKeys) {
+      for (int i = 0; i < permutation.length; i++) {
+        int p = permutation[i].toInt();
+
+        Value value = values[p];
+        array.put(LongValue.create(i), value.toValue().copy());
+      }
+    }
+    else {
+      for (int i = 0; i < permutation.length; i++) {
+        int p = permutation[i].toInt();
+        
+        Value key = keys[p];
+        Value value = values[p];
+        array.put(key, value.toValue().copy());
+      }
     }
   }
 
@@ -3540,11 +3581,13 @@ public class ArrayModule
   {
 
     private final Env _env;
-    private final Value[] _arrays;
+    private final Value []_rows;
+    private final Value []_arrays;
 
-    public MultiSortComparator(Env env, Value[] arrays)
+    public MultiSortComparator(Env env, Value[] rows, Value[] arrays)
     {
       this._env = env;
+      this._rows = rows;
       this._arrays = arrays;
     }
 
@@ -3556,20 +3599,19 @@ public class ArrayModule
     public int compare(LongValue index1, LongValue index2)
     {
       for (int i = 0; i < _arrays.length; i++) {
+        // reset direction/mode for each array (per the php.net spec)
+        int direction = SORT_ASC;
+        int mode      = SORT_REGULAR;
+        ArrayValue av = (ArrayValue) _arrays[i];
 
-	// reset direction/mode for each array (per the php.net spec)
-	int direction = SORT_ASC;
-	int mode      = SORT_REGULAR;
-	ArrayValue av = (ArrayValue) _arrays[i];
-
-	// process all flags appearing *after* an array but before the next one
-	while( (i + 1) < _arrays.length && _arrays[i + 1] instanceof LongValue) {
+        // process all flags appearing *after* an array but before the next one
+        while((i + 1) < _arrays.length && _arrays[i + 1] instanceof LongValue) {
           i++;
 
           int flag = _arrays[i].toInt();
 
           switch (flag) {
-	    case SORT_ASC:
+            case SORT_ASC:
               direction = SORT_ASC;
               break;
 
@@ -3591,22 +3633,22 @@ public class ArrayModule
 
             default:
               _env.warning("Unknown sort flag: " + _arrays[i]);
-	  }
-	}
+          }
+        }
 
         int cmp;
 
-        Value lValue = av.get(index1);
-	Value rValue = av.get(index2);
+        Value lValue = av.get(_rows[index1.toInt()]);
+        Value rValue = av.get(_rows[index2.toInt()]);
 
         if (mode == SORT_STRING) {
           // php/173g
           cmp = lValue.toString().compareTo(rValue.toString());
-	}
+        }
         else if (mode == SORT_NUMERIC) {
           // php/173f
           cmp = NumberValue.compareNum(lValue, rValue);
-	}
+        }
         else
           cmp = lValue.cmp(rValue);
 
