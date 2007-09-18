@@ -136,7 +136,7 @@ public class IniDefinition {
   {
     set(quercus.getIniMap(true),
         PHP_INI_SYSTEM,
-        new UnicodeValueImpl(value));
+        new StringBuilderValue(value));
   }
 
   /**
@@ -154,7 +154,7 @@ public class IniDefinition {
   {
     set(env.getIniMap(true),
         PHP_INI_USER,
-        new UnicodeValueImpl(value));
+        env.createString(value));
   }
 
   /**

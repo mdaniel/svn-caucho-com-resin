@@ -309,7 +309,7 @@ abstract public class ObjectValue extends Value {
    */
   public Value putField(String key, String value)
   {
-    return putField(null, key, new UnicodeValueImpl(value));
+    return putField(null, key, new StringBuilderValue(value));
   }
 
   /**

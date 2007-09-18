@@ -575,7 +575,7 @@ abstract public class ArrayValue extends Value {
   public void put(String key, String value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(new StringBuilderValue(key), new StringBuilderValue(value));
+    put(StringValue.create(key), StringValue.create(value));
   }
 
   /**
@@ -584,7 +584,7 @@ abstract public class ArrayValue extends Value {
   public void put(String key, char value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(new StringBuilderValue(key), StringValue.create(value));
+    put(StringValue.create(key), StringValue.create(value));
   }
 
   /**
@@ -593,7 +593,7 @@ abstract public class ArrayValue extends Value {
   public void put(String key, long value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(new StringBuilderValue(key), new LongValue(value));
+    put(StringValue.create(key), new LongValue(value));
   }
   
   /**
@@ -602,7 +602,7 @@ abstract public class ArrayValue extends Value {
   public void put(String key, double value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(new StringBuilderValue(key), new DoubleValue(value));
+    put(StringValue.create(key), new DoubleValue(value));
   }
 
   /**
@@ -611,7 +611,7 @@ abstract public class ArrayValue extends Value {
   public void put(String key, boolean value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(new StringBuilderValue(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
+    put(StringValue.create(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
   }
 
   /**
@@ -620,7 +620,7 @@ abstract public class ArrayValue extends Value {
   public void put(String value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(new StringBuilderValue(value));
+    put(StringValue.create(value));
   }
 
   /**

@@ -259,7 +259,8 @@ public class CompiledObjectValue extends ObjectValue
   @Override
   public Value putField(String key, String value)
   {
-    return putField(null, key, new UnicodeValueImpl(value));
+    // XXX: i18n
+    return putField(null, key, new StringBuilderValue(value));
   }
 
   /**
@@ -587,7 +588,7 @@ public class CompiledObjectValue extends ObjectValue
     if (fun != null)
       return fun.callMethod(env, this, new Expr[0]).toString(env);
     else
-      return new UnicodeBuilderValue().append(_quercusClass.getName()).append("[]");
+      return env.createUnicodeBuilder().append(_quercusClass.getName()).append("[]");
   }
 
   /**
@@ -609,7 +610,7 @@ public class CompiledObjectValue extends ObjectValue
     ArrayValue array = new ArrayValueImpl();
 
     for (Map.Entry<String,Value> entry : entrySet()) {
-      array.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
+      array.put(new StringBuilderValue(entry.getKey()), entry.getValue());
     }
 
     return array;
@@ -688,7 +689,7 @@ public class CompiledObjectValue extends ObjectValue
 
       putField(env,
                "__Quercus_Class_Definition_Not_Found",
-               new UnicodeValueImpl(name));
+               new StringBuilderValue(name));
     }
   }
 }

@@ -42,45 +42,45 @@ import java.util.Set;
  */
 public class ServerArrayValue extends ArrayValueImpl {
   private static final StringValue SERVER_NAME_V
-    = new UnicodeValueImpl("SERVER_NAME");
+    = new StringBuilderValue("SERVER_NAME");
   private static final StringValue SERVER_PORT_V
-    = new UnicodeValueImpl("SERVER_PORT");
+    = new StringBuilderValue("SERVER_PORT");
   private static final StringValue REMOTE_HOST_V
-    = new UnicodeValueImpl("REMOTE_HOST");
+    = new StringBuilderValue("REMOTE_HOST");
   private static final StringValue REMOTE_ADDR_V
-    = new UnicodeValueImpl("REMOTE_ADDR");
+    = new StringBuilderValue("REMOTE_ADDR");
   private static final StringValue REMOTE_PORT_V
-    = new UnicodeValueImpl("REMOTE_PORT");
+    = new StringBuilderValue("REMOTE_PORT");
   
   private static final StringValue DOCUMENT_ROOT_V
-    = new UnicodeValueImpl("DOCUMENT_ROOT");
+    = new StringBuilderValue("DOCUMENT_ROOT");
   
   private static final StringValue SERVER_PROTOCOL_V
-    = new UnicodeValueImpl("SERVER_PROTOCOL");
+    = new StringBuilderValue("SERVER_PROTOCOL");
   private static final StringValue REQUEST_METHOD_V
-    = new UnicodeValueImpl("REQUEST_METHOD");
+    = new StringBuilderValue("REQUEST_METHOD");
   private static final StringValue QUERY_STRING_V
-    = new UnicodeValueImpl("QUERY_STRING");
+    = new StringBuilderValue("QUERY_STRING");
   
   private static final StringValue REQUEST_URI_V
-    = new UnicodeValueImpl("REQUEST_URI");
+    = new StringBuilderValue("REQUEST_URI");
   private static final StringValue SCRIPT_NAME_V
-    = new UnicodeValueImpl("SCRIPT_NAME");
+    = new StringBuilderValue("SCRIPT_NAME");
   private static final StringValue SCRIPT_FILENAME_V
-    = new UnicodeValueImpl("SCRIPT_FILENAME");
+    = new StringBuilderValue("SCRIPT_FILENAME");
   private static final StringValue PATH_INFO_V
-    = new UnicodeValueImpl("PATH_INFO");
+    = new StringBuilderValue("PATH_INFO");
   private static final StringValue PATH_TRANSLATED_V
-    = new UnicodeValueImpl("PATH_TRANSLATED");
+    = new StringBuilderValue("PATH_TRANSLATED");
   
   private static final StringValue PHP_SELF_V
-    = new UnicodeValueImpl("PHP_SELF");
+    = new StringBuilderValue("PHP_SELF");
   
   private static final StringValue HTTPS_V
-    = new UnicodeValueImpl("HTTPS");
+    = new StringBuilderValue("HTTPS");
   
   private static final StringValue HTTP_HOST_V
-    = new UnicodeValueImpl("HTTP_HOST");
+    = new StringBuilderValue("HTTP_HOST");
   
   private final Env _env;
   
@@ -173,7 +173,7 @@ public class ServerArrayValue extends ArrayValueImpl {
     if (! _isFilled)
       fillMap();
 
-    super.put(key, value);
+    super.put(_env.createString(key), _env.createString(value));
   }
 
   /**
@@ -196,8 +196,8 @@ public class ServerArrayValue extends ArrayValueImpl {
     _isFilled = true;
 
     for (Map.Entry<String,String> entry: System.getenv().entrySet()) {
-      super.put(new UnicodeValueImpl(entry.getKey()),
-          new UnicodeValueImpl(entry.getValue()));
+      super.put(_env.createString(entry.getKey()),
+		_env.createString(entry.getValue()));
     }
 
     for (Map.Entry<Value,Value> entry:
@@ -209,21 +209,21 @@ public class ServerArrayValue extends ArrayValueImpl {
 
     if (request != null) {
       super.put(SERVER_NAME_V,
-                new UnicodeValueImpl(request.getServerName()));
+                _env.createString(request.getServerName()));
 
       super.put(SERVER_PORT_V,
                 new LongValue(request.getServerPort()));
       super.put(REMOTE_HOST_V,
-                new UnicodeValueImpl(request.getRemoteHost()));
+                _env.createString(request.getRemoteHost()));
       super.put(REMOTE_ADDR_V,
-                new UnicodeValueImpl(request.getRemoteAddr()));
+                _env.createString(request.getRemoteAddr()));
       super.put(REMOTE_PORT_V,
                 new LongValue(request.getRemotePort()));
 
       super.put(SERVER_PROTOCOL_V,
-                new UnicodeValueImpl(request.getProtocol()));
+                _env.createString(request.getProtocol()));
       super.put(REQUEST_METHOD_V,
-                new UnicodeValueImpl(request.getMethod()));
+                _env.createString(request.getMethod()));
 
       String queryString = QuercusRequestAdapter.getPageQueryString(request);
       String requestURI = QuercusRequestAdapter.getPageURI(request);
@@ -233,7 +233,7 @@ public class ServerArrayValue extends ArrayValueImpl {
 
       if (queryString != null) {
         super.put(QUERY_STRING_V,
-                  new UnicodeValueImpl(queryString));
+                  _env.createString(queryString));
       }
 
       // XXX: a better way?
@@ -246,34 +246,34 @@ public class ServerArrayValue extends ArrayValueImpl {
       }
       
       super.put(DOCUMENT_ROOT_V,
-                new UnicodeValueImpl(root));
+                _env.createString(root));
 
       super.put(SCRIPT_NAME_V,
-                new UnicodeValueImpl(contextPath +
+                _env.createString(contextPath +
                                     servletPath));
 
       if (queryString != null)
         requestURI = requestURI + '?' + queryString;
 
       super.put(REQUEST_URI_V,
-                new UnicodeValueImpl(requestURI));
+                _env.createString(requestURI));
       super.put(SCRIPT_FILENAME_V,
-                new UnicodeValueImpl(request.getRealPath(servletPath)));
+                _env.createString(request.getRealPath(servletPath)));
 
       if (pathInfo != null) {
         super.put(PATH_INFO_V,
-                  new UnicodeValueImpl(pathInfo));
+                  _env.createString(pathInfo));
         super.put(PATH_TRANSLATED_V,
-                  new UnicodeValueImpl(request.getRealPath(pathInfo)));
+                  _env.createString(request.getRealPath(pathInfo)));
       }
 
       if (request.isSecure())
-        super.put(HTTPS_V, new UnicodeValueImpl("on"));
+        super.put(HTTPS_V, _env.createString("on"));
 
       if (pathInfo == null)
-        super.put(PHP_SELF_V, new UnicodeValueImpl(contextPath + servletPath));
+        super.put(PHP_SELF_V, _env.createString(contextPath + servletPath));
       else
-        super.put(PHP_SELF_V, new UnicodeValueImpl(contextPath + servletPath + pathInfo));
+        super.put(PHP_SELF_V, _env.createString(contextPath + servletPath + pathInfo));
 
       Enumeration e = request.getHeaderNames();
       while (e.hasMoreElements()) {
@@ -282,10 +282,10 @@ public class ServerArrayValue extends ArrayValueImpl {
         String value = request.getHeader(key);
 
         if (key.equalsIgnoreCase("Host")) {
-          super.put(HTTP_HOST_V, new UnicodeValueImpl(value));
+          super.put(HTTP_HOST_V, _env.createString(value));
         }
         else {
-          super.put(convertHttpKey(key), new UnicodeValueImpl(value));
+          super.put(convertHttpKey(key), _env.createString(value));
         }
       }
     }
@@ -296,7 +296,7 @@ public class ServerArrayValue extends ArrayValueImpl {
    */
   private StringValue convertHttpKey(String key)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = _env.createUnicodeBuilder();
 
     sb.append("HTTP_");
 
@@ -312,7 +312,7 @@ public class ServerArrayValue extends ArrayValueImpl {
 	sb.append(ch);
     }
 
-    return new UnicodeValueImpl(sb.toString());
+    return sb;
   }
   
   //

@@ -139,7 +139,7 @@ public class Post {
           value.append((char) ch);
         }
 
-        addFormValue(env, post, name, new UnicodeValueImpl(value.toString()), null, addSlashesToValues);
+        addFormValue(env, post, name, env.createString(value.toString()), null, addSlashesToValues);
       }
       else {
         Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");

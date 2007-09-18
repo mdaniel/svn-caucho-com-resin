@@ -194,7 +194,7 @@ public class SessionModule extends AbstractQuercusModule
       oldValue = "";
 
     if (id != null && ! "".equals(id))
-      env.setSpecialValue("caucho.session_id", new UnicodeValueImpl(id));
+      env.setSpecialValue("caucho.session_id", env.createString(id));
 
     return oldValue;
   }
@@ -204,7 +204,7 @@ public class SessionModule extends AbstractQuercusModule
    */
   public static boolean session_is_registered(Env env, String name)
   {
-    return env.getGlobalValue("_SESSION").get(new UnicodeValueImpl(name)).isset();
+    return env.getGlobalValue("_SESSION").get(env.createString(name)).isset();
   }
 
   /**
@@ -323,7 +323,7 @@ public class SessionModule extends AbstractQuercusModule
 
     if (value.isNull() || value.length() == 0) {
       // XXX: should we create work directory if does not exist?
-      value = new UnicodeValueImpl(env.getWorkDir().getPath());
+      value = env.createString(env.getWorkDir().getPath());
     }
     
     return value;
@@ -428,7 +428,7 @@ public class SessionModule extends AbstractQuercusModule
       }
 
       if (! generateCookie)
-        env.addConstant("SID", StringValue.EMPTY, false);
+        env.addConstant("SID", env.createEmptyString(), false);
     }
 
     //
@@ -450,7 +450,7 @@ public class SessionModule extends AbstractQuercusModule
         }
       }
 
-      env.addConstant("SID", new UnicodeValueImpl(cookieName + '=' + sessionId),
+      env.addConstant("SID", env.createString(cookieName + '=' + sessionId),
                       false);
       
       OutputModule.pushUrlRewriter(env);
@@ -501,7 +501,7 @@ public class SessionModule extends AbstractQuercusModule
     if (env.getIni("session.use_cookies").toBoolean() && generateCookie) {
       generateSessionCookie(env, sessionId);
     }
-    env.setSpecialValue("caucho.session_id", new UnicodeValueImpl(sessionId));
+    env.setSpecialValue("caucho.session_id", env.createString(sessionId));
 
     return true;
   }
@@ -516,7 +516,7 @@ public class SessionModule extends AbstractQuercusModule
     String cookieName = env.getIni("session.name").toString();
     
     env.addConstant("SID", 
-            new UnicodeValueImpl(cookieName + '=' + sessionId),
+            env.createString(cookieName + '=' + sessionId),
             false);
 
     Cookie cookie = new Cookie(cookieName, sessionId);

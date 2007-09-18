@@ -323,7 +323,7 @@ public final class DefinitionState {
    *
    * @return an array of the declared classes()
    */
-  public Value getDeclaredClasses()
+  public Value getDeclaredClasses(Env env)
   {
     ArrayList<String> names = new ArrayList<String>();
 
@@ -349,7 +349,7 @@ public final class DefinitionState {
     ArrayValue array = new ArrayValueImpl();
 
     for (String name : names) {
-      array.put(new UnicodeValueImpl(name));
+      array.put(env.createString(name));
     }
 
     return array;

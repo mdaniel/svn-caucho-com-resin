@@ -2873,6 +2873,17 @@ public class Env {
     else
       return new StringBuilderValue(buffer, offset, length);
   }
+  
+  /**
+   * Creates a string from a byte.
+   */
+  public StringValue createString(char []buffer, int length)
+  {
+    if (_isUnicodeSemantics)
+      return new UnicodeBuilderValue(buffer, length);
+    else
+      return new StringBuilderValue(buffer, 0, length);
+  }
 
   /**
    * Creates a string from a byte.
@@ -2883,6 +2894,19 @@ public class Env {
       return new UnicodeValueImpl(s);
     else
       return new StringBuilderValue(s);
+  }
+
+  /**
+   * Creates a string from a byte.
+   */
+  public StringValue createString(char ch)
+  {
+    // XXX: create static cache for this
+    
+    if (_isUnicodeSemantics)
+      return new UnicodeValueImpl(String.valueOf(ch));
+    else
+      return new StringBuilderValue(String.valueOf(ch));
   }
 
   /**
@@ -3175,7 +3199,7 @@ public class Env {
         _autoload = findFunction("__autoload");
       
       if (_autoload != null) {
-        _autoload.call(this, new UnicodeValueImpl(name));
+        _autoload.call(this, new StringBuilderValue(name));
         return createClassImpl(name, false, useImport);
       }
     }
@@ -3246,7 +3270,7 @@ public class Env {
    */
   public Value getDeclaredClasses()
   {
-    return _defState.getDeclaredClasses();
+    return _defState.getDeclaredClasses(this);
   }
 
   /**
@@ -4166,7 +4190,7 @@ public class Env {
 	String fullMsg = locationMessagePrefix + getCodeName(mask) + msg;
 
 	if (getIniBoolean("track_errors"))
-	  setGlobalValue("php_errormsg", new UnicodeValueImpl(fullMsg));
+	  setGlobalValue("php_errormsg", createString(fullMsg));
 
 	if (getIniBoolean("display_errors"))
 	  getOut().println(fullMsg);

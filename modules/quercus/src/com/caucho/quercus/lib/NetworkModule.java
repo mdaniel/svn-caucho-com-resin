@@ -147,7 +147,7 @@ public class NetworkModule extends AbstractQuercusModule {
       log.log(Level.FINE, e.toString(), e);
 
       if (errstr != null)
-        errstr.set(new UnicodeValueImpl(e.toString()));
+        errstr.set(env.createString(e.toString()));
 
       return null;
     }
@@ -227,7 +227,7 @@ public class NetworkModule extends AbstractQuercusModule {
    * @return the IPs for the given host name or, if the IPs cannot be obtained,
    *         the provided host name
    */
-  public static Value gethostbynamel(String hostname)
+  public static Value gethostbynamel(Env env, String hostname)
   {
     // php/1m02
 
@@ -247,7 +247,7 @@ public class NetworkModule extends AbstractQuercusModule {
     for (int k = 0; k < ip.length; k++) {
       String currentIPString = ip[k].getHostAddress();
 
-      StringValue currentIP = new UnicodeValueImpl((currentIPString));
+      StringValue currentIP = env.createString((currentIPString));
 
       ipArray.append(currentIP);
     }

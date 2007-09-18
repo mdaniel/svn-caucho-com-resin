@@ -211,12 +211,12 @@ public class TokenModule extends AbstractQuercusModule {
 				       @Optional boolean isReturn)
   {
     try {
-      UnicodeBuilderValue sb = isReturn ? new UnicodeBuilderValue() : null;
+      StringValue sb = isReturn ? env.createUnicodeBuilder() : null;
       WriteStream out = env.getOut();
 
-      Token lexer = new Token(s);
+      Token lexer = new Token(env, s);
       int token;
-      StringValue topColor = new UnicodeValueImpl("#000000");
+      StringValue topColor = env.createString("#000000");
       StringValue lastColor = topColor;
 
       highlight(sb, out, "<code>");
@@ -262,7 +262,7 @@ public class TokenModule extends AbstractQuercusModule {
     }
   }
 
-  private static void highlight(UnicodeBuilderValue sb,
+  private static void highlight(StringValue sb,
 				WriteStream out,
 				String string)
     throws IOException
@@ -275,7 +275,7 @@ public class TokenModule extends AbstractQuercusModule {
     }
   }
 
-  private static void highlight(UnicodeBuilderValue sb,
+  private static void highlight(StringValue sb,
 				WriteStream out,
 				StringValue string)
     throws IOException
@@ -357,16 +357,16 @@ public class TokenModule extends AbstractQuercusModule {
   /**
    * Parses the string.
    */
-  public static ArrayValue token_get_all(StringValue s)
+  public static ArrayValue token_get_all(Env env, StringValue s)
   {
     ArrayValue result = new ArrayValueImpl();
 
-    Token lexer = new Token(s);
+    Token lexer = new Token(env, s);
     int token;
 
     while ((token = lexer.nextToken()) >= 0) {
       if (0x20 <= token && token <= 0x7f) {
-	result.put(StringValue.create((char) token));
+	result.put(env.createString((char) token));
       }
       else {
 	result.put(new ArrayValueImpl()
@@ -510,22 +510,24 @@ public class TokenModule extends AbstractQuercusModule {
   }
 
   static class Token {
+    private Env _env;
     private final StringValue _s;
     private final int _length;
     private int _i;
     private boolean _inPhp;
 
-    private UnicodeBuilderValue _lexeme;
+    private StringValue _lexeme;
 
-    Token(StringValue s)
+    Token(Env env, StringValue s)
     {
+      _env = env;
       _s = s;
       _length = s.length();
     }
 
     int nextToken()
     {
-      _lexeme = new UnicodeBuilderValue();
+      _lexeme = _env.createUnicodeBuilder();
 
       if (! _inPhp) {
 	_inPhp = true;
@@ -919,7 +921,7 @@ public class TokenModule extends AbstractQuercusModule {
       }
     }
 
-    UnicodeBuilderValue getLexeme()
+    StringValue getLexeme()
     {
       return _lexeme;
     }
