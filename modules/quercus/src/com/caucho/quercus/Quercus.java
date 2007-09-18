@@ -149,7 +149,7 @@ public class Quercus
   private HashMap<String, Object> _specialMap
     = new HashMap<String, Object>();
 
-  private String _scriptEncoding = "utf-8";
+  private String _scriptEncoding;
 
   private String _phpVersion = "5.2.0";
   private String _mySqlVersion;
@@ -338,7 +338,12 @@ public class Quercus
 
   public String getScriptEncoding()
   {
-    return _scriptEncoding;
+    if (_scriptEncoding != null)
+      return _scriptEncoding;
+    else if (isUnicodeSemantics())
+      return "utf-8";
+    else
+      return "iso-8859-1";
   }
 
   public void setScriptEncoding(String encoding)

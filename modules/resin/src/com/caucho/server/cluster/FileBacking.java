@@ -176,7 +176,7 @@ public class FileBacking {
       boolean hasDatabase = false;
 
       try {
-	String sql = "SELECT expire_interval FROM " + _tableName + " WHERE 1=0";
+	String sql = "SELECT expire_interval,is_valid FROM " + _tableName + " WHERE 1=0";
 
 	ResultSet rs = stmt.executeQuery(sql);
 	rs.next();

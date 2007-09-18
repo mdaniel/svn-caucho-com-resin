@@ -383,19 +383,19 @@ public class MysqlModule extends AbstractQuercusModule {
 
       ObjectValue fieldResult = env.createObject();
 
-      fieldResult.putField("name", columnName);
-      fieldResult.putField("table", tableName);
-      fieldResult.putField("def", "");
-      fieldResult.putField("max_length", maxLength);
-      fieldResult.putField("not_null", notNull);
-      fieldResult.putField("primary_key", primaryKey);
-      fieldResult.putField("multiple_key", multipleKey);
-      fieldResult.putField("unique_key", uniqueKey);
-      fieldResult.putField("numeric", numeric);
-      fieldResult.putField("blob", blob);
-      fieldResult.putField("type", type);
-      fieldResult.putField("unsigned", unsigned);
-      fieldResult.putField("zerofill", zerofill);
+      fieldResult.putField(env, "name", columnName);
+      fieldResult.putField(env, "table", tableName);
+      fieldResult.putField(env, "def", "");
+      fieldResult.putField(env, "max_length", maxLength);
+      fieldResult.putField(env, "not_null", notNull);
+      fieldResult.putField(env, "primary_key", primaryKey);
+      fieldResult.putField(env, "multiple_key", multipleKey);
+      fieldResult.putField(env, "unique_key", uniqueKey);
+      fieldResult.putField(env, "numeric", numeric);
+      fieldResult.putField(env, "blob", blob);
+      fieldResult.putField(env, "type", type);
+      fieldResult.putField(env, "unsigned", unsigned);
+      fieldResult.putField(env, "zerofill", zerofill);
 
       return fieldResult;
     } catch (SQLException e) {

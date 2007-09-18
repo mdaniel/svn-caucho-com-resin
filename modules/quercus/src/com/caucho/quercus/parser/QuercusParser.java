@@ -227,7 +227,10 @@ public class QuercusParser {
   {
     this(quercus);
 
-    init(sourceFile, is, "UTF-8");
+    if (quercus == null || quercus.isUnicodeSemantics())
+      init(sourceFile, is, "UTF-8");
+    else
+      init(sourceFile, is, "ISO-8859-1");
   }
 
   private void init(Path sourceFile)

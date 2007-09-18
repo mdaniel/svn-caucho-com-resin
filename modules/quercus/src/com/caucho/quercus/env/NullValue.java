@@ -360,7 +360,7 @@ public class NullValue extends Value
    */
   public StringValue toStringValue()
   {
-    return Env.getInstance().createEmptyString();
+    return StringBuilderValue.EMPTY;
   }
 
   @Override

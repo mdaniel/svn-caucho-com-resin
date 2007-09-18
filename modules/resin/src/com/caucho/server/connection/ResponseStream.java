@@ -425,18 +425,7 @@ class ResponseStream extends ToByteResponseStream {
 
       if (_next != null && ! _isHead) {
 	if (length > 0 && log.isLoggable(Level.FINE)) {
-	  String id;
-	  if (_response.getRequest() instanceof AbstractHttpRequest) {
-	    Connection conn = ((AbstractHttpRequest) _response.getRequest()).getConnection();
-	    if (conn != null)
-	      id = String.valueOf(conn.getId());
-	    else
-	      id = "jni";
-	  }
-	  else
-	    id = "inc";
-        
-	  log.fine("[" + id + "] chunk: " + length);
+	  log.fine(dbgId() +  "write-chunk(" + length + ")");
 	}
 	
 	if (! _chunkedEncoding) {

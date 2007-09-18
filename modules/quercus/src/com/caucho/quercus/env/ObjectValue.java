@@ -304,6 +304,20 @@ abstract public class ObjectValue extends Value {
     return _quercusClass.putField(env, this, name, value);
   }
 
+  public Value putField(Env env,
+                        String name,
+                        String value)
+  {
+    return _quercusClass.putField(env, this, name, env.createString(value));
+  }
+
+  public Value putField(Env env,
+                        String name,
+                        long value)
+  {
+    return _quercusClass.putField(env, this, name, LongValue.create(value));
+  }
+
   /**
    * Adds a new value.
    */

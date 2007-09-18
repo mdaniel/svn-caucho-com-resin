@@ -201,7 +201,7 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   protected StringValue realEscapeString(StringValue str)
   {
-    StringValue buf = _env.createString(String.valueOf(str.length()));
+    StringValue buf = _env.createUnicodeBuilder();
 
     final int strLength = str.length();
 

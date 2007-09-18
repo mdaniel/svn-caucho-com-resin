@@ -3233,7 +3233,8 @@ public class Env {
           JavaClassDef javaClassDef = getJavaClassDefinition(name, true);
 
           //XXX: do we want to create a QuercusClass for a JavaClassDef?
-          return createQuercusClass(javaClassDef, null);
+          if (javaClassDef != null)
+            return createQuercusClass(javaClassDef, null);
         }
         catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);

@@ -969,6 +969,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (isCommitted())
       return;
+
     if (_disableHeaders || value == null) {
       _contentType = null;
       return;

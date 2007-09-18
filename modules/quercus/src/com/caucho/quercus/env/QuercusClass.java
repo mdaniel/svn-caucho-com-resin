@@ -145,6 +145,11 @@ public class QuercusClass {
     for (int i = classDefList.length - 1; i >= 0; i--) {
       classDef = classDefList[i];
 
+      if (classDef == null) {
+        throw new NullPointerException("classDef:" + _classDef
+                                       + " i:" + i + " parent:" + parent);
+      }
+      
       classDef.init();
 
       for (String iface : classDef.getInterfaces()) {
@@ -294,7 +299,7 @@ public class QuercusClass {
   {
     _fieldNames.add(name);
     _fieldMap.put(name, index);
-    _fieldInitMap.put(new UnicodeBuilderValue(name), initExpr);
+    _fieldInitMap.put(new StringBuilderValue(name), initExpr);
   }
 
   /**
@@ -755,7 +760,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new UnicodeBuilderValue(name, nameLen),
+				  env.createString(name, nameLen),
 				  new ArrayValueImpl(args));
     }
     else
@@ -776,7 +781,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new UnicodeBuilderValue(name, nameLen),
+				  env.createString(name, nameLen),
 				  new ArrayValueImpl());
     }
     else
@@ -798,7 +803,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new UnicodeBuilderValue(name, nameLen),
+				  env.createString(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1));
     }
@@ -821,7 +826,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new UnicodeBuilderValue(name, nameLen),
+				  env.createString(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2));
@@ -845,7 +850,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new UnicodeBuilderValue(name, nameLen),
+				  env.createString(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2)
@@ -870,7 +875,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new UnicodeBuilderValue(name, nameLen),
+				  env.createString(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2)
@@ -896,7 +901,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new UnicodeBuilderValue(name, nameLen),
+				  env.createString(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2)
@@ -935,7 +940,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new UnicodeBuilderValue(name, nameLen),
+                                     env.createString(name, nameLen),
                                      new ArrayValueImpl(args));
     }
     else
@@ -956,7 +961,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new UnicodeBuilderValue(name, nameLen),
+                                     env.createString(name, nameLen),
                                      new ArrayValueImpl());
     }
     else
@@ -978,7 +983,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new UnicodeBuilderValue(name, nameLen),
+                                     env.createString(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1));
     }
@@ -1001,7 +1006,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new UnicodeBuilderValue(name, nameLen),
+                                     env.createString(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2));
@@ -1025,7 +1030,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new UnicodeBuilderValue(name, nameLen),
+                                     env.createString(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2)
@@ -1050,7 +1055,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new UnicodeBuilderValue(name, nameLen),
+                                     env.createString(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2)
@@ -1076,7 +1081,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new UnicodeBuilderValue(name, nameLen),
+                                     env.createString(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2)
@@ -1249,7 +1254,7 @@ public class QuercusClass {
     public Value getField(Env env, Value obj, String name, boolean create)
     {
       if (_get != null)
-        return _get.callMethod(env, obj, new UnicodeBuilderValue(name));
+        return _get.callMethod(env, obj, env.createString(name));
 
       return UnsetValue.UNSET;
     }
@@ -1258,7 +1263,7 @@ public class QuercusClass {
     public void putField(Env env, Value obj, String name, Value value)
     {
       if (_set != null)
-        _set.callMethod(env, obj, new UnicodeBuilderValue(name), value);
+        _set.callMethod(env, obj, env.createString(name), value);
       else
         obj.putThisField(env, name, value);
     }
