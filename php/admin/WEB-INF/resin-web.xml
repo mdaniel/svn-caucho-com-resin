@@ -16,7 +16,10 @@
     </init>
   </authenticator>
 
-  <login-config auth-method="basic"/>
+  <login-config auth-method="form">
+     <form-login-config form-login-page='/login.php'
+                        form-error-page='/login.php'/>
+  </login-config>
 
   <resin:if test="${! resin_admin_external}">
     <security-constraint>

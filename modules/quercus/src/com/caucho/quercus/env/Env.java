@@ -56,6 +56,7 @@ import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.i18n.EncodingReader;
 
 import javax.script.Bindings;
@@ -2907,6 +2908,25 @@ public class Env {
       return new UnicodeValueImpl(String.valueOf(ch));
     else
       return new StringBuilderValue(String.valueOf(ch));
+  }
+  
+  /**
+   * Creates a string from a byte.
+   */
+  public StringValue createBinaryString(TempBuffer head)
+  {
+    StringValue string;
+    
+    if (_isUnicodeSemantics)
+      string = new BinaryBuilderValue();
+    else
+      string = new StringBuilderValue();
+
+    for (; head != null; head = head.getNext()) {
+      string.append(head.getBuffer(), 0, head.getLength());
+    }
+
+    return string;
   }
 
   /**

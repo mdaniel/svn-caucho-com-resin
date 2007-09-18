@@ -533,7 +533,7 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param level
    * @return compressed using DEFLATE algorithm
    */
-  public Value gzdeflate(InputStream data,
+  public Value gzdeflate(Env env, InputStream data,
                          @Optional("6") int level)
   {
     TempBuffer tempBuf = TempBuffer.allocate();
@@ -564,7 +564,7 @@ public class ZlibModule extends AbstractQuercusModule {
       }
       deflater.end();
 
-      return new TempBufferBytesValue(out.getHead());
+      return env.createBinaryString(out.getHead());
 
     } catch (Exception e) {
       throw QuercusModuleException.create(e);

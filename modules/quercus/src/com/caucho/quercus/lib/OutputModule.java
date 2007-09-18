@@ -38,6 +38,7 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamImplOutputStream;
 import com.caucho.vfs.TempStream;
+import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -554,7 +555,14 @@ public class OutputModule extends AbstractQuercusModule
       return BooleanValue.FALSE;
     }
 
-    Value result = new TempBufferBytesValue(pair.tempStream.getHead());
+    //Value result = new TempBufferBytesValue(pair.tempStream.getHead());
+
+    StringValue result = env.createBinaryBuilder();
+    for (TempBuffer ptr = pair.tempStream.getHead();
+         ptr != null;
+         ptr = ptr.getNext()) {
+      result.append(ptr.getBuffer(), 0, ptr.getLength());
+    }
 
     pair.tempStream.discard();
 

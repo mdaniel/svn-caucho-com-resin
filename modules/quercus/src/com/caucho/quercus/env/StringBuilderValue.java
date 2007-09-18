@@ -649,7 +649,11 @@ public class StringBuilderValue
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
-    System.arraycopy(buf, offset, _buffer, _length, length);
+    char []charBuffer = _buffer;
+    int charLength = _length;
+
+    for (int i = 0; i < length; i++)
+      charBuffer[charLength + i] = (char) buf[offset + i];
 
     _length += length;
 

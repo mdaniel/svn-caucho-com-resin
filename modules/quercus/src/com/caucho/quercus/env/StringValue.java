@@ -1366,7 +1366,7 @@ abstract public class StringValue extends Value implements CharSequence {
    * @param env
    * @param charset
    */
-  public BytesValue toBinaryValue(Env env, String charset)
+  public StringValue toBinaryValue(Env env, String charset)
   {
     TempBuffer tb = TempBuffer.allocate();
     byte[] buffer = tb.getBuffer();
@@ -1383,8 +1383,17 @@ abstract public class StringValue extends Value implements CharSequence {
       }
 
       out.flush();
-      return new TempBufferBytesValue(out.getHead());
 
+      StringValue result = env.createBinaryBuilder();
+      for (TempBuffer ptr = out.getHead();
+           ptr != null;
+           ptr = ptr.getNext()) {
+        result.append(ptr.getBuffer(), 0, ptr.getLength());
+      }
+
+      TempBuffer.free(out.getHead());
+
+      return result;
     } catch (IOException e) {
       throw new QuercusModuleException(e.getMessage());
     } finally {
