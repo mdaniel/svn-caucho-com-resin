@@ -81,8 +81,9 @@ public class StreamContextResource extends ResourceValue {
    */
   public void setOption(String wrapper, String option, Value value)
   {
-    StringValue wrapperV = new UnicodeValueImpl(wrapper);
-    StringValue optionV = new UnicodeValueImpl(option);
+    // XXX: i18n
+    StringValue wrapperV = new StringBuilderValue(wrapper);
+    StringValue optionV = new StringBuilderValue(option);
 
     _options.getArray(wrapperV).put(optionV, value);
   }
@@ -101,7 +102,7 @@ public class StreamContextResource extends ResourceValue {
    */
   public StringValue toString(Env env)
   {
-    return new UnicodeValueImpl("StreamContextResource[]");
+    return env.createString("StreamContextResource[]");
   }
 }
 

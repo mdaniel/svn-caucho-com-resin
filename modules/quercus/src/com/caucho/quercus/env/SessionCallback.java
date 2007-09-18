@@ -65,13 +65,13 @@ public class SessionCallback extends Value {
 
   public void open(Env env, String savePath, String sessionName)
   {
-    _open.call(env, new UnicodeValueImpl(savePath), new UnicodeValueImpl(sessionName));
+    _open.call(env, env.createString(savePath), env.createString(sessionName));
   }
 
   public StringValue read(Env env, String id)
   {
     try {
-      Value value = _read.call(env, new UnicodeValueImpl(id));
+      Value value = _read.call(env, env.createString(id));
 
       if (value instanceof StringValue)
         return (StringValue) value;
@@ -87,7 +87,7 @@ public class SessionCallback extends Value {
   public void write(Env env, String id, String value)
   {
     try {
-      _write.call(env, new UnicodeValueImpl(id), new UnicodeValueImpl(value));
+      _write.call(env, env.createString(id), env.createString(value));
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
@@ -98,7 +98,7 @@ public class SessionCallback extends Value {
   public void destroy(Env env, String id)
   {
     try {
-      _destroy.call(env, new UnicodeValueImpl(id));
+      _destroy.call(env, env.createString(id));
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {

@@ -154,11 +154,11 @@ public class ImageModule extends AbstractQuercusModule {
     imageArray.put(new LongValue(info._width));
     imageArray.put(new LongValue(info._height));
     imageArray.put(new LongValue(info._type));
-    imageArray.put(new UnicodeValueImpl("width=\"" + info._width +
+    imageArray.put(env.createString("width=\"" + info._width +
 				   "\" height=\"" + info._height + "\""));
 
     if (info._bits >= 0)
-      imageArray.put(new UnicodeValueImpl("bits"), new LongValue(info._bits));
+      imageArray.put(env.createString("bits"), new LongValue(info._bits));
 
     if (info._type == IMAGETYPE_JPEG)
       imageArray.put("channels", 3);

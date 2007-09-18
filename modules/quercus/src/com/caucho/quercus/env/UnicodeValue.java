@@ -38,7 +38,10 @@ import java.io.IOException;
  * Represents a 16-bit unicode string value.
  */
 abstract public class UnicodeValue extends StringValue {
-
+  protected UnicodeValue()
+  {
+  }
+  
   @Override
   public String toDebugString()
   {
@@ -89,7 +92,7 @@ abstract public class UnicodeValue extends StringValue {
    * Convert to a unicode value.
    */
   @Override
-  public UnicodeValue toUnicodeValue()
+  public StringValue toUnicodeValue()
   {
     return this;
   }
@@ -98,7 +101,7 @@ abstract public class UnicodeValue extends StringValue {
    * Convert to a unicode value.
    */
   @Override
-  public UnicodeValue toUnicodeValue(Env env)
+  public StringValue toUnicodeValue(Env env)
   {
     return this;
   }
@@ -110,7 +113,7 @@ abstract public class UnicodeValue extends StringValue {
    * @param charset
    */
   @Override
-  public UnicodeValue toUnicodeValue(Env env, String charset)
+  public StringValue toUnicodeValue(Env env, String charset)
   {
     return this;
   }

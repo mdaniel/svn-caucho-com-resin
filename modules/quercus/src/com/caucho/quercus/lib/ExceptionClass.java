@@ -60,9 +60,9 @@ public class ExceptionClass {
     Location location = env.getLocation();
     if (location != null) {
       if (location.getFileName() != null)
-        value.putField(env, "file", new UnicodeValueImpl(location.getFileName()));
+        value.putField(env, "file", env.createString(location.getFileName()));
       else
-        value.putField(env, "file", new UnicodeValueImpl("unknown"));
+        value.putField(env, "file", env.createString("unknown"));
 
       value.putField(env, "line", new LongValue(location.getLineNumber()));
     }
@@ -77,7 +77,7 @@ public class ExceptionClass {
    */
   public static Value __toString(Env env, @This ObjectValue value)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = env.createUnicodeBuilder();
     
     sb.append("ExceptionClass[" + value.getName() + "]\n");
     sb.append(getMessage(env, value));
@@ -133,6 +133,6 @@ public class ExceptionClass {
    */
   public static Value getTraceAsString(Env env, @This ObjectValue obj)
   {
-    return new UnicodeValueImpl("<trace>");
+    return env.createString("<trace>");
   }
 }

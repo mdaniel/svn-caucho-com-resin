@@ -544,13 +544,13 @@ public class Var extends Value
   }
 
   @Override
-  public BinaryValue toBinaryValue(Env env)
+  public StringValue toBinaryValue(Env env)
   {
     return _value.toBinaryValue(env);
   }
 
   @Override
-  public UnicodeValue toUnicodeValue(Env env)
+  public StringValue toUnicodeValue(Env env)
   {
     return _value.toUnicodeValue(env);
   }

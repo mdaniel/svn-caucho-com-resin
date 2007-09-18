@@ -475,7 +475,8 @@ public class ModuleContext
                Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
-      return new UnicodeValueImpl((String) obj);
+      // XXX: i18n
+      return new StringBuilderValue((String) obj);
     } else {
       // XXX: unknown types, e.g. Character?
 

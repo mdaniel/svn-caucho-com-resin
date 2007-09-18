@@ -319,6 +319,14 @@ public class Quercus
   {
     return getIniBoolean("unicode.semantics");
   }
+
+  public StringValue createString(String v)
+  {
+    if (isUnicodeSemantics())
+      return new UnicodeBuilderValue(v);
+    else
+      return new StringBuilderValue(v);
+  }
   
   /**
    * Set true if pages should be compiled.
@@ -667,7 +675,7 @@ public class Quercus
    */
   public void setServerEnv(String name, String value)
   {
-    setServerEnv(new UnicodeValueImpl(name), new UnicodeValueImpl(value));
+    setServerEnv(createString(name), createString(value));
   }
 
   /**
@@ -1238,16 +1246,17 @@ public class Quercus
   {
     if (obj == null)
       return NullValue.NULL;
-    else if (Byte.class.equals(obj.getClass()) ||
-             Short.class.equals(obj.getClass()) ||
-             Integer.class.equals(obj.getClass()) ||
-             Long.class.equals(obj.getClass())) {
+    else if (Byte.class.equals(obj.getClass())
+	     || Short.class.equals(obj.getClass())
+	     || Integer.class.equals(obj.getClass())
+	     || Long.class.equals(obj.getClass())) {
       return LongValue.create(((Number) obj).longValue());
     } else if (Float.class.equals(obj.getClass()) ||
                Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
-      return new UnicodeValueImpl((String) obj);
+      // XXX: i18n
+      return new StringBuilderValue((String) obj);
     } else {
       // XXX: unknown types, e.g. Character?
 

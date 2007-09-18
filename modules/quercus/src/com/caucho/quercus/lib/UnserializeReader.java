@@ -84,7 +84,7 @@ public final class UnserializeReader {
         expect(':');
         expect('"');
 
-        StringValue s = readStringValue(len);
+        StringValue s = readStringValue(env, len);
 
         expect('"');
         expect(';');
@@ -164,8 +164,8 @@ public final class UnserializeReader {
           
           obj = env.createObject();
           obj.putField(env,
-                   "__Quercus_Incomplete_Class_name",
-                   new UnicodeValueImpl(className));
+		       "__Quercus_Incomplete_Class_name",
+		       env.createString(className));
         }
 	
         for (int i = 0; i < count; i++) {
@@ -218,15 +218,13 @@ public final class UnserializeReader {
           else {
             StringKey key = new StringKey(_buffer, _index, len);
 
-            String s = readString(len);
-            v = env.createString(s);
+            v = readStringValue(env, len);
 
             _keyCache.put(key, v);
           }
         }
         else {
-          String s = readString(len);
-          v = new UnicodeValueImpl(s);
+          v = readStringValue(env, len);
         }
 
         expect('"');
@@ -317,9 +315,9 @@ public final class UnserializeReader {
     return s;
   }
 
-  public final StringValue readStringValue(int len)
+  public final StringValue readStringValue(Env env, int len)
   {
-    StringValue s = new UnicodeBuilderValue(_buffer, _index, len, true);
+    StringValue s = env.createString(_buffer, _index, len);
 
     _index += len;
 

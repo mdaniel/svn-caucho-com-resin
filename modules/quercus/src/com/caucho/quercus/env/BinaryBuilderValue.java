@@ -257,6 +257,24 @@ public class BinaryBuilderValue
     // XXX: can this just return this, or does it need to return a copy?
     return new BinaryBuilderValue(_buffer, 0, _length);
   }
+
+  /**
+   * Converts to a BinaryValue.
+   */
+  @Override
+  public StringValue toBinaryValue(Env env)
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a BinaryValue in desired charset.
+   */
+  @Override
+  public StringValue toBinaryValue(Env env, String charset)
+  {
+    return this;
+  }
   
   /**
    * Append to a string builder.

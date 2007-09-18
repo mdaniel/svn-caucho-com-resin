@@ -207,7 +207,7 @@ abstract public class BytesValue
    * @param env
    */
   @Override
-  public UnicodeValue toUnicodeValue(Env env)
+  public StringValue toUnicodeValue(Env env)
   {
     UnicodeBuilderValue sb = new UnicodeBuilderValue();
 

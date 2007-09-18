@@ -24,54 +24,43 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
+package com.caucho.quercus.env;
 
-package com.caucho.quercus.expr;
-
-import com.caucho.quercus.Location;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
-import com.caucho.quercus.env.Value;
-
-/**
- * Converts to an string
- */
-public class ToStringExpr extends UnaryExpr {
-  public ToStringExpr(Location location, Expr expr)
+public class UnsetStringValue
+  extends StringBuilderValue
+{
+  public static final UnsetStringValue UNSET = new UnsetStringValue();
+  
+  private UnsetStringValue()
   {
-    super(location, expr);
-  }
-
-  public ToStringExpr(Expr expr)
-  {
-    super(expr);
-  }
-
-  public static Expr create(Expr expr)
-  {
-    if (expr.isString())
-      return expr;
-    else
-      return new ToStringExpr(expr);
+    super("");
   }
   
   /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
+   * Returns true if string is not empty.
    */
-  public Value eval(Env env)
+  @Override
+  public boolean isset()
   {
-    return _expr.eval(env).toStringValue();
+    return false;
   }
-
-  public String toString()
+  
+  /**
+   * Returns the length of the string.
+   */
+  public int length()
   {
-    return "((string) " + _expr + ")";
+    return -1;
+  }
+  
+  /**
+   * Returns the character at an index
+   */
+  @Override
+  public Value charValueAt(long index)
+  {
+    return this;
   }
 }
-

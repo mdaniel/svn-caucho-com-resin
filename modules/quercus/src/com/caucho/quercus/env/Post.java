@@ -242,7 +242,13 @@ public class Post {
                                   boolean addSlashesToValues)
   {
     // php/081b
-    Value value = env.createString(formValueList[formValueList.length - 1]);
+    String formValue = formValueList[formValueList.length - 1];
+    Value value;
+
+    if (formValue != null)
+      value = env.createString(formValue);
+    else
+      value = NullValue.NULL;
 
     addFormValue(env, array, key,
                  value,
@@ -320,7 +326,14 @@ public class Post {
       if (index.equals("")) {
         if (formValueList != null) {
           for (int i = 0; i < formValueList.length; i++) {
-            put(array, null, env.createString(formValueList[i]), addSlashesToValues);
+	    Value value;
+
+	    if (formValueList[i] != null)
+	      value = env.createString(formValueList[i]);
+	    else
+	      value = NullValue.NULL;
+	    
+            put(array, null, value, addSlashesToValues);
           }
         }
         else

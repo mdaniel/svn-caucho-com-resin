@@ -503,13 +503,13 @@ public class JavaAdapterVar extends Var
   }
 
   @Override
-  public BinaryValue toBinaryValue(Env env)
+  public StringValue toBinaryValue(Env env)
   {
     return getValue().toBinaryValue(env);
   }
 
   @Override
-  public UnicodeValue toUnicodeValue(Env env)
+  public StringValue toUnicodeValue(Env env)
   {
     return getValue().toUnicodeValue(env);
   }

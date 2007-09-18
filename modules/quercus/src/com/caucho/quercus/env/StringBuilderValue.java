@@ -41,11 +41,14 @@ public class StringBuilderValue
   extends StringValue
 {
   public static final StringBuilderValue EMPTY = new StringBuilderValue("");
+
+  private final static StringBuilderValue []CHAR_STRINGS;
   
   protected char []_buffer;
   protected int _length;
+  protected boolean _isCopy;
 
-  private String _value;
+  protected String _value;
 
   public StringBuilderValue()
   {
@@ -103,6 +106,25 @@ public class StringBuilderValue
 
     for (int i = 0; i < len; i++)
       _buffer[i] = s.charAt(i);
+  }
+
+  public StringBuilderValue(char ch)
+  {
+    _buffer = new char[1];
+    _length = 1;
+
+    _buffer[0] = ch;
+  }
+
+  /**
+   * Creates the string.
+   */
+  public static StringValue create(char value)
+  {
+    if (value < CHAR_STRINGS.length)
+      return CHAR_STRINGS[value];
+    else
+      return new StringBuilderValue(value);
   }
 
   /**
@@ -243,6 +265,60 @@ public class StringBuilderValue
   }
 
   /**
+   * Converts to a BinaryValue.
+   */
+  @Override
+  public StringValue toBinaryValue()
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a BinaryValue.
+   */
+  @Override
+  public StringValue toBinaryValue(Env env)
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a BinaryValue in desired charset.
+   */
+  @Override
+  public StringValue toBinaryValue(Env env, String charset)
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a UnicodeValue.
+   */
+  @Override
+  public StringValue toUnicodeValue()
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a UnicodeValue.
+   */
+  @Override
+  public StringValue toUnicodeValue(Env env)
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a UnicodeValue in desired charset.
+   */
+  @Override
+  public StringValue toUnicodeValue(Env env, String charset)
+  {
+    return this;
+  }
+
+  /**
    * Converts to an object.
    */
   @Override
@@ -340,20 +416,6 @@ public class StringBuilderValue
   }
 
   /**
-   * Returns the character at an index
-   */
-  @Override
-  public Value charValueAt(long index)
-  {
-    int len = _length;
-
-    if (index < 0 || len <= index)
-      return UnsetUnicodeValue.UNSET;
-    else
-      return StringBuilderValue.create((char) (_buffer[(int) index] & 0xff));
-  }
-
-  /**
    * sets the character at an index
    */
   /*
@@ -393,6 +455,26 @@ public class StringBuilderValue
   public char charAt(int index)
   {
     return (char) (_buffer[index] & 0xff);
+  }
+
+  /**
+   * Returns the character at an index
+   */
+  @Override
+  public Value charValueAt(long index)
+  {
+    int len = _length;
+
+    if (index < 0 || len <= index)
+      return UnsetStringValue.UNSET;
+    else {
+      int ch = _buffer[(int) index];
+
+      if (ch < CHAR_STRINGS.length)
+	return CHAR_STRINGS[ch];
+      else
+	return new StringBuilderValue((char) ch);
+    }
   }
 
   /**
@@ -828,8 +910,21 @@ public class StringBuilderValue
     out.print(length);
     out.print(") \"");
 
-    for (int i = 0; i < length; i++)
-      out.print(charAt(i));
+    for (int i = 0; i < length; i++) {
+      int ch = charAt(i);
+
+      if (0x20 <= ch && ch <= 0x7f || ch == '\t' || ch == '\r' || ch == '\n')
+	out.print((char) ch);
+      else if (ch <= 0xff)
+	out.print("\\x" + Integer.toHexString(ch / 16) + Integer.toHexString(ch % 16));
+      else {
+	out.print("\\u"
+		  + Integer.toHexString((ch >> 12) & 0xf)
+		  + Integer.toHexString((ch >> 8) & 0xf)
+		  + Integer.toHexString((ch >> 4) & 0xf)
+		  + Integer.toHexString((ch) & 0xf));
+      }
+    }
 
     out.print("\"");
   }
@@ -1123,6 +1218,13 @@ public class StringBuilderValue
     {
       append(buffer, offset, length);
     }
+  }
+
+  static {
+    CHAR_STRINGS = new StringBuilderValue[256];
+
+    for (int i = 0; i < CHAR_STRINGS.length; i++)
+      CHAR_STRINGS[i] = new StringBuilderValue((char) i);
   }
 }
 

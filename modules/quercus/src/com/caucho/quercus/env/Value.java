@@ -51,7 +51,7 @@ abstract public class Value implements java.io.Serializable
 {
   protected static final L10N L = new L10N(Value.class);
 
-  public static final StringValue SCALAR_V = new UnicodeValueImpl("scalar");
+  public static final StringValue SCALAR_V = new StringBuilderValue("scalar");
 
   public static final Value []NULL_VALUE_ARRAY = new Value[0];
   public static final Value []NULL_ARGS = new Value[0];
@@ -602,7 +602,7 @@ abstract public class Value implements java.io.Serializable
    */
   public QuercusException toException(Env env, String file, int line)
   {
-    putField(env, "file", new UnicodeValueImpl(file));
+    putField(env, "file", env.createString(file));
     putField(env, "line", LongValue.create(line));
     
     return new QuercusLanguageException(this);
@@ -703,7 +703,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a UnicodeValue.
    */
-  public UnicodeValue toUnicodeValue()
+  public StringValue toUnicodeValue()
   {
     return toUnicodeValue(Env.getInstance());
   }
@@ -711,21 +711,29 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a UnicodeValue.
    */
-  public UnicodeValue toUnicodeValue(Env env)
+  public StringValue toUnicodeValue(Env env)
   {
-    return new UnicodeValueImpl(toString());
+    return env.createString(toString());
   }
 
   /**
    * Converts to a BinaryValue.
    */
-  public BinaryValue toBinaryValue(Env env)
+  public StringValue toBinaryValue()
   {
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+    return toUnicodeValue(Env.getInstance());
+  }
 
-      bb.append(this);
+  /**
+   * Converts to a BinaryValue.
+   */
+  public StringValue toBinaryValue(Env env)
+  {
+    StringValue bb = env.createBinaryBuilder();
 
-      return bb;
+    bb.append(this);
+
+    return bb;
       
       /*
     try {

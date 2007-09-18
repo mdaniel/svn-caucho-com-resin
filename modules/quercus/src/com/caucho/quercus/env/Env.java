@@ -140,10 +140,10 @@ public class Env {
   private static final IntMap SPECIAL_VARS = new IntMap();
 
   private static final StringValue PHP_SELF_STRING
-    = new UnicodeValueImpl("PHP_SELF");
+    = new StringBuilderValue("PHP_SELF");
 
   private static final StringValue UTF8_STRING
-    = new UnicodeValueImpl("utf-8");
+    = new StringBuilderValue("utf-8");
 
   private static final
     LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
@@ -1783,12 +1783,12 @@ public class Env {
 
           String value = decodeValue(cookie.getValue());
 
-          StringValue valueAsValue = new UnicodeValueImpl(value);
+          StringValue valueAsValue = createString(value);
 
           if (getIniBoolean("magic_quotes_gpc")) // php/0876
             valueAsValue = StringModule.addslashes(valueAsValue);
 
-          array.append(new UnicodeValueImpl(cookie.getName()), valueAsValue);
+          array.append(createString(cookie.getName()), valueAsValue);
         }
       }
 
@@ -2280,11 +2280,11 @@ public class Env {
     ArrayValue result = new ArrayValueImpl();
 
     for (Map.Entry<String, Value> entry : _quercus.getConstMap().entrySet()) {
-      result.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
+      result.put(createString(entry.getKey()), entry.getValue());
     }
 
     for (Map.Entry<String, Value> entry : _constMap.entrySet()) {
-      result.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
+      result.put(createString(entry.getKey()), entry.getValue());
     }
 
     return result;
@@ -2885,13 +2885,26 @@ public class Env {
     else
       return new StringBuilderValue(buffer, 0, length);
   }
+  
+  /**
+   * Creates a string from a byte.
+   */
+  public StringValue createString(char []buffer, int offset, int length)
+  {
+    if (_isUnicodeSemantics)
+      return new UnicodeBuilderValue(buffer, offset, length);
+    else
+      return new StringBuilderValue(buffer, offset, length);
+  }
 
   /**
    * Creates a string from a byte.
    */
   public StringValue createString(String s)
   {
-    if (_isUnicodeSemantics)
+    if (s == null)
+      return null;
+    else if (_isUnicodeSemantics)
       return new UnicodeValueImpl(s);
     else
       return new StringBuilderValue(s);
@@ -4181,7 +4194,7 @@ public class Env {
         String fileName = location.getFileName();
 
         if (fileName != null)
-          fileNameV = new UnicodeValueImpl(fileName);
+          fileNameV = createString(fileName);
 
         Value lineV = NullValue.NULL;
         int line = location.getLineNumber();
@@ -4190,7 +4203,7 @@ public class Env {
 
         Value context = NullValue.NULL;
 
-        handler.call(this, new LongValue(mask), new UnicodeValueImpl(msg),
+        handler.call(this, new LongValue(mask), createString(msg),
                      fileNameV, lineV, context);
 
         return NullValue.NULL;

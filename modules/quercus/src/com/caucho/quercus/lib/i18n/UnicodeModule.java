@@ -77,7 +77,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     return BooleanValue.TRUE;
   }
 
-  public static UnicodeValue unicode_decode(Env env,
+  public static StringValue unicode_decode(Env env,
                               BytesValue str,
                               String encoding)
   {

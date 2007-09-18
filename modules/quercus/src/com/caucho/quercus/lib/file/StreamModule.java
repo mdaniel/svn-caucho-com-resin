@@ -474,10 +474,10 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   static {
-    _wrapperArray.append(new UnicodeValueImpl("quercus"));
-    _wrapperArray.append(new UnicodeValueImpl("file"));
-    _wrapperArray.append(new UnicodeValueImpl("http"));
-    _wrapperArray.append(new UnicodeValueImpl("ftp"));
+    _wrapperArray.append(new StringBuilderValue("quercus"));
+    _wrapperArray.append(new StringBuilderValue("file"));
+    _wrapperArray.append(new StringBuilderValue("http"));
+    _wrapperArray.append(new StringBuilderValue("ftp"));
   }
 
   static {

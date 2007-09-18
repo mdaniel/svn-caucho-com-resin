@@ -51,7 +51,8 @@ import java.util.TreeSet;
 public class ObjectExtValue extends ObjectValue
   implements Serializable
 {
-  private static final StringValue TO_STRING = new UnicodeValueImpl("__toString");
+  private static final StringValue TO_STRING
+    = new StringBuilderValue("__toString");
 
   private static final int DEFAULT_SIZE = 16;
 
@@ -279,7 +280,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value putField(String key, String value)
   {
-    return putField(null, key, new UnicodeValueImpl(value));
+    return putField(null, key, new StringBuilderValue(value));
   }
 
   /**
@@ -439,7 +440,7 @@ public class ObjectExtValue extends ObjectValue
 
         return new Map.Entry<Value,Value>() {
 
-          public Value getKey() { return new UnicodeValueImpl(next.getKey()); }
+          public Value getKey() { return new StringBuilderValue(next.getKey()); }
           public Value getValue() { return next.getValue(); }
           public Value setValue(Value value) { return next.setValue(value); }
         };
@@ -464,8 +465,8 @@ public class ObjectExtValue extends ObjectValue
       return iter;
 
     return new Iterator<Value>() {
-
-      final Iterator<Map.Entry<String,Value>> _iterator = new EntryIterator(_entries);
+      final Iterator<Map.Entry<String,Value>> _iterator
+	= new EntryIterator(_entries);
 
       public boolean hasNext()
       {
@@ -474,7 +475,7 @@ public class ObjectExtValue extends ObjectValue
 
       public Value next()
       {
-          return new UnicodeValueImpl(_iterator.next().getKey());
+	return new StringBuilderValue(_iterator.next().getKey());
       }
 
       public void remove()
@@ -813,7 +814,7 @@ public class ObjectExtValue extends ObjectValue
     if (fun != null)
       return fun.callMethod(env, this, new Expr[0]).toStringValue();
     else
-      return new UnicodeValueImpl(_quercusClass.getName() + "[]");
+      return env.createString(_quercusClass.getName() + "[]");
   }
 
   /**
@@ -835,7 +836,7 @@ public class ObjectExtValue extends ObjectValue
     ArrayValue array = new ArrayValueImpl();
 
     for (Map.Entry<String,Value> entry : entrySet()) {
-      array.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
+      array.put(new StringBuilderValue(entry.getKey()), entry.getValue());
     }
 
     return array;
@@ -955,7 +956,7 @@ public class ObjectExtValue extends ObjectValue
 
       putField(env,
                "__Quercus_Class_Definition_Not_Found",
-               new UnicodeValueImpl(name));
+               env.createString(name));
     }
 
     int size = in.readInt();

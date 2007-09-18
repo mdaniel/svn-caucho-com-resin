@@ -42,17 +42,22 @@ import java.io.IOException;
  * Represents read/write stream
  */
 public class StreamReadWrite extends StreamResource {
+  private Env _env;
   private ReadStream _is;
   private WriteStream _os;
 
   public StreamReadWrite(Env env)
   {
+    _env = env;
+    
     env.addClose(this);
   }
 
   public StreamReadWrite(Env env, ReadStream is, WriteStream os)
   {
     this(env);
+    
+    _env = env;
 
     init(is, os);
   }
@@ -115,9 +120,9 @@ public class StreamReadWrite extends StreamResource {
     throws IOException
   {
     if (_is != null)
-      return new UnicodeValueImpl(_is.readLineNoChop());
+      return _env.createString(_is.readLineNoChop());
     else
-      return UnicodeValueImpl.EMPTY;
+      return _env.createEmptyString();
   }
 
   /**

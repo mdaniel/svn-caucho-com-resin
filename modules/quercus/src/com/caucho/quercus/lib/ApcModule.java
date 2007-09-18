@@ -75,7 +75,7 @@ public class ApcModule extends AbstractQuercusModule {
   /**
    * Returns cache information.
    */
-  public Value apc_cache_info(@Optional String type)
+  public Value apc_cache_info(Env env, @Optional String type)
   {
     ArrayValue value = new ArrayValueImpl();
 
@@ -84,7 +84,7 @@ public class ApcModule extends AbstractQuercusModule {
     value.put("num_hits", 0);
     value.put("num_misses", 0);
     value.put("start_time", 0);
-    value.put(new UnicodeValueImpl("cache_list"), new ArrayValueImpl());
+    value.put(env.createString("cache_list"), new ArrayValueImpl());
 
     return value;
   }
@@ -162,14 +162,14 @@ public class ApcModule extends AbstractQuercusModule {
   /**
    * Returns cache information.
    */
-  public Value apc_sma_info(@Optional String type)
+  public Value apc_sma_info(Env env, @Optional String type)
   {
     ArrayValue value = new ArrayValueImpl();
 
     value.put("num_seg", 1);
     value.put("seg_size", 1024 * 1024);
     value.put("avail_mem", 1024 * 1024);
-    value.put(new UnicodeValueImpl("block_lists"), new ArrayValueImpl());
+    value.put(env.createString("block_lists"), new ArrayValueImpl());
 
     return value;
   }
