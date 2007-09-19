@@ -360,7 +360,12 @@ public class NullValue extends Value
    */
   public StringValue toStringValue()
   {
-    return StringBuilderValue.EMPTY;
+    Env env = Env.getInstance();
+
+    if (env != null && env.isUnicodeSemantics())
+      return UnicodeBuilderValue.EMPTY;
+    else
+      return StringBuilderValue.EMPTY;
   }
 
   @Override
