@@ -237,11 +237,15 @@ public class EjbProtocolManager {
 
         if (localObj != null) {
           if (_localJndiPrefix != null) {
+            /* ejb/0g43
+
             // ejb/0f6c (tck) vs ejb/0g01
             if (! _localJndiPrefix.endsWith("/env")) {
               // ejb/0f6c: should use the ejb-name for local beans (ignore mapped-name).
               mappedName = ejbName;
             }
+
+            */
 
             localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + mappedName);
 
