@@ -134,6 +134,20 @@ public class WebServiceIntrospector {
 
       WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
 
+      if (api != type) {
+        if (webMethod != null)
+          throw new WebServiceException(L.l("Cannot use WebMethod with WebService.endpointInterface: {0}", type));
+
+        try {
+          api.getDeclaredMethod(methods[i].getName(), 
+                                methods[i].getParameterTypes());
+        }
+        catch (NoSuchMethodException e) {
+          // ignore methods not declared in the endpoint interface
+          continue;
+        }
+      }
+
       if (excludeIfNoWebMethod && webMethod == null)
         continue;
 
@@ -145,6 +159,7 @@ public class WebServiceIntrospector {
 
       if (webMethod != null && webMethod.exclude())
         continue;
+
 
       AbstractAction action = 
         AbstractAction.createAction(methods[i], jaxbContext, namespace, wsdl,

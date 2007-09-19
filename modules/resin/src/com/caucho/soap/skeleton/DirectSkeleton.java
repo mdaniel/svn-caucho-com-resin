@@ -165,28 +165,28 @@ public class DirectSkeleton extends Skeleton {
     return _outputFactory;
   }
 
-  public DirectSkeleton(Class type, Class api,
+  public DirectSkeleton(Class impl, Class api,
                         JAXBContextImpl context, 
                         String wsdlLocation,
                         String targetNamespace,
                         WSDLDefinitions wsdl)
     throws WebServiceException
   {
-    WebService webService = (WebService) type.getAnnotation(WebService.class);
+    WebService webService = (WebService) impl.getAnnotation(WebService.class);
 
     _api = api;
     _namespace = targetNamespace;
-    _portType = getWebServiceName(type);
+    _portType = getPortType(impl, api);
 
     if (webService != null && ! "".equals(webService.portName()))
       _portName = webService.portName();
     else
-      _portName = _portType + "Port";
+      _portName = impl.getSimpleName() + "Port";
 
     if (webService != null && ! "".equals(webService.serviceName()))
       _serviceName = webService.serviceName();
     else
-      _serviceName = JAXBUtil.classBasename(type) + "Service";
+      _serviceName = impl.getSimpleName() + "Service";
 
     if (webService != null && ! "".equals(webService.wsdlLocation()))
       _wsdlLocation = webService.wsdlLocation();
@@ -247,14 +247,37 @@ public class DirectSkeleton extends Skeleton {
     return _namespace;
   }
 
-  static String getWebServiceName(Class type) 
+  static String getPortType(Class impl, Class api) 
+    throws WebServiceException
   {
-    WebService webService = (WebService) type.getAnnotation(WebService.class);
+    WebService webService = (WebService) impl.getAnnotation(WebService.class);
 
-    if (webService != null && !webService.name().equals(""))
-      return webService.name();
-    else
-      return JAXBUtil.classBasename(type);
+    if (webService != null) {
+      if ("".equals(webService.name()) && 
+          "".equals(webService.endpointInterface()))
+        return impl.getSimpleName();
+
+      if (! "".equals(webService.name()) && 
+          "".equals(webService.endpointInterface()))
+        return webService.name();
+
+      if ("".equals(webService.name()) && 
+          ! "".equals(webService.endpointInterface())) {
+        webService = (WebService) api.getAnnotation(WebService.class);
+        
+        if (webService != null && ! "".equals(webService.name()))
+          return webService.name();
+
+        else
+          return api.getSimpleName();
+      }
+
+      if (! "".equals(webService.name()) && 
+          ! "".equals(webService.endpointInterface()))
+        throw new WebServiceException(L.l("Cannot specify both name and endpointInterface properties in a WebService annotation: {0}", impl));
+    }
+
+    return impl.getSimpleName();
   }
 
   public void addAction(Method method, AbstractAction action)

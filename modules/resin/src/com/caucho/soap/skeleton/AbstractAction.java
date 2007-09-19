@@ -431,7 +431,7 @@ public abstract class AbstractAction {
 
     for (Class exception : exceptions) {
       QName faultName = new QName(targetNamespace, 
-                                  JAXBUtil.classBasename(exception),
+                                  exception.getSimpleName(),
                                   TARGET_NAMESPACE_PREFIX);
       // XXX check for generated exception classes versus raw exceptions
       // i.e. things like getFaultInfo()
