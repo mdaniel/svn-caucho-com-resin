@@ -69,7 +69,7 @@ package hessian.client
    * @see hessian.client.HessianOperation
    * @see hessian.mxml.HessianService
    */
-  public class HessianService extends AbstractService
+  public dynamic class HessianService extends AbstractService
   {
     private var _api:Class;
 
