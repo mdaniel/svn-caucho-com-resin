@@ -2722,7 +2722,7 @@ v   *
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strnatcasecmp(UnicodeValue a, UnicodeValue b)
+  public static int strnatcasecmp(StringValue a, StringValue b)
   {
     return naturalOrderCompare(a, b, true);
   }
@@ -2734,7 +2734,7 @@ v   *
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strnatcmp(UnicodeValue a, UnicodeValue b)
+  public static int strnatcmp(StringValue a, StringValue b)
   {
     return naturalOrderCompare(a, b, false);
   }
@@ -2742,8 +2742,8 @@ v   *
   /**
    * http://sourcefrog.net/projects/natsort/
    */
-  private static int naturalOrderCompare(UnicodeValue a,
-                                         UnicodeValue b,
+  private static int naturalOrderCompare(StringValue a,
+                                         StringValue b,
                                          boolean ignoreCase)
   {
     SimpleStringReader aIn = new SimpleStringReader(a);
@@ -2798,8 +2798,8 @@ v   *
           }
         }
       }
-      else if ('0' < aChar && aChar <= '9' &&
-               '0' < bChar && bChar <= '9')
+      else if ('0' < aChar && aChar <= '9'
+	       && '0' < bChar && bChar <= '9')
       {
         int aInteger = aIn.readInt(aChar);
         int bInteger = bIn.readInt(bChar);
@@ -4266,12 +4266,12 @@ v   *
   }
 
   static class SimpleStringReader {
-    UnicodeValue _str;
+    StringValue _str;
 
     int _length;
     int _index;
     
-    SimpleStringReader(UnicodeValue str)
+    SimpleStringReader(StringValue str)
     {
       _str = str;
       _length = str.length();

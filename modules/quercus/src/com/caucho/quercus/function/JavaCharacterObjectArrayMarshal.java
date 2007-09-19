@@ -30,8 +30,10 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 
 public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
 {
@@ -41,7 +43,14 @@ public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
   @Override
   public Value unmarshal(Env env, Object value)
   {
-    return new UnicodeBuilderValue((Character[]) value);
+    Character []buffer = (Character []) value;
+
+    if (buffer == null)
+      return NullValue.NULL;
+    else if (env.isUnicodeSemantics())
+      return new UnicodeBuilderValue(buffer);
+    else
+      return new StringBuilderValue(buffer);
   }
   
   @Override

@@ -96,6 +96,18 @@ public class StringBuilderValue
       _buffer[i] = (char) buffer[i].byteValue();
     }
   }
+  
+  public StringBuilderValue(Character []buffer)
+  {
+    int length = buffer.length;
+    
+    _buffer =  new char[length];
+    _length = length;
+    
+    for (int i = 0; i < length; i++) {
+      _buffer[i] = buffer[i];
+    }
+  }
 
   public StringBuilderValue(String s)
   {
@@ -434,7 +446,7 @@ public class StringBuilderValue
   @Override
   public char charAt(int index)
   {
-    return (char) (_buffer[index] & 0xff);
+    return _buffer[index];
   }
 
   /**

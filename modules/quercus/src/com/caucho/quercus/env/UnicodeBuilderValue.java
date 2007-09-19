@@ -30,7 +30,8 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.vfs.*;
 
 import java.io.*;
 import java.util.IdentityHashMap;
@@ -92,7 +93,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
 
   public UnicodeBuilderValue(Character []buffer)
   {
-    //super(buffer);
+    super(buffer);
   }
 
   public UnicodeBuilderValue(char ch)
@@ -180,6 +181,50 @@ public class UnicodeBuilderValue extends StringBuilderValue
     sb.append(_buffer, 0, _length);
 
     return sb;
+  }
+
+  /**
+   * Converts to a BinaryValue.
+   */
+  @Override
+  public StringValue toBinaryValue()
+  {
+    return toBinaryValue(Env.getInstance());
+  }
+
+  /**
+   * Converts to a BinaryValue.
+   */
+  @Override
+  public StringValue toBinaryValue(Env env)
+  {
+    return toBinaryValue(env, env.getRuntimeEncoding().toString());
+  }
+
+  /**
+   * Converts to a BinaryValue in desired charset.
+   *
+   * @param env
+   * @param charset
+   */
+  public StringValue toBinaryValue(Env env, String charset)
+  {
+    try {
+      BinaryBuilderValue result = new BinaryBuilderValue();
+      BinaryBuilderStream stream = new BinaryBuilderStream(result);
+
+      // XXX: can use EncodingWriter directly(?)
+      WriteStream out = new WriteStream(stream);
+      out.setEncoding(charset);
+
+      out.print(_buffer, 0, _length);
+
+      out.close();
+
+      return result;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e.getMessage());
+    }
   }
 
   /**

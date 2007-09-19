@@ -118,9 +118,9 @@ public class StringUtility
               }
               if (closeBracketIndex > openBracketIndex + 1) {
                 String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
-                v.put(new UnicodeValueImpl(index), new UnicodeValueImpl(value));
+                v.put(env.createString(index), env.createString(value));
               } else {
-                v.put(new UnicodeValueImpl(value));
+                v.put(env.createString(value));
               }
             } else {
               Post.addFormValue(env, result, key, new String[] { value }, isMagicQuotes);
@@ -190,13 +190,13 @@ public class StringUtility
     
     int p;
 
-    Value value = new UnicodeValueImpl(valueStr);
+    Value value = env.createString(valueStr);
 
     if ((p = key.indexOf('[')) > 0 && key.endsWith("]")) {
       String index = key.substring(p + 1, key.length() - 1);
       key = key.substring(0, p);
 
-      Value keyValue = new UnicodeValueImpl(key);
+      Value keyValue = env.createString(key);
 
       Value part;
 
@@ -211,7 +211,7 @@ public class StringUtility
       if (index.equals(""))
         part.put(value);
       else
-        part.put(new UnicodeValueImpl(index), value);
+        part.put(env.createString(index), value);
 
       if (array != null)
         array.put(keyValue, part);
@@ -220,7 +220,7 @@ public class StringUtility
     }
     else {
       if (array != null)
-        array.put(new UnicodeValueImpl(key), value);
+        array.put(env.createString(key), value);
       else
         env.setVar(key, value);
     }

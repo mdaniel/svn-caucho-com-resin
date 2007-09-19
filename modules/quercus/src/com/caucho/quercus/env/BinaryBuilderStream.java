@@ -27,43 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.function;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.UnicodeBuilderValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.vfs.*;
 
-public class JavaCharacterArrayMarshal extends JavaArrayMarshal
+import java.io.IOException;
+import java.util.Iterator;
+
+/**
+ * Stream for appending to binary builder.
+ */
+public class BinaryBuilderStream extends StreamImpl
 {
-  public static final Marshal MARSHAL
-    = new JavaCharacterArrayMarshal();
-  
-  @Override
-  public Value unmarshal(Env env, Object value)
-  {
-    char []buffer = (char []) value;
+  private StringValue _out;
 
-    if (buffer != null)
-      return env.createString(buffer, 0, buffer.length);
-    else
-      return NullValue.NULL;
-  }
-  
-  @Override
-  protected int getMarshalingCostImpl(Value argValue)
+  public BinaryBuilderStream(StringValue out)
   {
-    if (argValue.isUnicode())
-      return Marshal.EQUIVALENT;
-    else if (argValue.isArray())
-      return Marshal.SIMILAR; // php/0cib
-    else
-      return Marshal.DUBIOUS;
+    _out = out;
   }
-  
-  @Override
-  public Class getExpectedClass()
+
+  public StringValue getString()
   {
-    return char[].class;
+    return _out;
+  }
+  /**
+   * Returns true if this is a writable stream.
+   */
+  public boolean canWrite()
+  {
+    return true;
+  }
+
+  /**
+   * Writes a buffer to the underlying stream.
+   *
+   * @param buffer the byte array to write.
+   * @param offset the offset into the byte array.
+   * @param length the number of bytes to write.
+   * @param isEnd true when the write is flushing a close.
+   */
+  public void write(byte []buffer, int offset, int length, boolean isEnd)
+    throws IOException
+  {
+    _out.append(buffer, offset, length);
   }
 }
