@@ -1601,18 +1601,27 @@ v   *
     DecimalFormatSymbols decimal = new DecimalFormatSymbols(money);
     Currency currency = NumberFormat.getInstance(money).getCurrency();
     
-    array.put("decimal_point", decimal.getDecimalSeparator());
-    array.put("thousands_sep", decimal.getGroupingSeparator());
+    array.put(env.createString("decimal_point"),
+	      env.createString(decimal.getDecimalSeparator()));
+    array.put(env.createString("thousands_sep"),
+	      env.createString(decimal.getGroupingSeparator()));
     //array.put("grouping", "");
-    array.put("int_curr_symbol", decimal.getInternationalCurrencySymbol());
-    array.put("currency_symbol", decimal.getCurrencySymbol());
-    array.put("mon_decimal_point", decimal.getMonetaryDecimalSeparator());
-    array.put("mon_thousands_sep", decimal.getGroupingSeparator());
+    array.put(env.createString("int_curr_symbol"),
+	      env.createString(decimal.getInternationalCurrencySymbol()));
+    array.put(env.createString("currency_symbol"),
+	      env.createString(decimal.getCurrencySymbol()));
+    array.put(env.createString("mon_decimal_point"),
+	      env.createString(decimal.getMonetaryDecimalSeparator()));
+    array.put(env.createString("mon_thousands_sep"),
+	      env.createString(decimal.getGroupingSeparator()));
     //array.put("mon_grouping", "");
-    array.put("positive_sign", "");
-    array.put("negative_sign", decimal.getMinusSign());
-    array.put("int_frac_digits", currency.getDefaultFractionDigits());
-    array.put("frac_digits", currency.getDefaultFractionDigits());
+    array.put(env.createString("positive_sign"), env.createEmptyString());
+    array.put(env.createString("negative_sign"),
+	      env.createString(decimal.getMinusSign()));
+    array.put(env.createString("int_frac_digits"),
+	      LongValue.create(currency.getDefaultFractionDigits()));
+    array.put(env.createString("frac_digits"),
+	      LongValue.create(currency.getDefaultFractionDigits()));
     //array.put("p_cs_precedes", "");
     //array.put("p_sep_by_space", "");
     //array.put("n_cs_precedes", "");

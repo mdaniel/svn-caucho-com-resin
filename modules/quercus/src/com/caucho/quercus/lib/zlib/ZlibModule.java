@@ -406,16 +406,16 @@ public class ZlibModule extends AbstractQuercusModule {
     }
 
     ServerArrayValue sav = new ServerArrayValue(env);
-    Value val = sav.get(new UnicodeValueImpl("HTTP_ACCEPT_ENCODING"));
+    Value val = sav.get(env.createString("HTTP_ACCEPT_ENCODING"));
 
     if (!val.isset())
       return BooleanValue.FALSE;
 
     String s = val.toString();
     if (s.contains("gzip"))
-      return new UnicodeValueImpl("gzip");
+      return env.createString("gzip");
     else if(s.contains("deflate"))
-      return new UnicodeValueImpl("deflate");
+      return env.createString("deflate");
     else
       return BooleanValue.FALSE;
   }
@@ -427,7 +427,8 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param level (default is Deflater.DEFAULT_COMPRESSION)
    * @return compressed string
    */
-  public Value gzcompress(InputStream data,
+  public Value gzcompress(Env env,
+			  InputStream data,
                           @Optional("6") int level)
   {
     TempBuffer tempBuf = TempBuffer.allocate();
@@ -438,7 +439,8 @@ public class ZlibModule extends AbstractQuercusModule {
       Adler32 crc = new Adler32();
 
       boolean isFinished = false;
-      TempStream out = new TempStream();
+
+      StringValue out = env.createLargeBinaryBuilder();
 
       buffer[0] = (byte) 0x78;
 
@@ -451,7 +453,7 @@ public class ZlibModule extends AbstractQuercusModule {
       else
         buffer[1] = (byte) 0xda;
 
-      out.write(buffer, 0, 2, false);
+      out.append(buffer, 0, 2);
 
       int len;
       while (! isFinished) {
@@ -469,7 +471,7 @@ public class ZlibModule extends AbstractQuercusModule {
         }
 
         while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
-          out.write(buffer, 0, len, false);
+          out.append(buffer, 0, len);
         }
       }
 
@@ -480,9 +482,9 @@ public class ZlibModule extends AbstractQuercusModule {
       buffer[2] = (byte) (value >> 8);
       buffer[3] = (byte) (value >> 0);
 
-      out.write(buffer, 0, 4, true);
+      out.append(buffer, 0, 4);
 
-      return new TempBufferBytesValue(out.getHead());
+      return out;
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     } finally {
@@ -496,7 +498,8 @@ public class ZlibModule extends AbstractQuercusModule {
    * @param length (maximum length of string returned)
    * @return uncompressed string
    */
-  public Value gzuncompress(InputStream is,
+  public Value gzuncompress(Env env,
+			    InputStream is,
                             @Optional("0") long length)
   {
     TempBuffer tempBuf = TempBuffer.allocate();
@@ -507,18 +510,17 @@ public class ZlibModule extends AbstractQuercusModule {
         length = Long.MAX_VALUE;
 
       InflaterInputStream in = new InflaterInputStream(is);
-      TempStream out = new TempStream();
 
-
+      StringValue sb = env.createLargeBinaryBuilder();
 
       int len;
       while ((len = in.read(buffer, 0, buffer.length)) >= 0) {
-        out.write(buffer, 0, len, false);
+        sb.append(buffer, 0, len);
       }
 
       in.close();
 
-      return new TempBufferBytesValue(out.getHead());
+      return sb;
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     } finally {
@@ -590,7 +592,7 @@ public class ZlibModule extends AbstractQuercusModule {
       Inflater inflater = new Inflater(true);
 
       boolean isFinished = false;
-      TempStream out = new TempStream();
+      StringValue sb = env.createBinaryBuilder();
 
       int len;
       while (! isFinished) {
@@ -605,13 +607,13 @@ public class ZlibModule extends AbstractQuercusModule {
         }
 
         while ((len = inflater.inflate(buffer, 0, buffer.length)) > 0) {
-          out.write(buffer, 0, len, false);
+          sb.append(buffer, 0, len);
         }
       }
 
       inflater.end();
 
-      return new TempBufferBytesValue(out.getHead());
+      return sb;
     } catch (Exception e) {
       env.warning(e);
       return BooleanValue.FALSE;
@@ -631,7 +633,7 @@ public class ZlibModule extends AbstractQuercusModule {
    *    is FORCE_DEFLATE, default is to write CRC32
    * @return StringValue with gzip header and trailer
    */
-  public Value gzencode(InputStream is,
+  public Value gzencode(Env env, InputStream is,
                         @Optional("6") int level,
                         @Optional("1") int encodingMode)
   {
@@ -653,8 +655,12 @@ public class ZlibModule extends AbstractQuercusModule {
         gzOut.write(buffer, 0, len);
       }
       gzOut.close();
-      return new TempBufferBytesValue(ts.getHead());
 
+      StringValue sb = env.createBinaryBuilder();
+      for (TempBuffer ptr = ts.getHead(); ptr != null; ptr = ptr.getNext())
+	sb.append(ptr.getBuffer(), 0, ptr.getLength());
+
+      return sb;
     } catch(IOException e) {
       throw QuercusModuleException.create(e);
     } finally {

@@ -131,10 +131,13 @@ public class QuercusZipEntry {
 
     bb.append((InputStream) _in, length);
 
+    return bb;
+    /*
     if (bb.length() > 0)
       return bb;
     else
       return null;
+    */
   }
 
   /**

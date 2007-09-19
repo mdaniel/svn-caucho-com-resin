@@ -1018,7 +1018,7 @@ public class PDFModule extends AbstractQuercusModule {
     if (pdf == null)
       return BooleanValue.FALSE;
     
-    return pdf.get_buffer();
+    return pdf.get_buffer(env);
   }
 
   /**
@@ -1068,13 +1068,15 @@ public class PDFModule extends AbstractQuercusModule {
   /**
    * Returns the result as a string.
    */
-  public static Value pdf_get_buffer(@NotNull PDF pdf)
+  /*
+  public static Value pdf_get_buffer(Env env, @NotNull PDF pdf)
   {
     if (pdf != null)
-      return pdf.get_buffer();
+      return pdf.get_buffer(env);
     else
       return BooleanValue.FALSE;
   }
+  */
   
   /**
    * Returns the named parameter.

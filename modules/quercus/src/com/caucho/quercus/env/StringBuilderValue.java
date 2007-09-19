@@ -390,7 +390,9 @@ public class StringBuilderValue
   public byte[] toBytes()
   {
     byte[] bytes = new byte[_length];
-    System.arraycopy(_buffer, 0, bytes, 0, _length);
+
+    for (int i = _length - 1; i >= 0; i--)
+      bytes[i] = (byte) _buffer[i];
 
     return bytes;
   }
@@ -475,6 +477,39 @@ public class StringBuilderValue
       else
 	return new StringBuilderValue((char) ch);
     }
+  }
+    
+  /**
+   * Returns the last index of the match string, starting from the head.
+   */
+  public int indexOf(char match)
+  {
+    int length = _length;
+
+    char []buffer = _buffer;
+    for (int head = 0; head < length; head++) {
+      if (buffer[head] == match)
+	return head;
+    }
+
+    return -1;
+  }
+    
+  /**
+   * Returns the last index of the match string, starting from the head.
+   */
+  @Override
+  public int indexOf(char match, int head)
+  {
+    int length = _length;
+    
+    char []buffer = _buffer;
+    for (; head < length; head++) {
+      if (buffer[head] == match)
+	return head;
+    }
+
+    return -1;
   }
 
   /**

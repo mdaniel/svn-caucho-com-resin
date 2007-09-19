@@ -249,7 +249,7 @@ public class DateModule extends AbstractQuercusModule {
     return array;
   }
 
-  public Value gettimeofday(@Optional boolean isFloatReturn)
+  public Value gettimeofday(Env env, @Optional boolean isFloatReturn)
   {
     long gmtTime = Alarm.getExactTime();
 
@@ -766,7 +766,7 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the time including microseconds
    */
-  public static Value microtime(@Optional boolean getAsFloat)
+  public static Value microtime(Env env, @Optional boolean getAsFloat)
   {
     long now = Alarm.getExactTimeNanoseconds() / 1000;
 
@@ -774,7 +774,7 @@ public class DateModule extends AbstractQuercusModule {
       return new DoubleValue(((double) now) / 1e6);
     }
     else {
-      return (new UnicodeBuilderValue()
+      return (env.createUnicodeBuilder()
 	      .append(now % 1000000L / 1e6)
 	      .append(' ')
 	      .append(now / 1000000L));

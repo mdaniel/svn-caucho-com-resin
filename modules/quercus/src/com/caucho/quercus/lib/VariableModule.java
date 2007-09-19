@@ -569,7 +569,7 @@ public class VariableModule extends AbstractQuercusModule {
         
         v.printR(env, out, 0, new IdentityHashMap<Value, String>());
         
-        return new UnicodeValueImpl(writer.getString());
+        return env.createString(writer.getString());
       }
       else {
         out = env.getOut();
@@ -620,7 +620,7 @@ public class VariableModule extends AbstractQuercusModule {
       return true;
     }
     else if ("string".equals(type)) {
-      var.set(new UnicodeValueImpl(value.toString()));
+      var.set(value.toStringValue());
       return true;
     }
     else if ("int".equals(type) || "integer".equals(type)) {
@@ -691,7 +691,7 @@ public class VariableModule extends AbstractQuercusModule {
     v.varExport(sb);
 
     if (isReturn)
-      return new UnicodeValueImpl(sb.toString());
+      return env.createString(sb.toString());
     else {
       env.print(sb);
 

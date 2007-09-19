@@ -468,6 +468,17 @@ public class Env {
   }
 
   /**
+   * Creates a binary builder for large things like files.
+   */
+  public StringValue createLargeBinaryBuilder()
+  {
+    if (_isUnicodeSemantics)
+      return new BinaryBuilderValue();
+    else
+      return new StringBuilderValue();
+  }
+
+  /**
    * Creates a binary builder.
    */
   public StringValue createBinaryBuilder(int length)

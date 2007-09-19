@@ -42,6 +42,8 @@ public class BinaryBuilderValue
   extends BinaryValue
 {
   public static final BinaryBuilderValue EMPTY = new BinaryBuilderValue("");
+
+  private final static BinaryBuilderValue []CHAR_STRINGS;
   
   protected byte []_buffer;
   protected int _length;
@@ -97,6 +99,25 @@ public class BinaryBuilderValue
     for (int i = 0; i < length; i++) {
       _buffer[i] = buffer[i].byteValue();
     }
+  }
+
+  public BinaryBuilderValue(byte ch)
+  {
+    _buffer = new byte[1];
+    _length = 1;
+
+    _buffer[0] = ch;
+  }
+
+  /**
+   * Creates the string.
+   */
+  public static StringValue create(int value)
+  {
+    if (value < CHAR_STRINGS.length)
+      return CHAR_STRINGS[value];
+    else
+      return new BinaryBuilderValue(value);
   }
 
   /**
@@ -360,9 +381,9 @@ public class BinaryBuilderValue
     int len = _length;
 
     if (index < 0 || len <= index)
-      return UnsetUnicodeValue.UNSET;
+      return UnsetBinaryValue.UNSET;
     else
-      return BinaryBuilderValue.create((char) (_buffer[(int) index] & 0xff));
+      return BinaryBuilderValue.create(_buffer[(int) index] & 0xff);
   }
 
   /**
@@ -1383,6 +1404,13 @@ public class BinaryBuilderValue
     {
       append(buffer, offset, length);
     }
+  }
+
+  static {
+    CHAR_STRINGS = new BinaryBuilderValue[256];
+
+    for (int i = 0; i < CHAR_STRINGS.length; i++)
+      CHAR_STRINGS[i] = new BinaryBuilderValue((byte) i);
   }
 }
 

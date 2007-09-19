@@ -52,8 +52,8 @@ import java.util.logging.Logger;
  * PHP Zip
  */
 public class ZipModule extends AbstractQuercusModule {
-  private static final Logger log =
-                                Logger.getLogger(ZipModule.class.getName());
+  private static final Logger log
+    = Logger.getLogger(ZipModule.class.getName());
   private static final L10N L = new L10N(ZipModule.class);
 
   public String []getLoadedExtensions()
@@ -113,7 +113,7 @@ public class ZipModule extends AbstractQuercusModule {
     if (entry == null)
       return BooleanValue.FALSE;
 
-    return new UnicodeValueImpl(entry.zip_entry_name());
+    return env.createString(entry.zip_entry_name());
   }
 
   /**

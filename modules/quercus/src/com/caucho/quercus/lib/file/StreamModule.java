@@ -274,7 +274,7 @@ public class StreamModule extends AbstractQuercusModule {
 
       // XXX: handle offset and maxlen
 
-      return new UnicodeValueImpl(sb.toString());
+      return env.createString(sb.toString());
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -331,7 +331,7 @@ public class StreamModule extends AbstractQuercusModule {
     env.stub("stream_get_meta_data");
     
     ArrayValue array = new ArrayValueImpl();    
-    array.put(new UnicodeValueImpl("timed_out"), BooleanValue.FALSE);
+    array.put(env.createString("timed_out"), BooleanValue.FALSE);
     
     return array;
   }
@@ -343,8 +343,8 @@ public class StreamModule extends AbstractQuercusModule {
   {
     ArrayValue value = new ArrayValueImpl();
 
-    value.append(new UnicodeValueImpl("tcp"));
-    value.append(new UnicodeValueImpl("udp"));
+    value.append(env.createString("tcp"));
+    value.append(env.createString("udp"));
 
     return value;
   }

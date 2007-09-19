@@ -35,9 +35,11 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.TempBufferBytesValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempStream;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -159,7 +161,7 @@ public class PDF {
   /**
    * Returns the result as a string.
    */
-  public Value get_buffer()
+  public Value get_buffer(Env env)
   {
     TempStream ts = _tempStream;
     _tempStream = null;
@@ -167,7 +169,16 @@ public class PDF {
     if (ts == null)
       return BooleanValue.FALSE;
 
-    return new TempBufferBytesValue(ts.getHead());
+    StringValue result = env.createBinaryBuilder();
+    for (TempBuffer ptr = ts.getHead();
+	 ptr != null;
+	 ptr = ptr.getNext()) {
+      result.append(ptr.getBuffer(), 0, ptr.getLength());
+    }
+
+    TempBuffer.free(ts.getHead());
+
+    return result;
   }
 
   /**

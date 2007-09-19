@@ -140,7 +140,7 @@ public class MhashModule extends AbstractQuercusModule {
       _highestOrdinal = ordinal;
   }
 
-  public Value mhash(Env env, int hash, BinaryValue data, @Optional String key)
+  public Value mhash(Env env, int hash, StringValue data, @Optional String key)
   {
     if (key.length() > 0)
       throw new UnsupportedOperationException("key"); // XXX:
@@ -181,14 +181,14 @@ public class MhashModule extends AbstractQuercusModule {
     return new LongValue(512); // XXX: stubbed
   }
 
-  public Value mhash_get_hash_name(int hash)
+  public Value mhash_get_hash_name(Env env, int hash)
   {
     MhashAlgorithm algorithm = _algorithmMap.get(hash);
 
     if (algorithm == null)
       return BooleanValue.FALSE;
     else
-      return new UnicodeValueImpl(algorithm.getName());
+      return env.createString(algorithm.getName());
   }
 
   // XXX: public String mhash_keygen_s2k(int hash, String password, String salt, int bytes)

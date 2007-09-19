@@ -1132,7 +1132,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public int indexOf(char match)
   {
-    return lastIndexOf(match, 0);
+    return indexOf(match, 0);
   }
     
   /**
