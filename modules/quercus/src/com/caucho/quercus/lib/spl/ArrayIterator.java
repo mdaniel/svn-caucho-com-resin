@@ -34,49 +34,48 @@ import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.ArrayModule;
-import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-@Delegates({ArrayObject.PrintDelegateImpl.class, ArrayObject.FieldDelegateImpl.class})
-public class ArrayObject
-  implements ArrayAccess,
-             Countable,
-             IteratorAggregate,
-             Traversable
+@Delegates({ArrayIterator.PrintDelegateImpl.class})
+public class ArrayIterator
+  implements Traversable,
+             SeekableIterator,
+             ArrayAccess,
+             Countable
 {
-  private static L10N L = new L10N(ArrayObject.class);
-
   public static final int STD_PROP_LIST = 0x00000001;
   public static final int ARRAY_AS_PROPS = 0x00000002;
 
-  private final Env _env;
-  private Value _value;
+  private Env _env;
+  private final Value _value;
   private int _flags;
-  private QuercusClass _iteratorClass;
+
+  private java.util.Iterator<Map.Entry<Value,Value>> _iterator;
+  private Map.Entry<Value, Value> _current;
 
   @Name("__construct")
-  public ArrayObject(Env env,
-                     @Optional Value value,
-                     @Optional int flags,
-                     @Optional("ArrayIterator") String iteratorClassName)
+  public ArrayIterator(Env env,
+                       @Optional Value value,
+                       @Optional int flags)
   {
-    if (value.isNull())
-      value = new ArrayValueImpl();
-
     _env = env;
     _value = value;
     _flags = flags;
 
-    QuercusClass iteratorClass = _env.findClass(iteratorClassName);
+    resetToFirst();
+  }
 
-    if (iteratorClass == null || !iteratorClass.isA("Iterator"))
-      throw new IllegalArgumentException(L.l("A class that implements Iterator must be specified"));
-
-    _iteratorClass = iteratorClass;
+  private void resetToFirst()
+  {
+    _iterator = _value.getIterator(_env);
+    if (_iterator.hasNext())
+      _current = _iterator.next();
+    else
+      _current = null;
   }
 
   public void append(Value value)
@@ -84,7 +83,7 @@ public class ArrayObject
     _value.put(value);
   }
 
-  public void asort(@Optional long sortFlag)
+  public void asort(ArrayValue array, @Optional long sortFlag)
   {
     sortFlag = 0; // qa/4a46
 
@@ -97,13 +96,9 @@ public class ArrayObject
     return _value.getCount(_env);
   }
 
-  public Value exchangeArray(ArrayValue array)
+  public Value current()
   {
-    Value oldValue = _value;
-
-    _value = array;
-
-    return oldValue;
+    return _current == null ? UnsetValue.UNSET : _current.getValue();
   }
 
   public Value getArrayCopy()
@@ -116,16 +111,9 @@ public class ArrayObject
     return _flags;
   }
 
-  public ObjectValue getIterator()
+  public Value key()
   {
-    Value[] args = new Value[] { _value, LongValue.create(_flags) };
-
-    return (ObjectValue) _iteratorClass.callNew(_env,args);
-  }
-
-  public String getIteratorClass()
-  {
-    return _iteratorClass.getName();
+    return _current == null ? UnsetValue.UNSET : _current.getKey();
   }
 
   public void ksort(@Optional long sortFlag)
@@ -144,6 +132,14 @@ public class ArrayObject
   {
     if (_value instanceof ArrayValue)
       ArrayModule.natsort((ArrayValue) _value);
+  }
+
+  public void next()
+  {
+    if (_iterator.hasNext())
+      _current = _iterator.next();
+    else
+      _current = null;
   }
 
   public boolean offsetExists(Value offset)
@@ -166,26 +162,45 @@ public class ArrayObject
     return _value.remove(offset);
   }
 
+  public void rewind()
+  {
+    resetToFirst();
+  }
+
   public void setFlags(Value flags)
   {
     _flags = flags.toInt();
   }
 
-  public void setIteratorClass(String iteratorClass)
+  public void seek(int index)
   {
-    _iteratorClass = _env.findClass(iteratorClass);
+    resetToFirst();
+
+    for (int i = 0; i < index; i++) {
+      if (!_iterator.hasNext()) {
+        _current = null;
+        break;
+      }
+
+      _current = _iterator.next();
+    }
   }
 
-  public void uasort(Callback func)
+  public void uasort(Callback func, @Optional long sortFlag)
   {
     if (_value instanceof ArrayValue)
-      ArrayModule.uasort(_env, (ArrayValue) _value, func,  0);
+      ArrayModule.uasort(_env, (ArrayValue) _value, func, sortFlag);
   }
 
   public void uksort(Callback func, @Optional long sortFlag)
   {
     if (_value instanceof ArrayValue)
       ArrayModule.uksort(_env, (ArrayValue) _value, func, sortFlag);
+  }
+
+  public boolean valid()
+  {
+    return _current != null;
   }
 
 
@@ -199,59 +214,6 @@ public class ArrayObject
         out.print(' ');
     }
 
-    public void printRImpl(Env env,
-                           ObjectValue obj,
-                           WriteStream out,
-                           int depth,
-                           IdentityHashMap<Value, String> valueSet)
-      throws IOException
-    {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
-
-
-      if ((arrayObject._flags & STD_PROP_LIST) != 0) {
-        super.printRImpl(env, obj, out, depth, valueSet);
-      }
-      else {
-        out.print("ArrayObject");
-        out.print(' ');
-        out.println("Object");
-        printDepth(out, 4 * depth);
-        out.println("(");
-
-        depth++;
-
-        Value arrayValue = arrayObject._value;
-
-        java.util.Iterator<Map.Entry<Value,Value>> iterator
-          = arrayValue.getIterator(env);
-
-        while (iterator.hasNext()) {
-          Map.Entry<Value, Value> entry = iterator.next();
-
-          Value key = entry.getKey();
-          Value value = entry.getValue();
-
-          printDepth(out, 4 * depth);
-          
-          out.print("[" + key + "] => ");
-
-          value.printR(env, out, depth + 1, valueSet);
-
-          printDepth(out, 4 * depth);
-
-          out.println();
-        }
-
-
-        depth--;
-
-        printDepth(out, 4 * depth);
-        out.println(")");
-
-      }
-    }
-
     @Override
     public void varDumpImpl(Env env,
                             ObjectValue obj,
@@ -260,17 +222,17 @@ public class ArrayObject
                             IdentityHashMap<Value, String> valueSet)
       throws IOException
     {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
+      ArrayIterator arrayIterator = (ArrayIterator) obj.toJavaObject();
 
-      if ((arrayObject._flags & STD_PROP_LIST) != 0) {
+      if ((arrayIterator._flags & STD_PROP_LIST) != 0) {
         super.varDumpImpl(env, obj, out, depth, valueSet);
       }
       else {
-        out.println("object(ArrayObject) (" + obj.getSize() + ") {");
+        Value arrayValue = arrayIterator._value;
+
+        out.println("object (" + arrayValue.getCount(env) + ") {");
 
         depth++;
-
-        Value arrayValue = arrayObject._value;
 
         java.util.Iterator<Map.Entry<Value,Value>> iterator
           = arrayValue.getIterator(env);
@@ -300,38 +262,11 @@ public class ArrayObject
         }
 
         depth--;
-        
+
         printDepth(out, 2 * depth);
 
         out.print("}");
       }
-    }
-
-  }
-
-  static public class FieldDelegateImpl
-    extends FieldDelegate
-  {
-    @Override
-    public Value getField(Env env, Value obj, String name, boolean create)
-    {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
-
-      if ((arrayObject._flags & ARRAY_AS_PROPS) != 0) {
-        return arrayObject._value.get(env.createString(name));
-      }
-      else
-        return super.getField(env, obj, name, create);
-    }
-
-    public void putField(Env env, Value obj, String name, Value value)
-    {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
-
-      if ((arrayObject._flags & ARRAY_AS_PROPS) != 0)
-        arrayObject._value.put(env.wrapJava(name), value);
-      else
-        super.putField(env, obj, name, value);
     }
   }
 }

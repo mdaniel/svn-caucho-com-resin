@@ -529,7 +529,7 @@ public class QuercusClass {
   public ObjectValue newInstance(Env env)
   {
     ObjectValue obj = _classDef.newInstance(env, this);
-    
+
     for (int i = 0; i < _initializers.size(); i++) {
       _initializers.get(i).initInstance(env, obj);
     }
