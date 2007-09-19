@@ -57,6 +57,7 @@ public class BuilderProgramContainer extends BuilderProgram {
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
+    // ejb/4102
     reorderProgramList();
 
     for (int i = 0; i < _programList.size(); i++) {
@@ -87,14 +88,26 @@ public class BuilderProgramContainer extends BuilderProgram {
 
   private void reorderProgramList()
   {
+    int count = 0;
+
     // ejb/4102: callbacks must be called after all field injections.
-    for (int i = 0; i < _programList.size(); i++) {
+    for (int i = 0; i < _programList.size(); ) {
       BuilderProgram program = _programList.get(i);
+
+      count++;
 
       if (program instanceof CallbackProgram) {
         _programList.remove(i);
         _programList.add(program);
+
+        // ejb/4100, ejb/4102
+        if (count >= _programList.size())
+          break;
+
+        continue;
       }
+
+      i++;
     }
   }
 }

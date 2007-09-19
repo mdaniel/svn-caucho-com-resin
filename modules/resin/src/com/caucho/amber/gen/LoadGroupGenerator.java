@@ -74,7 +74,7 @@ public class LoadGroupGenerator extends ClassComponent {
     long mask = (1L << (_index % 64));
 
     out.println("boolean isLoaded = (__caucho_loadMask_" + group
-		+ " & " + mask + "L) != 0;");
+                + " & " + mask + "L) != 0;");
 
     // jpa/0ge2: MappedSuperclassType
     if (_relatedType.getTable() != null) {
@@ -138,9 +138,10 @@ public class LoadGroupGenerator extends ClassComponent {
         out.println("__caucho_load_callback();");
       }
 
-      // jpa/0r00 vs. jpa/0r01
+      // ejb/069a, jpa/0r00 vs. jpa/0r01
       out.println();
-      out.println("__caucho_home.postLoad(this);");
+      out.println("if (__caucho_home != null)");
+      out.println("  __caucho_home.postLoad(this);");
 
       // jpa/0r01: @PostLoad, with transaction.
       // Within a transaction the entity is not copied
@@ -195,10 +196,10 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println();
 
       /* XXX: jpa/0o09
-      int loadCount = _relatedType.getLoadGroupIndex();
-      for (int i = 0; i <= loadCount / 64; i++) {
-        out.println("    __caucho_loadMask_" + i + " = 0;");
-      }
+        int loadCount = _relatedType.getLoadGroupIndex();
+        for (int i = 0; i <= loadCount / 64; i++) {
+          out.println("    __caucho_loadMask_" + i + " = 0;");
+        }
       */
 
       int dirtyCount = _relatedType.getDirtyIndex();
@@ -210,8 +211,8 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("}");
       // ejb/0d01 - already loaded in the transaction
       /*
-      out.println("else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
-      out.println("  return;");
+        out.println("else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
+        out.println("  return;");
       */
 
       for (int i = min; i <= max; i++) {
@@ -237,11 +238,11 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("item.__caucho_load_select_" + _index + "(aConn);");
 
     /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
-    out.println("try {");
-    out.pushDepth();
+       out.println("try {");
+       out.pushDepth();
 
-    // jpa/0o01
-    out.println("Object child;");
+       // jpa/0o01
+       out.println("Object child;");
     */
 
     // ejb/06--, ejb/0a-- and jpa/0o04
@@ -253,15 +254,15 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + " & " + mask + "L;"); // mask + "L;");
 
     /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
-    out.popDepth();
-    out.println("} catch (RuntimeException e) {");
-    out.println("  throw e;");
-    out.println("} catch (Exception e) {");
-    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
-    out.println("}");
+       out.popDepth();
+       out.println("} catch (RuntimeException e) {");
+       out.println("  throw e;");
+       out.println("} catch (Exception e) {");
+       out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+       out.println("}");
 
-    out.println();
-    out.println("return;");
+       out.println();
+       out.println("return;");
     */
 
     out.popDepth();

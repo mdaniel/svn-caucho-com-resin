@@ -341,6 +341,8 @@ public class SessionBean extends ClassComponent {
 
       out.println("}");
 
+      out.println();
+
       generateCallReflectionGetMethod(out, "method" + j, aroundInvokeMethodName, "methodParamTypes", "cl" + j);
 
       out.println();
@@ -359,6 +361,8 @@ public class SessionBean extends ClassComponent {
 
       interceptors.append("this");
       interceptorMethods.append(aroundInvokeMethodName);
+
+      out.println();
 
       generateCallReflectionGetMethod(out, aroundInvokeMethodName, aroundInvokeMethodName, "methodParamTypes", "getClass()");
     }
@@ -422,6 +426,8 @@ public class SessionBean extends ClassComponent {
       out.println("  _interceptor" + j + " = cl" + j + ".newInstance();");
 
       out.println("}");
+
+      out.println();
 
       generateCallReflectionGetMethod(out, "method" + j, postConstructMethodName, "methodParamTypes", "cl" + j);
 
@@ -496,7 +502,6 @@ public class SessionBean extends ClassComponent {
     out.pushDepth();
 
     out.println("java.lang.reflect.Field field;");
-    out.println("java.lang.reflect.Method method;");
     out.println();
 
     for (EnvEntry envEntry : _bean.getEnvEntries()) {
@@ -561,23 +566,16 @@ public class SessionBean extends ClassComponent {
     out.println("try {");
     out.pushDepth();
 
-    out.print("method  = getClass().getSuperclass().getDeclaredMethod(\"set");
-    out.print(Character.toUpperCase(s.charAt(0)));
+    String methodName = "set" + Character.toUpperCase(s.charAt(0));
 
-    if (s.length() > 1) {
-      out.print(s.substring(1));
-    }
+    if (s.length() > 1)
+      methodName += s.substring(1);
 
-    out.print("\", new Class[] { ");
-    out.print(cl.getName());
-
-    // ejb/0fd2 vs ejb/0fd3
-    if (cl.isPrimitive())
-      out.print(".TYPE");
-    else
-      out.print(".class");
-
-    out.println(" });");
+    generateCallReflectionGetMethod(out,
+                                    "method",
+                                    methodName,
+                                    "new Class[] { " + cl.getName() + ".class }",
+                                    "getClass().getSuperclass()");
 
     out.println("method.setAccessible(true);");
 
@@ -586,8 +584,30 @@ public class SessionBean extends ClassComponent {
     out.println(");");
 
     out.popDepth();
-    out.println("} catch (NoSuchMethodException e) {");
+    out.println("} catch (NoSuchMethodException e1) {");
     out.pushDepth();
+
+    if (! cl.equals(String.class)) {
+      out.println("try {");
+      out.pushDepth();
+
+      // ejb/0fd2 vs ejb/0fd3
+      generateCallReflectionGetMethod(out,
+                                      "method",
+                                      methodName,
+                                      "new Class[] { " + cl.getName() + ".TYPE }",
+                                      "getClass().getSuperclass()");
+
+      out.println("method.setAccessible(true);");
+
+      out.print("method.invoke(this, ");
+      out.print(value);
+      out.println(");");
+
+      out.popDepth();
+      out.println("} catch (NoSuchMethodException e2) {");
+      out.pushDepth();
+    }
 
     out.print("field  = getClass().getSuperclass().getDeclaredField(\"");
     out.print(s);
@@ -598,6 +618,12 @@ public class SessionBean extends ClassComponent {
     out.print("field.set(this, ");
     out.print(value);
     out.println(");");
+
+    // ejb/0fd2 vs ejb/0fd3
+    if (! cl.equals(String.class)) {
+      out.popDepth();
+      out.println("}");
+    }
 
     out.popDepth();
     out.println("}");
@@ -613,7 +639,6 @@ public class SessionBean extends ClassComponent {
                                                  String classVar)
     throws IOException
   {
-    out.println();
     out.print("java.lang.reflect.Method ");
     out.print(methodVar);
     out.print(" = __caucho_getMethod(\"");

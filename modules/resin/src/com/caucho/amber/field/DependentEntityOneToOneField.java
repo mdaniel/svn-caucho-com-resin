@@ -386,7 +386,15 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     getEntitySourceType().getId().generateSet(out, "query"+index, "index"+index, "super");
 
-    out.println("v"+index+" = (" + javaType + ") query"+index+".getSingleResult();");
+    boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
+
+    if (isJPA) {
+      out.println("v"+index+" = (" + javaType + ") query"+index+".getSingleResult();");
+    } else {
+      // ejb/06hj
+      out.println("com.caucho.amber.entity.Entity e = (com.caucho.amber.entity.Entity) query"+index+".getSingleResult();");
+      out.println("v"+index+" = (" + javaType + ") __caucho_session.loadProxy(e.__caucho_getEntityType(), e.__caucho_getPrimaryKey());");
+    }
 
     out.popDepth();
     out.println("} catch (java.sql.SQLException e) {");
