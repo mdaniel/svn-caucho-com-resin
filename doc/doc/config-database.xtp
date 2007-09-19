@@ -393,6 +393,8 @@ understanding of how pooling works.
 
 <s1 name="reliability" title="Reliability Configuration">
 
+<s2 name="reliability-ping" title="ping">
+
 <p>Resin's database pool can test if the pooled database connection
 is still alive by configuring a <var>ping</var> query.  This is typically only
 necessary if the <a href="#pooling">pooling</a> parameters are changed from
@@ -432,7 +434,7 @@ configure the pool to check idle connections as follows:</p>
 </example>
 -->
 
-<p>You can test the database reliability using the following steps:
+<p>You can test the ping using the following steps:
 </p>
 
 <ol>
@@ -441,6 +443,95 @@ configure the pool to check idle connections as follows:</p>
 </li><li>Restart the database server.
 </li><li>Execute another servlet that queries the database.
 </li></ol>
+
+</s2> <!-- reliability-ping -->
+
+<s2 name="driver_list" title="&lt;driver> list">
+<p>
+If there is a pool of database servers available that can be used for database
+operations, Resin can be configured with a list of &lt;driver> tags. 
+Resin uses a round robin algorithm to cycle through the list of drivers when
+obtaining connections.  If a particular &lt;driver> fails to provide a
+connection, Resin continues the attempt to obtain a connection. If all of the
+configured drivers fail to provide a connection the exception is propogated to
+the caller.
+</p>
+
+<example title="A &lt;driver> list">
+&lt;database jndi-name="jdbc/hogwarts"&gt;
+  &lt;driver&gt;
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://192.168.0.<b>110</b>:3306/hogwarts&lt;/url&gt;
+    ...
+  &lt;/driver&gt;
+
+  &lt;driver&gt;
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://192.168.0.<b>111</b>:3306/hogwarts&lt;/url&gt;
+    ...
+  &lt;/driver&gt;
+  ...
+&lt;/database&gt;
+</example>
+
+<s3 name="backup-driver" title="&lt;backup-driver> list">
+<p>
+Drivers in a driver list can be marked as backups.  The drivers configured with
+&lt;backup-driver&gt; are used only if all of the drivers configured with
+&lt;driver&gt; have failed.
+</p>
+
+<p>
+Each time a new connection is needed Resin goes through the process of first
+attempting to use one of the &lt;driver> configured drivers to get a connection,
+and if that fails then the &lt;backup-driver> are used.
+A new connection is needed from the driver if the pool of connections that is
+maintained by Resin does not contain an idle connection.  The
+<a href="#pooling">Pooling configuration</a> and the usage pattern of the
+application determine how often a connection is obtained from a driver.  The
+pooling configuration typically allows a single real connection to be reused by
+the application many times.
+</p>
+
+<p>
+The lifetime of a connection obtained from a &lt;backup-driver> is determined by
+the <a href="#pooling">Pooling configuration</a>, thus even if the main
+&lt;driver> becomes available again a connection previously obtained from a
+&lt;backup-driver> will continue to be used until it expires from the pool.
+</p>
+
+<example title="A &lt;backup-driver> list">
+&lt;database jndi-name="jdbc/hogwarts"&gt;
+  &lt;driver&gt;
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://192.168.0.<b>110</b>:3306/hogwarts&lt;/url&gt;
+    ...
+  &lt;/driver&gt;
+
+  &lt;driver&gt;
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://192.168.0.<b>111</b>:3306/hogwarts&lt;/url&gt;
+    ...
+  &lt;/driver&gt;
+
+  &lt;backup-driver&gt;
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://192.168.0.<b>112</b>:3306/hogwarts&lt;/url&gt;
+    ...
+  &lt;/backup-driver&gt;
+
+  &lt;backup-driver&gt;
+    &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
+    &lt;url&gt;jdbc:mysql://192.168.0.<b>113</b>:3306/hogwarts&lt;/url&gt;
+    ...
+  &lt;/backup-driver&gt;
+  ...
+&lt;/database&gt;
+</example>
+
+</s3>
+
+</s2> <!-- driver-list -->
 
 </s1> <!-- reliability -->
 
