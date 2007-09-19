@@ -61,8 +61,9 @@ public class ClassLoaderConfig {
 
     ClassLoader loader = thread.getContextClassLoader();
 
-    if (! (loader instanceof EnvironmentClassLoader))
+    if (! (loader instanceof EnvironmentClassLoader)) {
       throw new ConfigException(L.l("<class-loader> requires an EnvironmentClassLoader."));
+    }
 
     _classLoader = (EnvironmentClassLoader) loader;
 

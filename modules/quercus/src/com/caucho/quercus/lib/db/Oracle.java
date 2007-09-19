@@ -139,10 +139,11 @@ public class Oracle extends JdbcConnectionResource {
   /**
    * Creates a database-specific result.
    */
-  protected JdbcResultResource createResult(Statement stmt,
+  protected JdbcResultResource createResult(Env env,
+					    Statement stmt,
                                             ResultSet rs)
   {
-    return new OracleResult(stmt, rs, this);
+    return new OracleResult(env, stmt, rs, this);
   }
 
 

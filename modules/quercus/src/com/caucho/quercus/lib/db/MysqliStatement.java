@@ -353,7 +353,7 @@ public class MysqliStatement extends JdbcStatementResource {
     try {
 
       if (getResultSet() != null) {
-        return new MysqliResult(getMetaData(),
+        return new MysqliResult(env, getMetaData(),
                                 (Mysqli) validateConnection());
       } else
         return null;

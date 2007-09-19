@@ -48,7 +48,10 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
   public Object create(NodeBuilder builder, Object parent)
     throws Exception
   {
-    return _typeStrategy.create();
+    if (builder.isIgnoreEnvironment())
+      return null;
+    else
+      return _typeStrategy.create();
   }
 
   public void configure(NodeBuilder builder, Object bean,

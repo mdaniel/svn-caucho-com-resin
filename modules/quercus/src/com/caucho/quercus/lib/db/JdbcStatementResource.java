@@ -410,7 +410,8 @@ public class JdbcStatementResource {
     if ((_stmt == null) || (_rs == null))
       return null;
 
-    _resultResource = new JdbcResultResource(_stmt, _rs, _conn);
+    _resultResource
+      = new JdbcResultResource(_conn.getEnv(), _stmt, _rs, _conn);
     return _resultResource;
   }
 

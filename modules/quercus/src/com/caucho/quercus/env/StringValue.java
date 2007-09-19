@@ -123,25 +123,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public boolean isLongConvertible()
   {
-    int len = length();
-
-    if (len == 0)
-      return true;
-
-    int i = 0;
-    char ch = charAt(0);
-
-    if (ch == '-' || ch == '+')
-      i++;
-
-    for (; i < len; i++) {
-      ch = charAt(i);
-
-      if (! ('0' <= ch && ch <= '9'))
-        return false;
-    }
-
-    return true;
+    return getValueType().isLongConvertable();
   }
 
   /**
@@ -149,7 +131,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public boolean isDoubleConvertible()
   {
-    return getNumericType() == IS_DOUBLE;
+    return getValueType().isNumberConvertable();
   }
 
   /**
@@ -157,7 +139,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public boolean isNumber()
   {
-    return getNumericType() != IS_STRING;
+    return false;
   }
 
   /**
@@ -630,14 +612,14 @@ abstract public class StringValue extends Value implements CharSequence {
 		  .append(tail));
         }
         else if ('0' <= ch && ch <= '9' && i == length() - 1) {
-          return LongValue.create(toLong() + 1);
+          return LongValue.create(toLong() + incr);
         }
       }
 
       return createStringBuilder().append(tail.toString());
     }
     else if (isLongConvertible()) {
-      return LongValue.create(toLong() - 1);
+      return LongValue.create(toLong() + incr);
     }
     else {
       return this;

@@ -154,28 +154,6 @@ public class StringBuilderValue
   }
 
   /**
-   * Returns true for a long
-   */
-  @Override
-  public boolean isLongConvertible()
-  {
-    char []buffer = _buffer;
-    int len = _length;
-
-    if (len == 0)
-      return true;
-
-    for (int i = 0; i < len; i++) {
-      int ch = _buffer[i];
-
-      if (! ('0' <= ch && ch <= '9'))
-        return false;
-    }
-
-    return true;
-  }
-
-  /**
    * Returns true for a double
    */
   public boolean isDouble()
@@ -948,17 +926,7 @@ public class StringBuilderValue
     for (int i = 0; i < length; i++) {
       int ch = charAt(i);
 
-      if (0x20 <= ch && ch <= 0x7f || ch == '\t' || ch == '\r' || ch == '\n')
-	out.print((char) ch);
-      else if (ch <= 0xff)
-	out.print("\\x" + Integer.toHexString(ch / 16) + Integer.toHexString(ch % 16));
-      else {
-	out.print("\\u"
-		  + Integer.toHexString((ch >> 12) & 0xf)
-		  + Integer.toHexString((ch >> 8) & 0xf)
-		  + Integer.toHexString((ch >> 4) & 0xf)
-		  + Integer.toHexString((ch) & 0xf));
-      }
+      out.print((char) ch);
     }
 
     out.print("\"");

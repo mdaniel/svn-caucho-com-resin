@@ -63,11 +63,12 @@ public class MysqliResult extends JdbcResultResource {
    * @param rs the corresponding result set
    * @param conn the corresponding connection
    */
-  public MysqliResult(Statement stmt,
+  public MysqliResult(Env env,
+		      Statement stmt,
                       ResultSet rs,
                       Mysqli conn)
   {
-    super(stmt, rs, conn);
+    super(env, stmt, rs, conn);
   }
 
   /**
@@ -76,10 +77,11 @@ public class MysqliResult extends JdbcResultResource {
    * @param metaData the corresponding result set meta data
    * @param conn the corresponding connection
    */
-  public MysqliResult(ResultSetMetaData metaData,
+  public MysqliResult(Env env,
+		      ResultSetMetaData metaData,
                       Mysqli conn)
   {
-    super(metaData, conn);
+    super(env, metaData, conn);
   }
 
   public String getResourceType()

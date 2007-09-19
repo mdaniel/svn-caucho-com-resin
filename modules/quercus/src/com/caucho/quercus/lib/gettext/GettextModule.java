@@ -480,7 +480,7 @@ public class GettextModule
           i += 4;
         }
         else {
-          sb.appendByte('{');
+          sb.appendByte('[');
           i++;
         }
       }

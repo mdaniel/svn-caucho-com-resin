@@ -651,6 +651,21 @@ public class BinaryBuilderValue
   }
 
   /**
+   * Append a Java byte to the value without conversions.
+   */
+  public final StringValue append(byte v)
+  {
+    int length = _length + 1;
+
+    if (_buffer.length < length)
+      ensureCapacity(length);
+
+    _buffer[_length++] = v;
+
+    return this;
+  }
+
+  /**
    * Append a Java boolean to the value.
    */
   @Override

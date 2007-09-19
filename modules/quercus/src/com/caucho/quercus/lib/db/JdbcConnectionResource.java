@@ -285,7 +285,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       ResultSet rs = _dmd.getCatalogs();
 
       if (rs != null)
-        return createResult(_stmt, rs);
+        return createResult(_env, _stmt, rs);
       else
         return null;
     } catch (SQLException e) {
@@ -576,7 +576,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       if (stmt.execute(sql)) {
         ResultSet rs = stmt.getResultSet();
-        _rs = createResult(stmt, rs);
+        _rs = createResult(_env, stmt, rs);
         _affectedRows = 0;
         _warnings = stmt.getWarnings();
       } else {
@@ -629,10 +629,11 @@ public abstract class JdbcConnectionResource implements Closeable {
   /**
    * Creates a database-specific result.
    */
-  protected JdbcResultResource createResult(Statement stmt,
+  protected JdbcResultResource createResult(Env env,
+					    Statement stmt,
                                             ResultSet rs)
   {
-    return new JdbcResultResource(stmt, rs, this);
+    return new JdbcResultResource(env, stmt, rs, this);
   }
 
 

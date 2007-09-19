@@ -793,20 +793,14 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
-   * Closes the connection
-   */
-  public boolean close(Env env)
-  {
-    return super.close(env);
-  }
-
-  /**
    * Creates a database-specific result.
    */
-  protected JdbcResultResource createResult(Statement stmt,
+  @Override
+  protected JdbcResultResource createResult(Env env,
+					    Statement stmt,
                                             ResultSet rs)
   {
-    return new MysqliResult(stmt, rs, this);
+    return new MysqliResult(env, stmt, rs, this);
   }
 
   /**
@@ -858,7 +852,8 @@ public class Mysqli extends JdbcConnectionResource {
       stmt.setEscapeProcessing(false);
 
       if (stmt.execute(sql)) {
-        MysqliResult result = (MysqliResult) createResult(stmt, stmt.getResultSet());
+        MysqliResult result
+	  = (MysqliResult) createResult(getEnv(), stmt, stmt.getResultSet());
         getConnection().setCatalog(currentCatalog.toString());
         return result;
       } else {
@@ -922,7 +917,7 @@ public class Mysqli extends JdbcConnectionResource {
         stmt.setEscapeProcessing(false);
         if (stmt.execute(s)) {
           setAffectedRows(0);
-          setResultResource(createResult(stmt, stmt.getResultSet()));
+          setResultResource(createResult(getEnv(), stmt, stmt.getResultSet()));
           _resultValues.add(getResultResource());
           setWarnings(stmt.getWarnings());
         } else {

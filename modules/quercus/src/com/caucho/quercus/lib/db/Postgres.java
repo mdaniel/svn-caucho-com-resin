@@ -119,14 +119,14 @@ public class Postgres extends JdbcConnectionResource {
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("postgres.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("postgres.connectError", new UnicodeValueImpl(e.getMessage()));
+      env.setSpecialValue("postgres.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("postgres.connectError", new UnicodeValueImpl(e.getMessage()));
+      env.setSpecialValue("postgres.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return false;
@@ -160,10 +160,11 @@ public class Postgres extends JdbcConnectionResource {
   /**
    * Creates a database-specific result.
    */
-  protected JdbcResultResource createResult(Statement stmt,
+  protected JdbcResultResource createResult(Env env,
+					    Statement stmt,
                                             ResultSet rs)
   {
-    return new PostgresResult(stmt, rs, this);
+    return new PostgresResult(env, stmt, rs, this);
   }
 
   public void setAsynchronousResult(PostgresResult asyncResult)
@@ -208,7 +209,7 @@ public class Postgres extends JdbcConnectionResource {
    */
   protected void keepResourceValues(Statement stmt)
   {
-    setResultResource(createResult(stmt, null));
+    setResultResource(createResult(getEnv(), stmt, null));
   }
 
   /**
@@ -226,9 +227,9 @@ public class Postgres extends JdbcConnectionResource {
    * @param str a string
    * @return the string escaped for SQL statements
    */
-  protected UnicodeBuilderValue realEscapeString(StringValue str)
+  protected StringValue realEscapeString(StringValue str)
   {
-    UnicodeBuilderValue buf = new UnicodeBuilderValue(str.length());
+    StringValue buf = str.createStringBuilder(str.length());
 
     final int strLength = str.length();
 

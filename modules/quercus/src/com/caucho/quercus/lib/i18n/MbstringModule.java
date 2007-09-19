@@ -90,7 +90,7 @@ public class MbstringModule
       encoding = getEncoding(env, encoding);
 
       str = str.toUnicodeValue(env, encoding);
-      str = toUpperCaseTitle(str);
+      str = toUpperCaseTitle(env, str);
 
       return str.toBinaryValue(env, encoding);
     }
@@ -165,7 +165,7 @@ public class MbstringModule
 
     vars.set(encodeAll(env, decoded, toEncoding));
 
-    return new UnicodeValueImpl(srcEncoding);
+    return env.createString(srcEncoding);
   }
 
   /**
@@ -232,7 +232,7 @@ public class MbstringModule
                                                 transfer_encoding,
                                                 linefeed,
                                                 76);
-      return new UnicodeValueImpl(mime);
+      return env.createString(mime);
 
     } catch (UnsupportedEncodingException e) {
       throw new QuercusModuleException(e.getMessage());
@@ -540,14 +540,14 @@ public class MbstringModule
     if (type.length() == 0) {
       ArrayValue array = new ArrayValueImpl();
 
-      array.put(new UnicodeValueImpl("internal_encoding"),
-                new UnicodeValueImpl(getEncoding(env)));
+      array.put(env.createString("internal_encoding"),
+                env.createString(getEncoding(env)));
 
       return array;
     }
 
     else if (type.equals("internal_encoding")) {
-      return new UnicodeValueImpl(getEncoding(env));
+      return env.createString(getEncoding(env));
 
     } else {
       throw new UnimplementedException("mb_get_info");
@@ -585,7 +585,7 @@ public class MbstringModule
                               @Optional String encoding)
   {
     if (encoding.length() == 0)
-      return new UnicodeValueImpl(getEncoding(env));
+      return env.createString(getEncoding(env));
     else {
       setEncoding(env, encoding);
       return BooleanValue.TRUE;
@@ -602,11 +602,11 @@ public class MbstringModule
 
     if (language.length() == 0) {
       if (encoding.equalsIgnoreCase("ISO-2022-JP"))
-        return new UnicodeValueImpl("Japanese");
+        return env.createString("Japanese");
       else if (encoding.equalsIgnoreCase("ISO-8859-1"))
-        return new UnicodeValueImpl("English");
+        return env.createString("English");
       else if (encoding.equalsIgnoreCase("UTF-8"))
-        return new UnicodeValueImpl("uni");
+        return env.createString("uni");
     }
     else if (language.equals("Japanese") || language.equals("ja"))
       setEncoding(env, "ISO-2022-JP");
@@ -627,18 +627,18 @@ public class MbstringModule
   {
     ArrayValue array = new ArrayValueImpl();
 
-    array.put(new UnicodeValueImpl("ASCII"));
-    array.put(new UnicodeValueImpl("UTF-8"));
-    array.put(new UnicodeValueImpl("UTF-16"));
-    array.put(new UnicodeValueImpl("ISO-8859-1"));
-    array.put(new UnicodeValueImpl("ISO-8859-2"));
-    array.put(new UnicodeValueImpl("ISO-8859-15"));
-    array.put(new UnicodeValueImpl("ISO-2022-JP"));
-    array.put(new UnicodeValueImpl("EUC-KR"));
-    array.put(new UnicodeValueImpl("EUC-CN"));
-    array.put(new UnicodeValueImpl("EUC-TW"));
-    array.put(new UnicodeValueImpl("EUC-JP"));
-    array.put(new UnicodeValueImpl("JIS"));
+    array.put(env.createString("ASCII"));
+    array.put(env.createString("UTF-8"));
+    array.put(env.createString("UTF-16"));
+    array.put(env.createString("ISO-8859-1"));
+    array.put(env.createString("ISO-8859-2"));
+    array.put(env.createString("ISO-8859-15"));
+    array.put(env.createString("ISO-2022-JP"));
+    array.put(env.createString("EUC-KR"));
+    array.put(env.createString("EUC-CN"));
+    array.put(env.createString("EUC-TW"));
+    array.put(env.createString("EUC-JP"));
+    array.put(env.createString("JIS"));
 
     return array;
   }
@@ -683,7 +683,7 @@ public class MbstringModule
   {
     String mimeName = Encoding.getMimeName(encoding.toString());
 
-    return new UnicodeValueImpl(mimeName);
+    return env.createString(mimeName);
   }
 
   /**
@@ -806,7 +806,7 @@ public class MbstringModule
     str = str.substring(start, end);
 
     if (end < len && trimmarker.length() > 0) {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      StringValue sb = env.createUnicodeBuilder();
 
       sb.append(str);
       sb.append(trimmarker.toUnicodeValue(env, encoding));
@@ -995,9 +995,9 @@ public class MbstringModule
    * Returns string with words capitalized and intermediate letters are
    * made lower-case.
    */
-  private static StringValue toUpperCaseTitle(StringValue string)
+  private static StringValue toUpperCaseTitle(Env env, StringValue string)
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = env.createUnicodeBuilder();
 
     int strLen = string.length();
     boolean isWordStart = true;
@@ -1120,8 +1120,7 @@ public class MbstringModule
                               String destEncoding)
   {
     try {
-      return IconvUtility.decodeEncode(val, srcEncoding, destEncoding);
-
+      return IconvUtility.decodeEncode(env, val, srcEncoding, destEncoding);
     } catch (UnsupportedEncodingException e) {
       throw new QuercusModuleException(e.getMessage());
     }

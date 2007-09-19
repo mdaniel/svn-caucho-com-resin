@@ -869,7 +869,7 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return null;
 
-      resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      resource = new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
       Value value = resource.fetchArray(env, JdbcResultResource.FETCH_ASSOC);
 
@@ -909,7 +909,8 @@ public class OracleModule extends AbstractQuercusModule {
 
     try {
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
       switch (mode) {
       case OCI_ASSOC:
@@ -938,7 +939,9 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return null;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
+      
       ArrayValue arrayValue = resource.fetchArray(env, JdbcResultResource.FETCH_ASSOC);
 
       return arrayValue;
@@ -959,7 +962,9 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return BooleanValue.FALSE;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
+      
       return resource.fetchObject(env);
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -979,7 +984,9 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return null;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
+      
       return resource.fetchArray(env, JdbcResultResource.FETCH_NUM);
 
     } catch (Exception ex) {
@@ -999,7 +1006,8 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return false;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
       Value result = resource.fetchArray(env, JdbcResultResource.FETCH_BOTH);
 
@@ -1053,7 +1061,8 @@ public class OracleModule extends AbstractQuercusModule {
 
       ResultSet rs = stmt.getResultSet();
 
-      JdbcResultResource resource = new JdbcResultResource(null, rs, null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, rs, null);
 
       int fieldNumber = resource.getColumnNumber(fieldNameOrNumber, 1);
 
@@ -1081,7 +1090,8 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return BooleanValue.FALSE;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
       return resource.getFieldName(env, fieldNumber);
     } catch (Exception ex) {
@@ -1158,7 +1168,8 @@ public class OracleModule extends AbstractQuercusModule {
 
       ResultSet rs = stmt.getResultSet();
 
-      JdbcResultResource resource = new JdbcResultResource(null, rs, null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, rs, null);
 
       int fieldNumber = resource.getColumnNumber(fieldNameOrNumber, 1);
 
@@ -1187,7 +1198,8 @@ public class OracleModule extends AbstractQuercusModule {
       if (field <= 0)
         return -1;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
       Value typeV = resource.getJdbcType(--field);
 
@@ -1246,7 +1258,8 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return BooleanValue.FALSE;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
       return resource.getFieldType(env, fieldNumber);
     } catch (Exception ex) {
@@ -1452,7 +1465,8 @@ public class OracleModule extends AbstractQuercusModule {
       if (stmt == null)
         return BooleanValue.FALSE;
 
-      JdbcResultResource resource = new JdbcResultResource(null, stmt.getResultSet(), null);
+      JdbcResultResource resource
+	= new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
       return LongValue.create(resource.getFieldCount());
     } catch (Exception ex) {

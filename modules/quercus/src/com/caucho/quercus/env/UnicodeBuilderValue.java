@@ -580,6 +580,10 @@ public class UnicodeBuilderValue extends StringBuilderValue
       sign = -1;
       offset++;
     }
+    else if (buffer[offset] == '+') {
+      sign = +1;
+      offset++;
+    }
 
     while (offset < end) {
       int ch = buffer[offset++];
@@ -590,7 +594,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
         return sign * value;
     }
 
-    return value;
+    return sign * value;
   }
 
   public static double toDouble(char []buffer, int offset, int len)

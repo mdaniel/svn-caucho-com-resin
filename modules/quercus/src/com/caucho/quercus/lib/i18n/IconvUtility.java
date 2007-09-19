@@ -32,9 +32,7 @@ package com.caucho.quercus.lib.i18n;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.env.*;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import javax.mail.internet.MimeUtility;
 import java.io.IOException;
@@ -46,31 +44,35 @@ public class IconvUtility {
   private static final Logger log
     = Logger.getLogger(IconvUtility.class.getName());
 
-  public static BytesValue decodeEncode(StringValue str,
-                              String inCharset,
-                              String outCharset)
+  public static StringValue decodeEncode(Env env,
+					StringValue str,
+					String inCharset,
+					String outCharset)
     throws UnsupportedEncodingException
   {
-    return decodeEncode(str, inCharset, outCharset, 0, Integer.MAX_VALUE);
+    return decodeEncode(env, str, inCharset, outCharset, 0, Integer.MAX_VALUE);
   }
 
-  public static BytesValue decodeEncode(StringValue str,
-                              String inCharset,
-                              String outCharset,
-                              int offset)
+  public static StringValue decodeEncode(Env env,
+					 StringValue str,
+					 String inCharset,
+					 String outCharset,
+					 int offset)
     throws UnsupportedEncodingException
   {
-    return decodeEncode(str, inCharset, outCharset, offset, Integer.MAX_VALUE);
+    return decodeEncode(env, str, inCharset, outCharset,
+			offset, Integer.MAX_VALUE);
   }
 
   /**
    * Decodes and encodes to specified charsets at the same time.
    */
-  public static BytesValue decodeEncode(StringValue str,
-                              String inCharset,
-                              String outCharset,
-                              int offset,
-                              int length)
+  public static StringValue decodeEncode(Env env,
+					 StringValue str,
+					 String inCharset,
+					 String outCharset,
+					 int offset,
+					 int length)
     throws UnsupportedEncodingException
   {
     TempCharBuffer tb = TempCharBuffer.allocate();
@@ -116,8 +118,13 @@ public class IconvUtility {
       }
 
       out.flush();
-      return new TempBufferBytesValue(ts.getHead());
 
+      StringValue sb = env.createBinaryBuilder();
+      for (TempBuffer ptr = ts.getHead(); ptr != null; ptr = ptr.getNext()) {
+	sb.append(ptr.getBuffer(), 0, ptr.getLength());
+      }
+      
+      return sb;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -184,7 +191,7 @@ public class IconvUtility {
     name = name.toUnicodeValue(env, inCharset);
     value = value.toUnicodeValue(env, inCharset);
 
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = env.createUnicodeBuilder();
     sb.append(name);
     sb.append(':');
     sb.append(' ');

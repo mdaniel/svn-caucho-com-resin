@@ -527,7 +527,7 @@ public class PostgresModule extends AbstractQuercusModule {
           if (value.isLongConvertible()) {
             value = LongValue.create(value.toLong());
           } else {
-            UnicodeBuilderValue sb = new UnicodeBuilderValue();
+            StringValue sb = env.createUnicodeBuilder();
             value = sb.append("'").append(value).append("'");
           }
           break;
@@ -540,13 +540,13 @@ public class PostgresModule extends AbstractQuercusModule {
           if (value.isDoubleConvertible()) {
             value = DoubleValue.create(value.toDouble());
           } else {
-            UnicodeBuilderValue sb = new UnicodeBuilderValue();
+            StringValue sb = env.createUnicodeBuilder();
             value = sb.append("'").append(value).append("'");
           }
           break;
 
         default:
-          UnicodeBuilderValue sb = new UnicodeBuilderValue();
+          StringValue sb = env.createUnicodeBuilder();
           if (value.isNumberConvertible())  {
             value = sb.append(value);
           } else {
@@ -706,7 +706,7 @@ public class PostgresModule extends AbstractQuercusModule {
         ArrayValueImpl arr = (ArrayValueImpl) value;
         int count = arr.size();
 
-        UnicodeBuilderValue sb = new UnicodeBuilderValue();
+        StringValue sb = env.createUnicodeBuilder();
 
         LongValue currValue = LongValue.create(curr);
 
@@ -1707,7 +1707,8 @@ public class PostgresModule extends AbstractQuercusModule {
         Statement stmt = result.getJavaStatement();
 
         if (stmt.getMoreResults()) {
-          result = (PostgresResult) conn.createResult(stmt, stmt.getResultSet());
+          result = (PostgresResult) conn.createResult(env, stmt,
+						      stmt.getResultSet());
         } else {
           // 3. Individual pg_send_query (clean up; no futher results)
           conn.setResultResource(null);
@@ -2877,7 +2878,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         return null;
 
-      UnicodeBuilderValue whereClause = new UnicodeBuilderValue();
+      StringValue whereClause = env.createUnicodeBuilder();
 
       boolean isFirst = true;
 
@@ -2894,7 +2895,7 @@ public class PostgresModule extends AbstractQuercusModule {
         // pi = pi.replaceAll("\\\\", "\\\\\\\\");
       }
 
-      UnicodeBuilderValue query = new UnicodeBuilderValue();
+      StringValue query = env.createUnicodeBuilder();
       query.append("SELECT * FROM ").append(tableName).append(" WHERE ").append(whereClause);
 
       PostgresResult result = pg_query(env, conn, query.toString());
@@ -3301,7 +3302,7 @@ public class PostgresModule extends AbstractQuercusModule {
         return null;
 
       if (pstmt.getStatementType().equals("SELECT")) {
-        PostgresResult result = new PostgresResult(null, pstmt.getResultSet(), null);
+        PostgresResult result = new PostgresResult(env, null, pstmt.getResultSet(), null);
         conn.setResultResource(result);
         return result;
       } else {

@@ -31,6 +31,8 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.util.L10N;
 
+import com.caucho.quercus.env.Env;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -52,11 +54,12 @@ public class OracleResult extends JdbcResultResource {
    * @param rs the corresponding result set
    * @param conn the corresponding connection
    */
-  public OracleResult(Statement stmt,
+  public OracleResult(Env env,
+		      Statement stmt,
                       ResultSet rs,
                       Oracle conn)
   {
-    super(stmt, rs, conn);
+    super(env, stmt, rs, conn);
   }
 
   /**
@@ -65,10 +68,11 @@ public class OracleResult extends JdbcResultResource {
    * @param metaData the corresponding result set meta data
    * @param conn the corresponding connection
    */
-  public OracleResult(ResultSetMetaData metaData,
+  public OracleResult(Env env,
+		      ResultSetMetaData metaData,
                       Oracle conn)
   {
-    super(metaData, conn);
+    super(env, metaData, conn);
   }
 
   /**

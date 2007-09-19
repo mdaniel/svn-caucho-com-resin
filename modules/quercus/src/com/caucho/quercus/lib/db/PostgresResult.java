@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.util.L10N;
+import com.caucho.quercus.env.Env;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -54,11 +55,12 @@ public class PostgresResult extends JdbcResultResource {
    * @param rs the corresponding result set
    * @param conn the corresponding connection
    */
-  public PostgresResult(Statement stmt,
+  public PostgresResult(Env env,
+			Statement stmt,
                         ResultSet rs,
                         Postgres conn)
   {
-    super(stmt, rs, conn);
+    super(env, stmt, rs, conn);
   }
 
   /**
@@ -67,10 +69,11 @@ public class PostgresResult extends JdbcResultResource {
    * @param metaData the corresponding result set meta data
    * @param conn the corresponding connection
    */
-  public PostgresResult(ResultSetMetaData metaData,
+  public PostgresResult(Env env,
+			ResultSetMetaData metaData,
                         Postgres conn)
   {
-    super(metaData, conn);
+    super(env, metaData, conn);
   }
 
   /**

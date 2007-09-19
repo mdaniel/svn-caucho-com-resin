@@ -581,6 +581,14 @@ abstract public class ArrayValue extends Value {
   /**
    * Convenience for lib.
    */
+  public void put(Env env, String key, String value)
+  {
+    put(env.createString(key), env.createString(value));
+  }
+
+  /**
+   * Convenience for lib.
+   */
   public void put(String key, char value)
   {
     // XXX: this needs an Env arg because of i18n

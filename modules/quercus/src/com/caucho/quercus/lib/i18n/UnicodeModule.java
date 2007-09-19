@@ -74,7 +74,7 @@ public class UnicodeModule extends AbstractQuercusModule {
 
   public static BooleanValue unicode_semantics(Env env)
   {
-    return BooleanValue.TRUE;
+    return env.isUnicodeSemantics() ? BooleanValue.TRUE : BooleanValue.FALSE;
   }
 
   public static StringValue unicode_decode(Env env,
@@ -105,21 +105,21 @@ public class UnicodeModule extends AbstractQuercusModule {
 
     if ("all".equals(type)) {
       ArrayValue array = new ArrayValueImpl();
-      array.put("input_encoding",
-          env.getIniString("iconv.input_encoding"));
-      array.put("output_encoding",
-          env.getIniString("iconv.output_encoding"));
-      array.put("internal_encoding",
-          env.getIniString("iconv.internal_encoding"));
+      array.put(env, "input_encoding",
+		env.getIniString("iconv.input_encoding"));
+      array.put(env, "output_encoding",
+		env.getIniString("iconv.output_encoding"));
+      array.put(env, "internal_encoding",
+		env.getIniString("iconv.internal_encoding"));
       return array;
     }
 
     if ("input_encoding".equals(type))
-      return new UnicodeValueImpl(env.getIniString("iconv.input_encoding"));
+      return env.createString(env.getIniString("iconv.input_encoding"));
     else if ("output_encoding".equals(type))
-      return new UnicodeValueImpl(env.getIniString("iconv.output_encoding"));
+      return env.createString(env.getIniString("iconv.output_encoding"));
     else if ("internal_encoding".equals(type))
-      return new UnicodeValueImpl(env.getIniString("iconv.internal_encoding"));
+      return env.createString(env.getIniString("iconv.internal_encoding"));
 
     return BooleanValue.FALSE;
   }
@@ -261,23 +261,23 @@ public class UnicodeModule extends AbstractQuercusModule {
       int lineLength = 76;
 
       if (preferences != null) {
-        Value tmp = new UnicodeValueImpl("scheme");
+        Value tmp = env.createString("scheme");
         if ((tmp = preferences.get(tmp)).isset())
           scheme = tmp.toString();
 
-        tmp = new UnicodeValueImpl("line-break-chars");
+        tmp = env.createString("line-break-chars");
         if ((tmp = preferences.get(tmp)).isset())
           lineBreakChars = tmp.toString();
 
-        tmp = new UnicodeValueImpl("input-charset");
+        tmp = env.createString("input-charset");
         if ((tmp = preferences.get(tmp)).isset())
           inCharset = tmp.toString();
 
-        tmp = new UnicodeValueImpl("output-charset");
+        tmp = env.createString("output-charset");
         if ((tmp = preferences.get(tmp)).isset())
           outCharset = tmp.toString();
 
-        tmp = new UnicodeValueImpl("line-length");
+        tmp = env.createString("line-length");
         if ((tmp = preferences.get(tmp)).isset()) {
         if (tmp.isLongConvertible())
           lineLength = (int)tmp.toLong();
@@ -475,7 +475,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     }
 
     try {
-      return IconvUtility.decodeEncode(str, in_charset, out_charset);
+      return IconvUtility.decodeEncode(env, str, in_charset, out_charset);
     }
     catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);

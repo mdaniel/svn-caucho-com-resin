@@ -82,15 +82,16 @@ public class JdbcResultResource {
    * @param rs the corresponding result set
    * @param conn the corresponding connection
    */
-  public JdbcResultResource(Statement stmt,
+  public JdbcResultResource(Env env,
+			    Statement stmt,
                             ResultSet rs,
                             JdbcConnectionResource conn)
   {
+    _env = env;
     _closed = false;
     _stmt = stmt;
     _rs = rs;
     _conn = conn;
-    _env = conn.getEnv();
   }
 
   /**
@@ -99,9 +100,11 @@ public class JdbcResultResource {
    * @param metaData the corresponding result set meta data
    * @param conn the corresponding connection
    */
-  public JdbcResultResource(ResultSetMetaData metaData,
+  public JdbcResultResource(Env env,
+			    ResultSetMetaData metaData,
                             JdbcConnectionResource conn)
   {
+    _env = env;
     _closed = true;
 
     _metaData = metaData;
