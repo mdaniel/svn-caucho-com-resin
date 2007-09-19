@@ -1005,7 +1005,7 @@
         includes="hessian/client/*.as hessian/io/*.as hessian/mxml/*.as"/>
     </compc>
 
-    <jar destfile="${dist}/hessian-flash-${version}-src.jar">
+    <jar destfile="${dist}/${dist.name}/hessian-flash-${version}-src.jar">
       <fileset dir="${modules}/flash/src">
         <exclude name=".cvsignore"/>
         <exclude name=".svnignore"/>
