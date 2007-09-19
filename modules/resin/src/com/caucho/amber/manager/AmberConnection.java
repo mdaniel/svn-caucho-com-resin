@@ -796,16 +796,6 @@ public class AmberConnection
                      boolean isEager)
     throws AmberException
   {
-    return load(cl, key, isEager, 0, 0);
-  }
-
-  public Object load(Class cl,
-                     Object key,
-                     boolean isEager,
-                     int loadGroup,
-                     long loadMask)
-    throws AmberException
-  {
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, L.l("loading entity class " + cl.getName() + " PK: " + key));
 
@@ -849,13 +839,6 @@ public class AmberConnection
 
       // The entity is added for eagerly loading optimization.
       addInternalEntity(entity);
-
-      if (loadMask != 0L) {
-        long loadMaskOR = entity.__caucho_getLoadMask(loadGroup) | loadMask;
-
-        // jpa/0o03
-        entity.__caucho_setLoadMask(loadMaskOR, loadGroup);
-      }
 
       // jpa/0l48: inheritance loading optimization.
       // jpa/0h20: no transaction, copy from the existing cache item.
@@ -1519,18 +1502,6 @@ public class AmberConnection
                            Object key,
                            boolean isEager)
   {
-    return loadEntity(cl, key, isEager, 0, 0);
-  }
-
-  /**
-   * Adds a new entity for the given class name and key.
-   */
-  public Entity loadEntity(Class cl,
-                           Object key,
-                           boolean isEager,
-                           int loadGroup,
-                           long loadMask)
-  {
     if (key == null)
       return null;
 
@@ -1545,7 +1516,7 @@ public class AmberConnection
       // XXX: needs to create based on the discriminator with inheritance.
       // Create a new entity for the given class and primary key.
       try {
-        entity = (Entity) load(cl, key, isEager, loadGroup, loadMask);
+        entity = (Entity) load(cl, key, isEager);
       } catch (AmberException e) {
         throw new AmberRuntimeException(e);
       }
