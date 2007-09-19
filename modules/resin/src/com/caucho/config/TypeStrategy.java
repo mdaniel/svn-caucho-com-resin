@@ -75,6 +75,14 @@ public abstract class TypeStrategy {
   /**
    * Called before the children are configured.
    */
+  public void beforeConfigureBean(NodeBuilder builder, Object bean, Node node)
+  {
+  }
+
+  /**
+   * Called before the children are configured.  Also called for
+   * attribute configuration, e.g. for macros and web-app-default.
+   */
   public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
   {
   }

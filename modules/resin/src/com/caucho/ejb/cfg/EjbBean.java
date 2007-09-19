@@ -2387,6 +2387,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    */
   public ConfigException error(String msg)
   {
-    return new ConfigException(msg);
+    if (! "".equals(_location))
+      return new LineConfigException(_location + msg);
+    else
+      return new ConfigException(msg);
   }
 }

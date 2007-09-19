@@ -180,9 +180,9 @@ public class BeanTypeStrategy extends TypeStrategy {
    * Called before the children are configured.
    */
   @Override
-  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
+  public void beforeConfigureBean(NodeBuilder builder, Object bean, Node node)
   {
-    super.beforeConfigure(builder, bean, node);
+    super.beforeConfigureBean(builder, bean, node);
 
     try {
       if (_setLocation != null && node instanceof QAbstractNode) {
@@ -200,6 +200,24 @@ public class BeanTypeStrategy extends TypeStrategy {
 	  _setSystemId.invoke(bean, systemId);
       }
        
+      for (int i = 0; i < _injectList.size(); i++) {
+        _injectList.get(i).configure(builder, bean);
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+  /**
+   * Called before the children are configured.
+   */
+  @Override
+  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
+  {
+    super.beforeConfigure(builder, bean, node);
+
+    try {
       if (_addDependency != null) {
 	ArrayList<Dependency> list = builder.getDependencyList();
 
@@ -209,10 +227,6 @@ public class BeanTypeStrategy extends TypeStrategy {
 	  if (depend instanceof PersistentDependency)
 	    _addDependency.invoke(bean, ((PersistentDependency) depend));
 	}
-      }
-
-      for (int i = 0; i < _injectList.size(); i++) {
-        _injectList.get(i).configure(builder, bean);
       }
     } catch (RuntimeException e) {
       throw e;
