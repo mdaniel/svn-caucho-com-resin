@@ -764,18 +764,22 @@ public class EntityManyToOneField extends CascadableField {
     long targetGroup = 0;
     long targetMask = 0;
 
+    String loadMaskString = "";
+
     // jpa/0s2e as a negative test.
     if (_targetField != null) {
       // jpa/0l42
       long targetLoadIndex = _targetField.getTargetLoadIndex();
       targetGroup = targetLoadIndex / 64;
       targetMask = (1L << (targetLoadIndex % 64));
+
+      loadMaskString = ", " + targetGroup + ", " + targetMask + "L";
     }
 
     out.println(varName + " = (" + targetTypeExt + ") "
                 + session + ".loadEntity("
                 + targetTypeExt + ".class, "
-                + otherKey + ", true);");
+                + otherKey + ", true" + loadMaskString + ");");
 
     generateSetTargetLoadMask(out, varName);
 
