@@ -33,6 +33,8 @@ import java.io.IOException;
 
 import java.util.Iterator;
 
+import static javax.xml.XMLConstants.*;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.MarshalException;
@@ -61,14 +63,14 @@ import com.caucho.xml.stream.StaxUtil;
 public abstract class CDataProperty extends Property {
   public static final L10N L = new L10N(CDataProperty.class);
 
-  protected boolean _isNillable = true;
+  protected boolean _isNullable = true;
 
   protected abstract Object read(String in) 
     throws IOException, JAXBException;
 
   public String getMinOccurs()
   {
-    if (_isNillable)
+    if (_isNullable)
       return "0";
 
     return null;
@@ -96,6 +98,9 @@ public abstract class CDataProperty extends Property {
                      ClassSkeleton attributed, Object parent)
     throws IOException, XMLStreamException, JAXBException
   {
+    // Read any attributes that might represent fields in the parent object.
+    // Necessary for situations in which the read object has an XmlValue,
+    // but also has XmlAttributes.
     if (attributed != null) {
       for (int i = 0; i < in.getAttributeCount(); i++) {
         QName attributeName = in.getAttributeName(i);
@@ -110,6 +115,7 @@ public abstract class CDataProperty extends Property {
       }
     }
 
+    // Now read the actual value of the CData
     in.next();
 
     Object ret = null;
@@ -125,8 +131,15 @@ public abstract class CDataProperty extends Property {
           break;
       }
     }
-    else
-      ret = read(""); // Hack when we have something like <tag></tag>
+    else {
+      String nil = in.getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil");
+
+      if ("true".equals(nil)) // XXX nillable?
+        ret = getNilValue();
+
+      else
+        ret = read(""); // Hack when we have something like <tag></tag>
+    }
 
     while (in.hasNext()) {
       in.next();
@@ -186,10 +199,14 @@ public abstract class CDataProperty extends Property {
                     Namer namer, Object obj, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
+    // This checks if obj != null (as opposed to value != null) because we 
+    // may actually want to write something if the value is null.  For example,
+    // we may write an xsi:nil="true".
     if (obj != null) {
       QName qname = namer.getQName(value);
 
-      StaxUtil.writeStartElement(out, qname);
+      if (attributes != null || value != null)
+        StaxUtil.writeStartElement(out, qname);
 
       if (attributes != null) {
         while (attributes.hasNext()) {
@@ -198,8 +215,10 @@ public abstract class CDataProperty extends Property {
         }
       }
 
-      out.writeCharacters(write(value));
-      StaxUtil.writeEndElement(out, qname);
+      if (attributes != null || value != null) {
+        out.writeCharacters(write(value));
+        StaxUtil.writeEndElement(out, qname);
+      }
     }
   }
 

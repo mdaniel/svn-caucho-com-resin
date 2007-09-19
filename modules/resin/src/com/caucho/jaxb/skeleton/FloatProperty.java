@@ -53,9 +53,14 @@ public class FloatProperty extends CDataProperty {
   public static final FloatProperty PRIMITIVE_PROPERTY 
     = new FloatProperty(false);
 
-  protected FloatProperty(boolean isNillable)
+  protected FloatProperty(boolean isNullable)
   {
-    _isNillable = isNillable;
+    _isNullable = isNullable;
+  }
+
+  public Object getNilValue()
+  {
+    return Float.valueOf(0.0F);
   }
 
   protected String write(Object in)

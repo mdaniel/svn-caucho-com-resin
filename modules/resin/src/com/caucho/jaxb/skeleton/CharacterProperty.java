@@ -53,9 +53,14 @@ public class CharacterProperty extends CDataProperty {
   public static final CharacterProperty PRIMITIVE_PROPERTY 
     = new CharacterProperty(false);
 
-  protected CharacterProperty(boolean isNillable)
+  protected CharacterProperty(boolean isNullable)
   {
-    _isNillable = isNillable;
+    _isNullable = isNullable;
+  }
+
+  public Object getNilValue()
+  {
+    return Character.valueOf((char) 0);
   }
 
   protected String write(Object in)

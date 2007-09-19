@@ -84,9 +84,14 @@ public abstract class Property {
     return null;
   }
 
-  public boolean isNillable()
+  public boolean isNullable()
   {
     return false;
+  }
+
+  public Object getNilValue()
+  {
+    return null;
   }
 
   public abstract QName getSchemaType();

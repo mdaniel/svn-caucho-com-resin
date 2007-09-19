@@ -51,9 +51,14 @@ public class IntProperty extends CDataProperty {
   public static final IntProperty OBJECT_PROPERTY = new IntProperty(true);
   public static final IntProperty PRIMITIVE_PROPERTY = new IntProperty(false);
 
-  protected IntProperty(boolean isNillable)
+  protected IntProperty(boolean isNullable)
   {
-    _isNillable = isNillable;
+    _isNullable = isNullable;
+  }
+
+  public Object getNilValue()
+  {
+    return Integer.valueOf(0);
   }
 
   protected String write(Object in)

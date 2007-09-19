@@ -275,21 +275,6 @@ public class JAXBUtil {
       return toUpperCase(cl.getName().charAt(0)) + cl.getName().substring(1);
   }
 
-  public static String classBasename(Class cl)
-  {
-    return classBasename(cl.getName());
-  }
-
-  public static String classBasename(String className)
-  {
-    int i = className.lastIndexOf('$');
-
-    if (i < 0)
-      i = className.lastIndexOf('.');
-
-    return className.substring(i + 1);
-  }
-
   /**
    * Tests for punctuation according to JAXB page 334.
    */
@@ -379,7 +364,7 @@ public class JAXBUtil {
 
   public static String identifierToXmlName(Class cl)
   {
-    List<StringBuilder> words = splitIdentifier(classBasename(cl));
+    List<StringBuilder> words = splitIdentifier(cl.getSimpleName());
     StringBuilder xmlName = new StringBuilder();
 
     xmlName.append(toLowerCase(words.get(0).charAt(0)));

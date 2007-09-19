@@ -53,9 +53,14 @@ public class ShortProperty extends CDataProperty {
   public static final ShortProperty PRIMITIVE_PROPERTY 
     = new ShortProperty(false);
 
-  protected ShortProperty(boolean isNillable)
+  protected ShortProperty(boolean isNullable)
   {
-    _isNillable = isNillable;
+    _isNullable = isNullable;
+  }
+
+  public Object getNilValue()
+  {
+    return Short.valueOf((short) 0);
   }
 
   protected String write(Object in)

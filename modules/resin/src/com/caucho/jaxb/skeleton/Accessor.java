@@ -37,6 +37,8 @@ import com.caucho.xml.stream.StaxUtil;
 
 import org.w3c.dom.Node;
 
+import static javax.xml.XMLConstants.*;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -73,8 +75,6 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-
-import javax.xml.XMLConstants;
 
 import java.lang.annotation.Annotation;
 
@@ -240,6 +240,10 @@ public abstract class Accessor implements Namer {
           // XXX XmlList value?
           _property =
             _context.createProperty(getGenericType(), false, mimeType, true);
+
+          if (! (_property instanceof CDataProperty) &&
+              ! (_property instanceof QNameProperty))
+            throw new JAXBException(L.l("Attributes must be simple XML types: {0}", _property));
 
           break;
         }
@@ -445,7 +449,17 @@ public abstract class Accessor implements Namer {
   {
     if (value != null) {
       QName name = getQName(value);
-      String output = ((CDataProperty) _property).write(value);
+      String output = null;
+      
+      if (_property instanceof CDataProperty)
+        output = ((CDataProperty) _property).write(value);
+
+      else if (_property instanceof QNameProperty)
+        output = StaxUtil.qnameToString(out, (QName) value);
+
+      else
+        throw new JAXBException(L.l("Invalid property for attribute: {0}", 
+                                    _property));
 
       StaxUtil.writeAttribute(out, name, output);
     }
@@ -705,7 +719,7 @@ public abstract class Accessor implements Namer {
       case ELEMENTS:
         {
           out.writeStartElement(XML_SCHEMA_PREFIX, "choice", 
-                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                W3C_XML_SCHEMA_NS_URI);
           out.writeAttribute("minOccurs", "0");
 
           if (_property.getMaxOccurs() != null)
@@ -729,7 +743,7 @@ public abstract class Accessor implements Namer {
 
           for (Property property : properties) {
             out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
-                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                  W3C_XML_SCHEMA_NS_URI);
 
             String type = 
               StaxUtil.qnameToString(out, property.getSchemaType());
@@ -753,7 +767,7 @@ public abstract class Accessor implements Namer {
       case ANY_ATTRIBUTE:
         {
           out.writeStartElement(XML_SCHEMA_PREFIX, "anyAttribute", 
-                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                W3C_XML_SCHEMA_NS_URI);
           out.writeAttribute("namespace", "##other");
           out.writeAttribute("processContents", "skip");
         }
@@ -763,7 +777,7 @@ public abstract class Accessor implements Namer {
       case ATTRIBUTE:
         {
           out.writeEmptyElement(XML_SCHEMA_PREFIX, "attribute", 
-                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                W3C_XML_SCHEMA_NS_URI);
 
           // See http://forums.java.net/jive/thread.jspa?messageID=167171
           // Primitives are always required
@@ -793,7 +807,7 @@ public abstract class Accessor implements Namer {
       case ANY_TYPE_ELEMENT:
         {
           out.writeEmptyElement(XML_SCHEMA_PREFIX, "any", 
-                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                W3C_XML_SCHEMA_NS_URI);
           out.writeAttribute("processContents", "skip");
 
           if (_property.getMaxOccurs() != null)
@@ -805,7 +819,7 @@ public abstract class Accessor implements Namer {
       case ANY_TYPE_ELEMENT_LAX:
         {
           out.writeEmptyElement(XML_SCHEMA_PREFIX, "any", 
-                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                W3C_XML_SCHEMA_NS_URI);
           out.writeAttribute("processContents", "lax");
 
           if (_property.getMaxOccurs() != null)
@@ -817,7 +831,7 @@ public abstract class Accessor implements Namer {
       case ELEMENT_REF:
         {
           out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
-                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                W3C_XML_SCHEMA_NS_URI);
 
           XmlElementRef elementRef = getAnnotation(XmlElementRef.class);
 
@@ -837,14 +851,14 @@ public abstract class Accessor implements Namer {
 
           if (xmlList != null) {
             out.writeStartElement(XML_SCHEMA_PREFIX, "element", 
-                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                  W3C_XML_SCHEMA_NS_URI);
             out.writeAttribute("name", getName());
 
             out.writeStartElement(XML_SCHEMA_PREFIX, "simpleType", 
-                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                  W3C_XML_SCHEMA_NS_URI);
 
             out.writeEmptyElement(XML_SCHEMA_PREFIX, "list", 
-                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                  W3C_XML_SCHEMA_NS_URI);
 
             String itemType = 
               StaxUtil.qnameToString(out, _property.getSchemaType());
@@ -857,7 +871,7 @@ public abstract class Accessor implements Namer {
           }
           else {
             out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
-                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                                  W3C_XML_SCHEMA_NS_URI);
 
             if (! _generateRICompatibleSchema || ! getType().isPrimitive()) {
               if (element != null) {
@@ -947,10 +961,10 @@ public abstract class Accessor implements Namer {
     }
   }
 
-  public boolean isNillable()
+  public boolean isNullable()
   {
     // XXX propertyMap
-    return _property.isNillable();
+    return _property.isNullable();
   }
 
   public QName getSchemaType()

@@ -53,9 +53,14 @@ public class BooleanProperty extends CDataProperty {
   public static final BooleanProperty PRIMITIVE_PROPERTY 
     = new BooleanProperty(false);
 
-  protected BooleanProperty(boolean isNillable)
+  public Object getNilValue()
   {
-    _isNillable = isNillable;
+    return Boolean.FALSE;
+  }
+
+  protected BooleanProperty(boolean isNullable)
+  {
+    _isNullable = isNullable;
   }
 
   protected String write(Object in)

@@ -39,6 +39,8 @@ import com.caucho.xml.stream.StaxUtil;
 
 import org.w3c.dom.Node;
 
+import static javax.xml.XMLConstants.*;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -625,7 +627,12 @@ public class ClassSkeleton<C> extends Skeleton {
     throws IOException, XMLStreamException, JAXBException
   {
     try {
-      C ret = newInstance();
+      C ret = null;
+
+      String nil = in.getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil");
+
+      if (! "true".equals(nil))
+        ret = newInstance();
 
       if (_locationAccessor != null)
         _locationAccessor.set(ret, in.getLocation());

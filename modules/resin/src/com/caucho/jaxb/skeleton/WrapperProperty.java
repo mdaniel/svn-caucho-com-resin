@@ -138,7 +138,7 @@ public class WrapperProperty extends Property {
     return null;
   }
 
-  public boolean isNillable()
+  public boolean isNullable()
   {
     return false;
   }

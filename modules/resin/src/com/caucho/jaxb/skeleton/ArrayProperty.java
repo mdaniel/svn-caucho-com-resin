@@ -107,7 +107,7 @@ public abstract class ArrayProperty extends IterableProperty {
     return _componentProperty.isXmlPrimitiveType();
   }
 
-  public boolean isNillable()
+  public boolean isNullable()
   {
     return true;
   }

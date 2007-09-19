@@ -53,9 +53,14 @@ public class DoubleProperty extends CDataProperty {
   public static final DoubleProperty PRIMITIVE_PROPERTY 
     = new DoubleProperty(false);
 
-  protected DoubleProperty(boolean isNillable)
+  protected DoubleProperty(boolean isNullable)
   {
-    _isNillable = isNillable;
+    _isNullable = isNullable;
+  }
+
+  public Object getNilValue()
+  {
+    return Double.valueOf(0.0);
   }
 
   protected String write(Object in)

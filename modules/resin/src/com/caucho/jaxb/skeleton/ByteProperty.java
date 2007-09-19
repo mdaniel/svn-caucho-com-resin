@@ -49,9 +49,14 @@ public class ByteProperty extends CDataProperty {
   public static final ByteProperty OBJECT_PROPERTY = new ByteProperty(true);
   public static final ByteProperty PRIMITIVE_PROPERTY = new ByteProperty(false);
 
-  protected ByteProperty(boolean isNillable)
+  protected ByteProperty(boolean isNullable)
   {
-    _isNillable = isNillable;
+    _isNullable = isNullable;
+  }
+
+  public Object getNilValue()
+  {
+    return Byte.valueOf((byte) 0);
   }
 
   protected String write(Object in)

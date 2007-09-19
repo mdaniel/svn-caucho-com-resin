@@ -52,9 +52,14 @@ public class LongProperty extends CDataProperty {
   public static final LongProperty OBJECT_PROPERTY = new LongProperty(true);
   public static final LongProperty PRIMITIVE_PROPERTY = new LongProperty(false);
 
-  protected LongProperty(boolean isNillable)
+  protected LongProperty(boolean isNullable)
   {
-    _isNillable = isNillable;
+    _isNullable = isNullable;
+  }
+
+  public Object getNilValue()
+  {
+    return Long.valueOf(0L);
   }
 
   protected String write(Object in)
@@ -66,7 +71,7 @@ public class LongProperty extends CDataProperty {
     throws JAXBException
   {
     if ("".equals(in)) {
-      if (_isNillable)
+      if (_isNullable)
         return null;
       else
         throw new UnmarshalException("Primitives may not be null");

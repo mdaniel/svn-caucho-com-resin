@@ -181,7 +181,7 @@ public class CollectionProperty extends IterableProperty {
     return "unbounded";
   }
 
-  public boolean isNillable()
+  public boolean isNullable()
   {
     return true;
   }

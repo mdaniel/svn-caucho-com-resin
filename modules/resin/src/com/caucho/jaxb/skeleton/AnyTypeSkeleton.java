@@ -174,13 +174,13 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
       Skeleton skeleton = _context.findSkeletonForObject(obj);
 
       if (skeleton != null) {
-        String typeName = null;//StaxUtil.qnameToString(out, skeleton.getTypeName());
+        // XXX if (skeleton.getTypeName() == null) {}
 
-        // XXX if (typeName == null) {}
+        /*
+        XmlInstanceWrapper instanceWrapper 
+          = new XmlInstanceWrapper(skeleton.getTypeName());
 
-        XmlInstanceWrapper instanceWrapper = new XmlInstanceWrapper(typeName);
-
-        attributes = instanceWrapper.getExtendedIterator(attributes);
+        attributes = instanceWrapper.getExtendedIterator(attributes);*/
 
         skeleton.write(m, out, obj, null, attributes);
         return;
@@ -189,8 +189,8 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
       Property property = _context.getSimpleTypeProperty(obj.getClass());
 
       if (property != null) {
-        String typeName = StaxUtil.qnameToString(out, property.getSchemaType());
-        XmlInstanceWrapper instanceWrapper = new XmlInstanceWrapper(typeName);
+        XmlInstanceWrapper instanceWrapper = 
+          XmlInstanceWrapper.getInstance(property.getSchemaType());
 
         attributes = instanceWrapper.getExtendedIterator(attributes);
 

@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
@@ -75,23 +76,39 @@ public class XmlInstanceWrapper extends Accessor {
   private static final QName XSI_TYPE_NAME 
     = new QName(W3C_XML_SCHEMA_INSTANCE_NS_URI, "type", "xsi");
 
-  private final String _type;
+  private static final HashMap<QName,XmlInstanceWrapper> _instances =
+    new HashMap<QName,XmlInstanceWrapper>();
 
-  public XmlInstanceWrapper(String type)
+  private final QName _type;
+
+  private XmlInstanceWrapper(QName type)
   {
     _type = type;
-    _property = StringProperty.PROPERTY;
+    _property = QNameProperty.PROPERTY;
   }
 
+  public static XmlInstanceWrapper getInstance(QName type)
+  {
+    XmlInstanceWrapper instance = _instances.get(type);
+
+    if (instance == null) {
+      instance = new XmlInstanceWrapper(type);
+      _instances.put(type, instance);
+    }
+
+    return instance;
+  }
+
+  /*
   // XXX this is an ugly hack
   public void writeAttribute(Marshaller m, XMLStreamWriter out, Object value)
     throws IOException, XMLStreamException, JAXBException
   {
     super.writeAttribute(m, out, value);
 
-    if (_type.startsWith("xsd:"))
+    if (W3C_XML_SCHEMA_NS_URI.equals(_type.getNamespaceURI()))
       out.writeNamespace("xsd", W3C_XML_SCHEMA_NS_URI);
-  }
+  }*/
 
   public AccessorType getAccessorType()
     throws JAXBException
@@ -123,12 +140,12 @@ public class XmlInstanceWrapper extends Accessor {
 
   public Class getType()
   {
-    return String.class;
+    return QName.class;
   }
 
   public Type getGenericType()
   {
-    return String.class;
+    return QName.class;
   }
 
   public <A extends Annotation> A getAnnotation(Class<A> c)
@@ -149,5 +166,10 @@ public class XmlInstanceWrapper extends Accessor {
   public Iterator getExtendedIterator(Iterator base)
   {
     return new ExtendedIterator(base, this);
+  }
+
+  public String toString()
+  {
+    return "XmlInstanceWrapper[" + _type + "]";
   }
 }
