@@ -224,7 +224,7 @@ the pool</td><td>30 sec
 
 </td></tr><tr><td>ping-table</td><td><a href="#reliability">Reliability parameter</a> - The database table used to "ping", checking that the connection is still live.</td><td>n/a
 </td></tr><tr><td>ping</td><td><a href="#reliability">Reliability parameter</a> - test for live connections before allocating them from the pool.</td><td>false
-</td></tr><tr><td>ping-interval</td><td><a href="#reliability">Reliability parameter</a> - how often to ping for ping-on-idle</td><td>60s
+</td></tr><tr><td>ping-interval</td><td><a href="#reliability">Reliability parameter</a> - set the interval for pings, instead of doing a ping every time</td><td>60s
 
 </td></tr><tr><td>prepared-statement-cache-size</td><td>A cache that holds prepared statements, a reused prepared statement avoids the overhead of the driver making the prepared statement</td><td>0
 </td></tr><tr><td>spy</td><td>A debugging aid, if true, generate <code>info</code> level log events that reveal the SQL that is used with the connections.</td><td>false
@@ -399,8 +399,9 @@ understanding of how pooling works.
 is still alive by configuring a <var>ping</var> query.  This is typically only
 necessary if the <a href="#pooling">pooling</a> parameters are changed from
 their default values.
+</p>
 
-</p><p>If the pool is configured with a long max-idle-time the database connection
+<p>If the pool is configured with a long max-idle-time the database connection
 may become stale if the database is restarted, or if the database is configured
 with a shorter connection timeout value than the configuration of the Resin
 pool.  Normally when a database connection is returned to the pool it will wait
@@ -411,28 +412,21 @@ stale.  The <var>ping</var> configuration can test the database connection.</p>
 <p>When pinging, Resin's DBPool will test a table specified with the
 <var>ping-table</var> parameter before returning the connection to the application.
 If the ping fails, the connection is assumed to be no good and a different
-connection from the pool is returned.  For a ping-table of my_table, Resin will
-use a query like the following:</p>
+connection from the pool is returned.  For a ping-table of BROOMS, Resin will
+use the query <code>select 1 from BROOMS where 1=0</code>
+</p>
 
-<example>
-SELECT 1 FROM my_table
+<example title="&lt;ping> configuration">
+  &lt;database jndi-name="..."&gt;
+    &lt;driver type="..."&gt;
+      ...
+    &lt;/driver&gt;
+
+    &lt;ping&gt;true&lt;/ping&gt;
+    &lt;ping-table&gt;BROOMS&lt;/ping-table&gt;
+  &lt;/database&gt;
 </example>
 
-<!--
-<p>If the database had a table <var/my_table/>, you could
-configure the pool to check idle connections as follows:</p>
-
-<example>
-&lt;resource-ref>
-  &lt;res-ref-name>jdbc/test&lt;/res-ref-name>
-  &lt;res-type>javax.sql.DataSource&lt;/res-type>
-  &lt;init-param driver-name="com.caucho.jdbc.mysql.Driver"/>
-  &lt;init-param url="jdbc:mysql-caucho://localhost:3306/test"/>
-  &lt;init-param ping-table="my_table"/>
-  &lt;init-param ping-on-idle="true"/>
-&lt;/resource-ref>
-</example>
--->
 
 <p>You can test the ping using the following steps:
 </p>
