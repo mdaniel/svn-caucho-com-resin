@@ -710,6 +710,22 @@ class Regcomp {
 	  ch = '\b';
 	  isChar = true;
 	  break;
+	case 'n':
+      ch = '\n';
+      isChar = true;
+      break;
+	case 't':
+	  ch = '\t';
+	  isChar = true;
+	  break;
+	 case 'r':
+       ch = '\r';
+       isChar = true;
+       break;
+	 case 'f':
+       ch = '\f';
+       isChar = true;
+       break;
 
     case 'x':
       ch = parseHex(pattern);
