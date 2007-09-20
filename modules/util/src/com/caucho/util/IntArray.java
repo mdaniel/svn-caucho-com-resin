@@ -85,7 +85,7 @@ public class IntArray {
    */
   public void add(IntArray array)
   {
-    if (_data.length <= _size)
+    if (_data.length <= array._size)
       expand(_size + array._size);
 
     for (int i = 0; i < array._size; i++)
