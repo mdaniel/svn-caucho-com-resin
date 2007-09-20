@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.annotation.Delegates;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
@@ -41,7 +40,6 @@ import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-@Delegates({ArrayObject.PrintDelegateImpl.class, ArrayObject.FieldDelegateImpl.class})
 public class ArrayObject
   implements ArrayAccess,
              Countable,
@@ -189,149 +187,106 @@ public class ArrayObject
   }
 
 
-  static public class PrintDelegateImpl
-    extends PrintDelegate
+  static private void printDepth(WriteStream out, int depth)
+    throws java.io.IOException
   {
-    static private void printDepth(WriteStream out, int depth)
-      throws java.io.IOException
-    {
-      for (int i = depth; i > 0; i--)
-        out.print(' ');
-    }
-
-    public void printRImpl(Env env,
-                           ObjectValue obj,
-                           WriteStream out,
-                           int depth,
-                           IdentityHashMap<Value, String> valueSet)
-      throws IOException
-    {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
-
-
-      if ((arrayObject._flags & STD_PROP_LIST) != 0) {
-        super.printRImpl(env, obj, out, depth, valueSet);
-      }
-      else {
-        out.print("ArrayObject");
-        out.print(' ');
-        out.println("Object");
-        printDepth(out, 4 * depth);
-        out.println("(");
-
-        depth++;
-
-        Value arrayValue = arrayObject._value;
-
-        java.util.Iterator<Map.Entry<Value,Value>> iterator
-          = arrayValue.getIterator(env);
-
-        while (iterator.hasNext()) {
-          Map.Entry<Value, Value> entry = iterator.next();
-
-          Value key = entry.getKey();
-          Value value = entry.getValue();
-
-          printDepth(out, 4 * depth);
-          
-          out.print("[" + key + "] => ");
-
-          value.printR(env, out, depth + 1, valueSet);
-
-          printDepth(out, 4 * depth);
-
-          out.println();
-        }
-
-
-        depth--;
-
-        printDepth(out, 4 * depth);
-        out.println(")");
-
-      }
-    }
-
-    @Override
-    public void varDumpImpl(Env env,
-                            ObjectValue obj,
-                            WriteStream out,
-                            int depth,
-                            IdentityHashMap<Value, String> valueSet)
-      throws IOException
-    {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
-
-      if ((arrayObject._flags & STD_PROP_LIST) != 0) {
-        super.varDumpImpl(env, obj, out, depth, valueSet);
-      }
-      else {
-        out.println("object(ArrayObject) (" + obj.getSize() + ") {");
-
-        depth++;
-
-        Value arrayValue = arrayObject._value;
-
-        java.util.Iterator<Map.Entry<Value,Value>> iterator
-          = arrayValue.getIterator(env);
-
-        while (iterator.hasNext()) {
-          Map.Entry<Value, Value> entry = iterator.next();
-
-          Value key = entry.getKey();
-          Value value = entry.getValue();
-
-          printDepth(out, 2 * depth);
-
-          out.print("[");
-
-          if (key instanceof StringValue)
-            out.print("\"" + key + "\"");
-          else
-            out.print(key);
-
-          out.println("]=>");
-
-          printDepth(out, 2 * depth);
-
-          value.varDump(env, out, depth, valueSet);
-
-          out.println();
-        }
-
-        depth--;
-        
-        printDepth(out, 2 * depth);
-
-        out.print("}");
-      }
-    }
-
+    for (int i = depth; i > 0; i--)
+      out.print(' ');
   }
 
-  static public class FieldDelegateImpl
-    extends FieldDelegate
+  public void printRImpl(Env env,
+                         WriteStream out,
+                         int depth,
+                         IdentityHashMap<Value, String> valueSet)
+    throws IOException
   {
-    @Override
-    public Value getField(Env env, Value obj, String name, boolean create)
-    {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
 
-      if ((arrayObject._flags & ARRAY_AS_PROPS) != 0) {
-        return arrayObject._value.get(env.createString(name));
-      }
-      else
-        return super.getField(env, obj, name, create);
+    if ((_flags & STD_PROP_LIST) != 0) {
+      // XXX: env.getThis().printRObject(env, out, depth, valueSet);
     }
+    else {
+      out.print("ArrayObject");
+      out.print(' ');
+      out.println("Object");
+      printDepth(out, 4 * depth);
+      out.println("(");
 
-    public void putField(Env env, Value obj, String name, Value value)
-    {
-      ArrayObject arrayObject = (ArrayObject) obj.toJavaObject();
+      depth++;
 
-      if ((arrayObject._flags & ARRAY_AS_PROPS) != 0)
-        arrayObject._value.put(env.wrapJava(name), value);
-      else
-        super.putField(env, obj, name, value);
+
+      java.util.Iterator<Map.Entry<Value,Value>> iterator
+        = _value.getIterator(env);
+
+      while (iterator.hasNext()) {
+        Map.Entry<Value, Value> entry = iterator.next();
+
+        Value key = entry.getKey();
+        Value value = entry.getValue();
+
+        printDepth(out, 4 * depth);
+
+        out.print("[" + key + "] => ");
+
+        value.printR(env, out, depth + 1, valueSet);
+
+        printDepth(out, 4 * depth);
+
+        out.println();
+      }
+
+      depth--;
+
+      printDepth(out, 4 * depth);
+      out.println(")");
+    }
+  }
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    if ((_flags & STD_PROP_LIST) != 0) {
+      // XXX: env.getThis().varDumpObject(env, out, depth, valueSet);
+    }
+    else {
+      out.println("object(ArrayObject) (" + _value.getSize() + ") {");
+
+      depth++;
+
+      java.util.Iterator<Map.Entry<Value,Value>> iterator
+        = _value.getIterator(env);
+
+      while (iterator.hasNext()) {
+        Map.Entry<Value, Value> entry = iterator.next();
+
+        Value key = entry.getKey();
+        Value value = entry.getValue();
+
+        printDepth(out, 2 * depth);
+
+        out.print("[");
+
+        if (key instanceof StringValue)
+          out.print("\"" + key + "\"");
+        else
+          out.print(key);
+
+        out.println("]=>");
+
+        printDepth(out, 2 * depth);
+
+        value.varDump(env, out, depth, valueSet);
+
+        out.println();
+      }
+
+      depth--;
+
+      printDepth(out, 2 * depth);
+
+      out.print("}");
     }
   }
 }

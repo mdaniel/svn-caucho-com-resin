@@ -238,7 +238,6 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Adds a new value.
    */
-  /**  XXX: dead code, now handles by super, which may end up in a call to putThisField
   @Override
   public Value putField(Env env, String key, Value value)
   {
@@ -272,7 +271,6 @@ public class ObjectExtValue extends ObjectValue
 
     return value;
   }
-*/
 
   /**
    * Adds a new value.
@@ -897,6 +895,7 @@ public class ObjectExtValue extends ObjectValue
     out.print("}");
   }
 
+  @Override
   protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,

@@ -30,14 +30,11 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Location;
-import com.caucho.vfs.WriteStream;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.IdentityHashMap;
-import java.io.IOException;
 
 /**
  * Represents a Quercus object value.
@@ -142,6 +139,54 @@ abstract public class ObjectValue extends Value {
   public double toDouble()
   {
     return toLong();
+  }
+
+  /**
+   * Adds a new value.
+   */
+  public Value putField(String key, String value)
+  {
+    return putField(null, key, new UnicodeValueImpl(value));
+  }
+
+  /**
+   * Adds a new value.
+   */
+  public Value putField(Env env, String key, String value)
+  {
+    return putField(env, key, env.createString(value));
+  }
+
+  /**
+   * Adds a new value.
+   */
+  public Value putField(String key, long value)
+  {
+    return putField(null, key, LongValue.create(value));
+  }
+
+  /**
+   * Adds a new value.
+   */
+  public Value putField(Env env, String key, long value)
+  {
+    return putField(env, key, LongValue.create(value));
+  }
+
+  /**
+   * Initializes a new field, does not call __set if it is defined.
+   */
+  public Value initField(Env env, String key, Value value)
+  {
+    return putField(env, key, value);
+  }
+
+  /**
+   * Adds a new value.
+   */
+  public Value putField(String key, double value)
+  {
+    return putField(null, key, DoubleValue.create(value));
   }
 
   /**
@@ -288,94 +333,5 @@ abstract public class ObjectValue extends Value {
     return _quercusClass.remove(Env.getInstance(), this, key);
   }
 
-  // FieldDelegate
-
-  @Override
-  public Value getField(Env env, String name, boolean create)
-  {
-    return _quercusClass.getField(env, this, name, create);
-  }
-
-  @Override
-  public Value putField(Env env,
-                        String name,
-                        Value value)
-  {
-    return _quercusClass.putField(env, this, name, value);
-  }
-
-  public Value putField(Env env,
-                        String name,
-                        String value)
-  {
-    return _quercusClass.putField(env, this, name, env.createString(value));
-  }
-
-  public Value putField(Env env,
-                        String name,
-                        long value)
-  {
-    return _quercusClass.putField(env, this, name, LongValue.create(value));
-  }
-
-  /**
-   * Adds a new value.
-   */
-  public Value putField(String key, String value)
-  {
-    return putField(null, key, new StringBuilderValue(value));
-  }
-
-  /**
-   * Adds a new value.
-   */
-  public Value putField(String key, long value)
-  {
-    return putField(null, key, LongValue.create(value));
-  }
-
-  /**
-   * Initializes a new field.
-   */
-  public Value initField(Env env, String key, Value value)
-  {
-    return putField(env, key, value);
-  }
-
-  /**
-   * Adds a new value.
-   */
-  public Value putField(String key, double value)
-  {
-    return putField(null, key, DoubleValue.create(value));
-  }
-
-  // PrintDelegate
-
-  @Override
-  protected void printRImpl(Env env,
-                            WriteStream out,
-                            int depth,
-                            IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    _quercusClass.printRImpl(env, this,  out, depth, valueSet);
-  }
-
-  @Override
-  protected void varDumpImpl(Env env,
-                             WriteStream out,
-                             int depth,
-                             IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    _quercusClass.varDumpImpl(env, this,  out, depth, valueSet);
-  }
-
-  @Override
-  public void varExport(StringBuilder sb)
-  {
-    _quercusClass.varExport(Env.getInstance(), this,  sb);
-  }
 }
 

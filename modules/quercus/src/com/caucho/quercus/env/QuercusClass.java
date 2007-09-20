@@ -39,9 +39,7 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.util.IdentityIntMap;
 import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,8 +64,6 @@ public class QuercusClass {
   private AbstractFunction _call;
 
   private ArrayDelegate _arrayDelegate = new DefaultArrayDelegate();
-  private FieldDelegate _fieldDelegate = new DefaultFieldDelegate();
-  private PrintDelegate _printDelegate = new DefaultPrintDelegate();
 
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
@@ -226,32 +222,6 @@ public class QuercusClass {
   }
 
   /**
-   * Add's a delegate.
-   */
-  public void addFieldDelegate(FieldDelegate delegate)
-  {
-    if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST, L.l("{0} adding delegate {1}", this,  delegate));
-
-    delegate.init(_fieldDelegate);
-
-    _fieldDelegate = delegate;
-  }
-
-  /**
-   * Add's a delegate.
-   */
-  public void addPrintDelegate(PrintDelegate delegate)
-  {
-    if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST, L.l("{0} adding delegate {1}", this,  delegate));
-
-    delegate.init(_printDelegate);
-
-    _printDelegate = delegate;
-  }
-
-  /**
    * Sets the __get
    */
   public void setGet(AbstractFunction fun)
@@ -265,6 +235,14 @@ public class QuercusClass {
   public void setSet(AbstractFunction fun)
   {
     _set = fun;
+  }
+
+  /**
+   * Sets the __set
+   */
+  public AbstractFunction getSetField()
+  {
+    return _set;
   }
 
   /**
@@ -618,53 +596,27 @@ public class QuercusClass {
   }
 
   //
-  // Print
-  //
-
-  public void printRImpl(Env env,
-                         ObjectValue obj,
-                         WriteStream out,
-                         int depth, IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    _printDelegate.printRImpl(env, obj, out, depth, valueSet);
-  }
-
-  public void varDumpImpl(Env env,
-                          ObjectValue obj,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    _printDelegate.varDumpImpl(env, obj, out, depth, valueSet);
-  }
-
-  public void varExport(Env env, ObjectValue obj, StringBuilder sb)
-  {
-    _printDelegate.varExport(env, obj, sb);
-  }
-
-  //
   // Fields
   //
 
   /**
    * Implements the __get method call.
    */
-  public Value getField(Env env, Value obj, String name, boolean create)
+  public Value getField(Env env, Value qThis, String name, boolean create)
   {
-    return _fieldDelegate.getField(env, obj, name, create);
+    if (_get != null)
+      return _get.callMethod(env, qThis, env.createString(name));
+    else
+      return UnsetValue.UNSET;
   }
 
   /**
    * Implements the __set method call.
    */
-  public Value putField(Env env, Value obj, String name, Value value)
+  public void setField(Env env, Value qThis, String name, Value value)
   {
-    _fieldDelegate.putField(env, obj, name, value);
-
-    return value;
+    if (_set != null)
+      _set.callMethod(env, qThis, env.createString(name), value);
   }
 
   /**
@@ -1245,109 +1197,6 @@ public class QuercusClass {
     public String toString()
     {
       return getClass().getSimpleName() + "[" + QuercusClass.this.getName() + "]";
-    }
-  }
-
-  /**
-   * Default implementations for delegated methods.
-   */
-  public class DefaultFieldDelegate
-    extends FieldDelegate
-  {
-    public DefaultFieldDelegate()
-    {
-    }
-
-    @Override
-    public Value getField(Env env, Value obj, String name, boolean create)
-    {
-      if (_get != null)
-        return _get.callMethod(env, obj, env.createString(name));
-
-      return UnsetValue.UNSET;
-    }
-
-    @Override
-    public void putField(Env env, Value obj, String name, Value value)
-    {
-      if (_set != null)
-        _set.callMethod(env, obj, env.createString(name), value);
-      else
-        obj.putThisField(env, name, value);
-    }
-  }
-
-  /**
-   * Default implementations for delegated methods.
-   */
-  public class DefaultPrintDelegate
-    extends PrintDelegate
-  {
-    @Override
-    public void printRImpl(Env env,
-                           ObjectValue obj,
-                           WriteStream out,
-                           int depth,
-                           IdentityHashMap<Value, String> valueSet)
-      throws IOException
-    {
-      out.print(getName());
-      out.print(' ');
-      out.println("Object");
-
-      for (int i = 0; i < 4 * depth; i++)
-        out.print(' ');
-
-      out.println("(");
-
-      for (Map.Entry<String,Value> entry : sortedEntrySet(env, obj)) {
-        entry.getValue().printRImpl(env, out, depth + 1, valueSet);
-      }
-
-      for (int i = 0; i < 4 * depth; i++)
-        out.print(' ');
-
-      out.println(")");
-    }
-
-    private Set<Map.Entry<String, Value>> sortedEntrySet(Env env, ObjectValue obj)
-    {
-      TreeMap<String, Value> sorted = new TreeMap<String, Value>();
-
-      Iterator<Map.Entry<Value,Value>> iterator = obj.getIterator(env);
-
-      while (iterator.hasNext()) {
-        Map.Entry<Value, Value> entry = iterator.next();
-        sorted.put(entry.getKey().toString(), entry.getValue());
-      }
-
-      return sorted.entrySet();
-    }
-
-    @Override
-    public void varDumpImpl(Env env,
-                            ObjectValue obj,
-                            WriteStream out,
-                            int depth,
-                            IdentityHashMap<Value, String> valueSet)
-      throws IOException
-    {
-      out.println("object(" + getName() + ") (" + obj.getSize() + ") {");
-
-      for (Map.Entry<String,Value> entry : sortedEntrySet(env, obj)) {
-        entry.getValue().varDumpImpl(env, out, depth + 1, valueSet);
-      }
-
-      for (int i = 0; i < 2 * depth; i++)
-        out.print(' ');
-
-      out.print("}");
-    }
-
-    @Override
-    public void varExport(Env env, ObjectValue obj, StringBuilder sb)
-    {
-      if (true) throw new UnsupportedOperationException("unimplemented");
     }
   }
 }

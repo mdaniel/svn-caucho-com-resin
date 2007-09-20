@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +41,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+import java.util.IdentityHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -167,6 +169,42 @@ public class JavaValue
       return Double.parseDouble(s);
   }
   
+  @Override
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    if (! _classDef.printRImpl(env, _object, out, depth, valueSet))
+      out.print("resource(" + toString(env) + ")"); // XXX:
+  }
+
+  @Override
+  protected void varDumpImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    if (! _classDef.varDumpImpl(env, _object, out, depth, valueSet))
+      out.print("resource(" + toString(env) + ")"); // XXX:
+  }
+
+  @Override
+  public Value getField(Env env, String name, boolean create)
+  {
+    return _classDef.getField(env, _object, name, create);
+  }
+
+  @Override
+  public Value putField(Env env,
+                        String name,
+                        Value value)
+  {
+    return _classDef.putField(env, _object, name, value);
+  }
+
   /**
    * Converts to a key.
    */

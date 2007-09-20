@@ -29,24 +29,22 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.quercus.UnimplementedException;
-import com.caucho.quercus.env.ArrayValue.KeyIterator;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.vfs.WriteStream;
 
-import java.util.*;
-import java.util.logging.*;
-
-import java.lang.reflect.Array;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Interface for marshalled Java data structures.
@@ -61,7 +59,6 @@ abstract public class JavaAdapter extends ArrayValue
   
   private JavaClassDef _classDef;
   private Env _env;
-  private QuercusClass _quercusClass;
 
   // Vars to update when matching array item is modified
   private HashMap<Value,Value> _refs;
@@ -72,7 +69,6 @@ abstract public class JavaAdapter extends ArrayValue
     _object = object;
     _classDef = def;
 
-    _quercusClass = env.createQuercusClass(def, null);
   }
 
   public Env getEnv()
@@ -709,7 +705,7 @@ abstract public class JavaAdapter extends ArrayValue
   @Override
   public Value getField(Env env, String name, boolean create)
   {
-    return _quercusClass.getField(env, this, name, create);
+    return _classDef.getField(env, _object, name, create);
   }
 
   @Override
@@ -717,7 +713,7 @@ abstract public class JavaAdapter extends ArrayValue
                         String name,
                         Value value)
   {
-    return _quercusClass.putField(env, this, name, value);
+    return _classDef.putField(env, _object, name, value);
   }
 
   /**
