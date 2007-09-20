@@ -1420,6 +1420,37 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Decodes from charset and returns UnicodeValue.
+   *
+   * @param env
+   * @param charset
+   */
+  public StringValue convertToUnicode(Env env, String charset)
+  {
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+
+    TempCharBuffer tb = TempCharBuffer.allocate();
+    char[] charBuf = tb.getBuffer();
+
+    try {
+      Reader in = toReader(charset);
+
+      int sublen;
+      while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
+        sb.append(charBuf, 0, sublen);
+      }
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e.getMessage());
+
+    } finally {
+      TempCharBuffer.free(tb);
+    }
+
+    return sb;
+  }
+
+  /**
    * Creates a string builder of the same type.
    */
   public StringValue createStringBuilder()

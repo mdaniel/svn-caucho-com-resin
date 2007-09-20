@@ -603,6 +603,14 @@ abstract public class ArrayValue extends Value {
     // XXX: this needs an Env arg because of i18n
     put(StringValue.create(key), new LongValue(value));
   }
+
+  /**
+   * Convenience for lib.
+   */
+  public void put(Env env, String key, long value)
+  {
+    put(env.createString(key), new LongValue(value));
+  }
   
   /**
    * Convenience for lib.
@@ -620,6 +628,15 @@ abstract public class ArrayValue extends Value {
   {
     // XXX: this needs an Env arg because of i18n
     put(StringValue.create(key), value ? BooleanValue.TRUE : BooleanValue.FALSE);
+  }
+
+  /**
+   * Convenience for lib.
+   */
+  public void put(Env env, String key, boolean value)
+  {
+    put(env.createString(key),
+	value ? BooleanValue.TRUE : BooleanValue.FALSE);
   }
 
   /**

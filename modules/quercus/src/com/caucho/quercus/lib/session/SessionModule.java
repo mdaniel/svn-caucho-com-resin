@@ -171,10 +171,10 @@ public class SessionModule extends AbstractQuercusModule
   {
     ArrayValue array = new ArrayValueImpl();
 
-    array.put("lifetime", env.getIniLong("session.cookie_lifetime"));
-    array.put("path", env.getIniString("session.cookie_path"));
-    array.put("domain", env.getIniString("session.cookie_domain"));
-    array.put("secure", env.getIniBoolean("session.cookie_secure"));
+    array.put(env, "lifetime", env.getIniLong("session.cookie_lifetime"));
+    array.put(env, "path", env.getIniString("session.cookie_path"));
+    array.put(env, "domain", env.getIniString("session.cookie_domain"));
+    array.put(env, "secure", env.getIniBoolean("session.cookie_secure"));
 
     return array;
   }

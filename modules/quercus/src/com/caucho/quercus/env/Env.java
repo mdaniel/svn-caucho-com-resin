@@ -2913,10 +2913,13 @@ public class Env {
    */
   public StringValue createString(String s)
   {
-    if (s == null)
-      return null;
+    if (s == null) {
+      return (_isUnicodeSemantics
+	      ? UnicodeBuilderValue.EMPTY
+	      : StringBuilderValue.EMPTY);
+    }
     else if (_isUnicodeSemantics)
-      return new UnicodeValueImpl(s);
+      return new UnicodeBuilderValue(s);
     else
       return new StringBuilderValue(s);
   }

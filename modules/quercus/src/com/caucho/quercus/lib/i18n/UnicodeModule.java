@@ -81,7 +81,7 @@ public class UnicodeModule extends AbstractQuercusModule {
                               BytesValue str,
                               String encoding)
   {
-    return str.toUnicodeValue(env, encoding);
+    return str.convertToUnicode(env, encoding);
   }
 
   public static StringValue unicode_encode(Env env,
@@ -345,7 +345,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0 )
       charset = env.getIniString("iconv.internal_encoding");
 
-    return LongValue.create(str.toUnicodeValue(env, charset).length());
+    return LongValue.create(str.convertToUnicode(env, charset).length());
   }
 
   /**
@@ -368,8 +368,8 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    haystack = haystack.toUnicodeValue(env, charset);
-    needle = needle.toUnicodeValue(env, charset);
+    haystack = haystack.convertToUnicode(env, charset);
+    needle = needle.convertToUnicode(env, charset);
 
     int index = haystack.indexOf(needle, offset);
 
@@ -398,8 +398,8 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    haystack = haystack.toUnicodeValue(env, charset);
-    needle = needle.toUnicodeValue(env, charset);
+    haystack = haystack.convertToUnicode(env, charset);
+    needle = needle.convertToUnicode(env, charset);
 
     int index = haystack.lastIndexOf(needle);
 
@@ -429,7 +429,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    str = str.toUnicodeValue(env, charset);
+    str = str.convertToUnicode(env, charset);
 
     int tail;
     int strlen = str.length();

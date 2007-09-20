@@ -89,7 +89,7 @@ public class MbstringModule
     if (mode == MB_CASE_TITLE) {
       encoding = getEncoding(env, encoding);
 
-      str = str.toUnicodeValue(env, encoding);
+      str = str.convertToUnicode(env, encoding);
       str = toUpperCaseTitle(env, str);
 
       return str.toBinaryValue(env, encoding);
@@ -261,8 +261,8 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.toUnicodeValue(env, encoding);
-    string = string.toUnicodeValue(env, encoding);
+    pattern = pattern.convertToUnicode(env, encoding);
+    string = string.convertToUnicode(env, encoding);
 
     // XXX: option
 
@@ -285,9 +285,9 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.toUnicodeValue(env, encoding);
-    replacement = replacement.toUnicodeValue(env, encoding);
-    subject = subject.toUnicodeValue(env, encoding);
+    pattern = pattern.convertToUnicode(env, encoding);
+    replacement = replacement.convertToUnicode(env, encoding);
+    subject = subject.convertToUnicode(env, encoding);
 
     //XXX: option
 
@@ -318,9 +318,9 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.toUnicodeValue(env, encoding);
-    replacement = replacement.toUnicodeValue(env, encoding);
-    subject = subject.toUnicodeValue(env, encoding);
+    pattern = pattern.convertToUnicode(env, encoding);
+    replacement = replacement.convertToUnicode(env, encoding);
+    subject = subject.convertToUnicode(env, encoding);
 
     //XXX: option
 
@@ -348,8 +348,8 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.toUnicodeValue(env, encoding);
-    string = string.toUnicodeValue(env, encoding);
+    pattern = pattern.convertToUnicode(env, encoding);
+    string = string.convertToUnicode(env, encoding);
 
     if (regs == null) {
       if (isCaseSensitive)
@@ -740,8 +740,8 @@ public class MbstringModule
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.toUnicodeValue(env, encoding);
-    string = string.toUnicodeValue(env, encoding);
+    pattern = pattern.convertToUnicode(env, encoding);
+    string = string.convertToUnicode(env, encoding);
 
     Value val = RegexpModule.split(env, pattern, string, limit);
 
@@ -760,7 +760,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.toUnicodeValue(env, encoding);
+    str = str.convertToUnicode(env, encoding);
 
     int len = str.length();
     int end = start + length;
@@ -792,7 +792,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.toUnicodeValue(env, encoding);
+    str = str.convertToUnicode(env, encoding);
 
     int len = str.length();
     int end = start + width;
@@ -809,7 +809,7 @@ public class MbstringModule
       StringValue sb = env.createUnicodeBuilder();
 
       sb.append(str);
-      sb.append(trimmarker.toUnicodeValue(env, encoding));
+      sb.append(trimmarker.convertToUnicode(env, encoding));
 
       str = sb;
     }
@@ -826,7 +826,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.toUnicodeValue(env, encoding);
+    str = str.convertToUnicode(env, encoding);
 
     return LongValue.create(str.length());
   }
@@ -842,8 +842,8 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    haystack = haystack.toUnicodeValue(env, encoding);
-    needle = needle.toUnicodeValue(env, encoding);
+    haystack = haystack.convertToUnicode(env, encoding);
+    needle = needle.convertToUnicode(env, encoding);
 
     Value val = StringModule.strpos(haystack, needle, offset);
 
@@ -861,8 +861,8 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    haystack = haystack.toUnicodeValue(env, encoding);
-    needle = needle.toUnicodeValue(env, encoding);
+    haystack = haystack.convertToUnicode(env, encoding);
+    needle = needle.convertToUnicode(env, encoding);
 
     Value val = StringModule.strrpos(haystack, needle, offsetV);
 
@@ -878,7 +878,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.toUnicodeValue(env, encoding);
+    str = str.convertToUnicode(env, encoding);
     str = StringModule.strtolower(str);
 
     return str.toBinaryValue(env, encoding);
@@ -893,7 +893,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.toUnicodeValue(env, encoding);
+    str = str.convertToUnicode(env, encoding);
     str = StringModule.strtoupper(str);
 
     return str.toBinaryValue(env, encoding);
@@ -908,7 +908,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.toUnicodeValue(env, encoding);
+    str = str.convertToUnicode(env, encoding);
 
     return LongValue.create(str.length());
 
@@ -951,8 +951,8 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    haystack = haystack.toUnicodeValue(env, encoding);
-    needle = needle.toUnicodeValue(env, encoding);
+    haystack = haystack.convertToUnicode(env, encoding);
+    needle = needle.convertToUnicode(env, encoding);
 
     int count = 0;
     int sublen = needle.length();
@@ -978,7 +978,7 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.toUnicodeValue(env, encoding);
+    str = str.convertToUnicode(env, encoding);
 
     Value val = StringModule.substr(env, str, start, lengthV);
 
@@ -1052,7 +1052,7 @@ public class MbstringModule
     val = val.toValue();
 
     if (val instanceof StringValue)
-      return ((StringValue)val).toUnicodeValue(env, encoding);
+      return ((StringValue)val).convertToUnicode(env, encoding);
 
     else if (val instanceof ArrayValue) {
       ArrayValue array = new ArrayValueImpl();
@@ -1146,7 +1146,7 @@ public class MbstringModule
                  Value pattern,
                  Value option)
     {
-      _string = string.toUnicodeValue(env, getEncoding(env));
+      _string = string.convertToUnicode(env, getEncoding(env));
       _position = 0;
       _length = _string.length();
 

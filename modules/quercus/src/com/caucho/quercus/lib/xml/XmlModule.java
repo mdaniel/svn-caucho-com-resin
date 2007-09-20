@@ -101,21 +101,59 @@ public class XmlModule extends AbstractQuercusModule {
   /**
    * Converts from iso-8859-1 to utf8
    */
-  public static Value utf8_encode(String str)
+  public static Value utf8_encode(Env env, StringValue str)
   {
-    // XXX: need to make a marker for the string
+    StringValue sb = str.createStringBuilder();
+    
+    int len = str.length();
+    for (int i = 0; i < len; i++) {
+      int ch = str.charAt(i);
 
-    return new UnicodeValueImpl(str);
+      if (ch < 0x80)
+	sb.append((char) ch);
+      else if (ch < 0x800) {
+	sb.append((char) (0xc0 + (ch >> 6)));
+	sb.append((char) (0x80 + (ch & 0x3f)));
+      }
+      else {
+	sb.append((char) (0xe0 + (ch >> 12)));
+	sb.append((char) (0x80 + ((ch >> 6) & 0x3f)));
+	sb.append((char) (0x80 + ((ch) & 0x3f)));
+      }
+    }
+
+    return sb;
   }
 
   /**
    * Converts from utf8 to iso-8859-1
    */
-  public static Value utf8_decode(String str)
+  public static Value utf8_decode(Env env, StringValue str)
   {
-    // XXX: need to make a marker for the string
+    StringValue sb = env.createUnicodeBuilder();
 
-    return new UnicodeValueImpl(str);
+    int len = str.length();
+    for (int i = 0; i < len; i++) {
+      int ch = str.charAt(i) & 0xff;
+
+      if (ch < 0x80)
+	sb.append((char) ch);
+      else if ((ch & 0xe0) == 0xc0) {
+	int d1 = (ch & 0x1f) << 6;
+	int d2 = str.charAt(++i) & 0x3f;
+
+	sb.append((char) (d1 + d2));
+      }
+      else {
+	int d1 = (ch & 0xf) << 12;
+	int d2 = (str.charAt(++i) & 0x3f) << 6;
+	int d3 = (str.charAt(++i) & 0x3f);
+
+	sb.append((char) (d1 + d2 + d3));
+      }
+    }
+
+    return sb;
   }
 
   /**
