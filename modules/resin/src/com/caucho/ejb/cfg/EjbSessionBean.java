@@ -211,6 +211,10 @@ public class EjbSessionBean extends EjbBean {
 
     JClass type = getEJBClassWrapper();
 
+    // XXX: ejb/0f78
+    if (type == null)
+      return;
+
     if (! type.isAnnotationPresent(Stateful.class)
         && ! type.isAnnotationPresent(Stateless.class))
       return;

@@ -945,22 +945,25 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void initIntrospect()
     throws ConfigException
   {
-    JAnnotation interceptorsAnn = _ejbClass.getAnnotation(Interceptors.class);
-
-    if (interceptorsAnn != null) {
-      for (Class cl : (Class []) interceptorsAnn.get("value")) {
-        // XXX: ejb/0fb0
-        if (! containsInterceptor(cl.getName())) {
-          addInterceptor(configureInterceptor(cl));
-        }
-      }
-    }
-
     boolean isExcludeDefault = false;
 
-    // ejb/0fbj
-    if (_ejbClass.isAnnotationPresent(ExcludeDefaultInterceptors.class))
-      isExcludeDefault = true;
+    // XXX: ejb/0f78
+    if (_ejbClass != null) {
+      JAnnotation interceptorsAnn = _ejbClass.getAnnotation(Interceptors.class);
+
+      if (interceptorsAnn != null) {
+        for (Class cl : (Class []) interceptorsAnn.get("value")) {
+          // XXX: ejb/0fb0
+          if (! containsInterceptor(cl.getName())) {
+            addInterceptor(configureInterceptor(cl));
+          }
+        }
+      }
+
+      // ejb/0fbj
+      if (_ejbClass.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+        isExcludeDefault = true;
+    }
 
     // ejb/0fb5
     InterceptorBinding binding =
