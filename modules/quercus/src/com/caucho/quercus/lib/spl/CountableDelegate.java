@@ -33,6 +33,8 @@ import com.caucho.quercus.env.ArrayDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
 
 /**
  * A delegate that intercepts the global count() function and calls count()
@@ -42,10 +44,13 @@ import com.caucho.quercus.env.Value;
 public class CountableDelegate
   extends ArrayDelegate
 {
+  private static final StringValue COUNT_METHOD
+    = new StringBuilderValue("count");
+  
   @Override
   public int getCount(Env env, ObjectValue obj)
   {
-    Value count = obj.findFunction("count").callMethod(env, obj);
+    Value count = obj.callMethod(env, COUNT_METHOD);
 
     return count.toInt();
   }

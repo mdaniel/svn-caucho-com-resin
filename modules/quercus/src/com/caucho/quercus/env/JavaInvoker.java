@@ -482,6 +482,7 @@ abstract public class JavaInvoker
 
   public Value call(Env env, Value obj, Value []value)
   {
+    // php/0cl1
     return call(env, obj.toJavaObject(), value);
   }
 

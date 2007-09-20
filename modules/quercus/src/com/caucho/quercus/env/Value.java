@@ -920,6 +920,10 @@ abstract public class Value implements java.io.Serializable
     return null;
   }
 
+  //
+  // Methods from hash parameters
+  //
+
   /**
    * Evaluates a method.
    */
