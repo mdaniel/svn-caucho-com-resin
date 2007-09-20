@@ -3262,6 +3262,18 @@ public class QuercusParser {
       else
         return createString(_function.getName());
     }
+    else if (name.equals("__METHOD__")) {
+      if (_classDef != null) {
+        if (_isTop)
+          return createString(_classDef.getName());
+        else
+          return createString(_classDef.getName() + "::" + _function.getName());
+      }
+      else if (_isTop)
+        return createString("");
+      else
+        return createString(_function.getName());
+    }
     else
       return _factory.createConst(name);
   }
