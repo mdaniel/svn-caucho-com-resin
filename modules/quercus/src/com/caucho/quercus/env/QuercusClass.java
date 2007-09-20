@@ -36,7 +36,6 @@ import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
-import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.util.IdentityIntMap;
 import com.caucho.util.L10N;
@@ -396,15 +395,29 @@ public class QuercusClass {
   public void validate(Env env)
   {
     if (! _classDef.isAbstract() && ! _classDef.isInterface()) {
-      for (AbstractFunction absFun : _methodMap.values()) {
+      for (AbstractFunction fun : _methodMap.values()) {
+        /* XXX: abstract methods need to be validated
+              php/393g, php/393i, php/39j2
         if (! (absFun instanceof Function))
           continue;
 
         Function fun = (Function) absFun;
+         */
 
-        if (fun.isAbstract()) {
-          throw env.errorException(L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
-                                        fun.getName(), getName()));
+        boolean isAbstract;
+
+        // php/093g constructor
+        if (_constructor != null && fun.getName().equals(_constructor.getName()))
+          isAbstract = _constructor.isAbstract();
+        else
+          isAbstract = fun.isAbstract();
+
+        if (isAbstract) {
+
+          throw env.createErrorException(
+            _classDef.getLocation(),
+            L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
+                fun.getName(), getName()));
         }
       }
     }
@@ -1179,14 +1192,9 @@ public class QuercusClass {
 
     private Value arrayerror(Env env, ObjectValue obj)
     {
-      String name;
+      String name = obj.getName();
 
-      if (obj instanceof ObjectValue)
-        name = ((ObjectValue) obj).getName();
-      else
-        name = obj.toDebugString();
-
-      env.error(L.l("Can't use object '{0}' as array", name));
+      env.error(env.getLocation(), L.l("Can't use object '{0}' as array", name));
 
       return UnsetValue.UNSET;
     }

@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 
 /**
  * Represents a PHP array reference expression.
@@ -78,11 +79,21 @@ public class ArrayGetExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    Value array = _expr.eval(env);
+    try {
+      Value array = _expr.eval(env);
 
-    Value index = _index.eval(env);
+      if (array.isObject())
+        env.pushCall(this, array);
+      else
+        env.pushCall(this, NullValue.NULL);
 
-    return array.get(env, getLocation(), index);
+      Value index = _index.eval(env);
+
+      return array.get(env, getLocation(), index);
+    }
+    finally {
+      env.popCall();
+    }
   }
 
   /**

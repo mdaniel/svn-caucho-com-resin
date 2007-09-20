@@ -2450,7 +2450,7 @@ case SORT_NUMERIC:
     Iterator []iters = new Iterator[args.length];
     for (int i = 0; i < args.length; i++) {
       if (! (args[i] instanceof ArrayValue))
-        throw env.errorException(L.l("expected array"));
+        throw env.createErrorException(L.l("expected array"));
 
       ArrayValue argArray = (ArrayValue) args[i];
 

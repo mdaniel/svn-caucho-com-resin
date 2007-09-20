@@ -72,7 +72,7 @@ public class JavaImplClassDef extends ClassDef {
 			   String name,
 			   Class type)
   {
-    super(name, null, new String[0]);
+    super(null, name, null, new String[0]);
 
     _moduleContext = moduleContext;
 

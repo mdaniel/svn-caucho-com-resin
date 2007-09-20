@@ -32,6 +32,7 @@ package com.caucho.quercus.parser;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -67,9 +68,10 @@ public class GlobalScope extends Scope {
   /**
    * Adds a class
    */
-  public InterpretedClassDef addClass(String name,
-				      String parentName,
-				      ArrayList<String> ifaceList)
+  public InterpretedClassDef addClass(Location location,
+                                      String name,
+                                      String parentName,
+                                      ArrayList<String> ifaceList)
   {
     InterpretedClassDef cl = _classMap.get(name);
 
@@ -77,7 +79,7 @@ public class GlobalScope extends Scope {
       String []ifaceArray = new String[ifaceList.size()];
       ifaceList.toArray(ifaceArray);
 
-      cl = _exprFactory.createClassDef(name, parentName, ifaceArray);
+      cl = _exprFactory.createClassDef(location, name, parentName, ifaceArray);
       
       _classMap.put(name, cl);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,41 +24,28 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.quercus.parser;
+package com.caucho.quercus.program;
 
-import com.caucho.quercus.program.Function;
-import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.Location;
 
-import java.util.ArrayList;
+public class CompiledAbstractClassDef
+  extends CompiledClassDef
+{
+  public CompiledAbstractClassDef(Location location,
+                                  String name,
+                                  String parent,
+                                  String[] ifaceList,
+                                  Class compiledClass)
+  {
+    super(location, name, parent, ifaceList, compiledClass);
+  }
 
-/**
- * Parse scope.
- */
-abstract public class Scope {
-  /**
-   * Returns true for an abstract scope, e.g. an abstract class or an
-   * interface.
-   */
+  @Override
   public boolean isAbstract()
   {
-    return false;
+    return true;
   }
-  
-  /**
-   * Adds a function.
-   */
-  abstract public void addFunction(String name, Function function);
-
-  /**
-   * Adds a class
-   */
-  abstract public InterpretedClassDef addClass(Location location,
-                                               String name,
-                                               String parent,
-                                               ArrayList<String> ifaceList);
 }
-

@@ -224,7 +224,7 @@ the pool</td><td>30 sec
 
 </td></tr><tr><td>ping-table</td><td><a href="#reliability">Reliability parameter</a> - The database table used to "ping", checking that the connection is still live.</td><td>n/a
 </td></tr><tr><td>ping</td><td><a href="#reliability">Reliability parameter</a> - test for live connections before allocating them from the pool.</td><td>false
-</td></tr><tr><td>ping-interval</td><td><a href="#reliability">Reliability parameter</a> - set the interval for pings, instead of doing a ping every time</td><td>60s
+</td></tr><tr><td>ping-interval</td><td><a href="#reliability">Reliability parameter</a> - set the minimum interval for pings, instead of doing a ping every time</td><td>1s
 
 </td></tr><tr><td>prepared-statement-cache-size</td><td>A cache that holds prepared statements, a reused prepared statement avoids the overhead of the driver making the prepared statement</td><td>0
 </td></tr><tr><td>spy</td><td>A debugging aid, if true, generate <code>info</code> level log events that reveal the SQL that is used with the connections.</td><td>false

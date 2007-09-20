@@ -93,7 +93,7 @@ public class MethodDeclaration extends Function
 
   public String toString()
   {
-    return "MethodFunction[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }
 

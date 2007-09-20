@@ -31,10 +31,11 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectExtValue;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
 
 import java.util.Map;
@@ -46,16 +47,29 @@ import java.util.Set;
 abstract public class ClassDef {
   private final static L10N L = new L10N(ClassDef.class);
 
+  private final Location _location;
   private final String _name;
   private final String _parentName;
 
   private String []_ifaceList;
 
-  protected ClassDef(String name, String parentName, String []ifaceList)
+  protected ClassDef(Location location,
+                     String name,
+                     String parentName,
+                     String []ifaceList)
   {
+    _location = location;
     _name = name;
     _parentName = parentName;
     _ifaceList = ifaceList;
+  }
+
+  /**
+   * Returns the location for where the class was defined, null if it is unknown.
+   */
+  public Location getLocation()
+  {
+    return _location;
   }
 
   /**
@@ -129,11 +143,11 @@ abstract public class ClassDef {
   public ObjectValue newInstance(Env env, QuercusClass qcl)
   {
     if (isAbstract()) {
-      throw env.errorException(L.l("abstract class '{0}' cannot be instantiated.",
+      throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
 				   getName()));
     }
     else if (isInterface()) {
-      throw env.errorException(L.l("interface '{0}' cannot be instantiated.",
+      throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
 				   getName()));
     }
     
@@ -202,5 +216,6 @@ abstract public class ClassDef {
   {
     return null;
   }
+
 }
 

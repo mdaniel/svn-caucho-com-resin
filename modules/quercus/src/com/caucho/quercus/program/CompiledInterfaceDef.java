@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.program;
 
+import com.caucho.quercus.Location;
+
 public class CompiledInterfaceDef
   extends CompiledClassDef
 {
@@ -38,6 +40,15 @@ public class CompiledInterfaceDef
                               Class compiledClass)
   {
     super(name, parent, ifaceList, compiledClass);
+  }
+
+  public CompiledInterfaceDef(Location location,
+                              String name,
+                              String parent,
+                              String[] ifaceList,
+                              Class compiledClass)
+  {
+    super(location, name, parent, ifaceList, compiledClass);
   }
 
   @Override

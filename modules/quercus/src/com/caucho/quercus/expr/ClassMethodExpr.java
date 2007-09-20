@@ -93,12 +93,12 @@ public class ClassMethodExpr extends Expr {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null)
-      throw env.errorException(L.l("{0} is an unknown class", _className));
+      throw env.createErrorException(L.l("{0} is an unknown class", _className));
 
     AbstractFunction fun = cl.findFunction(_name);
 
     if (fun == null)
-      throw env.errorException(L.l("{0}::{1} is an unknown method",
+      throw env.createErrorException(L.l("{0}::{1} is an unknown method",
 				   _className, _name));
     
     Value []values = new Value[_args.length];

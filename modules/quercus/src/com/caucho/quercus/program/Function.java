@@ -360,7 +360,7 @@ public class Function extends AbstractFunction {
 
   public String toString()
   {
-    return "Function[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }
 

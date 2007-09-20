@@ -112,6 +112,21 @@ public class JavaWriterWrapper extends JavaWriter {
   }
 
   /**
+   * Prints a Java escaped string surrounded by ", or null if the string is null.
+   */
+  public void printQuotedJavaString(String s)
+    throws IOException
+  {
+    if (s == null)
+      _writer.print("null");
+    else {
+      _writer.print("\"");
+      _writer.printJavaString(s);
+      _writer.print("\"");
+    }
+  }
+
+  /**
    * Prints a Java escaped string
    */
   public void printJavaChar(char ch)

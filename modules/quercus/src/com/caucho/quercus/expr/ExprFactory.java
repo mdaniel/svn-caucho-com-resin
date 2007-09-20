@@ -1211,11 +1211,12 @@ public class ExprFactory {
     return new MethodDeclaration(this, loc, cl, name, info, argList);
   }
 
-  public InterpretedClassDef createClassDef(String name,
-					    String parentName,
-					    String []ifaceList)
+  public InterpretedClassDef createClassDef(Location location,
+                                            String name,
+                                            String parentName,
+                                            String[] ifaceList)
   {
-    return new InterpretedClassDef(name, parentName, ifaceList);
+    return new InterpretedClassDef(location, name, parentName, ifaceList);
   }
 }
 

@@ -2426,7 +2426,7 @@ public class Env {
       return fun;
     }
 
-    throw errorException(L.l("'{0}' is an unknown function.", name));
+    throw createErrorException(L.l("'{0}' is an unknown function.", name));
   }
   */
   public AbstractFunction getFunction(String name)
@@ -2436,7 +2436,7 @@ public class Env {
     if (fun != null)
       return fun;
     else
-      throw errorException(L.l("'{0}' is an unknown function", name));
+      throw createErrorException(L.l("'{0}' is an unknown function", name));
   }
 
   /**
@@ -2457,7 +2457,7 @@ public class Env {
     if (fun != null)
       return fun;
 
-    throw errorException(L.l("'{0}' is an unknown function.", name));
+    throw createErrorException(L.l("'{0}' is an unknown function.", name));
   }
 
   /**
@@ -2995,7 +2995,7 @@ public class Env {
     if (def != null)
       return def;
     else
-      throw errorException(L.l("'{0}' class definition not found", className));
+      throw createErrorException(L.l("'{0}' class definition not found", className));
   }
 
   /*
@@ -3334,7 +3334,7 @@ public class Env {
     if (cl != null)
       return cl;
 
-    throw errorException(L.l("'{0}' is an unknown class name.", name));
+    throw createErrorException(L.l("'{0}' is an unknown class name.", name));
     /*
     // return _quercus.findJavaClassWrapper(name);
 
@@ -3355,7 +3355,7 @@ public class Env {
     if (cl != null)
       return cl;
     else
-      throw errorException(L.l("'{0}' is an unknown class.", name));
+      throw createErrorException(L.l("'{0}' is an unknown class.", name));
   }
 
   QuercusClass createQuercusClass(ClassDef def, QuercusClass parent)
@@ -3907,16 +3907,30 @@ public class Env {
   /**
    * A fatal runtime error.
    */
-  public RuntimeException errorException(String msg)
+  public QuercusRuntimeException createErrorException(String msg)
+    throws QuercusRuntimeException
   {
-    Location location = getLocation();
+    return createErrorException(null, msg);
+  }
+
+  /**
+   * A fatal runtime error.
+   */
+  public QuercusRuntimeException createErrorException(Location location, String msg)
+    throws QuercusRuntimeException
+  {
+    if (location == null)
+      location = getLocation();
+
     String prefix = location.getMessagePrefix();
-    
-    String fullMsg = prefix + msg + getFunctionLocation();
+
+    String fullMsg = msg + getFunctionLocation();
 
     error(B_ERROR, location, fullMsg);
 
-    throw new QuercusRuntimeException(fullMsg);
+    String exMsg = prefix + fullMsg;
+
+    return new QuercusRuntimeException(fullMsg);
   }
 
   /**

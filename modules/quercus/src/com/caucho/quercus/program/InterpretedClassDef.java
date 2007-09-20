@@ -34,6 +34,7 @@ import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.Location;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -67,11 +68,19 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _setField;
   protected AbstractFunction _call;
 
-  public InterpretedClassDef(String name,
+  public InterpretedClassDef(Location location,
+                             String name,
 			     String parentName,
 			     String []ifaceList)
   {
-    super(name, parentName, ifaceList);
+    super(location, name, parentName, ifaceList);
+  }
+
+  public InterpretedClassDef(String name,
+                             String parentName,
+                             String []ifaceList)
+  {
+    super(null, name, parentName, ifaceList);
   }
 
   /**

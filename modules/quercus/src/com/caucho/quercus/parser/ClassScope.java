@@ -30,10 +30,10 @@
 package com.caucho.quercus.parser;
 
 import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -97,9 +97,9 @@ public class ClassScope extends Scope {
   /**
    * Adds a class
    */
-  public InterpretedClassDef addClass(String name,
-				      String parentName,
-				      ArrayList<String> ifaceList)
+  public InterpretedClassDef addClass(Location location, String name,
+                                      String parentName,
+                                      ArrayList<String> ifaceList)
   {
     throw new UnsupportedOperationException();
   }

@@ -30,6 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
@@ -58,7 +59,16 @@ public class CompiledClassDef extends ClassDef {
   public CompiledClassDef(String name, String parent, String []ifaceList,
 			  Class compiledClass)
   {
-    super(name, parent, ifaceList);
+    this(null, name, parent, ifaceList, compiledClass);
+  }
+
+  public CompiledClassDef(Location location,
+                          String name,
+                          String parent,
+                          String []ifaceList,
+                          Class compiledClass)
+  {
+    super(location, name, parent, ifaceList);
 
     _compiledClass = compiledClass;
   }

@@ -84,7 +84,7 @@ public class NewExpr extends Expr {
     QuercusClass cl = env.findAbstractClass(_name);
 
     if (cl == null) {
-      throw env.errorException(L.l("no matching class {0}", _name));
+      throw env.createErrorException(L.l("no matching class {0}", _name));
     }
 
     Value []args = new Value[_args.length];
@@ -95,7 +95,7 @@ public class NewExpr extends Expr {
     env.pushCall(this, NullValue.NULL);
     try {
       env.checkTimeout();
-	
+
       return cl.callNew(env, args);
     } finally {
       env.popCall();

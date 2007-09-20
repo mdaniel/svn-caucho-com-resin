@@ -47,7 +47,6 @@ import com.caucho.vfs.*;
 
 import java.io.CharConversionException;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 
 /**
@@ -1751,7 +1750,7 @@ public class QuercusParser {
 
     try {
 
-      _classDef = oldScope.addClass(name, parentName, ifaceList);
+      _classDef = oldScope.addClass(getLocation(), name, parentName, ifaceList);
 
       if ((modifiers & M_ABSTRACT) != 0)
 	_classDef.setAbstract(true);
