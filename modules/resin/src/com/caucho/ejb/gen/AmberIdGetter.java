@@ -44,9 +44,9 @@ public class AmberIdGetter extends BaseMethod {
 
   private JMethod _method;
   private String _implClassName;
-  
+
   public AmberIdGetter(JMethod method,
-		       String implClassName)
+           String implClassName)
   {
     super(method);
 
@@ -62,6 +62,9 @@ public class AmberIdGetter extends BaseMethod {
   public void generateCall(JavaWriter out, String []args)
     throws IOException
   {
+    // ejb/0604
+    out.println("  _context.__caucho_getAmberCacheItem().loadEntity(0);");
+
     out.println("  return _context.__caucho_getAmberCacheEntity()." + _method.getName() + "();");
   }
 }
