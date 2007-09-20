@@ -46,7 +46,7 @@ public class AmberIdGetter extends BaseMethod {
   private String _implClassName;
 
   public AmberIdGetter(JMethod method,
-           String implClassName)
+                       String implClassName)
   {
     super(method);
 
