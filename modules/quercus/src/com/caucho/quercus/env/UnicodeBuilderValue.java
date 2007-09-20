@@ -173,6 +173,34 @@ public class UnicodeBuilderValue extends StringBuilderValue
   }
 
   /**
+   * Append a buffer to the value.
+   */
+  /*
+  public final StringValue append(byte []buf, int offset, int length)
+  {
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    Env env = Env.getInstance();
+    String charset = (env != null
+		      ? env.getRuntimeEncoding().toString()
+		      : null);
+
+    // ...
+
+    char []charBuffer = _buffer;
+    int charLength = _length;
+
+    for (int i = 0; i < length; i++)
+      charBuffer[charLength + i] = (char) buf[offset + i];
+
+    _length += length;
+
+    return this;
+  }
+  */
+
+  /**
    * Append to a string builder.
    */
   @Override

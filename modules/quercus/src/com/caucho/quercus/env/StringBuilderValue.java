@@ -751,7 +751,7 @@ public class StringBuilderValue
   /**
    * Append a buffer to the value.
    */
-  public final StringValue append(byte []buf, int offset, int length)
+  public StringValue append(byte []buf, int offset, int length)
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
