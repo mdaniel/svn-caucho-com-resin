@@ -40,7 +40,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.log.Log;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.PathMapping;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Crc64;
@@ -282,7 +282,7 @@ public class Store {
 
       // add path-mappings to map local files with absolute paths
 
-      Application app = Application.getLocal();
+      WebApp app = WebApp.getLocal();
 
       CharBuffer cb = CharBuffer.allocate();
 

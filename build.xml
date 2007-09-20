@@ -463,42 +463,7 @@
 
     <mkdir dir="${build}/javadoc/web-app"/>
 
-    <copy todir="${build}/javadoc/web-app" preservelastmodified="true">
-      <fileset dir="${modules}/javadoc/web-app">
-        <include name="**/*.java"/>
-        <include name="**/web.xml"/>
-        <include name="**/*.jsp"/>
-      </fileset>
-      <filterset>
-        <filter token="VERSION" value="${version}"/>
-        <filter token="JDKAPI.HREF" value="${jdkapi.href}"/>
-      </filterset>
-    </copy>
-
-    <copy todir="${build}/javadoc/web-app" preservelastmodified="true">
-      <fileset dir="${modules}/javadoc/web-app">
-        <exclude name="**/*.java"/>
-        <exclude name="**/web.xml"/>
-        <exclude name="**/*.jsp"/>
-      </fileset>
-    </copy>
-  
-    <mkdir dir="${build}/javadoc/web-app/WEB-INF/src"/>
-
-    <copy todir="${build}/javadoc/web-app/WEB-INF/src"
-          preservelastmodified="true">
-      <fileset dir="${modules}/javadoc/src">
-        <include name="**/*.java"/>
-      </fileset>
-      <filterset>
-        <filter token="VERSION" value="${version}"/>
-        <filter token="JDKAPI.HREF" value="${jdkapi.href}"/>
-      </filterset>
-    </copy>
-
-    <mkdir dir="${build}/javadoc/web-app/resin"/>
-
-    <javadoc destdir="${build}/javadoc/web-app/resin" 
+    <javadoc destdir="${build}/javadoc/web-app/" 
       maxmemory="256m"
       use="true" 
       author="true"
@@ -526,6 +491,7 @@
       <packageset dir="${modules}/saaj/src"/>
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
+      <packageset dir="${modules}/util/src"/>
       <packageset dir="${modules}/webutil/src"/>
       <packageset dir="${promodules}/pro/src"/>
 

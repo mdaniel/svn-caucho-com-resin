@@ -100,8 +100,8 @@ class XslManager {
     if (templateRef != null)
       stylesheet = templateRef.get();
 
-    if (stylesheet instanceof StylesheetImpl &&
-        ! ((StylesheetImpl) stylesheet).isModified())
+    if (stylesheet instanceof StylesheetImpl
+        && ! ((StylesheetImpl) stylesheet).isModified())
       return stylesheet;
 
     _lastUpdate = now;
