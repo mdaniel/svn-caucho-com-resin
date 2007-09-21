@@ -100,5 +100,32 @@ public class ContainerTransaction {
     EjbMethodPattern method = bean.createMethod(_method);
 
     method.setTransAttribute(_trans);
+
+    // ejb/0593
+    setInternalTransactionAttribute("ejb", bean);
+
+    // ejb/0596
+    setInternalTransactionAttribute("ejbHome", bean);
+  }
+
+  private void setInternalTransactionAttribute(String prefix, EjbBean bean)
+  {
+    // XXX: it might need to check <method-intf>
+
+    if (! _method.getName().startsWith(prefix)) {
+      MethodSignature signature = new MethodSignature();
+
+      signature.setEJBName(_method.getEJBName());
+
+      String methodName = _method.getName();
+
+      methodName = Character.toUpperCase(methodName.charAt(0)) + methodName.substring(1);
+
+      signature.setMethodName(prefix + methodName);
+
+      EjbMethodPattern method = bean.createMethod(signature);
+
+      method.setTransAttribute(_trans);
+    }
   }
 }
