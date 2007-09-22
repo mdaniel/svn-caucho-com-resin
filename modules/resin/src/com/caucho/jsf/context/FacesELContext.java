@@ -80,8 +80,6 @@ public class FacesELContext extends ServletELContext
   @Override
   public Object getSessionScope()
   {
-    System.out.println("SCOPE: " + _facesContext.getExternalContext());
-    
     return _facesContext.getExternalContext().getSessionMap();
   }
 

@@ -42,11 +42,14 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.*;
 
 /**
  * Generates the skeleton for a method call.
  */
 public class TransactionChain extends FilterCallChain {
+  private static final Logger log
+    = Logger.getLogger(TransactionChain.class.getName());
   private static final L10N L = new L10N(TransactionChain.class);
 
   private JMethod _apiMethod;
@@ -227,6 +230,13 @@ public class TransactionChain extends FilterCallChain {
     exnTypes = _implMethod.getExceptionTypes();
 
     for (JClass cl : exnTypes) {
+      if (! cl.isAssignableTo(Exception.class)) {
+	// XXX:
+	// hessian/3600
+	log.info(cl + " is not handled by EJB");
+	continue;
+      }
+      
       out.println("if (e instanceof " + cl.getName() + ") {");
       out.pushDepth();
 

@@ -1314,6 +1314,10 @@ r_web-app-Flow =
 r_web-app-Content =
   (r_web-app-Flow
 
+   & element prologue {
+      r_web-app-Content
+   }*
+
    & r_config-file*)
 
 r_web-app = element web-app {

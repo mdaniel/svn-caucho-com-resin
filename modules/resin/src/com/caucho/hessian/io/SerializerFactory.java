@@ -466,7 +466,7 @@ public class SerializerFactory extends AbstractSerializerFactory
     addBasic(Long.class, "long", BasicSerializer.LONG);
     addBasic(Float.class, "float", BasicSerializer.FLOAT);
     addBasic(Double.class, "double", BasicSerializer.DOUBLE);
-    addBasic(Character.class, "char", BasicSerializer.CHARACTER);
+    addBasic(Character.class, "char", BasicSerializer.CHARACTER_OBJECT);
     addBasic(String.class, "string", BasicSerializer.STRING);
     addBasic(Object.class, "object", BasicSerializer.OBJECT);
     addBasic(java.util.Date.class, "date", BasicSerializer.DATE);

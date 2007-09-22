@@ -88,4 +88,17 @@ abstract public class AbstractDeserializer implements Deserializer {
   {
     throw new UnsupportedOperationException(String.valueOf(this));
   }
+
+  protected HessianProtocolException error(String msg)
+  {
+    return new HessianProtocolException(msg);
+  }
+
+  protected String codeName(int ch)
+  {
+    if (ch < 0)
+      return "end of file";
+    else
+      return "0x" + Integer.toHexString(ch & 0xff);
+  }
 }

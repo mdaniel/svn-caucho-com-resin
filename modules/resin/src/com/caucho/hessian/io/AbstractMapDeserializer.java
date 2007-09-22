@@ -73,6 +73,11 @@ public class AbstractMapDeserializer extends AbstractDeserializer {
       return in.readRef();
     case 'r':
       return in.readRemote();
+    case 'M':
+      break;
+    default:
+      throw error(getClass().getName() + ".readObject() expected map at "
+		  + codeName(code));
     }
 
     String type = in.readType();

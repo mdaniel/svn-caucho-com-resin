@@ -33,7 +33,7 @@ import java.util.HashMap;
 
 
 /**
- * <association-override> tag in the orm.xml
+ * &lt;association-override> tag in the orm.xml
  */
 public class AssociationOverrideConfig {
 

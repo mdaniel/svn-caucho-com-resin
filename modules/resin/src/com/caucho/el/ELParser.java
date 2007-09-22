@@ -39,6 +39,7 @@ import javax.el.VariableMapper;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Parses the expression.
@@ -639,12 +640,18 @@ public class ELParser
         if (expr != null)
           return expr;
 
-        Method method = getStaticMethod(name);
+	try {
+	  Method method = getStaticMethod(name);
 
-        if (method != null)
-          return new StaticMethodExpr(method);
-        else
-          return new IdExpr(name);
+	  if (method != null)
+	    return new StaticMethodExpr(method);
+	  else
+	    return new IdExpr(name);
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
+	  
+	  return new IdExpr(name);
+	}
       }
     }
   }

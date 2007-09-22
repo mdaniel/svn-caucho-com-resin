@@ -284,8 +284,8 @@ public class JavaDeserializer extends AbstractMapDeserializer {
       for (int i = 0; i < fields.length; i++) {
         Field field = fields[i];
 
-        if (Modifier.isTransient(field.getModifiers()) ||
-            Modifier.isStatic(field.getModifiers()))
+        if (Modifier.isTransient(field.getModifiers())
+	    || Modifier.isStatic(field.getModifiers()))
           continue;
         else if (fieldMap.get(field.getName()) != null)
           continue;

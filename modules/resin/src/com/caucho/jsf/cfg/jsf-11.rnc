@@ -1,3 +1,4 @@
+
 include "../../server/resin/j2ee-dtd.rnc"
 
 start = jsf11_faces-config

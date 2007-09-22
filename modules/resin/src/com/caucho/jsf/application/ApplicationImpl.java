@@ -121,6 +121,9 @@ public class ApplicationImpl extends Application
     _elResolver = new FacesContextELResolver(customResolvers,
 					     _bundleResolver);
 
+    setViewHandler(new JspViewHandler());
+    setStateManager(new SessionStateManager());
+
     appContext.addELResolver(new FacesJspELResolver(this));
 
     addComponent(UIColumn.COMPONENT_TYPE,

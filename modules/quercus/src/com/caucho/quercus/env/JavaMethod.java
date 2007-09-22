@@ -97,10 +97,16 @@ public class JavaMethod extends JavaInvoker {
       return _method.invoke(obj, args);
     } catch (InvocationTargetException e) {
       Throwable e1 = e.getCause();
+
+      String methodName = (_method.getDeclaringClass().getName() + "."
+			   + _method.getName());
       
-      throw new QuercusException(_method.getName() + ": " + e1.getMessage(), e1);
+      throw new QuercusException(methodName + ": " + e1.getMessage(), e1);
     } catch (Exception e) {
-      throw new QuercusException(_method.getName() + ": " + e.getMessage(), e);
+      String methodName = (_method.getDeclaringClass().getName() + "."
+			   + _method.getName());
+      
+      throw new QuercusException(methodName + ": " + e.getMessage(), e);
     }
   }
 

@@ -273,7 +273,10 @@ class HtmlFormRenderer extends BaseRenderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    //context.getApplication().getViewHandler().writeState(context);
+    ViewHandler handler = context.getApplication().getViewHandler();
+
+    // jsf/1136 -- needed by facelets
+    handler.writeState(context);
 
     ResponseWriter out = context.getResponseWriter();
 

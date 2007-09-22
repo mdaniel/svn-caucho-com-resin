@@ -206,34 +206,32 @@ public class FilePath extends FilesystemPath {
     String path = getFullPath();
     int length = path.length();
     CharBuffer cb = new CharBuffer();
-    cb.append("file:");
+    cb.append("file:///");
     
     char ch;
     int offset = 0;
     // For windows, convert /c: to c:
-    if (isWindows()) {
-      if (length >= 3
-	  && path.charAt(0) == '/'
-	  && path.charAt(2) == ':'
-	  && ((ch = path.charAt(1)) >= 'a' && ch <= 'z'
-	      || ch >= 'A' && ch <= 'Z')) {
-        offset = 1;
-      }
-      else if (length >= 3
-	       && path.charAt(0) == '/'
-	       && path.charAt(1) == ':'
-	       && path.charAt(2) == '/') {
-        cb.append('/');
-        cb.append('/');
-        offset = 3;
-      }
+    if (length >= 3
+	&& path.charAt(0) == '/'
+	&& path.charAt(2) == ':'
+	&& ('a' <= (ch = path.charAt(1)) && ch <= 'z'
+	    || 'A' <= ch && ch <= 'Z')) {
+      offset = 1;
+    }
+    else if (length >= 3
+	     && path.charAt(0) == '/'
+	     && path.charAt(1) == ':'
+	     && path.charAt(2) == '/') {
+      cb.append('/');
+      cb.append('/');
+      offset = 3;
     }
 
     for (; offset < length; offset++) {
       cb.append(path.charAt(offset));
     }
 
-    return escapeURL("file:" + cb.toString());
+    return escapeURL(cb.toString());
         
   }
 

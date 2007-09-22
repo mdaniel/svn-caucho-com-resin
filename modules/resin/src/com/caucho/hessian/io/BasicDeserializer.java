@@ -65,6 +65,7 @@ public class BasicDeserializer extends AbstractDeserializer {
   public static final int FLOAT = BasicSerializer.FLOAT;
   public static final int DOUBLE = BasicSerializer.DOUBLE;
   public static final int CHARACTER = BasicSerializer.CHARACTER;
+  public static final int CHARACTER_OBJECT = BasicSerializer.CHARACTER_OBJECT;
   public static final int STRING = BasicSerializer.STRING;
   public static final int DATE = BasicSerializer.DATE;
   public static final int NUMBER = BasicSerializer.NUMBER;
@@ -108,6 +109,8 @@ public class BasicDeserializer extends AbstractDeserializer {
     case DOUBLE:
       return Double.class;
     case CHARACTER:
+      return Character.class;
+    case CHARACTER_OBJECT:
       return Character.class;
     case STRING:
       return String.class;
@@ -184,6 +187,15 @@ public class BasicDeserializer extends AbstractDeserializer {
       {
 	String s = in.readString();
 	if (s == null || s.equals(""))
+	  return new Character((char) 0);
+	else
+	  return new Character(s.charAt(0));
+      }
+      
+    case CHARACTER_OBJECT:
+      {
+	String s = in.readString();
+	if (s == null || s.equals(""))
 	  return null;
 	else
 	  return new Character(s.charAt(0));
@@ -205,7 +217,7 @@ public class BasicDeserializer extends AbstractDeserializer {
       if (s == null)
         return null;
       else {
-        int len= s.length();
+        int len = s.length();
         char []chars = new char[len];
         s.getChars(0, len, chars, 0);
         return chars;

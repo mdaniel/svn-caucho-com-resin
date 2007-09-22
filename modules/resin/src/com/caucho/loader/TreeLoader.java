@@ -229,7 +229,8 @@ public class TreeLoader extends Loader implements Dependency
 
       path = path.lookup(name);
 
-      if (path.canRead() || path.isDirectory()) {
+      // server/249i
+      if (path.exists()) {
 	try {
 	  URL url = new URL(path.getURL());
 

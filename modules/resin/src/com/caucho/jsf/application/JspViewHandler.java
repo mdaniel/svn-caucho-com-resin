@@ -455,7 +455,7 @@ public class JspViewHandler extends ViewHandler
       StateManager stateManager = context.getApplication().getStateManager();
 
       Object state = stateManager.saveView(context);
-      
+
       stateManager.writeState(context, state);
     }
   }

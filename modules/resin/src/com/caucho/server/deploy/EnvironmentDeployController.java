@@ -401,6 +401,13 @@ abstract public class
 
   protected void fillInitList(ArrayList<DeployConfig> initList)
   {
+    for (DeployConfig config : _configDefaults) {
+      DeployConfig prologue = config.getPrologue();
+
+      if (prologue != null)
+	initList.add(prologue);
+    }
+    
     initList.addAll(_configDefaults);
 
     if (_config != null && ! initList.contains(_config))

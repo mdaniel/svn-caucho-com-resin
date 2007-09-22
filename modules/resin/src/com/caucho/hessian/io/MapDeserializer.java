@@ -118,4 +118,41 @@ public class MapDeserializer extends AbstractMapDeserializer {
 
     return map;
   }
+
+  @Override
+  public Object readObject(AbstractHessianInput in,
+			   String []fieldNames)
+    throws IOException
+  {
+    Map map = createMap();
+      
+    int ref = in.addRef(map);
+
+    for (int i = 0; i < fieldNames.length; i++) {
+      String name = fieldNames[i];
+
+      map.put(name, in.readObject());
+    }
+
+    return map;
+  }
+
+  private Map createMap()
+    throws IOException
+  {
+    
+    if (_type == null)
+      return new HashMap();
+    else if (_type.equals(Map.class))
+      return new HashMap();
+    else if (_type.equals(SortedMap.class))
+      return new TreeMap();
+    else {
+      try {
+        return (Map) _ctor.newInstance();
+      } catch (Exception e) {
+        throw new IOExceptionWrapper(e);
+      }
+    }
+  }
 }

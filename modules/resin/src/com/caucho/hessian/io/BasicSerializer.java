@@ -64,7 +64,8 @@ public class BasicSerializer extends AbstractSerializer {
   public static final int FLOAT = LONG + 1;
   public static final int DOUBLE = FLOAT + 1;
   public static final int CHARACTER = DOUBLE + 1;
-  public static final int STRING = CHARACTER + 1;
+  public static final int CHARACTER_OBJECT = CHARACTER + 1;
+  public static final int STRING = CHARACTER_OBJECT + 1;
   public static final int DATE = STRING + 1;
   public static final int NUMBER = DATE + 1;
   public static final int OBJECT = NUMBER + 1;
@@ -111,6 +112,7 @@ public class BasicSerializer extends AbstractSerializer {
       break;
       
     case CHARACTER:
+    case CHARACTER_OBJECT:
       out.writeString(String.valueOf(obj));
       break;
       

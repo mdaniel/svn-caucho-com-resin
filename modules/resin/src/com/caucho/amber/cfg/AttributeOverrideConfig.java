@@ -31,7 +31,7 @@ package com.caucho.amber.cfg;
 
 
 /**
- * <attribute-override> tag in the orm.xml
+ * &lt;attribute-override> tag in the orm.xml
  */
 public class AttributeOverrideConfig {
 

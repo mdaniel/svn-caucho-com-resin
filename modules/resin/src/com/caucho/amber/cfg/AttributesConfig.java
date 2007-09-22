@@ -32,7 +32,7 @@ package com.caucho.amber.cfg;
 import java.util.HashMap;
 
 /**
- * <attributes> tag in the orm.xml
+ * &lt;attributes> tag in the orm.xml
  */
 public class AttributesConfig {
 

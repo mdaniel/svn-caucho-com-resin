@@ -479,6 +479,11 @@ public class WebAppController
   protected void fillInitList(ArrayList<DeployConfig> initList)
   {
     if (_container != null) {
+      for (WebAppConfig config : _container.getWebAppDefaultList()) {
+	if (config.getPrologue() != null)
+	  initList.add(config.getPrologue());
+      }
+      
       for (WebAppConfig config : _container.getWebAppDefaultList())
 	initList.add(config);
     }

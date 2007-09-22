@@ -190,7 +190,7 @@ public class BeanSerializer extends AbstractSerializer {
 	try {
 	  value = _methods[i].invoke(obj, (Object []) null);
 	} catch (Exception e) {
-	  throw new RuntimeException(e);
+	  log.log(Level.FINE, e.toString(), e);
 	}
 
 	out.writeString(_names[i]);

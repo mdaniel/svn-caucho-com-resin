@@ -372,6 +372,8 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
   public Object create(Class api, String urlName, ClassLoader loader)
     throws MalformedURLException
   {
+    if (api == null)
+      throw new NullPointerException("api must not be null for HessianProxyFactory.create()");
     InvocationHandler handler = null;
 
     if (urlName.startsWith("jms:")) {
