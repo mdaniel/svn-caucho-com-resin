@@ -58,6 +58,8 @@ public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
   {
     if (argValue.isUnicode())
       return Marshal.EQUIVALENT;
+    else if (argValue.isString() && !argValue.isBinary())
+      return Marshal.EQUIVALENT; // php/0ch2
     else if (argValue.isArray())
       return Marshal.MARSHALABLE;
     else

@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -50,6 +49,10 @@ public class JavaByteArrayMarshal extends JavaArrayMarshal
     // php/0cia
     if (argValue.isBinary())
       return Marshal.EQUIVALENT;
+    else if (argValue.isString() && !argValue.isUnicode())
+      return Marshal.EQUIVALENT; // php/0id6, php/0jd6
+    else if (argValue.isString())
+      return Marshal.SIMILAR;
     else if (argValue.isArray())
       return Marshal.MARSHALABLE;
     else

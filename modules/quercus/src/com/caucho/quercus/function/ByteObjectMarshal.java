@@ -65,9 +65,10 @@ public class ByteObjectMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isBinary() && argValue.length() == 1) {
+    if (argValue.isBinary() && argValue.length() == 1)
       return Marshal.EQUIVALENT;
-    }
+    else if (argValue.isString() && !argValue.isUnicode() && argValue.length() == 1)
+      return Marshal.EQUIVALENT; // php/0ch1
     else if (argValue.isLongConvertible())
       return Marshal.MARSHALABLE;
     else

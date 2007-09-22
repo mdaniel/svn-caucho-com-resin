@@ -242,15 +242,6 @@ abstract public class BytesValue
   }
 
   /**
-   * Returns true for BinaryValue
-   */
-  @Override
-  public boolean isBinary()
-  {
-    return true;
-  }
-
-  /**
    * Returns true for equality
    */
   @Override

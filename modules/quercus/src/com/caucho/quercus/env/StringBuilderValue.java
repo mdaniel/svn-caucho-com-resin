@@ -29,10 +29,15 @@
 
 package com.caucho.quercus.env;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.IdentityHashMap;
 
 /**
  * Represents a PHP 5 style string builder (unicode.semantics = off)
@@ -287,7 +292,8 @@ public class StringBuilderValue
   @Override
   public StringValue toUnicodeValue()
   {
-    return this;
+    // php/0ch7
+    return new UnicodeBuilderValue(_buffer, _length);
   }
 
   /**
@@ -296,7 +302,7 @@ public class StringBuilderValue
   @Override
   public StringValue toUnicodeValue(Env env)
   {
-    return this;
+    return toUnicodeValue();
   }
 
   /**
@@ -305,7 +311,7 @@ public class StringBuilderValue
   @Override
   public StringValue toUnicodeValue(Env env, String charset)
   {
-    return this;
+    return toUnicodeValue();
   }
 
   /**

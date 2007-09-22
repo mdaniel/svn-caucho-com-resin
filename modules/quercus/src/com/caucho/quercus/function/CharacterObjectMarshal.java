@@ -31,7 +31,6 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -65,9 +64,10 @@ public class CharacterObjectMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isUnicode() && argValue.length() == 1) {
+    if (argValue.isUnicode() && argValue.length() == 1)
       return Marshal.EQUIVALENT;
-    }
+    else if (argValue.isString() && !argValue.isBinary() && argValue.length() == 1)
+      return Marshal.EQUIVALENT; // php/0ch1
     else if (argValue.isLongConvertible())
       return Marshal.MARSHALABLE;
     else

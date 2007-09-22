@@ -158,6 +158,15 @@ public class UnicodeBuilderValue extends StringBuilderValue
    * Converts to a UnicodeValue.
    */
   @Override
+  public StringValue toUnicodeValue()
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a UnicodeValue.
+   */
+  @Override
   public StringValue toUnicodeValue(Env env)
   {
     return this;

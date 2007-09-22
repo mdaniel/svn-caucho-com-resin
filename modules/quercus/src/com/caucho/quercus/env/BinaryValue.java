@@ -29,16 +29,17 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.vfs.WriteStream;
-
-import java.util.IdentityHashMap;
-import java.io.IOException;
-
 /**
  * Represents an 8-bit binary php-6 value.
  */
 abstract public class BinaryValue extends StringValue
 {
+
+  @Override
+  public boolean isBinary()
+  {
+    return true;
+  }
 
   /**
    * Returns the buffer offset
@@ -63,7 +64,8 @@ abstract public class BinaryValue extends StringValue
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
+  @Override
   abstract public byte[] toBytes();
 }
 

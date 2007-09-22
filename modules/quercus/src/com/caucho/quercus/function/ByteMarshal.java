@@ -69,9 +69,13 @@ public class ByteMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isBinary() && argValue.length() == 1) {
+    System.out.println("XXX:: ByteMarshal getMarshalingCostImpl " + this + " " + argValue.getClass()); // XXX::
+    System.out.println("XXX::   isBinary " + argValue.isBinary() + " isUnicode " + argValue.isUnicode() + " isString " + argValue.isString() +  " len " + argValue.length()); // XXX::
+
+    if (argValue.isBinary() && argValue.length() == 1)
       return Marshal.EQUIVALENT;
-    }
+    else if (argValue.isString() && !argValue.isUnicode() && argValue.length() == 1) // php/0ch0
+      return Marshal.EQUIVALENT;
     else if (argValue.isLongConvertible())
       return Marshal.MARSHALABLE;
     else
