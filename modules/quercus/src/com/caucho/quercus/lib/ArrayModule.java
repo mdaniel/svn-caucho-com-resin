@@ -1597,7 +1597,7 @@ case SORT_NUMERIC:
     if (array == null)
       return false;
 
-    if (!func.isValid()) {
+    if (! func.isValid()) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }

@@ -412,7 +412,7 @@ public class QuercusParser {
   public QuercusProgram parse()
     throws IOException
   {
-    _function = new FunctionInfo(_quercus, "main");
+    _function = new FunctionInfo(_quercus, "");
     _function.setPageMain(true);
 
     // quercus/0b0d
@@ -3256,20 +3256,15 @@ public class QuercusParser {
     else if (name.equals("__CLASS__") && _classDef != null)
       return createString(_classDef.getName());
     else if (name.equals("__FUNCTION__")) {
-      if (_isTop)
-        return createString("");
-      else
-        return createString(_function.getName());
+      return createString(_function.getName());
     }
     else if (name.equals("__METHOD__")) {
       if (_classDef != null) {
-        if (_isTop)
-          return createString(_classDef.getName());
-        else
+        if (_function.getName().length() != 0)
           return createString(_classDef.getName() + "::" + _function.getName());
+        else
+          return createString(_classDef.getName());
       }
-      else if (_isTop)
-        return createString("");
       else
         return createString(_function.getName());
     }

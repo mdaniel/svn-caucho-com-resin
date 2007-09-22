@@ -80,6 +80,9 @@ class Node {
   static final int RC_UNICODE = 512;
   static final int RC_NUNICODE = 513;
   
+  // wrapper
+  static final int RC_WRAPPER = 640;
+  
   // unicode properties sets
   static final int RC_C = 1024;
   static final int RC_L = 1025;
@@ -177,6 +180,17 @@ class Node {
 
   byte _unicodeCategory;
   
+  static int _count = 0;
+  int _id = -1;
+  
+  public static String code(Node node)
+  {
+    if (node == null)
+      return "null";
+    else
+      return code(node._code) + node._id;
+  }
+  
   public static String code(int code)
   {
     switch (code) {
@@ -226,6 +240,8 @@ class Node {
   {
     _rest = END;
     _code = code;
+    
+    _id = _count++;
   }
 
   /**
@@ -281,6 +297,41 @@ class Node {
     _string = buf;
   }
 
+  static Node removeTail(Node head)
+  {
+    Node tail = head._rest;
+    
+    if (head == null || tail == null)
+      return null;
+    
+    if (tail._rest == null) {
+      head._rest = null;
+      return tail;
+    }
+    else
+      return removeTail(tail);
+  }
+  
+  /*
+   * Cuts out the non-null tail of this node.
+   */
+  static Node spliceNonNullTail(Node head)
+  {
+    Node tail = head._rest;
+    
+    if (head == null || tail == null)
+      return null;
+
+    if (tail._rest == null || tail._code == RC_END || tail._code == RC_NULL) {
+      head._rest = null;
+      
+      tail._rest = null;
+      return tail;
+    }
+    else
+      return spliceNonNullTail(tail);
+  }
+  
   /**
    * Replaces the tail of a node.
    */

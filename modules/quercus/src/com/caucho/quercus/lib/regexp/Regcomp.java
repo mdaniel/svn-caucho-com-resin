@@ -201,13 +201,16 @@ class Regcomp {
 	  node = new Node(Node.RC_LOOP, _nLoop++, 1, Integer.MAX_VALUE);
 	node._branch = last;
 	last = node;
+
 	break;
 
       case '?':
 	if (last == null)
 	  throw new IllegalRegexpException("`?' must follow content expression");
+	/*
 	if (last._code == last.RC_LOOP)
 	  throw new IllegalRegexpException("nested *?+");
+	*/
 
 	if (pattern.peek() == '?') {
 	  pattern.read();
@@ -244,8 +247,10 @@ class Regcomp {
         
 	if (last == null)
 	  throw new IllegalRegexpException("`{' must follow content expression");
+	/*
 	if (last._code == last.RC_LOOP)
 	  throw new IllegalRegexpException("nested *?+");
+	*/
 
 	node = new Node(Node.RC_LOOP);
 	node._index = _nLoop++;
@@ -279,8 +284,6 @@ class Regcomp {
 	break;
 
       case '|':
-
-        
         if (isConditional) {
           pattern.ungetc(ch);
           
@@ -337,7 +340,32 @@ class Regcomp {
 	  case ':':
 	    // (?:...) No grouping, only for precedence.
 	    last = parseRec(pattern);
+	    
 	    last = Node.replaceTail(last, new Node(Node.RC_NULL));
+	    
+	    /*
+	    if (last._rest == null || last._rest._code == Node.RC_NULL) {
+	    }
+	    else {
+	      Node newLast = new Node(Node.RC_NULL);
+	      newLast._rest = last;
+	      
+	      last = newLast;
+	    }
+	    */
+	    
+	    /*
+	    // removes RC_END
+	    Node.removeTail(last);
+	    
+	    if (last._rest != null) {
+	      Node newLast = Node.removeTail(last);
+	      head = Node.concat(head, last);
+	        
+	      last = newLast;
+	    }
+	    */
+	    
 	    break;
 
 	  case '=':
@@ -826,10 +854,13 @@ class Regcomp {
     int next = pattern.read();
     if (last == null
         || last._code != Node.RC_STRING
+        || last._rest == null
+        || last._rest._code != Node.RC_END
         || next == '*'
         || next == '?'
         || next == '{'
         || next == '+') {
+
       last = new Node(new CharBuffer());
     }
     last._string.append((char) ch);
@@ -933,12 +964,12 @@ class Regcomp {
 
         last = parseString(ch, pattern, last);
       }
-      
+
       return last;
       
     case '#':
       return parseString('#', pattern, last, true);
-      
+
     default:
       if ((_flags & STRICT) != 0)
         throw new IllegalRegexpException("unrecognized escape at " +

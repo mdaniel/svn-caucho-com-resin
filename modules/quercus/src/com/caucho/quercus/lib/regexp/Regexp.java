@@ -83,6 +83,8 @@ public class Regexp {
   
   GroupState _groupState = new GroupState();
   
+  Stack<Node> _parentLoopRestStack = new Stack<Node>();
+  
   public Regexp(Env env, StringValue rawRegexp)
     throws IllegalRegexpException
   {
@@ -140,17 +142,14 @@ public class Regexp {
       }
     }
 
-    /*
-    if (_isUTF8)
+    if (pattern.isUnicode())
+      _pattern = pattern;
+    else if (_isUTF8)
       _pattern = pattern.toUnicodeValue(env, "UTF-8");
     else
       _pattern = pattern.toUnicodeValue(env);
-    */
 
-    _pattern = pattern;
-    
     Regcomp comp = new Regcomp(flags);
-
     _prog = comp.parse(new PeekString(_pattern));
 
     compile(env, _prog, comp);
@@ -171,45 +170,25 @@ public class Regexp {
   {
     StringValue result = _subject.substring(start);
 
-    return result;
-    
-    // return encodeResultString(env, result);
+    return encodeResultString(env, result);
   }
   
   public StringValue substring(Env env, int start, int end)
   {
     StringValue result = _subject.substring(start, end);
 
-    return result;
-    
-    // return encodeResultString(env, result);
+    return encodeResultString(env, result);
   }
   
   private StringValue encodeResultString(Env env, StringValue str)
   {
-    return str;
-    /*
-    if (_isUnicode) {
-      if (_isUTF8)
-        return str.toUnicodeValue(env, "UTF-8");
-      else
-        return str.toUnicodeValue(env);
-    }
-    else {
-      if (_isUTF8)
-        return str.toBinaryValue(env, "UTF-8");
-      else
-        return str.toBinaryValue(env);
-    }
-    */
+    if (_isUnicode)
+      return str;
+    else if (_isUTF8)
+      return str.toBinaryValue(env, "UTF-8");
+    else
+      return str.toBinaryValue(env);
   }
-  
-  /*
-  public Regexp(Node prog, Regcomp comp)
-  {
-    compile(prog, comp);
-  }
-  */
 
   public StringValue getPattern()
   {
@@ -259,33 +238,28 @@ public class Regexp {
     for (Map.Entry<Integer,StringValue> entry : comp._groupNameMap.entrySet()) {
       StringValue groupName = entry.getValue();
 
-      /*
       if (_isUnicode) {
       }
-      else if (_isUTF8) {
+      else if (_isUTF8)
         groupName.toBinaryValue(env, "UTF-8");
-      }
-      else {
+      else
         groupName.toBinaryValue(env);
-      }
-      */
-      
+
       _groupNames[entry.getKey().intValue()] = groupName;
     }
   }
 
   public void init(Env env, StringValue subject)
   {
-    /*
+    
     _isUnicode = subject.isUnicode();
     
-    if (_isUTF8)
+    if (_isUnicode) {
+    }
+    else if (_isUTF8)
       _subject = subject.toUnicodeValue(env, "UTF-8");
     else
       _subject = subject.toUnicodeValue(env);
-    */
-
-    _subject = subject;
 
     _stringCursor.init(_subject);
     
@@ -435,15 +409,22 @@ public class Regexp {
     GroupState oldState;
     
     while (prog != null) {
+      
+      
       /*
-      System.err.print("Regexp->match(): " + Node.code(prog._code) + " " + prog._string);
+      System.err.print("Regexp->match(): " + Node.code(prog) + " " + prog._string);
       if (prog._branch != null)
-        System.err.print(" . " + Node.code(prog._branch._code) + " " + prog._branch._string);
+        System.err.print(" . " + Node.code(prog._branch) + " " + prog._branch._string);
       if (prog._rest != null)
-        System.err.print(" : " + Node.code(prog._rest._code) + " " + prog._rest._string);
+        System.err.print(" : " + Node.code(prog._rest) + " " + prog._rest._string);
       
       System.err.println(" " + cursor.getIndex() + " . " + cursor.current());
+      if (_parentLoopRestStack.size() > 0)
+        System.err.println("\t" + Node.code(_parentLoopRestStack.peek()) + " . " + _parentLoopRestStack.peek()._string);
       */
+
+      
+      
       
       switch (prog._code) {
       case Node.RC_NULL:
@@ -585,7 +566,7 @@ public class Regexp {
 
         int matchedCount = -1;
         int matchedTail = tail;
-        GroupState matchedGroupState = oldState;
+        GroupState matchedGroupState = null;
         
         int loopTail = -1;
         
@@ -593,28 +574,52 @@ public class Regexp {
           if (cursor.current() == cursor.DONE)
             break;
 
+          // empty string match break
           if (loopTail == cursor.getIndex())
             break;
 
           loopTail = cursor.getIndex();
           
-          if ((value = match(prog._branch, cursor)) == FAIL) {
-            break;
-          }
+          _parentLoopRestStack.push(prog._rest);
+          value = match(prog._branch, cursor);
+          _parentLoopRestStack.pop();
           
+          if (value == FAIL)
+            break;
+
           int lastPos = cursor.getIndex();
           GroupState innerState = _groupState.copy();
           
           value = match(prog._rest, cursor);
 
-          if (value == FAIL || i + 1 < prog._min) {
-          }
-          else {
-            matchedCount = i + 1;
-            matchedTail = cursor.getIndex();
-            
-            freeGroupState(matchedGroupState);
-            matchedGroupState = _groupState.copy();
+          if (value != FAIL && i + 1 >= prog._min) {
+            if (_parentLoopRestStack.size() == 0) {
+              matchedCount = i + 1;
+              matchedTail = cursor.getIndex();
+              
+              freeGroupState(matchedGroupState);
+              matchedGroupState = _groupState.copy();
+            }
+            else {
+              lastPos = cursor.getIndex();
+
+              freeGroupState(innerState);
+              innerState = _groupState.copy();
+              
+              Node oldRest = _parentLoopRestStack.pop();
+              
+              value = match(oldRest, cursor);
+              
+              _parentLoopRestStack.push(oldRest);
+              
+              if (value != FAIL) {
+                matchedCount = i + 1;
+                matchedTail = lastPos;
+                
+                freeGroupState(matchedGroupState);
+                matchedGroupState = innerState.copy();
+              }
+            }
           }
           
           cursor.setIndex(lastPos);
@@ -629,10 +634,11 @@ public class Regexp {
           
           return SUCCESS;
         }
+        // may have matched the empty string
         else if (prog._min == 0) {
           cursor.setIndex(tail);
           setGroupState(oldState);
-          
+
           prog = prog._rest;
         }
         else {
@@ -749,33 +755,75 @@ public class Regexp {
       case Node.RC_LOOP_SHORT:
         oldState = _groupState.copy();
         tail = cursor.getIndex();
+
+        if (prog._min == 0) {
+          if (match(prog._rest, cursor) != FAIL) {
+            if (_parentLoopRestStack.size() == 0)
+              return SUCCESS;
+            else {
+              Node oldRest = _parentLoopRestStack.pop();
+              value = match(oldRest, cursor);
+              _parentLoopRestStack.push(oldRest);
+              
+              if (value != FAIL)
+                return SUCCESS;
+            }
+          }
+
+          setGroupState(oldState);
+          oldState = _groupState.copy();
+          cursor.setIndex(tail);
+        }
         
         for (i = 0; i < prog._max; i++) {
           if (cursor.current() == cursor.DONE)
             break;
 
-          if ((value = match(prog._branch, cursor)) == FAIL) {
+          _parentLoopRestStack.push(prog._rest);
+          value = match(prog._branch, cursor);
+          _parentLoopRestStack.pop();
+          
+          if (value == FAIL)
             break;
-          }
           
           int lastPos = cursor.getIndex();
           GroupState innerState = _groupState.copy();
           
           value = match(prog._rest, cursor);
 
-          if (value == FAIL || i + 1 < prog._min) {
-          }
-          else {
-            // matched
-            freeGroupState(oldState);
-            freeGroupState(innerState);
-            return SUCCESS;
+          if (value != FAIL && i + 1 >= prog._min) {
+            if (_parentLoopRestStack.size() == 0) {
+              freeGroupState(oldState);
+              freeGroupState(innerState);
+              
+              return SUCCESS;
+            }
+            else {
+              int restPos = cursor.getIndex();
+              GroupState restState = _groupState.copy();
+              
+              Node oldRest = _parentLoopRestStack.pop();
+              value = match(oldRest, cursor);
+              _parentLoopRestStack.push(oldRest);
+              
+              if (value != FAIL) {
+                cursor.setIndex(restPos);             
+
+                freeGroupState(oldState);
+                freeGroupState(innerState);
+                setGroupState(restState);
+                
+                return SUCCESS;
+              }
+            }
+
           }
           
           cursor.setIndex(lastPos);
           setGroupState(innerState);
         }
 
+        // may have matched the empty string
         if (prog._min == 0) {
           cursor.setIndex(tail);
           setGroupState(oldState);
@@ -859,21 +907,31 @@ public class Regexp {
 
 	// The peek pattern must match but isn't included in the real match
       case Node.RC_POS_LOOKAHEAD:
-	tail = cursor.getIndex();
-	if (match(prog._branch, cursor) == FAIL)
-	  return FAIL;
-	cursor.setIndex(tail);
-	prog = prog._rest;
-	break;
+        tail = cursor.getIndex();
+        oldState = _groupState.copy();
+	
+        if (match(prog._branch, cursor) == FAIL)
+          return FAIL;
+	
+        cursor.setIndex(tail);
+        setGroupState(oldState);
+	
+        prog = prog._rest;
+        break;
 
 	// The peek pattern must not match and isn't included in the real match
       case Node.RC_NEG_LOOKAHEAD:
-	tail = cursor.getIndex();
-	if (match(prog._branch, cursor) != FAIL)
-	  return FAIL;
-	cursor.setIndex(tail);
-	prog = prog._rest;
-	break;
+        tail = cursor.getIndex();
+        oldState = _groupState.copy();
+	
+        if (match(prog._branch, cursor) != FAIL)
+          return FAIL;
+	
+        setGroupState(oldState);
+        cursor.setIndex(tail);
+        
+        prog = prog._rest;
+        break;
 
 	 // The previous pattern must match and isn't included in the real match
       case Node.RC_POS_LOOKBEHIND:
@@ -1303,7 +1361,7 @@ public class Regexp {
         return SUCCESS;
         
       default:
-        throw new RuntimeException("Internal error: " + Node.code(prog._code));
+        throw new RuntimeException("Internal error: " + Node.code(prog));
       }
     }
 
