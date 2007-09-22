@@ -597,8 +597,10 @@ public class UnicodeBuilderValue extends StringBuilderValue
 
   public static ValueType getValueType(char []buffer, int offset, int len)
   {
-    if (len == 0)
-      return ValueType.STRING;
+    if (len == 0) {
+      // php/0307
+      return ValueType.LONG_CONVERTABLE;
+    }
 
     int i = offset;
     int ch = 0;
