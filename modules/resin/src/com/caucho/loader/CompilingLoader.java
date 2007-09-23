@@ -777,7 +777,7 @@ public class CompilingLoader extends Loader implements Make {
    * @return the new classpath
    */
   @Override
-  protected void buildClassPath(StringBuilder head)
+  protected void buildClassPath(ArrayList<String> pathList)
   {
     if (! _classDir.getScheme().equals("file"))
       return;
@@ -791,17 +791,17 @@ public class CompilingLoader extends Loader implements Make {
       }
 
       if (_classDir.isDirectory()) {
-        if (head.length() > 0)
-          head.append(CauchoSystem.getPathSeparatorChar());
-        
-        head.append(_classDir.getNativePath());
+	String path = _classDir.getNativePath();
+
+	if (! pathList.contains(path))
+	  pathList.add(path);
       }
     
       if (! _classDir.equals(_sourceDir)) {
-        if (head.length() > 0)
-          head.append(CauchoSystem.getPathSeparatorChar());
-        
-        head.append(_sourceDir.getNativePath());
+	String path = _sourceDir.getNativePath();
+
+	if (! pathList.contains(path))
+	  pathList.add(path);
       }
     } catch (java.security.AccessControlException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -838,30 +838,13 @@ public class CompilingLoader extends Loader implements Make {
     return cb.close();
   }
 
+  /*
   @Override
   protected void buildSourcePath(StringBuilder head)
   {
     buildClassPath(head);
-
-    /* XXX: getClassPath already includes the source path
-    if (! sourceDir.getScheme().equals("file"))
-      return head;
-        
-    if (sourceDir.isDirectory() && ! sourceDir.equals(classDir)) {
-      CharBuffer cb = new CharBuffer();
-
-      if (! head.equals("")) {
-        cb.append(head);
-        cb.append(CauchoSystem.getPathSeparatorChar());
-      }
-      cb.append(classDir.getNativePath());
-
-      return cb.close();
-    }
-    else
-      return head;
-    */
   }
+  */
 
   public String toString()
   {

@@ -180,11 +180,8 @@ public class MergePath extends FilesystemPath {
 
       ArrayList<Path> pathList = ((MergePath) _root)._pathList;
 
-      /*
       if (! pathList.contains(path))
 	pathList.add(path);
-      */
-      pathList.add(path);
     }
     else if (((MergePath) path)._root == _root)
       return;
@@ -220,6 +217,23 @@ public class MergePath extends FilesystemPath {
     
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getClassPath();
+    else
+      classpath = CauchoSystem.getClassPath();
+
+    addClassPath(classpath);
+  }
+  
+  /**
+   * Adds the classpath for the loader as paths in the MergePath.
+   *
+   * @param loader class loader whose classpath should be used to search.
+   */
+  public void addResourceClassPath(ClassLoader loader)
+  {
+    String classpath = null;
+    
+    if (loader instanceof DynamicClassLoader)
+      classpath = ((DynamicClassLoader) loader).getResourcePathSpecificFirst();
     else
       classpath = CauchoSystem.getClassPath();
 
@@ -673,6 +687,7 @@ public class MergePath extends FilesystemPath {
       }
     }
 
+    /*
     pathname = _pathname;
     for (int i = 0; i < pathList.size(); i++) {
       Path path = pathList.get(i);
@@ -686,6 +701,7 @@ public class MergePath extends FilesystemPath {
         return realPath;
       }
     }
+    */
 
     if (pathList.size() > 0) {
       Path path = pathList.get(0);

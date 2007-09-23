@@ -866,31 +866,54 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public final String getResourcePathSpecificFirst()
   {
+    ArrayList<String> pathList = new ArrayList<String>();
+
+    buildResourcePathSpecificFirst(pathList);
+
+    StringBuilder sb = new StringBuilder();
+    char sep = CauchoSystem.getPathSeparatorChar();
+
+    if (pathList.size() == 0)
+      return "";
+
+    sb.append(pathList.get(0));
+    for (int i = 1; i < pathList.size(); i++) {
+      sb.append(sep);
+      sb.append(pathList.get(i));
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Returns the resource path with most specific first.
+   */
+  protected final void
+    buildResourcePathSpecificFirst(ArrayList<String> pathList)
+  {
     ClassLoader parent = getParent();
 
-    StringBuilder head = new StringBuilder();
     int size = _loaders != null ? _loaders.size() : 0;
     for (int i = 0; i < size; i++) {
       Loader loader = _loaders.get(i);
 
-      buildSourcePath(head);
+      loader.buildSourcePath(pathList);
     }
 
-    String tail;
     if (parent instanceof DynamicClassLoader)
-      tail = (((DynamicClassLoader) parent).getResourcePathSpecificFirst());
-    else
-      tail = CauchoSystem.getClassPath();
-
-    if (head == null || head.length() == 0)
-      return tail;
-    if (tail == null || tail.equals(""))
-      return head.toString();
+      ((DynamicClassLoader) parent).buildResourcePathSpecificFirst(pathList);
     else {
-      head.append(CauchoSystem.getPathSeparatorChar());
-      head.append(tail);
-      
-      return head.toString();
+      String tail = CauchoSystem.getClassPath();
+
+      if (tail != null) {
+	char sep = CauchoSystem.getPathSeparatorChar();
+	
+	String []values = tail.split("[" + sep + "]");
+
+	for (int i = 0; i < values.length; i++) {
+	  pathList.add(values[i]);
+	}
+      }
     }
   }
 

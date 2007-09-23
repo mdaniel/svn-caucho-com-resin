@@ -40,6 +40,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xml.Html;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlParser;
+import com.caucho.loader.*;
 
 import org.w3c.dom.Document;
 
@@ -193,7 +194,17 @@ public class Xsl extends AbstractStylesheetFactory {
       stylePath.addMergePath(Vfs.lookup(xslName).getParent());
       stylePath.addMergePath(Vfs.lookup());
       stylePath.addMergePath(CauchoSystem.getResinHome().lookup("xsl"));
-      stylePath.addClassPath(Thread.currentThread().getContextClassLoader());
+
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      if (loader instanceof DynamicClassLoader) {
+	DynamicClassLoader dynLoader
+	  = (DynamicClassLoader) loader;
+	String resourcePath = dynLoader.getResourcePathSpecificFirst();
+	stylePath.addClassPath(resourcePath);
+      }
+
+      // stylePath.addClassPath(
 
       /*
         Path []stylePath = new Path[] {

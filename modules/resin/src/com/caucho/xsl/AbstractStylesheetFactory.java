@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Crc64Stream;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.MergePath;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -832,6 +833,9 @@ abstract public class AbstractStylesheetFactory
       return generate(doc, path);
     } catch (TransformerConfigurationException e) {
       throw e;
+    } catch (IOException e) {
+      System.out.println("MP: " + ((MergePath) getSearchPath()).getMergePaths());
+      throw new TransformerConfigurationExceptionWrapper(e);
     } catch (Exception e) {
       throw new TransformerConfigurationExceptionWrapper(e);
     }

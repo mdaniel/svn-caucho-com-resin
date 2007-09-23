@@ -39,6 +39,7 @@ import javax.annotation.PostConstruct;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.cert.Certificate;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -234,16 +235,17 @@ public class SimpleLoader extends Loader {
    * Adds the class of this resource.
    */
   @Override
-  protected void buildClassPath(StringBuilder head)
+  protected void buildClassPath(ArrayList<String> pathList)
   {
-    if (head.length() > 0) {
-      head.append(Path.getPathSeparatorChar());
-    }
+    String path = null;
     
     if (_path instanceof JarPath)
-      head.append(((JarPath) _path).getContainer().getNativePath());
+      path = ((JarPath) _path).getContainer().getNativePath();
     else if (_path.isDirectory())
-      head.append(_path.getNativePath());
+      path = _path.getNativePath();
+
+    if (path != null && ! pathList.contains(path))
+      pathList.add(path);
   }
 
   /**

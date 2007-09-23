@@ -255,15 +255,16 @@ public class LibraryLoader extends Loader implements Dependency {
    * .jar and .zip files in the directory list.
    */
   @Override
-  protected void buildClassPath(StringBuilder head)
+  protected void buildClassPath(ArrayList<String> pathList)
   {
     for (int i = 0; i < _jarList.size(); i++) {
       JarEntry jarEntry = _jarList.get(i);
       JarPath jar = jarEntry.getJarPath();
+      
+      String path = jar.getContainer().getNativePath();
 
-      if (head.length() > 0)
-        head.append(CauchoSystem.getPathSeparatorChar());
-      head.append(jar.getContainer().getNativePath());
+      if (! pathList.contains(path))
+	pathList.add(path);
     }
   }
 

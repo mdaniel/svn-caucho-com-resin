@@ -31,12 +31,13 @@ package com.caucho.loader;
 import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.vfs.Path;
+import com.caucho.server.util.*;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.cert.Certificate;
-import java.util.Vector;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -188,7 +189,22 @@ abstract public class Loader {
   /**
    * Adds the classpath of this loader.
    */
-  protected void buildClassPath(StringBuilder head)
+  protected final void buildClassPath(StringBuilder head)
+  {
+    ArrayList<String> pathList = new ArrayList<String>();
+    buildClassPath(pathList);
+    
+    for (int i = 0; i < pathList.size(); i++) {
+      if (head.length() > 0)
+	head.append(CauchoSystem.getPathSeparatorChar());
+      head.append(pathList.get(i));
+    }
+  }
+  
+  /**
+   * Adds the sourcepath of this loader.
+   */
+  protected void buildClassPath(ArrayList<String> pathList)
   {
   }
   
@@ -198,6 +214,14 @@ abstract public class Loader {
   protected void buildSourcePath(StringBuilder head)
   {
     buildClassPath(head);
+  }
+  
+  /**
+   * Adds the sourcepath of this loader.
+   */
+  protected void buildSourcePath(ArrayList<String> pathList)
+  {
+    buildClassPath(pathList);
   }
 
   /**

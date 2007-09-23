@@ -188,6 +188,7 @@ class XslManager {
 
       factory.setClassName(className);
 
+      // XXX: error here
       return factory.newTemplates(href);
     } finally {
       thread.setContextClassLoader(oldLoader);
