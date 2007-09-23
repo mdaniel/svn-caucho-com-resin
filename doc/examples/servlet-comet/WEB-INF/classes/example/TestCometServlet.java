@@ -16,8 +16,8 @@ public class TestCometServlet extends AbstractCometServlet
 
   private TimerService _timerService;
   
-  private ArrayList<CometItem> _itemList
-    = new ArrayList<CometItem>();
+  private ArrayList<CometState> _itemList
+    = new ArrayList<CometState>();
 
   public void init()
   {
