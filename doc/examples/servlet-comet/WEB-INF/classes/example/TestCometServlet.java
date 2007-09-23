@@ -14,14 +14,14 @@ public class TestCometServlet extends AbstractCometServlet
 {
   private @Resource ScheduledExecutorService _timer;
 
-  private TimerManager _timerManager;
+  private TimerService _timerService;
   
   private ArrayList<CometItem> _itemList
     = new ArrayList<CometItem>();
 
   public void init()
   {
-    _timerManager = new TimerManager(_timer);
+    _timerService = new TimerService(_timer);
   }
   
   @Override
@@ -50,9 +50,14 @@ public class TestCometServlet extends AbstractCometServlet
     out.println();
     out.println("-->");
 
-    // Add the comet item to the controller
+    out.println("<script type='text/javascript'>");
+    out.println("var comet_update = window.parent.comet_update;");
+    out.println("</script>");
+
+    CometState state = new CometState(controller);
     
-    _timerManager.addCometItem(new CometItem(controller));
+    // Add the comet state to the controller
+    _timerService.addCometState(state);
 
     return true;
   }
@@ -65,8 +70,10 @@ public class TestCometServlet extends AbstractCometServlet
   {
     PrintWriter out = res.getWriter();
 
+    Object count = req.getAttribute("comet.count");
+
     out.println("<script type='text/javascript'>");
-    out.println("window.parent.comet_update(" + req.getAttribute("comet.count") + ");");
+    out.println("comet_update(" + count + ");");
     out.println("</script>");
 
     return true;
@@ -74,6 +81,6 @@ public class TestCometServlet extends AbstractCometServlet
 
   public void destroy()
   {
-    _timerManager.close();
+    _timerService.close();
   }
 }
