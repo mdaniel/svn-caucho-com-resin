@@ -2,13 +2,37 @@
   <header>
     <product>resin</product>
     <title>Comet Servlet</title>
-    <description><p>A basic "comet" servlet</p></description>
+    <description>
+<p>Resin's Comet servlet API enables streaming communication such
+as AJAX dynamic updates for browser/JavaScript applications.  The API
+encapsulates of the threading and communications issues between the
+request threads and the rest of the application.
+</p>
+</description>
     <type>tutorial</type>
     <tutorial-startpage>comet.html</tutorial-startpage>
   </header>
 
   <body>
-    <summary/>
+
+<s1>
+
+<p>Resin's Comet API lets server application push new data to
+the client as it becomes available.  Administration and monitoring
+applications need to continually update the client when new information
+becomes available to the server.
+</p>
+
+<figure src="cometcomm.png"/>
+
+<p>The architecture in the picture uses two HTTP streams to the server
+application, one for normal client-server requests, and a second
+unidirectional stream to send updates from the server to the client.
+In this example, we're using a browser with JavaScript, but the same
+architecture applies to a more sophisticated Flash monitoring
+application sending Hessian packets to update the monitoring display.</p>
+
+</s1>
 
 <s1 title="Files in this tutorial">
 <deftable>
@@ -31,7 +55,7 @@
 </deftable>
 </s1>
 
-<s1>
+<s1 title="example code">
 
 <example title="example/TestComet.java">
 package example;
@@ -81,12 +105,13 @@ public class TestComet extends AbstractCometServlet {
 
 <s1 title="state">
 
-<figure src="cometcomm.png"/>
 <figure src="cometstate.png"/>
 
 </s1>
 
 <s1 title="AbstractCometServlet">
+
+<p>See <a href="http://caucho.com/resin-javadoc/com/caucho/servlets/comet/AbstractCometServlet.html">AbstractCometServlet JavaDoc</a>.</p>
 
 <example title="com.caucho.servlets.comet.AbstractCometServlet">
 package com.caucho.servlets.comet;
@@ -111,6 +136,8 @@ abstract public class AbstractCometServlet extends GenericServlet
 </s1>
 
 <s1 title="CometController">
+
+<p>See <a href="http://caucho.com/resin-javadoc/com/caucho/servlets/comet/CometController.html">CometController JavaDoc</a>.</p>
 
 <example title="com.caucho.servlets.comet.CometController">
 package com.caucho.servlets.comet;

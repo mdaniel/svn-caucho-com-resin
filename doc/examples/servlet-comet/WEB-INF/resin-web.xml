@@ -1,6 +1,6 @@
 <web-app xmlns="http://caucho.com/ns/resin">
 
   <servlet-mapping url-pattern="/comet"
-                   servlet-class="example.TestComet"/>
+                   servlet-class="example.TestCometServlet"/>
 
 </web-app>
