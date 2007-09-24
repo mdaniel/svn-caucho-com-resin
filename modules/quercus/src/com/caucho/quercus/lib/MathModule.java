@@ -71,10 +71,11 @@ public class MathModule extends AbstractQuercusModule {
 
   public static Value abs(Value value)
   {
-    if (value instanceof DoubleValue)
-      return new DoubleValue(Math.abs(value.toDouble()));
+    if (value.getValueType().isDoubleCmp())
+      return DoubleValue.create(Math.abs(value.toDouble()));
     else
-      return new LongValue(Math.abs(value.toLong()));
+      return LongValue.create(Math.abs(value.toLong()));
+
   }
 
   public static double acos(double value)

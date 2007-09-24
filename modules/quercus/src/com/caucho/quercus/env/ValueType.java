@@ -70,6 +70,11 @@ abstract public class ValueType {
     return false;
   }
   
+  public final boolean isDoubleCmp()
+  {
+    return isNumberCmp() && ! isLongCmp();
+  }
+  
   public static final ValueType NULL = new ValueType()
     {
       public String toString()

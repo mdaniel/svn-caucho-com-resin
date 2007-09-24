@@ -65,10 +65,10 @@ public class DivExpr extends BinaryExpr {
    */
   public Value eval(Env env)
   {
-    double lValue = _left.evalDouble(env);
-    double rValue = _right.evalDouble(env);
+    Value lValue = _left.eval(env);
+    Value rValue = _right.eval(env);
 
-    return new DoubleValue(lValue / rValue);
+    return lValue.div(rValue);
   }
 
   public String toString()

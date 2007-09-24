@@ -1477,7 +1477,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value add(Value rValue)
   {
-    if (isLongConvertible() && rValue.isLongConvertible())
+    if (getValueType().isLongAdd() && rValue.getValueType().isLongAdd())
       return LongValue.create(toLong() + rValue.toLong());
     
     return DoubleValue.create(toDouble() + rValue.toDouble());
@@ -1516,7 +1516,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value sub(Value rValue)
   {
-    if (isLongConvertible() && rValue.isLongConvertible())
+    if (getValueType().isLongAdd() && rValue.getValueType().isLongAdd())
       return LongValue.create(toLong() - rValue.toLong());
     
     return DoubleValue.create(toDouble() - rValue.toDouble());
@@ -1544,7 +1544,10 @@ abstract public class Value implements java.io.Serializable
    */
   public Value mul(Value rValue)
   {
-    return new DoubleValue(toDouble() * rValue.toDouble());
+    if (getValueType().isLongAdd() && rValue.getValueType().isLongAdd())
+      return LongValue.create(toLong() * rValue.toLong());
+    else
+      return new DoubleValue(toDouble() * rValue.toDouble());
   }
 
   /**
@@ -1560,10 +1563,10 @@ abstract public class Value implements java.io.Serializable
    */
   public Value div(Value rValue)
   {
-    double lDouble = toDouble();
-    double rDouble = rValue.toDouble();
-
-    return new DoubleValue(lDouble / rDouble);
+    if (getValueType().isLongAdd() && rValue.getValueType().isLongAdd())
+      return LongValue.create(toLong() / rValue.toLong());
+    else
+      return DoubleValue.create(toDouble() / rValue.toDouble());
   }
 
   /**

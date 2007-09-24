@@ -571,7 +571,7 @@ abstract public class StringValue extends Value implements CharSequence {
       return this;
     }
   }
-
+  
   /**
    * Adds to the following value.
    */
@@ -582,7 +582,7 @@ abstract public class StringValue extends Value implements CharSequence {
     
     return DoubleValue.create(toDouble() + rValue);
   }
-
+  
   /**
    * Adds to the following value.
    */
