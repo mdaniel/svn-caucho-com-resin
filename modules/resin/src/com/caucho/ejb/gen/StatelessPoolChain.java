@@ -70,11 +70,12 @@ public class StatelessPoolChain extends SessionPoolChain {
     // The interceptor calls ctx.proceed() which invokes the business method.
     // generateFilterCall(out, retVar, "ptr", args);
 
+    out.popDepth();
+
     // ejb/0fb0
     // XXX: ejb/02i0
     generateInterceptorExceptionHandling(out);
 
-    out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();
 
