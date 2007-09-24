@@ -79,10 +79,7 @@ class Node {
   // unicode properties
   static final int RC_UNICODE = 512;
   static final int RC_NUNICODE = 513;
-  
-  // wrapper
-  static final int RC_WRAPPER = 640;
-  
+
   // unicode properties sets
   static final int RC_C = 1024;
   static final int RC_L = 1025;

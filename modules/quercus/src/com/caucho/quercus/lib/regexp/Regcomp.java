@@ -367,6 +367,11 @@ class Regcomp {
 	    */
 	    
 	    break;
+	    
+	  case '>':
+	    // (?>...) Atomic groups (once-only subpatterns). 
+	    last = parseRec(pattern);
+	    break;
 
 	  case '=':
 	    // (?=...) Positive lookahead assertion.
@@ -854,8 +859,7 @@ class Regcomp {
     int next = pattern.read();
     if (last == null
         || last._code != Node.RC_STRING
-        || last._rest == null
-        || last._rest._code != Node.RC_END
+        || (last._rest != null && last._rest._code != Node.RC_END)
         || next == '*'
         || next == '?'
         || next == '{'

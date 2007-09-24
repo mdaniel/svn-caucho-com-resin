@@ -251,7 +251,6 @@ public class Regexp {
 
   public void init(Env env, StringValue subject)
   {
-    
     _isUnicode = subject.isUnicode();
     
     if (_isUnicode) {
@@ -283,6 +282,7 @@ public class Regexp {
   public int exec(CharCursor cursor, int start, int first)
   { 
     _groupState.clear();
+    _parentLoopRestStack.clear();
     
     this._start = start;
     this._first = first;
@@ -570,10 +570,12 @@ public class Regexp {
         
         int loopTail = -1;
         
+        boolean isParentRestMatched = false;
+        
         for (i = 0; i < prog._max; i++) {
           if (cursor.current() == cursor.DONE)
             break;
-
+          
           // empty string match break
           if (loopTail == cursor.getIndex())
             break;
@@ -586,12 +588,12 @@ public class Regexp {
           
           if (value == FAIL)
             break;
-
+          
           int lastPos = cursor.getIndex();
           GroupState innerState = _groupState.copy();
           
           value = match(prog._rest, cursor);
-
+          
           if (value != FAIL && i + 1 >= prog._min) {
             if (_parentLoopRestStack.size() == 0) {
               matchedCount = i + 1;
@@ -612,7 +614,9 @@ public class Regexp {
               
               _parentLoopRestStack.push(oldRest);
               
-              if (value != FAIL) {
+              if (value != FAIL || ! isParentRestMatched) {
+                isParentRestMatched |= value != FAIL;
+                
                 matchedCount = i + 1;
                 matchedTail = lastPos;
                 
@@ -626,6 +630,8 @@ public class Regexp {
           setGroupState(innerState);
         }
 
+        //System.err.println("outside LOOP: " + Node.code(prog));
+        
         if (prog._min <= matchedCount) {
           cursor.setIndex(matchedTail);
 
