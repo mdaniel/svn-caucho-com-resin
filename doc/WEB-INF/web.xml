@@ -12,6 +12,8 @@
     </driver>
   </database>
 
+  <servlet-mapping url-pattern="*.xtp" servlet-name="resin-xtp"/>
+
   <servlet servlet-name="viewfile" 
            servlet-class="com.caucho.doc.ViewFileServlet"/>
   <servlet-mapping url-pattern="/viewfile/*" servlet-name="viewfile"/>
