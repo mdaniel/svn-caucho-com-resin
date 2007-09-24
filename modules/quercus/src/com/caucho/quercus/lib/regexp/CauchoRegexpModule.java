@@ -204,7 +204,7 @@ public class CauchoRegexpModule
         return LongValue.ZERO;
       }
 
-      StringValue empty = env.createEmptyString(subject);
+      StringValue empty = subject.getEmptyString();
       
       Regexp regexp = getRegexp(env, regexpValue, subject);
 
@@ -378,7 +378,7 @@ public class CauchoRegexpModule
 
     ArrayValue []matchList = new ArrayValue[groupCount + 1];
 
-    StringValue emptyStr = env.createEmptyString(subject);
+    StringValue emptyStr = subject.getEmptyString();
     
     for (int j = 0; j <= groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
@@ -459,7 +459,7 @@ public class CauchoRegexpModule
       return LongValue.ZERO;
     }
 
-    StringValue empty = env.createEmptyString(subject);
+    StringValue empty = subject.getEmptyString();
     
     int count = 0;
 
@@ -593,7 +593,7 @@ public class CauchoRegexpModule
         return pregReplace(env, pattern, replacement, subject.toStringValue(),
                            limit, count);
       } else
-        return env.createEmptyString(subject);
+        return subject.toStringValue().getEmptyString();
     }
     catch (IllegalRegexpException e) {
       e.printStackTrace();
@@ -678,7 +678,7 @@ public class CauchoRegexpModule
           Value countV)
     throws IllegalRegexpException
   {
-    StringValue empty = env.createEmptyString(subject);
+    StringValue empty = subject.getEmptyString();
     
     long numberOfMatches = 0;
 
@@ -687,7 +687,7 @@ public class CauchoRegexpModule
 
     Regexp regexp = getRegexp(env, patternString, subject);
 
-    StringValue result = env.createEmptyStringBuilder(patternString);
+    StringValue result = patternString.createEmptyStringBuilder();
     int tail = 0;
 
     while (regexp.find() && numberOfMatches < limit) {
@@ -846,7 +846,7 @@ public class CauchoRegexpModule
 
     int length = subject.length();
 
-    StringValue result = env.createEmptyStringBuilder(subject);
+    StringValue result = subject.createEmptyStringBuilder();
 
     int tail = 0;
     boolean isMatched = false;
@@ -868,7 +868,7 @@ public class CauchoRegexpModule
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
       if (isEval) {
-        StringValue evalString = env.createEmptyStringBuilder(subject);
+        StringValue evalString = subject.createEmptyStringBuilder();
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
@@ -1014,7 +1014,7 @@ public class CauchoRegexpModule
     if (limit <= 0)
       limit = Long.MAX_VALUE;
 
-    StringValue empty = env.createEmptyString(patternString);
+    StringValue empty = patternString.getEmptyString();
     
     Regexp regexp = getRegexp(env, patternString, string);
 
@@ -1363,7 +1363,7 @@ public class CauchoRegexpModule
                                            String startDelim,
                                            String endDelim)
   {
-    StringValue sb = env.createEmptyStringBuilder(str);
+    StringValue sb = str.createEmptyStringBuilder();
     
     sb = sb.appendBytes(startDelim);
     sb = sb.append(str);
@@ -1464,7 +1464,7 @@ public class CauchoRegexpModule
   {
     int len = regexp.length();
 
-    StringValue sb = env.createEmptyStringBuilder(regexp);
+    StringValue sb = regexp.createEmptyStringBuilder();
     char quote = 0;
 
     boolean sawVerticalBar = false;

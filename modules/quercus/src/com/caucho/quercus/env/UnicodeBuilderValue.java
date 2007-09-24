@@ -112,6 +112,22 @@ public class UnicodeBuilderValue extends StringBuilderValue
       return new UnicodeBuilderValue(value);
   }
   
+  /*
+   * Creates an empty string builder of the same type.
+   */
+  public StringValue createEmptyStringBuilder()
+  {
+    return new UnicodeBuilderValue();
+  }
+  
+  /*
+   * Returns the empty string of same type.
+   */
+  public StringValue getEmptyString()
+  {
+    return EMPTY;
+  }
+  
   /**
    * Returns the value.
    */

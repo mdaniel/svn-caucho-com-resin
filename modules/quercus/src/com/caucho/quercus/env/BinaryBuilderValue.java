@@ -119,6 +119,22 @@ public class BinaryBuilderValue
     else
       return new BinaryBuilderValue(value);
   }
+  
+  /*
+   * Creates an empty string builder of the same type.
+   */
+  public StringValue createEmptyStringBuilder()
+  {
+    return new BinaryBuilderValue();
+  }
+  
+  /*
+   * Returns the empty string of same type.
+   */
+  public StringValue getEmptyString()
+  {
+    return EMPTY;
+  }
 
   /**
    * Returns the value.

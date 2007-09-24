@@ -96,6 +96,16 @@ abstract public class StringValue extends Value implements CharSequence {
     else
       return new StringBuilderValue(value.toString());
   }
+  
+  /*
+   * Creates an empty string builder of the same type.
+   */
+  abstract public StringValue createEmptyStringBuilder();
+  
+  /*
+   * Returns the empty string of same type.
+   */
+  abstract public StringValue getEmptyString();
 
   //
   // Predicates and relations
