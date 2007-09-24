@@ -150,7 +150,7 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     // php/120y
 
-    return getValueType().isNumber();
+    return getValueType().isNumberCmp();
   }
 
   /**

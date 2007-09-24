@@ -615,7 +615,7 @@ public class Regexp {
               _parentLoopRestStack.push(oldRest);
               
               if (value != FAIL || ! isParentRestMatched) {
-                isParentRestMatched |= value != FAIL;
+                isParentRestMatched = isParentRestMatched || value != FAIL;
                 
                 matchedCount = i + 1;
                 matchedTail = lastPos;
