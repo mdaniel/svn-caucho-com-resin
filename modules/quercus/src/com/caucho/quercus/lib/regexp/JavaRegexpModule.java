@@ -137,7 +137,7 @@ public class JavaRegexpModule
       ArrayValue regs = new ArrayValueImpl();
       regsV.set(regs);
 
-      regs.put(LongValue.ZERO, new UnicodeValueImpl(matcher.group()));
+      regs.put(LongValue.ZERO, env.createString(matcher.group()));
       int count = matcher.groupCount();
 
       for (int i = 1; i <= count; i++) {
@@ -147,7 +147,7 @@ public class JavaRegexpModule
         if (group == null)
           value = BooleanValue.FALSE;
         else
-          value = new UnicodeValueImpl(group);
+          value = env.createString(group);
 
         regs.put(new LongValue(i), value);
       }
@@ -217,13 +217,13 @@ public class JavaRegexpModule
     if (regs != null) {
       if (isOffsetCapture) {
         ArrayValueImpl part = new ArrayValueImpl();
-        part.append(new UnicodeValueImpl(matcher.group()));
+        part.append(env.createString(matcher.group()));
         part.append(new LongValue(matcher.start()));
 
         regs.put(LongValue.ZERO, part);
       }
       else
-        regs.put(LongValue.ZERO, new UnicodeValueImpl(matcher.group()));
+        regs.put(LongValue.ZERO, env.createString(matcher.group()));
 
       int count = matcher.groupCount();
 
@@ -246,7 +246,7 @@ public class JavaRegexpModule
           }
 
           ArrayValueImpl part = new ArrayValueImpl();
-          part.append(new UnicodeValueImpl(group));
+          part.append(env.createString(group));
           part.append(new LongValue(matcher.start(i)));
 
           Value name = pcrePattern.get(i);
@@ -259,10 +259,10 @@ public class JavaRegexpModule
           // php/151u
           // add unmatched groups first
           for (int j = regs.getSize(); j < i; j++) {
-            regs.put(new LongValue(j), StringValue.EMPTY);
+            regs.put(new LongValue(j), env.createEmptyString());
           }
 
-          StringValue match = new UnicodeValueImpl(group);
+          StringValue match = env.createString(group);
 
           Value name = pcrePattern.get(i);
           if (name != null)
@@ -656,7 +656,7 @@ public class JavaRegexpModule
 
     Matcher matcher = pattern.matcher(subject);
 
-    StringValue result = new UnicodeBuilderValue();
+    StringValue result = env.createUnicodeBuilder();
     int tail = 0;
 
     while (matcher.find() && numberOfMatches < limit) {
@@ -675,9 +675,9 @@ public class JavaRegexpModule
         String group = matcher.group(i);
 
         if (group != null)
-          regs.put(new UnicodeValueImpl(group));
+          regs.put(env.createString(group));
         else
-          regs.put(StringValue.EMPTY);
+          regs.put(env.createEmptyString());
       }
 
       Value replacement = fun.call(env, regs);
@@ -2204,6 +2204,7 @@ public class JavaRegexpModule
   static class PCREPattern {
     private static final Logger log = Logger.getLogger(PCREPattern.class.getName());
 
+    private final Env _env;
     private final StringValue _regexp;
     private final Pattern _pattern;
     private final int _flags;
@@ -2213,6 +2214,7 @@ public class JavaRegexpModule
 
     PCREPattern(Env env, StringValue regexp)
     {
+      _env = env;
       _flags = regexpFlags(regexp);
 
       StringValue regexpValue;
@@ -2283,7 +2285,7 @@ public class JavaRegexpModule
 
     private StringValue cleanRegexpAndAddGroups(StringValue pattern)
     {
-      UnicodeBuilderValue sb = new UnicodeBuilderValue();
+      StringValue sb = _env.createUnicodeBuilder();
       int length = pattern.length();
 
       int groupCount = 1;

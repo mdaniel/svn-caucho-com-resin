@@ -171,38 +171,12 @@ public class StringBuilderValue
   }
 
   /**
-   * Returns true for a double
-   */
-  public boolean isDouble()
-  {
-    return getNumericType() == IS_DOUBLE;
-  }
-
-  /**
-   * Returns true for a number
-   */
-  @Override
-  public boolean isNumber()
-  {
-    return getNumericType() != IS_STRING;
-  }
-
-  /**
    * Returns true for a scalar
    */
   @Override
   public boolean isScalar()
   {
     return true;
-  }
-
-  /**
-   * Converts to a double.
-   */
-  @Override
-  protected int getNumericType()
-  {
-    return UnicodeBuilderValue.getNumericType(_buffer, 0, _length);
   }
 
   /**
@@ -292,8 +266,7 @@ public class StringBuilderValue
   @Override
   public StringValue toUnicodeValue()
   {
-    // php/0ch7
-    return new UnicodeBuilderValue(_buffer, _length);
+    return this;
   }
 
   /**
@@ -1002,7 +975,6 @@ public class StringBuilderValue
   @Override
   public boolean eq(Value rValue)
   {
-    ValueType typeA = getValueType();
     ValueType typeB = rValue.getValueType();
 
     if (typeB.isNumber()) {
@@ -1014,7 +986,9 @@ public class StringBuilderValue
     else if (typeB.isBoolean()) {
       return toBoolean() == rValue.toBoolean();
     }
-    else if (typeA.isNumberConvertable() && typeB.isNumberConvertable()) {
+      
+    ValueType typeA = getValueType();
+    if (typeA.isNumberCmp() && typeB.isNumberCmp()) {
       double l = toDouble();
       double r = rValue.toDouble();
 

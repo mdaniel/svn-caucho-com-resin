@@ -599,7 +599,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
   {
     if (len == 0) {
       // php/0307
-      return ValueType.LONG_CONVERTABLE;
+      return ValueType.LONG_ADD;
     }
 
     int i = offset;
@@ -617,7 +617,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
 
     if (ch == '.') {
       for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-        return ValueType.DOUBLE_CONVERTABLE;
+        return ValueType.DOUBLE_CMP;
       }
 
       return ValueType.STRING;
@@ -629,7 +629,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
     }
 
     if (len <= i)
-      return ValueType.LONG_CONVERTABLE;
+      return ValueType.LONG_EQ;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
            i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
@@ -640,7 +640,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
       if (i < len)
         return ValueType.STRING;
       else
-        return ValueType.DOUBLE_CONVERTABLE;
+        return ValueType.DOUBLE_CMP;
     }
     else
       return ValueType.STRING;

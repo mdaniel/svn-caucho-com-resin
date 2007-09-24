@@ -244,6 +244,7 @@ abstract public class BytesValue
   /**
    * Returns true for equality
    */
+  /*
   @Override
   public boolean eq(Value rValue)
   {
@@ -276,6 +277,7 @@ abstract public class BytesValue
       return equals(rValue.toStringValue());
 
   }
+  */
   
   abstract public byte[] toBytes();
 }

@@ -173,7 +173,7 @@ public class BinaryBuilderValue
    */
   public boolean isDouble()
   {
-    return getNumericType() == IS_DOUBLE;
+    return false;
   }
 
   /**
@@ -182,7 +182,7 @@ public class BinaryBuilderValue
   @Override
   public boolean isNumber()
   {
-    return getNumericType() != IS_STRING;
+    return false;
   }
 
   /**
@@ -192,15 +192,6 @@ public class BinaryBuilderValue
   public boolean isScalar()
   {
     return true;
-  }
-
-  /**
-   * Converts to a double.
-   */
-  @Override
-  protected int getNumericType()
-  {
-    return getNumericType(_buffer, 0, _length);
   }
 
   /**
@@ -952,7 +943,7 @@ public class BinaryBuilderValue
     else if (typeB.isBoolean()) {
       return toBoolean() == rValue.toBoolean();
     }
-    else if (typeA.isNumberConvertable() && typeB.isNumberConvertable()) {
+    else if (typeA.isNumberCmp() && typeB.isNumberCmp()) {
       double l = toDouble();
       double r = rValue.toDouble();
 
@@ -1157,7 +1148,7 @@ public class BinaryBuilderValue
   public static ValueType getValueType(byte []buffer, int offset, int len)
   {
     if (len == 0)
-      return ValueType.STRING;
+      return ValueType.LONG_ADD;
 
     int i = offset;
     int ch = 0;
@@ -1174,7 +1165,7 @@ public class BinaryBuilderValue
 
     if (ch == '.') {
       for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
-        return ValueType.DOUBLE_CONVERTABLE;
+        return ValueType.DOUBLE_CMP;
       }
 
       return ValueType.STRING;
@@ -1186,7 +1177,7 @@ public class BinaryBuilderValue
     }
 
     if (len <= i)
-      return ValueType.LONG_CONVERTABLE;
+      return ValueType.LONG_EQ;
     else if (ch == '.' || ch == 'e' || ch == 'E') {
       for (i++;
            i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
@@ -1197,7 +1188,7 @@ public class BinaryBuilderValue
       if (i < len)
         return ValueType.STRING;
       else
-        return ValueType.DOUBLE_CONVERTABLE;
+        return ValueType.DOUBLE_CMP;
     }
     else
       return ValueType.STRING;

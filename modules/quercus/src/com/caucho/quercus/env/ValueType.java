@@ -40,7 +40,12 @@ abstract public class ValueType {
     return false;
   }
   
-  public boolean isLongConvertable()
+  public boolean isLongCmp()
+  {
+    return false;
+  }
+  
+  public boolean isLongAdd()
   {
     return false;
   }
@@ -55,7 +60,12 @@ abstract public class ValueType {
     return false;
   }
   
-  public boolean isNumberConvertable()
+  public boolean isNumberCmp()
+  {
+    return false;
+  }
+  
+  public boolean isNumberAdd()
   {
     return false;
   }
@@ -88,7 +98,12 @@ abstract public class ValueType {
 	return true;
       }
   
-      public boolean isLongConvertable()
+      public boolean isLongCmp()
+      {
+	return true;
+      }
+  
+      public boolean isLongAdd()
       {
 	return true;
       }
@@ -98,7 +113,12 @@ abstract public class ValueType {
 	return true;
       }
   
-      public boolean isNumberConvertable()
+      public boolean isNumberCmp()
+      {
+	return true;
+      }
+  
+      public boolean isNumberAdd()
       {
 	return true;
       }
@@ -109,21 +129,49 @@ abstract public class ValueType {
       }
     };
   
-  public static final ValueType LONG_CONVERTABLE = new ValueType()
+  public static final ValueType LONG_EQ = new ValueType()
     {
-      public boolean isLongConvertable()
+      public boolean isLongCmp()
       {
 	return true;
       }
-  
-      public boolean isNumberConvertable()
+
+      public boolean isLongAdd()
+      {
+	return true;
+      }
+
+      public boolean isNumberCmp()
+      {
+	return true;
+      }
+
+      public boolean isNumberAdd()
       {
 	return true;
       }
       
       public String toString()
       {
-	return "ValueType[LONG_CONVERTABLE]";
+	return "ValueType[LONG_EQ]";
+      }
+    };
+  
+  public static final ValueType LONG_ADD = new ValueType()
+    {
+      public boolean isLongAdd()
+      {
+	return true;
+      }
+  
+      public boolean isNumberAdd()
+      {
+	return true;
+      }
+      
+      public String toString()
+      {
+	return "ValueType[LONG_ADD]";
       }
     };
   
@@ -139,7 +187,12 @@ abstract public class ValueType {
 	return true;
       }
   
-      public boolean isNumberConvertable()
+      public boolean isNumberCmp()
+      {
+	return true;
+      }
+  
+      public boolean isNumberAdd()
       {
 	return true;
       }
@@ -150,16 +203,21 @@ abstract public class ValueType {
       }
     };
   
-  public static final ValueType DOUBLE_CONVERTABLE = new ValueType()
+  public static final ValueType DOUBLE_CMP = new ValueType()
     {
-      public boolean isNumberConvertable()
+      public boolean isNumberCmp()
+      {
+	return true;
+      }
+      
+      public boolean isNumberAdd()
       {
 	return true;
       }
       
       public String toString()
       {
-	return "ValueType[DOUBLE_CONVERTABLE]";
+	return "ValueType[DOUBLE_CMP]";
       }
     };
   

@@ -123,7 +123,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public boolean isLongConvertible()
   {
-    return getValueType().isLongConvertable();
+    return getValueType().isLongCmp();
   }
 
   /**
@@ -131,7 +131,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public boolean isDoubleConvertible()
   {
-    return getValueType().isNumberConvertable();
+    return getValueType().isNumberCmp();
   }
 
   /**
@@ -150,7 +150,7 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     // php/120y
 
-    return getNumericType() != IS_STRING;
+    return getValueType().isNumber();
   }
 
   /**
@@ -208,7 +208,7 @@ abstract public class StringValue extends Value implements CharSequence {
     else if (typeB.isBoolean()) {
       return toBoolean() == rValue.toBoolean();
     }
-    else if (typeA.isNumberConvertable() && typeB.isNumberConvertable()) {
+    else if (typeA.isNumberCmp() && typeB.isNumberCmp()) {
       double l = toDouble();
       double r = rValue.toDouble();
 
@@ -237,60 +237,6 @@ abstract public class StringValue extends Value implements CharSequence {
 	return 0;
     }
     return toString().compareTo(rValue.toString());
-  }
-
-  /**
-   * Returns a code for the numeric type of the string
-   */
-  protected int getNumericType()
-  {
-    int len = length();
-
-    if (len == 0)
-      return IS_STRING;
-
-    int i = 0;
-    int ch = 0;
-    boolean hasPoint = false;
-
-    if (i < len && ((ch = charAt(i)) == '+' || ch == '-')) {
-      i++;
-    }
-
-    if (len <= i)
-      return IS_STRING;
-
-    ch = charAt(i);
-
-    if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
-        return IS_DOUBLE;
-      }
-
-      return IS_STRING;
-    }
-    else if (! ('0' <= ch && ch <= '9'))
-      return IS_STRING;
-
-    for (; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
-    }
-
-    if (len <= i)
-      return IS_LONG;
-    else if (ch == '.' || ch == 'e' || ch == 'E') {
-      for (i++;
-           i < len && ('0' <= (ch = charAt(i)) && ch <= '9' ||
-                       ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
-           i++) {
-      }
-
-      if (i < len)
-        return IS_STRING;
-      else
-        return IS_DOUBLE;
-    }
-    else
-      return IS_STRING;
   }
 
   // Conversions
@@ -618,7 +564,7 @@ abstract public class StringValue extends Value implements CharSequence {
 
       return createStringBuilder().append(tail.toString());
     }
-    else if (isLongConvertible()) {
+    else if (getValueType().isLongAdd()) {
       return LongValue.create(toLong() + incr);
     }
     else {
@@ -631,7 +577,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public Value add(long rValue)
   {
-    if (isLongConvertible())
+    if (getValueType().isLongAdd())
       return LongValue.create(toLong() + rValue);
     
     return DoubleValue.create(toDouble() + rValue);
@@ -642,7 +588,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public Value sub(long rValue)
   {
-    if (isLongConvertible())
+    if (getValueType().isLongAdd())
       return LongValue.create(toLong() - rValue);
     
     return DoubleValue.create(toDouble() - rValue);
