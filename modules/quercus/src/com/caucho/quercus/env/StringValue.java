@@ -179,6 +179,14 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     return true;
   }
+  
+  /*
+   * Returns true if this is a PHP5 string.
+   */
+  public boolean isPHP5String()
+  {
+    return false;
+  }
 
   /**
    * Returns true for equality

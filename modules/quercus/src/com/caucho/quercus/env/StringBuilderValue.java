@@ -185,12 +185,21 @@ public class StringBuilderValue
   {
     return UnicodeBuilderValue.getValueType(_buffer, 0, _length);
   }
-
+  
   /**
    * Returns true for a scalar
    */
   @Override
   public boolean isScalar()
+  {
+    return true;
+  }
+  
+  /*
+   * Returns true if this is a PHP5 string.
+   */
+  @Override
+  public boolean isPHP5String()
   {
     return true;
   }

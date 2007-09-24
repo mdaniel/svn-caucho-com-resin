@@ -29,11 +29,14 @@
 
 package com.caucho.quercus.lib.regexp;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.util.*;
 
 public class Regexp {
@@ -78,6 +81,8 @@ public class Regexp {
   StringValue []_groupNames;
   
   boolean _isUnicode;
+  boolean _isPHP5String;
+  
   boolean _isUTF8;
   boolean _isEval;
   
@@ -184,10 +189,36 @@ public class Regexp {
   {
     if (_isUnicode)
       return str;
+    else if (_isPHP5String)
+      return encodePHP5ResultString(env, str);
     else if (_isUTF8)
       return str.toBinaryValue(env, "UTF-8");
     else
       return str.toBinaryValue(env);
+  }
+  
+  private StringValue encodePHP5ResultString(Env env, StringValue str)
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+    
+    try {
+      byte []bytes;
+
+      if (_isUTF8)
+        bytes = str.toString().getBytes("UTF-8");
+      else
+        bytes = str.toBytes();
+      
+      sb.append(bytes);
+      
+      return sb;
+    }
+    catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.error(e);
+      
+      return null;
+    }
   }
 
   public StringValue getPattern()
@@ -252,11 +283,21 @@ public class Regexp {
   public void init(Env env, StringValue subject)
   {
     _isUnicode = subject.isUnicode();
-    
+    _isPHP5String = subject.isPHP5String();
+
     if (_isUnicode) {
     }
-    else if (_isUTF8)
-      _subject = subject.toUnicodeValue(env, "UTF-8");
+    else if (_isUTF8) {
+      try {
+        String s = new String(subject.toBytes(), "UTF-8");
+
+        _subject = new UnicodeBuilderValue(s);
+      }
+      catch (UnsupportedEncodingException e) {
+        log.log(Level.FINE, e.getMessage(), e);
+        env.error(e);
+      }
+    }
     else
       _subject = subject.toUnicodeValue(env);
 
@@ -1597,16 +1638,9 @@ public class Regexp {
     int begin = getBegin(i);
     int end = getEnd(i);
 
-    return _subject.substring(begin, end);
-    
-    /*
-    if (_isUnicode)
-      return (UnicodeValue) _subject.substring(begin, end);
-    else if (_isUTF8)
-      return _subject.substring(begin, end).toBinaryValue(env, "UTF-8");
-    else
-      return _subject.substring(begin, end).toBinaryValue(env);
-    */
+    StringValue s = _subject.substring(begin, end);
+
+    return encodeResultString(env, s);
   }
   
   public StringValue getGroupName(int i)
