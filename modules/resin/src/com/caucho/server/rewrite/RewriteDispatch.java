@@ -228,6 +228,12 @@ public class RewriteDispatch
   @PostConstruct
   public void init()
   {
+    _matchRule = new MatchRule(this);
+    _matchRule.setRegexp(Pattern.compile(".*"));
+
+    _program.configure(_matchRule);
+
+    _matchRule.init();
   }
 
   public FilterChain map(String uri, String queryString, FilterChain next)

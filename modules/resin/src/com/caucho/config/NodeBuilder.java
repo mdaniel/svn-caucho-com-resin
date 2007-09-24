@@ -252,6 +252,20 @@ public class NodeBuilder {
   }
 
   /**
+   * External call to configure a bean's attribute.
+   *
+   * @param bean the bean to be configured
+   * @param attribute the node representing the configured attribute
+   * @throws LineConfigException
+   */
+  public void configureAttributeImpl(Object bean, Node node,
+				     TypeStrategy typeStrategy)
+    throws LineConfigException
+  {
+    configureNode(node, bean, typeStrategy);
+  }
+
+  /**
    * Configures a bean, calling its init() and replaceObject() methods.
    *
    * @param typeStrategy the strategy for handling the bean's type
@@ -437,9 +451,18 @@ public class NodeBuilder {
       }
     }
 
+    if (bean == null)
+      bean = typeStrategy.create();
+
+    if (bean == null)
+      throw new NullPointerException();
+
     typeStrategy.setParent(bean, parent);
 
-    configureChildNode(top, TEXT, bean, typeStrategy);
+    if (top instanceof Element)
+      configureNode(top, bean, typeStrategy);
+    else
+      configureChildNode(top, TEXT, bean, typeStrategy);
 
     typeStrategy.init(bean);
 

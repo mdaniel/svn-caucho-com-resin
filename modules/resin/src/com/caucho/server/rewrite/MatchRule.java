@@ -288,6 +288,8 @@ public class MatchRule
 
     _ruleList.trimToSize();
 
+    register();
+
     if (_depend.size() > 0) {
       _alarm = new Alarm(this);
       

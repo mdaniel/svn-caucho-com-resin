@@ -84,23 +84,19 @@ public class BeanField extends JaxbProperty {
 			       Node node)
     throws ConfigException
   {
-    /*
     try {
-      Object value = _type.newInstance();
-
       if (_typeStrategy == null)
 	_typeStrategy = TypeStrategyFactory.getTypeStrategy(_type);
+      
+      Object value = _type.newInstance();
 
-      _typeStrategy.configureBean(builder, value, node);
+      builder.configureAttributeImpl(value, node, _typeStrategy);
       
       _field.set(bean, value);
     } catch (RuntimeException e) {
       throw e;
-    } catch (InvocationTargetException e) {
-      throw builder.error(e.getCause(), node);
     } catch (Exception e) {
       throw builder.error(e, node);
     }
-    */
   }
 }

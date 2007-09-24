@@ -68,7 +68,8 @@ public class GlobalMBeanServer extends AbstractMBeanServer {
   {
     AbstractMBeanServer envServer = Jmx.getMBeanServer();
 
-    return envServer.getContext(_loader);
+    // server/2102 vs server/211{1,2}
+    return envServer.getContext(loader);
   }
 
   /**

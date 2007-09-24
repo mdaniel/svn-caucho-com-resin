@@ -94,16 +94,13 @@ public class CollectionWrapperProperty extends JaxbProperty {
 			       Node node)
     throws ConfigException
   {
-    /*
+
     try {
-      _wrapperType.configureBean(builder, bean, node);
+      builder.configureAttributeImpl(bean, node, _wrapperType);
     } catch (RuntimeException e) {
       throw e;
-    } catch (InvocationTargetException e) {
-      throw builder.error(e.getCause(), node);
     } catch (Exception e) {
       throw builder.error(e, node);
     }
-    */
   }
 }

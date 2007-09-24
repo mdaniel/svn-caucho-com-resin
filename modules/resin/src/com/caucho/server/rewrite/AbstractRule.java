@@ -153,7 +153,7 @@ abstract public class AbstractRule
       _disableAlarmListener = new EnableAlarmListener(this, _disableAt, false);
   }
 
-  synchronized public void register()
+  public void register()
   {
     if (_admin == null && _name != null) {
       _admin = createAdmin();
@@ -161,7 +161,7 @@ abstract public class AbstractRule
     }
   }
 
-  synchronized public void unregister()
+  public void unregister()
   {
     RewriteRuleAdmin admin = _admin;
     _admin = null;

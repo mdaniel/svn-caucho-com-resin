@@ -394,8 +394,8 @@ r_port-Content =
    & (attribute keepalive-max { r_int-Type }
       | element keepalive-max { r_int-Type })?
 
-   & (attribute keepalive-connection-tmie-max { r_period-Type }
-      | element keepalive-connection-max { r_period-Type })?
+   & (attribute keepalive-connection-time-max { r_period-Type }
+      | element keepalive-connection-time-max { r_period-Type })?
 
    & (attribute port { string } | element port { string })
 

@@ -322,18 +322,20 @@ public class BeanTypeStrategy extends TypeStrategy {
       return strategy;
     }
 
-    /*
+    // server/2676
     if (builderMethod != null)
       return new ProgramAttributeStrategy(builderMethod);
-    */
     
     strategy = getEnvironmentAttribute(qName);
 
     if (strategy != null)
       return strategy;
 
+    // server/2676
+    /*
     if (builderMethod != null)
       return new ProgramAttributeStrategy(builderMethod);
+    */
 
     Method method = findSetPropertyMethod();
 

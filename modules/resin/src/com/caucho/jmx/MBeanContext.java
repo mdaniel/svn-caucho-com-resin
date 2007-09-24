@@ -542,6 +542,8 @@ public class MBeanContext
   {
     if (_mbeans == null)
       return;
+
+    log.finest(this + " destroy");
     
     ArrayList<ObjectName> list = new ArrayList<ObjectName>(_mbeans.keySet());
 

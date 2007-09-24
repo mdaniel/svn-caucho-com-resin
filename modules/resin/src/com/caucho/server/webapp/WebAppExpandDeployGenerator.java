@@ -246,6 +246,13 @@ public class WebAppExpandDeployGenerator
         segmentName = "/ROOT";
     }
 
+    // server/26cg
+    if (contextPath.equals("/ROOT"))
+      contextPath = "";
+    else if (contextPath.equalsIgnoreCase("/root")
+	     && CaseInsensitive.isCaseInsensitive())
+      contextPath = "";
+
     ArrayList<String> versionNames = getVersionNames(segmentName);
 
     if (versionNames == null || versionNames.size() == 0) {
@@ -316,8 +323,9 @@ public class WebAppExpandDeployGenerator
 
     WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
 
-    if (cfg != null && cfg.getContextPath() != null)
-      name = cfg.getContextPath();
+    if (cfg != null && cfg.getContextPath() != null) {
+      baseName = contextPath = cfg.getContextPath();
+    }
 
     WebAppController controller
       = new WebAppController(versionName, contextPath,

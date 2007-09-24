@@ -132,15 +132,13 @@ public class JaxbBeanType extends TypeStrategy
   public void configureBean(NodeBuilder builder, Object bean, Node top)
     throws Exception
   {
-    /*
     if (_valueAttr != null) {
       _valueAttr.configure(builder, bean, ((QNode) top).getQName(), top);
 
-      builder.configureBeanAttributesImpl(this, bean, top);
+      builder.configureAttributeImpl(bean, top, this);
     }
     else
-      builder.configureBeanImpl(this, bean, top);
-    */
+      builder.configureAttributeImpl(bean, top, this);
   }
 
   public void init(Object bean)
@@ -365,6 +363,8 @@ public class JaxbBeanType extends TypeStrategy
       else if (xmlValue != null) {
 	_valueAttr = createPropertyAttribute(getter, setter,
 					     valueType, adapter);
+
+	_attributeMap.put("#text", _valueAttr);
       }
       else if (xmlElements != null) {
 	for (XmlElement elt : xmlElements.value()) {
@@ -535,6 +535,7 @@ public class JaxbBeanType extends TypeStrategy
       }
       else if (xmlValue != null) {
 	_valueAttr = createFieldAttribute(field, valueType, adapter);
+	_attributeMap.put("#text", _valueAttr);
       }
       else if (xmlElements != null) {
 	for (XmlElement elt : xmlElements.value()) {

@@ -381,6 +381,7 @@ public class ResinWatchdog extends AbstractManagedObject
     list.add(getJavaExe());
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
+    list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
     list.add("-Dresin.root=" + resinRoot.getPath());

@@ -78,10 +78,10 @@ public class CollectionField extends JaxbProperty {
    * @param name the name of the property
    * @param node the configuration node for the value
    */
-  public void configureElement(NodeBuilder builder,
-			       Object bean,
-			       QName name,
-			       Node node)
+  public void configure(NodeBuilder builder,
+			Object bean,
+			QName name,
+			Node node)
     throws ConfigException
   {
     try {

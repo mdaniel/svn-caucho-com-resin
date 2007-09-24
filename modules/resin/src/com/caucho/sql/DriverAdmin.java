@@ -48,7 +48,7 @@ public class DriverAdmin extends AbstractManagedObject
   @Override
   public String getName()
   {
-    return _driver.getURL();
+    return _driver.getDBPool().getName();
   }
 
   public String getClassName()
