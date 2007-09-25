@@ -76,11 +76,20 @@ public class StatelessPoolChain extends SessionPoolChain {
     // XXX: ejb/02i0
     generateInterceptorExceptionHandling(out);
 
-    out.println("} catch (RuntimeException e) {");
+    // ejb/0f06 vs ejb/0271
+    out.println("} catch (com.caucho.ejb.EJBExceptionWrapper e) {");
     out.pushDepth();
 
     // Cannot set null since the finally block needs to free up the bean first.
     // ejb/0f06 out.println("ptr = null;");
+    out.println("throw e;");
+
+    out.popDepth();
+    out.println("} catch (RuntimeException e) {");
+    out.pushDepth();
+
+    // ejb/0271
+    out.println("ptr = null;");
 
     out.println("throw e;");
 
