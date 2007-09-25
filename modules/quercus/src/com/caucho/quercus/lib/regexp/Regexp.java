@@ -147,12 +147,18 @@ public class Regexp {
       }
     }
 
+    _pattern = pattern;
+    
+    /*
     if (pattern.isUnicode())
+      _pattern = pattern;
+    else if (pattern.isPHP5String())
       _pattern = pattern;
     else if (_isUTF8)
       _pattern = pattern.toUnicodeValue(env, "UTF-8");
     else
       _pattern = pattern.toUnicodeValue(env);
+    */
 
     Regcomp comp = new Regcomp(flags);
     _prog = comp.parse(new PeekString(_pattern));
@@ -285,6 +291,8 @@ public class Regexp {
     _isUnicode = subject.isUnicode();
     _isPHP5String = subject.isPHP5String();
 
+    _subject = subject;
+    
     if (_isUnicode) {
     }
     else if (_isUTF8) {

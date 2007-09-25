@@ -406,33 +406,17 @@ public class Xml {
   {
     switch(option) {
       case XmlModule.XML_OPTION_CASE_FOLDING:
-        if (value instanceof BooleanValue) {
-          _xmlOptionCaseFolding = value.toBoolean();
-          return true;
-        } else {
-          return false;
-        }
+        _xmlOptionCaseFolding = value.toBoolean();
+        return true;
       case XmlModule.XML_OPTION_SKIP_TAGSTART:
-        if (value instanceof LongValue) {
-          _xmlOptionSkipTagstart = value.toLong();
-          return true;
-        } else {
-          return false;
-        }
+        _xmlOptionSkipTagstart = value.toLong();
+        return true;
       case XmlModule.XML_OPTION_SKIP_WHITE:
-        if (value instanceof BooleanValue) {
-          _xmlOptionSkipWhite = value.toBoolean();
-          return true;
-        } else {
-          return false;
-        }
+        _xmlOptionSkipWhite = value.toBoolean();
+        return true;
       case XmlModule.XML_OPTION_TARGET_ENCODING:
-        if (value instanceof StringValue) {
-          _xmlOptionTargetEncoding = value.toString();
-          return true;
-        } else {
-          return false;
-        }
+        _xmlOptionTargetEncoding = value.toString();
+        return true;
       default:
         return false;
     }
