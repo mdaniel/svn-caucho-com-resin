@@ -581,6 +581,8 @@ public abstract class AbstractAction {
       httpConnection.setRequestMethod("POST");
       httpConnection.setDoInput(true);
       httpConnection.setDoOutput(true);
+      // XXX: Does this change for multipart/attachments?
+      httpConnection.setRequestProperty("Content-type", "text/xml");
 
       OutputStream httpOut = null;
       XMLStreamWriter out = null;
