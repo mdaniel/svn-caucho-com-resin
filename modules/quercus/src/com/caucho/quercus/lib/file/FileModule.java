@@ -367,28 +367,31 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null)
       return ".";
-
+    
     int len = path.length();
 
     if (len == 0)
       return ".";
     else if (path.equals("/"))
       return path;
-
+    
     int p = path.lastIndexOf('/', len - 2);
-
+    
+    // php/1601 (for Windows)
+    p = Math.max(p, path.lastIndexOf('\\', len - 2));
+    
     if (p == 0)
       return "/";
     else if (p > 0)
       return path.substring(0, p);
-
+    
     p = path.lastIndexOf('\\', len - 2);
-
+    
     if (p == 0)
       return "\\";
     else if (p > 0)
       return path.substring(0, p);
-
+    
     return ".";
   }
 
