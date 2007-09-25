@@ -1536,7 +1536,10 @@ abstract public class Value implements java.io.Serializable
    */
   public Value sub_rev(long lLong)
   {
-    return new DoubleValue(lLong - toDouble());
+    if (getValueType().isLongAdd())
+      return LongValue.create(lLong - toLong());
+    else
+      return new DoubleValue(lLong - toDouble());
   }
 
   /**
@@ -1553,9 +1556,12 @@ abstract public class Value implements java.io.Serializable
   /**
    * Multiplies to the following value.
    */
-  public Value mul(long lLong)
+  public Value mul(long r)
   {
-    return new DoubleValue(toDouble() * lLong);
+    if (isDoubleConvertible())
+      return new DoubleValue(toDouble() * r);
+    else
+      return LongValue.create(toLong() * r);
   }
 
   /**
@@ -1563,10 +1569,30 @@ abstract public class Value implements java.io.Serializable
    */
   public Value div(Value rValue)
   {
-    if (getValueType().isLongAdd() && rValue.getValueType().isLongAdd())
-      return LongValue.create(toLong() / rValue.toLong());
+    if (getValueType().isLongAdd() && rValue.getValueType().isLongAdd()) {
+      long l = toLong();
+      long r = rValue.toLong();
+      
+      if (l % r == 0)
+        return LongValue.create(l / r);
+      else
+        return new DoubleValue(toDouble() / rValue.toDouble());
+    }
     else
-      return DoubleValue.create(toDouble() / rValue.toDouble());
+      return new DoubleValue(toDouble() / rValue.toDouble());
+  }
+  
+  /**
+   * Multiplies to the following value.
+   */
+  public Value div(long r)
+  {
+    long l = toLong();
+    
+    if (l % r == 0)
+      return LongValue.create(l / r);
+    else
+      return new DoubleValue(toDouble() / r);
   }
 
   /**
