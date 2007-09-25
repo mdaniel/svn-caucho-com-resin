@@ -404,8 +404,14 @@ public class JavaJspGenerator extends JspGenerator {
 	! uri.startsWith("urn:jsptld:") && ! uri.startsWith("urn:jsptagdir:"))
       return null;
 
-    if (taglib == null)
-      throw error(L.l("`{0}' has no matching taglib-uri.  The taglib uri must match a taglib-uri for a taglib specified in the web.xml or implicitly in a taglib.tld in the tag jar.", uri));
+    if (taglib == null) {
+      throw error(L.l("'{0}' has no matching taglib-uri.  Taglibs specified with an absolute URI must either be:\n"
+		      + "1) specified in the web.xml\n"
+		      + "2) defined in a jar's .tld in META-INF\n"
+		      + "3) defined in a .tld in WEB-INF\n"
+		      + "4) predefined by Resin",
+		      uri));
+    }
 
     taglib = addLibrary(taglib);
     ArrayList<TldFunction> functions = taglib.getFunctionList();

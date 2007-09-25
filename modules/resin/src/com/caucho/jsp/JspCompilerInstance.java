@@ -481,9 +481,10 @@ public class JspCompilerInstance {
       else {
 	WebApp app = _jspCompiler.getWebApp();
 
+	// jsp/0135
 	/*
-	if (_jspPropertyGroup == null && app != null && app.isJsp1())
-	  _parseState.setELIgnored(true);
+	if (_jspPropertyGroup == null && app != null && app.has23Config())
+   	  _parseState.setELIgnored(true);
 	*/
 	
 	_parser.parse(_jspPath, _uri);

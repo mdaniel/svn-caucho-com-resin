@@ -1750,6 +1750,7 @@ public abstract class JspNode {
    */
   protected JspParseException error(String msg, Throwable e)
   {
+    System.out.println("ERR: " + _filename + " " + e);
     if (_filename != null) {
       String lines = _gen.getSourceLines(_sourcePath, _startLine);
       
@@ -1764,16 +1765,22 @@ public abstract class JspNode {
    */
   protected JspParseException error(Throwable e)
   {
+    System.out.println("ERR2: " + _filename + " " + e);
     if (e instanceof JspLineParseException)
       return (JspParseException) e;
     else if (_filename == null || e instanceof LineCompileException)
       return new JspLineParseException(e);
-    else if (e instanceof CompileException)
-      return new JspLineParseException(_filename + ":" + _startLine + ": " +
-				       e.getMessage(), e);
+
+    String msg;
+    
+    if (e instanceof CompileException)
+      msg = e.getMessage();
     else
-      return new JspLineParseException(_filename + ":" + _startLine + ": " +
-				       String.valueOf(e), e);
+      msg = String.valueOf(e);
+    
+    String lines = _gen.getSourceLines(_sourcePath, _startLine);
+      
+    return new JspLineParseException(_filename + ":" + _startLine + ": " + msg + lines, e);
   }
 
   /**

@@ -468,7 +468,8 @@ public class JavaJspBuilder extends JspBuilder {
 
   public JspParseException error(String message)
   {
-    return new JspParseException(_filename + ":" + _line + ": " + message);
+    return new JspParseException(_filename + ":" + _line + ": " + message
+				 + _gen.getSourceLines(_sourcePath, _line));
   }
 
   public JspParseException error(Throwable e)
@@ -476,10 +477,15 @@ public class JavaJspBuilder extends JspBuilder {
     if (e instanceof LineCompileException)
       return new JspLineParseException(e);
     else if (e instanceof CompileException)
-      return new JspLineParseException(_filename + ":" + _line + ": " + e.getMessage(), e);
+      return new JspLineParseException(_filename + ":" + _line + ": "
+				       + e.getMessage()
+				       + _gen.getSourceLines(_sourcePath, _line),
+				       e);
     else
-      return new JspLineParseException(_filename + ":" + _line + ": " +
-				   String.valueOf(e), e);
+      return new JspLineParseException(_filename + ":" + _line + ": "
+				       + String.valueOf(e)
+				       + _gen.getSourceLines(_sourcePath, _line),
+				       e);
   }
 
   private static void addMap(HashMap<QName,Class> map,

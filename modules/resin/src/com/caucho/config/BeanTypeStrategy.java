@@ -193,6 +193,10 @@ public class BeanTypeStrategy extends TypeStrategy {
 	_setLocation.invoke(bean, filename, line);
       }
       
+      if (_setNode != null && node != null) {
+	_setNode.invoke(bean, node);
+      }
+      
       if (_setSystemId != null && node instanceof QAbstractNode) {
 	String systemId = node.getBaseURI();
 
