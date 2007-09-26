@@ -3158,8 +3158,7 @@ public class Env {
     if (cl != null)
       return cl;
 
-    if (_lowerClassMap != null)
-      cl = _lowerClassMap.get(name.toLowerCase());
+    cl = _lowerClassMap.get(name.toLowerCase());
 
     if (cl != null)
       return cl;
@@ -3167,10 +3166,8 @@ public class Env {
     cl = createClassImpl(name, useAutoload, true);
 
     if (cl != null) {
-      _classMap.put(name, cl);
-
-      if (_lowerClassMap != null)
-        _lowerClassMap.put(name.toLowerCase(), cl);
+      _classMap.put(cl.getName(), cl);
+      _lowerClassMap.put(cl.getName().toLowerCase(), cl);
 
       // php/09b7
       cl.init(this);
@@ -3320,7 +3317,8 @@ public class Env {
    * Finds the class with the given name.
    *
    * @param name the class name
-   * @return the found class or null if no class found.
+   * @return the found class
+   * @throws QuercusRuntimeException if the class is not found
    */
   public QuercusClass getClass(String name)
   {

@@ -39,6 +39,8 @@ import com.caucho.util.L10N;
 
 import java.util.Map;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,41 +85,33 @@ public class ClassesModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array of method names and values
+   * Returns an array of method names
    *
-   * @param className the name of the class
+   * @param clss the name of the class, or an instance of a class
    *
-   * @return an array of method names and values
+   * @return an array of method names
    */
-  public static Value get_class_methods(Env env, String className)
+  public static Set<String> get_class_methods(Env env, Value clss)
   {
     // php/1j11
 
-    QuercusClass cl = null;
+    QuercusClass cl;
 
-    try {
-      cl = env.getClass(className);
-    }
-    catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      return NullValue.NULL;
-    }
+    if (clss instanceof ObjectValue)
+      cl = ((ObjectValue) clss).getQuercusClass();
+    else
+      cl = env.findClass(clss.toString());
 
     if (cl == null)
-      return NullValue.NULL;
+      return null;
 
-    ArrayValue methodArray = new ArrayValueImpl();
+    TreeSet<String> names = new TreeSet<String>();
 
     for (AbstractFunction fun : cl.getClassMethods()) {
-      Value key = StringValue.create(fun.getName());
-
-      methodArray.append(key);
+      names.add(fun.getName());
     }
 
-    methodArray.sort(ArrayValue.ValueComparator.CMP, true, true);
-
-    return methodArray;
+    return names;
   }
 
   /**

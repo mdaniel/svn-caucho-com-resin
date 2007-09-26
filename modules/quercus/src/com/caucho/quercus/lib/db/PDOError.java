@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -84,12 +85,10 @@ class PDOError {
     _errorInfo.put(driverError);
     _errorInfo.put(errorMessage);
 
-    if (level == ERRMODE_WARNING) {
-      _env.warning("SQLSTATE[" + _errorCode + "]: " + errorMessage);
-    }
-    else if (level == ERRMODE_EXCEPTION) {
-      // XXX: throw exception, or return exception object?
-    }
+    if (level == ERRMODE_WARNING)
+      _env.warning("SQLSTATE[" + errorCode + "]: " + errorMessage);
+    else if (level == ERRMODE_EXCEPTION)
+      throw new PDOException(errorCode, errorMessage);
   }
   /**
    * Save an error for subsequent calls to
@@ -203,7 +202,7 @@ class PDOError {
     _errorInfo.put(_errorCode);
 
     if (_errmode == ERRMODE_EXCEPTION) {
-      // XXX: throw exception, or return exception object?
+      throw new PDOException(_errorCode, message);
     }
     else {
       _env.warning("SQLSTATE[" + _errorCode + "]: " + message);
