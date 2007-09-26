@@ -558,7 +558,6 @@ public abstract class UIComponentBase extends UIComponent
 
       throw e;
     }
-    System.out.println("DECODE: " + context.getRenderResponse() + " " + getClass().getName());
   }
 
   /**
@@ -589,7 +588,6 @@ public abstract class UIComponentBase extends UIComponent
     for (UIComponent child : getFacetsAndChildrenArray()) {
       child.processValidators(context);
     }
-    System.out.println("VALID: " + context.getRenderResponse() + " " + getClass().getName());
   }
 
   //
@@ -607,7 +605,6 @@ public abstract class UIComponentBase extends UIComponent
     for (UIComponent child : getFacetsAndChildrenArray()) {
       child.processUpdates(context);
     }
-    System.out.println("UPDATE: " + context.getRenderResponse() + " " + getClass().getName());
   }
 
   //
@@ -790,8 +787,9 @@ public abstract class UIComponentBase extends UIComponent
       for (int i = 0; i < childSize; i++) {
 	UIComponent child = children.get(i);
 
-	if (child.isTransient())
+	if (child.isTransient()) {
 	  continue;
+	}
 	
 	k++;
 	
@@ -1031,8 +1029,10 @@ public abstract class UIComponentBase extends UIComponent
 
       return values;
     }
-    else
+    else if (attachedObject instanceof StateHolder)
       return new StateHandle(context, attachedObject);
+    else
+      return attachedObject;
   }
 
   public static Object restoreAttachedState(FacesContext context,
@@ -1055,7 +1055,7 @@ public abstract class UIComponentBase extends UIComponent
     else if (stateObject instanceof StateHandle)
       return ((StateHandle) stateObject).restore(context);
     else
-      throw new IllegalStateException("state object was not saved by saveAttachedState");
+      return stateObject;
   }
   
   private static class StateHandle implements java.io.Serializable {

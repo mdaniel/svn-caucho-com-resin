@@ -214,17 +214,13 @@ public class UIViewRoot extends UIComponentBase
     if (context == null)
       throw new NullPointerException();
 
-    System.out.println("PRE-APP:"  + context.getRenderResponse());
     if (_beforePhaseListener != null || _phaseListeners != null)
       beforePhase(context, PhaseId.INVOKE_APPLICATION);
-    System.out.println("POST-BP: " + context.getRenderResponse());
 
     broadcastEvents(PhaseId.INVOKE_APPLICATION);
-    System.out.println("POST-BC: " + context.getRenderResponse());
 
     if (_afterPhaseListener != null || _phaseListeners != null)
       afterPhase(context, PhaseId.INVOKE_APPLICATION);
-    System.out.println("POST-APP: " + context.getRenderResponse());
   }
 
   /**
@@ -322,7 +318,6 @@ public class UIViewRoot extends UIComponentBase
 	if (phaseId.equals(eventPhaseId)
 	    || PhaseId.ANY_PHASE.equals(eventPhaseId)) {
 	  event.getComponent().broadcast(event);
-	  System.out.println("BROAD: " + event + " " + event.getComponent());
 	  _eventList.remove(i);
 	  i--;
 	}
@@ -351,7 +346,6 @@ public class UIViewRoot extends UIComponentBase
 	PhaseListener listener = _phaseListeners.get(i);
 
 	listener.afterPhase(event);
-	System.out.println("APH: " + context.getRenderResponse() + " " + listener.getClass().getName() + " " + listener);
       }
     }
   }

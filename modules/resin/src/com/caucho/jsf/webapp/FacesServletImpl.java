@@ -196,9 +196,9 @@ public class FacesServletImpl extends GenericServlet
 
 	new Config().configure(facesConfig, facesPath, FACES_SCHEMA);
 
-	app.setNavigationHandler(facesConfig.getNavigationHandler());
-
 	if (app instanceof ApplicationImpl) {
+	  app.setNavigationHandler(facesConfig.getNavigationHandler());
+
 	  ApplicationImpl appImpl = (ApplicationImpl) app;
 	  
 	  facesConfig.configure(appImpl);

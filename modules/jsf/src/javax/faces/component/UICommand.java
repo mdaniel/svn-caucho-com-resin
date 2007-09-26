@@ -57,7 +57,6 @@ public class UICommand extends UIComponentBase
   private ValueExpression _immediateExpr;
   
   private MethodExpression _actionExpr;
-  private MethodBinding _action;
 
   private ActionListener []_actionListeners = NULL_ACTION_LISTENERS;
 
@@ -168,13 +167,15 @@ public class UICommand extends UIComponentBase
 	listeners[i].processAction(actionEvent);
       */
 
+      MethodBinding binding = getActionListener();
+      
+      if (binding != null)
+	binding.invoke(context, new Object[] { event });
+
       ActionListener listener = context.getApplication().getActionListener();
 
       if (listener != null) {
 	listener.processAction(actionEvent);
-	System.out.println("L: " + context.getRenderResponse() + " " + listener.getClass() + " " + listener);
-	System.out.println("ZZZ: " + getAction());
-	System.out.println("APP: " + context.getApplication().getNavigationHandler());
       }
     }
   }
@@ -194,17 +195,21 @@ public class UICommand extends UIComponentBase
   @Deprecated
   public MethodBinding getAction()
   {
-    return _action;
+    if (_actionExpr == null)
+      return null;
+    else if (_actionExpr instanceof MethodExpressionAdapter)
+      return ((MethodExpressionAdapter) _actionExpr).getBinding();
+    else
+      return new MethodBindingAdapter(_actionExpr);
   }
   
   @Deprecated
   public void setAction(MethodBinding action)
   {
-    System.out.println("SETA:" + action);
-    if (action == null)
-      throw new NullPointerException();
-
-    _action = action;
+    if (action != null)
+      _actionExpr = new MethodExpressionAdapter(action);
+    else
+      _actionExpr = null;
   }
 
   @Deprecated
@@ -227,7 +232,6 @@ public class UICommand extends UIComponentBase
     if (action == null)
       throw new NullPointerException();
 
-    System.out.println("SETAL:" + action);
     FacesListener []listeners = getFacesListeners(FacesListener.class);
 
     for (int i = 0; i < listeners.length; i++) {
@@ -243,7 +247,6 @@ public class UICommand extends UIComponentBase
 
   public void addActionListener(ActionListener listener)
   {
-    System.out.println("ADDAL:" + _action);
     if (listener == null)
       throw new NullPointerException();
     
@@ -291,14 +294,11 @@ public class UICommand extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    System.out.println("ACTION: " + _action);
-    
     return new Object[] {
       super.saveState(context),
       _value,
       _immediate,
-      _actionExpr,
-      saveAttachedState(context, _action),
+      saveAttachedState(context, _actionExpr),
     };
   }
 
@@ -314,10 +314,7 @@ public class UICommand extends UIComponentBase
 
     _actionListeners = null;
 
-    _actionExpr = (MethodExpression) state[i++];
-    _action = (MethodBinding) restoreAttachedState(context, state[i++]);
-
-    System.out.println("ACT-REST: " + _action);
+    _actionExpr = (MethodExpression) restoreAttachedState(context, state[i++]);
   }
 
   //
@@ -328,10 +325,10 @@ public class UICommand extends UIComponentBase
     VALUE,
   }
 
-  static class MethodBindingAdapter extends MethodExpression {
+  static class MethodExpressionAdapter extends MethodExpression {
     private MethodBinding _binding;
 
-    MethodBindingAdapter(MethodBinding binding)
+    MethodExpressionAdapter(MethodBinding binding)
     {
       _binding = binding;
     }
@@ -376,6 +373,68 @@ public class UICommand extends UIComponentBase
     public boolean equals(Object o)
     {
       return (this == o);
+    }
+  }
+
+  static class MethodBindingAdapter extends MethodBinding
+  {
+    private MethodExpression _expr;
+
+    public MethodBindingAdapter()
+    {
+    }
+
+    public MethodBindingAdapter(MethodExpression expr)
+    {
+      _expr = expr;
+    }
+
+    public String getExpressionString()
+    {
+      return _expr.getExpressionString();
+    }
+  
+    @Deprecated
+      public Object invoke(FacesContext context, Object []param)
+      throws EvaluationException, javax.faces.el.MethodNotFoundException
+    {
+      if (context == null)
+	throw new NullPointerException();
+    
+      try {
+	return _expr.invoke(context.getELContext(), param);
+      } catch (javax.el.MethodNotFoundException e) {
+	throw new javax.faces.el.MethodNotFoundException(e);
+      } catch (ELException e) {
+	if (e.getCause() != null)
+	  throw new EvaluationException(e.getCause());
+	else
+	  throw new EvaluationException(e);
+      } catch (Exception e) {
+	throw new EvaluationException(e);
+      }
+    }
+
+    @Deprecated
+      public Class getType(FacesContext context)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      try {
+	MethodInfo info = _expr.getMethodInfo(context.getELContext());
+
+	return info.getReturnType();
+      } catch (javax.el.MethodNotFoundException e) {
+	throw new javax.faces.el.MethodNotFoundException(e);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new EvaluationException(e);
+      }
+    }
+
+    public String toString()
+    {
+      return "MethodBindingAdapter[" + _expr.getExpressionString() + "]";
     }
   }
 
