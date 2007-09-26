@@ -45,11 +45,11 @@ public class SessionCreateMethod extends BaseMethod {
   private JMethod _method;
   private String _contextClassName;
   private String _prefix;
-  
+
   public SessionCreateMethod(JMethod apiMethod,
-			     JMethod implMethod,
-			     String contextClassName,
-			     String prefix)
+                             JMethod implMethod,
+                             String contextClassName,
+                             String prefix)
   {
     super(apiMethod, implMethod);
 
@@ -89,27 +89,32 @@ public class SessionCreateMethod extends BaseMethod {
     out.pushDepth();
     out.println("thread.setContextClassLoader(_server.getClassLoader());");
     out.println();
-    
+
     out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
 
     out.println("Bean bean = new Bean(cxt);");
 
     getCall().generateCall(out, null, "bean", args);
-    
+
     out.println("cxt._ejb_free(bean);");
-    
+
     out.println();
     out.println("_server.createSessionKey(cxt);");
 
     JClass retType = getReturnType();
+
+    // ejb/02j4
+    if (! retType.getName().equals("void"))
+      out.print("return (" + retType.getName() + ") ");
+
     if ("RemoteHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
+      out.println("cxt.getRemoteView();");
     else if ("LocalHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getEJBLocalObject();");
+      out.println("cxt.getEJBLocalObject();");
     else
       throw new IOException(L.l("trying to create unknown type {0}",
-				_prefix));
-    
+                                _prefix));
+
     out.popDepth();
     out.println("} finally {");
     out.println("  thread.setContextClassLoader(oldLoader);");

@@ -91,11 +91,22 @@ public class SessionPoolChain extends FilterCallChain {
       generateInterceptorExceptionHandling(out);
     }
 
+    out.println("} catch (com.caucho.ejb.EJBExceptionWrapper e) {");
+    out.pushDepth();
+
+    // Application exception: cannot set null since the finally block
+    // needs to free up the bean first.
+    // out.println("ptr = null;");
+
+    out.println("throw e;");
+
+    out.popDepth();
+
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();
 
-    // Cannot set null since the finally block needs to free up the bean first.
-    // out.println("ptr = null;");
+    // ejb/02d1
+    out.println("ptr = null;");
 
     out.println("throw e;");
 

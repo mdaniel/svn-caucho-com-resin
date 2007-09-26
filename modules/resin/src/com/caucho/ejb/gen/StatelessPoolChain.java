@@ -80,7 +80,8 @@ public class StatelessPoolChain extends SessionPoolChain {
     out.println("} catch (com.caucho.ejb.EJBExceptionWrapper e) {");
     out.pushDepth();
 
-    // Cannot set null since the finally block needs to free up the bean first.
+    // Application exception: cannot set null since the finally block
+    // needs to free up the bean first.
     // ejb/0f06 out.println("ptr = null;");
     out.println("throw e;");
 
