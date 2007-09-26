@@ -33,6 +33,7 @@ import java.io.*;
 import java.util.*;
 
 import com.caucho.vfs.*;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.util.*;
 
 /**
@@ -841,6 +842,31 @@ public class BinaryBuilderValue
     _buffer[_length++] = (byte) v;
 
     return this;
+  }
+  
+  /**
+   * Append to a string builder.
+   */
+  public StringValue appendTo(UnicodeBuilderValue sb)
+  {
+    if (length() == 0)
+      return sb;
+    
+    Env env = Env.getInstance();
+
+    try {
+      Reader reader = env.getRuntimeEncodingFactory().create(toInputStream());
+      
+      if (reader != null) {
+        sb.append(reader);
+
+        reader.close();
+      }
+
+      return sb;
+    } catch (IOException e) {
+      throw new QuercusRuntimeException(e);
+    }
   }
 
   /**

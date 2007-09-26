@@ -129,6 +129,15 @@ public class UnicodeBuilderValue extends StringBuilderValue
   }
   
   /**
+   * Returns true for UnicodeValue
+   */
+  @Override
+  public boolean isUnicode()
+  {
+    return true;
+  }
+  
+  /**
    * Returns the value.
    */
   public String getValue()
