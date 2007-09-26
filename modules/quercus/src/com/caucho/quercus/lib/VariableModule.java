@@ -511,7 +511,8 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public boolean is_resource(@ReadOnly Value value)
   {
-    return (value.toValue() instanceof ResourceValue);
+    // XXX:
+    return (value.toValue() instanceof JavaValue);
   }
 
   // XXX: is_scalar

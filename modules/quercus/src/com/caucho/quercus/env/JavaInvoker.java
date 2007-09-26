@@ -199,11 +199,6 @@ abstract public class JavaInvoker
         }
         else
           _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
-
-	/*
-        if (getName().equals("test"))
-          System.out.println("XXX:: MARSHALL " + getName() + " _marshalArgs for " + i + " " + argType + " is " + _marshalArgs[i]); // XXX::
-	*/
       }
 
       _unmarshalReturn = marshalFactory.create(_retType,
@@ -453,9 +448,6 @@ abstract public class JavaInvoker
         Value arg = args[i];
 
         cost = Math.max(marshal.getMarshalingCost(arg) + cost, cost);
-	/*
-        System.out.println("XXX:: MARSHALLING COST " + marshal + " " + arg.getClass() + " " + cost); // XXX::
-	*/
       }
     }
 
@@ -563,14 +555,6 @@ abstract public class JavaInvoker
     if (! _isInit)
       init();
 
-    /*
-    System.out.println("XXX:: JavaInvoker call " + this + " "); // XXX::
-    for (int i = 0; i < args.length; i++) {
-      Object arg = args[i];
-      System.out.println("XXX::    arg " + i + " " + (arg == null ? "null" : arg.getClass()));
-    }
-    */
-
     int len = _param.length;
 
     Object []javaArgs = new Object[len];
@@ -602,10 +586,6 @@ abstract public class JavaInvoker
         javaArgs[k] = _marshalArgs[i].marshal(env, NullValue.NULL, _param[k]);
       }
 
-      /*
-      System.out.println("XXX::    arg " + k + " marhsal " + _marshalArgs[i].getClass() ); // XXX::
-      */
-
       k++;
     }
 
@@ -629,14 +609,6 @@ abstract public class JavaInvoker
 
       javaArgs[k++] = rest;
     }
-
-    /*
-    System.out.println("XXX:: JavaInvoker call " + this + " "); // XXX::
-    for (int i = 0; i < javaArgs.length; i++) {
-      Object arg = javaArgs[i];
-      System.out.println("XXX::    javaArg "  + i + " " + (arg == null ? "null" : arg.getClass()));
-    }
-    */
 
     Object result = invoke(obj, javaArgs);
 
