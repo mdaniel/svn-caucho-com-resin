@@ -201,6 +201,11 @@ abstract public class DeployGenerator<E extends DeployController>
     return _lifecycle.isActive();
   }
 
+  public boolean isDestroyed()
+  {
+    return _lifecycle.isDestroyed();
+  }
+
   /**
    * Derived class implentation of start.
    */

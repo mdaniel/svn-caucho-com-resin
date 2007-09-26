@@ -991,9 +991,9 @@ public class NodeBuilder {
       throw (LineConfigRuntimeException) e;
     else if (e instanceof LineRuntimeException)
       throw (LineRuntimeException) e;
-    else if (e instanceof ConfigException &&
-             e.getMessage() != null &&
-             filename != null) {
+    else if (e instanceof ConfigException
+	     && e.getMessage() != null
+	     && filename != null) {
       String sourceLines = getSourceLines(systemId, line);
       
       return new LineConfigException(filename, line,
@@ -1026,6 +1026,8 @@ public class NodeBuilder {
 
   private static String getSourceLines(String systemId, int errorLine)
   {
+    System.out.println("GSL: " + systemId + " " + errorLine);
+    
     if (systemId == null)
       return "";
     

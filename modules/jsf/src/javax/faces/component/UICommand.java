@@ -170,8 +170,12 @@ public class UICommand extends UIComponentBase
 
       ActionListener listener = context.getApplication().getActionListener();
 
-      if (listener != null)
+      if (listener != null) {
 	listener.processAction(actionEvent);
+	System.out.println("L: " + context.getRenderResponse() + " " + listener.getClass() + " " + listener);
+	System.out.println("ZZZ: " + getAction());
+	System.out.println("APP: " + context.getApplication().getNavigationHandler());
+      }
     }
   }
 
@@ -196,6 +200,7 @@ public class UICommand extends UIComponentBase
   @Deprecated
   public void setAction(MethodBinding action)
   {
+    System.out.println("SETA:" + action);
     if (action == null)
       throw new NullPointerException();
 
@@ -221,7 +226,8 @@ public class UICommand extends UIComponentBase
   {
     if (action == null)
       throw new NullPointerException();
-    
+
+    System.out.println("SETAL:" + action);
     FacesListener []listeners = getFacesListeners(FacesListener.class);
 
     for (int i = 0; i < listeners.length; i++) {
@@ -237,6 +243,7 @@ public class UICommand extends UIComponentBase
 
   public void addActionListener(ActionListener listener)
   {
+    System.out.println("ADDAL:" + _action);
     if (listener == null)
       throw new NullPointerException();
     
@@ -284,14 +291,14 @@ public class UICommand extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
+    System.out.println("ACTION: " + _action);
+    
     return new Object[] {
       super.saveState(context),
       _value,
       _immediate,
       _actionExpr,
-      ((_action instanceof StateHolder)
-       ? saveAttachedState(context, _action)
-       : null),
+      saveAttachedState(context, _action),
     };
   }
 
@@ -309,6 +316,8 @@ public class UICommand extends UIComponentBase
 
     _actionExpr = (MethodExpression) state[i++];
     _action = (MethodBinding) restoreAttachedState(context, state[i++]);
+
+    System.out.println("ACT-REST: " + _action);
   }
 
   //

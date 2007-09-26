@@ -468,8 +468,8 @@ public class JavaJspBuilder extends JspBuilder {
 
   public JspParseException error(String message)
   {
-    return new JspParseException(_filename + ":" + _line + ": " + message
-				 + _gen.getSourceLines(_sourcePath, _line));
+    return new JspLineParseException(_filename + ":" + _line + ": " + message
+				     + _gen.getSourceLines(_sourcePath, _line));
   }
 
   public JspParseException error(Throwable e)

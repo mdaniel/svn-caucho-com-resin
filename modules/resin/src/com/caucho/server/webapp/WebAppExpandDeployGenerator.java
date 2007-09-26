@@ -306,13 +306,17 @@ public class WebAppExpandDeployGenerator
     Path rootDirectory;
 
     if (jarPath.isDirectory()) {
-      rootDirectory = getExpandDirectory().lookup("." + archiveName);
+      //rootDirectory = getExpandDirectory().lookup("./" + archiveName);
+      // server/10kw
+      rootDirectory = jarPath;
       jarPath = null;
     }
     else {
       // server/003j
       rootDirectory = getExpandDirectory().lookup("./" + expandName);
     }
+    
+
 
     if (! rootDirectory.isDirectory()
         && (jarPath == null || ! jarPath.isFile()))

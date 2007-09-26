@@ -854,7 +854,18 @@ abstract public class GenericTag extends JspContainerNode
 	out.println(";");
       }
 
-      _gen.addBeanClass(var.getVarName(), className);
+      try {
+	_gen.addBeanClass(var.getVarName(), className);
+      } catch (Exception e) {
+	Throwable cause = e.getCause();
+
+	if (cause == null)
+	  cause = e;
+
+	throw error(L.l("'{0}' is an unknown class for tag variable '{1}' in <{2}>",
+			className, var.getVarName(), getTagInfo().getTagName()),
+		    cause);
+      }
     }
   }
 

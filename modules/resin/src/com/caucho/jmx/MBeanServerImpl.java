@@ -56,7 +56,8 @@ class MBeanServerImpl extends AbstractMBeanServer {
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    _context = new MBeanContext(this, loader, delegate);
+    MBeanContext globalContext = null;
+    _context = new MBeanContext(this, loader, delegate, globalContext);
 
     try {
       IntrospectionMBean mbean;

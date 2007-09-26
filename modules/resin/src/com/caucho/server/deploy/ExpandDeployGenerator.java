@@ -97,7 +97,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   /**
    * Creates the deploy.
    */
-  public ExpandDeployGenerator(DeployContainer<E> container, Path containerRootDirectory)
+  public ExpandDeployGenerator(DeployContainer<E> container,
+			       Path containerRootDirectory)
   {
     super(container);
 
@@ -172,6 +173,18 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       return null;
 
     return getExpandDirectory().lookup(getExpandName(name));
+
+    /*
+    if (expandDir.isDirectory())
+      return expandDir;
+
+    Path extPath = getExpandDirectory().lookup(name + _extension);
+    
+    if (extPath.isDirectory())
+      return extPath;
+    else
+      return expandDir;
+    */
   }
 
   /**
@@ -758,12 +771,18 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     else
       return null;
 
-    if (_expandSuffix == null)
-      return name;
+
+    if (_expandSuffix == null || "".equals(_expandSuffix)) {
+    }
     else if (name.endsWith(_expandSuffix))
       return name.substring(0, name.length() - _expandSuffix.length());
     else
       return null;
+
+    if (_extension != null && name.endsWith(_extension))
+      return name.substring(0, name.length() - _extension.length());
+    else
+      return name;
   }
 
   /**
@@ -862,10 +881,10 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("unknown name '{0}'", name));
+        log.log(Level.FINE, L.l("{0} unknown name '{1}' in start", this, name));
 
       if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
+        log.log(Level.FINER, L.l("{0} known names are {1} in start", this, getNamesAsString()));
 
       return false;
     }
@@ -973,12 +992,14 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    */
   public void handleAlarm(Alarm alarm)
   {
-    if (! isActive())
+    if (isDestroyed())
       return;
     
     try {
       // XXX: tck, but no QA test
-      if ("automatic".equals(getRedeployMode()))
+
+      // server/10ka
+      if ("automatic".equals(getRedeployMode()) && isActive())
         request();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

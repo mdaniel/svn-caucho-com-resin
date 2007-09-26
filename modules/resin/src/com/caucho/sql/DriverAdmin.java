@@ -30,10 +30,13 @@
 
 package com.caucho.sql;
 
+import javax.management.*;
+
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.JdbcDriverMXBean;
 
 import java.util.Date;
+import java.util.Map;
 
 public class DriverAdmin extends AbstractManagedObject
   implements JdbcDriverMXBean
@@ -59,6 +62,19 @@ public class DriverAdmin extends AbstractManagedObject
   public String getUrl()
   {
     return _driver.getURL();
+  }
+
+  protected void addObjectNameProperties(Map<String,String> props)
+    throws MalformedObjectNameException
+  {
+    String url = getUrl();
+    
+    if (url != null) {
+      if (url.indexOf(':') >= 0)
+	url = ObjectName.quote(url);
+	  
+      props.put("url", url);
+    }
   }
 
   //

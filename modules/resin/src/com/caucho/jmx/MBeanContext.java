@@ -55,6 +55,8 @@ public class MBeanContext
   // The owning MBeanServer
   private AbstractMBeanServer _mbeanServer;
 
+  private MBeanContext _globalContext;
+
   private MBeanServerDelegate _delegate;
   private long _seq;
   
@@ -81,7 +83,8 @@ public class MBeanContext
 
   MBeanContext(AbstractMBeanServer mbeanServer,
 	       ClassLoader loader,
-	       MBeanServerDelegate delegate)
+	       MBeanServerDelegate delegate,
+	       MBeanContext globalContext)
   {
     for (; loader != null
 	   && loader != ClassLoader.getSystemClassLoader()
@@ -95,6 +98,7 @@ public class MBeanContext
     _mbeanServer = mbeanServer;
     _loader = loader;
     _delegate = delegate;
+    _globalContext = globalContext;
 
     Environment.addClassLoaderListener(new CloseListener(this), _loader);
     //Environment.addClassLoaderListener(new WeakCloseListener(this), _loader);
@@ -249,6 +253,9 @@ public class MBeanContext
       throw new MBeanRegistrationException(e);
     }
 
+    if (_globalContext != null)
+      _globalContext.addMBean(name, mbean);
+
     return mbean.getObjectInstance();
   }
   
@@ -394,6 +401,9 @@ public class MBeanContext
 
     if (_mbeans != null)
       mbean = _mbeans.remove(name);
+
+    if (_globalContext != null)
+      _globalContext._mbeans.remove(name);
 
     if (_view != null)
       _view.remove(name);

@@ -69,6 +69,21 @@ public class FacesServletImpl extends GenericServlet
   public void init(ServletConfig config)
     throws ServletException
   {
+    Object factoryObj;
+    String factory;
+
+    initFactory(FactoryFinder.APPLICATION_FACTORY,
+		"com.caucho.jsf.application.ApplicationFactoryImpl");
+
+    initFactory(FactoryFinder.LIFECYCLE_FACTORY,
+		"com.caucho.jsf.lifecycle.LifecycleFactoryImpl");
+
+    initFactory(FactoryFinder.RENDER_KIT_FACTORY,
+		"com.caucho.jsf.render.RenderKitFactoryImpl");
+
+    initFactory(FactoryFinder.FACES_CONTEXT_FACTORY,
+		"com.caucho.jsf.context.FacesContextFactoryImpl");
+    
     ApplicationFactory appFactory = (ApplicationFactory)
       FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
 
@@ -78,28 +93,6 @@ public class FacesServletImpl extends GenericServlet
       app = new ApplicationImpl();
       appFactory.setApplication(app);
     }
-
-    FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
-    FactoryFinder.getFactory(FactoryFinder.RENDER_KIT_FACTORY);
-    FactoryFinder.getFactory(FactoryFinder.FACES_CONTEXT_FACTORY);
-
-    String factory;
-
-    factory = getServiceFactory(FactoryFinder.APPLICATION_FACTORY);
-    if (factory != null && ! "".equals(factory))
-      FactoryFinder.setFactory(FactoryFinder.APPLICATION_FACTORY, factory);
-
-    factory = getServiceFactory(FactoryFinder.LIFECYCLE_FACTORY);
-    if (factory != null && ! "".equals(factory))
-      FactoryFinder.setFactory(FactoryFinder.LIFECYCLE_FACTORY, factory);
-
-    factory = getServiceFactory(FactoryFinder.RENDER_KIT_FACTORY);
-    if (factory != null && ! "".equals(factory))
-      FactoryFinder.setFactory(FactoryFinder.RENDER_KIT_FACTORY, factory);
-
-    factory = getServiceFactory(FactoryFinder.FACES_CONTEXT_FACTORY);
-    if (factory != null && ! "".equals(factory))
-      FactoryFinder.setFactory(FactoryFinder.FACES_CONTEXT_FACTORY, factory);
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     try {
@@ -141,6 +134,26 @@ public class FacesServletImpl extends GenericServlet
       for (PhaseListener listener : _phaseListenerList) {
 	lifecycle.addPhaseListener(listener);
       }
+    }
+  }
+
+  private static void initFactory(String factoryName, String defaultName)
+  {
+    Object factoryObj = null;
+    String factory;
+    
+    try {
+      factoryObj = FactoryFinder.getFactory(factoryName);
+    } catch (FacesException e) {
+    }
+    
+    if (factoryObj == null) {
+      factory = getServiceFactory(factoryName);
+      
+      if (factory == null || "".equals(factory))
+	factory = defaultName;
+      
+      FactoryFinder.setFactory(factoryName, factory);
     }
   }
 

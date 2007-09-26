@@ -50,6 +50,8 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
     new EnvironmentLocal<MBeanContext>();
   
   private MBeanServerDelegate _globalDelegate;
+
+  private MBeanContext _globalContext;
   
   /**
    * Creates an MBeanServerProxy based on the context class loader.
@@ -63,7 +65,10 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
 
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
     
-    MBeanContext context = new MBeanContext(this, systemLoader, delegate);
+    MBeanContext context = new MBeanContext(this, systemLoader, delegate,
+					    null);
+
+    _globalContext = context;
 
     _localContext.setGlobal(context);
 	
@@ -98,7 +103,7 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
 	MBeanServerDelegate delegate;
 	delegate = new MBeanServerDelegateImpl("Resin-JMX");
 
-	context = new MBeanContext(this, loader, delegate);
+	context = new MBeanContext(this, loader, delegate, _globalContext);
 
 	MBeanContext parent = null;
 

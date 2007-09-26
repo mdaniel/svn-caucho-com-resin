@@ -524,8 +524,9 @@ public abstract class UIComponentBase extends UIComponent
     throws AbortProcessingException
   {
     for (int i = 0; i < _facesListeners.length; i++) {
-      if (event.isAppropriateListener(_facesListeners[i]))
+      if (event.isAppropriateListener(_facesListeners[i])) {
 	event.processListener(_facesListeners[i]);
+      }
     }
   }
 
@@ -552,10 +553,12 @@ public abstract class UIComponentBase extends UIComponent
     try {
       decode(context);
     } catch (RuntimeException e) {
+      Thread.dumpStack();
       context.renderResponse();
 
       throw e;
     }
+    System.out.println("DECODE: " + context.getRenderResponse() + " " + getClass().getName());
   }
 
   /**
@@ -586,6 +589,7 @@ public abstract class UIComponentBase extends UIComponent
     for (UIComponent child : getFacetsAndChildrenArray()) {
       child.processValidators(context);
     }
+    System.out.println("VALID: " + context.getRenderResponse() + " " + getClass().getName());
   }
 
   //
@@ -603,6 +607,7 @@ public abstract class UIComponentBase extends UIComponent
     for (UIComponent child : getFacetsAndChildrenArray()) {
       child.processUpdates(context);
     }
+    System.out.println("UPDATE: " + context.getRenderResponse() + " " + getClass().getName());
   }
 
   //
@@ -703,12 +708,12 @@ public abstract class UIComponentBase extends UIComponent
       List<UIComponent> children = getChildren();
       
       for (int i = 0; i < childSize; i++) {
-	k++;
-	
 	UIComponent child = children.get(i);
 
 	if (child.isTransient())
 	  continue;
+	
+	k++;
 	
 	Object childState = child.processSaveState(context);
 
@@ -725,13 +730,13 @@ public abstract class UIComponentBase extends UIComponent
       Map<String,UIComponent> facetMap = getFacets();
 
       for (Map.Entry<String,UIComponent> entry : facetMap.entrySet()) {
-	k += 2;
-
 	UIComponent facet = entry.getValue();
 
 	if (facet.isTransient())
 	  continue;
 	
+	k += 2;
+
 	Object childState = facet.processSaveState(context);
 
 	if (childState != null) {
@@ -783,12 +788,12 @@ public abstract class UIComponentBase extends UIComponent
       List<UIComponent> children = getChildren();
       
       for (int i = 0; i < childSize; i++) {
-	k++;
-	
 	UIComponent child = children.get(i);
 
 	if (child.isTransient())
 	  continue;
+	
+	k++;
 	
 	Object childState;
 	
@@ -995,13 +1000,15 @@ public abstract class UIComponentBase extends UIComponent
   private void removeChild(UIComponent child)
   {
     if (_children != null) {
-      _children.remove(child);
+      if (_children.remove(child))
+	return;
     }
-    else if (_facets != null) {
+    
+    if (_facets != null) {
       for (Map.Entry<String,UIComponent> entry : _facets.entrySet()) {
 	if (entry.getValue() == child) {
 	  _facets.remove(entry.getKey());
-	  break;
+	  return;
 	}
       }
     }
@@ -1197,8 +1204,13 @@ public abstract class UIComponentBase extends UIComponent
     {
       UIComponent parent = child.getParent();
 
-      if (parent instanceof UIComponentBase) {
+      if (parent == null) {
+      }
+      else if (parent instanceof UIComponentBase) {
 	((UIComponentBase) parent).removeChild(child);
+      }
+      else {
+	parent.getChildren().remove(child);
       }
 
       child.setParent(_parent);
@@ -1385,7 +1397,7 @@ public abstract class UIComponentBase extends UIComponent
     {
       if (name == null || value == null)
 	throw new NullPointerException();
-      
+
       Property prop = _propertyMap.get(name);
 
       if (prop == null) {

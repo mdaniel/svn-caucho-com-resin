@@ -31,6 +31,7 @@ package com.caucho.jsp.cfg;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
+import com.caucho.jsp.JspLineParseException;
 import com.caucho.jsp.JspParseException;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
@@ -152,13 +153,13 @@ public class TldTag implements DependencyBean {
       log.warning(_configLocation +  e);
 
       if (_configException == null)
-	_configException = new JspParseException(_configLocation + e);
+	_configException = new JspLineParseException(_configLocation + e);
 
       return;
     }
 
-    if (! Tag.class.isAssignableFrom(tagClass) &&
-        ! SimpleTag.class.isAssignableFrom(tagClass))
+    if (! Tag.class.isAssignableFrom(tagClass)
+	&& ! SimpleTag.class.isAssignableFrom(tagClass))
       throw new ConfigException(L.l("{0} must either implement Tag or SimpleTag.",
 				    tagClass.getName()));
   }

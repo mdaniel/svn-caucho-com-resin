@@ -78,6 +78,9 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
 	  
 	  props.put("name", name);
 	}
+
+	addObjectNameProperties(props);
+	
 	//
 	_objectName = Jmx.getObjectName("resin", props);
       } catch (MalformedObjectNameException e) {
@@ -86,6 +89,11 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
     }
 
     return _objectName;
+  }
+
+  protected void addObjectNameProperties(Map<String,String> props)
+    throws MalformedObjectNameException
+  {
   }
 
   /**

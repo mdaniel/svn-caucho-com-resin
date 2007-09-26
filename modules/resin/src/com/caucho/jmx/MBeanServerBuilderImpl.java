@@ -83,12 +83,18 @@ public class MBeanServerBuilderImpl extends MBeanServerBuilder {
     if (! _isInit) {
       _isInit = true;
       
-      return Jmx.getContextMBeanServer();
+      Jmx.getContextMBeanServer();
     }
     
     if (defaultDomain == null)
       defaultDomain = "resin";
 
+    /*
+    if ("resin".equals(defaultDomain))
+      return Jmx.getContextMBeanServer();
+    else
+      return new MBeanServerImpl(defaultDomain, delegate);
+    */
     return new MBeanServerImpl(defaultDomain, delegate);
   }
 }

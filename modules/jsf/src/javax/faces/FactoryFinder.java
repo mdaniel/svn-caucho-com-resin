@@ -116,6 +116,9 @@ public class FactoryFinder
 
   public static void setFactory(String factoryName, String implName)
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine("FactoryFinder[] setting '" + factoryName + "' to implementation '" + implName + "'");
+    
     Class factoryClass = _factoryClassMap.get(factoryName);
     
     if (factoryClass == null)
@@ -135,7 +138,7 @@ public class FactoryFinder
       Object oldFactory = objectMap.get(factoryName);
 
       if (oldFactory == null)
-	oldFactory = getFactory(factoryName);
+	oldFactory = _factoryMap.get(factoryName);
       
       HashMap<String,String> map = _factoryNameMap.get(loader);
 
@@ -169,6 +172,8 @@ public class FactoryFinder
 
   private static String getDefaultFactory(String factoryName)
   {
+    return null;
+    /*
     if (APPLICATION_FACTORY.equals(factoryName))
       return "com.caucho.jsf.application.ApplicationFactoryImpl";
     else if (FACES_CONTEXT_FACTORY.equals(factoryName))
@@ -179,6 +184,7 @@ public class FactoryFinder
       return "com.caucho.jsf.render.RenderKitFactoryImpl";
     else
       return null;
+    */
   }
 
   private static Object createFactory(String className,
@@ -206,7 +212,7 @@ public class FactoryFinder
 
       Object obj;
 
-      if (ctor != null)
+      if (ctor != null && previous != null)
 	obj = ctor.newInstance(previous);
       else
 	obj = cl.newInstance();

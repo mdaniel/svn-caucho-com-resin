@@ -648,7 +648,7 @@ public class ELParser
 	  else
 	    return new IdExpr(name);
 	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
+	  log.log(Level.FINEST, e.toString(), e);
 	  
 	  return new IdExpr(name);
 	}
