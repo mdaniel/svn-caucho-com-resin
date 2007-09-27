@@ -30,6 +30,7 @@
 package com.caucho.quercus.module;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.JavaInvoker;
 import com.caucho.util.L10N;
 
@@ -59,7 +60,7 @@ public class StaticFunction extends JavaInvoker {
                         Method method)
   {
     super(moduleContext,
-          method.getName(),
+          getName(method),
           method.getParameterTypes(),
           method.getParameterAnnotations(),
           method.getAnnotations(),
@@ -68,6 +69,20 @@ public class StaticFunction extends JavaInvoker {
     _method = method;
     _argLength = method.getParameterTypes().length;
     _quercusModule = quercusModule;
+  }
+
+  private static String getName(Method method)
+  {
+    String name;
+
+    Name nameAnn = method.getAnnotation(Name.class);
+
+    if (nameAnn != null)
+      name = nameAnn.value();
+    else
+      name = method.getName();
+
+    return name;
   }
 
   /**

@@ -201,21 +201,22 @@ public class ModuleInfo {
       }
 
       try {
+        if (method.getName().startsWith("quercus_"))
+          throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method));
+
         StaticFunction function
 	  = _context.createStaticFunction(_module, method);
 
-        String methodName = method.getName();
+        String functionName = function.getName();
 
-        if (methodName.startsWith("quercus_"))
-          methodName = methodName.substring(8);
 
         AbstractJavaMethod oldFunction
-          = (AbstractJavaMethod) _staticFunctions.get(methodName);
+          = (AbstractJavaMethod) _staticFunctions.get(functionName);
 
         if (oldFunction != null)
-          _staticFunctions.put(methodName, oldFunction.overload(function));
+          _staticFunctions.put(functionName, oldFunction.overload(function));
         else
-          _staticFunctions.put(methodName, function);
+          _staticFunctions.put(functionName, function);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }

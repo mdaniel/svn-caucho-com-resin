@@ -1197,15 +1197,15 @@ public class ArrayModule
    * Executes a callback on each of the elements in the array.
    *
    * @param array the array to walk along
-   * @param callbacj the callback function
-   * @param extra extra parameter required by the callback function
+   * @param callback the callback function
+   * @param userData extra parameter required by the callback function
    *
    * @return true if the walk succedded, false otherwise
    */
   public boolean array_walk(Env env,
                             @NotNull ArrayValue array,
                             Callback callback,
-                            @Optional("NULL") Value extra)
+                            @Optional("NULL") Value userData)
   {
     if (callback == null || ! callback.isValid()) {
       env.error(L.l("'{0}' is an unknown function", callback.getCallbackName()));
@@ -1222,7 +1222,7 @@ public class ArrayModule
         Value key = keyArray[i];
         Value val = array.getRaw(key);
         
-        callback.call(env, array, key, val, key, extra);
+        callback.call(env, array, key, val, key, userData);
       }
       
       return true;

@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.annotation.Name;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +44,8 @@ public class QuercusModule extends AbstractQuercusModule
   /**
    * Returns the version of Quercus.
    */
-  public static String quercus_quercus_version(Env env)
+  @Name("quercus_version")
+  public static String version(Env env)
   {
     return env.getQuercus().getVersion();
   }
@@ -51,7 +53,8 @@ public class QuercusModule extends AbstractQuercusModule
   /**
    * Returns true if this is the Professional version.
    */
-  public static boolean quercus_quercus_is_pro(Env env)
+  @Name("quercus_is_pro")
+  public static boolean is_pro(Env env)
   {
     return env.getQuercus().isPro();
   }
@@ -59,7 +62,8 @@ public class QuercusModule extends AbstractQuercusModule
   /**
    * Returns true if pages will be compiled.
    */
-  public static boolean quercus_quercus_is_compile(Env env)
+  @Name("quercus_is_compile")
+  public static boolean is_compile(Env env)
   {
     return env.getQuercus().isCompile();
   }
@@ -67,7 +71,8 @@ public class QuercusModule extends AbstractQuercusModule
   /**
    * Returns true if Quercus is running under Resin.
    */
-  public static boolean quercus_quercus_is_resin(Env env)
+  @Name("quercus_is_resin")
+  public static boolean is_resin(Env env)
   {
     return env.getQuercus().isResin();
   }
@@ -75,7 +80,8 @@ public class QuercusModule extends AbstractQuercusModule
   /*
    * Returns true if a JDBC database has been explicitly set.
    */
-  public static boolean quercus_quercus_has_database(Env env)
+  @Name("quercus_has_database")
+  public static boolean has_database(Env env)
   {
     return env.getQuercus().getDatabase() != null;
   }
@@ -83,7 +89,8 @@ public class QuercusModule extends AbstractQuercusModule
   /*
    * Returns true if there is an HttpRequest associated with this Env.
    */
-  public static boolean quercus_quercus_has_request(Env env)
+  @Name("quercus_has_request")
+  public static boolean has_request(Env env)
   {
     return env.getRequest() != null;
   }
@@ -91,7 +98,8 @@ public class QuercusModule extends AbstractQuercusModule
   /**
    * Returns the HttpServletRequest associated with this Env.
    */
-  public static HttpServletRequest quercus_quercus_get_request(Env env)
+  @Name("quercus_get_request")
+  public static HttpServletRequest get_request(Env env)
   {
     return env.getRequest();
   }
@@ -99,7 +107,8 @@ public class QuercusModule extends AbstractQuercusModule
   /*
    * Returns the ServletContext.
    */
-  public static ServletContext quercus_quercus_get_servlet_context(Env env)
+  @Name("quercus_get_servlet_context")
+  public static ServletContext get_servlet_context(Env env)
   {
     return env.getServletContext();
   }

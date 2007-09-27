@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
@@ -396,8 +397,8 @@ public class OracleOciLob {
   /**
    * Imports file data to the LOB
    */
-  public boolean quercus_import(Env env,
-                                Path file)
+  @Name("import")
+  public boolean q_import(Env env, Path file)
   {
     try {
 
@@ -558,7 +559,7 @@ public class OracleOciLob {
   public boolean saveFile(Env env,
                           Path file)
   {
-    return quercus_import(env, file);
+    return q_import(env, file);
   }
 
   /**

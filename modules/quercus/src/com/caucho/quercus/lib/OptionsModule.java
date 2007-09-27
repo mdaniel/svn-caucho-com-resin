@@ -33,6 +33,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.UsesSymbolTable;
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -94,7 +95,8 @@ public class OptionsModule extends AbstractQuercusModule {
    * Checks the assertion
    */
   @UsesSymbolTable
-  public static Value quercus_assert(Env env, String code)
+  @Name("assert")
+  public static Value q_assert(Env env, String code)
   {
     try {
       Quercus quercus = env.getQuercus();

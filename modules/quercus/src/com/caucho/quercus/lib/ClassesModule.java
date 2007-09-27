@@ -37,11 +37,10 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -117,26 +116,23 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * Returns an array of member names and values
    *
-   * @param className the name of the class
+   * @param clss the name of the class, or an instance of a class
    *
    * @return an array of member names and values
    */
-  public static Value get_class_vars(Env env, String className)
+  public static Value get_class_vars(Env env, Value clss)
   {
     // php/1j10
 
-    QuercusClass cl = null;
+    QuercusClass cl;
 
-    try {
-      cl = env.getClass(className);
-    } catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      return NullValue.NULL;
-    }
+    if (clss instanceof ObjectValue)
+      cl = ((ObjectValue) clss).getQuercusClass();
+    else
+      cl = env.findClass(clss.toString());
 
     if (cl == null)
-      return null;
+      return BooleanValue.FALSE;
 
     ArrayValue varArray = new ArrayValueImpl();
 
@@ -146,6 +142,8 @@ public class ClassesModule extends AbstractQuercusModule {
 
       varArray.append(key, value);
     }
+
+    ArrayModule.ksort(env, varArray, ArrayModule.SORT_STRING);
 
     return varArray;
   }
