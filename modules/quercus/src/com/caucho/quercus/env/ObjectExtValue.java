@@ -882,6 +882,7 @@ public class ObjectExtValue extends ObjectValue
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
+    // XXX: push up to super, and use varDumpObject
     out.println("object(" + getName() + ") (" + getSize() + ") {");
 
     for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {

@@ -317,7 +317,10 @@ public class ArrayValueImpl extends ArrayValue
   {
     if (_isDirty)
       copyOnWrite();
-    
+
+    if (key instanceof UnsetValue) // php/4a4h
+      key = createTailKey();
+
     Entry entry = createEntry(key);
 
     // php/0434

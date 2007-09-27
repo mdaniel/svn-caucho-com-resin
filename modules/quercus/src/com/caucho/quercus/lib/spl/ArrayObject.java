@@ -186,6 +186,13 @@ public class ArrayObject
       ArrayModule.uksort(_env, (ArrayValue) _value, func, sortFlag);
   }
 
+  public Value __getField(StringValue key)
+  {
+    if ((_flags & ARRAY_AS_PROPS) != 0)
+      return _value.get(key);
+    else
+      return NullValue.NULL;
+  }
 
   static private void printDepth(WriteStream out, int depth)
     throws java.io.IOException
@@ -202,7 +209,13 @@ public class ArrayObject
   {
 
     if ((_flags & STD_PROP_LIST) != 0) {
-      // XXX: env.getThis().printRObject(env, out, depth, valueSet);
+      // XXX:
+      out.print("ArrayObject");
+      out.print(' ');
+      out.println("Object");
+      printDepth(out, 4 * depth);
+      out.println("(");
+      out.print(")");
     }
     else {
       out.print("ArrayObject");
@@ -229,8 +242,6 @@ public class ArrayObject
 
         value.printR(env, out, depth + 1, valueSet);
 
-        printDepth(out, 4 * depth);
-
         out.println();
       }
 
@@ -248,7 +259,10 @@ public class ArrayObject
     throws IOException
   {
     if ((_flags & STD_PROP_LIST) != 0) {
-      // XXX: env.getThis().varDumpObject(env, out, depth, valueSet);
+      // XXX:
+      out.println("object(ArrayObject) (0) {");
+      out.print("}");
+
     }
     else {
       out.println("object(ArrayObject) (" + _value.getSize() + ") {");

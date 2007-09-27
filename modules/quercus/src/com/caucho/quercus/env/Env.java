@@ -2883,7 +2883,7 @@ public class Env {
   }
 
   /**
-   * Creates a string from a byte.
+   * Creates a php string from a java string.
    */
   public StringValue createString(String s)
   {

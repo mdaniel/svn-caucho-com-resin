@@ -337,7 +337,7 @@ public class JavaClassDef extends ClassDef {
 
     if (__getField != null) {
       try {
-        return __getField.call(env, obj, new UnicodeValueImpl(name));
+        return __getField.call(env, obj, env.createString(name));
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -384,7 +384,7 @@ public class JavaClassDef extends ClassDef {
 
     if (__setField != null) {
       try {
-        return __setField.call(env, obj, new UnicodeValueImpl(name), value);
+        return __setField.call(env, obj, env.createString(name), value);
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;

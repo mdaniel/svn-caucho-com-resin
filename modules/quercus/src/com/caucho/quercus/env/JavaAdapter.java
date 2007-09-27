@@ -705,7 +705,14 @@ abstract public class JavaAdapter extends ArrayValue
   @Override
   public Value getField(Env env, String name, boolean create)
   {
-    return _classDef.getField(env, _object, name, create);
+    Value oldThis = env.setThis(this);
+
+    try {
+      return _classDef.getField(env, _object, name, create);
+    }
+    finally {
+      env.setThis(oldThis);
+    }
   }
 
   @Override
@@ -713,7 +720,14 @@ abstract public class JavaAdapter extends ArrayValue
                         String name,
                         Value value)
   {
-    return _classDef.putField(env, _object, name, value);
+    Value oldThis = env.setThis(this);
+
+    try {
+      return _classDef.putField(env, _object, name, value);
+    }
+    finally {
+      env.setThis(oldThis);
+    }
   }
 
   /**

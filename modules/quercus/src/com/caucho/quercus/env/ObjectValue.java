@@ -30,7 +30,11 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.lib.ArrayModule;
+import com.caucho.vfs.WriteStream;
 
+import java.io.IOException;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -333,5 +337,50 @@ abstract public class ObjectValue extends Value {
     return _quercusClass.remove(Env.getInstance(), this, key);
   }
 
+  public void varDumpObject(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    out.println("object(" + getName() + ") (" + getSize() + ") {");
+
+    ArrayValue sortedEntries = new ArrayValueImpl();
+
+    Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
+
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      sortedEntries.put(entry.getKey(), entry.getValue());
+    }
+
+    ArrayModule.ksort(env, sortedEntries, ArrayModule.SORT_STRING);
+
+    iter = sortedEntries.getIterator(env);
+
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+
+      printDepth(out, 2 * depth);
+      out.println("[\"" + key + "\"]=>");
+
+      depth++;
+
+      printDepth(out, 2 * depth);
+
+      value.varDump(env, out, depth, valueSet);
+
+      out.println();
+      
+      depth--;
+    }
+
+    printDepth(out, 2 * depth);
+
+    out.print("}");
+  }
 }
 
