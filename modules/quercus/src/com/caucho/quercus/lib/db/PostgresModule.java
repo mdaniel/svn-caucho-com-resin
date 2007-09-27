@@ -836,11 +836,6 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      Postgres conn = getConnection(env);
-
-      if (conn == null)
-        return null;
-
       StringBuilderValue bb = new StringBuilderValue();
 
       bb.append(is);
@@ -851,7 +846,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       String s = (String) method.invoke(cl, new Object[] { bb.toBytes()});
 
-      return conn.realEscapeString((StringValue) StringValue.create(s));
+      return Postgres.pgRealEscapeString((StringValue) StringValue.create(s));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2483,7 +2478,7 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   public static Value pg_parameter_status(Env env,
                                           @NotNull Postgres conn,
-                                          String paramName)
+                                          @NotNull String paramName)
   {
     try {
 
@@ -2493,6 +2488,11 @@ public class PostgresModule extends AbstractQuercusModule {
 
       if ((value == null) || value.isNull())
         return BooleanValue.FALSE;
+
+      if ("server_encoding".equals(paramName)) {
+        if (value.equals(env.createString("UNICODE")))
+          value = env.createString("UTF8");
+      }
 
       return value;
 
@@ -2635,9 +2635,18 @@ public class PostgresModule extends AbstractQuercusModule {
    * Execute a query
    */
   @ReturnNullAsFalse
+  public static PostgresResult pg_query(Env env, @NotNull String query)
+  {
+    return pg_query_impl(env, getConnection(env), query, true);
+  }
+
+  /**
+   * Execute a query
+   */
+  @ReturnNullAsFalse
   public static PostgresResult pg_query(Env env,
                                         @NotNull Postgres conn,
-                                        String query)
+                                        @NotNull String query)
   {
     if (conn == null)
       return null;

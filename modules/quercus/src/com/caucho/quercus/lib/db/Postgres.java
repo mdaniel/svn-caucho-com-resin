@@ -32,9 +32,7 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
@@ -221,13 +219,7 @@ public class Postgres extends JdbcConnectionResource {
     return true;
   }
 
-  /**
-   * Escape the given string for SQL statements.
-   *
-   * @param str a string
-   * @return the string escaped for SQL statements
-   */
-  protected StringValue realEscapeString(StringValue str)
+  static public StringValue pgRealEscapeString(StringValue str)
   {
     StringValue buf = str.createStringBuilder(str.length());
 
@@ -237,42 +229,53 @@ public class Postgres extends JdbcConnectionResource {
       char c = str.charAt(i);
 
       switch (c) {
-      case '\u0000':
-        buf.append('\\');
-        buf.append('\u0000');
-        break;
-      case '\n':
-        buf.append('\\');
-        buf.append('n');
-        break;
-      case '\r':
-        buf.append('\\');
-        buf.append('r');
-        break;
-      case '\\':
-        buf.append('\\');
-        buf.append('\\');
-        break;
-      case '\'':
-        buf.append('\'');
-        buf.append('\'');
-        break;
-      case '"':
-        // pg_escape_string does nothing about it.
-        // buf.append('\\');
-        buf.append('\"');
-        break;
-      case '\032':
-        buf.append('\\');
-        buf.append('Z');
-        break;
-      default:
-        buf.append(c);
-        break;
+        case '\u0000':
+          buf.append('\\');
+          buf.append('\u0000');
+          break;
+        case '\n':
+          buf.append('\\');
+          buf.append('n');
+          break;
+        case '\r':
+          buf.append('\\');
+          buf.append('r');
+          break;
+        case '\\':
+          buf.append('\\');
+          buf.append('\\');
+          break;
+        case '\'':
+          buf.append('\'');
+          buf.append('\'');
+          break;
+        case '"':
+          // pg_escape_string does nothing about it.
+          // buf.append('\\');
+          buf.append('\"');
+          break;
+        case '\032':
+          buf.append('\\');
+          buf.append('Z');
+          break;
+        default:
+          buf.append(c);
+          break;
       }
     }
 
     return buf;
+  }
+
+  /**
+   * Escape the given string for SQL statements.
+   *
+   * @param str a string
+   * @return the string escaped for SQL statements
+   */
+  protected StringValue realEscapeString(StringValue str)
+  {
+    return pgRealEscapeString(str);
   }
 
   /**
