@@ -202,20 +202,31 @@ public class FactoryFinder
       if (! factoryClass.isAssignableFrom(cl))
 	throw new FacesException(className + " is not assignable to " + factoryClass.getName());
 	
-      Constructor ctor = null;
+      Constructor ctor0 = null;
+      Constructor ctor1 = null;
 
       try {
-	ctor = cl.getConstructor(new Class[] { factoryClass });
+	ctor0 = cl.getConstructor(new Class[] { });
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+
+      try {
+	ctor1 = cl.getConstructor(new Class[] { factoryClass });
       } catch (Exception e) {
 	log.log(Level.FINEST, e.toString(), e);
       }
 
       Object obj;
 
-      if (ctor != null && previous != null)
-	obj = ctor.newInstance(previous);
-      else
+      if (ctor1 == null)
 	obj = cl.newInstance();
+      else if (previous != null)
+	obj = ctor1.newInstance(previous);
+      else if (ctor0 != null)
+	obj = cl.newInstance();
+      else
+	obj = ctor1.newInstance(new Object[1]);
 
       return obj;
     } catch (ClassNotFoundException e) {

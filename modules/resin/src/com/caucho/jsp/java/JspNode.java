@@ -1161,7 +1161,7 @@ public abstract class JspNode {
       else if (type.equals(MethodExpression.class)) {
         int exprIndex;
 
-	String sig = attrInfo != null ? attrInfo.getMethodSignature() : "";
+	String sig = attrInfo != null ? attrInfo.getMethodSignature() : "java.lang.String misc()";
 
         if (isEmpty)
           exprIndex = _gen.addMethodExpr("", sig);

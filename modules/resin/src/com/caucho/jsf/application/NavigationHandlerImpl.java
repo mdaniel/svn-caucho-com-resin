@@ -32,11 +32,15 @@ import javax.faces.application.*;
 import javax.faces.context.*;
 
 import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.jsf.cfg.*;
 
 public class NavigationHandlerImpl extends NavigationHandler
 {
+  private static final Logger log
+    = Logger.getLogger(NavigationHandlerImpl.class.getName());
+  
   private ArrayList<NavigationRule> _ruleList
     = new ArrayList<NavigationRule>();
   
@@ -52,8 +56,12 @@ public class NavigationHandlerImpl extends NavigationHandler
 			       String fromAction,
 			       String outcome)
   {
-    if (outcome == null)
+    if (outcome == null) {
+      if (log.isLoggable(Level.FINE))
+	log.fine("Jsf[" + context.getViewRoot().getViewId() + "] action " + fromAction + " has no outcome");
+      
       return;
+    }
     
     NavigationRule []ruleList;
 
@@ -72,6 +80,10 @@ public class NavigationHandlerImpl extends NavigationHandler
     for (int i = 0; i < ruleList.length; i++) {
       if (ruleList[i].handleNavigation(context, fromAction, outcome))
 	return;
+    }
+    
+    if (log.isLoggable(Level.FINE)) {
+      log.fine("Jsf[" + context.getViewRoot().getViewId() + "] action:" + fromAction + " outcome:" + outcome + " has no matching navigation rule");
     }
   }
 

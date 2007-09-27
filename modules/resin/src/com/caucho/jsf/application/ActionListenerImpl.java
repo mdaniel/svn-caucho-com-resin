@@ -30,6 +30,8 @@ package com.caucho.jsf.application;
 
 import javax.el.*;
 
+import java.util.logging.*;
+
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
@@ -38,6 +40,9 @@ import javax.faces.event.*;
 
 public class ActionListenerImpl implements ActionListener
 {
+  private static final Logger log
+    = Logger.getLogger(ActionListenerImpl.class.getName());
+  
   private static final Object[] NULL_ARG = new Object[0];
   
   public void processAction(ActionEvent event)
@@ -95,6 +100,10 @@ public class ActionListenerImpl implements ActionListener
 
     if (handler != null)
       handler.handleNavigation(context, fromAction, logicalOutcome);
+    else {
+      if (log.isLoggable(Level.FINE))
+	log.fine("Jsf[" + context.getViewRoot().getViewId() + "] has no navigationHandler for " + app);
+    }
   }
 
   public String toString()

@@ -1031,8 +1031,10 @@ public abstract class UIComponentBase extends UIComponent
     }
     else if (attachedObject instanceof StateHolder)
       return new StateHandle(context, attachedObject);
-    else
+    else if (attachedObject instanceof Serializable)
       return attachedObject;
+    else
+      return new StateHandle(context, attachedObject);
   }
 
   public static Object restoreAttachedState(FacesContext context,

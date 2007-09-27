@@ -170,7 +170,7 @@ public class UICommand extends UIComponentBase
       MethodBinding binding = getActionListener();
       
       if (binding != null)
-	binding.invoke(context, new Object[] { event });
+	binding.invoke(context, new Object[] { });
 
       ActionListener listener = context.getApplication().getActionListener();
 

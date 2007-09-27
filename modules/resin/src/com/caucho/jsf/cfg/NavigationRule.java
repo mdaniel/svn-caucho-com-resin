@@ -31,6 +31,7 @@ package com.caucho.jsf.cfg;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.*;
+import java.util.logging.*;
 
 import javax.el.*;
 
@@ -51,6 +52,9 @@ import com.caucho.util.*;
 
 public class NavigationRule implements Comparable<NavigationRule>
 {
+  private static final Logger log
+    = Logger.getLogger(NavigationRule.class.getName());
+  
   private String _id;
   
   private String _fromViewId;
@@ -134,6 +138,9 @@ public class NavigationRule implements Comparable<NavigationRule>
     NavigationCase navCase = findCase(action, outcome);
 
     if (navCase != null) {
+      if (log.isLoggable(Level.FINE))
+	log.fine("Jsf[" + context.getViewRoot().getViewId() + "] navigation action:" + action + " outcome:" + outcome + " matches " + navCase);
+	
       navCase.handleNavigation(context);
       return true;
     }
@@ -252,6 +259,14 @@ public class NavigationRule implements Comparable<NavigationRule>
 
 	context.setViewRoot(viewRoot);
       }
+    }
+
+    public String toString()
+    {
+      if (_isRedirect)
+	return "NavCase[redirect," + _toViewId + "]";
+      else
+	return "NavCase[" + _toViewId + "]";
     }
   }
 
