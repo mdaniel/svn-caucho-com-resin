@@ -558,6 +558,33 @@ public final class ByteBuffer {
     }
   }
 
+  public int indexOf(byte []buffer, int offset, int length)
+  {
+    if (length <= 0)
+      return -1;
+    
+    int end = _length - length;
+    int first = buffer[offset];
+
+    byte []testBuffer = _buffer;
+
+    for (int i = 0; i <= end; i++) {
+      if (testBuffer[i] != first)
+	continue;
+
+      int j = length - 1;
+      for (; j > 0; j--) {
+	if (testBuffer[i + j] != buffer[offset + j])
+	  break;
+      }
+
+      if (j == 0)
+	return i;
+    }
+
+    return -1;
+  }
+
   /**
    * Clones the buffer
    */

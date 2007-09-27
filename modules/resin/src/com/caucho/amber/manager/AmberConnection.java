@@ -168,6 +168,14 @@ public class AmberConnection
   }
 
   /**
+   * Returns true for JPA.
+   */
+  public boolean isJPA()
+  {
+    return _persistenceUnit.isJPA();
+  }
+
+  /**
    * Set true for a threaded connection.
    */
   public void initThreadConnection()
@@ -1268,6 +1276,34 @@ public class AmberConnection
 
       return null;
     }
+  }
+
+  /**
+   * Loads the CMP 2.1 object for the given entityItem
+   */
+  public Object loadProxy(EntityItem entityItem)
+  {
+    Entity itemEntity = entityItem.getEntity();
+
+    /*
+    Class cl = itemEntity.getClass();
+    Object pk = itemEntity.__caucho_getPrimaryKey();
+
+    Entity entity = getEntity(cl.getName(), pk);
+
+    if (entity != null) {
+      // jpa/0m30
+      return entity;
+    }
+    */
+    
+    AmberEntityHome home = entityItem.getEntityHome();
+
+    EntityFactory factory = home.getEntityFactory();
+
+    Object newEntity = factory.getEntity(this, entityItem);
+
+    return newEntity;
   }
 
   /**

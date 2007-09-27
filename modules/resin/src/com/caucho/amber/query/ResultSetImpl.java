@@ -1088,7 +1088,10 @@ public class ResultSetImpl implements ResultSet {
       if (obj instanceof EntityItem) {
         EntityItem entityItem = (EntityItem) obj;
 
-        return _session.getEntity(entityItem);
+	if (_session.isJPA())
+	  return _session.getEntity(entityItem);
+	else
+	  return _session.loadProxy(entityItem);
         
         /*
         Entity entity = entityItem.getEntity();
@@ -1164,6 +1167,9 @@ public class ResultSetImpl implements ResultSet {
 
       // XXX: should already be handled
       // _session.addEntity(entity);
+
+      if (! _session.isJPA())
+	return _session.loadProxy(entity.__caucho_getCacheItem());
     }
 
     return value;

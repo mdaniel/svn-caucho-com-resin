@@ -171,7 +171,7 @@ public class XmlParser extends AbstractParser {
     _extPublicId = null;
     _extSystemId = null;
 
-    _filename = null;
+    // _filename = null;
     _publicId = null;
     _systemId = null;
     
@@ -2974,6 +2974,7 @@ public class XmlParser extends AbstractParser {
 
   public void free()
   {
+    _filename = null;
   }
 
   /**

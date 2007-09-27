@@ -373,12 +373,16 @@ public class Config {
 
     builder.init(doc);
     String systemId = null;
+    String filename = null;
     if (is instanceof ReadStream) {
-      systemId = ((ReadStream) is).getPath().getUserPath();
+      systemId = ((ReadStream) is).getPath().getURL();
+      filename = ((ReadStream) is).getPath().getUserPath();
     }
 
     doc.setSystemId(systemId);
     builder.setSystemId(systemId);
+    doc.setRootFilename(filename);
+    builder.setFilename(filename);
     builder.setSkipWhitespace(true);
 
     InputSource in = new InputSource();
@@ -388,6 +392,7 @@ public class Config {
     Xml xml = new Xml();
     xml.setOwner(doc);
     xml.setResinInclude(_allowResinInclude);
+    xml.setFilename(filename);
 
     if (schema != null) {
       Verifier verifier = schema.newVerifier();

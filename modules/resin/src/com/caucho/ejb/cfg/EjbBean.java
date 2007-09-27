@@ -102,6 +102,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private String _mappedName;
 
   private String _location = "";
+  private boolean _isInit; // used for error messsage line #
 
   // these classes are loaded with the parent (configuration) loader, not
   // the server loader
@@ -918,6 +919,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     throws ConfigException
   {
     try {
+      _isInit = true;
+      
       initIntrospect();
 
       assembleBeanMethods();
@@ -2390,7 +2393,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    */
   public ConfigException error(String msg)
   {
-    if (! "".equals(_location))
+    if (_isInit && ! "".equals(_location))
       return new LineConfigException(_location + msg);
     else
       return new ConfigException(msg);
