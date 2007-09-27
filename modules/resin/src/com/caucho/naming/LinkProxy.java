@@ -185,7 +185,7 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
     if (_foreignName != null) {
       String foreignName;
 
-      if (_factory != null)
+      if (_factoryClass != null)
 	foreignName = _foreignName;
       else
 	foreignName = Jndi.getFullName(_foreignName);

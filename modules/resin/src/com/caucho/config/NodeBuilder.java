@@ -1026,8 +1026,6 @@ public class NodeBuilder {
 
   private static String getSourceLines(String systemId, int errorLine)
   {
-    System.out.println("GSL: " + systemId + " " + errorLine);
-    
     if (systemId == null)
       return "";
     

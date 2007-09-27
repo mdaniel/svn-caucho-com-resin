@@ -34,10 +34,15 @@ import com.caucho.amber.entity.Embeddable;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.field.*;
+import com.caucho.amber.gen.*;
+import com.caucho.java.*;
 import com.caucho.util.L10N;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.io.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**

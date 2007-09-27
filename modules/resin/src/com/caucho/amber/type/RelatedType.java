@@ -763,7 +763,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       for (ListenerType listenerType : getListeners()) {
         String listenerClass = listenerType.getBeanClass().getName();
 
@@ -807,7 +807,7 @@ abstract public class RelatedType extends AbstractStatefulType {
 
   private Method getListenerMethod(Class cl, String methodName)
   {
-    if (cl == null)
+    if (cl == null || cl.equals(Object.class))
       return null;
 
     Method []methods = cl.getDeclaredMethods();
@@ -817,12 +817,12 @@ abstract public class RelatedType extends AbstractStatefulType {
       
       if (methods[i].getName().equals(methodName)
           && paramTypes.length == 1
-          && paramTypes[0].equals(Object.class)) {
+          && getBeanClass().isAssignableTo(paramTypes[0])) {
         return methods[i];
       }
     }
 
-    return null;
+    return getListenerMethod(cl.getSuperclass(), methodName);
   }
 
   /**

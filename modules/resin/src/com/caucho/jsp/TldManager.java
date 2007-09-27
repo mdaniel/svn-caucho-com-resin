@@ -406,8 +406,8 @@ public class TldManager {
 	ZipEntry entry = en.nextElement();
 	String name = entry.getName();
 
-	if (name.startsWith(prefix) &&
-	    (name.endsWith(".tld") || name.endsWith(".ftld"))) {
+	if (name.startsWith(prefix)
+	    && (name.endsWith(".tld") || name.endsWith(".ftld"))) {
 	  Path path = jar.lookup(name);
 
 	  try {

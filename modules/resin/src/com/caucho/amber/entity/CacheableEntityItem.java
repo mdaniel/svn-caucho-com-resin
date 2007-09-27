@@ -48,6 +48,9 @@ public class CacheableEntityItem extends EntityItem {
     _home = home;
     _cacheEntity = cacheEntity;
 
+    // jpa/0w00
+    cacheEntity.__caucho_setConnection(null);
+
     if (cacheEntity.__caucho_getLoadMask(0) != 0)
       _expireTime = Alarm.getCurrentTime() + _home.getCacheTimeout();
   }
@@ -100,7 +103,7 @@ public class CacheableEntityItem extends EntityItem {
     AmberConnection aConn = _home.getManager().getCacheConnection();
 
     try {
-      _cacheEntity.__caucho_setConnection(aConn);
+      // _cacheEntity.__caucho_setConnection(aConn);
       _cacheEntity.__caucho_retrieve_self(aConn);
     } finally {
       aConn.freeConnection();
@@ -129,7 +132,8 @@ public class CacheableEntityItem extends EntityItem {
       // Prepared statements are cached per context so
       // at this point, the cache item needs to use the
       // context connection.
-      _cacheEntity.__caucho_setConnection(aConn);
+      
+      // _cacheEntity.__caucho_setConnection(aConn);
       _cacheEntity.__caucho_retrieve_self(aConn);
     } finally {
       // After loading the entity, all prepared statements

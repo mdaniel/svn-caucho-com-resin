@@ -425,8 +425,9 @@ public class EntityManyToOneField extends CascadableField {
   public void generatePostConstructor(JavaWriter out)
     throws IOException
   {
-    if (_aliasField == null)
+    if (_aliasField == null) {
       out.println(getSetterName() + "(" + generateSuperGetter() + ");");
+    }
   }
 
   /**
@@ -603,7 +604,7 @@ public class EntityManyToOneField extends CascadableField {
   }
 
   /**
-   * Generates the set property.
+   * Generates the get property.
    */
   public void generateGetProperty(JavaWriter out)
     throws IOException
@@ -775,9 +776,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println(varName + " = (" + targetTypeExt + ") "
                 + session + ".loadEntity("
                 + targetTypeExt + ".class, "
-                + otherKey + ", true);");
-
-    generateSetTargetLoadMask(out, varName);
+                + otherKey + ", false);");
 
     // jpa/0j67
     out.println("if (" + varName + " != null && " + varName + " != " + generateSuperGetter() + ") {");
@@ -787,6 +786,8 @@ public class EntityManyToOneField extends CascadableField {
     if (isJPA)
       out.println(generateSuperSetter(varName) + ";");
 
+    generateSetTargetLoadMask(out, varName);
+    
     out.println(varName + ".__caucho_retrieve_eager(" + session + ");");
 
     out.popDepth();

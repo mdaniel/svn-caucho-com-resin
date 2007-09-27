@@ -275,8 +275,13 @@ public class AmberEntityHome {
     throws SQLException
   {
     // jpa/0l43
-    Entity entity = aConn.getSubEntity(_homeBean.getClass(),
-                                       rs.getObject(index));
+    Entity entity;
+
+    if (_homeBean == null)
+      throw new NullPointerException("HOME:" + this);
+
+    entity = aConn.getSubEntity(_homeBean.getClass(),
+				rs.getObject(index));
 
     if (entity != null) {
       if (entity.__caucho_getEntityState().isManaged())
@@ -747,5 +752,10 @@ public class AmberEntityHome {
   public void addUpdate(CacheUpdate update)
   {
     _cacheUpdates.add(new SoftReference<CacheUpdate>(update));
+  }
+
+  public String toString()
+  {
+    return "AmberEntityHome[" + _entityType + "]";
   }
 }

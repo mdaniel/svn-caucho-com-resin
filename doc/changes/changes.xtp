@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>jar caching method was slower than previous method (rep by Sean Patronis)</li>
 <li>jsf: handle NPE thrown by facelets ELContext in EL evaluation (#2013, rep by Matt Raible)</li>
 <li>jsf: older faces-config.xml used xmlns="http://java.sun.com/JSF/Configuration" (#2010, rep by Matt Raible)</li>
 <li>(2007-09-20) quercus: file parsed data with unicode.semantics='0' need to be php5 strings, not php6 binary strings (#1938, #1975, rep by chillout, kim)</li>

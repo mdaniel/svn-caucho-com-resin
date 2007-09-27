@@ -448,7 +448,8 @@ public class EntityEmbeddedField extends AbstractField {
       out.println("if (" + generateGet(obj) + " == null) {");
       out.pushDepth();
 
-      embeddableType.generateSetNull(out, pstmt, "index++");
+      // embeddableType.generateSetNull(out, pstmt, "index++");
+      column.generateSet(out, pstmt, index, null);
 
       out.popDepth();
       out.println("} else");

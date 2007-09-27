@@ -1134,6 +1134,9 @@ public class ResultSetImpl implements ResultSet {
 
       AmberExpr expr = _resultList.get(column - 1);
 
+      if (_session == null)
+	throw new NullPointerException();
+
       value = expr.getObject(_session, _rs, index);
 
       /*

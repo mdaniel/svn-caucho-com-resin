@@ -796,6 +796,9 @@ public class AmberConnection
                      boolean isEager)
     throws AmberException
   {
+    if (_persistenceUnit == null)
+      throw new IllegalStateException(L.l("AmberConnection is closed"));
+    
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, L.l("loading entity class " + cl.getName() + " PK: " + key));
 
@@ -817,7 +820,11 @@ public class AmberConnection
 
       return entity;
     }
+    
+    _entityKey.init(cl, key);
 
+    boolean isXALoaded = false;
+    
     EntityItem cacheItem = loadCacheItem(cl, key, null);
 
     if (cacheItem == null)
@@ -825,11 +832,15 @@ public class AmberConnection
 
     AmberEntityHome entityHome = cacheItem.getEntityHome();
 
+    /*
     boolean isLoad = true;
 
     // jpa/0h13 as a negative test.
     if (isActiveTransaction())
       isLoad = isEager;
+    */
+    // jpa/0o03
+    boolean isLoad = isEager;
 
     try {
       entity = cacheItem.createEntity(this, key);
@@ -837,8 +848,10 @@ public class AmberConnection
       if (entity == null)
         return null;
 
-      // The entity is added for eagerly loading optimization.
+      // The entity is added for eager loading
       addInternalEntity(entity);
+
+      boolean isXA = isActiveTransaction();
 
       // jpa/0l48: inheritance loading optimization.
       // jpa/0h20: no transaction, copy from the existing cache item.
@@ -847,7 +860,7 @@ public class AmberConnection
       if (isLoad) {
         entity.__caucho_retrieve_eager(this);
       }
-      else if (isActiveTransaction()) {
+      else if (isXA) {
         // jpa/0v33: within a transaction, cannot copy from cache.
         entity.__caucho_retrieve_self(this);
       }
@@ -897,7 +910,7 @@ public class AmberConnection
       entityHome = _persistenceUnit.getEntityHome(cl.getName());
 
     if (entityHome == null) {
-      throw new IllegalArgumentException(L.l("'{0}' is an unknown class in persistence-unit '{1}'.  find() operation can only be applied if the entity classv is specified in the scope of a persistence unit.",
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown class in persistence-unit '{1}'.  find() operation can only be applied if the entity class is specified in the scope of a persistence unit.",
                                              cl.getName(),
                                              _persistenceUnit.getName()));
     }
