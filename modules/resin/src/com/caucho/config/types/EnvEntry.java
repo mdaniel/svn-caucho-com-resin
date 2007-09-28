@@ -144,8 +144,9 @@ public class EnvEntry implements Validator {
   /**
    * Gets the env-entry-value
    */
-  @PostConstruct
-    public void init()
+  // XXX: ejb/0fd0 vs ejb/0g03
+  // PostConstruct called from com.caucho.ejb.cfg.EjbSessionBean.
+  public void init()
     throws Exception
   {
     if (_name == null)

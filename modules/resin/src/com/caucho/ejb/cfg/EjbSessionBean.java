@@ -39,6 +39,7 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.j2ee.EjbInjectProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.j2ee.JndiBindProgram;
+import com.caucho.config.types.EnvEntry;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.gen.BeanAssembler;
@@ -431,6 +432,10 @@ public class EjbSessionBean extends EjbBean {
       try {
         if (getServerProgram() != null)
           getServerProgram().configure(server);
+
+        // ejb/0fd0, ejb/0g03
+        for (EnvEntry envEntry : getEnvEntries())
+          envEntry.init();
       } catch (ConfigException e) {
         throw e;
       } catch (RuntimeException e) {
