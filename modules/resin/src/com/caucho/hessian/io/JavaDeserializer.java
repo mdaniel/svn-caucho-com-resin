@@ -377,9 +377,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      Object value = in.readObject(_field.getType());
-	
+      Object value = null;
+      
       try {
+	value = in.readObject(_field.getType());
+	
 	_field.set(obj, value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -398,9 +400,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      boolean value = in.readBoolean();
-	
+      boolean value = false;
+      
       try {
+	value = in.readBoolean();
+	
 	_field.setBoolean(obj, value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -419,9 +423,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      int value = in.readInt();
-	
+      int value = 0;
+      
       try {
+	value = in.readInt();
+	
 	_field.setByte(obj, (byte) value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -440,9 +446,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      int value = in.readInt();
-	
+      int value = 0;
+      
       try {
+	value = in.readInt();
+	
 	_field.setShort(obj, (short) value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -461,9 +469,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      int value = in.readInt();
-	
+      int value = 0;
+      
       try {
+	value = in.readInt();
+	
 	_field.setInt(obj, value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -482,9 +492,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      long value = in.readLong();
-	
+      long value = 0;
+      
       try {
+	value = in.readLong();
+	
 	_field.setLong(obj, value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -503,9 +515,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      double value = in.readDouble();
-	
+      double value = 0;
+      
       try {
+	value = in.readDouble();
+	
 	_field.setFloat(obj, (float) value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -524,9 +538,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      double value = in.readDouble();
-	
+      double value = 0;
+      
       try {
+	value = in.readDouble();
+	
 	_field.setDouble(obj, value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -545,9 +561,11 @@ public class JavaDeserializer extends AbstractMapDeserializer {
     void deserialize(AbstractHessianInput in, Object obj)
       throws IOException
     {
-      String value = in.readString();
-	
+      String value = null;
+      
       try {
+	value = in.readString();
+	
 	_field.set(obj, value);
       } catch (Exception e) {
         logDeserializeError(_field, obj, value, e);
@@ -557,10 +575,20 @@ public class JavaDeserializer extends AbstractMapDeserializer {
 
   static void logDeserializeError(Field field, Object obj, Object value,
                                   Throwable e)
+    throws IOException
   {
     String fieldName = (field.getDeclaringClass().getName()
                         + "." + field.getName());
+
+    if (e instanceof HessianFieldException)
+      throw (HessianFieldException) e;
+    else if (e instanceof IOException)
+      throw new HessianFieldException(fieldName + ": " + e.getMessage(), e);
     
-    log.log(Level.WARNING, field + ": deserialize(" + obj + ", " + value + ")\n" + e.toString(), e);
+    if (value != null)
+      throw new HessianFieldException(fieldName + ": " + value.getClass().getName() + " (" + value + ")"
+					 + " cannot be assigned to " + field.getType().getName());
+    else
+       throw new HessianFieldException(fieldName + ": " + field.getType().getName() + " cannot be assigned from null", e);
   }
 }

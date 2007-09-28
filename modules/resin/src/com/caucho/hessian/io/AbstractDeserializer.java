@@ -62,7 +62,14 @@ abstract public class AbstractDeserializer implements Deserializer {
   public Object readObject(AbstractHessianInput in)
     throws IOException
   {
-    throw new UnsupportedOperationException(String.valueOf(this));
+    Object obj = in.readObject();
+
+    String className = getClass().getName();
+
+    if (obj != null)
+      throw error(className + ": unexpected object " + obj.getClass().getName() + " (" + obj + ")");
+    else
+      throw error(className + ": unexpected null value");
   }
   
   public Object readList(AbstractHessianInput in, int length)
@@ -80,7 +87,14 @@ abstract public class AbstractDeserializer implements Deserializer {
   public Object readMap(AbstractHessianInput in)
     throws IOException
   {
-    throw new UnsupportedOperationException(String.valueOf(this));
+    Object obj = in.readObject();
+
+    String className = getClass().getName();
+
+    if (obj != null)
+      throw error(className + ": unexpected object " + obj.getClass().getName() + " (" + obj + ")");
+    else
+      throw error(className + ": unexpected null value");
   }
   
   public Object readObject(AbstractHessianInput in, String []fieldNames)

@@ -64,24 +64,11 @@ public class AbstractMapDeserializer extends AbstractDeserializer {
   public Object readObject(AbstractHessianInput in)
     throws IOException
   {
-    int code = in.readMapStart();
+    Object obj = in.readObject();
 
-    switch (code) {
-    case 'N':
-      return null;
-    case 'R':
-      return in.readRef();
-    case 'r':
-      return in.readRemote();
-    case 'M':
-      break;
-    default:
-      throw error(getClass().getName() + ".readObject() expected map at "
-		  + codeName(code));
-    }
-
-    String type = in.readType();
-
-    return readMap(in);
+    if (obj != null)
+      throw error("expected map/object at " + obj.getClass().getName() + " (" + obj + ")");
+    else
+      throw error("expected map/object at null");
   }
 }

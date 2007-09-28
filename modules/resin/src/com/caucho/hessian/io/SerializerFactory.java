@@ -374,6 +374,23 @@ public class SerializerFactory extends AbstractSerializerFactory
   /**
    * Reads the object as a map.
    */
+  public Deserializer getObjectDeserializer(String type, Class cl)
+    throws HessianProtocolException
+  {
+    Deserializer reader = getObjectDeserializer(type);
+    
+    if (cl == reader.getType() || cl.isAssignableFrom(reader.getType()))
+      return reader;
+
+    if (log.isLoggable(Level.FINE))
+      log.fine("hessian: expected '" + cl.getName() + "' at '" + type + "'");
+    
+    return getDeserializer(cl);
+  }
+  
+  /**
+   * Reads the object as a map.
+   */
   public Deserializer getObjectDeserializer(String type)
     throws HessianProtocolException
   {

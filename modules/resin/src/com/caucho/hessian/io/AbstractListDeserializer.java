@@ -57,16 +57,11 @@ public class AbstractListDeserializer extends AbstractDeserializer {
   public Object readObject(AbstractHessianInput in)
     throws IOException
   {
-    int code = in.readListStart();
-    
-    if (code == 'N')
-      return null;
-    else if (code == 'R')
-      return in.readRef();
+    Object obj = in.readObject();
 
-    String type = in.readType();
-    int length = in.readLength();
-
-    return readList(in, length);
+    if (obj != null)
+      throw error("expected list at " + obj.getClass().getName() + " (" + obj + ")");
+    else
+      throw error("expected list at null");
   }
 }

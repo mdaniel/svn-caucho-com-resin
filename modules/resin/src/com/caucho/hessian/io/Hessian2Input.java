@@ -56,6 +56,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.*;
 
 /**
  * Input stream for Hessian requests.
@@ -77,6 +78,9 @@ public class Hessian2Input
   extends AbstractHessianInput
   implements Hessian2Constants
 {
+  private static final Logger log
+    = Logger.getLogger(Hessian2Input.class.getName());
+  
   private static final double D_256 = 1.0 / 256.0;
   private static final int END_OF_DATA = -2;
 
@@ -804,7 +808,7 @@ public class Hessian2Input
       return (int) parseDouble();
       
     default:
-      throw error("readInt() expected integer at " + codeName(tag));
+      throw expect("integer", tag);
     }
   }
 
@@ -1061,7 +1065,7 @@ public class Hessian2Input
     int tag = read();
 
     if (tag != 'd')
-      throw error("expected date");
+      throw expect("date", tag);
 
     long b64 = read();
     long b56 = read();
@@ -1072,14 +1076,14 @@ public class Hessian2Input
     long b16 = read();
     long b8 = read();
 
-    return ((b64 << 56) +
-            (b56 << 48) +
-            (b48 << 40) +
-            (b40 << 32) +
-            (b32 << 24) +
-            (b24 << 16) +
-            (b16 << 8) +
-            b8);
+    return ((b64 << 56)
+	    + (b56 << 48)
+	    + (b48 << 40)
+	    + (b40 << 32)
+	    + (b32 << 24)
+	    + (b24 << 16)
+	    + (b16 << 8)
+	    + b8);
   }
 
   /**
@@ -1125,7 +1129,7 @@ public class Hessian2Input
       return value;
       
     default:
-      throw new IOException("expected 'S' at " + (char) tag);
+      throw expect("char", tag);
     }
   }
 
@@ -1170,7 +1174,7 @@ public class Hessian2Input
 	break;
 
       default:
-        throw new IOException("expected 'S' at " + (char) tag);
+        throw expect("string", tag);
       }
     }
 
@@ -1202,7 +1206,7 @@ public class Hessian2Input
           break;
       
         default:
-          throw new IOException("expected 'S' at " + (char) tag);
+          throw expect("string", tag);
         }
       }
     }
@@ -1389,7 +1393,7 @@ public class Hessian2Input
       _isLastChunk = tag == 'S' || tag == 'X';
       _chunkLength = (read() << 8) + read();
 
-      throw error("can't cope");
+      throw error("XML is not supported");
 
     case 0x00: case 0x01: case 0x02: case 0x03:
     case 0x04: case 0x05: case 0x06: case 0x07:
@@ -1403,7 +1407,7 @@ public class Hessian2Input
       _isLastChunk = true;
       _chunkLength = tag - 0x00;
 
-      throw error("can't cope");
+      throw error("XML is not supported");
 
     default:
       throw expect("string", tag);
@@ -1497,7 +1501,7 @@ public class Hessian2Input
       return value;
       
     default:
-      throw new IOException("expected 'B' at " + (char) tag);
+      throw expect("binary", tag);
     }
   }
 
@@ -1527,7 +1531,7 @@ public class Hessian2Input
         break;
       
       default:
-        throw new IOException("expected 'B' at " + (char) tag);
+        throw expect("binary", tag);
       }
     }
 
@@ -1557,7 +1561,7 @@ public class Hessian2Input
           break;
       
         default:
-          throw new IOException("expected 'B' at " + (char) tag);
+          throw expect("binary", tag);
         }
       }
     }
@@ -1625,7 +1629,7 @@ public class Hessian2Input
       }
       else {
 	Deserializer reader;
-	reader = findSerializerFactory().getObjectDeserializer(type);
+	reader = findSerializerFactory().getObjectDeserializer(type, cl);
 
 	return reader.readMap(this);
       }
@@ -1657,12 +1661,7 @@ public class Hessian2Input
       int length = readLength();
       
       Deserializer reader;
-      reader = findSerializerFactory().getObjectDeserializer(type);
-      
-      if (cl != reader.getType() && cl.isAssignableFrom(reader.getType()))
-        return reader.readList(this, length);
-
-      reader = findSerializerFactory().getDeserializer(cl);
+      reader = findSerializerFactory().getObjectDeserializer(type, cl);
 
       Object v = reader.readList(this, length);
 
@@ -1676,12 +1675,7 @@ public class Hessian2Input
       int length = readInt();
       
       Deserializer reader;
-      reader = findSerializerFactory().getObjectDeserializer(type);
-      
-      if (cl != reader.getType() && cl.isAssignableFrom(reader.getType()))
-        return reader.readLengthList(this, length);
-
-      reader = findSerializerFactory().getDeserializer(cl);
+      reader = findSerializerFactory().getObjectDeserializer(type, cl);
 
       Object v = reader.readLengthList(this, length);
 
@@ -1924,7 +1918,7 @@ public class Hessian2Input
       int length = readInt();
       
       Deserializer reader;
-      reader = findSerializerFactory().getObjectDeserializer(type);
+      reader = findSerializerFactory().getObjectDeserializer(type, null);
       
       return reader.readLengthList(this, length);
     }
@@ -2012,12 +2006,7 @@ public class Hessian2Input
     
     if (cl != null) {
       Deserializer reader;
-      reader = findSerializerFactory().getObjectDeserializer(type);
-
-      if (cl != reader.getType() && cl.isAssignableFrom(reader.getType()))
-	return reader.readObject(this, fieldNames);
-
-      reader = findSerializerFactory().getDeserializer(cl);
+      reader = findSerializerFactory().getObjectDeserializer(type, cl);
 
       return reader.readObject(this, fieldNames);
     }
@@ -2616,11 +2605,31 @@ public class Hessian2Input
   }
 
   protected IOException expect(String expect, int ch)
+    throws IOException
   {
     if (ch < 0)
       return error("expected " + expect + " at end of file");
-    else
-      return error("expected " + expect + " at 0x" + Integer.toHexString(ch & 0xff) + " (" + (char) + ch + ")");
+    else {
+      _offset--;
+
+      try {
+	Object obj = readObject();
+
+	if (obj != null) {
+	  return error("expected " + expect
+		       + " at 0x" + Integer.toHexString(ch & 0xff)
+		       + " " + obj.getClass().getName() + " (" + obj + ")");
+	}
+	else
+	  return error("expected " + expect
+		       + " at 0x" + Integer.toHexString(ch & 0xff) + " null");
+      } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+	
+	return error("expected " + expect
+		     + " at 0x" + Integer.toHexString(ch & 0xff));
+      }
+    }
   }
 
   protected String codeName(int ch)
