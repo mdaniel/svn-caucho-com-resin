@@ -491,7 +491,6 @@ public class QuercusSessionManager {
         return;
 
       long now = Alarm.getCurrentTime();
-      long accessWindow = 0;
 
       synchronized (_sessions) {
         _sessionIter = _sessions.values(_sessionIter);
@@ -499,7 +498,7 @@ public class QuercusSessionManager {
         while (_sessionIter.hasNext()) {
           SessionArrayValue session = _sessionIter.next();
 
-          long maxIdleTime = session.getMaxInactiveInterval() + accessWindow;
+          long maxIdleTime = session.getMaxInactiveInterval();
 
           if (session.inUse())
             liveSessions++;

@@ -438,7 +438,7 @@ abstract public class JavaInvoker
       return Integer.MAX_VALUE;
     }
 
-    int cost = 0;    
+    int cost = 0;
     int i = 0;
     
     for (; i < _marshalArgs.length; i++) {
@@ -447,7 +447,9 @@ abstract public class JavaInvoker
       if (i < args.length && args[i] != null) {
         Value arg = args[i];
 
-        cost = Math.max(marshal.getMarshalingCost(arg) + cost, cost);
+        int argCost = marshal.getMarshalingCost(arg);
+
+        cost = Math.max(argCost + cost, cost);
       }
     }
 

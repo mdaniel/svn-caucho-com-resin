@@ -46,11 +46,12 @@ public class JavaByteArrayMarshal extends JavaArrayMarshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    // php/0id7, php/0jd7
     // php/0cia
-    if (argValue.isBinary())
-      return Marshal.EQUIVALENT;
-    else if (argValue.isString() && !argValue.isUnicode())
-      return Marshal.EQUIVALENT; // php/0id6, php/0jd6
+    if (argValue.isUnicode())
+      return Marshal.EQUIVALENT - 2;
+    else if (argValue.isString())
+      return Marshal.EQUIVALENT - 4;
     else if (argValue.isString())
       return Marshal.SIMILAR;
     else if (argValue.isArray())
