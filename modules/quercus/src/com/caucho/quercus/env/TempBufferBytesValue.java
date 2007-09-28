@@ -51,7 +51,6 @@ public class TempBufferBytesValue
   public TempBufferBytesValue(TempBuffer buffer)
   {
     _head = buffer;
-    Thread.dumpStack();
   }
   
   /*

@@ -144,6 +144,19 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   }
 
   /**
+   * Reads a buffer from a file, returning -1 on EOF.
+   */
+  public int read(char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (_is != null) {
+      return _is.read(buffer, offset, length);
+    }
+    else
+      return -1;
+  }
+
+  /**
    * Reads into a binary builder.
    */
   public StringValue read(int length)
@@ -283,7 +296,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   private LineReader getLineReader()
   {
     if (_lineReader == null)
-      _lineReader = new LineReader();
+      _lineReader = new LineReader(_env);
 
     return _lineReader;
   }

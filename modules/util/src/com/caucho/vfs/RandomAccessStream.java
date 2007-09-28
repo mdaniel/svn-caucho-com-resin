@@ -50,6 +50,12 @@ abstract public class RandomAccessStream {
     throws IOException;
 
   /**
+   * Reads a block starting from the current file pointer.
+   */
+  abstract public int read(char []buffer, int offset, int length)
+    throws IOException;
+
+  /**
    * Reads a block from a given location.
    */
   abstract public int read(long fileOffset,

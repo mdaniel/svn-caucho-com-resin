@@ -41,21 +41,15 @@ public class LineReader
 {
   private Boolean _isMacLineEnding;
 
-  protected LineReader(boolean isAutoDetectLineEndings)
-  {
-    if (!isAutoDetectLineEndings)
-      _isMacLineEnding = Boolean.FALSE;
-
-  }
-
   public LineReader(Env env)
   {
     this(FileModule.INI_AUTO_DETECT_LINE_ENDINGS.getAsBoolean(env));
   }
 
-  public LineReader()
+  private LineReader(boolean isAutoDetectLineEndings)
   {
-    this(false);
+    if (!isAutoDetectLineEndings)
+      _isMacLineEnding = Boolean.FALSE;
   }
 
   /**

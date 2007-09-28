@@ -73,6 +73,24 @@ public class FileRandomAccessStream extends RandomAccessStream {
   }
 
   /**
+   * Reads a block starting from the current file pointer.
+   */
+  public int read(char []buffer, int offset, int length)
+    throws IOException
+  {
+    byte[] bytes = new byte[length];
+
+    int count = _file.read(bytes, 0, length);
+
+    for (int i = 0; i < count; i++) {
+      buffer[offset + i] = (char) bytes[i];
+
+    }
+
+    return count;
+  }
+
+  /**
    * Reads a block from a given location.
    */
   public int read(long fileOffset, byte []buffer, int offset, int length)

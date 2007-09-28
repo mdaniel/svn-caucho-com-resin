@@ -178,10 +178,35 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
   public int read(byte []buffer, int offset, int length)
   {
-    Value output = _wrapper.callMethod(_env, STREAM_READ, 
+    // XXX: shgould be reimplemented
+
+    Value output = _wrapper.callMethod(_env, STREAM_READ,
                                        LongValue.create(length));
 
     // XXX "0"?
+
+    if (! output.toBoolean())
+      return -1;
+
+    byte []outputBytes = output.toString().getBytes();
+
+    if (outputBytes.length < length)
+      length = outputBytes.length;
+
+    System.arraycopy(outputBytes, 0, buffer, offset, length);
+
+    return length;
+  }
+
+  public int read(char []buffer, int offset, int length)
+  {
+    // XXX: shgould be reimplemented
+
+    Value output = _wrapper.callMethod(_env, STREAM_READ,
+                                       LongValue.create(length));
+
+    // XXX "0"?
+
     if (! output.toBoolean())
       return -1;
 

@@ -207,6 +207,17 @@ public class FileInputOutput extends AbstractBinaryOutput
   }
 
   /**
+   * Reads a buffer from a file, returning -1 on EOF.
+   */
+  public int read(char []buffer, int offset, int length)
+    throws IOException
+  {
+    _doUnread = false;
+
+    return _stream.read(buffer, offset, length);
+  }
+
+  /**
    * Appends to a string builder.
    */
   public StringValue appendTo(StringValue builder)

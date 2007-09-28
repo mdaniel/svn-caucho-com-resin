@@ -30,13 +30,10 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.QuercusModuleException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.IdentityHashMap;
 
 /**
@@ -837,6 +834,49 @@ public class StringBuilderValue
 
     for (int i = 0; i < sublen; i++) {
       _buffer[_length++] = s.charAt(i);
+    }
+
+    return this;
+  }
+
+  @Override
+  public StringValue append(BinaryInput is, long length)
+  {
+    int sublen = (int) length;
+
+    if (_buffer.length < _length + sublen)
+      ensureCapacity(_length + sublen);
+
+    try {
+      int count = is.read(_buffer, _length, sublen);
+
+      if (count > 0)
+        _length += count;
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+
+    return this;
+  }
+
+  @Override
+  public StringValue append(Reader reader, long length)
+    throws IOException
+  {
+    int sublen = (int) length;
+
+    if (_buffer.length < _length + sublen)
+      ensureCapacity(_length + sublen);
+
+    try {
+      int count = reader.read(_buffer, _length, sublen);
+
+      if (count > 0)
+        _length += count;
+
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
     }
 
     return this;

@@ -63,9 +63,21 @@ public class SpyRandomAccessStream extends RandomAccessStream {
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
-    log.info("random-read(0x" + Long.toHexString(getFilePointer()) + "," + 
-             length + ")");
+    log.finest("random-read(0x" + Long.toHexString(getFilePointer()) + "," +
+               length + ")");
     
+    return _file.read(buffer, offset, length);
+  }
+
+  /**
+   * Reads a block from a given location.
+   */
+  public int read(char []buffer, int offset, int length)
+    throws IOException
+  {
+    log.finest("random-read(0x" + Long.toHexString(getFilePointer()) + "," +
+               length + ")");
+
     return _file.read(buffer, offset, length);
   }
 

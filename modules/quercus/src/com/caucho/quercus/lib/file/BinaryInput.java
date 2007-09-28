@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.StringValue;
 
 import java.io.IOException;
@@ -72,7 +71,13 @@ public interface BinaryInput extends BinaryStream {
    */
   public int read(byte []buffer, int offset, int length)
     throws IOException;
-  
+
+  /**
+   * Reads into a buffer, returning -1 on eof.
+   */
+  public int read(char []buffer, int offset, int length)
+    throws IOException;
+
   /**
    * Reads a Binary string.
    */
