@@ -70,6 +70,34 @@ public class CollectionDeserializer extends AbstractListDeserializer {
   public Object readList(AbstractHessianInput in, int length)
     throws IOException
   {
+    Collection list = createList();
+
+    in.addRef(list);
+
+    while (! in.isEnd())
+      list.add(in.readObject());
+
+    in.readEnd();
+
+    return list;
+  }
+  
+  public Object readLengthList(AbstractHessianInput in, int length)
+    throws IOException
+  {
+    Collection list = createList();
+
+    in.addRef(list);
+
+    for (; length > 0; length--)
+      list.add(in.readObject());
+
+    return list;
+  }
+
+  private Collection createList()
+    throws IOException
+  {
     Collection list = null;
     
     if (_type == null)
@@ -98,13 +126,6 @@ public class CollectionDeserializer extends AbstractListDeserializer {
         throw new IOExceptionWrapper(e);
       }
     }
-
-    in.addRef(list);
-
-    while (! in.isEnd())
-      list.add(in.readObject());
-
-    in.readEnd();
 
     return list;
   }

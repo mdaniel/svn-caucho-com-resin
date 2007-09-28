@@ -379,8 +379,11 @@ public class SerializerFactory extends AbstractSerializerFactory
   {
     Deserializer reader = getObjectDeserializer(type);
     
-    if (cl == reader.getType() || cl.isAssignableFrom(reader.getType()))
+    if (cl == null
+	|| cl == reader.getType()
+	|| cl.isAssignableFrom(reader.getType())) {
       return reader;
+    }
 
     if (log.isLoggable(Level.FINE))
       log.fine("hessian: expected '" + cl.getName() + "' at '" + type + "'");

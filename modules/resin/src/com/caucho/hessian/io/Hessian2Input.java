@@ -1969,7 +1969,10 @@ public class Hessian2Input
     }
 
     default:
-      throw error("readObject: unknown code 0x" + Integer.toHexString(tag & 0xff) + " " + (char) tag);
+      if (tag < 0)
+	throw error("readObject: unexpected end of file");
+      else
+	throw error("readObject: unknown code 0x" + Integer.toHexString(tag & 0xff) + " " + (char) tag);
     }
   }
 

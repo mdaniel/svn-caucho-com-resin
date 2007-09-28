@@ -901,6 +901,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public final void save()
   {
+    if (! isValid())
+      return;
+    
     try {
       ClusterObject clusterObject = _clusterObject;
       if (clusterObject != null) {
