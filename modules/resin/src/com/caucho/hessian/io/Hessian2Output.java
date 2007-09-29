@@ -97,6 +97,8 @@ public class Hessian2Output
   
   private final byte []_buffer = new byte[SIZE];
   private int _offset;
+
+  private boolean _isStreaming;
   
   /**
    * Creates a new Hessian output stream, initialized with an
@@ -385,25 +387,6 @@ public class Hessian2Output
     flushIfFull();
     
     _buffer[_offset++] = (byte) 'p';
-    _buffer[_offset++] = (byte) 2;
-    _buffer[_offset++] = (byte) 0;
-  }
-
-  /**
-   * Starts the streaming message
-   *
-   * <p>A streaming message starts with 'P'</p>
-   *
-   * <pre>
-   * P x02 x00
-   * </pre>
-   */
-  public void startStreamingMessage()
-    throws IOException
-  {
-    flushIfFull();
-    
-    _buffer[_offset++] = (byte) 'P';
     _buffer[_offset++] = (byte) 2;
     _buffer[_offset++] = (byte) 0;
   }
@@ -1387,6 +1370,39 @@ public class Hessian2Output
   }
 
   /**
+   * Starts the streaming message
+   *
+   * <p>A streaming message starts with 'P'</p>
+   *
+   * <pre>
+   * P x02 x00
+   * </pre>
+   */
+  public void writeStreamingObject(Object obj)
+    throws IOException
+  {
+    if (_refs != null)
+      _refs.clear();
+    
+    flush();
+
+    _isStreaming = true;
+    _offset = 3;
+
+    writeObject(obj);
+
+    int len = _offset - 3;
+    
+    _buffer[0] = (byte) 'P';
+    _buffer[1] = (byte) (len >> 8);
+    _buffer[2] = (byte) len;
+
+    _isStreaming = false;
+
+    flush();
+  }
+
+  /**
    * Prints a string to the stream, encoded as UTF-8 with preceeding length
    *
    * @param v the string to print.
@@ -1510,6 +1526,13 @@ public class Hessian2Output
     int offset = _offset;
     
     if (offset > 0) {
+      if (_isStreaming) {
+	int len = offset - 3;
+	_buffer[0] = 'p';
+	_buffer[1] = (byte) (len >> 8);
+	_buffer[2] = (byte) len;
+      }
+      
       _offset = 0;
       _os.write(_buffer, 0, offset);
     }
@@ -1518,17 +1541,12 @@ public class Hessian2Output
   public final void close()
     throws IOException
   {
+    flush();
+    
     OutputStream os = _os;
     _os = null;
 
     if (os != null) {
-      int offset = _offset;
-    
-      if (offset > 0) {
-	_offset = 0;
-	os.write(_buffer, 0, offset);
-      }
-
       if (_isCloseStreamOnClose)
 	os.close();
     }

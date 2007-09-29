@@ -2173,6 +2173,15 @@ public class Hessian2Input
       _refs.clear();
   }
 
+  public Object readStreamingObject()
+    throws IOException
+  {
+    if (_refs != null)
+      _refs.clear();
+
+    return readObject();
+  }
+
   /**
    * Resolves a remote object.
    */

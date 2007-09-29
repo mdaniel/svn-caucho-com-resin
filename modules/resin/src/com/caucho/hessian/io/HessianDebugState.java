@@ -276,6 +276,45 @@ public class HessianDebugState implements Hessian2Constants
 
       case 'I':
 	return new IntegerState(this, "int");
+	
+      case 0xd8: case 0xd9: case 0xda: case 0xdb: 
+      case 0xdc: case 0xdd: case 0xde: case 0xdf: 
+      case 0xe0: case 0xe1: case 0xe2: case 0xe3: 
+      case 0xe4: case 0xe5: case 0xe6: case 0xe7: 
+      case 0xe8: case 0xe9: case 0xea: case 0xeb: 
+      case 0xec: case 0xed: case 0xee: case 0xef:
+	{
+	  Long value = new Long(ch - 0xe0);
+	  
+	  if (isShift(value))
+	    return shift(value);
+	  else {
+	    printObject(value.toString());
+	    return this;
+	  }
+	}
+	
+      case 0xf0: case 0xf1: case 0xf2: case 0xf3: 
+      case 0xf4: case 0xf5: case 0xf6: case 0xf7: 
+      case 0xf8: case 0xf9: case 0xfa: case 0xfb: 
+      case 0xfc: case 0xfd: case 0xfe: case 0xff:
+	return new LongState(this, "long", ch - 0xf8, 7);
+	
+      case 0x38: case 0x39: case 0x3a: case 0x3b: 
+      case 0x3c: case 0x3d: case 0x3e: case 0x3f:
+	return new LongState(this, "long", ch - 0x3c, 6);
+	
+      case 0x77:
+	return new LongState(this, "long", 0, 4);
+
+      case 'L':
+	return new LongState(this, "long");
+
+      case 0x4a:
+	return new RefState(this, "Ref", 0, 3);
+
+      case 0x4b:
+	return new RefState(this, "Ref", 0, 2);
 
       case 'R':
 	return new RefState(this, "Ref");
@@ -284,9 +323,6 @@ public class HessianDebugState implements Hessian2Constants
 	pushStack(this);
 	return new RemoteState();
 
-      case 'L':
-	return new LongState(this);
-
       case 'd':
 	return new DateState(this);
 
@@ -294,8 +330,16 @@ public class HessianDebugState implements Hessian2Constants
 	return new DoubleState(this);
 
       case 0x00:
-	printObject("\"\"");
-	return this;
+	{
+	  String value = "\"\"";
+	  
+	  if (isShift(value))
+	    return shift(value);
+	  else {
+	    printObject(value.toString());
+	    return this;
+	  }
+	}
 
       case 0x01: case 0x02: case 0x03:
       case 0x04: case 0x05: case 0x06: case 0x07:
@@ -314,13 +358,29 @@ public class HessianDebugState implements Hessian2Constants
       case 's': case 'x':
 	return new StringState(this, 'S', false);
 
+      case 0x20:
+	{
+	  String value = "binary(0)";
+	  
+	  if (isShift(value))
+	    return shift(value);
+	  else {
+	    printObject(value.toString());
+	    return this;
+	  }
+	}
+
+      case 0x21: case 0x22: case 0x23:
+      case 0x24: case 0x25: case 0x26: case 0x27:
+      case 0x28: case 0x29: case 0x2a: case 0x2b:
+      case 0x2c: case 0x2d: case 0x2e: case 0x2f:
+	return new BinaryState(this, 'B', ch - 0x20);
+
       case 'B':
-	pushStack(this);
-	return new ByteState(true);
+	return new BinaryState(this, 'B', true);
 
       case 'b':
-	pushStack(this);
-	return new ByteState(false);
+	return new BinaryState(this, 'B', false);
 
       case 'M':
 	return new MapState(this, _refId++);
@@ -334,8 +394,11 @@ public class HessianDebugState implements Hessian2Constants
       case 'o':
 	return new ObjectState(this, _refId++);
 
-      case ' ':
-	return this;
+      case 'P':
+	return new StreamingState(this, true);
+
+      case 'p':
+	return new StreamingState(this, false);
 	
       default:
 	println(String.valueOf((char) ch) + ": unexpected character");
@@ -405,6 +468,49 @@ public class HessianDebugState implements Hessian2Constants
     }
   }
   
+  class LongState extends State {
+    String _typeCode;
+    
+    int _length;
+    long _value;
+
+    LongState(State next, String typeCode)
+    {
+      super(next);
+
+      _typeCode = typeCode;
+    }
+
+    LongState(State next, String typeCode, long value, int length)
+    {
+      super(next);
+
+      _typeCode = typeCode;
+
+      _value = value;
+      _length = length;
+    }
+
+    State next(int ch)
+    {
+      _value = 256 * _value + (ch & 0xff);
+
+      if (++_length == 8) {
+	Long value = new Long(_value);
+	
+	if (_next.isShift(value))
+	  return _next.shift(value);
+	else {
+	  printObject(value.toString());
+	  
+	  return _next;
+	}
+      }
+      else
+	return this;
+    }
+  }
+  
   class RefState extends State {
     String _typeCode;
     
@@ -439,35 +545,6 @@ public class HessianDebugState implements Hessian2Constants
 	  return _next.shift(value);
 	else {
 	  printObject("ref(#" + value + ")");
-	  
-	  return _next;
-	}
-      }
-      else
-	return this;
-    }
-  }
-  
-  class LongState extends State {
-    int _length;
-    long _value;
-
-    LongState(State next)
-    {
-      super(next);
-    }
-    
-    State next(int ch)
-    {
-      _value = 256 * _value + (ch & 0xff);
-
-      if (++_length == 8) {
-	Long value = new Long(_value);
-	
-	if (_next.isShift(value))
-	  return _next.shift(value);
-	else {
-	  printObject(value.toString() + " (long)");
 	  
 	  return _next;
 	}
@@ -597,6 +674,20 @@ public class HessianDebugState implements Hessian2Constants
 	  _lengthIndex = 0;
 	  return this;
 	}
+	else if (ch == 0x00) {
+	  if (_next.isShift(_value.toString()))
+	    return _next.shift(_value.toString());
+	  else {
+	    printObject("\"" + _value + "\"");
+	    return _next;
+	  }
+	}
+	else if (0x00 <= ch && ch < 0x20) {
+	  _isLastChunk = true;
+	  _lengthIndex = 2;
+	  _length = ch & 0xff;
+	  return this;
+	}
 	else {
 	  println(String.valueOf((char) ch) + ": unexpected character");
 	  return _next;
@@ -634,7 +725,7 @@ public class HessianDebugState implements Hessian2Constants
 	break;
       }
 
-      if (_length == 0) {
+      if (_length == 0 && _isLastChunk) {
 	if (_next.isShift(_value.toString()))
 	  return _next.shift(_value.toString());
 	else {
@@ -648,14 +739,31 @@ public class HessianDebugState implements Hessian2Constants
     }
   }
   
-  class ByteState extends State {
+  class BinaryState extends State {
+    char _typeCode;
+    
+    int _totalLength;
+    
     int _lengthIndex;
     int _length;
     boolean _isLastChunk;
-
-    ByteState(boolean isLastChunk)
+    
+    BinaryState(State next, char typeCode, boolean isLastChunk)
     {
+      super(next);
+      
+      _typeCode = typeCode;
       _isLastChunk = isLastChunk;
+    }
+
+    BinaryState(State next, char typeCode, int length)
+    {
+      super(next);
+      
+      _typeCode = typeCode;
+      _isLastChunk = true;
+      _length = length;
+      _lengthIndex = 2;
     }
     
     State next(int ch)
@@ -663,15 +771,15 @@ public class HessianDebugState implements Hessian2Constants
       if (_lengthIndex < 2) {
 	_length = 256 * _length + (ch & 0xff);
 	
-	if (++_lengthIndex == 2) {
-	  if (_isLastChunk)
-	    println("B: " + _length);
-	  else
-	    println("b: " + _length);
-	}
-
-	if (_lengthIndex == 2 && _length == 0 && _isLastChunk) {
-	  return popStack();
+	if (++_lengthIndex == 2 && _length == 0 && _isLastChunk) {
+	  String value = "binary(" + _totalLength + ")";
+	  
+	  if (_next.isShift(value))
+	    return _next.shift(value);
+	  else {
+	    printObject(value);
+	    return _next;
+	  }
 	}
 	else
 	  return this;
@@ -687,16 +795,41 @@ public class HessianDebugState implements Hessian2Constants
 	  _lengthIndex = 0;
 	  return this;
 	}
+	else if (ch == 0x20) {
+	  String value = "binary(" + _totalLength + ")";
+	  
+	  if (_next.isShift(value))
+	    return _next.shift(value);
+	  else {
+	    printObject(value);
+	    return _next;
+	  }
+	}
+	else if (0x20 <=ch && ch < 0x30) {
+	  _isLastChunk = true;
+	  _lengthIndex = 2;
+	  _length = (ch & 0xff) - 0x20;
+	  return this;
+	}
 	else {
 	  println(String.valueOf((char) ch) + ": unexpected character");
-	  return popStack();
+	  return _next;
 	}
       }
-
+      
       _length--;
+      _totalLength++;
 
-      if (_length == 0) {
-	return popStack();
+      if (_length == 0 && _isLastChunk) {
+	String value = "binary(" + _totalLength + ")";
+	
+	if (_next.isShift(value))
+	  return _next.shift(value);
+	else {
+	  printObject(value);
+	  
+	  return _next;
+	}
       }
       else
 	return this;
@@ -799,6 +932,7 @@ public class HessianDebugState implements Hessian2Constants
     private static final int TYPE = 1;
     private static final int COUNT = 2;
     private static final int FIELD = 3;
+    private static final int COMPLETE = 4;
 
     private int _refId;
 
@@ -835,23 +969,16 @@ public class HessianDebugState implements Hessian2Constants
       else if (_state == TYPE) {
 	_type = (String) object;
 
-	println("defun " + _type);
+	print("/* defun " + _type + " [");
 
 	_objectDefList.add(new ObjectDef(_type, _fields));
 
 	_state = COUNT;
-
-	return this;
       }
       else if (_state == COUNT) {
 	_count = (Integer) object;
 
 	_state = FIELD;
-
-	if (_count == 0)
-	  return _next;
-	else
-	  return this;
       }
       else if (_state == FIELD) {
 	String field = (String) object;
@@ -860,16 +987,21 @@ public class HessianDebugState implements Hessian2Constants
 
 	_fields.add(field);
 
-	println(field);
-
-	if (_count == 0)
-	  return _next;
+	if (_fields.size() == 1)
+	  print(field);
 	else
-	  return this;
+	  print(", " + field);
+
+	if (_count == 0) {
+	  println("] */");
+	  _next.printIndent(0);
+	}
       }
       else {
 	throw new UnsupportedOperationException();
       }
+
+      return this;
     }
 
     @Override
@@ -894,7 +1026,10 @@ public class HessianDebugState implements Hessian2Constants
 	return nextObject(ch);
 	
       case FIELD:
-	return nextObject(ch);
+	if (_count == 0)
+	  return _next.nextObject(ch);
+	else
+	  return nextObject(ch);
 
       default:
 	throw new IllegalStateException();
@@ -1224,6 +1359,55 @@ public class HessianDebugState implements Hessian2Constants
       default:
 	throw new IllegalStateException();
       }
+    }
+  }
+  
+  class StreamingState extends State {
+    private int _digit;
+    private int _length;
+    private boolean _isLast;
+    private boolean _isFirst = true;
+
+    private State _childState;
+
+    StreamingState(State next, boolean isLast)
+    {
+      super(next);
+
+      _isLast = isLast;
+      _childState = new InitialState();
+    }
+    
+    State next(int ch)
+    {
+      if (_digit < 2) {
+	_length = 256 * _length + ch;
+	_digit++;
+
+	if (_digit == 2 && _length == 0 && _isLast) {
+	  _refId = 0;
+	  return _next;
+	}
+	else
+	  return this;
+      }
+      else if (_length == 0) {
+	_isLast = (ch == 'P');
+	_digit = 0;
+	
+	return this;
+      }
+
+      _childState = _childState.next(ch);
+
+      _length--;
+
+      if (_length == 0 && _isLast) {
+	_refId = 0;
+	return _next;
+      }
+      else
+	return this;
     }
   }
 
