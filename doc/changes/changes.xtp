@@ -12,6 +12,8 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>hessian: added debug="true" flag to HessianServlet, to log at level="fine"</li>
+<li>hessian: added HessianDebugInputStream and HessianDebugOutputStream</li>
 <li>hessian: field list deserialization with non-matching classes (#2026, rep by mfsiddiq)</li>
 <li>hessian: field object deserialization with non-matching classes (#2015, rep by Mark Church)</li>
 <li>hessian: Collection deserializer not properly handling 'v' (#2028, rep by Jerome Landreau)</li>

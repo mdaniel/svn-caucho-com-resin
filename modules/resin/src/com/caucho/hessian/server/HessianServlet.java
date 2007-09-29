@@ -48,11 +48,7 @@
 
 package com.caucho.hessian.server;
 
-import com.caucho.hessian.io.AbstractHessianOutput;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.HessianOutput;
-import com.caucho.hessian.io.SerializerFactory;
+import com.caucho.hessian.io.*;
 import com.caucho.services.server.GenericService;
 import com.caucho.services.server.Service;
 import com.caucho.services.server.ServiceContext;
@@ -65,15 +61,15 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.logging.*;
 
 /**
  * Servlet for serving Hessian services.
  */
 public class HessianServlet extends GenericServlet {
+  private Logger _log;
+  
   private Class _homeAPI;
   private Object _homeImpl;
   
@@ -84,6 +80,13 @@ public class HessianServlet extends GenericServlet {
   private HessianSkeleton _objectSkeleton;
 
   private SerializerFactory _serializerFactory;
+
+  private boolean _isDebug;
+
+  public HessianServlet()
+  {
+    _log = Logger.getLogger(HessianServlet.class.getName());
+  }
 
   public String getServletInfo()
   {
@@ -174,6 +177,22 @@ public class HessianServlet extends GenericServlet {
   }
 
   /**
+   * Sets the debugging flag.
+   */
+  public void setDebug(boolean isDebug)
+  {
+    _isDebug = isDebug;
+  }
+
+  /**
+   * Sets the debugging log name.
+   */
+  public void setLogName(String name)
+  {
+    _log = Logger.getLogger(name);
+  }
+
+  /**
    * Initialize the service, including the service object.
    */
   public void init(ServletConfig config)
@@ -260,6 +279,9 @@ public class HessianServlet extends GenericServlet {
       }
       else
 	_objectSkeleton = _homeSkeleton;
+
+      if ("true".equals(getInitParameter("debug")))
+	_isDebug = true;
     } catch (ServletException e) {
       throw e;
     } catch (Exception e) {
@@ -333,6 +355,12 @@ public class HessianServlet extends GenericServlet {
       InputStream is = request.getInputStream();
       OutputStream os = response.getOutputStream();
 
+      if (_isDebug && _log.isLoggable(Level.FINE)) {
+	PrintWriter dbg = new PrintWriter(new LogWriter(_log));
+	is = new HessianDebugInputStream(is, dbg);
+	os = new HessianDebugOutputStream(os, dbg);
+      }
+
       Hessian2Input in = new Hessian2Input(is);
       AbstractHessianOutput out;
 
@@ -371,6 +399,48 @@ public class HessianServlet extends GenericServlet {
       throw new ServletException(e);
     } finally {
       ServiceContext.end();
+    }
+  }
+
+  static class LogWriter extends Writer {
+    private Logger _log;
+    private StringBuilder _sb = new StringBuilder();
+
+    LogWriter(Logger log)
+    {
+      _log = log;
+    }
+
+    public void write(char ch)
+    {
+      if (ch == '\n' && _sb.length() > 0) {
+	_log.fine(_sb.toString());
+	_sb.setLength(0);
+      }
+      else
+	_sb.append((char) ch);
+    }
+
+    public void write(char []buffer, int offset, int length)
+    {
+      for (int i = 0; i < length; i++) {
+	char ch = buffer[offset + i];
+	
+	if (ch == '\n' && _sb.length() > 0) {
+	  _log.fine(_sb.toString());
+	  _sb.setLength(0);
+	}
+	else
+	  _sb.append((char) ch);
+      }
+    }
+
+    public void flush()
+    {
+    }
+
+    public void close()
+    {
     }
   }
 }
