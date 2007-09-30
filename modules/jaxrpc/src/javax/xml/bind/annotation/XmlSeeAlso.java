@@ -28,25 +28,14 @@
 */
 
 package javax.xml.bind.annotation;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 @Retention(value=RUNTIME)
-@Target(value={FIELD,METHOD})
-public @interface XmlElementWrapper {
-
-  public String name() default "##default";
-
-  public String namespace() default "##default";
-
-  public boolean nillable() default false;
-
-  /**
-   * @since JAXB 2.1
-   */
-  public boolean required() default false;
+@Target(value={TYPE})
+public @interface XmlSeeAlso {
+  Class []value();
 }
 

@@ -27,26 +27,19 @@
 * @author Scott Ferguson
 */
 
-package javax.xml.bind.annotation;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
+package javax.xml.bind;
 
-@Retention(value=RUNTIME)
-@Target(value={FIELD,METHOD})
-public @interface XmlElementWrapper {
+public class DataBindingException extends RuntimeException {
 
-  public String name() default "##default";
+  public DataBindingException(String message, Throwable exception)
+  {
+    super(message, exception);
+  }
 
-  public String namespace() default "##default";
+  public DataBindingException(Throwable exception)
+  {
+    super(exception);
+  }
 
-  public boolean nillable() default false;
-
-  /**
-   * @since JAXB 2.1
-   */
-  public boolean required() default false;
 }
 

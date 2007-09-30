@@ -43,7 +43,8 @@ import java.util.logging.Logger;
  * An object to store in an EL Environment to provide utility methods.
  */
 public class FmtFunctions {
-  static protected final Logger log = Log.open(FmtFunctions.class);
+  static protected final Logger log
+    = Logger.getLogger(FmtFunctions.class.getName());
   static final L10N L = new L10N(FmtFunctions.class);
 
   static private QDate _calendar = new QDate(true);

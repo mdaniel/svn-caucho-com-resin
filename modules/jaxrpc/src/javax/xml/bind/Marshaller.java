@@ -37,8 +37,7 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.validation.Schema;
-import java.io.OutputStream;
-import java.io.Writer;
+import java.io.*;
 
 public interface Marshaller {
 
@@ -78,6 +77,11 @@ public interface Marshaller {
   void marshal(Object jaxbElement, Result result) throws JAXBException;
 
   void marshal(Object jaxbElement, Writer writer) throws JAXBException;
+
+  /**
+   * @since JAXB 2.1
+   */
+  void marshal(Object jaxbElement, File output) throws JAXBException;
 
   void marshal(Object jaxbElement, XMLEventWriter writer)
     throws JAXBException;

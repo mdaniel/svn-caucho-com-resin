@@ -45,5 +45,10 @@ public @interface XmlSchema {
 
   public XmlNsForm attributeFormDefault() default XmlNsForm.UNSET;
 
+  /**
+   * @since Jaxb 2.1
+   */
+  public String location() default "##generate";
+
 }
 
