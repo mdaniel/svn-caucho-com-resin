@@ -129,15 +129,28 @@ public class TextMessageImpl extends MessageImpl implements TextMessage  {
       
     WriteStream ws = new WriteStream(body);
 
-    Hessian2Output out = new Hessian2Output(ws);
-
-    out.writeString(_text);
-
-    out.close();
+    writeBody(ws);
     
     ws.close();
 
     return body.openRead(true);
+  }
+
+  /**
+   * Serialize the body to an output stream.
+   */
+  @Override
+  public void writeBody(OutputStream os)
+    throws IOException
+  {
+    if (_text == null)
+      return;
+
+    Hessian2Output out = new Hessian2Output(os);
+
+    out.writeString(_text);
+
+    out.close();
   }
 
   /**

@@ -32,8 +32,7 @@ package com.caucho.jms2.message;
 import com.caucho.jms2.connection.SessionImpl;
 import com.caucho.hessian.io.*;
 import com.caucho.vfs.*;
-import com.caucho.util.L10N;
-import com.caucho.util.NullEnumeration;
+import com.caucho.util.*;
 
 import javax.jms.*;
 import java.lang.ref.WeakReference;
@@ -142,7 +141,6 @@ public class MessageImpl implements Message
    * Returns the message id.
    */
   public String getJMSMessageID()
-    throws JMSException
   {
     return _messageId;
   }
@@ -153,7 +151,6 @@ public class MessageImpl implements Message
    * @param id the new message id
    */
   public void setJMSMessageID(String id)
-    throws JMSException
   {
     _messageId = id;
   }
@@ -699,7 +696,23 @@ public class MessageImpl implements Message
       
     WriteStream ws = new WriteStream(header);
 
-    Hessian2Output out = new Hessian2Output(ws);
+    writeProperties(ws);
+    
+    ws.close();
+
+    return header.openRead(true);
+  }
+
+  /**
+   * Serialize the properties to an input stream.
+   */
+  public void writeProperties(OutputStream os)
+    throws IOException
+  {
+    if (_properties == null || _properties.size() == 0)
+      return;
+
+    Hessian2Output out = new Hessian2Output(os);
 
     for (Map.Entry<String,Object> entry : _properties.entrySet()) {
       out.writeString(entry.getKey());
@@ -707,10 +720,6 @@ public class MessageImpl implements Message
     }
 
     out.close();
-    
-    ws.close();
-
-    return header.openRead(true);
   }
 
   /**
@@ -741,6 +750,14 @@ public class MessageImpl implements Message
     throws IOException
   {
     return null;
+  }
+
+  /**
+   * Serialize the body to an output stream.
+   */
+  public void writeBody(OutputStream os)
+    throws IOException
+  {
   }
 
   /**
@@ -810,6 +827,8 @@ public class MessageImpl implements Message
     
     if (_messageId != null)
       return className + "[" + _messageId + "]";
+    else if (Alarm.isTest())
+      return className + "[]";
     else
       return className + "@" + System.identityHashCode(this);
   }

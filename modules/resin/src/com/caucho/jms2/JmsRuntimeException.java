@@ -27,53 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlets.comet;
+package com.caucho.jms2;
 
-import com.caucho.server.port.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
+import javax.jms.JMSException;
 
 /**
- * Public API to control a comet connection.
+ * Wraps the actual exception with an JMS exception
  */
-public interface CometController {
+public class JmsRuntimeException extends RuntimeException {
   /**
-   * Sets the max idle time.
+   * Null constructor for beans
    */
-  public void setMaxIdleTime(long idleTime);
-  
+  public JmsRuntimeException()
+  {
+  }
   /**
-   * Gets the max idle time.
+   * Create a basic JMSExceptionWrapper with a message.
+   *
+   * @param msg the exception message.
    */
-  public long getMaxIdleTime();
-  
-  /**
-   * Gets a request attribute.
-   */
-  public Object getAttribute(String name);
-  
-  /**
-   * Sets a request attribute.
-   */
-  public void setAttribute(String name, Object value);
-  
-  /**
-   * Remove a request attribute.
-   */
-  public void removeAttribute(String name);
+  public JmsRuntimeException(String msg)
+  {
+    super(msg);
+  }
 
   /**
-   * Returns true if the connection is active.
+   * Create a JMSExceptionWrapper wrapping a root exception.
+   *
+   * @param rootCause the underlying wrapped exception.
    */
-  public boolean isActive();
-  
+  public JmsRuntimeException(Throwable rootCause)
+  {
+    super(rootCause);
+  }
+
   /**
-   * Wakes the connection.
+   * Create a JMSExceptionWrapper wrapping a root exception.
+   *
+   * @param rootCause the underlying wrapped exception.
    */
-  public boolean wake();
-  
-  /**
-   * Closes the connection.
-   */
-  public void close();
+  public JmsRuntimeException(String msg, Throwable rootCause)
+  {
+    super(msg, rootCause);
+  }
 }
+

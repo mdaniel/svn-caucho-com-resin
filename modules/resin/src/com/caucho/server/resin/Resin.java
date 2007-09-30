@@ -1260,6 +1260,11 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
   }
 
+  public String toString()
+  {
+    return "Resin[" + _serverId + "]";
+  }
+
   private static long getFreeMemory(Runtime runtime)
   {
     long maxMemory = runtime.maxMemory();

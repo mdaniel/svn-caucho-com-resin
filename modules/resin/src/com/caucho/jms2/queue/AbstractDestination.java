@@ -106,6 +106,13 @@ abstract public class AbstractDestination
   {
     StringBuilder cb = new StringBuilder();
 
+    generateMessageID(cb);
+
+    return cb.toString();
+  }
+
+  protected void generateMessageID(StringBuilder cb)
+  {
     long id;
     
     synchronized (this) {
@@ -113,8 +120,6 @@ abstract public class AbstractDestination
     }
 
     Base64.encode(cb, id);
-
-    return cb.toString();
   }
 
   public Destination getJMSDestination()

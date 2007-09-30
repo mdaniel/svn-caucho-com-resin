@@ -121,6 +121,7 @@ abstract public class AbstractQueue extends AbstractDestination
    * active listeners.
    */
   protected void enqueue(MessageImpl msg, long expires)
+    throws JMSException
   {
   }
 

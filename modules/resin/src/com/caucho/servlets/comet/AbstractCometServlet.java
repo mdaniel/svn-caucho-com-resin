@@ -83,7 +83,7 @@ abstract public class AbstractCometServlet extends GenericServlet
     AbstractHttpRequest req = (AbstractHttpRequest) request;
     AbstractHttpResponse res = (AbstractHttpResponse) response;
 
-    CometController controller = new CometController(req);
+    CometController controller = new CometControllerImpl(req);
 
     if (! service(req, res, controller))
       controller.close();

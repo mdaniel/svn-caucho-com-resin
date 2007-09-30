@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,69 +31,41 @@ package com.caucho.server.hmux;
 
 import java.lang.ref.*;
 import java.util.*;
+import java.io.*;
 
-import com.caucho.server.connection.Connection;
-import com.caucho.server.port.Protocol;
-import com.caucho.server.port.ServerRequest;
 import com.caucho.loader.*;
+import com.caucho.vfs.*;
 
 /**
- * Dispatches the HMUX protocol.
- *
- * @see com.caucho.server.port.Protocol
+ * Manages hmux extensions.
  */
-public class HmuxProtocol extends Protocol {
-  private static EnvironmentLocal<HmuxProtocol> _localManager
-    = new EnvironmentLocal<HmuxProtocol>();
-  
-  private String _protocolName = "hmux";
+public class HmuxManager
+{
+  private static EnvironmentLocal<HmuxManager> _localManager
+    = new EnvironmentLocal<HmuxManager>();
 
   private ClassLoader _classLoader;
   
   private HashMap<Integer,WeakReference<HmuxExtension>> _extensionMap
     = new HashMap<Integer,WeakReference<HmuxExtension>>();
 
-  public HmuxProtocol()
+  private HmuxManager()
   {
     _classLoader = Thread.currentThread().getContextClassLoader();
-
-    _localManager.set(this);
   }
 
-  public static HmuxProtocol getLocal()
+  public static HmuxManager getLocal()
   {
     synchronized (_localManager) {
-      return _localManager.get();
+      HmuxManager manager = _localManager.get();
+
+      if (manager == null) {
+	manager = new HmuxManager();
+	_localManager.set(manager);
+      }
+
+      return manager;
     }
-  }
-
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName()
-  {
-    return _protocolName;
-  }
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _protocolName = name;
-  }
-
-  /**
-   * Create a HmuxRequest object for the new thread.
-   */
-  public ServerRequest createRequest(Connection conn)
-  {
-    return new HmuxRequest(getServer(), conn, this);
-  }
-
-  public ClassLoader getClassLoader()
-  {
-    return _classLoader;
   }
 
   public HmuxExtension getExtension(Integer id)

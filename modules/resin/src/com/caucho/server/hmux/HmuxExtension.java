@@ -27,53 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlets.comet;
+package com.caucho.server.hmux;
 
-import com.caucho.server.port.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
+import java.io.*;
+import com.caucho.vfs.*;
 
 /**
- * Public API to control a comet connection.
+ * Handles extension requests.
  */
-public interface CometController {
+public interface HmuxExtension {
   /**
-   * Sets the max idle time.
+   * Handles a new request.  Initializes the protocol handler and
+   * the request streams.
+   *
+   * <p>Note: ClientDisconnectException must be rethrown to
+   * the caller.
    */
-  public void setMaxIdleTime(long idleTime);
-  
-  /**
-   * Gets the max idle time.
-   */
-  public long getMaxIdleTime();
-  
-  /**
-   * Gets a request attribute.
-   */
-  public Object getAttribute(String name);
-  
-  /**
-   * Sets a request attribute.
-   */
-  public void setAttribute(String name, Object value);
-  
-  /**
-   * Remove a request attribute.
-   */
-  public void removeAttribute(String name);
-
-  /**
-   * Returns true if the connection is active.
-   */
-  public boolean isActive();
-  
-  /**
-   * Wakes the connection.
-   */
-  public boolean wake();
-  
-  /**
-   * Closes the connection.
-   */
-  public void close();
+  public int handleRequest(HmuxRequest request,
+			   ReadStream is,
+			   WriteStream os)
+    throws IOException;
 }

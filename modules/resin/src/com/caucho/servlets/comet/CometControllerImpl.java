@@ -34,46 +34,13 @@ import com.caucho.server.connection.*;
 import com.caucho.util.*;
 
 /**
- * Public API to control a comet connection.
+ * Implementation of the controller.
  */
-public interface CometController {
-  /**
-   * Sets the max idle time.
-   */
-  public void setMaxIdleTime(long idleTime);
-  
-  /**
-   * Gets the max idle time.
-   */
-  public long getMaxIdleTime();
-  
-  /**
-   * Gets a request attribute.
-   */
-  public Object getAttribute(String name);
-  
-  /**
-   * Sets a request attribute.
-   */
-  public void setAttribute(String name, Object value);
-  
-  /**
-   * Remove a request attribute.
-   */
-  public void removeAttribute(String name);
-
-  /**
-   * Returns true if the connection is active.
-   */
-  public boolean isActive();
-  
-  /**
-   * Wakes the connection.
-   */
-  public boolean wake();
-  
-  /**
-   * Closes the connection.
-   */
-  public void close();
+class CometControllerImpl extends HttpConnectionController
+  implements CometController
+{
+  CometControllerImpl(AbstractHttpRequest request)
+  {
+    super(request);
+  }
 }

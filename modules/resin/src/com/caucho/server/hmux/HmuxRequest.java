@@ -130,8 +130,10 @@ import java.util.logging.Logger;
  * 
  */
 public class HmuxRequest extends AbstractHttpRequest
-  implements ServerRequest {
-  private static final Logger log = Log.open(HmuxRequest.class);
+  implements ServerRequest
+{
+  private static final Logger log
+    = Logger.getLogger(HmuxRequest.class.getName());
 
   // HMUX channel control codes
   public static final int HMUX_CHANNEL =        'C';
@@ -187,6 +189,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
   public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
   public static final int HMUX_DISPATCH_PROTOCOL = 0x102;
+  public static final int HMUX_JMS_PROTOCOL = 0x103;
 
   public enum ProtocolResult {
     QUIT,
@@ -250,14 +253,19 @@ public class HmuxRequest extends AbstractHttpRequest
   private HmuxDispatchRequest _dispatchRequest;
   private BackingManager _backingManager;
   private Cluster _cluster;
-  
+
+  private HmuxProtocol _hmuxProtocol;
   private ErrorPageManager _errorManager = new ErrorPageManager();
 
   private int _srunIndex;
 
-  public HmuxRequest(DispatchServer server, Connection conn)
+  public HmuxRequest(DispatchServer server,
+		     Connection conn,
+		     HmuxProtocol protocol)
   {
     super(server, conn);
+    
+    _hmuxProtocol = protocol;
 
     _response = new HmuxResponse(this);
 
@@ -625,10 +633,10 @@ public class HmuxRequest extends AbstractHttpRequest
           return false;
         }
         
-        int value = ((is.read() << 24) +
-                     (is.read() << 16) +
-                     (is.read() << 8) +
-                     (is.read()));
+        int value = ((is.read() << 24)
+		     + (is.read() << 16)
+		     + (is.read() << 8)
+		     + (is.read()));
 
 	int result = HMUX_EXIT;
 	boolean isKeepalive = false;
@@ -660,8 +668,23 @@ public class HmuxRequest extends AbstractHttpRequest
 	    result = HMUX_EXIT;
         }
 	else {
-	  log.fine(dbgId() + (char) code + ": unknown protocol (" + value + ")");
-	  result = HMUX_EXIT;
+	  if (_server == null || _server.isDestroyed()) {
+	    return false;
+	  }
+	  
+	  HmuxExtension ext = _hmuxProtocol.getExtension(value);
+
+	  if (ext != null) {
+	    if (isLoggable)
+	      log.fine(dbgId() + (char) code + ": extension " + ext);
+	    _filter.setClientClosed(true);
+
+	    result = ext.handleRequest(this, is, _rawWrite);
+	  }
+	  else {
+	    log.fine(dbgId() + (char) code + ": unknown protocol (" + value + ")");
+	    result = HMUX_EXIT;
+	  }
 	}
 
 	if (result == HMUX_YIELD)

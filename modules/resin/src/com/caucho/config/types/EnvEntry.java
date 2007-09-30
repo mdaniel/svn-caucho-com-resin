@@ -146,6 +146,7 @@ public class EnvEntry implements Validator {
    */
   // XXX: ejb/0fd0 vs ejb/0g03
   // PostConstruct called from com.caucho.ejb.cfg.EjbSessionBean.
+  @PostConstruct
   public void init()
     throws Exception
   {

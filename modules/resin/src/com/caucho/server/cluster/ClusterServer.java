@@ -461,87 +461,17 @@ public class ClusterServer {
    */
   public long generateBackupCode()
   {
-    return generateBackupCode(_index);
+    return _cluster.generateBackupCode(_index);
   }
 
   /**
-   * Generate the primary, secondary, tertiary, returning the value encoded
-   * in a long.
+   * Adds the primary/backup/third digits to the id.
    */
-  public long generateBackupCode(int index)
+  public void generateBackupCode(StringBuilder cb)
   {
-    Cluster cluster = getCluster();
-    ClusterServer []srunList = cluster.getServerList();
-    int srunLength = srunList.length;
-    ArrayList<Machine> machineList = cluster.getMachineList();
-    int machineLength = machineList.size();
-
-    long backupCode = index;
-
-    long backupLength = srunLength;
-    if (backupLength < 3)
-      backupLength = 3;
-    int backup;
-
-    if (srunLength <= 1) {
-      backup = 0;
-      backupCode |= 1L << 16;
-    }
-    else if (srunLength == 2) {
-      backup = 0;
-      
-      backupCode |= ((index + 1L) % 2) << 16;
-    }
-    else if (machineLength == 1) {
-      int sublen = srunLength - 1;
-      if (sublen > 7)
-	sublen = 7;
-	
-      backup = RandomUtil.nextInt(sublen);
-      
-      backupCode |= ((index + backup + 1L) % backupLength) << 16;
-    }
-    else {
-      int machineIndex = _machine.getIndex();
-      int sublen = machineLength - 1;
-      if (sublen > 7)
-	sublen = 7;
-	
-      int backupMachine = ((machineIndex + RandomUtil.nextInt(sublen) + 1)
-			   % machineLength);
-
-      Machine machine = machineList.get(backupMachine);
-      ArrayList<ClusterServer> serverList = machine.getServerList();
-
-      ClusterServer server;
-
-      if (serverList.size() > 1)
-	server = serverList.get(RandomUtil.nextInt(serverList.size()));
-      else
-	server = serverList.get(0);
-
-      backup = (int) (server.getIndex() - index + srunLength) % srunLength - 1;
-      
-      backupCode |= ((index + backup + 1L) % backupLength) << 16;
-    }
-
-    if (srunLength <= 2)
-      backupCode |= 2L << 32;
-    else {
-      int sublen = srunLength - 2;
-      if (sublen > 6)
-	sublen = 6;
-
-      int third = RandomUtil.nextInt(sublen);
-
-      if (backup <= third)
-	third += 1;
-
-      backupCode |= ((index + third + 1) % backupLength) << 32;
-    }
-
-    return backupCode;
+    _cluster.generateBackupCode(cb, generateBackupCode());
   }
+
 
   /**
    * Close any ports.

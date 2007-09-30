@@ -43,6 +43,8 @@ public class MessageFactory
   private static final Logger log
     = Logger.getLogger(MessageFactory.class.getName());
 
+  private static final MessageType []MESSAGE_TYPE = MessageType.values();
+
   /**
    * Creates a new JMS text message.
    */
@@ -83,6 +85,38 @@ public class MessageFactory
       return MessageType.STREAM;
     else
       return MessageType.NULL;
+  }
+
+  /**
+   * Creates a message based on the type.
+   */
+  public MessageImpl createMessage(int type)
+  {
+    if (type < 0 && MESSAGE_TYPE.length <= type)
+      return null;
+
+    switch (MESSAGE_TYPE[type]) {
+    case NULL:
+      return new MessageImpl();
+
+    case BYTES:
+      return new BytesMessageImpl();
+
+    case MAP:
+      return new MapMessageImpl();
+
+    case OBJECT:
+      return new ObjectMessageImpl();
+      
+    case STREAM:
+      return new StreamMessageImpl();
+
+    case TEXT:
+      return new TextMessageImpl();
+
+    default:
+      return new MessageImpl();
+    }
   }
 
   /**

@@ -46,7 +46,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.server.port.Port;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -71,6 +71,8 @@ public class Cluster
   static protected final EnvironmentLocal<Cluster> _clusterLocal
     = new EnvironmentLocal<Cluster>("caucho.cluster");
 
+  private static final int DECODE[];
+  
   private String _id = "";
 
   private String _serverId = "";
@@ -723,6 +725,186 @@ public class Cluster
   }
 
   /**
+   * Generate the primary, secondary, tertiary, returning the value encoded
+   * in a long.
+   */
+  public long generateBackupCode(int index)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+    ArrayList<Machine> machineList = getMachineList();
+    int machineLength = machineList.size();
+
+    long backupCode = index;
+
+    long backupLength = srunLength;
+    if (backupLength < 3)
+      backupLength = 3;
+    int backup;
+
+    if (srunLength <= 1) {
+      backup = 0;
+      backupCode |= 1L << 16;
+    }
+    else if (srunLength == 2) {
+      backup = 0;
+      
+      backupCode |= ((index + 1L) % 2) << 16;
+    }
+    else if (machineLength == 1) {
+      int sublen = srunLength - 1;
+      if (sublen > 7)
+	sublen = 7;
+	
+      backup = RandomUtil.nextInt(sublen);
+      
+      backupCode |= ((index + backup + 1L) % backupLength) << 16;
+    }
+    else {
+      ClusterServer primaryServer = srunList[index];
+      int machineIndex = primaryServer.getMachine().getIndex();
+      int sublen = machineLength - 1;
+      if (sublen > 7)
+	sublen = 7;
+	
+      int backupMachine = ((machineIndex + RandomUtil.nextInt(sublen) + 1)
+			   % machineLength);
+
+      Machine machine = machineList.get(backupMachine);
+      ArrayList<ClusterServer> serverList = machine.getServerList();
+
+      ClusterServer server;
+
+      if (serverList.size() > 1)
+	server = serverList.get(RandomUtil.nextInt(serverList.size()));
+      else
+	server = serverList.get(0);
+
+      backup = (int) (server.getIndex() - index + srunLength) % srunLength - 1;
+      
+      backupCode |= ((index + backup + 1L) % backupLength) << 16;
+    }
+
+    if (srunLength <= 2)
+      backupCode |= 2L << 32;
+    else {
+      int sublen = srunLength - 2;
+      if (sublen > 6)
+	sublen = 6;
+
+      int third = RandomUtil.nextInt(sublen);
+
+      if (backup <= third)
+	third += 1;
+
+      backupCode |= ((index + third + 1) % backupLength) << 32;
+    }
+
+    return backupCode;
+  }
+
+  /**
+   * Adds the primary/backup/third digits to the id.
+   */
+  public void generateBackupCode(StringBuilder cb, long backupCode)
+  {
+    addDigit(cb, (int) (backupCode & 0xffff));
+    addDigit(cb, (int) ((backupCode >> 16) & 0xffff));
+    addDigit(cb, (int) ((backupCode >> 32) & 0xffff));
+  }
+
+  /**
+   * Returns the primary server.
+   */
+  public ClusterServer getPrimary(String id)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+
+    int index = 0;
+
+    if (srunLength < 64) {
+      index = decode(id.charAt(0));
+    }
+    else {
+      int d1 = decode(id.charAt(0));
+      int d2 = decode(id.charAt(1));
+      
+      index = d1 * 64 + d2;
+    }
+
+    if (index < srunLength)
+      return srunList[index];
+    else
+      return null;
+  }
+
+  /**
+   * Returns the secondary server.
+   */
+  public ClusterServer getSecondary(String id)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+
+    int index = 0;
+
+    if (srunLength < 64) {
+      index = decode(id.charAt(1));
+    }
+    else {
+      int d1 = decode(id.charAt(2));
+      int d2 = decode(id.charAt(3));
+      
+      index = d1 * 64 + d2;
+    }
+
+    if (index < srunLength)
+      return srunList[index];
+    else
+      return null;
+  }
+
+  /**
+   * Returns the tertiary server.
+   */
+  public ClusterServer getTertiary(String id)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+
+    int index = 0;
+
+    if (srunLength < 64) {
+      index = decode(id.charAt(2));
+    }
+    else {
+      int d1 = decode(id.charAt(4));
+      int d2 = decode(id.charAt(5));
+      
+      index = d1 * 64 + d2;
+    }
+
+    if (index < srunLength)
+      return srunList[index];
+    else
+      return null;
+  }
+
+  private void addDigit(StringBuilder cb, int digit)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+    
+    if (srunLength < 64)
+      cb.append(convert(digit));
+    else {
+      cb.append(convert(digit / 64));
+      cb.append(convert(digit));
+    }
+  }
+
+  /**
    * Handles the case where a class loader has completed initialization
    */
   public void classLoaderInit(DynamicClassLoader loader)
@@ -790,6 +972,31 @@ public class Cluster
     return "Cluster[" + _id + "]";
   }
 
+
+  /**
+   * Converts an integer to a printable character
+   */
+  private static char convert(long code)
+  {
+    code = code & 0x3f;
+    
+    if (code < 26)
+      return (char) ('a' + code);
+    else if (code < 52)
+      return (char) ('A' + code - 26);
+    else if (code < 62)
+      return (char) ('0' + code - 52);
+    else if (code == 62)
+      return '_';
+    else
+      return '-';
+  }
+
+  public static int decode(int code)
+  {
+    return DECODE[code & 0x7f];
+  }
+  
   /**
    * EL variables
    */
@@ -920,5 +1127,11 @@ public class Cluster
 
       return resin == null ? Vfs.getPwd() : resin.getRootDirectory();
     }
+  }
+
+  static {
+    DECODE = new int[128];
+    for (int i = 0; i < 64; i++)
+      DECODE[(int) convert(i)] = i;
   }
 }
