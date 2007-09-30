@@ -535,8 +535,13 @@ public class Jar implements CacheListener {
   {
     if (path.startsWith("/"))
       path = path.substring(1);
-    
-    return getJarFile().getJarEntry(path);
+
+    JarFile jarFile = getJarFile();
+
+    if (jarFile != null)
+      return jarFile.getJarEntry(path);
+    else
+      return null;
   }
 
   /**
@@ -586,7 +591,7 @@ public class Jar implements CacheListener {
       }
       catch (IOException ex) {
         if (log.isLoggable(Level.FINE))
-          log.log(Level.FINE, L.l("Error opening jar file `{0}'", _backing.getNativePath()));
+          log.log(Level.FINE, L.l("Error opening jar file '{0}'", _backing.getNativePath()));
 
         throw ex;
       }

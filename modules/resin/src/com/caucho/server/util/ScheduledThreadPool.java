@@ -785,16 +785,19 @@ public class ScheduledThreadPool
 	    _alarm.queue(_delay);
 	  }
 	  else if (_period > 0) {
-	    long time = Alarm.getCurrentTime() - _initialExpires;
-	    long delta = time % _period;
+            long now = Alarm.getCurrentTime();
+	    long time = now - _initialExpires;
+	    long modTime = time % _period;
 
-	    if (delta > 0) {
-	      _nextTime = Alarm.getCurrentTime() + delta;
+	    if (modTime > 0) {
+              long delta = (_period - modTime);
+              
+	      _nextTime = now + delta;
 
 	      _alarm.queue(delta);
 	    }
 	    else {
-	      _nextTime = Alarm.getCurrentTime() + _period;
+	      _nextTime = now + _period;
 	      
 	      _alarm.queue(_period);
 	    }
