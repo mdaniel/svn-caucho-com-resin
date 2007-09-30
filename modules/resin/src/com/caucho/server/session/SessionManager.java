@@ -1292,7 +1292,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     long backupCode;
 
     if (_selfServer != null)
-      backupCode = _selfServer.generateBackupCode(index);
+      backupCode = _selfServer.getCluster().generateBackupCode(index);
     else
       backupCode = 0x000200010000L;
     
