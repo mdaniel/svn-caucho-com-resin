@@ -34,6 +34,7 @@ import com.caucho.jaxb.skeleton.ClassSkeleton;
 import com.caucho.xml.stream.StaxUtil;
 import com.caucho.util.L10N;
 
+import java.io.File;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.MarshalException;
@@ -143,6 +144,11 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
   }
 
   public void marshal(Object obj, XMLEventWriter writer) throws JAXBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public void marshal(Object obj, File file) throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
