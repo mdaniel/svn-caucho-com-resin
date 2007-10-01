@@ -23,7 +23,7 @@ public class OneToManyServlet extends HttpServlet {
   public void init()
   {
     House house = null;
-      
+
     try {
       house = _entityManager.find(House.class, new Long(1));
     } catch (Throwable e) {
@@ -31,41 +31,41 @@ public class OneToManyServlet extends HttpServlet {
 
     if (house == null) {
       _entityManager.getTransaction().begin();
-      
+
       try {
-	House gryffindor = new House("Gryffindor");
-	_entityManager.persist(gryffindor);
-	
-	House slytherin = new House("Slytherin");
-	_entityManager.persist(slytherin);
-	
-	House ravenclaw = new House("Ravenclaw");
-	_entityManager.persist(ravenclaw);
-	
-	House hufflepuff = new House("Hufflepuff");
-	_entityManager.persist(hufflepuff);
+        House gryffindor = new House("Gryffindor");
+        _entityManager.persist(gryffindor);
 
-	Student student;
+        House slytherin = new House("Slytherin");
+        _entityManager.persist(slytherin);
 
-	student = new Student("Harry Potter", "M", gryffindor);
-	_entityManager.persist(student);
+        House ravenclaw = new House("Ravenclaw");
+        _entityManager.persist(ravenclaw);
 
-	student = new Student("Ron Weasley", "M", gryffindor);
-	_entityManager.persist(student);
+        House hufflepuff = new House("Hufflepuff");
+        _entityManager.persist(hufflepuff);
 
-	student = new Student("Hermione Granger", "F", gryffindor);
-	_entityManager.persist(student);
+        Student student;
 
-	student = new Student("Draco Malfoy", "M", slytherin);
-	_entityManager.persist(student);
+        student = new Student("Harry Potter", "M", gryffindor);
+        _entityManager.persist(student);
 
-	student = new Student("Millicent Bulstrode", "F", slytherin);
-	_entityManager.persist(student);
+        student = new Student("Ron Weasley", "M", gryffindor);
+        _entityManager.persist(student);
 
-	student = new Student("Penelope Clearwater", "F", ravenclaw);
-	_entityManager.persist(student);
+        student = new Student("Hermione Granger", "F", gryffindor);
+        _entityManager.persist(student);
+
+        student = new Student("Draco Malfoy", "M", slytherin);
+        _entityManager.persist(student);
+
+        student = new Student("Millicent Bulstrode", "F", slytherin);
+        _entityManager.persist(student);
+
+        student = new Student("Penelope Clearwater", "F", ravenclaw);
+        _entityManager.persist(student);
       } finally {
-	_entityManager.getTransaction().commit();
+        _entityManager.getTransaction().commit();
       }
     }
   }
@@ -77,20 +77,26 @@ public class OneToManyServlet extends HttpServlet {
 
     res.setContentType("text/html");
 
-    String sql = "SELECT h FROM House h";
-    
-    Query allHouse = _entityManager.createQuery("SELECT o FROM House o");
+    try {
+      _entityManager.getTransaction().begin();
 
-    List houses = allHouse.getResultList();
+      String sql = "SELECT h FROM House h";
 
-    for (int i = 0; i < houses.size(); i++) {
-      House house = (House) houses.get(i);
+      Query allHouse = _entityManager.createQuery("SELECT o FROM House o");
 
-      out.println("<h3>" + house.getName() + "</h3>");
+      List houses = allHouse.getResultList();
 
-      for (Student student : house.getStudents()) {
-        out.println(student.getName() + "<br>");
+      for (int i = 0; i < houses.size(); i++) {
+        House house = (House) houses.get(i);
+
+        out.println("<h3>" + house.getName() + "</h3>");
+
+        for (Student student : house.getStudents()) {
+          out.println(student.getName() + "<br>");
+        }
       }
+    } finally {
+      _entityManager.getTransaction().commit();
     }
   }
 }
