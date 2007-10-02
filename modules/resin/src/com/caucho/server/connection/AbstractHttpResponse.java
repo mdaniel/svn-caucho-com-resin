@@ -1726,33 +1726,34 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else if (! _allowCache) {
       return false;
     }
-    else if (isByte) {
-      CauchoRequest request = (CauchoRequest) _originalRequest;
-      
-      _cacheStream = _cacheInvocation.startByteCaching(request,
-						       this, keys, values,
-						       contentType,
-						       charEncoding,
-						       _contentLength);
-
-      if (_cacheStream != null)
-        _originalResponseStream.setByteCacheStream(_cacheStream);
-      
-      return _cacheStream != null;
-    }
     else {
       CauchoRequest request = (CauchoRequest) _originalRequest;
       
-      _cacheWriter = _cacheInvocation.startCharCaching(request,
-						       this, keys, values,
-						       contentType,
-						       charEncoding,
-						       _contentLength);
+      _cacheEntry = _cacheInvocation.startCaching(request,
+						  this, keys, values,
+						  contentType,
+						  charEncoding,
+						  _contentLength);
 
-      if (_cacheWriter != null)
-        _originalResponseStream.setCharCacheStream(_cacheWriter);
+      if (_cacheEntry == null) {
+	return false;
+      }
+      else if (isByte) {
+	_cacheStream = _cacheEntry.openOutputStream();
+
+	if (_cacheStream != null)
+	  _originalResponseStream.setByteCacheStream(_cacheStream);
       
-      return _cacheWriter != null;
+	return _cacheStream != null;
+      }
+      else {
+	_cacheWriter = _cacheEntry.openWriter();
+
+	if (_cacheWriter != null)
+	  _originalResponseStream.setCharCacheStream(_cacheWriter);
+      
+	return _cacheWriter != null;
+      }
     }
   }
   
@@ -2090,13 +2091,28 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       if (_cacheInvocation == null) {
       }
-      else if (_cacheStream != null || _cacheWriter != null) {
+      else if (_cacheEntry != null) {
+	OutputStream cacheStream = _cacheStream;
 	_cacheStream = null;
+	
+	Writer cacheWriter = _cacheWriter;
 	_cacheWriter = null;
+
+	if (cacheStream != null)
+	  cacheStream.close();
+
+	if (cacheWriter != null)
+	  cacheWriter.close();
+	
 	AbstractCacheFilterChain cache = _cacheInvocation;
 	_cacheInvocation = null;
 
-	cache.finishCaching(_statusCode == 200 && _allowCache);
+	if (_statusCode == 200 && _allowCache) {
+	  AbstractCacheEntry cacheEntry = _cacheEntry;
+	  _cacheEntry = null;
+	  
+	  cache.finishCaching(cacheEntry);
+	}
       }
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
@@ -2113,11 +2129,30 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       if (controller == null)
 	_isClosed = true;
 
+      AbstractCacheFilterChain cache = _cacheInvocation;
+      _cacheInvocation = null;
+      
+      AbstractCacheEntry cacheEntry = _cacheEntry;
+      _cacheEntry = null;
+      
       _cacheStream = null;
       _cacheWriter = null;
-      _cacheInvocation = null;
-      _cacheEntry = null;
+
+      if (cacheEntry != null)
+	cache.killCaching(cacheEntry);
     }
+  }
+
+  public void killCaching()
+  {
+    AbstractCacheFilterChain cache = _cacheInvocation;
+    _cacheInvocation = null;
+    
+    AbstractCacheEntry cacheEntry = _cacheEntry;
+    _cacheEntry = null;
+
+    if (cacheEntry != null)
+      cache.killCaching(cacheEntry);
   }
 
   TempBuffer getBuffer()

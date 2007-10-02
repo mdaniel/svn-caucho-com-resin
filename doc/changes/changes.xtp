@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>cache changes to avoid threading issues (#1992, rep by David Peterson)</li>
 <li>hessian: added debug="true" flag to HessianServlet, to log at level="fine"</li>
 <li>hessian: added HessianDebugInputStream and HessianDebugOutputStream</li>
 <li>hessian: field list deserialization with non-matching classes (#2026, rep by mfsiddiq)</li>

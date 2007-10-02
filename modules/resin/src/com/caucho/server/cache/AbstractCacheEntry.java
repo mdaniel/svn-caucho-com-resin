@@ -28,6 +28,8 @@
 
 package com.caucho.server.cache;
 
+import java.io.*;
+
 /**
  * Cached response.
  */
@@ -37,4 +39,19 @@ abstract public class AbstractCacheEntry {
    * update the cache time.
    */
   abstract public void updateExpiresDate();
+
+  /**
+   * Opens an output stream for byte entries.
+   */
+  abstract public OutputStream openOutputStream();
+
+  /**
+   * Opens a writer for char entries.
+   */
+  abstract public Writer openWriter();
+
+  /**
+   * Destroys the entry.
+   */
+  abstract public void destroy();
 }

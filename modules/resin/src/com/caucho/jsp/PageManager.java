@@ -227,7 +227,7 @@ abstract public class PageManager {
       }
 
       if (log.isLoggable(Level.FINE)) {
-        log.fine("uri:" + uri +
+        log.fine("Jsp[] uri:" + uri +
                  "(cp:" + getWebApp().getContextPath() + 
                  ",app:" + getWebApp().getAppDir() +
                  ") -> " + path);
