@@ -394,6 +394,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setCacheEntry(AbstractCacheEntry entry)
   {
+    if (_cacheInvocation == null)
+      throw new IllegalStateException();
+    
     _cacheEntry = entry;
   }
 
@@ -403,6 +406,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
   {
+    AbstractCacheFilterChain oldCache = _cacheInvocation;
+    _cacheInvocation = null;
+    
+    AbstractCacheEntry oldEntry = _cacheEntry;
+    _cacheEntry = null;
+
+    if (oldEntry != null)
+      oldCache.killCaching(oldEntry);
+      
     _cacheInvocation = cacheInvocation;
   }
 
@@ -2104,10 +2116,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	if (cacheWriter != null)
 	  cacheWriter.close();
 	
-	AbstractCacheFilterChain cache = _cacheInvocation;
-	_cacheInvocation = null;
-
 	if (_statusCode == 200 && _allowCache) {
+	  AbstractCacheFilterChain cache = _cacheInvocation;
+	  _cacheInvocation = null;
+
 	  AbstractCacheEntry cacheEntry = _cacheEntry;
 	  _cacheEntry = null;
 	  

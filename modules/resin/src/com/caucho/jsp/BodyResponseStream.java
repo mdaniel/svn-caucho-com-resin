@@ -42,7 +42,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BodyResponseStream extends AbstractResponseStream {
-  static final Logger log = Log.open(BodyResponseStream.class);
+  static final Logger log
+    = Logger.getLogger(BodyResponseStream.class.getName());
   
   static final L10N L = new L10N(BodyResponseStream.class);
 

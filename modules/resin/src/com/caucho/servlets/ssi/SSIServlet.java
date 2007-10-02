@@ -80,6 +80,13 @@ public class SSIServlet extends HttpServlet
 
     Path path = Vfs.lookup().lookup(realPath);
 
+    if (! path.canRead() || path.isDirectory()) {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND);
+      return;
+    }
+
+    response.setContentType("text/html");
+
     Statement stmt = new SSIParser().parse(path);
 
     WriteStream out = Vfs.openWrite(response.getOutputStream());

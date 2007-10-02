@@ -171,13 +171,13 @@ public class LruCache<K,V> {
       for (CacheItem<K,V> item = _entries[hash];
 	   item != null;
 	   item = item._nextHash) {
-        if (item._key == key || item._key.equals(key)) {
-          updateLru(item);
+	if (item._key == key || item._key.equals(key)) {
+	  updateLru(item);
 
 	  _hitCount++;
 
-          return item._value;
-        }
+	  return item._value;
+	}
       }
 
       _missCount++;
@@ -550,7 +550,7 @@ public class LruCache<K,V> {
     CacheItem<K,V> _prevLru;
     CacheItem<K,V> _nextLru;
     
-    K _key;
+    final K _key;
     V _value;
     int _index;
     int _hitCount;

@@ -34,6 +34,7 @@ import java.beans.FeatureDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -51,11 +52,11 @@ import java.util.logging.Logger;
 public class BeanELResolver extends ELResolver {
   private final static Logger log
     = Logger.getLogger(MapELResolver.class.getName());
+
+  private static WeakHashMap<Class,SoftReference<BeanProperties>> _classMap
+    = new WeakHashMap<Class,SoftReference<BeanProperties>>();
   
   private final boolean _isReadOnly;
-
-  private WeakHashMap<Class,BeanProperties> _classMap
-    = new WeakHashMap<Class,BeanProperties>();
   
   public BeanELResolver()
   {
@@ -84,7 +85,7 @@ public class BeanELResolver extends ELResolver {
       return null;
 
     Class cl = base.getClass();
-    BeanProperties props = _classMap.get(cl);
+    BeanProperties props = getProps(cl);
 
     if (props == null) {
       if (cl.isArray()
@@ -94,7 +95,7 @@ public class BeanELResolver extends ELResolver {
       }
 	  
       props = new BeanProperties(cl);
-      _classMap.put(cl, props);
+      setProps(cl, props);
     }
 
     ArrayList<FeatureDescriptor> descriptors
@@ -134,7 +135,7 @@ public class BeanELResolver extends ELResolver {
       return null;
 
     Class cl = base.getClass();
-    BeanProperties props = _classMap.get(cl);
+    BeanProperties props = getProps(cl);
 
     if (props == null) {
       if (cl.isArray()
@@ -144,7 +145,7 @@ public class BeanELResolver extends ELResolver {
       }
 	  
       props = new BeanProperties(cl);
-      _classMap.put(cl, props);
+      setProps(cl, props);
     }
 
     BeanProperty prop = props.getBeanProperty(fieldName);
@@ -202,7 +203,7 @@ public class BeanELResolver extends ELResolver {
       return;
 
     Class cl = base.getClass();
-    BeanProperties props = _classMap.get(cl);
+    BeanProperties props = getProps(cl);
 
     if (props == null) {
       if (cl.isArray()
@@ -212,7 +213,7 @@ public class BeanELResolver extends ELResolver {
       }
 	  
       props = new BeanProperties(cl);
-      _classMap.put(cl, props);
+      setProps(cl, props);
     }
 
     BeanProperty prop = props.getBeanProperty(fieldName);
@@ -246,7 +247,7 @@ public class BeanELResolver extends ELResolver {
       return null;
 
     Class cl = base.getClass();
-    BeanProperties props = _classMap.get(cl);
+    BeanProperties props = getProps(cl);
 
     if (props == null) {
       if (cl.isArray()
@@ -256,10 +257,29 @@ public class BeanELResolver extends ELResolver {
       }
 	  
       props = new BeanProperties(cl);
-      _classMap.put(cl, props);
+      setProps(cl, props);
     }
 
     return props;
+  }
+
+  static BeanProperties getProps(Class cl)
+  {
+    synchronized (_classMap) {
+      SoftReference<BeanProperties> ref = _classMap.get(cl);
+
+      if (ref != null)
+	return ref.get();
+      else
+	return null;
+    }
+  }
+
+  static void setProps(Class cl, BeanProperties props)
+  {
+    synchronized (_classMap) {
+      _classMap.put(cl, new SoftReference<BeanProperties>(props));
+    }
   }
 
   protected static final class BeanProperties
