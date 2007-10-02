@@ -57,12 +57,15 @@ package hessian.client
 
   import hessian.io.Hessian2Input;
   import hessian.io.HessianOutput;
+  import hessian.io.HessianServiceError;
 
   import mx.core.mx_internal;
 
   import mx.rpc.AbstractOperation;
   import mx.rpc.AbstractService;
   import mx.rpc.AsyncToken;
+  import mx.rpc.Fault;
+  import mx.rpc.events.FaultEvent;
   import mx.rpc.events.ResultEvent;
   import mx.rpc.events.InvokeEvent;
 
@@ -113,7 +116,12 @@ package hessian.client
       request.contentType = "binary/octet-stream";
 
       var msg:HessianMessage = new HessianMessage(args, service.destination);
-      var token:AsyncToken = this.invoke(msg);
+      
+      // XXX This seems to be necessary to avoid a Fault
+      msg.headers = new Object();
+      msg.headers.DSMessageStore = new Object();
+
+      var token:AsyncToken = mx_internal::invoke(msg);
       var stream:URLStream = new URLStream();
 
       _tokens[stream] = token;
@@ -142,21 +150,45 @@ package hessian.client
       delete _tokens[stream];
 
       var input:Hessian2Input = new Hessian2Input(stream);
+      var ret:Object = null;
+      var event:Event = null;
+      var fault:Fault = null;
 
-      var ret:Object = input.readReply(_returnType);
+      try {
+        ret = input.readReply(_returnType);
 
-      stream.close();
+        event = new ResultEvent(BINDING_RESULT, 
+                                /*bubbles=*/false, /*cancelable=*/false, 
+                                ret, token, token.message);
 
-      var resultEvent:ResultEvent = new ResultEvent(BINDING_RESULT, 
-                                                    false, 
-                                                    false, 
-                                                    ret, 
-                                                    token, 
-                                                    token.message);
+        token.applyResult(ResultEvent(event));
+      }
+      catch (e:HessianServiceError) {
+        fault = new Fault(e.code, e.message, String(e.detail));
+        fault.rootCause = e;
 
-      token.applyResult(resultEvent);
+        event = new FaultEvent(BINDING_RESULT, 
+                               /*bubbles=*/false, /*cancelable=*/false, 
+                               fault, token, token.message);
+
+        token.applyFault(FaultEvent(event));
+      }
+      catch (e:Error) {
+        fault = new Fault("", e.message, "");
+        fault.rootCause = e;
+
+        event = new FaultEvent(BINDING_RESULT, 
+                               /*bubbles=*/false, /*cancelable=*/false, 
+                               fault, token, token.message);
+
+        token.applyFault(FaultEvent(event));
+      }
+      finally {
+        stream.close();
+      }
+
       mx_internal::_result = ret;
-      dispatchEvent(resultEvent);
+      dispatchEvent(event);
     }
 
     /**

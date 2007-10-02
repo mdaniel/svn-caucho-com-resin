@@ -376,6 +376,8 @@ package hessian.io
       var msg:String = fault.message;
 
       if (detail is Error) {
+        // XXX will we ever get a detail that is an Error?
+        // (as opposed to a Throwable?)
         _replyFault = detail as Error;
 
         if (msg != null)
@@ -1059,13 +1061,17 @@ package hessian.io
       var b8:Number = read();
 
       // the << operator in actionscript returns a 32-bit int so we can only
-      // use it for the lowest 32 bits of the long
+      // use it for the lowest 32 bits of the long.  Note that we also have 
+      // to be careful about the sign bit of the lower 32 bits: if the MSB of
+      // byte b32 is 1, then it can make the bottom 32 bits actually 
+      // represent a negative number, so we really can only use << for the
+      // lowest 24 bits.
 
       return ((b64 * 0x100000000000000) +
               (b56 * 0x1000000000000) +
               (b48 * 0x10000000000) +
               (b40 * 0x100000000) +
-              (b32 << 24) +
+              (b32 * 0x1000000) +
               (b24 << 16) +
               (b16 << 8) +
               b8);
@@ -1938,14 +1944,18 @@ package hessian.io
       var b16:Number = read();
       var b8:Number = read();
 
-      // the << operator in actionscript returns a 32-bit int so we can only
-      // use it for the lowest 32 bits of the long
+      // The << operator in actionscript returns a 32-bit int so we can only
+      // use it for the lowest 32 bits of the long.  Note that we also have 
+      // to be careful about the sign bit of the lower 32 bits: if the MSB of
+      // byte b32 is 1, then it can make the bottom 32 bits actually 
+      // represent a negative number, so we really can only use << for the
+      // lowest 24 bits.
 
       return ((b64 * 0x100000000000000) +
               (b56 * 0x1000000000000) +
               (b48 * 0x10000000000) +
               (b40 * 0x100000000) +
-              (b32 << 24) +
+              (b32 * 0x1000000) +
               (b24 << 16) +
               (b16 << 8) +
               b8);
