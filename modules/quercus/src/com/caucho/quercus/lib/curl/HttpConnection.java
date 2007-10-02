@@ -96,6 +96,39 @@ public class HttpConnection
     Proxy proxy = getProxy();
 
     _conn = (HttpURLConnection)_URL.openConnection(proxy);
+    
+  }
+  
+  public final static HttpConnection createConnection(URL url,
+                                                      String username,
+                                                      String password,
+                                                      CurlResource curl,
+                                                      URL proxyURL,
+                                                      String proxyUsername,
+                                                      String proxyPassword,
+                                                      String proxyType)
+    throws IOException
+  {
+    HttpConnection conn;
+
+    if (url.getProtocol().equals("https")) {
+      HttpsConnection secureConn
+      = new HttpsConnection(url, username, password);
+
+      conn = secureConn;
+    }
+    else {
+      conn = new HttpConnection(url, username, password);
+    }
+
+    conn._proxyURL = proxyURL;
+    conn._proxyUsername = proxyUsername;
+    conn._proxyPassword = proxyPassword;
+    conn._proxyType = proxyType;
+
+    conn.init(curl);
+
+    return conn;
   }
   
   public final static HttpConnection createConnection(URL url,

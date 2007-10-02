@@ -99,13 +99,14 @@ public class HttpRequest
     if (_curl.getIsProxying()) {
       URL proxyURL = getURL(env, _curl.getProxyURL(), _curl.getProxyPort());
 
-      _conn = new HttpConnection(url,
-                                _curl.getUsername(),
-                                _curl.getPassword(),
-                                proxyURL,
-                                _curl.getProxyUsername(),
-                                _curl.getProxyPassword(),
-                                _curl.getProxyType());
+      _conn = HttpConnection.createConnection(url,
+                                              _curl.getUsername(),
+                                              _curl.getPassword(),
+                                              _curl,
+                                              proxyURL,
+                                              _curl.getProxyUsername(),
+                                              _curl.getProxyPassword(),
+                                              _curl.getProxyType());
     }
     else {
       _conn = HttpConnection.createConnection(url,
