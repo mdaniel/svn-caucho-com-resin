@@ -429,10 +429,10 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    str = str.convertToUnicode(env, charset);
+    StringValue unicodeStr = str.convertToUnicode(env, charset);
 
     int tail;
-    int strlen = str.length();
+    int strlen = unicodeStr.length();
 
     // Imitating PHP5 behavior
     if (offset < 0)
@@ -446,11 +446,11 @@ public class UnicodeModule extends AbstractQuercusModule {
       tail = offset + length;
 
     if (offset < 0 || tail < offset)
-      return StringValue.EMPTY;
+      return str.getEmptyString();
 
-    str = str.substring(offset, tail);
-
-    return str.toBinaryValue(env, charset);
+    unicodeStr = unicodeStr.substring(offset, tail);
+    
+    return str.create(env, unicodeStr, charset);
   }
 
   /**

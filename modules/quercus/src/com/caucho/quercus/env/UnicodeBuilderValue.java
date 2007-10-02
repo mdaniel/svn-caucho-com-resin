@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.vfs.*;
 
 import java.io.*;
@@ -113,6 +114,18 @@ public class UnicodeBuilderValue extends StringBuilderValue
   }
   
   /*
+   * Decodes the Unicode str from charset.
+   * 
+   * @param str should be a Unicode string
+   * @param charset to decode string from
+   */
+  @Override
+  public StringValue create(Env env, StringValue str, String charset)
+  {
+    return str;
+  }
+  
+  /*
    * Creates an empty string builder of the same type.
    */
   public StringValue createEmptyStringBuilder()
@@ -126,6 +139,17 @@ public class UnicodeBuilderValue extends StringBuilderValue
   public StringValue getEmptyString()
   {
     return EMPTY;
+  }
+  
+  /**
+   * Decodes from charset and returns UnicodeValue.
+   *
+   * @param env
+   * @param charset
+   */
+  public StringValue convertToUnicode(Env env, String charset)
+  {
+    return this;
   }
   
   /**
@@ -234,6 +258,18 @@ public class UnicodeBuilderValue extends StringBuilderValue
   }
   */
 
+  /*
+   * Appends a Unicode string to the value.
+   * 
+   * @param str should be a Unicode string
+   * @param charset to decode string from
+   */
+  @Override
+  public StringValue append(Env env, StringValue unicodeStr, String charset)
+  {
+    return append(unicodeStr);
+  }
+  
   /**
    * Append to a string builder.
    */

@@ -390,307 +390,307 @@ public class DateModule extends AbstractQuercusModule {
       int len = format.length();
 
       for (int i = 0; i < len; i++) {
-	char ch = format.charAt(i);
+        char ch = format.charAt(i);
 
-	switch (ch) {
-	case 'd':
-	  {
-	    int day = calendar.getDayOfMonth();
-	    sb.append(day / 10);
-	    sb.append(day % 10);
-	    break;
-	  }
+        switch (ch) {
+          case 'd':
+          {
+            int day = calendar.getDayOfMonth();
+            sb.append(day / 10);
+            sb.append(day % 10);
+            break;
+          }
 
-	case 'D':
-	  {
-	    int day = calendar.getDayOfWeek();
+          case 'D':
+          {
+            int day = calendar.getDayOfWeek();
 
-	    sb.append(_shortDayOfWeek[day - 1]);
-	    break;
-	  }
+            sb.append(_shortDayOfWeek[day - 1]);
+            break;
+          }
 
-	case 'j':
-	  {
-	    int day = calendar.getDayOfMonth();
-	    sb.append(day);
-	    break;
-	  }
+          case 'j':
+          {
+            int day = calendar.getDayOfMonth();
+            sb.append(day);
+            break;
+          }
 
-	case 'l':
-	  {
-	    int day = calendar.getDayOfWeek();
+          case 'l':
+          {
+            int day = calendar.getDayOfWeek();
 
-	    sb.append(_fullDayOfWeek[day]);
-	    break;
-	  }
+            sb.append(_fullDayOfWeek[day]);
+            break;
+          }
 
-	case 'S':
-	  {
-	    int day = calendar.getDayOfMonth();
+          case 'S':
+          {
+            int day = calendar.getDayOfMonth();
 
-	    switch (day) {
-	    case 1: case 21: case 31:
-	      sb.append("st");
-	      break;
-	    case 2: case 22:
-	      sb.append("nd");
-	      break;
-	    case 3: case 23:
-	      sb.append("rd");
-	      break;
-	    default:
-	      sb.append("th");
-	      break;
-	    }
-	    break;
-	  }
+            switch (day) {
+              case 1: case 21: case 31:
+                sb.append("st");
+                break;
+              case 2: case 22:
+                sb.append("nd");
+                break;
+              case 3: case 23:
+                sb.append("rd");
+                break;
+              default:
+                sb.append("th");
+              break;
+            }
+            break;
+          }
 
-	case 'w':
-	  {
-	    int day = calendar.getDayOfWeek() - 1;
+          case 'w':
+          {
+            int day = calendar.getDayOfWeek() - 1;
 
-	    sb.append(day);
-	    break;
-	  }
+            sb.append(day);
+            break;
+          }
 
-	case 'z':
-	  {
-	    int day = calendar.getDayOfYear();
+          case 'z':
+          {
+            int day = calendar.getDayOfYear();
 
-	    sb.append(day);
-	    break;
-	  }
+            sb.append(day);
+            break;
+          }
 
-	case 'W':
-	  {
-	    int week = calendar.getWeek();
+          case 'W':
+          {
+            int week = calendar.getWeek();
 
-	    sb.append(week);
-	    break;
-	  }
+            sb.append(week);
+            break;
+          }
 
-	case 'm':
-	  {
-	    int month = calendar.getMonth() + 1;
-	    sb.append(month / 10);
-	    sb.append(month % 10);
-	    break;
-	  }
+          case 'm':
+          {
+            int month = calendar.getMonth() + 1;
+            sb.append(month / 10);
+            sb.append(month % 10);
+            break;
+          }
 
-	case 'M':
-	  {
-	    int month = calendar.getMonth();
-	    sb.append(_shortMonth[month]);
-	    break;
-	  }
+          case 'M':
+          {
+            int month = calendar.getMonth();
+            sb.append(_shortMonth[month]);
+            break;
+          }
 
-	case 'F':
-	  {
-	    int month = calendar.getMonth();
-	    sb.append(_fullMonth[month]);
-	    break;
-	  }
+          case 'F':
+          {
+            int month = calendar.getMonth();
+            sb.append(_fullMonth[month]);
+            break;
+          }
 
-	case 'n':
-	  {
-	    int month = calendar.getMonth() + 1;
-	    sb.append(month);
-	    break;
-	  }
+          case 'n':
+          {
+            int month = calendar.getMonth() + 1;
+            sb.append(month);
+            break;
+          }
 
-	case 't':
-	  {
-	    int days = calendar.getDaysInMonth();
-	    sb.append(days);
-	    break;
-	  }
+          case 't':
+          {
+            int days = calendar.getDaysInMonth();
+            sb.append(days);
+            break;
+          }
 
-	case 'Y':
-	  {
-	    int year = calendar.getYear();
+          case 'Y':
+          {
+            int year = calendar.getYear();
 
-	    sb.append((year / 1000) % 10);
-	    sb.append((year / 100) % 10);
-	    sb.append((year / 10) % 10);
-	    sb.append((year) % 10);
-	    break;
-	  }
+            sb.append((year / 1000) % 10);
+            sb.append((year / 100) % 10);
+            sb.append((year / 10) % 10);
+            sb.append((year) % 10);
+            break;
+          }
 
-	case 'y':
-	  {
-	    int year = calendar.getYear();
+          case 'y':
+          {
+            int year = calendar.getYear();
 
-	    sb.append((year / 10) % 10);
-	    sb.append((year) % 10);
-	    break;
-	  }
+            sb.append((year / 10) % 10);
+            sb.append((year) % 10);
+            break;
+          }
 
-	case 'L':
-	  {
-	    if (calendar.isLeapYear())
-	      sb.append(1);
-	    else
-	      sb.append(0);
-	    break;
-	  }
+          case 'L':
+          {
+            if (calendar.isLeapYear())
+              sb.append(1);
+            else
+              sb.append(0);
+            break;
+          }
 
-	case 'a':
-	  {
-	    int hour = calendar.getHour();
+          case 'a':
+          {
+            int hour = calendar.getHour();
 
-	    if (hour < 12)
-	      sb.append("am");
-	    else
-	      sb.append("pm");
-	    break;
-	  }
+            if (hour < 12)
+              sb.append("am");
+            else
+              sb.append("pm");
+            break;
+          }
 
-	case 'A':
-	  {
-	    int hour = calendar.getHour();
+          case 'A':
+          {
+            int hour = calendar.getHour();
 
-	    if (hour < 12)
-	      sb.append("AM");
-	    else
-	      sb.append("PM");
-	    break;
-	  }
+            if (hour < 12)
+              sb.append("AM");
+            else
+              sb.append("PM");
+            break;
+          }
 
-	case 'g':
-	  {
-	    int hour = calendar.getHour() % 12;
+          case 'g':
+          {
+            int hour = calendar.getHour() % 12;
 
-	    if (hour == 0)
-	      hour = 12;
+            if (hour == 0)
+              hour = 12;
 
-	    sb.append(hour);
-	    break;
-	  }
+            sb.append(hour);
+            break;
+          }
 
-	case 'G':
-	  {
-	    int hour = calendar.getHour();
+          case 'G':
+          {
+            int hour = calendar.getHour();
 
-	    sb.append(hour);
-	    break;
-	  }
+            sb.append(hour);
+            break;
+          }
 
-	case 'h':
-	  {
-	    int hour = calendar.getHour() % 12;
+          case 'h':
+          {
+            int hour = calendar.getHour() % 12;
 
-	    if (hour == 0)
-	      hour = 12;
+            if (hour == 0)
+              hour = 12;
 
-	    sb.append(hour / 10);
-	    sb.append(hour % 10);
-	    break;
-	  }
+            sb.append(hour / 10);
+            sb.append(hour % 10);
+            break;
+          }
 
-	case 'H':
-	  {
-	    int hour = calendar.getHour();
+          case 'H':
+          {
+            int hour = calendar.getHour();
 
-	    sb.append(hour / 10);
-	    sb.append(hour % 10);
-	    break;
-	  }
+            sb.append(hour / 10);
+            sb.append(hour % 10);
+            break;
+          }
 
-	case 'i':
-	  {
-	    int minutes = calendar.getMinute();
+          case 'i':
+          {
+            int minutes = calendar.getMinute();
 
-	    sb.append(minutes / 10);
-	    sb.append(minutes % 10);
-	    break;
-	  }
+            sb.append(minutes / 10);
+            sb.append(minutes % 10);
+            break;
+          }
 
-	case 's':
-	  {
-	    int seconds = calendar.getSecond();
+          case 's':
+          {
+            int seconds = calendar.getSecond();
 
-	    sb.append(seconds / 10);
-	    sb.append(seconds % 10);
-	    break;
-	  }
+            sb.append(seconds / 10);
+            sb.append(seconds % 10);
+            break;
+          }
 
-	case 'O':
-	  {
-	    long offset = calendar.getZoneOffset();
+          case 'O':
+          {
+            long offset = calendar.getZoneOffset();
 
-	    int minute = (int) (offset / (60 * 1000));
+            int minute = (int) (offset / (60 * 1000));
 
-	    if (minute < 0)
-	      sb.append('-');
-	    else
-	      sb.append('+');
+            if (minute < 0)
+              sb.append('-');
+            else
+              sb.append('+');
 
-	    sb.append((minute / 60) / 10);
-	    sb.append((minute / 60) % 10);
-	    sb.append((minute / 10) % 10);
-	    sb.append(minute % 10);
-	    break;
-	  }
+            sb.append((minute / 60) / 10);
+            sb.append((minute / 60) % 10);
+            sb.append((minute / 10) % 10);
+            sb.append(minute % 10);
+            break;
+          }
 
-	case 'I':
-	  {
-	    if (calendar.isDST())
-	      sb.append('1');
-	    else
-	      sb.append('0');
-	    break;
-	  }
+          case 'I':
+          {
+            if (calendar.isDST())
+              sb.append('1');
+            else
+              sb.append('0');
+            break;
+          }
 
-	case 'T':
-	  {
-	    TimeZone zone = calendar.getLocalTimeZone();
+          case 'T':
+          {
+            TimeZone zone = calendar.getLocalTimeZone();
 
-	    sb.append(zone.getDisplayName(calendar.isDST(), TimeZone.SHORT));
-	    break;
-	  }
-      
-    case 'e':
-      {
-        TimeZone zone = calendar.getLocalTimeZone();
-        
-        sb.append(zone.getID());
-        break;
-      }
+            sb.append(zone.getDisplayName(calendar.isDST(), TimeZone.SHORT));
+            break;
+          }
 
-	case 'Z':
-	  {
-	    long offset = calendar.getZoneOffset();
+          case 'e':
+          {
+            TimeZone zone = calendar.getLocalTimeZone();
 
-	    sb.append(offset / (1000));
-	    break;
-	  }
+            sb.append(zone.getID());
+            break;
+          }
 
-	case 'c':
-	  {
-	    sb.append(calendar.printISO8601());
-	    break;
-	  }
+          case 'Z':
+          {
+            long offset = calendar.getZoneOffset();
 
-	case 'r':
-	  {
-	    sb.append(calendar.printDate());
-	    break;
-	  }
+            sb.append(offset / (1000));
+            break;
+          }
 
-	case 'U':
-	  {
-	    sb.append(now / 1000);
-	    break;
-	  }
+          case 'c':
+          {
+            sb.append(calendar.printISO8601());
+            break;
+          }
 
-	case '\\':
-	  sb.append(format.charAt(++i));
-	  break;
+          case 'r':
+          {
+            sb.append(calendar.printDate());
+            break;
+          }
 
-	default:
-	  sb.append(ch);
-	  break;
-	}
+          case 'U':
+          {
+            sb.append(now / 1000);
+            break;
+          }
+
+          case '\\':
+            sb.append(format.charAt(++i));
+            break;
+
+          default:
+            sb.append(ch);
+          break;
+        }
       }
 
       return sb.toString();

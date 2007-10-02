@@ -388,6 +388,7 @@ public class Env {
 
   /**
    * Returns the encoding used for runtime conversions, e.g. files
+   * XXX: ISO-8859-1 when unicode.semantics is OFF
    */
   public StringValue getRuntimeEncoding()
   {

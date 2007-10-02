@@ -89,10 +89,10 @@ public class MbstringModule
     if (mode == MB_CASE_TITLE) {
       encoding = getEncoding(env, encoding);
 
-      str = str.convertToUnicode(env, encoding);
-      str = toUpperCaseTitle(env, str);
+      StringValue unicodeStr = str.convertToUnicode(env, encoding);
+      unicodeStr = toUpperCaseTitle(env, unicodeStr);
 
-      return str.toBinaryValue(env, encoding);
+      return str.create(env, unicodeStr, encoding);
     }
     else if (mode == MB_CASE_LOWER)
       return mb_strtolower(env, str, encoding);
@@ -112,9 +112,6 @@ public class MbstringModule
   {
     // XXX: fallback encoding
     int tail = fromEncodings.indexOf(',', 1);
-
-    if (tail < 0)
-      tail = fromEncodings.length();
 
     String srcEncoding;
 
@@ -792,29 +789,29 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.convertToUnicode(env, encoding);
+    StringValue unicodeStr = str.convertToUnicode(env, encoding);
 
-    int len = str.length();
+    int len = unicodeStr.length();
     int end = start + width;
 
     if (end > len)
       end = len;
 
     if (start < 0 || start > end)
-      return StringValue.EMPTY;
+      return str.getEmptyString();
 
-    str = str.substring(start, end);
+    unicodeStr = unicodeStr.substring(start, end);
 
     if (end < len && trimmarker.length() > 0) {
       StringValue sb = env.createUnicodeBuilder();
 
-      sb.append(str);
+      sb.append(unicodeStr);
       sb.append(trimmarker.convertToUnicode(env, encoding));
 
-      str = sb;
+      unicodeStr = sb;
     }
 
-    return str.toBinaryValue(env, encoding);
+    return str.create(env, unicodeStr, encoding);
   }
 
   /**
@@ -845,9 +842,7 @@ public class MbstringModule
     haystack = haystack.convertToUnicode(env, encoding);
     needle = needle.convertToUnicode(env, encoding);
 
-    Value val = StringModule.strpos(haystack, needle, offset);
-
-    return encodeAll(env, val, encoding);
+   return StringModule.strpos(haystack, needle, offset);
   }
 
   /**
@@ -864,9 +859,7 @@ public class MbstringModule
     haystack = haystack.convertToUnicode(env, encoding);
     needle = needle.convertToUnicode(env, encoding);
 
-    Value val = StringModule.strrpos(haystack, needle, offsetV);
-
-    return encodeAll(env, val, encoding);
+    return StringModule.strrpos(haystack, needle, offsetV);
   }
 
   /**
@@ -878,10 +871,10 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.convertToUnicode(env, encoding);
-    str = StringModule.strtolower(str);
+    StringValue unicodeStr = str.convertToUnicode(env, encoding);
+    unicodeStr = StringModule.strtolower(str);
 
-    return str.toBinaryValue(env, encoding);
+    return str.create(env, unicodeStr, encoding);
   }
 
   /**
@@ -893,10 +886,10 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.convertToUnicode(env, encoding);
-    str = StringModule.strtoupper(str);
+    StringValue unicodeStr = str.convertToUnicode(env, encoding);
+    unicodeStr = StringModule.strtoupper(str);
 
-    return str.toBinaryValue(env, encoding);
+    return str.create(env, unicodeStr, encoding);
   }
 
   /**
@@ -997,7 +990,7 @@ public class MbstringModule
    */
   private static StringValue toUpperCaseTitle(Env env, StringValue string)
   {
-    StringValue sb = env.createUnicodeBuilder();
+    StringValue sb = string.createEmptyStringBuilder();
 
     int strLen = string.length();
     boolean isWordStart = true;
@@ -1082,14 +1075,18 @@ public class MbstringModule
    * Recursively encodes objects and arrays.
    */
   private static Value encodeAll(Env env,
-                              Value val,
-                              String encoding)
+                                 Value val,
+                                 String encoding)
   {
     val = val.toValue();
 
-    if (val instanceof StringValue)
-      return ((StringValue)val).toBinaryValue(env, encoding);
-
+    if (val instanceof StringValue) {
+      StringValue sb = env.createBinaryBuilder();
+      
+      sb.append(env, (StringValue) val, encoding);
+      
+      return sb;
+    }
     else if (val instanceof ArrayValue) {
       ArrayValue array = new ArrayValueImpl();
 

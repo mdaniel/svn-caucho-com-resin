@@ -58,6 +58,7 @@ class GettextResource
   private PluralExpr _pluralExpr;
 
   private HashMap<StringValue, ArrayList<StringValue>> _translations;
+  private String _charset;
 
   protected GettextResource(Env env,
                               Path root,
@@ -111,7 +112,8 @@ class GettextResource
 
       _pluralExpr = parser.getPluralExpr();
       _translations = parser.readTranslations();
-
+      _charset = parser.getCharset();
+      
       parser.close();
 
     } catch (IOException e) {
@@ -179,5 +181,10 @@ class GettextResource
       return pluralForms.get(index);
     else
       return pluralForms.get(0);
+  }
+  
+  protected String getCharset()
+  {
+    return _charset;
   }
 }

@@ -61,12 +61,12 @@ public class DateTime
   private DateTimeZone _dateTimeZone;
   
   protected DateTime(String timeString)
-  { 
+  {
     this(timeString, new DateTimeZone());
   }
   
   protected DateTime(String timeString, DateTimeZone dateTimeZone)
-  { 
+  {
     _qDate = new QDate(dateTimeZone.getTimeZone());
     _dateTimeZone = dateTimeZone;
     
@@ -122,6 +122,7 @@ public class DateTime
   public void setTimeZone(DateTimeZone dateTimeZone)
   {
     _dateTimeZone = dateTimeZone;
+    _qDate = new QDate(dateTimeZone.getTimeZone());
   }
   
   public long getOffset()

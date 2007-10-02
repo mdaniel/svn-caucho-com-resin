@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.gettext;
 
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -59,8 +60,6 @@ class MOFileParser extends GettextParser
   private int _numberOfStrings;
   private int _offsetOriginal;
   private int _offsetTranslation;
-
-  private String _charset;
 
   MOFileParser(Env env, Path path)
     throws IOException
@@ -177,7 +176,7 @@ class MOFileParser extends GettextParser
   private StringValue readOriginalString()
     throws IOException
   {
-    StringValue sb = _env.createUnicodeBuilder();
+    StringValue sb = new UnicodeBuilderValue();
 
     for (int ch = _in.readChar(); ch > 0; ch = _in.readChar()) {
       sb.append((char)ch);
@@ -193,7 +192,7 @@ class MOFileParser extends GettextParser
     throws IOException
   {
     ArrayList<StringValue> list = new ArrayList<StringValue>();
-    StringValue sb = _env.createUnicodeBuilder();
+    StringValue sb = new UnicodeBuilderValue();
 
     for (; length > 0; length--) {
       int ch = _in.readChar();
@@ -203,7 +202,7 @@ class MOFileParser extends GettextParser
 
       else if (ch == 0) {
         list.add(sb);
-        sb = _env.createUnicodeBuilder();
+        sb = new UnicodeBuilderValue();
       }
       else
         break;

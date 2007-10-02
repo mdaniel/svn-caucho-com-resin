@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.gettext;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 
@@ -36,63 +37,32 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-abstract class GettextParser
+public class GettextDomainMap
 {
-  PluralExpr _pluralExpr;
-  String _charset;
-
-  PluralExpr getPluralExpr()
+  private String _current = "messages";
+  
+  private HashMap<String, GettextDomain> _domains
+    = new HashMap<String, GettextDomain>();
+  
+  public GettextDomain getCurrent(Env env)
   {
-    return _pluralExpr;
-  }
-
-  /*
-   * Returns the charset defined in the PO/MO file.
-   */
-  public String getCharset()
-  {
-    return _charset;
+    return getDomain(env, _current);
   }
   
-  /**
-   * Extracts the charset from the gettext metadata.
-   */
-  protected static String getCharset(StringValue metadata)
+  public void setCurrent(String current)
   {
-    String header = "charset=";
-    int i = metadata.indexOf(header);
-
-    if (i < 0)
-      return "UTF-8";
-
-    i = i + header.length();
-    int len = metadata.length();
-
-    int j = i + 1;
-    for (; j < len; j++) {
-      char ch = metadata.charAt(j);
-
-      switch (ch) {
-        case ' ':
-        case '\t':
-        case '\r':
-        case '\n':
-          return metadata.substring(i, j).toString();
-        default:
-          continue; 
-      }
-    }
-
-    return metadata.substring(i, j).toString();
+    _current = current;
   }
-
-  /**
-   * Returns the gettext translations.
-   *
-   * @return translations from file, or null on error
-   */
-  abstract HashMap<StringValue, ArrayList<StringValue>> readTranslations()
-    throws IOException;
-
-  abstract void close();
+  
+  public GettextDomain getDomain(Env env, String name)
+  {
+    GettextDomain domain = _domains.get(name);
+    
+    if (domain == null) {
+      domain = new GettextDomain(env, name);
+      _domains.put(name, domain);
+    }
+    
+    return domain;
+  }
 }

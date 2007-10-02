@@ -98,6 +98,33 @@ abstract public class StringValue extends Value implements CharSequence {
   }
   
   /*
+   * Decodes the Unicode str from charset.
+   * 
+   * @param str should be a Unicode string
+   * @param charset to decode string from
+   */
+  public StringValue create(Env env, StringValue unicodeStr, String charset)
+  {
+    if (! unicodeStr.isUnicode())
+      return unicodeStr;
+    
+    try {
+      StringValue sb = createEmptyStringBuilder();
+      
+      byte []bytes = unicodeStr.toString().getBytes(charset);
+      
+      sb.append(bytes);
+      return sb;
+      
+    }
+    catch (UnsupportedEncodingException e) {
+      env.warning(e);
+      
+      return unicodeStr;
+    }
+  }
+  
+  /*
    * Creates an empty string builder of the same type.
    */
   abstract public StringValue createEmptyStringBuilder();
@@ -106,7 +133,7 @@ abstract public class StringValue extends Value implements CharSequence {
    * Returns the empty string of same type.
    */
   abstract public StringValue getEmptyString();
-
+  
   //
   // Predicates and relations
   //
@@ -676,6 +703,31 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  /*
+   * Appends a Unicode string to the value.
+   * 
+   * @param str should be a Unicode string
+   * @param charset to decode string from
+   */
+  public StringValue append(Env env, StringValue unicodeStr, String charset)
+  {
+    if (! unicodeStr.isUnicode())
+      return append(unicodeStr);
+
+    try {
+      byte []bytes = unicodeStr.toString().getBytes(charset);
+      
+      append(bytes);
+      return this;
+      
+    }
+    catch (UnsupportedEncodingException e) {
+      env.warning(e);
+      
+      return append(unicodeStr);
+    }
+  }
 
   /**
    * Append a Java char to the value.
@@ -739,6 +791,14 @@ abstract public class StringValue extends Value implements CharSequence {
   public StringValue append(byte []buf, int offset, int length)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Append a byte buffer to the value.
+   */
+  public StringValue append(byte []buf)
+  {
+    return append(buf, 0, buf.length);
   }
 
   /**
@@ -1301,7 +1361,7 @@ abstract public class StringValue extends Value implements CharSequence {
   public Reader toReader(String charset)
     throws UnsupportedEncodingException
   {
-    byte []bytes = toString().getBytes();
+    byte []bytes = toBytes();
     
     return new InputStreamReader(new ByteArrayInputStream(bytes), charset);
   }

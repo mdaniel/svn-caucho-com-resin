@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.gettext;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.string.StringModule;
@@ -37,6 +38,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -48,10 +50,10 @@ import java.util.logging.Logger;
  * Translations are LRU cached.
  */
 public class GettextModule
-    extends AbstractQuercusModule
+  extends AbstractQuercusModule
 {
-  private LruCache<Object,GettextResource> _cache =
-      new LruCache<Object,GettextResource>(16);
+  private LruCache<Object,GettextResource> _cache
+    = new LruCache<Object,GettextResource>(16);
 
   private final Logger log
     = Logger.getLogger(GettextModule.class.getName());
@@ -70,11 +72,13 @@ public class GettextModule
    * @param codeset
    * @return codeset
    */
-  public StringValue bind_textdomain_codeset(Env env,
-                              StringValue domain,
-                              StringValue codeset)
+  public String bind_textdomain_codeset(Env env,
+                                             String domainName,
+                                             String charset)
   {
-    return env.createString("UTF-16");
+    getDomain(env, domainName).setCharset(charset);
+    
+    return charset;
   }
 
   /**
@@ -86,10 +90,17 @@ public class GettextModule
    * @return directory
    */
   public Value bindtextdomain(Env env,
-                              StringValue domain,
+                              String domainName,
                               StringValue directory)
   {
-    return setPath(env, domain, directory);
+    GettextDomain domain = getDomain(env, domainName);
+    
+    domain.setPath(env, directory);
+    
+    if (domain.getPath() == null)
+      return BooleanValue.FALSE;
+    else
+      return directory;
   }
 
   /**
@@ -101,13 +112,13 @@ public class GettextModule
    * @param category
    */
   public StringValue dcgettext(Env env,
-                              StringValue domain,
+                              String domainName,
                               StringValue message,
                               int category,
                               Value args[])
   {
     return translate(env,
-                     domain,
+                     getDomain(env, domainName),
                      getCategory(env, category),
                      message,
                      args);
@@ -124,15 +135,15 @@ public class GettextModule
    * @param category
    */
   public StringValue dcngettext(Env env,
-                              StringValue domain,
-                              StringValue msgid1,
-                              StringValue msgid2,
-                              int n,
-                              int category,
-                              Value args[])
+                                String domainName,
+                                StringValue msgid1,
+                                StringValue msgid2,
+                                int n,
+                                int category,
+                                Value args[])
   {
     return translate(env,
-                     domain,
+                     getDomain(env, domainName),
                      getCategory(env, category),
                      msgid1,
                      msgid2,
@@ -148,12 +159,12 @@ public class GettextModule
    * @param message
    */
   public StringValue dgettext(Env env,
-                              StringValue domain,
+                              String domainName,
                               StringValue message,
                               Value args[])
   {
     return translate(env,
-                     domain,
+                     getDomain(env, domainName),
                      "LC_MESSAGES",
                      message,
                      args);
@@ -169,14 +180,14 @@ public class GettextModule
    * @param n
    */
   public StringValue dngettext(Env env,
-                              StringValue domain,
-                              StringValue msgid1,
-                              StringValue msgid2,
-                              int n,
-                              Value args[])
+                               String domainName,
+                               StringValue msgid1,
+                               StringValue msgid2,
+                               int n,
+                               Value args[])
   {
     return translate(env,
-                     domain,
+                     getDomain(env, domainName),
                      "LC_MESSAGES",
                      msgid1,
                      msgid2,
@@ -243,13 +254,18 @@ public class GettextModule
    * @param domain
    * @return name of current domain after change.
    */
-  public StringValue textdomain(Env env,
-                              @Optional Value domain)
+  public String textdomain(Env env,
+                                @Optional Value domain)
   {
-    if (! domain.isNull())
-      return setCurrentDomain(env, domain.toStringValue());
-
-    return getCurrentDomain(env);
+    if (! domain.isNull()) {
+      String name = domain.toString();
+      
+      setCurrentDomain(env, name);
+      
+      return name;
+    }
+    
+    return getCurrentDomain(env).getName();
   }
 
   /**
@@ -263,24 +279,27 @@ public class GettextModule
    * @return translation found, else message
    */
   private StringValue translate(Env env,
-                              StringValue domain,
-                              CharSequence category,
-                              StringValue message,
-                              Value []args)
+                                GettextDomain domain,
+                                CharSequence category,
+                                StringValue message,
+                                Value []args)
   {
     Locale locale = env.getLocaleInfo().getMessages();
 
     GettextResource resource = getResource(env,
-                                           getPath(env, domain),
+                                           domain.getPath(),
                                            locale,
                                            category,
-                                           domain);
+                                           domain.getName());
 
-    StringValue translation = resource.getTranslation(message);
+    StringValue unicodeTranslation = resource.getTranslation(message);
 
-    if (translation == null)
-      translation = message;
+    if (unicodeTranslation == null)
+      unicodeTranslation = message;
 
+    StringValue translation
+      = message.create(env, unicodeTranslation, domain.getCharset());
+    
     return format(env, translation, args);
   }
 
@@ -296,26 +315,29 @@ public class GettextModule
    * @return translation found, else msgid1 if n == 1, else msgid2
    */
   private StringValue translate(Env env,
-                              StringValue domain,
-                              CharSequence category,
-                              StringValue msgid1,
-                              StringValue msgid2,
-                              int quantity,
-                              Value []args)
+                                GettextDomain domain,
+                                CharSequence category,
+                                StringValue msgid1,
+                                StringValue msgid2,
+                                int quantity,
+                                Value []args)
   {
     Locale locale = env.getLocaleInfo().getMessages();
 
     GettextResource resource = getResource(env,
-                                           getPath(env, domain),
+                                           domain.getPath(),
                                            locale,
                                            category,
-                                           domain);
+                                           domain.getName());
 
-    StringValue translation = resource.getTranslation(msgid1, quantity);
+    StringValue unicodeTranslation
+      = resource.getTranslation(msgid1, quantity);
 
-    if (translation == null)
-      translation = errorReturn(msgid1, msgid2, quantity);
+    if (unicodeTranslation == null)
+      unicodeTranslation = errorReturn(msgid1, msgid2, quantity);
 
+    StringValue translation = msgid1.create(env, unicodeTranslation, domain.getCharset());
+    
     return format(env, translation, args);
   }
 
@@ -323,7 +345,7 @@ public class GettextModule
                               Path path,
                               Locale locale,
                               CharSequence category,
-                              StringValue domain)
+                              String domain)
   {
     ArrayList<Object> key = new ArrayList<Object>();
 
@@ -342,61 +364,32 @@ public class GettextModule
     return resource;
   }
 
-  private Path getPath(Env env, StringValue domain)
+  private GettextDomainMap getDomains(Env env)
   {
-    Object val = env.getSpecialValue("caucho.gettext_paths");
+    Object val = env.getSpecialValue("caucho.gettext_domains");
 
     if (val == null) {
-      val = new HashMap<StringValue,Path>();
+      val = new GettextDomainMap();
 
-      env.setSpecialValue("caucho.gettext_paths", val);
+      env.setSpecialValue("caucho.gettext_domains", val);
     }
-
-    Path path = ((HashMap<StringValue,Path>)val).get(domain);
-
-    if (path == null)
-      return env.getPwd();
-
-    return path;
+    
+    return (GettextDomainMap) val;
+  }
+  
+  private GettextDomain getDomain(Env env, String name)
+  {
+    return getDomains(env).getDomain(env, name);
+  }
+  
+  private GettextDomain getCurrentDomain(Env env)
+  {
+    return getDomains(env).getCurrent(env);
   }
 
-  private Value setPath(Env env,
-                              StringValue domain,
-                              StringValue directory)
+  private void setCurrentDomain(Env env, String name)
   {
-    Object val = env.getSpecialValue("caucho.gettext_paths");
-
-    if (val == null) {
-      val = new HashMap<StringValue,Path>();
-
-      env.setSpecialValue("caucho.gettext_paths", val);
-    }
-
-    Path path = env.lookupPwd(directory);
-
-    if (path == null)
-      return BooleanValue.FALSE;
-
-    ((HashMap<StringValue,Path>)val).put(domain, path);
-
-    return directory;
-  }
-
-  private StringValue getCurrentDomain(Env env)
-  {
-    Object val = env.getSpecialValue("caucho.gettext_current");
-
-    if (val == null)
-      return setCurrentDomain(env, env.createString("messages"));
-
-    return (StringValue)val;
-  }
-
-  private StringValue setCurrentDomain(Env env, StringValue currentDomain)
-  {
-    env.setSpecialValue("caucho.gettext_current", currentDomain);
-
-    return currentDomain;
+    getDomains(env).setCurrent(name);
   }
 
   /**
@@ -404,23 +397,24 @@ public class GettextModule
    */
   private String getCategory(Env env, int category)
   {
-    if (category == StringModule.LC_MESSAGES)
-      return "LC_MESSAGES";
-    else if (category == StringModule.LC_ALL)
-      return "LC_ALL";
-    else if (category == StringModule.LC_CTYPE)
-      return "LC_CTYPE";
-    else if (category == StringModule.LC_NUMERIC)
-      return "LC_NUMERIC";
-    else if (category == StringModule.LC_TIME)
-      return "LC_TIME";
-    else if (category == StringModule.LC_COLLATE)
-      return "LC_COLLATE";
-    else if (category == StringModule.LC_MONETARY)
-      return "LC_MONETARY";
-    else {
-      env.warning(L.l("Invalid category. Please use named constants"));
-      return "LC_MESSAGES";
+    switch (category) {
+      case StringModule.LC_MESSAGES:
+        return "LC_MESSAGES";
+      case StringModule.LC_ALL:
+        return "LC_ALL";
+      case StringModule.LC_CTYPE:
+        return "LC_CTYPE";
+      case StringModule.LC_NUMERIC:
+        return "LC_NUMERIC";
+      case StringModule.LC_TIME:
+        return "LC_TIME";
+      case StringModule.LC_COLLATE:
+        return "LC_COLLATE";
+      case StringModule.LC_MONETARY:
+        return "LC_MONETARY";
+      default:
+        env.warning(L.l("Invalid category. Please use named constants"));
+        return "LC_MESSAGES";
     }
   }
 
@@ -440,39 +434,56 @@ public class GettextModule
   {
     if (args.length == 0)
       return msg;
-    else if (msg.isUnicode())
-      return formatUnicode(env, msg, args);
+    
+    StringValue sb;
+    
+    if (msg.isUnicode())
+      sb = env.createUnicodeBuilder();
     else
-      return formatBinary(env, msg, args);
+      sb = env.createBinaryBuilder();
+    
+    return formatImpl(env, msg, args, sb);
   }
 
+  /*
   private static StringValue formatBinary(Env env,
 					  StringValue msg,
-					  Value []args)
+					  Value []args,
+					  String charset)
   {
     StringValue sb = env.createBinaryBuilder();
 
+    byte []bytes = null;
+    
+    try {
+      bytes = msg.toString().getBytes(charset);
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new QuercusModuleException(e);
+    }
+    
     int i = 0;
-    int length = msg.length();
+    int len = bytes.length;
+    
+    
+    while (i < len) {
+      byte ch = bytes[i];
 
-    while (i < length) {
-      char ch = msg.charAt(i);
-
-      if (ch != '[' || i + 4 > length) {
+      if (ch != '[' || i + 4 > len) {
         sb.appendByte(ch);
         i++;
       }
-      else if (msg.charAt(i + 1) != '_') {
+      else if (bytes[i + 1] != '_') {
         sb.appendByte('[');
         i++;
       }
-      else if (msg.charAt(i + 3) != ']') {
+      else if (bytes[i + 3] != ']') {
         sb.appendByte('[');
         sb.appendByte('_');
         i += 2;
       }
       else {
-        ch = msg.charAt(i + 2);
+        ch = bytes[i + 2];
         int argIndex = ch - '0';
 
         if (0 <= argIndex && argIndex < args.length) {
@@ -488,13 +499,13 @@ public class GettextModule
 
     return sb;
   }
+  */
 
-  private static StringValue formatUnicode(Env env,
-                              StringValue msg,
-                              Value []args)
+  private static StringValue formatImpl(Env env,
+                                        StringValue msg,
+                                        Value []args,
+                                        StringValue sb)
   {
-    StringValue sb = env.createUnicodeBuilder();
-
     int i = 0;
     int length = msg.length();
 
@@ -527,7 +538,7 @@ public class GettextModule
         }
       }
     }
-
+    
     return sb;
   }
 }

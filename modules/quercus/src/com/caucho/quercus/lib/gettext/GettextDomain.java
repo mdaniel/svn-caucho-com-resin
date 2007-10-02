@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,70 +29,66 @@
 
 package com.caucho.quercus.lib.gettext;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
+import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-abstract class GettextParser
+public class GettextDomain
 {
-  PluralExpr _pluralExpr;
-  String _charset;
-
-  PluralExpr getPluralExpr()
+  private String _name; 
+  private String _charset;
+  private Path _path;
+  
+  public GettextDomain(Env env, String name)
   {
-    return _pluralExpr;
-  }
+    _name = name;
+    _path = env.getPwd();
 
-  /*
-   * Returns the charset defined in the PO/MO file.
-   */
+    _charset = env.getRuntimeEncoding().toString();
+  }
+  
+  public String getName()
+  {
+    return _name;
+  }
+  
+  public void setName(String name)
+  {
+    _name = name;
+  }
+  
   public String getCharset()
   {
     return _charset;
   }
   
-  /**
-   * Extracts the charset from the gettext metadata.
-   */
-  protected static String getCharset(StringValue metadata)
+  public void setCharset(String charset)
   {
-    String header = "charset=";
-    int i = metadata.indexOf(header);
-
-    if (i < 0)
-      return "UTF-8";
-
-    i = i + header.length();
-    int len = metadata.length();
-
-    int j = i + 1;
-    for (; j < len; j++) {
-      char ch = metadata.charAt(j);
-
-      switch (ch) {
-        case ' ':
-        case '\t':
-        case '\r':
-        case '\n':
-          return metadata.substring(i, j).toString();
-        default:
-          continue; 
-      }
-    }
-
-    return metadata.substring(i, j).toString();
+    _charset = charset;
   }
-
-  /**
-   * Returns the gettext translations.
-   *
-   * @return translations from file, or null on error
-   */
-  abstract HashMap<StringValue, ArrayList<StringValue>> readTranslations()
-    throws IOException;
-
-  abstract void close();
+  
+  public Path getPath()
+  {
+    return _path;
+  }
+  
+  public boolean setPath(Env env, StringValue directory)
+  {
+    Path path = env.lookupPwd(directory);
+    
+    if (path != null)
+      _path = path;
+    
+    return path != null;
+  }
+  
+  public String toString()
+  {
+    return _name;
+  }
 }

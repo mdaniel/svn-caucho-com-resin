@@ -121,7 +121,7 @@ public class IconvUtility {
 
       StringValue sb = env.createBinaryBuilder();
       for (TempBuffer ptr = ts.getHead(); ptr != null; ptr = ptr.getNext()) {
-	sb.append(ptr.getBuffer(), 0, ptr.getLength());
+        sb.append(ptr.getBuffer(), 0, ptr.getLength());
       }
       
       return sb;
