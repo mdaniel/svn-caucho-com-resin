@@ -67,6 +67,10 @@ public class CharacterValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  public CharacterValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

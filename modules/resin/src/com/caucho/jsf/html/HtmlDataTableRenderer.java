@@ -40,18 +40,10 @@ import javax.faces.render.*;
 /**
  * The HTML data/table renderer
  */
-class HtmlDataTableRenderer extends Renderer
+class HtmlDataTableRenderer extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlDataTableRenderer();
-
-  /**
-   * True if the renderer is responsible for rendering the children.
-   */
-  @Override
-  public boolean getRendersChildren()
-  {
-    return true;
-  }
+  
   /**
    * Renders the open tag for the text.
    */
@@ -59,6 +51,8 @@ class HtmlDataTableRenderer extends Renderer
   public void encodeBegin(FacesContext context, UIComponent component)
     throws IOException
   {
+    System.out.println("ENCODE: " + component);
+    
     ResponseWriter out = context.getResponseWriter();
 
     String bgcolor = null;
@@ -455,6 +449,7 @@ class HtmlDataTableRenderer extends Renderer
     int count = 0;
 
     int dataCount = uiData.getRowCount();
+    System.out.println("DATA: " + dataCount);
 
     if (dataCount > 0)
       out.startElement("tbody", uiData);

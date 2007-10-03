@@ -50,6 +50,12 @@ abstract public class AbstractValueExpression extends ValueExpression
   protected final Expr _expr;
   private final String _expressionString;
 
+  protected AbstractValueExpression()
+  {
+    _expr = null;
+    _expressionString = "";
+  }
+
   protected AbstractValueExpression(Expr expr,
 				    String expressionString)
   {
@@ -60,7 +66,11 @@ abstract public class AbstractValueExpression extends ValueExpression
   protected AbstractValueExpression(Expr expr)
   {
     _expr = expr;
-    _expressionString = _expr.toString();
+
+    if (_expr != null)
+      _expressionString = _expr.toString();
+    else
+      _expressionString = "";
   }
 
   public boolean isLiteralText()

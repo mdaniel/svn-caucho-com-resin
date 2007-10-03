@@ -68,6 +68,10 @@ public class BigIntegerValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  public BigIntegerValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

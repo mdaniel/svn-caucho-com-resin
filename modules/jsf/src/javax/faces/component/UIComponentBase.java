@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.el.*;
 
@@ -46,6 +47,9 @@ import javax.faces.render.*;
 
 public abstract class UIComponentBase extends UIComponent
 {
+  private static final Logger log
+    = Logger.getLogger(UIComponentBase.class.getName());
+  
   private static final UIComponent []NULL_FACETS_AND_CHILDREN
     = new UIComponent[0];
   
@@ -421,7 +425,7 @@ public abstract class UIComponentBase extends UIComponent
     return new FacetAndChildIterator(getFacetsAndChildrenArray());
   }
 
-  private UIComponent []getFacetsAndChildrenArray()
+  UIComponent []getFacetsAndChildrenArray()
   {
     if (_facetsAndChildren == null) {
       if (_children == null && _facets == null)
@@ -553,7 +557,8 @@ public abstract class UIComponentBase extends UIComponent
     try {
       decode(context);
     } catch (RuntimeException e) {
-      Thread.dumpStack();
+      log.log(Level.WARNING, e.toString(), e);
+      
       context.renderResponse();
 
       throw e;

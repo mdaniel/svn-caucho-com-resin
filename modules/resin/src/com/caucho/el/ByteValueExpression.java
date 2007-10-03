@@ -67,6 +67,10 @@ public class ByteValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  public ByteValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

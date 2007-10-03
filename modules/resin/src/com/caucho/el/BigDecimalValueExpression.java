@@ -68,6 +68,10 @@ public class BigDecimalValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  public BigDecimalValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

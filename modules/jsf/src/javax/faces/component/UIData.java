@@ -53,6 +53,7 @@ public class UIData extends UIComponentBase
   private static final Object[] NULL_ARRAY = new Object[0];
 
   private DataModel _dataModel;
+  private Object _dataModelValue;
 
   private Integer _first;
   private ValueExpression _firstExpr;
@@ -65,6 +66,8 @@ public class UIData extends UIComponentBase
 
   private String _var;
   private int _rowIndex = -1;
+
+  private ArrayList<State>[] _state;
 
   public UIData()
   {
@@ -102,12 +105,16 @@ public class UIData extends UIComponentBase
 
   public int getRows()
   {
+    int rows;
+    
     if (_rows != null)
-      return _rows;
+      rows = _rows;
     else if (_rowsExpr != null)
-      return Util.evalInt(_rowsExpr, getFacesContext());
+      rows = Util.evalInt(_rowsExpr, getFacesContext());
     else
-      return -1;
+      rows = 0;
+
+     return rows;
   }
 
   public void setRows(int rows)
@@ -129,40 +136,31 @@ public class UIData extends UIComponentBase
 
   public Object getValue()
   {
+    Object value;
+    
     if (_value != null)
-      return _value;
+      value = _value;
     else if (_valueExpr != null)
-      return Util.eval(_valueExpr, getFacesContext());
+      value = Util.eval(_valueExpr, getFacesContext());
     else
-      return null;
+      value = null;
+    
+    return value;
   }
 
   public void setValue(Object value)
   {
     _value = value;
+    setDataModel(null);
+    
   }
 
   protected DataModel getDataModel()
   {
     if (_dataModel != null)
       return _dataModel;
-    
-    Object value = getValue();
 
-    if (value == null)
-      _dataModel = new ArrayDataModel(NULL_ARRAY);
-    else if (value instanceof DataModel)
-      _dataModel = (DataModel) value;
-    else if (value instanceof List)
-      _dataModel = new ListDataModel((List) value);
-    else if (value instanceof ResultSet)
-      _dataModel = new ResultSetDataModel((ResultSet) value);
-    else if (value instanceof Result)
-      _dataModel = new ResultDataModel((Result) value);
-    else if (value.getClass().isArray())
-      _dataModel = new ArrayDataModel((Object []) value);
-    else
-      _dataModel = new ScalarDataModel(value);
+    _dataModel = createDataModel(getValue());
     
     return _dataModel;
   }
@@ -170,6 +168,35 @@ public class UIData extends UIComponentBase
   protected void setDataModel(DataModel dataModel)
   {
     _dataModel = dataModel;
+    _state = null;
+  }
+
+  private void resetDataModel()
+  {
+    Object value = getValue();
+
+    if (value != _dataModelValue)
+      setDataModel(null);
+  }
+
+  private DataModel createDataModel(Object value)
+  {
+    _dataModelValue = value;
+    
+    if (value == null)
+      return new ArrayDataModel(NULL_ARRAY);
+    else if (value instanceof DataModel)
+      return (DataModel) value;
+    else if (value instanceof List)
+      return new ListDataModel((List) value);
+    else if (value instanceof ResultSet)
+      return new ResultSetDataModel((ResultSet) value);
+    else if (value instanceof Result)
+      return new ResultDataModel((Result) value);
+    else if (value.getClass().isArray())
+      return new ArrayDataModel((Object []) value);
+    else
+      return new ScalarDataModel(value);
   }
 
   public int getRowIndex()
@@ -187,26 +214,110 @@ public class UIData extends UIComponentBase
     if (value < -1)
       throw new IllegalArgumentException("UIData.setRowIndex must not be less than -1 at '" + value + "'");
     
-    _rowIndex = value;
-
     DataModel dataModel = getDataModel();
     
+    setRowIndexState(dataModel, _rowIndex, value);
+
+    _rowIndex = value;
+
     dataModel.setRowIndex(value);
 
     if (_var == null) {
     }
-    else if (value < 0) {
+    else if (value >= 0 && dataModel.isRowAvailable()) {
+      Object rowData = dataModel.getRowData();
+      
+      FacesContext context = FacesContext.getCurrentInstance();
+      
+      context.getExternalContext().getRequestMap().put(_var, rowData);
+    }
+    else {
       FacesContext context = FacesContext.getCurrentInstance();
 
       context.getExternalContext().getRequestMap().remove(_var);
     }
-    else {
-      Object rowData = dataModel.getRowData();
-      
-      FacesContext context = FacesContext.getCurrentInstance();
+  }
 
-      context.getExternalContext().getRequestMap().put(_var, rowData);
+  private void setRowIndexState(DataModel model, int oldRow, int newRow)
+  {
+    if (_state == null)
+      _state = new ArrayList[model.getRowCount()];
+    
+    setRowIndexState(this, oldRow, newRow, false, 0);
+  }
+
+  private int setRowIndexState(UIComponent comp,
+			       int oldRow,
+			       int newRow,
+			       boolean isTransient,
+			       int valueIndex)
+  {
+    comp.setId(comp.getId());
+
+    if (comp.isTransient())
+      isTransient = true;
+    else if (comp instanceof EditableValueHolder) {
+      EditableValueHolder holder = (EditableValueHolder) comp;
+      
+      if (oldRow >= 0) {
+	ArrayList<State> oldList = _state[oldRow];
+
+	if (oldList == null)
+	  _state[oldRow] = oldList = new ArrayList<State>();
+
+	while (oldList.size() < valueIndex)
+	  oldList.add(null);
+
+	State state = oldList.get(valueIndex);
+
+	if (state != null)
+	  state = state.update(holder);
+	else
+	  state = new State(holder);
+	
+	oldList.set(valueIndex, state);
+      }
+
+      ArrayList<State> newList = newRow >= 0 ? _state[newRow] : null;
+      State state;
+      
+      if (newList != null && valueIndex < newList.size())
+	state = newList.get(valueIndex);
+      else
+	state = null;
+
+      if (state != null)
+	state.restore(holder);
+      else {
+	holder.setSubmittedValue(null);
+	holder.setValue(null);
+	holder.setLocalValueSet(false);
+	holder.setValid(true);
+      }
+
+      valueIndex += 1;
     }
+    
+    if (comp instanceof UIComponentBase) {
+      UIComponentBase base = (UIComponentBase) comp;
+      
+      for (UIComponent child : base.getFacetsAndChildrenArray()) {
+	valueIndex = setRowIndexState(child, oldRow, newRow,
+				      isTransient, valueIndex);
+      }
+    }
+    else {
+      Iterator<UIComponent> iter = comp.getFacetsAndChildren();
+
+      while (iter.hasNext()) {
+	UIComponent child = iter.next();
+	
+	valueIndex = setRowIndexState(child, oldRow, newRow,
+				      isTransient, valueIndex);
+      }
+    }
+
+    return valueIndex;
   }
 
   public int getRowCount()
@@ -264,6 +375,7 @@ public class UIData extends UIComponentBase
     if (prop != null) {
       switch (_propMap.get(name)) {
       case VALUE:
+	_dataModel = null;
 	if (expr != null && expr.isLiteralText()) {
 	  _value = expr.getValue(null);
 	  return;
@@ -320,6 +432,274 @@ public class UIData extends UIComponentBase
   }
 
   //
+  // overrides
+
+  /**
+   * Returns the client-specific id for the component.
+   */
+  @Override
+  public String getClientId(FacesContext context)
+  {
+    String clientId = super.getClientId(context);
+
+    int rowIndex = getRowIndex();
+
+    if (rowIndex < 0)
+      return clientId;
+    else
+      return clientId + SEPARATOR_CHAR + rowIndex;
+  }
+
+  /**
+   * Queues the event, wrapping the rowIndex.
+   */
+  @Override
+  public void queueEvent(FacesEvent event)
+  {
+    int rowIndex = getRowIndex();
+
+    super.queueEvent(new UIDataEventWrapper(event, rowIndex));
+  }
+
+  /**
+   * Broadcasts the event, unwrapping the rowIndex.
+   */
+  @Override
+  public void broadcast(FacesEvent event)
+    throws AbortProcessingException
+  {
+    if (event instanceof UIDataEventWrapper) {
+      UIDataEventWrapper wrapper = (UIDataEventWrapper) event;
+
+      event = wrapper.getEvent();
+      
+      int oldIndex = getRowIndex();
+      setRowIndex(wrapper.getRowIndex());
+
+      super.broadcast(event);
+      
+      setRowIndex(oldIndex);
+    }
+    else
+      super.broadcast(event);
+  }
+
+  /**
+   * Recursively calls the decodes for any children, then calls
+   * decode().
+   */
+  @Override
+  public void processDecodes(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isRendered())
+      return;
+
+    setRowIndex(-1);
+
+    if (getFacetCount() > 0) {
+      for (UIComponent facet : getFacets().values()) {
+	facet.processDecodes(context);
+      }
+    }
+
+    int childCount = getChildCount();
+
+    if (childCount > 0) {
+      List<UIComponent> children = getChildren();
+
+      for (int i = 0; i < children.size(); i++) {
+	UIComponent child = children.get(i);
+
+	if (! child.isRendered() && child.getFacetCount() == 0)
+	  continue;
+	
+	for (UIComponent facet : child.getFacets().values()) {
+	  facet.processDecodes(context);
+	}
+      }
+      
+      int first = getFirst();
+      int rows = getRows();
+
+      for (int i = 0; i < rows; i++) {
+	setRowIndex(first + i);
+
+	if (isRowAvailable()) {
+	  for (int j = 0; j < childCount; j++) {
+	    UIComponent child = children.get(j);
+
+	    if (! child.isRendered())
+	      continue;
+	    
+	    int grandchildCount = child.getChildCount();
+	    List<UIComponent> grandchildren = child.getChildren();
+
+	    for (int k = 0; k < grandchildCount; k++) {
+	      grandchildren.get(k).processDecodes(context);
+	    }
+
+	    child.decode(context);
+	  }
+	}
+      }
+    }
+
+    setRowIndex(-1);
+    
+    decode(context);
+  }
+
+  /**
+   * Recursively calls the validators for any children, then calls
+   * decode().
+   */
+  @Override
+  public void processValidators(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isRendered())
+      return;
+
+    setRowIndex(-1);
+
+    if (getFacetCount() > 0) {
+      for (UIComponent facet : getFacets().values()) {
+	facet.processValidators(context);
+      }
+    }
+
+    int childCount = getChildCount();
+
+    if (childCount > 0) {
+      List<UIComponent> children = getChildren();
+
+      for (int i = 0; i < children.size(); i++) {
+	UIComponent child = children.get(i);
+
+	if (! child.isRendered() && child.getFacetCount() == 0)
+	  continue;
+	
+	for (UIComponent facet : child.getFacets().values()) {
+	  facet.processValidators(context);
+	}
+      }
+      
+      int first = getFirst();
+      int rows = getRows();
+
+      for (int i = 0; i < rows; i++) {
+	setRowIndex(first + i);
+
+	if (isRowAvailable()) {
+	  for (int j = 0; j < childCount; j++) {
+	    UIComponent child = children.get(j);
+
+	    if (! child.isRendered())
+	      continue;
+	    
+	    int grandchildCount = child.getChildCount();
+	    List<UIComponent> grandchildren = child.getChildren();
+
+	    for (int k = 0; k < grandchildCount; k++) {
+	      grandchildren.get(k).processValidators(context);
+	    }
+	  }
+	}
+      }
+    }
+
+    setRowIndex(-1);
+  }
+
+  /**
+   * Recursively calls the updates for any children, then calls
+   * decode().
+   */
+  @Override
+  public void processUpdates(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isRendered())
+      return;
+
+    setRowIndex(-1);
+
+    if (getFacetCount() > 0) {
+      for (UIComponent facet : getFacets().values()) {
+	facet.processUpdates(context);
+      }
+    }
+
+    int childCount = getChildCount();
+
+    if (childCount > 0) {
+      List<UIComponent> children = getChildren();
+
+      for (int i = 0; i < children.size(); i++) {
+	UIComponent child = children.get(i);
+
+	if (! child.isRendered() && child.getFacetCount() == 0)
+	  continue;
+	
+	for (UIComponent facet : child.getFacets().values()) {
+	  facet.processUpdates(context);
+	}
+      }
+      
+      int first = getFirst();
+      int rows = getRows();
+
+      for (int i = 0; i < rows; i++) {
+	setRowIndex(first + i);
+
+	if (isRowAvailable()) {
+	  for (int j = 0; j < childCount; j++) {
+	    UIComponent child = children.get(j);
+
+	    if (! child.isRendered())
+	      continue;
+	    
+	    int grandchildCount = child.getChildCount();
+	    List<UIComponent> grandchildren = child.getChildren();
+
+	    for (int k = 0; k < grandchildCount; k++) {
+	      grandchildren.get(k).processUpdates(context);
+	    }
+	  }
+	}
+      }
+    }
+
+    setRowIndex(-1);
+  }
+
+  /**
+   * Recursively calls the encodes for any children, then calls
+   * decode().
+   */
+  @Override
+  public void encodeBegin(FacesContext context)
+    throws java.io.IOException
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isRendered())
+      return;
+
+    resetDataModel();
+
+    super.encodeBegin(context);
+  }
+
+  //
   // state
   //
 
@@ -327,8 +707,8 @@ public class UIData extends UIComponentBase
   {
     return new Object[] {
       super.saveState(context),
-    
-      _value, // XXX: stateHolder issues
+
+      _value,
       _first,
       _rows,
       _var,
@@ -341,10 +721,104 @@ public class UIData extends UIComponentBase
     
     super.restoreState(context, state[0]);
 
-    _value = state[1];
+    _value = (ArrayList[]) state[1];
     _first = (Integer) state[2];
     _rows = (Integer) state[3];
     _var = (String) state[4];
+  }
+
+  //
+  // inner classes
+  //
+
+  static class UIDataEventWrapper extends FacesEvent
+  {
+    private FacesEvent _event;
+    private int _rowIndex;
+
+    UIDataEventWrapper(FacesEvent event, int rowIndex)
+    {
+      super(event.getComponent());
+
+      _event = event;
+      _rowIndex = rowIndex;
+    }
+
+    FacesEvent getEvent()
+    {
+      return _event;
+    }
+
+    int getRowIndex()
+    {
+      return _rowIndex;
+    }
+
+    public void setPhaseId(PhaseId phaseId)
+    {
+      _event.setPhaseId(phaseId);
+    }
+
+    public PhaseId getPhaseId()
+    {
+      return _event.getPhaseId();
+    }
+
+    public boolean isAppropriateListener(FacesListener listener)
+    {
+      return _event.isAppropriateListener(listener);
+    }
+
+    public void processListener(FacesListener listener)
+      throws AbortProcessingException
+    {
+      ((UIData) getComponent()).setRowIndex(_rowIndex);
+
+      _event.processListener(listener);
+    }
+  }
+
+  static class State implements java.io.Serializable
+  {
+    private final Object _submittedValue;
+    private final Object _value;
+    private final boolean _isLocal;
+    private final boolean _isValid;
+
+    State()
+    {
+      _submittedValue = null;
+      _value = null;
+      _isLocal = false;
+      _isValid = false;
+    }
+      
+    State(EditableValueHolder holder)
+    {
+      _submittedValue = holder.getSubmittedValue();
+      _value = holder.getValue();
+      _isLocal = holder.isLocalValueSet();
+      _isValid = holder.isValid();
+    }
+
+    State update(EditableValueHolder holder)
+    {
+      if (_submittedValue == holder.getSubmittedValue()
+	  && _value == holder.getValue()
+	  && _isLocal == holder.isLocalValueSet()
+	  && _isValid == holder.isValid())
+	return this;
+      else
+	return new State(holder);
+    }
+
+    void restore(EditableValueHolder holder)
+    {
+      holder.setSubmittedValue(_submittedValue);
+      holder.setValue(_value);
+      holder.setLocalValueSet(_isLocal);
+      holder.setValid(_isValid);
+    }
   }
 
   //

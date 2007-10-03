@@ -67,6 +67,10 @@ public class FloatValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  public FloatValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

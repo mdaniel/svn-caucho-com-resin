@@ -86,8 +86,8 @@ public class ListDataModel extends DataModel
 
   public void setRowIndex(int index)
   {
-    if (_value != null && index < 0)
-      throw new IllegalArgumentException("rowIndex '" + index + "' cannot be less than zero.");
+    if (_value != null && index < -1)
+      throw new IllegalArgumentException("rowIndex '" + index + "' cannot be less than -1.");
 
     DataModelListener []listeners = getDataModelListeners();
 

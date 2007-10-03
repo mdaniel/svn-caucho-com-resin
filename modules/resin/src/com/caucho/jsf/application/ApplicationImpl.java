@@ -173,7 +173,7 @@ public class ApplicationImpl extends Application
 
     addComponent(HtmlCommandLink.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlCommandLink");
-
+    
     addComponent(HtmlDataTable.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlDataTable");
 

@@ -122,8 +122,8 @@ public class NavigationRule implements Comparable<NavigationRule>
 
   public boolean isMatch(String url)
   {
-    return (_fromViewIdPattern != null
-            && _fromViewIdPattern.matcher(url).matches());
+    return (_fromViewIdPattern == null
+            || _fromViewIdPattern.matcher(url).matches());
   }
 
   public void addNavigationCase(NavigationCase navCase)
@@ -183,6 +183,11 @@ public class NavigationRule implements Comparable<NavigationRule>
     return bestCase;
   }
 
+  public String toString()
+  {
+    return "NavigationRule[" + _fromViewIdPattern + "]";
+  }
+
   public static class NavigationCase {
     private String _fromAction;
     private String _fromOutcome;
@@ -238,8 +243,11 @@ public class NavigationRule implements Comparable<NavigationRule>
       if (_isRedirect) {
 	try {
 	  ExternalContext extContext = context.getExternalContext();
+	  ViewHandler viewHandler = context.getApplication().getViewHandler();
 
-	  extContext.redirect(_toViewId);
+	  String actionUrl = viewHandler.getActionURL(context, _toViewId);
+
+	  extContext.redirect(extContext.encodeActionURL(actionUrl));
 
 	  context.responseComplete();
 	} catch (IOException e) {

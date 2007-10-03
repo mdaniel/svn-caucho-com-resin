@@ -67,6 +67,10 @@ public class BooleanValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  private BooleanValueExpression()
+  {
+  }
+
   @Override
   public Class<?> getExpectedType()
   {

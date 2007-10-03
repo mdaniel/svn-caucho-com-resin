@@ -37,7 +37,7 @@ import javax.faces.context.*;
 
 public class HtmlDataTable extends UIData
 {
-  public static final String COMPONENT_TYPE = "javax.faces.HtmlDataTable";
+  public static final String COMPONENT_TYPE = "javax.faces.Data";
 
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();

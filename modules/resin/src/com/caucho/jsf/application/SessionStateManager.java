@@ -108,7 +108,7 @@ public class SessionStateManager extends StateManager
 			 SerializedView state)
     throws IOException
   {
-    writeState(context, (Object) state);
+    writeState(context, (Object) state.getStructure());
   }
   
   @Override

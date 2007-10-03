@@ -55,15 +55,15 @@ public class ArrayDataModel extends DataModel
   {
     if (_array == null)
       return null;
-    else if (getRowIndex() < _array.length)
-      return _array[getRowIndex()];
+    else if (_rowIndex < _array.length)
+      return _array[_rowIndex];
     else
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("row " + _rowIndex + " is not available in " + _array.length);
   }
   
   public boolean isRowAvailable()
   {
-    return _array != null && getRowIndex() < _array.length;
+    return _array != null && _rowIndex < _array.length;
   }
 
   public Object getWrappedData()
@@ -84,8 +84,8 @@ public class ArrayDataModel extends DataModel
 
   public void setRowIndex(int index)
   {
-    if (_array != null && index < 0)
-      throw new IllegalArgumentException("rowIndex '" + index + "' cannot be less than zero.");
+    if (_array != null && index < -1)
+      throw new IllegalArgumentException("rowIndex '" + index + "' cannot be less than -1.");
 
     DataModelListener []listeners = getDataModelListeners();
 

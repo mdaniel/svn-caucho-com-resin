@@ -67,6 +67,10 @@ public class ShortValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  public ShortValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

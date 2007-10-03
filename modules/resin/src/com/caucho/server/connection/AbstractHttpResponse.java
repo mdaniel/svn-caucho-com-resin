@@ -135,7 +135,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected boolean _hasOutputStream;
 
   private AbstractCacheFilterChain _cacheInvocation;
-  private AbstractCacheEntry _cacheEntry;
+
+  // the cache entry for a match/if-modified-since
+  private AbstractCacheEntry _matchCacheEntry;
+
+  // the new cache for a request getting filled
+  private AbstractCacheEntry _newCacheEntry;
   private OutputStream _cacheStream;
   private Writer _cacheWriter;
 
@@ -315,7 +320,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _hasOutputStream = false;
 
     _cacheInvocation = null;
-    _cacheEntry = null;
+    _matchCacheEntry = null;
+    _newCacheEntry = null;
     _cacheStream = null;
     _cacheWriter = null;
     _isPrivateCache = false;
@@ -392,12 +398,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    *
    * @param entry the saved cache entry
    */
-  public void setCacheEntry(AbstractCacheEntry entry)
+  public void setMatchCacheEntry(AbstractCacheEntry entry)
   {
-    if (_cacheInvocation == null)
-      throw new IllegalStateException();
-    
-    _cacheEntry = entry;
+    _matchCacheEntry = entry;
   }
 
   /**
@@ -409,8 +412,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     AbstractCacheFilterChain oldCache = _cacheInvocation;
     _cacheInvocation = null;
     
-    AbstractCacheEntry oldEntry = _cacheEntry;
-    _cacheEntry = null;
+    AbstractCacheEntry oldEntry = _newCacheEntry;
+    _newCacheEntry = null;
 
     if (oldEntry != null)
       oldCache.killCaching(oldEntry);
@@ -472,7 +475,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void sendError(int code, String value)
     throws IOException
   {
-    if (code == SC_NOT_MODIFIED && _cacheEntry != null) {
+    if (code == SC_NOT_MODIFIED && _matchCacheEntry != null) {
       setStatus(code, value);
       if (handleNotModified(_isTopCache))
         return;
@@ -1741,17 +1744,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else {
       CauchoRequest request = (CauchoRequest) _originalRequest;
       
-      _cacheEntry = _cacheInvocation.startCaching(request,
-						  this, keys, values,
-						  contentType,
-						  charEncoding,
-						  _contentLength);
+      _newCacheEntry = _cacheInvocation.startCaching(request,
+						     this, keys, values,
+						     contentType,
+						     charEncoding,
+						     _contentLength);
 
-      if (_cacheEntry == null) {
+      if (_newCacheEntry == null) {
 	return false;
       }
       else if (isByte) {
-	_cacheStream = _cacheEntry.openOutputStream();
+	_cacheStream = _newCacheEntry.openOutputStream();
 
 	if (_cacheStream != null)
 	  _originalResponseStream.setByteCacheStream(_cacheStream);
@@ -1759,7 +1762,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	return _cacheStream != null;
       }
       else {
-	_cacheWriter = _cacheEntry.openWriter();
+	_cacheWriter = _newCacheEntry.openWriter();
 
 	if (_cacheWriter != null)
 	  _originalResponseStream.setCharCacheStream(_cacheWriter);
@@ -1784,7 +1787,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_statusCode != SC_NOT_MODIFIED) {
       return false;
     }
-    else if (_cacheEntry != null) {
+    else if (_matchCacheEntry != null) {
       if (_originalResponseStream.isCommitted())
         return false;
 
@@ -1796,10 +1799,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       /* XXX: complications with filters */
       if (_cacheInvocation != null &&
           _cacheInvocation.fillFromCache((CauchoRequest) _originalRequest,
-                                         this, _cacheEntry, isTop)) {
-        _cacheEntry.updateExpiresDate();
+                                         this, _matchCacheEntry, isTop)) {
+        _matchCacheEntry.updateExpiresDate();
         _cacheInvocation = null;
-        _cacheEntry = null;
+        _matchCacheEntry = null;
 
         finish(); // Don't force a flush to avoid extra TCP packet
       
@@ -2103,7 +2106,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       if (_cacheInvocation == null) {
       }
-      else if (_cacheEntry != null) {
+      else if (_newCacheEntry != null) {
 	OutputStream cacheStream = _cacheStream;
 	_cacheStream = null;
 	
@@ -2120,8 +2123,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	  AbstractCacheFilterChain cache = _cacheInvocation;
 	  _cacheInvocation = null;
 
-	  AbstractCacheEntry cacheEntry = _cacheEntry;
-	  _cacheEntry = null;
+	  AbstractCacheEntry cacheEntry = _newCacheEntry;
+	  _newCacheEntry = null;
 	  
 	  cache.finishCaching(cacheEntry);
 	}
@@ -2144,8 +2147,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       AbstractCacheFilterChain cache = _cacheInvocation;
       _cacheInvocation = null;
       
-      AbstractCacheEntry cacheEntry = _cacheEntry;
-      _cacheEntry = null;
+      AbstractCacheEntry cacheEntry = _newCacheEntry;
+      _newCacheEntry = null;
       
       _cacheStream = null;
       _cacheWriter = null;
@@ -2160,8 +2163,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     AbstractCacheFilterChain cache = _cacheInvocation;
     _cacheInvocation = null;
     
-    AbstractCacheEntry cacheEntry = _cacheEntry;
-    _cacheEntry = null;
+    AbstractCacheEntry cacheEntry = _newCacheEntry;
+    _newCacheEntry = null;
 
     if (cacheEntry != null)
       cache.killCaching(cacheEntry);
@@ -2182,7 +2185,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _request = null;
     _originalRequest = null;
     _cacheInvocation = null;
-    _cacheEntry = null;
+    _newCacheEntry = null;
+    _matchCacheEntry = null;
     _cacheStream = null;
     _cacheWriter = null;
   }

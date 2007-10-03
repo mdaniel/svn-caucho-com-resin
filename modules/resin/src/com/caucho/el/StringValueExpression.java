@@ -67,6 +67,10 @@ public class StringValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  private StringValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

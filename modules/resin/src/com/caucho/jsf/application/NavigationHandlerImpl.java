@@ -90,7 +90,7 @@ public class NavigationHandlerImpl extends NavigationHandler
   private NavigationRule []findRuleList(String viewId)
   {
     ArrayList<NavigationRule> ruleList = new ArrayList<NavigationRule>();
-    
+
     for (int i = 0; i < _ruleList.size(); i++) {
       NavigationRule rule = _ruleList.get(i);
 

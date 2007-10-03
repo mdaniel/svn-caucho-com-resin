@@ -67,6 +67,10 @@ public class IntegerValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  public IntegerValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)

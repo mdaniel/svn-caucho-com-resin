@@ -67,6 +67,10 @@ public class LongValueExpression extends AbstractValueExpression
     super(expr);
   }
 
+  private LongValueExpression()
+  {
+  }
+
   public Class<?> getExpectedType()
   {
     if (_expectedType != null)
