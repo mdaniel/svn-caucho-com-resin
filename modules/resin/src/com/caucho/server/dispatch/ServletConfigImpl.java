@@ -41,6 +41,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.servlet.comet.CometServlet;
 import com.caucho.soa.servlet.ProtocolServlet;
 import com.caucho.soa.servlet.ProviderServlet;
 import com.caucho.soa.servlet.SoapProtocolServlet;
@@ -635,9 +636,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     else if (SingleThreadModel.class.isAssignableFrom(servletClass)) {
       servletChain = new SingleThreadServletFilterChain(this);
     }
-    else if (servletClass.isAnnotationPresent(WebService.class) ||
-             servletClass.isAnnotationPresent(WebServiceProvider.class))
+    else if (servletClass.isAnnotationPresent(WebServiceProvider.class)
+	     || servletClass.isAnnotationPresent(WebService.class))
       servletChain = new WebServiceFilterChain(this);
+    else if (CometServlet.class.isAssignableFrom(servletClass))
+      servletChain = new CometServletFilterChain(this);
     else {
       servletChain = new ServletFilterChain(this);
     }

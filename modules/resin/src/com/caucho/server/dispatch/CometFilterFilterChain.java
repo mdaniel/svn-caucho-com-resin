@@ -35,19 +35,20 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
+import com.caucho.servlet.comet.CometFilter;
 import com.caucho.servlet.comet.CometFilterChain;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
  */
-public class FilterFilterChain extends AbstractFilterChain
+public class CometFilterFilterChain extends AbstractFilterChain
 {
   // Next filter chain
-  private FilterChain _next;
+  private CometFilterChain _next;
   
   // filter
-  private Filter _filter;
+  private CometFilter _filter;
 
   /**
    * Creates a new FilterChainFilter.
@@ -55,7 +56,7 @@ public class FilterFilterChain extends AbstractFilterChain
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterFilterChain(FilterChain next, Filter filter)
+  public CometFilterFilterChain(CometFilterChain next, CometFilter filter)
   {
     _next = next;
     _filter = filter;
@@ -75,6 +76,7 @@ public class FilterFilterChain extends AbstractFilterChain
   {
     _filter.doFilter(request, response, _next);
   }
+  
   /**
    * Resumes the request.
    *
@@ -88,12 +90,6 @@ public class FilterFilterChain extends AbstractFilterChain
 			  ServletResponse response)
     throws ServletException, IOException
   {
-    if (_next instanceof CometFilterChain) {
-      CometFilterChain next = (CometFilterChain) _next;
-
-      return next.doResume(request, response);
-    }
-    else
-      return false;
+    return _next.doResume(request, response);
   }
 }

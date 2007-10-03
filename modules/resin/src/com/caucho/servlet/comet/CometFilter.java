@@ -19,32 +19,35 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.dispatch;
+package com.caucho.servlet.comet;
 
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.UnavailableException;
-import java.io.IOException;
-import java.util.HashMap;
+import java.io.*;
+import javax.servlet.*;
 
 /**
- * Interface for servlets implementing comet capabilities.
+ * Servlet to handle comet requests.
  */
-public interface CometServlet extends Servlet {
+public interface CometFilter extends Filter
+{
   /**
-   * Resume a servlet request.
+   * Resumes service the initial request.
+   *
+   * @param request the servlet request object
+   * @param response the servlet response object
+   * @param controller the controller to be passed to application code
+   *
+   * @return true for keepalive, false for the end of the request
    */
-  abstract public boolean resume(ServletRequest request,
-				 ServletResponse response)
+  public boolean doResume(ServletRequest request,
+			  ServletResponse response,
+			  CometFilterChain next)
     throws IOException, ServletException;
 }

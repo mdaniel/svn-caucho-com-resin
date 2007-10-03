@@ -28,6 +28,7 @@
 
 package com.caucho.server.security;
 
+import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.dispatch.AbstractFilterChain;
@@ -142,14 +143,14 @@ public class SecurityFilterChain extends AbstractFilterChain {
    * @since Resin 3.1.3
    */
   @Override
-  public boolean resume(ServletRequest request,
-			ServletResponse response)
+  public boolean doResume(ServletRequest request,
+			  ServletResponse response)
     throws ServletException, IOException
   {
-    if (_next instanceof AbstractFilterChain) {
-      AbstractFilterChain next = (AbstractFilterChain) _next;
+    if (_next instanceof CometFilterChain) {
+      CometFilterChain next = (CometFilterChain) _next;
 
-      return next.resume(request, response);
+      return next.doResume(request, response);
     }
     else
       return false;

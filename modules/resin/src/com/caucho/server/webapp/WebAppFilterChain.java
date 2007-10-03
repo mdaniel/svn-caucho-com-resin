@@ -30,6 +30,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.log.Log;
+import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.dispatch.AbstractFilterChain;
@@ -229,8 +230,8 @@ public class WebAppFilterChain extends AbstractFilterChain {
    * @since Resin 3.1.3
    */
   @Override
-  public boolean resume(ServletRequest request,
-			ServletResponse response)
+  public boolean doResume(ServletRequest request,
+			  ServletResponse response)
     throws ServletException, IOException
   {
     Thread thread = Thread.currentThread();
@@ -244,10 +245,10 @@ public class WebAppFilterChain extends AbstractFilterChain {
       if (! app.enterWebApp())
 	return false;
 
-      if (_next instanceof AbstractFilterChain) {
-	AbstractFilterChain next = (AbstractFilterChain) _next;
+      if (_next instanceof CometFilterChain) {
+	CometFilterChain next = (CometFilterChain) _next;
 
-	return next.resume(request, response);
+	return next.doResume(request, response);
       }
       else
 	return false;

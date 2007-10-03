@@ -1,6 +1,6 @@
 package example;
 
-import com.caucho.servlets.comet.*;
+import com.caucho.servlet.comet.*;
 
 public class CometState {
   private final CometController _controller;

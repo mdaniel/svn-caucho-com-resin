@@ -27,11 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlets.comet;
-
-import com.caucho.server.port.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
+package com.caucho.servlet.comet;
 
 /**
  * Public API to control a comet connection.

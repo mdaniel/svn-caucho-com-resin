@@ -27,20 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlets.comet;
+package com.caucho.servlet.comet;
 
 import java.io.*;
 import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.server.connection.*;
-import com.caucho.server.dispatch.*;
 
 /**
  * Servlet to handle comet requests.
  */
-abstract public class AbstractCometServlet extends GenericServlet
-  implements CometServlet
+public interface CometServlet extends Servlet
 {
   /**
    * Services the initial request.
@@ -51,8 +46,8 @@ abstract public class AbstractCometServlet extends GenericServlet
    *
    * @return true for keepalive, false for the end of the request
    */
-  abstract public boolean service(HttpServletRequest request,
-				  HttpServletResponse response,
+  abstract public boolean service(ServletRequest request,
+				  ServletResponse response,
 				  CometController controller)
     throws IOException, ServletException;
 
@@ -65,52 +60,8 @@ abstract public class AbstractCometServlet extends GenericServlet
    *
    * @return true for keepalive, false for the end of the request
    */
-  public boolean resume(HttpServletRequest request,
-			HttpServletResponse response,
-			CometController controller)
-    throws IOException, ServletException
-  {
-    return false;
-  }
-  
-  /**
-   * Implementation of the servlet's request.
-   */
-  public final void service(ServletRequest request,
-			    ServletResponse response)
-    throws IOException, ServletException
-  {
-    AbstractHttpRequest req = (AbstractHttpRequest) request;
-    AbstractHttpResponse res = (AbstractHttpResponse) response;
-
-    CometController controller = new CometControllerImpl(req);
-
-    if (! service(req, res, controller))
-      controller.close();
-  }
-  
-  /**
-   * Implementation of the servlet's resume
-   */
-  public final boolean resume(ServletRequest request,
-			    ServletResponse response)
-    throws IOException, ServletException
-  {
-    AbstractHttpRequest req = (AbstractHttpRequest) request;
-    AbstractHttpResponse res = (AbstractHttpResponse) response;
-
-    CometController controller
-      = (CometController) req.getConnection().getController();
-
-    if (controller == null) {
-      return false;
-    }
-    else if (resume(req, res, controller) && controller.isActive())
-      return true;
-    else {
-      controller.close();
-
-      return false;
-    }
-  }
+  abstract public boolean resume(ServletRequest request,
+				 ServletResponse response,
+				 CometController controller)
+    throws IOException, ServletException;
 }

@@ -29,7 +29,7 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.log.Log;
+import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
@@ -247,14 +247,13 @@ public class ServletInvocation {
    * @param request the servlet request
    * @param response the servlet response
    */
-  public boolean resume(ServletRequest request, ServletResponse response)
+  public boolean doResume(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
-    if (_filterChain instanceof AbstractFilterChain) {
-      AbstractFilterChain filterChain
-	= (AbstractFilterChain) _filterChain;
+    if (_filterChain instanceof CometFilterChain) {
+      CometFilterChain filterChain = (CometFilterChain) _filterChain;
 
-      return filterChain.resume(request, response);
+      return filterChain.doResume(request, response);
     }
     else
       return false;

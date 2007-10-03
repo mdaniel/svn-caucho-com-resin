@@ -37,23 +37,29 @@ import javax.servlet.UnavailableException;
 import java.io.IOException;
 import java.util.HashMap;
 
+import com.caucho.servlet.comet.CometServlet;
+import com.caucho.servlet.comet.CometController;
+
+import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.HttpConnectionController;
+
 /**
  * Represents the final servlet in a filter chain.
  */
-public class ServletFilterChain extends AbstractFilterChain {
+public class CometServletFilterChain extends AbstractFilterChain {
   public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
   
   // servlet config
   private ServletConfigImpl _config;
   // servlet
-  private Servlet _servlet;
+  private CometServlet _servlet;
 
   /**
    * Create the filter chain servlet.
    *
    * @param servlet the underlying servlet
    */
-  public ServletFilterChain(ServletConfigImpl config)
+  public CometServletFilterChain(ServletConfigImpl config)
   {
     if (config == null)
       throw new NullPointerException();
@@ -91,16 +97,21 @@ public class ServletFilterChain extends AbstractFilterChain {
   {
     if (_servlet == null) {
       try {
-        _servlet = (Servlet) _config.createServlet(false);
+        _servlet = (CometServlet) _config.createServlet(false);
       } catch (ServletException e) {
         throw e;
       } catch (Exception e) {
         throw new ServletException(e);
       }
     }
+
+    CometController controller = null;
     
     try {
-      _servlet.service(request, response);
+      controller = new HttpConnectionController(request);
+
+      if (_servlet.service(request, response, controller))
+	controller = null;
     } catch (UnavailableException e) {
       _servlet = null;
       _config.setInitException(e);
@@ -116,6 +127,9 @@ public class ServletFilterChain extends AbstractFilterChain {
     } catch (RuntimeException e) {
       request.setAttribute(SERVLET_NAME, _config.getServletName());
       throw e;
+    } finally {
+      if (controller != null)
+	controller.close();
     }
   }
   
@@ -132,6 +146,48 @@ public class ServletFilterChain extends AbstractFilterChain {
 			  ServletResponse response)
     throws ServletException, IOException
   {
-    return false;
+    if (_servlet == null) {
+      try {
+        _servlet = (CometServlet) _config.createServlet(false);
+      } catch (ServletException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new ServletException(e);
+      }
+    }
+    
+    CometController controller = null;
+    try {
+      AbstractHttpRequest req = (AbstractHttpRequest) request;
+
+      controller = (CometController) req.getConnection().getController();
+
+      if (controller == null)
+	return false;
+      else if (_servlet.resume(request, response, controller)) {
+	controller = null;
+	return true;
+      }
+      else
+	return false;
+    } catch (UnavailableException e) {
+      _servlet = null;
+      _config.setInitException(e);
+      _config.killServlet();
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } catch (ServletException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } catch (IOException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } catch (RuntimeException e) {
+      request.setAttribute(SERVLET_NAME, _config.getServletName());
+      throw e;
+    } finally {
+      if (controller != null)
+	controller.close();
+    }
   }
 }

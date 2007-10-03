@@ -29,6 +29,10 @@
 
 package com.caucho.server.connection;
 
+import javax.servlet.*;
+
+import com.caucho.servlet.comet.CometController;
+
 import com.caucho.server.port.*;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
@@ -36,16 +40,29 @@ import com.caucho.util.*;
 /**
  * Public API to control a comet connection.
  */
-public class HttpConnectionController extends ConnectionController {
+public class HttpConnectionController extends ConnectionController
+  implements CometController
+{
   private AbstractHttpRequest _request;
   
   private long _maxIdleTime;
 
-  protected HttpConnectionController(AbstractHttpRequest request)
+  public HttpConnectionController(ServletRequest request)
+  {
+    this(getAbstractHttpRequest(request));
+  }
+
+  public HttpConnectionController(AbstractHttpRequest request)
   {
     super(request.getConnection());
     
     _request = request;
+  }
+
+  private static AbstractHttpRequest
+    getAbstractHttpRequest(ServletRequest request)
+  {
+    return (AbstractHttpRequest) request;
   }
   
   /**

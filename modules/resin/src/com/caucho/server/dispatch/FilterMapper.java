@@ -29,6 +29,8 @@
 
 package com.caucho.server.dispatch;
 
+import com.caucho.servlet.comet.CometFilter;
+import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -36,6 +38,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -43,8 +46,9 @@ import java.util.logging.Logger;
  * Manages dispatching: servlets and filters.
  */
 public class FilterMapper {
-  static final Logger log = Log.open(FilterMapper.class);
-  static final L10N L = new L10N(FilterMapper.class);
+  private static final Logger log
+    = Logger.getLogger(FilterMapper.class.getName());
+  private static final L10N L = new L10N(FilterMapper.class);
 
   private ServletContext _servletContext;
   
@@ -142,7 +146,7 @@ public class FilterMapper {
         
           Filter filter = _filterManager.createFilter(filterName);
 
-          chain = new FilterFilterChain(chain, filter);
+	  chain = addFilter(chain, filter);
         }
       }
     }
@@ -156,7 +160,7 @@ public class FilterMapper {
         
           Filter filter = _filterManager.createFilter(filterName);
 
-          chain = new FilterFilterChain(chain, filter);
+          chain = addFilter(chain, filter);
         }
       }
     }
@@ -187,11 +191,24 @@ public class FilterMapper {
         
           Filter filter = _filterManager.createFilter(filterName);
 
-          chain = new FilterFilterChain(chain, filter);
+          chain = addFilter(chain, filter);
         }
       }
     }
 
     return chain;
+  }
+
+  private FilterChain addFilter(FilterChain chain, Filter filter)
+  {
+    if (filter instanceof CometFilter
+	&& chain instanceof CometFilterChain) {
+      CometFilter cometFilter = (CometFilter) filter;
+      CometFilterChain cometChain = (CometFilterChain) chain;
+	    
+      return new CometFilterFilterChain(cometChain, cometFilter);
+    }
+    else
+      return new FilterFilterChain(chain, filter);
   }
 }

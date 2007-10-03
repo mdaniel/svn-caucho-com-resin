@@ -8,9 +8,9 @@ import javax.annotation.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import com.caucho.servlets.comet.*;
+import com.caucho.servlet.comet.*;
 
-public class TestCometServlet extends AbstractCometServlet
+public class TestCometServlet extends GenericCometServlet
 {
   private @Resource ScheduledExecutorService _timer;
 
@@ -25,11 +25,14 @@ public class TestCometServlet extends AbstractCometServlet
   }
   
   @Override
-  public boolean service(HttpServletRequest req,
-                         HttpServletResponse res,
+  public boolean service(ServletRequest request,
+                         ServletResponse response,
                          CometController controller)
     throws IOException, ServletException
   {
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
+    
     PrintWriter out = res.getWriter();
     res.setHeader("Cache-Control", "no-cache, must-revalidate");
     res.setHeader("Expires", "Mon, 27 Jul 1997 05:00:00 GMT");
@@ -63,11 +66,14 @@ public class TestCometServlet extends AbstractCometServlet
   }
   
   @Override
-  public boolean resume(HttpServletRequest req,
-                         HttpServletResponse res,
-                         CometController controller)
+  public boolean resume(ServletRequest request,
+                        ServletResponse response,
+                        CometController controller)
     throws IOException, ServletException
   {
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
+    
     PrintWriter out = res.getWriter();
 
     Object count = req.getAttribute("comet.count");

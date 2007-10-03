@@ -35,11 +35,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
+import com.caucho.servlet.comet.*;
+
 /**
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
  */
-abstract public class AbstractFilterChain implements FilterChain
+abstract public class AbstractFilterChain implements CometFilterChain
 {
   /**
    * Resumes the request.
@@ -49,8 +51,8 @@ abstract public class AbstractFilterChain implements FilterChain
    *
    * @since Resin 3.1.3
    */
-  public boolean resume(ServletRequest request,
-			ServletResponse response)
+  public boolean doResume(ServletRequest request,
+			  ServletResponse response)
     throws ServletException, IOException
   {
     return false;

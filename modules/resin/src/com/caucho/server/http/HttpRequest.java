@@ -313,20 +313,26 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     try {
+      ConnectionController controller = null;
+      
       try {
 	setStartTime();
+	
+	Connection conn = getConnection();
+	controller = conn.getController();
 
-	if (! _invocation.resume(this, _response)) {
-	  Connection conn = getConnection();
-	  ConnectionController controller = conn.getController();
-
-	  if (controller != null)
-	    controller.close();
-
+	if (controller == null) {
 	  killKeepalive();
 	}
+	else if (_invocation.doResume(this, _response))
+	  controller = null;
+	else
+	  killKeepalive();
       } finally {
 	finish();
+
+	if (controller != null)
+	  controller.close();
       }
     } catch (ClientDisconnectException e) {
       _response.killCache();

@@ -85,7 +85,7 @@ with new data.</li>
   <li>Servlet: TestCometServlet generates &lt;script> protocol tags from
 new data from the TimerService on each <code>resume</code>.</li>
   <li>State: CometState encapsulates both the item's state (the timer count),
-and the <a href="http://caucho.com/resin-javadoc/com/caucho/servlets/comet/CometController.html">CometController</a> needed to wake the servlet and
+and the <a href="http://caucho.com/resin-javadoc/com/caucho/servlet/comet/CometController.html">CometController</a> needed to wake the servlet and
 pass updated data.</li>
   </ul>
 </li>
@@ -166,7 +166,7 @@ function comet_update(value) {
 
 <s1 title="CometController">
 
-<p>The <a href="http://caucho.com/resin-javadoc/com/caucho/servlets/comet/CometController.html">CometController</a> is Resin's thread-safe encapsulation
+<p>The <a href="http://caucho.com/resin-javadoc/com/caucho/servlet/comet/CometController.html">CometController</a> is Resin's thread-safe encapsulation
 of control and communication from the application's service to the
 Comet servlet.  Applications may safely pass the <code>CometController</code>
 to different threads, wake the servlet with <code>wake()</code>, and send
@@ -183,10 +183,10 @@ Note, applications must only use the thread-safe
 output stream can only be used by the servlet thread itself, never by
 any other threads.</p>
 
-<example title="com.caucho.servlets.comet.CometController">
-package com.caucho.servlets.comet;
+<example title="com.caucho.servlet.comet.CometController">
+package com.caucho.servlet.comet;
 
-public class CometController
+public interface CometController
 {
   public void wake();
 
@@ -243,16 +243,19 @@ import java.io.*;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
-import com.caucho.servlets.comet.AbstractCometServlet;
-import com.caucho.servlets.comet.CometController;
+import com.caucho.servlet.comet.GenericCometServlet;
+import com.caucho.servlet.comet.CometController;
 
-public class TestComet extends AbstractCometServlet {
+public class TestComet extends GenericCometServlet {
   @Override
-  public boolean service(HttpServletRequest req,
-                         HttpServletResponse res,
+  public boolean service(ServletRequest request,
+                         ServletResponse response,
                          CometController controller)
     throws IOException, ServletException
   {
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
+
     res.setContentType("text/html");
 
     TestState state = new TestState(controller);
@@ -263,11 +266,14 @@ public class TestComet extends AbstractCometServlet {
   }
   
   @Override
-  public boolean resume(HttpServletRequest req,
-                        HttpServletResponse res,
+  public boolean resume(ServletRequest request,
+                        ServletResponse response,
                         CometController controller)
     throws IOException, ServletException
   {
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
+
     PrintWriter out = res.getWriter();
 
     String count = req.getAttribute("comet.count");

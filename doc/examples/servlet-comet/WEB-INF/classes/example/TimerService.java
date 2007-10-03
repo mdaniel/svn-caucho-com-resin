@@ -8,7 +8,7 @@ import javax.annotation.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import com.caucho.servlets.comet.*;
+import com.caucho.servlet.comet.*;
 
 public class TimerService implements Runnable {
   @Resource ScheduledExecutorService _timer;

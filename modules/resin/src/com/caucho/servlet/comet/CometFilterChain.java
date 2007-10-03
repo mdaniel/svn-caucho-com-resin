@@ -27,20 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.servlets.comet;
+package com.caucho.servlet.comet;
 
-import com.caucho.server.port.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
+import java.io.*;
+import javax.servlet.*;
 
 /**
- * Implementation of the controller.
+ * Filter chain to handle the next resume
  */
-class CometControllerImpl extends HttpConnectionController
-  implements CometController
+public interface CometFilterChain extends FilterChain
 {
-  CometControllerImpl(AbstractHttpRequest request)
-  {
-    super(request);
-  }
+  /**
+   * Resumes the request.
+   *
+   * @param request the servlet request object
+   * @param response the servlet response object
+   * @param controller the controller to be passed to application code
+   *
+   * @return true for keepalive, false for the end of the request
+   */
+  abstract public boolean doResume(ServletRequest request,
+				   ServletResponse response)
+    throws IOException, ServletException;
 }
