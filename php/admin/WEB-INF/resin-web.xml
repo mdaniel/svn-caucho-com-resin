@@ -29,6 +29,8 @@
         <allow>127.0.0.1</allow>
         <allow>192.168/16</allow>
       </ip-constraint>
+    
+      <auth-constraint role-name="*"/>
     </security-constraint>
   </resin:if>
 
@@ -39,7 +41,7 @@
   <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
   
   <security-constraint>
-    <web-resource-collection url-pattern="/*"/>
+    <web-resource-collection url-pattern="*.php"/>
       
     <auth-constraint role-name="*"/>
   </security-constraint>
