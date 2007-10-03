@@ -753,7 +753,7 @@ public class UIData extends UIComponentBase
     
     super.restoreState(context, state[0]);
 
-    _value = (ArrayList[]) state[1];
+    _value = state[1];
     _first = (Integer) state[2];
     _rows = (Integer) state[3];
     _var = (String) state[4];
