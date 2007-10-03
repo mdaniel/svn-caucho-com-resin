@@ -247,9 +247,10 @@ public class OracleOciLob {
       case OracleModule.OCI_D_LOB:
         if (_lob instanceof Blob) {
           Blob blob = (Blob) _lob;
-          if (_outputStream != null) {
+
+          if (_outputStream != null)
             _outputStream.close();
-          }
+
           _outputStream = blob.setBinaryStream(offset);
           long blobLength = blob.length();
           if ((length < 0) || (offset + length > blobLength)) {
@@ -264,12 +265,18 @@ public class OracleOciLob {
           if (remaining > 0) {
             _outputStream.write(zeroBuffer, 0, (int) remaining);
           }
+
+          _outputStream.close();
+          _outputStream = null;
+
         } else if (_lob instanceof Clob) {
           Clob clob = (Clob) _lob;
-          if (_writer != null) {
+
+          if (_writer != null)
             _writer.close();
-          }
+
           _writer = clob.setCharacterStream(offset);
+
           long clobLength = clob.length();
           if ((length < 0) || (offset + length > clobLength)) {
             length = clobLength - offset;
@@ -283,6 +290,9 @@ public class OracleOciLob {
           if (remaining > 0) {
             _writer.write(spaceBuffer, 0, (int) remaining);
           }
+
+          _writer.close();
+          _writer = null;
         }
         _currentPointer = offset + length;
         break;
@@ -407,9 +417,10 @@ public class OracleOciLob {
       if (_lob instanceof Blob) {
         Blob blob = (Blob) _lob;
         blob.truncate(0);
-        if (_outputStream != null) {
+
+        if (_outputStream != null)
           _outputStream.close();
-        }
+
         _outputStream = blob.setBinaryStream(0);
         long nbytes;
         byte buffer[] = new byte[128];
@@ -417,12 +428,16 @@ public class OracleOciLob {
           _outputStream.write(buffer, 0, (int) nbytes);
           _currentPointer += nbytes;
         }
+
+        _outputStream.close();
+        _outputStream = null;
       } else if (_lob instanceof Clob) {
         Clob clob = (Clob) _lob;
         clob.truncate(0);
-        if (_writer != null) {
+
+        if (_writer != null)
           _writer.close();
-        }
+
         _writer = clob.setCharacterStream(0);
         long nchars;
         char buffer[] = new char[128];
@@ -430,6 +445,9 @@ public class OracleOciLob {
           _writer.write(buffer, 0, (int) nchars);
           _currentPointer += nchars;
         }
+
+        _writer.close();
+        _writer = null;
       } else {
         readStream.close();
         return false;
@@ -531,6 +549,9 @@ public class OracleOciLob {
           }
           _outputStream = blob.setBinaryStream(offset);
           _outputStream.write(data.getBytes());
+          _outputStream.close();
+          _outputStream = null;
+
         } else if (_lob instanceof Clob) {
           Clob clob = (Clob) _lob;
           if (_writer != null) {
@@ -538,6 +559,8 @@ public class OracleOciLob {
           }
           _writer = clob.setCharacterStream(offset);
           _writer.write(data);
+          _writer.close(); // php/4408
+          _writer = null;
         }
         _currentPointer = offset + data.length();
         break;
@@ -741,14 +764,16 @@ public class OracleOciLob {
           if (_outputStream == null) {
             _outputStream = blob.setBinaryStream(0);
           }
+
           _outputStream.write(data.getBytes());
         } else if (_lob instanceof Clob) {
           Clob clob = (Clob) _lob;
-          if (_writer == null) {
+          if (_writer == null)
             _writer = clob.setCharacterStream(0);
-          }
+
           _writer.write(data);
         }
+
         _currentPointer += length;
         break;
       case OracleModule.OCI_D_ROWID:
@@ -851,9 +876,9 @@ public class OracleOciLob {
       Clob clob = (Clob) _lob;
       long clobLength = clob.length();
       if (_currentPointer != clobLength) {
-        if (_writer != null) {
+        if (_writer != null)
           _writer.close();
-        }
+
         _writer = clob.setCharacterStream(clobLength);
         _currentPointer = clobLength;
       }

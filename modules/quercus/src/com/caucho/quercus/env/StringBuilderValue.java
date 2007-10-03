@@ -842,19 +842,20 @@ public class StringBuilderValue
   @Override
   public StringValue append(BinaryInput is, long length)
   {
-    int sublen = (int) length;
-
-    if (_buffer.length < _length + sublen)
-      ensureCapacity(_length + sublen);
+    // php/161i 64k
+    
+    int sublen = Math.min(8192, (int) length);
 
     try {
-      while (sublen > 0) {
+      while (length > 0) {
+        ensureAppendCapacity(sublen);
+
         int count = is.read(_buffer, _length, sublen);
 
         if (count <= 0)
           break;
 
-        sublen -= count;
+        length -= count;
         _length += count;
       }
 
@@ -869,19 +870,20 @@ public class StringBuilderValue
   public StringValue append(Reader reader, long length)
     throws IOException
   {
-    int sublen = (int) length;
+    // php/4407 - oracle clob callback passes very long length
 
-    if (_buffer.length < _length + sublen)
-      ensureCapacity(_length + sublen);
+    int sublen = Math.min(8192, (int) length);
 
     try {
-      while (sublen > 0) {
+      while (length > 0) {
+        ensureAppendCapacity(sublen);
+
         int count = reader.read(_buffer, _length, sublen);
 
         if (count <= 0)
           break;
 
-        sublen -= count;
+        length -= count;
         _length += count;
       }
 
@@ -1019,6 +1021,8 @@ public class StringBuilderValue
       newCapacity = 4 * newCapacity;
     else
       newCapacity = newCapacity + 4096;
+
+    assert newCapacity > _buffer.length : "cannot set new capacity to " + newCapacity;
 
     char []buffer = new char[newCapacity];
     System.arraycopy(_buffer, 0, buffer, 0, _length);

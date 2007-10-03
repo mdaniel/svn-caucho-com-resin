@@ -30,19 +30,13 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ConstArrayValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * PHP functions implementing html code.
@@ -66,11 +60,36 @@ public class HtmlModule extends AbstractQuercusModule {
   private final static ArrayValue HTML_ENTITIES_ARRAY
     = new ConstArrayValue();
 
-  private final static HashMap<String,String> HTML_DECODE
-    = new HashMap<String,String>();
+  private static ArrayValueImpl HTML_ENTITIES_ARRAY_UNICODE;
+  private static ArrayValueImpl HTML_SPECIALCHARS_ARRAY_UNICODE;
 
   public HtmlModule()
   {
+  }
+
+  private static ConstArrayValue toUnicodeArray(Env env, ArrayValue array)
+  {
+    ConstArrayValue copy = new ConstArrayValue();
+
+    Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
+
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+
+
+      if (key.isString())
+        key = new UnicodeBuilderValue(key.toString());
+
+      if (value.isString())
+        value = new UnicodeBuilderValue(value.toString());
+
+      copy.put(key, value);
+    }
+
+    return copy;
   }
 
   /**
@@ -82,10 +101,26 @@ public class HtmlModule extends AbstractQuercusModule {
   {
     Value result;
 
-    if (table == HTML_ENTITIES)
-      result = HTML_ENTITIES_ARRAY.copy();
-    else
-      result = HTML_SPECIALCHARS_ARRAY.copy();
+    if (! env.isUnicodeSemantics()) {
+      if (table == HTML_ENTITIES)
+        result = HTML_ENTITIES_ARRAY.copy();
+      else
+        result = HTML_SPECIALCHARS_ARRAY.copy();
+    }
+    else {
+      if (table == HTML_ENTITIES) {
+        if (HTML_ENTITIES_ARRAY_UNICODE == null)
+          HTML_ENTITIES_ARRAY_UNICODE = toUnicodeArray(env, HTML_ENTITIES_ARRAY);
+
+        result = HTML_ENTITIES_ARRAY_UNICODE.copy();
+      }
+      else {
+        if (HTML_SPECIALCHARS_ARRAY_UNICODE == null)
+          HTML_SPECIALCHARS_ARRAY_UNICODE = toUnicodeArray(env, HTML_SPECIALCHARS_ARRAY);
+
+        result = HTML_SPECIALCHARS_ARRAY_UNICODE.copy();
+      }
+    }
 
     if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
       result.put(env.createString("'"), env.createString("&apos;"));
@@ -100,7 +135,7 @@ public class HtmlModule extends AbstractQuercusModule {
    * Escapes HTML
    *
    * @param env the calling environment
-   * @param stringV the string to be trimmed
+   * @param string the string to be trimmed
    * @param quoteStyleV optional quote style
    * @param charsetV optional charset style
    * @return the trimmed string
@@ -176,8 +211,12 @@ public class HtmlModule extends AbstractQuercusModule {
     if (string.length() == 0)
       return env.createEmptyString();
 
-    Iterator<Map.Entry<Value,Value>> iter
-      = HTML_SPECIALCHARS_ARRAY.getIterator(env);
+    Iterator<Map.Entry<Value,Value>> iter;
+
+    if (env.isUnicodeSemantics())
+      iter = HTML_SPECIALCHARS_ARRAY_UNICODE.getIterator(env);
+    else
+      iter = HTML_SPECIALCHARS_ARRAY.getIterator(env);
 
     while (iter.hasNext()) {
       Map.Entry<Value,Value> entry = iter.next();
@@ -230,7 +269,6 @@ public class HtmlModule extends AbstractQuercusModule {
   private static void entity(int ch, String entity)
   {
     HTML_ENTITIES_ARRAY.put("&" + (char) ch + ";", entity);
-    HTML_DECODE.put(entity, String.valueOf((char) ch));
   }
 
   static {

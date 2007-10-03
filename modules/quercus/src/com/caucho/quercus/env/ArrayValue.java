@@ -575,6 +575,7 @@ abstract public class ArrayValue extends Value {
   public void put(String key, String value)
   {
     // XXX: this needs an Env arg because of i18n
+    // XXX: but some  modules have arrays that are static constants
     put(StringValue.create(key), StringValue.create(value));
   }
 
