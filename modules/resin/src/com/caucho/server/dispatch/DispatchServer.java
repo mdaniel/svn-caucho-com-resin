@@ -216,7 +216,8 @@ public class DispatchServer implements Dependency {
 	Invocation oldInvocation;
 	oldInvocation = invocationCache.get(protocolKey);
 
-	if (oldInvocation != null)
+	// server/10r2
+	if (oldInvocation != null && ! oldInvocation.isModified())
 	  return oldInvocation;
 
 	if (invocation.getURLLength() < _maxURLLength) {

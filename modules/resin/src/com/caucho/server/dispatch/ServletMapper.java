@@ -350,6 +350,11 @@ public class ServletMapper {
     DependencyContainer dependencyList = new DependencyContainer();
 
     WebApp app = (WebApp) _servletContext;
+
+    Path contextPath = app.getAppDir().lookup(app.getRealPath(contextURI));
+
+    if (! contextPath.isDirectory())
+      return;
     
     for (int i = 0; i < _welcomeFileList.size(); i++) {
       String file = _welcomeFileList.get(i);

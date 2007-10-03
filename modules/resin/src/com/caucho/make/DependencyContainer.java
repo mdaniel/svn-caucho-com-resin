@@ -181,7 +181,7 @@ public class DependencyContainer implements Dependency
 
       for (int i = _dependencyList.size() - 1; i >= 0; i--) {
 	Dependency dependency = _dependencyList.get(i);
-	
+
 	if (dependency.isModified()) {
 	  dependency.logModified(log());
 
