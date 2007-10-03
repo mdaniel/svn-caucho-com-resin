@@ -70,10 +70,11 @@ class HtmlCommandLinkRenderer extends BaseRenderer
     Map<String,String> paramMap = ext.getRequestParameterMap();
 
     String value = paramMap.get(hiddenId);
-
-    if (value != null) {
+    
+    if (value != null && ! "".equals(value)) {
       ActionEvent event = new ActionEvent(component);
 
+      
       component.queueEvent(event);
     }
     else {

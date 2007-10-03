@@ -67,7 +67,7 @@ public class UIData extends UIComponentBase
   private String _var;
   private int _rowIndex = -1;
 
-  private ArrayList<State>[] _state;
+  private ArrayList<ArrayList<State>> _state;
 
   public UIData()
   {
@@ -215,12 +215,17 @@ public class UIData extends UIComponentBase
       throw new IllegalArgumentException("UIData.setRowIndex must not be less than -1 at '" + value + "'");
     
     DataModel dataModel = getDataModel();
-    
-    setRowIndexState(dataModel, _rowIndex, value);
 
+    int oldRow = _rowIndex;
+    
     _rowIndex = value;
 
     dataModel.setRowIndex(value);
+
+    if (dataModel.isRowAvailable())
+      setRowIndexState(dataModel, oldRow, _rowIndex);
+    else
+      setRowIndexState(dataModel, oldRow, -1);
 
     if (_var == null) {
     }
@@ -241,7 +246,7 @@ public class UIData extends UIComponentBase
   private void setRowIndexState(DataModel model, int oldRow, int newRow)
   {
     if (_state == null)
-      _state = new ArrayList[model.getRowCount()];
+      _state = new ArrayList<ArrayList<State>>();
     
     setRowIndexState(this, oldRow, newRow, false, 0);
   }
@@ -260,10 +265,18 @@ public class UIData extends UIComponentBase
       EditableValueHolder holder = (EditableValueHolder) comp;
       
       if (oldRow >= 0) {
-	ArrayList<State> oldList = _state[oldRow];
+	ArrayList<State> oldList;
 
-	if (oldList == null)
-	  _state[oldRow] = oldList = new ArrayList<State>();
+	while (_state.size() <= oldRow)
+	  _state.add(null);
+	
+	oldList = _state.get(oldRow);
+
+	if (oldList == null) {
+	  oldList = new ArrayList<State>();
+	  
+	  _state.set(oldRow, oldList);
+	}
 
 	while (oldList.size() < valueIndex)
 	  oldList.add(null);
@@ -278,7 +291,11 @@ public class UIData extends UIComponentBase
 	oldList.set(valueIndex, state);
       }
 
-      ArrayList<State> newList = newRow >= 0 ? _state[newRow] : null;
+      ArrayList<State> newList = null;
+
+      if (newRow >= 0 && newRow < _state.size())
+	newList = _state.get(newRow);
+
       State state;
       
       if (newList != null && valueIndex < newList.size())
@@ -458,7 +475,7 @@ public class UIData extends UIComponentBase
   {
     int rowIndex = getRowIndex();
 
-    super.queueEvent(new UIDataEventWrapper(event, rowIndex));
+    super.queueEvent(new UIDataEventWrapper(event, this, rowIndex));
   }
 
   /**
@@ -476,7 +493,7 @@ public class UIData extends UIComponentBase
       int oldIndex = getRowIndex();
       setRowIndex(wrapper.getRowIndex());
 
-      super.broadcast(event);
+      event.getComponent().broadcast(event);
       
       setRowIndex(oldIndex);
     }
@@ -524,25 +541,32 @@ public class UIData extends UIComponentBase
       int first = getFirst();
       int rows = getRows();
 
+      if (rows <= 0)
+	rows = Integer.MAX_VALUE;
+      
       for (int i = 0; i < rows; i++) {
 	setRowIndex(first + i);
 
-	if (isRowAvailable()) {
-	  for (int j = 0; j < childCount; j++) {
-	    UIComponent child = children.get(j);
+	if (! isRowAvailable())
+	  break;
 
-	    if (! child.isRendered())
-	      continue;
+	for (int j = 0; j < childCount; j++) {
+	  UIComponent child = children.get(j);
+
+	  if (! child.isRendered())
+	    continue;
 	    
-	    int grandchildCount = child.getChildCount();
+	  int grandchildCount = child.getChildCount();
+
+	  if (grandchildCount > 0) {
 	    List<UIComponent> grandchildren = child.getChildren();
 
 	    for (int k = 0; k < grandchildCount; k++) {
 	      grandchildren.get(k).processDecodes(context);
 	    }
-
-	    child.decode(context);
 	  }
+
+	  child.decode(context);
 	}
       }
     }
@@ -592,22 +616,26 @@ public class UIData extends UIComponentBase
       int first = getFirst();
       int rows = getRows();
 
+      if (rows <= 0)
+	rows = Integer.MAX_VALUE;
+
       for (int i = 0; i < rows; i++) {
 	setRowIndex(first + i);
 
-	if (isRowAvailable()) {
-	  for (int j = 0; j < childCount; j++) {
-	    UIComponent child = children.get(j);
+	if (! isRowAvailable())
+	  break;
+	
+	for (int j = 0; j < childCount; j++) {
+	  UIComponent child = children.get(j);
 
-	    if (! child.isRendered())
-	      continue;
+	  if (! child.isRendered())
+	    continue;
 	    
-	    int grandchildCount = child.getChildCount();
-	    List<UIComponent> grandchildren = child.getChildren();
+	  int grandchildCount = child.getChildCount();
+	  List<UIComponent> grandchildren = child.getChildren();
 
-	    for (int k = 0; k < grandchildCount; k++) {
-	      grandchildren.get(k).processValidators(context);
-	    }
+	  for (int k = 0; k < grandchildCount; k++) {
+	    grandchildren.get(k).processValidators(context);
 	  }
 	}
       }
@@ -656,22 +684,26 @@ public class UIData extends UIComponentBase
       int first = getFirst();
       int rows = getRows();
 
+      if (rows <= 0)
+	rows = Integer.MAX_VALUE;
+
       for (int i = 0; i < rows; i++) {
 	setRowIndex(first + i);
 
-	if (isRowAvailable()) {
-	  for (int j = 0; j < childCount; j++) {
-	    UIComponent child = children.get(j);
-
-	    if (! child.isRendered())
-	      continue;
+	if (! isRowAvailable())
+	  break;
 	    
-	    int grandchildCount = child.getChildCount();
-	    List<UIComponent> grandchildren = child.getChildren();
+	for (int j = 0; j < childCount; j++) {
+	  UIComponent child = children.get(j);
 
-	    for (int k = 0; k < grandchildCount; k++) {
-	      grandchildren.get(k).processUpdates(context);
-	    }
+	  if (! child.isRendered())
+	    continue;
+	    
+	  int grandchildCount = child.getChildCount();
+	  List<UIComponent> grandchildren = child.getChildren();
+
+	  for (int k = 0; k < grandchildCount; k++) {
+	    grandchildren.get(k).processUpdates(context);
 	  }
 	}
       }
@@ -736,9 +768,9 @@ public class UIData extends UIComponentBase
     private FacesEvent _event;
     private int _rowIndex;
 
-    UIDataEventWrapper(FacesEvent event, int rowIndex)
+    UIDataEventWrapper(FacesEvent event, UIData component, int rowIndex)
     {
-      super(event.getComponent());
+      super(component);
 
       _event = event;
       _rowIndex = rowIndex;

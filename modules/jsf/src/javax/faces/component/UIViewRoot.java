@@ -29,6 +29,7 @@
 package javax.faces.component;
 
 import java.util.*;
+import java.util.logging.*;
 
 import javax.el.*;
 
@@ -41,6 +42,9 @@ import javax.faces.lifecycle.*;
 
 public class UIViewRoot extends UIComponentBase
 {
+  private static final Logger log
+    = Logger.getLogger(UIViewRoot.class.getName());
+  
   public static final String COMPONENT_FAMILY = "javax.faces.ViewRoot";
   public static final String COMPONENT_TYPE = "javax.faces.ViewRoot";
   public static final String UNIQUE_ID_PREFIX = "j_id";
@@ -304,6 +308,9 @@ public class UIViewRoot extends UIComponentBase
   {
     if (_eventList == null)
       _eventList = new ArrayList<FacesEvent>();
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " queueEvent " + event);
 
     _eventList.add(event);
   }
