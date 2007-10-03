@@ -848,10 +848,15 @@ public class StringBuilderValue
       ensureCapacity(_length + sublen);
 
     try {
-      int count = is.read(_buffer, _length, sublen);
+      while (sublen > 0) {
+        int count = is.read(_buffer, _length, sublen);
 
-      if (count > 0)
+        if (count <= 0)
+          break;
+
+        sublen -= count;
         _length += count;
+      }
 
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -870,10 +875,15 @@ public class StringBuilderValue
       ensureCapacity(_length + sublen);
 
     try {
-      int count = reader.read(_buffer, _length, sublen);
+      while (sublen > 0) {
+        int count = reader.read(_buffer, _length, sublen);
 
-      if (count > 0)
+        if (count <= 0)
+          break;
+
+        sublen -= count;
         _length += count;
+      }
 
     } catch (IOException e) {
       throw new QuercusModuleException(e);
