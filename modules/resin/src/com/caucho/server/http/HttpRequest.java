@@ -312,9 +312,10 @@ public class HttpRequest extends AbstractHttpRequest
   public boolean handleResume()
     throws IOException
   {
+    boolean isResume = false;
+    ConnectionController controller = null;
+    
     try {
-      ConnectionController controller = null;
-      
       try {
 	setStartTime();
 	
@@ -324,8 +325,10 @@ public class HttpRequest extends AbstractHttpRequest
 	if (controller == null) {
 	  killKeepalive();
 	}
-	else if (_invocation.doResume(this, _response))
+	else if (_invocation.doResume(this, _response)) {
 	  controller = null;
+	  isResume = true;
+	}
 	else
 	  killKeepalive();
       } finally {
@@ -336,11 +339,13 @@ public class HttpRequest extends AbstractHttpRequest
       }
     } catch (ClientDisconnectException e) {
       _response.killCache();
+      isResume = false;
 
       throw e;
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
+      isResume = false;
       _response.killCache();
       killKeepalive();
 
@@ -354,7 +359,7 @@ public class HttpRequest extends AbstractHttpRequest
                (isKeepalive() ? "keepalive" : "no-keepalive"));
     }
 
-    return isKeepalive();
+    return isResume && controller == null;
   }
 
   /**

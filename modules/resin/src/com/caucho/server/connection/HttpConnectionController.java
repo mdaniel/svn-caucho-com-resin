@@ -55,7 +55,7 @@ public class HttpConnectionController extends ConnectionController
   public HttpConnectionController(AbstractHttpRequest request)
   {
     super(request.getConnection());
-    
+
     _request = request;
   }
 

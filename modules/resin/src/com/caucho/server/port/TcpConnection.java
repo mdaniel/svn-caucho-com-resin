@@ -559,6 +559,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	  return;
 
         isFirst = false;
+	ConnectionController controller = null;
 	
 	try {
 	  thread.interrupted();
@@ -566,6 +567,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	  
 	  do {
 	    thread.setContextClassLoader(systemLoader);
+
+	    controller = null;
 
             isKeepalive = false;
 
@@ -576,13 +579,15 @@ public class TcpConnection extends PortConnection implements ThreadTask
 		isKeepalive = request.handleRequest();
 	      }
 
-	      ConnectionController controller = getController();
-	      if (controller == null) {
-	      }
-	      else if (isKeepalive)
+	      controller = getController();
+	      if (controller != null && controller.isActive()) {
+		  isKeepalive = true;
 		return;
+	      }
+		/* XXX: else if (isKeepalive) check
 	      else
 		controller.close();
+		*/
 	    }
 	  } while (isKeepalive && waitForKeepalive() && ! port.isClosed());
 
@@ -596,11 +601,17 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	catch (ClientDisconnectException e) {
 	  isKeepalive = false;
 
+	  if (controller != null)
+	      controller.close();
+
           if (log.isLoggable(Level.FINER))
 	    log.finer(dbgId() + e);
 	}
 	catch (IOException e) {
 	  isKeepalive = false;
+
+	  if (controller != null)
+	      controller.close();
 	  
 	  if (log.isLoggable(Level.FINE))
 	    log.log(Level.FINE, dbgId() + e, e);

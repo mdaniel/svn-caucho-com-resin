@@ -2364,9 +2364,11 @@ public abstract class AbstractHttpRequest
   {
     _keepalive = false;
 
+    /*
     ConnectionController controller = _conn.getController();
     if (controller != null)
       controller.close();
+    */
   }
 
   /**
