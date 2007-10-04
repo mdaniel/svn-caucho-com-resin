@@ -7,7 +7,6 @@
   <body>
     <localtoc/>
 
-
 <s1 title="Introduction">
 
 <p>Quercus implements the PHP 5 language in Java, including object
@@ -19,8 +18,9 @@ avoid compilation overhead.</p>
 <p>Because Quercus is a Java implementation, it natively supports 16-bit
 unicode strings and functions.  Quercus (in 3.1.0) supports the
 new PHP 6 internationalization syntax, and the older unicode conversion
-functions like <code>iconv</code>.  By default, Quercus uses UTF-8
-encoding for PHP scripts and runtime unicode conversion.</p>
+functions like <code>iconv</code>.  Since 3.1.3, the new PHP6 unicode features
+are off by default but they can be enabled with the PHP ini
+<code>unicode.semantics=on</code>.</p>
 
 </s1>
 
@@ -29,10 +29,13 @@ encoding for PHP scripts and runtime unicode conversion.</p>
 <p>In general, getting an application to run on Quercus is straightforward.  To
 demonstrate this simple process, let's install
 <a href="http://wordpress.org/">WordPress</a>.</p>
+
 <p>Step 1.  Create the <code>${resin.root}/webapps/wordpress</code> directory.
 That will be the base directory for the wordpress installation.  It will
 correspond to a url like <code>http://localhost:8080/wordpress/</code>.
 Extract the wordpress files in that directory.</p>
+
+<!--
 
 <p>Step 2.  Create the <code>${resin.root}/webapps/wordpress/WEB-INF</code> directory,
 and add the resin-web.xml file below into that directory.  The resin-web.xml file
@@ -52,11 +55,13 @@ to ISO-8859-1.  If you need to set ini values, see <a href="#php.ini">php.ini</a
 &lt;/web-app>
 </example>
 
-<p>Step 3.  If you have not already done so, download the
+-->
+
+<p>Step 2.  If you have not already done so, download the
 <a href="http://www.mysql.com/products/connector/j/">MySQL Connector/J JDBC driver</a>
 into <code>${resin.root}/lib</code> to enable mysql database functions (See <a href="#databases">Using Databases</a>).</p>
 
-<p>Step 4.  The configuration for Resin/Quercus is now complete.  Now you'll need to go through the application's installation routine.  For Wordpress, go to http://localhost:8080/wordpress/wp-admin/setup-config.php to start the installation.</p>
+<p>Step 3.  The configuration for Resin/Quercus is now complete.  Now you'll need to go through the application's installation routine.  For Wordpress, go to http://localhost:8080/wordpress/wp-admin/setup-config.php to start the installation.</p>
 
 <p>That's it for Wordpress on Quercus.  If you are encountering issues with a certain application, please see <a>Resources</a> for assistance.</p>
 
@@ -102,17 +107,21 @@ into <code>${resin.root}/lib</code> to enable mysql database functions (See <a h
 
 <s2 name="encoding" title="Character Encoding">
 
-<p>Because Quercus is 100% Java, Quercus has native support for Unicode and will, by default, parse PHP scripts in UTF-8.  This also means Quercus supports the new PHP 6 Unicode keywords like this Unicode typecast: <code>(unicode)"foo"</code>.  If a PHP application uses special ISO-8859-X characters (i.e. the copyright symbol, accented characters), Quercus will complain because the byte code of those characters are illegal in UTF-8.</p>
+<p>Quercus 3.1.0 supports PHP6 and has full support for Unicode.  But like PHP6, Quercus 3.1.3 has its
+Unicode support turned off by default for compatibility with legacy PHP applications.
+Unicode support can be enabled with the php ini <code>unicode.semantics</code>.</p>
 
-<p>There are three encodings you need to worry about: script-encoding, unicodie.output_encoding,
-and unicode.runtime_encoding encoding.  By default, Quercus uses UTF-8 for all three.
-Script encoding is for when your scripts are in an encoding other than
-UTF-8.</p>
+<p>With unicode semantics off, Quercus will intrepret bytes in the default ISO-8859-1 encoding.
+Quercus will behave just as PHP5 would. With it on, PHP5 applications may break and
+you need to be concerned with the following three encodings options:
+script-encoding, unicode.output_encoding, and unicode.runtime_encoding.  By default,
+Quercus uses UTF-8 for all three.</p>
 
 <p>
-Script encoding indicates the encoding that is used in the PHP script source files.
-If the source code for an application is not encoded in UTF-8, 
-the solution is to tell Quercus to parse PHP scripts using the correct character
+Script encoding indicates the encoding of PHP script source files.
+If the source code for an application is not encoded in UTF-8, Quercus may give invalid UTF-8
+conversions errors when it tries to convert bytes read to UTF-8.
+The solution is to tell Quercus to parse PHP scripts using the correct character
 set (ISO-8859-1 for most applications).  For example, to tell Quercus to use
 ISO-8859-1, add <code>&lt;script-encoding></code> to the <code>init</code> tag
 of QuercusServlet:</p>
@@ -123,7 +132,7 @@ of QuercusServlet:</p>
   &lt;servlet-mapping url-pattern="*.php"
                    servlet-class="com.caucho.quercus.servlet.QuercusServlet"&gt;
     &lt;init&gt;
-      <b>&lt;script-encoding&gt;iso-8859-1&lt;/script-encoding&gt;</b>
+      <b>&lt;script-encoding&gt;ISO-8859-1&lt;/script-encoding&gt;</b>
     &lt;/init&gt;
   &lt;/servlet-mapping&gt;
 
@@ -132,7 +141,7 @@ of QuercusServlet:</p>
 
 <p>
 If the PHP application also expects conversion from binary to string using a
-character encoding that is not utf-8, then the
+character encoding that is not UTF-8, then the
 <code>unicode.runtime_encoding</code> is used to specify the encoding.
 In PHP 6, there are two types of strings, Unicode and binary.  A binary
 string is a string where the data is binary, the encoding is unknown, or the
