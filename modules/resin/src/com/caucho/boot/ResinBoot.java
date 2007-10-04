@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.el.EL;
+import com.caucho.util.CompileException;
 import com.caucho.loader.Environment;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
@@ -477,14 +478,17 @@ public class ResinBoot {
 	} catch (Throwable e) {
 	}
       }
-    } catch (ConfigException e) {
-      System.out.println(e.getMessage());
-
-      System.exit(2);
     } catch (Exception e) {
-      e.printStackTrace();
+      if (e instanceof CompileException) {
+	System.out.println(e.getMessage());
+
+	System.exit(2);
+      }
+      else {
+	e.printStackTrace();
       
-      System.exit(3);
+	System.exit(3);
+      }
     }
   }
 

@@ -237,6 +237,22 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     server.stop();
   }
 
+  void restartServer(String serverId, String []argv)
+  {
+    ResinWatchdog server = null;
+    
+    synchronized (_activeServerMap) {
+      server = _activeServerMap.remove(serverId);
+    }
+
+    if (server != null)
+      log().info(server + " stopping");
+
+    server.stop();
+
+    startServer(argv);
+  }
+
   private ResinConfig readConfig(Args args)
     throws Exception
   {

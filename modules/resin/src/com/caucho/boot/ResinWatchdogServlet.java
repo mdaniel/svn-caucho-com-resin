@@ -56,8 +56,7 @@ public class ResinWatchdogServlet extends HessianServlet implements WatchdogAPI 
   
   public void restart(String serverId, String []argv)
   {
-    stop(serverId);
-    start(argv);
+    _watchdogManager.restartServer(serverId, argv);
   }
 
   public void stop(String serverId)

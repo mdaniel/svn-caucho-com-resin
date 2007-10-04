@@ -111,8 +111,9 @@ public class RegexpModule
                                @Optional int flags,
                                @Optional int offset)
   {
-    if (useJavaRegexp(env))
+    if (useJavaRegexp(env)) {
       return JavaRegexpModule.preg_match(env, regexp, subject, matchRef, flags, offset);
+    }
     else
       return CauchoRegexpModule.preg_match(env, regexp, subject, matchRef, flags, offset);
   }
@@ -314,6 +315,6 @@ public class RegexpModule
   
   private static boolean useJavaRegexp(Env env)
   {
-    return env.getIniBoolean("caucho.java_regexp");
+    return ! env.getIniBoolean("caucho.resin_regexp");
   }
 }
