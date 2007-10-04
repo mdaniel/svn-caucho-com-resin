@@ -274,11 +274,23 @@ package hessian.io
         writeBoolean(object as Boolean);
         return;
       }
+      else if (className == "Number") {
+        writeDouble(object as Number); // XXX should this be writeLong?
+        return;
+      }
+      else if (className == "Double") {
+        writeDouble(object as Number); // special hack for double
+        return;
+      }
+      else if (className == "Long") {
+        writeLong(object as Number); // special hack for long 
+        return;
+      }
       else if (object is int || className == "int") {
         writeInt(object as int);
         return;
       }
-      else if (object is Number || className == "Number") {
+      else if (object is Number) {
         writeDouble(object as Number); // XXX should this be writeLong?
         return;
       }

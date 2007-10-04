@@ -49,11 +49,11 @@
 
 package hessian.client
 {
+  import flash.errors.IllegalOperationError;
   import flash.events.Event;
   import flash.net.URLRequest;
   import flash.net.URLStream;
   import flash.utils.ByteArray;
-  import flash.utils.describeType;
 
   import hessian.io.Hessian2Input;
   import hessian.io.HessianOutput;
@@ -77,74 +77,85 @@ package hessian.client
    *
    * @see hessian.client.HessianService
    */
-  public class HessianOperation extends AbstractHessianOperation
+  public class AbstractHessianOperation extends AbstractOperation         
   {
+    protected var _returnType:Class;
+    protected var _tokens:Object = new Object();
+    protected var _input:Hessian2Input = new Hessian2Input();
+    protected var _output:HessianOutput = new HessianOutput();
+
     /** @private */
-    public function HessianOperation(service:HessianService, 
-                                     name:String, returnType:Class = null)
+    public function AbstractHessianOperation(service:HessianService, 
+                                             name:String, 
+                                             returnType:Class = null)
     {
-      super(service, name, returnType);
+      super(service, name);
+
+      _returnType = returnType;
+    }
+
+    /** 
+     * Invokes the operation on the remote service.  The return value is
+     * an AsyncToken which can be used to retrieve the result of the 
+     * invocation.  The lastResult property may also be used.
+     *
+     * @param args The arguments to be sent.
+     *
+     * @return The AsyncToken that may be used to retrieve the result of
+     * the invocation.
+     */
+    public override function send(...args):AsyncToken
+    {
+      var data:ByteArray = new ByteArray();
+
+      _output.init(data);
+      _output.call(name, args == null ? arguments as Array : args);
+      data.position = 0;
+
+      var request:URLRequest = new URLRequest();
+      request.data = data;
+      request.url = service.destination;
+      request.method = "POST";
+      request.contentType = "binary/octet-stream";
+
+      var msg:HessianMessage = new HessianMessage(args, service.destination);
+      
+      // XXX This seems to be necessary to avoid a Fault
+      msg.headers = new Object();
+      msg.headers.DSMessageStore = new Object();
+
+      var token:AsyncToken = mx_internal::invoke(msg);
+      var stream:URLStream = new URLStream();
+
+      _tokens[stream] = token;
+
+      clearResult(true);
+      registerEventHandlers(stream);
+      stream.load(request);
+
+      var invoke:Event = new InvokeEvent("Hessian", false, false, token, msg);
+      service.dispatchEvent(invoke);
+
+      return token;
     }
 
     /** @private */
-    protected override function registerEventHandlers(stream:URLStream):void
+    protected function registerEventHandlers(stream:URLStream):void
     {
-      stream.addEventListener(Event.COMPLETE, handleComplete);
+      throw new IllegalOperationError();
     }
 
-    /** @private */
-    public function handleComplete(event:Event):void
+    /**
+     * The return type to which results will be cast.  Optional.
+     */
+    public function get returnType():Class
     {
-      var stream:URLStream = event.target as URLStream;
-      var token:AsyncToken = _tokens[stream] as AsyncToken;
+      return _returnType;
+    }
 
-      if (token == null) {
-        trace("Unknown stream completed: " + stream);
-        return;
-      }
-
-      delete _tokens[stream];
-
-      var ret:Object = null;
-      var event:Event = null;
-      var fault:Fault = null;
-
-      try {
-        _input.init(stream);
-        ret = _input.readReply(_returnType);
-
-        event = new ResultEvent(BINDING_RESULT, 
-                                /*bubbles=*/false, /*cancelable=*/false, 
-                                ret, token, token.message);
-
-        token.applyResult(ResultEvent(event));
-      }
-      catch (e:HessianServiceError) {
-        fault = new Fault(e.code, e.message, String(e.detail));
-        fault.rootCause = e;
-
-        event = new FaultEvent(BINDING_RESULT, 
-                               /*bubbles=*/false, /*cancelable=*/false, 
-                               fault, token, token.message);
-
-        token.applyFault(FaultEvent(event));
-      }
-      catch (e:Error) {
-        fault = new Fault("", e.message, "");
-        fault.rootCause = e;
-
-        event = new FaultEvent(BINDING_RESULT, 
-                               /*bubbles=*/false, /*cancelable=*/false, 
-                               fault, token, token.message);
-
-        token.applyFault(FaultEvent(event));
-      }
-      finally {
-        stream.close();
-      }
-
-      mx_internal::_result = ret;
-      dispatchEvent(event);
+    public function set returnType(returnType:Class):void
+    {
+      _returnType = returnType;
     }
   }
 }

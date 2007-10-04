@@ -47,17 +47,15 @@
  * 
  */
 
-package hessian.client
+package hessian.io
 {
   import flash.events.Event;
+  import flash.events.ProgressEvent;
   import flash.net.URLRequest;
   import flash.net.URLStream;
   import flash.utils.ByteArray;
   import flash.utils.describeType;
-
-  import hessian.io.Hessian2Input;
-  import hessian.io.HessianOutput;
-  import hessian.io.HessianServiceError;
+	import flash.utils.IDataInput;
 
   import mx.core.mx_internal;
 
@@ -72,79 +70,78 @@ package hessian.client
   use namespace mx_internal;
 
   /**
-   * The HessianOperation class is an AbstractOperation used exclusively
-   * by HessianServices.
+   * The HessianStreamingOperation class is an AbstractOperation used 
+   * exclusively by HessianStreamingServices.
    *
    * @see hessian.client.HessianService
    */
-  public class HessianOperation extends AbstractHessianOperation
+  public class Hessian2StreamingInput
   {
-    /** @private */
-    public function HessianOperation(service:HessianService, 
-                                     name:String, returnType:Class = null)
+    private var _tag:int = -1;
+    private var _length:int = 0;
+    private var _offset:int = 0;
+    private var _buffer:ByteArray = new ByteArray();
+    private var _input:Hessian2Input;
+    private var _queue:Array = new Array();
+
+    public function Hessian2StreamingInput(input:Hessian2Input)
     {
-      super(service, name, returnType);
+      _input = input;
     }
 
-    /** @private */
-    protected override function registerEventHandlers(stream:URLStream):void
+    public function hasMoreObjects():Boolean
     {
-      stream.addEventListener(Event.COMPLETE, handleComplete);
+      return _queue.length > 0;
     }
 
-    /** @private */
-    public function handleComplete(event:Event):void
+    public function nextObject():Object
     {
-      var stream:URLStream = event.target as URLStream;
-      var token:AsyncToken = _tokens[stream] as AsyncToken;
+      return _queue.shift();
+    }
 
-      if (token == null) {
-        trace("Unknown stream completed: " + stream);
-        return;
+    public function read(di:IDataInput):void
+    {
+      while (di.bytesAvailable > 0) {
+        while (_length == 0) {
+          // We expect at least three bytes at the beginning of a packet.
+          // If we don't get them, we don't read anything. This is important
+          // to note if you're throwing away the bytes everytime you call
+          // this method.
+          if (di.bytesAvailable < 3)
+            return;
+
+          _tag = di.readByte();
+          if (_tag != 'p'.charCodeAt() && _tag != 'P'.charCodeAt()) {
+            throw new HessianProtocolError("expected streaming packet at 0x"
+                                           + (_tag & 0xff).toString(16));
+          }
+
+          var d1:int = di.readByte();
+          var d2:int = di.readByte();
+
+          _length = (d1 << 8) + d2;
+        }
+
+        var length:int = _length;
+        if (di.bytesAvailable < _length)
+          length = di.bytesAvailable;
+
+        di.readBytes(_buffer, _offset, length);
+
+        _offset = _buffer.length;
+
+        _length -= length;
+
+        if (_length == 0 && _tag == 'P'.charCodeAt()) {
+          _buffer.position = 0;
+          _input.init(_buffer);
+          _queue.push(_input.readObject());
+
+          _offset = 0;
+          _buffer.length = 0;
+        }
       }
-
-      delete _tokens[stream];
-
-      var ret:Object = null;
-      var event:Event = null;
-      var fault:Fault = null;
-
-      try {
-        _input.init(stream);
-        ret = _input.readReply(_returnType);
-
-        event = new ResultEvent(BINDING_RESULT, 
-                                /*bubbles=*/false, /*cancelable=*/false, 
-                                ret, token, token.message);
-
-        token.applyResult(ResultEvent(event));
-      }
-      catch (e:HessianServiceError) {
-        fault = new Fault(e.code, e.message, String(e.detail));
-        fault.rootCause = e;
-
-        event = new FaultEvent(BINDING_RESULT, 
-                               /*bubbles=*/false, /*cancelable=*/false, 
-                               fault, token, token.message);
-
-        token.applyFault(FaultEvent(event));
-      }
-      catch (e:Error) {
-        fault = new Fault("", e.message, "");
-        fault.rootCause = e;
-
-        event = new FaultEvent(BINDING_RESULT, 
-                               /*bubbles=*/false, /*cancelable=*/false, 
-                               fault, token, token.message);
-
-        token.applyFault(FaultEvent(event));
-      }
-      finally {
-        stream.close();
-      }
-
-      mx_internal::_result = ret;
-      dispatchEvent(event);
     }
   }
 }
+

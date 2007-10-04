@@ -50,12 +50,14 @@
 package hessian.client
 {
   import flash.events.Event;
+  import flash.events.ProgressEvent;
   import flash.net.URLRequest;
   import flash.net.URLStream;
   import flash.utils.ByteArray;
   import flash.utils.describeType;
 
   import hessian.io.Hessian2Input;
+  import hessian.io.Hessian2StreamingInput;
   import hessian.io.HessianOutput;
   import hessian.io.HessianServiceError;
 
@@ -72,28 +74,34 @@ package hessian.client
   use namespace mx_internal;
 
   /**
-   * The HessianOperation class is an AbstractOperation used exclusively
-   * by HessianServices.
+   * The HessianStreamingOperation class is an AbstractOperation used 
+   * exclusively by HessianStreamingServices.
    *
    * @see hessian.client.HessianService
    */
-  public class HessianOperation extends AbstractHessianOperation
+  public class HessianStreamingOperation extends AbstractHessianOperation
   {
+    protected var _streamingInput:Hessian2StreamingInput;
+
     /** @private */
-    public function HessianOperation(service:HessianService, 
-                                     name:String, returnType:Class = null)
+    public function HessianStreamingOperation(service:HessianStreamingService, 
+                                              name:String, 
+                                              returnType:Class = null)
     {
       super(service, name, returnType);
+
+      _streamingInput = new Hessian2StreamingInput(_input);
     }
 
     /** @private */
     protected override function registerEventHandlers(stream:URLStream):void
     {
-      stream.addEventListener(Event.COMPLETE, handleComplete);
+      stream.addEventListener(ProgressEvent.PROGRESS, handleData);
+      stream.addEventListener(Event.COMPLETE, handleData);
     }
-
+    
     /** @private */
-    public function handleComplete(event:Event):void
+    public function handleData(event:ProgressEvent):void
     {
       var stream:URLStream = event.target as URLStream;
       var token:AsyncToken = _tokens[stream] as AsyncToken;
@@ -103,48 +111,23 @@ package hessian.client
         return;
       }
 
-      delete _tokens[stream];
+      _streamingInput.read(stream);
 
-      var ret:Object = null;
-      var event:Event = null;
-      var fault:Fault = null;
+      while (_streamingInput.hasMoreObjects()) {
+        var ret:Object = _streamingInput.nextObject();
+        mx_internal::_result = ret;
 
-      try {
-        _input.init(stream);
-        ret = _input.readReply(_returnType);
+        var resultEvent:ResultEvent = new ResultEvent(BINDING_RESULT, 
+                                                      /*bubbles=*/false, 
+                                                      /*cancelable=*/false, 
+                                                      ret, token, 
+                                                      token.message);
 
-        event = new ResultEvent(BINDING_RESULT, 
-                                /*bubbles=*/false, /*cancelable=*/false, 
-                                ret, token, token.message);
+        token.applyResult(ResultEvent(resultEvent));
 
-        token.applyResult(ResultEvent(event));
+        mx_internal::_result = ret;
+        dispatchEvent(resultEvent);
       }
-      catch (e:HessianServiceError) {
-        fault = new Fault(e.code, e.message, String(e.detail));
-        fault.rootCause = e;
-
-        event = new FaultEvent(BINDING_RESULT, 
-                               /*bubbles=*/false, /*cancelable=*/false, 
-                               fault, token, token.message);
-
-        token.applyFault(FaultEvent(event));
-      }
-      catch (e:Error) {
-        fault = new Fault("", e.message, "");
-        fault.rootCause = e;
-
-        event = new FaultEvent(BINDING_RESULT, 
-                               /*bubbles=*/false, /*cancelable=*/false, 
-                               fault, token, token.message);
-
-        token.applyFault(FaultEvent(event));
-      }
-      finally {
-        stream.close();
-      }
-
-      mx_internal::_result = ret;
-      dispatchEvent(event);
     }
   }
 }
