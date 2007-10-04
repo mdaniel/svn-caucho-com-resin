@@ -137,6 +137,8 @@ public class Port
   private ArrayList<TcpConnection> _suspendList
     = new ArrayList<TcpConnection>();
 
+  private Alarm _suspendAlarm;
+
   private volatile int _threadCount;
   private final Object _threadCountLock = new Object();
 
@@ -982,6 +984,9 @@ public class Port
       thread.start();
       
       enable();
+
+      _suspendAlarm = new Alarm(new SuspendReaper());
+      _suspendAlarm.queue(60000);
     } catch (Throwable e) {
       close();
 
@@ -1193,7 +1198,7 @@ public class Port
   boolean suspend(TcpConnection conn)
   {
     boolean isResume = false;
-    
+
     synchronized (_suspendList) {
       if (conn.isWake()) {
 	isResume = true;
@@ -1365,6 +1370,8 @@ public class Port
     if (log.isLoggable(Level.FINE))
       log.fine(this + " closing");
 
+    _suspendAlarm.dequeue();
+
     QServerSocket serverSocket = _serverSocket;
     _serverSocket = null;
 
@@ -1463,7 +1470,7 @@ public class Port
 
 	long now = Alarm.getCurrentTime();
 	synchronized (_suspendList) {
-	  for (int i = _suspendList.size(); i >=0; i--) {
+	  for (int i = _suspendList.size() - 1; i >=0; i--) {
 	    TcpConnection conn = _suspendList.get(i);
 
 	    if (conn.getSuspendTime() + _suspendTimeMax < now) {
@@ -1480,6 +1487,9 @@ public class Port
 	if (oldList != null) {
 	  for (int i = 0; i < oldList.size(); i++) {
 	    TcpConnection conn = oldList.get(i);
+
+	    if (log.isLoggable(Level.FINE))
+	      log.fine(this + " comet idle timeout " + conn);
 	    
 	    conn.destroy();
 	  }

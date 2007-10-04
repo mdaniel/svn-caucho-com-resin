@@ -399,10 +399,12 @@ public class TcpConnection extends PortConnection implements ThreadTask
       _suspendTime = Alarm.getCurrentTime();
       
       if (port.suspend(this)) {
-	log.fine(dbgId() + "suspend");
+	if (log.isLoggable(Level.FINE))
+	  log.fine(dbgId() + "suspend");
       }
       else {
-        log.fine(dbgId() + "suspend fail");
+	if (log.isLoggable(Level.FINE))
+	  log.fine(dbgId() + "suspend fail");
 	
 	free();
       }
@@ -545,6 +547,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	    controller.close();
 
 	  isKeepalive = false;
+	  
+	  closeImpl();
 	}
 
 	return;
@@ -602,7 +606,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	  isKeepalive = false;
 
 	  if (controller != null)
-	      controller.close();
+	    controller.close();
 
           if (log.isLoggable(Level.FINER))
 	    log.finer(dbgId() + e);
@@ -611,7 +615,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	  isKeepalive = false;
 
 	  if (controller != null)
-	      controller.close();
+	    controller.close();
 	  
 	  if (log.isLoggable(Level.FINE))
 	    log.log(Level.FINE, dbgId() + e, e);
@@ -633,7 +637,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
       //_admin.unregister();
       
       port.threadEnd(this);
-
       if (isKeepalive)
 	keepalive();
       else

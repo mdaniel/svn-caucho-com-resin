@@ -892,6 +892,33 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     try {
       int ch;
+
+      TempBuffer buf = TempBuffer.allocate();
+
+      int sublen = buf.getBuffer().length;
+      if (length < sublen)
+	sublen = (int) length;
+
+      sublen = is.read(buf.getBuffer(), 0, sublen);
+
+      if (sublen > 0)
+	append(buf.getBuffer(), 0, sublen);
+
+      TempBuffer.free(buf);
+
+      return this;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Append from an input stream
+   */
+  public StringValue appendAll(BinaryInput is, long length)
+  {
+    try {
+      int ch;
     
       while (length-- > 0 && (ch = is.read()) >= 0) {
 	appendByte(ch);

@@ -840,14 +840,35 @@ public class StringBuilderValue
   }
 
   @Override
-  public StringValue append(BinaryInput is, long length)
+  public StringValue append(BinaryInput is, long maxLength)
   {
     // php/161i 64k
     
-    int sublen = Math.min(8192, (int) length);
+    int sublen = Math.min(8192, (int) maxLength);
 
     try {
-      while (length > 0) {
+      ensureAppendCapacity(sublen);
+
+      int count = is.read(_buffer, _length, sublen);
+
+      if (count > 0)
+        _length += count;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+
+    return this;
+  }
+
+  @Override
+  public StringValue appendAll(BinaryInput is, long maxLength)
+  {
+    // php/161i 64k
+    
+    int sublen = Math.min(8192, (int) maxLength);
+
+    try {
+      while (sublen > 0) {
         ensureAppendCapacity(sublen);
 
         int count = is.read(_buffer, _length, sublen);
@@ -855,8 +876,8 @@ public class StringBuilderValue
         if (count <= 0)
           break;
 
-        length -= count;
         _length += count;
+	sublen -= count;
       }
 
     } catch (IOException e) {

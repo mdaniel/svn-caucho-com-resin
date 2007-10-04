@@ -373,6 +373,9 @@ class ResponseStream extends ToByteResponseStream {
       writeCache(_next.getBuffer(), startOffset, length);
     }
 
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() +  "write-chunk(" + length + ")");
+
     if (! _isHead) {
       _next.setBufferOffset(offset);
     }
@@ -598,7 +601,7 @@ class ResponseStream extends ToByteResponseStream {
 	  // jsp/01cf
 	  _bufferStartOffset = 0;
 	}
-	
+
         if (_next != null)
           _next.flush();
       }

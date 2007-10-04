@@ -99,6 +99,7 @@ public final class ISO8859_1Writer extends EncodingWriter {
    * @param off starting offset into the buffer.
    * @param len number of characters to write
    */
+  @Override
   public void write(OutputStreamWithBuffer os,
 		    char []cBuf, int cOffset, int cLength)
     throws IOException
