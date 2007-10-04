@@ -77,19 +77,65 @@ package hessian.client
    *
    * @see hessian.client.HessianService
    */
-  public class HessianOperation extends AbstractHessianOperation
+  public class HessianOperation extends AbstractOperation
   {
+    protected var _returnType:Class;
+    protected var _tokens:Object = new Object();
+    protected var _input:Hessian2Input = new Hessian2Input();
+    protected var _output:HessianOutput = new HessianOutput();
+
     /** @private */
     public function HessianOperation(service:HessianService, 
                                      name:String, returnType:Class = null)
     {
-      super(service, name, returnType);
+      super(service, name);
+
+      _returnType = returnType;
     }
 
-    /** @private */
-    protected override function registerEventHandlers(stream:URLStream):void
+    /** 
+     * Invokes the operation on the remote service.  The return value is
+     * an AsyncToken which can be used to retrieve the result of the 
+     * invocation.  The lastResult property may also be used.
+     *
+     * @param args The arguments to be sent.
+     *
+     * @return The AsyncToken that may be used to retrieve the result of
+     * the invocation.
+     */
+    public override function send(...args):AsyncToken
     {
+      var data:ByteArray = new ByteArray();
+
+      _output.init(data);
+      _output.call(name, args == null ? arguments as Array : args);
+      data.position = 0;
+
+      var request:URLRequest = new URLRequest();
+      request.data = data;
+      request.url = service.destination;
+      request.method = "POST";
+      request.contentType = "binary/octet-stream";
+
+      var msg:HessianMessage = new HessianMessage(args, service.destination);
+      
+      // XXX This seems to be necessary to avoid a Fault
+      msg.headers = new Object();
+      msg.headers.DSMessageStore = new Object();
+
+      var token:AsyncToken = mx_internal::invoke(msg);
+      var stream:URLStream = new URLStream();
+
+      _tokens[stream] = token;
+
+      clearResult(true);
       stream.addEventListener(Event.COMPLETE, handleComplete);
+      stream.load(request);
+
+      var invoke:Event = new InvokeEvent("Hessian", false, false, token, msg);
+      service.dispatchEvent(invoke);
+
+      return token;
     }
 
     /** @private */
@@ -145,6 +191,19 @@ package hessian.client
 
       mx_internal::_result = ret;
       dispatchEvent(event);
+    }
+
+    /**
+     * The return type to which results will be cast.  Optional.
+     */
+    public function get returnType():Class
+    {
+      return _returnType;
+    }
+
+    public function set returnType(returnType:Class):void
+    {
+      _returnType = returnType;
     }
   }
 }

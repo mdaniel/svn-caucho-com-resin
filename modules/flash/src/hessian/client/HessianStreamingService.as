@@ -49,9 +49,16 @@
 
 package hessian.client
 {
-  import mx.rpc.AbstractOperation;
+  import flash.events.Event;
+  import flash.events.TimerEvent;
+  import flash.net.URLRequest;
+  import flash.net.URLStream;
+  import flash.utils.Timer;
 
-  [Bindable]
+  import hessian.io.Hessian2StreamingInput;
+
+  import mx.rpc.IResponder;
+
   /**
    * The HessianStreamingService class provides access to streaming
    * Hessian-based web services on remote servers.
@@ -59,8 +66,19 @@ package hessian.client
    * @see hessian.client.HessianStreamingOperation
    * @see hessian.mxml.HessianStreamingService
    */
-  public dynamic class HessianStreamingService extends HessianService 
+  public dynamic class HessianStreamingService 
   {
+    // We are using a timer instead of the URLStream ProgressEvent because
+    // the ProgressEvent doesn't seem to fire when the URLStream has new
+    // data.  Using the timer, we poll for new data every 1/2 second.
+    // We might want to make this configurable at some point.
+    private const _timer:Timer = new Timer(500);
+    private const _stream:URLStream = new URLStream();
+    private const _input:Hessian2StreamingInput = new Hessian2StreamingInput();
+
+    private var _destination:String;
+    private var _responder:IResponder;
+
     /**
      * Constructor.
      *
@@ -68,27 +86,67 @@ package hessian.client
      * @param api The API associated with this HessianStreamingService, if any.
      *
      */
-    public function HessianStreamingService(destination:String = null, 
-                                            api:Class = null)
+    public function HessianStreamingService(destination:String = null)
     {
-      super(destination, api);
+      _destination = destination;
+    }
+
+    /** @private */
+    public function handleComplete(event:Event):void
+    {
+      _stream.close();
+      _timer.stop();
+    }
+
+    /** @private */
+    public function handleTimer(event:Event):void
+    {
+      if (_stream.bytesAvailable <= 0)
+        return;
+
+      _input.read(_stream);
+
+      while (_input.hasMoreObjects()) 
+        responder.result(_input.nextObject());
     }
 
     /**
-     * Retrieves a HessianStreamingOperation by name, creating one if it 
-     * does not already exist.
-     *
-     * @param name The name of the operation
-     *
-     * @return The HessianStreamingOperation named by <code>name</code>.
-     *
-     */
-    public override function getOperation(name:String):AbstractOperation
+      * The responder that this service calls when a new object comes in.
+      */
+    public function get responder():IResponder
     {
-      if (operations[name] == null)
-        operations[name] = new HessianStreamingOperation(this, name);
+      return _responder;
+    }
 
-      return operations[name];
+    public function set responder(value:IResponder):void
+    {
+      _responder = value;
+    }
+
+    /**
+      * The URL of the service.  A connection is established when the 
+      * destination is set.
+      */
+    public function get destination():String
+    {
+      return _destination;
+    }
+
+    public function set destination(value:String):void
+    {
+      _destination = value;
+
+      var request:URLRequest = new URLRequest();
+      request.data = "";
+      request.url = destination;
+      request.method = "POST";
+      request.contentType = "binary/octet-stream";
+
+      _stream.addEventListener(Event.COMPLETE, handleComplete);
+      _stream.load(request);
+
+      _timer.addEventListener(TimerEvent.TIMER, handleTimer);
+      _timer.start();
     }
   }
 }

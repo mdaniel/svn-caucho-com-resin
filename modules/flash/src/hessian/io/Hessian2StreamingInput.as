@@ -70,10 +70,12 @@ package hessian.io
   use namespace mx_internal;
 
   /**
-   * The HessianStreamingOperation class is an AbstractOperation used 
-   * exclusively by HessianStreamingServices.
+   * An input for streaming Hessian data.  Data that is sent in Hessian
+   * streaming packets is buffered until a whole object is received.  The
+   * object is then decoded and stored within this object.  Such received
+   * objects can be retrieved by calling #nextObject().
    *
-   * @see hessian.client.HessianService
+   * @see hessian.io.Hessian2Input
    */
   public class Hessian2StreamingInput
   {
@@ -81,24 +83,36 @@ package hessian.io
     private var _length:int = 0;
     private var _offset:int = 0;
     private var _buffer:ByteArray = new ByteArray();
-    private var _input:Hessian2Input;
+    private var _input:Hessian2Input = new Hessian2Input();
     private var _queue:Array = new Array();
 
-    public function Hessian2StreamingInput(input:Hessian2Input)
+    public function Hessian2StreamingInput()
     {
-      _input = input;
     }
 
+    /**
+      * @return true if there are objects available to read from this input.
+      */
     public function hasMoreObjects():Boolean
     {
       return _queue.length > 0;
     }
 
+    /**
+      * @return The next object available from this input.
+      */
     public function nextObject():Object
     {
       return _queue.shift();
     }
 
+    /**
+      * Submits data to be read as stream data.  If the data contains any
+      * headers, they must be complete.  
+      * 
+      * @param di The source from which to add the streaming data.
+      *
+      */
     public function read(di:IDataInput):void
     {
       while (di.bytesAvailable > 0) {
@@ -113,11 +127,13 @@ package hessian.io
           _tag = di.readByte();
           if (_tag != 'p'.charCodeAt() && _tag != 'P'.charCodeAt()) {
             throw new HessianProtocolError("expected streaming packet at 0x"
-                                           + (_tag & 0xff).toString(16));
+                                           + (_tag & 0xff).toString(16)
+                                           + "(" + String.fromCharCode(_tag) 
+                                           + ")");
           }
 
-          var d1:int = di.readByte();
-          var d2:int = di.readByte();
+          var d1:int = di.readUnsignedByte();
+          var d2:int = di.readUnsignedByte();
 
           _length = (d1 << 8) + d2;
         }
