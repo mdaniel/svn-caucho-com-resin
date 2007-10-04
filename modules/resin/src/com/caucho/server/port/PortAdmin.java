@@ -122,6 +122,11 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getSelectConnectionCount();
   }
 
+  public int getCometIdleCount()
+  {
+    return _port.getCometIdleCount();
+  }
+
   public long getRequestCountTotal()
   {
     return _port.getLifetimeRequestCount();

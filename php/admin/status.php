@@ -60,8 +60,24 @@ if (! empty($server->Id))
   </tr>
 
   <tr title="The time that this instance was last started or restarted.">
-    <th>Start time:</th>
-    <td><?= format_datetime($server->StartTime) ?></td>
+    <th>Uptime:</th>
+    <?php
+      $start_time = $server->StartTime->time / 1000;
+      $now = time(0);
+      $uptime = $now - $start_time;
+
+      if ($uptime < 24 * 3600)
+        echo "<td class='warmup'>";
+      else
+        echo "<td>";
+
+      echo sprintf("%d days %02d:%02d",
+                   $uptime / (24 * 3600),
+                   $uptime / 3600 % 24,
+                   $uptime / 60 % 60);
+      echo " -- " . format_datetime($server->StartTime);
+     ?>
+   </td>
   </tr>
 
   <tr title="The current total amount of memory available for the JVM, in bytes.">
@@ -157,9 +173,9 @@ The ThreadPool manages all threads used by Resin.
     <th colspan='2'>Config</th>
   </tr>
   <tr>
-    <th title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active thread count</th>
-    <th title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle thread count</th>
-    <th title="The current total number of threads managed by the pool.">Total count</th>
+    <th title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active</th>
+    <th title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle</th>
+    <th title="The current number of threads managed by the pool.">Total</th>
     <th title="The maximum number of threads that Resin can allocate.">thread-max</th>
     <th title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">thread-idle-min</th>
   </tr>
@@ -185,7 +201,7 @@ if ($ports) {
   <tr>
     <th colspan='2'>&nbsp;</th>
   <th colspan='3'>Threads</th>
-  <th colspan='1'>&nbsp;</th>
+  <th colspan='2'>&nbsp;</th>
   <th colspan='2'>Keepalive</th>
   <th colspan='1'>Socket</th>
 
@@ -193,11 +209,12 @@ if ($ports) {
     <th>&nbsp;</th>
     <th>Status</th>
 
-    <th>Active count</th>
-    <th>Idle count</th>
-    <th>Total count</th>
+    <th>Active</th>
+    <th>Idle</th>
+    <th>Total</th>
 
     <th>Keepalive</th>
+    <th>Comet</th>
 
     <th>max</th>
     <th>timeout</th>
@@ -205,11 +222,12 @@ if ($ports) {
     <th>timeout</th>
   </tr>
 <?php
+  $count = 0;
   foreach ($ports as $port) {
 ?>
 
-  <tr>
-    <td><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
+  <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
+    <td class='item'><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
     <td class="<?= $port->State ?>"><?= $port->State ?></td>
     <td><?= $port->ThreadActiveCount ?></td>
     <td><?= $port->ThreadIdleCount ?></td>
@@ -220,6 +238,7 @@ if ($ports) {
             ? ""
             : ("(" . $port->SelectKeepaliveCount . ")") ?></td>
 
+    <td><?= $port->CometIdleCount ?>
     <td><?= $port->KeepaliveMax ?></td>
     <td><?= $port->KeepaliveTimeout ?></td>
 
@@ -233,18 +252,9 @@ if ($ports) {
 
 <!-- Cluster -->
 
-<?php
-  foreach ($resin->Clusters as $cluster) {
-
-  if (empty($cluster->Servers))
-    continue;
-
-echo "<h2>Server Connectors: $cluster->Name</h2>";
-
-?>
+<h2>Server Connectors</h2>
 
 <table class="data">
-
   <tr>
     <th>Server</th>
     <th>Address</th>
@@ -257,14 +267,20 @@ echo "<h2>Server Connectors: $cluster->Name</h2>";
     <th>Fail Total</th>
     <th>Busy Total</th>
   </tr>
-
 <?php
-foreach ($cluster->Servers as $client) {
+
+  foreach ($resin->Clusters as $cluster) {
+    if (empty($cluster->Servers))
+      continue;
+
+    echo "<tr><td class='group' colspan='10'>$cluster->Name</td></tr>\n";
+
+  $count = 0;
+  foreach ($cluster->Servers as $client) {
 ?>
 
-  <tr class='<?= $client->ping() ? "active" : "inactive" ?>'>
-  <tr>
-    <td><?= $client->Name ?></td>
+  <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
+    <td class='item'><?= $client->Name ?></td>
     <td><?= $client->Address ?>:<?= $client->Port ?></td>
     <td class="<?= $client->State ?>"><?= $client->State ?></td>
     <td><?= $client->ConnectionActiveCount ?></td>
@@ -281,13 +297,11 @@ foreach ($cluster->Servers as $client) {
     <td><?= $client->ConnectionBusyCountTotal ?></td>
   </tr>
 <?php 
+  }
 }
 ?>
 
 </table>
-<?php 
-}
-?>
 
 <!-- Connection pools -->
 
@@ -356,12 +370,11 @@ if ($store) {
 
 ?>
 
-<!-- Hosts and Applications -->
-<h2>Hosts and Applications</h2>
+<!-- Applications -->
+<h2>WebApps</h2>
 
 <table class="data">
   <tr>
-    <th>Host</th>
     <th>Web-App</th>
     <th>State</th>
     <th>Sessions</th>
@@ -380,7 +393,7 @@ foreach ($hosts as $host) {
   $hostName = empty($host->HostName) ? "default" : $host->HostName;
 ?>
 
-  <tr title='<?= $hostObjectName ?>'><td colspan='4'><?= $host->URL ?></td></tr>
+  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='3'><?= $host->URL ?></td></tr>
 <?php
 function sort_webapp($a, $b)
 {
@@ -390,14 +403,13 @@ function sort_webapp($a, $b)
 $webapps = $host->WebApps;
 
 usort($webapps, "sort_webapp");
-
+$count = 0;
 foreach ($webapps as $webapp) {
   $session = $webapp->SessionManager;
 ?>
 
-  <tr class="<?= $webapp->State ?>" title='<?= $webapp->Name ?>'>
-    <td>&nbsp;</td>
-    <td><?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
+  <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
+    <td class='item'><?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
     <td><?= $webapp->State ?>
     <td><?= $session->SessionActiveCount ?>
   </tr>

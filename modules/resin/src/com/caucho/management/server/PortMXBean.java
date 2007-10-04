@@ -146,6 +146,14 @@ public interface PortMXBean extends ManagedObjectMXBean {
   public int getSelectKeepaliveCount();
 
   /**
+   * Returns the current number of comet-socket idle and
+   * waiting to service requests.
+   */
+  @Description("The current number of comet sockets that are"
+               + " idle and waiting to service requests")
+  public int getCometIdleCount();
+
+  /**
    * Returns the total number of requests serviced by the server
    * since it started.
    */

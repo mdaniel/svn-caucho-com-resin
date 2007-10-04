@@ -650,6 +650,14 @@ public class Port
     return _connectionCount;
   }
 
+  /**
+   * Returns the number of comet connections.
+   */
+  public int getCometIdleCount()
+  {
+    return _suspendList.size();
+  }
+
   public long getLifetimeRequestCount()
   {
     return _lifetimeRequestCount;
