@@ -1125,7 +1125,7 @@ public class Server extends ProtocolDispatchServer
 
         if (resin != null) {
           log.info("resin.home = " + resin.getResinHome().getNativePath());
-          log.info("root.directory = " + resin.getRootDirectory().getNativePath());
+          log.info("resin.root = " + resin.getRootDirectory().getNativePath());
           log.info("resin.conf = " + resin.getResinConf());
         }
         else {

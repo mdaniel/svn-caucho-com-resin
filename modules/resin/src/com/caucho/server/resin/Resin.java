@@ -212,6 +212,12 @@ public class Resin implements EnvironmentBean, SchemaBean
       if (serverRoot != null)
 	setRootDirectory(Vfs.lookup(serverRoot));
 
+      // resin.root backwards compat
+      serverRoot = System.getProperty("resin.root");
+
+      if (serverRoot != null)
+	setRootDirectory(Vfs.lookup(serverRoot));
+
       // default server id
       setServerId("");
       
