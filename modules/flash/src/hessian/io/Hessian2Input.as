@@ -1672,7 +1672,7 @@ package hessian.io
 
       addRef(value);
 
-      for (var key:String in fieldNames)
+      for each (var key:String in fieldNames)
         value[key] = readObject();
 
       return value;
