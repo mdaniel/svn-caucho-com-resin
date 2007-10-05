@@ -80,19 +80,20 @@ foreach ($resin->Clusters as $cluster) {
     if ($sub_server) {
       $live_count++;
 
-      $start_time = $server->StartTime->time / 1000;
+      $start_time = $sub_server->StartTime->time / 1000;
       $now = time(0);
       $uptime = $now - $start_time;
 
-      if ($uptime < 24 * 3600)
+      if ($uptime < 12 * 3600)
         echo "<td class='warmup'>";
       else
         echo "<td>";
 
-      echo sprintf("%d days %02d:%02d",
+      echo sprintf("%d days %02d:%02d:%02d",
                    $uptime / (24 * 3600),
                    $uptime / 3600 % 24,
-                   $uptime / 60 % 60) . "</td>";
+                   $uptime / 60 % 60,
+                   $uptime % 60) . "</td>";
 
       $total_memory = $sub_server->RuntimeMemory / (1024 * 1024);
       $free_memory = $sub_server->RuntimeMemoryFree / (1024 * 1024);

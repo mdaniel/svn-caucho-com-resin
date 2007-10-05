@@ -18,7 +18,7 @@ if (! $profile)
 
 ?>
 
-<?php display_header("profile.php", $title, $server->Id) ?>
+<?php display_header("profile.php", $title, $server) ?>
 
 <?php
 

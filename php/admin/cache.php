@@ -5,13 +5,28 @@
 
 require_once "WEB-INF/php/inc.php";
 
-$mbeanServer = new MBeanServer();
+if ($server_id) {
+  $mbean_server = new MBeanServer($server_id);
 
-$resin = $mbeanServer->lookup("resin:type=Resin");
-$server = $mbeanServer->lookup("resin:type=Server");
+  if (! $mbean_server) {
+    $title = "Resin: Cache for server $server_id";
 
-$block_cache = $mbeanServer->lookup("resin:type=BlockManager");
-$proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
+    display_header("thread.php", $title, $server);
+
+    echo "<h3 class='fail'>Can't contact $server_id</h3>";
+    return;
+  }
+}
+else
+  $mbean_server = new MBeanServer();
+
+if ($mbean_server) {
+  $resin = $mbean_server->lookup("resin:type=Resin");
+  $server = $mbean_server->lookup("resin:type=Server");
+
+  $block_cache = $mbean_server->lookup("resin:type=BlockManager");
+  $proxy_cache = $mbean_server->lookup("resin:type=ProxyCache");
+}
 
 $title = "Resin: Cache";
 
@@ -19,7 +34,7 @@ if (! empty($server->Id))
   $title = $title . " for server " . $server->Id;
 ?>
 
-<?php display_header("cache.php", $title, $server->Id) ?>
+<?php display_header("cache.php", $title, $server) ?>
 
 <h2>Server: <?= $server->Id ?></h2>
 

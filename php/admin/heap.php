@@ -22,7 +22,7 @@ if (! $heap)
 
 ?>
 
-<?php display_header("heap.php", $title, $server_Id) ?>
+<?php display_header("heap.php", $title, $server) ?>
 
 <?php
 

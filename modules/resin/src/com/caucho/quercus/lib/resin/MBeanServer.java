@@ -134,16 +134,13 @@ public class MBeanServer {
       if (objectNames == null)
         return values;
 
-      javax.management.MBeanServer server;
-      server = Jmx.getGlobalMBeanServer();
-
       TreeSet<ObjectName> sortedObjectNames
         = new TreeSet<ObjectName>(OBJECTNAME_COMPARATOR);
 
       sortedObjectNames.addAll(objectNames);
 
       for (ObjectName objectName : sortedObjectNames)
-        values.put(env.wrapJava(new MBean(server, objectName)));
+        values.put(env.wrapJava(new MBean(_server, objectName)));
 
       return values;
     }

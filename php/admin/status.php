@@ -8,10 +8,27 @@
 
 require_once "WEB-INF/php/inc.php";
 
-$mbeanServer = new MBeanServer();
+$server_id = $_GET["server-id"];
 
-$resin = $mbeanServer->lookup("resin:type=Resin");
-$server = $mbeanServer->lookup("resin:type=Server");
+if ($server_id) {
+  $mbean_server = new MBeanServer($server_id);
+
+  if (! $mbean_server) {
+    $title = "Resin: Status for server $server_id";
+
+    display_header("thread.php", $title, $server);
+
+    echo "<h3 class='fail'>Can't contact $server_id</h3>";
+    return;
+  }
+}
+else
+  $mbean_server = new MBeanServer();
+
+if ($mbean_server) {
+  $resin = $mbean_server->lookup("resin:type=Resin");
+  $server = $mbean_server->lookup("resin:type=Server");
+}
 
 $title = "Resin: Status";
 
@@ -19,7 +36,16 @@ if (! empty($server->Id))
   $title = $title . " for server " . $server->Id;
 ?>
 
-<?php display_header("status.php", $title, $server->Id) ?>
+<?php
+
+display_header("status.php", $title, $server, true);
+
+if (! $server) {
+  echo "<h2 class='fail'>Can't contact '$server_id'</h2>";
+  return;
+}
+
+?>
 
 <h2>Server: <?= $server->Id ?></h2>
 
@@ -66,15 +92,16 @@ if (! empty($server->Id))
       $now = time(0);
       $uptime = $now - $start_time;
 
-      if ($uptime < 24 * 3600)
+      if ($uptime < 12 * 3600)
         echo "<td class='warmup'>";
       else
         echo "<td>";
 
-      echo sprintf("%d days %02d:%02d",
+      echo sprintf("%d days %02d:%02d:%02d",
                    $uptime / (24 * 3600),
                    $uptime / 3600 % 24,
-                   $uptime / 60 % 60);
+                   $uptime / 60 % 60,
+                   $uptime % 60);
       echo " -- " . format_datetime($server->StartTime);
      ?>
    </td>
@@ -97,8 +124,10 @@ if (! empty($server->Id))
 
 <?php
 
-$block_cache = $mbeanServer->lookup("resin:type=BlockManager");
-$proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
+if ($mbean_server) {
+  $block_cache = $mbean_server->lookup("resin:type=BlockManager");
+  $proxy_cache = $mbean_server->lookup("resin:type=ProxyCache");
+}
 
 ?>
 
@@ -126,7 +155,10 @@ $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
 
 <?php
 
-$mbean = $mbeanServer->lookup("resin:type=LoggerManager");
+if ($mbean_server) {
+  $mbean = $mbean_server->lookup("resin:type=LoggerManager");
+}
+
 if ($mbean) {
   $messages = $mbean->findRecentMessages(10);
 
@@ -306,7 +338,9 @@ if ($ports) {
 <!-- Connection pools -->
 
 <?php
-$db_pools = $mbeanServer->query("resin:*,type=ConnectionPool");
+if ($mbean_server) {
+  $db_pools = $mbean_server->query("resin:*,type=ConnectionPool");
+}
 
 if ($db_pools) {
 ?>
@@ -354,7 +388,9 @@ if ($db_pools) {
 
 <!-- Persistent store -->
 <?php
-$store = $mbeanServer->lookup("resin:type=PersistentStore");
+if ($mbean_server) {
+  $store = $mbean_server->lookup("resin:type=PersistentStore");
+}
 
 if ($store) {
   echo "<h2>Persistent Store: $store->StoreType</h2>\n";
@@ -385,7 +421,9 @@ function sort_host($a, $b)
   return strcmp($a->URL, $b->URL);
 }
 
-$hosts = $mbeanServer->query("resin:*,type=Host");
+if ($mbean_server) {
+  $hosts = $mbean_server->query("resin:*,type=Host");
+}
 
 usort($hosts, "sort_host");
 
@@ -422,7 +460,10 @@ foreach ($webapps as $webapp) {
 
 <?php
 /*
-$tcp_conn = $mbeanServer->query("resin:*,type=TcpConnection");
+if ($mbean_server) {
+  $tcp_conn = $mbean_server->query("resin:*,type=TcpConnection");
+}
+
 $slow_conn = array();
 
 echo "<table class='data'>";
@@ -439,7 +480,9 @@ foreach ($tcp_conn as $conn_name) {
 
 echo "</table>";
 
-$thread_mgr = $mbeanServer->lookup("java.lang:type=Threading");
+if ($mbean_server) {
+  $thread_mgr = $mbean_server->lookup("java.lang:type=Threading");
+}
 
 foreach ($slow_conn as $slow) {
   echo "<h3>" . $slow->ObjectName . " " . ($slow->ActiveTime / 1000) . "</h3>";

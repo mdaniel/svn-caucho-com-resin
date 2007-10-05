@@ -185,6 +185,28 @@ td.buttons {
   text-align : right;
 }
 
+.nav-cluster {
+  font-weight : bold;
+  font-size : 120%;
+  margin-top : 0.5em;
+}
+
+.nav-this {
+  margin-left : 0.5em;
+  font-size : 110%;
+}
+
+.nav-server {
+  margin-left : 0.5em;
+  font-size : 110%;
+}
+
+.nav-dead {
+  margin-left : 0.5em;
+  font-size : 110%;
+  color : grey;
+}
+
 .fail {
   background : #f99;
 }

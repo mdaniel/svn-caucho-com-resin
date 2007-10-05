@@ -108,8 +108,10 @@ $is_display_footer = false;
  *
  * @return true if the header was output, false if a header has already been output
  */
-function display_header($script, $title, $server)
+function display_header($script, $title, $server, $allow_remote = false)
 {
+  $server_id = $server->Id;
+
   global $display_header_script, $display_header_title;
 
   if (! empty($display_header_script))
@@ -146,7 +148,7 @@ function display_header($script, $title, $server)
   <td valign="top">
    <ul class="status">
 <? if (! empty($server)) { ?>
-   <li class="server">Server: <?= $server ?></li>
+   <li class="server">Server: <?= $server->Id ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    <li><a href="<?= $script ?>">refresh</a></li>
@@ -169,7 +171,10 @@ function display_header($script, $title, $server)
 
 <tr>
   <td class="leftnav" valign="top">
-    <?php display_left_navigation(); ?>
+    <?php
+         if ($allow_remote)
+           display_left_navigation($server);
+    ?>
   </td>
 
   <td width="10">
@@ -262,8 +267,51 @@ function display_footer($script)
 <?php
 }
 
-function display_left_navigation()
+function display_left_navigation($current_server)
 {
+  $mbean_server = new MBeanServer();
+
+  if (! $mbean_server)
+    return;
+
+  $resin = $mbean_server->lookup("resin:type=Resin");
+  $server = $mbean_server->lookup("resin:type=Server");
+
+  if (! $current_server)
+    $current_server = $server;
+
+  foreach ($resin->Clusters as $cluster) {
+    if (empty($cluster->Servers))
+      continue;
+
+    echo "<div class='nav-cluster'>$cluster->Name</div>\n";
+
+    $client_names = array();
+    if ($cluster->Name == $server->Cluster->Name) {
+      $client_names[] = $server->Id;
+    }
+
+    foreach ($cluster->Servers as $client) {
+      $client_names[] = $client->Name;
+    }
+
+    sort($client_names);
+
+    foreach ($client_names as $client) {
+      $client_server = $mbean_server->lookup("resin:type=ServerConnector,name=$client");
+
+      if ($client == $current_server->Id) {
+        echo "<div class='nav-this'>$client</div>\n";
+      }
+      else if ($client_server && ! $client_server->ping()) {
+        echo "<div class='nav-dead'>$client</div>\n";
+      }
+      else {
+        echo "<div class='nav-server'><a href='?server-id=$client'>";
+        echo "$client</a></div>\n";
+      }
+    }
+  }
 }
 
 function row_style($i)

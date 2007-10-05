@@ -5,12 +5,27 @@
 
 require_once "WEB-INF/php/inc.php";
 
-$mbeanServer = new MBeanServer();
+$server_id = $_GET["server-id"];
 
-$resin = $mbeanServer->lookup("resin:type=Resin");
-$server = $mbeanServer->lookup("resin:type=Server");
+if ($server_id) {
+  $mbean_server = new MBeanServer($server_id);
 
-$jvm_thread = $mbeanServer->lookup("java.lang:type=Threading");
+  if (! $mbean_server) {
+    $title = "Resin: Thread for server $server_id";
+
+    display_header("thread.php", $title, $server);
+
+    echo "<h3 class='fail'>Can't contact $server_id</h3>";
+    return;
+  }
+}
+else
+  $mbean_server = new MBeanServer();
+
+$resin = $mbean_server->lookup("resin:type=Resin");
+$server = $mbean_server->lookup("resin:type=Server");
+
+$jvm_thread = $mbean_server->lookup("java.lang:type=Threading");
 
 $title = "Resin: Status";
 
@@ -18,7 +33,7 @@ if (! empty($server->Id))
   $title = $title . " for server " . $server->Id;
 ?>
 
-<?php display_header("thread.php", $title, $server->Id) ?>
+<?php display_header("thread.php", $title, $server); ?>
 
 <h2>Server: <?= $server->Id ?></h2>
 
