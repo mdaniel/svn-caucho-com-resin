@@ -252,7 +252,7 @@ public abstract class AbstractHttpRequest
   protected void start()
     throws IOException
   {
-    _oldProvider = SecurityContext.setProvider(this);
+    resume();
     
     _invocation = null;
 
@@ -260,8 +260,6 @@ public abstract class AbstractHttpRequest
     _varyCookie = null;
     _hasCookie = false;
     
-    _startTime = Alarm.getCurrentTime();
-
     _hostHeader = null;
     _expect100Continue = false;
     
@@ -288,6 +286,21 @@ public abstract class AbstractHttpRequest
 
     _attributeListeners = NULL_LISTENERS;
 
+    if (_attributes.size() > 0)
+      _attributes.clear();
+  }
+
+  /**
+   * Prepare the Request object for a new request.
+   *
+   * @param s the raw connection stream
+   */
+  protected void resume()
+    throws IOException
+  {
+    _oldProvider = SecurityContext.setProvider(this);
+    _startTime = Alarm.getCurrentTime();
+    
     if (_tcpConn != null)
       _tcpConn.beginActive();
   }
@@ -2443,16 +2456,14 @@ public abstract class AbstractHttpRequest
       SecurityContext.setProvider(oldProvider);
 
       SessionImpl session = _session;
-      _session = null;
 
       // server/0219
       // _invocation = null;
       
       if (session != null)
         session.finish();
-      
-      if (_attributes.size() > 0)
-	_attributes.clear();
+
+      cleanup();
     } finally {
       for (int i = _closeOnExit.size() - 1; i >= 0; i--) {
         Path path = _closeOnExit.get(i);
@@ -2467,6 +2478,18 @@ public abstract class AbstractHttpRequest
       
       if (_tcpConn != null)
 	_tcpConn.endActive();
+    }
+  }
+
+  public void cleanup()
+  {
+    ConnectionController comet = getConnection().getController();
+
+    if (comet == null) {
+      _session = null;
+      
+      if (_attributes.size() > 0)
+	_attributes.clear();
     }
   }
 

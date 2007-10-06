@@ -157,12 +157,12 @@ table.data {
 
 /*  background : #d0e4ff; */
 .data td.group {
-  background : #ccddee;
+  background : #b9cef7;
   font-weight : bold;
 }
 
 .data td.item {
-  background : #ccddee;
+  background : #e0e6f8;
   font-weight : bold;
 }
 

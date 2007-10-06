@@ -153,7 +153,7 @@ public class Env {
     LruCache<IncludeKey,SoftReference<IncludeCache>> _includeCache
     = new LruCache<IncludeKey,SoftReference<IncludeCache>>(4096);
 
-  private static ThreadLocal<Env> _env = new ThreadLocal<Env>();
+  private static ThreadLocal<Env> _threadEnv = new ThreadLocal<Env>();
 
   protected final Quercus _quercus;
   private final boolean _isUnicodeSemantics; 
@@ -283,6 +283,8 @@ public class Env {
   private ImportMap _importMap;
 
   private TimeZone _defaultTimeZone;
+
+  private Env _oldThreadEnv;
   
   public Env(Quercus quercus,
              QuercusPage page,
@@ -341,10 +343,6 @@ public class Env {
         setIni("caucho.server_id", selfServer.getId());
     }
     */
-
-    _startTime = Alarm.getCurrentTime();
-
-    _env.set(this);
   }
 
   public Env(Quercus quercus)
@@ -354,7 +352,7 @@ public class Env {
 
   public static Env getInstance()
   {
-    return _env.get();
+    return _threadEnv.get();
   }
 
   //
@@ -564,6 +562,12 @@ public class Env {
   
   public void start()
   {
+    _startTime = Alarm.getCurrentTime();
+
+    Env oldThreadEnv = _threadEnv.get();
+    
+    _threadEnv.set(this);
+    
     // quercus/1b06
     String encoding = getOutputEncoding();
     String type = getIniString("default_mimetype");
@@ -583,8 +587,8 @@ public class Env {
       }
     }
 	
-    HashSet<ModuleStartupListener> listeners = 
-      _quercus.getModuleStartupListeners(); 
+    HashSet<ModuleStartupListener> listeners
+      = _quercus.getModuleStartupListeners(); 
 
     for (ModuleStartupListener listener : listeners)
       listener.startup(this);
@@ -4610,6 +4614,8 @@ public class Env {
         setGlobalValue("_SESSION", session.copy(this));
         setGlobalValue("HTTP_SESSION_VARS", session.copy(this));
       }
+      
+      _threadEnv.set(_oldThreadEnv);
     }
   }
 

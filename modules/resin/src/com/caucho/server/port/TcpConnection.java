@@ -100,14 +100,17 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
     int id = getId();
 
+    String protocol = port.getProtocol().getProtocolName();
+
     if (port.getAddress() == null) {
-      _id = "resin-tcp-connection-*:" + port.getPort() + "-" + id;
-      _name = "INADDR_ANY-" + port.getPort() + "-" + id;
+      _id = "resin-" + protocol + "-:" + port.getPort() + "-" + id;
+      _name = protocol + "-" + port.getPort() + "-" + id;
     }
     else {
-      _id = ("resin-tcp-connection-" + port.getAddress() + ":" +
+      _id = ("resin-" + protocol + "-" + port.getAddress() + ":" +
              port.getPort() + "-" + id);
-      _name = port.getAddress() + "-" + port.getPort() + "-" + id;
+      _name = (protocol + "-" + port.getAddress() + "-" +
+	       port.getPort() + "-" + id);
     }
 
     _socket = socket;
