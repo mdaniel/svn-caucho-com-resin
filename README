@@ -56,11 +56,11 @@ file is found in resin-3.1.x/conf/resin.conf.
 
 2) To start the server:
 
-     unix> resin-3.1/bin/httpd.sh
+     unix> java -jar lib/resin.jar start
 
    or
 
-     C:\> resin-3.1/httpd
+     C:\> java -jar lib/resin.jar start
 
    The server listens to port 8080.  Port 8080 is the default specified
    in the configuration file resin-3.1.x/conf/resin.conf
@@ -108,6 +108,7 @@ file is found in resin-3.1.x/conf/resin.conf.
    resin-3.1.x/webapps/bar/WEB-INF/classes/example/HelloServlet.java
      -- java source file, automatically compiled by Resin
 
-9) An administration application is available at http://localhost:8080/resin-admin
+9) An administration application is available at
+   http://localhost:8080/resin-admin
    Instructions are provided for setting a password.
 

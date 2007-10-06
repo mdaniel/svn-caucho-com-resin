@@ -512,6 +512,9 @@ r_server-default = element server-default {
 r_server-Basis =
   r_group-name?
 
+  & (attribute bind-ports-after-start { r_boolean-Type }
+     | element bind-ports-after-start { r_boolean-Type })?
+
   & r_cluster-port*
 
   & r_http*

@@ -53,7 +53,22 @@ load-balanced database drivers.</p>
 
 <s1 title="JSF">
 
-<p>Resin 3.1.3 introduces out JSF implementation.</p>
+<p>Resin 3.1.3 introduces our JSF implementation.</p>
+
+</s1>
+
+<s1 title="Comet/Streaming Servlets">
+
+<p>Resin 3.1.3 introduces a Comet API for streaming servlet.
+Application with long-lived connections implementing server-push will
+use
+<a href="http://caucho.com/resin-javadoc/com/caucho/servlet/comet/CometController.html">CometController</a>
+and
+<a href="http://caucho.com/resin-javadoc/com/caucho/servlet/comet/CometServer.html">CometServlet</a>
+</p>
+
+<p>We've also added a <a href="../examples/servlet-comet/">Comet
+example</a>.</p>
 
 </s1>
 
@@ -81,6 +96,18 @@ session = request.getSession(true);
 </example>
 
 </s1>
+
+<s1 title="Administration">
+
+<p>The administration pages at /resin-admin have been updated to add
+clustering and database pooling capabilities.</p>
+
+</s1>
+
+<s1 title="Amber">
+
+<p>The performance of Amber (JPA) has been improved for loads and
+cached queries.</p>
 
 </body>
 </document>
