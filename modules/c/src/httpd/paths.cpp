@@ -61,6 +61,7 @@ FILE *err = stderr;
 void
 log(char *fmt, ...)
 {
+#ifdef DEBUG
 	va_list arg;
 	va_start(arg, fmt);
 
@@ -78,6 +79,7 @@ log(char *fmt, ...)
 	}
 
 	va_end(arg);
+#endif
 }
 
 char *

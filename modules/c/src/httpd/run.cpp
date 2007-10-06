@@ -312,6 +312,7 @@ set_jdk_args(char *exe, char *cp,
 		args[i++] = "-Djava.system.class.loader=com.caucho.loader.SystemClassLoader";
 		*/
 	// args[i++] = main;
+	args[i++] = "-Xrs";
 	args[i++] = "-jar";
 	args[i++] = strdup(rsprintf(buf, "\"%s/lib/resin.jar\"", resin_home));
 
@@ -670,9 +671,13 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 
 	if (g_is_standalone) {
 		int result = exec_java(java_exe, args);
-		log("exec %s (status %d)\n", java_exe, result);
-		for (int i = 0; args[i]; i++)
-			log("  arg-%d: %s\n", i, args[i]);
+
+		if (1 || result) {
+			log("service %d\n", g_is_service);
+			log("exec %s (status %d)\n", java_exe, result);
+			for (int i = 0; args[i]; i++)
+				log("  arg-%d: %s\n", i, args[i]);
+		}
 		if (! g_is_service)
 		  exit(result);
 

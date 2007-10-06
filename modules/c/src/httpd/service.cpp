@@ -239,6 +239,8 @@ install_service(char *name, char *full_name, char *user, char *password,
 
     TCHAR path[BUF_SIZE];
 	TCHAR args[BUF_SIZE];
+	TCHAR t_user[BUF_SIZE];
+	TCHAR t_password[BUF_SIZE];
 
     if (! GetModuleFileName(NULL, path, sizeof(path)))
       die("Can't get module executable");
@@ -278,13 +280,27 @@ install_service(char *name, char *full_name, char *user, char *password,
 
    if (! manager)
        die("Can't open service manager");
-
+	/*
    if (! user) {
 	   DWORD len = 256;
 	   char *buf = (char*)malloc(len);
 	   if (GetUserName(buf, &len) == S_OK)
-		   user = buf;
-	   
+		   user = buf;   
+   }
+	*/
+   
+   if (user && ! strchr(user, '\\')) {
+	   int i, j;
+
+	   j = 0;
+	   t_user[j++] = '.';
+	   t_user[j++] = '\\';
+
+	   for (i = 0; user[i]; i++)
+		   t_user[j++] = user[i];
+
+	   t_user[j] = 0;
+	   user = t_user;
    }
 
     service = CreateService(
@@ -299,8 +315,8 @@ install_service(char *name, char *full_name, char *user, char *password,
             NULL,                       // no load ordering group
             NULL,                       // no tag identifier
             NULL,                       // dependencies
-            user,                       // LocalSystem account
-            password);                      // no password
+			user,                       // LocalSystem account
+			password);                      // no password
 
 	// Don't automatically start the service
  	if (service)
