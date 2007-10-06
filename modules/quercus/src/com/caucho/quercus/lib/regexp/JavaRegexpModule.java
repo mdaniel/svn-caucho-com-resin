@@ -2204,7 +2204,6 @@ public class JavaRegexpModule
   static class PCREPattern {
     private static final Logger log = Logger.getLogger(PCREPattern.class.getName());
 
-    private final Env _env;
     private final StringValue _regexp;
     private final Pattern _pattern;
     private final int _flags;
@@ -2214,7 +2213,6 @@ public class JavaRegexpModule
 
     PCREPattern(Env env, StringValue regexp)
     {
-      _env = env;
       _flags = regexpFlags(regexp);
 
       StringValue regexpValue;
@@ -2285,7 +2283,7 @@ public class JavaRegexpModule
 
     private StringValue cleanRegexpAndAddGroups(StringValue pattern)
     {
-      StringValue sb = _env.createUnicodeBuilder();
+      StringValue sb = pattern.createStringBuilder();
       int length = pattern.length();
 
       int groupCount = 1;

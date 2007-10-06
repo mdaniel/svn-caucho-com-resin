@@ -29,6 +29,8 @@
 
 package com.caucho.server.webapp;
 
+import java.util.Date;
+
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.management.server.WebAppMXBean;
@@ -42,7 +44,7 @@ import com.caucho.util.L10N;
 public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   implements WebAppMXBean
 {
-  private static L10N L = new L10N(WebAppAdmin.class);
+  private static final L10N L = new L10N(WebAppAdmin.class);
 
   public WebAppAdmin(WebAppController controller)
   {
@@ -88,6 +90,29 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
     return getController().getContextPath();
   }
 
+  //
+  // error statistics
+  //
+
+  public long getStatus500CountTotal()
+  {
+    return getWebApp().getStatus500CountTotal();
+  }
+
+  public Date getStatus500LastTime()
+  {
+    long lastTime = getWebApp().getStatus500LastTime();
+
+    if (lastTime > 0)
+      return new Date(lastTime);
+    else
+      return null;
+  }
+
+  //
+  // statistics
+  //
+  
   public int getRequestCount()
   {
     return getWebApp().getRequestCount();

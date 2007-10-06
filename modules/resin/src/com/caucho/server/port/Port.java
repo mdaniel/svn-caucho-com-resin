@@ -216,9 +216,8 @@ public class Port
 	  = server.getKeepaliveSelectThreadTimeout();
       }
 
-      if (_suspendTimeMax == DEFAULT) {
-	_keepaliveSelectThreadTimeout = server.getSuspendTimeMax();
-      }
+      if (_suspendTimeMax == DEFAULT)
+	_suspendTimeMax = server.getSuspendTimeMax();
 
       if (_socketTimeout == DEFAULT)
 	_socketTimeout = server.getSocketTimeout();

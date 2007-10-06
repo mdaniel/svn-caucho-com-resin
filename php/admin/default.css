@@ -133,6 +133,7 @@ table.data {
   color: black;
   border-collapse: collapse;
   background: #f4f4f4;
+  empty-cells: hide;
 }
 
 .data tr.ra {

@@ -321,12 +321,14 @@ if ($ports) {
                               $client->ConnectionNewCountTotal) ?></td>
     <td><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
     <td><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
-    <td><?= $client->ConnectionFailCountTotal ?></td>
-    <td class='<?= format_ago_class($client->LastFailTime) ?>'>
-        <?= format_ago($client->LastFailTime) ?>
-    </td>
-    <td><?= $client->ConnectionBusyCountTotal ?></td>
-    <td><?= format_ago($client->LastBusyTime) ?></td>
+    <?php
+      format_ago_td_pair($client->ConnectionFailCountTotal,
+                         $client->LastFailTime);
+
+      format_ago_td_pair($client->ConnectionBusyCountTotal,
+                         $client->LastBusyTime);
+
+    ?>
   </tr>
 <?php 
   }
@@ -418,6 +420,7 @@ if ($store) {
     <th>Active</th>
     <th>Sessions</th>
     <th>Uptime</th>
+    <th colspan='2'>500</th>
     <th>Root</th>
   </tr>
 <?php
@@ -436,7 +439,7 @@ foreach ($hosts as $host) {
   $hostName = empty($host->HostName) ? "default" : $host->HostName;
 ?>
 
-  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='6'><?= $host->URL ?></td></tr>
+  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='8'><?= $host->URL ?></td></tr>
 <?php
 function sort_webapp($a, $b)
 {
@@ -461,6 +464,10 @@ foreach ($webapps as $webapp) {
     <td class='<?= format_ago_class($webapp->StartTime) ?>'>
       <?= format_ago($webapp->StartTime) ?>
     </td>
+    <?php
+        format_ago_td_pair($webapp->Status500CountTotal,
+                           $webapp->Status500LastTime);
+    ?>
     <td><?= $webapp->RootDirectory ?></td>
   </tr>
 <?php

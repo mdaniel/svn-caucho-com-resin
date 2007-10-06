@@ -291,6 +291,13 @@ public class WebApp extends ServletContextImpl
   private int _requestCount;
   private long _lastRequestTime = Alarm.getCurrentTime();
 
+  //
+  // statistics
+  //
+
+  private long _status500CountTotal;
+  private long _status500LastTime;
+
   /**
    * Creates the webApp with its environment loader.
    */
@@ -2683,6 +2690,28 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.destroy();
     }
+  }
+
+  //
+  // statistics
+  //
+
+  public void addStatus500()
+  {
+    synchronized (this) {
+      _status500CountTotal++;
+      _status500LastTime = Alarm.getExactTime();
+    }
+  }
+
+  long getStatus500CountTotal()
+  {
+    return _status500CountTotal;
+  }
+
+  long getStatus500LastTime()
+  {
+    return _status500LastTime;
   }
 
   public String toString()

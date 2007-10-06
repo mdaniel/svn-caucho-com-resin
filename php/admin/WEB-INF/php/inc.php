@@ -31,7 +31,26 @@ function format_hit_ratio($hit, $miss)
     return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
 }
 
-function format_ago_class($date)
+function format_ago_td_pair($value, $date, $fail=3600, $warn=14400)
+{
+  $ago_class = format_ago_class($date);
+  if ($ago_class)
+    $ago_class="class='$ago_class'";
+
+  /*
+  echo "<td $ago_class style='border-right: none'>$value</td>\n";
+  echo "<td $ago_class style='border-left: none'>";
+  echo format_ago($date);
+  echo "</td>";
+  */
+
+  echo "<td>$value</td>\n";
+  echo "<td $ago_class>";
+  echo format_ago($date);
+  echo "</td>";
+}
+
+function format_ago_class($date, $fail=3600, $warn=14400)
 {
   if (! $date)
     return "";
@@ -44,12 +63,12 @@ function format_ago_class($date)
   $now = time(0);
   $ago = $now - $event_time;
 
-  if ($ago > 3600)
-    return "";
-  else if ($ago < 120)
+  if ($ago < $fail)
     return "fail";
-  else
+  else if ($ago < $warn)
     return "warn";
+  else
+    return "";
 }
 
 function format_ago($date)
@@ -60,7 +79,7 @@ function format_ago($date)
   $event_time = $date->time / 1000;
 
   if ($event_time < 365 * 24 * 3600)
-    return "never";
+    return "";
 
   $now = time(0);
   $ago = $now - $event_time;

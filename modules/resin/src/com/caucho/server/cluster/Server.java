@@ -126,7 +126,7 @@ public class Server extends ProtocolDispatchServer
   private boolean _keepaliveSelectEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
   
-  private long _suspendTimeMax = 60000;
+  private long _suspendTimeMax = 600000;
 
   private long _memoryFreeMin = 1024 * 1024;
   

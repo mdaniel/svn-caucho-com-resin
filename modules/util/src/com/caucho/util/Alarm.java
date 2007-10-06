@@ -40,7 +40,9 @@ import java.util.logging.Logger;
  * <p>A separate thread periodically tests the queue for alarms ready.
  */
 public class Alarm implements ThreadTask {
-  static private final Logger log = Log.open(Alarm.class);
+  static private final Logger log
+    = Logger.getLogger(Alarm.class.getName());
+  
   static private final Integer timeLock = new Integer(0);
 
   static private volatile long _currentTime = System.currentTimeMillis();
@@ -72,8 +74,6 @@ public class Alarm implements ThreadTask {
 
   static {
     _currentTime = System.currentTimeMillis();
-    _alarmThread = new AlarmThread();
-    _alarmThread.start();
 
     Method nanoTimeMethod;
 
@@ -96,6 +96,8 @@ public class Alarm implements ThreadTask {
   protected Alarm()
   {
     _name = "alarm";
+
+    init();
   }
     
   /**
@@ -126,6 +128,8 @@ public class Alarm implements ThreadTask {
     
     setListener(listener);
     setContextLoader(loader);
+    
+    init();
   }
     
   /**
@@ -143,6 +147,8 @@ public class Alarm implements ThreadTask {
     setContextLoader(loader);
 
     queue(delta);
+    
+    init();
   }
 
   /**
@@ -158,6 +164,8 @@ public class Alarm implements ThreadTask {
 
     _name = name;
     queue(delta);
+    
+    init();
   }
   /**
    * Creates a new alarm and schedules its wakeup.
@@ -170,6 +178,19 @@ public class Alarm implements ThreadTask {
     this(listener);
 
     queue(delta);
+    
+    init();
+  }
+
+  private void init()
+  {
+    synchronized (Alarm.class) {
+      if (_alarmThread == null) {
+	_currentTime = System.currentTimeMillis();
+	_alarmThread = new AlarmThread();
+	_alarmThread.start();
+      }
+    }
   }
 
   /**
@@ -194,7 +215,10 @@ public class Alarm implements ThreadTask {
    */
   public static long getCurrentTime()
   {
-    return _currentTime;
+    if (_alarmThread != null)
+      return _currentTime;
+    else
+      return System.currentTimeMillis();
   }
 
   /**

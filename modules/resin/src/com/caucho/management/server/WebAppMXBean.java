@@ -29,6 +29,8 @@
 
 package com.caucho.management.server;
 
+import java.util.Date;
+
 import com.caucho.jmx.Description;
 import com.caucho.jmx.Units;
 
@@ -72,6 +74,22 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    */
   @Description("The configured context path that identifies the web-app in a url")
   public String getContextPath();
+
+  //
+  // Status attributes
+  //
+  
+  /**
+   * Returns the number of 500 status requests
+   */
+  @Description("The total number of 500 status errors")
+  public long getStatus500CountTotal();
+  
+  /**
+   * Returns the time of the last 500 status requests
+   */
+  @Description("The time of the last 500 status error")
+  public Date getStatus500LastTime();
 
   //
   // Statistics attributes

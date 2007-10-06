@@ -175,6 +175,8 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public Resin(ClassLoader loader)
   {
+    _startTime = Alarm.getCurrentTime();
+    
     Environment.init();
 
     if (loader == null)
@@ -196,8 +198,6 @@ public class Resin implements EnvironmentBean, SchemaBean
       _resinLocal.set(this, _classLoader);
 
       _lifecycle = new Lifecycle(log(), "Resin[]");
-
-      _startTime = Alarm.getCurrentTime();
 
       String resinHome = System.getProperty("resin.home");
 

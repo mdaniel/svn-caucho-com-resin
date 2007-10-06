@@ -45,7 +45,7 @@ public class ThreadPool {
   
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
 
-  private static final ThreadPool _globalThreadPool = new ThreadPool();
+  private static ThreadPool _globalThreadPool;
 
   private int _g_id;
     
@@ -70,12 +70,12 @@ public class ThreadPool {
   private final ArrayList<ClassLoader> _loaderQueue
     = new ArrayList<ClassLoader>();
 
+  private final Object _idleLock = new Object();
+
   private final ThreadLauncher _launcher = new ThreadLauncher();
   private final ScheduleThread _scheduler = new ScheduleThread();
   
   private boolean _isQueuePriority;
-
-  private final Object _idleLock = new Object();
   
   private Item _idleHead;
 
@@ -100,7 +100,12 @@ public class ThreadPool {
 
   public static ThreadPool getThreadPool()
   {
-    return _globalThreadPool;
+    synchronized (ThreadPool.class) {
+      if (_globalThreadPool == null)
+	_globalThreadPool = new ThreadPool();
+      
+      return _globalThreadPool;
+    }
   }
 
   //
