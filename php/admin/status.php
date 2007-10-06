@@ -296,8 +296,8 @@ if ($ports) {
     <th>Connection Miss</th>
     <th>Load</th>
     <th>Latency</th>
-    <th>Fail Total</th>
-    <th>Busy Total</th>
+    <th colspan='2'>Failures</th>
+    <th colspan='2'>Busy</th>
   </tr>
 <?php
 
@@ -305,7 +305,7 @@ if ($ports) {
     if (empty($cluster->Servers))
       continue;
 
-    echo "<tr><td class='group' colspan='10'>$cluster->Name</td></tr>\n";
+    echo "<tr><td class='group' colspan='12'>$cluster->Name</td></tr>\n";
 
   $count = 0;
   foreach ($cluster->Servers as $client) {
@@ -321,12 +321,12 @@ if ($ports) {
                               $client->ConnectionNewCountTotal) ?></td>
     <td><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
     <td><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
-<!-- XXX:
-    <td><?= $client->LastFailTime ?></td>
-    <td><?= $client->LastBusyTime ?></td>
--->
     <td><?= $client->ConnectionFailCountTotal ?></td>
+    <td class='<?= format_ago_class($client->LastFailTime) ?>'>
+        <?= format_ago($client->LastFailTime) ?>
+    </td>
     <td><?= $client->ConnectionBusyCountTotal ?></td>
+    <td><?= format_ago($client->LastBusyTime) ?></td>
   </tr>
 <?php 
   }
@@ -350,7 +350,7 @@ if ($db_pools) {
 <table class="data">
   <tr>
     <th>&nbsp;</th>
-    <th colspan='4'>Connections</th>
+    <th colspan='5'>Connections</th>
     <th colspan='2'>Config</th>
   </tr>
   <tr>
@@ -358,7 +358,7 @@ if ($db_pools) {
     <th>Active</th>
     <th>Idle</th>
     <th>Created</th>
-    <th>Failed</th>
+    <th colspan='2'>Failed</th>
     <th>max-connections</th>
     <th>idle-time</th>
   </tr>
@@ -375,6 +375,8 @@ if ($db_pools) {
     <td><?= format_miss_ratio($pool->ConnectionCountTotal,
                               $pool->ConnectionCreateCountTotal) ?></td>
     <td><?= $pool->ConnectionFailCountTotal ?></td>
+    <td class='<?= format_ago_class($pool->LastFailTime) ?>'>
+        <?= format_ago($pool->LastFailTime) ?></td>
     <td><?= $pool->MaxConnections ?></td>
     <td><?= $pool->MaxIdleTime ?></td>
   </tr>
@@ -413,7 +415,10 @@ if ($store) {
   <tr>
     <th>Web-App</th>
     <th>State</th>
+    <th>Active</th>
     <th>Sessions</th>
+    <th>Uptime</th>
+    <th>Root</th>
   </tr>
 <?php
 function sort_host($a, $b)
@@ -431,7 +436,7 @@ foreach ($hosts as $host) {
   $hostName = empty($host->HostName) ? "default" : $host->HostName;
 ?>
 
-  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='3'><?= $host->URL ?></td></tr>
+  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='6'><?= $host->URL ?></td></tr>
 <?php
 function sort_webapp($a, $b)
 {
@@ -446,10 +451,17 @@ foreach ($webapps as $webapp) {
   $session = $webapp->SessionManager;
 ?>
 
-  <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
-    <td class='item'><?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
-    <td><?= $webapp->State ?>
-    <td><?= $session->SessionActiveCount ?>
+  <tr class='<?= row_style($count++) ?>'>
+    <td class='item'>
+       <?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
+    </td>
+    <td><?= $webapp->State ?></td>
+    <td><?= $webapp->RequestCount ?></td>
+    <td><?= $session->SessionActiveCount ?></td>
+    <td class='<?= format_ago_class($webapp->StartTime) ?>'>
+      <?= format_ago($webapp->StartTime) ?>
+    </td>
+    <td><?= $webapp->RootDirectory ?></td>
   </tr>
 <?php
   } // webapps

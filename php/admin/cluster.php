@@ -24,7 +24,7 @@ display_header("cluster.php", $title, $server->Id);
 
 ?>
 
-<h2>Server: <?= $server->Id ?></h2>
+<h2>Cluster Overview</h2>
 
 <!-- Cluster -->
 
@@ -50,19 +50,10 @@ foreach ($resin->Clusters as $cluster) {
 
   echo "<tr><td class='group' colspan='8'>$cluster->Name</td></tr>\n";
 
-  $client_names = array();
-  if ($cluster->Name == $server->Cluster->Name) {
-    $client_names[] = $server->Id;
-  }
-
-  foreach ($cluster->Servers as $client) {
-    $client_names[] = $client->Name;
-  }
-
   sort($client_names);
 
   $count = 0;
-  foreach ($client_names as $name) {
+  foreach (server_names($server, $cluster) as $name) {
     $sub_mbean_server = new MBeanServer($name);
 
     $sub_server = $sub_mbean_server->lookup("resin:type=Server");
@@ -161,6 +152,78 @@ foreach ($resin->Clusters as $cluster) {
     }
 
     echo "</tr>\n";
+  }
+}
+
+echo "</table>";
+
+echo "<h2>Database Pools</h2>";
+
+echo "<table class='data'>";
+echo "<tr>";
+echo "<th>Server</th>";
+echo "<th>Name</th>";
+echo "<th>Active</th>";
+echo "<th>Idle</th>";
+echo "<th>Pool Miss</th>";
+echo "<th colspan='2'>Fail</th>";
+echo "</tr>";
+
+foreach ($resin->Clusters as $cluster) {
+
+  if (empty($cluster->Servers))
+    continue;
+
+  echo "<tr><td class='group' colspan='7'>$cluster->Name</td></tr>\n";
+
+  sort($client_names);
+
+  $row = 0;
+  foreach (server_names($server, $cluster) as $name) {
+    $sub_mbean_server = new MBeanServer($name);
+
+    $sub_server = $sub_mbean_server->lookup("resin:type=Server");
+
+    if (! $sub_server) {
+      echo "<tr class='" . row_style($row++) . "'>";
+      echo "<td class='itemfail'>$name</td>";
+      echo "<td colspan='6'/>";
+      echo "</tr>";
+      continue;
+    }
+
+    if ($sub_server)
+      $db_pools = $sub_mbean_server->query("resin:*,type=ConnectionPool");
+
+    if (! $db_pools) {
+      echo "<tr class='" . row_style($row++) . "'>";
+      echo "<td class='item'>$name</td>";
+      echo "<td colspan='6'/>";
+      echo "</tr>";
+      continue;
+    }
+
+    $pool_count = 0;
+    foreach ($db_pools as $pool) {
+?>
+    <tr class='<?= row_style($row++) ?>'>
+    <?php
+        if ($pool_count++ == 0)
+          echo "<td class='item'>$name</td>\n";
+        else
+          echo "<td></td>\n";
+     ?>
+    <td><?= $pool->Name ?></td>
+    <td><?= $pool->ConnectionActiveCount ?></td>
+    <td><?= $pool->ConnectionIdleCount ?></td>
+    <td><?= format_miss_ratio($pool->ConnectionCountTotal,
+                              $pool->ConnectionCreateCountTotal) ?></td>
+    <td><?= $pool->ConnectionFailCountTotal ?></td>
+    <td class='<?= format_ago_class($pool->LastFailTime) ?>'>
+        <?= format_ago($pool->LastFailTime) ?></td>
+    </tr>
+<?php
+    }
   }
 }
 

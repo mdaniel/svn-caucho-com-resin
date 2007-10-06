@@ -932,7 +932,8 @@ public class ServerConnector
   public void wake()
   {
     synchronized (this) {
-      _lastFailTime = 0;
+      // _lastFailTime = 0;
+      
       if (_state == ST_FAIL) {
 	_state = ST_STARTING;
       }

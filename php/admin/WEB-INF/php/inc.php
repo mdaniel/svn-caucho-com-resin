@@ -31,6 +31,43 @@ function format_hit_ratio($hit, $miss)
     return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
 }
 
+function format_ago_class($date)
+{
+  if (! $date)
+    return "";
+
+  $event_time = $date->time / 1000;
+
+  if ($event_time < 365 * 24 * 3600)
+    return "";
+
+  $now = time(0);
+  $ago = $now - $event_time;
+
+  if ($ago > 3600)
+    return "";
+  else if ($ago < 120)
+    return "fail";
+  else
+    return "warn";
+}
+
+function format_ago($date)
+{
+  if (! $date)
+    return "";
+
+  $event_time = $date->time / 1000;
+
+  if ($event_time < 365 * 24 * 3600)
+    return "never";
+
+  $now = time(0);
+  $ago = $now - $event_time;
+
+  return sprintf("%dh%02d", $ago / 3600, $ago / 60 % 60);
+}
+
 function format_miss_ratio($hit, $miss)
 {
   $total = $hit + $miss;
@@ -38,7 +75,21 @@ function format_miss_ratio($hit, $miss)
   if ($total == 0)
     return "0.00% (0 / 0)";
   else
-    return sprintf("%.2f%% (%d / %d)", 100 * $miss / $total, $miss, $total);
+    return sprintf("%.2f%% (%s / %s)", 100 * $miss / $total,
+                   format_count($miss),
+                   format_count($total));
+}
+
+function format_count($count)
+{
+  if ($count < 100 * 1000)
+    return sprintf("%d", $count);
+  if ($count < 1000 * 1000)
+    return sprintf("%.1fk", $count / 1000.0);
+  if ($count < 1000 * 1000 * 1000)
+    return sprintf("%.1fM", $count / (1000.0 * 1000.0));
+  else
+    return sprintf("%.1fG", $count / (1000.0 * 1000.0 * 1000.0));
 }
 
 function uri($path)
@@ -72,6 +123,22 @@ function uri_nocache($path)
     return $path . $rand;
   else
     return $home_uri . "/" . $path . $rand;
+}
+
+function server_names($server, $cluster)
+{
+  $client_names = array();
+  if ($cluster->Name == $server->Cluster->Name) {
+    $client_names[] = $server->Id;
+  }
+
+  foreach ($cluster->Servers as $client) {
+    $client_names[] = $client->Name;
+  }
+
+  sort($client_names);
+
+  return $client_names;
 }
 
 function redirect($relative_url)
