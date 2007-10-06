@@ -421,7 +421,6 @@ if ($store) {
     <th>Sessions</th>
     <th>Uptime</th>
     <th colspan='2'>500</th>
-    <th>Root</th>
   </tr>
 <?php
 function sort_host($a, $b)
@@ -439,7 +438,7 @@ foreach ($hosts as $host) {
   $hostName = empty($host->HostName) ? "default" : $host->HostName;
 ?>
 
-  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='8'><?= $host->URL ?></td></tr>
+  <tr title='<?= $hostObjectName ?>'><td class='group' colspan='7'><?= $host->URL ?></td></tr>
 <?php
 function sort_webapp($a, $b)
 {
@@ -468,7 +467,6 @@ foreach ($webapps as $webapp) {
         format_ago_td_pair($webapp->Status500CountTotal,
                            $webapp->Status500LastTime);
     ?>
-    <td><?= $webapp->RootDirectory ?></td>
   </tr>
 <?php
   } // webapps
