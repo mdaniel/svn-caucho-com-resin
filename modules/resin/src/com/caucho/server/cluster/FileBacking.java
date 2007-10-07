@@ -734,7 +734,8 @@ public class FileBacking {
 
     void close()
     {
-      _freeConn.free(this);
+      if (_freeConn != null)
+	_freeConn.free(this);
     }
   }
 }

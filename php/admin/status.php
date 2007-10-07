@@ -323,7 +323,7 @@ if ($ports) {
     <td><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
     <?php
       format_ago_td_pair($client->ConnectionFailCountTotal,
-                         $client->LastFailTime);
+                         $client->LastFailConnectTime);
 
       format_ago_td_pair($client->ConnectionBusyCountTotal,
                          $client->LastBusyTime);
