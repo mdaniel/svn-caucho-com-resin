@@ -512,6 +512,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 	else if ("-verbose".equals(arg)
 		 || "--verbose".equals(arg)) {
 	  _isVerbose = true;
+	  Logger.getLogger("").setLevel(Level.FINE);
 	}
       }
     }

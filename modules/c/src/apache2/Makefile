@@ -5,7 +5,7 @@ CP=/bin/cp
 CFLAGS=-g -O2 -DPOLL -DEPOLL -D_POSIX_PTHREAD_SEMANTICS -DHAS_SOCK_TIMEOUT -DHAS_JVMTI -DHAS_JVMDI 
 CFLAGS_SHLIB=-fpic
 EGREP=grep -E
-LIBTOOL=EGREP="grep -E" /home/ferg/ws/resin/libtool --silent
+LIBTOOL=EGREP="grep -E" /home/ferg/ws/test-resin/libtool --silent
 LD=/usr/bin/ld
 LD_SHLIB=gcc
 LIBS_SHLIB=
@@ -15,7 +15,7 @@ APACHE_INC=-I
 apache_conf=
 apache_dir=
 apache_libexec=
-resin_home=/home/ferg/ws/resin
+resin_home=/home/ferg/ws/test-resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common
 COMMON_OBJ=$C/stream.lo $C/config.lo $C/memory.lo

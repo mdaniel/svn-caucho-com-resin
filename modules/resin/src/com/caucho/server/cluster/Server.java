@@ -1158,10 +1158,16 @@ public class Server extends ProtocolDispatchServer
 
 
       _alarm.queue(ALARM_INTERVAL);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+      // if the server can't start, it needs to completely fail, especially
+      // for the watchdog
+      throw new RuntimeException(e);
+      
+      // log.log(Level.WARNING, e.toString(), e);
 
-      _configException = e;
+      // _configException = e;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

@@ -505,8 +505,9 @@ public class ResinWatchdog extends AbstractManagedObject
   public void run()
   {
     _initialStartTime = new Date();
+    long retry = Long.MAX_VALUE;
     
-    while (_lifecycle.isActive()) {
+    while (_lifecycle.isActive() && retry-- >= 0) {
       InputStream watchdogIs = null;
       WriteStream jvmOut = null;
 
@@ -607,6 +608,12 @@ public class ResinWatchdog extends AbstractManagedObject
 
 	  try {
 	    int status = process.exitValue();
+
+	    /*
+	    // if bind failure, only retry 3 times
+	    if (status == 67 && retry > 3)
+	      retry = 3;
+	    */
 
 	    isLive = false;
 	  } catch (IllegalThreadStateException e) {
@@ -954,7 +961,7 @@ public class ResinWatchdog extends AbstractManagedObject
   private Boot getJniBoot()
   {
     if (_jniBoot != null)
-      return _jniBoot;
+      return _jniBoot.isValid() ? _jniBoot : null;
     
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();

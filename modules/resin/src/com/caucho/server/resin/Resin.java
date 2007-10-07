@@ -1348,28 +1348,36 @@ public class Resin implements EnvironmentBean, SchemaBean
 	Runtime.getRuntime().halt(1);
 
       System.exit(0);
-    } catch (BindException e) {
-      System.out.println(e);
-
-      log().log(Level.FINE, e.toString(), e);
-
-      System.exit(67);
     } catch (Throwable e) {
       boolean isCompile = false;
       Throwable cause;
 
-      for (cause = e; cause != null; cause = cause.getCause()) {
+      for (cause = e;
+	   cause != null && cause.getCause() != null;
+	   cause = cause.getCause()) {
 	if (cause instanceof CompileException) {
-	  System.err.println(cause.getMessage());
 	  isCompile = true;
 	  break;
 	}
       }
 
-      if (! isCompile)
-	e.printStackTrace(System.err);
-      else
+      if (cause instanceof BindException) {
+	System.err.println(e.getMessage());
+			   
+	log().severe(e.toString());
+	
+	log().log(Level.FINE, e.toString(), e);
+	
+	System.exit(67);
+      }
+      else if (e instanceof CompileException) {
+	System.err.println(e.getMessage());
+			   
 	log().log(Level.CONFIG, e.toString(), e);
+      }
+      else {
+	e.printStackTrace(System.err);
+      }
     } finally {
       System.exit(1);
     }
