@@ -5,14 +5,14 @@
      - Configuration for the administration application
     -->
 
-  <resin:set var="resin_admin_name" default="admin"/>
+  <resin:set var="resin_admin_user" default="admin"/>
 
   <authenticator>
     <type>com.caucho.server.security.XmlAuthenticator</type>
 
     <init>
       <resin:if test="${not empty(resin_admin_password)}">
-        <user name="${resin_admin_name}"
+        <user name="${resin_admin_user}"
 	      password="${resin_admin_password}" roles='read,write'/>
       </resin:if>
     </init>

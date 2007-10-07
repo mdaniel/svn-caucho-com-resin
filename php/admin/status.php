@@ -457,7 +457,7 @@ foreach ($webapps as $webapp) {
     <td class='item'>
        <?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
     </td>
-    <td><?= $webapp->State ?></td>
+    <td <?= format_state_class($webapp->state) ?>><?= $webapp->State ?></td>
     <td><?= $webapp->RequestCount ?></td>
     <td><?= $session->SessionActiveCount ?></td>
     <td class='<?= format_ago_class($webapp->StartTime) ?>'>

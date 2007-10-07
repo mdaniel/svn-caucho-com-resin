@@ -50,6 +50,14 @@ function format_ago_td_pair($value, $date, $fail=3600, $warn=14400)
   echo "</td>";
 }
 
+function format_state_class($state)
+{
+  if ($state == "error")
+    return "fail";
+  else
+    return "";
+}
+
 function format_ago_class($date, $fail=3600, $warn=14400)
 {
   if (! $date)
