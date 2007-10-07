@@ -1473,7 +1473,7 @@ public class Port
     return "Port[" + getAddress() + ":" + getPort() + "]";
   }
 
-  class SuspendReaper implements AlarmListener {
+  public class SuspendReaper implements AlarmListener {
     public void handleAlarm(Alarm alarm)
     {
       try {
