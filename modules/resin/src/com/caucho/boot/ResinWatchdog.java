@@ -977,7 +977,7 @@ public class ResinWatchdog extends AbstractManagedObject
       log.log(Level.FINE, e.toString(), e);
     }
 
-    return _jniBoot;
+    return _jniBoot != null && _jniBoot.isValid() ? _jniBoot : null;
   }
 
   private boolean hasBoot()
