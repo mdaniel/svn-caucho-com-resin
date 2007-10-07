@@ -183,8 +183,6 @@ public class DependencyContainer implements Dependency
 	Dependency dependency = _dependencyList.get(i);
 
 	if (dependency.isModified()) {
-	  dependency.logModified(log());
-
 	  _isModified = true;
         
 	  return _isModified;

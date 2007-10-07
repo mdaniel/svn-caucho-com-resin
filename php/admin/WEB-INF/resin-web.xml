@@ -5,7 +5,9 @@
      - Configuration for the administration application
     -->
 
-  <resin:set var="resin_admin_user" default="admin"/>
+  <resin:if test="${empty(resin_admin_user)}">
+    <resin:set var="resin_admin_user" value="admin"/>
+  </resin:if>
 
   <authenticator>
     <type>com.caucho.server.security.XmlAuthenticator</type>

@@ -67,7 +67,7 @@ the following form can be used to establish a new one.
       }
     }
 
-    $digest_username = "admin";
+    $digest_username = "";
 
     include "digest.php";
 
@@ -99,6 +99,7 @@ to enable administration functionality.
 </p>
 
 <pre>
+  &lt;resin:set var="resin_admin_user"  value="<?= $digest_username ?>"/&gt;
   &lt;resin:set var="resin_admin_password"  value="<?= $digest ?>"/&gt;
 </pre>
 

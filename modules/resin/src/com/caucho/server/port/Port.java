@@ -1377,7 +1377,11 @@ public class Port
     if (log.isLoggable(Level.FINE))
       log.fine(this + " closing");
 
-    _suspendAlarm.dequeue();
+    Alarm suspendAlarm = _suspendAlarm;
+    _suspendAlarm = null;
+    
+    if (suspendAlarm != null)
+      suspendAlarm.dequeue();
 
     QServerSocket serverSocket = _serverSocket;
     _serverSocket = null;
