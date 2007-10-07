@@ -40,8 +40,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.Version;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.lang.management.*;
 import java.util.*;
@@ -89,7 +88,7 @@ public class ResinBoot {
     _argv = fillArgv(argv);
     
     calculateResinHome();
-    
+
     ClassLoader loader = ProLoader.create(_resinHome);
     if (loader != null) {
       System.setProperty("resin.home", _resinHome.getNativePath());
@@ -465,6 +464,7 @@ public class ResinBoot {
    * -server web-a     : &lt;server> to start
    * <pre>
    */
+
   public static void main(String []argv)
   {
     try {

@@ -52,8 +52,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -276,7 +275,6 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
   {
     try {
       ResinWatchdogManager manager = new ResinWatchdogManager(argv);
-
       manager.startServer(argv);
     } catch (Exception e) {
       e.printStackTrace();

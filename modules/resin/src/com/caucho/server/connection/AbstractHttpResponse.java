@@ -1651,6 +1651,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       _originalResponseStream.setHead();
     }
 
+    WebApp webApp = _request.getWebApp();
+
+    int majorCode = _statusCode / 100;
+
+    if (webApp != null) {
+      if (majorCode == 5)
+	webApp.addStatus500();
+    }
+
     HttpSession session = _originalRequest.getSession(false);
     if (session instanceof SessionImpl)
       ((SessionImpl) session).saveBeforeHeaders();
@@ -1658,7 +1667,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_sessionId != null && ! _hasSessionCookie) {
       _hasSessionCookie = true;
       
-      SessionManager manager = _request.getWebApp().getSessionManager();
+      SessionManager manager = webApp.getSessionManager();
 
       String cookieName;
 
