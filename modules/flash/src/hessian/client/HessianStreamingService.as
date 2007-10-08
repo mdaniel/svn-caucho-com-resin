@@ -50,14 +50,21 @@
 package hessian.client
 {
   import flash.events.Event;
+  import flash.events.ProgressEvent;
   import flash.events.TimerEvent;
   import flash.net.URLRequest;
   import flash.net.URLStream;
+  import flash.net.Socket;
+  import flash.utils.describeType;
   import flash.utils.Timer;
 
   import hessian.io.Hessian2StreamingInput;
+  import hessian.util.URL;
 
+  import mx.core.Application;
+  import mx.events.FlexEvent;
   import mx.rpc.IResponder;
+  import mx.utils.URLUtil;
 
   /**
    * The HessianStreamingService class provides access to streaming
@@ -68,16 +75,14 @@ package hessian.client
    */
   public dynamic class HessianStreamingService 
   {
-    // We are using a timer instead of the URLStream ProgressEvent because
-    // the ProgressEvent doesn't seem to fire when the URLStream has new
-    // data.  Using the timer, we poll for new data every 1/2 second.
-    // We might want to make this configurable at some point.
-    private const _timer:Timer = new Timer(500);
-    private const _stream:URLStream = new URLStream();
     private const _input:Hessian2StreamingInput = new Hessian2StreamingInput();
 
+    private var _url:URL;
+    private var _socket:Socket = new Socket();
     private var _destination:String;
     private var _responder:IResponder;
+    private var _readHTTPHeader:Boolean = false;
+    private var _headerHistory:Array = new Array(4);
 
     /**
      * Constructor.
@@ -90,21 +95,42 @@ package hessian.client
     {
       _destination = destination;
     }
-
-    /** @private */
-    public function handleComplete(event:Event):void
+    
+    private function handleCreation(event:Event):void
     {
-      _stream.close();
-      _timer.stop();
+      initSocket();
     }
 
-    /** @private */
-    public function handleTimer(event:Event):void
+    private function handleConnect(event:Event):void
     {
-      if (_stream.bytesAvailable <= 0)
+      _socket.writeUTFBytes("POST " + _url.path + " HTTP/1.0\r\n");
+      _socket.writeUTFBytes("Content-Length: 0\r\n");
+      _socket.writeUTFBytes("Content-Type: x-application/hessian\r\n");
+      _socket.writeUTFBytes("Connection: keep-alive\r\n");
+      _socket.writeUTFBytes("\r\n");
+      _socket.addEventListener(ProgressEvent.SOCKET_DATA, handleData);
+    }
+
+    private function handleData(event:Event):void
+    {
+      if (_socket.bytesAvailable <= 0)
         return;
 
-      _input.read(_stream);
+      if (! _readHTTPHeader) {
+        while (_socket.bytesAvailable > 0) {
+          if (_headerHistory[0] == '\r' && _headerHistory[1] == '\n' &&
+              _headerHistory[2] == '\r' && _headerHistory[3] == '\n') {
+            _headerHistory = null;
+            _readHTTPHeader = true;
+            break;
+          }
+
+          _headerHistory.push(_socket.readUTFBytes(1));
+          _headerHistory.shift();
+        }
+      }
+
+      _input.read(_socket);
 
       while (_input.hasMoreObjects()) 
         responder.result(_input.nextObject());
@@ -136,17 +162,22 @@ package hessian.client
     {
       _destination = value;
 
-      var request:URLRequest = new URLRequest();
-      request.data = "";
-      request.url = destination;
-      request.method = "POST";
-      request.contentType = "binary/octet-stream";
+      if (Application.application.url == null) {
+        Application.application.addEventListener(FlexEvent.CREATION_COMPLETE,
+                                                 handleCreation);
+        return;
+      }
 
-      _stream.addEventListener(Event.COMPLETE, handleComplete);
-      _stream.load(request);
+      initSocket();
+    }
 
-      _timer.addEventListener(TimerEvent.TIMER, handleTimer);
-      _timer.start();
+    private function initSocket():void
+    {
+      _url = 
+        new URL(URLUtil.getFullURL(Application.application.url, destination));
+
+      _socket = new Socket(_url.host, _url.port);
+      _socket.addEventListener(Event.CONNECT, handleConnect);
     }
   }
 }
