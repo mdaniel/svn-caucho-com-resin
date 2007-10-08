@@ -103,11 +103,7 @@ package hessian.client
 
     private function handleConnect(event:Event):void
     {
-      _socket.writeUTFBytes("POST " + _url.path + " HTTP/1.0\r\n");
-      _socket.writeUTFBytes("Content-Length: 0\r\n");
-      _socket.writeUTFBytes("Content-Type: x-application/hessian\r\n");
-      _socket.writeUTFBytes("Connection: keep-alive\r\n");
-      _socket.writeUTFBytes("\r\n");
+      _socket.writeUTFBytes("GET " + _url.path + " HTTP/1.0\r\n\r\n");
       _socket.addEventListener(ProgressEvent.SOCKET_DATA, handleData);
     }
 
