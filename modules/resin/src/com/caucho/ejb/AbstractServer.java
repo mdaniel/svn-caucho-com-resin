@@ -107,6 +107,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected EJBLocalHome _localHome;
   protected EJBMetaDataImpl _metaData;
 
+  protected Class _serviceEndpointClass;
+
   protected long _transactionTimeout;
 
   protected BuilderProgram _initProgram;
@@ -290,6 +292,22 @@ abstract public class AbstractServer implements EnvironmentBean {
   public Class getLocalHomeClass()
   {
     return _localHomeClass;
+  }
+
+  /**
+   * Sets the service endpoint.
+   */
+  public void setServiceEndpoint(Class cl)
+  {
+    _serviceEndpointClass = cl;
+  }
+
+  /**
+   * Gets the service endpoint
+   */
+  public Class getServiceEndpoint()
+  {
+    return _serviceEndpointClass;
   }
 
   /**
