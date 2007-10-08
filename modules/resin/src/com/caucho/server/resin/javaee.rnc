@@ -388,7 +388,25 @@ javaee_security-role-ref = element security-role-ref {
   javaee_role-link?
 }
 
-javaee_service-ref = element service-ref { empty }
+javaee_service-ref = element service-ref {
+  javaee_description-Group,
+
+  element service-ref-name { string },
+
+  element service-interface { javaee_fully-qualified-class },
+
+  element service-ref-type { javaee_fully-qualified-class }?,
+
+  element wsdl-file { string }?,
+
+  element jaxrpc-mapping-file { string }?,
+
+  element service-qname { string }?,
+
+  element port-component-ref { string }*,
+
+  javaee_resource-Group
+}
 
 javaee_service-ref-Group =
   javaee_service-ref*
