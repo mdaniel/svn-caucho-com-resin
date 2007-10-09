@@ -662,6 +662,9 @@ public class CurlModule
       case CURLOPT_FOLLOWLOCATION:
         curl.setIsFollowingRedirects(value.toBoolean());
         break;
+      case CURLOPT_FRESH_CONNECT:
+        // caching handled by Java
+        break;
       case CURLOPT_HEADER:
         curl.setIsReturningHeader(value.toBoolean());
         break;

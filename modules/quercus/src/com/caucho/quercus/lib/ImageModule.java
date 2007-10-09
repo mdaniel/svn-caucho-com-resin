@@ -994,11 +994,7 @@ public class ImageModule extends AbstractQuercusModule {
     if (image == null)
       return 0;
     
-    Graphics2D g = (Graphics2D) image.getGraphics();
-
-    Rectangle bounds = g.getDeviceConfiguration().getBounds();
-
-    return (int) bounds.getWidth();
+    return image.getWidth();
   }
 
   /**
@@ -1009,11 +1005,7 @@ public class ImageModule extends AbstractQuercusModule {
     if (image == null)
       return 0;
     
-    Graphics2D g = (Graphics2D) image.getGraphics();
-
-    Rectangle bounds = g.getDeviceConfiguration().getBounds();
-
-    return (int) bounds.getHeight();
+    return image.getHeight();
 
   }
 

@@ -56,12 +56,12 @@ public class DateModule extends AbstractQuercusModule {
   public static final int CAL_JULIAN = 1;
 
   private static final String []_shortDayOfWeek = {
-    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
   };
 
   private static final String []_fullDayOfWeek = {
     "Sunday", "Monday", "Tuesday", "Wednesday",
-    "Thursday", "Friday", "Saturday", "Sunday"
+    "Thursday", "Friday", "Saturday"
   };
 
   private static final String []_shortMonth = {
@@ -78,7 +78,7 @@ public class DateModule extends AbstractQuercusModule {
   private static final long DAY = 24 * HOUR;
 
   private final QDate _localCalendar = QDate.createLocal();
-  private final  QDate _gmtCalendar = new QDate();
+  private final QDate _gmtCalendar = new QDate();
 
   /**
    * Returns the days in a given month.
@@ -238,11 +238,11 @@ public class DateModule extends AbstractQuercusModule {
     array.put("minutes", date.getMinute());
     array.put("hours", date.getHour());
     array.put("mday", date.getDayOfMonth());
-    array.put("wday", date.getDayOfWeek());
+    array.put("wday", date.getDayOfWeek() - 1);
     array.put("mon", date.getMonth() + 1);
     array.put("year", date.getYear());
     array.put("yday", date.getDayOfYear());
-    array.put("weekday", _fullDayOfWeek[date.getDayOfWeek()]);
+    array.put("weekday", _fullDayOfWeek[date.getDayOfWeek() - 1]);
     array.put("month", _fullMonth[date.getMonth()]);
     array.put(new LongValue(0), new LongValue(time));
 
@@ -393,6 +393,11 @@ public class DateModule extends AbstractQuercusModule {
         char ch = format.charAt(i);
 
         switch (ch) {
+          
+          //
+          // day
+          //
+          
           case 'd':
           {
             int day = calendar.getDayOfMonth();
@@ -403,9 +408,10 @@ public class DateModule extends AbstractQuercusModule {
 
           case 'D':
           {
-            int day = calendar.getDayOfWeek();
+            // subtract 1 to be zero-based for array
+            int day = calendar.getDayOfWeek() - 1;
 
-            sb.append(_shortDayOfWeek[day - 1]);
+            sb.append(_shortDayOfWeek[day]);
             break;
           }
 
@@ -418,9 +424,24 @@ public class DateModule extends AbstractQuercusModule {
 
           case 'l':
           {
-            int day = calendar.getDayOfWeek();
+            // subtract 1 to be zero-based for array
+            int day = calendar.getDayOfWeek() - 1;
 
             sb.append(_fullDayOfWeek[day]);
+            break;
+          }
+          
+          case 'N':
+          {
+            int day = calendar.getDayOfWeek();
+            
+            // Mon=1, Sun=7
+            day = day - 1;
+            
+            if (day == 0)
+              day = 7;
+            
+            sb.append(day);
             break;
           }
 
@@ -461,14 +482,30 @@ public class DateModule extends AbstractQuercusModule {
             break;
           }
 
+          //
+          // week
+          //
+          
           case 'W':
           {
             int week = calendar.getWeek();
 
-            sb.append(week);
+            sb.append(week / 10);
+            sb.append(week % 10);
             break;
           }
 
+          //
+          // month
+          //
+          
+          case 'F':
+          {
+            int month = calendar.getMonth();
+            sb.append(_fullMonth[month]);
+            break;
+          }
+          
           case 'm':
           {
             int month = calendar.getMonth() + 1;
@@ -481,13 +518,6 @@ public class DateModule extends AbstractQuercusModule {
           {
             int month = calendar.getMonth();
             sb.append(_shortMonth[month]);
-            break;
-          }
-
-          case 'F':
-          {
-            int month = calendar.getMonth();
-            sb.append(_fullMonth[month]);
             break;
           }
 
@@ -505,6 +535,38 @@ public class DateModule extends AbstractQuercusModule {
             break;
           }
 
+          //
+          // year
+          //
+          
+          case 'L':
+          {
+            if (calendar.isLeapYear())
+              sb.append(1);
+            else
+              sb.append(0);
+            break;
+          }
+          
+          case 'o':
+          {
+            int year = calendar.getYear();
+            
+            int week = calendar.getWeek();
+            int month = calendar.getMonth();
+            
+            if (month > week)
+              year++;
+            else if (week == 53)
+              year--;
+            
+            sb.append((year / 1000) % 10);
+            sb.append((year / 100) % 10);
+            sb.append((year / 10) % 10);
+            sb.append((year) % 10);
+            break;
+          }
+          
           case 'Y':
           {
             int year = calendar.getYear();
@@ -525,15 +587,10 @@ public class DateModule extends AbstractQuercusModule {
             break;
           }
 
-          case 'L':
-          {
-            if (calendar.isLeapYear())
-              sb.append(1);
-            else
-              sb.append(0);
-            break;
-          }
-
+          //
+          // time
+          //
+          
           case 'a':
           {
             int hour = calendar.getHour();
@@ -614,24 +671,18 @@ public class DateModule extends AbstractQuercusModule {
             break;
           }
 
-          case 'O':
+          //
+          // timezone
+          //
+          
+          case 'e':
           {
-            long offset = calendar.getZoneOffset();
+            TimeZone zone = calendar.getLocalTimeZone();
 
-            int minute = (int) (offset / (60 * 1000));
-
-            if (minute < 0)
-              sb.append('-');
-            else
-              sb.append('+');
-
-            sb.append((minute / 60) / 10);
-            sb.append((minute / 60) % 10);
-            sb.append((minute / 10) % 10);
-            sb.append(minute % 10);
+            sb.append(zone.getID());
             break;
           }
-
+          
           case 'I':
           {
             if (calendar.isDST())
@@ -640,20 +691,53 @@ public class DateModule extends AbstractQuercusModule {
               sb.append('0');
             break;
           }
+          
+          case 'O':
+          {
+            long offset = calendar.getZoneOffset();
+
+            int minute = (int) (offset / (60 * 1000));
+
+            if (minute < 0) {
+              sb.append('-');
+              minute = -1 * minute;
+            }
+            else
+              sb.append('+');
+
+            sb.append((minute / 60) / 10);
+            sb.append((minute / 60) % 10);
+            sb.append((minute % 60) % 10);
+            sb.append(minute % 10);
+            break;
+          }
+          
+          case 'P':
+          {
+            long offset = calendar.getZoneOffset();
+
+            int minute = (int) (offset / (60 * 1000));
+
+            if (minute < 0) {
+              sb.append('-');
+              minute = -1 * minute;
+            }
+            else
+              sb.append('+');
+
+            sb.append((minute / 60) / 10);
+            sb.append((minute / 60) % 10);
+            sb.append(':');
+            sb.append((minute % 60) % 10);
+            sb.append(minute % 10);
+            break;
+          }
 
           case 'T':
           {
             TimeZone zone = calendar.getLocalTimeZone();
 
             sb.append(zone.getDisplayName(calendar.isDST(), TimeZone.SHORT));
-            break;
-          }
-
-          case 'e':
-          {
-            TimeZone zone = calendar.getLocalTimeZone();
-
-            sb.append(zone.getID());
             break;
           }
 
@@ -984,8 +1068,9 @@ public class DateModule extends AbstractQuercusModule {
     ArrayValue array = new ArrayValueImpl();
     
     array.put("year", qDate.getYear());
-    array.put("month", qDate.getMonth());
+    array.put("month", qDate.getMonth() + 1);
     array.put("day", qDate.getDayOfMonth());
+    array.put("hour", qDate.getHour());
     array.put("minute", qDate.getMinute());
     array.put("second", qDate.getSecond());
     array.put("fraction", qDate.getMillisecond() / 1000.0);
@@ -1156,85 +1241,85 @@ public class DateModule extends AbstractQuercusModule {
       _unit = 0;
 	
       while (true) {
-	int token = nextToken();
+        int token = nextToken();
 
-	if (token == '-') {
-	  token = nextToken();
+        if (token == '-') {
+          token = nextToken();
 
-	  if (token == INT)
-	    _value = -_value;
-	  else {
-	    _peekToken = token;
-	    continue;
-	  }
-	}
+          if (token == INT)
+            _value = -_value;
+          else {
+            _peekToken = token;
+            continue;
+          }
+        }
 
-	if (token < 0) {
-	  return _date.getGMTTime();
-	}
-	else if (token == INT) {
-	  int digits = _digits;
-	  int value = _value;
-	  
-	  token = nextToken();
+        if (token < 0) {
+          return _date.getGMTTime();
+        }
+        else if (token == INT) {
+          int digits = _digits;
+          int value = _value;
 
-	  if (token == PERIOD) {
-	    parsePeriod();
-	  }
-	  else if (token == ':') {
-	    parseTime();
-	    _hasTime = true;
-	  }
-	  else if (token == '-') {
-	    parseISODate(value);
-	    _hasDate = true;
-	  }
-	  else if (token == '/') {
-	    parseUSDate(value);
-	    _hasDate = true;
-	  }
-	  else if (token == MONTH) {
-	    parseDayMonthDate(value);
-	    _hasDate = true;
-	  }
-	  else {
-	    _peekToken = token;
+          token = nextToken();
 
-	    parseBareInt(value, digits);
-	  }
-	}
-	else if (token == PERIOD) {
-	  parsePeriod();
-	}
-	else if (token == WEEKDAY) {
-	  addWeekday(_value, _weekday);
-	  _value = NULL_VALUE;
-	}
-	else if (token == MONTH) {
-	  parseMonthDate(_value);
-	  _hasDate = true;
-	}
-	else if (token == '@') {
-	  token = nextToken();
+          if (token == PERIOD) {
+            parsePeriod();
+          }
+          else if (token == ':') {
+            parseTime();
+            _hasTime = true;
+          }
+          else if (token == '-') {
+            parseISODate(value);
+            _hasDate = true;
+          }
+          else if (token == '/') {
+            parseUSDate(value);
+            _hasDate = true;
+          }
+          else if (token == MONTH) {
+            parseDayMonthDate(value);
+            _hasDate = true;
+          }
+          else {
+            _peekToken = token;
 
-	  if (token == INT) {
-	    int value = _value;
-	    _value = NULL_VALUE;
+            parseBareInt(value, digits);
+          }
+        }
+        else if (token == PERIOD) {
+          parsePeriod();
+        }
+        else if (token == WEEKDAY) {
+          addWeekday(_value, _weekday);
+          _value = NULL_VALUE;
+        }
+        else if (token == MONTH) {
+          parseMonthDate(_value);
+          _hasDate = true;
+        }
+        else if (token == '@') {
+          token = nextToken();
 
-	    _date.setGMTTime(value * 1000L);
+          if (token == INT) {
+            int value = _value;
+            _value = NULL_VALUE;
 
-	    token = nextToken();
-	    if (token == '.') {
-	      token = nextToken();
+            _date.setGMTTime(value * 1000L);
 
-	      if (token != INT)
-		_peekToken = token;
-	    }
-	    else {
-	      _peekToken = token;
-	    }
-	  }
-	}
+            token = nextToken();
+            if (token == '.') {
+              token = nextToken();
+
+              if (token != INT)
+                _peekToken = token;
+            }
+            else {
+              _peekToken = token;
+            }
+          }
+        }
       }
     }
 
