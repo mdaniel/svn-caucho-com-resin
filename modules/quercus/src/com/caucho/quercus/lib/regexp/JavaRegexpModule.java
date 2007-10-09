@@ -1456,7 +1456,7 @@ public class JavaRegexpModule
   private static String cleanRegexp(StringValue regexp,
           boolean isComments)
   {
-    return cleanRegexp(regexp,  isComments, 0);
+    return cleanRegexp(regexp, isComments, 0);
   }
 
   private static String cleanRegexp(StringValue regexp,
@@ -1691,7 +1691,15 @@ public class JavaRegexpModule
           sawVerticalBar = true; 
         }
         break;
-
+      
+      case ' ':
+        // php/1533
+        if (quote == '[' && isComments)
+          sb.append("\\ ");
+        else
+          sb.append(' ');
+        break;
+        
       default:
         sb.append(ch);
       }
