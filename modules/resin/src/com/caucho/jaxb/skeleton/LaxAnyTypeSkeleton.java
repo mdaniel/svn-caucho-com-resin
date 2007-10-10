@@ -32,6 +32,9 @@ package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
+import com.caucho.jaxb.NodeIterator;
+import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.property.Property;
 import com.caucho.util.L10N;
 
 import org.w3c.dom.Node;

@@ -31,7 +31,7 @@ package com.caucho.jaxb;
 
 import com.caucho.jaxb.adapters.BeanAdapter;
 import com.caucho.jaxb.skeleton.Skeleton;
-import com.caucho.jaxb.skeleton.Property;
+import com.caucho.jaxb.property.Property;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;

@@ -30,6 +30,7 @@
 package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.accessor.Accessor;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.annotation.*;

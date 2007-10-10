@@ -32,6 +32,8 @@ package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
+import com.caucho.jaxb.NodeIterator;
+import com.caucho.jaxb.accessor.Namer;
 import com.caucho.jaxb.annotation.XmlLocation;
 import com.caucho.util.L10N;
 
@@ -57,11 +59,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyDescriptor;
-
 import java.io.IOException;
 
 import java.lang.reflect.AccessibleObject;
@@ -85,6 +82,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.jaxb.accessor.Accessor;
+import com.caucho.jaxb.accessor.FieldAccessor;
+import com.caucho.jaxb.accessor.GetterSetterAccessor;
 
 public class ClassSkeleton<C> extends Skeleton {
   public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";

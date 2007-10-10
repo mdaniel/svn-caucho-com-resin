@@ -30,6 +30,7 @@
 package com.caucho.jaxb;
 
 import com.caucho.jaxb.skeleton.*;
+import com.caucho.jaxb.property.*;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.xml.QNode;

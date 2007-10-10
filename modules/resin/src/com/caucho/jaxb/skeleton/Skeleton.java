@@ -31,6 +31,9 @@ package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.BinderImpl;
+import com.caucho.jaxb.NodeIterator;
+import com.caucho.jaxb.accessor.Accessor;
+import com.caucho.jaxb.accessor.Namer;
 
 import org.w3c.dom.Node;
 
@@ -136,7 +139,7 @@ public abstract class Skeleton {
     return null;
   }
 
-  protected Accessor getAttributeAccessor(QName q)
+  public Accessor getAttributeAccessor(QName q)
     throws JAXBException
   {
     Accessor a = _attributeQNameToAccessorMap.get(q);

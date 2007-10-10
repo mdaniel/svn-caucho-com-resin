@@ -30,7 +30,6 @@
 package com.caucho.jaxb;
 
 import com.caucho.jaxb.skeleton.ClassSkeleton;
-import com.caucho.jaxb.skeleton.NodeIterator;
 import com.caucho.jaxb.skeleton.Skeleton;
 
 import com.caucho.util.L10N;
