@@ -52,7 +52,6 @@ import static javax.xml.XMLConstants.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import static javax.xml.soap.SOAPConstants.*;
@@ -180,6 +179,8 @@ public class DirectSkeleton extends Skeleton {
 
     if (webService != null && ! "".equals(webService.portName()))
       _portName = webService.portName();
+    else if (webService != null && ! "".equals(webService.name()))
+      _portName = webService.name() + "Port";
     else
       _portName = impl.getSimpleName() + "Port";
 

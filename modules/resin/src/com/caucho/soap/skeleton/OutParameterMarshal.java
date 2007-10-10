@@ -29,7 +29,7 @@
 
 package com.caucho.soap.skeleton;
 
-import com.caucho.jaxb.skeleton.Property;
+import com.caucho.jaxb.property.Property;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;

@@ -29,8 +29,8 @@
 
 package com.caucho.soap.skeleton;
 
-import com.caucho.jaxb.skeleton.Property;
-import com.caucho.jaxb.skeleton.WrapperProperty;
+import com.caucho.jaxb.property.Property;
+import com.caucho.jaxb.property.WrapperProperty;
 import com.caucho.jaxb.JAXBContextImpl;
 import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.soap.wsdl.WSDLDefinitions;

@@ -31,7 +31,6 @@ package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
-import com.caucho.jaxb.skeleton.Property;
 import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.soap.wsdl.WSDLDefinitions;
 

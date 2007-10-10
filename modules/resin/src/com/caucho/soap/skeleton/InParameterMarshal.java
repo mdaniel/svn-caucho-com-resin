@@ -29,8 +29,8 @@
 
 package com.caucho.soap.skeleton;
 
-import com.caucho.jaxb.skeleton.AttachmentProperty;
-import com.caucho.jaxb.skeleton.Property;
+import com.caucho.jaxb.property.AttachmentProperty;
+import com.caucho.jaxb.property.Property;
 
 import com.caucho.util.Attachment;
 import com.caucho.util.L10N;
