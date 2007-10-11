@@ -273,7 +273,7 @@ public class StringModule extends AbstractQuercusModule {
 
   /**
    * Alias of rtrim.  Removes trailing whitespace.
-v   *
+   *
    * @param env the quercus environment
    * @param str the string to be trimmed
    * @param charset optional set of characters to trim
@@ -1723,21 +1723,23 @@ v   *
    *
    * @return the formatted string
    */
-  public static Value sscanf(StringValue string,
+  public static Value sscanf(Env env,
+                             StringValue string,
                              StringValue format,
                              @Optional Value []args)
-  {
-    // quercus/113-
-
+  { 
     int fmtLen = format.length();
     int strlen = string.length();
 
     int sIndex = 0;
     int fIndex = 0;
 
+    boolean isAssignment = args.length != 0;
+    int argIndex = 0;
+    
     ArrayValue array = new ArrayValueImpl();
 
-    while (fIndex < fmtLen && sIndex < strlen) {
+    while (fIndex < fmtLen) {
       char ch = format.charAt(fIndex++);
 
       if (isWhitespace(ch)) {
@@ -1759,12 +1761,16 @@ v   *
       }
       else if (ch == '%') {
         int maxLen = -1;
-        boolean suppressAssignment = false;
 
         loop:
         while (fIndex < fmtLen) {
           ch = format.charAt(fIndex++);
 
+          if (sIndex >= strlen) {
+            array.append(NullValue.NULL);
+            break loop;
+          }
+          
           switch (ch) {
           case '%':
             if (string.charAt(sIndex) != '%')
@@ -1783,9 +1789,38 @@ v   *
           case 's':
             sIndex = sscanfString(string, sIndex, maxLen, array);
             break loop;
+            
+          case 'c':
+            if ( maxLen < 0)
+              maxLen = 1;
+            
+            sIndex = sscanfString(string, sIndex, maxLen, array);
+            break loop;
+            
+          case 'd':
+            sIndex = sscanfInteger(string, sIndex, maxLen, array, 10, false);
+            break loop;
+            
+          case 'u':
+            sIndex = sscanfInteger(string, sIndex, maxLen, array, 10, true);
+            break loop;
+            
+          case 'o':
+            sIndex = sscanfInteger(string, sIndex, maxLen, array, 8, false);
+            break loop;
+            
+          case 'x': case 'X':
+            sIndex = sscanfHex(string, sIndex, maxLen, array);
+            break loop;
+
+          case 'e': case 'f':
+            sIndex = sscanfScientific(string, sIndex, maxLen, array);
+            break loop;
 
           default:
             log.fine(L.l("'{0}' is a bad sscanf string.", format));
+            env.warning(L.l("'{0}' is a bad sscanf string.", format));
+          
             return array;
           }
         }
@@ -1803,10 +1838,11 @@ v   *
   /**
    * Scans a string with a given length.
    */
-  private static int sscanfString(StringValue string, int sIndex, int maxLen,
+  private static int sscanfString(StringValue string,
+                                  int sIndex,
+                                  int maxLen,
                                   ArrayValue array)
   {
-    // quercus/1131
     int strlen = string.length();
 
     if (maxLen < 0)
@@ -1817,19 +1853,210 @@ v   *
     for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
       char ch = string.charAt(sIndex);
 
-      if (isWhitespace(ch)) {
-        array.append(sb);
-        return sIndex;
-      }
-      else
+      if (! isWhitespace(ch))
         sb.append(ch);
+      else
+        break;
     }
 
     array.append(sb);
 
     return sIndex;
   }
+  
+  /**
+   * Scans a integer with a given length.
+   */
+  private static int sscanfInteger(StringValue string,
+                                   int sIndex,
+                                   int maxLen,
+                                   ArrayValue array,
+                                   int base,
+                                   boolean isUnsigned)
+  {
+    int strlen = string.length();
 
+    if (maxLen < 0)
+      maxLen = Integer.MAX_VALUE;
+
+    int val = 0;
+    int sign = 1;
+    boolean isNotMatched = true;
+    
+    if (sIndex < strlen) {
+      char ch = string.charAt(sIndex);
+      
+      if (ch == '+') {
+        sIndex++;
+        maxLen--;
+      }
+      else if (ch == '-') {
+        sign = -1;
+        
+        sIndex++;
+        maxLen--;
+      }
+    }
+    
+    int topRange = base + '0';
+    
+    for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
+      char ch = string.charAt(sIndex);
+
+      if ('0' <= ch && ch < topRange) {
+        val = val * base + ch - '0';
+        isNotMatched = false;
+      }
+      else if (isNotMatched) {
+        array.append(NullValue.NULL);
+        return sIndex;
+      }
+      else
+        break;
+    }
+
+    if (isUnsigned) {
+      if (sign == -1 && val != 0)
+        array.append(StringValue.create(0xFFFFFFFFL - val + 1));
+      else
+        array.append(LongValue.create(val));
+    }
+    else
+      array.append(LongValue.create(val * sign));
+
+    return sIndex;
+  }
+
+  /**
+   * Scans a integer with a given length.
+   */
+  private static int sscanfHex(StringValue string,
+                               int sIndex,
+                               int maxLen,
+                               ArrayValue array)
+  {
+    int strlen = string.length();
+
+    if (maxLen < 0)
+      maxLen = Integer.MAX_VALUE;
+
+    int val = 0;
+    int sign = 1;
+    boolean isMatched = false;
+    
+    if (sIndex < strlen) {
+      char ch = string.charAt(sIndex);
+      
+      if (ch == '+') {
+        sIndex++;
+        maxLen--;
+      }
+      else if (ch == '-') {
+        sign = -1;
+        
+        sIndex++;
+        maxLen--;
+      }
+    }
+
+    for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
+      char ch = string.charAt(sIndex);
+
+      if ('0' <= ch && ch <= '9') {
+        val = val * 16 + ch - '0';
+        isMatched = true;
+      }
+      else if ('a' <= ch && ch <= 'f') {
+        val = val * 16 + ch - 'a' + 10;
+        isMatched = true;
+      }
+      else if ('A' <= ch && ch <= 'F') {
+        val = val * 16 + ch - 'A' + 10;
+        isMatched = true;
+      }
+      else if (! isMatched) {
+        array.append(NullValue.NULL);
+        return sIndex;
+      }
+      else
+        break;
+    }
+
+    array.append(LongValue.create(val * sign));
+
+    return sIndex;
+  }
+  
+  /**
+   * Scans a integer with a given length.
+   */
+  private static int sscanfScientific(StringValue s,
+                                   int i,
+                                   int maxLen,
+                                   ArrayValue array)
+  {
+    if (maxLen < 0)
+      maxLen = Integer.MAX_VALUE;
+    
+    int start = i;
+    int len = s.length();
+    int ch = 0;
+
+    if (i < len && maxLen > 0 && ((ch = s.charAt(i)) == '+' || ch == '-')) {
+      i++;
+      maxLen--;
+    }
+
+    for (; i < len && maxLen > 0
+           && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+      maxLen--;
+    }
+
+    if (ch == '.') {
+      maxLen--;
+      
+      for (i++; i < len && maxLen > 0
+                && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+        maxLen--;
+      }
+    }
+
+    if (ch == 'e' || ch == 'E') {
+      maxLen--;
+      
+      int e = i++;
+
+      if (start == e) {
+        array.append(NullValue.NULL);
+        return start;
+      }
+      
+      if (i < len && maxLen > 0 && (ch = s.charAt(i)) == '+' || ch == '-') {
+        i++;
+        maxLen--;
+      }
+
+      for (; i < len && maxLen > 0
+             && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+        maxLen--;
+      }
+
+      if (i == e + 1)
+        i = e;
+    }
+
+    double val;
+
+    if (i == 0)
+      val = 0;
+    else
+      val = Double.parseDouble(s.substring(start, i).toString());
+
+    array.append(DoubleValue.create(val));
+
+    return i;
+  }
+  
   /**
    * print to the output with a formatter
    *
