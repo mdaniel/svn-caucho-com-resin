@@ -1572,7 +1572,7 @@ public class FileModule extends AbstractQuercusModule {
       if (value == null)
         return BooleanValue.FALSE;
 
-      return StringModule.sscanf(value, format, args);
+      return StringModule.sscanf(env, value, format, args);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
