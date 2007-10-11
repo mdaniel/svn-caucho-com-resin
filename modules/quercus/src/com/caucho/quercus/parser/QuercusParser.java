@@ -4190,23 +4190,23 @@ public class QuercusParser {
           }
         }
 
-	if (end == '"') {
-	  _sb.append('\\');
+        if (end == '"') {
+          _sb.append('\\');
 
-	  if (ch >= 0)
-	    _sb.append((char) ch);
-	}
-	else {
-	  switch (ch) {
-	  case '\'': case '\\': case '\"':
-	    _sb.append((char) ch);
-	    break;
-	  default:
-	    _sb.append('\\');
-	    _sb.append((char) ch);
-	    break;
-	  }
-	}
+          if (ch >= 0)
+            _sb.append((char) ch);
+        }
+        else {
+          switch (ch) {
+          case '\'': case '\\':
+            _sb.append((char) ch);
+            break;
+          default:
+            _sb.append('\\');
+            _sb.append((char) ch);
+            break;
+          }
+        }
       }
       else
         _sb.append((char) ch);
