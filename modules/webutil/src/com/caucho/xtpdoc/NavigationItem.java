@@ -51,6 +51,7 @@ public class NavigationItem {
 
   private int _maxDepth = 3;
   private int _depth;
+  private boolean _isRelative;
   private String _link;
   private String _title;
   private String _product;
@@ -216,7 +217,11 @@ public class NavigationItem {
   public void setLink(String link)
   {
     _link = link;
-    _uri = _navigation.getUri() + link;
+    _isRelative  = (_link.indexOf(':') < 0);
+    if (_isRelative)
+      _uri = _navigation.getUri() + link;
+    else
+      _uri = _link;
   }
 
   public String getLink()
@@ -249,7 +254,10 @@ public class NavigationItem {
   @PostConstruct
   public void init()
   {
-    _navigation.putItem(_navigation.getUri() + _link, this);
+    if (_isRelative) 
+      _navigation.putItem(_navigation.getUri() + _link, this);
+    else
+      _navigation.putItem(_link, this);
   }
 
   public void writeHtml(XMLStreamWriter out, String path)
@@ -294,16 +302,21 @@ public class NavigationItem {
     if (depth <= 1) {
       out.writeStartElement("h2");
       out.writeAttribute("class", "section");
-      
+
       if (_link != null) {
-	out.writeStartElement("a");
-	out.writeAttribute("href", path + _link);
-	out.writeCharacters(_title);
-	out.writeEndElement(); // a
+        out.writeStartElement("a");
+
+        if (_isRelative)
+          out.writeAttribute("href", path + _link);
+        else
+          out.writeAttribute("href", _link);
+
+        out.writeCharacters(_title);
+        out.writeEndElement(); // a
       }
       else
-	out.writeCharacters(_title);
-      
+        out.writeCharacters(_title);
+
       out.writeEndElement();
     }
     else {
@@ -312,19 +325,24 @@ public class NavigationItem {
       out.writeStartElement("b");
 
       if (_link != null) {
-	out.writeStartElement("a");
-	out.writeAttribute("href", path + _link);
-	out.writeCharacters(_title);
-	out.writeEndElement(); // a
+        out.writeStartElement("a");
+
+        if (_isRelative)
+          out.writeAttribute("href", path + _link);
+        else
+          out.writeAttribute("href", _link);
+
+        out.writeCharacters(_title);
+        out.writeEndElement(); // a
       }
 
       out.writeEndElement(); // b
-      
+
       if (_fullDescription != null && depth + styleDepth <= 1) {
       }
       else if (_description != null && depth > 1) {
-	out.writeCharacters(" - ");
-	out.writeCharacters(_description);
+        out.writeCharacters(" - ");
+        out.writeCharacters(_description);
       }
 
       out.writeEndElement(); // dt
@@ -346,21 +364,21 @@ public class NavigationItem {
         tail = path + _link.substring(0, p + 1);
       else
         tail = path;
-      
+
       String depthString = (depth == 0) ? "top" : ("" + depth);
       boolean hasDL = false;
-    
-      if (_child != null || _items.size() > 0) {
-	out.writeStartElement("dl");
-	out.writeAttribute("class", "atoc-" + (depth + 1));
 
-	if (_child != null)
-	  _child.writeHtml(out, tail, depth + 1, styleDepth, maxDepth);
-	else {
-	  for (NavigationItem item : _items)
-	    item.writeHtmlImpl(out, tail, depth + 1, styleDepth, maxDepth);
-	}
-	out.writeEndElement();
+      if (_child != null || _items.size() > 0) {
+        out.writeStartElement("dl");
+        out.writeAttribute("class", "atoc-" + (depth + 1));
+
+        if (_child != null)
+          _child.writeHtml(out, tail, depth + 1, styleDepth, maxDepth);
+        else {
+          for (NavigationItem item : _items)
+            item.writeHtmlImpl(out, tail, depth + 1, styleDepth, maxDepth);
+        }
+        out.writeEndElement();
       }
     }
 
