@@ -76,14 +76,14 @@ can become confusing.</p>
 <var/velocity='true'/> or in the web-app with the &lt;jsp> tag:</p>
 
 <example title='Enabling velocity for a page'>
-&lt;jsp:directive.page velocity='true'/&gt;
+&lt;jsp:directive.page isVelocityEnabled='true'/&gt;
   ...
 </example>
 
 
 <example title='Enabling velocity for a web-app'>
 &lt;web-app>
-  &lt;jsp velocity='true'/>
+  &lt;jsp velocity-enabled='true'/>
   ...
 &lt;/web-app>
 </example>
