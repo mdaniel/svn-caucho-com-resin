@@ -568,6 +568,27 @@ public class StringBuilderValue
 
     return string;
   }
+    
+  /**
+   * Returns true if the region matches
+   */
+  public boolean regionMatches(int offset,
+			       char []mBuffer, int mOffset, int mLength)
+  {
+    int length = _length;
+
+    if (length < offset + mLength)
+      return false;
+
+    char []buffer = _buffer;
+
+    for (int i = 0; i < mLength; i++) {
+      if (buffer[offset + i] != mBuffer[mOffset + i])
+	return false;
+    }
+
+    return true;
+  }
 
   /**
    * Creates a string builder of the same type.

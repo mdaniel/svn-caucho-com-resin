@@ -36,8 +36,7 @@ import com.caucho.util.*;
 // XXX: non-ascii range not quite correct for unicode, and neither is
 // PHP's /u unicode option
 class RegexpSet {
-  static final int BITSET_CHARS = 0x80;
-  static final int BITSET_WIDTH = 16;
+  static final int BITSET_CHARS = 128;
 
   static RegexpSet SPACE = null;
   static RegexpSet WORD = null;
@@ -61,8 +60,135 @@ class RegexpSet {
   
   static HashMap<String,RegexpSet> CLASS_MAP = null;
   
-  int _bitset[];
+  boolean _bitset[] = new boolean[BITSET_CHARS];
   IntSet _range;
+
+  /**
+   * Create a new RegexpSet
+   */
+  RegexpSet()
+  {
+    _range = new IntSet();
+  }
+
+  /**
+   * Create a new RegexpSet
+   */
+  RegexpSet(RegexpSet old)
+  {
+    System.arraycopy(old._bitset, 0, _bitset, 0, _bitset.length);
+
+    _range = (IntSet) old._range.clone();
+  }
+  
+  /**
+   * Ors two character sets.
+   */
+  void mergeOr(RegexpSet b)
+  {
+    for (int i = 0; i < BITSET_CHARS; i++)
+      _bitset[i] = _bitset[i] || b._bitset[i];
+
+    _range.union(b._range);
+  }
+
+  /**
+   * Ors a set with the inverse of another.
+   */
+  void mergeOrInv(RegexpSet b)
+  {
+    for (int i = 0; i < BITSET_CHARS; i++)
+      _bitset[i] = _bitset[i] || ! b._bitset[i];
+
+    _range.unionNegate(b._range, 0, 0xffff);
+  }
+
+  /**
+   * Set a range of characters in a character set.
+   */
+  void setRange(int low, int high)
+  {
+    if (low > high || low < 0 || high > 0xffff)
+	throw new RuntimeException("Range out of range");
+
+    if (low < BITSET_CHARS) {
+      for (int i = low; i < Math.min(high + 1, BITSET_CHARS); i++)
+	_bitset[i] = true;
+
+      if (high < BITSET_CHARS)
+	return;
+
+      low = BITSET_CHARS;
+    }
+
+    _range.union(low, high);
+  }
+
+  /**
+   * Calculate the intersection of two sets.
+   *
+   * @return true if disjoint
+   */
+  boolean mergeOverlap(RegexpSet next)
+  {
+    boolean isDisjoint = true;
+
+    for (int i = 0; i < BITSET_CHARS; i++) {
+      _bitset[i] = _bitset[i] & next._bitset[i];
+      
+      if (_bitset[i])
+	isDisjoint = false;
+    }
+
+    if (_range.intersection(next._range))
+      isDisjoint = false;
+
+    return isDisjoint;
+  }
+
+  /**
+   * Calculate the difference of two sets.
+   *
+   * @return true if disjoint
+   */
+  void difference(RegexpSet next)
+  {
+    for (int i = 0; i < BITSET_CHARS; i++) {
+      _bitset[i] = _bitset[i] & ! next._bitset[i];
+    }
+
+    _range.difference(next._range);
+  }
+
+  /*
+   *   Returns true if the character is in the set.
+   */
+  boolean match(int ch)
+  {
+    if (ch < 0)
+      return false;
+    else if (ch < BITSET_CHARS)
+      return _bitset[ch];
+    else {
+      return _range.contains(ch);
+    }
+  }
+
+  RegexpNode createNode()
+  {
+    if (_range.size() == 0)
+      return new RegexpNode.AsciiSet(_bitset);
+    else
+      throw new UnsupportedOperationException();
+  }
+
+  RegexpNode createNotNode()
+  {
+    if (_range.size() == 0)
+      return new RegexpNode.AsciiNotSet(_bitset);
+    else
+      throw new UnsupportedOperationException();
+  }
 
   static {
     SPACE = new RegexpSet();
@@ -184,118 +310,5 @@ class RegexpSet {
     CLASS_MAP.put("space", PSPACE); //php/4eka
     CLASS_MAP.put("upper", PUPPER); //php/4ekb
     CLASS_MAP.put("xdigit", PXDIGIT); //php/4ekc
-    
-  }
-  /**
-   * Ors two character sets.
-   */
-  void mergeOr(RegexpSet b)
-  {
-    for (int i = 0; i < BITSET_WIDTH; i++)
-      _bitset[i] |= b._bitset[i];
-
-    _range.union(b._range);
-  }
-
-  /**
-   * Ors a set with the inverse of another.
-   */
-  void mergeOrInv(RegexpSet b)
-  {
-    for (int i = 0; i < BITSET_WIDTH; i++)
-      _bitset[i] |= ~b._bitset[i];
-
-    _range.unionNegate(b._range, 0, 0xffff);
-  }
-
-  /**
-   * Set a range of characters in a character set.
-   */
-  void setRange(int low, int high)
-  {
-    if (low > high || low < 0 || high > 0xffff)
-	throw new RuntimeException("Range out of range");
-
-    if (low < BITSET_CHARS) {
-      for (int i = low; i < Math.min(high + 1, BITSET_CHARS); i++)
-	_bitset[i >> 3] |= (1 << (i & 0x7));
-
-      if (high < BITSET_CHARS)
-	return;
-
-      low = BITSET_CHARS;
-    }
-
-    _range.union(low, high);
-  }
-
-  /**
-   * Calculate the intersection of two sets.
-   *
-   * @return true if disjoint
-   */
-  boolean mergeOverlap(RegexpSet next)
-  {
-    boolean isDisjoint = true;
-
-    for (int i = 0; i < BITSET_WIDTH; i++) {
-      if ((_bitset[i] &= next._bitset[i]) != 0)
-	isDisjoint = false;
-    }
-
-    if (_range.intersection(next._range))
-      isDisjoint = false;
-
-    return isDisjoint;
-  }
-
-  /**
-   * Calculate the difference of two sets.
-   *
-   * @return true if disjoint
-   */
-  void difference(RegexpSet next)
-  {
-    for (int i = 0; i < BITSET_WIDTH; i++) {
-      _bitset[i] &= ~next._bitset[i];
-    }
-
-    _range.difference(next._range);
-  }
-
-  /*
-   *   Returns true if the character is in the set.
-   */
-  boolean match(int ch)
-  {
-    if (ch < 0)
-      return false;
-    else if (ch < BITSET_CHARS)
-      return (_bitset[ch >> 3] & (1 << (ch & 7))) != 0;
-    else {
-      return _range.contains(ch);
-    }
-  }
-
-  /**
-   * Create a new RegexpSet
-   */
-  RegexpSet()
-  {
-    _bitset = new int[BITSET_WIDTH];
-    _range = new IntSet();
-  }
-
-  /**
-   * Create a new RegexpSet
-   */
-  RegexpSet(RegexpSet old)
-  {
-    _bitset = new int[BITSET_WIDTH];
-
-    for (int i = 0; i < BITSET_WIDTH; i++)
-      _bitset[i] = old._bitset[i];
-
-    _range = (IntSet) old._range.clone();
   }
 }

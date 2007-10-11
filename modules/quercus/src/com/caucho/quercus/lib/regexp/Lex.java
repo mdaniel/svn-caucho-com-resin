@@ -35,7 +35,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.util.*;
 
 public class Lex {
-  Node _rawProg;
+  RegexpNode _rawProg;
   Regcomp _comp;
 
   public void addLexeme(String pattern, int value) 
@@ -43,7 +43,7 @@ public class Lex {
   {
     _comp._nGroup = 0;
 
-    Node prog = _comp.parse(new PeekString(pattern));
+    RegexpNode prog = _comp.parse(new PeekString(pattern));
 
     _rawProg = RegOptim.appendLexeme(_rawProg, prog, value);
   }

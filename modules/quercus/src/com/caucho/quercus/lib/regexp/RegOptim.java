@@ -41,21 +41,23 @@ class RegOptim {
   /*
    * The following are really optimization things.
    */
-  static void ignoreCase(Node node)
+  static void ignoreCase(RegexpNode nodeArg)
   {
-    for (; node != null; node = node._rest) {
+    RegexpNode.Compat node = (RegexpNode.Compat) nodeArg;
+    
+    for (; node != null; node = (RegexpNode.Compat) node._rest) {
       switch (node._code) {
-      case Node.RC_SET:
-	node._code = Node.RC_SET_I;
+      case RegexpNode.RC_SET:
+	node._code = RegexpNode.RC_SET_I;
 	break;
-      case Node.RC_NSET:
-	node._code = Node.RC_NSET_I;
+      case RegexpNode.RC_NSET:
+	node._code = RegexpNode.RC_NSET_I;
 	break;
-      case Node.RC_STRING:
-	node._code = Node.RC_STRING_I;
+      case RegexpNode.RC_STRING:
+	node._code = RegexpNode.RC_STRING_I;
 	break;
-      case Node.RC_GROUP_REF:
-	node._code = Node.RC_GROUP_REF_I;
+      case RegexpNode.RC_GROUP_REF:
+	node._code = RegexpNode.RC_GROUP_REF_I;
 	break;
       }
 
@@ -67,64 +69,68 @@ class RegOptim {
    *
    * Returns the minimum length of a matching string.
    */
-  static int minLength(Node node)
+  static int minLength(RegexpNode nodeArg)
   {
+    RegexpNode.Compat node = (RegexpNode.Compat) nodeArg;
+    
     if (node == null)
       return 0;
 
     switch (node._code) {
-    case Node.RC_SET:
-    case Node.RC_NSET:
-    case Node.RC_SET_I:
-    case Node.RC_NSET_I:
+    case RegexpNode.RC_SET:
+    case RegexpNode.RC_NSET:
+    case RegexpNode.RC_SET_I:
+    case RegexpNode.RC_NSET_I:
       return 1 + minLength(node._rest);
 
-    case Node.RC_STRING:
-    case Node.RC_STRING_I:
+    case RegexpNode.RC_STRING:
+    case RegexpNode.RC_STRING_I:
       return node._string.length() + minLength(node._rest);
 
-    case Node.RC_OR:
-    case Node.RC_OR_UNIQUE:
+    case RegexpNode.RC_OR:
+    case RegexpNode.RC_OR_UNIQUE:
       return Math.min(minLength(node._branch), minLength(node._rest));
 
-    case Node.RC_LOOP:
-    case Node.RC_LOOP_SHORT:
-    case Node.RC_LOOP_UNIQUE:
-    case Node.RC_LOOP_SHORT_UNIQUE:
+    case RegexpNode.RC_LOOP:
+    case RegexpNode.RC_LOOP_SHORT:
+    case RegexpNode.RC_LOOP_UNIQUE:
+    case RegexpNode.RC_LOOP_SHORT_UNIQUE:
       return (node._min * minLength(node._branch) + minLength(node._rest));
     default:
       return minLength(node._rest);
     }
   }
 
-  static CharBuffer prefix(Node node)
+  static CharBuffer prefix(RegexpNode nodeArg)
   {
+    RegexpNode.Compat node = (RegexpNode.Compat) nodeArg;
+    
     if (node == null)
       return null;
 
     switch (node._code) {
-    case Node.RC_BEG_GROUP:
-    case Node.RC_END_GROUP:
-    case Node.RC_WORD:
-    case Node.RC_NWORD:
-    case Node.RC_BLINE:
-    case Node.RC_ELINE:
-    case Node.RC_BSTRING:
-    case Node.RC_ESTRING:
-    case Node.RC_GSTRING:
+    case RegexpNode.RC_BEG_GROUP:
+    case RegexpNode.RC_END_GROUP:
+    case RegexpNode.RC_WORD:
+    case RegexpNode.RC_NWORD:
+    case RegexpNode.RC_BLINE:
+    case RegexpNode.RC_ELINE:
+    case RegexpNode.RC_BSTRING:
+    case RegexpNode.RC_ESTRING:
+    case RegexpNode.RC_GSTRING:
       return prefix(node._rest);
 
-    case Node.RC_POS_LOOKAHEAD:
+    case RegexpNode.RC_POS_LOOKAHEAD:
       return prefix(node._branch);
 
-    case Node.RC_STRING:
-    case Node.RC_STRING_I:
+    case RegexpNode.RC_STRING:
+    case RegexpNode.RC_STRING_I:
       return node._string;
 
-    case Node.RC_LOOP:
-    case Node.RC_LOOP_SHORT:
-    case Node.RC_LOOP_UNIQUE:
-    case Node.RC_LOOP_SHORT_UNIQUE:
+    case RegexpNode.RC_LOOP:
+    case RegexpNode.RC_LOOP_SHORT:
+    case RegexpNode.RC_LOOP_UNIQUE:
+    case RegexpNode.RC_LOOP_SHORT_UNIQUE:
       if (node._min > 0)
 	return prefix(node._branch);
       else
@@ -141,8 +147,10 @@ class RegOptim {
    * Returns the _last_ string so or-branches will choose the same string.
    * (Remember the tails of the or jump directly to the continuation.)
    */
-  static private CharBuffer findMust(Node node)
+  static private CharBuffer findMust(RegexpNode nodeArg)
   {
+    RegexpNode.Compat node = (RegexpNode.Compat) nodeArg;
+    
     CharBuffer string1;
     CharBuffer string2;
 
@@ -150,12 +158,12 @@ class RegOptim {
       return null;
 
     switch (node._code) {
-    case Node.RC_STRING:
+    case RegexpNode.RC_STRING:
       string1 = findMust(node._rest);
       return string1 != null ? string1 : node._string;
 
-    case Node.RC_OR:
-    case Node.RC_OR_UNIQUE:
+    case RegexpNode.RC_OR:
+    case RegexpNode.RC_OR_UNIQUE:
       string1 = findMust(node._branch);
       string2 = findMust(node._rest);
 
@@ -164,9 +172,9 @@ class RegOptim {
       else
 	return null;
 
-    case Node.RC_LOOP:
-    case Node.RC_LOOP_UNIQUE:
-    case Node.RC_LOOP_SHORT:
+    case RegexpNode.RC_LOOP:
+    case RegexpNode.RC_LOOP_UNIQUE:
+    case RegexpNode.RC_LOOP_SHORT:
       string1 = findMust(node._rest);
       if (string1 != null)
 	return string1;
@@ -175,7 +183,7 @@ class RegOptim {
       else
 	return null;
 
-    case Node.RC_POS_LOOKAHEAD:
+    case RegexpNode.RC_POS_LOOKAHEAD:
       string1 = findMust(node._rest);
       if (string1 != null)
 	return string1;
@@ -190,8 +198,13 @@ class RegOptim {
   /**
    * Link the loop branches and eliminate null derivations.
    */
-  static private Node linkLoops(Node node, Node loop, boolean canDeriveNull)
+  static private RegexpNode linkLoops(RegexpNode nodeArg,
+				      RegexpNode loopArg,
+				      boolean canDeriveNull)
   {
+    RegexpNode.Compat node = (RegexpNode.Compat) nodeArg;
+    RegexpNode.Compat loop = (RegexpNode.Compat) loopArg;
+    
     if (node == null && loop != null && canDeriveNull) {
       if (loop._min > 0)
 	loop._min = 1;
@@ -202,12 +215,12 @@ class RegOptim {
       return loop;
 
     switch (node._code) {
-    case Node.RC_END:
-    case Node.RC_NULL:
+    case RegexpNode.RC_END:
+    case RegexpNode.RC_NULL:
       return linkLoops(node._rest, loop, canDeriveNull);
 
-    case Node.RC_OR:
-    case Node.RC_OR_UNIQUE:
+    case RegexpNode.RC_OR:
+    case RegexpNode.RC_OR_UNIQUE:
       if (node._mark)
 	return node;
 
@@ -217,9 +230,9 @@ class RegOptim {
 
       return node;
 
-    case Node.RC_LOOP:
-    case Node.RC_LOOP_SHORT:
-    case Node.RC_LOOP_UNIQUE:
+    case RegexpNode.RC_LOOP:
+    case RegexpNode.RC_LOOP_SHORT:
+    case RegexpNode.RC_LOOP_UNIQUE:
 
       if (node._mark) {
 	if (canDeriveNull && node._min > 0)
@@ -230,23 +243,23 @@ class RegOptim {
       node._mark = true;
       node._branch = linkLoops(node._branch, node, true);
       node._rest = linkLoops(node._rest, loop, canDeriveNull);
-      Node init = new Node(Node.RC_LOOP_INIT);
+      RegexpNode init = RegexpNode.create(RegexpNode.RC_LOOP_INIT);
       init._rest = node;
       return init;
 
-    case Node.RC_GROUP_REF:
-    case Node.RC_GROUP_REF_I:
-    case Node.RC_STRING:
-    case Node.RC_SET:
-    case Node.RC_NSET:
-    case Node.RC_STRING_I:
-    case Node.RC_SET_I:
-    case Node.RC_NSET_I:
+    case RegexpNode.RC_GROUP_REF:
+    case RegexpNode.RC_GROUP_REF_I:
+    case RegexpNode.RC_STRING:
+    case RegexpNode.RC_SET:
+    case RegexpNode.RC_NSET:
+    case RegexpNode.RC_STRING_I:
+    case RegexpNode.RC_SET_I:
+    case RegexpNode.RC_NSET_I:
       node._rest = linkLoops(node._rest, loop, false);
       return node;
 
-    case Node.RC_POS_LOOKBEHIND:
-    case Node.RC_NEG_LOOKBEHIND:
+    case RegexpNode.RC_POS_LOOKBEHIND:
+    case RegexpNode.RC_NEG_LOOKBEHIND:
       node._branch = linkLoops(node._branch, loop, canDeriveNull);
       return node;
       
@@ -256,7 +269,7 @@ class RegOptim {
     }
   }
 
-  static Node linkLoops(Node node)
+  static RegexpNode linkLoops(RegexpNode node)
   {    
     return linkLoops(node, null, true);
   }
@@ -283,8 +296,10 @@ class RegOptim {
    * then removed with re_eliminate_null.
    */
 
-  static void eliminateBacktrack(Node node, Node rest)
+  static void eliminateBacktrack(RegexpNode nodeArg, RegexpNode rest)
   {
+    RegexpNode.Compat node = (RegexpNode.Compat) nodeArg;
+    
     RegexpSet left;
     RegexpSet right;
 
@@ -292,7 +307,7 @@ class RegOptim {
       return;
 
     switch (node._code) {
-    case Node.RC_LOOP_SHORT:
+    case RegexpNode.RC_LOOP_SHORT:
       eliminateBacktrack(node._branch, node._rest);
       eliminateBacktrack(node._rest, rest);
 
@@ -302,7 +317,7 @@ class RegOptim {
       }
       return;
 
-    case Node.RC_LOOP:
+    case RegexpNode.RC_LOOP:
       //XXX: disable loop optimizations for now
       // php/4ebc
       if (true)
@@ -330,7 +345,7 @@ class RegOptim {
         // If the right can derive null, then we can't take a shortcut
       }
       else if (right.mergeOverlap(left)) {
-	node._code = Node.RC_LOOP_UNIQUE;
+	node._code = RegexpNode.RC_LOOP_UNIQUE;
 	node._set = left;
       }
       else {
@@ -340,8 +355,8 @@ class RegOptim {
 
       return;
 
-    case Node.RC_OR: 
-    case Node.RC_OR_UNIQUE:
+    case RegexpNode.RC_OR: 
+    case RegexpNode.RC_OR_UNIQUE:
       eliminateBacktrack(node._branch, rest);
       eliminateBacktrack(node._rest, rest);
 
@@ -355,13 +370,13 @@ class RegOptim {
 	firstset(rest, right);
       
       if (! emptyFirst && right.mergeOverlap(left)) {
-	node._code = Node.RC_OR_UNIQUE;
+	node._code = RegexpNode.RC_OR_UNIQUE;
 	node._set = left;
       }
       return;
 
-    case Node.RC_POS_LOOKAHEAD:
-    case Node.RC_NEG_LOOKAHEAD:
+    case RegexpNode.RC_POS_LOOKAHEAD:
+    case RegexpNode.RC_NEG_LOOKAHEAD:
       eliminateBacktrack(node._branch, rest);
       eliminateBacktrack(node._rest, rest);
       return;
@@ -379,39 +394,41 @@ class RegOptim {
    *
    * @return true if the node can derive null
    */
-  static private boolean firstset(Node node, RegexpSet set)
+  static private boolean firstset(RegexpNode nodeArg, RegexpSet set)
   {
     int i;
+
+    RegexpNode.Compat node = (RegexpNode.Compat) nodeArg;
 
     if (node == null)
       return true;
 
     switch (node._code) {
     //XXX: optimize group references
-    case Node.RC_GROUP_REF_I:
-    case Node.RC_GROUP_REF:
+    case RegexpNode.RC_GROUP_REF_I:
+    case RegexpNode.RC_GROUP_REF:
       return false;
-    case Node.RC_STRING:
+    case RegexpNode.RC_STRING:
       int ch = node._string.charAt(0);
       if (set != null)
 	set.setRange(ch, ch);
       return false;
 
-    case Node.RC_SET:
+    case RegexpNode.RC_SET:
       if (set != null)
 	set.mergeOr(node._set);
       return false;
 
-    case Node.RC_NSET:
+    case RegexpNode.RC_NSET:
       if (set != null) {
 	set.mergeOrInv(node._set);
       }
       return false;
 
-    case Node.RC_LOOP:
-    case Node.RC_LOOP_SHORT:
-    case Node.RC_LOOP_SHORT_UNIQUE:
-    case Node.RC_LOOP_UNIQUE:
+    case RegexpNode.RC_LOOP:
+    case RegexpNode.RC_LOOP_SHORT:
+    case RegexpNode.RC_LOOP_SHORT_UNIQUE:
+    case RegexpNode.RC_LOOP_UNIQUE:
       if (firstset(node._branch, set)) {
 	if (node._min > 0)
 	  node._min = 1;
@@ -426,8 +443,8 @@ class RegOptim {
       else
 	return false;
 
-    case Node.RC_OR:
-    case Node.RC_OR_UNIQUE:
+    case RegexpNode.RC_OR:
+    case RegexpNode.RC_OR_UNIQUE:
       if (firstset(node._branch, set)) {
 	firstset(node._rest, set);
 	return true;
@@ -435,7 +452,7 @@ class RegOptim {
       else
 	return firstset(node._rest, set);
 
-    case Node.RC_POS_LOOKAHEAD:
+    case RegexpNode.RC_POS_LOOKAHEAD:
       RegexpSet lookahead = new RegexpSet();
 
       boolean result = firstset(node._rest, set);
@@ -453,30 +470,34 @@ class RegOptim {
     }
   }
 
-  static Node appendLexemeValue(Node node, int lexeme)
+  static RegexpNode appendLexemeValue(RegexpNode node, int lexeme)
   {
-    if (node == null || node._code == Node.RC_END || 
-	node._code == Node.RC_LEXEME) {
-      node = new Node(Node.RC_LEXEME, lexeme);
+    RegexpNode.Compat compat = (RegexpNode.Compat) node;
+    
+    if (compat == null || compat == RegexpNode.END
+	|| compat._code == RegexpNode.RC_LEXEME) {
+      node = RegexpNode.create(RegexpNode.RC_LEXEME, lexeme);
       node._rest = null;
       return node;
     }
 
-    node._rest = appendLexemeValue(node._rest, lexeme);
-    if (node._code == Node.RC_OR)
-      node._branch = appendLexemeValue(node._branch, lexeme);
+    compat._rest = appendLexemeValue(compat._rest, lexeme);
+    if (compat._code == RegexpNode.RC_OR)
+      compat._branch = appendLexemeValue(compat._branch, lexeme);
 
-    return node;
+    return compat;
   }
 
-  static Node appendLexeme(Node parent, Node child, int lexeme)
+  static RegexpNode appendLexeme(RegexpNode parent,
+				 RegexpNode child,
+				 int lexeme)
   {
     child = appendLexemeValue(child, lexeme);
 
     if (parent == null)
       return child;
     
-    parent = new Node(Node.RC_OR, parent);
+    parent = RegexpNode.create(RegexpNode.RC_OR, parent);
     parent._rest = child;
 
     return parent;
