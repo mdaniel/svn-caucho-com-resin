@@ -1933,6 +1933,28 @@ case SORT_NUMERIC:
     return diffArray;
   }
 
+  /*
+   * Returns an array whose keys are the values of the keyArray passed in,
+   * and whose values are all the value passed in.
+   * 
+   * @param keyArray whose values are used to populate the keys of the new
+   * array
+   * @param value used as the value of the keys
+   * 
+   * @return newly filled array
+   */
+  public ArrayValue array_fill_keys(Env env, ArrayValue keyArray, Value value)
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    Iterator<Value> iter = keyArray.getValueIterator(env);
+    
+    while (iter.hasNext()) {
+      array.put(iter.next(), value);
+    }
+    
+    return array;
+  }
 
   /**
    * Returns an array with everything that is in array and not in the other
