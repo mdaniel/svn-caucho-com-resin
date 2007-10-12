@@ -39,14 +39,24 @@ import java.util.logging.Logger;
 
 public class EjbIiopRemoteService extends IiopRemoteService {
   private static final Logger log = Log.open(EjbIiopRemoteService.class);
-  
+
   private AbstractServer _server;
+
+  private boolean _isEJB3;
 
   public EjbIiopRemoteService(AbstractServer server)
   {
     _server = server;
   }
-  
+
+  /**
+   * Uses the 3.0 remote interface when multiple 2.1/3.0 interfaces are available.
+   */
+  public void setEJB3(boolean isEJB3)
+  {
+    _isEJB3 = isEJB3;
+  }
+
   /**
    * Returns the context class loader.
    */
@@ -54,16 +64,16 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   {
     return _server.getClassLoader();
   }
-  
+
   /**
    * Returns the home API class.
    */
   public ArrayList<Class> getHomeAPI()
   {
-    if (_server.getRemoteHomeClass() != null) {
+    if ((! _isEJB3) && (_server.getRemoteHomeClass() != null)) {
       ArrayList<Class> list = new ArrayList<Class>();
       list.add(_server.getRemoteHomeClass());
-      
+
       return list;
     }
     else
@@ -77,18 +87,21 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   {
     return _server.getRemoteObjectList();
   }
-  
+
   /**
    * Returns the home object.
    */
   public Object getHome()
   {
+    if (_isEJB3)
+      return _server.getRemoteObject30();
+
     Object obj = _server.getHomeObject();
 
-    if (obj != null)
-      return obj;
-    else
-      return _server.getRemoteObject();
+    if (obj == null)
+      obj = _server.getRemoteObject();
+
+    return obj;
   }
 
   /**
@@ -100,7 +113,7 @@ public class EjbIiopRemoteService extends IiopRemoteService {
       return _server.getEJBObject(local);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return null;
     }
   }

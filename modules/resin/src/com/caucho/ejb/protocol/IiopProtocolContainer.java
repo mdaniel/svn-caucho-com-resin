@@ -110,6 +110,24 @@ public class IiopProtocolContainer extends ProtocolContainer {
     EjbIiopRemoteService service = new EjbIiopRemoteService(server);
 
     _context.setService(name, service);
+
+    String remoteJndiName = name;
+
+    // TCK (ejb/0f6f)
+    // Multiple remote interfaces
+    for (Class cl : server.getRemoteObjectList()) {
+      String s = cl.getName().replace(".", "_");
+
+      name = remoteJndiName + "#" + s;
+
+      log.fine("iiop: add server " + name);
+
+      service = new EjbIiopRemoteService(server);
+
+      service.setEJB3(true);
+
+      _context.setService(name, service);
+    }
   }
 
   private String getName(AbstractServer server)
@@ -135,7 +153,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
       return;
 
     String name = getName(server);
-    
+
     _context.removeService(name);
   }
 
@@ -144,7 +162,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
     throws ConfigException
   {
     String name = getName(server);
-    
+
     if (_urlPrefix != null)
       return new HandleEncoder(server, _urlPrefix + name);
     else

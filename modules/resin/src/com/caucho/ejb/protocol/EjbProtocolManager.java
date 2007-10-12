@@ -276,6 +276,12 @@ public class EjbProtocolManager {
               log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
 
             bindServer(remoteJndiName, remoteObj);
+
+            // ejb/0f6f (TCK): multiple remote interfaces
+            for (Class cl : server.getRemoteObjectList()) {
+              String s = cl.getName().replace(".", "_");
+              bindServer(remoteJndiName + "#" + s, server.getRemoteObject30());
+            }
           }
         }
         else {
