@@ -29,12 +29,7 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.BytesValue;
-import com.caucho.quercus.env.Callback;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.program.JavaClassDef;
@@ -114,6 +109,9 @@ public class MarshalFactory {
     else if (Long.class.equals(argType)) {
       marshal = LongObjectMarshal.MARSHAL;
     }
+    else if (LongValue.class.equals(argType)) {
+      marshal = LongValueMarshal.MARSHAL;
+    }
     else if (float.class.equals(argType)) {
       marshal = FloatMarshal.MARSHAL;
     }
@@ -125,6 +123,9 @@ public class MarshalFactory {
     }
     else if (Double.class.equals(argType)) {
       marshal = DoubleObjectMarshal.MARSHAL;
+    }
+    else if (DoubleValue.class.equals(argType)) {
+      marshal = DoubleValueMarshal.MARSHAL;
     }
     else if (char.class.equals(argType)) {
       marshal = CharacterMarshal.MARSHAL;
@@ -143,6 +144,9 @@ public class MarshalFactory {
     }
     else if (UnicodeValue.class.equals(argType)) {
       marshal = UnicodeValueMarshal.MARSHAL;
+    }
+    else if (BinaryValue.class.equals(argType)) {
+      marshal = BinaryValueMarshal.MARSHAL;
     }
     else if (BytesValue.class.equals(argType)) {
       marshal = BinaryValueMarshal.MARSHAL;

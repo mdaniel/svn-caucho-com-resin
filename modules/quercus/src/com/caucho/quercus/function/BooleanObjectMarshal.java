@@ -74,7 +74,7 @@ public class BooleanObjectMarshal extends Marshal
     if (argValue instanceof BooleanValue)
       return Marshal.EQUIVALENT;
     else
-      return Marshal.MARSHALABLE;
+      return Marshal.MARSHALABLE + 1;
   }
   
   @Override

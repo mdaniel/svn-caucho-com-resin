@@ -52,13 +52,14 @@ public class JavaCharacterArrayMarshal extends JavaArrayMarshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    // php/0id7, php/0jd7
-    if (argValue.isUnicode())
-      return Marshal.EQUIVALENT - 4;
-    else if (argValue.isString())
-      return Marshal.EQUIVALENT - 2;
-    else if (argValue.isString())
-      return Marshal.SIMILAR;
+    if (argValue.isString()) {
+      if (argValue.isUnicode())
+        return Marshal.UNICODE_CHARACTER_ARRAY_COST;
+      else if (argValue.isBinary())
+        return Marshal.BINARY_CHARACTER_ARRAY_COST;
+      else
+        return Marshal.PHP5_CHARACTER_ARRAY_COST;
+    }
     else if (argValue.isArray())
       return Marshal.SIMILAR; // php/0cib
     else

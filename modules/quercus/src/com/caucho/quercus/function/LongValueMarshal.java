@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,60 +24,71 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
-public class FloatObjectMarshal extends Marshal
+public class LongValueMarshal
+  extends Marshal
 {
-  public static final Marshal MARSHAL = new FloatObjectMarshal();
-  
+  public static final Marshal MARSHAL = new LongValueMarshal();
+
   public boolean isReadOnly()
+  {
+    return true;
+  }
+
+  /**
+   * Return true if is a Value.
+   */
+  @Override
+  public boolean isValue()
   {
     return true;
   }
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return new Float((float) expr.evalDouble(env));
+    return expr.eval(env).toLongValue();
   }
 
-  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return value.toJavaFloat();
+    return value.toLongValue();
   }
 
   public Value unmarshal(Env env, Object value)
   {
-    if (value == null)
-      return DoubleValue.ZERO;
+    if (value instanceof LongValue)
+      return (LongValue) value;
+    else if (value instanceof Value)
+      return ((Value) value).toLongValue();
     else
-      return new DoubleValue(((Number) value).doubleValue());
+      return null;
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue instanceof DoubleValue)
-      return Marshal.EQUIVALENT;
+    if (argValue instanceof LongValue)
+      return Marshal.SAME;
     else if (argValue.isLongConvertible())
-      return LONG_CONVERTIBLE_FLOAT_OBJECT_COST;
+      return LONG_CONVERTIBLE_LONG_VALUE_COST;
     else if (argValue.isDoubleConvertible())
-      return DOUBLE_CONVERTIBLE_FLOAT_OBJECT_COST;
+      return DOUBLE_CONVERTIBLE_LONG_VALUE_COST;
     else
       return Marshal.DUBIOUS;
   }
-  
+
   @Override
   public Class getExpectedClass()
   {
-    return Float.class;
+    return LongValue.class;
   }
 }

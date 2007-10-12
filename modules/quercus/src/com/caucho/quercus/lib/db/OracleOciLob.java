@@ -103,7 +103,7 @@ public class OracleOciLob {
       CLOB_DURATION_CALL = classOracleCLOB.getDeclaredField("DURATION_CALL").getInt(null);
       CLOB_DURATION_SESSION = classOracleCLOB.getDeclaredField("DURATION_SESSION").getInt(null);
     } catch (Exception e) {
-      L.l("Unable to load LOB classes or methods for oracle.sql.BLOB and oracle.sql.CLOB.");
+      log.log(Level.FINER, L.l("Unable to load LOB classes or methods for oracle.sql.BLOB and oracle.sql.CLOB."));
     }
   }
 

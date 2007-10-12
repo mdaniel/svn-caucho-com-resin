@@ -71,10 +71,10 @@ public class FloatMarshal extends Marshal
   {
     if (argValue instanceof DoubleValue)
       return Marshal.EQUIVALENT;
-    if (argValue.isDoubleConvertible())
-      return Marshal.MARSHALABLE;
-    else if (argValue.isNumeric())
-      return Marshal.MARSHALABLE;
+    else if (argValue.isLongConvertible())
+      return LONG_CONVERTIBLE_FLOAT_COST;
+    else if (argValue.isDoubleConvertible())
+      return DOUBLE_CONVERTIBLE_FLOAT_COST;
     else
       return Marshal.DUBIOUS;
   }

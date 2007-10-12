@@ -29,15 +29,14 @@
 
 package com.caucho.quercus.function;
 
-import java.io.InputStream;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
-import com.caucho.vfs.Path;
+
+import java.io.InputStream;
 
 public class BinaryInputMarshal extends Marshal
 {

@@ -70,10 +70,10 @@ public class DoubleMarshal extends Marshal
   {
     if (argValue instanceof DoubleValue)
       return Marshal.EQUIVALENT;
-    if (argValue.isDoubleConvertible())
-      return Marshal.MARSHALABLE;
-    else if (argValue.isNumeric())
-      return Marshal.MARSHALABLE;
+    else if (argValue.isLongConvertible())
+      return LONG_CONVERTIBLE_DOUBLE_COST;
+    else if (argValue.isDoubleConvertible())
+      return DOUBLE_CONVERTIBLE_DOUBLE_COST;
     else
       return Marshal.DUBIOUS;
   }

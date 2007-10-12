@@ -71,10 +71,14 @@ public class StringMarshal extends Marshal {
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    // php/0ch0 for char and byte
-    // php/0ch2 for char[] and byte[]
-    if (argValue.isString())
-      return Marshal.EQUIVALENT;
+    if (argValue.isString()) {
+      if (argValue.isUnicode())
+        return Marshal.UNICODE_STRING_COST;
+      else if (argValue.isBinary())
+        return Marshal.BINARY_STRING_COST;
+      else
+        return Marshal.PHP5_STRING_COST;
+    }
     else if (! (argValue.isArray() || argValue.isObject()))
       return Marshal.MARSHALABLE;
     else

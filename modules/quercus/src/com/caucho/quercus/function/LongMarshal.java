@@ -72,9 +72,9 @@ public class LongMarshal extends Marshal
     if (argValue instanceof LongValue)
       return Marshal.EQUIVALENT;
     else if (argValue.isLongConvertible())
-      return Marshal.MARSHALABLE;
-    else if (argValue.isNumeric())
-      return Marshal.MARSHALABLE;
+      return LONG_CONVERTIBLE_LONG_COST;
+    else if (argValue.isDoubleConvertible())
+      return DOUBLE_CONVERTIBLE_LONG_COST;
     else
       return Marshal.DUBIOUS;
   }

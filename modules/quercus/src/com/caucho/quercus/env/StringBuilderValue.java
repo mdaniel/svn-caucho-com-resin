@@ -78,7 +78,7 @@ public class StringBuilderValue
     _buffer = new char[length];
     _length = length;
 
-    for (int i = 0; i < length; i++)
+    for (int i = offset; i < length; i++)
       _buffer[i] = (char) buffer[i];
   }
 
@@ -259,18 +259,10 @@ public class StringBuilderValue
    * Converts to a BinaryValue.
    */
   @Override
-  public StringValue toBinaryValue()
-  {
-    return this;
-  }
-
-  /**
-   * Converts to a BinaryValue.
-   */
-  @Override
   public StringValue toBinaryValue(Env env)
   {
-    return this;
+    // XXX: inefficient, but not often invoked
+    return new BinaryBuilderValue(toString());
   }
 
   /**
@@ -279,7 +271,8 @@ public class StringBuilderValue
   @Override
   public StringValue toBinaryValue(Env env, String charset)
   {
-    return this;
+    // XXX: inefficient, but not often invoked
+    return new BinaryBuilderValue(toString());
   }
 
   /**

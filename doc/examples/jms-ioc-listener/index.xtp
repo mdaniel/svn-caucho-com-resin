@@ -164,6 +164,7 @@ and receives messages from the queue.</p>
      &lt;destination&gt;\${queue}&lt;/destination&gt;
 
      &lt;listener type="example.MyListener"/&gt;
+     &lt;listener-max&gt;10&lt;/listener-max&gt; &lt;!-- 5 is the default --&gt;
   &lt;/init&gt;
 &lt;/resource&gt;
 </example>

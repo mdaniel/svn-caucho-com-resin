@@ -31,8 +31,9 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.Expr;
 
 public class BinaryValueMarshal extends Marshal
@@ -55,31 +56,42 @@ public class BinaryValueMarshal extends Marshal
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return expr.eval(env).toBinaryValue(env);
+    return marshal(env, expr.eval(env), expectedClass);
   }
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return value.toBinaryValue(env);
+    Value arg = value.toBinaryValue(env);
+    
+    assert arg instanceof BinaryValue : "" + value.getClass() + ".toBinaryValue() returned a " + arg.getClass();
+
+    return arg;
   }
 
   public Value unmarshal(Env env, Object value)
   {
-    if (value instanceof BytesValue)
-      return (BytesValue) value;
+    if (value instanceof BinaryValue)
+      return (BinaryValue) value;
     else if (value instanceof Value)
       return ((Value) value).toBinaryValue(env);
-    else
-      return env.createString(String.valueOf(value));
+    else {
+      StringValue ret =  env.createBinaryBuilder();
+      ret.append(value);
+      return ret;
+    }
   }
   
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isBinary())
-      return Marshal.SAME;
-    else if (argValue.isString())
-      return Marshal.SIMILAR;
+    if (argValue.isString()) {
+      if (argValue.isUnicode())
+        return Marshal.UNICODE_BINARY_VALUE_COST;
+      else if (argValue.isBinary())
+        return Marshal.BINARY_BINARY_VALUE_COST;
+      else
+        return Marshal.PHP5_BINARY_VALUE_COST;
+    }
     else if (! (argValue.isArray() || argValue.isObject()))
       return Marshal.MARSHALABLE;
     else

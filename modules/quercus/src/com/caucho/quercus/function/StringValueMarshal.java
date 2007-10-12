@@ -31,7 +31,6 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -78,8 +77,14 @@ public class StringValueMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isString())
-      return Marshal.EQUIVALENT;
+    if (argValue.isString()) {
+      if (argValue.isUnicode())
+        return Marshal.UNICODE_STRING_VALUE_COST;
+      else if (argValue.isBinary())
+        return Marshal.BINARY_STRING_VALUE_COST;
+      else
+        return Marshal.PHP5_STRING_VALUE_COST;
+    }
     else if (! (argValue.isArray() || argValue.isObject()))
       return Marshal.MARSHALABLE;
     else

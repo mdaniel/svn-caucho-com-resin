@@ -66,10 +66,10 @@ public class DoubleObjectMarshal extends Marshal
   {
     if (argValue instanceof DoubleValue)
       return Marshal.EQUIVALENT;
-    else if (argValue.isNumeric())
-      return Marshal.SIMILAR;
+    else if (argValue.isLongConvertible())
+      return LONG_CONVERTIBLE_DOUBLE_OBJECT_COST;
     else if (argValue.isDoubleConvertible())
-      return Marshal.MARSHALABLE;
+      return DOUBLE_CONVERTIBLE_DOUBLE_OBJECT_COST;
     else
       return Marshal.DUBIOUS;
   }

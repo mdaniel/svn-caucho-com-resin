@@ -721,7 +721,7 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toBinaryValue()
   {
-    return toUnicodeValue(Env.getInstance());
+    return toBinaryValue(Env.getInstance());
   }
 
   /**
