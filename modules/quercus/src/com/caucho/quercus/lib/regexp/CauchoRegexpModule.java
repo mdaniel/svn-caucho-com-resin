@@ -570,11 +570,11 @@ public class CauchoRegexpModule
    * @return
    */
   public static Value preg_replace(Env env,
-          Value pattern,
-          Value replacement,
-          Value subject,
-          @Optional("-1") long limit,
-          @Optional @Reference Value count)
+				   Value pattern,
+				   Value replacement,
+				   Value subject,
+				   @Optional("-1") long limit,
+				   @Optional @Reference Value count)
   {
     try {
       if (subject instanceof ArrayValue) {
@@ -582,11 +582,11 @@ public class CauchoRegexpModule
 
         for (Value value : ((ArrayValue) subject).values()) {
           result.put(pregReplace(env,
-                     pattern,
-                     replacement,
-                     value.toStringValue(),
-                     limit,
-                     count));
+				 pattern,
+				 replacement,
+				 value.toStringValue(),
+				 limit,
+				 count));
         }
 
         return result;
@@ -599,8 +599,6 @@ public class CauchoRegexpModule
         return subject.toStringValue().getEmptyString();
     }
     catch (IllegalRegexpException e) {
-      e.printStackTrace();
-      
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
       
@@ -613,11 +611,11 @@ public class CauchoRegexpModule
    * Replaces values using regexps
    */
   private static Value pregReplace(Env env,
-          Value patternValue,
-          Value replacement,
-          StringValue subject,
-          @Optional("-1") long limit,
-          Value countV)
+				   Value patternValue,
+				   Value replacement,
+				   StringValue subject,
+				   @Optional("-1") long limit,
+				   Value countV)
     throws IllegalRegexpException
   {
     StringValue string = subject;
@@ -634,30 +632,30 @@ public class CauchoRegexpModule
 
       while (patternIter.hasNext() && replacementIter.hasNext()) {
         string = pregReplaceString(env,
-                patternIter.next().toStringValue(),
-                replacementIter.next().toStringValue(),
-                string,
-                limit,
-                countV);
+				   patternIter.next().toStringValue(),
+				   replacementIter.next().toStringValue(),
+				   string,
+				   limit,
+				   countV);
       }
     } else if (patternValue.isArray()) {
       ArrayValue patternArray = (ArrayValue) patternValue;
 
       for (Value value : patternArray.values()) {
         string = pregReplaceString(env,
-                value.toStringValue(),
-                replacement.toStringValue(),
-                string,
-                limit,
-                countV);
+				   value.toStringValue(),
+				   replacement.toStringValue(),
+				   string,
+				   limit,
+				   countV);
       }
     } else {
       return pregReplaceString(env,
-              patternValue.toStringValue(),
-              replacement.toStringValue(),
-              string,
-              limit,
-              countV);
+			       patternValue.toStringValue(),
+			       replacement.toStringValue(),
+			       string,
+			       limit,
+			       countV);
     }
 
     return string;
@@ -674,11 +672,11 @@ public class CauchoRegexpModule
    * @return subject with everything replaced
    */
   private static StringValue pregReplaceCallbackImpl(Env env,
-          StringValue patternString,
-          Callback fun,
-          StringValue subject,
-          long limit,
-          Value countV)
+						     StringValue patternString,
+						     Callback fun,
+						     StringValue subject,
+						     long limit,
+						     Value countV)
     throws IllegalRegexpException
   {
     StringValue empty = subject.getEmptyString();

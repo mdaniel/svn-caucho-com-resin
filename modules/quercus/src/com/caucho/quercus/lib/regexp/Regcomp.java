@@ -59,8 +59,8 @@ class Regcomp {
     = new HashMap<String,Integer>();
   
   int _nGroup;
-  int _maxGroup;
   int _nLoop;
+  int _maxGroup;
   int _flags;
 
   HashMap<Integer,StringValue> _groupNameMap
@@ -68,6 +68,8 @@ class Regcomp {
 
   HashMap<StringValue,Integer> _groupNameReverseMap
     = new HashMap<StringValue,Integer>();
+
+  RegexpNode _groupTail;
   
   boolean _isLookbehind;
   boolean _isOr;
@@ -77,11 +79,17 @@ class Regcomp {
     _flags = flags;
   }
 
+  int nextLoopIndex()
+  {
+    return _nLoop++;
+  }
+
   RegexpNode parse(PeekStream pattern) throws IllegalRegexpException
   {
     _nGroup = 1;
     
     RegexpNode value = parseRec(pattern, null);
+    value = value.getHead();
 
     if (_maxGroup < _nGroup)
       _maxGroup = _nGroup;
@@ -632,7 +640,7 @@ class Regcomp {
    *                 v -- rest
    *                node
    */
-  private RegexpNode parseRec(PeekStream pattern, RegexpNode prev)
+  private RegexpNode parseRec(PeekStream pattern, RegexpNode tail)
     throws IllegalRegexpException
   {
     int ch = pattern.read();
@@ -640,25 +648,64 @@ class Regcomp {
 
     switch (ch) {
     case -1:
-      return prev;
+      return tail;
 
     case '?':
-      if (prev == null)
+      if (tail == null)
 	throw error(L.l("'?' requires a preceeding regexp"));
-      else
-	return parseRec(pattern, prev.createOptional());
+      
+      if (pattern.peek() == '+') {
+	pattern.read();
+
+	tail = tail.createPossessiveLoop(0, 1);
+	
+	return parseRec(pattern, tail.getTail());
+      }
+      else {
+	tail = tail.createLoop(this, 0, 1);
+	
+	return parseRec(pattern, tail.getTail());
+      }
 
     case '*':
-      if (prev == null)
+      if (tail == null)
 	throw error(L.l("'*' requires a preceeding regexp"));
-      else
-	return parseRec(pattern, prev.createStar());
+      
+      if (pattern.peek() == '+') {
+	pattern.read();
+
+	tail = tail.createPossessiveLoop(0, Integer.MAX_VALUE);
+	
+	return parseRec(pattern, tail.getTail());
+      }
+      else {
+	tail = tail.createLoop(this, 0, Integer.MAX_VALUE);
+	
+	return parseRec(pattern, tail.getTail());
+      }
 
     case '+':
-      if (prev == null)
+      if (tail == null)
 	throw error(L.l("'+' requires a preceeding regexp"));
-      else
-	return parseRec(pattern, prev.createPlus());
+      
+      if (pattern.peek() == '+') {
+	pattern.read();
+
+	tail = tail.createPossessiveLoop(1, Integer.MAX_VALUE);
+	
+	return parseRec(pattern, tail.getTail());
+      }
+      else {
+	tail = tail.createLoop(this, 1, Integer.MAX_VALUE);
+	
+	return parseRec(pattern, tail.getTail());
+      }
+
+    case '{':
+      if (tail == null)
+	throw error(L.l("'{' requires a preceeding regexp"));
+
+      return parseRec(pattern, parseBrace(pattern, tail));
 
     case '.':
       if ((_flags & SINGLE_LINE) == 0)
@@ -666,43 +713,64 @@ class Regcomp {
       else
 	next = RegexpNode.ANY_CHAR;
 	
-      return concat(prev, parseRec(pattern, next));
+      return concat(tail, parseRec(pattern, next));
 
     case '|':
-      return new RegexpNode.Or(prev, parseRec(pattern, null));
+      return new RegexpNode.Or(tail, parseRec(pattern, null));
 
     case '(':
       {
-	next = new RegexpNode.Group(parseRec(pattern, null), _nGroup++);
+	int group = _nGroup++;
+	
+	RegexpNode.GroupHead groupHead = new RegexpNode.GroupHead(group);
+	RegexpNode.GroupTail groupTail
+	  = new RegexpNode.GroupTail(group, groupHead);
+
+	RegexpNode oldTail = _groupTail;
+
+	_groupTail = groupTail;
+	
+	RegexpNode body = parseRec(pattern, null);
+
+	_groupTail = oldTail;
+
+	groupHead.setNode(body);
 
 	ch = pattern.read();
 
 	if (ch != ')')
 	  throw error(L.l("expected ')'"));
 
-	return concat(prev, parseRec(pattern, next));
+	return concat(tail, parseRec(pattern, groupHead));
       }
 
     case ')':
       pattern.ungetc(ch);
       
-      return prev;
+      return concat(tail, _groupTail);
 
     case '[':
       next = parseSet(pattern);
 
-      return concat(prev, parseRec(pattern, next));
+      return concat(tail, parseRec(pattern, next));
       
     case '\\':
       next = parseSlash(pattern);
       
-      return concat(prev, parseRec(pattern, next));
+      return concat(tail, parseRec(pattern, next));
       
     default:
       next = parseString(ch, pattern);
       
-      return concat(prev, parseRec(pattern, next));
+      return concat(tail, parseRec(pattern, next));
     }
+  }
+
+  private void expect(char test, int value)
+    throws IllegalRegexpException
+  {
+    if (test != value)
+      throw error(L.l("expected '{0}'", test));
   }
 
   private IllegalRegexpException error(String msg)
@@ -718,8 +786,8 @@ class Regcomp {
    *   {n,m}  -- from n to m
    *   {,m}   -- at most m
    */
-  private void
-  parseBrace(PeekStream pattern, RegexpNode loopNode)
+  /*
+  private void parseBrace(PeekStream pattern, RegexpNode loopNode)
   {
     RegexpNode.Compat loop = (RegexpNode.Compat) loopNode;
     
@@ -744,11 +812,55 @@ class Regcomp {
 
     pattern.ungetc(ch);
   }
+  */
+
+  /**
+   *   Parse the repetition construct.
+   *
+   *   {n}    -- exactly n
+   *   {n,}   -- at least n
+   *   {n,m}  -- from n to m
+   *   {,m}   -- at most m
+   */
+  private RegexpNode parseBrace(PeekStream pattern, RegexpNode node)
+    throws IllegalRegexpException
+  {
+    int ch;
+    int min = 0;
+    int max = Integer.MAX_VALUE;
+
+    while ((ch = pattern.read()) >= '0' && ch <= '9') {
+      min = 10 * min + ch - '0';
+    }
+
+    if (ch == ',') {
+      while ('0' <= (ch = pattern.read()) && ch <= '9') {
+	if (max == Integer.MAX_VALUE)
+	  max = 0;
+	
+	max = 10 * max + ch - '0';
+      }
+    }
+    else
+      max = min;
+
+    if (ch != '}')
+      throw error(L.l("Expected '}'"));
+
+    if (pattern.peek() == '+') {
+      pattern.read();
+      
+      return node.createPossessiveLoop(min, max);
+    }
+    else
+      return node.createLoop(this, min, max);
+  }
 
   static RegexpNode concat(RegexpNode prev, RegexpNode next)
   {
-    if (prev != null)
-      return prev.concat(next);
+    if (prev != null) {
+      return prev.concat(next).getHead();
+    }
     else
       return next;
   }
@@ -770,12 +882,12 @@ class Regcomp {
 
   private String badChar(int ch)
   {
-    if (ch >= 0x20 && ch <= 0x7f)
-      return "`" + (char) ch + "'";
+    if (0x20 <= ch && ch <= 0x7f)
+      return "'" + (char) ch + "'";
     else if ((ch & 0xffff) == 0xffff)
       return "end of expression";
     else
-      return "`" + (char) ch + "' (\\u" + hex(ch) + ")";
+      return "'" + (char) ch + "' (\\u" + hex(ch) + ")";
   }
 
   /**
@@ -863,44 +975,44 @@ class Regcomp {
 	  isChar = true;
 	  break;
 	case 'n':
-      ch = '\n';
-      isChar = true;
-      break;
+	  ch = '\n';
+	  isChar = true;
+	  break;
 	case 't':
 	  ch = '\t';
 	  isChar = true;
 	  break;
-	 case 'r':
-       ch = '\r';
-       isChar = true;
-       break;
-	 case 'f':
-       ch = '\f';
-       isChar = true;
-       break;
+	case 'r':
+	  ch = '\r';
+	  isChar = true;
+	  break;
+	case 'f':
+	  ch = '\f';
+	  isChar = true;
+	  break;
 
-    case 'x':
-      ch = parseHex(pattern);
-      isChar = true;
-      break;
+	case 'x':
+	  ch = parseHex(pattern);
+	  isChar = true;
+	  break;
 
-    case '0': case '1': case '2': case '3':
-    case '4': case '5': case '6': case '7':
-      ch = parseOctal(ch, pattern);
-      isChar = true;
-      break;
+	case '0': case '1': case '2': case '3':
+	case '4': case '5': case '6': case '7':
+	  ch = parseOctal(ch, pattern);
+	  isChar = true;
+	  break;
 
 	default:
 	  isChar = true;
 	}
       }
-	else if (ch == '[') {
-      if (pattern.peek() == ':') {
-        isChar = false;
-        pattern.read();
-        set.mergeOr(parseCharacterClass(pattern));
+      else if (ch == '[') {
+	if (pattern.peek() == ':') {
+	  isChar = false;
+	  pattern.read();
+	  set.mergeOr(parseCharacterClass(pattern));
+	}
       }
-    }
 
       if (isDash && last != -1 && lastdash == -1) {
 	lastdash = last;
@@ -977,22 +1089,22 @@ class Regcomp {
       return RegexpSet.WORD.createNotNode();
 
     case 'b':
-      return RegexpSet.WORD.createNode();
+      return RegexpNode.WORD;
 
     case 'B':
-      return RegexpSet.WORD.createNotNode();
+      return RegexpNode.NOT_WORD;
 
     case 'A':
-      return RegexpNode.create(RegexpNode.RC_BSTRING);
+      return RegexpNode.STRING_BEGIN;
 
     case 'z':
-      return RegexpNode.create(RegexpNode.RC_ESTRING);
+      return RegexpNode.STRING_END;
       
     case 'Z':
-      return RegexpNode.create(RegexpNode.RC_ENSTRING);
+      return RegexpNode.STRING_NEWLINE;
 
     case 'G':
-      return RegexpNode.create(RegexpNode.RC_GSTRING);
+      return RegexpNode.STRING_FIRST;
 
     case 'a':
       return parseString('\u0007', pattern);
@@ -1217,9 +1329,93 @@ class Regcomp {
 
       case '{': case '}': case '(': case ')': case '[': case ']':
       case '+': case '?': case '*': case '.':
-      case '\\': case '$': case '^': case '|':
+      case '$': case '^': case '|':
 	pattern.ungetc(ch);
 	return new RegexpNode.StringNode(cb);
+
+      case '\\':
+	ch = pattern.read();
+	
+	switch (ch) {
+	case -1:
+	  cb.append('\\');
+	  return new RegexpNode.StringNode(cb);
+	  
+	case 's': case 'S': case 'd': case 'D':
+	case 'w': case 'W': case 'b': case 'B':
+	case 'A': case 'z': case 'Z': case 'G':
+	case 'p': case 'P':
+	  pattern.ungetc(ch);
+	  pattern.ungetc('\\');
+	  return new RegexpNode.StringNode(cb);
+
+	case 'a':
+	  cb.append('\u0007');
+	  break;
+	  
+	case 'c':
+	  ch = pattern.read();
+      
+	  ch = Character.toUpperCase(ch);
+	  ch ^= 0x40;
+	  cb.append((char) ch);
+	  break;
+	case 'e':
+	  cb.append('\u001b');
+	  break;
+	case 'f':
+	  cb.append('\f');
+	  break;
+
+	case 'x':
+	  int hex = parseHex(pattern);
+	  cb.append((char) hex);
+	  break;
+      
+	case 'Q':
+	  throw new UnsupportedOperationException();
+	  /*
+	    while ((ch = pattern.read()) >= 0) {
+	    if (ch == '\\' && pattern.peek() == 'E') {
+	    pattern.read();
+	    break;
+	    }
+
+	    last = parseString(ch, pattern);
+	    }
+
+	    return last;
+	  */
+    
+	case '0':
+	  int oct = parseOctal(ch, pattern);
+	  cb.append((char) oct);
+	  break;
+
+	case '1': case '2': case '3': case '4': 
+	case '5': case '6': case '7': case '8': case '9':
+	  if (ch - '0' <= _nGroup) {
+	    pattern.ungetc(ch);
+	    pattern.ungetc('\\');
+	    return new RegexpNode.StringNode(cb);
+	  }
+	  else {
+	    oct = parseOctal(ch, pattern);
+	    cb.append((char) oct);
+	  }
+	  break;
+	case '#':
+	  cb.append('#');
+	  break;
+
+	default:
+	  if ((_flags & STRICT) != 0)
+	    throw error(L.l("unrecognized escape at " + badChar(ch)));
+
+	  cb.append((char) ch);
+	  break;
+	}
+	break;
 
       default:
 	cb.append((char) ch);
@@ -1298,167 +1494,194 @@ class Regcomp {
     case 'C':
       switch (ch2) {
       case 'c':
-        category = Character.CONTROL;
-        break;
+	expect('}', pattern.read());
+	       
+        return isNegated ? RegexpNode.PROP_NOT_Cc : RegexpNode.PROP_Cc;
       case 'f':
-        category = Character.FORMAT;
-        break;
+	expect('}', pattern.read());
+	       
+        return isNegated ? RegexpNode.PROP_NOT_Cf : RegexpNode.PROP_Cf;
       case 'n':
-        category = Character.UNASSIGNED;
-        break;
+	expect('}', pattern.read());
+	       
+        return isNegated ? RegexpNode.PROP_NOT_Cn : RegexpNode.PROP_Cn;
       case 'o':
-        category = Character.PRIVATE_USE;
-        break;
+	expect('}', pattern.read());
+	       
+        return isNegated ? RegexpNode.PROP_NOT_Co : RegexpNode.PROP_Co;
       case 's':
-        category = Character.SURROGATE;
-        break;
+	expect('}', pattern.read());
+	       
+        return isNegated ? RegexpNode.PROP_NOT_Cs : RegexpNode.PROP_Cs;
       case '}':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NC);
-        else
-          return RegexpNode.create(RegexpNode.RC_C);
+        return isNegated ? RegexpNode.PROP_NOT_C : RegexpNode.PROP_C;
+	
       default:
-        throw new IllegalRegexpException("invalid Unicode category " +
-                badChar(ch) + "" + badChar(ch2));
+        throw error(L.l("invalid Unicode category "
+			+ badChar(ch) + "" + badChar(ch2)));
       }
-      break;
+
     case 'L':
       switch (ch2) {
-        case 'l':
-          category = Character.LOWERCASE_LETTER;
-          break;
-        case 'm':
-          category = Character.MODIFIER_LETTER;
-          break;
-        case 'o':
-          category = Character.OTHER_LETTER;
-          break;
-        case 't':
-          category = Character.TITLECASE_LETTER;
-          break;
-        case 'u':
-          category = Character.UPPERCASE_LETTER;
-          break;
-        case '}':
-          if (isNegated)
-            return RegexpNode.create(RegexpNode.RC_NL);
-          else
-            return RegexpNode.create(RegexpNode.RC_L);
-        default:
-          throw new IllegalRegexpException("invalid Unicode category " +
-                  badChar(ch) + "" + badChar(ch2));
+      case 'l':
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Ll : RegexpNode.PROP_Ll;
+      case 'm':
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Lm : RegexpNode.PROP_Lm;
+      case 'o':
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Lo : RegexpNode.PROP_Lo;
+      case 't':
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Lt : RegexpNode.PROP_Lt;
+      case 'u':
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Lu : RegexpNode.PROP_Lu;
+      case '}':
+	if (isNegated)
+	  return RegexpNode.create(RegexpNode.RC_NL);
+	else
+	  return RegexpNode.create(RegexpNode.RC_L);
+      default:
+	throw error(L.l("invalid Unicode category "
+			+ badChar(ch) + "" + badChar(ch2)));
       }
-      break;
     case 'M':
       switch (ch2) {
       case 'c':
-        category = Character.COMBINING_SPACING_MARK;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Lu : RegexpNode.PROP_Lu;
       case 'e':
-        category = Character.ENCLOSING_MARK;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Lu : RegexpNode.PROP_Lu;
       case 'n':
-        category = Character.NON_SPACING_MARK;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Lu : RegexpNode.PROP_Lu;
       case '}':
         if (isNegated)
           return RegexpNode.create(RegexpNode.RC_NM);
         else
           return RegexpNode.create(RegexpNode.RC_M);
       default:
-        throw new IllegalRegexpException("invalid Unicode category " +
-                badChar(ch) + "" + badChar(ch2));
+        throw error(L.l("invalid Unicode category " +
+			badChar(ch) + "" + badChar(ch2)));
       }
-      break;
+
     case 'N':
       switch (ch2) {
       case 'd':
-        category = Character.DECIMAL_DIGIT_NUMBER;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Nd : RegexpNode.PROP_Nd;
       case 'l':
-        category = Character.LETTER_NUMBER;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Nl : RegexpNode.PROP_Nl;
       case 'o':
-        category = Character.OTHER_NUMBER;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_No : RegexpNode.PROP_No;
       case '}':
         if (isNegated)
           return RegexpNode.create(RegexpNode.RC_NN);
         else
           return RegexpNode.create(RegexpNode.RC_N);
       default:
-        throw new IllegalRegexpException("invalid Unicode category " +
-                badChar(ch) + "" + badChar(ch2));
+        throw error(L.l("invalid Unicode category " +
+			badChar(ch) + "" + badChar(ch2)));
       }
-      break;
+
     case 'P':
       switch (ch2) {
       case 'c':
-        category = Character.CONNECTOR_PUNCTUATION;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Pc : RegexpNode.PROP_Pc;
       case 'd':
-        category = Character.DASH_PUNCTUATION;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Pd : RegexpNode.PROP_Pd;
       case 'e':
-        category = Character.END_PUNCTUATION;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Pe : RegexpNode.PROP_Pe;
       case 'f':
-        category = Character.FINAL_QUOTE_PUNCTUATION;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Pf : RegexpNode.PROP_Pf;
       case 'i':
-        category = Character.INITIAL_QUOTE_PUNCTUATION;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Pi : RegexpNode.PROP_Pi;
       case 'o':
-        category = Character.OTHER_PUNCTUATION;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Po : RegexpNode.PROP_Po;
       case 's':
-        category = Character.START_PUNCTUATION;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Ps : RegexpNode.PROP_Ps;
       case '}':
         if (isNegated)
           return RegexpNode.create(RegexpNode.RC_NP);
         else
           return RegexpNode.create(RegexpNode.RC_P);
       default:
-        throw new IllegalRegexpException("invalid Unicode category " +
-                badChar(ch) + "" + badChar(ch2));
+        throw error(L.l("invalid Unicode category "
+			+ badChar(ch) + "" + badChar(ch2)));
       }
-      break;
+
     case 'S':
       switch (ch2) {
       case 'c':
-        category = Character.CURRENCY_SYMBOL;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Sc : RegexpNode.PROP_Sc;
       case 'k':
-        category = Character.MODIFIER_SYMBOL;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Sk : RegexpNode.PROP_Sk;
       case 'm':
-        category = Character.MATH_SYMBOL;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_Sm : RegexpNode.PROP_Sm;
       case 'o':
-        category = Character.OTHER_SYMBOL;
-        break;
+	expect('}', pattern.read());
+	       
+	return isNegated ? RegexpNode.PROP_NOT_So : RegexpNode.PROP_So;
       case '}':
         if (isNegated)
           return RegexpNode.create(RegexpNode.RC_NS);
         else
           return RegexpNode.create(RegexpNode.RC_S);
       default:
-        throw new IllegalRegexpException("invalid Unicode category " +
-                badChar(ch) + "" + badChar(ch2));
+        throw error(L.l("invalid Unicode category "
+			+ badChar(ch) + "" + badChar(ch2)));
       }
-      break;
+
     case 'Z':
       switch (ch2) {
         case 'l':
-          category = Character.LINE_SEPARATOR;
-          break;
+	  expect('}', pattern.read());
+	       
+	  return isNegated ? RegexpNode.PROP_NOT_Zl : RegexpNode.PROP_Zl;
         case 'p':
-          category = Character.PARAGRAPH_SEPARATOR;
-          break;
+	  expect('}', pattern.read());
+	       
+	  return isNegated ? RegexpNode.PROP_NOT_Zp : RegexpNode.PROP_Zp;
         case 's':
-          category = Character.SPACE_SEPARATOR;
-          break;
+	  expect('}', pattern.read());
+	       
+	  return isNegated ? RegexpNode.PROP_NOT_Zs : RegexpNode.PROP_Zs;
         case '}':
           if (isNegated)
             return RegexpNode.create(RegexpNode.RC_NZ);
@@ -1468,12 +1691,10 @@ class Regcomp {
           throw new IllegalRegexpException("invalid Unicode category " +
                   badChar(ch) + "" + badChar(ch2));
       }
-      break;
     }
 
     if ((ch = pattern.read()) != '}')
-      throw new IllegalRegexpException("expected '}' at " +
-              badChar(ch));
+      throw error(L.l("expected '}' at " + badChar(ch)));
     
     RegexpNode.Compat node;
 

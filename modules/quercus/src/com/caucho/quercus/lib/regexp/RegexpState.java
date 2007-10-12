@@ -107,28 +107,36 @@ public class RegexpState {
     _nGroup = _regexp._nGroup;
     _groupBegin = new int[_nGroup];
     _groupEnd = new int[_nGroup];
+
+    _nLoop = _regexp._nLoop;
+    _loopCount = new int[_nLoop];
   }
 
   public boolean find()
   {
-    if (_subject.length() < _first)
-      return false;
-    
-    //_groupState.clear();
+    int minLength = _regexp._minLength;
+    int length = _subject.length();
 
-    int offset = _regexp._prog.match(_subject, _first, this);
+    for (; _first + minLength <= length; _first++) {
+      clearGroup();
 
-    if (offset >= 0) {
-      setBegin(0, _first);
-      setEnd(0, offset);
+      int offset = _regexp._prog.match(_subject, _first, this);
+
+      if (offset >= 0) {
+	setBegin(0, _first);
+	setEnd(0, offset);
+
+	if (_first < offset)
+	  _first = offset;
+	else
+	  _first += 1;
       
-      _first = offset;
-      return true;
+	return true;
+      }
     }
-    else {
-      _first = _subject.length() + 1;
-      return false;
-    }
+
+    _first = _subject.length() + 1;
+    return false;
   }
 
   public boolean find(StringValue subject)
@@ -143,7 +151,7 @@ public class RegexpState {
   {
     _subject = subject;
     
-    _groupState.clear();
+    clearGroup();
 
     return _regexp._prog.match(_subject, first, this);
   }
@@ -153,7 +161,7 @@ public class RegexpState {
    */
   public int exec(StringValue subject, int start)
   { 
-    _groupState.clear();
+    clearGroup();
     
     _start = start;
     _first = start;
@@ -165,7 +173,7 @@ public class RegexpState {
       int value = _regexp._prog.match(subject, start, this);
 
       if (value >= 0) {
-	setBegin(0, _first);
+	setBegin(0, start);
 	setEnd(0, value);
     
 	_groupState.setMatched(0);
@@ -175,6 +183,11 @@ public class RegexpState {
     }
 
     return -1;
+  }
+
+  private void clearGroup()
+  {
+    _groupLength = 0;
   }
   
   void setGroupState(GroupState newState)
@@ -207,14 +220,21 @@ public class RegexpState {
   public void setBegin(int i, int v)
   {
     _groupBegin[i] = v;
-    
-    if (i > 0)
-      _groupLength = i;
   }
 
   public void setEnd(int i, int v)
   {
     _groupEnd[i] = v;
+  }
+
+  public int getLength()
+  {
+    return _groupLength;
+  }
+
+  public void setLength(int length)
+  {
+    _groupLength = length;
   }
 
   public int length()
