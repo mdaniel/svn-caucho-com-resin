@@ -161,20 +161,31 @@ public class SessionServer extends AbstractServer
   {
     if (_remoteHomeView != null)
       return _remoteHomeView;
-    else if (_remoteObject != null) // XXX: always new?
-      return _remoteObject;
-    else if (_isInitRemote) {
-      return null;
-    }
-    else {
+
+    return getRemoteObject30();
+  }
+
+  /**
+   * Returns the EJBRemote stub for the container
+   */
+  @Override
+  public Object getRemoteObject30()
+  {
+    Object obj = null;
+
+    if (_remoteObject != null) // XXX: always new?
+      obj = _remoteObject;
+    else if (! _isInitRemote) {
       _isInitRemote = true;
 
       _remoteObject = _homeContext._caucho_newRemoteInstance();
 
       _isInitRemote = false;
 
-      return _remoteObject;
+      obj = _remoteObject;
     }
+
+    return obj;
   }
 
   /**
