@@ -167,6 +167,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _loader = Thread.currentThread().getContextClassLoader();
 
     _jClassLoader = JClassLoaderWrapper.create(_loader);
+
+    // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
+    _ejbConfig.getEJBManager().getTransactionManager().setEJB3(isEJB3());
   }
 
   public String getAroundInvokeMethodName()
@@ -920,7 +923,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   {
     try {
       _isInit = true;
-      
+
       initIntrospect();
 
       assembleBeanMethods();

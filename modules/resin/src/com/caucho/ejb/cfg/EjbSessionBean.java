@@ -220,7 +220,7 @@ public class EjbSessionBean extends EjbBean {
         && ! type.isAnnotationPresent(Stateless.class))
       return;
 
-    /* XXX: ejb/0f6d: bean with local and remote interfaces
+    /* TCK: ejb/0f6d: bean with local and remote interfaces
     if (_localHome != null || _localList.size() != 0
         || _remoteHome != null || _remoteList.size() != 0)
       return;

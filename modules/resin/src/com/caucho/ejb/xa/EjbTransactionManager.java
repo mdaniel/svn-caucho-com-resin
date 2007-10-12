@@ -37,6 +37,7 @@ import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 
 import javax.ejb.EJBException;
+import javax.ejb.EJBTransactionRequiredException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.Transaction;
@@ -51,7 +52,7 @@ import java.util.logging.Logger;
  *
  * <p>Each protocol will extend the container to override Handle creation.
  */
-public class EjbTransactionManager {
+public class EjbTransactionManager implements java.io.Serializable {
   private static final L10N L = new L10N(EjbTransactionManager.class);
   private static final Logger log = Log.open(EjbTransactionManager.class);
 
@@ -82,6 +83,8 @@ public class EjbTransactionManager {
   private long _transactionTimeout = 0;
 
   private boolean _isClosed;
+
+  private boolean _isEJB3;
 
   /**
    * Create a server with the given prefix name.
@@ -119,6 +122,21 @@ public class EjbTransactionManager {
     return _ejbManager;
   }
 
+  /**
+   * Sets EJB 3.0 for throwing expected exceptions.
+   */
+  public void setEJB3(boolean isEJB3)
+  {
+    _isEJB3 = isEJB3;
+  }
+
+  /**
+   * Returns true if it is EJB 3.0
+   */
+  public boolean isEJB3()
+  {
+    return _isEJB3;
+  }
 
   /**
    * Sets the Resin isolation.
@@ -504,8 +522,14 @@ public class EjbTransactionManager {
     try {
       Transaction trans = _transactionManager.getTransaction();
 
-      if (trans == null)
-        throw new EJBException("Transaction required in 'Mandatory' method");
+      if (trans == null) {
+        // XXX: check ejb/02a0
+        // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
+        if (isEJB3())
+          throw new EJBTransactionRequiredException("Transaction required in 'Mandatory' method");
+        else
+          throw new EJBException("Transaction required in 'Mandatory' method");
+      }
 
       return beginRequired();
     } catch (Exception e) {
