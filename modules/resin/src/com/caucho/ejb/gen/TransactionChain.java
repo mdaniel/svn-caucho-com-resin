@@ -183,7 +183,8 @@ public class TransactionChain extends FilterCallChain {
       out.println("}");
     }
 
-    out.println("throw (com.caucho.ejb.EJBExceptionWrapper) e;");
+    // ejb/02b1
+    out.println("throw (javax.ejb.EJBException) e;");
 
     out.popDepth();
 
@@ -231,12 +232,12 @@ public class TransactionChain extends FilterCallChain {
 
     for (JClass cl : exnTypes) {
       if (! cl.isAssignableTo(Exception.class)) {
-	// XXX:
-	// hessian/3600
-	log.info(cl + " is not handled by EJB");
-	continue;
+        // XXX:
+        // hessian/3600
+        log.info(cl + " is not handled by EJB");
+        continue;
       }
-      
+
       out.println("if (e instanceof " + cl.getName() + ") {");
       out.pushDepth();
 

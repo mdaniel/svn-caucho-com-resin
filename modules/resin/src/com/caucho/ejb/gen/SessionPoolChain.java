@@ -102,11 +102,20 @@ public class SessionPoolChain extends FilterCallChain {
 
     out.popDepth();
 
+    out.println("} catch (javax.ejb.EJBException e) {");
+    out.pushDepth();
+
+    // XXX: ejb/02d1 vs TCK
+    out.println("ptr = null;");
+
+    out.println("throw e;");
+
+    out.popDepth();
+
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();
 
-    // ejb/02d1
-    out.println("ptr = null;");
+    // XXX TCK, needs QA out.println("ptr = null;");
 
     out.println("throw e;");
 
@@ -219,13 +228,7 @@ public class SessionPoolChain extends FilterCallChain {
   {
     out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
     out.pushDepth();
-
-    for (JClass cl : _apiMethod.getExceptionTypes()) {
-      out.println("if (e.getCause() instanceof " + cl.getName() + ")");
-      out.println("  throw (" + cl.getName() + ") e.getCause();");
-    }
-
-    out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
+    out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e.getCause());");
     out.popDepth();
   }
 

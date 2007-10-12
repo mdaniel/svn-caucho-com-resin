@@ -377,12 +377,17 @@ public class SessionBean extends ClassComponent {
 
     out.popDepth();
 
+    /* ejb/0fba
+
     // ejb/0f66
     if (_bean.getInterceptors().size() > 0) {
       out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
       out.println("  throw e;");
     }
+    */
 
+    out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
+    out.println("  throw e;");
     out.println("} catch (RuntimeException e) {");
     out.println("  throw e;");
     out.println("} catch (Throwable e) {");
