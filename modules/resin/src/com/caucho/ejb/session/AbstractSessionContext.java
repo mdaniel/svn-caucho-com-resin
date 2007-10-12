@@ -44,7 +44,7 @@ abstract public class AbstractSessionContext extends AbstractContext
   implements SessionContext
 {
   protected final SessionServer _server;
-  
+
   private String _primaryKey;
   private EJBObject _remote;
 
@@ -52,7 +52,7 @@ abstract public class AbstractSessionContext extends AbstractContext
   {
     _server = server;
   }
-  
+
   /**
    * Returns the owning server.
    */
@@ -94,17 +94,18 @@ abstract public class AbstractSessionContext extends AbstractContext
 
     return _primaryKey;
   }
-  
+
   public <T> T getBusinessObject(Class<T> businessInterface)
   {
-    throw new UnsupportedOperationException();
+    // XXX: it needs to check multiple business interfaces.
+    return (T) getSessionServer().getRemoteObject30();
   }
-  
+
   public Class getInvokedBusinessInterface()
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public MessageContext getMessageContext()
   {
     throw new UnsupportedOperationException();

@@ -614,6 +614,14 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
+   * Returns the 3.0 remote stub for the container
+   */
+  public Object getRemoteObject30()
+  {
+    throw new UnsupportedOperationException("3.0 remote interface not found");
+  }
+
+  /**
    * Returns the EJBHome stub for the container
    */
   public Object getClientLocalHome()
