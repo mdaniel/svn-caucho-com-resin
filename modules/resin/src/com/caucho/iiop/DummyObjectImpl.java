@@ -36,7 +36,7 @@ public class DummyObjectImpl extends org.omg.CORBA.portable.ObjectImpl {
     _ior = ior;
   }
 
-  IOR getIOR()
+  public IOR getIOR()
   {
     return _ior;
   }
