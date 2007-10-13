@@ -43,7 +43,7 @@ public class IiopSkeleton extends DummyObjectImpl {
   private static final L10N L = new L10N(IiopSkeleton.class);
   private static final Logger log
     = Logger.getLogger(IiopSkeleton.class.getName());
-  
+
   private static HashMap<String,String> _knownClasses;
 
   private ClassLoader _loader;
@@ -52,14 +52,14 @@ public class IiopSkeleton extends DummyObjectImpl {
 
   private Object _obj;
 
-  IiopSkeleton(Object obj, ArrayList<Class> apiList, ClassLoader loader,
-	       String host, int port, String oid)
+  public IiopSkeleton(Object obj, ArrayList<Class> apiList, ClassLoader loader,
+                      String host, int port, String oid)
   {
     super(new IOR(apiList.get(0), host, port, oid));
-    
+
     if (obj == null)
       throw new NullPointerException();
-    
+
     _obj = obj;
     _apiList = apiList;
     _remoteClass = _apiList.get(0);
@@ -70,12 +70,12 @@ public class IiopSkeleton extends DummyObjectImpl {
   {
     return _obj;
   }
-  
+
   ArrayList<Class> getApiList()
   {
     return _apiList;
   }
-  
+
   void service(Object obj, IiopReader reader, IiopWriter writer)
     throws Throwable
   {
@@ -89,16 +89,16 @@ public class IiopSkeleton extends DummyObjectImpl {
 
     if ((method = getMethod(op)) != null) {
       boolean isJava = ! _remoteClass.getName().startsWith("com.caucho.iiop");
-      
+
       skelMethod = new SkeletonMethod(this, method, isJava);
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
       try {
-	thread.setContextClassLoader(_loader);
-	
-	skelMethod.service(obj, reader, writer);
+        thread.setContextClassLoader(_loader);
+
+        skelMethod.service(obj, reader, writer);
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     }
     else if (serviceSystemMethod(obj, op, reader, writer)) {
@@ -113,10 +113,10 @@ public class IiopSkeleton extends DummyObjectImpl {
   {
     for (int j = 0; j < _apiList.size(); j++) {
       Method []methods = _apiList.get(j).getMethods();
-      
+
       for (int i = 0; i < methods.length; i++)
-	if (methods[i].getName().equals(name))
-	  return methods[i];
+        if (methods[i].getName().equals(name))
+          return methods[i];
     }
 
     return null;
@@ -146,11 +146,11 @@ public class IiopSkeleton extends DummyObjectImpl {
       boolean value = isA(cl, className);
 
       if (log.isLoggable(Level.FINE))
-	log.fine("IIOP _is_a: " + obj.getClass() + " " + className + " " + value);
+        log.fine("IIOP _is_a: " + obj.getClass() + " " + className + " " + value);
 
       writer.startReplyOk(reader.getRequestId());
       writer.write_boolean(value);
-      
+
       return true;
     }
     else
@@ -161,12 +161,12 @@ public class IiopSkeleton extends DummyObjectImpl {
   {
     for (; cl != null; cl = cl.getSuperclass()) {
       if (cl.getName().equals(className))
-	return true;
+        return true;
 
       Class []ifs = cl.getInterfaces();
       for (int i = 0; i < ifs.length; i++) {
-	if (isA(ifs[i], className))
-	  return true;
+        if (isA(ifs[i], className))
+          return true;
       }
     }
 
@@ -181,6 +181,6 @@ public class IiopSkeleton extends DummyObjectImpl {
   static {
     _knownClasses = new HashMap<String,String>();
     _knownClasses.put("IDL:omg.org/CosNaming/NamingContext:1.0",
-                     "org.omg.CosNaming.NamingContext");
+                      "org.omg.CosNaming.NamingContext");
   }
 }

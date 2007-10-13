@@ -30,6 +30,7 @@
 package com.caucho.iiop;
 
 import com.caucho.iiop.marshal.Marshal;
+import com.caucho.iiop.orb.EjbSessionObjectMarshal;
 import com.caucho.iiop.orb.MarshalFactory;
 
 import java.lang.reflect.InvocationTargetException;
@@ -40,10 +41,10 @@ import java.rmi.RemoteException;
 public class SkeletonMethod {
   private static final Logger log
     = Logger.getLogger(SkeletonMethod.class.getName());
-  
+
   private IiopSkeleton _skeleton;
   private Method _method;
-  
+
   private Marshal []_marshalArgs;
   private Marshal _marshalReturn;
 
@@ -57,7 +58,7 @@ public class SkeletonMethod {
     MarshalFactory factory = MarshalFactory.create();
 
     // System.out.println("M: " + method);
-    
+
     Class []paramTypes = method.getParameterTypes();
 
     _marshalArgs = new Marshal[paramTypes.length];
@@ -88,19 +89,29 @@ public class SkeletonMethod {
 
       writer.startReplyOk(reader.getRequestId());
 
+      // XXX
+      // If the method return type is a EJB 3.0 remote interface, it is difficult to
+      // find the correct marshaller. Since EJB 3.0 remote interfaces do not need to
+      // have well-known superinterfaces, the method return type might not help.
+      // For now, we rely on the result object type.
+
+      // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getBusinessObjectRemote1
+      if (result != null && (result instanceof com.caucho.ejb.session.SessionObject))
+        _marshalReturn = new EjbSessionObjectMarshal(_method, _skeleton);
+
       _marshalReturn.marshal(writer, result);
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
 
       if (cause instanceof RemoteException)
-	throw cause;
+        throw cause;
 
       for (int i = 0; i < _exnTypes.length; i++) {
-	if (_exnTypes[i].isAssignableFrom(cause.getClass()))
-	  throw cause;
-	
+        if (_exnTypes[i].isAssignableFrom(cause.getClass()))
+          throw cause;
+
       }
-      
+
       throw new RemoteException(cause.toString(), cause);
     }
   }

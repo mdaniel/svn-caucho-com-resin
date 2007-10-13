@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.lang.reflect.Method;
 
 import com.caucho.iiop.*;
+import com.caucho.iiop.orb.EjbSessionObjectMarshal;
+import com.caucho.iiop.marshal.AnyMarshal;
 import com.caucho.iiop.marshal.Marshal;
 import com.caucho.iiop.RemoteUserException;
 
@@ -45,11 +47,13 @@ public class MethodMarshal {
   private Marshal _ret;
 
   private Class []_exceptionTypes;
-  
+  private Method _method;
+
   MethodMarshal(MarshalFactory factory, Method method)
   {
+    _method = method;
     _name = method.getName();
-    
+
     Class []params = method.getParameterTypes();
 
     boolean isIdl = false;
@@ -62,12 +66,12 @@ public class MethodMarshal {
     _ret = factory.create(method.getReturnType(), isIdl);
 
     ArrayList<Class> exnList = new ArrayList<Class>();
-    
+
     for (Class exn : method.getExceptionTypes()) {
       if (RuntimeException.class.isAssignableFrom(exn))
-	continue;
+        continue;
       if (Error.class.isAssignableFrom(exn))
-	continue;
+        continue;
 
       exnList.add(exn);
     }
@@ -77,43 +81,48 @@ public class MethodMarshal {
   }
 
   public Object invoke(org.omg.CORBA.portable.ObjectImpl obj,
-		       Object []args)
+                       Object []args)
     throws Throwable
   {
     org.omg.CORBA_2_3.portable.InputStream is = null;
-    
+
     try {
       org.omg.CORBA_2_3.portable.OutputStream os
-	= ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_name, true));
+        = ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_name, true));
 
       // ejb/1331
       if (_args.length > 0)
-	((IiopWriter) os).alignMethodArgs();
-    
+        ((IiopWriter) os).alignMethodArgs();
+
       for (int i = 0; i < _args.length; i++) {
-	_args[i].marshal(os, args[i]);
+        _args[i].marshal(os, args[i]);
       }
 
       is = ((org.omg.CORBA_2_3.portable.InputStream) obj._invoke(os));
 
+      // XXX TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getBusinessObjectRemote1
+      // See also: SkeletonMethod.service()
+      if (_ret instanceof AnyMarshal)
+        _ret = new EjbSessionObjectMarshal(_method, null);
+
       return _ret.unmarshal(is);
     } catch (RemoteUserException e) {
       // unwrap remote exceptions
-      
+
       Throwable cause = e.getCause();
 
       if (cause instanceof RuntimeException)
-	throw cause;
+        throw cause;
 
       for (int i = 0; i < _exceptionTypes.length; i++) {
-	if (_exceptionTypes[i].isAssignableFrom(cause.getClass()))
-	  throw cause;
+        if (_exceptionTypes[i].isAssignableFrom(cause.getClass()))
+          throw cause;
       }
 
       throw e;
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
   }
 }
