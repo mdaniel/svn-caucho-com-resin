@@ -270,7 +270,7 @@ public class CauchoRegexpModule
               regs.put(LongValue.create(j), empty);
             }
 
-            StringValue name = regexpState.getGroupName(i);
+            StringValue name = regexp.getGroupName(i);
             if (name != null)
               regs.put(name, group);
 

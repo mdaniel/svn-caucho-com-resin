@@ -305,6 +305,11 @@ public class Regexp {
   {
     return _groupState.copy();
   }
+
+  public StringValue getGroupName(int i)
+  {
+    return _groupNames[i];
+  }
   
   public int getBegin(int i)
   {

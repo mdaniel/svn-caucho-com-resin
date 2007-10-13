@@ -179,7 +179,7 @@ class RegexpSet {
     if (_range.size() == 0)
       return new RegexpNode.AsciiSet(_bitset);
     else
-      throw new UnsupportedOperationException();
+      return new RegexpNode.Set(_bitset, _range);
   }
 
   RegexpNode createNotNode()
@@ -187,7 +187,7 @@ class RegexpSet {
     if (_range.size() == 0)
       return new RegexpNode.AsciiNotSet(_bitset);
     else
-      throw new UnsupportedOperationException();
+      return new RegexpNode.NotSet(_bitset, _range);
   }
 
   static {

@@ -165,7 +165,7 @@ class RegexpNode {
   static RegexpNode NULL = RegexpNode.create(RC_NULL);
   
   static final RegexpNode N_END = new End();
-  static final RegexpNode DOT;
+  
   static final RegexpNode ANY_CHAR;
 
   RegexpNode _rest;
@@ -269,11 +269,27 @@ class RegexpNode {
   }
 
   /**
+   * Any loop
+   */
+  RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
+  {
+    return new LoopHeadUngreedy(parser, this, min, max);
+  }
+
+  /**
    * Possessive loop
    */
   RegexpNode createPossessiveLoop(int min, int max)
   {
     return new PossessiveLoop(this, min, max);
+  }
+
+  /**
+   * Create an or expression
+   */
+  RegexpNode createOr(RegexpNode node)
+  {
+    return new Or(getHead(), node.getHead());
   }
 
   //
@@ -1481,6 +1497,43 @@ class RegexpNode {
 	return -1;
     }
   }
+
+  static final AnchorBegin ANCHOR_BEGIN = new AnchorBegin();
+  static final AnchorEnd ANCHOR_END = new AnchorEnd();
+  
+  private static class AnchorBegin extends RegexpNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset == 0 || string.charAt(offset - 1) == '\n')
+	  return offset;
+	else
+	  return -1;
+    }
+  }
+  
+  private static class AnchorEnd extends RegexpNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset == string.length() || string.charAt(offset) == '\n')
+	  return offset;
+	else
+	  return -1;
+    }
+  }
+
+  static final RegexpNode DIGIT = RegexpSet.DIGIT.createNode();
+  static final RegexpNode NOT_DIGIT = RegexpSet.DIGIT.createNotNode();
+
+  static final RegexpNode DOT = RegexpSet.DOT.createNode();
+  static final RegexpNode NOT_DOT = RegexpSet.DOT.createNotNode();
+
+  static final RegexpNode SPACE = RegexpSet.SPACE.createNode();
+  static final RegexpNode NOT_SPACE = RegexpSet.SPACE.createNotNode();
+
+  static final RegexpNode S_WORD = RegexpSet.WORD.createNode();
+  static final RegexpNode NOT_S_WORD = RegexpSet.WORD.createNotNode();
     
   static class AsciiSet extends AbstractCharNode {
     private final boolean []_set;
@@ -1598,6 +1651,12 @@ class RegexpNode {
 	return new LoopHead(parser, this, min, max);
     }
 
+    @Override
+    int minLength()
+    {
+      return _min;
+    }
+
     //
     // match functions
     //
@@ -1640,9 +1699,12 @@ class RegexpNode {
     private final RegexpNode _head;
     private RegexpNode _next;
 
-    Concat(RegexpNode prev, RegexpNode next)
+    Concat(RegexpNode head, RegexpNode next)
     {
-      _head = prev;
+      if (head == null || next == null)
+	throw new NullPointerException();
+      
+      _head = head;
       _next = next;
     }
 
@@ -1679,6 +1741,143 @@ class RegexpNode {
 	return -1;
       else
 	return _next.match(string, offset, state);
+    }
+  }
+  
+  static class ConditionalHead extends RegexpNode {
+    private RegexpNode _first;
+    private RegexpNode _second;
+    private RegexpNode _tail;
+    private final int _group;
+
+    ConditionalHead(int group)
+    {
+      _group = group;
+
+      _tail = new ConditionalTail(this);
+    }
+
+    void setFirst(RegexpNode first)
+    {
+      _first = first;
+    }
+
+    void setSecond(RegexpNode second)
+    {
+      _second = second;
+    }
+
+    void setTail(RegexpNode tail)
+    {
+      _tail = tail;
+    }
+
+    RegexpNode getTail()
+    {
+      return _tail;
+    }
+
+    @Override
+    RegexpNode concat(RegexpNode next)
+    {
+      _tail.concat(next);
+
+      return this;
+    }
+
+    @Override
+    RegexpNode createLoop(Regcomp parser, int min, int max)
+    {
+      return _tail.createLoop(parser, min, max);
+    }
+
+    /**
+     * Create an or expression
+     */
+    @Override
+    RegexpNode createOr(RegexpNode node)
+    {
+      return _tail.createOr(node);
+    }
+    
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      int begin = state.getBegin(_group);
+      int end = state.getEnd(_group);
+
+      if (_group <= state.getLength() && begin <= end) {
+	return _first.match(string, offset, state);
+      }
+      else if (_second != null)
+	return _second.match(string, offset, state);
+      else
+	return _tail.match(string, offset, state);
+    }
+  }
+  
+  static class ConditionalTail extends RegexpNode {
+    private RegexpNode _head;
+    private RegexpNode _next;
+
+    ConditionalTail(ConditionalHead head)
+    {
+      _next = N_END;
+      _head = head;
+      head.setTail(this);
+    }
+
+    RegexpNode getHead()
+    {
+      return _head;
+    }
+
+    @Override
+    RegexpNode concat(RegexpNode next)
+    {
+      if (_next != null)
+	_next = _next.concat(next);
+      else
+	_next = next;
+
+      return _head;
+    }
+
+    @Override
+    RegexpNode createLoop(Regcomp parser, int min, int max)
+    {
+      LoopHead head = new LoopHead(parser, _head, min, max);
+
+      _next = _next.concat(head.getTail());
+      
+      return head.getTail();
+    }
+
+    @Override
+    RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
+    {
+      LoopHeadUngreedy head = new LoopHeadUngreedy(parser, _head, min, max);
+
+      _next = _next.concat(head.getTail());
+      
+      return head.getTail();
+    }
+
+    /**
+     * Create an or expression
+     */
+    @Override
+    RegexpNode createOr(RegexpNode node)
+    {
+      _next = _next.createOr(node);
+
+      return getHead();
+    }
+    
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      return _next.match(string, offset, state);
     }
   }
   
@@ -1761,6 +1960,39 @@ class RegexpNode {
 
       return this;
     }
+
+    @Override
+    RegexpNode createLoop(Regcomp parser, int min, int max)
+    {
+      return _tail.createLoop(parser, min, max);
+    }
+
+    @Override
+    RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
+    {
+      return _tail.createLoopUngreedy(parser, min, max);
+    }
+
+    /**
+     * Create an or expression
+     */
+    @Override
+    RegexpNode createOr(RegexpNode node)
+    {
+      return _tail.createOr(node);
+    }
+
+    @Override
+    int minLength()
+    {
+      return _node.minLength();
+    }
+
+    @Override
+    String prefix()
+    {
+      return _node.prefix();
+    }
     
     @Override
     int match(StringValue string, int offset, RegexpState state)
@@ -1805,7 +2037,7 @@ class RegexpNode {
       else
 	_next = next;
 
-      return this;
+      return _head;
     }
 
     @Override
@@ -1817,6 +2049,33 @@ class RegexpNode {
       
       return head.getTail();
     }
+
+    @Override
+    RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
+    {
+      LoopHeadUngreedy head = new LoopHeadUngreedy(parser, _head, min, max);
+
+      _next = _next.concat(head.getTail());
+      
+      return head.getTail();
+    }
+
+    /**
+     * Create an or expression
+     */
+    @Override
+    RegexpNode createOr(RegexpNode node)
+    {
+      _next = _next.createOr(node);
+
+      return getHead();
+    }
+
+    @Override
+    int minLength()
+    {
+      return _next.minLength();
+    }
     
     @Override
     int match(StringValue string, int offset, RegexpState state)
@@ -1824,8 +2083,10 @@ class RegexpNode {
       int oldEnd = state.getEnd(_group);
       int oldLength = state.getLength();
       
-      state.setEnd(_group, offset);
-      state.setLength(_group);
+      if (_group > 0) {
+	state.setEnd(_group, offset);
+	state.setLength(_group);
+      }
 
       int tail = _next.match(string, offset, state);
 
@@ -1859,6 +2120,86 @@ class RegexpNode {
 
       if (string.regionMatches(offset, string, begin, length))
 	return offset + length;
+      else
+	return -1;
+    }
+  }
+  
+  static class Lookahead extends RegexpNode {
+    private final RegexpNode _head;
+
+    Lookahead(RegexpNode head)
+    {
+      _head = head;
+    }
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (_head.match(string, offset, state) >= 0)
+	return offset;
+      else
+	return -1;
+    }
+  }
+  
+  static class NotLookahead extends RegexpNode {
+    private final RegexpNode _head;
+
+    NotLookahead(RegexpNode head)
+    {
+      _head = head;
+    }
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (_head.match(string, offset, state) < 0)
+	return offset;
+      else
+	return -1;
+    }
+  }
+  
+  static class Lookbehind extends RegexpNode {
+    private final RegexpNode _head;
+
+    Lookbehind(RegexpNode head)
+    {
+      _head = head;
+    }
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      int length = _head.minLength();
+
+      if (offset < length)
+	return -1;
+      else if (_head.match(string, offset - length, state) >= 0)
+	return offset;
+      else
+	return -1;
+    }
+  }
+  
+  static class NotLookbehind extends RegexpNode {
+    private final RegexpNode _head;
+
+    NotLookbehind(RegexpNode head)
+    {
+      _head = head;
+    }
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      int length = _head.minLength();
+
+      if (offset < length)
+	return offset;
+      else if (_head.match(string, offset - length, state) < 0)
+	return offset;
       else
 	return -1;
     }
@@ -1907,6 +2248,12 @@ class RegexpNode {
       }
       else
 	return new LoopHead(parser, this, min, max);
+    }
+
+    @Override
+    int minLength()
+    {
+      return _min * _node.minLength() + _tail.minLength();
     }
 
     //
@@ -1991,6 +2338,144 @@ class RegexpNode {
       
       state._loopCount[_index] = i;
       return _next.match(string, offset, state);
+    }
+  }
+  
+  static class LoopHeadUngreedy extends RegexpNode {
+    private final int _index;
+    
+    final RegexpNode _node;
+    private final RegexpNode _tail;
+
+    private int _min;
+    private int _max;
+
+    LoopHeadUngreedy(Regcomp parser, RegexpNode node, int min, int max)
+    {
+      _index = parser.nextLoopIndex();
+      _node = node;
+      _min = min;
+      _max = max;
+
+      _tail = new LoopTailUngreedy(_index, this);
+    }
+
+    @Override
+    RegexpNode getTail()
+    {
+      return _tail;
+    }
+
+    @Override
+    RegexpNode concat(RegexpNode next)
+    {
+      _tail.concat(next);
+
+      return this;
+    }
+
+    @Override
+    RegexpNode createLoop(Regcomp parser, int min, int max)
+    {
+      if (min == 0 && max == 1) {
+	_min = 0;
+      
+	return this;
+      }
+      else
+	return new LoopHead(parser, this, min, max);
+    }
+
+    @Override
+    int minLength()
+    {
+      return _min * _node.minLength() + _tail.minLength();
+    }
+
+    //
+    // match functions
+    //
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      state._loopCount[_index] = 0;
+      
+      RegexpNode next = _tail;
+      RegexpNode node = _node;
+      int min = _min;
+      
+      for (int i = 0; i < min; i++) {
+	state._loopCount[_index] = i;
+      
+	offset = node.match(string, offset, state);
+
+	if (offset < 0)
+	  return -1;
+      }
+
+      int tail = _tail.match(string, offset, state);
+      if (tail >= 0)
+	return tail;
+      
+      state._loopCount[_index] = min;
+      return node.match(string, offset, state);
+    }
+  }
+  
+  static class LoopTailUngreedy extends RegexpNode {
+    private final int _index;
+
+    private LoopHeadUngreedy _head;
+    private RegexpNode _next;
+
+    LoopTailUngreedy(int index, LoopHeadUngreedy head)
+    {
+      _index = index;
+      _head = head;
+      _next = N_END;
+    }
+
+    RegexpNode getHead()
+    {
+      return _head;
+    }
+
+    @Override
+    RegexpNode concat(RegexpNode next)
+    {
+      if (_next != null)
+	_next = _next.concat(next);
+      else
+	_next = next;
+
+      return this;
+    }
+
+    //
+    // match functions
+    //
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      int i = state._loopCount[_index];
+
+      if (i < _head._min)
+	return offset;
+      
+      state._loopCount[_index] = i;
+      int tail = _next.match(string, offset, state);
+      if (tail >= 0)
+	return tail;
+      
+      if (i + 1 < _head._max) {
+	state._loopCount[_index] = i + 1;
+
+	return _head._node.match(string, offset, state);
+      }
+      else
+	return -1;
     }
   }
   
@@ -2118,6 +2603,9 @@ class RegexpNode {
   static final Prop PROP_Cs = new Prop(Character.SURROGATE);
   static final PropNot PROP_NOT_Cs = new PropNot(Character.SURROGATE);
 
+  static final PropL PROP_L = new PropL();
+  static final PropNotL PROP_NOT_L = new PropNotL();
+
   static final Prop PROP_Ll = new Prop(Character.LOWERCASE_LETTER);
   static final PropNot PROP_NOT_Ll = new PropNot(Character.LOWERCASE_LETTER);
 
@@ -2132,6 +2620,9 @@ class RegexpNode {
 
   static final Prop PROP_Lu = new Prop(Character.UPPERCASE_LETTER);
   static final PropNot PROP_NOT_Lu = new PropNot(Character.UPPERCASE_LETTER);
+
+  static final PropM PROP_M = new PropM();
+  static final PropNotM PROP_NOT_M = new PropNotM();
   
   static final Prop PROP_Mc = new Prop(Character.COMBINING_SPACING_MARK);
   static final PropNot PROP_NOT_Mc
@@ -2142,6 +2633,9 @@ class RegexpNode {
   
   static final Prop PROP_Mn = new Prop(Character.NON_SPACING_MARK);
   static final PropNot PROP_NOT_Mn = new PropNot(Character.NON_SPACING_MARK);
+
+  static final PropN PROP_N = new PropN();
+  static final PropNotN PROP_NOT_N = new PropNotN();
   
   static final Prop PROP_Nd = new Prop(Character.DECIMAL_DIGIT_NUMBER);
   static final PropNot PROP_NOT_Nd
@@ -2152,6 +2646,9 @@ class RegexpNode {
   
   static final Prop PROP_No = new Prop(Character.OTHER_NUMBER);
   static final PropNot PROP_NOT_No = new PropNot(Character.OTHER_NUMBER);
+
+  static final PropP PROP_P = new PropP();
+  static final PropNotP PROP_NOT_P = new PropNotP();
   
   static final Prop PROP_Pc = new Prop(Character.CONNECTOR_PUNCTUATION);
   static final PropNot PROP_NOT_Pc
@@ -2176,6 +2673,9 @@ class RegexpNode {
   
   static final Prop PROP_Ps = new Prop(Character.START_PUNCTUATION);
   static final PropNot PROP_NOT_Ps = new PropNot(Character.START_PUNCTUATION);
+
+  static final PropS PROP_S = new PropS();
+  static final PropNotS PROP_NOT_S = new PropNotS();
   
   static final Prop PROP_Sc = new Prop(Character.CURRENCY_SYMBOL);
   static final PropNot PROP_NOT_Sc = new PropNot(Character.CURRENCY_SYMBOL);
@@ -2188,6 +2688,9 @@ class RegexpNode {
   
   static final Prop PROP_So = new Prop(Character.OTHER_SYMBOL);
   static final PropNot PROP_NOT_So = new PropNot(Character.OTHER_SYMBOL);
+
+  static final PropZ PROP_Z = new PropZ();
+  static final PropNotZ PROP_NOT_Z = new PropNotZ();
   
   static final Prop PROP_Zl = new Prop(Character.LINE_SEPARATOR);
   static final PropNot PROP_NOT_Zl = new PropNot(Character.LINE_SEPARATOR);
@@ -2284,6 +2787,312 @@ class RegexpNode {
       }
 
       return -1;
+    }
+  }
+
+  static class PropL extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (value == Character.LOWERCASE_LETTER
+	    || value == Character.MODIFIER_LETTER
+	    || value == Character.OTHER_LETTER
+	    || value == Character.TITLECASE_LETTER
+	    || value == Character.UPPERCASE_LETTER) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropNotL extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (! (value == Character.LOWERCASE_LETTER
+	       || value == Character.MODIFIER_LETTER
+	       || value == Character.OTHER_LETTER
+	       || value == Character.TITLECASE_LETTER
+	       || value == Character.UPPERCASE_LETTER)) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropM extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (value == Character.COMBINING_SPACING_MARK
+	    || value == Character.ENCLOSING_MARK
+	    || value == Character.NON_SPACING_MARK) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropNotM extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (! (value == Character.COMBINING_SPACING_MARK
+	       || value == Character.ENCLOSING_MARK
+	       || value == Character.NON_SPACING_MARK)) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropN extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (value == Character.DECIMAL_DIGIT_NUMBER
+	    || value == Character.LETTER_NUMBER
+	    || value == Character.OTHER_NUMBER) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropNotN extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+        
+	if (! (value == Character.DECIMAL_DIGIT_NUMBER
+	       || value == Character.LETTER_NUMBER
+	       || value == Character.OTHER_NUMBER)) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropP extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (value == Character.CONNECTOR_PUNCTUATION
+	    || value == Character.DASH_PUNCTUATION
+	    || value == Character.END_PUNCTUATION
+	    || value == Character.FINAL_QUOTE_PUNCTUATION
+	    || value == Character.INITIAL_QUOTE_PUNCTUATION
+	    || value == Character.OTHER_PUNCTUATION
+	    || value == Character.START_PUNCTUATION) {
+	  return offset + 1;
+	}
+      }
+  
+
+      return -1;
+    }
+  }
+
+  static class PropNotP extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (! (value == Character.CONNECTOR_PUNCTUATION
+	       || value == Character.DASH_PUNCTUATION
+	       || value == Character.END_PUNCTUATION
+	       || value == Character.FINAL_QUOTE_PUNCTUATION
+	       || value == Character.INITIAL_QUOTE_PUNCTUATION
+	       || value == Character.OTHER_PUNCTUATION
+	       || value == Character.START_PUNCTUATION)) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropS extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (value == Character.CURRENCY_SYMBOL
+	    || value == Character.MODIFIER_SYMBOL
+	    || value == Character.MATH_SYMBOL
+	    || value == Character.OTHER_SYMBOL) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropNotS extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (! (value == Character.CURRENCY_SYMBOL
+	       || value == Character.MODIFIER_SYMBOL
+	       || value == Character.MATH_SYMBOL
+	       || value == Character.OTHER_SYMBOL)) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropZ extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (value == Character.LINE_SEPARATOR
+	    || value == Character.PARAGRAPH_SEPARATOR
+	    || value == Character.SPACE_SEPARATOR) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+
+  static class PropNotZ extends AbstractCharNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset < string.length()) {
+	char ch = string.charAt(offset);
+	
+	int value = Character.getType(ch);
+        
+	if (! (value == Character.LINE_SEPARATOR
+	       || value == Character.PARAGRAPH_SEPARATOR
+	       || value == Character.SPACE_SEPARATOR)) {
+	  return offset + 1;
+	}
+      }
+
+      return -1;
+    }
+  }
+    
+  static class Set extends AbstractCharNode {
+    private final boolean []_asciiSet;
+    private final IntSet _range;
+
+    Set(boolean []set, IntSet range)
+    {
+      _asciiSet = set;
+      _range = range;
+    }
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (string.length() <= offset)
+	return -1;
+
+      char ch = string.charAt(offset);
+
+      if (ch < 128)
+	return _asciiSet[ch] ? offset + 1 : -1;
+      else
+	return _range.contains(ch) ? offset + 1 : -1;
+    }
+  }
+    
+  static class NotSet extends AbstractCharNode {
+    private final boolean []_asciiSet;
+    private final IntSet _range;
+
+    NotSet(boolean []set, IntSet range)
+    {
+      _asciiSet = set;
+      _range = range;
+    }
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (string.length() <= offset)
+	return -1;
+
+      char ch = string.charAt(offset);
+
+      if (ch < 128)
+	return _asciiSet[ch] ? -1 : offset + 1;
+      else
+	return _range.contains(ch) ? -1 : offset + 1;
     }
   }
   
@@ -2437,10 +3246,6 @@ class RegexpNode {
   }
 
   static {
-    AsciiNotSet dot = new AsciiNotSet();
-    dot.setChar('\n');
-    DOT = dot;
-    
     ANY_CHAR = new AsciiNotSet();
   }
 }
