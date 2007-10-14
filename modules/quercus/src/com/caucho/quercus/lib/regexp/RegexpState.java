@@ -61,6 +61,7 @@ public class RegexpState {
 
   int _nLoop;
   int []_loopCount;
+  int []_loopOffset;
   int []_loopTail;
 
   int _nGroup;
@@ -110,6 +111,7 @@ public class RegexpState {
 
     _nLoop = _regexp._nLoop;
     _loopCount = new int[_nLoop];
+    _loopOffset = new int[_nLoop];
   }
 
   public boolean find()

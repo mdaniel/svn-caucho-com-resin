@@ -100,7 +100,8 @@ abstract public class AbstractDestination
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.
    */
-  abstract public MessageImpl receive(long timeout);
+  abstract public MessageImpl receive(long timeout)
+    throws JMSException;
 
   public String generateMessageID()
   {

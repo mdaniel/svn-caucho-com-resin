@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * JMS facade
@@ -64,6 +65,7 @@ public class Jms
     try {
       _connectionFactory = new ConnectionFactoryImpl();
       _conn = _connectionFactory.createConnection();
+      _conn.start();
     } catch (JMSException e) {
       throw new JmsRuntimeException(e);
     }
@@ -85,10 +87,39 @@ public class Jms
     }
   }
 
+  public Message receive(Destination dest)
+  {
+    Session session = null;
+    MessageConsumer consumer = null;
+    
+    try {
+      session = getSession();
+
+      consumer = session.createConsumer(dest);
+
+      System.out.println("CONSUMER: " + consumer);
+
+      return consumer.receive();
+    } catch (JMSException e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+	if (consumer != null)
+	  consumer.close();
+      } catch (JMSException e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+      
+      freeSession(session);
+    }
+  }
+
   private Session getSession()
     throws JMSException
   {
-    return _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    Session session = _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+    return session;
   }
 
   private void freeSession(Session session)

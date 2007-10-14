@@ -131,6 +131,7 @@ public class FileQueue extends AbstractQueue implements Topic
       FileQueueEntry entry = addEntry(id, expires, null);
 
       entry.setMessage(msg);
+      System.out.println("ENTRY:  " + entry + " " + msg);
     }
   }
 
@@ -142,6 +143,7 @@ public class FileQueue extends AbstractQueue implements Topic
   public MessageImpl receive(long timeout)
   {
     synchronized (_queueLock) {
+      System.out.println("RECEIVE_HEAD: " + _head);
       for (FileQueueEntry entry = _head;
 	   entry != null;
 	   entry = entry._next) {

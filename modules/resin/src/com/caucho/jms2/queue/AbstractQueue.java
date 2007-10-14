@@ -131,6 +131,7 @@ abstract public class AbstractQueue extends AbstractDestination
    */
   @Override
   public MessageImpl receive(long timeout)
+    throws JMSException
   {
     return null;
   }

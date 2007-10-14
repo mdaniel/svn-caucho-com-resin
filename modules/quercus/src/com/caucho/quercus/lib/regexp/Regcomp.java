@@ -34,6 +34,7 @@
 package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
@@ -43,6 +44,8 @@ import com.caucho.util.*;
  * Regular expression compilation.
  */
 class Regcomp {
+  private static final Logger log
+    = Logger.getLogger(Regcomp.class.getName());
   private static final L10N L = new L10N(RegexpNode.class);
   
   static final int MULTILINE = 0x1;
@@ -85,6 +88,21 @@ class Regcomp {
     return (_flags & UNGREEDY) != UNGREEDY;
   }
 
+  boolean isIgnoreCase()
+  {
+    return (_flags & IGNORE_CASE) == IGNORE_CASE;
+  }
+
+  boolean isMultiline()
+  {
+    return (_flags & MULTILINE) == MULTILINE;
+  }
+
+  boolean isDollarEndOnly()
+  {
+    return (_flags & END_ONLY) == END_ONLY;
+  }
+
   int nextLoopIndex()
   {
     return _nLoop++;
@@ -93,12 +111,16 @@ class Regcomp {
   RegexpNode parse(PeekStream pattern) throws IllegalRegexpException
   {
     _nGroup = 1;
+
+    RegexpNode begin = null;
+    if ((_flags & ANCHORED) != 0)
+      begin = RegexpNode.ANCHOR_BEGIN;
     
-    RegexpNode value = parseRec(pattern, null);
+    RegexpNode value = parseRec(pattern, begin);
 
     int ch;
     while ((ch = pattern.read()) == '|') {
-      value = new RegexpNode.Or(value, parseRec(pattern, null));
+      value = new RegexpNode.Or(value, parseRec(pattern, begin));
     }
     
     value = value.getHead();
@@ -106,14 +128,9 @@ class Regcomp {
     if (_maxGroup < _nGroup)
       _maxGroup = _nGroup;
 
-    /*
-    if ((_flags & ANCHORED) != 0) {
-      RegexpNode node = RegexpNode.create(RegexpNode.RC_BSTRING);
-      node._rest = value;
-      
-      value = node;
-    }
-    */
+    // System.out.println("V: " + value);
+    if (log.isLoggable(Level.FINER))
+      log.finer("regexp[] " + value);
     
     return value;
   }
@@ -661,7 +678,7 @@ class Regcomp {
 
     switch (ch) {
     case -1:
-      return tail;
+      return tail.getHead();
 
     case '?':
       if (tail == null)
@@ -691,7 +708,7 @@ class Regcomp {
       if (tail == null)
 	throw error(L.l("'{' requires a preceeding regexp"));
 
-      return parseRec(pattern, parseBrace(pattern, tail));
+      return parseRec(pattern, parseBrace(pattern, tail).getTail());
 
     case '.':
       if ((_flags & SINGLE_LINE) == 0)
@@ -707,7 +724,7 @@ class Regcomp {
       if (_groupTail != null)
 	return concat(tail, _groupTail);
       else
-	return tail;
+	return tail.getHead();
 
     case '(':
       {
@@ -730,7 +747,7 @@ class Regcomp {
 	    
 	  case '=':
 	  case '!':
-	    pattern.read();
+	    ch = pattern.read();
 
 	    boolean isPositive = (ch == '=');
 
@@ -836,12 +853,20 @@ class Regcomp {
       return concat(tail, parseRec(pattern, next));
       
     case '^':
-      next = RegexpNode.ANCHOR_BEGIN;
+      if (isMultiline())
+	next = RegexpNode.ANCHOR_BEGIN_OR_NEWLINE;
+      else
+	next = RegexpNode.ANCHOR_BEGIN;
       
       return concat(tail, parseRec(pattern, next));
       
     case '$':
-      next = RegexpNode.ANCHOR_END;
+      if (isMultiline())
+	next = RegexpNode.ANCHOR_END_OR_NEWLINE;
+      else if (isDollarEndOnly())
+	next = RegexpNode.ANCHOR_END_ONLY;
+      else
+	next = RegexpNode.ANCHOR_END;
       
       return concat(tail, parseRec(pattern, next));
       
@@ -970,8 +995,7 @@ class Regcomp {
     throws IllegalRegexpException
   {
     RegexpNode.GroupHead groupHead = new RegexpNode.GroupHead(group);
-    RegexpNode.GroupTail groupTail
-      = new RegexpNode.GroupTail(group, groupHead);
+    RegexpNode groupTail = groupHead.getTail();
 
     RegexpNode oldTail = _groupTail;
 
@@ -989,9 +1013,9 @@ class Regcomp {
 
     _groupTail = oldTail;
 
-    groupHead.setNode(body);
+    groupHead.setNode(body.getHead());
 	
-    return concat(tail, parseRec(pattern, groupHead));
+    return concat(tail, parseRec(pattern, groupTail).getHead());
   }
 
   private void expect(char test, int value)
@@ -1269,20 +1293,20 @@ class Regcomp {
 	  throw new IllegalRegexpException("expected increasing range at " +
 					   badChar(ch));
 
-	set.setRange(lastdash, ch);
+	setRange(set, lastdash, ch);
 
 	last = -1;
 	lastdash = -1;
       }
       else if (lastdash != -1) {
-	set.setRange(lastdash, lastdash);
-	set.setRange('-', '-');
+	setRange(set, lastdash, lastdash);
+	setRange(set, '-', '-');
 
 	last = -1;
 	lastdash = -1;
       }
       else if (last != -1) {
-	set.setRange(last, last);
+	setRange(set, last, last);
 
 	if (isChar)
 	  last = ch;
@@ -1293,11 +1317,11 @@ class Regcomp {
 
     // Dash at end of set: [a-z1-]
     if (lastdash != -1) {
-      set.setRange(lastdash, lastdash);
-      set.setRange('-', '-');
+      setRange(set, lastdash, lastdash);
+      setRange(set, '-', '-');
     }
     else if (last != -1)
-      set.setRange(last, last);
+      setRange(set, last, last);
     
     if (ch != ']')
       throw error(L.l("Expected ']'"));
@@ -1306,6 +1330,21 @@ class Regcomp {
       return set.createNotNode();
     else
       return set.createNode();
+  }
+
+  private void setRange(RegexpSet set, int a, int b)
+  {
+    set.setRange(a, b);
+    
+    if (isIgnoreCase()) {
+      if (Character.isLowerCase(a) && Character.isLowerCase(b)) {
+	set.setRange(Character.toUpperCase(a), Character.toUpperCase(b));
+      }
+	  
+      if (Character.isUpperCase(a) && Character.isUpperCase(b)) {
+	set.setRange(Character.toLowerCase(a), Character.toLowerCase(b));
+      }
+    }
   }
 
   /**
@@ -1556,8 +1595,9 @@ class Regcomp {
     throws IllegalRegexpException
   {
     CharBuffer cb = new CharBuffer();
+    cb.append((char) ch);
     
-    for (; ch >= 0; ch = pattern.read()) {
+    for (ch = pattern.read(); ch >= 0; ch = pattern.read()) {
       switch (ch) {
       case ' ': case '\t': case '\n': case '\r':
 	if ((_flags & IGNORE_WS) == 0 || isEscaped)
@@ -1573,11 +1613,11 @@ class Regcomp {
 	}
 	break;
 
-      case '{': case '}': case '(': case ')': case '[': case ']':
+      case '{': case '}': case '(': case ')': case '[':
       case '+': case '?': case '*': case '.':
       case '$': case '^': case '|':
 	pattern.ungetc(ch);
-	return new RegexpNode.StringNode(cb);
+	return createString(cb);
 
       case '\\':
 	ch = pattern.read();
@@ -1585,7 +1625,7 @@ class Regcomp {
 	switch (ch) {
 	case -1:
 	  cb.append('\\');
-	  return new RegexpNode.StringNode(cb);
+	  return createString(cb);
 	  
 	case 's': case 'S': case 'd': case 'D':
 	case 'w': case 'W': case 'b': case 'B':
@@ -1593,7 +1633,7 @@ class Regcomp {
 	case 'p': case 'P':
 	  pattern.ungetc(ch);
 	  pattern.ungetc('\\');
-	  return new RegexpNode.StringNode(cb);
+	  return createString(cb);
 
 	case 'a':
 	  cb.append('\u0007');
@@ -1609,8 +1649,17 @@ class Regcomp {
 	case 'e':
 	  cb.append('\u001b');
 	  break;
+	case 't':
+	  cb.append('\t');
+	  break;
 	case 'f':
 	  cb.append('\f');
+	  break;
+	case 'n':
+	  cb.append('\n');
+	  break;
+	case 'r':
+	  cb.append('\r');
 	  break;
 
 	case 'x':
@@ -1619,19 +1668,15 @@ class Regcomp {
 	  break;
       
 	case 'Q':
-	  throw new UnsupportedOperationException();
-	  /*
-	    while ((ch = pattern.read()) >= 0) {
+	  while ((ch = pattern.read()) >= 0) {
 	    if (ch == '\\' && pattern.peek() == 'E') {
-	    pattern.read();
-	    break;
+	      pattern.read();
+	      break;
 	    }
 
-	    last = parseString(ch, pattern);
-	    }
-
-	    return last;
-	  */
+	    cb.append((char) ch);
+	  }
+	  break;
     
 	case '0':
 	  int oct = parseOctal(ch, pattern);
@@ -1643,7 +1688,7 @@ class Regcomp {
 	  if (ch - '0' <= _nGroup) {
 	    pattern.ungetc(ch);
 	    pattern.ungetc('\\');
-	    return new RegexpNode.StringNode(cb);
+	    return createString(cb);
 	  }
 	  else {
 	    oct = parseOctal(ch, pattern);
@@ -1668,7 +1713,15 @@ class Regcomp {
       }
     }
 
-    return new RegexpNode.StringNode(cb);
+    return createString(cb);
+  }
+
+  private RegexpNode createString(CharBuffer cb)
+  {
+    if (isIgnoreCase())
+      return new RegexpNode.StringIgnoreCase(cb);
+    else
+      return new RegexpNode.StringNode(cb);
   }
   
   private int parseOctal(int ch, PeekStream pattern)

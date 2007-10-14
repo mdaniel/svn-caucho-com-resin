@@ -281,7 +281,7 @@ class RegexpNode {
    */
   RegexpNode createPossessiveLoop(int min, int max)
   {
-    return new PossessiveLoop(this, min, max);
+    return new PossessiveLoop(getHead(), min, max);
   }
 
   /**
@@ -1499,9 +1499,25 @@ class RegexpNode {
   }
 
   static final AnchorBegin ANCHOR_BEGIN = new AnchorBegin();
+  static final AnchorBeginOrNewline ANCHOR_BEGIN_OR_NEWLINE
+    = new AnchorBeginOrNewline();
   static final AnchorEnd ANCHOR_END = new AnchorEnd();
+  static final AnchorEndOnly ANCHOR_END_ONLY = new AnchorEndOnly();
+  static final AnchorEndOrNewline ANCHOR_END_OR_NEWLINE
+    = new AnchorEndOrNewline();
   
   private static class AnchorBegin extends RegexpNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset == 0)
+	  return offset;
+	else
+	  return -1;
+    }
+  }
+  
+  private static class AnchorBeginOrNewline extends RegexpNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
@@ -1516,18 +1532,41 @@ class RegexpNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
+      if (offset == string.length() ||
+	  offset + 1 == string.length() && string.charAt(offset) == '\n')
+	return offset;
+      else
+	return -1;
+    }
+  }
+  
+  private static class AnchorEndOnly extends RegexpNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (offset == string.length())
+	return offset;
+      else
+	return -1;
+    }
+  }
+  
+  private static class AnchorEndOrNewline extends RegexpNode {
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
       if (offset == string.length() || string.charAt(offset) == '\n')
-	  return offset;
-	else
-	  return -1;
+	return offset;
+      else
+	return -1;
     }
   }
 
   static final RegexpNode DIGIT = RegexpSet.DIGIT.createNode();
   static final RegexpNode NOT_DIGIT = RegexpSet.DIGIT.createNotNode();
 
-  static final RegexpNode DOT = RegexpSet.DOT.createNode();
-  static final RegexpNode NOT_DOT = RegexpSet.DOT.createNotNode();
+  static final RegexpNode DOT = RegexpSet.DOT.createNotNode();
+  static final RegexpNode NOT_DOT = RegexpSet.DOT.createNode();
 
   static final RegexpNode SPACE = RegexpSet.SPACE.createNode();
   static final RegexpNode NOT_SPACE = RegexpSet.SPACE.createNotNode();
@@ -1620,9 +1659,12 @@ class RegexpNode {
 
     CharLoop(RegexpNode node, int min, int max)
     {
-      _node = node;
+      _node = node.getHead();
       _min = min;
       _max = max;
+
+      if (_min < 0)
+	throw new IllegalStateException();
     }
 
     @Override
@@ -1634,7 +1676,7 @@ class RegexpNode {
       if (_next != null)
 	_next = _next.concat(next);
       else
-	_next = next;
+	_next = next.getHead();
 
       return this;
     }
@@ -1693,6 +1735,11 @@ class RegexpNode {
 
       return -1;
     }
+
+    public String toString()
+    {
+      return "CharLoop[" + _node + ", " + _next + "]";
+    }
   }
   
   static class Concat extends RegexpNode {
@@ -1741,6 +1788,11 @@ class RegexpNode {
 	return -1;
       else
 	return _next.match(string, offset, state);
+    }
+
+    public String toString()
+    {
+      return "Concat[" + _head + ", " + _next + "]";
     }
   }
   
@@ -1850,7 +1902,7 @@ class RegexpNode {
 
       _next = _next.concat(head.getTail());
       
-      return head.getTail();
+      return head;
     }
 
     @Override
@@ -1860,7 +1912,7 @@ class RegexpNode {
 
       _next = _next.concat(head.getTail());
       
-      return head.getTail();
+      return head;
     }
 
     /**
@@ -1902,7 +1954,7 @@ class RegexpNode {
 
     Group(RegexpNode node, int group)
     {
-      _node = node;
+      _node = node.getHead();
       _group = group;
     }
     
@@ -1936,16 +1988,16 @@ class RegexpNode {
     GroupHead(int group)
     {
       _group = group;
+      _tail = new GroupTail(group, this);
     }
 
     void setNode(RegexpNode node)
     {
-      _node = node;
-    }
+      _node = node.getHead();
 
-    void setTail(RegexpNode tail)
-    {
-      _tail = tail;
+      // php/4eh1
+      if (_node == this)
+	_node = _tail;
     }
 
     RegexpNode getTail()
@@ -2009,6 +2061,11 @@ class RegexpNode {
 	return tail;
       }
     }
+
+    public String toString()
+    {
+      return "GroupHead[" + _group + ", " + _node + "]";
+    }
   }
   
   static class GroupTail extends RegexpNode {
@@ -2016,11 +2073,10 @@ class RegexpNode {
     private RegexpNode _next;
     private final int _group;
 
-    GroupTail(int group, GroupHead head)
+    private GroupTail(int group, GroupHead head)
     {
       _next = N_END;
       _head = head;
-      head.setTail(this);
       _group = group;
     }
 
@@ -2045,9 +2101,9 @@ class RegexpNode {
     {
       LoopHead head = new LoopHead(parser, _head, min, max);
 
-      _next = _next.concat(head.getTail());
+      _next = head.getTail();
       
-      return head.getTail();
+      return head;
     }
 
     @Override
@@ -2055,9 +2111,9 @@ class RegexpNode {
     {
       LoopHeadUngreedy head = new LoopHeadUngreedy(parser, _head, min, max);
 
-      _next = _next.concat(head.getTail());
+      _next = head.getTail();
       
-      return head.getTail();
+      return head;
     }
 
     /**
@@ -2085,7 +2141,9 @@ class RegexpNode {
       
       if (_group > 0) {
 	state.setEnd(_group, offset);
-	state.setLength(_group);
+
+	if (oldLength < _group)
+	  state.setLength(_group);
       }
 
       int tail = _next.match(string, offset, state);
@@ -2098,6 +2156,11 @@ class RegexpNode {
       }
       else
 	return tail;
+    }
+
+    public String toString()
+    {
+      return "GroupTail[" + _group + ", " + _next + "]";
     }
   }
   
@@ -2118,8 +2181,9 @@ class RegexpNode {
       int begin = state.getBegin(_group);
       int length = state.getEnd(_group) - begin;
 
-      if (string.regionMatches(offset, string, begin, length))
+      if (string.regionMatches(offset, string, begin, length)) {
 	return offset + length;
+      }
       else
 	return -1;
     }
@@ -2166,7 +2230,7 @@ class RegexpNode {
 
     Lookbehind(RegexpNode head)
     {
-      _head = head;
+      _head = head.getHead();
     }
 
     @Override
@@ -2217,11 +2281,10 @@ class RegexpNode {
     LoopHead(Regcomp parser, RegexpNode node, int min, int max)
     {
       _index = parser.nextLoopIndex();
-      _node = node;
+      _tail = new LoopTail(_index, this);
+      _node = node.concat(_tail);
       _min = min;
       _max = max;
-
-      _tail = new LoopTail(_index, this);
     }
 
     @Override
@@ -2278,13 +2341,20 @@ class RegexpNode {
 	  return -1;
       }
 
-      state._loopCount[_index] = min;
-      int tail = node.match(string, offset, state);
-      if (tail >= 0)
-	return tail;
-      else {
-	return _tail.match(string, offset, state);
+      if (min < _max) {
+	state._loopCount[_index] = min;
+	state._loopOffset[_index] = offset;
+	int tail = node.match(string, offset, state);
+	if (tail >= 0)
+	  return tail;
       }
+
+      return _tail.match(string, offset, state);
+    }
+
+    public String toString()
+    {
+      return "LoopHead[" + _min + ", " + _max + ", " + _node + "]";
     }
   }
   
@@ -2314,6 +2384,9 @@ class RegexpNode {
       else
 	_next = next;
 
+      if (_next == this)
+	throw new IllegalStateException();
+
       return this;
     }
 
@@ -2324,20 +2397,32 @@ class RegexpNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
-      int i = state._loopCount[_index];
+      int oldCount = state._loopCount[_index];
 
-      if (i < _head._min)
+      if (oldCount < _head._min)
 	return offset;
-      else if (i + 1 < _head._max) {
-	state._loopCount[_index] = i + 1;
+      else if (oldCount + 1 < _head._max) {
+	int oldOffset = state._loopOffset[_index];
+	
+	if (oldOffset != offset) {
+	  state._loopCount[_index] = oldCount + 1;
+	  state._loopOffset[_index] = offset;
+			    
+	  int tail = _head._node.match(string, offset, state);
+	  if (tail >= 0)
+	    return tail;
 
-	int tail = _head._node.match(string, offset, state);
-	if (tail >= 0)
-	  return tail;
+	  state._loopCount[_index] = oldCount;
+	  state._loopOffset[_index] = oldOffset;
+	}
       }
       
-      state._loopCount[_index] = i;
       return _next.match(string, offset, state);
+    }
+
+    public String toString()
+    {
+      return "LoopTail[" + _next + "]";
     }
   }
   
@@ -2345,7 +2430,7 @@ class RegexpNode {
     private final int _index;
     
     final RegexpNode _node;
-    private final RegexpNode _tail;
+    private final LoopTailUngreedy _tail;
 
     private int _min;
     private int _max;
@@ -2353,11 +2438,11 @@ class RegexpNode {
     LoopHeadUngreedy(Regcomp parser, RegexpNode node, int min, int max)
     {
       _index = parser.nextLoopIndex();
-      _node = node;
       _min = min;
       _max = max;
 
       _tail = new LoopTailUngreedy(_index, this);
+      _node = node.getTail().concat(_tail).getHead();
     }
 
     @Override
@@ -2407,6 +2492,7 @@ class RegexpNode {
       
       for (int i = 0; i < min; i++) {
 	state._loopCount[_index] = i;
+	state._loopOffset[_index] = offset;
       
 	offset = node.match(string, offset, state);
 
@@ -2414,12 +2500,23 @@ class RegexpNode {
 	  return -1;
       }
 
-      int tail = _tail.match(string, offset, state);
+      int tail = _tail._next.match(string, offset, state);
       if (tail >= 0)
 	return tail;
+
+      if (min < _max) {
+	state._loopCount[_index] = min;
+	state._loopOffset[_index] = offset;
       
-      state._loopCount[_index] = min;
-      return node.match(string, offset, state);
+	return node.match(string, offset, state);
+      }
+      else
+	return -1;
+    }
+
+    public String toString()
+    {
+      return "LoopHeadUngreedy[" + _min + ", " + _max + ", " + _node + "]";
     }
   }
   
@@ -2449,6 +2546,9 @@ class RegexpNode {
       else
 	_next = next;
 
+      if (_next == this)
+	throw new IllegalStateException();
+
       return this;
     }
 
@@ -2460,22 +2560,36 @@ class RegexpNode {
     int match(StringValue string, int offset, RegexpState state)
     {
       int i = state._loopCount[_index];
+      int oldOffset = state._loopOffset[_index];
 
       if (i < _head._min)
 	return offset;
+
+      if (offset == oldOffset)
+	return -1;
       
-      state._loopCount[_index] = i;
       int tail = _next.match(string, offset, state);
       if (tail >= 0)
 	return tail;
       
       if (i + 1 < _head._max) {
 	state._loopCount[_index] = i + 1;
+	state._loopOffset[_index] = offset;
 
-	return _head._node.match(string, offset, state);
+	tail = _head._node.match(string, offset, state);
+
+	state._loopCount[_index] = i;
+	state._loopOffset[_index] = oldOffset;
+
+	return tail;
       }
       else
 	return -1;
+    }
+
+    public String toString()
+    {
+      return "LoopTailUngreedy[" + _next + "]";
     }
   }
   
@@ -2516,7 +2630,7 @@ class RegexpNode {
 
     PossessiveLoop(RegexpNode node, int min, int max)
     {
-      _node = node;
+      _node = node.getHead();
       
       _min = min;
       _max = max;
@@ -2582,6 +2696,11 @@ class RegexpNode {
       }
       
       return _next.match(string, offset, state);
+    }
+
+    public String toString()
+    {
+      return "PossessiveLoop[" + _min + ", " + _max + ", " + _node + ", " + _next + "]";
     }
   }
 
@@ -3134,6 +3253,34 @@ class RegexpNode {
       }
     }
 
+    @Override
+    RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
+    {
+      if (_length == 1)
+	return super.createLoopUngreedy(parser, min, max);
+      else {
+	char ch = _buffer[_length - 1];
+	
+	RegexpNode head = new StringNode(_buffer, _length - 1);
+
+	return head.concat(new CharNode(ch).createLoopUngreedy(parser, min, max));
+      }
+    }
+
+    @Override
+    RegexpNode createPossessiveLoop(int min, int max)
+    {
+      if (_length == 1)
+	return super.createPossessiveLoop(min, max);
+      else {
+	char ch = _buffer[_length - 1];
+	
+	RegexpNode head = new StringNode(_buffer, _length - 1);
+
+	return head.concat(new CharNode(ch).createPossessiveLoop(min, max));
+      }
+    }
+
     //
     // optim functions
     //
@@ -3158,6 +3305,110 @@ class RegexpNode {
     int match(StringValue string, int offset, RegexpState state)
     {
       if (string.regionMatches(offset, _buffer, 0, _length))
+	return offset + _length;
+      else
+	return -1;
+    }
+
+    public String toString()
+    {
+      return "StringNode[" + new String(_buffer, 0, _length) + "]";
+    }
+  }
+  
+  static class StringIgnoreCase extends RegexpNode {
+    private final char []_buffer;
+    private final int _length;
+
+    StringIgnoreCase(CharBuffer value)
+    {
+      _length = value.length();
+      _buffer = new char[_length];
+
+      if (_length == 0)
+	throw new IllegalStateException("empty string");
+      
+      System.arraycopy(value.getBuffer(), 0, _buffer, 0, _buffer.length);
+    }
+
+    StringIgnoreCase(char []buffer, int length)
+    {
+      _length = length;
+      _buffer = buffer;
+
+      if (_length == 0)
+	throw new IllegalStateException("empty string");
+    }
+
+    @Override
+    RegexpNode createLoop(Regcomp parser, int min, int max)
+    {
+      if (_length == 1)
+	return new CharLoop(this, min, max);
+      else {
+	char ch = _buffer[_length - 1];
+	
+	RegexpNode head = new StringIgnoreCase(_buffer, _length - 1);
+	RegexpNode tail = new StringIgnoreCase(new char[] { ch }, 1);
+
+	return head.concat(tail.createLoop(parser, min, max));
+      }
+    }
+
+    @Override
+    RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
+    {
+      if (_length == 1)
+	return super.createLoopUngreedy(parser, min, max);
+      else {
+	char ch = _buffer[_length - 1];
+	
+	RegexpNode head = new StringIgnoreCase(_buffer, _length - 1);
+	RegexpNode tail = new StringIgnoreCase(new char[] { ch }, 1);
+
+	return head.concat(tail.createLoopUngreedy(parser, min, max));
+      }
+    }
+
+    @Override
+    RegexpNode createPossessiveLoop(int min, int max)
+    {
+      if (_length == 1)
+	return super.createPossessiveLoop(min, max);
+      else {
+	char ch = _buffer[_length - 1];
+	
+	RegexpNode head = new StringIgnoreCase(_buffer, _length - 1);
+	RegexpNode tail = new StringIgnoreCase(new char[] { ch }, 1);
+
+	return head.concat(tail.createPossessiveLoop(min, max));
+      }
+    }
+
+    //
+    // optim functions
+    //
+
+    @Override
+    int minLength()
+    {
+      return _length;
+    }
+
+    @Override
+    String prefix()
+    {
+      return new String(_buffer, 0, _length);
+    }
+
+    //
+    // match function
+    //
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      if (string.regionMatchesIgnoreCase(offset, _buffer, 0, _length))
 	return offset + _length;
       else
 	return -1;

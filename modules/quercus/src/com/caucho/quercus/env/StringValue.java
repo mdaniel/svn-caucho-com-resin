@@ -1288,6 +1288,29 @@ abstract public class StringValue extends Value implements CharSequence {
 
     return true;
   }
+    
+  /**
+   * Returns true if the region matches
+   */
+  public boolean
+    regionMatchesIgnoreCase(int offset,
+			    char []match, int mOffset, int mLength)
+  {
+    int length = length();
+
+    if (length < offset + mLength)
+      return false;
+
+    for (int i = 0; i < mLength; i++) {
+      char a = Character.toLowerCase(charAt(offset + i));
+      char b = Character.toLowerCase(match[mOffset + i]);
+      
+      if (a != b)
+	return false;
+    }
+
+    return true;
+  }
 
   /**
    * Returns a StringValue substring.

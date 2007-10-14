@@ -582,6 +582,37 @@ public class StringBuilderValue
 
     return true;
   }
+    
+  /**
+   * Returns true if the region matches
+   */
+  public boolean
+    regionMatchesIgnoreCase(int offset,
+			    char []mBuffer, int mOffset, int mLength)
+  {
+    int length = _length;
+
+    if (length < offset + mLength)
+      return false;
+
+    char []buffer = _buffer;
+
+    for (int i = 0; i < mLength; i++) {
+      char a = buffer[offset + i];
+      char b = mBuffer[mOffset + i];
+
+      if ('A' <= a && a <= 'Z')
+	a += 'a' - 'A';
+
+      if ('A' <= b && b <= 'Z')
+	b += 'a' - 'A';
+      
+      if (a != b)
+	return false;
+    }
+
+    return true;
+  }
 
   /**
    * Creates a string builder of the same type.
