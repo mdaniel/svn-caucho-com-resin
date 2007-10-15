@@ -81,7 +81,6 @@ public class BinaryBuilderValue
 
   public BinaryBuilderValue(String s)
   {
-    Thread.dumpStack();
     int len = s.length();
     
     _buffer = new byte[len];
@@ -93,7 +92,6 @@ public class BinaryBuilderValue
   
   public BinaryBuilderValue(Byte []buffer)
   {
-    Thread.dumpStack();
     int length = buffer.length;
     
     _buffer =  new byte[length];

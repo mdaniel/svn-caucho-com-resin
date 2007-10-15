@@ -29,9 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -59,8 +57,8 @@ public class OutputBuffer {
 
   private final OutputBuffer _next;
 
-  private final TempStream _tempStream;
-  private final WriteStream _out;
+  private TempStream _tempStream;
+  private WriteStream _out;
 
   private final Env _env;
 
@@ -130,13 +128,13 @@ public class OutputBuffer {
     try {
       _out.flush();
 
-      ReadStream rs = _tempStream.openRead(false);
       StringValue bb = _env.createBinaryBuilder();
-      int ch;
 
-      bb.appendAll(rs);
-
-      rs.close();
+      for (TempBuffer ptr = _tempStream.getHead();
+	   ptr != null;
+	   ptr = ptr.getNext()) {
+	bb.append(ptr.getBuffer(), 0, ptr.getLength());
+      }
 
       return bb;
     } catch (IOException e) {
@@ -297,6 +295,22 @@ public class OutputBuffer {
     _state = 0; 
 
     doFlush();
+
+    WriteStream out = _out;
+    _out = null;
+
+    TempStream tempStream = _tempStream;
+    _tempStream = null;
+
+    try {
+      if (out != null)
+	out.close();
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    if (tempStream != null)
+      tempStream.destroy();
   }
 
   /**

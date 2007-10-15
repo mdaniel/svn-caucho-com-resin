@@ -163,9 +163,10 @@ public class AbstractBinaryInputOutput
 
     StringValue bb = _env.createBinaryBuilder();
 
-    bb.append(_is, length);
-
-    return bb;
+    if (bb.appendRead(_is, length) > 0)
+      return bb;
+    else
+      return null;
   }
 
   /**

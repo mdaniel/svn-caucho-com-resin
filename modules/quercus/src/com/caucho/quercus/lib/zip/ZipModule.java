@@ -67,7 +67,7 @@ public class ZipModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public ZipDirectory zip_open(Env env,
-                               @NotNull String filename)
+                               @NotNull StringValue filename)
   {
     if (filename == null || filename.length() == 0)
       return null;

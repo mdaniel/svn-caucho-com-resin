@@ -76,14 +76,20 @@ public class MailModule extends AbstractQuercusModule {
       StringValue host = env.getIni("SMTP");
       if (host != null && ! host.toString().equals(""))
         props.put("mail.smtp.host", host.toString());
+      else
+        props.put("mail.smtp.host", System.getProperty("mail.smtp.host"));
 
       StringValue port = env.getIni("smtp_port");
       if (port != null && ! port.toString().equals(""))
         props.put("mail.smtp.port", port.toString());
+      else
+        props.put("mail.smtp.port", System.getProperty("mail.smtp.port"));
 
       StringValue user = env.getIni("sendmail_from");
       if (user != null && ! user.toString().equals(""))
         props.put("mail.from", user.toString());
+      else
+        props.put("mail.from", System.getProperty("mail.from"));
 
       String username = env.getIniString("smtp_username");
       String password = env.getIniString("smtp_password");
@@ -136,12 +142,18 @@ public class MailModule extends AbstractQuercusModule {
 
       throw e;
     } catch (MessagingException e) {
+      log.warning(L.l("Quercus[] mail could not send mail to '" + to + "'"
+		      + "\n" + e.getMessage()));
+		  
       log.log(Level.FINE, e.toString(), e);
 
       env.warning(e.getMessage());
 
       return false;
     } catch (Exception e) {
+      log.warning(L.l("Quercus[] mail could not send mail to '" + to + "'"
+		      + "\n" + e.getMessage()));
+		  
       log.log(Level.FINE, e.toString(), e);
 
       env.warning(e.toString());

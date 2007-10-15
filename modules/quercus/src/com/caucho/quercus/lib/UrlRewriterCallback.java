@@ -133,13 +133,14 @@ public class UrlRewriterCallback extends CallbackFunction {
     private boolean _quoted;
 
     private String _input;
-    private UnicodeBuilderValue _output = new UnicodeBuilderValue();
+    private StringValue _output;
 
     public Parser(String input, Env env)
     {
       _input = input;
       _env = env;
       _index = 0;
+      _output = env.createUnicodeBuilder();
     }
 
     public Value parse()

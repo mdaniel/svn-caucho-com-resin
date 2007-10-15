@@ -304,7 +304,7 @@ public class Zlib {
     if (_in == null)
       return sb;
 
-    sb.append(_in, length);
+    sb.appendReadAll(_in, length);
 
     return sb;
   }

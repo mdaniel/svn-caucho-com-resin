@@ -245,7 +245,7 @@ public class UrlModule extends AbstractQuercusModule {
   /**
    * Extracts the meta tags from a file and returns them as an array.
    */
-  public static Value get_meta_tags(Env env, String filename,
+  public static Value get_meta_tags(Env env, StringValue filename,
                                     @Optional("false") boolean use_include_path)
   {
     InputStream in = null;
@@ -253,8 +253,8 @@ public class UrlModule extends AbstractQuercusModule {
     ArrayValue result = new ArrayValueImpl();
 
     try {
-      BinaryStream stream =
-        FileModule.fopen(env, filename, "r", use_include_path, null);
+      BinaryStream stream
+	= FileModule.fopen(env, filename, "r", use_include_path, null);
 
       if (stream == null || ! (stream instanceof BinaryInput))
         return result;
@@ -442,15 +442,15 @@ public class UrlModule extends AbstractQuercusModule {
   /**
    * Parses the URL into an array.
    */
-  public static Value parse_url(Env env, String str)
+  public static Value parse_url(Env env, StringValue str)
   {
     if (str == null)
-      str = "";
+      str = env.createEmptyString();
 
     int i = 0;
     int length = str.length();
 
-    CharBuffer sb = new CharBuffer();
+    StringValue sb = env.createUnicodeBuilder();
 
     ArrayValueImpl value = new ArrayValueImpl();
 
@@ -459,7 +459,7 @@ public class UrlModule extends AbstractQuercusModule {
 
     ParseUrlState state = ParseUrlState.INIT;
 
-    String user = null;
+    StringValue user = null;
 
     for (; i < length; i++) {
       char ch = str.charAt(i);
@@ -467,8 +467,8 @@ public class UrlModule extends AbstractQuercusModule {
       switch (ch) {
       case ':':
         if (state == ParseUrlState.INIT) {
-          value.put("scheme", sb.toString());
-          sb.clear();
+          value.put(env.createString("scheme"), sb);
+          sb = env.createUnicodeBuilder();
 
           if (length <= i + 1 || str.charAt(i + 1) != '/') {
             state = ParseUrlState.PATH;
@@ -488,13 +488,13 @@ public class UrlModule extends AbstractQuercusModule {
           }
         }
         else if (state == ParseUrlState.USER) {
-          user = sb.toString();
-          sb.clear();
+          user = sb;
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.PASS;
         }
         else if (state == ParseUrlState.HOST) {
-          value.put("host", sb.toString());
-          sb.clear();
+          value.put(env.createString("host"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.PORT;
         }
         else
@@ -503,14 +503,14 @@ public class UrlModule extends AbstractQuercusModule {
 
       case '@':
         if (state == ParseUrlState.USER) {
-          value.put("user", sb.toString());
-          sb.clear();
+          value.put(env.createString("user"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.HOST;
         }
         else if (state == ParseUrlState.PASS) {
-          value.put("user", user);
-          value.put("pass", sb.toString());
-          sb.clear();
+          value.put(env.createString("user"), user);
+          value.put(env.createString("pass"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.HOST;
         }
         else
@@ -519,23 +519,21 @@ public class UrlModule extends AbstractQuercusModule {
 
       case '/':
         if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
-          value.put("host", sb.toString());
-          sb.clear();
+          value.put(env.createString("host"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.PATH;
           sb.append(ch);
         }
         else if (state == ParseUrlState.PASS) {
-          value.put("host", user);
-          value.put(env.createString("port"),
-                    new LongValue(env.createString(sb.toString()).toLong()));
-          sb.clear();
+          value.put(env.createString("host"), user);
+          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.PATH;
           sb.append(ch);
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(env.createString("port"),
-                    new LongValue(env.createString(sb.toString()).toLong()));
-          sb.clear();
+          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.PATH;
           sb.append(ch);
         }
@@ -545,27 +543,25 @@ public class UrlModule extends AbstractQuercusModule {
 
       case '?':
         if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
-          value.put("host", sb.toString());
-          sb.clear();
+          value.put(env.createString("host"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.QUERY;
         }
         else if (state == ParseUrlState.PASS) {
-          value.put("host", user);
-          value.put(env.createString("port"),
-                    new LongValue(env.createString(sb.toString()).toLong()));
-          sb.clear();
+          value.put(env.createString("host"), user);
+          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.QUERY;
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(env.createString("port"),
-                    new LongValue(env.createString(sb.toString()).toLong()));
-          sb.clear();
+          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.QUERY;
         }
         else if (state == ParseUrlState.PATH) {
           if (sb.length() > 0)
-            value.put("path", sb.toString());
-          sb.clear();
+            value.put(env.createString("path"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.QUERY;
         }
         else
@@ -574,33 +570,31 @@ public class UrlModule extends AbstractQuercusModule {
 
       case '#':
         if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
-          value.put("host", sb.toString());
-          sb.clear();
+          value.put(env.createString("host"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.FRAGMENT;
         }
         else if (state == ParseUrlState.PASS) {
-          value.put("host", user);
-          value.put(env.createString("port"),
-                    new LongValue(env.createString(sb.toString()).toLong()));
-          sb.clear();
+          value.put(env.createString("host"), user);
+          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.FRAGMENT;
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(env.createString("port"),
-                    new LongValue(env.createString(sb.toString()).toLong()));
-          sb.clear();
+          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.FRAGMENT;
         }
         else if (state == ParseUrlState.PATH) {
           if (sb.length() > 0)
-            value.put("path", sb.toString());
-          sb.clear();
+            value.put(env.createString("path"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.FRAGMENT;
         }
         else if (state == ParseUrlState.QUERY) {
           if (sb.length() > 0)
-            value.put("query", sb.toString());
-          sb.clear();
+            value.put(env.createString("query"), sb);
+          sb = env.createUnicodeBuilder();
           state = ParseUrlState.FRAGMENT;
         }
         else
@@ -615,24 +609,22 @@ public class UrlModule extends AbstractQuercusModule {
 
     if (sb.length() == 0) {
     }
-    else if (state == ParseUrlState.USER ||
-             state == ParseUrlState.HOST)
-      value.put("host", sb.toString());
+    else if (state == ParseUrlState.USER
+	     || state == ParseUrlState.HOST)
+      value.put(env.createString("host"), sb);
     else if (state == ParseUrlState.PASS) {
-      value.put("host", user);
-      value.put(env.createString("port"),
-                new LongValue(env.createString(sb.toString()).toLong()));
+      value.put(env.createString("host"), user);
+      value.put(env.createString("port"), new LongValue(sb.toLong()));
     }
     else if (state == ParseUrlState.PORT) {
-      value.put(env.createString("port"),
-                new LongValue(env.createString(sb.toString()).toLong()));
+      value.put(env.createString("port"), new LongValue(sb.toLong()));
     }
     else if (state == ParseUrlState.QUERY)
-      value.put("query", sb.toString());
+      value.put(env.createString("query"), sb);
     else if (state == ParseUrlState.FRAGMENT)
-      value.put("fragment", sb.toString());
+      value.put(env.createString("fragment"), sb);
     else
-      value.put("path", sb.toString());
+      value.put(env.createString("path"), sb);
 
     return value;
   }

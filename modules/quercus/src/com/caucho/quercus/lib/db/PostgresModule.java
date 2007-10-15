@@ -2217,7 +2217,7 @@ public class PostgresModule extends AbstractQuercusModule {
       try {
 	StringValue bb = env.createBinaryBuilder();
 
-	bb.append(is, len);
+	bb.appendReadAll(is, len);
 
 	return bb;
       } finally {

@@ -135,7 +135,7 @@ public class CauchoRegexpModule
 
     try {
       Regexp regexp = getRegexp(env, cleanPattern);
-      RegexpState regexpState = new RegexpState(regexp, string);
+      RegexpState regexpState = new RegexpState(env, regexp, string);
 
       if (! regexpState.find())
         return BooleanValue.FALSE;
@@ -207,7 +207,7 @@ public class CauchoRegexpModule
       StringValue empty = subject.getEmptyString();
       
       Regexp regexp = getRegexp(env, regexpValue);
-      RegexpState regexpState = new RegexpState(regexp, subject);
+      RegexpState regexpState = new RegexpState(env, regexp, subject);
 
       ArrayValue regs;
 
@@ -216,7 +216,7 @@ public class CauchoRegexpModule
       else
         regs = new ArrayValueImpl();
 
-      if (regexpState == null || regexpState.exec(subject, offset) < 0) {
+      if (regexpState == null || regexpState.exec(env, subject, offset) < 0) {
         matchRef.set(regs);
         return LongValue.ZERO;
       }
@@ -323,7 +323,7 @@ public class CauchoRegexpModule
     }
 
     Regexp regexp = getRegexp(env, rawRegexp);
-    RegexpState regexpState = new RegexpState(regexp, subject);
+    RegexpState regexpState = new RegexpState(env, regexp, subject);
 
     ArrayValue matches;
 
@@ -395,7 +395,7 @@ public class CauchoRegexpModule
       matchList[j] = values;
     }
 
-    if (regexpState == null || regexpState.exec(subject, 0) < 0) {
+    if (regexpState == null || regexpState.exec(env, subject, 0) < 0) {
       return LongValue.ZERO;
     }
 
@@ -687,7 +687,7 @@ public class CauchoRegexpModule
       limit = Long.MAX_VALUE;
 
     Regexp regexp = getRegexp(env, patternString);
-    RegexpState regexpState = new RegexpState(regexp, subject);
+    RegexpState regexpState = new RegexpState(env, regexp, subject);
 
     StringValue result = patternString.createStringBuilder();
     int tail = 0;
@@ -741,7 +741,7 @@ public class CauchoRegexpModule
     throws IllegalRegexpException
   {
     Regexp regexp = getRegexp(env, patternString);
-    RegexpState regexpState = new RegexpState(regexp, subject);
+    RegexpState regexpState = new RegexpState(env, regexp, subject);
 
     // check for e modifier in patternString
     boolean isEval = regexp.isEval();
@@ -777,7 +777,7 @@ public class CauchoRegexpModule
       patternString = addDelimiters(env, patternString, "/", "/");
       
       Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = new RegexpState(regexp, subject);
+      RegexpState regexpState = new RegexpState(env, regexp, subject);
 
       ArrayList<Replacement> replacementProgram
         = _replacementCache.get(replacement);
@@ -817,7 +817,7 @@ public class CauchoRegexpModule
       patternString = addDelimiters(env, patternString, "/", "/i");
       
       Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = new RegexpState(regexp, subject);
+      RegexpState regexpState = new RegexpState(env, regexp, subject);
 
       ArrayList<Replacement> replacementProgram
         = _replacementCache.get(replacement);
@@ -1029,7 +1029,7 @@ public class CauchoRegexpModule
     StringValue empty = patternString.getEmptyString();
     
     Regexp regexp = getRegexp(env, patternString);
-    RegexpState regexpState = new RegexpState(regexp, string);
+    RegexpState regexpState = new RegexpState(env, regexp, string);
 
     ArrayValue result = new ArrayValueImpl();
 
@@ -1204,7 +1204,7 @@ public class CauchoRegexpModule
       patternString = addDelimiters(env, patternString, "/", "/");
       
       Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = new RegexpState(regexp, string);
+      RegexpState regexpState = new RegexpState(env, regexp, string);
 
       ArrayValue result = new ArrayValueImpl();
 
@@ -1268,7 +1268,7 @@ public class CauchoRegexpModule
         Value entryValue = entry.getValue();
         Value entryKey = entry.getKey();
 
-        boolean found = regexpState.find(entryValue.toStringValue());
+        boolean found = regexpState.find(env, entryValue.toStringValue());
 
         if (! found && flag == PREG_GREP_INVERT)
           matchArray.append(entryKey, entryValue);
@@ -1308,7 +1308,7 @@ public class CauchoRegexpModule
       patternString = addDelimiters(env, patternString, "/", "/i");
       
       Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = new RegexpState(regexp, string);
+      RegexpState regexpState = new RegexpState(env, regexp, string);
 
       ArrayValue result = new ArrayValueImpl();
 

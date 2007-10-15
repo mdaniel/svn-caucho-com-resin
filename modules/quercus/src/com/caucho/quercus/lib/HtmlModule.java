@@ -79,12 +79,11 @@ public class HtmlModule extends AbstractQuercusModule {
       Value key = entry.getKey();
       Value value = entry.getValue();
 
-
       if (key.isString())
-        key = new UnicodeBuilderValue(key.toString());
+        key = key.toUnicodeValue(env);
 
       if (value.isString())
-        value = new UnicodeBuilderValue(value.toString());
+        value = value.toUnicodeValue(env);
 
       copy.put(key, value);
     }

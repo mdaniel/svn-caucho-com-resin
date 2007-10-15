@@ -1049,58 +1049,6 @@ public class StringBuilderValue
   }
 
   @Override
-  public StringValue append(BinaryInput is, long maxLength)
-  {
-    // php/161i 64k
-    
-    int sublen = Math.min(8192, (int) maxLength);
-
-    try {
-      ensureAppendCapacity(sublen);
-
-      int count = is.read(_buffer, _length, sublen);
-
-      if (count > 0)
-        _length += count;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-
-    return this;
-  }
-
-  @Override
-  public StringValue appendAll(InputStream is)
-  {
-    try {
-      TempBuffer tBuf = TempBuffer.allocate();
-      byte []buffer = tBuf.getBuffer();
-      
-      while (true) {
-	int sublen = buffer.length;
-
-        sublen = is.read(buffer, 0, sublen);
-
-        if (sublen <= 0)
-          break;
-
-        ensureAppendCapacity(sublen);
-
-	for (int i = 0; i < sublen; i++)
-	  _buffer[_length + i] = (char) buffer[i];
-
-        _length += sublen;
-      }
-
-      TempBuffer.free(tBuf);
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-
-    return this;
-  }
-
-  @Override
   public StringValue append(Reader reader, long length)
     throws IOException
   {

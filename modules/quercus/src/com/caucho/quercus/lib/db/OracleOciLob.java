@@ -916,7 +916,7 @@ public class OracleOciLob {
       if (length < 0)
 	length = Integer.MAX_VALUE;
       
-      bb.append(is, length);
+      bb.appendReadAll(is, length);
 
       is.close();
 

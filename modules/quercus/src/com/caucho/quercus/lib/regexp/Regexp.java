@@ -128,18 +128,12 @@ public class Regexp {
       }
     }
 
-    _pattern = pattern;
+    // XXX: what if unicode.semantics='true'?
     
-    /*
-    if (pattern.isUnicode())
-      _pattern = pattern;
-    else if (pattern.isPHP5String())
-      _pattern = pattern;
-    else if (_isUTF8)
-      _pattern = pattern.toUnicodeValue(env, "UTF-8");
-    else
-      _pattern = pattern.toUnicodeValue(env);
-    */
+    if (_isUTF8)
+      pattern = fromUtf8(env, pattern);
+
+    _pattern = pattern;
 
     Regcomp comp = new Regcomp(flags);
     _prog = comp.parse(new PeekString(_pattern));
@@ -171,6 +165,14 @@ public class Regexp {
   public boolean isEval()
   {
     return _isEval;
+  }
+
+  public StringValue convertSubject(Env env, StringValue subject)
+  {
+    if (_isUTF8)
+      return fromUtf8(env, subject);
+    else
+      return subject;
   }
 
   private void compile(Env env, RegexpNode prog, Regcomp comp)
@@ -218,6 +220,34 @@ public class Regexp {
   
   public boolean isGlobal() { return _isGlobal; }
   public boolean ignoreCase() { return _ignoreCase; }
+
+  static StringValue fromUtf8(Env env, StringValue source)
+  {
+    StringValue target = env.createUnicodeBuilder();
+    int len = source.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = source.charAt(i);
+
+      if (ch < 0x80)
+	target.append(ch);
+      else if ((ch & 0xe0) == 0xc0) {
+	char ch2 = source.charAt(++i);
+
+	target.append((char) (((ch & 0x1f) << 6) + (ch2 & 0x3f)));
+      }
+      else {
+	char ch2 = source.charAt(++i);
+	char ch3 = source.charAt(++i);
+	
+	target.append((char) (((ch & 0xf) << 12)
+			      + ((ch2 & 0x3f) << 6)
+			      + (ch3 & 0x3f)));
+      }
+    }
+
+    return target;
+  }
   
   public String toString()
   {

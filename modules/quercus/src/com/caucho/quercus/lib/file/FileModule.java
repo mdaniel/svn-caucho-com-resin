@@ -674,7 +674,7 @@ public class FileModule extends AbstractQuercusModule {
    * @param context the resource context
    */
   public static Value file(Env env,
-                           String filename,
+                           StringValue filename,
                            @Optional boolean useIncludePath,
                            @Optional Value context)
   {
@@ -921,7 +921,7 @@ public class FileModule extends AbstractQuercusModule {
   @ReturnNullAsFalse
   public static StringValue
     file_get_contents(Env env,
-		      String filename,
+		      StringValue filename,
 		      @Optional boolean useIncludePath,
 		      @Optional Value context,
 		      @Optional long offset,
@@ -954,7 +954,7 @@ public class FileModule extends AbstractQuercusModule {
    * Writes data to a file.
    */
   public Value file_put_contents(Env env,
-                                 String filename,
+                                 StringValue filename,
                                  Value data,
                                  @Optional int flags,
                                  @Optional Value context)
@@ -1293,7 +1293,8 @@ public class FileModule extends AbstractQuercusModule {
     return string.matches(globRegex.toString());
   }
 
-  private static ProtocolWrapper getProtocolWrapper(Env env, String pathName)
+  private static ProtocolWrapper getProtocolWrapper(Env env,
+						    StringValue pathName)
   {
     ArrayValue url = (ArrayValue) UrlModule.parse_url(env, pathName);
 
@@ -1314,7 +1315,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static BinaryStream fopen(Env env,
-				   String filename,
+				   StringValue filename,
 				   String mode,
 				   @Optional boolean useIncludePath,
 				   @Optional Value context)
@@ -1339,18 +1340,18 @@ public class FileModule extends AbstractQuercusModule {
         if (useIncludePath)
           options = StreamModule.STREAM_USE_PATH;
            
-        return wrapper.fopen(env, env.createString(filename),
+        return wrapper.fopen(env, filename,
                                   env.createString(mode),
                                   LongValue.create(options));
       }
 
       Path path;
 
-      path = env.getPwd().lookup(filename);
+      path = env.getPwd().lookup(filename.toString());
 
       if (mode.startsWith("r")) {
         if (useIncludePath)
-          path = env.lookupInclude(filename);
+          path = env.lookupInclude(filename.toString());
 
         if (path == null) {
           env.warning(L.l("{0} cannot be read", filename));
@@ -1550,7 +1551,7 @@ public class FileModule extends AbstractQuercusModule {
 
     StringValue sb = env.createBinaryBuilder();
 
-    sb.append(is, length);
+    sb.appendRead(is, length);
 
     return sb;
   }
@@ -1936,7 +1937,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value lstat(Env env, StringValue filename)
   {
-    ProtocolWrapper wrapper = getProtocolWrapper(env, filename.toString());
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
     if (wrapper != null)
       // XXX flags?
@@ -1961,7 +1962,7 @@ public class FileModule extends AbstractQuercusModule {
 			      @Optional boolean recursive,
 			      @Optional Value context)
   {
-    ProtocolWrapper wrapper = getProtocolWrapper(env, dirname.toString());
+    ProtocolWrapper wrapper = getProtocolWrapper(env, dirname);
 
     if (wrapper != null)
       // XXX options?
@@ -2024,7 +2025,7 @@ public class FileModule extends AbstractQuercusModule {
   public static Value opendir(Env env, StringValue pathName,
                               @Optional Value context)
   {
-    ProtocolWrapper wrapper = getProtocolWrapper(env, pathName.toString());
+    ProtocolWrapper wrapper = getProtocolWrapper(env, pathName);
 
     if (wrapper != null)
       /// XXX options?
@@ -2343,7 +2344,7 @@ public class FileModule extends AbstractQuercusModule {
    * Read the contents of a file and write them out.
    */
   public Value readfile(Env env,
-                        String filename,
+                        StringValue filename,
                         @Optional boolean useIncludePath,
                         @Optional Value context)
   {
@@ -2395,7 +2396,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean rename(Env env, StringValue from, StringValue to)
   {
-    ProtocolWrapper wrapper = getProtocolWrapper(env, from.toString());
+    ProtocolWrapper wrapper = getProtocolWrapper(env, from);
 
     if (wrapper != null)
       return wrapper.rename(env, from, to);
@@ -2453,7 +2454,7 @@ public class FileModule extends AbstractQuercusModule {
                               StringValue filename,
                               @Optional Value context)
   {
-    ProtocolWrapper wrapper = getProtocolWrapper(env, filename.toString());
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
     if (wrapper != null)
       // XXX options?
@@ -2550,7 +2551,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value stat(Env env, StringValue filename)
   {
-    ProtocolWrapper wrapper = getProtocolWrapper(env, filename.toString());
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
     if (wrapper != null)
       // XXX flags?
@@ -2714,7 +2715,7 @@ public class FileModule extends AbstractQuercusModule {
 
     // XXX: safe_mode
     try {
-      ProtocolWrapper wrapper = getProtocolWrapper(env, filename.toString());
+      ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
       if (wrapper != null)
         return wrapper.unlink(env, filename);

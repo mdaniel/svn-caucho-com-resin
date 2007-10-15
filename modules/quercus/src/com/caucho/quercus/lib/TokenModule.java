@@ -190,7 +190,7 @@ public class TokenModule extends AbstractQuercusModule {
   }
 
   public static Value highlight_file(Env env,
-				     String filename,
+				     StringValue filename,
 				     @Optional boolean isReturn)
   {
     StringValue v = FileModule.file_get_contents(env,

@@ -76,9 +76,11 @@ public class RegexpState {
   int []_loopCount;
   int []_loopOffset;
   
-  public RegexpState(Regexp regexp, StringValue subject)
+  public RegexpState(Env env, Regexp regexp, StringValue subject)
   {
     this(regexp);
+
+    subject = _regexp.convertSubject(env, subject);
     
     _subject = subject;
   }
@@ -130,19 +132,24 @@ public class RegexpState {
     return false;
   }
 
-  public boolean find(StringValue subject)
+  public boolean find(Env env, StringValue subject)
   {
+    subject = _regexp.convertSubject(env, subject);
+    
     _subject = subject;
     _first = 0;
 
     return find();
   }
 
-  public int find(StringValue subject, int first)
+  public int find(Env env, StringValue subject, int first)
   {
-    _subject = subject;
+    subject = _regexp.convertSubject(env, subject);
     
-    clearGroup();
+    _subject = subject;
+
+    _first = first;
+    _groupLength = 0;
 
     return _regexp._prog.match(_subject, first, this);
   }
@@ -150,12 +157,16 @@ public class RegexpState {
   /**
    * XXX: not proper behaviour with /g
    */
-  public int exec(StringValue subject, int start)
+  public int exec(Env env, StringValue subject, int start)
   { 
+    subject = _regexp.convertSubject(env, subject);
+    
     _groupLength = 0;
     
     _start = start;
     _first = start;
+
+    _subject = subject;
 
     int minLength = _regexp._minLength;
     boolean []firstSet = _regexp._firstSet;
@@ -164,7 +175,7 @@ public class RegexpState {
 
     for (; start <= end; start++) {
       if (firstSet != null) {
-	char firstChar = _subject.charAt(start);
+	char firstChar = subject.charAt(start);
 	
 	if (firstChar < 256 && ! firstSet[firstChar])
 	  continue;
@@ -217,7 +228,7 @@ public class RegexpState {
   {
     _groupLength = length;
   }
-
+  
   public int length()
   {
     return _groupLength;
@@ -292,37 +303,9 @@ public class RegexpState {
   
   private StringValue encodeResultString(Env env, StringValue str)
   {
-    if (_isUnicode)
-      return str;
-    else if (_isPHP5String)
-      return encodePHP5ResultString(env, str);
-    else if (_isUTF8)
+    if (_isUTF8)
       return str.toBinaryValue(env, "UTF-8");
     else
-      return str.toBinaryValue(env);
-  }
-  
-  private StringValue encodePHP5ResultString(Env env, StringValue str)
-  {
-    StringBuilderValue sb = new StringBuilderValue();
-    
-    try {
-      byte []bytes;
-
-      if (_isUTF8)
-        bytes = str.toString().getBytes("UTF-8");
-      else
-        bytes = str.toBytes();
-      
-      sb.append(bytes);
-      
-      return sb;
-    }
-    catch (UnsupportedEncodingException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.error(e);
-      
-      return null;
-    }
+      return str;
   }
 }

@@ -81,9 +81,9 @@ public class ZlibModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static BinaryStream gzopen(Env env,
-			      String fileName,
-			      String mode,
-			      @Optional("false") boolean useIncludePath)
+				    StringValue fileName,
+				    String mode,
+				    @Optional("false") boolean useIncludePath)
   {
     String filemode = getFileMode(mode);
     int compressionLevel = getCompressionLevel(mode);
@@ -134,7 +134,7 @@ public class ZlibModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static ArrayValue gzfile(Env env,
-				  String fileName,
+				  StringValue fileName,
 				  @Optional boolean useIncludePath)
   {
     BinaryInput is = (BinaryInput) gzopen(env, fileName, "r", useIncludePath);
@@ -174,7 +174,7 @@ public class ZlibModule extends AbstractQuercusModule {
    * @return number of bytes read from file, or FALSE if an error occurred
    */
   public static Value readgzfile(Env env,
-				 String fileName,
+				 StringValue fileName,
 				 @Optional boolean useIncludePath)
   {
     BinaryInput is = (BinaryInput) gzopen(env, fileName, "r", useIncludePath);

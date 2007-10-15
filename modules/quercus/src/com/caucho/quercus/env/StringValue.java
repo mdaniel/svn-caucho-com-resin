@@ -805,153 +805,6 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     return append(buf, 0, buf.length);
   }
-
-  /**
-   * Append from a read stream
-   */
-  public StringValue append(Reader reader)
-    throws IOException
-  {
-    int ch;
-    
-    while ((ch = reader.read()) >= 0) {
-      append((char) ch);
-    }
-
-    return this;
-  }
-
-  /**
-   * Append from a read stream
-   */
-  public StringValue append(Reader reader, long length)
-    throws IOException
-  {
-    int ch;
-    
-    while (length-- > 0 && (ch = reader.read()) >= 0) {
-      append((char) ch);
-    }
-
-    return this;
-  }
-
-  /**
-   * Append from an input stream
-   */
-  public StringValue append(InputStream is)
-  {
-    try {
-      int ch;
-    
-      while ((ch = is.read()) >= 0) {
-	appendByte(ch);
-      }
-
-      return this;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
-   * Append from an input stream
-   */
-  public StringValue appendAll(InputStream is)
-  {
-    try {
-      int ch;
-    
-      while ((ch = is.read()) >= 0) {
-	appendByte(ch);
-      }
-
-      return this;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
-   * Append from an input stream
-   */
-  public StringValue append(InputStream is, long length)
-  {
-    try {
-      int ch;
-    
-      while (length-- > 0 && (ch = is.read()) >= 0) {
-	appendByte(ch);
-      }
-
-      return this;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
-   * Append from an input stream
-   */
-  public StringValue append(BinaryInput is)
-  {
-    try {
-      int ch;
-    
-      while ((ch = is.read()) >= 0) {
-	appendByte(ch);
-      }
-
-      return this;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
-   * Append from an input stream
-   */
-  public StringValue append(BinaryInput is, long length)
-  {
-    try {
-      int ch;
-
-      TempBuffer buf = TempBuffer.allocate();
-
-      int sublen = buf.getBuffer().length;
-      if (length < sublen)
-	sublen = (int) length;
-
-      sublen = is.read(buf.getBuffer(), 0, sublen);
-
-      if (sublen > 0)
-	append(buf.getBuffer(), 0, sublen);
-
-      TempBuffer.free(buf);
-
-      return this;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
-   * Append from an input stream
-   */
-  public StringValue appendAll(BinaryInput is, long length)
-  {
-    try {
-      int ch;
-    
-      while (length-- > 0 && (ch = is.read()) >= 0) {
-	appendByte(ch);
-      }
-
-      return this;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
   
   /**
    * Append to a string builder.
@@ -1090,6 +943,164 @@ abstract public class StringValue extends Value implements CharSequence {
     }
     
     return sb;
+  }
+
+  /**
+   * Append from a read stream
+   */
+  public StringValue append(Reader reader)
+    throws IOException
+  {
+    int ch;
+    
+    while ((ch = reader.read()) >= 0) {
+      append((char) ch);
+    }
+
+    return this;
+  }
+
+  /**
+   * Append from a read stream
+   */
+  public StringValue append(Reader reader, long length)
+    throws IOException
+  {
+    int ch;
+    
+    while (length-- > 0 && (ch = reader.read()) >= 0) {
+      append((char) ch);
+    }
+
+    return this;
+  }
+
+  /**
+   * Append from an input stream, using InputStream.read semantics,
+   * i.e. just call is.read once even if more data is available.
+   */
+  public int appendRead(InputStream is, long length)
+  {
+    TempBuffer tBuf = TempBuffer.allocate();
+
+    try {
+      byte []buffer = tBuf.getBuffer();
+      int sublen = buffer.length;
+      if (length < sublen)
+	sublen = (int) length;
+
+      sublen = is.read(buffer, 0, sublen);
+
+      if (sublen > 0)
+	append(buffer, 0, sublen);
+
+      return sublen;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      TempBuffer.free(tBuf);
+    }
+  }
+
+  /**
+   * Append from an input stream, reading from the input stream until
+   * end of file or the length is reached.
+   */
+  public int appendReadAll(InputStream is, long length)
+  {
+    TempBuffer tBuf = TempBuffer.allocate();
+
+    try {
+      byte []buffer = tBuf.getBuffer();
+      int readLength = 0;
+      
+      while (length > 0) {
+	int sublen = buffer.length;
+	if (length < sublen)
+	  sublen = (int) length;
+
+	sublen = is.read(buffer, 0, sublen);
+
+	if (sublen > 0) {
+	  append(buffer, 0, sublen);
+	  length -= sublen;
+	  readLength += sublen;
+	}
+	else
+	  return readLength > 0 ? readLength : -1;
+      }
+
+      return readLength;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      TempBuffer.free(tBuf);
+    }
+  }
+
+  /**
+   * Append from an input stream, using InputStream semantics, i.e
+   * call is.read() only once.
+   */
+  public int appendRead(BinaryInput is, long length)
+  {
+    TempBuffer tBuf = TempBuffer.allocate();
+
+    try {
+      byte []buffer = tBuf.getBuffer();
+      int sublen = buffer.length;
+      if (length < sublen)
+	sublen = (int) length;
+
+      sublen = is.read(buffer, 0, sublen);
+
+      if (sublen > 0)
+	append(buffer, 0, sublen);
+
+      TempBuffer.free(tBuf);
+
+      return sublen;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      TempBuffer.free(tBuf);
+    }
+  }
+
+  /**
+   * Append from an input stream, reading all available data from the
+   * stream.
+   */
+  public int appendReadAll(BinaryInput is, long length)
+  {
+    TempBuffer tBuf = TempBuffer.allocate();
+
+    try {
+      byte []buffer = tBuf.getBuffer();
+      int readLength = 0;
+      
+      while (length > 0) {
+	int sublen = buffer.length;
+	if (length < sublen)
+	  sublen = (int) length;
+
+	sublen = is.read(buffer, 0, sublen);
+
+	if (sublen > 0) {
+	  append(buffer, 0, sublen);
+	  length -= sublen;
+	  readLength += sublen;
+	}
+	else
+	  return readLength > 0 ? readLength : -1;
+      }
+
+      return readLength;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      TempBuffer.free(tBuf);
+    }
   }
 
   /**

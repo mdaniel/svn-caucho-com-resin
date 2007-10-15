@@ -129,7 +129,7 @@ public class QuercusZipEntry {
 
     StringValue bb = env.createBinaryBuilder();
 
-    bb.append((InputStream) _in, length);
+    bb.appendReadAll((InputStream) _in, length);
 
     return bb;
     /*

@@ -486,7 +486,7 @@ public class MiscModule extends AbstractQuercusModule {
         Value val = entry.getValue();
 
         String type = val.get(LongValue.ZERO).toString();
-        String name = val.get(LongValue.ONE).toString();
+        StringValue name = val.get(LongValue.ONE).toStringValue();
         String mode = val.get(LongValue.create(2)).toString();
         
         // input to the command

@@ -364,12 +364,8 @@ public class SessionModule extends AbstractQuercusModule
                                           Callback gc)
 
   {
-    SessionCallback cb = new SessionCallback(open,
-                                             close,
-                                             read,
-                                             write,
-                                             directory,
-                                             gc);
+    SessionCallback cb
+      = new SessionCallback(open, close, read, write, directory, gc);
 
     env.setSessionCallback(cb);
 

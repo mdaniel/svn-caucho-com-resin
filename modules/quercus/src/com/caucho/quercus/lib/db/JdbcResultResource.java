@@ -708,7 +708,7 @@ public class JdbcResultResource {
             return NullValue.NULL;
 
 	  try {
-	    bb.append(is);
+	    bb.appendReadAll(is, Long.MAX_VALUE);
           } catch (RuntimeException e) {
             log.log(Level.WARNING, e.toString(), e);
 
