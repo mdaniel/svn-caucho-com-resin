@@ -1583,20 +1583,21 @@ public class FileModule extends AbstractQuercusModule {
    * Sets the current position.
    *
    * @param is the stream to test
+   * @return 0 on success, -1 on error.
    */
   public static Value fseek(Env env,
 			    @NotNull BinaryInput is,
 			    long offset, @Optional int whence)
   {
     if (is == null)
-      return BooleanValue.FALSE;
+      return LongValue.MINUS_ONE;
 
     long position = is.seek(offset, whence);
 
     if (position < 0)
-      return BooleanValue.FALSE;
+      return LongValue.MINUS_ONE;
     else
-      return LongValue.create(position);
+      return LongValue.ZERO;
   }
 
   /**
@@ -1611,6 +1612,7 @@ public class FileModule extends AbstractQuercusModule {
    * Returns the current position.
    *
    * @param file the stream to test
+   * @return position in file or FALSE on error.
    */
   public static Value ftell(Env env,
 			    @NotNull BinaryInput is)
@@ -1618,7 +1620,12 @@ public class FileModule extends AbstractQuercusModule {
     if (is == null)
       return BooleanValue.FALSE;
 
-    return new LongValue(is.getPosition());
+    long pos = is.getPosition();
+
+    if (pos < 0)
+      return BooleanValue.FALSE;
+
+    return LongValue.create(pos);
   }
 
   /**
