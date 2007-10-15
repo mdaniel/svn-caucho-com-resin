@@ -134,10 +134,9 @@ public class OutputBuffer {
       StringValue bb = _env.createBinaryBuilder();
       int ch;
 
-      // XXX: encoding
-      while ((ch = rs.read()) >= 0) {
-        bb.appendByte(ch);
-      }
+      bb.appendAll(rs);
+
+      rs.close();
 
       return bb;
     } catch (IOException e) {

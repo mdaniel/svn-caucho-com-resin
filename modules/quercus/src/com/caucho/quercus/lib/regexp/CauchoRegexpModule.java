@@ -235,7 +235,7 @@ public class CauchoRegexpModule
           regs.put(LongValue.ZERO, regexpState.group(env));
 
         int count = regexpState.groupCount();
-        for (int i = 1; i <= count; i++) {
+        for (int i = 1; i < count; i++) {
           if (! regexpState.isMatchedGroup(i))
             continue;
           
@@ -523,14 +523,14 @@ public class CauchoRegexpModule
   /**
    * Quotes regexp values
    */
-  public static String preg_quote(StringValue string,
-				  @Optional String delim)
+  public static StringValue preg_quote(StringValue string,
+				       @Optional StringValue delim)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = string.createStringBuilder();
 
     boolean []extra = null;
 
-    if (delim != null && ! delim.equals("")) {
+    if (delim != null && delim.length() > 0) {
       extra = new boolean[256];
 
       for (int i = 0; i < delim.length(); i++)
@@ -555,7 +555,7 @@ public class CauchoRegexpModule
         sb.append(ch);
     }
 
-    return sb.toString();
+    return sb;
   }
 
   /**
@@ -689,7 +689,7 @@ public class CauchoRegexpModule
     Regexp regexp = getRegexp(env, patternString);
     RegexpState regexpState = new RegexpState(regexp, subject);
 
-    StringValue result = patternString.createEmptyStringBuilder();
+    StringValue result = patternString.createStringBuilder();
     int tail = 0;
 
     while (regexpState.find() && numberOfMatches < limit) {
@@ -705,7 +705,7 @@ public class CauchoRegexpModule
 
       ArrayValue regs = new ArrayValueImpl();
 
-      for (int i = 0; i <= regexpState.groupCount(); i++) {
+      for (int i = 0; i < regexpState.groupCount(); i++) {
         StringValue group = regexpState.group(env, i);
 
         if (group != null)
@@ -857,7 +857,7 @@ public class CauchoRegexpModule
 
     int length = subject.length();
 
-    StringValue result = subject.createEmptyStringBuilder();
+    StringValue result = subject.createStringBuilder();
 
     int tail = 0;
     boolean isMatched = false;
@@ -880,7 +880,7 @@ public class CauchoRegexpModule
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
       if (isEval) {
-        StringValue evalString = subject.createEmptyStringBuilder();
+        StringValue evalString = subject.createStringBuilder();
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
@@ -1079,7 +1079,7 @@ public class CauchoRegexpModule
 
       // Append parameterized delimiters
       if (isCaptureDelim) {
-        for (int i = 1; i <= regexpState.groupCount(); i++) {
+        for (int i = 1; i < regexpState.groupCount(); i++) {
           int start = regexpState.start(i);
           int end = regexpState.end(i);
 
@@ -1160,9 +1160,9 @@ public class CauchoRegexpModule
   /**
    * Makes a regexp for a case-insensitive match.
    */
-  public static String sql_regcase(String string)
+  public static StringValue sql_regcase(StringValue string)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = string.createStringBuilder();
 
     int len = string.length();
     for (int i = 0; i < len; i++) {
@@ -1184,7 +1184,7 @@ public class CauchoRegexpModule
         sb.append(ch);
     }
 
-    return sb.toString();
+    return sb;
   }
 
   /**
@@ -1295,9 +1295,9 @@ public class CauchoRegexpModule
    * @return an array of strings split around the pattern string
    */
   public static Value spliti(Env env,
-          StringValue patternString,
-          StringValue string,
-          @Optional("-1") long limit)
+			     StringValue patternString,
+			     StringValue string,
+			     @Optional("-1") long limit)
   {
     try {
       if (limit < 0)
@@ -1349,11 +1349,7 @@ public class CauchoRegexpModule
                                   StringValue subject)
     throws IllegalRegexpException
   {
-    Regexp regexp = getRegexp(env, rawRegexp);
-
-    regexp.init(env, subject);
-
-    return regexp;
+    return getRegexp(env, rawRegexp);
   }
 
   private static Regexp getRegexp(Env env,
@@ -1363,7 +1359,7 @@ public class CauchoRegexpModule
     Regexp regexp = _regexpCache.get(rawRegexp);
 
     if (regexp != null)
-      return regexp.clone();
+      return regexp;
 
     regexp = new Regexp(env, rawRegexp);
 
@@ -1377,7 +1373,7 @@ public class CauchoRegexpModule
                                            String startDelim,
                                            String endDelim)
   {
-    StringValue sb = str.createEmptyStringBuilder();
+    StringValue sb = str.createStringBuilder();
     
     sb = sb.appendBytes(startDelim);
     sb = sb.append(str);
@@ -1478,7 +1474,7 @@ public class CauchoRegexpModule
   {
     int len = regexp.length();
 
-    StringValue sb = regexp.createEmptyStringBuilder();
+    StringValue sb = regexp.createStringBuilder();
     char quote = 0;
 
     boolean sawVerticalBar = false;
@@ -1756,7 +1752,7 @@ public class CauchoRegexpModule
                      StringValue sb,
                      RegexpState regexpState)
     {
-      if (_group <= regexpState.groupCount())
+      if (_group < regexpState.groupCount())
         sb = sb.append(regexpState.group(env, _group));
       
       return sb;

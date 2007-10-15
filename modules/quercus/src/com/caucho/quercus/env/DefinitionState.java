@@ -198,7 +198,7 @@ public final class DefinitionState {
       fun = _lowerFunMap.get(name.toLowerCase());
 
       if (fun != null) {
-        copyOnWrite();
+        // copyOnWrite();
         _funMap.put(name, fun);
 
         return fun;
@@ -208,13 +208,13 @@ public final class DefinitionState {
     fun = findModuleFunction(name);
 
     if (fun != null) {
-      copyOnWrite();
+      // copyOnWrite();
       _funMap.put(name, fun);
 
       return fun;
     }
     else {
-      copyOnWrite();
+      // copyOnWrite();
       _funMap.put(name, new UnsetFunction(_crc));
       
       return null;

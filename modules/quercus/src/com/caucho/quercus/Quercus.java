@@ -317,7 +317,9 @@ public class Quercus
    */
   public boolean isUnicodeSemantics()
   {
-    return getIniBoolean("unicode.semantics");
+    boolean value = getIniBoolean("unicode.semantics");
+
+    return value;
   }
 
   public StringValue createString(String v)

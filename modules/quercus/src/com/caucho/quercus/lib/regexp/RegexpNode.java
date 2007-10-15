@@ -161,70 +161,18 @@ class RegexpNode {
   public static final int FAIL = -1;
   public static final int SUCCESS = 0;
   
-  static RegexpNode END = RegexpNode.create(RC_END);
-  static RegexpNode NULL = RegexpNode.create(RC_NULL);
-  
   static final RegexpNode N_END = new End();
   
   static final RegexpNode ANY_CHAR;
-
-  RegexpNode _rest;
   
   //for lookbehind
   int _length;
-  
-  static int _count = 0;
-  int _id = -1;
-
   
   /**
    * Creates a node with a code
    */
   protected RegexpNode()
   {
-    _rest = N_END;
-    
-    _id = _count++;
-  }
-  
-  /**
-   * Creates a node with a code
-   */
-  static RegexpNode create(int code)
-  {
-    return new Compat(code);
-  }
-
-  /**
-   * Creates a node with a group index
-   */
-  static RegexpNode create(int code, int index)
-  {
-    return new Compat(code, index);
-  }
-
-  /**
-   * Creates a node with a group index
-   */
-  static RegexpNode create(int code, RegexpNode branch)
-  {
-    return new Compat(code, branch);
-  }
-
-  /**
-   * Creates a node with a group index
-   */
-  static RegexpNode create(int code, int index, int min, int max)
-  {
-    return new Compat(code, index, min, max);
-  }
-
-  /**
-   * Creates a node with a group index
-   */
-  static RegexpNode create(int code, RegexpSet set)
-  {
-    return new Compat(code, set);
   }
 
   //
@@ -289,7 +237,7 @@ class RegexpNode {
    */
   RegexpNode createOr(RegexpNode node)
   {
-    return new Or(getHead(), node.getHead());
+    return Or.create(getHead(), node.getHead());
   }
 
   //
@@ -304,6 +252,21 @@ class RegexpNode {
   String prefix()
   {
     return "";
+  }
+
+  int firstChar()
+  {
+    return -1;
+  }
+
+  boolean isNullable()
+  {
+    return false;
+  }
+
+  boolean []firstSet(boolean []firstSet)
+  {
+    return null;
   }
 
   RegexpNode getTail()
@@ -346,1123 +309,6 @@ class RegexpNode {
     return name.substring(p + 1) + "[]";
   }
 
-  static RegexpNode removeTail(RegexpNode head)
-  {
-    RegexpNode tail = head._rest;
-    
-    if (head == null || tail == null)
-      return null;
-    
-    if (tail._rest == null) {
-      head._rest = null;
-      return tail;
-    }
-    else
-      return removeTail(tail);
-  }
-  
-  /*
-   * Cuts out the non-null tail of this node.
-   */
-  static RegexpNode spliceNonNullTail(RegexpNode head)
-  {
-    RegexpNode tail = head._rest;
-    
-    if (head == null || tail == null)
-      return null;
-
-    if (tail._rest == null || tail == END || tail == NULL) {
-      head._rest = null;
-      
-      tail._rest = null;
-      return tail;
-    }
-    else
-      return spliceNonNullTail(tail);
-  }
-  
-  /**
-   * Replaces the tail of a node.
-   */
-  static RegexpNode replaceTail(RegexpNode node, RegexpNode tail)
-  {
-    if (node == null || node == END || node == tail)
-      return tail;
-
-    Compat compat = (Compat) node;
-    if (compat._code == RC_OR)
-      compat._branch = replaceTail(compat._branch, tail);
-
-    node._rest = replaceTail(node._rest, tail);
-
-    return node;
-  }
-
-  /**
-   * Connects lastBegin to the tail, returning the head;
-   */
-  static RegexpNode concat(RegexpNode head, RegexpNode tail)
-  {
-    if (head == null || head == END)
-      return tail;
-
-    RegexpNode node = head;
-    while (node._rest != null && node._rest != END)
-      node = node._rest;
-
-    node._rest = tail;
-
-    return head;
-  }
-  
-  public static String code(RegexpNode node)
-  {
-    if (node == null)
-      return "null";
-    else
-      return code(((Compat) node)._code) + node._id;
-  }
-  
-  public static String code(int code)
-  {
-    switch (code) {
-      case RC_END: return "RC_END";
-      case RC_NULL: return "RC_NULL";
-      case RC_STRING: return "RC_STRING";
-      case RC_SET: return "RC_SET";
-      case RC_NSET: return "RC_NSET";
-      case RC_BEG_GROUP: return "RC_BEG_GROUP";
-      case RC_END_GROUP: return "RC_END_GROUP";
-      case RC_GROUP_REF: return "RC_GROUP_REF";
-      case RC_LOOP: return "RC_LOOP";
-      case RC_LOOP_INIT: return "RC_LOOP_INIT";
-      case RC_LOOP_SHORT: return "RC_LOOP_SHORT";
-      case RC_LOOP_UNIQUE: return "RC_LOOP_UNIQUE";
-      case RC_LOOP_SHORT_UNIQUE: return "RC_LOOP_SHORT_UNIQUE";
-      case RC_LOOP_LONG: return "RC_LOOP_LONG";
-      case RC_OR: return "RC_OR";
-      case RC_OR_UNIQUE: return "RC_OR_UNIQUE";
-      case RC_POS_LOOKAHEAD: return "RC_POS_PEEK";
-      case RC_NEG_LOOKAHEAD: return "RC_NEG_PEEK";
-      case RC_WORD: return "RC_WORD";
-      case RC_NWORD: return "RC_NWORD";
-      case RC_BLINE: return "RC_BLINE";
-      case RC_ELINE: return "RC_ELINE";
-      case RC_BSTRING: return "RC_BSTRING";
-      case RC_ESTRING: return "RC_ESTRING";
-      case RC_ENSTRING: return "RC_ENSTRING";
-      case RC_GSTRING: return "RC_GSTRING";
-      case RC_COND: return "RC_COND";
-      case RC_POS_LOOKBEHIND: return "RC_POS_LOOKBEHIND";
-      case RC_NEG_LOOKBEHIND: return "RC_NEG_LOOKBEHIND";
-      case RC_LOOKBEHIND_OR: return "RC_LOOKBEHIND_OR";
-      case RC_STRING_I: return "RC_STRING_I";
-      case RC_SET_I: return "RC_SET_I";
-      case RC_NSET_I: return "RC_NSET_I";
-      case RC_GROUP_REF_I: return "RC_GROUP_REF_I";
-      case RC_LEXEME: return "RC_LEXEME";
-      default: return "unknown(" + code + ")";
-    }
-  }
-
-  static class Compat extends RegexpNode {
-    int _code;
-  
-    CharBuffer _string;
-    RegexpSet _set;
-    int _index;
-    int _min;
-    int _max;
-    RegexpNode _branch;
-  
-    //for conditionals
-    RegexpNode _condition;
-    RegexpNode _nBranch;
-
-    // XXX: needs to be removed
-    boolean _mark;
-    boolean _printMark;
-
-    byte _unicodeCategory;
-  
-    /**
-     * Creates a node with a code
-     */
-    Compat(int code)
-    {
-      _rest = END;
-      _code = code;
-    
-      _id = _count++;
-    }
-
-    /**
-     * Creates a node with a group index
-     */
-    Compat(int code, int index)
-    {
-      this(code);
-
-      _index = index;
-    }
-
-    /**
-     * Creates a node with a group index
-     */
-    Compat(int code, RegexpNode branch)
-    {
-      this(code);
-
-      _branch = branch;
-    }
-
-    /**
-     * Creates a node with a group index
-     */
-    Compat(int code, int index, int min, int max)
-    {
-      this(code);
-
-      _index = index;
-      _min = min;
-      _max = max;
-    }
-
-    /**
-     * Creates a node with a group index
-     */
-    Compat(int code, RegexpSet set)
-    {
-      this(code);
-
-      _set = set;
-      _length = 1;
-    }
-    
-    /**
-     * Tries to match the program.
-     *
-     * @return index to the tail of the match
-     */
-    int match(CharCursor cursor, Regexp state)
-    {
-      int tail;
-      char ch;
-      int value;
-    
-      int i;
-    
-      GroupState oldState;
-
-      switch (_code) {
-      case RegexpNode.RC_NULL:
-	return _rest.match(cursor, state);
-
-      case RegexpNode.RC_LEXEME:
-      case RegexpNode.RC_END:
-	state._lexeme = _index;
-	return _index;
-
-      case RegexpNode.RC_STRING:
-	if (true)
-	  throw new UnsupportedOperationException();
-	
-	int length = _string.length();
-
-	if (cursor.regionMatches(_string.getBuffer(), 0, length)) {
-	  
-	  return _rest.match(cursor, state);
-	}
-	else {
-	  return FAIL;
-	}
-    
-      case RegexpNode.RC_STRING_I:
-	length = _string.length();
-
-	if (cursor.regionMatchesIgnoreCase(_string.getBuffer(), 0, length))
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-      case RegexpNode.RC_SET:
-	if ((ch = cursor.read()) != cursor.DONE && _set.match(ch))
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-      case RegexpNode.RC_SET_I:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-	int lch = Character.toLowerCase((char) ch);
-	int uch = Character.toUpperCase((char) lch);
-	if (_set.match(lch) || _set.match(uch))
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-      case RegexpNode.RC_NSET:
-	if ((ch = cursor.read()) != cursor.DONE && ! _set.match(ch))
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-      case RegexpNode.RC_NSET_I:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-	
-	lch = Character.toLowerCase((char) ch);
-	uch = Character.toUpperCase((char) lch);
-	if (! _set.match(lch) && ! _set.match(uch))
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-	// '('
-      case RegexpNode.RC_BEG_GROUP:
-	state._groupStart[_index] = cursor.getIndex();
-	
-	return _rest.match(cursor, state);
-
-	// ')'
-      case RegexpNode.RC_END_GROUP:
-	int index = 2 * _index;
-	
-	if (state._groupState.size() <= index + 1)
-	  state._groupState.setLength(index + 2);
-	state._groupState.set(2 * _index, state._groupStart[_index]);
-	state._groupState.set(2 * _index + 1, cursor.getIndex());
-	
-	state._groupState.setMatched(_index);
-	
-	return _rest.match(cursor, state);
-
-	// '\nn'
-      case RegexpNode.RC_GROUP_REF:
-	if (! state._groupState.isMatched(_index))
-	  return FAIL;
-	else {
-	  int begin = state._groupState.get(2 * _index);
-	  length = (state._groupState.get(2 * _index + 1)
-		    - state._groupState.get(2 * _index));
-	  state._cb.setLength(0);
-	  cursor.subseq(state._cb, begin, begin + length);
-	  if (cursor.regionMatches(state._cb.getBuffer(), 0, length))
-	    return _rest.match(cursor, state);
-	  else
-	    return FAIL;
-	}
-
-	// '\nn'
-      case RegexpNode.RC_GROUP_REF_I:
-	if (! state._groupState.isMatched(_index))
-	  return FAIL;
-	else {
-	  int begin = state._groupState.get(2 * _index);
-	  length = (state._groupState.get(2 * _index + 1)
-		    - state._groupState.get(2 * _index));
-
-	  state._cb.setLength(0);
-	  cursor.subseq(state._cb, begin, begin + length);
-	  if (cursor.regionMatchesIgnoreCase(state._cb.getBuffer(), 0, length)) {
-	    cursor.skip(length);
-	    return _rest.match(cursor, state);
-	  } else
-	    return FAIL;
-	}
-
-      case RegexpNode.RC_LOOP_INIT:
-	state._loopCount[((Compat) _rest)._index] = 0;
-	state._loopTail[((Compat) _rest)._index] = -1;
-	
-	return _rest.match(cursor, state);
-
-	// '*' '{n,m}' '+' '?' matches as much as possible
-      case RegexpNode.RC_LOOP:
-	oldState = state._groupState.copy();
-	tail = cursor.getIndex();
-
-	int matchedCount = -1;
-	int matchedTail = tail;
-	GroupState matchedGroupState = null;
-        
-	int loopTail = -1;
-        
-	boolean isParentRestMatched = false;
-        
-	for (i = 0; i < _max; i++) {
-	  if (cursor.current() == cursor.DONE)
-	    break;
-          
-	  // empty string match break
-	  if (loopTail == cursor.getIndex())
-	    break;
-
-	  loopTail = cursor.getIndex();
-          
-	  value = _branch.match(cursor, state);
-          
-	  if (value == FAIL)
-	    break;
-          
-	  int lastPos = cursor.getIndex();
-	  GroupState innerState = state._groupState.copy();
-          
-	  value = _rest.match(cursor, state);
-
-          /*
-	  if (value != FAIL && prog._min <= i + 1) {
-	    if (_parentLoopRestStack.size() == 0) {
-	      matchedCount = i + 1;
-	      matchedTail = cursor.getIndex();
-              
-	      freeGroupState(matchedGroupState);
-	      matchedGroupState = _groupState.copy();
-	    }
-	    else {
-	      lastPos = cursor.getIndex();
-
-	      freeGroupState(innerState);
-	      innerState = _groupState.copy();
-              
-	      RegexpNode oldRest = _parentLoopRestStack.pop();
-              
-	      value = match(oldRest, cursor);
-              
-	      _parentLoopRestStack.push(oldRest);
-              
-	      if (value != FAIL || ! isParentRestMatched) {
-		isParentRestMatched = isParentRestMatched || value != FAIL;
-                
-		matchedCount = i + 1;
-		matchedTail = lastPos;
-                
-		freeGroupState(matchedGroupState);
-		matchedGroupState = innerState.copy();
-	      }
-	    }
-	  }
-          
-	  cursor.setIndex(lastPos);
-	  setGroupState(innerState);
-	  */
-	  if (true) throw new UnsupportedOperationException(getClass().getName());
-	}
-
-	//System.err.println("outside LOOP: " + RegexpNode.code(prog));
-        
-	if (_min <= matchedCount) {
-	  cursor.setIndex(matchedTail);
-
-	  state.freeGroupState(oldState);
-	  state.setGroupState(matchedGroupState);
-          
-	  return SUCCESS;
-	}
-	// may have matched the empty string
-	else if (_min == 0) {
-	  cursor.setIndex(tail);
-	  state.setGroupState(oldState);
-
-	  return _rest.match(cursor, state);
-	}
-	else {
-	  cursor.setIndex(tail);
-	  state.setGroupState(oldState);
-          
-	  return FAIL;
-	}
-
-
-	/*
-	  tail = cursor.getIndex();
-	  if (_loopCount[prog._index]++ < prog._min)
-	  prog = prog._branch;
-	  else if (_loopCount[prog._index] > prog._max)
-	  prog = prog._rest;
-	  else if (_loopTail[prog._index] == tail)
-	  return FAIL;
-	  else {
-	  _loopTail[prog._index] = tail;
-	  int match = _group.size();
-
-	  if ((ch = cursor.current()) == cursor.DONE)
-	  prog = prog._rest;
-	  else if (prog._set != null && prog._set.match(ch))
-	  prog = prog._branch;
-	  else {
-	  oldState = _groupState.copy();
-
-	  if ((value = match(prog._branch, cursor)) != FAIL) {
-	  return value;
-	  }
-	  else {
-	  _groupState = oldState;
-          
-	  cursor.setIndex(tail);
-	  _group.setLength(match);
-	  prog = prog._rest;
-	  }
-	  }
-	  }
-	
-	*/
-
-    
-	// '*' '{n,m}' '+' '?' possessively matches as much as possible
-      case RegexpNode.RC_LOOP_LONG:
-	oldState = state._groupState.copy();
-	tail = cursor.getIndex();
-        
-	for (i = 0; i < _max; i++) {
-	  if (cursor.current() == cursor.DONE)
-	    break;
-
-	  int lastPos = cursor.getIndex();
-	  GroupState innerState = state._groupState.copy();
-          
-	  if ((value = _branch.match(cursor, state)) == FAIL) {
-	    cursor.setIndex(lastPos);
-	    state.setGroupState(innerState);
-            
-	    break;
-	  }
-	  else
-	    state.freeGroupState(innerState);
-	}
-
-	if (_min <= i) {
-	  state.freeGroupState(oldState);
-	  return _rest.match(cursor, state);
-	}
-	else {
-	  cursor.setIndex(tail);
-	  state.setGroupState(oldState);
-          
-	  return FAIL;
-	}
-        
-	/*
-	  tail = cursor.getIndex();
-
-	  if (_loopCount[prog._index] > prog._max)
-	  prog = prog._rest;
-	  else if (_loopTail[prog._index] == tail)
-	  return FAIL;
-	  else {
-	  _loopTail[prog._index] = tail;
-	  int match = _group.size();
-
-	  oldState = _groupState.copy();
-          
-	  if (match(prog._branch, cursor) != FAIL) {
-	  cursor.setIndex(tail);
-	  }
-	  else {
-	  _groupState = oldState;
-            
-	  if ((ch = cursor.current()) == cursor.DONE)
-	  prog = prog._rest;
-	  else if (prog._set != null && prog._set.match(ch))
-	  prog = prog._branch;
-	  else {
-	  cursor.setIndex(tail);
-	  _group.setLength(match);
-	  prog = prog._rest;
-	  }
-	  }
-	  }
-	*/
-
-	// '*' '{n,m}' '+' '?' matches as little as possible
-      case RegexpNode.RC_LOOP_SHORT:
-	oldState = state._groupState.copy();
-	tail = cursor.getIndex();
-
-	if (_min == 0) {
-	  if (_rest.match(cursor, state) != FAIL)
-	    return SUCCESS;
-
-	  state.setGroupState(oldState);
-	  oldState = state._groupState.copy();
-	  cursor.setIndex(tail);
-	}
-        
-	for (i = 0; i < _max; i++) {
-	  if (cursor.current() == cursor.DONE)
-	    break;
-
-	  value = _branch.match(cursor, state);
-          
-	  if (value == FAIL)
-	    break;
-          
-	  int lastPos = cursor.getIndex();
-	  GroupState innerState = state._groupState.copy();
-          
-	  value = _rest.match(cursor, state);
-
-	  if (value != FAIL && _min <= i + 1) {
-	    return SUCCESS;
-	  }
-          
-	  cursor.setIndex(lastPos);
-	  state.setGroupState(innerState);
-	}
-
-	// may have matched the empty string
-	if (_min == 0) {
-	  cursor.setIndex(tail);
-	  state.setGroupState(oldState);
-          
-	  return _rest.match(cursor, state);
-	}
-	else {
-	  cursor.setIndex(tail);
-	  state.setGroupState(oldState);
-          
-	  return FAIL;
-	}
-
-	// The first mismatch for loop unique is necessarily a match
-	// for the successor, e.g. a*b as opposed to a*ab
-	// XXX: this needs to be changed to be like the or.
-      case RegexpNode.RC_LOOP_UNIQUE:
-
-	if (state._loopCount[_index]++ < _min) {
-	  return _branch.match(cursor, state);
-	}
-	else if (_max < state._loopCount[_index])
-	  return _rest.match(cursor, state);
-	else if ((ch = cursor.current()) == cursor.DONE)
-	  return _rest.match(cursor, state);
-	else if (_set.match(ch))
-	  return _branch.match(cursor, state);
-	else
-	  return _rest.match(cursor, state);
-
-      case RegexpNode.RC_OR:
-	state._match = state._groupState.size();
-	tail = cursor.getIndex();
-	if ((value = _branch.match(cursor, state)) != FAIL)
-	  return value;
-	cursor.setIndex(tail);
-	state._groupState.setLength(state._match);
-	return _rest.match(cursor, state);
-
-	// Here we can tell by the first character if the match works
-      case RegexpNode.RC_OR_UNIQUE:
-	if ((ch = cursor.current()) == cursor.DONE)
-	  return _rest.match(cursor, state);
-	else if (_set.match(ch))
-	  return _branch.match(cursor, state);
-	else
-	  return _rest.match(cursor, state);
-
-	// The peek pattern must match but isn't included in the real match
-      case RegexpNode.RC_POS_LOOKAHEAD:
-	tail = cursor.getIndex();
-	oldState = state._groupState.copy();
-	
-	if (_branch.match(cursor, state) == FAIL)
-	  return FAIL;
-	
-	cursor.setIndex(tail);
-	state.setGroupState(oldState);
-	
-	return _rest.match(cursor, state);
-
-	// The peek pattern must not match and isn't included in the real match
-      case RegexpNode.RC_NEG_LOOKAHEAD:
-	tail = cursor.getIndex();
-	oldState = state._groupState.copy();
-	
-	if (_branch.match(cursor, state) != FAIL)
-	  return FAIL;
-	
-	state.setGroupState(oldState);
-	cursor.setIndex(tail);
-        
-	return _rest.match(cursor, state);
-
-	// The previous pattern must match and isn't included in the real match
-      case RegexpNode.RC_POS_LOOKBEHIND:
-	tail = cursor.getIndex();
-	oldState = state._groupState.copy();
-        
-	length = _length;
-        
-	if (tail < length)
-	  return FAIL;
-        
-	cursor.setIndex(tail - length);
-        
-	if (_branch.match(cursor, state) == FAIL) {
-	  cursor.setIndex(tail);
-	  state.setGroupState(oldState);
-
-	  return FAIL;
-	}
-
-	cursor.setIndex(tail);
-	state.setGroupState(oldState);
-
-	return _rest.match(cursor, state);
-        
-	// The previous pattern must not match and isn't included in the real match
-      case RegexpNode.RC_NEG_LOOKBEHIND:
-	tail = cursor.getIndex();
-	oldState = state._groupState.copy();
-        
-	length = _branch._length;
-        
-	if (length <= tail) {
-	  cursor.setIndex(tail - length);
-          
-	  if (_branch.match(cursor, state) != FAIL) {
-	    cursor.setIndex(tail);
-	    state.setGroupState(oldState);
-            
-	    return FAIL;
-	  }
-	}
-        
-	cursor.setIndex(tail);
-	state.setGroupState(oldState);
-
-	return _rest.match(cursor, state);
-        
-      case RegexpNode.RC_LOOKBEHIND_OR:
-	tail = cursor.getIndex();
-	oldState = state._groupState.copy();
-        
-	int defaultLength = _length;
-	boolean isMatched = false;
-        
-	RegexpNode node = _branch;
-
-	if ((value = _branch.match(cursor, state)) != FAIL) {
-	  return value;
-	}
-	else {
-	  state.setGroupState(oldState);
-          
-	  for (node = _rest;
-	       node != null && node != END;
-	       node = node._rest) {
-	    cursor.setIndex(tail);
-	    oldState = state._groupState.copy();
-            
-	    cursor.setIndex(tail + defaultLength - node._length);
-            
-	    if (node.match(cursor, state) != FAIL) {
-	      isMatched = true;
-	      break;
-	    }
-            
-	    cursor.setIndex(tail);
-	    state.setGroupState(oldState);
-	  }
-	}
-        
-	if (! isMatched)
-	  return FAIL;
-        
-	return _rest.match(cursor, state);
-
-	// Conditional subpattern
-      case RegexpNode.RC_COND:
-	tail = cursor.getIndex();
-
-	if (state._groupState.isMatched(_index)) {
-	  if (_branch.match(cursor, state) == FAIL)
-	    return FAIL;
-	}
-	else if (_nBranch != null) {
-	  if (_nBranch.match(cursor, state) == FAIL)
-	    return FAIL;
-	}
-
-	return _rest.match(cursor, state);
-
-	// Beginning of line
-      case RegexpNode.RC_BLINE:
-	if (cursor.getIndex() == state._start)
-	  return _rest.match(cursor, state);
-	else if (cursor.previous() == '\n') {
-	  cursor.next();
-	  return _rest.match(cursor, state);
-	}
-	else {
-	  cursor.next();
-	  return FAIL;
-	}
-
-	// End of line
-      case RegexpNode.RC_ELINE:
-	if (cursor.current() == cursor.DONE || cursor.current() == '\n')
-	  return _rest.match(cursor, state);	  // XXX: return on success?
-	else
-	  return FAIL;
-
-	// Beginning of match
-      case RegexpNode.RC_GSTRING:
-	if (cursor.getIndex() == state._first)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-	// beginning of string
-      case RegexpNode.RC_BSTRING:
-	if (cursor.getIndex() == state._start)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-	// end of string
-      case RegexpNode.RC_ESTRING:
-	if (cursor.current() == cursor.DONE)
-	  return _rest.match(cursor, state);      // XXX: return on success?
-	else
-	  return FAIL;
-    
-	// end of string or newline at end of string
-      case RegexpNode.RC_ENSTRING:
-	ch = cursor.current();
-	tail = cursor.getIndex();
-	if (ch == '\n' && tail == cursor.getEndIndex() - 1
-	    || ch == cursor.DONE)
-	  return _rest.match(cursor, state);	  // XXX: return on success?
-	else
-	  return FAIL;
-
-      case RegexpNode.RC_WORD:
-	tail = cursor.getIndex();
-	if ((tail != state._start && RegexpSet.WORD.match(cursor.prev()))
-	    != (cursor.current() != cursor.DONE
-		&& RegexpSet.WORD.match(cursor.current())))
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-      case RegexpNode.RC_NWORD:
-	tail = cursor.getIndex();
-      
-	if ((tail != state._start && RegexpSet.WORD.match(cursor.prev()))
-	    == (cursor.current() != cursor.DONE
-		&& RegexpSet.WORD.match(cursor.current())))
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-    
-      case RegexpNode.RC_UNICODE:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	if (Character.getType(ch) == _unicodeCategory)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NUNICODE:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	if (Character.getType(ch) != _unicodeCategory)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_C:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value == Character.CONTROL
-	    || value == Character.FORMAT
-	    || value == Character.UNASSIGNED
-	    || value == Character.PRIVATE_USE
-	    || value == Character.SURROGATE)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NC:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-
-	value = Character.getType(ch);
-        
-	if (value != Character.CONTROL
-	    && value != Character.FORMAT
-	    && value != Character.UNASSIGNED
-	    && value != Character.PRIVATE_USE
-	    && value != Character.SURROGATE)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-
-      case RegexpNode.RC_L:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value == Character.LOWERCASE_LETTER
-	    || value == Character.MODIFIER_LETTER
-	    || value == Character.OTHER_LETTER
-	    || value == Character.TITLECASE_LETTER
-	    || value == Character.UPPERCASE_LETTER)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NL:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value != Character.LOWERCASE_LETTER
-	    && value != Character.MODIFIER_LETTER
-	    && value != Character.OTHER_LETTER
-	    && value != Character.TITLECASE_LETTER
-	    && value != Character.UPPERCASE_LETTER)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_M:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value == Character.COMBINING_SPACING_MARK
-	    || value == Character.ENCLOSING_MARK
-	    || value == Character.NON_SPACING_MARK)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NM:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value != Character.COMBINING_SPACING_MARK
-	    && value != Character.ENCLOSING_MARK
-	    && value != Character.NON_SPACING_MARK)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_N:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value == Character.DECIMAL_DIGIT_NUMBER
-	    || value == Character.LETTER_NUMBER
-	    || value == Character.OTHER_NUMBER)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NN:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value != Character.DECIMAL_DIGIT_NUMBER
-	    && value != Character.LETTER_NUMBER
-	    && value != Character.OTHER_NUMBER)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_P:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value == Character.CONNECTOR_PUNCTUATION
-	    || value == Character.DASH_PUNCTUATION
-	    || value == Character.END_PUNCTUATION
-	    || value == Character.FINAL_QUOTE_PUNCTUATION
-	    || value == Character.INITIAL_QUOTE_PUNCTUATION
-	    || value == Character.OTHER_PUNCTUATION
-	    || value == Character.START_PUNCTUATION)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NP:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value != Character.CONNECTOR_PUNCTUATION
-	    && value != Character.DASH_PUNCTUATION
-	    && value != Character.END_PUNCTUATION
-	    && value != Character.FINAL_QUOTE_PUNCTUATION
-	    && value != Character.INITIAL_QUOTE_PUNCTUATION
-	    && value != Character.OTHER_PUNCTUATION
-	    && value != Character.START_PUNCTUATION)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_S:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value == Character.CURRENCY_SYMBOL
-	    || value == Character.MODIFIER_SYMBOL
-	    || value == Character.MATH_SYMBOL
-	    || value == Character.OTHER_SYMBOL)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NS:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value != Character.CURRENCY_SYMBOL
-	    && value != Character.MODIFIER_SYMBOL
-	    && value != Character.MATH_SYMBOL
-	    && value != Character.OTHER_SYMBOL)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_Z:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value == Character.LINE_SEPARATOR
-	    || value == Character.PARAGRAPH_SEPARATOR
-	    || value == Character.SPACE_SEPARATOR)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_NZ:
-	if ((ch = cursor.read()) == cursor.DONE)
-	  return FAIL;
-        
-	value = Character.getType(ch);
-        
-	if (value != Character.LINE_SEPARATOR
-	    && value != Character.PARAGRAPH_SEPARATOR
-	    && value != Character.SPACE_SEPARATOR)
-	  return _rest.match(cursor, state);
-	else
-	  return FAIL;
-        
-      case RegexpNode.RC_CHAR_CLASS:
-	switch (((Compat) _branch)._code) {
-	case RegexpNode.RC_SPACE:
-	  if ((ch = cursor.read()) == cursor.DONE)
-	    return FAIL;
-            
-	  //value 
-            
-	  break;
-          
-	}
-	return SUCCESS;
-        
-      default:
-	throw new RuntimeException("Internal error: " + RegexpNode.code(this));
-      }
-    }
-
-    public Object clone()
-    {
-      Compat node = new Compat(_code);
-      node._rest = _rest;
-      node._string = _string;
-      node._set = _set;
-      node._index = _index;
-      node._min = _min;
-      node._max = _max;
-      node._branch = _branch;
-    
-      node._length = _length;
-      node._unicodeCategory = _unicodeCategory;
-
-      return node;
-    }
-
-    public String toString()
-    {
-      if (_printMark)
-	return "...";
-    
-      _printMark = true;
-      try {
-	switch (_code) {
-	case RC_END:
-	  return "";
-      
-	case RC_STRING:
-	  return _string.toString() + (_rest == null ? "" : _rest.toString());
-      
-	case RC_OR:
-	  return "(?:" + _branch + "|" + _rest + ")";
-      
-	case RC_OR_UNIQUE:
-	  return "(?:" + _branch + "|!" + _rest + ")";
-      
-	case RC_ESTRING:
-	  return "\\Z" + (_rest == null ? "" : _rest.toString());
-      
-	case RC_LOOP_INIT:
-	  return _rest.toString();
-      
-	case RC_LOOP:
-	  return ("(?:" + _branch + "){" + _min + "," + _max + "}" +
-		  (_rest == null ? "" : _rest.toString()));
-      
-	case RC_LOOP_UNIQUE:
-	  return ("(?:" + _branch + ")!{" + _min + "," + _max + "}" +
-		  (_rest == null ? "" : _rest.toString()));
-      
-	case RC_BEG_GROUP:
-	  return "(" + (_rest == null ? "" : _rest.toString());
-      
-	case RC_END_GROUP:
-	  return ")" + (_rest == null ? "" : _rest.toString());
-      
-	case RC_SET:
-	  return "[" + _set + "]" + (_rest == null ? "" : _rest.toString());
-      
-	case RC_NSET:
-	  return "[^" + _set + "]" + (_rest == null ? "" : _rest.toString());
-      
-	default:
-	  return "" + _code + " " + super.toString();
-	}
-      } finally {
-	_printMark = false;
-      }
-    }
-  }
-
   /**
    * A node with exactly one character matches.
    */
@@ -1489,6 +335,24 @@ class RegexpNode {
     }
 
     @Override
+    int firstChar()
+    {
+      return _ch;
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      if (firstSet != null && _ch < firstSet.length) {
+	firstSet[_ch] = true;
+      
+	return firstSet;
+      }
+      else
+	return null;
+    }
+
+    @Override
     int match(StringValue string, int offset, RegexpState state)
     {
       if (offset < string.length() && string.charAt(offset) == _ch)
@@ -1506,7 +370,7 @@ class RegexpNode {
   static final AnchorEndOrNewline ANCHOR_END_OR_NEWLINE
     = new AnchorEndOrNewline();
   
-  private static class AnchorBegin extends RegexpNode {
+  private static class AnchorBegin extends NullableNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
@@ -1517,7 +381,7 @@ class RegexpNode {
     }
   }
   
-  private static class AnchorBeginOrNewline extends RegexpNode {
+  private static class AnchorBeginOrNewline extends NullableNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
@@ -1528,7 +392,7 @@ class RegexpNode {
     }
   }
   
-  private static class AnchorEnd extends RegexpNode {
+  private static class AnchorEnd extends NullableNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
@@ -1540,7 +404,7 @@ class RegexpNode {
     }
   }
   
-  private static class AnchorEndOnly extends RegexpNode {
+  private static class AnchorEndOnly extends NullableNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
@@ -1551,7 +415,7 @@ class RegexpNode {
     }
   }
   
-  private static class AnchorEndOrNewline extends RegexpNode {
+  private static class AnchorEndOrNewline extends NullableNode {
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
@@ -1585,6 +449,20 @@ class RegexpNode {
     AsciiSet(boolean []set)
     {
       _set = set;
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      if (firstSet == null)
+	return null;
+
+      for (int i = 0; i < _set.length; i++) {
+	if (_set[i])
+	  firstSet[i] = true;
+      }
+
+      return null;
     }
 
     void setChar(char ch)
@@ -1699,6 +577,19 @@ class RegexpNode {
       return _min;
     }
 
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      firstSet = _node.firstSet(firstSet);
+
+      if (_min > 0 && ! _node.isNullable())
+	return firstSet;
+
+      firstSet = _next.firstSet(firstSet);
+      
+      return firstSet;
+    }
+
     //
     // match functions
     //
@@ -1771,6 +662,23 @@ class RegexpNode {
     int minLength()
     {
       return _head.minLength() + _next.minLength();
+    }
+
+    @Override
+    int firstChar()
+    {
+      return _head.firstChar();
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      firstSet = _head.firstSet(firstSet);
+
+      if (_head.isNullable())
+	firstSet = _next.firstSet(firstSet);
+
+      return firstSet;
     }
 
     @Override
@@ -2041,6 +949,18 @@ class RegexpNode {
     }
 
     @Override
+    int firstChar()
+    {
+      return _node.firstChar();
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      return _node.firstSet(firstSet);
+    }
+
+    @Override
     String prefix()
     {
       return _node.prefix();
@@ -2268,6 +1188,17 @@ class RegexpNode {
 	return -1;
     }
   }
+
+  /**
+   * A nullable node can match an empty string.
+   */
+  abstract static class NullableNode extends RegexpNode {
+    @Override
+    boolean isNullable()
+    {
+      return true;
+    }
+  }
   
   static class LoopHead extends RegexpNode {
     private final int _index;
@@ -2317,6 +1248,19 @@ class RegexpNode {
     int minLength()
     {
       return _min * _node.minLength() + _tail.minLength();
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      firstSet = _node.firstSet(firstSet);
+
+      if (_min > 0 && ! _node.isNullable())
+	return firstSet;
+
+      firstSet = _tail.firstSet(firstSet);
+      
+      return firstSet;
     }
 
     //
@@ -2594,30 +1538,84 @@ class RegexpNode {
   }
   
   static class Or extends RegexpNode {
-    private final RegexpNode _left;
-    private final RegexpNode _right;
+    private RegexpNode _left;
+    private Or _right;
 
-    Or(RegexpNode left, RegexpNode right)
+    private Or(RegexpNode left, Or right)
     {
       _left = left;
       _right = right;
     }
 
+    static Or create(RegexpNode left, RegexpNode right)
+    {
+      if (left instanceof Or)
+	return ((Or) left).append(right);
+      else if (right instanceof Or)
+	return new Or(left, (Or) right);
+      else
+	return new Or(left, new Or(right, null));
+    }
+
+    private Or append(RegexpNode right)
+    {
+      if (_right != null)
+	_right = _right.append(right);
+      else if (right instanceof Or)
+	_right = (Or) right;
+      else
+	_right = new Or(right, null);
+
+      return this;
+    }
+
     @Override
     int minLength()
     {
-      return Math.min(_left.minLength(), _right.minLength());
+      if (_right != null)
+	return Math.min(_left.minLength(), _right.minLength());
+      else
+	return _left.minLength();
+    }
+
+    @Override
+    int firstChar()
+    {
+      if (_right == null)
+	return _left.firstChar();
+
+      int leftChar = _left.firstChar();
+      int rightChar = _right.firstChar();
+
+      if (leftChar == rightChar)
+	return leftChar;
+      else
+	return -1;
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      if (_right == null)
+	return _left.firstSet(firstSet);
+
+      firstSet = _left.firstSet(firstSet);
+      firstSet = _right.firstSet(firstSet);
+
+      return firstSet;
     }
 
     @Override
     int match(StringValue string, int offset, RegexpState state)
     {
-      int value = _left.match(string, offset, state);
+      for (Or ptr = this; ptr != null; ptr = ptr._right) {
+	int value = ptr._left.match(string, offset, state);
 
-      if (value >= 0)
-	return value;
-      else
-	return _right.match(string, offset, state);
+	if (value >= 0)
+	  return value;
+      }
+
+      return -1;
     }
   }
   
@@ -3292,6 +2290,27 @@ class RegexpNode {
     }
 
     @Override
+    int firstChar()
+    {
+      if (_length > 0)
+	return _buffer[0];
+      else
+	return -1;
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      if (firstSet != null && _length > 0 && _buffer[0] < firstSet.length) {
+	firstSet[_buffer[0]] = true;
+
+	return firstSet;
+      }
+      else
+	return null;
+    }
+
+    @Override
     String prefix()
     {
       return new String(_buffer, 0, _length);
@@ -3393,6 +2412,35 @@ class RegexpNode {
     int minLength()
     {
       return _length;
+    }
+
+    @Override
+    int firstChar()
+    {
+      if (_length > 0
+	  && (Character.toLowerCase(_buffer[0])
+	      == Character.toUpperCase(_buffer[0])))
+	return _buffer[0];
+      else
+	return -1;
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      if (_length > 0 && firstSet != null) {
+	char lower = Character.toLowerCase(_buffer[0]);
+	char upper = Character.toUpperCase(_buffer[0]);
+
+	if (lower < firstSet.length && upper < firstSet.length) {
+	  firstSet[lower] = true;
+	  firstSet[upper] = true;
+
+	  return firstSet;
+	}
+      }
+
+      return null;
     }
 
     @Override

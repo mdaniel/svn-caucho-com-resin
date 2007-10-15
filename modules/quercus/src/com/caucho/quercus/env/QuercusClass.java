@@ -171,6 +171,11 @@ public class QuercusClass {
     return _classDef;
   }
 
+  MethodMap getMethodMap()
+  {
+    return _methodMap;
+  }
+
   /**
    * Returns the name.
    */

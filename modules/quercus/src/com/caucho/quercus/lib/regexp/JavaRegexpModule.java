@@ -500,10 +500,10 @@ public class JavaRegexpModule
   /**
    * Quotes regexp values
    */
-  public static String preg_quote(StringValue string,
-          @Optional String delim)
+  public static StringValue preg_quote(StringValue string,
+				  @Optional StringValue delim)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = string.createStringBuilder();
 
     boolean []extra = null;
 
@@ -532,7 +532,7 @@ public class JavaRegexpModule
         sb.append(ch);
     }
 
-    return sb.toString();
+    return sb;
   }
 
   /**
@@ -1077,9 +1077,9 @@ public class JavaRegexpModule
   /**
    * Makes a regexp for a case-insensitive match.
    */
-  public static String sql_regcase(String string)
+  public static StringValue sql_regcase(StringValue string)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = string.createStringBuilder();
 
     int len = string.length();
     for (int i = 0; i < len; i++) {
@@ -1101,7 +1101,7 @@ public class JavaRegexpModule
         sb.append(ch);
     }
 
-    return sb.toString();
+    return sb;
   }
 
   /**

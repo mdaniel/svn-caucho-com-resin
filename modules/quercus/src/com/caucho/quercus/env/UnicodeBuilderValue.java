@@ -102,6 +102,16 @@ public class UnicodeBuilderValue extends StringBuilderValue
     super(ch);
   }
 
+  public UnicodeBuilderValue(char []s, Value v1)
+  {
+    super(s, v1);
+  }
+
+  public UnicodeBuilderValue(Value v1)
+  {
+    super(v1);
+  }
+
   /**
    * Creates the string.
    */

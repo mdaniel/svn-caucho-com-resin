@@ -2253,7 +2253,7 @@ public class StringModule extends AbstractQuercusModule {
             sb.append(format, head, j);
             sb.append(ch);
 
-            segments.add(new LongPrintfSegment(sb.toString(), index++));
+            segments.add(LongPrintfSegment.create(sb.toString(), index++));
             sb.setLength(0);
             i = j;
             break loop;
@@ -4306,15 +4306,21 @@ public class StringModule extends AbstractQuercusModule {
     private final String _format;
     private final int _index;
 
-    LongPrintfSegment(String format, int index)
-    { 
+    private LongPrintfSegment(String format, int index)
+    {
+      _format = format;
+      _index = index;
+    }
+    
+    static PrintfSegment create(String format, int index)
+    {
       if (hasIndex(format)) {
-        _index = getIndex(format);
+        index = getIndex(format);
 	format = getIndexFormat(format);
       }
       else {
         format = '%' + format;
-        _index = index;
+        index = index;
       }
       
       // php/115b
@@ -4325,15 +4331,79 @@ public class StringModule extends AbstractQuercusModule {
         for (i = 2; i < format.length(); i++) {
           char ch = format.charAt(i);
           
-          if (ch < '0' || ch > '9')
+          if (! ('0' <= ch && ch <= '9'))
             break;
         }
         
-        _format = '%' + format.substring(i);
+        format = '%' + format.substring(i);
       }
-      else {
-        _format = format;
+
+      if (format.charAt(format.length() - 1) == 'x'
+	  || format.charAt(format.length() - 1) == 'X') {
+	HexPrintfSegment hex = HexPrintfSegment.create(format, index);
+
+	if (hex != null)
+	  return hex;
       }
+
+      return new LongPrintfSegment(format, index);
+    }
+
+    public void apply(StringValue sb, Value []args)
+    {
+      long value;
+
+      if (_index < args.length)
+        value = args[_index].toLong();
+      else
+        value = 0;
+
+      sb.append(String.format(_format, value));
+    }
+  }
+
+  static class HexPrintfSegment extends PrintfSegment {
+    private final int _index;
+    private final int _min;
+    private final char _pad;
+    private boolean _isUpper;
+
+    HexPrintfSegment(int index, int min, char pad, boolean isUpper)
+    {
+      _index = index;
+      _min = min;
+      _pad = pad;
+      _isUpper = isUpper;
+    }
+
+    static HexPrintfSegment create(String format, int index)
+    {
+      int length = format.length();
+      int offset = 1;
+
+      boolean isUpper = format.charAt(length - 1) == 'X';
+      char pad = ' ';
+      
+      if (format.charAt(offset) == ' ') {
+	pad = ' ';
+	offset++;
+      }
+      else if (format.charAt(offset) == '0') {
+	pad = '0';
+	offset++;
+      }
+
+      int min = 0;
+      for (; offset < length - 1; offset++) {
+	char ch = format.charAt(offset);
+
+	if ('0' <= ch && ch <= '9')
+	  min = 10 * min + ch - '0';
+	else
+	  return null;
+      }
+
+      return new HexPrintfSegment(index, min, pad, isUpper);
     }
 
     public void apply(StringValue sb, Value []args)
@@ -4344,8 +4414,30 @@ public class StringModule extends AbstractQuercusModule {
         value = args[_index].toLong();
       else
         value = 0;
+      
+      int digits = 0;
 
-      sb.append(String.format(_format, value));
+      long shift = value;
+      for (int i = 0; i < 16; i++) {
+	if (shift != 0)
+	  digits = i;
+
+	shift = shift >>> 4;
+      }
+
+      for (int i = digits + 1; i < _min; i++)
+	sb.append(_pad);
+
+      for (; digits >= 0; digits--) {
+	int digit = (int) (value >>> (4 * digits)) & 0xf;
+
+	if (digit <= 9)
+	  sb.append((char) ('0' + digit));
+	else if (_isUpper)
+	  sb.append((char) ('A' + digit - 10));
+	else
+	  sb.append((char) ('a' + digit - 10));
+      }
     }
   }
 
@@ -4548,6 +4640,5 @@ public class StringModule extends AbstractQuercusModule {
     DEFAULT_DECIMAL_FORMAT_SYMBOLS.setGroupingSeparator(',');
     DEFAULT_DECIMAL_FORMAT_SYMBOLS.setZeroDigit('0');
   }
-
 }
 

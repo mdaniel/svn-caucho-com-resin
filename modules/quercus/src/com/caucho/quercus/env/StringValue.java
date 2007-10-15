@@ -109,7 +109,7 @@ abstract public class StringValue extends Value implements CharSequence {
       return unicodeStr;
     
     try {
-      StringValue sb = createEmptyStringBuilder();
+      StringValue sb = createStringBuilder();
       
       byte []bytes = unicodeStr.toString().getBytes(charset);
       
@@ -123,14 +123,19 @@ abstract public class StringValue extends Value implements CharSequence {
       return unicodeStr;
     }
   }
-  
-  /*
-   * Creates an empty string builder of the same type.
+
+  /**
+   * Creates a string builder of the same type.
    */
-  abstract public StringValue createEmptyStringBuilder();
+  abstract public StringValue createStringBuilder();
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  abstract public StringValue createStringBuilder(int length);
   
   /*
-   * Returns the empty string of same type.
+   * Returns the immutable empty string of same type.
    */
   abstract public StringValue getEmptyString();
   
@@ -852,6 +857,24 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Append from an input stream
    */
+  public StringValue appendAll(InputStream is)
+  {
+    try {
+      int ch;
+    
+      while ((ch = is.read()) >= 0) {
+	appendByte(ch);
+      }
+
+      return this;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
+   * Append from an input stream
+   */
   public StringValue append(InputStream is, long length)
   {
     try {
@@ -995,6 +1018,14 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Append a Java char buffer, possibly converting to a unicode string
    */
+  public StringValue appendUnicode(char []buffer)
+  {
+    return append(buffer);
+  }
+
+  /**
+   * Append a Java char buffer, possibly converting to a unicode string
+   */
   public StringValue appendUnicode(String value)
   {
     return append(value);
@@ -1014,6 +1045,14 @@ abstract public class StringValue extends Value implements CharSequence {
   public StringValue appendUnicode(Value value)
   {
     return append(value);
+  }
+
+  /**
+   * Append a Java char buffer, possibly converting to a unicode string
+   */
+  public StringValue appendUnicode(Value v1, Value v2)
+  {
+    return append(v1).append(v2);
   }
 
   /**
@@ -1560,22 +1599,6 @@ abstract public class StringValue extends Value implements CharSequence {
     }
 
     return sb;
-  }
-
-  /**
-   * Creates a string builder of the same type.
-   */
-  public StringValue createStringBuilder()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Creates a string builder of the same type.
-   */
-  public StringValue createStringBuilder(int length)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

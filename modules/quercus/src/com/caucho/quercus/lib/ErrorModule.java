@@ -112,7 +112,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	return result;
       }
       else if (className.startsWith("_quercus._")
-	  && name.equals("call")) {
+	       && name.equals("call")) {
 	String path = unmangleFile(className);
 	String fileName = env.getPwd().lookup("./" + path).getNativePath();
 	

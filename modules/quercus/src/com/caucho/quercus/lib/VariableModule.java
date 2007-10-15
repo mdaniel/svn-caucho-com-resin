@@ -359,7 +359,7 @@ public class VariableModule extends AbstractQuercusModule {
       if (isSyntaxOnly)
 	return true;
       else
-	return env.findFunction(v.toString().intern()) != null;
+	return env.findFunction(v.toString()) != null;
     }
     else if (v instanceof ArrayValue) {
       Value obj = v.get(LongValue.ZERO);
@@ -375,17 +375,17 @@ public class VariableModule extends AbstractQuercusModule {
 	if (isSyntaxOnly)
 	  return true;
 
-	QuercusClass cl = env.findClass(obj.toString().intern());
+	QuercusClass cl = env.findClass(obj.toString());
 	if (cl == null)
 	  return false;
 
-	return (cl.findFunction(name.toString().intern()) != null);
+	return (cl.findFunction(name.toString()) != null);
       }
       else if (obj.isObject()) {
 	if (isSyntaxOnly)
 	  return true;
 
-	return obj.findFunction(name.toString().intern()) != null;
+	return obj.findFunction(name.toString()) != null;
       }
       else
 	return false;

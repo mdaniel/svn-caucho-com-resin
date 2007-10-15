@@ -576,7 +576,9 @@ public abstract class JdbcConnectionResource implements Closeable {
         ResultSet rs = stmt.getResultSet();
         _rs = createResult(_env, stmt, rs);
         _affectedRows = 0;
-        _warnings = stmt.getWarnings();
+
+	// XXX: if these are needed, get them lazily for performance
+        // _warnings = stmt.getWarnings();
       } else {
         // php/430a should return a result set
         // for update statements. It is always
@@ -592,7 +594,9 @@ public abstract class JdbcConnectionResource implements Closeable {
         _affectedRows = stmt.getUpdateCount();
         if (_rs != null)
           _rs.setAffectedRows(_affectedRows);
-        _warnings = stmt.getWarnings();
+	
+	// XXX: if these are neede, get them lazily for performance
+        // _warnings = stmt.getWarnings();
 
         // for php/430a
         if (!keepStatementOpen()) {
@@ -609,7 +613,6 @@ public abstract class JdbcConnectionResource implements Closeable {
         return null;
       }
     } catch (SQLException e) {
-
       saveErrors(e);
 
       // php/431h

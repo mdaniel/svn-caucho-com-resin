@@ -56,9 +56,20 @@ public class TempBufferBytesValue
   /*
    * Creates an empty string builder of the same type.
    */
-  public StringValue createEmptyStringBuilder()
+  @Override
+  public StringValue createStringBuilder()
   {
     return new BinaryBuilderValue();
+  }
+  
+  
+  /*
+   * Creates an empty string builder of the same type.
+   */
+  @Override
+  public StringValue createStringBuilder(int length)
+  {
+    return new BinaryBuilderValue(length);
   }
   
   /*

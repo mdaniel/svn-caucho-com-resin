@@ -214,8 +214,11 @@ public class Env {
   private HashMap<String, Object> _specialMap
     = new HashMap<String, Object>();
 
+  private int _iniCount;
+
   private String _prevIncludePath = ".";
   private String _includePath;
+  private int _includePathIniCount;
   private ArrayList<String> _includePathList;
   private HashMap<Path,ArrayList<Path>> _includePathMap;
 
@@ -1252,6 +1255,8 @@ public class Env {
    */
   public StringValue setIni(String name, Value value)
   {
+    _iniCount++;
+    
     StringValue oldValue = getIni(name);
 
     getIniDefinition(name).set(this, value);
@@ -1264,6 +1269,8 @@ public class Env {
    */
   public StringValue setIni(String name, String value)
   {
+    _iniCount++;
+    
     StringValue oldValue = getIni(name);
 
     getIniDefinition(name).set(this, value);
@@ -3562,7 +3569,13 @@ public class Env {
 
   private Path lookupInclude(String include, Path pwd, Path scriptPwd)
   {
-    String includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+    String includePath = _includePath;
+
+    if (_includePathIniCount != _iniCount) {
+      includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+      _includePath = null;
+      _includePathList = null;
+    }
 
     if (includePath == null)
       includePath = ".";
@@ -3575,6 +3588,9 @@ public class Env {
       if (path != null)
 	_quercus.putIncludeCache(include, includePath, pwd, scriptPwd, path);
     }
+
+    _includePath = includePath;
+    _includePathIniCount = _iniCount;
     
     return path;
   }
@@ -3624,13 +3640,18 @@ public class Env {
    */
   private ArrayList<Path> getIncludePath(Path pwd)
   {
-    String includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+    String includePath = _includePath;
 
+    if (_iniCount != _includePathIniCount) {
+      _includePath = null;
+      _includePathList = null;
+      includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+    }
 
     if (includePath == null)
       includePath = ".";
 
-    if (! includePath.equals(_includePath)) {
+    if (_includePathList == null) {
       _includePathList = new ArrayList<String>();
       _includePathMap = new HashMap<Path,ArrayList<Path>>();
 
@@ -3653,6 +3674,7 @@ public class Env {
       _includePathList.add(subpath);
 
       _includePath = includePath;
+      _includePathIniCount = _iniCount;
     }
 
     ArrayList<Path> pathList = _includePathMap.get(pwd);

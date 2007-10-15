@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.QuercusModuleException;
 
@@ -49,6 +49,7 @@ public class StringBuilderValue
   protected char []_buffer;
   protected int _length;
   protected boolean _isCopy;
+  private int _hashCode;
 
   protected String _value;
 
@@ -111,6 +112,14 @@ public class StringBuilderValue
     }
   }
 
+  public StringBuilderValue(char ch)
+  {
+    _buffer = new char[1];
+    _length = 1;
+
+    _buffer[0] = ch;
+  }
+
   public StringBuilderValue(String s)
   {
     int len = s.length();
@@ -118,16 +127,57 @@ public class StringBuilderValue
     _buffer = new char[len];
     _length = len;
 
-    for (int i = 0; i < len; i++)
-      _buffer[i] = s.charAt(i);
+    s.getChars(0, len, _buffer, 0);
   }
 
-  public StringBuilderValue(char ch)
+  public StringBuilderValue(char []s)
   {
-    _buffer = new char[1];
-    _length = 1;
+    int len = s.length;
+    
+    _buffer = new char[len];
+    _length = len;
 
-    _buffer[0] = ch;
+    System.arraycopy(s, 0, _buffer, 0, len);
+  }
+
+  public StringBuilderValue(char []s, Value v1)
+  {
+    int len = s.length;
+
+    if (len < 128)
+      _buffer = new char[128];
+    else
+      _buffer = new char[len + 32];
+    
+    _length = len;
+
+    System.arraycopy(s, 0, _buffer, 0, len);
+
+    v1.appendTo(this);
+  }
+
+  public StringBuilderValue(Value v1)
+  {
+    _buffer = new char[128];
+
+    v1.appendTo(this);
+  }
+
+  public StringBuilderValue(Value v1, Value v2)
+  {
+    _buffer = new char[128];
+
+    v1.appendTo(this);
+    v2.appendTo(this);
+  }
+
+  public StringBuilderValue(Value v1, Value v2, Value v3)
+  {
+    _buffer = new char[128];
+
+    v1.appendTo(this);
+    v2.appendTo(this);
+    v3.appendTo(this);
   }
 
   /**
@@ -261,8 +311,7 @@ public class StringBuilderValue
   @Override
   public StringValue toBinaryValue(Env env)
   {
-    // XXX: inefficient, but not often invoked
-    return new BinaryBuilderValue(toString());
+    return this;
   }
 
   /**
@@ -271,8 +320,7 @@ public class StringBuilderValue
   @Override
   public StringValue toBinaryValue(Env env, String charset)
   {
-    // XXX: inefficient, but not often invoked
-    return new BinaryBuilderValue(toString());
+    return this;
   }
 
   /**
@@ -327,9 +375,35 @@ public class StringBuilderValue
   /**
    * Append to a string builder.
    */
-  public void appendTo(StringValue bb)
+  @Override
+  public StringValue appendTo(StringBuilderValue bb)
   {
     bb.append(_buffer, 0, _length);
+
+    return bb;
+  }
+  
+  /**
+   * Append to a string builder.
+   */
+  @Override
+  public StringValue appendTo(UnicodeBuilderValue bb)
+  {
+    bb.append(_buffer, 0, _length);
+    
+    return bb;
+  }
+
+  
+  /**
+   * Append to a string builder.
+   */
+  @Override
+  public StringValue appendTo(BinaryBuilderValue bb)
+  {
+    bb.append(_buffer, 0, _length);
+    
+    return bb;
   }
 
   /**
@@ -724,6 +798,73 @@ public class StringBuilderValue
    * Append a Java buffer to the value.
    */
   @Override
+  public final StringValue appendUnicode(char []buf, int offset, int length)
+  {
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    char []buffer = _buffer;
+    int bufferLength = _length;
+
+    for (; length > 0; length--)
+      buffer[bufferLength++] = buf[offset++];
+
+    _buffer = buffer;
+    _length = bufferLength;
+
+    return this;
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  @Override
+  public final StringValue append(char []buf)
+  {
+    int length = buf.length;
+    
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    char []buffer = _buffer;
+    int bufferLength = _length;
+    _length = bufferLength + length;
+
+    for (length--; length >= 0; length--)
+      buffer[bufferLength + length] = buf[length];
+
+    _buffer = buffer;
+
+    return this;
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  @Override
+  public final StringValue appendUnicode(char []buf)
+  {
+    int length = buf.length;
+    
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    char []buffer = _buffer;
+    int bufferLength = _length;
+    _length = bufferLength + length;
+
+    for (length--; length >= 0; length--)
+      buffer[bufferLength + length] = buf[length];
+
+    _buffer = buffer;
+
+    return this;
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  @Override
   public final StringValue append(CharSequence buf, int head, int tail)
   {
     int length = tail - head;
@@ -790,6 +931,29 @@ public class StringBuilderValue
     */
     
     v.appendTo(this);
+
+    return this;
+  }
+
+  /**
+   * Append a Java value to the value.
+   */
+  @Override
+  public StringValue appendUnicode(Value v)
+  {
+    v.appendTo(this);
+
+    return this;
+  }
+
+  /**
+   * Append a Java value to the value.
+   */
+  @Override
+  public StringValue appendUnicode(Value v1, Value v2)
+  {
+    v1.appendTo(this);
+    v2.appendTo(this);
 
     return this;
   }
@@ -906,25 +1070,29 @@ public class StringBuilderValue
   }
 
   @Override
-  public StringValue appendAll(BinaryInput is, long maxLength)
+  public StringValue appendAll(InputStream is)
   {
-    // php/161i 64k
-    
-    int sublen = Math.min(8192, (int) maxLength);
-
     try {
-      while (sublen > 0) {
-        ensureAppendCapacity(sublen);
+      TempBuffer tBuf = TempBuffer.allocate();
+      byte []buffer = tBuf.getBuffer();
+      
+      while (true) {
+	int sublen = buffer.length;
 
-        int count = is.read(_buffer, _length, sublen);
+        sublen = is.read(buffer, 0, sublen);
 
-        if (count <= 0)
+        if (sublen <= 0)
           break;
 
-        _length += count;
-	sublen -= count;
+        ensureAppendCapacity(sublen);
+
+	for (int i = 0; i < sublen; i++)
+	  _buffer[_length + i] = (char) buffer[i];
+
+        _length += sublen;
       }
 
+      TempBuffer.free(tBuf);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -1102,14 +1270,21 @@ public class StringBuilderValue
   @Override
   public int hashCode()
   {
-    int hash = 37;
+    int hash = _hashCode;
+
+    if (hash != 0)
+      return hash;
+    
+    hash = 37;
 
     int length = _length;
 
     char []buffer = _buffer;
-    for (int i = 0; i < length; i++) {
-      hash = 65521 * hash + (buffer[i] & 0xff);
+    for (int i = length - 1; i >= 0; i--) {
+      hash = 65521 * hash + buffer[i];
     }
+
+    _hashCode = hash;
 
     return hash;
   }

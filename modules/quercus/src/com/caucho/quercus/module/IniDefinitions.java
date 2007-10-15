@@ -36,13 +36,13 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 
 import java.util.Collections;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.Set;
 
 public class IniDefinitions {
   public static final IniDefinitions EMPTY = new IniDefinitions();
 
-  private IdentityHashMap<String, IniDefinition> _defaultMap;
+  private HashMap<String, IniDefinition> _defaultMap;
 
   /**
    * Add an ini default for an ini that has a boolean value.
@@ -79,7 +79,7 @@ public class IniDefinitions {
   private IniDefinition add(IniDefinition iniDefinition)
   {
     if (_defaultMap == null)
-      _defaultMap = new IdentityHashMap<String, IniDefinition>();
+      _defaultMap = new HashMap<String, IniDefinition>();
 
     _defaultMap.put(iniDefinition.getName(), iniDefinition);
 
@@ -130,7 +130,7 @@ public class IniDefinitions {
       return;
 
     if (_defaultMap == null)
-      _defaultMap = new IdentityHashMap<String, IniDefinition>();
+      _defaultMap = new HashMap<String, IniDefinition>();
     
     _defaultMap.putAll(iniDefinitions._defaultMap);
   }
@@ -148,8 +148,6 @@ public class IniDefinitions {
 
   public IniDefinition get(String name)
   {
-    name = name.intern();
-
     IniDefinition iniDefinition = _defaultMap == null ? null : _defaultMap.get(name);
 
     if (iniDefinition == null) {

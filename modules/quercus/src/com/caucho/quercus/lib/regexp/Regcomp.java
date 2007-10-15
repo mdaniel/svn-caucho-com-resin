@@ -93,6 +93,11 @@ class Regcomp {
     return (_flags & IGNORE_CASE) == IGNORE_CASE;
   }
 
+  boolean isIgnoreWs()
+  {
+    return (_flags & IGNORE_WS) == IGNORE_WS;
+  }
+
   boolean isMultiline()
   {
     return (_flags & MULTILINE) == MULTILINE;
@@ -120,7 +125,7 @@ class Regcomp {
 
     int ch;
     while ((ch = pattern.read()) == '|') {
-      value = new RegexpNode.Or(value, parseRec(pattern, begin));
+      value = RegexpNode.Or.create(value, parseRec(pattern, begin));
     }
     
     value = value.getHead();
@@ -134,522 +139,8 @@ class Regcomp {
     
     return value;
   }
-
-  private RegexpNode parseRec(PeekStream pattern)
-    throws IllegalRegexpException
-  {
-    return parseRec(pattern, false);
-  }
   
   /**
-   * @param isConditional true is parsing for (?(cond)yes|no)
-   * 
-   *   Recursively compile a RegexpNode.
-   *
-   * first      -- The first node of this sub-RegexpNode
-   * prev       -- The previous node of this sub-RegexpNode
-   * last_begin -- When the last grouping began
-   * last_end   -- When the last grouping ended
-   *
-   * head       ->  node
-   *                 v -- rest
-   *                ...
-   *                 v -- rest
-   *                node
-   *
-   * last       ->  node
-   *                 v -- rest
-   *                ...
-   *                 v -- rest
-   *                node
-   */
-  private RegexpNode parseRec(PeekStream pattern, boolean isConditional)
-    throws IllegalRegexpException
-  {
-    RegexpNode head;
-    RegexpNode.Compat last;
-    RegexpNode node;
-    RegexpNode.Compat compat;
-
-    head = null;
-    last = null;
-
-    int ch;
-    int lastNonWhitespaceChar = -1;
-    
-    while ((ch = pattern.read()) >= 0) {
-      if ((_flags & IGNORE_WS) != 0 &&
-          (RegexpSet.SPACE.match(ch) || ch == '#')) {
-      }
-      else
-        lastNonWhitespaceChar = ch;
-      
-      switch (ch) {
-      case '*':
-	if (last == null)
-	  throw new IllegalRegexpException("`*' must follow content expression");
-	
-	/*
-	if (last._code == last.RC_LOOP)
-	  throw new IllegalRegexpException("nested *?+");
-    */
-
-	if (pattern.peek() == '?') {
-	  pattern.read();
-	  
-	  if ((_flags & UNGREEDY) != 0)
-	    node = RegexpNode.create(RegexpNode.RC_LOOP, _nLoop++, 0, Integer.MAX_VALUE);
-	  else
-	    node = RegexpNode.create(RegexpNode.RC_LOOP_SHORT, _nLoop++, 0, Integer.MAX_VALUE);
-	}
-	else if (pattern.peek() == '+') {
-	  pattern.read();
-	  node = RegexpNode.create(RegexpNode.RC_LOOP_LONG, _nLoop++, 0, Integer.MAX_VALUE);
-	}
-	else if ((_flags & UNGREEDY) != 0)
-      node = RegexpNode.create(RegexpNode.RC_LOOP_SHORT, _nLoop++, 0, Integer.MAX_VALUE);
-	else
-	  node = RegexpNode.create(RegexpNode.RC_LOOP, _nLoop++, 0, Integer.MAX_VALUE);
-	
-	((RegexpNode.Compat) node)._branch = last;
-	last = (RegexpNode.Compat) node;
-	break;
-
-      case '+':
-	if (last == null)
-	  throw new IllegalRegexpException("`+' must follow content expression");
-	
-	// php/4e59
-	/*
-	if (last._code == last.RC_LOOP)
-	  throw new IllegalRegexpException("nested *?+");
-    */
-
-	if (pattern.peek() == '?') {
-	  pattern.read();
-	  
-	  if (((_flags & UNGREEDY) != 0))
-	      node = RegexpNode.create(RegexpNode.RC_LOOP, _nLoop++, 1, Integer.MAX_VALUE);
-	  else
-	    node = RegexpNode.create(RegexpNode.RC_LOOP_SHORT, _nLoop++, 1, Integer.MAX_VALUE);
-	}
-	else if (pattern.peek() == '+') {
-	  pattern.read();
-	  node = RegexpNode.create(RegexpNode.RC_LOOP_LONG, _nLoop++, 1, Integer.MAX_VALUE);
-	}
-	else if ((_flags & UNGREEDY) != 0)
-      node = RegexpNode.create(RegexpNode.RC_LOOP_SHORT, _nLoop++, 1, Integer.MAX_VALUE);
-	else
-	  node = RegexpNode.create(RegexpNode.RC_LOOP, _nLoop++, 1, Integer.MAX_VALUE);
-	((RegexpNode.Compat) node)._branch = last;
-	last = (RegexpNode.Compat) node;
-
-	break;
-
-      case '?':
-	if (last == null)
-	  throw new IllegalRegexpException("`?' must follow content expression");
-	/*
-	if (last._code == last.RC_LOOP)
-	  throw new IllegalRegexpException("nested *?+");
-	*/
-
-	if (pattern.peek() == '?') {
-	  pattern.read();
-	  
-	  if ((_flags & UNGREEDY) != 0)
-	    node = RegexpNode.create(RegexpNode.RC_LOOP, _nLoop++, 0, 1);
-	  else
-	    node = RegexpNode.create(RegexpNode.RC_LOOP_SHORT, _nLoop++, 0, 1);
-	}
-	else if (pattern.peek() == '+') {
-	  pattern.read();
-	  node = RegexpNode.create(RegexpNode.RC_LOOP_LONG, _nLoop++, 0, 1);
-	}
-	else if ((_flags & UNGREEDY) != 0)
-	  node = RegexpNode.create(RegexpNode.RC_LOOP_SHORT, _nLoop++, 0, 1);
-	else
-	  node = RegexpNode.create(RegexpNode.RC_LOOP, _nLoop++, 0, 1);
-
-	((RegexpNode.Compat) node)._branch = last;
-	last = (RegexpNode.Compat) node;
-	break;
-
-      case '{':
-        ch = pattern.peek();
-        if (! ('0' <= ch && ch <= '9')) {
-          RegexpNode next = parseString('{', pattern);
-          if (next != last) {
-            head = RegexpNode.concat(head, last);
-            last = (RegexpNode.Compat) next;
-          }
-          
-          break;
-        }
-        
-	if (last == null)
-	  throw new IllegalRegexpException("`{' must follow content expression");
-	/*
-	if (last._code == last.RC_LOOP)
-	  throw new IllegalRegexpException("nested *?+");
-	*/
-
-	node = RegexpNode.create(RegexpNode.RC_LOOP);
-	compat = (RegexpNode.Compat) node;
-	compat._index = _nLoop++;
-	compat._branch = last;
-	compat._length = compat._branch._length * compat._min;
-
-	parseBrace(pattern, node);
-	if ((ch = pattern.read()) != '}')
-	  throw new IllegalRegexpException("expected `}' at " +
-					   badChar(ch));
-	  
-	if (pattern.peek() == '?') {
-	  pattern.read();
-	  compat._code = RegexpNode.RC_LOOP_SHORT;
-	}
-	else if (pattern.peek() == '+') {
-	  pattern.read();
-	  compat._code = RegexpNode.RC_LOOP_LONG;
-	}
-
-	if (_isLookbehind) {
-	  if (compat._min != compat._max)
-	    throw new IllegalRegexpException("lookbehind strings must be fixed length: "
-	                                     + compat._min + " != " + compat._max);
-	}
-	
-	int length = compat._branch._length * compat._min;
-	compat._length = length;
-	
-	last = (RegexpNode.Compat) node;
-	break;
-
-      case '|':
-        if (isConditional) {
-          pattern.ungetc(ch);
-          
-          return last;
-        }
-        
-        /*
-        //php/152o
-        if ((_flags & IGNORE_WS) != 0) {
-          while ((ch = pattern.peek()) == '|' || RegexpSet.SPACE.match(ch)) {
-            pattern.read();
-          }
-        }
-        else {
-          while ((ch = pattern.peek()) == '|') {
-            pattern.read();
-          }
-        }
-        */
-
-        if (last == null && head != null
-            && (((RegexpNode.Compat) head)._code == RegexpNode.RC_OR
-		|| ((RegexpNode.Compat) head)._code == RegexpNode.RC_LOOKBEHIND_OR))
-          break;
-        
-        node = RegexpNode.concat(head, last);
-	head = RegexpNode.create(RegexpNode.RC_OR, node);
-	
-	if (_isLookbehind) {
-	  ((RegexpNode.Compat) head)._code = RegexpNode.RC_LOOKBEHIND_OR;
-	  //head = RegexpNode.create(RegexpNode.RC_LOOKBEHIND_OR, head);
-	}
-	
-
-	head._length = node._length;
-	
-	last = null;
-	break;
-
-      case '(':
-	head = RegexpNode.concat(head, last);
-
-	if (pattern.peek() == '?') {
-	  pattern.read();
-	  switch ((ch = pattern.read())) {
-	  case '#':
-	    // (?#...) Comment
-	    while ((ch = pattern.read()) >= 0 && ch != ')') {
-	    }
-	    pattern.ungetc(ch);
-
-	    last = null;
-	    break;
-
-	  case ':':
-	    // (?:...) No grouping, only for precedence.
-	    last = (RegexpNode.Compat) parseRec(pattern);
-	    
-	    last = (RegexpNode.Compat) RegexpNode.replaceTail(last, RegexpNode.create(RegexpNode.RC_NULL));
-	    
-	    /*
-	    if (last._rest == null || last._rest._code == RegexpNode.RC_NULL) {
-	    }
-	    else {
-	      RegexpNode newLast = RegexpNode.create(RegexpNode.RC_NULL);
-	      newLast._rest = last;
-	      
-	      last = newLast;
-	    }
-	    */
-	    
-	    /*
-	    // removes RC_END
-	    RegexpNode.removeTail(last);
-	    
-	    if (last._rest != null) {
-	      RegexpNode newLast = RegexpNode.removeTail(last);
-	      head = RegexpNode.concat(head, last);
-	        
-	      last = newLast;
-	    }
-	    */
-	    
-	    break;
-	    
-	  case '>':
-	    // (?>...) Atomic groups (once-only subpatterns). 
-	    last = (RegexpNode.Compat) parseRec(pattern);
-	    break;
-
-	  case '=':
-	    // (?=...) Positive lookahead assertion.
-	    last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_POS_LOOKAHEAD, parseRec(pattern));
-	    break;
-
-	  case '!':
-	    // (?!...) Negative lookahead assertion.
-	    last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_NEG_LOOKAHEAD, parseRec(pattern));
-	    break;
-	    
-	  case '<':
-	    ch = pattern.read();
-	    
-	    // (?<=...) Positive lookbehind assertion.
-        if (ch == '=')
-          last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_POS_LOOKBEHIND);
-        // (?<!...) Negative lookbehind assertion.
-	    else if (ch == '!')
-          last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_NEG_LOOKBEHIND);
-        else
-          throw new IllegalRegexpException("expected `}' at " +
-                                           badChar(ch));
-        
-        _isLookbehind = true;
-        node = parseRec(pattern);
-        _isLookbehind = false;
-        
-        last._branch = node;
-        
-        if (node != null)
-          last._length = node._length;
-	    break;
-	    
-	  case 'P':
-	    // (?P<name>group), (?P=name) named groups
-
-	    StringValue name = pattern.createStringBuilder();
-
-	    if ((ch = pattern.read()) == '<') {
-	      // this is a named group definition
-
-	      while ((ch = pattern.read()) != '>' && ch >= 0) {
-	        name.append((char)ch);
-	      }
-	      
-	      int groupIndex = ++_nGroup;
-
-	      last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_BEG_GROUP, groupIndex);
-	      last._rest = parseRec(pattern);
-	      last._length = last._rest._length;
-
-	      node = RegexpNode.create(RegexpNode.RC_END_GROUP, groupIndex);
-	      last = (RegexpNode.Compat) RegexpNode.replaceTail(last, node);
-	      
-	       _groupNameMap.put(Integer.valueOf(groupIndex), name);
-	       _groupNameReverseMap.put(name, Integer.valueOf(groupIndex));
-	    }
-	    else if (ch == '=') {
-	      // this is a named group reference
-
-	      while ((ch = pattern.peek()) != ')' && ch >= 0) {
-	        pattern.read();
-	        name.append((char)ch);
-	      }
-	      
-	      Integer groupIndex = _groupNameReverseMap.get(name);
-	      
-	      if (groupIndex == null) {
-	          throw new IllegalRegexpException("undeclared group reference '" +
-                                               name + "'");
-	      }
-	      
-	      last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_GROUP_REF, groupIndex.intValue());
-	    }
-	    else
-          throw new IllegalRegexpException("expected '<' or '=' at " +
-                                           badChar(ch));
-
-	    break;
-
-	  case '(':
-	    // (?(cond)yes|no) Conditional subpattern.
-	    
-	    /*
-	    int index = 0;
-	    while ('0' <= (ch = pattern.read()) && ch <= '9') {
-	      index = index * 10 + ch - '0';
-	    }
-	    */
-	    
-	    RegexpNode condition = null;;
-
-	    ch = pattern.peek();
-	    if ('0' <= ch && ch <= '9')
-	      condition = parseBackReference(pattern.read(), pattern);
-	    else
-	      condition = null;
-	    ch = pattern.read();
-	    
-
-	    if (ch != ')')
-	      throw new IllegalRegexpException("expected `)' at " +
-                                           badChar(ch));
-
-	    RegexpNode yesPattern = parseRec(pattern, true);
-	    RegexpNode noPattern = null;
-	    
-	    if (pattern.peek() == '|') {
-	      pattern.read();
-	      
-	      noPattern = parseRec(pattern, true);
-	    }
-
-	    last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_COND, ((RegexpNode.Compat) condition)._index);
-	    last._condition = condition;
-	    last._branch = yesPattern;
-	    last._nBranch = noPattern;
-	    
-	    break;
-
-	  case 'm': case 'i': case 's': case 'x': case 'g':
-	    do {
-	      switch (ch) {
-	      case 'm': _flags |= MULTILINE; break;
-	      case 'i': _flags |= IGNORE_CASE; break;
-	      case 's': _flags |= SINGLE_LINE; break;
-	      case 'x': _flags |= IGNORE_WS; break;
-	      case 'g': _flags |= GLOBAL; break;
-	      default:
-		throw new IllegalRegexpException("expected one of `misxg' at "
-						 + badChar(ch));
-	      }
-	    } while ((ch = pattern.read()) >= 0 && ch != ')');
-	    pattern.ungetc(ch);
-	    last = null;
-	    break;
-
-	  default:
-	    throw new IllegalRegexpException("expected `(?' code at "
-					     + badChar(ch));
-	  }
-	}
-	else {
-	  int groupIndex = ++_nGroup;
-
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_BEG_GROUP, groupIndex);
-	  last._rest = parseRec(pattern);
-	  
-	  if (last._rest != null)
-	    last._length = last._rest._length;
-
-	  node = RegexpNode.create(RegexpNode.RC_END_GROUP, groupIndex);
-	  last = (RegexpNode.Compat) RegexpNode.replaceTail(last, node);
-	}
-
-	if ((ch = pattern.read()) != ')')
-	  throw new IllegalRegexpException("expected `)' at " +
-					   badChar(ch));
-
-	break;
-
-      case ')':
-	pattern.ungetc(ch);
-
-	return RegexpNode.concat(head, last);
-
-      case '[':
-	head = RegexpNode.concat(head, last);
-	
-	if (pattern.peek() == ':') {
-	  throw new IllegalRegexpException("POSIX [::] class outside []");
-	}
-	else {
-	  last = (RegexpNode.Compat) parseSet(pattern);
-	}
-
-	if ((ch = pattern.read()) != ']') {
-	  throw new IllegalRegexpException("expected `]' at " + 
-					   badChar(ch));
-	}
-	break;
-
-      case '.':
-	head = RegexpNode.concat(head, last);
-
-	if ((_flags & SINGLE_LINE) == 0)
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_NSET, RegexpSet.DOT);
-	else
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_NSET, new RegexpSet());
-	break;
-
-      case '\\':
-	RegexpNode next = parseSlash(pattern);
-	/*
-	if (next != last)
-	  head = RegexpNode.concat(head, last);
-	*/
-
-	last = (RegexpNode.Compat) next;
-	break;
-            
-      case '^':
-	head = RegexpNode.concat(head, last);
-	if ((_flags & MULTILINE) != 0)
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_BLINE);
-	else
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_BSTRING);
-	break;
-
-      case '$':
-	head = RegexpNode.concat(head, last);
-	if ((_flags & MULTILINE) != 0)
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_ELINE);
-	else if ((_flags & END_ONLY) != 0)
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_ESTRING);
-	else
-	  last = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_ENSTRING);
-	break;
-            
-      default:
-	next = parseString(ch, pattern);
-	head = RegexpNode.concat(head, last);
-	last = (RegexpNode.Compat) next;
-	break;
-      }
-    }
-
-    return RegexpNode.concat(head, last);
-  }
-  
-  /**
-   * @param isConditional true is parsing for (?(cond)yes|no)
-   * 
    *   Recursively compile a RegexpNode.
    *
    * first      -- The first node of this sub-RegexpNode
@@ -705,8 +196,11 @@ class Regcomp {
       return parseRec(pattern, tail.getTail());
 
     case '{':
-      if (tail == null)
-	throw error(L.l("'{' requires a preceeding regexp"));
+      if (tail == null || ! ('0' <= pattern.peek() && pattern.peek() <= '9')) {
+	next = parseString('{', pattern);
+      
+	return concat(tail, parseRec(pattern, next));
+      }
 
       return parseRec(pattern, parseBrace(pattern, tail).getTail());
 
@@ -869,6 +363,32 @@ class Regcomp {
 	next = RegexpNode.ANCHOR_END;
       
       return concat(tail, parseRec(pattern, next));
+
+    case ' ': case '\n': case '\t': case '\r':
+      if (isIgnoreWs()) {
+	while (Character.isSpace((char) pattern.peek()))
+	  pattern.read();
+
+	return parseRec(pattern, tail);
+      }
+      else {
+	next = parseString(ch, pattern);
+      
+	return concat(tail, parseRec(pattern, next));
+      }
+
+    case '#':
+      if (isIgnoreWs()) {
+	while ((ch = pattern.read()) > 0 && ch!= '\n') {
+	}
+
+	return parseRec(pattern, tail);
+      }
+      else {
+	next = parseString(ch, pattern);
+      
+	return concat(tail, parseRec(pattern, next));
+      }
       
     default:
       next = parseString(ch, pattern);
@@ -1171,23 +691,15 @@ class Regcomp {
   private RegexpNode parseSet(PeekStream pattern) 
     throws IllegalRegexpException
   {
-    RegexpNode.Compat node;
     int first = pattern.peek();
     boolean isNot = false;
     
     if (first == '^') {
       pattern.read();
       isNot = true;
-      node = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_NSET);
-      node._length = 1;
-    }
-    else {
-      node = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_SET);
-      node._length = 1;
     }
     
     RegexpSet set = new RegexpSet();
-    node._set = set;
 
     int last = -1;
     int lastdash = -1;
@@ -1600,12 +1112,12 @@ class Regcomp {
     for (ch = pattern.read(); ch >= 0; ch = pattern.read()) {
       switch (ch) {
       case ' ': case '\t': case '\n': case '\r':
-	if ((_flags & IGNORE_WS) == 0 || isEscaped)
+	if (! isIgnoreWs() || isEscaped)
 	  cb.append((char) ch);
 	break;
 
       case '#':
-	if ((_flags & IGNORE_WS) == 0 || isEscaped)
+	if (! isIgnoreWs() || isEscaped)
 	  cb.append((char) ch);
 	else {
 	  while ((ch = pattern.read()) != '\n' && ch >= 0) {
@@ -1613,12 +1125,20 @@ class Regcomp {
 	}
 	break;
 
-      case '{': case '}': case '(': case ')': case '[':
+      case '(': case ')': case '[':
       case '+': case '?': case '*': case '.':
       case '$': case '^': case '|':
 	pattern.ungetc(ch);
 	return createString(cb);
 
+      case '{':
+	if ('0' <= pattern.peek() && pattern.peek() <= '9') {
+	  pattern.ungetc(ch);
+	  return createString(cb);
+	}
+	cb.append('{');
+	break;
+	
       case '\\':
 	ch = pattern.read();
 	
@@ -1988,17 +1508,8 @@ class Regcomp {
 
     if ((ch = pattern.read()) != '}')
       throw error(L.l("expected '}' at " + badChar(ch)));
-    
-    RegexpNode.Compat node;
 
-    if (isNegated)
-      node = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_NUNICODE);
-    else
-      node = (RegexpNode.Compat) RegexpNode.create(RegexpNode.RC_UNICODE);
-    
-    node._unicodeCategory = category;
-    
-    return node;
+    throw new UnsupportedOperationException();
   }
   
   private RegexpNode parseUnbracedUnicodeProperty(int ch,
@@ -2008,40 +1519,26 @@ class Regcomp {
   {
     switch (ch) {
       case 'C':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NC);
-        else
-          return RegexpNode.create(RegexpNode.RC_C);
+        return isNegated ? RegexpNode.PROP_NOT_C : RegexpNode.PROP_C;
+
       case 'L':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NL);
-        else
-          return RegexpNode.create(RegexpNode.RC_L);
+        return isNegated ? RegexpNode.PROP_NOT_L : RegexpNode.PROP_L;
+	
       case 'M':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NM);
-        else
-          return RegexpNode.create(RegexpNode.RC_M);
+        return isNegated ? RegexpNode.PROP_NOT_M : RegexpNode.PROP_M;
+	
       case 'N':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NN);
-        else
-          return RegexpNode.create(RegexpNode.RC_N);
+        return isNegated ? RegexpNode.PROP_NOT_N : RegexpNode.PROP_N;
+
       case 'P':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NP);
-        else
-          return RegexpNode.create(RegexpNode.RC_P);
+        return isNegated ? RegexpNode.PROP_NOT_P : RegexpNode.PROP_P;
+
       case 'S':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NS);
-        else
-          return RegexpNode.create(RegexpNode.RC_S);
+        return isNegated ? RegexpNode.PROP_NOT_S : RegexpNode.PROP_S;
+
       case 'Z':
-        if (isNegated)
-          return RegexpNode.create(RegexpNode.RC_NZ);
-        else
-          return RegexpNode.create(RegexpNode.RC_Z);
+        return isNegated ? RegexpNode.PROP_NOT_Z : RegexpNode.PROP_Z;
+	
       default:
         throw new IllegalRegexpException("invalid Unicode property " +
                 badChar(ch));

@@ -139,9 +139,9 @@ public class RegexpModule
   /**
    * Quotes regexp values
    */
-  public static String preg_quote(Env env,
-                                  StringValue string,
-                                  @Optional String delim)
+  public static StringValue preg_quote(Env env,
+				       StringValue string,
+				       @Optional StringValue delim)
   {
     if (useJavaRegexp(env))
       return JavaRegexpModule.preg_quote(string, delim);
@@ -248,7 +248,7 @@ public class RegexpModule
   /**
    * Makes a regexp for a case-insensitive match.
    */
-  public static String sql_regcase(Env env, String string)
+  public static StringValue sql_regcase(Env env, StringValue string)
   {
     if (useJavaRegexp(env))
       return JavaRegexpModule.sql_regcase(string);
@@ -315,6 +315,8 @@ public class RegexpModule
   
   private static boolean useJavaRegexp(Env env)
   {
-    return ! env.getIniBoolean("caucho.resin_regexp");
+    //return false;
+    return false;
+    // return ! env.getIniBoolean("caucho.resin_regexp");
   }
 }

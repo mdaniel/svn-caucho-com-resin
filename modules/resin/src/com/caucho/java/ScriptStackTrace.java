@@ -55,8 +55,8 @@ public class ScriptStackTrace {
   private static final L10N L = new L10N(ScriptStackTrace.class);
   private static final Logger log = Log.open(ScriptStackTrace.class);
   
-  private static WeakHashMap<Class,LineMap> _scriptMap =
-    new WeakHashMap<Class,LineMap>();
+  private static WeakHashMap<Class,LineMap> _scriptMap
+    = new WeakHashMap<Class,LineMap>();
   
   /**
    * Filter a stack trace, replacing names.

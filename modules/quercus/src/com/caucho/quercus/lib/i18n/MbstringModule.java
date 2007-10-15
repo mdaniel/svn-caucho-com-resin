@@ -990,7 +990,7 @@ public class MbstringModule
    */
   private static StringValue toUpperCaseTitle(Env env, StringValue string)
   {
-    StringValue sb = string.createEmptyStringBuilder();
+    StringValue sb = string.createStringBuilder();
 
     int strLen = string.length();
     boolean isWordStart = true;

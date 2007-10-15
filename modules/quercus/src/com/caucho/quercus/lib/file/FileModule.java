@@ -363,16 +363,16 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the directory name of a string.
    */
-  public String dirname(String path)
+  public StringValue dirname(Env env, StringValue path)
   {
     if (path == null)
-      return ".";
+      return env.createString(".");
     
     int len = path.length();
 
     if (len == 0)
-      return ".";
-    else if (path.equals("/"))
+      return env.createString(".");
+    else if (path.length() == 1 && path.charAt(0) == '/')
       return path;
     
     int p = path.lastIndexOf('/', len - 2);
@@ -381,18 +381,18 @@ public class FileModule extends AbstractQuercusModule {
     p = Math.max(p, path.lastIndexOf('\\', len - 2));
     
     if (p == 0)
-      return "/";
+      return env.createString("/");
     else if (p > 0)
       return path.substring(0, p);
     
     p = path.lastIndexOf('\\', len - 2);
     
     if (p == 0)
-      return "\\";
+      return env.createString("\\");
     else if (p > 0)
       return path.substring(0, p);
     
-    return ".";
+    return env.createString(".");
   }
 
   /**

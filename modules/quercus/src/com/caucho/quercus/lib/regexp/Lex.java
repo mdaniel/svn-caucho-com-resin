@@ -45,7 +45,7 @@ public class Lex {
 
     RegexpNode prog = _comp.parse(new PeekString(pattern));
 
-    _rawProg = RegOptim.appendLexeme(_rawProg, prog, value);
+    //_rawProg = RegOptim.appendLexeme(_rawProg, prog, value);
   }
 
   public Regexp compile(Env env)

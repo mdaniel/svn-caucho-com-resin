@@ -1801,7 +1801,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the field ref.
    */
-  public final Value getField(Env env, String index)
+  public Value getField(Env env, String index)
   {
     return getField(env, index, false);
   }

@@ -48,35 +48,18 @@ public class RegexpState {
   public static final int FAIL = -1;
   public static final int SUCCESS = 0;
 
-  StringValue _pattern;
+  private Regexp _regexp;
+
   StringValue _subject;
   
-  boolean _ignoreCase;
   boolean _isGlobal;
 
   int _first;
   int _start;
 
-  StringCharCursor _stringCursor;
-
-  int _nLoop;
-  int []_loopCount;
-  int []_loopOffset;
-  int []_loopTail;
-
-  int _nGroup;
-  int []_groupStart; // possibly not matching
-  int _match;
-  int _lexeme;
-
-  CharBuffer _cb;
-  
   // optim stuff
   CharBuffer _prefix; // initial string
   int _minLength; // minimum length possible for this regexp
-
-  CharCursor _lastCursor;
-  int _lastIndex;
 
   StringValue []_groupNames;
   
@@ -85,14 +68,13 @@ public class RegexpState {
   
   boolean _isUTF8;
   boolean _isEval;
-  
-  GroupState _groupState = new GroupState();
 
   int _groupLength;
   int []_groupBegin;
   int []_groupEnd;
-
-  private Regexp _regexp;
+  
+  int []_loopCount;
+  int []_loopOffset;
   
   public RegexpState(Regexp regexp, StringValue subject)
   {
@@ -105,28 +87,35 @@ public class RegexpState {
   {
     _regexp = regexp;
 
-    _nGroup = _regexp._nGroup;
-    _groupBegin = new int[_nGroup];
-    _groupEnd = new int[_nGroup];
+    int nGroup = _regexp._nGroup;
+    _groupBegin = new int[nGroup];
+    _groupEnd = new int[nGroup];
 
-    _nLoop = _regexp._nLoop;
-    _loopCount = new int[_nLoop];
-    _loopOffset = new int[_nLoop];
+    int nLoop = _regexp._nLoop;
+    _loopCount = new int[nLoop];
+    _loopOffset = new int[nLoop];
   }
 
   public boolean find()
   {
     int minLength = _regexp._minLength;
+    boolean []firstSet = _regexp._firstSet;
     int length = _subject.length();
 
     for (; _first + minLength <= length; _first++) {
-      clearGroup();
+      if (firstSet != null) {
+	char firstChar = _subject.charAt(_first);
+	
+	if (firstChar < 256 && ! firstSet[firstChar])
+	  continue;
+      }
 
+      _groupLength = 0;
       int offset = _regexp._prog.match(_subject, _first, this);
 
       if (offset >= 0) {
-	setBegin(0, _first);
-	setEnd(0, offset);
+	_groupBegin[0] = _first;
+	_groupEnd[0] = offset;
 
 	if (_first < offset)
 	  _first = offset;
@@ -163,22 +152,29 @@ public class RegexpState {
    */
   public int exec(StringValue subject, int start)
   { 
-    clearGroup();
+    _groupLength = 0;
     
     _start = start;
     _first = start;
 
     int minLength = _regexp._minLength;
+    boolean []firstSet = _regexp._firstSet;
     int end = subject.length() - minLength;
+    RegexpNode prog = _regexp._prog;
 
     for (; start <= end; start++) {
-      int value = _regexp._prog.match(subject, start, this);
+      if (firstSet != null) {
+	char firstChar = _subject.charAt(start);
+	
+	if (firstChar < 256 && ! firstSet[firstChar])
+	  continue;
+      }
+      
+      int value = prog.match(subject, start, this);
 
       if (value >= 0) {
-	setBegin(0, start);
-	setEnd(0, value);
-    
-	_groupState.setMatched(0);
+	_groupBegin[0] = start;
+	_groupEnd[0] = value;
 	
 	return start;
       }
@@ -190,23 +186,6 @@ public class RegexpState {
   private void clearGroup()
   {
     _groupLength = 0;
-  }
-  
-  void setGroupState(GroupState newState)
-  {
-    newState.free(_groupState);
-    
-    _groupState = newState;
-  }
-  
-  void freeGroupState(GroupState oldState)
-  {
-    _groupState.free(oldState);
-  }
-  
-  GroupState copyGroupState()
-  {
-    return _groupState.copy();
   }
   
   public int getBegin(int i)
@@ -266,13 +245,12 @@ public class RegexpState {
   
   public int groupCount()
   {
-    return _nGroup;
+    return _regexp._nGroup;
   }
   
   public boolean isMatchedGroup(int i)
   {
     return i <= _groupLength;
-    // return _groupState.isMatched(i);
   }
   
   public StringValue group(Env env)
