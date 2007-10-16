@@ -1726,15 +1726,15 @@ public class StringModule extends AbstractQuercusModule {
   public static Value sscanf(Env env,
                              StringValue string,
                              StringValue format,
-                             @Optional Value []args)
-  { 
+                             @Optional @Reference Value []args)
+  {
     int fmtLen = format.length();
     int strlen = string.length();
 
     int sIndex = 0;
     int fIndex = 0;
 
-    boolean isAssignment = args.length != 0;
+    boolean isAssign = args.length != 0;
     int argIndex = 0;
     
     ArrayValue array = new ArrayValueImpl();
@@ -1751,7 +1751,8 @@ public class StringModule extends AbstractQuercusModule {
 
         ch = string.charAt(sIndex);
         if (! isWhitespace(ch)) {
-          return array; // XXX: return false?
+          // XXX: return false?
+          return sscanfReturn(env, array, args, argIndex, isAssign);
         }
 
         for (sIndex++;
@@ -1771,10 +1772,23 @@ public class StringModule extends AbstractQuercusModule {
             break loop;
           }
           
+          Value obj;
+          
+          if (isAssign) {
+            if (argIndex < args.length)
+              obj = args[argIndex++];
+            else {
+              env.warning(L.l("not enough vars passed in"));
+              break loop; 
+            }
+          }
+          else
+            obj = array;
+          
           switch (ch) {
           case '%':
             if (string.charAt(sIndex) != '%')
-              return array;
+              return sscanfReturn(env, array, args, argIndex, isAssign);
             else
               break loop;
 
@@ -1787,41 +1801,41 @@ public class StringModule extends AbstractQuercusModule {
             break;
 
           case 's':
-            sIndex = sscanfString(string, sIndex, maxLen, array);
+            sIndex = sscanfString(string, sIndex, maxLen, obj, isAssign);
             break loop;
             
           case 'c':
             if ( maxLen < 0)
               maxLen = 1;
             
-            sIndex = sscanfString(string, sIndex, maxLen, array);
+            sIndex = sscanfString(string, sIndex, maxLen, obj, isAssign);
             break loop;
             
           case 'd':
-            sIndex = sscanfInteger(string, sIndex, maxLen, array, 10, false);
+            sIndex = sscanfInteger(string, sIndex, maxLen, obj, isAssign, 10, false);
             break loop;
             
           case 'u':
-            sIndex = sscanfInteger(string, sIndex, maxLen, array, 10, true);
+            sIndex = sscanfInteger(string, sIndex, maxLen, obj, isAssign, 10, true);
             break loop;
             
           case 'o':
-            sIndex = sscanfInteger(string, sIndex, maxLen, array, 8, false);
+            sIndex = sscanfInteger(string, sIndex, maxLen, obj, isAssign, 8, false);
             break loop;
             
           case 'x': case 'X':
-            sIndex = sscanfHex(string, sIndex, maxLen, array);
+            sIndex = sscanfHex(string, sIndex, maxLen, obj, isAssign);
             break loop;
 
           case 'e': case 'f':
-            sIndex = sscanfScientific(string, sIndex, maxLen, array);
+            sIndex = sscanfScientific(string, sIndex, maxLen, obj, isAssign);
             break loop;
 
           default:
             log.fine(L.l("'{0}' is a bad sscanf string.", format));
             env.warning(L.l("'{0}' is a bad sscanf string.", format));
           
-            return array;
+            return isAssign ? LongValue.create(argIndex) : array;
           }
         }
       }
@@ -1829,19 +1843,39 @@ public class StringModule extends AbstractQuercusModule {
         sIndex++;
       }
       else
-        return array;
+        return sscanfReturn(env, array, args, argIndex, isAssign);
     }
 
-    return array;
+    return sscanfReturn(env, array, args, argIndex, isAssign);
   }
 
+  private static Value sscanfReturn(Env env,
+                                    ArrayValue array,
+                                    Value []args,
+                                    int argIndex,
+                                    boolean isAssign)
+  {
+    if (isAssign) {
+      if (argIndex != args.length)
+        env.warning(L.l("{0} vars passed in but saw only {1} '%' args", args.length, argIndex));
+      
+      return LongValue.create(argIndex);
+    }
+    else {
+      return array;
+    }
+  }
+                                    
+                                    
+  
   /**
    * Scans a string with a given length.
    */
   private static int sscanfString(StringValue string,
                                   int sIndex,
                                   int maxLen,
-                                  ArrayValue array)
+                                  Value obj,
+                                  boolean isAssignment)
   {
     int strlen = string.length();
 
@@ -1859,9 +1893,17 @@ public class StringModule extends AbstractQuercusModule {
         break;
     }
 
-    array.append(sb);
+    sscanfPut(obj, sb, isAssignment);
 
     return sIndex;
+  }
+  
+  private static void sscanfPut(Value obj, Value val, boolean isAssignment)
+  {
+    if (isAssignment)
+      obj.set(val);
+    else
+      obj.put(val);
   }
   
   /**
@@ -1870,7 +1912,8 @@ public class StringModule extends AbstractQuercusModule {
   private static int sscanfInteger(StringValue string,
                                    int sIndex,
                                    int maxLen,
-                                   ArrayValue array,
+                                   Value obj,
+                                   boolean isAssign,
                                    int base,
                                    boolean isUnsigned)
   {
@@ -1908,7 +1951,7 @@ public class StringModule extends AbstractQuercusModule {
         isNotMatched = false;
       }
       else if (isNotMatched) {
-        array.append(NullValue.NULL);
+        sscanfPut(obj, NullValue.NULL, isAssign);
         return sIndex;
       }
       else
@@ -1917,12 +1960,12 @@ public class StringModule extends AbstractQuercusModule {
 
     if (isUnsigned) {
       if (sign == -1 && val != 0)
-        array.append(StringValue.create(0xFFFFFFFFL - val + 1));
+        sscanfPut(obj, StringValue.create(0xFFFFFFFFL - val + 1), isAssign);
       else
-        array.append(LongValue.create(val));
+        sscanfPut(obj, LongValue.create(val), isAssign);
     }
     else
-      array.append(LongValue.create(val * sign));
+      sscanfPut(obj, LongValue.create(val * sign), isAssign);
 
     return sIndex;
   }
@@ -1933,7 +1976,8 @@ public class StringModule extends AbstractQuercusModule {
   private static int sscanfHex(StringValue string,
                                int sIndex,
                                int maxLen,
-                               ArrayValue array)
+                               Value obj,
+                               boolean isAssign)
   {
     int strlen = string.length();
 
@@ -1975,14 +2019,14 @@ public class StringModule extends AbstractQuercusModule {
         isMatched = true;
       }
       else if (! isMatched) {
-        array.append(NullValue.NULL);
+        sscanfPut(obj, NullValue.NULL, isAssign);
         return sIndex;
       }
       else
         break;
     }
 
-    array.append(LongValue.create(val * sign));
+    sscanfPut(obj, LongValue.create(val * sign), isAssign);
 
     return sIndex;
   }
@@ -1991,9 +2035,10 @@ public class StringModule extends AbstractQuercusModule {
    * Scans a integer with a given length.
    */
   private static int sscanfScientific(StringValue s,
-                                   int i,
-                                   int maxLen,
-                                   ArrayValue array)
+                                      int i,
+                                      int maxLen,
+                                      Value obj,
+                                      boolean isAssign)
   {
     if (maxLen < 0)
       maxLen = Integer.MAX_VALUE;
@@ -2027,7 +2072,7 @@ public class StringModule extends AbstractQuercusModule {
       int e = i++;
 
       if (start == e) {
-        array.append(NullValue.NULL);
+        sscanfPut(obj, NullValue.NULL, isAssign);
         return start;
       }
       
@@ -2052,7 +2097,7 @@ public class StringModule extends AbstractQuercusModule {
     else
       val = Double.parseDouble(s.substring(start, i).toString());
 
-    array.append(DoubleValue.create(val));
+    sscanfPut(obj, DoubleValue.create(val), isAssign);
 
     return i;
   }
