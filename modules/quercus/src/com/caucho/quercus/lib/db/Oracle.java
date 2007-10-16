@@ -66,29 +66,32 @@ public class Oracle extends JdbcConnectionResource {
   /**
    * Connects to the underlying database.
    */
-  public boolean connectInternal(Env env,
-                                 @Optional("localhost") String host,
-                                 @Optional String userName,
-                                 @Optional String password,
-                                 @Optional String dbname,
-                                 @Optional("5432") int port,
-                                 @Optional String socket,
-                                 @Optional int flags,
-                                 @Optional String driver,
-                                 @Optional String url)
+  protected Connection connectImpl(Env env,
+				   @Optional("localhost") String host,
+				   @Optional String userName,
+				   @Optional String password,
+				   @Optional String dbname,
+				   @Optional("5432") int port,
+				   @Optional String socket,
+				   @Optional int flags,
+				   @Optional String driver,
+				   @Optional String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
-      return false;
+      return null;
     }
 
     try {
 
-      if (host == null || host.equals(""))
+      if (host == null || host.equals("")) {
         host = "localhost";
+	_host = host;
+      }
 
       if (driver == null || driver.equals("")) {
         driver = "oracle.jdbc.OracleDriver";
+	_driver = driver;
       }
 
       if (url == null || url.equals("")) {
@@ -99,13 +102,14 @@ public class Oracle extends JdbcConnectionResource {
         } else {
           url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + dbname;
         }
+	_url = url;
       }
 
-      Connection jConn = env.getConnection(driver, url, userName, password);
+      Connection jConn = env.getConnection(driver, url, dbname,
+					   userName, password);
 
-      setConnection(host, userName, password, dbname, port, jConn, driver, url);
 
-      return true;
+      return jConn;
 
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
@@ -114,13 +118,13 @@ public class Oracle extends JdbcConnectionResource {
 
       log.log(Level.FINE, e.toString(), e);
 
-      return false;
+      return null;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("oracle.connectError", new UnicodeValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
-      return false;
+      return null;
     }
   }
 

@@ -667,7 +667,7 @@ public class VariableModule extends AbstractQuercusModule {
       UnserializeReader is = new UnserializeReader(s);
 
       v = is.unserialize(env);
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
       env.notice(e.toString());

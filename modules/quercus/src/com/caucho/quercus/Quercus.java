@@ -416,7 +416,7 @@ public class Quercus
   /**
    * Gets the default data source.
    */
-  public DataSource findDatabase(String driver, String url)
+  public DataSource findDatabase(String driver, String url, String catalog)
   {
     if (_database != null)
       return _database;
@@ -427,7 +427,6 @@ public class Quercus
         Class cls = loader.loadClass(driver);
         
         return (DataSource)cls.newInstance();
-        
       } catch (ClassNotFoundException e) {
         throw new QuercusModuleException(e);
       } catch (InstantiationException e) {

@@ -735,9 +735,9 @@ public class MysqlModule extends AbstractQuercusModule {
                                  @Optional Mysqli conn)
   {
     if (conn == null)
-      conn = getConnection(env);
-
-    return conn.select_db(name);
+      return getConnection(env, name).select_db(name);
+    else
+      return conn.select_db(name);
   }
 
   /**
@@ -896,12 +896,17 @@ public class MysqlModule extends AbstractQuercusModule {
 
   private Mysqli getConnection(Env env)
   {
+    return getConnection(env, "");
+  }
+
+  private Mysqli getConnection(Env env, String db)
+  {
     Mysqli conn = (Mysqli) env.getSpecialValue("caucho.mysql");
 
     if (conn != null)
       return conn;
 
-    conn = new Mysqli(env, "localhost", "", "", "", 3306, "", 0, null, null);
+    conn = new Mysqli(env, "localhost", "", "", db, 3306, "", 0, null, null);
 
     env.setSpecialValue("caucho.mysql", conn);
 

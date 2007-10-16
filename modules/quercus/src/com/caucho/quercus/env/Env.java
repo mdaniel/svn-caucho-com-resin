@@ -648,16 +648,16 @@ public class Env {
     return _quercus.getDatabase();
   }
 
-  protected DataSource findDatabase(String driver, String url)
+  protected DataSource findDatabase(String driver, String url, String catalog)
     throws Exception
   {
-    return _quercus.findDatabase(driver, url);
+    return _quercus.findDatabase(driver, url, catalog);
   }
 
   /**
    * Returns the configured database.
    */
-  public Connection getConnection(String driver, String url,
+  public Connection getConnection(String driver, String url, String catalog,
                                   String userName, String password)
     throws Exception
   {
@@ -675,34 +675,44 @@ public class Env {
       entry.setConnection(database.getConnection());
       _connMap.put(entry, entry);
       
-      return entry.getConnection();
+      Connection conn = entry.getConnection();
+
+      if (catalog != null)
+	conn.setCatalog(catalog);
     }
 
-    database = findDatabase(driver, url);
+    database = findDatabase(driver, url, catalog);
     
     ConnectionEntry entry = new ConnectionEntry();
     entry.init(database, userName, password);
 
     ConnectionEntry oldEntry = _connMap.get(entry);
 
+    Connection conn;
+    
     if (oldEntry != null)
-      return oldEntry.getConnection();
-
-    if (userName == null || userName.equals(""))
-      entry.setConnection(database.getConnection());
+      conn = oldEntry.getConnection();
     else {
-      entry.setConnection(database.getConnection(userName, password));
+      if (userName == null || userName.equals(""))
+	conn = database.getConnection();
+      else
+	conn = database.getConnection(userName, password);
+
+      entry.setConnection(conn);
     }
 
     _connMap.put(entry, entry);
+
+    if (catalog != null && ! "".equals(catalog))
+      conn.setCatalog(catalog);
       
-    return entry.getConnection();
+    return conn;
   }
 
   /**
    * Returns the configured database.
    */
-  public DataSource getDataSource(String driver, String url)
+  public DataSource getDataSource(String driver, String url, String catalog)
     throws Exception
   {
     DataSource database = _quercus.getDatabase();
@@ -710,7 +720,7 @@ public class Env {
     if (database != null)
       return database;
     else
-      return findDatabase(driver, url);
+      return findDatabase(driver, url, catalog);
   }
 
   /**

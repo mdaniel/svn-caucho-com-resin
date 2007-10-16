@@ -48,8 +48,10 @@ public class DatabaseManager {
   private static final EnvironmentLocal<DatabaseManager> _localManager
     = new EnvironmentLocal<DatabaseManager>();
 
-  private final HashMap<String,DBPool> _databaseMap
-    = new HashMap<String,DBPool>();
+  private final HashMap<DatabaseKey,DBPool> _databaseMap
+    = new HashMap<DatabaseKey,DBPool>();
+
+  private static int _gId;
 
   /**
    * The manager is never instantiated.
@@ -79,23 +81,44 @@ public class DatabaseManager {
   /**
    * Returns a matching dbpool.
    */
-  public static DataSource findDatabase(String driver, String url)
+  public static DataSource findDatabase(String driver,
+					String url)
     throws Exception
   {
-    return getLocalManager().findDatabaseImpl(driver, url);
+    return findDatabase(driver, url, null);
+  }
+
+  /**
+   * Returns a matching dbpool.
+   */
+  public static DataSource findDatabase(String driver,
+					String url,
+					String catalog)
+    throws Exception
+  {
+    return getLocalManager().findDatabaseImpl(driver, url, catalog);
   }
 
   /**
    * Looks up the local database, creating if necessary.
    */
-  private DataSource findDatabaseImpl(String driverName, String url)
+  private DataSource findDatabaseImpl(String driverName,
+				      String url,
+				      String catalog)
     throws Exception
   {
+    DatabaseKey key = new DatabaseKey(url, catalog);
+    
     synchronized (_databaseMap) {
-      DBPool db = _databaseMap.get(url);
+      DBPool db = _databaseMap.get(key);
 
       if (db == null) {
 	db = new DBPool();
+
+	if (catalog != null)
+	  db.setVar(url + "-" + catalog + "-" + _gId++);
+	else
+	  db.setVar(url + "-" + _gId++);
 	
 	DriverConfig driver = db.createDriver();
 
@@ -106,12 +129,52 @@ public class DatabaseManager {
 	driver.setType(driverClass);
 	driver.setURL(url);
 
+	if (catalog != null)
+	  db.createConnection().setCatalog(catalog);
+
 	db.init();
 
-	_databaseMap.put(url, db);
+	_databaseMap.put(key, db);
       }
 
       return db;
+    }
+  }
+
+  static class DatabaseKey {
+    private String _url;
+    private String _catalog;
+
+    DatabaseKey(String url, String catalog)
+    {
+      _url = url;
+      _catalog = catalog;
+    }
+
+    public int hashCode()
+    {
+      int hash = 37;
+
+      hash = 65521 * hash + _url.hashCode();
+
+      if (_catalog != null)
+	hash = 65521 * hash + _catalog.hashCode();
+
+      return hash;
+    }
+
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof DatabaseKey))
+	return false;
+
+      DatabaseKey key = (DatabaseKey) o;
+
+      if (! _url.equals(key._url))
+	return false;
+
+      return (_catalog == key._catalog
+	      || _catalog != null && _catalog.equals(key._catalog));
     }
   }
 }

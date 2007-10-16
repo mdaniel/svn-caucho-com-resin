@@ -110,7 +110,10 @@ public class ManagedConnectionImpl
   // old value for getReadOnly
   private boolean _readOnly = false;
   // old value for getCatalog
+  private String _catalogOrig = null;
+  // current value for getCatalog
   private String _catalog = null;
+  
   // old value for isolation
   private int _oldIsolation = -1;
   // old value for getTypeMap
@@ -179,7 +182,9 @@ public class ManagedConnectionImpl
     if (_connException != null)
       throw _connException;
 
-    ping();
+    if (! ping())
+      return null;
+    
     _lastEventTime = Alarm.getCurrentTime();
 
     return new UserConnection(this);
@@ -308,8 +313,13 @@ public class ManagedConnectionImpl
     if (_connConfig.isReadOnly())
       _driverConnection.setReadOnly(true);
 
-    if (_connConfig.getCatalog() != null)
-      _driverConnection.setCatalog(_connConfig.getCatalog());
+    _catalogOrig = _driverConnection.getCatalog();
+
+    String configCatalog = _connConfig.getCatalog();
+    if (configCatalog != null && ! configCatalog.equals(_catalogOrig)) {
+      _catalogOrig = configCatalog;
+      _driverConnection.setCatalog(_catalogOrig);
+    }
   }
 
   /**
@@ -573,10 +583,16 @@ public class ManagedConnectionImpl
     throws SQLException
   {
     try {
-      if (_catalog == null)
-        _catalog = _driverConnection.getCatalog();
-
-      _driverConnection.setCatalog(catalog);
+      // only call catalog if changed
+      if (_catalog != null && ! _catalog.equals(catalog)) {
+	_catalog = catalog;
+	_driverConnection.setCatalog(catalog);
+      }
+      else if (_catalog == null
+	       && (_catalogOrig == null || ! _catalogOrig.equals(catalog))) {
+	_catalog = catalog;
+	_driverConnection.setCatalog(catalog);
+      }
     } catch (SQLException e) {
       fatalEvent();
       throw e;
@@ -642,8 +658,8 @@ public class ManagedConnectionImpl
 	conn.setReadOnly(false);
       _readOnly = false;
 
-      if (_catalog != null && ! _catalog.equals(""))
-	conn.setCatalog(_catalog);
+      if (_catalog != null && ! _catalog.equals(_catalogOrig))
+	conn.setCatalog(_catalogOrig);
       _catalog = null;
 
       if (_typeMap != null)
@@ -680,9 +696,7 @@ public class ManagedConnectionImpl
   boolean isValid()
   {
     try {
-      ping();
-
-      return true;
+      return ping();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -693,7 +707,7 @@ public class ManagedConnectionImpl
   /**
    * Checks the validity with ping.
    */
-  private void ping()
+  private boolean ping()
     throws ResourceException
   {
     DBPoolImpl dbPool = _factory.getDBPool();
@@ -701,29 +715,34 @@ public class ManagedConnectionImpl
     long now = Alarm.getCurrentTime();
 
     if (now < _lastEventTime + 1000)
-      return;
+      return true;
 
     if (! dbPool.isPing())
-      return;
+      return true;
 
     long pingInterval = dbPool.getPingInterval();
     if (pingInterval > 0 && now < _lastEventTime + pingInterval)
-      return;
+      return true;
 
-    String pingQuery = dbPool.getPingQuery();
-
-    if (pingQuery == null)
-      return;
-
-    if (_driverConnection == null)
-      return;
+    Connection conn = _driverConnection;
 
     try {
-      Statement stmt = _driverConnection.createStatement();
+      if (conn == null || conn.isClosed()) {
+	return false;
+      }
+
+      String pingQuery = dbPool.getPingQuery();
+
+      if (pingQuery == null)
+	return true;
+      
+      Statement stmt = conn.createStatement();
 
       try {
 	ResultSet rs = stmt.executeQuery(pingQuery);
 	rs.close();
+
+	return true;
       } finally {
 	stmt.close();
       }

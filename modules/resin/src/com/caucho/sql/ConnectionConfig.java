@@ -94,7 +94,10 @@ public class ConnectionConfig {
    */
   public void setCatalog(String catalog)
   {
-    _catalog = catalog;
+    if (! "".equals(catalog))
+      _catalog = catalog;
+    else
+      _catalog = null;
   }
 
   /**

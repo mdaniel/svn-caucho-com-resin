@@ -162,13 +162,13 @@ public class ResinQuercus extends Quercus
   }
 
   @Override
-  public DataSource findDatabase(String driver, String url)
+  public DataSource findDatabase(String driver, String url, String catalog)
   {
     try {
       if (getDatabase() != null)
 	return getDatabase();
       else
-	return DatabaseManager.findDatabase(driver, url);
+	return DatabaseManager.findDatabase(driver, url, catalog);
     } catch (Exception e) {
       throw new QuercusModuleException(e);
     }

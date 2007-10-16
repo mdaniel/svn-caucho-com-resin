@@ -234,7 +234,7 @@ public class SpyStatement implements java.sql.Statement {
       ResultSet result = _stmt.getResultSet();
 
       if (log.isLoggable(Level.FINE))
-	log.fine(getId() + ":getResultSet() -> " + result);
+	log.fine(getId() + ":getResultSet() -> " + (result != null ? result.getClass().getName() : ""));
       
       return result;
     } catch (Throwable e) {

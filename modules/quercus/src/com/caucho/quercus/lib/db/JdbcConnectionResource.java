@@ -69,15 +69,18 @@ public abstract class JdbcConnectionResource implements Closeable {
   private SQLWarning _warnings;
 
   private Env _env;
-  private String _host;
+  protected String _host;
   private String _dbname;
-  private int _port;
+  protected int _port;
   private String _userName;
   private String _password;
-  private String _driver;
-  private String _url;
+  protected String _driver;
+  protected String _url;
+  private int _flags;
+  private String _socket;
 
-  private boolean _connected;
+  private boolean _isUsed;
+  private boolean _isConnected;
 
   public JdbcConnectionResource(Env env)
   {
@@ -97,7 +100,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   public boolean isConnected()
   {
-    return _connected;
+    return _isConnected;
   }
 
   public Env getEnv()
@@ -149,47 +152,54 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @param port server port
    * @param dbname database name
    */
-  protected void setConnection(String host,
-                               String userName,
-                               String password,
-                               String dbname,
-                               int port,
-                               Connection conn,
-                               String driver,
-                               String url)
+  final protected boolean connectInternal(Env env,
+					  @Optional("localhost") String host,
+					  @Optional String userName,
+					  @Optional String password,
+					  @Optional String dbname,
+					  @Optional int port,
+					  @Optional String socket,
+					  @Optional int flags,
+					  @Optional String driver,
+					  @Optional String url)
   {
     _host = host;
     _userName = userName;
     _password = password;
     _dbname = dbname;
     _port = port;
-
-    _conn = conn;
-
+    _socket = socket;
+    _flags = flags;
     _driver = driver;
-
     _url = url;
 
+    Connection conn = connectImpl(env, host, userName, password,
+				  dbname, port, socket, flags, driver, url);
+
     if (conn != null) {
-      _connected = true;
+      _conn = conn;
+      
+      _isConnected = true;
 
       _env.addClose(this);
     }
+
+    return conn != null;
   }
 
   /**
    * Connects to the underlying database.
    */
-  protected abstract boolean connectInternal(Env env,
-                                             @Optional("localhost") String host,
-                                             @Optional String userName,
-                                             @Optional String password,
-                                             @Optional String dbname,
-                                             @Optional int port,
-                                             @Optional String socket,
-                                             @Optional int flags,
-                                             @Optional String driver,
-                                             @Optional String url);
+  protected abstract Connection connectImpl(Env env,
+					    @Optional("localhost") String host,
+					    @Optional String userName,
+					    @Optional String password,
+					    @Optional String dbname,
+					    @Optional int port,
+					    @Optional String socket,
+					    @Optional int flags,
+					    @Optional String driver,
+					    @Optional String url);
 
   /**
    * Escape the given string for SQL statements.
@@ -348,8 +358,10 @@ public abstract class JdbcConnectionResource implements Closeable {
   /**
    * Returns the connection
    */
-  public Connection getConnection()
+  public final Connection getConnection()
   {
+    _isUsed = true;
+    
     if (_conn != null)
       return _conn;
     else if (_errorMessage != null)
@@ -471,12 +483,14 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   public boolean close(Env env)
   {
-    if (_connected) {
-      _connected = false;
+    if (_isConnected) {
+      _isConnected = false;
 
       // php/1418
-      //env.removeClose(this);
-      //close();
+      if (! _isUsed) {
+	env.removeClose(this);
+	close();
+      }
     }
 
     return true;
@@ -484,7 +498,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   public JdbcConnectionResource validateConnection()
   {
-    if (! _connected) {
+    if (! _isConnected) {
       throw _env.createErrorException(L.l("Connection is not properly initialized {0}\nDriver {1}",
                                     _url, _driver));
     }
@@ -700,9 +714,37 @@ public abstract class JdbcConnectionResource implements Closeable {
   public void setCatalog(String name)
     throws SQLException
   {
+    if (name != null && name.equals(_dbname))
+      return;
+    
     clearErrors();
 
-    _conn.setCatalog(name);
+    if (! _isUsed) {
+      // The database is only connected, but not used, reopen with
+      // a real catalog
+      
+      Connection conn = _conn;
+      _conn = null;
+      _isConnected = false;
+      
+      if (conn != null)
+	conn.close();
+
+      _dbname = name;
+      
+      connectInternal(_env, 
+		      _host,
+		      _userName,
+		      _password,
+		      _dbname,
+		      _port,
+		      _socket,
+		      _flags,
+		      _driver,
+		      _url);
+    }
+    else
+      _conn.setCatalog(name);
   }
 
   /**

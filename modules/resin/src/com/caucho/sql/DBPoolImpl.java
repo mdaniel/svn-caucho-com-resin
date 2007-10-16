@@ -173,7 +173,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   // The Query used for connection liveness.
   private String _pingQuery;
   // Ping when the connection is reused.
-  private boolean _isPing;
+  private Boolean _isPing;
   // How long between pings
   private long _pingInterval = 1000;
 
@@ -623,6 +623,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       _pingQuery = "select 1 from " + pingTable + " where 1=0";
     else
       _pingQuery = null;
+
+    if (_isPing == null)
+      _isPing = true;
   }
 
   /**
@@ -639,6 +642,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public void setPingQuery(String pingQuery)
   {
     _pingQuery = pingQuery;
+
+    if (_isPing == null)
+      _isPing = true;
   }
 
   /**
@@ -646,7 +652,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
    */
   public boolean getPingOnReuse()
   {
-    return _isPing;
+    return isPing();
   }
 
   /**
@@ -686,7 +692,10 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
    */
   public boolean isPing()
   {
-    return _isPing;
+    if (_isPing != null)
+      return _isPing;
+    else
+      return false;
   }
 
   /**
@@ -700,6 +709,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       _pingInterval = Long.MAX_VALUE / 2;
     else if (_pingInterval < 1000)
       _pingInterval = 1000;
+
+    if (_isPing == null)
+      _isPing = true;
   }
 
   /**

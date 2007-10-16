@@ -106,55 +106,60 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Connects to the underlying database.
    */
-  protected boolean connectInternal(Env env,
-                                    @Optional("localhost") String host,
-                                    @Optional String userName,
-                                    @Optional String password,
-                                    @Optional String dbname,
-                                    @Optional("3306") int port,
-                                    @Optional String socket,
-                                    @Optional int flags,
-                                    @Optional String driver,
-                                    @Optional String url)
+  protected Connection connectImpl(Env env,
+				   @Optional("localhost") String host,
+				   @Optional String userName,
+				   @Optional String password,
+				   @Optional String dbname,
+				   @Optional("3306") int port,
+				   @Optional String socket,
+				   @Optional int flags,
+				   @Optional String driver,
+				   @Optional String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
-      return false;
+      return null;
     }
 
-    if (port <= 0)
+    if (port <= 0) {
       port = 3306;
+      _port = port;
+    }
 
     try {
-      if (host == null || host.equals(""))
+      if (host == null || host.equals("")) {
         host = "localhost";
+	_host = host;
+      }
 
       if (driver == null || driver.equals("")) {
         driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+	_driver = driver;
       }
 
       if (url == null || url.equals("")) {
         url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+
+	_url = url;
       }
 
-      Connection jConn = env.getConnection(driver, url, userName, password);
+      Connection jConn = env.getConnection(driver, url, dbname,
+					   userName, password);
 
-      setConnection(host, userName, password, dbname, port, jConn, driver, url);
-
-      return true;
-
+      return jConn;
     } catch (SQLException e) {
-      env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()));
+      env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
 
       env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
       env.setSpecialValue("mysqli.connectError", new UnicodeValueImpl(e.getMessage()));
 
-      return false;
+      return null;
     } catch (Exception e) {
       env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()));
       env.setSpecialValue("mysqli.connectError", new UnicodeValueImpl(e.toString()));
 
-      return false;
+      return null;
     }
   }
 

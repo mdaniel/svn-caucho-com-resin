@@ -38,6 +38,8 @@
 
     <database>com.caucho.sql.DBPool</database>
 
+    <database-default>com.caucho.sql.DatabaseConfig</database-default>
+
     <dependency>com.caucho.make.DependencyConfig</dependency>
 
     <dependency-check-interval>com.caucho.loader.DependencyCheckInterval</dependency-check-interval>

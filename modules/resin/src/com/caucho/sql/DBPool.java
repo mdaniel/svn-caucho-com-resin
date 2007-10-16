@@ -133,6 +133,8 @@ public class DBPool implements DataSource {
 
     _resourceManager = ResourceManagerImpl.createLocalManager();
     _connectionPool = _resourceManager.createConnectionPool();
+
+    DatabaseConfig.configDefault(this);
   }
 
   /**
