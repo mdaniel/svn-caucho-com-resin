@@ -647,8 +647,8 @@ public class ZlibModule extends AbstractQuercusModule {
       ZlibOutputStream gzOut;
 
       gzOut = new ZlibOutputStream(out, level,
-			   Deflater.DEFAULT_STRATEGY,
-			   encodingMode);
+				   Deflater.DEFAULT_STRATEGY,
+				   encodingMode);
 
       int len;
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
@@ -665,6 +665,8 @@ public class ZlibModule extends AbstractQuercusModule {
       throw QuercusModuleException.create(e);
     } finally {
       TempBuffer.free(tempBuf);
+
+      ts.destroy();
     }
   }
 

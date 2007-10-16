@@ -937,17 +937,13 @@ public class FileModule extends AbstractQuercusModule {
     if (! (s instanceof BinaryInput))
       return null;
 
-    try {
-      BinaryInput is = (BinaryInput) s;
+    BinaryInput is = (BinaryInput) s;
 
-      StringValue bb = env.createBinaryBuilder();
+    StringValue bb = env.createBinaryBuilder();
 
-      is.appendTo(bb);
+    bb.appendReadAll(is, Long.MAX_VALUE);
 
-      return bb;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
+    return bb;
   }
 
   /**

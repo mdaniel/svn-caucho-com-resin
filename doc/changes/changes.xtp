@@ -12,8 +12,9 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
-<li>Add &lt;database-default> (#1108, rep by koreth)</li>
+<li>(2007-10-16) Add &lt;database-default> (#1108, rep by koreth)</li>
 <li>Quercus: regexp "/u" flag with Drupal install issues (#2069, rep by jims)</li>
+<li>Quercus: regexp rewrite for performance and PHP extensions</li>
 </ul>
 </s2>
 
