@@ -1050,12 +1050,16 @@ abstract public class StringValue extends Value implements CharSequence {
       byte []buffer = tBuf.getBuffer();
       int sublen = buffer.length;
       if (length < sublen)
-	sublen = (int) length;
+        sublen = (int) length;
+      else if (length > sublen) {
+        buffer = new byte[(int) length];
+        sublen = (int) length;
+      }
 
       sublen = is.read(buffer, 0, sublen);
 
       if (sublen > 0)
-	append(buffer, 0, sublen);
+        append(buffer, 0, sublen);
 
       TempBuffer.free(tBuf);
 

@@ -45,6 +45,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -501,7 +502,7 @@ public class MbstringModule
     if (obj == null)
       return null;
 
-    return (EregSearch)obj;
+    return (EregSearch) obj;
   }
 
   /**
@@ -509,13 +510,13 @@ public class MbstringModule
    * is a valid one.
    */
   private static EregSearch getEreg(Env env,
-                              Value pattern,
-                              Value option)
+                                    Value pattern,
+                                    Value option)
   {
     Object obj = env.getSpecialValue("mb.search");
 
     if (obj != null) {
-      EregSearch ereg = (EregSearch)obj;
+      EregSearch ereg = (EregSearch) obj;
 
       ereg.init(env, pattern, option);
 
@@ -539,15 +540,22 @@ public class MbstringModule
 
       array.put(env.createString("internal_encoding"),
                 env.createString(getEncoding(env)));
+      
+      array.put(env.createString("http_output"),
+                env.createString(getOutputEncoding(env)));
 
       return array;
     }
-
     else if (type.equals("internal_encoding")) {
       return env.createString(getEncoding(env));
-
-    } else {
-      throw new UnimplementedException("mb_get_info");
+    }
+    else if (type.equals("http_output")) {
+      return env.createString(getOutputEncoding(env));
+    }
+    else {
+      env.warning(L.l("unsupported option: {0}", type));
+      
+      return BooleanValue.FALSE;
     }
   }
 
@@ -564,15 +572,16 @@ public class MbstringModule
    * Returns and/or sets the http output encoding
    */
   public static Value mb_http_output(Env env,
-                              @Optional String encoding)
+                                     @Optional String encoding)
   {
-    throw new UnimplementedException("mb_http_output");
-/*
-    if (encoding.length() == 0)
-      return new StringValueImpl(getEncoding(env));
-    else
-      return BooleanValue.FALSE;
-*/
+    if (encoding.length() == 0) {
+      return env.createString(getOutputEncoding(env));
+    }
+    else {
+      env.setIni("mbstring.http_output", encoding);
+      
+      return BooleanValue.TRUE;
+    }
   }
 
   /**
@@ -618,24 +627,17 @@ public class MbstringModule
   }
 
   /**
-   * XXX: get all supported encodings
+   * Get all supported encodings.
    */
   public static ArrayValue mb_list_encodings(Env env)
   {
     ArrayValue array = new ArrayValueImpl();
 
-    array.put(env.createString("ASCII"));
-    array.put(env.createString("UTF-8"));
-    array.put(env.createString("UTF-16"));
-    array.put(env.createString("ISO-8859-1"));
-    array.put(env.createString("ISO-8859-2"));
-    array.put(env.createString("ISO-8859-15"));
-    array.put(env.createString("ISO-2022-JP"));
-    array.put(env.createString("EUC-KR"));
-    array.put(env.createString("EUC-CN"));
-    array.put(env.createString("EUC-TW"));
-    array.put(env.createString("EUC-JP"));
-    array.put(env.createString("JIS"));
+    Map<String,Charset> charsetMap = Charset.availableCharsets();
+
+    for (String name : charsetMap.keySet()) {
+      array.put(env.createString(name));
+    }
 
     return array;
   }
@@ -644,10 +646,28 @@ public class MbstringModule
    * ob_start() handler
    */
   public static StringValue mb_output_handler(Env env,
-                              StringValue contents,
-                              int value)
+                                              StringValue contents,
+                                              int status)
   {
-    throw new UnimplementedException("mb_output_handler");
+    // XXX: status?
+
+    String toEncoding = getOutputEncoding(env);
+
+    if (toEncoding.equals("pass"))
+      return contents;
+    
+    String fromEncoding = getEncoding(env);
+
+    contents = contents.convertToUnicode(env, fromEncoding);
+
+    try {
+      byte []bytes = contents.toString().getBytes(toEncoding);
+
+      return env.createBinaryBuilder(bytes);
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**
@@ -1019,7 +1039,12 @@ public class MbstringModule
 
   private static String getEncoding(Env env)
   {
-    return env.getRuntimeEncoding().toString();
+    Value encoding = env.getIni("mbstring.internal_encoding");
+    
+    if (encoding.length() > 0)
+      return encoding.toString();
+    else
+      return env.getRuntimeEncoding().toString();
   }
 
   private static String getEncoding(Env env, String encoding)
@@ -1032,7 +1057,17 @@ public class MbstringModule
 
   private static void setEncoding(Env env, String encoding)
   {
-    env.setRuntimeEncoding(encoding);
+    env.setIni("mbstring.internal_encoding", encoding);
+  }
+  
+  private static String getOutputEncoding(Env env)
+  {
+    Value encoding = env.getIni("mbstring.http_output");
+    
+    if (encoding.length() != 0)
+      return encoding.toString();
+    else
+      return env.getOutputEncoding();
   }
 
   /**

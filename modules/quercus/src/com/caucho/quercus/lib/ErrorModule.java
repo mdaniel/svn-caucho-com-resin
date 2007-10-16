@@ -34,6 +34,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.FunctionExpr;
 import com.caucho.quercus.expr.IncludeExpr;
+import com.caucho.quercus.expr.IncludeOnceExpr;
 import com.caucho.quercus.expr.MethodCallExpr;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
@@ -93,7 +94,7 @@ public class ErrorModule extends AbstractQuercusModule {
   public static Value debug_backtrace(Env env)
   {
     ArrayValue result = new ArrayValueImpl();
-
+    
     Exception e = new Exception();
     e.fillInStackTrace();
 
@@ -181,6 +182,10 @@ public class ErrorModule extends AbstractQuercusModule {
 	       && name.equals("eval")) {
 	addInterpreted(env, result, depth++);
       }
+      else if (className.equals("com.caucho.quercus.expr.IncludeOnceExpr")
+               && name.equals("eval")) {
+        addInterpreted(env, result, depth++);
+      }
       else if (className.startsWith("com.caucho.quercus")) {
       }
       else if (name.equals("invoke") || name.equals("invoke0")) {
@@ -205,6 +210,7 @@ public class ErrorModule extends AbstractQuercusModule {
   private static void addInterpreted(Env env, ArrayValue result, int i)
   {
     Expr expr = env.peekCall(i);
+
     if (expr instanceof FunctionExpr) {
       FunctionExpr callExpr = (FunctionExpr) expr;
 
@@ -257,6 +263,30 @@ public class ErrorModule extends AbstractQuercusModule {
       }
 	
       call.put(env.createString("function"), env.createString("include"));
+
+      call.put(env.createString("args"), new ArrayValueImpl());
+    }
+    else if (expr instanceof IncludeOnceExpr) {
+      boolean isRequire = ((IncludeOnceExpr) expr).isRequire();
+      
+      ArrayValue call = new ArrayValueImpl();
+      result.put(call);
+      
+      if (expr.getFileName() != null) {
+        call.put(env.createString("file"),
+                 env.createString(expr.getFileName()));
+        call.put(env.createString("line"),
+                 LongValue.create(expr.getLine()));
+      }
+    
+      String name;
+      
+      if (isRequire)
+        name = "require_once";
+      else
+        name = "include_once";
+      
+      call.put(env.createString("function"), env.createString(name));
 
       call.put(env.createString("args"), new ArrayValueImpl());
     }

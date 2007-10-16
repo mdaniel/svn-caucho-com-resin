@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
 
@@ -77,14 +78,27 @@ public class IncludeOnceExpr extends UnaryExpr {
   public Value eval(Env env)
   {
     String name = _expr.evalString(env);
-      
+
     // return env.include(_dir, name);
-    if (_dir != null)
-      return env.include(_dir, name, _isRequire, true);
-    else if (_isRequire)
-      return env.require_once(name);
-    else
-      return env.include_once(name);
+    
+    env.pushCall(this, NullValue.NULL);
+    
+    try {
+      if (_dir != null)
+        return env.include(_dir, name, _isRequire, true);
+      else if (_isRequire)
+        return env.require_once(name);
+      else
+        return env.include_once(name);
+    }
+    finally {
+      env.popCall();
+    }
+  }
+  
+  public boolean isRequire()
+  {
+    return _isRequire;
   }
   
   public String toString()

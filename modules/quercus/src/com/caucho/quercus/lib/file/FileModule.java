@@ -1316,6 +1316,8 @@ public class FileModule extends AbstractQuercusModule {
 				   @Optional boolean useIncludePath,
 				   @Optional Value context)
   {
+    //System.err.println("FileModule->fopen(): " + filename + " . " + mode);
+    
     if (filename == null) {
       env.warning(L.l("file name must not be null"));
       return null;
@@ -1807,7 +1809,11 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static String getcwd(Env env)
   {
-    return env.getPwd().getNativePath();
+    // for xoops on Windows
+    // paths returned must be consistent across Quercus
+    return env.getPwd().getPath();
+    
+    // return env.getPwd().getNativePath();
   }
 
   /**
