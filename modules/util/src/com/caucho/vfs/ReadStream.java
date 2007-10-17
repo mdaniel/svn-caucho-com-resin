@@ -224,7 +224,9 @@ public final class ReadStream extends InputStream {
     if (_readEncoding != null)
       _readEncoding = Encoding.getReadEncoding(this, _readEncodingName);
 
-    if (pos < _position) {
+    if (pos < getPosition()) {
+      // Seek backwards in the stream
+
       _position = pos;
       _readLength = _readOffset = 0;
 
@@ -236,13 +238,10 @@ public final class ReadStream extends InputStream {
       else
 	return false;
     }
-    else if (pos < _position + _readLength) {
-      _readOffset = (int) (pos - _position);
-
-      return true;
-    }
     else {
-      long n = pos - _position - _readOffset;
+      // Seek forward in the stream, skip any buffered bytes
+
+      long n = pos - getPosition();
       
       return skip(n) == n;
     }
@@ -366,7 +365,7 @@ public final class ReadStream extends InputStream {
         return skipped + count;
     }
     
-    while (_readLength < _readOffset + n - count) {
+    while (_readLength < (_readOffset + n - count)) {
       count += _readLength - _readOffset;
       _readOffset = 0;
       _readLength = 0;
