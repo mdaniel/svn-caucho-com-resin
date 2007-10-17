@@ -302,72 +302,94 @@ public class UrlModule extends AbstractQuercusModule {
     return result;
   }
   
-  public static Value http_build_query(Env env, Value formdata,
-                                       @Optional String numeric_prefix)
+  public static Value
+    http_build_query(Env env, Value formdata, 
+		     @Optional StringValue numeric_prefix,
+		     @Optional("'&'") StringValue separator)
   {
-    String result =
-      httpBuildQueryImpl(env, "", formdata, numeric_prefix).toString();
+    StringValue result = env.createUnicodeBuilder();
 
-    return env.createString(result);
+    httpBuildQueryImpl(env, result, formdata, env.createEmptyString(),
+		       numeric_prefix, separator);
+
+    return result;
   }
-
-  public static StringBuilder httpBuildQueryImpl(Env env, String path,
-                                                 Value formdata,
-                                                 String numeric_prefix)
+  
+  private static void
+    httpBuildQueryImpl(Env env, StringValue result,
+		       Value formdata, StringValue path,
+		       StringValue numeric_prefix,
+		       StringValue separator)
   {
-    StringBuilder result = new StringBuilder();
-
     Set<Map.Entry<Value,Value>> entrySet;
 
     if (formdata.isArray())
       entrySet = ((ArrayValue)formdata).entrySet();
     else if (formdata.isObject()) {
-      Set<Map.Entry<String,Value>> stringEntrySet
+      Set<? extends Map.Entry<Value,Value>> stringEntrySet
         = ((ObjectValue)formdata).entrySet();
 
       LinkedHashMap<Value,Value> valueMap = new LinkedHashMap<Value,Value>();
 
-      for (Map.Entry<String,Value> entry : stringEntrySet)
-        valueMap.put(env.createString(entry.getKey()), entry.getValue());
+      for (Map.Entry<Value,Value> entry : stringEntrySet)
+        valueMap.put(entry.getKey(), entry.getValue());
 
       entrySet = valueMap.entrySet();
     } else {
       env.warning(L.l("formdata must be an array or object"));
 
-      return result;
+      return;
     }
 
+    boolean isFirst = true;
     for (Map.Entry<Value,Value> entry : entrySet) {
-      String newPath = makeNewPath(path, entry.getKey(), numeric_prefix);
+      if (! isFirst) {
+	if (separator != null)
+	  result.append(separator);
+	else
+	  result.append("&");
+      }
+      isFirst = false;
+      
+      StringValue newPath = makeNewPath(path, entry.getKey(), numeric_prefix);
+      Value entryValue = entry.getValue();
 
-      if (entry.getValue().isArray() || entry.getValue().isObject()) {
+      if (entryValue.isArray() || entryValue.isObject()) {
         // can always throw away the numeric prefix on recursive calls
-        result.append(httpBuildQueryImpl(env, newPath, entry.getValue(), null));
-        result.append("&");
+        httpBuildQueryImpl(env, result, entryValue,
+			   newPath, null, separator);
       } else {
-        result.append(newPath + "=");
-        result.append(urlencode(entry.getValue().toString()));
-        result.append("&");
+        result.append(newPath);
+        result.append("=");
+        result.append(urlencode(entry.getValue().toStringValue()));
       }
     }
-
-    // trim any trailing &'s
-    if (result.length() > 0)
-      result.deleteCharAt(result.length() - 1);
-
-    return result;
   }
 
-  private static String makeNewPath(String oldPath, Value key,
-                                    String numeric_prefix)
+  private static StringValue makeNewPath(StringValue oldPath, Value key,
+					 StringValue numeric_prefix)
   {
-    if (oldPath.length() == 0) {
-      if (key.isLongConvertible() && numeric_prefix != null)
-        return urlencode(numeric_prefix + key.toString());
-      else
-        return urlencode(key.toString());
-    } else
-      return oldPath + "[" + urlencode(key.toString()) + "]";
+    StringValue path = oldPath.createStringBuilder();
+    
+    if (oldPath.length() != 0) {
+      path.append(oldPath);
+      path.append('[');
+      urlencode(path, key.toStringValue());
+      path.append(']');
+
+      return path;
+    }
+    else if (key.isLongConvertible() && numeric_prefix != null) {
+      urlencode(path, numeric_prefix);
+      urlencode(path, key.toStringValue());
+      
+      return path;
+    }
+    else {
+      urlencode(path, key.toStringValue());
+      
+      return path;
+    }
   }
 
   /**
@@ -718,19 +740,19 @@ public class UrlModule extends AbstractQuercusModule {
   /**
    * Gets the magic quotes value.
    */
-  public static String urlencode(String str)
+  public static StringValue urlencode(StringValue str)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = str.createStringBuilder();
 
     urlencode(sb, str);
 
-    return sb.toString();
+    return sb;
   }
 
   /**
    * Gets the magic quotes value.
    */
-  private static void urlencode(StringBuilder sb, String str)
+  private static void urlencode(StringValue sb, StringValue str)
   {
     int len = str.length();
 

@@ -1095,9 +1095,9 @@ public class MbstringModule
 
       ObjectValue obj = (ObjectValue)val;
 
-      for (Map.Entry<String,Value> entry : obj.entrySet()) {
+      for (Map.Entry<Value,Value> entry : obj.entrySet()) {
         obj.putField(env,
-                     entry.getKey(),
+                     entry.getKey().toStringValue(),
                      decodeAll(env, entry.getValue(), encoding));
       }
 
@@ -1135,9 +1135,9 @@ public class MbstringModule
 
       ObjectValue obj = (ObjectValue)val;
 
-      for (Map.Entry<String,Value> entry : obj.entrySet()) {
+      for (Map.Entry<Value,Value> entry : obj.entrySet()) {
         obj.putField(env,
-                     entry.getKey(),
+                     entry.getKey().toStringValue(),
                      encodeAll(env, entry.getValue(), encoding));
       }
 

@@ -94,7 +94,7 @@ public class CompiledObjectValue extends ObjectValue
    * Gets a new value.
    */
   @Override
-  public Value getField(Env env, String key, boolean create)
+  public Value getField(Env env, StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -104,12 +104,7 @@ public class CompiledObjectValue extends ObjectValue
     }
     
     if (_object != null) {
-      return _object.getField(env, key, create);
-    }
-    else if (create) {
-      _object = new ObjectExtValue(_quercusClass);
-
-      return _object.getField(env, key, create);
+      return _object.getField(env, key);
     }
     else
       return UnsetValue.UNSET;
@@ -119,7 +114,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns the array ref.
    */
   @Override
-  public Var getFieldRef(Env env, String key)
+  public Var getFieldRef(Env env, StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -143,7 +138,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  public Value getFieldArg(Env env, String key)
+  public Value getFieldArg(Env env, StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -167,7 +162,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  public Value getFieldArgRef(Env env, String key)
+  public Value getFieldArgRef(Env env, StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -191,7 +186,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns field as an array.
    */
   @Override
-  public Value getFieldArray(Env env, String key)
+  public Value getFieldArray(Env env, StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -213,7 +208,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns field as an object.
    */
   @Override
-  public Value getFieldObject(Env env, String key)
+  public Value getFieldObject(Env env, StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -235,7 +230,7 @@ public class CompiledObjectValue extends ObjectValue
    * Adds a new value.
    */
   @Override
-  public Value putField(Env env, String key, Value value)
+  public Value putField(Env env, StringValue key, Value value)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -254,38 +249,10 @@ public class CompiledObjectValue extends ObjectValue
   }
 
   /**
-   * Adds a new value.
-   */
-  @Override
-  public Value putField(String key, String value)
-  {
-    // XXX: i18n
-    return putField(null, key, new StringBuilderValue(value));
-  }
-
-  /**
-   * Adds a new value.
-   */
-  @Override
-  public Value putField(String key, long value)
-  {
-    return putField(null, key, LongValue.create(value));
-  }
-
-  /**
-   * Adds a new value.
-   */
-  @Override
-  public Value putField(String key, double value)
-  {
-    return putField(null, key, DoubleValue.create(value));
-  }
-
-  /**
    * Removes a value.
    */
   @Override
-  public void removeField(String key)
+  public void unsetField(StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -298,7 +265,7 @@ public class CompiledObjectValue extends ObjectValue
     }
     
     if (_object != null)
-      _object.removeField(key);
+      _object.unsetField(key);
   }
 
   /**
@@ -536,13 +503,13 @@ public class CompiledObjectValue extends ObjectValue
     sb.append(getSize());
     sb.append(":{");
 
-    ArrayList<String> names = _quercusClass.getFieldNames();
+    ArrayList<StringValue> names = _quercusClass.getFieldNames();
     
     if (names != null) {
       int index = 0;
 
       for (int i = 0; i < names.size(); i++) {
-	String key = names.get(i);
+	StringValue key = names.get(i);
 	
 	if (_fields[i] == UnsetValue.UNSET)
 	  continue;
@@ -558,10 +525,10 @@ public class CompiledObjectValue extends ObjectValue
     }
 
     if (_object != null) {
-      for (Map.Entry<String,Value> mapEntry : _object.sortedEntrySet()) {
+      for (Map.Entry<Value,Value> mapEntry : _object.sortedEntrySet()) {
 	ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
-	String key = entry.getKey();
+	StringValue key = entry.getKey().toStringValue();
 	
 	sb.append("s:");
 	sb.append(key.length());
@@ -609,8 +576,8 @@ public class CompiledObjectValue extends ObjectValue
   {
     ArrayValue array = new ArrayValueImpl();
 
-    for (Map.Entry<String,Value> entry : entrySet()) {
-      array.put(new StringBuilderValue(entry.getKey()), entry.getValue());
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      array.put(entry.getKey().toStringValue(), entry.getValue());
     }
 
     return array;
@@ -635,7 +602,7 @@ public class CompiledObjectValue extends ObjectValue
   }
 
   @Override
-  public Set<Map.Entry<String,Value>> entrySet()
+  public Set<? extends Map.Entry<Value,Value>> entrySet()
   {
     throw new UnsupportedOperationException();
     // return new EntrySet();
@@ -644,7 +611,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns a Set of entries, sorted by key.
    */
-  public Set<Map.Entry<String,Value>> sortedEntrySet()
+  public Set<? extends Map.Entry<Value,Value>> sortedEntrySet()
   {
     throw new UnsupportedOperationException();
     //return new TreeSet<Map.Entry<String, Value>>(entrySet());

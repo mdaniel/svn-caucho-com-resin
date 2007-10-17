@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
@@ -43,21 +44,24 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
   protected final InterpretedClassDef _quercusClass;
   
-  protected final String _name;
+  protected final StringValue _name;
 
-  public ThisFieldExpr(Location location, InterpretedClassDef quercusClass, String name)
+  public ThisFieldExpr(Location location,
+		       InterpretedClassDef quercusClass,
+		       StringValue name)
   {
     super(location);
     _quercusClass = quercusClass;
     
-    _name = name.intern();
+    _name = name;
   }
 
-  public ThisFieldExpr(InterpretedClassDef quercusClass, String name)
+  public ThisFieldExpr(InterpretedClassDef quercusClass,
+		       StringValue name)
   {
     _quercusClass = quercusClass;
     
-    _name = name.intern();
+    _name = name;
   }
 
   private Value cannotUseThisError(Env env)
@@ -80,7 +84,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       return cannotUseThisError(env);
     
-    return obj.getField(env, _name);
+    return obj.getThisField(env, _name);
   }
   
   /**
@@ -97,7 +101,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       return cannotUseThisError(env);
     
-    return obj.getField(env, _name).copy();
+    return obj.getThisField(env, _name).copy();
   }
 
   /**
@@ -114,7 +118,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       return cannotUseThisError(env);
     
-    return obj.getFieldRef(env, _name);
+    return obj.getThisFieldRef(env, _name);
   }
   
   /**
@@ -131,7 +135,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       return cannotUseThisError(env);
     
-    return obj.getFieldArg(env, _name);
+    return obj.getThisFieldArg(env, _name);
   }
   
   /**
@@ -148,7 +152,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       cannotUseThisError(env);
     
-    obj.putField(env, _name, value);
+    obj.putThisField(env, _name, value);
   }
 
   /**
@@ -165,7 +169,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       return cannotUseThisError(env);
     
-    return obj.getFieldArray(env, _name);
+    return obj.getThisFieldArray(env, _name);
   }
 
   /**
@@ -182,7 +186,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       return cannotUseThisError(env);
     
-    return obj.getFieldObject(env, _name);
+    return obj.getThisFieldObject(env, _name);
   }
   
   /**
@@ -199,7 +203,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       cannotUseThisError(env);
     
-    obj.removeField(_name);
+    obj.unsetThisField(_name);
   }
   
   public String toString()

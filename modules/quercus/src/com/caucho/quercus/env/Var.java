@@ -983,38 +983,42 @@ public class Var extends Value
     return _value.remove(index);
   }
 
+  //
+  // Field references
+  //
+
   /**
-   * Returns the field ref.
+   * Returns the field value.
    */
   @Override
-  public Value getField(Env env, String index, boolean create)
+  public Value getField(Env env, StringValue name)
   {
-    return _value.getField(env, index, create);
+    return _value.getField(env, name);
   }
 
   /**
    * Returns the field ref.
    */
   @Override
-  public Value getFieldRef(Env env, String index)
+  public Value getFieldRef(Env env, StringValue name)
   {
     // php/3a0r
     _value = _value.toAutoObject(env);
     
-    return _value.getFieldRef(env, index);
+    return _value.getFieldRef(env, name);
   }
 
   /**
    * Returns the array ref.
    */
   @Override
-  public Value getFieldArg(Env env, String index)
+  public Value getFieldArg(Env env, StringValue name)
   {
     if (_value.isset())
-      return _value.getFieldArg(env, index);
+      return _value.getFieldArg(env, name);
     else {
       // php/3d1q
-      return new ArgGetFieldValue(env, this, index);
+      return new ArgGetFieldValue(env, this, name);
     }
   }
 
@@ -1022,57 +1026,131 @@ public class Var extends Value
    * Returns the field value as an array
    */
   @Override
-  public Value getFieldArray(Env env, String index)
+  public Value getFieldArray(Env env, StringValue name)
   {
     // php/3d1q
     _value = _value.toAutoObject(env);
     
-    return _value.getFieldArray(env, index);
+    return _value.getFieldArray(env, name);
   }
 
   /**
    * Returns the field value as an object
    */
   @Override
-  public Value getFieldObject(Env env, String index)
+  public Value getFieldObject(Env env, StringValue name)
   {
     _value = _value.toAutoObject(env);
     
-    return _value.getFieldObject(env, index);
+    return _value.getFieldObject(env, name);
   }
 
   /**
    * Sets the field.
    */
   @Override
-  public Value putField(Env env, String index, Value value)
+  public Value putField(Env env, StringValue name, Value value)
   {
     // php/3a0s
     _value = _value.toAutoObject(env);
 
-    return _value.putField(env, index, value);
+    return _value.putField(env, name, value);
   }
-
+  
   /**
-   * Sets the field.
+   * Returns true if the field is set.
    */
   @Override
-  public Value putThisField(Env env, String index, Value value)
+  public boolean issetField(StringValue name)
   {
-    _value = _value.toAutoObject(env);
-    
-    return _value.putThisField(env, index, value);
+    return _value.issetField(name);
   }
   
   /**
    * Unsets the field.
    */
   @Override
-  public void removeField(String index)
+  public void unsetField(StringValue name)
   {
-    _value.removeField(index);
+    _value.unsetField(name);
   }
 
+  /**
+   * Returns the field value.
+   */
+  @Override
+  public Value getThisField(Env env, StringValue name)
+  {
+    return _value.getThisField(env, name);
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  @Override
+  public Value getThisFieldRef(Env env, StringValue name)
+  {
+    return _value.getThisFieldRef(env, name);
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  @Override
+  public Value getThisFieldArg(Env env, StringValue name)
+  {
+    return _value.getThisFieldArg(env, name);
+  }
+
+  /**
+   * Returns the field value as an array
+   */
+  @Override
+  public Value getThisFieldArray(Env env, StringValue name)
+  {
+    return _value.getThisFieldArray(env, name);
+  }
+
+  /**
+   * Returns the field value as an object
+   */
+  @Override
+  public Value getThisFieldObject(Env env, StringValue name)
+  {
+    return _value.getThisFieldObject(env, name);
+  }
+
+  /**
+   * Sets the field.
+   */
+  @Override
+  public Value putThisField(Env env, StringValue name, Value value)
+  {
+    return _value.putThisField(env, name, value);
+  }
+  
+  /**
+   * Returns true if the field is set.
+   */
+  @Override
+  public boolean issetThisField(StringValue name)
+  {
+    return _value.issetThisField(name);
+  }
+  
+  /**
+   * Unsets the field.
+   */
+  @Override
+  public void unsetThisField(StringValue name)
+  {
+    _value.unsetThisField(name);
+  }
+
+  //
+  // array routines
+  //
+  
   /**
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.

@@ -30,48 +30,57 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 /**
- * Represents the 'this' expression.
+ * Represents a PHP field reference.
  */
-public class ThisExpr extends AbstractVarExpr {
-  private static final L10N L = new L10N(ThisExpr.class);
+public class ThisFieldVarGetExpr extends AbstractVarExpr {
+  private static final L10N L = new L10N(FieldVarGetExpr.class);
 
-  protected final InterpretedClassDef _quercusClass;
-  
-  public ThisExpr(Location location, InterpretedClassDef quercusClass)
+  protected final Expr _nameExpr;
+
+  public ThisFieldVarGetExpr(Location location, Expr nameExpr)
   {
     super(location);
-    _quercusClass = quercusClass;
+    
+    _nameExpr = nameExpr;
   }
-  
-  public ThisExpr(InterpretedClassDef quercusClass)
+
+  public ThisFieldVarGetExpr(Expr nameExpr)
   {
-    _quercusClass = quercusClass;
+    _nameExpr = nameExpr;
   }
 
   /**
-   * Creates a field ref
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
    */
-  @Override
-  public Expr createFieldGet(ExprFactory factory,
-                             Location location,
-                             StringValue name)
+  public Value evalArg(Env env)
   {
-    return new ThisFieldExpr(_quercusClass, name);
+    Value value = env.getThis();
+
+    return value.getThisFieldArg(env, _nameExpr.evalStringValue(env));
   }
 
   /**
-   * Creates a field ref
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
    */
-  public Expr createFieldGet(ExprFactory factory,
-                             Location location,
-                             Expr name)
+  public Value evalRef(Env env)
   {
-    return new ThisFieldVarGetExpr(location, name);
+    // quercus/0d1k
+    Value value = env.getThis();
+
+    return value.getThisFieldRef(env, _nameExpr.evalStringValue(env));
   }
   
   /**
@@ -83,31 +92,9 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getThis();
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArg(Env env)
-  {
-    return env.getThis();
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalRef(Env env)
-  {
-    return env.getThis();
+    Value obj = env.getThis();
+
+    return obj.getThisField(env, _nameExpr.evalStringValue(env));
   }
   
   /**
@@ -119,7 +106,37 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    env.error(getLocation(), "can't assign $this");
+    Value obj = env.getThis();
+
+    obj.putThisField(env, _nameExpr.evalStringValue(env), value);
+  }
+
+  /**
+   * Evaluates the expression, creating an array if the field is unset.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalArray(Env env)
+  {
+    Value obj = env.getThis();
+
+    return obj.getThisFieldArray(env, _nameExpr.evalStringValue(env));
+  }
+
+  /**
+   * Evaluates the expression, creating an object if the field is unset.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalObject(Env env)
+  {
+    Value obj = env.getThis();
+
+    return obj.getThisFieldObject(env, _nameExpr.evalStringValue(env));
   }
   
   /**
@@ -131,12 +148,14 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
-    env.error(getLocation(), "can't unset $this");
+    Value obj = env.getThis();
+
+    obj.unsetThisField(_nameExpr.evalStringValue(env));
   }
   
   public String toString()
   {
-    return "$this";
+    return "$this->{" + _nameExpr + "}";
   }
 }
 

@@ -1367,6 +1367,27 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Returns true if the string ends with another string.
+   */
+  public boolean endsWith(StringValue tail)
+  {
+    int len = length();
+    int tailLen = tail.length();
+
+    int offset = len - tailLen;
+    
+    if (offset < 0)
+      return false;
+
+    for (int i = 0; i < tailLen; i++) {
+      if (charAt(offset + i) != tail.charAt(i))
+	return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Returns a StringValue substring.
    */
   public StringValue substring(int head)

@@ -79,21 +79,10 @@ public class ArrayGetExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    try {
-      Value array = _expr.eval(env);
+    Value array = _expr.eval(env);
+    Value index = _index.eval(env);
 
-      if (array.isObject())
-        env.pushCall(this, array);
-      else
-        env.pushCall(this, NullValue.NULL);
-
-      Value index = _index.eval(env);
-
-      return array.get(env, getLocation(), index);
-    }
-    finally {
-      env.popCall();
-    }
+    return array.get(index);
   }
 
   /**
@@ -106,10 +95,9 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public Value evalCopy(Env env)
   {
     Value array = _expr.eval(env);
-
     Value index = _index.eval(env);
 
-    return array.get(env, getLocation(), index).copy();
+    return array.get(index).copy();
   }
 
   /**
@@ -122,7 +110,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public Value evalArray(Env env)
   {
     Value array = _expr.evalArray(env);
-
     Value index = _index.eval(env);
 
     return array.getArray(index);
@@ -138,7 +125,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public Value evalDirty(Env env)
   {
     Value array = _expr.eval(env);
-
     Value index = _index.eval(env);
 
     return array.getDirty(index);
@@ -154,10 +140,9 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public Value evalObject(Env env)
   {
     Value array = _expr.evalArray(env);
-
     Value index = _index.eval(env);
     
-    return array.getObject(env, getLocation(), index);
+    return array.getObject(env, index);
   }
 
   /**
@@ -198,10 +183,9 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void evalAssign(Env env, Value value)
   {
     Value array = _expr.evalArray(env);
-
     Value index = _index.eval(env);
     
-    array.put(env, getLocation(), index, value);
+    array.put(index, value);
   }
 
   /**
@@ -214,7 +198,6 @@ public class ArrayGetExpr extends AbstractVarExpr {
   public void evalUnset(Env env)
   {
     Value array = _expr.evalDirty(env);
-
     Value index = _index.eval(env);
 
     array.remove(index);

@@ -127,7 +127,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
 
     ArrayValue array = new ArrayValueImpl();
     
-    obj.put(env, getLocation(), array);
+    obj.put(array);
     
     return array;
   }
@@ -145,7 +145,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
 
     Value value = env.createObject();
     
-    array.put(env, getLocation(), value);
+    array.put(value);
     
     return value;
   }
@@ -161,7 +161,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   {
     Value array = _expr.evalArray(env);
 
-    array.put(env, getLocation(), value);
+    array.put(value);
   }
 
   /**

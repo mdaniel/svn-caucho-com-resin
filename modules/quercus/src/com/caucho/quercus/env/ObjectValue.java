@@ -73,7 +73,7 @@ abstract public class ObjectValue extends Value {
    * Returns a Set of entries.
    */
   // XXX: remove entrySet() and use getIterator() instead
-  abstract public Set<Map.Entry<String,Value>> entrySet();
+  abstract public Set<? extends Map.Entry<Value,Value>> entrySet();
 
   /**
    * Returns the class name.
@@ -145,12 +145,19 @@ abstract public class ObjectValue extends Value {
     return toLong();
   }
 
+  //
+  // Convenience field methods
+  //
+
   /**
    * Adds a new value.
+   * @Deprecated
    */
   public Value putField(String key, String value)
   {
-    return putField(null, key, new UnicodeValueImpl(value));
+    Env env = Env.getInstance();
+    
+    return putThisField(env, env.createString(key), env.createString(value));
   }
 
   /**
@@ -158,15 +165,18 @@ abstract public class ObjectValue extends Value {
    */
   public Value putField(Env env, String key, String value)
   {
-    return putField(env, key, env.createString(value));
+    return putThisField(env, env.createString(key), env.createString(value));
   }
 
   /**
    * Adds a new value.
+   * @Deprecated
    */
   public Value putField(String key, long value)
   {
-    return putField(null, key, LongValue.create(value));
+    Env env = Env.getInstance();
+    
+    return putThisField(env, env.createString(key), LongValue.create(value));
   }
 
   /**
@@ -174,23 +184,34 @@ abstract public class ObjectValue extends Value {
    */
   public Value putField(Env env, String key, long value)
   {
-    return putField(env, key, LongValue.create(value));
-  }
-
-  /**
-   * Initializes a new field, does not call __set if it is defined.
-   */
-  public Value initField(Env env, String key, Value value)
-  {
-    return putField(env, key, value);
+    return putThisField(env, env.createString(key), LongValue.create(value));
   }
 
   /**
    * Adds a new value.
    */
+  public Value putField(Env env, String key, Value value)
+  {
+    return putThisField(env, env.createString(key), value);
+  }
+
+  /**
+   * Initializes a new field, does not call __set if it is defined.
+   */
+  public Value initField(Env env, StringValue key, Value value)
+  {
+    return putThisField(env, key, value);
+  }
+
+  /**
+   * Adds a new value.
+   * @Deprecated
+   */
   public Value putField(String key, double value)
   {
-    return putField(null, key, DoubleValue.create(value));
+    Env env = Env.getInstance();
+    
+    return putThisField(env, env.createString(key), DoubleValue.create(value));
   }
 
   /**
@@ -220,8 +241,8 @@ abstract public class ObjectValue extends Value {
     if (result != 0)
       return result;
     
-    Set<Map.Entry<String,Value>> aSet = entrySet();
-    Set<Map.Entry<String,Value>> bSet = rValue.entrySet();
+    Set<? extends Map.Entry<Value,Value>> aSet = entrySet();
+    Set<? extends Map.Entry<Value,Value>> bSet = rValue.entrySet();
     
     if (aSet.equals(bSet))
       return 0;
@@ -230,20 +251,20 @@ abstract public class ObjectValue extends Value {
     else if (aSet.size() < bSet.size())
       return -1;
     else {
-      TreeSet<Map.Entry<String,Value>> aTree
-      = new TreeSet<Map.Entry<String,Value>>(aSet);
+      TreeSet<Map.Entry<Value,Value>> aTree
+	= new TreeSet<Map.Entry<Value,Value>>(aSet);
 
-      TreeSet<Map.Entry<String,Value>> bTree
-      = new TreeSet<Map.Entry<String,Value>>(bSet);
+      TreeSet<Map.Entry<Value,Value>> bTree
+	= new TreeSet<Map.Entry<Value,Value>>(bSet);
 
-      Iterator<Map.Entry<String,Value>> iterA = aTree.iterator();
-      Iterator<Map.Entry<String,Value>> iterB = bTree.iterator();
+      Iterator<Map.Entry<Value,Value>> iterA = aTree.iterator();
+      Iterator<Map.Entry<Value,Value>> iterB = bTree.iterator();
 
       while (iterA.hasNext()) {
-        Map.Entry<String,Value> a = iterA.next();
-        Map.Entry<String,Value> b = iterB.next();
+        Map.Entry<Value,Value> a = iterA.next();
+        Map.Entry<Value,Value> b = iterB.next();
 
-        result = a.getKey().compareTo(b.getKey());
+        result = a.getKey().cmp(b.getKey());
 
         if (result != 0)
           return result;
@@ -272,6 +293,10 @@ abstract public class ObjectValue extends Value {
   {
     return _quercusClass.getCountRecursive(env, this);
   }
+
+  //
+  // array methods
+  //
 
   @Override
   public Value get(Value key)
@@ -314,21 +339,9 @@ abstract public class ObjectValue extends Value {
   }
 
   @Override
-  public Value put(Env env, Location location, Value key, Value value)
-  {
-    return _quercusClass.put(env, this, key, value);
-  }
-
-  @Override
   public Value put(Value value)
   {
     return _quercusClass.put(Env.getInstance(), this, value);
-  }
-
-  @Override
-  public Value put(Env env, Location location, Value value)
-  {
-    return _quercusClass.put(env, this, value);
   }
 
   @Override

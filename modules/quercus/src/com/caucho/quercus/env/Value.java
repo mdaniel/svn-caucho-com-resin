@@ -418,7 +418,7 @@ abstract public class Value implements java.io.Serializable
   {
     ObjectValue obj = env.createObject();
     
-    obj.putField(env, "scalar", this);
+    obj.putField(env, env.createString("scalar"), this);
     
     return obj;
   }
@@ -602,8 +602,8 @@ abstract public class Value implements java.io.Serializable
    */
   public QuercusException toException(Env env, String file, int line)
   {
-    putField(env, "file", env.createString(file));
-    putField(env, "line", LongValue.create(line));
+    putField(env, env.createString("file"), env.createString(file));
+    putField(env, env.createString("line"), LongValue.create(line));
     
     return new QuercusLanguageException(this);
   }
@@ -1795,21 +1795,13 @@ abstract public class Value implements java.io.Serializable
   }
 
   //
-  // Object operations
+  // Object field references
   //
 
   /**
-   * Returns the field ref.
+   * Returns the field value
    */
-  public Value getField(Env env, String index)
-  {
-    return getField(env, index, false);
-  }
-
-  /**
-   * Returns the field ref, optionally creating it if it does not exist.
-   */
-  public Value getField(Env env, String index, boolean create)
+  public Value getField(Env env, StringValue name)
   {
     return NullValue.NULL;
   }
@@ -1817,39 +1809,39 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the field ref.
    */
-  public Value getFieldRef(Env env, String index)
+  public Value getFieldRef(Env env, StringValue name)
   {
-    return getField(env, index);
+    return getField(env, name);
   }
 
   /**
-   * Returns the field ref.
+   * Returns the field used as a method argument
    */
-  public Value getFieldArg(Env env, String index)
+  public Value getFieldArg(Env env, StringValue name)
   {
-    return getFieldRef(env, index);
+    return getFieldRef(env, name);
   }
 
   /**
    * Returns the field ref for an argument.
    */
-  public Value getFieldArgRef(Env env, String index)
+  public Value getFieldArgRef(Env env, StringValue name)
   {
-    return getFieldRef(env, index);
+    return getFieldRef(env, name);
   }
 
   /**
    * Returns the value for a field, creating an object if the field
    * is unset.
    */
-  public Value getFieldObject(Env env, String index)
+  public Value getFieldObject(Env env, StringValue name)
   {
-    Value v = getField(env, index);
+    Value v = getField(env, name);
 
     if (! v.isset()) {
       v = env.createObject();
 
-      putField(env, index, v);
+      putField(env, name, v);
     }
 
     return v;
@@ -1859,43 +1851,147 @@ abstract public class Value implements java.io.Serializable
    * Returns the value for a field, creating an object if the field
    * is unset.
    */
-  public Value getFieldArray(Env env, String index)
+  public Value getFieldArray(Env env, StringValue name)
   {
-    Value v = getField(env, index);
+    Value v = getField(env, name);
 
     Value array = v.toAutoArray();
 
     if (v == array)
       return v;
     else {
-      putField(env, index, array);
+      putField(env, name, array);
 
       return array;
     }
   }
 
   /**
-   * Sets/adds field to this object.
+   * Returns the field ref.
    */
-  public Value putThisField(Env env, String index, Value object)
+  public Value putField(Env env, StringValue name, Value object)
   {
     return NullValue.NULL;
   }
 
   /**
-   * Returns the field ref.
+   * Returns true if the field is set
    */
-  public Value putField(Env env, String index, Value object)
+  public boolean issetField(StringValue name)
   {
-    return NullValue.NULL;
+    return false;
   }
 
   /**
    * Removes the field ref.
    */
-  public void removeField(String index)
+  public void unsetField(StringValue name)
   {
   }
+
+  /**
+   * Returns the field value
+   */
+  public Value getThisField(Env env, StringValue name)
+  {
+    return getField(env, name);
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  public Value getThisFieldRef(Env env, StringValue name)
+  {
+    return getThisField(env, name);
+  }
+
+  /**
+   * Returns the field used as a method argument
+   */
+  public Value getThisFieldArg(Env env, StringValue name)
+  {
+    return getThisFieldRef(env, name);
+  }
+
+  /**
+   * Returns the field ref for an argument.
+   */
+  public Value getThisFieldArgRef(Env env, StringValue name)
+  {
+    return getThisFieldRef(env, name);
+  }
+
+  /**
+   * Returns the value for a field, creating an object if the field
+   * is unset.
+   */
+  public Value getThisFieldObject(Env env, StringValue name)
+  {
+    Value v = getThisField(env, name);
+
+    if (! v.isset()) {
+      v = env.createObject();
+
+      putThisField(env, name, v);
+    }
+
+    return v;
+  }
+
+  /**
+   * Returns the value for a field, creating an object if the field
+   * is unset.
+   */
+  public Value getThisFieldArray(Env env, StringValue name)
+  {
+    Value v = getField(env, name);
+
+    Value array = v.toAutoArray();
+
+    if (v == array)
+      return v;
+    else {
+      putField(env, name, array);
+
+      return array;
+    }
+  }
+
+  /**
+   * Returns the field ref.
+   */
+  public Value putThisField(Env env, StringValue name, Value object)
+  {
+    return putField(env, name, object);
+  }
+
+  /**
+   * Returns true if the field is set
+   */
+  public boolean issetThisField(StringValue name)
+  {
+    return issetField(name);
+  }
+
+  /**
+   * Removes the field ref.
+   */
+  public void unsetThisField(StringValue name)
+  {
+    unsetField(name);
+  }
+
+  //
+  // field convenience
+  //
+  public Value putField(Env env, String name, Value value)
+  {
+    return putThisField(env, env.createString(name), value);
+  }
+
+  //
+  // array references
+  //
 
   /**
    * Returns the value for the variable, creating an object if the var
@@ -1914,15 +2010,6 @@ abstract public class Value implements java.io.Serializable
   {
     return NullValue.NULL;
   }
-  
-  /**
-   * Returns the value for a field, creating an object if the field
-   * is unset.
-   */
-  public Value getObject(Env env, Location location, Value index)
-  {
-    return getObject(env, index);
-  }
 
   /**
    * Sets the value ref.
@@ -1939,29 +2026,13 @@ abstract public class Value implements java.io.Serializable
   {
     return value;
   }
-  
-  /**
-   * Sets the array ref.
-   */
-  public Value put(Env env, Location location, Value index, Value value)
-  {
-    return put(index, value);
-  }
 
   /**
-   * Sets the array ref.
+   * Appends an array value
    */
   public Value put(Value value)
   {
     return value;
-  }
-  
-  /**
-   * Sets the array ref.
-   */
-  public Value put(Env env, Location location, Value value)
-  {
-    return put(value);
   }
 
   /**

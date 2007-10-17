@@ -84,11 +84,11 @@ public class IteratorDelegate
       _env = env;
       _obj = obj;
 
-      _currentFun =  _obj.findFunction("current");
-      _keyFun =  _obj.findFunction("key");
-      _nextFun =  _obj.findFunction("next");
-      _rewindFun =  _obj.findFunction("rewind");
-      _validFun =  _obj.findFunction("valid");
+      _currentFun = _obj.findFunction("current");
+      _keyFun = _obj.findFunction("key");
+      _nextFun = _obj.findFunction("next");
+      _rewindFun = _obj.findFunction("rewind");
+      _validFun = _obj.findFunction("valid");
 
       _rewindFun.callMethod(_env, _obj);
       _needNext = false;

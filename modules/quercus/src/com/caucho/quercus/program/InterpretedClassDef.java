@@ -29,10 +29,7 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.Location;
 
@@ -53,8 +50,8 @@ public class InterpretedClassDef extends ClassDef
   protected final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
 
-  protected final HashMap<String,Expr> _fieldMap
-    = new LinkedHashMap<String,Expr>();
+  protected final HashMap<StringValue,Expr> _fieldMap
+    = new LinkedHashMap<StringValue,Expr>();
 
   protected final HashMap<String,Expr> _staticFieldMap
     = new LinkedHashMap<String,Expr>();
@@ -140,7 +137,7 @@ public class InterpretedClassDef extends ClassDef
       cl.addMethod(entry.getKey(), entry.getValue());
     }
     
-    for (Map.Entry<String,Expr> entry : _fieldMap.entrySet()) {
+    for (Map.Entry<StringValue,Expr> entry : _fieldMap.entrySet()) {
       cl.addField(entry.getKey(), 0, entry.getValue());
     }
 
@@ -212,7 +209,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addValue(Value name, Expr value)
   {
-    _fieldMap.put(name.toString().intern(), value);
+    _fieldMap.put(name.toStringValue(), value);
   }
 
   /**
@@ -220,13 +217,13 @@ public class InterpretedClassDef extends ClassDef
    */
   public Expr get(Value name)
   {
-    return _fieldMap.get(name.toString().intern());
+    return _fieldMap.get(name.toStringValue());
   }
 
   /**
    * Return true for a declared field.
    */
-  public boolean isDeclaredField(String name)
+  public boolean isDeclaredField(StringValue name)
   {
     return _fieldMap.get(name) != null;
   }
@@ -250,8 +247,10 @@ public class InterpretedClassDef extends ClassDef
   {
     ObjectValue object = (ObjectValue) value;
     
-    for (Map.Entry<String,Expr> entry : _fieldMap.entrySet())
-      object.initField(env, entry.getKey(), entry.getValue().eval(env).copy());
+    for (Map.Entry<StringValue,Expr> entry : _fieldMap.entrySet()) {
+      object.putThisField(env, entry.getKey(),
+			  entry.getValue().eval(env).copy());
+    }
   }
 
   /**
@@ -262,7 +261,7 @@ public class InterpretedClassDef extends ClassDef
     return _constructor;
   }
 
-  public Set<Map.Entry<String, Expr>> fieldSet()
+  public Set<Map.Entry<StringValue, Expr>> fieldSet()
   {
     return _fieldMap.entrySet();
   }

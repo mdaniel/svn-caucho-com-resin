@@ -93,69 +93,65 @@ public class ObjectExtValue extends ObjectValue
    * Gets a field value.
    */
   @Override
-  public Value getField(Env env, String key)
+  public Value getField(Env env, StringValue name)
   {
-    int capacity = _entries.length;
+    int hash = name.hashCode() & _hashMask;
 
-    int hashMask = _hashMask;
-    int hash = key.hashCode() & hashMask;
-
-    int count = capacity;
-    for (; count >= 0; count--) {
-      Entry entry = _entries[hash];
-
-      if (entry == null) {
-	return _quercusClass.getField(env, this, key, false);
-      }
-      else if (key.equals(entry.getKey())) {
-        return entry.getValue();
-      }
-
-      hash = (hash + 1) & hashMask;
+    for (Entry entry = _entries[hash];
+	 entry != null;
+	 entry = entry._next) {
+      if (name.equals(entry._key))
+        return entry._value.toValue();
     }
 
-    return _quercusClass.getField(env, this, key, false);
+    return _quercusClass.getField(env, this, name);
   }
-
 
   /**
    * Gets a field value.
    */
   @Override
-  public Value getField(Env env, String key, boolean create)
+  public Value getThisField(Env env, StringValue name)
   {
-    int capacity = _entries.length;
+    int hash = name.hashCode() & _hashMask;
 
-    int hashMask = _hashMask;
-    int hash = key.hashCode() & hashMask;
-
-    int count = capacity;
-    for (; count >= 0; count--) {
-      Entry entry = _entries[hash];
-
-      if (entry == null) {
-        if (create)
-          return createEntry(key).getValue();
-        else
-          return _quercusClass.getField(env, this, key, create);
-      }
-      else if (key.equals(entry.getKey())) {
-        return entry.getValue();
-      }
-
-      hash = (hash + 1) & hashMask;
+    for (Entry entry = _entries[hash];
+	 entry != null;
+	 entry = entry._next) {
+      if (name.equals(entry._key))
+        return entry._value.toValue();
     }
 
-    return _quercusClass.getField(env, this, key, create);
+    return UnsetValue.UNSET;
   }
 
   /**
    * Returns the array ref.
    */
   @Override
-  public Var getFieldRef(Env env, String index)
+  public Var getFieldRef(Env env, StringValue name)
   {
-    Entry entry = createEntry(index);
+    Entry entry = createEntry(name);
+
+    Value value = entry._value;
+
+    if (value instanceof Var)
+      return (Var) value;
+
+    Var var = new Var(value);
+
+    entry.setValue(var);
+
+    return var;
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  @Override
+  public Var getThisFieldRef(Env env, StringValue name)
+  {
+    Entry entry = createEntry(name);
 
     Value value = entry._value;
 
@@ -173,61 +169,102 @@ public class ObjectExtValue extends ObjectValue
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  public Value getFieldArg(Env env, String index)
+  public Value getFieldArg(Env env, StringValue name)
   {
-    Entry entry = getEntry(index);
+    Entry entry = getEntry(name);
 
     if (entry != null)
       return entry.toArg();
     else
-      return new ArgGetFieldValue(env, this, index);
+      return new ArgGetFieldValue(env, this, name);
   }
 
   /**
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  public Value getFieldArgRef(Env env, String index)
+  public Value getThisFieldArg(Env env, StringValue name)
   {
-    Entry entry = getEntry(index);
+    Entry entry = getEntry(name);
 
     if (entry != null)
       return entry.toArg();
     else
-      return new ArgGetFieldValue(env, this, index);
+      return new ArgGetFieldValue(env, this, name);
   }
 
   /**
-   * Gets a new value.
+   * Returns the value as an argument which may be a reference.
    */
-  private Entry getEntry(String key)
+  @Override
+  public Value getFieldArgRef(Env env, StringValue name)
   {
-    int capacity = _entries.length;
+    Entry entry = getEntry(name);
 
-    int hash = key.hashCode() & _hashMask;
+    if (entry != null)
+      return entry.toArg();
+    else
+      return new ArgGetFieldValue(env, this, name);
+  }
 
-    int count = capacity;
-    for (; count >= 0; count--) {
-      Entry entry = _entries[hash];
+  /**
+   * Returns the value as an argument which may be a reference.
+   */
+  @Override
+  public Value getThisFieldArgRef(Env env, StringValue name)
+  {
+    Entry entry = getEntry(name);
 
-      if (entry == null)
-        return null;
-      else if (key.equals(entry.getKey()))
-        return entry;
+    if (entry != null)
+      return entry.toArg();
+    else
+      return new ArgGetFieldValue(env, this, name);
+  }
 
-      hash = (hash + 1) & _hashMask;
+  /**
+   * Adds a new value.
+   */
+  @Override
+  public Value putField(Env env, StringValue name, Value value)
+  {
+    Entry entry = getEntry(name);
+
+    if (entry == null) {
+      AbstractFunction setField = _quercusClass.getSetField();
+    
+      if (setField != null)
+        return setField.callMethod(env, this, name, value);
+      else
+	entry = createEntry(name);
     }
 
-    return null;
+    Value oldValue = entry._value;
+
+    if (value instanceof Var) {
+      Var var = (Var) value;
+
+      // for function return optimization
+      var.setReference();
+
+      entry._value = var;
+    }
+    else if (oldValue instanceof Var) {
+      oldValue.set(value);
+    }
+    else {
+      entry._value = value;
+    }
+
+    return value;
   }
 
   /**
    * Sets/adds field to this object.
    */
   @Override
-  public Value putThisField(Env env, String key, Value value)
+  public Value putThisField(Env env, StringValue name, Value value)
   {
-    Entry entry = createEntry(key);
+    Entry entry = createEntry(name);
 
     Value oldValue = entry._value;
 
@@ -251,188 +288,85 @@ public class ObjectExtValue extends ObjectValue
    * Adds a new value.
    */
   @Override
-  public Value initField(Env env, String key, Value value)
+  public Value initField(Env env, StringValue key, Value value)
   {
-    createEntry(key);
-
-    return putField(env, key, value);
-  }
-
-  /**
-   * Adds a new value.
-   */
-  @Override
-  public Value putField(Env env, String key, Value value)
-  {
-    Entry entry = null;
-    
-    AbstractFunction setField = getQuercusClass().getSetField();
-    if (setField != null) {
-      
-      entry = getEntry(key);
-      
-      if (entry == null)
-        return setField.callMethod(env, this, new UnicodeValueImpl(key), value);
-    }
-    else
-      entry = createEntry(key);
-
-    Value oldValue = entry._value;
-
-    if (value instanceof Var) {
-      Var var = (Var) value;
-      var.setReference();
-
-      entry._value = var;
-    }
-    else if (oldValue instanceof Var) {
-      oldValue.set(value);
-    }
-    else {
-      entry._value = value;
-    }
-
-    return value;
-  }
-
-  /**
-   * Adds a new value.
-   */
-  @Override
-  public Value putField(String key, String value)
-  {
-    return putField(null, key, new StringBuilderValue(value));
-  }
-
-  /**
-   * Adds a new value.
-   */
-  @Override
-  public Value putField(String key, long value)
-  {
-    return putField(null, key, LongValue.create(value));
-  }
-
-  /**
-   * Adds a new value.
-   */
-  @Override
-  public Value putField(String key, double value)
-  {
-    return putField(null, key, DoubleValue.create(value));
+    return putThisField(env, key, value);
   }
 
   /**
    * Removes a value.
    */
   @Override
-  public void removeField(String key)
+  public void unsetField(StringValue name)
   {
-    int capacity = _entries.length;
+    int hash = name.hashCode() & _hashMask;
 
-    int hash = key.hashCode() & _hashMask;
+    for (Entry entry = _entries[hash];
+	 entry != null;
+	 entry = entry._next) {
+      if (name.equals(entry.getKey())) {
+	Entry prev = entry._prev;
+	Entry next = entry._next;
 
-    int count = capacity;
-    for (; count >= 0; count--) {
-      Entry entry = _entries[hash];
+	if (prev != null)
+	  prev._next = next;
+	else
+	  _entries[hash] = next;
 
-      if (entry == null)
-        return;
-      else if (key.equals(entry.getKey())) {
-        _size--;
-
-        _entries[hash] = null;
-        shiftEntries(hash + 1);
+	if (next != null)
+	  next._prev = prev;
 
         return;
       }
-
-      hash = (hash + 1) & _hashMask;
     }
   }
 
   /**
-   * Shift entries after a delete.
+   * Gets a new value.
    */
-  private void shiftEntries(int index)
+  private Entry getEntry(StringValue name)
   {
-    int capacity = _entries.length;
+    int hash = name.hashCode() & _hashMask;
 
-    for (; index < capacity; index++) {
-      Entry entry = _entries[index];
-
-      if (entry == null)
-        return;
-
-      _entries[index] = null;
-
-      addEntry(entry);
+    for (Entry entry = _entries[hash];
+	 entry != null;
+	 entry = entry._next) {
+      if (name.equals(entry._key))
+	return entry;
     }
+
+    return null;
   }
 
   /**
    * Creates the entry for a key.
    */
-  private Entry createEntry(String key)
+  private Entry createEntry(StringValue name)
   {
-    int capacity = _entries.length;
+    int hash = name.hashCode() & _hashMask;
 
-    int hashMask = _hashMask;
-
-    int hash = key.hashCode() & hashMask;
-
-    int count = capacity;
-    for (; count >= 0; count--) {
-      Entry entry = _entries[hash];
-
-      if (entry == null)
-        break;
-      else if (key.equals(entry.getKey()))
+    for (Entry entry = _entries[hash];
+	 entry != null;
+	 entry = entry._next) {
+      if (name.equals(entry._key))
         return entry;
-
-      hash = (hash + 1) & hashMask;
     }
-
+    
     _size++;
 
-    Entry newEntry = new Entry(key);
+    Entry newEntry = new Entry(name);
+    Entry next = _entries[hash];
+    
+    if (next != null) {
+      newEntry._next = next;
+      next._prev = newEntry;
+    }
+
     _entries[hash] = newEntry;
 
-    if (_entries.length <= 2 * _size)
-      expand();
+    // XXX: possibly resize
 
     return newEntry;
-  }
-
-  private void expand()
-  {
-    Entry []entries = _entries;
-
-    _entries = new Entry[2 * entries.length];
-    _hashMask = _entries.length - 1;
-
-    for (int i = entries.length - 1; i >= 0; i--) {
-      Entry entry = entries[i];
-
-      if (entry != null)
-        addEntry(entry);
-    }
-  }
-
-  private void addEntry(Entry entry)
-  {
-    int capacity = _entries.length;
-
-    int hash = entry.getKey().hashCode() & _hashMask;
-
-    for (int i = capacity; i >= 0; i--) {
-      if (_entries[hash] == null) {
-        _entries[hash] = entry;
-        return;
-      }
-
-      hash = (hash + 1) & _hashMask;
-    }
   }
 
   /**
@@ -446,32 +380,7 @@ public class ObjectExtValue extends ObjectValue
     if (iter != null)
       return iter;
 
-    return new Iterator<Map.Entry<Value,Value>>() {
-
-      final Iterator<Map.Entry<String,Value>> _iterator = new EntryIterator(_entries);
-
-      public boolean hasNext()
-      {
-        return _iterator.hasNext();
-      }
-
-      public Map.Entry<Value, Value> next()
-      {
-        final Map.Entry<String,Value> next = _iterator.next();
-
-        return new Map.Entry<Value,Value>() {
-
-          public Value getKey() { return new StringBuilderValue(next.getKey()); }
-          public Value getValue() { return next.getValue(); }
-          public Value setValue(Value value) { return next.setValue(value); }
-        };
-      }
-
-      public void remove()
-      {
-        _iterator.remove();
-      }
-    };
+    return new EntryIterator(_entries);
   }
 
   /**
@@ -485,25 +394,7 @@ public class ObjectExtValue extends ObjectValue
     if (iter != null)
       return iter;
 
-    return new Iterator<Value>() {
-      final Iterator<Map.Entry<String,Value>> _iterator
-	= new EntryIterator(_entries);
-
-      public boolean hasNext()
-      {
-        return _iterator.hasNext();
-      }
-
-      public Value next()
-      {
-	return new StringBuilderValue(_iterator.next().getKey());
-      }
-
-      public void remove()
-      {
-        _iterator.remove();
-      }
-    };
+    return new KeyIterator(_entries);
   }
 
   /**
@@ -512,30 +403,12 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Iterator<Value> getValueIterator(Env env)
   {
-    Iterator<Value> iter =  super.getValueIterator(env);
+    Iterator<Value> iter = super.getValueIterator(env);
 
     if (iter != null)
       return iter;
 
-    return new Iterator<Value>() {
-
-      final Iterator<Map.Entry<String,Value>> _iterator = new EntryIterator(_entries);
-
-      public boolean hasNext()
-      {
-        return _iterator.hasNext();
-      }
-
-      public Value next()
-      {
-        return _iterator.next().getValue();
-      }
-
-      public void remove()
-      {
-        _iterator.remove();
-      }
-    };
+    return new ValueIterator(_entries);
   }
 
   //
@@ -762,7 +635,19 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value []args)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen, args);
+    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, args);
+    else if ((fun = _quercusClass.getCall()) != null) {
+      return fun.callMethodRef(env,
+			       this,
+			       env.createString(name, nameLen),
+			       new ArrayValueImpl(args));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -771,7 +656,19 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen);
+    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this);
+    else if ((fun = _quercusClass.getCall()) != null) {
+      return fun.callMethodRef(env,
+			       this,
+			       env.createString(name, nameLen),
+			       new ArrayValueImpl());
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -779,10 +676,22 @@ public class ObjectExtValue extends ObjectValue
    */
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Value a0)
+                             Value a1)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
-                                       a0);
+    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a1);
+    else if ((fun = _quercusClass.getCall()) != null) {
+      return fun.callMethodRef(env,
+			       this,
+			       env.createString(name, nameLen),
+			       new ArrayValueImpl()
+			       .append(a1));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -790,10 +699,23 @@ public class ObjectExtValue extends ObjectValue
    */
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Value a0, Value a1)
+                             Value a1, Value a2)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
-                                       a0, a1);
+    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a1, a2);
+    else if ((fun = _quercusClass.getCall()) != null) {
+      return fun.callMethodRef(env,
+			       this,
+			       env.createString(name, nameLen),
+			       new ArrayValueImpl()
+			       .append(a1)
+			       .append(a2));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -801,10 +723,24 @@ public class ObjectExtValue extends ObjectValue
    */
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Value a0, Value a1, Value a2)
+                             Value a1, Value a2, Value a3)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
-                                       a0, a1, a2);
+    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a1, a2, a3);
+    else if ((fun = _quercusClass.getCall()) != null) {
+      return fun.callMethodRef(env,
+			       this,
+			       env.createString(name, nameLen),
+			       new ArrayValueImpl()
+			       .append(a1)
+			       .append(a2)
+			       .append(a3));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -812,10 +748,25 @@ public class ObjectExtValue extends ObjectValue
    */
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Value a0, Value a1, Value a2, Value a3)
+                             Value a1, Value a2, Value a3, Value a4)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
-                                       a0, a1, a2, a3);
+    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a1, a2, a3, a4);
+    else if ((fun = _quercusClass.getCall()) != null) {
+      return fun.callMethodRef(env,
+			       this,
+			       env.createString(name, nameLen),
+			       new ArrayValueImpl()
+			       .append(a1)
+			       .append(a2)
+			       .append(a3)
+			       .append(a4));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -823,10 +774,26 @@ public class ObjectExtValue extends ObjectValue
    */
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Value a0, Value a1, Value a2, Value a3, Value a4)
+                             Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen,
-                                       a0, a1, a2, a3, a4);
+    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a1, a2, a3, a4, a5);
+    else if ((fun = _quercusClass.getCall()) != null) {
+      return fun.callMethodRef(env,
+			       this,
+			       env.createString(name, nameLen),
+			       new ArrayValueImpl()
+			       .append(a1)
+			       .append(a2)
+			       .append(a3)
+			       .append(a4)
+			       .append(a5));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -854,14 +821,6 @@ public class ObjectExtValue extends ObjectValue
     // php/3d92
 
     env.error(L.l("Can't use object '{0}' as array", getName()));
-
-    return NullValue.NULL;
-  }
-
-  @Override
-  public Value getObject(Env env, Location location, Value index)
-  {
-    env.error(location, L.l("Can't use object '{0}' as array", getName()));
 
     return NullValue.NULL;
   }
@@ -900,8 +859,11 @@ public class ObjectExtValue extends ObjectValue
   {
     ObjectExtValue newObject = new ObjectExtValue(_quercusClass);
 
-    for (Map.Entry<String,Value> entry : entrySet())
-      newObject.putField(null, entry.getKey(), entry.getValue());
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      newObject.putThisField(null,
+			     (StringValue) entry.getKey(),
+			     entry.getValue());
+    }
 
     return newObject;
   }
@@ -922,8 +884,8 @@ public class ObjectExtValue extends ObjectValue
     sb.append(getSize());
     sb.append(":{");
 
-    for (Map.Entry<String,Value> entry : entrySet()) {
-      String key = entry.getKey();
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      Value key = entry.getKey();
 
       sb.append("s:");
       sb.append(key.length());
@@ -970,8 +932,8 @@ public class ObjectExtValue extends ObjectValue
   {
     ArrayValue array = new ArrayValueImpl();
 
-    for (Map.Entry<String,Value> entry : entrySet()) {
-      array.put(new StringBuilderValue(entry.getKey()), entry.getValue());
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      array.put(entry.getKey(), entry.getValue());
     }
 
     return array;
@@ -996,7 +958,7 @@ public class ObjectExtValue extends ObjectValue
   }
 
   @Override
-  public Set<Map.Entry<String,Value>> entrySet()
+  public Set<? extends Map.Entry<Value,Value>> entrySet()
   {
     return new EntrySet();
   }
@@ -1004,9 +966,9 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Returns a Set of entries, sorted by key.
    */
-  public Set<Map.Entry<String,Value>> sortedEntrySet()
+  public Set<? extends Map.Entry<Value,Value>> sortedEntrySet()
   {
-    return new TreeSet<Map.Entry<String, Value>>(entrySet());
+    return new TreeSet<Map.Entry<Value, Value>>(entrySet());
   }
 
   //
@@ -1022,7 +984,7 @@ public class ObjectExtValue extends ObjectValue
     // XXX: push up to super, and use varDumpObject
     out.println("object(" + getName() + ") (" + getSize() + ") {");
 
-    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
+    for (Map.Entry<Value,Value> mapEntry : sortedEntrySet()) {
       ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
       entry.varDumpImpl(env, out, depth + 1, valueSet);
@@ -1046,7 +1008,7 @@ public class ObjectExtValue extends ObjectValue
     printDepth(out, 4 * depth);
     out.println("(");
 
-    for (Map.Entry<String,Value> mapEntry : sortedEntrySet()) {
+    for (Map.Entry<Value,Value> mapEntry : sortedEntrySet()) {
       ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
       entry.printRImpl(env, out, depth + 1, valueSet);
@@ -1067,7 +1029,7 @@ public class ObjectExtValue extends ObjectValue
 
     out.writeInt(_size);
     
-    for (Map.Entry<String,Value> entry : entrySet()) {      
+    for (Map.Entry<Value,Value> entry : entrySet()) {      
       out.writeObject(entry.getKey());
       out.writeObject(entry.getValue());
     }
@@ -1091,15 +1053,17 @@ public class ObjectExtValue extends ObjectValue
 
       setQuercusClass(cl);
 
-      putField(env,
-               "__Quercus_Class_Definition_Not_Found",
-               env.createString(name));
+      putThisField(env,
+		   env.createString("__Quercus_Class_Definition_Not_Found"),
+		   env.createString(name));
     }
 
     int size = in.readInt();
     
     for (int i = 0; i < size; i++) {
-      putField(env, (String) in.readObject(), (Value) in.readObject());
+      putThisField(env,
+		   (StringValue) in.readObject(),
+		   (Value) in.readObject());
     }
   }
 
@@ -1114,7 +1078,7 @@ public class ObjectExtValue extends ObjectValue
     return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + _quercusClass.getName() + "]";
   }
   
-  public class EntrySet extends AbstractSet<Map.Entry<String,Value>> {
+  public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {
     EntrySet()
     {
     }
@@ -1126,16 +1090,18 @@ public class ObjectExtValue extends ObjectValue
     }
 
     @Override
-    public Iterator<Map.Entry<String,Value>> iterator()
+    public Iterator<Map.Entry<Value,Value>> iterator()
     {
       return new EntryIterator(ObjectExtValue.this._entries);
     }
   }
 
   public static class EntryIterator
-    implements Iterator<Map.Entry<String,Value>> {
+    implements Iterator<Map.Entry<Value,Value>>
+  {
     private final Entry []_list;
     private int _index;
+    private Entry _entry;
 
     EntryIterator(Entry []list)
     {
@@ -1144,21 +1110,134 @@ public class ObjectExtValue extends ObjectValue
 
     public boolean hasNext()
     {
+      if (_entry != null)
+	return true;
+      
       for (; _index < _list.length && _list[_index] == null; _index++) {
       }
 
       return _index < _list.length;
     }
 
-    public Map.Entry<String,Value> next()
+    public Map.Entry<Value,Value> next()
     {
+      if (_entry != null) {
+	Entry entry = _entry;
+	_entry = entry._next;
+
+	return entry;
+      }
+
       for (; _index < _list.length && _list[_index] == null; _index++) {
       }
 
       if (_list.length <= _index)
         return null;
 
-      return _list[_index++];
+      Entry entry = _list[_index++];
+      _entry = entry._next;
+
+      return entry;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public static class ValueIterator
+    implements Iterator<Value>
+  {
+    private final Entry []_list;
+    private int _index;
+    private Entry _entry;
+
+    ValueIterator(Entry []list)
+    {
+      _list = list;
+    }
+
+    public boolean hasNext()
+    {
+      if (_entry != null)
+	return true;
+      
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      return _index < _list.length;
+    }
+
+    public Value next()
+    {
+      if (_entry != null) {
+	Entry entry = _entry;
+	_entry = entry._next;
+
+	return entry._value;
+      }
+
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      if (_list.length <= _index)
+        return null;
+
+      Entry entry = _list[_index++];
+      _entry = entry._next;
+
+      return entry._value;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public static class KeyIterator
+    implements Iterator<Value>
+  {
+    private final Entry []_list;
+    private int _index;
+    private Entry _entry;
+
+    KeyIterator(Entry []list)
+    {
+      _list = list;
+    }
+
+    public boolean hasNext()
+    {
+      if (_entry != null)
+	return true;
+      
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      return _index < _list.length;
+    }
+
+    public Value next()
+    {
+      if (_entry != null) {
+	Entry entry = _entry;
+	_entry = entry._next;
+
+	return entry._key;
+      }
+
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      if (_list.length <= _index)
+        return null;
+
+      Entry entry = _list[_index++];
+      _entry = entry._next;
+
+      return entry._key;
     }
 
     public void remove()
@@ -1168,19 +1247,22 @@ public class ObjectExtValue extends ObjectValue
   }
 
   public final static class Entry
-    implements Map.Entry<String,Value>,
-               Comparable<Map.Entry<String, Value>>
+    implements Map.Entry<Value,Value>,
+               Comparable<Map.Entry<Value, Value>>
   {
-    private final String _key;
+    private final StringValue _key;
     private Value _value;
 
-    public Entry(String key)
+    Entry _prev;
+    Entry _next;
+
+    public Entry(StringValue key)
     {
       _key = key;
       _value = NullValue.NULL;
     }
 
-    public Entry(String key, Value value)
+    public Entry(StringValue key, Value value)
     {
       _key = key;
       _value = value;
@@ -1191,7 +1273,7 @@ public class ObjectExtValue extends ObjectValue
       return _value.toValue();
     }
 
-    public String getKey()
+    public Value getKey()
     {
       return _key;
     }
@@ -1283,13 +1365,13 @@ public class ObjectExtValue extends ObjectValue
       }
     }
 
-    public int compareTo(Map.Entry<String, Value> other)
+    public int compareTo(Map.Entry<Value, Value> other)
     {
       if (other == null)
         return 1;
 
-      String thisKey = getKey();
-      String otherKey = other.getKey();
+      Value thisKey = getKey();
+      Value otherKey = other.getKey();
 
       if (thisKey == null)
         return otherKey == null ? 0 : -1;
@@ -1297,7 +1379,7 @@ public class ObjectExtValue extends ObjectValue
       if (otherKey == null)
         return 1;
 
-      return thisKey.compareTo(otherKey);
+      return thisKey.cmp(otherKey);
     }
 
     public void varDumpImpl(Env env,

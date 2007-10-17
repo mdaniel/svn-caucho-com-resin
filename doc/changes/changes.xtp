@@ -12,6 +12,10 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>httpd.sh had wrong path to resin.jar (rep by koyama)</li>
+<li>Quercus: StringStream not return proper utf-8 length for read() (#1903, rep by S Sozonoff)</li>
+<li>Quercus: http_build_query requires arg_separator (#1906, rep by ssozonoff)</li>
+<li>Quercus: basename nullpointer check (#1837, rep by dizzle)</li>
 <li>(2007-10-16) Add &lt;database-default> (#1108, rep by koreth)</li>
 <li>Quercus: regexp "/u" flag with Drupal install issues (#2069, rep by jims)</li>
 <li>Quercus: regexp rewrite for performance and PHP extensions</li>

@@ -29,11 +29,7 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ObjectExtValue;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
@@ -207,7 +203,7 @@ abstract public class ClassDef {
            + "[" + _name + "]";
   }
 
-  public Set<Map.Entry<String, Expr>> fieldSet()
+  public Set<Map.Entry<StringValue, Expr>> fieldSet()
   {
     return null;
   }

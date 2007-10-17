@@ -33,19 +33,19 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.This;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.UnicodeBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 
 /**
  * Exception object facade.
  */
 @ClassImplementation
 public class ExceptionClass {
+  private static final StringValue MESSAGE = new StringBuilderValue("message");
+  private static final StringValue FILE = new StringBuilderValue("file");
+  private static final StringValue LINE = new StringBuilderValue("line");
+  private static final StringValue CODE = new StringBuilderValue("code");
+  private static final StringValue TRACE = new StringBuilderValue("trace");
+  
   /**
    * Create a new exception API object.
    */
@@ -93,7 +93,7 @@ public class ExceptionClass {
    */
   public static Value getMessage(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, "message");
+    return obj.getField(env, MESSAGE);
   }
 
   /**
@@ -101,7 +101,7 @@ public class ExceptionClass {
    */
   public static Value getCode(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, "code");
+    return obj.getField(env, CODE);
   }
 
   /**
@@ -109,7 +109,7 @@ public class ExceptionClass {
    */
   public static Value getFile(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, "file");
+    return obj.getField(env, FILE);
   }
 
   /**
@@ -117,7 +117,7 @@ public class ExceptionClass {
    */
   public static Value getLine(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, "line");
+    return obj.getField(env, LINE);
   }
 
   /**
@@ -125,7 +125,7 @@ public class ExceptionClass {
    */
   public static Value getTrace(Env env, @This ObjectValue obj)
   {
-    return obj.getField(env, "trace");
+    return obj.getField(env, TRACE);
   }
 
   /**

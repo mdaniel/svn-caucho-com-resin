@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 
 /**
@@ -41,21 +42,21 @@ public class FieldGetExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(FieldGetExpr.class);
 
   protected final Expr _objExpr;
-  protected final String _name;
+  protected final StringValue _name;
 
-  public FieldGetExpr(Location location, Expr objExpr, String name)
+  public FieldGetExpr(Location location, Expr objExpr, StringValue name)
   {
     super(location);
     _objExpr = objExpr;
 
-    _name = name.intern();
+    _name = name;
   }
 
-  public FieldGetExpr(Expr objExpr, String name)
+  public FieldGetExpr(Expr objExpr, StringValue name)
   {
     _objExpr = objExpr;
 
-    _name = name.intern();
+    _name = name;
   }
 
   /**
@@ -94,7 +95,7 @@ public class FieldGetExpr extends AbstractVarExpr {
     // php/0228
     Value obj = _objExpr.eval(env);
 
-    return obj.getField(env, _name, true);
+    return obj.getFieldRef(env, _name).toValue();
   }
 
   /**
@@ -186,7 +187,7 @@ public class FieldGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    obj.removeField(_name);
+    obj.unsetField(_name);
   }
 
   @Override

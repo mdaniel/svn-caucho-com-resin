@@ -94,6 +94,19 @@ public class StringLiteralExpr extends Expr {
     return _value;
   }
 
+  /**
+   * Evaluates the expression as a string value.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public StringValue evalStringValue(Env env)
+  {
+    return _value;
+  }
+
   public String toString()
   {
     return "\"" + _value + "\"";

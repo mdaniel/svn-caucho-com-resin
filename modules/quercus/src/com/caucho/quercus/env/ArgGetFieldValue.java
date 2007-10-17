@@ -35,32 +35,32 @@ package com.caucho.quercus.env;
 public class ArgGetFieldValue extends Value {
   private final Env _env;
   private final Value _obj;
-  private final String _index;
+  private final StringValue _name;
 
-  public ArgGetFieldValue(Env env, Value obj, String index)
+  public ArgGetFieldValue(Env env, Value obj, StringValue name)
   {
     _env = env;
     _obj = obj;
-    _index = index;
+    _name = name;
   }
 
   /**
    * Creates an argument which may create the given field.
    */
-  public Value getArg(Value index)
+  public Value getArg(Value name)
   {
     // php/3d1q
-    return new ArgGetValue(this, index);
+    return new ArgGetValue(this, name);
   }
 
   /**
    * Creates an argument which may create the given field.
    */
   @Override
-  public Value getFieldArg(Env env, String index)
+  public Value getFieldArg(Env env, StringValue name)
   {
     // php/3d2q
-    return new ArgGetFieldValue(env, this, index);
+    return new ArgGetFieldValue(env, this, name);
   }
 
   /**
@@ -70,7 +70,7 @@ public class ArgGetFieldValue extends Value {
   public Var toRefVar()
   {
     // php/3d2t
-    return _obj.getFieldRef(_env, _index).toRefVar();
+    return _obj.getFieldRef(_env, _name).toRefVar();
   }
 
   /**
@@ -79,7 +79,7 @@ public class ArgGetFieldValue extends Value {
   @Override
   public Value toValue()
   {
-    return _obj.getField(_env, _index);
+    return _obj.getField(_env, _name);
   }
 
   /**
@@ -106,7 +106,7 @@ public class ArgGetFieldValue extends Value {
   @Override
   public Value toRefValue()
   {
-    return _obj.getFieldRef(_env, _index);
+    return _obj.getFieldRef(_env, _name);
   }
 
   /**
@@ -123,21 +123,22 @@ public class ArgGetFieldValue extends Value {
   @Override
   public Value getRef(Value index)
   {
-    return _obj.getFieldArray(_env, _index).getRef(index);
+    return _obj.getFieldArray(_env, _name).getRef(index);
   }
 
   /**
    * Converts to a reference variable.
    */
-  public Value getFieldRef(Env env, String index)
+  @Override
+  public Value getFieldRef(Env env, StringValue name)
   {
     // php/3d2q
-    return _obj.getFieldObject(_env, _index).getFieldRef(_env, index);
+    return _obj.getFieldObject(_env, _name).getFieldRef(_env, name);
   }
 
   public String toString()
   {
-    return "Arg[" + _obj + "->" + _index + "]";
+    return "Arg[" + _obj + "->" + _name + "]";
   }
 }
 

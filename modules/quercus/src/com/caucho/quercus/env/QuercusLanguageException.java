@@ -37,6 +37,11 @@ import com.caucho.quercus.lib.VariableModule;
  * Parent of PHP exceptions
  */
 public class QuercusLanguageException extends QuercusException {
+  private static final StringValue FILE = new StringBuilderValue("file");
+  private static final StringValue LINE = new StringBuilderValue("line");
+  private static final StringValue MESSAGE
+    = new StringBuilderValue("message");
+  
   private Value _value;
   
   public QuercusLanguageException(Value value)
@@ -59,7 +64,7 @@ public class QuercusLanguageException extends QuercusException {
    */
   public String getMessage(Env env)
   {
-    Value field = _value.getField(env, "message");
+    Value field = _value.getField(env, MESSAGE);
     
     if (field != null)
       return field.toString();
@@ -72,8 +77,8 @@ public class QuercusLanguageException extends QuercusException {
    */
   public Location getLocation(Env env)
   {
-    Value file = _value.getField(env, "file");
-    Value line = _value.getField(env, "line");
+    Value file = _value.getField(env, FILE);
+    Value line = _value.getField(env, LINE);
     
     if (file.isNull() || line.isNull())
       return Location.UNKNOWN;

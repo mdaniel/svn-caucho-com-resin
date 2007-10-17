@@ -461,7 +461,7 @@ public class ArrayModule
     if (searchArray instanceof ArrayValue)
       return ((ArrayValue) searchArray).containsKey(key) != null;
     else
-      return ! searchArray.getField(env, key.toString()).isNull();
+      return ! searchArray.getField(env, key.toStringValue()).isNull();
   }
 
   /**

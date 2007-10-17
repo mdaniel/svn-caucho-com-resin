@@ -2741,7 +2741,9 @@ public class QuercusParser {
         //php/09fj
         
         _peekToken = token;
-        return term.createFieldGet(_factory, getLocation(), name);
+        return term.createFieldGet(_factory,
+				   getLocation(),
+				   createString(name));
       }
 
       ArrayList<Expr> args = new ArrayList<Expr>();
@@ -2762,7 +2764,7 @@ public class QuercusParser {
     else {
       _peekToken = token;
 
-      return term.createFieldGet(_factory, getLocation(), name);
+      return term.createFieldGet(_factory, getLocation(), createString(name));
     }
   }
   
@@ -4323,7 +4325,7 @@ public class QuercusParser {
 		_sb.append((char) ch);
 	      }
 
-	      tail = tail.createFieldGet(_factory, getLocation(), _sb.toString());
+	      tail = tail.createFieldGet(_factory, getLocation(), createString(_sb.toString()));
 	    }
 	    else {
 	      tail = _factory.createAppend(tail, createString("->"));

@@ -49,15 +49,12 @@ public class CompositeDataValue extends Value {
    * Returns an attribute.
    */
   @Override
-  public Value getField(Env env, String attrName, boolean create)
+  public Value getField(Env env, StringValue attrName)
   {
     try {
-      Object value = _data.get(attrName);
+      Object value = _data.get(attrName.toString());
 
-      if (create && value == null)
-          env.warning(L.l("field '{0}' is invalid"));
-
-      return env.wrapJava(_data.get(attrName));
+      return env.wrapJava(_data.get(attrName.toString()));
     } catch (InvalidKeyException e) {
       env.warning(e);
       return NullValue.NULL;

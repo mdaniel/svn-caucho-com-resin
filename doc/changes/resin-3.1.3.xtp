@@ -84,7 +84,7 @@ load-balanced database drivers.</p>
 
 <s1 title="JSF">
 
-<p>Resin 3.1.3 introduces our JSF 2.0 implementation.  The implementation
+<p>Resin 3.1.3 introduces our JSF 1.2 implementation.  The implementation
 includes fast JSP code generation.  The JSP generation can be configured
 like:</p>
 

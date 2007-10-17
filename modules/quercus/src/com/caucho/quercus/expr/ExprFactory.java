@@ -30,7 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.*;
 import com.caucho.util.L10N;
@@ -186,7 +186,7 @@ public class ExprFactory {
    */
   public Expr createFieldGet(Location location,
                              Expr base,
-                             String name)
+                             StringValue name)
   {
     return new FieldGetExpr(location, base, name);
   }

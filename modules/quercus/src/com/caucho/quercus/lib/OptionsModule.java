@@ -592,8 +592,8 @@ public class OptionsModule extends AbstractQuercusModule {
       
       ObjectValue result = new ObjectExtValue(obj.getQuercusClass());
       
-      for (Map.Entry<String,Value> entry : obj.entrySet()) {
-        Value key = escape(env, StringValue.create(entry.getKey()));
+      for (Map.Entry<Value,Value> entry : obj.entrySet()) {
+        Value key = escape(env, entry.getKey());
         Value val = escape(env, entry.getValue());
         
         result.putField(env, key.toString(), val);

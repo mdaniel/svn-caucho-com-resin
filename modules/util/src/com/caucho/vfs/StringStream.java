@@ -56,28 +56,37 @@ public class StringStream extends StreamImpl {
   // XXX: encoding issues
   public int read(byte []buf, int offset, int length) throws IOException
   {
-    if (_length - _index < length)
-      length = _length - _index;
+    int strlen = _length;
 
-    for (int i = 0; i < length; i++) {
-      int ch = _string.charAt(_index + i); 
+    int start = offset;
+    int end = offset + length;
+    
+    int index = _index;
+    for (; index < strlen && offset < end; index++) {
+      int ch = _string.charAt(index);
 
       if (ch < 0x80)
 	buf[offset++] = (byte) ch;
-      else if (ch < 0x800) {
+      else if (ch < 0x800 && offset + 1 < end) {
 	buf[offset++] = (byte) (0xc0 | (ch >> 6));
 	buf[offset++] = (byte) (0x80 | (ch & 0x3f));
       }
-      else if (ch < 0x8000) {
+      else if (ch < 0x8000 && offset + 2 < end) {
 	buf[offset++] = (byte) (0xe0 | (ch >> 12));
 	buf[offset++] = (byte) (0x80 | ((ch >> 6) & 0x3f));
 	buf[offset++] = (byte) (0x80 | ((ch >> 6) & 0x3f));
       }
+      else if (offset == start) {
+	throw new IllegalStateException("buffer length is not large enough to decode UTF-8 data");
+      }
+      else {
+	break;
+      }
     }
 
-    _index += length;
+    _index = index;
 
-    return length > 0 ? length : -1;
+    return start < offset ? offset - start : -1;
   }
 
   public int getAvailable() throws IOException

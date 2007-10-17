@@ -127,19 +127,17 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the base name of a string.
    */
-  @ReturnNullAsFalse
-  public static String basename(String path, @Optional String suffix)
+  public static Value basename(StringValue path,
+			       @Optional StringValue suffix)
   {
-    if (path == null)
-      return null;
-
     int len = path.length();
 
     if (len == 0)
-      return "";
-    else if (path.endsWith("/"))
+      return path;
+    
+    else if (path.charAt(len - 1) == '/')
       len -= 1;
-    else if (path.endsWith("\\"))
+    else if (path.charAt(len - 1) == '\\')
       len -= 1;
 
     int p = path.lastIndexOf('/', len - 1);
@@ -147,7 +145,7 @@ public class FileModule extends AbstractQuercusModule {
     if (p < 0)
       p = path.lastIndexOf('\\', len - 1);
 
-    String file;
+    StringValue file;
 
     if (p < 0)
       file = path.substring(0, len);

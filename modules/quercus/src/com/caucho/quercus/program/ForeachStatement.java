@@ -79,7 +79,6 @@ public class ForeachStatement
     Value obj = origObj.copy(); // php/0669
 
     if (_key == null && ! _isRef) {
-
       Iterator<Value> iter = obj.getValueIterator(env);
 
       while (iter.hasNext()) {
@@ -139,7 +138,8 @@ public class ForeachStatement
         Value result = _block.execute(env);
 
         if (result == null || result instanceof ContinueValue) {
-        } else if (result instanceof BreakValue)
+        }
+	else if (result instanceof BreakValue)
           return null;
         else
           return result;

@@ -369,7 +369,11 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (! _isValid)
       throw new IllegalStateException(L.l("Can't call removeAttribute(String) when session is no longer valid."));
 
-    Object oldValue = _values.remove(name);
+    Object oldValue;
+
+    synchronized (_values) {
+      oldValue = _values.remove(name);
+    }
 
     if (_clusterObject != null && oldValue != null)
       _clusterObject.change();
@@ -753,7 +757,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     ArrayList<String> names = new ArrayList<String>();
     ArrayList<Object> values = new ArrayList<Object>();
     
-    synchronized (this) {
+    synchronized (_values) {
       //System.out.println("UNBIND: " + this + " " + clusterObject + " " + System.identityHashCode(this));
 
       /*
@@ -770,10 +774,10 @@ public class SessionImpl implements HttpSession, CacheListener {
       }
       
       _values.clear();
-
-      if (clusterObject != null)
-	clusterObject.update();
     }
+
+    if (clusterObject != null)
+      clusterObject.update();
 
     // server/015a
     for (int i = 0; i < names.size(); i++) {

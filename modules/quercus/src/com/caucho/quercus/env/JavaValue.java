@@ -75,7 +75,7 @@ public class JavaValue
     return _classDef.getName();
   }
 
-  public Set<Map.Entry<String, Value>> entrySet()
+  public Set<? extends Map.Entry<Value, Value>> entrySet()
   {
     throw new UnsupportedOperationException("unimplementated");
   }
@@ -198,32 +198,26 @@ public class JavaValue
     }
   }
 
-  @Override
-  public Value getField(Env env, String name, boolean create)
-  {
-    Value oldThis = env.setThis(this);
+  //
+  // field routines
+  //
 
-    try {
-      return _classDef.getField(env, _object, name, create);
-    }
-    finally {
-      env.setThis(oldThis);
-    }
+  /**
+   * Returns the field value.
+   */
+  @Override
+  public Value getField(Env env, StringValue name)
+  {
+    return _classDef.getField(env, _object, name);
   }
 
+  /**
+   * Sets the field value.
+   */
   @Override
-  public Value putField(Env env,
-                        String name,
-                        Value value)
+  public Value putField(Env env, StringValue name, Value value)
   {
-    Value oldThis = env.setThis(this);
-
-    try {
-      return _classDef.putField(env, _object, name, value);
-    }
-    finally {
-      env.setThis(oldThis);
-    }
+    return _classDef.putField(env, _object, name, value);
   }
 
   /**

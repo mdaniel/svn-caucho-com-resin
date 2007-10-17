@@ -68,8 +68,8 @@ public class QuercusClass {
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
   
-  private final ArrayList<String> _fieldNames
-    = new ArrayList<String>();
+  private final ArrayList<StringValue> _fieldNames
+    = new ArrayList<StringValue>();
   
   private final IdentityIntMap _fieldMap
     = new IdentityIntMap();
@@ -277,17 +277,17 @@ public class QuercusClass {
   /**
    * Adds a field.
    */
-  public void addField(String name, int index, Expr initExpr)
+  public void addField(StringValue name, int index, Expr initExpr)
   {
     _fieldNames.add(name);
     _fieldMap.put(name, index);
-    _fieldInitMap.put(new StringBuilderValue(name), initExpr);
+    _fieldInitMap.put(name, initExpr);
   }
 
   /**
    * Adds a field.
    */
-  public int addFieldIndex(String name)
+  public int addFieldIndex(StringValue name)
   {
     int index = _fieldMap.get(name);
 
@@ -362,7 +362,7 @@ public class QuercusClass {
   /**
    * Returns the field index.
    */
-  public int findFieldIndex(String name)
+  public int findFieldIndex(StringValue name)
   {
     return _fieldMap.get(name);
   }
@@ -370,7 +370,7 @@ public class QuercusClass {
   /**
    * Returns the key set.
    */
-  public ArrayList<String> getFieldNames()
+  public ArrayList<StringValue> getFieldNames()
   {
     return _fieldNames;
   }
@@ -607,10 +607,10 @@ public class QuercusClass {
   /**
    * Implements the __get method call.
    */
-  public Value getField(Env env, Value qThis, String name, boolean create)
+  public Value getField(Env env, Value qThis, StringValue name)
   {
     if (_get != null)
-      return _get.callMethod(env, qThis, env.createString(name));
+      return _get.callMethod(env, qThis, name);
     else
       return UnsetValue.UNSET;
   }
@@ -618,10 +618,10 @@ public class QuercusClass {
   /**
    * Implements the __set method call.
    */
-  public void setField(Env env, Value qThis, String name, Value value)
+  public void setField(Env env, Value qThis, StringValue name, Value value)
   {
     if (_set != null)
-      _set.callMethod(env, qThis, env.createString(name), value);
+      _set.callMethod(env, qThis, name, value);
   }
 
   /**

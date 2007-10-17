@@ -29,7 +29,7 @@ if test -z "${RESIN_HOME}"; then
   done
 
   bin=`dirname $script`
-  RESIN_HOME="$bin/../lib"
+  RESIN_HOME="$bin/.."
 fi  
 
-exec $java -jar ${RESIN_HOME}/resin.jar $*
+exec $java -jar ${RESIN_HOME}/lib/resin.jar $*

@@ -61,7 +61,7 @@ public class ArgGetValue extends Value
    * Returns the arg object for a field reference, e.g.
    * foo($a[0]->x)
    */
-  public Value getFieldArg(Env env, String index)
+  public Value getFieldArg(Env env, StringValue index)
   {
     return new ArgGetFieldValue(env, this, index); // php/3d2p
   }
@@ -135,7 +135,7 @@ public class ArgGetValue extends Value
   /**
    * Converts to a reference variable.
    */
-  public Value getFieldObject(Env env, String index)
+  public Value getFieldObject(Env env, StringValue index)
   {
     return _obj.getObject(env, _index).getFieldObject(env, index);
   }
@@ -143,7 +143,7 @@ public class ArgGetValue extends Value
   /**
    * Converts to a reference variable.
    */
-  public Value getFieldRef(Env env, String index)
+  public Value getFieldRef(Env env, StringValue index)
   {
     // php/3d2p
     return _obj.getObject(env, _index).getFieldRef(env, index);

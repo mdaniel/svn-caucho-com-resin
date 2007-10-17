@@ -30,8 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.Statement;
 import com.caucho.util.L10N;
@@ -243,7 +242,7 @@ abstract public class Expr {
    */
   public Expr createFieldGet(ExprFactory factory,
                              Location location,
-                             String name)
+                             StringValue name)
   {
     return factory.createFieldGet(location, this, name);
   }
@@ -431,6 +430,18 @@ abstract public class Expr {
   public String evalString(Env env)
   {
     return eval(env).toString();
+  }
+
+  /**
+   * Evaluates the expression as a string value
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public StringValue evalStringValue(Env env)
+  {
+    return eval(env).toStringValue();
   }
 
   /**

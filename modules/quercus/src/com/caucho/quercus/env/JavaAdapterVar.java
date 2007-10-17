@@ -936,16 +936,16 @@ public class JavaAdapterVar extends Var
    * Returns the field ref.
    */
   @Override
-  public Value getField(Env env, String index, boolean create)
+  public Value getField(Env env, StringValue index)
   {
-    return getValue().getField(env, index, create);
+    return getValue().getField(env, index);
   }
 
   /**
    * Returns the field ref.
    */
   @Override
-  public Value getFieldRef(Env env, String index)
+  public Value getFieldRef(Env env, StringValue index)
   {
     setRaw(getValue());
     
@@ -960,7 +960,7 @@ public class JavaAdapterVar extends Var
    * Returns the array ref.
    */
   @Override
-  public Value getFieldArg(Env env, String index)
+  public Value getFieldArg(Env env, StringValue index)
   {
     setRaw(getValue());
     
@@ -975,7 +975,7 @@ public class JavaAdapterVar extends Var
    * Returns the field value as an array
    */
   @Override
-  public Value getFieldArray(Env env, String index)
+  public Value getFieldArray(Env env, StringValue index)
   {
     setRaw(getValue());
     
@@ -990,7 +990,7 @@ public class JavaAdapterVar extends Var
    * Returns the field value as an object
    */
   @Override
-  public Value getFieldObject(Env env, String index)
+  public Value getFieldObject(Env env, StringValue index)
   {
     setRaw(getValue());
     
@@ -1005,7 +1005,7 @@ public class JavaAdapterVar extends Var
    * Sets the field.
    */
   @Override
-  public Value putField(Env env, String index, Value value)
+  public Value putField(Env env, StringValue index, Value value)
   {
     setRaw(getValue());
     
@@ -1020,7 +1020,7 @@ public class JavaAdapterVar extends Var
    * Sets the field.
    */
   @Override
-  public Value putThisField(Env env, String index, Value value)
+  public Value putThisField(Env env, StringValue index, Value value)
   {
     setRaw(getValue());
     
@@ -1035,9 +1035,9 @@ public class JavaAdapterVar extends Var
    * Unsets the field.
    */
   @Override
-  public void removeField(String index)
+  public void unsetField(StringValue index)
   {
-    getValue().removeField(index);
+    getValue().unsetField(index);
   }
 
   /**

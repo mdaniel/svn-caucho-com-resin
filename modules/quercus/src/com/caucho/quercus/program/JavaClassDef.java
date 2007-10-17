@@ -81,21 +81,23 @@ public class JavaClassDef extends ClassDef {
   private final MethodMap<AbstractJavaMethod> _functionMap
     = new MethodMap<AbstractJavaMethod>();
 
-  private final HashMap<String, AbstractJavaMethod> _getMap
-    = new HashMap<String, AbstractJavaMethod>();
+  private final HashMap<StringValue, AbstractJavaMethod> _getMap
+    = new HashMap<StringValue, AbstractJavaMethod>();
 
-  private final HashMap<String, AbstractJavaMethod> _setMap
-    = new HashMap<String, AbstractJavaMethod>();
+  private final HashMap<StringValue, AbstractJavaMethod> _setMap
+    = new HashMap<StringValue, AbstractJavaMethod>();
 
   // _fieldMap stores all public non-static fields
   // used by getField and setField
-  private final HashMap<String, FieldMarshalPair> _fieldMap
-    = new HashMap<String, FieldMarshalPair> ();
+  private final HashMap<StringValue, FieldMarshalPair> _fieldMap
+    = new HashMap<StringValue, FieldMarshalPair> ();
 
-  private JavaMethod __get = null;
   private JavaMethod __getField = null;
-  private JavaMethod __set = null;
   private JavaMethod __setField = null;
+  
+  private JavaMethod __get = null;
+  private JavaMethod __set = null;
+  
   private JavaMethod __call = null;
 
   private Method _printRImpl = null;
@@ -129,13 +131,13 @@ public class JavaClassDef extends ClassDef {
   public static JavaClassDef create(ModuleContext moduleContext,
 				    String name, Class type)
   {
-    if (Double.class.isAssignableFrom(type) ||
-	Float.class.isAssignableFrom(type))
+    if (Double.class.isAssignableFrom(type)
+	|| Float.class.isAssignableFrom(type))
       return new DoubleClassDef(moduleContext);
     else if (Number.class.isAssignableFrom(type))
       return new LongClassDef(moduleContext);
-    else if (String.class.isAssignableFrom(type) ||
-	     Character.class.isAssignableFrom(type))
+    else if (String.class.isAssignableFrom(type)
+	     || Character.class.isAssignableFrom(type))
       return new StringClassDef(moduleContext);
     else if (Boolean.class.isAssignableFrom(type))
       return new BooleanClassDef(moduleContext);
@@ -280,8 +282,8 @@ public class JavaClassDef extends ClassDef {
     // XX: not sure how to do this, to imitate PHP objects,
     // should getters be involved as well?
 
-    for (Map.Entry<String, FieldMarshalPair> lEntry : _fieldMap.entrySet()) {
-      String lFieldName = lEntry.getKey();
+    for (Map.Entry<StringValue, FieldMarshalPair> lEntry : _fieldMap.entrySet()) {
+      StringValue lFieldName = lEntry.getKey();
       FieldMarshalPair rFieldPair = rClassDef._fieldMap.get(lFieldName);
 
       if (rFieldPair == null)
@@ -308,17 +310,19 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
+   * Returns the field getter.
+   *
    * @param name
    * @return Value attained through invoking getter
    */
-  public Value getField(Env env, Object obj, String name, boolean create)
+  public Value getField(Env env, Object obj, StringValue name)
   {
     AbstractJavaMethod get = _getMap.get(name);
 
     if (get != null) {
       try {
         return get.call(env, obj);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
@@ -329,7 +333,7 @@ public class JavaClassDef extends ClassDef {
       try {
         Object result = fieldPair._field.get(obj);
         return fieldPair._marshal.unmarshal(env, result);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
@@ -337,22 +341,19 @@ public class JavaClassDef extends ClassDef {
 
     if (__getField != null) {
       try {
-        return __getField.call(env, obj, env.createString(name));
-      } catch (Throwable e) {
+        return __getField.call(env, obj, name);
+      } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
     }
-
-    if (create)
-      env.warning(L.l("field '{0}' is invalid"));
 
     return NullValue.NULL;
   }
 
   public Value putField(Env env,
                         Object obj,
-                        String name,
+                        StringValue name,
                         Value value)
   {
     AbstractJavaMethod setter = _setMap.get(name);
@@ -360,7 +361,7 @@ public class JavaClassDef extends ClassDef {
     if (setter != null) {
       try {
         return setter.call(env, obj, value);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
@@ -376,7 +377,7 @@ public class JavaClassDef extends ClassDef {
 
         return value;
 
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
@@ -384,11 +385,11 @@ public class JavaClassDef extends ClassDef {
 
     if (__setField != null) {
       try {
-        return __setField.call(env, obj, env.createString(name), value);
-      } catch (Throwable e) {
+        return __setField.call(env, obj, name, value);
+      } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
+	
         return NullValue.NULL;
-
       }
     }
 
@@ -798,10 +799,10 @@ public class JavaClassDef extends ClassDef {
     try {
       Method method = _type.getMethod("iterator", new Class[0]);
 
-      if (method != null &&
-          Iterator.class.isAssignableFrom(method.getReturnType()))
+      if (method != null
+	  && Iterator.class.isAssignableFrom(method.getReturnType()))
         _iteratorMethod = method;
-    } catch (Throwable e) {
+    } catch (Exception e) {
     }
 
     try {
@@ -810,7 +811,7 @@ public class JavaClassDef extends ClassDef {
       if (method != null &&
           Set.class.isAssignableFrom(method.getReturnType()))
         _keySetMethod = method;
-    } catch (Throwable e) {
+    } catch (Exception e) {
     }
   }
 
@@ -917,8 +918,9 @@ public class JavaClassDef extends ClassDef {
 
       if (length > 3) {
         if (methodName.startsWith("get")) {
-          String quercusName = javaToQuercusConvert(methodName.substring(3, length));
-          
+          StringValue quercusName
+	    = javaToQuercusConvert(methodName.substring(3, length));
+	  
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
           
@@ -929,7 +931,8 @@ public class JavaClassDef extends ClassDef {
           _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("is")) {
-          String quercusName = javaToQuercusConvert(methodName.substring(2, length));
+          StringValue quercusName
+	    = javaToQuercusConvert(methodName.substring(2, length));
           
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
@@ -941,7 +944,8 @@ public class JavaClassDef extends ClassDef {
           _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("set")) {
-          String quercusName = javaToQuercusConvert(methodName.substring(3, length));
+          StringValue quercusName
+	    = javaToQuercusConvert(methodName.substring(3, length));
           
           AbstractJavaMethod existingSetter = _setMap.get(quercusName);
           AbstractJavaMethod newSetter = new JavaMethod(moduleContext, method);
@@ -971,7 +975,9 @@ public class JavaClassDef extends ClassDef {
 
       MarshalFactory factory = moduleContext.getMarshalFactory();
       Marshal marshal = factory.create(field.getType(), false);
-      _fieldMap.put(field.getName(), new FieldMarshalPair(field, marshal));
+      
+      _fieldMap.put(new StringBuilderValue(field.getName()),
+		    new FieldMarshalPair(field, marshal));
     }
 
 
@@ -984,16 +990,16 @@ public class JavaClassDef extends ClassDef {
    * @param s (eg: Foo, URL)
    * @return (foo, URL)
    */
-  private String javaToQuercusConvert(String s)
+  private StringValue javaToQuercusConvert(String s)
   {
     if (s.length() == 1) {
-      return new String(new char[] {Character.toLowerCase(s.charAt(0))});
+      return new StringBuilderValue(new char[] {Character.toLowerCase(s.charAt(0))});
     }
 
     if (Character.isUpperCase(s.charAt(1)))
-      return s;
+      return new StringBuilderValue(s);
     else {
-      StringBuilder sb = new StringBuilder();
+      StringBuilderValue sb = new StringBuilderValue();
       sb.append(Character.toLowerCase(s.charAt(0)));
 
       int length = s.length();
@@ -1001,7 +1007,7 @@ public class JavaClassDef extends ClassDef {
         sb.append(s.charAt(i));
       }
 
-      return sb.toString();
+      return sb;
     }
   }
 
@@ -1412,7 +1418,7 @@ public class JavaClassDef extends ClassDef {
 
       try {
         _iterator = ((Iterator<?>) iteratorMethod.invoke(obj.toJavaObject()));
-      } catch (Throwable e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }

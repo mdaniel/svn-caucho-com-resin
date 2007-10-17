@@ -156,11 +156,11 @@ public class JsonModule
       sb.append('{');
 
       int length = 0;
-      for (Map.Entry<String,Value> entry : val.entrySet()) {
+      for (Map.Entry<Value,Value> entry : val.entrySet()) {
         if (length > 0)
           sb.append(',');
 
-        jsonEncodeImpl(env, sb, env.createString(entry.getKey()));
+        jsonEncodeImpl(env, sb, entry.getKey().toStringValue());
         sb.append(':');
         jsonEncodeImpl(env, sb, entry.getValue());
         length++;
