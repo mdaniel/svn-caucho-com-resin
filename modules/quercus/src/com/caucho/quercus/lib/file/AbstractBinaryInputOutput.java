@@ -328,7 +328,8 @@ public class AbstractBinaryInputOutput
   }
 
   /**
-   * Writes to a stream.
+   * Read length bytes of data from the InputStream
+   * argument and write them to this output stream.
    */
   public int write(InputStream is, int length)
   {
