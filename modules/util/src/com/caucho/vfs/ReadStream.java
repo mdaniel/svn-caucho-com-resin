@@ -355,6 +355,9 @@ public final class ReadStream extends InputStream {
     _readOffset = 0;
 
     if (_source.hasSkip()) {
+      if (_sibling != null)
+        _sibling.flush();
+
       long skipped = _source.skip(n - count);
       
       if (skipped < 0)

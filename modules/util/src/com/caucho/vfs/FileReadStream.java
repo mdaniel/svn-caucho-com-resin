@@ -84,7 +84,7 @@ public class FileReadStream extends StreamImpl {
   /**
    * Returns true if there's an associated file.
    */
-  public boolean canSkip()
+  public boolean hasSkip()
   {
     return _is != null;
   }

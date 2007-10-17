@@ -118,6 +118,34 @@ public class SocketStream extends StreamImpl {
   }
 
   /**
+   * Returns true if stream is readable and bytes can be skipped.
+   */
+  public boolean hasSkip()
+  {
+    return canRead();
+  }
+
+  /**
+   * Skips bytes in the file.
+   *
+   * @param n the number of bytes to skip
+   *
+   * @return the actual bytes skipped.
+   */
+  public long skip(long n)
+    throws IOException
+  {
+    if (_is == null) {
+      if (_s == null)
+        return -1;
+
+      _is = _s.getInputStream();
+    }
+
+    return _is.skip(n);
+  }
+
+  /**
    * Returns true since the socket stream can be read.
    */
   public boolean canRead()
