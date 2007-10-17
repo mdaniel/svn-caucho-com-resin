@@ -124,28 +124,34 @@ public class Mysqli extends JdbcConnectionResource {
 
     if (port <= 0) {
       port = 3306;
-      _port = port;
     }
 
     try {
       if (host == null || host.equals("")) {
         host = "localhost";
-	_host = host;
       }
 
       if (driver == null || driver.equals("")) {
         driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
-	_driver = driver;
       }
 
       if (url == null || url.equals("")) {
         url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
-	_url = url;
+	if ((flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0) {
+	  char sep = url.indexOf('?') < 0 ? '?' : '&';
+	  
+	  url += sep + "interactiveClient=true";
+	}
+
+	if ((flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0) {
+	  char sep = url.indexOf('?') < 0 ? '?' : '&';
+	  
+	  url += sep + "useCompression=true";
+	}
       }
 
-      Connection jConn = env.getConnection(driver, url, dbname,
-					   userName, password);
+      Connection jConn = env.getConnection(driver, url, userName, password);
 
       return jConn;
     } catch (SQLException e) {
@@ -207,8 +213,8 @@ public class Mysqli extends JdbcConnectionResource {
       db = getDbName();
     }
 
-    return connectInternal(getEnv(), getHost(), user, password, db, getPort(),
-                           "", 0, getDriver(), getUrl());
+    return connectInternal(getEnv(), _host, user, password, db, _port,
+                           _socket, _flags, _driver, _url);
   }
 
   /**
@@ -575,7 +581,7 @@ public class Mysqli extends JdbcConnectionResource {
                               @Optional int flags)
   {
     return connectInternal(env, host, userName, password, dbname, port, socket,
-                           flags, "", "");
+                           flags, null, null);
   }
 
   /**

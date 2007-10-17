@@ -821,7 +821,7 @@ public class PDO implements java.io.Closeable {
 
     String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
-    return env.getDataSource(driver, url, dbname);
+    return env.getDataSource(driver, url);
   }
 
   /**
@@ -875,7 +875,7 @@ public class PDO implements java.io.Closeable {
     url.append('/');
     url.append(dbname);
 
-    return env.getDataSource(driver, url.toString(), dbname);
+    return env.getDataSource(driver, url.toString());
   }
 
   /**
@@ -888,7 +888,7 @@ public class PDO implements java.io.Closeable {
 
     String url = "jdbc:" + dsn;
 
-    return env.getDataSource(driver, url, null);
+    return env.getDataSource(driver, url);
   }
 
   /**

@@ -48,8 +48,8 @@ public class DatabaseManager {
   private static final EnvironmentLocal<DatabaseManager> _localManager
     = new EnvironmentLocal<DatabaseManager>();
 
-  private final HashMap<DatabaseKey,DBPool> _databaseMap
-    = new HashMap<DatabaseKey,DBPool>();
+  private final HashMap<String,DBPool> _databaseMap
+    = new HashMap<String,DBPool>();
 
   private static int _gId;
 
@@ -85,40 +85,23 @@ public class DatabaseManager {
 					String url)
     throws Exception
   {
-    return findDatabase(driver, url, null);
-  }
-
-  /**
-   * Returns a matching dbpool.
-   */
-  public static DataSource findDatabase(String driver,
-					String url,
-					String catalog)
-    throws Exception
-  {
-    return getLocalManager().findDatabaseImpl(driver, url, catalog);
+    return getLocalManager().findDatabaseImpl(driver, url);
   }
 
   /**
    * Looks up the local database, creating if necessary.
    */
   private DataSource findDatabaseImpl(String driverName,
-				      String url,
-				      String catalog)
+				      String url)
     throws Exception
   {
-    DatabaseKey key = new DatabaseKey(url, catalog);
-    
     synchronized (_databaseMap) {
-      DBPool db = _databaseMap.get(key);
+      DBPool db = _databaseMap.get(url);
 
       if (db == null) {
 	db = new DBPool();
 
-	if (catalog != null)
-	  db.setVar(url + "-" + catalog + "-" + _gId++);
-	else
-	  db.setVar(url + "-" + _gId++);
+	db.setVar(url + "-" + _gId++);
 	
 	DriverConfig driver = db.createDriver();
 
@@ -129,12 +112,9 @@ public class DatabaseManager {
 	driver.setType(driverClass);
 	driver.setURL(url);
 
-	if (catalog != null)
-	  db.createConnection().setCatalog(catalog);
-
 	db.init();
 
-	_databaseMap.put(key, db);
+	_databaseMap.put(url, db);
       }
 
       return db;

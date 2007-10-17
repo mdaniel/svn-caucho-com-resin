@@ -828,7 +828,8 @@ public class MysqlModule extends AbstractQuercusModule {
       host = host.substring(0, portIndex);
     }
 
-    Mysqli mysqli = new Mysqli(env, host, userName, password, "", port, "", 0, null, null);
+    Mysqli mysqli = new Mysqli(env, host, userName, password, "", port, "",
+			       flagsV.toInt(), null, null);
 
     if (! mysqli.isConnected())
       return BooleanValue.FALSE;

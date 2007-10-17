@@ -103,6 +103,11 @@ public class MysqliModule extends AbstractQuercusModule {
   public static final int MYSQL_TYPE_STRING = 0xFE;
   public static final int MYSQL_TYPE_GEOMETRY = 0xFF;
 
+  public static final int MYSQL_CLIENT_COMPRESS = 0x01;
+  public static final int MYSQL_CLIENT_IGNORE_SPACE = 0x02;
+  public static final int MYSQL_CLIENT_INTERACTIVE = 0x04;
+  public static final int MYSQL_CLIENT_SSL = 0x08;
+
   public MysqliModule()
   {
   }

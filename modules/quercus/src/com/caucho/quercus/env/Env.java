@@ -648,16 +648,16 @@ public class Env {
     return _quercus.getDatabase();
   }
 
-  protected DataSource findDatabase(String driver, String url, String catalog)
+  protected DataSource findDatabase(String driver, String url)
     throws Exception
   {
-    return _quercus.findDatabase(driver, url, catalog);
+    return _quercus.findDatabase(driver, url);
   }
 
   /**
    * Returns the configured database.
    */
-  public Connection getConnection(String driver, String url, String catalog,
+  public Connection getConnection(String driver, String url,
                                   String userName, String password)
     throws Exception
   {
@@ -669,7 +669,7 @@ public class Env {
 
       ConnectionEntry oldEntry = _connMap.get(entry);
 
-      if (oldEntry != null)
+      if (oldEntry != null && ! oldEntry.getConnection().isClosed())
         return oldEntry.getConnection();
 
       entry.setConnection(database.getConnection());
@@ -677,11 +677,10 @@ public class Env {
       
       Connection conn = entry.getConnection();
 
-      if (catalog != null)
-	conn.setCatalog(catalog);
+      return conn;
     }
 
-    database = findDatabase(driver, url, catalog);
+    database = findDatabase(driver, url);
     
     ConnectionEntry entry = new ConnectionEntry();
     entry.init(database, userName, password);
@@ -690,7 +689,7 @@ public class Env {
 
     Connection conn;
     
-    if (oldEntry != null)
+    if (oldEntry != null && ! oldEntry.getConnection().isClosed())
       conn = oldEntry.getConnection();
     else {
       if (userName == null || userName.equals(""))
@@ -702,9 +701,6 @@ public class Env {
     }
 
     _connMap.put(entry, entry);
-
-    if (catalog != null && ! "".equals(catalog))
-      conn.setCatalog(catalog);
       
     return conn;
   }
@@ -712,7 +708,7 @@ public class Env {
   /**
    * Returns the configured database.
    */
-  public DataSource getDataSource(String driver, String url, String catalog)
+  public DataSource getDataSource(String driver, String url)
     throws Exception
   {
     DataSource database = _quercus.getDatabase();
@@ -720,7 +716,7 @@ public class Env {
     if (database != null)
       return database;
     else
-      return findDatabase(driver, url, catalog);
+      return findDatabase(driver, url);
   }
 
   /**

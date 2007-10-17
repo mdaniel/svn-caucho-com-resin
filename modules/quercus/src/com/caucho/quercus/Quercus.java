@@ -416,7 +416,7 @@ public class Quercus
   /**
    * Gets the default data source.
    */
-  public DataSource findDatabase(String driver, String url, String catalog)
+  public DataSource findDatabase(String driver, String url)
   {
     if (_database != null)
       return _database;

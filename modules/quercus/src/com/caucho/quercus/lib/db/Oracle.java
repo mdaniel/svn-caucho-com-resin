@@ -86,12 +86,10 @@ public class Oracle extends JdbcConnectionResource {
 
       if (host == null || host.equals("")) {
         host = "localhost";
-	_host = host;
       }
 
       if (driver == null || driver.equals("")) {
         driver = "oracle.jdbc.OracleDriver";
-	_driver = driver;
       }
 
       if (url == null || url.equals("")) {
@@ -102,11 +100,9 @@ public class Oracle extends JdbcConnectionResource {
         } else {
           url = "jdbc:oracle:thin:@" + host + ":" + port + ":" + dbname;
         }
-	_url = url;
       }
 
-      Connection jConn = env.getConnection(driver, url, dbname,
-					   userName, password);
+      Connection jConn = env.getConnection(driver, url, userName, password);
 
 
       return jConn;

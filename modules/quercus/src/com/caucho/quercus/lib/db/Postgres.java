@@ -99,21 +99,17 @@ public class Postgres extends JdbcConnectionResource {
 
       if (host == null || host.equals("")) {
         host = "localhost";
-	_host = host;
       }
 
       if (driver == null || driver.equals("")) {
         driver = "org.postgresql.Driver";
-	_driver = driver;
       }
 
       if (url == null || url.equals("")) {
         url = "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
-	_url = url;
       }
 
-      Connection jConn = env.getConnection(driver, url, dbname,
-					   userName, password);
+      Connection jConn = env.getConnection(driver, url, userName, password);
 
       return jConn;
 

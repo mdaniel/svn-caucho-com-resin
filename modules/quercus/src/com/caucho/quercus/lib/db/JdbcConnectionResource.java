@@ -76,8 +76,11 @@ public abstract class JdbcConnectionResource implements Closeable {
   private String _password;
   protected String _driver;
   protected String _url;
-  private int _flags;
-  private String _socket;
+  protected int _flags;
+  protected String _socket;
+
+  private boolean _isCatalogOptimEnabled = false;
+  private boolean _isCloseOnClose = true;
 
   private boolean _isUsed;
   private boolean _isConnected;
@@ -153,15 +156,15 @@ public abstract class JdbcConnectionResource implements Closeable {
    * @param dbname database name
    */
   final protected boolean connectInternal(Env env,
-					  @Optional("localhost") String host,
-					  @Optional String userName,
-					  @Optional String password,
-					  @Optional String dbname,
-					  @Optional int port,
-					  @Optional String socket,
-					  @Optional int flags,
-					  @Optional String driver,
-					  @Optional String url)
+					  String host,
+					  String userName,
+					  String password,
+					  String dbname,
+					  int port,
+					  String socket,
+					  int flags,
+					  String driver,
+					  String url)
   {
     _host = host;
     _userName = userName;
@@ -191,15 +194,15 @@ public abstract class JdbcConnectionResource implements Closeable {
    * Connects to the underlying database.
    */
   protected abstract Connection connectImpl(Env env,
-					    @Optional("localhost") String host,
-					    @Optional String userName,
-					    @Optional String password,
-					    @Optional String dbname,
-					    @Optional int port,
-					    @Optional String socket,
-					    @Optional int flags,
-					    @Optional String driver,
-					    @Optional String url);
+					    String host,
+					    String userName,
+					    String password,
+					    String dbname,
+					    int port,
+					    String socket,
+					    int flags,
+					    String driver,
+					    String url);
 
   /**
    * Escape the given string for SQL statements.
@@ -487,7 +490,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       _isConnected = false;
 
       // php/1418
-      if (! _isUsed) {
+      if (! _isUsed || _isCloseOnClose) {
 	env.removeClose(this);
 	close();
       }
@@ -719,7 +722,7 @@ public abstract class JdbcConnectionResource implements Closeable {
     
     clearErrors();
 
-    if (! _isUsed) {
+    if (! _isUsed && _isCatalogOptimEnabled) {
       // The database is only connected, but not used, reopen with
       // a real catalog
       
