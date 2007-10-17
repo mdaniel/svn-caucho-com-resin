@@ -343,9 +343,9 @@ public final class ReadStream extends InputStream {
   public long skip(long n)
     throws IOException
   {
-    long count = _readLength - _readOffset;
-    
-    if (n < count) {
+    long buffered = getBufferAvailable();
+
+    if (n < buffered) {
       _readOffset += n;
       return n;
     }
@@ -357,24 +357,26 @@ public final class ReadStream extends InputStream {
       if (_sibling != null)
         _sibling.flush();
 
-      long skipped = _source.skip(n - count);
-      
+      long skipped = _source.skip(n - buffered);
+
       if (skipped < 0)
-        return count;
-      else
-        return skipped + count;
+        return buffered;
+      else {
+        _position += skipped + buffered;
+        return skipped + buffered;
+      }
     }
-    
-    while (_readLength < (_readOffset + n - count)) {
-      count += _readLength - _readOffset;
+
+    while (_readLength < (_readOffset + n - buffered)) {
+      buffered += getBufferAvailable();
       _readOffset = 0;
       _readLength = 0;
 
       if (! readBuffer())
-	return count;
+	return buffered;
     }
-    
-    _readOffset += (int) (n - count);
+
+    _readOffset += (int) (n - buffered);
 
     return n;
   }
