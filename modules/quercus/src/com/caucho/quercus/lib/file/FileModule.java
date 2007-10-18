@@ -1314,8 +1314,6 @@ public class FileModule extends AbstractQuercusModule {
 				   @Optional boolean useIncludePath,
 				   @Optional Value context)
   {
-    //System.err.println("FileModule->fopen(): " + filename + " . " + mode);
-    
     if (filename == null) {
       env.warning(L.l("file name must not be null"));
       return null;
@@ -1404,7 +1402,13 @@ public class FileModule extends AbstractQuercusModule {
           return null;
         }
       }
-      else if (mode.startsWith("x") && ! path.exists()) {
+      else if (mode.startsWith("x")) {
+        if (path.exists()) {
+          env.warning(L.l("{0} already exist", filename));
+          
+          return null;
+        }
+        
         if (mode.startsWith("x+"))
           return new FileInputOutput(env, path);
         else 

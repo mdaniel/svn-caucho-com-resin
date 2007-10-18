@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  * Represents a PHP open file
  */
 public class FileInputOutput extends AbstractBinaryOutput
-  implements BinaryInput, BinaryOutput, Closeable
+  implements BinaryInput, BinaryOutput, LockableStream, Closeable
 {
   private static final Logger log
     = Logger.getLogger(FileInputOutput.class.getName());

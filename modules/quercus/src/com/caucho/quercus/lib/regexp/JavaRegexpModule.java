@@ -1658,7 +1658,10 @@ public class JavaRegexpModule
           quote = 0;
         break;
 
+      /* commented out - braces also used for character properties (i.e. \p{L}
+       * php/1534
       case '{':
+
         if (i + 1 < len &&
                 ('0' <= (ch = regexp.charAt(i + 1)) && ch <= '9' || ch == ',')) {
           sb.append("{");
@@ -1680,6 +1683,7 @@ public class JavaRegexpModule
       case '}':
         sb.append("\\}");
         break;
+      */
 
       case '|':
         // php/152o
