@@ -36,6 +36,7 @@ import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.util.IdentityIntMap;
 import com.caucho.util.L10N;
@@ -51,7 +52,10 @@ public class QuercusClass {
   private final L10N L = new L10N(QuercusClass.class);
   private final Logger log = Logger.getLogger(QuercusClass.class.getName());
 
+  private final JavaClassDef _javaClassDef;
   private final ClassDef _classDef;
+
+  private boolean _isJavaWrapper;
   
   private ClassDef []_classDefList;
 
@@ -113,6 +117,13 @@ public class QuercusClass {
     _classDef = classDef;
     _parent = parent;
 
+    JavaClassDef javaClassDef = null;
+
+    if (classDef instanceof JavaClassDef) {
+      javaClassDef = (JavaClassDef) classDef;
+      _isJavaWrapper = true;
+    }
+    
     for (QuercusClass cls = parent; cls != null; cls = cls.getParent()) {
       AbstractFunction cons = cls.getConstructor();
       
@@ -120,7 +131,7 @@ public class QuercusClass {
         addMethod(cls.getName(), cons);
       }
     }
-    
+
     ClassDef []classDefList;
     
     if (_parent != null) {
@@ -134,8 +145,15 @@ public class QuercusClass {
     else {
       classDefList = new ClassDef[] { classDef };
     }
-    
+	  
     _classDefList = classDefList;
+
+    for (int i = 0; i < classDefList.length; i++) {
+      if (classDefList[i] instanceof JavaClassDef)
+	javaClassDef = (JavaClassDef) classDefList[i];
+    }
+    
+    _javaClassDef = javaClassDef;
 
     HashSet<String> ifaces = new HashSet<String>();
 
@@ -457,8 +475,8 @@ public class QuercusClass {
 
   public void init(Env env)
   {
-    for (Map.Entry<String,ArrayList<StaticField>> map :
-         _staticFieldExprMap.entrySet()) {
+    for (Map.Entry<String,ArrayList<StaticField>> map
+	   : _staticFieldExprMap.entrySet()) {
       if (env.isInitializedClass(map.getKey()))
         continue;
       
@@ -506,6 +524,7 @@ public class QuercusClass {
   /**
    * Creates a new instance.
    */
+  /*
   public Value callNew(Env env, Expr []args)
   {
     Value object = _classDef.callNew(env, args);
@@ -523,28 +542,50 @@ public class QuercusClass {
 
     return object;
   }
+  */
 
   /**
    * Creates a new instance.
    */
   public Value callNew(Env env, Value []args)
   {
-    Value object = _classDef.callNew(env, args);
+    if (_classDef.isAbstract()) {
+      throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
+					 _classDef.getName()));
+    }
+    else if (_classDef.isInterface()) {
+      throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
+					 _classDef.getName()));
+    }
 
-    if (object != null)
-      return object;
+    ObjectValue objectValue = null;
+
+    if (_isJavaWrapper) {
+      return _javaClassDef.callNew(env, args);
+    }
+    else if (_javaClassDef != null) {
+      Value javaWrapper = _javaClassDef.callNew(env, new Value[0]);
+      Object object = javaWrapper.toJavaObject();
+      
+      objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
+    }
+    else {
+      objectValue = _classDef.newInstance(env, this);
+    }
+
+    for (int i = 0; i < _initializers.size(); i++) {
+      _initializers.get(i).initInstance(env, objectValue);
+    }
     
-    object = newInstance(env);
-
     AbstractFunction fun = findConstructor();
 
     if (fun != null)
-      fun.callMethod(env, object, args);
+      fun.callMethod(env, objectValue, args);
     else {
       //  if expr
     }
 
-    return object;
+    return objectValue;
   }
 
   /**
@@ -566,20 +607,6 @@ public class QuercusClass {
     }
 
     return false;
-  }
-
-  /**
-   * Creates a new instance.
-   */
-  public ObjectValue newInstance(Env env)
-  {
-    ObjectValue obj = _classDef.newInstance(env, this);
-
-    for (int i = 0; i < _initializers.size(); i++) {
-      _initializers.get(i).initInstance(env, obj);
-    }
-    
-    return obj;
   }
 
   /**

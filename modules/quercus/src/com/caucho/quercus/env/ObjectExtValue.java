@@ -93,7 +93,7 @@ public class ObjectExtValue extends ObjectValue
    * Gets a field value.
    */
   @Override
-  public Value getField(Env env, StringValue name)
+  public final Value getField(Env env, StringValue name)
   {
     int hash = name.hashCode() & _hashMask;
 
@@ -104,7 +104,12 @@ public class ObjectExtValue extends ObjectValue
         return entry._value.toValue();
     }
 
-    return _quercusClass.getField(env, this, name);
+    Value value = getFieldExt(env, name);
+
+    if (value != null)
+      return value;
+    else
+      return _quercusClass.getField(env, this, name);
   }
 
   /**
@@ -122,7 +127,20 @@ public class ObjectExtValue extends ObjectValue
         return entry._value.toValue();
     }
 
-    return UnsetValue.UNSET;
+    Value value = getFieldExt(env, name);
+
+    if (value != null)
+      return value;
+    else
+      return UnsetValue.UNSET;
+  }
+
+  /**
+   * Returns fields not specified by the value.
+   */
+  protected Value getFieldExt(Env env, StringValue name)
+  {
+    return null;
   }
 
   /**
@@ -230,6 +248,11 @@ public class ObjectExtValue extends ObjectValue
     Entry entry = getEntry(name);
 
     if (entry == null) {
+      Value oldValue = putFieldExt(env, name, value);
+
+      if (oldValue != null)
+	return oldValue;
+      
       AbstractFunction setField = _quercusClass.getSetField();
     
       if (setField != null)
@@ -264,9 +287,20 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value putThisField(Env env, StringValue name, Value value)
   {
-    Entry entry = createEntry(name);
+    Entry entry = getEntry(name);
 
-    Value oldValue = entry._value;
+    Value oldValue;
+    
+    if (entry == null) {
+      oldValue = putFieldExt(env, name, value);
+
+      if (oldValue != null)
+	return oldValue;
+    }
+    
+    entry = createEntry(name);
+
+    oldValue = entry._value;
 
     if (value instanceof Var) {
       Var var = (Var) value;
@@ -283,14 +317,21 @@ public class ObjectExtValue extends ObjectValue
 
     return value;
   }
+  
+  protected Value putFieldExt(Env env, StringValue name, Value value)
+  {
+    return null;
+  }
 
   /**
-   * Adds a new value.
+   * Adds a new value to the object.
    */
   @Override
-  public Value initField(Env env, StringValue key, Value value)
+  public void initField(StringValue key, Value value)
   {
-    return putThisField(env, key, value);
+    Entry entry = createEntry(key);
+
+    entry._value = value;
   }
 
   /**

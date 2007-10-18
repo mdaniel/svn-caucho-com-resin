@@ -323,7 +323,8 @@ public class JavaClassDef extends ClassDef {
         return get.call(env, obj);
       } catch (Exception e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
-        return NullValue.NULL;
+	
+        return null;
       }
     }
 
@@ -334,7 +335,8 @@ public class JavaClassDef extends ClassDef {
         return fieldPair._marshal.unmarshal(env, result);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
+	
+        return null;
       }
     }
 
@@ -343,11 +345,12 @@ public class JavaClassDef extends ClassDef {
         return __getField.call(env, obj, name);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
+
+	return null;
       }
     }
 
-    return NullValue.NULL;
+    return null;
   }
 
   public Value putField(Env env,
@@ -362,6 +365,7 @@ public class JavaClassDef extends ClassDef {
         return setter.call(env, obj, value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
+	
         return NullValue.NULL;
       }
     }
@@ -392,7 +396,7 @@ public class JavaClassDef extends ClassDef {
       }
     }
 
-    return NullValue.NULL;
+    return null;
   }
 
   /**
@@ -839,22 +843,7 @@ public class JavaClassDef extends ClassDef {
 	  Class[] delegateClasses = ((Delegates) annotation).value();
 
 	  for (Class cl : delegateClasses) {
-	    boolean isDelegate = false;
-
-	    if (TraversableDelegate.class.isAssignableFrom(cl)) {
-	      _traversableDelegate = (TraversableDelegate) cl.newInstance();
-	      isDelegate = true;
-	    }
-
-	    if (ArrayDelegate.class.isAssignableFrom(cl)) {
-	      _arrayDelegate = (ArrayDelegate) cl.newInstance();
-	      isDelegate = true;
-	    }
-
-	    if (CountDelegate.class.isAssignableFrom(cl)) {
-	      _countDelegate = (CountDelegate) cl.newInstance();
-	      isDelegate = true;
-	    }
+	    boolean isDelegate = addDelegate(cl);
 	  
 	    if (! isDelegate)
 	      throw new IllegalArgumentException(L.l("unknown @Delegate class '{0}'",
@@ -869,6 +858,29 @@ public class JavaClassDef extends ClassDef {
     } catch (Exception e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  private boolean addDelegate(Class cl)
+    throws InstantiationException, IllegalAccessException
+  {
+    boolean isDelegate = false;
+    
+    if (TraversableDelegate.class.isAssignableFrom(cl)) {
+      _traversableDelegate = (TraversableDelegate) cl.newInstance();
+      isDelegate = true;
+    }
+
+    if (ArrayDelegate.class.isAssignableFrom(cl)) {
+      _arrayDelegate = (ArrayDelegate) cl.newInstance();
+      isDelegate = true;
+    }
+
+    if (CountDelegate.class.isAssignableFrom(cl)) {
+      _countDelegate = (CountDelegate) cl.newInstance();
+      isDelegate = true;
+    }
+
+    return isDelegate;
   }
 
   private <T> boolean addDelegate(Class<T> cl,

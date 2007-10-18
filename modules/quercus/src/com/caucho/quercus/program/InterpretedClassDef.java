@@ -248,8 +248,7 @@ public class InterpretedClassDef extends ClassDef
     ObjectValue object = (ObjectValue) value;
     
     for (Map.Entry<StringValue,Expr> entry : _fieldMap.entrySet()) {
-      object.putThisField(env, entry.getKey(),
-			  entry.getValue().eval(env).copy());
+      object.initField(entry.getKey(), entry.getValue().eval(env).copy());
     }
   }
 

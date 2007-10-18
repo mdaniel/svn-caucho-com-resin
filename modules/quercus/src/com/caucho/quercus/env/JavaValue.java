@@ -208,7 +208,12 @@ public class JavaValue
   @Override
   public Value getField(Env env, StringValue name)
   {
-    return _classDef.getField(env, _object, name);
+    Value value = _classDef.getField(env, _object, name);
+
+    if (value != null)
+      return value;
+    else
+      return NullValue.NULL;
   }
 
   /**
@@ -217,7 +222,12 @@ public class JavaValue
   @Override
   public Value putField(Env env, StringValue name, Value value)
   {
-    return _classDef.putField(env, _object, name, value);
+    Value oldValue = _classDef.putField(env, _object, name, value);
+
+    if (oldValue != null)
+      return oldValue;
+    else
+      return NullValue.NULL;
   }
 
   /**
