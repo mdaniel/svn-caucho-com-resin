@@ -1627,6 +1627,17 @@ abstract public class Value implements java.io.Serializable
 
     return new LongValue(lLong >> rLong);
   }
+  
+  /*
+   * Binary xor.
+   */
+  public Value bitxor(Value rValue)
+  {
+    if (rValue.isString())
+      return this;
+    else
+      return LongValue.create(this.toLong() ^ rValue.toLong());
+  }
 
   /**
    * Returns the next array index based on this value.

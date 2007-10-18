@@ -644,6 +644,29 @@ abstract public class StringValue extends Value implements CharSequence {
     return DoubleValue.create(toDouble() - rValue);
   }
   
+  /*
+   * Bit xor.
+   */
+  public Value bitxor(Value rValue)
+  {
+    if (rValue.isString()) {
+      int len = Math.min(length(), rValue.length());
+      
+      StringValue sb = createStringBuilder();
+      
+      for (int i = 0; i < len; i++) {
+        char l = toChar();
+        char r = rValue.toChar();
+        
+        sb.appendByte(l ^ r);
+      }
+
+      return sb;
+    }
+    else
+      return rValue;
+  }
+  
   /**
    * Serializes the value.
    */

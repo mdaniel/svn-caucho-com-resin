@@ -65,10 +65,10 @@ public class BitXorExpr extends BinaryExpr {
    */
   public Value eval(Env env)
   {
-    long lValue = _left.evalLong(env);
-    long rValue = _right.evalLong(env);
+    Value lValue = _left.eval(env);
+    Value rValue = _right.eval(env);
 
-    return new LongValue(lValue ^ rValue);
+    return lValue.bitxor(rValue);
   }
 
   public String toString()
