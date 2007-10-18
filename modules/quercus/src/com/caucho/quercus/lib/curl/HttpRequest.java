@@ -323,7 +323,15 @@ public class HttpRequest
       }
     }
 
-    bb.append(in);
+    int ch;
+    
+    try {
+      while ((ch = in.read()) >= 0) {
+        bb.appendByte(ch);
+      }
+    }
+    catch (IOException e) {
+    }
 
     return bb;
   }
