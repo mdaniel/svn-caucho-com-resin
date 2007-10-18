@@ -12,6 +12,9 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>Quercus: mysql_fetch_assoc should use metaData.getColumnLabel if available (#2080, rep by koreth)</li>
+<li>Quercus: $this->x does not trigger __get and __set (#1965, rep by rjc)</li>
+<li>Quercus: mysql_connect flags were not getting passed to driver (#2075, rep by koreth)</li>
 <li>httpd.sh had wrong path to resin.jar (rep by koyama)</li>
 <li>Quercus: StringStream not return proper utf-8 length for read() (#1903, rep by S Sozonoff)</li>
 <li>Quercus: http_build_query requires arg_separator (#1906, rep by ssozonoff)</li>

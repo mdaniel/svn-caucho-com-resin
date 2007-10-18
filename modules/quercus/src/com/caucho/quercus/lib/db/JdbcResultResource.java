@@ -159,8 +159,14 @@ public class JdbcResultResource {
         if ((type & FETCH_ASSOC) != 0) {
           _columnNames = new Value[count];
 
-          for (int i = 0; i < count; i++)
-            _columnNames[i] = env.createString(_metaData.getColumnName(i + 1));
+          for (int i = 0; i < count; i++) {
+	    String columnName = _metaData.getColumnLabel(i + 1);
+
+	    if (columnName == null)
+	      _metaData.getColumnName(i + 1);
+	    
+            _columnNames[i] = env.createString(columnName);
+	  }
         }
 
         for (int i = 0; i < count; i++) {

@@ -32,12 +32,7 @@ package com.caucho.quercus.parser;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.CallbackFunction;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.*;
 import com.caucho.quercus.program.*;
 import com.caucho.util.CharBuffer;
@@ -2743,7 +2738,7 @@ public class QuercusParser {
         _peekToken = token;
         return term.createFieldGet(_factory,
 				   getLocation(),
-				   createString(name));
+				   createStringValue(name));
       }
 
       ArrayList<Expr> args = new ArrayList<Expr>();
@@ -2764,7 +2759,7 @@ public class QuercusParser {
     else {
       _peekToken = token;
 
-      return term.createFieldGet(_factory, getLocation(), createString(name));
+      return term.createFieldGet(_factory, getLocation(), createStringValue(name));
     }
   }
   
@@ -4325,7 +4320,7 @@ public class QuercusParser {
 		_sb.append((char) ch);
 	      }
 
-	      tail = tail.createFieldGet(_factory, getLocation(), createString(_sb.toString()));
+	      tail = tail.createFieldGet(_factory, getLocation(), createStringValue(_sb.toString()));
 	    }
 	    else {
 	      tail = _factory.createAppend(tail, createString("->"));
@@ -4424,6 +4419,15 @@ public class QuercusParser {
       return _factory.createUnicode(lexeme);
     else
       return _factory.createString(lexeme);
+  }
+
+  private StringValue createStringValue(String lexeme)
+  {
+    // XXX: see QuercusParser.parseDefault for _quercus == null
+    if (_quercus != null && _quercus.isUnicodeSemantics())
+      return new UnicodeBuilderValue(lexeme);
+    else
+      return new StringBuilderValue(lexeme);
   }
 
   private Expr createBinary(byte []bytes)

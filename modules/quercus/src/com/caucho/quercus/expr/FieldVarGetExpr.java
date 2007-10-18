@@ -49,6 +49,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr = objExpr;
     
     _nameExpr = nameExpr;
+    Thread.dumpStack();
   }
 
   public FieldVarGetExpr(Expr objExpr, Expr nameExpr)
@@ -56,6 +57,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr = objExpr;
     
     _nameExpr = nameExpr;
+    Thread.dumpStack();
   }
 
   /**
@@ -112,7 +114,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.evalObject(env);
 
-    obj.putThisField(env, _nameExpr.evalStringValue(env), value);
+    obj.putField(env, _nameExpr.evalStringValue(env), value);
   }
 
   /**
