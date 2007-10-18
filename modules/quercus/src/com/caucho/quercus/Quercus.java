@@ -1556,7 +1556,7 @@ public class Quercus
   }
 
   public static final IniDefinition INI_INCLUDE_PATH
-    = _ini.add("include_path", "", IniDefinition.PHP_INI_ALL);
+    = _ini.add("include_path", ".", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_REGISTER_LONG_ARRAYS
     = _ini.add("register_long_arrays", true, IniDefinition.PHP_INI_PERDIR);
   public static final IniDefinition INI_UNICODE_SEMANTICS

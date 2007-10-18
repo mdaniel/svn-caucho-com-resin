@@ -214,9 +214,10 @@ public class Env {
   private HashMap<String, Object> _specialMap
     = new HashMap<String, Object>();
 
-  private int _iniCount;
+  // include_path ini
+  private int _iniCount = 1;
 
-  private String _prevIncludePath = ".";
+  private String _defaultIncludePath;
   private String _includePath;
   private int _includePathIniCount;
   private ArrayList<String> _includePathList;
@@ -3575,16 +3576,7 @@ public class Env {
 
   private Path lookupInclude(String include, Path pwd, Path scriptPwd)
   {
-    String includePath = _includePath;
-
-    if (_includePathIniCount != _iniCount) {
-      includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
-      _includePath = null;
-      _includePathList = null;
-    }
-
-    if (includePath == null)
-      includePath = ".";
+    String includePath = getDefaultIncludePath();
     
     Path path = _quercus.getIncludeCache(include, includePath, pwd, scriptPwd);
 
@@ -3599,6 +3591,22 @@ public class Env {
     _includePathIniCount = _iniCount;
     
     return path;
+  }
+  
+  private String getDefaultIncludePath()
+  {
+    String includePath = _includePath;
+    
+    if (_includePathIniCount != _iniCount) {
+      includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+      _includePath = null;
+      _includePathList = null;
+    }
+    
+    if (includePath == null)
+      includePath = ".";
+    
+    return includePath;
   }
     
   private Path lookupIncludeImpl(String include, Path pwd, Path scriptPwd)
@@ -3646,16 +3654,7 @@ public class Env {
    */
   private ArrayList<Path> getIncludePath(Path pwd)
   {
-    String includePath = _includePath;
-
-    if (_iniCount != _includePathIniCount) {
-      _includePath = null;
-      _includePathList = null;
-      includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
-    }
-
-    if (includePath == null)
-      includePath = ".";
+    String includePath = getDefaultIncludePath();
 
     if (_includePathList == null) {
       _includePathList = new ArrayList<String>();
@@ -3703,26 +3702,22 @@ public class Env {
    */
   public String setIncludePath(String path)
   {
-    _prevIncludePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+    String prevIncludePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
 
-    if (_prevIncludePath == null)
-      _prevIncludePath = "";
+    if (_defaultIncludePath == null)
+      _defaultIncludePath = prevIncludePath;
 
     Quercus.INI_INCLUDE_PATH.set(this, path);
 
-    return _prevIncludePath;
+    return prevIncludePath;
   }
 
   /**
-   * Restores the previous include path.
+   * Restores the default include path.
    */
   public void restoreIncludePath()
   {
-    String path = Quercus.INI_INCLUDE_PATH.getAsString(this);
-
-    Quercus.INI_INCLUDE_PATH.set(this, _prevIncludePath);
-
-    _prevIncludePath = path;
+    Quercus.INI_INCLUDE_PATH.set(this, _defaultIncludePath);
   }
   
   /**
