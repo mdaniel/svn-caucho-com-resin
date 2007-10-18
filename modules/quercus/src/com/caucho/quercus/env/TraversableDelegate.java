@@ -27,31 +27,28 @@
  * @author Sam
  */
 
-package com.caucho.quercus.lib.spl;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.CountDelegate;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
+import java.util.Map;
+import java.util.Iterator;
 
 /**
- * A delegate that intercepts the global count() function and calls count()
- * method on target objects that implement
- * the {@link com.caucho.quercus.lib.spl.Countable} interface.
+ * A delegate that performs Iterator operations for Quercus objects.
  */
-public class CountableDelegate implements CountDelegate
-{
-  private static final StringValue COUNT_METHOD
-    = new StringBuilderValue("count");
+public interface TraversableDelegate {
+  /**
+   * Returns an iterator over the object's &lt;key,value> entries. 
+   */
+  public Iterator<Map.Entry<Value, Value>>
+    getIterator(Env env, ObjectValue qThis);
   
-  public int count(ObjectValue qThis)
-  {
-    Env env = Env.getInstance();
-    
-    Value count = qThis.callMethod(env, COUNT_METHOD);
+  /**
+   * Returns an iterator over the object's keys
+   */
+  public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis);
 
-    return count.toInt();
-  }
+  /**
+   * Returns an iterator over the object's values.
+   */
+  public Iterator<Value> getValueIterator(Env env, ObjectValue qThis);
 }

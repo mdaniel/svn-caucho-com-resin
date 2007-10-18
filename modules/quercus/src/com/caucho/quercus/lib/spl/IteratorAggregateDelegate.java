@@ -29,9 +29,10 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.env.ArrayDelegate;
+import com.caucho.quercus.env.TraversableDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Value;
 
 import java.util.Iterator;
@@ -42,32 +43,33 @@ import java.util.Map;
  * them to the iteerator returned by {@link IteratorAggregate@getIterator()}
  */
 public class IteratorAggregateDelegate
-  extends ArrayDelegate
+  implements TraversableDelegate
 {
+  private static final StringBuilderValue GET_ITERATOR
+    = new StringBuilderValue("getIterator");
+  
   private final IteratorDelegate _iteratorDelegate = new IteratorDelegate();
 
-  private ObjectValue getTarget(Env env, ObjectValue obj)
+  public Iterator<Map.Entry<Value, Value>>
+    getIterator(Env env, ObjectValue qThis)
   {
-    Value iter = obj.findFunction("getIterator").callMethod(env, obj);
+    return _iteratorDelegate.getIterator(env, getTarget(env, qThis));
+  }
+
+  public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
+  {
+    return _iteratorDelegate.getKeyIterator(env, getTarget(env, qThis));
+  }
+
+  public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
+  {
+    return _iteratorDelegate.getValueIterator(env, getTarget(env, qThis));
+  }
+
+  private ObjectValue getTarget(Env env, ObjectValue qThis)
+  {
+    Value iter = qThis.callMethod(env, GET_ITERATOR, qThis);
 
     return (ObjectValue) iter;
-  }
-
-  @Override
-  public java.util.Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
-  {
-    return _iteratorDelegate.getIterator(env, getTarget(env, obj));
-  }
-
-  @Override
-  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
-  {
-    return _iteratorDelegate.getKeyIterator(env, getTarget(env, obj));
-  }
-
-  @Override
-  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
-  {
-    return _iteratorDelegate.getValueIterator(env, getTarget(env, obj));
   }
 }

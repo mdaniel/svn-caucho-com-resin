@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.env.ArrayDelegate;
+import com.caucho.quercus.env.TraversableDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ObjectValue;
@@ -43,27 +43,22 @@ import java.util.Map;
  * target objects that implement
  * the {@link com.caucho.quercus.lib.spl.Iterator} interface.
  */
-public class IteratorDelegate
-  extends ArrayDelegate
+public class IteratorDelegate implements TraversableDelegate
 {
-  @Override
-  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
+  public Iterator<Map.Entry<Value, Value>>
+    getIterator(Env env, ObjectValue qThis)
   {
-    return new EntryIterator(env, obj);
+    return new EntryIterator(env, qThis);
   }
 
-  @Override
-  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
+  public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
   {
-    env.error("An iterator cannot be used with foreach by reference");
-
-    return null;
+    return new KeyIterator(env, qThis);
   }
 
-  @Override
-  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
+  public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
   {
-    return new ValueIteratorImpl(env, obj);
+    return new ValueIterator(env, qThis);
   }
 
   abstract public static class AbstractIteratorImpl<T>
@@ -174,10 +169,10 @@ public class IteratorDelegate
     }
   }
 
-  public static class KeyIteratorImpl<T>
+  public static class KeyIterator<T>
     extends AbstractIteratorImpl<Value>
   {
-    public KeyIteratorImpl(Env env, ObjectValue obj)
+    public KeyIterator(Env env, ObjectValue obj)
     {
       super(env, obj);
     }
@@ -189,10 +184,10 @@ public class IteratorDelegate
     }
   }
 
-  public static class ValueIteratorImpl<T>
+  public static class ValueIterator<T>
     extends AbstractIteratorImpl<Value>
   {
-    public ValueIteratorImpl(Env env, ObjectValue obj)
+    public ValueIterator(Env env, ObjectValue obj)
     {
       super(env, obj);
     }

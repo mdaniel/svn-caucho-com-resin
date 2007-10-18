@@ -59,11 +59,13 @@ public class QuercusClass {
 
   private AbstractFunction _constructor;
 
-  private AbstractFunction _get;
-  private AbstractFunction _set;
+  private AbstractFunction _getField;
+  private AbstractFunction _setField;
   private AbstractFunction _call;
 
-  private ArrayDelegate _arrayDelegate = new DefaultArrayDelegate();
+  private ArrayDelegate _arrayDelegate;
+  private TraversableDelegate _traversableDelegate;
+  private CountDelegate _countDelegate;
 
   private final ArrayList<InstanceInitializer> _initializers
     = new ArrayList<InstanceInitializer>();
@@ -214,32 +216,79 @@ public class QuercusClass {
   }
   
   /**
-   * Add's a delegate.
+   * Sets the array delegate (see ArrayAccess)
    */
-  public void addArrayDelegate(ArrayDelegate delegate)
+  public void setArrayDelegate(ArrayDelegate delegate)
   {
     if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST, L.l("{0} adding delegate {1}", this,  delegate));
-
-    delegate.init(_arrayDelegate);
+      log.log(Level.FINEST, L.l("{0} adding array delegate {1}",
+				this,  delegate));
 
     _arrayDelegate = delegate;
+  }
+  
+  /**
+   * Gets the array delegate (see ArrayAccess)
+   */
+  public final ArrayDelegate getArrayDelegate()
+  {
+    return _arrayDelegate;
+  }
+  
+  /**
+   * Sets the traversable delegate
+   */
+  public void setTraversableDelegate(TraversableDelegate delegate)
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, L.l("{0} setting traversable delegate {1}",
+				this,  delegate));
+
+    _traversableDelegate = delegate;
+  }
+  
+  /**
+   * Gets the traversable delegate
+   */
+  public final TraversableDelegate getTraversableDelegate()
+  {
+    return _traversableDelegate;
+  }
+  
+  /**
+   * Sets the count delegate
+   */
+  public void setCountDelegate(CountDelegate delegate)
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, L.l("{0} setting count delegate {1}",
+				this,  delegate));
+
+    _countDelegate = delegate;
+  }
+  
+  /**
+   * Gets the count delegate
+   */
+  public final CountDelegate getCountDelegate()
+  {
+    return _countDelegate;
   }
 
   /**
    * Sets the __get
    */
-  public void setGet(AbstractFunction fun)
+  public void setGetField(AbstractFunction fun)
   {
-    _get = fun;
+    _getField = fun;
   }
 
   /**
    * Sets the __set
    */
-  public void setSet(AbstractFunction fun)
+  public void setSetField(AbstractFunction fun)
   {
-    _set = fun;
+    _setField = fun;
   }
 
   /**
@@ -247,7 +296,7 @@ public class QuercusClass {
    */
   public AbstractFunction getSetField()
   {
-    return _set;
+    return _setField;
   }
 
   /**
@@ -541,65 +590,6 @@ public class QuercusClass {
     return _constructor;
   }
 
-
-  //
-  // Array
-  //
-
-  public int getCount(Env env, ObjectValue obj)
-  {
-    return _arrayDelegate.getCount(env, obj);
-  }
-
-  public int getCountRecursive(Env env, ObjectValue obj)
-  {
-    return _arrayDelegate.getCountRecursive(env, obj);
-  }
-
-  /**
-   * Returns the key => value pairs, or null for default behaviour.
-   */
-  public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
-  {
-    return _arrayDelegate.getIterator(env, obj);
-  }
-
-  /**
-   * Returns the array keys, or null for default behaviour.
-   */
-  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
-  {
-    return _arrayDelegate.getKeyIterator(env, obj);
-  }
-
-  /**
-   * Returns the array values, or null for default behaviour.
-   */
-  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
-  {
-    return _arrayDelegate.getValueIterator(env, obj);
-  }
-
-  public Value get(Env env, ObjectValue obj, Value key)
-  {
-    return _arrayDelegate.get(env, obj, key);
-  }
-
-  public Value put(Env env, ObjectValue obj, Value key, Value value)
-  {
-    return _arrayDelegate.put(env, obj, key, value);
-  }
-
-  public Value put(Env env, ObjectValue obj, Value value)
-  {
-    return _arrayDelegate.put(env, obj, value);
-  }
-
-  public Value remove(Env env, ObjectValue obj, Value key)
-  {
-    return _arrayDelegate.remove(env, obj, key);
-  }
-
   //
   // Fields
   //
@@ -609,8 +599,8 @@ public class QuercusClass {
    */
   public Value getField(Env env, Value qThis, StringValue name)
   {
-    if (_get != null)
-      return _get.callMethod(env, qThis, name);
+    if (_getField != null)
+      return _getField.callMethod(env, qThis, name);
     else
       return UnsetValue.UNSET;
   }
@@ -620,8 +610,8 @@ public class QuercusClass {
    */
   public void setField(Env env, Value qThis, StringValue name, Value value)
   {
-    if (_set != null)
-      _set.callMethod(env, qThis, name, value);
+    if (_setField != null)
+      _setField.callMethod(env, qThis, name, value);
   }
 
   /**
@@ -1126,82 +1116,6 @@ public class QuercusClass {
     {
       _name = name;
       _expr = expr;
-    }
-  }
-
-  /**
-   * Default implementations for delegated methods.
-   */
-  public class DefaultArrayDelegate
-    extends ArrayDelegate
-  {
-    @Override
-    public int getCount(Env env, ObjectValue obj)
-    {
-      return 1;
-    }
-
-    @Override
-    public int getCountRecursive(Env env, ObjectValue obj)
-    {
-      return getCount(env, obj);
-    }
-
-    private Value arrayerror(Env env, ObjectValue obj)
-    {
-      String name = obj.getName();
-
-      env.error(env.getLocation(), L.l("Can't use object '{0}' as array", name));
-
-      return UnsetValue.UNSET;
-    }
-
-    @Override
-    public Value get(Env env, ObjectValue obj, Value offset)
-    {
-      return arrayerror(env, obj);
-    }
-
-    @Override
-    public Value put(Env env, ObjectValue obj, Value value)
-    {
-      return arrayerror(env, obj);
-    }
-
-    @Override
-    public Value put(Env env, ObjectValue obj, Value offset, Value value)
-    {
-      return arrayerror(env, obj);
-    }
-
-    @Override
-    public Value remove(Env env, ObjectValue obj, Value offset)
-    {
-      return arrayerror(env, obj);
-    }
-
-    @Override
-    public Iterator<Map.Entry<Value, Value>> getIterator(Env env, ObjectValue obj)
-    {
-      return null;
-    }
-
-    @Override
-    public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
-    {
-      return null;
-    }
-
-    @Override
-    public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
-    {
-      return null;
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + QuercusClass.this.getName() + "]";
     }
   }
 }

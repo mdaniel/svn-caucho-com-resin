@@ -103,8 +103,9 @@ public class JavaClassDef extends ClassDef {
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
 
-  private ArrayList<ArrayDelegate> _arrayDelegates
-    = new ArrayList<ArrayDelegate>();
+  private ArrayDelegate _arrayDelegate;
+  private TraversableDelegate _traversableDelegate;
+  private CountDelegate _countDelegate;
 
   private AbstractJavaMethod _cons;
 
@@ -124,8 +125,6 @@ public class JavaClassDef extends ClassDef {
     _isAbstract = Modifier.isAbstract(type.getModifiers());
     _isArray = type.isArray();
     _isInterface = type.isInterface();
-
-    _arrayDelegates.add(new DefaultArrayDelegate());
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
@@ -679,18 +678,24 @@ public class JavaClassDef extends ClassDef {
       cl.addMethod("__construct", _cons);
     }
 
-    if (__get != null)
-      cl.setGet(__get);
-
     for (AbstractJavaMethod value : _functionMap.values()) {
       cl.addMethod(value.getName(), value);
     }
 
+    if (__getField != null)
+      cl.setGetField(__getField);
+
+    if (__setField != null)
+      cl.setSetField(__setField);
+
     if (__call != null)
       cl.setCall(__call);
 
-    for (ArrayDelegate delegate : _arrayDelegates)
-      cl.addArrayDelegate(delegate);
+    if (_arrayDelegate != null)
+      cl.setArrayDelegate(_arrayDelegate);
+
+    if (_traversableDelegate != null)
+      cl.setTraversableDelegate(_traversableDelegate);
 
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
@@ -817,29 +822,52 @@ public class JavaClassDef extends ClassDef {
 
   private void introspectAnnotations(Class type)
   {
-    if (type == null || type == Object.class)
-      return;
+    try {
+      if (type == null || type == Object.class)
+	return;
 
-    // interfaces
-    for (Class<?> iface : type.getInterfaces())
-      introspectAnnotations(iface);
+      // interfaces
+      for (Class<?> iface : type.getInterfaces())
+	introspectAnnotations(iface);
 
-    // super-class
-    introspectAnnotations(type.getSuperclass());
+      // super-class
+      introspectAnnotations(type.getSuperclass());
 
-    // this
-    for (Annotation annotation : type.getAnnotations()) {
-      if (annotation.annotationType() == Delegates.class) {
-        Class<? extends Object>[] delegateClasses = ((Delegates) annotation).value();
+      // this
+      for (Annotation annotation : type.getAnnotations()) {
+	if (annotation.annotationType() == Delegates.class) {
+	  Class[] delegateClasses = ((Delegates) annotation).value();
 
-        for (Class<? extends Object> delegateClass : delegateClasses) {
-          if (addDelegate(ArrayDelegate.class, _arrayDelegates, delegateClass)) {
-          }
-          else
-            throw new IllegalArgumentException(L.l("unknown @Delegate class '{0}'",
-                                                   delegateClass));
-        }
+	  for (Class cl : delegateClasses) {
+	    boolean isDelegate = false;
+
+	    if (TraversableDelegate.class.isAssignableFrom(cl)) {
+	      _traversableDelegate = (TraversableDelegate) cl.newInstance();
+	      isDelegate = true;
+	    }
+
+	    if (ArrayDelegate.class.isAssignableFrom(cl)) {
+	      _arrayDelegate = (ArrayDelegate) cl.newInstance();
+	      isDelegate = true;
+	    }
+
+	    if (CountDelegate.class.isAssignableFrom(cl)) {
+	      _countDelegate = (CountDelegate) cl.newInstance();
+	      isDelegate = true;
+	    }
+	  
+	    if (! isDelegate)
+	      throw new IllegalArgumentException(L.l("unknown @Delegate class '{0}'",
+						     cl));
+	  }
+	}
       }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (InstantiationException e) {
+      throw new QuercusModuleException(e.getCause());
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
     }
   }
 
@@ -1263,181 +1291,5 @@ public class JavaClassDef extends ClassDef {
       return new JavaURLValue(env, (URL)obj, this);
     }
   }
-
-  public class DefaultArrayDelegate
-    extends ArrayDelegate
-  {
-    @Override
-    public Iterator<Map.Entry<Value,Value>> getIterator(Env env, ObjectValue obj)
-    {
-      Iterator<Map.Entry<Value,Value>> iter = super.getIterator(env, obj);
-
-      if (iter == null && _keySetMethod != null)
-        iter = new EntryIterator(env, obj, _keySetMethod);
-
-      return iter;
-    }
-
-    @Override
-    public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
-    {
-      Iterator<Value> iter = super.getKeyIterator(env, obj);
-
-      if (iter == null && _keySetMethod != null)
-        iter = new KeyIterator(env, obj, _keySetMethod);
-
-      return iter;
-    }
-
-    @Override
-    public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
-    {
-      Iterator<Value> iter = super.getKeyIterator(env, obj);
-
-      if (iter == null && _iteratorMethod != null)
-        iter = new ValueIterator(env, obj, _iteratorMethod);
-
-      return iter;
-    }
-
-    @Override
-    public Value get(Env env, ObjectValue obj, Value name)
-    {
-      if (__get != null) {
-        try {
-          //__get needs to handle a Value $foo[5] vs. $foo['bar']
-          return __get.call(env, obj.toJavaObject(), name);
-        } catch (Throwable e) {
-          log.log(Level.FINE,  L.l(e.getMessage()), e);
-          return NullValue.NULL;
-        }
-      }
-
-      return NullValue.NULL;
-    }
-
-    @Override
-    public Value put(Env env,
-                     ObjectValue obj,
-                     Value name,
-                     Value value)
-    {
-      if (__set != null) {
-        try {
-          return __set.call(env, obj.toJavaObject(), name, value);
-        } catch (Throwable e) {
-          log.log(Level.FINE,  L.l(e.getMessage()), e);
-          return NullValue.NULL;
-
-        }
-      }
-
-      return NullValue.NULL;
-    }
-  }
-
-  public static class EntryIterator
-    implements Iterator<Map.Entry<Value, Value>>
-  {
-    private final Value _obj;
-
-    private final KeyIterator _keyIterator;
-
-    private EntryIterator(Env env, ObjectValue obj, Method keySetMethod)
-    {
-      _obj = obj;
-
-      _keyIterator = new KeyIterator(env, obj, keySetMethod);
-    }
-
-    public boolean hasNext()
-    {
-      return _keyIterator.hasNext();
-    }
-
-    public Map.Entry<Value, Value> next()
-    {
-      final Value key = _keyIterator.next();
-      final Value value = _obj.get(key);
-
-      return new Map.Entry<Value, Value>() {
-        public Value getKey() { return key; }
-        public Value getValue() { return value; }
-        public Value setValue(Value value) { throw new UnsupportedOperationException(); }
-      };
-    }
-
-    public void remove()
-    {
-      _keyIterator.remove();
-    }
-  }
-
-  public static class KeyIterator
-    implements Iterator<Value>
-  {
-    private final Env _env;
-    private final Iterator<?> _iterator;
-
-    private KeyIterator(Env env, ObjectValue obj, Method keySetMethod)
-    {
-      _env = env;
-
-      try {
-        _iterator = ((Set<?>) keySetMethod.invoke(obj.toJavaObject())).iterator();
-      } catch (Throwable e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    public boolean hasNext()
-    {
-      return _iterator.hasNext();
-    }
-
-    public Value next()
-    {
-      return _env.wrapJava(_iterator.next());
-    }
-
-    public void remove()
-    {
-      _iterator.remove();
-    }
-  }
-
-  public static class ValueIterator
-    implements Iterator<Value>
-  {
-    private final Env _env;
-    private final Iterator<?> _iterator;
-
-    private ValueIterator(Env env, ObjectValue obj, Method iteratorMethod)
-    {
-      _env = env;
-
-      try {
-        _iterator = ((Iterator<?>) iteratorMethod.invoke(obj.toJavaObject()));
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    public boolean hasNext()
-    {
-      return _iterator.hasNext();
-    }
-
-    public Value next()
-    {
-      return _env.wrapJava(_iterator.next());
-    }
-
-    public void remove()
-    {
-      _iterator.remove();
-    }
-  }
-
 }
 

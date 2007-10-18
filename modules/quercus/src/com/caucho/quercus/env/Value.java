@@ -1754,14 +1754,6 @@ abstract public class Value implements java.io.Serializable
   {
     return UnsetValue.UNSET;
   }
-  
-  /**
-   * Returns the array ref.
-   */
-  public Value get(Env env, Location location, Value index)
-  {
-    return get(index);
-  }
 
   /**
    * Returns a reference to the array value.

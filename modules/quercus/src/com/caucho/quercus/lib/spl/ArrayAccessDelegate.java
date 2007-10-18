@@ -36,7 +36,7 @@ import com.caucho.quercus.env.*;
  * target objects that implement
  * the {@link com.caucho.quercus.lib.spl.ArrayAccess} interface.
  */
-public class ArrayAccessDelegate
+public class ArrayAccessDelegate implements ArrayDelegate
 {
   private static final StringValue OFFSET_GET
     = new StringBuilderValue("offsetGet");
@@ -45,23 +45,31 @@ public class ArrayAccessDelegate
   private static final StringValue OFFSET_UNSET
     = new StringBuilderValue("offsetUnset");
   
-  public static Value get(Env env, Value obj, Value index)
+  public Value get(ObjectValue qThis, Value index)
   {
-    return obj.callMethod(env, OFFSET_GET, index);
+    Env env = Env.getInstance();
+    
+    return qThis.callMethod(env, OFFSET_GET, index);
   }
 
-  public static Value put(Env env, Value obj, Value index, Value value)
+  public Value put(ObjectValue qThis, Value index, Value value)
   {
-    return obj.callMethod(env, OFFSET_SET, index, value);
+    Env env = Env.getInstance();
+    
+    return qThis.callMethod(env, OFFSET_SET, index, value);
   }
 
-  public static Value put(Env env, Value obj, Value index)
+  public Value put(ObjectValue qThis, Value index)
   {
-    return obj.callMethod(env, OFFSET_SET, UnsetValue.UNSET, index);
+    Env env = Env.getInstance();
+    
+    return qThis.callMethod(env, OFFSET_SET, UnsetValue.UNSET, index);
   }
 
-  public static Value unset(Env env, Value obj, Value index)
+  public Value unset(ObjectValue qThis, Value index)
   {
-    return obj.callMethod(env, OFFSET_UNSET, index);
+    Env env = Env.getInstance();
+    
+    return qThis.callMethod(env, OFFSET_UNSET, index);
   }
 }

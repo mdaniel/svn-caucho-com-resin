@@ -369,16 +369,85 @@ public class ObjectExtValue extends ObjectValue
     return newEntry;
   }
 
+  //
+  // array methods
+  //
+
+  /**
+   * Returns the array value with the given key.
+   */
+  @Override
+  public Value get(Value key)
+  {
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+      
+    // php/066q vs. php/0906
+    //return getField(null, key.toString());
+
+    if (delegate != null)
+      return delegate.get(this, key);
+    else
+      return super.get(key);
+  }
+
+  /**
+   * Sets the array value with the given key.
+   */
+  @Override
+  public Value put(Value key, Value value)
+  {
+    // php/0d94
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.put(this, key, value);
+    else
+      return super.put(key, value);
+  }
+
+  /**
+   * Appends a new array value
+   */
+  @Override
+  public Value put(Value value)
+  {
+    // php/0d94
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.put(this, value);
+    else
+      return super.put(value);
+  }
+
+  /**
+   * Unsets the array value
+   */
+  @Override
+  public Value remove(Value key)
+  {
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.unset(this, key);
+    else
+      return super.remove(key);
+  }
+
+  //
+  // Foreach/Traversable functions
+  //
+
   /**
    * Returns an iterator for the key => value pairs.
    */
   @Override
   public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
   {
-    Iterator<Map.Entry<Value, Value>> iter =  super.getIterator(env);
+    TraversableDelegate delegate = _quercusClass.getTraversableDelegate();
 
-    if (iter != null)
-      return iter;
+    if (delegate != null)
+      return delegate.getIterator(env, this);
 
     return new EntryIterator(_entries);
   }
@@ -389,10 +458,10 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Iterator<Value> getKeyIterator(Env env)
   {
-    Iterator<Value> iter =  super.getKeyIterator(env);
+    TraversableDelegate delegate = _quercusClass.getTraversableDelegate();
 
-    if (iter != null)
-      return iter;
+    if (delegate != null)
+      return delegate.getKeyIterator(env, this);
 
     return new KeyIterator(_entries);
   }
@@ -403,10 +472,10 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Iterator<Value> getValueIterator(Env env)
   {
-    Iterator<Value> iter = super.getValueIterator(env);
+    TraversableDelegate delegate = _quercusClass.getTraversableDelegate();
 
-    if (iter != null)
-      return iter;
+    if (delegate != null)
+      return delegate.getValueIterator(env, this);
 
     return new ValueIterator(_entries);
   }

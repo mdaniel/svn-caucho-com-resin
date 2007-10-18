@@ -35,89 +35,24 @@ import java.util.Iterator;
 /**
  * A delegate that performs Array operations for Quercus objects.
  */
-abstract public class ArrayDelegate {
-  private ArrayDelegate _next;
-
-  public ArrayDelegate()
-  {
-  }
-
-  public void init(ArrayDelegate next)
-  {
-    _next = next;
-  }
-
+public interface ArrayDelegate {
   /**
    * Returns the value for the specified key.
    */
-  public Value get(Env env, ObjectValue obj, Value key)
-  {
-    return _next.get(env, obj, key);
-  }
-
-  /**
-   * Returns the key => value pairs.
-   */
-  public Iterator<Map.Entry<Value,Value>> getIterator(Env env, ObjectValue obj)
-  {
-    return _next.getIterator(env, obj);
-  }
-
-  /**
-   * Returns the keys.
-   */
-  public Iterator<Value> getKeyIterator(Env env, ObjectValue obj)
-  {
-    return _next.getKeyIterator(env, obj);
-  }
-
-  /**
-   * Returns the values.
-   * A return value of null causes the object to use it's default behaviour
-   * for iteration.
-   */
-  public Iterator<Value> getValueIterator(Env env, ObjectValue obj)
-  {
-    return _next.getValueIterator(env, obj);
-  }
-
-  /**
-   * Returns the value for the count() function.
-   */
-  public int getCount(Env env, ObjectValue obj)
-  {
-    return _next.getCount(env, obj);
-  }
-
-  /**
-   * Returns the value for the count() function.
-   */
-  public int getCountRecursive(Env env, ObjectValue obj)
-  {
-    return _next.getCountRecursive(env, obj);
-  }
+  public Value get(ObjectValue obj, Value key);
 
   /**
    * Sets the value for the spoecified key.
    */
-  public Value put(Env env, ObjectValue obj, Value key, Value value)
-  {
-    return _next.put(env, obj, key, value);
-  }
+  public Value put(ObjectValue obj, Value key, Value value);
 
   /**
    * Appends a value.
    */
-  public Value put(Env env, ObjectValue obj, Value value)
-  {
-    return _next.put(env, obj, value);
-  }
+  public Value put(ObjectValue obj, Value value);
 
   /**
    * Removes the value at the speified key.
    */
-  public Value remove(Env env, ObjectValue obj, Value key)
-  {
-    return _next.remove(env, obj, key);
-  }
+  public Value unset(ObjectValue obj, Value key);
 }
