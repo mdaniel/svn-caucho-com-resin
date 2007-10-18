@@ -30,6 +30,7 @@
 package com.caucho.quercus.script;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.QuercusPage;
@@ -101,8 +102,18 @@ public class QuercusScriptEngine
 
       env.setScriptContext(cxt);
 
-      Object value = program.execute(env).toJavaObject();
-
+      // php/214c
+      env.start();
+      
+      Object value = null;
+      
+      try {
+        value = program.execute(env).toJavaObject();
+      }
+      catch (QuercusExitException e) {
+        //php/2148
+      }
+        
       out.flushBuffer();
       out.free();
 
