@@ -407,9 +407,7 @@ public class FileInputOutput extends AbstractBinaryOutput
    */
   public boolean setPosition(long offset)
   {
-    _stream.seek(offset);
-
-    return true;
+    return _stream.seek(offset);
   }
 
   public long seek(long offset, int whence)

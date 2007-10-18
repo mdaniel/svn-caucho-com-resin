@@ -41,12 +41,15 @@ public interface BinaryStream {
   public void close();
 
   /**
-   * Tells the position in the stream
+   * Tells the position in the stream.
+   * The valid range for a stream position is 0 to Long.MAX_VALUE,
+   * so a negative number can't be a valid stream position.
    */
   public long getPosition();
 
   /**
-   * Sets the position.
+   * Sets the current position in the stream.
+   * Returns true on success, false otherwise.
    */
   public boolean setPosition(long offset);
 

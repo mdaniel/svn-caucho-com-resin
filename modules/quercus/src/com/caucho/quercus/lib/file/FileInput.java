@@ -94,21 +94,25 @@ public class FileInput extends ReadStreamInput implements LockableStream {
 
   public long seek(long offset, int whence)
   {
+    long position;
+
     switch (whence) {
       case BinaryInput.SEEK_CUR:
-        offset = getPosition() + offset;
+        position = getPosition() + offset;
         break;
       case BinaryInput.SEEK_END:
-        offset = getLength() + offset;
+        position = getLength() + offset;
         break;
-      case SEEK_SET:
+      case BinaryInput.SEEK_SET:
       default:
+        position = offset;
         break;
     }
 
-    setPosition(offset);
-
-    return offset;
+    if (! setPosition(position))
+      return -1L;
+    else
+      return position;
   }
 
   /**

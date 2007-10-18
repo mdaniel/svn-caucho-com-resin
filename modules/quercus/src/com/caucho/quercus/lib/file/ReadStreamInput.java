@@ -259,9 +259,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
       return false;
 
     try {
-      _is.setPosition(offset);
-
-      return true;
+      return _is.setPosition(offset);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -269,23 +267,26 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
 
   public long seek(long offset, int whence)
   {
+    long position;
+
     switch (whence) {
       case BinaryInput.SEEK_CUR:
-        offset = getPosition() + offset;
+        position = getPosition() + offset;
         break;
       case BinaryInput.SEEK_END:
         // don't necessarily have an end
-        offset = getPosition();
+        position = getPosition();
         break;
-      case SEEK_SET:
-        break;
+      case BinaryInput.SEEK_SET:
       default:
+        position = offset;
         break;
     }
 
-    setPosition(offset);
-
-    return offset;
+    if (! setPosition(position))
+      return -1L;
+    else
+      return position;
   }
 
   public Value stat()

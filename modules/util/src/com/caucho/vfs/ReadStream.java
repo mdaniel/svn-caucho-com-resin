@@ -224,7 +224,12 @@ public final class ReadStream extends InputStream {
     if (_readEncoding != null)
       _readEncoding = Encoding.getReadEncoding(this, _readEncodingName);
 
-    if (pos < getPosition()) {
+    if (pos < 0) {
+      // Return error on seek to negative stream position
+
+      return false;
+    }
+    else if (pos < getPosition()) {
       // Seek backwards in the stream
 
       _position = pos;
