@@ -1629,9 +1629,31 @@ abstract public class Value implements java.io.Serializable
   }
   
   /*
+   * Binary or.
+   */
+  public Value bitAnd(Value rValue)
+  {
+    if (rValue.isString())
+      return LongValue.ZERO;
+    else
+      return LongValue.create(this.toLong() & rValue.toLong());
+  }
+  
+  /*
+   * Binary or.
+   */
+  public Value bitOr(Value rValue)
+  {
+    if (rValue.isString())
+      return this;
+    else
+      return LongValue.create(this.toLong() | rValue.toLong());
+  }
+  
+  /*
    * Binary xor.
    */
-  public Value bitxor(Value rValue)
+  public Value bitXor(Value rValue)
   {
     if (rValue.isString())
       return this;

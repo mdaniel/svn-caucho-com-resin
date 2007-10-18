@@ -645,18 +645,75 @@ abstract public class StringValue extends Value implements CharSequence {
   }
   
   /*
-   * Bit xor.
+   * Bit and.
    */
-  public Value bitxor(Value rValue)
+  @Override
+  public Value bitAnd(Value rValue)
   {
     if (rValue.isString()) {
-      int len = Math.min(length(), rValue.length());
+      StringValue rStr = (StringValue) rValue;
       
+      int len = Math.min(length(), rValue.length());
       StringValue sb = createStringBuilder();
       
       for (int i = 0; i < len; i++) {
-        char l = toChar();
-        char r = rValue.toChar();
+        char l = charAt(i);
+        char r = rStr.charAt(i);
+        
+        sb.appendByte(l & r);
+      }
+
+      return sb;
+    }
+    else
+      return LongValue.ZERO;
+  }
+  
+  /*
+   * Bit or.
+   */
+  @Override
+  public Value bitOr(Value rValue)
+  {
+    if (rValue.isString()) {
+      StringValue rStr = (StringValue) rValue;
+      
+      int len = Math.min(length(), rValue.length());
+      StringValue sb = createStringBuilder();
+      
+      for (int i = 0; i < len; i++) {
+        char l = charAt(i);
+        char r = rStr.charAt(i);
+        
+        sb.appendByte(l | r);
+      }
+     
+      if (len != length())
+        sb.append(substring(len));
+      else if (len != rStr.length())
+        sb.append(rStr.substring(len));
+
+      return sb;
+    }
+    else
+      return rValue;
+  }
+  
+  /*
+   * Bit xor.
+   */
+  @Override
+  public Value bitXor(Value rValue)
+  {
+    if (rValue.isString()) {
+      StringValue rStr = (StringValue) rValue;
+      
+      int len = Math.min(length(), rValue.length());
+      StringValue sb = createStringBuilder();
+      
+      for (int i = 0; i < len; i++) {
+        char l = charAt(i);
+        char r = rStr.charAt(i);
         
         sb.appendByte(l ^ r);
       }
