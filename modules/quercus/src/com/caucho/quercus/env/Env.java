@@ -695,9 +695,9 @@ public class Env {
 
     Connection conn;
     
-    if (oldEntry != null && ! oldEntry.getConnection().isClosed())
-      conn = oldEntry.getConnection();
-    else {
+    if (oldEntry == null
+	|| (conn = oldEntry.getConnection()) == null
+	|| conn.isClosed()) {
       if (userName == null || userName.equals(""))
 	conn = database.getConnection();
       else
