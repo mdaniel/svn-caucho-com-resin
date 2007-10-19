@@ -564,7 +564,7 @@ public class OutputModule extends AbstractQuercusModule
       result.append(ptr.getBuffer(), 0, ptr.getLength());
     }
 
-    pair.tempStream.discard();
+    pair.tempStream.clearWrite();
 
     return result;
   }

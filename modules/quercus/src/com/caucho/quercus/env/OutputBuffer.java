@@ -213,55 +213,6 @@ public class OutputBuffer {
   }
 
   /**
-   * Flushes the data without calling the callback.
-   */
-  private void doFlush()
-  {
-    try {
-      _out.flush();
-
-      WriteStream out;
-
-      if (_next != null)
-        out = _next.getOut();
-      else
-        out = _env.getOriginalOut();
-
-      _tempStream.writeToStream(out);
-
-      _tempStream.clearWrite();
-    } catch (IOException e) {
-      _env.error(e.toString(), e);
-    }
-  }
-
-  /**
-   * Invokes the callback using the data in the current buffer.
-   */
-  private void callCallback()
-  {
-    if (_callback != null) {
-      Value result = 
-        _callback.call(_env, getContents(), LongValue.create(_state));
-
-      // special code to do nothing to the buffer
-      if (result == BooleanValue.FALSE)
-        return;
-
-      clean();
-
-      try {
-        if (result instanceof BytesValue)
-          _out.write(((BytesValue) result).toBytes());
-        else
-          _out.print(result.toString(_env).toString());
-      } catch (IOException e) {
-        _env.error(e.toString(), e);
-      }
-    }
-  }
-
-  /**
    * Flushs the data in the stream, calling the callback with appropriate
    * flags if necessary.
    */
@@ -269,14 +220,13 @@ public class OutputBuffer {
   {
     _state |= 1 << PHP_OUTPUT_HANDLER_CONT;
 
-    callCallback();
-
-    // clear the start and cont flags
+    if (! callCallback()) {
+      // clear the start and cont flags
+      doFlush();
+    }
+    
     _state &= ~(1 << PHP_OUTPUT_HANDLER_START);
     _state &= ~(1 << PHP_OUTPUT_HANDLER_CONT);
-
-    doFlush();
-
     _haveFlushed = true;
   }
 
@@ -287,12 +237,12 @@ public class OutputBuffer {
   {
     _state |= 1 << PHP_OUTPUT_HANDLER_END;
 
-    callCallback();
-    
-    // all data that has and ever will be written has now been processed
-    _state = 0; 
+    if (! callCallback()) {
+      // all data that has and ever will be written has now been processed
+      _state = 0; 
 
-    doFlush();
+      doFlush();
+    }
 
     WriteStream out = _out;
     _out = null;
@@ -309,6 +259,56 @@ public class OutputBuffer {
 
     if (tempStream != null)
       tempStream.destroy();
+  }
+
+  /**
+   * Invokes the callback using the data in the current buffer.
+   */
+  private boolean callCallback()
+  {
+    if (_callback == null)
+      return false;
+
+    Value result = 
+      _callback.call(_env, getContents(), LongValue.create(_state));
+
+    // special code to do nothing to the buffer
+    if (result.toValue() != BooleanValue.FALSE) {
+      // php/1l11, php/1l13
+      clean();
+
+      result.print(_env, getNextOut());
+
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Flushes the data without calling the callback.
+   */
+  private void doFlush()
+  {
+    try {
+      _out.flush();
+
+      WriteStream out = getNextOut();
+
+      _tempStream.writeToStream(out);
+
+      _tempStream.clearWrite();
+    } catch (IOException e) {
+      _env.error(e.toString(), e);
+    }
+  }
+
+  private WriteStream getNextOut()
+  {
+    if (_next != null)
+      return _next.getOut();
+    else
+      return _env.getOriginalOut();
   }
 
   /**

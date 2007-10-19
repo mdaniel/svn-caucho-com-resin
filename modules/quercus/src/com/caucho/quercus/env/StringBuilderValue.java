@@ -1122,6 +1122,19 @@ public class StringBuilderValue
   }
 
   /**
+   * Prints the value.
+   * @param env
+   */
+  public void print(Env env, WriteStream out)
+  {
+    try {
+      out.print(_buffer, 0, _length);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  /**
    * Serializes the value.
    */
   public void serialize(StringBuilder sb)

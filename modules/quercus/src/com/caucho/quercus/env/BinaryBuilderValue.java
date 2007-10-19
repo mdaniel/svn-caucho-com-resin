@@ -915,6 +915,19 @@ public class BinaryBuilderValue
   }
 
   /**
+   * Prints the value.
+   * @param env
+   */
+  public void print(Env env, WriteStream out)
+  {
+    try {
+      out.write(_buffer, 0, _length);
+    } catch (IOException e) {
+      throw new QuercusRuntimeException(e);
+    }
+  }
+
+  /**
    * Serializes the value.
    */
   public void serialize(StringBuilder sb)

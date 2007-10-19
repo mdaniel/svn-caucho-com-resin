@@ -2140,6 +2140,19 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Prints the value.
+   * @param env
+   */
+  public void print(Env env, WriteStream out)
+  {
+    try {
+      out.print(toString(env));
+    } catch (IOException e) {
+      throw new QuercusRuntimeException(e);
+    }
+  }
+
+  /**
    * Serializes the value.
    */
   public void serialize(StringBuilder sb)

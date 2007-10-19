@@ -1418,6 +1418,16 @@ public class Var extends Value
   }
 
   /**
+   * Prints the value.
+   * @param env
+   */
+  @Override
+  public void print(Env env, WriteStream out)
+  {
+    _value.print(env, out);
+  }
+
+  /**
    * Serializes the value.
    */
   @Override
