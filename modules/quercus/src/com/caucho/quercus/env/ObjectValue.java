@@ -146,6 +146,152 @@ abstract public class ObjectValue extends Value {
   }
 
   //
+  // array delegate methods
+  //
+
+  /**
+   * Returns the array value with the given key.
+   */
+  @Override
+  public Value get(Value key)
+  {
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+      
+    // php/066q vs. php/0906
+    //return getField(null, key.toString());
+
+    if (delegate != null)
+      return delegate.get(this, key);
+    else
+      return super.get(key);
+  }
+
+  /**
+   * Sets the array value with the given key.
+   */
+  @Override
+  public Value put(Value key, Value value)
+  {
+    // php/0d94
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.put(this, key, value);
+    else
+      return super.put(key, value);
+  }
+
+  /**
+   * Appends a new array value
+   */
+  @Override
+  public Value put(Value value)
+  {
+    // php/0d94
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.put(this, value);
+    else
+      return super.put(value);
+  }
+
+  /**
+   * Return true if set
+   */
+  @Override
+  public boolean isset(Value key)
+  {
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.isset(this, key);
+    else
+      return super.isset(key);
+  }
+
+  /**
+   * Unsets the array value
+   */
+  @Override
+  public Value remove(Value key)
+  {
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.unset(this, key);
+    else
+      return super.remove(key);
+  }
+
+  //
+  // Foreach/Traversable functions
+  //
+
+  /**
+   * Returns an iterator for the key => value pairs.
+   */
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
+  {
+    TraversableDelegate delegate = _quercusClass.getTraversableDelegate();
+
+    if (delegate != null)
+      return delegate.getIterator(env, this);
+    else
+      return super.getIterator(env);
+  }
+
+  /**
+   * Returns an iterator for the keys.
+   */
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
+  {
+    TraversableDelegate delegate = _quercusClass.getTraversableDelegate();
+
+    if (delegate != null)
+      return delegate.getKeyIterator(env, this);
+    else
+      return super.getKeyIterator(env);
+  }
+
+  /**
+   * Returns an iterator for the values.
+   */
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    TraversableDelegate delegate = _quercusClass.getTraversableDelegate();
+
+    if (delegate != null)
+      return delegate.getValueIterator(env, this);
+    else
+      return super.getValueIterator(env);
+  }
+
+  //
+  // count delegate methods
+  //
+
+  /**
+   * Returns the count value with the given key.
+   */
+  @Override
+  public int getCount(Env env)
+  {
+    CountDelegate delegate = _quercusClass.getCountDelegate();
+      
+    // php/066q vs. php/0906
+    //return getField(null, key.toString());
+
+    if (delegate != null)
+      return delegate.count(this);
+    else
+      return super.getSize();
+  }
+
+  //
   // Convenience field methods
   //
 

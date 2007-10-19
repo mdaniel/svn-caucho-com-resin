@@ -1769,56 +1769,6 @@ abstract public class Value implements java.io.Serializable
     };
   }
 
-  /**
-   * Returns the array ref.
-   */
-  public Value get(Value index)
-  {
-    return UnsetValue.UNSET;
-  }
-
-  /**
-   * Returns a reference to the array value.
-   */
-  public Value getRef(Value index)
-  {
-    return NullValue.NULL;
-  }
-
-  /**
-   * Returns the array ref as a function argument.
-   */
-  public Value getArg(Value index)
-  {
-    return NullValue.NULL;
-  }
-
-  /**
-   * Returns the array value, copying on write if necessary.
-   */
-  public Value getDirty(Value index)
-  {
-    return NullValue.NULL;
-  }
-
-  /**
-   * Returns the value for a field, creating an array if the field
-   * is unset.
-   */
-  public Value getArray()
-  {
-    return this;
-  }
-
-  /**
-   * Returns the value for a field, creating an array if the field
-   * is unset.
-   */
-  public Value getArray(Value index)
-  {
-    return NullValue.NULL;
-  }
-
   //
   // Object field references
   //
@@ -2014,9 +1964,55 @@ abstract public class Value implements java.io.Serializable
     return putThisField(env, env.createString(name), value);
   }
 
-  //
-  // array references
-  //
+  /**
+   * Returns the array ref.
+   */
+  public Value get(Value index)
+  {
+    return UnsetValue.UNSET;
+  }
+
+  /**
+   * Returns a reference to the array value.
+   */
+  public Value getRef(Value index)
+  {
+    return get(index);
+  }
+
+  /**
+   * Returns the array ref as a function argument.
+   */
+  public Value getArg(Value index)
+  {
+    return get(index);
+  }
+
+  /**
+   * Returns the array value, copying on write if necessary.
+   */
+  public Value getDirty(Value index)
+  {
+    return get(index);
+  }
+
+  /**
+   * Returns the value for a field, creating an array if the field
+   * is unset.
+   */
+  public Value getArray()
+  {
+    return this;
+  }
+
+  /**
+   * Returns the value for a field, creating an array if the field
+   * is unset.
+   */
+  public Value getArray(Value index)
+  {
+    return NullValue.NULL;
+  }
 
   /**
    * Returns the value for the variable, creating an object if the var
@@ -2090,6 +2086,14 @@ abstract public class Value implements java.io.Serializable
     put(value);
 
     return value;
+  }
+
+  /**
+   * Return true if the array value is set
+   */
+  public boolean isset(Value index)
+  {
+    return false;
   }
 
   /**

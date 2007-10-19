@@ -44,6 +44,8 @@ public class ArrayAccessDelegate implements ArrayDelegate
     = new StringBuilderValue("offsetSet");
   private static final StringValue OFFSET_UNSET
     = new StringBuilderValue("offsetUnset");
+  private static final StringValue OFFSET_EXISTS
+    = new StringBuilderValue("offsetExists");
   
   public Value get(ObjectValue qThis, Value index)
   {
@@ -64,6 +66,13 @@ public class ArrayAccessDelegate implements ArrayDelegate
     Env env = Env.getInstance();
     
     return qThis.callMethod(env, OFFSET_SET, UnsetValue.UNSET, index);
+  }
+
+  public boolean isset(ObjectValue qThis, Value index)
+  {
+    Env env = Env.getInstance();
+    
+    return qThis.callMethod(env, OFFSET_EXISTS, index).toBoolean();
   }
 
   public Value unset(ObjectValue qThis, Value index)

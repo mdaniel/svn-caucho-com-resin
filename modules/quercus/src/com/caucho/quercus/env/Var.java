@@ -975,6 +975,15 @@ public class Var extends Value
   }
 
   /**
+   * Return true if the array value is set
+   */
+  @Override
+  public boolean isset(Value index)
+  {
+    return _value.isset(index);
+  }
+
+  /**
    * Return unset the value.
    */
   @Override

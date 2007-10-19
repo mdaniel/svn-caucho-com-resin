@@ -35,6 +35,8 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.program.AbstractFunction;
 
+import com.caucho.util.L10N;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -45,6 +47,8 @@ import java.util.Map;
  */
 public class IteratorDelegate implements TraversableDelegate
 {
+  private static final L10N L = new L10N(IteratorDelegate.class);
+  
   public Iterator<Map.Entry<Value, Value>>
     getIterator(Env env, ObjectValue qThis)
   {
@@ -53,6 +57,9 @@ public class IteratorDelegate implements TraversableDelegate
 
   public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
   {
+    // php/4ar3
+    env.error(L.l("An iterator cannot be used with foreach by reference"));
+    
     return new KeyIterator(env, qThis);
   }
 

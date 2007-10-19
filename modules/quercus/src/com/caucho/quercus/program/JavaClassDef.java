@@ -701,6 +701,9 @@ public class JavaClassDef extends ClassDef {
     if (_traversableDelegate != null)
       cl.setTraversableDelegate(_traversableDelegate);
 
+    if (_countDelegate != null)
+      cl.setCountDelegate(_countDelegate);
+
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
     }

@@ -39,20 +39,25 @@ public interface ArrayDelegate {
   /**
    * Returns the value for the specified key.
    */
-  public Value get(ObjectValue obj, Value key);
+  public Value get(ObjectValue qThis, Value key);
 
   /**
    * Sets the value for the spoecified key.
    */
-  public Value put(ObjectValue obj, Value key, Value value);
+  public Value put(ObjectValue qThis, Value key, Value value);
 
   /**
    * Appends a value.
    */
-  public Value put(ObjectValue obj, Value value);
+  public Value put(ObjectValue qThis, Value value);
+
+  /**
+   * Returns true if the value is set
+   */
+  public boolean isset(ObjectValue qThis, Value key);
 
   /**
    * Removes the value at the speified key.
    */
-  public Value unset(ObjectValue obj, Value key);
+  public Value unset(ObjectValue qThis, Value key);
 }

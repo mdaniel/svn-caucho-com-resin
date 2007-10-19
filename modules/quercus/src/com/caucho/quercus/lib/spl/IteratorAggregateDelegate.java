@@ -68,7 +68,7 @@ public class IteratorAggregateDelegate
 
   private ObjectValue getTarget(Env env, ObjectValue qThis)
   {
-    Value iter = qThis.callMethod(env, GET_ITERATOR, qThis);
+    Value iter = qThis.callMethod(env, GET_ITERATOR);
 
     return (ObjectValue) iter;
   }

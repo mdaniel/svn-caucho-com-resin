@@ -298,7 +298,7 @@ public class ArrayModule
                             @ReadOnly Value value,
                             @Optional("false") boolean recursive)
   {
-    if (!recursive)
+    if (! recursive)
       return LongValue.create(value.getCount(env));
     else
       return LongValue.create(value.getCountRecursive(env));
@@ -457,7 +457,7 @@ public class ArrayModule
 	key.getType()));
       return false;
     }
-    
+
     if (searchArray instanceof ArrayValue)
       return ((ArrayValue) searchArray).containsKey(key) != null;
     else

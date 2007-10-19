@@ -639,8 +639,29 @@ public class ArrayValueImpl extends ArrayValue
   }
 
   /**
+   * Returns true if the value is set.
+   */
+  @Override
+  public boolean isset(Value key)
+  {
+    key = key.toKey();
+
+    int hash = key.hashCode() & _hashMask;
+
+    for (Entry entry = _entries[hash];
+         entry != null;
+         entry = entry._nextHash) {
+      if (key.equals(entry._key))
+	return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Removes a value.
    */
+  @Override
   public Value remove(Value key)
   {
     if (_isDirty)
