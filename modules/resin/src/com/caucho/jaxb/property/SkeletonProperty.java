@@ -32,17 +32,14 @@ package com.caucho.jaxb.property;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
-import com.caucho.jaxb.skeleton.Skeleton;
+import com.caucho.jaxb.mapping.Namer;
+import com.caucho.jaxb.skeleton.ClassSkeleton;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -56,20 +53,14 @@ import org.w3c.dom.Node;
 public class SkeletonProperty extends Property {
   private static final L10N L = new L10N(SkeletonProperty.class);
 
-  private Skeleton _skeleton;
+  private ClassSkeleton _skeleton;
 
-  public SkeletonProperty(Skeleton skeleton)
+  public SkeletonProperty(ClassSkeleton skeleton)
   {
     _skeleton = skeleton;
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    return _skeleton.read(u, in);
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     return _skeleton.read(u, in);
@@ -90,13 +81,6 @@ public class SkeletonProperty extends Property {
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object obj, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    _skeleton.write(m, out, obj, namer, null);
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
                     Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {

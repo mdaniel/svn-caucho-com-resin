@@ -30,7 +30,6 @@
 package com.caucho.jaxb;
 
 import com.caucho.jaxb.skeleton.ClassSkeleton;
-import com.caucho.jaxb.skeleton.Skeleton;
 
 import com.caucho.util.L10N;
 
@@ -206,7 +205,7 @@ public class BinderImpl extends Binder<Node> {
     if (xmlNode == null)
       throw new IllegalArgumentException(L.l("Node may not be null"));
 
-    Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
+    ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbObject);
 
     if (skeleton == null)
       throw new MarshalException(L.l("Unable to marshal {0}: its type unknown to this JAXBContext", jaxbObject));
@@ -243,7 +242,7 @@ public class BinderImpl extends Binder<Node> {
 
     QName name = JAXBUtil.qnameFromNode(root);
 
-    Skeleton skeleton = _context.getRootElement(name);
+    ClassSkeleton skeleton = _context.getRootElement(name);
 
     if (skeleton == null)
       throw new UnmarshalException(L.l("Root element {0} is unknown to this context",
@@ -270,7 +269,7 @@ public class BinderImpl extends Binder<Node> {
       root = doc.getDocumentElement();
     }
 
-    Skeleton skeleton = _context.findSkeletonForClass(declaredType);
+    ClassSkeleton skeleton = _context.findSkeletonForClass(declaredType);
 
     if (skeleton == null)
       throw new UnmarshalException(L.l("Type {0} is unknown to this context",
@@ -303,7 +302,7 @@ public class BinderImpl extends Binder<Node> {
     if (jaxbObject == null)
       throw new JAXBException(L.l("Unknown xmlNode"));
 
-    Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
+    ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbObject);
 
     if (skeleton == null) {
       // we strip the JAXBElement when we bind objects, so rewrap
@@ -336,7 +335,7 @@ public class BinderImpl extends Binder<Node> {
   public Node updateXML(Object jaxbObject, Node xmlNode)
     throws JAXBException
   {
-    Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
+    ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbObject);
 
     if (skeleton == null)
       throw new MarshalException(L.l("Unable to update {0}: its type unknown to this JAXBContext", jaxbObject));

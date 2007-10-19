@@ -31,7 +31,7 @@ package com.caucho.jaxb.property;
 
 import java.io.IOException;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -39,10 +39,6 @@ import javax.xml.bind.Unmarshaller;
 
 import javax.xml.namespace.QName;
 
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -51,13 +47,13 @@ import org.w3c.dom.Node;
 
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
+import com.caucho.jaxb.mapping.XmlMapping;
 import com.caucho.jaxb.skeleton.ClassSkeleton;
 
 import com.caucho.util.L10N;
 
 /**
- * represents a property in a skeleton; requires an Accessor to access it
  */
 public abstract class Property {
   public static final L10N L = new L10N(Property.class);
@@ -92,17 +88,11 @@ public abstract class Property {
 
   public abstract QName getSchemaType();
 
-  //
+  // XXX: This is hideous -- there is way too much overloading going on here
   // R/W methods
   //
 
   public Object readAttribute(XMLStreamReader in, int i)
-    throws IOException, JAXBException
-  {
-    throw new JAXBException(L.l("Internal error: Property does not support attributes {0}", this));
-  }
-
-  public Object readAttribute(Attribute attribute)
     throws IOException, JAXBException
   {
     throw new JAXBException(L.l("Internal error: Property does not support attributes {0}", this));
@@ -113,19 +103,7 @@ public abstract class Property {
                               Object previous)
     throws IOException, XMLStreamException, JAXBException;
   
-  public abstract Object read(Unmarshaller u, 
-                              XMLEventReader in, 
-                              Object previous)
-    throws IOException, XMLStreamException, JAXBException;
-
   public Object read(Unmarshaller u, XMLStreamReader in, 
-                     Object previous, ClassSkeleton attributed, Object parent)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    return read(u, in, previous);
-  }
-  
-  public Object read(Unmarshaller u, XMLEventReader in, 
                      Object previous, ClassSkeleton attributed, Object parent)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -141,10 +119,6 @@ public abstract class Property {
                              Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException;
 
-  public abstract void write(Marshaller m, XMLEventWriter out, 
-                             Object value, Namer namer)
-    throws IOException, XMLStreamException, JAXBException;
-
   public abstract Node bindTo(BinderImpl binder, Node node, 
                               Object value, Namer namer)
     throws IOException,JAXBException;
@@ -156,23 +130,9 @@ public abstract class Property {
     write(m, out, value, namer);
   }
 
-  public void write(Marshaller m, XMLEventWriter out, 
-                    Object value, Namer namer, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    write(m, out, value, namer);
-  }
-
   public void write(Marshaller m, XMLStreamWriter out, 
                     Object value, Namer namer, Object obj,
-                    Iterator attributes)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    write(m, out, value, namer, obj);
-  }
-
-  public void write(Marshaller m, XMLEventWriter out, Object value, 
-                    Namer namer, Object obj, Iterator attributes)
+                    ArrayList<XmlMapping> attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     write(m, out, value, namer, obj);
@@ -180,7 +140,7 @@ public abstract class Property {
 
   public Node bindTo(BinderImpl binder, Node node, 
                      Object value, Namer namer,
-                     Iterator attributes)
+                     ArrayList<XmlMapping> attributes)
     throws IOException, JAXBException
   {
     return bindTo(binder, node, value, namer);

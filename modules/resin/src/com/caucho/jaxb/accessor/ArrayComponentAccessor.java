@@ -29,7 +29,6 @@
 
 package com.caucho.jaxb.accessor;
 
-import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
@@ -46,8 +45,6 @@ public class ArrayComponentAccessor extends Accessor {
 
   public ArrayComponentAccessor(Accessor a) 
   {
-    super(a.getContext());
-
     _accessor = a;
 
     _type = _accessor.getType().getComponentType();

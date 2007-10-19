@@ -27,12 +27,12 @@
  * @author Emil Ong
  */
 
-package com.caucho.jaxb.accessor;
+package com.caucho.jaxb.mapping;
 
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
-import com.caucho.jaxb.property.StringProperty;
+import com.caucho.jaxb.property.QNameProperty;
 import com.caucho.util.L10N;
 import com.caucho.xml.stream.StaxUtil;
 
@@ -61,83 +61,71 @@ import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.NoSuchElementException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  *
  **/
-public class NilWrapper extends Accessor {
+public class XmlInstanceWrapper extends XmlMapping {
   private static final Logger log 
-    = Logger.getLogger(NilWrapper.class.getName());
-  private static final L10N L = new L10N(NilWrapper.class);
-  private static final QName XSI_NIL_NAME 
-    = new QName(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "xsi");
+    = Logger.getLogger(XmlInstanceWrapper.class.getName());
+  private static final L10N L = new L10N(XmlInstanceWrapper.class);
+  private static final QName XSI_TYPE_NAME 
+    = new QName(W3C_XML_SCHEMA_INSTANCE_NS_URI, "type", "xsi");
 
-  public static final NilWrapper INSTANCE = new NilWrapper();
+  private static final HashMap<QName,XmlInstanceWrapper> _instances =
+    new HashMap<QName,XmlInstanceWrapper>();
 
-  private NilWrapper()
+  private final QName _type;
+
+  private XmlInstanceWrapper(QName type)
   {
-    _property = StringProperty.PROPERTY;
+    super();
+
+    _type = type;
   }
 
-  public AccessorType getAccessorType()
-    throws JAXBException
+  public static XmlInstanceWrapper getInstance(QName type)
   {
-    return AccessorType.ATTRIBUTE;
+    XmlInstanceWrapper instance = _instances.get(type);
+
+    if (instance == null) {
+      instance = new XmlInstanceWrapper(type);
+      _instances.put(type, instance);
+    }
+
+    return instance;
   }
 
-  public Object get(Object o) 
-    throws JAXBException
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return "true";
-  }
-
-  public void set(Object o, Object value) 
-    throws JAXBException
-  {
+    String typeString = StaxUtil.qnameToString(out, _type);
+    StaxUtil.writeAttribute(out, XSI_TYPE_NAME, typeString);
   }
 
   public QName getQName(Object obj)
     throws JAXBException
   {
-    return XSI_NIL_NAME;
+    return XSI_TYPE_NAME;
   }
 
-  public String getName()
+  public void putQNames(Map<QName,XmlMapping> map)
+    throws JAXBException
   {
-    return "";
+    throw new UnsupportedOperationException();
   }
 
-  public Class getType()
+  public void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
   {
-    return String.class;
-  }
-
-  public Type getGenericType()
-  {
-    return String.class;
-  }
-
-  public <A extends Annotation> A getAnnotation(Class<A> c)
-  {
-    return null;
-  }
-
-  public <A extends Annotation> A getPackageAnnotation(Class<A> c)
-  {
-    return null;
-  }
-
-  public Package getPackage()
-  {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   public String toString()
   {
-    return "NilWrapper";
+    return "XmlInstanceWrapper[" + _type + "]";
   }
 }

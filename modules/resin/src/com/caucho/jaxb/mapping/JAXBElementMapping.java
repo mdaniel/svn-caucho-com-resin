@@ -24,27 +24,49 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
-package com.caucho.jaxb.property;
+package com.caucho.jaxb.mapping;
+
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.accessor.JAXBElementAccessor;
+import com.caucho.jaxb.property.Property;
+import com.caucho.util.L10N;
+
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+
 import javax.xml.namespace.QName;
+
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
 
-/**
- * common superclass for arrays and collections
- */
-public abstract class IterableProperty extends Property {
-  protected Property _componentProperty = null;
+public class JAXBElementMapping extends XmlValueMapping {
+  private static final L10N L = new L10N(JAXBElementMapping.class);
 
-  public Property getComponentProperty()
+  public JAXBElementMapping(JAXBContextImpl context)
+    throws JAXBException
   {
-    return _componentProperty;
+    super(context);
+    
+    _accessor = new JAXBElementAccessor();
+  }
+
+  // this method exists for the convenience of (Dynamic)JAXBElementSkeleton
+  public void setQName(QName qname)
+  {
+    _qname = qname;
+  }
+
+  // this method exists for the convenience of (Dynamic)JAXBElementSkeleton
+  public void setProperty(Property property)
+  {
+    _property = property;
+  }
+
+  public void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
+  {
+    throw new UnsupportedOperationException();
   }
 }

@@ -390,6 +390,7 @@ public class JAXBUtil {
       return toUpperCase(name.charAt(0)) + "";
   }
 
+  /// XXX this is sooooooooo wrong.  It belongs in JAXBContextImpl
   public static QName getXmlSchemaDatatype(Class cl, JAXBContextImpl context)
   {
     if (_datatypeMap.containsKey(cl))

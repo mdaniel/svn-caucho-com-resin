@@ -29,87 +29,69 @@
 
 package com.caucho.jaxb.accessor;
 
-import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.util.L10N;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
-public class FieldAccessor extends Accessor {
-  private final Package _package;
-  private final Field _field;
-  private final Class _type;
-  private final Type _genericType;
+public class JAXBElementAccessor extends Accessor {
+  private Class _cl;
 
-  public FieldAccessor(Field f)
+  public Object get(Object obj)
     throws JAXBException
   {
-    Class declarer = f.getDeclaringClass();
-    
-    _package = declarer.getPackage();
-    _field = f;
-    _type = _field.getType();
-    _genericType = _field.getGenericType();
-    _name = _field.getName();
+    JAXBElement element = (JAXBElement) obj;
+
+    return element.getValue();
   }
 
-  public Object get(Object o)
+  public void set(Object obj, Object value)
     throws JAXBException
   {
-    try {
-      return _field.get(o);
-    }
-    catch (Exception e) {
-      throw new JAXBException(e);
-    }
-  }
+    JAXBElement element = (JAXBElement) obj;
 
-  public void set(Object o, Object value)
-    throws JAXBException
-  {
-    try {
-      _field.set(o, value);
-    }
-    catch (Exception e) {
-      throw new JAXBException(e);
-    }
+    element.setValue(value);
   }
 
   public <A extends Annotation> A getAnnotation(Class<A> c)
   {
-    return _field.getAnnotation(c);
+    return null;
   }
 
   public <A extends Annotation> A getPackageAnnotation(Class<A> c)
   {
-    return _package.getAnnotation(c);
+    return null;
   }
 
   public Package getPackage()
   {
-    return _package;
+    return _cl.getPackage();
   }
 
   public Class getType()
   {
-    return _type;
+    return _cl;
+  }
+
+  public void setType(Class cl)
+  {
+    _cl = cl;
   }
 
   public Type getGenericType()
   {
-    return _genericType;
+    return _cl;
   }
 
   public String getName()
   {
-    return _name;
+    return null;
   }
 
   public String toString()
   {
-    return "FieldAccessor[" + _field.getDeclaringClass().getName() + "." +
-                              _field.getName() + "]";
+    return "JAXBElementAccessor[]";
   }
 }

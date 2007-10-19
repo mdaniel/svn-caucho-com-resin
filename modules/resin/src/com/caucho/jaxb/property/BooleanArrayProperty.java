@@ -33,12 +33,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -49,7 +46,7 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 
 /**
@@ -67,26 +64,6 @@ public class BooleanArrayProperty extends ArrayProperty {
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    boolean[] array = (boolean[]) previous;
-
-    if (array == null)
-      array = new boolean[1];
-    else {
-      boolean[] newArray = new boolean[array.length + 1];
-      System.arraycopy(array, 0, newArray, 0, array.length);
-
-      array = newArray;
-    }
-
-    array[array.length - 1] =
-      ((Boolean) _componentProperty.read(u, in, null)).booleanValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     boolean[] array = (boolean[]) previous;
@@ -139,18 +116,6 @@ public class BooleanArrayProperty extends ArrayProperty {
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, 
-                    Object value, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (value != null) {
-      boolean[] array = (boolean[]) value;
-
-      for (int i = 0; i < array.length; i++) 
-        BooleanProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
-    }
-  }
-  
   public Node bindTo(BinderImpl binder, Node node, 
                      Object value, Namer namer)
     throws IOException, JAXBException

@@ -31,8 +31,6 @@ package com.caucho.jaxb.property;
 
 import java.io.IOException;
 
-import java.util.Iterator;
-
 import static javax.xml.XMLConstants.*;
 
 import javax.xml.bind.JAXBException;
@@ -42,10 +40,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 
 import javax.xml.namespace.QName;
 
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -54,12 +48,12 @@ import org.w3c.dom.Node;
 
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.ConstantNamer;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.ConstantNamer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 
 /**
- * represents a property in a skeleton; requires an Accessor to access it
+ * represents a property in a skeleton
  */
 public class WrapperProperty extends Property {
   public static final L10N L = new L10N(WrapperProperty.class);
@@ -177,12 +171,6 @@ public class WrapperProperty extends Property {
     return previous;
   }
   
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws IOException,JAXBException
   {
@@ -210,13 +198,6 @@ public class WrapperProperty extends Property {
     if (value != null || _nillable) {
       out.writeEndElement();
     }
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object value, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException();
   }
 
   public Node bindTo(BinderImpl binder, Node node,

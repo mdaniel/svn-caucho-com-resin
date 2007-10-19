@@ -29,16 +29,6 @@
 
 package com.caucho.jaxb.skeleton;
 
-import com.caucho.jaxb.BinderImpl;
-import com.caucho.jaxb.JAXBContextImpl;
-import com.caucho.jaxb.JAXBUtil;
-import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
-import com.caucho.jaxb.annotation.XmlLocation;
-import com.caucho.util.L10N;
-
-import com.caucho.xml.stream.StaxUtil;
-
 import org.w3c.dom.Node;
 
 import static javax.xml.XMLConstants.*;
@@ -51,10 +41,7 @@ import javax.xml.bind.annotation.*;
 
 import javax.xml.namespace.QName;
 
-import javax.xml.stream.events.*;
 import javax.xml.stream.Location;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -69,38 +56,74 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.jaxb.BinderImpl;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.JAXBUtil;
+import com.caucho.jaxb.NodeIterator;
+import com.caucho.jaxb.annotation.XmlLocation;
+
 import com.caucho.jaxb.accessor.Accessor;
 import com.caucho.jaxb.accessor.FieldAccessor;
 import com.caucho.jaxb.accessor.GetterSetterAccessor;
 
-public class ClassSkeleton<C> extends Skeleton {
+import com.caucho.jaxb.mapping.AnyAttributeMapping;
+import com.caucho.jaxb.mapping.AttributeMapping;
+import com.caucho.jaxb.mapping.AnyElementMapping;
+import com.caucho.jaxb.mapping.ElementMapping;
+import com.caucho.jaxb.mapping.ElementRefMapping;
+import com.caucho.jaxb.mapping.ElementsMapping;
+import com.caucho.jaxb.mapping.Namer;
+import com.caucho.jaxb.mapping.XmlMapping;
+import com.caucho.jaxb.mapping.XmlValueMapping;
+
+import com.caucho.util.L10N;
+
+import com.caucho.xml.stream.StaxUtil;
+
+public class ClassSkeleton<C> {
   public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
   public static final String XML_SCHEMA_PREFIX = "xsd";
 
   private static final L10N L = new L10N(ClassSkeleton.class);
-  private static final Logger log = Logger.getLogger(Skeleton.class.getName());
+  private static final Logger log = 
+    Logger.getLogger(ClassSkeleton.class.getName());
 
   private static final Class[] NO_PARAMS = new Class[0];
   private static final Object[] NO_ARGS = new Object[0];
 
+  protected JAXBContextImpl _context;
+  protected QName _elementName;
   private Class<C> _class;
+  private ClassSkeleton _parent;
   private Package _package;
   private Method _createMethod;
   private Object _factory;
+  private QName _typeName;
+
+  private HashMap<QName,XmlMapping> _attributeQNameToMappingMap
+    = new HashMap<QName,XmlMapping>();
+
+  private HashMap<QName,XmlMapping> _elementQNameToMappingMap
+    = new HashMap<QName,XmlMapping>();
+
+  private ArrayList<XmlMapping> _attributeMappings
+    = new ArrayList<XmlMapping>();
+
+  private ArrayList<XmlMapping> _elementMappings
+    = new ArrayList<XmlMapping>();
+
+  private AnyElementMapping _anyElementMapping;
+  private AnyAttributeMapping _anyAttributeMapping;
 
   private Method _beforeUnmarshal;
   private Method _afterUnmarshal;
@@ -109,13 +132,15 @@ public class ClassSkeleton<C> extends Skeleton {
 
   private Constructor _constructor;
 
+  /** Special hook to allow injecting the location where an instance was
+      unmarshalled from. */
   private Accessor _locationAccessor;
 
   /**
    * The value @XmlValue.
    * 
    **/
-  protected Accessor _value;
+  protected XmlValueMapping _value;
 
   public Class<C> getType()
   {
@@ -129,12 +154,12 @@ public class ClassSkeleton<C> extends Skeleton {
 
   protected ClassSkeleton(JAXBContextImpl context)
   {
-    super(context);
+    _context = context;
   }
 
   public ClassSkeleton(JAXBContextImpl context, Class<C> c)
   {
-    super(context);
+    this(context);
     _class = c;
   }
 
@@ -265,7 +290,7 @@ public class ClassSkeleton<C> extends Skeleton {
       // Collect the fields/properties of the class
       if (orderMap != null) {
         for (int i = 0; i < orderMap.size(); i++)
-          _elementAccessors.add(null);
+          _elementMappings.add(null);
       }
 
       XmlAccessorType accessorType = 
@@ -390,7 +415,7 @@ public class ClassSkeleton<C> extends Skeleton {
           get.setAccessible(true);
           set.setAccessible(true);
 
-          Accessor a = new GetterSetterAccessor(_context, name, get, set); 
+          Accessor a = new GetterSetterAccessor(name, get, set); 
 
           if (orderMap != null) {
             Integer i = orderMap.remove(name);
@@ -424,7 +449,7 @@ public class ClassSkeleton<C> extends Skeleton {
             if (! f.getType().equals(Location.class))
               throw new JAXBException(L.l("Fields annotated by @Location must have type javax.xml.stream.Location"));
 
-            _locationAccessor = new FieldAccessor(_context, f);
+            _locationAccessor = new FieldAccessor(f);
           }
 
           // special case: jaxb/0250
@@ -447,7 +472,7 @@ public class ClassSkeleton<C> extends Skeleton {
           if (accessType == XmlAccessType.NONE && ! JAXBUtil.isJAXBAnnotated(f))
             continue;
 
-          Accessor a = new FieldAccessor(_context, f);
+          Accessor a = new FieldAccessor(f);
 
           if (orderMap != null) {
             Integer i = orderMap.remove(f.getName());
@@ -461,30 +486,9 @@ public class ClassSkeleton<C> extends Skeleton {
         }
       }
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest("JAXB: " + _class.getName() + " has children: ");
-
       // do ordering if necessary
-      if (orderMap != null || accessOrder != XmlAccessOrder.ALPHABETICAL) {
-        for (int i = 0; i < _elementAccessors.size(); i++) {
-          Accessor a = _elementAccessors.get(i);
-          a.putQNames(_elementQNameToAccessorMap);
-
-          if (log.isLoggable(Level.FINEST))
-            log.finest("\t" + a);
-        }
-      }
-      else {
-        Collections.sort(_elementAccessors, Accessor.nameComparator);
-
-        for (int i = 0; i < _elementAccessors.size(); i++) { 
-          Accessor a = _elementAccessors.get(i);
-          a.putQNames(_elementQNameToAccessorMap);
-
-          if (log.isLoggable(Level.FINEST))
-            log.finest("\t" + a);
-        }
-      }
+      if (orderMap == null && accessOrder == XmlAccessOrder.ALPHABETICAL)
+        Collections.sort(_elementMappings, XmlMapping.nameComparator);
     }
     catch (JAXBException e) {
       throw e;
@@ -505,66 +509,114 @@ public class ClassSkeleton<C> extends Skeleton {
   public void postProcess()
     throws JAXBException
   {
-    for (int i = 0; i < _elementAccessors.size(); i++) { 
-      Accessor a = _elementAccessors.get(i);
+    if (log.isLoggable(Level.FINEST))
+      log.finest("JAXB: " + _class.getName() + " has children: ");
 
-      if (a.getAccessorType() == Accessor.AccessorType.ELEMENT_REF)
-        a.putQNames(_elementQNameToAccessorMap);
+    for (int i = 0; i < _elementMappings.size(); i++)
+      _elementMappings.get(i).putQNames(_elementQNameToMappingMap);
+  }
+
+  /**
+   * Create an XmlMapping for this accessor and insert it in the correct
+   * mapping or field.
+   **/
+  private void processAccessor(Accessor accessor)
+    throws JAXBException
+  {
+    XmlMapping mapping = XmlMapping.newInstance(_context, accessor);
+
+    if (mapping instanceof XmlValueMapping) {
+      if (_value != null)
+        throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+
+      if (_elementMappings.size() > 0) {
+        // in case of propOrder & XmlValue
+        if (_elementMappings.size() != 1 || _elementMappings.get(0) != null)
+          throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", _elementMappings.get(0)));
+
+        _elementMappings.clear();
+      }
+
+      _value = (XmlValueMapping) mapping;
+    }
+    else if (mapping instanceof AttributeMapping) {
+      mapping.putQNames(_attributeQNameToMappingMap);
+      _attributeMappings.add((AttributeMapping) mapping);
+    }
+    else if (mapping instanceof AnyAttributeMapping) {
+      if (_anyAttributeMapping != null)
+        throw new JAXBException(L.l("Cannot have two fields or properties with @XmlAnyAttribute annotation"));
+
+      _anyAttributeMapping = (AnyAttributeMapping) mapping;
+      _attributeMappings.add(mapping);
+    }
+    else if ((mapping instanceof ElementMapping) ||
+             (mapping instanceof ElementRefMapping) ||
+             (mapping instanceof ElementsMapping)) {
+      if (_value != null)
+        throw new JAXBException(L.l("{0}: Cannot have both @XmlValue and elements in a JAXB element", _class.getName()));
+
+      if (mapping.getAccessor().getOrder() >= 0)
+        _elementMappings.set(mapping.getAccessor().getOrder(), mapping);
+      else
+        _elementMappings.add(mapping);
+    }
+    else if (mapping instanceof AnyElementMapping) {
+      if (_anyElementMapping != null)
+        throw new JAXBException(L.l("{0}: Cannot have two @XmlAnyElement annotations in a single class", _class.getName()));
+
+      _anyElementMapping = (AnyElementMapping) mapping;
+    }
+    else {
+      throw new RuntimeException(L.l("Unknown mapping type {0}", mapping.getClass()));
     }
   }
 
-  private void processAccessor(Accessor a)
+  private XmlMapping getElementMapping(QName q)
     throws JAXBException
   {
-    switch (a.getAccessorType()) {
-      case VALUE: 
-        if (_value != null)
-          throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+    XmlMapping mapping = _elementQNameToMappingMap.get(q);
 
-        if (_elementAccessors.size() > 0) {
-          // in case of propOrder & XmlValue
-          if (_elementAccessors.size() != 1 || _elementAccessors.get(0) != null)
-            throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", _elementAccessors.get(0)));
+    if (mapping != null)
+      return mapping;
 
-          _elementAccessors.clear();
-        }
+    if (_anyElementMapping != null)
+      return _anyElementMapping;
 
-        _value = a;
-        break;
+    if (_parent != null)
+      return _parent.getElementMapping(q);
 
-      case ATTRIBUTE:
-        a.putQNames(_attributeQNameToAccessorMap);
-        _attributeAccessors.add(a);
-        break;
+    return null;
+  }
 
-      case ANY_ATTRIBUTE:
-        if (_anyTypeAttributeAccessor != null)
-          throw new JAXBException(L.l("Cannot have two fields or properties with @XmlAnyAttribute annotation"));
+  public XmlMapping getAttributeMapping(QName q)
+    throws JAXBException
+  {
+    XmlMapping mapping = _attributeQNameToMappingMap.get(q);
 
-        _anyTypeAttributeAccessor = a;
-        _attributeAccessors.add(a);
-        break;
+    if (mapping != null)
+      return mapping;
 
-      case ELEMENT:
-      case ELEMENT_REF:
-      case ELEMENTS:
-        if (_value != null)
-          throw new JAXBException(L.l("{0}: Cannot have both @XmlValue and elements in a JAXB element", _class.getName()));
+    if (_anyAttributeMapping != null)
+      return _anyAttributeMapping;
 
-        if (a.getOrder() >= 0)
-          _elementAccessors.set(a.getOrder(), a);
-        else
-          _elementAccessors.add(a);
-        break;
-        
-      case ANY_TYPE_ELEMENT:
-      case ANY_TYPE_ELEMENT_LAX:
-        if (_anyTypeElementAccessor != null)
-          throw new JAXBException(L.l("{0}: Cannot have two @XmlAnyElement annotations in a single class", _class.getName()));
+    if (_parent != null)
+      return _parent.getAttributeMapping(q);
 
-        _anyTypeElementAccessor = a;
-        break;
-    }
+    return null;
+  }
+
+  public QName getElementName()
+  {
+    if (_elementName != null)
+      return _elementName;
+    else
+      return _typeName;
+  }
+
+  public void setElementName(QName elementName)
+  {
+    _elementName = elementName;
   }
 
   public QName getTypeName()
@@ -577,6 +629,8 @@ public class ClassSkeleton<C> extends Skeleton {
     _createMethod = createMethod;
     _factory = factory;
   }
+
+
 
   public C newInstance()
     throws JAXBException
@@ -645,40 +699,38 @@ public class ClassSkeleton<C> extends Skeleton {
         u.getListener().beforeUnmarshal(ret, null);
 
       if (_value != null) {
-        Object val = _value.read(u, in, ret, this);
-        _value.set(ret, val);
+        _value.read(u, in, ret, this);
       }
       else {
         // process the attributes
         for (int i = 0; i < in.getAttributeCount(); i++) {
           QName attributeName = in.getAttributeName(i);
-          Accessor a = getAttributeAccessor(attributeName);
+          XmlMapping mapping = getAttributeMapping(attributeName);
 
-          if (a == null)
+          if (mapping == null)
             throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
                                              attributeName, getType()));
 
-          a.set(ret, a.readAttribute(in, i, ret));
+          mapping.readAttribute(in, i, ret);
         }
 
         int i = 0;
         in.nextTag();
 
         while (in.getEventType() == in.START_ELEMENT) {
-          Accessor a = getElementAccessor(in.getName());
+          XmlMapping mapping = getElementMapping(in.getName());
 
-          if (a == null) {
+          if (mapping == null) {
             throw new UnmarshalException(L.l("Child <{0}> not found in {1}", 
                                              in.getName(), getType()));
           }
 
-          if (! a.checkOrder(i++, u.getEventHandler())) {
+          if (! mapping.getAccessor().checkOrder(i++, u.getEventHandler())) {
             throw new UnmarshalException(L.l("Child <{0}> misordered in {1}", 
                                              in.getName(), getType()));
           }
 
-          Object val = a.read(u, in, ret);
-          a.set(ret, val);
+          mapping.read(u, in, ret);
         }
 
         // essentially a nextTag() that handles end of document gracefully
@@ -710,84 +762,6 @@ public class ClassSkeleton<C> extends Skeleton {
     }
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    try {
-      C ret = newInstance();
-
-      if (_beforeUnmarshal != null)
-        _beforeUnmarshal.invoke(ret, u, /*FIXME : parent*/ null);
-
-      if (u.getListener() != null)
-        u.getListener().beforeUnmarshal(ret, null);
-
-
-      if (_value != null) { 
-        Object val = _value.read(u, in, ret);
-        _value.set(ret, val);
-      }
-      else {
-        XMLEvent event = in.peek();
-        StartElement start = event.asStartElement();
-        Iterator iterator = start.getAttributes();
-
-        // process the attributes
-        while (iterator.hasNext()) {
-          Attribute attribute = (Attribute) iterator.next();
-          Accessor a = getAttributeAccessor(attribute.getName());
-
-          if (a == null)
-            throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
-                                             attribute.getName(), getType()));
-
-          a.set(ret, a.readAttribute(attribute, ret));
-        }
-
-        int i = 0;
-        event = in.nextEvent();
-        event = in.nextEvent();
-
-        while (event.isStartElement()) {
-          QName name = ((StartElement) event).getName();
-          Accessor a = getElementAccessor(name);
-
-          if (a == null)
-            throw new UnmarshalException(L.l("Child <{0}> not found", name));
-
-          if (! a.checkOrder(i++, u.getEventHandler()))
-            throw new UnmarshalException(L.l("Child <{0}> misordered", name));
-
-          Object val = a.read(u, in, ret);
-          a.set(ret, val);
-
-          event = in.peek();
-        }
-
-        while (in.hasNext()) {
-          event = in.nextEvent();
-
-          if (event.isStartElement() ||
-              event.isEndElement())
-            break;
-        }
-      }
-
-      if (_afterUnmarshal != null)
-        _afterUnmarshal.invoke(ret, u, /*FIXME : parent*/ null);
-      if (u.getListener() != null)
-        u.getListener().afterUnmarshal(ret, null);
-      
-      return ret;
-    }
-    catch (InvocationTargetException e) {
-      throw new JAXBException(e);
-    }
-    catch (IllegalAccessException e) {
-      throw new JAXBException(e);
-    }
-  }
-
   public Object bindFrom(BinderImpl binder, Object existing, NodeIterator node)
     throws IOException, JAXBException
   {
@@ -798,8 +772,7 @@ public class ClassSkeleton<C> extends Skeleton {
       ret = newInstance();
 
     if (_value != null) { 
-      Object val = _value.bindFrom(binder, node, ret);
-      _value.set(ret, val);
+      _value.bindFrom(binder, node, ret);
     }
     else {
       int i = 0;
@@ -809,16 +782,15 @@ public class ClassSkeleton<C> extends Skeleton {
         if (child.getNodeType() == Node.ELEMENT_NODE) {
           QName name = JAXBUtil.qnameFromNode(child);
 
-          Accessor a = getElementAccessor(name);
+          XmlMapping mapping = getElementMapping(name);
 
-          if (a == null)
+          if (mapping == null)
             throw new UnmarshalException(L.l("Child <{0}> not found", name));
 
-          if (! a.checkOrder(i++, binder.getEventHandler()))
+          if (! mapping.getAccessor().checkOrder(i++, binder.getEventHandler()))
             throw new UnmarshalException(L.l("Child <{0}> misordered", name));
 
-          Object val = a.bindFrom(binder, node, ret);
-          a.set(ret, val);
+          mapping.bindFrom(binder, node, ret);
         }
 
         child = node.nextSibling();
@@ -832,7 +804,8 @@ public class ClassSkeleton<C> extends Skeleton {
   }
   
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, Namer namer, Iterator attributes)
+                    Object obj, Namer namer, 
+                    ArrayList<XmlMapping> attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj == null)
@@ -855,7 +828,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if (_value != null) {
         _value.setQName(tagName);
-        _value.write(m, out, obj, _attributeAccessors.iterator());
+        _value.write(m, out, obj, _attributeMappings);
       }
       else {
         if (tagName.getNamespaceURI() == null ||
@@ -871,20 +844,18 @@ public class ClassSkeleton<C> extends Skeleton {
                                 tagName.getNamespaceURI());
 
         if (attributes != null) {
-          while (attributes.hasNext()) {
-            Accessor a = (Accessor) attributes.next();
-            a.write(m, out, obj);
-          }
+          for (int i = 0; i < attributes.size(); i++)
+            attributes.get(i).write(m, out, obj);
         }
 
-        for (Accessor a : _attributeAccessors)
-          a.write(m, out, obj);
+        for (XmlMapping mapping : _attributeMappings)
+          mapping.write(m, out, obj);
 
-        for (Accessor a : _elementAccessors)
-          a.write(m, out, obj);
+        for (XmlMapping mapping : _elementMappings)
+          mapping.write(m, out, obj);
 
-        if (_anyTypeElementAccessor != null) // XXX ordering!
-          _anyTypeElementAccessor.write(m, out, obj);
+        if (_anyElementMapping != null) // XXX ordering!
+          _anyElementMapping.write(m, out, obj);
         
         out.writeEndElement();
       }
@@ -903,62 +874,9 @@ public class ClassSkeleton<C> extends Skeleton {
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, Namer namer, Iterator attributes)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    // XXX: beforeMarshal/afterMarshal???
-    if (obj == null)
-      return;
-
-    try {
-      if (_beforeMarshal != null)
-        _beforeMarshal.invoke(obj, m);
-
-      if (m.getListener() != null)
-        m.getListener().beforeMarshal(obj);
-
-      QName tagName = null;
-      
-      if (namer != null)
-        tagName = namer.getQName(obj);
-
-      if (tagName == null)
-        tagName = _elementName;
-
-      if (_value != null) {
-        _value.setQName(tagName);
-        _value.write(m, out, _value.get(obj), _attributeAccessors.iterator());
-      }
-      else {
-        out.add(JAXBUtil.EVENT_FACTORY.createStartElement(tagName, null, null));
-
-        if (attributes != null) {
-          // XXX
-        }
-
-        for (Accessor a : _elementAccessors)
-          a.write(m, out, a.get(obj));
-
-        out.add(JAXBUtil.EVENT_FACTORY.createEndElement(tagName, null));
-      }
-      
-      if (_afterMarshal != null)
-        _afterMarshal.invoke(obj, m);
-
-      if (m.getListener() != null)
-        m.getListener().afterMarshal(obj);
-    }
-    catch (InvocationTargetException e) {
-      throw new JAXBException(e);
-    }
-    catch (IllegalAccessException e) {
-      throw new JAXBException(e);
-    }
-  }
-
   public Node bindTo(BinderImpl binder, Node node, 
-                     Object obj, Namer namer, Iterator attributes)
+                     Object obj, Namer namer, 
+                     ArrayList<XmlMapping> attributes)
     throws IOException, JAXBException
   {
     if (obj == null)
@@ -973,7 +891,7 @@ public class ClassSkeleton<C> extends Skeleton {
       tagName = _elementName;
 
     if (_value != null) {
-      Node newNode = _value.bindTo(binder, node, _value.get(obj));
+      Node newNode = _value.bindTo(binder, node, obj);
 
       if (newNode != node) {
         binder.invalidate(node);
@@ -992,10 +910,10 @@ public class ClassSkeleton<C> extends Skeleton {
           // XXX
         }
 
-        for (Accessor a : _elementAccessors) {
+        for (XmlMapping mapping : _elementMappings) {
           if (child != null) {
             // try to reuse as many of the child nodes as possible
-            Node newNode = a.bindTo(binder, child, a.get(obj));
+            Node newNode = mapping.bindTo(binder, child, obj);
 
             if (newNode != child) {
               node.replaceChild(newNode, child);
@@ -1007,8 +925,9 @@ public class ClassSkeleton<C> extends Skeleton {
             child = JAXBUtil.skipIgnorableNodes(child);
           }
           else {
-            Node newNode = JAXBUtil.elementFromQName(a.getQName(obj), node);
-            node.appendChild(a.bindTo(binder, newNode, a.get(obj)));
+            Node newNode = 
+              JAXBUtil.elementFromQName(mapping.getQName(obj), node);
+            node.appendChild(mapping.bindTo(binder, newNode, obj));
           }
         }
       }
@@ -1017,9 +936,9 @@ public class ClassSkeleton<C> extends Skeleton {
 
         node = JAXBUtil.elementFromQName(tagName, node);
 
-        for (Accessor a : _elementAccessors) {
-          Node child = JAXBUtil.elementFromQName(a.getQName(obj), node);
-          node.appendChild(a.bindTo(binder, child, a.get(obj)));
+        for (XmlMapping mapping : _elementMappings) {
+          Node child = JAXBUtil.elementFromQName(mapping.getQName(obj), node);
+          node.appendChild(mapping.bindTo(binder, child, obj));
         }
       }
     }
@@ -1032,14 +951,6 @@ public class ClassSkeleton<C> extends Skeleton {
   public boolean isRootElement()
   {
     return _elementName != null;
-  }
-
-  public QName getElementName()
-  {
-    if (_elementName != null)
-      return _elementName;
-    else
-      return _typeName;
   }
 
   public void generateSchema(XMLStreamWriter out)
@@ -1073,7 +984,7 @@ public class ClassSkeleton<C> extends Skeleton {
       if (! "".equals(_typeName.getLocalPart()))
         out.writeAttribute("name", _typeName.getLocalPart());
 
-      if (Collection.class.isAssignableFrom(_value.getType())) {
+      if (Collection.class.isAssignableFrom(_value.getAccessor().getType())) {
         out.writeEmptyElement(XML_SCHEMA_PREFIX, "list", XML_SCHEMA_NS);
 
         String itemType = StaxUtil.qnameToString(out, _value.getSchemaType());
@@ -1088,8 +999,8 @@ public class ClassSkeleton<C> extends Skeleton {
         out.writeAttribute("base", base);
       }
 
-      for (Accessor accessor : _attributeAccessors)
-        accessor.generateSchema(out);
+      for (XmlMapping mapping : _attributeMappings)
+        mapping.generateSchema(out);
 
       out.writeEndElement(); // simpleType
     }
@@ -1104,16 +1015,16 @@ public class ClassSkeleton<C> extends Skeleton {
 
       out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
 
-      for (Accessor accessor : _elementAccessors)
-        accessor.generateSchema(out);
+      for (XmlMapping mapping : _elementMappings)
+        mapping.generateSchema(out);
 
-      if (_anyTypeElementAccessor != null)
-        _anyTypeElementAccessor.generateSchema(out);
+      if (_anyElementMapping != null)
+        _anyElementMapping.generateSchema(out);
 
       out.writeEndElement(); // sequence
 
-      for (Accessor accessor : _attributeAccessors)
-        accessor.generateSchema(out);
+      for (XmlMapping mapping : _attributeMappings)
+        mapping.generateSchema(out);
 
       out.writeEndElement(); // complexType
     }

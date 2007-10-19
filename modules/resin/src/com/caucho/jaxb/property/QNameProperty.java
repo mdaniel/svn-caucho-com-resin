@@ -31,7 +31,6 @@ package com.caucho.jaxb.property;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
@@ -39,9 +38,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.namespace.NamespaceContext;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
@@ -52,7 +48,7 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 import com.caucho.xml.stream.StaxUtil;
 
@@ -134,89 +130,6 @@ public class QNameProperty extends Property {
     StaxUtil.writeEndElement(out, qname);
   }
 
-  public void write(Marshaller m, XMLEventWriter out, 
-                    Object obj, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    QName qname = namer.getQName(obj);
-
-    if (obj != null) {
-      Namespace ns = null;
-      QName name = (QName) obj;
-
-      String namespace = name.getNamespaceURI();
-      String prefix = name.getPrefix();
-
-      // check if we need to declare this namespace prefix
-      if (namespace != null && ! "".equals(namespace)) {
-        String declaredPrefix = out.getPrefix(namespace);
-        
-        // 6 cases: the given prefix can be "" or not "" 
-        // and the declared prefix can be null, default (""), or not ""
-
-        if (declaredPrefix == null) {
-          if ("".equals(prefix)) {
-            // use a dummy prefix... can use "n" all the time since we enter
-            // and leave the element without any children... unless the name
-            // of the element itself has a namespace with prefix "n"
-            if ("n".equals(qname.getPrefix()))
-              prefix = "d";
-            else
-              prefix = "n";
-
-            ns = JAXBUtil.EVENT_FACTORY.createNamespace(prefix, namespace);
-          }
-          else {
-            // just write the given prefix
-            ns = JAXBUtil.EVENT_FACTORY.createNamespace(prefix, namespace);
-          }
-        }
-        else if ("".equals(declaredPrefix)) {
-          if (! "".equals(prefix)) {
-            // need to declare this prefix
-            ns = JAXBUtil.EVENT_FACTORY.createNamespace(prefix, namespace);
-          }
-          // else if prefix == "" or prefix == null, do nothing
-        }
-        else {
-          if ("".equals(prefix)) {
-            // take on existing prefix
-            prefix = declaredPrefix;
-          }
-          else if (! prefix.equals(declaredPrefix)) {
-            // the given prefix doesn't match the existing one, so declare it
-            ns = JAXBUtil.EVENT_FACTORY.createNamespace(prefix, namespace);
-          }
-        }
-      }
-
-      if (ns == null)
-        out.add(JAXBUtil.EVENT_FACTORY.createStartElement(qname, null, null));
-      else {
-        ArrayList namespaces = new ArrayList<Namespace>();
-        namespaces.add(ns);
-
-        Iterator iterator = namespaces.iterator();
-
-        StartElement start = 
-          JAXBUtil.EVENT_FACTORY.createStartElement(qname, null, iterator);
-
-        out.add(start);
-      }
-
-      String characters = null;
-
-      if (prefix == null || "".equals(prefix))
-        characters = name.getLocalPart();
-      else 
-        characters = prefix + ":" + name.getLocalPart();
-
-      out.add(JAXBUtil.EVENT_FACTORY.createCharacters(characters));
-    }
-
-    out.add(JAXBUtil.EVENT_FACTORY.createEndElement(qname, null));
-  }
-
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
@@ -257,31 +170,6 @@ public class QNameProperty extends Property {
       if (in.getEventType() == in.START_ELEMENT ||
           in.getEventType() == in.END_ELEMENT)
         break;
-    }
-
-    return ret;
-  }
-
-  // Can't use CDataProperty because we need access to the namespace map
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.nextEvent();
-    StartElement start = event.asStartElement(); 
-    event = in.nextEvent();
- 
-    Object ret = null;
-
-    if (event.isCharacters()) {
-      String text = ((Characters) event).getData();
-      ret = resolveQName(text, start.getNamespaceContext());
-    }
-
-    while (in.hasNext()) {
-      if (event.isEndElement())
-        break;
-
-      event = in.nextEvent();
     }
 
     return ret;

@@ -31,24 +31,16 @@ package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.accessor.Accessor;
+import com.caucho.jaxb.accessor.JAXBElementAccessor;
+import com.caucho.jaxb.mapping.JAXBElementMapping;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.LinkedHashMap;
+
+import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 public class JAXBElementSkeleton<C> extends ClassSkeleton<JAXBElement<C>> {
@@ -60,16 +52,25 @@ public class JAXBElementSkeleton<C> extends ClassSkeleton<JAXBElement<C>> {
   private final Class<C> _contents;
   private final Method _createMethod;
   private final Object _factory;
+  private final JAXBElementAccessor _accessor;
 
   public JAXBElementSkeleton(JAXBContextImpl context, Class<C> cl,
                              Method createMethod, Object factory)
     throws JAXBException
   {
     super(context);
+
     _contents = cl;
     _createMethod = createMethod;
     _factory = factory;
-    _value = new ContentsAccessor(context);
+
+    JAXBElementMapping mapping = new JAXBElementMapping(context);
+    mapping.setQName(_elementName);
+    mapping.setProperty(context.createProperty(cl));
+    _value = mapping;
+
+    _accessor = (JAXBElementAccessor) _value.getAccessor();
+    _accessor.setType(cl);
   }
 
   public JAXBElement<C> newInstance()
@@ -82,71 +83,6 @@ public class JAXBElementSkeleton<C> extends ClassSkeleton<JAXBElement<C>> {
     }
     catch (Exception e) {
       throw new JAXBException(e);
-    }
-  }
-
-  private class ContentsAccessor extends Accessor {
-    public ContentsAccessor(JAXBContextImpl context)
-      throws JAXBException
-    {
-      super(context);
-
-      _property = _context.createProperty(_contents);
-    }
-
-    public QName getQName()
-    {
-      return _elementName;
-    }
-
-    public Object get(Object o) 
-      throws JAXBException
-    {
-      JAXBElement<C> element = (JAXBElement<C>) o;
-
-      return element.getValue();
-    }
-
-    public void set(Object o, Object value) 
-      throws JAXBException
-    {
-      JAXBElement<C> element = (JAXBElement<C>) o;
-      element.setValue((C) value);
-    }
-
-    public String getName()
-    {
-      return null;
-    }
-
-    public Class getType()
-    {
-      return _contents;
-    }
-
-    public Type getGenericType()
-    {
-      return _contents;
-    }
-
-    public <A extends Annotation> A getAnnotation(Class<A> c)
-    {
-      return null;
-    }
-
-    public <A extends Annotation> A getPackageAnnotation(Class<A> c)
-    {
-      return null;
-    }
-
-    public Package getPackage()
-    {
-      return null;
-    }
-
-    public String toString()
-    {
-      return "JAXBElementSkeleton.ContentsAccessor[" + _contents + "]";
     }
   }
 

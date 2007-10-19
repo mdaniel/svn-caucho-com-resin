@@ -346,7 +346,7 @@ public class JAXBContextImpl extends JAXBContext {
   public void generateSchemaWithoutHeader(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
-    for (Skeleton skeleton : _classSkeletons.values())
+    for (ClassSkeleton skeleton : _classSkeletons.values())
       skeleton.generateSchema(out);
 
     for (int i = 0; i < _enums.size(); i++)
@@ -764,7 +764,7 @@ public class JAXBContextImpl extends JAXBContext {
     return _roots.containsKey(elementName);
   }
 
-  public Skeleton getRootElement(QName q)
+  public ClassSkeleton getRootElement(QName q)
   {
     return _roots.get(q);
   }

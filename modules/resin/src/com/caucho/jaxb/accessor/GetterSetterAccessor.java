@@ -29,8 +29,6 @@
 
 package com.caucho.jaxb.accessor;
 
-import com.caucho.jaxb.JAXBContextImpl;
-
 import javax.xml.bind.JAXBException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -43,12 +41,9 @@ public class GetterSetterAccessor extends Accessor {
   private final Type _genericType;
   private final Package _package;
 
-  public GetterSetterAccessor(JAXBContextImpl context, 
-                              String name, Method get, Method set)
+  public GetterSetterAccessor(String name, Method get, Method set)
     throws JAXBException
   {
-    super(context);
-
     Class declarer = get.getDeclaringClass();
 
     _package = declarer.getPackage();
@@ -60,8 +55,6 @@ public class GetterSetterAccessor extends Accessor {
 
     if ("clazz".equals(_name))
       _name = "class";
-
-    init();
   }
 
   public Object get(Object o)

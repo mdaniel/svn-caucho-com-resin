@@ -32,9 +32,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -48,7 +45,7 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 
 /**
@@ -66,26 +63,6 @@ public class CharacterArrayProperty extends ArrayProperty {
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    char[] array = (char[]) previous;
-
-    if (array == null)
-      array = new char[1];
-    else {
-      char[] newArray = new char[array.length + 1];
-      System.arraycopy(array, 0, newArray, 0, array.length);
-
-      array = newArray;
-    }
-
-    array[array.length - 1] =
-      ((Character) _componentProperty.read(u, in, null)).charValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     char[] array = (char[]) previous;
@@ -127,18 +104,6 @@ public class CharacterArrayProperty extends ArrayProperty {
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (value != null) {
-      char[] array = (char[]) value;
-
-      for (int i = 0; i < array.length; i++)
-        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
-    }
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
                     Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {

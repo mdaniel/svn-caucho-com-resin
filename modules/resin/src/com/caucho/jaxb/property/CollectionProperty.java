@@ -35,15 +35,13 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -52,7 +50,6 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * a Collection Property
@@ -78,19 +75,6 @@ public class CollectionProperty extends IterableProperty {
     return collection;
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    Collection collection = (Collection) previous;
-
-    if (collection == null)
-      collection = createCollection();
-
-    collection.add(_componentProperty.read(u, in, null));
-
-    return collection;
-  }
-
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws IOException, JAXBException
   {
@@ -104,20 +88,6 @@ public class CollectionProperty extends IterableProperty {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object value, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (value != null) {
-      validateType(value);
-
-      Collection collection = (Collection) value;
-
-      for (Object o : collection)
-        _componentProperty.write(m, out, o, namer);
-    }
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
                     Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {

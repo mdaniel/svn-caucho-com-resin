@@ -27,42 +27,72 @@
  * @author Emil Ong
  */
 
-package com.caucho.jaxb.property;
+package com.caucho.jaxb.mapping;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import com.caucho.util.L10N;
+import com.caucho.xml.stream.StaxUtil;
 
-import com.caucho.jaxb.BinderImpl;
-import com.caucho.jaxb.JAXBUtil;
-
+import static javax.xml.XMLConstants.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.stream.events.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
- * a List Property
- */
-public class ListProperty extends CollectionProperty {
-  public ListProperty(Property componentProperty)
+ *
+ **/
+public class NilWrapper extends XmlMapping {
+  private static final Logger log 
+    = Logger.getLogger(NilWrapper.class.getName());
+  private static final L10N L = new L10N(NilWrapper.class);
+  private static final QName XSI_NIL_NAME 
+    = new QName(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "xsi");
+
+  public static final NilWrapper INSTANCE = new NilWrapper();
+
+  private NilWrapper()
   {
-    super(componentProperty);
   }
 
-  protected void validateType(Object obj)
+  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
   {
-    if (! (obj instanceof List))
-      throw new ClassCastException(L.l("Argument is not a List: {0}", obj));
+    StaxUtil.writeAttribute(out, XSI_NIL_NAME, "true");
+  }
+
+  public QName getQName(Object obj)
+    throws JAXBException
+  {
+    return XSI_NIL_NAME;
+  }
+
+  public void putQNames(Map<QName,XmlMapping> map)
+    throws JAXBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
+  {
+    throw new UnsupportedOperationException();
   }
 
   public String toString()
   {
-    return "ListProperty[" + _componentProperty + "]";
+    return "NilWrapper[]";
   }
 }

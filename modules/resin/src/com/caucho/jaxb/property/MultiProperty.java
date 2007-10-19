@@ -35,16 +35,13 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -80,21 +77,6 @@ public class MultiProperty extends Property {
     return property.read(u, in, previous);
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    QName readQname = event.asStartElement().getName();
-
-    Property property = _qnameToPropertyMap.get(readQname);
-
-    if (property == null)
-      throw new JAXBException(L.l("Unexpected element {0}", readQname));
-
-    return property.read(u, in, previous);
-  }
-
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws IOException, JAXBException
   {
@@ -109,22 +91,6 @@ public class MultiProperty extends Property {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (obj != null) {
-      Class cl = obj.getClass();
-
-      Property property = _classToPropertyMap.get(cl);
-
-      if (property == null)
-        throw new JAXBException(L.l("Unexpected object {0}", obj));
-
-      property.write(m, out, obj, namer);
-    }
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
                     Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {

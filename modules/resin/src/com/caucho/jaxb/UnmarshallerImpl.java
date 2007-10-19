@@ -30,7 +30,7 @@
 package com.caucho.jaxb;
 
 import com.caucho.jaxb.adapters.BeanAdapter;
-import com.caucho.jaxb.skeleton.Skeleton;
+import com.caucho.jaxb.skeleton.ClassSkeleton;
 import com.caucho.jaxb.property.Property;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -114,6 +114,9 @@ public class UnmarshallerImpl implements Unmarshaller
    */
   public Object unmarshal(XMLEventReader reader) throws JAXBException
   {
+    throw new UnsupportedOperationException();
+
+    /*
     try {
       XMLEvent event = null;
 
@@ -123,7 +126,7 @@ public class UnmarshallerImpl implements Unmarshaller
         if (event.isStartElement()) {
           StartElement start = (StartElement) event;
 
-          Skeleton skel = _context.getRootElement(start.getName());
+          ClassSkeleton skel = _context.getRootElement(start.getName());
 
           if (skel == null)
             throw new JAXBException(L.l("'{0}' is an unknown root element",
@@ -142,7 +145,7 @@ public class UnmarshallerImpl implements Unmarshaller
     } 
     catch (Exception e) {
       throw new RuntimeException(e);
-    }
+    }*/
   }
 
   public <T> JAXBElement<T> unmarshal(XMLEventReader xmlEventReader,
@@ -159,7 +162,7 @@ public class UnmarshallerImpl implements Unmarshaller
       if (reader.nextTag() != XMLStreamReader.START_ELEMENT)
         throw new JAXBException(L.l("Expected root element"));
 
-      Skeleton skel = _context.getRootElement(reader.getName());
+      ClassSkeleton skel = _context.getRootElement(reader.getName());
 
       if (skel == null)
         throw new JAXBException(L.l("'{0}' is an unknown root element",

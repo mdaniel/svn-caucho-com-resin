@@ -24,27 +24,14 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
-package com.caucho.jaxb.property;
+package com.caucho.jaxb.mapping;
+
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
 
-/**
- * common superclass for arrays and collections
- */
-public abstract class IterableProperty extends Property {
-  protected Property _componentProperty = null;
-
-  public Property getComponentProperty()
-  {
-    return _componentProperty;
-  }
+public interface Namer {
+  public QName getQName(Object obj) throws JAXBException;
 }

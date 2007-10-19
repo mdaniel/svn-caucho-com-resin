@@ -27,11 +27,49 @@
  * @author Emil Ong
  */
 
-package com.caucho.jaxb.accessor;
+package com.caucho.jaxb.mapping;
+
+import com.caucho.jaxb.BinderImpl;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.JAXBUtil;
+import com.caucho.jaxb.accessor.Accessor;
+import com.caucho.util.L10N;
+import com.caucho.xml.stream.StaxUtil;
+
+import org.w3c.dom.Node;
+
+import java.util.Map;
+
+import static javax.xml.XMLConstants.*;
 
 import javax.xml.bind.JAXBException;
+
 import javax.xml.namespace.QName;
 
-public interface Namer {
-  public QName getQName(Object obj) throws JAXBException;
+public abstract class SingleQNameXmlMapping extends XmlMapping {
+  private static final L10N L = new L10N(SingleQNameXmlMapping.class);
+
+  protected QName _qname;
+
+  protected SingleQNameXmlMapping(JAXBContextImpl context, Accessor accessor)
+  {
+    super(context, accessor);
+  }
+
+  public void putQNames(Map<QName,XmlMapping> map)
+    throws JAXBException
+  {
+    if (_qname != null) {
+      if (map.containsKey(_qname))
+        throw new JAXBException(L.l("Class contains two elements with the same QName {0}", _qname));
+
+      map.put(_qname, (XmlMapping) this);
+    }
+  }
+
+  public QName getQName(Object obj)
+    throws JAXBException
+  {
+    return _qname;
+  }
 }

@@ -33,8 +33,9 @@ import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
-import com.caucho.jaxb.accessor.XmlInstanceWrapper;
+import com.caucho.jaxb.mapping.XmlInstanceWrapper;
+import com.caucho.jaxb.mapping.Namer;
+import com.caucho.jaxb.mapping.XmlMapping;
 import com.caucho.jaxb.property.Property;
 import com.caucho.util.L10N;
 import com.caucho.xml.stream.StaxUtil;
@@ -49,9 +50,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -66,8 +64,7 @@ import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -111,56 +108,6 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
 
       return node;
     }
-
-    /*
-    Skeleton skeleton = _context.getRootElement(in.getName());
-
-    if (skeleton != null)
-      return skeleton.read(u, in);
-
-    // skip everything in this subtree
-    int depth = 0;
-
-    in.nextTag();
-
-    do {
-      if (in.getEventType() == XMLStreamConstants.START_ELEMENT)
-        depth++;
-      else if (in.getEventType() == XMLStreamConstants.END_ELEMENT)
-        depth--;
-
-      if (depth < 0)
-        break;
-
-      in.next();
-    } 
-    while (depth > 0);
-
-    return null;*/
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    // skip everything in this subtree
-    int depth = 0;
-
-    XMLEvent event = in.nextTag();
-
-    do {
-      if (event.getEventType() == XMLStreamConstants.START_ELEMENT)
-        depth++;
-      else if (event.getEventType() == XMLStreamConstants.END_ELEMENT)
-        depth--;
-
-      if (depth < 0)
-        break;
-
-      event = in.nextEvent();
-    } 
-    while (depth > 0);
-
-    return null;
   }
 
   public Object bindFrom(BinderImpl binder, Object existing, NodeIterator node)
@@ -171,11 +118,12 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, Namer namer, Iterator attributes)
+                    Object obj, Namer namer, 
+                    ArrayList<XmlMapping> attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
-      Skeleton skeleton = _context.findSkeletonForObject(obj);
+      ClassSkeleton skeleton = _context.findSkeletonForObject(obj);
 
       if (skeleton != null) {
         // XXX if (skeleton.getTypeName() == null) {}
@@ -196,7 +144,10 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
         XmlInstanceWrapper instanceWrapper = 
           XmlInstanceWrapper.getInstance(property.getSchemaType());
 
-        attributes = instanceWrapper.getExtendedIterator(attributes);
+        if (attributes == null) 
+          attributes = new ArrayList<XmlMapping>(1);
+
+        attributes.add(instanceWrapper);
 
         // XXX the second obj here is a hack: we just need it not to be null.
         // Figure out if the api is wrong or there is a reasonable value for
@@ -227,16 +178,6 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
                               fieldName.getLocalPart(), 
                               fieldName.getNamespaceURI()); 
     }
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, Namer namer, Iterator attributes)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    QName fieldName = namer.getQName(obj);
-
-    out.add(JAXBUtil.EVENT_FACTORY.createStartElement(fieldName, null, null));
-    out.add(JAXBUtil.EVENT_FACTORY.createEndElement(fieldName, null));
   }
 
   public Node bindTo(BinderImpl binder, Node node, 

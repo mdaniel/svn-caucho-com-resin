@@ -27,42 +27,61 @@
  * @author Emil Ong
  */
 
-package com.caucho.jaxb.property;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+package com.caucho.jaxb.mapping;
 
 import com.caucho.jaxb.BinderImpl;
+import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
+import com.caucho.jaxb.accessor.Accessor;
+import com.caucho.util.L10N;
+import com.caucho.xml.stream.StaxUtil;
 
+import org.w3c.dom.Node;
+
+import static javax.xml.XMLConstants.*;
+
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.UnmarshalException;
+
+import javax.xml.bind.annotation.XmlAnyElement;
+
 import javax.xml.namespace.QName;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
+import java.lang.annotation.Annotation;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
-/**
- * a List Property
- */
-public class ListProperty extends CollectionProperty {
-  public ListProperty(Property componentProperty)
+public class AnyElementMapping extends SingleQNameXmlMapping {
+  private static final L10N L = new L10N(AnyElementMapping.class);
+
+  protected boolean _lax = false;
+
+  public AnyElementMapping(JAXBContextImpl context, Accessor accessor)
+    throws JAXBException
   {
-    super(componentProperty);
+    super(context, accessor);
+
+    XmlAnyElement xmlAnyElement = accessor.getAnnotation(XmlAnyElement.class);
+    _qname = new QName(accessor.getName());
+    _lax = xmlAnyElement.lax();
+    _property = _context.createProperty(accessor.getGenericType(), _lax);
   }
 
-  protected void validateType(Object obj)
+  public void generateSchema(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
   {
-    if (! (obj instanceof List))
-      throw new ClassCastException(L.l("Argument is not a List: {0}", obj));
-  }
+    out.writeEmptyElement(XML_SCHEMA_PREFIX, "any", 
+                          W3C_XML_SCHEMA_NS_URI);
+    out.writeAttribute("processContents", _lax ? "lax" : "skip");
 
-  public String toString()
-  {
-    return "ListProperty[" + _componentProperty + "]";
+    if (_property.getMaxOccurs() != null)
+      out.writeAttribute("maxOccurs", _property.getMaxOccurs());
   }
 }

@@ -29,7 +29,7 @@
 
 package com.caucho.jaxb;
 
-import com.caucho.jaxb.skeleton.Skeleton;
+import com.caucho.jaxb.skeleton.ClassSkeleton;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
@@ -70,7 +70,7 @@ public class SchemaGenerator {
   public void generateSchemaParticle(XMLStreamWriter out, Class cl)
     throws XMLStreamException, JAXBException
   {
-    Skeleton skeleton = _context.getSkeleton(cl);
+    ClassSkeleton skeleton = _context.getSkeleton(cl);
     skeleton.generateSchema(out);
   }
 }

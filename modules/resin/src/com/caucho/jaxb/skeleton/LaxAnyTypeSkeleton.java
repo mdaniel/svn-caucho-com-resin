@@ -33,7 +33,8 @@ import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
+import com.caucho.jaxb.mapping.XmlMapping;
 import com.caucho.jaxb.property.Property;
 import com.caucho.util.L10N;
 
@@ -45,9 +46,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -58,7 +56,7 @@ import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
@@ -81,23 +79,7 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   {
     QName name = in.getName();
 
-    Skeleton skeleton = _context.getRootElement(name);
-
-    // Get the AnyTypeSkeleton as a fallback
-    if (skeleton == null)
-      skeleton = _context.getSkeleton(Object.class);
-
-    return skeleton.read(u, in);
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    QName name = event.asStartElement().getName();
-
-    Skeleton skeleton = _context.getRootElement(name);
+    ClassSkeleton skeleton = _context.getRootElement(name);
 
     // Get the AnyTypeSkeleton as a fallback
     if (skeleton == null)
@@ -111,7 +93,7 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   {
     QName name = JAXBUtil.qnameFromNode(node.getNode());
 
-    Skeleton skeleton = _context.getRootElement(name);
+    ClassSkeleton skeleton = _context.getRootElement(name);
 
     if (skeleton == null)
       throw new JAXBException(L.l("No root found for element {0}", name));
@@ -120,10 +102,11 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, Namer namer, Iterator attributes)
+                    Object obj, Namer namer, 
+                    ArrayList<XmlMapping> attributes)
     throws IOException, XMLStreamException, JAXBException
   {
-    Skeleton skeleton = _context.findSkeletonForObject(obj);
+    ClassSkeleton skeleton = _context.findSkeletonForObject(obj);
 
     if (skeleton == null) {
       Property property = _context.getSimpleTypeProperty(obj.getClass());
@@ -137,29 +120,12 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
       skeleton.write(m, out, obj, null, attributes);
   }
 
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, Namer namer, Iterator attributes)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    Skeleton skeleton = _context.findSkeletonForObject(obj);
-
-    if (skeleton == null) {
-      Property property = _context.getSimpleTypeProperty(obj.getClass());
-
-      if (property == null)
-        throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
-
-      property.write(m, out, obj, namer); // XXX attributes
-    }
-    else 
-      skeleton.write(m, out, obj, namer, attributes);
-  }
-
   public Node bindTo(BinderImpl binder, Node node, 
-                     Object obj, Namer namer, Iterator attributes)
+                     Object obj, Namer namer, 
+                     ArrayList<XmlMapping> attributes)
     throws IOException, JAXBException
   {
-    Skeleton skeleton = _context.findSkeletonForObject(obj);
+    ClassSkeleton skeleton = _context.findSkeletonForObject(obj);
 
     if (skeleton == null)
       throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));

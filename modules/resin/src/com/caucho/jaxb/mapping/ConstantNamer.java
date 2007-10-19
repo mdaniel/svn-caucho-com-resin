@@ -27,7 +27,7 @@
  * @author Emil Ong
  */
 
-package com.caucho.jaxb.accessor;
+package com.caucho.jaxb.mapping;
 
 import java.util.HashMap;
 import javax.xml.namespace.QName;

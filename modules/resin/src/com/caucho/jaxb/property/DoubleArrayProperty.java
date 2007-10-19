@@ -33,9 +33,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -49,7 +46,7 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 
 /**
@@ -66,26 +63,6 @@ public class DoubleArrayProperty extends ArrayProperty {
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    double[] array = (double[]) previous;
-
-    if (array == null)
-      array = new double[1];
-    else {
-      double[] newArray = new double[array.length + 1];
-      System.arraycopy(array, 0, newArray, 0, array.length);
-
-      array = newArray;
-    }
-
-    array[array.length - 1] =
-      ((Double) _componentProperty.read(u, in, null)).doubleValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     double[] array = (double[]) previous;
@@ -138,18 +115,6 @@ public class DoubleArrayProperty extends ArrayProperty {
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object value, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (value != null) {
-      double[] array = (double[]) value;
-
-      for (int i = 0; i < array.length; i++) 
-        DoubleProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
-    }
-  }
-  
   public Node bindTo(BinderImpl binder, Node node,
                      Object value, Namer namer)
     throws IOException, JAXBException

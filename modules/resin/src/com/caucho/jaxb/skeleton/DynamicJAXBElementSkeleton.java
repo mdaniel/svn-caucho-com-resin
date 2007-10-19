@@ -31,7 +31,11 @@ package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.accessor.Accessor;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.accessor.JAXBElementAccessor;
+import com.caucho.jaxb.mapping.Namer;
+import com.caucho.jaxb.mapping.XmlMapping;
+import com.caucho.jaxb.mapping.XmlValueMapping;
+import com.caucho.jaxb.mapping.JAXBElementMapping;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.annotation.*;
@@ -40,9 +44,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -52,7 +53,7 @@ import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
@@ -63,25 +64,28 @@ import java.util.logging.Logger;
  * instantiated once per JAXBContext.
  *
  **/
-public class DynamicJAXBElementSkeleton extends ClassSkeleton {
+public class DynamicJAXBElementSkeleton extends ClassSkeleton<Object> {
+  // We must extend ClassSkeleton<Object> rather than ClassSkeleton
+  // or else javac complains about overridden methods.
   private static final Logger log 
     = Logger.getLogger(DynamicJAXBElementSkeleton.class.getName());
   private static final L10N L = new L10N(DynamicJAXBElementSkeleton.class);
   private static final Object[] SINGLE_NULL_ARG = new Object[] {null};
 
-  private DynamicAccessor _accessor;
+  private final JAXBElementAccessor _accessor;
 
   public DynamicJAXBElementSkeleton(JAXBContextImpl context)
     throws JAXBException
   {
     super(context);
 
-    _accessor = new DynamicAccessor(context);
-    _value = _accessor;
+    _value = new JAXBElementMapping(context);
+    _accessor = (JAXBElementAccessor) _value.getAccessor();
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, Namer namer, Iterator attributes)
+                    Object obj, Namer namer, 
+                    ArrayList<XmlMapping> attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (! (obj instanceof JAXBElement))
@@ -89,23 +93,11 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
 
     JAXBElement element = (JAXBElement) obj;
 
-    _accessor.setQName(element.getName());
     _accessor.setType(element.getDeclaredType());
 
-    super.write(m, out, obj, namer, attributes);
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, Namer namer, Iterator attributes)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (! (obj instanceof JAXBElement))
-      throw new IllegalArgumentException(L.l("Object must be a JAXBElement"));
-
-    JAXBElement element = (JAXBElement) obj;
-
-    _accessor.setQName(element.getName());
-    _accessor.setType(element.getDeclaredType());
+    JAXBElementMapping mapping = (JAXBElementMapping) _value;
+    mapping.setQName(element.getName());
+    mapping.setProperty(_context.createProperty(element.getDeclaredType()));
 
     super.write(m, out, obj, namer, attributes);
   }
@@ -117,80 +109,8 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
     throw new IllegalStateException();
   }
 
-  private class DynamicAccessor extends Accessor {
-    private Class _cl;
-
-    public DynamicAccessor(JAXBContextImpl context)
-      throws JAXBException
-    {
-      super(context);
-    }
-
-    public void setQName(QName qname)
-    {
-      _qname = qname;
-    }
-
-    public QName getQName()
-    {
-      return _qname;
-    }
-
-    public Object get(Object o) 
-      throws JAXBException
-    {
-      JAXBElement element = (JAXBElement) o;
-
-      return element.getValue();
-    }
-
-    public void set(Object o, Object value) 
-      throws JAXBException
-    {
-      JAXBElement element = (JAXBElement) o;
-      element.setValue(value);
-    }
-
-    public String getName()
-    {
-      return null;
-    }
-
-    public void setType(Class cl)
-      throws JAXBException
-    {
-      _cl = cl;
-      _property = _context.createProperty(cl);
-    }
-
-    public Class getType()
-    {
-      return _cl;
-    }
-
-    public Type getGenericType()
-    {
-      return _cl;
-    }
-
-    public <A extends Annotation> A getAnnotation(Class<A> c)
-    {
-      return null;
-    }
-
-    public <A extends Annotation> A getPackageAnnotation(Class<A> c)
-    {
-      return null;
-    }
-
-    public Package getPackage()
-    {
-      return _cl.getPackage();
-    }
-  }
-
   public String toString()
   {
-    return "DynamicJAXBElementSkeleton";
+    return "DynamicJAXBElementSkeleton[]";
   }
 }

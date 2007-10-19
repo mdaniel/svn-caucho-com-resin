@@ -33,9 +33,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.stream.events.*;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -49,7 +46,7 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.NodeIterator;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.util.L10N;
 
 /**
@@ -67,26 +64,6 @@ public class IntegerArrayProperty extends ArrayProperty {
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    int[] array = (int[]) previous;
-
-    if (array == null)
-      array = new int[1];
-    else {
-      int[] newArray = new int[array.length + 1];
-      System.arraycopy(array, 0, newArray, 0, array.length);
-
-      array = newArray;
-    }
-
-    array[array.length - 1] =
-      ((Integer) _componentProperty.read(u, in, null)).intValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     int[] array = (int[]) previous;
@@ -139,18 +116,6 @@ public class IntegerArrayProperty extends ArrayProperty {
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object value, Namer namer)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (value != null) {
-      int[] array = (int[]) value;
-
-      for (int i = 0; i < array.length; i++) 
-        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
-    }
-  }
-  
   public Node bindTo(BinderImpl binder, Node node,
                      Object value, Namer namer)
     throws IOException, JAXBException
