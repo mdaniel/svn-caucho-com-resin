@@ -672,13 +672,16 @@ public class Env {
 
       ConnectionEntry oldEntry = _connMap.get(entry);
 
-      if (oldEntry != null && ! oldEntry.getConnection().isClosed())
-        return oldEntry.getConnection();
+      Connection conn;
+      if (oldEntry != null
+	  && (conn = oldEntry.getConnection()) != null
+	  && ! conn.isClosed())
+        return conn;
 
       entry.setConnection(database.getConnection());
       _connMap.put(entry, entry);
       
-      Connection conn = entry.getConnection();
+      conn = entry.getConnection();
 
       return conn;
     }

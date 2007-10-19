@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>Quercus: NPE in Env connection close updates (#2093, rep by koreth)</li>
 <li>Quercus: mysql_fetch_assoc should use metaData.getColumnLabel if available (#2080, rep by koreth)</li>
 <li>Quercus: $this->x does not trigger __get and __set (#1965, rep by rjc)</li>
 <li>Quercus: mysql_connect flags were not getting passed to driver (#2075, rep by koreth)</li>
