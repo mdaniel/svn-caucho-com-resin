@@ -29,8 +29,8 @@
 
 package com.caucho.soap.skeleton;
 
-import com.caucho.jaxb.accessor.ConstantNamer;
-import com.caucho.jaxb.accessor.Namer;
+import com.caucho.jaxb.mapping.ConstantNamer;
+import com.caucho.jaxb.mapping.Namer;
 import com.caucho.jaxb.property.Property;
 
 import com.caucho.util.Attachment;
