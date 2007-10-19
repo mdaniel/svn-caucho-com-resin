@@ -220,8 +220,6 @@ public class OutputBuffer {
     try {
       _out.flush();
 
-      ReadStream rs = _tempStream.openRead(true);
-
       WriteStream out;
 
       if (_next != null)
@@ -229,9 +227,9 @@ public class OutputBuffer {
       else
         out = _env.getOriginalOut();
 
-      rs.writeToStream(out);
+      _tempStream.writeToStream(out);
 
-      rs.close();
+      _tempStream.clearWrite();
     } catch (IOException e) {
       _env.error(e.toString(), e);
     }
