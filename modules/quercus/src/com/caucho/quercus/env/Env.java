@@ -145,6 +145,8 @@ public class Env {
   private static final StringValue UTF8_STRING
     = new StringBuilderValue("utf-8");
 
+  public static final Value []EMPTY_VALUE = new Value[0];
+
   private static final
     LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
     = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
@@ -2850,7 +2852,7 @@ public class Env {
   public ObjectValue createObject()
   {
     try {
-      return (ObjectValue) _quercus.getStdClass().newInstance(this);
+      return (ObjectValue) _quercus.getStdClass().callNew(this, EMPTY_VALUE);
     }
     catch (Exception e) {
       throw new QuercusModuleException(e);

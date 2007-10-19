@@ -94,7 +94,12 @@ public class VarNewExpr extends Expr {
 
     _fullArgs = _args;
 
-    return cl.callNew(env, _args);
+    Value []args = new Value[_args.length];
+
+    for (int i = 0; i < args.length; i++)
+      args[i] = _args[i].eval(env);
+
+    return cl.callNew(env, args);
   }
   
   public String toString()

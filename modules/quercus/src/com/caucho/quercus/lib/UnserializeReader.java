@@ -157,7 +157,7 @@ public final class UnserializeReader {
         Value obj;
 
         if (qClass != null)
-          obj = qClass.newInstance(env);
+          obj = qClass.callNew(env, Env.EMPTY_VALUE);
         else {
           log.fine(L.l("{0} is an undefined class in unserialize",
                    className));
