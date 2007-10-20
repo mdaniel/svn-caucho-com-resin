@@ -233,7 +233,7 @@ public class EjbProtocolManager {
         // EJB 3.0 does not require home interfaces, e.g
         // for stateless session beans
         if (localObj == null)
-          localObj = server.getClientObject();
+          localObj = server.getClientObject(null);
 
         if (localObj != null) {
           if (_localJndiPrefix != null) {
@@ -246,9 +246,9 @@ public class EjbProtocolManager {
             bindServer(localJndiName, localObj);
 
             // ejb/0f6d (tck)
-            if (server.getRemoteObject() == null) {
-              // ejb/0f6c (tck) vs ejb/0g01
-              if (! _localJndiPrefix.endsWith("/env")) {
+            if (server.getRemoteObject() == null && ejbName != null) {
+              // ejb/0f30, ejb/0f6c (tck) vs ejb/0g01
+              if (! (ejbName.equals(mappedName) || _localJndiPrefix.endsWith("/env"))) {
                 localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
 
                 if (log.isLoggable(Level.CONFIG))
@@ -256,6 +256,35 @@ public class EjbProtocolManager {
 
                 bindServer(localJndiName, localObj);
               }
+            }
+
+            // ejb/0ff4 (TCK): multiple local interfaces
+            for (Class cl : server.getLocalApiList()) {
+              String s = cl.getName().replace(".", "_");
+
+              Object obj;
+
+              // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceLocalIllegal
+              if (server.getLocal21() == null
+                  || ! server.getLocal21().getName().equals(cl.getName())) {
+                // XXX obj = server.getLocalObject30(cl);
+                // XXX: TO BE IMPLEMENTED ejb/0ff4
+                continue;
+              }
+              else {
+                obj = server.getClientObject(server.getLocal21());
+
+                try {
+                  // XXX TCK: switch to method.getName().startsWith("create")
+                  java.lang.reflect.Method method = obj.getClass().getDeclaredMethod("create", new Class[] {});
+                  obj = method.invoke(obj, null);
+                } catch (Exception e) {
+                  log.config(L.l("local home {0} has no create method", obj.getClass().getName()));
+                  continue;
+                }
+              }
+
+              bindServer(localJndiName + "#" + s, obj);
             }
           }
           else {
@@ -280,7 +309,28 @@ public class EjbProtocolManager {
             // ejb/0f6f (TCK): multiple remote interfaces
             for (Class cl : server.getRemoteObjectList()) {
               String s = cl.getName().replace(".", "_");
-              bindServer(remoteJndiName + "#" + s, server.getRemoteObject30());
+
+              Object obj;
+
+              // ejb/0ff0 TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemoteIllegal
+              if (server.getRemote21() == null
+                  || ! server.getRemote21().getName().equals(cl.getName())) {
+                obj = server.getRemoteObject30(cl);
+              }
+              else {
+                obj = server.getRemoteObject();
+
+                try {
+                  // XXX TCK: switch to method.getName().startsWith("create")
+                  java.lang.reflect.Method method = obj.getClass().getDeclaredMethod("create", new Class[] {});
+                  obj = method.invoke(obj, null);
+                } catch (Exception e) {
+                  log.config(L.l("remote home {0} has no create method", obj.getClass().getName()));
+                  continue;
+                }
+              }
+
+              bindServer(remoteJndiName + "#" + s, obj);
             }
           }
         }
@@ -378,7 +428,7 @@ public class EjbProtocolManager {
 
       AbstractServer server = _serverMap.get(name);
 
-      if (server.getClientObject() == null)
+      if (server.getClientObject(null) == null)
         continue;
 
       if (name.startsWith(ejbName)) {

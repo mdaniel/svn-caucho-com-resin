@@ -217,8 +217,9 @@ public class SessionPoolChain extends FilterCallChain {
 
     if (_apiMethod.getReturnType().getPrintName().equals("void"))
       out.print(s);
-    else
+    else {
       out.print("return " + generateTypeCasting(s, _apiMethod.getReturnType()));
+    }
 
     out.println(";");
   }

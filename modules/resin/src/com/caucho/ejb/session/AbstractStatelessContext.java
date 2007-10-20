@@ -31,6 +31,9 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 
+import java.util.ArrayList;
+
+import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import javax.ejb.SessionContext;
@@ -44,14 +47,24 @@ abstract public class AbstractStatelessContext extends AbstractContext
   implements SessionContext
 {
   protected final StatelessServer _server;
-  
+
   private EJBObject _remote;
 
   protected AbstractStatelessContext(StatelessServer server)
   {
     _server = server;
   }
-  
+
+  /**
+   * Returns the local object in the context.
+   */
+  public EJBLocalObject createLocalObject()
+    throws IllegalStateException
+  {
+    throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
+                                        getServer()));
+  }
+
   /**
    * Returns the owning server.
    */
@@ -86,7 +99,7 @@ abstract public class AbstractStatelessContext extends AbstractContext
   {
     if (_remote == null)
       _remote = getStatelessServer().createEJBObject(getPrimaryKey());
-    
+
     return _remote;
   }
   */
@@ -95,19 +108,65 @@ abstract public class AbstractStatelessContext extends AbstractContext
   {
     return "::ejb:stateless";
   }
-  
+
   public <T> T getBusinessObject(Class<T> businessInterface)
   {
-    throw new UnsupportedOperationException();
+    if (businessInterface == null)
+      throw new IllegalStateException("SessionContext.getBusinessObject(null) is not allowed");
+
+    Object obj = getStatelessServer().getRemoteObject30(businessInterface);
+
+    if (obj != null)
+      return (T) validateObject(obj, businessInterface);
+
+    obj = getStatelessServer().getClientObject(businessInterface);
+
+    if (obj == null)
+      return null;
+
+    getStatelessServer().setBusinessInterface(obj, businessInterface);
+
+    return (T) validateObject(obj, businessInterface);
   }
-  
+
+  private Object validateObject(Object obj, Class businessInterface)
+  {
+    if (businessInterface == null)
+      return obj;
+
+    ArrayList<Class> apiList = getStatelessServer().getRemoteObjectList();
+
+    if (apiList.contains(businessInterface))
+      return obj;
+
+    apiList = getStatelessServer().getLocalApiList();
+
+    if (apiList.contains(businessInterface))
+      return obj;
+
+    throw new IllegalStateException(L.l("Trying to get business object with invalid business interface: {0}",
+                                        businessInterface.getName()));
+  }
+
+  @Override
   public Class getInvokedBusinessInterface()
   {
-    throw new UnsupportedOperationException();
+    return super.getInvokedBusinessInterface();
   }
-  
+
   public MessageContext getMessageContext()
   {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Looks up an object in the current JNDI context.
+   */
+  public Object lookup(String name)
+  {
+    if (name == null)
+      throw new IllegalArgumentException("Cannot call SessionContext.lookup(null)");
+
+    return super.lookup(name);
   }
 }

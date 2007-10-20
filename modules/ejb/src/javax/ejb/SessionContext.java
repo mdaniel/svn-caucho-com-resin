@@ -34,16 +34,18 @@ import javax.xml.rpc.handler.MessageContext;
  * The main ejb context.
  */
 public interface SessionContext extends EJBContext {
-  public <T> T getBusinessObject(Class<T> businessInterface);
-  
+  public <T> T getBusinessObject(Class<T> businessInterface)
+    throws IllegalStateException;
+
   public EJBLocalObject getEJBLocalObject()
     throws IllegalStateException;
-  
+
   public EJBObject getEJBObject()
     throws IllegalStateException;
-  
-  public Class getInvokedBusinessInterface();
-  
-  public MessageContext getMessageContext();
-  
+
+  public Class getInvokedBusinessInterface()
+    throws IllegalStateException;
+
+  public MessageContext getMessageContext()
+    throws IllegalStateException;
 }

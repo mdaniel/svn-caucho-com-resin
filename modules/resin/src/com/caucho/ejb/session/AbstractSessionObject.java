@@ -52,7 +52,10 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
   implements EJBObject, EJBLocalObject, Serializable
 {
   private static final Logger log = Log.open(AbstractSessionObject.class);
-  
+
+  // ejb/0ff0
+  protected Class _businessInterface;
+
   public SessionBean _getObject()
   {
     throw new UnsupportedOperationException("_getObject is not implemented");
@@ -70,7 +73,7 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
   {
     return getServer().getHandleEncoder().createHandle(__caucho_getId());
   }
-  
+
   /**
    * Returns the EJBHome stub for the container.
    */
@@ -83,7 +86,7 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
       return null;
     }
   }
-  
+
   /**
    * Returns the EJBLocalHome stub for the container.
    */
@@ -109,7 +112,7 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
   {
     return this;
   }
-  
+
   /**
    * Returns the SessionBean's primary stub
    */
@@ -132,6 +135,22 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
   public String __caucho_getId()
   {
     return getServer().encodeId(getPrimaryKey());
+  }
+
+  /**
+   * Returns the business interface.
+   */
+  public Class __caucho_getBusinessInterface()
+  {
+    return _businessInterface;
+  }
+
+  /**
+   * Sets the business interface.
+   */
+  public void __caucho_setBusinessInterface(Class businessInterface)
+  {
+    _businessInterface = businessInterface;
   }
 
   /**

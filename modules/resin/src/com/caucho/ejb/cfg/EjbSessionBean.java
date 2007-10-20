@@ -31,6 +31,7 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JClassWrapper;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
@@ -288,16 +289,56 @@ public class EjbSessionBean extends EjbBean {
 
     JAnnotation localHomeAnn = ejbClass.getAnnotation(LocalHome.class);
 
+    // ejb/0f6f
     if (localHomeAnn != null) {
-      setLocalHome((Class) localHomeAnn.get("value"));
+      Class localHome = (Class) localHomeAnn.get("value");
+      setLocalHome(localHome);
+
+      // ejb/0ff4
+      // Adds the 2.1 local interface
+      JMethod method = findFirstCreateMethod(localHome);
+
+      JClass localWrapper = method.getReturnType();
+      setLocalWrapper(localWrapper);
+      setLocal21(localWrapper);
     }
 
     JAnnotation remoteHomeAnn = ejbClass.getAnnotation(RemoteHome.class);
 
     // ejb/0f6f
     if (remoteHomeAnn != null) {
-      setHome((Class) remoteHomeAnn.get("value"));
+      Class home = (Class) remoteHomeAnn.get("value");
+      setHome(home);
+
+      // ejb/0ff0
+      // Adds the 2.1 remote interface
+      JMethod method = findFirstCreateMethod(home);
+
+      JClass remoteWrapper = method.getReturnType();
+      setRemoteWrapper(remoteWrapper);
+      setRemote21(remoteWrapper);
     }
+  }
+
+  private JMethod findFirstCreateMethod(Class cl)
+    throws ConfigException
+  {
+    JClass homeClass = new JClassWrapper(cl, _jClassLoader);
+
+    JMethod []methods = getMethods(homeClass);
+
+    for (int i = 0; i < methods.length; i++) {
+      String methodName = methods[i].getName();
+
+      try {
+        if (methodName.startsWith("create"))
+          return methods[i];
+      } catch (Exception e) {
+        throw new ConfigException(e);
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -370,6 +411,9 @@ public class EjbSessionBean extends EjbBean {
     if (remoteList.size() > 0)
       server.setRemoteObjectList(remoteList);
 
+    if (getRemote21() != null)
+      server.setRemote21(getRemote21().getJavaClass());
+
     JClass localHome = getLocalHome();
     if (localHome != null)
       server.setLocalHomeClass(localHome.getJavaClass());
@@ -377,6 +421,9 @@ public class EjbSessionBean extends EjbBean {
     ArrayList<JClass> localList = getLocalList();
     if (localList.size() > 0)
       server.setLocalApiList(localList);
+
+    if (getLocal21() != null)
+      server.setLocal21(getLocal21().getJavaClass());
 
     Class contextImplClass = javaGen.loadClass(getSkeletonName());
 

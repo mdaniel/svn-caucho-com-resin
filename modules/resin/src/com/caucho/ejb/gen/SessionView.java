@@ -106,6 +106,14 @@ public class SessionView extends ViewClass {
     out.println();
     out.println("  return _view" + _prefix + ";");
     out.println("}");
+
+    if (_prefix.equals("Local")) {
+      out.println();
+      out.println("public EJBLocalObject createLocalObject()");
+      out.println("{");
+      out.println("  return new Local(this);");
+      out.println("}");
+    }
   }
 
   protected void generateClassContent(JavaWriter out)

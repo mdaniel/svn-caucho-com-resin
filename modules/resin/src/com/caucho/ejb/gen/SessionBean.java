@@ -98,6 +98,7 @@ public class SessionBean extends ClassComponent {
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
+
     out.println("Bean bean;");
     out.println("synchronized (this) {");
     out.println("  bean = _freeBean;");
@@ -109,6 +110,7 @@ public class SessionBean extends ClassComponent {
     out.println("  }");
     out.println("}");
     out.println();
+
     out.println("throw new EJBException(\"session bean is not reentrant\");");
     out.popDepth();
     out.println("}");
@@ -170,6 +172,8 @@ public class SessionBean extends ClassComponent {
     out.pushDepth();
 
     out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
+
+    // XXX TCK: bb/session/stateful/cm/allowed/afterBeginSetRollbackOnlyTest (infinite recursion issue)
 
     out.println("Bean bean = new Bean(cxt);");
 
@@ -592,7 +596,7 @@ public class SessionBean extends ClassComponent {
     out.println("} catch (NoSuchMethodException e1) {");
     out.pushDepth();
 
-    if (! cl.equals(String.class)) {
+    if (cl.isPrimitive()) { // if (! cl.equals(String.class)) {
       out.println("try {");
       out.pushDepth();
 
@@ -625,7 +629,7 @@ public class SessionBean extends ClassComponent {
     out.println(");");
 
     // ejb/0fd2 vs ejb/0fd3
-    if (! cl.equals(String.class)) {
+    if (cl.isPrimitive()) { // if (! cl.equals(String.class)) {
       out.popDepth();
       out.println("}");
     }

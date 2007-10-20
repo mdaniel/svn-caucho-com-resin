@@ -122,9 +122,17 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
       log.fine("iiop: add server " + name);
 
-      service = new EjbIiopRemoteService(server);
+      service = new EjbIiopRemoteService(server, cl);
 
-      service.setEJB3(true);
+      boolean isEJB3 = true;
+
+      if (server.getRemote21() != null) {
+        if (server.getRemote21().getName().equals(cl.getName())) {
+          isEJB3 = false;
+        }
+      }
+
+      service.setEJB3(isEJB3);
 
       _context.setService(name, service);
     }

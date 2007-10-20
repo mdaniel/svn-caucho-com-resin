@@ -72,7 +72,7 @@ public class EnvServerManager implements EnvironmentListener
     = Logger.getLogger(EnvServerManager.class.getName());
 
   /*
-  private static EnvironmentLocal<EnvServerManager> _localServerManager
+    private static EnvironmentLocal<EnvServerManager> _localServerManager
     = new EnvironmentLocal<EnvServerManager>("caucho.env-server");
   */
 
@@ -122,15 +122,15 @@ public class EnvServerManager implements EnvironmentListener
 
       _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
-      
+
       _classLoader.addLoader(new SimpleLoader(_workPath));
 
       try {
-	_ejbTransactionManager = new EjbTransactionManager(this);
+        _ejbTransactionManager = new EjbTransactionManager(this);
       } catch (Throwable e) {
-	log.info("transactions are not available to EJB server");
+        log.info("transactions are not available to EJB server");
 
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
 
       _ejbAdmin = new EJBAdmin(this);
@@ -147,29 +147,29 @@ public class EnvServerManager implements EnvironmentListener
    * Gets the local server.
    */
   /*
-  public static EnvServerManager getLocal()
-  {
+    public static EnvServerManager getLocal()
+    {
     return _localServerManager.get();
-  }
+    }
   */
 
   /**
    * Creates the local server.
    */
   /*
-  public static EnvServerManager createLocal()
-  {
+    public static EnvServerManager createLocal()
+    {
     synchronized (EnvServerManager.class) {
-      EnvServerManager serverManager = _localServerManager.getLevel();
+    EnvServerManager serverManager = _localServerManager.getLevel();
 
-      if (serverManager == null) {
-	serverManager = new EnvServerManager();
-	_localServerManager.set(serverManager);
-      }
-
-      return serverManager;
+    if (serverManager == null) {
+    serverManager = new EnvServerManager();
+    _localServerManager.set(serverManager);
     }
-  }
+
+    return serverManager;
+    }
+    }
   */
 
   /**
@@ -330,8 +330,8 @@ public class EnvServerManager implements EnvironmentListener
       _amberPersistenceUnit.init();
 
       /*
-      for (EjbConfig cfg : _ejbConfigList)
-	cfg.configure();
+        for (EjbConfig cfg : _ejbConfigList)
+        cfg.configure();
       */
 
       _entityCache = new LruCache<EntityKey,QEntityContext>(_entityCacheSize);
@@ -353,13 +353,13 @@ public class EnvServerManager implements EnvironmentListener
 
     for (AbstractServer server : _serverMap.values()) {
       try {
-	thread.setContextClassLoader(server.getClassLoader());
+        thread.setContextClassLoader(server.getClassLoader());
 
-	log.fine(server + " starting");
+        log.fine(server + " starting");
 
-	server.start();
+        server.start();
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     }
   }
@@ -392,7 +392,7 @@ public class EnvServerManager implements EnvironmentListener
   public void addServer(AbstractServer server)
   {
     String id = server.getId();
-    
+
     _serverMap.put(id, server);
 
     try {
@@ -443,9 +443,9 @@ public class EnvServerManager implements EnvironmentListener
     return null;
   }
 
-   /**
-    * Adds a new entity.
-    */
+  /**
+   * Adds a new entity.
+   */
   public QEntityContext getEntity(EntityServer server, Object key)
   {
     synchronized (_entityKey) {
@@ -459,19 +459,19 @@ public class EnvServerManager implements EnvironmentListener
   {
     for (AbstractServer server : _serverMap.values()) {
       if (server.getLocalHomeClass() != null
-	  && type.isAssignableFrom(server.getLocalHomeClass())) {
-	// ejb/0gb0
-	
-	return server.getEJBLocalHome();
+          && type.isAssignableFrom(server.getLocalHomeClass())) {
+        // ejb/0gb0
+
+        return server.getEJBLocalHome();
       }
-      
+
       ArrayList<Class> apiList = server.getLocalApiList();
 
       if (apiList != null) {
-	for (int i = apiList.size() - 1; i >= 0; i--) {
-	  if (type.isAssignableFrom(apiList.get(i)))
-	    return server.getClientObject();
-	}
+        for (int i = apiList.size() - 1; i >= 0; i--) {
+          if (type.isAssignableFrom(apiList.get(i)))
+            return server.getClientObject(type);
+        }
       }
     }
 
@@ -484,7 +484,7 @@ public class EnvServerManager implements EnvironmentListener
       Object remote = server.getRemoteObject();
 
       if (remote != null && type.isAssignableFrom(remote.getClass()))
-	return remote;
+        return remote;
     }
 
     return null;
@@ -494,7 +494,7 @@ public class EnvServerManager implements EnvironmentListener
    * Adds a new entity.
    */
   public QEntityContext putEntityIfNew(EntityServer server, Object key,
-				       QEntityContext context)
+                                       QEntityContext context)
   {
     return _entityCache.putIfNew(new EntityKey(server, key), context);
   }
@@ -521,11 +521,11 @@ public class EnvServerManager implements EnvironmentListener
       iter = _entityCache.iterator();
 
       while (iter.hasNext()) {
-	LruCache.Entry<EntityKey,QEntityContext> entry = iter.next();
+        LruCache.Entry<EntityKey,QEntityContext> entry = iter.next();
 
-	beans.add(entry.getValue());
+        beans.add(entry.getValue());
 
-	iter.remove();
+        iter.remove();
       }
     }
   }
@@ -560,27 +560,27 @@ public class EnvServerManager implements EnvironmentListener
       _serverMap.clear();
 
       /*
-	for (int i = 0; i < _serverNames.size(); i++)
-	_staticServerMap.remove(_serverNames.get(i));
+        for (int i = 0; i < _serverNames.size(); i++)
+        _staticServerMap.remove(_serverNames.get(i));
       */
 
       // only purpose of the sort is to make the qa order consistent
       Collections.sort(servers, new ServerCmp());
 
       for (AbstractServer server : servers) {
-	try {
-	  _protocolManager.removeServer(server);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          _protocolManager.removeServer(server);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       for (AbstractServer server : servers) {
-	try {
-	  server.destroy();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          server.destroy();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       _serverMap = null;
@@ -605,4 +605,3 @@ public class EnvServerManager implements EnvironmentListener
     }
   }
 }
-

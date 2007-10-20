@@ -110,9 +110,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
   protected JClass _remoteHome;
   protected ArrayList<JClass> _remoteList = new ArrayList<JClass>();
+  protected JClass _remote21;
 
   protected JClass _localHome;
   protected ArrayList<JClass> _localList = new ArrayList<JClass>();
+  protected JClass _local21;
 
   protected EjbView _remoteHomeView;
   protected EjbView _remoteView;
@@ -589,6 +591,38 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     if (! _remoteList.contains(remote))
       _remoteList.add(remote);
+  }
+
+  /**
+   * Gets the 2.1 remote interface.
+   */
+  public JClass getRemote21()
+  {
+    return _remote21;
+  }
+
+  /**
+   * Sets the 2.1 remote interface.
+   */
+  public void setRemote21(JClass remote21)
+  {
+    _remote21 = remote21;
+  }
+
+  /**
+   * Gets the 2.1 local interface.
+   */
+  public JClass getLocal21()
+  {
+    return _local21;
+  }
+
+  /**
+   * Sets the 2.1 local interface.
+   */
+  public void setLocal21(JClass local21)
+  {
+    _local21 = local21;
   }
 
   /**

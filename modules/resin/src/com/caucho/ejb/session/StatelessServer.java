@@ -49,12 +49,13 @@ import java.util.logging.Logger;
  */
 public class StatelessServer extends AbstractServer {
   protected static Logger log = Log.open(StatelessServer.class);
-  
+
   private AbstractStatelessContext _homeContext;
-  
+
   private EJBObject _remoteObject;
+
   private EJBLocalObject _localObject;
-  
+
   /**
    * Creates a new stateless server.
    *
@@ -79,40 +80,40 @@ public class StatelessServer extends AbstractServer {
 
     try {
       thread.setContextClassLoader(_loader);
-      
+
       super.init();
-    
+
       Jndi.rebindDeep("java:comp/env/ejbContext",
-		      getStatelessContext());
+                      getStatelessContext());
       Jndi.rebindDeep("java:comp/env/sessionContext",
-		      getStatelessContext());
-      
+                      getStatelessContext());
+
       _localHome = getStatelessContext().createLocalHome();
       _remoteHomeView = getStatelessContext().createRemoteHomeView();
 
       try {
-	_localObject = getStatelessContext().getEJBLocalObject();
+        _localObject = getStatelessContext().getEJBLocalObject();
       } catch (Throwable e) {
       }
 
       try {
-	_remoteObject = getStatelessContext().getEJBObject();
+        _remoteObject = getStatelessContext().getEJBObject();
       } catch (Throwable e) {
       }
       /*
-	if (_config.getLocalHomeClass() != null)
-	_localHome = _homeContext.createLocalHome();
+        if (_config.getLocalHomeClass() != null)
+        _localHome = _homeContext.createLocalHome();
 
-	if (_homeStubClass != null) {
-	_remoteHomeView = _homeContext.createRemoteHomeView();
+        if (_homeStubClass != null) {
+        _remoteHomeView = _homeContext.createRemoteHomeView();
 
-	if (_config.getJndiName() != null) {
-	Context ic = new InitialContext();
-	ic.rebind(_config.getJndiName(), this);
-	}
-	}
+        if (_config.getJndiName() != null) {
+        Context ic = new InitialContext();
+        ic.rebind(_config.getJndiName(), this);
+        }
+        }
       */
-      
+
       log.config("initialized session bean: " + this);
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -147,31 +148,93 @@ public class StatelessServer extends AbstractServer {
   public Object getRemoteObject()
   {
     Object home = getEJBHome();
-    
+
     if (home != null)
       return home;
 
     if (_remoteObject != null)
       return _remoteObject;
-    
-    return null; 
+
+    return null;
+  }
+
+  /**
+   * Returns the 3.0 remote stub for the container
+   */
+  public Object getRemoteObject30()
+  {
+    return _remoteObject;
+  }
+
+  /**
+   * Returns the 3.0 remote stub for the container
+   */
+  public Object getRemoteObject30(Class businessInterface)
+  {
+    if (_remoteObject == null)
+      return null;
+
+    if (businessInterface == null)
+      return _remoteObject;
+
+    if (businessInterface.isAssignableFrom(_remoteObject.getClass())) {
+      setBusinessInterface(_remoteObject, businessInterface);
+
+      return _remoteObject;
+    }
+
+    return null;
   }
 
   /**
    * Returns the EJBHome stub for the container
    */
   @Override
-  public Object getClientObject()
+  public Object getClientObject(Class businessInterface)
   {
-    Object home = getClientLocalHome();
-    
-    if (home != null)
-      return home;
+    Class local21 = getLocal21();
+    Class remote30 = null;
 
-    if (_localObject != null)
-      return _localObject;
-    
-    return null; 
+    if (getLocalApiList().size() > 0)
+      remote30 = getLocalApiList().get(0);
+
+    Object obj = getClientLocalHome();
+
+    if (obj != null) {
+      if (businessInterface != null
+          && businessInterface.isAssignableFrom(obj.getClass())) {
+        return obj;
+      }
+
+      if (local21 != null
+          && local21.isAssignableFrom(obj.getClass())) {
+        return obj;
+      }
+    }
+
+    if (businessInterface == null)
+      businessInterface = remote30;
+
+    if (_localObject != null) {
+      obj = _localObject;
+
+      if (obj instanceof AbstractSessionObject) {
+        AbstractSessionObject sessionObject = (AbstractSessionObject) obj;
+
+        if (sessionObject.__caucho_getBusinessInterface() == businessInterface)
+          return obj;
+      }
+
+      // ejb/0ff4 TCK: ejb30/bb/session/stateless/sessioncontext/annotated/getInvokedBusinessInterfaceLocal1
+      // Creates a new instance to store the invoked business interface.
+      obj = getStatelessContext().createLocalObject();
+      setBusinessInterface(obj, businessInterface);
+
+      // XXX TCK: ejb30/bb/session/stateless/equals/annotated/testBeanotherEquals, needs QA
+      _localObject = (EJBLocalObject) obj;
+    }
+
+    return obj;
   }
 
   /**
@@ -203,14 +266,14 @@ public class StatelessServer extends AbstractServer {
   {
     synchronized (this) {
       if (_homeContext == null) {
-	try {
-	  Class []param = new Class[] { StatelessServer.class };
-	  Constructor cons = _contextImplClass.getConstructor(param);
+        try {
+          Class []param = new Class[] { StatelessServer.class };
+          Constructor cons = _contextImplClass.getConstructor(param);
 
-	  _homeContext = (AbstractStatelessContext) cons.newInstance(this);
-	} catch (Exception e) {
-	  throw new EJBExceptionWrapper(e);
-	}
+          _homeContext = (AbstractStatelessContext) cons.newInstance(this);
+        } catch (Exception e) {
+          throw new EJBExceptionWrapper(e);
+        }
       }
     }
 
@@ -223,7 +286,7 @@ public class StatelessServer extends AbstractServer {
   AbstractHandle createHandle(AbstractContext context)
   {
     String key = createSessionKey(context);
-    
+
     return getHandleEncoder().createHandle(key);
   }
 
@@ -231,17 +294,17 @@ public class StatelessServer extends AbstractServer {
    * Creates a handle for a new session.
    */
   /*
-  JVMObject createEJBObject(Object primaryKey)
-  {
+    JVMObject createEJBObject(Object primaryKey)
+    {
     try {
-      JVMObject obj = (JVMObject) _remoteStubClass.newInstance();
-      obj._init(this, createSessionKey(null));
+    JVMObject obj = (JVMObject) _remoteStubClass.newInstance();
+    obj._init(this, createSessionKey(null));
 
-      return obj;
+    return obj;
     } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
+    throw new EJBExceptionWrapper(e);
     }
-  }
+    }
   */
 
   /**
@@ -251,7 +314,7 @@ public class StatelessServer extends AbstractServer {
   {
     return "::ejb:stateless";
   }
-  
+
   /**
    * Cleans up the entity server nicely.
    */
@@ -260,12 +323,12 @@ public class StatelessServer extends AbstractServer {
   {
     if (_homeContext != null) {
       try {
-	_homeContext.destroy();
+        _homeContext.destroy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
-    
+
     super.destroy();
   }
 }

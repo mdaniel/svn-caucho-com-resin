@@ -42,11 +42,28 @@ public class EjbIiopRemoteService extends IiopRemoteService {
 
   private AbstractServer _server;
 
+  private Class _businessInterface;
+
   private boolean _isEJB3;
 
   public EjbIiopRemoteService(AbstractServer server)
   {
     _server = server;
+  }
+
+  public EjbIiopRemoteService(AbstractServer server,
+                              Class businessInterface)
+  {
+    _server = server;
+    _businessInterface = businessInterface;
+  }
+
+  /**
+   * Returns true for 3.0 when multiple 2.1/3.0 interfaces are available.
+   */
+  public boolean isEJB3()
+  {
+    return _isEJB3;
   }
 
   /**
@@ -76,6 +93,12 @@ public class EjbIiopRemoteService extends IiopRemoteService {
 
       return list;
     }
+    else if (getBusinessInterface() != null) {
+      ArrayList<Class> list = new ArrayList<Class>();
+      list.add(getBusinessInterface());
+
+      return list;
+    }
     else
       return _server.getRemoteObjectList();
   }
@@ -85,7 +108,22 @@ public class EjbIiopRemoteService extends IiopRemoteService {
    */
   public ArrayList<Class> getObjectAPI()
   {
+    if ((! _isEJB3) && (_server.getRemote21() != null)) {
+      ArrayList<Class> list = new ArrayList<Class>();
+      list.add(_server.getRemote21());
+
+      return list;
+    }
+
     return _server.getRemoteObjectList();
+  }
+
+  /**
+   * Returns the invoked API class.
+   */
+  public Class getBusinessInterface()
+  {
+    return _businessInterface;
   }
 
   /**
@@ -94,7 +132,7 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   public Object getHome()
   {
     if (_isEJB3)
-      return _server.getRemoteObject30();
+      return _server.getRemoteObject30(_businessInterface);
 
     Object obj = _server.getHomeObject();
 

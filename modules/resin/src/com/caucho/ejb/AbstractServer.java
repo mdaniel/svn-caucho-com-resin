@@ -36,6 +36,8 @@ import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
 import com.caucho.ejb.protocol.SameJVMClientContainer;
+import com.caucho.ejb.session.AbstractSessionContext;
+import com.caucho.ejb.session.AbstractSessionObject;
 import com.caucho.ejb.session.SessionServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.ejb.xa.EjbTransactionManager;
@@ -90,6 +92,9 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   // The class for the extended bean
   protected Class _contextImplClass;
+
+  protected Class _local21;
+  protected Class _remote21;
 
   protected Class _remoteHomeClass;
   protected Class _remoteObjectClass;
@@ -234,6 +239,38 @@ abstract public class AbstractServer implements EnvironmentBean {
   public Class getRemoteHomeClass()
   {
     return _remoteHomeClass;
+  }
+
+  /**
+   * Gets the 2.1 remote interface.
+   */
+  public Class getRemote21()
+  {
+    return _remote21;
+  }
+
+  /**
+   * Sets the 2.1 remote interface.
+   */
+  public void setRemote21(Class remote21)
+  {
+    _remote21 = remote21;
+  }
+
+  /**
+   * Gets the 2.1 local interface.
+   */
+  public Class getLocal21()
+  {
+    return _local21;
+  }
+
+  /**
+   * Sets the 2.1 local interface.
+   */
+  public void setLocal21(Class local21)
+  {
+    _local21 = local21;
   }
 
   /**
@@ -606,6 +643,14 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
+   * Returns the session context.
+   */
+  public AbstractSessionContext getSessionContext()
+  {
+    return null;
+  }
+
+  /**
    * Returns the EJBHome stub for the container
    */
   public Object getRemoteObject()
@@ -622,6 +667,14 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
+   * Returns the 3.0 remote stub for the container
+   */
+  public Object getRemoteObject30(Class businessInterface)
+  {
+    throw new UnsupportedOperationException("3.0 remote interface not found");
+  }
+
+  /**
    * Returns the EJBHome stub for the container
    */
   public Object getClientLocalHome()
@@ -632,7 +685,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the EJBHome stub for the container
    */
-  public Object getClientObject()
+  public Object getClientObject(Class businessInterface)
   {
     return getClientLocalHome();
   }
@@ -665,6 +718,11 @@ abstract public class AbstractServer implements EnvironmentBean {
     throws FinderException
   {
     return getContext(key).getEJBObject();
+  }
+
+  public AbstractContext getContext()
+  {
+    return null;
   }
 
   public AbstractContext getContext(Object key)
@@ -836,6 +894,14 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void setPreDestroy(PreDestroyConfig preDestroy)
   {
     _preDestroyConfig = preDestroy;
+  }
+
+  public void setBusinessInterface(Object obj, Class businessInterface)
+  {
+    if (obj instanceof AbstractSessionObject) {
+      AbstractSessionObject sessionObject = (AbstractSessionObject) obj;
+      sessionObject.__caucho_setBusinessInterface(businessInterface);
+    }
   }
 
   public String toString()

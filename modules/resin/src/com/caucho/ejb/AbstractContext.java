@@ -49,9 +49,11 @@ import java.util.logging.Logger;
 abstract public class AbstractContext implements EJBContext {
   protected static final L10N L = new L10N(AbstractContext.class);
   protected static final Logger log = Log.open(AbstractContext.class);
-  
+
   private boolean _isDead;
-  
+
+  private Class _invokedBusinessInterface;
+
   /**
    * Returns true if the context is dead.
    */
@@ -72,7 +74,7 @@ abstract public class AbstractContext implements EJBContext {
   {
     return getServer().getEJBMetaData();
   }
-  
+
   /**
    * Returns the EJBHome stub for the container.
    */
@@ -84,11 +86,11 @@ abstract public class AbstractContext implements EJBContext {
       throw e;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       return null;
     }
   }
-  
+
   /**
    * Returns the EJBLocalHome stub for the container.
    */
@@ -136,7 +138,7 @@ abstract public class AbstractContext implements EJBContext {
   {
     return getServer().lookup(name);
   }
-  
+
   /**
    * Returns the EJBObject stub for the container.
    */
@@ -144,21 +146,21 @@ abstract public class AbstractContext implements EJBContext {
   {
     return getRemoteView();
     /*
-    throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
-                                        getServer().getEJBName()));
+      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
+                                          getServer().getEJBName()));
     */
   }
-  
+
   /**
    * Returns the underlying bean
    */
   public EJBObject getRemoteView()
   {
     return null;
-    
+
     /*
-    throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
-                                        getServer()));
+      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
+                                          getServer()));
     */
   }
 
@@ -169,8 +171,8 @@ abstract public class AbstractContext implements EJBContext {
   {
     return null;
     /*
-    throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
-                                        getServer().getEJBName()));
+      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
+                                          getServer().getEJBName()));
     */
   }
 
@@ -181,8 +183,8 @@ abstract public class AbstractContext implements EJBContext {
   {
     return null;
     /*
-    throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
-                                        getServer().getEJBName()));
+      throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
+                                          getServer().getEJBName()));
     */
   }
 
@@ -211,7 +213,7 @@ abstract public class AbstractContext implements EJBContext {
       return SecurityContext.getUserPrincipal();
     } catch (SecurityContextException e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       return null;
     }
   }
@@ -248,7 +250,7 @@ abstract public class AbstractContext implements EJBContext {
       }
     } catch (RemoteException e) {
     }
-    
+
     EJBLocalObject local = null;
     try {
       local = getEJBLocalObject();
@@ -314,6 +316,18 @@ abstract public class AbstractContext implements EJBContext {
   {
     _isDead = true;
   }
+
+  public Class getInvokedBusinessInterface()
+    throws IllegalStateException
+  {
+    if (_invokedBusinessInterface == null)
+      throw new IllegalStateException("SessionContext.getInvokedBusinessInterface() is only allowed through EJB 3.0 interfaces");
+
+    return _invokedBusinessInterface;
+  }
+
+  public void __caucho_setInvokedBusinessInterface(Class invokedBusinessInterface)
+  {
+    _invokedBusinessInterface = invokedBusinessInterface;
+  }
 }
-
-

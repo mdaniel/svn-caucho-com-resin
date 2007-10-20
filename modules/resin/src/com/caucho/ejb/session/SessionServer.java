@@ -171,6 +171,15 @@ public class SessionServer extends AbstractServer
   @Override
   public Object getRemoteObject30()
   {
+    return getRemoteObject30(null);
+  }
+
+  /**
+   * Returns the EJBRemote stub for the container
+   */
+  @Override
+  public Object getRemoteObject30(Class businessInterface)
+  {
     Object obj = null;
 
     if (_remoteObject != null) // XXX: always new?
@@ -185,16 +194,39 @@ public class SessionServer extends AbstractServer
       obj = _remoteObject;
     }
 
-    return obj;
+    if (obj == null)
+      return null;
+
+    if (businessInterface == null)
+      return obj;
+
+    if (businessInterface.isAssignableFrom(obj.getClass())) {
+      setBusinessInterface(obj, businessInterface);
+
+      return obj;
+    }
+
+    return null;
   }
 
   /**
    * Returns the EJBHome stub for the container
    */
   @Override
-  public Object getClientObject()
+  public Object getClientObject(Class businessInterface)
   {
-    return new StatefulJndiFactory(this);
+    return new StatefulJndiFactory(this, businessInterface);
+
+    //getSessionContext().getEJBLocalObject();
+
+    /* XXX TCK
+
+    Object obj = _homeContext._caucho_newInstance();
+
+    setBusinessInterface(obj, businessInterface);
+
+    return obj;
+    */
   }
 
   /**
@@ -263,6 +295,11 @@ public class SessionServer extends AbstractServer
     return key;
   }
 
+  public AbstractContext getContext()
+  {
+    return getSessionContext();
+  }
+
   /**
    * Finds the remote bean by its key.
    *
@@ -284,7 +321,7 @@ public class SessionServer extends AbstractServer
     return cxt;
   }
 
-  private AbstractSessionContext getSessionContext()
+  public AbstractSessionContext getSessionContext()
   {
     synchronized (this) {
       if (_homeContext == null) {

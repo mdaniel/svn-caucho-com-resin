@@ -116,6 +116,11 @@ public class TransactionChain extends FilterCallChain {
          String var, String []args)
     throws IOException
   {
+    // ejb/0ff0 TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemote2
+    out.println("if (getServer().getContext() != null)");
+    out.println("  getServer().getContext().__caucho_setInvokedBusinessInterface(_businessInterface);");
+    out.println();
+
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
 
@@ -194,10 +199,11 @@ public class TransactionChain extends FilterCallChain {
     out.println("thread.setContextClassLoader(oldLoader);");
 
     // TCK: needs QA, ejb30/bb/localaccess/statefulclient/exceptionTest1
-    if (_xaType != EjbMethod.TRANS_BEAN) {
-      // ejb/0224 out.println("if (trans.getTransaction() != oldTrans)");
-      out.println("trans.commit();");
-    }
+    // if (_xaType != EjbMethod.TRANS_BEAN)
+    // ejb/0224 vs TCK
+    //out.println("if (trans.getTransaction() != oldTrans)");
+    // XXX TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceLocal1
+    out.println("  trans.commit();");
 
     /*
     if (out.isSession())

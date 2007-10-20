@@ -39,11 +39,14 @@ import java.util.Hashtable;
 public class StatefulJndiFactory implements ObjectProxy {
   private SessionServer _server;
 
-  StatefulJndiFactory(SessionServer server)
+  private Class _businessInterface;
+
+  StatefulJndiFactory(SessionServer server, Class businessInterface)
   {
     _server = server;
+    _businessInterface = businessInterface;
   }
-  
+
   /**
    * Creates the object from the proxy.
    *
@@ -52,6 +55,10 @@ public class StatefulJndiFactory implements ObjectProxy {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    return _server.newInstance();
+    Object obj = _server.newInstance();
+
+    _server.setBusinessInterface(obj, _businessInterface);
+
+    return obj;
   }
 }
