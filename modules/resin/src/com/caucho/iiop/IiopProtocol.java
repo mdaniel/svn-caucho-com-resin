@@ -38,6 +38,7 @@ import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.iiop.orb.*;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.*;
 import javax.annotation.*;
@@ -158,7 +159,26 @@ public class IiopProtocol extends Protocol {
       // ejb/4012: multiple <business-remote> interfaces
       ArrayList<Class> apiList = service.getHomeAPI();
 
-      return new IiopSkeleton(service.getHome(),
+      Object obj = service.getHome();
+
+      // Restrict the service API to the given business interface.
+      // TCK: ejb30/getInvokedBusinessInterfaceRemoteIllegal, needs QA
+      if (service.getBusinessInterface() != null) {
+        apiList.clear();
+        apiList.add(service.getBusinessInterface());
+
+        for (Method method : obj.getClass().getDeclaredMethods()) {
+          try {
+            // XXX TCK
+            if (method.getName().startsWith("create"))
+              obj = method.invoke(obj, null);
+          } catch (Exception e) {
+            log.config("Remote home "+obj.getClass().getName()+" has no create method");
+          }
+        }
+      }
+
+      return new IiopSkeleton(obj,
                               apiList,
                               service.getClassLoader(),
                               host, port, url);

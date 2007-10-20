@@ -40,12 +40,12 @@ import javax.rmi.PortableRemoteObject;
  * EJB session object marshaller
  */
 public class EjbSessionObjectMarshal extends CorbaObjectMarshal {
-  Method _method;
+  Class _type;
   IiopSkeleton _skeleton;
 
-  public EjbSessionObjectMarshal(Method method, IiopSkeleton skeleton)
+  public EjbSessionObjectMarshal(Class type, IiopSkeleton skeleton)
   {
-    _method = method;
+    _type = type;
     _skeleton = skeleton;
   }
 
@@ -58,10 +58,10 @@ public class EjbSessionObjectMarshal extends CorbaObjectMarshal {
 
     // XXX: check multiple business interfaces.
     java.util.ArrayList<Class> apiList = new java.util.ArrayList<Class>();
-    apiList.add(_method.getReturnType());
+    apiList.add(_type);
 
     // Adds the suffix "#com_sun_ts_tests_ejb30_common_sessioncontext_Three1IF";
-    url = url + "#" + _method.getReturnType().getName().replace(".", "_");
+    url = url + "#" + _type.getName().replace(".", "_");
 
     IiopSkeleton resSkeleton = new IiopSkeleton(value,
                                                 apiList,
@@ -79,7 +79,7 @@ public class EjbSessionObjectMarshal extends CorbaObjectMarshal {
     Object result = super.unmarshal(is);
 
     if (result != null)
-      result = PortableRemoteObject.narrow(result, _method.getReturnType());
+      result = PortableRemoteObject.narrow(result, _type);
 
     return result;
   }

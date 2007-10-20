@@ -48,6 +48,22 @@ abstract public class IiopRemoteService {
   abstract public ArrayList<Class> getObjectAPI();
 
   /**
+   * Returns the invoked API class.
+   */
+  public Class getBusinessInterface()
+  {
+    return null;
+  }
+
+  /**
+   * Returns true for 3.0 when multiple 2.1/3.0 interfaces are available.
+   */
+  public boolean isEJB3()
+  {
+    return false;
+  }
+
+  /**
    * Returns the home object.
    */
   abstract public Object getHome();

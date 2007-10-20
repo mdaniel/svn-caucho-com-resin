@@ -180,7 +180,7 @@ public class EjbRef implements ObjectProxy {
   }
 
   @PostConstruct
-    public void init()
+  public void init()
     throws Exception
   {
     boolean bind = false;
@@ -256,6 +256,16 @@ public class EjbRef implements ObjectProxy {
         return createObject(null);
 
       if (_foreignName != null) {
+        int pos = _foreignName.indexOf("#");
+
+        if (pos > 0) {
+          String intf = _foreignName.substring(++pos).replace("_", ".");
+
+          // TCK: application-client.xml with multiple business interfaces.
+          if (! type.getName().equals(intf))
+            return null;
+        }
+
         Object target;
 
         // XXX: JDK's iiop lookup

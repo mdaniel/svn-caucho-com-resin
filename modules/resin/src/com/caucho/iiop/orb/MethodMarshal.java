@@ -95,6 +95,17 @@ public class MethodMarshal {
         ((IiopWriter) os).alignMethodArgs();
 
       for (int i = 0; i < _args.length; i++) {
+        // XXX TCK: ejb30/bb/session/stateful/sessioncontext/annotated/passBusinessObjectRemote1
+        if (_args[i] instanceof AnyMarshal) {
+          Class type = null;
+
+          if (args[i] != null) {
+            type = args[i].getClass();
+
+            _args[i] = new com.caucho.iiop.marshal.RemoteMarshal(type);
+          }
+        }
+
         _args[i].marshal(os, args[i]);
       }
 
@@ -102,8 +113,11 @@ public class MethodMarshal {
 
       // XXX TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getBusinessObjectRemote1
       // See also: SkeletonMethod.service()
-      if (_ret instanceof AnyMarshal)
-        _ret = new EjbSessionObjectMarshal(_method, null);
+      if (_ret instanceof AnyMarshal) {
+        // XXX TCK: ejb30/bb/session/stateless/callback/defaultinterceptor/descriptor/defaultInterceptorsForCallbackBean1
+        if (! _method.getReturnType().getName().startsWith("java."))
+          _ret = new EjbSessionObjectMarshal(_method.getReturnType(), null);
+      }
 
       return _ret.unmarshal(is);
     } catch (RemoteUserException e) {

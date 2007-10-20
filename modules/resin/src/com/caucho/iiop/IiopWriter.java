@@ -31,6 +31,7 @@ package com.caucho.iiop;
 import com.caucho.util.Alarm;
 import com.caucho.util.IdentityIntMap;
 import com.caucho.iiop.any.*;
+import com.caucho.iiop.orb.IiopProxyHandler;
 
 import org.omg.CORBA.Any;
 import org.omg.CORBA.ORB;
@@ -54,17 +55,17 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   static protected final int VALUE_NO_TYPE = 0x0;
   static protected final int VALUE_ONE_REP_ID = 0x2;
   static protected final int VALUE_MANY_REP_IDS = 0x6;
-  
+
   protected MessageWriter _out;
   protected int _type;
 
   protected SystemException _nullSystemException;
-  
+
   protected IiopReader _reader;
 
   protected String _host;
   protected int _port;
-  
+
   private org.omg.CORBA.ORB _orb;
 
   private IiopWriter _parent;
@@ -80,7 +81,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     _out = out;
     _context = parent.getContext();
   }
-  
+
   /**
    * Initialize the writer with a new underlying stream.
    *
@@ -97,7 +98,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   {
     _context = new WriterContext();
   }
-  
+
   /**
    * Initialize the writer with a new underlying stream and a reader.
    *
@@ -107,7 +108,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   public void init(MessageWriter out, IiopReader reader)
   {
     init(out);
-    
+
     _reader = reader;
   }
 
@@ -160,7 +161,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 
     startRequest(bytes, 0, bytes.length, operation);
   }
-  
+
   /**
    * Writes the header for a request
    *
@@ -171,15 +172,15 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   {
     startRequest(oid, off, len, operation, (int) Alarm.getCurrentTime(), null);
   }
-  
+
   /**
    * Writes the header for a request
    *
    * @param operation the method to call
    */
   abstract public void startRequest(byte []oid, int off, int len,
-				    String operation, int requestId,
-				    ArrayList<ServiceContext> serviceList)
+                                    String operation, int requestId,
+                                    ArrayList<ServiceContext> serviceList)
     throws IOException;
 
   public void writeRequestServiceControlList()
@@ -198,35 +199,35 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     write_long(0x10001); // iso-8859-1
     write_long(0x10100); // utf-16
   }
-  
+
   /**
    * Writes the header for a request
    */
   abstract public void startReplyOk(int requestId)
     throws IOException;
-  
+
   /**
    * Writes the header for a system reply exception
    */
   abstract public void startReplySystemException(int requestId,
-						 String exceptionId,
-						 int minorStatus,
-						 int completionStatus,
-						 Throwable cause)
+                                                 String exceptionId,
+                                                 int minorStatus,
+                                                 int completionStatus,
+                                                 Throwable cause)
     throws IOException;
 
   /**
    * Writes the header for a user exception
    */
   public void startReplyUserException(int requestId,
-				      String exceptionId)
+                                      String exceptionId)
     throws IOException
   {
     startReplyUserException(requestId);
 
     writeString(exceptionId);
   }
-  
+
   /**
    * Writes the header for a user exception with no exception id
    */
@@ -276,7 +277,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   {
     _orb = orb;
   }
-  
+
   public org.omg.CORBA.portable.InputStream create_input_stream()
   {
     throw new UnsupportedOperationException("no input stream");
@@ -386,7 +387,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     for (int i = 0; i < length; i++) {
       float v = value[i + offset];
       int bits = Float.floatToIntBits(v);
-      
+
       _out.writeInt(bits);
     }
   }
@@ -400,7 +401,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     for (int i = 0; i < length; i++) {
       double v = value[i + offset];
       long bits = Double.doubleToLongBits(v);
-      
+
       _out.writeLong(bits);
     }
   }
@@ -426,13 +427,13 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     }
     else {
       int length = a.length();
-      
+
       write_long(length + 1);
       int offset = getOffset();
       _context.putString(a, offset);
-      
+
       for (int i = 0; i < length; i++)
-	_out.write((int) a.charAt(i));
+        _out.write((int) a.charAt(i));
       _out.write(0);
     }
   }
@@ -446,7 +447,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
       write_long(0);
       return;
     }
-    
+
     int length = a.length();
     write_long(length + 1);
     for (int i = 0; i < length; i++)
@@ -478,7 +479,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
       write_long(TCKind._tk_null);
       return;
     }
-      
+
     try {
       switch (tc.kind().value()) {
       case TCKind._tk_null:
@@ -498,33 +499,33 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
       case TCKind._tk_octet:
       case TCKind._tk_any:
       case TCKind._tk_TypeCode:
-	write_long(tc.kind().value());
-	break;
-	  
+        write_long(tc.kind().value());
+        break;
+
       case TCKind._tk_string:
-	write_long(tc.kind().value());
-	write_long(tc.length());
-	break;
-	  
+        write_long(tc.kind().value());
+        write_long(tc.length());
+        break;
+
       case TCKind._tk_sequence:
-	SequenceTypeCode.writeTypeCode(this, tc);
-	break;
-	  
+        SequenceTypeCode.writeTypeCode(this, tc);
+        break;
+
       case TCKind._tk_value:
-	ValueTypeCode.writeTypeCode(this, tc);
-	break;
-	  
+        ValueTypeCode.writeTypeCode(this, tc);
+        break;
+
       case TCKind._tk_value_box:
-	ValueBoxTypeCode.writeTypeCode(this, tc);
-	break;
-	  
+        ValueBoxTypeCode.writeTypeCode(this, tc);
+        break;
+
       case TCKind._tk_abstract_interface:
-	AbstractInterfaceTypeCode.writeTypeCode(this, tc);
-	break;
-      
+        AbstractInterfaceTypeCode.writeTypeCode(this, tc);
+        break;
+
       default:
-	System.out.println("UNKNOWN TC: " + tc + " " + tc.kind() + " " + tc.kind().value());
-	throw new UnsupportedOperationException(String.valueOf(tc));
+        System.out.println("UNKNOWN TC: " + tc + " " + tc.kind() + " " + tc.kind().value());
+        throw new UnsupportedOperationException(String.valueOf(tc));
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -539,15 +540,18 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     // XXX: check for remote object
     write_boolean(false);
 
-    write_value((Serializable) obj);
+    if (obj instanceof Serializable)
+      write_value((Serializable) obj);
+    else
+      write_value(((IiopProxyHandler) obj).getStub());
   }
-  
+
   public void write_any(Any any)
   {
     write_TypeCode(any.type());
     any.write_value(this);
   }
-  
+
   public void write_Principal(org.omg.CORBA.Principal principal)
   {
     throw new UnsupportedOperationException();
@@ -561,7 +565,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   public void write_value(Serializable obj)
   {
     ValueHandler valueHandler = _context.getValueHandler();
-    
+
     if (obj == null) {
       write_long(0);
       return;
@@ -579,37 +583,37 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     }
     else if (obj instanceof IDLEntity) {
       try {
-	Class helperClass = Class.forName(obj.getClass().getName() + "Helper", false, obj.getClass().getClassLoader());
+        Class helperClass = Class.forName(obj.getClass().getName() + "Helper", false, obj.getClass().getClassLoader());
 
-	Method writeHelper = helperClass.getMethod("write", new Class[] {
-	  org.omg.CORBA.portable.OutputStream.class, obj.getClass()
-	});
+        Method writeHelper = helperClass.getMethod("write", new Class[] {
+          org.omg.CORBA.portable.OutputStream.class, obj.getClass()
+        });
 
-	writeHelper.invoke(null, this, obj);
+        writeHelper.invoke(null, this, obj);
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
     else {
       int oldValue = _context.getRef(obj);
 
       if (oldValue < 0) {
-	_out.align(4);
+        _out.align(4);
 
-	_context.putRef(obj, getOffset());
+        _context.putRef(obj, getOffset());
 
-	write_long(VALUE_TAG | VALUE_ONE_REP_ID);
-	String repId = valueHandler.getRMIRepositoryID(obj.getClass());
-	write_string(repId);
-	valueHandler.writeValue(this, obj);
+        write_long(VALUE_TAG | VALUE_ONE_REP_ID);
+        String repId = valueHandler.getRMIRepositoryID(obj.getClass());
+        write_string(repId);
+        valueHandler.writeValue(this, obj);
       }
       else {
-	_out.align(4);
+        _out.align(4);
 
-	write_long(0xffffffff);
-	int delta = oldValue - getOffset();
-	
-	write_long(delta);
+        write_long(0xffffffff);
+        int delta = oldValue - getOffset();
+
+        write_long(delta);
       }
     }
   }

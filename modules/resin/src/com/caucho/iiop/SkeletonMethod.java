@@ -29,6 +29,7 @@
 
 package com.caucho.iiop;
 
+import com.caucho.iiop.marshal.AnyMarshal;
 import com.caucho.iiop.marshal.Marshal;
 import com.caucho.iiop.orb.EjbSessionObjectMarshal;
 import com.caucho.iiop.orb.MarshalFactory;
@@ -80,7 +81,13 @@ public class SkeletonMethod {
     if (args.length > 0)
       reader.alignMethodArgs();
 
+    Class paramTypes[] = _method.getParameterTypes();
+
     for (int i = 0; i < args.length; i++) {
+      if (_marshalArgs[i] instanceof AnyMarshal) {
+        _marshalArgs[i] = new com.caucho.iiop.marshal.RemoteMarshal(paramTypes[i]);
+      }
+
       args[i] = _marshalArgs[i].unmarshal(reader);
     }
 
@@ -97,7 +104,7 @@ public class SkeletonMethod {
 
       // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getBusinessObjectRemote1
       if (result != null && (result instanceof com.caucho.ejb.session.SessionObject))
-        _marshalReturn = new EjbSessionObjectMarshal(_method, _skeleton);
+        _marshalReturn = new EjbSessionObjectMarshal(_method.getReturnType(), _skeleton);
 
       _marshalReturn.marshal(writer, result);
     } catch (InvocationTargetException e) {
