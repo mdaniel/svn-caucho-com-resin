@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms2.file;
+package com.caucho.jms.file;
 
 import java.lang.ref.*;
 

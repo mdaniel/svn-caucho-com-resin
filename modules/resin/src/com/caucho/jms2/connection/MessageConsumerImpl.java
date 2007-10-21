@@ -214,7 +214,6 @@ public class MessageConsumerImpl
   public Message receive(long timeout)
     throws JMSException
   {
-    System.out.println("RECEIVE: " + timeout);
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("receiveNoWait(): MessageConsumer is closed."));
     
@@ -224,12 +223,10 @@ public class MessageConsumerImpl
     long now = Alarm.getCurrentTime();
     long expireTime = timeout > 0 ? now + timeout : 0;
     
-    System.out.println("ACTIVE: " + _session.isActive());
     if (! _session.isActive())
       return null;
 
     while (true) {
-      System.out.println("RECEIE: " + _queue);
       MessageImpl msg = _queue.receive(expireTime);
 
       if (msg == null)

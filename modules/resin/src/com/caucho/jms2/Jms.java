@@ -97,8 +97,6 @@ public class Jms
 
       consumer = session.createConsumer(dest);
 
-      System.out.println("CONSUMER: " + consumer);
-
       return consumer.receive();
     } catch (JMSException e) {
       throw new RuntimeException(e);
