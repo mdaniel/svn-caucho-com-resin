@@ -66,6 +66,8 @@ public class SystemClassLoader
   public SystemClassLoader(ClassLoader parent)
   {
     super(parent);
+
+    setId("system");
   }
 
   public ClassLoader getClassLoader()

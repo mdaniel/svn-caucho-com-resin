@@ -40,5 +40,5 @@ import com.caucho.config.ConfigException;
  */
 public interface LoggingManagementMXBean extends ManagedObjectMXBean
 {
-  public LogMessage []findRecentMessages(int max);
+  public LogMessage []findMessages(long minTime, long maxTime);
 }

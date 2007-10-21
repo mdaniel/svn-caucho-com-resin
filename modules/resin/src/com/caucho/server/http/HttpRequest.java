@@ -247,7 +247,7 @@ public class HttpRequest extends AbstractHttpRequest
 	  decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
 
 	  if (_server.isModified()) {
-	    log.info("<server> is modified");
+	    _server.logModified(log);
 
 	    _invocation = invocation;
 	    if (_server instanceof Server)

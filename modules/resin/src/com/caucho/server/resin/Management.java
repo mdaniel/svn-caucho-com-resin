@@ -33,17 +33,19 @@ import java.util.logging.*;
 
 import com.caucho.config.*;
 import com.caucho.vfs.*;
+import com.caucho.util.*;
 
 /**
  * Configuration for management.
  */
 public class Management
 {
+  private static L10N L = new L10N(Management.class);
   private static Logger log = Logger.getLogger(Management.class.getName());
 
   private Resin _resin;
   private Path _path;
-  private boolean _isRemoteEnable;
+  private String _remoteEnableCookie;
 
   void setResin(Resin resin)
   {
@@ -65,14 +67,35 @@ public class Management
     return _path;
   }
     
+  public void setRemoteEnableCookie(String cookie)
+  {
+    if ("false".equals(cookie)
+	|| "no".equals(cookie)
+	|| "".equals(cookie)) {
+      _remoteEnableCookie = null;
+    }
+    else
+      _remoteEnableCookie = cookie;
+  }
+    
+  public String getRemoteEnableCookie()
+  {
+    return _remoteEnableCookie;
+  }
+    
   public void setRemoteEnable(boolean isRemote)
   {
-    _isRemoteEnable = isRemote;
+    log.config(L.l("remote-enable is deprecated.  Please use remote-enable-cookie instead."));
+    
+    if (isRemote)
+      _remoteEnableCookie = "true";
+    else
+      _remoteEnableCookie = null;
   }
     
   public boolean isRemoteEnable()
   {
-    return _isRemoteEnable;
+    return _remoteEnableCookie != null;
   }
 
   public void start()

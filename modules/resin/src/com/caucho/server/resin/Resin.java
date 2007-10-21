@@ -1198,7 +1198,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	  if (getFreeMemory(runtime) < minFreeMemory) {
 	    log().severe(L().l("Restarting due to low free memory. {0} free bytes",
 			   getFreeMemory(runtime)));
-	    destroy();
+
 	    return;
 	  }
 	}
@@ -1217,7 +1217,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 	// GC might take a good deal of time.
 	if (10 * 60000L < diff) {
 	  log().severe(L().l("Restarting due to frozen Resin timer manager thread (Alarm).  This error generally indicates a JVM freeze, not an application deadlock."));
-	  Runtime.getRuntime().halt(1);
+
+	  return;
 	}
 
 	if (_waitIn != null) {
@@ -1225,6 +1226,8 @@ public class Resin implements EnvironmentBean, SchemaBean
           if ((len = _waitIn.read()) >= 0) {
             socketExceptionCount = 0;
           }
+	  else
+	    log().warning(L().l("Stopping due to watchdog or user."));
 
 	  return;
         }
@@ -1259,7 +1262,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	  Runtime.getRuntime().halt(1);
 	}
       } catch (Throwable e) {
-        log().log(Level.FINE, e.toString(), e);
+        log().log(Level.WARNING, e.toString(), e);
 
         return;
       }
@@ -1315,20 +1318,13 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       resin.initMain();
 
+      Server server = resin.getServer();
+
+      DestroyThread destroyThread = new DestroyThread(resin);
+
       resin.waitForExit();
 
-      System.err.println(L().l("closing server"));
-
-      new Thread() {
-	public void run()
-	{
-	  setName("resin-destroy");
-
-	  resin.destroy();
-	}
-      }.start();
-
-      Server server = resin.getServer();
+      destroyThread.shutdown();
 
       long stopTime = System.currentTimeMillis();
       long endTime = stopTime +	15000L;
@@ -1693,6 +1689,42 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       if (_isEnable)
         System.setSecurityManager(_securityManager);
+    }
+  }
+
+  static class DestroyThread extends Thread {
+    private final Resin _resin;
+    private boolean _isDestroy;
+
+    DestroyThread(Resin resin)
+    {
+      _resin = resin;
+      
+      setName("resin-destroy");
+    }
+
+    public void shutdown()
+    {
+      synchronized (this) {
+	_isDestroy = true;
+	notifyAll();
+      }
+    }
+    
+    public void run()
+    {
+      synchronized (this) {
+	while (! _isDestroy) {
+	  try {
+	    wait();
+	  } catch (Exception e) {
+	  }
+	}
+      }
+      
+      System.err.println(L().l("closing server"));
+      
+      _resin.destroy();
     }
   }
 }

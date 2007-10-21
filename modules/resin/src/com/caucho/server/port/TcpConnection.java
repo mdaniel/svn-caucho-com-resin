@@ -33,6 +33,7 @@ import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.server.connection.*;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
 import com.caucho.util.ThreadPool;
 import com.caucho.util.ThreadTask;
@@ -103,11 +104,15 @@ public class TcpConnection extends PortConnection implements ThreadTask
     String protocol = port.getProtocol().getProtocolName();
 
     if (port.getAddress() == null) {
-      _id = "resin-" + protocol + "-:" + port.getPort() + "-" + id;
+      String serverId = Resin.getLocal().getServerId();
+      if (serverId == null)
+	serverId = "";
+      
+      _id = protocol + "-" + serverId + "-" + port.getPort() + "-" + id;
       _name = protocol + "-" + port.getPort() + "-" + id;
     }
     else {
-      _id = ("resin-" + protocol + "-" + port.getAddress() + ":" +
+      _id = (protocol + "-" + port.getAddress() + ":" +
              port.getPort() + "-" + id);
       _name = (protocol + "-" + port.getAddress() + "-" +
 	       port.getPort() + "-" + id);

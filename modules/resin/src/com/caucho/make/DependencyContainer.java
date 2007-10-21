@@ -48,6 +48,8 @@ public class DependencyContainer implements Dependency
 
   // Marks if the last check returned modified
   private boolean _isModified;
+  // Marks if the modification has been logged
+  private boolean _isModifiedLog;
 
   // The interval for checking for a dependency.
   private long _checkInterval = 2000L;
@@ -138,6 +140,9 @@ public class DependencyContainer implements Dependency
   {
     _isModified = isModified;
     _lastCheckTime = 0;
+    
+    if (! isModified)
+      _isModifiedLog = false;
   }
       
   /**
@@ -155,6 +160,7 @@ public class DependencyContainer implements Dependency
   {
     _isModified = false;
     _lastCheckTime = Alarm.getCurrentTime();
+    _isModifiedLog = false;
   }
 
   /**
@@ -202,11 +208,16 @@ public class DependencyContainer implements Dependency
    */
   public boolean logModified(Logger log)
   {
+    if (_isModifiedLog)
+      return true;
+    
     for (int i = _dependencyList.size() - 1; i >= 0; i--) {
       Dependency dependency = _dependencyList.get(i);
 
-      if (dependency.logModified(log))
+      if (dependency.logModified(log)) {
+	_isModifiedLog = true;
 	return true;
+      }
     }
       
     return false;

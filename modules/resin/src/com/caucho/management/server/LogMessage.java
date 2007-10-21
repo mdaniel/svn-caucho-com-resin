@@ -105,4 +105,9 @@ public class LogMessage implements java.io.Serializable
   {
     _methodName = methodName;
   }
+
+  public String toString()
+  {
+    return "LogMessage[" + _name + ", " + _className + ", " + _methodName + ", " + _message + "]";
+  }
 }

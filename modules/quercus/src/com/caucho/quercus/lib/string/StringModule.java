@@ -4196,7 +4196,18 @@ public class StringModule extends AbstractQuercusModule {
 
     StringBuilder sb = new StringBuilder();
     while (head + width < len) {
+      int newline = string.indexOf('\n', head + 1);
+
       int tail = head + width;
+      
+      if (newline > 0 && newline < tail) {
+	if (sb.length() > 0)
+	  sb.append(breakString);
+	
+	sb.append(string.substring(head, newline));
+	head = newline + 1;
+	continue;
+      }
 
       if (! cut) {
         for (;

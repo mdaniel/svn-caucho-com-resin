@@ -147,6 +147,14 @@ public class ServerAdmin extends AbstractEmitterObject
   }
 
   /**
+   * Returns the current time according to the server.
+   */
+  public Date getCurrentTime()
+  {
+    return new Date(Alarm.getExactTime());
+  }
+
+  /**
    * Returns the last start time.
    */
   public Date getStartTime()

@@ -24,5 +24,21 @@ use the Resin 3.0.x branch.</p>
 
 </s1>
 
+<s1 title="logging enhancements">
+
+<p>The logging timestamp now allows %{thread} and %{env}.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;log name="" level="fine" path="stdout:"
+       timestamp="[%H:%M:%S.%s] {%{thread} %{env}} "/>
+
+  ...
+&lt;/resin>
+</example>
+
+</s1>
+
 </body>
 </document>

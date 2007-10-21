@@ -1239,19 +1239,20 @@ public class Server extends ProtocolDispatchServer
 
       if (isModified()) {
         // XXX: message slightly wrong
-        log.info("Resin restarting due to configuration change");
+        log.warning("Resin restarting due to configuration change");
 
         _clusterServer.getCluster().getResin().destroy();
         return;
       }
 
       try {
-      ArrayList<Port> ports = _clusterServer.getPorts();
+	ArrayList<Port> ports = _clusterServer.getPorts();
+	
         for (int i = 0; i < ports.size(); i++) {
           Port port = ports.get(i);
 
           if (port.isClosed()) {
-            log.info("Resin restarting due to closed port: " + port);
+            log.severe("Resin restarting due to closed port: " + port);
             // destroy();
             //_controller.restart();
           }

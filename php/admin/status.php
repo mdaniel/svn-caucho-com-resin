@@ -89,7 +89,7 @@ if (! $server) {
     <th>Uptime:</th>
     <?php
       $start_time = $server->StartTime->time / 1000;
-      $now = time(0);
+      $now = $server->CurrentTime->time / 1000;
       $uptime = $now - $start_time;
 
       if ($uptime < 12 * 3600)
@@ -152,39 +152,7 @@ if ($mbean_server) {
   </tr>
 
 </table>
-
 <?php
-
-if ($mbean_server) {
-  $mbean = $mbean_server->lookup("resin:type=LoggerManager");
-}
-
-if ($mbean) {
-  $messages = $mbean->findRecentMessages(10);
-
-  if (! empty($messages)) {
-    echo "<h2>Recent Messages</h2>\n";
-
-    echo "<table class='data'>\n";
-    echo "<tr><th>Date</th><th>Level</th><th>Message</th><th>Source</th></tr>\n";
-
-    $messages = array_reverse($messages);
-
-    foreach ($messages as $message) {
-      echo "<tr>";
-      echo "  <td>";
-      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
-      echo "</td>";
-      echo "  <td class='{$message->level}'>{$message->level}</td>";
-      echo "  <td>{$message->message}</td>";
-      echo "  <td>{$message->className}.{$message->methodName}()</td>";
-      echo "</tr>";
-    }
-
-    echo "</table>\n";
-  }
-}
-
 $thread_pool = $server->ThreadPool;
 ?>
 
@@ -323,7 +291,7 @@ if ($ports) {
     <td><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
     <?php
       format_ago_td_pair($client->ConnectionFailCountTotal,
-                         $client->LastFailConnectTime);
+                         $client->LastFailTime);
 
       format_ago_td_pair($client->ConnectionBusyCountTotal,
                          $client->LastBusyTime);
@@ -390,6 +358,98 @@ if ($db_pools) {
 }
 ?>
 
+<?php
+
+if ($mbean_server) {
+  $mbean = $mbean_server->lookup("resin:type=LoggerManager");
+}
+
+//
+// recent messages
+//
+
+if ($mbean) {
+  $now = time();
+
+  $messages = $mbean->findMessages(($now - 24 * 3600) * 1000, $now * 1000);
+
+  if (! empty($messages)) {
+    echo "<h2>Recent Messages</h2>\n";
+
+    echo "<table class='data'>\n";
+/*
+    //echo "<thead class='scroll'>\n";
+    echo "<tr><th class='date'>Date</th>"
+    echo "    <th class='level'>Level</th>"
+    echo "    <th class='message'>Message</th></tr>\n";
+    //echo "</thead>\n";
+*/
+
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90));
+      echo "  </td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+    echo "</table>\n";
+  }
+
+  //
+  // startup
+  //
+  $start_time = $server->StartTime->time / 1000;
+
+  $messages = $mbean->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
+
+  if (! empty($messages)) {
+    echo "<h2>Shutdown Messages</h2>\n";
+
+    echo "<table class='data'>\n";
+/*
+    //echo "<thead class='scroll'>\n";
+    echo "<tr><th class='date'>Date</th>"
+    echo "    <th class='level'>Level</th>"
+    echo "    <th class='message'>Message</th></tr>\n";
+    //echo "</thead>\n";
+*/
+
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+
+    // mark the start time
+    echo "<tr class='warning'>";
+    echo "  <td class='date'>";
+    echo strftime("%Y-%m-%d %H:%M:%S", $start_time);
+    echo "</td>";
+    echo "  <td class='level'></td>";
+    echo "  <td class='message'>Start Time</td>";
+    echo "</tr>";
+
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90)) . "</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+    echo "</table>\n";
+  }
+}
+?>
 <!-- Persistent store -->
 <?php
 if ($mbean_server) {
@@ -457,7 +517,9 @@ foreach ($webapps as $webapp) {
     <td class='item'>
        <?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
     </td>
-    <td <?= format_state_class($webapp->state) ?>><?= $webapp->State ?></td>
+    <td class='<?= format_state_class($webapp->State) ?>'>
+       <?= $webapp->State ?>
+    </td>
     <td><?= $webapp->RequestCount ?></td>
     <td><?= $session->SessionActiveCount ?></td>
     <td class='<?= format_ago_class($webapp->StartTime) ?>'>

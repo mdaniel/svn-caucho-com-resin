@@ -137,8 +137,9 @@ public class MBean {
 	
 	return unmarshall(value);
       }
-      else
-	return null;
+      else {
+	return _server.invoke(_name, name, args, null);
+      }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -163,6 +164,9 @@ public class MBean {
   {
     MBeanInfo info = getMbean_info();
 
+    if (info == null)
+      return null;
+    
     MBeanOperationInfo []ops = info.getOperations();
     
     MBeanOperationInfo bestOp = null;

@@ -290,6 +290,9 @@ r_management = element management {
 
   & (attribute remote-enable { r_boolean-Type }
      | element remote-enable { r_boolean-Type })?
+
+  & (attribute remote-enable-cookie { string }
+     | element remote-enable-cookie { string })?
 }
 
 r_memory-free-min =

@@ -101,13 +101,15 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   public boolean mysql_close(Env env, @Optional Mysqli conn)
   {
+    Mysqli envConn = (Mysqli) env.getSpecialValue("caucho.mysql");
+    
     if (conn == null)
-      conn = getConnection(env);
+      conn = envConn;
+
+    if (conn == envConn)
+      env.removeSpecialValue("caucho.mysql");
 
     if (conn != null) {
-      if (conn == getConnection(env))
-        env.removeSpecialValue("caucho.mysql");
-
       conn.close(env);
 
       return true;
@@ -904,12 +906,13 @@ public class MysqlModule extends AbstractQuercusModule {
   {
     Mysqli conn = (Mysqli) env.getSpecialValue("caucho.mysql");
 
+    // php/1436
     if (conn != null)
       return conn;
-
+    
     conn = new Mysqli(env, "localhost", "", "", db, 3306, "", 0, null, null);
 
-    env.setSpecialValue("caucho.mysql", conn);
+    env.setSpecialValue("caucho.mysql", env.wrapJava(conn));
 
     return conn;
   }

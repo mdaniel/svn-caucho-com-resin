@@ -47,10 +47,13 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.L10N;
+
 /**
  * Resin implementation of StandardMBean.
  */
 public class IntrospectionMBean implements DynamicMBean {
+  private static final L10N L = new L10N(IntrospectionMBean.class);
   private static final Logger log
     = Logger.getLogger(IntrospectionMBean.class.getName());
 
@@ -121,7 +124,9 @@ public class IntrospectionMBean implements DynamicMBean {
       if (method != null)
         return method.invoke(_impl, (Object []) null);
       else
-        throw new AttributeNotFoundException(attribute);
+        throw new AttributeNotFoundException(L.l("'{0}' is an unknown attribute in '{1}'",
+						 attribute,
+						 _mbeanInterface.getName()));
     } catch (IllegalAccessException e) {
       throw new MBeanException(e);
     } catch (InvocationTargetException e) {
@@ -366,17 +371,20 @@ v   * Returns the open mbean unmarshaller for the given return type.
 
         boolean isMatch = true;
         for (int j = length - 1; j >= 0; j--) {
-          if (! args[j].getName().equals(signature[j]))
+          if (signature != null && ! args[j].getName().equals(signature[j]))
             isMatch = false;
         }
 
-        if (isMatch)
+        if (isMatch) {
           return methods[i].invoke(_impl, params);
+	}
       }
 
-      if (actionName.equals("hashCode") && signature.length == 0)
+      if (actionName.equals("hashCode")
+	  && (signature == null || signature.length == 0))
         return _impl.hashCode();
-      else if (actionName.equals("toString") && signature.length == 0)
+      else if (actionName.equals("toString")
+	       && (signature == null || signature.length == 0))
         return _impl.toString();
       else
         return null;

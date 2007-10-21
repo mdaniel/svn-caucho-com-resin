@@ -28,6 +28,9 @@
 
 package com.caucho.log;
 
+import java.util.ArrayList;
+
+import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.QDate;
@@ -42,9 +45,35 @@ import java.io.IOException;
  * getStream instead of using the StreamImpl interface.
  */
 public class TimestampFilter extends StreamImpl {
+
+  static final String []DAY_NAMES = {
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+  };
+  static final String []MONTH_NAMES = {
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  };
+
+  private static final String []SHORT_WEEKDAY = {
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+  };
+  private static final String []LONG_WEEKDAY = {
+    "Sunday", "Monday", "Tuesday", "Wednesday",
+    "Thursday", "Friday", "Saturday"
+  };
+  private static final String []SHORT_MONTH = {
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  };
+  private static final String []LONG_MONTH = {
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  };
+  
   private WriteStream _stream;
   
-  private String _timestamp;
+  private String _timestampString;
+  private TimestampBase []_timestamp;
 
   private QDate _calendar = new QDate(true);
 
@@ -67,12 +96,70 @@ public class TimestampFilter extends StreamImpl {
   public TimestampFilter(WriteStream out, String timestamp)
   {
     _stream = out;
-    _timestamp = timestamp;
+    setTimestamp(timestamp);
   }
 
   public void setTimestamp(String timestamp)
   {
-    _timestamp = timestamp;
+    _timestampString = timestamp;
+
+    ArrayList<TimestampBase> timestampList = new ArrayList<TimestampBase>();
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < timestamp.length(); i++) {
+      char ch = timestamp.charAt(i);
+
+      if (ch == '%') {
+	ch = timestamp.charAt(i + 1);
+	switch (ch) {
+	case 'a': case 'A': case 'b': case 'B': case 'c': case 'd':
+	case 'H': case 'I': case 'j': case 'm': case 'M': case 'p':
+	case 'S': case 's': case 'W': case 'w': case 'x': case 'X':
+	case 'y': case 'Y': case 'Z': case 'z':
+	  if (sb.length() > 0)
+	    timestampList.add(new Text(sb.toString()));
+	  sb.setLength(0);
+	  timestampList.add(new Code(ch));
+	  i++;
+	  break;
+
+	case '{':
+	  if (sb.length() > 0)
+	    timestampList.add(new Text(sb.toString()));
+	  sb.setLength(0);
+	  for (i += 2;
+	       i < timestamp.length() && timestamp.charAt(i) != '}';
+	       i++) {
+	    sb.append((char) timestamp.charAt(i));
+	  }
+	  String type = sb.toString();
+	  sb.setLength(0);
+
+	  if ("thread".equals(type)) {
+	    timestampList.add(new ThreadTimestamp());
+	  }
+	  else if ("env".equals(type)) {
+	    timestampList.add(new EnvTimestamp());
+	  }
+	  else {
+	    sb.append("%{" + type + "}");
+	  }
+	  break;
+	  
+	default:
+	  sb.append('%');
+	  break;
+	}
+      }
+      else
+	sb.append(ch);
+    }
+
+    if (sb.length() > 0)
+      timestampList.add(new Text(sb.toString()));
+
+    _timestamp = new TimestampBase[timestampList.size()];
+    timestampList.toArray(_timestamp);
   }
 
   public void setStream(WriteStream stream)
@@ -119,7 +206,15 @@ public class TimestampFilter extends StreamImpl {
     
     for (int i = 0; i < length; i++) {
       if (_isLineBegin) {
-        _stream.print(_calendar.formatLocal(now, _timestamp));
+        // _stream.print(_calendar.formatLocal(now, _timestamp));
+	synchronized (_calendar) {
+	  _calendar.setGMTTime(now);
+	  
+	  int len = _timestamp.length;
+	  for (int j = 0; j < len; j++)
+	    _timestamp[j].print(_stream, _calendar);
+	}
+
         _isLineBegin = false;
       }
 
@@ -150,5 +245,191 @@ public class TimestampFilter extends StreamImpl {
   {
     if (_stream != null)
       _stream.close();
+  }
+
+  static class TimestampBase {
+    public void print(WriteStream out, QDate cal)
+      throws IOException
+    {
+    }
+  }
+
+  static class Text extends TimestampBase {
+    private final char []_text;
+
+    Text(String text)
+    {
+      _text = text.toCharArray();
+    }
+    
+    public void print(WriteStream out, QDate cal)
+      throws IOException
+    {
+      out.print(_text, 0, _text.length);
+    }
+  }
+
+  static class Code extends TimestampBase {
+    private final char _code;
+
+    Code(char code)
+    {
+      _code = code;
+    }
+    
+    public void print(WriteStream out, QDate cal)
+      throws IOException
+    {
+      switch (_code) {
+      case 'a':
+	out.print(SHORT_WEEKDAY[cal.getDayOfWeek() - 1]);
+	break;
+
+      case 'A':
+	out.print(LONG_WEEKDAY[cal.getDayOfWeek() - 1]);
+	break;
+
+      case 'b':
+	out.print(SHORT_MONTH[cal.getMonth()]);
+	break;
+
+      case 'B':
+	out.print(LONG_MONTH[cal.getMonth()]);
+	break;
+
+      case 'c':
+	out.print(cal.printLocaleDate());
+	break;
+
+      case 'd':
+	out.print((cal.getDayOfMonth() + 1) / 10);
+	out.print((cal.getDayOfMonth() + 1) % 10);
+	break;
+
+      case 'H':
+	int hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
+	out.print(hour / 10);
+	out.print(hour % 10);
+	break;
+
+      case 'I':
+	hour = (int) (cal.getTimeOfDay() / 3600000) % 12;
+	if (hour == 0)
+	  hour = 12;
+	out.print(hour / 10);
+	out.print(hour % 10);
+	break;
+
+      case 'j':
+	out.print((cal.getDayOfYear() + 1) / 100);
+	out.print((cal.getDayOfYear() + 1) / 10 % 10);
+	out.print((cal.getDayOfYear() + 1) % 10);
+	break;
+
+      case 'm':
+	out.print((cal.getMonth() + 1) / 10);
+	out.print((cal.getMonth() + 1) % 10);
+	break;
+
+      case 'M':
+	out.print((cal.getTimeOfDay() / 600000) % 6);
+	out.print((cal.getTimeOfDay() / 60000) % 10);
+	break;
+
+      case 'p':
+	hour = (int) (cal.getTimeOfDay() / 3600000) % 24;
+	if (hour < 12)
+	  out.print("am");
+	else
+	  out.print("pm");
+	break;
+
+      case 'S':
+	out.print((cal.getTimeOfDay() / 10000) % 6);
+	out.print((cal.getTimeOfDay() / 1000) % 10);
+	break;
+
+      case 's':
+	out.print((cal.getTimeOfDay() / 100) % 10);
+	out.print((cal.getTimeOfDay() / 10) % 10);
+	out.print(cal.getTimeOfDay() % 10);
+	break;
+
+      case 'W':
+	int week = cal.getWeek();
+	out.print((week + 1) / 10);
+	out.print((week + 1) % 10);
+	break;
+
+      case 'w':
+	out.print(cal.getDayOfWeek() - 1);
+	break;
+
+      case 'x':
+        out.print(cal.printShortLocaleDate());
+        break;
+        
+      case 'X':
+        out.print(cal.printShortLocaleTime());
+        break;
+    
+      case 'y':
+	{
+	  int year = cal.getYear();
+	  out.print(year / 10 % 10);
+	  out.print(year % 10);
+	  break;
+	}
+
+      case 'Y':
+	{
+	  int year = cal.getYear();
+	  out.print(year / 1000 % 10);
+	  out.print(year / 100 % 10);
+	  out.print(year / 10 % 10);
+	  out.print(year % 10);
+	  break;
+	}
+
+      case 'Z':
+        if (cal.getZoneName() == null)
+          out.print("GMT");
+        else
+          out.print(cal.getZoneName());
+	break;
+
+      case 'z':
+        long offset = cal.getZoneOffset();
+
+        if (offset < 0) {
+          out.print("-");
+          offset = - offset;
+        }
+        else
+          out.print("+");
+
+        out.print((offset / 36000000) % 10);
+        out.print((offset / 3600000) % 10);
+        out.print((offset / 600000) % 6);
+        out.print((offset / 60000) % 10);
+	break;
+      }
+    }
+  }
+
+  static class ThreadTimestamp extends TimestampBase {
+    public void print(WriteStream out, QDate cal)
+      throws IOException
+    {
+      out.print(Thread.currentThread().getName());
+    }
+  }
+
+  static class EnvTimestamp extends TimestampBase {
+    public void print(WriteStream out, QDate cal)
+      throws IOException
+    {
+      out.print(Environment.getEnvironmentName());
+    }
   }
 }

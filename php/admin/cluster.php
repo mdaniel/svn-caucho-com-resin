@@ -38,8 +38,6 @@ echo "<th>Name</th>";
 echo "<th>Uptime</th>";
 echo "<th>Free Memory</th>";
 echo "<th>CPU Avg</th>";
-echo "<th>Cache Miss</th>";
-echo "<th>Block Miss</th>";
 echo "<th>Thread</th>";
 echo "</tr>";
 
@@ -72,7 +70,7 @@ foreach ($resin->Clusters as $cluster) {
       $live_count++;
 
       $start_time = $sub_server->StartTime->time / 1000;
-      $now = time(0);
+      $now = $sub_server->CurrentTime->time / 1000;
       $uptime = $now - $start_time;
 
       if ($uptime < 12 * 3600)
@@ -111,27 +109,6 @@ foreach ($resin->Clusters as $cluster) {
     else {
       echo "<td></td>";
       echo "<td></td>";
-      echo "<td></td>";
-    }
-
-    $proxy_cache = $sub_mbean_server->lookup("resin:type=ProxyCache");
-    if ($proxy_cache) {
-      echo "<td>";
-      echo format_miss_ratio($proxy_cache->HitCountTotal,
-                             $proxy_cache->MissCountTotal);
-      echo "</td>";
-    }
-    else {
-      echo "<td></td>";
-    }
-
-    $block_cache = $sub_mbean_server->lookup("resin:type=BlockManager");
-    if ($block_cache) {
-      echo "<td>" . format_miss_ratio($block_cache->HitCountTotal,
-                                      $block_cache->MissCountTotal)
-                  . "</td>";
-    }
-    else {
       echo "<td></td>";
     }
 
@@ -229,13 +206,89 @@ foreach ($resin->Clusters as $cluster) {
 
 echo "</table>";
 
+echo "<h2>Shutdown Messages</h2>";
+
+echo "<table class='data'>";
+
+foreach ($resin->Clusters as $cluster) {
+
+  if (empty($cluster->Servers))
+    continue;
+
+  echo "<tr><td class='group'>$cluster->Name</td></tr>\n";
+
+  sort($client_names);
+
+  $row = 0;
+  foreach (server_names($server, $cluster) as $name) {
+    $sub_mbean_server = new MBeanServer($name);
+
+    $sub_server = $sub_mbean_server->lookup("resin:type=Server");
+
+    if (! $sub_server) {
+      echo "<tr class='" . row_style($row++) . "'>";
+      echo "<td class='itemfail'>$name</td>";
+      echo "</tr>";
+      continue;
+    }
+
+    echo "<tr>";
+    echo "<td class='item'>$name</td>";
+    echo "</tr>";
+
+    echo "<tr><td>";
+    //
+    // startup
+    //
+    $start_time = $sub_server->StartTime->time / 1000;
+    $logger_manager = $sub_mbean_server->lookup("resin:type=LoggerManager");
+
+    if (! $logger_manager)
+      continue;
+
+    $messages = $logger_manager->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
+resin_var_dump($messages);
+    echo "<table class='data' width='100%'>\n";
+
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+
+    // mark the start time
+    echo "<tr class='warning'>";
+    echo "  <td class='date'>";
+    echo strftime("%Y-%m-%d %H:%M:%S", $start_time);
+    echo "</td>";
+    echo "  <td class='level'></td>";
+    echo "  <td class='message'>Start Time</td>";
+    echo "</tr>";
+
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars($message->message) . "</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+    echo "</table>\n";
+
+    echo "</td></tr>";
+  }
+}
+
+echo "</table>";
+
 if ($live_count < 2) {
   echo "<p>The cluster report requires Resin Professional and enabled remote debugging</>\n";
 
   echo "<h3>resin.conf</h3>";
   echo "<pre>\n";
   echo "&lt;resin xmlns='http://caucho.com/ns/resin'>\n";
-  echo "  &lt;management enable-remote='true'>\n";
+  echo "  &lt;management remote-enable-cookie='j9N3z19p3'>\n";
   echo "  ...\n";
   echo "  &lt;cluster id='...'>\n";
   echo "    ...\n";

@@ -939,7 +939,7 @@ public class FileModule extends AbstractQuercusModule {
 
     StringValue bb = env.createBinaryBuilder();
 
-    bb.appendReadAll(is, Long.MAX_VALUE);
+    bb.appendReadAll(is, maxLen);
 
     return bb;
   }

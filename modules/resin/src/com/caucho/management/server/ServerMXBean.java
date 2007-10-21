@@ -115,6 +115,12 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   public String getState();
 
   /**
+   * Returns the current time according to the server.
+   */
+  @Description("The current time")
+  public Date getCurrentTime();
+
+  /**
    * Returns the last start time.
    */
   @Description("The time that this instance was last started or restarted")

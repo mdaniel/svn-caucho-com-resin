@@ -172,6 +172,35 @@ table.data {
   background : #f99;
 }
 
+/**
+  * scrolling table
+  */
+
+tbody.scroll {
+  display : block;
+  overflow : auto;
+  height : 15em;
+  width : 100%;
+}
+
+thead.scroll {
+  display : block;
+  width : 100%;
+}
+
+td.date {
+  width : 11em;
+}
+
+td.level {
+  width : 4em;
+}
+
+td.message {
+  white-space : pre;
+  width : auto;
+}
+
 td.leftnav {
   background : #b9cef7;
   color : black;
@@ -221,6 +250,10 @@ th.fail {
 }
 
 .warn {
+  background : #fe9;
+}
+
+.warning td {
   background : #fe9;
 }
 

@@ -173,14 +173,15 @@ public class DirectoryLoader extends Loader implements Dependency
     } catch (IOException e) {
     }
 
-    if (_fileNames.length != list.length ||
-        ((_fileNames == null) != (list == null)))
+    if (_fileNames.length != list.length
+	|| ((_fileNames == null) != (list == null)))
       return true;
 
     if (_fileNames != null) {
-      for (int i = 0; i < _fileNames.length; i++)
+      for (int i = 0; i < _fileNames.length; i++) {
         if (! _fileNames[i].equals(list[i]))
           return true;
+      }
     }
 
     return _dependencyList.isModified();

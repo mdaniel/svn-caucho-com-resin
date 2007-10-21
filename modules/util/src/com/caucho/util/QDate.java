@@ -456,6 +456,14 @@ public class QDate {
   }
 
   /**
+   * Returns the name of the timezone
+   */
+  public String getZoneName()
+  {
+    return _zoneName;
+  }
+
+  /**
    * Returns true for DST
    */
   public boolean isDST()
