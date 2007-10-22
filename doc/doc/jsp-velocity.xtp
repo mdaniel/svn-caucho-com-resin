@@ -82,11 +82,22 @@ can become confusing.</p>
 
 
 <example title='Enabling velocity for a web-app'>
-&lt;web-app>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
   &lt;jsp velocity-enabled='true'/>
   ...
 &lt;/web-app>
 </example>
+
+<s2 title="Older web applications and JSTL">
+<p>
+Resin uses the format of the web.xml to determine the specification version for
+the web application.  Older versions of the specification did not support JSTL
+syntax, which is also used for Velocity syntax (see <a href="#expressions">expressions</a>, below).
+It is important when using velocity syntax that the WEB-INF/web.xml and/or
+WEB-INF/resin-web.xml files indicate the proper specification version.  The
+easiest way to do this is to specify the top level element as <code>&lt;web-app xmlns="http://caucho.com/ns/resin"></code>
+</p>
+</s2>
 
 </s1>
 
