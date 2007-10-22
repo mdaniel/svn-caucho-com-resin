@@ -1,0 +1,210 @@
+/*
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jms.listener;
+
+import java.util.ArrayList;
+import java.util.logging.*;
+
+import javax.jms.*;
+
+import com.caucho.jms2.message.*;
+import com.caucho.jms.queue.*;
+
+import com.caucho.util.ThreadPool;
+
+/**
+ * Manages the listeners for a queue.
+ */
+public class ListenerManager
+{
+  private static final Logger log
+    = Logger.getLogger(ListenerManager.class.getName());
+
+  private AbstractQueue _queue;
+  
+  private ArrayList<MessageListener> _listenerList
+    = new ArrayList<MessageListener>();
+  
+  private ListenerEntry []_idleStack = new ListenerEntry[0];
+  private int _idleTop;
+
+  public ListenerManager(AbstractQueue queue)
+  {
+    _queue = queue;
+  }
+
+  public void addListener(MessageListener listener)
+  {
+    synchronized (this) {
+      _listenerList.add(listener);
+      
+      ListenerEntry []newIdle;
+
+      if (_idleStack.length < _listenerList.size()) {
+        newIdle = new ListenerEntry[_idleStack.length + 1];
+
+        System.arraycopy(_idleStack, 0, newIdle, 0, _idleStack.length);
+        
+        _idleStack = newIdle;
+      }
+
+      _idleStack[_idleTop++] = new ListenerEntry(listener);
+
+      try {
+        // lock should be okay, since _queue.receive won't lock listener
+        
+        MessageImpl msg;
+        while (_idleTop > 0 && (msg = _queue.receive(0)) != null) {
+          send(msg);
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString());
+      }
+    }
+
+  }
+
+  /**
+   * Returns true if the manager has at least one listener.
+   */
+  public boolean hasListener()
+  {
+    return _listenerList.size() > 0;
+  }
+
+  /**
+   * Removes the listener from the list.
+   */
+  public void removeListener(MessageListener listener)
+  {
+    synchronized (this) {
+      _listenerList.remove(listener);
+
+      for (int i = 0; i < _idleTop; i++) {
+        ListenerEntry entry = _idleStack[i];
+
+        if (entry.getListener() == listener) {
+          System.arraycopy(_idleStack, i + 1, _idleStack, i,
+                           _idleStack.length - i - 1);
+
+          _idleTop--;
+          break;
+        }
+      }
+    }
+  }
+
+  public boolean hasIdle()
+  {
+    return _idleTop > 0;
+  }
+
+  public SendStatus send(MessageImpl msg)
+  {
+    ListenerEntry entry = null;
+    
+    synchronized (this) {
+      if (_idleTop > 0) {
+	entry = _idleStack[--_idleTop];
+      }
+    }
+
+    if (entry != null) {
+      entry.send(msg);
+      return SendStatus.OK;
+    }
+    else
+      return SendStatus.FAIL;
+  }
+
+  void toIdle(ListenerEntry entry)
+  {
+    synchronized (this) {
+      try {
+        MessageImpl msg = _queue.receive(0);
+
+        if (msg != null) {
+          entry.send(msg);
+          return;
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString());
+      }
+      
+      _idleStack[_idleTop++] = entry;
+    }
+  }
+
+  public void close()
+  {
+  }
+
+  class ListenerEntry implements Runnable {
+    private final MessageListener _listener;
+    
+    private Message _msg;
+
+    ListenerEntry(MessageListener listener)
+    {
+      _listener = listener;
+    }
+
+    MessageListener getListener()
+    {
+      return _listener;
+    }
+
+    /**
+     * Queue the message for sending.
+     */
+    void send(MessageImpl msg)
+    {
+      _msg = msg;
+
+      ThreadPool.getThreadPool().schedule(this);
+    }
+
+    /**
+     * Runnable to process the message.
+     */
+    public void run()
+    {
+      try {
+	Message msg = _msg;
+	_msg = null;
+	
+	_listener.onMessage(msg);
+      } finally {
+	toIdle(this);
+      }
+    }
+  }
+}
+
