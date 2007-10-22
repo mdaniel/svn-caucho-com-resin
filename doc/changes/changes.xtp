@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>Quercus: updated support for large binary data (php5) (#2101, rep by koreth)</li>
 <li>Quercus: stubs for getrusage, memory_get_usage, memory_get_peak_usage (#2102, rep by koreth)</li>
 <li>Quercus: mysql_close was automatically allocating connections (#2103, rep by koreth)</li>
 <li>logging now allows %{thread} and %{env}</li>

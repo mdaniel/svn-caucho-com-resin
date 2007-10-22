@@ -480,7 +480,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new BinaryBuilderValue();
     else
-      return new StringBuilderValue();
+      return new LargeStringBuilderValue();
   }
 
   /**

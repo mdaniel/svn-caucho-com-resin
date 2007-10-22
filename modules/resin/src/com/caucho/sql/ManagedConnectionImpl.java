@@ -658,8 +658,12 @@ public class ManagedConnectionImpl
 	conn.setReadOnly(false);
       _readOnly = false;
 
-      if (_catalog != null && ! _catalog.equals(_catalogOrig))
+      if (_catalog != null
+	  && ! _catalog.equals(_catalogOrig)
+	  && _catalogOrig != null
+	  && ! "".equals(_catalogOrig)) {
 	conn.setCatalog(_catalogOrig);
+      }
       _catalog = null;
 
       if (_typeMap != null)

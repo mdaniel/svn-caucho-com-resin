@@ -937,7 +937,7 @@ public class FileModule extends AbstractQuercusModule {
 
     BinaryInput is = (BinaryInput) s;
 
-    StringValue bb = env.createBinaryBuilder();
+    StringValue bb = env.createLargeBinaryBuilder();
 
     bb.appendReadAll(is, maxLen);
 
