@@ -29,7 +29,7 @@
 
 package com.caucho.jms2.message;
 
-import com.caucho.jms2.connection.SessionImpl;
+import com.caucho.jms.connection.SessionImpl;
 import com.caucho.hessian.io.*;
 import com.caucho.vfs.*;
 import com.caucho.util.*;

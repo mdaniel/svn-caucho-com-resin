@@ -34,8 +34,8 @@ import java.util.logging.*;
 import javax.jms.*;
 
 import com.caucho.jms2.message.*;
-import com.caucho.jms2.listener.*;
-import com.caucho.jms2.queue.*;
+import com.caucho.jms.listener.*;
+import com.caucho.jms.queue.*;
 
 import com.caucho.util.Alarm;
 
