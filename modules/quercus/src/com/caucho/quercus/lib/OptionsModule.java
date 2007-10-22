@@ -340,6 +340,44 @@ public class OptionsModule extends AbstractQuercusModule {
     return Thread.currentThread().getId();
   }
 
+  /**
+   * Stub value for getrusage.
+   */
+  public static Value getrusage(Env env, @Optional int who)
+  {
+    ArrayValue value = new ArrayValueImpl();
+
+    value.put(env.createString("ru_inblock"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_outblock"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_msgsnd"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_msgrcv"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_maxrss"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_ixrss"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_idrss"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_minflt"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_majflt"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_nsignals"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_nvcsw"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_nswap"),
+	      LongValue.create(0));
+    value.put(env.createString("ru_utime.tv_sec"), LongValue.create(0));
+    value.put(env.createString("ru_utime.tv_usec"), LongValue.create(0));
+    value.put(env.createString("ru_stime.tv_sec"), LongValue.create(0));
+    value.put(env.createString("ru_stime.tv_usec"), LongValue.create(0));
+
+    return value;
+  }
 
   /**
    * Sets an initialization value.
@@ -441,6 +479,28 @@ public class OptionsModule extends AbstractQuercusModule {
       return oldValue;
     else
       return StringValue.EMPTY;
+  }
+
+  /**
+   * Stub value for memory get usage.
+   */
+  public static Value memory_get_peak_usage(Env env, @Optional boolean real)
+  {
+    if (com.caucho.util.Alarm.isTest())
+      return LongValue.create(0);
+    else
+      return LongValue.create(Runtime.getRuntime().maxMemory());
+  }
+
+  /**
+   * Stub value for memory get usage.
+   */
+  public static Value memory_get_usage(Env env, @Optional boolean real)
+  {
+    if (com.caucho.util.Alarm.isTest())
+      return LongValue.create(0);
+    else
+      return LongValue.create(Runtime.getRuntime().maxMemory());
   }
 
   /**
