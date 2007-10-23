@@ -748,10 +748,12 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Sets the time limit
+   * Sets the time limit and resets the timeout.
    */
   public static Value set_time_limit(Env env, long seconds)
   {
+    env.resetTimeout();
+    
     env.setTimeLimit(seconds * 1000L);
 
     return NullValue.NULL;
@@ -764,6 +766,12 @@ public class OptionsModule extends AbstractQuercusModule {
                                       String version2,
                                       @Optional("cmp") String op)
   {
+    if (version1 == null)
+      version1 = "";
+    
+    if (version2 == null)
+      version2 = "";
+    
     ArrayList<Value> expanded1 = expandVersion(version1);
     ArrayList<Value> expanded2 = expandVersion(version2);
 
@@ -894,7 +902,7 @@ public class OptionsModule extends AbstractQuercusModule {
   static final IniDefinition INI_ENABLE_DL
     = _iniDefinitions.add("enable_dl", true, PHP_INI_SYSTEM);
   static final IniDefinition INI_MAX_EXECUTION_TIME
-    = _iniDefinitions.add("max_execution_time", "30", PHP_INI_ALL);
+    = _iniDefinitions.add("max_execution_time", "600", PHP_INI_ALL);
   static final IniDefinition INI_MAX_INPUT_TIME
     = _iniDefinitions.add("max_input_time", "-1", PHP_INI_PERDIR);
   static final IniDefinition INI_MAGIC_QUOTES_GPC

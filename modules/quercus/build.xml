@@ -63,7 +63,7 @@
   <target name="php" depends="init">
     <!-- build module -->
     <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="quercusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcusrcus"/>
+      <param name="module.name" value="quercus"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
