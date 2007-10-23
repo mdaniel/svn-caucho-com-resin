@@ -68,7 +68,6 @@ abstract public class JavaAdapter extends ArrayValue
     _env = env;
     _object = object;
     _classDef = def;
-
   }
 
   public Env getEnv()
@@ -705,7 +704,7 @@ abstract public class JavaAdapter extends ArrayValue
   @Override
   public Value getField(Env env, StringValue name)
   {
-    return _classDef.getField(env, _object, name);
+    return _classDef.getField(env, this, name);
   }
 
   @Override
@@ -713,7 +712,7 @@ abstract public class JavaAdapter extends ArrayValue
                         StringValue name,
                         Value value)
   {
-    return _classDef.putField(env, _object, name, value);
+    return _classDef.putField(env, this, name, value);
   }
 
   /**
@@ -745,7 +744,7 @@ abstract public class JavaAdapter extends ArrayValue
                           int hash, char []name, int nameLen,
                           Expr []args)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
+    return _classDef.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -755,7 +754,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value []args)
   {
-    return _classDef.callMethod(env, _object,
+    return _classDef.callMethod(env, this,
                                 hash, name, nameLen,
                                 args);
   }
@@ -766,7 +765,7 @@ abstract public class JavaAdapter extends ArrayValue
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen);
+    return _classDef.callMethod(env, this, hash, name, nameLen);
   }
 
   /**
@@ -776,7 +775,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1);
   }
 
@@ -787,7 +786,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2);
   }
 
@@ -798,7 +797,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3);
   }
 
@@ -809,7 +808,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4);
   }
 
@@ -820,7 +819,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4, a5);
   }
 
@@ -832,7 +831,7 @@ abstract public class JavaAdapter extends ArrayValue
                              int hash, char []name, int nameLen,
                              Expr []args)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
+    return _classDef.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -843,7 +842,7 @@ abstract public class JavaAdapter extends ArrayValue
                              int hash, char []name, int nameLen,
                              Value []args)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
+    return _classDef.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -852,7 +851,7 @@ abstract public class JavaAdapter extends ArrayValue
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen);
+    return _classDef.callMethod(env, this, hash, name, nameLen);
   }
 
   /**
@@ -863,7 +862,7 @@ abstract public class JavaAdapter extends ArrayValue
                              int hash, char []name, int nameLen,
                              Value a1)
   {
-    return _classDef.callMethod(env, _object,
+    return _classDef.callMethod(env, this,
                                 hash, name, nameLen,
                                 a1);
   }
@@ -875,7 +874,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2);
   }
 
@@ -886,7 +885,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3);
   }
 
@@ -897,7 +896,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3, Value a4)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4);
   }
 
@@ -908,7 +907,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4, a5);
   }
   

@@ -138,9 +138,9 @@ abstract public class JavaInvoker
       boolean hasRestArgs = false;
       boolean isRestReference = false;
 
-      if (_param.length > 0 &&
-          (_param[_param.length - 1].equals(Value[].class) ||
-	       _param[_param.length - 1].equals(Object[].class))) {
+      if (_param.length > 0
+	  && (_param[_param.length - 1].equals(Value[].class)
+	      || _param[_param.length - 1].equals(Object[].class))) {
         hasRestArgs = true;
 
         for (Annotation ann : _paramAnn[_param.length - 1]) {
@@ -467,28 +467,8 @@ abstract public class JavaInvoker
 
     return cost;
   }
-  
-  public Value call(Env env, Value []value)
-  {
-    return call(env, env.getThis(), value);
-  }
 
-  /**
-   * Evaluates the function, returning a copy.  Java methods don't
-   * need the copy.
-   */
-  public Value callCopy(Env env, Value []args)
-  {
-    return call(env, args);
-  }
-
-  public Value call(Env env, Value obj, Value []value)
-  {
-    // php/0cl1
-    return call(env, obj.toJavaObject(), value);
-  }
-
-  public Value call(Env env, Object obj, Expr []exprs)
+  public Value callMethod(Env env, Value qThis, Expr []exprs)
   {
     if (! _isInit)
       init();
@@ -504,10 +484,12 @@ abstract public class JavaInvoker
 
     if (_hasEnv)
       values[k++] = env;
+    Object obj = null;
     if (_hasThis) {
-      values[k++] = (ObjectValue) obj;
-      obj = null;
+      values[k++] = qThis;
     }
+    else
+      obj = qThis.toJavaObject();
 
     for (int i = 0; i < _marshalArgs.length; i++) {
       Expr expr;
@@ -552,7 +534,12 @@ abstract public class JavaInvoker
     return _unmarshalReturn.unmarshal(env, result);
   }
 
-  public Value call(Env env, Object obj, Value []args)
+  public Value call(Env env, Value []args)
+  {
+    return callMethod(env, null, args);
+  }
+
+  public Value callMethod(Env env, Value qThis, Value []args)
   {
     if (! _isInit)
       init();
@@ -566,9 +553,10 @@ abstract public class JavaInvoker
     if (_hasEnv)
       javaArgs[k++] = env;
 
+    Object obj = qThis != null ? qThis.toJavaObject() : null;
+    
     if (_hasThis) {
-      javaArgs[k++] = (ObjectValue) obj;
-      obj = null;
+      javaArgs[k++] = qThis;
     }
 
     for (int i = 0; i < _marshalArgs.length; i++) {
@@ -615,38 +603,6 @@ abstract public class JavaInvoker
     Object result = invoke(obj, javaArgs);
 
     return _unmarshalReturn.unmarshal(env, result);
-  }
-
-  public Value call(Env env, Object obj)
-  {
-    return call(env, obj, new Value[0]);
-  }
-
-  public Value call(Env env, Object obj, Value a1)
-  {
-    return call(env, obj, new Value[] {a1});
-  }
-
-  public Value call(Env env, Object obj, Value a1, Value a2)
-  {
-    return call(env, obj, new Value[]{a1, a2});
-  }
-
-  public Value call(Env env, Object obj, Value a1, Value a2, Value a3)
-  {
-    return call(env, obj, new Value[]{a1, a2, a3});
-  }
-
-  public Value call(Env env, Object obj,
-                    Value a1, Value a2, Value a3, Value a4)
-  {
-    return call(env, obj, new Value[]{a1, a2, a3, a4});
-  }
-
-  public Value call(Env env, Object obj,
-                    Value a1, Value a2, Value a3, Value a4, Value a5)
-  {
-    return call(env, obj, new Value[]{a1, a2, a3, a4, a5});
   }
 
   abstract public Object invoke(Object obj, Object []args);

@@ -172,8 +172,9 @@ abstract public class ObjectValue extends Value {
   @Override
   public Value put(Value key, Value value)
   {
-    // php/0d94
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+    
+    // php/0d94
 
     if (delegate != null)
       return delegate.put(this, key, value);
@@ -187,8 +188,9 @@ abstract public class ObjectValue extends Value {
   @Override
   public Value put(Value value)
   {
-    // php/0d94
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+    
+    // php/0d94
 
     if (delegate != null)
       return delegate.put(this, value);

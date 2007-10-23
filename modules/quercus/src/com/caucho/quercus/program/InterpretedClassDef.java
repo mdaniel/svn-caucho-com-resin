@@ -123,10 +123,10 @@ public class InterpretedClassDef extends ClassDef
     }
     
     if (_getField != null)
-      cl.setGetField(_getField);
+      cl.setFieldSet(_getField);
     
     if (_setField != null)
-      cl.setSetField(_setField);
+      cl.setFieldSet(_setField);
     
     if (_call != null)
       cl.setCall(_call);

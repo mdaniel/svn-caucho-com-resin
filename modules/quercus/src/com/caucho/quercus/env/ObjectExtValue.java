@@ -253,10 +253,10 @@ public class ObjectExtValue extends ObjectValue
       if (oldValue != null)
 	return oldValue;
       
-      AbstractFunction setField = _quercusClass.getSetField();
+      AbstractFunction fieldSet = _quercusClass.getFieldSet();
     
-      if (setField != null)
-        return setField.callMethod(env, this, name, value);
+      if (fieldSet != null)
+        return fieldSet.callMethod(env, this, name, value);
       else
 	entry = createEntry(name);
     }
@@ -356,6 +356,8 @@ public class ObjectExtValue extends ObjectValue
 
 	if (next != null)
 	  next._prev = prev;
+
+	_size--;
 
         return;
       }

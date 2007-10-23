@@ -49,7 +49,6 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr = objExpr;
     
     _nameExpr = nameExpr;
-    Thread.dumpStack();
   }
 
   public FieldVarGetExpr(Expr objExpr, Expr nameExpr)
@@ -57,7 +56,6 @@ public class FieldVarGetExpr extends AbstractVarExpr {
     _objExpr = objExpr;
     
     _nameExpr = nameExpr;
-    Thread.dumpStack();
   }
 
   /**

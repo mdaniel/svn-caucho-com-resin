@@ -208,7 +208,7 @@ public class JavaValue
   @Override
   public Value getField(Env env, StringValue name)
   {
-    Value value = _classDef.getField(env, _object, name);
+    Value value = _classDef.getField(env, this, name);
 
     if (value != null)
       return value;
@@ -222,7 +222,7 @@ public class JavaValue
   @Override
   public Value putField(Env env, StringValue name, Value value)
   {
-    Value oldValue = _classDef.putField(env, _object, name, value);
+    Value oldValue = _classDef.putField(env, this, name, value);
 
     if (oldValue != null)
       return oldValue;
@@ -274,7 +274,7 @@ public class JavaValue
                           int hash, char []name, int nameLen,
                           Expr []args)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 args);
   }
 
@@ -286,7 +286,7 @@ public class JavaValue
                           int hash, char []name, int nameLen,
                           Value []args)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
+    return _classDef.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -295,7 +295,7 @@ public class JavaValue
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen);
+    return _classDef.callMethod(env, this, hash, name, nameLen);
   }
 
   /**
@@ -305,7 +305,7 @@ public class JavaValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, a1);
+    return _classDef.callMethod(env, this, hash, name, nameLen, a1);
   }
 
   /**
@@ -315,7 +315,7 @@ public class JavaValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, a1, a2);
+    return _classDef.callMethod(env, this, hash, name, nameLen, a1, a2);
   }
 
   /**
@@ -325,7 +325,7 @@ public class JavaValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, a1, a2, a3);
+    return _classDef.callMethod(env, this, hash, name, nameLen, a1, a2, a3);
   }
 
   /**
@@ -335,7 +335,7 @@ public class JavaValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4);
   }
 
@@ -346,7 +346,7 @@ public class JavaValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4, a5);
   }
 
@@ -357,7 +357,7 @@ public class JavaValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Expr []args)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
+    return _classDef.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -367,7 +367,7 @@ public class JavaValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value []args)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
+    return _classDef.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
@@ -376,7 +376,7 @@ public class JavaValue
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen);
+    return _classDef.callMethod(env, this, hash, name, nameLen);
   }
 
   /**
@@ -386,7 +386,7 @@ public class JavaValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, a1);
+    return _classDef.callMethod(env, this, hash, name, nameLen, a1);
   }
 
   /**
@@ -396,7 +396,7 @@ public class JavaValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, a1, a2);
+    return _classDef.callMethod(env, this, hash, name, nameLen, a1, a2);
   }
 
   /**
@@ -406,7 +406,7 @@ public class JavaValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen, a1, a2, a3);
+    return _classDef.callMethod(env, this, hash, name, nameLen, a1, a2, a3);
   }
 
   /**
@@ -416,7 +416,7 @@ public class JavaValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3, Value a4)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4);
   }
 
@@ -427,7 +427,7 @@ public class JavaValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _classDef.callMethod(env, _object, hash, name, nameLen,
+    return _classDef.callMethod(env, this, hash, name, nameLen,
                                 a1, a2, a3, a4, a5);
   }
 
@@ -546,8 +546,6 @@ public class JavaValue
     setQuercusClass(_env.createQuercusClass(_classDef, null));
 
     _object = in.readObject();
-
   }
-
 }
 

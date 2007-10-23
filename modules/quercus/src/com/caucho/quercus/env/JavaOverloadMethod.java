@@ -137,23 +137,9 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
   /**
    * Evaluates the function.
-   * XXX: define getBestFitMethod(Expr []args)
    */
-  public Value call(Env env, Object obj, Expr []args)
-  {
-    Value []values = new Value[args.length];
-
-    for (int i = 0; i < args.length; i++) {
-      values[i] = args[i].eval(env);
-    }
-    
-    return call(env, obj, values);
-  }
-
-  /**
-   * Evaluates the function.
-   */
-  public Value call(Env env, Object obj, Value []args)
+  @Override
+  public Value callMethod(Env env, Value qThis, Value []args)
   {
     if (_methodTable.length <= args.length) {
 
@@ -163,7 +149,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
         AbstractJavaMethod method =
           getBestFitJavaMethod(null, _restMethodTable, args);
 
-        return method.call(env, obj, args);
+        return method.callMethod(env, qThis, args);
       }
     }
     else {
@@ -171,12 +157,12 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
       if (methods != null) {
 	if (methods.length == 1)
-	  return methods[0].call(env, obj, args);
+	  return methods[0].callMethod(env, qThis, args);
 	else {
 	  AbstractJavaMethod method
 	    = getBestFitJavaMethod(methods, _restMethodTable, args);
 
-	  return method.call(env, obj, args);
+	  return method.callMethod(env, qThis, args);
 	}
       }
       else {
@@ -187,7 +173,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 	AbstractJavaMethod method
 	  = getBestFitJavaMethod(methods, _restMethodTable, args);
 
-	return method.call(env, obj, args);
+	return method.callMethod(env, qThis, args);
       }
     }
   }
@@ -195,9 +181,10 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   /**
    * Returns the Java function that matches the args passed in.
    */
-  private AbstractJavaMethod getBestFitJavaMethod(AbstractJavaMethod []methods,
-                                                  AbstractJavaMethod [][]restMethodTable,
-                                                  Value []args)
+  private AbstractJavaMethod
+    getBestFitJavaMethod(AbstractJavaMethod []methods,
+			 AbstractJavaMethod [][]restMethodTable,
+			 Value []args)
   {
 
     AbstractJavaMethod minCostJavaMethod = null;

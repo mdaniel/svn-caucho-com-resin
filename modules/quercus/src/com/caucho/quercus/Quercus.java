@@ -1401,17 +1401,15 @@ public class Quercus
   {
     ModuleContext context = getLocalContext();
 
+    /*
     if (type.isAnnotationPresent(ClassImplementation.class)) {
       if (javaClassDefClass != null)
         throw new UnimplementedException();
 
       ClassDef def = context.addClassImpl(name, type, extension);
-      /*
-      _staticClasses.put(name, def);
-      _lowerStaticClasses.put(name.toLowerCase(), def);
-      */
     }
     else {
+    */
       JavaClassDef def = context.addClass(name, type,
 					  extension, javaClassDefClass);
 
@@ -1422,7 +1420,7 @@ public class Quercus
       _staticClasses.put(name, def);
       _lowerStaticClasses.put(name.toLowerCase(), def);
       */
-    }
+      // }
 
     if (extension != null)
       _extensionSet.add(extension);
@@ -1449,12 +1447,19 @@ public class Quercus
 
     ModuleContext context = getLocalContext();
 
-    JavaImplClassDef def = context.addClassImpl(name, type, extension);
+    // JavaImplClassDef def = context.addClassImpl(name, type, extension);
+    try {
+      JavaClassDef def = context.addClass(name, type, extension, null);
 
-    /*
-    _staticClasses.put(name, def);
-    _lowerStaticClasses.put(name.toLowerCase(), def);
-    */
+      /*
+	_staticClasses.put(name, def);
+	_lowerStaticClasses.put(name.toLowerCase(), def);
+      */
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**

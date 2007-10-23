@@ -63,8 +63,9 @@ public class QuercusClass {
 
   private AbstractFunction _constructor;
 
-  private AbstractFunction _getField;
-  private AbstractFunction _setField;
+  private AbstractFunction _fieldGet;
+  private AbstractFunction _fieldSet;
+  
   private AbstractFunction _call;
 
   private ArrayDelegate _arrayDelegate;
@@ -294,27 +295,35 @@ public class QuercusClass {
   }
 
   /**
-   * Sets the __get
+   * Sets the __fieldGet
    */
-  public void setGetField(AbstractFunction fun)
+  public void setFieldGet(AbstractFunction fun)
   {
-    _getField = fun;
+    _fieldGet = fun;
   }
 
   /**
-   * Sets the __set
+   * Returns the __fieldGet
    */
-  public void setSetField(AbstractFunction fun)
+  public AbstractFunction getFieldGet()
   {
-    _setField = fun;
+    return _fieldGet;
   }
 
   /**
-   * Sets the __set
+   * Sets the __fieldSet
    */
-  public AbstractFunction getSetField()
+  public void setFieldSet(AbstractFunction fun)
   {
-    return _setField;
+    _fieldSet = fun;
+  }
+
+  /**
+   * Returns the __fieldSet
+   */
+  public AbstractFunction getFieldSet()
+  {
+    return _fieldSet;
   }
 
   /**
@@ -626,8 +635,8 @@ public class QuercusClass {
    */
   public Value getField(Env env, Value qThis, StringValue name)
   {
-    if (_getField != null)
-      return _getField.callMethod(env, qThis, name);
+    if (_fieldGet != null)
+      return _fieldGet.callMethod(env, qThis, name);
     else
       return UnsetValue.UNSET;
   }
@@ -637,8 +646,8 @@ public class QuercusClass {
    */
   public void setField(Env env, Value qThis, StringValue name, Value value)
   {
-    if (_setField != null)
-      _setField.callMethod(env, qThis, name, value);
+    if (_fieldSet != null)
+      _fieldSet.callMethod(env, qThis, name, value);
   }
 
   /**

@@ -48,7 +48,6 @@ import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.quercus.program.JavaImplClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.server.webapp.*;
 import com.caucho.server.session.*;

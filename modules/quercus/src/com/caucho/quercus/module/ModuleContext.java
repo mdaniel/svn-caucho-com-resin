@@ -38,7 +38,6 @@ import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.quercus.program.JavaImplClassDef;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
@@ -137,58 +136,6 @@ public class ModuleContext
   }
 
   /**
-   * Adds a module
-   */
-  /*
-  public static ModuleInfo addModule(String name, QuercusModule module)
-    throws ConfigException
-  {
-    ClassLoader loader = module.getClass().getClassLoader();
-
-    ModuleContext context = getLocalContext(loader);
-
-    return context.addModuleInfo(name, module);
-  }
-  */
-
-  /**
-   * Adds a class
-   */
-  /*
-  public static JavaClassDef addClass(String name,
-                                      Class type,
-                                      String ext,
-                                      Class javaClassDefClass)
-    throws ConfigException,
-           IllegalAccessException,
-           InstantiationException,
-           NoSuchMethodException,
-           InvocationTargetException
-  {
-    ClassLoader loader = type.getClassLoader();
-
-    ModuleContext context = getLocalContext(loader);
-
-    return context.addClassInfo(name, type, ext, javaClassDefClass);
-  }
-  */
-
-  /**
-   * Adds a class
-   */
-  /*
-  public static JavaImplClassDef addClassImpl(String name, Class type, String ext)
-    throws ConfigException, IllegalAccessException, InstantiationException
-  {
-    ClassLoader loader = type.getClassLoader();
-
-    ModuleContext context = getLocalContext(loader);
-
-    return context.addClassImplInfo(name, type, ext);
-  }
-  */
-
-  /**
    * Adds module info.
    */
   public ModuleInfo addModule(String name, QuercusModule module)
@@ -249,19 +196,6 @@ public class ModuleContext
       if (extension != null)
         _extensionSet.add(extension);
     }
-
-    return def;
-  }
-
-  public JavaImplClassDef addClassImpl(String name,
-				       Class type,
-				       String extension)
-    throws IllegalAccessException, InstantiationException
-  {
-    JavaImplClassDef def = (JavaImplClassDef) _staticClasses.get(name);
-
-    if (def == null)
-      def = addJavaImplClass(name, type, extension);
 
     return def;
   }
@@ -482,38 +416,6 @@ public class ModuleContext
 
       return null;
     }
-  }
-
-  /**
-   * Introspects the module class for functions.
-   *
-   * @param name the php class name
-   * @param type the class to introspect.
-   * @param extension the extension provided by the class, or null
-   */
-  private JavaImplClassDef addJavaImplClass(String name,
-                                            Class type,
-                                            String extension)
-    throws IllegalAccessException, InstantiationException
-  {
-    if (log.isLoggable(Level.FINE)) {
-      if (extension == null)
-        log.fine(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
-      else
-        log.fine(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
-    }
-
-    JavaImplClassDef def = new JavaImplClassDef(this, name, type);
-
-    _staticClasses.put(name, def);
-    _lowerStaticClasses.put(name.toLowerCase(), def);
-
-    def.introspect(this);
-
-    if (extension != null)
-      _extensionSet.add(extension);
-
-    return def;
   }
 }
 

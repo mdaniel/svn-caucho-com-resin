@@ -115,7 +115,7 @@ public class MysqlModule extends AbstractQuercusModule {
       return true;
     }
     else
-      return false;
+      return true;
   }
 
   /**
@@ -912,7 +912,7 @@ public class MysqlModule extends AbstractQuercusModule {
     
     conn = new Mysqli(env, "localhost", "", "", db, 3306, "", 0, null, null);
 
-    env.setSpecialValue("caucho.mysql", env.wrapJava(conn));
+    env.setSpecialValue("caucho.mysql", conn);
 
     return conn;
   }

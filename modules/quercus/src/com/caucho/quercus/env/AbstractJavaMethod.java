@@ -79,59 +79,97 @@ abstract public class AbstractJavaMethod extends AbstractFunction
     
     return method;
   }
-  
-  public Value call(Env env, Value []value)
-  {
-    return call(env, env.getThis(), value);
-  }
 
+  abstract public Value callMethod(Env env, Value qThis, Value []args);
+  
   /**
-   * Evaluates the function, returning a copy.  Java methods don't
-   * need the copy.
+   * Evaluates the function, returning a copy
    */
+  @Override
   public Value callCopy(Env env, Value []args)
   {
     return call(env, args);
   }
 
-  public Value call(Env env, Value obj, Value []value)
+  @Override
+  public Value call(Env env, Value []args)
   {
-    return call(env, obj.toJavaObject(), value);
+    return callMethod(env, null, args);
   }
 
-  abstract public Value call(Env env, Object obj, Expr []args);
-
-  abstract public Value call(Env env, Object obj, Value []args);
-
-  public Value call(Env env, Object obj)
+  @Override
+  public Value call(Env env)
   {
-    return call(env, obj, new Value[0]);
+    return callMethod(env, null, new Value[0]);
   }
 
-  public Value call(Env env, Object obj, Value a1)
+  @Override
+  public Value call(Env env, Value a1)
   {
-    return call(env, obj, new Value[]{a1});
+    return callMethod(env, null, new Value[] {a1});
   }
 
-  public Value call(Env env, Object obj, Value a1, Value a2)
+  @Override
+  public Value call(Env env, Value a1, Value a2)
   {
-    return call(env, obj, new Value[]{a1, a2});
+    return callMethod(env, null, new Value[] {a1, a2});
   }
 
-  public Value call(Env env, Object obj, Value a1, Value a2, Value a3)
+  @Override
+  public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return call(env, obj, new Value[]{a1, a2, a3});
+    return callMethod(env, null, new Value[] {a1, a2, a3});
   }
 
-  public Value call(Env env, Object obj,
-                    Value a1, Value a2, Value a3, Value a4)
+  @Override
+  public Value call(Env env,
+		    Value a1, Value a2, Value a3, Value a4)
   {
-    return call(env, obj, new Value[]{a1, a2, a3, a4});
+    return callMethod(env, null, new Value[] {a1, a2, a3, a4});
   }
 
-  public Value call(Env env, Object obj,
-                    Value a1, Value a2, Value a3, Value a4, Value a5)
+  @Override
+  public Value call(Env env,
+		    Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return call(env, obj, new Value[]{a1, a2, a3, a4, a5});
+    return callMethod(env, null, new Value[] {a1, a2, a3, a4, a5});
+  }
+
+  @Override
+  public Value callMethod(Env env, Value qThis)
+  {
+    return callMethod(env, qThis, new Value[0]);
+  }
+
+  @Override
+  public Value callMethod(Env env, Value qThis, Value a1)
+  {
+    return callMethod(env, qThis, new Value[]{a1});
+  }
+
+  @Override
+  public Value callMethod(Env env, Value qThis, Value a1, Value a2)
+  {
+    return callMethod(env, qThis, new Value[]{a1, a2});
+  }
+
+  @Override
+  public Value callMethod(Env env, Value qThis, Value a1, Value a2, Value a3)
+  {
+    return callMethod(env, qThis, new Value[]{a1, a2, a3});
+  }
+
+  @Override
+  public Value callMethod(Env env, Value qThis,
+			  Value a1, Value a2, Value a3, Value a4)
+  {
+    return callMethod(env, qThis, new Value[]{a1, a2, a3, a4});
+  }
+
+  @Override
+  public Value callMethod(Env env, Value qThis,
+			  Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return callMethod(env, qThis, new Value[] {a1, a2, a3, a4, a5});
   }
 }

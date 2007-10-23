@@ -92,22 +92,21 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<StringValue, FieldMarshalPair> _fieldMap
     = new HashMap<StringValue, FieldMarshalPair> ();
 
-  private JavaMethod __getField = null;
-  private JavaMethod __setField = null;
+  private AbstractJavaMethod _cons;
   
-  private JavaMethod __get = null;
-  private JavaMethod __set = null;
+  private JavaMethod __fieldGet;
+  private JavaMethod __fieldSet;
   
-  private JavaMethod __call = null;
-
-  private Method _printRImpl = null;
-  private Method _varDumpImpl = null;
-
+  private FunctionArrayDelegate _funArrayDelegate;
   private ArrayDelegate _arrayDelegate;
+  
+  private JavaMethod __call;
+
+  private Method _printRImpl;
+  private Method _varDumpImpl;
+
   private TraversableDelegate _traversableDelegate;
   private CountDelegate _countDelegate;
-
-  private AbstractJavaMethod _cons;
 
   private Method _iteratorMethod;
   private Method _keySetMethod;
@@ -314,13 +313,13 @@ public class JavaClassDef extends ClassDef {
    * @param name
    * @return Value attained through invoking getter
    */
-  public Value getField(Env env, Object obj, StringValue name)
+  public Value getField(Env env, Value qThis, StringValue name)
   {
     AbstractJavaMethod get = _getMap.get(name);
 
     if (get != null) {
       try {
-        return get.call(env, obj);
+        return get.call(env, qThis);
       } catch (Exception e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
 	
@@ -331,7 +330,7 @@ public class JavaClassDef extends ClassDef {
     FieldMarshalPair fieldPair = _fieldMap.get(name);
     if (fieldPair != null) {
       try {
-        Object result = fieldPair._field.get(obj);
+        Object result = fieldPair._field.get(qThis.toJavaObject());
         return fieldPair._marshal.unmarshal(env, result);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
@@ -340,9 +339,9 @@ public class JavaClassDef extends ClassDef {
       }
     }
 
-    if (__getField != null) {
+    if (__fieldGet != null) {
       try {
-        return __getField.call(env, obj, name);
+        return __fieldGet.call(env, qThis, name);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 
@@ -354,7 +353,7 @@ public class JavaClassDef extends ClassDef {
   }
 
   public Value putField(Env env,
-                        Object obj,
+                        Value qThis,
                         StringValue name,
                         Value value)
   {
@@ -362,7 +361,7 @@ public class JavaClassDef extends ClassDef {
 
     if (setter != null) {
       try {
-        return setter.call(env, obj, value);
+        return setter.call(env, qThis, value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 	
@@ -376,7 +375,7 @@ public class JavaClassDef extends ClassDef {
       try {
         Class type = fieldPair._field.getType();
         Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
-        fieldPair._field.set(obj, marshaledValue);
+        fieldPair._field.set(qThis.toJavaObject(), marshaledValue);
 
         return value;
 
@@ -386,9 +385,9 @@ public class JavaClassDef extends ClassDef {
       }
     }
 
-    if (__setField != null) {
+    if (__fieldSet != null) {
       try {
-        return __setField.call(env, obj, name, value);
+        return __fieldSet.call(env, qThis, name, value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 	
@@ -436,7 +435,7 @@ public class JavaClassDef extends ClassDef {
   @Override
   public Value callNew(Env env, Expr []args)
   {
-    return _cons.call(env, (Object) null, args);
+    return _cons.callMethod(env, null, args);
   }
 
   /**
@@ -446,7 +445,7 @@ public class JavaClassDef extends ClassDef {
   public Value callNew(Env env, Value []args)
   {
     if (_cons != null)
-      return _cons.call(env, (Object) null, args);
+      return _cons.callMethod(env, null, args);
     else
       return NullValue.NULL;
   }
@@ -470,7 +469,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen,
                           Expr []args)
   {
@@ -483,40 +482,20 @@ public class JavaClassDef extends ClassDef {
       return NullValue.NULL;
     }
 
-    return method.call(env, obj, args);
+    return method.callMethod(env, qThis, args);
   }
 
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Value value,
-                          int hash, char []name, int nameLen,
-                          Expr []args)
-  {
-    return callMethod(env, value.toJavaObject(), hash, name, nameLen, args);
-  }
-
-  /**
-   * Eval a method
-   */
-  public Value callMethod(Env env, Value value,
-                          int hash, char []name, int nameLen,
-                          Value []args)
-  {
-    return callMethod(env, value.toJavaObject(), hash, name, nameLen, args);
-  }
-
-  /**
-   * Eval a method
-   */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen,
                           Value []args)
   {
     AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
-      return method.call(env, obj, args);
+      return method.callMethod(env, qThis, args);
     else if (__call != null) {
       Value []extArgs = new Value[args.length + 1];
 
@@ -524,7 +503,7 @@ public class JavaClassDef extends ClassDef {
 
       System.arraycopy(args, 0, extArgs, 1, args.length);
       
-      return __call.call(env, obj, extArgs);
+      return __call.callMethod(env, qThis, extArgs);
     }
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
@@ -537,15 +516,15 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen)
   {
     AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
-      return method.call(env, obj);
+      return method.callMethod(env, qThis);
     else if (__call != null)
-      return __call.call(env, obj, env.createString(name, nameLen));
+      return __call.callMethod(env, qThis, env.createString(name, nameLen));
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
 		    _name, toMethod(name, nameLen)));
@@ -557,16 +536,16 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen,
                           Value a1)
   {
     AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
-      return method.call(env, obj, a1);
+      return method.callMethod(env, qThis, a1);
     else if (__call != null)
-      return __call.call(env, obj, env.createString(name, nameLen), a1);
+      return __call.callMethod(env, qThis, env.createString(name, nameLen), a1);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
 		    _name, toMethod(name, nameLen)));
@@ -578,16 +557,16 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen,
                           Value a1, Value a2)
   {
     AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
-      return method.call(env, obj, a1, a2);
+      return method.callMethod(env, qThis, a1, a2);
     else if (__call != null)
-      return __call.call(env, obj, env.createString(name, nameLen),
+      return __call.callMethod(env, qThis, env.createString(name, nameLen),
                          a1, a2);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
@@ -600,16 +579,16 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3)
   {
     AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
-      return method.call(env, obj, a1, a2, a3);
+      return method.callMethod(env, qThis, a1, a2, a3);
     else if (__call != null)
-      return __call.call(env, obj, env.createString(name, nameLen),
+      return __call.callMethod(env, qThis, env.createString(name, nameLen),
                          a1, a2, a3);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
@@ -622,17 +601,17 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4)
   {
     AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
-      return method.call(env, obj, a1, a2, a3, a4);
+      return method.callMethod(env, qThis, a1, a2, a3, a4);
     else if (__call != null)
-      return __call.call(env, obj, env.createString(name, nameLen),
-                         a1, a2, a3, a4);
+      return __call.callMethod(env, qThis, env.createString(name, nameLen),
+			       a1, a2, a3, a4);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
 		    _name, toMethod(name, nameLen)));
@@ -644,18 +623,18 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj,
+  public Value callMethod(Env env, Value qThis,
                           int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
-      return method.call(env, obj, a1, a2, a3, a4, a5);
+      return method.callMethod(env, qThis, a1, a2, a3, a4, a5);
     else if (__call != null)
-      return __call.call(env, obj,
-                         new Value[] { env.createString(name, nameLen),
-                                       a1, a2, a3, a4, a5 });
+      return __call.callMethod(env, qThis,
+			       new Value[] { env.createString(name, nameLen),
+					     a1, a2, a3, a4, a5 });
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
 		    _name, toMethod(name, nameLen)));
@@ -686,17 +665,19 @@ public class JavaClassDef extends ClassDef {
       cl.addMethod(value.getName(), value);
     }
 
-    if (__getField != null)
-      cl.setGetField(__getField);
+    if (__fieldGet != null)
+      cl.setFieldGet(__fieldGet);
 
-    if (__setField != null)
-      cl.setSetField(__setField);
+    if (__fieldSet != null)
+      cl.setFieldSet(__fieldSet);
 
     if (__call != null)
       cl.setCall(__call);
 
     if (_arrayDelegate != null)
       cl.setArrayDelegate(_arrayDelegate);
+    else if (_funArrayDelegate != null)
+      cl.setArrayDelegate(_funArrayDelegate);
 
     if (_traversableDelegate != null)
       cl.setTraversableDelegate(_traversableDelegate);
@@ -998,13 +979,23 @@ public class JavaClassDef extends ClassDef {
 	    
 	  _setMap.put(quercusName, newSetter);
         } else if ("__get".equals(methodName)) {
-          __get = new JavaMethod(moduleContext, method);
-        } else if ("__getField".equals(methodName)) {
-          __getField = new JavaMethod(moduleContext, method);
+	  if (_funArrayDelegate == null)
+	    _funArrayDelegate = new FunctionArrayDelegate();
+	  
+          _funArrayDelegate.setArrayGet(new JavaMethod(moduleContext, method));
         } else if ("__set".equals(methodName)) {
-          __set = new JavaMethod(moduleContext, method);
+	  if (_funArrayDelegate == null)
+	    _funArrayDelegate = new FunctionArrayDelegate();
+	  
+          _funArrayDelegate.setArrayPut(new JavaMethod(moduleContext, method));
+        } else if ("__getField".equals(methodName)) {
+          __fieldGet = new JavaMethod(moduleContext, method);
         } else if ("__setField".equals(methodName)) {
-          __setField = new JavaMethod(moduleContext, method);
+          __fieldSet = new JavaMethod(moduleContext, method);
+        } else if ("__fieldGet".equals(methodName)) {
+          __fieldGet = new JavaMethod(moduleContext, method);
+        } else if ("__fieldSet".equals(methodName)) {
+          __fieldSet = new JavaMethod(moduleContext, method);
         }
       }
     }

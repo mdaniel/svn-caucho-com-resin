@@ -74,7 +74,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
    */
   protected Value getFieldExt(Env env, StringValue name)
   {
-    Value value = _javaClassDef.getField(env, _object, name);
+    Value value = _javaClassDef.getField(env, this, name);
 
     if (value != null)
       return value;
@@ -87,7 +87,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
    */
   protected Value putFieldExt(Env env, StringValue name, Value value)
   {
-    return _javaClassDef.putField(env, _object, name, value);
+    return _javaClassDef.putField(env, this, name, value);
   }
 
   /**

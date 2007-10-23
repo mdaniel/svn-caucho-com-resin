@@ -147,7 +147,7 @@ public class CauchoRegexpModule
         regs.put(LongValue.ZERO, regexpState.group(env));
         int count = regexpState.groupCount();
 
-        for (int i = 1; i <= count; i++) {
+        for (int i = 1; i < count; i++) {
           StringValue group = regexpState.group(env, i);
 
           Value value;
@@ -304,57 +304,57 @@ public class CauchoRegexpModule
 				     @Optional int offset)
   {
     try {
-    if (rawRegexp.length() < 2) {
-      env.warning(L.l("Pattern must have at least opening and closing delimiters"));
-      return BooleanValue.FALSE;
-    }
-
-    if ((flags & PREG_PATTERN_ORDER) == 0) {
-      // php/152m
-      if ((flags & PREG_SET_ORDER) == 0) {
-        flags = flags | PREG_PATTERN_ORDER;
+      if (rawRegexp.length() < 2) {
+	env.warning(L.l("Pattern must have at least opening and closing delimiters"));
+	return BooleanValue.FALSE;
       }
-    }
-    else {
-      if ((flags & PREG_SET_ORDER) != 0) {
-        env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
-        return BooleanValue.FALSE;
+
+      if ((flags & PREG_PATTERN_ORDER) == 0) {
+	// php/152m
+	if ((flags & PREG_SET_ORDER) == 0) {
+	  flags = flags | PREG_PATTERN_ORDER;
+	}
       }
-    }
+      else {
+	if ((flags & PREG_SET_ORDER) != 0) {
+	  env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
+	  return BooleanValue.FALSE;
+	}
+      }
 
-    Regexp regexp = getRegexp(env, rawRegexp);
-    RegexpState regexpState = new RegexpState(env, regexp, subject);
+      Regexp regexp = getRegexp(env, rawRegexp);
+      RegexpState regexpState = new RegexpState(env, regexp, subject);
 
-    ArrayValue matches;
+      ArrayValue matches;
 
-    if (matchRef instanceof ArrayValue)
-      matches = (ArrayValue) matchRef;
-    else
-      matches = new ArrayValueImpl();
+      if (matchRef instanceof ArrayValue)
+	matches = (ArrayValue) matchRef;
+      else
+	matches = new ArrayValueImpl();
 
-    matches.clear();
+      matches.clear();
 
-    matchRef.set(matches);
+      matchRef.set(matches);
 
-    if ((flags & PREG_PATTERN_ORDER) != 0) {
-      return pregMatchAllPatternOrder(env,
-				      regexpState,
-				      subject,
-				      matches,
-				      flags,
-				      offset);
-    }
-    else if ((flags & PREG_SET_ORDER) != 0) {
-      return pregMatchAllSetOrder(env,
-				  regexp,
-				  regexpState,
-				  subject,
-				  matches,
-				  flags,
-				  offset);
-    }
-    else
-      throw new UnsupportedOperationException();
+      if ((flags & PREG_PATTERN_ORDER) != 0) {
+	return pregMatchAllPatternOrder(env,
+					regexpState,
+					subject,
+					matches,
+					flags,
+					offset);
+      }
+      else if ((flags & PREG_SET_ORDER) != 0) {
+	return pregMatchAllSetOrder(env,
+				    regexp,
+				    regexpState,
+				    subject,
+				    matches,
+				    flags,
+				    offset);
+      }
+      else
+	throw new UnsupportedOperationException();
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -382,7 +382,7 @@ public class CauchoRegexpModule
 
     StringValue emptyStr = subject.getEmptyString();
     
-    for (int j = 0; j <= groupCount; j++) {
+    for (int j = 0; j < groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
 
       Value patternName = regexpState.getGroupName(j);
@@ -395,20 +395,15 @@ public class CauchoRegexpModule
       matchList[j] = values;
     }
 
-    if (regexpState == null || regexpState.exec(env, subject, 0) < 0) {
-      return LongValue.ZERO;
-    }
-
     int count = 0;
 
-    do {
+    while (regexpState.find()) {
       count++;
 
-      for (int j = 0; j <= groupCount; j++) {
+      for (int j = 0; j < groupCount; j++) {
         ArrayValue values = matchList[j];
         
         if (! regexpState.isMatchedGroup(j)) {
-
           if (j == groupCount || (flags & PREG_OFFSET_CAPTURE) == 0)
             values.put(emptyStr);
           else {
@@ -440,7 +435,7 @@ public class CauchoRegexpModule
 
         values.put(result);
       }
-    } while (regexpState.find());
+    }
 
     return LongValue.create(count);
   }
@@ -472,7 +467,7 @@ public class CauchoRegexpModule
       ArrayValue matchResult = new ArrayValueImpl();
       matches.put(matchResult);
 
-      for (int i = 0; i <= regexpState.groupCount(); i++) {
+      for (int i = 0; i < regexpState.groupCount(); i++) {
         int start = regexpState.start(i);
         int end = regexpState.end(i);
 
@@ -1779,7 +1774,7 @@ public class CauchoRegexpModule
                      StringValue sb,
                      RegexpState regexpState)
     {
-      if (_group <= regexpState.groupCount()) {
+      if (_group < regexpState.groupCount()) {
         StringValue group = regexpState.group(env, _group);
 
         int len = group.length();

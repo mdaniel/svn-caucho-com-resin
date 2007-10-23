@@ -128,7 +128,7 @@ class Regcomp {
       value = RegexpNode.Or.create(value, parseRec(pattern, begin));
     }
     
-    value = value.getHead();
+    value = value != null ? value.getHead() : RegexpNode.N_END;
 
     if (_maxGroup < _nGroup)
       _maxGroup = _nGroup;
@@ -169,7 +169,7 @@ class Regcomp {
 
     switch (ch) {
     case -1:
-      return tail.getHead();
+      return tail != null ? tail.getHead() : null;
 
     case '?':
       if (tail == null)

@@ -175,6 +175,9 @@ public class RegexpState {
 
     for (; start <= end; start++) {
       if (firstSet != null) {
+	if (start == end)
+	  continue;
+	  
 	char firstChar = subject.charAt(start);
 	
 	if (firstChar < 256 && ! firstSet[firstChar])
