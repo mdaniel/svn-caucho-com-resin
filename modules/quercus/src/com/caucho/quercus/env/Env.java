@@ -747,6 +747,11 @@ public class Env {
       throw new QuercusRuntimeException(L.l("script timed out"));
   }
 
+  public void resetTimeout()
+  {
+    _startTime = Alarm.getCurrentTime();
+  }
+  
   /**
    * Returns the writer.
    */
