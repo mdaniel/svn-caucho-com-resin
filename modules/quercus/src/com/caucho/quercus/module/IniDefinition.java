@@ -120,6 +120,34 @@ public class IniDefinition {
     else
       return BooleanValue.TRUE;
   }
+  
+  /*
+  private LongValue toLongValue(Value value)
+  {
+    if (value instanceof LongValue)
+      return (LongValue) value;
+    else if (! (value instanceof StringValue))
+      return LongValue.create(value.toLong());
+    
+    String valueAsString = value.toString().trim();
+    
+    if (valueAsString.length() == 0)
+      return LongValue.ZERO;
+    
+    char suffix = valueAsString.charAt(valueAsString.length() - 1);
+    
+    long val = value.toLong();
+    
+    if (suffix == 'G')
+      val = 1024 * 1024 * val;
+    else if (suffix == 'M')
+      val = 1024 * 1024 * val;
+    else if (suffix == 'K')
+      val = 1024 * val;
+    
+    return LongValue.create(val);
+  }
+  */
 
   /**
    * Set the ini value for the given scope.
@@ -172,8 +200,11 @@ public class IniDefinition {
     else if (_type == Type.BOOLEAN) {
       map.put(_name, toBooleanValue(value));
     }
+    /* up to modules to interpret values
+     * http://bugs.caucho.com/view.php?id=2095
     else if (_type == Type.LONG)
-      map.put(_name, value.toLongValue());
+      map.put(_name, toLongValue(value));
+    */
     else
       map.put(_name, value);
   }
