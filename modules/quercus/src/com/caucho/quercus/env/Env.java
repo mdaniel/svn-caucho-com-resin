@@ -573,6 +573,7 @@ public class Env {
   public void start()
   {
     _startTime = Alarm.getCurrentTime();
+    _timeLimit = getIniLong("max_execution_time");
 
     _oldThreadEnv = _threadEnv.get();
     
