@@ -17,7 +17,7 @@ display_header("login.php", $title, null);
 <tr>
   <th>Password: </th>
   <td>
-    <input name="j_password" width="40" type="secret"></input>
+    <input name="j_password" width="40" type="password"></input>
   </td>
 </tr>
 <tr>
