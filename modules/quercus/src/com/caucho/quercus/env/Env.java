@@ -169,7 +169,7 @@ public class Env {
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
 
-  private HashMap<String, Var> _globalMap
+  private final HashMap<String, Var> _globalMap
     = new HashMap<String, Var>(1024);
   
   private HashMap<String, Var> _staticMap

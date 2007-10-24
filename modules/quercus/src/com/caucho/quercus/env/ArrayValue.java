@@ -1090,9 +1090,7 @@ abstract public class ArrayValue extends Value {
     out.println("array(" + getSize() + ") {");
 
     for (Map.Entry<Value,Value> mapEntry : entrySet()) {
-      ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-
-      entry.varDumpImpl(env, out, depth + 1, valueSet);
+      varDumpEntry(env, out, depth + 1, valueSet, mapEntry);
 
       out.println();
     }
@@ -1102,6 +1100,18 @@ abstract public class ArrayValue extends Value {
     out.print("}");
   }
 
+  protected void varDumpEntry(Env env,
+                              WriteStream out,
+                              int depth,
+                              IdentityHashMap<Value, String> valueSet,
+                              Map.Entry<Value, Value> mapEntry)
+    throws IOException
+  {
+    ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+
+    entry.varDumpImpl(env, out, depth, valueSet);
+  }
+  
   @Override
   protected void printRImpl(Env env,
                             WriteStream out,
@@ -1114,13 +1124,23 @@ abstract public class ArrayValue extends Value {
     out.println("(");
 
     for (Map.Entry<Value,Value> mapEntry : entrySet()) {
-      ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-
-      entry.printRImpl(env, out, depth, valueSet);
+      printREntry(env, out, depth, valueSet, mapEntry);
     }
 
     printDepth(out, 8 * depth);
     out.println(")");
+  }
+  
+  protected void printREntry(Env env,
+                             WriteStream out,
+                             int depth,
+                             IdentityHashMap<Value, String> valueSet,
+                             Map.Entry<Value, Value> mapEntry)
+    throws IOException
+  {
+    ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+
+    entry.printRImpl(env, out, depth, valueSet);
   }
 
   public final static class Entry

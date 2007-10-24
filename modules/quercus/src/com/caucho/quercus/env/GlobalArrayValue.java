@@ -29,8 +29,15 @@
 
 package com.caucho.quercus.env;
 
+import java.util.AbstractSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import com.caucho.quercus.env.ArrayValue.Entry;
+import com.caucho.quercus.env.ArrayValue.EntryIterator;
+import com.caucho.quercus.env.ArrayValue.KeyIterator;
+import com.caucho.quercus.env.ArrayValue.ValueIterator;
 
 /**
  * Represents the server
@@ -99,15 +106,15 @@ public class GlobalArrayValue extends ArrayValueImpl {
   {
     return this;
   }
-
-  /**
-   * Returns an iterator of the entries.
+  
+  /*
+   * Returns the size.
    */
-  public Set<Map.Entry<Value,Value>> entrySet()
+  public int getSize()
   {
-    throw new UnsupportedOperationException();
+    return _env.getGlobalEnv().size();
   }
-
+  
   /**
    * Prints the value.
    * @param env
@@ -115,6 +122,46 @@ public class GlobalArrayValue extends ArrayValueImpl {
   public void print(Env env)
   {
     env.print("Array");
+  }
+
+  /**
+   * Returns an iterator of the entries.
+   */
+  public Set<Map.Entry<Value,Value>> entrySet()
+  {
+    return createAndFillArray().entrySet();
+  }
+  
+  @Override
+  public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
+  {
+    return createAndFillArray().getIterator(env);
+  }
+
+  @Override
+  public Iterator<Value> getKeyIterator(Env env)
+  {
+    return createAndFillArray().getKeyIterator(env);
+  }
+
+  @Override
+  public Iterator<Value> getValueIterator(Env env)
+  {
+    return createAndFillArray().getValueIterator(env);
+  }
+  
+  private ArrayValue createAndFillArray()
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    for(Map.Entry<String,Var> entry : _env.getGlobalEnv().entrySet()) {
+      Value key = _env.createString(entry.getKey());
+      Value val = entry.getValue().toValue();
+      
+      array.put(key, val);
+    }
+    
+    return array;
   }
 }
 
