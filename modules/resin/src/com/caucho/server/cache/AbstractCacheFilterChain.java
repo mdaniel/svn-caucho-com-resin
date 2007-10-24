@@ -93,38 +93,23 @@ abstract public class AbstractCacheFilterChain implements FilterChain {
    * @return the output stream to store the cache value or null if
    *         uncacheable.
    */
-  abstract public OutputStream startByteCaching(CauchoRequest req,
+  abstract public AbstractCacheEntry startCaching(CauchoRequest req,
 						AbstractHttpResponse res,
 						ArrayList<String> keys,
 						ArrayList<String> values,
 						String contentType,
 						String charEncoding,
 						long contentLength);
-  
-  /**
-   * Starts the caching after the headers have been sent.
-   *
-   * @param req the servlet request
-   * @param req the servlet response
-   * @param keys the saved header keys
-   * @param values the saved header values
-   * @param contentType the response content type
-   * @param charEncoding the response character encoding
-   *
-   * @return the output stream to store the cache value or null if
-   *         uncacheable.
-   */
-  abstract public Writer startCharCaching(CauchoRequest req,
-					  AbstractHttpResponse res,
-					  ArrayList<String> keys,
-					  ArrayList<String> values,
-					  String contentType,
-					  String charEncoding,
-					  long contentLength);
+
   /**
    * Update the headers when the caching has finished.
    *
    * @param okay if true, the cache if valid
    */
-  abstract public void finishCaching(boolean okay);
+  abstract public void finishCaching(AbstractCacheEntry entry);
+
+  /**
+   * Cleanup the cache entry on a failed cache attempt.
+   */
+  abstract public void killCaching(AbstractCacheEntry entry);
 }
