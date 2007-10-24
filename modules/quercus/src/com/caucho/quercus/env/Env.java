@@ -748,7 +748,7 @@ public class Env {
   {
     long now = Alarm.getCurrentTime();
 
-    if (_startTime + _timeLimit < now)
+    if (_timeLimit > 0 && _startTime + _timeLimit < now)
       throw new QuercusRuntimeException(L.l("script timed out"));
   }
 
