@@ -75,6 +75,7 @@ public class ClusterServer {
   
   private long _loadBalanceIdleTime = DEFAULT;
   private long _loadBalanceRecoverTime = 15000L;
+  private long _loadBalanceSocketTimeout = DEFAULT;
   private long _loadBalanceWarmupTime = 60000L;
   
   private long _loadBalanceConnectTimeout = 5000L;
@@ -199,6 +200,25 @@ public class ClusterServer {
   public long getLoadBalanceConnectTimeout()
   {
     return _loadBalanceConnectTimeout;
+  }
+
+  /**
+   * Sets the loadBalance socket time.
+   */
+  public void setLoadBalanceSocketTimeout(Period period)
+  {
+    _loadBalanceSocketTimeout = period.getPeriod();
+  }
+
+  /**
+   * Gets the loadBalance socket time.
+   */
+  public long getLoadBalanceSocketTimeout()
+  {
+    if (_loadBalanceSocketTimeout != DEFAULT)
+      return _loadBalanceSocketTimeout;
+    else
+      return _socketTimeout;
   }
 
   /**

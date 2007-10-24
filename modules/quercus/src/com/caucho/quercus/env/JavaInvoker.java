@@ -559,6 +559,7 @@ abstract public class JavaInvoker
       javaArgs[k++] = qThis;
     }
 
+
     for (int i = 0; i < _marshalArgs.length; i++) {
 
       if (i < args.length && args[i] != null)

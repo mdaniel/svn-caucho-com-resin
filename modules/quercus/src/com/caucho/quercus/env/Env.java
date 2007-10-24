@@ -3515,6 +3515,19 @@ public class Env {
 	return NullValue.NULL;
       }
 
+      // php/0b2d
+      if (! "".equals(path.getScheme())
+	  && ! "file".equals(path.getScheme())
+	  && ! "memory".equals(path.getScheme())) {
+	String msg = (L.l("attempt to include {0}",
+			  path.getURL()));
+	
+	log.warning(dbgId() + msg);
+	error(msg);
+
+	return NullValue.NULL;
+      }
+
       if (isOnce && _includeSet.contains(path))
 	return NullValue.NULL;
 
@@ -4657,6 +4670,11 @@ public class Env {
         _threadEnv.set(_oldThreadEnv);
 
     }
+  }
+
+  public String dbgId()
+  {
+    return "Quercus[" + _selfPath + "] ";
   }
 
   static class ClassKey {

@@ -128,7 +128,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public long getSocketTimeout()
   {
-    return _client.getSocketTimeout();
+    return _client.getLoadBalanceSocketTimeout();
   }
 
   /**

@@ -48,10 +48,11 @@ import java.util.logging.Level;
 public class QueueReceiverImpl extends MessageConsumerImpl
   implements QueueReceiver
 {
-  private static final Logger log = Log.open(QueueReceiverImpl.class);
+  private static final Logger log
+    = Logger.getLogger(QueueReceiverImpl.class.getName());
   private static final L10N L = new L10N(QueueReceiverImpl.class);
   
-  QueueReceiverImpl(SessionImpl session,
+  QueueReceiverImpl(JmsSession session,
                     AbstractQueue queue,
                     String messageSelector)
     throws JMSException

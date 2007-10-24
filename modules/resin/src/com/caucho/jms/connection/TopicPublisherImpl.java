@@ -39,7 +39,7 @@ import com.caucho.jms.queue.*;
 public class TopicPublisherImpl extends MessageProducerImpl
   implements TopicPublisher
 {
-  public TopicPublisherImpl(SessionImpl session, AbstractTopic topic)
+  public TopicPublisherImpl(JmsSession session, AbstractTopic topic)
   {
     super(session, topic);
   }

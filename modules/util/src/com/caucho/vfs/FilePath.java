@@ -125,9 +125,9 @@ public class FilePath extends FilesystemPath {
     
     if (colon == 1 && (ch = path.charAt(0)) != '/' && ch != '\\')
       return "/" + path.charAt(0) + ":/" + path.substring(2);
-    else if (length > 1 &&
-	     ((ch = path.charAt(0)) == '/' || ch == '\\') &&
-	     ((ch = path.charAt(1)) == '/' || ch == '\\')) {
+    else if (length > 1
+	     && ((ch = path.charAt(0)) == '/' || ch == '\\')
+	     && ((ch = path.charAt(1)) == '/' || ch == '\\')) {
       if (colon < 0)
 	return "/:" + path;
 
@@ -166,8 +166,8 @@ public class FilePath extends FilesystemPath {
     char ch1 = filePath.charAt(offset + 1);
     char ch2 = filePath.charAt(offset);
 
-    if ((ch2 == '/' || ch2 == _separatorChar) &&
-        (ch1 == '/' || ch1 == _separatorChar))
+    if ((ch2 == '/' || ch2 == _separatorChar)
+	&& (ch1 == '/' || ch1 == _separatorChar))
       return super.schemeWalk(userPath, attributes,
                               convertFromWindowsPath(filePath.substring(offset)), 0);
     else
@@ -206,7 +206,7 @@ public class FilePath extends FilesystemPath {
     String path = getFullPath();
     int length = path.length();
     CharBuffer cb = new CharBuffer();
-    cb.append("file:///");
+    cb.append("file:/");
     
     char ch;
     int offset = 0;
@@ -224,11 +224,17 @@ public class FilePath extends FilesystemPath {
 	     && path.charAt(2) == '/') {
       cb.append('/');
       cb.append('/');
+      cb.append('/');
       offset = 3;
     }
 
     for (; offset < length; offset++) {
-      cb.append(path.charAt(offset));
+      ch = path.charAt(offset);
+
+      if (ch == '\\')
+	cb.append('/');
+      else
+	cb.append(ch);
     }
 
     return escapeURL(cb.toString());
@@ -245,7 +251,7 @@ public class FilePath extends FilesystemPath {
     
     String path = getFullPath();
     int length = path.length();
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
     char ch;
     int offset = 0;
     // For windows, convert /c: to c:
@@ -253,8 +259,8 @@ public class FilePath extends FilesystemPath {
       if (length >= 3
 	  && path.charAt(0) == '/'
 	  && path.charAt(2) == ':'
-	  && ((ch = path.charAt(1)) >= 'a' && ch <= 'z'
-	      || ch >= 'A' && ch <= 'Z')) {
+	  && ('a' <= (ch = path.charAt(1)) && ch <= 'z'
+	      || 'A' <= ch && ch <= 'Z')) {
         offset = 1;
       }
       else if (length >= 3

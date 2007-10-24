@@ -39,7 +39,7 @@ import com.caucho.jms.queue.*;
 public class QueueSenderImpl extends MessageProducerImpl
   implements QueueSender
 {
-  public QueueSenderImpl(SessionImpl session, AbstractQueue queue)
+  public QueueSenderImpl(JmsSession session, AbstractQueue queue)
   {
     super(session, queue);
   }

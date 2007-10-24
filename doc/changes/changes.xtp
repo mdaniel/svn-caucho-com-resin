@@ -12,6 +12,16 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>load-balance failover logging was showing incorrect target server info (#2098, rep by stbu)</li>
+<li>add secure="true" to cluster-port (#2104, rep by Takahiro Fukuda)</li>
+<li>&lt;http> and &lt;cluster-port> socket-timeout were not using &lt;server-default> values (#2110, rep by B Choate)</li>
+<li>jsf: attribute-extension wasn't properly ignored (#2111, rep by borisk)</li>
+<li>&lt;load-balance> add &lt;strategy> tag (#2100, rep by stbu)</li>
+<li>Added remote-enable-cookie to &lt;management> to replace remote-enable (#2085, rep by stbu)</li>
+<li>Windows file URL with Java uses file:/c:/foo, not file:///c:/foo (#2086, rep by Matt Ledom)</li>
+<li>Verify that proxy-cache file was properly removed on startup (#2065, rep by Mike Waldman)</li>
+<li>resin-admin needs to use Server->CurrentTime to avoid clock skew (#2099, rep by stbu)</li>
+<li>Quercus: forbid include of non-file.</li>
 <li>Quercus: updated support for large binary data (php5) (#2101, rep by koreth)</li>
 <li>Quercus: stubs for getrusage, memory_get_usage, memory_get_peak_usage (#2102, rep by koreth)</li>
 <li>Quercus: mysql_close was automatically allocating connections (#2103, rep by koreth)</li>

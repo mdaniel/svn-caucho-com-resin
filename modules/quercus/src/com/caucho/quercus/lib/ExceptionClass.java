@@ -38,8 +38,10 @@ import com.caucho.quercus.env.*;
 /**
  * Exception object facade.
  */
+
 @ClassImplementation
-public class ExceptionClass {
+public class ExceptionClass
+{
   private static final StringValue MESSAGE = new StringBuilderValue("message");
   private static final StringValue FILE = new StringBuilderValue("file");
   private static final StringValue LINE = new StringBuilderValue("line");

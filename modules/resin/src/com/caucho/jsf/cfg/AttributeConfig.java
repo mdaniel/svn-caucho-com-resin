@@ -94,7 +94,7 @@ public class AttributeConfig extends DescriptionGroupConfig
     _suggestedValue = suggestedValue;
   }
 
-  public void setApplicationExtension(BuilderProgram program)
+  public void setAttributeExtension(BuilderProgram program)
     throws ConfigException
   {
   }

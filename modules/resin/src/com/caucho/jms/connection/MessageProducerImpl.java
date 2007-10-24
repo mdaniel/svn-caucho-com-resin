@@ -52,10 +52,10 @@ public class MessageProducerImpl implements MessageProducer {
   private int _priority = 4;
   private long _timeToLive = 30 * 24 * 3600 * 1000L;
 
-  protected SessionImpl _session;
+  protected JmsSession _session;
   protected AbstractDestination _queue;
 
-  public MessageProducerImpl(SessionImpl session, AbstractDestination queue)
+  public MessageProducerImpl(JmsSession session, AbstractDestination queue)
   {
     _session = session;
     _queue = queue;

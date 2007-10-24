@@ -29,7 +29,7 @@
 
 package com.caucho.jms2.message;
 
-import com.caucho.jms.connection.SessionImpl;
+import com.caucho.jms.connection.JmsSession;
 import com.caucho.hessian.io.*;
 import com.caucho.vfs.*;
 import com.caucho.util.*;
@@ -52,7 +52,7 @@ public class MessageImpl implements Message
 
   private static final HashSet<String> _reserved;
 
-  private volatile WeakReference<SessionImpl> _sessionRef;
+  private volatile WeakReference<JmsSession> _sessionRef;
   
   private String _messageId;
   private String _correlationId;
@@ -124,9 +124,9 @@ public class MessageImpl implements Message
   /**
    * Sets the session.
    */
-  public void setSession(SessionImpl session)
+  public void setSession(JmsSession session)
   {
-    _sessionRef = new WeakReference<SessionImpl>(session);
+    _sessionRef = new WeakReference<JmsSession>(session);
   }
 
   /**

@@ -32,8 +32,7 @@ package com.caucho.quercus.program;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.annotation.Construct;
-import com.caucho.quercus.annotation.Delegates;
+import com.caucho.quercus.annotation.*;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
@@ -70,6 +69,7 @@ public class JavaClassDef extends ClassDef {
   private final boolean _isAbstract;
   private final boolean _isArray;
   private final boolean _isInterface;
+  private final boolean _isDelegate;
 
   private JavaClassDef _componentDef;
 
@@ -124,6 +124,7 @@ public class JavaClassDef extends ClassDef {
     _isAbstract = Modifier.isAbstract(type.getModifiers());
     _isArray = type.isArray();
     _isInterface = type.isInterface();
+    _isDelegate = type.isAnnotationPresent(ClassImplementation.class);
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
@@ -219,6 +220,11 @@ public class JavaClassDef extends ClassDef {
   public boolean isInterface()
   {
     return _isInterface;
+  }
+
+  public boolean isDelegate()
+  {
+    return _isDelegate;
   }
 
   public JavaClassDef getComponentDef()
@@ -319,7 +325,7 @@ public class JavaClassDef extends ClassDef {
 
     if (get != null) {
       try {
-        return get.call(env, qThis);
+        return get.callMethod(env, qThis);
       } catch (Exception e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
 	
@@ -341,7 +347,7 @@ public class JavaClassDef extends ClassDef {
 
     if (__fieldGet != null) {
       try {
-        return __fieldGet.call(env, qThis, name);
+        return __fieldGet.callMethod(env, qThis, name);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 
@@ -361,7 +367,7 @@ public class JavaClassDef extends ClassDef {
 
     if (setter != null) {
       try {
-        return setter.call(env, qThis, value);
+        return setter.callMethod(env, qThis, value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 	
@@ -387,7 +393,7 @@ public class JavaClassDef extends ClassDef {
 
     if (__fieldSet != null) {
       try {
-        return __fieldSet.call(env, qThis, name, value);
+        return __fieldSet.callMethod(env, qThis, name, value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 	
@@ -427,15 +433,6 @@ public class JavaClassDef extends ClassDef {
       throw new QuercusRuntimeException(e);
     }
     */
-  }
-
-  /**
-   * Eval new
-   */
-  @Override
-  public Value callNew(Env env, Expr []args)
-  {
-    return _cons.callMethod(env, null, args);
   }
 
   /**

@@ -50,11 +50,11 @@ import java.util.logging.Logger;
 /**
  * Manages the JMS session.
  */
-public class SessionImpl implements XASession, ThreadTask, XAResource
+public class JmsSession implements XASession, ThreadTask, XAResource
 {
   protected static final Logger log
-    = Logger.getLogger(SessionImpl.class.getName());
-  protected static final L10N L = new L10N(SessionImpl.class);
+    = Logger.getLogger(JmsSession.class.getName());
+  protected static final L10N L = new L10N(JmsSession.class);
 
   private static final long SHUTDOWN_WAIT_TIME = 10000;
 
@@ -84,7 +84,7 @@ public class SessionImpl implements XASession, ThreadTask, XAResource
   private volatile boolean _isClosed;
   private volatile boolean _hasMessage;
 
-  public SessionImpl(ConnectionImpl connection,
+  public JmsSession(ConnectionImpl connection,
 		     boolean isTransacted, int ackMode,
                      boolean isXA)
     throws JMSException
@@ -1130,7 +1130,7 @@ public class SessionImpl implements XASession, ThreadTask, XAResource
     void send()
       throws JMSException
     {
-      _queue.send(SessionImpl.this, _message, 0);
+      _queue.send(JmsSession.this, _message, 0);
     }
   }
 }

@@ -73,7 +73,7 @@ abstract public class AbstractQueue extends AbstractDestination
   }
 
   @Override
-  public void send(SessionImpl session, Message msg, long timeout)
+  public void send(JmsSession session, Message msg, long timeout)
     throws JMSException
   {
     if (log.isLoggable(Level.FINE))
@@ -152,7 +152,7 @@ abstract public class AbstractQueue extends AbstractDestination
    *
    * @param queue the queue to send messages to.
    */
-  public QueueBrowser createBrowser(SessionImpl session,
+  public QueueBrowser createBrowser(JmsSession session,
 				    String messageSelector)
     throws JMSException
   {

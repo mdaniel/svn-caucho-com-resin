@@ -112,7 +112,7 @@ public class Server extends ProtocolDispatchServer
 
   private long _waitForActiveTime = 10000L;
 
-  // <server> configuration
+  // <server> configuration compat
   private int _acceptListenBacklog = 100;
   
   private int _acceptThreadMin = 5;
@@ -121,7 +121,6 @@ public class Server extends ProtocolDispatchServer
   private int _keepaliveMax = 128;
   
   private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
-  private long _keepaliveTimeout = 15000;
   
   private boolean _keepaliveSelectEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
@@ -129,8 +128,6 @@ public class Server extends ProtocolDispatchServer
   private long _suspendTimeMax = 600000;
 
   private long _memoryFreeMin = 1024 * 1024;
-  
-  private long _socketTimeout = 65000L;
   
   private long _shutdownWaitMax = 60 * 1000;
   
@@ -328,7 +325,7 @@ public class Server extends ProtocolDispatchServer
    */
   public void setKeepaliveTimeout(Period period)
   {
-    _keepaliveTimeout = period.getPeriod();
+    _clusterServer.setKeepaliveTimeout(period);
   }
 
   /**
@@ -336,11 +333,11 @@ public class Server extends ProtocolDispatchServer
    */
   public long getKeepaliveTimeout()
   {
-    return _keepaliveTimeout;
+    return _clusterServer.getKeepaliveTimeout();
   }
 
   /**
-   * Sets the keepalive timeout
+   * Sets the keepalive connection timeout
    */
   public void setKeepaliveConnectionTimeMax(Period period)
   {
@@ -424,7 +421,7 @@ public class Server extends ProtocolDispatchServer
    */
   public void setSocketTimeout(Period period)
   {
-    _socketTimeout = period.getPeriod();
+    _clusterServer.setSocketTimeout(period);
   }
 
   /**
@@ -432,7 +429,7 @@ public class Server extends ProtocolDispatchServer
    */
   public long getSocketTimeout()
   {
-    return _socketTimeout;
+    return _clusterServer.getSocketTimeout();
   }
 
   /**

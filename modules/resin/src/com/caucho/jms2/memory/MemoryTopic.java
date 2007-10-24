@@ -57,7 +57,7 @@ public class MemoryTopic extends AbstractTopic
   private int _id;
 
   @Override
-  public AbstractQueue createSubscriber(SessionImpl session,
+  public AbstractQueue createSubscriber(JmsSession session,
                                         String name,
                                         boolean noLocal)
   {
@@ -93,7 +93,7 @@ public class MemoryTopic extends AbstractTopic
       _subscriptionList.remove(queue);
   }
   
-  public void send(SessionImpl session, Message msg, long timeout)
+  public void send(JmsSession session, Message msg, long timeout)
     throws JMSException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {

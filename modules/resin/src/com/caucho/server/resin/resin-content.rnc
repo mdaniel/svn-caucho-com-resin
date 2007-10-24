@@ -539,13 +539,16 @@ r_server-Basis =
   & r_keepalive-select-thread-timeout?
 
   & (attribute load-balance-connect-timeout { r_period-Type }
-    | element load-balance-connect-timeout { r_period-Type })?
+     | element load-balance-connect-timeout { r_period-Type })?
 
   & (attribute load-balance-recover-time { r_period-Type }
      | element load-balance-recover-time { r_period-Type })?
 
   & (attribute load-balance-idle-time { r_period-Type }
      | element load-balance-idle-time { r_period-Type })?
+
+  & (attribute load-balance-socket-timeout { r_period-Type }
+     | element load-balance-socket-timeout { r_period-Type })?
 
   & (attribute load-balance-warmup-time { r_period-Type }
      | element load-balance-warmup-time { r_period-Type })?

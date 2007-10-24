@@ -57,7 +57,7 @@ public class ConnectionImpl implements XAConnection
   
   private ExceptionListener _exceptionListener;
 
-  private ArrayList<SessionImpl> _sessions = new ArrayList<SessionImpl>();
+  private ArrayList<JmsSession> _sessions = new ArrayList<JmsSession>();
 
   private HashMap<String,TopicSubscriber> _durableSubscriberMap
     = new HashMap<String,TopicSubscriber>();
@@ -246,7 +246,7 @@ public class ConnectionImpl implements XAConnection
     
     assignClientID();
     
-    return new SessionImpl(this, transacted, acknowledgeMode, isXA());
+    return new JmsSession(this, transacted, acknowledgeMode, isXA());
   }
 
   /**
@@ -259,13 +259,13 @@ public class ConnectionImpl implements XAConnection
     
     assignClientID();
     
-    return new SessionImpl(this, true, 0, true);
+    return new JmsSession(this, true, 0, true);
   }
 
   /**
    * Adds a session.
    */
-  protected void addSession(SessionImpl session)
+  protected void addSession(JmsSession session)
   {
     _sessions.add(session);
     
@@ -276,7 +276,7 @@ public class ConnectionImpl implements XAConnection
   /**
    * Removes a session.
    */
-  void removeSession(SessionImpl session)
+  void removeSession(JmsSession session)
   {
     _sessions.remove(session);
   }
@@ -349,7 +349,7 @@ public class ConnectionImpl implements XAConnection
 
     _factory.removeConnection(this);
 
-    ArrayList<SessionImpl> sessions = new ArrayList<SessionImpl>(_sessions);
+    ArrayList<JmsSession> sessions = new ArrayList<JmsSession>(_sessions);
     _sessions.clear();
     
     for (int i = 0; i < sessions.size(); i++) {

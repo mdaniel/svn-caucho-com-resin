@@ -41,19 +41,19 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
 {
   private static int _idCount;
 
-  private SessionImpl _session;
+  private JmsSession _session;
 
   private ArrayList<MessageConsumer> _consumerList
     = new ArrayList<MessageConsumer>();
   
-  TemporaryTopicImpl(SessionImpl session)
+  TemporaryTopicImpl(JmsSession session)
   {
     _session = session;
     
     setName("TemporaryTopic-" + _idCount++);
   }
 
-  SessionImpl getSession()
+  JmsSession getSession()
   {
     return _session;
   }

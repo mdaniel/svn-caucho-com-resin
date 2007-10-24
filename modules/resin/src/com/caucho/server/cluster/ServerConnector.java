@@ -143,19 +143,6 @@ public class ServerConnector
     _cluster = _server.getCluster();
     _port = server.getClusterPort();
 
-    String selfId = null;
-    if (_cluster != null)
-      selfId = _cluster.getId();
-
-    if (selfId == null || selfId.equals(""))
-      selfId = "default";
-
-    String targetId = server.getId();
-    if (targetId == null || targetId.equals(""))
-      targetId = String.valueOf(server.getIndex());
-
-    _debugId = selfId + "->" + targetId;
-
     _warmupTime = server.getLoadBalanceWarmupTime();
     _warmupChunkTime = _warmupTime / WARMUP_MAX;
     if (_warmupChunkTime <= 0)
@@ -254,9 +241,9 @@ public class ServerConnector
    * Returns the socket timeout when reading from the
    * target server.
    */
-  public long getSocketTimeout()
+  public long getLoadBalanceSocketTimeout()
   {
-    return _server.getSocketTimeout();
+    return _server.getLoadBalanceSocketTimeout();
   }
 
   /**
@@ -471,6 +458,22 @@ public class ServerConnector
    */
   public String getDebugId()
   {
+    if (_debugId == null) {
+      String selfId = null;
+      Cluster localCluster = Cluster.getLocal();
+      if (localCluster != null)
+	selfId = localCluster.getId();
+
+      if (selfId == null || selfId.equals(""))
+	selfId = "default";
+
+      String targetId = _server.getId();
+      if (targetId == null || targetId.equals(""))
+	targetId = String.valueOf(_server.getIndex());
+
+      _debugId = selfId + "->" + targetId;
+    }
+    
     return _debugId;
   }
 
@@ -898,7 +901,7 @@ public class ServerConnector
     try {
       ReadWritePair pair = openTCPPair();
       ReadStream rs = pair.getReadStream();
-      rs.setAttribute("timeout", new Integer((int) _server.getSocketTimeout()));
+      rs.setAttribute("timeout", new Integer((int) getLoadBalanceSocketTimeout()));
 
       synchronized (this) {
         _activeCount++;

@@ -43,10 +43,10 @@ import com.caucho.jms.connection.*;
  */
 public class MemorySubscriberQueue extends MemoryQueue
 {
-  private SessionImpl _session;
+  private JmsSession _session;
   private boolean _isNoLocal;
   
-  MemorySubscriberQueue(SessionImpl session, boolean noLocal)
+  MemorySubscriberQueue(JmsSession session, boolean noLocal)
   {
     _session = session;
     _isNoLocal = noLocal;
@@ -54,7 +54,7 @@ public class MemorySubscriberQueue extends MemoryQueue
 
 
   @Override
-  public void send(SessionImpl session, Message msg, long timeout)
+  public void send(JmsSession session, Message msg, long timeout)
     throws JMSException
   {
     if (_isNoLocal && _session == session)

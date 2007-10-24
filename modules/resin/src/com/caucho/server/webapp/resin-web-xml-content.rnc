@@ -660,7 +660,7 @@ r_rewrite-dispatch-Contents =
      }*
 
    & element load-balance {
-       ((attribute disable-at { string }
+       (attribute disable-at { string }
          | element disable-at { string })?
 
         & (attribute enable-at { string }
@@ -675,21 +675,24 @@ r_rewrite-dispatch-Contents =
         & (attribute regexp { string }
            | element regexp { string }
            | attribute full-url-regexp { string }
-           | element full-url-regexp { string })),
+           | element full-url-regexp { string })
 
-       ((attribute cluster { string }
-         | element cluster { string })
+        & (attribute strategy { string }
+           | element strategy { string })?
 
-         & (attribute connection-load-weight { r_int-Type }
-            | element connection-load-weight { r_int-Type })?
+        & (attribute cluster { string }
+           | element cluster { string })
 
-         & (attribute cpu-load-weight { r_int-Type }
-            | element cpu-load-weight { r_int-Type })?
+        & (attribute connection-load-weight { r_int-Type }
+           | element connection-load-weight { r_int-Type })?
 
-         & (attribute sticky-sessions { r_boolean-Type }
-            | element sticky-sessions { r_boolean-Type })?),
+        & (attribute cpu-load-weight { r_int-Type }
+           | element cpu-load-weight { r_int-Type })?
 
-       r_rewrite-conditions-Type
+       & (attribute sticky-sessions { r_boolean-Type }
+           | element sticky-sessions { r_boolean-Type })?
+
+       & r_rewrite-conditions-Type
      }*
 
    & element match {

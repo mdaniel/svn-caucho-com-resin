@@ -45,19 +45,19 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
   
   private static int _idCount;
 
-  private SessionImpl _session;
+  private JmsSession _session;
   private boolean _isClosed;
 
   private ArrayList<MessageConsumer> _consumerList
     = new ArrayList<MessageConsumer>();
   
-  TemporaryQueueImpl(SessionImpl session)
+  TemporaryQueueImpl(JmsSession session)
   {
     _session = session;
     setName("TemporaryQueue-" + _idCount++);
   }
 
-  SessionImpl getSession()
+  JmsSession getSession()
   {
     return _session;
   }

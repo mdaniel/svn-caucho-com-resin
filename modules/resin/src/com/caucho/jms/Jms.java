@@ -113,6 +113,49 @@ public class Jms
     }
   }
 
+  /**
+   * Creates an auto-ack session.
+   */
+  public Session createSession()
+    throws JmsRuntimeException
+  {
+    try {
+      return _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    } catch (JMSException e) {
+      throw new JmsRuntimeException(e);
+    }
+  }
+
+  public Connection createConnection()
+  {
+    try {
+      return _connectionFactory.createConnection();
+    } catch (JMSException e) {
+      throw new JmsRuntimeException(e);
+    }
+  }
+  
+  /**
+   * Creates a session and listener.
+   */
+  public Session createListener(Connection conn,
+				Destination queue,
+				MessageListener listener)
+    throws JmsRuntimeException
+  {
+    try {
+      Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+      MessageConsumer consumer = session.createConsumer(queue);
+
+      consumer.setMessageListener(listener);
+
+      return session;
+    } catch (JMSException e) {
+      throw new JmsRuntimeException(e);
+    }
+  }
+
   private Session getSession()
     throws JMSException
   {

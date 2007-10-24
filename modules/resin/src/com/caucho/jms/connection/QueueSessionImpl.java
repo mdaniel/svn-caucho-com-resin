@@ -36,7 +36,7 @@ import com.caucho.jms.queue.*;
 /**
  * A sample queue session.  Lets the client create queues, browsers, etc.
  */
-public class QueueSessionImpl extends SessionImpl
+public class QueueSessionImpl extends JmsSession
   implements XAQueueSession, QueueSession
 {
   /**

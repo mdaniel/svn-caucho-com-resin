@@ -74,7 +74,7 @@ abstract public class AbstractTopic extends AbstractDestination
     throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
   }
 
-  public abstract AbstractQueue createSubscriber(SessionImpl session,
+  public abstract AbstractQueue createSubscriber(JmsSession session,
                                                  String name,
                                                  boolean noLocal);
 

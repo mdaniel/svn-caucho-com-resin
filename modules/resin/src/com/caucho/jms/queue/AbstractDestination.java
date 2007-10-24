@@ -92,7 +92,7 @@ abstract public class AbstractDestination
   {
   }
 
-  abstract public void send(SessionImpl session, Message msg, long timeout)
+  abstract public void send(JmsSession session, Message msg, long timeout)
     throws JMSException;
   
   /**

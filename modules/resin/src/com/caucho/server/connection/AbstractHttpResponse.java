@@ -1630,23 +1630,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     boolean canCache = startCaching(true);
     _isHeaderWritten = true;
     
-    /*
-    if (_statusCode == SC_OK && ! _disableCaching) // && getBufferSize() > 0)
-      canCache = startCaching(_headerKeys, _headerValues,
-                              _contentType, _charEncoding);
-    else if (_statusCode != SC_OK && _statusCode != SC_NOT_MODIFIED &&
-             _statusCode != SC_MOVED_TEMPORARILY && length < 512 &&
-             (_contentType == null || _contentType.startsWith("text/html"))) {
-    }
-
-    if (canCache) {
-    }
-    else if (_statusCode == SC_OK && _request.getMethod().equals("HEAD")) {
-      // length = 0;
-      _originalResponseStream.setHead();
-    }
-    */
-    
     if (_request.getMethod().equals("HEAD")) {
       _originalResponseStream.setHead();
     }

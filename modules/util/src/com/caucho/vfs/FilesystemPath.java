@@ -106,9 +106,9 @@ abstract public class FilesystemPath extends Path {
   {
     String canonicalPath;
 
-    if (filePath.length() > offset &&
-        (filePath.charAt(offset) == '/' ||
-         filePath.charAt(offset) == _separatorChar))
+    if (filePath.length() > offset
+	&& (filePath.charAt(offset) == '/'
+	    || filePath.charAt(offset) == _separatorChar))
       canonicalPath = normalizePath("/", filePath, offset, _separatorChar);
     else
       canonicalPath = normalizePath(_pathname, filePath, offset,

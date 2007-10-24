@@ -44,22 +44,47 @@ import com.caucho.jmx.Units;
 @Description("The protocol listening to an IP address.")
 public interface PortMXBean extends ManagedObjectMXBean {
   /**
+   * Returns the ip address or used to bind the port.
+   */
+  @Description("The configured ip address or host name used to bind the port")
+  public String getAddress();
+  
+  /**
    * Returns the port's protocol name.
    */
   @Description("The configured protocol for the port")
   public String getProtocolName();
 
   /**
-   * Returns the ip address or used to bind the port.
-   */
-  @Description("The configured ip address or host name used to bind the port")
-  public String getAddress();
-
-  /**
    * Returns the port number used to bind the port.
    */
   @Description("The configured port number used to bind the port")
   public int getPort();
+
+  @Description("True if the port is using SSL encryption")
+  public boolean isSSL();
+
+  //
+  // Tuning/Configuration
+  //
+
+  /**
+   * Returns the minimum number of accept threads
+   */
+  @Description("The minimum number of accept threads")
+  public int getAcceptThreadMin();
+
+  /**
+   * Returns the maximum number of accept threads
+   */
+  @Description("The maximum number of accept threads")
+  public int getAcceptThreadMax();
+
+  /**
+   * Returns the operating system listen backlog
+   */
+  @Description("The operating system listen backlog")
+  public int getAcceptListenBacklog();
 
   /**
    * Returns the maximum number of active connections allowed for the port.
@@ -74,13 +99,16 @@ public interface PortMXBean extends ManagedObjectMXBean {
   public int getKeepaliveMax();
 
   /**
+   * Returns the maximum total time for keepalive connections
+   */
+  @Description("The maximum total time for keepalive connections")
+  public long getKeepaliveConnectionTimeMax();
+
+  /**
    * Returns the timeout for a keepalive connection
    */
   @Description("The configured timeout for keepalive connections")
   public long getKeepaliveTimeout();
-
-  @Description("True if the port is using SSL encryption")
-  public boolean isSSL();
 
   /**
    * Returns the timeout for socket reads when waiting for data from a client.
@@ -92,6 +120,13 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The configured timeout for socket reads when waiting for data from a client")
   @Units("milliseconds")    
   public long getSocketTimeout();
+
+  /**
+   * Returns the suspend/comet time max
+   */
+  @Description("The maximum suspend/comet time")
+  @Units("milliseconds")    
+  public long getSuspendTimeMax();
 
   //
   // State attributes

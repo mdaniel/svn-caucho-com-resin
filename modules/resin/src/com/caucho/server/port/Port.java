@@ -99,29 +99,29 @@ public class Port
 
   private InetAddress _socketAddress;
 
-  // default timeout
-  private long _socketTimeout = DEFAULT;
+  private int _acceptThreadMin = DEFAULT;
+  private int _acceptThreadMax = DEFAULT;
+
+  private int _acceptListenBacklog = DEFAULT;
 
   private int _connectionMax = 512;
-  private int _minSpareConnection = 16;
 
   private int _keepaliveMax = DEFAULT;
   
   private long _keepaliveTimeMax = DEFAULT;
   private long _keepaliveTimeout = DEFAULT;
   private long _keepaliveSelectThreadTimeout = DEFAULT;
+  private int _minSpareConnection = 16;
+  
+  // default timeout
+  private long _socketTimeout = DEFAULT;
 
   private long _suspendTimeMax = DEFAULT;
 
-  private int _acceptThreadMin = DEFAULT;
-  private int _acceptThreadMax = DEFAULT;
-
-  private int _acceptListenBacklog = DEFAULT;
+  private boolean _tcpNoDelay = true;
 
   // The virtual host name
   private String _virtualHost;
-
-  private boolean _tcpNoDelay = true;
 
   private final PortAdmin _admin = new PortAdmin(this);
 
@@ -473,23 +473,9 @@ public class Port
     _serverSocket = socket;
   }
 
-  /**
-   * Sets the minimum spare listen.
-   */
-  public void setMinSpareListen(int minSpare)
-    throws ConfigException
-  {
-    setAcceptThreadMin(minSpare);
-  }
-
-  /**
-   * Sets the maximum spare listen.
-   */
-  public void setMaxSpareListen(int maxSpare)
-    throws ConfigException
-  {
-    setAcceptThreadMax(maxSpare);
-  }
+  //
+  // Configuration/Tuning
+  //
 
   /**
    * Sets the minimum spare listen.
@@ -498,104 +484,57 @@ public class Port
     throws ConfigException
   {
     if (minSpare < 1)
-      throw new ConfigException(L.l("min-spare-listen must be at least 1."));
+      throw new ConfigException(L.l("accept-thread-min must be at least 1."));
 
     _acceptThreadMin = minSpare;
   }
 
   /**
-   * Sets the maximum spare listen.
+   * The minimum spare threads.
+   */
+  public int getAcceptThreadMin()
+  {
+    return _acceptThreadMin;
+  }
+
+  /**
+   * Sets the minimum spare listen.
    */
   public void setAcceptThreadMax(int maxSpare)
     throws ConfigException
   {
     if (maxSpare < 1)
-      throw new ConfigException(L.l("max-spare-listen must be at least 1."));
+      throw new ConfigException(L.l("accept-thread-max must be at least 1."));
 
     _acceptThreadMax = maxSpare;
   }
 
   /**
-   * Gets the tcp-no-delay property
+   * The maximum spare threads.
    */
-  public boolean getTcpNoDelay()
+  public int getAcceptThreadMax()
   {
-    return _tcpNoDelay;
+    return _acceptThreadMax;
   }
 
   /**
-   * Sets the tcp-no-delay property
+   * Sets the operating system listen backlog
    */
-  public void setTcpNoDelay(boolean tcpNoDelay)
+  public void setAcceptListenBacklog(int listen)
+    throws ConfigException
   {
-    _tcpNoDelay = tcpNoDelay;
+    if (listen < 1)
+      throw new ConfigException(L.l("accept-listen-backlog must be at least 1."));
+
+    _acceptListenBacklog = listen;
   }
 
   /**
-   * Returns true for ignore-client-disconnect.
+   * The operating system listen backlog
    */
-  public boolean isIgnoreClientDisconnect()
+  public int getAcceptListenBacklog()
   {
-    return _server.isIgnoreClientDisconnect();
-  }
-
-  /**
-   * Returns the thread count.
-   */
-  public int getThreadCount()
-  {
-    return _threadCount;
-  }
-
-  /**
-   * Sets the default read/write timeout for the accepted sockets.
-   */
-  public void setSocketTimeout(Period period)
-  {
-    _socketTimeout = period.getPeriod();
-  }
-
-  /**
-   * Gets the read timeout for the accepted sockets.
-   */
-  public long getSocketTimeout()
-  {
-    return _socketTimeout;
-  }
-
-  /**
-   * Sets the read timeout for the accepted sockets.
-   *
-   * @deprecated
-   */
-  public void setReadTimeout(Period period)
-  {
-    setSocketTimeout(period);
-  }
-
-  /**
-   * Sets the write timeout for the accepted sockets.
-   *
-   * @deprecated
-   */
-  public void setWriteTimeout(Period period)
-  {
-  }
-
-  /**
-   * Returns the active thread count.
-   */
-  public int getActiveThreadCount()
-  {
-    return _threadCount - _idleThreadCount;
-  }
-
-  /**
-   * Returns the count of idle threads.
-   */
-  public int getIdleThreadCount()
-  {
-    return _idleThreadCount;
+    return _acceptListenBacklog;
   }
 
   /**
@@ -615,6 +554,56 @@ public class Port
   }
 
   /**
+   * Returns true for ignore-client-disconnect.
+   */
+  public boolean isIgnoreClientDisconnect()
+  {
+    return _server.isIgnoreClientDisconnect();
+  }
+
+  /**
+   * Sets the read/write timeout for the accepted sockets.
+   */
+  public void setSocketTimeout(Period period)
+  {
+    _socketTimeout = period.getPeriod();
+  }
+
+  /**
+   * Sets the read timeout for the accepted sockets.
+   *
+   * @deprecated
+   */
+  public void setReadTimeout(Period period)
+  {
+    setSocketTimeout(period);
+  }
+
+  /**
+   * Gets the read timeout for the accepted sockets.
+   */
+  public long getSocketTimeout()
+  {
+    return _socketTimeout;
+  }
+
+  /**
+   * Gets the tcp-no-delay property
+   */
+  public boolean getTcpNoDelay()
+  {
+    return _tcpNoDelay;
+  }
+
+  /**
+   * Sets the tcp-no-delay property
+   */
+  public void setTcpNoDelay(boolean tcpNoDelay)
+  {
+    _tcpNoDelay = tcpNoDelay;
+  }
+
+  /**
    * Configures the throttle.
    */
   public void setThrottleConcurrentMax(int max)
@@ -622,6 +611,26 @@ public class Port
     Throttle throttle = createThrottle();
 
     throttle.setMaxConcurrentRequests(max);
+  }
+
+  /**
+   * Configures the throttle.
+   */
+  public long getThrottleConcurrentMax()
+  {
+    if (_throttle != null)
+      return _throttle.getMaxConcurrentRequests();
+    else
+      return -1;
+  }
+
+  /**
+   * Sets the write timeout for the accepted sockets.
+   *
+   * @deprecated
+   */
+  public void setWriteTimeout(Period period)
+  {
   }
 
   private Throttle createThrottle()
@@ -636,6 +645,27 @@ public class Port
     return _throttle;
   }
 
+  //
+  // compat config
+  //
+
+  /**
+   * Sets the minimum spare listen.
+   */
+  public void setMinSpareListen(int minSpare)
+    throws ConfigException
+  {
+    setAcceptThreadMin(minSpare);
+  }
+
+  /**
+   * Sets the maximum spare listen.
+   */
+  public void setMaxSpareListen(int maxSpare)
+    throws ConfigException
+  {
+    setAcceptThreadMax(maxSpare);
+  }
 
   //
   // statistics
@@ -719,6 +749,19 @@ public class Port
     return _keepaliveTimeMax;
   }
 
+  /**
+   * Gets the suspend max.
+   */
+  public long getSuspendTimeMax()
+  {
+    return _suspendTimeMax;
+  }
+
+  public void setSuspendTimeMax(Period period)
+  {
+    _suspendTimeMax = period.getPeriod();
+  }
+
   public void setKeepaliveTimeout(Period period)
   {
     _keepaliveTimeout = period.getPeriod();
@@ -734,6 +777,34 @@ public class Port
     return _keepaliveSelectThreadTimeout;
   }
 
+  //
+  // statistics
+  //
+  
+  /**
+   * Returns the thread count.
+   */
+  public int getThreadCount()
+  {
+    return _threadCount;
+  }
+
+  /**
+   * Returns the active thread count.
+   */
+  public int getActiveThreadCount()
+  {
+    return _threadCount - _idleThreadCount;
+  }
+
+  /**
+   * Returns the count of idle threads.
+   */
+  public int getIdleThreadCount()
+  {
+    return _idleThreadCount;
+  }
+
   /**
    * Returns the number of keepalive connections
    */
@@ -742,19 +813,6 @@ public class Port
     synchronized (_keepaliveCountLock) {
       return _keepaliveCount;
     }
-  }
-
-  /**
-   * Gets the suspend max.
-   */
-  public long getSuspendTimeMax()
-  {
-    return _suspendTimeMax;
-  }
-
-  public void setSuspendTimeMax(Period period)
-  {
-    _suspendTimeMax = period.getPeriod();
   }
 
   public Lifecycle getLifecycleState()
@@ -768,6 +826,33 @@ public class Port
   public boolean isActive()
   {
     return _lifecycle.isActive();
+  }
+
+  /**
+   * Returns the active connections.
+   */
+  public int getActiveConnectionCount()
+  {
+    return _threadCount - _idleThreadCount;
+  }
+
+  /**
+   * Returns the keepalive connections.
+   */
+  public int getKeepaliveConnectionCount()
+  {
+    return getKeepaliveCount();
+  }
+
+  /**
+   * Returns the number of connections in the select.
+   */
+  public int getSelectConnectionCount()
+  {
+    if (_selectManager != null)
+      return _selectManager.getSelectCount();
+    else
+      return -1;
   }
 
   /**
@@ -1032,38 +1117,11 @@ public class Port
   }
 
   /**
-   * Returns the active connections.
-   */
-  public int getActiveConnectionCount()
-  {
-    return _threadCount - _idleThreadCount;
-  }
-
-  /**
-   * Returns the keepalive connections.
-   */
-  public int getKeepaliveConnectionCount()
-  {
-    return getKeepaliveCount();
-  }
-
-  /**
    * returns the select manager.
    */
   public AbstractSelectManager getSelectManager()
   {
     return _selectManager;
-  }
-
-  /**
-   * Returns the number of connections in the select.
-   */
-  public int getSelectConnectionCount()
-  {
-    if (_selectManager != null)
-      return _selectManager.getSelectCount();
-    else
-      return -1;
   }
 
   /**

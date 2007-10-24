@@ -36,7 +36,7 @@ import com.caucho.jms.queue.*;
 /**
  * A sample topic session.  Lets the client create topics, browsers, etc.
  */
-public class TopicSessionImpl extends SessionImpl
+public class TopicSessionImpl extends JmsSession
   implements XATopicSession, TopicSession
 {
   public TopicSessionImpl(ConnectionImpl conn,

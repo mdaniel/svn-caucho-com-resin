@@ -278,7 +278,7 @@ public class Cluster
   ClusterServer createServer(ClusterServer server)
   {
     server.setIndex(_serverList.size());
-    
+
     for (int i = 0; i < _serverDefaultList.size(); i++)
       _serverDefaultList.get(i).configure(server);
 

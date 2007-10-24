@@ -48,13 +48,14 @@ import java.util.logging.Level;
 public class TopicSubscriberImpl extends MessageConsumerImpl
   implements TopicSubscriber
 {
-  private static final Logger log = Log.open(TopicSubscriberImpl.class);
+  private static final Logger log
+    = Logger.getLogger(TopicSubscriberImpl.class.getName());
   private static final L10N L = new L10N(TopicSubscriberImpl.class);
 
   private AbstractTopic _topic;
   private AbstractQueue _subscription;
   
-  TopicSubscriberImpl(SessionImpl session,
+  TopicSubscriberImpl(JmsSession session,
 		      AbstractTopic topic,
 		      String messageSelector,
 		      boolean noLocal)
@@ -69,7 +70,7 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
     _topic.addConsumer(this);
   }
   
-  TopicSubscriberImpl(SessionImpl session,
+  TopicSubscriberImpl(JmsSession session,
 		      AbstractTopic topic,
 		      AbstractQueue subscription,
 		      String messageSelector,

@@ -50,12 +50,12 @@ public class QueueBrowserImpl implements QueueBrowser  {
     = Logger.getLogger(QueueBrowserImpl.class.getName());
   static final L10N L = new L10N(QueueBrowserImpl.class);
 
-  private SessionImpl _session;
+  private JmsSession _session;
   protected AbstractQueue _queue;
   private String _messageSelector;
   private Selector _selector;
   
-  QueueBrowserImpl(SessionImpl session, Queue queue, String messageSelector)
+  QueueBrowserImpl(JmsSession session, Queue queue, String messageSelector)
     throws JMSException
   {
     _session = session;

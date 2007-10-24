@@ -67,6 +67,30 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getPort();
   }
 
+  public boolean isSSL()
+  {
+    return _port.isSSL();
+  }
+
+  //
+  // Config
+  //
+
+  public int getAcceptThreadMin()
+  {
+    return _port.getAcceptThreadMin();
+  }
+
+  public int getAcceptThreadMax()
+  {
+    return _port.getAcceptThreadMax();
+  }
+
+  public int getAcceptListenBacklog()
+  {
+    return _port.getAcceptListenBacklog();
+  }
+
   public int getConnectionMax()
   {
     return _port.getConnectionMax();
@@ -77,19 +101,24 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getKeepaliveMax();
   }
 
+  public long getKeepaliveConnectionTimeMax()
+  {
+    return _port.getKeepaliveConnectionTimeMax();
+  }
+
   public long getKeepaliveTimeout()
   {
     return _port.getKeepaliveTimeout();
   }
 
-  public boolean isSSL()
-  {
-    return _port.isSSL();
-  }
-
   public long getSocketTimeout()
   {
     return _port.getSocketTimeout();
+  }
+
+  public long getSuspendTimeMax()
+  {
+    return _port.getSuspendTimeMax();
   }
 
   public String getState()

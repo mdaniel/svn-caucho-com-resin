@@ -122,7 +122,7 @@ public class QuercusClass {
 
     if (classDef instanceof JavaClassDef) {
       javaClassDef = (JavaClassDef) classDef;
-      _isJavaWrapper = true;
+      _isJavaWrapper = ! javaClassDef.isDelegate();
     }
     
     for (QuercusClass cls = parent; cls != null; cls = cls.getParent()) {
@@ -572,7 +572,10 @@ public class QuercusClass {
     if (_isJavaWrapper) {
       return _javaClassDef.callNew(env, args);
     }
-    else if (_javaClassDef != null) {
+    else if (_javaClassDef != null && _javaClassDef.isDelegate()) {
+      objectValue = new ObjectExtValue(this);
+    }
+    else if (_javaClassDef != null && ! _javaClassDef.isDelegate()) {
       Value javaWrapper = _javaClassDef.callNew(env, new Value[0]);
       Object object = javaWrapper.toJavaObject();
       

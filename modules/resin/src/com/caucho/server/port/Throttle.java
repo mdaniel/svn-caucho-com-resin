@@ -47,6 +47,11 @@ public class Throttle
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public int getMaxConcurrentRequests()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   public static Throttle createPro()
   {
     try {

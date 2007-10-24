@@ -58,7 +58,7 @@ public class MessageConsumerImpl
 
   private final Object _consumerLock = new Object();
   
-  protected final SessionImpl _session;
+  protected final JmsSession _session;
   private AbstractQueue _queue;
   private MessageListener _messageListener;
   private String _messageSelector;
@@ -68,7 +68,7 @@ public class MessageConsumerImpl
   private volatile boolean _isClosed;
   private Alarm _pollAlarm;
 
-  MessageConsumerImpl(SessionImpl session,
+  MessageConsumerImpl(JmsSession session,
                       AbstractQueue queue,
                       String messageSelector,
                       boolean noLocal)
