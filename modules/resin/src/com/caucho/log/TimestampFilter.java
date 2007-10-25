@@ -302,8 +302,8 @@ public class TimestampFilter extends StreamImpl {
 	break;
 
       case 'd':
-	out.print((cal.getDayOfMonth() + 1) / 10);
-	out.print((cal.getDayOfMonth() + 1) % 10);
+	out.print((cal.getDayOfMonth()) / 10);
+	out.print((cal.getDayOfMonth()) % 10);
 	break;
 
       case 'H':
