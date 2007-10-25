@@ -358,11 +358,7 @@ public class Env {
 
   public static Env getInstance()
   {
-    Env env = _threadEnv.get();
-    if (env == null) {
-        throw new NullPointerException("uninitialized thread local Env");
-    }
-    return env;
+    return _threadEnv.get();
   }
 
   //
@@ -575,7 +571,7 @@ public class Env {
     _startTime = Alarm.getCurrentTime();
     _timeLimit = getIniLong("max_execution_time");
 
-    _oldThreadEnv = _threadEnv.get();
+    Env oldThreadEnv = _threadEnv.get();
     
     _threadEnv.set(this);
     
@@ -4665,10 +4661,8 @@ public class Env {
         setGlobalValue("_SESSION", session.copy(this));
         setGlobalValue("HTTP_SESSION_VARS", session.copy(this));
       }
-
-      if (_oldThreadEnv != null)
-        _threadEnv.set(_oldThreadEnv);
-
+      
+      _threadEnv.set(_oldThreadEnv);
     }
   }
 
