@@ -30,8 +30,10 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.resources.StreamContextResource;
@@ -39,9 +41,15 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Handling the PHP Stream API
@@ -363,17 +371,22 @@ public class StreamModule extends AbstractQuercusModule {
     return stream_wrapper_register(env, protocol, className);
   }
 
+  /**
+   * stream_set_blocking is stubbed since Quercus should wait for
+   * any stream (unless a non-web-server Quercus is developed.)
+   */
   public static boolean stream_set_blocking(Env env,
                                             @NotNull Value stream,
                                             int mode)
   {
+    env.stub("stream_set_blocking()");
+    
     if (stream == null)
       return false;
-    
-    env.stub("stream_set_blocking");
-    return false; 
+    else
+      return true;
   }
-
+  
   public static boolean stream_set_timeout(Env env,
                                            @NotNull Value stream,
                                            int seconds,
@@ -391,19 +404,6 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   /**
-   * stream_set_blocking is stubbed since Quercus should wait for
-   * any stream (unless a non-web-server Quercus is developed.)
-   */
-  public static boolean
-    stream_set_blocking(@NotNull Value stream, int mode)
-  {
-    if (stream == null)
-      return false;
-    else
-      return true;
-  }
-
-  /**
    * Sets the write buffer.
    */
   public static int stream_set_write_buffer(Env env, BinaryOutput stream,
@@ -411,9 +411,99 @@ public class StreamModule extends AbstractQuercusModule {
   {
     return 0;
   }
+  
+  /*
+   * Opens an Internet connection.
+   */
+  public static Value stream_socket_client(Env env,
+                                  @NotNull String remoteSocket,
+                                  @Optional @Reference Value errorInt,
+                                  @Optional @Reference Value errorStr,
+                                  @Optional("120.0") double timeout,
+                                  @Optional("STREAM_CLIENT_CONNECT") int flags,
+                                  @Optional StreamContextResource context)
+  {
+    try {
+      if (remoteSocket == null) {
+        env.warning("socket to connect to must not be null");
+        return BooleanValue.FALSE;
+      }
+      
+      if (flags != STREAM_CLIENT_CONNECT) {
+        env.stub("unsupported stream_socket_client flag");
+      }
+      
+      boolean isSecure = false;
+      remoteSocket = remoteSocket.trim();
 
-  static void stream_wrapper_register(StringValue protocol, 
-                                      ProtocolWrapper wrapper)
+      int typeIndex = remoteSocket.indexOf("://");
+      
+      if (typeIndex > 0) {
+        String type = remoteSocket.substring(0, typeIndex);
+        remoteSocket = remoteSocket.substring(typeIndex + 3);
+
+        if (type.equals("tcp")) {
+        }
+        else if (type.equals("ssl")) {
+          isSecure = true;
+        }
+        else {
+          env.warning(L.l("unrecognized socket transport: {0}", type));
+          
+          return BooleanValue.FALSE;
+        }
+      }
+
+      int colonIndex = remoteSocket.lastIndexOf(':');
+      
+      String host = remoteSocket;
+      int port = 80;
+      
+      if (colonIndex > 0) {
+        host = remoteSocket.substring(0, colonIndex);
+        
+        port = 0;
+        
+        for (int i = colonIndex + 1; i < remoteSocket.length(); i++) {
+          char ch = remoteSocket.charAt(i);
+          
+          if ('0' <= ch && ch <= '9')
+            port = port * 10 + ch - '0';
+          else
+            break;
+        }
+      }
+
+      Socket socket;
+      
+      if (isSecure)
+        socket = SSLSocketFactory.getDefault().createSocket(host, port);
+      else
+        socket = SocketFactory.getDefault().createSocket(host, port);
+
+      socket.setSoTimeout((int) (timeout * 1000));
+
+      SocketInputOutput stream
+        = new SocketInputOutput(env, socket, SocketInputOutput.Domain.AF_INET);
+
+      stream.init();
+
+      return env.wrapJava(stream);
+    }
+    catch (UnknownHostException e) {
+      errorStr.set(env.createString(e.getMessage()));
+      
+      return BooleanValue.FALSE;
+    }
+    catch (IOException e) {
+      errorStr.set(env.createString(e.getMessage()));
+      
+      return BooleanValue.FALSE;
+    }
+  }
+
+  public static void stream_wrapper_register(StringValue protocol, 
+                                             ProtocolWrapper wrapper)
   {
     _wrapperMap.put(protocol.toString(), wrapper);
     
@@ -468,7 +558,7 @@ public class StreamModule extends AbstractQuercusModule {
     return true;
   }
 
-  public static ProtocolWrapper getWrapper(String protocol)
+  protected static ProtocolWrapper getWrapper(String protocol)
   {
     return _wrapperMap.get(protocol);
   }

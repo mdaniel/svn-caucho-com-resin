@@ -845,7 +845,7 @@ public class JavaClassDef extends ClassDef {
     throws InstantiationException, IllegalAccessException
   {
     boolean isDelegate = false;
-    
+
     if (TraversableDelegate.class.isAssignableFrom(cl)) {
       _traversableDelegate = (TraversableDelegate) cl.newInstance();
       isDelegate = true;

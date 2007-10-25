@@ -51,7 +51,9 @@ public class SocketInputOutput
   
   public enum Domain { AF_INET, AF_INET6, AF_UNIX };
 
-  private int _lastError;
+  private int _lastErrorCode;
+  private String _lastErrorString;
+  
   private Domain _domain;
   private Socket _socket;
 
@@ -81,7 +83,7 @@ public class SocketInputOutput
 
   public void setError(int error)
   {
-    _lastError = error;
+    _lastErrorCode = error;
   }
 
   public void init()
