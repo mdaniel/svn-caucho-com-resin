@@ -85,12 +85,9 @@ public class TopicConnectionImpl extends ConnectionImpl
                                          int acknowledgeMode)
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
-
-    assignClientID();
-
     checkOpen();
+    
+    assignClientID();
     
     return new TopicSessionImpl(this, transacted, acknowledgeMode, isXA());
   }

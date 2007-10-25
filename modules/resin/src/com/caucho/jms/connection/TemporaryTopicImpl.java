@@ -43,8 +43,8 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
 
   private JmsSession _session;
 
-  private ArrayList<MessageConsumer> _consumerList
-    = new ArrayList<MessageConsumer>();
+  private ArrayList<MessageConsumerImpl> _consumerList
+    = new ArrayList<MessageConsumerImpl>();
   
   TemporaryTopicImpl(JmsSession session)
   {
@@ -58,15 +58,13 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
     return _session;
   }
 
-  @Override
-  public void addConsumer(MessageConsumer consumer)
+  public void addConsumer(MessageConsumerImpl consumer)
   {
     if (! _consumerList.contains(consumer))
       _consumerList.add(consumer);
   }
 
-  @Override
-  public void removeConsumer(MessageConsumer consumer)
+  public void removeConsumer(MessageConsumerImpl consumer)
   {
     _consumerList.remove(consumer);
   }

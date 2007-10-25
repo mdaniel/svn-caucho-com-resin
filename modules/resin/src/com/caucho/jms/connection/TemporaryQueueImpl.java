@@ -62,14 +62,12 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
     return _session;
   }
 
-  @Override
   public void addConsumer(MessageConsumer consumer)
   {
     if (! _consumerList.contains(consumer))
       _consumerList.add(consumer);
   }
 
-  @Override
   public void removeConsumer(MessageConsumer consumer)
   {
     _consumerList.remove(consumer);
