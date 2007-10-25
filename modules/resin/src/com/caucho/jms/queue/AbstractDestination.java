@@ -84,11 +84,11 @@ abstract public class AbstractDestination
     return _messageFactory.createTextMessage(msg);
   }
   
-  public void addConsumer(MessageConsumer consumer)
+  public void addConsumer(MessageConsumerImpl consumer)
   {
   }
   
-  public void removeConsumer(MessageConsumer consumer)
+  public void removeConsumer(MessageConsumerImpl consumer)
   {
   }
 

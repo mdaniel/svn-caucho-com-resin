@@ -569,8 +569,7 @@ public class Env {
   public void start()
   {
     _startTime = Alarm.getCurrentTime();
-    _timeLimit = getIniLong("max_execution_time");
-
+    _timeLimit = getIniLong("max_execution_time") * 1000;
     Env oldThreadEnv = _threadEnv.get();
     
     _threadEnv.set(this);
@@ -4602,8 +4601,12 @@ public class Env {
       catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
-      
-      sessionWriteClose();
+
+      try {
+	sessionWriteClose();
+      } catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
 
       ArrayList<SoftReference<Closeable>> closeList;
       closeList = new ArrayList<SoftReference<Closeable>>(_closeList);
@@ -4619,6 +4622,8 @@ public class Env {
           log.log(Level.FINER, e.toString(), e);
         }
       }
+
+      _threadEnv.set(_oldThreadEnv);
 
       for (int i = 0; _removePaths != null && i < _removePaths.size(); i++) {
         Path path = _removePaths.get(i);
@@ -4661,8 +4666,6 @@ public class Env {
         setGlobalValue("_SESSION", session.copy(this));
         setGlobalValue("HTTP_SESSION_VARS", session.copy(this));
       }
-      
-      _threadEnv.set(_oldThreadEnv);
     }
   }
 

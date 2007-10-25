@@ -68,7 +68,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   
   private ConnectionImpl _connection;
   
-  private ArrayList<MessageConsumerImpl> _consumers
+  private final ArrayList<MessageConsumerImpl> _consumers
     = new ArrayList<MessageConsumerImpl>();
   
   private MessageListener _messageListener;
@@ -80,7 +80,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   // transacted messages
   private ArrayList<TransactedMessage> _transactedMessages;
 
+  // true if the listener thread is running
   private volatile boolean _isRunning;
+  
   private volatile boolean _isClosed;
   private volatile boolean _hasMessage;
 
@@ -216,11 +218,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    */
   void setAsynchronous()
   {
-    boolean oldAsynchronous = _isAsynchronous;
-    
     _isAsynchronous = true;
 
-    notifyListener();
+    notifyMessageAvailable();
   }
 
   /**
@@ -373,28 +373,26 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (destination == null)
       throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.createConsumer"));
 
+    MessageConsumerImpl consumer;
+    
     if (destination instanceof AbstractQueue) {
       AbstractQueue dest = (AbstractQueue) destination;
 
-      MessageConsumer consumer
-        = new MessageConsumerImpl(this, dest, messageSelector, noLocal);
-
-      return consumer;
+      consumer = new MessageConsumerImpl(this, dest, messageSelector, noLocal);
     }
     else if (destination instanceof AbstractTopic) {
       AbstractTopic dest = (AbstractTopic) destination;
 
-      MessageConsumer consumer
-        = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);
-
-      return consumer;
+      consumer = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);
     }
     else
       throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
 						destination));
 
     
-    // addConsumer((MessageConsumerImpl) consumer);
+    addConsumer(consumer);
+
+    return consumer;
   }
 
   /**
@@ -548,13 +546,13 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     AbstractQueue queue = topicImpl.createSubscriber(this, name, noLocal);
 
-    TopicSubscriber consumer;
+    TopicSubscriberImpl consumer;
     consumer = new TopicSubscriberImpl(this, topicImpl, queue,
 				       messageSelector, noLocal);
     
     _connection.putDurableSubscriber(name, consumer);
     
-    // addConsumer((MessageConsumerImpl) consumer);
+    addConsumer(consumer);
 
     return consumer;
   }
@@ -584,7 +582,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    */
   void start()
   {
-    notifyListener();
+    notifyMessageAvailable();
   }
 
   /**
@@ -770,12 +768,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
   protected void addConsumer(MessageConsumerImpl consumer)
   {
-    if (_consumers == null)
-      _consumers = new ArrayList<MessageConsumerImpl>();
-
     _consumers.add(consumer);
 
-    notifyListener();
+    notifyMessageAvailable();
   }
 
   protected void removeConsumer(MessageConsumerImpl consumer)
@@ -787,19 +782,22 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   /**
    * Notifies the receiver.
    */
-  void notifyListener()
+  boolean notifyMessageAvailable()
   {
-    _hasMessage = true;
-
     synchronized (_consumers) {
-      _consumers.notifyAll();
+      _hasMessage = true;
+
+      if (_isRunning || ! _isAsynchronous || ! isActive())
+	return false;
+
+      _isRunning = true;
     }
-    
-    if (_isAsynchronous) {
-      ThreadPool.getThreadPool().schedule(this);
-      // the yield is only needed for the regressions
-      Thread.yield();
-    }
+
+    ThreadPool.getThreadPool().schedule(this);
+    // the yield is only needed for the regressions
+    Thread.yield();
+
+    return true;
   }
 
   /**
@@ -1021,67 +1019,33 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    */
   public void run()
   {
-    _hasMessage = true;
-    Thread thread = Thread.currentThread();
+    boolean isValid = true;
 
-    try {
-      while (_hasMessage && isActive() && ! isStopping()) {
-	synchronized (_consumers) {
-	  if (_isRunning)
-	    return;
-
-	  _isRunning = true;
-	}
-
-	try {
-	  // _thread = Thread.currentThread();
-	  _hasMessage = false;
-
+    while (isValid) {
+      isValid = false;
+      _hasMessage = false;
+	
+      try {
+	if (isActive()) {
 	  for (int i = 0; i < _consumers.size(); i++) {
 	    MessageConsumerImpl consumer = _consumers.get(i);
-	    //AbstractQueue queue;
-	    //queue = (AbstractQueue) consumer.getDestination();
-	    //Selector selector = consumer.getSelector();
-	    MessageListener listener = consumer.getMessageListener();
 
-	    if (_messageListener != null)
-	      listener = _messageListener;
-
-	    if (consumer.isActive() && ! isStopping() && listener != null) {
-	      try {
-		Message msg = consumer.receiveNoWait();
-
-		if (msg != null) {
-		  _hasMessage = true;
-
-		  if (log.isLoggable(Level.FINE))
-		    log.fine("JMS " + msg + " delivered to " + listener);
-
-		  ClassLoader oldLoader = thread.getContextClassLoader();
-		  try {
-		    thread.setContextClassLoader(_classLoader);
-		    listener.onMessage(msg);
-		  } finally {
-		    thread.setContextClassLoader(oldLoader);
-		  }
-		}
-	      } catch (Throwable e) {
-		log.log(Level.WARNING, e.toString(), e);
-	      }
+	    while (consumer.handleMessage(_messageListener)) {
 	    }
 	  }
-	} finally {
-	  // _thread = null;
-	
-	  synchronized (_consumers) {
+
+	  isValid = true;
+	}
+      } finally {
+	synchronized (_consumers) {
+	  if (! isValid)
 	    _isRunning = false;
-	  
-	    _consumers.notifyAll();
+	  else if (! _hasMessage) {
+	    _isRunning = false;
+	    isValid = false;
 	  }
 	}
       }
-    } catch (JMSException e) {
-      throw new RuntimeException(e);
     }
   }
 

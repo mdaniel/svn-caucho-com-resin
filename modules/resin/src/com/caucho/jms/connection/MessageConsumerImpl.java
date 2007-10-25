@@ -50,7 +50,7 @@ import java.util.logging.Level;
  * A basic message consumer.
  */
 public class MessageConsumerImpl
-  implements MessageConsumer, MessageAvailableListener
+  implements MessageConsumer
 {
   static final Logger log
     = Logger.getLogger(MessageConsumerImpl.class.getName());
@@ -59,6 +59,7 @@ public class MessageConsumerImpl
   private final Object _consumerLock = new Object();
   
   protected final JmsSession _session;
+  
   private AbstractQueue _queue;
   private MessageListener _messageListener;
   private String _messageSelector;
@@ -77,14 +78,12 @@ public class MessageConsumerImpl
     _session = session;
     _queue = queue;
     _messageSelector = messageSelector;
+    
     if (_messageSelector != null) {
       SelectorParser parser = new SelectorParser();
       _selector = parser.parse(messageSelector);
     }
     _noLocal = noLocal;
-
-    // XXX:
-    // _queue.addListener(this);
 
     _queue.addConsumer(this);
   }
@@ -143,11 +142,8 @@ public class MessageConsumerImpl
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("setMessageListener(): MessageConsumer is closed."));
 
-    if (_messageListener != null)
-      _queue.removeListener(_messageListener);
-
     _messageListener = listener;
-    _queue.addListener(listener);
+    _session.setAsynchronous();
   }
 
   /**
@@ -259,6 +255,41 @@ public class MessageConsumerImpl
   }
 
   /**
+   * Notifies that a message is available.
+   */
+  public boolean notifyMessageAvailable()
+  {
+    return _session.notifyMessageAvailable();
+  }
+
+  /**
+   * Called with the session's thread to handle any messages
+   */
+  boolean handleMessage(MessageListener listener)
+  {
+    if (_messageListener != null)
+      listener = _messageListener;
+    
+    if (listener == null)
+      return false;
+
+    try {
+      Message msg = receiveNoWait();
+
+      if (msg != null) {
+	listener.onMessage(msg);
+	msg.acknowledge();
+	
+	return true;
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    return false;
+  }
+
+  /**
    * Receives the next message, if one is available
    */
   protected MessageImpl receiveImpl(long expires)
@@ -289,76 +320,15 @@ public class MessageConsumerImpl
   public void close()
     throws JMSException
   {
-    _isClosed = true;
-    // XXX:
-    // _queue.removeListener(this);
-    // XXX: remove session?
-    // _session.removeListener(this);
+    synchronized (this) {
+      if (_isClosed)
+	return;
+      
+      _isClosed = true;
+    }
 
     _queue.removeConsumer(this);
-
-    if (_messageListener != null)
-      _queue.removeListener(_messageListener);
-  }
-
-  /**
-   * Called when a new message is available.
-   */
-  public void messageAvailable()
-  {
-    _session.notifyListener();
-    synchronized (_consumerLock) {
-      try {
-	_consumerLock.notify();
-      } catch (Throwable e) {
-      }
-    }
-  }
-
-  private class PollAlarmListener implements AlarmListener {
-    private final long _pollInterval;
-
-    public PollAlarmListener(long pollInterval)
-    {
-      _pollInterval = pollInterval;
-    }
-
-    public void handleAlarm(Alarm alarm)
-    {
-      if (isClosed())
-        return;
-
-      MessageListener messageListener = _messageListener;
-
-      if (messageListener == null)
-        return;
-
-      ClassLoader classLoader = _session.getClassLoader();
-
-      try {
-        Message msg = receiveNoWait();
-
-        if (msg != null) {
-          Thread thread = Thread.currentThread();
-
-          ClassLoader oldLoader = thread.getContextClassLoader();
-
-          try {
-            thread.setContextClassLoader(classLoader);
-            messageListener.onMessage(msg);
-          }
-          finally {
-            thread.setContextClassLoader(oldLoader);
-          }
-        }
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-      finally {
-        if (!isClosed())
-          _pollAlarm.queue(_pollInterval);
-      }
-    }
+    _session.removeConsumer(this);
   }
 
   public String toString()

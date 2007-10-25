@@ -30,6 +30,7 @@
 package com.caucho.jms.connection;
 
 import com.caucho.util.L10N;
+import com.caucho.lifecycle.Lifecycle;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
@@ -62,9 +63,7 @@ public class ConnectionImpl implements XAConnection
   private HashMap<String,TopicSubscriber> _durableSubscriberMap
     = new HashMap<String,TopicSubscriber>();
 
-  private volatile boolean _isActive;
-  private volatile boolean _isStopping;
-  protected volatile boolean _isClosed;
+  private final Lifecycle _lifecycle = new Lifecycle();
 
   public ConnectionImpl(ConnectionFactoryImpl factory, boolean isXA)
   {
@@ -92,8 +91,7 @@ public class ConnectionImpl implements XAConnection
   public String getClientID()
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
+    checkOpen();
     
     return _clientId;
   }
@@ -106,8 +104,7 @@ public class ConnectionImpl implements XAConnection
   public void setClientID(String clientId)
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
+    checkOpen();
     
     if (_isClientIdSet)
       throw new IllegalStateException(L.l("Can't set client id '{0}' after the connection has been used.",
@@ -137,8 +134,7 @@ public class ConnectionImpl implements XAConnection
   public ExceptionListener getExceptionListener()
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
+    checkOpen();
     
     return _exceptionListener;
   }
@@ -149,8 +145,7 @@ public class ConnectionImpl implements XAConnection
   public void setExceptionListener(ExceptionListener listener)
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
+    checkOpen();
 
     assignClientID();
     
@@ -163,8 +158,7 @@ public class ConnectionImpl implements XAConnection
   public ConnectionMetaData getMetaData()
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
+    checkOpen();
     
     return new ConnectionMetaDataImpl();
   }
@@ -175,18 +169,17 @@ public class ConnectionImpl implements XAConnection
   public void start()
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
+    checkOpen();
+
+    if (! _lifecycle.toActive())
+      return;
     
     assignClientID();
 
-    if (_isActive || _isStopping)
-      return;
-
-    _isActive = true;
-
-    for (int i = 0; i < _sessions.size(); i++) {
-      _sessions.get(i).start();
+    synchronized (_sessions) {
+      for (int i = 0; i < _sessions.size(); i++) {
+	_sessions.get(i).start();
+      }
     }
   }
 
@@ -196,27 +189,25 @@ public class ConnectionImpl implements XAConnection
   public void stop()
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
-    
-    if (_isStopping || ! _isActive)
+    checkOpen();
+
+    if (! _lifecycle.toStopping())
       return;
     
-    assignClientID();
-
-    _isStopping = true;
-
     try {
-      for (int i = 0; i < _sessions.size(); i++) {
-	try {
-	  _sessions.get(i).stop();
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
+      assignClientID();
+
+      synchronized (_sessions) {
+	for (int i = 0; i < _sessions.size(); i++) {
+	  try {
+	    _sessions.get(i).stop();
+	  } catch (Exception e) {
+	    log.log(Level.FINE, e.toString(), e);
+	  }
 	}
       }
     } finally {
-      _isActive = false;
-      _isStopping = false;
+      _lifecycle.toStop();
     }
   }
 
@@ -225,7 +216,7 @@ public class ConnectionImpl implements XAConnection
    */
   boolean isActive()
   {
-    return _isActive;
+    return _lifecycle.isActive();
   }
 
   /**
@@ -233,7 +224,7 @@ public class ConnectionImpl implements XAConnection
    */
   boolean isStopping()
   {
-    return _isStopping;
+    return _lifecycle.isStopping();
   }
 
   /**
@@ -269,7 +260,7 @@ public class ConnectionImpl implements XAConnection
   {
     _sessions.add(session);
     
-    if (_isActive)
+    if (_lifecycle.isActive())
       session.start();
   }
 
@@ -328,8 +319,7 @@ public class ConnectionImpl implements XAConnection
 				    int maxMessages)
     throws JMSException
   {
-    if (_isClosed)
-      throw new IllegalStateException(L.l("connection is closed"));
+    checkOpen();
     
     throw new UnsupportedOperationException();
   }
@@ -340,17 +330,22 @@ public class ConnectionImpl implements XAConnection
   public void close()
     throws JMSException
   {
-    if (_isClosed)
+    if (_lifecycle.isDestroyed())
       return;
     
     stop();
-    
-    _isClosed = true;
+
+    if (! _lifecycle.toDestroy())
+      return;
 
     _factory.removeConnection(this);
 
-    ArrayList<JmsSession> sessions = new ArrayList<JmsSession>(_sessions);
-    _sessions.clear();
+    ArrayList<JmsSession> sessions;
+
+    synchronized (_sessions) {
+      sessions = new ArrayList<JmsSession>(_sessions);
+      _sessions.clear();
+    }
     
     for (int i = 0; i < sessions.size(); i++) {
       try {
@@ -367,7 +362,7 @@ public class ConnectionImpl implements XAConnection
   protected void checkOpen()
     throws IllegalStateException
   {
-    if (_isClosed)
+    if (_lifecycle.isDestroyed())
       throw new IllegalStateException(L.l("connection is closed"));
   }
 

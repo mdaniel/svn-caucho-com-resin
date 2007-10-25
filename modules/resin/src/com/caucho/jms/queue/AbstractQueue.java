@@ -29,6 +29,7 @@
 
 package com.caucho.jms.queue;
 
+import java.util.*;
 import java.util.logging.*;
 
 import javax.jms.*;
@@ -49,6 +50,11 @@ abstract public class AbstractQueue extends AbstractDestination
   private static final Logger log
     = Logger.getLogger(AbstractQueue.class.getName());
 
+  private ArrayList<MessageConsumerImpl> _messageConsumerList
+    = new ArrayList<MessageConsumerImpl>();
+
+  private int _roundRobin;
+  
   private ListenerManager _listenerManager;
   private int _enqueueCount;
 
@@ -71,6 +77,26 @@ abstract public class AbstractQueue extends AbstractDestination
   {
     _listenerManager.removeListener(listener);
   }
+  
+  public void addConsumer(MessageConsumerImpl consumer)
+  {
+    synchronized (_messageConsumerList) {
+      if (! _messageConsumerList.contains(consumer))
+	_messageConsumerList.add(consumer);
+    }
+  }
+  
+  public void removeConsumer(MessageConsumerImpl consumer)
+  {
+    synchronized (_messageConsumerList) {
+      _messageConsumerList.remove(consumer);
+
+      // force a poll to avoid missing messages
+      for (int i = 0; i < _messageConsumerList.size(); i++) {
+	_messageConsumerList.get(i).notifyMessageAvailable();
+      }
+    }
+  }
 
   @Override
   public void send(JmsSession session, Message msg, long timeout)
@@ -83,42 +109,25 @@ abstract public class AbstractQueue extends AbstractDestination
     
     MessageImpl queueMsg = _messageFactory.copy(msg);
 
-    SendStatus status;
+    enqueue(queueMsg, timeout);
+    
+    synchronized (_messageConsumerList) {
+      if (_messageConsumerList.size() > 0) {
+	MessageConsumerImpl consumer;
+	int count = _messageConsumerList.size();
 
-    ListenerManager listenerManager = _listenerManager;
-
-    try {
-      synchronized (listenerManager) {
-        _enqueueCount++;
-        
-        if (_enqueueCount > 1)
-          status = SendStatus.FAIL;
-        else
-          status = listenerManager.send(queueMsg);
-      }
-
-      if (status == SendStatus.FAIL) {
-        enqueue(queueMsg, timeout);
-      
-        synchronized (listenerManager) {
-          if (listenerManager.hasIdle()) {
-            MessageImpl oldMsg = receive(0);
-
-            if (oldMsg != null)
-              listenerManager.send(oldMsg);
-          }
-        }
-      }
-    } finally {
-      synchronized (listenerManager) {
-        _enqueueCount--;
+	// notify until one of the consumers signals readiness to read
+	do {
+	  int roundRobin = _roundRobin++ % _messageConsumerList.size();
+	  
+	  consumer = _messageConsumerList.get(roundRobin);
+	} while (! consumer.notifyMessageAvailable() && count-- > 0);
       }
     }
   }
 
   /**
-   * Adds the message to the persistent store.  Called if there are no
-   * active listeners.
+   * Adds the message to the persistent store.
    */
   protected void enqueue(MessageImpl msg, long expires)
     throws JMSException
