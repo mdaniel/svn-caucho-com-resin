@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms2.message;
+package com.caucho.jms.message;
 
 import java.io.*;
 import java.util.logging.*;

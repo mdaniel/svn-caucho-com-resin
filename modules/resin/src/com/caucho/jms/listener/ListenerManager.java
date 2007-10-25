@@ -34,7 +34,7 @@ import java.util.logging.*;
 
 import javax.jms.*;
 
-import com.caucho.jms2.message.*;
+import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 
 import com.caucho.util.ThreadPool;

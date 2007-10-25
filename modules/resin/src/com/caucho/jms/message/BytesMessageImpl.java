@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms2.message;
+package com.caucho.jms.message;
 
 import com.caucho.jms.JMSExceptionWrapper;
 import com.caucho.util.CharBuffer;

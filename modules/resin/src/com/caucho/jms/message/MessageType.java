@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms2.message;
+package com.caucho.jms.message;
 
 /**
  * Message types

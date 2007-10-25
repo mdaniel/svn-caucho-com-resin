@@ -29,7 +29,7 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms2.message.MessageImpl;
+import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;

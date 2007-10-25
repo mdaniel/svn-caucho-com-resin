@@ -27,40 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms2.message;
+package com.caucho.jms.message;
 
-import com.caucho.jms.JMSExceptionWrapper;
+import java.io.*;
+
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+
 import com.caucho.vfs.*;
 import com.caucho.hessian.io.*;
 
-import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
-import java.io.*;
-
 /**
- * An object message.
+ * A text message.
  */
-public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
-{
-  private TempStream _tempStream;
+public class TextMessageImpl extends MessageImpl implements TextMessage  {
+  private String _text;
 
-  public ObjectMessageImpl()
+  public TextMessageImpl()
   {
   }
 
-  public ObjectMessageImpl(ObjectMessage msg)
+  public TextMessageImpl(TextMessage msg)
     throws JMSException
   {
     super(msg);
 
-    setObject(msg.getObject());
+    _text = msg.getText();
   }
 
-  public ObjectMessageImpl(ObjectMessageImpl msg)
+  public TextMessageImpl(TextMessageImpl msg)
   {
     super(msg);
 
-    _tempStream = msg._tempStream;
+    _text = msg._text;
   }
 
   /**
@@ -69,67 +68,50 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
   @Override
   public MessageType getType()
   {
-    return MessageType.OBJECT;
+    return MessageType.TEXT;
   }
-  
+
   /**
-   * Writes the object to the stream.
+   * Returns the message text.
    */
-  public void setObject(Serializable o)
+  public String getText()
+    throws JMSException
+  {
+    return _text;
+  }
+
+  /**
+   * Returns the message text.
+   */
+  public void setText(String text)
     throws JMSException
   {
     checkBodyWriteable();
     
-    _tempStream = new TempStream();
-    
-    try {
-      OutputStream ws = new StreamImplOutputStream(_tempStream);
-      Hessian2Output out = new Hessian2Output(ws);
-      out.writeObject(o);
-      out.close();
-      ws.close();
-    } catch (Exception e) {
-      throw JMSExceptionWrapper.create(e);
-    }
+    _text = text;
   }
 
   /**
-   * Reads the object from the stream.
-   */
-  public Serializable getObject()
-    throws JMSException
-  {
-    if (_tempStream == null)
-      return null;
-    
-    try {
-      ReadStream is = _tempStream.openRead(false);
-      Hessian2Input in = new Hessian2Input(is);
-      Serializable object = (Serializable) in.readObject();
-      in.close();
-      is.close();
-
-      return object;
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw JMSExceptionWrapper.create(e);
-    }
-  }
-  
-  /**
-   * Clears the body
+   * Clears the body.
    */
   public void clearBody()
     throws JMSException
   {
     super.clearBody();
     
-    _tempStream = null;
+    _text = null;
   }
 
   public MessageImpl copy()
   {
-    return new ObjectMessageImpl(this);
+    return new TextMessageImpl(this);
+  }
+
+  protected void copy(TextMessageImpl newMsg)
+  {
+    super.copy(newMsg);
+
+    newMsg._text = _text;
   }
 
   /**
@@ -139,10 +121,36 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
   public InputStream bodyToInputStream()
     throws IOException
   {
-    if (_tempStream != null)
-      return _tempStream.openRead(false);
-    else
+    if (_text == null)
       return null;
+    
+    TempStream body = new TempStream();
+    body.openWrite();
+      
+    WriteStream ws = new WriteStream(body);
+
+    writeBody(ws);
+    
+    ws.close();
+
+    return body.openRead(true);
+  }
+
+  /**
+   * Serialize the body to an output stream.
+   */
+  @Override
+  public void writeBody(OutputStream os)
+    throws IOException
+  {
+    if (_text == null)
+      return;
+
+    Hessian2Output out = new Hessian2Output(os);
+
+    out.writeString(_text);
+
+    out.close();
   }
 
   /**
@@ -155,17 +163,11 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
     if (is == null)
       return;
 
-    _tempStream = new TempStream();
-    _tempStream.openWrite();
+    Hessian2Input in = new Hessian2Input(is);
 
-    WriteStream ws = new WriteStream(_tempStream);
-    ws.writeStream(is);
-    ws.close();
-  }
+    _text = in.readString();
 
-  public String toString()
-  {
-    return "ObjectMessageImpl[]";
+    in.close();
   }
 }
 

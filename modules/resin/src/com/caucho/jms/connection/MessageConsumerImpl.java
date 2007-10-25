@@ -29,7 +29,7 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms2.message.*;
+import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.selector.Selector;
 import com.caucho.jms.selector.SelectorParser;

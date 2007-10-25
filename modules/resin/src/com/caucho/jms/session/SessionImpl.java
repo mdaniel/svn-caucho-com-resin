@@ -753,7 +753,7 @@ public class SessionImpl implements Session, ThreadTask {
     message.setJMSPriority(priority);
     
     MessageImpl destMessage = ((MessageImpl) message).copy();
-    destMessage.setSession(this);
+    //destMessage.setSession(this);
     destMessage.setReceive();
 
     if (_isTransacted) {

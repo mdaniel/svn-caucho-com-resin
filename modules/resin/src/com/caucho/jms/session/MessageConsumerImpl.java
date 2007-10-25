@@ -258,7 +258,7 @@ public class MessageConsumerImpl
 
     switch (_session.getAcknowledgeMode()) {
     case Session.CLIENT_ACKNOWLEDGE:
-      msg.setSession(_session);
+      //msg.setSession(_session);
       break;
 	
     case Session.AUTO_ACKNOWLEDGE:

@@ -37,7 +37,7 @@ import javax.jms.*;
 import javax.annotation.*;
 
 import com.caucho.jms.queue.*;
-import com.caucho.jms2.message.*;
+import com.caucho.jms.message.*;
 import com.caucho.config.ConfigException;
 import com.caucho.db.*;
 import com.caucho.util.L10N;

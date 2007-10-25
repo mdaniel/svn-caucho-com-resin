@@ -33,7 +33,7 @@ import java.lang.ref.*;
 
 import javax.jms.*;
 
-import com.caucho.jms2.message.*;
+import com.caucho.jms.message.*;
 
 /**
  * Entry in a file queue
