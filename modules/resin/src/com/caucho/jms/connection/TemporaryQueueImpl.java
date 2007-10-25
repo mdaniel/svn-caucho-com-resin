@@ -29,7 +29,7 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms2.memory.MemoryQueue;
+import com.caucho.jms.memory.MemoryQueue;
 
 import com.caucho.util.L10N;
 

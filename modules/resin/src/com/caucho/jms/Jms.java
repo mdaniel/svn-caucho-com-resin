@@ -31,7 +31,7 @@ package com.caucho.jms;
 import com.caucho.config.ConfigException;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JMSResource;
-import com.caucho.jms2.memory.*;
+import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 import com.caucho.jms.connection.ConnectionFactoryImpl;

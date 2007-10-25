@@ -40,7 +40,7 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic {
   
   TemporaryTopicImpl()
   {
-    setTopicName("TemporaryTopic-" + _idCount++);
+    setName("TemporaryTopic-" + _idCount++);
   }
 
   /**

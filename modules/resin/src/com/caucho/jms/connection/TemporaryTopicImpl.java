@@ -29,7 +29,7 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms2.memory.MemoryTopic;
+import com.caucho.jms.memory.MemoryTopic;
 
 import java.util.ArrayList;
 import javax.jms.*;

@@ -40,7 +40,7 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue {
   
   TemporaryQueueImpl()
   {
-    setQueueName("TemporaryQueue-" + _idCount++);
+    setName("TemporaryQueue-" + _idCount++);
   }
 
   public void delete()

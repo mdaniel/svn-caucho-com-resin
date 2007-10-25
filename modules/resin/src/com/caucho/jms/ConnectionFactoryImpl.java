@@ -246,7 +246,7 @@ public class ConnectionFactoryImpl
 	}
 	else {
 	  MemoryQueue memoryQueue = new MemoryQueue();
-	  memoryQueue.setQueueName(name);
+	  memoryQueue.setName(name);
 
 	  _queues.put(name, memoryQueue);
 
@@ -285,7 +285,7 @@ public class ConnectionFactoryImpl
 	}
 	else {
 	  MemoryTopic memoryTopic = new MemoryTopic();
-	  memoryTopic.setTopicName(name);
+	  memoryTopic.setName(name);
 
 	  _topics.put(name, memoryTopic);
 
