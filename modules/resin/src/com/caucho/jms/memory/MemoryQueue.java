@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -34,7 +35,6 @@ import java.util.logging.*;
 import javax.jms.*;
 
 import com.caucho.jms.message.*;
-import com.caucho.jms.listener.*;
 import com.caucho.jms.queue.*;
 
 import com.caucho.util.Alarm;
@@ -48,6 +48,8 @@ public class MemoryQueue extends AbstractQueue
     = Logger.getLogger(MemoryQueue.class.getName());
 
   private ArrayList<MessageImpl> _queueList = new ArrayList<MessageImpl>();
+  // messages waiting for an ack
+  private ArrayList<MessageImpl> _readList = new ArrayList<MessageImpl>();
 
   /**
    * Adds the message to the persistent store.  Called if there are no
@@ -58,33 +60,62 @@ public class MemoryQueue extends AbstractQueue
   {
     synchronized (_queueList) {
       _queueList.add(msg);
-      _queueList.notifyAll();
     }
   }
 
   /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
+   * Polls the next message from the store.
    */
   @Override
-  public MessageImpl receive(long expires)
+  public MessageImpl receive(boolean isAutoAck)
   {
-    while (true) {
-      synchronized (_queueList) {
-        if (_queueList.size() > 0)
-          return _queueList.remove(0);
+    synchronized (_queueList) {
+      if (_queueList.size() == 0)
+	return null;
+      
+      MessageImpl msg = _queueList.remove(0);
 
-        long now = Alarm.getCurrentTime();
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " receive " + msg + (isAutoAck ? " (auto-ack)" : ""));
+      
+      if (isAutoAck) {
+	return msg;
+      }
+      else {
+	_readList.add(msg);
+	return msg;
+      }
+    }
+  }
 
-        if (expires <= now || Alarm.isTest()) {
-          return null;
-        }
+  /**
+   * Acknowledges the receipt of a message
+   */
+  @Override
+  public void acknowledge(MessageImpl msg)
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " acknowledge " + msg);
+    
+    synchronized (_queueList) {
+      _readList.remove(msg);
+    }
+  }
 
-        try {
-          _queueList.wait(expires - now);
-        } catch (Exception e) {
-          log.log(Level.FINE, e.toString(), e);
-        }
+  /**
+   * Rolls back the receipt of a message
+   */
+  @Override
+  public void rollback(MessageImpl msg)
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " rollback " + msg);
+    
+    synchronized (_queueList) {
+      if (_readList.remove(msg)) {
+	msg.setJMSRedelivered(true);
+	
+	_queueList.add(msg);
       }
     }
   }

@@ -65,6 +65,7 @@ public class MessageConsumerImpl
   private String _messageSelector;
   protected Selector _selector;
   private boolean _noLocal;
+  private boolean _isAutoAcknowledge;
 
   private volatile boolean _isClosed;
   private Alarm _pollAlarm;
@@ -86,6 +87,17 @@ public class MessageConsumerImpl
     _noLocal = noLocal;
 
     _queue.addConsumer(this);
+
+    switch (_session.getAcknowledgeMode()) {
+    case Session.AUTO_ACKNOWLEDGE:
+    case Session.DUPS_OK_ACKNOWLEDGE:
+      _isAutoAcknowledge = true;
+      break;
+
+    default:
+      _isAutoAcknowledge = false;
+      break;
+    }
   }
 
   /**
@@ -218,15 +230,21 @@ public class MessageConsumerImpl
     
     long now = Alarm.getCurrentTime();
     long expireTime = timeout > 0 ? now + timeout : 0;
-    
-    if (! _session.isActive())
-      return null;
 
-    while (true) {
-      MessageImpl msg = _queue.receive(expireTime);
+    while (_session.isActive()) {
+      MessageImpl msg = _queue.receive(_isAutoAcknowledge);
 
-      if (msg == null)
-        return null;
+      if (msg == null) {
+	synchronized (_consumerLock) {
+	  if (expireTime <= Alarm.getCurrentTime() || Alarm.isTest())
+	    return null;
+
+	  try {
+	    _consumerLock.wait(expireTime - Alarm.getCurrentTime());
+	  } catch (Exception e) {
+	  }
+	}
+      }
     
       else if (_selector != null && ! _selector.isMatch(msg)) {
         msg.acknowledge();
@@ -234,24 +252,14 @@ public class MessageConsumerImpl
       }
 
       else {
-        switch (_session.getAcknowledgeMode()) {
-        case Session.CLIENT_ACKNOWLEDGE:
-          msg.setSession(_session);
-          break;
+	if (! _isAutoAcknowledge)
+	  _session.addTransactedReceive(_queue, msg);
 	
-        case Session.AUTO_ACKNOWLEDGE:
-        case Session.DUPS_OK_ACKNOWLEDGE:
-          acknowledge();
-          break;
-
-        default:
-          // transacted
-          break;
-        }
-
         return msg;
       }
     }
+    
+    return null;
   }
 
   /**
@@ -290,15 +298,6 @@ public class MessageConsumerImpl
   }
 
   /**
-   * Receives the next message, if one is available
-   */
-  protected MessageImpl receiveImpl(long expires)
-    throws JMSException
-  {
-    return _queue.receive(expires);
-  }
-
-  /**
    * acknowledge any received messages.
    */
   public void acknowledge()
@@ -314,6 +313,17 @@ public class MessageConsumerImpl
   {
   }
 
+  /**
+   * Stops the consumer.
+   */
+  public void stop()
+    throws JMSException
+  {
+    synchronized (_consumerLock) {
+      _consumerLock.notifyAll();
+    }
+  }
+  
   /**
    * Closes the consumer.
    */

@@ -139,7 +139,7 @@ public class FileQueue extends AbstractQueue implements Topic
    * wait for the timeout.
    */
   @Override
-  public MessageImpl receive(long timeout)
+  public MessageImpl receive(boolean isAutoAck)
   {
     synchronized (_queueLock) {
       for (FileQueueEntry entry = _head;
@@ -153,8 +153,7 @@ public class FileQueue extends AbstractQueue implements Topic
 	  if (msg == null)
 	    msg = _store.readMessage(entry.getId(), entry.getType());
 
-	  boolean autoAck = true;
-	  if (autoAck)
+	  if (isAutoAck)
 	    removeEntry(entry);
 
 	  return msg;

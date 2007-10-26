@@ -31,7 +31,7 @@ package com.caucho.jms.jdbc;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jdbc.JdbcMetaData;
-import com.caucho.jms.AbstractDestination;
+import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -48,8 +48,8 @@ import java.util.logging.Logger;
 /**
  * Represents a JDBC destination.
  */
-public class JdbcDestination extends AbstractDestination {
-  static final Logger log = Log.open(JdbcDestination.class);
+abstract public class JdbcDestination extends AbstractDestination {
+  static final Logger log = Logger.getLogger(JdbcDestination.class.getName());
   static final L10N L = new L10N(JdbcDestination.class);
   
   protected JdbcManager _jdbcManager = new JdbcManager();

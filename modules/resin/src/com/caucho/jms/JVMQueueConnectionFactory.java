@@ -34,6 +34,6 @@ package com.caucho.jms;
  * @deprecated Use ConnectionFactoryImpl
  */
 public class JVMQueueConnectionFactory
-  extends ConnectionFactoryImpl
+  extends com.caucho.jms.connection.JVMQueueConnectionFactory
 {
 }

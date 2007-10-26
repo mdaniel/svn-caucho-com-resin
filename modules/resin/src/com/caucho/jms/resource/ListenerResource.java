@@ -32,8 +32,8 @@ package com.caucho.jms.resource;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitProgram;
-import com.caucho.jms.AbstractDestination;
-import com.caucho.jms.ConnectionFactoryImpl;
+import com.caucho.jms.queue.AbstractDestination;
+import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -46,7 +46,8 @@ import java.util.logging.Logger;
  */
 public class ListenerResource {
   private static L10N L = new L10N(ListenerResource.class);
-  protected static Logger log = Log.open(ListenerResource.class);
+  protected static Logger log
+    = Logger.getLogger(ListenerResource.class.getName());
 
   private ConnectionFactory _connFactory;
   private Connection _conn;
@@ -84,6 +85,14 @@ public class ListenerResource {
     _listenerConfig = config;
   }
 
+  /**
+   * Sets the listener-max
+   */
+  public void setListenerMax(int listenerMax)
+  {
+    _listenerMax = listenerMax;
+  }
+
   @PostConstruct
   public void init() throws ConfigException, JMSException
   {
@@ -94,7 +103,7 @@ public class ListenerResource {
       throw new ConfigException(L.l("'listener' is required for ListenerResource."));
 
     if (_connFactory == null && _destination instanceof AbstractDestination)
-      _connFactory = new ConnectionFactoryImpl();
+      _connFactory = new JmsConnectionFactory();
 
     if (_connFactory == null)
       throw new ConfigException(L.l("connection-factory is required for ListenerResource."));

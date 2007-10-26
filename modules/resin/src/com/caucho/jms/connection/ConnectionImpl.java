@@ -31,6 +31,7 @@ package com.caucho.jms.connection;
 
 import com.caucho.util.L10N;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.jms.memory.*;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
@@ -63,7 +64,13 @@ public class ConnectionImpl implements XAConnection
   private HashMap<String,TopicSubscriber> _durableSubscriberMap
     = new HashMap<String,TopicSubscriber>();
 
-  private final Lifecycle _lifecycle = new Lifecycle();
+  private HashMap<String,Queue> _dynamicQueueMap
+    = new HashMap<String,Queue>();
+
+  private HashMap<String,Topic> _dynamicTopicMap
+    = new HashMap<String,Topic>();
+
+  private final Lifecycle _lifecycle = new Lifecycle(log);
 
   public ConnectionImpl(ConnectionFactoryImpl factory, boolean isXA)
   {
@@ -118,6 +125,7 @@ public class ConnectionImpl implements XAConnection
     
     _clientId = clientId;
     _isClientIdSet = true;
+    _lifecycle.setName(toString());
   }
 
   /**
@@ -170,12 +178,11 @@ public class ConnectionImpl implements XAConnection
     throws JMSException
   {
     checkOpen();
+    assignClientID();
 
     if (! _lifecycle.toActive())
       return;
     
-    assignClientID();
-
     synchronized (_sessions) {
       for (int i = 0; i < _sessions.size(); i++) {
 	_sessions.get(i).start();
@@ -270,6 +277,40 @@ public class ConnectionImpl implements XAConnection
   void removeSession(JmsSession session)
   {
     _sessions.remove(session);
+  }
+
+  /**
+   * Creates a dynamic queue.
+   */
+  Queue createQueue(String name)
+  {
+    Queue queue = _dynamicQueueMap.get(name);
+
+    if (queue != null)
+      return queue;
+    
+    MemoryQueue memoryQueue = new MemoryQueue();
+    memoryQueue.setName(name);
+    _dynamicQueueMap.put(name, memoryQueue);
+
+    return memoryQueue;
+  }
+
+  /**
+   * Creates a dynamic topic.
+   */
+  Topic createTopic(String name)
+  {
+    Topic topic = _dynamicTopicMap.get(name);
+
+    if (topic != null)
+      return topic;
+    
+    MemoryTopic memoryTopic = new MemoryTopic();
+    memoryTopic.setName(name);
+    _dynamicTopicMap.put(name, memoryTopic);
+
+    return memoryTopic;
   }
 
   /**
@@ -376,20 +417,12 @@ public class ConnectionImpl implements XAConnection
     if (_clientId == null)
       _clientId = "resin-temp-" + _clientIdGenerator++;
     _isClientIdSet = true;
+
+    _lifecycle.setName(toString());
   }
 
-  /**
-   * automatically close if GC.
-   */
-  public void finalize()
+  public String toString()
   {
-    // possible deadlock with the close, since it triggers
-    // a rollback i.e. it's trying to do too much
-    /*
-    try {
-      close();
-    } catch (Throwable e) {
-    }
-    */
+    return "JmsConnection[" + _clientId + "]";
   }
 }

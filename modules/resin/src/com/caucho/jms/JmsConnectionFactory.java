@@ -26,25 +26,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.session;
-
-import com.caucho.jms.memory.MemoryQueue;
-
-import javax.jms.TemporaryQueue;
+package com.caucho.jms;
 
 /**
- * A temporary queue
+ * Top-level JMS connection
  */
-public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue {
-  private static int _idCount;
-  
-  TemporaryQueueImpl()
-  {
-    setName("TemporaryQueue-" + _idCount++);
-  }
-
-  public void delete()
-  {
-  }
+public class JmsConnectionFactory
+  extends com.caucho.jms.connection.ConnectionFactoryImpl
+{
 }
-

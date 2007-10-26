@@ -303,7 +303,6 @@ public class MessageImpl implements Message
    * @param deliveryMode the delivery mode
    */
   public void setJMSRedelivered(boolean isRedelivered)
-    throws JMSException
   {
     _isRedelivered = isRedelivered;
   }
@@ -626,16 +625,14 @@ public class MessageImpl implements Message
   public void acknowledge()
     throws JMSException
   {
-    /*
-    SoftReference<SessionImpl> sessionRef = _sessionRef;
-    SessionImpl session;
+    WeakReference<JmsSession> sessionRef = _sessionRef;
+    _sessionRef = null;
+    
+    JmsSession session;
 
     if (sessionRef != null && (session = sessionRef.get()) != null) {
       session.acknowledge();
     }
-
-    _sessionRef = null;
-    */
   }
   
   /**

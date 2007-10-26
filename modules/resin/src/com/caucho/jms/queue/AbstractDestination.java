@@ -77,12 +77,6 @@ abstract public class AbstractDestination
   {
     return getName();
   }
-
-  public TextMessage createTextMessage(String msg)
-    throws JMSException
-  {
-    return _messageFactory.createTextMessage(msg);
-  }
   
   public void addConsumer(MessageConsumerImpl consumer)
   {
@@ -96,11 +90,30 @@ abstract public class AbstractDestination
     throws JMSException;
   
   /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
+   * Polls the next message from the store.  Returns null if no message
+   * is available.
+   *
+   * @param isAutoAcknowledge if true, automatically acknowledge the message
    */
-  abstract public MessageImpl receive(long timeout)
-    throws JMSException;
+  public MessageImpl receive(boolean isAutoAcknowledge)
+    throws JMSException
+  {
+    return null;
+  }
+  
+  /**
+   * Rollback the message read.
+   */
+  public void rollback(MessageImpl msg)
+  {
+  }
+  
+  /**
+   * Acknowledge receipt of the message.
+   */
+  public void acknowledge(MessageImpl msg)
+  {
+  }
 
   public String generateMessageID()
   {

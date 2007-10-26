@@ -92,10 +92,10 @@ public class QueueSessionImpl extends JmsSession
       }
     }
 
-    QueueReceiver receiver
+    QueueReceiverImpl receiver
       = new QueueReceiverImpl(this, dest, messageSelector);
     
-    // addConsumer((MessageConsumerImpl) consumer);
+     addConsumer(receiver);
 
     return receiver;
   }

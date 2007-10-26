@@ -30,8 +30,8 @@
 package com.caucho.jms.resource;
 
 import com.caucho.config.ConfigException;
-import com.caucho.jms.AbstractDestination;
-import com.caucho.jms.ConnectionFactoryImpl;
+import com.caucho.jms.queue.AbstractDestination;
+import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
 import com.caucho.util.L10N;
@@ -86,7 +86,7 @@ public class MessageSenderResource implements MessageSender {
       throw new ConfigException(L.l("'destination' required for message sender."));
 
     if (_connFactory == null && _destination instanceof AbstractDestination)
-      _connFactory = new ConnectionFactoryImpl();
+      _connFactory = new JmsConnectionFactory();
 
     if (_connFactory == null)
       throw new ConfigException(L.l("'connection-factory' required for message sender"));

@@ -30,9 +30,6 @@ package com.caucho.jms.jdbc;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jms.JMSExceptionWrapper;
-import com.caucho.jms.session.MessageConsumerImpl;
-import com.caucho.jms.session.SessionImpl;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -46,8 +43,9 @@ import java.util.logging.Logger;
 /**
  * A jdbc topic.
  */
-public class JdbcTopic extends JdbcDestination implements Topic {
-  static final Logger log = Log.open(JdbcTopic.class);
+//public class JdbcTopic extends JdbcDestination implements Topic {
+public class JdbcTopic {
+  static final Logger log = Logger.getLogger(JdbcTopic.class.getName());
   static final L10N L = new L10N(JdbcTopic.class);
 
   private int _id;
@@ -64,12 +62,17 @@ public class JdbcTopic extends JdbcDestination implements Topic {
     return getName();
   }
 
+  public String getName()
+  {
+    return "ook";
+  }
+
   /**
    * Sets the topic's name.
    */
   public void setTopicName(String name)
   {
-    setName(name);
+    //setName(name);
   }
 
   /**
@@ -95,6 +98,7 @@ public class JdbcTopic extends JdbcDestination implements Topic {
   public void init()
     throws ConfigException, SQLException
   {
+    /*
     if (_jdbcManager.getDataSource() == null)
       throw new ConfigException(L.l("JdbcTopic requires a <data-source> element."));
     
@@ -106,12 +110,13 @@ public class JdbcTopic extends JdbcDestination implements Topic {
     _id = createDestination(getName(), true);
 
     super.init();
-
+    */
   }
 
   /**
    * Creates a consumer.
    */
+    /*
   public MessageConsumerImpl createConsumer(SessionImpl session,
 					    String selector,
 					    boolean noLocal)
@@ -120,10 +125,12 @@ public class JdbcTopic extends JdbcDestination implements Topic {
     return new JdbcTopicConsumer(session, selector,
 				 _jdbcManager, this, noLocal);
   }
+    */
 
   /**
    * Creates a durable subscriber.
    */
+    /*
   public TopicSubscriber createDurableSubscriber(SessionImpl session,
 						 String selector,
 						 boolean noLocal,
@@ -133,6 +140,7 @@ public class JdbcTopic extends JdbcDestination implements Topic {
     return new JdbcTopicConsumer(session, selector,
 				 _jdbcManager, this, noLocal, name);
   }
+    */
 
   /**
    * Sends the message to the queue.
@@ -140,6 +148,7 @@ public class JdbcTopic extends JdbcDestination implements Topic {
   public void send(Message message)
     throws JMSException
   {
+    /*
     long expireTime = message.getJMSExpiration();
     if (expireTime <= 0)
       expireTime = Long.MAX_VALUE / 2;
@@ -153,6 +162,7 @@ public class JdbcTopic extends JdbcDestination implements Topic {
     }
 
     messageAvailable();
+    */
   }
 
   /**
@@ -160,7 +170,9 @@ public class JdbcTopic extends JdbcDestination implements Topic {
    */
   public String toString()
   {
-    return "JdbcTopic[" + getName() + "]";
+    //return "JdbcTopic[" + getName() + "]";
+    
+    return "JdbcTopic[]";
   }
 }
 

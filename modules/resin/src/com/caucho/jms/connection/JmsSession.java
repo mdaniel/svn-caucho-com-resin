@@ -459,7 +459,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   {
     checkOpen();
 
-    return _connection.getConnectionFactory().createQueue(queueName);
+    return _connection.createQueue(queueName);
   }
 
   /**
@@ -481,7 +481,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   {
     checkOpen();
 
-    return _connection.getConnectionFactory().createTopic(topicName);
+    return _connection.createTopic(topicName);
   }
 
   /**
@@ -582,6 +582,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    */
   void start()
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(toString() + " active");
+    
     notifyMessageAvailable();
   }
 
@@ -590,9 +593,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    */
   void stop()
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(toString() + " stopping");
+    
     synchronized (_consumers) {
-      _consumers.notifyAll();
-
       long timeout = Alarm.getCurrentTime() + SHUTDOWN_WAIT_TIME;
       while (_isRunning && Alarm.getCurrentTime() < timeout) {
 	try {
@@ -602,12 +606,18 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 	    return;
 	  }
 	} catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
 	}
       }
 
-      for (MessageConsumerImpl consumer : _consumers) {
+      ArrayList<MessageConsumerImpl> consumers
+	= new ArrayList<MessageConsumerImpl>(_consumers);
+      
+      for (MessageConsumerImpl consumer : consumers) {
 	try {
-	  consumer.close();
+	  // XXX: should be stop()?
+	  
+	  consumer.stop();
 	} catch (Throwable e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
@@ -641,7 +651,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (messages != null) {
       try {
 	for (int i = 0; i < messages.size(); i++) {
-	  messages.get(i).send();
+	  messages.get(i).commit();
 	}
       } finally {
 	messages.clear();
@@ -653,20 +663,46 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   }
   
   /**
-   * Commits the messages.
+   * Acknowledge received
    */
   public void acknowledge()
     throws JMSException
   {
     checkOpen();
 
-    for (int i = 0; i < _consumers.size(); i++) {
-      MessageConsumerImpl consumer = _consumers.get(i);
+    if (_transactedMessages != null) {
+      for (int i = _transactedMessages.size() - 1; i >= 0; i--) {
+	TransactedMessage msg = _transactedMessages.get(i);
 
-      try {
-	consumer.acknowledge();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+	if (msg instanceof ReceiveMessage) {
+	  _transactedMessages.remove(i);
+
+	  msg.commit();
+	}
+      }
+    }
+  }
+  
+  /**
+   * Recovers the messages.
+   */
+  public void recover()
+    throws JMSException
+  {
+    checkOpen();
+
+    if (_isTransacted)
+      throw new IllegalStateException(L.l("recover() may not be called on a transacted session."));
+
+    if (_transactedMessages != null) {
+      for (int i = _transactedMessages.size() - 1; i >= 0; i--) {
+	TransactedMessage msg = _transactedMessages.get(i);
+
+	if (msg instanceof ReceiveMessage) {
+	  _transactedMessages.remove(i);
+
+	  msg.rollback();
+	}
       }
     }
   }
@@ -682,31 +718,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (! _isTransacted)
       throw new IllegalStateException(L.l("rollback() can only be called on a transacted session."));
     
-    if (_transactedMessages != null)
+    if (_transactedMessages != null) {
+      for (int i = 0; i < _transactedMessages.size(); i++)
+	_transactedMessages.get(i).rollback();
+
       _transactedMessages.clear();
-
-    
-    for (int i = 0; i < _consumers.size(); i++) {
-      MessageConsumerImpl consumer = _consumers.get(i);
-
-      try {
-	consumer.rollback();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
     }
-  }
-  
-  /**
-   * Recovers the messages.
-   */
-  public void recover()
-    throws JMSException
-  {
-    checkOpen();
-
-    if (_isTransacted)
-      throw new IllegalStateException(L.l("recover() may not be called on a transacted session."));
     
     for (int i = 0; i < _consumers.size(); i++) {
       MessageConsumerImpl consumer = _consumers.get(i);
@@ -729,16 +746,20 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       return;
 
     try {
-      if (_isTransacted)
-        commit();
-    } catch (Throwable e) {
+      stop();
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    try {
-      stop();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
+    ArrayList<TransactedMessage> messages = _transactedMessages;
+    if (messages != null) {
+      try {
+	for (int i = 0; i < messages.size(); i++) {
+	  messages.get(i).close();
+	}
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
     }
 
     for (int i = 0; i < _consumers.size(); i++) {
@@ -746,13 +767,13 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
       try {
 	consumer.rollback();
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
 
       try {
 	consumer.close();
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
     }
@@ -828,7 +849,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (_transactedMessages == null)
 	_transactedMessages = new ArrayList<TransactedMessage>();
 
-      TransactedMessage transMsg = new TransactedMessage(queue, message);
+      TransactedMessage transMsg = new SendMessage(queue, message);
       
       _transactedMessages.add(transMsg);
 
@@ -845,6 +866,33 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
     else
       queue.send(this, message, 0);
+  }
+
+  /**
+   * Adds a message to the session message queue.
+   */
+  void addTransactedReceive(AbstractDestination queue,
+			    MessageImpl message)
+  {
+    message.setSession(this);
+    
+    if (_transactedMessages == null)
+      _transactedMessages = new ArrayList<TransactedMessage>();
+
+    TransactedMessage transMsg = new ReceiveMessage(queue, message);
+      
+    _transactedMessages.add(transMsg);
+
+    if (_tm != null && _transactedMessages.size() == 1) {
+      try {
+	Transaction trans = _tm.getTransaction();
+
+	if (trans != null)
+	  trans.enlistResource(this);
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
+    }
   }
 
   /**
@@ -1026,16 +1074,14 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       _hasMessage = false;
 	
       try {
-	if (isActive()) {
-	  for (int i = 0; i < _consumers.size(); i++) {
-	    MessageConsumerImpl consumer = _consumers.get(i);
+	for (int i = 0; i < _consumers.size(); i++) {
+	  MessageConsumerImpl consumer = _consumers.get(i);
 
-	    while (consumer.handleMessage(_messageListener)) {
-	    }
+	  while (isActive() && consumer.handleMessage(_messageListener)) {
 	  }
-
-	  isValid = true;
 	}
+
+	isValid = isActive();
       } finally {
 	synchronized (_consumers) {
 	  if (! isValid)
@@ -1044,6 +1090,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 	    _isRunning = false;
 	    isValid = false;
 	  }
+
+	  // notification, e.g. for shutdown
+	  _consumers.notifyAll();
 	}
       }
     }
@@ -1081,20 +1130,81 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
   }
 
-  class TransactedMessage {
-    private AbstractDestination _queue;
-    private Message _message;
+  public String toString()
+  {
+    String className = getClass().getName();
+    int p = className.lastIndexOf('.');
 
-    TransactedMessage(AbstractDestination queue, Message message)
+    return className.substring(p + 1) + "[]";
+  }
+
+  abstract class TransactedMessage {
+    abstract void commit()
+      throws JMSException;
+    
+    abstract void rollback()
+      throws JMSException;
+    
+    void close()
+      throws JMSException
+    {
+    }
+  }
+
+  class SendMessage extends TransactedMessage {
+    private final AbstractDestination _queue;
+    private final Message _message;
+    
+    SendMessage(AbstractDestination queue, Message message)
     {
       _queue = queue;
       _message = message;
     }
 
-    void send()
+    void commit()
       throws JMSException
     {
       _queue.send(JmsSession.this, _message, 0);
+    }
+
+    void rollback()
+      throws JMSException
+    {
+    }
+    
+    void close()
+      throws JMSException
+    {
+      commit();
+    }
+  }
+
+  class ReceiveMessage extends TransactedMessage {
+    private final AbstractDestination _queue;
+    private final MessageImpl _message;
+    
+    ReceiveMessage(AbstractDestination queue, MessageImpl message)
+    {
+      _queue = queue;
+      _message = message;
+    }
+
+    void commit()
+      throws JMSException
+    {
+      _queue.acknowledge(_message);
+    }
+
+    void rollback()
+      throws JMSException
+    {
+      _queue.rollback(_message);
+    }
+    
+    void close()
+      throws JMSException
+    {
+      rollback();
     }
   }
 }

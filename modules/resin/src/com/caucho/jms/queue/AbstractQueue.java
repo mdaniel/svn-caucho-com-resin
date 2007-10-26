@@ -35,7 +35,6 @@ import java.util.logging.*;
 import javax.jms.*;
 
 import com.caucho.jms.message.*;
-import com.caucho.jms.listener.*;
 import com.caucho.jms.connection.*;
 
 import com.caucho.util.*;
@@ -55,27 +54,10 @@ abstract public class AbstractQueue extends AbstractDestination
 
   private int _roundRobin;
   
-  private ListenerManager _listenerManager;
   private int _enqueueCount;
 
   protected AbstractQueue()
   {
-    _listenerManager = new ListenerManager(this);
-  }
-  
-  public void addListener(MessageListener listener)
-  {
-    _listenerManager.addListener(listener);
-  }
-
-  public boolean hasListener()
-  {
-    return _listenerManager.hasListener();
-  }
-
-  public void removeListener(MessageListener listener)
-  {
-    _listenerManager.removeListener(listener);
   }
   
   public void addConsumer(MessageConsumerImpl consumer)
@@ -103,13 +85,13 @@ abstract public class AbstractQueue extends AbstractDestination
     throws JMSException
   {
     if (log.isLoggable(Level.FINE))
-      log.fine(L.l("{0}: sending message {1}", this, msg));
+      log.fine(L.l("{0} sending message {1}", this, msg));
     
     long expires = Alarm.getCurrentTime() + timeout;
     
     MessageImpl queueMsg = _messageFactory.copy(msg);
 
-    enqueue(queueMsg, timeout);
+    enqueue(queueMsg, expires);
     
     synchronized (_messageConsumerList) {
       if (_messageConsumerList.size() > 0) {
@@ -134,26 +116,9 @@ abstract public class AbstractQueue extends AbstractDestination
   {
   }
 
-  /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
-   */
-  @Override
-  public MessageImpl receive(long timeout)
-    throws JMSException
-  {
-    return null;
-  }
-
   public void close()
   {
     super.close();
-    
-    ListenerManager listenerManager = _listenerManager;
-    _listenerManager = null;
-
-    if (listenerManager != null)
-      listenerManager.close();
   }
   
   /**
