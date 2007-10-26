@@ -140,8 +140,8 @@ public class FileQueueStore
     else if ("".equals(serverId))
       serverId = "default";
 
-    _queueTable = "jms_queue_" + serverId;
-    _messageTable = "jms_message_" + serverId;
+    _queueTable = escapeName("jms_queue_" + serverId);
+    _messageTable = escapeName("jms_message_" + serverId);
 
     try {
       DataSourceImpl db = new DataSourceImpl(_path);
@@ -436,5 +436,25 @@ public class FileQueueStore
 	   + " WHERE id=?");
     
     _deleteStmt = _conn.prepareStatement(sql);
+  }
+
+  private static String escapeName(String name)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < name.length(); i++) {
+      char ch = name.charAt(i);
+
+      if ('a' <= ch && ch <= 'z'
+	  || 'A' <= ch && ch <= 'Z'
+	  || '0' <= ch && ch <= '0'
+	  || ch == '_') {
+	sb.append(ch);
+      }
+      else
+	sb.append('_');
+    }
+
+    return sb.toString();
   }
 }

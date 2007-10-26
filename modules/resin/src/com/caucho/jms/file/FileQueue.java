@@ -150,17 +150,59 @@ public class FileQueue extends AbstractQueue implements Topic
 
 	  MessageImpl msg = entry.getMessage();
 
-	  if (msg == null)
+	  if (msg == null) {
 	    msg = _store.readMessage(entry.getId(), entry.getType());
+	    entry.setMessage(msg);
+	  }
 
-	  if (isAutoAck)
+	  if (isAutoAck) {
 	    removeEntry(entry);
+	    _store.delete(entry.getId());
+	  }
 
 	  return msg;
 	}
       }
 
       return null;
+    }
+  }
+
+  /**
+   * Rollsback the message from the store.
+   */
+  @Override
+  public void rollback(MessageImpl msg)
+  {
+    synchronized (_queueLock) {
+      for (FileQueueEntry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (entry.getMessage() == msg && entry.isRead()) {
+	  entry.setRead(false);
+	  msg.setJMSRedelivered(true);
+	  return;
+	}
+      }
+    }
+  }
+
+  /**
+   * Rollsback the message from the store.
+   */
+  @Override
+  public void acknowledge(MessageImpl msg)
+  {
+    synchronized (_queueLock) {
+      for (FileQueueEntry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (entry.getMessage() == msg && entry.isRead()) {
+	  removeEntry(entry);
+	  _store.delete(entry.getId());
+	  return;
+	}
+      }
     }
   }
 
@@ -178,8 +220,6 @@ public class FileQueue extends AbstractQueue implements Topic
       next._prev = prev;
     else
       _tail = prev;
-
-    _store.delete(entry.getId());
   }
 }
 
