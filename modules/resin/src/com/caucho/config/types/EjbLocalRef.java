@@ -36,15 +36,27 @@ import com.caucho.vfs.*;
 public class EjbLocalRef
   extends EjbRef
 {
+  private Class _local;
+
   public EjbLocalRef()
   {
   }
-  
+
   public EjbLocalRef(Path path)
   {
     super(path);
   }
-  
+
+  public EjbLocalRef(Path path, String sourceEjbName)
+  {
+    super(path, sourceEjbName);
+  }
+
+  public boolean isEjbLocalRef()
+  {
+    return true;
+  }
+
   protected String getTagName()
   {
     return "<ejb-local-ref>";
@@ -56,8 +68,28 @@ public class EjbLocalRef
     setHome(home);
   }
 
+  public Class getLocal()
+  {
+    return _local;
+  }
+
   public void setLocal(Class local)
   {
-    setRemote(local);
+    //setRemote(local);
+
+    _local = local;
+  }
+
+  /**
+   * Merges duplicated information in application-client.xml / resin-application-client.xml
+   */
+  public void mergeFrom(EjbRef otherRef)
+  {
+    super.mergeFrom(otherRef);
+
+    EjbLocalRef other = (EjbLocalRef) otherRef;
+
+    if (_local == null)
+      _local = other._local;
   }
 }

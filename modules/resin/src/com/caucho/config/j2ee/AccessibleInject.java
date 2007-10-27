@@ -34,11 +34,11 @@ import com.caucho.config.ConfigException;
 
 abstract public class AccessibleInject {
   abstract Class getDeclaringClass();
-  
+
   abstract String getName();
-  
+
   abstract Class getType();
-  
-  abstract void inject(Object bean, Object value)
+
+  abstract public void inject(Object bean, Object value)
     throws ConfigException;
 }

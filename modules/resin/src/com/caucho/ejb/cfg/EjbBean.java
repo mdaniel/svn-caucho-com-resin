@@ -35,11 +35,13 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.types.EjbLocalRef;
 import com.caucho.config.types.EjbRef;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
+import com.caucho.config.types.ResourceEnvRef;
 import com.caucho.config.types.ResourceRef;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
@@ -146,8 +148,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private ArrayList<Interceptor> _interceptors
     = new ArrayList<Interceptor>();
 
+  private ArrayList<EjbLocalRef> _ejbLocalRefs
+    = new ArrayList<EjbLocalRef>();
+
   private ArrayList<EnvEntry> _envEntries
     = new ArrayList<EnvEntry>();
+
+  private ArrayList<ResourceEnvRef> _resourceEnvRefs
+    = new ArrayList<ResourceEnvRef>();
 
   private ArrayList<ResourceRef> _resourceRefs
     = new ArrayList<ResourceRef>();
@@ -170,8 +178,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     _jClassLoader = JClassLoaderWrapper.create(_loader);
 
-    // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
-    _ejbConfig.getEJBManager().getTransactionManager().setEJB3(isEJB3());
+    if (_ejbConfig.getEJBManager() != null) {
+      // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
+      _ejbConfig.getEJBManager().getTransactionManager().setEJB3(isEJB3());
+    }
   }
 
   public String getAroundInvokeMethodName()
@@ -821,7 +831,41 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
   public EjbRef createEjbRef()
   {
-    return new EjbRef(Vfs.lookup(_ejbModuleName));
+    return new EjbRef(Vfs.lookup(_ejbModuleName), getEJBName());
+  }
+
+  public ResourceEnvRef createResourceEnvRef()
+  {
+    ResourceEnvRef ref = new ResourceEnvRef(Vfs.lookup(_ejbModuleName), getEJBName());
+
+    _resourceEnvRefs.add(ref);
+
+    return ref;
+  }
+
+  /**
+   * Returns the ejb-local-ref's from this bean
+   */
+  public ArrayList<EjbLocalRef> getEjbLocalRefs()
+  {
+    return _ejbLocalRefs;
+  }
+
+  /**
+   * Returns the resource-env-ref's from this bean
+   */
+  public ArrayList<ResourceEnvRef> getResourceEnvRefs()
+  {
+    return _resourceEnvRefs;
+  }
+
+  public EjbLocalRef createEjbLocalRef()
+  {
+    EjbLocalRef ejbLocalRef = new EjbLocalRef(Vfs.lookup(_ejbModuleName), getEJBName());
+
+    _ejbLocalRefs.add(ejbLocalRef);
+
+    return ejbLocalRef;
   }
 
   public MessageDestinationRef createMessageDestinationRef()

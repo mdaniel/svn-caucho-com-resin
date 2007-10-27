@@ -49,7 +49,9 @@ javaee_ejb-local-ref = element ejb-local-ref {
 
   javaee_local?,
 
-  javaee_ejb-link?
+  javaee_ejb-link?,
+
+  javaee_injection-target?
 }
 
 javaee_ejb-ref = element ejb-ref {
@@ -65,7 +67,9 @@ javaee_ejb-ref = element ejb-ref {
 
   javaee_remote?,
 
-  javaee_ejb-link?
+  javaee_ejb-link?,
+
+  javaee_injection-target?
 }
 
 javaee_ejb-ref-name = element ejb-ref-name {
@@ -319,7 +323,9 @@ javaee_resource-env-ref = element resource-env-ref {
 
   javaee_resource-env-ref-name,
 
-  javaee_resource-env-ref-type
+  javaee_resource-env-ref-type,
+
+  javaee_injection-target?
 }
 
 javaee_resource-env-ref-name = element resource-env-ref-name {

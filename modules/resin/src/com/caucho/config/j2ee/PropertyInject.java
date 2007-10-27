@@ -44,13 +44,13 @@ public class PropertyInject extends AccessibleInject {
   private Method _method;
   private Class _type;
 
-  PropertyInject(Method method)
+  public PropertyInject(Method method)
   {
     _method = method;
 
     Class []paramTypes = method.getParameterTypes();
     _type = paramTypes[0];
-    
+
     _method.setAccessible(true);
   }
 
@@ -69,15 +69,15 @@ public class PropertyInject extends AccessibleInject {
     return _method.getDeclaringClass();
   }
 
-  void inject(Object bean, Object value)
+  public void inject(Object bean, Object value)
     throws ConfigException
   {
     try {
       if (! _type.isAssignableFrom(value.getClass())) {
-	throw new ConfigException(L.l("Resource type {0} is not assignable to method '{1}' of type {2}.",
-				      value.getClass().getName(),
-				      _method.getName(),
-				      _type.getName()));
+        throw new ConfigException(L.l("Resource type {0} is not assignable to method '{1}' of type {2}.",
+                                      value.getClass().getName(),
+                                      _method.getName(),
+                                      _type.getName()));
       }
 
       _method.invoke(bean, value);

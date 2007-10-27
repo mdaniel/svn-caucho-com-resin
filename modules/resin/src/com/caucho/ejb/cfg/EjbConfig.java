@@ -34,7 +34,9 @@ import com.caucho.bytecode.JMethod;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.types.EjbLocalRef;
 import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.ResourceEnvRef;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
@@ -628,14 +630,14 @@ public class EjbConfig {
 
               AbstractServer dependServer = initBean(b, javaGen);
 
-              _ejbManager.addServer(dependServer);
+              initResources(b, dependServer);
 
               thread.setContextClassLoader(server.getClassLoader());
             }
           }
         }
 
-        _ejbManager.addServer(server);
+        initResources(bean, server);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -654,6 +656,19 @@ public class EjbConfig {
     server.init();
 
     return server;
+  }
+
+  private void initResources(EjbBean bean, AbstractServer server)
+    throws Throwable
+  {
+    for (ResourceEnvRef ref : bean.getResourceEnvRefs())
+      ref.initBinding(server);
+
+    // XXX TCK, needs QA probably ejb/0gc4 ejb/0gc5
+    for (EjbLocalRef ref : bean.getEjbLocalRefs())
+      ref.initBinding(server);
+
+    _ejbManager.addServer(server);
   }
 
   /**

@@ -49,7 +49,7 @@ public class JndiFieldInjectProgram extends BuilderProgram {
   private String _jndiName;
   private Field _field;
 
-  JndiFieldInjectProgram(String jndiName, Field field)
+  public JndiFieldInjectProgram(String jndiName, Field field)
   {
     _jndiName = jndiName;
     _field = field;
@@ -66,12 +66,12 @@ public class JndiFieldInjectProgram extends BuilderProgram {
         return;
 
       if (! _field.getType().isAssignableFrom(value.getClass())
-	  && ! _field.getType().isPrimitive()) {
-	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
-				      _jndiName,
-				      value.getClass().getName(),
-				      _field.getName(),
-				      _field.getType().getName()));
+          && ! _field.getType().isPrimitive()) {
+        throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
+                                      _jndiName,
+                                      value.getClass().getName(),
+                                      _field.getName(),
+                                      _field.getType().getName()));
       }
 
       _field.setAccessible(true);

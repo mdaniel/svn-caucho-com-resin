@@ -28,16 +28,34 @@
 
 package com.caucho.config.types;
 
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.j2ee.*;
+import com.caucho.ejb.*;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import java.lang.reflect.*;
 
 /**
  * Configuration for the init-param pattern.
  */
-public class ResourceEnvRef {
+public class ResourceEnvRef extends BaseRef {
   private static L10N L = new L10N(ResourceEnvRef.class);
 
   private String _name;
   private Class _type;
+
+
+  public ResourceEnvRef()
+  {
+  }
+
+  public ResourceEnvRef(Path modulePath, String sourceEjbName)
+  {
+    super(modulePath, sourceEjbName);
+  }
 
   /**
    * Sets the description.
@@ -60,6 +78,50 @@ public class ResourceEnvRef {
   public void setResourceEnvRefType(Class type)
   {
     _type = type;
+  }
+
+  /**
+   * Initialize the resource.
+   */
+  // XXX TCK: @PostConstruct, needs QA, called from EjbConfig.
+  public void initBinding(AbstractServer ejbServer)
+    throws Exception
+  {
+    String jndiName = null;
+
+    // XXX TCK: merge this code with the one in InjectIntrospector.
+    if (javax.ejb.SessionContext.class.equals(_type)) {
+      jndiName = "java:comp/env/sessionContext";
+    }
+
+    Object targetValue = null;
+
+    if (jndiName != null) {
+      targetValue = Jndi.lookup(jndiName);
+    }
+
+    // XXX TCK, needs QA
+    if (_injectionTarget != null && targetValue != null) {
+      String className = _injectionTarget.getInjectionTargetClass();
+      String fieldName = _injectionTarget.getInjectionTargetName();
+
+      if (ejbServer != null) {
+        Class cl = getJavaClass(className);
+
+        AccessibleObject field = getFieldOrMethod(cl, fieldName);
+
+        if (field != null) {
+          BuilderProgram program;
+
+          if (field instanceof Method)
+            program = new JndiInjectProgram(jndiName, (Method) field);
+          else
+            program = new JndiFieldInjectProgram(jndiName, (Field) field);
+
+          ejbServer.getInitProgram().addProgram(program);
+        }
+      }
+    }
   }
 
   public String toString()

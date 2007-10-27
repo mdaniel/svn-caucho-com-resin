@@ -32,6 +32,7 @@ package com.caucho.config.j2ee;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
+import javax.rmi.PortableRemoteObject;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
@@ -44,7 +45,7 @@ public class FieldInject extends AccessibleInject
 
   private Field _field;
 
-  FieldInject(Field field)
+  public FieldInject(Field field)
   {
     _field = field;
     _field.setAccessible(true);
@@ -65,15 +66,21 @@ public class FieldInject extends AccessibleInject
     return _field.getDeclaringClass();
   }
 
-  void inject(Object bean, Object value)
+  public void inject(Object bean, Object value)
     throws ConfigException
   {
     try {
+      // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1, needs QA
       if (! _field.getType().isAssignableFrom(value.getClass())) {
-	throw new ConfigException(L.l("Resource type {0} is not assignable to field '{1}' of type {2}.",
-				      value.getClass().getName(),
-				      _field.getName(),
-				      _field.getType().getName()));
+        value = PortableRemoteObject.narrow(value, _field.getType());
+      }
+
+      if (! _field.getType().isAssignableFrom(value.getClass())) {
+
+        throw new ConfigException(L.l("Resource type {0} is not assignable to field '{1}' of type {2}.",
+                                      value.getClass().getName(),
+                                      _field.getName(),
+                                      _field.getType().getName()));
       }
 
       _field.set(bean, value);

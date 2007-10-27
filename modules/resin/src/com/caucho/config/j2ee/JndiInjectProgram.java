@@ -43,7 +43,7 @@ public class JndiInjectProgram extends BuilderProgram {
   private String _jndiName;
   private Method _method;
 
-  JndiInjectProgram(String jndiName, Method method)
+  public JndiInjectProgram(String jndiName, Method method)
   {
     _jndiName = jndiName;
     _method = method;

@@ -29,10 +29,15 @@
 
 package com.caucho.config.types;
 
+import com.caucho.bytecode.*;
+import com.caucho.config.j2ee.*;
 import com.caucho.ejb.*;
+import com.caucho.ejb.cfg.EjbConfig;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
+import com.caucho.util.BeanUtil;
 import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -40,7 +45,10 @@ import javax.annotation.PostConstruct;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,14 +58,12 @@ import java.util.logging.Logger;
  * An ejb-ref is used to make an ejb available within the environment
  * in which the ejb-ref is declared.
  */
-public class EjbRef implements ObjectProxy {
+public class EjbRef extends BaseRef implements ObjectProxy {
   private static final L10N L = new L10N(EjbRef.class);
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());
 
   private Context _context;
-
-  private final Path _modulePath;
 
   private String _ejbRefName;
   private String _type;
@@ -70,21 +76,46 @@ public class EjbRef implements ObjectProxy {
 
   private Object _target;
 
+  private boolean _isInitBinding;
+
+  private String _clientClassName;
+
   public EjbRef()
   {
-    _modulePath = Vfs.getPwd();
   }
-
 
   public EjbRef(Context context)
   {
     _context = context;
-    _modulePath = Vfs.getPwd();
   }
 
   public EjbRef(Path modulePath)
   {
-    _modulePath = modulePath;
+    super(modulePath);
+  }
+
+
+  public EjbRef(Path modulePath, String sourceEjbName)
+  {
+    super(modulePath, sourceEjbName);
+  }
+
+  public boolean isEjbLocalRef()
+  {
+    return false;
+  }
+
+  /**
+   * Gets the injection-target
+   */
+  public InjectionTarget getInjectionTarget()
+  {
+    return _injectionTarget;
+  }
+
+  public Class getLocal()
+  {
+    return null;
   }
 
   protected String getTagName()
@@ -98,6 +129,11 @@ public class EjbRef implements ObjectProxy {
 
   public void setDescription(String description)
   {
+  }
+
+  public void setClientClassName(String clientClassName)
+  {
+    _clientClassName = clientClassName;
   }
 
   /**
@@ -114,6 +150,14 @@ public class EjbRef implements ObjectProxy {
   public void setEjbRefName(String name)
   {
     _ejbRefName = name;
+  }
+
+  /**
+   * Sets the injection-target
+   */
+  public void setInjectionTarget(InjectionTarget injectionTarget)
+  {
+    _injectionTarget = injectionTarget;
   }
 
   /**
@@ -179,21 +223,130 @@ public class EjbRef implements ObjectProxy {
     _ejbLink = ejbLink;
   }
 
+  /**
+   * Merges duplicated information in application-client.xml / resin-application-client.xml
+   */
+  public void mergeFrom(EjbRef other)
+  {
+    if (_foreignName == null)
+      _foreignName = other._foreignName;
+
+    if (_ejbLink == null)
+      _ejbLink = other._ejbLink;
+
+    if (_type == null)
+      _type = other._type;
+
+    if (_home == null)
+      _home = other._home;
+
+    if (_remote == null)
+      _remote = other._remote;
+
+    if (_injectionTarget == null)
+      _injectionTarget = other._injectionTarget;
+  }
+
+  // XXX TCK, needs QA
   @PostConstruct
   public void init()
     throws Exception
   {
+    // TCK, needsQA, ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1
+
+    // Cannot do initialization here as there might be duplicated ejb-ref's in
+    // application-client.xml and resin-application-client.xml or even additional
+    // configuration files (TCK).
+    // application-client: <ejb-ref> initialization
+    // if (_clientClassName != null)
+    //  initBinding(null);
+
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, L.l("{0} init", this));
+  }
+
+  // XXX TCK, needs QA @PostConstruct, called from EjbConfig.deployBeans()
+  public void initBinding(AbstractServer ejbServer)
+    throws Exception
+  {
+    if (_isInitBinding)
+      return;
+
+    _isInitBinding = true;
+
+    if (_foreignName != null) {
+      int pos = _foreignName.indexOf("#");
+
+      // TCK/IIOP for multiple interfaces 2.1/3.0 home/remote, needs QA
+      // TCK: ejb30/bb/session/stateful/sessioncontext/descriptor/getBusinessObjectLocal1
+      if (pos < 0) {
+        // TCK, needs QA: ejb30/bb/session/stateless/migration/twothree/descriptor
+        // The EJB 2.1 home is bound to the foreign name. No need to append the interface.
+        if (_home == null) {
+          if (_remote != null)
+            _foreignName += "#" + _remote.getName().replace(".", "_");
+          else if (getLocal() != null)
+            _foreignName += "#" + getLocal().getName().replace(".", "_");
+        }
+      }
+    }
+
+    EjbRefContext context = EjbRefContext.createLocal();
+
+    context.add(this);
+
     boolean bind = false;
+
+    EJBServer server = EJBServer.getLocal();
 
     String fullEjbRefName = Jndi.getFullName(_ejbRefName);
 
-    if (_ejbLink != null) {
-      EJBServer server = EJBServer.getLocal();
+    /*
+    if (isEjbLocalRef()) {
+      if (server == null || server.getLocalJndiPrefix() == null)
+        fullEjbRefName = Jndi.getFullName(_ejbRefName);
+      else // ejb/0gc5
+        fullEjbRefName = Jndi.getFullName(server.getLocalJndiPrefix()
+                                          + "/" + _ejbRefName);
+    } else {
+      if (server == null || server.getRemoteJndiPrefix() == null)
+        fullEjbRefName = Jndi.getFullName(_ejbRefName);
+      else // ejb/0gc5
+        fullEjbRefName = Jndi.getFullName(server.getRemoteJndiPrefix()
+                                          + "/" + _ejbRefName);
+    }
+    */
 
-      /*
-        if (server == null)
-          throw new ConfigException(L.l("{0} requires a local {1}", "<ejb-link>", "<ejb-server>"));
-      */
+    Object targetValue = null;
+
+    if (_ejbLink != null) {
+      String fullEjbLink = null;
+
+      int pos = _ejbLink.indexOf("#");
+
+      if (pos > 0) {
+        // XXX TCK
+        fullEjbLink = _foreignName;
+      }
+      else if (isEjbLocalRef()) {
+        if (server == null || server.getLocalJndiPrefix() == null)
+          fullEjbLink = Jndi.getFullName(_ejbLink);
+        else
+          fullEjbLink = Jndi.getFullName(server.getLocalJndiPrefix()
+                                         + "/" + _ejbLink);
+      }
+      else {
+        if (server == null || server.getRemoteJndiPrefix() == null)
+          fullEjbLink = Jndi.getFullName(_ejbLink);
+        else {
+          fullEjbLink = Jndi.getFullName(server.getRemoteJndiPrefix()
+                                         + "/" + _ejbLink);
+        }
+      }
+
+      if (_injectionTarget != null && fullEjbLink != null) {
+        targetValue = Jndi.lookup(fullEjbLink);
+      }
 
       bind = true;
     }
@@ -209,21 +362,67 @@ public class EjbRef implements ObjectProxy {
     if (bind) {
       try {
         Object value = Jndi.lookup(fullEjbRefName);
+
         if (value != null)
           bind = false;
       } catch (Exception e) {
       }
 
-      if (bind)
-        Jndi.rebindDeep(fullEjbRefName, this);
+      try {
+        if (bind)
+          Jndi.rebindDeep(fullEjbRefName, this);
+      } catch (Exception e) {
+        throw e;
+      }
     }
 
-    EjbRefContext context = EjbRefContext.createLocal();
+    // XXX TCK, needs QA
+    if (_injectionTarget != null && targetValue != null) {
+      String className = _injectionTarget.getInjectionTargetClass();
+      String fieldName = _injectionTarget.getInjectionTargetName();
 
-    context.add(this);
+      AccessibleInject accessibleInject = null;
 
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, L.l("{0} init", this));
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      JClassLoader jClassLoader = JClassLoaderWrapper.create(loader);
+
+      JClass jClass = jClassLoader.forName(className);
+
+      Class cl = jClass.getJavaClass();
+
+      Method method = BeanUtil.getSetMethod(cl, fieldName);
+
+      if (method != null)
+        accessibleInject = new PropertyInject(method);
+      else {
+        Field field = cl.getDeclaredField(fieldName);
+        accessibleInject = new FieldInject(field);
+      }
+
+      EjbServerManager manager = EjbServerManager.getLocal();
+
+      if (manager != null) {
+        Class type;
+
+        if (isEjbLocalRef())
+          type = getLocal();
+        else
+          type = getRemote();
+
+        EjbInjectProgram program = new EjbInjectProgram(_ejbRefName,
+                                                        null,
+                                                        ejbServer.getMappedName(),
+                                                        cl,
+                                                        accessibleInject);
+
+        ejbServer.getInitProgram().addProgram(program);
+      }
+      else if (_clientClassName != null) {
+        if (targetValue != null)
+          accessibleInject.inject(null, targetValue);
+      }
+    }
   }
 
   /**
@@ -235,7 +434,10 @@ public class EjbRef implements ObjectProxy {
     throws NamingException
   {
     if (_target == null) {
-      if (_home != null)
+      // ejb/0f6g, TCK
+      if (_foreignName != null)
+        resolve(null);
+      else if (_home != null)
         resolve(_home);
       else if (_remote != null)
         resolve(_remote);
@@ -271,10 +473,11 @@ public class EjbRef implements ObjectProxy {
         // XXX: JDK's iiop lookup
         String foreignName = _foreignName.replace('.', '_');
 
-        if (_context != null)
+        if (_context != null) {
           target = _context.lookup(foreignName);
-        else
+        } else {
           target = Jndi.lookup(foreignName);
+        }
 
         if (target != null && type != null)
           return PortableRemoteObject.narrow(target, type);
@@ -382,6 +585,11 @@ public class EjbRef implements ObjectProxy {
   private Object lookupByForeignJndi(String foreignName, Class type)
     throws NamingException
   {
+    Object target = Jndi.lookup(foreignName);
+
+    return target;
+
+    /* XXX
     Object target = null;
 
     String fullForeignName = Jndi.getFullName(foreignName);
@@ -389,15 +597,6 @@ public class EjbRef implements ObjectProxy {
 
     if (_context != null) {
       target = _context.lookup(fullForeignName);
-      /*
-        try {
-          target = _context.lookup(foreignName);
-        } catch (NamingException e) {
-          log.log(Level.FINER, e.toString(), e);
-        }
-
-        target = Jndi.lookup(Jndi.getFullName(foreignName));
-      */
     }
     else if (fullForeignName.equals(fullEjbName)) {
       // ejb/0ga0
@@ -419,6 +618,7 @@ public class EjbRef implements ObjectProxy {
       target = PortableRemoteObject.narrow(target, type);
 
     return target;
+    */
   }
 
   private Object lookupLocal(Class type)

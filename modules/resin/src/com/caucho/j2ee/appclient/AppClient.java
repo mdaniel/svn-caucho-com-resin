@@ -100,6 +100,8 @@ public class AppClient implements EnvironmentBean
   private PreDestroyConfig _preDestroyConfig;
   private PostConstructConfig _postConstructConfig;
 
+  ArrayList<EjbRef> _ejbRefList = new ArrayList<EjbRef>();
+
   private AppClient()
   {
     _loader = new EnvironmentClassLoader();
@@ -244,7 +246,13 @@ public class AppClient implements EnvironmentBean
 
   public EjbRef createEjbRef()
   {
-    return new EjbRef(_ejbContext);
+    EjbRef ejbRef = new EjbRef(_ejbContext);
+
+    _ejbRefList.add(ejbRef);
+
+    ejbRef.setClientClassName(_mainClassName);
+
+    return ejbRef;
   }
 
   public void init()
@@ -263,16 +271,16 @@ public class AppClient implements EnvironmentBean
 
     if (_rootDirectory == null) {
       /*
-      String name = _clientJar.getTail();
+        String name = _clientJar.getTail();
 
-      int lastDot = name.lastIndexOf(".");
+        int lastDot = name.lastIndexOf(".");
 
-      if (lastDot > -1)
+        if (lastDot > -1)
         name = name.substring(0, lastDot);
 
-      Path root = WorkDir.getLocalWorkDir(_loader).lookup("_appclient").lookup("_" + name);
+        Path root = WorkDir.getLocalWorkDir(_loader).lookup("_appclient").lookup("_" + name);
 
-      _rootDirectory = root;
+        _rootDirectory = root;
       */
 
       setRootDirectory(_clientJar.getParent());
@@ -340,11 +348,15 @@ public class AppClient implements EnvironmentBean
       JarPath jarPath = JarPath.create(_clientJar);
 
       configureFrom(jarPath.lookup("META-INF/application-client.xml"), true);
+
       configureFrom(jarPath.lookup("META-INF/resin-application-client.xml"), true);
 
       for (Path configPath : _configList) {
         configureFrom(configPath, true);
       }
+
+      // Merge duplicated <ejb-ref>'s
+      mergeEjbRefs();
 
       // jpa/0s37
       Environment.addChildLoaderListener(new com.caucho.amber.manager.PersistenceEnvironmentListener());
@@ -400,6 +412,28 @@ public class AppClient implements EnvironmentBean
 
       if (log.isLoggable(Level.FINEST))
         log.log(Level.FINEST, L.l("no configuration file {0}", xml));
+    }
+  }
+
+  private void mergeEjbRefs()
+    throws Exception
+  {
+    for (int i = 0; i < _ejbRefList.size(); i++) {
+      EjbRef ref = _ejbRefList.get(i);
+      String refName = ref.getEjbRefName();
+
+      for (int j = i + 1; j < _ejbRefList.size(); j++) {
+        EjbRef other = _ejbRefList.get(j);
+
+        if (refName.equals(other.getEjbRefName())) {
+          ref.mergeFrom(other);
+          _ejbRefList.remove(j);
+          j--;
+        }
+      }
+
+      // After we merge all the information, the <ejb-ref> can be initialized.
+      ref.initBinding(null);
     }
   }
 
@@ -541,4 +575,3 @@ public class AppClient implements EnvironmentBean
     }
   }
 }
-

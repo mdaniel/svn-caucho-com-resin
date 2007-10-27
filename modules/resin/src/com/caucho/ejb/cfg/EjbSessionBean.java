@@ -40,6 +40,8 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.j2ee.EjbInjectProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.j2ee.JndiBindProgram;
+import com.caucho.config.types.EjbLocalRef;
+import com.caucho.config.types.EjbRef;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
@@ -163,8 +165,9 @@ public class EjbSessionBean extends EjbBean {
     super.init();
 
     try {
-      if (getRemoteHome() != null)
+      if (getRemoteHome() != null) {
         validateHome(getRemoteHome(), getRemoteList().get(0));
+      }
 
       if (getLocalHome() != null) {
         validateHome(getLocalHome(), getLocalList().get(0));
@@ -615,6 +618,13 @@ public class EjbSessionBean extends EjbBean {
 
       if (name.startsWith("create")) {
         hasCreate = true;
+
+        // TCK: ejb30/bb/session/stateless/migration/twothree/descriptor/callLocalSameTxContextTest
+        // XXX TCK, needs QA: if a stateless session bean has EJB 3.0 and 2.1 interfaces,
+        // it is not required to have a matching ejbCreate().
+        // It may have a @PostConstruct method, if any.
+        if (isStateless() && name.equals("create"))
+          continue;
 
         if (isStateless() && (! name.equals("create") ||
                               method.getParameterTypes().length != 0)) {

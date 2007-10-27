@@ -58,11 +58,11 @@ public class EjbInjectProgram extends BuilderProgram
   private Class _type;
   private AccessibleInject _field;
 
-  EjbInjectProgram(String name,
-                   String beanName,
-                   String mappedName,
-                   Class type,
-                   AccessibleInject field)
+  public EjbInjectProgram(String name,
+                          String beanName,
+                          String mappedName,
+                          Class type,
+                          AccessibleInject field)
     throws ConfigException
   {
     try {
@@ -116,6 +116,7 @@ public class EjbInjectProgram extends BuilderProgram
 
           if (value != null) {
             if (! _type.isAssignableFrom(value.getClass())) {
+
               value = PortableRemoteObject.narrow(value, _type);
             }
 

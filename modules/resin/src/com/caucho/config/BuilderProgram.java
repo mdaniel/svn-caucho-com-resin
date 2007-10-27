@@ -55,6 +55,11 @@ public abstract class BuilderProgram {
     _loader = Thread.currentThread().getContextClassLoader();
   }
 
+  public void addProgram(BuilderProgram program)
+  {
+    throw new UnsupportedOperationException("Cannot add a program to a BuilderProgram. You probably need a BuilderProgramContainer.");
+  }
+
   /**
    * Configures the object.
    */
