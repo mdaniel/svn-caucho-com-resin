@@ -56,8 +56,9 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
   private Path _path;
   private WriteStream _os;
   private long _offset;
+
   private FileLock _fileLock;
-  private RandomAccessFile _randomAccessFile;
+  private FileChannel _fileChannel;
 
   public FileOutput(Env env, Path path)
     throws IOException
@@ -160,34 +161,18 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
    */
   public void close()
   {
+    _env.removeClose(this);
+
+    unlock();
+
+    _fileChannel = null;
+
     try {
-      _env.removeClose(this);
-      
       WriteStream os = _os;
       _os = null;
 
       if (os != null)
         os.close();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    try {
-      FileLock lock = _fileLock;
-      _fileLock = null;
-      
-      if (lock != null)
-        lock.release();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    try {
-      RandomAccessFile file = _randomAccessFile;
-      _randomAccessFile = null;
-      
-      if (file != null)
-        file.close();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -201,19 +186,23 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
     if (! (getPath() instanceof FilePath))
       return true;
 
-    try {
-      File file = ((FilePath) getPath()).getFile();
+    unlock();
 
-      if (_randomAccessFile == null) {
-        _randomAccessFile = new RandomAccessFile(file, "rw");
+    if (shared) {
+      // Invalid request for a shared "read" lock on a write only stream.
+
+      return false;
+    }
+
+    try {
+      if (_fileChannel == null) {
+        _fileChannel = FilePath.getFileChannel(_os);
       }
 
-      FileChannel fileChannel = _randomAccessFile.getChannel();
-      
       if (block)
-        _fileLock = fileChannel.lock(0, Long.MAX_VALUE, shared);
-      else 
-        _fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, shared);
+        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, false);
+      else
+        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, false);
 
       return _fileLock != null;
     } catch (OverlappingFileLockException e) {
@@ -233,15 +222,17 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
     try {
       FileLock lock = _fileLock;
       _fileLock = null;
-      
+
       if (lock != null) {
         lock.release();
-
-        return true;
       }
-      else
-	return true;
+
+      // flock($fd, LOCK_UN) returns true
+      // even when no lock is held.
+
+      return true;
     } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
       return false;
     }
   }

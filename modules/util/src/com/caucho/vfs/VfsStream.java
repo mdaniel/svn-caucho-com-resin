@@ -84,6 +84,11 @@ public class VfsStream extends StreamImpl {
     position = 0;
   }
 
+  public OutputStream getOutputStream()
+  {
+    return _os;
+  }
+
   public void setNewline(byte []newline)
   {
     this.newline = newline;

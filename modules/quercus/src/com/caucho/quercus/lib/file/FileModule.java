@@ -1035,10 +1035,10 @@ public class FileModule extends AbstractQuercusModule {
     }
 
     boolean shared = false;
-    boolean block = false;
+    boolean block = true;
 
     if (operation > LOCK_NB) {
-      block = true;
+      block = false;
       operation -= LOCK_NB;
     }
 

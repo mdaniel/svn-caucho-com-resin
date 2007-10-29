@@ -82,6 +82,15 @@ public class FileReadStream extends StreamImpl {
   }
 
   /**
+   * Return the FileInputStream contained inside this
+   * FileReadStream object.
+   */
+  public FileInputStream getFileInputStream()
+  {
+    return _is;
+  }
+
+  /**
    * Returns true if there's an associated file.
    */
   public boolean hasSkip()

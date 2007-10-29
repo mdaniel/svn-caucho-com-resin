@@ -65,7 +65,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   private String _readEncodingName;
 
   private FileLock _fileLock;
-  private RandomAccessFile _randomAccessFile;
+  private FileChannel _fileChannel;
 
   private boolean _temporary;
 
@@ -365,27 +365,25 @@ public class FileInputOutput extends AbstractBinaryOutput
    */
   public void close()
   {
-    try {
-      _env.removeClose(this);
-      
-      _stream.close();
+    _env.removeClose(this);
 
-      if (_temporary)
-        _path.remove();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    
+    unlock();
+
+    _fileChannel = null;
+
     try {
-      RandomAccessFile file = _randomAccessFile;
-      _randomAccessFile = null;
-      
-      if (file != null) {
-        file.close();
+      RandomAccessStream ras = _stream;
+      _stream = null;
+
+      if (ras != null) {
+        ras.close();
+
+        if (_temporary)
+          _path.remove();
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-    }
+    }    
   }
 
   /**
@@ -452,19 +450,17 @@ public class FileInputOutput extends AbstractBinaryOutput
     if (! (getPath() instanceof FilePath))
       return false;
 
-    try {
-      File file = ((FilePath) getPath()).getFile();
+    unlock();
 
-      if (_randomAccessFile == null) {
-        _randomAccessFile = new RandomAccessFile(file, "rw");
+    try {
+      if (_fileChannel == null) {
+        _fileChannel = FilePath.getFileChannel(_stream);
       }
-      
-      FileChannel fileChannel = _randomAccessFile.getChannel();
 
       if (block)
-        _fileLock = fileChannel.lock(0, Long.MAX_VALUE, shared);
-      else 
-        _fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, shared);
+        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, shared);
+      else
+        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
 
       return _fileLock != null;
     } catch (IOException e) {
@@ -478,14 +474,19 @@ public class FileInputOutput extends AbstractBinaryOutput
   public boolean unlock()
   {
     try {
-      if (_fileLock != null) {
-        _fileLock.release();
+      FileLock lock = _fileLock;
+      _fileLock = null;
 
-        return true;
+      if (lock != null) {
+        lock.release();
       }
 
-      return false;
+      // flock($fd, LOCK_UN) returns true
+      // even when no lock is held.
+
+      return true;
     } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
       return false;
     }
   }
