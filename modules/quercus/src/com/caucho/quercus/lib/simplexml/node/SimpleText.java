@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.simplexml.node;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.WriteStream;
 
@@ -53,7 +54,7 @@ public class SimpleText extends SimpleNode
   }
   
   @Override
-  protected void toXMLImpl(StringBuilder sb)
+  protected void toXMLImpl(StringValue sb)
   {
     sb.append(getValue());
   }

@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.lib.simplexml.node;
 
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+
 /**
  * Represents a SimpleXML result set from SimpleXML operations.
  * There is no parent node.
@@ -56,20 +59,20 @@ public class SimpleResultSet extends SimpleElement
   }
   
   @Override
-  public String toXML()
+  public StringValue toXML(Env env)
   {
     if (getElementList().size() == 0 && getAttributes().size() == 0)
       return null;
     
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = env.createBinaryBuilder();
     
     toXMLImpl(sb);
     
-    return sb.toString();
+    return sb;
   }
   
   @Override
-  protected void toXMLImpl(StringBuilder sb)
+  protected void toXMLImpl(StringValue sb)
   {
     if (getElementList().size() > 0)
       getElementList().get(0).toXMLImpl(sb);

@@ -1471,19 +1471,19 @@ public class QuercusParser {
       int token = parseToken();
 
       while (token == CATCH) {
-	expect('(');
-	
-	String id = parseIdentifier();
+        expect('(');
+        
+        String id = parseIdentifier();
 
-	AbstractVarExpr lhs = parseLeftHandSide();
-	
-	expect(')');
+        AbstractVarExpr lhs = parseLeftHandSide();
+        
+        expect(')');
 
-	block = parseStatement();
+        block = parseStatement();
 
-	stmt.addCatch(id, lhs, block);
+        stmt.addCatch(id, lhs, block);
 
-	token = parseToken();
+        token = parseToken();
       }
 
       _peekToken = token;

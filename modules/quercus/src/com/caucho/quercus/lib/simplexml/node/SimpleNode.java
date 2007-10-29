@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.simplexml.node;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.WriteStream;
 
@@ -375,16 +376,16 @@ public abstract class SimpleNode
     return _elementList.iterator();
   }
   
-  public String toXML()
+  public StringValue toXML(Env env)
   {
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = env.createBinaryBuilder();
     
     toXMLImpl(sb);
     
-    return sb.toString();
+    return sb;
   }
   
-  abstract protected void toXMLImpl(StringBuilder sb);
+  abstract protected void toXMLImpl(StringValue sb);
 
   public String toString()
   {

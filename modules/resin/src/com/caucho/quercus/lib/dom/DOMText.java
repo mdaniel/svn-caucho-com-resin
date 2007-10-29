@@ -35,7 +35,7 @@ import com.caucho.quercus.env.Env;
 import org.w3c.dom.Text;
 
 public class DOMText
-  extends DOMNode<Text>
+  extends DOMCharacterData<Text>
 {
   public static DOMText __construct(Env env, @Optional String value)
   {

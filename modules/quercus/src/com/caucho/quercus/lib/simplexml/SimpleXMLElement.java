@@ -361,15 +361,21 @@ public class SimpleXMLElement
    * @return xml string
    */
   @ReturnNullAsFalse
-  public String asXML()
-  {    
-    String xml = getNode().toXML();
+  public StringValue asXML(Env env)
+  {
+    StringValue xml = getNode().toXML(env);
     
     if (_isRoot) {
-      xml = "<?xml version=\"1.0\"?>\n" + xml + "\n";
+      StringValue root = env.createBinaryBuilder();
+
+      root.append("<?xml version=\"1.0\"?>\n");
+      root.append(xml);
+      root.append("\n");
+      
+      return root;
     }
-    
-    return xml;
+    else
+      return xml;
   }
 
   /**
@@ -440,7 +446,7 @@ public class SimpleXMLElement
     try {
       XPath xpath = XPathFactory.newInstance().newXPath();
 
-      InputSource is = new InputSource(new StringReader(asXML()));
+      InputSource is = new InputSource(asXML(env).toInputStream());
       NodeList nodes = (NodeList) xpath.evaluate(expression, is, XPathConstants.NODESET);
 
       int nodeLength = nodes.getLength();

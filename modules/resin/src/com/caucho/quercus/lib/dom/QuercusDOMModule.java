@@ -29,8 +29,17 @@
 
 package com.caucho.quercus.lib.dom;
 
+import java.io.IOException;
+
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.lib.simplexml.SimpleXMLElement;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.StringPath;
 
 public class QuercusDOMModule
   extends AbstractQuercusModule
@@ -81,8 +90,13 @@ public class QuercusDOMModule
   public static final int DOM_INVALID_ACCESS_ERR = 15;
   public static final int DOM_VALIDATION_ERR = 16;
 
-  public static void  dom_import_simplexml()
+  public static DOMElement dom_import_simplexml(Env env, SimpleXMLElement node)
   {
-    throw new UnimplementedException();
+    DOMDocument document = DOMDocument.__construct(env, "1.0", null);
+    
+    StringValue xml = node.asXML(env);
+    document.loadXML(env, xml, DefaultValue.DEFAULT);
+
+    return document.getDocumentElement();
   }
 }

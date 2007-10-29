@@ -28,6 +28,7 @@
 
 package com.caucho.quercus.lib.simplexml;
 
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -90,6 +91,10 @@ public class SimpleXMLModule
                                         namespaceV,
                                         isPrefix);
   }
-
-  //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)
+  
+  public SimpleXMLElement simplexml_import_dom(Env env)
+  {
+    // XXX: DOMNode needs to be able to export partial documents
+    throw new UnimplementedException("simplexml_import_dom");
+  }
 }
