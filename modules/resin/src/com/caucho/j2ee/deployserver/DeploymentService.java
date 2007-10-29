@@ -168,11 +168,27 @@ public class DeploymentService
     ArrayList<TargetModuleIDImpl> targetModuleIDList
       = new ArrayList<TargetModuleIDImpl>();
 
+    ArchiveDeployMXBean mxbean = null;
+
     for (TargetImpl target : targets) {
-      targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
+      String name = target.getName();
+        
+      if ("ear".equals(plan.getArchiveType())
+          && name.indexOf("type=EarDeploy") >= 0)
+        targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
+      else if ("war".equals(plan.getArchiveType())
+               && name.indexOf("type=WebAppDeploy") >= 0)
+        targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
+      else if ("rar".equals(plan.getArchiveType())
+               && name.indexOf("type=ResourceDeploy") >= 0)
+        targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
     }
 
-    TargetModuleIDImpl[] targetModuleIDs
+    if (targetModuleIDList.size() == 0) {
+      log.warning(L.l("jsr88 cannot deploy '{0}'", moduleID));
+    }
+
+    TargetModuleID[] targetModuleIDs
       = new TargetModuleIDImpl[targetModuleIDList.size()];
 
     targetModuleIDs = targetModuleIDList.toArray(targetModuleIDs);
@@ -184,24 +200,11 @@ public class DeploymentService
 
     Path archivePath = null;
 
-    for (TargetModuleIDImpl targetModuleID : targetModuleIDs) {
+    for (TargetModuleIDImpl targetModuleID : targetModuleIDList) {
       Throwable exception = null;
-
-      ArchiveDeployMXBean mxbean = null;
 
       try {
         mxbean = getMXBean(targetModuleID.getTarget());
-
-
-        if ("ear".equals(plan.getArchiveType())
-            && ! "EarDeploy".equals(mxbean.getType()))
-          continue;
-        else if ("war".equals(plan.getArchiveType())
-                 && ! "WebAppDeploy".equals(mxbean.getType()))
-          continue;
-        else if ("rar".equals(plan.getArchiveType())
-                 && ! "RarDeploy".equals(mxbean.getType()))
-          continue;
 
         Path deployPath = Vfs.lookup(mxbean.getArchivePath(moduleID));
 
@@ -264,7 +267,7 @@ public class DeploymentService
     throws IOException
   {
     if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, L.l("jsr88 creating archive {0}", archivePath));
+      log.log(Level.FINER, L.l("jsr88 deploying archive {0}", archivePath));
 
     Path originalPath = archivePath;
 
@@ -369,7 +372,7 @@ public class DeploymentService
         try {
           zipInputStream.close();
         }
-        catch (Throwable ex) {
+        catch (Exception ex) {
           log.log(Level.FINER, ex.toString(), ex);
         }
       }
@@ -378,7 +381,7 @@ public class DeploymentService
         try {
           zipOutputStream.close();
         }
-        catch (Throwable ex) {
+        catch (Exception ex) {
           log.log(Level.FINER, ex.toString(), ex);
         }
       }
@@ -387,7 +390,7 @@ public class DeploymentService
         try {
           archiveStream.close();
         }
-        catch (Throwable ex) {
+        catch (Exception ex) {
           log.log(Level.FINER, ex.toString(), ex);
         }
       }
@@ -411,7 +414,7 @@ public class DeploymentService
 
     for (TargetModuleID targetModuleID : ids) {
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("starting {0}", targetModuleID.getModuleID()));
+        log.log(Level.FINE, L.l("jsr88 starting {0}", targetModuleID.getModuleID()));
 
       Throwable exception = null;
       ArchiveDeployMXBean mxbean = null;

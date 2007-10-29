@@ -65,6 +65,8 @@ abstract public class AbstractQueue extends AbstractDestination
     synchronized (_messageConsumerList) {
       if (! _messageConsumerList.contains(consumer))
 	_messageConsumerList.add(consumer);
+
+      startPoll();
     }
   }
   
@@ -77,22 +79,14 @@ abstract public class AbstractQueue extends AbstractDestination
       for (int i = 0; i < _messageConsumerList.size(); i++) {
 	_messageConsumerList.get(i).notifyMessageAvailable();
       }
+
+      if (_messageConsumerList.size() == 0)
+        stopPoll();
     }
   }
 
-  @Override
-  public void send(JmsSession session, Message msg, long timeout)
-    throws JMSException
+  protected void notifyMessageAvailable()
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(L.l("{0} sending message {1}", this, msg));
-    
-    long expires = Alarm.getCurrentTime() + timeout;
-    
-    MessageImpl queueMsg = _messageFactory.copy(msg);
-
-    enqueue(queueMsg, expires);
-    
     synchronized (_messageConsumerList) {
       if (_messageConsumerList.size() > 0) {
 	MessageConsumerImpl consumer;
@@ -108,16 +102,18 @@ abstract public class AbstractQueue extends AbstractDestination
     }
   }
 
-  /**
-   * Adds the message to the persistent store.
-   */
-  protected void enqueue(MessageImpl msg, long expires)
-    throws JMSException
+  protected void startPoll()
+  {
+  }
+
+  protected void stopPoll()
   {
   }
 
   public void close()
   {
+    stopPoll();
+    
     super.close();
   }
   

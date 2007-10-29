@@ -186,7 +186,7 @@ public class JdbcQueue extends AbstractQueue {
    * Sends the message to the queue.
    */
   @Override
-  protected void enqueue(MessageImpl message, long expireTime)
+  public void send(JmsSession session, MessageImpl message, long expireTime)
     throws JMSException
   {
     try {

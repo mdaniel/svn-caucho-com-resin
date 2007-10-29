@@ -41,6 +41,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.message.MessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.jca.*;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.util.L10N;
 
@@ -312,6 +313,15 @@ public class EjbMessageBean extends EjbBean {
     return new ActivationConfig();
   }
 
+
+  public void setResourceAdapter(String name)
+  {
+    ResourceArchive ra = ResourceArchiveManager.findResourceArchive(name);
+
+    if (ra == null)
+      throw new ConfigException(L.l("'{0}' is an unknown resource-adapter"));
+  }
+
   private void addActivationConfigProperty(String name, String value)
   {
     if ("destination".equals(name)) {
@@ -407,17 +417,21 @@ public class EjbMessageBean extends EjbBean {
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
     server.setMappedName(getMappedName());
+    server.setId(getEJBModuleName() + "#" + getMappedName());
 
     //Class contextImplClass = javaGen.loadClass(getSkeletonName());
     //server.setContextImplClass(contextImplClass);
+
+    server.setContainerTransaction(getContainerTransaction());
     
     server.setContextImplClass(getEJBClass());
     server.setMessageListenerType(_messagingType);
 
-    server.setDestination(_destination);
+    if (_destination != null)
+      server.setDestination(_destination);
+
     server.setMessageDestinationLink(_messageDestinationLink);
     server.setConsumerMax(_consumerMax);
-
 
     Class beanClass = javaGen.loadClass(getEJBClass().getName());
 

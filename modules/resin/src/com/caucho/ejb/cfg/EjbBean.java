@@ -238,6 +238,25 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
 
   /**
+   * Returns the interceptors.
+   */
+  public ArrayList<Interceptor> getInvokeInterceptors(String methodName)
+  {
+    ArrayList<Interceptor> matchList = null;
+
+    for (Interceptor interceptor : _interceptors) {
+      if (methodName.equals(interceptor.getAroundInvokeMethodName())) {
+        if (matchList == null)
+          matchList = new ArrayList<Interceptor>();
+
+        matchList.add(interceptor);
+      }
+    }
+    
+    return matchList;
+  }
+
+  /**
    * Adds a new interceptor.
    */
   public void addInterceptor(Interceptor interceptor)

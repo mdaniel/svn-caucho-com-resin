@@ -30,6 +30,7 @@
 package com.caucho.ejb.gen;
 
 import com.caucho.bytecode.JClass;
+import com.caucho.ejb.cfg.EjbBean;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -44,17 +45,20 @@ import java.util.ArrayList;
 public class SessionView extends ViewClass {
   private static L10N L = new L10N(SessionView.class);
 
+  private EjbBean _bean;
   private ArrayList<JClass> _apiList;
   private String _prefix;
   private String _contextClassName;
   private boolean _isStateless;
 
-  public SessionView(ArrayList<JClass> apiList,
+  public SessionView(EjbBean bean, ArrayList<JClass> apiList,
                      String contextClassName,
                      String prefix,
                      boolean isStateless)
   {
     super(prefix, isStateless ? "StatelessObject" : "SessionObject");
+
+    _bean = bean;
 
     for (JClass api : apiList)
       addInterfaceName(api.getName());
@@ -74,9 +78,9 @@ public class SessionView extends ViewClass {
   public CallChain createPoolChain(CallChain call, BaseMethod method)
   {
     if (_isStateless)
-      return new StatelessPoolChain(call, method);
+      return new StatelessPoolChain(_bean, call, method);
     else
-      return new SessionPoolChain(call, method);
+      return new SessionPoolChain(_bean, call, method);
   }
 
   public void generate(JavaWriter out)

@@ -68,6 +68,11 @@ public class StatelessServer extends AbstractServer {
     super(ejbManager);
   }
 
+  protected String getType()
+  {
+    return "session:";
+  }
+
   /**
    * Initialize the server
    */

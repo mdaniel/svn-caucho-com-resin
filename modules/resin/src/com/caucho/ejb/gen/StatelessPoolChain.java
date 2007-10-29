@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.ejb.cfg.EjbBean;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -43,9 +44,9 @@ import java.io.IOException;
 public class StatelessPoolChain extends SessionPoolChain {
   private static L10N L = new L10N(StatelessPoolChain.class);
 
-  public StatelessPoolChain(CallChain next, BaseMethod method)
+  public StatelessPoolChain(EjbBean bean, CallChain next, BaseMethod method)
   {
-    super(next, method);
+    super(bean, next, method);
   }
 
   /**

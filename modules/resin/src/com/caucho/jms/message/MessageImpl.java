@@ -292,7 +292,6 @@ public class MessageImpl implements Message
    * Returns if the message is being redelivered.
    */
   public boolean getJMSRedelivered()
-    throws JMSException
   {
     return _isRedelivered;
   }
@@ -691,11 +690,11 @@ public class MessageImpl implements Message
     TempStream header = new TempStream();
     header.openWrite();
       
-    WriteStream ws = new WriteStream(header);
+    OutputStream out = new StreamImplOutputStream(header);
 
-    writeProperties(ws);
+    writeProperties(out);
     
-    ws.close();
+    out.close();
 
     return header.openRead(true);
   }
@@ -710,6 +709,12 @@ public class MessageImpl implements Message
       return;
 
     Hessian2Output out = new Hessian2Output(os);
+
+    out.writeString(_messageId);
+    out.writeBoolean(_isRedelivered);
+    out.writeInt(_priority);
+    out.writeLong(_timestamp);
+    out.writeInt(_deliveryMode);
 
     for (Map.Entry<String,Object> entry : _properties.entrySet()) {
       out.writeString(entry.getKey());
@@ -729,6 +734,12 @@ public class MessageImpl implements Message
       return;
 
     Hessian2Input in = new Hessian2Input(is);
+
+    _messageId = in.readString();
+    _isRedelivered = in.readBoolean();
+    _priority = in.readInt();
+    _timestamp = in.readLong();
+    _deliveryMode = in.readInt();
 
     while (! in.isEnd()) {
       String key = in.readString();

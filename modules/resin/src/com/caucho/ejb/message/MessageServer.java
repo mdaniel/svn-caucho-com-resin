@@ -41,6 +41,7 @@ import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 import javax.jms.*;
 import javax.naming.*;
+import javax.transaction.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -58,6 +59,8 @@ public class MessageServer extends AbstractServer {
   private String _messageDestinationLink;
   private Class _messageListenerType;
 
+  private boolean _isContainerTransaction;
+
   private String _subscriptionName;
   private String _selector;
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
@@ -66,13 +69,26 @@ public class MessageServer extends AbstractServer {
 
   private MessageDrivenContext _context;
 
+  private UserTransaction _ut;
+
   private ArrayList<Consumer> _consumers = new ArrayList<Consumer>();
 
   public MessageServer(EjbServerManager manager)
   {
     super(manager);
     
-    _context = new MessageDrivenContextImpl(this);
+    try {
+      InitialContext ic = new InitialContext();
+      
+      _ut = (UserTransaction) ic.lookup("java:comp/UserTransaction");
+    } catch (NamingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected String getType()
+  {
+    return "message:";
   }
 
   /**
@@ -105,6 +121,14 @@ public class MessageServer extends AbstractServer {
   public void setConsumerMax(int consumer)
   {
     _consumerMax = consumer;
+  }
+
+  /**
+   * Set true for container transaction.
+   */
+  public void setContainerTransaction(boolean isContainerTransaction)
+  {
+    _isContainerTransaction = isContainerTransaction;
   }
 
   /**
@@ -251,10 +275,15 @@ public class MessageServer extends AbstractServer {
     private Session _session;
     private MessageConsumer _consumer;
     private MessageListener _listener;
+    private MessageDrivenContextImpl _context;
     
     Consumer()
       throws Exception
     {
+      if (_isContainerTransaction)
+        _context = new MessageDrivenContextImpl(MessageServer.this, _ut);
+      else
+        _context = new MessageDrivenContextImpl(MessageServer.this, null);
     }
 
     /**
@@ -301,7 +330,14 @@ public class MessageServer extends AbstractServer {
 	_consumer = _session.createConsumer(_destination, _selector);
       }
 
-      _consumer.setMessageListener(_listener);
+      if (_isContainerTransaction) {
+        _consumer.setMessageListener(new XAListener(_listener,
+                                                    _context,
+                                                    _ut,
+                                                    _session));
+      }
+      else
+        _consumer.setMessageListener(_listener);
     }
 
     /**
@@ -331,6 +367,42 @@ public class MessageServer extends AbstractServer {
 	  _listener = null;
 	  bean.ejbRemove();
 	}
+      }
+    }
+  }
+
+  static class XAListener implements MessageListener {
+    private MessageListener _listener;
+    private MessageDrivenContextImpl _context;
+    private UserTransaction _ut;
+    private Session _session;
+
+    XAListener(MessageListener listener,
+               MessageDrivenContextImpl context,
+               UserTransaction ut,
+               Session session)
+    {
+      _listener = listener;
+      _context = context;
+      _ut = ut;
+      _session = session;
+    }
+
+    public void onMessage(Message msg)
+    {
+      try {
+        _context.clearRollbackOnly();
+
+        try {
+          _listener.onMessage(msg);
+        } finally {
+          if (_context.getRollbackOnly())
+            _session.recover();
+        }
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     }
   }

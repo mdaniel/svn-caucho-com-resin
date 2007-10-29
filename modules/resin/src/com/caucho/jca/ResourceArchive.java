@@ -213,6 +213,10 @@ public class ResourceArchive implements EnvironmentBean {
     log.info("ResourceArchive[" + _config.getDisplayName() + "] loaded");
   }
 
+  void destroy()
+  {
+  }
+
   /**
    * Adds the jars from the rar file to the class loader.
    */

@@ -31,6 +31,8 @@ package com.caucho.ejb.gen;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.EjbBean;
+import com.caucho.ejb.cfg.Interceptor;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -39,6 +41,7 @@ import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Generates the bean instance for a method call.
@@ -46,13 +49,15 @@ import java.io.IOException;
 public class SessionPoolChain extends FilterCallChain {
   private static L10N L = new L10N(SessionPoolChain.class);
 
+  private final EjbBean _bean;
   private BaseMethod _apiMethod;
   private JMethod _implMethod;
 
-  public SessionPoolChain(CallChain next, BaseMethod apiMethod)
+  public SessionPoolChain(EjbBean bean, CallChain next, BaseMethod apiMethod)
   {
     super(next);
 
+    _bean = bean;
     _apiMethod = apiMethod;
 
     CallChain callChain = apiMethod.getCall();
@@ -73,21 +78,32 @@ public class SessionPoolChain extends FilterCallChain {
                            String var, String []args)
     throws IOException
   {
+    ArrayList<Interceptor> interceptors
+      = _bean.getInvokeInterceptors(_apiMethod.getMethodName());
+    boolean hasInterceptors = false;
+    
     out.println("Bean ptr = _context._ejb_begin(trans);");
 
     out.println("try {");
     out.pushDepth();
 
     // ejb/0fba
-    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class))
-      generateCallInterceptors(out, args);
-    else // The interceptor calls ctx.proceed() which invokes the business method.
+    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
+      if (interceptors != null) {
+        generateCallInterceptors(out, args);
+        hasInterceptors = true;
+      }
+      else
+        super.generateCall(out, retVar, "ptr", args);
+    }
+    else { // The interceptor calls ctx.proceed() which invokes the business method.
       super.generateCall(out, retVar, "ptr", args);
+    }
+
+    out.popDepth();
 
     // ejb/0fba
-    if (! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
-      out.popDepth();
-
+    if (hasInterceptors) {
       generateInterceptorExceptionHandling(out);
     }
 
@@ -152,6 +168,11 @@ public class SessionPoolChain extends FilterCallChain {
     super.generateCall(out, retVar, "ptr", args);
   }
 
+  protected void generateMethodCall(JavaWriter out, String []args)
+    throws IOException
+  {
+  }
+
   protected void generateCallInterceptors(JavaWriter out, String []args)
     throws IOException
   {
@@ -170,7 +191,6 @@ public class SessionPoolChain extends FilterCallChain {
 
       argList += arg;
     }
-
 
     JClass types[] = _apiMethod.getParameterTypes();
 

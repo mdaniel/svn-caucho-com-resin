@@ -60,6 +60,7 @@ public class ConnectorResource implements EnvironmentListener {
   private static int _idGen;
 
   private String _name;
+  private String _jndiName;
   private String _type;
 
   private ResourceArchive _rar;
@@ -90,6 +91,14 @@ public class ConnectorResource implements EnvironmentListener {
   }
 
   /**
+   * Sets the name
+   */
+  public void setJndiName(String name)
+  {
+    _jndiName = name;
+  }
+
+  /**
    * Gets the name
    */
   public String getName()
@@ -111,9 +120,6 @@ public class ConnectorResource implements EnvironmentListener {
 
     if (_rar != null) {
       ObjectConfig raConfig = _rar.getResourceAdapter();
-
-      if (_name == null)
-	_name = _rar.getDisplayName() + "-" + _idGen++;
 
       if (raConfig.getType() != null)
 	_ra = (ResourceAdapter) raConfig.instantiate();
@@ -173,7 +179,7 @@ public class ConnectorResource implements EnvironmentListener {
    * Configures a connection-factory
    */
   public ConnectionFactory createConnectionFactory()
-    throws Throwable
+    throws Exception
   {
     initRA();
     
@@ -184,7 +190,7 @@ public class ConnectorResource implements EnvironmentListener {
    * Configures a connection-factory
    */
   public void addConnectionFactory(ConnectionFactory factory)
-    throws Throwable
+    throws Exception
   {
     ManagedConnectionFactory managedFactory = factory.getFactory();
     
@@ -229,8 +235,12 @@ public class ConnectorResource implements EnvironmentListener {
     Object connectionFactory = cm.init(managedFactory);
     cm.start();
 
+    _outboundList.add(factory);
+
     if (factory.getName() != null)
       Jndi.bindDeepShort(factory.getName(), connectionFactory);
+    else if (_jndiName != null)
+      Jndi.bindDeepShort(_jndiName, connectionFactory);
   }
 
   /**
@@ -323,7 +333,7 @@ public class ConnectorResource implements EnvironmentListener {
    * Configures a connection-resource
    */
   public void addResource(ConnectionResource resource)
-    throws Throwable
+    throws Exception
   {
     Object resourceObject = resource.getObject();
     
@@ -346,7 +356,26 @@ public class ConnectorResource implements EnvironmentListener {
   {
     if (_type == null)
       throw new ConfigException(L.l("<connector> requires a <type>."));
-    
+
+    if (_name == null)
+      _name = _jndiName;
+
+    if (_name == null)
+      _name = _rar.getDisplayName() + "-" + _idGen++;
+
+    // create a default outbound factory
+    if (_outboundList.size() == 0 && _jndiName != null && _rar != null) {
+      ObjectConfig factoryConfig = _rar.getConnectionDefinition(null);
+
+      if (factoryConfig != null) {
+        ConnectionFactory factory = createConnectionFactory();
+        factory.setJndiName(_jndiName);
+        factory.init();
+
+        addConnectionFactory(factory);
+      }
+    }
+
     /*
     if (close != null && ! (obj instanceof ResourceAdapter))
       Environment.addEnvironmentListener(new CloseListener(obj, close));
@@ -490,7 +519,7 @@ public class ConnectorResource implements EnvironmentListener {
 	ObjectConfig factoryConfig = _rar.getConnectionDefinition(type);
 
 	if (factoryConfig == null)
-	  throw new ConfigException(L.l("`{0}' is an unknown type of <connection-factory> for `{1}'.  The connector has no matching outbound connection-factory.",
+	  throw new ConfigException(L.l("'{0}' is an unknown type of <connection-factory> for '{1}'.  The connector has no matching outbound connection-factory.",
 					type,
 					ConnectorResource.this._type));
 
@@ -502,8 +531,8 @@ public class ConnectorResource implements EnvironmentListener {
 	
 	try {
 	  factoryClass = Class.forName(type, false, loader);
-	} catch (Throwable e) {
-	  throw new ConfigException(L.l("`{0}' is not a known connection factory.  The type must match the resource adaptor or managed connection factory of one of the installed *.rar files or specify a ManagedConnectionFactory implementation.",
+	} catch (Exception e) {
+	  throw new ConfigException(L.l("'{0}' is not a known connection factory.  The type must match the resource adaptor or managed connection factory of one of the installed *.rar files or specify a ManagedConnectionFactory implementation.",
 					type));
 	}
 

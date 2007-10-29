@@ -31,6 +31,7 @@ package com.caucho.jms.connection;
 
 import com.caucho.util.L10N;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.*;
 import com.caucho.jms.memory.*;
 
 import javax.jms.*;
@@ -82,6 +83,8 @@ public class ConnectionImpl implements XAConnection
   public ConnectionImpl(ConnectionFactoryImpl factory)
   {
     _factory = factory;
+
+    Environment.addCloseListener(this);
   }
 
   /**

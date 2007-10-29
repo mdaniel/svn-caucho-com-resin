@@ -172,7 +172,7 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
   {
     Context context;
     Hashtable<String,String> mergeEnv;
-    
+
     mergeEnv = new Hashtable<String,String>();
 
     if (env != null && env.size() > 0)
@@ -191,7 +191,9 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
 	foreignName = Jndi.getFullName(_foreignName);
 
       try {
-        return context.lookup(foreignName);
+        Object value = context.lookup(foreignName);
+
+        return value;
       } catch (RuntimeException e) {
         throw e;
       } catch (NamingException e) {

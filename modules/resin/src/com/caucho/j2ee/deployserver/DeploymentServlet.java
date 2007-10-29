@@ -30,8 +30,7 @@
 package com.caucho.j2ee.deployserver;
 
 import com.caucho.config.Config;
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.*;
 import com.caucho.j2ee.deployclient.TargetImpl;
 import com.caucho.j2ee.deployclient.TargetModuleIDImpl;
 import com.caucho.log.Log;
@@ -88,7 +87,7 @@ public class DeploymentServlet
     InputStream is = req.getInputStream();
     OutputStream os = res.getOutputStream();
 
-    HessianInput in = new HessianInput(is);
+    Hessian2Input in = new Hessian2Input(is);
     HessianOutput out = new HessianOutput(os);
 
     in.readCall();

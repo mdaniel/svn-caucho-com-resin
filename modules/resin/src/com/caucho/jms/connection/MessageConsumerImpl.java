@@ -61,7 +61,10 @@ public class MessageConsumerImpl
   protected final JmsSession _session;
   
   private AbstractQueue _queue;
+  
   private MessageListener _messageListener;
+  private ClassLoader _listenerClassLoader;
+  
   private String _messageSelector;
   protected Selector _selector;
   private boolean _noLocal;
@@ -155,6 +158,7 @@ public class MessageConsumerImpl
       throw new javax.jms.IllegalStateException(L.l("setMessageListener(): MessageConsumer is closed."));
 
     _messageListener = listener;
+    _listenerClassLoader = Thread.currentThread().getContextClassLoader();
     _session.setAsynchronous();
   }
 
@@ -204,7 +208,7 @@ public class MessageConsumerImpl
   public Message receive()
     throws JMSException
   {
-    return receive(Long.MAX_VALUE / 2);
+    return receiveImpl(Long.MAX_VALUE / 2);
   }
 
   /**
@@ -213,13 +217,27 @@ public class MessageConsumerImpl
   public Message receiveNoWait()
     throws JMSException
   {
-    return receive(0);
+    return receiveImpl(0);
   }
 
   /**
    * Receives a message from the queue.
    */
   public Message receive(long timeout)
+    throws JMSException
+  {
+    Message msg = receiveImpl(timeout);
+
+    if (msg != null && log.isLoggable(Level.FINE))
+      log.fine(_queue + " receive message " + msg);
+
+    return msg;
+  }
+
+  /**
+   * Receives a message from the queue.
+   */
+  private Message receiveImpl(long timeout)
     throws JMSException
   {
     if (_isClosed || _session.isClosed())
@@ -282,10 +300,27 @@ public class MessageConsumerImpl
       return false;
 
     try {
-      Message msg = receiveNoWait();
+      MessageImpl msg = _queue.receive(false);
 
       if (msg != null) {
-	listener.onMessage(msg);
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(_queue + " receive message " + msg
+                   + " for listener " + listener);
+        }
+
+        msg.setSession(_session);
+        _session.addTransactedReceive(_queue, msg);
+
+        Thread thread = Thread.currentThread();
+        ClassLoader oldLoader = thread.getContextClassLoader();
+        try {
+          thread.setContextClassLoader(_listenerClassLoader);
+        
+          listener.onMessage(msg);
+        } finally {
+          thread.setContextClassLoader(oldLoader);
+        }
+        
 	msg.acknowledge();
 	
 	return true;
@@ -295,22 +330,6 @@ public class MessageConsumerImpl
     }
 
     return false;
-  }
-
-  /**
-   * acknowledge any received messages.
-   */
-  public void acknowledge()
-    throws JMSException
-  {
-  }
-
-  /**
-   * rollback any received messages.
-   */
-  public void rollback()
-    throws JMSException
-  {
   }
 
   /**

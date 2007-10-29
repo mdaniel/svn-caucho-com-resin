@@ -76,6 +76,11 @@ public class SessionServer extends AbstractServer
     super(manager);
   }
 
+  protected String getType()
+  {
+    return "session:";
+  }
+
   /**
    * Initialize the server
    */
@@ -289,6 +294,8 @@ public class SessionServer extends AbstractServer
   public String createSessionKey(AbstractSessionContext context)
   {
     String key = getHandleEncoder().createRandomStringKey();
+
+    System.out.println("SESSION-KEY: " + key);
 
     _sessions.put(key, context);
 

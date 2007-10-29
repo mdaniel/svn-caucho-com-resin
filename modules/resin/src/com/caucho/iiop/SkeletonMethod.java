@@ -103,8 +103,12 @@ public class SkeletonMethod {
       // For now, we rely on the result object type.
 
       // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getBusinessObjectRemote1
+      
+      // See RemoteMarshal.  The following breaks several TCK
+      /*
       if (result != null && (result instanceof com.caucho.ejb.session.SessionObject))
         _marshalReturn = new EjbSessionObjectMarshal(_method.getReturnType(), _skeleton);
+      */
 
       _marshalReturn.marshal(writer, result);
     } catch (InvocationTargetException e) {
@@ -116,7 +120,6 @@ public class SkeletonMethod {
       for (int i = 0; i < _exnTypes.length; i++) {
         if (_exnTypes[i].isAssignableFrom(cause.getClass()))
           throw cause;
-
       }
 
       throw new RemoteException(cause.toString(), cause);

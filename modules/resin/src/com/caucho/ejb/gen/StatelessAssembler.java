@@ -94,7 +94,8 @@ public class StatelessAssembler extends SessionAssembler
                               String fullClassName,
                               String viewPrefix)
   {
-    SessionView view = new SessionView(apiList,
+    SessionView view = new SessionView(_sessionBean,
+                                       apiList,
                                        fullClassName,
                                        viewPrefix,
                                        true);
@@ -113,7 +114,7 @@ public class StatelessAssembler extends SessionAssembler
 
     CallChain call = method.getCall();
 
-    call = new SessionPoolChain(call, method);
+    call = new SessionPoolChain(_sessionBean, call, method);
 
     method.setCall(call);
 

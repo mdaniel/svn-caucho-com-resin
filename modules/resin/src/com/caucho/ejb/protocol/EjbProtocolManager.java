@@ -306,8 +306,12 @@ public class EjbProtocolManager {
 
             bindServer(remoteJndiName, remoteObj);
 
+            
             // ejb/0f6f (TCK): multiple remote interfaces
             for (Class cl : server.getRemoteObjectList()) {
+              if (server.getRemote21() != null)
+                continue;
+              
               String s = cl.getName().replace(".", "_");
 
               Object obj;

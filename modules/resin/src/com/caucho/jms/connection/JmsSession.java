@@ -70,7 +70,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   
   private final ArrayList<MessageConsumerImpl> _consumers
     = new ArrayList<MessageConsumerImpl>();
-  
+
+  private MessageFactory _messageFactory = new MessageFactory();
   private MessageListener _messageListener;
   private boolean _isAsynchronous;
 
@@ -108,9 +109,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
     
     _isTransacted = isTransacted;
-    
+    _acknowledgeMode = ackMode;
+
     if (isTransacted)
-      _acknowledgeMode = SESSION_TRANSACTED;
+      _acknowledgeMode = 0;
     else {
       switch (ackMode) {
       case CLIENT_ACKNOWLEDGE:
@@ -119,8 +121,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 	_acknowledgeMode = ackMode;
 	break;
       default:
-	throw new JMSException(L.l("{0} is an illegal acknowledge mode",
-				   ackMode));
+        // XXX: tck
+        // throw new JMSException(L.l("{0} is an illegal acknowledge mode", ackMode));
+	log.warning(L.l("JmsSession {0} is an illegal acknowledge mode",
+                        ackMode));
+        _acknowledgeMode = AUTO_ACKNOWLEDGE;
+        break;
       }
     }
     
@@ -571,7 +577,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     TopicSubscriber subscriber = _connection.removeDurableSubscriber(name);
 
     if (subscriber == null)
-      throw new IllegalStateException(L.l("'{0}' is an unknown subscriber for Session.unsubscribe",
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown subscriber for Session.unsubscribe",
                                           name));
 
     subscriber.close();
@@ -724,16 +730,6 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
       _transactedMessages.clear();
     }
-    
-    for (int i = 0; i < _consumers.size(); i++) {
-      MessageConsumerImpl consumer = _consumers.get(i);
-
-      try {
-	consumer.rollback();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
   }
   
   /**
@@ -764,12 +760,6 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     for (int i = 0; i < _consumers.size(); i++) {
       MessageConsumerImpl consumer = _consumers.get(i);
-
-      try {
-	consumer.rollback();
-      } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
 
       try {
 	consumer.close();
@@ -825,23 +815,26 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    * Adds a message to the session message queue.
    */
   public void send(AbstractDestination queue,
-                   Message message,
+                   Message appMessage,
                    int deliveryMode,
                    int priority,
-                   long expiration)
+                   long timeout)
     throws JMSException
   {
     checkOpen();
     
-    assert message != null;
-
     if (queue == null)
       throw new UnsupportedOperationException(L.l("empty queue is not allowed for this session."));
+    
+    MessageImpl message = _messageFactory.copy(appMessage);
+
+    long now = Alarm.getExactTime();
+    long expiration = now + timeout;
 
     message.setJMSMessageID(queue.generateMessageID());
     message.setJMSDestination(queue.getJMSDestination());
     message.setJMSDeliveryMode(deliveryMode);
-    message.setJMSTimestamp(Alarm.getExactTime());
+    message.setJMSTimestamp(now);
     message.setJMSExpiration(expiration);
     message.setJMSPriority(priority);
     
@@ -1153,9 +1146,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
   class SendMessage extends TransactedMessage {
     private final AbstractDestination _queue;
-    private final Message _message;
+    private final MessageImpl _message;
     
-    SendMessage(AbstractDestination queue, Message message)
+    SendMessage(AbstractDestination queue, MessageImpl message)
     {
       _queue = queue;
       _message = message;
@@ -1192,13 +1185,13 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     void commit()
       throws JMSException
     {
-      _queue.acknowledge(_message);
+      _queue.acknowledge(_message.getJMSMessageID());
     }
 
     void rollback()
       throws JMSException
     {
-      _queue.rollback(_message);
+      _queue.rollback(_message.getJMSMessageID());
     }
     
     void close()

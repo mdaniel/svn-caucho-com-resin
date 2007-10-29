@@ -772,8 +772,9 @@ public class ServerConnector
     if (canOpenSoft()) {
       return connect();
     }
-    else
+    else {
       return null;
+    }
   }
 
   /**
@@ -783,8 +784,9 @@ public class ServerConnector
    */
   public ClusterStream openIfLive()
   {
-    if (_state == ST_CLOSED)
+    if (_state == ST_CLOSED) {
       return null;
+    }
 
     ClusterStream stream = openRecycle();
 
@@ -793,8 +795,9 @@ public class ServerConnector
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _lastFailTime + _failRecoverTime)
+    if (now < _lastFailTime + _failRecoverTime) {
       return null;
+    }
 
     return connect();
   }

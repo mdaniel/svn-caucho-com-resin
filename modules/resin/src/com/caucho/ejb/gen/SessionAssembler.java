@@ -97,7 +97,8 @@ public class SessionAssembler extends BeanAssembler
 			      String fullClassName,
 			      String viewPrefix)
   {
-    SessionView view = new SessionView(apiList,
+    SessionView view = new SessionView(_sessionBean,
+                                       apiList,
 				       fullClassName,
 				       viewPrefix,
 				       false);

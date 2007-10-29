@@ -38,6 +38,7 @@ import javax.annotation.*;
 
 import com.caucho.jms.queue.*;
 import com.caucho.jms.message.*;
+import com.caucho.jms.connection.*;
 import com.caucho.config.ConfigException;
 import com.caucho.db.*;
 import com.caucho.util.L10N;
@@ -123,7 +124,7 @@ public class FileQueue extends AbstractQueue implements Topic
    * @param expires the expires time
    */
   @Override
-  protected void enqueue(MessageImpl msg, long expires)
+  public void send(JmsSession session, MessageImpl msg, long expires)
   {
     synchronized (_queueLock) {
       long id = _store.send(msg, expires);
@@ -172,13 +173,16 @@ public class FileQueue extends AbstractQueue implements Topic
    * Rollsback the message from the store.
    */
   @Override
-  public void rollback(MessageImpl msg)
+  public void rollback(String msgId)
   {
     synchronized (_queueLock) {
       for (FileQueueEntry entry = _head;
 	   entry != null;
 	   entry = entry._next) {
-	if (entry.getMessage() == msg && entry.isRead()) {
+        MessageImpl msg = entry.getMessage();
+        
+	if (msg.getJMSMessageID().equals(msgId)
+            && entry.isRead()) {
 	  entry.setRead(false);
 	  msg.setJMSRedelivered(true);
 	  return;
@@ -191,13 +195,14 @@ public class FileQueue extends AbstractQueue implements Topic
    * Rollsback the message from the store.
    */
   @Override
-  public void acknowledge(MessageImpl msg)
+  public void acknowledge(String msgId)
   {
     synchronized (_queueLock) {
       for (FileQueueEntry entry = _head;
 	   entry != null;
 	   entry = entry._next) {
-	if (entry.getMessage() == msg && entry.isRead()) {
+	if (entry.getMessage().getJMSMessageID().equals(msgId)
+            && entry.isRead()) {
 	  removeEntry(entry);
 	  _store.delete(entry.getId());
 	  return;

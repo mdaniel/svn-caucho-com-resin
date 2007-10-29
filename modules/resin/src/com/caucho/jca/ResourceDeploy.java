@@ -50,6 +50,8 @@ public class ResourceDeploy {
 
   private final ResourceDeployAdmin _admin = new ResourceDeployAdmin(this);
 
+  private ClassLoader _classLoader;
+  
   private Path _containerRootDirectory;
 
   private Path _rarDir;
@@ -63,6 +65,8 @@ public class ResourceDeploy {
 
   public ResourceDeploy()
   {
+    _classLoader = Thread.currentThread().getContextClassLoader();
+    
     setExpandPrefix("_rar_");
 
     _containerRootDirectory = Vfs.getPwd();
@@ -198,13 +202,26 @@ public class ResourceDeploy {
     
     if (getPath() == null)
       throw new ConfigException(L.l("resource-deploy requires a path attribute"));
+    deployResources();
+
+    _admin.register();
+  }
+
+  private void deployResources()
+  {
+    HashSet<String> oldNames = _rarNames;
 
     try {
       _rarNames = getRarNames();
       
-      Iterator<String> iter = _rarNames.iterator();
-      while (iter.hasNext()) {
-	String name = iter.next();
+      for (String oldName : oldNames) {
+        if (! _rarNames.contains(oldName))
+          undeployResource(oldName);
+      }
+      
+      for (String name : _rarNames) {
+        if (oldNames.contains(name))
+          continue;
 
 	ResourceArchive rar;
 
@@ -233,8 +250,11 @@ public class ResourceDeploy {
     } catch (Throwable e) {
       throw new ConfigException(e);
     }
+  }
 
-    _admin.register();
+  private void undeployResource(String name)
+  {
+    ResourceArchiveManager.removeResourceArchive(name);
   }
 
   /**
@@ -372,7 +392,16 @@ public class ResourceDeploy {
 
   public void start(String name)
   {
-    // XXX:
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+      
+      deployResources();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   public Throwable getConfigException(String moduleID)

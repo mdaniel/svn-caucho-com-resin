@@ -34,6 +34,7 @@ import java.util.logging.*;
 
 import javax.jms.*;
 
+import com.caucho.jms.connection.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 
@@ -56,13 +57,21 @@ public class MemoryQueue extends AbstractQueue
    * active listeners.
    */
   @Override
-  protected void enqueue(MessageImpl msg, long expires)
+  public void send(JmsSession session, MessageImpl msg, long expires)
   {
     synchronized (_queueList) {
       _queueList.add(msg);
     }
   }
 
+  /**
+   * Returns true if a message is available.
+   */
+  public boolean hasMessage()
+  {
+    return _queueList.size() > 0;
+  }
+  
   /**
    * Polls the next message from the store.
    */
@@ -92,13 +101,18 @@ public class MemoryQueue extends AbstractQueue
    * Acknowledges the receipt of a message
    */
   @Override
-  public void acknowledge(MessageImpl msg)
+  public void acknowledge(String msgId)
   {
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " acknowledge " + msg);
+      log.fine(this + " acknowledge " + msgId);
     
     synchronized (_queueList) {
-      _readList.remove(msg);
+      for (int i = _readList.size() - 1; i >= 0; i--) {
+        MessageImpl msg = _readList.get(i);
+
+        if (msg.getJMSMessageID().equals(msgId))
+          _readList.remove(i);
+      }
     }
   }
 
@@ -106,16 +120,20 @@ public class MemoryQueue extends AbstractQueue
    * Rolls back the receipt of a message
    */
   @Override
-  public void rollback(MessageImpl msg)
+  public void rollback(String msgId)
   {
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " rollback " + msg);
+      log.fine(this + " rollback " + msgId);
     
     synchronized (_queueList) {
-      if (_readList.remove(msg)) {
-	msg.setJMSRedelivered(true);
-	
-	_queueList.add(msg);
+      for (int i = _readList.size() - 1; i >= 0; i--) {
+        MessageImpl msg = _readList.get(i);
+
+        if (msg.getJMSMessageID().equals(msgId)) {
+          _readList.remove(i);
+          msg.setJMSRedelivered(true);
+          _queueList.add(msg);
+        }
       }
     }
   }

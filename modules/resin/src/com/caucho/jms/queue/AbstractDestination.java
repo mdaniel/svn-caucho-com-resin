@@ -38,6 +38,7 @@ import com.caucho.jms.connection.*;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
+import com.caucho.util.RandomUtil;
 
 /**
  * Implements an abstract queue.
@@ -48,14 +49,21 @@ abstract public class AbstractDestination
   private static final Logger log
     = Logger.getLogger(AbstractDestination.class.getName());
 
+  private static long _idRandom;
+  private static long _idCount;
+  
   private String _name = "default";
-  private long _count;
 
   protected MessageFactory _messageFactory = new MessageFactory();
 
   protected AbstractDestination()
   {
-    _count = Alarm.getCurrentTime() << 16;
+    synchronized (AbstractDestination.class) {
+      if (_idRandom == 0 || Alarm.isTest()) {
+        _idRandom = RandomUtil.getRandomLong();
+        _idCount = Alarm.getCurrentTime() << 16;
+      }
+    }
   }
 
   public void setName(String name)
@@ -86,7 +94,7 @@ abstract public class AbstractDestination
   {
   }
 
-  abstract public void send(JmsSession session, Message msg, long timeout)
+  abstract public void send(JmsSession session, MessageImpl msg, long timeout)
     throws JMSException;
   
   /**
@@ -100,25 +108,31 @@ abstract public class AbstractDestination
   {
     return null;
   }
-  
-  /**
-   * Rollback the message read.
-   */
-  public void rollback(MessageImpl msg)
+
+  public boolean hasMessage()
   {
+    return false;
   }
   
   /**
    * Acknowledge receipt of the message.
    */
-  public void acknowledge(MessageImpl msg)
+  public void acknowledge(String msgId)
+  {
+  }
+  
+  /**
+   * Rollback the message read.
+   */
+  public void rollback(String msgId)
   {
   }
 
-  public String generateMessageID()
+  public final String generateMessageID()
   {
     StringBuilder cb = new StringBuilder();
 
+    cb.append("ID:");
     generateMessageID(cb);
 
     return cb.toString();
@@ -128,10 +142,11 @@ abstract public class AbstractDestination
   {
     long id;
     
-    synchronized (this) {
-      id = _count++;
+    synchronized (AbstractDestination.class) {
+      id = _idCount++;
     }
 
+    Base64.encode(cb, _idRandom);
     Base64.encode(cb, id);
   }
 

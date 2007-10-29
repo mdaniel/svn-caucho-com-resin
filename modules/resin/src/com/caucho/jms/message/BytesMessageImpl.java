@@ -351,7 +351,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 
     try {
       int len = readShort();
-      
+
       int d1;
       
       while (len > 0) {
@@ -560,10 +560,10 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       WriteStream out = getWriteStream();
 
       int len = s.length();
-      
+
       int byteLength = 0;
 
-      for (int i = 0; i < byteLength; i++) {
+      for (int i = 0; i < len; i++) {
         int ch = s.charAt(0);
 
         if (ch == 0)

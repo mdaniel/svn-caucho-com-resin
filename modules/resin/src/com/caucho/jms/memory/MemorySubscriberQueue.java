@@ -53,8 +53,7 @@ public class MemorySubscriberQueue extends MemoryQueue
 
 
   @Override
-  public void send(JmsSession session, Message msg, long timeout)
-    throws JMSException
+  public void send(JmsSession session, MessageImpl msg, long timeout)
   {
     if (_isNoLocal && _session == session)
       return;

@@ -405,7 +405,8 @@ public class EjbSessionBean extends EjbBean {
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
     server.setMappedName(getMappedName());
-
+    server.setId(getEJBModuleName() + "#" + getEJBName());
+    
     JClass remoteHome = getRemoteHome();
     if (remoteHome != null)
       server.setRemoteHomeClass(remoteHome.getJavaClass());

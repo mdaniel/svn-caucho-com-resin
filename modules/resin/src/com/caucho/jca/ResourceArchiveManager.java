@@ -73,12 +73,31 @@ public class ResourceArchiveManager {
   }
 
   /**
+   * Adds a new resource.
+   */
+  static void removeResourceArchive(String name)
+  {
+    ResourceArchiveManager raManager = _localManager.getLevel();
+
+    if (raManager == null)
+      return;
+
+    ResourceArchive rar = raManager.getResourceArchive(name);
+
+    if (rar != null) {
+      raManager._resources.remove(rar);
+
+      rar.destroy();
+    }
+  }
+
+  /**
    * Finds a resource.
    */
-  static ResourceArchive findResourceArchive(String name)
+  public static ResourceArchive findResourceArchive(String name)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
 	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
@@ -126,6 +145,33 @@ public class ResourceArchiveManager {
     for (int i = 0; i < _resources.size(); i++) {
       ResourceArchive ra = _resources.get(i);
       if (ra.getConnectionDefinition(type) != null)
+	return ra;
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the resource archive in the manager.
+   */
+  private ResourceArchive getResourceArchiveByType(Class type)
+  {
+    for (int i = 0; i < _resources.size(); i++) {
+      ResourceArchive ra = _resources.get(i);
+
+      ResourceAdapterConfig raConfig =  ra.getResourceAdapter();
+      if (raConfig == null)
+	continue;
+
+      Class resourceAdapterClass = raConfig.getResourceadapterClass();
+
+      if (type.equals(resourceAdapterClass))
+	return ra;
+    }
+    
+    for (int i = 0; i < _resources.size(); i++) {
+      ResourceArchive ra = _resources.get(i);
+      if (ra.getConnectionDefinition(type.getName()) != null)
 	return ra;
     }
 

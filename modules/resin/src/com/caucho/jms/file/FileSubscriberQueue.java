@@ -19,57 +19,54 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.queue;
+package com.caucho.jms.file;
 
+import java.util.ArrayList;
 import java.util.logging.*;
 
 import javax.jms.*;
 
 import com.caucho.jms.message.*;
+import com.caucho.jms.queue.*;
+import com.caucho.jms.memory.*;
 import com.caucho.jms.connection.*;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-
 /**
- * Implements an abstract topic.
+ * Implements a file queue.
  */
-abstract public class AbstractTopic extends AbstractDestination
-  implements javax.jms.Topic
+public class FileSubscriberQueue extends MemoryQueue
 {
-  public static final L10N L = new L10N(AbstractTopic.class);
+  private FileTopic _topic;
+  private JmsSession _session;
+  private boolean _isNoLocal;
   
-  public String getTopicName()
+  FileSubscriberQueue(FileTopic topic, JmsSession session, boolean noLocal)
   {
-    return getName();
-  }
-  
-  /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
-   */
-  public MessageImpl receive(long timeout)
-  {
-    throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
+    _topic = topic;
+    _session = session;
+    _isNoLocal = noLocal;
   }
 
-  public abstract AbstractQueue createSubscriber(JmsSession session,
-                                                 String name,
-                                                 boolean noLocal);
 
-  public abstract void closeSubscriber(AbstractQueue subscriber);
-  
+  @Override
+  public void send(JmsSession session, MessageImpl msg, long timeout)
+  {
+    if (_isNoLocal && _session == session)
+      return;
+    else
+      super.send(session, msg, timeout);
+  }
+
   public String toString()
   {
-    return getClass().getName() + "[" + getName() + "]";
+    return "FileSubscriberQueue[" + _topic.getName() + "]";
   }
 }
 

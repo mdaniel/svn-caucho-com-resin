@@ -816,7 +816,7 @@ public class Cluster
   /**
    * Returns the primary server.
    */
-  public ClusterServer getPrimary(String id)
+  public ClusterServer getPrimary(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
     int srunLength = srunList.length;
@@ -824,11 +824,11 @@ public class Cluster
     int index = 0;
 
     if (srunLength < 64) {
-      index = decode(id.charAt(0));
+      index = decode(id.charAt(offset + 0));
     }
     else {
-      int d1 = decode(id.charAt(0));
-      int d2 = decode(id.charAt(1));
+      int d1 = decode(id.charAt(offset + 0));
+      int d2 = decode(id.charAt(offset + 1));
       
       index = d1 * 64 + d2;
     }
@@ -842,7 +842,7 @@ public class Cluster
   /**
    * Returns the secondary server.
    */
-  public ClusterServer getSecondary(String id)
+  public ClusterServer getSecondary(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
     int srunLength = srunList.length;
@@ -850,11 +850,11 @@ public class Cluster
     int index = 0;
 
     if (srunLength < 64) {
-      index = decode(id.charAt(1));
+      index = decode(id.charAt(offset + 1));
     }
     else {
-      int d1 = decode(id.charAt(2));
-      int d2 = decode(id.charAt(3));
+      int d1 = decode(id.charAt(offset + 2));
+      int d2 = decode(id.charAt(offset + 3));
       
       index = d1 * 64 + d2;
     }
@@ -868,7 +868,7 @@ public class Cluster
   /**
    * Returns the tertiary server.
    */
-  public ClusterServer getTertiary(String id)
+  public ClusterServer getTertiary(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
     int srunLength = srunList.length;
@@ -876,11 +876,11 @@ public class Cluster
     int index = 0;
 
     if (srunLength < 64) {
-      index = decode(id.charAt(2));
+      index = decode(id.charAt(offset + 2));
     }
     else {
-      int d1 = decode(id.charAt(4));
-      int d2 = decode(id.charAt(5));
+      int d1 = decode(id.charAt(offset + 4));
+      int d2 = decode(id.charAt(offset + 5));
       
       index = d1 * 64 + d2;
     }

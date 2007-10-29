@@ -69,6 +69,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected final static Logger log = Log.open(AbstractServer.class);
   private static final L10N L = new L10N(AbstractServer.class);
 
+  protected String _id;
   protected String _ejbName;
   protected String _moduleName;
   protected String _handleServerId;
@@ -140,7 +141,26 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public String getId()
   {
-    return "" + getModuleName() + "#" + getEJBName();
+    return _id;
+  }
+
+  /**
+   * Sets the id, module-path#ejb-name.
+   */
+  public void setId(String id)
+  {
+    _id = id;
+
+    int p = id.lastIndexOf('/');
+    if (p > 0)
+      _loader.setId(getType() + id.substring(p + 1));
+    else
+      _loader.setId(getType() + id);
+  }
+
+  protected String getType()
+  {
+    return "ejb:";
   }
 
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
@@ -829,7 +849,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void init()
     throws Exception
   {
-    _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
+    // _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
   }
 
   public void start()

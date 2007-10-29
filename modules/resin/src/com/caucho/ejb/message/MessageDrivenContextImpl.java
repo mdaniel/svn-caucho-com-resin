@@ -31,27 +31,98 @@ package com.caucho.ejb.message;
 
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.util.Log;
+import com.caucho.util.L10N;
 
 import javax.ejb.MessageDrivenContext;
+import javax.ejb.EJBHome;
+import javax.transaction.UserTransaction;
 import java.util.logging.Logger;
 
 /**
  * Server container for a message bean.
  */
 public class MessageDrivenContextImpl extends AbstractContext
-  implements MessageDrivenContext {
-  protected static final Logger log = Log.open(MessageDrivenContextImpl.class);
+  implements MessageDrivenContext
+{
+  protected static final L10N L = new L10N(MessageDrivenContextImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(MessageDrivenContextImpl.class.getName());
 
-  MessageServer _server;
+  private MessageServer _server;
+  private UserTransaction _ut;
+  private boolean _isRollbackOnly;
   
-  MessageDrivenContextImpl(MessageServer server)
+  MessageDrivenContextImpl(MessageServer server, UserTransaction ut)
   {
     _server = server;
+    _ut = ut;
   }
 
   protected AbstractServer getServer()
   {
     return _server;
+  }
+
+  /**
+   * Returns the EJBHome stub for the container.
+   */
+  public EJBHome getEJBHome()
+  {
+    throw new IllegalStateException(L.l("Message-driven beans may not use getEJBHome()"));
+  }
+
+  /**
+   * Returns the current UserTransaction.  Only Session beans with
+   * bean-managed transactions may use this.
+   */
+  public UserTransaction getUserTransaction()
+    throws IllegalStateException
+  {
+    if (_ut != null)
+      return _ut;
+    else
+      throw new IllegalStateException(L.l("Message-driven beans may not use getUserTransaction()"));
+  }
+
+  /**
+   * Forces a rollback of the current transaction.
+   */
+  void clearRollbackOnly()
+  {
+    _isRollbackOnly = false;
+  }
+
+  /**
+   * Forces a rollback of the current transaction.
+   */
+  public void setRollbackOnly()
+    throws IllegalStateException
+  {
+    _isRollbackOnly = true;
+    /*
+    TransactionContext trans = getServer().getTransaction();
+
+    if (trans != null)
+      trans.setRollbackOnly();
+    else
+      throw new IllegalStateException("invalid transaction");
+    */
+  }
+
+  /**
+   * Forces a rollback of the current transaction.
+   */
+  public boolean getRollbackOnly()
+    throws IllegalStateException
+  {
+    return _isRollbackOnly;
+    /*
+    TransactionContext trans = getServer().getTransaction();
+
+    if (trans != null)
+      trans.setRollbackOnly();
+    else
+      throw new IllegalStateException("invalid transaction");
+    */
   }
 }

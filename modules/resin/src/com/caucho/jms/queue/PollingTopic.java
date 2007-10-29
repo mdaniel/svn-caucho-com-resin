@@ -29,6 +29,7 @@
 
 package com.caucho.jms.queue;
 
+import java.util.*;
 import java.util.logging.*;
 
 import javax.jms.*;
@@ -36,40 +37,63 @@ import javax.jms.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
+import com.caucho.config.types.Period;
+import com.caucho.util.*;
 
 /**
- * Implements an abstract topic.
+ * Implements an topic which polls the data periodically.
  */
-abstract public class AbstractTopic extends AbstractDestination
-  implements javax.jms.Topic
+abstract public class PollingTopic extends AbstractTopic
+  implements AlarmListener
 {
-  public static final L10N L = new L10N(AbstractTopic.class);
-  
-  public String getTopicName()
+  private static final L10N L = new L10N(PollingTopic.class);
+  private static final Logger log
+    = Logger.getLogger(PollingTopic.class.getName());
+
+  private long _pollPeriod = 10000;
+
+  private boolean _isPolling;
+  private WeakAlarm _alarm;
+
+  protected PollingTopic()
   {
-    return getName();
-  }
-  
-  /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
-   */
-  public MessageImpl receive(long timeout)
-  {
-    throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
+    _alarm = new WeakAlarm(this);
   }
 
-  public abstract AbstractQueue createSubscriber(JmsSession session,
-                                                 String name,
-                                                 boolean noLocal);
-
-  public abstract void closeSubscriber(AbstractQueue subscriber);
-  
-  public String toString()
+  public void setPollPeriod(Period period)
   {
-    return getClass().getName() + "[" + getName() + "]";
+    _pollPeriod = period.getPeriod();
+  }
+
+  protected boolean isPolling()
+  {
+    return _isPolling;
+  }
+
+  public void startPoll()
+  {
+    _isPolling = true;
+    _alarm.queue(_pollPeriod);
+  }
+
+  public void stopPoll()
+  {
+    _isPolling = false;
+    _alarm.dequeue();
+  }
+
+  public void handleAlarm(Alarm alarm)
+  {
+    try {
+      run();
+    } finally {
+      if (_isPolling)
+        _alarm.queue(_pollPeriod);
+    }
+  }
+
+  protected void run()
+  {
   }
 }
 

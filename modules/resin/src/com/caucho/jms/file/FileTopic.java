@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.memory;
+package com.caucho.jms.file;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,36 +37,46 @@ import javax.jms.*;
 
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
+import com.caucho.jms.memory.MemoryQueue;
 import com.caucho.jms.connection.*;
+import com.caucho.vfs.*;
 
 /**
- * Implements a memory topic.
+ * Implements a file topic.
  */
-public class MemoryTopic extends AbstractTopic
+public class FileTopic extends AbstractTopic
 {
   private static final Logger log
-    = Logger.getLogger(MemoryTopic.class.getName());
+    = Logger.getLogger(FileTopic.class.getName());
 
-  private HashMap<String,MemoryQueue> _durableSubscriptionMap
-    = new HashMap<String,MemoryQueue>();
+  private HashMap<String,AbstractQueue> _durableSubscriptionMap
+    = new HashMap<String,AbstractQueue>();
     
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
   private int _id;
 
+  public void setPath(Path path)
+  {
+  }
+
+  public void init()
+  {
+  }
+
   @Override
   public AbstractQueue createSubscriber(JmsSession session,
                                         String name,
                                         boolean noLocal)
   {
-    MemoryQueue queue;
+    AbstractQueue queue;
 
     if (name != null) {
       queue = _durableSubscriptionMap.get(name);
 
       if (queue == null) {
-	queue = new MemorySubscriberQueue(session, noLocal);
+	queue = new FileSubscriberQueue(this, session, noLocal);
 	queue.setName(getName() + ":sub-" + name);
 
 	_subscriptionList.add(queue);
@@ -76,7 +86,7 @@ public class MemoryTopic extends AbstractTopic
       return queue;
     }
     else {
-      queue = new MemorySubscriberQueue(session, noLocal);
+      queue = new FileSubscriberQueue(this, session, noLocal);
       queue.setName(getName() + ":sub-" + _id++);
 
       _subscriptionList.add(queue);
@@ -96,6 +106,7 @@ public class MemoryTopic extends AbstractTopic
   public void send(JmsSession session, MessageImpl msg, long timeout)
     throws JMSException
   {
+    System.out.println("SEND: " + _subscriptionList);
     for (int i = 0; i < _subscriptionList.size(); i++) {
       _subscriptionList.get(i).send(session, msg, timeout);
     }
@@ -103,7 +114,7 @@ public class MemoryTopic extends AbstractTopic
 
   public String toString()
   {
-    return "MemoryTopic[" + getTopicName() + "]";
+    return "FileTopic[" + getTopicName() + "]";
   }
 }
 
