@@ -577,38 +577,40 @@ public class ZlibModule extends AbstractQuercusModule {
 
   /**
    * @param data compressed using Deflate algorithm
-   * @param length (maximum length of string returned)
+   * @param length of data to decompress
    *
    * @return uncompressed string
    */
   public Value gzinflate(Env env,
                          InputStream data,
-                         @Optional("0") long length)
+                         @Optional("0") int length)
   {
+    if (length <= 0)
+      length = Integer.MAX_VALUE;
+    
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
 
     try {
       Inflater inflater = new Inflater(true);
-
-      boolean isFinished = false;
       StringValue sb = env.createBinaryBuilder();
 
-      int len;
-      while (! isFinished) {
-        if (! isFinished && inflater.needsInput()) {
-          len = data.read(buffer, 0, buffer.length);
+      while (true) {
+        int sublen = Math.min(length, buffer.length);
+          
+        sublen = data.read(buffer, 0, sublen);
 
-          if (len > 0) {
-            inflater.setInput(buffer, 0, len);
-	  }
-          else
-            isFinished = true;
+        if (sublen > 0) {
+          inflater.setInput(buffer, 0, sublen);
+          length -= sublen;
+          
+          int inflatedLength;
+          while ((inflatedLength = inflater.inflate(buffer, 0, sublen)) > 0) {
+            sb.append(buffer, 0, inflatedLength);
+          }
         }
-
-        while ((len = inflater.inflate(buffer, 0, buffer.length)) > 0) {
-          sb.append(buffer, 0, len);
-        }
+        else
+          break;
       }
 
       inflater.end();

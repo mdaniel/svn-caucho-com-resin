@@ -166,17 +166,23 @@ public class GZInputStream extends InputStream
         }
 
        sublen = _inflater.inflate(b, off + length, len - length);
+       
         _crc.update(b, off + length, sublen);
        _inputSize += sublen;
        _totalInputSize += sublen;
+       
        length += sublen;
 
         // Unread gzip trailer and possibly beginning of appended gzip data.
         if (_inflater.finished()) {
           int remaining = _inflater.getRemaining();
           _in.unread(_readBuffer, _readBufferSize - remaining, remaining);
+          
           readTrailer();
-          break;
+          
+          int secondPart = read(b, off + length, len - length);
+          
+          return secondPart > 0 ? length + secondPart : length;
         }
       }
 
@@ -201,9 +207,11 @@ public class GZInputStream extends InputStream
     long remaining = n;
     while (remaining > 0) {
       int length = (int)Math.min(_tbuffer.length, remaining);
+      
       int sublen = read(_tbuffer, 0, length);
       if (sublen < 0)
         break;
+      
       remaining -= sublen;
     }
     return (n - remaining);
@@ -263,6 +271,7 @@ public class GZInputStream extends InputStream
       while (c != 0) {
         if (c < 0)
           throw new IOException("Bad GZIP (FCOMMENT) header.");
+        
         c = _in.read();
       }
     }
@@ -279,7 +288,7 @@ public class GZInputStream extends InputStream
 
   /**
    * Reads the trailer and prepare this class for the possibility
-   *   of an appended gzip stream.
+   * of an appended gzip stream.
    */
   private void readTrailer()
     throws IOException
@@ -315,11 +324,14 @@ public class GZInputStream extends InputStream
     // Check to see if this gzip stream is appended with a valid gzip stream.
     // If it is appended, then can continue reading from stream.
     int c = _in.read();
+    
     if (c < 0)
       _eof = true;
     else {
       _in.unread(c);
+      
       init();
+
       if (!_isGzip)
         _eof = true;
     }
