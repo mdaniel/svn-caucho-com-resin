@@ -175,6 +175,14 @@ public class Regexp {
       return subject;
   }
 
+  public StringValue convertResult(Env env, StringValue result)
+  {
+    if (_isUTF8)
+      return toUtf8(env, result);
+    else
+      return result;
+  }
+
   private void compile(Env env, RegexpNode prog, Regcomp comp)
   {
     _ignoreCase = (comp._flags & Regcomp.IGNORE_CASE) != 0;
@@ -243,6 +251,31 @@ public class Regexp {
 	target.append((char) (((ch & 0xf) << 12)
 			      + ((ch2 & 0x3f) << 6)
 			      + (ch3 & 0x3f)));
+      }
+    }
+
+    return target;
+  }
+
+  static StringValue toUtf8(Env env, StringValue source)
+  {
+    StringValue target = env.createBinaryBuilder();
+    int len = source.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = source.charAt(i);
+
+      if (ch < 0x80) {
+	target.append(ch);
+      }
+      else if (ch < 0x800) {
+	target.append((char) (0xc0 | (ch >> 6)));
+	target.append((char) (0x80 | (ch & 0x3f)));
+      }
+      else {
+	target.append((char) (0xe0 | (ch >> 12)));
+	target.append((char) (0x80 | ((ch >> 6) & 0x3f)));
+	target.append((char) (0x80 | (ch & 0x3f)));
       }
     }
 

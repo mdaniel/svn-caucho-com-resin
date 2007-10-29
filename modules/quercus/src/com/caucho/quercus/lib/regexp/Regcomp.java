@@ -133,10 +133,9 @@ class Regcomp {
     if (_maxGroup < _nGroup)
       _maxGroup = _nGroup;
 
-    // System.out.println("V: " + value);
     if (log.isLoggable(Level.FINER))
       log.finer("regexp[] " + value);
-    
+
     return value;
   }
   
@@ -251,7 +250,8 @@ class Regcomp {
 	    next = parseRec(pattern, null);
 	    
 	    while ((ch = pattern.read()) == '|') {
-	      next = next.createOr(parseRec(pattern, null));
+	      RegexpNode nextHead = parseRec(pattern, null);
+	      next = next.createOr(nextHead);
 	    }
 
 	    if (isPositive)
@@ -525,7 +525,8 @@ class Regcomp {
 
     int ch;
     while ((ch = pattern.read()) == '|') {
-      body = body.createOr(parseRec(pattern, null));
+      RegexpNode nextBody = parseRec(pattern, null);
+      body = body.createOr(nextBody);
     }
 
     if (ch != ')')
@@ -1108,7 +1109,7 @@ class Regcomp {
   {
     CharBuffer cb = new CharBuffer();
     cb.append((char) ch);
-    
+
     for (ch = pattern.read(); ch >= 0; ch = pattern.read()) {
       switch (ch) {
       case ' ': case '\t': case '\n': case '\r':
@@ -1164,6 +1165,7 @@ class Regcomp {
       
 	  ch = Character.toUpperCase(ch);
 	  ch ^= 0x40;
+	  
 	  cb.append((char) ch);
 	  break;
 	case 'e':

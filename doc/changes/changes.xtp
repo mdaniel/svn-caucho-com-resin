@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>quercus: regexp fixes (#2124, rep by koreth)</li>
 <li>jms: ListenerResource needs listener-max (#2047, rep by D McAndrew)</li>
 <li>(2007-10-25) load-balance failover logging was showing incorrect target server info (#2098, rep by stbu)</li>
 <li>add secure="true" to cluster-port (#2104, rep by Takahiro Fukuda)</li>

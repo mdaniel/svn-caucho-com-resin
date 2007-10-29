@@ -237,7 +237,7 @@ class RegexpNode {
    */
   RegexpNode createOr(RegexpNode node)
   {
-    return Or.create(getHead(), node.getHead());
+    return Or.create(this, node);
   }
 
   //
@@ -605,10 +605,12 @@ class RegexpNode {
       int i;
       
       int headOffset = offset;
+      int tail;
       
       for (i = 0; i < min; i++) {
-	if (node.match(string, offset + i, state) < 0)
-	  return -1;
+	tail = node.match(string, offset + i, state);
+	if (tail < 0)
+	  return tail;
       }
 
       for (; i < max; i++) {
@@ -618,7 +620,7 @@ class RegexpNode {
       }
 
       for (; min <= i; i--) {
-	int tail = next.match(string, offset + i, state);
+	tail = next.match(string, offset + i, state);
 
 	if (tail >= 0)
 	  return tail;
@@ -629,7 +631,7 @@ class RegexpNode {
 
     public String toString()
     {
-      return "CharLoop[" + _node + ", " + _next + "]";
+      return "CharLoop[" + _min + ", " + _max + ", " + _node + ", " + _next + "]";
     }
   }
   
@@ -933,15 +935,6 @@ class RegexpNode {
       return _tail.createLoopUngreedy(parser, min, max);
     }
 
-    /**
-     * Create an or expression
-     */
-    @Override
-    RegexpNode createOr(RegexpNode node)
-    {
-      return _tail.createOr(node);
-    }
-
     @Override
     int minLength()
     {
@@ -1074,8 +1067,9 @@ class RegexpNode {
 	
 	return -1;
       }
-      else
+      else {
 	return tail;
+      }
     }
 
     public String toString()
@@ -1213,7 +1207,7 @@ class RegexpNode {
     {
       _index = parser.nextLoopIndex();
       _tail = new LoopTail(_index, this);
-      _node = node.concat(_tail);
+      _node = node.concat(_tail).getHead();
       _min = min;
       _max = max;
     }
@@ -1275,25 +1269,26 @@ class RegexpNode {
       RegexpNode next = _tail;
       RegexpNode node = _node;
       int min = _min;
-      
-      for (int i = 0; i < min; i++) {
+      int i;
+      for (i = 0; i < min - 1; i++) {
 	state._loopCount[_index] = i;
       
 	offset = node.match(string, offset, state);
 
 	if (offset < 0)
-	  return -1;
+	  return offset;
       }
 
-      if (min < _max) {
-	state._loopCount[_index] = min;
-	state._loopOffset[_index] = offset;
-	int tail = node.match(string, offset, state);
-	if (tail >= 0)
-	  return tail;
-      }
-
-      return _tail.match(string, offset, state);
+      state._loopCount[_index] = i;
+      state._loopOffset[_index] = offset;
+      int tail = node.match(string, offset, state);
+      
+      if (tail >= 0)
+	return tail;
+      else if (state._loopCount[_index] < _min)
+	return tail;
+      else
+	return _tail.match(string, offset, state);
     }
 
     public String toString()
@@ -1343,7 +1338,7 @@ class RegexpNode {
     {
       int oldCount = state._loopCount[_index];
 
-      if (oldCount < _head._min)
+      if (oldCount + 1 < _head._min)
 	return offset;
       else if (oldCount + 1 < _head._max) {
 	int oldOffset = state._loopOffset[_index];

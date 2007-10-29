@@ -61,8 +61,6 @@ public class RegexpState {
   CharBuffer _prefix; // initial string
   int _minLength; // minimum length possible for this regexp
 
-  StringValue []_groupNames;
-  
   boolean _isUnicode;
   boolean _isPHP5String;
   
@@ -112,7 +110,7 @@ public class RegexpState {
 	  continue;
       }
 
-      _groupLength = 0;
+      clearGroup();
       int offset = _regexp._prog.match(_subject, _first, this);
 
       if (offset >= 0) {
@@ -149,7 +147,7 @@ public class RegexpState {
     _subject = subject;
 
     _first = first;
-    _groupLength = 0;
+    clearGroup();
 
     return _regexp._prog.match(_subject, first, this);
   }
@@ -160,8 +158,8 @@ public class RegexpState {
   public int exec(Env env, StringValue subject, int start)
   { 
     subject = _regexp.convertSubject(env, subject);
-    
-    _groupLength = 0;
+
+    clearGroup();
     
     _start = start;
     _first = start;
@@ -174,10 +172,7 @@ public class RegexpState {
     RegexpNode prog = _regexp._prog;
 
     for (; start <= end; start++) {
-      if (firstSet != null) {
-	if (start == end)
-	  continue;
-	  
+      if (firstSet != null && (start < end || minLength > 0)) {
 	char firstChar = subject.charAt(start);
 	
 	if (firstChar < 256 && ! firstSet[firstChar])
@@ -200,6 +195,11 @@ public class RegexpState {
   private void clearGroup()
   {
     _groupLength = 0;
+
+    for (int i = _groupBegin.length - 1; i > 0; i--) {
+      _groupBegin[i] = -1;
+      _groupEnd[i] = -1;
+    }
   }
   
   public int getBegin(int i)
@@ -279,36 +279,30 @@ public class RegexpState {
 
     StringValue s = _subject.substring(begin, end);
 
-    return encodeResultString(env, s);
+    return _regexp.convertResult(env, s);
   }
   
   public StringValue getGroupName(int i)
   {
-    if (_groupNames == null || _groupNames.length <= i)
+    StringValue []groupNames = _regexp._groupNames;
+
+    if (groupNames == null || groupNames.length <= i)
       return null;
     else
-      return _groupNames[i];
+      return groupNames[i];
   }
   
   public StringValue substring(Env env, int start)
   {
     StringValue result = _subject.substring(start);
 
-    return encodeResultString(env, result);
+    return _regexp.convertResult(env, result);
   }
   
   public StringValue substring(Env env, int start, int end)
   {
     StringValue result = _subject.substring(start, end);
 
-    return encodeResultString(env, result);
-  }
-  
-  private StringValue encodeResultString(Env env, StringValue str)
-  {
-    if (_isUTF8)
-      return str.toBinaryValue(env, "UTF-8");
-    else
-      return str;
+    return _regexp.convertResult(env, result);
   }
 }

@@ -386,7 +386,7 @@ public class CauchoRegexpModule
       ArrayValue values = new ArrayValueImpl();
 
       Value patternName = regexpState.getGroupName(j);
-
+      
       // XXX: named subpatterns causing conflicts with array indexes?
       if (patternName != null)
         matches.put(patternName, values);
@@ -475,7 +475,7 @@ public class CauchoRegexpModule
         if (end - start <= 0)
           continue;
 
-        StringValue groupValue = subject.substring(start, end);
+        StringValue groupValue = regexpState.group(env, i);
 
         Value result = NullValue.NULL;
 
@@ -1018,131 +1018,131 @@ public class CauchoRegexpModule
   {
     try {
     
-    if (limit <= 0)
-      limit = Long.MAX_VALUE;
+      if (limit <= 0)
+	limit = Long.MAX_VALUE;
 
-    StringValue empty = patternString.getEmptyString();
+      StringValue empty = patternString.getEmptyString();
     
-    Regexp regexp = getRegexp(env, patternString);
-    RegexpState regexpState = new RegexpState(env, regexp, string);
+      Regexp regexp = getRegexp(env, patternString);
+      RegexpState regexpState = new RegexpState(env, regexp, string);
 
-    ArrayValue result = new ArrayValueImpl();
+      ArrayValue result = new ArrayValueImpl();
 
-    int head = 0;
-    long count = 0;
+      int head = 0;
+      long count = 0;
 
-    boolean allowEmpty = (flags & PREG_SPLIT_NO_EMPTY) == 0;
-    boolean isCaptureOffset = (flags & PREG_SPLIT_OFFSET_CAPTURE) != 0; 
-    boolean isCaptureDelim = (flags & PREG_SPLIT_DELIM_CAPTURE) != 0;
+      boolean allowEmpty = (flags & PREG_SPLIT_NO_EMPTY) == 0;
+      boolean isCaptureOffset = (flags & PREG_SPLIT_OFFSET_CAPTURE) != 0; 
+      boolean isCaptureDelim = (flags & PREG_SPLIT_DELIM_CAPTURE) != 0;
 
-    GroupNeighborMap neighborMap
-      = new GroupNeighborMap(regexp.getPattern(), regexpState.groupCount());
+      GroupNeighborMap neighborMap
+	= new GroupNeighborMap(regexp.getPattern(), regexpState.groupCount());
     
-    while (regexpState.find()) {
-      int startPosition = head;
-      StringValue unmatched;
+      while (regexpState.find()) {
+	int startPosition = head;
+	StringValue unmatched;
 
-      // Get non-matching sequence
-      if (count == limit - 1) {
-        unmatched = string.substring(head);
-        head = string.length();
+	// Get non-matching sequence
+	if (count == limit - 1) {
+	  unmatched = string.substring(head);
+	  head = string.length();
+	}
+	else {
+	  unmatched = string.substring(head, regexpState.start());
+	  head = regexpState.end();
+	}
+
+	// Append non-matching sequence
+	if (unmatched.length() != 0 || allowEmpty) {
+	  if (isCaptureOffset) {
+	    ArrayValue part = new ArrayValueImpl();
+
+	    part.put(unmatched);
+	    part.put(LongValue.create(startPosition));
+
+	    result.put(part);
+	  }
+	  else {
+	    result.put(unmatched);
+	  }
+
+	  count++;
+	}
+
+	if (count == limit)
+	  break;
+
+	// Append parameterized delimiters
+	if (isCaptureDelim) {
+	  for (int i = 1; i < regexpState.groupCount(); i++) {
+	    int start = regexpState.start(i);
+	    int end = regexpState.end(i);
+
+	    // Skip empty groups
+	    if (! regexpState.isMatchedGroup(i)) {
+	      continue;
+	    }
+
+	    // Append empty OR neighboring groups that were skipped
+	    // php/152r
+	    if (allowEmpty) {
+	      int group = i;
+	      while (neighborMap.hasNeighbor(group)) {
+		group = neighborMap.getNeighbor(group);
+
+		if (regexpState.isMatchedGroup(group))
+		  break;
+
+		if (isCaptureOffset) {
+		  ArrayValue part = new ArrayValueImpl();
+
+		  part.put(empty);
+		  part.put(LongValue.create(startPosition));
+
+		  result.put(part);
+		}
+		else
+		  result.put(empty);
+	      }
+	    }
+
+	    if (end - start <= 0 && ! allowEmpty) {
+	      continue;
+	    }
+
+	    StringValue groupValue = regexpState.group(env, i);
+
+	    if (isCaptureOffset) {
+	      ArrayValue part = new ArrayValueImpl();
+
+	      part.put(groupValue);
+	      part.put(LongValue.create(startPosition));
+
+	      result.put(part);
+	    }
+	    else {
+	      result.put(groupValue);
+	    }
+	  }
+	}
       }
-      else {
-        unmatched = string.substring(head, regexpState.start());
-        head = regexpState.end();
+
+      // Append non-matching sequence at the end
+      if (count < limit && (head < string.length() || allowEmpty)) {
+	if (isCaptureOffset) {
+	  ArrayValue part = new ArrayValueImpl();
+
+	  part.put(string.substring(head));
+	  part.put(LongValue.create(head));
+
+	  result.put(part);
+	}
+	else {
+	  result.put(string.substring(head));
+	}
       }
 
-      // Append non-matching sequence
-      if (unmatched.length() != 0 || allowEmpty) {
-        if (isCaptureOffset) {
-          ArrayValue part = new ArrayValueImpl();
-
-          part.put(unmatched);
-          part.put(LongValue.create(startPosition));
-
-          result.put(part);
-        }
-        else {
-          result.put(unmatched);
-        }
-
-        count++;
-      }
-
-      if (count == limit)
-        break;
-
-      // Append parameterized delimiters
-      if (isCaptureDelim) {
-        for (int i = 1; i < regexpState.groupCount(); i++) {
-          int start = regexpState.start(i);
-          int end = regexpState.end(i);
-
-          // Skip empty groups
-          if (! regexpState.isMatchedGroup(i)) {
-            continue;
-          }
-
-          // Append empty OR neighboring groups that were skipped
-          // php/152r
-          if (allowEmpty) {
-            int group = i;
-            while (neighborMap.hasNeighbor(group)) {
-              group = neighborMap.getNeighbor(group);
-
-              if (regexpState.isMatchedGroup(group))
-                break;
-
-              if (isCaptureOffset) {
-                ArrayValue part = new ArrayValueImpl();
-
-                part.put(empty);
-                part.put(LongValue.create(startPosition));
-
-                result.put(part);
-              }
-              else
-                result.put(empty);
-            }
-          }
-
-          if (end - start <= 0 && ! allowEmpty) {
-            continue;
-          }
-
-          StringValue groupValue = string.substring(start, end);
-
-          if (isCaptureOffset) {
-            ArrayValue part = new ArrayValueImpl();
-
-            part.put(groupValue);
-            part.put(LongValue.create(startPosition));
-
-            result.put(part);
-          }
-          else {
-            result.put(groupValue);
-          }
-        }
-      }
-    }
-
-    // Append non-matching sequence at the end
-    if (count < limit && (head < string.length() || allowEmpty)) {
-      if (isCaptureOffset) {
-        ArrayValue part = new ArrayValueImpl();
-
-        part.put(string.substring(head));
-        part.put(LongValue.create(head));
-
-        result.put(part);
-      }
-      else {
-        result.put(string.substring(head));
-      }
-    }
-
-    return result;
+      return result;
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
