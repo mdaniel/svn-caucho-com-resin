@@ -197,6 +197,46 @@ public class StatelessServer extends AbstractServer {
   @Override
   public Object getClientObject(Class businessInterface)
   {
+    Object obj = getClientLocalHome();
+
+    if (obj != null) {
+      if (businessInterface == null)
+        return obj;
+
+      if (businessInterface.isAssignableFrom(obj.getClass()))
+        return obj;
+
+      Class local21 = getLocal21();
+
+      if (local21 != null && local21.isAssignableFrom(obj.getClass()))
+        return obj;
+    }
+
+    for (Class cl : getLocalApiList()) {
+      if (businessInterface == null
+          || businessInterface.isAssignableFrom(cl)) {
+        if (_localObject instanceof AbstractSessionObject) {
+          AbstractSessionObject sessionObject = (AbstractSessionObject) _localObject;
+
+          if (sessionObject.__caucho_getBusinessInterface() == businessInterface)
+            break;
+
+          // ejb/0ff4 TCK: ejb30/bb/session/stateless/sessioncontext/annotated/getInvokedBusinessInterfaceLocal1
+          // Creates a new instance to store the invoked business interface.
+          obj = getStatelessContext().createLocalObject();
+          setBusinessInterface(obj, businessInterface);
+
+          // XXX TCK: ejb30/bb/session/stateless/equals/annotated/testBeanotherEquals, needs QA
+          _localObject = (EJBLocalObject) obj;
+
+          break;
+        }
+      }
+    }
+
+    return _localObject;
+
+    /*
     Class local21 = getLocal21();
     Class remote30 = null;
 
@@ -240,6 +280,41 @@ public class StatelessServer extends AbstractServer {
     }
 
     return obj;
+    */
+  }
+
+  /**
+   * Returns the 3.0 local stub for the container
+   */
+  @Override
+  public Object getLocalObject30()
+  {
+    return _localObject;
+  }
+
+  /**
+   * Returns the 3.0 local stub for the container
+   */
+  @Override
+  public Object getLocalObject30(Class businessInterface)
+  {
+    return getClientObject(businessInterface);
+
+    /*
+    if (_localObject == null)
+      return null;
+
+    if (businessInterface == null)
+      return _localObject;
+
+    if (businessInterface.isAssignableFrom(_localObject.getClass())) {
+      setBusinessInterface(_localObject, businessInterface);
+
+      return _localObject;
+    }
+
+    return null;
+    */
   }
 
   /**

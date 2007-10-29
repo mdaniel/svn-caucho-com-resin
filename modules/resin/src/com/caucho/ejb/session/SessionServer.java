@@ -235,6 +235,24 @@ public class SessionServer extends AbstractServer
   }
 
   /**
+   * Returns the 3.0 local stub for the container
+   */
+  @Override
+  public Object getLocalObject30()
+  {
+    return getClientObject(null);
+  }
+
+  /**
+   * Returns the 3.0 local stub for the container
+   */
+  @Override
+  public Object getLocalObject30(Class businessInterface)
+  {
+    return getClientObject(businessInterface);
+  }
+
+  /**
    * Returns a new instance.
    */
   Object newInstance()

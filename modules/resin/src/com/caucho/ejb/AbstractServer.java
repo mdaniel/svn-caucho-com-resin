@@ -711,6 +711,22 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
+   * Returns the 3.0 local stub for the container
+   */
+  public Object getLocalObject30()
+  {
+    throw new UnsupportedOperationException("3.0 local interface not found");
+  }
+
+  /**
+   * Returns the 3.0 local stub for the container
+   */
+  public Object getLocalObject30(Class businessInterface)
+  {
+    throw new UnsupportedOperationException("3.0 local interface not found");
+  }
+
+  /**
    * Returns the EJBLocalHome stub for the container
    */
   public EJBLocalHome getEJBLocalHome()

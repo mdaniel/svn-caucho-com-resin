@@ -267,8 +267,8 @@ public class EjbProtocolManager {
               // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceLocalIllegal
               if (server.getLocal21() == null
                   || ! server.getLocal21().getName().equals(cl.getName())) {
-                // XXX obj = server.getLocalObject30(cl);
-                // XXX: TO BE IMPLEMENTED ejb/0ff4
+                // ejb/0ff4
+                obj = server.getLocalObject30(cl);
                 continue;
               }
               else {

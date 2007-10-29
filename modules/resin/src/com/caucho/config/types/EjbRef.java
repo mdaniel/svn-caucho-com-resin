@@ -441,6 +441,8 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         resolve(_home);
       else if (_remote != null)
         resolve(_remote);
+      else if (getLocal() != null) // ejb/0f6g
+        resolve(getLocal());
       else
         resolve(null);
     }
@@ -544,11 +546,23 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         if (localHome != null)
           target = localHome;
 
+        if (target != null) {
+          // ejb/0f6g
+          if (type != null && ! type.isAssignableFrom(target.getClass()))
+            target = server.getLocalObject30(type);
+        }
+
         if (target == null) {
           Object remoteHome = server.getEJBHome();
 
           if (remoteHome != null)
             target = remoteHome;
+        }
+
+        if (target != null) {
+          // XXX: needs QA
+          if (type != null && ! type.isAssignableFrom(target.getClass()))
+            target = server.getRemoteObject30(type);
         }
 
         if (target == null)  {

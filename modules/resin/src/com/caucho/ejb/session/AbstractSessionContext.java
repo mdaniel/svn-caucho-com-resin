@@ -102,13 +102,12 @@ abstract public class AbstractSessionContext extends AbstractContext
   public <T> T getBusinessObject(Class<T> businessInterface)
     throws IllegalStateException
   {
-    if (businessInterface == null)
-      throw new IllegalStateException("SessionContext.getBusinessObject(null) is not allowed");
+    validateBusinessInterface(businessInterface);
 
     Object obj = getSessionServer().getRemoteObject30(businessInterface);
 
-    if (obj != null)
-      return (T) validateObject(obj, businessInterface);
+    if (validateObject(obj, businessInterface))
+      return (T) obj;
 
     obj = getSessionServer().getClientObject(businessInterface);
 
@@ -123,25 +122,45 @@ abstract public class AbstractSessionContext extends AbstractContext
       }
     }
 
-    getSessionServer().setBusinessInterface(obj, businessInterface);
+    if (validateObject(obj, businessInterface))
+      return (T) obj;
 
-    return (T) validateObject(obj, businessInterface);
+    //getSessionServer().setBusinessInterface(obj, businessInterface);
+
+    //return (T) validateObject(obj, businessInterface);
+
+    throw new IllegalStateException(L.l("Trying to get business object with invalid business interface: {0}",
+                                        businessInterface.getName()));
   }
 
-  private Object validateObject(Object obj, Class businessInterface)
+  private boolean validateObject(Object obj, Class businessInterface)
+  {
+    if (obj == null)
+      return false;
+
+    if (businessInterface == null)
+      return true;
+
+    if (businessInterface.isAssignableFrom(obj.getClass()))
+      return true;
+
+    return false;
+  }
+
+  private void validateBusinessInterface(Class businessInterface)
   {
     if (businessInterface == null)
-      return obj;
+      throw new IllegalStateException("SessionContext.getBusinessObject(null) is not allowed");
 
     ArrayList<Class> apiList = getSessionServer().getRemoteObjectList();
 
     if (apiList.contains(businessInterface))
-      return obj;
+      return;
 
     apiList = getSessionServer().getLocalApiList();
 
     if (apiList.contains(businessInterface))
-      return obj;
+      return;
 
     throw new IllegalStateException(L.l("Trying to get business object with invalid business interface: {0}",
                                         businessInterface.getName()));

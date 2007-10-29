@@ -110,39 +110,62 @@ abstract public class AbstractStatelessContext extends AbstractContext
   }
 
   public <T> T getBusinessObject(Class<T> businessInterface)
+    throws IllegalStateException
+  {
+    validateBusinessInterface(businessInterface);
+
+    Object obj = getStatelessServer().getRemoteObject30(businessInterface);
+
+    if (validateObject(obj, businessInterface))
+      return (T) obj;
+
+    // TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getInvokedBusinessInterfaceLocal1, needs QA
+    obj = getStatelessServer().getLocalObject30(businessInterface);
+
+    if (validateObject(obj, businessInterface))
+      return (T) obj;
+
+    obj = getStatelessServer().getClientObject(businessInterface);
+
+    if (validateObject(obj, businessInterface))
+      return (T) obj;
+
+    //getStatelessServer().setBusinessInterface(obj, businessInterface);
+
+    //return (T) validateObject(obj, businessInterface);
+
+    throw new IllegalStateException(L.l("Trying to get business object with invalid business interface: {0}",
+                                        businessInterface.getName()));
+  }
+
+  private boolean validateObject(Object obj, Class businessInterface)
+  {
+    if (obj == null)
+      return false;
+
+    if (businessInterface == null)
+      return true;
+
+    if (businessInterface.isAssignableFrom(obj.getClass()))
+      return true;
+
+    return false;
+  }
+
+  private void validateBusinessInterface(Class businessInterface)
   {
     if (businessInterface == null)
       throw new IllegalStateException("SessionContext.getBusinessObject(null) is not allowed");
 
-    Object obj = getStatelessServer().getRemoteObject30(businessInterface);
-
-    if (obj != null)
-      return (T) validateObject(obj, businessInterface);
-
-    obj = getStatelessServer().getClientObject(businessInterface);
-
-    if (obj == null)
-      return null;
-
-    getStatelessServer().setBusinessInterface(obj, businessInterface);
-
-    return (T) validateObject(obj, businessInterface);
-  }
-
-  private Object validateObject(Object obj, Class businessInterface)
-  {
-    if (businessInterface == null)
-      return obj;
-
     ArrayList<Class> apiList = getStatelessServer().getRemoteObjectList();
 
     if (apiList.contains(businessInterface))
-      return obj;
+      return;
 
     apiList = getStatelessServer().getLocalApiList();
 
     if (apiList.contains(businessInterface))
-      return obj;
+      return;
 
     throw new IllegalStateException(L.l("Trying to get business object with invalid business interface: {0}",
                                         businessInterface.getName()));
