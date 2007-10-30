@@ -63,7 +63,7 @@ public abstract class JdbcConnectionResource implements Closeable {
   private JdbcResultResource _rs;
   private int _affectedRows;
 
-  private String _errorMessage = "";
+  private String _errorMessage = null;
   private int _errorCode;
   private boolean _fieldCount = false;
   private SQLWarning _warnings;
@@ -872,6 +872,9 @@ public abstract class JdbcConnectionResource implements Closeable {
   protected void saveErrors(SQLException e)
   {
     _errorMessage = e.getMessage();
+    if (_errorMessage == null || "".equals(_errorMessage))
+      _errorMessage = e.toString();
+    
     _errorCode = e.getErrorCode();
   }
 

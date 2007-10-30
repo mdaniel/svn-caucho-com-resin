@@ -220,7 +220,16 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.errno();
+    String error = conn.error();
+
+    int errno = conn.errno();
+
+    if (errno != 0)
+      return errno;
+    else if (error != null && ! "".equals(error))
+      return 2006; // mysql has gone away
+    else
+      return 0;
   }
 
   /**
