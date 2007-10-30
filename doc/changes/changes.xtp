@@ -12,6 +12,10 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>quercus: fwrite for socket automatically flushes (#2120, rep by koreth)</li>
+<li>quercus: HashMap adapter wasn't properly implementing copy() for APC (#2121, rep by koreth)</li>
+<li>quercus: mysql_fetch should append LONGVARCHAR as binary instead of letting mysql convert it (rep by koreth)</li>
+<li>quercus: StringBuilderValue.append(byte[]) wasn't converting to char properly (rep by koreth, #2119)</li>
 <li>quercus: regexp fixes (#2124, rep by koreth)</li>
 <li>jms: ListenerResource needs listener-max (#2047, rep by D McAndrew)</li>
 <li>(2007-10-25) load-balance failover logging was showing incorrect target server info (#2098, rep by stbu)</li>

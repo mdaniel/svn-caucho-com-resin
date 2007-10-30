@@ -340,9 +340,9 @@ public class JdbcResultResource {
         flags += MysqliModule.PART_KEY_FLAG;
       }
 
-      if ((_rs.getString(2).indexOf("blob") != -1) ||
-          (type == Types.LONGVARCHAR) ||
-          (type == Types.LONGVARBINARY))
+      if ((_rs.getString(2).indexOf("blob") != -1)
+	  || (type == Types.LONGVARCHAR)
+	  || (type == Types.LONGVARBINARY))
         flags += MysqliModule.BLOB_FLAG;
 
       if (_rs.getString(2).indexOf("unsigned") != -1)
@@ -353,10 +353,10 @@ public class JdbcResultResource {
 
       // php/1f73 - null check
       if ((_rs.getString(3) != null &&
-           _rs.getString(3).indexOf("bin") != -1) ||
-          (type == Types.LONGVARBINARY) ||
-          (type == Types.DATE) ||
-          (type == Types.TIMESTAMP))
+           _rs.getString(3).indexOf("bin") != -1)
+	  || (type == Types.LONGVARBINARY)
+	  || (type == Types.DATE)
+	  || (type == Types.TIMESTAMP))
         flags += MysqliModule.BINARY_FLAG;
 
       if (_rs.getString(2).indexOf("enum") != -1)
@@ -368,14 +368,14 @@ public class JdbcResultResource {
       if (_rs.getString(2).indexOf("set") != -1)
         flags += MysqliModule.SET_FLAG;
 
-      if ((type == Types.BIGINT) ||
-          (type == Types.BIT) ||
-          (type == Types.BOOLEAN) ||
-          (type == Types.DECIMAL) ||
-          (type == Types.DOUBLE) ||
-          (type == Types.REAL) ||
-          (type == Types.INTEGER) ||
-          (type == Types.SMALLINT))
+      if ((type == Types.BIGINT)
+	  || (type == Types.BIT)
+	  || (type == Types.BOOLEAN)
+	  || (type == Types.DECIMAL)
+	  || (type == Types.DOUBLE)
+	  || (type == Types.REAL)
+	  || (type == Types.INTEGER)
+	  || (type == Types.SMALLINT))
         flags += MysqliModule.NUM_FLAG;
 
       result.putField(env, "flags", new LongValue(flags));
@@ -707,6 +707,26 @@ public class JdbcResultResource {
       case Types.BINARY:
         {
           StringValue bb = env.createBinaryBuilder();
+
+          InputStream is = rs.getBinaryStream(column);
+
+          if (is == null || rs.wasNull())
+            return NullValue.NULL;
+
+	  try {
+	    bb.appendReadAll(is, Long.MAX_VALUE);
+          } catch (RuntimeException e) {
+            log.log(Level.WARNING, e.toString(), e);
+
+            return NullValue.NULL;
+          }
+
+          return bb;
+        }
+
+      case Types.LONGVARCHAR:
+        {
+          StringValue bb = env.createUnicodeBuilder();
 
           InputStream is = rs.getBinaryStream(column);
 

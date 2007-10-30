@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Level;
@@ -54,35 +55,37 @@ abstract public class JavaAdapter extends ArrayValue
 {
   private static final Logger log
     = Logger.getLogger(JavaAdapter.class.getName());
-  
+
+  private WeakReference<Env> _envRef;
   private Object _object;
   
   private JavaClassDef _classDef;
-  private Env _env;
 
   // Vars to update when matching array item is modified
   private HashMap<Value,Value> _refs;
 
   protected JavaAdapter(Env env, Object object, JavaClassDef def)
   {
-    _env = env;
+    if (env != null)
+      _envRef = new WeakReference<Env>(env);
+    
     _object = object;
     _classDef = def;
   }
 
-  public Env getEnv()
-  {
-    return _env;
-  }
-  
   public JavaClassDef getClassDef()
   {
     return _classDef;
   }
+
+  public Env getEnv()
+  {
+    return _envRef.get();
+  }
   
   public Value wrapJava(Object obj)
   {
-    return _env.wrapJava(obj);
+    return _envRef.get().wrapJava(obj);
   }
   
   /**
@@ -253,10 +256,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Copy for serialization
    */
-  public Value copy(Env env, IdentityHashMap<Value,Value> map)
-  {
-    throw new UnsupportedOperationException();
-  }
+  abstract public Value copy(Env env, IdentityHashMap<Value,Value> map);
 
   /**
    * Returns the size.
@@ -409,7 +409,7 @@ abstract public class JavaAdapter extends ArrayValue
   @Override
   public Set<Value> keySet()
   {
-    return new KeySet(_env);
+    return new KeySet(getEnv());
   }
 
   /**
@@ -993,10 +993,10 @@ abstract public class JavaAdapter extends ArrayValue
   private void readObject(ObjectInputStream in)
     throws ClassNotFoundException, IOException
   {
-    _env = Env.getInstance();
+    _envRef = new WeakReference<Env>(Env.getInstance());
     
     _object = in.readObject();
-    _classDef = _env.getJavaClassDefinition((String) in.readObject());
+    _classDef = getEnv().getJavaClassDefinition((String) in.readObject());
   }
   
   /**

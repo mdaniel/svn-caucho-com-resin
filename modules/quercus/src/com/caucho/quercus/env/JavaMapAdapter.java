@@ -34,13 +34,8 @@ import com.caucho.quercus.env.JavaCollectionAdapter.KeyIterator;
 import com.caucho.quercus.env.JavaCollectionAdapter.ValueIterator;
 import com.caucho.quercus.program.JavaClassDef;
 
-import java.util.AbstractCollection;
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * Represents a marshalled Map argument.
@@ -108,19 +103,22 @@ public class JavaMapAdapter
   public Value copy()
   {
     try {
-      Class cl = _map.getClass();
-
-      Map map = (Map)cl.newInstance();
-
-      map.putAll(_map);
-
-      return new JavaMapAdapter(getEnv(), map, getClassDef());
+      return new JavaMapAdapter(getEnv(), _map, getClassDef());
     }
     catch (Exception e) {
       throw new QuercusRuntimeException(e);
     }
   }
 
+  /**
+   * Copy for serialization
+   */
+  @Override
+  public Value copy(Env env, IdentityHashMap<Value,Value> map)
+  {
+    return new JavaMapAdapter(env, _map, getClassDef());
+  }
+  
   /**
    * Returns the size.
    */

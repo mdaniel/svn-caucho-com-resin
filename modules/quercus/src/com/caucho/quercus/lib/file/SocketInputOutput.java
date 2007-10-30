@@ -34,6 +34,7 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketStream;
 import com.caucho.vfs.WriteStream;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -104,6 +105,43 @@ public class SocketInputOutput
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
+  }
+
+  public void write(int ch)
+    throws IOException
+  {
+    super.write(ch);
+
+    flush();
+  }
+
+  public void write(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    super.write(buffer, offset, length);
+
+    try {
+      flush();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * Read length bytes of data from the InputStream
+   * argument and write them to this output stream.
+   */
+  public int write(InputStream is, int length)
+  {
+    int result = super.write(is, length);
+
+    try {
+      flush();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return result;
   }
 
   /**

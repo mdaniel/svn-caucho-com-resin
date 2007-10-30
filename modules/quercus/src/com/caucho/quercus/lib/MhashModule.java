@@ -136,7 +136,7 @@ public class MhashModule extends AbstractQuercusModule {
 
     _algorithmMap.put(ordinal, algorithm);
 
-    if (ordinal > _highestOrdinal)
+    if (_highestOrdinal < ordinal)
       _highestOrdinal = ordinal;
   }
 

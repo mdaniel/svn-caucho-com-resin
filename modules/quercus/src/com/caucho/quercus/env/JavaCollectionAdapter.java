@@ -32,12 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.program.JavaClassDef;
 
-import java.util.AbstractCollection;
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents a marshalled Collection argument.
@@ -72,18 +67,16 @@ public class JavaCollectionAdapter extends JavaAdapter
   @Override
   public Value copy()
   {
-    try {
-      Class cl = _collection.getClass();
+    return new JavaCollectionAdapter(getEnv(), _collection, getClassDef());
+  }
 
-      Collection coll = (Collection)cl.newInstance();
-
-      coll.addAll(_collection);
-
-      return new JavaCollectionAdapter(getEnv(), coll, getClassDef());
-    }
-    catch (Exception e) {
-      throw new QuercusRuntimeException(e);
-    }
+  /**
+   * Copy for serialization
+   */
+  @Override
+  public Value copy(Env env, IdentityHashMap<Value,Value> map)
+  {
+    return new JavaCollectionAdapter(env, _collection, getClassDef());
   }
 
   /**
