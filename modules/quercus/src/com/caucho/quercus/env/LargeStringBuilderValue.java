@@ -475,11 +475,7 @@ public class LargeStringBuilderValue
    */
   public final StringValue append(byte []buf, int offset, int length)
   {
-    int stringOffset = _length % SIZE;
-    int stringEnd = _length + length;
-
-    if (SIZE < stringOffset + length)
-      ensureCapacity(_length + length);
+    ensureCapacity(_length + length);
 
     while (length > 0) {
       int chunk = _length / SIZE;
