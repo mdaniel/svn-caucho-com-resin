@@ -39,8 +39,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
 
-import java.nio.channels.FileChannel;
-
 /**
  * FilePath implements the native filesystem.
  */
@@ -576,38 +574,4 @@ public class FilePath extends FilesystemPath {
 
     return false;
   }
-
-  /**
-   * Get the FileChannel object contained inside a write stream
-   * opended via openWriteImpl or openAppendImpl.
-   */
-  public static FileChannel getFileChannel(WriteStream ws)
-  {
-    VfsStream vfsStream = (VfsStream) ws.getSource();
-    FileOutputStream fos = (FileOutputStream) vfsStream.getOutputStream();
-    return fos.getChannel();
-  }
-
-  /**
-   * Get the FileChannel object contained inside a read stream
-   * opended via openReadImpl.
-   */
-  public static FileChannel getFileChannel(ReadStream rs)
-  {
-    FileReadStream frs = (FileReadStream) rs.getSource();
-    FileInputStream fis = frs.getFileInputStream();
-    return fis.getChannel();
-  }
-
-  /**
-   * Get the FileChannel object contained inside a read/write
-   * random access stream opened via openRandomAccess.
-   */
-  public static FileChannel getFileChannel(RandomAccessStream ras)
-  {
-    FileRandomAccessStream fras = (FileRandomAccessStream) ras;
-    RandomAccessFile raf = fras.getRandomAccessFile();
-    return raf.getChannel();
-  }
-
 }
