@@ -363,14 +363,16 @@ public class LruCache<K,V> {
   {
     CacheItem<K,V> tail;
 
-    if (_capacity1 <= _size1)
-      tail = _tail1;
-    else if (_size2 > 0)
-      tail = _tail2;
-    else if (_size1 > 0)
-      tail = _tail1;
-    else
-      return false;
+    synchronized (this) {
+      if (_capacity1 <= _size1)
+	tail = _tail1;
+      else if (_size2 > 0)
+	tail = _tail2;
+      else if (_size1 > 0)
+	tail = _tail1;
+      else
+	return false;
+    }
     
     remove(tail._key);
     

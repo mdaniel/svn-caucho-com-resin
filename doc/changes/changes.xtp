@@ -12,6 +12,8 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>quercus: mysql_query error detection was not detecting connection close (#2138, rep by koreth)</li>
+<li>LruCache removeTail synchronization issue (#2130, rep by Matthew Schmidt)</li>
 <li>quercus: fwrite for socket automatically flushes (#2120, rep by koreth)</li>
 <li>quercus: HashMap adapter wasn't properly implementing copy() for APC (#2121, rep by koreth)</li>
 <li>quercus: mysql_fetch should append LONGVARCHAR as binary instead of letting mysql convert it (rep by koreth)</li>

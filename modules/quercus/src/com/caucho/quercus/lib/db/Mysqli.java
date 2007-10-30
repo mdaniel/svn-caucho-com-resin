@@ -545,15 +545,14 @@ public class Mysqli extends JdbcConnectionResource {
   {
     MysqliResult result = (MysqliResult) realQuery(sql);
 
-    if (result == null) {
-      if (getErrorCode() == 0) {
-        // No error, this was an UPDATE, DELETE, etc.
-        return BooleanValue.TRUE;
-      }
-      return BooleanValue.FALSE;
+    if (result != null)
+      return env.wrapJava(result);
+    else if (getErrorMessage() == null) {
+      // No error, this was an UPDATE, DELETE, etc.
+      return BooleanValue.TRUE;
     }
-
-    return env.wrapJava(result);
+    else
+      return BooleanValue.FALSE;
   }
 
   /**
