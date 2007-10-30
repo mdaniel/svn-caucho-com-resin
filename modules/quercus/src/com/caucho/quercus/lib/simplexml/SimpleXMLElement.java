@@ -111,6 +111,9 @@ public class SimpleXMLElement
                                              @Optional Value namespaceV,
                                              @Optional boolean isPrefix)
   { 
+    if (data.length() == 0)
+      return null;
+    
     try {
       String namespace = null;
 

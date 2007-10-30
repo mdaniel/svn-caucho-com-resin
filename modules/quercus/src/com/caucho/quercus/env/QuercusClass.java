@@ -151,7 +151,7 @@ public class QuercusClass {
 
     for (int i = 0; i < classDefList.length; i++) {
       if (classDefList[i] instanceof JavaClassDef)
-	javaClassDef = (JavaClassDef) classDefList[i];
+        javaClassDef = (JavaClassDef) classDefList[i];
     }
     
     _javaClassDef = javaClassDef;
@@ -192,7 +192,7 @@ public class QuercusClass {
     return _classDef;
   }
 
-  MethodMap getMethodMap()
+  MethodMap<AbstractFunction> getMethodMap()
   {
     return _methodMap;
   }
@@ -400,7 +400,13 @@ public class QuercusClass {
    */
   public void addMethod(String name, AbstractFunction fun)
   {
-    _methodMap.put(name, fun);
+    //php/09j9
+    // XXX: this is a hack to get Zend Framework running, the better fix is
+    // to initialize all interface classes before any concrete classes
+    AbstractFunction existingFun = _methodMap.get(name);
+    
+    if (existingFun == null || ! fun.isAbstract())
+      _methodMap.put(name, fun);
   }
 
   /**
@@ -472,7 +478,6 @@ public class QuercusClass {
           isAbstract = fun.isAbstract();
 
         if (isAbstract) {
-
           throw env.createErrorException(
             _classDef.getLocation(),
             L.l("Abstract function '{0}' must be implemented in concrete class {1}.",

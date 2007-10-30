@@ -296,6 +296,14 @@ public class BooleanValue extends Value
     return _value == value._value;
   }
 
+  @Override
+  public String toDebugString()
+  {
+    if (toBoolean())
+      return "true";
+    else
+      return "false";
+  }
 
   public void varDumpImpl(Env env,
                           WriteStream out,
