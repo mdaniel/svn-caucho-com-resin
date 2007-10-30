@@ -56,7 +56,7 @@ public class HttpModule extends AbstractQuercusModule {
     ArrayList<String> headers = env.getSpecialValue("caucho.headers");
 
     if (headers == null) {
-      headers = new ArrayList();
+      headers = new ArrayList<String>();
       env.setSpecialValue("caucho.headers", headers);
     }
 

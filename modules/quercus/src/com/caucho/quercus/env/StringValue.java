@@ -1067,12 +1067,12 @@ abstract public class StringValue extends Value implements CharSequence {
       byte []buffer = tBuf.getBuffer();
       int sublen = buffer.length;
       if (length < sublen)
-	sublen = (int) length;
+        sublen = (int) length;
 
       sublen = is.read(buffer, 0, sublen);
 
       if (sublen > 0)
-	append(buffer, 0, sublen);
+        append(buffer, 0, sublen);
 
       return sublen;
     } catch (IOException e) {
@@ -1140,8 +1140,6 @@ abstract public class StringValue extends Value implements CharSequence {
 
       if (sublen > 0)
         append(buffer, 0, sublen);
-
-      TempBuffer.free(tBuf);
 
       return sublen;
     } catch (IOException e) {

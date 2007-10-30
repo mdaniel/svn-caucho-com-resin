@@ -302,24 +302,29 @@ public class UrlModule extends AbstractQuercusModule {
     return result;
   }
   
-  public static Value
-    http_build_query(Env env, Value formdata, 
-		     @Optional StringValue numeric_prefix,
-		     @Optional("'&'") StringValue separator)
+  public static Value http_build_query(Env env,
+                                       Value formdata, 
+		                               @Optional StringValue numeric_prefix,
+		                               @Optional("'&'") StringValue separator)
   {
     StringValue result = env.createUnicodeBuilder();
 
-    httpBuildQueryImpl(env, result, formdata, env.createEmptyString(),
-		       numeric_prefix, separator);
+    httpBuildQueryImpl(env,
+                       result,
+                       formdata,
+                       env.createEmptyString(),
+                       numeric_prefix,
+                       separator);
 
     return result;
   }
   
-  private static void
-    httpBuildQueryImpl(Env env, StringValue result,
-		       Value formdata, StringValue path,
-		       StringValue numeric_prefix,
-		       StringValue separator)
+  private static void httpBuildQueryImpl(Env env,
+                                         StringValue result,
+                                         Value formdata,
+                                         StringValue path,
+                                         StringValue numeric_prefix,
+                                         StringValue separator)
   {
     Set<Map.Entry<Value,Value>> entrySet;
 
@@ -344,10 +349,10 @@ public class UrlModule extends AbstractQuercusModule {
     boolean isFirst = true;
     for (Map.Entry<Value,Value> entry : entrySet) {
       if (! isFirst) {
-	if (separator != null)
-	  result.append(separator);
-	else
-	  result.append("&");
+        if (separator != null)
+          result.append(separator);
+        else
+          result.append("&");
       }
       isFirst = false;
       
@@ -356,8 +361,8 @@ public class UrlModule extends AbstractQuercusModule {
 
       if (entryValue.isArray() || entryValue.isObject()) {
         // can always throw away the numeric prefix on recursive calls
-        httpBuildQueryImpl(env, result, entryValue,
-			   newPath, null, separator);
+        httpBuildQueryImpl(env, result, entryValue, newPath, null, separator);
+
       } else {
         result.append(newPath);
         result.append("=");
@@ -366,16 +371,19 @@ public class UrlModule extends AbstractQuercusModule {
     }
   }
 
-  private static StringValue makeNewPath(StringValue oldPath, Value key,
-					 StringValue numeric_prefix)
+  private static StringValue makeNewPath(StringValue oldPath,
+                                         Value key,
+                                         StringValue numeric_prefix)
   {
     StringValue path = oldPath.createStringBuilder();
     
     if (oldPath.length() != 0) {
       path.append(oldPath);
-      path.append('[');
+      //path.append('[');
+      path.append("%5B");
       urlencode(path, key.toStringValue());
-      path.append(']');
+      //path.append(']');
+      path.append("%5D");
 
       return path;
     }
