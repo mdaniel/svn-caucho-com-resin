@@ -29,11 +29,11 @@
 
 package com.caucho.server.resin;
 
-import java.util.logging.*;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
-import com.caucho.config.*;
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import java.util.logging.Logger;
 
 /**
  * Configuration for management.
@@ -69,8 +69,9 @@ public class Management
     
   public void setRemoteEnableCookie(String cookie)
   {
-    if ("false".equals(cookie)
-	|| "no".equals(cookie)
+    if ("false".equalsIgnoreCase(cookie)
+	|| "no".equalsIgnoreCase(cookie)
+        || "off".equalsIgnoreCase(cookie)
 	|| "".equals(cookie)) {
       _remoteEnableCookie = null;
     }

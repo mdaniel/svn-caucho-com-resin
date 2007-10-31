@@ -246,7 +246,7 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   /**
    * Restart this Resin server.
    */
-  @Description("Exit this instance cleanly and allow the wrapper script to"
+  @Description("Exit this instance cleanly and allow the watchdog to"
                + " start a new JVM")
   public void restart();
 

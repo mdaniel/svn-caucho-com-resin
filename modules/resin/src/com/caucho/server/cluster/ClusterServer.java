@@ -37,17 +37,15 @@ import com.caucho.log.Log;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.Port;
 import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
 import com.caucho.vfs.QServerSocket;
 
-import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
- * Defines a member of the cluster.
+ * Defines a member of the cluster, corresponds to <server> in the conf file.
  *
  * A {@link ServerConnector} obtained with {@link #getServerConnector} is used to actually
  * communicate with this ClusterServer when it is active in another instance of
