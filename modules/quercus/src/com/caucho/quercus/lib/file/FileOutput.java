@@ -34,21 +34,21 @@ import com.caucho.quercus.env.Value;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.LockableStream;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Represents a PHP open file
  */
-public class FileOutput extends AbstractBinaryOutput implements LockableStream {
+public class FileOutput extends AbstractBinaryOutput
+    implements LockableStream
+{
   private static final Logger log
     = Logger.getLogger(FileOutput.class.getName());
 
@@ -56,8 +56,6 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
   private Path _path;
   private WriteStream _os;
   private long _offset;
-  private FileLock _fileLock;
-  private RandomAccessFile _randomAccessFile;
 
   public FileOutput(Env env, Path path)
     throws IOException
@@ -160,34 +158,14 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
    */
   public void close()
   {
+    _env.removeClose(this);
+
     try {
-      _env.removeClose(this);
-      
       WriteStream os = _os;
       _os = null;
 
       if (os != null)
         os.close();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    try {
-      FileLock lock = _fileLock;
-      _fileLock = null;
-      
-      if (lock != null)
-        lock.release();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    try {
-      RandomAccessFile file = _randomAccessFile;
-      _randomAccessFile = null;
-      
-      if (file != null)
-        file.close();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -198,31 +176,7 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
    */
   public boolean lock(boolean shared, boolean block)
   {
-    if (! (getPath() instanceof FilePath))
-      return true;
-
-    try {
-      File file = ((FilePath) getPath()).getFile();
-
-      if (_randomAccessFile == null) {
-        _randomAccessFile = new RandomAccessFile(file, "rw");
-      }
-
-      FileChannel fileChannel = _randomAccessFile.getChannel();
-      
-      if (block)
-        _fileLock = fileChannel.lock(0, Long.MAX_VALUE, shared);
-      else 
-        _fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, shared);
-
-      return _fileLock != null;
-    } catch (OverlappingFileLockException e) {
-      return false;
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return false;
-    }
+    return _os.lock(shared, block);
   }
 
   /**
@@ -230,20 +184,7 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
    */
   public boolean unlock()
   {
-    try {
-      FileLock lock = _fileLock;
-      _fileLock = null;
-      
-      if (lock != null) {
-        lock.release();
-
-        return true;
-      }
-      else
-	return true;
-    } catch (IOException e) {
-      return false;
-    }
+    return _os.unlock();
   }
 
   public Value stat()

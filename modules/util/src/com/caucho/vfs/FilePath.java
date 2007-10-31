@@ -458,13 +458,13 @@ public class FilePath extends FilesystemPath {
 
   public StreamImpl openWriteImpl() throws IOException
   {
-    VfsStream os;
+    FileWriteStream fws = new FileWriteStream(
+      new FileOutputStream(getFile()),
+      this);
 
-    os = new VfsStream(null, new FileOutputStream(getFile()), this);
+    fws.setNewline(NEWLINE);
 
-    os.setNewline(NEWLINE);
-
-    return os;
+    return fws;
   }
 
   public StreamImpl openAppendImpl() throws IOException
@@ -478,11 +478,11 @@ public class FilePath extends FilesystemPath {
       fos = new FileOutputStream(getFile().toString());
     }
 
-    VfsStream os = new VfsStream(null, fos);
+    FileWriteStream fws = new FileWriteStream(fos);
 
-    os.setNewline(NEWLINE);
-    
-    return os;
+    fws.setNewline(NEWLINE);
+
+    return fws;
   }
 
   public StreamImpl openReadWriteImpl() throws IOException

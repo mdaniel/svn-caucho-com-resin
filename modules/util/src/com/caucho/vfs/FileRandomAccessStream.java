@@ -36,13 +36,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Reads from a file in a random-access fashion.
  */
-public class FileRandomAccessStream extends RandomAccessStream {
+public class FileRandomAccessStream extends RandomAccessStream
+    implements LockableStream
+{
+  private static final Logger log
+    = Logger.getLogger(FileRandomAccessStream.class.getName());
+
   private RandomAccessFile _file;
   private OutputStream _os;
   private InputStream _is;
+
+  private FileLock _fileLock;
+  private FileChannel _fileChannel;
 
   public FileRandomAccessStream(RandomAccessFile file)
   {
@@ -53,7 +67,7 @@ public class FileRandomAccessStream extends RandomAccessStream {
   {
     return _file;
   }
-  
+
   /**
    * Returns the length.
    */
@@ -191,10 +205,55 @@ public class FileRandomAccessStream extends RandomAccessStream {
    */
   public void close() throws IOException
   {
+    unlock();
+
+    _fileChannel = null;
+
     RandomAccessFile file = _file;
     _file = null;
 
     if (file != null)
       file.close();
   }
+
+  public boolean lock(boolean shared, boolean block)
+  {
+    unlock();
+
+    try {
+      if (_fileChannel == null) {
+        _fileChannel = _file.getChannel();
+      }
+
+      if (block)
+        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, shared);
+      else
+        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
+
+      return _fileLock != null;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
+  public boolean unlock()
+  {
+    try {
+      FileLock lock = _fileLock;
+      _fileLock = null;
+
+      if (lock != null) {
+        lock.release();
+
+        return true;
+      }
+
+      return false;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
 }

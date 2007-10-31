@@ -36,7 +36,9 @@ import java.io.OutputStream;
 /**
  * Reads from a file in a random-access fashion.
  */
-abstract public class RandomAccessStream {
+abstract public class RandomAccessStream
+  implements LockableStream
+{
   /**
    * Returns the length.
    */
@@ -115,5 +117,17 @@ abstract public class RandomAccessStream {
    */
   public void close() throws IOException
   {
+  }
+
+  // Placeholder for LockableStream implementation
+
+  public boolean lock(boolean shared, boolean block)
+  {
+    return true;
+  }
+
+  public boolean unlock()
+  {
+    return true;
   }
 }

@@ -45,6 +45,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.LockableStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1035,10 +1036,10 @@ public class FileModule extends AbstractQuercusModule {
     }
 
     boolean shared = false;
-    boolean block = false;
+    boolean block = true;
 
     if (operation > LOCK_NB) {
-      block = true;
+      block = false;
       operation -= LOCK_NB;
     }
 
@@ -1050,7 +1051,11 @@ public class FileModule extends AbstractQuercusModule {
         shared = false;
         break;
       case LOCK_UN:
-        return fileV.unlock();
+        // flock($fd, LOCK_UN) returns true even
+        // if no lock is held.
+
+        fileV.unlock();
+        return true;
       default:
         // This is PHP's behavior... 
         return true;

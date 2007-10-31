@@ -33,12 +33,26 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Stream encapsulating FileInputStream
  */
-public class FileReadStream extends StreamImpl {
+public class FileReadStream extends StreamImpl
+    implements LockableStream
+{
+  private static final Logger log
+    = Logger.getLogger(FileRandomAccessStream.class.getName());
+
   private FileInputStream _is;
-  
+
+  private FileLock _fileLock;
+  private FileChannel _fileChannel;
+
   /**
    * Create a new FileReadStream.
    */
@@ -159,10 +173,61 @@ public class FileReadStream extends StreamImpl {
    */
   public void close() throws IOException
   {
+    unlock();
+
+    _fileChannel = null;
+
     InputStream is = _is;
     _is = null;
     
     if (is != null)
       is.close();
   }
+
+  public boolean lock(boolean shared, boolean block)
+  {
+    unlock();
+
+    if (!shared) {
+      // Invalid request for an exclusive "write" lock on a read only stream.
+
+      return false;
+    }
+
+    try {
+      if (_fileChannel == null) {
+        _fileChannel = _is.getChannel();
+      }
+
+      if (block)
+        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, true);
+      else
+        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, true);
+
+      return _fileLock != null;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
+  public boolean unlock()
+  {
+    try {
+      FileLock lock = _fileLock;
+      _fileLock = null;
+
+      if (lock != null) {
+        lock.release();
+
+        return true;
+      }
+
+      return false;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
 }

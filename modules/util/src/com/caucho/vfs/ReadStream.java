@@ -55,7 +55,9 @@ import java.util.logging.Logger;
  * Specialized applications, like servers, need the capability of recycling
  * streams.
  */
-public final class ReadStream extends InputStream {
+public final class ReadStream extends InputStream
+    implements LockableStream
+{
   public static int ZERO_COPY_SIZE = 1024;
   
   private TempBuffer _tempRead;
@@ -1205,6 +1207,24 @@ public final class ReadStream extends InputStream {
   public String toString()
   {
     return "ReadStream[" + _source + "]";
+  }
+
+  public boolean lock(boolean shared, boolean block)
+  {
+    if (! (_source instanceof LockableStream))
+      return true;
+
+    LockableStream ls = (LockableStream) _source;
+    return ls.lock(shared, block);
+  }
+
+  public boolean unlock()
+  {
+    if (! (_source instanceof LockableStream))
+      return true;
+
+    LockableStream ls = (LockableStream) _source;
+    return ls.unlock();
   }
 
   public class StreamReader extends Reader {

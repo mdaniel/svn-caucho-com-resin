@@ -54,7 +54,9 @@ import java.util.Locale;
  * Specialized applications, like servers, need the capability of recycling
  * streams.
  */
-public class WriteStream extends OutputStreamWithBuffer {
+public class WriteStream extends OutputStreamWithBuffer
+    implements LockableStream
+{
   private static byte []lfBytes = new byte[] {'\n'};
   private static byte []crBytes = new byte[] {'\r'};
   private static byte []crlfBytes = new byte[] {'\r', '\n'};
@@ -1235,6 +1237,24 @@ public class WriteStream extends OutputStreamWithBuffer {
   {
     _sysNewline = newline;
     _sysNewlineBytes = _sysNewline.getBytes();
+  }
+
+  public boolean lock(boolean shared, boolean block)
+  {
+    if (! (_source instanceof LockableStream))
+      return true;
+
+    LockableStream ls = (LockableStream) _source;
+    return ls.lock(shared, block);
+  }
+
+  public boolean unlock()
+  {
+    if (! (_source instanceof LockableStream))
+      return true;
+
+    LockableStream ls = (LockableStream) _source;
+    return ls.unlock();
   }
 
   private class StreamWriter extends Writer

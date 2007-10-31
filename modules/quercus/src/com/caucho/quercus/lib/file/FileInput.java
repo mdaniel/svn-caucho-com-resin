@@ -33,25 +33,26 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.LockableStream;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.util.logging.*;
 
 /**
  * Represents a Quercus file open for reading
  */
-public class FileInput extends ReadStreamInput implements LockableStream {
+public class FileInput extends ReadStreamInput
+    implements LockableStream
+{
   private static final Logger log
     = Logger.getLogger(FileInput.class.getName());
 
   private Env _env;
   private Path _path;
-  private FileLock _fileLock;
-  private RandomAccessFile _randomAccessFile;
+
+  private ReadStream _is;
 
   public FileInput(Env env, Path path)
     throws IOException
@@ -64,7 +65,9 @@ public class FileInput extends ReadStreamInput implements LockableStream {
     
     _path = path;
 
-    init(path.openRead());
+    _is = path.openRead();
+
+    init(_is);
   }
 
   /**
@@ -120,29 +123,7 @@ public class FileInput extends ReadStreamInput implements LockableStream {
    */
   public boolean lock(boolean shared, boolean block)
   {
-    if (! (getPath() instanceof FilePath))
-      return true;
-
-    try {
-      File file = ((FilePath) getPath()).getFile();
-
-      if (_randomAccessFile == null) {
-        _randomAccessFile = new RandomAccessFile(file, "rw");
-      }
-
-      FileChannel fileChannel = _randomAccessFile.getChannel();
-      
-      if (block)
-        _fileLock = fileChannel.lock(0, Long.MAX_VALUE, shared);
-      else 
-        _fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, shared);
-
-      return _fileLock != null;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      
-      return false;
-    }
+    return _is.lock(shared, block);
   }
 
   /**
@@ -150,20 +131,7 @@ public class FileInput extends ReadStreamInput implements LockableStream {
    */
   public boolean unlock()
   {
-    try {
-      FileLock lock = _fileLock;
-      _fileLock = null;
-      
-      if (lock != null) {
-        lock.release();
-
-        return true;
-      }
-
-      return true;
-    } catch (IOException e) {
-      return false;
-    }
+    return _is.unlock();
   }
 
   public Value stat()
@@ -173,28 +141,8 @@ public class FileInput extends ReadStreamInput implements LockableStream {
 
   public void close()
   {
-    try {
-      _env.removeClose(this);
-      
-      FileLock lock = _fileLock;
-      _fileLock = null;
-      
-      if (lock != null)
-        lock.release();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    
-    try {
-      RandomAccessFile file = _randomAccessFile;
-      _randomAccessFile = null;
-      
-      if (file != null)
-        file.close();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    
+    _env.removeClose(this);
+
     super.close();
   }
 

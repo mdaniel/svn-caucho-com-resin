@@ -37,10 +37,9 @@ import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
 import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.LockableStream;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,9 +62,6 @@ public class FileInputOutput extends AbstractBinaryOutput
 
   private Reader _readEncoding;
   private String _readEncodingName;
-
-  private FileLock _fileLock;
-  private RandomAccessFile _randomAccessFile;
 
   private boolean _temporary;
 
@@ -365,27 +361,21 @@ public class FileInputOutput extends AbstractBinaryOutput
    */
   public void close()
   {
-    try {
-      _env.removeClose(this);
-      
-      _stream.close();
+    _env.removeClose(this);
 
-      if (_temporary)
-        _path.remove();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    
     try {
-      RandomAccessFile file = _randomAccessFile;
-      _randomAccessFile = null;
-      
-      if (file != null) {
-        file.close();
+      RandomAccessStream ras = _stream;
+      _stream = null;
+
+      if (ras != null) {
+        ras.close();
+
+        if (_temporary)
+          _path.remove();
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-    }
+    }    
   }
 
   /**
@@ -449,27 +439,7 @@ public class FileInputOutput extends AbstractBinaryOutput
    */
   public boolean lock(boolean shared, boolean block)
   {
-    if (! (getPath() instanceof FilePath))
-      return false;
-
-    try {
-      File file = ((FilePath) getPath()).getFile();
-
-      if (_randomAccessFile == null) {
-        _randomAccessFile = new RandomAccessFile(file, "rw");
-      }
-      
-      FileChannel fileChannel = _randomAccessFile.getChannel();
-
-      if (block)
-        _fileLock = fileChannel.lock(0, Long.MAX_VALUE, shared);
-      else 
-        _fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, shared);
-
-      return _fileLock != null;
-    } catch (IOException e) {
-      return false;
-    }
+    return _stream.lock(shared, block);
   }
 
   /**
@@ -477,17 +447,7 @@ public class FileInputOutput extends AbstractBinaryOutput
    */
   public boolean unlock()
   {
-    try {
-      if (_fileLock != null) {
-        _fileLock.release();
-
-        return true;
-      }
-
-      return false;
-    } catch (IOException e) {
-      return false;
-    }
+    return _stream.unlock();
   }
 
   public Value stat()
