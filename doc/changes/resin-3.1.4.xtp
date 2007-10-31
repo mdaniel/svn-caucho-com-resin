@@ -24,6 +24,12 @@ use the Resin 3.0.x branch.</p>
 
 </s1>
 
+<s1 title="Admin">
+
+<p>Added resin_admin_insecure to allow sites to require SSL for admin.</p>
+
+</s1>
+
 <s1 title="logging enhancements">
 
 <p>The logging timestamp now allows %{thread} and %{env}.</p>

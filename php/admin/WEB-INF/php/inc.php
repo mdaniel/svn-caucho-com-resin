@@ -172,14 +172,18 @@ function redirect($relative_url)
 {
   $uri = uri($relative_url);
 
-  header("Location: http://" . $_SERVER['HTTP_HOST'] . $uri);
+  $scheme = $_SERVER['HTTPS'] ? "https" : "http";
+
+  header("Location: $scheme://" . $_SERVER['HTTP_HOST'] . $uri);
 }
 
 function redirect_nocache($relative_url)
 {
   $uri = uri_nocache($relative_url);
 
-  header("Location: http://" . $_SERVER['HTTP_HOST'] . $uri);
+  $scheme = $_SERVER['HTTPS'] ? "https" : "http";
+
+  header("Location: $scheme://" . $_SERVER['HTTP_HOST'] . $uri);
 }
 
 if (is_null($target_uri))

@@ -102,7 +102,7 @@ public class HttpModule extends AbstractQuercusModule {
 	}
       }
 
-      int colonIndex  = header.indexOf(':');
+      int colonIndex = header.indexOf(':');
 
       if (colonIndex > 0) {
 	String key = header.substring(0, colonIndex).trim();

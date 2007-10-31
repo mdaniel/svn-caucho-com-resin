@@ -15,7 +15,7 @@
     <init>
       <resin:if test="${not empty(resin_admin_password)}">
         <user name="${resin_admin_user}"
-	      password="${resin_admin_password}" roles='read,write'/>
+	      password="${resin_admin_password}" roles="read,write"/>
       </resin:if>
     </init>
   </authenticator>
@@ -25,18 +25,22 @@
                         form-error-page='/login.php'/>
   </login-config>
 
-  <resin:if test="${! resin_admin_external}">
-    <security-constraint>
-      <web-resource-collection url-pattern="*.php"/>
+  <security-constraint>
+    <web-resource-collection url-pattern="*.php"/>
       
+    <resin:if test="${! resin_admin_external}">
       <ip-constraint>
         <allow>127.0.0.1</allow>
         <allow>192.168/16</allow>
       </ip-constraint>
+    </resin:if>
+      
+    <resin:if test="${! resin_admin_insecure}">
+      <user-data-constraint transport-guarantee="CONFIDENTIAL"/>
+    </resin:if>
     
-      <auth-constraint role-name="*"/>
-    </security-constraint>
-  </resin:if>
+    <auth-constraint role-name="admin"/>
+  </security-constraint>
 
   <servlet servlet-name="resin-php"
            servlet-class="com.caucho.quercus.servlet.QuercusServlet">

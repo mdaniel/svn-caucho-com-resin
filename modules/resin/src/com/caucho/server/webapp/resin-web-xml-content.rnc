@@ -905,20 +905,35 @@ r_secure =
 
 r_security-constraint =
   element security-constraint {
-    (r_display-name?,
-
-     r_web-resource-collection*,
-
-     (r_auth-constraint*
-
-      & r_user-data-constraint*
-
-      & r_ip-constraint*
-
-      & r_constraint*))
+    r_security-constraint-Content
 
     | (r_url-pattern, r_role-name*)
   }
+
+r_security-constraint-Content = r_security-constraint-Flow
+
+r_security-constraint-Flow =
+  r_security-constraint-Basis
+
+  & element rcore:if { rcore_if-Args, r_security-constraint-Flow }*
+
+  & element rcore:choose {
+      element rcore:when { rcore_when-Args, r_security-constraint-Flow }+,
+      element rcore:otherwise { r_security-constraint-Flow }?
+    }*
+
+r_security-constraint-Basis =
+    r_display-name?
+
+    & r_web-resource-collection*
+
+    & r_auth-constraint*
+
+    & r_user-data-constraint*
+
+    & r_ip-constraint*
+
+    & r_constraint*
 
 r_servlet = element servlet {
   r_description-Group

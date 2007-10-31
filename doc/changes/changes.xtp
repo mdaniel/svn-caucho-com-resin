@@ -12,7 +12,16 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
-<li>quercus: mysql_query error detection was not detecting connection close (#2138, rep by koreth)</li>
+<li>config should defer jsse-ssl for &lt;http> until server-specific startup (#2020, rep by Mike Wynholds)</li>
+<li>rewrite-dispatch secure='true' should affect sendRedirect (#1996, rep by Michael Wang)</li>
+<li>configure: updated config.guess to support ppc64 (#2114, rep by Tamas Perlaky)</li>
+<li>session: unserializable login principal should not be serialized (#2011, rep by K Fetterman)</li>
+<li>build: class cleanup (#2051, rep by koreth)</li>
+<li>build: split version from resin compilation (#2088, rep by koreth)</li>
+<li>resin-admin: added resin_admin_insecure, defaulting to true to require SSL (#2007)</li>
+<li>hessian: Java calendars not properly serialized (#2106, rep by rhodepc)</li>
+<li>Config schema validation could not handle spaces in path (#2117, rep by taylorc)</li>
+<li>(2007-10-30) quercus: mysql_query error detection was not detecting connection close (#2138, rep by koreth)</li>
 <li>LruCache removeTail synchronization issue (#2130, rep by Matthew Schmidt)</li>
 <li>quercus: fwrite for socket automatically flushes (#2120, rep by koreth)</li>
 <li>quercus: HashMap adapter wasn't properly implementing copy() for APC (#2121, rep by koreth)</li>

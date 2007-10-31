@@ -264,12 +264,16 @@ public class JavaDeserializer extends AbstractMapDeserializer {
   }
 
   protected Object instantiate()
-    throws Exception
+    throws IOException
   {
-    if (_constructor != null)
-      return _constructor.newInstance(_constructorArgs);
-    else
-      return _type.newInstance();
+    try {
+      if (_constructor != null)
+	return _constructor.newInstance(_constructorArgs);
+      else
+	return _type.newInstance();
+    } catch (Exception e) {
+      throw new HessianProtocolException("'" + _type.getName() + "' could not be instantiated", e);
+    }
   }
 
   /**

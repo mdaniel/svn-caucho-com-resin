@@ -29,7 +29,9 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.connection.*;
+import com.caucho.filters.*;
+import com.caucho.server.dispatch.*;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -47,15 +49,14 @@ public class SetFilterChain
   private final String _responseContentType;
   private String _responseCharacterEncoding;
 
-  public SetFilterChain(
-    String uri,
-    String queryString,
-    FilterChain accept,
-    FilterChainMapper nextFilterChainMapper,
-    String requestCharacterEncoding,
-    Boolean requestSecure,
-    String responseCharacterEncoding,
-    String responseContentType)
+  public SetFilterChain(String uri,
+			String queryString,
+			FilterChain accept,
+			FilterChainMapper nextFilterChainMapper,
+			String requestCharacterEncoding,
+			Boolean requestSecure,
+			String responseCharacterEncoding,
+			String responseContentType)
   {
     super(uri, queryString, accept, nextFilterChainMapper);
 
@@ -72,8 +73,21 @@ public class SetFilterChain
     if (_requestCharacterEncoding != null)
       request.setCharacterEncoding(_requestCharacterEncoding);
 
+    CauchoRequest oldRequest = null;
+    AbstractHttpResponse cauchoResponse = null;
     if (_requestSecure != null) {
-      request = new SecureServletRequestWrapper((HttpServletRequest) request);
+      CauchoRequest cauchoRequest
+	= new SecureServletRequestWrapper((HttpServletRequest) request);
+
+      if (response instanceof AbstractHttpResponse
+	  && cauchoRequest.getWebApp() != null) {
+	cauchoResponse = (AbstractHttpResponse) response;
+
+	oldRequest = cauchoResponse.getRequest();
+	cauchoResponse.setRequest(cauchoRequest);
+      }
+
+      request = cauchoRequest;
 
       request.setCharacterEncoding(_requestCharacterEncoding);
     }
@@ -84,20 +98,36 @@ public class SetFilterChain
     if (_responseContentType != null)
       response.setContentType(_responseContentType);
 
-    super.doFilter(request, response);
+    try {
+      super.doFilter(request, response);
+    } finally {
+      if (cauchoResponse != null && request != oldRequest)
+	cauchoResponse.setRequest(oldRequest);
+    }
   }
 
   private class SecureServletRequestWrapper
-    extends HttpServletRequestWrapper
+    extends RequestAdapter
   {
     public SecureServletRequestWrapper(HttpServletRequest request)
     {
-      super(request);
+      setRequest(request);
+
+      if (request instanceof CauchoRequest)
+	setWebApp(((CauchoRequest) request).getWebApp());
     }
 
     public boolean isSecure()
     {
       return _requestSecure;
+    }
+
+    /**
+     * Returns the request's scheme.
+     */
+    public String getScheme()
+    {
+      return isSecure() ? "https" : "http";
     }
   }
 }

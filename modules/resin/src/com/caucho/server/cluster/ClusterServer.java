@@ -325,23 +325,6 @@ public class ClusterServer {
   }
 
   /**
-   * Adds a http.
-   */
-  public Port createHttp()
-    throws ConfigException
-  {
-    Port port = new Port(this);
-    
-    HttpProtocol protocol = new HttpProtocol();
-    protocol.setParent(port);
-    port.setProtocol(protocol);
-
-    _ports.add(port);
-
-    return port;
-  }
-
-  /**
    * Adds a custom-protocol port.
    */
   public Port createProtocol()
@@ -352,6 +335,11 @@ public class ClusterServer {
     _ports.add(port);
 
     return port;
+  }
+
+  void addProtocolPort(Port port)
+  {
+    _ports.add(port);
   }
 
   /**

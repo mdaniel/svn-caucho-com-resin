@@ -247,7 +247,12 @@ public class SessionImpl implements HttpSession, CacheListener {
       return _user;
 
     if (_isValid) {
-      _user = (Principal) getAttribute(LOGIN);
+      Object user = getAttribute(LOGIN);
+
+      if (user instanceof Principal)
+	_user = (Principal) user;
+      else if (user instanceof LoginPrincipal)
+	_user = ((LoginPrincipal) user).getUser();
     }
 
     return _user;
@@ -260,7 +265,12 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     _user = user;
 
-    setAttribute(LOGIN, user);
+    if (user == null)
+      removeAttribute(LOGIN);
+    else if (user instanceof java.io.Serializable)
+      setAttribute(LOGIN, user);
+    else
+      setAttribute(LOGIN, new LoginPrincipal(user));
   }
 
   /**
@@ -1239,6 +1249,20 @@ public class SessionImpl implements HttpSession, CacheListener {
     LRU,
     TIMEOUT
   };
+
+  static class LoginPrincipal implements java.io.Serializable {
+    private transient Principal _user;
+
+    LoginPrincipal(Principal user)
+    {
+      _user = user;
+    }
+
+    public Principal getUser()
+    {
+      return _user;
+    }
+  }
 
   private static Comparator KEY_COMPARATOR = new Comparator() {
       public int compare(Object aObj, Object bObj)

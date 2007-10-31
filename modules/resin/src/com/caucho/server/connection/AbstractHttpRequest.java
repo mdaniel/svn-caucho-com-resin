@@ -30,7 +30,6 @@
 package com.caucho.server.connection;
 
 import com.caucho.i18n.CharacterEncoding;
-import com.caucho.log.Log;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.dispatch.DispatchServer;

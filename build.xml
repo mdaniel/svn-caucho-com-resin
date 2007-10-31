@@ -221,10 +221,7 @@
     </antcall>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util">
-
-    <!-- filter to insert version -->
-
+  <target name="version">
     <copy file="${modules}/resin/src/com/caucho/Version.tmpl"
           tofile="${modules}/resin/src/com/caucho/Version.java"
           preservelastmodified="true"
@@ -246,6 +243,9 @@
         <filter token="VERSION_DATE" value="${vdate}"/>
       </filterset>
     </copy>
+  </target>
+
+  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util, version">
 
     <!-- build module -->
 

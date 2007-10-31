@@ -110,7 +110,7 @@ resin.conf file.  To enable access to clients other than localhost:
 </p>
 
 <pre>
-  &lt;resin:set var="resin_admin_localhost" value="false"/&gt;
+  &lt;resin:set var="resin_admin_external" value="true"/&gt;
 </pre>
 
 <p>

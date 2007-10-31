@@ -57,6 +57,7 @@ import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.port.AbstractSelectManager;
+import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.resin.Resin;
@@ -185,11 +186,11 @@ public class Server extends ProtocolDispatchServer
         _hostContainer.setClassLoader(_classLoader);
         _hostContainer.setDispatchServer(this);
 
-	_clusterServer.getServerProgram().configure(this);
-
 	_admin = new ServerAdmin(this);
 	
 	_alarm = new Alarm(this);
+
+	_clusterServer.getServerProgram().configure(this);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -466,6 +467,23 @@ public class Server extends ProtocolDispatchServer
   public void setThreadIdleMax(int max)
   {
     _threadIdleMax = max;
+  }
+
+  /**
+   * Adds a http.
+   */
+  public Port createHttp()
+    throws ConfigException
+  {
+    Port port = new Port(_clusterServer);
+    
+    HttpProtocol protocol = new HttpProtocol();
+    protocol.setParent(port);
+    port.setProtocol(protocol);
+
+    _clusterServer.addProtocolPort(port);
+
+    return port;
   }
 
   //
@@ -1152,7 +1170,6 @@ public class Server extends ProtocolDispatchServer
         bindPorts();
 	startPorts();
       }
-
 
       _alarm.queue(ALARM_INTERVAL);
     } catch (RuntimeException e) {

@@ -31,7 +31,7 @@ display_header("login.php", $title, null);
 
 <?php
 
-$digest_username = "admin";
+$digest_username = null;
 
 include "digest.php";
 
@@ -61,7 +61,8 @@ to enable administration functionality.
 </p>
 
 <pre>
-  &lt;resin:set var="resin_admin_password"  value="<?= $digest ?>"/&gt;
+  &lt;resin:set var="resin_admin_user" value="<?= $digest_username ?>"/&gt;
+  &lt;resin:set var="resin_admin_password" value="<?= $digest ?>"/&gt;
 </pre>
 
 <p>
@@ -71,7 +72,7 @@ resin.conf file.  To enable access to clients other than localhost:
 </p>
 
 <pre>
-  &lt;resin:set var="resin_admin_localhost" value="false"/&gt;
+  &lt;resin:set var="resin_admin_external" value="true"/&gt;
 </pre>
 
 <p>

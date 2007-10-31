@@ -30,7 +30,7 @@ package com.caucho.server.security;
 
 import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.util.L10N;
 
@@ -57,11 +57,11 @@ public class FormLoginServlet extends GenericServlet {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    Application app = (Application) getServletContext();
+    WebApp app = (WebApp) getServletContext();
     FormLogin login;
 
     if (! (app.getLogin() instanceof FormLogin))
-      throw new ServletException(L.l("FormLoginServlet requires a form login auth-type configuration at `{0}'",
+      throw new ServletException(L.l("FormLoginServlet requires a form login auth-type configuration at '{0}'",
                                      app.getLogin().getAuthType()));
     login = (FormLogin) app.getLogin();
 
@@ -162,9 +162,10 @@ public class FormLoginServlet extends GenericServlet {
     // Most GETs will want a redirect.
     boolean useInternalForward = login.getInternalForward();
     
-    if (useInternalForward &&
-        uri.startsWith(uriPwd) && uri.indexOf('/', uriPwd.length() + 1) < 0) {
-      Application newApp = (Application) app.getContext(uri);
+    if (useInternalForward
+	&& uri.startsWith(uriPwd)
+	&& uri.indexOf('/', uriPwd.length() + 1) < 0) {
+      WebApp newApp = (WebApp) app.getContext(uri);
       String suffix = uri.substring(newApp.getContextPath().length());
       
       // force authorization of the page because the normal forward()
@@ -175,7 +176,7 @@ public class FormLoginServlet extends GenericServlet {
 	return;
       }
     }
-      
+    
     res.sendRedirect(res.encodeRedirectURL(uri));
   }
 }

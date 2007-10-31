@@ -116,8 +116,8 @@ public class FactoryFinder
 
   public static void setFactory(String factoryName, String implName)
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine("FactoryFinder[] setting '" + factoryName + "' to implementation '" + implName + "'");
+    if (log.isLoggable(Level.FINER))
+      log.finer("FactoryFinder[] setting '" + factoryName + "' to implementation '" + implName + "'");
     
     Class factoryClass = _factoryClassMap.get(factoryName);
     

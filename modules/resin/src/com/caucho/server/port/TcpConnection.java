@@ -104,7 +104,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
     String protocol = port.getProtocol().getProtocolName();
 
     if (port.getAddress() == null) {
-      String serverId = Resin.getLocal().getServerId();
+      Resin resin = Resin.getLocal();
+      String serverId = resin != null ? resin.getServerId() : null;
       if (serverId == null)
 	serverId = "";
       

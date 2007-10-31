@@ -685,8 +685,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     if (hostPrefix != null && ! hostPrefix.equals("")) {
     }
-    else if (serverName.startsWith("http:") ||
-             serverName.startsWith("https:"))
+    else if (serverName.startsWith("http:")
+	     || serverName.startsWith("https:"))
       hostPrefix = serverName;
     else if (host != null) {
       hostPrefix = _request.getScheme() + "://" + host;
@@ -694,8 +694,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else {
       hostPrefix = _request.getScheme() + "://" + serverName;
       
-      if (serverName.indexOf(':') < 0 &&
-	  port != 0 && port != 80 && port != 443)
+      if (serverName.indexOf(':') < 0
+	  && port != 0 && port != 80 && port != 443)
         hostPrefix += ":" + port;
     }
 

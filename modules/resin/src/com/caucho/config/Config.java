@@ -430,7 +430,7 @@ public class Config {
       if (url == null)
         return null;
       
-      Path path = Vfs.lookup(url.toString());
+      Path path = Vfs.lookup(URLDecoder.decode(url.toString()));
 
       // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
           

@@ -55,6 +55,8 @@ public class TransactionChain extends FilterCallChain {
   private JMethod _apiMethod;
   private JMethod _implMethod;
 
+  private JClass _businessInterface;
+
   private int _xaType;
 
   private boolean _isEJB3;
@@ -117,9 +119,14 @@ public class TransactionChain extends FilterCallChain {
     throws IOException
   {
     // ejb/0ff0 TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemote2
-    out.println("if (getServer().getContext() != null)");
-    out.println("  getServer().getContext().__caucho_setInvokedBusinessInterface(_businessInterface);");
-    out.println();
+    //out.println("if (getServer().getContext() != null)");
+    //out.println("  getServer().getContext().__caucho_setInvokedBusinessInterface(_businessInterface);");
+
+    if (_isEJB3 && _businessInterface != null) {
+      out.println("if (_context != null)");
+      out.println("  _context.__caucho_setInvokedBusinessInterface(" + _businessInterface.getName() + ");");
+      out.println();
+    }
 
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
