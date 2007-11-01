@@ -41,7 +41,7 @@
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31"
       description="%resin31serverTypeDescription"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-      behaviourClass="org.eclipse.jst.server.generic.resin.ResinServerBehaviour"
+      behaviourClass="com.caucho.eclipse.ResinServerBehaviour"
       name="%resin31serverTypeName"
       hasConfiguration="false"
       launchModes="run">        

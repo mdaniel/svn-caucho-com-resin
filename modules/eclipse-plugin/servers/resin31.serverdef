@@ -59,6 +59,7 @@
     <classpathReference>resin</classpathReference>
   </start>
 
+  <!-- this is not actually used, see ResinServerBehaviour#top(boolean) -->
   <stop>
     <mainClass>com.caucho.boot.ResinBoot</mainClass>
     <workingDirectory>${resinHome}</workingDirectory>
