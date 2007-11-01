@@ -59,6 +59,11 @@ public class XMLEventReaderImpl implements XMLEventReader {
     _next = _allocator.allocate(_in);
   }
 
+  public XMLStreamReader getXMLStreamReader()
+  {
+    return _in;
+  }
+
   public void close() 
     throws XMLStreamException
   {

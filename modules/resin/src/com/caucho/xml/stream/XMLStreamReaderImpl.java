@@ -247,7 +247,36 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public String getElementText() throws XMLStreamException
   {
-    return getText();
+    if (_current != START_ELEMENT)
+      throw new XMLStreamException(L.l("START_ELEMENT expected when calling getElementText()"));
+
+    StringBuilder sb = new StringBuilder();
+
+    for (int eventType = next(); eventType != END_ELEMENT; eventType = next()) {
+      switch (eventType) {
+        case CHARACTERS:
+        case CDATA:
+        case SPACE:
+        case ENTITY_REFERENCE:
+          sb.append(_cBuf, 0, _cBufLength);
+          break;
+
+        case PROCESSING_INSTRUCTION:
+        case COMMENT:
+          break;
+
+        case END_DOCUMENT:
+          throw new XMLStreamException(L.l("Document ended unexpectedly while reading element text"));
+
+        case START_ELEMENT:
+          throw new XMLStreamException(L.l("getElementText() encountered a START_ELEMENT; text only element expected"));
+
+        default:
+          throw new XMLStreamException(L.l("Unexpected event during getElementText(): {0}", eventType));
+      }
+    }
+
+    return sb.toString();
   }
 
   public String getEncoding()
@@ -847,7 +876,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
         int next = read();
         if (next == '>') {
           _processingInstructionTarget = target.toString();
-          _processingInstructionData = data.toString();
+          _processingInstructionData = data == null ? null : data.toString();
           return;
         }
         unread();

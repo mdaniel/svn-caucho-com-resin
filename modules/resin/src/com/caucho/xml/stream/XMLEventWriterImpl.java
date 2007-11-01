@@ -48,6 +48,11 @@ public class XMLEventWriterImpl implements XMLEventWriter {
     _out = out;
   }
 
+  public XMLStreamWriter getXMLStreamWriter()
+  {
+    return _out;
+  }
+
   public void add(XMLEvent event) throws XMLStreamException
   {
     // Order important: Namespace extends Attribute, so it comes first
