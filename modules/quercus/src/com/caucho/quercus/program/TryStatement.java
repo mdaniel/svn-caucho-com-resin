@@ -71,7 +71,7 @@ public class TryStatement extends Statement {
         Catch item = _catchList.get(i);
         
         if (value != null && value.isA(item.getId()) ||
-            value == null && item.getId().equals("Exception")) {
+            item.getId().equals("Exception")) {
           if (value != null)
             item.getExpr().evalAssign(env, value);
           else

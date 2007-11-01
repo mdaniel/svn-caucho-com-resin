@@ -620,7 +620,7 @@ public class QuercusClass {
   {
     for (int i = _classDefList.length - 1; i >= 0; i--) {
       if (_classDefList[i].isA(name))
-	return true;
+        return true;
     }
 
     return false;

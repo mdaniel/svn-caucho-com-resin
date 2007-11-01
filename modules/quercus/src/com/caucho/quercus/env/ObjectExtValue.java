@@ -63,6 +63,7 @@ public class ObjectExtValue extends ObjectValue
   private int _hashMask;
 
   private int _size;
+  private boolean _isFieldInit;
 
   public ObjectExtValue(QuercusClass cl)
   {
@@ -251,15 +252,22 @@ public class ObjectExtValue extends ObjectValue
       Value oldValue = putFieldExt(env, name, value);
 
       if (oldValue != null)
-	return oldValue;
+        return oldValue;
       
-      AbstractFunction fieldSet = _quercusClass.getFieldSet();
-    
-      if (fieldSet != null)
-        return fieldSet.callMethod(env, this, name, value);
-      else
-	entry = createEntry(name);
+      if (! _isFieldInit) {
+        AbstractFunction fieldSet = _quercusClass.getFieldSet();
+
+        if (fieldSet != null) {
+          _isFieldInit = true;
+          Value retVal = fieldSet.callMethod(env, this, name, value);
+          _isFieldInit = false;
+          
+          return retVal;
+        }
+      }
     }
+    
+    entry = createEntry(name);
 
     Value oldValue = entry._value;
 
@@ -289,21 +297,35 @@ public class ObjectExtValue extends ObjectValue
   {
     Entry entry = getEntry(name);
 
-    Value oldValue;
-    
     if (entry == null) {
-      oldValue = putFieldExt(env, name, value);
+      Value oldValue = putFieldExt(env, name, value);
 
       if (oldValue != null)
-	return oldValue;
+        return oldValue;
+      
+      if (! _isFieldInit) {
+        AbstractFunction fieldSet = _quercusClass.getFieldSet();
+    
+        if (fieldSet != null) {
+          //php/09k7
+          _isFieldInit = true;
+          
+          Value retVal = fieldSet.callMethod(env, this, name, value);
+          
+          _isFieldInit = false;
+          return retVal;
+        }
+      }
     }
     
     entry = createEntry(name);
 
-    oldValue = entry._value;
+    Value oldValue = entry._value;
 
     if (value instanceof Var) {
       Var var = (Var) value;
+
+      // for function return optimization
       var.setReference();
 
       entry._value = var;
