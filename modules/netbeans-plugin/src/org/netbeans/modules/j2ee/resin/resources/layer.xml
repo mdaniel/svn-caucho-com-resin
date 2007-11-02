@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.1//EN" "http://www.netbeans.org/dtds/filesystem-1_1.dtd">
+<filesystem>
+  <folder name="J2EE">
+    <folder name="DeploymentPlugins">
+      <folder name="ResinServer">
+        
+        <file name="Descriptor" url="nbdep.xml"/>
+        
+        <file name="Factory.instance">
+          <attr name="instanceCreate" methodvalue="org.netbeans.modules.j2ee.resin.ResinDeploymentFactory.create"/>
+          <attr name="instanceClass" stringvalue="org.netbeans.modules.j2ee.resin.ResinDeploymentFactory"/>
+          <attr name="instanceOf" stringvalue="javax.enterprise.deploy.spi.factories.DeploymentFactory"/>
+        </file>
+        
+        <file name="RegistryNodeFactory.instance">
+          <attr name="instanceClass" stringvalue="org.netbeans.modules.j2ee.resin.nodes.ResinRegistryNodeFactory"/>
+          <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.RegistryNodeFactory"/>
+        </file>
+        
+        <file name="J2eePlatformFactory.instance">
+          <attr name="instanceCreate" newvalue="org.netbeans.modules.j2ee.resin.ResinJ2eePlatformFactory"/>
+          <attr name="instanceClass" stringvalue="org.netbeans.modules.j2ee.resin.ResinJ2eePlatformFactory"/>
+          <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformFactory"/>
+        </file>
+        
+        <file name="OptionalFactory.instance">
+          <attr name="instanceCreate" newvalue="org.netbeans.modules.j2ee.resin.ResinOptionalFactory"/>
+          <attr name="instanceClass" stringvalue="org.netbeans.modules.j2ee.resin.ResinOptionalFactory"/>
+          <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.OptionalDeploymentManagerFactory"/>
+        </file>
+        
+        <file name="ConfigurationSupportImpl.instance">
+          <attr name="instanceCreate" newvalue="org.netbeans.modules.j2ee.resin.ConfigurationSupportImpl"/>
+          <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.ConfigurationSupport"/>
+        </file>
+        
+        <folder name="DeploymentFileNames">
+          <folder name="WAR">
+            <file name="WEB-INF\resin-web.xml"/>
+          </folder>
+        </folder>
+        
+      </folder>
+    </folder>
+    
+  </folder>
+</filesystem>
+

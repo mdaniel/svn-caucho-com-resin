@@ -26,19 +26,19 @@
  * @author Sam
  */
 
-package com.caucho.eclipse;
+package org.netbeans.modules.j2ee.resin;
 
-import org.eclipse.jst.server.generic.core.internal.GenericServerBehaviour;
+import java.util.logging.Logger;
+import javax.enterprise.deploy.spi.DeploymentManager;
+import org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformFactory;
+import org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformImpl;
 
-public class ResinServerBehaviour
-  extends GenericServerBehaviour
+public class ResinJ2eePlatformFactory extends J2eePlatformFactory
 {
+  private static final Logger log = Logger.getLogger(ResinJ2eePlatformFactory.class.getName());
 
-  public void stop(boolean force)
+  public J2eePlatformImpl getJ2eePlatformImpl(DeploymentManager dm)
   {
-    // change the default behaviour and always force the stop,
-    // which causes eclipse to just terminate the process and
-    // not run the <stop> defined in the serverdef file
-    super.stop(true);
+    return new ResinJ2eePlatformImpl();
   }
 }

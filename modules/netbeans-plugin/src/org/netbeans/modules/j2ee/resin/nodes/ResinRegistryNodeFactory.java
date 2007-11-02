@@ -26,19 +26,26 @@
  * @author Sam
  */
 
-package com.caucho.eclipse;
+package org.netbeans.modules.j2ee.resin.nodes;
 
-import org.eclipse.jst.server.generic.core.internal.GenericServerBehaviour;
+import java.util.logging.Logger;
+import org.netbeans.modules.j2ee.deployment.plugins.api.RegistryNodeFactory;
+import org.openide.nodes.Children;
+import org.openide.nodes.Node;
+import org.openide.util.Lookup;
 
-public class ResinServerBehaviour
-  extends GenericServerBehaviour
+public class ResinRegistryNodeFactory implements RegistryNodeFactory
 {
+  private static final Logger log = Logger.getLogger(ResinRegistryNodeFactory.class.getName());
 
-  public void stop(boolean force)
+  
+  public Node getTargetNode(Lookup lookup)
   {
-    // change the default behaviour and always force the stop,
-    // which causes eclipse to just terminate the process and
-    // not run the <stop> defined in the serverdef file
-    super.stop(true);
+    return null;
+  }
+  
+  public Node getManagerNode(Lookup lookup)
+  {
+    return new ResinInstanceNode(lookup);
   }
 }
