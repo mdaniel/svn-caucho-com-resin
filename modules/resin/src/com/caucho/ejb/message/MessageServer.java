@@ -280,10 +280,8 @@ public class MessageServer extends AbstractServer {
     Consumer()
       throws Exception
     {
-      if (_isContainerTransaction)
-        _context = new MessageDrivenContextImpl(MessageServer.this, _ut);
-      else
-        _context = new MessageDrivenContextImpl(MessageServer.this, null);
+      _context = new MessageDrivenContextImpl(MessageServer.this, _ut,
+					      _isContainerTransaction);
     }
 
     /**

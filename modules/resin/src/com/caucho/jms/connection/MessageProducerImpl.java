@@ -269,7 +269,7 @@ public class MessageProducerImpl implements MessageProducer {
 
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));
-    
+
     _session.send((AbstractDestination) destination,
 		  message,
 		  deliveryMode, priority,

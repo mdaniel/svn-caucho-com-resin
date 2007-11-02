@@ -107,10 +107,12 @@ public class EjbMessageBean extends EjbBean {
     
     Class ejbClass = getEJBClass();
 
-    if (! MessageDrivenBean.class.isAssignableFrom(ejbClass) &&
-	! isAllowPOJO())
+    // ejb/0987
+    /*
+    if (! MessageDrivenBean.class.isAssignableFrom(ejbClass)
+	&& ! isAllowPOJO())
       throw error(L.l("'{0}' must implement javax.ejb.MessageDrivenBean.  Every message-driven bean must implement MessageDrivenBean.", ejbClass.getName()));
-
+    */
 
     if (Modifier.isAbstract(ejbClass.getModifiers()))
       throw error(L.l("'{0}' must not be abstract.  Every message-driven bean must be a fully-implemented class.",
@@ -294,8 +296,10 @@ public class EjbMessageBean extends EjbBean {
     throws ConfigException
   {
     if (type.equals("Container")) {
+      _isContainerTransaction = true;
     }
     else if (type.equals("Bean")) {
+      _isContainerTransaction = false;
     }
     else
       throw new ConfigException(L.l("'{0}' is an unknown transaction-type.  transaction-type must be 'Bean' or 'Container'.", type));
@@ -365,7 +369,7 @@ public class EjbMessageBean extends EjbBean {
                       getEJBClass().getName(),
                       isAllowPOJO() ? "messaging-type" : "messageListenerInterface"));
 
-    J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
+    // J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
   }
 
   /**

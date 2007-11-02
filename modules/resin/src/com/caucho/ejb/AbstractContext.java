@@ -48,7 +48,8 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractContext implements EJBContext {
   protected static final L10N L = new L10N(AbstractContext.class);
-  protected static final Logger log = Log.open(AbstractContext.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractContext.class.getName());
 
   private boolean _isDead;
 
@@ -280,11 +281,11 @@ abstract public class AbstractContext implements EJBContext {
   }
 
   /**
-   * Looks up an object in the current JNDI context.
+   * Looks the timer service.
    */
   public TimerService getTimerService()
   {
-    throw new UnsupportedOperationException();
+    return getServer().getTimerService();
   }
 
   /**

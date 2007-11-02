@@ -40,6 +40,7 @@ import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.ejb.session.AbstractSessionObject;
 import com.caucho.ejb.session.SessionServer;
 import com.caucho.ejb.session.StatelessServer;
+import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.loader.DynamicClassLoader;
@@ -117,6 +118,8 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected long _transactionTimeout;
 
+  private TimerService _timerService;
+
   protected BuilderProgram _initProgram;
 
   private AroundInvokeConfig _aroundInvokeConfig;
@@ -134,6 +137,8 @@ abstract public class AbstractServer implements EnvironmentBean {
     _ejbManager = manager;
 
     _loader = new EnvironmentClassLoader(manager.getClassLoader());
+
+    _timerService = EjbTimerService.getLocal(manager.getClassLoader());
   }
 
   /**
@@ -536,6 +541,14 @@ abstract public class AbstractServer implements EnvironmentBean {
   public long getTransactionTimeout()
   {
     return _transactionTimeout;
+  }
+
+  /**
+   * Returns the timer service.
+   */
+  public TimerService getTimerService()
+  {
+    return _timerService;
   }
 
   /**

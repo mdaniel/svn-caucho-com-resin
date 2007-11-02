@@ -51,12 +51,16 @@ public class MessageDrivenContextImpl extends AbstractContext
 
   private MessageServer _server;
   private UserTransaction _ut;
+  private boolean _isContainerTransaction;
   private boolean _isRollbackOnly;
   
-  MessageDrivenContextImpl(MessageServer server, UserTransaction ut)
+  MessageDrivenContextImpl(MessageServer server,
+			   UserTransaction ut,
+			   boolean isContainerTransaction)
   {
     _server = server;
     _ut = ut;
+    _isContainerTransaction = isContainerTransaction;
   }
 
   protected AbstractServer getServer()
@@ -66,7 +70,7 @@ public class MessageDrivenContextImpl extends AbstractContext
 
   private boolean isCMT()
   {
-    return _ut != null;
+    return _isContainerTransaction;
   }
 
   /**
@@ -84,10 +88,10 @@ public class MessageDrivenContextImpl extends AbstractContext
   public UserTransaction getUserTransaction()
     throws IllegalStateException
   {
-    if (_ut != null)
-      return _ut;
-    else
-      throw new IllegalStateException(L.l("Message-driven beans may not use getUserTransaction()"));
+    if (isCMT())
+      throw new IllegalStateException(L.l("Container-managed message-driven beans may not use getUserTransaction()"));
+
+    return _ut;
   }
 
   /**
@@ -113,8 +117,6 @@ public class MessageDrivenContextImpl extends AbstractContext
       trans.setRollbackOnly();
     else
       throw new IllegalStateException("invalid transaction");
-    
-    _isRollbackOnly = true;
   }
 
   /**
@@ -123,7 +125,7 @@ public class MessageDrivenContextImpl extends AbstractContext
   public boolean getRollbackOnly()
     throws IllegalStateException
   {
-    if (isCMT())
+    if (! isCMT())
       throw new IllegalStateException("getRollbackOnly may not be called from a bean-managed transaction");
 
     TransactionContext trans = getServer().getTransaction();
@@ -131,6 +133,6 @@ public class MessageDrivenContextImpl extends AbstractContext
     if (trans == null)
       throw new IllegalStateException("getRollbackOnly requires a valid container-managed transaction");
     
-    return _isRollbackOnly;
+    return trans.getRollbackOnly();
   }
 }

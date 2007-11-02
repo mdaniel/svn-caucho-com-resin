@@ -837,7 +837,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     message.setJMSTimestamp(now);
     message.setJMSExpiration(expiration);
     message.setJMSPriority(priority);
-    
+
     if (_isTransacted) {
       if (_transactedMessages == null)
 	_transactedMessages = new ArrayList<TransactedMessage>();
@@ -859,9 +859,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
     else {
       if (log.isLoggable(Level.FINE))
-        log.fine(queue + " sending " + message);
+	log.fine(queue + " sending " + message);
       
-      queue.send(this, message, timeout);
+      queue.send(this, message, expiration);
     }
   }
 

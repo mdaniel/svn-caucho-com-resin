@@ -135,6 +135,7 @@ public class MemoryQueue extends AbstractQueue
           _readList.remove(i);
           msg.setJMSRedelivered(true);
           _queueList.add(msg);
+	  notifyMessageAvailable();
         }
       }
     }
