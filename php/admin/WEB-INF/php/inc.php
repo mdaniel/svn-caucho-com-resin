@@ -287,6 +287,12 @@ if ($script == "status.php") {
   ?><li><a href="status.php">Summary</a></li><?
 }
 
+if ($script == "config.php") {
+  ?><li class="selected">Config</li><?
+} else {
+  ?><li><a href="config.php">Config</a></li><?
+}
+
 if ($script == "thread.php") {
   ?><li class="selected">Threads</li><?
 } else {

@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>admin: add root-directory and uptime for web-app (#2043, rep by stbu)</li>
 <li>amber: hessian serialization for @OneToMany was incorrect (#2118, rep by Daniel Spangler)</li>
 <li>ProxyCacheMXBean.clearCacheByPattern (#2115, rep by B Youngblood)</li>
 <li>cache: change from uncacheable to cacheable was not properly detected (#2113, rep by paulberto)</li>

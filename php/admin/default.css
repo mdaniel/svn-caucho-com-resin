@@ -28,6 +28,10 @@ div.tab-container {
   position: relative;
 }
 
+div.section {
+  padding-left: 2em;
+}
+
 ul.status {
   border-bottom: 1px solid gray;
   list-style-type:none;

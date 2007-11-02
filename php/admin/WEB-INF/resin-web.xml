@@ -39,7 +39,7 @@
       <user-data-constraint transport-guarantee="CONFIDENTIAL"/>
     </resin:if>
     
-    <auth-constraint role-name="admin"/>
+    <auth-constraint role-name="*"/>
   </security-constraint>
 
   <servlet servlet-name="resin-php"
