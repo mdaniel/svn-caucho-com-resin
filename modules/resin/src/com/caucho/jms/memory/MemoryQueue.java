@@ -62,6 +62,8 @@ public class MemoryQueue extends AbstractQueue
     synchronized (_queueList) {
       _queueList.add(msg);
     }
+
+    notifyMessageAvailable();
   }
 
   /**

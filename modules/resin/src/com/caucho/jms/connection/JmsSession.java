@@ -857,8 +857,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
         }
       }
     }
-    else
-      queue.send(this, message, 0);
+    else {
+      if (log.isLoggable(Level.FINE))
+        log.fine(queue + " sending " + message);
+      
+      queue.send(this, message, timeout);
+    }
   }
 
   /**

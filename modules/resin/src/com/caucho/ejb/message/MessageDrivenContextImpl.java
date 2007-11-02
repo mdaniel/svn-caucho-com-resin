@@ -31,6 +31,7 @@ package com.caucho.ejb.message;
 
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.util.L10N;
 
 import javax.ejb.MessageDrivenContext;
@@ -61,6 +62,11 @@ public class MessageDrivenContextImpl extends AbstractContext
   protected AbstractServer getServer()
   {
     return _server;
+  }
+
+  private boolean isCMT()
+  {
+    return _ut != null;
   }
 
   /**
@@ -98,15 +104,17 @@ public class MessageDrivenContextImpl extends AbstractContext
   public void setRollbackOnly()
     throws IllegalStateException
   {
-    _isRollbackOnly = true;
-    /*
+    if (! isCMT())
+      throw new IllegalStateException("setRollbackOnly may not be called from a bean-managed transaction");
+
     TransactionContext trans = getServer().getTransaction();
 
     if (trans != null)
       trans.setRollbackOnly();
     else
       throw new IllegalStateException("invalid transaction");
-    */
+    
+    _isRollbackOnly = true;
   }
 
   /**
@@ -115,14 +123,14 @@ public class MessageDrivenContextImpl extends AbstractContext
   public boolean getRollbackOnly()
     throws IllegalStateException
   {
-    return _isRollbackOnly;
-    /*
+    if (isCMT())
+      throw new IllegalStateException("getRollbackOnly may not be called from a bean-managed transaction");
+
     TransactionContext trans = getServer().getTransaction();
 
-    if (trans != null)
-      trans.setRollbackOnly();
-    else
-      throw new IllegalStateException("invalid transaction");
-    */
+    if (trans == null)
+      throw new IllegalStateException("getRollbackOnly requires a valid container-managed transaction");
+    
+    return _isRollbackOnly;
   }
 }

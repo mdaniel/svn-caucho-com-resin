@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.xa.*;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.naming.Jndi;
@@ -210,7 +211,6 @@ public class MessageServer extends AbstractServer {
     }
     
     _connection.start();
-
   }
   
   void generate()
@@ -376,6 +376,7 @@ public class MessageServer extends AbstractServer {
     private MessageDrivenContextImpl _context;
     private UserTransaction _ut;
     private Session _session;
+    private EjbTransactionManager _xaManager;
 
     XAListener(MessageListener listener,
                MessageDrivenContextImpl context,
@@ -386,18 +387,26 @@ public class MessageServer extends AbstractServer {
       _context = context;
       _ut = ut;
       _session = session;
+
+      if (_ut != null)
+        _xaManager = _context.getServer().getTransactionManager();
     }
 
     public void onMessage(Message msg)
     {
       try {
-        _context.clearRollbackOnly();
+        _xaManager.beginRequired();
 
         try {
           _listener.onMessage(msg);
         } finally {
-          if (_context.getRollbackOnly())
+          Transaction xa = _xaManager.getTransaction();
+          
+          if (xa != null && xa.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
             _session.recover();
+          }
+          
+          _xaManager.commitTransaction();
         }
       } catch (RuntimeException e) {
         throw e;

@@ -604,6 +604,10 @@
   <target name="dist" depends="dist.build, dist.package"/>
   
   <target name="configure">
+     <exec executable="aclocal"/>
+     <exec executable="automake">
+        <arg line="-f -a -c"/>
+     </exec>
      <exec executable="autoconf"/>
   </target>
 

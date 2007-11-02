@@ -133,6 +133,8 @@ public class FileQueue extends AbstractQueue implements Topic
 
       entry.setMessage(msg);
     }
+
+    notifyMessageAvailable();
   }
 
   /**
