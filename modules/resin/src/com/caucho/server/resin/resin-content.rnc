@@ -324,6 +324,9 @@ r_openssl = element openssl {
   & (attribute cipher-suite { string }
      | element cipher-suite { r_string-Group })?
 
+  & (attribute crypto-device { string }
+     | element crypto-device { r_string-Group })?
+
   & (attribute password { string }
      | element password { r_string-Group })
 

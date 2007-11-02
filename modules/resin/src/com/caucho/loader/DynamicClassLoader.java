@@ -94,6 +94,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private JarLoader _jarLoader;
   private PathLoader _pathLoader;
 
+  private ArrayList<Path> _nativePath = new ArrayList<Path>();
+
   // List of cached classes
   private Hashtable<String,ClassEntry> _entryCache;
 
@@ -385,6 +387,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       addJar(pwd.lookup(url));
     }
+  }
+
+  /**
+   * Adds a native path.
+   */
+  public void addNative(Path path)
+  {
+    _nativePath.add(path);
   }
 
   /**
@@ -1616,6 +1626,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       if (path != null && path.canRead()) {
         return path.getNativePath();
       }
+    }
+
+    for (int i = 0; i < _nativePath.size(); i++) {
+      Path path = _nativePath.get(i);
+
+      if (path.canRead())
+	return path.getNativePath();
     }
 
     return super.findLibrary(name);

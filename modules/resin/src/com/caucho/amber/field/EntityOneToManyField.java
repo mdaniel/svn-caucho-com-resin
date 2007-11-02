@@ -348,7 +348,7 @@ public class EntityOneToManyField extends CollectionField {
     JType param = paramArgs.length > 0 ? paramArgs[0] : null;
     JType param2 = paramArgs.length > 1 ? paramArgs[1] : null;
 
-    out.print("protected ");
+    out.print("protected transient ");
 
     String collectionImpl;
 
@@ -403,14 +403,7 @@ public class EntityOneToManyField extends CollectionField {
 
     out.println();
     out.println("com.caucho.amber.AmberQuery query = null;");
-
-    out.println();
-    out.println("try {");
-    out.pushDepth();
-
-    out.println("if (__caucho_session == null) {");
-    out.pushDepth();
-
+    
     String newEmptyCollection = "new " + collectionImpl;
 
     if (param != null) {
@@ -444,12 +437,23 @@ public class EntityOneToManyField extends CollectionField {
     }
     newEmptyCollection += ")";
 
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
+    out.println("if (__caucho_session == null) {");
+    out.pushDepth();
+
+    /*
     out.println("if (" + var + " == null)");
     out.println("  " + var + " = " + newEmptyCollection + ";");
 
     // if (! isAbstract())
     out.println();
     out.println("return " + var + ";");
+    */
+    
+    out.println("return " + generateSuperGetter() + ";");
 
     out.popDepth();
     out.println("}");
@@ -511,6 +515,9 @@ public class EntityOneToManyField extends CollectionField {
       out.println(")");
       out.println("  __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) o);");
     }
+
+    // jpa/0j70
+    out.println(generateSuperSetter(var) + ";");
 
     out.println();
     out.println("return " + var + ";");
@@ -632,6 +639,13 @@ public class EntityOneToManyField extends CollectionField {
     //
     // jpa/0j57:
 
+    out.println("if (__caucho_session == null) {");
+    out.pushDepth();
+    out.println(generateSuperSetter("value") + ";");
+    out.popDepth();
+    out.println("} else {");
+    out.pushDepth();
+    
     out.println("try {");
     out.pushDepth();
 
@@ -708,6 +722,9 @@ public class EntityOneToManyField extends CollectionField {
     out.popDepth();
     out.println("} catch(Exception e) {");
     out.println("  throw com.caucho.amber.AmberRuntimeException.create(e);");
+    out.println("}");
+
+    out.popDepth();
     out.println("}");
 
     out.popDepth();

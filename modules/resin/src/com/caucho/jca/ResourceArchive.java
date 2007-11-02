@@ -56,9 +56,10 @@ import java.util.zip.ZipInputStream;
 /**
  * A resource archive (rar)
  */
-public class ResourceArchive implements EnvironmentBean {
+public class ResourceArchive implements EnvironmentBean
+{
   static final L10N L = new L10N(ResourceArchive.class);
-  static final Logger log = Log.open(ResourceArchive.class);
+  static final Logger log = Logger.getLogger(ResourceArchive.class.getName());
 
   private ClassLoader _loader;
   
@@ -194,6 +195,7 @@ public class ResourceArchive implements EnvironmentBean {
 	throw new ConfigException(L.l("loader issues with resource adapter"));
 
       addJars((DynamicClassLoader) loader, _rootDir);
+      addNative((DynamicClassLoader) loader, _rootDir);
       
       Path raXml = _rootDir.lookup("META-INF/ra.xml");
 
@@ -231,6 +233,28 @@ public class ResourceArchive implements EnvironmentBean {
 
       for (int i = 0; i < list.length; i++)
 	addJars(loader, path.lookup(list[i]));
+    }
+  }
+
+  /**
+   * Adds the native paths from the rar file to the class loader.
+   */
+  private void addNative(DynamicClassLoader loader, Path path)
+    throws IOException
+  {
+    String fileName = path.getPath();
+
+    if (fileName.endsWith(".so")
+	|| fileName.endsWith(".dll")
+	|| fileName.endsWith(".jnilib")) {
+      loader.addNative(path);
+    }
+    
+    else if (path.isDirectory()) {
+      String []list = path.list();
+
+      for (int i = 0; i < list.length; i++)
+	addNative(loader, path.lookup(list[i]));
     }
   }
 

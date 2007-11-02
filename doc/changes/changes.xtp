@@ -12,6 +12,11 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>amber: hessian serialization for @OneToMany was incorrect (#2118, rep by Daniel Spangler)</li>
+<li>ProxyCacheMXBean.clearCacheByPattern (#2115, rep by B Youngblood)</li>
+<li>cache: change from uncacheable to cacheable was not properly detected (#2113, rep by paulberto)</li>
+<li>ssl: added crypto-device to openssl (#2046, rep by V Vyas)</li>
+<li>JCA .rar wasn't loading native libraries (#1846, rep by Ray Cromwell)</li>
 <li>config should defer jsse-ssl for &lt;http> until server-specific startup (#2020, rep by Mike Wynholds)</li>
 <li>rewrite-dispatch secure='true' should affect sendRedirect (#1996, rep by Michael Wang)</li>
 <li>configure: updated config.guess to support ppc64 (#2114, rep by Tamas Perlaky)</li>

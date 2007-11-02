@@ -44,13 +44,14 @@ import java.util.Iterator;
  * Represents a lazy collection.
  */
 public class CollectionImpl<E> extends AbstractList<E>
-  implements AmberCollection {
-  private AmberQuery _query;
+  implements AmberCollection
+{
+  private transient AmberQuery _query;
 
-  private AmberConnection _aConn;
+  private transient AmberConnection _aConn;
 
   private ArrayList<E> _values = new ArrayList<E>();
-  private long _expireTime;
+  private transient long _expireTime;
 
   public CollectionImpl(AmberConnection aConn, String query)
   {
@@ -201,6 +202,11 @@ public class CollectionImpl<E> extends AbstractList<E>
     } catch (SQLException e) {
       throw new AmberRuntimeException(e);
     }
+  }
+
+  private Object writeReplace()
+  {
+    return _values;
   }
 
   class ValuesIterator implements Iterator {

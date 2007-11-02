@@ -264,7 +264,7 @@ public class JavaDeserializer extends AbstractMapDeserializer {
   }
 
   protected Object instantiate()
-    throws IOException
+    throws Exception
   {
     try {
       if (_constructor != null)

@@ -36,6 +36,7 @@ public class CacheItem implements java.io.Serializable
 {
   private String _url;
 
+  private boolean _isCacheable;
   private long _hitCount;
   private long _missCount;
 
@@ -51,6 +52,16 @@ public class CacheItem implements java.io.Serializable
   public void setUrl(String url)
   {
     _url = url;
+  }
+  
+  public boolean isCacheable()
+  {
+    return _isCacheable;
+  }
+  
+  public void setCacheable(boolean isCacheable)
+  {
+    _isCacheable = isCacheable;
   }
 
   public long getHitCount()

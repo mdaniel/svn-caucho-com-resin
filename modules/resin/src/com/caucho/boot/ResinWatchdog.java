@@ -568,7 +568,7 @@ public class ResinWatchdog extends AbstractManagedObject
         Process process = createProcess(pwd, resinHome, rootDirectory,
                                         port, jvmOut);
 
-	ss.setSoTimeout(60000);
+	ss.setSoTimeout(120000);
 
 	Socket s = null;
 	try {

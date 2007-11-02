@@ -64,6 +64,8 @@ public class JavaSerializer extends AbstractSerializer
 {
   private static final Logger log
     = Logger.getLogger(JavaSerializer.class.getName());
+
+  private static Object []NULL_ARGS = new Object[0];
   
   private Field []_fields;
   private FieldSerializer []_fieldSerializers;
@@ -83,16 +85,16 @@ public class JavaSerializer extends AbstractSerializer
       for (int i = 0; i < fields.length; i++) {
 	Field field = fields[i];
 
-	if (Modifier.isTransient(field.getModifiers()) ||
-	    Modifier.isStatic(field.getModifiers()))
+	if (Modifier.isTransient(field.getModifiers())
+	    || Modifier.isStatic(field.getModifiers()))
 	  continue;
 
 	// XXX: could parameterize the handler to only deal with public
 	field.setAccessible(true);
 
-	if (field.getType().isPrimitive() ||
-	    field.getType().getName().startsWith("java.lang.") &&
-	    ! field.getType().equals(Object.class))
+	if (field.getType().isPrimitive()
+	    || (field.getType().getName().startsWith("java.lang.")
+		&& ! field.getType().equals(Object.class)))
 	  primitiveFields.add(field);
 	else
 	  compoundFields.add(field);
@@ -116,7 +118,7 @@ public class JavaSerializer extends AbstractSerializer
   /**
    * Returns the writeReplace method
    */
-  protected Method getWriteReplace(Class cl)
+  static Method getWriteReplace(Class cl)
   {
     for (; cl != null; cl = cl.getSuperclass()) {
       Method []methods = cl.getDeclaredMethods();
@@ -124,8 +126,8 @@ public class JavaSerializer extends AbstractSerializer
       for (int i = 0; i < methods.length; i++) {
 	Method method = methods[i];
 
-	if (method.getName().equals("writeReplace") &&
-	    method.getParameterTypes().length == 0)
+	if (method.getName().equals("writeReplace")
+	    && method.getParameterTypes().length == 0)
 	  return method;
       }
     }
@@ -141,10 +143,10 @@ public class JavaSerializer extends AbstractSerializer
     }
     
     Class cl = obj.getClass();
-    
+
     try {
       if (_writeReplace != null) {
-	Object repl = _writeReplace.invoke(obj, new Object[0]);
+	Object repl = _writeReplace.invoke(obj, NULL_ARGS);
 
 	out.removeRef(obj);
 

@@ -49,6 +49,7 @@
 package com.caucho.hessian.io;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -56,7 +57,8 @@ import java.util.Iterator;
 /**
  * Serializing a JDK 1.2 Collection.
  */
-public class CollectionSerializer extends AbstractSerializer {
+public class CollectionSerializer extends AbstractSerializer
+{
   private boolean _sendJavaType = true;
 
   /**
@@ -74,7 +76,6 @@ public class CollectionSerializer extends AbstractSerializer {
   {
     return _sendJavaType;
   }
-
     
   public void writeObject(Object obj, AbstractHessianOutput out)
     throws IOException
@@ -87,7 +88,9 @@ public class CollectionSerializer extends AbstractSerializer {
     Class cl = obj.getClass();
     boolean hasEnd;
     
-    if (cl.equals(ArrayList.class) || ! _sendJavaType)
+    if (cl.equals(ArrayList.class)
+	|| ! _sendJavaType
+	|| ! Serializable.class.isAssignableFrom(cl))
       hasEnd = out.writeListBegin(list.size(), null);
     else
       hasEnd = out.writeListBegin(list.size(), obj.getClass().getName());
