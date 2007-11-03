@@ -267,8 +267,8 @@ public class EjbTransactionManager implements java.io.Serializable {
 
       // If this is within the same EJB transaction, just bump
       // the count
-      if (oldCxt != null && oldTrans != null &&
-          oldCxt.getTransaction() == oldTrans) {
+      if (oldCxt != null && oldTrans != null
+          && oldCxt.getTransaction() == oldTrans) {
         oldCxt.pushDepth();
         return oldCxt;
       }

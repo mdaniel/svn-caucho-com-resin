@@ -35,6 +35,7 @@ import javax.jms.*;
 
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
+import com.caucho.jms.memory.*;
 
 import com.caucho.util.*;
 
@@ -52,6 +53,14 @@ public class DestinationHandle implements Destination, java.io.Serializable
   public DestinationHandle(String name)
   {
     _name = name;
+  }
+
+  public Object readResolve()
+  {
+    MemoryQueue queue = new MemoryQueue();
+    queue.setName(_name);
+    
+    return queue;
   }
 
   public String toString()

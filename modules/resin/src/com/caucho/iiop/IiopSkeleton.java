@@ -49,6 +49,8 @@ public class IiopSkeleton extends DummyObjectImpl {
   private ClassLoader _loader;
   private Class _remoteClass;
   private ArrayList<Class> _apiList;
+  private HashMap<String,SkeletonMethod> _methodMap
+    = new HashMap<String,SkeletonMethod>();
 
   private Object _obj;
 
@@ -64,6 +66,8 @@ public class IiopSkeleton extends DummyObjectImpl {
     _apiList = apiList;
     _remoteClass = _apiList.get(0);
     _loader = loader;
+
+    introspectMethods();
   }
 
   Object getObject()
@@ -87,10 +91,9 @@ public class IiopSkeleton extends DummyObjectImpl {
     if (log.isLoggable(Level.FINE))
       log.fine("IIOP-call: " + _remoteClass.getName() + "." + op);
 
-    if ((method = getMethod(op)) != null) {
-      boolean isJava = ! _remoteClass.getName().startsWith("com.caucho.iiop");
-
-      skelMethod = new SkeletonMethod(this, method, isJava);
+    skelMethod = _methodMap.get(op);
+    
+    if (skelMethod != null) {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
       try {
@@ -120,6 +123,54 @@ public class IiopSkeleton extends DummyObjectImpl {
     }
 
     return null;
+  }
+
+  private void introspectMethods()
+  {
+    for (int j = 0; j < _apiList.size(); j++) {
+      Method []methods = _apiList.get(j).getMethods();
+
+      for (int i = 0; i < methods.length; i++) {
+        introspectMethod(methods[i]);
+      }
+    }
+  }
+
+  private void introspectMethod(Method method)
+  {
+    boolean isJava = ! _remoteClass.getName().startsWith("com.caucho.iiop");
+
+    SkeletonMethod skelMethod = new SkeletonMethod(this, method, isJava);
+
+    _methodMap.put(method.getName(), skelMethod);
+    _methodMap.put(mangle(method), skelMethod);
+  }
+
+  public static String mangle(Method method)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(method.getName());
+    sb.append("__");
+
+    Class []args = method.getParameterTypes();
+    for (int i = 0; i < args.length; i++) {
+      Class arg = args[i];
+
+      if (i > 0)
+        sb.append("__");
+
+      if (String.class.equals(arg))
+        sb.append("CORBA_WStringValue");
+      else if (int.class.equals(arg))
+        sb.append("long");
+      else if (long.class.equals(arg))
+        sb.append("longlong");
+      else
+        sb.append(arg.getName().replace('.', '_'));
+    }
+
+    return sb.toString();
   }
 
   boolean serviceSystemMethod(Object obj, String op, IiopReader reader, IiopWriter writer)

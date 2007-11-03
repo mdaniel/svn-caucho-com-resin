@@ -43,16 +43,22 @@ import com.caucho.iiop.RemoteUserException;
  */
 public class MethodMarshal {
   private String _name;
+  private String _overloadName;
   private Marshal []_args;
   private Marshal _ret;
 
   private Class []_exceptionTypes;
   private Method _method;
 
-  MethodMarshal(MarshalFactory factory, Method method)
+  MethodMarshal(MarshalFactory factory, Method method, Class cl)
   {
     _method = method;
     _name = method.getName();
+
+    if (isOverload(method, cl))
+      _overloadName = IiopSkeleton.mangle(method);
+    else
+      _overloadName = _name;
 
     Class []params = method.getParameterTypes();
 
@@ -80,6 +86,17 @@ public class MethodMarshal {
     exnList.toArray(_exceptionTypes);
   }
 
+  private boolean isOverload(Method method, Class cl)
+  {
+    for (Method declMethod : cl.getMethods()) {
+      if (method.getName().equals(declMethod.getName())
+          && ! method.equals(declMethod))
+        return true;
+    }
+
+    return false;
+  }
+
   public Object invoke(org.omg.CORBA.portable.ObjectImpl obj,
                        Object []args)
     throws Throwable
@@ -88,7 +105,7 @@ public class MethodMarshal {
 
     try {
       org.omg.CORBA_2_3.portable.OutputStream os
-        = ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_name, true));
+        = ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_overloadName, true));
 
       // ejb/1331
       if (_args.length > 0)

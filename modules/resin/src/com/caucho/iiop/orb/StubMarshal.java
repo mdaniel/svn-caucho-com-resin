@@ -58,7 +58,7 @@ public class StubMarshal {
       if (method.getDeclaringClass().equals(org.omg.CORBA.Object.class))
 	continue;
 
-      _methodMap.put(method, new MethodMarshal(factory, method));
+      _methodMap.put(method, new MethodMarshal(factory, method, cl));
     }
   }
 

@@ -43,6 +43,7 @@ import javax.ejb.MessageDrivenContext;
 import javax.jms.*;
 import javax.naming.*;
 import javax.transaction.*;
+import javax.transaction.xa.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -312,7 +313,7 @@ public class MessageServer extends AbstractServer {
 
       // XXX: ejb/090c
       // XXX: doesn't seem to be properly handling the sessions
-      boolean transacted = false; 
+      boolean transacted = false;
 
       _session = _connection.createSession(transacted, _acknowledgeMode);
 
@@ -329,10 +330,13 @@ public class MessageServer extends AbstractServer {
       }
 
       if (_isContainerTransaction) {
+        XAResource xaResource = ((XASession) _session).getXAResource();
+        
         _consumer.setMessageListener(new XAListener(_listener,
                                                     _context,
                                                     _ut,
-                                                    _session));
+                                                    _session,
+                                                    xaResource));
       }
       else
         _consumer.setMessageListener(_listener);
@@ -374,17 +378,20 @@ public class MessageServer extends AbstractServer {
     private MessageDrivenContextImpl _context;
     private UserTransaction _ut;
     private Session _session;
+    private XAResource _xaResource;
     private EjbTransactionManager _xaManager;
 
     XAListener(MessageListener listener,
                MessageDrivenContextImpl context,
                UserTransaction ut,
-               Session session)
+               Session session,
+               XAResource xaResource)
     {
       _listener = listener;
       _context = context;
       _ut = ut;
       _session = session;
+      _xaResource = xaResource;
 
       if (_ut != null)
         _xaManager = _context.getServer().getTransactionManager();
@@ -393,18 +400,24 @@ public class MessageServer extends AbstractServer {
     public void onMessage(Message msg)
     {
       try {
-        _xaManager.beginRequired();
+        TransactionContext xa = _xaManager.beginRequired();
+        Transaction trans = xa.getTransaction();
 
+        if (trans != null)
+          trans.enlistResource(_xaResource);
+        
         try {
           _listener.onMessage(msg);
         } finally {
-          Transaction xa = _xaManager.getTransaction();
+          if (trans != null)
+            trans.delistResource(_xaResource, 0);
           
-          if (xa != null && xa.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
+          /*
+          if (xa.getRollbackOnly())
             _session.recover();
-          }
+          */
           
-          _xaManager.commitTransaction();
+          xa.commit();
         }
       } catch (RuntimeException e) {
         throw e;

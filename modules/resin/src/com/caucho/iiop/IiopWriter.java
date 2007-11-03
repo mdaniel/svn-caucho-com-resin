@@ -540,7 +540,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     // XXX: check for remote object
     write_boolean(false);
 
-    if (obj instanceof Serializable)
+    if (obj instanceof Serializable || obj == null)
       write_value((Serializable) obj);
     else
       write_value(((IiopProxyHandler) obj).getStub());

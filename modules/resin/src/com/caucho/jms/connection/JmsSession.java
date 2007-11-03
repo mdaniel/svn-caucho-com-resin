@@ -59,6 +59,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   private static final long SHUTDOWN_WAIT_TIME = 10000;
 
   private boolean _isXA;
+  private Xid _xid;
   private TransactionManager _tm;
   
   private boolean _isTransacted;
@@ -97,16 +98,6 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     _connection = connection;
 
     _isXA = isXA;
-
-    if (isTransacted) {
-      try {
-        InitialContext ic = new InitialContext();
-        
-        _tm = (TransactionManager) ic.lookup("java:comp/TransactionManager");
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
-    }
     
     _isTransacted = isTransacted;
     _acknowledgeMode = ackMode;
@@ -121,13 +112,27 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 	_acknowledgeMode = ackMode;
 	break;
       default:
-        // XXX: tck
-        // throw new JMSException(L.l("{0} is an illegal acknowledge mode", ackMode));
-	log.warning(L.l("JmsSession {0} is an illegal acknowledge mode",
-                        ackMode));
-        _acknowledgeMode = AUTO_ACKNOWLEDGE;
+        try {
+          log.warning(L.l("JmsSession {0} is an illegal acknowledge mode",
+                          ackMode));
+          // XXX: tck
+          // throw new JMSException(L.l("{0} is an illegal acknowledge mode", ackMode));
+          log.warning(L.l("JmsSession {0} is an illegal acknowledge mode",
+                          ackMode));
+          _acknowledgeMode = AUTO_ACKNOWLEDGE;
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
         break;
       }
+    }
+
+    try {
+      InitialContext ic = new InitialContext();
+        
+      _tm = (TransactionManager) ic.lookup("java:comp/TransactionManager");
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
     }
     
     _connection.addSession(this);
@@ -637,6 +642,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   public void commit()
     throws JMSException
   {
+    checkOpen();
+    
     commit(false);
   }
   
@@ -646,12 +653,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   private void commit(boolean isXA)
     throws JMSException
   {
-    if (! isXA)
-      checkOpen();
+    _xid = null;
 
-    if (! _isTransacted)
+    if (! _isTransacted && ! _isXA)
       throw new IllegalStateException(L.l("commit() can only be called on a transacted session."));
 
+    _isXA = false;
 
     ArrayList<TransactedMessage> messages = _transactedMessages;
     if (messages != null) {
@@ -721,9 +728,18 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   {
     checkOpen();
 
-    if (! _isTransacted)
+    rollbackImpl();
+  }
+  
+  /**
+   * Rollsback the messages.
+   */
+  public void rollbackImpl()
+    throws JMSException
+  {
+    if (! _isTransacted && ! _isXA)
       throw new IllegalStateException(L.l("rollback() can only be called on a transacted session."));
-    
+
     if (_transactedMessages != null) {
       for (int i = 0; i < _transactedMessages.size(); i++)
 	_transactedMessages.get(i).rollback();
@@ -748,7 +764,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
 
     ArrayList<TransactedMessage> messages = _transactedMessages;
-    if (messages != null) {
+    
+    if (messages != null && _xid == null) {
+      _transactedMessages = null;
+      
       try {
 	for (int i = 0; i < messages.size(); i++) {
 	  messages.get(i).close();
@@ -832,13 +851,24 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     long expiration = now + timeout;
 
     message.setJMSMessageID(queue.generateMessageID());
-    message.setJMSDestination(queue.getJMSDestination());
+    if (message.getJMSDestination() == null)
+      message.setJMSDestination(queue);
     message.setJMSDeliveryMode(deliveryMode);
-    message.setJMSTimestamp(now);
-    message.setJMSExpiration(expiration);
+    if (message.getJMSTimestamp() == 0)
+      message.setJMSTimestamp(now);
+    if (message.getJMSExpiration() == 0)
+      message.setJMSExpiration(expiration);
     message.setJMSPriority(priority);
 
-    if (_isTransacted) {
+    boolean isXA = false;
+    try {
+      if (_tm != null && _tm.getTransaction() != null)
+        isXA = true;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    
+    if (_isTransacted || isXA) {
       if (_transactedMessages == null)
 	_transactedMessages = new ArrayList<TransactedMessage>();
 
@@ -846,22 +876,42 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       
       _transactedMessages.add(transMsg);
 
-      if (_tm != null && _transactedMessages.size() == 1) {
-        try {
-          Transaction trans = _tm.getTransaction();
-
-          if (trans != null)
-            trans.enlistResource(this);
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      }
+      if (_xid == null)
+        enlist();
     }
     else {
       if (log.isLoggable(Level.FINE))
 	log.fine(queue + " sending " + message);
       
       queue.send(this, message, expiration);
+    }
+  }
+
+  private void enlist()
+  {
+    if (_tm != null) {
+      try {
+        Transaction trans = _tm.getTransaction();
+
+        if (trans != null)
+          trans.enlistResource(this);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  private void delist()
+  {
+    if (_tm != null) {
+      try {
+        Transaction trans = _tm.getTransaction();
+
+        if (trans != null)
+          trans.delistResource(this, 0);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
@@ -881,14 +931,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     _transactedMessages.add(transMsg);
 
     if (_tm != null && _transactedMessages.size() == 1) {
-      try {
-	Transaction trans = _tm.getTransaction();
-
-	if (trans != null)
-	  trans.enlistResource(this);
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
+      enlist();
     }
   }
 
@@ -997,6 +1040,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   public void start(Xid xid, int flags)
     throws XAException
   {
+    _isXA = true;
+    _xid = xid;
   }
   
   /**
@@ -1005,6 +1050,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   public void end(Xid xid, int flags)
     throws XAException
   {
+    _xid = null;
   }
   
   /**
@@ -1026,6 +1072,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       commit(true);
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      delist();
+      _isXA = false;
     }
   }
   
@@ -1036,9 +1085,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     throws XAException
   {
     try {
-      rollback();
+      rollbackImpl();
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      delist();
+      _isXA = false;
     }
   }
   

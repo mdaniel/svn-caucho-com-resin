@@ -193,7 +193,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       int value = is.read();
 
       if (value >= 0)
-        return is.read();
+        return value;
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {

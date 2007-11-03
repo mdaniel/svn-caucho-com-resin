@@ -84,6 +84,21 @@ public class MessageImpl implements Message
   public MessageImpl(Message msg)
     throws JMSException
   {
+    _messageId = msg.getJMSMessageID();
+    _correlationId = msg.getJMSCorrelationID();
+    
+    _timestamp = msg.getJMSTimestamp();
+    _expiration = msg.getJMSExpiration();
+    
+    _destination = msg.getJMSDestination();
+    _replyTo = msg.getJMSReplyTo();
+
+    _deliveryMode = msg.getJMSDeliveryMode();
+    System.out.println("DM1: " + _deliveryMode + " " + this);
+    
+    _messageType = msg.getJMSType();
+    _priority = msg.getJMSPriority();
+    
     Enumeration e = msg.getPropertyNames();
 
     while (e.hasMoreElements()) {
@@ -113,6 +128,7 @@ public class MessageImpl implements Message
 
     _deliveryMode = msg._deliveryMode;
     _isRedelivered = msg._isRedelivered;
+    System.out.println("DM2: " + _deliveryMode + " " + this);
     
     _messageType = msg._messageType;
     _priority = msg._priority;
@@ -715,6 +731,16 @@ public class MessageImpl implements Message
     out.writeInt(_priority);
     out.writeLong(_timestamp);
     out.writeInt(_deliveryMode);
+    System.out.println("WRITE-DELIVERY: " + _deliveryMode + " " + this);
+    if (_destination instanceof java.io.Serializable)
+      out.writeObject(_destination);
+    else
+      out.writeObject(null);
+    
+    if (_replyTo instanceof java.io.Serializable)
+      out.writeObject(_replyTo);
+    else
+      out.writeObject(null);
 
     for (Map.Entry<String,Object> entry : _properties.entrySet()) {
       out.writeString(entry.getKey());
@@ -740,6 +766,9 @@ public class MessageImpl implements Message
     _priority = in.readInt();
     _timestamp = in.readLong();
     _deliveryMode = in.readInt();
+    System.out.println("READ-DELIVERY: " + _deliveryMode + " " + this);
+    _destination = (Destination) in.readObject();
+    _replyTo = (Destination) in.readObject();
 
     while (! in.isEnd()) {
       String key = in.readString();

@@ -155,6 +155,11 @@ abstract public class AbstractDestination
     return new DestinationHandle(toString());
   }
 
+  protected Object writeReplace()
+  {
+    return new DestinationHandle(toString());
+  }
+
   public void close()
   {
   }
