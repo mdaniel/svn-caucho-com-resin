@@ -79,7 +79,7 @@ abstract public class Expr {
   }
 
   /**
-   * Returns the filename.
+   * Returns the line number in the file.
    */
   public int getLine()
   {
@@ -93,9 +93,9 @@ abstract public class Expr {
   {
     return "";
   }
-  
+
   /**
-   * Returns the location if known.
+   * Returns the file name and line number, if location is known.
    */
   public String getLocationLine()
   {
