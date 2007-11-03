@@ -146,18 +146,19 @@ public class ErrorModule extends AbstractQuercusModule {
       }
       else if (className.startsWith("_quercus._")
 	       && name.equals("execute")) {
-	if (stack[i - 1].getMethodName().equals("include") &&
-	    stack[i - 1].getClassName().equals("com.caucho.quercus.env.Env")) {
+	String methodName = stack[i - 1].getMethodName();
+	if (stack[i - 1].getClassName().equals("com.caucho.quercus.env.Env") &&
+            (methodName.equals("include") || methodName.equals("include_once"))) {
 	  String path = unmangleFile(className);
 	  String fileName = env.getPwd().lookup("./" + path).getNativePath();
-	
+
 	  ArrayValue call = new ArrayValueImpl();
 	  result.put(call);
 
 	  call.put("file", fileName);
 	  call.put("line", env.getSourceLine(className, elt.getLineNumber()));
 
-	  call.put(env.createString("args"), new ArrayValueImpl());
+	  call.put("function", methodName);
 	}
       }
       else if (className.equals("com.caucho.quercus.expr.FunctionExpr")
@@ -226,7 +227,11 @@ public class ErrorModule extends AbstractQuercusModule {
       call.put(env.createString("function"),
 	       env.createString(callExpr.getName()));
 
-      call.put(env.createString("args"), new ArrayValueImpl());
+      // Create "args" argument value array
+
+      ArrayValueImpl args = evalArgsArray(env, callExpr);
+
+      call.put(env.createString("args"), args);
     }
     else if (expr instanceof MethodCallExpr) {
       MethodCallExpr callExpr = (MethodCallExpr) expr;
@@ -240,7 +245,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	call.put(env.createString("line"),
 		 new LongValue(callExpr.getLine()));
       }
-	
+
       call.put(env.createString("function"),
 	       env.createString(callExpr.getName()));
 
@@ -261,10 +266,8 @@ public class ErrorModule extends AbstractQuercusModule {
 	call.put(env.createString("line"),
 		 new LongValue(expr.getLine()));
       }
-	
-      call.put(env.createString("function"), env.createString("include"));
 
-      call.put(env.createString("args"), new ArrayValueImpl());
+      call.put(env.createString("function"), env.createString("include"));
     }
     else if (expr instanceof IncludeOnceExpr) {
       boolean isRequire = ((IncludeOnceExpr) expr).isRequire();
@@ -287,9 +290,27 @@ public class ErrorModule extends AbstractQuercusModule {
         name = "include_once";
       
       call.put(env.createString("function"), env.createString(name));
-
-      call.put(env.createString("args"), new ArrayValueImpl());
     }
+  }
+
+  // Return an array that contains the values passed
+  // into a function as the arguments. IF no values
+  // were passed this method returns an empty array.
+
+  private static ArrayValueImpl evalArgsArray(Env env, FunctionExpr callExpr)
+  {
+    ArrayValueImpl args = new ArrayValueImpl();
+
+    Value []argsValues = callExpr.evalArguments(env);
+
+    if (argsValues != null) {
+      for (int index=0; index < argsValues.length; index++) {
+        Value ref = argsValues[index].toRefVar();
+        args.put(ref);
+      }
+    }
+
+    return args;
   }
 
   private static String unmangleFile(String className)

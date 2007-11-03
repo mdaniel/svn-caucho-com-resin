@@ -85,7 +85,7 @@ public class IncludeOnceExpr extends UnaryExpr {
     
     try {
       if (_dir != null)
-        return env.include(_dir, name, _isRequire, true);
+        return env.include_once(_dir, name, _isRequire);
       else if (_isRequire)
         return env.require_once(name);
       else

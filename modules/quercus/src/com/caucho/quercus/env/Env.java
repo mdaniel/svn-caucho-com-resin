@@ -3491,6 +3491,15 @@ public class Env {
   /**
    * Evaluates an included file.
    */
+  public Value include_once(Path scriptPwd, String include,
+		       boolean isRequire)
+  {
+    return include(scriptPwd, include, isRequire, true);
+  }
+
+  /**
+   * Evaluates an included file.
+   */
   public Value include(Path scriptPwd, String include,
 		       boolean isRequire, boolean isOnce)
   {

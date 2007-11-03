@@ -185,7 +185,21 @@ public class FunctionExpr extends Expr {
       // XXX: qa/1d14 env.setThis(oldThis);
     }
   }
-  
+
+  // Return an array containing the Values to be
+  // passed in to this function.
+
+  public Value []evalArguments(Env env)
+  {
+    AbstractFunction fun = env.findFunction(_name);
+
+    if (fun == null) {
+      return null;
+    }
+
+    return fun.evalArguments(env, this, _args);
+  }
+
   public String toString()
   {
     return _name + "()";
