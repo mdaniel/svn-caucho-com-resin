@@ -92,7 +92,7 @@ public class NamespaceWriterContext extends NamespaceContextImpl
   /**
    * declares a new namespace prefix in the current context
    */
-  public void declare(String prefix, String uri, boolean emit)
+  public void declare(String prefix, String uri, boolean forceEmit)
   {
     NamespaceBinding binding;
 
@@ -105,7 +105,9 @@ public class NamespaceWriterContext extends NamespaceContextImpl
           binding.getPrefix() != null &&
           binding.getPrefix().equals(prefix)) {
         // for writing, ignore matching prefixes
-        binding.setEmit(emit);
+        if (forceEmit)
+          binding.setEmit(true);
+
         return;
       }
       else if (binding == null) {
@@ -131,7 +133,7 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     binding.setPrefix(prefix);
     binding.setUri(uri);
     binding.setVersion(_version);
-    binding.setEmit(emit);
+    binding.setEmit(forceEmit);
   }
 
   /**

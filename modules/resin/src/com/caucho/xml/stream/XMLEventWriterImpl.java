@@ -149,6 +149,14 @@ public class XMLEventWriterImpl implements XMLEventWriter {
       StartElement startElement = (StartElement) event;
       QName name = startElement.getName();
 
+      // Namespaces
+      // We do namespaces first because the element itself may need one
+      // xml/300w should catch this
+      Iterator namespaces = startElement.getNamespaces();
+
+      while (namespaces.hasNext())
+        add((Namespace) namespaces.next());
+
       if (name.getPrefix() != null && ! "".equals(name.getPrefix())) {
         _out.writeStartElement(name.getPrefix(), 
                                name.getLocalPart(),
@@ -166,12 +174,6 @@ public class XMLEventWriterImpl implements XMLEventWriter {
 
       while (attributes.hasNext())
         add((Attribute) attributes.next());
-
-      // Namespaces
-      Iterator namespaces = startElement.getNamespaces();
-
-      while (namespaces.hasNext())
-        add((Namespace) namespaces.next());
     }
     else
       throw new XMLStreamException();
