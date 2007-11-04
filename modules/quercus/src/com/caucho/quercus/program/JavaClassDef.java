@@ -173,9 +173,10 @@ public class JavaClassDef extends ClassDef {
   @Override
   public boolean isA(String name)
   {
-    Class type = _type;
-
-    while (type != null) {
+    if (_name.equalsIgnoreCase(name))
+      return true;
+    
+    for (Class type = _type; type != null; type = type.getSuperclass()) {
       if (type.getSimpleName().equalsIgnoreCase(name))
         return true;
 

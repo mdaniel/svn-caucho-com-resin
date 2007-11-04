@@ -619,8 +619,9 @@ public class QuercusClass {
   public boolean isA(String name)
   {
     for (int i = _classDefList.length - 1; i >= 0; i--) {
-      if (_classDefList[i].isA(name))
+      if (_classDefList[i].isA(name)) {
         return true;
+      }
     }
 
     return false;
