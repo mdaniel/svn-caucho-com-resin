@@ -106,7 +106,6 @@ public class FileTopic extends AbstractTopic
   public void send(JmsSession session, MessageImpl msg, long timeout)
     throws JMSException
   {
-    System.out.println("SEND: " + _subscriptionList);
     for (int i = 0; i < _subscriptionList.size(); i++) {
       _subscriptionList.get(i).send(session, msg, timeout);
     }

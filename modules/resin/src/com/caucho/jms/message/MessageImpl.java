@@ -94,7 +94,6 @@ public class MessageImpl implements Message
     _replyTo = msg.getJMSReplyTo();
 
     _deliveryMode = msg.getJMSDeliveryMode();
-    System.out.println("DM1: " + _deliveryMode + " " + this);
     
     _messageType = msg.getJMSType();
     _priority = msg.getJMSPriority();
@@ -128,7 +127,6 @@ public class MessageImpl implements Message
 
     _deliveryMode = msg._deliveryMode;
     _isRedelivered = msg._isRedelivered;
-    System.out.println("DM2: " + _deliveryMode + " " + this);
     
     _messageType = msg._messageType;
     _priority = msg._priority;
@@ -731,7 +729,6 @@ public class MessageImpl implements Message
     out.writeInt(_priority);
     out.writeLong(_timestamp);
     out.writeInt(_deliveryMode);
-    System.out.println("WRITE-DELIVERY: " + _deliveryMode + " " + this);
     if (_destination instanceof java.io.Serializable)
       out.writeObject(_destination);
     else
@@ -766,7 +763,6 @@ public class MessageImpl implements Message
     _priority = in.readInt();
     _timestamp = in.readLong();
     _deliveryMode = in.readInt();
-    System.out.println("READ-DELIVERY: " + _deliveryMode + " " + this);
     _destination = (Destination) in.readObject();
     _replyTo = (Destination) in.readObject();
 

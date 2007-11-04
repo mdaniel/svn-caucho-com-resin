@@ -285,6 +285,10 @@ public class MessageConsumerImpl
    */
   public boolean notifyMessageAvailable()
   {
+    synchronized (_consumerLock) {
+      _consumerLock.notifyAll();
+    }
+    
     return _session.notifyMessageAvailable();
   }
 
