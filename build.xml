@@ -83,7 +83,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, jaxrpc, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webutil, deploy, conf, ext">
+          depends="init, jaxrpc, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
   </target>
 
   <target name="ant" depends="init">
@@ -221,6 +221,13 @@
     </antcall>
   </target>
 
+  <target name="webbeans" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="webbeans"/>
+      <param name="module.jar" value="webbeans-16.jar"/>
+    </antcall>
+  </target>
+
   <target name="version">
     <copy file="${modules}/resin/src/com/caucho/Version.tmpl"
           tofile="${modules}/resin/src/com/caucho/Version.java"
@@ -245,7 +252,7 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util, version">
+  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util, webbeans, version">
 
     <!-- build module -->
 

@@ -33,6 +33,8 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 
+import com.caucho.server.util.CauchoSystem;
+
 import java.security.Permission;
 import java.util.ArrayList;
 
@@ -649,6 +651,30 @@ public class Environment {
     }
 
     return Thread.currentThread().getContextClassLoader().toString();
+  }
+
+  /**
+   * Returns the classpath for the environment level.
+   */
+  public static String getLocalClassPath()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    return getLocalClassPath(loader);
+  }
+    
+  /**
+   * Returns the classpath for the environment level.
+   */
+  public static String getLocalClassPath(ClassLoader loader)
+  {
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader) {
+	return ((EnvironmentClassLoader) loader).getLocalClassPath();
+      }
+    }
+
+    return CauchoSystem.getClassPath();
   }
 
   /**

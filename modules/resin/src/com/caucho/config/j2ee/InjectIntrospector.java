@@ -31,16 +31,14 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
+import com.caucho.webbeans.WebBeans;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import org.omg.CORBA.ORB;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.annotation.Resources;
+import javax.annotation.*;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.ejb.SessionContext;
@@ -49,9 +47,12 @@ import javax.naming.*;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.transaction.UserTransaction;
+import javax.webbeans.*;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceRef;
+
 import java.beans.Introspector;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -371,6 +372,19 @@ public class InjectIntrospector {
       configurePersistenceContext(initList, field, fieldName, fieldType);
     else if (field.isAnnotationPresent(WebServiceRef.class))
       configureWebServiceRef(initList, field, fieldName, fieldType);
+    else if (field.isAnnotationPresent(In.class))
+      configureWebBean(initList, field, fieldName, fieldType);
+    else {
+      boolean isWebBean = false;
+      
+      for (Annotation ann : field.getDeclaredAnnotations()) {
+	if (ann.getClass().isAnnotationPresent(BindingType.class))
+	  isWebBean = true;
+      }
+
+      if (isWebBean)
+	configureWebBean(initList, field, fieldName, fieldType);
+    }
   }
 
   private static void configureResource(ArrayList<BuilderProgram> initList,
@@ -670,6 +684,24 @@ public class InjectIntrospector {
       log.log(Level.FINEST,  String.valueOf(program));
 
     return program;
+  }
+
+  private static void configureWebBean(ArrayList<BuilderProgram> initList,
+				       AccessibleObject field,
+				       String fieldName,
+				       Class fieldType)
+    throws ConfigException
+  {
+    WebBeans webBean = WebBeans.getLocal();
+
+    AccessibleInject inject;
+
+    if (field instanceof Field)
+      inject = new FieldInject((Field) field);
+    else
+      inject = new PropertyInject((Method) field);
+
+    webBean.createProgram(initList, field, fieldName, fieldType, inject);
   }
 
   private static String toFullName(String jndiName)

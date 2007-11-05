@@ -325,6 +325,23 @@ public class ClusterServer {
   }
 
   /**
+   * Adds a http.
+   */
+  public Port createHttp()
+    throws ConfigException
+  {
+    Port port = new Port(this);
+    
+    HttpProtocol protocol = new HttpProtocol();
+    protocol.setParent(port);
+    port.setProtocol(protocol);
+
+    addProtocolPort(port);
+
+    return port;
+  }
+
+  /**
    * Adds a custom-protocol port.
    */
   public Port createProtocol()
@@ -348,6 +365,9 @@ public class ClusterServer {
   public void bind(String address, int port, QServerSocket ss)
     throws Exception
   {
+    if ("null".equals(address))
+      address = null;
+
     for (int i = 0; i < _ports.size(); i++) {
       Port serverPort = _ports.get(i);
 
@@ -439,7 +459,7 @@ public class ClusterServer {
   {
     return _serverProgram;
   }
-
+  
   /**
    * Initialize
    */

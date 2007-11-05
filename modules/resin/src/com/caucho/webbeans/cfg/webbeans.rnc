@@ -1,0 +1,63 @@
+default namespace w = "http://caucho.com/ns/resin"
+
+start = w_web-beans
+
+w_web-beans = element web-beans {
+  w_component*
+
+  & w_component-types*
+
+  & w_interceptors?
+}
+
+w_binding = element binding {
+  string
+}
+
+w_class = element class {
+  string
+}
+
+w_component = element component {
+  w_binding*
+  & w_class?
+  & w_name?
+  & w_producer?
+  & w_scope?
+  & w_type?
+}
+
+w_component-type = element component-type {
+  string
+}
+
+w_component-types = element component-types {
+  w_component-type*
+}
+
+w_name = element name {
+  string
+}
+
+w_interceptor = element interceptor {
+  w_binding
+
+  & w_class
+}
+
+w_interceptors = element interceptors {
+  w_interceptor*
+}
+
+w_producer = element producer {
+  string
+}
+
+w_type = element type {
+  string
+}
+
+w_scope = element scope {
+  string
+}
+

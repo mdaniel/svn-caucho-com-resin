@@ -23,7 +23,7 @@ if (! empty($server->Id))
 
 <?php
 
-display_header("status.php", $title, $server, true);
+display_header("config.php", $title, $server, true);
 
 if (! $server) {
   echo "<h2 class='fail'>Can't contact '$server_id'</h2>";
@@ -166,9 +166,10 @@ $servers = $cluster->Servers;
 echo "<h2>ServerConnectors</h2>"
 echo "<div class='section'>";
 
+echo "<table class='data'>\n";
+
 foreach ($servers as $srun) {
 ?>
-<table class="data">
   <tr>
     <td class='group'><?= $srun->ClusterIndex + 1 ?>. <?= $srun->Name ?></td>
     <td class='group'>hmux://<?= $srun->Address ? $srun->Address : "*" ?>:<?= $srun->Port ?></td>

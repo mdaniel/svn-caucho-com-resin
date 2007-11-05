@@ -162,11 +162,17 @@ public class Config {
    * Configures a bean with a configuration file.
    */
   public Object configure(Object obj, Path path)
-    throws Exception
+    throws ConfigException
   {
-    QDocument doc = parseDocument(path, null);
+    try {
+      QDocument doc = parseDocument(path, null);
 
-    return configure(obj, doc.getDocumentElement());
+      return configure(obj, doc.getDocumentElement());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**
@@ -184,24 +190,36 @@ public class Config {
    * Configures a bean with a configuration file and schema.
    */
   public Object configure(Object obj, Path path, String schemaLocation)
-    throws Exception
+    throws ConfigException
   {
-    Schema schema = findCompactSchema(schemaLocation);
+    try {
+      Schema schema = findCompactSchema(schemaLocation);
 
-    QDocument doc = parseDocument(path, schema);
+      QDocument doc = parseDocument(path, schema);
 
-    return configure(obj, doc.getDocumentElement());
+      return configure(obj, doc.getDocumentElement());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**
    * Configures a bean with a configuration file and schema.
    */
   public Object configure(Object obj, Path path, Schema schema)
-    throws Exception
+    throws ConfigException
   {
-    QDocument doc = parseDocument(path, schema);
+    try {
+      QDocument doc = parseDocument(path, schema);
 
-    return configure(obj, doc.getDocumentElement());
+      return configure(obj, doc.getDocumentElement());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**

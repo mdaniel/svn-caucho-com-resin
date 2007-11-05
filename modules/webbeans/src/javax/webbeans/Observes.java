@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,27 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho;
+package javax.webbeans;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2007 Caucho Technology.  All rights reserved.";
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-  public static String FULL_VERSION = "Resin-3.1.s071104 (built Sun, 04 Nov 2007 07:16:58 PST)";
-  public static String VERSION = "3.1.s071104";
-  public static String VERSION_DATE = "20071104T071658";
-
-  public static void main(String []argv)
-  {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
-  }
+/**
+ * The @Observes annotation for web beans
+ */
+@Target({PARAMETER})
+@Retention(RUNTIME)
+public @interface Observes {
 }

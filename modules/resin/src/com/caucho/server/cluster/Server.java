@@ -469,23 +469,6 @@ public class Server extends ProtocolDispatchServer
     _threadIdleMax = max;
   }
 
-  /**
-   * Adds a http.
-   */
-  public Port createHttp()
-    throws ConfigException
-  {
-    Port port = new Port(_clusterServer);
-    
-    HttpProtocol protocol = new HttpProtocol();
-    protocol.setParent(port);
-    port.setProtocol(protocol);
-
-    _clusterServer.addProtocolPort(port);
-
-    return port;
-  }
-
   //
   // Configuration from <cluster>
   //

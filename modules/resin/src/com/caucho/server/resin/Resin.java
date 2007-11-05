@@ -1103,6 +1103,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     config.configure(this, resinConf, getSchema());
 
     ClusterServer clusterServer = findClusterServer(_serverId);
+
     for (int i = 0; i < _boundPortList.size(); i++) {
       BoundPort port = _boundPortList.get(i);
 
