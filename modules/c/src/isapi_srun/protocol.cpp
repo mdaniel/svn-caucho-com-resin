@@ -633,6 +633,7 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 
 		default:
 			if (code < 0) {
+				connection_error(config, r);
 				code = -1;
 				break;
 			}
