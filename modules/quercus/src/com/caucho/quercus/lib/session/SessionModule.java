@@ -98,14 +98,14 @@ public class SessionModule extends AbstractQuercusModule
     return value;
   }
 
-  public Value session_cache_expire(Env env, @Optional LongValue newValue)
+  public Value session_cache_expire(Env env, @Optional Value newValue)
   {
     Value value = (LongValue) env.getSpecialValue("cache_expire");
 
     if (value == null)
       value = env.getIni("session.cache_expire");
 
-    if (newValue != null && ! newValue.isNull())
+    if (newValue != null && ! newValue.isDefault())
       env.setSpecialValue("cache_expire", newValue);
 
     return LongValue.create(value.toLong());

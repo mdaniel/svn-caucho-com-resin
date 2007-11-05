@@ -32,6 +32,7 @@ package com.caucho.quercus.program;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.annotation.*;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
@@ -679,6 +680,12 @@ public class JavaClassDef extends ClassDef {
 
     if (_traversableDelegate != null)
       cl.setTraversableDelegate(_traversableDelegate);
+    else if (cl.getTraversableDelegate() == null &&
+             _iteratorMethod != null) {
+      // adds support for Java classes implementing iterator()
+      // php/
+      cl.setTraversableDelegate(new JavaTraversableDelegate(_iteratorMethod));
+    }
 
     if (_countDelegate != null)
       cl.setCountDelegate(_countDelegate);
@@ -1175,6 +1182,192 @@ public class JavaClassDef extends ClassDef {
       return true;
     } catch (Exception e) {
       throw new QuercusException(e);
+    }
+  }
+  
+  private class JavaTraversableDelegate
+    implements TraversableDelegate
+  {
+    private Method _iteratorMethod;
+    
+    public JavaTraversableDelegate(Method iterator)
+    {
+      _iteratorMethod = iterator;
+    }
+    
+    public Iterator<Map.Entry<Value, Value>>
+      getIterator(Env env, ObjectValue qThis)
+    {
+      try {
+        Iterator iterator =
+          (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+        
+        return new JavaIterator(env, iterator);
+      }
+      catch (Exception e) {
+        throw new QuercusRuntimeException(e);
+      }
+    }
+
+    public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
+    {
+      try {
+        Iterator iterator =
+          (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+        
+        return new JavaKeyIterator(iterator);
+      }
+      catch (Exception e) {
+        throw new QuercusRuntimeException(e);
+      }
+    }
+    
+    public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
+    {
+      try {
+        Iterator iterator =
+          (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+        
+        return new JavaValueIterator(env, iterator);
+      }
+      catch (Exception e) {
+        throw new QuercusRuntimeException(e);
+      }
+    }
+  }
+
+  private class JavaKeyIterator
+    implements Iterator<Value>
+  {
+    private Iterator _iterator;
+    private int _index;
+    
+    public JavaKeyIterator(Iterator iterator)
+    {
+      _iterator = iterator;
+    }
+    
+    public Value next()
+    {
+      _iterator.next();
+
+      return LongValue.create(_index++);
+    }
+    
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+    
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private class JavaValueIterator
+    implements Iterator<Value>
+  {
+    private Env _env;
+    private Iterator _iterator;
+    
+    public JavaValueIterator(Env env, Iterator iterator)
+    {
+      _env = env;
+      _iterator = iterator;
+    }
+    
+    public Value next()
+    {
+      return _env.wrapJava(_iterator.next());
+    }
+    
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+    
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private class JavaIterator
+    implements Iterator<Map.Entry<Value, Value>>
+  {
+    private Env _env;
+    private Iterator _iterator;
+    
+    private int _index;
+    
+    public JavaIterator(Env env, Iterator iterator)
+    {
+      _env = env;
+      _iterator = iterator;
+    }
+    
+    public Map.Entry<Value, Value> next()
+    {
+      Object next = _iterator.next();
+      int index = _index++;
+      
+      if (next instanceof Map.Entry) {
+        Map.Entry entry = (Map.Entry) next;
+        
+        if (entry.getKey() instanceof Value &&
+            entry.getValue() instanceof Value)
+        {
+          return (Map.Entry<Value, Value>) entry;
+        }
+        else {
+          Value key = _env.wrapJava(entry.getKey());
+          Value val = _env.wrapJava(entry.getValue());
+          
+          return new JavaEntry(key, val);
+        }
+      }
+      else {
+        return new JavaEntry(LongValue.create(index), _env.wrapJava(next));
+      }
+    }
+    
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+    
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private class JavaEntry
+    implements Map.Entry<Value, Value>
+  {
+    private Value _key;
+    private Value _value;
+    
+    public JavaEntry(Value key, Value value)
+    {
+      _key = key;
+      _value = value;
+    }
+    
+    public Value getKey()
+    {
+      return _key;
+    }
+    
+    public Value getValue()
+    {
+      return _value;
+    }
+    
+    public Value setValue(Value value)
+    {
+      throw new UnsupportedOperationException();
     }
   }
 

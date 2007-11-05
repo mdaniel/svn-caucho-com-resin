@@ -1151,7 +1151,7 @@ public class QuercusClass {
   {
     return getClass().getSimpleName() + "[" + getName() + "]";
   }
-
+  
   static class StaticField
   {
     String _name;
