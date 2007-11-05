@@ -114,10 +114,6 @@ public class ResinDocServlet extends HttpServlet {
       document.writeHtml(xmlOut);
 
       xmlOut.flush();
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString());
-
-      response.sendError(404);
     } catch (LineConfigException e) {
       if (e.getLineNumber() < 0)
         throw new ServletException("Error configuring document", e);
