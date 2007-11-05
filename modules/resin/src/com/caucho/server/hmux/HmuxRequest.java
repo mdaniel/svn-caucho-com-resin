@@ -565,7 +565,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     _pendingData = 0;
 
-    _isSecure = false;
+    _isSecure = _conn.isSecure();
   }
   
   /**

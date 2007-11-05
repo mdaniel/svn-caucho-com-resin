@@ -348,10 +348,12 @@ public class LruCache<K,V> {
   {
     CacheItem<K,V> tail;
 
-    if (_capacity1 <= _size1)
-      tail = _tail1 != null ? _tail1 : _tail2;
-    else
-      tail = _tail2 != null ? _tail2 : _tail1;
+    synchronized (this) {
+      if (_capacity1 <= _size1)
+	tail = _tail1 != null ? _tail1 : _tail2;
+      else
+	tail = _tail2 != null ? _tail2 : _tail1;
+    }
 
     if (tail == null)
       return false;

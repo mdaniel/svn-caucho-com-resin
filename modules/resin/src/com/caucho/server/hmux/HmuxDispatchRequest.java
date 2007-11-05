@@ -388,6 +388,9 @@ public class HmuxDispatchRequest {
 
     writeString(os, HmuxRequest.HMUX_HEADER, "dead-time");
     writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientFailRecoverTime() / 1000));
+    
+    writeString(os, HmuxRequest.HMUX_HEADER, "read-timeout");
+    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientReadTimeout() / 1000));
 
     ClusterServer []servers = cluster.getServerList();
 

@@ -803,7 +803,7 @@ esac
 case "$target_os" in
   linux*)
 	jni_os=linux
-        PROXY_LIBS='-lpthread'
+        PROXY_LIBS='-lpthread -lc'
 	;;
 
   *solaris*)

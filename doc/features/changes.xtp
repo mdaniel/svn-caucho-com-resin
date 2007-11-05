@@ -4,6 +4,11 @@
 
 <s2 title="3.0.snap - Aug 14, 2007">
 <ul>
+<li>configure.in fix with -lc for linux (#2082, rep by marcusherou)</li>
+<li>(2007-11-05) win32: isapi_srun.dll should return 503 on backend disconnect (#2040, rep by Takahiro Fukuda)</li>
+<li>win32: isapi_srun.dll config of client-read-time (#2039, #2129, rep by Ed Hollingsworth)</li>
+<li>win32: isapi_srun.dll saving of config (#1879, rep by Sven Droll)</li>
+<li>proxy cache: redo cache loading for sync issues (#1992, rep by david-peterson)</li>
 <li>hessian: issue with class serialization (#1988, rep by ngiudici)</li>
 <li>windows issues with webapps and trailing dot</li>
 <li>request.getInputStream issues with encodings (#1915, rep by Takahiro Fukuda)</li>

@@ -91,6 +91,11 @@ public class ListenerResource {
     _listenerConfig = config;
   }
 
+  public void setListenerMax(int max)
+  {
+    _listenerMax = max;
+  }
+
   public void init() throws ConfigException, JMSException
   {
     if (_destination == null)
