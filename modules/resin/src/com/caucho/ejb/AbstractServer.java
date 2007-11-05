@@ -243,6 +243,24 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
+   * The name to use for remoting protocols, such as IIOP and Hessian.
+   */
+  public String getProtocolId(Class cl)
+  {
+    if (cl == null)
+      return getProtocolId();
+
+    // XXX TCK: ejb30/bb/session/stateless/callback/defaultinterceptor/descriptor/defaultInterceptorsForCallbackBean1
+    if (cl.getName().startsWith("java."))
+      return getProtocolId();
+
+    // Adds the suffix "#com_sun_ts_tests_ejb30_common_sessioncontext_Three1IF";
+    String url = getProtocolId() + "#" + cl.getName().replace(".", "_");
+
+    return url;
+  }
+
+  /**
    * Sets the context implementation class.
    */
   public void setContextImplClass(Class cl)
@@ -317,6 +335,20 @@ abstract public class AbstractServer implements EnvironmentBean {
   public ArrayList<Class> getRemoteObjectList()
   {
     return _remoteObjectList;
+  }
+
+  /**
+   * Returns true if there is any remote object.
+   */
+  public boolean hasRemoteObject()
+  {
+    if (_remoteObjectList == null)
+      return false;
+
+    if (_remoteObjectList.size() == 0)
+      return false;
+
+    return true;
   }
 
   /**
@@ -561,7 +593,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Remove an object.
    */
-  public void remove(AbstractHandle handle)
+  public Object remove(AbstractHandle handle)
   {
     throw new UnsupportedOperationException();
   }
@@ -767,6 +799,16 @@ abstract public class AbstractServer implements EnvironmentBean {
     throws FinderException
   {
     return getContext(key).getEJBObject();
+  }
+
+  /**
+   * Returns the remote object.
+   */
+  public Object getRemoteObject(Object key)
+    throws FinderException
+  {
+    // XXX TCK: ejb30/.../remove
+    return getContext(key).createRemoteView();
   }
 
   public AbstractContext getContext()

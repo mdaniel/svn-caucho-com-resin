@@ -98,26 +98,43 @@ public class SessionView extends ViewClass {
     out.println("private " + _prefix + " _view" + _prefix + ";");
 
     out.println();
-    if (_prefix.equals("Local"))
+
+    String interfaceName;
+
+    if (_prefix.equals("Local")) {
+      interfaceName = "EJBLocalObject";
       out.println("public EJBLocalObject getEJBLocalObject()");
-    else
+      out.println("{");
+      out.println("  createLocalObject();");
+    } else {
+      interfaceName = "EJBObject";
       out.println("public EJBObject getRemoteView()");
+      out.println("{");
+      out.println("  createRemoteView();");
+    }
+
+    out.println();
+    out.println("  if (_view" + _prefix + " instanceof " + interfaceName + ")");
+    out.println("    return (" + interfaceName + ") _view" + _prefix + ";");
+
+    out.println();
+    out.println("  throw new IllegalStateException(\"Cannot getEJBObject/getEJBLocalObject when the session bean does not define a 2.1 interface\");");
+    out.println("}");
+
+    out.println();
+
+    if (_prefix.equals("Local"))
+      out.println("public Object createLocalObject()");
+    else {
+      out.println("public Object createRemoteView()");
+    }
 
     out.println("{");
     out.println("  if (_view" + _prefix + " == null)");
     out.println("    _view" + _prefix + " = new " + _prefix + "(this);");
-
     out.println();
     out.println("  return _view" + _prefix + ";");
     out.println("}");
-
-    if (_prefix.equals("Local")) {
-      out.println();
-      out.println("public EJBLocalObject createLocalObject()");
-      out.println("{");
-      out.println("  return new Local(this);");
-      out.println("}");
-    }
   }
 
   protected void generateClassContent(JavaWriter out)

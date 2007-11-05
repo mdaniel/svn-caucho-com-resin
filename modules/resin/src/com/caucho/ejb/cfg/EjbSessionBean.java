@@ -296,14 +296,6 @@ public class EjbSessionBean extends EjbBean {
     if (localHomeAnn != null) {
       Class localHome = (Class) localHomeAnn.get("value");
       setLocalHome(localHome);
-
-      // ejb/0ff4
-      // Adds the 2.1 local interface
-      JMethod method = findFirstCreateMethod(localHome);
-
-      JClass localWrapper = method.getReturnType();
-      setLocalWrapper(localWrapper);
-      setLocal21(localWrapper);
     }
 
     JAnnotation remoteHomeAnn = ejbClass.getAnnotation(RemoteHome.class);
@@ -312,36 +304,7 @@ public class EjbSessionBean extends EjbBean {
     if (remoteHomeAnn != null) {
       Class home = (Class) remoteHomeAnn.get("value");
       setHome(home);
-
-      // ejb/0ff0
-      // Adds the 2.1 remote interface
-      JMethod method = findFirstCreateMethod(home);
-
-      JClass remoteWrapper = method.getReturnType();
-      setRemoteWrapper(remoteWrapper);
-      setRemote21(remoteWrapper);
     }
-  }
-
-  private JMethod findFirstCreateMethod(Class cl)
-    throws ConfigException
-  {
-    JClass homeClass = new JClassWrapper(cl, _jClassLoader);
-
-    JMethod []methods = getMethods(homeClass);
-
-    for (int i = 0; i < methods.length; i++) {
-      String methodName = methods[i].getName();
-
-      try {
-        if (methodName.startsWith("create"))
-          return methods[i];
-      } catch (Exception e) {
-        throw new ConfigException(e);
-      }
-    }
-
-    return null;
   }
 
   /**
@@ -406,7 +369,7 @@ public class EjbSessionBean extends EjbBean {
     server.setEJBName(getEJBName());
     server.setMappedName(getMappedName());
     server.setId(getEJBModuleName() + "#" + getEJBName());
-    
+
     JClass remoteHome = getRemoteHome();
     if (remoteHome != null)
       server.setRemoteHomeClass(remoteHome.getJavaClass());

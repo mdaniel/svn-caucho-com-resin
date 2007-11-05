@@ -167,6 +167,11 @@ public class TransactionChain extends FilterCallChain {
     out.pushDepth();
 
     out.println("thread.setContextClassLoader(_context._server.getClassLoader());");
+    out.println();
+
+    // ejb/0fe4: throws exception if this context has been removed.
+    out.println("getServer().getContext(_context.getPrimaryKey());");
+    out.println();
 
     super.generateCall(out, retType, var, args);
 
@@ -176,7 +181,7 @@ public class TransactionChain extends FilterCallChain {
 
     JClass beanClass = _implMethod.getDeclaringClass();
 
-    if (_isEJB3 && ! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
+    if (_isEJB3) { // XXX && ! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
       generateExceptionHandling(out);
     }
 

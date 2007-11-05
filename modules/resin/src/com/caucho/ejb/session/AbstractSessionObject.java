@@ -49,7 +49,9 @@ import java.util.logging.Logger;
  * Abstract base class for a session object
  */
 abstract public class AbstractSessionObject extends AbstractEJBObject
-  implements EJBObject, EJBLocalObject, Serializable
+    implements Serializable
+// XXX ejb/0fe- TCK: ejb30/.../remove, needs refactoring of 2.1/3.0 interfaces.
+//  implements EJBObject, EJBLocalObject, Serializable
 {
   private static final Logger log = Log.open(AbstractSessionObject.class);
 
@@ -105,21 +107,23 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
     throw new UnsupportedOperationException();
   }
 
-  /**
+  /* XXX ejb/0fe- TCK ejb30/.../remove
    * Returns the SessionBean's primary stub
-   */
+   *
   public EJBObject getEJBObject()
   {
     return this;
   }
+  */
 
-  /**
+  /* XXX ejb/0fe- TCK ejb30/.../remove
    * Returns the SessionBean's primary stub
-   */
+   *
   public EJBLocalObject getEJBLocalObject()
   {
     return this;
   }
+  */
 
   /**
    * Returns the server.

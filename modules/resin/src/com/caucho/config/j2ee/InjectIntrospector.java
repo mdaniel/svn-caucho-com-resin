@@ -661,6 +661,9 @@ public class InjectIntrospector {
     else if (MessageDrivenContext.class.equals(fieldType)) {
       jndiName = "java:comp/env/messageDrivenContext";
     }
+    else if (UserTransaction.class.equals(fieldType)) {
+      jndiName = "java:comp/UserTransaction";
+    }
 
     int colon = jndiName.indexOf(':');
     int slash = jndiName.indexOf('/');

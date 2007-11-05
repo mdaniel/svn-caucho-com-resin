@@ -487,12 +487,12 @@ ejb15_remote = element remote {
 
 ##role-name = element role-name { string }
 
-ejb15_remove-method = element remve-method {
+ejb15_remove-method = element remove-method {
   attribute id { string }?,
 
   element bean-method { ejb15_named-method-Type },
 
-  element retain-if-exception { string }
+  element retain-if-exception { string }?
 }
 
 ejb15_rollback = element rollback {

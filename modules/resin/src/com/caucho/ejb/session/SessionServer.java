@@ -41,10 +41,7 @@ import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
+import javax.ejb.*;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -167,6 +164,9 @@ public class SessionServer extends AbstractServer
     if (_remoteHomeView != null)
       return _remoteHomeView;
 
+    //if (_remoteHomeView == null)
+    //  return null;
+
     return getRemoteObject30();
   }
 
@@ -185,19 +185,18 @@ public class SessionServer extends AbstractServer
   @Override
   public Object getRemoteObject30(Class businessInterface)
   {
-    Object obj = null;
+    if (_isInitRemote)
+      return null;
 
-    if (_remoteObject != null) // XXX: always new?
-      obj = _remoteObject;
-    else if (! _isInitRemote) {
+    if (true) { // isNew) {
       _isInitRemote = true;
 
       _remoteObject = _homeContext._caucho_newRemoteInstance();
 
       _isInitRemote = false;
-
-      obj = _remoteObject;
     }
+
+    Object obj = _remoteObject;
 
     if (obj == null)
       return null;
@@ -221,17 +220,6 @@ public class SessionServer extends AbstractServer
   public Object getClientObject(Class businessInterface)
   {
     return new StatefulJndiFactory(this, businessInterface);
-
-    //getSessionContext().getEJBLocalObject();
-
-    /* XXX TCK
-
-    Object obj = _homeContext._caucho_newInstance();
-
-    setBusinessInterface(obj, businessInterface);
-
-    return obj;
-    */
   }
 
   /**
@@ -313,7 +301,7 @@ public class SessionServer extends AbstractServer
   {
     String key = getHandleEncoder().createRandomStringKey();
 
-    System.out.println("SESSION-KEY: " + key);
+    //System.out.println("SESSION-KEY: " + key);
 
     _sessions.put(key, context);
 
@@ -340,8 +328,12 @@ public class SessionServer extends AbstractServer
       return null;
 
     AbstractSessionContext cxt = _sessions.get(key);
+
+    // ejb/0fe4
     if (cxt == null)
-      throw new FinderException("no matching object:" + key);
+      throw new NoSuchEJBException("no matching object:" + key);
+    // XXX ejb/0fe-: needs refactoring of 2.1/3.0 interfaces.
+    // throw new FinderException("no matching object:" + key);
 
     return cxt;
   }
@@ -401,21 +393,23 @@ public class SessionServer extends AbstractServer
    * Remove an object by its handle.
    */
   @Override
-  public void remove(AbstractHandle handle)
+  public Object remove(AbstractHandle handle)
   {
-    _sessions.remove(handle.getObjectId());
+    return _sessions.remove(handle.getObjectId());
     // _ejbManager.remove(handle);
   }
 
   /**
-   * Remove an object by its handle and reset this remote object.
+   * Remove an object.
    */
-  public void removeRemote(AbstractHandle handle)
+  @Override
+  public void remove(Object key)
   {
-    // ejb/0fba
-    remove(handle);
+    AbstractSessionContext cxt = _sessions.remove(key);
 
-    _remoteObject = null;
+    // ejb/0fe2
+    if (cxt == null)
+      throw new NoSuchEJBException("no matching object:" + key);
   }
 
   /**

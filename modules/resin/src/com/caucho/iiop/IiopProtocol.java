@@ -29,6 +29,8 @@
 
 package com.caucho.iiop;
 
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.session.SessionObject;
 import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.RMI_IIOPResource;
@@ -39,6 +41,7 @@ import com.caucho.server.port.ServerRequest;
 import com.caucho.iiop.orb.*;
 
 import java.lang.reflect.Method;
+import java.rmi.NoSuchObjectException;
 import java.util.ArrayList;
 import java.util.logging.*;
 import javax.annotation.*;
@@ -113,6 +116,7 @@ public class IiopProtocol extends Protocol {
   }
 
   public IiopSkeleton getService(String host, int port, String oid)
+    throws NoSuchObjectException
   {
     return lookupService(host, port, oid);
   }
@@ -132,6 +136,7 @@ public class IiopProtocol extends Protocol {
    * Returns the service with the given URL.
    */
   private IiopSkeleton lookupService(String host, int port, String oid)
+    throws NoSuchObjectException
   {
     String url;
     String local;
@@ -163,9 +168,9 @@ public class IiopProtocol extends Protocol {
 
       // Restrict the service API to the given business interface.
       // TCK: ejb30/getInvokedBusinessInterfaceRemoteIllegal, needs QA
-      if (service.getBusinessInterface() != null) {
+      if (service.getRemoteInterface() != null) {
         apiList.clear();
-        apiList.add(service.getBusinessInterface());
+        apiList.add(service.getRemoteInterface());
 
         for (Method method : obj.getClass().getDeclaredMethods()) {
           try {
@@ -176,6 +181,16 @@ public class IiopProtocol extends Protocol {
             log.config("Remote home "+obj.getClass().getName()+" has no create method");
           }
         }
+      }
+
+      // XXX TCK: ejb30/.../remove
+      if (obj instanceof SessionObject) {
+        SessionObject ejb = (SessionObject) obj;
+
+        AbstractServer server = ejb.__caucho_getServer();
+        local = ejb.__caucho_getId();
+
+        url = url + "?" + local;
       }
 
       return new IiopSkeleton(obj,
@@ -190,6 +205,23 @@ public class IiopProtocol extends Protocol {
         return null;
 
       ArrayList<Class> apiList = service.getObjectAPI();
+
+      // Restrict the service API to the given business interface.
+      // TCK: ejb30/getInvokedBusinessInterfaceRemoteIllegal, needs QA
+      if (service.getRemoteInterface() != null) {
+        apiList.clear();
+        apiList.add(service.getRemoteInterface());
+
+        for (Method method : obj.getClass().getDeclaredMethods()) {
+          try {
+            // XXX TCK
+            if (method.getName().startsWith("create"))
+              obj = method.invoke(obj, null);
+          } catch (Exception e) {
+            log.config("Remote home "+obj.getClass().getName()+" has no create method");
+          }
+        }
+      }
 
       return new IiopSkeleton(obj, apiList,
                               service.getClassLoader(),

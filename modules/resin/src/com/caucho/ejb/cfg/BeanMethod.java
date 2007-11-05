@@ -19,45 +19,59 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package com.caucho.ejb.session;
+package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.protocol.AbstractHandle;
-
-import javax.ejb.RemoveException;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 /**
- * Abstract base class for a session object
+ * Configuration for bean-method.
  */
-abstract public class SessionObject extends AbstractSessionObject {
-  protected final SessionServer _server;
+public class BeanMethod {
+  private static final L10N L = new L10N(BeanMethod.class);
 
-  protected SessionObject(SessionServer server)
+  private String _methodName;
+
+  private MethodParams _methodParams;
+
+  public BeanMethod()
   {
-    _server = server;
   }
 
-  /**
-   * Returns the session server.
-   */
-  public AbstractServer getServer()
+  public String getMethodName()
   {
-    return _server;
+    return _methodName;
   }
 
-  /**
-   * Removes the bean from the underlying store.
-   */
-  // XXX ejb/0fe- public void remove() throws RemoveException
-  public void remove() throws Exception
+  public void setMethodName(String methodName)
   {
-    getServer().remove((AbstractHandle) getHandle());
+    _methodName = methodName;
+  }
+
+  public void setMethodParams(MethodParams methodParams)
+  {
+    _methodParams = methodParams;
+  }
+
+  public boolean isMatch(JMethod otherMethod)
+  {
+    if (! _methodName.equals(otherMethod.getName()))
+      return false;
+
+    if (_methodParams != null)
+      return _methodParams.isMatch(otherMethod);
+    else if (otherMethod.getParameterTypes().length == 0)
+      return true;
+
+    return false;
   }
 }

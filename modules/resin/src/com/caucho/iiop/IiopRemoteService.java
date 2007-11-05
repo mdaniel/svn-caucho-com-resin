@@ -29,6 +29,7 @@
 
 package com.caucho.iiop;
 
+import java.rmi.NoSuchObjectException;
 import java.util.ArrayList;
 
 abstract public class IiopRemoteService {
@@ -50,7 +51,7 @@ abstract public class IiopRemoteService {
   /**
    * Returns the invoked API class.
    */
-  public Class getBusinessInterface()
+  public Class getRemoteInterface()
   {
     return null;
   }
@@ -71,5 +72,6 @@ abstract public class IiopRemoteService {
   /**
    * Returns the object interface.
    */
-  abstract public Object getObject(String local);
+  abstract public Object getObject(String local)
+    throws NoSuchObjectException;
 }

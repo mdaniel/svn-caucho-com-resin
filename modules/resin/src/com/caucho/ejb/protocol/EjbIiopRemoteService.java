@@ -33,6 +33,8 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.iiop.IiopRemoteService;
 import com.caucho.util.Log;
 
+import java.rmi.NoSuchObjectException;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +44,7 @@ public class EjbIiopRemoteService extends IiopRemoteService {
 
   private AbstractServer _server;
 
-  private Class _businessInterface;
+  private Class _remoteInterface;
 
   private boolean _isEJB3;
 
@@ -52,10 +54,10 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   }
 
   public EjbIiopRemoteService(AbstractServer server,
-                              Class businessInterface)
+                              Class remoteInterface)
   {
     _server = server;
-    _businessInterface = businessInterface;
+    _remoteInterface = remoteInterface;
   }
 
   /**
@@ -93,9 +95,9 @@ public class EjbIiopRemoteService extends IiopRemoteService {
 
       return list;
     }
-    else if (getBusinessInterface() != null) {
+    else if (getRemoteInterface() != null) {
       ArrayList<Class> list = new ArrayList<Class>();
-      list.add(getBusinessInterface());
+      list.add(getRemoteInterface());
 
       return list;
     }
@@ -121,9 +123,10 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   /**
    * Returns the invoked API class.
    */
-  public Class getBusinessInterface()
+  @Override
+  public Class getRemoteInterface()
   {
-    return _businessInterface;
+    return _remoteInterface;
   }
 
   /**
@@ -132,7 +135,7 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   public Object getHome()
   {
     if (_isEJB3)
-      return _server.getRemoteObject30(_businessInterface);
+      return _server.getRemoteObject30(_remoteInterface);
 
     Object obj = _server.getHomeObject();
 
@@ -146,9 +149,22 @@ public class EjbIiopRemoteService extends IiopRemoteService {
    * Returns the object interface.
    */
   public Object getObject(String local)
+    throws NoSuchObjectException
   {
+    // Move this logic to the ejb SessionServer after refactoring the 2.1 / 3.0 remote interfaces.
     try {
-      return _server.getEJBObject(local);
+      // XXX TCK: ejb30/.../remove return _server.getEJBObject(local);
+      return _server.getRemoteObject(local);
+    } catch (javax.ejb.NoSuchEJBException e) {
+      // XXX TCK: ejb30/.../remove/removeBean2
+      if ((_remoteInterface == null && ! _isEJB3) ||
+          (_remoteInterface != null && Remote.class.isAssignableFrom(_remoteInterface))) {
+        throw new NoSuchObjectException("no matching object: " + local);
+      }
+
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

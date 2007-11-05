@@ -36,6 +36,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
 import javax.naming.NamingException;
+import java.lang.reflect.Method;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -260,31 +261,49 @@ public class EjbProtocolManager {
 
             // ejb/0ff4 (TCK): multiple local interfaces
             for (Class cl : server.getLocalApiList()) {
+              // ejb/0fe1
+              if (cl == server.getLocal21())
+                continue;
+
               String s = cl.getName().replace(".", "_");
 
               Object obj;
 
-              // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceLocalIllegal
-              if (server.getLocal21() == null
-                  || ! server.getLocal21().getName().equals(cl.getName())) {
-                // ejb/0ff4
-                obj = server.getLocalObject30(cl);
-                continue;
-              }
+              if (server.getRemoteObjectList().size() == 1) {
+                // ejb/0fe1: it is the same object.
+                obj = localObj;
+              } // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceLocalIllegal
               else {
-                obj = server.getClientObject(server.getLocal21());
+                if (server.getLocal21() == null
+                    || ! server.getLocal21().getName().equals(cl.getName())) {
+                  // ejb/0ff4
+                  obj = server.getLocalObject30(cl);
+                }
+                else {
+                  obj = server.getClientObject(server.getLocal21());
 
-                try {
-                  // XXX TCK: switch to method.getName().startsWith("create")
-                  java.lang.reflect.Method method = obj.getClass().getDeclaredMethod("create", new Class[] {});
-                  obj = method.invoke(obj, null);
-                } catch (Exception e) {
-                  log.config(L.l("local home {0} has no create method", obj.getClass().getName()));
-                  continue;
+                  if (obj instanceof com.caucho.naming.ObjectProxy) {
+                    // OK
+                  } else {
+                    try {
+                      // XXX TCK: switch to method.getName().startsWith("create")
+                      Method method = obj.getClass().getDeclaredMethod("create",
+                                                                       new Class[] {});
+                      obj = method.invoke(obj, null);
+                    } catch (Exception e) {
+                      log.config(L.l("local home {0} has no create method", obj.getClass().getName()));
+                      continue;
+                    }
+                  }
                 }
               }
 
-              bindServer(localJndiName + "#" + s, obj);
+              String jndiName = localJndiName + "#" + s;
+
+              bindServer(jndiName, obj);
+
+              if (log.isLoggable(Level.CONFIG))
+                log.config(L.l("local ejb {0} has JNDI binding {1}", obj, jndiName));
             }
           }
           else {
@@ -294,7 +313,16 @@ public class EjbProtocolManager {
         }
       }
 
-      Object remoteObj = server.getRemoteObject();
+      Object remoteObj = null;
+      Class businessInterface = null;
+
+      // ejb/0fe-
+      if (server.getRemote21() != null) {
+        remoteObj = server.getRemoteObject();
+      } else if (server.hasRemoteObject()) {
+        businessInterface = server.getRemoteObjectList().get(0);
+        remoteObj = server.getRemoteObject30(businessInterface);
+      }
 
       if (remoteObj != null) {
         if (_remoteJndiPrefix != null) {
@@ -306,35 +334,43 @@ public class EjbProtocolManager {
 
             bindServer(remoteJndiName, remoteObj);
 
-            
             // ejb/0f6f (TCK): multiple remote interfaces
             for (Class cl : server.getRemoteObjectList()) {
-              if (server.getRemote21() != null)
-                continue;
-              
               String s = cl.getName().replace(".", "_");
 
               Object obj;
 
-              // ejb/0ff0 TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemoteIllegal
-              if (server.getRemote21() == null
-                  || ! server.getRemote21().getName().equals(cl.getName())) {
-                obj = server.getRemoteObject30(cl);
-              }
-              else {
-                obj = server.getRemoteObject();
+              if (server.getRemoteObjectList().size() == 1) {
+                // It is the same object.
+                obj = remoteObj;
+              } else {
+                // ejb/0ff0
+                // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemoteIllegal
+                if (server.getRemote21() == null
+                    || ! server.getRemote21().getName().equals(cl.getName())) {
+                  obj = server.getRemoteObject30(cl);
+                }
+                else {
+                  obj = server.getRemoteObject();
 
-                try {
-                  // XXX TCK: switch to method.getName().startsWith("create")
-                  java.lang.reflect.Method method = obj.getClass().getDeclaredMethod("create", new Class[] {});
-                  obj = method.invoke(obj, null);
-                } catch (Exception e) {
-                  log.config(L.l("remote home {0} has no create method", obj.getClass().getName()));
-                  continue;
+                  try {
+                    // XXX TCK: switch to method.getName().startsWith("create")
+                    Method method = obj.getClass().getDeclaredMethod("create",
+                                                                     new Class[] {});
+                    obj = method.invoke(obj, null);
+                  } catch (Exception e) {
+                    log.config(L.l("remote home {0} has no create method", obj.getClass().getName()));
+                    continue;
+                  }
                 }
               }
 
-              bindServer(remoteJndiName + "#" + s, obj);
+              String jndiName = remoteJndiName + "#" + s;
+
+              bindServer(jndiName, obj);
+
+              if (log.isLoggable(Level.CONFIG))
+                log.config(L.l("remote ejb {0} has JNDI binding {1}", obj, jndiName));
             }
           }
         }

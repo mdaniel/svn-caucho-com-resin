@@ -58,7 +58,8 @@ abstract public class AbstractStatelessContext extends AbstractContext
   /**
    * Returns the local object in the context.
    */
-  public EJBLocalObject createLocalObject()
+  // XXX public EJBLocalObject createLocalObject()
+  public Object createLocalObject()
     throws IllegalStateException
   {
     throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",

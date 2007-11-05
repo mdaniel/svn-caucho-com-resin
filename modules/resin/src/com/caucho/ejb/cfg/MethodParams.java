@@ -19,45 +19,55 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package com.caucho.ejb.session;
+package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
-import javax.ejb.RemoveException;
+import java.util.ArrayList;
 
 /**
- * Abstract base class for a session object
+ * Configuration for method-params.
  */
-abstract public class SessionObject extends AbstractSessionObject {
-  protected final SessionServer _server;
+public class MethodParams {
+  private static final L10N L = new L10N(MethodParams.class);
 
-  protected SessionObject(SessionServer server)
+  private ArrayList<Class> _methodParams
+    = new ArrayList<Class>();
+
+  public MethodParams()
   {
-    _server = server;
   }
 
-  /**
-   * Returns the session server.
-   */
-  public AbstractServer getServer()
+  public void addMethodParam(Class methodParam)
   {
-    return _server;
+    _methodParams.add(methodParam);
   }
 
-  /**
-   * Removes the bean from the underlying store.
-   */
-  // XXX ejb/0fe- public void remove() throws RemoveException
-  public void remove() throws Exception
+  public boolean isMatch(JMethod otherMethod)
   {
-    getServer().remove((AbstractHandle) getHandle());
+    JClass otherParams[] = otherMethod.getParameterTypes();
+
+    if (otherParams.length != _methodParams.size())
+      return false;
+
+    int i = 0;
+
+    for (Class thisParam : _methodParams) {
+      if (! thisParam.equals(otherParams[i++].getJavaClass()))
+        return false;
+    }
+
+    return true;
   }
 }

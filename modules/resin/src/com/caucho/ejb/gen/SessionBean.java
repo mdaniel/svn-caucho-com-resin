@@ -191,7 +191,10 @@ public class SessionBean extends ClassComponent {
         throw new IOException(L.l("trying to create unknown type {0}",
                               _prefix));
     */
-    out.println("return cxt.getEJBLocalObject();");
+
+    //out.println("return cxt.getEJBLocalObject();");
+
+    out.println("return cxt.createLocalObject();");
 
     out.popDepth();
     out.println("}");
@@ -227,7 +230,8 @@ public class SessionBean extends ClassComponent {
         throw new IOException(L.l("trying to create unknown type {0}",
                               _prefix));
     */
-    out.println("return cxt.getEJBObject();");
+
+    out.println("return cxt.createRemoteView();");
 
     out.popDepth();
     out.println("}");

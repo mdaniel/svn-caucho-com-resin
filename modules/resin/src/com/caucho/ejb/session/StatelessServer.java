@@ -52,9 +52,10 @@ public class StatelessServer extends AbstractServer {
 
   private AbstractStatelessContext _homeContext;
 
-  private EJBObject _remoteObject;
+  // XXX private EJBObject _remoteObject;
+  private Object _remoteObject;
 
-  private EJBLocalObject _localObject;
+  private Object _localObject;
 
   /**
    * Creates a new stateless server.
@@ -97,12 +98,13 @@ public class StatelessServer extends AbstractServer {
       _remoteHomeView = getStatelessContext().createRemoteHomeView();
 
       try {
-        _localObject = getStatelessContext().getEJBLocalObject();
+        _localObject = getStatelessContext().createLocalObject();
       } catch (Throwable e) {
       }
 
       try {
-        _remoteObject = getStatelessContext().getEJBObject();
+        // XXX _remoteObject = getStatelessContext().getEJBObject();
+        _remoteObject = getStatelessContext().createRemoteView();
       } catch (Throwable e) {
       }
       /*
@@ -206,10 +208,12 @@ public class StatelessServer extends AbstractServer {
       if (businessInterface.isAssignableFrom(obj.getClass()))
         return obj;
 
-      Class local21 = getLocal21();
+      if (_localObject != null) {
+        Class local21 = getLocal21();
 
-      if (local21 != null && local21.isAssignableFrom(obj.getClass()))
-        return obj;
+        if (businessInterface.isAssignableFrom(local21))
+          return _localObject;
+      }
     }
 
     for (Class cl : getLocalApiList()) {
@@ -227,7 +231,7 @@ public class StatelessServer extends AbstractServer {
           setBusinessInterface(obj, businessInterface);
 
           // XXX TCK: ejb30/bb/session/stateless/equals/annotated/testBeanotherEquals, needs QA
-          _localObject = (EJBLocalObject) obj;
+          _localObject = obj;
 
           break;
         }
@@ -289,7 +293,7 @@ public class StatelessServer extends AbstractServer {
   @Override
   public Object getLocalObject30()
   {
-    return _localObject;
+    return getClientObject(null);
   }
 
   /**

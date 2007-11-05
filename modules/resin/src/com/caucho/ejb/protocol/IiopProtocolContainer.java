@@ -100,14 +100,23 @@ public class IiopProtocolContainer extends ProtocolContainer {
   @Override
   public void addServer(AbstractServer server)
   {
-    if (server.getRemoteObject() == null)
+    Object obj = null;
+    Class remoteInterface = null; //server.getRemote21();
+
+    obj = server.getRemoteObject();
+
+    if (obj == null)
       return;
 
     String name = getName(server);
 
     log.fine("iiop: add server " + name);
 
-    EjbIiopRemoteService service = new EjbIiopRemoteService(server);
+    EjbIiopRemoteService service = new EjbIiopRemoteService(server, remoteInterface);
+
+    if (server.getRemote21() == null) {
+      service.setEJB3(true);
+    }
 
     _context.setService(name, service);
 

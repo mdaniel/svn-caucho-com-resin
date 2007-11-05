@@ -195,6 +195,11 @@ abstract public class AbstractContext implements EJBContext {
     */
   }
 
+  public Object createRemoteView()
+  {
+    return null;
+  }
+
   /**
    * Obsolete method which returns the EJB 1.0 environment.
    */

@@ -166,6 +166,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
   private AroundInvokeConfig _aroundInvokeConfig;
 
+  private ArrayList<RemoveMethod> _removeMethods
+    = new ArrayList<RemoveMethod>();
+
   /**
    * Creates a new entity bean configuration.
    */
@@ -195,6 +198,35 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     // ejb/0fbb
     _aroundInvokeMethodName = aroundInvoke.getMethodName();
+  }
+
+  /**
+   * Returns the remove-method for the given method.
+   */
+  public RemoveMethod getRemoveMethod(JMethod method)
+  {
+    for (RemoveMethod removeMethod : _removeMethods) {
+      if (removeMethod.isMatch(method))
+        return removeMethod;
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the remove-method list.
+   */
+  public ArrayList<RemoveMethod> getRemoveMethods()
+  {
+    return _removeMethods;
+  }
+
+  /**
+   * Adds a new remove-method
+   */
+  public void addRemoveMethod(RemoveMethod removeMethod)
+  {
+    _removeMethods.add(removeMethod);
   }
 
   /**
@@ -252,7 +284,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
         matchList.add(interceptor);
       }
     }
-    
+
     return matchList;
   }
 
@@ -534,6 +566,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     throws ConfigException
   {
     setHomeWrapper(new JClassWrapper(home, _jClassLoader));
+
+    // ejb/0ff0
+    // Adds the 2.1 remote interface
+    JMethod method = findFirstCreateMethod(home);
+
+    JClass remoteWrapper = method.getReturnType();
+    setRemoteWrapper(remoteWrapper);
+    setRemote21(remoteWrapper);
   }
 
   /**
@@ -686,6 +726,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     throws ConfigException
   {
     setLocalHomeWrapper(new JClassWrapper(localHome, _jClassLoader));
+
+    // ejb/0ff4
+    // Adds the 2.1 local interface
+    JMethod method = findFirstCreateMethod(localHome);
+
+    JClass localWrapper = method.getReturnType();
+    setLocalWrapper(localWrapper);
+    setLocal21(localWrapper);
   }
 
   /**
@@ -2319,6 +2367,27 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     return false;
+  }
+
+  protected JMethod findFirstCreateMethod(Class cl)
+    throws ConfigException
+  {
+    JClass homeClass = new JClassWrapper(cl, _jClassLoader);
+
+    JMethod []methods = getMethods(homeClass);
+
+    for (int i = 0; i < methods.length; i++) {
+      String methodName = methods[i].getName();
+
+      try {
+        if (methodName.startsWith("create"))
+          return methods[i];
+      } catch (Exception e) {
+        throw new ConfigException(e);
+      }
+    }
+
+    return null;
   }
 
   protected void introspectBean(JClass type, String defaultName)

@@ -485,6 +485,11 @@ public class EnvServerManager implements EnvironmentListener
 
       if (remote != null && type.isAssignableFrom(remote.getClass()))
         return remote;
+
+      remote = server.getRemoteObject30(type);
+
+      if (remote != null && type.isAssignableFrom(remote.getClass()))
+        return remote;
     }
 
     return null;
