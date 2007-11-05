@@ -39,16 +39,17 @@ import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.omg.CosNaming.NamingContextPackage.NotFoundReason;
 
 import javax.naming.NamingException;
+import java.rmi.NoSuchObjectException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CosServer {
   private static final Logger log = Log.open(CosServer.class);
-    
+
   private IiopProtocol _iiopServer;
   private String _host;
   private int _port;
-  
+
   AbstractModel _model = new MemoryModel();
 
   CosServer(IiopProtocol iiopServer)
@@ -75,14 +76,14 @@ public class CosServer {
 
     try {
       if (log.isLoggable(Level.FINE)) {
-	String name = "";
-	  
-	for (int i = 0; i < n.length; i++)
-	  name += "/"  + n[i].id;
+        String name = "";
 
-	log.fine("IIOP NameService lookup: " + name);
+        for (int i = 0; i < n.length; i++)
+          name += "/"  + n[i].id;
+
+        log.fine("IIOP NameService lookup: " + name);
       }
-      
+
       for (int i = 0; i < n.length; i++) {
         String name = n[i].id;
         String type = n[i].kind;
@@ -92,37 +93,41 @@ public class CosServer {
         if (value != null)
           continue;
 
-	/*
-        if (i == 0) {
-        }
-        else if (i == 1) {
+        /*
+          if (i == 0) {
+          }
+          else if (i == 1) {
           host = name;
           continue;
-        }
-        else {
+          }
+          else {
           uri += "/" + name;
           continue;
-        }
-	*/
-	uri += "/" + name;
+          }
+        */
+        uri += "/" + name;
       }
 
       IiopSkeleton skel;
-      
+
       if (value != null) {
       }
       else if (uri.equals("")) {
         String oid = "/NameService";
         skel = _iiopServer.getService(_host, _port, oid);
 
-	return skel;
+        return skel;
       }
       else if ((skel = _iiopServer.getService(_host, _port, uri)) != null) {
-	return skel;
+        return skel;
       }
     } catch (NamingException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
+      throw new NotFound(NotFoundReason.from_int(NotFoundReason._missing_node), n);
+    } catch (NoSuchObjectException e) {
+      log.log(Level.FINE, e.toString(), e);
+
       throw new NotFound(NotFoundReason.from_int(NotFoundReason._missing_node), n);
     }
 
