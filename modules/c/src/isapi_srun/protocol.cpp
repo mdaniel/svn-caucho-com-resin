@@ -78,8 +78,10 @@ cse_error(config_t *config, char *fmt, ...)
 	{
 		FILE *file;
 	    file = fopen("/temp/isapi.log", "a+b");
-		fprintf(file, "%s\n", buf);
-		fclose(file);
+		if (file) {
+			fprintf(file, "%s\n", buf);
+			fclose(file);
+		}
 	}
 #endif
 }
@@ -112,10 +114,11 @@ cse_log(char *fmt, ...)
 	FILE *file;
 	file = fopen("/temp/isapi.log", "a+");
 	va_start(arg, fmt);
-	if (file)
+	if (file) 
 		vfprintf(file, fmt, arg);
 	va_end(arg);
-	fclose(file);
+	if (file)
+		fclose(file);
 #endif
 }
 
@@ -509,7 +512,7 @@ fill_chunk(char *buf, int size)
 
 static int
 send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, 
-	  int ack, int http11, int *p_is_first)
+	  int ack, int *p_http11, int *p_is_first)
 {
 	char headers[32 * 1024];
 	char status[BUF_LENGTH];
@@ -518,6 +521,7 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
     char *header_ptr = headers;
     char *header_end = header_ptr + sizeof(headers) - 256;
 	int code;
+	int http11 = *p_http11;
 
 	chunk[0] = '\r';
 	chunk[1] = '\n';
@@ -563,6 +567,10 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 			read_len = hmux_read_len(s);
             cse_read_limit(s, status, sizeof(status), read_len);
 
+			if (status[0] != '2') {
+				http11 = 0;
+				*p_http11 = 0;
+			}
 			status_ptr = status + read_len;
 			break;
 
@@ -774,7 +782,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 		  send_length = 0;
 		  cse_write_byte(s, HMUX_YIELD);
 
-			code = send_data(s, r, config, CSE_ACK, isHttp11, &is_first);
+			code = send_data(s, r, config, CSE_ACK, &isHttp11, &is_first);
 
 			if (code < 0 || code == HMUX_QUIT || code == HMUX_EXIT)
 				break;
@@ -784,7 +792,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 	LOG(("quit\n"));
 	cse_write_byte(s, HMUX_QUIT);
 
-	code = send_data(s, r, config, HMUX_QUIT, isHttp11, &is_first);
+	code = send_data(s, r, config, HMUX_QUIT, &isHttp11, &is_first);
 
 	if (code == HMUX_QUIT)
 		cse_recycle(s, now);

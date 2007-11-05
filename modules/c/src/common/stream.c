@@ -92,7 +92,12 @@ static int
 std_read(stream_t *s, void *buf, int length)
 {
 #ifdef WIN32
-  if (poll_read(s->socket, WINDOWS_READ_TIMEOUT) <= 0)
+	int timeout = WINDOWS_READ_TIMEOUT;
+
+  if (s->cluster_srun && s->cluster_srun->srun->read_timeout > 0)
+	  timeout = s->cluster_srun->srun->read_timeout;
+
+  if (poll_read(s->socket, timeout) <= 0)
     return -1;
 #endif
 

@@ -464,6 +464,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   int is_change = 1;
   mem_pool_t *pool = 0;
   cluster_t cluster;
+  int read_timeout = -1;
   int live_time = -1;
   int dead_time = -1;
   char error_page[1024];
@@ -584,6 +585,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  live_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
 	  dead_time = resin_atoi(value);
+	else if (! strcmp(buffer, "read-timeout"))
+ 	  read_timeout = resin_atoi(value);
 	else if (! strcmp(buffer, "last-update")) {
 	  int last_update = resin_atoi(value);
 	  if (host) {
@@ -638,6 +641,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	      srun->srun->live_time = live_time;
 	    if (dead_time > 0)
 	      srun->srun->dead_time = dead_time;
+		if (read_timeout > 0)
+			srun->srun->read_timeout = read_timeout;
 	  }
 	}
       }
@@ -692,6 +697,22 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   }
 }
 
+#ifdef WIN32
+static char *
+temp_directory(config_t *config, char *buf, int len)
+{
+  GetCurrentDirectory(len, buf);
+
+  if (buf[0] && buf[1] == ':')
+    buf[2] = 0;
+  else
+    buf[0] = 0;
+  strcat(buf, "/temp");
+
+  return buf;
+}
+#endif
+
 static void
 write_config(config_t *config)
 {
@@ -701,11 +722,10 @@ write_config(config_t *config)
   char temp[1024];
   char buffer[1024];
   char *tail;
-
   if (! *config->config_path)
     return;
   
-  ERR(("%s:%d:write_config(): writing cached config\n",
+  LOG(("%s:%d:write_config(): writing cached config\n",
        __FILE__, __LINE__));
 
   strncpy(temp, config->config_path, sizeof(temp));
@@ -718,16 +738,22 @@ write_config(config_t *config)
     *tail = 0;
 
 #ifdef WIN32
-  tail = tempnam("c:/temp", "resin-");
-  fd = open(tail, O_WRONLY, 0644);
+  tail = tempnam(temp_directory(config, temp, sizeof(temp)), "resin-");
+  if (tail) {
+	strcpy(temp, tail);
+	fd = open(temp, O_WRONLY|O_CREAT|O_TRUNC, 0664);
+  }
+  else
+	  fd = -1;
 #else
   strcat(temp, "/resintmp-XXXXXX");
-
   fd = mkstemp(temp);
 #endif
 
-  if (fd < 0)
+  if (fd < 0) {
+    ERR(("Can't open %s to cache configuration (errno=%d)\n", temp, errno));
     return;
+  }
 
   memset(&s, 0, sizeof(s));
   s.socket = fd;
@@ -841,6 +867,9 @@ write_config(config_t *config)
 
   close(fd);
 
+#ifdef WIN32
+  unlink(config->config_path);
+#endif
   rename(temp, config->config_path);
   unlink(temp);
 }
@@ -864,8 +893,12 @@ read_all_config_impl(config_t *config)
   
   fd = open(config->config_path, O_RDONLY);
 
-  if (fd < 0)
+  if (fd < 0) {
+	  ERR(("%s:%d can't open config path '%s' (errno=%d)", __FILE__, __LINE__,
+		  config->config_path, errno));
+
     return 0;
+  }
 
   if (fstat(fd, &st) == 0) {
     mtime = st.st_mtime;
@@ -1045,12 +1078,15 @@ cse_init_config(config_t *config)
   config->config_cluster.config = config;
   
 #ifdef WIN32  
-  strcpy(config->work_dir, "/temp");
-  mkdir("/temp");
+  {
+	  char temp[1024];
+	  strcpy(config->work_dir, temp_directory(config, temp, sizeof(temp)));
+	  mkdir(config->work_dir);
+	  chmod(config->work_dir, 775);
+  }
 #else
   strcpy(config->work_dir, "/tmp");
 #endif
-
   /*
   cse_add_host(&config->config_cluster, "localhost", 6802);
 
@@ -1073,7 +1109,7 @@ void
 cse_add_config_server(config_t *config, const char *host, int port)
 {
   char buffer[1024];
-  
+
   cse_add_host(&config->config_cluster, host, port);
 
   if (! *config->config_file) {

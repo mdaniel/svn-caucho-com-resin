@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2007 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -69,6 +69,7 @@ typedef struct srun_t {
   int connect_timeout;       /* time the connect() call should wait  */
   int live_time;             /* time an idle socket should live      */
   int dead_time;             /* time a dead srun stays dead          */
+  int read_timeout;          /* iis read timeout */
   int send_buffer_size;      /* how big the send buffer is           */
   
   void *lock;                /* lock specific to the srun            */
