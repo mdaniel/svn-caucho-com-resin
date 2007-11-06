@@ -32,6 +32,8 @@ package com.caucho.quercus.env;
 import java.util.IdentityHashMap;
 import java.util.logging.Logger;
 
+import com.caucho.quercus.Location;
+
 /**
  * Represents a PHP array value.
  */
@@ -150,9 +152,10 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Returns the field value, creating an object if it's unset.
    */
-  public Value getObject(Env env, Value fieldName)
+  @Override
+  public Value getObject(Env env, Value fieldName, Location location)
   {
-    return getCopyArray().getObject(env, fieldName);
+    return getCopyArray().getObject(env, fieldName, location);
   }
 
   /**

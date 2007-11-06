@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
@@ -867,11 +868,11 @@ public class JavaAdapterVar extends Var
    * Returns the value, creating an object if unset.
    */
   @Override
-  public Value getObject(Env env, Value index)
+  public Value getObject(Env env, Value index, Location location)
   {
     setRaw(getValue());
     
-    Value value = super.getObject(env, index);
+    Value value = super.getObject(env, index, location);
     
     setValue(getRawValue());
     

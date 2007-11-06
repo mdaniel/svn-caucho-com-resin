@@ -958,11 +958,11 @@ public class ObjectExtValue extends ObjectValue
   }
 
   @Override
-  public Value getObject(Env env, Value index)
+  public Value getObject(Env env, Value index, Location location)
   {
     // php/3d92
 
-    env.error(L.l("Can't use object '{0}' as array", getName()));
+    env.error(location, L.l("Can't use object '{0}' as array", getName()));
 
     return NullValue.NULL;
   }

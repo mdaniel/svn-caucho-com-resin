@@ -31,6 +31,8 @@ package com.caucho.quercus.env;
 
 import java.io.Serializable;
 
+import com.caucho.quercus.Location;
+
 /**
  * Represents an array-get argument which might be a call to a reference.
  *
@@ -137,7 +139,9 @@ public class ArgGetValue extends Value
    */
   public Value getFieldObject(Env env, StringValue index)
   {
-    return _obj.getObject(env, _index).getFieldObject(env, index);
+    return _obj.getObject(env,
+                          _index,
+                          Location.UNKNOWN).getFieldObject(env, index);
   }
 
   /**
@@ -146,7 +150,9 @@ public class ArgGetValue extends Value
   public Value getFieldRef(Env env, StringValue index)
   {
     // php/3d2p
-    return _obj.getObject(env, _index).getFieldRef(env, index);
+    return _obj.getObject(env,
+                          _index,
+                          Location.UNKNOWN).getFieldRef(env, index);
   }
   
   //

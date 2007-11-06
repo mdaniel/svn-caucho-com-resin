@@ -65,12 +65,6 @@ public class CompiledObjectValue extends ObjectValue
       _fields = NULL_FIELDS;
   }
 
-  @Override
-  public CompiledObjectValue toObjectValue()
-  {
-    return this;
-  }
-
   /**
    * Returns the number of entries.
    */

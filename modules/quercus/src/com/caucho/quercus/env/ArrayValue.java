@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.vfs.WriteStream;
@@ -449,7 +450,7 @@ abstract public class ArrayValue extends Value {
    * Returns the field value, creating an object if it's unset.
    */
   @Override
-  public Value getObject(Env env, Value fieldName)
+  public Value getObject(Env env, Value fieldName, Location location)
   {
     Value value = get(fieldName);
 

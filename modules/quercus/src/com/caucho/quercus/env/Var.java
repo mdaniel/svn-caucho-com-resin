@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
@@ -933,12 +934,12 @@ public class Var extends Value
    * Returns the value, creating an object if unset.
    */
   @Override
-  public Value getObject(Env env, Value index)
+  public Value getObject(Env env, Value index, Location location)
   {
     // php/3d2p
     _value = _value.toAutoArray();
 
-    return _value.getObject(env, index);
+    return _value.getObject(env, index, location);
   }
 
   /**

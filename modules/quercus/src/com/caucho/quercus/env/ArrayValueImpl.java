@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.util.RandomUtil;
 
 import java.io.IOException;
@@ -482,7 +483,8 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Returns the field value, creating an object if it's unset.
    */
-  public Value getObject(Env env, Value fieldName)
+  @Override
+  public Value getObject(Env env, Value fieldName, Location location)
   {
     Value value = get(fieldName);
 

@@ -47,7 +47,7 @@ abstract public class Expr {
 
   public static final int COMPILE_ARG_MAX = 5;
 
-  private final Location _location;
+  protected final Location _location;
 
   public Expr(Location location)
   {
