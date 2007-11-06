@@ -651,7 +651,7 @@ public class Env {
     return _quercus.getDatabase();
   }
 
-  protected DataSource findDatabase(String driver, String url)
+  protected final DataSource findDatabase(String driver, String url)
     throws Exception
   {
     return _quercus.findDatabase(driver, url);

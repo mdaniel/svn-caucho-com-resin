@@ -94,7 +94,7 @@ public class DatabaseManager {
   {
     String driver = findDriverByUrl(url);
     
-    return getLocalManager().findDatabaseImpl(driver, url);
+    return getLocalManager().findDatabaseImpl(url, driver);
   }
 
   /**
