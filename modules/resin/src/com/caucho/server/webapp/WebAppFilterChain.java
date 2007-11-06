@@ -74,11 +74,12 @@ public class WebAppFilterChain extends AbstractFilterChain {
 
   private HashMap<String,String> _securityRoleMap;
 
+  private ThreadLocal<ServletRequest> _requestThreadLocal;
+
   private AbstractAccessLog _accessLog;
 
   // true it's the top
   private boolean _isTop = true;
-
 
   /**
    * Creates a new FilterChainFilter.
@@ -104,6 +105,8 @@ public class WebAppFilterChain extends AbstractFilterChain {
     _errorPageManager = app.getErrorPageManager();
     _isTop = isTop;
     _requestListeners = app.getRequestListeners();
+
+    _requestThreadLocal = app.getRequestThreadLocal();
 
     if (_isTop)
       _accessLog = app.getAccessLog();

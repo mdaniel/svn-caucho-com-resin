@@ -38,7 +38,8 @@ import com.caucho.quercus.env.Value;
  * Represents a PHP required expression.
  */
 public class RequiredExpr extends Expr {
-  public static final RequiredExpr REQUIRED = new RequiredExpr(Location.UNKNOWN);
+  public static final RequiredExpr REQUIRED
+    = new RequiredExpr(Location.UNKNOWN);
 
   public RequiredExpr(Location location)
   {

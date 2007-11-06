@@ -48,6 +48,9 @@ public class ServletInvocation {
     = Logger.getLogger(ServletInvocation.class.getName());
   static final L10N L = new L10N(ServletInvocation.class);
 
+  private static final ThreadLocal<ServletRequest> _requestThreadLocal
+    = new ThreadLocal<ServletRequest>();
+
   private ClassLoader _classLoader;
   
   private String _contextPath = "";
@@ -226,6 +229,14 @@ public class ServletInvocation {
   }
 
   /**
+   * Returns the thread request.
+   */
+  public static ServletRequest getContextRequest()
+  {
+    return _requestThreadLocal.get();
+  }
+
+  /**
    * Service a request.
    *
    * @param request the servlet request
@@ -238,7 +249,16 @@ public class ServletInvocation {
       _requestCount++;
     }
 
-    _filterChain.doFilter(request, response);
+    ThreadLocal<ServletRequest> requestThreadLocal = _requestThreadLocal;
+    ServletRequest oldRequest = requestThreadLocal.get();
+
+    try {
+      requestThreadLocal.set(request);
+      
+      _filterChain.doFilter(request, response);
+    } finally {
+      requestThreadLocal.set(oldRequest);
+    }
   }
 
   /**

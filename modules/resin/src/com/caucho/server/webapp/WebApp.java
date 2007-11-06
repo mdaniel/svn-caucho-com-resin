@@ -79,6 +79,7 @@ import com.caucho.vfs.Encoding;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.webbeans.el.WebBeansELResolver;
 import com.caucho.java.WorkDir;
 
 import javax.annotation.PostConstruct;
@@ -121,6 +122,9 @@ public class WebApp extends ServletContextImpl
 
   private static EnvironmentLocal<WebApp> _appLocal
     = new EnvironmentLocal<WebApp>("caucho.application");
+
+  private static ThreadLocal<ServletRequest> _requestThreadLocal
+    = new ThreadLocal<ServletRequest>();
 
   static String []_classLoaderHackPackages;
 
@@ -1646,6 +1650,16 @@ public class WebApp extends ServletContextImpl
     return _lifecycle.isDestroyed();
   }
 
+  static ThreadLocal<ServletRequest> getRequestThreadLocal()
+  {
+    return _requestThreadLocal;
+  }
+
+  public static ServletRequest getThreadRequest()
+  {
+    return _requestThreadLocal.get();
+  }
+
   /**
    * Initializes.
    */
@@ -1776,6 +1790,8 @@ public class WebApp extends ServletContextImpl
         log.log(Level.WARNING, e.toString(), e);
       }
 
+      _jspApplicationContext.addELResolver(new WebBeansELResolver());
+      
       ServletContextEvent event = new ServletContextEvent(this);
 
       for (Listener listener : _listeners) {

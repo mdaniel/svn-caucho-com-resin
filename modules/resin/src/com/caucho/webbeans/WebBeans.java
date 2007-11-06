@@ -31,8 +31,7 @@ package com.caucho.webbeans;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.server.util.*;
@@ -40,6 +39,7 @@ import com.caucho.webbeans.cfg.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.net.URL;
@@ -49,8 +49,10 @@ import javax.webbeans.*;
 /**
  * The web beans for a given environment (?)
  */
-public class WebBeans {
+public class WebBeans implements EnvironmentListener {
   private static final L10N L = new L10N(WebBeans.class);
+  private static final Logger log
+    = Logger.getLogger(WebBeans.class.getName());
   
   private static final String SCHEMA = "com/caucho/webbeans/cfg/webbeans.rnc";
 
@@ -65,11 +67,16 @@ public class WebBeans {
   private HashMap<Class,WebComponent> _componentMap
     = new HashMap<Class,WebComponent>();
 
+  private HashMap<String,WbComponent> _namedComponentMap
+    = new HashMap<String,WbComponent>();
+
   private RuntimeException _configException;
 
   private WebBeans()
   {
     _loader = Thread.currentThread().getContextClassLoader();
+
+    Environment.addEnvironmentListener(this);
   }
 
   public static WebBeans getLocal()
@@ -104,9 +111,25 @@ public class WebBeans {
 
       throw _configException;
     }
+
+    try {
+      
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   public void addComponent(Class cl, WbComponent comp)
+  {
+    addComponentRec(cl, comp);
+
+    String name = comp.getName();
+
+    if (name != null && comp.getScopeAnnotation() != null)
+      _namedComponentMap.put(name, comp);
+  }
+
+  private void addComponentRec(Class cl, WbComponent comp)
   {
     if (cl == null)
       return;
@@ -120,10 +143,10 @@ public class WebBeans {
 
     webComponent.addComponent(comp);
 
-    addComponent(cl.getSuperclass(), comp);
+    addComponentRec(cl.getSuperclass(), comp);
 
     for (Class subClass : cl.getInterfaces()) {
-      addComponent(subClass, comp);
+      addComponentRec(subClass, comp);
     }
   }
 
@@ -160,6 +183,16 @@ public class WebBeans {
     component.createProgram(initList, field, name, inject, bindingList);
   }
 
+  public Object findByName(String name)
+  {
+    WbComponent comp = _namedComponentMap.get(name);
+
+    if (comp != null)
+      return comp.get();
+    else
+      return null;
+  }
+
   private void fillClassPath()
     throws IOException
   {
@@ -175,13 +208,29 @@ public class WebBeans {
 
       if (_webBeansMap.get(path) != null)
 	continue;
-      
-      System.out.println("PATH! " + path + " " + root);
 
       WbWebBeans webBeans = new WbWebBeans(this, root);
 
       new Config().configure(webBeans, path, SCHEMA);
     }
+  }
+
+  /**
+   * Handles the case where the environment is starting (after init).
+   */
+  public void environmentStart(EnvironmentClassLoader loader)
+    throws Exception
+  {
+    loader.make();
+    
+    fillClassPath();
+  }
+
+  /**
+   * Handles the case where the environment is stopping
+   */
+  public void environmentStop(EnvironmentClassLoader loader)
+  {
   }
 
   public static ConfigException injectError(AccessibleObject prop, String msg)

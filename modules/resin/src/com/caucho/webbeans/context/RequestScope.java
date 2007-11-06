@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,18 +27,32 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package com.caucho.webbeans.context;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.caucho.server.dispatch.ServletInvocation;
+
+import javax.servlet.*;
 
 /**
- * The @RequestScoped represents the servlet request scope
+ * Configuration for the xml web bean component.
  */
-@ScopeType
-@Target({TYPE, METHOD})
-@Retention(RUNTIME)
-public @interface RequestScoped {
+public class RequestScope {
+  public Object get(String name)
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request != null)
+      return request.getAttribute(name);
+    else
+      return null;
+  }
+  
+  public void set(String name, Object value)
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request != null) {
+      request.setAttribute(name, value);
+    }
+  }
 }

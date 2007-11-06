@@ -33,6 +33,7 @@ import com.caucho.el.AbstractVariableResolver;
 import com.caucho.jsf.application.*;
 import com.caucho.jsf.cfg.*;
 import com.caucho.jsp.el.*;
+import com.caucho.webbeans.el.*;
 
 import javax.el.*;
 import javax.faces.component.*;
@@ -52,6 +53,7 @@ public class FacesJspELResolver extends ELResolver {
 
   private ApplicationImpl _app;
   private ELResolver _managedBeanResolver;
+  private ELResolver _webBeansResolver;
   private ELResolver _resourceBundleResolver;
 
   public FacesJspELResolver(ApplicationImpl app)
@@ -62,6 +64,7 @@ public class FacesJspELResolver extends ELResolver {
       = (FacesContextELResolver) _app.getELResolver();
 
     _managedBeanResolver = facesResolver.getManagedBeanResolver();
+    _webBeansResolver = new WebBeansELResolver();
     _resourceBundleResolver = facesResolver.getResourceBundleResolver();
   }
 
@@ -97,6 +100,9 @@ public class FacesJspELResolver extends ELResolver {
 
     addDescriptors(descriptors,
 		   _managedBeanResolver.getFeatureDescriptors(env, base));
+
+    addDescriptors(descriptors,
+		   _webBeansResolver.getFeatureDescriptors(env, base));
 
     addDescriptors(descriptors,
 		   _resourceBundleResolver.getFeatureDescriptors(env, base));
@@ -156,7 +162,12 @@ public class FacesJspELResolver extends ELResolver {
 	}
       }
 
-      Object value = _managedBeanResolver.getValue(env, base, property);
+      Object value = _webBeansResolver.getValue(env, base, property);
+
+      if (env.isPropertyResolved())
+	return value;
+
+      value = _managedBeanResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
 	return value;

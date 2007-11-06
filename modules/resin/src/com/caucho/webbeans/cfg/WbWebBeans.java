@@ -199,10 +199,15 @@ public class WbWebBeans {
       Class cl = Class.forName(className, false, loader);
 
       Annotation compTypeAnn = null;
+      Annotation scopeAnn = null;
       ArrayList<Annotation> bindList = new ArrayList<Annotation>();
       for (Annotation ann : cl.getAnnotations()) {
 	if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
 	  compTypeAnn = ann;
+	}
+	
+	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	  scopeAnn = ann;
 	}
 	
 	if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
@@ -221,6 +226,9 @@ public class WbWebBeans {
       WbComponent component = new WbComponent();
       component.setClass(cl);
       component.setType(type);
+
+      if (scopeAnn != null)
+	component.setScopeAnnotation(scopeAnn);
 
       for (int i = 0; i < bindList.size(); i++) {
 	Annotation bindAnn = bindList.get(i);

@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>quercus: required expr missing from function not properly generated (#2139, rep by koreth)</li>
 <li>hessian: object definition ('O') should use string for type (#2142, rep by Charlie Groves)</li>
 <li>rewrite-dispatch forward and redirect should use query-string (#1997, rep by Jan Kriesten)</li>
 <li>Add DatabaseManager.findDatabase(url) (#1932, rep by Geoff Hendry)</li>

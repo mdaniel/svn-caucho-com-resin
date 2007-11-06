@@ -32,6 +32,7 @@ package com.caucho.webbeans.cfg;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.context.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -43,18 +44,62 @@ import java.util.ArrayList;
 public class WbComponent {
   private Class _cl;
   private WbComponentType _type;
+
+  private String _name;
   
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
+  private Annotation _scopeAnn;
+  private RequestScope _scopeContext;
+
+  /**
+   * Returns the component's EL binding name.
+   */
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Gets the component's EL binding name.
+   */
+  public String getName()
+  {
+    return _name;
+  }
+
+  /**
+   * Sets the component type.
+   */
   public void setType(WbComponentType type)
   {
     _type = type;
   }
 
+  /**
+   * Gets the component type.
+   */
+  public WbComponentType getType()
+  {
+    return _type;
+  }
+
+  /**
+   * Sets the component implementation class.
+   */
   public void setClass(Class cl)
   {
     _cl = cl;
+
+    if (_name == null) {
+      String className = cl.getName();
+      int p = className.lastIndexOf('.');
+      
+      char ch = Character.toLowerCase(className.charAt(p + 1));
+      
+      _name = ch + className.substring(p + 2);
+    }
   }
   
   public String getClassName()
@@ -65,20 +110,42 @@ public class WbComponent {
       return null;
   }
 
-  public WbComponentType getType()
-  {
-    return _type;
-  }
-
+  /**
+   * Adds a component binding.
+   */
   public void addBinding(WbBinding binding)
   {
     _bindingList.add(binding);
   }
 
+  /**
+   * Sets the scope attribute.
+   */
+  public void setScope(String scope)
+  {
+  }
+
+  /**
+   * Sets the scope annotation.
+   */
+  public void setScopeAnnotation(Annotation scopeAnn)
+  {
+    _scopeAnn = scopeAnn;
+
+    if (scopeAnn != null)
+      _scopeContext = new RequestScope();
+  }
+
+  /**
+   * Gets the scope annotation.
+   */
+  public Annotation getScopeAnnotation()
+  {
+    return _scopeAnn;
+  }
+
   public boolean isMatch(ArrayList<Annotation> bindList)
   {
-    System.out.println("MATCH: " + _bindingList + " " + bindList);
-    
     for (int i = 0; i < bindList.size(); i++) {
       if (! isMatch(bindList.get(i)))
 	return false;
@@ -99,6 +166,25 @@ public class WbComponent {
     }
     
     return false;
+  }
+
+  public Object get()
+  {
+    if (_scopeContext != null) {
+      Object value = _scopeContext.get(_name);
+
+      try {
+	value = _cl.newInstance();
+
+	_scopeContext.set(_name, value);
+
+	return value;
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
+    }
+    else
+      return null;
   }
   
   public void createProgram(ArrayList<BuilderProgram> initList,

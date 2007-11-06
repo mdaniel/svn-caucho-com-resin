@@ -37,6 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @ApplicationScoped represents the servlet application scope
  */
+@ScopeType
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface ApplicationScoped {
