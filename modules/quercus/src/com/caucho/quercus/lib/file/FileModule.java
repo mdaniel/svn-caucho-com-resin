@@ -364,14 +364,11 @@ public class FileModule extends AbstractQuercusModule {
    */
   public StringValue dirname(Env env, StringValue path)
   {
-    if (path == null)
-      return env.createString(".");
-    
     int len = path.length();
 
     if (len == 0)
       return env.createString(".");
-    else if (path.length() == 1 && path.charAt(0) == '/')
+    else if (len == 1 && path.charAt(0) == '/')
       return path;
     
     int p = path.lastIndexOf('/', len - 2);
@@ -926,7 +923,7 @@ public class FileModule extends AbstractQuercusModule {
 		      @Optional long offset,
 		      @Optional("4294967296") long maxLen)
   {
-    if (filename == null) {
+    if (filename.length() == 0) {
       env.warning(L.l("file name must not be null"));
       return null;
     }
@@ -954,7 +951,7 @@ public class FileModule extends AbstractQuercusModule {
                                  @Optional int flags,
                                  @Optional Value context)
   {
-    if (filename == null) {
+    if (filename.length() == 0) {
       env.warning(L.l("file name must not be null"));
       return BooleanValue.FALSE;
     }
