@@ -677,6 +677,7 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 		default:
 			if (code < 0) {
 				code = -1;
+				connection_error(config, r);
 				break;
 			}
 			read_len = hmux_read_len(s);

@@ -613,18 +613,14 @@ public class Hessian2Output
     else {
       int ref = _classRefs.size();
       
-      _classRefs.put(type, new Integer(ref));
+      _classRefs.put(type, Integer.valueOf(ref));
       
       if (SIZE < _offset + 32)
 	flush();
 
       _buffer[_offset++] = (byte) 'O';
-      
-      int len = type.length();
 
-      writeInt(len);
-      
-      printString(type, 0, len);
+      writeString(type);
 
       return -1;
     }
@@ -698,7 +694,7 @@ public class Hessian2Output
       writeInt(typeRef);
     }
     else {
-      _typeRefs.put(type, new Integer(_typeRefs.size()));
+      _typeRefs.put(type, Integer.valueOf(_typeRefs.size()));
 
       if (SIZE < _offset + 32)
 	flush();

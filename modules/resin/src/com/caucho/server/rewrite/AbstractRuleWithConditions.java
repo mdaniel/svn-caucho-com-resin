@@ -218,7 +218,7 @@ public abstract class AbstractRuleWithConditions
 				     accept, getPassFilterChainMapper());
 
     Condition []conditions = _conditions;
-
+    
     if (conditions == null) {
       if (_isFiner)
         log.finer(getLogPrefix() + " '" + uri + "' --> '" + targetUri + "'");
@@ -227,7 +227,6 @@ public abstract class AbstractRuleWithConditions
         return getPassFilterChainMapper().map(uri, queryString, accept);
       else
         return ruleChain;
-
     }
     else {
       FilterChain passChain = ruleChain;

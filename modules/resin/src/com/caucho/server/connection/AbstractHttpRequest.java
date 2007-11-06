@@ -1982,16 +1982,24 @@ public abstract class AbstractHttpRequest
           charEncoding = Encoding.getMimeName(locale);
       }
 
-      if (charEncoding == null && _server != null)
-        charEncoding = _server.getURLCharacterEncoding();
+      if (query != null) {
+	String queryEncoding = charEncoding;
+	
+	if (queryEncoding == null && _server != null)
+	  queryEncoding = _server.getURLCharacterEncoding();
+      
+	if (queryEncoding == null)
+	  queryEncoding = CharacterEncoding.getLocalEncoding();
+
+	String javaEncoding = Encoding.getJavaName(queryEncoding);
+	
+	_formParser.parseQueryString(_form, query, javaEncoding, true);
+      }
       
       if (charEncoding == null)
 	charEncoding = CharacterEncoding.getLocalEncoding();
-
+      
       String javaEncoding = Encoding.getJavaName(charEncoding);
-
-      if (query != null)
-	_formParser.parseQueryString(_form, query, javaEncoding, true);
 
       if (contentType == null || ! "POST".equalsIgnoreCase(getMethod())) {
       }

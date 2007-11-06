@@ -24,6 +24,23 @@ use the Resin 3.0.x branch.</p>
 
 </s1>
 
+<s1 title="DatabaseManager">
+
+<p>com.caucho.sql.DatabaseManager allows dynamic allocation of
+database pools.</p>
+
+<p>The two methods are:</p>
+
+<code><pre>
+  DataSource DatabaseManager.findDatabase(String url);
+
+  DataSource DatabaseManager.findDatabase(String url, String driver);
+</pre></code>
+
+<p>The first method is only allowed if the driver has a META-INF/services.</p>
+
+</s1>
+
 <s1 title="Admin">
 
 <p>Added resin_admin_insecure to allow sites to require SSL for admin.</p>

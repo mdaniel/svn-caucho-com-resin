@@ -167,7 +167,7 @@ public class ResinQuercus extends Quercus
       if (getDatabase() != null)
 	return getDatabase();
       else
-	return DatabaseManager.findDatabase(driver, url);
+	return DatabaseManager.findDatabase(url, driver);
     } catch (Exception e) {
       throw new QuercusModuleException(e);
     }

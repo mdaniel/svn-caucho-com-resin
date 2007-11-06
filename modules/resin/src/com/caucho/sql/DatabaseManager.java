@@ -31,10 +31,14 @@ package com.caucho.sql;
 
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
+import com.caucho.vfs.*;
 
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.logging.Logger;
+import java.net.*;
+import java.sql.*;
+import javax.sql.*;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * Manages databases in a local environment, e.g. for PHP dynamic
@@ -51,6 +55,9 @@ public class DatabaseManager {
   private final HashMap<String,DBPool> _databaseMap
     = new HashMap<String,DBPool>();
 
+  private final ArrayList<Driver> _driverList
+    = new ArrayList<Driver>();
+
   private static int _gId;
 
   /**
@@ -58,6 +65,7 @@ public class DatabaseManager {
    */
   private DatabaseManager()
   {
+    initDriverList();
   }
 
   /**
@@ -81,43 +89,138 @@ public class DatabaseManager {
   /**
    * Returns a matching dbpool.
    */
-  public static DataSource findDatabase(String driver,
-					String url)
-    throws Exception
+  public static DataSource findDatabase(String url)
+    throws SQLException
   {
+    String driver = findDriverByUrl(url);
+    
     return getLocalManager().findDatabaseImpl(driver, url);
+  }
+
+  /**
+   * Returns a matching dbpool.
+   */
+  public static DataSource findDatabase(String url, String driver)
+    throws SQLException
+  {
+    return getLocalManager().findDatabaseImpl(url, driver);
   }
 
   /**
    * Looks up the local database, creating if necessary.
    */
-  private DataSource findDatabaseImpl(String driverName,
-				      String url)
-    throws Exception
+  private DataSource findDatabaseImpl(String url,
+				      String driverName)
+    throws SQLException
   {
-    synchronized (_databaseMap) {
-      DBPool db = _databaseMap.get(url);
+    try {
+      synchronized (_databaseMap) {
+	DBPool db = _databaseMap.get(url);
 
-      if (db == null) {
-	db = new DBPool();
+	if (db == null) {
+	  db = new DBPool();
 
-	db.setVar(url + "-" + _gId++);
+	  db.setVar(url + "-" + _gId++);
 	
-	DriverConfig driver = db.createDriver();
+	  DriverConfig driver = db.createDriver();
 
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
 	
-	Class driverClass = Class.forName(driverName, false, loader);
+	  Class driverClass = Class.forName(driverName, false, loader);
 
-	driver.setType(driverClass);
-	driver.setURL(url);
+	  driver.setType(driverClass);
+	  driver.setURL(url);
 
-	db.init();
+	  db.init();
 
-	_databaseMap.put(url, db);
+	  _databaseMap.put(url, db);
+	}
+
+	return db;
       }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
 
-      return db;
+  public static String findDriverByUrl(String url)
+  {
+    return getLocalManager().findDriverByUrlImpl(url);
+  }
+  
+  private String findDriverByUrlImpl(String url)
+  {
+    for (int i = 0; i < _driverList.size(); i++) {
+      try {
+	Driver driver = (Driver) _driverList.get(i);
+	
+	if (driver.acceptsURL(url))
+	  return driver.getClass().getName();
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
+    return null;
+  }
+
+  private void initDriverList()
+  {
+    try {
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+      
+      Enumeration iter
+	= loader.getResources("META-INF/services/java.sql.Driver");
+      while (iter.hasMoreElements()) {
+	URL url = (URL) iter.nextElement();
+
+	ReadStream is = null;
+	try {
+	  is = Vfs.lookup(url.toString()).openRead();
+
+	  String filename;
+
+	  while ((filename = is.readLine()) != null) {
+	    int p = filename.indexOf('#');
+	    
+	    if (p >= 0)
+	      filename = filename.substring(0, p);
+
+	    filename = filename.trim();
+	    if (filename.length() == 0)
+	      continue;
+
+	    try {
+	      Class cl = Class.forName(filename, false, loader);
+	      Driver driver = null;
+	      
+	      if (Driver.class.isAssignableFrom(cl))
+		driver = (Driver) cl.newInstance();
+
+	      if (driver != null) {
+		log.fine(L.l("DatabaseManager adding driver '{0}'",
+			     driver.getClass().getName()));
+
+		_driverList.add(driver);
+	      }
+	    } catch (Exception e) {
+	      log.log(Level.FINE, e.toString(), e);
+	    }
+	  }
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
+	} finally {
+	  if (is != null)
+	    is.close();
+	}
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 

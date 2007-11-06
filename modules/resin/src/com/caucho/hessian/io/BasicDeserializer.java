@@ -157,25 +157,25 @@ public class BasicDeserializer extends AbstractDeserializer {
       return null;
       
     case BOOLEAN:
-      return new Boolean(in.readBoolean());
+      return Boolean.valueOf(in.readBoolean());
       
     case BYTE:
-      return new Byte((byte) in.readInt());
+      return Byte.valueOf((byte) in.readInt());
       
     case SHORT:
-      return new Short((short) in.readInt());
+      return Short.valueOf((short) in.readInt());
       
     case INTEGER:
-      return new Integer(in.readInt());
+      return Integer.valueOf(in.readInt());
 
     case LONG:
-      return new Long(in.readLong());
+      return Long.valueOf(in.readLong());
 
     case FLOAT:
-      return new Float((float) in.readDouble());
+      return Float.valueOf((float) in.readDouble());
 
     case DOUBLE:
-      return new Double(in.readDouble());
+      return Double.valueOf(in.readDouble());
       
     case STRING:
       return in.readString();

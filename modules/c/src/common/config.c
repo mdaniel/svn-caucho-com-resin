@@ -821,7 +821,12 @@ write_config(config_t *config)
 
 #ifdef WIN32
   tail = tempnam("c:/temp", "resin-");
-  fd = open(tail, O_WRONLY, 0644);
+  if (tail) {
+    strcpy(temp, tail);
+    fd = open(tail, O_WRONLY|O_CREAT|O_TRUNC, 0664);
+  }
+  else
+    fd = -1;
 #else
   strcat(temp, "/resintmp-XXXXXX");
 
@@ -948,6 +953,9 @@ write_config(config_t *config)
 
   close(fd);
 
+#ifdef WIN32  
+  unlink(temp);
+#endif  
   rename(temp, config->config_path);
   unlink(temp);
 }
@@ -1184,7 +1192,8 @@ cse_init_config(config_t *config)
   
 #ifdef WIN32  
   strcpy(config->work_dir, "/temp");
-  mkdir("/temp");
+  mkdir(config->work_dir);
+  chmod(config->work_dir, 0775);
 #else
   strcpy(config->work_dir, "/tmp");
 #endif

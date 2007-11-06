@@ -67,7 +67,13 @@ public class ForwardRule
                               FilterChain accept,
                               FilterChainMapper next)
   {
-    return new ForwardFilterChain(uri);
+    if (queryString == null)
+      return new ForwardFilterChain(uri);
+
+    if (uri.indexOf('?') >= 0)
+      return new ForwardFilterChain(uri + "&" + queryString);
+    else
+      return new ForwardFilterChain(uri + "?" + queryString);
   }
 
   @Override

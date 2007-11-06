@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,26 +19,33 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package com.caucho.management.server;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
+
+import java.util.Date;
 
 /**
- * The @Named annotation for web beans
+ * MBean API for a JMS Topic.
+ *
+ * <pre>
+ * resin:type=Topic,name=jms/mytopic,...
+ * </pre>
  */
-@BindingType
-@Target({TYPE, METHOD, FIELD, PARAMETER})
-@Retention(RUNTIME)
-public @interface Named {
-  String value() default "";
+@Description("Manages a JMS topic")
+public interface JmsTopicMXBean extends ManagedObjectMXBean {
+  /**
+   * Returns a URL describing the topic configuration.
+   */
+  @Description("A descriptive URL for the topic")
+  public String getUrl();
 }

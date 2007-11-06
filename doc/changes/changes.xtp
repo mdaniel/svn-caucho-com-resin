@@ -12,6 +12,12 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>hessian: object definition ('O') should use string for type (#2142, rep by Charlie Groves)</li>
+<li>rewrite-dispatch forward and redirect should use query-string (#1997, rep by Jan Kriesten)</li>
+<li>Add DatabaseManager.findDatabase(url) (#1932, rep by Geoff Hendry)</li>
+<li>form encoding needs to default to character-encoding, not url-character-encoding (#2140, rep by refactor)</li>
+<li>hessian: use Integer.valueOf instead of new Integer (#2138, rep by regor)</li>
+<li>resource-ref validation schema incorrect (#2143, rep by Gary Zhu)</li>
 <li>(2007-11-04) admin: add root-directory and uptime for web-app (#2043, rep by stbu)</li>
 <li>amber: hessian serialization for @OneToMany was incorrect (#2118, rep by Daniel Spangler)</li>
 <li>ProxyCacheMXBean.clearCacheByPattern (#2115, rep by B Youngblood)</li>

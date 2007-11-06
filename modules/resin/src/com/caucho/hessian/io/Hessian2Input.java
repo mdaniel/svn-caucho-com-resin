@@ -1734,10 +1734,10 @@ public class Hessian2Input
       return null;
       
     case 'T':
-      return new Boolean(true);
+      return Boolean.valueOf(true);
       
     case 'F':
-      return new Boolean(false);
+      return Boolean.valueOf(false);
 
       // direct integer
     case 0x80: case 0x81: case 0x82: case 0x83:
@@ -1759,22 +1759,22 @@ public class Hessian2Input
     case 0xb4: case 0xb5: case 0xb6: case 0xb7:
     case 0xb8: case 0xb9: case 0xba: case 0xbb:
     case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-      return new Integer(tag - INT_ZERO);
+      return Integer.valueOf(tag - INT_ZERO);
 
       /* byte int */
     case 0xc0: case 0xc1: case 0xc2: case 0xc3:
     case 0xc4: case 0xc5: case 0xc6: case 0xc7:
     case 0xc8: case 0xc9: case 0xca: case 0xcb:
     case 0xcc: case 0xcd: case 0xce: case 0xcf:
-      return new Integer(((tag - INT_BYTE_ZERO) << 8) + read());
+      return Integer.valueOf(((tag - INT_BYTE_ZERO) << 8) + read());
       
       /* short int */
     case 0xd0: case 0xd1: case 0xd2: case 0xd3:
     case 0xd4: case 0xd5: case 0xd6: case 0xd7:
-      return new Integer(((tag - INT_SHORT_ZERO) << 16) + 256 * read() + read());
+      return Integer.valueOf(((tag - INT_SHORT_ZERO) << 16) + 256 * read() + read());
       
     case 'I':
-      return new Integer(parseInt());
+      return Integer.valueOf(parseInt());
 
       // direct long
     case 0xd8: case 0xd9: case 0xda: case 0xdb:
@@ -1784,47 +1784,47 @@ public class Hessian2Input
     case 0xe4: case 0xe5: case 0xe6: case 0xe7:
     case 0xe8: case 0xe9: case 0xea: case 0xeb:
     case 0xec: case 0xed: case 0xee: case 0xef:
-      return new Long(tag - LONG_ZERO);
+      return Long.valueOf(tag - LONG_ZERO);
 
       /* byte long */
     case 0xf0: case 0xf1: case 0xf2: case 0xf3:
     case 0xf4: case 0xf5: case 0xf6: case 0xf7:
     case 0xf8: case 0xf9: case 0xfa: case 0xfb:
     case 0xfc: case 0xfd: case 0xfe: case 0xff:
-      return new Long(((tag - LONG_BYTE_ZERO) << 8) + read());
+      return Long.valueOf(((tag - LONG_BYTE_ZERO) << 8) + read());
       
       /* short long */
     case 0x38: case 0x39: case 0x3a: case 0x3b:
     case 0x3c: case 0x3d: case 0x3e: case 0x3f:
-      return new Long(((tag - LONG_SHORT_ZERO) << 16) + 256 * read() + read());
+      return Long.valueOf(((tag - LONG_SHORT_ZERO) << 16) + 256 * read() + read());
       
     case LONG_INT:
-      return new Long(parseInt());
+      return Long.valueOf(parseInt());
     
     case 'L':
-      return new Long(parseLong());
+      return Long.valueOf(parseLong());
 
     case DOUBLE_ZERO:
-      return new Double(0);
+      return Double.valueOf(0);
 
     case DOUBLE_ONE:
-      return new Double(1);
+      return Double.valueOf(1);
 
     case DOUBLE_BYTE:
-      return new Double((byte) read());
+      return Double.valueOf((byte) read());
 
     case DOUBLE_SHORT:
-      return new Double((short) (256 * read() + read()));
+      return Double.valueOf((short) (256 * read() + read()));
       
     case DOUBLE_FLOAT:
       {
 	int f = parseInt();
 
-	return new Double(Float.intBitsToFloat(f));
+	return Double.valueOf(Float.intBitsToFloat(f));
       }
 
     case 'D':
-      return new Double(parseDouble());
+      return Double.valueOf(parseDouble());
     
     case 'd':
       return new Date(parseLong());
@@ -1980,13 +1980,13 @@ public class Hessian2Input
    * Reads an object definition:
    *
    * <pre>
-   * O type <int> (string)* <value>*
+   * O string <int> (string)* <value>*
    * </pre>
    */
   private void readObjectDefinition(Class cl)
     throws IOException
   {
-    String type = readLenString();
+    String type = readString();
     int len = readInt();
 
     String []fieldNames = new String[len];

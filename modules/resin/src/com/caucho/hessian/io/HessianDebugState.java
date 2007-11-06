@@ -1055,7 +1055,6 @@ public class HessianDebugState implements Hessian2Constants
   }
   
   class ObjectDefState extends State {
-    private static final int TYPE_COUNT = 0;
     private static final int TYPE = 1;
     private static final int COUNT = 2;
     private static final int FIELD = 3;
@@ -1074,7 +1073,7 @@ public class HessianDebugState implements Hessian2Constants
     {
       super(next);
       
-      _state = TYPE_COUNT;
+      _state = TYPE;
     }
 
     @Override
@@ -1086,14 +1085,7 @@ public class HessianDebugState implements Hessian2Constants
     @Override
     State shift(Object object)
     {
-      if (_state == TYPE_COUNT) {
-	int length = (Integer) object;
-
-	_state = TYPE;
-
-	return new StringState(this, 't', length);
-      }
-      else if (_state == TYPE) {
+      if (_state == TYPE) {
 	_type = (String) object;
 
 	print("/* defun " + _type + " [");
@@ -1138,9 +1130,6 @@ public class HessianDebugState implements Hessian2Constants
     State next(int ch)
     {
       switch (_state) {
-      case TYPE_COUNT:
-	return nextObject(ch);
-	
       case TYPE:
 	return nextObject(ch);
 	

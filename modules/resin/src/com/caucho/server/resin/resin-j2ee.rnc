@@ -290,9 +290,11 @@ r_resource-env-ref-type = element resource-env-ref-type {
 }
 
 r_resource-ref = element resource-ref {
+  attribute id { string }?,
+
   r_description*,
 
-  r_resource-ref-name,
+  r_res-ref-name,
 
   r_res-type,
 
@@ -303,8 +305,8 @@ r_resource-ref = element resource-ref {
   r_deployment-extension*
 }
 
-r_resource-ref-name = element resource-ref-name {
-  r_jndi-name
+r_res-ref-name = element res-ref-name {
+  string
 }
 
 r_role-name =

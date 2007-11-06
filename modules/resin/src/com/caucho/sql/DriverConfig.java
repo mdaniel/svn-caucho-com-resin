@@ -48,6 +48,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.lifecycle.Lifecycle;
 
+import javax.annotation.PostConstruct;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
@@ -645,6 +646,34 @@ public class DriverConfig
     }
   }
 
+  @PostConstruct
+  public void init()
+  {
+    if (_driverClass == null) {
+      if (_driverURL == null)
+	throw new ConfigException(L.l("<driver> requires a 'type' or 'url'"));
+
+      String driver = DatabaseManager.findDriverByUrl(_driverURL);
+
+      if (driver == null)
+	throw new ConfigException(L.l("url='{0}' does not have a known driver.  The driver class must be specified by a 'type' parameter.",
+				      _driverURL));
+
+      Class driverClass = null;
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	driverClass = Class.forName(driver, false, loader);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
+
+      setType(driverClass);
+    }
+  }
+  
   /**
    * Initializes the JDBC driver.
    */
