@@ -868,11 +868,11 @@ public class JavaAdapterVar extends Var
    * Returns the value, creating an object if unset.
    */
   @Override
-  public Value getObject(Env env, Value index, Location location)
+  public Value getObject(Env env, Value index)
   {
     setRaw(getValue());
     
-    Value value = super.getObject(env, index, location);
+    Value value = super.getObject(env, index);
     
     setValue(getRawValue());
     

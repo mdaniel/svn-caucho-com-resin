@@ -2022,7 +2022,7 @@ abstract public class Value implements java.io.Serializable
    * Returns the value for a field, creating an object if the field
    * is unset.
    */
-  public Value getObject(Env env, Value index, Location location)
+  public Value getObject(Env env, Value index)
   {
     return NullValue.NULL;
   }

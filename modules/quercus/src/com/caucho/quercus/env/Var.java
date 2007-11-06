@@ -934,12 +934,12 @@ public class Var extends Value
    * Returns the value, creating an object if unset.
    */
   @Override
-  public Value getObject(Env env, Value index, Location location)
+  public Value getObject(Env env, Value index)
   {
     // php/3d2p
     _value = _value.toAutoArray();
 
-    return _value.getObject(env, index, location);
+    return _value.getObject(env, index);
   }
 
   /**

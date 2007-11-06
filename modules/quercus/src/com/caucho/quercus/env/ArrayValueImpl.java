@@ -484,7 +484,7 @@ public class ArrayValueImpl extends ArrayValue
    * Returns the field value, creating an object if it's unset.
    */
   @Override
-  public Value getObject(Env env, Value fieldName, Location location)
+  public Value getObject(Env env, Value fieldName)
   {
     Value value = get(fieldName);
 

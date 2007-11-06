@@ -139,9 +139,7 @@ public class ArgGetValue extends Value
    */
   public Value getFieldObject(Env env, StringValue index)
   {
-    return _obj.getObject(env,
-                          _index,
-                          Location.UNKNOWN).getFieldObject(env, index);
+    return _obj.getObject(env, _index).getFieldObject(env, index);
   }
 
   /**
@@ -150,9 +148,7 @@ public class ArgGetValue extends Value
   public Value getFieldRef(Env env, StringValue index)
   {
     // php/3d2p
-    return _obj.getObject(env,
-                          _index,
-                          Location.UNKNOWN).getFieldRef(env, index);
+    return _obj.getObject(env, _index).getFieldRef(env, index);
   }
   
   //
