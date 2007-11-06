@@ -677,7 +677,7 @@ public class FileModule extends AbstractQuercusModule {
                            @Optional boolean useIncludePath,
                            @Optional Value context)
   {
-    if (filename == null)
+    if (filename.length() == 0)
       return BooleanValue.FALSE;    
 
     try {
@@ -1319,12 +1319,12 @@ public class FileModule extends AbstractQuercusModule {
 				   @Optional boolean useIncludePath,
 				   @Optional Value context)
   {
-    if (filename == null) {
+    if (filename.length() == 0) {
       env.warning(L.l("file name must not be null"));
       return null;
     }
-    
-    if (mode == null) {
+
+    if (mode == null || mode.length() == 0) {
       env.warning(L.l("fopen mode must not be null"));
       return null;
     }
@@ -2364,7 +2364,7 @@ public class FileModule extends AbstractQuercusModule {
                         @Optional boolean useIncludePath,
                         @Optional Value context)
   {
-    if (filename == null)
+    if (filename.length() == 0)
       return BooleanValue.FALSE;
 
     BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
