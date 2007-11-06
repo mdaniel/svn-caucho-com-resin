@@ -176,15 +176,13 @@ public class JavaClassDef extends ClassDef {
   {
     if (_name.equalsIgnoreCase(name))
       return true;
-    
+
     for (Class type = _type; type != null; type = type.getSuperclass()) {
       if (type.getSimpleName().equalsIgnoreCase(name))
         return true;
 
       if (hasInterface(name, type))
         return true;
-
-      type = type.getSuperclass();
     }
 
     return false;

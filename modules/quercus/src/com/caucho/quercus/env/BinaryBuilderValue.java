@@ -90,6 +90,33 @@ public class BinaryBuilderValue
       _buffer[i] = (byte) s.charAt(i);
   }
   
+  public BinaryBuilderValue(char []buffer)
+  {
+    _buffer = new byte[buffer.length];
+    _length = buffer.length;
+
+    for (int i = 0; i < buffer.length; i++)
+      _buffer[i] = (byte) buffer[i];
+  }
+  
+  public BinaryBuilderValue(char []s, Value v1)
+  {
+    int len = s.length;
+
+    if (len < 128)
+      _buffer = new byte[128];
+    else
+      _buffer = new byte[len + 32];
+    
+    _length = len;
+
+    for (int i = 0; i < len; i++) {
+      _buffer[i] = (byte) s[i];
+    }
+
+    v1.appendTo(this);
+  }
+  
   public BinaryBuilderValue(Byte []buffer)
   {
     int length = buffer.length;
