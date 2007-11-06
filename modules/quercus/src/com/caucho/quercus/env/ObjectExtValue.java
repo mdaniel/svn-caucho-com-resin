@@ -57,7 +57,7 @@ public class ObjectExtValue extends ObjectValue
 
   private static final int DEFAULT_SIZE = 16;
 
-  private final MethodMap<AbstractFunction> _methodMap;
+  private MethodMap<AbstractFunction> _methodMap;
 
   private Entry []_entries;
   private int _hashMask;
@@ -79,6 +79,14 @@ public class ObjectExtValue extends ObjectValue
   {
     _entries = new Entry[DEFAULT_SIZE];
     _hashMask = _entries.length - 1;
+  }
+  
+  @Override
+  protected void setQuercusClass(QuercusClass cl)
+  {
+    super.setQuercusClass(cl);
+    
+    _methodMap = cl.getMethodMap();
   }
 
   /**

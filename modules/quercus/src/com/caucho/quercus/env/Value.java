@@ -423,11 +423,6 @@ abstract public class Value implements java.io.Serializable
     return obj;
   }
 
-  public CompiledObjectValue toObjectValue()
-  {
-    return null;
-  }
-
   /**
    * Converts to a java object.
    */
