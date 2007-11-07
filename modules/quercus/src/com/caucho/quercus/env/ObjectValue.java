@@ -164,6 +164,8 @@ abstract public class ObjectValue extends Value {
       return delegate.get(this, key);
     else
       return super.get(key);
+      //return Env.getInstance().error(L.l("Can't use object '{0}' as array",
+      //                                   getName()));
   }
 
   /**
@@ -289,6 +291,23 @@ abstract public class ObjectValue extends Value {
 
     if (delegate != null)
       return delegate.count(this);
+    else
+      return super.getSize();
+  }
+  
+  /**
+   * Returns the count value with the given key.
+   */
+  @Override
+  public int getCountRecursive(Env env)
+  {
+    CountDelegate delegate = _quercusClass.getCountDelegate();
+      
+    // php/066q vs. php/0906
+    //return getField(null, key.toString());
+
+    if (delegate != null)
+      return delegate.countRecursive(this);
     else
       return super.getSize();
   }

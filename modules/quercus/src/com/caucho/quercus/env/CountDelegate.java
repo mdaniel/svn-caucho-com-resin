@@ -40,4 +40,9 @@ public interface CountDelegate {
    * Returns the object's count
    */
   public int count(ObjectValue qThis);
+  
+  /**
+   * Returns the object's count recursively.
+   */
+  public int countRecursive(ObjectValue qThis);
 }

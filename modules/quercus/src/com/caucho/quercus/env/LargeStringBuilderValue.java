@@ -779,6 +779,24 @@ public class LargeStringBuilderValue
 
     if (length < 0)
         length = 0;
+    
+    out.print("string(");
+    out.print(length);
+    out.print(") \"");
+
+    for (int i = 0; i < length; i++) {
+      int ch = charAt(i);
+
+      out.print((char) ch);
+    }
+
+    out.print("\"");
+    
+    /*
+    int length = length();
+
+    if (length < 0)
+        length = 0;
 
     out.print("string");
     
@@ -790,11 +808,11 @@ public class LargeStringBuilderValue
       char ch = charAt(i);
 
       if (0x20 <= ch && ch <= 0x7f || ch == '\t' || ch == '\r' || ch == '\n')
-	out.print(ch);
+        out.print(ch);
       else if (ch <= 0xff)
-	out.print("\\x" + Integer.toHexString(ch / 16) + Integer.toHexString(ch % 16));
+        out.print("\\x" + Integer.toHexString(ch / 16) + Integer.toHexString(ch % 16));
       else {
-	out.print("\\u"
+        out.print("\\u"
 		  + Integer.toHexString((ch >> 12) & 0xf)
 		  + Integer.toHexString((ch >> 8) & 0xf)
 		  + Integer.toHexString((ch >> 4) & 0xf)
@@ -803,6 +821,7 @@ public class LargeStringBuilderValue
     }
 
     out.print("\"");
+    */
   }
 
   class BuilderInputStream extends InputStream {

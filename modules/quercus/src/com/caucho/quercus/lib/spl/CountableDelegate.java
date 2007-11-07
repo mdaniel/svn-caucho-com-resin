@@ -46,11 +46,23 @@ public class CountableDelegate implements CountDelegate
   private static final StringValue COUNT_METHOD
     = new StringBuilderValue("count");
   
+  private static final StringValue COUNT_RECURSIVE_METHOD
+  = new StringBuilderValue("countRecursive");
+  
   public int count(ObjectValue qThis)
   {
     Env env = Env.getInstance();
     
     Value count = qThis.callMethod(env, COUNT_METHOD);
+
+    return count.toInt();
+  }
+  
+  public int countRecursive(ObjectValue qThis)
+  {
+    Env env = Env.getInstance();
+    
+    Value count = qThis.callMethod(env, COUNT_RECURSIVE_METHOD);
 
     return count.toInt();
   }

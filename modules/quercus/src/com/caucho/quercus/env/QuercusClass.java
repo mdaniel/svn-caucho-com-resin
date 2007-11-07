@@ -171,7 +171,13 @@ public class QuercusClass {
       for (String iface : classDef.getInterfaces()) {
         
         // XXX: php/0cn2, but this is wrong:
-        ClassDef ifaceDef = Env.getInstance().findClass(iface).getClassDef();
+        QuercusClass cl = Env.getInstance().findClass(iface);
+        
+        if (cl == null)
+          throw new QuercusRuntimeException(L.l("cannot find interface {0}",
+                                                iface));
+        
+        ClassDef ifaceDef = cl.getClassDef();
         // ClassDef ifaceDef = moduleContext.findClass(iface);
 
         if (ifaceDef != null) {
