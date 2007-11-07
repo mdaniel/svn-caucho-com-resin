@@ -62,8 +62,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
   RelatedType _relatedType;
 
-  private ArrayList<PersistentDependency> _dependencies =
-    new ArrayList<PersistentDependency>();
+  private ArrayList<PersistentDependency> _dependencies
+    = new ArrayList<PersistentDependency>();
 
   public AmberMappedComponent()
   {
@@ -266,13 +266,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     if (id == null) {
       if (_relatedType instanceof EntityType)
-        throw new IllegalStateException(L.l("`{0}' is missing a key.",
+        throw new IllegalStateException(L.l("'{0}' is missing a key.",
                                             _relatedType.getName()));
     } // ejb/0623 as a negative test.
     else if (id instanceof CompositeId) {
-      // jpa/0u21
-      out.println();
-      out.println("private " + id.getForeignTypeName() + " __caucho_compound_key = new " + id.getForeignTypeName() + "();");
     }
 
     boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
@@ -1512,34 +1509,28 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     Table table = _relatedType.getTable();
 
-    String sql = _relatedType.generateCreateSQL(table);
+    String sql = null;
 
     out.println("String sql;");
 
     boolean isAutoInsert = false;
 
-    // jpa/0gg0
-    if (_relatedType.getId() != null && ! isAbstract) {
-      ArrayList<IdField> fields = _relatedType.getId().getKeys();
-      IdField idField = fields.size() > 0 ? fields.get(0) : null;
+    // jpa/0gg0, jpa/0gh0
+    if (_relatedType.getId() != null
+	&& ! isAbstract
+	&& _relatedType.getId().isIdentityGenerator()) {
+      isAutoInsert = true;
 
-      // jpa/0gh0
-      if (idField != null
-          && idField.getGenerator() != null
-          && idField.getGenerator().equals("identity")) {
-        isAutoInsert = true;
-
-        out.print("sql = \"");
-        out.printJavaString(_relatedType.generateAutoCreateSQL(sql));
-        out.println("\";");
-      }
+      out.print("sql = \"");
+      out.printJavaString(_relatedType.generateAutoCreateSQL(table));
+      out.println("\";");
     }
 
     _relatedType.getId().generateCheckCreateKey(out);
 
     if (! isAutoInsert) {
       out.print("sql = \"");
-      out.printJavaString(sql);
+      out.printJavaString(_relatedType.generateCreateSQL(table));
       out.println("\";");
     }
 
@@ -1618,31 +1609,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     else {
       // jpa/0gh0
 
-      EmbeddableType embeddable = (EmbeddableType) id.getEmbeddedIdField().getType();
+      id.generateCopy(out, "cacheEntity", "this");
 
-      ArrayList<AmberField> fields = embeddable.getFields();
+      // out.println("pk = __caucho_compound_key;");
 
-      for (int i = 0; i < fields.size(); i++) {
-        AmberField field = (AmberField) fields.get(i);
-
-        String getter = field.getName();
-
-        if (_relatedType.isFieldAccess())
-          out.println(field.generateSet("__caucho_compound_key", getter) + ";");
-        else {
-          getter = Character.toUpperCase(getter.charAt(0)) +
-            (getter.length() == 1 ? "" : getter.substring(1));
-
-          String value = id.getEmbeddedIdField().generateSuperGetter() + ".get" + getter;
-
-          // jpa/0gh0
-          out.println("__caucho_compound_key.set" + getter + "(" + value + "());");
-        }
-      }
-
-      out.println("pk = __caucho_compound_key;");
-
-      out.println(id.getEmbeddedIdField().generateSet("cacheEntity", "__caucho_compound_key") + ";");
+      // out.println(id.getEmbeddedIdField().generateSet("cacheEntity", "__caucho_compound_key") + ";");
     }
 
     out.println("try {");
@@ -2013,13 +1984,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     // jpa/0ge6: MappedSuperclass
     if (_relatedType.getId() != null) {
-      ArrayList<IdField> keys = _relatedType.getId().getKeys();
-
-      for (int i = 0; i < keys.size(); i++) {
-        IdField key = keys.get(i);
-
-        out.println(key.generateSet("o", key.generateGet("super")) + ";");
-      }
+      _relatedType.getId().generateCopy(out, "o", "super");
     }
 
     out.println("try {");
@@ -2173,20 +2138,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     // jpa/0ge6: MappedSuperclass
     if (_relatedType.getId() != null) {
-      ArrayList<IdField> keys = _relatedType.getId().getKeys();
-
-      for (int i = 0; i < keys.size(); i++) {
-        IdField key = keys.get(i);
-
-        out.println(key.generateSet("super", key.generateGet("entity")) + ";");
-      }
+      _relatedType.getId().generateCopy(out, "super", "entity");
     }
 
     out.println("__caucho_session = aConn;");
 
-    // out.println("if (__caucho_state != com.caucho.amber.entity.EntityState.P_TRANSACTIONAL) {");
     out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
-    // out.println("}");
 
     out.popDepth();
     out.println("}");

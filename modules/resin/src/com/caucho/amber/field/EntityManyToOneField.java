@@ -67,7 +67,7 @@ public class EntityManyToOneField extends CascadableField {
   private int _targetLoadIndex;
 
   private DependentEntityOneToOneField _targetField;
-  private PropertyField _aliasField;
+  private AmberField _aliasField;
 
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
@@ -249,7 +249,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Sets any alias field.
    */
-  public void setAliasField(PropertyField alias)
+  public void setAliasField(AmberField alias)
   {
     _aliasField = alias;
   }
@@ -402,13 +402,11 @@ public class EntityManyToOneField extends CascadableField {
     if (relatedType.getId() != null) {
       // resolve any alias
       for (AmberField field : relatedType.getId().getKeys()) {
-        if (field instanceof PropertyField) {
-          PropertyField prop = (PropertyField) field;
-
-          for (ForeignColumn column : _linkColumns.getColumns()) {
-            if (prop.getColumn().getName().equals(column.getName()))
-              _aliasField = prop;
-          }
+	for (ForeignColumn column : _linkColumns.getColumns()) {
+	  if (field.getColumn() != null
+	      && field.getColumn().getName().equals(column.getName())) {
+	    _aliasField = field;
+	  }
         }
       }
     }
@@ -1012,8 +1010,9 @@ public class EntityManyToOneField extends CascadableField {
         else
           targetObject = generateSuperGetter();
 
-        out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
-                    generateSuperSetter(targetObject) + ";");
+	String objThis = "((" + getRelatedType().getInstanceClassName() + ") " + dst + ")";
+
+        out.println(generateSuperSetter(objThis, targetObject) + ";");
       }
     }
 

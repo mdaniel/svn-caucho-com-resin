@@ -29,6 +29,7 @@
 package com.caucho.amber.expr;
 
 import com.caucho.amber.field.EntityEmbeddedField;
+import com.caucho.amber.field.EmbeddedSubField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
@@ -36,7 +37,7 @@ import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -47,9 +48,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
 
   private EmbeddableType _embeddableType;
 
-  private HashMap<String, Column> _columns;
-
-  private HashMap<String, String> _fieldNameByColumn;
+  private ArrayList<EmbeddedSubField> _subFields;
 
   private FromItem _fromItem;
   private FromItem _childFromItem;
@@ -59,13 +58,11 @@ public class EmbeddedExpr extends AbstractPathExpr {
    */
   public EmbeddedExpr(PathExpr parent,
                       EmbeddableType embeddableType,
-                      HashMap<String, Column> columns,
-                      HashMap<String, String> fieldNameByColumn)
+		      ArrayList<EmbeddedSubField> subFields)
   {
     _parent = parent;
     _embeddableType = embeddableType;
-    _columns = columns;
-    _fieldNameByColumn = fieldNameByColumn;
+    _subFields = subFields;
   }
 
   /**
@@ -89,14 +86,11 @@ public class EmbeddedExpr extends AbstractPathExpr {
    */
   public Column getColumnByFieldName(String fieldName)
   {
-    // XXX: there is no reverse lookup.
-    for (Map.Entry<String, String> entry :
-           _fieldNameByColumn.entrySet()) {
+    for (int i = 0; i < _subFields.size(); i++) {
+      EmbeddedSubField subField = _subFields.get(i);
 
-      String name = entry.getValue();
-
-      if (name.equals(fieldName))
-        return _columns.get(entry.getKey());
+      if (subField.getName().equals(fieldName))
+	return subField.getColumn();
     }
 
     return null;
@@ -186,9 +180,9 @@ public class EmbeddedExpr extends AbstractPathExpr {
    */
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
-    return (_childFromItem == from && type == IS_INNER_JOIN ||
-            _fromItem == from ||
-            _parent.usesFrom(from, type));
+    return (_childFromItem == from && type == IS_INNER_JOIN
+	    || _fromItem == from
+	    || _parent.usesFrom(from, type));
   }
 
   /**
@@ -229,10 +223,12 @@ public class EmbeddedExpr extends AbstractPathExpr {
    */
   public void generateSelect(CharBuffer cb)
   {
-    cb.append(EntityEmbeddedField.generateSelect(null,
-                                                 _embeddableType,
-                                                 _fieldNameByColumn,
-                                                 _columns));
+    for (int i = 0; i < _subFields.size(); i++) {
+      if (i > 0)
+	cb.append(", ");
+      
+      cb.append(_subFields.get(i).generateSelect(null));
+    }
   }
 
   /**
@@ -245,7 +241,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
 
   public int hashCode()
   {
-    return 65521 * _parent.hashCode() + _columns.hashCode();
+    return 65521 * _parent.hashCode() + _subFields.hashCode();
   }
 
   public boolean equals(Object o)
@@ -255,8 +251,8 @@ public class EmbeddedExpr extends AbstractPathExpr {
 
     EmbeddedExpr embedded = (EmbeddedExpr) o;
 
-    return (_parent.equals(embedded._parent) &&
-            _columns.equals(embedded._columns));
+    return (_parent.equals(embedded._parent)
+	    && _subFields.equals(embedded._subFields));
   }
 
   public String toString()

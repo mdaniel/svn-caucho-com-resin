@@ -24,12 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp;
+ * @author Scott Ferguson
  */
 
 package com.caucho.config.j2ee;
 
 import com.caucho.amber.manager.EntityManagerProxy;
+import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
@@ -46,35 +47,36 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class PersistenceContextInjectProgram extends BuilderProgram {
+public class PersistenceContextGenerator extends ValueGenerator {
   private static final Logger log
-    = Logger.getLogger(PersistenceContextInjectProgram.class.getName());
-  private static final L10N L = new L10N(PersistenceContextInjectProgram.class);
+    = Logger.getLogger(PersistenceContextGenerator.class.getName());
+  private static final L10N L = new L10N(PersistenceContextGenerator.class);
+
+  private String _location;
 
   private String _jndiName;
   private String _unitName;
   private PersistenceContextType _type;
   private Map _properties;
-  private AccessibleInject _inject;
-  private EntityManagerFactory _factory;
+  private EntityManager _manager;
 
-  PersistenceContextInjectProgram(AccessibleInject inject,
-				  String jndiName,
-				  String unitName,
-				  PersistenceContextType type,
-				  Map properties)
+  PersistenceContextGenerator(String location,
+			      String jndiName,
+			      String unitName,
+			      PersistenceContextType type,
+			      Map properties)
   {
-    _inject = inject;
+    _location = location;
+    
     _jndiName = jndiName;
     _unitName = unitName;
     _type = type;
     _properties = properties;
   }
 
-  PersistenceContextInjectProgram(AccessibleInject inject,
-				  PersistenceContext pc)
+  PersistenceContextGenerator(String location, PersistenceContext pc)
   {
-    _inject = inject;
+    _location = location;
     
     _jndiName = pc.name();
     _unitName = pc.unitName();
@@ -88,28 +90,35 @@ public class PersistenceContextInjectProgram extends BuilderProgram {
 
       _properties.put(prop.name(), prop.value());
     }
-
-    System.out.println("PROP!:");
   }
 
+  /**
+   * Returns the expected type
+   */
   @Override
-  public void configureImpl(NodeBuilder builder, Object bean)
-    throws ConfigException
+  public Class getType()
   {
-    if (_factory == null)
-      _factory = createFactory();
+    return EntityManager.class;
   }
 
-  EntityManagerFactory createFactory()
+  /**
+   * Creates the value.
+   */
+  public Object create()
   {
-    throw new ConfigException("CAN'T MAKE, DUDE");
-  }
+    if (_manager != null)
+      return _manager;
 
-  @Override
-  public Object configureImpl(NodeBuilder builder, Class type)
-    throws ConfigException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    AmberContainer amber = AmberContainer.getLocalContainer();
+
+    EntityManager manager = amber.getPersistenceContext(_unitName);
+
+    if (manager == null)
+      throw new ConfigException(_location
+				+ L.l("@PersistenceContext '{0}' is an unknown unit",
+				      _unitName));
+				
+    return manager;
   }
 
   @Override

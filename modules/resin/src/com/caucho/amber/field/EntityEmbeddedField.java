@@ -53,42 +53,60 @@ import java.util.logging.Logger;
 /**
  * Configuration for a bean's embedded field
  */
-public class EntityEmbeddedField extends AbstractField {
-  private static final L10N L = new L10N(PropertyField.class);
-  protected static final Logger log = Log.open(PropertyField.class);
+public class EntityEmbeddedField extends AbstractField
+{
+  private static final L10N L = new L10N(EntityEmbeddedField.class);
+  protected static final Logger log
+    = Logger.getLogger(EntityEmbeddedField.class.getName());
+  
+  private EmbeddableType _embeddableType;
 
-  private HashMap<String, Column> _columns;
-  private HashMap<String, String> _fieldNameByColumn;
-  private EmbeddableType _type;
+  private ArrayList<EmbeddedSubField> _subFields;
 
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
 
-  private boolean _isEmbeddedId = false;
-
-  public EntityEmbeddedField(RelatedType relatedType,
+  public EntityEmbeddedField(RelatedType ownerType,
+			     EmbeddableType embeddableType,
                              String name)
     throws ConfigException
   {
-    super(relatedType, name);
+    super(ownerType, name);
+
+    setEmbeddableType(embeddableType);
   }
 
-  public EntityEmbeddedField(RelatedType relatedType)
+  public EntityEmbeddedField(RelatedType ownerType,
+			     EmbeddableType embeddableType)
   {
-    super(relatedType);
+    super(ownerType);
+
+    setEmbeddableType(embeddableType);
   }
 
   public EmbeddableType getEmbeddableType()
   {
-    return (EmbeddableType) _type;
+    return _embeddableType;
   }
 
   /**
    * Sets the result type.
    */
-  public void setType(EmbeddableType type)
+  public void setEmbeddableType(EmbeddableType type)
   {
-    _type = type;
+    _embeddableType = type;
+
+    _subFields = new ArrayList<EmbeddedSubField>();
+
+    ArrayList<AmberField> fields = type.getFields();
+    for (int i = 0; i < fields.size(); i++) {
+      _subFields.add(createSubField(fields.get(i), i));
+    }
+  }
+
+  protected EmbeddedSubField createSubField(AmberField field, int index)
+  {
+    return new EmbeddedSubField(this, field, index);
   }
 
   /**
@@ -96,53 +114,15 @@ public class EntityEmbeddedField extends AbstractField {
    */
   public Type getType()
   {
-    return _type;
+    return _embeddableType;
   }
 
   /**
-   * Returns the table containing the field's columns.
+   * Returns the subfields.
    */
-  public Table getTable()
+  public ArrayList<EmbeddedSubField> getSubFields()
   {
-    // Assume all columns belong to the same table
-    for (Map.Entry<String, Column> entry : _columns.entrySet()) {
-      Column column = entry.getValue();
-      return column.getTable();
-    }
-
-    return null;
-  }
-
-  /**
-   * Sets the columns.
-   */
-  public void setEmbeddedColumns(HashMap<String, Column> columns)
-  {
-    _columns = columns;
-  }
-
-  /**
-   * Gets the columns.
-   */
-  public HashMap<String, Column> getEmbeddedColumns()
-  {
-    return _columns;
-  }
-
-  /**
-   * Sets the field name by column mapping.
-   */
-  public void setFieldNameByColumn(HashMap<String, String> fieldNameByColumn)
-  {
-    _fieldNameByColumn = fieldNameByColumn;
-  }
-
-  /**
-   * Gets the field name by column mapping.
-   */
-  public HashMap<String, String> getFieldNameByColumn()
-  {
-    return _fieldNameByColumn;
+    return _subFields;
   }
 
   /**
@@ -150,15 +130,7 @@ public class EntityEmbeddedField extends AbstractField {
    */
   public boolean isEmbeddedId()
   {
-    return _isEmbeddedId;
-  }
-
-  /**
-   * Set true if the property is an @EmbeddedId.
-   */
-  public void setEmbeddedId(boolean isEmbeddedId)
-  {
-    _isEmbeddedId = isEmbeddedId;
+    return false;
   }
 
   /**
@@ -184,9 +156,6 @@ public class EntityEmbeddedField extends AbstractField {
     throws ConfigException
   {
     super.init();
-
-    if (getEmbeddedColumns() == null)
-      throw new IllegalStateException(L.l("columns must be set before init"));
   }
 
   /**
@@ -230,8 +199,8 @@ public class EntityEmbeddedField extends AbstractField {
   public void generateSetProperty(JavaWriter out)
     throws IOException
   {
-    if (! isFieldAccess() && (getGetterMethod() == null ||
-                              getSetterMethod() == null && ! isAbstract()))
+    if (! isFieldAccess() && (getGetterMethod() == null
+			      || getSetterMethod() == null && ! isAbstract()))
       return;
 
     out.println();
@@ -280,6 +249,21 @@ public class EntityEmbeddedField extends AbstractField {
   }
 
   /**
+   * Generates code to copy to an object.
+   */
+  public void generateCopy(JavaWriter out,
+			   String dest,
+			   String source)
+    throws IOException
+  {
+    // XXX: how to make a new instance?
+
+    String value = generateGet(source);
+    
+    out.println(generateSet(dest, value) + ";");
+  }
+
+  /**
    * Generates the select clause.
    */
   public String generateLoadSelect(Table table, String id)
@@ -295,49 +279,13 @@ public class EntityEmbeddedField extends AbstractField {
    */
   public String generateSelect(String id)
   {
-    return generateSelect(id, getEmbeddableType(),
-                          _fieldNameByColumn, _columns);
-  }
-
-  /**
-   * Generates the select clause.
-   */
-  public static String generateSelect(String id,
-                                      EmbeddableType type,
-                                      HashMap<String, String> fieldNameByColumn,
-                                      HashMap<String, Column> columns)
-  {
-    // XXX: needs to simplify the HashMap and ArrayList
-    // but the same embeddable type could be reused
-    // for different entities with embedded fields
-    // and different column mappings.
-
     StringBuilder sb = new StringBuilder();
 
-    boolean isFirst = true;
+    for (int i = 0; i < _subFields.size(); i++) {
+      if (i > 0)
+	sb.append(", ");
 
-    ArrayList<AmberField> fields = type.getFields();
-
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
-
-      if (! (field instanceof PropertyField))
-        throw new IllegalStateException(L.l("Only property fields are expected for embeddable types in '{0}'", type.getName()));
-
-      if (isFirst)
-        isFirst = false;
-      else
-        sb.append(", ");
-
-      for (Map.Entry<String, String> entry : fieldNameByColumn.entrySet()) {
-        String columnName = entry.getKey();
-        String fieldName = entry.getValue();
-
-        if (fieldName.equals(field.getName())) {
-          Column column = columns.get(columnName);
-          sb.append(column.generateSelect(id));
-        }
-      }
+      sb.append(_subFields.get(i).generateSelect(id));
     }
 
     return sb.toString();
@@ -350,9 +298,11 @@ public class EntityEmbeddedField extends AbstractField {
   {
     StringBuilder sb = new StringBuilder();
 
-    for (Map.Entry<String, Column> entry : _columns.entrySet()) {
-      Column column = entry.getValue();
-      sb.append(column.generateSelect(id));
+    for (int i = 0; i < _subFields.size(); i++) {
+      if (i > 0)
+	sb.append(" and ");
+
+      sb.append(_subFields.get(i).generateWhere(id));
     }
 
     return sb.toString();
@@ -364,9 +314,8 @@ public class EntityEmbeddedField extends AbstractField {
   public void generateInsertColumns(ArrayList<String> columns)
   {
     if (_isInsert) {
-      for (Map.Entry<String, Column> entry : _columns.entrySet()) {
-        Column column = entry.getValue();
-        columns.add(column.getName());
+      for (int i = 0; i < _subFields.size(); i++) {
+	_subFields.get(i).generateInsertColumns(columns);
       }
     }
   }
@@ -378,22 +327,14 @@ public class EntityEmbeddedField extends AbstractField {
   {
     if (_isUpdate) {
       boolean isFirst = true;
-
-      for (Map.Entry<String, Column> entry : _columns.entrySet()) {
-        if (isFirst)
-          isFirst = false;
-        else
+      
+      for (int i = 0; i < _subFields.size(); i++) {
+	if (i > 0)
           sql.append(", ");
-
-        Column column = entry.getValue();
-        sql.append(column.generateUpdateSet());
+	  
+	_subFields.get(i).generateUpdate(sql);
       }
     }
-
-    /*
-      sql.append(getColumn());
-      sql.append("=?");
-    */
   }
 
   /**
@@ -434,6 +375,10 @@ public class EntityEmbeddedField extends AbstractField {
     if (! isFieldAccess() && getGetterMethod() == null)
       return;
 
+    for (int i = 0; i < _subFields.size(); i++) {
+      
+    }
+    /*
     for (Map.Entry<String, Column> entry : _columns.entrySet()) {
       Column column = entry.getValue();
 
@@ -457,6 +402,7 @@ public class EntityEmbeddedField extends AbstractField {
       column.generateSet(out, pstmt, index, generateGet(obj)+"."+getter);
       out.popDepth();
     }
+    */
   }
 
   /**
@@ -467,6 +413,7 @@ public class EntityEmbeddedField extends AbstractField {
     if (! isFieldAccess() && getGetterMethod() == null)
       return;
 
+    /*
     String thisGetter = generateGet("this");
 
     EmbeddableType embeddableType = getEmbeddableType();
@@ -487,6 +434,7 @@ public class EntityEmbeddedField extends AbstractField {
 
       cb.append(thisGetter + "." + getter);
     }
+    */
   }
 
   /**
@@ -497,45 +445,21 @@ public class EntityEmbeddedField extends AbstractField {
     throws IOException
   {
     /*
-      if (getSetterMethod() == null)
-      return index;
-    */
-
     String var = "amber_ld_embedded" + index;
 
     out.print(getJavaTypeName());
     out.println(" " + var + " = new "+getJavaTypeName()+"();");
-
-    // jpa/0w01
-    out.println("((com.caucho.amber.entity.Embeddable) " + var + ")."+
-                "__caucho_load(aConn, rs, " +
-                indexVar + " + " + index + ");");
-
-    index += _columns.entrySet().size();
-
-    /* jpa/0w01
-    for (Map.Entry<String, Column> entry : _columns.entrySet()) {
-      Column column = entry.getValue();
-      out.print(column.getType().getJavaTypeName());
-      out.print(" amber_ld" + index + " = ");
-      index = column.generateLoad(out, rs, indexVar, index);
-      out.println(";");
-
-      String setter = _fieldNameByColumn.get(column.getName());
-
-      EmbeddableType embeddableType = getEmbeddableType();
-
-      if (getSourceType().isFieldAccess()) {
-        out.println(var + "." + setter + " = amber_ld" + (index-1) + ";");
-      }
-      else {
-        out.println(var + ".set" + Character.toUpperCase(setter.charAt(0)) +
-                    setter.substring(1) + "(amber_ld" + (index-1) + ");");
-      }
-    }
     */
 
-    out.println(generateSuperSetter(var) + ";");
+    // jpa/0w01
+    String value = (_embeddableType.getJavaTypeName()
+		    + ".__caucho_make(aConn, rs, "
+		    + indexVar + " + " + index + ")");
+
+    // XXX: should cound
+    index += _subFields.size();
+
+    out.println(generateSuperSetter(value) + ";");
 
     // out.println("__caucho_loadMask |= " + (1L << getIndex()) + "L;");
 
@@ -545,8 +469,9 @@ public class EntityEmbeddedField extends AbstractField {
   /**
    * Creates the expression for the field.
    */
+
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
-    return new EmbeddedExpr(parent, _type, _columns, _fieldNameByColumn);
+    return new EmbeddedExpr(parent, _embeddableType, _subFields);
   }
 }

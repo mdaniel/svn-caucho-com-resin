@@ -44,8 +44,7 @@ import javax.ejb.EJBs;
 import javax.ejb.SessionContext;
 import javax.ejb.MessageDrivenContext;
 import javax.naming.*;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUnit;
+import javax.persistence.*;
 import javax.transaction.UserTransaction;
 import javax.webbeans.*;
 import javax.xml.ws.Service;
@@ -246,14 +245,11 @@ public class InjectIntrospector {
 
     PersistenceContext pc
       = (PersistenceContext) type.getAnnotation(PersistenceContext.class);
-    if (pc != null) {
-      String foreignName = findPersistenceContextName(pc.name(),
-                                                      pc.unitName());
-
-      if (! foreignName.equals(pc.name()) && ! "".equals(pc.name()))
-        initList.add(new JndiBindProgram(pc.name(), foreignName,
-                                         javax.persistence.EntityManager.class));
+    /*
+    if (pc != null)
+      introspectClassPersistenceContext(initList, type);
     }
+    */
 
     // ejb/0f66
     EJB ejb = (EJB) type.getAnnotation(EJB.class);
@@ -352,12 +348,7 @@ public class InjectIntrospector {
     throws ConfigException
   {
 
-    AccessibleInject inject;
-
-    if (field instanceof Field)
-      inject = new FieldInject((Field) field);
-    else
-      inject = new PropertyInject((Method) field);
+    AccessibleInject inject = createInject(field);
 
     if (field.isAnnotationPresent(Resource.class))
       configureResource(initList, field, fieldName, fieldType);
@@ -366,7 +357,10 @@ public class InjectIntrospector {
     else if (field.isAnnotationPresent(PersistenceUnit.class)) {
       PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
 
-      initList.add(new PersistenceUnitProgram(pUnit, inject));
+      PersistenceUnitGenerator gen
+	= new PersistenceUnitGenerator(location(field), pUnit);
+
+      initList.add(new GeneratorInjectProgram(inject, gen));
     }
     else if (field.isAnnotationPresent(PersistenceContext.class))
       configurePersistenceContext(initList, field, fieldName, fieldType);
@@ -495,60 +489,23 @@ public class InjectIntrospector {
     initList.add(program);
   }
 
-  private static void configurePersistenceContext(ArrayList<BuilderProgram> initList,
-                                                  AccessibleObject field,
-                                                  String fieldName,
-                                                  Class fieldType)
+  private static void
+    configurePersistenceContext(ArrayList<BuilderProgram> initList,
+				AccessibleObject prop,
+				String fieldName,
+				Class fieldType)
     throws ConfigException
   {
-    PersistenceContext pContext = field.getAnnotation(PersistenceContext.class);
+    PersistenceContext pContext = prop.getAnnotation(PersistenceContext.class);
 
-    String jndiPrefix = "java:comp/env/persistence";
-
-    String jndiName = null;
-    String unitName = pContext.unitName();
-
-    try {
-      if (! unitName.equals(""))
-        jndiName = jndiPrefix + '/' + unitName;
-      else {
-        InitialContext ic = new InitialContext();
-
-        NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
-
-        if (iter == null) {
-          log.warning("Can't find configured PersistenceContext");
-          return; // XXX: error?
-        }
-
-        String ejbJndiName = null;
-        while (iter.hasMore()) {
-          NameClassPair pair = iter.next();
-
-          // Skip reserved prefixes.
-          // See com.caucho.amber.manager.AmberContainer
-          if (pair.getName().startsWith("_amber"))
-            continue;
-
-          if (pair.getName().equals("resin-ejb"))
-            ejbJndiName = jndiPrefix + '/' + pair.getName();
-          else {
-            jndiName = jndiPrefix + '/' + pair.getName();
-            break;
-          }
-        }
-
-        if (jndiName == null)
-          jndiName = ejbJndiName;
-      }
-
-      initList.add(configureResource(field, fieldName, fieldType,
-                                     unitName,
-                                     "javax.persistence.EntityManager",
-                                     jndiName));
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+    if (! fieldType.isAssignableFrom(EntityManager.class)) {
+      throw error(prop, L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", fieldType.getName()));
     }
+
+    PersistenceContextGenerator gen
+      = new PersistenceContextGenerator(location(prop), pContext);
+
+    initList.add(new GeneratorInjectProgram(createInject(prop), gen));
   }
 
   private static String findPersistenceContextName(String jndiName,
@@ -677,7 +634,7 @@ public class InjectIntrospector {
       = (PersistenceContext) field.getAnnotation(PersistenceContext.class);
 
     if (pc != null)
-      program = new PersistenceContextInjectProgram(jndiName, field, pc);
+      program = new PersistenceContextInjectProgram(createInject(field), pc);
     else if (field instanceof Method)
       program = new JndiInjectProgram(jndiName, (Method) field);
     else
@@ -687,6 +644,14 @@ public class InjectIntrospector {
       log.log(Level.FINEST,  String.valueOf(program));
 
     return program;
+  }
+
+  private static AccessibleInject createInject(AccessibleObject prop)
+  {
+    if (prop instanceof Field)
+      return new FieldInject((Field) prop);
+    else
+      return new PropertyInject((Method) prop);
   }
 
   private static void configureWebBean(ArrayList<BuilderProgram> initList,
@@ -716,5 +681,35 @@ public class InjectIntrospector {
       jndiName = "java:comp/env/" + jndiName;
 
     return jndiName;
+  }
+
+  private static ConfigException error(AccessibleObject prop, String msg)
+  {
+    return new ConfigException(location(prop) + msg);
+  }
+
+  private static String location(AccessibleObject prop)
+  {
+    if (prop instanceof Field) {
+      Field field = (Field) prop;
+
+      String className = field.getDeclaringClass().getName();
+      int p = className.lastIndexOf('.');
+      className = className.substring(p + 1);
+
+      return className + "." + field.getName() + ": ";
+    }
+    else if (prop instanceof Method) {
+      Method method = (Method) prop;
+
+      String className = method.getDeclaringClass().getName();
+      int p = className.lastIndexOf('.');
+      className = className.substring(p + 1);
+
+      return className + "." + method.getName() + ": ";
+    }
+    else {
+      return "";
+    }
   }
 }

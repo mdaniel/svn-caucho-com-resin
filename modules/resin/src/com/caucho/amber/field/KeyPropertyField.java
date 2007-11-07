@@ -221,12 +221,23 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Sets the actual data.
    */
-  public String generateSuperSetter(String value)
+  public String generateSuperSetter(String objThis, String value)
   {
     if (isAbstract() || getGetterMethod() == null || getSetterMethod() == null)
-      return(getFieldName() + " = " + value + ";");
+      return objThis + "." + getFieldName() + " = " + value + ";";
     else
-      return getSetterMethod().getName() + "(" + value + ")";
+      return objThis + "." +  getSetterMethod().getName() + "(" + value + ")";
+  }
+
+  /**
+   * Generates code to copy to an object.
+   */
+  public void generateCopy(JavaWriter out,
+			   String dest,
+			   String source)
+    throws IOException
+  {
+    throw new UnsupportedOperationException();
   }
 
   /**

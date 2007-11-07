@@ -224,8 +224,8 @@ public class PropertyField extends AbstractField {
   public void generateSetProperty(JavaWriter out)
     throws IOException
   {
-    if (! isFieldAccess() && (getGetterMethod() == null ||
-                              getSetterMethod() == null && ! isAbstract()))
+    if (! isFieldAccess() && (getGetterMethod() == null
+			      || getSetterMethod() == null && ! isAbstract()))
       return;
 
     out.println();
@@ -405,6 +405,7 @@ public class PropertyField extends AbstractField {
                           String index, String obj)
     throws IOException
   {
+    // XXX: need to find QA explaining the following test
     if (! isFieldAccess() && getGetterMethod() == null || _aliasKey != null)
       return;
 

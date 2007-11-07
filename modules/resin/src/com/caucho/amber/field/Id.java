@@ -59,8 +59,6 @@ public class Id {
   private ArrayList<IdField> _keys = new ArrayList<IdField>();
   private ArrayList<Column> _columns = new ArrayList<Column>();
 
-  private EmbeddedIdField _embeddedIdField;
-
   public Id(RelatedType ownerType, ArrayList<IdField> keys)
   {
     _ownerType = ownerType;
@@ -70,23 +68,26 @@ public class Id {
     }
   }
 
+  protected Id(RelatedType ownerType)
+  {
+    _ownerType = ownerType;
+  }
+  
   public Id(RelatedType ownerType, IdField key)
   {
     _ownerType = ownerType;
 
-    if (key instanceof EmbeddedIdField) {
-      _embeddedIdField = (EmbeddedIdField) key;
-    }
-    else {
-      // ejb/0623
-      addKey(key);
-    }
+    if (key instanceof EmbeddedIdField)
+      throw new IllegalArgumentException();
+
+    // ejb/0623
+    addKey(key);
   }
 
   /**
    * Adds a new field to the id.
    */
-  private void addKey(IdField key)
+  protected void addKey(IdField key)
   {
     _keys.add(key);
     // ejb/0a04
@@ -163,6 +164,11 @@ public class Id {
     return _keys.get(0).getForeignTypeName();
   }
 
+  public boolean isIdentityGenerator()
+  {
+    return _keys.size() == 0 && "identity".equals(_keys.get(0).getGenerator());
+  }
+
   /**
    * Initialize the id.
    */
@@ -215,6 +221,27 @@ public class Id {
 
     return _keys.get(0).generateLoadForeign(out, rs, indexVar, index, name);
   }
+
+  /**
+   * Generates code to copy to an object.
+   */
+  public void generateCopy(JavaWriter out,
+			   String dest,
+			   String source)
+    throws IOException
+  {
+    ArrayList<IdField> keys = getKeys();
+
+    for (int i = 0; i < keys.size(); i++) {
+      IdField key = keys.get(i);
+
+      out.println(key.generateSet(dest, key.generateGet(source)) + ";");
+    }
+  }
+
+  //
+  // SQL generation
+  //
 
   /**
    * Generates the select clause.
@@ -303,27 +330,13 @@ public class Id {
 
     boolean isFirst = true;
 
-    if (_embeddedIdField == null) {
-      for (IdField field : getKeys()) {
-        for (Column column : field.getColumns()) {
-          if (! isFirst)
-            cb.append(" and ");
-          isFirst = false;
+    for (IdField field : getKeys()) {
+      for (Column column : field.getColumns()) {
+	if (! isFirst)
+	  cb.append(" and ");
+	isFirst = false;
 
-          cb.append(column.generateMatchArgWhere(id));
-        }
-      }
-    } else {
-      HashMap<String, Column> columns
-        = _embeddedIdField.getEmbeddedColumns();
-
-      for (Map.Entry<String, Column> entry : columns.entrySet()) {
-        Column column = entry.getValue();
-        if (isFirst)
-          isFirst = false;
-        else
-          cb.append(" and ");
-        cb.append(column.generateMatchArgWhere(id));
+	cb.append(column.generateMatchArgWhere(id));
       }
     }
 
@@ -511,7 +524,7 @@ public class Id {
    */
   public EmbeddedIdField getEmbeddedIdField()
   {
-    return _embeddedIdField;
+    return null;
   }
 
   /**
@@ -519,7 +532,7 @@ public class Id {
    */
   public boolean isEmbeddedId()
   {
-    return _embeddedIdField != null;
+    return false;
   }
 
   /**

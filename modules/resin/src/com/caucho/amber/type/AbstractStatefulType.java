@@ -97,6 +97,14 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   }
 
   /**
+   * Returns true for an embeddable
+   */
+  public boolean isEmbeddable()
+  {
+    return false;
+  }
+
+  /**
    * Returns the discriminator.
    */
   public Column getDiscriminator()
@@ -375,7 +383,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
                                    String id,
                                    int loadGroup)
   {
-    return generateLoadSelect(table, id, loadGroup, false, null);
+    return generateLoadSelect(table, id, loadGroup, false);
   }
 
   /**
@@ -384,21 +392,21 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   public String generateLoadSelect(Table table,
                                    String id,
                                    int loadGroup,
-                                   boolean hasSelect,
-                                   ArrayList<AmberField> overriddenFields)
+                                   boolean hasSelect)
   {
     CharBuffer cb = CharBuffer.allocate();
 
+    // jpa/0ge2
+    // jpa/0l14
+    /*
     ArrayList<AmberField> fields = null;
 
     if (this instanceof RelatedType) {
-      // jpa/0ge2
       fields = getMappedSuperclassFields();
 
       RelatedType parent = ((RelatedType) this).getParentType();
 
       if (parent != null) {
-        // jpa/0l14
         String parentSelect =
           parent.generateLoadSelect(table, id, loadGroup,
                                     hasSelect, fields);
@@ -410,51 +418,29 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
         }
       }
     }
+    */
 
-    for (int i = 0; i < 2; i++) {
-      if (fields == null) {
-        fields = getFields();
-        continue;
+    // jpa/0l14, jpa/0ge3
+    for (AmberField field : getFields()) {
+      // ejb/0602
+      if (getPersistenceUnit().isJPA()) {
+	if (field instanceof EntityManyToOneField)
+	  ((EntityManyToOneField) field).init((RelatedType) this);
       }
 
-      for (int j = 0; j < fields.size(); j++) {
-        AmberField field = fields.get(j);
+      // jpa/0gg3
+      if (field.getLoadGroupIndex() == loadGroup) {
+	String propSelect = field.generateLoadSelect(table, id);
 
-        // jpa/0l14, jpa/0ge3
-        if (overriddenFields != null) {
-          boolean isOverridden = false;
+	if (propSelect == null)
+	  continue;
 
-          for (AmberField amberField : overriddenFields) {
-            if (amberField.getName().equals(field.getName()))
-              isOverridden = true;
-          }
+	if (hasSelect)
+	  cb.append(", ");
+	hasSelect = true;
 
-          if (isOverridden)
-            continue;
-        }
-
-        // ejb/0602
-        if (getPersistenceUnit().isJPA()) {
-          if (field instanceof EntityManyToOneField)
-            ((EntityManyToOneField) field).init((RelatedType) this);
-        }
-
-        // jpa/0gg3
-        if (field.getLoadGroupIndex() == loadGroup) {
-          String propSelect = field.generateLoadSelect(table, id);
-
-          if (propSelect == null)
-            continue;
-
-          if (hasSelect)
-            cb.append(", ");
-          hasSelect = true;
-
-          cb.append(propSelect);
-        }
+	cb.append(propSelect);
       }
-
-      fields = getFields();
     }
 
     if (cb.length() == 0)

@@ -49,12 +49,21 @@ import java.util.logging.Logger;
  * Represents an embeddable type
  */
 public class EmbeddableType extends AbstractStatefulType {
-  private static final Logger log = Logger.getLogger(EmbeddableType.class.getName());
+  private static final Logger log
+    = Logger.getLogger(EmbeddableType.class.getName());
   private static final L10N L = new L10N(EmbeddableType.class);
 
   public EmbeddableType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
+  }
+
+  /**
+   * Returns true for an embeddable
+   */
+  public boolean isEmbeddable()
+  {
+    return true;
   }
 
   /**

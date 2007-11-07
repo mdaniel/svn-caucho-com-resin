@@ -52,6 +52,14 @@ public class AmberPersistenceProvider implements PersistenceProvider {
   public EntityManagerFactory createEntityManagerFactory(String name,
                                                          Map map)
   {
+    if (map != null) {
+      String providerClass = (String) map.get("javax.persistence.provider");
+
+      if (providerClass != null
+	  && ! getClass().getName().equals(providerClass))
+	return null;
+    }
+    
     AmberContainer container = AmberContainer.getLocalContainer();
 
     AmberPersistenceUnit pUnit = container.getPersistenceUnit(name);

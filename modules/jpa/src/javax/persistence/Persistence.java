@@ -29,8 +29,6 @@
 
 package javax.persistence;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.spi.PersistenceProvider;
 import java.io.InputStream;
 import java.net.URL;
@@ -52,9 +50,14 @@ public class Persistence {
     = "META-INF/services/javax.persistence.spi.PersistenceProvider";
   private static WeakHashMap<ClassLoader,PersistenceProvider[]>
     _providerMap = new WeakHashMap<ClassLoader,PersistenceProvider[]>();
-
+  
+  private static final String AMBER_PROVIDER
+    = "com.caucho.amber.manager.AmberPersistenceProvider";
+  
   /**
    * Create an return an EntityManagerFactory for the named unit.
+   *
+   * @param name - the name of the persistence unit
    */
   public static EntityManagerFactory createEntityManagerFactory(String name)
   {
@@ -69,32 +72,28 @@ public class Persistence {
         return factory;
     }
 
-    // persistence-unit-ref
-    try {
-      InitialContext ic = new InitialContext();
-
-      // XXX: amber dependency.
-      Object value = ic.lookup("java:comp/env/persistence/_amber_PersistenceUnit/" + name);
-
-      if (value != null) {
-        return (EntityManagerFactory) value;
-      }
-    } catch (NamingException e) {
-      log.finest(e.toString());
-    }
-
     return null;
   }
 
   /**
-   * Create an return an EntityManagerFactory for the named unit.
+   * Create and return an EntityManagerFactory for the named unit.
+   *
+   * @param name - the name of the persistence unit
+   * @param props - persistence unit properties
    */
   public static EntityManagerFactory createEntityManagerFactory(String name,
                                                                 Map props)
   {
-    PersistenceProvider []providerList = getProviderList();
+    for (PersistenceProvider provider : getProviderList()) {
+      EntityManagerFactory factory;
 
-    throw new UnsupportedOperationException();
+      factory = provider.createEntityManagerFactory(name, props);
+
+      if (factory != null)
+	return factory;
+    }
+
+    return null;
   }
 
   private static PersistenceProvider []getProviderList()
@@ -107,6 +106,16 @@ public class Persistence {
       return providers;
 
     ArrayList<PersistenceProvider> list = new ArrayList<PersistenceProvider>();
+
+    try {
+      Class cl = Class.forName(AMBER_PROVIDER, false, loader);
+
+      PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
+
+      list.add(provider);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
 
     try {
       Enumeration e = loader.getResources(SERVICE);

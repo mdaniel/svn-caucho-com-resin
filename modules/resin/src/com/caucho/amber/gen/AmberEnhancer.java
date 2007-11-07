@@ -517,6 +517,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       if (type == null || ! type.isFieldAccess())
         continue;
+      
+      if (type instanceof EmbeddableType)
+	continue;
 
       if (type instanceof EntityType) {
         EntityType entityType = (EntityType) type;

@@ -64,6 +64,20 @@ public class Environment {
   }
   
   /**
+   * Returns the local environment.
+   */
+  public static EnvironmentClassLoader
+    getEnvironmentClassLoader(ClassLoader loader)
+  {
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader)
+        return (EnvironmentClassLoader) loader;
+    }
+
+    return null;
+  }
+  
+  /**
    * Add listener.
    *
    * @param listener object to listen for environment start/stop

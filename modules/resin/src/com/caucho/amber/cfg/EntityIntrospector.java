@@ -96,6 +96,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     try {
       getInternalEntityConfig(type, _annotationCfg);
+      
       JAnnotation entityAnn = _annotationCfg.getAnnotation();
       EntityConfig entityConfig = _annotationCfg.getEntityConfig();
 
@@ -136,10 +137,6 @@ public class EntityIntrospector extends BaseConfigIntrospector {
           throw new ConfigException(L.l("'{0}' is not an @Entity or @MappedSuperclass.",
                                         type));
       }
-
-      // Adds named queries, if any.
-      introspectNamedQueries(type, typeName);
-      introspectNamedNativeQueries(type, typeName);
 
       // Validates the type
       String entityName;
@@ -272,6 +269,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       // Adds sql result set mappings, if any.
       introspectSqlResultSetMappings(type, entityType, typeName);
+
+      // Adds named queries, if any.
+      introspectNamedQueries(type, typeName);
+      introspectNamedNativeQueries(type, typeName);
 
       boolean isField = isField(type, mappedSuperOrEntityConfig, false);
 

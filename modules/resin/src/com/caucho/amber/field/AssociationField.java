@@ -102,7 +102,7 @@ public class AssociationField extends CollectionField {
   /**
    * Sets the result columns.
    */
-  public void setColumn(LinkColumns columns)
+  public void setLinkColumns(LinkColumns columns)
   {
     _linkColumns = columns;
   }
@@ -110,7 +110,7 @@ public class AssociationField extends CollectionField {
   /**
    * Gets the result.
    */
-  public LinkColumns getColumn()
+  public LinkColumns getLinkColumns()
   {
     return _linkColumns;
   }
@@ -120,6 +120,6 @@ public class AssociationField extends CollectionField {
    */
   public String generateTargetSelect(String id)
   {
-    return getColumn().generateSelectSQL(id);
+    return getLinkColumns().generateSelectSQL(id);
   }
 }

@@ -490,9 +490,9 @@ public class AmberPersistenceUnit {
         _amberContainer.addEntity(className, entityType);
       }
       else if (isEmbeddable) {
-        EmbeddableType embeddableType = _embeddableIntrospector.introspect(type);
+	EmbeddableType embeddableType = createEmbeddable(type);
 
-        _amberContainer.addEmbeddable(className, embeddableType);
+	_amberContainer.addEmbeddable(className, embeddableType);
       }
       else if (isMappedSuper) {
         // XXX: needs to refactor EntityIntrospector and MappedSuperIntrospector.
@@ -673,6 +673,14 @@ public class AmberPersistenceUnit {
   /**
    * Adds an embeddable type.
    */
+  public EmbeddableType createEmbeddable(JClass beanClass)
+  {
+    return createEmbeddable(beanClass.getName(), beanClass);
+  }
+
+  /**
+   * Adds an embeddable type.
+   */
   public EmbeddableType createEmbeddable(String name,
                                          JClass beanClass)
   {
@@ -701,6 +709,14 @@ public class AmberPersistenceUnit {
     embeddableType.setBeanClass(beanClass);
 
     _embeddableTypes.add(embeddableType);
+
+    try {
+      getEmbeddableIntrospector().introspect(beanClass);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
 
     return embeddableType;
   }

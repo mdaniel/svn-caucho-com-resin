@@ -12,6 +12,11 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>amber: misc @EmbeddedId issues (#2037, rep by Sergey Plehov)</li>
+<li>amber: @NamedQuery and inheritance were conflicting (#2053, rep by Sergey Plehov)</li>
+<li>admin: snapshot resin.conf changed to resin_admin_insecure (#2145)</li>
+<li>amber: inheritance auto-gen columns generated improper inserts (#2054, rep by Sergey Plehov)</li>
+<li>amber: allow JPA with other providers (#2041, rep by Sergey Plehov)</li>
 <li>quercus: required expr missing from function not properly generated (#2139, rep by koreth)</li>
 <li>hessian: object definition ('O') should use string for type (#2142, rep by Charlie Groves)</li>
 <li>rewrite-dispatch forward and redirect should use query-string (#1997, rep by Jan Kriesten)</li>

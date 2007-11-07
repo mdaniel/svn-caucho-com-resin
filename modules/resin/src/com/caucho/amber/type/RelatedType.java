@@ -1145,9 +1145,8 @@ abstract public class RelatedType extends AbstractStatefulType {
     else
     */
 
-    if ((getTable() == table) && // jpa/0l11
-        (loadGroup == 0 && getDiscriminator() != null)) {
-
+    // jpa/0l11
+    if (getTable() == table && loadGroup == 0 && getDiscriminator() != null) {
       if (id != null) {
         if (getDiscriminator().getTable() == getTable()) {
           cb.append(id + ".");
@@ -1165,8 +1164,7 @@ abstract public class RelatedType extends AbstractStatefulType {
     String propSelect = super.generateLoadSelect(table,
                                                  id,
                                                  loadGroup,
-                                                 hasSelect,
-                                                 null);
+                                                 hasSelect);
     // jpa/0s26
     if (propSelect != null)
       cb.append(propSelect);
@@ -1180,30 +1178,23 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Generates the auto insert sql.
    */
-  public String generateAutoCreateSQL(String sql)
+  public String generateAutoCreateSQL(Table table)
   {
-    // SQLServer does not expect the ID column
-    // with GenerationType.IDENTITY or GenerationType.AUTO.
-
-    // XXX: Assume it is a single column since it is auto-generated.
-    int start = sql.indexOf("(") + 1;
-    int end = sql.indexOf(",", start) + 2;
-
-    CharBuffer cb = new CharBuffer(sql);
-    cb.delete(start, end);
-
-    end = cb.length() - 1;
-    start = end - 3;
-
-    cb.delete(start, end);
-
-    return cb.close();
+    return generateCreateSQL(table, true);
   }
 
   /**
    * Generates the insert sql.
    */
   public String generateCreateSQL(Table table)
+  {
+    return generateCreateSQL(table, false);
+  }
+
+  /**
+   * Generates the insert sql.
+   */
+  private String generateCreateSQL(Table table, boolean isAuto)
   {
     CharBuffer sql = new CharBuffer();
 
@@ -1213,7 +1204,11 @@ abstract public class RelatedType extends AbstractStatefulType {
     boolean isFirst = true;
 
     ArrayList<String> idColumns = new ArrayList<String>();
+
     for (IdField field : getId().getKeys()) {
+      if (isAuto && "identity".equals(field.getGenerator()))
+	continue;
+      
       for (Column key : field.getColumns()) {
         String name;
 

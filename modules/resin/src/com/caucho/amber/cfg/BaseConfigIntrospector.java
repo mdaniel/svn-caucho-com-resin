@@ -45,6 +45,7 @@ import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.L10N;
 
 import javax.persistence.*;
+import javax.persistence.EmbeddedId;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -838,7 +839,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (keys.size() == 0) {
       if (idField != null) {
         // @EmbeddedId was used.
-        CompositeId id = new CompositeId(entityType, (EmbeddedIdField) idField);
+        com.caucho.amber.field.EmbeddedId id
+	  = new com.caucho.amber.field.EmbeddedId(entityType, (EmbeddedIdField) idField);
+	
         entityType.setId(id);
       }
     }
@@ -932,28 +935,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (type == null)
       return false;
 
-    if (isEmbeddable) {
-
-      for (JMethod method : type.getDeclaredMethods()) {
-
-        JAnnotation ann[] = method.getDeclaredAnnotations();
-
-        if ((ann != null) && (ann.length > 0))
-          return false;
-      }
-
-      // jpa/0gh0
-      for (JField field : type.getDeclaredFields()) {
-
-        if ((! field.isTransient()) && field.isPrivate())
-          return false;
-      }
-
-      return true;
-    }
-
     if (typeConfig != null) {
-
       String access = typeConfig.getAccess();
 
       if (access != null)
@@ -975,7 +957,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     for (JField field : type.getDeclaredFields()) {
-
       JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
 
       if (id != null)
@@ -1081,7 +1062,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   private IdField introspectEmbeddedId(AmberPersistenceUnit persistenceUnit,
-                                       RelatedType entityType,
+                                       RelatedType ownerType,
                                        JAccessibleObject field,
                                        String fieldName,
                                        JClass fieldType)
@@ -1089,7 +1070,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     IdField idField;
 
-    idField = new EmbeddedIdField(entityType, fieldName);
+    EmbeddableType embeddableType
+      = persistenceUnit.createEmbeddable(fieldType);
+
+    idField = new EmbeddedIdField(ownerType, embeddableType, fieldName);
 
     return idField;
   }
@@ -1360,21 +1344,20 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                         boolean isEmbeddable)
     throws ConfigException
   {
-    if (! isEmbeddable)
-      if (((RelatedType) entityType).getId() == null)
-        throw new IllegalStateException(L.l("{0} has no key", entityType));
+    if (! isEmbeddable && ((RelatedType) entityType).getId() == null)
+      throw new IllegalStateException(L.l("{0} has no key", entityType));
 
     for (JField field : type.getFields()) {
       String fieldName = field.getName();
 
-      if (containsFieldOrCompletion(parentType, fieldName))
+      if (containsFieldOrCompletion(parentType, fieldName)) {
         continue;
+      }
 
       if (field.isStatic() || field.isTransient())
         continue;
 
       JClass fieldType = field.getType();
-
       introspectField(persistenceUnit, entityType, field,
                       fieldName, fieldType, typeConfig);
     }
@@ -1448,8 +1431,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       }
     }
 
-    if ((idConfig != null) ||
-        field.isAnnotationPresent(javax.persistence.Id.class)) {
+    if ((idConfig != null)
+	|| field.isAnnotationPresent(javax.persistence.Id.class)) {
       validateAnnotations(field, _idAnnotations);
 
       if (! _idTypes.contains(fieldType.getName())) {
@@ -1457,21 +1440,21 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                fieldType.getName(), field.getName()));
       }
     }
-    else if ((basicConfig != null) ||
-             field.isAnnotationPresent(javax.persistence.Basic.class)) {
+    else if ((basicConfig != null)
+	     || field.isAnnotationPresent(javax.persistence.Basic.class)) {
       validateAnnotations(field, _basicAnnotations);
 
       addBasic(sourceType, field, fieldName, fieldType, basicConfig);
     }
-    else if ((versionConfig != null) ||
-             field.isAnnotationPresent(javax.persistence.Version.class)) {
+    else if ((versionConfig != null)
+	     || field.isAnnotationPresent(javax.persistence.Version.class)) {
       validateAnnotations(field, _versionAnnotations);
 
       addVersion((RelatedType) sourceType, field,
                  fieldName, fieldType, versionConfig);
     }
-    else if ((manyToOneConfig != null) ||
-             field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
+    else if ((manyToOneConfig != null)
+	     || field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
       validateAnnotations(field, _manyToOneAnnotations);
 
       JAnnotation ann = field.getAnnotation(ManyToOne.class);
@@ -1518,8 +1501,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                                    fieldName,
                                                    fieldType));
     }
-    else if ((oneToManyConfig != null) ||
-             field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
+    else if ((oneToManyConfig != null)
+	     || field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
       validateAnnotations(field, _oneToManyAnnotations);
 
       if (field.isAnnotationPresent(javax.persistence.MapKey.class)) {
@@ -1543,8 +1526,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                                   fieldType,
                                                   oneToManyConfig));
     }
-    else if ((oneToOneConfig != null) ||
-             field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
+    else if ((oneToOneConfig != null)
+	     || field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
       validateAnnotations(field, _oneToOneAnnotations);
 
       RelatedType relatedType = (RelatedType) sourceType;
@@ -1584,8 +1567,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       oneToOneList.add(oneToOne);
     }
-    else if ((manyToManyConfig != null) ||
-             field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
+    else if ((manyToManyConfig != null)
+	     || field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
 
       if (field.isAnnotationPresent(javax.persistence.MapKey.class)) {
         if (! fieldType.getName().equals("java.util.Map")) {
@@ -1689,9 +1672,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     Column fieldColumn = null;
 
-    if (sourceType instanceof RelatedType)
-      fieldColumn = createColumn((RelatedType) sourceType, field, fieldName,
-                                 columnAnn, amberType, columnConfig);
+    fieldColumn = createColumn(sourceType, field, fieldName,
+			       columnAnn, amberType, columnConfig);
 
     PropertyField property = new PropertyField(sourceType, fieldName);
     property.setColumn(fieldColumn);
@@ -1746,7 +1728,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     sourceType.setVersionField(version);
   }
 
-  private Column createColumn(RelatedType entityType,
+  private Column createColumn(AbstractStatefulType beanType,
                               JAccessibleObject field,
                               String fieldName,
                               JAnnotation columnAnn,
@@ -1754,6 +1736,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                               ColumnConfig columnConfig)
     throws ConfigException
   {
+    RelatedType entityType = null;
+
+    if (beanType instanceof RelatedType)
+      entityType = (RelatedType) beanType;
+    
     String name;
 
     if (columnAnn != null && ! columnAnn.get("name").equals(""))
@@ -1765,7 +1752,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     Column column = null;
 
-    if (columnAnn != null && ! columnAnn.get("table").equals("")) {
+    if (entityType == null) { // embeddable
+      column = new Column(null, name, amberType);
+    }
+    else if (columnAnn != null && ! columnAnn.get("table").equals("")) {
       String tableName = columnAnn.getString("table");
       Table table;
 
@@ -1778,12 +1768,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       column = table.createColumn(name, amberType);
     }
-    else if (entityType.getTable() == null) // jpa/0ge2: MappedSuperclassType
-      column = new Column(null, name, amberType);
-    else
+    else if (entityType.getTable() != null)
       column = entityType.getTable().createColumn(name, amberType);
+    else { // jpa/0ge2: MappedSuperclassType
+      column = new Column(null, name, amberType);
+    }
 
-    if ((column != null) && (columnAnn != null)) {
+    if (column != null && columnAnn != null) {
       // primaryKey = column.primaryKey();
       column.setUnique(columnAnn.getBoolean("unique"));
       column.setNotNull(! columnAnn.getBoolean("nullable"));
@@ -3111,23 +3102,21 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
       }
 
+      AmberPersistenceUnit persistenceUnit = _relatedType.getPersistenceUnit();
+
+      EmbeddableType type = persistenceUnit.createEmbeddable(_fieldType);
+
       EntityEmbeddedField embeddedField;
 
       if (_embeddedId) {
         embeddedField = _relatedType.getId().getEmbeddedIdField();
       } else {
-        embeddedField = new EntityEmbeddedField(_relatedType, _fieldName);
+        embeddedField = new EntityEmbeddedField(_relatedType, type, _fieldName);
       }
 
-      embeddedField.setEmbeddedId(_embeddedId);
+      // embeddedField.setEmbeddedId(_embeddedId);
 
       embeddedField.setLazy(false);
-
-      AmberPersistenceUnit persistenceUnit = _relatedType.getPersistenceUnit();
-
-      EmbeddableType type = persistenceUnit.createEmbeddable(_fieldType.getName(), _fieldType);
-
-      embeddedField.setType(type);
 
       _relatedType.addField(embeddedField);
 
@@ -3139,18 +3128,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       HashMap<String, Column> embeddedColumns = new HashMap<String, Column>();
       HashMap<String, String> fieldNameByColumn = new HashMap<String, String>();
 
-      ArrayList<AmberField> fields = type.getFields();
-
-      for (int i=0; i < fields.size(); i++) {
-
-        String embeddedFieldName = fields.get(i).getName();
+      for (EmbeddedSubField subField : embeddedField.getSubFields()) {
+        String embeddedFieldName = subField.getName();
 
         String columnName = toSqlName(embeddedFieldName);
         boolean notNull = false;
         boolean unique = false;
 
         if (attOverridesAnn != null) {
-          for (int j=0; j<attOverridesAnn.length; j++) {
+          for (int j= 0; j < attOverridesAnn.length; j++) {
 
             if (embeddedFieldName.equals(((JAnnotation) attOverridesAnn[j]).getString("name"))) {
 
@@ -3160,11 +3146,16 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                 columnName = columnAnn.getString("name");
                 notNull = ! columnAnn.getBoolean("nullable");
                 unique = columnAnn.getBoolean("unique");
+
+		subField.getColumn().setName(columnName);
+		subField.getColumn().setNotNull(notNull);
+		subField.getColumn().setUnique(unique);
               }
             }
           }
         }
 
+	/*
         Type amberType = _persistenceUnit.createType(fields.get(i).getJavaType().getName());
 
         Column column = sourceTable.createColumn(columnName, amberType);
@@ -3174,10 +3165,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
         embeddedColumns.put(columnName, column);
         fieldNameByColumn.put(columnName, embeddedFieldName);
+	*/
       }
 
+      /*
       embeddedField.setEmbeddedColumns(embeddedColumns);
       embeddedField.setFieldNameByColumn(fieldNameByColumn);
+      */
 
       embeddedField.init();
     }

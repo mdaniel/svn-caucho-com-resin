@@ -267,8 +267,8 @@ abstract public class AbstractConfigIntrospector {
   {
     if (Character.isLowerCase(name.charAt(0)))
       return name;
-    else if (name.length() == 1 ||
-             Character.isLowerCase(name.charAt(1)))
+    else if (name.length() == 1
+	     || Character.isLowerCase(name.charAt(1)))
       return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     else
       return name;

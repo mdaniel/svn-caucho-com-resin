@@ -31,8 +31,7 @@ package com.caucho.amber.cfg;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -92,7 +91,7 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
       embeddableType = _persistenceUnit.createEmbeddable(typeName, type);
       _embeddableMap.put(typeName, embeddableType);
 
-      boolean isField = isField(type, embeddableConfig, true);
+      boolean isField = isField(type, embeddableConfig);
 
       if (isField)
         embeddableType.setFieldAccess(true);
@@ -131,5 +130,27 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
     }
 
     return embeddableType;
+  }
+
+  boolean isField(JClass type,
+                  AbstractEnhancedConfig typeConfig)
+    throws ConfigException
+  {
+    for (JMethod method : type.getDeclaredMethods()) {
+      JAnnotation ann[] = method.getDeclaredAnnotations();
+
+      for (int i = 0; ann != null && i < ann.length; i++) {
+	if (isPropertyAnnotation(ann[i].getType()))
+	  return false;
+      }
+    }
+
+    return true;
+  }
+
+  private boolean isPropertyAnnotation(String name)
+  {
+    return ("javax.persistence.Basic".equals(name)
+	    || "javax.persistence.Column".equals(name));
   }
 }

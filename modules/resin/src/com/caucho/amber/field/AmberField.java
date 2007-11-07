@@ -35,6 +35,7 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.table.Column;
 import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;
@@ -71,6 +72,11 @@ public interface AmberField {
    * Returns the table containing the value (or null)
    */
   public Table getTable();
+
+  /**
+   * Returns the column for the field.
+   */
+  public Column getColumn();
 
   /**
    * Returns the property index.
@@ -152,6 +158,11 @@ public interface AmberField {
    * Sets the actual data.
    */
   public String generateSuperSetter(String value);
+
+  /**
+   * Sets the actual data.
+   */
+  public String generateSuperSetter(String objThis, String value);
 
   /**
    * Generates any prologue.

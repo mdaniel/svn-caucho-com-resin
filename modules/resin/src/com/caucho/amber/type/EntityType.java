@@ -41,7 +41,8 @@ import java.util.logging.Logger;
  * Represents an application persistent bean type
  */
 public class EntityType extends RelatedType {
-  private static final Logger log = Logger.getLogger(EntityType.class.getName());
+  private static final Logger log
+    = Logger.getLogger(EntityType.class.getName());
   private static final L10N L = new L10N(EntityType.class);
 
   public EntityType(AmberPersistenceUnit amberPersistenceUnit)

@@ -64,10 +64,9 @@ public class CompositeId extends Id {
     super(ownerType, keys);
   }
 
-  public CompositeId(RelatedType ownerType,
-                     EmbeddedIdField embeddedId)
+  protected CompositeId(RelatedType ownerType)
   {
-    super(ownerType, embeddedId);
+    super(ownerType);
   }
 
   /**
@@ -120,6 +119,10 @@ public class CompositeId extends Id {
                                String name)
     throws IOException
   {
+    // jpa/0u21
+    out.println();
+    out.println("private transient " + getForeignTypeName() + " __caucho_compound_key = new " + getForeignTypeName() + "();");
+      
     generatePrologueMake(out, completedSet);
     generatePrologueLoad(out, completedSet);
   }
@@ -425,16 +428,11 @@ public class CompositeId extends Id {
 
     ArrayList<IdField> keys = getKeys();
 
-    if (! isEmbeddedId()) {
-      for (int i = 0; i < keys.size(); i++) {
-        if (i != 0)
-          cb.append(", ");
+    for (int i = 0; i < keys.size(); i++) {
+      if (i != 0)
+	cb.append(", ");
 
-        cb.append(keys.get(i).generateGet(value));
-      }
-    }
-    else {
-      getEmbeddedIdField().generateGetPrimaryKey(cb);
+      cb.append(keys.get(i).generateGet(value));
     }
 
     cb.append(")");
@@ -620,116 +618,6 @@ public class CompositeId extends Id {
     throws IOException
   {
     generateSet(out, pstmt, obj, index);
-  }
-
-  /**
-   * Generates the set clause.
-   */
-  public void generateSet(JavaWriter out, String pstmt,
-                          String obj, String index)
-    throws IOException
-  {
-    // ejb/06x2
-    if (getOwnerType().getPersistenceUnit().isJPA() && ! isEmbeddedId()) {
-
-      // XXX: jpa/0u21
-
-      ArrayList keys = getKeys();
-
-      for (int i = 0; i < keys.size(); i++) {
-        PropertyField key = (PropertyField) keys.get(i);
-
-        String name = key.getName();
-
-        char ch = Character.toUpperCase(name.charAt(0));
-        if (name.length() == 1)
-          name = "get" + ch;
-        else
-          name = "get" + ch + key.getName().substring(1);
-
-        JMethod method = AbstractStatefulType.getGetter(_keyClass, name);
-
-        if ((key instanceof KeyPropertyField) &&
-            (((KeyPropertyField) key).isKeyField() || (method != null))) {
-          key.generateSet(out, pstmt, obj, index);
-        }
-        else {
-          // XXX: jpa/0u21
-
-          String getter = null;
-
-          AmberPersistenceUnit persistenceUnit
-            = getOwnerType().getPersistenceUnit();
-
-          EmbeddableType embeddable
-            = persistenceUnit.getEmbeddable(_keyClass.getName());
-
-          if (embeddable.isIdClass()) {
-            ArrayList<AmberField> fields = embeddable.getFields();
-            for (int j = 0; j < fields.size(); j++) {
-              AmberField id = fields.get(j);
-              if (id.getName().equals(key.getName()))
-                if (id instanceof PropertyField)
-                  getter = "__caucho_get_field(" + j + ")";
-            }
-          }
-          else
-            getter = key.getGetterMethod().getName() + "()";
-
-          Column column = key.getColumn();
-
-          Type columnType = column.getType();
-
-          String value
-            = "((com.caucho.amber.entity.Embeddable) __caucho_compound_key)." + getter;
-
-          value = columnType.generateCastFromObject(value);
-
-          columnType.generateSet(out, pstmt, obj, value);
-        }
-      }
-    }
-    else {
-      if (getEmbeddedIdField() == null) {
-        // ejb/06x2
-
-        ArrayList<IdField> keys = getKeys();
-
-        for (int i = 0; i < keys.size(); i++) {
-          IdField key = keys.get(i);
-
-          key.generateSet(out, pstmt, obj, index);
-        }
-      }
-      else
-        getEmbeddedIdField().generateSet(out, pstmt, obj, index);
-    }
-  }
-
-  /**
-   * Generates the set clause.
-   */
-  public void generateSet(JavaWriter out, String pstmt, String index)
-    throws IOException
-  {
-    ArrayList<IdField> keys = getKeys();
-
-    for (int i = 0; i < keys.size(); i++) {
-      keys.get(i).generateSet(out, pstmt, index);
-    }
-  }
-
-  /**
-   * Generates the set clause.
-   */
-  public void generateSetInsert(JavaWriter out, String pstmt, String index)
-    throws IOException
-  {
-    ArrayList<IdField> keys = getKeys();
-
-    for (int i = 0; i < keys.size(); i++) {
-      keys.get(i).generateSetInsert(out, pstmt, index);
-    }
   }
 
   /**

@@ -299,16 +299,15 @@ public class LoadGroupGenerator extends ClassComponent {
     String select = null;
     String where = null;
 
-    String subSelect = _relatedType.generateLoadSelect(table, "o", _index);
+    String subSelect = null;
     Table mainTable = null;
     String tableName = null;
 
-    if (subSelect != null) {
-      select = subSelect;
+    select = _relatedType.generateLoadSelect(table, "o", _index);
 
+    if (select != null) {
       from = table.getName() + " o";
       where = _relatedType.getId().generateMatchArgWhere("o");
-
       mainTable = table;
       tableName = "o";
     }

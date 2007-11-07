@@ -27,40 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
-
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.AddLoaderListener;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import java.net.URL;
+package com.caucho.config.j2ee;
 
 /**
- * Listener for environment start to detect and load persistence.xml
+ * Creates a new value.
  */
-public class PersistenceEnvironmentListener implements AddLoaderListener
-{
-  public PersistenceEnvironmentListener()
+abstract public class ValueGenerator {
+  public Class getType()
   {
+    return null;
   }
   
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void addLoader(EnvironmentClassLoader loader)
-  {
-    AmberContainer container = AmberContainer.getLocalContainer(loader);
-    container.scanClassPath();
-  }
-
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader)
-  {
-  }
+  abstract public Object create();
 }
-
-

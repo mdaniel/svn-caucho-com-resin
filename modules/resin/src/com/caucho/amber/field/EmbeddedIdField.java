@@ -34,6 +34,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EmbeddableType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -47,24 +48,31 @@ import java.util.logging.Logger;
 /**
  * Configuration for a bean's field
  */
-public class EmbeddedIdField extends EntityEmbeddedField implements IdField {
+public class EmbeddedIdField extends EntityEmbeddedField implements IdField
+{
   private static final L10N L = new L10N(EmbeddedIdField.class);
-  protected static final Logger log = Log.open(EmbeddedIdField.class);
+  protected static final Logger log
+    = Logger.getLogger(EmbeddedIdField.class.getName());
 
   boolean _isKeyField;
 
-  public EmbeddedIdField(RelatedType tableType)
+  public EmbeddedIdField(RelatedType ownerType,
+			 EmbeddableType embeddableType)
   {
-    super(tableType);
-    setEmbeddedId(true);
+    super(ownerType, embeddableType);
   }
 
-  public EmbeddedIdField(RelatedType tableType,
+  public EmbeddedIdField(RelatedType ownerType,
+			 EmbeddableType embeddableType,
                          String name)
     throws ConfigException
   {
-    super(tableType, name);
-    setEmbeddedId(true);
+    super(ownerType, embeddableType, name);
+  }
+
+  protected EmbeddedSubField createSubField(AmberField field, int index)
+  {
+    return new KeyEmbeddedSubField(this, field, index);
   }
 
   /**

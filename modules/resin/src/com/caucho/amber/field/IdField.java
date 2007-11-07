@@ -79,10 +79,22 @@ public interface IdField extends AmberField {
    */
   public String getGenerator();
 
+  //
+  // Java code generation
+  //
+
   /**
-   * Generates the setter for a key property
+   * Generates the set for an insert.
    */
-  public String generateSetKeyProperty(String key, String value)
+  public void generateCheckCreateKey(JavaWriter out)
+    throws IOException;
+
+  /**
+   * Generates code to copy to an object.
+   */
+  public void generateCopy(JavaWriter out,
+			   String dest,
+			   String source)
     throws IOException;
 
   /**
@@ -99,22 +111,9 @@ public interface IdField extends AmberField {
   public String generateGetProxyProperty(String value);
 
   /**
-   * Generates the set clause.
+   * Returns a test for null.
    */
-  public void generateSetGeneratedKeys(JavaWriter out, String pstmt)
-    throws IOException;
-
-  /**
-   * Generates the set for an insert.
-   */
-  public void generateCheckCreateKey(JavaWriter out)
-    throws IOException;
-
-  /**
-   * Generates the set for an insert.
-   */
-  public void generateSetInsert(JavaWriter out, String pstmt, String index)
-    throws IOException;
+  public String generateIsNull(String value);
 
   /**
    * Returns the foreign type.
@@ -132,9 +131,26 @@ public interface IdField extends AmberField {
     throws IOException;
 
   /**
-   * Returns a test for null.
+   * Generates the set clause.
    */
-  public String generateIsNull(String value);
+  public void generateSetGeneratedKeys(JavaWriter out, String pstmt)
+    throws IOException;
+
+  /**
+   * Generates the setter for a key property
+   */
+  public String generateSetKeyProperty(String key, String value)
+    throws IOException;
+
+  /**
+   * Generates the set for an insert.
+   */
+  public void generateSetInsert(JavaWriter out, String pstmt, String index)
+    throws IOException;
+
+  //
+  // SQL generation
+  //
 
   /**
    * Returns the where code

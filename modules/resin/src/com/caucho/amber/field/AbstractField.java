@@ -35,6 +35,7 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.table.Column;
 import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.bytecode.JClass;
@@ -88,8 +89,8 @@ abstract public class AbstractField implements AmberField {
     this(sourceType);
 
     if (log.isLoggable(Level.FINER)) {
-      log.log(Level.FINER, L.l("AbstractField.<constructor> class: '{0}' name: '{1}'",
-                               this.getClass().getName(), name));
+      log.log(Level.FINER, sourceType + " "
+	      + getClass().getSimpleName() + "[" + name + "]");
     }
 
     setName(name);
@@ -219,6 +220,14 @@ abstract public class AbstractField implements AmberField {
   public Table getTable()
   {
     return getEntitySourceType().getTable();
+  }
+
+  /**
+   * Returns the column for the field
+   */
+  public Column getColumn()
+  {
+    return null;
   }
 
   /**
@@ -655,25 +664,33 @@ abstract public class AbstractField implements AmberField {
    */
   public String generateSuperGetter()
   {
-    /*
-      if (isAbstract() || getGetterMethod() == null)
-      return getFieldName();
-      else
-    */
-    return("__caucho_super_get_" + getName() + "()");
+    if (! getSourceType().isEmbeddable())
+      return "__caucho_super_get_" + getName() + "()";
+    else if (isFieldAccess())
+      return getName();
+    else
+      return getGetterMethod().getName() + "()";
   }
 
   /**
    * Sets the actual data.
    */
-  public String generateSuperSetter(String value)
+  public final String generateSuperSetter(String value)
   {
-    /*
-      if (isAbstract() || getGetterMethod() == null)
-      return(getFieldName() + " = " + value + ";");
-      else
-    */
-    return "__caucho_super_set_" + getName() + "(" + value + ")";
+    return generateSuperSetter("this", value);
+  }
+
+  /**
+   * Sets the actual data.
+   */
+  public String generateSuperSetter(String objThis, String value)
+  {
+    if (! getSourceType().isEmbeddable())
+      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
+    else if (isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
   }
 
   /**
@@ -787,11 +804,11 @@ abstract public class AbstractField implements AmberField {
 
     boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
 
-    if (isJPA &&
-        ! (dst.equals("cacheEntity")
-           || dst.equals("super")
-           || dst.equals("item"))) {
-      // jpa/0j5f: merge()
+    if (isJPA
+	&& ! (dst.equals("cacheEntity")
+	      || dst.equals("super")
+	      || dst.equals("item"))) {
+      // jpa/0j5fn: merge()
       out.println("if (isFullMerge)");
       out.println("  " + generateSet(dst, value) + ";");
       out.println("else");
@@ -799,9 +816,9 @@ abstract public class AbstractField implements AmberField {
     }
 
     if (! dst.equals("super"))
-      out.print(dst + ".");
-
-    out.println(generateSuperSetter(value) + ";");
+      out.println(generateSuperSetter(dst, value) + ";");
+    else
+      out.println(generateSuperSetter("this", value) + ";");
   }
 
   /**

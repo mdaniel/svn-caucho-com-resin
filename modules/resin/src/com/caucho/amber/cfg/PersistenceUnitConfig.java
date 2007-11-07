@@ -32,6 +32,7 @@ package com.caucho.amber.cfg;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClass;
+import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.vfs.Path;
 
@@ -45,7 +46,7 @@ import java.util.*;
  */
 public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private String _name;
-  private String _provider;
+  private Class _provider;
   private DataSource _jtaDataSource;
   private DataSource _nonJtaDataSource;
   private boolean _isExcludeUnlistedClasses;
@@ -103,9 +104,30 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Sets the provider class name.
    */
-  public void setProvider(String provider)
+  public void setProvider(Class provider)
   {
     _provider = provider;
+
+    Config.validate(provider, PersistenceProvider.class);
+  }
+
+  /**
+   * Sets the provider class name.
+   */
+  public Class getProvider()
+  {
+    return _provider;
+  }
+
+  /**
+   * Sets the provider class name.
+   */
+  public String getPersistenceProviderClassName()
+  {
+    if (_provider != null)
+      return _provider.getName();
+    else
+      return null;
   }
 
   /**
@@ -259,14 +281,6 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   public String getPersistenceUnitName()
   {
     return getName();
-  }
-
-  /**
-   * Returns the full class name of the persistence provider.
-   */
-  public String getPersistenceProviderClassName()
-  {
-    return _provider;
   }
 
   /**
