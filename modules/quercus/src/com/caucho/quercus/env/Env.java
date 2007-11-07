@@ -3303,7 +3303,7 @@ public class Env {
     }
 
     if (url != null) {
-      include_once(url.toString());
+      includeOnce(url.toString());
       return true;
     }
     else {
@@ -3459,7 +3459,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value require_once(String include)
+  public Value requireOnce(String include)
   {
     return include(getSelfDirectory(), include, true, true);
   }
@@ -3483,7 +3483,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value include_once(String include)
+  public Value includeOnce(String include)
   {
     return include(getSelfDirectory(), include, false, true);
   }
@@ -3491,7 +3491,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value include_once(Path scriptPwd, String include,
+  public Value includeOnce(Path scriptPwd, String include,
 		       boolean isRequire)
   {
     return include(scriptPwd, include, isRequire, true);

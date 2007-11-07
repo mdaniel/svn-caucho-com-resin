@@ -148,7 +148,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	       && name.equals("execute")) {
 	String methodName = stack[i - 1].getMethodName();
 	if (stack[i - 1].getClassName().equals("com.caucho.quercus.env.Env") &&
-            (methodName.equals("include") || methodName.equals("include_once"))) {
+            (methodName.equals("include") || methodName.equals("includeOnce"))) {
 	  String path = unmangleFile(className);
 	  String fileName = env.getPwd().lookup("./" + path).getNativePath();
 
@@ -158,7 +158,10 @@ public class ErrorModule extends AbstractQuercusModule {
 	  call.put("file", fileName);
 	  call.put("line", env.getSourceLine(className, elt.getLineNumber()));
 
-	  call.put("function", methodName);
+	  if (methodName.equals("includeOnce"))
+	    call.put("function", "include_once");
+	  else
+	    call.put("function", "include");
 	}
       }
       else if (className.equals("com.caucho.quercus.expr.FunctionExpr")
