@@ -55,8 +55,11 @@ public class StatefulJndiFactory implements ObjectProxy {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    Object obj = _server.newInstance();
+    if (_businessInterface == null)
+      return _server.newInstance21();
 
+    // EJB 3.0 only.
+    Object obj = _server.newInstance();
     _server.setBusinessInterface(obj, _businessInterface);
 
     return obj;

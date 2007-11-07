@@ -48,15 +48,17 @@ public class SessionView extends ViewClass {
   private EjbBean _bean;
   private ArrayList<JClass> _apiList;
   private String _prefix;
+  private String _suffix;
   private String _contextClassName;
   private boolean _isStateless;
 
   public SessionView(EjbBean bean, ArrayList<JClass> apiList,
                      String contextClassName,
                      String prefix,
+                     String suffix, // "21" for EJB 2.1 only
                      boolean isStateless)
   {
-    super(prefix, isStateless ? "StatelessObject" : "SessionObject");
+    super(prefix + suffix, (isStateless ? "StatelessObject" : "SessionObject") + suffix);
 
     _bean = bean;
 
@@ -67,6 +69,7 @@ public class SessionView extends ViewClass {
 
     _contextClassName = contextClassName;
     _prefix = prefix;
+    _suffix = suffix;
     _isStateless = isStateless;
 
     setStatic(true);
@@ -95,45 +98,48 @@ public class SessionView extends ViewClass {
   private void generateGetter(JavaWriter out)
     throws IOException
   {
-    out.println("private " + _prefix + " _view" + _prefix + ";");
+    out.println("private " + _prefix + _suffix + " _view" + _prefix + _suffix + ";");
 
     out.println();
 
-    String interfaceName;
+    // EJB 2.1 only.
+    if (_suffix.equals("21")) {
+      String interfaceName;
 
-    if (_prefix.equals("Local")) {
-      interfaceName = "EJBLocalObject";
-      out.println("public EJBLocalObject getEJBLocalObject()");
-      out.println("{");
-      out.println("  createLocalObject();");
-    } else {
-      interfaceName = "EJBObject";
-      out.println("public EJBObject getRemoteView()");
-      out.println("{");
-      out.println("  createRemoteView();");
+      if (_prefix.equals("Local")) {
+        interfaceName = "EJBLocalObject";
+        out.println("public EJBLocalObject getEJBLocalObject()");
+        out.println("{");
+        out.println("  createLocalObject" + _suffix + "();");
+      } else {
+        interfaceName = "EJBObject";
+        out.println("public EJBObject getRemoteView()");
+        out.println("{");
+        out.println("  createRemoteView" + _suffix + "();");
+      }
+
+      out.println();
+      out.println("  if (_view" + _prefix + _suffix + " instanceof " + interfaceName + ")");
+      out.println("    return (" + interfaceName + ") _view" + _prefix + _suffix + ";");
+
+      out.println();
+      out.println("  throw new IllegalStateException(\"Cannot getEJBObject/getEJBLocalObject when the session bean does not define a 2.1 interface\");");
+      out.println("}");
+
+      out.println();
     }
 
-    out.println();
-    out.println("  if (_view" + _prefix + " instanceof " + interfaceName + ")");
-    out.println("    return (" + interfaceName + ") _view" + _prefix + ";");
-
-    out.println();
-    out.println("  throw new IllegalStateException(\"Cannot getEJBObject/getEJBLocalObject when the session bean does not define a 2.1 interface\");");
-    out.println("}");
-
-    out.println();
-
     if (_prefix.equals("Local"))
-      out.println("public Object createLocalObject()");
+      out.println("public Object createLocalObject" + _suffix + "()");
     else {
-      out.println("public Object createRemoteView()");
+      out.println("public Object createRemoteView" + _suffix + "()");
     }
 
     out.println("{");
-    out.println("  if (_view" + _prefix + " == null)");
-    out.println("    _view" + _prefix + " = new " + _prefix + "(this);");
+    out.println("  if (_view" + _prefix + _suffix + " == null)");
+    out.println("    _view" + _prefix + _suffix + " = new " + _prefix + _suffix + "(this);");
     out.println();
-    out.println("  return _view" + _prefix + ";");
+    out.println("  return _view" + _prefix + _suffix + ";");
     out.println("}");
   }
 
@@ -144,7 +150,7 @@ public class SessionView extends ViewClass {
     out.println("private final EjbTransactionManager _xaManager;");
 
     out.println();
-    out.println(_prefix + "(" + _contextClassName + " context)");
+    out.println(_prefix + _suffix + "(" + _contextClassName + " context)");
     out.println("{");
     if (_isStateless)
       out.println("  super(context.getStatelessServer());");

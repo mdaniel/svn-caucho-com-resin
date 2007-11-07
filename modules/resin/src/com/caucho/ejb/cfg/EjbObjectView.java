@@ -51,22 +51,23 @@ public class EjbObjectView extends EjbView
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbObjectView(EjbBean bean, ArrayList<JClass> apiList, String prefix)
+  public EjbObjectView(EjbBean bean, ArrayList<JClass> apiList, String prefix, String suffix)
     throws ConfigException
   {
-    super(bean, apiList, prefix);
+    super(bean, apiList, prefix, suffix);
   }
 
   /**
    * Assembles the generator.
    */
   protected void assembleView(BeanAssembler assembler,
-			      String fullClassName)
+                              String fullClassName)
     throws ConfigException
   {
     ViewClass viewClass = assembler.createView(getApiList(),
-					       fullClassName,
-					       getPrefix());
+                                               fullClassName,
+                                               getPrefix(),
+                                               getSuffix());
 
     assembleMethods(assembler, viewClass, fullClassName);
   }

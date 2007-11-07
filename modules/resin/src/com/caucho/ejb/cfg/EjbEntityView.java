@@ -58,7 +58,7 @@ public class EjbEntityView extends EjbObjectView {
                        String prefix)
     throws ConfigException
   {
-    super(bean, apiClass, prefix);
+    super(bean, apiClass, prefix, "");
   }
 
   protected EjbEntityBean getEntityBean()

@@ -123,7 +123,7 @@ abstract public class StatelessHome extends AbstractEJBHome
   {
     getServer().remove(handle);
   }
-  
+
   /**
    * Remove the object specified by the primary key.
    */
@@ -143,7 +143,7 @@ abstract public class StatelessHome extends AbstractEJBHome
     return new HomeSkeletonWrapper(getHomeHandle());
   }
 
-  protected SessionObject _caucho_getStatelessObject()
+  protected SessionObject21 _caucho_getStatelessObject()
   {
     return null;
   }

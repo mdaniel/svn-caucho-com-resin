@@ -28,13 +28,12 @@
 
 package com.caucho.ejb.session;
 
-
 import com.caucho.ejb.AbstractServer;
 
 import javax.ejb.RemoveException;
 
 /**
- * Abstract base class for a session object
+ * Abstract base class for a 3.0 session object
  */
 abstract public class StatelessObject extends AbstractSessionObject {
   protected final StatelessServer _server;
@@ -59,11 +58,11 @@ abstract public class StatelessObject extends AbstractSessionObject {
   {
     return "::ejb:stateless";
   }
-  
+
   /**
    * Removes the bean from the underlying store.
    */
-  public void remove() throws RemoveException
+  public void remove() throws Exception
   {
   }
 }

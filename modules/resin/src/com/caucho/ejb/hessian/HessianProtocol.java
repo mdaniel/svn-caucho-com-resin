@@ -92,8 +92,8 @@ public class HessianProtocol extends ProtocolContainer
       url = prefix + id;
     else
       url = prefix + '/' + id;
-    
-      
+
+
     return new HessianHandleEncoder(server, url, primaryKeyClass);
   }
 
@@ -134,7 +134,7 @@ public class HessianProtocol extends ProtocolContainer
       else
         objectId = queryString;
     }
-    
+
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST, "uri=" + uri + ", queryString=" + queryString + ", serverId=" + serverId + ", objectId=" + objectId);
 
@@ -147,7 +147,7 @@ public class HessianProtocol extends ProtocolContainer
     String name = serverId;
     if (name == null)
       name = "";
-    
+
     while (name.startsWith("/"))
       name = name.substring(1);
 
@@ -181,7 +181,11 @@ public class HessianProtocol extends ProtocolContainer
       return new MessageSkeleton((MessageServer) server);
     }
     else {
-      Object remote = server.getRemoteObject();
+      // ejb/02l0
+      Object remote = server.getRemoteObject21();
+
+      if (remote == null)
+        remote = server.getRemoteObject();
 
       if (remote instanceof EJBHome) {
         Class homeSkelClass = getHomeSkelClass(server);

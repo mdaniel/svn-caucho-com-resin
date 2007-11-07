@@ -28,44 +28,35 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.protocol.AbstractHandle;
+
+import javax.ejb.RemoveException;
+
 /**
- * Abstract base class for an session context
+ * Abstract base class for a 2.1 session object
  */
-abstract public class StatefulContext extends AbstractSessionContext {
-  protected StatefulContext(SessionServer server)
+abstract public class SessionObject21 extends AbstractSessionObject21 {
+  protected final SessionServer _server;
+
+  protected SessionObject21(SessionServer server)
   {
-    super(server);
+    _server = server;
   }
 
   /**
-   * Returns the new instance for EJB 3.0
+   * Returns the session server.
    */
-  protected Object _caucho_newInstance()
+  public AbstractServer getServer()
   {
-    return null;
+    return _server;
   }
 
   /**
-   * Returns the new instance for EJB 2.1
+   * Removes the bean from the underlying store.
    */
-  protected Object _caucho_newInstance21()
+  public void remove() throws RemoveException
   {
-    return null;
-  }
-
-  /**
-   * Returns the new remote instance for EJB 3.0
-   */
-  protected Object _caucho_newRemoteInstance()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the new remote instance for EJB 2.1
-   */
-  protected Object _caucho_newRemoteInstance21()
-  {
-    return null;
+    getServer().remove((AbstractHandle) getHandle());
   }
 }

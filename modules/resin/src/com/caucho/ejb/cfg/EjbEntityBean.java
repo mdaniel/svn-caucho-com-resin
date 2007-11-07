@@ -1033,7 +1033,8 @@ public class EjbEntityBean extends EjbBean {
    */
   @Override
   protected EjbObjectView createObjectView(ArrayList<JClass> apiList,
-                                           String prefix)
+                                           String prefix,
+                                           String suffix)
     throws ConfigException
   {
     if (isCMP())

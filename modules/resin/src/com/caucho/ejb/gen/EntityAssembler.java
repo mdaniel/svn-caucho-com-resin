@@ -44,9 +44,9 @@ public class EntityAssembler extends BeanAssembler {
   private static final L10N L = new L10N(EntityAssembler.class);
 
   private EjbEntityBean _bean;
-  
+
   protected EntityBean _entityBean;
-  
+
   public EntityAssembler(EjbEntityBean bean, String fullClassName)
   {
     super(bean, fullClassName);
@@ -68,14 +68,14 @@ public class EntityAssembler extends BeanAssembler {
    * Adds the header component.
    */
   public void addHeaderComponent(JClass beanClass,
-				 String contextClassName,
-				 String implClassName)
+                                 String contextClassName,
+                                 String implClassName)
   {
     _entityBean = new EntityBean(beanClass,
-				 contextClassName,
-				 implClassName);
+                                 contextClassName,
+                                 implClassName);
     _entityBean.setBean(_bean);
-    
+
     _genClass.addComponent(_entityBean);
   }
 
@@ -107,13 +107,13 @@ public class EntityAssembler extends BeanAssembler {
    * Creates the home view.
    */
   public ViewClass createHomeView(JClass homeClass,
-				  String fullClassName,
-				  String viewPrefix)
+                                  String fullClassName,
+                                  String viewPrefix)
   {
     EntityHomeView homeView = new EntityHomeView(homeClass,
-						 fullClassName,
-						 viewPrefix,
-						 false);
+                                                 fullClassName,
+                                                 viewPrefix,
+                                                 false);
 
     _genClass.addComponent(homeView);
 
@@ -124,12 +124,13 @@ public class EntityAssembler extends BeanAssembler {
    * Creates the home view.
    */
   public ViewClass createView(ArrayList<JClass> homeClass,
-			      String fullClassName,
-			      String viewPrefix)
+                              String fullClassName,
+                              String viewPrefix,
+                              String viewSuffix)
   {
     EntityView view = new EntityView(homeClass.get(0),
-				     fullClassName,
-				     viewPrefix);
+                                     fullClassName,
+                                     viewPrefix);
 
     _genClass.addComponent(view);
 

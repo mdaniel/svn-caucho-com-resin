@@ -33,6 +33,10 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
 import com.caucho.util.Log;
 
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import javax.ejb.SessionBean;
 import java.io.ObjectStreamException;
@@ -42,15 +46,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Abstract base class for a 3.0 session object
+ * Abstract base class for a 2.1 session object
  */
-abstract public class AbstractSessionObject extends AbstractEJBObject
-    implements Serializable
+abstract public class AbstractSessionObject21 extends AbstractEJBObject
+  implements EJBObject, EJBLocalObject, Serializable
 {
-  private static final Logger log = Log.open(AbstractSessionObject.class);
-
-  // ejb/0ff0
-  protected Class _businessInterface;
+  private static final Logger log = Log.open(AbstractSessionObject21.class);
 
   public SessionBean _getObject()
   {
@@ -70,9 +71,51 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
     return getServer().getHandleEncoder().createHandle(__caucho_getId());
   }
 
+  /**
+   * Returns the EJBHome stub for the container.
+   */
+  public EJBHome getEJBHome()
+  {
+    try {
+      return getServer().getEJBHome();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
+  }
+
+  /**
+   * Returns the EJBLocalHome stub for the container.
+   */
+  public EJBLocalHome getEJBLocalHome()
+  {
+    try {
+      return (EJBLocalHome) getServer().getEJBLocalHome();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
+  }
+
   public Object getPrimaryKey()
   {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the SessionBean's primary stub
+   */
+  public EJBObject getEJBObject()
+  {
+    return this;
+  }
+
+  /**
+   * Returns the SessionBean's primary stub
+   */
+  public EJBLocalObject getEJBLocalObject()
+  {
+    return this;
   }
 
   /**
@@ -92,19 +135,19 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
   }
 
   /**
-   * Returns the business interface.
+   * Returns true if the two objects are identical.
    */
-  public Class __caucho_getBusinessInterface()
+  public boolean isIdentical(EJBObject obj) throws RemoteException
   {
-    return _businessInterface;
+    return getHandle().equals(obj.getHandle());
   }
 
   /**
-   * Sets the business interface.
+   * Returns true if the two objects are identical.
    */
-  public void __caucho_setBusinessInterface(Class businessInterface)
+  public boolean isIdentical(EJBLocalObject obj)
   {
-    _businessInterface = businessInterface;
+    return this == obj;
   }
 
   /**

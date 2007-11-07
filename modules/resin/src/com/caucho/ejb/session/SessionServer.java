@@ -62,6 +62,7 @@ public class SessionServer extends AbstractServer
 
   private boolean _isClosed;
 
+  private Object _remoteObject21;
   private Object _remoteObject;
   private boolean _isInitRemote;
 
@@ -159,7 +160,7 @@ public class SessionServer extends AbstractServer
    * Returns the EJBRemote stub for the container
    */
   @Override
-  public Object getRemoteObject()
+  public Object getRemoteObject21()
   {
     if (_remoteHomeView != null)
       return _remoteHomeView;
@@ -167,47 +168,59 @@ public class SessionServer extends AbstractServer
     //if (_remoteHomeView == null)
     //  return null;
 
-    return getRemoteObject30();
+    return getRemoteObject();
   }
 
   /**
    * Returns the EJBRemote stub for the container
    */
   @Override
-  public Object getRemoteObject30()
+  public Object getRemoteObject()
   {
-    return getRemoteObject30(null);
+    return getRemoteObject(null);
   }
 
   /**
-   * Returns the EJBRemote stub for the container
+   * Returns the remote stub for the container
    */
   @Override
-  public Object getRemoteObject30(Class businessInterface)
+  public Object getRemoteObject(Class businessInterface)
   {
     if (_isInitRemote)
       return null;
 
-    if (true) { // isNew) {
-      _isInitRemote = true;
+    _isInitRemote = true;
 
-      _remoteObject = _homeContext._caucho_newRemoteInstance();
-
-      _isInitRemote = false;
+    // EJB 3.0 only.
+    if (businessInterface == null) {
+      if (getRemote21() == null) {
+        // Assumes EJB 3.0
+        businessInterface = getRemoteObjectList().get(0);
+      }
     }
 
-    Object obj = _remoteObject;
+    if (businessInterface != null)
+      _remoteObject = _homeContext._caucho_newRemoteInstance();
 
-    if (obj == null)
-      return null;
+    // EJB 2.1
+    if (_remoteObject == null) {
+      _remoteObject21 = _homeContext._caucho_newRemoteInstance21();
 
+      _isInitRemote = false;
+
+      return _remoteObject21;
+    }
+
+    _isInitRemote = false;
+
+    // EJB 3.0 only.
     if (businessInterface == null)
-      return obj;
+      return _remoteObject;
 
-    if (businessInterface.isAssignableFrom(obj.getClass())) {
-      setBusinessInterface(obj, businessInterface);
+    if (businessInterface.isAssignableFrom(_remoteObject.getClass())) {
+      setBusinessInterface(_remoteObject, businessInterface);
 
-      return obj;
+      return _remoteObject;
     }
 
     return null;
@@ -226,7 +239,7 @@ public class SessionServer extends AbstractServer
    * Returns the 3.0 local stub for the container
    */
   @Override
-  public Object getLocalObject30()
+  public Object getLocalObject()
   {
     return getClientObject(null);
   }
@@ -235,7 +248,7 @@ public class SessionServer extends AbstractServer
    * Returns the 3.0 local stub for the container
    */
   @Override
-  public Object getLocalObject30(Class businessInterface)
+  public Object getLocalObject(Class businessInterface)
   {
     return getClientObject(businessInterface);
   }
@@ -246,6 +259,14 @@ public class SessionServer extends AbstractServer
   Object newInstance()
   {
     return _homeContext._caucho_newInstance();
+  }
+
+  /**
+   * Returns a new 2.1 instance.
+   */
+  Object newInstance21()
+  {
+    return _homeContext._caucho_newInstance21();
   }
 
   /**

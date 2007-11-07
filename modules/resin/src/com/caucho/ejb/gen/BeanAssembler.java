@@ -47,14 +47,14 @@ abstract public class BeanAssembler {
   private static final L10N L = new L10N(BeanAssembler.class);
 
   private EjbBean _bean;
-  
+
   protected GenClass _genClass;
   protected GenClass _beanClass;
 
   protected DependencyComponent _dependency;
 
   public BeanAssembler(EjbBean bean,
-		       String fullClassName)
+                       String fullClassName)
   {
     _bean = bean;
     _genClass = new GenClass(fullClassName);
@@ -90,8 +90,8 @@ abstract public class BeanAssembler {
    * Adds the header component.
    */
   public void addHeaderComponent(JClass beanClass,
-				 String contextClassName,
-				 String implClassName)
+                                 String contextClassName,
+                                 String implClassName)
   {
   }
 
@@ -122,28 +122,29 @@ abstract public class BeanAssembler {
    * Creates the home view.
    */
   abstract public ViewClass createHomeView(JClass homeClass,
-					   String fullClassName,
-					   String viewPrefix);
+                                           String fullClassName,
+                                           String viewPrefix);
 
   /**
    * Creates the home view.
    */
   public final ViewClass createView(JClass homeClass,
-				    String fullClassName,
-				    String viewPrefix)
+                                    String fullClassName,
+                                    String viewPrefix)
   {
     ArrayList<JClass> apiList = new ArrayList<JClass>();
     apiList.add(homeClass);
 
-    return createView(apiList, fullClassName, viewPrefix);
+    return createView(apiList, fullClassName, viewPrefix, "");
   }
 
   /**
    * Creates the home view.
    */
   abstract public ViewClass createView(ArrayList<JClass> apiList,
-				       String fullClassName,
-				       String viewPrefix);
+                                       String fullClassName,
+                                       String viewPrefix,
+                                       String viewSuffix);
 
   /**
    * Checks for the existence of a method.

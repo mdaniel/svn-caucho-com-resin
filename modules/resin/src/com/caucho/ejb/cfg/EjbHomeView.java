@@ -51,19 +51,19 @@ public class EjbHomeView extends EjbView {
   public EjbHomeView(EjbBean bean, JClass apiClass, String prefix)
     throws ConfigException
   {
-    super(bean, apiClass, prefix);
+    super(bean, apiClass, prefix, "");
   }
 
   /**
    * Assembles the generator.
    */
   protected void assembleView(BeanAssembler assembler,
-			      String fullClassName)
+                              String fullClassName)
     throws ConfigException
   {
     ViewClass viewClass = assembler.createHomeView(getApiClass(),
-						   fullClassName,
-						   getPrefix());
+                                                   fullClassName,
+                                                   getPrefix());
 
     assembleMethods(assembler, viewClass, fullClassName);
   }

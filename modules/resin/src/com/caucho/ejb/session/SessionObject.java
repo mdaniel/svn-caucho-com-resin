@@ -31,10 +31,8 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.AbstractHandle;
 
-import javax.ejb.RemoveException;
-
 /**
- * Abstract base class for a session object
+ * Abstract base class for a 3.0 session object
  */
 abstract public class SessionObject extends AbstractSessionObject {
   protected final SessionServer _server;
@@ -55,7 +53,6 @@ abstract public class SessionObject extends AbstractSessionObject {
   /**
    * Removes the bean from the underlying store.
    */
-  // XXX ejb/0fe- public void remove() throws RemoveException
   public void remove() throws Exception
   {
     getServer().remove((AbstractHandle) getHandle());

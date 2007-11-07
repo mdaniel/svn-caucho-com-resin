@@ -104,7 +104,7 @@ abstract public class AbstractSessionContext extends AbstractContext
   {
     validateBusinessInterface(businessInterface);
 
-    Object obj = getSessionServer().getRemoteObject30(businessInterface);
+    Object obj = getSessionServer().getRemoteObject(businessInterface);
 
     if (validateObject(obj, businessInterface))
       return (T) obj;

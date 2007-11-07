@@ -55,6 +55,7 @@ public class EjbView {
   private ArrayList<JClass> _apiList;
 
   private String _prefix;
+  private String _suffix;
 
   private HashMap<String,EjbMethod> _methodMap =
     new HashMap<String,EjbMethod>();
@@ -62,24 +63,26 @@ public class EjbView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbView(EjbBean bean, JClass apiClass, String prefix)
+  public EjbView(EjbBean bean, JClass apiClass, String prefix, String suffix)
     throws ConfigException
   {
     _bean = bean;
     _apiList = new ArrayList<JClass>();
     _apiList.add(apiClass);
     _prefix = prefix;
+    _suffix = suffix;
   }
 
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbView(EjbBean bean, ArrayList<JClass> apiList, String prefix)
+  public EjbView(EjbBean bean, ArrayList<JClass> apiList, String prefix, String suffix)
     throws ConfigException
   {
     _bean = bean;
     _apiList = apiList;
     _prefix = prefix;
+    _suffix = suffix;
   }
 
   /**
@@ -117,6 +120,14 @@ public class EjbView {
   protected String getPrefix()
   {
     return _prefix;
+  }
+
+  /**
+   * Returns the suffix.
+   */
+  protected String getSuffix()
+  {
+    return _suffix;
   }
 
   /**

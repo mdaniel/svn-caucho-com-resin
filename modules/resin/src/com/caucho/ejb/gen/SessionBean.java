@@ -67,8 +67,17 @@ public class SessionBean extends ClassComponent {
   {
     generateContext(out);
 
-    generateNewInstance(out);
-    generateNewRemoteInstance(out);
+    if (_bean.isEJB21())
+      generateNewInstance(out, "21");
+
+    if (_bean.isEJB30())
+      generateNewInstance(out, "");
+
+    if (_bean.isEJB21())
+      generateNewRemoteInstance(out, "21");
+
+    if (_bean.isEJB30())
+      generateNewRemoteInstance(out, "");
 
     generateBean(out);
   }
@@ -159,7 +168,7 @@ public class SessionBean extends ClassComponent {
     generateInvokeMethod(out);
   }
 
-  protected void generateNewInstance(JavaWriter out)
+  protected void generateNewInstance(JavaWriter out, String suffix)
     throws IOException
   {
     // ejb/0g27
@@ -167,7 +176,7 @@ public class SessionBean extends ClassComponent {
       return;
 
     out.println();
-    out.println("protected Object _caucho_newInstance()");
+    out.println("protected Object _caucho_newInstance" + suffix + "()");
     out.println("{");
     out.pushDepth();
 
@@ -194,13 +203,13 @@ public class SessionBean extends ClassComponent {
 
     //out.println("return cxt.getEJBLocalObject();");
 
-    out.println("return cxt.createLocalObject();");
+    out.println("return cxt.createLocalObject" + suffix + "();");
 
     out.popDepth();
     out.println("}");
   }
 
-  protected void generateNewRemoteInstance(JavaWriter out)
+  protected void generateNewRemoteInstance(JavaWriter out, String suffix)
     throws IOException
   {
     // ejb/0g27
@@ -208,7 +217,7 @@ public class SessionBean extends ClassComponent {
       return;
 
     out.println();
-    out.println("protected Object _caucho_newRemoteInstance()");
+    out.println("protected Object _caucho_newRemoteInstance" + suffix + "()");
     out.println("{");
     out.pushDepth();
 
@@ -231,7 +240,7 @@ public class SessionBean extends ClassComponent {
                               _prefix));
     */
 
-    out.println("return cxt.createRemoteView();");
+    out.println("return cxt.createRemoteView" + suffix + "();");
 
     out.popDepth();
     out.println("}");

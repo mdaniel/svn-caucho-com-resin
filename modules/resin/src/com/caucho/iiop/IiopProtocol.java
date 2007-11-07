@@ -29,8 +29,8 @@
 
 package com.caucho.iiop;
 
+import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.session.SessionObject;
 import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.RMI_IIOPResource;
@@ -184,8 +184,8 @@ public class IiopProtocol extends Protocol {
       }
 
       // XXX TCK: ejb30/.../remove
-      if (obj instanceof SessionObject) {
-        SessionObject ejb = (SessionObject) obj;
+      if (obj instanceof AbstractEJBObject) {
+        AbstractEJBObject ejb = (AbstractEJBObject) obj;
 
         AbstractServer server = ejb.__caucho_getServer();
         local = ejb.__caucho_getId();

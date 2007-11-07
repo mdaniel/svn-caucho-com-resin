@@ -161,7 +161,11 @@ public class BurlapProtocol extends ProtocolContainer {
       return new MessageSkeleton((MessageServer) server);
     }
     else {
-      Object remote = server.getRemoteObject();
+      // ejb/0200
+      Object remote = server.getRemoteObject21();
+
+      if (remote == null)
+        remote = server.getRemoteObject();
 
       if (remote instanceof EJBHome) {
         Class homeSkelClass = getHomeSkelClass(server);

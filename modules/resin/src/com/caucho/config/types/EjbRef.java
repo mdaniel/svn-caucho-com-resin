@@ -549,7 +549,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         if (target != null) {
           // ejb/0f6g
           if (type != null && ! type.isAssignableFrom(target.getClass()))
-            target = server.getLocalObject30(type);
+            target = server.getLocalObject(type);
         }
 
         if (target == null) {
@@ -562,7 +562,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         if (target != null) {
           // XXX: needs QA
           if (type != null && ! type.isAssignableFrom(target.getClass()))
-            target = server.getRemoteObject30(type);
+            target = server.getRemoteObject(type);
         }
 
         if (target == null)  {

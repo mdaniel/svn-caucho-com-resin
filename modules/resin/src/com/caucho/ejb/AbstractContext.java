@@ -195,6 +195,17 @@ abstract public class AbstractContext implements EJBContext {
     */
   }
 
+  /**
+   * Create the 2.1 remote view.
+   */
+  public Object createRemoteView21()
+  {
+    return null;
+  }
+
+  /**
+   * Create the 3.0 remote view.
+   */
   public Object createRemoteView()
   {
     return null;

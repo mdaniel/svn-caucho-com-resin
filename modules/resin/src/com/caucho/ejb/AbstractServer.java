@@ -718,7 +718,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the EJBHome stub for the container
    */
-  public Object getRemoteObject()
+  public Object getRemoteObject21()
   {
     return getHomeObject();
   }
@@ -726,7 +726,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the 3.0 remote stub for the container
    */
-  public Object getRemoteObject30()
+  public Object getRemoteObject()
   {
     throw new UnsupportedOperationException("3.0 remote interface not found");
   }
@@ -734,7 +734,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the 3.0 remote stub for the container
    */
-  public Object getRemoteObject30(Class businessInterface)
+  public Object getRemoteObject(Class businessInterface)
   {
     throw new UnsupportedOperationException("3.0 remote interface not found");
   }
@@ -758,7 +758,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the 3.0 local stub for the container
    */
-  public Object getLocalObject30()
+  public Object getLocalObject()
   {
     throw new UnsupportedOperationException("3.0 local interface not found");
   }
@@ -766,7 +766,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the 3.0 local stub for the container
    */
-  public Object getLocalObject30(Class businessInterface)
+  public Object getLocalObject(Class businessInterface)
   {
     throw new UnsupportedOperationException("3.0 local interface not found");
   }

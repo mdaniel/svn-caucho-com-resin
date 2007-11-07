@@ -119,9 +119,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   protected JClass _local21;
 
   protected EjbView _remoteHomeView;
+  protected EjbView _remoteView21;
   protected EjbView _remoteView;
   protected EjbView _localHomeView;
+  protected EjbView _localView21;
   protected EjbView _localView;
+
+  // Can be both with multiple interfaces.
+  protected boolean _isEJB21;
+  protected boolean _isEJB30;
 
   private boolean _isAllowPOJO;
 
@@ -381,6 +387,22 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
 
   /**
+   * Returns true if this EJB has a 2.1 interface.
+   */
+  public boolean isEJB21()
+  {
+    return _isEJB21;
+  }
+
+  /**
+   * Returns true if this EJB has a 3.0 interface.
+   */
+  public boolean isEJB30()
+  {
+    return _isEJB30;
+  }
+
+  /**
    * Adds a description
    */
   public void addDescription(String description)
@@ -572,8 +594,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     JMethod method = findFirstCreateMethod(home);
 
     JClass remoteWrapper = method.getReturnType();
-    setRemoteWrapper(remoteWrapper);
+
+    // Order is important.
     setRemote21(remoteWrapper);
+    setRemoteWrapper(remoteWrapper);
   }
 
   /**
@@ -658,8 +682,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! remote.isAssignableTo(EJBObject.class) && ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBObject.  <remote> interfaces must extend javax.ejb.EJBObject.", remote.getName()));
 
-    if (! _remoteList.contains(remote))
+    if (! _remoteList.contains(remote)) {
       _remoteList.add(remote);
+
+      if (remote == _remote21)
+        _isEJB21 = true;
+      else
+        _isEJB30 = true;
+    }
   }
 
   /**
@@ -675,6 +705,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    */
   public void setRemote21(JClass remote21)
   {
+    _isEJB21 = true;
+
     _remote21 = remote21;
   }
 
@@ -691,6 +723,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    */
   public void setLocal21(JClass local21)
   {
+    _isEJB21 = true;
+
     _local21 = local21;
   }
 
@@ -732,8 +766,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     JMethod method = findFirstCreateMethod(localHome);
 
     JClass localWrapper = method.getReturnType();
-    setLocalWrapper(localWrapper);
+
+    // Order is important.
     setLocal21(localWrapper);
+    setLocalWrapper(localWrapper);
   }
 
   /**
@@ -804,8 +840,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! local.isAssignableTo(EJBLocalObject.class) && ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
 
-    if (! _localList.contains(local))
+    if (! _localList.contains(local)) {
       _localList.add(local);
+
+      if (local == _local21)
+        _isEJB21 = true;
+      else
+        _isEJB30 = true;
+    }
   }
 
   /**
@@ -1195,9 +1237,23 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       _remoteHomeView.introspect();
     }
 
+    if (_remote21 != null) {
+      ArrayList<JClass> list = new ArrayList<JClass>();
+      list.add(_remote21);
+
+      _remoteView21 = createObjectView(list, "Remote", "21");
+      _remoteView21.introspect();
+    }
+
     if (_remoteList.size() > 0) {
-      _remoteView = createObjectView(_remoteList, "Remote");
-      _remoteView.introspect();
+      ArrayList<JClass> list = new ArrayList<JClass>();
+      list.addAll(_remoteList);
+      list.remove(_remote21);
+
+      if (list.size() > 0) {
+        _remoteView = createObjectView(list, "Remote", "");
+        _remoteView.introspect();
+      }
     }
 
     if (_localHome != null) {
@@ -1205,9 +1261,23 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       _localHomeView.introspect();
     }
 
+    if (_local21 != null) {
+      ArrayList<JClass> list = new ArrayList<JClass>();
+      list.add(_local21);
+
+      _localView21 = createObjectView(list, "Local", "21");
+      _localView21.introspect();
+    }
+
     if (_localList.size() > 0) {
-      _localView = createObjectView(_localList, "Local");
-      _localView.introspect();
+      ArrayList<JClass> list = new ArrayList<JClass>();
+      list.addAll(_localList);
+      list.remove(_local21);
+
+      if (list.size() > 0) {
+        _localView = createObjectView(list, "Local", "");
+        _localView.introspect();
+      }
     }
   }
 
@@ -1224,10 +1294,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    * Creates an object view.
    */
   protected EjbObjectView createObjectView(ArrayList<JClass> apiList,
-                                           String prefix)
+                                           String prefix,
+                                           String suffix)
     throws ConfigException
   {
-    return new EjbObjectView(this, apiList, prefix);
+    return new EjbObjectView(this, apiList, prefix, suffix);
   }
 
   /**
@@ -1574,11 +1645,17 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (_remoteHomeView != null)
       _remoteHomeView.assembleView(assembler, fullClassName);
 
+    if (_remoteView21 != null)
+      _remoteView21.assembleView(assembler, fullClassName);
+
     if (_remoteView != null)
       _remoteView.assembleView(assembler, fullClassName);
 
     if (_localHomeView != null)
       _localHomeView.assembleView(assembler, fullClassName);
+
+    if (_localView21 != null)
+      _localView21.assembleView(assembler, fullClassName);
 
     if (_localView != null)
       _localView.assembleView(assembler, fullClassName);

@@ -135,12 +135,12 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   public Object getHome()
   {
     if (_isEJB3)
-      return _server.getRemoteObject30(_remoteInterface);
+      return _server.getRemoteObject(_remoteInterface);
 
     Object obj = _server.getHomeObject();
 
     if (obj == null)
-      obj = _server.getRemoteObject();
+      obj = _server.getRemoteObject21();
 
     return obj;
   }

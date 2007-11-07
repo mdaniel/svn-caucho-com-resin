@@ -233,8 +233,14 @@ public class EjbProtocolManager {
         // ejb/0f00
         // EJB 3.0 does not require home interfaces, e.g
         // for stateless session beans
-        if (localObj == null)
+
+        // ejb/0fe2
+        if (server.getLocal21() != null) {
           localObj = server.getClientObject(null);
+        } else {
+          Class businessInterface = server.getLocalApiList().get(0);
+          localObj = server.getLocalObject(businessInterface);
+        }
 
         if (localObj != null) {
           if (_localJndiPrefix != null) {
@@ -247,7 +253,7 @@ public class EjbProtocolManager {
             bindServer(localJndiName, localObj);
 
             // ejb/0f6d (tck)
-            if (server.getRemoteObject() == null && ejbName != null) {
+            if (server.getRemoteObject21() == null && ejbName != null) {
               // ejb/0f30, ejb/0f6c (tck) vs ejb/0g01
               if (! (ejbName.equals(mappedName) || _localJndiPrefix.endsWith("/env"))) {
                 localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
@@ -269,7 +275,7 @@ public class EjbProtocolManager {
 
               Object obj;
 
-              if (server.getRemoteObjectList().size() == 1) {
+              if (server.getLocalApiList().size() == 1) {
                 // ejb/0fe1: it is the same object.
                 obj = localObj;
               } // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceLocalIllegal
@@ -277,7 +283,7 @@ public class EjbProtocolManager {
                 if (server.getLocal21() == null
                     || ! server.getLocal21().getName().equals(cl.getName())) {
                   // ejb/0ff4
-                  obj = server.getLocalObject30(cl);
+                  obj = server.getLocalObject(cl);
                 }
                 else {
                   obj = server.getClientObject(server.getLocal21());
@@ -318,10 +324,10 @@ public class EjbProtocolManager {
 
       // ejb/0fe-
       if (server.getRemote21() != null) {
-        remoteObj = server.getRemoteObject();
+        remoteObj = server.getRemoteObject21();
       } else if (server.hasRemoteObject()) {
         businessInterface = server.getRemoteObjectList().get(0);
-        remoteObj = server.getRemoteObject30(businessInterface);
+        remoteObj = server.getRemoteObject(businessInterface);
       }
 
       if (remoteObj != null) {
@@ -348,10 +354,10 @@ public class EjbProtocolManager {
                 // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemoteIllegal
                 if (server.getRemote21() == null
                     || ! server.getRemote21().getName().equals(cl.getName())) {
-                  obj = server.getRemoteObject30(cl);
+                  obj = server.getRemoteObject(cl);
                 }
                 else {
-                  obj = server.getRemoteObject();
+                  obj = server.getRemoteObject21();
 
                   try {
                     // XXX TCK: switch to method.getName().startsWith("create")

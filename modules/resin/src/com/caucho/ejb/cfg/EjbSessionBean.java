@@ -329,13 +329,23 @@ public class EjbSessionBean extends EjbBean {
       assembler.addImport("com.caucho.ejb.session.StatelessServer");
       assembler.addImport("com.caucho.ejb.session.AbstractStatelessContext");
       assembler.addImport("com.caucho.ejb.session.StatelessHome");
-      assembler.addImport("com.caucho.ejb.session.StatelessObject");
+
+      if (_isEJB21)
+        assembler.addImport("com.caucho.ejb.session.StatelessObject21");
+
+      if (_isEJB30)
+        assembler.addImport("com.caucho.ejb.session.StatelessObject");
     }
     else {
       assembler.addImport("com.caucho.ejb.session.SessionServer");
       assembler.addImport("com.caucho.ejb.session.AbstractSessionContext");
       assembler.addImport("com.caucho.ejb.session.SessionHome");
-      assembler.addImport("com.caucho.ejb.session.SessionObject");
+
+      if (_isEJB21)
+        assembler.addImport("com.caucho.ejb.session.SessionObject21");
+
+      if (_isEJB30)
+        assembler.addImport("com.caucho.ejb.session.SessionObject");
     }
   }
 

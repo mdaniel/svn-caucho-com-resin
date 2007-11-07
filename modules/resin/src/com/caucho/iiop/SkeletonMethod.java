@@ -102,13 +102,13 @@ public class SkeletonMethod {
       // have well-known superinterfaces, the method return type might not help.
       // For now, we rely on the result object type.
 
-      // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getBusinessObjectRemote1
-      
       // See RemoteMarshal.  The following breaks several TCK
-      /*
-      if (result != null && (result instanceof com.caucho.ejb.session.SessionObject))
+      // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getBusinessObjectRemote1 and
+      // TCK: ejb30/bb/session/stateless/sessioncontext/annotated/getBusinessObjectRemote1
+      if (result != null && (result instanceof com.caucho.ejb.AbstractEJBObject)) {
+        //_marshalReturn = new com.caucho.iiop.marshal.RemoteMarshal(_method.getReturnType());
         _marshalReturn = new EjbSessionObjectMarshal(_method.getReturnType(), _skeleton);
-      */
+      }
 
       _marshalReturn.marshal(writer, result);
     } catch (InvocationTargetException e) {

@@ -92,12 +92,14 @@ public class StatelessAssembler extends SessionAssembler
    */
   public ViewClass createView(ArrayList<JClass> apiList,
                               String fullClassName,
-                              String viewPrefix)
+                              String viewPrefix,
+                              String viewSuffix)
   {
     SessionView view = new SessionView(_sessionBean,
                                        apiList,
                                        fullClassName,
                                        viewPrefix,
+                                       viewSuffix,
                                        true);
 
     _genClass.addComponent(view);

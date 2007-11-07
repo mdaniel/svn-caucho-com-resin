@@ -115,13 +115,13 @@ abstract public class AbstractStatelessContext extends AbstractContext
   {
     validateBusinessInterface(businessInterface);
 
-    Object obj = getStatelessServer().getRemoteObject30(businessInterface);
+    Object obj = getStatelessServer().getRemoteObject(businessInterface);
 
     if (validateObject(obj, businessInterface))
       return (T) obj;
 
     // TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getInvokedBusinessInterfaceLocal1, needs QA
-    obj = getStatelessServer().getLocalObject30(businessInterface);
+    obj = getStatelessServer().getLocalObject(businessInterface);
 
     if (validateObject(obj, businessInterface))
       return (T) obj;

@@ -65,26 +65,26 @@ public class SessionAssembler extends BeanAssembler
    * Adds the header component.
    */
   public void addHeaderComponent(JClass beanClass,
-				 String contextClassName,
-				 String implClassName)
+                                 String contextClassName,
+                                 String implClassName)
   {
     _genClass.addComponent(new SessionBean(_sessionBean,
-					   beanClass,
-					   contextClassName));
+                                           beanClass,
+                                           contextClassName));
   }
 
   /**
    * Creates the home view.
    */
   public ViewClass createHomeView(JClass homeClass,
-				  String fullClassName,
-				  String viewPrefix)
+                                  String fullClassName,
+                                  String viewPrefix)
   {
     SessionHomeView homeView = new SessionHomeView(homeClass,
-						   fullClassName,
-						   viewPrefix,
-						   false);
-    
+                                                   fullClassName,
+                                                   viewPrefix,
+                                                   false);
+
     _genClass.addComponent(homeView);
 
     return homeView;
@@ -94,14 +94,16 @@ public class SessionAssembler extends BeanAssembler
    * Creates the home view.
    */
   public ViewClass createView(ArrayList<JClass> apiList,
-			      String fullClassName,
-			      String viewPrefix)
+                              String fullClassName,
+                              String viewPrefix,
+                              String viewSuffix)
   {
     SessionView view = new SessionView(_sessionBean,
                                        apiList,
-				       fullClassName,
-				       viewPrefix,
-				       false);
+                                       fullClassName,
+                                       viewPrefix,
+                                       viewSuffix,
+                                       false);
 
     _genClass.addComponent(view);
 

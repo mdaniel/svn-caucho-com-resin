@@ -52,9 +52,12 @@ public class StatelessServer extends AbstractServer {
 
   private AbstractStatelessContext _homeContext;
 
-  // XXX private EJBObject _remoteObject;
-  private Object _remoteObject;
+  // EJB 2.1
+  private EJBObject _remoteObject21;
+  private EJBLocalObject _localObject21;
 
+  // EJB 3.0
+  private Object _remoteObject;
   private Object _localObject;
 
   /**
@@ -94,19 +97,31 @@ public class StatelessServer extends AbstractServer {
       Jndi.rebindDeep("java:comp/env/sessionContext",
                       getStatelessContext());
 
+      // EJB 2.1
       _localHome = getStatelessContext().createLocalHome();
       _remoteHomeView = getStatelessContext().createRemoteHomeView();
 
+      try {
+        _localObject21 = getStatelessContext().getEJBLocalObject();
+      } catch (Throwable e) {
+      }
+
+      try {
+        _remoteObject21 = getStatelessContext().getEJBObject();
+      } catch (Throwable e) {
+      }
+
+      // EJB 3.0
       try {
         _localObject = getStatelessContext().createLocalObject();
       } catch (Throwable e) {
       }
 
       try {
-        // XXX _remoteObject = getStatelessContext().getEJBObject();
         _remoteObject = getStatelessContext().createRemoteView();
       } catch (Throwable e) {
       }
+
       /*
         if (_config.getLocalHomeClass() != null)
         _localHome = _homeContext.createLocalHome();
@@ -130,13 +145,13 @@ public class StatelessServer extends AbstractServer {
   @Override
   public boolean isLocal()
   {
-    return super.isLocal() || _localObject != null;
+    return super.isLocal() || _localObject != null || _localObject21 != null;
   }
 
   @Override
   public boolean isRemote()
   {
-    return super.isRemote() || _remoteObject != null;
+    return super.isRemote() || _remoteObject != null || _remoteObject21 != null;
   }
 
   /**
@@ -152,7 +167,7 @@ public class StatelessServer extends AbstractServer {
    * Returns the EJBHome stub for the container
    */
   @Override
-  public Object getRemoteObject()
+  public Object getRemoteObject21()
   {
     Object home = getEJBHome();
 
@@ -160,7 +175,7 @@ public class StatelessServer extends AbstractServer {
       return home;
 
     if (_remoteObject != null)
-      return _remoteObject;
+      return _remoteObject21;
 
     return null;
   }
@@ -168,7 +183,7 @@ public class StatelessServer extends AbstractServer {
   /**
    * Returns the 3.0 remote stub for the container
    */
-  public Object getRemoteObject30()
+  public Object getRemoteObject()
   {
     return _remoteObject;
   }
@@ -176,7 +191,7 @@ public class StatelessServer extends AbstractServer {
   /**
    * Returns the 3.0 remote stub for the container
    */
-  public Object getRemoteObject30(Class businessInterface)
+  public Object getRemoteObject(Class businessInterface)
   {
     if (_remoteObject == null)
       return null;
@@ -291,7 +306,7 @@ public class StatelessServer extends AbstractServer {
    * Returns the 3.0 local stub for the container
    */
   @Override
-  public Object getLocalObject30()
+  public Object getLocalObject()
   {
     return getClientObject(null);
   }
@@ -300,7 +315,7 @@ public class StatelessServer extends AbstractServer {
    * Returns the 3.0 local stub for the container
    */
   @Override
-  public Object getLocalObject30(Class businessInterface)
+  public Object getLocalObject(Class businessInterface)
   {
     return getClientObject(businessInterface);
 

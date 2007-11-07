@@ -29,7 +29,7 @@
 
 package com.caucho.iiop.orb;
 
-import com.caucho.ejb.session.SessionObject;
+import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.iiop.IiopSkeleton;
 import com.caucho.iiop.marshal.Marshal;
 
@@ -53,8 +53,8 @@ public class EjbSessionObjectMarshal extends CorbaObjectMarshal {
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    SessionObject sessionObj = (SessionObject) value;
-    String url = sessionObj.getServer().getProtocolId();
+    AbstractEJBObject sessionObj = (AbstractEJBObject) value;
+    String url = sessionObj.__caucho_getServer().getProtocolId();
 
     // XXX: check multiple business interfaces.
     java.util.ArrayList<Class> apiList = new java.util.ArrayList<Class>();

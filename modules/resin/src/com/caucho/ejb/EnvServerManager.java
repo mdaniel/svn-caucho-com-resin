@@ -481,12 +481,12 @@ public class EnvServerManager implements EnvironmentListener
   public Object getRemoteByInterface(Class type)
   {
     for (AbstractServer server : _serverMap.values()) {
-      Object remote = server.getRemoteObject();
+      Object remote = server.getRemoteObject21();
 
       if (remote != null && type.isAssignableFrom(remote.getClass()))
         return remote;
 
-      remote = server.getRemoteObject30(type);
+      remote = server.getRemoteObject(type);
 
       if (remote != null && type.isAssignableFrom(remote.getClass()))
         return remote;
