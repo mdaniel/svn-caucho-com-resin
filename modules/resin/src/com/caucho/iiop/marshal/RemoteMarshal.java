@@ -55,10 +55,9 @@ public class RemoteMarshal extends Marshal
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    //System.out.println("V: " + value);
     if (value instanceof IiopProxy) {
       IiopProxyHandler handler
-	= (IiopProxyHandler) Proxy.getInvocationHandler(value);
+        = (IiopProxyHandler) Proxy.getInvocationHandler(value);
 
       StubImpl stub = handler.getStub();
 
@@ -73,7 +72,9 @@ public class RemoteMarshal extends Marshal
       AbstractServer server = absObj.__caucho_getServer();
       String local = absObj.__caucho_getId();
 
-      String url = server.getProtocolId() + "?" + local;
+      // XXX TCK: ejb30/bb/session/stateless/sessioncontext/annotated/passBusinessObjectRemote1
+      String url = server.getProtocolId(_cl) + "?" + local;
+
       String typeName = "RMI:" + _cl.getName() + ":0";
 
       ORBImpl orb = (ORBImpl) os.orb();
@@ -101,32 +102,32 @@ public class RemoteMarshal extends Marshal
       String typeId = ior.getTypeId();
 
       if (typeId.startsWith("RMI:")) {
-	int p = typeId.lastIndexOf(':');
-	String typeName = typeId.substring(4, p);
+        int p = typeId.lastIndexOf(':');
+        String typeName = typeId.substring(4, p);
 
-	try {
-	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	  Class typeClass = Class.forName(typeName, false, loader);
+        try {
+          ClassLoader loader = Thread.currentThread().getContextClassLoader();
+          Class typeClass = Class.forName(typeName, false, loader);
 
-	  if (typeClass.isInterface())
-	    type = typeClass;
-	} catch (Exception e) {
-	  log.finer(e.toString());
-	}
+          if (typeClass.isInterface())
+            type = typeClass;
+        } catch (Exception e) {
+          log.finer(e.toString());
+        }
       }
-      
+
       // XXX: check is_a
 
       StubMarshal stubMarshal = new StubMarshal(type);
 
-      IiopProxyHandler handler = 
-	new IiopProxyHandler(stub.getORBImpl(),
-			     stub,
-			     stubMarshal);
+      IiopProxyHandler handler =
+        new IiopProxyHandler(stub.getORBImpl(),
+                             stub,
+                             stubMarshal);
 
       return Proxy.newProxyInstance(type.getClassLoader(),
-				    new Class[] { type, IiopProxy.class },
-				    handler);
+                                    new Class[] { type, IiopProxy.class },
+                                    handler);
     }
 
     return value;
