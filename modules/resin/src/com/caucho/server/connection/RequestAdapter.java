@@ -375,6 +375,11 @@ public class RequestAdapter extends RequestWrapper
       return false;
   }
       
+  public HttpSession getMemorySession()
+  {
+    return getSession(false);
+  }
+  
   public HttpSession getSession(boolean create)
   {
     SessionManager manager = getSessionManager();
