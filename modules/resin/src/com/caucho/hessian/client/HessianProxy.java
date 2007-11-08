@@ -74,12 +74,24 @@ public class HessianProxy implements InvocationHandler {
   private static final Logger log
     = Logger.getLogger(HessianProxy.class.getName());
   
-  private HessianProxyFactory _factory;
+  protected HessianProxyFactory _factory;
   private WeakHashMap<Method,String> _mangleMap
     = new WeakHashMap<Method,String>();
   private URL _url;
   
+  /**
+   * Package protected constructor for factory
+   */
   HessianProxy(HessianProxyFactory factory, URL url)
+  {
+    _factory = factory;
+    _url = url;
+  }
+
+  /**
+   * Protected constructor for subclassing
+   */
+  protected HessianProxy(URL url, HessianProxyFactory factory)
   {
     _factory = factory;
     _url = url;
@@ -158,6 +170,8 @@ public class HessianProxy implements InvocationHandler {
           code = httpConn.getResponseCode();
         } catch (Exception e) {
         }
+
+        parseResponseHeaders(conn);
 
         if (code != 200) {
           StringBuffer sb = new StringBuffer();
@@ -238,6 +252,15 @@ public class HessianProxy implements InvocationHandler {
       return AbstractSkeleton.mangleName(method, false);
   }
 
+  /**
+   * Method that allows subclasses to parse response headers such as cookies.
+   * Default implementation is empty. 
+   * @param conn
+   */
+  protected void parseResponseHeaders(URLConnection conn) {
+	  
+  }
+
   protected URLConnection sendRequest(String methodName, Object []args)
     throws IOException
   {
@@ -255,6 +278,8 @@ public class HessianProxy implements InvocationHandler {
       }
     }
     
+    addRequestHeaders(conn);
+
     OutputStream os = null;
 
     try {
@@ -282,6 +307,15 @@ public class HessianProxy implements InvocationHandler {
       throw e;
     }
   }
+
+  /**
+   * Method that allows subclasses to add request headers such as cookies.
+   * Default implementation is empty. 
+   */
+  protected void addRequestHeaders(URLConnection conn) {
+	  
+  }
+	
 
   static class ResultInputStream extends InputStream {
     private HttpURLConnection _conn;
