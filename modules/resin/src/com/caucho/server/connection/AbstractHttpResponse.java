@@ -1582,7 +1582,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       _originalResponseStream.setHead();
     }
 
-    SessionImpl session = (SessionImpl) _originalRequest.getSession(false);
+    SessionImpl session = (SessionImpl) _originalRequest.getMemorySession();
     if (session != null)
       session.saveBeforeHeaders();
 

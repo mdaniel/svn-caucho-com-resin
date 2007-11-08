@@ -4,7 +4,8 @@
 
 <s2 title="3.0.snap - Aug 14, 2007">
 <ul>
-<li>configure.in fix with -lc for linux (#2082, rep by marcusherou)</li>
+<li>session - always-load-session would load for static pages (#2154, rep by copart)</li>
+<li>configure.infix with -lc for linux (#2082, rep by marcusherou)</li>
 <li>(2007-11-05) win32: isapi_srun.dll should return 503 on backend disconnect (#2040, rep by Takahiro Fukuda)</li>
 <li>win32: isapi_srun.dll config of client-read-time (#2039, #2129, rep by Ed Hollingsworth)</li>
 <li>win32: isapi_srun.dll saving of config (#1879, rep by Sven Droll)</li>

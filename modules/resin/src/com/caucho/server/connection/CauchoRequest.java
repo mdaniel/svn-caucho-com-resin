@@ -58,6 +58,7 @@ public interface CauchoRequest extends HttpServletRequest {
 
   public boolean isTop();
 
+  public HttpSession getMemorySession();
   public Cookie getCookie(String name);
   public void setHasCookie();
   public void killKeepalive();
