@@ -167,6 +167,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     = new ArrayList<ResourceRef>();
 
   private String _aroundInvokeMethodName;
+  private String _timeoutMethodName;
 
   private long _transactionTimeout;
 
@@ -225,6 +226,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public ArrayList<RemoveMethod> getRemoveMethods()
   {
     return _removeMethods;
+  }
+
+  /**
+   * Returns the timeout method name.
+   */
+  public String getTimeoutMethodName()
+  {
+    return _timeoutMethodName;
   }
 
   /**
@@ -2577,6 +2586,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       // ejb/0fb8
       if (aroundInvoke != null) {
         _aroundInvokeMethodName = method.getName();
+      }
+
+      JAnnotation timeout = method.getAnnotation(Timeout.class);
+
+      // ejb/0fj0
+      if (timeout != null) {
+        _timeoutMethodName = method.getName();
       }
     }
   }

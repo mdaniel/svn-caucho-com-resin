@@ -36,6 +36,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.logging.*;
 
+import com.caucho.ejb.AbstractContext;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.loader.EnvironmentLocal;
 
@@ -50,17 +52,25 @@ public class EjbTimerService implements TimerService {
   private static final EnvironmentLocal<EjbTimerService> _localTimer
     = new EnvironmentLocal<EjbTimerService>();
 
-  public static EjbTimerService getLocal(ClassLoader loader)
+  private AbstractContext _context;
+
+  EjbTimerService(AbstractContext context)
+  {
+    _context = context;
+  }
+
+  public static EjbTimerService getLocal(ClassLoader loader,
+                                         AbstractContext context)
   {
     synchronized (_localTimer) {
       EjbTimerService timer = _localTimer.get(loader);
-      
-      if (timer == null) {
-	timer = new EjbTimerService();
 
-	_localTimer.set(timer, loader);
+      if (timer == null) {
+        timer = new EjbTimerService(context);
+
+        _localTimer.set(timer, loader);
       }
-      
+
       return timer;
     }
   }
@@ -70,41 +80,57 @@ public class EjbTimerService implements TimerService {
   public Timer createTimer(long duration, Serializable info)
     throws EJBException
   {
-    throw new UnsupportedOperationException();
+    if (duration < 0)
+      throw new IllegalArgumentException("Timer duration must not be negative");
+
+    Date expiration = new Date(Alarm.getCurrentTime() + duration);
+
+    return createTimer(expiration, info);
   }
-  
+
   /**
    * Creates an interval timer
    */
   public Timer createTimer(long initialDuration,
-			   long intervalDuration,
-			   Serializable info)
+                           long intervalDuration,
+                           Serializable info)
     throws EJBException
   {
-    throw new UnsupportedOperationException();
+    if (initialDuration < 0)
+      throw new IllegalArgumentException("Timer initial duration must not be negative");
+
+    if (intervalDuration < 0)
+      throw new IllegalArgumentException("Timer interval duration must not be negative");
+
+    Date initialExpiration = new Date(Alarm.getCurrentTime() + initialDuration);
+
+    return createTimer(initialExpiration, intervalDuration, info);
   }
-  
+
   /**
    * Creates a timer
    */
   public Timer createTimer(Date expiration,
-			   Serializable info)
+                           Serializable info)
     throws EJBException
   {
-    throw new UnsupportedOperationException();
+    return new EjbTimer(expiration, info, _context);
   }
-  
+
   /**
    * Creates a timer
    */
   public Timer createTimer(Date expiration,
-			   long interval,
-			   Serializable info)
+                           long interval,
+                           Serializable info)
     throws EJBException
   {
-    throw new UnsupportedOperationException();
+    if (interval < 0)
+      throw new IllegalArgumentException("Timer interval must not be negative");
+
+    return new EjbTimer(expiration, interval, info, _context);
   }
-  
+
   /**
    * Returns the timers
    */

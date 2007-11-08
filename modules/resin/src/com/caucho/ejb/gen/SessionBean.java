@@ -49,7 +49,7 @@ import java.io.IOException;
 public class SessionBean extends ClassComponent {
   private static final L10N L = new L10N(SessionBean.class);
 
-  private EjbSessionBean _bean;
+  protected EjbSessionBean _bean;
   private JClass _ejbClass;
   protected String _contextClassName;
 

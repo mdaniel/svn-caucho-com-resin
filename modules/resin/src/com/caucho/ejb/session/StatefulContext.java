@@ -28,6 +28,8 @@
 
 package com.caucho.ejb.session;
 
+import javax.ejb.TimerService;
+
 /**
  * Abstract base class for an session context
  */
@@ -35,6 +37,15 @@ abstract public class StatefulContext extends AbstractSessionContext {
   protected StatefulContext(SessionServer server)
   {
     super(server);
+  }
+
+  /**
+   * Returns the timer service.
+   */
+  public TimerService getTimerService()
+    throws IllegalStateException
+  {
+    throw new IllegalStateException("Stateful session beans cannot call SessionContext.getTimerService()");
   }
 
   /**

@@ -159,6 +159,28 @@ public class StatelessBean extends SessionBean {
     out.popDepth();
     out.println("}");
 
+    if (_bean.getTimeoutMethodName() != null) {
+      String methodName = _bean.getTimeoutMethodName();
+
+      // ejb/0fj0
+      out.println();
+      out.println("public void __caucho_timeout_callback(javax.ejb.Timer timer)");
+      out.println("{");
+      out.pushDepth();
+
+      out.println("Bean bean = _ejb_begin(null);");
+
+      out.println();
+      out.println("try {");
+      out.println("  bean." + methodName + "(timer);");
+      out.println("} finally {");
+      out.println("  _ejb_free(bean);");
+      out.println("}");
+
+      out.popDepth();
+      out.println("}");
+    }
+
     generateInvokeMethod(out);
   }
 

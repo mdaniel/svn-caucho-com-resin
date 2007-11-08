@@ -300,6 +300,7 @@ abstract public class AbstractContext implements EJBContext {
    * Looks the timer service.
    */
   public TimerService getTimerService()
+    throws IllegalStateException
   {
     return getServer().getTimerService();
   }
@@ -352,5 +353,12 @@ abstract public class AbstractContext implements EJBContext {
   public void __caucho_setInvokedBusinessInterface(Class invokedBusinessInterface)
   {
     _invokedBusinessInterface = invokedBusinessInterface;
+  }
+
+  /**
+   * Runs the timeout callbacks.
+   */
+  public void __caucho_timeout_callback(Timer timer)
+  {
   }
 }

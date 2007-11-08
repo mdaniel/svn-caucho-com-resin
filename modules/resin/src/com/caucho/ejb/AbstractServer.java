@@ -137,8 +137,6 @@ abstract public class AbstractServer implements EnvironmentBean {
     _ejbManager = manager;
 
     _loader = new EnvironmentClassLoader(manager.getClassLoader());
-
-    _timerService = EjbTimerService.getLocal(manager.getClassLoader());
   }
 
   /**
@@ -580,6 +578,12 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public TimerService getTimerService()
   {
+    // ejb/0fj0
+    if (_timerService == null) {
+      _timerService = EjbTimerService.getLocal(_ejbManager.getClassLoader(),
+                                               getContext());
+    }
+
     return _timerService;
   }
 

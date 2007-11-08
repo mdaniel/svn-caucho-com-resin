@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Rodrigo Westrupp
+ */
+
+package com.caucho.ejb.timer;
+
+import javax.ejb.*;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.logging.*;
+
+import com.caucho.ejb.AbstractContext;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
+
+/**
+ * Implements the EJB timer.
+ */
+public class EjbTimer implements javax.ejb.Timer, Runnable {
+  private static final L10N L = new L10N(EjbTimer.class);
+  protected static final Logger log
+    = Logger.getLogger(EjbTimer.class.getName());
+
+  private ThreadPool _threadPool = ThreadPool.getThreadPool();
+
+  private Date _expiration;
+  private long _interval;
+  private Serializable _info;
+  private AbstractContext _context;
+
+  EjbTimer(Date expiration, Serializable info, AbstractContext context)
+  {
+    this(expiration, -1, info, context);
+  }
+
+  EjbTimer(Date expiration,
+           long interval,
+           Serializable info,
+           AbstractContext context)
+  {
+    _expiration = expiration;
+    _interval = interval;
+    _info = info;
+    _context = context;
+
+    if (context == null)
+      throw new NullPointerException();
+
+    _threadPool.schedule(this);
+  }
+
+  /**
+   * Cancels the timer.
+   */
+  public void cancel()
+    throws NoSuchObjectLocalException, EJBException
+  {
+    //_timer.cancel();
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the timer handle.
+   */
+  public TimerHandle getHandle()
+    throws NoSuchObjectLocalException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns timer information.
+   */
+  public Serializable getInfo()
+    throws NoSuchObjectLocalException, EJBException
+  {
+    return _info;
+  }
+
+  /**
+   * Returns the time corresponding to the next scheduled expiration.
+   */
+  public Date getNextTimeout()
+    throws NoSuchObjectLocalException, EJBException
+  {
+    return _expiration;
+  }
+
+  /**
+   * Returns the time remaining in milliseconds.
+   */
+  public long getTimeRemaining()
+    throws NoSuchObjectLocalException, EJBException
+  {
+    return _expiration.getTime() - Alarm.getCurrentTime();
+  }
+
+  public void run()
+  {
+    _context.__caucho_timeout_callback(this);
+  }
+
+  public String toString()
+  {
+    return "EjbTimer[]";
+  }
+}
