@@ -97,6 +97,9 @@ public class FileQueueStore
     return _name;
   }
 
+  /**
+   * Sets the path to the database
+   */
   public void setPath(Path path)
   {
     if (! path.exists()) {
@@ -112,6 +115,14 @@ public class FileQueueStore
 				    path));
 
     _path = path;
+  }
+
+  /**
+   * Returns the path to the backing database
+   */
+  public Path getPath()
+  {
+    return _path;
   }
 
   public void setTablePrefix(String prefix)

@@ -58,6 +58,12 @@
 
     <jndi-link>com.caucho.naming.LinkProxy</jndi-link>
 
+    <jms-connection-factory>com.caucho.jms.cfg.JmsConnectionFactoryConfig</jms-connection-factory>
+
+    <jms-queue>com.caucho.jms.cfg.JmsQueueConfig</jms-queue>
+    
+    <jms-topic>com.caucho.jms.cfg.JmsTopicConfig</jms-topic>
+
     <log>com.caucho.log.LogConfig</log>
 
     <logger>com.caucho.log.LoggerConfig</logger>

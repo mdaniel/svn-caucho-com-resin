@@ -42,6 +42,7 @@ import com.caucho.vfs.*;
 import com.caucho.xml.DOMBuilder;
 import com.caucho.xml.QDocument;
 import com.caucho.xml.QName;
+import com.caucho.xml.QAttr;
 import com.caucho.xml.Xml;
 
 import org.w3c.dom.Node;
@@ -535,6 +536,23 @@ public class Config {
     QName attrName = new QName(attr);
     AttributeStrategy attrStrategy = strategy.getAttributeStrategy(attrName);
     attrStrategy.setAttribute(obj, attrName, value);
+  }
+
+  /**
+   * Sets an attribute with a value.
+   *
+   * @param obj the bean to be set
+   * @param attr the attribute name
+   * @param value the attribute value
+   */
+  public static void setStringAttribute(Object obj, String attr, String value)
+    throws Exception
+  {
+    NodeBuilder builder = new NodeBuilder();
+    QAttr qAttr = new QAttr(attr);
+    qAttr.setValue(value);
+
+    builder.configureAttribute(obj, qAttr);
   }
 
   public static void init(Object bean)

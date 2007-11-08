@@ -41,6 +41,30 @@ database pools.</p>
 
 </s1>
 
+<s1 title="JMS">
+
+<p>Added new configuration tags for JMS:</p>
+
+<example title="resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory jndi-name="jms/ConnectionFactory"/>
+
+  &lt;jms-queue jndi-name="jms/q1" url="memory:"/>
+  &lt;jms-queue jndi-name="jms/q1" url="file:path=WEB-INF/jms"/>
+  &lt;jms-queue jndi-name="jms/q1" url="cluster:path=WEB-INF/jms"/>
+
+  &lt;jms-topic jndi-name="jms/q1" url="memory:"/>
+  &lt;jms-topic jndi-name="jms/q1" url="file:path=WEB-INF/jms"/>
+  &lt;jms-topic jndi-name="jms/q1" url="cluster:path=WEB-INF/jms"/>
+
+&lt;/web-app>
+</example>
+
+<p>JMS also has new MXBeans, JmsQueueMXBean and JmsTopicMXBean.</p>
+
+</s1>
+
 <s1 title="Admin">
 
 <p>Added resin_admin_insecure to allow sites to require SSL for admin.</p>

@@ -303,8 +303,9 @@ public class MessageConsumerImpl
     if (listener == null)
       return false;
 
+    MessageImpl msg = null;
     try {
-      MessageImpl msg = _queue.receive(false);
+      msg = _queue.receive(false);
 
       if (msg != null) {
         if (log.isLoggable(Level.FINE)) {
@@ -330,7 +331,11 @@ public class MessageConsumerImpl
 	return true;
       }
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.WARNING, L.l("{0} message listener '{1}' failed for message '{2}' with exception\n{3}",
+				 _queue, listener, msg, e.toString()),
+	      e);
+
+      _queue.addListenerException(e);
     }
 
     return false;

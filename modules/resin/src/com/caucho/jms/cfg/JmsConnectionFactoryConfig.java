@@ -27,65 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.queue;
+package com.caucho.jms.cfg;
 
+import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.jms.*;
+import javax.naming.*;
 
+import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
+import com.caucho.naming.*;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 
 /**
- * Implements an abstract topic.
+ * jms-connection-factory configuration
  */
-abstract public class AbstractTopic extends AbstractDestination
-  implements javax.jms.Topic
+public class JmsConnectionFactoryConfig
 {
-  public static final L10N L = new L10N(AbstractTopic.class);
+  private static final L10N L = new L10N(JmsConnectionFactoryConfig.class);
+  private static final Logger log
+    = Logger.getLogger(JmsConnectionFactoryConfig.class.getName());
 
-  private TopicAdmin _admin;
-  
-  public String getTopicName()
-  {
-    return getName();
-  }
+  private String _jndiName;
 
-  public void init()
+  /**
+   * Sets the JNDI name to be used to bind the factory
+   */
+  public void setJndiName(String name)
   {
+    _jndiName = name;
   }
 
   @PostConstruct
-  public void postConstruct()
+  public void init()
+    throws NamingException
   {
-    init();
+    JmsConnectionFactory factory = new JmsConnectionFactory();
 
-    _admin = new TopicAdmin(this);
-    _admin.register();
-  }
-  
-  /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
-   */
-  public MessageImpl receive(long timeout)
-  {
-    throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
-  }
-
-  public abstract AbstractQueue createSubscriber(JmsSession session,
-                                                 String name,
-                                                 boolean noLocal);
-
-  public abstract void closeSubscriber(AbstractQueue subscriber);
-  
-  public String toString()
-  {
-    return getClass().getName() + "[" + getName() + "]";
+    if (_jndiName != null) {
+      Jndi.bindDeepShort(_jndiName, factory);
+    }
   }
 }
 

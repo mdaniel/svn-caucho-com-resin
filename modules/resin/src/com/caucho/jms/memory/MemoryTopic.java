@@ -55,6 +55,18 @@ public class MemoryTopic extends AbstractTopic
 
   private int _id;
 
+  //
+  // JMX configuration
+  //
+
+  /**
+   * Returns the configuration URL.
+   */
+  public String getUrl()
+  {
+    return "memory:name=" + getName();
+  }
+
   @Override
   public AbstractQueue createSubscriber(JmsSession session,
                                         String name,

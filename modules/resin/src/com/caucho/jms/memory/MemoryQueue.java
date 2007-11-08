@@ -52,6 +52,32 @@ public class MemoryQueue extends AbstractQueue
   // messages waiting for an ack
   private ArrayList<MessageImpl> _readList = new ArrayList<MessageImpl>();
 
+  //
+  // JMX configuration
+  //
+
+  /**
+   * Returns the configuration URL.
+   */
+  public String getUrl()
+  {
+    return "memory:name=" + getName();
+  }
+
+  //
+  // JMX statistics
+  //
+
+  /**
+   * Returns the queue size
+   */
+  public int getQueueSize()
+  {
+    synchronized (_queueList) {
+      return _queueList.size();
+    }
+  }
+
   /**
    * Adds the message to the persistent store.  Called if there are no
    * active listeners.

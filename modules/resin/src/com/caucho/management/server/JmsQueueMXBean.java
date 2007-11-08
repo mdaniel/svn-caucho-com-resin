@@ -48,4 +48,32 @@ public interface JmsQueueMXBean extends ManagedObjectMXBean {
    */
   @Description("A descriptive URL for the topic")
   public String getUrl();
+
+  //
+  // statistics
+  //
+
+  /**
+   * Returns the number of consumers for the queue.
+   */
+  @Description("The number of queue consumers")
+  public int getConsumerCount();
+
+  /**
+   * Returns the number of listener failures
+   */
+  @Description("The number of listener failures")
+  public long getListenerFailCountTotal();
+
+  /**
+   * Returns the last time of listener failures
+   */
+  @Description("The last time for a listener failures")
+  public Date getListenerFailLastTime();
+
+  /**
+   * Returns the current size of the queue.
+   */
+  @Description("The queue size")
+  public int getQueueSize();
 }

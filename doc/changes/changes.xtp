@@ -12,6 +12,8 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>jms: add JmsQueueMXBean and JmsTopicMXBean (#2049, rep by P Tripathy)</li>
+<li>hessian: HessianProxy updates to simplify subclassing (#2155, fixed! by mate)</li>
 <li>hessian: sendCollectionType now affects Maps (#2149, rep by mate)</li>
 <li>session - always-load-session would load for static pages (#2154, rep by copart)</li>
 <li>amber: misc @EmbeddedId issues (#2037, rep by Sergey Plehov)</li>

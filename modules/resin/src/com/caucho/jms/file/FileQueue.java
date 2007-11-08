@@ -46,7 +46,17 @@ import com.caucho.java.*;
 import com.caucho.vfs.*;
 
 /**
- * Implements a file queue.
+ * A JMS queue backed by a file-based database.
+ *
+ * The URL looks like
+ * <pre>
+ * file:name=my-name;path=file:/var/www/webapps/test/WEB-INFjms
+ * </pre>
+ *
+ * It is configured as:
+ * <pre>
+ * &lt;queue jndi-name="jms/my-name" url="file:path=WEB-INF/jms"/>
+ * </pre>
  */
 public class FileQueue extends AbstractQueue implements Topic
 {
@@ -75,9 +85,21 @@ public class FileQueue extends AbstractQueue implements Topic
     init();
   }
 
+  //
+  // Configuration
+  //
+
+  /**
+   * Sets the path to the backing database
+   */
   public void setPath(Path path)
   {
     _store.setPath(path);
+  }
+
+  public Path getPath()
+  {
+    return _store.getPath();
   }
 
   public void setTablePrefix(String prefix)
@@ -85,7 +107,38 @@ public class FileQueue extends AbstractQueue implements Topic
     _store.setTablePrefix(prefix);
   }
 
-  @PostConstruct
+  //
+  // JMX configuration items
+  //
+
+  /**
+   * Returns the JMS configuration url.
+   */
+  public String getUrl()
+  {
+    return "file:name=" + getName() + ";path=" + _store.getPath().getURL();
+  }
+
+  //
+  // JMX stats
+  //
+
+  public int getQueueSize()
+  {
+    synchronized (_queueLock) {
+      int count = 0;
+
+      for (FileQueueEntry entry = _head; entry != null; entry = entry._next) {
+	count++;
+      }
+
+      return count;
+    }
+  }
+
+  /**
+   * Initialize the queue
+   */
   public void init()
   {
     _store.setName(getName());
@@ -94,7 +147,7 @@ public class FileQueue extends AbstractQueue implements Topic
 
     _store.receiveStart(this);
   }
-
+  
   /**
    * Adds a message entry from startup.
    */

@@ -49,6 +49,8 @@ public class FileTopic extends AbstractTopic
   private static final Logger log
     = Logger.getLogger(FileTopic.class.getName());
 
+  private final FileQueueStore _store;
+
   private HashMap<String,AbstractQueue> _durableSubscriptionMap
     = new HashMap<String,AbstractQueue>();
     
@@ -57,8 +59,33 @@ public class FileTopic extends AbstractTopic
 
   private int _id;
 
+  public FileTopic()
+  {
+    _store = new FileQueueStore(_messageFactory);
+  }
+
+  //
+  // Configuration
+  //
+
+  /**
+   * Sets the path to the backing database
+   */
   public void setPath(Path path)
   {
+    _store.setPath(path);
+  }
+
+  //
+  // JMX configuration attributes
+  //
+
+  /**
+   * Returns the JMS configuration url.
+   */
+  public String getUrl()
+  {
+    return "file:name=" + getName() + ";path=" + _store.getPath().getURL();
   }
 
   public void init()

@@ -85,6 +85,22 @@ abstract public class AbstractDestination
   {
     return getName();
   }
+
+  //
+  // JMX configuration data
+  //
+
+  /**
+   * Returns a descriptive URL for the queue.
+   */
+  public String getUrl()
+  {
+    return getClass().getSimpleName() + ":";
+  }
+
+  //
+  // runtime methods
+  //
   
   public void addConsumer(MessageConsumerImpl consumer)
   {

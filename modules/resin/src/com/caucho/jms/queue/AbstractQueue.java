@@ -32,6 +32,7 @@ package com.caucho.jms.queue;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.annotation.*;
 import javax.jms.*;
 
 import com.caucho.jms.message.*;
@@ -49,6 +50,8 @@ abstract public class AbstractQueue extends AbstractDestination
   private static final Logger log
     = Logger.getLogger(AbstractQueue.class.getName());
 
+  private QueueAdmin _admin;
+
   private ArrayList<MessageConsumerImpl> _messageConsumerList
     = new ArrayList<MessageConsumerImpl>();
 
@@ -56,8 +59,61 @@ abstract public class AbstractQueue extends AbstractDestination
   
   private int _enqueueCount;
 
+  // stats
+  private long _listenerFailCount;
+  private long _listenerFailLastTime;
+
   protected AbstractQueue()
   {
+  }
+
+  //
+  // JMX statistics
+  //
+
+  /**
+   * Returns the number of active message consumers
+   */
+  public int getConsumerCount()
+  {
+    return _messageConsumerList.size();
+  }
+
+  /**
+   * Returns the queue size
+   */
+  public int getQueueSize()
+  {
+    return -1;
+  }
+
+  /**
+   * Returns the number of listener failures.
+   */
+  public long getListenerFailCountTotal()
+  {
+    return _listenerFailCount;
+  }
+
+  /**
+   * Returns the number of listener failures.
+   */
+  public long getListenerFailLastTime()
+  {
+    return _listenerFailLastTime;
+  }
+
+  public void init()
+  {
+  }
+
+  @PostConstruct
+  public void postConstruct()
+  {
+    init();
+
+    _admin = new QueueAdmin(this);
+    _admin.register();
   }
   
   public void addConsumer(MessageConsumerImpl consumer)
@@ -110,6 +166,18 @@ abstract public class AbstractQueue extends AbstractDestination
   {
   }
 
+  /**
+   * Called when a listener throws an excepton
+   */
+  public void addListenerException(Exception e)
+  {
+    synchronized (this) {
+      _listenerFailCount++;
+      _listenerFailLastTime = Alarm.getCurrentTime();
+    }
+  }
+
+  @PreDestroy
   public void close()
   {
     stopPoll();
