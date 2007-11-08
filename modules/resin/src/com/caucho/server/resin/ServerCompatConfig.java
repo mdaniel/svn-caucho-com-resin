@@ -84,14 +84,13 @@ public class ServerCompatConfig implements SchemaBean {
   /**
    * Creates a http compat.
    */
-  /*
+
   public HttpCompatConfig createHttp()
   {
     HttpCompatConfig http = new HttpCompatConfig();
 
     return http;
   }
-  */
 
   /**
    * Creates a cluster compat.
@@ -180,10 +179,8 @@ public class ServerCompatConfig implements SchemaBean {
 	cluster.addServer(server);
       }
 
-      /*
       Port http = server.createHttp();
       _program.configure(http);
-      */
     }
   }
 }
