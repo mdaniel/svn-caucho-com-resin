@@ -143,19 +143,24 @@ public class JdbcQueue extends AbstractQueue {
   /**
    * Initializes the JdbcQueue
    */
-  @PostConstruct
   public void init()
-    throws ConfigException, SQLException
+    throws ConfigException
   {
-    if (_jdbcManager.getDataSource() == null)
-      throw new ConfigException(L.l("JdbcQueue requires a <data-source> element."));
+    try {
+      if (_jdbcManager.getDataSource() == null)
+	throw new ConfigException(L.l("JdbcQueue requires a <data-source> element."));
     
-    if (getName() == null)
-      throw new ConfigException(L.l("JdbcQueue requires a <queue-name> element."));
+      if (getName() == null)
+	throw new ConfigException(L.l("JdbcQueue requires a <queue-name> element."));
 
-    _jdbcManager.init();
+      _jdbcManager.init();
 
-    _id = createDestination(getName(), false);
+      _id = createDestination(getName(), false);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**
