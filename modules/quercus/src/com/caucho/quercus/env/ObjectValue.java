@@ -294,23 +294,6 @@ abstract public class ObjectValue extends Value {
     else
       return super.getSize();
   }
-  
-  /**
-   * Returns the count value with the given key.
-   */
-  @Override
-  public int getCountRecursive(Env env)
-  {
-    CountDelegate delegate = _quercusClass.getCountDelegate();
-      
-    // php/066q vs. php/0906
-    //return getField(null, key.toString());
-
-    if (delegate != null)
-      return delegate.countRecursive(this);
-    else
-      return super.getSize();
-  }
 
   //
   // Convenience field methods
