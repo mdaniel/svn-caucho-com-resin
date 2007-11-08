@@ -12,6 +12,8 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>hessian: sendCollectionType now affects Maps (#2149, rep by mate)</li>
+<li>session - always-load-session would load for static pages (#2154, rep by copart)</li>
 <li>amber: misc @EmbeddedId issues (#2037, rep by Sergey Plehov)</li>
 <li>amber: @NamedQuery and inheritance were conflicting (#2053, rep by Sergey Plehov)</li>
 <li>admin: snapshot resin.conf changed to resin_admin_insecure (#2145)</li>

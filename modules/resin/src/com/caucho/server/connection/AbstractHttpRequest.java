@@ -1277,6 +1277,17 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Returns the memory session.
+   */
+  public HttpSession getMemorySession()
+  {
+    if (_session != null && _session.isValid())
+      return _session;
+    else
+      return null;
+  }
+
+  /**
    * Returns the current session, creating one if necessary.
    */
   public HttpSession getSession()

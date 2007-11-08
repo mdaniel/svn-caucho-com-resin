@@ -77,6 +77,7 @@ public class SerializerFactory extends AbstractSerializerFactory
   protected ArrayList _factories = new ArrayList();
   
   protected CollectionSerializer _collectionSerializer;
+  protected MapSerializer _mapSerializer;
   
   private Deserializer _hashMapDeserializer;
   private HashMap _cachedSerializerMap;
@@ -94,6 +95,11 @@ public class SerializerFactory extends AbstractSerializerFactory
       _collectionSerializer = new CollectionSerializer();
 
     _collectionSerializer.setSendJavaType(isSendType);
+    
+    if (_mapSerializer == null)
+      _mapSerializer = new MapSerializer();
+
+    _mapSerializer.setSendJavaType(isSendType);
   }
 
   /**
@@ -164,9 +170,12 @@ public class SerializerFactory extends AbstractSerializerFactory
     else if (BurlapRemoteObject.class.isAssignableFrom(cl))
       serializer = new RemoteSerializer();
 
-    else if (Map.class.isAssignableFrom(cl))
-      serializer = new MapSerializer();
-
+    else if (Map.class.isAssignableFrom(cl)) {
+      if (_mapSerializer == null)
+	_mapSerializer = new MapSerializer();
+      
+      serializer = _mapSerializer;
+    }
     else if (Collection.class.isAssignableFrom(cl)) {
       if (_collectionSerializer == null) {
 	_collectionSerializer = new CollectionSerializer();

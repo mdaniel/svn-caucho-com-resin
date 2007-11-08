@@ -32,8 +32,7 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.ReadStream;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.*;
 import java.io.IOException;
 
 public interface CauchoRequest extends HttpServletRequest {
@@ -55,6 +54,7 @@ public interface CauchoRequest extends HttpServletRequest {
 
   public boolean isTop();
 
+  public HttpSession getMemorySession();
   public Cookie getCookie(String name);
   public void setHasCookie();
   public void killKeepalive();

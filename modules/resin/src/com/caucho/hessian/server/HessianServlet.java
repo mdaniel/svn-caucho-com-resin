@@ -282,6 +282,9 @@ public class HessianServlet extends GenericServlet {
 
       if ("true".equals(getInitParameter("debug")))
 	_isDebug = true;
+
+      if ("false".equals(getInitParameter("send-collection-type")))
+	setSendCollectionType(false);
     } catch (ServletException e) {
       throw e;
     } catch (Exception e) {

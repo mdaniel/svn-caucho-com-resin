@@ -1643,7 +1643,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	webApp.addStatus500();
     }
 
-    HttpSession session = _originalRequest.getSession(false);
+    HttpSession session = _originalRequest.getMemorySession();
     if (session instanceof SessionImpl)
       ((SessionImpl) session).saveBeforeHeaders();
 
