@@ -57,8 +57,20 @@ public class WebComponent {
 
   public void addComponent(WbComponent comp)
   {
-    if (! _componentList.contains(comp))
-      _componentList.add(comp);
+    for (int i = _componentList.size() - 1; i >= 0; i--) {
+      WbComponent oldComponent = _componentList.get(i);
+
+      if (! comp.getClassName().equals(oldComponent.getClassName())) {
+      }
+      else if (comp.isFromClass())
+	return;
+      else if (oldComponent.isFromClass())
+	_componentList.remove(i);
+      else if (comp.equals(oldComponent))
+	return;
+    }
+
+    _componentList.add(comp);
   }
   
   public void createProgram(ArrayList<BuilderProgram> initList,
@@ -70,7 +82,6 @@ public class WebComponent {
   {
     WbComponent matchComp = null;
 
-    System.out.println("COMPP: " + _componentList);
     for (int i = 0; i < _componentList.size(); i++) {
       WbComponent comp = _componentList.get(i);
 

@@ -2,13 +2,7 @@ default namespace w = "http://caucho.com/ns/resin"
 
 start = w_web-beans
 
-w_web-beans = element web-beans {
-  w_component*
-
-  & w_component-types*
-
-  & w_interceptors?
-}
+w_Any = text | (attribute * {string} | element * { w_Any })*
 
 w_binding = element binding {
   string
@@ -21,22 +15,27 @@ w_class = element class {
 w_component = element component {
   w_binding*
   & w_class?
+  & w_init?
   & w_name?
   & w_producer?
   & w_scope?
   & w_type?
 }
 
-w_component-type = element component-type {
-  string
-}
+w_component-type =
+  attribute component-type { string }
+  | element component-type { string }
 
-w_component-types = element component-types {
+w_component-types =  element component-types {
   w_component-type*
 }
 
 w_name = element name {
   string
+}
+
+w_init = element init {
+  w_Any
 }
 
 w_interceptor = element interceptor {
@@ -61,3 +60,11 @@ w_scope = element scope {
   string
 }
 
+
+w_web-beans = element web-beans {
+  w_component*
+
+  & w_component-types*
+
+  & w_interceptors?
+}

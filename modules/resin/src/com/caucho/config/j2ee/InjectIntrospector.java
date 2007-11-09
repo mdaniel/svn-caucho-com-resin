@@ -372,9 +372,10 @@ public class InjectIntrospector {
       boolean isWebBean = false;
       
       for (Annotation ann : field.getDeclaredAnnotations()) {
-	if (ann.getClass().isAnnotationPresent(BindingType.class))
+	if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	  isWebBean = true;
       }
+
 
       if (isWebBean)
 	configureWebBean(initList, field, fieldName, fieldType);

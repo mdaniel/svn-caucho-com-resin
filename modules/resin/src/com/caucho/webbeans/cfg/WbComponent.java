@@ -31,6 +31,9 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.types.*;
+import com.caucho.util.*;
+import com.caucho.webbeans.*;
 import com.caucho.webbeans.inject.*;
 import com.caucho.webbeans.context.*;
 
@@ -38,12 +41,19 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
 
+import javax.annotation.*;
+import javax.webbeans.*;
+
 /**
  * Configuration for the xml web bean component.
  */
 public class WbComponent {
+  private static final L10N L = new L10N(WbComponent.class);
+  
   private Class _cl;
   private WbComponentType _type;
+
+  private boolean _isFromClass;
 
   private String _name;
   
@@ -53,12 +63,20 @@ public class WbComponent {
   private Annotation _scopeAnn;
   private RequestScope _scopeContext;
 
+  private InitProgram _init;
+
   /**
    * Returns the component's EL binding name.
    */
   public void setName(String name)
   {
     _name = name;
+
+    WbBinding binding = new WbBinding();
+    binding.setClass(Named.class);
+    binding.addValue("value", name);
+
+    addBinding(binding);
   }
 
   /**
@@ -144,6 +162,61 @@ public class WbComponent {
     return _scopeAnn;
   }
 
+  /**
+   * Sets the init program.
+   */
+  public void setInit(InitProgram init)
+  {
+    _init = init;
+  }
+
+  /**
+   * True if the component was defined by class introspection.
+   */
+  public void setFromClass(boolean isFromClass)
+  {
+    _isFromClass = isFromClass;
+  }
+
+  /**
+   * True if the component was defined by class introspection.
+   */
+  public boolean isFromClass()
+  {
+    return _isFromClass;
+  }
+
+  /**
+   * Initialization.
+   */
+  @PostConstruct
+  public void init()
+  {
+    if (_type == null) {
+      for (Annotation ann : _cl.getDeclaredAnnotations()) {
+	if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
+	  // XXX:
+	  _type = new WbComponentType(ann.annotationType(), 0);
+	}
+      }
+    }
+
+    if (_type == null) {
+      throw new ConfigException(L.l("component '{0}' does not have a ComponentType",
+				    _cl.getName()));
+    }
+    
+    if (_scopeAnn == null) {
+      for (Annotation ann : _cl.getDeclaredAnnotations()) {
+	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	  setScopeAnnotation(ann);
+	}
+      }
+    }
+
+    WebBeans.getLocal().addComponent(_cl, this);
+  }
+
   public boolean isMatch(ArrayList<Annotation> bindList)
   {
     for (int i = 0; i < bindList.size(); i++) {
@@ -174,7 +247,7 @@ public class WbComponent {
       Object value = _scopeContext.get(_name);
 
       try {
-	value = _cl.newInstance();
+	value = create();
 
 	_scopeContext.set(_name, value);
 
@@ -186,20 +259,66 @@ public class WbComponent {
     else
       return null;
   }
-  
+
+  public Object create()
+  {
+    try {
+      Object value = _cl.newInstance();
+
+      if (_init != null)
+	_init.configure(value);
+
+      return value;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
   public void createProgram(ArrayList<BuilderProgram> initList,
 			    AccessibleObject field,
 			    String name,
 			    AccessibleInject inject)
     throws ConfigException
   {
-    BuilderProgram program = new NewComponentProgram(_cl, inject);
+    BuilderProgram program = new ComponentProgram(this, inject);
 
     initList.add(program);
   }
 
+  public boolean equals(Object obj)
+  {
+    if (this == obj)
+      return true;
+    else if (! (obj instanceof WbComponent))
+      return false;
+
+    WbComponent comp = (WbComponent) obj;
+
+    if (! _cl.equals(comp._cl)) {
+      return false;
+    }
+
+    int size = _bindingList.size();
+
+    if (size != comp._bindingList.size()) {
+      return false;
+    }
+
+    for (int i = size - 1; i >= 0; i--) {
+      if (! comp._bindingList.contains(_bindingList.get(i))) {
+	return false;
+      }
+    }
+
+    return true;
+  }
+
   public String toString()
   {
-    return "WbComponent[" + _cl + "]";
+    if (_name != null)
+      return "WbComponent[" + _name + ", " + _cl.getName() + "]";
+    else
+      return "WbComponent[" + _cl.getName() + "]";
   }
 }

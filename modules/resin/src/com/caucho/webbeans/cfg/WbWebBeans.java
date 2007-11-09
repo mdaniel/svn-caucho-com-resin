@@ -76,6 +76,14 @@ public class WbWebBeans {
     return _root;
   }
 
+  /**
+   * Adds a component.
+   */
+  public void addComponent(WbComponent comp)
+  {
+    _componentList.add(comp);
+  }
+
   @PostConstruct
   public void init()
   {
@@ -226,6 +234,7 @@ public class WbWebBeans {
       WbComponent component = new WbComponent();
       component.setClass(cl);
       component.setType(type);
+      component.setFromClass(true);
 
       if (scopeAnn != null)
 	component.setScopeAnnotation(scopeAnn);

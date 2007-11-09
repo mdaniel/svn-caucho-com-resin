@@ -75,8 +75,6 @@ public class WebBeans implements EnvironmentListener {
   private WebBeans()
   {
     _loader = Thread.currentThread().getContextClassLoader();
-
-    Environment.addEnvironmentListener(this);
   }
 
   public static WebBeans getLocal()
@@ -117,6 +115,8 @@ public class WebBeans implements EnvironmentListener {
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
+    
+    Environment.addEnvironmentListener(this);
   }
 
   public void addComponent(Class cl, WbComponent comp)

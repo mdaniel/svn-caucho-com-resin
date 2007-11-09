@@ -1200,9 +1200,14 @@ public abstract class JspNode {
       }
       else if (! rtexpr && hasELAttribute(value, isELIgnored)) {
 	// JSP.2.3.6 says this is an error
-	// jsp/184v vs jsp/18cr
-	throw error(L.l("EL expression '{0}' is only allowed for attributes with rtexprvalue='true'.",
-			value));
+	// jsp/184v vs jsp/18cr vs jsp/18f5
+	// #2112
+
+	if (String.class.equals(type))
+	  return '"' + escapeJavaString(value) + '"';
+	else
+	  throw error(L.l("EL expression '{0}' is only allowed for attributes with rtexprvalue='true'.",
+			  value));
       }
       else if (rtexpr && hasDeferredAttribute(value, false)) {
         // jsp/1c2m, jsp/1ce8

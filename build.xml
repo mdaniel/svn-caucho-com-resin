@@ -499,6 +499,7 @@
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
       <packageset dir="${modules}/util/src"/>
+      <packageset dir="${modules}/webbeans/src"/>
       <packageset dir="${modules}/webutil/src"/>
       <packageset dir="${promodules}/pro/src"/>
 
@@ -691,6 +692,7 @@
 	-->
         <include name="lib/saaj.jar"/>
         <include name="lib/script-10.jar"/>
+        <include name="lib/webbeans-16.jar"/>
         <include name="lib/webutil.jar"/>
 
         <include name="webapps/resin-doc.war"/>

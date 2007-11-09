@@ -31,16 +31,21 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.util.*;
 import com.caucho.webbeans.inject.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
 
+import javax.webbeans.*;
+
 /**
  * Configuration for the xml web bean component.
  */
 public class WbBinding {
+  private static final L10N L = new L10N(WbBinding.class);
+  
   private Class _cl;
 
   private ArrayList<WbBindingValue> _valueList
@@ -64,6 +69,22 @@ public class WbBinding {
       throw e;
     } catch (Exception e) {
       throw new ConfigException(e);
+    }
+  }
+
+  public void addValue(WbBindingValue value)
+  {
+    _valueList.add(value);
+  }
+
+  public void addValue(String name, Object value)
+  {
+    try {
+      Method method = _cl.getMethod(name, new Class[0]);
+      _valueList.add(new WbBindingValue(method, value));
+    } catch (Exception e) {
+      throw new ConfigException(L.l("{0}: '{1}' is an unknown method.",
+				    _cl.getSimpleName(), name));
     }
   }
 
@@ -110,6 +131,31 @@ public class WbBinding {
     return false;
   }
 
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof WbBinding))
+      return false;
+
+    WbBinding binding = (WbBinding) o;
+
+    int size = _valueList.size();
+    if (size != binding._valueList.size()) {
+      return false;
+    }
+
+    for (int i = size - 1; i >= 0; i--) {
+      WbBindingValue value = _valueList.get(i);
+
+      if (! binding._valueList.contains(value)) {
+	return false;
+      }
+    }
+
+    return true;
+  }
+
   public String toString()
   {
     return "WbBinding[" + _cl.getName() + "]";
@@ -143,6 +189,28 @@ public class WbBinding {
       } catch (Exception e) {
 	throw new ConfigException(e);
       }
+    }
+
+    public boolean equals(Object o)
+    {
+      if (this == o)
+	return true;
+      else if (! (o instanceof WbBindingValue))
+	return false;
+
+      WbBindingValue value = (WbBindingValue) o;
+
+      if (! _method.equals(value._method))
+	return false;
+      else if (_value == value._value)
+	return true;
+      else
+	return _value != null && _value.equals(value._value);
+    }
+
+    public String toString()
+    {
+      return "WbBinding[" + _method.getName() + ", " + _value + "]";
     }
   }
 }
