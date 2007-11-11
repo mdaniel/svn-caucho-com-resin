@@ -32,17 +32,21 @@ package com.caucho.webbeans.context;
 import com.caucho.server.dispatch.ServletInvocation;
 
 import javax.servlet.*;
+import javax.servlet.http.*;
 
 /**
- * Configuration for the xml web bean component.
+ * The session scope value
  */
-public class RequestScope extends ScopeContext {
+public class SessionScope extends ScopeContext {
   public Object get(String name)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
-    if (request != null)
-      return request.getAttribute(name);
+    if (request != null) {
+      HttpSession session = ((HttpServletRequest) request).getSession();
+      
+      return session.getAttribute(name);
+    }
     else
       return null;
   }
@@ -52,7 +56,9 @@ public class RequestScope extends ScopeContext {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
-      request.setAttribute(name, value);
+      HttpSession session = ((HttpServletRequest) request).getSession();
+      
+      session.setAttribute(name, value);
     }
   }
 }

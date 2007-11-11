@@ -457,6 +457,6 @@ public class UIViewRoot extends UIComponentBase
   
   public String toString()
   {
-    return getClass().getName() + "[" + getViewId() + "]";
+    return getClass().getSimpleName() + "[" + getViewId() + "]";
   }
 }

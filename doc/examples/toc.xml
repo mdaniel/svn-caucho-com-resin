@@ -43,9 +43,9 @@
     </item>
 
     <!--
-       - SOA
+       - SOA/WebServices
       -->
-    <item link="soa.xtp" title="SOA/ESB">
+    <item link="soa.xtp" title="WebServices/SOA">
       <item link="soa-hello-world/index.xtp" title="Simple Service"/>
       <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
       <item link="esb-servlet-client/index.xtp" title="An ESB client"/>
@@ -66,6 +66,13 @@
       <item link="ioc-periodictask/index.xtp" title="Periodic Task"/>
       <item link="jndi-appconfig/index.xtp" title="JNDI appconfig"/>
     </item>
+
+    <!--
+       - JSF
+      -->
+    <item link="jsf.xtp" title="JSF">
+      <item link="jsf-webbeans/index.xtp" title="JSF/WebBeans"/>
+     </item>
 
     <!--
        - JMS

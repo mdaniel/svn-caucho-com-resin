@@ -1213,7 +1213,7 @@ public class Quercus
   private void introspectPhpModuleClass(Class cl)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
-    log.fine("Quercus loading module " + cl.getName());
+    log.finer("Quercus loading module " + cl.getName());
 
     QuercusModule module = (QuercusModule) cl.newInstance();
 

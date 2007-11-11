@@ -30,6 +30,7 @@ package com.caucho.jsf.html;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.faces.*;
 import javax.faces.component.*;
@@ -42,6 +43,9 @@ import javax.faces.render.*;
  */
 class HtmlInputTextRenderer extends BaseRenderer
 {
+  private static final Logger log
+    = Logger.getLogger(HtmlInputTextRenderer.class.getName());
+  
   public static final Renderer RENDERER = new HtmlInputTextRenderer();
 
   /**
@@ -65,9 +69,15 @@ class HtmlInputTextRenderer extends BaseRenderer
     Map<String,String> paramMap = ext.getRequestParameterMap();
 
     String value = paramMap.get(clientId);
-
-    if (value != null)
+    
+    if (value != null) {
       ((EditableValueHolder) component).setSubmittedValue(value);
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer("JSF[" + context.getViewRoot().getViewId() + "] h:inputText["
+		  + clientId + "] =" + value);
+      }
+    }
   }
   
   /**

@@ -1,0 +1,97 @@
+<document>
+  <header>
+    <title>JSF with WebBeans</title>
+        <description>
+          <p>Introduces JSF using WebBeans as the model.</p>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>test.jsf</tutorial-startpage>
+  </header>
+
+<body>
+<summary/>
+
+<s1 title="Files in this tutorial">
+<deftable>
+<tr>
+  <td><viewfile-link file="test.jsp"/></td>
+  <td>JSP to create the JSF component tree.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/Calculator.java"/></td>
+  <td>Calculator model WebBean, taking the input and calculating the result.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>Configures FacesServlet.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/web-beans.xml"/></td>
+  <td>WebBeans configuration file.</td>
+</tr>
+</deftable>
+</s1>
+
+<s1 title="Overview">
+
+<example title="Calculator.java">
+package example;
+
+import javax.webbeans.*;
+
+@Component
+@RequestScoped
+@Named("calc")  
+public class Calculator {
+  private int _a;
+  private int _b;
+
+  public int getA() { return _a; }
+  public void setA(int a) { _a = a; }
+
+  public int getB() { return _b; }
+  public void setB(int b) { _b = b; }
+
+  public int getSum()
+  {
+    return _a + _b;
+  }
+}
+</example>
+
+<example title="test.jsp">
+&lt;%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
+&lt;%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
+&lt;f:view>
+  &lt;h:messages/>
+  &lt;h:form>
+    &lt;h:inputText value="#{calc.a}" size="4"/>
+     + &lt;h:inputText value="#{calc.b}" size="4"/>
+     = &lt;h:outputText value="#{calc.sum}" style="color:red"/>
+  &lt;/h:form>
+&lt;/f:view>
+</example>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;servlet-mapping url-pattern="*.jsf"
+                   servlet-class="javax.faces.webapp.FacesServlet"/>
+
+&lt;/web-app>
+</example>
+
+<example title="META-INF/web-beans.xml">
+&lt;web-beans xmlns="http://caucho.com/ns/resin">
+  &lt;!--
+     - The web-beans.xml marks a class root for WebBeans to search for
+     - @Component beans.  Since the example doesn't need to override any
+     - defaults, there's no additional configuration necessary.
+     -->
+&lt;/web-beans>
+</example>
+
+</s1>
+
+</body>
+</document>

@@ -48,11 +48,15 @@ import javax.webbeans.*;
  * Configuration for the top-level web bean
  */
 public class WbWebBeans {
+  private static final L10N L = new L10N(WbWebBeans.class);
   private static final Logger log
     = Logger.getLogger(WbWebBeans.class.getName());
   
   private WebBeans _webBeans;
   private Path _root;
+
+  private HashMap<Class,WbComponentType> _componentTypeMap
+    = new HashMap<Class,WbComponentType>();
   
   private ArrayList<WbComponentType> _componentTypeList;
   
@@ -79,9 +83,24 @@ public class WbWebBeans {
   /**
    * Adds a component.
    */
+  public WbComponent createComponent()
+  {
+    WbComponent comp = new WbComponent(this);
+
+    return comp;
+  }
+
   public void addComponent(WbComponent comp)
   {
     _componentList.add(comp);
+  }
+
+  /**
+   * Adds a component.
+   */
+  public WbComponentTypes createComponentTypes()
+  {
+    return new WbComponentTypes();
   }
 
   @PostConstruct
@@ -89,8 +108,13 @@ public class WbWebBeans {
   {
     if (_componentTypeList == null) {
       _componentTypeList = new ArrayList<WbComponentType>();
-      _componentTypeList.add(new WbComponentType(Standard.class, 0));
-      _componentTypeList.add(new WbComponentType(Component.class, 1));
+
+      WbComponentType type = createComponentType(Standard.class);
+      type.setPriority(0);
+      _componentTypeList.add(type);
+      type = createComponentType(Component.class);
+      type.setPriority(1);
+      _componentTypeList.add(type);
     }
 
     ByteCodeClassMatcher scanner = new ClassScanner();
@@ -103,6 +127,26 @@ public class WbWebBeans {
     } catch (IOException e) {
       throw new ConfigException(e);
     }
+
+    WebBeans webBeans = WebBeans.getLocal();
+
+    for (WbComponent comp : _componentList) {
+      if (comp.getType().isEnabled()) {
+	webBeans.addComponent(comp);
+      }
+    }
+  }
+
+  public WbComponentType createComponentType(Class cl)
+  {
+    WbComponentType type = _componentTypeMap.get(cl);
+
+    if (type == null) {
+      type = new WbComponentType(cl);
+      _componentTypeMap.put(cl, type);
+    }
+
+    return type;
   }
 
   private void scanForClasses(Path root,
@@ -231,13 +275,13 @@ public class WbWebBeans {
 	  break;
       }
 
-      WbComponent component = new WbComponent();
-      component.setClass(cl);
-      component.setType(type);
-      component.setFromClass(true);
+      // XXX:
+      if (type == null)
+	return;
 
-      if (scopeAnn != null)
-	component.setScopeAnnotation(scopeAnn);
+      WbComponent component = new WbComponent(this);
+      component.setClass(cl);
+      component.setFromClass(true);
 
       for (int i = 0; i < bindList.size(); i++) {
 	Annotation bindAnn = bindList.get(i);
@@ -247,7 +291,9 @@ public class WbWebBeans {
 	component.addBinding(binding);
       }
 
-      _webBeans.addComponent(cl, component);
+      component.introspect();
+      component.init();
+      _componentList.add(component);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -277,6 +323,26 @@ public class WbWebBeans {
       }
       
       return false;
+    }
+  }
+
+  public class WbComponentTypes {
+    public void addComponentType(Class cl)
+    {
+      if (! cl.isAnnotationPresent(ComponentType.class))
+	throw new ConfigException(L.l("'{0}' is missing a @ComponentType annotation.  Component annotations must be annotated with @ComponentType.",
+				      cl.getName()));
+
+      if (_componentTypeList == null)
+	_componentTypeList = new ArrayList<WbComponentType>();
+
+      int priority =  _componentTypeList.size();
+
+      WbComponentType type = createComponentType(cl);
+
+      type.setPriority(priority);
+      
+      _componentTypeList.add(type);
     }
   }
 }

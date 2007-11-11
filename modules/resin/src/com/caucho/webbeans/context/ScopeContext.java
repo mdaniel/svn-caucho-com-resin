@@ -34,25 +34,10 @@ import com.caucho.server.dispatch.ServletInvocation;
 import javax.servlet.*;
 
 /**
- * Configuration for the xml web bean component.
+ * Context for a named EL bean scope
  */
-public class RequestScope extends ScopeContext {
-  public Object get(String name)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request != null)
-      return request.getAttribute(name);
-    else
-      return null;
-  }
+abstract public class ScopeContext {
+  abstract public Object get(String name);
   
-  public void set(String name, Object value)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request != null) {
-      request.setAttribute(name, value);
-    }
-  }
+  abstract public void set(String name, Object value);
 }

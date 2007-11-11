@@ -30,6 +30,7 @@ package com.caucho.jsf.html;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.faces.*;
 import javax.faces.application.*;
@@ -43,6 +44,9 @@ import javax.faces.render.*;
  */
 class HtmlFormRenderer extends BaseRenderer
 {
+  private static final Logger log
+    = Logger.getLogger(HtmlFormRenderer.class.getName());
+  
   public static final Renderer RENDERER = new HtmlFormRenderer();
 
   /**
@@ -68,6 +72,11 @@ class HtmlFormRenderer extends BaseRenderer
     String value = paramMap.get(clientId);
 
     ((UIForm) component).setSubmitted(value != null);
+
+    if (log.isLoggable(Level.FINE) && value != null) {
+      log.fine("JSF[" + context.getViewRoot().getViewId()
+	       + "] decoding form data for '" + clientId + "'");
+    }
   }
   
   /**

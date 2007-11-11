@@ -27,32 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.webbeans.cfg;
 
-import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.config.types.*;
+import com.caucho.util.*;
+import com.caucho.webbeans.*;
+import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.context.*;
 
-import javax.servlet.*;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.ArrayList;
+
+import javax.annotation.*;
+import javax.webbeans.*;
 
 /**
  * Configuration for the xml web bean component.
  */
-public class RequestScope extends ScopeContext {
-  public Object get(String name)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request != null)
-      return request.getAttribute(name);
-    else
-      return null;
-  }
+public class WbClassComponent extends WbComponent {
+  private static final L10N L = new L10N(WbClassComponent.class);
   
-  public void set(String name, Object value)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
+  private Class _cl;
+  private boolean _isFromClass;
 
-    if (request != null) {
-      request.setAttribute(name, value);
-    }
+  private InitProgram _init;
+
+  public WbClassComponent(WbWebBeans webbeans)
+  {
+    super(webbeans);
   }
 }

@@ -29,30 +29,32 @@
 
 package com.caucho.webbeans.context;
 
-import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.server.webapp.WebApp;
 
 import javax.servlet.*;
+import javax.servlet.http.*;
 
 /**
- * Configuration for the xml web bean component.
+ * The application scope value
  */
-public class RequestScope extends ScopeContext {
+public class ApplicationScope extends ScopeContext {
   public Object get(String name)
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
+    WebApp webApp = WebApp.getLocal();
 
-    if (request != null)
-      return request.getAttribute(name);
+    if (webApp != null) {
+      return webApp.getAttribute(name);
+    }
     else
       return null;
   }
   
   public void set(String name, Object value)
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
+    WebApp webApp = WebApp.getLocal();
 
-    if (request != null) {
-      request.setAttribute(name, value);
+    if (webApp != null) {
+      webApp.setAttribute(name, value);
     }
   }
 }

@@ -34,16 +34,14 @@ package com.caucho.webbeans.cfg;
  */
 public class WbComponentType {
   private Class _type;
-  private int _priority;
+  private int _priority = -1;
 
-  public WbComponentType()
-  {
-  }
-
-  public WbComponentType(Class type, int priority)
+  public WbComponentType(Class type)
   {
     _type = type;
-    _priority = priority;
+
+    if (type == null)
+      throw new NullPointerException();
   }
 
   public void setType(Class type)
@@ -64,5 +62,10 @@ public class WbComponentType {
   public int getPriority()
   {
     return _priority;
+  }
+
+  public boolean isEnabled()
+  {
+    return _priority >= 0;
   }
 }

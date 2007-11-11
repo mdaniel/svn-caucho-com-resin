@@ -172,9 +172,12 @@ public class JsfViewRoot extends JsfNode
     throws Exception
   {
     String className = "javax.faces.component.UIViewRoot";
+
+    long digest = calculateDigest();
+    // XXX: eventually use pre-allocated long
     
     out.print(_var + " = ");
-    out.println("com.caucho.jsp.jsf.JsfTagUtil.findRoot(_jsp_faces_context, request);");
+    out.print("com.caucho.jsp.jsf.JsfTagUtil.findRoot(_jsp_faces_context, request, " + digest + "L);");
 
     if (isJsfParentRequired())
       out.println("request.setAttribute(\"caucho.jsf.parent\""
@@ -231,5 +234,20 @@ public class JsfViewRoot extends JsfNode
       out.println("out = pageContext.popBody();");
       out.println("pageContext.releaseBody(" + _bodyVar + ");");
     }
+  }
+
+  private long calculateDigest()
+  {
+    long digest = 0;
+
+    for (PersistentDependency pDepend : _gen.getDependList()) {
+      if (pDepend instanceof Depend) {
+	Depend depend = (Depend) pDepend;
+
+	digest = 65521 * digest + depend.getDigest();
+      }
+    }
+
+    return digest;
   }
 }

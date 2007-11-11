@@ -49,9 +49,13 @@ import javax.webbeans.*;
  */
 public class WbComponent {
   private static final L10N L = new L10N(WbComponent.class);
+
+  private WbWebBeans _webbeans;
   
   private Class _cl;
   private WbComponentType _type;
+
+  private Class _targetType;
 
   private boolean _isFromClass;
 
@@ -61,9 +65,14 @@ public class WbComponent {
     = new ArrayList<WbBinding>();
 
   private Annotation _scopeAnn;
-  private RequestScope _scopeContext;
+  private ScopeContext _scopeContext;
 
   private InitProgram _init;
+
+  public WbComponent(WbWebBeans webbeans)
+  {
+    _webbeans = webbeans;
+  }
 
   /**
    * Returns the component's EL binding name.
@@ -90,9 +99,13 @@ public class WbComponent {
   /**
    * Sets the component type.
    */
-  public void setType(WbComponentType type)
+  public void setType(Class type)
   {
-    _type = type;
+    if (! type.isAnnotationPresent(ComponentType.class))
+      throw new ConfigException(L.l("'{0}' is an invalid component annotation.  Component types must be annotated by @ComponentType.",
+				    type.getName()));
+    
+    _type = _webbeans.createComponentType(type);
   }
 
   /**
@@ -104,28 +117,62 @@ public class WbComponent {
   }
 
   /**
+   * Sets the component type.
+   */
+  public void setComponentType(WbComponentType type)
+  {
+    if (type == null)
+      throw new NullPointerException();
+    
+    _type = type;
+  }
+
+  /**
    * Sets the component implementation class.
    */
   public void setClass(Class cl)
   {
     _cl = cl;
+    _targetType = cl;
 
     if (_name == null) {
-      String className = cl.getName();
-      int p = className.lastIndexOf('.');
+      Named named = (Named) cl.getAnnotation(Named.class);
+
+      if (named != null)
+	_name = named.value();
+
+      if (_name == null || "".equals(_name)) {
+	String className = cl.getName();
+	int p = className.lastIndexOf('.');
       
-      char ch = Character.toLowerCase(className.charAt(p + 1));
+	char ch = Character.toLowerCase(className.charAt(p + 1));
       
-      _name = ch + className.substring(p + 2);
+	_name = ch + className.substring(p + 2);
+      }
     }
+  }
+
+  public Class getInstanceClass()
+  {
+    return _cl;
   }
   
   public String getClassName()
   {
-    if (_cl != null)
-      return _cl.getName();
+    if (_targetType != null)
+      return _targetType.getName();
     else
       return null;
+  }
+  
+  public void setTargetType(Class type)
+  {
+    _targetType = type;
+  }
+  
+  public Class getTargetType()
+  {
+    return _targetType;
   }
 
   /**
@@ -134,6 +181,11 @@ public class WbComponent {
   public void addBinding(WbBinding binding)
   {
     _bindingList.add(binding);
+  }
+  
+  public ArrayList<WbBinding> getBindingList()
+  {
+    return _bindingList;
   }
 
   /**
@@ -150,8 +202,7 @@ public class WbComponent {
   {
     _scopeAnn = scopeAnn;
 
-    if (scopeAnn != null)
-      _scopeContext = new RequestScope();
+    _scopeContext = WebBeans.getLocal().getScopeContext(scopeAnn);
   }
 
   /**
@@ -192,20 +243,9 @@ public class WbComponent {
   @PostConstruct
   public void init()
   {
-    if (_type == null) {
-      for (Annotation ann : _cl.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
-	  // XXX:
-	  _type = new WbComponentType(ann.annotationType(), 0);
-	}
-      }
-    }
-
-    if (_type == null) {
-      throw new ConfigException(L.l("component '{0}' does not have a ComponentType",
-				    _cl.getName()));
-    }
-    
+    if (_type == null)
+      _type = _webbeans.createComponentType(Component.class);
+				  
     if (_scopeAnn == null) {
       for (Annotation ann : _cl.getDeclaredAnnotations()) {
 	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
@@ -214,7 +254,54 @@ public class WbComponent {
       }
     }
 
-    WebBeans.getLocal().addComponent(_cl, this);
+    introspectProduces();
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  public void introspect()
+  {
+    for (Annotation ann : _cl.getDeclaredAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
+	if (_type != null)
+	  throw new ConfigException(L.l("{0}: component type annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ComponentType.",
+					_cl.getName(),
+					_type.getType().getName(),
+					ann.annotationType().getName()));
+	
+	_type = _webbeans.createComponentType(ann.annotationType());
+      }
+    }
+
+    if (_type == null) {
+      throw new ConfigException(L.l("component '{0}' does not have a ComponentType",
+				    _cl.getName()));
+    }
+  }
+
+  /**
+   * Introspects the methods for any @Produces
+   */
+  private void introspectProduces()
+  {
+    if (_cl == null)
+      return;
+    
+    for (Method method : _cl.getDeclaredMethods()) {
+      if (Modifier.isStatic(method.getModifiers()))
+	continue;
+
+      if (! method.isAnnotationPresent(Produces.class))
+	continue;
+
+      WbProducesComponent comp
+	= new WbProducesComponent(_webbeans, this, method);
+
+      comp.init();
+
+      _webbeans.addComponent(comp);
+    }
   }
 
   public boolean isMatch(ArrayList<Annotation> bindList)
@@ -246,12 +333,11 @@ public class WbComponent {
     if (_scopeContext != null) {
       Object value = _scopeContext.get(_name);
 
-      try {
-	value = create();
-
-	_scopeContext.set(_name, value);
-
+      if (value != null)
 	return value;
+
+      try {
+	return createScoped(_name);
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
@@ -263,7 +349,7 @@ public class WbComponent {
   public Object create()
   {
     try {
-      Object value = _cl.newInstance();
+      Object value = createNew();
 
       if (_init != null)
 	_init.configure(value);
@@ -275,6 +361,36 @@ public class WbComponent {
       throw new RuntimeException(e);
     }
   }
+
+  public Object createScoped(String name)
+  {
+    try {
+      Object value = createNew();
+
+      _scopeContext.set(name, value);
+
+      if (_init != null)
+	_init.configure(value);
+
+      return value;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public Object createNew()
+  {
+    try {
+      return _cl.newInstance();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   public void createProgram(ArrayList<BuilderProgram> initList,
 			    AccessibleObject field,
 			    String name,
@@ -295,7 +411,7 @@ public class WbComponent {
 
     WbComponent comp = (WbComponent) obj;
 
-    if (! _cl.equals(comp._cl)) {
+    if (! _targetType.equals(comp._targetType)) {
       return false;
     }
 
@@ -316,9 +432,15 @@ public class WbComponent {
 
   public String toString()
   {
-    if (_name != null)
-      return "WbComponent[" + _name + ", " + _cl.getName() + "]";
-    else
-      return "WbComponent[" + _cl.getName() + "]";
+    if (_name != null) {
+      return (getClass().getSimpleName() + "[" + _name
+	      + ", " + _cl.getSimpleName()
+	      + ", @" + _type.getType().getSimpleName() + "]");
+    }
+    else {
+      return (getClass().getSimpleName() + "["
+	      + _cl.getSimpleName()
+	      + ", @" + _type.getType().getSimpleName() + "]");
+    }
   }
 }

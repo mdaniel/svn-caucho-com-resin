@@ -30,8 +30,10 @@ package com.caucho.jsf.lifecycle;
 
 import com.caucho.util.*;
 
+import java.io.*;
 import java.util.*;
 import java.util.logging.*;
+import java.lang.reflect.*;
 
 import javax.el.*;
 import javax.faces.*;
@@ -41,6 +43,8 @@ import javax.faces.context.*;
 import javax.faces.event.*;
 import javax.faces.lifecycle.*;
 import javax.faces.render.*;
+
+import javax.servlet.http.*;
 
 import com.caucho.jsf.application.*;
 
@@ -142,6 +146,9 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       viewRoot.processUpdates(context);
+    } catch (RuntimeException e) {
+      if (sendError(context, "processUpdates", e))
+	return;
     } finally {
       afterPhase(context, PhaseId.UPDATE_MODEL_VALUES);
     }
@@ -316,6 +323,179 @@ public class LifecycleImpl extends Lifecycle
 	  log.fine(viewId + " [ " + msg.getSeverity() + "] " + msg.getSummary());
       }
     }
+  }
+
+  private boolean sendError(FacesContext context,
+			    String lifecycle,
+			    RuntimeException e)
+  {
+    ExternalContext extContext = context.getExternalContext();
+    Object response = extContext.getResponse();
+
+    if (! (response instanceof HttpServletResponse)) {
+      context.renderResponse();
+      return false;
+    }
+
+    HttpServletResponse res = (HttpServletResponse) response;
+
+    try {
+      context.renderResponse();
+      context.responseComplete();
+      
+      res.setStatus(500, "JSF Exception");
+      res.setContentType("text/html");
+
+      PrintWriter out = res.getWriter();
+
+      out.println("<body>");
+
+      out.println("<h3>JSF exception detected in " + lifecycle + " phase</h3>");
+
+      String msg = e.getMessage();
+      out.println("<span style='color:red;font:bold'>" + msg + "</span><br/>");
+
+      out.println("<h3>Context: " + context.getViewRoot() + "</h3>");
+      out.println("<code><pre>");
+
+      String errorId = null;
+      
+      if (e instanceof FacesException && msg.startsWith("id=")) {
+	int p = msg.indexOf(' ');
+	errorId = msg.substring(3, p);
+      }
+
+      printComponentTree(out, errorId, context, context.getViewRoot(), 0);
+      
+      out.println("</pre></code>");
+
+      if (! Alarm.isTest()) {
+	out.println("<h3>Stack Trace</h3>");
+	out.println("<pre>");
+	if (e.getCause() != null)
+	  e.getCause().printStackTrace(out);
+	else
+	  e.printStackTrace(out);
+	out.println("</pre>");
+      }
+      
+      out.println("</body>");
+      
+      // clear, so we don't just loop
+      Application app = context.getApplication();
+    
+      ViewHandler view = app.getViewHandler();
+      
+      UIViewRoot viewRoot = context.getViewRoot();
+      
+      viewRoot = view.createView(context, viewRoot.getViewId());
+
+      context.setViewRoot(viewRoot);
+
+      view.writeState(context);
+
+      return true;
+    } catch (IOException e1) {
+      log.log(Level.FINE, e.toString(), e1);
+      
+      throw e;
+    } finally {
+    }
+  }
+
+  private void printComponentTree(PrintWriter out,
+				  String errorId,
+				  FacesContext context,
+				  UIComponent comp,
+				  int depth)
+  {
+    for (int i = 0; i < depth; i++)
+      out.print(' ');
+
+    boolean isError = false;
+    if (errorId != null && errorId.equals(comp.getClientId(context))) {
+      isError = true;
+      out.print("<span style='color:red'>");
+    }
+
+    out.print("&lt;" + comp.getClass().getSimpleName());
+    if (comp.getId() != null)
+      out.print(" id=\"" + comp.getId() + "\"");
+
+    for (Method method : comp.getClass().getMethods()) {
+      if (! method.getName().startsWith("get")
+	  && ! method.getName().startsWith("is"))
+	continue;
+      else if (method.getParameterTypes().length != 0)
+	continue;
+
+      String name;
+
+      if (method.getName().startsWith("get"))
+	name = method.getName().substring(3);
+      else if (method.getName().startsWith("is"))
+	name = method.getName().substring(2);
+      else
+	continue;
+
+      // XXX: getURL
+      name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+      
+      ValueExpression expr = comp.getValueExpression(name);
+
+      Class type = method.getReturnType();
+
+      if (expr != null) {
+	out.print(" " + name + "=\"" + expr.getExpressionString() + "\"");
+      }
+      else if (method.getDeclaringClass().equals(UIComponent.class)
+	       || method.getDeclaringClass().equals(UIComponentBase.class)) {
+      }
+      else if (name.equals("family")) {
+      }
+      else if (String.class.equals(type)) {
+	try {
+	  Object value = method.invoke(comp);
+
+	  if (value != null)
+	    out.print(" " + name + "=\"" + value + "\"");
+	} catch (Exception e) {
+	}
+      }
+    }
+
+    int facetCount = comp.getFacetCount();
+    int childCount = comp.getChildCount();
+
+    if (facetCount == 0 && childCount == 0) {
+      out.print("/>");
+
+      if (isError)
+	out.print("</span>");
+
+      out.println();
+      return;
+    }
+    out.println(">");
+
+    if (isError)
+      out.print("</span>");
+
+    for (int i = 0; i < childCount; i++) {
+      printComponentTree(out, errorId, context,
+			 comp.getChildren().get(i), depth + 1);
+    }
+    
+    for (int i = 0; i < depth; i++)
+      out.print(' ');
+
+    if (isError)
+      out.print("<span style='color:red'>");
+    
+    out.println("&lt;/" + comp.getClass().getSimpleName() + ">");
+
+    if (isError)
+      out.print("</span>");
   }
 
   public String toString()

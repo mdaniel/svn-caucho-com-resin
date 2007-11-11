@@ -44,6 +44,7 @@ public class WebBeansELResolver extends ELResolver {
   public WebBeansELResolver()
   {
     _webBeans = WebBeans.getLocal();
+    _webBeans.update();
   }
   
   public Class<?> getCommonPropertyType(ELContext context,

@@ -41,12 +41,17 @@ import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.webapp.*;
 
+import com.caucho.util.*;
+
 /**
  * Utilities for JsfTags
  */
 public class JsfTagUtil {
+  private static final L10N L = new L10N(JsfTagUtil.class);
+  
   public static UIViewRoot findRoot(FacesContext context,
-				    ServletRequest req)
+				    ServletRequest req,
+				    Object etag)
     throws Exception
   {
     if (context == null)
@@ -55,8 +60,18 @@ public class JsfTagUtil {
     UIViewRoot root = context.getViewRoot();
 
     if (root == null)
-      throw new NullPointerException();
-      
+      throw new NullPointerException(L.l("f:view can't find current in FacesContext"));
+
+    Object oldETag = root.getAttributes().get("caucho.etag");
+
+    if (oldETag != null && ! oldETag.equals(etag)) {
+      // clear view on JSP change
+
+      root.getChildren().clear();
+      root.getFacets().clear();
+    }
+
+    root.getAttributes().put("caucho.etag", etag);
 
     return root;
   }

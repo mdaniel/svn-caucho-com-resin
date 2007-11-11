@@ -81,6 +81,7 @@ public class WebComponent {
     throws ConfigException
   {
     WbComponent matchComp = null;
+    WbComponent secondComp = null;
 
     for (int i = 0; i < _componentList.size(); i++) {
       WbComponent comp = _componentList.get(i);
@@ -90,19 +91,32 @@ public class WebComponent {
 
       if (matchComp == null)
 	matchComp = comp;
-      else if (matchComp.getType().getPriority() < comp.getType().getPriority())
+      else if (comp.getBindingList().size() == bindList.size()
+	       && matchComp.getBindingList().size() != bindList.size()) {
 	matchComp = comp;
+	secondComp = null;
+      }
+      else if (matchComp.getBindingList().size() == bindList.size()
+	       && comp.getBindingList().size() != bindList.size()) {
+      }
+      else if (matchComp.getType().getPriority() < comp.getType().getPriority()) {
+	matchComp = comp;
+	secondComp = null;
+      }
       else if (comp.getType().getPriority() < matchComp.getType().getPriority()) {
       }
-      else if (matchComp != null) {
-	throw WebBeans.injectError(field, L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
-					      matchComp.getClassName(),
-					      comp.getClassName()));
+      else {
+	secondComp = comp;
       }
     }
 
     if (matchComp == null)
       throw WebBeans.injectError(field, L.l("WebBeans unable to find matching component."));
+
+    else if (matchComp != null && secondComp != null) {
+	throw WebBeans.injectError(field, L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
+					      matchComp, secondComp));
+    }
 
     matchComp.createProgram(initList, field, name, inject);
   }

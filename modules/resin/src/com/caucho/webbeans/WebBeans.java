@@ -36,6 +36,7 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.server.util.*;
 import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.context.*;
 
 import java.io.*;
 import java.util.*;
@@ -59,7 +60,7 @@ public class WebBeans implements EnvironmentListener {
   private static final EnvironmentLocal<WebBeans> _localWebBeans
     = new EnvironmentLocal<WebBeans>();
   
-  private ClassLoader _loader;
+  private EnvironmentClassLoader _loader;
   
   private HashMap<Path,WbWebBeans> _webBeansMap
     = new HashMap<Path,WbWebBeans>();
@@ -74,7 +75,7 @@ public class WebBeans implements EnvironmentListener {
 
   private WebBeans()
   {
-    _loader = Thread.currentThread().getContextClassLoader();
+    _loader = Environment.getEnvironmentClassLoader();
   }
 
   public static WebBeans getLocal()
@@ -82,7 +83,7 @@ public class WebBeans implements EnvironmentListener {
     WebBeans webBeans = null;
     
     synchronized (_localWebBeans) {
-      webBeans = _localWebBeans.get();
+      webBeans = _localWebBeans.getLevel();
 
       if (webBeans != null)
 	return webBeans;
@@ -99,7 +100,7 @@ public class WebBeans implements EnvironmentListener {
   private void init()
   {
     try {
-      fillClassPath();
+      update();
     } catch (RuntimeException e) {
       _configException = e;
       
@@ -119,9 +120,12 @@ public class WebBeans implements EnvironmentListener {
     Environment.addEnvironmentListener(this);
   }
 
-  public void addComponent(Class cl, WbComponent comp)
+  public void addComponent(WbComponent comp)
   {
-    addComponentRec(cl, comp);
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " adding " + comp);
+    
+    addComponentRec(comp.getTargetType(), comp);
 
     String name = comp.getName();
 
@@ -148,6 +152,19 @@ public class WebBeans implements EnvironmentListener {
     for (Class subClass : cl.getInterfaces()) {
       addComponentRec(subClass, comp);
     }
+  }
+
+  public ScopeContext getScopeContext(Annotation scopeAnn)
+  {
+    if (scopeAnn instanceof RequestScoped)
+      return new RequestScope();
+    else if (scopeAnn instanceof SessionScoped)
+      return new SessionScope();
+    else if (scopeAnn instanceof ApplicationScoped)
+      return new ApplicationScope();
+    else
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown scope.",
+					     scopeAnn));
   }
 
   public void createProgram(ArrayList<BuilderProgram> initList,
@@ -193,6 +210,17 @@ public class WebBeans implements EnvironmentListener {
       return null;
   }
 
+  public void update()
+  {
+    try {
+      _loader.make();
+    
+      fillClassPath();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
   private void fillClassPath()
     throws IOException
   {
@@ -209,7 +237,11 @@ public class WebBeans implements EnvironmentListener {
       if (_webBeansMap.get(path) != null)
 	continue;
 
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " scanning " + root.getURL());
+
       WbWebBeans webBeans = new WbWebBeans(this, root);
+      _webBeansMap.put(path, webBeans);
 
       new Config().configure(webBeans, path, SCHEMA);
     }
@@ -257,5 +289,10 @@ public class WebBeans implements EnvironmentListener {
     }
 
     return new ConfigException(location + msg);
+  }
+
+  public String toString()
+  {
+    return "WebBeans[" + _loader.getId() + "]";
   }
 }
