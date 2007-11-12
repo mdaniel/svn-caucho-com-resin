@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.1//EN" "http://www.netbeans.org/dtds/filesystem-1_1.dtd">
+<filesystem>
+  <folder name="J2EE">
+    <folder name="DeploymentPlugins">
+      <folder name="Resin">
+        <file name="Descriptor" url="nbdep.xml"/>
+        <file name="Factory.instance">
+          <attr name="instanceCreate"
+                methodvalue="com.caucho.netbeans.core.ResinDeploymentFactory.create"/>
+          <attr name="instanceClass"
+                stringvalue="com.caucho.netbeans.core.ResinDeploymentFactory"/>
+          <attr name="instanceOf"
+                stringvalue="javax.enterprise.deploy.spi.factories.DeploymentFactory"/>
+        </file>
+        <file name="RegistryNodeFactory.instance">
+          <attr name="instanceClass"
+                stringvalue="com.caucho.netbeans.nodes.ResinRegistryNodeFactory"/>
+          <attr name="instanceOf"
+                stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.RegistryNodeFactory"/>
+        </file>
+        <file name="ConfigurationSupport.instance">
+          <attr name="instanceClass"
+                stringvalue="com.caucho.netbeans.config.ConfigurationSupportImpl"/>
+          <attr name="instanceOf"
+                stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.ConfigurationSupport"/>
+        </file>
+        <file name="J2eePlatformFactory.instance">
+          <attr name="instanceCreate"
+                newvalue="com.caucho.netbeans.core.ResinPlatformFactory"/>
+          <attr name="instanceClass"
+                stringvalue="com.caucho.netbeans.core.ResinPlatformFactory"/>
+          <attr name="instanceOf"
+                stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformFactory"/>
+        </file>
+        <file name="OptionalFactory.instance">
+          <attr name="instanceCreate"
+                newvalue="com.caucho.netbeans.core.ResinOptionalFactory"/>
+          <attr name="instanceClass"
+                stringvalue="com.caucho.netbeans.core.ResinOptionalFactory"/>
+          <attr name="instanceOf"
+                stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.OptionalDeploymentManagerFactory"/>
+        </file>
+        <folder name="DeploymentFileNames">
+          <folder name="WAR">
+            <file name="WEB-INF\resin-web.xml"/>
+          </folder>
+          <folder name="EJB">
+            <file name="META-INF\resin-ejb-jar.xml"/>
+          </folder>
+          <folder name="EAR"/>
+        </folder>
+      </folder>
+    </folder>
+  </folder>
+</filesystem>

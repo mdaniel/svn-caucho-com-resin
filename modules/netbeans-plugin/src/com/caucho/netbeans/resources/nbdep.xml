@@ -1,0 +1,34 @@
+<netbeans-deployment>
+
+  <!--
+  The icon element contains a path to the icon to be used to present the server
+  in the server registry.
+  -->
+  <icon>com/caucho/netbeans/resources/resin</icon>
+
+  <!--
+  The disconnected-string element contains the String parameter to DeploymentFactory.getDisconnectedDeploymentManager()
+  -->
+  <disconnected-string>resin:virtual</disconnected-string>
+
+  <!--
+  The container-limitation element modifies a plugin to say that not all j2ee deployments are valid.
+  For example, a web-only server would include
+  <container-limitation> <war-deploy/> </container-limitation>
+  to indicate that only war deployments are accepted.
+  If a container-limitation element is not present, all j2ee deployments are assumed valid.
+  If a container-limitation element is present, then only j2ee deployment types explicitly
+  mentioned are allowed.
+  -->
+  <container-limitation>
+    <ear-deploy/>
+    <war-deploy/>
+    <ejbjar-deploy/>
+  </container-limitation>
+
+  <web-context-root>
+    <xpath>/</xpath>
+    <prop-name>contextRoot</prop-name>
+  </web-context-root>
+
+</netbeans-deployment>

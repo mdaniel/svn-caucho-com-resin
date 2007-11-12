@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <Properties>
+    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+      <ResourceString bundle="org/netbeans/modules/j2ee/resin/wizard/Bundle.properties" key="LBL_InstanceProperties" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+    </Property>
+  </Properties>
+  <AuxValues>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="2"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="_descriptionLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="_resinHomeLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="_resinConfLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="_resinHomeTextField" alignment="0" pref="252" max="32767" attributes="3"/>
+                                  <Component id="_resinConfTextField" alignment="0" max="32767" attributes="3"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="_resinConfBrowseButton" min="-2" max="-2" attributes="0"/>
+                                  <Component id="_resinHomeBrowseButton" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="_serverPortTextField" alignment="0" max="32767" attributes="1"/>
+                              <Component id="_serverIdTextField" alignment="0" pref="113" max="32767" attributes="1"/>
+                          </Group>
+                      </Group>
+                  </Group>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <Component id="_descriptionLabel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="_resinHomeLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="_resinHomeBrowseButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="_resinHomeTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="60" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="_serverIdTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="_resinConfLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="_resinConfBrowseButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="_resinConfTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                  <Component id="_serverPortTextField" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JLabel" name="_descriptionLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Specify the details for the Resin installation"/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value=""/>
+        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="_resinHomeLabel">
+      <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="_resinHomeTextField"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Resin &amp;Home:"/>
+        <Property name="toolTipText" type="java.lang.String" value="The Resin Home is the installation folder of the Resin software, for example C:\resin-pro-3.1.x or /usr/share/resin-pro-3.1.x."/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Resin &amp;Home"/>
+        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="_resinHomeTextField">
+      <Properties>
+        <Property name="columns" type="int" value="15"/>
+        <Property name="toolTipText" type="java.lang.String" value="The Resin Home is the installation folder of the Resin software, for example C:\resin-pro-3.1.x or /usr/share/resin-pro-3.1.x."/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Resin &amp;Home"/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JButton" name="_resinHomeBrowseButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&amp;Browse..."/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="&amp;Browse for Resin Home"/>
+      </AccessibilityProperties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="_resinHomeBrowseButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="_resinConfLabel">
+      <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="_resinConfTextField"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Resin &amp;Conf:"/>
+        <Property name="toolTipText" type="java.lang.String" value="The Resin Conf is the main Resin configuration file, typically named resin.conf.  The default is the file conf/resin.conf contained in the Resin Home folder, however many installtions will have a resin.conf in a custom location, for example /etc/resin.conf."/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Resin &amp;Conf"/>
+        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="_resinConfTextField">
+      <Properties>
+        <Property name="columns" type="int" value="15"/>
+        <Property name="toolTipText" type="java.lang.String" value="The Resin Conf is the main Resin configuration file, typically named resin.conf.  The default is the file conf/resin.conf contained in the Resin Home folder, however many installtions will have a resin.conf in a custom location, for example /etc/resin.conf."/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Resin &amp;Conf"/>
+        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JButton" name="_resinConfBrowseButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Br&amp;owse..."/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Br&amp;owse for Resin Conf"/>
+        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+      </AccessibilityProperties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="_resinConfBrowseButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="_serverIdTextField"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Server &amp;Id"/>
+        <Property name="toolTipText" type="java.lang.String" value="The Server Id corresponds to the id attribute of an entry like  &lt;server id=&quot;&quot; address=&quot;127.0.0.1&quot; port=&quot;6800&quot;/&gt; in resin.conf.  "/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="_serverIdTextField">
+      <Properties>
+        <Property name="toolTipText" type="java.lang.String" value="The Server Id corresponds to the id attribute of an entry like  &lt;server id=&quot;&quot; address=&quot;127.0.0.1&quot; port=&quot;6800&quot;/&gt; in resin.conf.  "/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="_serverPortTextField"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Server &amp;Port"/>
+        <Property name="toolTipText" type="java.lang.String" value="The Server Port corresponds to the port attribute of an entry like  &lt;server id=&quot;&quot; address=&quot;127.0.0.1&quot; port=&quot;6800&quot;/&gt;in resin.conf.  "/>
+      </Properties>
+      <AccessibilityProperties>
+        <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+      </AccessibilityProperties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="_serverPortTextField">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="6800"/>
+        <Property name="toolTipText" type="java.lang.String" value="The Server Port corresponds to the port attribute of an entry like  &lt;server id=&quot;&quot; address=&quot;127.0.0.1&quot; port=&quot;6800&quot;/&gt;in resin.conf.  "/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>
