@@ -79,6 +79,8 @@ public class WebBeans implements EnvironmentListener {
   private WebBeans()
   {
     _loader = Environment.getEnvironmentClassLoader();
+
+    _localWebBeans.set(this);
     
     _wbWebBeans = new WbWebBeans(this, null);
 
