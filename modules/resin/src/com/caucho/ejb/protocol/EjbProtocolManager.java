@@ -228,7 +228,7 @@ public class EjbProtocolManager {
       // with the local prefix
 
       if (server.isLocal()) {
-        Object localObj = server.getEJBLocalHome();
+        Object localObj = server.getClientLocalHome();
 
         // ejb/0f00
         // EJB 3.0 does not require home interfaces, e.g
@@ -339,6 +339,17 @@ public class EjbProtocolManager {
               log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
 
             bindServer(remoteJndiName, remoteObj);
+
+            if (ejbName != null) {
+              if (! (ejbName.equals(mappedName) || _remoteJndiPrefix.endsWith("/env"))) {
+                remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
+
+                if (log.isLoggable(Level.CONFIG))
+                  log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
+
+                bindServer(remoteJndiName, remoteObj);
+              }
+            }
 
             // ejb/0f6f (TCK): multiple remote interfaces
             for (Class cl : server.getRemoteObjectList()) {

@@ -88,7 +88,12 @@ abstract public class AbstractSessionContext extends AbstractContext
   public EJBObject getEJBObject()
     throws IllegalStateException
   {
-    return getRemoteView();
+    EJBObject obj = getRemoteView();
+
+    if (obj == null)
+      throw new IllegalStateException("getEJBObject() is only allowed through EJB 2.1 interfaces");
+
+    return obj;
   }
 
   public String getPrimaryKey()
@@ -173,9 +178,13 @@ abstract public class AbstractSessionContext extends AbstractContext
     return super.getInvokedBusinessInterface();
   }
 
+  /**
+   * Obtain a reference to the JAX-RPC MessageContext.
+   */
   public MessageContext getMessageContext()
+    throws IllegalStateException
   {
-    throw new UnsupportedOperationException();
+    throw new IllegalStateException("Operation not supported");
   }
 
   /**

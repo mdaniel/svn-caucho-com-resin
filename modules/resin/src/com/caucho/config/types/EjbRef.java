@@ -413,7 +413,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         EjbInjectProgram program = new EjbInjectProgram(_ejbRefName,
                                                         null,
                                                         ejbServer.getMappedName(),
-                                                        cl,
+                                                        type,
                                                         accessibleInject);
 
         ejbServer.getInitProgram().addProgram(program);
@@ -541,34 +541,35 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       }
 
       if (server != null) {
-        Object localHome = server.getEJBLocalHome();
+        if (isEjbLocalRef()) {
+          target = server.getEJBLocalHome();
 
-        if (localHome != null)
-          target = localHome;
+          if (target != null) {
+            // ejb/0f6g
+            if (type != null && ! type.isAssignableFrom(target.getClass()))
+              target = null;
+          }
 
-        if (target != null) {
-          // ejb/0f6g
-          if (type != null && ! type.isAssignableFrom(target.getClass()))
+          if (target == null) {
             target = server.getLocalObject(type);
+          }
+        } else {
+          target = server.getEJBHome();
+
+          if (target != null) {
+            if (type != null && ! type.isAssignableFrom(target.getClass()))
+              target = null;
+          }
+
+          if (target == null) {
+            target = server.getRemoteObject(type);
+          }
         }
 
         if (target == null) {
-          Object remoteHome = server.getEJBHome();
+          log.log(Level.FINE, L.l("no home or business interface is available for '{0}'", server));
 
-          if (remoteHome != null)
-            target = remoteHome;
-        }
-
-        if (target != null) {
-          // XXX: needs QA
-          if (type != null && ! type.isAssignableFrom(target.getClass()))
-            target = server.getRemoteObject(type);
-        }
-
-        if (target == null)  {
-          log.log(Level.FINE, L.l("no home interface is available for '{0}'", server));
-
-          throw new NamingException(L.l("{0} '{1}' ejb bean found with ejb-link '{2}' has no home interface",
+          throw new NamingException(L.l("{0} '{1}' ejb bean found with ejb-link '{2}' has no home or business interface",
                                         getTagName(), _ejbRefName, link));
         }
       }
@@ -582,6 +583,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
             throw new NamingException(L.l("{0} '{1}' ejb-link '{2}' not found",
                                       getTagName(), _ejbRefName, _ejbLink));
         */
+      }
+
+      if (target != null && target instanceof ObjectProxy) {
+        ObjectProxy proxy = (ObjectProxy) target;
+        target = proxy.createObject(null);
       }
     }
     catch (NamingException e) {

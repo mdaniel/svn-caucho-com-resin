@@ -178,9 +178,13 @@ abstract public class AbstractStatelessContext extends AbstractContext
     return super.getInvokedBusinessInterface();
   }
 
+  /**
+   * Obtain a reference to the JAX-RPC MessageContext
+   */
   public MessageContext getMessageContext()
+    throws IllegalStateException
   {
-    throw new UnsupportedOperationException();
+    throw new IllegalStateException("Operation not supported");
   }
 
   /**

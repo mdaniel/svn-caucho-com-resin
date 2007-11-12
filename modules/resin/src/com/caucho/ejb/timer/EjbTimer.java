@@ -33,12 +33,14 @@ import javax.ejb.*;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
 import com.caucho.ejb.AbstractContext;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
+import com.caucho.server.util.ScheduledThreadPool;
 
 /**
  * Implements the EJB timer.
@@ -48,12 +50,16 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
   protected static final Logger log
     = Logger.getLogger(EjbTimer.class.getName());
 
-  private ThreadPool _threadPool = ThreadPool.getThreadPool();
+  private ScheduledThreadPool _threadPool;
+  private Future _future;
 
   private Date _expiration;
   private long _interval;
   private Serializable _info;
   private AbstractContext _context;
+  private long _timerId;
+
+  private static long _currentTimerId;
 
   EjbTimer(Date expiration, Serializable info, AbstractContext context)
   {
@@ -68,12 +74,26 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
     _expiration = expiration;
     _interval = interval;
     _info = info;
-    _context = context;
 
     if (context == null)
       throw new NullPointerException();
 
-    _threadPool.schedule(this);
+    _context = context;
+    _timerId = _currentTimerId++;
+
+    long initialDelay = getTimeRemaining();
+
+    _threadPool = ScheduledThreadPool.getLocal();
+
+    if (interval <= 0)
+      _future = _threadPool.schedule(this,
+                                     initialDelay,
+                                     TimeUnit.MILLISECONDS);
+    else
+      _future = _threadPool.scheduleWithFixedDelay(this,
+                                                   initialDelay,
+                                                   interval,
+                                                   TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -82,8 +102,12 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
   public void cancel()
     throws NoSuchObjectLocalException, EJBException
   {
-    //_timer.cancel();
-    throw new UnsupportedOperationException();
+    try {
+      _future.cancel(true);
+    } finally {
+      _expiration = new Date(Alarm.getCurrentTime());
+      _interval = -1;
+    }
   }
 
   /**
@@ -92,7 +116,11 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
   public TimerHandle getHandle()
     throws NoSuchObjectLocalException, EJBException
   {
-    throw new UnsupportedOperationException();
+    return new EjbTimerHandle(_expiration,
+                              _interval,
+                              _info,
+                              _context.getServer().getEJBName(),
+                              _timerId);
   }
 
   /**
@@ -110,6 +138,8 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
   public Date getNextTimeout()
     throws NoSuchObjectLocalException, EJBException
   {
+    checkExpiration();
+
     return _expiration;
   }
 
@@ -119,7 +149,7 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
   public long getTimeRemaining()
     throws NoSuchObjectLocalException, EJBException
   {
-    return _expiration.getTime() - Alarm.getCurrentTime();
+    return checkExpiration();
   }
 
   public void run()
@@ -127,8 +157,26 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
     _context.__caucho_timeout_callback(this);
   }
 
+  long __caucho_getId()
+  {
+    return _timerId;
+  }
+
+  private long checkExpiration()
+  {
+    long delay = _expiration.getTime() - Alarm.getCurrentTime();
+
+    if (delay < 0 && _interval < 0)
+      throw new NoSuchObjectLocalException(this + " is expired");
+
+    return delay;
+  }
+
   public String toString()
   {
-    return "EjbTimer[]";
+    return "EjbTimer[" + _timerId + ", "
+      + _expiration + ", "
+      + _interval + ", "
+      + _info + "]";
   }
 }

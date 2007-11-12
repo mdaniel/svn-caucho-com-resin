@@ -103,7 +103,10 @@ public class IiopProtocolContainer extends ProtocolContainer {
     Object obj = null;
     Class remoteInterface = null; //server.getRemote21();
 
-    obj = server.getRemoteObject();
+    obj = server.getRemoteObject21();
+
+    if (obj == null)
+      obj = server.getRemoteObject();
 
     if (obj == null)
       return;

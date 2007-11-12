@@ -66,7 +66,7 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Returns the server which owns this bean.
    */
-  protected abstract AbstractServer getServer();
+  public abstract AbstractServer getServer();
 
   /**
    * Returns the EJB's meta data.
@@ -82,7 +82,12 @@ abstract public class AbstractContext implements EJBContext {
   public EJBHome getEJBHome()
   {
     try {
-      return getServer().getEJBHome();
+      EJBHome home = getServer().getEJBHome();
+
+      if (home == null)
+        throw new IllegalStateException("getEJBHome() is only allowed through EJB 2.1 interfaces");
+
+      return home;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -98,7 +103,12 @@ abstract public class AbstractContext implements EJBContext {
   public EJBLocalHome getEJBLocalHome()
   {
     try {
-      return getServer().getEJBLocalHome();
+      Object obj = getServer().getEJBLocalHome();
+
+      if (obj == null)
+        throw new IllegalStateException("getEJBLocalHome() is only allowed through EJB 2.1 interfaces");
+
+      return null;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -146,6 +156,9 @@ abstract public class AbstractContext implements EJBContext {
   public EJBObject getEJBObject()
   {
     EJBObject obj = getRemoteView();
+
+    if (obj == null)
+      throw new IllegalStateException("getEJBObject() is only allowed through EJB 2.1 interfaces");
 
     // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getInvokedBusinessInterfaceRemoteIllegal, needs QA
     getServer().setBusinessInterface(obj, null);
@@ -293,6 +306,9 @@ abstract public class AbstractContext implements EJBContext {
   public UserTransaction getUserTransaction()
     throws IllegalStateException
   {
+    if (getServer().isContainerTransaction())
+      throw new IllegalStateException("getUserTransaction() is not allowed with container-managed transaction");
+
     return getServer().getUserTransaction();
   }
 
@@ -311,6 +327,9 @@ abstract public class AbstractContext implements EJBContext {
   public void setRollbackOnly()
     throws IllegalStateException
   {
+    if (! getServer().isContainerTransaction())
+      throw new IllegalStateException("setRollbackOnly() is only allowed with container-managed transaction");
+
     TransactionContext trans = getServer().getTransaction();
 
     if (trans != null)
@@ -325,6 +344,9 @@ abstract public class AbstractContext implements EJBContext {
   public boolean getRollbackOnly()
     throws IllegalStateException
   {
+    if (! getServer().isContainerTransaction())
+      throw new IllegalStateException("getRollbackOnly() is only allowed with container-managed transaction");
+
     TransactionContext trans = getServer().getTransaction();
 
     if (trans != null)

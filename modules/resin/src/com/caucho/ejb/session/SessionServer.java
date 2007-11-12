@@ -186,6 +186,9 @@ public class SessionServer extends AbstractServer
   @Override
   public Object getRemoteObject(Class businessInterface)
   {
+    if (! hasRemoteObject())
+      return null;
+
     if (_isInitRemote)
       return null;
 

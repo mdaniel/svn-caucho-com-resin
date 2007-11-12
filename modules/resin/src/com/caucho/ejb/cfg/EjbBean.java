@@ -672,8 +672,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! remote.isInterface())
       throw error(L.l("'{0}' must be an interface. <business-remote> interfaces must be interfaces.", remote.getName()));
 
-    if (! _remoteList.contains(remote))
+    if (! _remoteList.contains(remote)) {
       _remoteList.add(remote);
+
+      if (remote == _remote21)
+        _isEJB21 = true;
+      else
+        _isEJB30 = true;
+    }
   }
 
   /**
@@ -830,8 +836,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! local.isInterface())
       throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
 
-    if (! _localList.contains(local))
+    if (! _localList.contains(local)) {
       _localList.add(local);
+
+      if (local == _local21)
+        _isEJB21 = true;
+      else
+        _isEJB30 = true;
+    }
   }
 
   /**

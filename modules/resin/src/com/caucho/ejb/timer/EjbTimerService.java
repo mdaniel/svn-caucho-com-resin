@@ -32,6 +32,7 @@ package com.caucho.ejb.timer;
 import javax.ejb.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.logging.*;
@@ -53,6 +54,7 @@ public class EjbTimerService implements TimerService {
     = new EnvironmentLocal<EjbTimerService>();
 
   private AbstractContext _context;
+  private ArrayList<EjbTimer> _timers = new ArrayList<EjbTimer>();
 
   EjbTimerService(AbstractContext context)
   {
@@ -74,6 +76,7 @@ public class EjbTimerService implements TimerService {
       return timer;
     }
   }
+
   /**
    * Creates a timer for a duration.
    */
@@ -114,7 +117,11 @@ public class EjbTimerService implements TimerService {
                            Serializable info)
     throws EJBException
   {
-    return new EjbTimer(expiration, info, _context);
+    EjbTimer timer = new EjbTimer(expiration, info, _context);
+
+    _timers.add(timer);
+
+    return timer;
   }
 
   /**
@@ -128,7 +135,11 @@ public class EjbTimerService implements TimerService {
     if (interval < 0)
       throw new IllegalArgumentException("Timer interval must not be negative");
 
-    return new EjbTimer(expiration, interval, info, _context);
+    EjbTimer timer = new EjbTimer(expiration, interval, info, _context);
+
+    _timers.add(timer);
+
+    return timer;
   }
 
   /**
@@ -137,7 +148,20 @@ public class EjbTimerService implements TimerService {
   public Collection getTimers()
     throws EJBException
   {
-    throw new UnsupportedOperationException();
+    return _timers;
+  }
+
+  /**
+   * Finds a timer by id
+   */
+  EjbTimer __caucho_find(long timerId)
+  {
+    for (EjbTimer timer : _timers) {
+      if (timer.__caucho_getId() == timerId)
+        return timer;
+    }
+
+    return null;
   }
 
   public String toString()

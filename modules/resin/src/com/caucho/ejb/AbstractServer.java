@@ -127,6 +127,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   private PreDestroyConfig _preDestroyConfig;
   private PostConstructConfig _postConstructConfig;
 
+  private boolean _isContainerTransaction = true;
+
   /**
    * Creates a new server container
    *
@@ -732,7 +734,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public Object getRemoteObject()
   {
-    throw new UnsupportedOperationException("3.0 remote interface not found");
+    return null;
   }
 
   /**
@@ -740,7 +742,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public Object getRemoteObject(Class businessInterface)
   {
-    throw new UnsupportedOperationException("3.0 remote interface not found");
+    return null;
   }
 
   /**
@@ -930,6 +932,22 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void start()
     throws Exception
   {
+  }
+
+  /**
+   * Returns true if container transaction is used.
+   */
+  public boolean isContainerTransaction()
+  {
+    return _isContainerTransaction;
+  }
+
+  /**
+   * Sets true if container transaction is used.
+   */
+  public void setContainerTransaction(boolean isContainerTransaction)
+  {
+    _isContainerTransaction = isContainerTransaction;
   }
 
   /**

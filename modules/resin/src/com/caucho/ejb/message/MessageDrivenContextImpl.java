@@ -53,17 +53,17 @@ public class MessageDrivenContextImpl extends AbstractContext
   private UserTransaction _ut;
   private boolean _isContainerTransaction;
   private boolean _isRollbackOnly;
-  
+
   MessageDrivenContextImpl(MessageServer server,
-			   UserTransaction ut,
-			   boolean isContainerTransaction)
+                           UserTransaction ut,
+                           boolean isContainerTransaction)
   {
     _server = server;
     _ut = ut;
     _isContainerTransaction = isContainerTransaction;
   }
 
-  protected AbstractServer getServer()
+  public AbstractServer getServer()
   {
     return _server;
   }
@@ -132,7 +132,7 @@ public class MessageDrivenContextImpl extends AbstractContext
 
     if (trans == null)
       throw new IllegalStateException("getRollbackOnly requires a valid container-managed transaction");
-    
+
     return trans.getRollbackOnly();
   }
 }
