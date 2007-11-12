@@ -142,24 +142,34 @@ public class Post {
         addFormValue(env, post, name, env.createString(value.toString()), null, addSlashesToValues);
       }
       else {
-        Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");
+        String tmpName = "";
+        long tmpLength = 0;
 
-        env.addRemovePath(tmpPath);
+        // A POST file upload with an empty string as the filename does not
+        // create a temp file in the upload directory.
 
-        WriteStream os = tmpPath.openWrite();
-        try {
-          os.writeStream(is);
-        } finally {
-          os.close();
+        if (filename.length() > 0) {
+          Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");
+          tmpName = tmpPath.getFullPath();
+          tmpLength = tmpPath.getLength();
+
+          env.addRemovePath(tmpPath);
+
+          WriteStream os = tmpPath.openWrite();
+          try {
+            os.writeStream(is);
+          } finally {
+            os.close();
+          }
         }
 
         addFormFile(env,
                     files,
                     name,
                     filename,
-                    tmpPath.getFullPath(),
+                    tmpName,
                     getAttribute(attr, "mime-type"),
-                    tmpPath.getLength(),
+                    tmpLength,
                     addSlashesToValues);
       }
     }
@@ -199,6 +209,8 @@ public class Post {
     
     if (fileLength > uploadMaxFilesize)
       error = FileModule.UPLOAD_ERR_INI_SIZE;
+    else if (fileLength == 0)
+      error = FileModule.UPLOAD_ERR_NO_FILE;
     else
       error = FileModule.UPLOAD_ERR_OK;
 
