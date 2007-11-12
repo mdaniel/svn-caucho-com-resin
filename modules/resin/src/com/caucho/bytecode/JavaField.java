@@ -41,13 +41,16 @@ import java.util.logging.Logger;
  * Represents a java field.
  */
 public class JavaField extends JField {
-  static private final Logger log = Log.open(JavaField.class);
+  static private final Logger log
+    = Logger.getLogger(JavaField.class.getName());
 
   private JavaClass _jClass;
   private int _accessFlags;
   private String _name;
   private String _descriptor;
 
+  private boolean _isWrite;
+  
   private ArrayList<Attribute> _attributes = new ArrayList<Attribute>();
 
   private JavaAnnotation []_annotations;
@@ -58,6 +61,11 @@ public class JavaField extends JField {
   public void setJavaClass(JavaClass jClass)
   {
     _jClass = jClass;
+  }
+
+  public void setWrite(boolean isWrite)
+  {
+    _isWrite = isWrite;
   }
 
   /**
@@ -82,6 +90,9 @@ public class JavaField extends JField {
   public void setName(String name)
   {
     _name = name;
+
+    if (_isWrite)
+      _jClass.getConstantPool().addUTF8(name);
   }
 
   /**
@@ -115,7 +126,7 @@ public class JavaField extends JField {
   {
     _descriptor = descriptor;
 
-    if (_jClass != null)
+    if (_isWrite)
       _jClass.getConstantPool().addUTF8(descriptor);
   }
 
@@ -190,7 +201,7 @@ public class JavaField extends JField {
       Attribute attr = _attributes.get(i);
 
       if (attr.getName().equals(name))
-  return attr;
+	return attr;
     }
 
     return null;
@@ -205,22 +216,22 @@ public class JavaField extends JField {
       Attribute attr = getAttribute("RuntimeVisibleAnnotations");
 
       if (attr instanceof OpaqueAttribute) {
-  byte []buffer = ((OpaqueAttribute) attr).getValue();
+	byte []buffer = ((OpaqueAttribute) attr).getValue();
 
-  try {
-    ByteArrayInputStream is = new ByteArrayInputStream(buffer);
+	try {
+	  ByteArrayInputStream is = new ByteArrayInputStream(buffer);
 
-    ConstantPool cp = _jClass.getConstantPool();
+	  ConstantPool cp = _jClass.getConstantPool();
 
-    _annotations = JavaAnnotation.parseAnnotations(is, cp,
-               getClassLoader());
-  } catch (IOException e) {
-    log.log(Level.FINER, e.toString(), e);
-  }
+	  _annotations = JavaAnnotation.parseAnnotations(is, cp,
+							 getClassLoader());
+	} catch (IOException e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
       }
 
       if (_annotations == null) {
-  _annotations = new JavaAnnotation[0];
+	_annotations = new JavaAnnotation[0];
       }
     }
 

@@ -60,6 +60,8 @@ public class JavaMethod extends JMethod {
 
   private JavaAnnotation []_annotations;
 
+  private boolean _isWrite;
+
   public JavaMethod(JavaClassLoader loader)
   {
     _loader = loader;
@@ -75,6 +77,11 @@ public class JavaMethod extends JMethod {
   public void setJavaClass(JavaClass jClass)
   {
     _jClass = jClass;
+  }
+
+  public void setWrite(boolean isWrite)
+  {
+    _isWrite = isWrite;
   }
 
   /**
@@ -334,6 +341,15 @@ public class JavaMethod extends JMethod {
     _attributes.add(attr);
   }
 
+  public CodeWriterAttribute createCodeWriter()
+  {
+    CodeWriterAttribute code = new CodeWriterAttribute(_jClass);
+
+    _attributes.add(code);
+
+    return code;
+  }
+
   /**
    * Removes an attribute.
    */
@@ -368,7 +384,7 @@ public class JavaMethod extends JMethod {
       Attribute attr = _attributes.get(i);
 
       if (attr.getName().equals(name))
-  return attr;
+	return attr;
     }
 
     return null;
@@ -383,22 +399,22 @@ public class JavaMethod extends JMethod {
       Attribute attr = getAttribute("RuntimeVisibleAnnotations");
 
       if (attr instanceof OpaqueAttribute) {
-  byte []buffer = ((OpaqueAttribute) attr).getValue();
+	byte []buffer = ((OpaqueAttribute) attr).getValue();
 
-  try {
-    ByteArrayInputStream is = new ByteArrayInputStream(buffer);
+	try {
+	  ByteArrayInputStream is = new ByteArrayInputStream(buffer);
 
-    ConstantPool cp = _jClass.getConstantPool();
+	  ConstantPool cp = _jClass.getConstantPool();
 
-    _annotations = JavaAnnotation.parseAnnotations(is, cp,
-               getClassLoader());
-  } catch (IOException e) {
-    log.log(Level.FINER, e.toString(), e);
-  }
+	  _annotations = JavaAnnotation.parseAnnotations(is, cp,
+							 getClassLoader());
+	} catch (IOException e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
       }
 
       if (_annotations == null) {
-  _annotations = new JavaAnnotation[0];
+	_annotations = new JavaAnnotation[0];
       }
     }
 
@@ -414,7 +430,24 @@ public class JavaMethod extends JMethod {
       Attribute attr = _attributes.get(i);
 
       if (attr instanceof CodeAttribute)
-  return (CodeAttribute) attr;
+	return (CodeAttribute) attr;
+    }
+
+    return null;
+  }
+
+  /**
+   * Create the code attribute.
+   */
+  public CodeAttribute createCode()
+  {
+    CodeAttribute code = new CodeAttribute();
+    
+    for (int i = 0; i < _attributes.size(); i++) {
+      Attribute attr = _attributes.get(i);
+
+      if (attr instanceof CodeAttribute)
+	return (CodeAttribute) attr;
     }
 
     return null;

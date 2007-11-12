@@ -34,7 +34,7 @@
 
     <class-update-interval>com.caucho.loader.DependencyCheckInterval</class-update-interval>
 
-    <component>com.caucho.webbeans.cfg.WbComponent</component>
+    <component>com.caucho.webbeans.cfg.WbComponentConfig</component>
 
     <connector>com.caucho.jca.ConnectorResource</connector>
 

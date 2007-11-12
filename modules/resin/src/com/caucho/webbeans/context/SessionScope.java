@@ -61,4 +61,11 @@ public class SessionScope extends ScopeContext {
       session.setAttribute(name, value);
     }
   }
+
+  @Override
+  public boolean canInject(ScopeContext scope)
+  {
+    return (scope instanceof ApplicationScope
+	    || scope instanceof SessionScope);
+  }
 }

@@ -31,36 +31,73 @@ package com.caucho.webbeans.context;
 
 import com.caucho.server.webapp.WebApp;
 
+import java.util.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
 /**
  * The application scope value
  */
-public class ApplicationScope extends ScopeContext {
-  public Object get(String name)
-  {
-    WebApp webApp = WebApp.getLocal();
+public class DependentScope extends ScopeContext {
+  private static final ThreadLocal<DependentScope> _threadScope
+    = new ThreadLocal<DependentScope>();
 
-    if (webApp != null) {
-      return webApp.getAttribute(name);
-    }
-    else
-      return null;
+  private ScopeContext _scope;
+  private final HashMap<String,Object> _map = new HashMap<String,Object>(8);
+
+  private DependentScope(ScopeContext scope)
+  {
+    _scope = scope;
   }
   
+  /**
+   * Returns the current dependent scope.
+   */
+  public static DependentScope getCurrent()
+  {
+    return _threadScope.get();
+  }
+  
+  /**
+   * Begins a new instanceof the dependent scope
+   */
+  public static DependentScope begin(ScopeContext ownerScope)
+  {
+    DependentScope scope = new DependentScope(ownerScope);
+
+    _threadScope.set(scope);
+
+    return scope;
+  }
+
+  /**
+   * Closes the scope
+   */
+  public static void end()
+  {
+    _threadScope.set(null);
+  }
+
+  /**
+   * Returns the object with the given name.
+   */
+  public Object get(String name)
+  {
+    return _map.get(name);
+  }
+
+  /**
+   * Sets the object with the given name.
+   */
   public void set(String name, Object value)
   {
-    WebApp webApp = WebApp.getLocal();
-
-    if (webApp != null) {
-      webApp.setAttribute(name, value);
-    }
+    _map.put(name, value);
   }
 
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof ApplicationScope);
+    return _scope.canInject(scope);
   }
 }

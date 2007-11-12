@@ -82,6 +82,8 @@ public class JavaClass extends JClass {
   
   private JavaAnnotation []_annotations;
 
+  private boolean _isWrite;
+
   public JavaClass(JavaClassLoader loader)
   {
     if (loader == null)
@@ -96,6 +98,11 @@ public class JavaClass extends JClass {
   public JavaClassLoader getClassLoader()
   {
     return _loader;
+  }
+
+  public void setWrite(boolean isWrite)
+  {
+    _isWrite = isWrite;
   }
 
   /**
@@ -170,6 +177,9 @@ public class JavaClass extends JClass {
   public void setThisClass(String className)
   {
     _thisClass = className;
+
+    if (_isWrite)
+      getConstantPool().addClass(className);
   }
 
   /**
@@ -251,6 +261,9 @@ public class JavaClass extends JClass {
   public void addInterface(String className)
   {
     _interfaces.add(className);
+
+    if (_isWrite)
+      getConstantPool().addClass(className);
   }
 
   /**
@@ -288,6 +301,23 @@ public class JavaClass extends JClass {
     _fields.add(field);
   }
 
+  public JavaField createField(String name, String descriptor)
+  {
+    if (! _isWrite)
+      throw new IllegalStateException("create field requires write");
+
+    JavaField jField = new JavaField();
+    jField.setWrite(true);
+    jField.setJavaClass(this);
+
+    jField.setName(name);
+    jField.setDescriptor(descriptor);
+
+    _fields.add(jField);
+
+    return jField;
+  }
+
   /**
    * Returns the fields.
    */
@@ -321,6 +351,23 @@ public class JavaClass extends JClass {
   public void addMethod(JavaMethod method)
   {
     _methods.add(method);
+  }
+
+  public JavaMethod createMethod(String name, String descriptor)
+  {
+    if (! _isWrite)
+      throw new IllegalStateException("create method requires write");
+
+    JavaMethod jMethod = new JavaMethod();
+    jMethod.setWrite(true);
+    jMethod.setJavaClass(this);
+
+    jMethod.setName(name);
+    jMethod.setDescriptor(descriptor);
+
+    _methods.add(jMethod);
+
+    return jMethod;
   }
 
   /**

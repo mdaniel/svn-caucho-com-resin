@@ -29,20 +29,32 @@
 
 package com.caucho.webbeans.context;
 
-import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.util.*;
 
 import javax.servlet.*;
+import javax.servlet.http.*;
 
 /**
- * Context for a named EL bean scope
+ * The conversation scope value
  */
-abstract public class ScopeContext {
-  abstract public Object get(String name);
+public class ConversationScope extends ScopeContext {
+  private static final L10N L = new L10N(ConversationScope.class);
   
-  abstract public void set(String name, Object value);
+  public Object get(String name)
+  {
+    throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+  }
+  
+  public void set(String name, Object value)
+  {
+    throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+  }
 
+  @Override
   public boolean canInject(ScopeContext scope)
   {
-    return getClass().equals(scope.getClass());
+    return (scope instanceof ApplicationScope
+	    || scope instanceof SessionScope
+	    || scope instanceof ConversationScope);
   }
 }

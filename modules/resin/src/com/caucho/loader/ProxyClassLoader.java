@@ -27,22 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
-
-import com.caucho.server.dispatch.ServletInvocation;
-
-import javax.servlet.*;
+package com.caucho.loader;
 
 /**
- * Context for a named EL bean scope
+ * Class loader which loads a single proxy.
  */
-abstract public class ScopeContext {
-  abstract public Object get(String name);
-  
-  abstract public void set(String name, Object value);
-
-  public boolean canInject(ScopeContext scope)
+public class ProxyClassLoader extends DynamicClassLoader {
+  public ProxyClassLoader()
   {
-    return getClass().equals(scope.getClass());
+    super(Thread.currentThread().getContextClassLoader());
+  }
+
+  public Class loadClass(String className, byte []bytecode)
+  {
+    Class cl = defineClass(className,
+			   bytecode, 0, bytecode.length,
+			   (java.security.CodeSource) null);
+
+    return cl;
   }
 }

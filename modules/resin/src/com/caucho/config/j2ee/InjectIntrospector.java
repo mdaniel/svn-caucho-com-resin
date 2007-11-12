@@ -166,6 +166,14 @@ public class InjectIntrospector {
       String fieldName = method.getName();
       Class []param = method.getParameterTypes();
 
+      if (hasBindingAnnotation(method)) {
+	WebBeans webBean = WebBeans.getLocal();
+	
+	webBean.createProgram(initList, method);
+
+	continue;
+      }
+
       if (param.length != 1)
         continue;
 
@@ -380,6 +388,26 @@ public class InjectIntrospector {
       if (isWebBean)
 	configureWebBean(initList, field, fieldName, fieldType);
     }
+  }
+
+  private static boolean hasBindingAnnotation(Method method)
+  {
+    if (method.isAnnotationPresent(Produces.class))
+      return false;
+    else if (method.isAnnotationPresent(In.class))
+      return true;
+
+    for (Annotation []annList : method.getParameterAnnotations()) {
+      if (annList == null)
+	continue;
+      
+      for (Annotation ann : annList) {
+	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	  return true;
+      }
+    }
+
+    return false;
   }
 
   private static void configureResource(ArrayList<BuilderProgram> initList,

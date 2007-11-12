@@ -37,6 +37,7 @@ import com.caucho.vfs.*;
 import com.caucho.server.util.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.inject.*;
 
 import java.io.*;
 import java.util.*;
@@ -61,6 +62,8 @@ public class WebBeans implements EnvironmentListener {
     = new EnvironmentLocal<WebBeans>();
   
   private EnvironmentClassLoader _loader;
+
+  private WbWebBeans _wbWebBeans;
   
   private HashMap<Path,WbWebBeans> _webBeansMap
     = new HashMap<Path,WbWebBeans>();
@@ -76,6 +79,10 @@ public class WebBeans implements EnvironmentListener {
   private WebBeans()
   {
     _loader = Environment.getEnvironmentClassLoader();
+    
+    _wbWebBeans = new WbWebBeans(this, null);
+
+    Environment.addEnvironmentListener(this);
   }
 
   public static WebBeans getLocal()
@@ -95,6 +102,11 @@ public class WebBeans implements EnvironmentListener {
     webBeans.init();
 
     return webBeans;
+  }
+
+  public WbWebBeans getWbWebBeans()
+  {
+    return _wbWebBeans;
   }
 
   private void init()
@@ -162,6 +174,8 @@ public class WebBeans implements EnvironmentListener {
       return new SessionScope();
     else if (scopeAnn instanceof ApplicationScoped)
       return new ApplicationScope();
+    else if (scopeAnn instanceof ConversationScoped)
+      return new ConversationScope();
     else
       throw new IllegalArgumentException(L.l("'{0}' is an unknown scope.",
 					     scopeAnn));
@@ -198,6 +212,64 @@ public class WebBeans implements EnvironmentListener {
     }
 
     component.createProgram(initList, field, name, inject, bindingList);
+  }
+
+  public void createProgram(ArrayList<BuilderProgram> initList,
+			    Method method)
+    throws ConfigException
+  {
+    // XXX: lazy binding
+    try {
+      Class []paramTypes = method.getParameterTypes();
+      Annotation[][]paramAnn = method.getParameterAnnotations();
+      
+      WbComponent []args = new WbComponent[paramTypes.length];
+
+      for (int i = 0; i < args.length; i++) {
+	args[i] = bind(paramTypes[i], paramAnn[i]);
+      }
+
+      initList.add(new InjectMethodProgram(method, args));
+    } catch (Exception e) {
+      String className = method.getDeclaringClass().getSimpleName();
+      String loc = className + '.' + method.getName() + ": ";
+
+      if (e instanceof ConfigException)
+	throw new ConfigException(loc + e.getMessage(), e);
+      else
+	throw new ConfigException(loc + e, e);
+    }
+  }
+
+  /**
+   * Returns the web beans component corresponding to a method
+   * parameter.
+   */
+  public WbComponent bind(Class type, Annotation []paramAnn)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation ann : paramAnn) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	bindingList.add(ann);
+    }
+
+    return bind(type, bindingList);
+  }
+
+  /**
+   * Returns the web beans component with a given binding list.
+   */
+  public WbComponent bind(Class type, ArrayList<Annotation> bindingList)
+  {
+    WebComponent component = _componentMap.get(type);
+
+    if (component == null) {
+      throw new ConfigException(L.l("'{0}' is an unknown component type.",
+				    type.getName()));
+    }
+
+    return component.bind(bindingList);
   }
 
   public Object findByName(String name)
@@ -256,6 +328,8 @@ public class WebBeans implements EnvironmentListener {
     loader.make();
     
     fillClassPath();
+
+    _wbWebBeans.init();
   }
 
   /**

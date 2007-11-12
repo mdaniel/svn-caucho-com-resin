@@ -34,8 +34,9 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.inject.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -50,9 +51,14 @@ import javax.webbeans.*;
 public class WbComponent {
   private static final L10N L = new L10N(WbComponent.class);
 
-  private WbWebBeans _webbeans;
+  private static final Object []NULL_ARGS = new Object[0];
+
+  protected WbWebBeans _webbeans;
   
   private Class _cl;
+  private Constructor _ctor;
+  private WbComponent []_ctorArgs;
+  
   private WbComponentType _type;
 
   private Class _targetType;
@@ -67,7 +73,18 @@ public class WbComponent {
   private Annotation _scopeAnn;
   private ScopeContext _scopeContext;
 
+  private ArrayList<BuilderProgram> _injectProgram
+    = new ArrayList<BuilderProgram>();
+  
   private InitProgram _init;
+  private Object _scopeAdapter;
+
+  public WbComponent()
+  {
+    _webbeans = WebBeans.getLocal().getWbWebBeans();
+
+    _webbeans.addComponent(this);
+  }
 
   public WbComponent(WbWebBeans webbeans)
   {
@@ -200,9 +217,16 @@ public class WbComponent {
    */
   public void setScopeAnnotation(Annotation scopeAnn)
   {
-    _scopeAnn = scopeAnn;
+    if (scopeAnn != null
+	&& ! scopeAnn.annotationType().equals(Dependent.class)) {
+      _scopeAnn = scopeAnn;
 
-    _scopeContext = WebBeans.getLocal().getScopeContext(scopeAnn);
+      _scopeContext = WebBeans.getLocal().getScopeContext(scopeAnn);
+    }
+    else {
+      _scopeAnn = null;
+      _scopeContext = null;
+    }
   }
 
   /**
@@ -255,6 +279,7 @@ public class WbComponent {
     }
 
     introspectProduces();
+    introspectConstructor();
   }
 
   /**
@@ -281,6 +306,23 @@ public class WbComponent {
   }
 
   /**
+   * Binds parameters
+   */
+  public void bind()
+  {
+    Class []param = _ctor.getParameterTypes();
+    Annotation [][]paramAnn = _ctor.getParameterAnnotations();
+
+    _ctorArgs = new WbComponent[param.length];
+
+    for (int i = 0; i < param.length; i++) {
+      _ctorArgs[i] = _webbeans.bindParameter(param[i], paramAnn[i]);
+    }
+
+    _injectProgram = InjectIntrospector.introspectNoInit(_cl);
+  }
+
+  /**
    * Introspects the methods for any @Produces
    */
   private void introspectProduces()
@@ -302,6 +344,56 @@ public class WbComponent {
 
       _webbeans.addComponent(comp);
     }
+  }
+
+  /**
+   * Introspects the constructor
+   */
+  private void introspectConstructor()
+  {
+    try {
+      Constructor best = null;
+      Constructor second = null;
+
+      for (Constructor ctor : _cl.getDeclaredConstructors()) {
+	if (best == null) {
+	  best = ctor;
+	}
+	else if (hasBindingAnnotation(ctor)) {
+	  if (best != null && hasBindingAnnotation(best))
+	    throw new ConfigException(L.l("WebBean {0} has two constructors with binding annotations.",
+					  ctor.getDeclaringClass().getName()));
+	  best = ctor;
+	  second = null;
+	}
+	else {
+	  second = ctor;
+	}
+      }
+
+      _ctor = best;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  private boolean hasBindingAnnotation(Constructor ctor)
+  {
+    if (ctor.isAnnotationPresent(In.class))
+      return true;
+
+    Annotation [][]paramAnn = ctor.getParameterAnnotations();
+
+    for (Annotation []annotations : paramAnn) {
+      for (Annotation ann : annotations) {
+	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	  return true;
+      }
+    }
+
+    return false;
   }
 
   public boolean isMatch(ArrayList<Annotation> bindList)
@@ -328,22 +420,75 @@ public class WbComponent {
     return false;
   }
 
-  public Object get()
+  public Object getByName()
   {
     if (_scopeContext != null) {
       Object value = _scopeContext.get(_name);
 
       if (value != null)
 	return value;
-
-      try {
-	return createScoped(_name);
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
+      else
+	return get();
     }
     else
-      return null;
+      throw new IllegalStateException();
+  }
+
+  public Object getInject()
+  {
+    DependentScope scope = DependentScope.getCurrent();
+
+    if (scope == null
+	|| _scopeContext == null
+	|| scope.canInject(_scopeContext)) {
+      return get();
+    }
+
+    if (_scopeAdapter == null)
+      _scopeAdapter = ScopeAdapter.create(_cl).wrap(this);
+    
+    return _scopeAdapter;
+  }
+
+  public Object get()
+  {
+    DependentScope scope = DependentScope.getCurrent();
+
+    if (_scopeContext != null) {
+      Object value = _scopeContext.get(_name);
+
+      if (value != null) {
+	return value;
+      }
+    }
+    else {
+      if (scope != null) {
+	Object value = scope.get(_name);
+
+	if (value != null)
+	  return value;
+      }
+    }
+    
+    DependentScope self = null;
+
+    if (scope == null)
+      self = DependentScope.begin(_scopeContext);
+
+    try {
+      if (_scopeContext != null) {
+	return createScoped(_name, _scopeContext);
+      }
+      else if (_name == null)
+	return create();
+      else if (scope != null)
+	return createScoped(_name, scope);
+      else
+	return create();
+    } finally {
+      if (self != null)
+	DependentScope.end();
+    }
   }
 
   public Object create()
@@ -362,12 +507,20 @@ public class WbComponent {
     }
   }
 
-  public Object createScoped(String name)
+  public Object createScoped(String name, ScopeContext scope)
   {
     try {
       Object value = createNew();
 
-      _scopeContext.set(name, value);
+      scope.set(name, value);
+
+      if (_injectProgram != null) {
+	for (int i = 0; i < _injectProgram.size(); i++) {
+	  BuilderProgram program = _injectProgram.get(i);
+
+	  program.configure(value);
+	}
+      }
 
       if (_init != null)
 	_init.configure(value);
@@ -383,7 +536,17 @@ public class WbComponent {
   public Object createNew()
   {
     try {
-      return _cl.newInstance();
+      Object []args;
+      if (_ctorArgs.length > 0) {
+	args = new Object[_ctorArgs.length];
+
+	for (int i = 0; i < args.length; i++)
+	  args[i] = _ctorArgs[i].create();
+      }
+      else
+	args = NULL_ARGS;
+      
+      return _ctor.newInstance(args);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

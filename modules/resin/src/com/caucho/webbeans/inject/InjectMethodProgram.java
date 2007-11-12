@@ -34,31 +34,48 @@ import com.caucho.config.j2ee.*;
 import com.caucho.webbeans.cfg.*;
 
 import java.util.logging.*;
+import java.lang.reflect.*;
 
-public class ComponentProgram extends BuilderProgram
+public class InjectMethodProgram extends BuilderProgram
 {
   private static final Logger log
-    = Logger.getLogger(ComponentProgram.class.getName());
+    = Logger.getLogger(InjectMethodProgram.class.getName());
 
-  private WbComponent _component;
-  private AccessibleInject _inject;
+  private static final Object []NULL_ARGS = new Object[0];
 
-  public ComponentProgram(WbComponent component,
-			  AccessibleInject inject)
+  private Method _method;
+  private WbComponent []_args;
+
+  public InjectMethodProgram(Method method,
+			     WbComponent []args)
   {
-    _component = component;
-    _inject = inject;
+    _method = method;
+    _args = args;
   }
 
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
     try {
-      Object value = _component.getInject();
+      Object []args;
 
-      _inject.inject(bean, value);
+      if (_args.length > 0) {
+	args = new Object[_args.length];
+	
+	for (int i = 0; i < args.length; i++)
+	  args[i] = _args[i].get();
+      }
+      else
+	args = NULL_ARGS;
+      
+      _method.invoke(bean, args);
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      else
+	throw new ConfigException(e.getCause());
     } catch (Exception e) {
       throw new ConfigException(e);
     }

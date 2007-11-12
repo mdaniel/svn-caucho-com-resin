@@ -44,6 +44,7 @@ import java.util.logging.Logger;
 public class CodeAttribute extends Attribute {
   static private final Logger log = Log.open(CodeAttribute.class);
 
+  private JavaClass _jClass;
   private int _maxStack;
   private int _maxLocals;
   private byte []_code;
@@ -60,6 +61,16 @@ public class CodeAttribute extends Attribute {
   CodeAttribute(String name)
   {
     super(name);
+  }
+
+  public void setJavaClass(JavaClass jClass)
+  {
+    _jClass = jClass;
+  }
+
+  public JavaClass getJavaClass()
+  {
+    return _jClass;
   }
 
   /**

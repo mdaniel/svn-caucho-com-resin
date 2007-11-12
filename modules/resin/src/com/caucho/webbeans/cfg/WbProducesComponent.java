@@ -49,9 +49,12 @@ import javax.webbeans.*;
  */
 public class WbProducesComponent extends WbComponent {
   private static final L10N L = new L10N(WbProducesComponent.class);
-  
+
+  private static final Object []NULL_ARGS = new Object[0];
   private final WbComponent _producer;
   private final Method _method;
+
+  private WbComponent []_args;
 
   public WbProducesComponent(WbWebBeans webbeans,
 			     WbComponent producer,
@@ -69,9 +72,19 @@ public class WbProducesComponent extends WbComponent {
   public Object createNew()
   {
     try {
-      Object factory = _producer.create();
+      Object factory = _producer.get();
+
+      Object []args;
+      if (_args.length > 0) {
+	args = new Object[_args.length];
+
+	for (int i = 0; i < args.length; i++)
+	  args[i] = _args[i].get();
+      }
+      else
+	args = NULL_ARGS;
       
-      return _method.invoke(factory);
+      return _method.invoke(factory, args);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -103,7 +116,8 @@ public class WbProducesComponent extends WbComponent {
       }
 	
       if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	//scopeAnn = ann;
+	if (getScopeAnnotation() == null)
+	  setScopeAnnotation(ann);
       }
 	
       if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
@@ -112,17 +126,44 @@ public class WbProducesComponent extends WbComponent {
     }
   }
 
+  @Override
+  public void bind()
+  {
+    Class []param = _method.getParameterTypes();
+    Annotation [][]paramAnn = _method.getParameterAnnotations();
+
+    _args = new WbComponent[param.length];
+
+    for (int i = 0; i < param.length; i++) {
+      _args[i] = _webbeans.bindParameter(param[i], paramAnn[i]);
+
+      if (_args[i] == null)
+	throw new NullPointerException();
+    }
+  }
+
   public String toString()
   {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    
     if (getName() != null) {
-      return (getClass().getSimpleName() + "[" + getName()
-	      + ", " + getTargetType().getSimpleName()
-	      + ", @" + getType().getType().getSimpleName() + "]");
+      sb.append("name=");
+      sb.append(getName());
+      sb.append(", ");
     }
-    else {
-      return (getClass().getSimpleName() + "["
-	      + getTargetType().getSimpleName()
-	      + ", @" + getType().getType().getSimpleName() + "]");
-    }
+
+    sb.append(getTargetType().getSimpleName());
+    sb.append(", ");
+    sb.append(_method.getDeclaringClass().getSimpleName());
+    sb.append(".");
+    sb.append(_method.getName());
+    sb.append("(), @");
+    sb.append(getType().getType().getSimpleName());
+    sb.append("]");
+
+    return sb.toString();
   }
 }

@@ -92,7 +92,8 @@ public class WbWebBeans {
 
   public void addComponent(WbComponent comp)
   {
-    _componentList.add(comp);
+    if (! _componentList.contains(comp))
+      _componentList.add(comp);
   }
 
   /**
@@ -117,22 +118,30 @@ public class WbWebBeans {
       _componentTypeList.add(type);
     }
 
-    ByteCodeClassMatcher scanner = new ClassScanner();
+    if (_root != null) {
+      ByteCodeClassMatcher scanner = new ClassScanner();
 
-    try {
-      if (_root instanceof JarPath)
-	scanForJarClasses(((JarPath) _root).getContainer(), scanner);
-      else
-	scanForClasses(_root, _root, scanner);
-    } catch (IOException e) {
-      throw new ConfigException(e);
+      try {
+	if (_root instanceof JarPath)
+	  scanForJarClasses(((JarPath) _root).getContainer(), scanner);
+	else
+	  scanForClasses(_root, _root, scanner);
+      } catch (IOException e) {
+	throw new ConfigException(e);
+      }
     }
 
-    WebBeans webBeans = WebBeans.getLocal();
+    WebBeans webBeans = _webBeans;
 
     for (WbComponent comp : _componentList) {
       if (comp.getType().isEnabled()) {
 	webBeans.addComponent(comp);
+      }
+    }
+
+    for (WbComponent comp : _componentList) {
+      if (comp.getType().isEnabled()) {
+	comp.bind();
       }
     }
   }
@@ -147,6 +156,26 @@ public class WbWebBeans {
     }
 
     return type;
+  }
+
+  public WbComponent bindParameter(Class type, Annotation []annotations)
+  {
+    return _webBeans.bind(type, getBindList(annotations));
+  }
+
+  /**
+   * Returns the binding annotations
+   */
+  private ArrayList<Annotation> getBindList(Annotation []annotations)
+  {
+    ArrayList<Annotation> bindList = new ArrayList<Annotation>();
+
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	bindList.add(ann);
+    }
+
+    return bindList;
   }
 
   private void scanForClasses(Path root,

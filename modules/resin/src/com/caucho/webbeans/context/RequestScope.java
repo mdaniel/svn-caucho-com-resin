@@ -55,4 +55,14 @@ public class RequestScope extends ScopeContext {
       request.setAttribute(name, value);
     }
   }
+
+
+  @Override
+  public boolean canInject(ScopeContext scope)
+  {
+    return (scope instanceof ApplicationScope
+	    || scope instanceof SessionScope
+	    || scope instanceof ConversationScope
+	    || scope instanceof RequestScope);
+  }
 }
