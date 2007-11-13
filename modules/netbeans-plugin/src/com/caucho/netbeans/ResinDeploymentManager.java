@@ -27,17 +27,12 @@
  * @author Sam
  */
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans;
 
 import com.caucho.netbeans.PluginL10N;
-import com.caucho.netbeans.util.ResinProperties;
+import com.caucho.netbeans.core.ResinTarget;
 
-import org.netbeans.api.java.platform.JavaPlatform;
-import org.netbeans.api.java.platform.JavaPlatformManager;
-import org.netbeans.api.java.platform.Specification;
 import org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 
 import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.shared.DConfigBeanVersionType;
@@ -59,70 +54,32 @@ public final class ResinDeploymentManager
 {
   private static final PluginL10N L = new PluginL10N(ResinStartServer.class);
 
-  private static final String PLAT_PROP_ANT_NAME = "platform.ant.name";
-
-  private static final String PROP_JAVA_PLATFORM = "java_platform";
-  private static final String PROP_DEBUG_PORT = "debugger_port";
-
   private final String _uri;
-  private final InstanceProperties _instanceProperties;
   private final ResinConfiguration _resinConfiguration;
   private final ResinProcess _resinProcess;
-  private final ResinProperties _properties;
 
   private ResinPlatformImpl _j2eePlatform;
-  private Process _process;
-  private Console _console;
-
-  private LiveSettings _liveSettings;
 
   public ResinDeploymentManager(String uri, boolean connected)
   {
     _uri = uri;
 
-    // XXX:
-    _properties = new ResinProperties(this);
-
     // XXX: what is connected for?
 
-    _instanceProperties = InstanceProperties.getInstanceProperties(_uri);
+    InstanceProperties instanceProperties = InstanceProperties.getInstanceProperties(_uri);
 
-    _resinConfiguration = new ResinConfiguration(_instanceProperties);
+    _resinConfiguration = new ResinConfiguration(instanceProperties);
 
-    ResinProcess resinProcess = new ResinProcess(_resinConfiguration, _uri);
-
-    String currentJvm = _instanceProperties.getProperty(PROP_JAVA_PLATFORM);
-    JavaPlatformManager platformManager = JavaPlatformManager.getDefault();
-    JavaPlatform javaPlatform = platformManager.getDefaultPlatform();
-
-    JavaPlatform[] installedPlatforms = platformManager.getPlatforms(null,
-                                                                     new Specification("J2SE", null));
-
-    for (int i = 0; i < installedPlatforms.length; i++) {
-      String platformName = (String) installedPlatforms[i].getProperties()
-        .get(PLAT_PROP_ANT_NAME);
-      if (platformName != null && platformName.equals(currentJvm)) {
-        javaPlatform = installedPlatforms[i];
-      }
-    }
-
-    File javaHome = FileUtil.toFile((FileObject) javaPlatform.getInstallFolders().iterator().next());
-
-    resinProcess.setJavaHome(javaHome);
-
-    String debugPort = _instanceProperties.getProperty(PROP_DEBUG_PORT);
-
-    if (debugPort != null) {
-      try {
-        resinProcess.setDebugPort(Integer.parseInt(debugPort));
-      }
-      catch (NumberFormatException e) {
-      }
-    }
+    ResinProcess resinProcess = new ResinProcess(_uri, _resinConfiguration);
 
     resinProcess.init();
 
     _resinProcess = resinProcess;
+  }
+
+  public ResinConfiguration getResinConfiguration()
+  {
+    return _resinConfiguration;
   }
 
   public ResinProcess getResinProcess()
@@ -130,15 +87,10 @@ public final class ResinDeploymentManager
     return _resinProcess;
   }
 
-  public String getDisplayName()
-  {
-    return _resinProcess.getDisplayName();
-  }
-
   public Target[] getTargets()
     throws IllegalStateException
   {
-    return new ResinTarget[]{new ResinTarget(_uri, _properties.getDisplayName())};
+    return new ResinTarget[]{new ResinTarget(_uri, _resinConfiguration.getDisplayName())};
   }
 
   public TargetModuleID[] getRunningModules(ModuleType moduleType,
@@ -283,7 +235,7 @@ public final class ResinDeploymentManager
   public synchronized ResinPlatformImpl getJ2eePlatform()
   {
     if (_j2eePlatform == null)
-      _j2eePlatform = new ResinPlatformImpl(_properties);
+      _j2eePlatform = new ResinPlatformImpl(_resinConfiguration);
 
     return _j2eePlatform;
   }
@@ -292,15 +244,4 @@ public final class ResinDeploymentManager
   {
     return _uri;
   }
-
-  public InstanceProperties getInstanceProperties()
-  {
-    return InstanceProperties.getInstanceProperties(_uri);
-  }
-
-  public ResinProperties getProperties()
-  {
-    return _properties;
-  }
-
 }

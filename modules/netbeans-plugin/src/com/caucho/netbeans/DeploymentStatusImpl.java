@@ -28,77 +28,61 @@
  */
 
 
-package com.caucho.netbeans.util;
+package com.caucho.netbeans;
 
 import javax.enterprise.deploy.shared.ActionType;
 import javax.enterprise.deploy.shared.CommandType;
 import javax.enterprise.deploy.shared.StateType;
 import javax.enterprise.deploy.spi.status.DeploymentStatus;
 
-public final class Status
+public class DeploymentStatusImpl
   implements DeploymentStatus
 {
+  private final ActionType _action;
+  private final CommandType _command;
+  private final String _message;
+  private final StateType _state;
 
-  private final ActionType action;
-  private final CommandType command;
-  private final String message;
-  private final StateType state;
-
-  /**
-   * Creates a new instance of Status
-   */
-  public Status(CommandType command, String message, StateType state)
+  public DeploymentStatusImpl(CommandType command, String message, StateType state)
   {
-    this.action = ActionType.EXECUTE;
-    this.command = command;
-    this.message = message;
-    this.state = state;
+    _action = ActionType.EXECUTE;
+    _command = command;
+    _message = message;
+    _state = state;
   }
 
   public StateType getState()
   {
-    return state;
+    return _state;
   }
 
   public CommandType getCommand()
   {
-    return command;
+    return _command;
   }
 
   public ActionType getAction()
   {
-    return action;
+    return _action;
   }
 
   public String getMessage()
   {
-    return message;
+    return _message;
   }
 
   public boolean isCompleted()
   {
-    return StateType.COMPLETED.equals(state);
+    return StateType.COMPLETED.equals(_state);
   }
 
   public boolean isFailed()
   {
-    return StateType.FAILED.equals(state);
+    return StateType.FAILED.equals(_state);
   }
 
   public boolean isRunning()
   {
-    return StateType.RUNNING.equals(state);
-  }
-
-  public String toString()
-  {
-    return "action=" +
-           action +
-           " command=" +
-           command +
-           " state=" +
-           state +
-           "message=" +
-           message;   // NOI18N
+    return StateType.RUNNING.equals(_state);
   }
 }

@@ -30,7 +30,7 @@
 
 package com.caucho.netbeans.nodes;
 
-import com.caucho.netbeans.core.ResinDeploymentManager;
+import com.caucho.netbeans.ResinDeploymentManager;
 import com.caucho.netbeans.core.ResinTargetModuleID;
 
 import org.openide.ErrorManager;

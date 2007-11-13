@@ -29,8 +29,7 @@
 
 package com.caucho.netbeans.nodes;
 
-import com.caucho.netbeans.core.ResinDeploymentManager;
-import com.caucho.netbeans.customizer.Customizer;
+import com.caucho.netbeans.ResinDeploymentManager;
 import com.caucho.netbeans.nodes.actions.AdminConsoleAction;
 import com.caucho.netbeans.nodes.actions.ServerLogAction;
 
@@ -63,7 +62,7 @@ public class ResinManagerNode
 
   public String getShortDescription()
   {
-    return manager.getDisplayName();
+    return manager.getResinConfiguration().getDisplayName();
   }
 
   public javax.swing.Action[] getActions(boolean context)
@@ -73,14 +72,17 @@ public class ResinManagerNode
                                     SystemAction.get(ServerLogAction.class),};
   }
 
-  public Component getCustomizer()
-  {
-    return new Customizer(manager);
-  }
-
   public boolean hasCustomizer()
   {
-    return true;
+    // XXX: return true and implement getCustomizer to enable a
+   //  "Properties" menu item for a Resin server entry
+    return false;
+  }
+
+
+  public Component getCustomizer()
+  {
+    return super.getCustomizer();
   }
 
   public ResinDeploymentManager getManger()

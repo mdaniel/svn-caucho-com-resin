@@ -27,7 +27,7 @@
  * @author Sam
  */
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans;
 
 import com.caucho.netbeans.PluginL10N;
 import com.caucho.netbeans.PluginLogger;
@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
+import java.net.InetAddress;
 import java.util.logging.Level;
 
 public class ResinProcess
@@ -62,30 +63,29 @@ public class ResinProcess
 
   private static final int TIMEOUT_TICK = 250;
 
-  private final ResinConfiguration _properties;
-  private final String _id;
-
-  private File _javaHome;
-  private String _displayName;
-
-  private File _javaExe;
-  private File _resinJar;
-
-  private int _debugPort = 11999;
-
-  private int _startTimeout = 60 * 1000;
-  private int _stopTimeout = 60 * 1000;
+  private final String _uri;
+  private final ResinConfiguration _resinConfiguration;
 
   private boolean _isDebug;
+  private int _activeServerPort;
+  private int _activeDebugPort;
+
   private Process _process;
   private Console _console;
 
   private final Object _lock = new Object();
+  private File _javaExe;
+  private File _resinJar;
 
-  public ResinProcess(ResinConfiguration properties, String id)
+  public ResinProcess(String uri, ResinConfiguration resinConfiguration)
   {
-    _properties = properties;
-    _id = id;
+    _uri = uri;
+    _resinConfiguration = resinConfiguration;
+  }
+
+  public ResinConfiguration getResinConfiguration()
+  {
+    return _resinConfiguration;
   }
 
   private boolean isInit()
@@ -98,84 +98,6 @@ public class ResinProcess
     return _lifecycle == LIFECYCLE_ACTIVE;
   }
 
-  public File getResinConf()
-  {
-    return _properties.getResinConf();
-  }
-
-  public File getResinHome()
-  {
-    return _properties.getResinHome();
-  }
-
-  public String getServerId()
-  {
-    return _properties.getServerId();
-  }
-
-  public String getServerAddress()
-  {
-    return _properties.getServerAddress();
-  }
-
-  public int getServerPort()
-  {
-    return _properties.getServerPort();
-  }
-
-  public File getJavaHome()
-  {
-    return _javaHome;
-  }
-
-  public void setJavaHome(File javaHome)
-  {
-    if (isInit())
-      throw new IllegalStateException();
-
-    _javaHome = javaHome;
-  }
-
-  public String getDisplayName()
-  {
-    return _displayName;
-  }
-
-  public void setDisplayName(String displayName)
-  {
-    _displayName = displayName;
-  }
-
-  public int getStartTimeout()
-  {
-    return _startTimeout;
-  }
-
-  public void setStartTimeout(int startTimeoutMilliseconds)
-  {
-    _startTimeout = startTimeoutMilliseconds;
-  }
-
-  public int getStopTimeout()
-  {
-    return _stopTimeout;
-  }
-
-  public void setStopTimeout(int stopTimeoutMilliseconds)
-  {
-    _stopTimeout = stopTimeoutMilliseconds;
-  }
-
-  private void requiredFile(String name, File file)
-    throws IllegalStateException
-  {
-    if (file == null)
-      throw new IllegalStateException(L.l("''{0}'' is required", name));
-
-    if (!file.exists())
-      throw new IllegalStateException(L.l("''{0}'' does not exist", file));
-  }
-
   public void init()
     throws IllegalStateException
   {
@@ -185,49 +107,34 @@ public class ResinProcess
 
       _lifecycle = LIFECYCLE_INITIALIZING;
 
-      _properties.validate();
-
-      requiredFile("java-home", _javaHome);
+      _resinConfiguration.validate();
 
       File javaExe;
 
-      javaExe = new File(_javaHome, "bin/java");
+      File javaHome = _resinConfiguration.calculateJavaHome();
+
+      javaExe = new File(javaHome, "bin/java");
 
       if (!javaExe.exists())
-        javaExe = new File(_javaHome, "bin/java.exe");
+        javaExe = new File(javaHome, "bin/java.exe");
 
       if (!javaExe.exists())
-        throw new IllegalStateException(L.l("Cannot find java exe in ''{0}''", _javaHome));
+        throw new IllegalStateException(L.l("Cannot find java exe in ''{0}''", javaHome));
 
       _javaExe = javaExe;
 
-      File resinJar = new File(getResinHome(), "lib/resin.jar");
+      File resinHome = _resinConfiguration.getResinHome();
+
+      File resinJar = new File(resinHome, "lib/resin.jar");
 
       if (!resinJar.exists())
-        throw new IllegalStateException(L.l("Cannot find lib/resin.jar in ''{0}''", getResinHome()));
+        throw new IllegalStateException(L.l("Cannot find lib/resin.jar in ''{0}''", resinHome));
 
       _resinJar = resinJar;
 
       _lifecycle = LIFECYCLE_INIT;
     }
   }
-
-  public int getDebugPort()
-  {
-    return _debugPort;
-  }
-
-  /**
-   * Default is 11999.
-   */
-  public void setDebugPort(int debugPort)
-  {
-    if (isActive())
-      throw new IllegalStateException();
-
-    _debugPort = debugPort;
-  }
-
 
   public void start()
     throws IllegalStateException, IOException
@@ -269,11 +176,33 @@ public class ResinProcess
   {
     _lifecycle = LIFECYCLE_STARTING;
 
-    if (!isPortFree(getServerPort()))
-      throw new IllegalStateException(L.l("Cannot start Resin, server-port {0} is already in use", getServerPort()));
+    int serverPort = _resinConfiguration.getServerPort();
+    int debugPort = _resinConfiguration.getDebugPort();
+    File resinHome = _resinConfiguration.getResinHome();
+    File resinConf = _resinConfiguration.getResinConf();
+    String serverId = _resinConfiguration.getServerId();
 
-    if (_isDebug && !isPortFree(_debugPort))
-        throw new IllegalStateException(L.l("Cannot start Resin, debug-port {0} is already in use", _debugPort));
+    if (!isPortFree(serverPort))
+      throw new IllegalStateException(L.l("Cannot start Resin, server-port {0} is already in use", serverPort));
+
+    if (_isDebug) {
+      if (debugPort == 0) {
+        ServerSocket ss = new ServerSocket(0, 5,
+                                           InetAddress.getByName("127.0.0.1"));
+
+        debugPort = ss.getLocalPort();
+
+        try {
+          Thread.sleep(100);
+        }
+        catch (InterruptedException e) {
+        }
+        ss.close();
+      }
+
+      if (!isPortFree(debugPort))
+        throw new IllegalStateException(L.l("Cannot start Resin, debug-port {0} is already in use", debugPort));
+    }
 
     StringBuilder args = new StringBuilder();
 
@@ -285,14 +214,14 @@ public class ResinProcess
     args.append(' ');
     args.append("-conf ");
     args.append('"');
-    args.append(getResinConf().getAbsolutePath());
+    args.append(resinConf.getAbsolutePath());
     args.append('"');
 
-    if (getServerId() != null && getServerId().length() > 0) {
+    if (serverId != null && serverId.length() > 0) {
       args.append(' ');
       args.append("-server ");
       args.append('"');
-      args.append(getResinConf().getAbsolutePath());
+      args.append(serverId);
       args.append('"');
     }
 
@@ -305,14 +234,16 @@ public class ResinProcess
         _console.takeFocus();
       }
       else {
-        _console = new Console(_id);
+        _console = new Console(_uri);
       }
     }
+
+    String displayName = _resinConfiguration.getDisplayName();
 
     NbProcessDescriptor processDescriptor
       = new NbProcessDescriptor(_javaExe.getAbsolutePath(),
                                 args.toString(),
-                                getDisplayName());
+                                displayName);
 
     _console.println(L.l("Starting Resin process {0} {1}",
                          processDescriptor.getProcessName(),
@@ -320,14 +251,14 @@ public class ResinProcess
 
     _console.flush();
 
-    _process = processDescriptor.exec(null, null, true, getResinHome());
+    _process = processDescriptor.exec(null, null, true, resinHome);
 
     _console.println();
 
     _console.start(new InputStreamReader(_process.getInputStream()),
                    new InputStreamReader(_process.getErrorStream()));
 
-    new Thread("resin-" + _id + "-process-monitor")
+    new Thread("resin-" + _uri + "-process-monitor")
     {
       public void run()
       {
@@ -345,11 +276,16 @@ public class ResinProcess
 
     // wait for server port to become active
 
-    boolean isResponsive = false;
+    _activeServerPort = serverPort;
+    _activeDebugPort = debugPort;
 
-    for (int i = _stopTimeout; i > 0; i-= TIMEOUT_TICK) {
-      if (isResponsive()) {
-        isResponsive = true;
+    int startTimeout =  _resinConfiguration.getStartTimeout();
+
+    boolean isResponding = false;
+
+    for (int i = startTimeout; i > 0; i-= TIMEOUT_TICK) {
+      if (isResponding()) {
+        isResponding = true;
         break;
       }
 
@@ -362,8 +298,8 @@ public class ResinProcess
       }
     }
 
-    if (!isResponsive) {
-      String msg = L.l("Resin process failed to respond on server-port {0}", getServerPort());
+    if (!isResponding) {
+      String msg = L.l("Resin process failed to respond on server-port {0}", serverPort);
 
       log.log(Level.WARNING, msg);
 
@@ -377,13 +313,8 @@ public class ResinProcess
       throw new IOException(msg);
     }
 
-    _lifecycle = LIFECYCLE_ACTIVE;
-  }
 
-  public boolean isResponsive()
-  {
-    // XXX: could be more robust, i.e. actually get a response from the server
-    return !isPortFree(getServerPort());
+    _lifecycle = LIFECYCLE_ACTIVE;
   }
 
   public Console getConsole()
@@ -445,7 +376,7 @@ public class ResinProcess
   public boolean isResponding()
   {
     // XXX: could be more robust, contact the server and make sure there is a response
-    return !isPortFree(getServerPort());
+    return _activeServerPort > 0 && !isPortFree(_activeServerPort);
   }
 
   public Process getJavaProcess()
@@ -479,6 +410,12 @@ public class ResinProcess
     Console console = _console;
     _console = null;
 
+    int activeServerPort = _activeServerPort;
+    _activeServerPort = 0;
+
+    int activeDebugPort = _activeDebugPort;
+    _activeDebugPort = 0;
+
     _isDebug = false;
 
     try {
@@ -494,7 +431,7 @@ public class ResinProcess
         // no-op
       }
 
-      for (int i = STOP_TIMEOUT; !isPortFree(getServerPort()) && i > 0; i-= TICK) {
+      for (int i = STOP_TIMEOUT; !isPortFree(activeServerPort) && i > 0; i-= TICK) {
         try {
           Thread.sleep(TICK);
         }
@@ -508,6 +445,7 @@ public class ResinProcess
       */
     }
     finally {
+
       try {
         if (process != null)
           process.destroy();

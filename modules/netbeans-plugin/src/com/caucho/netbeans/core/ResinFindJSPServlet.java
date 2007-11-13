@@ -44,35 +44,16 @@ public final class ResinFindJSPServlet
   private static final String WEB_INF_TAGS = "WEB-INF/tags/";     // NOI18N
   private static final String META_INF_TAGS = "META-INF/tags/";   // NOI18N
 
-  private final ResinDeploymentManager manager;
-
-  /**
-   * Creates a new instance of ResinFindJSPServlet
-   */
   public ResinFindJSPServlet(DeploymentManager manager)
   {
-    this.manager = (ResinDeploymentManager) manager;
   }
 
 
   public File getServletTempDirectory(String moduleContextPath)
   {
-    File baseDir = manager.getProperties().getResinConf();
-    if ((baseDir == null) || !baseDir.exists()) {
-      return null;
-    }
-    File hostBase = new File(baseDir, "work/resin/localhost"); // NOI18N
-    return new File(hostBase, getContextRootString(moduleContextPath));
+    return new File("unimplemented"); // XXX: unimplemented
   }
 
-  private String getContextRootString(String moduleContextPath)
-  {
-    String contextRootPath = moduleContextPath;
-    if (contextRootPath.startsWith("/")) { // NOI18N
-      contextRootPath = contextRootPath.substring(1);
-    }
-    return "".equals(contextRootPath) ? "_" : contextRootPath; // NOI18N
-  }
 
   public String getServletResourcePath(String moduleContextPath,
                                        String jspResourcePath)

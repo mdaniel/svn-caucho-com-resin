@@ -28,27 +28,18 @@
  */
 
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans;
 
-public final class LiveSettings
+import org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformFactory;
+import org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformImpl;
+
+import javax.enterprise.deploy.spi.DeploymentManager;
+
+public class ResinPlatformFactory
+  extends J2eePlatformFactory
 {
-
-  private final String _httpConnecterUrl;
-  private final String _providerUrl;
-
-  public LiveSettings(String httpConnecterUrl, String providerUrl)
+  public J2eePlatformImpl getJ2eePlatformImpl(DeploymentManager deploymentManager)
   {
-    this._httpConnecterUrl = httpConnecterUrl;
-    this._providerUrl = providerUrl;
-  }
-
-  public String getHttpConnecterUrl()
-  {
-    return _httpConnecterUrl;
-  }
-
-  public String getProviderUrl()
-  {
-    return _providerUrl;
+    return ((ResinDeploymentManager) deploymentManager).getJ2eePlatform();
   }
 }

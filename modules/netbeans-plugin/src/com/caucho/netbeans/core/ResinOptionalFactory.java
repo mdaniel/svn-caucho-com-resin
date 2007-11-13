@@ -29,7 +29,8 @@
 
 package com.caucho.netbeans.core;
 
-import com.caucho.netbeans.wizard.AddInstanceIterator;
+import com.caucho.netbeans.AddInstanceIterator;
+import com.caucho.netbeans.ResinStartServer;
 
 import org.netbeans.modules.j2ee.deployment.plugins.api.FindJSPServlet;
 import org.netbeans.modules.j2ee.deployment.plugins.api.IncrementalDeployment;

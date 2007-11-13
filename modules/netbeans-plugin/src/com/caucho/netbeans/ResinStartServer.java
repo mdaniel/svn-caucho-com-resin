@@ -28,13 +28,12 @@
  */
 
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans;
 
 import com.caucho.netbeans.PluginL10N;
 import com.caucho.netbeans.PluginLogger;
-import com.caucho.netbeans.util.ProgressEventSupport;
-import com.caucho.netbeans.util.ResinProperties;
-import com.caucho.netbeans.util.Status;
+import com.caucho.netbeans.ProgressEventSupport;
+import com.caucho.netbeans.DeploymentStatusImpl;
 
 import org.netbeans.modules.j2ee.deployment.plugins.api.ServerDebugInfo;
 import org.netbeans.modules.j2ee.deployment.plugins.api.StartServer;
@@ -133,9 +132,12 @@ public final class ResinStartServer
 
   public ServerDebugInfo getDebugInfo(Target target)
   {
-    ResinProperties props = _manager.getProperties();
+    ResinConfiguration resinConfiguration = _manager.getResinConfiguration();
 
-    return new ServerDebugInfo(props.getHost(), props.getDebugPort());
+    String address = resinConfiguration.getServerAddress();
+    int debugPort = resinConfiguration.getDebugPort();
+
+    return new ServerDebugInfo(address, debugPort);
   }
 
   private class StartRunnable
@@ -165,9 +167,9 @@ public final class ResinStartServer
     {
       log.log(state == StateType.FAILED ? Level.WARNING : Level.INFO, msg);
 
-      Status status = new Status(_command, msg, state);
+      DeploymentStatusImpl deploymentStatusImpl = new DeploymentStatusImpl(_command, msg, state);
 
-      _eventSupport.fireProgressEvent(null, status);
+      _eventSupport.fireProgressEvent(null, deploymentStatusImpl);
     }
 
     public void run()

@@ -28,10 +28,7 @@
  */
 
 
-package com.caucho.netbeans.core;
-
-import com.caucho.netbeans.PluginL10N;
-import com.caucho.netbeans.util.ResinProperties;
+package com.caucho.netbeans;
 
 import org.netbeans.api.java.platform.JavaPlatform;
 import org.netbeans.modules.j2ee.deployment.common.api.J2eeLibraryTypeProvider;
@@ -63,15 +60,15 @@ public class ResinPlatformImpl
     = new LinkedHashSet<String>();
 
   private final String _displayName;
-  private final ResinProperties _resinProperties;
+  private final ResinConfiguration _resinConfiguration;
 
   private final List<LibraryImplementation> _libraries
     = new ArrayList<LibraryImplementation>();
 
-  public ResinPlatformImpl(ResinProperties properties)
+  public ResinPlatformImpl(ResinConfiguration resinConfiguration)
   {
-    _resinProperties = properties;
-    _displayName = properties.getDisplayName();
+    _resinConfiguration = resinConfiguration;
+    _displayName = resinConfiguration.getDisplayName();
 
     J2eeLibraryTypeProvider libProvider = new J2eeLibraryTypeProvider();
 
@@ -87,13 +84,13 @@ public class ResinPlatformImpl
   private void initLibrary(LibraryImplementation library)
   {
     library.setContent(J2eeLibraryTypeProvider.VOLUME_TYPE_CLASSPATH,
-                       _resinProperties.getClasses());
+                       _resinConfiguration.getClasses());
 
     library.setContent(J2eeLibraryTypeProvider.VOLUME_TYPE_JAVADOC,
-                       _resinProperties.getJavadocs());
+                       _resinConfiguration.getJavadocs());
 
     library.setContent(J2eeLibraryTypeProvider.VOLUME_TYPE_SRC,
-                       _resinProperties.getSources());
+                       _resinConfiguration.getSources());
   }
 
   public void notifyLibrariesChanged()
@@ -117,12 +114,12 @@ public class ResinPlatformImpl
 
   public Image getIcon()
   {
-    return Utilities.loadImage("com/caucho/netbeans/resources/resin.png"); // NOI18N
+    return Utilities.loadImage("com/caucho/netbeans/resources/resin.png");
   }
 
   public File[] getPlatformRoots()
   {
-    return new File[] { _resinProperties.getResinHome() };
+    return new File[] { _resinConfiguration.getResinHome() };
   }
 
   public File[] getToolClasspathEntries(String toolName)
@@ -152,7 +149,7 @@ public class ResinPlatformImpl
 
   public JavaPlatform getJavaPlatform()
   {
-    return _resinProperties.getJavaPlatform();
+    return _resinConfiguration.getJavaPlatform();
   }
 
   static {
@@ -164,9 +161,8 @@ public class ResinPlatformImpl
     SUPPORTED_SPEC_VERSIONS.add(J2eeModule.J2EE_14);
     SUPPORTED_SPEC_VERSIONS.add(J2eeModule.JAVA_EE_5);
 
-    SUPPORTED_JAVA_PLATFORM_VERSIONS.add("1.4"); // NOI18N
-    SUPPORTED_JAVA_PLATFORM_VERSIONS.add("1.5"); // NOI18N
-    SUPPORTED_JAVA_PLATFORM_VERSIONS.add("1.6"); // NOI18N
+    SUPPORTED_JAVA_PLATFORM_VERSIONS.add("1.5");
+    SUPPORTED_JAVA_PLATFORM_VERSIONS.add("1.6");
 
   }
 

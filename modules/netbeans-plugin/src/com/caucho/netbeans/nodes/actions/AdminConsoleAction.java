@@ -30,7 +30,7 @@
 package com.caucho.netbeans.nodes.actions;
 
 import com.caucho.netbeans.PluginLogger;
-import com.caucho.netbeans.core.ResinDeploymentManager;
+import com.caucho.netbeans.ResinDeploymentManager;
 import com.caucho.netbeans.nodes.ResinManagerNode;
 
 import org.openide.awt.HtmlBrowser.URLDisplayer;

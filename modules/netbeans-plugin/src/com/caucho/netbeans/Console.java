@@ -28,7 +28,7 @@
  */
 
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans;
 
 import com.caucho.netbeans.PluginLogger;
 import com.caucho.netbeans.util.LogSupport;

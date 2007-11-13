@@ -38,8 +38,8 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.Annotation;
 import org.openide.text.Line;
-import org.openide.util.NbBundle;
-import org.openide.windows.*;
+import org.openide.windows.OutputEvent;
+import org.openide.windows.OutputListener;
 
 import java.io.File;
 import java.util.Collections;
@@ -383,8 +383,8 @@ public final class LogSupport
           errAnnot.detach();
         }
         String errorMsg = msg;
-        if (errorMsg == null || errorMsg.equals("")) { //NOI18N
-          errorMsg = NbBundle.getMessage(Link.class, "MSG_ExceptionOccurred");
+        if (errorMsg == null || errorMsg.equals("")) {
+          errorMsg = "Exception occured";
         }
         errAnnot = new ErrorAnnotation(errorMsg);
         errAnnot.attach(errorLine);

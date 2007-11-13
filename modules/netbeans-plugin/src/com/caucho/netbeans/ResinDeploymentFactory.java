@@ -28,12 +28,9 @@
  */
 
 
-package com.caucho.netbeans.core;
-
-import com.caucho.netbeans.PluginL10N;
+package com.caucho.netbeans;
 
 import org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties;
-import org.openide.util.NbBundle;
 
 import javax.enterprise.deploy.shared.factories.DeploymentFactoryManager;
 import javax.enterprise.deploy.spi.DeploymentManager;
@@ -57,6 +54,7 @@ public class ResinDeploymentFactory
   {
     if (_instance == null) {
       _instance = new ResinDeploymentFactory();
+
       DeploymentFactoryManager.getInstance().registerDeploymentFactory(_instance);
     }
 
@@ -65,7 +63,7 @@ public class ResinDeploymentFactory
 
   public boolean handlesURI(String uri)
   {
-    return (uri != null) && uri.startsWith("resin:");
+    return (uri != null) && uri.startsWith("resin");
   }
 
   public synchronized DeploymentManager getDeploymentManager(String uri,
@@ -74,17 +72,13 @@ public class ResinDeploymentFactory
     throws DeploymentManagerCreationException
   {
     if (!handlesURI(uri))
-      throw new DeploymentManagerCreationException("Invalid URI:" + uri); // NOI18N
+      throw new DeploymentManagerCreationException(L.l("''{0}'' is not a Resin URI",  uri));
 
     InstanceProperties ip = InstanceProperties.getInstanceProperties(uri);
 
     if (ip == null) {
-      // null ip either means that the instance is not registered, or that this is the disconnected URL
-      if (!DISCONNECTED_URI.equals(uri)) {
-        throw new DeploymentManagerCreationException("Resin instance: " +
-                                                     uri +
-                                                     " is not registered in the IDE."); // NOI18N
-      }
+      if (!DISCONNECTED_URI.equals(uri))
+        throw new DeploymentManagerCreationException(L.l("Resin instance ''{0}'' is not registered.", uri));
     }
 
     ResinDeploymentManager manager = _managerCache.get(ip);
@@ -96,8 +90,7 @@ public class ResinDeploymentFactory
         _managerCache.put(ip, manager);
       }
       catch (IllegalArgumentException e) {
-        Throwable t = new DeploymentManagerCreationException(
-          L.l("Cannot create deployment manager for Resin instance: {0}", uri));
+        Throwable t = new DeploymentManagerCreationException(L.l("Cannot create deployment manager for Resin instance: {0}", uri));
 
         throw (DeploymentManagerCreationException) t.initCause(e);
       }
@@ -114,12 +107,12 @@ public class ResinDeploymentFactory
 
   public String getDisplayName()
   {
-    return NbBundle.getMessage(ResinDeploymentFactory.class, "LBL_DisplayName");
+    return "Resin Application Server";
   }
 
   public String getProductVersion()
   {
-    return "1.0"; // NOI18N
+    return "1.0";
   }
 
 }

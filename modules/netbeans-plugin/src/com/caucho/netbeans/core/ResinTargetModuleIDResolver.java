@@ -30,6 +30,8 @@
 
 package com.caucho.netbeans.core;
 
+import com.caucho.netbeans.ResinDeploymentManager;
+
 import org.netbeans.modules.j2ee.deployment.plugins.api.TargetModuleIDResolver;
 import org.openide.ErrorManager;
 

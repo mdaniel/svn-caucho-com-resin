@@ -27,23 +27,41 @@
  * @author Sam
  */
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans;
 
 import com.caucho.netbeans.PluginL10N;
 import com.caucho.netbeans.PluginLogger;
 
+import org.netbeans.api.java.platform.JavaPlatform;
+import org.netbeans.api.java.platform.JavaPlatformManager;
+import org.netbeans.api.java.platform.Specification;
 import org.netbeans.modules.j2ee.deployment.plugins.api.InstanceCreationException;
 import org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.URL;
 import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResinConfiguration
+  implements Cloneable
 {
   private static final PluginL10N L = new PluginL10N(ResinConfiguration.class);
   private static final PluginLogger log = new PluginLogger(ResinConfiguration.class);
+
+
+  private static final String PROPERTY_AUTOLOAD_ENABLED = "autoload_enabled";
+  private static final String PROPERTY_DEBUG_PORT = "debugger_port";
+  private static final String PROPERTY_DISPLAY_NAME = InstanceProperties.DISPLAY_NAME_ATTR;
+  private static final String PROPERTY_JAVA_PLATFORM = "java_platform";
+  private static final String PROPERTY_JAVA_OPTS = "java_opts";
+
+  private static final String PLATFORM_PROPERTY_ANT_NAME = "platform.ant.name";
 
   private static final String URI_TOKEN_HOME = ":home=";
   private static final String URI_TOKEN_CONF = ":conf=";
@@ -56,6 +74,10 @@ public class ResinConfiguration
   private String _serverId;
   private String _serverAddress;
   private int _serverPort;
+  private JavaPlatform _javaPlatform;
+  private int _debugPort = 0;
+  private int _startTimeout = 60 * 1000;
+  private int _stopTimeout = 60 * 1000;
 
   private String _displayName = "Resin";
   private String _username = "Username";
@@ -63,6 +85,8 @@ public class ResinConfiguration
 
   public ResinConfiguration()
   {
+    JavaPlatformManager platformManager = JavaPlatformManager.getDefault();
+    _javaPlatform = platformManager.getDefaultPlatform();
   }
 
   public ResinConfiguration(InstanceProperties ip)
@@ -74,6 +98,29 @@ public class ResinConfiguration
     setUsername(ip.getProperty(InstanceProperties.USERNAME_ATTR));
     setPassword(ip.getProperty(InstanceProperties.PASSWORD_ATTR));
     setDisplayName(ip.getProperty(InstanceProperties.DISPLAY_NAME_ATTR));
+
+    setJavaPlatformByName(ip.getProperty(PROPERTY_JAVA_PLATFORM));
+
+    String debugPort = ip.getProperty(PROPERTY_DEBUG_PORT);
+
+    if (debugPort != null) {
+      try {
+        setDebugPort(Integer.parseInt(debugPort));
+      }
+      catch (NumberFormatException e) {
+        // no-op
+      }
+    }
+  }
+
+  protected Object clone()
+  {
+    try {
+      return super.clone();
+    }
+    catch (CloneNotSupportedException e) {
+      throw new AssertionError(e);
+    }
   }
 
   public InstanceProperties toInstanceProperties()
@@ -98,6 +145,12 @@ public class ResinConfiguration
                                                     password,
                                                     displayName);
 
+
+    if (_debugPort > 0)
+      instanceProperties.setProperty(PROPERTY_DEBUG_PORT, String.valueOf(_debugPort));
+
+    if (_javaPlatform != null)
+      instanceProperties.setProperty(PROPERTY_JAVA_PLATFORM, getJavaPlatformName(_javaPlatform));
 
     return instanceProperties;
   }
@@ -215,6 +268,109 @@ public class ResinConfiguration
   public void setUsername(String username)
   {
     _username = username;
+  }
+
+  /**
+   * Returns the debug port, 0 means a free port should be determnined.
+   */
+  public int getDebugPort()
+  {
+    return _debugPort;
+  }
+
+  public void setDebugPort(int debugPort)
+  {
+    _debugPort = debugPort;
+  }
+
+  /**
+   * Returns the java platform.
+   */
+  public JavaPlatform getJavaPlatform()
+  {
+    return _javaPlatform;
+  }
+
+  public void setJavaPlatform(JavaPlatform javaPlatform)
+  {
+    _javaPlatform = javaPlatform;
+  }
+
+  public static String getJavaPlatformName(JavaPlatform javaPlatform)
+  {
+    return ((String) javaPlatform.getProperties().get(PLATFORM_PROPERTY_ANT_NAME));
+  }
+
+  public void setJavaPlatformByName(String javaPlatformName)
+  {
+    JavaPlatformManager platformManager = JavaPlatformManager.getDefault();
+    JavaPlatform javaPlatform = platformManager.getDefaultPlatform();
+
+    JavaPlatform[] installedPlatforms
+      = platformManager.getPlatforms(null, new Specification("J2SE", null));
+
+    for (JavaPlatform installedPlatform : installedPlatforms) {
+      String platformName = getJavaPlatformName(installedPlatform);
+
+      if (platformName != null && platformName.equals(javaPlatformName)) {
+        javaPlatform = installedPlatform;
+        break;
+      }
+    }
+
+    _javaPlatform = javaPlatform;
+  }
+
+  public int getStartTimeout()
+  {
+    return _startTimeout;
+  }
+
+  public void setStartTimeout(int startTimeout)
+  {
+    _startTimeout = startTimeout;
+  }
+
+  public int getStopTimeout()
+  {
+    return _stopTimeout;
+  }
+
+  public void setStopTimeout(int stopTimeout)
+  {
+    _stopTimeout = stopTimeout;
+  }
+
+  /**
+   * Calculates a javaHome based on the {@link #getJavaPlatform()}
+   * javaHome.
+   */
+  public File calculateJavaHome()
+  {
+    JavaPlatform javaPlatform = _javaPlatform;
+
+
+    if (javaPlatform == null)
+      javaPlatform = JavaPlatformManager.getDefault().getDefaultPlatform();
+
+    return FileUtil.toFile((FileObject) javaPlatform.getInstallFolders().iterator().next());
+  }
+
+  public List<URL> getClasses()
+  {
+    // XXX: s/b urls to Resin libraries
+    return new ArrayList<URL>();
+  }
+
+  public List<URL> getSources()
+  {
+    // XXX: s/b urls to Resin sources
+    return new ArrayList<URL>();
+  }
+
+  public List<URL> getJavadocs()
+  {
+    return new ArrayList<URL>();
   }
 
   private void requiredFile(String name, File file)
@@ -353,10 +509,6 @@ public class ResinConfiguration
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getURI() + "]";
-  }
-
-  public static void main(String[] argv)
-  {
   }
 
 }

@@ -27,7 +27,7 @@
  * @author Sam
  */
 
-package com.caucho.netbeans.config;
+package com.caucho.netbeans;
 
 import org.netbeans.modules.j2ee.deployment.common.api.OriginalCMPMapping;
 import org.netbeans.modules.j2ee.deployment.plugins.api.ConfigurationSupport;

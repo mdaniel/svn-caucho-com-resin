@@ -1,4 +1,4 @@
-package com.caucho.netbeans.core;
+package com.caucho.netbeans;
 
 import junit.framework.TestCase;
 

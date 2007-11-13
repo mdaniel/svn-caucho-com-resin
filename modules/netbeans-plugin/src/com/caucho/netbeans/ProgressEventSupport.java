@@ -27,71 +27,63 @@
  * @author Sam
  */
 
-package com.caucho.netbeans.util;
+package com.caucho.netbeans;
 
 import javax.enterprise.deploy.spi.TargetModuleID;
 import javax.enterprise.deploy.spi.status.DeploymentStatus;
 import javax.enterprise.deploy.spi.status.ProgressEvent;
 import javax.enterprise.deploy.spi.status.ProgressListener;
-import java.util.Vector;
+import java.util.ArrayList;
 
-/**
- * Progress event support
- */
-public final class ProgressEventSupport
+public class ProgressEventSupport
 {
+  private final Object _eventSource;
 
-  private final Object eventSource;
-  private final Vector<ProgressListener> listeners
-    = new Vector<ProgressListener>();
-  private DeploymentStatus status;
-  private TargetModuleID targetModuleID;
+  private final ArrayList<ProgressListener> _listeners
+    = new ArrayList<ProgressListener>();
+
+  private volatile DeploymentStatus _status;
 
 
   public ProgressEventSupport(Object eventSource)
   {
-    if (eventSource == null) {
-      throw new NullPointerException();
-    }
-    this.eventSource = eventSource;
+    _eventSource = eventSource;
   }
 
-  /**
-   * Add a ProgressListener to the listener list.
-   */
   public synchronized void addProgressListener(ProgressListener progressListener)
   {
-    listeners.add(progressListener);
+    synchronized (_listeners) {
+      _listeners.add(progressListener);
+    }
   }
 
   public synchronized void removeProgressListener(ProgressListener progressListener)
   {
-    listeners.remove(progressListener);
+    synchronized (_listeners) {
+      _listeners.remove(progressListener);
+    }
   }
 
   public void fireProgressEvent(TargetModuleID targetModuleID,
                                 DeploymentStatus status)
   {
-    Vector<ProgressListener> listenersCopy = null;
-    synchronized (this) {
-      this.status = status;
-      this.targetModuleID = targetModuleID;
-      if (listeners != null) {
-        listenersCopy = (Vector<ProgressListener>) listeners.clone();
-      }
+    ArrayList<ProgressListener> listeners = new ArrayList<ProgressListener>();
+
+    synchronized (_listeners) {
+      listeners.addAll(_listeners);
     }
-    if (listenersCopy != null) {
-      ProgressEvent evt = new ProgressEvent(eventSource,
-                                            targetModuleID,
-                                            status);
-      for (ProgressListener progressListener : listenersCopy) {
-        progressListener.handleProgressEvent(evt);
-      }
-    }
+
+    _status = status;
+
+    ProgressEvent event
+      = new ProgressEvent(_eventSource, targetModuleID, status);
+
+    for (ProgressListener progressListener : listeners)
+      progressListener.handleProgressEvent(event);
   }
 
-  public synchronized DeploymentStatus getDeploymentStatus()
+  public DeploymentStatus getDeploymentStatus()
   {
-    return status;
+    return _status;
   }
 }
