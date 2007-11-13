@@ -727,7 +727,7 @@ public abstract class UIComponentBase extends UIComponent
 	}
       }
     }
-      
+
     if (facetSize > 0) {
       Map<String,UIComponent> facetMap = getFacets();
 
@@ -739,14 +739,14 @@ public abstract class UIComponentBase extends UIComponent
 	
 	k += 2;
 
-	Object childState = facet.processSaveState(context);
+	Object facetState = facet.processSaveState(context);
 
-	if (childState != null) {
+	if (facetState != null) {
 	  if (childSaveState == null)
 	    childSaveState = new Object[1 + childSize + 2 * facetSize];
       
 	  childSaveState[k - 2] = entry.getKey();
-	  childSaveState[k - 1] = entry.getValue();
+	  childSaveState[k - 1] = facetState;
 	}
       }
     }

@@ -34,7 +34,8 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClass;
 import com.caucho.config.*;
 import com.caucho.loader.*;
-import com.caucho.vfs.Path;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import javax.sql.DataSource;
 import javax.persistence.spi.*;
@@ -45,6 +46,7 @@ import java.util.*;
  * <persistence-unit> tag in the persistence.xml
  */
 public class PersistenceUnitConfig implements PersistenceUnitInfo {
+  private static final L10N L = new L10N(PersistenceUnitConfig.class);
   private String _name;
   private Class _provider;
   private DataSource _jtaDataSource;
@@ -53,6 +55,11 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
 
   private URL _rootUrl;
   private DynamicClassLoader _loader;
+
+  private PersistenceUnitTransactionType _transactionType
+    = PersistenceUnitTransactionType.JTA;
+
+  private Properties _properties = new Properties();
 
   // className -> type
   private HashMap<String, JClass> _classMap
@@ -64,11 +71,16 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private ArrayList<String> _jarFiles
     = new ArrayList<String>();
 
-  public PersistenceUnitConfig()
+  private ArrayList<URL> _jarFileUrls
+    = new ArrayList<URL>();
+
+  public PersistenceUnitConfig(URL rootUrl)
   {
     Thread thread = Thread.currentThread();
 
     _loader = (DynamicClassLoader) thread.getContextClassLoader();
+
+    _rootUrl = rootUrl;
   }
 
   /**
@@ -92,6 +104,13 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public void setTransactionType(String type)
   {
+    if ("JTA".equals(type))
+      _transactionType = PersistenceUnitTransactionType.JTA;
+    else if ("RESOURCE_LOCAL".equals(type))
+      _transactionType = PersistenceUnitTransactionType.RESOURCE_LOCAL;
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown JPA transaction-type.",
+				    type));
   }
 
   /**
@@ -184,6 +203,13 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   public void addJarFile(String fileName)
   {
     _jarFiles.add(fileName);
+    try {
+      URL url = new URL(Vfs.lookup(fileName).getURL());
+      
+      _jarFileUrls.add(url);
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**
@@ -288,7 +314,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public PersistenceUnitTransactionType getTransactionType()
   {
-    throw new UnsupportedOperationException();
+    return _transactionType;
   }
 
   /**
@@ -297,7 +323,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public List<String> getMappingFileNames()
   {
-    throw new UnsupportedOperationException();
+    return _mappingFiles;
   }
 
   /**
@@ -305,7 +331,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public List<URL> getJarFileUrls()
   {
-    throw new UnsupportedOperationException();
+    return _jarFileUrls;
   }
 
   /**
@@ -340,7 +366,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public Properties getProperties()
   {
-    throw new UnsupportedOperationException();
+    return _properties;
   }
 
   /**
@@ -365,7 +391,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public ClassLoader getNewTempClassLoader()
   {
-    throw new UnsupportedOperationException();
+    return _loader.getNewTempClassLoader();
   }
 
   public String toString()
@@ -374,19 +400,34 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   }
 
   public class PropertiesConfig {
-    public PropertyConfig createProperty()
+    public void addProperty(PropertyConfig prop)
     {
-      return new PropertyConfig();
+      _properties.put(prop.getName(), prop.getValue());
     }
   }
 
-  public class PropertyConfig {
+  public static class PropertyConfig {
+    private String _name;
+    private String _value;
+    
     public void setName(String name)
     {
+      _name = name;
+    }
+    
+    public String getName()
+    {
+      return _name;
     }
 
-    public void setValue(String name)
+    public void setValue(String value)
     {
+      _value = value;
+    }
+
+    public String getValue()
+    {
+      return _value;
     }
   }
 }

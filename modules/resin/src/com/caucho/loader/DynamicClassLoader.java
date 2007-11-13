@@ -1792,6 +1792,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   
   public ClassLoader getThrowawayClassLoader()
   {
+    return getNewTempClassLoader();
+  }
+  
+  public ClassLoader getNewTempClassLoader()
+  {
     DynamicClassLoader dynLoader = new DynamicClassLoader(getParent());
 
     for (int i = 0; i < _loaders.size(); i++) {

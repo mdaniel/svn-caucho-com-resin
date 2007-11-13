@@ -56,7 +56,7 @@ public class DataSourceBuilder {
   public DataSource replaceObject()
     throws NamingException
   {
-    if (_jndiPath.startsWith("java:comp/"))
+    if (_jndiPath.startsWith("java:"))
       return (DataSource) new InitialContext().lookup(_jndiPath);
     else
       return (DataSource) new InitialContext().lookup("java:comp/env/" +

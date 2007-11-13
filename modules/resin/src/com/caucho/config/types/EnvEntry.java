@@ -191,7 +191,7 @@ public class EnvEntry implements Validator {
         value = new Character(v.charAt(0));
     }
 
-    if (_name.startsWith("java:comp"))
+    if (_name.startsWith("java:"))
       Jndi.bindDeep(_name, value);
     else
       Jndi.bindDeep("java:comp/env/" + _name, value);

@@ -650,6 +650,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       // Applications are incorrectly using TransactionManager
       // as an extended UserTransaction
       Jndi.bindDeep("java:comp/TransactionManager", tm);
+      Jndi.bindDeep("java:/TransactionManager", tm);
       
       Jndi.bindDeep("java:comp/ThreadPool",
 		    ResinThreadPoolExecutor.getThreadPool());

@@ -196,4 +196,9 @@ public class FileSetType {
 
     return false;
   }
+
+  public String toString()
+  {
+    return "FileSetType[]";
+  }
 }

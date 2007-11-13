@@ -29,8 +29,10 @@
 
 package com.caucho.amber.cfg;
 
-import com.caucho.vfs.Path;
+import com.caucho.config.*;
+import com.caucho.vfs.*;
 
+import java.net.*;
 import java.util.ArrayList;
 
 /**
@@ -63,9 +65,25 @@ public class PersistenceConfig {
   /**
    * Adds a new <persistence-unit>.
    */
-  public void addPersistenceUnit(PersistenceUnitConfig unit)
+  public PersistenceUnitConfig createPersistenceUnit()
   {
-    _unitList.add(unit);
+    try {
+      URL rootUrl;
+
+      // need to return the base url
+      if (_root instanceof JarPath)
+	rootUrl = new URL(((JarPath) _root).getContainer().getURL());
+      else
+	rootUrl = new URL(_root.getURL());
+      
+      PersistenceUnitConfig unit = new PersistenceUnitConfig(rootUrl);
+    
+      _unitList.add(unit);
+
+      return unit;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**

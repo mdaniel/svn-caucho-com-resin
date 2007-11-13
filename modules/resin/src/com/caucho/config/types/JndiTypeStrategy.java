@@ -56,7 +56,7 @@ public class JndiTypeStrategy extends TypeStrategy  {
 
     String jndiPath = (String) jndiObject;
     
-    if (jndiPath.startsWith("java:comp/"))
+    if (jndiPath.startsWith("java:"))
       return new InitialContext().lookup(jndiPath);
     else
       return new InitialContext().lookup("java:comp/env/" + jndiPath);

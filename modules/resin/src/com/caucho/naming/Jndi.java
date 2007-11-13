@@ -54,7 +54,7 @@ public class Jndi {
    */
   public static String getFullName(String shortName)
   {
-    if (shortName.startsWith("java:comp"))
+    if (shortName.startsWith("java:"))
       return shortName;
     else
       return "java:comp/env/" + shortName;
@@ -219,7 +219,7 @@ public class Jndi {
       ex = e;
     }
 
-    if (! name.startsWith("java:comp/env")) {
+    if (! name.startsWith("java:")) {
       try {
         Object value = new InitialContext().lookup("java:comp/env/" + name);
         
