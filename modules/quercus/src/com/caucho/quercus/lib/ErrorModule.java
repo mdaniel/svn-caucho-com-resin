@@ -232,8 +232,12 @@ public class ErrorModule extends AbstractQuercusModule {
 
       // Create "args" argument value array
 
-      ArrayValueImpl args = evalArgsArray(env, callExpr);
+      // evaluating args a second time is problematic, affecting mediawiki
+      // php/180q
+      //ArrayValueImpl args = evalArgsArray(env, callExpr);
 
+      ArrayValueImpl args = new ArrayValueImpl();
+      
       call.put(env.createString("args"), args);
     }
     else if (expr instanceof MethodCallExpr) {

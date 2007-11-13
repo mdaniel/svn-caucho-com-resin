@@ -103,26 +103,26 @@ public class RegexpState {
     int length = _subject.length();
 
     for (; _first + minLength <= length; _first++) {
-      if (firstSet != null) {
-	char firstChar = _subject.charAt(_first);
+      if (firstSet != null && _first < length) {
+        char firstChar = _subject.charAt(_first);
 	
-	if (firstChar < 256 && ! firstSet[firstChar])
-	  continue;
+        if (firstChar < 256 && ! firstSet[firstChar])
+          continue;
       }
 
       clearGroup();
       int offset = _regexp._prog.match(_subject, _first, this);
 
       if (offset >= 0) {
-	_groupBegin[0] = _first;
-	_groupEnd[0] = offset;
+        _groupBegin[0] = _first;
+        _groupEnd[0] = offset;
 
-	if (_first < offset)
-	  _first = offset;
-	else
-	  _first += 1;
-      
-	return true;
+        if (_first < offset)
+          _first = offset;
+        else
+          _first += 1;
+          
+        return true;
       }
     }
 
