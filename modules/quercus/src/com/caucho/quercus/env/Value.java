@@ -1624,14 +1624,11 @@ abstract public class Value implements java.io.Serializable
   }
   
   /*
-   * Binary or.
+   * Binary And.
    */
   public Value bitAnd(Value rValue)
   {
-    if (rValue.isString())
-      return LongValue.ZERO;
-    else
-      return LongValue.create(this.toLong() & rValue.toLong());
+    return LongValue.create(toLong() & rValue.toLong());
   }
   
   /*
@@ -1639,10 +1636,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value bitOr(Value rValue)
   {
-    if (rValue.isString())
-      return this;
-    else
-      return LongValue.create(this.toLong() | rValue.toLong());
+    return LongValue.create(toLong() | rValue.toLong());
   }
   
   /*
@@ -1650,10 +1644,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value bitXor(Value rValue)
   {
-    if (rValue.isString())
-      return this;
-    else
-      return LongValue.create(this.toLong() ^ rValue.toLong());
+    return LongValue.create(toLong() ^ rValue.toLong());
   }
 
   /**

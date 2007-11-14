@@ -4012,10 +4012,12 @@ public class QuercusParser {
     while ((ch = readByte()) >= 0) {
       if (ch != '*') {
       }
-      else if ((ch = readByte()) == '/')
+      else if ((ch = readByte()) == '/') {
         return;
-      else
-	    _is.unread();
+      }
+      else {
+        _peek = ch;
+      }
     }
   }
 
@@ -4826,18 +4828,17 @@ public class QuercusParser {
       int ch = _is.readChar();
 
       if (ch == '\r') {
-	_parserLocation.incrementLineNumber();
-	_hasCr = true;
+        _parserLocation.incrementLineNumber();
+        _hasCr = true;
       }
       else if (ch == '\n' && ! _hasCr)
-	_parserLocation.incrementLineNumber();
+        _parserLocation.incrementLineNumber();
       else
-	_hasCr = false;
+        _hasCr = false;
 
       return ch;
     } catch (CharConversionException e) {
-      throw new QuercusParseException(getFileName() + ":" + getLine() + ": " + e + "\nCheck that the script-encoding setting matches the source file's encoding",
-				   e);
+      throw new QuercusParseException(getFileName() + ":" + getLine() + ": " + e + "\nCheck that the script-encoding setting matches the source file's encoding", e);
     } catch (IOException e) {
       throw new IOExceptionWrapper(getFileName() + ":" + getLine() + ":" + e, e);
     }
@@ -4857,7 +4858,14 @@ public class QuercusParser {
     }
 
     try {
-      int ch = _is.read();
+      int ch;
+
+      // XXX: should really be handled by ReadStream
+      // php/001b
+      if (_encoding == null)
+        ch = _is.read();
+      else
+        ch = _is.readChar();
 
       if (ch == '\r') {
         _parserLocation.incrementLineNumber();

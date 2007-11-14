@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
@@ -238,19 +239,25 @@ public class Regexp {
       char ch = source.charAt(i);
 
       if (ch < 0x80)
-	target.append(ch);
+        target.append(ch);
       else if ((ch & 0xe0) == 0xc0) {
-	char ch2 = source.charAt(++i);
+        if (i + 1 >= len)
+          throw new QuercusRuntimeException("bad UTF-8 sequence, saw EOF");
+        
+        char ch2 = source.charAt(++i);
 
-	target.append((char) (((ch & 0x1f) << 6) + (ch2 & 0x3f)));
+        target.append((char) (((ch & 0x1f) << 6) + (ch2 & 0x3f)));
       }
       else {
-	char ch2 = source.charAt(++i);
-	char ch3 = source.charAt(++i);
-	
-	target.append((char) (((ch & 0xf) << 12)
-			      + ((ch2 & 0x3f) << 6)
-			      + (ch3 & 0x3f)));
+        if (i + 2 >= len)
+          throw new QuercusRuntimeException("bad UTF-8 sequence, saw EOF");
+        
+        char ch2 = source.charAt(++i);
+        char ch3 = source.charAt(++i);
+
+        target.append((char) (((ch & 0xf) << 12)
+                      + ((ch2 & 0x3f) << 6)
+                      + (ch3 & 0x3f)));
       }
     }
 

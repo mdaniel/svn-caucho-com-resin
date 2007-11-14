@@ -934,11 +934,11 @@ public class FileModule extends AbstractQuercusModule {
       return null;
 
     BinaryInput is = (BinaryInput) s;
-
+    
     StringValue bb = env.createLargeBinaryBuilder();
-
     bb.appendReadAll(is, maxLen);
-
+    
+    s.close();
     return bb;
   }
 

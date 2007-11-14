@@ -310,7 +310,7 @@ public final class ReadStream extends InputStream
   {
     if (_readLength <= _readOffset) {
       if (! readBuffer())
-	return -1;
+        return -1;
     }
 
     return _readBuffer[_readOffset++] & 0xff;
@@ -508,7 +508,7 @@ public final class ReadStream extends InputStream
 
     if (_readLength <= _readOffset) {
       if (! readBuffer())
-	return -1;
+        return -1;
     }
 
     return _readBuffer[_readOffset++] & 0xff;
