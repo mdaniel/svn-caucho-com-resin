@@ -121,6 +121,22 @@ OracleConnectionPoolDataSource will be more efficient.</p>
 </example>
 </s1>
 
+<s1 name="sybase" title="Sybase">
+<example>
+&lt;database&gt;
+  &lt;jndi-name&gt;jdbc/sybase&lt;/jndi-name&gt;
+  &lt;driver type="com.sybase.jdbc2.jdbc.SybConnectionPoolDataSource"&gt;
+    &lt;network-protocol&gt;Tds&lt;/network-protocol&gt;
+    &lt;port-number&gt;5000&lt;/port-number&gt;
+    &lt;server-name&gt;myhost&lt;/server-name&gt;
+    &lt;database-name&gt;mydb&lt;/database-name&gt;
+    &lt;user&gt;XXX&lt;/user&gt;
+    &lt;password&gt;YYY&lt;/password&gt;
+  &lt;/driver&gt;
+&lt;/database&gt;
+</example>
+</s1> <!-- sybase -->
+
 <s1 title="DB2">
 <p>Contributions welcome!</p>
 </s1>
