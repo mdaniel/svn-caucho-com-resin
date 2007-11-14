@@ -29,12 +29,11 @@
 
 package com.caucho.java.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.*;
 
 /**
  * Basic method generation.
@@ -42,16 +41,16 @@ import java.io.IOException;
 public class BaseMethod extends ClassComponent {
   private static final L10N L = new L10N(BaseMethod.class);
 
-  private JMethod _method;
+  private Method _method;
   private String _methodName;
 
   private boolean _isStatic;
   private String _visibility = "public";
 
-  private JClass _returnType;
-  private JClass []_parameterTypes;
+  private Class _returnType;
+  private Class []_parameterTypes;
   
-  private JClass []_exceptionTypes;
+  private Class []_exceptionTypes;
 
   private CallChain _call;
 
@@ -68,7 +67,7 @@ public class BaseMethod extends ClassComponent {
   /**
    * Creates the base method
    */
-  public BaseMethod(JMethod method, CallChain call)
+  public BaseMethod(Method method, CallChain call)
   {
     _method = method;
     _exceptionTypes = method.getExceptionTypes();
@@ -79,7 +78,7 @@ public class BaseMethod extends ClassComponent {
   /**
    * Creates the base method
    */
-  public BaseMethod(JMethod method)
+  public BaseMethod(Method method)
   {
     _method = method;
     _exceptionTypes = method.getExceptionTypes();
@@ -88,7 +87,7 @@ public class BaseMethod extends ClassComponent {
   /**
    * Creates the base method
    */
-  public BaseMethod(JMethod apiMethod, JMethod implMethod)
+  public BaseMethod(Method apiMethod, Method implMethod)
   {
     this(apiMethod, new MethodCallChain(implMethod));
     
@@ -117,7 +116,7 @@ public class BaseMethod extends ClassComponent {
   /**
    * Returns the method.
    */
-  public JMethod getMethod()
+  public Method getMethod()
   {
     return _method;
   }
@@ -136,31 +135,36 @@ public class BaseMethod extends ClassComponent {
   /**
    * Returns the parameter types.
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
+    // ejb/0f7a
+    return _call.getParameterTypes();
+    /*
     if (_parameterTypes != null)
       return _parameterTypes;
     else if (_method != null)
       return _method.getParameterTypes();
     else
-      return _call.getParameterTypes();
+    */
   }
 
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
+    return _call.getReturnType();
+    /*
     if (_method != null)
       return _method.getReturnType();
     else
-      return _call.getReturnType();
+    */
   }
 
   /**
    * Returns the exception types.
    */
-  public JClass []getExceptionTypes()
+  public Class []getExceptionTypes()
   {
     return _exceptionTypes;
   }
@@ -175,7 +179,7 @@ public class BaseMethod extends ClassComponent {
   {
     String []args = generateMethodHeader(out);
 
-    JClass []exceptionTypes = getExceptionTypes();
+    Class []exceptionTypes = getExceptionTypes();
     if (exceptionTypes != null && exceptionTypes.length > 0) {
       out.print("  throws ");
 
@@ -183,7 +187,7 @@ public class BaseMethod extends ClassComponent {
 	if (i != 0)
 	  out.print(", ");
 
-	out.print(exceptionTypes[i].getPrintName());
+	out.printClass(exceptionTypes[i]);
       }
       out.println();
     }
@@ -214,17 +218,23 @@ public class BaseMethod extends ClassComponent {
     if (_isStatic)
       out.print("static ");
 
-    out.print(getReturnType().getPrintName());
+    out.printClass(getReturnType());
     out.print(" " + getMethodName() + "(");
 
-    JClass []parameterTypes = getParameterTypes();
+    Class []parameterTypes = getParameterTypes();
     String []args = new String[parameterTypes.length];
     
     for (int i = 0; i < args.length; i++) {
       if (i != 0)
 	out.print(", ");
-      
-      out.print(parameterTypes[i].getPrintName());
+
+      // ejb/0f7a
+      if (i + 1 == args.length && getMethod().isVarArgs()) {
+	out.printClass(parameterTypes[i].getComponentType());
+	out.print("...");
+      }
+      else
+	out.printClass(parameterTypes[i]);
       
       args[i] = "a" + i;
       out.print(" " + args[i]);

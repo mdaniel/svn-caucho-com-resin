@@ -29,10 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -49,11 +46,11 @@ public class EntityRemoveMethod extends BaseMethod {
   private String _contextClassName;
 
   public EntityRemoveMethod(EjbEntityBean bean,
-			    JMethod apiMethod,
+			    ApiMethod apiMethod,
 			    String contextClassName)
   {
-    super(apiMethod, new EntityRemoveCall(bean,
-					  contextClassName));
+    super(apiMethod.getMethod(),
+	  new EntityRemoveCall(bean, contextClassName));
 
     _contextClassName = contextClassName;
   }
@@ -61,9 +58,9 @@ public class EntityRemoveMethod extends BaseMethod {
   /**
    * Returns the exception types.
    */
-  public JClass []getExceptionTypes()
+  public Class []getExceptionTypes()
   {
-    return new JClass[] { JClassLoader.systemForName(RemoveException.class.getName()) };
+    return new Class[] { RemoveException.class };
   }
 
   /**

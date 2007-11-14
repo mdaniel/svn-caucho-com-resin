@@ -31,8 +31,6 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.EntityBean;
 import com.caucho.java.JavaWriter;
@@ -75,29 +73,29 @@ public class CmrRelation extends CmpProperty {
 
     setFieldName(fieldName);
 
-    JMethod getter = getGetter();
+    ApiMethod getter = getGetter();
 
     if (! getter.isAbstract() && ! entityBean.isAllowPOJO())
       throw new ConfigException(L.l("{0}: '{1}' must have an abstract getter method. cmr-relations must have abstract getter methods returning a local interface.",
 				    entityBean.getEJBClass().getName(),
 				    getter.getFullName()));
 
-    JClass retType = getter.getReturnType();
+    Class retType = getter.getReturnType();
 
-    if (! retType.isAssignableTo(EJBLocalObject.class) &&
-	! retType.isAssignableTo(Collection.class) &&
-	! retType.isAssignableTo(Map.class)) {
+    if (! EJBLocalObject.class.isAssignableFrom(retType)
+	&& ! Collection.class.isAssignableFrom(retType)
+	&& ! Map.class.isAssignableFrom(retType)) {
       throw new ConfigException(L.l("{0}: '{1}' must return an EJBLocalObject or a Collection. cmr-relations must have abstract getter methods returning a local interface.",
 				    entityBean.getEJBClass().getName(),
 				    getter.getFullName()));
     }
 
-    JMethod setter = getSetter();
+    ApiMethod setter = getSetter();
 
     if (setter == null)
       return;
 
-    JClass []paramTypes = setter.getParameterTypes();
+    Class []paramTypes = setter.getParameterTypes();
 
     if (! retType.equals(paramTypes[0]))
       throw new ConfigException(L.l("{0}: '{1}' must return an '{2}'.  Persistent setters must match the getter types .",
@@ -133,7 +131,7 @@ public class CmrRelation extends CmpProperty {
   /**
    * Returns the target type.
    */
-  public JClass getTargetType()
+  public ApiClass getTargetType()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -206,8 +204,8 @@ public class CmrRelation extends CmpProperty {
    * Create any bean methods.
    */
   public EjbMethod createGetter(EjbView view,
-				JMethod apiMethod,
-				JMethod implMethod)
+				ApiMethod apiMethod,
+				ApiMethod implMethod)
     throws ConfigException
   {
     return new CmpGetter(view, apiMethod, implMethod);    

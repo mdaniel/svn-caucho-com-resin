@@ -67,6 +67,7 @@ public class WbComponent {
 
   private String _name;
   
+  private boolean _hasBinding;
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
@@ -83,7 +84,7 @@ public class WbComponent {
   {
     _webbeans = WebBeans.getLocal().getWbWebBeans();
 
-    _webbeans.addComponent(this);
+    _webbeans.addWbComponent(this);
   }
 
   public WbComponent(WbWebBeans webbeans)
@@ -102,7 +103,7 @@ public class WbComponent {
     binding.setClass(Named.class);
     binding.addValue("value", name);
 
-    addBinding(binding);
+    _bindingList.add(binding);
   }
 
   /**
@@ -197,6 +198,7 @@ public class WbComponent {
    */
   public void addBinding(WbBinding binding)
   {
+    _hasBinding = true;
     _bindingList.add(binding);
   }
   
@@ -280,6 +282,9 @@ public class WbComponent {
 
     introspectProduces();
     introspectConstructor();
+
+    if (! _hasBinding)
+      introspectBindings();
   }
 
   /**
@@ -342,7 +347,7 @@ public class WbComponent {
 
       comp.init();
 
-      _webbeans.addComponent(comp);
+      _webbeans.addWbComponent(comp);
     }
   }
 
@@ -377,6 +382,13 @@ public class WbComponent {
     } catch (Exception e) {
       throw new ConfigException(e);
     }
+  }
+
+  /**
+   * Introspects the methods for any @Produces
+   */
+  protected void introspectBindings()
+  {
   }
 
   private boolean hasBindingAnnotation(Constructor ctor)

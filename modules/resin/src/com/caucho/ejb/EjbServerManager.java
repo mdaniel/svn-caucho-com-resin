@@ -594,13 +594,13 @@ public class EjbServerManager
 	      else if (type.isAnnotationPresent(javax.ejb.Stateless.class)
                        || type.isAnnotationPresent(javax.ejb.Stateful.class)) {
 		EjbSessionBean bean = new EjbSessionBean(_ejbConfig, "resin-ejb");
-		bean.setEJBClass(className);
+		bean.setEJBClass(type.getJavaClass());
 		_ejbConfig.setBeanConfig(bean.getEJBName(), bean);
 	      }
               else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
                 EjbMessageBean bean = new EjbMessageBean(_ejbConfig, "resin-ejb");
                 bean.setAllowPOJO(true);
-                bean.setEJBClass(className);
+                bean.setEJBClass(type.getJavaClass());
                 _ejbConfig.setBeanConfig(bean.getEJBName(), bean);
               }
 	      else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -29,46 +28,53 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
+public class ApplicationExceptionConfig {
+  private String _id;
+  private String _exceptionClass;
+  private String _rollback;
 
-import java.lang.reflect.*;
-
-/**
- * Configuration for remove-method.
- */
-public class RemoveMethod {
-  private static final L10N L = new L10N(RemoveMethod.class);
-
-  private BeanMethod _beanMethod;
-  private boolean _retainIfException;
-
-  public RemoveMethod()
+  public ApplicationExceptionConfig()
   {
   }
 
-  public BeanMethod getBeanMethod()
+  public String getExceptionClass()
   {
-    return _beanMethod;
+    return _exceptionClass;
   }
 
-  public boolean isRetainIfException()
+  public String getId()
   {
-    return _retainIfException;
+    return _id;
   }
 
-  public void setBeanMethod(BeanMethod beanMethod)
+  public String getRollback()
   {
-    _beanMethod = beanMethod;
+    return _rollback;
   }
 
-  public void setRetainIfException(boolean retainIfException)
+  public boolean isRollback()
   {
-    _retainIfException = retainIfException;
+    if (_rollback == null)
+      return false;
+
+    if (_rollback.equals("true"))
+      return true;
+
+    return false;
   }
 
-  public boolean isMatch(Method method)
+  public void setExceptionClass(String exceptionClass)
   {
-    return _beanMethod.isMatch(method);
+    _exceptionClass = exceptionClass;
+  }
+
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
+  public void setRollback(String rollback)
+  {
+    _rollback = rollback;
   }
 }

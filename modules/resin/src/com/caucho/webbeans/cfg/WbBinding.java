@@ -38,6 +38,7 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
 
+import javax.annotation.*;
 import javax.webbeans.*;
 
 /**
@@ -45,7 +46,8 @@ import javax.webbeans.*;
  */
 public class WbBinding {
   private static final L10N L = new L10N(WbBinding.class);
-  
+
+  private String _signature;
   private Class _cl;
 
   private ArrayList<WbBindingValue> _valueList
@@ -93,9 +95,9 @@ public class WbBinding {
     _cl = cl;
   }
 
-  public void setText(Class cl)
+  public void setText(String signature)
   {
-    setClass(cl);
+    _signature = signature;
   }
   
   public String getClassName()
@@ -104,6 +106,36 @@ public class WbBinding {
       return _cl.getName();
     else
       return null;
+  }
+
+  /**
+   * Parses the function signature.
+   */
+  @PostConstruct
+  public void init()
+    throws ConfigException
+  {
+    if (_signature == null)
+      throw new ConfigException(L.l("binding requires an annotation"));
+    
+    int p = _signature.indexOf('(');
+    
+    String className;
+
+    if (p > 0)
+      className = _signature.substring(0, p);
+    else
+      className = _signature;
+
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      _cl = Class.forName(className, false, loader);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public boolean isMatch(Annotation bindAnn)

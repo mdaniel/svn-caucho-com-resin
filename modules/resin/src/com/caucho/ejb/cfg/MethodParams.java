@@ -29,12 +29,11 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
+import java.lang.reflect.*;
 
 /**
  * Configuration for method-params.
@@ -54,17 +53,30 @@ public class MethodParams {
     _methodParams.add(methodParam);
   }
 
-  public boolean isMatch(JMethod otherMethod)
+  public boolean isMatch(ApiMethod otherMethod)
   {
-    JClass otherParams[] = otherMethod.getParameterTypes();
+    Class otherParams[] = otherMethod.getParameterTypes();
 
     if (otherParams.length != _methodParams.size())
       return false;
 
-    int i = 0;
+    for (int i = 0; i < otherParams.length; i++) {
+      if (! _methodParams.get(i).equals(otherParams[i]))
+        return false;
+    }
 
-    for (Class thisParam : _methodParams) {
-      if (! thisParam.equals(otherParams[i++].getJavaClass()))
+    return true;
+  }
+
+  public boolean isMatch(Method otherMethod)
+  {
+    Class otherParams[] = otherMethod.getParameterTypes();
+
+    if (otherParams.length != _methodParams.size())
+      return false;
+
+    for (int i = 0; i < otherParams.length; i++) {
+      if (! _methodParams.get(i).equals(otherParams[i]))
         return false;
     }
 

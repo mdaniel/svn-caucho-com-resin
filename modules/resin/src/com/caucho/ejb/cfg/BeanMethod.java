@@ -29,9 +29,10 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
+
+import java.lang.reflect.*;
 
 /**
  * Configuration for bean-method.
@@ -62,16 +63,13 @@ public class BeanMethod {
     _methodParams = methodParams;
   }
 
-  public boolean isMatch(JMethod otherMethod)
+  public boolean isMatch(ApiMethod otherMethod)
   {
-    if (! _methodName.equals(otherMethod.getName()))
-      return false;
+    return _methodParams.isMatch(otherMethod);
+  }
 
-    if (_methodParams != null)
-      return _methodParams.isMatch(otherMethod);
-    else if (otherMethod.getParameterTypes().length == 0)
-      return true;
-
-    return false;
+  public boolean isMatch(Method otherMethod)
+  {
+    return _methodParams.isMatch(otherMethod);
   }
 }

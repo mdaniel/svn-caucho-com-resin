@@ -30,10 +30,9 @@
 package com.caucho.ejb.gen;
 
 import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JClassWrapper;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.ql.EjbSelectQuery;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -47,13 +46,13 @@ public class AmberSelectMethod extends AbstractQueryMethod {
   private static L10N L = new L10N(AmberSelectMethod.class);
 
   private EjbEntityBean _returnType;
-  private JMethod _method;
+  private ApiMethod _method;
   private String _contextClassName;
   private EjbSelectQuery _query;
   private Type _amberType;
   
   public AmberSelectMethod(EjbEntityBean type,
-			   JMethod method,
+			   ApiMethod method,
 			   String contextClassName,
 			   EjbSelectQuery query,
 			   Type amberType)
@@ -74,7 +73,7 @@ public class AmberSelectMethod extends AbstractQueryMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _method.getParameterTypes();
   }
@@ -82,7 +81,7 @@ public class AmberSelectMethod extends AbstractQueryMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _method.getReturnType();
   }
@@ -109,7 +108,7 @@ public class AmberSelectMethod extends AbstractQueryMethod {
     out.println("if (rs.next()) {");
     out.pushDepth();
 
-    out.print(getReturnType().getPrintName());
+    out.printClass(getReturnType());
     out.print(" v = ");
 
     if (getReturnType().isPrimitive()) {
@@ -117,7 +116,8 @@ public class AmberSelectMethod extends AbstractQueryMethod {
       out.println(";");
     }
     else {
-      _amberType.generateLoad(out, "rs", "0", 1, getReturnType());
+      _amberType.generateLoad(out, "rs", "0", 1,
+			      JClassWrapper.create(getReturnType()));
       out.println(";");
     }
 

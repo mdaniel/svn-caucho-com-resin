@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.ManyToOneSetter;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
@@ -48,7 +47,9 @@ public class CmpManyToOneSetter extends EjbMethod {
    * @param apiMethod the method from the view
    * @param implMethod the method from the implementation
    */
-  public CmpManyToOneSetter(EjbView view, JMethod apiMethod, JMethod implMethod)
+  public CmpManyToOneSetter(EjbView view,
+			    ApiMethod apiMethod,
+			    ApiMethod implMethod)
   {
     super(view, apiMethod, implMethod);
   }

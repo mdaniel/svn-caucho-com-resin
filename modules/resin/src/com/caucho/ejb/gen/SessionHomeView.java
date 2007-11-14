@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -44,12 +43,12 @@ import java.io.IOException;
 public class SessionHomeView extends ViewClass {
   private static L10N L = new L10N(SessionHomeView.class);
 
-  private JClass _remoteClass;
+  private ApiClass _remoteClass;
   private String _prefix;
   private String _contextClassName;
   private boolean _isStateless;
 
-  public SessionHomeView(JClass remoteClass,
+  public SessionHomeView(ApiClass remoteClass,
                          String contextClassName,
                          String prefix,
                          boolean isStateless)
@@ -76,8 +75,8 @@ public class SessionHomeView extends ViewClass {
   /**
    * Adds the pool chaining.
    */
-  public BaseMethod createCreateMethod(JMethod apiMethod,
-                                       JMethod implMethod,
+  public BaseMethod createCreateMethod(ApiMethod apiMethod,
+                                       ApiMethod implMethod,
                                        String fullClassName,
                                        String prefix)
   {

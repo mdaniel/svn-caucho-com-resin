@@ -29,13 +29,9 @@
 
 package com.caucho.ejb.ql;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.ejb.cfg.EjbEntityBean;
-import com.caucho.ejb.cfg.FunctionSignature;
+import com.caucho.ejb.cfg.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -120,7 +116,7 @@ public class QLParser extends Query {
   // Method name to generate
   private String _methodName;
   // Return class
-  private JClass _returnType;
+  private Class _returnType;
   // Return ejb
   private String _returnEJB;
   // EJB-QL
@@ -198,8 +194,8 @@ public class QLParser extends Query {
    */
   public QLParser(EjbEntityBean bean,
 		  String methodName,
-		  JMethod method,
-		  JClass returnType)
+		  ApiMethod method,
+		  Class returnType)
     throws ConfigException
   {
     this(bean);
@@ -209,9 +205,9 @@ public class QLParser extends Query {
     _methodName = methodName;
     _returnType = returnType;
 
-    JClass []exn = method.getExceptionTypes();
+    Class []exn = method.getExceptionTypes();
     for (int i = 0; i < exn.length; i++)
-      if (exn[i].isAssignableTo(FinderException.class))
+      if (FinderException.class.isAssignableFrom(exn[i]))
         return;
 
     throw new ConfigException(L.l("{0}: '{1}' must throw javax.ejb.FinderException.",
@@ -258,7 +254,7 @@ public class QLParser extends Query {
   /**
    * Gets a persistent bean by its type.
    */
-  public EjbEntityBean getBeanByType(JClass type)
+  public EjbEntityBean getBeanByType(Class type)
   {
     //return _bean.getManager().getBeanInfoByRemote(type);
     throw new UnsupportedOperationException();
@@ -307,7 +303,7 @@ public class QLParser extends Query {
   /**
    * Returns the return type of the select method.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _returnType;
   }
@@ -323,7 +319,7 @@ public class QLParser extends Query {
   /**
    * Sets the return type of the select method
    */
-  void setReturnType(JClass returnType)
+  void setReturnType(Class returnType)
   {
     _returnType = returnType;
   }
@@ -1357,8 +1353,8 @@ public class QLParser extends Query {
       
       Expr expr = args.get(0);
 
-      if (! expr.getJavaType().isAssignableTo(EntityBean.class) &&
-          ! expr.getJavaType().isAssignableTo(EJBLocalObject.class))
+      if (! EntityBean.class.isAssignableFrom(expr.getJavaType())
+          && ! EJBLocalObject.class.isAssignableFrom(expr.getJavaType()))
         throw error(L.l("OBJECT({0}) requires an entity bean as its argument at '{1}'",
                         expr, expr.getJavaType()));
 
@@ -1642,7 +1638,7 @@ public class QLParser extends Query {
   /**
    * Returns a full method name with arguments.
    */
-  private String getFullMethodName(JMethod method)
+  private String getFullMethodName(ApiMethod method)
   {
     return method.getFullName();
   }
@@ -1650,7 +1646,7 @@ public class QLParser extends Query {
   /**
    * Returns a full method name with arguments.
    */
-  private String getFullMethodName(String methodName, JClass []params)
+  private String getFullMethodName(String methodName, Class []params)
   {
     String name = methodName + "(";
 
@@ -1658,7 +1654,7 @@ public class QLParser extends Query {
       if (i != 0)
         name += ", ";
 
-      name += params[i].getPrintName();
+      name += params[i].getSimpleName();
     }
 
     return name + ")";
@@ -1772,26 +1768,12 @@ public class QLParser extends Query {
     if (_bean != bSel._bean)
       return false;
 
-    return methodEquals(getMethod(), bSel.getMethod());
+    return getMethod().equals(bSel.getMethod());
   }
 
-  static boolean methodEquals(JMethod a, JMethod b)
+  static boolean methodEquals(ApiMethod a, ApiMethod b)
   {
-    if (! a.getName().equals(b.getName()))
-      return false;
-    
-    JClass []aParam = a.getParameterTypes();
-    JClass []bParam = b.getParameterTypes();
-    
-    if (aParam.length != bParam.length)
-      return false;
-
-    for (int i = 0; i < aParam.length; i++) {
-      if (! aParam[i].equals(bParam[i]))
-        return false;
-    }
-    
-    return true;
+    return a.equals(b);
   }
 
   static class FromItem {

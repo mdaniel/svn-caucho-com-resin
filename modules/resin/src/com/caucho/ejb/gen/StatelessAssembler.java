@@ -29,9 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbSessionBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 import com.caucho.util.L10N;
@@ -61,7 +59,7 @@ public class StatelessAssembler extends SessionAssembler
   /**
    * Adds the header component.
    */
-  public void addHeaderComponent(JClass beanClass,
+  public void addHeaderComponent(ApiClass beanClass,
                                  String contextClassName,
                                  String implClassName)
   {
@@ -73,7 +71,7 @@ public class StatelessAssembler extends SessionAssembler
   /**
    * Creates the home view.
    */
-  public ViewClass createHomeView(JClass homeClass,
+  public ViewClass createHomeView(ApiClass homeClass,
                                   String fullClassName,
                                   String viewPrefix)
   {
@@ -90,7 +88,7 @@ public class StatelessAssembler extends SessionAssembler
   /**
    * Creates the home view.
    */
-  public ViewClass createView(ArrayList<JClass> apiList,
+  public ViewClass createView(ArrayList<ApiClass> apiList,
                               String fullClassName,
                               String viewPrefix,
                               String viewSuffix)
@@ -110,13 +108,15 @@ public class StatelessAssembler extends SessionAssembler
   /**
    * Creates the business method
    */
-  public BaseMethod createBusinessMethod(JMethod apiMethod, JMethod implMethod)
+  public BaseMethod createBusinessMethod(ApiMethod apiMethod,
+					 ApiMethod implMethod)
   {
-    BaseMethod method = new BaseMethod(apiMethod, implMethod);
+    BaseMethod method
+      = new BaseMethod(apiMethod.getMethod(), implMethod.getMethod());
 
     CallChain call = method.getCall();
 
-    call = new SessionPoolChain(_sessionBean, call, method);
+    call = new StatelessPoolChain(_sessionBean, call, method);
 
     method.setCall(call);
 

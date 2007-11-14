@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -45,14 +44,14 @@ import java.util.Set;
 public class AmberGetter extends BaseMethod {
   private static L10N L = new L10N(AmberGetter.class);
 
-  private JMethod _method;
+  private ApiMethod _method;
   private String _implClassName;
   private boolean _isReadOnly;
   
-  public AmberGetter(JMethod method,
+  public AmberGetter(ApiMethod method,
 		     String implClassName)
   {
-    super(method);
+    super(method.getMethod());
 
     _method = method;
     _implClassName = implClassName;
@@ -74,7 +73,7 @@ public class AmberGetter extends BaseMethod {
   public void generateCall(JavaWriter out, String []args)
     throws IOException
   {
-    JClass returnType = _method.getReturnType();
+    Class returnType = _method.getReturnType();
 
     if (! _isReadOnly) {
       
@@ -88,7 +87,7 @@ public class AmberGetter extends BaseMethod {
       out.pushDepth();
     }
 
-    out.print(returnType.getPrintName());
+    out.printClass(returnType);
     out.print(" value = ");
     out.print("((" + _implClassName + ") _context.__caucho_getAmberCacheItem().loadEntity(0))." + _method.getName() + "(");
     for (int i = 0; i < args.length; i++) {
@@ -98,11 +97,11 @@ public class AmberGetter extends BaseMethod {
     }
     out.println(");");
 
-    if (returnType.isAssignableTo(Collection.class)) {
+    if (Collection.class.isAssignableFrom(returnType)) {
       out.println("if (value == null)");
       out.println("  return value;");
 
-      if (returnType.isAssignableTo(Set.class))
+      if (Set.class.isAssignableFrom(returnType))
 	out.println("return new java.util.HashSet(value);");
       else
 	out.println("return new java.util.ArrayList(value);");

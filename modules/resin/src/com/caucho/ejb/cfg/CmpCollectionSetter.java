@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.CollectionSetter;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
@@ -49,8 +48,8 @@ public class CmpCollectionSetter extends EjbMethod {
    * @param implMethod the method from the implementation
    */
   public CmpCollectionSetter(EjbView view,
-			     JMethod apiMethod,
-			     JMethod implMethod)
+			     ApiMethod apiMethod,
+			     ApiMethod implMethod)
   {
     super(view, apiMethod, implMethod);
   }

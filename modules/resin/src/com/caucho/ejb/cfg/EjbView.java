@@ -52,7 +52,7 @@ public class EjbView {
 
   private EjbBean _bean;
 
-  private ArrayList<JClass> _apiList;
+  private ArrayList<ApiClass> _apiList;
 
   private String _prefix;
   private String _suffix;
@@ -63,11 +63,11 @@ public class EjbView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbView(EjbBean bean, JClass apiClass, String prefix, String suffix)
+  public EjbView(EjbBean bean, ApiClass apiClass, String prefix, String suffix)
     throws ConfigException
   {
     _bean = bean;
-    _apiList = new ArrayList<JClass>();
+    _apiList = new ArrayList<ApiClass>();
     _apiList.add(apiClass);
     _prefix = prefix;
     _suffix = suffix;
@@ -76,7 +76,10 @@ public class EjbView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbView(EjbBean bean, ArrayList<JClass> apiList, String prefix, String suffix)
+  public EjbView(EjbBean bean,
+		 ArrayList<ApiClass> apiList,
+		 String prefix,
+		 String suffix)
     throws ConfigException
   {
     _bean = bean;
@@ -93,7 +96,7 @@ public class EjbView {
     return _bean;
   }
 
-  protected JClass getApiClass()
+  protected ApiClass getApiClass()
   {
     return _apiList.get(0);
   }
@@ -101,7 +104,7 @@ public class EjbView {
   /**
    * Returns the api class for the view.
    */
-  protected ArrayList<JClass> getApiList()
+  protected ArrayList<ApiClass> getApiList()
   {
     return _apiList;
   }
@@ -109,7 +112,7 @@ public class EjbView {
   /**
    * Returns the implementation class for the view.
    */
-  protected JClass getImplClass()
+  protected ApiClass getImplClass()
   {
     return _bean.getEJBClassWrapper();
   }
@@ -157,16 +160,12 @@ public class EjbView {
     throws ConfigException
   {
     // find API methods matching an implementation method
-    JMethod []implMethods = EjbBean.getMethods(getImplClass());
-
-    for (int i = 0; i < implMethods.length; i++) {
-      JMethod method = implMethods[i];
-
+    for (ApiMethod method : getImplClass().getMethods()) {
       EjbMethod ejbMethod = null;
 
       String name = method.getName();
 
-      if (JClass.OBJECT.getMethod(name, method.getParameterTypes()) != null
+      if (ApiClass.OBJECT.getMethod(name, method.getParameterTypes()) != null
           && ! name.equals("toString")) {
       }
       else if (name.startsWith("ejb"))
@@ -180,15 +179,11 @@ public class EjbView {
     }
 
     // find API methods with no matching implementation method
-    JMethod []apiMethods = EjbBean.getMethods(_apiList);
-
-    for (int i = 0; i < apiMethods.length; i++) {
-      JMethod method = apiMethods[i];
-
+    for (ApiMethod method : EjbBean.getMethods(_apiList)) {
       if (method.getDeclaringClass().getName().startsWith("javax.ejb"))
         continue;
-      else if (JClass.OBJECT.getMethod(method.getName(),
-                                       method.getParameterTypes()) != null) {
+      else if (ApiClass.OBJECT.getMethod(method.getName(),
+					 method.getParameterTypes()) != null) {
         continue;
       }
 
@@ -210,7 +205,7 @@ public class EjbView {
   /**
    * Introspects an ejb method.
    */
-  protected EjbMethod introspectEJBMethod(JMethod method)
+  protected EjbMethod introspectEJBMethod(ApiMethod method)
     throws ConfigException
   {
     return null;
@@ -219,12 +214,12 @@ public class EjbView {
   /**
    * Introspects a business method.
    */
-  protected EjbMethod introspectBusinessMethod(JMethod implMethod)
+  protected EjbMethod introspectBusinessMethod(ApiMethod implMethod)
     throws ConfigException
   {
-    JMethod apiMethod = EjbBean.getMethod(_apiList,
-                                          implMethod.getName(),
-                                          implMethod.getParameterTypes());
+    ApiMethod apiMethod = EjbBean.getMethod(_apiList,
+					    implMethod.getName(),
+					    implMethod.getParameterTypes());
 
     if (apiMethod == null)
       return null;
@@ -235,8 +230,8 @@ public class EjbView {
   /**
    * Creates a new business method.
    */
-  protected EjbMethod createBusinessMethod(JMethod apiMethod,
-                                           JMethod implMethod)
+  protected EjbMethod createBusinessMethod(ApiMethod apiMethod,
+                                           ApiMethod implMethod)
     throws ConfigException
   {
     validateImplMethod(implMethod);
@@ -247,7 +242,7 @@ public class EjbView {
   /**
    * Validate impl method.
    */
-  protected void validateImplMethod(JMethod implMethod)
+  protected void validateImplMethod(ApiMethod implMethod)
     throws ConfigException
   {
     if (! implMethod.isPublic()) {
@@ -273,7 +268,7 @@ public class EjbView {
    * Introspects a method in the view api which does not exist in
    * implementation bean.
    */
-  protected EjbMethod introspectApiMethod(JMethod apiMethod)
+  protected EjbMethod introspectApiMethod(ApiMethod apiMethod)
     throws ConfigException
   {
     /*
@@ -295,22 +290,22 @@ public class EjbView {
   /**
    * Validates an API method.
    */
-  protected void validateApiMethod(JMethod apiMethod)
+  protected void validateApiMethod(ApiMethod apiMethod)
     throws ConfigException
   {
     if ("Remote".equals(_prefix))
       validateException(apiMethod, RemoteException.class);
   }
 
-  protected ConfigException errorMissingMethod(JClass expectedClass,
+  protected ConfigException errorMissingMethod(ApiClass expectedClass,
                                                String expectedName,
-                                               JMethod matchMethod)
+                                               ApiMethod matchMethod)
   {
     return error(L.l("{0}: missing '{1}' method needed to match {2}.{3}",
                      expectedClass.getName(),
                      getFullMethodName(expectedName,
                                        matchMethod.getParameterTypes()),
-                     getShortClassName(matchMethod.getDeclaringClass()),
+                     matchMethod.getDeclaringClass().getSimpleName(),
                      getFullMethodName(matchMethod)));
   }
 
@@ -345,7 +340,7 @@ public class EjbView {
   /**
    * Finds the matching method pattern.
    */
-  protected EjbMethodPattern findMethodPattern(JMethod apiMethod,
+  protected EjbMethodPattern findMethodPattern(ApiMethod apiMethod,
                                                String prefix)
   {
     return _bean.getMethodPattern(apiMethod, prefix);
@@ -355,8 +350,8 @@ public class EjbView {
    * Returns the transaction chain.
    */
   protected CallChain getTransactionChain(CallChain callChain,
-                                          JMethod apiMethod,
-                                          JMethod implMethod,
+                                          ApiMethod apiMethod,
+                                          ApiMethod implMethod,
                                           String prefix)
   {
     return _bean.getTransactionChain(callChain, apiMethod, implMethod, prefix);
@@ -366,7 +361,7 @@ public class EjbView {
    * Returns the transaction chain.
    */
   protected CallChain getSecurityChain(CallChain callChain,
-                                       JMethod apiMethod,
+                                       ApiMethod apiMethod,
                                        String prefix)
   {
     return _bean.getSecurityChain(callChain, apiMethod, prefix);
@@ -375,7 +370,7 @@ public class EjbView {
   /**
    * Validate the exceptions.
    */
-  protected void validateException(JMethod method, Class exn)
+  protected void validateException(ApiMethod method, Class exn)
     throws ConfigException
   {
     _bean.validateException(method, exn);
@@ -384,16 +379,7 @@ public class EjbView {
   /**
    * Validate the exceptions.
    */
-  protected void validateException(JMethod method, JClass exn)
-    throws ConfigException
-  {
-    _bean.validateException(method, exn);
-  }
-
-  /**
-   * Validate the exceptions.
-   */
-  protected void validateExceptions(JMethod method, JClass []exn)
+  protected void validateExceptions(ApiMethod method, Class []exn)
     throws ConfigException
   {
     _bean.validateExceptions(method, exn);
@@ -410,19 +396,19 @@ public class EjbView {
       return null;
   }
 
-  static String getFullMethodName(JMethod method)
+  static String getFullMethodName(ApiMethod method)
   {
     return EjbBean.getFullMethodName(method);
   }
 
-  static String getFullMethodName(String methodName, JClass []paramTypes)
+  static String getFullMethodName(String methodName, Class []paramTypes)
   {
     return EjbBean.getFullMethodName(methodName, paramTypes);
   }
 
-  static String getShortClassName(JClass cl)
+  static String getShortClassName(ApiClass cl)
   {
-    return EjbBean.getShortClassName(cl);
+    return cl.getJavaClass().getSimpleName();
   }
 
   /**

@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.EntityRemoveMethod;
@@ -54,7 +52,7 @@ public class EjbEntityView extends EjbObjectView {
    * Creates a new entity bean configuration.
    */
   public EjbEntityView(EjbEntityBean bean,
-                       ArrayList<JClass> apiClass,
+                       ArrayList<ApiClass> apiClass,
                        String prefix)
     throws ConfigException
   {
@@ -76,9 +74,9 @@ public class EjbEntityView extends EjbObjectView {
   {
     super.assembleMethods(assembler, viewClass, fullClassName);
 
-    JMethod removeApiMethod = null;
+    ApiMethod removeApiMethod = null;
 
-    removeApiMethod = getApiClass().getMethod("remove", new JClass[0]);
+    removeApiMethod = getApiClass().getMethod("remove", new Class[0]);
 
     if (removeApiMethod != null) {
       EntityRemoveMethod removeMethod;

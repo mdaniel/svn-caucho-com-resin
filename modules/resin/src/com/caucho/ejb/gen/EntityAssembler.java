@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
@@ -67,7 +66,7 @@ public class EntityAssembler extends BeanAssembler {
   /**
    * Adds the header component.
    */
-  public void addHeaderComponent(JClass beanClass,
+  public void addHeaderComponent(ApiClass beanClass,
                                  String contextClassName,
                                  String implClassName)
   {
@@ -106,7 +105,7 @@ public class EntityAssembler extends BeanAssembler {
   /**
    * Creates the home view.
    */
-  public ViewClass createHomeView(JClass homeClass,
+  public ViewClass createHomeView(ApiClass homeClass,
                                   String fullClassName,
                                   String viewPrefix)
   {
@@ -123,7 +122,7 @@ public class EntityAssembler extends BeanAssembler {
   /**
    * Creates the home view.
    */
-  public ViewClass createView(ArrayList<JClass> homeClass,
+  public ViewClass createView(ArrayList<ApiClass> homeClass,
                               String fullClassName,
                               String viewPrefix,
                               String viewSuffix)

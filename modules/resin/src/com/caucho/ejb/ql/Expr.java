@@ -31,8 +31,6 @@ package com.caucho.ejb.ql;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.KeyManyToOneField;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.EjbEntityBean;
 import com.caucho.util.CharBuffer;
@@ -54,12 +52,12 @@ public class Expr {
   protected Query _query;
   
   // The type of the expression value
-  private JClass _javaType;
+  private Class _javaType;
 
   /**
    * Gets the Java Type of the expression.
    */
-  public JClass getJavaType()
+  public Class getJavaType()
   {
     return _javaType;
   }
@@ -67,17 +65,9 @@ public class Expr {
   /**
    * Sets the Java Type of the expression.
    */
-  void setJavaType(JClass javaType)
-  {
-    _javaType = javaType;
-  }
-
-  /**
-   * Sets the Java Type of the expression.
-   */
   void setJavaType(Class javaType)
   {
-    setJavaType(JClassLoader.localForName(javaType.getName()));
+    _javaType = javaType;
   }
 
   /**
@@ -101,7 +91,7 @@ public class Expr {
    */
   boolean isNumeric()
   {
-    JClass type = getJavaType();
+    Class type = getJavaType();
 
     if (type == null)
       return false;
@@ -128,7 +118,7 @@ public class Expr {
    */
   boolean isInteger()
   {
-    JClass type = getJavaType();
+    Class type = getJavaType();
     String typeName = type.getName();
 
     return ("java.lang.Byte".equals(typeName) ||
@@ -144,7 +134,7 @@ public class Expr {
   /**
    * True if the type is integer.
    */
-  static boolean isInteger(JClass type)
+  static boolean isInteger(Class type)
   {
    String typeName = type.getName();
 
@@ -168,7 +158,7 @@ public class Expr {
    */
   boolean isString()
   {
-    JClass type = getJavaType();
+    Class type = getJavaType();
     String typeName = type.getName();
 
     return ("java.lang.String".equals(typeName) ||
@@ -181,7 +171,7 @@ public class Expr {
    */
   boolean isBoolean()
   {
-    JClass type = getJavaType();
+    Class type = getJavaType();
     String typeName = type.getName();
 
     return ("boolean".equals(typeName) ||
@@ -193,7 +183,7 @@ public class Expr {
    */
   boolean isDate()
   {
-    JClass type = getJavaType();
+    Class type = getJavaType();
     String typeName = type.getName();
 
     return ("java.util.Date".equals(typeName) ||
@@ -215,9 +205,9 @@ public class Expr {
    */
   boolean isCollection()
   {
-    JClass type = getJavaType();
+    Class type = getJavaType();
 
-    return type.isAssignableTo(Collection.class);
+    return Collection.class.isAssignableFrom(type);
   }
 
   /**

@@ -28,10 +28,8 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.ql.EjbSelectQuery;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -46,12 +44,12 @@ public class AmberQueryMethod extends AbstractQueryMethod {
   private static final L10N L = new L10N(AmberQueryMethod.class);
 
   private EjbEntityBean _returnType;
-  private JMethod _method;
+  private ApiMethod _method;
   private String _contextClassName;
   private String _prefix;
   
   public AmberQueryMethod(EjbEntityBean type,
-			  JMethod method,
+			  ApiMethod method,
 			  String contextClassName,
 			  String prefix,
 			  EjbSelectQuery query)
@@ -68,7 +66,7 @@ public class AmberQueryMethod extends AbstractQueryMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _method.getParameterTypes();
   }
@@ -76,7 +74,7 @@ public class AmberQueryMethod extends AbstractQueryMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _method.getReturnType();
   }
@@ -101,7 +99,7 @@ public class AmberQueryMethod extends AbstractQueryMethod {
     out.println("java.util.ArrayList list = new java.util.ArrayList();");
 
     boolean isCollection = 
-      _method.getReturnType().isAssignableTo(Collection.class);
+      Collection.class.isAssignableFrom(_method.getReturnType());
 
     if (isCollection) {
       out.println("while (rs.next()) {");

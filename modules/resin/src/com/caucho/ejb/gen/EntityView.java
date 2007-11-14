@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -43,11 +43,11 @@ import java.io.IOException;
 public class EntityView extends ViewClass {
   private static L10N L = new L10N(SessionView.class);
 
-  private JClass _remoteClass;
+  private ApiClass _remoteClass;
   private String _prefix;
   private String _contextClassName;
 
-  public EntityView(JClass remoteClass,
+  public EntityView(ApiClass remoteClass,
                     String contextClassName,
                     String prefix)
   {

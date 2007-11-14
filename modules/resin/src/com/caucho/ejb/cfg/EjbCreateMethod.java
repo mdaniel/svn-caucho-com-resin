@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -47,7 +46,7 @@ public class EjbCreateMethod extends EjbMethod {
    * @param apiMethod the method from the view
    * @param implMethod the method from the implementation
    */
-  public EjbCreateMethod(EjbView view, JMethod apiMethod, JMethod implMethod)
+  public EjbCreateMethod(EjbView view, ApiMethod apiMethod, ApiMethod implMethod)
   {
     super(view, apiMethod, implMethod);
   }

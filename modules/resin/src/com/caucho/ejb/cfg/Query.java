@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -98,7 +97,7 @@ public class Query {
       throw new ConfigException(L.l("'findByPrimaryKey' can't be defined in a query."));
     }
     else if (methodName.startsWith("find")) {
-      JMethod method = _entity.findMethod(_signature, _entity.getRemoteHome(), "home");
+      ApiMethod method = _entity.findMethod(_signature, _entity.getRemoteHome(), "home");
 
       if (method == null)
 	method = _entity.findMethod(_signature, _entity.getLocalHome(), "local-home");
@@ -108,7 +107,7 @@ public class Query {
 				      _signature.toSignatureString()));
     }
     else if (methodName.startsWith("ejbSelect")) {
-      JMethod method = _entity.findMethod(_signature,
+      ApiMethod method = _entity.findMethod(_signature,
 					  _entity.getEJBClassWrapper(),
 					  null);
 

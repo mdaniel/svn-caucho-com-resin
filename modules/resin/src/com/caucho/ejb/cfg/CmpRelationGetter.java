@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.CmpManyToOneGetter;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
@@ -51,7 +50,7 @@ public class CmpRelationGetter extends EjbMethod {
    * @param implMethod the method from the implementation
    */
   public CmpRelationGetter(EjbView view,
-			   JMethod apiMethod, JMethod implMethod,
+			   ApiMethod apiMethod, ApiMethod implMethod,
 			   CmpRelationRole relationRole)
   {
     super(view, apiMethod, implMethod);

@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Signature;
 import com.caucho.util.CharBuffer;
@@ -189,35 +187,8 @@ public class MethodSignature {
     else
       return isMatch(method.getName(), method.getParameterTypes(), intf);
   }
-  
-  public boolean isMatch(String methodName, Class []params, String intf)
-  {
-    if (_methodIntf != null && ! _methodIntf.equals(intf))
-      return false;
-    else if (_methodName == null)
-      return false;
-    else if (_methodName.equals("*"))
-      return true;
-    else if (! _methodName.equals(methodName))
-      return false;
-    else if (_paramTypes == null)
-      return true;
 
-    if (params.length != _paramTypes.size())
-      return false;
-
-    for (int i = 0; i < params.length; i++) {
-      String name = params[i].getName();
-      String param = (String) _paramTypes.get(i);
-
-      if (! name.equals(param) && ! name.endsWith("." + param))
-        return false;
-    }
-
-    return true;
-  }
-
-  public boolean isMatch(JMethod method, String intf)
+  public boolean isMatch(ApiMethod method, String intf)
   {
     if (method == null)
       return _methodName.equals("*");
@@ -225,7 +196,7 @@ public class MethodSignature {
       return isMatch(method.getName(), method.getParameterTypes(), intf);
   }
   
-  public boolean isMatch(String methodName, JClass []params, String intf)
+  public boolean isMatch(String methodName, Class []params, String intf)
   {
     if (_methodIntf != null && ! _methodIntf.equals(intf))
       return false;

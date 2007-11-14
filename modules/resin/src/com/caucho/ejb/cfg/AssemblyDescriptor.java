@@ -64,7 +64,7 @@ public class AssemblyDescriptor {
     _config.addMessageDestination(messageDestination);
   }
 
-  public void addApplicationException(ApplicationException applicationException)
+  public void addApplicationException(ApplicationExceptionConfig applicationException)
   {
     _config.addApplicationException(applicationException);
   }

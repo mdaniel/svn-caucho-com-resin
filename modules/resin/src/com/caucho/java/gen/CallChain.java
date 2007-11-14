@@ -29,7 +29,6 @@
 
 package com.caucho.java.gen;
 
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -44,25 +43,25 @@ public class CallChain {
   /**
    * Returns the method's parameter types.
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
-    return new JClass[0];
+    return new Class[0];
   }
 
   /**
    * Returns the method's return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
-    return JClass.VOID;
+    return void.class;
   }
 
   /**
    * Returns the method's exception types.
    */
-  public JClass []getExceptionTypes()
+  public Class []getExceptionTypes()
   {
-    return new JClass[0];
+    return new Class[0];
   }
 
   /**

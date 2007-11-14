@@ -29,9 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseClass;
 import com.caucho.java.gen.BaseMethod;
@@ -48,13 +46,13 @@ public class EntityBean extends ClassComponent {
   private final static L10N L = new L10N(EntityBean.class);
 
   private EjbEntityBean _bean;
-  private JClass _ejbClass;
+  private ApiClass _ejbClass;
   protected String _implClassName;
   protected String _contextClassName;
 
   protected BaseClass _beanClass;
 
-  public EntityBean(JClass ejbClass,
+  public EntityBean(ApiClass ejbClass,
                     String contextClassName,
                     String implClassName)
   {
@@ -183,7 +181,7 @@ public class EntityBean extends ClassComponent {
     out.pushDepth();
     out.println("ptr = new Bean(this);");
 
-    if (BeanAssembler.hasMethod(_ejbClass, "ejbActivate", new JClass[0])) {
+    if (_ejbClass.hasMethod("ejbActivate", new Class[0])) {
       // ejb/061c
       out.println("if (trans != null && ! isHome)");
       out.println("  try { ptr.ejbActivate(); } catch (Exception e) { throw com.caucho.ejb.EJBExceptionWrapper.createRuntime(e); }");
@@ -308,12 +306,12 @@ public class EntityBean extends ClassComponent {
     out.println("if (bean != null) {");
     out.pushDepth();
 
-    if (hasMethod("ejbPassivate", new JClass[0])) {
+    if (hasMethod("ejbPassivate", new Class[0])) {
       out.println("if (bean._ejb_state > QEntity._CAUCHO_IS_HOME)");
       out.println("  bean.ejbPassivate();");
     }
 
-    if (hasMethod("unsetEntityContext", new JClass[0]))
+    if (hasMethod("unsetEntityContext", new Class[0]))
       out.println("bean.unsetEntityContext();");
 
     out.popDepth();
@@ -344,17 +342,9 @@ public class EntityBean extends ClassComponent {
   /**
    * Returns true if the method is implemented.
    */
-  protected boolean hasMethod(String methodName, JClass []paramTypes)
+  protected boolean hasMethod(String methodName, Class []paramTypes)
   {
-    return BeanAssembler.hasMethod(_ejbClass, methodName, paramTypes);
-  }
-
-  /**
-   * Returns true if the method is implemented.
-   */
-  protected boolean hasMethod(JClass ejbClass, String methodName, JClass []paramTypes)
-  {
-    return BeanAssembler.hasMethod(ejbClass, methodName, paramTypes);
+    return _ejbClass.hasMethod(methodName, paramTypes);
   }
 
   /**
@@ -363,10 +353,10 @@ public class EntityBean extends ClassComponent {
   protected void generateLoad(JavaWriter out)
     throws IOException
   {
-    if (hasMethod("ejbLoad", new JClass[0])) {
+    if (hasMethod("ejbLoad", new Class[0])) {
       out.println("if (doLoad) {");
       out.println("  try {");
-      if (hasMethod("ejbLoad", new JClass[0]))
+      if (hasMethod("ejbLoad", new Class[0]))
         out.println("    ptr.ejbLoad();");
 
       out.println("  } catch (Exception e) { throw com.caucho.ejb.EJBExceptionWrapper.createRuntime(e); }");
@@ -415,10 +405,8 @@ public class EntityBean extends ClassComponent {
       out.println("  _ejb_context = context;");
       out.println("  _ejb_state = QEntity._CAUCHO_IS_HOME;");
 
-      if (BeanAssembler.hasMethod(_ejbClass, "setEntityContext",
-                                  new JClass[] {
-                                    JClassLoader.systemForName(EntityContext.class.getName())
-                                  })) {
+      if (_ejbClass.hasMethod("setEntityContext",
+			      new Class[] { EntityContext.class })) {
         out.println("  setEntityContext(context);");
       }
 
@@ -436,7 +424,7 @@ public class EntityBean extends ClassComponent {
       out.popDepth();
       out.println("}");
 
-      if (BeanAssembler.hasMethod(_ejbClass, "ejbActivate", new JClass[0])) {
+      if (_ejbClass.hasMethod("ejbActivate", new Class[0])) {
         out.println();
         out.println("public void ejbActivate()");
         out.println("{");
@@ -452,7 +440,7 @@ public class EntityBean extends ClassComponent {
         out.println("}");
       }
 
-      if (BeanAssembler.hasMethod(_ejbClass, "ejbPassivate", new JClass[0])) {
+      if (_ejbClass.hasMethod("ejbPassivate", new Class[0])) {
         out.println();
         out.println("public void ejbPassivate()");
         out.println("{");
@@ -489,7 +477,7 @@ public class EntityBean extends ClassComponent {
     out.println("public void _caucho_sync()");
     out.println("{");
 
-    if (BeanAssembler.hasMethod(_ejbClass, "ejbStore", new JClass[0])) {
+    if (_ejbClass.hasMethod("ejbStore", new Class[0])) {
       out.pushDepth();
       out.println("if (this._ejb_state >= _CAUCHO_IS_ACTIVE) {");
       // if (! getContainerManagedPersistence())
@@ -512,7 +500,7 @@ public class EntityBean extends ClassComponent {
     out.println("public void _caucho_beforeCompletion(boolean isCommit)");
     out.println("{");
 
-    if (BeanAssembler.hasMethod(_ejbClass, "ejbStore", new JClass[0])) {
+    if (_ejbClass.hasMethod("ejbStore", new Class[0])) {
       out.pushDepth();
 
       generateStore(out);
@@ -580,12 +568,12 @@ public class EntityBean extends ClassComponent {
     out.println("  }");
     out.println("}");
 
-    if (hasMethod("ejbPassivate", new JClass[0])) {
+    if (hasMethod("ejbPassivate", new Class[0])) {
       out.println("if (_ejb_state > QEntity._CAUCHO_IS_HOME)");
       out.println("  ejbPassivate();");
     }
 
-    if (hasMethod("unsetEntityContext", new JClass[0])) {
+    if (hasMethod("unsetEntityContext", new Class[0])) {
       out.println();
       out.println("unsetEntityContext();");
     }

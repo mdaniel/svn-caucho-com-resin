@@ -28,7 +28,6 @@
 
 package com.caucho.ejb.ql;
 
-import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
 import com.caucho.util.CharBuffer;
 
@@ -91,7 +90,7 @@ class IsExpr extends Expr {
   {
     _value.generateWhereSubExpr(cb);
 
-    JClass valueType = _value.getJavaType();
+    Class valueType = _value.getJavaType();
       /*
     if (javax.ejb.EJBLocalObject.class.isAssignableFrom(valueType)) {
       EjbEntityBean bean = _query.getBeanByType(valueType);

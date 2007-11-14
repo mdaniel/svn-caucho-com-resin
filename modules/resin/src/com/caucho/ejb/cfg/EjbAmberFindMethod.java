@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.AmberQueryMethod;
 import com.caucho.ejb.gen.ViewClass;
@@ -56,7 +55,7 @@ public class EjbAmberFindMethod extends EjbMethod {
    * @param apiMethod the method from the view
    * @param implMethod the method from the implementation
    */
-  public EjbAmberFindMethod(EjbView view, JMethod apiMethod,
+  public EjbAmberFindMethod(EjbView view, ApiMethod apiMethod,
 			    String query, String location)
     throws ConfigException
   {
@@ -83,7 +82,7 @@ public class EjbAmberFindMethod extends EjbMethod {
   public BaseMethod assemble(ViewClass viewAssembler, String fullClassName)
     throws ConfigException
   {
-    JMethod apiMethod = getApiMethod();
+    ApiMethod apiMethod = getApiMethod();
     EjbEntityBean bean = (EjbEntityBean) getView().getBean();
     
     QLParser parser =  new QLParser(bean,

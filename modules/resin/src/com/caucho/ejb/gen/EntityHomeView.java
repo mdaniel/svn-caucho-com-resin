@@ -29,9 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -47,12 +45,12 @@ public class EntityHomeView extends ViewClass {
 
   private EjbEntityBean _bean;
 
-  private JClass _remoteClass;
+  private ApiClass _remoteClass;
   private String _prefix;
   private String _contextClassName;
   private boolean _isCMP;
 
-  public EntityHomeView(JClass remoteClass,
+  public EntityHomeView(ApiClass remoteClass,
                         String contextClassName,
                         String prefix,
                         boolean isCMP)
@@ -77,9 +75,9 @@ public class EntityHomeView extends ViewClass {
   }
 
   public BaseMethod createCreateMethod(EjbEntityBean bean,
-                                       JMethod api,
-                                       JMethod create,
-                                       JMethod postCreate,
+                                       ApiMethod api,
+                                       ApiMethod create,
+                                       ApiMethod postCreate,
                                        String fullClassName)
   {
     EntityCreateMethod method;

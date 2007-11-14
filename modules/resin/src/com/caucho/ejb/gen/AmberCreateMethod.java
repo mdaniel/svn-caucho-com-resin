@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
 
 /**
@@ -40,9 +39,9 @@ public class AmberCreateMethod extends EntityCreateMethod {
   private static final L10N L = new L10N(AmberCreateMethod.class);
 
   public AmberCreateMethod(EjbEntityBean bean,
-			   JMethod apiMethod,
-			   JMethod beanCreateMethod,
-			   JMethod beanPostCreateMethod,
+			   ApiMethod apiMethod,
+			   ApiMethod beanCreateMethod,
+			   ApiMethod beanPostCreateMethod,
 			   String contextClassName)
   {
     super(bean, apiMethod, beanCreateMethod, beanPostCreateMethod,

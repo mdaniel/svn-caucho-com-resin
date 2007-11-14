@@ -28,12 +28,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbBean;
-import com.caucho.ejb.cfg.Interceptor;
-import com.caucho.ejb.cfg.RemoveMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -44,198 +39,21 @@ import com.caucho.util.L10N;
 import javax.ejb.Remove;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.lang.reflect.*;
 
 /**
  * Generates the bean instance for a method call.
  */
-public class SessionPoolChain extends FilterCallChain {
+abstract public class SessionPoolChain extends FilterCallChain {
   private static L10N L = new L10N(SessionPoolChain.class);
 
-  private final EjbBean _bean;
-  private BaseMethod _apiMethod;
-  private JMethod _implMethod;
-
-  public SessionPoolChain(EjbBean bean, CallChain next, BaseMethod apiMethod)
+  protected BaseMethod _apiMethod;
+  
+  protected SessionPoolChain(CallChain next, BaseMethod apiMethod)
   {
     super(next);
 
-    _bean = bean;
     _apiMethod = apiMethod;
-
-    CallChain callChain = apiMethod.getCall();
-
-    MethodCallChain methodCallChain = (MethodCallChain) callChain;
-
-    _implMethod = methodCallChain.getMethod();
-  }
-
-  /**
-   * Prints a call within the same JVM
-   *
-   * @param out the java source stream
-   * @param var the object with the method
-   * @param args the call's arguments
-   */
-  public void generateCall(JavaWriter out, String retVar,
-                           String var, String []args)
-    throws IOException
-  {
-    ArrayList<Interceptor> interceptors
-      = _bean.getInvokeInterceptors(_apiMethod.getMethodName());
-    boolean hasInterceptors = false;
-
-    boolean isRemove = false;
-    boolean retain = false;
-
-    if (_implMethod.isAnnotationPresent(Remove.class)) {
-      isRemove = true;
-      JAnnotation removeAnn = _implMethod.getAnnotation(javax.ejb.Remove.class);
-      retain = ((Boolean) removeAnn.get("retainIfException")).booleanValue();
-    } else {
-      RemoveMethod removeMethod = _bean.getRemoveMethod(_implMethod);
-
-      if (removeMethod != null) {
-        isRemove = true;
-        retain = removeMethod.isRetainIfException();
-      }
-    }
-
-    if (isRemove) {
-      out.println("Exception exn = null;");
-      out.println();
-    }
-
-    out.println("Bean ptr = _context._ejb_begin(trans);");
-
-    out.println("try {");
-    out.pushDepth();
-
-    // ejb/0fba
-    if (! isRemove) {
-      // ejb/0fbk
-      if (interceptors != null || _bean.getAroundInvokeMethodName() != null) {
-        generateCallInterceptors(out, args);
-        hasInterceptors = true;
-      }
-      else
-        super.generateCall(out, retVar, "ptr", args);
-    }
-    else { // The interceptor calls ctx.proceed() which invokes the business method.
-      super.generateCall(out, retVar, "ptr", args);
-    }
-
-    out.popDepth();
-
-    // ejb/0fba
-    if (hasInterceptors) {
-      generateInterceptorExceptionHandling(out);
-    }
-
-    out.println("} catch (com.caucho.ejb.EJBExceptionWrapper e) {");
-    out.pushDepth();
-
-    // Application exception: cannot set null since the finally block
-    // needs to free up the bean first.
-    // out.println("ptr = null;");
-
-    if (isRemove) {
-      out.println("exn = e;");
-      out.println();
-    }
-
-    out.println("throw e;");
-
-    out.popDepth();
-
-    out.println("} catch (javax.ejb.EJBException e) {");
-    out.pushDepth();
-
-    // XXX: ejb/02d1 vs TCK
-    out.println("ptr = null;");
-
-    if (isRemove) {
-      out.println("exn = e;");
-      out.println();
-    }
-
-    out.println("throw e;");
-
-    out.popDepth();
-
-    out.println("} catch (RuntimeException e) {");
-    out.pushDepth();
-
-    // XXX TCK, needs QA out.println("ptr = null;");
-
-    if (isRemove) {
-      out.println("exn = e;");
-      out.println();
-    }
-
-    out.println("throw e;");
-
-    out.popDepth();
-
-    if (isRemove) {
-      // ejb/0fe6
-      out.println("} catch (Exception e) {");
-      out.println("  exn = e;");
-      out.println("  throw e;");
-    }
-
-    out.println("} finally {");
-    out.pushDepth();
-
-    out.println("_context._ejb_free(ptr);");
-
-    // ejb/0fba
-    if (isRemove) {
-      // ejb/0fe6
-      if (retain) {
-        JClass exnTypes[] = _implMethod.getExceptionTypes();
-
-        boolean isFirst = true;
-
-        for (JClass cl : exnTypes) {
-          if (isFirst)
-            isFirst = false;
-          else
-            out.print("else ");
-
-          out.println("if (exn instanceof " + cl.getName() + ") {");
-          out.println("}");
-        }
-
-        if (! isFirst) {
-          out.println("else");
-          out.print("  ");
-        }
-      }
-
-      out.println("_server.remove(_context.getPrimaryKey());");
-    }
-
-    out.println("ptr = null;");
-
-    out.popDepth();
-    out.println("}");
-
-    // ejb/0fba
-    if (! isRemove) {
-      // generateExceptionHandling(out);
-    }
-    else {
-      // XXX TCK: ejb30/sec
-      if (_implMethod.getReturnType().getPrintName().equals("void")) {
-        out.popDepth();
-        out.println("} catch (javax.ejb.NoSuchEJBException e) {");
-        out.println("  throw e;");
-
-        // ejb/0fe1: always remove after system exception.
-        out.println("} catch (RuntimeException e) {");
-        out.pushDepth();
-      }
-    }
   }
 
   protected void generateFilterCall(JavaWriter out, String retVar,
@@ -269,14 +87,14 @@ public class SessionPoolChain extends FilterCallChain {
       argList += arg;
     }
 
-    JClass types[] = _apiMethod.getParameterTypes();
+    Class types[] = _apiMethod.getParameterTypes();
 
     StringBuilder paramTypes = new StringBuilder();
 
     isFirst = true;
 
     for (int i = 0; i < args.length; i++) {
-      String typeName = types[i].getPrintName();
+      String typeName = javaClassName(types[i]);
 
       if (isFirst)
         isFirst = false;
@@ -288,7 +106,7 @@ public class SessionPoolChain extends FilterCallChain {
       if (! types[i].isPrimitive())
         paramTypes.append(typeName + ".class");
       else {
-        Class primitiveType = (Class) types[i].getJavaClass();
+        Class primitiveType = types[i];
 
         if (primitiveType == Boolean.TYPE)
           paramTypes.append("Boolean.TYPE");
@@ -312,7 +130,7 @@ public class SessionPoolChain extends FilterCallChain {
     String s = "ptr.__caucho_callInterceptors(this, new Object[] {" + argList + "}, ";
     s += "\"" + _apiMethod.getMethodName() + "\", new Class[] {" + paramTypes + "})";
 
-    if (_apiMethod.getReturnType().getPrintName().equals("void"))
+    if (void.class.equals(_apiMethod.getReturnType()))
       out.print(s);
     else {
       out.print("return " + generateTypeCasting(s, _apiMethod.getReturnType()));
@@ -330,29 +148,36 @@ public class SessionPoolChain extends FilterCallChain {
     out.popDepth();
   }
 
-  private String generateTypeCasting(String s, JClass type)
+  protected String generateTypeCasting(String s, Class type)
   {
     if (type.isPrimitive()) {
-      Class primitiveType = (Class) type.getJavaClass();
-
-      if (primitiveType == Boolean.TYPE)
+      if (type == Boolean.TYPE)
         return "((Boolean) " + s + ").booleanValue()";
-      else if (primitiveType == Byte.TYPE)
+      else if (type == Byte.TYPE)
         return "((Byte) " + s + ").byteValue()";
-      else if (primitiveType == Character.TYPE)
+      else if (type == Character.TYPE)
         return "((Character) " + s + ").charValue()";
-      else if (primitiveType == Double.TYPE)
+      else if (type == Double.TYPE)
         return "((Double) " + s + ").doubleValue()";
-      else if (primitiveType == Float.TYPE)
+      else if (type == Float.TYPE)
         return "((Float) " + s + ").floatValue()";
-      else if (primitiveType == Integer.TYPE)
+      else if (type == Integer.TYPE)
         return "((Integer) " + s + ").intValue()";
-      else if (primitiveType == Long.TYPE)
+      else if (type == Long.TYPE)
         return "((Long) " + s + ").longValue()";
-      else if (primitiveType == Short.TYPE)
+      else if (type == Short.TYPE)
         return "((Short) " + s + ").shortValue()";
     }
 
-    return "(" + type.getPrintName() + ") " + s;
+    // XXX: arrays
+    return "(" + javaClassName(type) + ") " + s;
+  }
+
+  protected String javaClassName(Class cl)
+  {
+    if (cl.isArray())
+      return javaClassName(cl.getComponentType()) + "[]";
+    else
+      return cl.getName();
   }
 }

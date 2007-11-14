@@ -28,11 +28,11 @@
 
 package com.caucho.java.gen;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.*;
 
 /**
  * Generates the skeleton for a method call.
@@ -50,7 +50,7 @@ public class SuperMethodCallChain extends MethodCallChain {
   /**
    * Creates the chain with the method.
    */
-  public SuperMethodCallChain(JMethod method)
+  public SuperMethodCallChain(Method method)
   {
     super(method);
   }

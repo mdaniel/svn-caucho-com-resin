@@ -29,14 +29,14 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.MethodCallChain;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.*;
 
 /**
  * Generates the skeleton for the find method.
@@ -44,17 +44,19 @@ import java.io.IOException;
 public class EntityFindMethod extends BaseMethod {
   private static L10N L = new L10N(EntityFindMethod.class);
 
-  private JMethod _apiMethod;
+  private ApiMethod _apiMethod;
   private String _contextClassName;
   private String _prefix;
   
-  public EntityFindMethod(JMethod apiMethod,
-			  JMethod implMethod,
+  public EntityFindMethod(ApiMethod apiMethod,
+			  ApiMethod implMethod,
 			  String contextClassName,
 			  String prefix)
   {
-    super(apiMethod,
-	  implMethod != null ? new MethodCallChain(implMethod) : null);
+    super(apiMethod.getMethod(),
+	  (implMethod != null
+	   ? new MethodCallChain(implMethod.getMethod())
+	   : null));
 
     _apiMethod = apiMethod;
     _contextClassName = contextClassName;
@@ -64,7 +66,7 @@ public class EntityFindMethod extends BaseMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _apiMethod.getParameterTypes();
   }
@@ -72,7 +74,7 @@ public class EntityFindMethod extends BaseMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _apiMethod.getReturnType();
   }
@@ -85,17 +87,17 @@ public class EntityFindMethod extends BaseMethod {
   public void generateCall(JavaWriter out, String []args)
     throws IOException
   {
-    JClass keyType;
+    Class keyType;
 
     if (getCall() != null) {
       keyType = getCall().getReturnType();
-      out.print(keyType.getPrintName());
+      out.printClass(keyType);
       out.print(" key;");
       getCall().generateCall(out, "key", "bean", args);
     }
     else {
       keyType = getParameterTypes()[0];
-      out.print(keyType.getPrintName());
+      out.printClass(keyType);
       out.print(" key;");
       out.println("key = " + args[0] + ";");
     }

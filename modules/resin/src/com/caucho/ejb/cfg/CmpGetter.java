@@ -28,7 +28,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.AmberGetter;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
@@ -48,7 +47,7 @@ public class CmpGetter extends EjbMethod {
    * @param apiMethod the method from the view
    * @param implMethod the method from the implementation
    */
-  public CmpGetter(EjbView view, JMethod apiMethod, JMethod implMethod)
+  public CmpGetter(EjbView view, ApiMethod apiMethod, ApiMethod implMethod)
   {
     super(view, apiMethod, implMethod);
   }

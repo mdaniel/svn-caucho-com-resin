@@ -28,8 +28,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -42,16 +41,16 @@ import java.io.IOException;
 public class SessionCreateMethod extends BaseMethod {
   private static final L10N L = new L10N(StatelessCreateMethod.class);
 
-  private JMethod _method;
+  private ApiMethod _method;
   private String _contextClassName;
   private String _prefix;
 
-  public SessionCreateMethod(JMethod apiMethod,
-                             JMethod implMethod,
+  public SessionCreateMethod(ApiMethod apiMethod,
+                             ApiMethod implMethod,
                              String contextClassName,
                              String prefix)
   {
-    super(apiMethod, implMethod);
+    super(apiMethod.getMethod(), implMethod.getMethod());
 
     _method = apiMethod;
     _contextClassName = contextClassName;
@@ -61,7 +60,7 @@ public class SessionCreateMethod extends BaseMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _method.getParameterTypes();
   }
@@ -69,7 +68,7 @@ public class SessionCreateMethod extends BaseMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _method.getReturnType();
   }
@@ -101,7 +100,7 @@ public class SessionCreateMethod extends BaseMethod {
     out.println();
     out.println("_server.createSessionKey(cxt);");
 
-    JClass retType = getReturnType();
+    Class retType = getReturnType();
 
     // ejb/02j4
     if (! retType.getName().equals("void"))

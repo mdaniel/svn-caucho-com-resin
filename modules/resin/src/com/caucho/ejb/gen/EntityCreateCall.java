@@ -29,9 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.CallChain;
 import com.caucho.java.gen.MethodCallChain;
@@ -47,20 +45,20 @@ public class EntityCreateCall extends CallChain {
 
   private EjbEntityBean _bean;
   
-  private JMethod _createMethod;
-  private JMethod _postCreateMethod;
+  private ApiMethod _createMethod;
+  private ApiMethod _postCreateMethod;
 
   private CallChain _createCall;
   private CallChain _postCreateCall;
   
-  private JClass _primKeyClass;
+  private ApiClass _primKeyClass;
   private String _contextClassName;
 
   private boolean _isCMP;
 
   public EntityCreateCall(EjbEntityBean bean,
-			  JMethod createMethod,
-			  JMethod postCreateMethod,
+			  ApiMethod createMethod,
+			  ApiMethod postCreateMethod,
 			  String contextClassName)
   {
     _bean = bean;
@@ -68,10 +66,10 @@ public class EntityCreateCall extends CallChain {
     _createMethod = createMethod;
     _postCreateMethod = postCreateMethod;
     
-    _createCall = new MethodCallChain(_createMethod);
+    _createCall = new MethodCallChain(_createMethod.getMethod());
     
     if (_postCreateMethod != null)
-      _postCreateCall = new MethodCallChain(_postCreateMethod);
+      _postCreateCall = new MethodCallChain(_postCreateMethod.getMethod());
     
     _contextClassName = contextClassName;
   }
@@ -101,7 +99,7 @@ public class EntityCreateCall extends CallChain {
     out.println("bean._ejb_trans = trans;");
     out.println("bean._ejb_flags = 1;");
     
-    out.print(_createCall.getReturnType().getPrintName());
+    out.printClass(_createCall.getReturnType());
     out.println(" key;");
 
     _createCall.generateCall(out, "key", "bean", args);
@@ -116,10 +114,10 @@ public class EntityCreateCall extends CallChain {
 
     out.println("trans.addObject(bean);");
 
-    JClass retType = _createCall.getReturnType();
+    Class retType = _createCall.getReturnType();
     if (_isCMP) {
     }
-    else if (retType.isAssignableTo(Object.class))
+    else if (! retType.isPrimitive())
       out.println("cxt.postCreate(key);");
     else {
       out.print("Object okey = ");

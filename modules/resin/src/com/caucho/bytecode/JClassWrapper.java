@@ -54,6 +54,11 @@ public class JClassWrapper extends JClass {
     _class = cl;
   }
 
+  public static JClassWrapper create(Class cl)
+  {
+    return new JClassWrapper(cl, JClassLoaderWrapper.create());
+  }
+
   JClassWrapper(Class cl)
   {
     _class = cl;

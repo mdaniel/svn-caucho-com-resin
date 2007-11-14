@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public class AmberAssembler extends EntityAssembler {
   /**
    * Adds the header component.
    */
-  public void addHeaderComponent(JClass beanClass,
+  public void addHeaderComponent(ApiClass beanClass,
 				 String contextClassName,
 				 String implClassName)
   {
@@ -65,7 +64,7 @@ public class AmberAssembler extends EntityAssembler {
   /**
    * Creates the home view.
    */
-  public ViewClass createHomeView(JClass homeClass,
+  public ViewClass createHomeView(ApiClass homeClass,
 				  String fullClassName,
 				  String viewPrefix)
   {
@@ -82,7 +81,7 @@ public class AmberAssembler extends EntityAssembler {
   /**
    * Creates the instance view.
    */
-  public ViewClass createView(ArrayList<JClass> apiList,
+  public ViewClass createView(ArrayList<ApiClass> apiList,
 			      String fullClassName,
 			      String viewPrefix)
   {

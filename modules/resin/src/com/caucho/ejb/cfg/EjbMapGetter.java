@@ -31,7 +31,6 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.AbstractQueryMethod;
 import com.caucho.ejb.gen.BeanAssembler;
@@ -58,7 +57,7 @@ public class EjbMapGetter extends CmpGetter {
    * @param implMethod the method from the implementation
    */
   public EjbMapGetter(EjbView view,
-		      JMethod apiMethod, JMethod implMethod,
+		      ApiMethod apiMethod, ApiMethod implMethod,
 		      CmrMap map)
   {
     super(view, apiMethod, implMethod);
@@ -76,9 +75,9 @@ public class EjbMapGetter extends CmpGetter {
   }
 
   class BeanMethod extends BaseMethod {
-    BeanMethod(JMethod method)
+    BeanMethod(ApiMethod method)
     {
-      super(method);
+      super(method.getMethod());
     }
   
     /**
@@ -134,24 +133,26 @@ public class EjbMapGetter extends CmpGetter {
       EjbConfig config = _map.getBean().getConfig();
  
       out.println("int index = 2;");
+      Class indexClass = index.getJavaType().getRawType().getJavaClass();
       AbstractQueryMethod.generateSetParameter(out,
 					       config,
-					       index.getJavaType(),
+					       indexClass,
 					       "query",
 					       args[0]);
       
       for (int i = 0; i < keys.size(); i++) {
 	IdField key = keys.get(i);
 
+	Class keyClass = key.getJavaType().getRawType().getJavaClass();
 	AbstractQueryMethod.generateSetParameter(out,
 						 config,
-						 key.getJavaType(),
+						 keyClass,
 						 "query",
 						 key.generateGet("this"));
       }
       
       out.print("return (");
-      out.print(getMethod().getReturnType().getPrintName());
+      out.printClass(getMethod().getReturnType());
       out.println(") query.getSingleResult();");
 
       out.popDepth();

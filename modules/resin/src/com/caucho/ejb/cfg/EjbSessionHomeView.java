@@ -48,7 +48,7 @@ public class EjbSessionHomeView extends EjbHomeView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbSessionHomeView(EjbBean bean, JClass apiClass, String prefix)
+  public EjbSessionHomeView(EjbBean bean, ApiClass apiClass, String prefix)
     throws ConfigException
   {
     super(bean, apiClass, prefix);
@@ -57,19 +57,19 @@ public class EjbSessionHomeView extends EjbHomeView {
   /**
    * Introspects an ejb method.
    */
-  protected EjbMethod introspectEJBMethod(JMethod method)
+  protected EjbMethod introspectEJBMethod(ApiMethod method)
     throws ConfigException
   {
-    JClass apiClass = getApiClass();
+    ApiClass apiClass = getApiClass();
     String methodName = method.getName();
-    JClass []paramTypes = method.getParameterTypes();
+    Class []paramTypes = method.getParameterTypes();
 
     if (methodName.startsWith("ejbCreate")) {
       String createName = "c" + methodName.substring(4);
       
-      JMethod apiMethod = EjbBean.getMethod(apiClass,
-					    createName,
-					   paramTypes);
+      ApiMethod apiMethod = EjbBean.getMethod(apiClass,
+					      createName,
+					      paramTypes);
 
       /*
       if (apiMethod == null)
@@ -110,7 +110,7 @@ public class EjbSessionHomeView extends EjbHomeView {
    * Introspects a method in the view api which does not exist in
    * implementation bean.
    */
-  protected EjbMethod introspectApiMethod(JMethod apiMethod)
+  protected EjbMethod introspectApiMethod(ApiMethod apiMethod)
     throws ConfigException
   {
     String apiName = apiMethod.getName();

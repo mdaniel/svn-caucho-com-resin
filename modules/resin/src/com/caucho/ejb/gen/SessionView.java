@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.ejb.cfg.EjbBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -46,13 +45,14 @@ public class SessionView extends ViewClass {
   private static L10N L = new L10N(SessionView.class);
 
   private EjbBean _bean;
-  private ArrayList<JClass> _apiList;
+  private ArrayList<ApiClass> _apiList;
   private String _prefix;
   private String _suffix;
   private String _contextClassName;
   private boolean _isStateless;
 
-  public SessionView(EjbBean bean, ArrayList<JClass> apiList,
+  public SessionView(EjbBean bean,
+		     ArrayList<ApiClass> apiList,
                      String contextClassName,
                      String prefix,
                      String suffix, // "21" for EJB 2.1 only
@@ -62,7 +62,7 @@ public class SessionView extends ViewClass {
 
     _bean = bean;
 
-    for (JClass api : apiList)
+    for (ApiClass api : apiList)
       addInterfaceName(api.getName());
 
     _apiList = apiList;
@@ -83,7 +83,7 @@ public class SessionView extends ViewClass {
     if (_isStateless)
       return new StatelessPoolChain(_bean, call, method);
     else
-      return new SessionPoolChain(_bean, call, method);
+      return new StatefulPoolChain(_bean, call, method);
   }
 
   public void generate(JavaWriter out)

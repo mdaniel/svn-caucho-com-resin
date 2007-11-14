@@ -29,9 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
 
@@ -41,7 +39,7 @@ import com.caucho.util.L10N;
 public class AmberView extends EntityView {
   private static L10N L = new L10N(AmberView.class);
 
-  public AmberView(JClass remoteClass,
+  public AmberView(ApiClass remoteClass,
 		   String contextClassName,
 		   String prefix)
   {
@@ -49,9 +47,9 @@ public class AmberView extends EntityView {
   }
 
   public BaseMethod createCreateMethod(EjbEntityBean bean,
-				       JMethod api,
-				       JMethod create,
-				       JMethod postCreate,
+				       ApiMethod api,
+				       ApiMethod create,
+				       ApiMethod postCreate,
 				       String fullClassName)
   {
     return new AmberCreateMethod(bean, api, create, postCreate, fullClassName);

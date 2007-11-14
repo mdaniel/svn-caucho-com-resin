@@ -28,7 +28,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -39,8 +38,8 @@ import com.caucho.util.L10N;
 public class EjbEntityCreateMethod extends EjbMethod {
   private static final L10N L = new L10N(EjbEntityCreateMethod.class);
 
-  private JMethod _createMethod;
-  private JMethod _postCreateMethod;
+  private ApiMethod _createMethod;
+  private ApiMethod _postCreateMethod;
   
   /**
    * Creates a new method.
@@ -50,9 +49,9 @@ public class EjbEntityCreateMethod extends EjbMethod {
    * @param implMethod the method from the implementation
    */
   public EjbEntityCreateMethod(EjbView view,
-			       JMethod apiMethod,
-			       JMethod createMethod,
-			       JMethod postCreateMethod)
+			       ApiMethod apiMethod,
+			       ApiMethod createMethod,
+			       ApiMethod postCreateMethod)
   {
     super(view, apiMethod, null);
 

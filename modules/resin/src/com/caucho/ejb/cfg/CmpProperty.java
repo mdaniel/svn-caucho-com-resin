@@ -31,8 +31,6 @@ package com.caucho.ejb.cfg;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -149,29 +147,29 @@ public class CmpProperty {
   /**
    * Returns the getter.
    */
-  public JMethod getGetter()
+  public ApiMethod getGetter()
   {
     String methodName = ("get" +
 			 Character.toUpperCase(_name.charAt(0)) +
 			 _name.substring(1));
     
-    return _entity.getMethod(methodName, new JClass[0]);
+    return _entity.getMethod(methodName, new Class[0]);
   }
 
   /**
    * Returns the setter.
    */
-  public JMethod getSetter()
+  public ApiMethod getSetter()
   {
     String methodName = ("set" +
 			 Character.toUpperCase(_name.charAt(0)) +
 			 _name.substring(1));
 
-    JMethod getter = getGetter();
+    ApiMethod getter = getGetter();
 
     if (getter != null)
       return _entity.getMethod(methodName,
-			       new JClass[] { getter.getReturnType() });
+			       new Class[] { getter.getReturnType() });
     else
       return null;
   }

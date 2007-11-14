@@ -31,7 +31,6 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.AbstractQueryMethod;
 import com.caucho.ejb.gen.BeanAssembler;
@@ -60,7 +59,7 @@ public class EjbMapMethod extends CmpGetter {
    * @param implMethod the method from the implementation
    */
   public EjbMapMethod(EjbView view,
-		      JMethod apiMethod, JMethod implMethod,
+		      ApiMethod apiMethod, ApiMethod implMethod,
 		      CmrMap map)
   {
     super(view, apiMethod, implMethod);
@@ -96,9 +95,9 @@ public class EjbMapMethod extends CmpGetter {
   }
 
   class BeanMethod extends BaseMethod {
-    BeanMethod(JMethod method)
+    BeanMethod(ApiMethod method)
     {
-      super(method);
+      super(method.getMethod());
     }
   
     /**
@@ -154,9 +153,10 @@ public class EjbMapMethod extends CmpGetter {
       for (int i = 0; i < keys.size(); i++) {
 	IdField key = keys.get(i);
 
+	Class keyClass = key.getJavaType().getRawType().getJavaClass();
 	AbstractQueryMethod.generateSetParameter(out,
 						 config,
-						 key.getJavaType(),
+						 keyClass,
 						 "query",
 						 key.generateGet("this"));
       }

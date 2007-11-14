@@ -39,6 +39,8 @@ import com.caucho.vfs.*;
 
 import javax.sql.DataSource;
 import javax.persistence.spi.*;
+import java.lang.instrument.*;
+import java.security.*;
 import java.net.URL;
 import java.util.*;
 
@@ -383,7 +385,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public void addTransformer(ClassTransformer transformer)
   {
-    throw new UnsupportedOperationException();
+    _loader.addTransformer(new TransformerAdapter(transformer));
   }
 
   /**
@@ -428,6 +430,29 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
     public String getValue()
     {
       return _value;
+    }
+  }
+
+  public static class TransformerAdapter implements ClassFileTransformer {
+    private ClassTransformer _transformer;
+
+    TransformerAdapter(ClassTransformer transformer)
+    {
+      _transformer = transformer;
+    }
+
+    public byte[] transform(ClassLoader loader,
+			    String className,
+			    Class redefineClass,
+			    ProtectionDomain domain,
+			    byte []classFileBuffer)
+      throws IllegalClassFormatException
+    {
+      return _transformer.transform(loader,
+				    className,
+				    redefineClass,
+				    domain,
+				    classFileBuffer);
     }
   }
 }

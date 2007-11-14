@@ -28,9 +28,8 @@
 
 package com.caucho.ejb.ql;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.cfg.*;
 import com.caucho.util.IntArray;
 
 /**
@@ -84,17 +83,17 @@ class Query {
   final static int ARG = EXTERNAL_DOT + 1;
   final static int THIS = ARG + 1;
 
-  private JMethod _method;
+  private ApiMethod _method;
   private EjbConfig _config;
 
   private IntArray _argSize = new IntArray();
 
-  JMethod getMethod()
+  ApiMethod getMethod()
   {
     return _method;
   }
 
-  void setMethod(JMethod method)
+  void setMethod(ApiMethod method)
   {
     _method = method;
   }

@@ -38,8 +38,6 @@ import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.ql.QLParser;
 import com.caucho.util.L10N;
@@ -129,7 +127,7 @@ public class CmrManyToMany extends CmrRelation {
   /**
    * Returns the target type.
    */
-  public JClass getTargetType()
+  public ApiClass getTargetType()
   {
     return _targetBean.getLocal();
   }
@@ -203,8 +201,8 @@ public class CmrManyToMany extends CmrRelation {
    * Create any bean methods.
    */
   public EjbMethod createGetter(EjbView view,
-				JMethod apiMethod,
-				JMethod implMethod)
+				ApiMethod apiMethod,
+				ApiMethod implMethod)
     throws ConfigException
   {
     return new EjbManyToManyMethod(view, apiMethod, implMethod, this);

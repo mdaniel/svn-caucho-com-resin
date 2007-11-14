@@ -29,7 +29,6 @@
 package com.caucho.ejb.ql;
 
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.CmrRelation;
 import com.caucho.ejb.cfg.EjbEntityBean;
@@ -85,9 +84,9 @@ class RelationExpr extends PathExpr {
   /**
    * Gets the Java Type of the expression.
    */
-  public JClass getJavaType()
+  public Class getJavaType()
   {
-    return _relation.getTargetType();
+    return _relation.getTargetType().getJavaClass();
   }
 
   void setUsesField()

@@ -72,6 +72,7 @@ import javax.ejb.*;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.interceptor.Interceptors;
+import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,6 +80,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.reflect.*;
 
 /**
  * Configuration for an ejb bean.
@@ -87,15 +89,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private static Logger log = Log.open(EjbBean.class);
   private static L10N L = new L10N(EjbBean.class);
 
-  private static EnvironmentLocal<Map<JClass,SoftReference<JMethod[]>>> _methodCache
-    = new EnvironmentLocal<Map<JClass,SoftReference<JMethod[]>>>();
+  private static EnvironmentLocal<Map<Class,SoftReference<ApiMethod[]>>> _methodCache
+    = new EnvironmentLocal<Map<Class,SoftReference<ApiMethod[]>>>();
 
   private final EjbConfig _ejbConfig;
   private final String _ejbModuleName;
 
   private ClassLoader _loader;
 
-  protected JClassLoader _jClassLoader;
+  protected ClassLoader _jClassLoader;
 
   private String _ejbName;
 
@@ -108,15 +110,17 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
   // these classes are loaded with the parent (configuration) loader, not
   // the server loader
-  private JClass _ejbClass;
+  private ApiClass _ejbClass;
 
-  protected JClass _remoteHome;
-  protected ArrayList<JClass> _remoteList = new ArrayList<JClass>();
-  protected JClass _remote21;
+  protected ApiClass _remoteHome;
+  protected ArrayList<ApiClass> _remoteList = new ArrayList<ApiClass>();
+  protected ApiClass _remote21;
 
-  protected JClass _localHome;
-  protected ArrayList<JClass> _localList = new ArrayList<JClass>();
-  protected JClass _local21;
+  protected ApiClass _localHome;
+  protected ArrayList<ApiClass> _localList = new ArrayList<ApiClass>();
+  protected ArrayList<ApiClass> _localApiList = new ArrayList<ApiClass>();
+  protected ApiClass _local21;
+
 
   protected EjbView _remoteHomeView;
   protected EjbView _remoteView21;
@@ -186,8 +190,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     _loader = Thread.currentThread().getContextClassLoader();
 
-    _jClassLoader = JClassLoaderWrapper.create(_loader);
-
     if (_ejbConfig.getEJBManager() != null) {
       // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
       _ejbConfig.getEJBManager().getTransactionManager().setEJB3(isEJB3());
@@ -210,7 +212,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Returns the remove-method for the given method.
    */
-  public RemoveMethod getRemoveMethod(JMethod method)
+  public RemoveMethod getRemoveMethod(Method method)
   {
     for (RemoveMethod removeMethod : _removeMethods) {
       if (removeMethod.isMatch(method))
@@ -478,21 +480,16 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the ejb implementation class.
    */
-  public void setEJBClass(String typeName)
+  public void setEJBClass(Class ejbClass)
     throws ConfigException
   {
-    JClass ejbClass = _jClassLoader.forName(typeName);
-
-    if (ejbClass == null)
-      throw error(L.l("ejb-class '{0}' not found", typeName));
-
-    setEJBClassWrapper(ejbClass);
+    setEJBClassWrapper(new ApiClass(ejbClass));
   }
 
   /**
    * Sets the ejb implementation class.
    */
-  public void setEJBClassWrapper(JClass ejbClass)
+  public void setEJBClassWrapper(ApiClass ejbClass)
     throws ConfigException
   {
     if (_ejbClass != null && ! _ejbClass.getName().equals(ejbClass.getName()))
@@ -512,26 +509,25 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       throw error(L.l("'{0}' must not be an interface.  Bean implementations must be classes.", ejbClass.getName()));
 
     // ejb/02e5
-    JMethod constructor = null;
+    Constructor constructor = null;
     try {
-      constructor = ejbClass.getConstructor(new JClass[0]);
-    } catch (Throwable e) {
+      constructor = ejbClass.getConstructor(new Class[0]);
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
 
     if (constructor == null)
       throw error(L.l("'{0}' needs a public zero-arg constructor.  Bean implementations need a public zero-argument constructor.", ejbClass.getName()));
 
-    JClass []exn = constructor.getExceptionTypes();
-    for (int i = 0; i < exn.length; i++) {
-      if (! exn[i].isAssignableTo(RuntimeException.class)) {
-        throw error(L.l("{0}: constructor must not throw '{1}'.  Bean constructors must not throw checked exceptions.", ejbClass.getName(), exn[i].getName()));
+    for (Class exn : constructor.getExceptionTypes()) {
+      if (! RuntimeException.class.isAssignableFrom(exn)) {
+        throw error(L.l("{0}: constructor must not throw '{1}'.  Bean constructors must not throw checked exceptions.", ejbClass.getName(), exn.getName()));
       }
     }
 
-    JMethod method = ejbClass.getMethod("finalize", new JClass[0]);
+    ApiMethod method = ejbClass.getMethod("finalize", new Class[0]);
 
-    if (method != null && ! method.getDeclaringClass().equals(JClass.OBJECT))
+    if (method != null && ! method.getDeclaringClass().equals(Object.class))
       throw error(L.l("'{0}' may not implement finalize().  Bean implementations may not implement finalize().", ejbClass.getName()));
   }
 
@@ -555,7 +551,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the ejb implementation class.
    */
-  public JClass getEJBClassWrapper()
+  public ApiClass getEJBClassWrapper()
   {
     return _ejbClass;
   }
@@ -593,16 +589,18 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the remote home interface class.
    */
-  public void setHome(Class home)
+  public void setHome(Class homeClass)
     throws ConfigException
   {
-    setHomeWrapper(new JClassWrapper(home, _jClassLoader));
+    ApiClass home = new ApiClass(homeClass);
+    
+    setHomeWrapper(home);
 
     // ejb/0ff0
     // Adds the 2.1 remote interface
-    JMethod method = findFirstCreateMethod(home);
+    ApiMethod method = findFirstCreateMethod(home);
 
-    JClass remoteWrapper = method.getReturnType();
+    ApiClass remoteWrapper = new ApiClass(method.getReturnType());
 
     // Order is important.
     setRemote21(remoteWrapper);
@@ -612,7 +610,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the remote home interface class.
    */
-  public void setHomeWrapper(JClass remoteHome)
+  public void setHomeWrapper(ApiClass remoteHome)
     throws ConfigException
   {
     _remoteHome = remoteHome;
@@ -623,14 +621,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! remoteHome.isInterface())
       throw error(L.l("'{0}' must be an interface. <home> interfaces must be interfaces.", remoteHome.getName()));
 
-    if (! remoteHome.isAssignableTo(EJBHome.class) && ! isAllowPOJO())
+    if (! EJBHome.class.isAssignableFrom(remoteHome.getJavaClass())
+	&& ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBHome.  <home> interfaces must extend javax.ejb.EJBHome.", remoteHome.getName()));
   }
 
   /**
    * Gets the ejb implementation class.
    */
-  public JClass getRemoteHome()
+  public ApiClass getRemoteHome()
   {
     return _remoteHome;
   }
@@ -656,16 +655,16 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void setRemote(Class remote)
     throws ConfigException
   {
-    setRemoteWrapper(new JClassWrapper(remote, _jClassLoader));
+    setRemoteWrapper(new ApiClass(remote));
   }
 
   /**
    * Adds a remote interface class
    */
-  public void addBusinessRemote(String typeName)
+  public void addBusinessRemote(Class remoteClass)
   {
-    JClass remote = _jClassLoader.forName(typeName);
-
+    ApiClass remote = new ApiClass(remoteClass);
+    
     if (! remote.isPublic())
       throw error(L.l("'{0}' must be public.  <business-remote> interfaces must be public.", remote.getName()));
 
@@ -685,7 +684,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the remote interface class.
    */
-  public void setRemoteWrapper(JClass remote)
+  public void setRemoteWrapper(ApiClass remote)
     throws ConfigException
   {
     if (! remote.isPublic())
@@ -694,7 +693,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! remote.isInterface())
       throw error(L.l("'{0}' must be an interface. <remote> interfaces must be interfaces.", remote.getName()));
 
-    if (! remote.isAssignableTo(EJBObject.class) && ! isAllowPOJO())
+    if (! EJBObject.class.isAssignableFrom(remote.getJavaClass())
+	&& ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBObject.  <remote> interfaces must extend javax.ejb.EJBObject.", remote.getName()));
 
     if (! _remoteList.contains(remote)) {
@@ -710,7 +710,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the 2.1 remote interface.
    */
-  public JClass getRemote21()
+  public ApiClass getRemote21()
   {
     return _remote21;
   }
@@ -718,7 +718,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the 2.1 remote interface.
    */
-  public void setRemote21(JClass remote21)
+  public void setRemote21(ApiClass remote21)
   {
     _isEJB21 = true;
 
@@ -728,7 +728,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the 2.1 local interface.
    */
-  public JClass getLocal21()
+  public ApiClass getLocal21()
   {
     return _local21;
   }
@@ -736,7 +736,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the 2.1 local interface.
    */
-  public void setLocal21(JClass local21)
+  public void setLocal21(ApiClass local21)
   {
     _isEJB21 = true;
 
@@ -746,7 +746,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the remote interface class.
    */
-  public ArrayList<JClass> getRemoteList()
+  public ArrayList<ApiClass> getRemoteList()
   {
     return _remoteList;
   }
@@ -760,7 +760,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       return null;
 
     try {
-      JClass remote = _remoteList.get(0);
+      ApiClass remote = _remoteList.get(0);
 
       return Class.forName(remote.getName(), false, getClassLoader());
     } catch (Exception e) {
@@ -771,16 +771,18 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the ejb local home interface
    */
-  public void setLocalHome(Class localHome)
+  public void setLocalHome(Class localHomeClass)
     throws ConfigException
   {
-    setLocalHomeWrapper(new JClassWrapper(localHome, _jClassLoader));
+    ApiClass localHome = new ApiClass(localHomeClass);
+    
+    setLocalHomeWrapper(localHome);
 
     // ejb/0ff4
     // Adds the 2.1 local interface
-    JMethod method = findFirstCreateMethod(localHome);
+    ApiMethod method = findFirstCreateMethod(localHome);
 
-    JClass localWrapper = method.getReturnType();
+    ApiClass localWrapper = new ApiClass(method.getReturnType());
 
     // Order is important.
     setLocal21(localWrapper);
@@ -790,7 +792,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the local home interface class.
    */
-  public void setLocalHomeWrapper(JClass localHome)
+  public void setLocalHomeWrapper(ApiClass localHome)
     throws ConfigException
   {
     _localHome = localHome;
@@ -801,7 +803,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! localHome.isInterface())
       throw error(L.l("'{0}' must be an interface. <local-home> interfaces must be interfaces.", localHome.getName()));
 
-    if (! localHome.isAssignableTo(EJBLocalHome.class) && ! isAllowPOJO())
+    if (! EJBLocalHome.class.isAssignableFrom(localHome.getJavaClass())
+	&& ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBLocalHome.  <local-home> interfaces must extend javax.ejb.EJBLocalHome.", localHome.getName()));
 
   }
@@ -809,7 +812,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the local home interface class.
    */
-  public JClass getLocalHome()
+  public ApiClass getLocalHome()
   {
     return _localHome;
   }
@@ -820,16 +823,16 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void setLocal(Class local)
     throws ConfigException
   {
-    setLocalWrapper(new JClassWrapper(local, _jClassLoader));
+    setLocalWrapper(new ApiClass(local));
   }
 
   /**
    * Adds a local interface class
    */
-  public void addBusinessLocal(String typeName)
+  public void addBusinessLocal(Class localClass)
   {
-    JClass local = _jClassLoader.forName(typeName);
-
+    ApiClass local = new ApiClass(localClass);
+    
     if (! local.isPublic())
       throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", local.getName()));
 
@@ -838,6 +841,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     if (! _localList.contains(local)) {
       _localList.add(local);
+      _localApiList.add(local);
 
       if (local == _local21)
         _isEJB21 = true;
@@ -849,7 +853,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the local interface class.
    */
-  public void setLocalWrapper(JClass local)
+  public void setLocalWrapper(ApiClass local)
     throws ConfigException
   {
     if (! local.isPublic())
@@ -858,11 +862,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! local.isInterface())
       throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
 
-    if (! local.isAssignableTo(EJBLocalObject.class) && ! isAllowPOJO())
+    if (! EJBLocalObject.class.isAssignableFrom(local.getJavaClass())
+	&& ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
 
     if (! _localList.contains(local)) {
       _localList.add(local);
+      _localApiList.add(new ApiClass(local.getJavaClass()));
 
       if (local == _local21)
         _isEJB21 = true;
@@ -874,7 +880,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the local interface class.
    */
-  public ArrayList<JClass> getLocalList()
+  public ArrayList<ApiClass> getLocalList()
   {
     return _localList;
   }
@@ -917,7 +923,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the best method.
    */
-  public EjbMethodPattern getMethodPattern(JMethod method, String intf)
+  public EjbMethodPattern getMethodPattern(ApiMethod method, String intf)
   {
     EjbMethodPattern bestMethod = null;
     int bestCost = -1;
@@ -1163,10 +1169,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     // XXX: ejb/0f78
     if (_ejbClass != null) {
-      JAnnotation interceptorsAnn = _ejbClass.getAnnotation(Interceptors.class);
+      Interceptors interceptorsAnn = _ejbClass.getAnnotation(Interceptors.class);
 
       if (interceptorsAnn != null) {
-        for (Class cl : (Class []) interceptorsAnn.get("value")) {
+        for (Class cl : interceptorsAnn.value()) {
           // XXX: ejb/0fb0
           if (! containsInterceptor(cl.getName())) {
             addInterceptor(configureInterceptor(cl));
@@ -1215,19 +1221,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
   }
 
-  private Interceptor configureInterceptor(Class cl)
+  private Interceptor configureInterceptor(Class type)
     throws ConfigException
   {
-    JClass type = _jClassLoader.forName(cl.getName());
-
-    if (type == null)
-      throw new ConfigException(L.l("'{0}' is an unknown interceptor type",
-                                    cl.getName()));
-
     try {
       Interceptor interceptor = new Interceptor();
 
-      interceptor.setInterceptorClass(cl.getName());
+      interceptor.setInterceptorClass(type.getName());
 
       interceptor.init();
 
@@ -1259,7 +1259,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     if (_remote21 != null) {
-      ArrayList<JClass> list = new ArrayList<JClass>();
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.add(_remote21);
 
       _remoteView21 = createObjectView(list, "Remote", "21");
@@ -1267,7 +1267,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     if (_remoteList.size() > 0) {
-      ArrayList<JClass> list = new ArrayList<JClass>();
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.addAll(_remoteList);
       list.remove(_remote21);
 
@@ -1283,7 +1283,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     if (_local21 != null) {
-      ArrayList<JClass> list = new ArrayList<JClass>();
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.add(_local21);
 
       _localView21 = createObjectView(list, "Local", "21");
@@ -1291,7 +1291,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     if (_localList.size() > 0) {
-      ArrayList<JClass> list = new ArrayList<JClass>();
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.addAll(_localList);
       list.remove(_local21);
 
@@ -1305,7 +1305,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Creates a home view.
    */
-  protected EjbHomeView createHomeView(JClass homeClass, String prefix)
+  protected EjbHomeView createHomeView(ApiClass homeClass, String prefix)
     throws ConfigException
   {
     return new EjbHomeView(this, homeClass, prefix);
@@ -1314,7 +1314,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Creates an object view.
    */
-  protected EjbObjectView createObjectView(ArrayList<JClass> apiList,
+  protected EjbObjectView createObjectView(ArrayList<ApiClass> apiList,
                                            String prefix,
                                            String suffix)
     throws ConfigException
@@ -1353,10 +1353,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Validates the remote interface.
    */
-  protected void validateRemote(JClass objectClass)
+  protected void validateRemote(ApiClass objectClass)
     throws ConfigException
   {
-    JClass beanClass = getEJBClassWrapper();
+    ApiClass beanClass = getEJBClassWrapper();
     String beanName = beanClass.getName();
 
     String objectName = objectClass.getName();
@@ -1367,19 +1367,17 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! objectClass.isInterface())
       throw error(L.l("'{0}' must be an interface", objectName));
 
-    JMethod []methods = getMethods(objectClass);
-    for (int i = 0; i < methods.length; i++) {
-      JMethod method = methods[i];
+    for (ApiMethod method : objectClass.getMethods()) {
       String name = method.getName();
-      JClass []param = method.getParameterTypes();
-      JClass retType = method.getReturnType();
+      Class []param = method.getParameterTypes();
+      Class retType = method.getReturnType();
 
       if (method.getDeclaringClass().isAssignableFrom(EJBObject.class))
         continue;
       if (method.getDeclaringClass().isAssignableFrom(EJBLocalObject.class))
         continue;
 
-      if (objectClass.isAssignableTo(EJBObject.class))
+      if (EJBObject.class.isAssignableFrom(objectClass.getJavaClass()))
         validateException(method, java.rmi.RemoteException.class);
 
       if (name.startsWith("ejb")) {
@@ -1388,17 +1386,18 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
                         objectName));
       }
 
-      JClass returnType = method.getReturnType();
+      Class returnType = method.getReturnType();
 
-      if (objectClass.isAssignableTo(EJBObject.class) &&
-          (returnType.isAssignableTo(EJBLocalObject.class) ||
-           returnType.isAssignableTo(EJBLocalHome.class)))
+      if (EJBObject.class.isAssignableFrom(objectClass.getJavaClass())
+          && (EJBLocalObject.class.isAssignableFrom(returnType)
+	      || EJBLocalHome.class.isAssignableFrom(returnType))) {
         throw error(L.l("'{0}' must not return '{1}' in {2}.  Remote methods must not return local interfaces.",
                         getFullMethodName(method),
                         getShortClassName(returnType),
                         objectClass.getName()));
+      }
 
-      JMethod implMethod =
+      ApiMethod implMethod =
         validateRemoteImplMethod(method.getName(), param,
                                  method, objectClass);
 
@@ -1423,14 +1422,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method
    */
-  private JMethod validateRemoteImplMethod(String methodName,
-                                           JClass []param,
-                                           JMethod sourceMethod,
-                                           JClass sourceClass)
+  private ApiMethod validateRemoteImplMethod(String methodName,
+                                           Class []param,
+                                           ApiMethod sourceMethod,
+                                           ApiClass sourceClass)
     throws ConfigException
   {
-    JMethod method = null;
-    JClass beanClass = getEJBClassWrapper();
+    ApiMethod method = null;
+    ApiClass beanClass = getEJBClassWrapper();
 
     method = getMethod(beanClass, methodName, param);
 
@@ -1476,7 +1475,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     return method;
   }
 
-  JMethod validateNonFinalMethod(String methodName, JClass []param,
+  ApiMethod validateNonFinalMethod(String methodName, Class []param,
                                  boolean isOptional)
     throws ConfigException
   {
@@ -1486,14 +1485,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       return validateNonFinalMethod(methodName, param);
   }
 
-  JMethod validateNonFinalMethod(String methodName, JClass []param)
+  ApiMethod validateNonFinalMethod(String methodName, Class []param)
     throws ConfigException
   {
     return validateNonFinalMethod(methodName, param, null, null);
   }
 
-  JMethod validateNonFinalMethod(String methodName, JClass []param,
-                                 JMethod sourceMethod, JClass sourceClass)
+  ApiMethod validateNonFinalMethod(String methodName, Class []param,
+                                 ApiMethod sourceMethod, ApiClass sourceClass)
     throws ConfigException
   {
     return validateNonFinalMethod(methodName, param,
@@ -1508,14 +1507,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method
    */
-  JMethod validateNonFinalMethod(String methodName, JClass []param,
-                                 JMethod sourceMethod, JClass sourceClass,
-                                 boolean isOptional)
+  ApiMethod validateNonFinalMethod(String methodName, Class []param,
+				   ApiMethod sourceMethod,
+				   ApiClass sourceClass,
+				   boolean isOptional)
     throws ConfigException
   {
-    JMethod method = validateMethod(methodName, param,
-                                    sourceMethod, sourceClass,
-                                    isOptional);
+    ApiMethod method = validateMethod(methodName, param,
+				      sourceMethod, sourceClass,
+				      isOptional);
 
     if (method == null && isOptional)
       return null;
@@ -1534,7 +1534,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     return method;
   }
 
-  JMethod validateMethod(String methodName, JClass []param)
+  ApiMethod validateMethod(String methodName, Class []param)
     throws ConfigException
   {
     return validateMethod(methodName, param, null, null);
@@ -1548,8 +1548,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method
    */
-  JMethod validateMethod(String methodName, JClass []param,
-                         JMethod sourceMethod, JClass sourceClass)
+  ApiMethod validateMethod(String methodName, Class []param,
+                         ApiMethod sourceMethod, ApiClass sourceClass)
     throws ConfigException
   {
     return validateMethod(methodName, param, sourceMethod, sourceClass, false);
@@ -1563,12 +1563,12 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method
    */
-  JMethod validateMethod(String methodName, JClass []param,
-                         JMethod sourceMethod, JClass sourceClass,
-                         boolean isOptional)
+  ApiMethod validateMethod(String methodName, Class []param,
+			   ApiMethod sourceMethod, ApiClass sourceClass,
+			   boolean isOptional)
     throws ConfigException
   {
-    JMethod method = null;
+    ApiMethod method = null;
 
     method = getMethod(_ejbClass, methodName, param);
 
@@ -1579,7 +1579,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       throw error(L.l("{0}: missing '{1}' needed to match {2}.{3}",
                       _ejbClass.getName(),
                       getFullMethodName(methodName, param),
-                      getShortClassName(sourceClass),
+                      sourceClass.getSimpleName(),
                       getFullMethodName(sourceMethod)));
     }
     else if (method == null) {
@@ -1588,7 +1588,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
                       getFullMethodName(methodName, param)));
     }
 
-    JClass declaringClass = method.getDeclaringClass();
+    Class declaringClass = method.getDeclaringClass();
 
     if (method.isAbstract()) {
       if (method.getDeclaringClass().getName().equals("javax.ejb.EntityBean"))
@@ -1685,20 +1685,20 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       assembler.addDependency(depend);
     }
 
-    assembler.addDependency(new JClassDependency(_ejbClass));
+    assembler.addDependency(new ClassDependency(_ejbClass.getJavaClass()));
 
     if (_remoteHome != null)
-      assembler.addDependency(new JClassDependency(_remoteHome));
+      assembler.addDependency(new ClassDependency(_remoteHome.getJavaClass()));
 
-    for (JClass remote : _remoteList) {
-      assembler.addDependency(new JClassDependency(remote));
+    for (ApiClass remote : _remoteList) {
+      assembler.addDependency(new ClassDependency(remote.getJavaClass()));
     }
 
     if (_localHome != null)
-      assembler.addDependency(new JClassDependency(_localHome));
+      assembler.addDependency(new ClassDependency(_localHome.getJavaClass()));
 
-    for (JClass local : _localList) {
-      assembler.addDependency(new JClassDependency(local));
+    for (ApiClass local : _localList) {
+      assembler.addDependency(new ClassDependency(local.getJavaClass()));
     }
 
     return assembler.getAssembledGenerator();
@@ -1733,11 +1733,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     throws ConfigException
   {
     // find API methods matching an implementation method
-    JMethod []implMethods = getMethods(getEJBClassWrapper());
-
-    for (int i = 0; i < implMethods.length; i++) {
-      JMethod method = implMethods[i];
-
+    for (ApiMethod method : getEJBClassWrapper().getMethods()) {
       EjbBaseMethod ejbMethod = null;
 
       String name = method.getName();
@@ -1768,7 +1764,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Introspects an ejb method.
    */
-  protected EjbBaseMethod introspectEJBMethod(JMethod method)
+  protected EjbBaseMethod introspectEJBMethod(ApiMethod method)
     throws ConfigException
   {
     return null;
@@ -1777,7 +1773,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Validates an implementation method.
    */
-  protected void validateImplMethod(JMethod method)
+  protected void validateImplMethod(ApiMethod method)
     throws ConfigException
   {
   }
@@ -1788,42 +1784,44 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   protected void assembleMethods(BeanAssembler assembler,
                                  ViewClass view,
                                  String contextClassName,
-                                 JMethod []methods,
+                                 ArrayList<ApiMethod> methods,
                                  String prefix)
     throws NoSuchMethodException
   {
-    for (int i = 0; i < methods.length; i++) {
-      String className = methods[i].getDeclaringClass().getName();
-      String methodName = methods[i].getName();
-      JClass []args = methods[i].getParameterTypes();
+    for (ApiMethod method : methods) {
+      String className = method.getDeclaringClass().getName();
+      String methodName = method.getName();
+      Class []args = method.getParameterTypes();
 
       if (className.startsWith("javax.ejb.")) {
       }
-      else if (isOld(methods, methods[i], i)) {
+      /*
+      else if (isOld(methods, method, i)) {
       }
-      else if (methodName.equals("equals") && args.length == 1 &&
-               args[0].equals(JClass.OBJECT)) {
+      */
+      else if (methodName.equals("equals") && args.length == 1
+	       && args[0].equals(Object.class)) {
       }
       else if (methodName.equals("hashCode") && args.length == 0) {
       }
       else {
-        JMethod beanMethod = null;
+        ApiMethod beanMethod = null;
 
-        JClass ejbClass = getEJBClassWrapper();
+        ApiClass ejbClass = getEJBClassWrapper();
 
-        beanMethod = ejbClass.getMethod(methods[i].getName(),
-                                        methods[i].getParameterTypes());
+        beanMethod = ejbClass.getMethod(method.getName(),
+                                        method.getParameterTypes());
 
         if (beanMethod == null)
           throw new NoSuchMethodException("Can't find public method " +
-                                          methods[i].getFullName());
+                                          method.getFullName());
 
-        CallChain call = new MethodCallChain(beanMethod);
+        CallChain call = new MethodCallChain(beanMethod.getMethod());
         call = view.createPoolChain(call, null);
-        call = getTransactionChain(call, beanMethod, methods[i], prefix);
+        call = getTransactionChain(call, beanMethod, method, prefix);
         call = getSecurityChain(call, beanMethod, prefix);
 
-        view.addMethod(new BaseMethod(methods[i], call));
+        view.addMethod(new BaseMethod(method.getMethod(), call));
       }
     }
   }
@@ -1831,31 +1829,28 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   protected void assembleHomeMethods(BeanAssembler assembler,
                                      BaseClass baseClass,
                                      String contextClassName,
-                                     JClass homeClass,
+                                     ApiClass homeClass,
                                      String prefix)
     throws NoSuchMethodException
   {
-    JMethod []methods = getMethods(homeClass);
-
-    for (int i = 0; i < methods.length; i++) {
-      String className = methods[i].getDeclaringClass().getName();
-      String methodName = methods[i].getName();
+    for (ApiMethod method : homeClass.getMethods()) {
+      String className = method.getDeclaringClass().getName();
+      String methodName = method.getName();
 
       if (className.startsWith("javax.ejb.")) {
       }
-      else if (isOld(methods, methods[i], i)) {
+      /*
+      else if (isOld(methods, method, i)) {
       }
+      */
       else if (methodName.startsWith("create")) {
-        JMethod beanMethod = null;
+        ApiMethod beanMethod = null;
 
         String name = ("ejbCreate" + Character.toUpperCase(methodName.charAt(0))
                        + methodName.substring(1));
 
-        try {
-          beanMethod = getEJBClassWrapper().getMethod(name,
-                                                      methods[i].getParameterTypes());
-        } catch (Throwable e) {
-        }
+	beanMethod
+	  = getEJBClassWrapper().getMethod(name, method.getParameterTypes());
 
         /*
           baseClass.addMethod(assembler.createCreateMethod(methods[i],
@@ -1880,39 +1875,36 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
         //printFind(methods[i], prefix);
       }
       else {
-        JMethod beanMethod = null;
+        ApiMethod beanMethod = null;
 
         String name = ("ejbHome" + Character.toUpperCase(methodName.charAt(0))
                        + methodName.substring(1));
 
-        try {
-          beanMethod = getEJBClassWrapper().getMethod(name,
-                                                      methods[i].getParameterTypes());
-        } catch (Exception e) {
-          throw new NoSuchMethodException("can't find method " + name);
-        }
+	beanMethod
+	  = getEJBClassWrapper().getMethod(name, method.getParameterTypes());
 
-        CallChain call = new MethodCallChain(beanMethod);
-        call = getTransactionChain(call, beanMethod, methods[i], prefix);
+        CallChain call = new MethodCallChain(beanMethod.getMethod());
+        call = getTransactionChain(call, beanMethod, method, prefix);
         call = getSecurityChain(call, beanMethod, prefix);
 
-        baseClass.addMethod(new BaseMethod(methods[i], call));
+        baseClass.addMethod(new BaseMethod(method.getMethod(), call));
       }
     }
   }
 
   protected CallChain getTransactionChain(CallChain next,
-                                          JMethod apiMethod,
-                                          JMethod implMethod,
+                                          ApiMethod apiMethod,
+                                          ApiMethod implMethod,
                                           String prefix)
   {
-    return TransactionChain.create(next, getTransactionAttribute(implMethod, prefix),
+    return TransactionChain.create(next,
+				   getTransactionAttribute(implMethod, prefix),
                                    apiMethod, implMethod, isEJB3(),
                                    _ejbConfig.getApplicationExceptions());
   }
 
   protected CallChain getSecurityChain(CallChain next,
-                                       JMethod method,
+                                       ApiMethod method,
                                        String prefix)
   {
     EjbMethodPattern ejbMethod = getMethodPattern(method, prefix);
@@ -1951,7 +1943,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method
    */
-  protected void validatePublicMethod(JMethod method)
+  protected void validatePublicMethod(ApiMethod method)
     throws ConfigException
   {
     if (! method.isPublic()) {
@@ -1969,7 +1961,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * True if we've already handled the method.
    */
-  static boolean isOld(JMethod []methods, JMethod method, int index)
+  /*
+  static boolean isOld(ApiMethod []methods, ApiMethod method, int index)
   {
     for (int i = 0; i < index; i++) {
       if (isEquiv(methods[i], method))
@@ -1978,14 +1971,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     return false;
   }
+  */
 
-  static boolean isEquiv(JMethod oldMethod, JMethod method)
+  static boolean isEquiv(ApiMethod oldMethod, ApiMethod method)
   {
     if (! oldMethod.getName().equals(method.getName()))
       return false;
 
-    JClass []oldParam = oldMethod.getParameterTypes();
-    JClass []param = method.getParameterTypes();
+    Class []oldParam = oldMethod.getParameterTypes();
+    Class []param = method.getParameterTypes();
 
     if (oldParam.length != param.length)
       return false;
@@ -2001,7 +1995,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Returns the matching transaction attribute.
    */
-  public int getTransactionAttribute(JMethod method, String intf)
+  public int getTransactionAttribute(ApiMethod method, String intf)
   {
     if (! isContainerTransaction())
       return EjbMethod.TRANS_BEAN;
@@ -2034,7 +2028,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method or null if non matches.
    */
-  JMethod getMethod(String methodName, JClass []paramTypes)
+  ApiMethod getMethod(String methodName, Class []paramTypes)
   {
     return getMethod(getEJBClassWrapper(), methodName, paramTypes);
   }
@@ -2047,7 +2041,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method or null if non matches.
    */
-  public static JMethod getMethod(JClass cl, JMethod sourceMethod)
+  public static ApiMethod getMethod(ApiClass cl, ApiMethod sourceMethod)
   {
     return getMethod(cl, sourceMethod.getName(),
                      sourceMethod.getParameterTypes());
@@ -2062,12 +2056,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method or null if non matches.
    */
-  public static JMethod getMethod(ArrayList<JClass> apiList,
-                                  String name,
-                                  JClass []param)
+  public static ApiMethod getMethod(ArrayList<ApiClass> apiList,
+				    String name,
+				    Class []param)
   {
+    
     for (int i = 0; i < apiList.size(); i++) {
-      JMethod method = getMethod(apiList.get(i), name, param);
+      ApiMethod method = getMethod(apiList.get(i), name, param);
 
       if (method != null)
         return method;
@@ -2085,29 +2080,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method or null if non matches.
    */
-  public static JMethod getMethod(JClass cl, String name, JClass []param)
+  public static ApiMethod getMethod(ApiClass cl, String name, Class []param)
   {
-    if (cl == null)
-      return null;
-
-    JMethod []methods = cl.getDeclaredMethods();
-
-    for (int i = 0; i < methods.length; i++) {
-      if (isMatch(methods[i], name, param))
-        return methods[i];
-    }
-
-    JMethod method = getMethod(cl.getSuperClass(), name, param);
-    if (method != null)
-      return method;
-
-    for (JClass iface : cl.getInterfaces()) {
-      method = getMethod(iface, name, param);
-      if (method != null)
-        return method;
-    }
-
-    return null;
+    return cl.getMethod(name, param);
   }
 
   public boolean isCMP()
@@ -2125,7 +2100,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     return ! (isCMP() || isCMP1());
   }
 
-  static boolean isMatch(JMethod methodA, JMethod methodB)
+  static boolean isMatch(ApiMethod methodA, ApiMethod methodB)
   {
     if (methodA == methodB)
       return true;
@@ -2135,12 +2110,12 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       return isMatch(methodA, methodB.getName(), methodB.getParameterTypes());
   }
 
-  static boolean isMatch(JMethod method, String name, JClass []param)
+  static boolean isMatch(ApiMethod method, String name, Class []param)
   {
     if (! method.getName().equals(name))
       return false;
 
-    JClass []mparam = method.getParameterTypes();
+    Class []mparam = method.getParameterTypes();
 
     if (mparam.length != param.length)
       return false;
@@ -2162,16 +2137,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method or null if non matches.
    */
-  static JMethod findMethod(MethodSignature sig, JClass cl, String intf)
+  static ApiMethod findMethod(MethodSignature sig, ApiClass cl, String intf)
   {
     if (cl == null)
       return null;
 
-    JMethod []methods = getMethods(cl);
-
-    for (int i = 0; i < methods.length; i++) {
-      if (sig.isMatch(methods[i], intf))
-        return methods[i];
+    for (ApiMethod method : cl.getMethods()) {
+      if (sig.isMatch(method, intf))
+        return method;
     }
 
     return null;
@@ -2180,78 +2153,18 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Returns all the method in the class.
    */
-  static JMethod []getMethods(ArrayList<JClass> apiList)
+  static ArrayList<ApiMethod> getMethods(ArrayList<ApiClass> apiList)
   {
-    ArrayList<JMethod> methodList = new ArrayList<JMethod>();
+    ArrayList<ApiMethod> methodList = new ArrayList<ApiMethod>();
 
-    for (JClass api : apiList) {
-      for (JMethod method : getMethods(api)) {
+    for (ApiClass api : apiList) {
+      for (ApiMethod method : api.getMethods()) {
         if (! methodList.contains(method))
           methodList.add(method);
       }
     }
 
-    JMethod []methods = new JMethod[methodList.size()];
-    methodList.toArray(methods);
-
-    return methods;
-  }
-
-  /**
-   * Returns all the method in the class.
-   */
-  static JMethod []getMethods(JClass cl)
-  {
-    Map<JClass,SoftReference<JMethod[]>> methodMap = _methodCache.get();
-
-    if (methodMap == null) {
-      methodMap = new WeakHashMap<JClass,SoftReference<JMethod[]>>();
-      _methodCache.set(methodMap);
-    }
-
-    SoftReference<JMethod[]> methodArrayRef = methodMap.get(cl);
-    JMethod []methodArray = null;
-
-    if (methodArrayRef != null) {
-      methodArray = methodArrayRef.get();
-
-      if (methodArray != null)
-        return methodArray;
-    }
-
-    ArrayList<JMethod> methods = new ArrayList<JMethod>();
-
-    getMethods(methods, cl);
-
-    methodArray = methods.toArray(new JMethod[methods.size()]);
-
-    methodMap.put(cl, new SoftReference<JMethod[]>(methodArray));
-
-    return methodArray;
-  }
-
-  /**
-   * Returns all the method in the class.
-   */
-  static void getMethods(ArrayList<JMethod> methods, JClass cl)
-  {
-    if (cl == null)
-      return;
-
-    JMethod []subMethods = cl.getDeclaredMethods();
-
-    for (int i = 0; i < subMethods.length; i++) {
-      if (findMethod(methods, subMethods[i]) == null) {
-        methods.add(subMethods[i]);
-      }
-    }
-
-    getMethods(methods, cl.getSuperClass());
-
-    JClass []interfaces = cl.getInterfaces();
-    for (int i = 0; interfaces != null && i < interfaces.length; i++) {
-      getMethods(methods, interfaces[i]);
-    }
+    return methodList;
   }
 
   /**
@@ -2262,61 +2175,23 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the matching method or null if non matches.
    */
-  static JMethod findMethod(ArrayList<JMethod> methods, JMethod method)
+  static ApiMethod findMethod(ArrayList<ApiMethod> methods, ApiMethod method)
   {
     loop:
     for (int i = 0; i < methods.size(); i++) {
-      JMethod oldMethod = methods.get(i);
+      ApiMethod oldMethod = methods.get(i);
 
-      if (! method.getName().equals(oldMethod.getName()))
-        continue loop;
-
-      JClass []aParamTypes = oldMethod.getParameterTypes();
-      JClass []bParamTypes = method.getParameterTypes();
-
-      if (aParamTypes.length != bParamTypes.length)
-        continue loop;
-
-      for (int j = 0; j < aParamTypes.length; j++) {
-        if (! aParamTypes[j].equals(bParamTypes[j]))
-          continue loop;
-      }
-
-      return oldMethod;
+      if (oldMethod.equals(method))
+	return oldMethod;
     }
 
     return null;
   }
 
   /**
-   * Returns a full method name with arguments.
-   */
-  static String getFullMethodName(JMethod method)
-  {
-    return getFullMethodName(method.getName(), method.getParameterTypes());
-  }
-
-  /**
-   * Returns a full method name with arguments.
-   */
-  static String getFullMethodName(String methodName, JClass []params)
-  {
-    String name = methodName + "(";
-
-    for (int i = 0; i < params.length; i++) {
-      if (i != 0)
-        name += ", ";
-
-      name += getShortClassName(params[i]);
-    }
-
-    return name + ")";
-  }
-
-  /**
    * Returns a printable version of a class.
    */
-  static String getClassName(JClass cl)
+  static String getClassName(Class cl)
   {
     if (cl == null)
       return "null";
@@ -2334,41 +2209,32 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Returns a printable version of a class.
    */
-  static String getShortClassName(JClass cl)
+  static String getShortClassName(Class cl)
   {
     if (cl.isArray())
       return getShortClassName(cl.getComponentType()) + "[]";
-    else {
-      int p = cl.getName().lastIndexOf('.');
-
-      return cl.getName().substring(p + 1);
-    }
+    else
+      return cl.getSimpleName();
   }
 
   /**
    * Tests is a method is declared in a class.
    */
-  boolean classHasMethod(JMethod method, JClass cl)
+  boolean classHasMethod(ApiMethod method, ApiClass cl)
   {
     try {
-      JMethod match = cl.getMethod(method.getName(),
-                                   method.getParameterTypes());
+      ApiMethod match = cl.getMethod(method.getName(),
+				     method.getParameterTypes());
       return match != null;
     } catch (Exception e) {
       return false;
     }
   }
 
-  void validateException(JMethod method, Class e)
+  void validateException(ApiMethod method, Class e)
     throws ConfigException
   {
-    validateException(method, new JClassWrapper(e, _jClassLoader));
-  }
-
-  void validateException(JMethod method, JClass e)
-    throws ConfigException
-  {
-    validateExceptions(method, new JClass[] { e });
+    validateExceptions(method, new Class[] { e });
   }
 
   /**
@@ -2377,14 +2243,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    * @param method the method to test
    * @param exn the expected exceptions
    */
-  void validateExceptions(JMethod method, JClass []exn)
+  void validateExceptions(ApiMethod method, Class []exn)
     throws ConfigException
   {
-    JClass []methodExceptions = method.getExceptionTypes();
+    Class []methodExceptions = method.getExceptionTypes();
 
     loop:
     for (int i = 0; i < exn.length; i++) {
-      if (exn[i].isAssignableTo(RuntimeException.class))
+      if (RuntimeException.class.isAssignableFrom(exn[i]))
         continue;
 
       for (int j = 0; j < methodExceptions.length; j++) {
@@ -2399,11 +2265,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
   }
 
-  void validateExceptions(JMethod caller, JMethod callee)
+  void validateExceptions(ApiMethod caller, ApiMethod callee)
     throws ConfigException
   {
-    JClass []exn = callee.getExceptionTypes();
-    JClass missing = findMissingException(caller, exn);
+    Class []exn = callee.getExceptionTypes();
+    Class missing = findMissingException(caller, exn);
 
     if (missing != null) {
       throw error(L.l("{0}: '{1}' must throw {2}.",
@@ -2427,24 +2293,24 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    *
    * @return the first missing exception
    */
-  JClass findMissingException(JMethod method, JClass []exn)
+  Class findMissingException(ApiMethod method, Class []exn)
     throws ConfigException
   {
-    JClass []methodExceptions = method.getExceptionTypes();
+    Class []methodExceptions = method.getExceptionTypes();
 
     for (int i = 0; i < exn.length; i++) {
-      if (! hasException(method, exn[i]) &&
-          ! exn[i].isAssignableTo(RuntimeException.class))
+      if (! hasException(method, exn[i])
+	  && ! RuntimeException.class.isAssignableFrom(exn[i]))
         return exn[i];
     }
 
     return null;
   }
 
-  boolean hasException(JMethod method, JClass exn)
+  boolean hasException(ApiMethod method, Class exn)
     throws ConfigException
   {
-    JClass []methodExceptions = method.getExceptionTypes();
+    Class []methodExceptions = method.getExceptionTypes();
 
     for (int j = 0; j < methodExceptions.length; j++) {
       if (methodExceptions[j].isAssignableFrom(exn))
@@ -2454,41 +2320,18 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     return false;
   }
 
-  boolean hasException(JMethod method, Class exn)
+  protected ApiMethod findFirstCreateMethod(ApiClass cl)
     throws ConfigException
   {
-    JClass []methodExceptions = method.getExceptionTypes();
-
-    for (int j = 0; j < methodExceptions.length; j++) {
-      if (methodExceptions[j].isAssignableFrom(exn))
-        return true;
-    }
-
-    return false;
-  }
-
-  protected JMethod findFirstCreateMethod(Class cl)
-    throws ConfigException
-  {
-    JClass homeClass = new JClassWrapper(cl, _jClassLoader);
-
-    JMethod []methods = getMethods(homeClass);
-
-    for (int i = 0; i < methods.length; i++) {
-      String methodName = methods[i].getName();
-
-      try {
-        if (methodName.startsWith("create"))
-          return methods[i];
-      } catch (Exception e) {
-        throw new ConfigException(e);
-      }
+    for (ApiMethod method : cl.getMethods()) {
+      if (method.getName().startsWith("create"))
+	return method;
     }
 
     return null;
   }
 
-  protected void introspectBean(JClass type, String defaultName)
+  protected void introspectBean(ApiClass type, String defaultName)
     throws ConfigException
   {
     try {
@@ -2512,15 +2355,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
       setEJBName(name);
 
-      JAnnotation local = type.getAnnotation(Local.class);
+      Local local = type.getAnnotation(Local.class);
       if (local != null) {
-        Object []values = (Object []) local.get("value");
+        Object []values = local.value();
 
         for (int i = 0; i < values.length; i++) {
-          if (values[i] instanceof JClass) {
-            JClass localClass = (JClass) values[i];
+          if (values[i] instanceof Class) {
+            Class localClass = (Class) values[i];
 
-            setLocalWrapper(localClass);
+            setLocalWrapper(new ApiClass(localClass));
           }
           else if (values[i] instanceof Class) {
             setLocal((Class) values[i]);
@@ -2528,15 +2371,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
         }
       }
 
-      JAnnotation remote = type.getAnnotation(Remote.class);
+      Remote remote = type.getAnnotation(Remote.class);
       if (remote != null) {
-        Object []values = (Object []) remote.get("value");
+        Object []values = remote.value();
 
         for (int i = 0; i < values.length; i++) {
-          if (values[i] instanceof JClass) {
-            JClass remoteClass = (JClass) values[i];
+          if (values[i] instanceof Class) {
+            Class remoteClass = (Class) values[i];
 
-            setRemoteWrapper(remoteClass);
+            setRemoteWrapper(new ApiClass(remoteClass));
           }
           else if (values[i] instanceof Class) {
             setRemote((Class) values[i]);
@@ -2545,14 +2388,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
         // ejb/0f08: single interface
         if (values.length == 0) {
-          JClass []ifs = type.getInterfaces();
+	  // XXX: getGenericInterfaces
+          Class []ifs = type.getJavaClass().getInterfaces();
 
           if (ifs.length == 1)
-            setRemoteWrapper(ifs[0]);
+            setRemoteWrapper(new ApiClass(ifs[0]));
         }
       }
 
-      JAnnotation xa = type.getAnnotation(TransactionAttribute.class);
+      TransactionAttribute xa = type.getAnnotation(TransactionAttribute.class);
       if (xa != null) {
         MethodSignature sig = new MethodSignature();
         sig.setMethodName("*");
@@ -2577,15 +2421,12 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
   }
 
-  private void configureMethods(JClass type)
+  private void configureMethods(ApiClass type)
     throws ConfigException
   {
-    JMethod []methods = type.getDeclaredMethods();
-
-    for (int i = 0; i < methods.length; i++) {
-      JMethod method = methods[i];
-
-      JAnnotation xa = method.getAnnotation(TransactionAttribute.class);
+    for (ApiMethod method : type.getMethods()) {
+      TransactionAttribute xa
+	= (TransactionAttribute) method.getAnnotation(TransactionAttribute.class);
 
       if (xa != null) {
         EjbMethodPattern pattern = createMethod(getSignature(method));
@@ -2593,14 +2434,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
         setPatternTransaction(pattern, xa);
       }
 
-      JAnnotation aroundInvoke = method.getAnnotation(AroundInvoke.class);
+      Annotation aroundInvoke = method.getAnnotation(AroundInvoke.class);
 
       // ejb/0fb8
       if (aroundInvoke != null) {
         _aroundInvokeMethodName = method.getName();
       }
 
-      JAnnotation timeout = method.getAnnotation(Timeout.class);
+      Annotation timeout = method.getAnnotation(Timeout.class);
 
       // ejb/0fj0
       if (timeout != null) {
@@ -2610,11 +2451,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
 
   private void setPatternTransaction(EjbMethodPattern pattern,
-                                     JAnnotation xa)
+                                     TransactionAttribute xa)
     throws ConfigException
   {
-    TransactionAttributeType xaType;
-    xaType = (TransactionAttributeType) xa.get("value");
+    TransactionAttributeType xaType = xa.value();
 
     switch (xaType) {
     case REQUIRED:
@@ -2646,20 +2486,45 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
   }
 
-  private MethodSignature getSignature(JMethod method)
+  private MethodSignature getSignature(ApiMethod method)
     throws ConfigException
   {
     MethodSignature sig = new MethodSignature();
 
     sig.setMethodName(method.getName());
 
-    JClass []paramTypes = method.getParameterTypes();
+    Class []paramTypes = method.getParameterTypes();
 
     for (int i = 0; i < paramTypes.length; i++) {
       sig.addParam(paramTypes[i].getName());
     }
 
     return sig;
+  }
+
+  /**
+   * Returns a full method name with arguments.
+   */
+  static String getFullMethodName(ApiMethod method)
+  {
+    return getFullMethodName(method.getName(), method.getParameterTypes());
+  }
+
+  /**
+   * Returns a full method name with arguments.
+   */
+  static String getFullMethodName(String methodName, Class []params)
+  {
+    String name = methodName + "(";
+
+    for (int i = 0; i < params.length; i++) {
+      if (i != 0)
+        name += ", ";
+
+      name += params[i].getSimpleName();
+    }
+
+    return name + ")";
   }
 
   /**

@@ -29,9 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.BuilderProgram;
@@ -100,12 +97,10 @@ public class EjbMessageBean extends EjbBean {
    * Sets the ejb implementation class.
    */
   @Override
-  public void setEJBClass(String ejbType)
+  public void setEJBClass(Class ejbClass)
     throws ConfigException
   {
-    super.setEJBClass(ejbType);
-    
-    Class ejbClass = getEJBClass();
+    super.setEJBClass(ejbClass);
 
     // ejb/0987
     /*
@@ -123,12 +118,11 @@ public class EjbMessageBean extends EjbBean {
     // class.
 
     if (getEJBName() == null) {
-      int i = ejbType.lastIndexOf('.');
-
-      setEJBName(ejbType.substring(i + 1));
+      setEJBName(ejbClass.getSimpleName());
     }
 
-    JMethod create = getMethod(getEJBClassWrapper(), "ejbCreate", new JClass[] {});
+    ApiMethod create = getEJBClassWrapper().getMethod("ejbCreate",
+						      new Class[0]);
 
     if (create == null) {
       if (! isAllowPOJO()) {
@@ -379,7 +373,7 @@ public class EjbMessageBean extends EjbBean {
   public void initIntrospect()
     throws ConfigException
   {
-    JClass type = getEJBClassWrapper();
+    ApiClass type = getEJBClassWrapper();
 
     if (! type.isAnnotationPresent(MessageDriven.class)
         && ! type.isAnnotationPresent(MessageDriven.class))
@@ -387,21 +381,21 @@ public class EjbMessageBean extends EjbBean {
 
     // XXX: annotations in super classes?
 
-    JAnnotation messageDriven = type.getAnnotation(javax.ejb.MessageDriven.class);
+    javax.ejb.MessageDriven messageDriven
+      = type.getAnnotation(javax.ejb.MessageDriven.class);
 
     if (messageDriven != null) {
-
       ActivationConfigProperty[] properties
-        = (ActivationConfigProperty[]) messageDriven.get("activationConfig");
+        = messageDriven.activationConfig();
 
       if (properties != null) {
-
         for (ActivationConfigProperty property : properties)
           addActivationConfigProperty(property.propertyName(),
                                       property.propertyValue());
       }
 
-      Class messageListenerInterface = (Class) messageDriven.get("messageListenerInterface");
+      Class messageListenerInterface
+	= messageDriven.messageListenerInterface();
 
       if (messageListenerInterface != null)
         setMessagingType(messageListenerInterface);

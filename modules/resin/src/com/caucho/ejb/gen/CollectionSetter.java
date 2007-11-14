@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -42,13 +42,13 @@ import java.io.IOException;
 public class CollectionSetter extends BaseMethod {
   private static final L10N L = new L10N(CollectionSetter.class);
 
-  private JMethod _method;
+  private ApiMethod _method;
   private String _implClassName;
   
-  public CollectionSetter(JMethod method,
+  public CollectionSetter(ApiMethod method,
 			  String implClassName)
   {
-    super(method);
+    super(method.getMethod());
 
     _method = method;
     _implClassName = implClassName;
@@ -72,10 +72,10 @@ public class CollectionSetter extends BaseMethod {
     String methodName = _method.getName();
     String getterName = "get" + methodName.substring(3);
 
-    out.print(_method.getParameterTypes()[0].getPrintName());
-    out.println(" var = ptr." + getterName + "();");
-    out.println("var.clear();");
-    out.println("var.addAll(" + args[0] + ");");
+    out.printClass(_method.getParameterTypes()[0]);
+    out.println("  var = ptr." + getterName + "();");
+    out.println("  var.clear();");
+    out.println("  var.addAll(" + args[0] + ");");
     
     out.println("} catch (RuntimeException e) {");
     out.println("  xa.setRollbackOnly(e);");

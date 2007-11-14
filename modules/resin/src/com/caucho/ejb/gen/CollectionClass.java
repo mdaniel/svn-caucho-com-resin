@@ -29,12 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.CmrManyToMany;
-import com.caucho.ejb.cfg.CmrManyToOne;
-import com.caucho.ejb.cfg.CmrRelation;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseClass;
 import com.caucho.util.L10N;
@@ -57,8 +52,8 @@ public class CollectionClass extends BaseClass {
 
     setClassName(className);
 
-    JClass retType = oneToMany.getGetter().getReturnType();
-    if (retType.isAssignableTo(Set.class))
+    Class retType = oneToMany.getGetter().getReturnType();
+    if (Set.class.isAssignableFrom(retType))
       setSuperClassName("com.caucho.ejb.entity.CmpSetImpl");
     else
       setSuperClassName("com.caucho.ejb.entity.CmpCollectionImpl");
@@ -126,13 +121,13 @@ public class CollectionClass extends BaseClass {
     if (targetRelation instanceof CmrManyToOne) {
       CmrManyToOne manyToOne = (CmrManyToOne) targetRelation;
 
-      JMethod setter = manyToOne.getSetter();
+      ApiMethod setter = manyToOne.getSetter();
 
       if (setter != null) {
         out.println(targetType + " bean = (" + targetType + ") v;");
 
-        JMethod localDstSetter = targetBean.getMethod(targetBean.getLocal(),
-                                                      setter);
+        ApiMethod localDstSetter
+	  = targetBean.getMethod(targetBean.getLocal(), setter);
 
         if (localDstSetter != null) {
           out.print("bean");
@@ -148,7 +143,7 @@ public class CollectionClass extends BaseClass {
     else if (_oneToMany instanceof CmrManyToMany) {
       CmrManyToMany manyToMany = (CmrManyToMany) _oneToMany;
 
-      JMethod getter = manyToMany.getGetter();
+      ApiMethod getter = manyToMany.getGetter();
 
       if (manyToMany.isTargetUnique())
         out.println("_bean.__amber_" + getter.getName() + "_remove_target(v);");
@@ -187,8 +182,8 @@ public class CollectionClass extends BaseClass {
     if (targetRelation instanceof CmrManyToOne) {
       CmrManyToOne manyToOne = (CmrManyToOne) targetRelation;
 
-      JMethod setter = manyToOne.getSetter();
-      JMethod getter = manyToOne.getGetter();
+      ApiMethod setter = manyToOne.getSetter();
+      ApiMethod getter = manyToOne.getGetter();
 
       if (setter != null) {
         out.println("if (_bean != null) {");
@@ -199,8 +194,8 @@ public class CollectionClass extends BaseClass {
         out.println("if (_beanLocal != null) {");
         out.pushDepth();
 
-        JMethod localDstSetter = targetBean.getMethod(targetBean.getLocal(),
-                                                      setter);
+        ApiMethod localDstSetter
+	  = targetBean.getMethod(targetBean.getLocal(), setter);
         String bean = "bean";
 
         if (localDstSetter == null) {
@@ -231,7 +226,7 @@ public class CollectionClass extends BaseClass {
     else if (_oneToMany instanceof CmrManyToMany) {
       CmrManyToMany manyToMany = (CmrManyToMany) _oneToMany;
 
-      JMethod getter = manyToMany.getGetter();
+      ApiMethod getter = manyToMany.getGetter();
 
       out.println("_bean.__amber_" + getter.getName() + "_remove(v);");
     }

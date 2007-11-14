@@ -29,13 +29,12 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
+import java.lang.reflect.*;
 
 /**
  * Configuration for a particular view.
@@ -49,7 +48,7 @@ public class EjbEntityHomeView extends EjbHomeView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbEntityHomeView(EjbBean bean, JClass apiClass, String prefix)
+  public EjbEntityHomeView(EjbBean bean, ApiClass apiClass, String prefix)
     throws ConfigException
   {
     super(bean, apiClass, prefix);
@@ -76,18 +75,16 @@ public class EjbEntityHomeView extends EjbHomeView {
   /**
    * Introspects an ejb method.
    */
-  protected EjbMethod introspectEJBMethod(JMethod method)
+  protected EjbMethod introspectEJBMethod(ApiMethod method)
     throws ConfigException
   {
     String methodName = method.getName();
-    JClass []paramTypes = method.getParameterTypes();
+    Class []paramTypes = method.getParameterTypes();
 
     if (methodName.startsWith("ejbCreate")) {
       String apiMethodName = "c" + methodName.substring(4);
 
-      JMethod apiMethod = EjbBean.getMethod(getApiClass(),
-					    apiMethodName,
-					    paramTypes);
+      ApiMethod apiMethod = getApiClass().getMethod(apiMethodName, paramTypes);
 
       if (apiMethod == null) {
 	/*
@@ -107,9 +104,8 @@ public class EjbEntityHomeView extends EjbHomeView {
 
       String postMethodName = "ejbPost" + methodName.substring(3);
       
-      JMethod postCreateMethod = EjbBean.getMethod(getImplClass(),
-						   postMethodName,
-						   method.getParameterTypes());
+      ApiMethod postCreateMethod
+	= getImplClass().getMethod(postMethodName, method.getParameterTypes());
 
       return new EjbEntityCreateMethod(this, apiMethod,
 				       method, postCreateMethod);
@@ -126,7 +122,7 @@ public class EjbEntityHomeView extends EjbHomeView {
       if (methodName.equals("ejbFindByPrimaryKey")) {
 	_hasFindByPrimaryKey = true;
     
-	JClass primKeyClass = ((EjbEntityBean) getBean()).getPrimKeyClass();
+	ApiClass primKeyClass = ((EjbEntityBean) getBean()).getPrimKeyClass();
       
 	if (paramTypes.length != 1 || ! paramTypes[0].equals(primKeyClass))
 	  throw error(L.l("{0}: '{1}' expected as only argument of {2}. ejbFindByPrimaryKey must take the primary key as its only argument.",
@@ -137,7 +133,7 @@ public class EjbEntityHomeView extends EjbHomeView {
       
       String apiMethodName = "f" + methodName.substring(4);
 
-      JMethod apiMethod = EjbBean.getMethod(getApiClass(),
+      ApiMethod apiMethod = EjbBean.getMethod(getApiClass(),
 					   apiMethodName,
 					   paramTypes);
 
@@ -149,7 +145,7 @@ public class EjbEntityHomeView extends EjbHomeView {
       String apiMethodName = (Character.toLowerCase(methodName.charAt(7)) +
 			      methodName.substring(8));
 
-      JMethod apiMethod = EjbBean.getMethod(getApiClass(),
+      ApiMethod apiMethod = EjbBean.getMethod(getApiClass(),
 					   apiMethodName,
 					   paramTypes);
 
@@ -169,16 +165,16 @@ public class EjbEntityHomeView extends EjbHomeView {
   /**
    * Introspects an ejb method.
    */
-  protected EjbMethod introspectApiMethod(JMethod apiMethod)
+  protected EjbMethod introspectApiMethod(ApiMethod apiMethod)
     throws ConfigException
   {
     String methodName = apiMethod.getName();
-    JClass []paramTypes = apiMethod.getParameterTypes();
+    Class []paramTypes = apiMethod.getParameterTypes();
 
     if (methodName.equals("findByPrimaryKey")) {
       _hasFindByPrimaryKey = true;
       
-      JClass primKeyClass = ((EjbEntityBean) getBean()).getPrimKeyClass();
+      ApiClass primKeyClass = ((EjbEntityBean) getBean()).getPrimKeyClass();
     
       if (paramTypes.length != 1 || ! paramTypes[0].equals(primKeyClass))
 	throw error(L.l("{0}: '{1}' expected as only argument of {2}. findByPrimaryKey must take the primary key as its only argument.",

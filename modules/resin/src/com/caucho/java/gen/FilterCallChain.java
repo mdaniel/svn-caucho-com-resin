@@ -28,7 +28,6 @@
 
 package com.caucho.java.gen;
 
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -50,7 +49,7 @@ public class FilterCallChain extends CallChain {
   /**
    * Returns the method's parameter types.
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _next.getParameterTypes();
   }
@@ -58,7 +57,7 @@ public class FilterCallChain extends CallChain {
   /**
    * Returns the method's return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _next.getReturnType();
   }
@@ -66,7 +65,7 @@ public class FilterCallChain extends CallChain {
   /**
    * Returns the method's exception types.
    */
-  public JClass []getExceptionTypes()
+  public Class []getExceptionTypes()
   {
     return _next.getExceptionTypes();
   }

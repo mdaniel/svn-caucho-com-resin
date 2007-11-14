@@ -28,12 +28,12 @@
 
 package com.caucho.java.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+
+import java.lang.reflect.*;
 
 /**
  * Generates the skeleton for a method call.
@@ -41,10 +41,10 @@ import java.io.IOException;
 public class MethodCallChain extends CallChain {
   private static L10N L = new L10N(MethodCallChain.class);
 
-  private JMethod _method;
+  private Method _method;
   private String _methodName;
-  private JClass []_parameterTypes;
-  private JClass _returnType;
+  private Class []_parameterTypes;
+  private Class _returnType;
 
   /**
    * Creates the chain.
@@ -56,7 +56,7 @@ public class MethodCallChain extends CallChain {
   /**
    * Creates the chain with the method.
    */
-  public MethodCallChain(JMethod method)
+  public MethodCallChain(Method method)
   {
     _method = method;
     _methodName = method.getName();
@@ -67,7 +67,7 @@ public class MethodCallChain extends CallChain {
   /**
    * Creates the chain with the method.
    */
-  public MethodCallChain(String methodName, JClass []params, JClass returnType)
+  public MethodCallChain(String methodName, Class []params, Class returnType)
   {
     _methodName = methodName;
     _parameterTypes = params;
@@ -77,7 +77,7 @@ public class MethodCallChain extends CallChain {
   /**
    * Returns the method.
    */
-  public JMethod getMethod()
+  public Method getMethod()
   {
     return _method;
   }
@@ -85,7 +85,7 @@ public class MethodCallChain extends CallChain {
   /**
    * Returns the method's parameter types.
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _parameterTypes;
   }
@@ -93,7 +93,7 @@ public class MethodCallChain extends CallChain {
   /**
    * Returns the method's return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _returnType;
   }

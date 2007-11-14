@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
@@ -51,7 +49,7 @@ public class EjbCmpView extends EjbEntityView {
    * Creates a new entity bean configuration.
    */
   public EjbCmpView(EjbEntityBean bean,
-		    ArrayList<JClass> apiList,
+		    ArrayList<ApiClass> apiList,
 		    String prefix)
     throws ConfigException
   {
@@ -64,11 +62,11 @@ public class EjbCmpView extends EjbEntityView {
    * Introspects an ejb method.
    */
   @Override
-  protected EjbMethod introspectEJBMethod(JMethod method)
+  protected EjbMethod introspectEJBMethod(ApiMethod method)
     throws ConfigException
   {
     String methodName = method.getName();
-    JClass []paramTypes = method.getParameterTypes();
+    Class []paramTypes = method.getParameterTypes();
 
     if (methodName.startsWith("ejbSelect") && method.isAbstract()) {
       _entityBean.addStubMethod(method);
@@ -83,12 +81,12 @@ public class EjbCmpView extends EjbEntityView {
    * Creates a new business method.
    */
   @Override
-  protected EjbMethod createBusinessMethod(JMethod apiMethod,
-					   JMethod implMethod)
+  protected EjbMethod createBusinessMethod(ApiMethod apiMethod,
+					   ApiMethod implMethod)
     throws ConfigException
   {
     String methodName = implMethod.getName();
-    JClass []paramTypes = implMethod.getParameterTypes();
+    Class []paramTypes = implMethod.getParameterTypes();
 
     if (methodName.startsWith("get")
 	&& methodName.length() > 3
@@ -131,9 +129,9 @@ public class EjbCmpView extends EjbEntityView {
 	return new EjbMethod(this, apiMethod, implMethod);
       }
     }
-    else if (methodName.startsWith("get") &&
-	methodName.length() > 3 &&
-	paramTypes.length == 1) {
+    else if (methodName.startsWith("get")
+	     && methodName.length() > 3
+	     && paramTypes.length == 1) {
       String fieldName = toFieldName(methodName.substring(3));
       
       CmrRelation rel = _entityBean.getRelation(fieldName);
@@ -149,9 +147,9 @@ public class EjbCmpView extends EjbEntityView {
 	return new CmpGetter(this, apiMethod, implMethod);
       }
     }
-    else if (methodName.startsWith("set") &&
-	     methodName.length() > 3 &&
-	     paramTypes.length == 1) {
+    else if (methodName.startsWith("set")
+	     && methodName.length() > 3
+	     && paramTypes.length == 1) {
       String fieldName = toFieldName(methodName.substring(3));
 
       CmpField field = _entityBean.getCmpField(fieldName);
@@ -220,7 +218,7 @@ public class EjbCmpView extends EjbEntityView {
   /**
    * Validate impl method.
    */
-  protected void validateCmpMethod(JMethod implMethod)
+  protected void validateCmpMethod(ApiMethod implMethod)
     throws ConfigException
   {
     if (! implMethod.isPublic()) {

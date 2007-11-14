@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
@@ -42,7 +42,7 @@ import java.io.IOException;
 public class AmberBean extends EntityBean {
   private final static L10N L = new L10N(AmberBean.class);
   
-  public AmberBean(JClass ejbClass,
+  public AmberBean(ApiClass ejbClass,
 		   String contextClassName,
 		   String implClassName)
   {
@@ -50,11 +50,11 @@ public class AmberBean extends EntityBean {
 
     addComponent(new FlushMethod());
 
-    if (hasMethod(ejbClass, "ejbLoad", new JClass[0])) {
+    if (ejbClass.hasMethod("ejbLoad", new Class[0])) {
       addComponent(new LoadMethod());
     }
 
-    boolean hasRemove = hasMethod(ejbClass, "ejbRemove", new JClass[0]);
+    boolean hasRemove = ejbClass.hasMethod("ejbRemove", new Class[0]);
     
     addComponent(new RemoveMethod(hasRemove));
   }

@@ -29,12 +29,12 @@
 
 package com.caucho.ejb.ql;
 
+import java.lang.reflect.*;
+import javax.ejb.*;
+
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JField;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -77,9 +77,9 @@ class ArgExpr extends Expr {
     if (getJavaType() != null)
       return;
 
-    JMethod method = _query.getMethod();
+    ApiMethod method = _query.getMethod();
 
-    JClass []args = method.getParameterTypes();
+    Class []args = method.getParameterTypes();
 
     if (args.length <= _index - 1)
       throw error(L.l("`{0}' exceeds number of arguments", "?" + _index));
@@ -104,14 +104,14 @@ class ArgExpr extends Expr {
 
   int getComponentCount()
   {
-    JClass javaType = getJavaType();
+    Class javaType = getJavaType();
 
-    if (javaType.isPrimitive() ||
-        javaType.isArray() ||
-        javaType.getName().startsWith("java."))
+    if (javaType.isPrimitive()
+	|| javaType.isArray()
+	|| javaType.getName().startsWith("java."))
       return 1;
 
-    if (javaType.isAssignableTo(javax.ejb.EJBLocalObject.class)) {
+    if (EJBLocalObject.class.isAssignableFrom(javaType)) {
       EjbEntityBean bean = _query.getConfig().findEntityByLocal(javaType);
 
       EntityType type = bean.getEntityType();
@@ -119,7 +119,8 @@ class ArgExpr extends Expr {
       return type.getId().getKeys().size();
     }
 
-    JField []fields = javaType.getFields();
+    Field []fields = javaType.getFields();
+    
     return fields.length;
   }
   

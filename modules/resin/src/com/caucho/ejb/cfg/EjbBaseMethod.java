@@ -29,8 +29,8 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -43,7 +43,7 @@ public class EjbBaseMethod {
 
   private EjbBean _bean;
 
-  private JMethod _method;
+  private ApiMethod _method;
 
   /**
    * Creates a new method.
@@ -51,7 +51,7 @@ public class EjbBaseMethod {
    * @param bean the owning bean
    * @param method the method from the implementation
    */
-  public EjbBaseMethod(EjbBean bean, JMethod method)
+  public EjbBaseMethod(EjbBean bean, ApiMethod method)
   {
     if (method == null)
       throw new NullPointerException();
@@ -71,7 +71,7 @@ public class EjbBaseMethod {
   /**
    * Returns the impl method.
    */
-  public JMethod getMethod()
+  public ApiMethod getMethod()
   {
     return _method;
   }

@@ -29,9 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -47,18 +45,18 @@ import java.io.IOException;
 public class EntityCreateMethod extends BaseMethod {
   private static L10N L = new L10N(EntityCreateMethod.class);
 
-  private JMethod _apiMethod;
+  private ApiMethod _apiMethod;
   private String _contextClassName;
 
-  protected EntityCreateMethod(JMethod apiMethod, CallChain call)
+  protected EntityCreateMethod(ApiMethod apiMethod, CallChain call)
   {
-    super(apiMethod, call);
+    super(apiMethod.getMethod(), call);
   }
 
   public EntityCreateMethod(EjbEntityBean bean,
-			    JMethod apiMethod,
-			    JMethod beanCreateMethod,
-			    JMethod beanPostCreateMethod,
+			    ApiMethod apiMethod,
+			    ApiMethod beanCreateMethod,
+			    ApiMethod beanPostCreateMethod,
 			    String contextClassName)
   {
     this(apiMethod, new EntityCreateCall(bean,
@@ -96,10 +94,10 @@ public class EntityCreateMethod extends BaseMethod {
 
     out.println();
     
-    JClass retType = _apiMethod.getReturnType();
-    if (retType.isAssignableTo(EJBObject.class))
+    Class retType = _apiMethod.getReturnType();
+    if (EJBObject.class.isAssignableFrom(retType))
       out.println("return (" + retType.getName() + ") cxt.getEJBObject();");
-    else if (retType.isAssignableTo(EJBLocalObject.class))
+    else if (EJBLocalObject.class.isAssignableFrom(retType))
       out.println("return (" + retType.getName() + ") cxt.getEJBLocalObject();");
     else
       throw new RuntimeException(L.l("trying to create unknown type {0}",

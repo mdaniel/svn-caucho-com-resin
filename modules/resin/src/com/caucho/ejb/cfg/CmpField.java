@@ -35,8 +35,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JClassWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.CharBuffer;
@@ -57,7 +56,7 @@ public class CmpField extends CmpProperty {
   private String _sqlType;
   private boolean _isAutoGenerate = true;
 
-  private JClass _javaType = JClass.STRING;
+  private Class _javaType = String.class;
 
   /**
    * Creates a new cmp-field
@@ -120,19 +119,19 @@ public class CmpField extends CmpProperty {
   /**
    * Sets the Java type.
    */
-  public void setJavaType(JClass javaType)
+  public void setJavaType(Class javaType)
   {
     if (javaType.getName().equals("java.util.Map"))
       Thread.dumpStack();
     
-    //_javaType = new JClassWrapper(javaType);
+    //_javaType = new ClassWrapper(javaType);
     _javaType = javaType;
   }
 
   /**
    * Returns the Java type.
    */
-  public JClass getJavaType()
+  public Class getJavaType()
   {
     return _javaType;
   }
@@ -169,9 +168,9 @@ public class CmpField extends CmpProperty {
 			 Character.toUpperCase(name.charAt(0)) +
 			 name.substring(1));
 	
-    JMethod getter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
-					  getterName,
-					   new JClass[0]);
+    ApiMethod getter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
+					     getterName,
+					     new Class[0]);
 
     if (getter == null)
       throw new ConfigException(L.l("{0}: '{1}' is an unknown cmp-field.  cmp-fields must have matching getter methods.",
@@ -201,12 +200,12 @@ public class CmpField extends CmpProperty {
 				    getEntity().getEJBClass().getName(),
 				    getName()));
     }
-    else if (_javaType.isAssignableTo(EJBLocalObject.class)) {
+    else if (EJBLocalObject.class.isAssignableFrom(_javaType)) {
       throw new ConfigException(L.l("{0}: '{1}' must not return an EJB interface.  CMP fields must return concrete values.",
 				    getEntity().getEJBClass().getName(),
 				    getName()));
     }
-    else if (_javaType.isAssignableTo(EJBObject.class)) {
+    else if (EJBObject.class.isAssignableFrom(_javaType)) {
       throw new ConfigException(L.l("{0}: '{1}' must not return an EJB interface.  CMP fields must return concrete values.",
 				    getEntity().getEJBClass().getName(),
 				    getName()));
@@ -216,9 +215,9 @@ public class CmpField extends CmpProperty {
 			 Character.toUpperCase(name.charAt(0)) +
 			 name.substring(1));
 	
-    JMethod setter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
-					   setterName,
-					   new JClass[] { getter.getReturnType() });
+    ApiMethod setter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
+					     setterName,
+					     new Class[] { getter.getReturnType() });
 
     if (setter == null) {
     }
@@ -260,13 +259,14 @@ public class CmpField extends CmpProperty {
     if (sqlName == null)
       sqlName = toSqlName(fieldName);
       
-    JClass dataType = getJavaType();
+    Class dataType = getJavaType();
 
     if (dataType == null)
       throw new NullPointerException(L.l("'{0}' is an unknown field",
 					 fieldName));
 
-    Type amberType = amberPersistenceUnit.createType(dataType);
+    Type amberType
+      = amberPersistenceUnit.createType(JClassWrapper.create(dataType));
     Column column = type.getTable().createColumn(sqlName, amberType);
 
     KeyPropertyField idField = new KeyPropertyField(type, fieldName, column);

@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.StatelessCreateMethod;
 import com.caucho.java.gen.BaseMethod;
@@ -49,7 +48,7 @@ public class EjbStatelessCreateMethod extends EjbMethod {
    * @param implMethod the method from the implementation
    */
   public EjbStatelessCreateMethod(EjbView view,
-				  JMethod apiMethod)
+				  ApiMethod apiMethod)
   {
     super(view, apiMethod, null);
   }

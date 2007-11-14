@@ -28,8 +28,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.MethodCallChain;
@@ -46,17 +45,19 @@ import java.util.Iterator;
 public class EntityFindCollectionMethod extends BaseMethod {
   private static L10N L = new L10N(EntityFindCollectionMethod.class);
 
-  private JMethod _apiMethod;
+  private ApiMethod _apiMethod;
   private String _contextClassName;
   private String _prefix;
   
-  public EntityFindCollectionMethod(JMethod apiMethod,
-				    JMethod implMethod,
+  public EntityFindCollectionMethod(ApiMethod apiMethod,
+				    ApiMethod implMethod,
 				    String contextClassName,
 				    String prefix)
   {
-    super(apiMethod,
-	  implMethod != null ? new MethodCallChain(implMethod) : null);
+    super(apiMethod.getMethod(),
+	  implMethod != null
+	  ? new MethodCallChain(implMethod.getMethod())
+	  : null);
 
     _apiMethod = apiMethod;
     _contextClassName = contextClassName;
@@ -66,7 +67,7 @@ public class EntityFindCollectionMethod extends BaseMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _apiMethod.getParameterTypes();
   }
@@ -74,7 +75,7 @@ public class EntityFindCollectionMethod extends BaseMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _apiMethod.getReturnType();
   }
@@ -95,17 +96,17 @@ public class EntityFindCollectionMethod extends BaseMethod {
 
     out.println("java.util.ArrayList values = new java.util.ArrayList();");
 
-    JClass retType = getReturnType();
-    if (retType.isAssignableTo(Collection.class)) {
+    Class retType = getReturnType();
+    if (Collection.class.isAssignableFrom(retType)) {
       out.println("java.util.Iterator iter = keys.iterator();");
       out.println("while (iter.hasNext()) {");
       out.pushDepth();
       out.println("Object key = iter.next();");
-    } else if (retType.isAssignableTo(Iterator.class)) {
+    } else if (Iterator.class.isAssignableFrom(retType)) {
       out.println("while (keys.hasNext()) {");
       out.pushDepth();
       out.println("Object key = keys.next();");
-    } else if (retType.isAssignableTo(Enumeration.class)) {
+    } else if (Enumeration.class.isAssignableFrom(retType)) {
       out.println("while (keys.hasMoreElements()) {");
       out.pushDepth();
       out.println("Object key = keys.nextElement();");
@@ -123,11 +124,11 @@ public class EntityFindCollectionMethod extends BaseMethod {
     out.popDepth();
     out.println("}");
 
-    if (retType.isAssignableTo(Collection.class)) {
+    if (Collection.class.isAssignableFrom(retType)) {
       out.println("return values;");
-    } else if (retType.isAssignableTo(Iterator.class)) {
+    } else if (Iterator.class.isAssignableFrom(retType)) {
       out.println("return values.iterator();");
-    } else if (retType.isAssignableTo(Enumeration.class)) {
+    } else if (Enumeration.class.isAssignableFrom(retType)) {
       out.println("return java.util.Collections.enumeration(values);");
     }
   }

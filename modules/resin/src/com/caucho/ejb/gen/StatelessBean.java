@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
@@ -43,7 +42,7 @@ public class StatelessBean extends SessionBean {
   private static final L10N L = new L10N(StatelessBean.class);
 
   public StatelessBean(EjbSessionBean bean,
-                       JClass ejbClass,
+                       ApiClass ejbClass,
                        String contextClassName)
   {
     super(bean, ejbClass, contextClassName);
@@ -89,7 +88,7 @@ public class StatelessBean extends SessionBean {
     out.println("try {");
     out.println("  bean = new Bean(this);");
 
-    if (hasMethod("ejbCreate", new JClass[0])) {
+    if (hasMethod("ejbCreate", new Class[0])) {
       // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");
       out.println("  invokeMethod(bean, \"ejbCreate\", new Class[] {}, new Object[] {});");
     }
@@ -116,7 +115,7 @@ public class StatelessBean extends SessionBean {
     out.println("  }");
     out.println("}");
 
-    if (hasMethod("ejbRemove", new JClass[0])) {
+    if (hasMethod("ejbRemove", new Class[0])) {
       out.println();
       // ejb/0fe0: ejbRemove() can be private, out.println("bean.ejbRemove();");
       out.println("invokeMethod(bean, \"ejbRemove\", new Class[] {}, new Object[] {});");
@@ -140,7 +139,7 @@ public class StatelessBean extends SessionBean {
     out.println("  _freeBeanTop = 0;");
     out.println("}");
 
-    if (hasMethod("ejbRemove", new JClass[0])) {
+    if (hasMethod("ejbRemove", new Class[0])) {
       out.println();
       out.println("for (int i = 0; i < freeBeanTop; i++) {");
       out.pushDepth();

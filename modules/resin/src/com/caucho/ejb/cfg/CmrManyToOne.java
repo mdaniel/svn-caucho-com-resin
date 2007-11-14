@@ -40,8 +40,6 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -79,7 +77,7 @@ public class CmrManyToOne extends CmrRelation {
 
     _targetBean = targetBean;
 
-    JMethod getter = getGetter();
+    ApiMethod getter = getGetter();
     
     if (! getter.getReturnType().equals(_targetBean.getLocal()))
       throw new ConfigException(L.l("{0}: '{1}' must return the local interface '{2}' of the EJB bean '{3}'.",
@@ -100,7 +98,7 @@ public class CmrManyToOne extends CmrRelation {
   /**
    * Returns the target type.
    */
-  public JClass getTargetType()
+  public ApiClass getTargetType()
   {
     return _targetBean.getLocal();
   }

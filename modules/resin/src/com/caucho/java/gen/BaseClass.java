@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.lang.reflect.*;
 
 /**
  * Basic class generation.
@@ -153,7 +154,7 @@ public class BaseClass extends ClassComponent {
   /**
    * Finds a method
    */
-  public BaseMethod findMethod(JMethod method)
+  public BaseMethod findMethod(Method method)
   {
     for (ClassComponent component : _components) {
       if (component instanceof BaseMethod) {
@@ -170,7 +171,7 @@ public class BaseClass extends ClassComponent {
   /**
    * Creates a method
    */
-  public BaseMethod createMethod(JMethod method)
+  public BaseMethod createMethod(Method method)
   {
     BaseMethod baseMethod = findMethod(method);
 

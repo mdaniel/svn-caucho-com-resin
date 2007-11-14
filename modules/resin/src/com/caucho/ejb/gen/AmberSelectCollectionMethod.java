@@ -29,15 +29,14 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.ql.EjbSelectQuery;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.util.*;
 
 /**
  * Generates the code for a query
@@ -46,11 +45,11 @@ public class AmberSelectCollectionMethod extends AbstractQueryMethod {
   private static final L10N L = new L10N(AmberSelectCollectionMethod.class);
 
   private EjbEntityBean _returnType;
-  private JMethod _method;
+  private ApiMethod _method;
   private String _contextClassName;
   
   public AmberSelectCollectionMethod(EjbEntityBean type,
-				     JMethod method,
+				     ApiMethod method,
 				     String contextClassName,
 				     EjbSelectQuery query)
     throws ConfigException
@@ -65,7 +64,7 @@ public class AmberSelectCollectionMethod extends AbstractQueryMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _method.getParameterTypes();
   }
@@ -73,7 +72,7 @@ public class AmberSelectCollectionMethod extends AbstractQueryMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _method.getReturnType();
   }
@@ -113,8 +112,8 @@ public class AmberSelectCollectionMethod extends AbstractQueryMethod {
     out.println();
     
     // XXX:
-    JClass retType = _method.getReturnType();
-    if (retType.isAssignableTo(java.util.Collection.class))
+    Class retType = _method.getReturnType();
+    if (Collection.class.isAssignableFrom(retType))
       out.println("return list;");
     else
       out.println("return null;");

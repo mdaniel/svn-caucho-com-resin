@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -42,13 +42,13 @@ import java.io.IOException;
 public class CmpManyToOneGetter extends BaseMethod {
   private static final L10N L = new L10N(CmpManyToOneGetter.class);
 
-  private JMethod _method;
+  private ApiMethod _method;
   private String _implClassName;
   
-  public CmpManyToOneGetter(JMethod method,
+  public CmpManyToOneGetter(ApiMethod method,
 			    String implClassName)
   {
-    super(method);
+    super(method.getMethod());
 
     _method = method;
     _implClassName = implClassName;

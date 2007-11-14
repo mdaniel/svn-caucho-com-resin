@@ -33,7 +33,7 @@ import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.EntityMapField;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JMethodWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -45,7 +45,7 @@ public class CmrMap extends CmrRelation {
 
   private EjbEntityBean _targetBean;
   private CmrManyToOne _idRel;
-  private JMethod _mapMethod;
+  private ApiMethod _mapMethod;
 
   /**
    * Creates a new cmr map
@@ -67,7 +67,7 @@ public class CmrMap extends CmrRelation {
   /**
    * Sets the map method.
    */
-  public void setMapMethod(JMethod method)
+  public void setMapMethod(ApiMethod method)
   {
     _mapMethod = method;
   }
@@ -75,7 +75,7 @@ public class CmrMap extends CmrRelation {
   /**
    * Gets the map method.
    */
-  public JMethod getMapMethod()
+  public ApiMethod getMapMethod()
   {
     return _mapMethod;
   }
@@ -115,8 +115,8 @@ public class CmrMap extends CmrRelation {
    * Create any bean methods.
    */
   public EjbMethod createGetter(EjbView view,
-				JMethod apiMethod,
-				JMethod implMethod)
+				ApiMethod apiMethod,
+				ApiMethod implMethod)
     throws ConfigException
   {
     return new EjbMapMethod(view, apiMethod, implMethod, this);
@@ -131,7 +131,7 @@ public class CmrMap extends CmrRelation {
     EntityMapField field = new EntityMapField(type);
 
     field.setName(getName());
-    field.setMapMethod(_mapMethod);
+    field.setMapMethod(new JMethodWrapper(_mapMethod.getMethod()));
 
     field.setTargetType(_targetBean.getEntityType());
 

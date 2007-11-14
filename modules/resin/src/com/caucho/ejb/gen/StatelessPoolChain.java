@@ -29,14 +29,18 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.ejb.cfg.EjbBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
+import com.caucho.java.gen.MethodCallChain;
 import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
 
+import javax.ejb.Remove;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.lang.reflect.*;
 
 /**
  * The pooling interceptor for stateless session beans.
@@ -44,9 +48,22 @@ import java.io.IOException;
 public class StatelessPoolChain extends SessionPoolChain {
   private static L10N L = new L10N(StatelessPoolChain.class);
 
-  public StatelessPoolChain(EjbBean bean, CallChain next, BaseMethod method)
+  private final EjbBean _bean;
+  private BaseMethod _apiMethod;
+  private Method _implMethod;
+
+  public StatelessPoolChain(EjbBean bean, CallChain next, BaseMethod apiMethod)
   {
-    super(bean, next, method);
+    super(next, apiMethod);
+
+    _bean = bean;
+    _apiMethod = apiMethod;
+
+    CallChain callChain = apiMethod.getCall();
+
+    MethodCallChain methodCallChain = (MethodCallChain) callChain;
+
+    _implMethod = methodCallChain.getMethod();
   }
 
   /**
@@ -60,13 +77,21 @@ public class StatelessPoolChain extends SessionPoolChain {
                            String var, String []args)
     throws IOException
   {
+    ArrayList<Interceptor> interceptors
+      = _bean.getInvokeInterceptors(_apiMethod.getMethodName());
+    
     out.println("Bean ptr = _context._ejb_begin(trans);");
 
     out.println("try {");
     out.pushDepth();
 
+    boolean hasInterceptors = interceptors != null && interceptors.size() > 0;
+
     // XXX: ejb/02i0
-    generateCallInterceptors(out, args);
+    if (hasInterceptors)
+      generateCallInterceptors(out, args);
+    else
+      super.generateCall(out, retVar, "ptr", args);
 
     // The interceptor calls ctx.proceed() which invokes the business method.
     // generateFilterCall(out, retVar, "ptr", args);
@@ -75,7 +100,8 @@ public class StatelessPoolChain extends SessionPoolChain {
 
     // ejb/0fb0
     // XXX: ejb/02i0
-    generateInterceptorExceptionHandling(out);
+    if (hasInterceptors)
+      generateInterceptorExceptionHandling(out);
 
     // ejb/0f06 vs ejb/0271
     out.println("} catch (com.caucho.ejb.EJBExceptionWrapper e) {");

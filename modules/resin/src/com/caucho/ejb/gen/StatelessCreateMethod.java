@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
@@ -43,15 +42,15 @@ import java.io.IOException;
 public class StatelessCreateMethod extends BaseMethod {
   private static final L10N L = new L10N(StatelessCreateMethod.class);
 
-  private JMethod _method;
+  private ApiMethod _method;
   private String _contextClassName;
   private String _prefix;
   
-  public StatelessCreateMethod(JMethod method,
+  public StatelessCreateMethod(ApiMethod method,
 			       String contextClassName,
 			       String prefix)
   {
-    super(method);
+    super(method.getMethod());
 
     _method = method;
     _contextClassName = contextClassName;
@@ -61,7 +60,7 @@ public class StatelessCreateMethod extends BaseMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _method.getParameterTypes();
   }
@@ -69,7 +68,7 @@ public class StatelessCreateMethod extends BaseMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _method.getReturnType();
   }
@@ -86,7 +85,7 @@ public class StatelessCreateMethod extends BaseMethod {
     
     out.println();
 
-    JClass retType = getReturnType();
+    Class retType = getReturnType();
     if ("RemoteHome".equals(_prefix))
       out.println("return (" + retType.getName() + ") cxt.getEJBObject();");
     else if ("LocalHome".equals(_prefix))

@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
@@ -93,8 +91,8 @@ public class EjbConfig {
   private ArrayList<InterceptorBinding> _cfgInterceptorBindings =
     new ArrayList<InterceptorBinding>();
 
-  private ArrayList<ApplicationException> _cfgApplicationExceptions
-    = new ArrayList<ApplicationException>();
+  private ArrayList<ApplicationExceptionConfig> _cfgApplicationExceptions
+    = new ArrayList<ApplicationExceptionConfig>();
 
   public EjbConfig(EjbServerManager ejbManager)
   {
@@ -306,7 +304,7 @@ public class EjbConfig {
   /**
    * Adds an application exception.
    */
-  public void addApplicationException(ApplicationException applicationException)
+  public void addApplicationException(ApplicationExceptionConfig applicationException)
   {
     _cfgApplicationExceptions.add(applicationException);
   }
@@ -314,7 +312,7 @@ public class EjbConfig {
   /**
    * Returns the application exceptions.
    */
-  public ArrayList<ApplicationException> getApplicationExceptions()
+  public ArrayList<ApplicationExceptionConfig> getApplicationExceptions()
   {
     return _cfgApplicationExceptions;
   }
@@ -381,14 +379,16 @@ public class EjbConfig {
   /**
    * Finds an entity bean by its abstract schema.
    */
-  public EjbEntityBean findEntityByLocal(JClass cl)
+  public EjbEntityBean findEntityByLocal(Class cl)
   {
     for (EjbBean bean : _cfgBeans.values()) {
       if (bean instanceof EjbEntityBean) {
         EjbEntityBean entity = (EjbEntityBean) bean;
 
-        if (entity.getLocalList().contains(cl))
-          return entity;
+	for (ApiClass apiClass : entity.getLocalList()) {
+	  if (apiClass.getJavaClass().equals(cl))
+	    return entity;
+	}
       }
     }
 
@@ -690,9 +690,9 @@ public class EjbConfig {
                                         sourceEJB));
 
         String sourceField = sourceRole.getFieldName();
-        JMethod sourceMethod = sourceEntity.getFieldGetter(sourceField);
+        ApiMethod sourceMethod = sourceEntity.getFieldGetter(sourceField);
 
-        JMethod sourceMapMethod = null;
+        ApiMethod sourceMapMethod = null;
 
         if (sourceField != null)
           sourceMapMethod = getMapMethod(sourceEntity, sourceField);
@@ -711,9 +711,9 @@ public class EjbConfig {
                                         targetEJB));
 
         String targetField = targetRole.getFieldName();
-        JMethod targetMethod = targetEntity.getFieldGetter(targetField);
+        ApiMethod targetMethod = targetEntity.getFieldGetter(targetField);
 
-        JMethod targetMapMethod = null;
+        ApiMethod targetMapMethod = null;
 
         if (targetField != null)
           targetMapMethod = getMapMethod(targetEntity, targetField);
@@ -730,9 +730,9 @@ public class EjbConfig {
 
         if (sourceMethod == null) {
         }
-        else if (sourceMethod.getReturnType().isAssignableTo(Collection.class))
+        else if (Collection.class.isAssignableFrom(sourceMethod.getReturnType()))
           sourceOneToMany = true;
-        else if (sourceMethod.getReturnType().isAssignableTo(Map.class))
+        else if (Map.class.isAssignableFrom(sourceMethod.getReturnType()))
           sourceMap = true;
         else
           sourceManyToOne = true;
@@ -746,9 +746,9 @@ public class EjbConfig {
 
         if (targetMethod == null) {
         }
-        else if (targetMethod.getReturnType().isAssignableTo(Collection.class))
+        else if (Collection.class.isAssignableFrom(targetMethod.getReturnType()))
           targetOneToMany = true;
-        else if (targetMethod.getReturnType().isAssignableTo(Map.class))
+        else if (Map.class.isAssignableFrom(targetMethod.getReturnType()))
           targetMap = true;
         else
           targetManyToOne = true;
@@ -1017,7 +1017,7 @@ public class EjbConfig {
                          EjbEntityBean targetEntity,
                          String targetField,
                          CmpRelationRole targetRole,
-                         JMethod targetMapMethod)
+                         ApiMethod targetMapMethod)
     throws ConfigException
   {
     CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
@@ -1043,17 +1043,13 @@ public class EjbConfig {
   /**
    * Returns the map method.
    */
-  public JMethod getMapMethod(EjbEntityBean entityBean, String field)
+  public ApiMethod getMapMethod(EjbEntityBean entityBean, String field)
   {
     String methodName = ("get" +
                          Character.toUpperCase(field.charAt(0)) +
                          field.substring(1));
 
-    JMethod []methods = entityBean.getMethods(entityBean.getEJBClassWrapper());
-
-    for (int i = 0; i < methods.length; i++) {
-      JMethod method = methods[i];
-
+    for (ApiMethod method : entityBean.getEJBClassWrapper().getMethods()) {
       if (! method.getName().equals(methodName))
         continue;
       else if (method.getParameterTypes().length != 1)

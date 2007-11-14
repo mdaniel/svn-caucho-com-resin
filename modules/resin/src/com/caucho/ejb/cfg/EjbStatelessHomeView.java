@@ -47,7 +47,7 @@ public class EjbStatelessHomeView extends EjbHomeView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbStatelessHomeView(EjbBean bean, JClass apiClass, String prefix)
+  public EjbStatelessHomeView(EjbBean bean, ApiClass apiClass, String prefix)
     throws ConfigException
   {
     super(bean, apiClass, prefix);
@@ -56,11 +56,11 @@ public class EjbStatelessHomeView extends EjbHomeView {
   /**
    * Introspects an ejb method.
    */
-  protected EjbMethod introspectApiMethod(JMethod apiMethod)
+  protected EjbMethod introspectApiMethod(ApiMethod apiMethod)
     throws ConfigException
   {
     String methodName = apiMethod.getName();
-    JClass []paramTypes = apiMethod.getParameterTypes();
+    Class []paramTypes = apiMethod.getParameterTypes();
 
     if (methodName.equals("create") && paramTypes.length == 0) {
       return new EjbCreateMethod(this, apiMethod, null);

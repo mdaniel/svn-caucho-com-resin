@@ -48,7 +48,7 @@ public class EjbHomeView extends EjbView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbHomeView(EjbBean bean, JClass apiClass, String prefix)
+  public EjbHomeView(EjbBean bean, ApiClass apiClass, String prefix)
     throws ConfigException
   {
     super(bean, apiClass, prefix, "");

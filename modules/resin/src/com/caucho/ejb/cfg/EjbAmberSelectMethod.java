@@ -31,8 +31,7 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JClassWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.gen.AbstractQueryMethod;
@@ -65,7 +64,7 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
    * @param apiMethod the method from the view
    * @param implMethod the method from the implementation
    */
-  public EjbAmberSelectMethod(EjbEntityBean bean, JMethod method,
+  public EjbAmberSelectMethod(EjbEntityBean bean, ApiMethod method,
 			      String query, String location)
     throws ConfigException
   {
@@ -89,7 +88,7 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
   public BaseMethod assemble(BeanAssembler assembler, String fullClassName)
     throws ConfigException
   {
-    JMethod method = getMethod();
+    ApiMethod method = getMethod();
 
     QLParser parser =  new QLParser((EjbEntityBean) getBean(),
 				    method.getName(), method,
@@ -100,7 +99,7 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
     EjbSelectQuery query = (EjbSelectQuery) parser.parseQuery(_query);
 
     String returnEJB = parser.getReturnEJB();
-    JClass retType = method.getReturnType();
+    Class retType = method.getReturnType();
 
     EjbConfig ejbConfig = getBean().getConfig();
     EjbServerManager ejbManager = ejbConfig.getEJBManager();
@@ -119,26 +118,26 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
       if (amberType == null)
 	throw new NullPointerException("No amber entity for " + returnEJB);
     }
-    else if (retType.isAssignableTo(EJBLocalObject.class)) {
+    else if (EJBLocalObject.class.isAssignableFrom(retType)) {
       EjbEntityBean targetBean = getBean().getConfig().findEntityByLocal(retType);
 
-      JClass queryRetType = parser.getSelectExpr().getJavaType();
+      Class queryRetType = parser.getSelectExpr().getJavaType();
       
-      if (queryRetType != null &&
-	  ! queryRetType.getName().equals("java.lang.Object") &&
-	  ! queryRetType.isAssignableTo(EJBLocalObject.class)) {
+      if (queryRetType != null
+	  && ! Object.class.equals(queryRetType)
+	  && ! EJBLocalObject.class.equals(queryRetType)) {
 	throw new ConfigException(L.l("Mismatched return type '{0}' in\n{1}",
 				      retType.getName(), _query));
       }
 
       amberType = amberPersistenceUnit.getEntityType(targetBean.getAbstractSchemaName());
     }
-    else if (! retType.isAssignableTo(Collection.class))
-      amberType = amberPersistenceUnit.createType(retType);
+    else if (! Collection.class.isAssignableFrom(retType))
+      amberType = amberPersistenceUnit.createType(JClassWrapper.create(retType));
 
     AbstractQueryMethod queryMethod;
     
-    if (retType.isAssignableTo(Collection.class))
+    if (Collection.class.isAssignableFrom(retType))
       queryMethod = new AmberSelectCollectionMethod((EjbEntityBean) getBean(),
 						    getMethod(),
 						    fullClassName,

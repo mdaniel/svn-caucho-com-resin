@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.ejb.cfg.EjbBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.java.gen.DependencyComponent;
@@ -89,7 +88,7 @@ abstract public class BeanAssembler {
   /**
    * Adds the header component.
    */
-  public void addHeaderComponent(JClass beanClass,
+  public void addHeaderComponent(ApiClass beanClass,
                                  String contextClassName,
                                  String implClassName)
   {
@@ -121,18 +120,18 @@ abstract public class BeanAssembler {
   /**
    * Creates the home view.
    */
-  abstract public ViewClass createHomeView(JClass homeClass,
+  abstract public ViewClass createHomeView(ApiClass homeClass,
                                            String fullClassName,
                                            String viewPrefix);
 
   /**
    * Creates the home view.
    */
-  public final ViewClass createView(JClass homeClass,
+  public final ViewClass createView(ApiClass homeClass,
                                     String fullClassName,
                                     String viewPrefix)
   {
-    ArrayList<JClass> apiList = new ArrayList<JClass>();
+    ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
     apiList.add(homeClass);
 
     return createView(apiList, fullClassName, viewPrefix, "");
@@ -141,7 +140,7 @@ abstract public class BeanAssembler {
   /**
    * Creates the home view.
    */
-  abstract public ViewClass createView(ArrayList<JClass> apiList,
+  abstract public ViewClass createView(ArrayList<ApiClass> apiList,
                                        String fullClassName,
                                        String viewPrefix,
                                        String viewSuffix);
@@ -149,7 +148,7 @@ abstract public class BeanAssembler {
   /**
    * Checks for the existence of a method.
    */
-  public static boolean hasMethod(JClass cl, String methodName, JClass []args)
+  public static boolean hasMethod(ApiClass cl, String methodName, Class []args)
   {
     return cl.getMethod(methodName, args) != null;
   }

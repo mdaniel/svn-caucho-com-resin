@@ -31,13 +31,8 @@ package com.caucho.ejb.gen;
 
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JField;
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JType;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.ql.EjbSelectQuery;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
@@ -46,6 +41,7 @@ import com.caucho.util.L10N;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.lang.reflect.*;
 
 /**
  * Generates the code for a query
@@ -53,17 +49,17 @@ import java.util.Collections;
 abstract public class AbstractQueryMethod extends BaseMethod {
   private static final L10N L = new L10N(AbstractQueryMethod.class);
 
-  private JMethod _method;
+  private ApiMethod _method;
   private EjbEntityBean _bean;
   private EjbSelectQuery _query;
   private boolean _queryLoadsBean = true;
   
   protected AbstractQueryMethod(EjbEntityBean bean,
-				JMethod method,
+				ApiMethod method,
 				EjbSelectQuery query)
     throws ConfigException
   {
-    super(method);
+    super(method.getMethod());
 
     _bean = bean;
     _query = query;
@@ -87,7 +83,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
   /**
    * Gets the parameter types
    */
-  public JClass []getParameterTypes()
+  public Class []getParameterTypes()
   {
     return _method.getParameterTypes();
   }
@@ -95,7 +91,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
   /**
    * Gets the return type.
    */
-  public JClass getReturnType()
+  public Class getReturnType()
   {
     return _method.getReturnType();
   }
@@ -122,7 +118,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
     if (len > 0 || _query.getThisExpr() != null)
       out.println("int index = 1;");
 
-    JClass []paramTypes = getParameterTypes();
+    Class []paramTypes = getParameterTypes();
     
     for (int i = 0; i < len; i++) {
       generateSetParameter(out, paramTypes[i], args[i]);
@@ -161,7 +157,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
     }
   }
   
-  public void generateSetParameter(JavaWriter out, JClass type, String arg)
+  public void generateSetParameter(JavaWriter out, Class type, String arg)
     throws IOException
   {
     generateSetParameter(out, _bean.getConfig(), type, "query", arg);
@@ -169,7 +165,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
   
   public static void generateSetParameter(JavaWriter out,
 					  EjbConfig config,
-					  JType type,
+					  Class type,
 					  String query,
 					  String arg)
     throws IOException
@@ -214,14 +210,14 @@ abstract public class AbstractQueryMethod extends BaseMethod {
       
       out.println(query + ".setDouble(index++, " + arg + ");");
     }
-    else if (type.isAssignableTo(java.sql.Timestamp.class)) {
+    else if (java.sql.Timestamp.class.isAssignableFrom(type)) {
       out.println(query + ".setTimestamp(index++, " + arg + ");");
     }
-    else if (type.isAssignableTo(java.sql.Date.class))
+    else if (java.sql.Date.class.isAssignableFrom(type))
       out.println(query + ".setDate(index++, " + arg + ");");
-    else if (type.isAssignableTo(java.sql.Time.class))
+    else if (java.sql.Time.class.isAssignableFrom(type))
       out.println(query + ".setTime(index++, " + arg + ");");
-    else if (type.isAssignableTo(java.util.Date.class)) {
+    else if (java.util.Date.class.isAssignableFrom(type)) {
       out.println("{");
       out.println("  java.util.Date _caucho_tmp_date = " + arg + ";");
       out.println("  if (_caucho_tmp_date == null)");
@@ -230,64 +226,64 @@ abstract public class AbstractQueryMethod extends BaseMethod {
       out.println("    " + query + ".setTimestamp(index++, new java.sql.Timestamp(_caucho_tmp_date.getTime()));");
       out.println("}");
     }
-    else if (type.getName().equals("java.lang.Boolean")) {
+    else if (Boolean.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.BIT);");
       out.println("else");
       out.println("  " + query + ".setBoolean(index++, " + arg + ".booleanValue());");
     }
-    else if (type.getName().equals("java.lang.Character")) {
+    else if (Character.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.VARCHAR);");
       out.println("else");
       out.println("  " + query + ".setString(index++, " + arg + ".toString());");
     }
-    else if (type.getName().equals("java.lang.String")) {
+    else if (String.class.equals(type)) {
       out.println("  " + query + ".setString(index++, " + arg + ");");
     }
-    else if (type.getName().equals("java.lang.Byte")) {
+    else if (Byte.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.TINYINT);");
       out.println("else");
       out.println("  " + query + ".setInt(index++, " + arg + ".byteValue());");
     }
-    else if (type.getName().equals("java.lang.Short")) {
+    else if (Short.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.SMALLINT);");
       out.println("else");
       out.println("  " + query + ".setInt(index++, " + arg + ".shortValue());");
     }
-    else if (type.getName().equals("java.lang.Integer")) {
+    else if (Integer.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.INTEGER);");
       out.println("else");
       out.println("  " + query + ".setInt(index++, " + arg + ".intValue());");
     }
-    else if (type.getName().equals("java.lang.Long")) {
+    else if (Long.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.BIGINT);");
       out.println("else");
       out.println("  " + query + ".setLong(index++, " + arg + ".longValue());");
     }
-    else if (type.getName().equals("java.lang.Float")) {
+    else if (Float.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.REAL);");
       out.println("else");
       out.println("  " + query + ".setDouble(index++, " + arg + ".floatValue());");
     }
-    else if (type.getName().equals("java.lang.Double")) {
+    else if (Double.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.DOUBLE);");
       out.println("else");
       out.println("  " + query + ".setDouble(index++, " + arg + ".doubleValue());");
     }
-    else if (type.getName().equals("java.math.BigDecimal")) {
+    else if (java.math.BigDecimal.class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.NUMERIC);");
       out.println("else");
       out.println("  " + query + ".setBigDecimal(index++, " + arg + ");");
     }
-    else if (type.getName().equals("[B")) {
+    else if (byte[].class.equals(type)) {
       out.println("if (" + arg + " == null)");
       out.println("  " + query + ".setNull(index++, java.sql.Types.VARBINARY);");
       out.println("else {");
@@ -307,8 +303,8 @@ abstract public class AbstractQueryMethod extends BaseMethod {
       hasSerialization = true;
     }
     */
-    else if (type.isAssignableTo(javax.ejb.EJBLocalObject.class)) {
-      EjbEntityBean bean = config.findEntityByLocal(type.getRawType());
+    else if (javax.ejb.EJBLocalObject.class.isAssignableFrom(type)) {
+      EjbEntityBean bean = config.findEntityByLocal(type);
 
       if (bean == null)
 	throw new IllegalStateException(L.l("can't find bean for {0}",
@@ -321,7 +317,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
       Collections.sort(keys, new IdFieldCompare());
 
       String var = "_expr" + out.generateId();
-      out.print(type.getPrintName());
+      out.printClass(type);
       out.println(" " + var + " = " + arg + ";");
 
       out.println("if (" + var + " != null) {");
@@ -343,17 +339,15 @@ abstract public class AbstractQueryMethod extends BaseMethod {
       out.println("}");
     }
     else {
-      JField []fields = type.getFields();
+      Field []fields = type.getFields();
 
       String var = "_expr" + out.generateId();
-      out.print(type.getPrintName());
+      out.printClass(type);
       out.println(" " + var + " = " + arg + ";");
 
       out.println("if (" + var + " != null) {");
       out.pushDepth();
-      for (int i = 0; i < fields.length; i++) {
-        JField field = fields[i];
-
+      for (Field field : fields) {
 	generateSetParameter(out, config,
 			     field.getType(),
 			     query, arg + "." + field.getName());

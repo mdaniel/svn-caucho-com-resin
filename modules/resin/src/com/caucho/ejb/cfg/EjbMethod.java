@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.ViewClass;
@@ -61,8 +60,8 @@ public class EjbMethod {
 
   private EjbView _view;
 
-  private JMethod _apiMethod;
-  private JMethod _implMethod;
+  private ApiMethod _apiMethod;
+  private ApiMethod _implMethod;
 
   /**
    * Creates a new method.
@@ -71,7 +70,7 @@ public class EjbMethod {
    * @param apiMethod the method from the view
    * @param implMethod the method from the implementation
    */
-  public EjbMethod(EjbView view, JMethod apiMethod, JMethod implMethod)
+  public EjbMethod(EjbView view, ApiMethod apiMethod, ApiMethod implMethod)
   {
     if (apiMethod == null)
       throw new NullPointerException();
@@ -100,7 +99,7 @@ public class EjbMethod {
   /**
    * Returns the API method.
    */
-  public JMethod getApiMethod()
+  public ApiMethod getApiMethod()
   {
     return _apiMethod;
   }
@@ -108,7 +107,7 @@ public class EjbMethod {
   /**
    * Returns the Impl method.
    */
-  public JMethod getImplMethod()
+  public ApiMethod getImplMethod()
   {
     return _implMethod;
   }

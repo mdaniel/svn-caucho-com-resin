@@ -44,6 +44,11 @@ public class JMethodWrapper extends JMethod {
 
   private Method _method;
 
+  public JMethodWrapper(Method method)
+  {
+    this(method, JClassLoaderWrapper.create());
+  }
+  
   public JMethodWrapper(Method method, JClassLoader loader)
   {
     if (loader == null)

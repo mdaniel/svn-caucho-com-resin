@@ -217,7 +217,7 @@ public class Bean {
     throws ConfigException
   {
     try {
-      bean.setEJBClass(type.getName());
+      bean.setEJBClass(type.getJavaClass());
       bean.init();
 
       _ejbManager.getConfig().setBeanConfig(bean.getEJBName(), bean);

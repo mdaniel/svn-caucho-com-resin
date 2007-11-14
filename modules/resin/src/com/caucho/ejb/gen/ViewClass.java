@@ -29,9 +29,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.EjbEntityBean;
-import com.caucho.ejb.cfg.EjbMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.gen.BaseClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -51,8 +49,8 @@ public class ViewClass extends BaseClass {
   /**
    * Adds the pool chaining.
    */
-  public BaseMethod createCreateMethod(JMethod apiMethod,
-                                       JMethod implMethod,
+  public BaseMethod createCreateMethod(ApiMethod apiMethod,
+                                       ApiMethod implMethod,
                                        String fullClassName,
                                        String viewPrefix)
   {
@@ -60,9 +58,9 @@ public class ViewClass extends BaseClass {
   }
 
   public BaseMethod createCreateMethod(EjbEntityBean bean,
-                                       JMethod api,
-                                       JMethod create,
-                                       JMethod postCreate,
+                                       ApiMethod api,
+                                       ApiMethod create,
+                                       ApiMethod postCreate,
                                        String fullClassName)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -73,8 +71,8 @@ public class ViewClass extends BaseClass {
    */
   public BaseMethod createBusinessMethod(EjbMethod ejbMethod)
   {
-    BaseMethod method = new BaseMethod(ejbMethod.getApiMethod(),
-                                       ejbMethod.getImplMethod());
+    BaseMethod method = new BaseMethod(ejbMethod.getApiMethod().getMethod(),
+                                       ejbMethod.getImplMethod().getMethod());
 
     method.setCall(createPoolChain(method.getCall(), method));
 

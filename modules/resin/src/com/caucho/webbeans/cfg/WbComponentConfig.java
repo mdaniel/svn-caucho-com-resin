@@ -72,6 +72,11 @@ public class WbComponentConfig {
     _webbeans = WebBeans.getLocal().getWbWebBeans();
   }
 
+  public WbComponentConfig(WbWebBeans webbeans)
+  {
+    _webbeans = webbeans;
+  }
+
   /**
    * Returns the component's EL binding name.
    */
@@ -83,7 +88,7 @@ public class WbComponentConfig {
     binding.setClass(Named.class);
     binding.addValue("value", name);
 
-    addBinding(binding);
+    _bindingList.add(binding);
   }
 
   /**
@@ -172,14 +177,18 @@ public class WbComponentConfig {
     if (_name != null)
       comp.setName(_name);
 
+    for (WbBinding binding : _bindingList)
+      comp.addBinding(binding);
+
     if (_type != null)
       comp.setComponentType(_type);
 
     if (_init != null)
       comp.setInit(_init);
 
+    comp.introspect();
     comp.init();
 
-    _webbeans.addComponent(comp);
+    _webbeans.addWbComponent(comp);
   }
 }

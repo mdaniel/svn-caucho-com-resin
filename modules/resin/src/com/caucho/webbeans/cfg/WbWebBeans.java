@@ -83,17 +83,15 @@ public class WbWebBeans {
   /**
    * Adds a component.
    */
-  public WbComponent createComponent()
+  public WbComponentConfig createComponent()
   {
-    WbComponent comp = new WbComponent(this);
-
-    return comp;
+    return new WbComponentConfig(this);
   }
 
-  public void addComponent(WbComponent comp)
+  public void addWbComponent(WbComponent component)
   {
-    if (! _componentList.contains(comp))
-      _componentList.add(comp);
+    if (! _componentList.contains(component))
+      _componentList.add(component);
   }
 
   /**

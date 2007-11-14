@@ -40,14 +40,10 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JClassWrapper;
+import com.caucho.bytecode.JMethodWrapper;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.CmpField;
-import com.caucho.ejb.cfg.CmpProperty;
-import com.caucho.ejb.cfg.CmrRelation;
-import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
@@ -103,7 +99,7 @@ public class AmberConfig {
     EntityType type = bean.getEntityType();
 
     type.setInstanceClassName(bean.getFullImplName());
-    type.setProxyClass(bean.getLocal());
+    type.setProxyClass(JClassWrapper.create(bean.getLocal().getJavaClass()));
 
     String sqlTable;
 
@@ -132,7 +128,7 @@ public class AmberConfig {
     table.setReadOnly(bean.isReadOnly());
     type.setCacheTimeout(bean.getCacheTimeout());
 
-    if (hasMethod(bean.getEJBClassWrapper(), "ejbLoad", new JClass[0])) {
+    if (bean.getEJBClassWrapper().hasMethod("ejbLoad", new Class[0])) {
       type.setHasLoadCallback(true);
     }
     
@@ -154,8 +150,8 @@ public class AmberConfig {
 
     configureId(bean, type, ids);
 
-    for (JMethod method : bean.getStubMethods()) {
-      type.addStubMethod(new StubMethod(method));
+    for (ApiMethod method : bean.getStubMethods()) {
+      type.addStubMethod(new StubMethod(new JMethodWrapper(method.getMethod())));
     }
 
     for (PersistentDependency depend : bean.getDependList()) {
@@ -175,13 +171,13 @@ public class AmberConfig {
     if (sqlName == null)
       sqlName = fieldName;
       
-    JClass dataType = cmpField.getJavaType();
+    Class dataType = cmpField.getJavaType();
 
     if (dataType == null)
       throw new NullPointerException(L.l("'{0}' is an unknown field",
 					 fieldName));
 
-    Type amberType = _manager.createType(dataType);
+    Type amberType = _manager.createType(JClassWrapper.create(dataType));
     Column column = type.getTable().createColumn(sqlName, amberType);
 
     column.setConfigLocation(cmpField.getLocation());
@@ -217,7 +213,7 @@ public class AmberConfig {
     }
     else {
       CompositeId id = new CompositeId(type, keys);
-      id.setKeyClass(bean.getPrimKeyClass());
+      id.setKeyClass(JClassWrapper.create(bean.getPrimKeyClass().getJavaClass()));
       type.setId(id);
     }
   }
@@ -283,14 +279,5 @@ public class AmberConfig {
     throws Exception
   {
     _manager.generate(javaGen);
-  }
-
-  private static boolean hasMethod(JClass cl, String name, JClass []param)
-  {
-    try {
-      return cl.getMethod(name, param) != null;
-    } catch (Throwable e) {
-      return false;
-    }
   }
 }

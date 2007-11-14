@@ -37,8 +37,6 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.ql.QLParser;
 import com.caucho.java.JavaWriter;
@@ -89,7 +87,7 @@ public class CmrOneToMany extends CmrRelation {
   /**
    * Returns the target type.
    */
-  public JClass getTargetType()
+  public ApiClass getTargetType()
   {
     return _targetBean.getLocal();
   }
@@ -139,8 +137,8 @@ public class CmrOneToMany extends CmrRelation {
    * Create any bean methods.
    */
   public EjbMethod createGetter(EjbView view,
-                                JMethod apiMethod,
-                                JMethod implMethod)
+                                ApiMethod apiMethod,
+                                ApiMethod implMethod)
     throws ConfigException
   {
     return new EjbOneToManyMethod(view, apiMethod, implMethod, this);

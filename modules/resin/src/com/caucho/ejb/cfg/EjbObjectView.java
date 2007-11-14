@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.ViewClass;
@@ -51,7 +50,10 @@ public class EjbObjectView extends EjbView
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbObjectView(EjbBean bean, ArrayList<JClass> apiList, String prefix, String suffix)
+  public EjbObjectView(EjbBean bean,
+		       ArrayList<ApiClass> apiList,
+		       String prefix,
+		       String suffix)
     throws ConfigException
   {
     super(bean, apiList, prefix, suffix);

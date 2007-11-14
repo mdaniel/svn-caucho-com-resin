@@ -30,7 +30,6 @@
 package com.caucho.ejb;
 
 import com.caucho.config.BuilderProgram;
-import com.caucho.bytecode.JClass;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
@@ -319,11 +318,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Sets the remote object list.
    */
-  public void setRemoteObjectList(ArrayList<JClass> list)
+  public void setRemoteObjectList(ArrayList<Class> list)
   {
-    _remoteObjectList = new ArrayList<Class>();
-    for (int i = 0; i < list.size(); i++)
-      _remoteObjectList.add(list.get(i).getJavaClass());
+    _remoteObjectList = new ArrayList<Class>(list);
 
     if (_remoteObjectList.size() > 0)
       _remoteObjectClass = _remoteObjectList.get(0);
@@ -407,11 +404,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Sets the local api class list
    */
-  public void setLocalApiList(ArrayList<JClass> list)
+  public void setLocalApiList(ArrayList<Class> list)
   {
-    _localApiList = new ArrayList<Class>();
-    for (int i = 0; i < list.size(); i++)
-      _localApiList.add(list.get(i).getJavaClass());
+    _localApiList = new ArrayList<Class>(list);
   }
 
   /**

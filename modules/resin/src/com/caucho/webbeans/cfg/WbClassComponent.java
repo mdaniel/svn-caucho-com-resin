@@ -59,4 +59,15 @@ public class WbClassComponent extends WbComponent {
   {
     super(webbeans);
   }
+
+  /**
+   * Introspects the methods for any @Produces
+   */
+  protected void introspectBindings()
+  {
+    for (Annotation ann : getInstanceClass().getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	addBinding(new WbBinding(ann));
+    }
+  }
 }

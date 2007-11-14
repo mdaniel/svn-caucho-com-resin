@@ -31,11 +31,7 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
 import com.caucho.bytecode.JClassWrapper;
-import com.caucho.bytecode.JField;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.types.Period;
@@ -62,6 +58,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -73,10 +70,10 @@ import java.util.Map;
 public class EjbEntityBean extends EjbBean {
   private final static L10N L = new L10N(EjbEntityBean.class);
 
-  private JClassWrapper _primKeyClass;
+  private ApiClass _primKeyClass;
   private String _primKeyField;
 
-  private JClass _compositeKeyClass;
+  private ApiClass _compositeKeyClass;
 
   private String _cmpVersion = "2.x";
   private boolean _isCMP = false;
@@ -97,7 +94,7 @@ public class EjbEntityBean extends EjbBean {
   private ArrayList<CmpField> _fields = new ArrayList<CmpField>();
 
   private ArrayList<CmrRelation> _relations = new ArrayList<CmrRelation>();
-  private ArrayList<JMethod> _stubMethods = new ArrayList<JMethod>();
+  private ArrayList<ApiMethod> _stubMethods = new ArrayList<ApiMethod>();
 
   /**
    * Creates a new entity bean configuration.
@@ -126,28 +123,27 @@ public class EjbEntityBean extends EjbBean {
    * Sets the ejb implementation class.
    */
   @Override
-  public void setEJBClass(String ejbType)
+  public void setEJBClass(Class ejbClass)
     throws ConfigException
   {
-    super.setEJBClass(ejbType);
-
-    Class ejbClass = getEJBClass();
+    super.setEJBClass(ejbClass);
 
     if (! EntityBean.class.isAssignableFrom(ejbClass) && ! isAllowPOJO())
       throw error(L.l("'{0}' must implement EntityBean.  Entity beans must implement javax.ejb.EntityBean.", ejbClass.getName()));
 
 
     validateNonFinalMethod("setEntityContext",
-                           new JClass[] { JClassLoader.systemForName(EntityContext.class.getName()) }, isAllowPOJO());
-    validateNonFinalMethod("unsetEntityContext", new JClass[0], isAllowPOJO());
-    validateNonFinalMethod("ejbActivate", new JClass[0], isAllowPOJO());
-    validateNonFinalMethod("ejbPassivate", new JClass[0], isAllowPOJO());
+                           new Class[] { EntityContext.class },
+			   isAllowPOJO());
+    validateNonFinalMethod("unsetEntityContext", new Class[0], isAllowPOJO());
+    validateNonFinalMethod("ejbActivate", new Class[0], isAllowPOJO());
+    validateNonFinalMethod("ejbPassivate", new Class[0], isAllowPOJO());
 
-    validateNonFinalMethod("ejbRemove", new JClass[0], isAllowPOJO());
+    validateNonFinalMethod("ejbRemove", new Class[0], isAllowPOJO());
     // XXX: spec doesn't enforce this
     // validator.validateException(implMethod, RemoveException.class);
-    validateNonFinalMethod("ejbLoad", new JClass[0], isAllowPOJO());
-    validateNonFinalMethod("ejbStore", new JClass[0], isAllowPOJO());
+    validateNonFinalMethod("ejbLoad", new Class[0], isAllowPOJO());
+    validateNonFinalMethod("ejbStore", new Class[0], isAllowPOJO());
   }
 
   /**
@@ -155,14 +151,16 @@ public class EjbEntityBean extends EjbBean {
    */
   public EntityType getEntityType()
   {
-    AmberPersistenceUnit amberPersistenceUnit = getConfig().getEJBManager().getAmberManager();
+    AmberPersistenceUnit amberPersistenceUnit
+      = getConfig().getEJBManager().getAmberManager();
 
-    EntityType type = amberPersistenceUnit.createEntity(getAbstractSchemaName(),
-                                                        getEJBClassWrapper());
+    EntityType type
+      = amberPersistenceUnit.createEntity(getAbstractSchemaName(),
+					  JClassWrapper.create(getEJBClassWrapper().getJavaClass()));
 
     // XXX: why is this if statement required?
     if (getLocalList().size() > 0)
-      type.setProxyClass(getLocalList().get(0));
+      type.setProxyClass(JClassWrapper.create(getLocalList().get(0).getJavaClass()));
 
     return type;
   }
@@ -170,7 +168,7 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Returns the primary key class.
    */
-  public JClass getPrimKeyClass()
+  public ApiClass getPrimKeyClass()
   {
     return _primKeyClass;
   }
@@ -180,13 +178,13 @@ public class EjbEntityBean extends EjbBean {
    */
   public void setPrimKeyClass(Class cl)
   {
-    _primKeyClass = new JClassWrapper(cl, _jClassLoader);
+    _primKeyClass = new ApiClass(cl);
   }
 
   /**
    * Returns the primary key class.
    */
-  public JClass getCompositeKeyClass()
+  public ApiClass getCompositeKeyClass()
   {
     return _compositeKeyClass;
   }
@@ -265,7 +263,7 @@ public class EjbEntityBean extends EjbBean {
       return super.getFullImplName();
   }
 
-  public JClass getLocal()
+  public ApiClass getLocal()
   {
     return getLocalList().get(0);
   }
@@ -458,7 +456,7 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Returns the field getter method.
    */
-  public JMethod getFieldGetter(String fieldName)
+  public ApiMethod getFieldGetter(String fieldName)
   {
     if (fieldName == null)
       return null;
@@ -468,7 +466,7 @@ public class EjbEntityBean extends EjbBean {
                          fieldName.substring(1));
 
     try {
-      return getMethod(getEJBClassWrapper(), methodName, new JClass[0]);
+      return getMethod(getEJBClassWrapper(), methodName, new Class[0]);
     } catch (Throwable e) {
       return null;
     }
@@ -482,7 +480,7 @@ public class EjbEntityBean extends EjbBean {
   {
     String fieldName = relation.getName();
 
-    JMethod method = getMethodField(fieldName);
+    ApiMethod method = getMethodField(fieldName);
 
     if (method == null && ! (relation instanceof CmrMap))
       throw error(L.l("'{0}' is a missing method", fieldName));
@@ -518,7 +516,7 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Returns the stub methods
    */
-  public ArrayList<JMethod> getStubMethods()
+  public ArrayList<ApiMethod> getStubMethods()
   {
     return _stubMethods;
   }
@@ -526,7 +524,7 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Adds a stub method
    */
-  public void addStubMethod(JMethod method)
+  public void addStubMethod(ApiMethod method)
   {
     if (! _stubMethods.contains(method))
       _stubMethods.add(method);
@@ -535,9 +533,9 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Gets the matching cmp-field.
    */
-  public JClass getFieldType(String fieldName)
+  public Class getFieldType(String fieldName)
   {
-    JMethod method = getMethodField(fieldName);
+    ApiMethod method = getMethodField(fieldName);
 
     if (method != null)
       return method.getReturnType();
@@ -587,7 +585,7 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Gets the best method.
    */
-  public EjbMethodPattern getQuery(JMethod method, String intf)
+  public EjbMethodPattern getQuery(ApiMethod method, String intf)
   {
     return getMethodPattern(method, intf);
   }
@@ -623,9 +621,9 @@ public class EjbEntityBean extends EjbBean {
         validateHome(getRemoteHome());
       if (getLocalHome() != null)
         validateHome(getLocalHome());
-      for (JClass remote : getRemoteList())
+      for (ApiClass remote : getRemoteList())
         validateRemote(remote);
-      for (JClass local : getLocalList())
+      for (ApiClass local : getLocalList())
         validateRemote(local);
 
       validateMethods();
@@ -660,9 +658,7 @@ public class EjbEntityBean extends EjbBean {
   protected void introspectCMPFields()
     throws ConfigException
   {
-    JMethod []methods = getMethods(getEJBClassWrapper());
-
-    for (JMethod method : methods) {
+    for (ApiMethod method : getEJBClassWrapper().getMethods()) {
       if (! method.isAbstract())
         continue;
 
@@ -678,23 +674,23 @@ public class EjbEntityBean extends EjbBean {
           continue;
         }
 
-        JClass type = method.getReturnType();
+        Class type = method.getReturnType();
 
-        if (type.isAssignableTo(Collection.class)) {
+        if (Collection.class.isAssignableFrom(type)) {
           throw error(L.l("'{0}' needs to be a relation",
                           fieldName));
         }
-        else if (type.isAssignableTo(Map.class)) {
+        else if (Map.class.isAssignableFrom(type)) {
           throw error(L.l("'{0}' needs to be a relation",
                           fieldName));
         }
-        else if (type.isAssignableTo(EJBLocalObject.class)) {
+        else if (EJBLocalObject.class.isAssignableFrom(type)) {
           throw error(L.l("{0}: '{1}' needs to be defined in an ejb-relation for getter method {2}.",
                           getEJBClass().getName(),
                           fieldName,
                           method.getFullName()));
         }
-        else if (type.isAssignableTo(EJBObject.class)) {
+        else if (EJBObject.class.isAssignableFrom(type)) {
           throw error(L.l("'{0}' needs to be a relation",
                           fieldName));
         }
@@ -713,9 +709,7 @@ public class EjbEntityBean extends EjbBean {
   protected void validateCMPFields()
     throws ConfigException
   {
-    JMethod []methods = getMethods(getEJBClassWrapper());
-
-    for (JMethod method : methods) {
+    for (ApiMethod method : getEJBClassWrapper().getMethods()) {
       if (! method.isAbstract())
         continue;
 
@@ -753,7 +747,7 @@ public class EjbEntityBean extends EjbBean {
 
         if (field == null) {
         }
-        else if (isMatch(method, field.getSetter()))
+        else if (method.isMatch(field.getSetter()))
           continue;
         else
           throw new ConfigException(L.l("{0}: '{1}' does not match the corresponding cmp-field getter '{2}'.",
@@ -787,14 +781,14 @@ public class EjbEntityBean extends EjbBean {
     throws ConfigException
   {
 
-    if (_primKeyClass != null &&
-        ! _primKeyClass.isPrimitive() &&
-        ! _primKeyClass.getName().startsWith("java.lang.") &&
-        ! _primKeyClass.getName().equals("java.util.Date") &&
-        ! _primKeyClass.getName().equals("java.sql.Date") &&
-        ! _primKeyClass.getName().equals("java.sql.Time") &&
-        ! _primKeyClass.getName().equals("java.sql.Timestamp") &&
-        ! _primKeyClass.isAssignableTo(EJBLocalObject.class)) {
+    if (_primKeyClass != null
+	&& ! _primKeyClass.isPrimitive()
+	&& ! _primKeyClass.getName().startsWith("java.lang.")
+	&& ! _primKeyClass.getName().equals("java.util.Date")
+	&& ! _primKeyClass.getName().equals("java.sql.Date")
+	&& ! _primKeyClass.getName().equals("java.sql.Time")
+	&& ! _primKeyClass.getName().equals("java.sql.Timestamp")
+	&& ! EJBLocalObject.class.isAssignableFrom(_primKeyClass.getJavaClass())) {
 
       if (_primKeyField != null)
         throw error(L.l("{0}: 'primkey-field' must not be defined for a composite primkey-class.",
@@ -828,9 +822,9 @@ public class EjbEntityBean extends EjbBean {
     throws ConfigException
   {
     try {
-      JMethod equals = _primKeyClass.getMethod("equals", new JClass[] { JClass.OBJECT });
+      ApiMethod equals = _primKeyClass.getMethod("equals", new Class[] { Object.class });
 
-      if (equals.getDeclaringClass().equals(JClass.OBJECT))
+      if (equals.getDeclaringClass().equals(Object.class))
         throw error(L.l("{0}: primary key class '{1}' must override the 'equals' method.",
                         getEJBClass().getName(),
                         _primKeyClass.getName()));
@@ -840,7 +834,7 @@ public class EjbEntityBean extends EjbBean {
     }
 
     try {
-      JMethod hashCode = _primKeyClass.getMethod("hashCode", new JClass[] { });
+      ApiMethod hashCode = _primKeyClass.getMethod("hashCode", new Class[] { });
 
       if (hashCode.getDeclaringClass().getName().equals(Object.class.getName()))
         throw error(L.l("{0}: primary key class '{1}' must override the 'hashCode' method.",
@@ -856,7 +850,7 @@ public class EjbEntityBean extends EjbBean {
                       getEJBClass().getName(),
                       _primKeyClass.getName()));
 
-    for (JField field : _primKeyClass.getFields()) {
+    for (Field field : _primKeyClass.getFields()) {
       CmpProperty cmpProperty = getCmpField(field.getName());
 
       if (cmpProperty == null)
@@ -933,11 +927,11 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Introspects an ejb method.
    */
-  protected EjbBaseMethod introspectEJBMethod(JMethod method)
+  protected EjbBaseMethod introspectEJBMethod(ApiMethod method)
     throws ConfigException
   {
     String methodName = method.getName();
-    JClass []paramTypes = method.getParameterTypes();
+    Class []paramTypes = method.getParameterTypes();
 
     if (methodName.startsWith("ejbSelect") && method.isAbstract()) {
       validateSelectMethod(method);
@@ -966,11 +960,11 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Introspects an ejb method.
    */
-  protected void validateImplMethod(JMethod method)
+  protected void validateImplMethod(ApiMethod method)
     throws ConfigException
   {
     String methodName = method.getName();
-    JClass []paramTypes = method.getParameterTypes();
+    Class []paramTypes = method.getParameterTypes();
 
     if (method.isAbstract() &&
         methodName.startsWith("get") &&
@@ -998,7 +992,7 @@ public class EjbEntityBean extends EjbBean {
    *
    * @return the matching method
    */
-  private void validateSelectMethod(JMethod method)
+  private void validateSelectMethod(ApiMethod method)
     throws ConfigException
   {
     if (! method.isPublic()) {
@@ -1022,7 +1016,7 @@ public class EjbEntityBean extends EjbBean {
    * Creates the views.
    */
   @Override
-  protected EjbHomeView createHomeView(JClass homeClass, String prefix)
+  protected EjbHomeView createHomeView(ApiClass homeClass, String prefix)
     throws ConfigException
   {
     return new EjbEntityHomeView(this, homeClass, prefix);
@@ -1032,7 +1026,7 @@ public class EjbEntityBean extends EjbBean {
    * Creates the views.
    */
   @Override
-  protected EjbObjectView createObjectView(ArrayList<JClass> apiList,
+  protected EjbObjectView createObjectView(ArrayList<ApiClass> apiList,
                                            String prefix,
                                            String suffix)
     throws ConfigException
@@ -1067,7 +1061,7 @@ public class EjbEntityBean extends EjbBean {
     server.setCMP(isCMP());
 
     if (_primKeyClass != null)
-      server.setPrimaryKeyClass(_primKeyClass.getWrappedClass());
+      server.setPrimaryKeyClass(_primKeyClass.getJavaClass());
 
     server.setLoadLazyOnTransaction(_loadLazyOnTransaction);
 
@@ -1102,26 +1096,24 @@ public class EjbEntityBean extends EjbBean {
   private void validateMethods()
     throws ConfigException
   {
-    JClass primKeyClass = getPrimKeyClass();
+    ApiClass primKeyClass = getPrimKeyClass();
 
-    JMethod []methods = getMethods(getEJBClassWrapper());
-
-    for (JMethod method : methods) {
+    for (ApiMethod method : getEJBClassWrapper().getMethods()) {
       String name = method.getName();
 
       try {
         // XXX: ???
-        JMethod cleanMethod = getEJBClassWrapper().getMethod(name, method.getParameterTypes());
+        ApiMethod cleanMethod = getEJBClassWrapper().getMethod(name, method.getParameterTypes());
         if (cleanMethod != null)
           method = cleanMethod;
       } catch (Exception e) {
       }
 
-      if (method.getReturnType().isAssignableTo(EntityBean.class))
+      if (EntityBean.class.isAssignableFrom(method.getReturnType()))
         throw error(L.l("{0}: '{1}' must not return entity bean '{2}'.  Entity bean methods must always return local or remote interfaces.",
                         getEJBClass().getName(),
                         method.getFullName(),
-                        method.getReturnType().getShortName()));
+                        method.getReturnType().getSimpleName()));
 
       if (name.startsWith("ejbFind")) {
         if (! isCMP()) {
@@ -1155,7 +1147,7 @@ public class EjbEntityBean extends EjbBean {
           throw error(L.l("{0}: '{1}' must return '{2}'.  ejbCreate methods must return the primary key.",
                           method.getDeclaringClass().getName(),
                           method.getFullName(),
-                          getClassName(primKeyClass)));
+                          primKeyClass.getName()));
         if (isCMP())
           validateException(method, CreateException.class);
       }
@@ -1167,8 +1159,8 @@ public class EjbEntityBean extends EjbBean {
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
       }
-      else if (name.startsWith("create") &&
-               method.isAbstract()) {
+      else if (name.startsWith("create")
+	       && method.isAbstract()) {
         // validated in dependent phase.
       }
       else if (name.startsWith("ejbHome")) {
@@ -1181,14 +1173,14 @@ public class EjbEntityBean extends EjbBean {
                           method.getFullName()));
       }
       else if (name.equals("ejbTimeout")) {
-        JClass []types = method.getParameterTypes();
+        Class []types = method.getParameterTypes();
 
         if (types.length != 1 || ! types[0].getName().equals("javax.ejb.Timer"))
           throw error(L.l("{0}: '{1}' must have one javax.ejb.Timer argument.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
       }
-      else if (classHasMethod(method, JClassLoader.systemForName(EntityBean.class.getName()))) {
+      else if (ApiClass.ENTITY_BEAN.getMethod(method) != null) {
       }
       else if (name.equals("finalize") &&
                method.getParameterTypes().length == 0 &&
@@ -1202,7 +1194,7 @@ public class EjbEntityBean extends EjbBean {
       }
       else {
         boolean isAbstract = method.isAbstract();
-        JMethod persist = null;
+        ApiMethod persist = null;
 
         if (! isAbstract || ! isCMP()) {
         }
@@ -1244,24 +1236,26 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Validates the home interface.
    */
-  private void validateHome(JClass homeClass)
+  private void validateHome(ApiClass homeClass)
     throws ConfigException
   {
-    JClass beanClass = getEJBClassWrapper();
+    ApiClass beanClass = getEJBClassWrapper();
     String beanName = beanClass.getName();
 
     String homeName = homeClass.getName();
 
-    JClass objectClass;
-    if (homeClass.isAssignableTo(EJBHome.class))
+    ApiClass objectClass;
+    
+    if (EJBHome.class.isAssignableFrom(homeClass.getJavaClass()))
       objectClass = getRemoteList().get(0);
     else
       objectClass = getLocal();
+    
     String objectName = objectClass != null ? objectClass.getName() : null;
 
     boolean hasFindByPrimaryKey = false;
 
-    JClass primKeyClass = getPrimKeyClass();
+    ApiClass primKeyClass = getPrimKeyClass();
 
     if (! homeClass.isPublic())
       throw error(L.l("'{0}' must be public. Entity beans must be public.", homeName));
@@ -1275,12 +1269,10 @@ public class EjbEntityBean extends EjbBean {
     if (! homeClass.isInterface())
       throw error(L.l("'{0}' must be an interface.", homeName));
 
-    JMethod []methods = getMethods(homeClass);
-    for (int i = 0; i < methods.length; i++) {
-      JMethod method = methods[i];
+    for (ApiMethod method : homeClass.getMethods()) {
       String name = method.getName();
-      JClass []param = method.getParameterTypes();
-      JClass retType = method.getReturnType();
+      Class []param = method.getParameterTypes();
+      Class retType = method.getReturnType();
 
       if (method.getDeclaringClass().isAssignableFrom(EJBHome.class))
         continue;
@@ -1288,7 +1280,7 @@ public class EjbEntityBean extends EjbBean {
       if (method.getDeclaringClass().isAssignableFrom(EJBLocalHome.class))
         continue;
 
-      if (homeClass.isAssignableTo(EJBHome.class))
+      if (EJBHome.class.isAssignableFrom(homeClass.getJavaClass()))
         validateException(method, java.rmi.RemoteException.class);
 
       if (name.startsWith("create")) {
@@ -1301,14 +1293,14 @@ public class EjbEntityBean extends EjbBean {
                           objectName));
 
         String createName = "ejbC" + name.substring(1);
-        JMethod implMethod =
+        ApiMethod implMethod =
           validateNonFinalMethod(createName, param, method, homeClass);
 
         if (! isPrimaryKeyClass(implMethod.getReturnType()))
           throw error(L.l("{0}: '{1}' must return '{2}'.  ejbCreate methods must return the primary key.",
                           beanName,
                           getFullMethodName(createName, param),
-                          getClassName(primKeyClass)));
+                          primKeyClass.getName()));
 
         if (! hasException(implMethod, CreateException.class)) {
           throw error(L.l("{0}: '{1}' must throw {2}.  ejbCreate methods must throw CreateException.",
@@ -1354,7 +1346,7 @@ public class EjbEntityBean extends EjbBean {
         String findName = "ejbF" + name.substring(1);
         if (! isCMP() && ! isCMP1()
             || getMethod(beanClass, findName, param) != null) {
-          JMethod impl = validateNonFinalMethod(findName, param, isAllowPOJO());
+          ApiMethod impl = validateNonFinalMethod(findName, param, isAllowPOJO());
 
           if (impl != null)
             validateExceptions(method, impl);
@@ -1364,16 +1356,16 @@ public class EjbEntityBean extends EjbBean {
               throw error(L.l("{0}: '{1}' must return primary key '{2}'.  ejbFind methods must return the primary key",
                               beanName,
                               impl.getFullName(),
-                              getClassName(primKeyClass)));
+                              primKeyClass.getName()));
           }
-          else if (method.getReturnType().isAssignableTo(Collection.class)) {
-            if (impl != null && ! impl.getReturnType().isAssignableTo(Collection.class))
+          else if (Collection.class.isAssignableFrom(method.getReturnType())) {
+            if (impl != null && ! Collection.class.isAssignableFrom(impl.getReturnType()))
               throw error(L.l("{0}: '{1}' must return collection.",
                               beanName,
                               impl.getFullName()));
           }
-          else if (method.getReturnType().isAssignableTo(Enumeration.class)) {
-            if (! impl.getReturnType().isAssignableTo(Enumeration.class))
+          else if (Enumeration.class.isAssignableFrom(method.getReturnType())) {
+            if (! Enumeration.class.isAssignableFrom(impl.getReturnType()))
               throw error(L.l("{0}: '{1}' must return enumeration.",
                               beanName,
                               impl.getFullName()));
@@ -1396,10 +1388,10 @@ public class EjbEntityBean extends EjbBean {
 
         validateException(method, FinderException.class);
 
-        if (! retType.equals(objectClass) &&
-            (! retType.isAssignableTo(Collection.class) &&
-             ! Enumeration.class.getName().equals(retType.getName()) ||
-             name.equals("findByPrimaryKey"))) {
+        if (! retType.equals(objectClass)
+	    && (! Collection.class.isAssignableFrom(retType)
+		&& ! Enumeration.class.equals(retType)
+		|| name.equals("findByPrimaryKey"))) {
           throw error(L.l("{0}: '{1}' must return {2} or a collection. ejbFind methods must return the primary key or a collection.",
                           homeName,
                           method.getFullName(),
@@ -1424,9 +1416,9 @@ public class EjbEntityBean extends EjbBean {
       else {
         retType = method.getReturnType();
 
-        if (homeClass.isAssignableTo(EJBHome.class) &&
-            (retType.isAssignableTo(EJBLocalObject.class) ||
-             retType.isAssignableTo(EJBLocalHome.class)))
+        if (EJBHome.class.isAssignableFrom(homeClass.getJavaClass())
+	    && (EJBLocalObject.class.isAssignableFrom(retType)
+		|| EJBLocalHome.class.isAssignableFrom(retType)))
           throw error(L.l("{1}: '{0}' must not return local interface.",
                           homeClass.getName(),
                           method.getFullName()));
@@ -1434,7 +1426,7 @@ public class EjbEntityBean extends EjbBean {
         String homeMethodName = ("ejbHome" +
                                  Character.toUpperCase(name.charAt(0)) +
                                  name.substring(1));
-        JMethod implMethod = validateMethod(homeMethodName, param,
+        ApiMethod implMethod = validateMethod(homeMethodName, param,
                                             method, homeClass);
 
         if (! retType.equals(implMethod.getReturnType()))
@@ -1452,45 +1444,45 @@ public class EjbEntityBean extends EjbBean {
       throw error(L.l("{0}: expected '{1}'. All entity homes must define findByPrimaryKey.",
                       homeName,
                       getFullMethodName("findByPrimaryKey",
-                                        new JClass[] {
-                                          primKeyClass })));
+                                        new Class[] {
+                                          primKeyClass.getJavaClass() })));
   }
 
   protected void assembleHomeMethods(BeanAssembler assembler,
                                      BaseClass baseClass,
                                      String contextClassName,
-                                     JClass homeClass,
+                                     ApiClass homeClass,
                                      String prefix)
     throws NoSuchMethodException
   {
-    JMethod []methods = getMethods(homeClass);
-
-    for (int i = 0; i < methods.length; i++) {
-      String className = methods[i].getDeclaringClass().getName();
-      String methodName = methods[i].getName();
+    for (ApiMethod method : homeClass.getMethods()) {
+      String className = method.getDeclaringClass().getName();
+      String methodName = method.getName();
 
       if (className.startsWith("javax.ejb.")) {
       }
-      else if (isOld(methods, methods[i], i)) {
+      /*
+      else if (isOld(methods, method, i)) {
       }
+      */
       else if (methodName.startsWith("create")) {
-        assembleCreateMethod(methods[i], baseClass, contextClassName, prefix);
+        assembleCreateMethod(method, baseClass, contextClassName, prefix);
       }
       else if (methodName.startsWith("find")) {
-        JMethod beanMethod = null;
+        ApiMethod beanMethod = null;
 
         String name = ("ejb" + Character.toUpperCase(methodName.charAt(0))
                        + methodName.substring(1));
 
         try {
           beanMethod = getEJBClassWrapper().getMethod(name,
-                                                      methods[i].getParameterTypes());
+                                                      method.getParameterTypes());
         } catch (Throwable e) {
         }
 
         if (beanMethod != null) {
           EntityFindMethod findMethod;
-          findMethod = new EntityFindMethod(methods[i],
+          findMethod = new EntityFindMethod(method,
                                             beanMethod,
                                             contextClassName,
                                             prefix);
@@ -1504,36 +1496,36 @@ public class EjbEntityBean extends EjbBean {
         }
       }
       else {
-        JMethod beanMethod = null;
+        ApiMethod beanMethod = null;
 
         String name = ("ejbHome" + Character.toUpperCase(methodName.charAt(0))
                        + methodName.substring(1));
 
         try {
           beanMethod = getEJBClassWrapper().getMethod(name,
-                                                      methods[i].getParameterTypes());
+                                                      method.getParameterTypes());
         } catch (Exception e) {
           throw new NoSuchMethodException("can't find method " + name);
         }
 
-        CallChain call = new MethodCallChain(beanMethod);
+        CallChain call = new MethodCallChain(beanMethod.getMethod());
         // call = assembler.createPoolChain(call);
-        call = getTransactionChain(call, beanMethod, methods[i], prefix);
+        call = getTransactionChain(call, beanMethod, method, prefix);
 
-        baseClass.addMethod(new BaseMethod(methods[i], call));
+        baseClass.addMethod(new BaseMethod(method.getMethod(), call));
       }
     }
   }
 
-  protected void assembleCreateMethod(JMethod method,
+  protected void assembleCreateMethod(ApiMethod method,
                                       BaseClass baseClass,
                                       String contextClassName,
                                       String prefix)
   {
     String methodName = method.getName();
 
-    JMethod beanCreateMethod = null;
-    JMethod beanPostCreateMethod = null;
+    ApiMethod beanCreateMethod = null;
+    ApiMethod beanPostCreateMethod = null;
 
     String name = ("ejb" + Character.toUpperCase(methodName.charAt(0))
                    + methodName.substring(1));
@@ -1574,31 +1566,23 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Return true if the type matches the primary key class.
    */
-  private boolean isPrimaryKeyClass(JClass type)
+  private boolean isPrimaryKeyClass(Class type)
   {
-    return type.equals(getPrimKeyClass());
+    return type.equals(getPrimKeyClass().getJavaClass());
   }
 
-  private JMethod getMethodField(String fieldName)
+  private ApiMethod getMethodField(String fieldName)
   {
     String getter = "get" + Character.toUpperCase(fieldName.charAt(0)) +
       fieldName.substring(1);
 
-    JMethod []methods = getMethods(getEJBClassWrapper());
-
-    for (int i = 0; i < methods.length; i++) {
-      if (getter.equals(methods[i].getName()) &&
-          methods[i].getParameterTypes().length == 0)
-        return methods[i];
-    }
-
-    return null;
+    return getEJBClassWrapper().getMethod(getter, new Class[0]);
   }
 
   /**
    * Finds the matching query.
    */
-  private String findQuery(JMethod method)
+  private String findQuery(ApiMethod method)
     throws ConfigException
   {
     EjbMethodPattern ejbMethod = getMethodPattern(method, null);

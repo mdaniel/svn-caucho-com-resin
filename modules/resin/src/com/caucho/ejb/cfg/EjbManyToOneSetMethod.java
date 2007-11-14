@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.java.JavaWriter;
@@ -54,7 +53,7 @@ public class EjbManyToOneSetMethod extends EjbMethod {
    * @param implMethod the method from the implementation
    */
   public EjbManyToOneSetMethod(EjbView view,
-			       JMethod apiMethod, JMethod implMethod,
+			       ApiMethod apiMethod, ApiMethod implMethod,
 			       CmrManyToOne manyToOne)
   {
     super(view, apiMethod, implMethod);
@@ -72,9 +71,9 @@ public class EjbManyToOneSetMethod extends EjbMethod {
   }
 
   class BeanMethod extends BaseMethod {
-    BeanMethod(JMethod method)
+    BeanMethod(ApiMethod method)
     {
-      super(method);
+      super(method.getMethod());
     }
   
     /**
@@ -93,8 +92,8 @@ public class EjbManyToOneSetMethod extends EjbMethod {
       if (targetRelation instanceof CmrManyToOne) {
 	CmrManyToOne targetManyToOne = (CmrManyToOne) targetRelation;
 
-	JMethod srcGetter = _manyToOne.getGetter();
-	JMethod dstSetter = targetManyToOne.getSetter();
+	ApiMethod srcGetter = _manyToOne.getGetter();
+	ApiMethod dstSetter = targetManyToOne.getSetter();
 
 	// XXX: EJBClass, i.e. Bean setter 
 	
@@ -104,8 +103,8 @@ public class EjbManyToOneSetMethod extends EjbMethod {
 
 	  String localType = _manyToOne.getBean().getLocal().getName();
 
-	  JMethod localDstSetter = targetBean.getMethod(targetBean.getLocal(),
-						       dstSetter);
+	  ApiMethod localDstSetter
+	    = targetBean.getMethod(targetBean.getLocal(), dstSetter);
 
 	  out.println(targetType + " oldBean = " + srcGetter.getName() + "();");
 

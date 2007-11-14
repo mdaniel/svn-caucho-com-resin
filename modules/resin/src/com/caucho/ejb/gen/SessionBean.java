@@ -29,18 +29,16 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.InjectionTarget;
 import com.caucho.config.types.ResourceRef;
-import com.caucho.ejb.cfg.EjbSessionBean;
-import com.caucho.ejb.cfg.Interceptor;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
 import javax.ejb.SessionContext;
+import javax.ejb.SessionSynchronization;
 import java.io.IOException;
 
 /**
@@ -50,11 +48,11 @@ public class SessionBean extends ClassComponent {
   private static final L10N L = new L10N(SessionBean.class);
 
   protected EjbSessionBean _bean;
-  private JClass _ejbClass;
+  private ApiClass _ejbClass;
   protected String _contextClassName;
 
   public SessionBean(EjbSessionBean bean,
-                     JClass ejbClass,
+                     ApiClass ejbClass,
                      String contextClassName)
   {
     _bean = bean;
@@ -113,7 +111,7 @@ public class SessionBean extends ClassComponent {
     out.println("  bean = _freeBean;");
     out.println("  if (bean != null) {");
     out.println("    _freeBean = null;");
-    if (_ejbClass.isAssignableTo(javax.ejb.SessionSynchronization.class))
+    if (SessionSynchronization.class.isAssignableFrom(_ejbClass.getJavaClass()))
       out.println("    trans.addSession(bean);");
     out.println("    return bean;");
     out.println("  }");
@@ -152,7 +150,7 @@ public class SessionBean extends ClassComponent {
     out.println("  _freeBean = null;");
     out.println("}");
 
-    if (hasMethod("ejbRemove", new JClass[0])) {
+    if (hasMethod("ejbRemove", new Class[0])) {
       out.println();
       out.println("try {");
       out.println("  if (ptr != null)");
@@ -282,7 +280,7 @@ public class SessionBean extends ClassComponent {
 
     out.println("_ejb_context = context;");
 
-    if (hasMethod("setSessionContext", new JClass[] { JClassLoader.systemForName(SessionContext.class.getName()) })) {
+    if (hasMethod("setSessionContext", new Class[] { SessionContext.class })) {
       // TCK: ejb30/bb/session/stateless/annotation/resource/dataSourceTest
       // ejb/0f55 setSessionContext() can be private, out.println("setSessionContext(context);");
       out.println("invokeMethod(this, \"setSessionContext\", new Class[] { javax.ejb.SessionContext.class }, new Object[] { context });");
@@ -492,8 +490,7 @@ public class SessionBean extends ClassComponent {
     out.println("invocationContext.proceed();");
 
     out.popDepth();
-    out.println("} catch (Throwable e) {");
-    out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
+    out.println("} catch (Exception e) {");
     out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
     out.println("}");
 
@@ -758,9 +755,9 @@ public class SessionBean extends ClassComponent {
   /**
    * Returns true if the method is implemented.
    */
-  protected boolean hasMethod(String methodName, JClass []paramTypes)
+  protected boolean hasMethod(String methodName, Class []paramTypes)
   {
-    return BeanAssembler.hasMethod(_ejbClass, methodName, paramTypes);
+    return _ejbClass.hasMethod(methodName, paramTypes);
   }
 
   private String generateTypeCasting(String value, Class cl, boolean isEscapeString)

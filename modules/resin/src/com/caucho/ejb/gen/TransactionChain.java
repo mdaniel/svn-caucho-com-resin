@@ -28,11 +28,7 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.ejb.cfg.ApplicationException;
-import com.caucho.ejb.cfg.EjbMethod;
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -44,39 +40,42 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.*;
 
+import javax.ejb.ApplicationException;
+
 /**
  * Generates the skeleton for a method call.
  */
-public class TransactionChain extends FilterCallChain {
+public class TransactionChain extends FilterCallChain
+{
   private static final Logger log
     = Logger.getLogger(TransactionChain.class.getName());
   private static final L10N L = new L10N(TransactionChain.class);
 
-  private JMethod _apiMethod;
-  private JMethod _implMethod;
+  private ApiMethod _apiMethod;
+  private ApiMethod _implMethod;
 
-  private JClass _businessInterface;
+  private ApiClass _businessInterface;
 
   private int _xaType;
 
   private boolean _isEJB3;
 
-  private ArrayList<ApplicationException> _appExceptions;
+  private ArrayList<ApplicationExceptionConfig> _appExceptions;
 
   public TransactionChain(CallChain next,
                           int xaType,
-                          JMethod apiMethod,
-                          JMethod implMethod)
+                          ApiMethod apiMethod,
+                          ApiMethod implMethod)
   {
     this(next, xaType, apiMethod, implMethod, false, null);
   }
 
   public TransactionChain(CallChain next,
                           int xaType,
-                          JMethod apiMethod,
-                          JMethod implMethod,
+                          ApiMethod apiMethod,
+                          ApiMethod implMethod,
                           boolean isEJB3,
-                          ArrayList<ApplicationException> appExceptions)
+                          ArrayList<ApplicationExceptionConfig> appExceptions)
   {
     super(next);
 
@@ -92,18 +91,18 @@ public class TransactionChain extends FilterCallChain {
 
   public static TransactionChain create(CallChain next,
                                         int xaType,
-                                        JMethod apiMethod,
-                                        JMethod implMethod)
+                                        ApiMethod apiMethod,
+                                        ApiMethod implMethod)
   {
     return new TransactionChain(next, xaType, apiMethod, implMethod);
   }
 
   public static TransactionChain create(CallChain next,
                                         int xaType,
-                                        JMethod apiMethod,
-                                        JMethod implMethod,
+                                        ApiMethod apiMethod,
+                                        ApiMethod implMethod,
                                         boolean isEJB3,
-                                        ArrayList<ApplicationException> appExceptions)
+                                        ArrayList<ApplicationExceptionConfig> appExceptions)
   {
     return new TransactionChain(next, xaType, apiMethod, implMethod, isEJB3, appExceptions);
   }
@@ -115,7 +114,7 @@ public class TransactionChain extends FilterCallChain {
    * @param method the method to call
    */
   public void generateCall(JavaWriter out, String retType,
-         String var, String []args)
+			   String var, String []args)
     throws IOException
   {
     // ejb/0ff0 TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemote2
@@ -179,7 +178,7 @@ public class TransactionChain extends FilterCallChain {
     out.println("} catch (Exception e) {");
     out.pushDepth();
 
-    JClass beanClass = _implMethod.getDeclaringClass();
+    Class beanClass = _implMethod.getDeclaringClass();
 
     if (_isEJB3) { // XXX && ! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
       generateExceptionHandling(out);
@@ -240,16 +239,14 @@ public class TransactionChain extends FilterCallChain {
     out.println("  e = (Exception) e.getCause();");
     out.println();
 
-    JClass beanClass = _implMethod.getDeclaringClass();
+    Class beanClass = _implMethod.getDeclaringClass();
 
     // ejb/0500
-    JClass exnTypes[]; // = getExceptionTypes();
+    Class exnTypes[]; // = getExceptionTypes();
 
     // ejb/0fb3, ejb/0fbg
-    exnTypes = _implMethod.getExceptionTypes();
-
-    for (JClass cl : exnTypes) {
-      if (! cl.isAssignableTo(Exception.class)) {
+    for (Class cl : _implMethod.getExceptionTypes()) {
+      if (! Exception.class.isAssignableFrom(cl)) {
         // XXX:
         // hessian/3600
         log.info(cl + " is not handled by EJB");
@@ -267,14 +264,15 @@ public class TransactionChain extends FilterCallChain {
         boolean isRollback = false;
 
         // Check @ApplicationException(rollback=true/false)
-        JAnnotation ann = cl.getAnnotation(javax.ejb.ApplicationException.class);
+        ApplicationException ann =
+	  (ApplicationException) cl.getAnnotation(ApplicationException.class);
 
         if (ann != null) {
           isApplicationException = true;
-          isRollback = ((Boolean) ann.get("rollback")).booleanValue();
+          isRollback = ann.rollback();
         } else if (_appExceptions != null) {
           // ejb/0fc3
-          for (ApplicationException cfg : _appExceptions) {
+          for (ApplicationExceptionConfig cfg : _appExceptions) {
             if (cfg.getExceptionClass().equals(cl.getName())) {
               isApplicationException = true;
               isRollback = cfg.isRollback();

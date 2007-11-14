@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.ejb.gen.*;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -54,8 +52,8 @@ public class EjbEntityFindMethod extends EjbMethod {
    * @param implMethod the method from the implementation
    */
   public EjbEntityFindMethod(EjbView view,
-			     JMethod apiMethod,
-			     JMethod implMethod)
+			     ApiMethod apiMethod,
+			     ApiMethod implMethod)
   {
     super(view, apiMethod, implMethod);
   }
@@ -67,7 +65,7 @@ public class EjbEntityFindMethod extends EjbMethod {
    * @param apiMethod the method from the view
    * @param implMethod the method from the implementation
    */
-  public EjbEntityFindMethod(EjbView view, JMethod apiMethod)
+  public EjbEntityFindMethod(EjbView view, ApiMethod apiMethod)
   {
     super(view, apiMethod, null);
   }
@@ -77,16 +75,16 @@ public class EjbEntityFindMethod extends EjbMethod {
    */
   public BaseMethod assemble(ViewClass viewAssembler, String fullClassName)
   {
-    if (((EjbEntityBean) getView().getBean()).isCMP() &&
-	(getImplMethod() == null ||
-	 getImplMethod().isAbstract())) {
+    if (((EjbEntityBean) getView().getBean()).isCMP()
+	&& (getImplMethod() == null
+	    || getImplMethod().isAbstract())) {
       return new AmberFindMethod(getApiMethod(),
 				 fullClassName,
 				 getViewPrefix());
     }
-    else if (((EjbEntityBean) getView().getBean()).isCMP1() &&
-	     (getImplMethod() == null ||
-	      getImplMethod().isAbstract())) {
+    else if (((EjbEntityBean) getView().getBean()).isCMP1()
+	     && (getImplMethod() == null
+		 || getImplMethod().isAbstract())) {
       return new CMP10FindMethod(getApiMethod(),
 				 fullClassName,
 				 getViewPrefix());
@@ -94,11 +92,11 @@ public class EjbEntityFindMethod extends EjbMethod {
     else {
       BaseMethod method;
 
-      JClass apiReturnType = getApiMethod().getReturnType();
+      Class apiReturnType = getApiMethod().getReturnType();
       
-      if (apiReturnType.isAssignableTo(Collection.class) ||
-	  apiReturnType.isAssignableTo(Enumeration.class) ||
-	  apiReturnType.isAssignableTo(Iterator.class))
+      if (Collection.class.isAssignableFrom(apiReturnType)
+	  || Enumeration.class.isAssignableFrom(apiReturnType)
+	  || Iterator.class.isAssignableFrom(apiReturnType))
 	method = new EntityFindCollectionMethod(getApiMethod(),
 						getImplMethod(),
 						fullClassName,
