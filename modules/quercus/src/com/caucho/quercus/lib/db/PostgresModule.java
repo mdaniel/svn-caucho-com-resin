@@ -3048,11 +3048,10 @@ public class PostgresModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    if (pg_query(env, conn, "SET CLIENT_ENCODING TO '" + encoding +"'") == null) {
+    if (conn.setClientEncoding(encoding))
+      return 0;
+    else
       return -1;
-    }
-
-    return 0;
   }
 
   /**

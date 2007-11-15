@@ -151,6 +151,19 @@ public class Postgres extends JdbcConnectionResource {
    */
   public PostgresResult query(String sql)
   {
+    if (sql.charAt(0) == ' ')
+      sql = sql.trim();
+
+    if (sql.charAt(0) == 'S' &&
+        sql.startsWith("SET CLIENT_ENCODING TO")) {
+      // Ignore any attempt to change the CLIENT_ENCODING since
+      // the JDBC driver for Postgres only supports UNICODE.
+      // Execute no-op SQL statement since we need to return
+      // a valid SQL result to the caller.
+
+      sql = "SET CLIENT_ENCODING TO 'UNICODE'";
+    }
+
     return (PostgresResult) realQuery(sql);
   }
 
@@ -320,4 +333,31 @@ public class Postgres extends JdbcConnectionResource {
     else
       return "Postgres[]";
   }
+
+  /**
+   * Return the "client_encoding" property. This is the
+   * encoding the JDBC driver uses to read character
+   * data from the server. The JDBC driver used to let
+   * the user change the encoding, but it now fails on
+   * any attempt to set the encoding to anything other
+   * than UNICODE.
+   */
+
+  public String getClientEncoding()
+  {
+    return "UNICODE";
+  }
+
+  /**
+   * Set the "client_encoding" property. This is
+   * a no-op for the JDBC driver because it only
+   * supports UNICODE as the client encoding.
+   * Return true to indicate success in all cases.
+   */
+
+  public boolean setClientEncoding(String encoding)
+  {
+    return true;
+  }
+
 }

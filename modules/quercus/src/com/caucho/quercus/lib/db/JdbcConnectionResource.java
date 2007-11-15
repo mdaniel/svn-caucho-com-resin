@@ -342,6 +342,16 @@ public abstract class JdbcConnectionResource implements Closeable {
   }
 
   /**
+   * Set encoding on the client side of the connection.
+   * Return true if the encoding was set, otherwise false.
+   */
+
+  public boolean setClientEncoding(String encoding)
+  {
+    return true;
+  }
+
+  /**
    * Returns the client version
    * @deprecated
    */
