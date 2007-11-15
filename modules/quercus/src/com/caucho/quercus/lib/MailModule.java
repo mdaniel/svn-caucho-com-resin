@@ -82,7 +82,7 @@ public class MailModule extends AbstractQuercusModule {
       StringValue port = env.getIni("smtp_port");
       if (port != null && ! port.toString().equals(""))
         props.put("mail.smtp.port", port.toString());
-      else
+      else if (System.getProperty("mail.smtp.port") != null)
         props.put("mail.smtp.port", System.getProperty("mail.smtp.port"));
 
       StringValue user = env.getIni("sendmail_from");
