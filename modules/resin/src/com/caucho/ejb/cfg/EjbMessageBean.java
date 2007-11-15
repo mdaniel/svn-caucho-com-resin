@@ -36,6 +36,7 @@ import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.message.MessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
@@ -81,7 +82,7 @@ public class EjbMessageBean extends EjbBean {
   {
     super(config, ejbModuleName);
 
-    _consumerMax = config.getEJBManager().getMessageConsumerMax();
+    _consumerMax = config.getEjbContainer().getMessageConsumerMax();
   }
 
   /**
@@ -406,7 +407,7 @@ public class EjbMessageBean extends EjbBean {
    * Deploys the bean.
    */
   @Override
-  public AbstractServer deployServer(EjbServerManager ejbManager,
+  public AbstractServer deployServer(EjbContainer ejbManager,
 				     JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
@@ -425,6 +426,11 @@ public class EjbMessageBean extends EjbBean {
     server.setContextImplClass(getEJBClass());
     server.setMessageListenerType(_messagingType);
 
+    if (_connectionFactory != null)
+      server.setConnectionFactory(_connectionFactory);
+    else
+      server.setConnectionFactory(getEjbContainer().getJmsConnectionFactory());
+    
     if (_destination != null)
       server.setDestination(_destination);
 

@@ -32,7 +32,7 @@ package com.caucho.ejb.message;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.xa.*;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -56,6 +56,7 @@ public class MessageServer extends AbstractServer {
   private static final L10N L = new L10N(MessageServer.class);
   protected static final Logger log = Log.open(MessageServer.class);
 
+  private ConnectionFactory _connectionFactory;
   private Connection _connection;
   private Destination _destination;
   private String _messageDestinationLink;
@@ -75,9 +76,9 @@ public class MessageServer extends AbstractServer {
 
   private ArrayList<Consumer> _consumers = new ArrayList<Consumer>();
 
-  public MessageServer(EjbServerManager manager)
+  public MessageServer(EjbContainer ejbContainer)
   {
-    super(manager);
+    super(ejbContainer);
     
     try {
       InitialContext ic = new InitialContext();
@@ -91,6 +92,14 @@ public class MessageServer extends AbstractServer {
   protected String getType()
   {
     return "message:";
+  }
+
+  /**
+   * Sets the connection factory
+   */
+  public void setConnectionFactory(ConnectionFactory factory)
+  {
+    _connectionFactory = factory;
   }
 
   /**
@@ -171,13 +180,15 @@ public class MessageServer extends AbstractServer {
   {
     super.start();
 
-    ConnectionFactory factory = null;//_config.getConnectionFactory();
-    if (factory == null)
-      factory = _ejbManager.getConnectionFactory();
+    ConnectionFactory factory = _connectionFactory;
 
+    /*
+     * XXX: not correct way, waiting for webbeans integration
+     *
     if (_destination == null && _messageDestinationLink != null) {
       _destination = getContainer().getMessageDestination(_messageDestinationLink).getResolvedDestination();
     }
+    */
 
     if (_destination == null) {
       try {

@@ -30,6 +30,7 @@
 package com.caucho.ejb;
 
 import javax.ejb.EJBException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Wraps the actual exception with an EJB exception
@@ -90,12 +91,14 @@ public class EJBExceptionWrapper extends EJBException
   /**
    * Creates an EJBException from a throwable.
    */
-  public static EJBException create(Throwable rootCause)
+  public static EJBException create(Throwable exn)
   {
-    if (rootCause instanceof EJBException)
-      return ((EJBException) rootCause);
+    if (exn instanceof EJBException)
+      return (EJBException) exn;
+    else if (exn instanceof InvocationTargetException)
+      return create(exn.getCause());
     else
-      return new EJBExceptionWrapper(rootCause);
+      return new EJBExceptionWrapper(exn);
   }
 
   /**

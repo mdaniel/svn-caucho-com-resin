@@ -35,6 +35,7 @@ import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
 import com.caucho.ejb.EJBServer;
 import com.caucho.ejb.cfg.MessageDestination;
+import com.caucho.ejb.manager.EjbContainer;
 
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
@@ -219,14 +220,20 @@ public class MessageDestinationRef
     try {
       Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
 
-      EJBServer ejbServer = EJBServer.getLocal();
+      EjbContainer ejbContainer = EjbContainer.getCurrent();
       MessageDestination dest = null;
 
-      if (ejbServer != null) {
-        dest = ejbServer.getMessageDestination(path, name);
+      if (ejbContainer != null) {
 
+	if (true)
+	  throw new IllegalStateException();
+	
+	/*
+        dest = ejbContainer.getMessageDestination(path, name);
+	
         if (dest == null && archiveName == null)
           dest = ejbServer.getMessageDestination(name);
+	*/
 
         if (dest != null) {
 

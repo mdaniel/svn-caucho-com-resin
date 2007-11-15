@@ -31,6 +31,7 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.util.Log;
 
 import javax.ejb.EJBHome;
@@ -42,14 +43,15 @@ import java.util.logging.Logger;
  * Server container for a session bean.
  */
 abstract public class AbstractSessionServer extends AbstractServer {
-  protected final static Logger log = Log.open(AbstractSessionServer.class);
+  protected final static Logger log
+    = Logger.getLogger(AbstractSessionServer.class.getName());
 
   private AbstractSessionContext _homeContext;
 
-  public AbstractSessionServer(EjbServerManager manager)
+  public AbstractSessionServer(EjbContainer container)
     throws Exception
   {
-    super(manager);
+    super(container);
   }
 
   /**

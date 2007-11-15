@@ -337,7 +337,7 @@ public class TransactionContext implements Synchronization {
   public AmberConnection getAmberConnection()
   {
     if (_amberConn == null) {
-      _amberConn = _container.getEJBManager().getAmberManager().getThreadConnection(false);
+      _amberConn = _container.getEjbContainer().createEjbPersistenceUnit().getThreadConnection(false);
     }
 
     try {

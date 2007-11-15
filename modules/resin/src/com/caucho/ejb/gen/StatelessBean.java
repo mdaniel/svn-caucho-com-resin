@@ -69,7 +69,7 @@ public class StatelessBean extends SessionBean {
     out.println("public " + shortContextName + "(com.caucho.ejb.session.StatelessServer server)");
     out.println("{");
     out.println("  super(server);");
-    out.println("  _xaManager = server.getContainer().getTransactionManager();");
+    out.println("  _xaManager = server.getTransactionManager();");
     out.println("}");
 
     out.println();

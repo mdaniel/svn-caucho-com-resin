@@ -31,7 +31,8 @@ package com.caucho.ejb.protocol;
 
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EnvServerManager;
+import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
@@ -62,12 +63,14 @@ public class EjbProtocolManager {
   private static Hashtable<String,WeakReference<AbstractServer>> _staticServerMap
     = new Hashtable<String,WeakReference<AbstractServer>>();
 
-  private final EnvServerManager _ejbServer;
+  private final EjbContainer _ejbContainer;
   private final ClassLoader _loader;
 
   private String _localJndiPrefix; // = "java:comp/env/cmp";
   private String _remoteJndiPrefix; // = "java:comp/env/ejb";
 
+  private String _jndiPrefix; // java:comp/env/ejb/FooBean/local
+  
   private HashMap<String,AbstractServer> _serverMap
     = new HashMap<String,AbstractServer>();
 
@@ -79,16 +82,26 @@ public class EjbProtocolManager {
   /**
    * Create a server with the given prefix name.
    */
-  public EjbProtocolManager(EnvServerManager ejbServer)
+  public EjbProtocolManager(EjbContainer ejbContainer)
     throws ConfigException
   {
-    _ejbServer = ejbServer;
-    _loader = _ejbServer.getClassLoader();
+    _ejbContainer = ejbContainer;
+    _loader = _ejbContainer.getClassLoader();
 
      ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
 
      if (iiop != null)
        _protocolMap.put("iiop", iiop);
+   }
+
+   public void setJndiPrefix(String name)
+   {
+     _jndiPrefix = name;
+   }
+
+   public String getJndiPrefix()
+   {
+     return _jndiPrefix;
    }
 
    public void setLocalJndiPrefix(String name)
@@ -114,9 +127,9 @@ public class EjbProtocolManager {
    /**
     * Returns the EJB server.
     */
-  public EnvServerManager getServerManager()
+  public EjbContainer getEjbContainer()
   {
-    return _ejbServer;
+    return _ejbContainer;
   }
 
   /**
@@ -205,7 +218,6 @@ public class EjbProtocolManager {
    * Adds a server.
    */
   public void addServer(AbstractServer server)
-    throws NamingException
   {
     _serverMap.put(server.getProtocolId(), server);
 
@@ -226,6 +238,9 @@ public class EjbProtocolManager {
       // ejb/0g11
       // remote without a local interface should not get bound
       // with the local prefix
+
+      if (_localJndiPrefix == null)
+	bindDefaultJndi(_jndiPrefix, server);
 
       if (server.isLocal()) {
         Object localObj = server.getClientLocalHome();
@@ -396,9 +411,43 @@ public class EjbProtocolManager {
             log.fine(L.l("remote ejb {0} has no JNDI binding", remoteObj));
         }
       }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
     }
     finally {
       Thread.currentThread().setContextClassLoader(loader);
+    }
+  }
+
+  private void bindDefaultJndi(String prefix, AbstractServer server)
+  {
+    EnterpriseApplication eApp = EnterpriseApplication.getLocal();
+
+    if (prefix == null)
+      prefix = "";
+    else if (! prefix.endsWith("/"))
+      prefix = prefix + "/";
+    
+    if (eApp != null)
+      prefix = prefix + eApp.getName();
+
+    prefix = prefix + server.getEJBName();
+
+    ArrayList<Class> apiList = server.getLocalApiList();
+    if (apiList != null && apiList.size() > 0) {
+      String jndiName = prefix + "/local";
+
+      Object obj = server.getClientObject(apiList.get(0));
+
+      try {
+	Jndi.bindDeep(jndiName, obj);
+
+	log.fine(server + " local binding to '" + jndiName + "'");
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
     }
   }
 

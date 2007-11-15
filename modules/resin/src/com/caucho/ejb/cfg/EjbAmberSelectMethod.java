@@ -38,6 +38,7 @@ import com.caucho.ejb.gen.AbstractQueryMethod;
 import com.caucho.ejb.gen.AmberSelectCollectionMethod;
 import com.caucho.ejb.gen.AmberSelectMethod;
 import com.caucho.ejb.gen.BeanAssembler;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.ql.EjbSelectQuery;
 import com.caucho.ejb.ql.QLParser;
 import com.caucho.java.gen.BaseMethod;
@@ -102,13 +103,14 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
     Class retType = method.getReturnType();
 
     EjbConfig ejbConfig = getBean().getConfig();
-    EjbServerManager ejbManager = ejbConfig.getEJBManager();
+    EjbContainer ejbManager = ejbConfig.getEjbContainer();
     EjbEntityBean retBean = null;
 
     if (returnEJB != null)
       retBean = (EjbEntityBean) ejbConfig.getBeanConfig(returnEJB);
     
-    AmberPersistenceUnit amberPersistenceUnit = ejbManager.getAmberManager();
+    AmberPersistenceUnit amberPersistenceUnit
+      = ejbManager.createEjbPersistenceUnit();
 
     Type amberType = null;
 

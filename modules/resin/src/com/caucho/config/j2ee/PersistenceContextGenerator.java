@@ -109,7 +109,7 @@ public class PersistenceContextGenerator extends ValueGenerator {
     if (_manager != null)
       return _manager;
 
-    AmberContainer amber = AmberContainer.getLocalContainer();
+    AmberContainer amber = AmberContainer.getCurrent();
 
     EntityManager manager = amber.getPersistenceContext(_unitName);
 

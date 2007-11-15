@@ -31,6 +31,7 @@ package com.caucho.ejb;
 
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
@@ -72,7 +73,7 @@ public class EJBServlet extends GenericServlet {
   private Hashtable<CharSequence,Skeleton> _beanMap
     = new Hashtable<CharSequence,Skeleton>();
 
-  private EjbServerManager _ejbManager;
+  private EjbContainer _ejbManager;
   private ProtocolContainer _protocolContainer;
 
   private ServletException _exception;
@@ -103,7 +104,7 @@ public class EJBServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    _ejbManager = EJBServer.getLocalManager();
+    _ejbManager = EjbContainer.getCurrent();
 
     if (_ejbManager == null) {
       throw new ServletException(L.l("No <ejb-server> detected.  '{0}' requires a configured <ejb-server>",

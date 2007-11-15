@@ -139,7 +139,7 @@ public class HessianProtocol extends ProtocolContainer
       log.log(Level.FINEST, "uri=" + uri + ", queryString=" + queryString + ", serverId=" + serverId + ", objectId=" + objectId);
 
     if ("/_ejb_xa_resource".equals(serverId))
-      return new XAResourceSkeleton(getProtocolManager().getServerManager().getTransactionManager());
+      return new XAResourceSkeleton(getProtocolManager().getEjbContainer().getTransactionManager());
 
     AbstractServer server;
 

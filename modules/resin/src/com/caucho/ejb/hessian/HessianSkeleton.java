@@ -149,7 +149,7 @@ abstract public class HessianSkeleton extends Skeleton {
     out.startReply();
 
     if (xa != null && ! xa.isEmpty()) {
-      EjbProtocolManager pm = _server.getServerManager().getProtocolManager();
+      EjbProtocolManager pm = _server.getEjbContainer().getProtocolManager();
       HessianProtocol hessian = (HessianProtocol) pm.getProtocol("hessian");
 
       if (hessian != null) {

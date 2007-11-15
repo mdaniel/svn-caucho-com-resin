@@ -32,6 +32,7 @@ import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.naming.Jndi;
 import com.caucho.util.Log;
@@ -67,14 +68,14 @@ public class StatelessServer extends AbstractServer {
    * @param allowJVMCall allows fast calls to the same JVM (with serialization)
    * @param config the session configuration from the ejb.xml
    */
-  public StatelessServer(EjbServerManager ejbManager)
+  public StatelessServer(EjbContainer ejbContainer)
   {
-    super(ejbManager);
+    super(ejbContainer);
   }
 
   protected String getType()
   {
-    return "session:";
+    return "stateless:";
   }
 
   /**
@@ -103,23 +104,23 @@ public class StatelessServer extends AbstractServer {
 
       try {
         _localObject21 = getStatelessContext().getEJBLocalObject();
-      } catch (Throwable e) {
+      } catch (Exception e) {
       }
 
       try {
         _remoteObject21 = getStatelessContext().getEJBObject();
-      } catch (Throwable e) {
+      } catch (Exception e) {
       }
 
       // EJB 3.0
       try {
         _localObject = getStatelessContext().createLocalObject();
-      } catch (Throwable e) {
+      } catch (Exception e) {
       }
 
       try {
         _remoteObject = getStatelessContext().createRemoteView();
-      } catch (Throwable e) {
+      } catch (Exception e) {
       }
 
       /*

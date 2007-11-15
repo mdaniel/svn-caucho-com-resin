@@ -35,11 +35,6 @@ import com.caucho.util.CharBuffer;
  */
 public interface ByteCodeClassMatcher {
   /**
-   * Returns true if the class is a match.
-   */
-  public boolean isClassMatch(String className);
-  
-  /**
    * Returns true if the annotation class is a match.
    */
   public boolean isMatch(CharBuffer annotationClassName); 

@@ -30,10 +30,12 @@
 package com.caucho.ejb;
 
 import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.admin.EJBAdmin;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.cfg.EjbConfig;
 import com.caucho.ejb.cfg.MessageDestination;
 import com.caucho.ejb.entity.EntityKey;
@@ -80,19 +82,12 @@ public class EnvServerManager implements EnvironmentListener
 
   private Path _workPath;
 
-  private int _entityCacheSize = 32 * 1024;
-
-  private long _entityCacheTimeout = 5000L;
-
   private ConfigException _initException;
 
   private EJBAdmin _ejbAdmin;
 
+  private AmberContainer _amberContainer;
   private AmberPersistenceUnit _amberPersistenceUnit;
-
-  private EjbTransactionManager _ejbTransactionManager;
-
-  private EjbProtocolManager _protocolManager;
 
   private ArrayList<EjbConfig> _ejbConfigList = new ArrayList<EjbConfig>();
 
@@ -108,39 +103,47 @@ public class EnvServerManager implements EnvironmentListener
 
   private EntityKey _entityKey = new EntityKey();
 
+  private EjbContainer _ejbContainer;
+
   private final Lifecycle _lifecycle = new Lifecycle(log, "ejb-manager");
 
   /**
    * Create a server with the given prefix name.
    */
-  EnvServerManager(AmberPersistenceUnit amberPersistenceUnit)
+  EnvServerManager(AmberContainer amberContainer)
   {
     try {
-      _amberPersistenceUnit = amberPersistenceUnit;
-      _amberPersistenceUnit.initLoaders();
-      _amberPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
-
       _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
 
       _classLoader.addLoader(new SimpleLoader(_workPath));
 
-      try {
-        _ejbTransactionManager = new EjbTransactionManager(this);
-      } catch (Throwable e) {
-        log.info("transactions are not available to EJB server");
-
-        log.log(Level.FINE, e.toString(), e);
-      }
+      _ejbContainer = EjbContainer.create();
 
       _ejbAdmin = new EJBAdmin(this);
-
-      _protocolManager = new EjbProtocolManager(this);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private AmberPersistenceUnit getAmberPersistenceUnit()
+  {
+    if (_amberPersistenceUnit == null) {
+      try {
+	_amberPersistenceUnit = _amberContainer.createPersistenceUnit("resin-ejb");
+	_amberPersistenceUnit.setBytecodeGenerator(false);
+	_amberPersistenceUnit.initLoaders();
+	// _amberPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
+    }
+
+    return _amberPersistenceUnit;
   }
 
   /**
@@ -185,7 +188,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public EjbProtocolManager getProtocolManager()
   {
-    return _protocolManager;
+    return _ejbContainer.getProtocolManager();
   }
 
   /**
@@ -193,7 +196,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public EjbTransactionManager getTransactionManager()
   {
-    return _ejbTransactionManager;
+    return _ejbContainer.getTransactionManager();
   }
 
   /**
@@ -201,7 +204,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public void setResinIsolation(int resinIsolation)
   {
-    _ejbTransactionManager.setResinIsolation(resinIsolation);
+    getTransactionManager().setResinIsolation(resinIsolation);
   }
 
   /**
@@ -209,7 +212,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public int getResinIsolation()
   {
-    return _ejbTransactionManager.getResinIsolation();
+    return getTransactionManager().getResinIsolation();
   }
 
   /**
@@ -217,7 +220,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public void setJDBCIsolation(int jdbcIsolation)
   {
-    _ejbTransactionManager.setJDBCIsolation(jdbcIsolation);
+    getTransactionManager().setJDBCIsolation(jdbcIsolation);
   }
 
   /**
@@ -225,7 +228,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public int getJDBCIsolation()
   {
-    return _ejbTransactionManager.getJDBCIsolation();
+    return getTransactionManager().getJDBCIsolation();
   }
 
   /**
@@ -233,7 +236,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public long getTransactionTimeout()
   {
-    return _ejbTransactionManager.getTransactionTimeout();
+    return getTransactionManager().getTransactionTimeout();
   }
 
   /**
@@ -241,7 +244,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public void setTransactionTimeout(long transactionTimeout)
   {
-    _ejbTransactionManager.setTransactionTimeout(transactionTimeout);
+    getTransactionManager().setTransactionTimeout(transactionTimeout);
   }
 
   /**
@@ -258,39 +261,6 @@ public class EnvServerManager implements EnvironmentListener
   public void setWorkPath(Path workPath)
   {
     _workPath = workPath;
-  }
-
-  /**
-   * Gets the cache timeout.
-   */
-  public long getCacheTimeout()
-  {
-    return _entityCacheTimeout;
-  }
-
-  /**
-   * Sets the cache timeout.
-   */
-  public void setCacheTimeout(long cacheTimeout)
-  {
-    _entityCacheTimeout = cacheTimeout;
-    // _amberPersistenceUnitenceUnitenceUnit.setTableCacheTimeout(cacheTimeout);
-  }
-
-  /**
-   * Gets the cache size.
-   */
-  public int getCacheSize()
-  {
-    return _entityCacheSize;
-  }
-
-  /**
-   * Sets the cache size.
-   */
-  public void setCacheSize(int cacheSize)
-  {
-    _entityCacheSize = cacheSize;
   }
 
   /**
@@ -327,16 +297,8 @@ public class EnvServerManager implements EnvironmentListener
     throws ConfigException
   {
     try {
-      _amberPersistenceUnit.init();
-
-      /*
-        for (EjbConfig cfg : _ejbConfigList)
-        cfg.configure();
-      */
-
-      _entityCache = new LruCache<EntityKey,QEntityContext>(_entityCacheSize);
-
-      _protocolManager.init();
+      if (_amberPersistenceUnit != null)
+	_amberPersistenceUnit.init();
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -366,12 +328,12 @@ public class EnvServerManager implements EnvironmentListener
 
   public AmberEntityHome getAmberEntityHome(String name)
   {
-    return _amberPersistenceUnit.getEntityHome(name);
+    return getAmberPersistenceUnit().getEntityHome(name);
   }
 
   public AmberPersistenceUnit getAmberManager()
   {
-    return _amberPersistenceUnit;
+    return getAmberPersistenceUnit();
   }
 
   public JClassLoader getJClassLoader()
@@ -396,7 +358,7 @@ public class EnvServerManager implements EnvironmentListener
     _serverMap.put(id, server);
 
     try {
-      _protocolManager.addServer(server);
+      getProtocolManager().addServer(server);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -574,7 +536,7 @@ public class EnvServerManager implements EnvironmentListener
 
       for (AbstractServer server : servers) {
         try {
-          _protocolManager.removeServer(server);
+          getProtocolManager().removeServer(server);
         } catch (Throwable e) {
           log.log(Level.WARNING, e.toString(), e);
         }
@@ -589,10 +551,6 @@ public class EnvServerManager implements EnvironmentListener
       }
 
       _serverMap = null;
-      _protocolManager.destroy();
-      _protocolManager = null;
-      _ejbTransactionManager.destroy();
-      _ejbTransactionManager = null;
       _amberPersistenceUnit = null;
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);

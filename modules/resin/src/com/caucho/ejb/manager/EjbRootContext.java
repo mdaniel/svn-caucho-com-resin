@@ -27,46 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.ejb.manager;
 
-import com.caucho.amber.manager.*;
-import com.caucho.config.*;
-import com.caucho.loader.*;
-import com.caucho.util.*;
+import com.caucho.vfs.*;
 
-import java.util.logging.*;
-import javax.sql.*;
-import javax.annotation.*;
+import java.util.ArrayList;
 
 /**
- * Configures the persistence for a level.
+ * Scanned data for the root context
  */
-public class PersistenceManager
-{
-  private static final L10N L = new L10N(PersistenceManager.class);
-  protected static final Logger log
-    = Logger.getLogger(PersistenceManager.class.getName());
-
-  private AmberContainer _amberManager;
-
-  /**
-   * Create a persistence manager
-   */
-  public PersistenceManager()
-    throws ConfigException
+class EjbRootContext  {
+  private final Path _root;
+  
+  private ArrayList<String> _classList = new ArrayList<String>();
+  private boolean _isScanComplete;
+  
+  EjbRootContext(Path root)
   {
-    _amberManager = AmberContainer.create();
+    _root = root;
   }
 
-  public void setDataSource(DataSource dataSource)
+  Path getRoot()
   {
-    _amberManager.setDataSource(dataSource);
+    return _root;
   }
 
-  @PostConstruct
-  public void init()
+  void addClassName(String className)
   {
-    Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+    _classList.add(className);
+  }
+
+  ArrayList<String> getClassNameList()
+  {
+    return _classList;
+  }
+
+  boolean isScanComplete()
+  {
+    return _isScanComplete;
+  }
+
+  void setScanComplete(boolean isScanComplete)
+  {
+    _isScanComplete = isScanComplete;
   }
 }
-

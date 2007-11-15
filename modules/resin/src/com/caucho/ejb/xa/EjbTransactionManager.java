@@ -31,7 +31,7 @@ package com.caucho.ejb.xa;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.EJBExceptionWrapper;
-import com.caucho.ejb.EnvServerManager;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -72,7 +72,7 @@ public class EjbTransactionManager implements java.io.Serializable {
   private Hashtable<String,TransactionContext> _foreignTransactionMap
     = new Hashtable<String,TransactionContext>();
 
-  private final EnvServerManager _ejbManager;
+  private final EjbContainer _ejbContainer;
 
   protected final TransactionManager _transactionManager;
   protected UserTransaction _userTransaction;
@@ -89,10 +89,10 @@ public class EjbTransactionManager implements java.io.Serializable {
   /**
    * Create a server with the given prefix name.
    */
-  public EjbTransactionManager(EnvServerManager ejbManager)
+  public EjbTransactionManager(EjbContainer ejbContainer)
     throws ConfigException
   {
-    _ejbManager = ejbManager;
+    _ejbContainer = ejbContainer;
 
     UserTransaction ut = null;
     TransactionManager tm = null;
@@ -117,9 +117,9 @@ public class EjbTransactionManager implements java.io.Serializable {
   /**
    * Returns the manager.
    */
-  public EnvServerManager getEJBManager()
+  public EjbContainer getEjbContainer()
   {
-    return _ejbManager;
+    return _ejbContainer;
   }
 
   /**

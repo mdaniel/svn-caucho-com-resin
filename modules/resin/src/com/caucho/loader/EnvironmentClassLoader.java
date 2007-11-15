@@ -32,6 +32,8 @@ package com.caucho.loader;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.log.EnvironmentStream;
+import com.caucho.loader.enhancer.ScanManager;
+import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JTAResource;
 import com.caucho.management.server.ClassLoaderMXBean;
@@ -42,6 +44,7 @@ import com.caucho.util.ResinThreadPoolExecutor;
 import com.caucho.vfs.Vfs;
 
 import javax.management.MBeanServerFactory;
+import java.net.URL;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -72,8 +75,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private EnvironmentBean _owner;
 
   // Class loader specific attributes
-  private Hashtable<String,Object> _attributes =
-    new Hashtable<String,Object>(8);
+  private Hashtable<String,Object> _attributes
+    = new Hashtable<String,Object>(8);
+
+  private ArrayList<ScanListener> _scanListeners;
+  private ArrayList<URL> _pendingScanUrls = new ArrayList<URL>();
 
   // Array of listeners
   // XXX: this used to be a weak reference list, but that caused problems
@@ -449,6 +455,72 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 	 listeners != null && i < listeners.size();
 	 i++) {
       listeners.get(i).addLoader(this);
+    }
+  }
+
+  /**
+   * Adds the URL to the URLClassLoader.
+   */
+  @Override
+  public void addURL(URL url)
+  {
+    super.addURL(url);
+
+    _pendingScanUrls.add(url);
+  }
+
+  /**
+   * Adds a scan listener.
+   */
+  public void addScanListener(ScanListener listener)
+  {
+    if (_scanListeners == null)
+      _scanListeners = new ArrayList<ScanListener>();
+
+    _scanListeners.add(listener);
+    
+    ArrayList<URL> urlList = new ArrayList<URL>();
+    for (URL url : getURLs()) {
+      if (! _pendingScanUrls.contains(url))
+	urlList.add(url);
+    }
+
+    if (urlList.size() > 0) {
+      try {
+	make();
+      } catch (Exception e) {
+	log().log(Level.WARNING, e.toString(), e);
+	
+	if (_configException == null)
+	  _configException = e;
+      }
+      
+      ArrayList<ScanListener> selfList = new ArrayList<ScanListener>();
+      selfList.add(listener);
+      ScanManager scanManager = new ScanManager(selfList);
+
+      for (URL url : urlList) {
+	scanManager.scan(this, url);
+      }
+    }
+  }
+
+  /**
+   * Called when the <class-loader> completes.
+   */
+  public void validate()
+  {
+    super.validate();
+
+    ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
+    _pendingScanUrls.clear();
+    
+    if (_scanListeners != null && urlList.size() > 0) {
+      ScanManager scanManager = new ScanManager(_scanListeners);
+      
+      for (URL url : urlList) {
+	scanManager.scan(this, url);
+      }
     }
   }
 

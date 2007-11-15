@@ -34,6 +34,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
 import com.caucho.naming.Jndi;
@@ -57,8 +58,9 @@ public class SessionServer extends AbstractServer
 
   private StatefulContext _homeContext;
 
+  // XXX: need real lifecycle
   private LruCache<Object,AbstractSessionContext> _sessions
-    = new LruCache<Object,AbstractSessionContext>(1024);
+    = new LruCache<Object,AbstractSessionContext>(8192);
 
   private boolean _isClosed;
 
@@ -69,7 +71,7 @@ public class SessionServer extends AbstractServer
   private PrePassivateConfig _prePassivateConfig;
   private PostActivateConfig _postActivateConfig;
 
-  public SessionServer(EjbServerManager manager)
+  public SessionServer(EjbContainer manager)
   {
     super(manager);
   }
@@ -378,6 +380,15 @@ public class SessionServer extends AbstractServer
     }
 
     return _homeContext;
+  }
+
+  @Override
+  public void setBusinessInterface(Object obj, Class businessInterface)
+  {
+    if (obj instanceof AbstractSessionObject) {
+      AbstractSessionObject sessionObject = (AbstractSessionObject) obj;
+      sessionObject.__caucho_setBusinessInterface(businessInterface);
+    }
   }
 
   public void addSession(AbstractSessionContext context)

@@ -30,6 +30,7 @@
 package com.caucho.ejb;
 
 import com.caucho.amber.cfg.EntityIntrospector;
+import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
@@ -38,6 +39,8 @@ import com.caucho.config.types.PathPatternType;
 import com.caucho.config.types.Period;
 import com.caucho.ejb.cfg.EjbMethod;
 import com.caucho.ejb.cfg.MessageDestination;
+import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.ejb.metadata.Bean;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.loader.Environment;
@@ -69,7 +72,7 @@ import java.util.logging.Logger;
  * <p>Each protocol will extend the container to override Handle creation.
  */
 public class EJBServer
-  implements EnvironmentListener, EJBServerInterface, EnvironmentBean
+  implements EJBServerInterface, EnvironmentBean
 {
   static final L10N L = new L10N(EJBServer.class);
   protected static final Logger log = Log.open(EJBServer.class);
@@ -82,13 +85,14 @@ public class EJBServer
 
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
+  
+  private EjbContainer _ejbContainer;
+  private AmberContainer _amberContainer;
 
   private String _localJndiPrefix; // = "java:comp/env/cmp";
   private String _remoteJndiPrefix; // = "java:comp/env/ejb";
 
   private String _entityManagerJndiName = "java:comp/EntityManager";
-
-  private EjbServerManager _ejbManager;
 
   private ArrayList<Path> _descriptors;
   private ArrayList<Path> _ejbJars = new ArrayList<Path>();
@@ -132,47 +136,14 @@ public class EJBServer
   public EJBServer()
     throws ConfigException
   {
-    _ejbManager = new EjbServerManager();
-
+    _ejbContainer = EjbContainer.create();
+    _amberContainer = AmberContainer.create();
+    
     _urlPrefix = _localURL.get();
 
     _mergePath = new MergePath();
     _mergePath.addMergePath(Vfs.lookup());
     _mergePath.addClassPath();
-
-    // XXX: to be reviewed. Workaround to add JARs
-    // to look up the persistence.xml and find the
-    // persistence root.
-    // See com.caucho.amber.manager.PersistenceEnvironmentListener
-    /*
-      try {
-      EnvironmentClassLoader envLoader = getClassLoader();
-
-      ArrayList<Loader> loaders = envLoader.getLoaders();
-
-      if (loaders.size() > 0) {
-
-      Loader loader = loaders.get(0);
-
-      if (loader instanceof SimpleLoader) {
-      // Gets the root dir for the deployed ear file
-      //
-      // /tmp/caucho/tck/deploy/<ear_dir>/META-INF/work/ejb
-      // /tmp/caucho/tck/deploy/<ear_dir>/*.jar
-
-      Path path = ((SimpleLoader) loader).getPath().lookup("../../..");
-
-      addJarUrls(envLoader, path);
-      }
-      }
-      } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-      }
-    */
-
-    // _entityIntrospector = new EntityIntrospector(_ejbManager);
-
-    //Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
   }
 
   public void addJarUrls(EnvironmentClassLoader loader, Path root)
@@ -212,7 +183,7 @@ public class EJBServer
    */
   public EnvironmentClassLoader getClassLoader()
   {
-    return _ejbManager.getClassLoader();
+    return _ejbContainer.getClassLoader();
   }
 
   /**
@@ -235,7 +206,15 @@ public class EJBServer
    */
   public void setJndiName(String name)
   {
-    setJndiLocalPrefix(name);
+    setJndiPrefix(name);
+  }
+
+  /**
+   * Sets the JNDI name.
+   */
+  public void setJndiPrefix(String name)
+  {
+    _ejbContainer.getProtocolManager().setJndiPrefix(name);
   }
 
   /**
@@ -243,15 +222,7 @@ public class EJBServer
    */
   public void setJndiLocalPrefix(String name)
   {
-    _localJndiPrefix = name;
-  }
-
-  /**
-   * Gets the JNDI name.
-   */
-  public String getLocalJndiPrefix()
-  {
-    return _localJndiPrefix;
+    _ejbContainer.getProtocolManager().setLocalJndiPrefix(name);
   }
 
   /**
@@ -259,15 +230,7 @@ public class EJBServer
    */
   public void setJndiRemotePrefix(String name)
   {
-    _remoteJndiPrefix = name;
-  }
-
-  /**
-   * Gets the JNDI name.
-   */
-  public String getRemoteJndiPrefix()
-  {
-    return _remoteJndiPrefix;
+    _ejbContainer.getProtocolManager().setRemoteJndiPrefix(name);
   }
 
   /**
@@ -325,7 +288,7 @@ public class EJBServer
       fileSet.setUserPathPrefix(prefix);
     }
 
-    _ejbManager.addConfigFiles(fileSet);
+    _ejbContainer.getConfigManager().addFileSet(fileSet);
   }
 
   /**
@@ -333,12 +296,9 @@ public class EJBServer
    */
   public void addEJBDescriptor(String ejbDescriptor)
   {
-    if (_descriptors == null)
-      _descriptors = new ArrayList<Path>();
-
     Path path = _mergePath.lookup(ejbDescriptor);
 
-    _descriptors.add(path);
+    _ejbContainer.getConfigManager().addEjbPath(path);
   }
 
   /**
@@ -365,7 +325,7 @@ public class EJBServer
    */
   public Bean createBean()
   {
-    return new Bean(_ejbManager);
+    return new Bean(_ejbContainer);
   }
 
   /**
@@ -387,7 +347,7 @@ public class EJBServer
     if (_dataSource == null)
       throw new ConfigException(L.l("<ejb-server> data-source must be a valid DataSource."));
 
-    _ejbManager.setDataSource(_dataSource);
+    _amberContainer.setDataSource(_dataSource);
   }
 
   /**
@@ -396,7 +356,7 @@ public class EJBServer
   public void setReadDataSource(DataSource dataSource)
     throws ConfigException
   {
-    _ejbManager.setReadDataSource(dataSource);
+    _amberContainer.setReadDataSource(dataSource);
   }
 
   /**
@@ -405,7 +365,7 @@ public class EJBServer
   public void setXADataSource(DataSource dataSource)
     throws ConfigException
   {
-    _ejbManager.setXADataSource(dataSource);
+    _amberContainer.setXADataSource(dataSource);
   }
 
   /**
@@ -413,9 +373,7 @@ public class EJBServer
    */
   public void setCreateDatabaseSchema(boolean create)
   {
-    _createDatabaseSchema = create;
-    _ejbManager.getAmberContainer().setCreateDatabaseTables(create);
-    _ejbManager.getAmberManager().setCreateDatabaseTables(create);
+    _amberContainer.setCreateDatabaseTables(create);
   }
 
   /**
@@ -423,7 +381,7 @@ public class EJBServer
    */
   public boolean getCreateDatabaseSchema()
   {
-    return _ejbManager.getAmberContainer().getCreateDatabaseTables();
+    return _amberContainer.getCreateDatabaseTables();
   }
 
   /**
@@ -447,7 +405,7 @@ public class EJBServer
    */
   public void setLoadLazyOnTransaction(boolean isLazy)
   {
-    _ejbManager.setEntityLoadLazyOnTransaction(isLazy);
+    // _ejbContainer.setEntityLoadLazyOnTransaction(isLazy);
   }
 
   /**
@@ -478,7 +436,7 @@ public class EJBServer
   public void setMessageConsumerMax(int consumerMax)
     throws ConfigException, NamingException
   {
-    _ejbManager.setMessageConsumerMax(consumerMax);
+    _ejbContainer.setMessageConsumerMax(consumerMax);
   }
 
   /**
@@ -486,7 +444,7 @@ public class EJBServer
    */
   public int getEntityCacheSize()
   {
-    return _entityCacheSize;
+    return _ejbContainer.getEntityCache().getCacheSize();
   }
 
   /**
@@ -494,7 +452,7 @@ public class EJBServer
    */
   public void setCacheSize(int size)
   {
-    _entityCacheSize = size;
+    _ejbContainer.getEntityCache().setCacheSize(size);
   }
 
   /**
@@ -502,7 +460,7 @@ public class EJBServer
    */
   public long getEntityCacheTimeout()
   {
-    return _entityCacheTimeout;
+    return _ejbContainer.getEntityCache().getCacheTimeout();
   }
 
   /**
@@ -510,7 +468,7 @@ public class EJBServer
    */
   public void setCacheTimeout(Period timeout)
   {
-    _entityCacheTimeout = timeout.getPeriod();
+    _ejbContainer.getEntityCache().setCacheTimeout(timeout.getPeriod());
   }
 
   /**
@@ -635,6 +593,7 @@ public class EJBServer
       }
     */
 
+    /*
     if (_localServer.getLevel() == null
         || "java:comp/env/cmp".equals(_localJndiPrefix)) {
       _localServer.set(this);
@@ -656,13 +615,17 @@ public class EJBServer
     }
 
     try {
-      if (_entityManagerJndiName != null) {
+      if (_entityManagerJndiName != null
+	  && _ejbManager.getAmberManager() != null) {
         Jndi.rebindDeepShort(_entityManagerJndiName,
                              _ejbManager.getAmberManager().getEntityManager());
       }
     } catch (NamingException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+    */
+
+    _ejbContainer.start();
 
     if ("manual".equals(_startupMode))
       return;
@@ -680,6 +643,10 @@ public class EJBServer
       log.fine("Initializing ejb-server : local-jndi=" + _localJndiPrefix
                + " remote-jndi=" + _remoteJndiPrefix);
 
+      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+      Environment.addChildLoaderListener(new EjbEnvironmentListener());
+
+      /*
       ProtocolContainer protocol = new ProtocolContainer();
       if (_urlPrefix != null)
         protocol.setURLPrefix(_urlPrefix);
@@ -694,8 +661,6 @@ public class EJBServer
       //_ejbManager.setCreateDatabaseSchema(_createDatabaseSchema);
       _ejbManager.setValidateDatabaseSchema(_validateDatabaseSchema);
       _ejbManager.setJMSConnectionFactory(_jmsConnectionFactory);
-      _ejbManager.setCacheSize(_entityCacheSize);
-      _ejbManager.setCacheTimeout(_entityCacheTimeout);
       _ejbManager.setTransactionTimeout(_transactionTimeout);
       _ejbManager.setAllowJVMCall(! _forbidJVMCall);
       _ejbManager.setAutoCompile(_autoCompile);
@@ -734,9 +699,9 @@ public class EJBServer
                                       _jdbcIsolation));
 
       _ejbManager.setJDBCIsolation(jdbcIsolation);
+      */
 
-      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
-
+      /*
       for (int i = 0; i < _beanList.size(); i++)
         _beanList.get(i).init();
 
@@ -745,7 +710,8 @@ public class EJBServer
       initAllEjbs();
 
       _ejbManager.init();
-
+      */
+      
       /*
         String name = _jndiName;
         if (! name.startsWith("java:"))
@@ -754,7 +720,7 @@ public class EJBServer
         Jndi.bindDeep(name, this);
       */
 
-      Environment.addEnvironmentListener(this);
+      // Environment.addEnvironmentListener(this);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -776,6 +742,7 @@ public class EJBServer
    * Initialize all EJBs for any *.ejb or ejb-jar.xml in the WEB-INF or
    * in a META-INF in the classpath.
    */
+  /*
   private void initAllEjbs()
     throws Exception
   {
@@ -786,11 +753,13 @@ public class EJBServer
         Path path = _descriptors.get(i);
 
         // XXX: app.addDepend(path);
-        _ejbManager.addEJBPath(path, path);
+        _ejbContainer.getConfigManager().addEJBPath(path, path);
       }
     }
   }
+  */
 
+  /*
   private void addEJBJars()
     throws Exception
   {
@@ -801,26 +770,12 @@ public class EJBServer
 
       JarPath jar = JarPath.create(path);
 
-      _ejbManager.addEJBJar(jar);
+      _ejbManager.getEjbConfig().addEJBJar(jar);
     }
   }
+  */
 
-  /**
-   * Return the ejb with the passed name.
-   */
-  public AbstractServer getServer(String ejbName)
-  {
-    return _ejbManager.getServer(ejbName);
-  }
-
-  /**
-   * Return the ejb with the passed path and name.
-   */
-  public AbstractServer getServer(Path path, String ejbName)
-  {
-    return _ejbManager.getServer(path, ejbName);
-  }
-
+  /*
   public MessageDestination getMessageDestination(Path path, String name)
   {
     return _ejbManager.getMessageDestination(path, name);
@@ -830,24 +785,5 @@ public class EJBServer
   {
     return _ejbManager.getMessageDestination(name);
   }
-
-  /**
-   * Handles the case where a class loader is activated.
-   */
-  public void environmentStart(EnvironmentClassLoader loader)
-  {
-  }
-
-  /**
-   * Handles the case where a class loader is dropped.
-   */
-  public void environmentStop(EnvironmentClassLoader loader)
-  {
-    close();
-  }
-
-  public void close()
-  {
-    _ejbManager.destroy();
-  }
+  */
 }

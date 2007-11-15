@@ -56,8 +56,7 @@ import java.util.logging.Logger;
 /**
  * Manages the enhancement
  */
-public class EnhancerManager
-  implements ClassFileTransformer, ByteCodeClassMatcher
+public class EnhancerManager implements ClassFileTransformer
 {
   private static final L10N L = new L10N(EnhancerManager.class);
   private static final Logger log = Log.open(EnhancerManager.class);
@@ -192,25 +191,20 @@ public class EnhancerManager
 			  ProtectionDomain domain,
 			  byte []buffer)
   {
-    int length = buffer.length;
-    
-    ByteCodeClassScanner scanner;
-
-    // XXX: temp
-    scanner = new ByteCodeClassScanner(className, buffer, 0, length, this);
-
-    if (scanner.scan()) {
+    if (isClassMatch(className)) {
       try {
 	ByteCodeParser parser = new ByteCodeParser();
 	parser.setClassLoader(_jClassLoader);
 	
 	ByteArrayInputStream is;
-	is = new ByteArrayInputStream(buffer, 0, length);
+	is = new ByteArrayInputStream(buffer, 0, buffer.length);
       
 	JavaClass jClass = parser.parse(is);
 
 	return enhance(jClass);
-      } catch (Throwable e) {
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
 	throw new EnhancerRuntimeException(e);
       }
     }
@@ -249,7 +243,6 @@ public class EnhancerManager
     boolean hasEnhancer = false;
     GenClass genClass = new GenClass(extClassName);
     genClass.setSuperClassName(className);
-
     for (ClassEnhancer enhancer : _classEnhancerList) {
       if (enhancer.shouldEnhance(className)) {
 	try {
@@ -296,8 +289,11 @@ public class EnhancerManager
 
       return buffer;
     } catch (RuntimeException e) {
+      e.printStackTrace();
+      
       throw e;
     } catch (Exception e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       
       throw new ClassNotFoundException(e.getMessage());
@@ -315,11 +311,11 @@ public class EnhancerManager
       int p = className.lastIndexOf('$');
       char ch = className.charAt(p + 1);
 
-      if (ch >= '0' && ch <= '9')
+      if ('0' <= ch && ch <= '9')
 	return false;
     }
-    else if (className.indexOf('+') > 0 ||
-	     className.indexOf('-') > 0)
+    else if (className.indexOf('+') > 0
+	     || className.indexOf('-') > 0)
       return false;
     
     for (int i = 0; i < _classEnhancerList.size(); i++) {
@@ -328,14 +324,6 @@ public class EnhancerManager
       }
     }
 
-    return false;
-  }
-
-  /**
-   * Returns true for a matching class.
-   */
-  public boolean isMatch(CharBuffer cb)
-  {
     return false;
   }
 }

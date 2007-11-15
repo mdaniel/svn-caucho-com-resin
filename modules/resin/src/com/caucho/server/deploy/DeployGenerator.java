@@ -133,9 +133,6 @@ abstract public class DeployGenerator<E extends DeployController>
   final public void init()
     throws ConfigException
   {
-    if (! _lifecycle.toInitializing())
-      return;
-
     try {
       initImpl();
     }
@@ -145,8 +142,6 @@ abstract public class DeployGenerator<E extends DeployController>
     }
 
     _lifecycle.setName(toString());
-
-    _lifecycle.toInit();
   }
 
   /**
@@ -184,16 +179,14 @@ abstract public class DeployGenerator<E extends DeployController>
   {
     try {
       init();
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    if (!_lifecycle.toStarting())
+    if (! _lifecycle.toActive())
       return;
 
     startImpl();
-
-    _lifecycle.toActive();
   }
 
   public boolean isActive()

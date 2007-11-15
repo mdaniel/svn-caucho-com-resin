@@ -575,6 +575,8 @@ public class ContextImpl implements Context {
       }
       else
         return value;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (NamingException e) {
       throw e;
     } catch (Exception e) {

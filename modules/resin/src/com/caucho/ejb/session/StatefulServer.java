@@ -27,46 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.ejb.session;
 
-import com.caucho.amber.manager.*;
-import com.caucho.config.*;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-
-import java.util.logging.*;
-import javax.sql.*;
-import javax.annotation.*;
+import com.caucho.ejb.manager.EjbContainer;
 
 /**
- * Configures the persistence for a level.
+ * Server container for a session bean.
  */
-public class PersistenceManager
+public class StatefulServer extends SessionServer
 {
-  private static final L10N L = new L10N(PersistenceManager.class);
-  protected static final Logger log
-    = Logger.getLogger(PersistenceManager.class.getName());
-
-  private AmberContainer _amberManager;
-
-  /**
-   * Create a persistence manager
-   */
-  public PersistenceManager()
-    throws ConfigException
+  public StatefulServer(EjbContainer ejbContainer)
   {
-    _amberManager = AmberContainer.create();
+    super(ejbContainer);
   }
 
-  public void setDataSource(DataSource dataSource)
+  @Override
+  protected String getType()
   {
-    _amberManager.setDataSource(dataSource);
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+    return "stateful:";
   }
 }
-

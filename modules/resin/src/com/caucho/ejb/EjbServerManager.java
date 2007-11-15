@@ -39,13 +39,11 @@ import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.admin.EJBAdmin;
-import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.ejb.cfg.EjbSessionBean;
-import com.caucho.ejb.cfg.EjbMessageBean;
-import com.caucho.ejb.cfg.MessageDestination;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.entity.EntityKey;
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntityContext;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -76,11 +74,11 @@ import java.util.zip.ZipInputStream;
 /**
  * Manages the EJBs.
  */
-public class EjbServerManager
-  implements EJBServerInterface, EnvironmentListener
+public class EjbServerManager implements EnvironmentListener
 {
   private static final L10N L = new L10N(EjbServerManager.class);
-  protected static final Logger log = Logger.getLogger(EjbServerManager.class.getName());
+  protected static final Logger log
+    = Logger.getLogger(EjbServerManager.class.getName());
 
   private EnvironmentClassLoader _classLoader;
 
@@ -120,14 +118,11 @@ public class EjbServerManager
   EjbServerManager()
   {
     try {
-      _amberContainer = AmberContainer.getLocalContainer();
+      _amberContainer = AmberContainer.create();
 
-      _amberPersistenceUnit = AmberContainer.getLocalContainer().createPersistenceUnit("resin-ejb");
-      _amberPersistenceUnit.setBytecodeGenerator(false);
-
-      _envServerManager = new EnvServerManager(_amberPersistenceUnit);
-
-      _ejbConfig = new EjbConfig(this);
+      _envServerManager = new EnvServerManager(_amberContainer);
+      
+      // _ejbConfig = new EjbConfig(EjbContainer.create());
 
       _envServerManager.addEjbConfig(_ejbConfig);
     } catch (RuntimeException e) {
@@ -205,7 +200,9 @@ public class EjbServerManager
   public void setDataSource(DataSource dataSource)
   {
     _amberContainer.setDataSource(dataSource);
-    _amberPersistenceUnit.setDataSource(dataSource);
+
+    if (_amberPersistenceUnit != null)
+      _amberPersistenceUnit.setDataSource(dataSource);
   }
 
   /**
@@ -417,7 +414,8 @@ public class EjbServerManager
   {
     _createDatabaseSchema = create;
 
-    _amberPersistenceUnit.setCreateDatabaseTables(create);
+    if (_amberPersistenceUnit != null)
+      _amberPersistenceUnit.setCreateDatabaseTables(create);
   }
 
   /**
@@ -434,8 +432,9 @@ public class EjbServerManager
   public void setValidateDatabaseSchema(boolean validate)
   {
     _validateDatabaseSchema = validate;
-    
-    _amberPersistenceUnit.setValidateDatabaseTables(validate);
+
+    if (_amberPersistenceUnit != null)
+      _amberPersistenceUnit.setValidateDatabaseTables(validate);
   }
 
   /**
@@ -444,38 +443,6 @@ public class EjbServerManager
   public boolean getValidateDatabaseSchema()
   {
     return _validateDatabaseSchema;
-  }
-
-  /**
-   * Gets the cache timeout.
-   */
-  public long getCacheTimeout()
-  {
-    return _envServerManager.getCacheTimeout();
-  }
-
-  /**
-   * Sets the cache timeout.
-   */
-  public void setCacheTimeout(long cacheTimeout)
-  {
-    _envServerManager.setCacheTimeout(cacheTimeout);
-  }
-
-  /**
-   * Gets the cache size.
-   */
-  public int getCacheSize()
-  {
-    return _envServerManager.getCacheSize();
-  }
-
-  /**
-   * Sets the cache size.
-   */
-  public void setCacheSize(int cacheSize)
-  {
-    _envServerManager.setCacheSize(cacheSize);
   }
 
   /**
@@ -500,126 +467,6 @@ public class EjbServerManager
   public void addConfigFiles(FileSetType fileSet)
   {
     _ejbConfig.addFileSet(fileSet);
-  }
-      
-  /**
-   * Adds an EJB jar.
-   */
-  public void addEJBJar(Path path)
-    throws Exception
-  {
-    JarPath jar;
-
-    if (path instanceof JarPath)
-      jar = (JarPath) path;
-    else
-      jar = JarPath.create(path);
-
-    introspectJar(jar.getContainer());
-
-    Path descriptorPath = jar.lookup("META-INF/ejb-jar.xml");
-
-    if (descriptorPath.exists()) {
-      addEJBPath(path, descriptorPath);
-    }
-    
-    descriptorPath = jar.lookup("META-INF/resin-ejb-jar.xml");
-
-    if (descriptorPath.exists()) {
-      addEJBPath(path, descriptorPath);
-    }
-
-    Path metaInf = jar.lookup("META-INF");
-    if (metaInf.isDirectory()) {
-      String []metaList = metaInf.list();
-      for (int j = 0; j < metaList.length; j++) {
-	String metaName = metaList[j];
-	if (metaName.endsWith(".ejb")) {
-	  Path metaPath = metaInf.lookup(metaName);
-	
-	  addEJBPath(path, metaPath);
-	}
-      }
-    }
-  }
-
-  private void introspectJar(Path path)
-  {
-    try {
-      InputStream is = path.openRead();
-      
-      try {
-	ZipInputStream zipIs = new ZipInputStream(is);
-
-	ZipEntry entry;
-	TempBuffer tbuf = TempBuffer.allocate();
-	byte []buffer = tbuf.getBuffer();
-	
-	while ((entry = zipIs.getNextEntry()) != null) {
-	  String classFileName = entry.getName();
-	  
-	  if (! classFileName.endsWith(".class"))
-	    continue;
-
-	  String className
-	    = classFileName.substring(0, classFileName.length() - 6);
-	  className = className.replace('/', '.');
-
-	  ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-	  int size = 0;
-	  int sublen;
-
-	  while ((sublen = zipIs.read(buffer, 0, buffer.length)) > 0) {
-	    bos.write(buffer, 0, sublen);
-
-	    size += size;
-	  }
-
-	  bos.close();
-
-	  byte []classBytes = bos.toByteArray();
-	  ByteCodeClassMatcher matcher = new EjbClassMatcher();
-	  ByteCodeClassScanner scanner
-	    = new ByteCodeClassScanner(className,
-				       classBytes, 0, classBytes.length,
-				       matcher);
-
-	  if (scanner.scan()) {
-	    try {
-	      JClass type = getJClassLoader().forName(className);
-
-              if (type == null)
-                continue;
-	      else if (type.isAnnotationPresent(javax.ejb.Stateless.class)
-                       || type.isAnnotationPresent(javax.ejb.Stateful.class)) {
-		EjbSessionBean bean = new EjbSessionBean(_ejbConfig, "resin-ejb");
-		bean.setEJBClass(type.getJavaClass());
-		_ejbConfig.setBeanConfig(bean.getEJBName(), bean);
-	      }
-              else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
-                EjbMessageBean bean = new EjbMessageBean(_ejbConfig, "resin-ejb");
-                bean.setAllowPOJO(true);
-                bean.setEJBClass(type.getJavaClass());
-                _ejbConfig.setBeanConfig(bean.getEJBName(), bean);
-              }
-	      else {
-	      }
-	    } catch (ConfigException e) {
-	      throw e;
-	    } catch (Exception e) {
-	      throw new ConfigException(e);
-	    }
-	  }
-	}
-
-	zipIs.close();
-      } finally {
-	is.close();
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
   }
 
   // callback
@@ -669,7 +516,8 @@ public class EjbServerManager
     throws ConfigException
   {
     try {
-      _amberPersistenceUnit.init();
+      if (_amberPersistenceUnit != null)
+	_amberPersistenceUnit.init();
 
       _ejbConfig.configure();
 
@@ -725,7 +573,7 @@ public class EjbServerManager
 
   public JClassLoader getJClassLoader()
   {
-    return getAmberManager().getJClassLoader();
+    return getAmberContainer().getJClassLoader();
   }
 
   /**
@@ -850,8 +698,6 @@ public class EjbServerManager
       if (annotationName.matches("javax.ejb.Stateless"))
         return true;
       else if (annotationName.matches("javax.ejb.Stateful"))
-        return true;
-      else if (annotationName.matches("javax.ejb.Session"))
         return true;
       else if (annotationName.matches("javax.ejb.MessageDriven"))
         return true;

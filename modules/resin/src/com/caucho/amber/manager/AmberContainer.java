@@ -36,10 +36,14 @@ import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.*;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
+import com.caucho.bytecode.JClassLoaderWrapper;
+import com.caucho.bytecode.ByteCodeClassMatcher;
+import com.caucho.bytecode.ByteCodeClassScanner;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;
+import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -58,7 +62,7 @@ import java.util.zip.ZipInputStream;
 /**
  * Environment-based container.
  */
-public class AmberContainer {
+public class AmberContainer implements ScanListener {
   private static final L10N L = new L10N(AmberContainer.class);
   private static final Logger log
     = Logger.getLogger(AmberContainer.class.getName());
@@ -68,6 +72,7 @@ public class AmberContainer {
 
   private EnvironmentClassLoader _parentLoader;
   // private EnhancingClassLoader _enhancedLoader;
+  private AmberContainer _parentAmberContainer;
 
   private JClassLoader _jClassLoader;
 
@@ -117,19 +122,35 @@ public class AmberContainer {
   private HashMap<String,Throwable> _listenerExceptionMap
     = new HashMap<String,Throwable>();
 
-  private HashSet<Path> _persistenceRootSet
-    = new HashSet<Path>();
+  private HashMap<Path,RootContext> _persistenceRootMap
+    = new HashMap<Path,RootContext>();
+  
+  private ArrayList<RootContext> _pendingRootList
+    = new ArrayList<RootContext>();
   
   private HashSet<URL> _persistenceURLSet = new HashSet<URL>();
 
+  private ArrayList<String> _pendingClasses = new ArrayList<String>();
+
   private AmberContainer(ClassLoader loader)
   {
+    _parentAmberContainer = _localContainer.get(loader);
     _parentLoader = Environment.getEnvironmentClassLoader(loader);
-    _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
+    //_jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
+
+    _localContainer.set(this, _parentLoader);
+    
+    _jClassLoader
+      = JClassLoaderWrapper.create(_parentLoader.getNewTempClassLoader());
 
     _enhancer = new AmberEnhancer(this);
 
     EnhancerManager.create().addClassEnhancer(_enhancer);
+
+    if (_parentAmberContainer != null)
+      copyContainerDefaults(_parentAmberContainer);
+
+    _parentLoader.addScanListener(this);
 
     try {
       if (_parentLoader instanceof DynamicClassLoader)
@@ -144,15 +165,15 @@ public class AmberContainer {
   /**
    * Returns the local container.
    */
-  public static AmberContainer getLocalContainer()
+  public static AmberContainer create()
   {
-    return getLocalContainer(Thread.currentThread().getContextClassLoader());
+    return create(Thread.currentThread().getContextClassLoader());
   }
 
   /**
    * Returns the local container.
    */
-  public static AmberContainer getLocalContainer(ClassLoader loader)
+  public static AmberContainer create(ClassLoader loader)
   {
     synchronized (_localContainer) {
       AmberContainer container = _localContainer.getLevel(loader);
@@ -164,6 +185,24 @@ public class AmberContainer {
       }
 
       return container;
+    }
+  }
+
+  /**
+   * Returns the local container.
+   */
+  public static AmberContainer getCurrent()
+  {
+    return getCurrent(Thread.currentThread().getContextClassLoader());
+  }
+
+  /**
+   * Returns the current environment container.
+   */
+  public static AmberContainer getCurrent(ClassLoader loader)
+  {
+    synchronized (_localContainer) {
+      return _localContainer.get(loader);
     }
   }
 
@@ -278,6 +317,14 @@ public class AmberContainer {
   public JClassLoader getJClassLoader()
   {
     return _jClassLoader;
+  }
+
+  private void copyContainerDefaults(AmberContainer parent)
+  {
+    _dataSource = parent._dataSource;
+    _xaDataSource = parent._xaDataSource;
+    _readDataSource = parent._readDataSource;
+    _createDatabaseTables = parent._createDatabaseTables;
   }
 
   public void init()
@@ -508,6 +555,11 @@ public class AmberContainer {
     return unit;
   }
 
+  public void start()
+  {
+    configurePersistenceRoots();
+  }
+
   public AmberPersistenceUnit getPersistenceUnit(String name)
   {
     if (_exception != null)
@@ -525,7 +577,8 @@ public class AmberContainer {
     if (factory != null)
       return factory;
 
-    scanClassPath();
+    if (_pendingRootList.size() > 0)
+      configurePersistenceRoots();
 
     factory = _factoryMap.get(name);
     if (factory != null)
@@ -538,7 +591,21 @@ public class AmberContainer {
       return factory;
     }
 
-    return null;
+    if ("".equals(name) && _factoryMap.size() == 1)
+      return _factoryMap.values().iterator().next();
+
+    if ("".equals(name) && _unitMap.size() == 1) {
+      amberUnit = _unitMap.values().iterator().next();
+      
+      factory = new AmberEntityManagerFactory(amberUnit);
+      _factoryMap.put(name, factory);
+      return factory;
+    }
+
+    if (_parentAmberContainer != null)
+      return _parentAmberContainer.getEntityManagerFactory(name);
+    else
+      return null;
   }
 
   public EntityManager getPersistenceContext(String name)
@@ -553,7 +620,8 @@ public class AmberContainer {
     if (context != null)
       return context;
 
-    scanClassPath();
+    if (_pendingRootList.size() > 0)
+      configurePersistenceRoots();
 
     if ("".equals(name) && _unitConfigList.size() > 0)
       name = _unitConfigList.get(0).getName();
@@ -571,56 +639,46 @@ public class AmberContainer {
 
     return null;
   }
-  
-  /**
-   * Adds the URLs for the classpath.
-   */
-  public void scanClassPath()
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_parentLoader);
-      
-      URL []urls = _parentLoader.getURLs();
-
-      for (URL url : _parentLoader.getURLs()) {
-	if (_persistenceURLSet.contains(url))
-	  continue;
-
-	_persistenceURLSet.add(url);
-	
-	// XXX: workaround for tck
-	String s = url.toString();
-
-	Path pwd = Vfs.getPwd();
-
-	Path path;
-	if (s.endsWith("jar!/") && s.startsWith("jar:file:")) {
-	  s = s.substring(9, s.length() - 2);
-	  path = JarPath.create(pwd.lookup(s));
-	}
-	else {
-	  path = pwd.lookup(s);
-	}
-
-	addPersistenceUnit(path);
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
 
   /**
    * Adds a persistence root.
    */
   public void addPersistenceUnit(Path root)
   {
-    if (_persistenceRootSet.contains(root))
+    if (_persistenceRootMap.get(root) != null)
       return;
 
-    _persistenceRootSet.add(root);
+    RootContext context = new RootContext(root);
+    _persistenceRootMap.put(root, context);
+    _pendingRootList.add(context);
+  }
+  
+  /**
+   * Adds the URLs for the classpath.
+   */
+  public void configurePersistenceRoots()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_parentLoader);
+
+      ArrayList<RootContext> rootList
+	= new ArrayList<RootContext>(_pendingRootList);
+      _pendingRootList.clear();
+      
+      for (RootContext rootContext : rootList) {
+	configureRoot(rootContext);
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  private void configureRoot(RootContext rootContext)
+  {
+    Path root = rootContext.getRoot();
 
     try {
       Path ormXml = root.lookup("META-INF/orm.xml");
@@ -645,11 +703,16 @@ public class AmberContainer {
 	}
 	
         try {
+	  if (log.isLoggable(Level.CONFIG))
+	    log.config("Amber PersistenceUnit[" + unitConfig.getName() + "] configuring " + rootContext.getRoot().getURL());
+	  
           if (! unitConfig.isExcludeUnlistedClasses()) {
-            classMap.clear();
-            lookupClasses(root.getPath().length(), root, classMap,
-                          entityMappings);
-            unitConfig.addAllClasses(classMap);
+	    classMap.clear();
+	    
+	    for (String className : rootContext.getClassNameList())
+	      lookupClass(className, classMap, entityMappings);
+	    
+	    unitConfig.addAllClasses(classMap);
           }
 
           ArrayList<EntityMappingsConfig> entityMappingsList
@@ -672,7 +735,7 @@ public class AmberContainer {
 
             classMap.clear();
 
-            lookupJarClasses(jarFile, classMap, entityMappings);
+            // lookupJarClasses(jarFile, classMap, entityMappings);
 
             unitConfig.addAllClasses(classMap);
           }
@@ -688,8 +751,10 @@ public class AmberContainer {
               entityMappingsList.add(mappingFileConfig);
 
               classMap.clear();
-              lookupClasses(root.getPath().length(), root, classMap,
+	      /*
+	      lookupClasses(root.getPath().length(), root, classMap,
                             mappingFileConfig);
+	      */
               unitConfig.addAllClasses(classMap);
             }
           }
@@ -714,6 +779,11 @@ public class AmberContainer {
   {
     try {
       Class cl = unit.getProvider();
+	  
+      if (log.isLoggable(Level.CONFIG)) {
+	log.config("JPA PersistenceUnit[" + unit.getName() + "] handled by "
+		   + cl.getName());
+      }
 
       PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
 
@@ -780,47 +850,6 @@ public class AmberContainer {
     }
   }
 
-  /**
-   * Lookup *.class files and add the corresponding
-   * fully qualified class names to the list.
-   */
-  public void lookupClasses(int rootNameLength,
-                            Path curr,
-                            HashMap<String, JClass> classMap,
-                            EntityMappingsConfig entityMappings)
-    throws Exception
-  {
-    if (curr instanceof JarPath) {
-      lookupJarClasses((JarPath) curr, classMap, entityMappings);
-
-      return;
-    }
-
-    Iterator<String> it = curr.iterator();
-
-    while (it.hasNext()) {
-      String s = it.next();
-
-      Path path = curr.lookup(s);
-
-      if (path.isDirectory()) {
-        lookupClasses(rootNameLength, path, classMap, entityMappings);
-      }
-      else if (s.endsWith(".class")) {
-        String packageName = curr.getPath().substring(rootNameLength);
-
-        packageName = packageName.replace('/', '.');
-
-        if (packageName.length() > 0)
-          packageName = packageName + '.';
-
-        String className = packageName + s.substring(0, s.length() - 6);
-
-        lookupClass(className, classMap, entityMappings);
-      }
-    }
-  }
-
   //
   // private
 
@@ -847,41 +876,6 @@ public class AmberContainer {
     return entityMappings;
   }
 
-  private void lookupJarClasses(JarPath path,
-                                HashMap<String, JClass> classMap,
-                                EntityMappingsConfig entityMappings)
-    throws Exception
-  {
-    try {
-      InputStream is = path.getContainer().openRead();
-
-      try {
-        ZipInputStream zipIs = new ZipInputStream(is);
-
-        ZipEntry entry;
-
-        while ((entry = zipIs.getNextEntry()) != null) {
-          String classFileName = entry.getName();
-
-          if (! classFileName.endsWith(".class"))
-            continue;
-
-          String className
-            = classFileName.substring(0, classFileName.length() - 6);
-          className = className.replace('/', '.');
-
-          lookupClass(className, classMap, entityMappings);
-        }
-
-        zipIs.close();
-      } finally {
-        is.close();
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-  }
-
   private void lookupClass(String className,
                            HashMap<String, JClass> classMap,
                            EntityMappingsConfig entityMappings)
@@ -906,10 +900,68 @@ public class AmberContainer {
           mappedSuperclassOrEntityConfig = entityMappings.getMappedSuperclass(className);
       }
 
-      if (isEntity || isEmbeddable || isMappedSuperclass ||
-          (mappedSuperclassOrEntityConfig != null)) {
+      if (isEntity || isEmbeddable || isMappedSuperclass
+	  || (mappedSuperclassOrEntityConfig != null)) {
         classMap.put(className, type);
       }
     }
+  }
+
+  //
+  // ScanListener
+  //
+
+  /**
+   * Returns true if the root is a valid scannable root.
+   */
+  public boolean isRootScannable(Path root)
+  {
+    if (! root.lookup("META-INF/persistence.xml").canRead())
+      return false;
+
+    RootContext context = _persistenceRootMap.get(root);
+
+    if (context == null) {
+      context = new RootContext(root);
+      _pendingRootList.add(context);
+      _persistenceRootMap.put(root, context);
+    }
+
+    if (context.isScanComplete())
+      return false;
+    else {
+      context.setScanComplete(true);
+      return true;
+    }
+  }
+
+  public boolean isScanMatch(CharBuffer annotationName)
+  {
+    if (annotationName.matches("Ljavax/persistence/Entity;"))
+      return true;
+    else if (annotationName.matches("Ljavax/persistence/Embeddable;"))
+      return true;
+    else if (annotationName.matches("Ljavax/persistence/MappedSuperclass;"))
+      return true;
+    else
+      return false;
+  }
+  
+  /**
+   * Callback to note the class matches
+   */
+  public void classMatchEvent(EnvironmentClassLoader loader,
+			      Path root,
+			      String className)
+  {
+    RootContext context = _persistenceRootMap.get(root);
+
+    if (context == null) {
+      context = new RootContext(root);
+      _persistenceRootMap.put(root, context);
+      _pendingRootList.add(context);
+    }
+      
+    context.addClassName(className);
   }
 }

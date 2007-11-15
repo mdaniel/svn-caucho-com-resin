@@ -402,21 +402,31 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void addJar(Path jar)
   {
+    addRoot(jar);
+  }
+  
+  /**
+   * Adds a root loader.
+   */
+  public void addRoot(Path root)
+  {
     if (_lifecycle.isDestroyed())
-      throw new IllegalStateException(L().l("can't add jars after closing"));
+      throw new IllegalStateException(L().l("can't add roots after closing"));
 
-    if (jar instanceof JarPath || jar.isFile()) {
+    if (root instanceof JarPath || root.isFile()) {
       if (_jarLoader == null) {
         _jarLoader = new JarLoader();
         addLoader(_jarLoader);
       }
 
-      _jarLoader.addJar(jar);
+      _jarLoader.addJar(root);
     }
     else {
       SimpleLoader loader = new SimpleLoader();
-      loader.setPath(jar);
-      addLoader(loader);
+      loader.setPath(root);
+
+      if (! _loaders.contains(loader))
+	addLoader(loader);
     }
   }
 
@@ -455,6 +465,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Adds the URL to the URLClassLoader.
    */
+  @Override
   public void addURL(URL url)
   {
     addURL(_urls.length, url);
@@ -466,6 +477,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public void addURL(int index, URL url)
   {
     super.addURL(url);
+
+    for (int i = 0; i < _urls.length; i++) {
+      if (_urls[i].equals(url))
+	return;
+    }
 
     URL []newURLs = new URL[_urls.length + 1];
 
@@ -814,8 +830,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     else
       head.append(CauchoSystem.getClassPath());
 
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = getLoaders();
+    for (int i = 0; i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       loader.buildClassPath(head);
     }
@@ -829,8 +846,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     StringBuilder head = new StringBuilder();
 
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = getLoaders();
+    for (int i = 0; i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       buildClassPath(head);
     }
@@ -864,8 +882,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     else
       head.append(CauchoSystem.getClassPath());
 
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = getLoaders();
+    for (int i = 0; i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       loader.buildSourcePath(head);
     }
@@ -903,9 +922,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     ClassLoader parent = getParent();
 
-    int size = _loaders != null ? _loaders.size() : 0;
+    ArrayList<Loader> loaders = getLoaders();
+    int size = loaders != null ? loaders.size() : 0;
     for (int i = 0; i < size; i++) {
-      Loader loader = _loaders.get(i);
+      Loader loader = loaders.get(i);
 
       loader.buildSourcePath(pathList);
     }
@@ -1077,7 +1097,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Initialize the class loader.
    */
-  @PostConstruct
   public void init()
   {
     if (! _lifecycle.toActive())
@@ -1096,8 +1115,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     }
-
-    sendAddLoaderEvent();
   }
 
   /**
@@ -1106,13 +1123,15 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public void validate()
     throws ConfigException
   {
-    ArrayList<Loader> loaders = _loaders;
+    ArrayList<Loader> loaders = getLoaders();
 
     if (loaders == null)
       throw new IllegalStateException(_L.l("Class loader {0} is closed during initialization.", this));
 
     for (int i = 0; i < loaders.size(); i++)
       loaders.get(i).validate();
+
+    sendAddLoaderEvent();
   }
 
   public Class<?> loadClass(String name) throws ClassNotFoundException
@@ -1250,9 +1269,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (_lifecycle.isBeforeInit())
       init();
-    
-    if (_hasNewLoader)
-      sendAddLoaderEvent();
 
     /*
     if (! _lifecycle.isActive())
@@ -1309,8 +1325,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     String pathName = name.replace('.', '/') + ".class";
     
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = getLoaders();
+    for (int i = 0; i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       ClassEntry entry = loader.getClassEntry(name, pathName);
 
@@ -1476,7 +1493,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         return url;
     }
 
-    ArrayList<Loader> loaders = _loaders;
+    ArrayList<Loader> loaders = getLoaders();
 
     for (int i = 0; loaders != null && i < loaders.size(); i++) {
       Loader loader = loaders.get(i);
@@ -1552,7 +1569,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         return is;
     }
 
-    ArrayList<Loader> loaders = _loaders;
+    ArrayList<Loader> loaders = getLoaders();
 
     for (int i = 0; loaders != null && i < loaders.size(); i++) {
       Loader loader = loaders.get(i);
@@ -1602,8 +1619,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     Vector<URL> resources = new Vector<URL>();
 
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = getLoaders();
+    for (int i = 0; i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       loader.getResources(resources, name);
     }
@@ -1618,8 +1636,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     String systemName = System.mapLibraryName(name);
 
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = getLoaders();
+    for (int i = 0; i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       Path path = loader.getPath(systemName);
 
@@ -1643,8 +1662,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public Path findPath(String name)
   {
-    for (int i = 0; i < _loaders.size(); i++) {
-      Loader loader = _loaders.get(i);
+    ArrayList<Loader> loaders = getLoaders();
+    for (int i = 0; i < loaders.size(); i++) {
+      Loader loader = loaders.get(i);
 
       Path path = loader.getPath(name);
 
@@ -1741,8 +1761,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         thread.setContextClassLoader(oldLoader);
       }
 
-      for (int i = _loaders.size() - 1; i >= 0; i--) {
-        Loader loader = _loaders.get(i);
+      ArrayList<Loader> loaders = getLoaders();
+      for (int i = loaders.size() - 1; i >= 0; i--) {
+        Loader loader = loaders.get(i);
 
         try {
           loader.destroy();
@@ -1797,13 +1818,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   
   public ClassLoader getNewTempClassLoader()
   {
-    DynamicClassLoader dynLoader = new DynamicClassLoader(getParent());
-
-    for (int i = 0; i < _loaders.size(); i++) {
-      dynLoader.addLoader(_loaders.get(i));
-    }
-
-    return dynLoader;
+    return new TempDynamicClassLoader(this);
   }
 
   /**
@@ -1848,7 +1863,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (_id != null)
       return "DynamicClassLoader[" + _id + "]";
     else
-      return "DynamicClassLoader" + _loaders;
+      return "DynamicClassLoader" + getLoaders();
   }
 
   private static L10N L()

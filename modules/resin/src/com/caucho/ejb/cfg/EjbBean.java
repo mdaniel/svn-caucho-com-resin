@@ -51,6 +51,7 @@ import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.TransactionChain;
 import com.caucho.ejb.gen.UserInRoleChain;
 import com.caucho.ejb.gen.ViewClass;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.gen.BaseClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -190,10 +191,18 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     _loader = Thread.currentThread().getContextClassLoader();
 
-    if (_ejbConfig.getEJBManager() != null) {
-      // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
-      _ejbConfig.getEJBManager().getTransactionManager().setEJB3(isEJB3());
-    }
+    // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
+    getEjbContainer().getTransactionManager().setEJB3(isEJB3());
+  }
+
+  public EjbConfig getConfig()
+  {
+    return _ejbConfig;
+  }
+
+  public EjbContainer getEjbContainer()
+  {
+    return _ejbConfig.getEjbContainer();
   }
 
   public String getAroundInvokeMethodName()
@@ -334,14 +343,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     return null;
-  }
-
-  /**
-   * Returns the owning config.
-   */
-  public EjbConfig getConfig()
-  {
-    return _ejbConfig;
   }
 
   public String getEJBModuleName()
@@ -1266,7 +1267,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       _remoteView21.introspect();
     }
 
-    if (_remoteList.size() > 0) {
+    else if (_remoteList.size() > 0) {
       ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.addAll(_remoteList);
       list.remove(_remote21);
@@ -1343,7 +1344,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Deploys the bean.
    */
-  public AbstractServer deployServer(EjbServerManager ejbManager,
+  public AbstractServer deployServer(EjbContainer ejbContainer,
                                      JavaClassGenerator javaGen)
     throws ClassNotFoundException, ConfigException
   {

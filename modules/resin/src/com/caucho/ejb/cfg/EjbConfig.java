@@ -38,6 +38,7 @@ import com.caucho.config.types.ResourceEnvRef;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.ql.FunExpr;
 import com.caucho.java.WorkDir;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -63,7 +64,7 @@ public class EjbConfig {
   private static final L10N L = new L10N(EjbConfig.class);
   private static final Logger log = Log.open(EjbConfig.class);
 
-  private EjbServerManager _ejbManager;
+  private final EjbContainer _ejbContainer;
 
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
   private ArrayList<Path> _pathList = new ArrayList<Path>();
@@ -94,21 +95,11 @@ public class EjbConfig {
   private ArrayList<ApplicationExceptionConfig> _cfgApplicationExceptions
     = new ArrayList<ApplicationExceptionConfig>();
 
-  public EjbConfig(EjbServerManager ejbManager)
+  public EjbConfig(EjbContainer ejbContainer)
   {
-    _ejbManager = ejbManager;
+    _ejbContainer = ejbContainer;
 
     _functions.addAll(FunExpr.getStandardFunctions());
-  }
-
-  public String getRemoteJndiName()
-  {
-    return _ejbManager.getRemoteJndiPrefix();
-  }
-
-  public String getLocalJndiName()
-  {
-    return _ejbManager.getLocalJndiPrefix();
   }
 
   /**
@@ -120,6 +111,19 @@ public class EjbConfig {
       return;
 
     _fileSetList.add(fileSet);
+    
+    for (Path path : fileSet.getPaths()) {
+      addEJBPath(fileSet.getDir(), path);
+    }
+  }
+
+  /**
+   * Adds a path for an EJB config file to the config list.
+   */
+  public void addEjbPath(Path path)
+    throws ConfigException
+  {
+    addEJBPath(path, path);
   }
 
   /**
@@ -157,8 +161,10 @@ public class EjbConfig {
        ejbModuleName = ejbModuleName.substring(1);
     */
 
+    /*
     if (_ejbManager != null)
       _ejbManager.addEJBModule(ejbModuleName);
+    */
 
     EjbJar ejbJar = new EjbJar(this, ejbModuleName);
 
@@ -188,9 +194,9 @@ public class EjbConfig {
   /**
    * Returns the EJB manager.
    */
-  public EjbServerManager getEJBManager()
+  public EjbContainer getEjbContainer()
   {
-    return _ejbManager;
+    return _ejbContainer;
   }
 
   /**
@@ -359,6 +365,40 @@ public class EjbConfig {
     return _isAllowPOJO;
   }
 
+  public void addIntrospectableClass(String className)
+  {
+    try {
+      ClassLoader loader = _ejbContainer.getIntrospectionClassLoader();
+
+      Class type = Class.forName(className, false, loader);
+
+      if (type.isAnnotationPresent(javax.ejb.Stateless.class)) {
+	EjbStatelessBean bean = new EjbStatelessBean(this, "resin-ejb");
+	bean.setEJBClass(type);
+	
+	setBeanConfig(bean.getEJBName(), bean);
+      }
+      else if (type.isAnnotationPresent(javax.ejb.Stateful.class)) {
+	EjbStatefulBean bean = new EjbStatefulBean(this, "resin-ejb");
+		
+	bean.setEJBClass(type);
+		
+	setBeanConfig(bean.getEJBName(), bean);
+      }
+      else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
+	EjbMessageBean bean = new EjbMessageBean(this, "resin-ejb");
+	bean.setAllowPOJO(true);
+	bean.setEJBClass(type);
+	
+	setBeanConfig(bean.getEJBName(), bean);
+      }
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
   /**
    * Finds an entity bean by its abstract schema.
    */
@@ -507,13 +547,13 @@ public class EjbConfig {
 
       _deployingBeans.addAll(beanConfig);
 
-      EnvironmentClassLoader parentLoader = _ejbManager.getClassLoader();
+      EnvironmentClassLoader parentLoader = _ejbContainer.getClassLoader();
 
-      Path workPath = _ejbManager.getWorkPath();
+      Path workDir = _ejbContainer.getWorkDir();
 
       JavaClassGenerator javaGen = new JavaClassGenerator();
       // need to be compatible with enhancement
-      javaGen.setWorkDir(workPath);
+      javaGen.setWorkDir(workDir);
       javaGen.setParentLoader(parentLoader);
 
       configureRelations();
@@ -539,11 +579,11 @@ public class EjbConfig {
 
       amberConfig.configureRelations();
 
-      if (_ejbManager.isAutoCompile())
+      if (_ejbContainer.isAutoCompile())
         amberConfig.generate(javaGen);
 
       for (EjbBean bean : beanConfig) {
-        bean.generate(javaGen, _ejbManager.isAutoCompile());
+        bean.generate(javaGen, _ejbContainer.isAutoCompile());
       }
 
       javaGen.compilePendingJava();
@@ -575,15 +615,12 @@ public class EjbConfig {
     throws ConfigException
   {
     try {
-      ClassLoader parentLoader = _ejbManager.getClassLoader();
+      ClassLoader parentLoader = _ejbContainer.getClassLoader();
 
-      Path workPath = _ejbManager.getWorkPath();
-
-      if (workPath == null)
-        workPath = WorkDir.getLocalWorkDir();
+      Path workDir = _ejbContainer.getWorkDir();
 
       JavaClassGenerator javaGen = new JavaClassGenerator();
-      javaGen.setWorkDir(workPath);
+      javaGen.setWorkDir(workDir);
       javaGen.setParentLoader(parentLoader);
 
       deployBeans(_deployingBeans, javaGen);
@@ -599,15 +636,13 @@ public class EjbConfig {
    */
   public void deployBeans(ArrayList<EjbBean> beanConfig,
                           JavaClassGenerator javaGen)
-    throws Throwable
+    throws Exception
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_ejbManager.getClassLoader());
-
-      _ejbManager.getAmberManager().initEntityHomes();
+      thread.setContextClassLoader(_ejbContainer.getClassLoader());
 
       // ejb/0g1c, ejb/0f68, ejb/0f69
       ArrayList<EjbBean> beanList = new ArrayList<EjbBean>();
@@ -645,9 +680,9 @@ public class EjbConfig {
   }
 
   private AbstractServer initBean(EjbBean bean, JavaClassGenerator javaGen)
-    throws Throwable
+    throws Exception
   {
-    AbstractServer server = bean.deployServer(_ejbManager, javaGen);
+    AbstractServer server = bean.deployServer(_ejbContainer, javaGen);
 
     Thread thread = Thread.currentThread();
 
@@ -659,7 +694,7 @@ public class EjbConfig {
   }
 
   private void initResources(EjbBean bean, AbstractServer server)
-    throws Throwable
+    throws Exception
   {
     for (ResourceEnvRef ref : bean.getResourceEnvRefs())
       ref.initBinding(server);
@@ -668,7 +703,7 @@ public class EjbConfig {
     for (EjbLocalRef ref : bean.getEjbLocalRefs())
       ref.initBinding(server);
 
-    _ejbManager.addServer(server);
+    _ejbContainer.addServer(server);
   }
 
   /**

@@ -108,7 +108,28 @@ public class ApplicationConfig
   public void setNavigationHandler(Class navigationHandler)
     throws ConfigException
   {
-    Config.validate(navigationHandler, NavigationHandler.class);
+    if (! NavigationHandler.class.isAssignableFrom(navigationHandler))
+      throw new ConfigException(L.l("navigation-handler '{0}' must extend javax.faces.application.NavigationHandler.",
+                                    navigationHandler.getName()));
+
+    Constructor ctor = null;
+
+    try {
+      ctor = navigationHandler.getConstructor(new Class[] { NavigationHandler.class });
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    try {
+      if (ctor == null)
+        ctor = navigationHandler.getConstructor(new Class[] { });
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    if (ctor == null)
+      throw new ConfigException(L.l("navigation-handler '{0}' must have either a zero-arg constructor or a constructor with a single NavigationHandler argument.",
+                                    navigationHandler.getName()));
     
     _navigationHandler = navigationHandler;
   }
@@ -150,7 +171,28 @@ public class ApplicationConfig
   public void setStateManager(Class stateManager)
     throws ConfigException
   {
-    Config.validate(stateManager, StateManager.class);
+    if (! StateManager.class.isAssignableFrom(stateManager))
+      throw new ConfigException(L.l("state-manager '{0}' must extend javax.faces.application.StateManager.",
+                                    stateManager.getName()));
+
+    Constructor ctor = null;
+
+    try {
+      ctor = stateManager.getConstructor(new Class[] { StateManager.class });
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    try {
+      if (ctor == null)
+        ctor = stateManager.getConstructor(new Class[] { });
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    if (ctor == null)
+      throw new ConfigException(L.l("state-manager '{0}' must have either a zero-arg constructor or a constructor with a single StateManager argument.",
+                                    stateManager.getName()));
     
     _stateManager = stateManager;
   }
@@ -268,8 +310,80 @@ public class ApplicationConfig
         }
       }
 
-      if (handler != null)
+      if (handler != null) {
         app.setViewHandler(handler);
+	log.fine(L.l("JSF[] using '{0}' as view-handler", handler));
+      }
+    }
+
+    if (_navigationHandler != null) {
+      NavigationHandler handler = null;
+      
+      try {
+        Constructor ctor
+          = _navigationHandler.getConstructor(new Class[] { NavigationHandler.class });
+        
+        NavigationHandler oldHandler = app.getNavigationHandler();
+
+        handler = (NavigationHandler) ctor.newInstance(oldHandler);
+      } catch (NoSuchMethodException e) {
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        throw new ConfigException(e.getCause());
+      } catch (Exception e) {
+        throw new ConfigException(e);
+      }
+
+      if (handler == null) {
+        try {
+          handler = (NavigationHandler) _navigationHandler.newInstance();
+        } catch (RuntimeException e) {
+          throw e;
+        } catch (Exception e) {
+          throw new ConfigException(e);
+        }
+      }
+
+      if (handler != null) {
+        app.setNavigationHandler(handler);
+	log.fine(L.l("JSF[] using '{0}' as navigation-handler", handler));
+      }
+    }
+
+    if (_stateManager != null) {
+      StateManager manager = null;
+      
+      try {
+        Constructor ctor
+          = _stateManager.getConstructor(new Class[] { StateManager.class });
+        
+        StateManager oldHandler = app.getStateManager();
+
+        manager = (StateManager) ctor.newInstance(oldHandler);
+      } catch (NoSuchMethodException e) {
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        throw new ConfigException(e.getCause());
+      } catch (Exception e) {
+        throw new ConfigException(e);
+      }
+
+      if (manager == null) {
+        try {
+          manager = (StateManager) _stateManager.newInstance();
+        } catch (RuntimeException e) {
+          throw e;
+        } catch (Exception e) {
+          throw new ConfigException(e);
+        }
+      }
+
+      if (manager != null) {
+        app.setStateManager(manager);
+	log.fine(L.l("JSF[] using '{0}' as state-manager", manager));
+      }
     }
 
     for (int i = 0; i < _elResolverList.size(); i++)

@@ -30,12 +30,10 @@
 package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.EJBServer;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.*;
 import com.caucho.log.Log;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.webapp.WebAppContainer;
@@ -59,7 +57,11 @@ public class EnterpriseApplication
   implements EnvironmentBean, EnvironmentDeployInstance
 {
   static final L10N L = new L10N(EnterpriseApplication.class);
-  static final Logger log = Log.open(EnterpriseApplication.class);
+  static final Logger log
+    = Logger.getLogger(EnterpriseApplication.class.getName());
+
+  private static final EnvironmentLocal<EnterpriseApplication> _localEApp
+    = new EnvironmentLocal<EnterpriseApplication>();
 
   /*
     protected static EnvironmentLocal<EJBServerInterface> _localServer
@@ -118,7 +120,6 @@ public class EnterpriseApplication
     _controller = controller;
     _name = name;
 
-
     ClassLoader parentLoader;
 
     if (container != null)
@@ -127,7 +128,7 @@ public class EnterpriseApplication
       parentLoader = Thread.currentThread().getContextClassLoader();
 
     _loader = new EnvironmentClassLoader(parentLoader);
-    _loader.setId("EnterpriseApplication[" + name + "]");
+    _loader.setId("eapp:" + name);
 
     _webappsPath = _controller.getRootDirectory().lookup("webapps");
     WorkDir.setLocalWorkDir(_controller.getRootDirectory().lookup("META-INF/work"),
@@ -137,6 +138,8 @@ public class EnterpriseApplication
 
     if (controller.getArchivePath() != null)
       Environment.addDependency(new Depend(controller.getArchivePath()), _loader);
+
+    _localEApp.set(this, _loader);
   }
 
   /*
@@ -147,13 +150,18 @@ public class EnterpriseApplication
   }
   */
 
+  public static EnterpriseApplication getLocal()
+  {
+    return _localEApp.get();
+  }
+
   /**
    * Sets the name.
    */
   public void setName(String name)
   {
     _name = name;
-    _loader.setId("EnterpriseApplication[" + name + "]");
+    _loader.setId("eapp:" + name + "");
   }
 
   /**
@@ -397,8 +405,6 @@ public class EnterpriseApplication
     if (! _lifecycle.toInit())
       return;
 
-    log.fine(this + " initializing");
-
     Vfs.setPwd(_rootDir, _loader);
 
     _loader.addJarManifestClassPath(_rootDir);
@@ -414,22 +420,23 @@ public class EnterpriseApplication
     }
 
     if (_ejbPaths.size() != 0) {
-      EJBServer ejbServer = EJBServer.getLocal();
-
-      if (ejbServer == null)
-        throw new ConfigException(L.l("Expected configured <ejb-server> in " +
-                                      Thread.currentThread().getContextClassLoader()));
+      EjbContainer ejbContainer = EjbContainer.create();
 
       for (Path path : _ejbPaths) {
-        ejbServer.addEJBJar(path);
+        // ejbContainer.addRoot(path);
+	_loader.addJar(path);
       }
 
+      // XXX:??
+      /*
       Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
       if (ejbJar.canRead()) {
-        ejbServer.addEJBDescriptor("META-INF/ejb-jar.xml");
+        ejbContainer.addRoot(path);
       }
+      */
 
-      ejbServer.initEJBs();
+      // starts with the environment
+      // ejbServer.start();
     }
 
     // updates the invocation caches

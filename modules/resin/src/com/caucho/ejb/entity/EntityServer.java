@@ -38,6 +38,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.FinderExceptionWrapper;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
 import com.caucho.util.Alarm;
@@ -54,7 +55,7 @@ import javax.sql.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.rmi.RemoteException;
-import java.sql.Connection;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,6 +66,8 @@ import java.util.logging.Level;
  */
 public class EntityServer extends AbstractServer {
   private static final L10N L = new L10N(EntityServer.class);
+
+  private EntityCache _entityCache;
 
   private DataSource _dataSource;
 
@@ -104,10 +107,12 @@ public class EntityServer extends AbstractServer {
    * @param allowJVMCall allows fast calls to the same JVM (with serialization)
    * @param config the EJB configuration.
    */
-  public EntityServer(EjbServerManager ejbManager)
+  public EntityServer(EjbContainer ejbContainer)
   {
-    super(ejbManager);
+    super(ejbContainer);
 
+    _entityCache = _ejbContainer.getEntityCache();
+    
     // getPersistentManager().setHome(config.getName(), this);
     // _dataSource = config.getDataSource();
 
@@ -122,6 +127,10 @@ public class EntityServer extends AbstractServer {
   {
     return _primaryKeyClass;
   }
+  
+  //
+  // configuration
+  // 
 
   /**
    * Sets CMP.
@@ -161,6 +170,11 @@ public class EntityServer extends AbstractServer {
   public void setLoadLazyOnTransaction(boolean isLoadLazy)
   {
     _isLoadLazyOnTransaction = isLoadLazy;
+  }
+
+  public void setJdbcIsolation(int isolation)
+  {
+    _jdbcIsolation = isolation;
   }
 
   /**
@@ -239,7 +253,7 @@ public class EntityServer extends AbstractServer {
         cacheSize = 1024;
       */
 
-      _jdbcIsolation = _ejbManager.getJDBCIsolation();
+      // _jdbcIsolation = _ejbManager.getJDBCIsolation();
       Class []param = new Class[] { EntityServer.class };
       _contextConstructor = _contextImplClass.getConstructor(param);
 
@@ -365,7 +379,7 @@ public class EntityServer extends AbstractServer {
    */
   public void postCreate(Object key, QEntityContext cxt)
   {
-    _ejbManager.putEntityIfNew(this, key, cxt);
+    _entityCache.putEntityIfNew(this, key, cxt);
   }
 
   /**
@@ -414,7 +428,7 @@ public class EntityServer extends AbstractServer {
 
   public void removeCache(Object key)
   {
-    _ejbManager.removeEntity(this, key);
+    _entityCache.removeEntity(this, key);
   }
 
   /**
@@ -632,14 +646,14 @@ public class EntityServer extends AbstractServer {
     if (key == null)
       return null;
 
-    QEntityContext cxt = _ejbManager.getEntity(this, key);
+    QEntityContext cxt = _entityCache.getEntity(this, key);
 
     try {
       if (cxt == null) {
         cxt = (QEntityContext) _contextConstructor.newInstance(this);
         cxt.setPrimaryKey(key);
 
-        cxt = _ejbManager.putEntityIfNew(this, key, cxt);
+        cxt = _entityCache.putEntityIfNew(this, key, cxt);
 
         EntityItem amberItem = null;
 
@@ -754,7 +768,7 @@ public class EntityServer extends AbstractServer {
     if (key == null)
       return;
 
-    QEntityContext cxt = _ejbManager.getEntity(this, key);
+    QEntityContext cxt = _entityCache.getEntity(this, key);
 
     if (cxt == null)
       return;
@@ -762,6 +776,28 @@ public class EntityServer extends AbstractServer {
     // XXX: only update in the transaction?
     // why doesn't the transaction have the update?
     cxt.update();
+  }
+
+  /**
+   * Returns the server's DataSource
+   */
+  public DataSource getDataSource()
+  {
+    return _dataSource;
+  }
+
+  /**
+   * Sets the server's DataSource
+   */
+  public void setDataSource(DataSource dataSource)
+  {
+    _dataSource = dataSource;
+  }
+
+  public Connection getConnection()
+    throws SQLException
+  {
+    return getDataSource().getConnection();
   }
 
   /**
@@ -848,7 +884,7 @@ public class EntityServer extends AbstractServer {
   {
     ArrayList<QEntityContext> beans = new ArrayList<QEntityContext>();
 
-    _ejbManager.removeBeans(beans, this);
+    _entityCache.removeBeans(beans, this);
 
     // only purpose of the sort is to make the qa order consistent
     Collections.sort(beans, new EntityCmp());

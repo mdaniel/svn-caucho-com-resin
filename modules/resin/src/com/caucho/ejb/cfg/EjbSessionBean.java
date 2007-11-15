@@ -44,6 +44,7 @@ import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.SessionAssembler;
 import com.caucho.ejb.gen.StatelessAssembler;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.session.SessionServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -364,16 +365,17 @@ public class EjbSessionBean extends EjbBean {
   /**
    * Deploys the bean.
    */
-  public AbstractServer deployServer(EjbServerManager ejbManager,
+  @Override
+  public AbstractServer deployServer(EjbContainer ejbContainer,
                                      JavaClassGenerator javaGen)
     throws ClassNotFoundException, ConfigException
   {
     AbstractServer server;
 
     if (isStateless())
-      server = new StatelessServer(ejbManager);
+      server = new StatelessServer(ejbContainer);
     else
-      server = new SessionServer(ejbManager);
+      server = new SessionServer(ejbContainer);
 
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
@@ -426,7 +428,7 @@ public class EjbSessionBean extends EjbBean {
       thread.setContextClassLoader(server.getClassLoader());
 
       ArrayList<BuilderProgram> initList;
-      initList = InjectIntrospector.introspect(beanClass, ejbManager.getLocalJndiPrefix());
+      initList = InjectIntrospector.introspect(beanClass);
 
       BuilderProgramContainer initContainer = getInitProgram();
 

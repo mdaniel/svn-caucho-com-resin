@@ -92,7 +92,7 @@ public class PersistenceUnitGenerator extends ValueGenerator {
     if (_factory != null)
       return _factory;
 
-    AmberContainer amber = AmberContainer.getLocalContainer();
+    AmberContainer amber = AmberContainer.getCurrent();
 
     EntityManagerFactory factory = amber.getEntityManagerFactory(_unitName);
 

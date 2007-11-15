@@ -142,6 +142,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
    */
   public boolean shouldEnhance(String className)
   {
+    className = className.replace('/', '.');
+    
     int p = className.lastIndexOf('-');
 
     if (p > 0)

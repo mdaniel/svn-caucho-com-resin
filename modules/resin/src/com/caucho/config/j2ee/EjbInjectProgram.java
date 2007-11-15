@@ -91,6 +91,10 @@ public class EjbInjectProgram extends BuilderProgram
     try {
       Object value = lookup();
 
+      if (value == null)
+	throw new ConfigException(L.l("'{0}' is an unknown @EJB",
+				      _type.getName()));
+
       _field.inject(bean, value);
     } catch (RuntimeException e) {
       throw e;

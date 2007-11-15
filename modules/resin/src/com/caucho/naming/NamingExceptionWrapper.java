@@ -39,7 +39,7 @@ import java.io.PrintWriter;
  */
 public class NamingExceptionWrapper extends NamingException
   implements ExceptionWrapper {
-  private Throwable rootCause;
+  private Throwable _rootCause;
 
   /**
    * Null constructor for beans
@@ -66,7 +66,7 @@ public class NamingExceptionWrapper extends NamingException
   {
     super(rootCause.getMessage());
 
-    this.rootCause = rootCause;
+    _rootCause = rootCause;
   }
 
   /**
@@ -76,7 +76,18 @@ public class NamingExceptionWrapper extends NamingException
    */
   public Throwable getRootCause()
   {
-    return rootCause;
+    return _rootCause;
+  }
+
+  /**
+   * Returns the root exception if it exists.
+   *
+   * @return the underlying wrapped exception.
+   */
+  @Override
+  public Throwable getCause()
+  {
+    return _rootCause;
   }
 
   /**
@@ -84,8 +95,8 @@ public class NamingExceptionWrapper extends NamingException
    */
   public String getMessage()
   {
-    if (rootCause != null)
-      return rootCause.getMessage();
+    if (_rootCause != null)
+      return _rootCause.getMessage();
     else
       return super.getMessage();
   }
@@ -95,8 +106,8 @@ public class NamingExceptionWrapper extends NamingException
    */
   public void printStackTrace()
   {
-    if (rootCause != null)
-      rootCause.printStackTrace();
+    if (_rootCause != null)
+      _rootCause.printStackTrace();
     else
       super.printStackTrace();
   }
@@ -106,8 +117,8 @@ public class NamingExceptionWrapper extends NamingException
    */
   public void printStackTrace(PrintStream os)
   {
-    if (rootCause != null)
-      rootCause.printStackTrace(os);
+    if (_rootCause != null)
+      _rootCause.printStackTrace(os);
     else
       super.printStackTrace(os);
   }
@@ -117,8 +128,8 @@ public class NamingExceptionWrapper extends NamingException
    */
   public void printStackTrace(PrintWriter os)
   {
-    if (rootCause != null)
-      rootCause.printStackTrace(os);
+    if (_rootCause != null)
+      _rootCause.printStackTrace(os);
     else
       super.printStackTrace(os);
   }
@@ -128,10 +139,10 @@ public class NamingExceptionWrapper extends NamingException
    */
   public String toString()
   {
-    if (rootCause == null)
+    if (_rootCause == null)
       return super.toString();
     else
-      return getClass().getName() + ": " + rootCause;
+      return getClass().getName() + ": " + _rootCause;
   }
 }
 

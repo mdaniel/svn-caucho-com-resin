@@ -454,8 +454,8 @@ public final class Lifecycle implements LifecycleState {
     _state = IS_INITIALIZING;
     _lastChangeTime = Alarm.getCurrentTime();
 
-    if (_log != null && _log.isLoggable(Level.FINE))
-      _log.fine(_name + " initializing");
+    if (_log != null && _log.isLoggable(Level.FINER))
+      _log.finer(_name + " initializing");
 
     notifyListeners(oldState, _state);
 
@@ -477,8 +477,8 @@ public final class Lifecycle implements LifecycleState {
      _state = IS_INIT;
      _lastChangeTime = Alarm.getCurrentTime();
 
-     if (_log != null && _log.isLoggable(Level.FINE))
-       _log.fine(_name + " initialized");
+     if (_log != null && _log.isLoggable(Level.FINER))
+       _log.finer(_name + " initialized");
 
      notifyListeners(oldState, _state);
 
@@ -520,9 +520,9 @@ public final class Lifecycle implements LifecycleState {
 
       _state = IS_STARTING;
        _lastChangeTime = Alarm.getCurrentTime();
-
-      if (_log != null && _log.isLoggable(_level))
-	_log.log(_level, _name + " starting");
+       
+      if (_log != null && _log.isLoggable(Level.FINE))
+	_log.fine(_name + " starting");
 
       notifyListeners(oldState, _state);
 
@@ -545,9 +545,9 @@ public final class Lifecycle implements LifecycleState {
       _state = IS_ACTIVE;
       _lastChangeTime = Alarm.getCurrentTime();
       _activeCount++;
-       
-      if (_log != null && _log.isLoggable(Level.FINE))
-	_log.fine(_name + " active");
+
+      if (_log != null && _log.isLoggable(_level))
+	_log.log(_level, _name + " active");
 
       notifyListeners(oldState, _state);
 
@@ -632,8 +632,8 @@ public final class Lifecycle implements LifecycleState {
       }
       else if (_state < IS_STOPPING && _log.isLoggable(_level))
 	_log.log(_level, _name + " stopped");
-      else if (_log.isLoggable(Level.FINE))
-	_log.fine(_name + " stopped");
+      else if (_log.isLoggable(Level.FINER))
+	_log.finer(_name + " stopped");
       
       int oldState = _state;
 
@@ -663,8 +663,8 @@ public final class Lifecycle implements LifecycleState {
       _state = IS_DESTROYING;
       _lastChangeTime = Alarm.getCurrentTime();
 
-      if (_log != null && _log.isLoggable(Level.FINE))
-	_log.fine(_name + " destroying");
+      if (_log != null && _log.isLoggable(Level.FINER))
+	_log.finer(_name + " destroying");
 
       notifyListeners(oldState, _state);
 
@@ -687,8 +687,8 @@ public final class Lifecycle implements LifecycleState {
       _state = IS_DESTROYED;
       _lastChangeTime = Alarm.getCurrentTime();
 
-      if (_log != null && _log.isLoggable(Level.FINE))
-	_log.fine(_name + " destroyed");
+      if (_log != null && _log.isLoggable(Level.FINER))
+	_log.finer(_name + " destroyed");
 
       notifyListeners(oldState, _state);
 

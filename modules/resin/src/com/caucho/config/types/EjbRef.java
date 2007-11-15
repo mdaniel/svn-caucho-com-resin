@@ -33,6 +33,8 @@ import com.caucho.bytecode.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.ejb.*;
 import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.BeanUtil;
@@ -297,7 +299,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
 
     boolean bind = false;
 
-    EJBServer server = EJBServer.getLocal();
+    EjbContainer container = EjbContainer.getCurrent();
+    EjbProtocolManager protocolManager = null;
+
+    if (container != null)
+      protocolManager = container.getProtocolManager();
 
     String fullEjbRefName = Jndi.getFullName(_ejbRefName);
 
@@ -329,17 +335,17 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         fullEjbLink = _foreignName;
       }
       else if (isEjbLocalRef()) {
-        if (server == null || server.getLocalJndiPrefix() == null)
+        if (protocolManager == null || protocolManager.getLocalJndiPrefix() == null)
           fullEjbLink = Jndi.getFullName(_ejbLink);
         else
-          fullEjbLink = Jndi.getFullName(server.getLocalJndiPrefix()
+          fullEjbLink = Jndi.getFullName(protocolManager.getLocalJndiPrefix()
                                          + "/" + _ejbLink);
       }
       else {
-        if (server == null || server.getRemoteJndiPrefix() == null)
+        if (protocolManager == null || protocolManager.getRemoteJndiPrefix() == null)
           fullEjbLink = Jndi.getFullName(_ejbLink);
         else {
-          fullEjbLink = Jndi.getFullName(server.getRemoteJndiPrefix()
+          fullEjbLink = Jndi.getFullName(protocolManager.getRemoteJndiPrefix()
                                          + "/" + _ejbLink);
         }
       }
@@ -530,6 +536,9 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     try {
       Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
 
+      if (true)
+	throw new IllegalStateException();
+      /*
       EJBServer ejbServer = EJBServer.getLocal();
       AbstractServer server = null;
 
@@ -575,20 +584,15 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       }
       else {
         target = lookupByForeignJndi(_ejbLink, type);
-        /*
-          if (_ejbLink.equals(_ejbRefName))
-            throw new NamingException(L.l("{0} '{1}' cannot be resolved",
-                                      getTagName(), _ejbRefName));
-          else
-            throw new NamingException(L.l("{0} '{1}' ejb-link '{2}' not found",
-                                      getTagName(), _ejbRefName, _ejbLink));
-        */
       }
 
       if (target != null && target instanceof ObjectProxy) {
         ObjectProxy proxy = (ObjectProxy) target;
         target = proxy.createObject(null);
       }
+      */
+
+      if (false) throw new NamingException();
     }
     catch (NamingException e) {
       throw e;

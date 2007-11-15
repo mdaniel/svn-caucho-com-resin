@@ -147,8 +147,8 @@ public class SimpleLoader extends Loader {
    */
   public void setPath(Path path)
   {
-    if (path.getPath().endsWith(".jar") ||
-        path.getPath().endsWith(".zip"))
+    if (path.getPath().endsWith(".jar")
+	|| path.getPath().endsWith(".zip"))
       path = JarPath.create(path);
 
     _path = path;

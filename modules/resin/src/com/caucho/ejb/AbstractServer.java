@@ -31,6 +31,7 @@ package com.caucho.ejb;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.ejb.cfg.*;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
@@ -42,6 +43,7 @@ import com.caucho.ejb.session.StatelessServer;
 import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.ejb.xa.TransactionContext;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -69,6 +71,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected final static Logger log = Log.open(AbstractServer.class);
   private static final L10N L = new L10N(AbstractServer.class);
 
+  protected final EjbContainer _ejbContainer;
+  
   protected String _id;
   protected String _ejbName;
   protected String _moduleName;
@@ -79,7 +83,6 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   private Context _jndiEnv;
 
-  protected EjbServerManager _ejbManager;
   private BuilderProgram _serverProgram;
 
   protected HashMap<String,HandleEncoder> _protocolEncoderMap;
@@ -128,16 +131,18 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   private boolean _isContainerTransaction = true;
 
+  private final Lifecycle _lifecycle = new Lifecycle();;
+
   /**
    * Creates a new server container
    *
    * @param manager the owning server container
    */
-  public AbstractServer(EjbServerManager manager)
+  public AbstractServer(EjbContainer container)
   {
-    _ejbManager = manager;
+    _ejbContainer = container;
 
-    _loader = new EnvironmentClassLoader(manager.getClassLoader());
+    _loader = new EnvironmentClassLoader(container.getClassLoader());
   }
 
   /**
@@ -431,7 +436,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     try {
       Class keyClass = getPrimaryKeyClass();
 
-      encoder = _ejbManager.getProtocolManager().createHandleEncoder(this, keyClass, protocol);
+      encoder = _ejbContainer.getProtocolManager().createHandleEncoder(this, keyClass, protocol);
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
     }
@@ -519,23 +524,15 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   public UserTransaction getUserTransaction()
   {
-    return _ejbManager.getTransactionManager().getUserTransaction();
+    return _ejbContainer.getTransactionManager().getUserTransaction();
   }
 
   /**
    * Returns the owning container.
    */
-  public EjbServerManager getContainer()
+  public EjbContainer getEjbContainer()
   {
-    return _ejbManager;
-  }
-
-  /**
-   * Returns the owning container.
-   */
-  public EjbServerManager getServerManager()
-  {
-    return _ejbManager;
+    return _ejbContainer;
   }
 
   /**
@@ -577,7 +574,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     // ejb/0fj0
     if (_timerService == null) {
-      _timerService = EjbTimerService.getLocal(_ejbManager.getClassLoader(),
+      _timerService = EjbTimerService.getLocal(_ejbContainer.getClassLoader(),
                                                getContext());
     }
 
@@ -852,7 +849,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public EjbTransactionManager getTransactionManager()
   {
-    return _ejbManager.getTransactionManager();
+    return _ejbContainer.getTransactionManager();
   }
 
   /**
@@ -862,23 +859,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public TransactionContext getTransaction()
   {
-    return _ejbManager.getTransactionManager().getTransactionContext();
-  }
-
-  /**
-   * Returns the server's DataSource
-   */
-  public DataSource getDataSource()
-  {
-    return _dataSource;
-  }
-
-  /**
-   * Sets the server's DataSource
-   */
-  public void setDataSource(DataSource dataSource)
-  {
-    _dataSource = dataSource;
+    return _ejbContainer.getTransactionManager().getTransactionContext();
   }
 
   /**
@@ -911,7 +892,6 @@ abstract public class AbstractServer implements EnvironmentBean {
         thread.setContextClassLoader(_loader);
 
         _initProgram.configure(instance);
-
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -927,6 +907,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void start()
     throws Exception
   {
+    if (! _lifecycle.toActive())
+      return;
   }
 
   /**
@@ -955,7 +937,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Returns true is there is a remote home or remote client object for the bean.
+   * Returns true is there is a remote home or remote client object
+   * for the bean.
    */
   public boolean isRemote()
   {
@@ -967,21 +950,15 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public boolean isDead()
   {
-    return _ejbManager == null;
+    return ! _lifecycle.isActive();
   }
 
   /**
    * Cleans up the server on shutdown
    */
-  protected void destroy()
+  public void destroy()
   {
-    _ejbManager = null;
-  }
-
-  public Connection getConnection()
-    throws SQLException
-  {
-    return getDataSource().getConnection();
+    _lifecycle.toDestroy();
   }
 
   public PostConstructConfig getPostConstruct()
@@ -1006,10 +983,6 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   public void setBusinessInterface(Object obj, Class businessInterface)
   {
-    if (obj instanceof AbstractSessionObject) {
-      AbstractSessionObject sessionObject = (AbstractSessionObject) obj;
-      sessionObject.__caucho_setBusinessInterface(businessInterface);
-    }
   }
 
   public String toString()

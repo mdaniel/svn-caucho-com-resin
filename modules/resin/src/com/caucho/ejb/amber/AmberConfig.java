@@ -72,7 +72,7 @@ public class AmberConfig {
   public AmberConfig(EjbConfig ejbConfig)
   {
     _ejbConfig = ejbConfig;
-    _manager = _ejbConfig.getEJBManager().getAmberManager();
+    _manager = _ejbConfig.getEjbContainer().createEjbPersistenceUnit();
   }
 
   public void init()
@@ -278,6 +278,7 @@ public class AmberConfig {
   public void generate(JavaClassGenerator javaGen)
     throws Exception
   {
-    _manager.generate(javaGen);
+    if (_manager != null)
+      _manager.generate(javaGen);
   }
 }

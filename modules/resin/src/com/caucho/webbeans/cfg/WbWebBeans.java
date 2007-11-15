@@ -197,6 +197,7 @@ public class WbWebBeans {
 	byte []buffer = new byte[(int) path.getLength()];
 	is.readAll(buffer, 0, buffer.length);
 
+	/*
 	ByteCodeClassScanner classScanner =
 	  new ByteCodeClassScanner(path.getPath(),
 				   buffer, 0, buffer.length,
@@ -209,6 +210,7 @@ public class WbWebBeans {
 
 	  loadComponentType(name.substring(rootName.length(), p));
 	}
+	*/
       } finally {
 	is.close();
       }
@@ -238,7 +240,8 @@ public class WbWebBeans {
 	try {
 	  byte []buffer = new byte[size];
 	  is.readAll(buffer, 0, buffer.length);
-	  
+
+	  /*
 	  ByteCodeClassScanner classScanner =
 	    new ByteCodeClassScanner(path.getPath(),
 				     buffer, 0, buffer.length,
@@ -250,6 +253,7 @@ public class WbWebBeans {
 
 	    loadComponentType(name.substring(0, p));
 	  }
+	  */
 	} finally {
 	  is.close();
 	}

@@ -97,7 +97,7 @@ public class SessionBean extends ClassComponent {
     out.println("public " + shortContextName + "(com.caucho.ejb.session.SessionServer server)");
     out.println("{");
     out.println("  super(server);");
-    out.println("  _xaManager = server.getContainer().getTransactionManager();");
+    out.println("  _xaManager = server.getTransactionManager();");
     out.println("}");
 
     out.println();
@@ -286,8 +286,8 @@ public class SessionBean extends ClassComponent {
       out.println("invokeMethod(this, \"setSessionContext\", new Class[] { javax.ejb.SessionContext.class }, new Object[] { context });");
     }
 
-    out.println();
-    out.println("__caucho_initInjection();");
+    //out.println();
+    //out.println("__caucho_initInjection();");
 
     out.println();
     out.println("context.getServer().initInstance(this);");

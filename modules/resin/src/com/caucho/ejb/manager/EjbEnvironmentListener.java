@@ -27,46 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.ejb.manager;
 
-import com.caucho.amber.manager.*;
-import com.caucho.config.*;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-
-import java.util.logging.*;
-import javax.sql.*;
-import javax.annotation.*;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.AddLoaderListener;
 
 /**
- * Configures the persistence for a level.
+ * Listener for environment start to detect and load persistence.xml
  */
-public class PersistenceManager
+public class EjbEnvironmentListener implements AddLoaderListener
 {
-  private static final L10N L = new L10N(PersistenceManager.class);
-  protected static final Logger log
-    = Logger.getLogger(PersistenceManager.class.getName());
-
-  private AmberContainer _amberManager;
-
+  public EjbEnvironmentListener()
+  {
+  }
+  
   /**
-   * Create a persistence manager
+   * Handles the case where the environment is starting (after init).
    */
-  public PersistenceManager()
-    throws ConfigException
+  public void addLoader(EnvironmentClassLoader loader)
   {
-    _amberManager = AmberContainer.create();
-  }
-
-  public void setDataSource(DataSource dataSource)
-  {
-    _amberManager.setDataSource(dataSource);
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+    EjbContainer ejbContainer = EjbContainer.create(loader);
   }
 }
+
 

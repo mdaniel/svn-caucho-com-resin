@@ -60,7 +60,7 @@ public class AmberPersistenceProvider implements PersistenceProvider {
 	return null;
     }
     
-    AmberContainer container = AmberContainer.getLocalContainer();
+    AmberContainer container = AmberContainer.getCurrent();
 
     AmberPersistenceUnit pUnit = container.getPersistenceUnit(name);
 

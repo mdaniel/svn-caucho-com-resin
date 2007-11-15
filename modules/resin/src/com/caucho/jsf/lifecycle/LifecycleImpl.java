@@ -258,11 +258,11 @@ public class LifecycleImpl extends Lifecycle
   {
     if (context.getResponseComplete())
       return;
-
-    beforePhase(context, PhaseId.RENDER_RESPONSE);
     
     Application app = context.getApplication();
     ViewHandler view = app.getViewHandler();
+
+    beforePhase(context, PhaseId.RENDER_RESPONSE);
 
     try {
       view.renderView(context, context.getViewRoot());
@@ -281,9 +281,10 @@ public class LifecycleImpl extends Lifecycle
       PhaseListener listener = _phaseListeners[i];
       PhaseId id = listener.getPhaseId();
 
-      if (phase == id || id == PhaseId.ANY_PHASE) {
+      if (id == phase || id == PhaseId.ANY_PHASE) {
 	PhaseEvent event = new PhaseEvent(context, phase, this);
 
+	System.out.println("BEFORE: " + id + " " + listener);
 	listener.beforePhase(event);
       }
     }
@@ -298,6 +299,7 @@ public class LifecycleImpl extends Lifecycle
       if (phase == id || id == PhaseId.ANY_PHASE) {
 	PhaseEvent event = new PhaseEvent(context, phase, this);
 	
+	System.out.println("AFTER: " + id + " " + listener);
 	listener.afterPhase(event);
       }
     }

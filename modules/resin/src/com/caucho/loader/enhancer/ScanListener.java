@@ -27,46 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.loader.enhancer;
 
-import com.caucho.amber.manager.*;
-import com.caucho.config.*;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-
-import java.util.logging.*;
-import javax.sql.*;
-import javax.annotation.*;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Path;
 
 /**
- * Configures the persistence for a level.
+ * Interface for a scan manager
  */
-public class PersistenceManager
-{
-  private static final L10N L = new L10N(PersistenceManager.class);
-  protected static final Logger log
-    = Logger.getLogger(PersistenceManager.class.getName());
-
-  private AmberContainer _amberManager;
-
+public interface ScanListener {
   /**
-   * Create a persistence manager
+   * Called to check if the archive should be scan.
    */
-  public PersistenceManager()
-    throws ConfigException
-  {
-    _amberManager = AmberContainer.create();
-  }
-
-  public void setDataSource(DataSource dataSource)
-  {
-    _amberManager.setDataSource(dataSource);
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
-  }
+  public boolean isRootScannable(Path root);
+  
+  /**
+   * Returns true if the string matches an annotation class.
+   */
+  public boolean isScanMatch(CharBuffer string);
+  
+  /**
+   * Callback to note the class matches
+   */
+  public void classMatchEvent(EnvironmentClassLoader loader,
+			      Path root,
+			      String className);
 }
-

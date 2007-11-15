@@ -51,8 +51,9 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
    */
   public void addLoader(EnvironmentClassLoader loader)
   {
-    AmberContainer container = AmberContainer.getLocalContainer(loader);
-    container.scanClassPath();
+    AmberContainer amber = AmberContainer.create(loader);
+
+    amber.start();
   }
 
   /**

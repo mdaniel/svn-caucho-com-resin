@@ -45,6 +45,7 @@ import com.caucho.ejb.gen.EntityAssembler;
 import com.caucho.ejb.gen.EntityCreateMethod;
 import com.caucho.ejb.gen.EntityFindMethod;
 import com.caucho.ejb.gen.EntityHomePoolChain;
+import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseClass;
 import com.caucho.java.gen.BaseMethod;
@@ -103,12 +104,14 @@ public class EjbEntityBean extends EjbBean {
   {
     super(ejbConfig, ejbModuleName);
 
+    /*
     EjbServerManager ejbManager = ejbConfig.getEJBManager();
 
     if (ejbManager != null) {
       _cacheTimeout = ejbManager.getCacheTimeout();
       _loadLazyOnTransaction = ejbManager.isEntityLoadLazyOnTransaction();
     }
+    */
   }
 
   /**
@@ -152,7 +155,7 @@ public class EjbEntityBean extends EjbBean {
   public EntityType getEntityType()
   {
     AmberPersistenceUnit amberPersistenceUnit
-      = getConfig().getEJBManager().getAmberManager();
+      = getEjbContainer().createEjbPersistenceUnit();
 
     EntityType type
       = amberPersistenceUnit.createEntity(getAbstractSchemaName(),
@@ -1040,7 +1043,8 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Deploys the bean.
    */
-  public AbstractServer deployServer(EjbServerManager ejbManager,
+  @Override
+  public AbstractServer deployServer(EjbContainer ejbManager,
                                      JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
