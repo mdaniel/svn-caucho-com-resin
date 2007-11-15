@@ -870,11 +870,11 @@ public class DateModule extends AbstractQuercusModule {
    */
   public long mktime(Env env,
                      @Optional("-1") int hour,
-		     @Optional("-1") int minute,
-		     @Optional("-1") int second,
-		     @Optional("-1") int month,
-		     @Optional("-1") int day,
-		     @Optional("-1") int year,
+                     @Optional("-1") int minute,
+                     @Optional("-1") int second,
+                     @Optional("-1") int month,
+                     @Optional("-1") int day,
+                     @Optional("-1") int year,
                      @Optional("-1") int isDST)
   {
     if (isDST != -1)
@@ -901,8 +901,15 @@ public class DateModule extends AbstractQuercusModule {
     if (day > 0)
       date.setDayOfMonth(day);
 
-    if (year > 0)
+    if (year >= 1000) {
       date.setYear(year);
+    }
+    else if (year >= 70) {
+      date.setYear(year + 1900);
+    }
+    else if (year >= 0) {
+      date.setYear(year + 2000);
+    }
 
     return date.getGMTTime() / 1000L;
   }

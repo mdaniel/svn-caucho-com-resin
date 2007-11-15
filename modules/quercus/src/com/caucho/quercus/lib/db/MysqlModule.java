@@ -867,7 +867,7 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns a string with the status of the connection
    * or NULL if error.
    */
-  public Value mysql_stat(Env env, Mysqli conn)
+  public Value mysql_stat(Env env, @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
