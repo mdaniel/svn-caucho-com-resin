@@ -37,6 +37,7 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.server.util.*;
 import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.inject.*;
 
@@ -52,7 +53,8 @@ import javax.webbeans.*;
 /**
  * The web beans container for a given environment.
  */
-public class WebBeansContainer implements ScanListener, EnvironmentListener {
+public class WebBeansContainer
+  implements ScanListener, EnvironmentListener, Container {
   private static final L10N L = new L10N(WebBeansContainer.class);
   private static final Logger log
     = Logger.getLogger(WebBeansContainer.class.getName());
@@ -226,6 +228,16 @@ public class WebBeansContainer implements ScanListener, EnvironmentListener {
     }
   }
 
+  public void addSingleton(Object object)
+  {
+    SingletonComponent comp = new SingletonComponent(object);
+
+    comp.setClass(object.getClass());
+    comp.init();
+
+    addComponent(comp);
+  }
+
   public ScopeContext getScopeContext(Annotation scopeAnn)
   {
     if (scopeAnn instanceof RequestScoped)
@@ -329,6 +341,25 @@ public class WebBeansContainer implements ScanListener, EnvironmentListener {
       return _parent.findByName(name);
     else
       return null;
+  }
+
+  //
+  // Container
+  //
+  
+  public <T> ComponentFactory<T> resolveByType(Class<T> apiType,
+					       Annotation...bindingTypes)
+  {
+    return null;
+  }
+  
+  public void addContext(Class<Annotation> scopeType, Context context)
+  {
+  }
+  
+  public Context getContext(Class<Annotation> scopeType)
+  {
+    return null;
   }
 
   public void update()

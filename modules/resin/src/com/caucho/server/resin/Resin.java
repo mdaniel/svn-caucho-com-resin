@@ -58,6 +58,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.webbeans.ResinWebBeansProducer;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
 import com.caucho.transaction.xalog.*;
 import com.caucho.util.Alarm;
@@ -249,6 +250,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
       WebBeansContainer webBeans = WebBeansContainer.create();
+
+      webBeans.addSingleton(new ResinWebBeansProducer());
 
       _threadPoolAdmin = ThreadPoolAdmin.create();
       _resinAdmin = new ResinAdmin(this);
