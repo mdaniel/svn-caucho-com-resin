@@ -51,7 +51,7 @@ public class SingletonClassComponent extends WbClassComponent {
   }
 
   @Override
-  public void setScopeAnnotation(Annotation ann)
+  public void setScope(Class ann)
   {
   }
 

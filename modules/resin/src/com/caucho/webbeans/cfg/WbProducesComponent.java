@@ -116,8 +116,8 @@ public class WbProducesComponent extends WbComponent {
       }
 	
       if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	if (getScopeAnnotation() == null)
-	  setScopeAnnotation(ann);
+	if (getScope() == null)
+	  setScope(ann.annotationType());
       }
 	
       if (ann.annotationType().isAnnotationPresent(BindingType.class)) {

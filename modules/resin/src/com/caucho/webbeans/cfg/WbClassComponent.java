@@ -74,13 +74,13 @@ public class WbClassComponent extends WbComponent {
       }
       
       if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	if (getScopeAnnotation() != null)
+	if (getScope() != null)
 	  throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ScopeType.",
 					cl.getName(),
-					getScopeAnnotation().annotationType().getName(),
+					getScope().getName(),
 					ann.annotationType().getName()));
 	
-	setScopeAnnotation(ann);
+	setScope(ann.annotationType());
       }
     }
 
