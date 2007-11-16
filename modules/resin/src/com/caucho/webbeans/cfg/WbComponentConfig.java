@@ -65,7 +65,7 @@ public class WbComponentConfig {
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
-  private Annotation _scopeAnn;
+  private Class _scope;
   
   private InitProgram _init;
 
@@ -153,6 +153,39 @@ public class WbComponentConfig {
    */
   public void setScope(String scope)
   {
+    if ("singleton".equals(scope))
+      _scope = SingletonScoped.class;
+    else if ("dependent".equals(scope))
+      _scope = Dependent.class;
+    else if ("request".equals(scope))
+      _scope = RequestScoped.class;
+    else if ("session".equals(scope))
+      _scope = SessionScoped.class;
+    else if ("application".equals(scope))
+      _scope = ApplicationScoped.class;
+    else if ("conversation".equals(scope))
+      _scope = ConversationScoped.class;
+    else {
+      Class cl = null;
+      
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	cl = Class.forName(scope, false, loader);
+      } catch (ClassNotFoundException e) {
+      }
+
+      if (cl == null)
+	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+
+      if (! Annotation.class.isAssignableFrom(cl))
+	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+
+      if (! cl.isAnnotationPresent(ScopeType.class))
+	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+
+      _scope = cl;
+    }
   }
 
   /**
@@ -176,10 +209,8 @@ public class WbComponentConfig {
     
     WbComponent comp;
 
-    if (_scopeAnn != null
-	&& SingletonScoped.class.equals(_scopeAnn.annotationType())) {
+    if (SingletonScoped.class.equals(_scope))
       comp = new SingletonClassComponent(_webbeans);
-    }
     else
       comp = new WbClassComponent(_webbeans);
 
@@ -194,8 +225,8 @@ public class WbComponentConfig {
     if (_type != null)
       comp.setComponentType(_type);
 
-    if (_scopeAnn != null)
-      comp.setScopeAnnotation(_scopeAnn);
+    if (_scope != null)
+      comp.setScope(_scope);
 
     if (_init != null)
       comp.setInit(_init);
@@ -207,17 +238,17 @@ public class WbComponentConfig {
 
   private void introspect()
   {
-    if (_scopeAnn == null) {
+    if (_scope == null) {
       for (Annotation ann : _cl.getDeclaredAnnotations()) {
 	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	  if (_scopeAnn != null) {
+	  if (_scope != null) {
 	    throw new ConfigException(L.l("{0}: multiple scope annotations are forbidden ({1} and {2}).",
 					  _cl.getName(),
-					  _scopeAnn.annotationType().getSimpleName(),
+					  _scope.getSimpleName(),
 					  ann.annotationType().getSimpleName()));
 	  }
 	  
-	  _scopeAnn = ann;
+	  _scope = ann.annotationType();
 	}
       }
     }

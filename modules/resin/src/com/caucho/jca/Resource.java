@@ -44,6 +44,7 @@ import com.caucho.loader.StartListener;
 import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.management.Attribute;
@@ -74,6 +75,7 @@ public class Resource {
   private Class _type;
 
   private String _var;
+  private String _name;
   private String _jndiName;
   
   private String _mbeanName;
@@ -112,6 +114,22 @@ public class Resource {
   public String getJndiName()
   {
     return _jndiName;
+  }
+
+  /**
+   * Sets the WebBeans name
+   */
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Gets the WebBeans name
+   */
+  public String getName()
+  {
+    return _name;
   }
 
   /**
@@ -410,6 +428,21 @@ public class Resource {
       Environment.addEnvironmentListener(new StartListener(_object));
     else if (CloseListener.getDestroyMethod(_object.getClass()) != null)
       Environment.addClassLoaderListener(new CloseListener(_object));
+
+    String name = _name;
+    
+    if (_name == null)
+      name = _var;
+    
+    if (_name == null)
+      name = _jndiName;
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    if (name != null)
+      webBeans.addSingleton(_object, name);
+    else
+      webBeans.addSingleton(_object);
 
     if (log.isLoggable(Level.CONFIG))
       logConfig();

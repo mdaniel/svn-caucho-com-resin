@@ -186,7 +186,7 @@ public class WebBeansContainer
 
     String name = comp.getName();
 
-    if (name != null && comp.getScopeAnnotation() != null)
+    if (name != null && comp.getScope() != null)
       _namedComponentMap.put(name, comp);
   }
 
@@ -238,19 +238,32 @@ public class WebBeansContainer
     addComponent(comp);
   }
 
-  public ScopeContext getScopeContext(Annotation scopeAnn)
+  public void addSingleton(Object object, String name)
   {
-    if (scopeAnn instanceof RequestScoped)
+    SingletonComponent comp = new SingletonComponent(object);
+
+    comp.setClass(object.getClass());
+    comp.setName(name);
+    comp.init();
+
+    addComponent(comp);
+  }
+
+  public ScopeContext getScopeContext(Class scope)
+  {
+    if (scope == null)
+      throw new NullPointerException();
+    else if (RequestScoped.class.equals(scope))
       return new RequestScope();
-    else if (scopeAnn instanceof SessionScoped)
+    else if (SessionScoped.class.equals(scope))
       return new SessionScope();
-    else if (scopeAnn instanceof ApplicationScoped)
+    else if (ApplicationScoped.class.equals(scope))
       return new ApplicationScope();
-    else if (scopeAnn instanceof ConversationScoped)
+    else if (ConversationScoped.class.equals(scope))
       return new ConversationScope();
     else
       throw new IllegalArgumentException(L.l("'{0}' is an unknown scope.",
-					     scopeAnn));
+					     scope.getName()));
   }
 
   public void createProgram(ArrayList<BuilderProgram> initList,

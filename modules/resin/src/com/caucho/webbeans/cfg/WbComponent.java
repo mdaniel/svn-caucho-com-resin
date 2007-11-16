@@ -72,7 +72,7 @@ public class WbComponent {
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
-  private Annotation _scopeAnn;
+  private Class _scope;
   private ScopeContext _scopeContext;
 
   private ArrayList<BuilderProgram> _injectProgram
@@ -207,35 +207,31 @@ public class WbComponent {
   }
 
   /**
-   * Sets the scope attribute.
-   */
-  public void setScope(String scope)
-  {
-  }
-
-  /**
    * Sets the scope annotation.
    */
-  public void setScopeAnnotation(Annotation scopeAnn)
+  public void setScope(Class scope)
   {
-    if (scopeAnn != null
-	&& ! scopeAnn.annotationType().equals(Dependent.class)) {
-      _scopeAnn = scopeAnn;
-
-      _scopeContext = WebBeansContainer.create().getScopeContext(scopeAnn);
+    if (scope == null || scope.equals(Dependent.class)) {
+      _scope = null;
+      _scopeContext = null;
+    }
+    else if (scope.equals(SingletonScoped.class)) {
+      _scope = scope;
+      _scopeContext = null;
     }
     else {
-      _scopeAnn = null;
-      _scopeContext = null;
+      _scope = scope;
+
+      _scopeContext = WebBeansContainer.create().getScopeContext(scope);
     }
   }
 
   /**
    * Gets the scope annotation.
    */
-  public Annotation getScopeAnnotation()
+  public Class<Annotation> getScope()
   {
-    return _scopeAnn;
+    return _scope;
   }
 
   /**
@@ -609,9 +605,9 @@ public class WbComponent {
       sb.append(_name);
     }
     
-    if (_scopeAnn != null) {
+    if (_scope != null) {
       sb.append(", @");
-      sb.append(_scopeAnn.annotationType().getSimpleName());
+      sb.append(_scope.getSimpleName());
     }
 
     sb.append("]");
