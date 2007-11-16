@@ -50,14 +50,44 @@ import javax.webbeans.*;
 public class WbClassComponent extends WbComponent {
   private static final L10N L = new L10N(WbClassComponent.class);
   
-  private Class _cl;
-  private boolean _isFromClass;
-
-  private InitProgram _init;
-
   public WbClassComponent(WbWebBeans webbeans)
   {
     super(webbeans);
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  public void introspect()
+  {
+    Class cl = getInstanceClass();
+    
+    for (Annotation ann : cl.getDeclaredAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
+	if (getType() != null)
+	  throw new ConfigException(L.l("{0}: component type annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ComponentType.",
+					cl.getName(),
+					getType().getType().getName(),
+					ann.annotationType().getName()));
+	
+	setComponentType(_webbeans.createComponentType(ann.annotationType()));
+      }
+      
+      if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	if (getScopeAnnotation() != null)
+	  throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ScopeType.",
+					cl.getName(),
+					getScopeAnnotation().annotationType().getName(),
+					ann.annotationType().getName()));
+	
+	setScopeAnnotation(ann);
+      }
+    }
+
+    if (getType() == null) {
+      throw new ConfigException(L.l("WebBeans component '{0}' does not have a ComponentType",
+				    cl.getName()));
+    }
   }
 
   /**

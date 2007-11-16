@@ -1861,9 +1861,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public String toString()
   {
     if (_id != null)
-      return "DynamicClassLoader[" + _id + "]";
+      return getClass().getSimpleName() +  "[" + _id + "]";
     else
-      return "DynamicClassLoader" + getLoaders();
+      return getClass().getSimpleName() + getLoaders();
   }
 
   private static L10N L()

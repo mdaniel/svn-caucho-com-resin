@@ -69,7 +69,15 @@ public class ConfigException
    */
   public ConfigException(Throwable e)
   {
-    super(e);
+    super(getMessage(e), e);
+  }
+
+  private static String getMessage(Throwable e)
+  {
+    if (e instanceof DisplayableException || e instanceof CompileException)
+      return e.getMessage();
+    else
+      return e.toString();
   }
 
   public void print(PrintWriter out)

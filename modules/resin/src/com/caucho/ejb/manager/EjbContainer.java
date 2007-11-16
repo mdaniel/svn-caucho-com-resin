@@ -382,11 +382,11 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 
   public boolean isScanMatch(CharBuffer annotationName)
   {
-    if (annotationName.matches("Ljavax/ejb/Stateless;"))
+    if (annotationName.matches("javax.ejb.Stateless"))
       return true;
-    else if (annotationName.matches("Ljavax/ejb/Stateful;"))
+    else if (annotationName.matches("javax.ejb.Stateful"))
       return true;
-    else if (annotationName.matches("Ljavax/ejb/MessageDriven;"))
+    else if (annotationName.matches("javax.ejb.MessageDriven"))
       return true;
     else
       return false;

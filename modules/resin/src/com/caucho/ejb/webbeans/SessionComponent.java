@@ -19,50 +19,61 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.xml;
+package com.caucho.ejb.webbeans;
 
-import com.caucho.util.LineCompileException;
+import java.lang.annotation.*;
+import javax.webbeans.*;
 
-import org.xml.sax.SAXException;
+import com.caucho.ejb.AbstractServer;
 
-public class XmlParseException extends SAXException
-  implements LineCompileException
-{
-  private Throwable _cause;
-  
-  XmlParseException(String msg)
+import com.caucho.webbeans.cfg.WbComponent;
+
+/**
+ * Component for session beans
+ */
+public class SessionComponent extends WbComponent {
+  private static final Object []NULL_ARGS = new Object[0];
+
+  private AbstractServer _server;
+
+  public SessionComponent(AbstractServer server)
   {
-    super(msg);
+    _server = server;
   }
 
-  XmlParseException()
+  @Override
+  public void setScopeAnnotation(Annotation ann)
   {
-    super("generic");
-  }
-  
-  XmlParseException(String msg, Throwable cause)
-  {
-    super(msg);
-
-    _cause = cause;
   }
 
-  XmlParseException(Throwable cause)
+  @Override
+  public Object getByName()
   {
-    super("generic");
-
-    _cause = cause;
+    return _server.getLocalObject();
   }
 
-  public Throwable getCause()
+  @Override
+  public Object getInject()
   {
-    return _cause;
+    return _server.getLocalObject();
+  }
+
+  @Override
+  public Object get()
+  {
+    return _server.getLocalObject();
+  }
+
+  protected Object createNew()
+  {
+    throw new IllegalStateException();
   }
 }

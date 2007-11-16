@@ -623,7 +623,11 @@ public class EjbConfig {
       javaGen.setWorkDir(workDir);
       javaGen.setParentLoader(parentLoader);
 
-      deployBeans(_deployingBeans, javaGen);
+      ArrayList<EjbBean> deployingBeans
+	= new ArrayList<EjbBean>(_deployingBeans);
+      _deployingBeans.clear();
+      
+      deployBeans(deployingBeans, javaGen);
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
@@ -683,10 +687,6 @@ public class EjbConfig {
     throws Exception
   {
     AbstractServer server = bean.deployServer(_ejbContainer, javaGen);
-
-    Thread thread = Thread.currentThread();
-
-    thread.setContextClassLoader(server.getClassLoader());
 
     server.init();
 

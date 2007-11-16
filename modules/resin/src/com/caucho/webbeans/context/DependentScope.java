@@ -74,9 +74,9 @@ public class DependentScope extends ScopeContext {
   /**
    * Closes the scope
    */
-  public static void end()
+  public static void end(DependentScope oldScope)
   {
-    _threadScope.set(null);
+    _threadScope.set(oldScope);
   }
 
   /**
@@ -98,6 +98,11 @@ public class DependentScope extends ScopeContext {
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return _scope.canInject(scope);
+    if (scope == null)
+      return true;
+    else if (_scope == null)
+      return false;
+    else
+      return _scope.canInject(scope);
   }
 }

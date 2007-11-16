@@ -516,6 +516,15 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     _pendingScanUrls.clear();
     
     if (_scanListeners != null && urlList.size() > 0) {
+      try {
+	make();
+      } catch (Exception e) {
+	log().log(Level.WARNING, e.toString(), e);
+	
+	if (_configException == null)
+	  _configException = e;
+      }
+      
       ScanManager scanManager = new ScanManager(_scanListeners);
       
       for (URL url : urlList) {

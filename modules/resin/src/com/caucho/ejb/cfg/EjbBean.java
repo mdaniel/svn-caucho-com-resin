@@ -189,7 +189,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _ejbConfig = ejbConfig;
     _ejbModuleName = ejbModuleName;
 
-    _loader = Thread.currentThread().getContextClassLoader();
+    _loader = ejbConfig.getEjbContainer().getClassLoader();
 
     // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
     getEjbContainer().getTransactionManager().setEJB3(isEJB3());
@@ -356,6 +356,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public ClassLoader getClassLoader()
   {
     return _loader;
+  }
+
+  protected Class loadClass(String className)
+  {
+    try {
+      return Class.forName(className, false, _loader);
+    } catch (ClassNotFoundException e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**

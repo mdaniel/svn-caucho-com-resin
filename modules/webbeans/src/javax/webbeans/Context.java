@@ -28,19 +28,12 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 /**
- * The web bean context
+ * The web bean context corresponds to a scope,
+ * e.g. "RequestScoped", "SessionScoped", "ApplicationScoped"
  */
-
 public interface Context {
-  /*
-  public <T> T get(Component<T> component, boolean create);
+  public <T> T get(ComponentFactory<T> component, boolean create);
   
-  public <T> void remove(Component<T> component);
-  */
+  public <T> void remove(ComponentFactory<T> component);
 }

@@ -253,14 +253,14 @@ public class ScanManager {
       int activeCount = 0;
 
       for (int i = _listeners.length - 1; i >= 0; i--) {
-	ScanListener listener = _listeners[i];
+	ScanListener listener = _currentListeners[i];
 
 	if (listener == null)
 	  continue;
 
 	if (listener.isScanMatch(annotationClassName)) {
 	  listener.classMatchEvent(_loader, _root, getClassName());
-	  _listeners[i] = null;
+	  _currentListeners[i] = null;
 	}
 	else
 	  activeCount++;

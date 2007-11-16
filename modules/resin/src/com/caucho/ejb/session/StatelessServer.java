@@ -34,14 +34,17 @@ import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.ejb.webbeans.SessionComponent;
 import com.caucho.naming.Jndi;
 import com.caucho.util.Log;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBObject;
 import javax.ejb.FinderException;
 import java.lang.reflect.Constructor;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -137,9 +140,33 @@ public class StatelessServer extends AbstractServer {
         }
       */
 
-      log.config("initialized session bean: " + this);
+      log.config(this + " starting");
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+
+    registerWebBeans();
+  }
+
+  private void registerWebBeans()
+  {
+    Class beanClass = getBeanSkelClass();
+    ArrayList<Class> localApiList = getLocalApiList();
+
+    if (beanClass != null && localApiList != null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      SessionComponent comp = new SessionComponent(this);
+    
+      comp.setClass(beanClass);
+    
+      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class))
+	comp.setName(getEJBName());
+
+      comp.init();
+
+      for (Class api : localApiList) {
+	webBeans.addComponentByType(api, comp);
+      }
     }
   }
 

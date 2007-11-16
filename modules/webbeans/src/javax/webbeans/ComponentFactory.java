@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -26,43 +26,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xml;
+package javax.webbeans;
 
-import com.caucho.util.LineCompileException;
-
-import org.xml.sax.SAXException;
-
-public class XmlParseException extends SAXException
-  implements LineCompileException
-{
-  private Throwable _cause;
-  
-  XmlParseException(String msg)
-  {
-    super(msg);
-  }
-
-  XmlParseException()
-  {
-    super("generic");
-  }
-  
-  XmlParseException(String msg, Throwable cause)
-  {
-    super(msg);
-
-    _cause = cause;
-  }
-
-  XmlParseException(Throwable cause)
-  {
-    super("generic");
-
-    _cause = cause;
-  }
-
-  public Throwable getCause()
-  {
-    return _cause;
-  }
+/**
+ * The web bean component
+ */
+public interface ComponentFactory<T> {
 }

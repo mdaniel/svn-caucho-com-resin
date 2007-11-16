@@ -38,10 +38,8 @@ import java.lang.annotation.*;
  */
 
 public interface Container {
-  /*
-  public <T> Component<T> resolveByType(Class<T> apiType,
-					Annotation...bindingTypes);
-  */
+  public <T> ComponentFactory<T> resolveByType(Class<T> apiType,
+					       Annotation...bindingTypes);
   
   public void addContext(Class<Annotation> scopeType, Context context);
   

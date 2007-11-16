@@ -68,8 +68,8 @@ class CompilingClassEntry extends ClassEntry {
     Path classFile = getClassPath();
     
     if (javaFile.getLastModified() <= classFile.getLastModified()) {
-      log.fine(L.l("loading pre-compiled class {0} from {1}",
-		   getName(), classFile));
+      log.finest(L.l("loading pre-compiled class {0} from {1}",
+		     getName(), classFile));
       return;
     }
 

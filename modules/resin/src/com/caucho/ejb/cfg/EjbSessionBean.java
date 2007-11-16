@@ -385,35 +385,37 @@ public class EjbSessionBean extends EjbBean {
 
     ApiClass remoteHome = getRemoteHome();
     if (remoteHome != null)
-      server.setRemoteHomeClass(remoteHome.getJavaClass());
+      server.setRemoteHomeClass(loadClass(remoteHome.getName()));
 
     ArrayList<ApiClass> remoteList = getRemoteList();
     if (remoteList.size() > 0) {
       ArrayList<Class> classList = new ArrayList<Class>();
-      for (ApiClass apiClass : remoteList)
-	classList.add(apiClass.getJavaClass());
+      for (ApiClass apiClass : remoteList) {
+	classList.add(loadClass(apiClass.getName()));
+      }
       
       server.setRemoteObjectList(classList);
     }
 
     if (getRemote21() != null)
-      server.setRemote21(getRemote21().getJavaClass());
+      server.setRemote21(loadClass(getRemote21().getName()));
 
     ApiClass localHome = getLocalHome();
     if (localHome != null)
-      server.setLocalHomeClass(localHome.getJavaClass());
+      server.setLocalHomeClass(loadClass(localHome.getName()));
 
     ArrayList<ApiClass> localList = getLocalList();
     if (localList.size() > 0) {
       ArrayList<Class> classList = new ArrayList<Class>();
-      for (ApiClass apiClass : localList)
-	classList.add(apiClass.getJavaClass());
+      for (ApiClass apiClass : localList) {
+	classList.add(loadClass(apiClass.getName()));
+      }
       
       server.setLocalApiList(classList);
     }
 
     if (getLocal21() != null)
-      server.setLocal21(getLocal21().getJavaClass());
+      server.setLocal21(loadClass(getLocal21().getName()));
 
     Class contextImplClass = javaGen.loadClass(getSkeletonName());
 

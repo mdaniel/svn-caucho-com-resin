@@ -70,6 +70,8 @@ import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.webbeans.manager.WebBeansAddLoaderListener;
 
 import javax.annotation.PostConstruct;
 import javax.el.ELResolver;
@@ -244,6 +246,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       } catch (Exception e) {
 	throw new ConfigException(e);
       }
+
+      Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
+      WebBeansContainer webBeans = WebBeansContainer.create();
 
       _threadPoolAdmin = ThreadPoolAdmin.create();
       _resinAdmin = new ResinAdmin(this);

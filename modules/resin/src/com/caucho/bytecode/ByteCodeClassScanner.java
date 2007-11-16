@@ -163,9 +163,10 @@ public class ByteCodeClassScanner {
 	{
 	  int length = readShort();
 
-	  parseUtf8(_cb, length);
-	  if (_matcher.isMatch(_cb))
-	    return true;
+	  if (parseUtf8ForAnnotation(_cb, length)) {
+	    if (_matcher.isMatch(_cb))
+	      return true;
+	  }
 
 	  break;
 	}
@@ -181,10 +182,19 @@ public class ByteCodeClassScanner {
   /**
    * Parses the UTF.
    */
-  private void parseUtf8(CharBuffer cb, int len)
+  private boolean parseUtf8ForAnnotation(CharBuffer cb, int len)
     throws IOException
   {
     InputStream is = _is;
+
+    int ch = is.read();
+    len -= 1;
+
+    // only scan annotations
+    if (ch != 'L') {
+      is.skip(len);
+      return false;
+    }
     
     cb.ensureCapacity(len);
 
@@ -194,7 +204,12 @@ public class ByteCodeClassScanner {
     while (len > 0) {
       int d1 = is.read();
 
-      if (d1 < 0x80) {
+      if (d1 == '/') {
+	cBuf[cLen++] = '.';
+	
+	len--;
+      }
+      else if (d1 < 0x80) {
 	cBuf[cLen++] = (char) d1;
 	
 	len--;
@@ -217,8 +232,14 @@ public class ByteCodeClassScanner {
       else
 	throw new IllegalStateException();
     }
+
+    if (cLen > 0 && cBuf[cLen - 1] == ';') {
+      cb.setLength(cLen - 1);
     
-    cb.setLength(cLen);
+      return true;
+    }
+    else
+      return false;
   }
 
   /**

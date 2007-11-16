@@ -937,11 +937,11 @@ public class AmberContainer implements ScanListener {
 
   public boolean isScanMatch(CharBuffer annotationName)
   {
-    if (annotationName.matches("Ljavax/persistence/Entity;"))
+    if (annotationName.matches("javax.persistence.Entity"))
       return true;
-    else if (annotationName.matches("Ljavax/persistence/Embeddable;"))
+    else if (annotationName.matches("javax.persistence.Embeddable"))
       return true;
-    else if (annotationName.matches("Ljavax/persistence/MappedSuperclass;"))
+    else if (annotationName.matches("javax.persistence.MappedSuperclass"))
       return true;
     else
       return false;

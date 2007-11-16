@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans;
+package com.caucho.webbeans.manager;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
@@ -111,10 +111,10 @@ public class WebComponent {
     }
 
     if (matchComp == null)
-      throw WebBeans.injectError(field, L.l("WebBeans unable to find matching component."));
+      throw WebBeansContainer.injectError(field, L.l("WebBeans unable to find matching component."));
 
     else if (matchComp != null && secondComp != null) {
-	throw WebBeans.injectError(field, L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
+	throw WebBeansContainer.injectError(field, L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
 					      matchComp, secondComp));
     }
 

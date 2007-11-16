@@ -258,12 +258,10 @@ abstract public class DeployGenerator<E extends DeployController>
    */
   final public void stop()
   {
-    if (!_lifecycle.toStopping())
+    if (!_lifecycle.toStop())
       return;
 
     stopImpl();
-
-    _lifecycle.toStop();
   }
 
   /**
@@ -289,12 +287,10 @@ abstract public class DeployGenerator<E extends DeployController>
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    if (!_lifecycle.toDestroying())
+    if (!_lifecycle.toDestroy())
       return;
 
     destroyImpl();
-
-    _lifecycle.toDestroy();
   }
 
   /**

@@ -31,7 +31,7 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.webbeans.WebBeans;
+import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -167,9 +167,9 @@ public class InjectIntrospector {
       Class []param = method.getParameterTypes();
 
       if (hasBindingAnnotation(method)) {
-	WebBeans webBean = WebBeans.getLocal();
+	WebBeansContainer webBeans = WebBeansContainer.create();
 	
-	webBean.createProgram(initList, method);
+	webBeans.createProgram(initList, method);
 
 	continue;
       }
@@ -689,7 +689,7 @@ public class InjectIntrospector {
 				       Class fieldType)
     throws ConfigException
   {
-    WebBeans webBean = WebBeans.getLocal();
+    WebBeansContainer webBeans = WebBeansContainer.create();
 
     AccessibleInject inject;
 
@@ -698,7 +698,7 @@ public class InjectIntrospector {
     else
       inject = new PropertyInject((Method) field);
 
-    webBean.createProgram(initList, field, fieldName, fieldType, inject);
+    webBeans.createProgram(initList, field, fieldName, fieldType, inject);
   }
 
   private static String toFullName(String jndiName)

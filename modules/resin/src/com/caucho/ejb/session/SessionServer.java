@@ -37,10 +37,12 @@ import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
+import com.caucho.ejb.webbeans.SessionComponent;
 import com.caucho.naming.Jndi;
 import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
 import java.lang.reflect.Constructor;
@@ -96,29 +98,39 @@ public class SessionServer extends AbstractServer
 
       super.init();
 
-      // XXX: from TCK, s/b local or remote?
-      // Should be a resin-specific name, like
-      // java:comp/env/resin-ejb/sessionContext, since storing it in
-      // JNDI is a resin-specific implementation
-      // This needs to match InjectIntrospector
-      /*
-        String prefix = getServerManager().getLocalJndiPrefix();
-        if (prefix != null)
-          Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
-
-        prefix = getServerManager().getRemoteJndiPrefix();
-        if (prefix != null)
-          Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
-      */
       Jndi.rebindDeep("java:comp/env/ejbContext", getSessionContext());
       Jndi.rebindDeep("java:comp/env/sessionContext", getSessionContext());
 
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();
 
-      log.config("initialized session bean: " + this);
+      log.config(this + " starting");
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+
+    registerWebBeans();
+  }
+
+  private void registerWebBeans()
+  {
+    Class beanClass = getBeanSkelClass();
+    ArrayList<Class> localApiList = getLocalApiList();
+
+    if (beanClass != null && localApiList != null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      SessionComponent comp = new SessionComponent(this);
+    
+      comp.setClass(beanClass);
+    
+      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class))
+	comp.setName(getEJBName());
+
+      comp.init();
+
+      for (Class api : localApiList) {
+	webBeans.addComponentByType(api, comp);
+      }
     }
   }
 
@@ -237,7 +249,7 @@ public class SessionServer extends AbstractServer
   @Override
   public Object getClientObject(Class businessInterface)
   {
-    return new StatefulJndiFactory(this, businessInterface);
+    return newInstance();
   }
 
   /**

@@ -37,6 +37,7 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -82,9 +83,7 @@ public class WbComponent {
 
   public WbComponent()
   {
-    _webbeans = WebBeans.getLocal().getWbWebBeans();
-
-    _webbeans.addWbComponent(this);
+    _webbeans = WebBeansContainer.create().getWbWebBeans();
   }
 
   public WbComponent(WbWebBeans webbeans)
@@ -223,7 +222,7 @@ public class WbComponent {
 	&& ! scopeAnn.annotationType().equals(Dependent.class)) {
       _scopeAnn = scopeAnn;
 
-      _scopeContext = WebBeans.getLocal().getScopeContext(scopeAnn);
+      _scopeContext = WebBeansContainer.create().getScopeContext(scopeAnn);
     }
     else {
       _scopeAnn = null;
@@ -269,45 +268,16 @@ public class WbComponent {
   @PostConstruct
   public void init()
   {
+    // _webbeans.addWbComponent(this);
+    
     if (_type == null)
       _type = _webbeans.createComponentType(Component.class);
-				  
-    if (_scopeAnn == null) {
-      for (Annotation ann : _cl.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	  setScopeAnnotation(ann);
-	}
-      }
-    }
 
     introspectProduces();
     introspectConstructor();
 
     if (! _hasBinding)
       introspectBindings();
-  }
-
-  /**
-   * Called for implicit introspection.
-   */
-  public void introspect()
-  {
-    for (Annotation ann : _cl.getDeclaredAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
-	if (_type != null)
-	  throw new ConfigException(L.l("{0}: component type annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ComponentType.",
-					_cl.getName(),
-					_type.getType().getName(),
-					ann.annotationType().getName()));
-	
-	_type = _webbeans.createComponentType(ann.annotationType());
-      }
-    }
-
-    if (_type == null) {
-      throw new ConfigException(L.l("component '{0}' does not have a ComponentType",
-				    _cl.getName()));
-    }
   }
 
   /**
@@ -482,34 +452,23 @@ public class WbComponent {
       }
     }
     
-    DependentScope self = null;
-
-    if (scope == null)
-      self = DependentScope.begin(_scopeContext);
-
-    try {
-      if (_scopeContext != null) {
-	return createScoped(_name, _scopeContext);
-      }
-      else if (_name == null)
-	return create();
-      else if (scope != null)
-	return createScoped(_name, scope);
-      else
-	return create();
-    } finally {
-      if (self != null)
-	DependentScope.end();
+    if (_scopeContext != null) {
+      return createScoped(_name, _scopeContext);
     }
+    else if (_name == null)
+      return create();
+    else if (scope != null)
+      return createScoped(_name, scope);
+    else
+      return create();
   }
 
-  public Object create()
+  protected Object create()
   {
     try {
       Object value = createNew();
 
-      if (_init != null)
-	_init.configure(value);
+      init(value);
 
       return value;
     } catch (RuntimeException e) {
@@ -519,23 +478,14 @@ public class WbComponent {
     }
   }
 
-  public Object createScoped(String name, ScopeContext scope)
+  protected Object createScoped(String name, ScopeContext scope)
   {
     try {
       Object value = createNew();
 
       scope.set(name, value);
 
-      if (_injectProgram != null) {
-	for (int i = 0; i < _injectProgram.size(); i++) {
-	  BuilderProgram program = _injectProgram.get(i);
-
-	  program.configure(value);
-	}
-      }
-
-      if (_init != null)
-	_init.configure(value);
+      init(value);
 
       return value;
     } catch (RuntimeException e) {
@@ -545,7 +495,7 @@ public class WbComponent {
     }
   }
 
-  public Object createNew()
+  protected Object createNew()
   {
     try {
       Object []args;
@@ -565,7 +515,38 @@ public class WbComponent {
       throw new RuntimeException(e);
     }
   }
-  
+
+  /**
+   * Initialize the created value
+   */
+  protected Object init(Object value)
+  {
+    DependentScope scope = DependentScope.getCurrent();
+    
+    DependentScope self = null;
+
+    if (scope == null || _scopeContext != null)
+      self = DependentScope.begin(_scopeContext);
+
+    try {
+      if (_injectProgram != null) {
+	for (int i = 0; i < _injectProgram.size(); i++) {
+	  BuilderProgram program = _injectProgram.get(i);
+
+	  program.configure(value);
+	}
+      }
+
+      if (_init != null)
+	_init.configure(value);
+
+      return value;
+    } finally {
+      if (self != null)
+	DependentScope.end(scope);
+    }
+  }
+
   public void createProgram(ArrayList<BuilderProgram> initList,
 			    AccessibleObject field,
 			    String name,
@@ -607,15 +588,34 @@ public class WbComponent {
 
   public String toString()
   {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    sb.append(_cl != null ? _cl.getSimpleName() : "null");
+    sb.append(", ");
+
+    if (_type != null) {
+      sb.append("@");
+      sb.append(_type.getType().getSimpleName());
+    }
+    else
+      sb.append("@null");
+    
     if (_name != null) {
-      return (getClass().getSimpleName() + "[" + _name
-	      + ", " + _cl.getSimpleName()
-	      + ", @" + _type.getType().getSimpleName() + "]");
+      sb.append(", ");
+      sb.append("name=");
+      sb.append(_name);
     }
-    else {
-      return (getClass().getSimpleName() + "["
-	      + _cl.getSimpleName()
-	      + ", @" + _type.getType().getSimpleName() + "]");
+    
+    if (_scopeAnn != null) {
+      sb.append(", @");
+      sb.append(_scopeAnn.annotationType().getSimpleName());
     }
+
+    sb.append("]");
+
+    return sb.toString();
   }
 }

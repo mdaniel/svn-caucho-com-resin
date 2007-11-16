@@ -33,7 +33,9 @@ import com.caucho.bytecode.*;
 import com.caucho.config.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.WebBeans;
+import com.caucho.webbeans.SingletonScoped;
+import com.caucho.webbeans.component.SingletonClassComponent;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.io.IOException;
 import java.lang.annotation.*;
@@ -52,11 +54,11 @@ public class WbWebBeans {
   private static final Logger log
     = Logger.getLogger(WbWebBeans.class.getName());
   
-  private WebBeans _webBeans;
+  private WebBeansContainer _webBeansContainer;
   private Path _root;
 
-  private HashMap<Class,WbComponentType> _componentTypeMap
-    = new HashMap<Class,WbComponentType>();
+  private HashMap<String,WbComponentType> _componentTypeMap
+    = new HashMap<String,WbComponentType>();
   
   private ArrayList<WbComponentType> _componentTypeList;
   
@@ -66,9 +68,15 @@ public class WbWebBeans {
   private ArrayList<WbInterceptor> _interceptorList
     = new ArrayList<WbInterceptor>();
 
-  public WbWebBeans(WebBeans webBeans, Path root)
+  private ArrayList<Class> _pendingClasses
+    = new ArrayList<Class>();
+
+  private boolean _isConfigured;
+
+  public WbWebBeans(WebBeansContainer webBeansContainer, Path root)
   {
-    _webBeans = webBeans;
+    _webBeansContainer = webBeansContainer;
+    
     _root = root;
   }
   
@@ -81,6 +89,30 @@ public class WbWebBeans {
   }
 
   /**
+   * Adds a scanned class
+   */
+  public void addScannedClass(Class cl)
+  {
+    _pendingClasses.add(cl);
+  }
+
+  /**
+   * True if the configuration file has been passed.
+   */
+  public boolean isConfigured()
+  {
+    return _isConfigured;
+  }
+
+  /**
+   * True if the configuration file has been passed.
+   */
+  public void setConfigured(boolean isConfigured)
+  {
+    _isConfigured = isConfigured;
+  }
+
+  /**
    * Adds a component.
    */
   public WbComponentConfig createComponent()
@@ -90,8 +122,9 @@ public class WbWebBeans {
 
   public void addWbComponent(WbComponent component)
   {
-    if (! _componentList.contains(component))
-      _componentList.add(component);
+    _componentList.remove(component);
+    
+    _componentList.add(component);
   }
 
   /**
@@ -100,6 +133,31 @@ public class WbWebBeans {
   public WbComponentTypes createComponentTypes()
   {
     return new WbComponentTypes();
+  }
+
+  public void update()
+  {
+    ArrayList<Class> pendingClasses = new ArrayList<Class>(_pendingClasses);
+    _pendingClasses.clear();
+
+    for (Class cl : pendingClasses) {
+      if (_componentTypeMap.get(cl.getName()) != null)
+	continue;
+
+      WbClassComponent component;
+
+      if (cl.isAnnotationPresent(SingletonScoped.class))
+	component = new SingletonClassComponent(this);
+      else
+	component = new WbClassComponent(this);
+	
+      component.setClass(cl);
+      component.setFromClass(true);
+      component.introspect();
+      component.init();
+
+      _componentList.add(component);
+    }
   }
 
   @PostConstruct
@@ -116,20 +174,7 @@ public class WbWebBeans {
       _componentTypeList.add(type);
     }
 
-    if (_root != null) {
-      ByteCodeClassMatcher scanner = new ClassScanner();
-
-      try {
-	if (_root instanceof JarPath)
-	  scanForJarClasses(((JarPath) _root).getContainer(), scanner);
-	else
-	  scanForClasses(_root, _root, scanner);
-      } catch (IOException e) {
-	throw new ConfigException(e);
-      }
-    }
-
-    WebBeans webBeans = _webBeans;
+    WebBeansContainer webBeans = _webBeansContainer;
 
     for (WbComponent comp : _componentList) {
       if (comp.getType().isEnabled()) {
@@ -146,11 +191,11 @@ public class WbWebBeans {
 
   public WbComponentType createComponentType(Class cl)
   {
-    WbComponentType type = _componentTypeMap.get(cl);
+    WbComponentType type = _componentTypeMap.get(cl.getName());
 
     if (type == null) {
       type = new WbComponentType(cl);
-      _componentTypeMap.put(cl, type);
+      _componentTypeMap.put(cl.getName(), type);
     }
 
     return type;
@@ -158,7 +203,7 @@ public class WbWebBeans {
 
   public WbComponent bindParameter(Class type, Annotation []annotations)
   {
-    return _webBeans.bind(type, getBindList(annotations));
+    return _webBeansContainer.bind(type, getBindList(annotations));
   }
 
   /**
@@ -176,185 +221,12 @@ public class WbWebBeans {
     return bindList;
   }
 
-  private void scanForClasses(Path root,
-			      Path path,
-			      ByteCodeClassMatcher scanner)
-    throws IOException
+  public String toString()
   {
-    if (path.isDirectory()) {
-      for (String name : path.list())
-	scanForClasses(root, path.lookup(name), scanner);
-
-      return;
-    }
-
-    if (! path.getPath().endsWith(".class"))
-      return;
-
-    try {
-      ReadStream is = path.openRead();
-      try {
-	byte []buffer = new byte[(int) path.getLength()];
-	is.readAll(buffer, 0, buffer.length);
-
-	/*
-	ByteCodeClassScanner classScanner =
-	  new ByteCodeClassScanner(path.getPath(),
-				   buffer, 0, buffer.length,
-				   scanner);
-
-	if (classScanner.scan()) {
-	  String rootName = root.getPath();
-	  String name = path.getPath();
-	  int p = name.lastIndexOf('.');
-
-	  loadComponentType(name.substring(rootName.length(), p));
-	}
-	*/
-      } finally {
-	is.close();
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-  }
-
-  private void scanForJarClasses(Path path, ByteCodeClassMatcher scanner)
-  {
-    ZipFile zipFile = null;
-
-    try {
-      zipFile = new ZipFile(path.getNativePath());
-
-      Enumeration<? extends ZipEntry> e = zipFile.entries();
-
-      while (e.hasMoreElements()) {
-	ZipEntry entry = e.nextElement();
-
-	if (! entry.getName().endsWith(".class"))
-	  continue;
-
-	int size = (int) entry.getSize();
-      
-	ReadStream is = Vfs.openRead(zipFile.getInputStream(entry));
-	try {
-	  byte []buffer = new byte[size];
-	  is.readAll(buffer, 0, buffer.length);
-
-	  /*
-	  ByteCodeClassScanner classScanner =
-	    new ByteCodeClassScanner(path.getPath(),
-				     buffer, 0, buffer.length,
-				     scanner);
-
-	  if (classScanner.scan()) {
-	    String name = entry.getName();
-	    int p = name.lastIndexOf('.');
-
-	    loadComponentType(name.substring(0, p));
-	  }
-	  */
-	} finally {
-	  is.close();
-	}
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      try {
-	if (zipFile != null)
-	  zipFile.close();
-      } catch (Exception e) {
-      }
-    }
-  }
-
-  private void loadComponentType(String className)
-  {
-    try {
-      if (className.startsWith("/"))
-	className = className.substring(1);
-
-      className = className.replace('/', '.');
-      
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-      Class cl = Class.forName(className, false, loader);
-
-      Annotation compTypeAnn = null;
-      Annotation scopeAnn = null;
-      ArrayList<Annotation> bindList = new ArrayList<Annotation>();
-      for (Annotation ann : cl.getAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
-	  compTypeAnn = ann;
-	}
-	
-	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	  scopeAnn = ann;
-	}
-	
-	if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
-	  bindList.add(ann);
-	}
-      }
-      
-      WbComponentType type = null;
-      for (int i = 0; i < _componentTypeList.size(); i++) {
-	type = _componentTypeList.get(i);
-
-	if (type.getType().equals(compTypeAnn.annotationType()))
-	  break;
-      }
-
-      // XXX:
-      if (type == null)
-	return;
-
-      WbComponent component = new WbComponent(this);
-      component.setClass(cl);
-      component.setFromClass(true);
-
-      for (int i = 0; i < bindList.size(); i++) {
-	Annotation bindAnn = bindList.get(i);
-	
-	WbBinding binding = new WbBinding(bindAnn);
-
-	component.addBinding(binding);
-      }
-
-      component.introspect();
-      component.init();
-      _componentList.add(component);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ConfigException(e);
-    }
-  }
-
-  class ClassScanner implements ByteCodeClassMatcher {
-    /**
-     * Returns true if the class is a match.
-     */
-    public boolean isClassMatch(String className)
-    {
-      return false;
-    }
-  
-    /**
-     * Returns true if the annotation class is a match.
-     */
-    public boolean isMatch(CharBuffer annotationClassName)
-    {
-      for (int i = 0; i < _componentTypeList.size(); i++) {
-	WbComponentType type = _componentTypeList.get(i);
-
-	if (annotationClassName.matches(type.getType().getName()))
-	  return true;
-      }
-      
-      return false;
-    }
+    if (_root != null)
+      return "WbWebBeans[" + _root.getURL() + "]";
+    else
+      return "WbWebBeans[]";
   }
 
   public class WbComponentTypes {

@@ -33,17 +33,17 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
-import com.caucho.webbeans.WebBeans;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 /**
  * Variable resolution for webbeans variables
  */
 public class WebBeansELResolver extends ELResolver {
-  private final WebBeans _webBeans;
+  private final WebBeansContainer _webBeans;
   
   public WebBeansELResolver()
   {
-    _webBeans = WebBeans.getLocal();
+    _webBeans = WebBeansContainer.create();
     _webBeans.update();
   }
   

@@ -34,8 +34,10 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -69,7 +71,7 @@ public class WbComponentConfig {
 
   public WbComponentConfig()
   {
-    _webbeans = WebBeans.getLocal().getWbWebBeans();
+    _webbeans = WebBeansContainer.create().getWbWebBeans();
   }
 
   public WbComponentConfig(WbWebBeans webbeans)
@@ -170,8 +172,17 @@ public class WbComponentConfig {
     if (_cl == null)
       throw new ConfigException(L.l("<component> requires a class attribute"));
 
-    WbClassComponent comp = new WbClassComponent(_webbeans);
+    introspect();
     
+    WbComponent comp;
+
+    if (_scopeAnn != null
+	&& SingletonScoped.class.equals(_scopeAnn.annotationType())) {
+      comp = new SingletonClassComponent(_webbeans);
+    }
+    else
+      comp = new WbClassComponent(_webbeans);
+
     comp.setClass(_cl);
 
     if (_name != null)
@@ -183,12 +194,32 @@ public class WbComponentConfig {
     if (_type != null)
       comp.setComponentType(_type);
 
+    if (_scopeAnn != null)
+      comp.setScopeAnnotation(_scopeAnn);
+
     if (_init != null)
       comp.setInit(_init);
 
-    comp.introspect();
     comp.init();
 
     _webbeans.addWbComponent(comp);
+  }
+
+  private void introspect()
+  {
+    if (_scopeAnn == null) {
+      for (Annotation ann : _cl.getDeclaredAnnotations()) {
+	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	  if (_scopeAnn != null) {
+	    throw new ConfigException(L.l("{0}: multiple scope annotations are forbidden ({1} and {2}).",
+					  _cl.getName(),
+					  _scopeAnn.annotationType().getSimpleName(),
+					  ann.annotationType().getSimpleName()));
+	  }
+	  
+	  _scopeAnn = ann;
+	}
+      }
+    }
   }
 }

@@ -68,4 +68,9 @@ public class WbComponentType {
   {
     return _priority >= 0;
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[@" + _type.getSimpleName() + "]";
+  }
 }
