@@ -57,14 +57,14 @@ public class MessageConsumerImpl
   static final L10N L = new L10N(MessageConsumerImpl.class);
 
   private final Object _consumerLock = new Object();
-  
+
   protected final JmsSession _session;
-  
+
   private AbstractQueue _queue;
-  
+
   private MessageListener _messageListener;
   private ClassLoader _listenerClassLoader;
-  
+
   private String _messageSelector;
   protected Selector _selector;
   private boolean _noLocal;
@@ -82,7 +82,7 @@ public class MessageConsumerImpl
     _session = session;
     _queue = queue;
     _messageSelector = messageSelector;
-    
+
     if (_messageSelector != null) {
       SelectorParser parser = new SelectorParser();
       _selector = parser.parse(messageSelector);
@@ -111,7 +111,7 @@ public class MessageConsumerImpl
   {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDestination(): MessageConsumer is closed."));
-    
+
     return _queue;
   }
 
@@ -123,10 +123,10 @@ public class MessageConsumerImpl
   {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getNoLocal(): MessageConsumer is closed."));
-    
+
     return _noLocal;
   }
-  
+
   /**
    * Returns the message listener
    */
@@ -135,7 +135,7 @@ public class MessageConsumerImpl
   {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getNoLocal(): MessageConsumer is closed."));
-    
+
     return _messageListener;
   }
 
@@ -170,7 +170,7 @@ public class MessageConsumerImpl
   {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getMessageSelector(): MessageConsumer is closed."));
-    
+
     return _messageSelector;
   }
 
@@ -190,7 +190,7 @@ public class MessageConsumerImpl
   {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("isActive(): MessageConsumer is closed."));
-    
+
     return _session.isActive() && ! _isClosed;
   }
 
@@ -242,10 +242,10 @@ public class MessageConsumerImpl
   {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("receiveNoWait(): MessageConsumer is closed."));
-    
+
     if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
       timeout = Long.MAX_VALUE / 2;
-    
+
     long now = Alarm.getCurrentTime();
     long expireTime = timeout > 0 ? now + timeout : 0;
 
@@ -253,30 +253,30 @@ public class MessageConsumerImpl
       MessageImpl msg = _queue.receive(_isAutoAcknowledge);
 
       if (msg == null) {
-	synchronized (_consumerLock) {
-	  if (expireTime <= Alarm.getCurrentTime() || Alarm.isTest())
-	    return null;
+        synchronized (_consumerLock) {
+          if (expireTime <= Alarm.getCurrentTime() || Alarm.isTest())
+            return null;
 
-	  try {
-	    _consumerLock.wait(expireTime - Alarm.getCurrentTime());
-	  } catch (Exception e) {
-	  }
-	}
+          try {
+            _consumerLock.wait(expireTime - Alarm.getCurrentTime());
+          } catch (Exception e) {
+          }
+        }
       }
-    
+
       else if (_selector != null && ! _selector.isMatch(msg)) {
         msg.acknowledge();
         continue;
       }
 
       else {
-	if (! _isAutoAcknowledge)
-	  _session.addTransactedReceive(_queue, msg);
-	
+        if (! _isAutoAcknowledge)
+          _session.addTransactedReceive(_queue, msg);
+
         return msg;
       }
     }
-    
+
     return null;
   }
 
@@ -288,7 +288,7 @@ public class MessageConsumerImpl
     synchronized (_consumerLock) {
       _consumerLock.notifyAll();
     }
-    
+
     return _session.notifyMessageAvailable();
   }
 
@@ -299,7 +299,7 @@ public class MessageConsumerImpl
   {
     if (_messageListener != null)
       listener = _messageListener;
-    
+
     if (listener == null)
       return false;
 
@@ -314,26 +314,30 @@ public class MessageConsumerImpl
         }
 
         msg.setSession(_session);
-        _session.addTransactedReceive(_queue, msg);
 
-        Thread thread = Thread.currentThread();
-        ClassLoader oldLoader = thread.getContextClassLoader();
-        try {
-          thread.setContextClassLoader(_listenerClassLoader);
-        
-          listener.onMessage(msg);
-        } finally {
-          thread.setContextClassLoader(oldLoader);
+        // XXX: ejb30/bb/mdb/activationconfig/queue/selectorauto/annotated/negativeTest1
+        if (_selector == null || _selector.isMatch(msg)) {
+          _session.addTransactedReceive(_queue, msg);
+
+          Thread thread = Thread.currentThread();
+          ClassLoader oldLoader = thread.getContextClassLoader();
+          try {
+            thread.setContextClassLoader(_listenerClassLoader);
+
+            listener.onMessage(msg);
+          } finally {
+            thread.setContextClassLoader(oldLoader);
+          }
         }
-        
-	msg.acknowledge();
-	
-	return true;
+
+        msg.acknowledge();
+
+        return true;
       }
     } catch (Exception e) {
       log.log(Level.WARNING, L.l("{0} message listener '{1}' failed for message '{2}' with exception\n{3}",
-				 _queue, listener, msg, e.toString()),
-	      e);
+                                 _queue, listener, msg, e.toString()),
+              e);
 
       _queue.addListenerException(e);
     }
@@ -351,7 +355,7 @@ public class MessageConsumerImpl
       _consumerLock.notifyAll();
     }
   }
-  
+
   /**
    * Closes the consumer.
    */
@@ -360,8 +364,8 @@ public class MessageConsumerImpl
   {
     synchronized (this) {
       if (_isClosed)
-	return;
-      
+        return;
+
       _isClosed = true;
     }
 
@@ -374,4 +378,3 @@ public class MessageConsumerImpl
     return "MessageConsumerImpl[" + _queue + "]";
   }
 }
-

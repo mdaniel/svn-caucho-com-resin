@@ -29,6 +29,9 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.bytecode.JAnnotation;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.BuilderProgram;
@@ -44,9 +47,12 @@ import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.MessageDrivenBean;
-import javax.ejb.ActivationConfigProperty;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
+import javax.interceptor.AroundInvoke;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.MessageListener;
@@ -67,6 +73,7 @@ public class EjbMessageBean extends EjbBean {
 
   private ConnectionFactory _connectionFactory;
   private Destination _destination;
+  private String _messageSelector;
   private boolean _isContainerTransaction = true;
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
   private String _selector;
@@ -105,14 +112,14 @@ public class EjbMessageBean extends EjbBean {
 
     // ejb/0987
     /*
-    if (! MessageDrivenBean.class.isAssignableFrom(ejbClass)
-	&& ! isAllowPOJO())
+      if (! MessageDrivenBean.class.isAssignableFrom(ejbClass)
+      && ! isAllowPOJO())
       throw error(L.l("'{0}' must implement javax.ejb.MessageDrivenBean.  Every message-driven bean must implement MessageDrivenBean.", ejbClass.getName()));
     */
 
     if (Modifier.isAbstract(ejbClass.getModifiers()))
       throw error(L.l("'{0}' must not be abstract.  Every message-driven bean must be a fully-implemented class.",
-		      ejbClass.getName()));
+                      ejbClass.getName()));
 
     // ejb 3.0 simplified section 10.1.3
     // The name annotation element defaults to the unqualified name of the bean
@@ -122,19 +129,21 @@ public class EjbMessageBean extends EjbBean {
       setEJBName(ejbClass.getSimpleName());
     }
 
-    ApiMethod create = getEJBClassWrapper().getMethod("ejbCreate",
-						      new Class[0]);
+    /* XXX: ejb/0fbl, EJB 3.0 should not need ejbCreate()
+       ApiMethod create = getEJBClassWrapper().getMethod("ejbCreate",
+       new Class[0]);
 
-    if (create == null) {
-      if (! isAllowPOJO()) {
-	throw error(L.l("{0}: ejbCreate() method is missing.  Every message-driven bean must have an ejbCreate() method.",
-		      ejbClass.getName()));
-      }
-    }
-    else if (! create.isPublic()) {
-      throw error(L.l("{0}: ejbCreate() must be public.  Every message-driven bean must have a public ejbCreate method.",
-		      ejbClass.getName()));
-    }
+       if (create == null) {
+       if (! isAllowPOJO()) {
+       throw error(L.l("{0}: ejbCreate() method is missing.  Every message-driven bean must have an ejbCreate() method.",
+       ejbClass.getName()));
+       }
+       }
+       else if (! create.isPublic()) {
+       throw error(L.l("{0}: ejbCreate() must be public.  Every message-driven bean must have a public ejbCreate method.",
+       ejbClass.getName()));
+       }
+    */
   }
 
   /**
@@ -155,14 +164,15 @@ public class EjbMessageBean extends EjbBean {
 
     if (! (obj instanceof Destination))
       throw new ConfigException(L.l("'{0}' needs to implement javax.jms.Destination.",
-				    obj));
-    
+                                    obj));
+
     _destination = (Destination) obj;
   }
 
   public void setMessagingType(Class messagingType)
   {
-    _messagingType = messagingType;
+    if (messagingType != Object.class)
+      _messagingType = messagingType;
   }
 
   /**
@@ -207,8 +217,8 @@ public class EjbMessageBean extends EjbBean {
   {
     if (! (factory.getObject() instanceof ConnectionFactory))
       throw new ConfigException(L.l("'{0}' needs to implement javax.jms.ConnectionFactory.",
-				    factory.getObject()));
-    
+                                    factory.getObject()));
+
     _connectionFactory = (ConnectionFactory) factory.getObject();
   }
 
@@ -333,6 +343,9 @@ public class EjbMessageBean extends EjbBean {
         throw new ConfigException(e);
       }
     }
+    else if ("messageSelector".equals(name)) {
+      _messageSelector = value;
+    }
     else
       log.log(Level.FINE, L.l("activation-config-property '{0}' is unknown, ignored",
                               name));
@@ -374,6 +387,9 @@ public class EjbMessageBean extends EjbBean {
   public void initIntrospect()
     throws ConfigException
   {
+    // ejb/0fbm
+    super.initIntrospect();
+
     ApiClass type = getEJBClassWrapper();
 
     if (! type.isAnnotationPresent(MessageDriven.class)
@@ -396,10 +412,36 @@ public class EjbMessageBean extends EjbBean {
       }
 
       Class messageListenerInterface
-	= messageDriven.messageListenerInterface();
+        = messageDriven.messageListenerInterface();
 
       if (messageListenerInterface != null)
         setMessagingType(messageListenerInterface);
+
+      TransactionManagement transaction = type.getAnnotation(TransactionManagement.class);
+      if (transaction == null)
+        setTransactionType("Container");
+      else if (TransactionManagementType.BEAN.equals(transaction.value()))
+        setTransactionType("Bean");
+      else
+        setTransactionType("Container");
+
+      configureMethods(type);
+    }
+  }
+
+  private void configureMethods(ApiClass type)
+    throws ConfigException
+  {
+    for (ApiMethod method : type.getMethods()) {
+      AroundInvoke aroundInvoke = method.getAnnotation(AroundInvoke.class);
+
+      // ejb/0fbl
+      if (aroundInvoke != null) {
+        setAroundInvokeMethodName(method.getName());
+
+        // XXX: needs to check invalid duplicated @AroundInvoke methods.
+        break;
+      }
     }
   }
 
@@ -408,7 +450,7 @@ public class EjbMessageBean extends EjbBean {
    */
   @Override
   public AbstractServer deployServer(EjbContainer ejbManager,
-				     JavaClassGenerator javaGen)
+                                     JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
     MessageServer server = new MessageServer(ejbManager);
@@ -422,18 +464,21 @@ public class EjbMessageBean extends EjbBean {
     //server.setContextImplClass(contextImplClass);
 
     server.setContainerTransaction(getContainerTransaction());
-    
+
     server.setContextImplClass(getEJBClass());
     server.setMessageListenerType(_messagingType);
+    server.setAroundInvokeMethodName(getAroundInvokeMethodName());
+    server.setInterceptors(getInterceptors());
 
     if (_connectionFactory != null)
       server.setConnectionFactory(_connectionFactory);
     else
       server.setConnectionFactory(getEjbContainer().getJmsConnectionFactory());
-    
+
     if (_destination != null)
       server.setDestination(_destination);
 
+    server.setMessageSelector(_messageSelector);
     server.setMessageDestinationLink(_messageDestinationLink);
     server.setConsumerMax(_consumerMax);
 
@@ -518,11 +563,11 @@ public class EjbMessageBean extends EjbBean {
     {
       setMessageDestinationType(value);
     }
-    
+
     public void setSubscriptionDurability(String durability)
     {
     }
-    
+
     public void setJndiName(JndiBuilder destination)
       throws ConfigException, NamingException
     {

@@ -210,6 +210,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     return _aroundInvokeMethodName;
   }
 
+  public void setAroundInvokeMethodName(String aroundInvokeMethodName)
+  {
+    _aroundInvokeMethodName = aroundInvokeMethodName;
+  }
+
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
   {
     _aroundInvokeConfig = aroundInvoke;

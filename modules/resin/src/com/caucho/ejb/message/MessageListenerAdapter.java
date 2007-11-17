@@ -77,6 +77,11 @@ public class MessageListenerAdapter
     _ejbCreateMethod = ejbCreateMethod;
   }
 
+  public Object getListener()
+  {
+    return _listener;
+  }
+
   public void onMessage(Message message)
   {
     try {

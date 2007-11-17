@@ -68,7 +68,7 @@ public class MessageDrivenContextImpl extends AbstractContext
     return _server;
   }
 
-  private boolean isCMT()
+  public boolean isCMT()
   {
     return _isContainerTransaction;
   }

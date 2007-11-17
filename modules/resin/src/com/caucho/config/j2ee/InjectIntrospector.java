@@ -43,6 +43,7 @@ import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.ejb.SessionContext;
 import javax.ejb.MessageDrivenContext;
+import javax.jms.QueueConnectionFactory;
 import javax.naming.*;
 import javax.persistence.*;
 import javax.transaction.UserTransaction;
@@ -167,11 +168,11 @@ public class InjectIntrospector {
       Class []param = method.getParameterTypes();
 
       if (hasBindingAnnotation(method)) {
-	WebBeansContainer webBeans = WebBeansContainer.create();
-	
-	webBeans.createProgram(initList, method);
+        WebBeansContainer webBeans = WebBeansContainer.create();
 
-	continue;
+        webBeans.createProgram(initList, method);
+
+        continue;
       }
 
       if (param.length != 1)
@@ -265,21 +266,18 @@ public class InjectIntrospector {
     // ejb/0f67
     EJBs ejbs = (EJBs) type.getAnnotation(EJBs.class);
 
-    if (localJndiPrefix == null)
-      localJndiPrefix = "java:comp/env/cmp";
-
     if (ejb != null && ejbs != null) {
       throw new ConfigException(L.l("{0} cannot have both @EJBs and @EJB",
                                     type.getName()));
     } else if (ejb != null) {
-      initList.add(new JndiBindProgram("java:comp/env/" + ejb.name(),
-                                       localJndiPrefix + "/" + ejb.beanName(),
-                                       null));
+      initList.add(new EjbRefProgram("java:comp/env/" + ejb.name(),
+                                     ejb.beanName(),
+                                     ejb.beanInterface()));
     } else if (ejbs != null) {
       for (EJB e : ejbs.value()) {
-        initList.add(new JndiBindProgram("java:comp/env/" + e.name(),
-                                         localJndiPrefix + "/" + e.beanName(),
-                                         null));
+        initList.add(new EjbRefProgram("java:comp/env/" + e.name(),
+                                       e.beanName(),
+                                       e.beanInterface()));
       }
     }
 
@@ -366,7 +364,7 @@ public class InjectIntrospector {
       PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
 
       PersistenceUnitGenerator gen
-	= new PersistenceUnitGenerator(location(field), pUnit);
+        = new PersistenceUnitGenerator(location(field), pUnit);
 
       initList.add(new GeneratorInjectProgram(inject, gen));
     }
@@ -378,15 +376,15 @@ public class InjectIntrospector {
       configureWebBean(initList, field, fieldName, fieldType);
     else {
       boolean isWebBean = false;
-      
+
       for (Annotation ann : field.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	  isWebBean = true;
+        if (ann.annotationType().isAnnotationPresent(BindingType.class))
+          isWebBean = true;
       }
 
 
       if (isWebBean)
-	configureWebBean(initList, field, fieldName, fieldType);
+        configureWebBean(initList, field, fieldName, fieldType);
     }
   }
 
@@ -399,11 +397,11 @@ public class InjectIntrospector {
 
     for (Annotation []annList : method.getParameterAnnotations()) {
       if (annList == null)
-	continue;
-      
+        continue;
+
       for (Annotation ann : annList) {
-	if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	  return true;
+        if (ann.annotationType().isAnnotationPresent(BindingType.class))
+          return true;
       }
     }
 
@@ -520,9 +518,9 @@ public class InjectIntrospector {
 
   private static void
     configurePersistenceContext(ArrayList<BuilderProgram> initList,
-				AccessibleObject prop,
-				String fieldName,
-				Class fieldType)
+                                AccessibleObject prop,
+                                String fieldName,
+                                Class fieldType)
     throws ConfigException
   {
     PersistenceContext pContext = prop.getAnnotation(PersistenceContext.class);
@@ -650,6 +648,9 @@ public class InjectIntrospector {
     else if (UserTransaction.class.equals(fieldType)) {
       jndiName = "java:comp/UserTransaction";
     }
+    else if (QueueConnectionFactory.class.equals(fieldType)) {
+      jndiName = "java:comp/env/jms/QueueConnectionFactory";
+    }
 
     int colon = jndiName.indexOf(':');
     int slash = jndiName.indexOf('/');
@@ -684,9 +685,9 @@ public class InjectIntrospector {
   }
 
   private static void configureWebBean(ArrayList<BuilderProgram> initList,
-				       AccessibleObject field,
-				       String fieldName,
-				       Class fieldType)
+                                       AccessibleObject field,
+                                       String fieldName,
+                                       Class fieldType)
     throws ConfigException
   {
     WebBeansContainer webBeans = WebBeansContainer.create();

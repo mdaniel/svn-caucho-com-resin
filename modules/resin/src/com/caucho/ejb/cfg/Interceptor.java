@@ -84,6 +84,11 @@ public class Interceptor {
     _jClassLoader = JClassLoaderWrapper.create(_loader);
   }
 
+  public JClass getInterceptorJClass()
+  {
+    return _interceptorJClass;
+  }
+
   public String getInterceptorClass()
   {
     return _interceptorClass;
@@ -155,6 +160,35 @@ public class Interceptor {
     } catch (PrivilegedActionException e) {
       throw new RuntimeException(e.getException());
     }
+  }
+
+  public Method getAroundInvokeMethod()
+  {
+    return getAroundInvokeMethod(_interceptorJClass.getJavaClass(),
+                                 _aroundInvokeMethodName);
+  }
+
+  public static Method getAroundInvokeMethod(Class cl,
+                                             String methodName)
+  {
+    // ejb/0fbm
+    for (Method method : cl.getDeclaredMethods()) {
+      if (method.getName().equals(methodName)) {
+        Class paramTypes[] = method.getParameterTypes();
+
+        if (paramTypes.length != 1)
+          continue;
+
+        if (! paramTypes[0].equals(InvocationContext.class))
+          continue;
+
+        method.setAccessible(true);
+
+        return method;
+      }
+    }
+
+    return null;
   }
 
   public String getAroundInvokeMethodName()
