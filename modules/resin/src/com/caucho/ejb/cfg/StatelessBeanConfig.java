@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.cfg;
+package com.caucho.ejb.cfg;
 
 import java.util.*;
 import java.util.logging.*;
@@ -36,40 +36,50 @@ import javax.annotation.*;
 import javax.jms.*;
 
 import com.caucho.config.*;
-import com.caucho.jms.JmsConnectionFactory;
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
+import com.caucho.config.types.*;
+import com.caucho.ejb.manager.*;
 import com.caucho.webbeans.cfg.AbstractBeanConfig;
 
 import com.caucho.util.*;
 
 /**
- * jms-connection-factory configuration
+ * ejb-stateless-bean configuration
  */
-public class JmsConnectionFactoryConfig extends AbstractBeanConfig
+public class StatelessBeanConfig extends AbstractBeanConfig
 {
-  private static final L10N L = new L10N(JmsConnectionFactoryConfig.class);
+  private static final L10N L = new L10N(StatelessBeanConfig.class);
   private static final Logger log
-    = Logger.getLogger(JmsConnectionFactoryConfig.class.getName());
-
-  public void setClass(Class cl)
-  {
-    if (! ConnectionFactory.class.isAssignableFrom(cl))
-      throw new ConfigException(L.l("'{0}' must implement javax.jms.ConnectionFactory"));
-
-    super.setClass(cl);
-  }
+    = Logger.getLogger(StatelessBeanConfig.class.getName());
 
   @PostConstruct
   public void init()
   {
-    if (getInstanceClass() == null) {
-      JmsConnectionFactory factory = new JmsConnectionFactory();
+    if (getInstanceClass() == null)
+      throw new ConfigException(L.l("ejb-stateless-bean requires a 'class' attribute"));
+    
+    EjbContainer ejbContainer = EjbContainer.create();
+    EjbConfigManager configManager = ejbContainer.getConfigManager();
 
-      register(factory);
-    }
-    else
-      register();
+    EjbStatelessBean bean = new EjbStatelessBean(configManager, "config");
+    bean.setEJBClass(getInstanceClass());
+
+    String name = getName();
+    
+    if (name == null)
+      name = getJndiName();
+
+    if (name == null)
+      name = getInstanceClass().getSimpleName();
+
+    bean.setEJBName(name);
+
+    if (getInit() != null)
+      bean.setInit(getInit());
+
+    configManager.setBeanConfig(name, bean);
+
+    // XXX: timing?
+    configManager.start();
   }
 }
 

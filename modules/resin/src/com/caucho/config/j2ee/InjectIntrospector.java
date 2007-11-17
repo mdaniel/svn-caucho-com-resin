@@ -270,9 +270,14 @@ public class InjectIntrospector {
       throw new ConfigException(L.l("{0} cannot have both @EJBs and @EJB",
                                     type.getName()));
     } else if (ejb != null) {
+      /*
+      initList.add(new JndiBindProgram("java:comp/env/" + ejb.name(),
+                                       localJndiPrefix + "/" + ejb.beanName(),
+                                       null));
       initList.add(new EjbRefProgram("java:comp/env/" + ejb.name(),
                                      ejb.beanName(),
                                      ejb.beanInterface()));
+      */
     } else if (ejbs != null) {
       for (EJB e : ejbs.value()) {
         initList.add(new EjbRefProgram("java:comp/env/" + e.name(),
@@ -358,8 +363,21 @@ public class InjectIntrospector {
 
     if (field.isAnnotationPresent(Resource.class))
       configureResource(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(EJB.class))
-      configureEJB(initList, field, fieldName, fieldType);
+    else if (field.isAnnotationPresent(EJB.class)) {
+      EJB ejb = field.getAnnotation(EJB.class);
+
+      Class type = ejb.beanInterface();
+      if (type == null || Object.class.equals(type))
+	type = fieldType;
+      
+      EjbGenerator gen = new EjbGenerator(type,
+					  ejb.mappedName(),
+					  ejb.beanName(),
+					  ejb.name(),
+					  location(field));
+      
+      initList.add(new GeneratorInjectProgram(inject, gen));
+    }
     else if (field.isAnnotationPresent(PersistenceUnit.class)) {
       PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
 

@@ -41,13 +41,14 @@ import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 import com.caucho.jms.queue.AbstractQueue;
 import com.caucho.naming.*;
+import com.caucho.webbeans.cfg.AbstractBeanConfig;
 
 import com.caucho.util.*;
 
 /**
  * jms-queue configuration
  */
-public class JmsQueueConfig
+public class JmsQueueConfig extends AbstractBeanConfig
 {
   private static final L10N L = new L10N(JmsQueueConfig.class);
   private static final Logger log
@@ -56,18 +57,7 @@ public class JmsQueueConfig
   private static HashMap<String,Class> _urlMap
     = new  HashMap<String,Class>();
 
-  private InitProgram _init;
-
-  private String _jndiName;
   private String _url;
-
-  /**
-   * Sets the JNDI name to be used to bind the queue
-   */
-  public void setJndiName(String name)
-  {
-    _jndiName = name;
-  }
 
   /**
    * Sets the JMS URL for the queue
@@ -78,20 +68,18 @@ public class JmsQueueConfig
   }
 
   /**
-   * Sets the init builder program.
-   */
-  public void setInit(InitProgram init)
-  {
-    _init = init;
-  }
-
-  /**
    * Initialize the queue.
    */
   @PostConstruct
   public void init()
     throws Exception
   {
+    if (getInstanceClass() != null) {
+      register();
+
+      return;
+    }
+    
     if (_url == null)
       throw new ConfigException(L.l("<jms-queue> requires a url attribute"));
 
@@ -110,8 +98,10 @@ public class JmsQueueConfig
 
     AbstractQueue queue = (AbstractQueue) cl.newInstance();
 
-    if (_jndiName != null)
-      queue.setName(_jndiName);
+    if (getName() != null)
+      queue.setName(getName());
+    else if (getJndiName() != null)
+      queue.setName(getJndiName());
 
     for (String paramValue : param.split(";")) {
       if (paramValue.equals(""))
@@ -128,13 +118,12 @@ public class JmsQueueConfig
       Config.setStringAttribute(queue, name, value);
     }
 
-    if (_init != null)
-      _init.configure(queue);
+    if (getInit() != null)
+      getInit().configure(queue);
 
     queue.postConstruct();
 
-    if (_jndiName != null)
-      Jndi.bindDeepShort(_jndiName, queue);
+    register(queue);
   }
 
   static {

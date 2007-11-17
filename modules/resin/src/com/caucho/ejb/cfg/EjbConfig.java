@@ -375,12 +375,13 @@ public class EjbConfig {
       if (type.isAnnotationPresent(javax.ejb.Stateless.class)) {
 	EjbStatelessBean bean = new EjbStatelessBean(this, "resin-ejb");
 	bean.setEJBClass(type);
+	bean.setAllowPOJO(true);
 	
 	setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.Stateful.class)) {
 	EjbStatefulBean bean = new EjbStatefulBean(this, "resin-ejb");
-		
+	bean.setAllowPOJO(true);
 	bean.setEJBClass(type);
 		
 	setBeanConfig(bean.getEJBName(), bean);
@@ -626,7 +627,7 @@ public class EjbConfig {
       ArrayList<EjbBean> deployingBeans
 	= new ArrayList<EjbBean>(_deployingBeans);
       _deployingBeans.clear();
-      
+
       deployBeans(deployingBeans, javaGen);
     } catch (RuntimeException e) {
       throw e;
@@ -656,7 +657,6 @@ public class EjbConfig {
           continue;
 
         AbstractServer server = initBean(bean, javaGen);
-
         ArrayList<String> dependList = bean.getBeanDependList();
 
         for (String depend : dependList) {

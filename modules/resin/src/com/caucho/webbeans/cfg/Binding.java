@@ -27,49 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.cfg;
-
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-import javax.jms.*;
+package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
-import com.caucho.jms.JmsConnectionFactory;
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
-import com.caucho.webbeans.cfg.AbstractBeanConfig;
-
+import com.caucho.config.j2ee.*;
 import com.caucho.util.*;
+import com.caucho.webbeans.inject.*;
+
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.annotation.*;
+import javax.webbeans.*;
 
 /**
- * jms-connection-factory configuration
+ * Runtime binding value
  */
-public class JmsConnectionFactoryConfig extends AbstractBeanConfig
-{
-  private static final L10N L = new L10N(JmsConnectionFactoryConfig.class);
-  private static final Logger log
-    = Logger.getLogger(JmsConnectionFactoryConfig.class.getName());
+public class Binding {
+  private static final L10N L = new L10N(Binding.class);
 
-  public void setClass(Class cl)
+  private Class _cl;
+
+  private HashMap<String,Object> _valueMap
+    = new HashMap<String,Object>();
+
+  public Binding(Class cl)
   {
-    if (! ConnectionFactory.class.isAssignableFrom(cl))
-      throw new ConfigException(L.l("'{0}' must implement javax.jms.ConnectionFactory"));
-
-    super.setClass(cl);
+    _cl = cl;
   }
 
-  @PostConstruct
-  public void init()
+  public Class getBindingClass()
   {
-    if (getInstanceClass() == null) {
-      JmsConnectionFactory factory = new JmsConnectionFactory();
+    return _cl;
+  }
 
-      register(factory);
-    }
-    else
-      register();
+  public void put(String key, Object value)
+  {
+    _valueMap.put(key, value);
+  }
+
+  public Object get(String key)
+  {
+    return _valueMap.get(key);
   }
 }
-

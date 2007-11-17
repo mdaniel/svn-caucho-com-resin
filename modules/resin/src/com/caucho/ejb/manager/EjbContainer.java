@@ -413,8 +413,28 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   }
 
   public void start()
+    throws ConfigException
   {
-    _configManager.start();
+    try {
+      _configManager.start();
+
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      for (AbstractServer server : _serverList) {
+	try {
+	  thread.setContextClassLoader(server.getClassLoader());
+
+	  server.start();
+	} finally {
+	  thread.setContextClassLoader(oldLoader);
+	}
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   /**

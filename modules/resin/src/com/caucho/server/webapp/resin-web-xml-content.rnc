@@ -1312,8 +1312,6 @@ r_web-app-Basis =
 
   & r_web-service*
 
-  & r_web-service-client*
-
   & r_welcome-file-list?
 
 ## web-app allowed tags, including flow control
@@ -1372,16 +1370,6 @@ r_web-resource-collection = element web-resource-collection {
   r_url-pattern*,
 
   r_http-method*
-}
-
-r_web-service-client = element web-service-client {
-  r_jndi-name
-
-  & r_url
-
-  & r_interface?
-
-  & (element jaxb-package { string }* | element jaxb-class { string }*)?
 }
 
 r_web-service = element web-service {

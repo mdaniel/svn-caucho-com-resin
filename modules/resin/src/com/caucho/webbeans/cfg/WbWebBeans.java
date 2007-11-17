@@ -65,6 +65,9 @@ public class WbWebBeans {
   private ArrayList<WbComponent> _componentList
     = new ArrayList<WbComponent>();
   
+  private ArrayList<WbComponent> _pendingComponentList
+    = new ArrayList<WbComponent>();
+  
   private ArrayList<WbInterceptor> _interceptorList
     = new ArrayList<WbInterceptor>();
 
@@ -123,8 +126,10 @@ public class WbWebBeans {
   public void addWbComponent(WbComponent component)
   {
     _componentList.remove(component);
-    
     _componentList.add(component);
+    
+    _pendingComponentList.remove(component);
+    _pendingComponentList.add(component);
   }
 
   /**
@@ -176,13 +181,17 @@ public class WbWebBeans {
 
     WebBeansContainer webBeans = _webBeansContainer;
 
-    for (WbComponent comp : _componentList) {
+    ArrayList<WbComponent> componentList
+      = new ArrayList<WbComponent>(_pendingComponentList);
+    _pendingComponentList.clear();
+
+    for (WbComponent comp : componentList) {
       if (comp.getType().isEnabled()) {
 	webBeans.addComponent(comp);
       }
     }
 
-    for (WbComponent comp : _componentList) {
+    for (WbComponent comp : componentList) {
       if (comp.getType().isEnabled()) {
 	comp.bind();
       }

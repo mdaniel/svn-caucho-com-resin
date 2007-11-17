@@ -262,8 +262,8 @@ public class EjbProtocolManager {
             // ejb/0g43
             localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + mappedName);
 
-            if (log.isLoggable(Level.CONFIG))
-              log.config(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
+            if (log.isLoggable(Level.FINER))
+              log.finer(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
 
             bindServer(localJndiName, localObj);
 
@@ -273,8 +273,8 @@ public class EjbProtocolManager {
               if (! (ejbName.equals(mappedName) || _localJndiPrefix.endsWith("/env"))) {
                 localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
 
-                if (log.isLoggable(Level.CONFIG))
-                  log.config(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
+                if (log.isLoggable(Level.FINER))
+                  log.finer(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
 
                 bindServer(localJndiName, localObj);
               }
@@ -323,13 +323,13 @@ public class EjbProtocolManager {
 
               bindServer(jndiName, obj);
 
-              if (log.isLoggable(Level.CONFIG))
-                log.config(L.l("local ejb {0} has JNDI binding {1}", obj, jndiName));
+              if (log.isLoggable(Level.FINER))
+                log.finer(L.l("local ejb {0} has JNDI binding {1}", obj, jndiName));
             }
           }
           else {
-            if (log.isLoggable(Level.FINE))
-              log.fine(L.l("local ejb {0} has no JNDI binding", localObj));
+            if (log.isLoggable(Level.FINER))
+              log.finer(L.l("local ejb {0} has no JNDI binding", localObj));
           }
         }
       }
@@ -350,8 +350,8 @@ public class EjbProtocolManager {
           String remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + mappedName);
 
           if (!remoteJndiName.equals(localJndiName)) {
-            if (log.isLoggable(Level.CONFIG))
-              log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
+            if (log.isLoggable(Level.FINER))
+              log.finer(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
 
             bindServer(remoteJndiName, remoteObj);
 
@@ -359,8 +359,8 @@ public class EjbProtocolManager {
               if (! (ejbName.equals(mappedName) || _remoteJndiPrefix.endsWith("/env"))) {
                 remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
 
-                if (log.isLoggable(Level.CONFIG))
-                  log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
+                if (log.isLoggable(Level.FINER))
+                  log.finer(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
 
                 bindServer(remoteJndiName, remoteObj);
               }
@@ -401,14 +401,14 @@ public class EjbProtocolManager {
 
               bindServer(jndiName, obj);
 
-              if (log.isLoggable(Level.CONFIG))
-                log.config(L.l("remote ejb {0} has JNDI binding {1}", obj, jndiName));
+              if (log.isLoggable(Level.FINER))
+                log.finer(L.l("remote ejb {0} has JNDI binding {1}", obj, jndiName));
             }
           }
         }
         else {
-          if (localJndiName == null && log.isLoggable(Level.FINE))
-            log.fine(L.l("remote ejb {0} has no JNDI binding", remoteObj));
+          if (localJndiName == null && log.isLoggable(Level.FINER))
+            log.finer(L.l("remote ejb {0} has no JNDI binding", remoteObj));
         }
       }
     } catch (RuntimeException e) {

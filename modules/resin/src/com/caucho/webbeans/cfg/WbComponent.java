@@ -81,6 +81,8 @@ public class WbComponent {
   private InitProgram _init;
   private Object _scopeAdapter;
 
+  private boolean _isBound;
+
   public WbComponent()
   {
     _webbeans = WebBeansContainer.create().getWbWebBeans();
@@ -151,22 +153,6 @@ public class WbComponent {
   {
     _cl = cl;
     _targetType = cl;
-
-    if (_name == null) {
-      Named named = (Named) cl.getAnnotation(Named.class);
-
-      if (named != null)
-	_name = named.value();
-
-      if (_name == null || "".equals(_name)) {
-	String className = cl.getName();
-	int p = className.lastIndexOf('.');
-      
-	char ch = Character.toLowerCase(className.charAt(p + 1));
-      
-	_name = ch + className.substring(p + 2);
-      }
-    }
   }
 
   public Class getInstanceClass()
@@ -261,13 +247,28 @@ public class WbComponent {
   /**
    * Initialization.
    */
-  @PostConstruct
   public void init()
   {
     // _webbeans.addWbComponent(this);
     
     if (_type == null)
       _type = _webbeans.createComponentType(Component.class);
+
+    if (_name == null) {
+      Named named = (Named) _cl.getAnnotation(Named.class);
+
+      if (named != null)
+	_name = named.value();
+
+      if (_name == null || "".equals(_name)) {
+	String className = _targetType.getName();
+	int p = className.lastIndexOf('.');
+      
+	char ch = Character.toLowerCase(className.charAt(p + 1));
+      
+	_name = ch + className.substring(p + 2);
+      }
+    }
 
     introspectProduces();
     introspectConstructor();
@@ -281,16 +282,23 @@ public class WbComponent {
    */
   public void bind()
   {
-    Class []param = _ctor.getParameterTypes();
-    Annotation [][]paramAnn = _ctor.getParameterAnnotations();
+    synchronized (this) {
+      if (_isBound)
+	return;
 
-    _ctorArgs = new WbComponent[param.length];
+      Class []param = _ctor.getParameterTypes();
+      Annotation [][]paramAnn = _ctor.getParameterAnnotations();
 
-    for (int i = 0; i < param.length; i++) {
-      _ctorArgs[i] = _webbeans.bindParameter(param[i], paramAnn[i]);
+      _ctorArgs = new WbComponent[param.length];
+
+      for (int i = 0; i < param.length; i++) {
+	_ctorArgs[i] = _webbeans.bindParameter(param[i], paramAnn[i]);
+      }
+
+      _injectProgram = InjectIntrospector.introspectNoInit(_cl);
+      
+      _isBound = true;
     }
-
-    _injectProgram = InjectIntrospector.introspectNoInit(_cl);
   }
 
   /**
@@ -311,9 +319,9 @@ public class WbComponent {
       WbProducesComponent comp
 	= new WbProducesComponent(_webbeans, this, method);
 
-      comp.init();
-
       _webbeans.addWbComponent(comp);
+      
+      comp.init();
     }
   }
 
@@ -398,6 +406,30 @@ public class WbComponent {
     return false;
   }
 
+  public boolean isMatchByBinding(ArrayList<Binding> bindList)
+  {
+    for (int i = 0; i < bindList.size(); i++) {
+      if (! isMatchByBinding(bindList.get(i)))
+	return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Returns true if at least one of this component's bindings match
+   * the injection binding.
+   */
+  public boolean isMatchByBinding(Binding binding)
+  {
+    for (int i = 0; i < _bindingList.size(); i++) {
+      if (_bindingList.get(i).isMatch(binding))
+	return true;
+    }
+    
+    return false;
+  }
+
   public Object getByName()
   {
     if (_scopeContext != null) {
@@ -459,6 +491,34 @@ public class WbComponent {
       return create();
   }
 
+  public Object get(DependentScope scope)
+  {
+    if (_scopeContext != null) {
+      Object value = _scopeContext.get(_name);
+
+      if (value != null) {
+	return value;
+      }
+    }
+    else {
+      // XXX: key is the component
+      Object value = scope.get(_name);
+
+      if (value != null)
+	return value;
+    }
+    
+    if (_scopeContext != null) {
+      return createScoped(_name, _scopeContext);
+    }
+    else if (_name == null)
+      return create();
+    else if (scope != null)
+      return createScoped(_name, scope);
+    else
+      return create();
+  }
+
   protected Object create()
   {
     try {
@@ -494,6 +554,9 @@ public class WbComponent {
   protected Object createNew()
   {
     try {
+      if (! _isBound)
+	bind();
+      
       Object []args;
       if (_ctorArgs.length > 0) {
 	args = new Object[_ctorArgs.length];
@@ -582,6 +645,35 @@ public class WbComponent {
     return true;
   }
 
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(_targetType != null ? _targetType.getSimpleName() : "null");
+    sb.append("[");
+
+    for (WbBinding binding : _bindingList) {
+      sb.append(binding.toDebugString());
+      sb.append(",");
+    }
+
+    if (_type != null) {
+      sb.append("@");
+      sb.append(_type.getType().getSimpleName());
+    }
+    else
+      sb.append("@null");
+    
+    if (_scope != null) {
+      sb.append(", @");
+      sb.append(_scope.getSimpleName());
+    }
+
+    sb.append("]");
+
+    return sb.toString();
+  }
+
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
@@ -589,7 +681,10 @@ public class WbComponent {
     sb.append(getClass().getSimpleName());
     sb.append("[");
 
-    sb.append(_cl != null ? _cl.getSimpleName() : "null");
+    Class targetType = getTargetType();
+    if (targetType == null)
+      targetType = _cl;
+    sb.append(targetType != null ? targetType.getSimpleName() : "null");
     sb.append(", ");
 
     if (_type != null) {

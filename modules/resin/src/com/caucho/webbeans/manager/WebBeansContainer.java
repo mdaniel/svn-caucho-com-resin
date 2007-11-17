@@ -180,6 +180,11 @@ public class WebBeansContainer
     Environment.addEnvironmentListener(this);
   }
 
+  public WbComponentType createComponentType(Class cl)
+  {
+    return _wbWebBeans.createComponentType(cl);
+  }
+  
   public void addComponent(WbComponent comp)
   {
     addComponentByType(comp.getTargetType(), comp);
@@ -201,15 +206,16 @@ public class WebBeansContainer
     if (type == null)
       return;
     
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " adding " + comp);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(comp.toDebugString() + " added to " + this);
+    }
 
     addComponentRec(type, comp);
   }
     
   private void addComponentRec(Class type, WbComponent comp)
   {
-    if (type == null)
+    if (type == null || Object.class.equals(type))
       return;
     
     WebComponent webComponent = _componentMap.get(type);
@@ -230,7 +236,7 @@ public class WebBeansContainer
 
   public void addSingleton(Object object)
   {
-    SingletonComponent comp = new SingletonComponent(object);
+    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
 
     comp.setClass(object.getClass());
     comp.init();
@@ -315,6 +321,32 @@ public class WebBeansContainer
 
   /**
    * Returns the web beans component corresponding to a method
+   * and a @Named value
+   */
+  public WbComponent bind(Class type, String name)
+  {
+    ArrayList<Binding> bindingList = new ArrayList<Binding>();
+
+    Binding binding = new Binding(Named.class);
+    binding.put("value", name);
+
+    bindingList.add(binding);
+
+    return bindByBindings(type, bindingList);
+  }
+
+  /**
+   * Returns the web beans component corresponding to the return type.
+   */
+  public WbComponent bind(Class type)
+  {
+    ArrayList<Binding> bindingList = new ArrayList<Binding>();
+
+    return bindByBindings(type, bindingList);
+  }
+
+  /**
+   * Returns the web beans component corresponding to a method
    * parameter.
    */
   public WbComponent bind(Class type, Annotation []paramAnn)
@@ -334,12 +366,32 @@ public class WebBeansContainer
    */
   public WbComponent bind(Class type, ArrayList<Annotation> bindingList)
   {
+    _wbWebBeans.init();
+    
     WebComponent component = _componentMap.get(type);
 
     if (component != null)
       return component.bind(bindingList);
     else if (_parent != null)
       return _parent.bind(type, bindingList);
+    else
+      return null;
+  }
+
+  /**
+   * Returns the web beans component with a given binding list.
+   */
+  public WbComponent bindByBindings(Class type,
+				    ArrayList<Binding> bindingList)
+  {
+    _wbWebBeans.init();
+    
+    WebComponent component = _componentMap.get(type);
+
+    if (component != null)
+      return component.bindByBindings(type, bindingList);
+    else if (_parent != null)
+      return _parent.bindByBindings(type, bindingList);
     else
       return null;
   }
@@ -377,9 +429,6 @@ public class WebBeansContainer
 
   public void update()
   {
-    if (_pendingRootContextList.size() == 0)
-      return;
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -427,6 +476,8 @@ public class WebBeansContainer
 
 	webBeans.init();
       }
+    
+      _wbWebBeans.init();
     } catch (ConfigException e) {
       if (_configException == null)
 	_configException = e;
@@ -547,6 +598,9 @@ public class WebBeansContainer
 
   public String toString()
   {
-    return "WebBeansContainer[" + _classLoader.getId() + "]";
+    if (_classLoader.getId() != null)
+      return "WebBeansContainer[" + _classLoader.getId() + "]";
+    else
+      return "WebBeansContainer[]";
   }
 }

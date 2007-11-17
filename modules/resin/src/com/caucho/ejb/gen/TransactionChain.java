@@ -168,9 +168,11 @@ public class TransactionChain extends FilterCallChain
     out.println("thread.setContextClassLoader(_context._server.getClassLoader());");
     out.println();
 
+    /* XXX: need to check something like _context.isDead() instead
     // ejb/0fe4: throws exception if this context has been removed.
     out.println("getServer().getContext(_context.getPrimaryKey());");
     out.println();
+    */
 
     super.generateCall(out, retType, var, args);
 

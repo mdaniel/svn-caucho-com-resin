@@ -62,12 +62,13 @@ public class WebComponent {
 
       if (! comp.getClassName().equals(oldComponent.getClassName())) {
       }
-      else if (comp.isFromClass())
+      else if (comp.isFromClass() && ! oldComponent.isFromClass())
 	return;
-      else if (oldComponent.isFromClass())
+      else if (! comp.isFromClass() && oldComponent.isFromClass())
 	_componentList.remove(i);
-      else if (comp.equals(oldComponent))
+      else if (comp.equals(oldComponent)) {
 	return;
+      }
     }
 
     _componentList.add(comp);
@@ -155,11 +156,55 @@ public class WebComponent {
     }
 
     if (matchComp == null)
-      throw new ConfigException(L.l("WebBeans unable to find matching component."));
+      return null;
 
     else if (matchComp != null && secondComp != null) {
 	throw new ConfigException(L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
 					      matchComp, secondComp));
+    }
+    
+    return matchComp;
+  }
+  
+  public WbComponent bindByBindings(Class type, ArrayList<Binding> bindList)
+    throws ConfigException
+  {
+    WbComponent matchComp = null;
+    WbComponent secondComp = null;
+
+    for (int i = 0; i < _componentList.size(); i++) {
+      WbComponent comp = _componentList.get(i);
+
+      if (! comp.isMatchByBinding(bindList))
+	continue;
+
+      if (matchComp == null)
+	matchComp = comp;
+      else if (comp.getBindingList().size() == bindList.size()
+	       && matchComp.getBindingList().size() != bindList.size()) {
+	matchComp = comp;
+	secondComp = null;
+      }
+      else if (matchComp.getBindingList().size() == bindList.size()
+	       && comp.getBindingList().size() != bindList.size()) {
+      }
+      else if (matchComp.getType().getPriority() < comp.getType().getPriority()) {
+	matchComp = comp;
+	secondComp = null;
+      }
+      else if (comp.getType().getPriority() < matchComp.getType().getPriority()) {
+      }
+      else {
+	secondComp = comp;
+      }
+    }
+
+    if (matchComp == null)
+      return null;
+
+    else if (matchComp != null && secondComp != null) {
+      throw new ConfigException(L.l("WebBeans binding '{0}' conflicts between '{1}' and '{2}'.  WebBean injection must match uniquely.",
+				      type.getName(), matchComp, secondComp));
     }
     
     return matchComp;

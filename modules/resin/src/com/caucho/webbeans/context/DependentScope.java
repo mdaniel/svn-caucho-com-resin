@@ -30,11 +30,13 @@
 package com.caucho.webbeans.context;
 
 import com.caucho.server.webapp.WebApp;
+import com.caucho.webbeans.cfg.WbComponent;
 
 import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+
 
 /**
  * The application scope value
@@ -44,7 +46,8 @@ public class DependentScope extends ScopeContext {
     = new ThreadLocal<DependentScope>();
 
   private ScopeContext _scope;
-  private final HashMap<String,Object> _map = new HashMap<String,Object>(8);
+  private final IdentityHashMap<WbComponent,Object> _map
+    = new IdentityHashMap<WbComponent,Object>(8);
 
   private DependentScope(ScopeContext scope)
   {
@@ -82,9 +85,25 @@ public class DependentScope extends ScopeContext {
   /**
    * Returns the object with the given name.
    */
+  public Object get(WbComponent comp)
+  {
+    return _map.get(comp);
+  }
+
+  /**
+   * Sets the object with the given name.
+   */
+  public void set(WbComponent comp, Object value)
+  {
+    _map.put(comp, value);
+  }
+
+  /**
+   * Sets the object with the given name.
+   */
   public Object get(String name)
   {
-    return _map.get(name);
+    return null;
   }
 
   /**
@@ -92,7 +111,6 @@ public class DependentScope extends ScopeContext {
    */
   public void set(String name, Object value)
   {
-    _map.put(name, value);
   }
 
   @Override

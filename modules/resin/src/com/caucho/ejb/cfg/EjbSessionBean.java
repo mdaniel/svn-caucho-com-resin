@@ -218,8 +218,10 @@ public class EjbSessionBean extends EjbBean {
     if (type == null)
       return;
 
+    // ejb/0j20
     if (! type.isAnnotationPresent(Stateful.class)
-        && ! type.isAnnotationPresent(Stateless.class))
+        && ! type.isAnnotationPresent(Stateless.class)
+	&& ! isAllowPOJO())
       return;
 
     /* TCK: ejb/0f6d: bean with local and remote interfaces

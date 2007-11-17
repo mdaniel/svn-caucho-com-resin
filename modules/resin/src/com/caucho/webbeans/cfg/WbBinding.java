@@ -99,6 +99,11 @@ public class WbBinding {
   {
     _signature = signature;
   }
+
+  public Class getBindingClass()
+  {
+    return _cl;
+  }
   
   public String getClassName()
   {
@@ -151,6 +156,19 @@ public class WbBinding {
     return true;
   }
 
+  public boolean isMatch(Binding bind)
+  {
+    if (! _cl.equals(bind.getBindingClass()))
+      return false;
+
+    for (int i = 0; i < _valueList.size(); i++) {
+      if (! _valueList.get(i).isMatch(bind))
+	return false;
+    }
+
+    return true;
+  }
+
   public boolean isBindingPresent(ArrayList<Annotation> bindingList)
   {
     for (int i = 0; i < bindingList.size(); i++) {
@@ -172,6 +190,9 @@ public class WbBinding {
 
     WbBinding binding = (WbBinding) o;
 
+    if (! _cl.equals(binding._cl))
+      return false;
+
     int size = _valueList.size();
     if (size != binding._valueList.size()) {
       return false;
@@ -188,6 +209,43 @@ public class WbBinding {
     return true;
   }
 
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("@");
+    sb.append(_cl.getSimpleName());
+
+    if (_valueList.size() == 0)
+      return sb.toString();
+
+    sb.append("(");
+    for (int i = 0; i < _valueList.size(); i++) {
+      WbBindingValue value = _valueList.get(i);
+
+      if (i != 0)
+	sb.append(",");
+
+      if (! value.getName().equals("value")) {
+	sb.append(value.getName());
+	sb.append("=");
+      }
+
+      Object objValue = value.getValue();
+
+      if (objValue instanceof String) {
+	sb.append("\"");
+	sb.append(objValue);
+	sb.append("\"");
+      }
+      else
+	sb.append(objValue);
+    }
+    
+    sb.append(")");
+
+    return sb.toString();
+  }
+
   public String toString()
   {
     return "WbBinding[" + _cl.getName() + "]";
@@ -201,6 +259,16 @@ public class WbBinding {
     {
       _method = method;
       _value = value;
+    }
+
+    public String getName()
+    {
+      return _method.getName();
+    }
+
+    public Object getValue()
+    {
+      return _value;
     }
 
     boolean isMatch(Annotation ann)
@@ -221,6 +289,20 @@ public class WbBinding {
       } catch (Exception e) {
 	throw new ConfigException(e);
       }
+    }
+
+    boolean isMatch(Binding binding)
+    {
+      String key = _method.getName();
+
+      Object value = binding.get(key);
+
+      if (value == _value)
+	return true;
+      else if (value == null)
+	return false;
+      else
+	return value.equals(_value);
     }
 
     public boolean equals(Object o)

@@ -33,6 +33,7 @@ import java.lang.annotation.*;
 import javax.webbeans.*;
 
 import com.caucho.webbeans.cfg.WbComponent;
+import com.caucho.webbeans.cfg.WbWebBeans;
 
 /**
  * Component for a singleton beans
@@ -45,6 +46,17 @@ public class SingletonComponent extends WbComponent {
   public SingletonComponent(Object value)
   {
     _value = value;
+
+    setClass(value.getClass());
+  }
+
+  public SingletonComponent(WbWebBeans webBeans, Object value)
+  {
+    super(webBeans);
+    
+    _value = value;
+
+    setClass(value.getClass());
   }
 
   @Override

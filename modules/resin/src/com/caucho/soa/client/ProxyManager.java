@@ -40,8 +40,8 @@ public class ProxyManager {
   private static final Logger log 
     = Logger.getLogger(ProxyManager.class.getName());
 
-  private static final HashMap<String,EncodingProxyFactory> _factories =
-    new HashMap<String,EncodingProxyFactory>();
+  private static final HashMap<String,EncodingProxyFactory> _factories
+    = new HashMap<String,EncodingProxyFactory>();
 
   public static void addEncodingProxyFactory(String name, 
                                              EncodingProxyFactory factory)

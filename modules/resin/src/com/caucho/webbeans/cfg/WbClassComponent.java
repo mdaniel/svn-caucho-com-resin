@@ -50,6 +50,11 @@ import javax.webbeans.*;
 public class WbClassComponent extends WbComponent {
   private static final L10N L = new L10N(WbClassComponent.class);
   
+  public WbClassComponent()
+  {
+    super();
+  }
+  
   public WbClassComponent(WbWebBeans webbeans)
   {
     super(webbeans);

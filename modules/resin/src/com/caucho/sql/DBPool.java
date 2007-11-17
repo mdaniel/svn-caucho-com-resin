@@ -42,6 +42,7 @@ import com.caucho.management.j2ee.JDBCResource;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.ManagedConnectionFactory;
@@ -113,6 +114,7 @@ public class DBPool implements DataSource {
   private EnvironmentLocal<DataSource> _localDataSourceImpl;
 
   private String _var;
+  private String _name;
   private String _jndiName;
   private String _tmpName;
 
@@ -153,8 +155,19 @@ public class DBPool implements DataSource {
   {
     _jndiName = name;
 
-    if (_var == null)
+    if (_var == null && _name == null)
       getPool().setName(name);
+  }
+
+  /**
+   * Sets the Pool's WebBeans name.  Also puts the pool in the classloader's
+   * list of pools.
+   */
+  public void setName(String name)
+  {
+    _name = name;
+
+    getPool().setName(name);
   }
 
   /**
@@ -164,7 +177,8 @@ public class DBPool implements DataSource {
   {
     _var = var;
 
-    getPool().setName(var);
+    if (_name == null)
+      getPool().setName(var);
   }
 
   /**
@@ -172,15 +186,7 @@ public class DBPool implements DataSource {
    */
   public String getName()
   {
-    if (_var != null)
-      return _var;
-    else if (getJndiName() != null)
-      return getJndiName();
-    else {
-      _tmpName = "dbpool-" + _g_id++;
-      return _tmpName;
-    }
-      
+    return getPool().getName();
   }
 
   /**
@@ -654,10 +660,21 @@ public class DBPool implements DataSource {
       if (! name.startsWith("java:"))
         name = "java:comp/env/" + name;
 
-      log.config("database " + name + " starting");
-
       Jndi.bindDeep(name, this);
     }
+
+    String name = _name;
+    
+    if (name == null)
+      name = _jndiName;
+    
+    if (name == null)
+      name = _var;
+
+    if (name != null)
+      WebBeansContainer.create().addSingleton(this, name);
+    else
+      WebBeansContainer.create().addSingleton(this);
 
     J2EEManagedObject.register(new JDBCResource(this));
     J2EEManagedObject.register(new JDBCDataSource(this));

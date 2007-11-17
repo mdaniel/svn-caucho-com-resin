@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.cfg.AbstractBeanConfig;
 
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
@@ -45,21 +46,22 @@ import java.util.logging.Logger;
 
 /**
  */
-public class WebServiceClient implements ObjectProxy, java.io.Serializable {
+public class WebServiceClient extends AbstractBeanConfig
+   implements ObjectProxy, java.io.Serializable
+{
   private static final Logger log 
     = Logger.getLogger(WebServiceClient.class.getName());
   private static final L10N L = new L10N(WebServiceClient.class);
 
   private Class _serviceClass;
-  private String _jndiName;
   private String _url;
 
   private ArrayList<Class> _jaxbClasses = null;
   private StringBuilder _jaxbPackages = null;
 
-  public void setJndiName(String jndiName)
+  public void setClass(Class serviceClass)
   {
-    _jndiName = jndiName;
+    setInterface(serviceClass);
   }
 
   public void setInterface(Class serviceClass)
@@ -203,15 +205,7 @@ public class WebServiceClient implements ObjectProxy, java.io.Serializable {
   public void init()
     throws Throwable
   {
-    if (_jndiName == null)
-      throw new ConfigException(L.l("jndi-name not set for <web-service-client>"));
-
-    /*
-    if (_serviceClass == null)
-      throw new ConfigException("interface not set for <web-service-client>");
-    */
-
-    Jndi.bindDeepShort(_jndiName, this);
+    register(createObject(new Hashtable()), _serviceClass);
   }
 }
 

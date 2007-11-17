@@ -41,13 +41,14 @@ import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 import com.caucho.jms.queue.AbstractTopic;
 import com.caucho.naming.*;
+import com.caucho.webbeans.cfg.AbstractBeanConfig;
 
 import com.caucho.util.*;
 
 /**
  * jms-topic configuration
  */
-public class JmsTopicConfig
+public class JmsTopicConfig extends AbstractBeanConfig
 {
   private static final L10N L = new L10N(JmsTopicConfig.class);
   private static final Logger log
@@ -56,18 +57,7 @@ public class JmsTopicConfig
   private static HashMap<String,Class> _urlMap
     = new  HashMap<String,Class>();
 
-  private InitProgram _init;
-
-  private String _jndiName;
   private String _url;
-
-  /**
-   * Sets the JNDI name to be used to bind the topic
-   */
-  public void setJndiName(String name)
-  {
-    _jndiName = name;
-  }
 
   /**
    * Sets the JMS URL for the topic
@@ -78,20 +68,18 @@ public class JmsTopicConfig
   }
 
   /**
-   * Sets the init builder program.
-   */
-  public void setInit(InitProgram init)
-  {
-    _init = init;
-  }
-
-  /**
    * Initialize the topic.
    */
   @PostConstruct
   public void init()
     throws Exception
   {
+    if (getInstanceClass() != null) {
+      register();
+
+      return;
+    }
+    
     if (_url == null)
       throw new ConfigException(L.l("<jms-topic> requires a url attribute"));
 
@@ -110,8 +98,10 @@ public class JmsTopicConfig
 
     AbstractTopic topic = (AbstractTopic) cl.newInstance();
 
-    if (_jndiName != null)
-      topic.setName(_jndiName);
+    if (getName() != null)
+      topic.setName(getName());
+    else if (getJndiName() != null)
+      topic.setName(getJndiName());
 
     for (String paramValue : param.split(";")) {
       if (paramValue.equals(""))
@@ -128,13 +118,12 @@ public class JmsTopicConfig
       Config.setStringAttribute(topic, name, value);
     }
 
-    if (_init != null)
-      _init.configure(topic);
+    if (getInit() != null)
+      getInit().configure(topic);
 
     topic.postConstruct();
 
-    if (_jndiName != null)
-      Jndi.bindDeepShort(_jndiName, topic);
+    register(topic);
   }
 
   static {

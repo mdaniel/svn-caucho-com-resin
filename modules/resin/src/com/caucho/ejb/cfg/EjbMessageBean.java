@@ -169,6 +169,14 @@ public class EjbMessageBean extends EjbBean {
     _destination = (Destination) obj;
   }
 
+  /**
+   * Sets the JMS destination.
+   */
+  public void setDestinationValue(Destination destination)
+  {
+    _destination = destination;
+  }
+
   public void setMessagingType(Class messagingType)
   {
     if (messagingType != Object.class)
@@ -220,6 +228,14 @@ public class EjbMessageBean extends EjbBean {
                                     factory.getObject()));
 
     _connectionFactory = (ConnectionFactory) factory.getObject();
+  }
+
+  /**
+   * Sets the connection factory.
+   */
+  public void setConnectionFactoryValue(ConnectionFactory factory)
+  {
+    _connectionFactory = factory;
   }
 
   /**
@@ -392,8 +408,10 @@ public class EjbMessageBean extends EjbBean {
 
     ApiClass type = getEJBClassWrapper();
 
+    // ejb/0j40
     if (! type.isAnnotationPresent(MessageDriven.class)
-        && ! type.isAnnotationPresent(MessageDriven.class))
+        && ! type.isAnnotationPresent(MessageDriven.class)
+        && ! isAllowPOJO())
       return;
 
     // XXX: annotations in super classes?

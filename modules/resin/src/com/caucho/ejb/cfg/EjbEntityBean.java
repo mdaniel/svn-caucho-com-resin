@@ -1340,7 +1340,7 @@ public class EjbEntityBean extends EjbBean {
             name, homeName));
           */
 
-          if (! objectClass.equals(method.getReturnType()))
+          if (! objectClass.getJavaClass().equals(method.getReturnType()))
             throw error(L.l("{0}: '{1}' must return '{2}'.  Find methods must return the remote or local interface.",
                             homeName,
                             method.getFullName(),
@@ -1355,7 +1355,7 @@ public class EjbEntityBean extends EjbBean {
           if (impl != null)
             validateExceptions(method, impl);
 
-          if (objectClass.equals(method.getReturnType())) {
+          if (objectClass.getJavaClass().equals(method.getReturnType())) {
             if (impl != null && ! isPrimaryKeyClass(impl.getReturnType()))
               throw error(L.l("{0}: '{1}' must return primary key '{2}'.  ejbFind methods must return the primary key",
                               beanName,
@@ -1392,7 +1392,7 @@ public class EjbEntityBean extends EjbBean {
 
         validateException(method, FinderException.class);
 
-        if (! retType.equals(objectClass)
+        if (! retType.equals(objectClass.getJavaClass())
 	    && (! Collection.class.isAssignableFrom(retType)
 		&& ! Enumeration.class.equals(retType)
 		|| name.equals("findByPrimaryKey"))) {

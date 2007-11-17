@@ -45,6 +45,10 @@ import javax.webbeans.*;
 public class SingletonClassComponent extends WbClassComponent {
   private Object _value;
   
+  public SingletonClassComponent()
+  {
+  }
+  
   public SingletonClassComponent(WbWebBeans webbeans)
   {
     super(webbeans);

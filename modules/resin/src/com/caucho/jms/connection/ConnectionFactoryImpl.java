@@ -438,4 +438,9 @@ public class ConnectionFactoryImpl
 
     return conn;
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

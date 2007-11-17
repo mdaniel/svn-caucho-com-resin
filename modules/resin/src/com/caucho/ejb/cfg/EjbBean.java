@@ -35,14 +35,7 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
-import com.caucho.config.types.EjbLocalRef;
-import com.caucho.config.types.EjbRef;
-import com.caucho.config.types.EnvEntry;
-import com.caucho.config.types.MessageDestinationRef;
-import com.caucho.config.types.Period;
-import com.caucho.config.types.PostConstructType;
-import com.caucho.config.types.ResourceEnvRef;
-import com.caucho.config.types.ResourceRef;
+import com.caucho.config.types.*;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
@@ -134,7 +127,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   protected boolean _isEJB21;
   protected boolean _isEJB30;
 
-  private boolean _isAllowPOJO;
+  private boolean _isAllowPOJO = true;
 
   private boolean _isContainerTransaction = true;
 
@@ -611,15 +604,19 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     
     setHomeWrapper(home);
 
+    /* XXX: skipping temp
     // ejb/0ff0
     // Adds the 2.1 remote interface
     ApiMethod method = findFirstCreateMethod(home);
 
-    ApiClass remoteWrapper = new ApiClass(method.getReturnType());
+    ApiClass remoteWrapper;
+
+    remoteWrapper = new ApiClass(method.getReturnType());
 
     // Order is important.
     setRemote21(remoteWrapper);
     setRemoteWrapper(remoteWrapper);
+    */
   }
 
   /**
@@ -1110,6 +1107,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       _serverProgram = new BuilderProgramContainer();
 
     _serverProgram.addProgram(init);
+  }
+
+  public void setInit(InitProgram init)
+  {
+    if (_initProgram == null)
+      _initProgram = new BuilderProgramContainer();
+
+    _initProgram.addProgram(init.getBuilderProgram());
   }
 
   public void addPostConstruct(PostConstructType postConstruct)

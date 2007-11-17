@@ -52,6 +52,12 @@
 
     <ejb-server>com.caucho.ejb.EJBServer</ejb-server>
 
+    <ejb-message-bean>com.caucho.ejb.cfg.MessageBeanConfig</ejb-message-bean>
+
+    <ejb-stateless-bean>com.caucho.ejb.cfg.StatelessBeanConfig</ejb-stateless-bean>
+
+    <ejb-stateful-bean>com.caucho.ejb.cfg.StatefulBeanConfig</ejb-stateful-bean>
+
     <env-entry>com.caucho.config.types.EnvEntry</env-entry>
 
     <java>com.caucho.java.JavacConfig</java>
@@ -109,6 +115,8 @@
     <temp-dir>com.caucho.java.TempDir</temp-dir>
     <temporary-directory>com.caucho.java.TempDir</temporary-directory>
 
+    <web-service-client>com.caucho.soa.client.WebServiceClient</web-service-client>
+    
     <work-dir>com.caucho.java.WorkDir</work-dir>
     <work-directory>com.caucho.java.WorkDir</work-directory>
   </environment-attribute>
