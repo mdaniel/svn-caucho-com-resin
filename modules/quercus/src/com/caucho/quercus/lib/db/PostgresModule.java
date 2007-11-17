@@ -832,26 +832,35 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static StringValue pg_escape_bytea(Env env,
-                                            InputStream is)
+                                            StringValue data)
   {
+    if (data.length() == 0)
+      return data;
+
     try {
-
-      StringBuilderValue bb = new StringBuilderValue();
-
-      bb.append(is);
-
       Class cl = Class.forName("org.postgresql.util.PGbytea");
 
       Method method = cl.getDeclaredMethod("toPGString", new Class[] {byte[].class});
 
-      String s = (String) method.invoke(cl, new Object[] { bb.toBytes()});
+      String s = (String) method.invoke(cl, new Object[] { data.toBytes()});
 
-      return Postgres.pgRealEscapeString((StringValue) StringValue.create(s));
+      return Postgres.pgRealEscapeString(env.createString(s));
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;
     }
+  }
+
+  /**
+   * Escape a string for insertion into a bytea field.
+   */
+  @ReturnNullAsFalse
+  public static StringValue pg_escape_bytea(Env env,
+                                            @NotNull Postgres conn,
+                                            StringValue data)
+  {
+    return pg_escape_bytea(env, data);
   }
 
   /**
