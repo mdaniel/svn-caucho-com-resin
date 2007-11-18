@@ -46,6 +46,7 @@ import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.*;
 
 import javax.sql.DataSource;
 import javax.persistence.*;
@@ -634,6 +635,7 @@ public class AmberContainer implements ScanListener {
     if (amberUnit != null) {
       context = new EntityManagerProxy(amberUnit);
       _persistenceContextMap.put(name, context);
+      
       return context;
     }
 

@@ -62,6 +62,7 @@ import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.webbeans.manager.*;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
@@ -237,6 +238,10 @@ public class AmberPersistenceUnit {
 
     Jndi.bindDeep(_amberContainer.getPersistenceContextJndiPrefix() + name,
                   new EntityManagerNamingProxy(this));
+
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    webBeans.addSingleton(new AmberEntityManagerFactory(this), name);
+    webBeans.addSingleton(new EntityManagerProxy(this), name);
   }
 
   public EntityManager getEntityManager()

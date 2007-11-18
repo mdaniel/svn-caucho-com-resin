@@ -72,7 +72,6 @@ public class AmberConfig {
   public AmberConfig(EjbConfig ejbConfig)
   {
     _ejbConfig = ejbConfig;
-    _manager = _ejbConfig.getEjbContainer().createEjbPersistenceUnit();
   }
 
   public void init()
@@ -85,6 +84,9 @@ public class AmberConfig {
    */
   public AmberPersistenceUnit getManager()
   {
+    if (_manager == null)
+      _manager = _ejbConfig.getEjbContainer().createEjbPersistenceUnit();
+    
     return _manager;
   }
   
