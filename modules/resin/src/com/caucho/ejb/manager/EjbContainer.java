@@ -71,6 +71,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 
   private AmberPersistenceUnit _ejbPersistenceUnit;
 
+  private HashSet<String> _ejbUrls = new HashSet<String>();
+
   //
   // configuration
   //
@@ -363,11 +365,24 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   //
 
   /**
+   * Adds a root URL
+   */
+  public void addRoot(Path root)
+  {
+    if (root.getURL().endsWith(".jar"))
+      root = JarPath.create(root);
+    
+    _ejbUrls.add(root.getURL());
+  }
+
+  /**
    * Returns true if the root is a valid scannable root.
    */
   public boolean isRootScannable(Path root)
   {
-    if (! root.lookup("META-INF/ejb-jar.xml").canRead())
+    if (_ejbUrls.contains(root.getURL())) {
+    }
+    else if (! root.lookup("META-INF/ejb-jar.xml").canRead())
       return false;
 
     EjbRootConfig context = _configManager.createRootConfig(root);
@@ -400,7 +415,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 			      String className)
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
-    
+
+    System.out.println("MATCH: " + root + " " + className);
     config.addClassName(className);
   }
 

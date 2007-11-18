@@ -98,9 +98,9 @@ public class SessionServer extends AbstractServer
       thread.setContextClassLoader(_loader);
 
       super.init();
-
-      Jndi.rebindDeep("java:comp/env/ejbContext", getSessionContext());
-      Jndi.rebindDeep("java:comp/env/sessionContext", getSessionContext());
+      
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      webBeans.addSingleton(getSessionContext());
 
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();

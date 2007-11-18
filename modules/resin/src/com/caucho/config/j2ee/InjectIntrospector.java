@@ -102,8 +102,6 @@ public class InjectIntrospector {
     if (type == null || type.equals(Object.class))
       return;
 
-    introspectConstruct(initList, type.getSuperclass());
-
     for (Method method : type.getDeclaredMethods()) {
       if (method.isAnnotationPresent(PostConstruct.class)) {
         if (method.getParameterTypes().length != 0)
@@ -125,6 +123,8 @@ public class InjectIntrospector {
         initList.add(new PreDestroyProgram(method));
       }
     }
+    
+    introspectConstruct(initList, type.getSuperclass());
   }
 
   public static void
@@ -154,6 +154,8 @@ public class InjectIntrospector {
     try {
       introspectInjectImpl(injectList, type);
     } catch (ClassNotFoundException e) {
+    } catch (NoClassDefFoundError e) {
+      // occurs in some TCK tests
     }
   }
 
@@ -562,7 +564,11 @@ public class InjectIntrospector {
       return new ComponentGenerator(location, component);
     }
 
-    throw new UnsupportedOperationException();
+    throw new ConfigException(location + L.l("{0} with mappedName={1}, beanName={2}, and jndiName={3} does not match anything",
+                                             type.getName(),
+                                             mappedName,
+                                             beanName,
+                                             jndiName));
 
     /*
       if (_component != null && _jndiName != null && ! "".equals(_jndiName)) {

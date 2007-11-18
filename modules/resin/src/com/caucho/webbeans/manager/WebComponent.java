@@ -166,9 +166,7 @@ public class WebComponent {
     }
 
     if (matchComp == null) {
-      throw new ConfigException(location
-				+ L.l("Injection of '{0}' with bindings {1} does not match any component",
-				      type.getName(), bindList));
+      return null;
     }
     else if (matchComp != null && secondComp != null) {
       throw new ConfigException(location

@@ -423,9 +423,11 @@ public class EnterpriseApplication
       EjbContainer ejbContainer = EjbContainer.create();
 
       for (Path path : _ejbPaths) {
-        // ejbContainer.addRoot(path);
+        ejbContainer.addRoot(path);
 	_loader.addJar(path);
       }
+
+      _loader.validate();
 
       // XXX:??
       /*
