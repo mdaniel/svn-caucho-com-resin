@@ -373,6 +373,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   {
     StringBuilder sb = new StringBuilder();
 
+
     for (AbstractServer server : _server) {
       server.addClientRemoteConfig(sb);
     }
