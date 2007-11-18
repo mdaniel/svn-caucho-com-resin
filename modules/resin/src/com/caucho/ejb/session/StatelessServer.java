@@ -28,13 +28,15 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.config.j2ee.Inject;
+import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.ejb.webbeans.SessionComponent;
+import com.caucho.ejb.webbeans.StatelessComponent;
 import com.caucho.naming.Jndi;
 import com.caucho.util.Log;
 import com.caucho.webbeans.manager.WebBeansContainer;
@@ -52,7 +54,8 @@ import java.util.logging.Logger;
  * Server home container for a stateless session bean
  */
 public class StatelessServer extends AbstractServer {
-  protected static Logger log = Log.open(StatelessServer.class);
+  protected static Logger log
+    = Logger.getLogger(StatelessServer.class.getName());
 
   private AbstractStatelessContext _homeContext;
 
@@ -96,10 +99,8 @@ public class StatelessServer extends AbstractServer {
 
       super.init();
 
-      Jndi.rebindDeep("java:comp/env/ejbContext",
-                      getStatelessContext());
-      Jndi.rebindDeep("java:comp/env/sessionContext",
-                      getStatelessContext());
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      webBeans.addSingleton(getStatelessContext());
 
       // EJB 2.1
       _localHome = getStatelessContext().createLocalHome();
@@ -139,8 +140,6 @@ public class StatelessServer extends AbstractServer {
         }
         }
       */
-
-      log.config(this + " starting");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -155,7 +154,7 @@ public class StatelessServer extends AbstractServer {
 
     if (beanClass != null && localApiList != null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
-      SessionComponent comp = new SessionComponent(this);
+      StatelessComponent comp = new StatelessComponent(this);
     
       comp.setTargetType(beanClass);
     

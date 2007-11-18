@@ -91,7 +91,7 @@ public class SessionCreateMethod extends BaseMethod {
 
     out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
 
-    out.println("Bean bean = new Bean(cxt);");
+    out.println("Bean bean = new Bean(cxt, null);");
 
     getCall().generateCall(out, null, "bean", args);
 

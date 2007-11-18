@@ -72,4 +72,9 @@ public class Binding {
   {
     return _valueMap.get(key);
   }
+
+  public String toString()
+  {
+    return "@" + _cl.getSimpleName() + _valueMap;
+  }
 }

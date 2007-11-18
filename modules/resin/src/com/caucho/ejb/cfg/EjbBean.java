@@ -604,7 +604,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     
     setHomeWrapper(home);
 
-    /* XXX: skipping temp
     // ejb/0ff0
     // Adds the 2.1 remote interface
     ApiMethod method = findFirstCreateMethod(home);
@@ -616,7 +615,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     // Order is important.
     setRemote21(remoteWrapper);
     setRemoteWrapper(remoteWrapper);
-    */
   }
 
   /**

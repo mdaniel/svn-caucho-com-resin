@@ -483,6 +483,8 @@ public class EjbMessageBean extends EjbBean {
 
     server.setContainerTransaction(getContainerTransaction());
 
+    server.setEjbClass(getEJBClass());
+
     server.setContextImplClass(getEJBClass());
     server.setMessageListenerType(_messagingType);
     server.setAroundInvokeMethodName(getAroundInvokeMethodName());

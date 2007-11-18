@@ -37,11 +37,12 @@ import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
-import com.caucho.ejb.webbeans.SessionComponent;
+import com.caucho.ejb.webbeans.StatefulComponent;
 import com.caucho.naming.Jndi;
 import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
@@ -119,7 +120,7 @@ public class SessionServer extends AbstractServer
 
     if (beanClass != null && localApiList != null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
-      SessionComponent comp = new SessionComponent(this);
+      StatefulComponent comp = new StatefulComponent(this);
     
       comp.setTargetType(beanClass);
     
@@ -268,6 +269,15 @@ public class SessionServer extends AbstractServer
   public Object getLocalObject(Class businessInterface)
   {
     return getClientObject(businessInterface);
+  }
+
+  /**
+   * Returns the 3.0 local stub for the container
+   */
+  @Override
+  public Object getLocalObject(DependentScope scope)
+  {
+    return _homeContext._caucho_newInstance(scope);
   }
 
   /**

@@ -68,6 +68,32 @@ import java.util.concurrent.*;
 public class InjectIntrospector {
   private static final L10N L = new L10N(InjectIntrospector.class);
   private static final Logger log = Log.open(InjectIntrospector.class);
+  
+  public static void
+    introspectInit(ArrayList<Inject> initList, Class type)
+    throws ConfigException
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectInit(initList, type.getSuperclass());
+
+    for (Method method : type.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(PostConstruct.class)) {
+        if (method.getParameterTypes().length != 0)
+          throw new ConfigException(location(method)
+				    + L.l("{0}: @PostConstruct is requires zero arguments"));
+	
+	/*
+        PostConstructProgram initProgram
+          = new PostConstructProgram(method);
+
+        if (! initList.contains(initProgram))
+          initList.add(initProgram);
+	*/
+      }
+    }
+  }
 
   public static void
     introspectConstruct(ArrayList<BuilderProgram> initList, Class type)
@@ -181,7 +207,7 @@ public class InjectIntrospector {
         }
       }
 
-      // configure(injectList, method, fieldName, param[0]);
+      introspect(injectList, method);
     }
   }
 
@@ -309,6 +335,51 @@ public class InjectIntrospector {
 
     if (gen != null)
       injectList.add(new FieldInject(field, gen));
+  }
+
+  private static void introspect(ArrayList<Inject> injectList,
+				 Method method)
+    throws ConfigException
+  {
+    String location = location(method);
+    ValueGenerator gen = null;
+    Class type = null;
+
+    if (method.getParameterTypes().length > 0)
+      type = method.getParameterTypes()[0];
+
+    if (method.isAnnotationPresent(Resource.class)) {
+      Resource resource = method.getAnnotation(Resource.class);
+
+      gen = generateResource(location, type, resource);
+    }
+    else if (method.isAnnotationPresent(EJB.class)) {
+      EJB ejb = method.getAnnotation(EJB.class);
+
+      gen = generateEjb(location, type, ejb);
+    }
+    else if (method.isAnnotationPresent(PersistenceUnit.class)) {
+      PersistenceUnit pUnit = method.getAnnotation(PersistenceUnit.class);
+
+      gen = generatePersistenceUnit(location, type, pUnit);
+    }
+    else if (method.isAnnotationPresent(PersistenceContext.class)) {
+      PersistenceContext pContext
+	= method.getAnnotation(PersistenceContext.class);
+
+      gen = generatePersistenceContext(location, type, pContext);
+    }
+    else if (method.isAnnotationPresent(WebServiceRef.class)) {
+      WebServiceRef webService
+	= method.getAnnotation(WebServiceRef.class);
+
+      gen = generateWebService(location, type, webService);
+    }
+    else if (hasBindingAnnotation(method))
+      introspectWebBean(injectList, method);
+
+    if (gen != null)
+      injectList.add(new MethodInject(method, gen));
   }
 
   private static ValueGenerator

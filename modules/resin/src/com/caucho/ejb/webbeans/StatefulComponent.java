@@ -41,12 +41,12 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 /**
  * Component for session beans
  */
-public class SessionComponent extends ComponentImpl {
+public class StatefulComponent extends ComponentImpl {
   private static final Object []NULL_ARGS = new Object[0];
 
   private AbstractServer _server;
 
-  public SessionComponent(AbstractServer server)
+  public StatefulComponent(AbstractServer server)
   {
     super(WebBeansContainer.create().getWbWebBeans());
     
@@ -86,7 +86,7 @@ public class SessionComponent extends ComponentImpl {
     if (obj != null)
       return obj;
 
-    obj = _server.getLocalObject();
+    obj = _server.getLocalObject(scope);
     scope.put(this, obj);
 
     return obj;

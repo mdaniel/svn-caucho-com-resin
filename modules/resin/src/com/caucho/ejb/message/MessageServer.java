@@ -208,10 +208,11 @@ public class MessageServer extends AbstractServer {
    * Starts the server.
    */
   @Override
-  public void start()
+  public boolean start()
     throws Exception
   {
-    super.start();
+    if (! super.start())
+      return false;
 
     ConnectionFactory factory = _connectionFactory;
 
@@ -256,6 +257,8 @@ public class MessageServer extends AbstractServer {
     }
 
     _connection.start();
+
+    return true;
   }
 
   void generate()
@@ -347,7 +350,9 @@ public class MessageServer extends AbstractServer {
         listener = ((MessageListenerAdapter) _listener).getListener();
       }
 
-      getInitProgram().configure(listener);
+      initInstance(listener, null);
+      
+      // getInitProgram().configure(listener);
 
       Method create = null;
 

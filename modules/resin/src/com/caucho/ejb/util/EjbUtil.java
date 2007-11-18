@@ -27,27 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.session;
+package com.caucho.ejb.util;
 
-import java.util.*;
-
-import com.caucho.config.j2ee.Inject;
-import com.caucho.config.j2ee.InjectIntrospector;
-import com.caucho.ejb.manager.EjbContainer;
+import java.lang.reflect.*;
 
 /**
- * Server container for a session bean.
+ * Utilities
  */
-public class StatefulServer extends SessionServer
-{
-  public StatefulServer(EjbContainer ejbContainer)
+public class EjbUtil {
+  private EjbUtil()
   {
-    super(ejbContainer);
   }
 
-  @Override
-  protected String getType()
+  public static Method getMethod(Class cl,
+				 String methodName,
+				 Class paramTypes[])
+    throws Exception
   {
-    return "stateful:";
+    Method method = null;
+    Exception firstException = null;
+
+    do {
+      try {
+	method = cl.getDeclaredMethod(methodName, paramTypes);
+      } catch (Exception e) {
+	if (firstException == null)
+	  firstException = e;
+
+	cl = cl.getSuperclass();
+      }
+    } while (method == null && cl != null);
+
+    if (method == null)
+      throw firstException;
+
+    return method;
   }
 }

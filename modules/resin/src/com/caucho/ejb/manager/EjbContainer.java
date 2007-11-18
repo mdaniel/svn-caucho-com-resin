@@ -425,7 +425,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 	try {
 	  thread.setContextClassLoader(server.getClassLoader());
 
-	  server.start();
+ 	  server.start();
 	} finally {
 	  thread.setContextClassLoader(oldLoader);
 	}

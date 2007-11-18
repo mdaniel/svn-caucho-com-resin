@@ -221,7 +221,6 @@ public class WbComponentConfig {
       comp.setName(_name);
 
     comp.setBindingList(_bindingList);
-    System.out.println("BL: " + _bindingList);
 
     if (_type != null)
       comp.setType(_type);

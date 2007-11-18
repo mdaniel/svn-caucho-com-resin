@@ -249,6 +249,16 @@ public class WebBeansContainer
     SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
 
     comp.setName(name);
+
+    WbBinding binding = new WbBinding();
+    binding.setClass(Named.class);
+    binding.addValue("value", name);
+
+    ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+    bindingList.add(binding);
+    
+    comp.setBindingList(bindingList);
+    
     comp.init();
 
     addComponent(comp);

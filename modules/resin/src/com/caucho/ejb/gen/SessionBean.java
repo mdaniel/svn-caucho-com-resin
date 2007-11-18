@@ -60,6 +60,11 @@ public class SessionBean extends ClassComponent {
     _contextClassName = contextClassName;
   }
 
+  public boolean isStateless()
+  {
+    return false;
+  }
+
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -90,6 +95,7 @@ public class SessionBean extends ClassComponent {
       shortContextName = shortContextName.substring(p + 1);
 
     out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + _contextClassName + "\");");
+    out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
     out.println();
     out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
     out.println("private Bean _freeBean;");
@@ -173,6 +179,34 @@ public class SessionBean extends ClassComponent {
     if (_bean.getLocalHome() == null && _bean.getLocalList().size() == 0)
       return;
 
+    if (! isStateless()) {
+      out.println();
+      out.print("protected Object _caucho_newInstance" + suffix);
+      out.println("(com.caucho.webbeans.context.DependentScope scope)");
+      out.println("{");
+      out.pushDepth();
+
+      out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
+
+      // XXX TCK: bb/session/stateful/cm/allowed/afterBeginSetRollbackOnlyTest (infinite recursion issue)
+
+      if (isStateless())
+	out.println("Bean bean = new Bean(cxt);");
+      else
+	out.println("Bean bean = new Bean(cxt, scope);");
+
+      out.println("cxt._ejb_free(bean);");
+
+      out.println();
+
+      out.println();
+
+      out.println("return cxt.createLocalObject" + suffix + "();");
+
+      out.popDepth();
+      out.println("}");
+    }
+
     out.println();
     out.println("protected Object _caucho_newInstance" + suffix + "()");
     out.println("{");
@@ -182,24 +216,14 @@ public class SessionBean extends ClassComponent {
 
     // XXX TCK: bb/session/stateful/cm/allowed/afterBeginSetRollbackOnlyTest (infinite recursion issue)
 
-    out.println("Bean bean = new Bean(cxt);");
+    if (isStateless())
+      out.println("Bean bean = new Bean(cxt);");
+    else
+      out.println("Bean bean = new Bean(cxt, null);");
 
     out.println("cxt._ejb_free(bean);");
 
     out.println();
-
-    /*
-      Class retType = getReturnType();
-      if ("RemoteHome".equals(_prefix))
-        out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
-      else if ("LocalHome".equals(_prefix))
-        out.println("return (" + retType.getName() + ") cxt.getLocalView();");
-      else
-        throw new IOException(L.l("trying to create unknown type {0}",
-                              _prefix));
-    */
-
-    //out.println("return cxt.getEJBLocalObject();");
 
     out.println("return cxt.createLocalObject" + suffix + "();");
 
@@ -221,7 +245,10 @@ public class SessionBean extends ClassComponent {
 
     out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
 
-    out.println("Bean bean = new Bean(cxt);");
+    if (isStateless())
+      out.println("Bean bean = new Bean(cxt);");
+    else
+      out.println("Bean bean = new Bean(cxt, null);");
 
     out.println("cxt._ejb_free(bean);");
 
@@ -254,7 +281,7 @@ public class SessionBean extends ClassComponent {
     out.println();
     out.println("protected final static java.util.logging.Logger __caucho_log = com.caucho.log.Log.open(" + _ejbClass.getName() + ".class);");
     out.println("private static int __caucho_dbg_id;");
-    out.println("private final String __caucho_id;");
+    out.println("private String __caucho_id;");
 
     out.println(_contextClassName + " _ejb_context;");
     out.println("boolean _ejb_isActive;");
@@ -266,14 +293,23 @@ public class SessionBean extends ClassComponent {
     }
 
     out.println();
-    out.println("Bean(" + _contextClassName + " context)");
+    if (isStateless())
+      out.println("Bean(" + _contextClassName + " context)");
+    else
+      out.println("Bean(" + _contextClassName + " context, com.caucho.webbeans.context.DependentScope scope)");
     out.println("{");
     out.pushDepth();
 
+    out.println("if (__caucho_isFiner) {");
+    out.pushDepth();
+      
     out.println("synchronized (" + _ejbClass.getName() + ".class) {");
-    out.println("  __caucho_id = __caucho_dbg_id++ + \"-" + _ejbClass.getName() + "\";");
+    out.println("  __caucho_id = \"" + _ejbClass.getName() + "[\" + __caucho_dbg_id++ + \"]\";");
     out.println("}");
     out.println("__caucho_log.fine(__caucho_id + \":new()\");");
+    out.popDepth();
+    out.println("}");
+
 
     out.println("try {");
     out.pushDepth();
@@ -290,7 +326,10 @@ public class SessionBean extends ClassComponent {
     //out.println("__caucho_initInjection();");
 
     out.println();
-    out.println("context.getServer().initInstance(this);");
+    if (isStateless())
+      out.println("context.getServer().initInstance(this, null);");
+    else
+      out.println("context.getServer().initInstance(this, scope);");
 
     out.println();
     out.println("__caucho_callInterceptorsPostConstruct();");
@@ -298,7 +337,7 @@ public class SessionBean extends ClassComponent {
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.println("  throw e;");
-    out.println("} catch (Throwable e) {");
+    out.println("} catch (Exception e) {");
     out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
     out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
     out.println("}");
@@ -660,12 +699,12 @@ public class SessionBean extends ClassComponent {
   {
     out.print("java.lang.reflect.Method ");
     out.print(methodVar);
-    out.print(" = __caucho_getMethod(\"");
+    out.print(" = com.caucho.ejb.util.getMethod(");
+    out.print(classVar);
+    out.print(", \"");
     out.print(methodName);
     out.print("\", ");
     out.print(paramVar);
-    out.print(", ");
-    out.print(classVar);
     out.println(");");
   }
 
@@ -675,49 +714,7 @@ public class SessionBean extends ClassComponent {
   protected void generateReflectionGetMethod(JavaWriter out)
     throws IOException
   {
-    // ejb/0fb0
-    out.println();
-    out.println("private java.lang.reflect.Method __caucho_getMethod(String methodName, Class paramTypes[], Class cl)");
-    out.println("  throws Exception");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("java.lang.reflect.Method method = null;");
-    out.println("Exception firstException = null;");
-    out.println();
-
-    out.println("do {");
-    out.pushDepth();
-
-    out.println("try {");
-    out.pushDepth();
-
-    out.println("method = cl.getDeclaredMethod(methodName, paramTypes);");
-
-    out.popDepth();
-    out.println("} catch (Exception e) {");
-    out.pushDepth();
-
-    out.println("if (firstException == null)");
-    out.println("  firstException = e;");
-    out.println();
-    out.println("cl = cl.getSuperclass();");
-
-    out.popDepth();
-    out.println("}");
-
-    out.popDepth();
-    out.println("} while (method == null && cl != null);");
-
-    out.println();
-    out.println("if (method == null)");
-    out.println("  throw firstException;");
-
-    out.println();
-    out.println("return method;");
-
-    out.popDepth();
-    out.println("}");
+    // moved to EjbUtil
   }
 
   /**
@@ -734,7 +731,7 @@ public class SessionBean extends ClassComponent {
     out.println("try {");
     out.pushDepth();
 
-    out.println("java.lang.reflect.Method m = bean.__caucho_getMethod(methodName, paramTypes, bean.getClass());");
+    out.println("java.lang.reflect.Method m = com.caucho.ejb.util.EjbUtil.getMethod(bean.getClass(), methodName, paramTypes);");
     out.println("m.setAccessible(true);");
     out.println("m.invoke(bean, paramValues);");
 

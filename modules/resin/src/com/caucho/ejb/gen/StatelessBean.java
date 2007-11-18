@@ -48,6 +48,11 @@ public class StatelessBean extends SessionBean {
     super(bean, ejbClass, contextClassName);
   }
 
+  public boolean isStateless()
+  {
+    return true;
+  }
+  
   protected void generateContext(JavaWriter out)
     throws IOException
   {
@@ -59,7 +64,8 @@ public class StatelessBean extends SessionBean {
 
     int freeStackMax = 16;
 
-    out.println("protected static final java.util.logging.Logger __caucho_log = com.caucho.log.Log.open(" + _contextClassName + ".class);");
+    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(" + _contextClassName + ".class.getName());");
+    out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
     out.println();
     out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
 

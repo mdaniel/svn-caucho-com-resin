@@ -27,27 +27,64 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.session;
+package com.caucho.ejb.webbeans;
 
-import java.util.*;
+import java.lang.annotation.*;
+import javax.webbeans.*;
 
-import com.caucho.config.j2ee.Inject;
-import com.caucho.config.j2ee.InjectIntrospector;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.AbstractServer;
+
+import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 /**
- * Server container for a session bean.
+ * Component for session beans
  */
-public class StatefulServer extends SessionServer
-{
-  public StatefulServer(EjbContainer ejbContainer)
+public class StatelessComponent extends ComponentImpl {
+  private static final Object []NULL_ARGS = new Object[0];
+
+  private AbstractServer _server;
+
+  public StatelessComponent(AbstractServer server)
   {
-    super(ejbContainer);
+    super(WebBeansContainer.create().getWbWebBeans());
+    
+    _server = server;
   }
 
   @Override
-  protected String getType()
+  public void setScope(ScopeContext scope)
   {
-    return "stateful:";
+  }
+
+  @Override
+  public Object getByName()
+  {
+    return _server.getLocalObject();
+  }
+
+  @Override
+  public Object getInject()
+  {
+    return _server.getLocalObject();
+  }
+
+  @Override
+  public Object get()
+  {
+    return _server.getLocalObject();
+  }
+
+  @Override
+  public Object get(DependentScope scope)
+  {
+    return _server.getLocalObject();
+  }
+
+  @Override
+  public Object create()
+  {
+    return _server.getLocalObject();
   }
 }

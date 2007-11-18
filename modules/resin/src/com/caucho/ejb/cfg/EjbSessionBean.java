@@ -46,6 +46,7 @@ import com.caucho.ejb.gen.SessionAssembler;
 import com.caucho.ejb.gen.StatelessAssembler;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.session.SessionServer;
+import com.caucho.ejb.session.StatefulServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.management.j2ee.J2EEManagedObject;
@@ -377,13 +378,15 @@ public class EjbSessionBean extends EjbBean {
     if (isStateless())
       server = new StatelessServer(ejbContainer);
     else
-      server = new SessionServer(ejbContainer);
+      server = new StatefulServer(ejbContainer);
 
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
     server.setMappedName(getMappedName());
     server.setId(getEJBModuleName() + "#" + getEJBName());
     server.setContainerTransaction(_isContainerTransaction);
+    
+    server.setEjbClass(loadClass(getEJBClass().getName()));
 
     ApiClass remoteHome = getRemoteHome();
     if (remoteHome != null)

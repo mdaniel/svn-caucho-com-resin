@@ -30,6 +30,8 @@
 package com.caucho.ejb;
 
 import com.caucho.config.BuilderProgram;
+import com.caucho.config.j2ee.Inject;
+import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
@@ -49,6 +51,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.webbeans.context.*;
 
 import javax.ejb.*;
 import javax.naming.Context;
@@ -94,6 +97,9 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected SameJVMClientContainer _jvmClient;
 
+  // The original bean implementation class
+  protected Class _ejbClass;
+  
   // The class for the extended bean
   protected Class _contextImplClass;
 
@@ -123,6 +129,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   private TimerService _timerService;
 
   protected BuilderProgram _initProgram;
+  protected Inject []_initInject;
 
   private AroundInvokeConfig _aroundInvokeConfig;
 
@@ -262,6 +269,22 @@ abstract public class AbstractServer implements EnvironmentBean {
     String url = getProtocolId() + "#" + cl.getName().replace(".", "_");
 
     return url;
+  }
+
+  /**
+   * Sets the ejb class
+   */
+  public void setEjbClass(Class cl)
+  {
+    _ejbClass = cl;
+  }
+
+  /**
+   * Sets the ejb class
+   */
+  protected Class getEjbClass()
+  {
+    return _ejbClass;
   }
 
   /**
@@ -764,6 +787,14 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the 3.0 local stub for the container
    */
+  public Object getLocalObject(DependentScope scope)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the 3.0 local stub for the container
+   */
   public Object getLocalObject(Class businessInterface)
   {
     throw new UnsupportedOperationException("3.0 local interface not found");
@@ -881,17 +912,21 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Initialize an instance
    */
-  public void initInstance(Object instance)
-    throws Throwable
+  public void initInstance(Object instance, DependentScope scope)
+    throws Exception
   {
-    if (_initProgram != null) {
+    if (_initInject != null) {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
         thread.setContextClassLoader(_loader);
 
-        _initProgram.configure(instance);
+	if (scope == null)
+	  scope = new DependentScope();
+
+	for (Inject inject : _initInject)
+	  inject.inject(instance, scope);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -904,11 +939,38 @@ abstract public class AbstractServer implements EnvironmentBean {
     // _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
   }
 
-  public void start()
+  public boolean start()
     throws Exception
   {
     if (! _lifecycle.toActive())
-      return;
+      return false;
+
+    log.config(this + " starting");
+
+    bindInjection();
+
+    return true;
+  }
+
+  protected void bindInjection()
+  {
+    // Injection binding occurs in the start phase
+
+    ArrayList<Inject> injectList = new ArrayList<Inject>();
+    InjectIntrospector.introspectInject(injectList, getEjbClass());
+    // XXX: add inject from xml here
+
+    if (_initProgram != null)
+      injectList.add(_initProgram);
+    
+    InjectIntrospector.introspectInit(injectList, getEjbClass());
+    // XXX: add init from xml here
+
+    Inject []injectArray = new Inject[injectList.size()];
+    injectList.toArray(injectArray);
+
+    if (injectArray.length > 0)
+      _initInject = injectArray;
   }
 
   /**

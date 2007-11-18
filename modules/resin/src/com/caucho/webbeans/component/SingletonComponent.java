@@ -76,6 +76,18 @@ public class SingletonComponent extends ClassComponent {
     return _value;
   }
 
+  @Override
+  public Object get(DependentScope scope)
+  {
+    return _value;
+  }
+
+  @Override
+  public Object create()
+  {
+    return _value;
+  }
+
   protected Object createNew()
   {
     throw new IllegalStateException();
