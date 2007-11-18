@@ -42,11 +42,14 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
+import javax.webbeans.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
@@ -65,6 +68,8 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());
 
+  private String _loc;
+  
   private Context _context;
 
   private String _ejbRefName;
@@ -100,6 +105,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   public EjbRef(Path modulePath, String sourceEjbName)
   {
     super(modulePath, sourceEjbName);
+  }
+
+  public void setConfigLocation(String loc)
+  {
+    _loc = loc;
   }
 
   public boolean isEjbLocalRef()
@@ -254,15 +264,6 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   public void init()
     throws Exception
   {
-    System.out.println("EJB_REF: refName=" + _ejbRefName
-		       + "\n type=" + _type
-		       + "\n home=" + _home
-		       + "\n remote=" + _remote
-		       + "\n foreignName=" + _foreignName
-		       + "\n ejbLink=" + _ejbLink
-		       + "\n typeName=" + _typeName
-		       + "\n target=" + _target);
-  
     // TCK, needsQA, ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1
 
     // Cannot do initialization here as there might be duplicated ejb-ref's in
@@ -276,6 +277,12 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       log.log(Level.FINER, L.l("{0} init", this));
   }
 
+  public void bind()
+    throws Exception
+  {
+    initBinding(null);
+  }
+
   // XXX TCK, needs QA @PostConstruct, called from EjbConfig.deployBeans()
   public void initBinding(AbstractServer ejbServer)
     throws Exception
@@ -284,7 +291,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       return;
 
     _isInitBinding = true;
-
+    
     if (_foreignName != null) {
       int pos = _foreignName.indexOf("#");
 
@@ -305,140 +312,59 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     EjbRefContext context = EjbRefContext.createLocal();
 
     context.add(this);
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    ComponentImpl comp = null;
 
-    boolean bind = false;
+    if (_home != null) {
+      if (comp == null && _ejbLink != null)
+        comp = webBeans.bind(_loc, _home, _ejbLink);
+      
+      if (comp == null)
+        comp = webBeans.bind(_loc, _home, _ejbRefName);
+      
+      if (comp == null)
+        comp = webBeans.bind(_loc, _home);
 
-    EjbContainer container = EjbContainer.getCurrent();
-    EjbProtocolManager protocolManager = null;
+      if (comp == null) {
+        comp = new ObjectProxyComponent(webBeans, this, _home);
+        comp.setName(_ejbRefName);
+        comp.addNameBinding(_ejbRefName);
+        // weaker priority
+        comp.setType(webBeans.createComponentType(Standard.class));
 
-    if (container != null)
-      protocolManager = container.getProtocolManager();
+        webBeans.addComponent(comp);
+      }
+    }
+    else if (_remote != null) {
+      if (comp == null && _ejbLink != null)
+        comp = webBeans.bind(_loc, _home, _ejbLink);
+
+      if (comp == null)
+        comp = webBeans.bind(_loc, _remote, _ejbRefName);
+      
+      if (comp == null)
+        comp = webBeans.bind(_loc, _remote);
+
+      if (comp == null) {
+        comp = new ObjectProxyComponent(webBeans, this, _remote);
+        comp.setName(_ejbRefName);
+        comp.addNameBinding(_ejbRefName);
+        // weaker priority
+        comp.setType(webBeans.createComponentType(Standard.class));
+
+        webBeans.addComponent(comp);
+      }
+    }
 
     String fullEjbRefName = Jndi.getFullName(_ejbRefName);
 
-    /*
-    if (isEjbLocalRef()) {
-      if (server == null || server.getLocalJndiPrefix() == null)
-        fullEjbRefName = Jndi.getFullName(_ejbRefName);
-      else // ejb/0gc5
-        fullEjbRefName = Jndi.getFullName(server.getLocalJndiPrefix()
-                                          + "/" + _ejbRefName);
-    } else {
-      if (server == null || server.getRemoteJndiPrefix() == null)
-        fullEjbRefName = Jndi.getFullName(_ejbRefName);
-      else // ejb/0gc5
-        fullEjbRefName = Jndi.getFullName(server.getRemoteJndiPrefix()
-                                          + "/" + _ejbRefName);
-    }
-    */
-
-    Object targetValue = null;
-
-    if (_ejbLink != null) {
-      String fullEjbLink = null;
-
-      int pos = _ejbLink.indexOf("#");
-
-      if (pos > 0) {
-        // XXX TCK
-        fullEjbLink = _foreignName;
-      }
-      else if (isEjbLocalRef()) {
-        if (protocolManager == null || protocolManager.getLocalJndiPrefix() == null)
-          fullEjbLink = Jndi.getFullName(_ejbLink);
-        else
-          fullEjbLink = Jndi.getFullName(protocolManager.getLocalJndiPrefix()
-                                         + "/" + _ejbLink);
-      }
-      else {
-        if (protocolManager == null || protocolManager.getRemoteJndiPrefix() == null)
-          fullEjbLink = Jndi.getFullName(_ejbLink);
-        else {
-          fullEjbLink = Jndi.getFullName(protocolManager.getRemoteJndiPrefix()
-                                         + "/" + _ejbLink);
-        }
-      }
-
-      if (_injectionTarget != null && fullEjbLink != null) {
-        targetValue = Jndi.lookup(fullEjbLink);
-      }
-
-      bind = true;
-    }
-    else if (_foreignName != null) {
-      String fullForeignName = Jndi.getFullName(_foreignName);
-
-      if (! fullForeignName.equals(fullEjbRefName))
-        bind = true;
-    }
-    else
-      bind = true;
-
-    if (bind) {
-      try {
-        Object value = Jndi.lookup(fullEjbRefName);
-
-        if (value != null)
-          bind = false;
-      } catch (Exception e) {
-      }
-
-      try {
-        if (bind)
-          Jndi.rebindDeep(fullEjbRefName, this);
-      } catch (Exception e) {
-        throw e;
-      }
-    }
-
-    // XXX TCK, needs QA
-    if (_injectionTarget != null && targetValue != null) {
-      String className = _injectionTarget.getInjectionTargetClass();
-      String fieldName = _injectionTarget.getInjectionTargetName();
-
-      AccessibleInject accessibleInject = null;
-
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-      JClassLoader jClassLoader = JClassLoaderWrapper.create(loader);
-
-      JClass jClass = jClassLoader.forName(className);
-
-      Class cl = jClass.getJavaClass();
-
-      Method method = BeanUtil.getSetMethod(cl, fieldName);
-
-      /*
-      if (method != null)
-        accessibleInject = new PropertyInject(method);
-      else {
-        Field field = cl.getDeclaredField(fieldName);
-        accessibleInject = new FieldInject(field);
-      }
-
-      EjbServerManager manager = EjbServerManager.getLocal();
-
-      if (manager != null) {
-        Class type;
-
-        if (isEjbLocalRef())
-          type = getLocal();
-        else
-          type = getRemote();
-
-        EjbInjectProgram program = new EjbInjectProgram(_ejbRefName,
-                                                        null,
-                                                        ejbServer.getMappedName(),
-                                                        type,
-                                                        accessibleInject);
-
-        ejbServer.getInitProgram().addProgram(program);
-      }
-      else if (_clientClassName != null) {
-        if (targetValue != null)
-          accessibleInject.inject(null, targetValue);
-      }
-      */
+    boolean bind = false;
+    try {
+      if (bind)
+        Jndi.rebindDeep(fullEjbRefName, this);
+    } catch (Exception e) {
+      throw e;
     }
   }
 

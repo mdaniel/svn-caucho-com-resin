@@ -42,6 +42,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
@@ -100,7 +101,12 @@ public class SessionServer extends AbstractServer
       super.init();
       
       WebBeansContainer webBeans = WebBeansContainer.create();
-      webBeans.addSingleton(getSessionContext());
+
+      SingletonComponent comp
+        = new SingletonComponent(webBeans, getSessionContext());
+      comp.setTargetType(SessionContext.class);
+      comp.init();
+      webBeans.addComponent(comp);
 
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();
@@ -124,8 +130,10 @@ public class SessionServer extends AbstractServer
     
       comp.setTargetType(beanClass);
     
-      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class))
+      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class)) {
 	comp.setName(getEJBName());
+        comp.addNameBinding(getEJBName());
+      }
 
       comp.init();
 

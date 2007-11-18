@@ -291,7 +291,7 @@ public class SerializerFactory extends AbstractSerializerFactory
       deserializer = OBJECT_DESERIALIZER;
 
     else if (cl.isArray())
-      deserializer = new ArrayDeserializer(getDeserializer(cl.getComponentType()));
+      deserializer = new ArrayDeserializer(cl.getComponentType());
 
     else if (Enumeration.class.isAssignableFrom(cl))
       deserializer = EnumerationDeserializer.create();
@@ -447,7 +447,11 @@ public class SerializerFactory extends AbstractSerializerFactory
 
     if (type.startsWith("[")) {
       Deserializer subDeserializer = getDeserializer(type.substring(1));
-      deserializer = new ArrayDeserializer(subDeserializer);
+
+      if (subDeserializer != null)
+        deserializer = new ArrayDeserializer(subDeserializer.getType());
+      else
+        deserializer = new ArrayDeserializer(Object.class);
     }
     else {
       try {

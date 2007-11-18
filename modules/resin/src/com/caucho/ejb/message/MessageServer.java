@@ -39,6 +39,8 @@ import com.caucho.ejb.xa.*;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.naming.Jndi;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
@@ -190,13 +192,13 @@ public class MessageServer extends AbstractServer {
 
       super.init();
 
-      // XXX:
-      // Should be a resin-specific name, like
-      // java:comp/env/resin-ejb/messageDrivenContext, since storing it in
-      // JNDI is a resin-specific implementation
-      // It needs to match InjectIntrospector
-      Jndi.rebindDeep("java:comp/env/ejbContext", _context);
-      Jndi.rebindDeep("java:comp/env/messageDrivenContext", _context);
+      WebBeansContainer webBeans = WebBeansContainer.create();
+
+      SingletonComponent comp
+        = new SingletonComponent(webBeans, _context);
+      comp.setTargetType(MessageDrivenContext.class);
+      comp.init();
+      webBeans.addComponent(comp);
 
       log.config("initialized message bean: " + this);
     } finally {

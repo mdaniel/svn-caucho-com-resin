@@ -136,7 +136,10 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   {
     Object obj = _server.getHomeObject();
 
-    return obj;
+    if (obj != null)
+      return obj;
+
+    return _server.getRemoteObject(_remoteInterface);
 
     // this logic would be in server
     /*

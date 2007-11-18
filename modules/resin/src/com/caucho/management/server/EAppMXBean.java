@@ -35,4 +35,8 @@ import com.caucho.jmx.Description;
 public interface EAppMXBean
   extends DeployControllerMXBean
 {
+  /**
+   * Returns an XML fragment of deployed ejb-ref.
+   */
+  public String getClientRefs();
 }

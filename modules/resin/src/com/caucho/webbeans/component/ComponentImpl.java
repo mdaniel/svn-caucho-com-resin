@@ -100,6 +100,15 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     return _name;
   }
 
+  public void addNameBinding(String name)
+  {
+    WbBinding binding = new WbBinding();
+    binding.setClass(Named.class);
+    binding.addValue("value", name);
+
+    _bindingList.add(binding);
+  }
+
   /**
    * Gets the component type.
    */

@@ -710,6 +710,17 @@ public class EnterpriseApplication
     }
   }
 
+  //
+  // JMX utilities
+  //
+
+  public String getClientRefs()
+  {
+    EjbContainer ejbContainer = EjbContainer.create();
+
+    return ejbContainer.getClientRemoteConfig();
+  }
+
   public String toString()
   {
     return "EnterpriseApplication[" + getName() + "]";

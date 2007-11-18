@@ -39,12 +39,10 @@ import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.webbeans.StatelessComponent;
 import com.caucho.naming.Jndi;
 import com.caucho.util.Log;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
-import javax.ejb.FinderException;
+import javax.ejb.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.logging.Level;
@@ -100,7 +98,12 @@ public class StatelessServer extends AbstractServer {
       super.init();
 
       WebBeansContainer webBeans = WebBeansContainer.create();
-      webBeans.addSingleton(getStatelessContext());
+
+      SingletonComponent comp
+        = new SingletonComponent(webBeans, getStatelessContext());
+      comp.setTargetType(SessionContext.class);
+      comp.init();
+      webBeans.addComponent(comp);
 
       // EJB 2.1
       _localHome = getStatelessContext().createLocalHome();
@@ -158,8 +161,10 @@ public class StatelessServer extends AbstractServer {
     
       comp.setTargetType(beanClass);
     
-      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class))
+      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class)) {
 	comp.setName(getEJBName());
+        comp.addNameBinding(getEJBName());
+      }
 
       comp.init();
 

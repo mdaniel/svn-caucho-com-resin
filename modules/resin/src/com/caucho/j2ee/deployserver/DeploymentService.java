@@ -35,7 +35,7 @@ import com.caucho.j2ee.deployclient.TargetImpl;
 import com.caucho.j2ee.deployclient.TargetModuleIDImpl;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.management.server.ArchiveDeployMXBean;
+import com.caucho.management.server.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -45,8 +45,7 @@ import javax.enterprise.deploy.spi.Target;
 import javax.enterprise.deploy.spi.TargetModuleID;
 import javax.enterprise.deploy.spi.exceptions.TargetException;
 import javax.enterprise.deploy.spi.status.ProgressObject;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.management.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -89,15 +88,15 @@ public class DeploymentService
     throws IllegalStateException
   {
     MBeanServer mbeanServer = Jmx.getMBeanServer();
-    ArrayList<Target> targetList = new ArrayList<Target>();
-    TargetImpl target;
+    ArrayList<String> hosts = new ArrayList<String>();
 
     try {
       Set<ObjectName> objectNames = mbeanServer.queryNames(new ObjectName("resin:type=EarDeploy,*"), null);
 
       for (ObjectName objectName : objectNames) {
-	target = new TargetImpl(objectName.getCanonicalName(), "");
-        targetList.add(target);
+        String host = objectName.getKeyProperty("Host");
+        if (! hosts.contains(host))
+          hosts.add(host);
       }
     }
     catch (MalformedObjectNameException e) {
@@ -109,8 +108,9 @@ public class DeploymentService
       Set<ObjectName> objectNames = mbeanServer.queryNames(new ObjectName("resin:type=WebAppDeploy,*"), null);
 
       for (ObjectName objectName : objectNames) {
-	target = new TargetImpl(objectName.getCanonicalName(), "");
-        targetList.add(target);
+        String host = objectName.getKeyProperty("Host");
+        if (! hosts.contains(host))
+          hosts.add(host);
       }
     }
     catch (MalformedObjectNameException e) {
@@ -123,8 +123,9 @@ public class DeploymentService
       Set<ObjectName> objectNames = mbeanServer.queryNames(new ObjectName("resin:type=ResourceDeploy,*"), null);
 
       for (ObjectName objectName : objectNames) {
-	target = new TargetImpl(objectName.getCanonicalName(), "");
-        targetList.add(target);
+        String host = objectName.getKeyProperty("Host");
+        if (! hosts.contains(host))
+          hosts.add(host);
       }
     }
     catch (MalformedObjectNameException e) {
@@ -132,8 +133,13 @@ public class DeploymentService
         log.log(Level.WARNING, e.toString(), e);
     }
 
-    TargetImpl[] targets = new TargetImpl[targetList.size()];
-    targetList.toArray(targets);
+    TargetImpl[] targets = new TargetImpl[hosts.size()];
+    for (int i = 0; i < hosts.size(); i++) {
+      String host = hosts.get(i);
+      String description = "Virtual Host: " + host;
+      
+      targets[i] = new TargetImpl(host, description);
+    }
 
     return targets;
   }
@@ -142,14 +148,6 @@ public class DeploymentService
     throws TargetException, IllegalStateException
   {
     return new TargetModuleID[] {};
-  }
-
-  private ArchiveDeployMXBean getMXBean(Target target)
-    throws MalformedObjectNameException
-  {
-    ArchiveDeployMXBean mxbean;
-    mxbean = (ArchiveDeployMXBean) Jmx.find(target.getName());
-    return mxbean;
   }
 
   private String getExceptionMessage(Throwable exception)
@@ -162,109 +160,181 @@ public class DeploymentService
       return exception.toString();
   }
 
-  public ProgressObject distribute(TargetImpl []targets,
+  public ProgressObject distribute(TargetImpl []hostTargets,
                                    InputStream archiveIs,
                                    DeploymentPlan plan)
     throws IllegalStateException
   {
-    String moduleID = plan.getName();
+    ProgressObjectImpl progress;
+    
+    if (hostTargets == null || hostTargets.length != 1) {
+      String msg = L.l("jsr88 can only support single-host deploy");
+      
+      log.warning(msg);
 
-    ArrayList<TargetModuleIDImpl> targetModuleIDList
-      = new ArrayList<TargetModuleIDImpl>();
+      progress = new ProgressObjectImpl(new TargetModuleID[0]);
+    
+      progress.failed(msg);
+
+      return progress;
+    }
+
+    String hostName = hostTargets[0].getName();
+
+    String name = plan.getName();
+    String moduleID;
 
     ArchiveDeployMXBean mxbean = null;
 
-    for (TargetImpl target : targets) {
-      String name = target.getName();
-        
-      if ("ear".equals(plan.getArchiveType())
-          && name.indexOf("type=EarDeploy") >= 0)
-        targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
-      else if ("war".equals(plan.getArchiveType())
-               && name.indexOf("type=WebAppDeploy") >= 0)
-        targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
-      else if ("rar".equals(plan.getArchiveType())
-               && name.indexOf("type=ResourceDeploy") >= 0)
-        targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
+    try {
+      if ("ear".equals(plan.getArchiveType())) {
+        moduleID = "resin:name=" + name + ",type=EApp,Host=" + hostName;
+      
+        String jmxName = "resin:type=EarDeploy,Host=" + hostName + ",*";
+        mxbean = loadArchiveMXBean(jmxName);
+      }
+      else if ("war".equals(plan.getArchiveType())) {
+        moduleID = "resin:name=" + name + ",type=WebApp,Host=" + hostName;
+      
+        String jmxName = "resin:type=WarDeploy,Host=" + hostName + ",*";
+        mxbean = loadArchiveMXBean(jmxName);
+      }
+      else if ("rar".equals(plan.getArchiveType())) {
+        moduleID = "resin:name=" + name + ",type=Resource,Host=" + hostName;
+      
+        String jmxName = "resin:type=ResourceDeploy,Host=" + hostName + ",*";
+        mxbean = loadArchiveMXBean(jmxName);
+      }
+      else
+        throw new UnsupportedOperationException(plan.getArchiveType());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
 
-    if (targetModuleIDList.size() == 0) {
+    if (mxbean == null) {
       log.warning(L.l("jsr88 cannot deploy '{0}'", moduleID));
     }
-
-    TargetModuleID[] targetModuleIDs
-      = new TargetModuleIDImpl[targetModuleIDList.size()];
-
-    targetModuleIDs = targetModuleIDList.toArray(targetModuleIDs);
-
-    ProgressObjectImpl progress = new ProgressObjectImpl(targetModuleIDs);
 
     boolean failed = false;
     StringBuilder message = new StringBuilder();
 
     Path archivePath = null;
 
-    for (TargetModuleIDImpl targetModuleID : targetModuleIDList) {
-      Throwable exception = null;
+    Throwable exception = null;
 
-      try {
-        mxbean = getMXBean(targetModuleID.getTarget());
+    TargetImpl childTarget = new TargetImpl(moduleID, "");
+    
+    TargetModuleIDImpl childModuleID
+      = new TargetModuleIDImpl(childTarget, moduleID);
 
-        Path deployPath = Vfs.lookup(mxbean.getArchivePath(moduleID));
+    try {
+      Path deployPath = Vfs.lookup(mxbean.getArchivePath(name));
 
-        deployPath.getParent().mkdirs();
+      deployPath.getParent().mkdirs();
 
-        if (archivePath == null) {
-          createArchive(deployPath, plan, archiveIs);
-          archivePath = deployPath;
+      if (archivePath == null) {
+        createArchive(deployPath, plan, archiveIs);
+        archivePath = deployPath;
+      }
+      else {
+        WriteStream deployStream = deployPath.openWrite();
+
+        try {
+          deployStream.writeFile(archivePath);
         }
-        else {
-          WriteStream deployStream = deployPath.openWrite();
-
-          try {
-            deployStream.writeFile(archivePath);
-          }
-          finally {
-            deployStream.close();
-          }
+        finally {
+          deployStream.close();
         }
-
-        mxbean.update();
-
-        exception = mxbean.getConfigException(moduleID);
-      }
-      catch (Exception e) {
-        if (log.isLoggable(Level.INFO))
-          log.log(Level.INFO, e.toString(), e);
-
-        exception = e;
       }
 
-      if (exception != null) {
-        failed = true;
-        describe(message, targetModuleID, false, getExceptionMessage(exception));
+      mxbean.update();
 
-        /*
-          if (mxbean != null) {
-          try {
-          mxbean.undeploy(moduleID);
-          }
-          catch (Throwable t) {
-          log.log(Level.FINE, t.toString(), t);
-          }
-          }
-        */
-      }
-      else
-        describe(message, targetModuleID, true);
+      exception = mxbean.getConfigException(name);
+    }
+    catch (Exception e) {
+      if (log.isLoggable(Level.INFO))
+        log.log(Level.INFO, e.toString(), e);
+
+      exception = e;
     }
 
+    if (exception != null) {
+      failed = true;
+      describe(message, childModuleID, false, getExceptionMessage(exception));
+
+      /*
+        if (mxbean != null) {
+        try {
+        mxbean.undeploy(moduleID);
+        }
+        catch (Throwable t) {
+        log.log(Level.FINE, t.toString(), t);
+        }
+        }
+      */
+    }
+    else {
+      if ("ear".equals(plan.getArchiveType())) {
+        try {
+          EAppMXBean eApp = (EAppMXBean) Jmx.find(moduleID);
+
+          childTarget.setClientRefs(eApp.getClientRefs());
+          
+          System.out.println("REFS: " + eApp.getClientRefs());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+
+      describe(message, childModuleID, true);
+    }
+    
+    TargetModuleID []targetModuleIDs
+      = new TargetModuleID[] { childModuleID };
+
+    progress = new ProgressObjectImpl(targetModuleIDs);
+    
     if (failed)
-      progress.failed(L.l("deploy {0}", message));
+      progress.failed(message.toString());
     else
-      progress.completed(L.l("deploy {0}", message));
+      progress.completed(message.toString());
 
     return progress;
+  }
+
+  private ArchiveDeployMXBean loadArchiveMXBean(String pattern)
+  {
+    try {
+      ObjectName objectName = null;
+      
+      for (ObjectName subName
+             : Jmx.getMBeanServer().queryNames(new ObjectName(pattern), null)) {
+        if (objectName == null)
+          objectName = subName;
+      }
+
+      if (objectName != null)
+        return (ArchiveDeployMXBean) Jmx.find(objectName);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return null;
+  }
+
+  private ArchiveDeployMXBean getMXBean(ObjectName targetName)
+    throws MalformedObjectNameException
+  {
+    String type = targetName.getKeyProperty("type");
+    String host = targetName.getKeyProperty("Host");
+    
+    if (type.equals("EApp")) {
+      String archiveName = "resin:type=EarDeploy,Host=" + host + ",*";
+
+      return loadArchiveMXBean(archiveName);
+    }
+    else
+      return null;
   }
 
   private void createArchive(Path archivePath, DeploymentPlan plan, InputStream archiveIs)
@@ -424,8 +494,10 @@ public class DeploymentService
       ArchiveDeployMXBean mxbean = null;
 
       try {
-        mxbean = getMXBean(targetModuleID.getTarget());
-        mxbean.start(targetModuleID.getModuleID());
+        ObjectName objectName
+          = new ObjectName(targetModuleID.getTarget().getName());
+        mxbean = getMXBean(objectName);
+        mxbean.start(objectName.getKeyProperty("name"));
       }
       catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
@@ -470,8 +542,10 @@ public class DeploymentService
       ArchiveDeployMXBean mxbean = null;
 
       try {
-        mxbean = getMXBean(targetModuleID.getTarget());
-        mxbean.stop(targetModuleID.getModuleID());
+        ObjectName objectName
+          = new ObjectName(targetModuleID.getTarget().getName());
+        mxbean = getMXBean(objectName);
+        mxbean.stop(objectName.getKeyProperty("name"));
       }
       catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
@@ -510,8 +584,10 @@ public class DeploymentService
       Throwable exception = null;
 
       try {
-        mxbean = getMXBean(targetModuleID.getTarget());
-        mxbean.undeploy(targetModuleID.getModuleID());
+        ObjectName objectName
+          = new ObjectName(targetModuleID.getTarget().getName());
+        mxbean = getMXBean(objectName);
+        mxbean.undeploy(objectName.getKeyProperty("name"));
       }
       catch (Throwable t) {
         log.log(Level.INFO, t.toString(), t);

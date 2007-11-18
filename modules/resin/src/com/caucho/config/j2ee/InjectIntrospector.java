@@ -505,7 +505,7 @@ public class InjectIntrospector {
       jndiName = ejb.name();
 
     return generateJndiComponent(location, fieldType, type,
-				 jndiName, mappedName, beanName);
+				 jndiName, beanName, mappedName);
   }
 
   private static ValueGenerator generateResource(String location,
@@ -559,6 +559,13 @@ public class InjectIntrospector {
     if (type.isPrimitive())
       type = _primitiveTypeMap.get(type);
     
+    Object value = Jndi.lookup(jndiName);
+
+    // XXX: can use lookup-link and store the proxy
+
+    if (value != null)
+      return new SingletonGenerator(value);
+    
     WebBeansContainer webBeans = WebBeansContainer.create();
 
     ComponentImpl component = null;
@@ -572,9 +579,9 @@ public class InjectIntrospector {
 	return new ComponentGenerator(location, component);
       }
     }
-    else if (beanName != null && ! "".equals(beanName)) {
+    
+    if (component == null && beanName != null && ! "".equals(beanName)) {
       component = webBeans.bind(location, type, beanName);
-
       if (component != null) {
 	bindJndi(location, jndiName, component);
       
@@ -582,7 +589,7 @@ public class InjectIntrospector {
       }
     }
     
-    if (jndiName != null && ! "".equals(jndiName)) {
+    if (component == null && jndiName != null && ! "".equals(jndiName)) {
       component = webBeans.bind(location, type, jndiName);
 
       if (component != null) {
@@ -591,8 +598,9 @@ public class InjectIntrospector {
 	return new ComponentGenerator(location, component);
       }
     }
-    
-    component = webBeans.bind(location, type);
+
+    if (component == null)
+      component = webBeans.bind(location, type);
 
     if (component != null) {
       bindJndi(location, jndiName, component);
@@ -600,12 +608,6 @@ public class InjectIntrospector {
       return new ComponentGenerator(location, component);
     }
 
-    Object value = Jndi.lookup(jndiName);
-
-    // XXX: can use lookup-link and store the proxy
-
-    if (value != null)
-      return new SingletonGenerator(value);
     else
       throw new ConfigException(location + L.l("{0} with mappedName={1}, beanName={2}, and jndiName={3} does not match anything",
                                              type.getName(),
@@ -633,7 +635,8 @@ public class InjectIntrospector {
   private static void bindJndi(String location, String name, Object value)
   {
     try {
-      Jndi.bindDeepShort(name, value);
+      if (! "".equals(name))
+        Jndi.bindDeepShort(name, value);
     } catch (NamingException e) {
       throw new ConfigException(location + e.getMessage(), e);
     }

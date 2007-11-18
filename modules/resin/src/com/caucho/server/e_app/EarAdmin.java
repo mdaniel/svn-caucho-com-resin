@@ -36,8 +36,29 @@ public class EarAdmin
   extends DeployControllerAdmin<EarDeployController>
   implements EAppMXBean
 {
+  private EarDeployController _eAppController;
+  
   public EarAdmin(EarDeployController earDeployController)
   {
     super(earDeployController);
+
+    _eAppController = earDeployController;
   }
+
+  public String getClientRefs()
+  {
+    EnterpriseApplication eApp = _eAppController.getDeployInstance();
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(eApp.getClassLoader());
+
+      return eApp.getClientRefs();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
 }

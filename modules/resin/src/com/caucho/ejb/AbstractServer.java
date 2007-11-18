@@ -947,7 +947,19 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     log.config(this + " starting");
 
-    bindInjection();
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_loader);
+
+      if (_serverProgram != null)
+        _serverProgram.configure(this);
+      
+      bindInjection();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
 
     return true;
   }
@@ -1052,6 +1064,16 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void addClientRemoteConfig(StringBuilder sb)
   {
+    if (_remoteObjectList != null && _remoteObjectList.size() > 0) {
+      sb.append("<ejb-ref>\n");
+      sb.append("<ejb-ref-name>" + getEJBName() + "</ejb-ref-name>\n");
+
+      if (_remoteHomeClass != null)
+        sb.append("<home>" + _remoteHomeClass.getName() + "</home>\n");
+      
+      sb.append("<remote>" + _remoteObjectList.get(0).getName() + "</remote>\n");
+      sb.append("</ejb-ref>\n");
+    }
   }
 
   public String toString()

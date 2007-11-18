@@ -432,7 +432,7 @@ public class AppClient implements EnvironmentBean
       }
 
       // After we merge all the information, the <ejb-ref> can be initialized.
-      ref.initBinding(null);
+      ref.bind();
     }
   }
 

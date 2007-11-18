@@ -154,7 +154,7 @@ public class DeploymentServlet
       case UNDEPLOY:
 	{
 	  TargetModuleID []targetIDs;
-	  targetIDs = (TargetModuleID []) in.readObject(TargetModuleIDImpl[].class);
+	  targetIDs = (TargetModuleID []) in.readObject(TargetModuleID[].class);
 
 	  ProgressObject po = _deploymentService.undeploy(targetIDs);
 

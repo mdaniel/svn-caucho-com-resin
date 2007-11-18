@@ -57,32 +57,26 @@ import java.util.ArrayList;
  */
 public class ArrayDeserializer extends AbstractListDeserializer {
   private Class _componentType;
+  private Class _type;
   
-  public ArrayDeserializer(Deserializer componentDeserializer)
+  public ArrayDeserializer(Class componentType)
   {
-    if (componentDeserializer != null)
-      _componentType = componentDeserializer.getType();
+    _componentType = componentType;
+    
+    if (_componentType != null) {
+      try {
+        _type = Array.newInstance(_componentType, 0).getClass();
+      } catch (Exception e) {
+      }
+    }
+
+    if (_type == null)
+      _type = Object[].class;
   }
 
   public Class getType()
   {
-    if (_componentType == null || _componentType.getName() == null) {
-      return Object[].class;
-    }
-    
-    try {
-      return Class.forName("[" + getArrayClassName(_componentType));
-    } catch (ClassNotFoundException e) {
-      return Object[].class;
-    }
-  }
-
-  private static String getArrayClassName(Class cl)
-  {
-    if (cl.isArray())
-      return "[" + getArrayClassName(cl.getComponentType());
-    else
-      return "L" + cl.getName() + ";";
+    return _type;
   }
 
   /**

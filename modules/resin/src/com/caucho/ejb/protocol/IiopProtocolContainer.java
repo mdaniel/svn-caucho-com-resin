@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.iiop.IiopContext;
 import com.caucho.iiop.IiopRemoteService;
+import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.util.L10N;
 
 import javax.ejb.EJBHome;
@@ -150,20 +151,6 @@ public class IiopProtocolContainer extends ProtocolContainer {
     }
   }
 
-  private String getName(AbstractServer server)
-  {
-    String name = server.getProtocolId();
-    if (name == null)
-      name = server.getEJBName();
-
-    name = name.replace('.', '_'); // XXX:
-
-    if (! name.startsWith("/"))
-      name = "/" + name;
-
-    return name;
-  }
-
   /**
    * Removes a server from iiop.
    */
@@ -196,5 +183,24 @@ public class IiopProtocolContainer extends ProtocolContainer {
     throws Exception
   {
     throw new UnsupportedOperationException();
+  }
+
+  private String getName(AbstractServer server)
+  {
+    String name = server.getProtocolId();
+    if (name == null)
+      name = server.getEJBName();
+
+    name = name.replace('.', '_'); // XXX:
+
+    if (! name.startsWith("/"))
+      name = "/" + name;
+
+    EnterpriseApplication eApp = EnterpriseApplication.getLocal();
+
+    if (eApp != null)
+      return "/" + eApp.getName() + "_" + name.substring(1);
+    else
+      return name;
   }
 }

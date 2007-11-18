@@ -39,6 +39,8 @@ public class TargetImpl
   private String _name;
   private String _description;
 
+  private String _clientRefs;
+
   /**
    * Null constructor.
    */
@@ -61,6 +63,16 @@ public class TargetImpl
   public String getName()
   {
     return _name;
+  }
+
+  public String getClientRefs()
+  {
+    return _clientRefs;
+  }
+
+  public void setClientRefs(String refs)
+  {
+    _clientRefs = refs;
   }
 
   /**

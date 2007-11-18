@@ -30,8 +30,10 @@
 package com.caucho.webbeans.component;
 
 import java.lang.annotation.*;
+import javax.naming.*;
 import javax.webbeans.*;
 
+import com.caucho.naming.*;
 import com.caucho.webbeans.cfg.WbWebBeans;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.*;
@@ -39,29 +41,20 @@ import com.caucho.webbeans.manager.*;
 /**
  * Component for a singleton beans
  */
-public class SingletonComponent extends ClassComponent {
+public class ObjectProxyComponent extends ComponentImpl {
   private static final Object []NULL_ARGS = new Object[0];
 
-  private Object _value;
+  private ObjectProxy _proxy;
+  private Class _type;
 
-  public SingletonComponent(WbWebBeans webBeans, Object value)
-  {
-    super(webBeans);
-    
-    _value = value;
-
-    setInstanceClass(value.getClass());
-    setTargetType(value.getClass());
-  }
-
-  public SingletonComponent(WebBeansContainer webBeans, Object value)
+  public ObjectProxyComponent(WebBeansContainer webBeans,
+                              ObjectProxy proxy,
+                              Class type)
   {
     super(webBeans.getWbWebBeans());
     
-    _value = value;
-
-    setInstanceClass(value.getClass());
-    setTargetType(value.getClass());
+    _proxy = proxy;
+    setTargetType(type);
   }
 
   @Override
@@ -72,31 +65,35 @@ public class SingletonComponent extends ClassComponent {
   @Override
   public Object getByName()
   {
-    return _value;
+    return get();
   }
 
   @Override
   public Object getInject()
   {
-    return _value;
+    return get();
   }
 
   @Override
   public Object get()
   {
-    return _value;
+    try {
+      return _proxy.createObject(null);
+    } catch (NamingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public Object get(DependentScope scope)
   {
-    return _value;
+    return get();
   }
 
   @Override
   public Object create()
   {
-    return _value;
+    return get();
   }
 
   protected Object createNew()
