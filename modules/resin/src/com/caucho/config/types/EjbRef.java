@@ -254,6 +254,15 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   public void init()
     throws Exception
   {
+    System.out.println("EJB_REF: refName=" + _ejbRefName
+		       + "\n type=" + _type
+		       + "\n home=" + _home
+		       + "\n remote=" + _remote
+		       + "\n foreignName=" + _foreignName
+		       + "\n ejbLink=" + _ejbLink
+		       + "\n typeName=" + _typeName
+		       + "\n target=" + _target);
+  
     // TCK, needsQA, ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1
 
     // Cannot do initialization here as there might be duplicated ejb-ref's in

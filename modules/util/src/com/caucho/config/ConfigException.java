@@ -80,6 +80,14 @@ public class ConfigException
       return e.toString();
   }
 
+  public static RuntimeException create(String location, Throwable e)
+  {
+    if (e instanceof DisplayableException)
+      return new ConfigException(location + e.getMessage(), e);
+    else
+      return new ConfigException(location + e, e);
+  }
+
   public void print(PrintWriter out)
   {
     out.println(Html.escapeHtml(getMessage()));

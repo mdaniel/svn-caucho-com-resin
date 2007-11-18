@@ -80,6 +80,16 @@ public class ResinWebBeansProducer
   }
   
   /**
+   * Returns the corba ORB
+   */
+  @Produces
+  @Standard
+  public org.omg.CORBA.ORB getORB()
+  {
+    return new com.caucho.iiop.orb.ORBImpl();
+  }
+  
+  /**
    * Returns the UserTransaction
    */
   @Produces

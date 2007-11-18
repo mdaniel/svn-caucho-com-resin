@@ -127,6 +127,9 @@ public class EntityCache
    */
   public void removeEntity(EntityServer server, Object key)
   {
+    if (_entityCache == null)
+      return;
+    
     synchronized (_entityKey) {
       _entityKey.init(server, key);
       _entityCache.remove(_entityKey);
@@ -138,6 +141,9 @@ public class EntityCache
    */
   public void removeBeans(ArrayList<QEntityContext> beans, EntityServer server)
   {
+    if (_entityCache == null)
+      return;
+    
     synchronized (_entityCache) {
       Iterator<LruCache.Entry<EntityKey,QEntityContext>> iter;
 

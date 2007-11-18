@@ -77,22 +77,17 @@ public class FieldInject extends Inject
       Object value = _gen.create();
       
       // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1, needs QA
-      if (! _field.getType().isAssignableFrom(value.getClass())) {
-        value = PortableRemoteObject.narrow(value, _field.getType());
-      }
-
-      if (! _field.getType().isAssignableFrom(value.getClass())) {
-
-        throw new ConfigException(location()
-				  + L.l("Resource type {0} is not assignable to field '{1}' of type {2}.",
-					value.getClass().getName(),
-					_field.getName(),
-					_field.getType().getName()));
+      if (! _field.getType().isAssignableFrom(value.getClass())
+	  && ! _field.getType().isPrimitive()) {
+	value = PortableRemoteObject.narrow(value, _field.getType());
+	  
       }
 
       _field.set(bean, value);
+    } catch (ConfigException e) {
+      throw e;
     } catch (Exception e) {
-      throw new ConfigException(location() + e.getMessage(), e);
+      throw ConfigException.create(location(), e);
     }
   }
 

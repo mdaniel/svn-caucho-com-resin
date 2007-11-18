@@ -359,6 +359,26 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     return null;
   }
 
+  //
+  // Deployment information
+  //
+
+  /**
+   * Returns the information for a client remote configuration, e.g.
+   * the <ejb-ref> needed for the client to properly connect.
+   *
+   * Only needed for the TCK.
+   */
+  public String getClientRemoteConfig()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (AbstractServer server : _server) {
+      server.addClientRemoteConfig(sb);
+    }
+
+    return sb.toString();
+  }
 
   //
   // ScanListener
@@ -416,7 +436,6 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
 
-    System.out.println("MATCH: " + root + " " + className);
     config.addClassName(className);
   }
 

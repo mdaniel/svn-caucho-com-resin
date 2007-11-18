@@ -88,13 +88,17 @@ public class DeploymentService
   public TargetImpl[] getTargets()
     throws IllegalStateException
   {
-    ArrayList<String> names = new ArrayList<String>();
+    MBeanServer mbeanServer = Jmx.getMBeanServer();
+    ArrayList<Target> targetList = new ArrayList<Target>();
+    TargetImpl target;
 
     try {
-      Set<ObjectName> objectNames = Jmx.getMBeanServer().queryNames(new ObjectName("resin:type=EarDeploy,*"), null);
+      Set<ObjectName> objectNames = mbeanServer.queryNames(new ObjectName("resin:type=EarDeploy,*"), null);
 
-      for (ObjectName objectName : objectNames)
-        names.add(objectName.getCanonicalName());
+      for (ObjectName objectName : objectNames) {
+	target = new TargetImpl(objectName.getCanonicalName(), "");
+        targetList.add(target);
+      }
     }
     catch (MalformedObjectNameException e) {
       if (log.isLoggable(Level.WARNING))
@@ -102,10 +106,12 @@ public class DeploymentService
     }
 
     try {
-      Set<ObjectName> objectNames = Jmx.getMBeanServer().queryNames(new ObjectName("resin:type=WebAppDeploy,*"), null);
+      Set<ObjectName> objectNames = mbeanServer.queryNames(new ObjectName("resin:type=WebAppDeploy,*"), null);
 
-      for (ObjectName objectName : objectNames)
-        names.add(objectName.getCanonicalName());
+      for (ObjectName objectName : objectNames) {
+	target = new TargetImpl(objectName.getCanonicalName(), "");
+        targetList.add(target);
+      }
     }
     catch (MalformedObjectNameException e) {
       if (log.isLoggable(Level.WARNING))
@@ -114,22 +120,20 @@ public class DeploymentService
     }
 
     try {
-      Set<ObjectName> objectNames = Jmx.getMBeanServer().queryNames(new ObjectName("resin:type=ResourceDeploy,*"), null);
+      Set<ObjectName> objectNames = mbeanServer.queryNames(new ObjectName("resin:type=ResourceDeploy,*"), null);
 
-      for (ObjectName objectName : objectNames)
-        names.add(objectName.getCanonicalName());
+      for (ObjectName objectName : objectNames) {
+	target = new TargetImpl(objectName.getCanonicalName(), "");
+        targetList.add(target);
+      }
     }
     catch (MalformedObjectNameException e) {
       if (log.isLoggable(Level.WARNING))
         log.log(Level.WARNING, e.toString(), e);
     }
 
-    final int size = names.size();
-
-    TargetImpl[] targets = new TargetImpl[size];
-    for (int i = 0; i < size; i++) {
-      targets[i] = new TargetImpl(names.get(i), "");
-    }
+    TargetImpl[] targets = new TargetImpl[targetList.size()];
+    targetList.toArray(targets);
 
     return targets;
   }

@@ -34,6 +34,7 @@ import com.caucho.config.LineConfigException;
 import com.caucho.el.Expr;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.naming.InitialContext;
@@ -151,14 +152,9 @@ public class EnvEntry implements Validator {
     throws Exception
   {
     if (_name == null)
-      throw new ConfigException(L.l("env-entry needs `env-entry-name' attribute"));
+      throw new ConfigException(L.l("env-entry needs 'env-entry-name' attribute"));
     if (_type == null)
-      throw new ConfigException(L.l("env-entry needs `env-entry-type' attribute"));
-
-    /*
-      if (_value == null)
-        throw new BeanBuilderException(L.l("env-entry needs `env-entry-value' attribute"));
-    */
+      throw new ConfigException(L.l("env-entry needs 'env-entry-type' attribute"));
 
     // actually, should register for validation
     if (_value == null)
@@ -191,10 +187,10 @@ public class EnvEntry implements Validator {
         value = new Character(v.charAt(0));
     }
 
-    if (_name.startsWith("java:"))
-      Jndi.bindDeep(_name, value);
-    else
-      Jndi.bindDeep("java:comp/env/" + _name, value);
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    webBeans.addSingleton(value, _name);
+
+    Jndi.bindDeepShort("java:comp/env/" + _name, value);
   }
 
   /**

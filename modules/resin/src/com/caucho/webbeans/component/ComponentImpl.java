@@ -32,6 +32,7 @@ package com.caucho.webbeans.component;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
+import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
@@ -42,7 +43,7 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-import java.util.ArrayList;
+import java.util.*;
 
 import javax.annotation.*;
 import javax.webbeans.*;
@@ -50,7 +51,7 @@ import javax.webbeans.*;
 /**
  * Configuration for the xml web bean component.
  */
-public class ComponentImpl implements ComponentFactory {
+public class ComponentImpl implements ComponentFactory, ObjectProxy {
   private static final L10N L = new L10N(ComponentImpl.class);
 
   private static final Object []NULL_ARGS = new Object[0];
@@ -424,6 +425,18 @@ public class ComponentImpl implements ComponentFactory {
   public String getScopeId()
   {
     return _name;
+  }
+
+  //
+  // ObjectProxy
+  //
+
+  /**
+   * Returns the new object for JNDI
+   */
+  public Object createObject(Hashtable env)
+  {
+    return get();
   }
 
   public boolean equals(Object obj)

@@ -604,17 +604,21 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     
     setHomeWrapper(home);
 
+    /*
     // ejb/0ff0
     // Adds the 2.1 remote interface
     ApiMethod method = findFirstCreateMethod(home);
 
-    ApiClass remoteWrapper;
+    if (method != null) {
+      ApiClass remoteWrapper;
 
-    remoteWrapper = new ApiClass(method.getReturnType());
+      remoteWrapper = new ApiClass(method.getReturnType());
 
-    // Order is important.
-    setRemote21(remoteWrapper);
-    setRemoteWrapper(remoteWrapper);
+      // Order is important.
+      setRemote21(remoteWrapper);
+      setRemoteWrapper(remoteWrapper);
+    }
+    */
   }
 
   /**
@@ -631,9 +635,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! remoteHome.isInterface())
       throw error(L.l("'{0}' must be an interface. <home> interfaces must be interfaces.", remoteHome.getName()));
 
-    if (! EJBHome.class.isAssignableFrom(remoteHome.getJavaClass())
-	&& ! isAllowPOJO())
+    if (EJBHome.class.isAssignableFrom(remoteHome.getJavaClass())) {
+      _isEJB21 = true;
+    }
+    else if (! isAllowPOJO()) {
+      // XXX: does descriptor still have this requirement?
+      // i.e. annotations act differently
       throw new ConfigException(L.l("'{0}' must extend EJBHome.  <home> interfaces must extend javax.ejb.EJBHome.", remoteHome.getName()));
+    }
   }
 
   /**

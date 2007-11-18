@@ -36,8 +36,8 @@ import javax.enterprise.deploy.spi.factories.DeploymentFactory;
  * Factory for the implementation classes.
  */
 public final class DeploymentFactoryManager {
-  private final static DeploymentFactoryManager _manager =
-    new DeploymentFactoryManager();
+  private final static DeploymentFactoryManager _manager
+    = new DeploymentFactoryManager();
   
   private DeploymentFactoryManager()
   {

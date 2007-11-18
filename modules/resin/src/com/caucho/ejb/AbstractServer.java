@@ -1047,6 +1047,13 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
   }
 
+  /**
+   * Client information for connecting to the server.
+   */
+  public void addClientRemoteConfig(StringBuilder sb)
+  {
+  }
+
   public String toString()
   {
     if (getMappedName() != null)

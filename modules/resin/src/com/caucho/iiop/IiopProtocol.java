@@ -166,6 +166,9 @@ public class IiopProtocol extends Protocol {
 
       Object obj = service.getHome();
 
+      if (obj == null)
+	throw new IllegalStateException(service + " does not have a valid EJB home interface");
+
       // Restrict the service API to the given business interface.
       // TCK: ejb30/getInvokedBusinessInterfaceRemoteIllegal, needs QA
       if (service.getRemoteInterface() != null) {

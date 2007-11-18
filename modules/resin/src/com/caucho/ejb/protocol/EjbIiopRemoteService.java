@@ -89,7 +89,7 @@ public class EjbIiopRemoteService extends IiopRemoteService {
    */
   public ArrayList<Class> getHomeAPI()
   {
-    if ((! _isEJB3) && (_server.getRemoteHomeClass() != null)) {
+    if (_server.getRemoteHomeClass() != null) {
       ArrayList<Class> list = new ArrayList<Class>();
       list.add(_server.getRemoteHomeClass());
 
@@ -134,6 +134,12 @@ public class EjbIiopRemoteService extends IiopRemoteService {
    */
   public Object getHome()
   {
+    Object obj = _server.getHomeObject();
+
+    return obj;
+
+    // this logic would be in server
+    /*
     if (_isEJB3)
       return _server.getRemoteObject(_remoteInterface);
 
@@ -141,8 +147,8 @@ public class EjbIiopRemoteService extends IiopRemoteService {
 
     if (obj == null)
       obj = _server.getRemoteObject21();
+    */
 
-    return obj;
   }
 
   /**
@@ -157,8 +163,8 @@ public class EjbIiopRemoteService extends IiopRemoteService {
       return _server.getRemoteObject(local);
     } catch (javax.ejb.NoSuchEJBException e) {
       // XXX TCK: ejb30/.../remove/removeBean2
-      if ((_remoteInterface == null && ! _isEJB3) ||
-          (_remoteInterface != null && Remote.class.isAssignableFrom(_remoteInterface))) {
+      if ((_remoteInterface == null && ! _isEJB3)
+	  || (_remoteInterface != null && Remote.class.isAssignableFrom(_remoteInterface))) {
         throw new NoSuchObjectException("no matching object: " + local);
       }
 
@@ -170,5 +176,10 @@ public class EjbIiopRemoteService extends IiopRemoteService {
 
       return null;
     }
+  }
+
+  public String toString()
+  {
+    return "EjbIiopRemoteService[" + _server + "]";
   }
 }

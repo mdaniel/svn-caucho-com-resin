@@ -699,7 +699,7 @@ public class SessionBean extends ClassComponent {
   {
     out.print("java.lang.reflect.Method ");
     out.print(methodVar);
-    out.print(" = com.caucho.ejb.util.getMethod(");
+    out.print(" = com.caucho.ejb.util.EjbUtil.getMethod(");
     out.print(classVar);
     out.print(", \"");
     out.print(methodName);
