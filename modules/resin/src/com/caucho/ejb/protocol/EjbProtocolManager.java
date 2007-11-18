@@ -439,10 +439,8 @@ public class EjbProtocolManager {
     if (apiList != null && apiList.size() > 0) {
       String jndiName = prefix + "/local";
 
-      Object obj = server.getClientObject(apiList.get(0));
-
       try {
-	Jndi.bindDeep(jndiName, obj);
+	Jndi.bindDeep(jndiName, new ServerLocalProxy(server, apiList.get(0)));
 
 	log.fine(server + " local binding to '" + jndiName + "'");
       } catch (Exception e) {

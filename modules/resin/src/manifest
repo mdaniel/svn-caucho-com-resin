@@ -1,4 +1,4 @@
-Class-Path: jsdk-15.jar jta-101.jar ejb-15.jar jca-15.jar jms-11.jar jaxrpc-15.jar pro.jar license.jar jpa-15.jar j2ee-management-10.jar resin-util.jar
+Class-Path: jsdk-15.jar jta-101.jar ejb-15.jar jca-15.jar jms-11.jar jaxrpc-15.jar pro.jar license.jar jpa-15.jar j2ee-management-10.jar resin-util.jar webbeans-16.jar
 Implementation-Vendor: Caucho Technology, Inc.
 Implementation-Version: 3.1.0
 J2EE-DeploymentFactory-Implementation-Class: com.caucho.j2ee.deployclient.DeploymentFactoryImpl
