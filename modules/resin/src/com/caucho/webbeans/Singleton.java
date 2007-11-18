@@ -37,11 +37,11 @@ import java.lang.annotation.Target;
 import javax.webbeans.*;
 
 /**
- * The @SingletonScoped represents a unique single instance
+ * The @Singleton represents a unique single instance
  */
 
 @ScopeType
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
-public @interface SingletonScoped {
+public @interface Singleton {
 }

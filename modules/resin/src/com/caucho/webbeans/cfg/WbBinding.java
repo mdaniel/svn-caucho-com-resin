@@ -248,7 +248,7 @@ public class WbBinding {
 
   public String toString()
   {
-    return "WbBinding[" + _cl.getName() + "]";
+    return toDebugString();
   }
 
   static class WbBindingValue {

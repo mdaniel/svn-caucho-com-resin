@@ -162,7 +162,7 @@ abstract public class AbstractBeanConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      _scope = SingletonScoped.class;
+      _scope = Singleton.class;
     else if ("dependent".equals(scope))
       _scope = Dependent.class;
     else if ("request".equals(scope))
@@ -223,18 +223,21 @@ abstract public class AbstractBeanConfig {
   }
 
   protected void register(Object value, Class api)
-  {    
-    WbComponent comp;
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    WbWebBeans wbWebBeans = webBeans.getWbWebBeans();
+    
+    ComponentImpl comp;
 
     if (value != null) {
-      comp = new SingletonComponent(value);
-
-      comp.setClass(value.getClass());
+      comp = new SingletonComponent(wbWebBeans, value);
     }
     else {
-      comp = new SingletonClassComponent();
+      ClassComponent classComp = new SingletonClassComponent(wbWebBeans);
 
-      comp.setClass(_cl);
+      classComp.setInstanceClass(_cl);
+
+      comp = classComp;
     }
 
     if (api != null)
@@ -243,18 +246,17 @@ abstract public class AbstractBeanConfig {
     if (_name != null)
       comp.setName(_name);
 
-    for (WbBinding binding : _bindingList)
-      comp.addBinding(binding);
+    comp.setBindingList(_bindingList);
 
     if (_type != null)
-      comp.setComponentType(_type);
+      comp.setType(_type);
+    else
+      comp.setType(wbWebBeans.createComponentType(ComponentType.class));
 
     if (_scope != null)
-      comp.setScope(_scope);
+      comp.setScope(webBeans.getScopeContext(_scope));
 
     comp.init();
-
-    WebBeansContainer webBeans = WebBeansContainer.create();
 
     webBeans.addComponent(comp);
 

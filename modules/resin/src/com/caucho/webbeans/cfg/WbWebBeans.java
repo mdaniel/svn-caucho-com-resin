@@ -33,8 +33,9 @@ import com.caucho.bytecode.*;
 import com.caucho.config.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.SingletonScoped;
-import com.caucho.webbeans.component.SingletonClassComponent;
+import com.caucho.webbeans.Singleton;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.io.IOException;
@@ -62,11 +63,11 @@ public class WbWebBeans {
   
   private ArrayList<WbComponentType> _componentTypeList;
   
-  private ArrayList<WbComponent> _componentList
-    = new ArrayList<WbComponent>();
+  private ArrayList<ComponentImpl> _pendingComponentList
+    = new ArrayList<ComponentImpl>();
   
-  private ArrayList<WbComponent> _pendingComponentList
-    = new ArrayList<WbComponent>();
+  private ArrayList<ComponentImpl> _pendingBindList
+    = new ArrayList<ComponentImpl>();
   
   private ArrayList<WbInterceptor> _interceptorList
     = new ArrayList<WbInterceptor>();
@@ -123,11 +124,8 @@ public class WbWebBeans {
     return new WbComponentConfig(this);
   }
 
-  public void addWbComponent(WbComponent component)
+  public void addWbComponent(ComponentImpl component)
   {
-    _componentList.remove(component);
-    _componentList.add(component);
-    
     _pendingComponentList.remove(component);
     _pendingComponentList.add(component);
   }
@@ -138,31 +136,6 @@ public class WbWebBeans {
   public WbComponentTypes createComponentTypes()
   {
     return new WbComponentTypes();
-  }
-
-  public void update()
-  {
-    ArrayList<Class> pendingClasses = new ArrayList<Class>(_pendingClasses);
-    _pendingClasses.clear();
-
-    for (Class cl : pendingClasses) {
-      if (_componentTypeMap.get(cl.getName()) != null)
-	continue;
-
-      WbClassComponent component;
-
-      if (cl.isAnnotationPresent(SingletonScoped.class))
-	component = new SingletonClassComponent(this);
-      else
-	component = new WbClassComponent(this);
-	
-      component.setClass(cl);
-      component.setFromClass(true);
-      component.introspect();
-      component.init();
-
-      _componentList.add(component);
-    }
   }
 
   @PostConstruct
@@ -179,19 +152,62 @@ public class WbWebBeans {
       _componentTypeList.add(type);
     }
 
+    update();
+  }
+
+  public void update()
+  {
     WebBeansContainer webBeans = _webBeansContainer;
 
-    ArrayList<WbComponent> componentList
-      = new ArrayList<WbComponent>(_pendingComponentList);
-    _pendingComponentList.clear();
+    if (_pendingClasses.size() > 0) {
+      ArrayList<Class> pendingClasses = new ArrayList<Class>(_pendingClasses);
+      _pendingClasses.clear();
 
-    for (WbComponent comp : componentList) {
-      if (comp.getType().isEnabled()) {
-	webBeans.addComponent(comp);
+      for (Class cl : pendingClasses) {
+	/*
+	  if (_componentTypeMap.get(cl.getName()) != null)
+	  continue;
+	*/
+
+	ClassComponent component;
+
+	if (cl.isAnnotationPresent(Singleton.class))
+	  component = new SingletonClassComponent(this);
+	else
+	  component = new ClassComponent(this);
+	
+	component.setInstanceClass(cl);
+	component.setTargetType(cl);
+	component.setFromClass(true);
+	component.introspect();
+	component.init();
+
+	_pendingComponentList.add(component);
       }
     }
 
-    for (WbComponent comp : componentList) {
+    if (_pendingComponentList.size() > 0) {
+      ArrayList<ComponentImpl> componentList
+	= new ArrayList<ComponentImpl>(_pendingComponentList);
+      _pendingComponentList.clear();
+
+      for (ComponentImpl comp : componentList) {
+	if (comp.getType().isEnabled()) {
+	  webBeans.addComponent(comp);
+
+	  _pendingBindList.add(comp);
+	}
+      }
+    }
+  }
+
+  public void bind()
+  {
+    ArrayList<ComponentImpl> componentList
+      = new ArrayList<ComponentImpl>(_pendingBindList);
+    _pendingBindList.clear();
+
+    for (ComponentImpl comp : componentList) {
       if (comp.getType().isEnabled()) {
 	comp.bind();
       }
@@ -210,9 +226,16 @@ public class WbWebBeans {
     return type;
   }
 
-  public WbComponent bindParameter(Class type, Annotation []annotations)
+  public ScopeContext getScopeContext(Class cl)
   {
-    return _webBeansContainer.bind(type, getBindList(annotations));
+    return _webBeansContainer.getScopeContext(cl);
+  }
+
+  public ComponentImpl bindParameter(String loc,
+				     Class type,
+				     Annotation []annotations)
+  {
+    return _webBeansContainer.bind(loc, type, getBindList(annotations));
   }
 
   /**

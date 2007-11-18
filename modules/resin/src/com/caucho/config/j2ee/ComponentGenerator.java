@@ -27,49 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.j2ee;
 
-import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.naming.*;
+import com.caucho.util.L10N;
 import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
-import javax.servlet.*;
-import javax.webbeans.*;
+import javax.naming.*;
+import javax.persistence.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import javax.rmi.*;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Configuration for the xml web bean component.
+ * Generator for a component value.
  */
-public class RequestScope extends ScopeContext {
-  public <T> T get(ComponentFactory<T> component)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
+public class ComponentGenerator extends ValueGenerator {
+  private static final Logger log
+    = Logger.getLogger(ComponentGenerator.class.getName());
+  private static final L10N L = new L10N(ComponentGenerator.class);
 
-    if (request != null) {
-      ComponentImpl comp = (ComponentImpl) component;
-      
-      return (T) request.getAttribute(comp.getScopeId());
-    }
-    else
-      return null;
-  }
+  private final ComponentImpl _comp;
   
-  public <T> void put(ComponentFactory<T> component, T value)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
+  private final String _location;
 
-    if (request != null) {
-      ComponentImpl comp = (ComponentImpl) component;
-      
-      request.setAttribute(comp.getScopeId(), value);
-    }
+  ComponentGenerator(String location, ComponentImpl comp)
+  {
+    _location = location;
+
+    _comp = comp;
   }
 
-
-  @Override
-  public boolean canInject(ScopeContext scope)
+  /**
+   * Creates the value.
+   */
+  public Object create()
   {
-    return (scope instanceof ApplicationScope
-	    || scope instanceof SessionScope
-	    || scope instanceof ConversationScope
-	    || scope instanceof RequestScope);
+    return _comp.get();
   }
 }

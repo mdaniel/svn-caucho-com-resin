@@ -121,7 +121,7 @@ public class SessionServer extends AbstractServer
       WebBeansContainer webBeans = WebBeansContainer.create();
       SessionComponent comp = new SessionComponent(this);
     
-      comp.setClass(beanClass);
+      comp.setTargetType(beanClass);
     
       if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class))
 	comp.setName(getEJBName());

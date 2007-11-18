@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.inject.*;
 
 import java.lang.annotation.*;
@@ -47,18 +48,18 @@ public class WebComponent {
   
   private Class _type;
 
-  private ArrayList<WbComponent> _componentList
-    = new ArrayList<WbComponent>();
+  private ArrayList<ComponentImpl> _componentList
+    = new ArrayList<ComponentImpl>();
 
   public WebComponent(Class type)
   {
     _type = type;
   }
 
-  public void addComponent(WbComponent comp)
+  public void addComponent(ComponentImpl comp)
   {
     for (int i = _componentList.size() - 1; i >= 0; i--) {
-      WbComponent oldComponent = _componentList.get(i);
+      ComponentImpl oldComponent = _componentList.get(i);
 
       if (! comp.getClassName().equals(oldComponent.getClassName())) {
       }
@@ -74,62 +75,24 @@ public class WebComponent {
     _componentList.add(comp);
   }
   
-  public void createProgram(ArrayList<BuilderProgram> initList,
-			    AccessibleObject field,
-			    String name,
-			    AccessibleInject inject,
+  public void createProgram(ArrayList<Inject> initList,
+			    Field field,
 			    ArrayList<Annotation> bindList)
     throws ConfigException
   {
-    WbComponent matchComp = null;
-    WbComponent secondComp = null;
+    ComponentImpl comp = bind(WebBeansContainer.location(field), bindList);
 
-    for (int i = 0; i < _componentList.size(); i++) {
-      WbComponent comp = _componentList.get(i);
-
-      if (! comp.isMatch(bindList))
-	continue;
-
-      if (matchComp == null)
-	matchComp = comp;
-      else if (comp.getBindingList().size() == bindList.size()
-	       && matchComp.getBindingList().size() != bindList.size()) {
-	matchComp = comp;
-	secondComp = null;
-      }
-      else if (matchComp.getBindingList().size() == bindList.size()
-	       && comp.getBindingList().size() != bindList.size()) {
-      }
-      else if (matchComp.getType().getPriority() < comp.getType().getPriority()) {
-	matchComp = comp;
-	secondComp = null;
-      }
-      else if (comp.getType().getPriority() < matchComp.getType().getPriority()) {
-      }
-      else {
-	secondComp = comp;
-      }
-    }
-
-    if (matchComp == null)
-      throw WebBeansContainer.injectError(field, L.l("WebBeans unable to find matching component."));
-
-    else if (matchComp != null && secondComp != null) {
-	throw WebBeansContainer.injectError(field, L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
-					      matchComp, secondComp));
-    }
-
-    matchComp.createProgram(initList, field, name, inject);
+    comp.createProgram(initList, field);
   }
   
-  public WbComponent bind(ArrayList<Annotation> bindList)
+  public ComponentImpl bind(String location, ArrayList<Annotation> bindList)
     throws ConfigException
   {
-    WbComponent matchComp = null;
-    WbComponent secondComp = null;
+    ComponentImpl matchComp = null;
+    ComponentImpl secondComp = null;
 
     for (int i = 0; i < _componentList.size(); i++) {
-      WbComponent comp = _componentList.get(i);
+      ComponentImpl comp = _componentList.get(i);
 
       if (! comp.isMatch(bindList))
 	continue;
@@ -155,25 +118,28 @@ public class WebComponent {
       }
     }
 
-    if (matchComp == null)
+    if (matchComp == null) {
       return null;
-
+    }
     else if (matchComp != null && secondComp != null) {
-	throw new ConfigException(L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
+	throw new ConfigException(location +
+				  L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
 					      matchComp, secondComp));
     }
     
     return matchComp;
   }
   
-  public WbComponent bindByBindings(Class type, ArrayList<Binding> bindList)
+  public ComponentImpl bindByBindings(String location,
+				      Class type,
+				      ArrayList<Binding> bindList)
     throws ConfigException
   {
-    WbComponent matchComp = null;
-    WbComponent secondComp = null;
+    ComponentImpl matchComp = null;
+    ComponentImpl secondComp = null;
 
     for (int i = 0; i < _componentList.size(); i++) {
-      WbComponent comp = _componentList.get(i);
+      ComponentImpl comp = _componentList.get(i);
 
       if (! comp.isMatchByBinding(bindList))
 	continue;
@@ -199,11 +165,14 @@ public class WebComponent {
       }
     }
 
-    if (matchComp == null)
-      return null;
-
+    if (matchComp == null) {
+      throw new ConfigException(location
+				+ L.l("Injection of '{0}' with bindings {1} does not match any component",
+				      type.getName(), bindList));
+    }
     else if (matchComp != null && secondComp != null) {
-      throw new ConfigException(L.l("WebBeans binding '{0}' conflicts between '{1}' and '{2}'.  WebBean injection must match uniquely.",
+      throw new ConfigException(location
+				+ L.l("Injection of '{0}' conflicts between '{1}' and '{2}'.  WebBean injection must match uniquely.",
 				      type.getName(), matchComp, secondComp));
     }
     

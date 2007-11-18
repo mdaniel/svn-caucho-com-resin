@@ -27,20 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.j2ee;
 
-import javax.webbeans.*;
+import com.caucho.webbeans.context.DependentScope;
 
 /**
- * Context for a named EL bean scope
+ * A program to inject dependencies
  */
-abstract public class ScopeContext {
-  abstract public <T> T get(ComponentFactory<T> comp);
-  
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
-
-  public boolean canInject(ScopeContext scope)
-  {
-    return getClass().equals(scope.getClass());
-  }
+abstract public class Inject {
+  /**
+   * Injects the bean with the dependencies
+   */
+  abstract public void inject(Object bean, DependentScope scope);
 }
+

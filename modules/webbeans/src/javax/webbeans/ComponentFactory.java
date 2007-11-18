@@ -32,4 +32,18 @@ package javax.webbeans;
  * The web bean component
  */
 public interface ComponentFactory<T> {
+  /**
+   * Creates a new component instance
+   */
+  public T create();
+
+  /**
+   * Destroys a component instance
+   */
+  public void destroy(T instance);
+  
+  /**
+   * Returns the appropriate component instance, creating if necessary
+   */
+  public T get();
 }

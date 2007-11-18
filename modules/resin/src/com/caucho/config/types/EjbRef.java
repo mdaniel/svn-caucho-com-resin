@@ -399,6 +399,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
 
       Method method = BeanUtil.getSetMethod(cl, fieldName);
 
+      /*
       if (method != null)
         accessibleInject = new PropertyInject(method);
       else {
@@ -428,6 +429,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         if (targetValue != null)
           accessibleInject.inject(null, targetValue);
       }
+      */
     }
   }
 

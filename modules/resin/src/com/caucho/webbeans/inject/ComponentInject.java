@@ -24,23 +24,46 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.webbeans.inject;
 
-import javax.webbeans.*;
+import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.context.DependentScope;
 
-/**
- * Context for a named EL bean scope
- */
-abstract public class ScopeContext {
-  abstract public <T> T get(ComponentFactory<T> comp);
-  
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
+import java.util.logging.*;
+import java.lang.reflect.*;
 
-  public boolean canInject(ScopeContext scope)
+public class ComponentInject extends Inject
+{
+  private static final Logger log
+    = Logger.getLogger(ComponentInject.class.getName());
+
+  private ComponentImpl _component;
+  private Field _field;
+
+  public ComponentInject(ComponentImpl component,
+			 Field field)
   {
-    return getClass().equals(scope.getClass());
+    _component = component;
+    _field = field;
+
+    field.setAccessible(true);
+  }
+
+  public void inject(Object bean, DependentScope scope)
+  {
+    try {
+      Object value = _component.get(scope);
+
+      _field.set(bean, value);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 }

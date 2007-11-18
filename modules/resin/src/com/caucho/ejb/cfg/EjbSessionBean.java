@@ -431,10 +431,12 @@ public class EjbSessionBean extends EjbBean {
     try {
       thread.setContextClassLoader(server.getClassLoader());
 
-      ArrayList<BuilderProgram> initList;
-      initList = InjectIntrospector.introspect(beanClass);
 
       BuilderProgramContainer initContainer = getInitProgram();
+
+      /*
+      ArrayList<BuilderProgram> initList;
+      initList = InjectIntrospector.introspect(beanClass);
 
       if (initList != null && initList.size() > 0) {
         if (initContainer == null)
@@ -467,6 +469,7 @@ public class EjbSessionBean extends EjbBean {
           initContainer.addProgram(init);
         }
       }
+      */
 
       server.setInitProgram(initContainer);
 

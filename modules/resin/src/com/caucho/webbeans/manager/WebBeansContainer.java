@@ -36,6 +36,7 @@ import com.caucho.loader.enhancer.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.server.util.*;
+import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
@@ -77,8 +78,8 @@ public class WebBeansContainer
   private HashMap<Class,WebComponent> _componentMap
     = new HashMap<Class,WebComponent>();
 
-  private HashMap<String,WbComponent> _namedComponentMap
-    = new HashMap<String,WbComponent>();
+  private HashMap<String,ComponentImpl> _namedComponentMap
+    = new HashMap<String,ComponentImpl>();
 
   private HashMap<Path,WebBeansRootContext> _rootContextMap
     = new HashMap<Path,WebBeansRootContext>();
@@ -185,7 +186,7 @@ public class WebBeansContainer
     return _wbWebBeans.createComponentType(cl);
   }
   
-  public void addComponent(WbComponent comp)
+  public void addComponent(ComponentImpl comp)
   {
     addComponentByType(comp.getTargetType(), comp);
 
@@ -201,7 +202,7 @@ public class WebBeansContainer
    * @param type the interface type to expose the component
    * @param comp the component to register
    */
-  public void addComponentByType(Class type, WbComponent comp)
+  public void addComponentByType(Class type, ComponentImpl comp)
   {
     if (type == null)
       return;
@@ -213,7 +214,7 @@ public class WebBeansContainer
     addComponentRec(type, comp);
   }
     
-  private void addComponentRec(Class type, WbComponent comp)
+  private void addComponentRec(Class type, ComponentImpl comp)
   {
     if (type == null || Object.class.equals(type))
       return;
@@ -238,7 +239,6 @@ public class WebBeansContainer
   {
     SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
 
-    comp.setClass(object.getClass());
     comp.init();
 
     addComponent(comp);
@@ -246,9 +246,8 @@ public class WebBeansContainer
 
   public void addSingleton(Object object, String name)
   {
-    SingletonComponent comp = new SingletonComponent(object);
+    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
 
-    comp.setClass(object.getClass());
     comp.setName(name);
     comp.init();
 
@@ -267,32 +266,30 @@ public class WebBeansContainer
       return new ApplicationScope();
     else if (ConversationScoped.class.equals(scope))
       return new ConversationScope();
+    else if (Singleton.class.equals(scope))
+      return null;
+    else if (Dependent.class.equals(scope))
+      return null;
     else
       throw new IllegalArgumentException(L.l("'{0}' is an unknown scope.",
 					     scope.getName()));
   }
 
-  public void createProgram(ArrayList<BuilderProgram> initList,
-			    AccessibleObject field,
-			    String fieldName,
-			    Class fieldType,
-			    AccessibleInject inject)
+  public void createProgram(ArrayList<Inject> injectList,
+			    Field field)
     throws ConfigException
   {
-    Annotation componentAnn = null;
-    Annotation bindingAnn = null;
-    String name = null;
-
-    WbComponent component = bind(fieldType, field.getAnnotations());
+    ComponentImpl component
+      = bind(location(field), field.getType(), field.getAnnotations());
 
     if (component == null)
       throw injectError(field, L.l("Can't find a component for '{0}'",
-				   fieldType.getName()));
+				   field.getName()));
 
-    component.createProgram(initList, field, name, inject);
+    component.createProgram(injectList, field);
   }
 
-  public void createProgram(ArrayList<BuilderProgram> initList,
+  public void createProgram(ArrayList<Inject> injectList,
 			    Method method)
     throws ConfigException
   {
@@ -301,16 +298,15 @@ public class WebBeansContainer
       Class []paramTypes = method.getParameterTypes();
       Annotation[][]paramAnn = method.getParameterAnnotations();
       
-      WbComponent []args = new WbComponent[paramTypes.length];
+      ComponentImpl []args = new ComponentImpl[paramTypes.length];
 
       for (int i = 0; i < args.length; i++) {
-	args[i] = bind(paramTypes[i], paramAnn[i]);
+	args[i] = bind(location(method), paramTypes[i], paramAnn[i]);
       }
 
-      initList.add(new InjectMethodProgram(method, args));
+      injectList.add(new InjectMethodProgram(method, args));
     } catch (Exception e) {
-      String className = method.getDeclaringClass().getSimpleName();
-      String loc = className + '.' + method.getName() + ": ";
+      String loc = location(method);
 
       if (e instanceof ConfigException)
 	throw new ConfigException(loc + e.getMessage(), e);
@@ -323,7 +319,7 @@ public class WebBeansContainer
    * Returns the web beans component corresponding to a method
    * and a @Named value
    */
-  public WbComponent bind(Class type, String name)
+  public ComponentImpl bind(String location, Class type, String name)
   {
     ArrayList<Binding> bindingList = new ArrayList<Binding>();
 
@@ -332,24 +328,26 @@ public class WebBeansContainer
 
     bindingList.add(binding);
 
-    return bindByBindings(type, bindingList);
+    return bindByBindings(location, type, bindingList);
   }
 
   /**
    * Returns the web beans component corresponding to the return type.
    */
-  public WbComponent bind(Class type)
+  public ComponentImpl bind(String location, Class type)
   {
     ArrayList<Binding> bindingList = new ArrayList<Binding>();
 
-    return bindByBindings(type, bindingList);
+    return bindByBindings(location, type, bindingList);
   }
 
   /**
    * Returns the web beans component corresponding to a method
    * parameter.
    */
-  public WbComponent bind(Class type, Annotation []paramAnn)
+  public ComponentImpl bind(String location,
+			    Class type,
+			    Annotation []paramAnn)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
@@ -358,22 +356,24 @@ public class WebBeansContainer
 	bindingList.add(ann);
     }
 
-    return bind(type, bindingList);
+    return bind(location, type, bindingList);
   }
 
   /**
    * Returns the web beans component with a given binding list.
    */
-  public WbComponent bind(Class type, ArrayList<Annotation> bindingList)
+  public ComponentImpl bind(String location,
+			    Class type,
+			    ArrayList<Annotation> bindingList)
   {
     _wbWebBeans.init();
     
     WebComponent component = _componentMap.get(type);
 
     if (component != null)
-      return component.bind(bindingList);
+      return component.bind(location, bindingList);
     else if (_parent != null)
-      return _parent.bind(type, bindingList);
+      return _parent.bind(location, type, bindingList);
     else
       return null;
   }
@@ -381,27 +381,28 @@ public class WebBeansContainer
   /**
    * Returns the web beans component with a given binding list.
    */
-  public WbComponent bindByBindings(Class type,
-				    ArrayList<Binding> bindingList)
+  public ComponentImpl bindByBindings(String location,
+				      Class type,
+				      ArrayList<Binding> bindingList)
   {
     _wbWebBeans.init();
     
     WebComponent component = _componentMap.get(type);
 
     if (component != null)
-      return component.bindByBindings(type, bindingList);
+      return component.bindByBindings(location, type, bindingList);
     else if (_parent != null)
-      return _parent.bindByBindings(type, bindingList);
+      return _parent.bindByBindings(location, type, bindingList);
     else
       return null;
   }
 
-  public Object findByName(String name)
+  public ComponentImpl findByName(String name)
   {
-    WbComponent comp = _namedComponentMap.get(name);
+    ComponentImpl comp = _namedComponentMap.get(name);
 
     if (comp != null)
-      return comp.get();
+      return comp;
     else if (_parent != null)
       return _parent.findByName(name);
     else
@@ -409,13 +410,16 @@ public class WebBeansContainer
   }
 
   //
-  // Container
+  // javax.webbeans.Container
   //
-  
+
+  /**
+   * Returns the component which matches the apiType and binding types
+   */
   public <T> ComponentFactory<T> resolveByType(Class<T> apiType,
 					       Annotation...bindingTypes)
   {
-    return null;
+    return bind("", apiType, bindingTypes);
   }
   
   public void addContext(Class<Annotation> scopeType, Context context)
@@ -448,6 +452,14 @@ public class WebBeansContainer
 	if (webBeans == null) {
 	  webBeans = new WbWebBeans(this, root);
 	  _webBeansMap.put(root, webBeans);
+
+	  Path path = root.lookup("META-INF/web-beans.xml");
+	  
+	  if (path.canRead()) {
+	    path.setUserPath(path.getURL());
+	    
+	    new Config().configure(webBeans, path, SCHEMA);
+	  }
 	}
 
 	for (String className : context.getClassNameList()) {
@@ -462,22 +474,18 @@ public class WebBeansContainer
 	
 	webBeans.update();
 
-	if (! webBeans.isConfigured()) {
-	  webBeans.setConfigured(true);
-
-	  Path path = root.lookup("META-INF/web-beans.xml");
-	  
-	  if (path.canRead()) {
-	    path.setUserPath(path.getURL());
-	    
-	    new Config().configure(webBeans, path, SCHEMA);
-	  }
-	}
-
 	webBeans.init();
       }
     
       _wbWebBeans.init();
+      
+      for (WebBeansRootContext context : rootContextList) {
+	WbWebBeans webBeans = _webBeansMap.get(context.getRoot());
+	
+	webBeans.bind();
+      }
+      
+      _wbWebBeans.bind();
     } catch (ConfigException e) {
       if (_configException == null)
 	_configException = e;
@@ -514,17 +522,11 @@ public class WebBeansContainer
       Field field = (Field) prop;
       String className = field.getDeclaringClass().getName();
 
-      int p = className.lastIndexOf('.');
-      className = className.substring(p + 1);
-
       location = className + "." + field.getName() + ": ";
     }
     else if (prop instanceof Method) {
       Method method = (Method) prop;
       String className = method.getDeclaringClass().getName();
-
-      int p = className.lastIndexOf('.');
-      className = className.substring(p + 1);
 
       location = className + "." + method.getName() + ": ";
     }
@@ -532,6 +534,16 @@ public class WebBeansContainer
     return new ConfigException(location + msg);
   }
 
+  public static String location(Field field)
+  {
+    return field.getDeclaringClass().getName() + "." + field.getName() + ": ";
+  }
+
+  public static String location(Method method)
+  {
+    return (method.getDeclaringClass().getName()
+	    + "." + method.getName() + ": ");
+  }
 
   //
   // ScanListener

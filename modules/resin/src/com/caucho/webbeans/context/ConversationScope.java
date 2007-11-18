@@ -33,6 +33,7 @@ import com.caucho.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.webbeans.*;
 
 /**
  * The conversation scope value
@@ -40,12 +41,12 @@ import javax.servlet.http.*;
 public class ConversationScope extends ScopeContext {
   private static final L10N L = new L10N(ConversationScope.class);
   
-  public Object get(String name)
+  public <T> T get(ComponentFactory<T> component)
   {
     throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
   }
   
-  public void set(String name, Object value)
+  public <T> void put(ComponentFactory<T> component, T value)
   {
     throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
   }

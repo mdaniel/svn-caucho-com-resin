@@ -31,12 +31,13 @@ package com.caucho.webbeans.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.context.DependentScope;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class InjectMethodProgram extends BuilderProgram
+public class InjectMethodProgram extends Inject
 {
   private static final Logger log
     = Logger.getLogger(InjectMethodProgram.class.getName());
@@ -44,16 +45,16 @@ public class InjectMethodProgram extends BuilderProgram
   private static final Object []NULL_ARGS = new Object[0];
 
   private Method _method;
-  private WbComponent []_args;
+  private ComponentImpl []_args;
 
   public InjectMethodProgram(Method method,
-			     WbComponent []args)
+			     ComponentImpl []args)
   {
     _method = method;
     _args = args;
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void inject(Object bean, DependentScope scope)
     throws ConfigException
   {
     try {
@@ -63,27 +64,23 @@ public class InjectMethodProgram extends BuilderProgram
 	args = new Object[_args.length];
 	
 	for (int i = 0; i < args.length; i++)
-	  args[i] = _args[i].get();
+	  args[i] = _args[i].get(scope);
       }
       else
 	args = NULL_ARGS;
       
       _method.invoke(bean, args);
-    } catch (RuntimeException e) {
-      throw e;
     } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException)
-	throw (RuntimeException) e.getCause();
-      else
-	throw new ConfigException(e.getCause());
+      throw new ConfigException(loc() + e.getCause().getMessage(),
+				e.getCause());
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw new ConfigException(loc() + e.getMessage(), e);
     }
   }
 
-  public Object configure(NodeBuilder builder, Class type)
-    throws ConfigException
+  private String loc()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (_method.getDeclaringClass().getSimpleName()
+	    + "." + _method.getName() + ": ");
   }
 }

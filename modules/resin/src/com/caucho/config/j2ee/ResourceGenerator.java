@@ -48,16 +48,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Generator for the @EJB tag.
+ * Generator for the @Resource tag.
  */
-public class EjbGenerator extends ValueGenerator {
+public class ResourceGenerator extends ValueGenerator {
   private static final Logger log
-    = Logger.getLogger(EjbGenerator.class.getName());
-  private static final L10N L = new L10N(EjbGenerator.class);
+    = Logger.getLogger(ResourceGenerator.class.getName());
+  private static final L10N L = new L10N(ResourceGenerator.class);
 
   private final Class _type;
   private final String _mappedName;
-  private final String _beanName;
   
   private final String _jndiName;
   
@@ -66,15 +65,13 @@ public class EjbGenerator extends ValueGenerator {
   private ComponentImpl _component;
   private boolean _isBound;
 
-  EjbGenerator(Class type,
-	       String mappedName,
-	       String beanName,
-	       String jndiName,
-	       String location)
+  ResourceGenerator(Class type,
+		    String mappedName,
+		    String jndiName,
+		    String location)
   {
     _type = type;
     _mappedName = mappedName;
-    _beanName = beanName;
     
     _jndiName = jndiName;
     
@@ -101,7 +98,7 @@ public class EjbGenerator extends ValueGenerator {
       WebBeansContainer webBeans = WebBeansContainer.create();
 
       if (_mappedName != null && ! "".equals(_mappedName)) {
-	_component = webBeans.bind("error", _type, _mappedName);
+	_component = webBeans.bind(_location, _type, _mappedName);
 	
 	if (_component == null) {
 	  Object value = getJndiValue(_type);
@@ -112,20 +109,19 @@ public class EjbGenerator extends ValueGenerator {
 	  throw new ConfigException(_location + L.l("'{0}' with mappedName='{1}' is an unknown @EJB", _type.getName(), _mappedName));
 	}
       }
-      else if (_beanName != null && ! "".equals(_beanName)) {
-	_component = webBeans.bind("error", _type, _beanName);
+      else if (_jndiName != null && ! "".equals(_jndiName)) {
+	_component = webBeans.bind(_location, _type, _jndiName);
 	
 	if (_component == null) {
 	  Object value = getJndiValue(_type);
 
 	  if (value != null)
 	    return value;
-
-	  throw new ConfigException(_location + L.l("'{0}' with beanName='{1}' is an unknown @EJB", _type.getName(), _beanName));
 	}
       }
-      else {
-	_component = webBeans.bind("error", _type);
+
+      if (_component == null) {
+	_component = webBeans.bind(_location, _type);
 	
 	if (_component == null) {
 	  Object value = getJndiValue(_type);
@@ -133,7 +129,7 @@ public class EjbGenerator extends ValueGenerator {
 	  if (value != null)
 	    return value;
 
-	  throw new ConfigException(_location + L.l("'{0}'  is an unknown @EJB", _type.getName()));
+	  throw new ConfigException(_location + L.l("'{0}'  is an unknown @Resource", _type.getName()));
 	}
       }
 
@@ -183,11 +179,6 @@ public class EjbGenerator extends ValueGenerator {
     if (_mappedName != null) {
       sb.append(", mappedName=");
       sb.append(_mappedName);
-    }
-    
-    if (_beanName != null) {
-      sb.append(", beanName=");
-      sb.append(_beanName);
     }
     
     if (_jndiName != null) {

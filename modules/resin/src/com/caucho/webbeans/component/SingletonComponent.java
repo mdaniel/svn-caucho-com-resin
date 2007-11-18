@@ -32,23 +32,16 @@ package com.caucho.webbeans.component;
 import java.lang.annotation.*;
 import javax.webbeans.*;
 
-import com.caucho.webbeans.cfg.WbComponent;
 import com.caucho.webbeans.cfg.WbWebBeans;
+import com.caucho.webbeans.context.*;
 
 /**
  * Component for a singleton beans
  */
-public class SingletonComponent extends WbComponent {
+public class SingletonComponent extends ClassComponent {
   private static final Object []NULL_ARGS = new Object[0];
 
   private Object _value;
-
-  public SingletonComponent(Object value)
-  {
-    _value = value;
-
-    setClass(value.getClass());
-  }
 
   public SingletonComponent(WbWebBeans webBeans, Object value)
   {
@@ -56,11 +49,12 @@ public class SingletonComponent extends WbComponent {
     
     _value = value;
 
-    setClass(value.getClass());
+    setInstanceClass(value.getClass());
+    setTargetType(value.getClass());
   }
 
   @Override
-  public void setScope(Class scope)
+  public void setScope(ScopeContext scope)
   {
   }
 

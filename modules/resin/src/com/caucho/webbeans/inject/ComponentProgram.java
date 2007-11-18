@@ -31,7 +31,7 @@ package com.caucho.webbeans.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.component.*;
 
 import java.util.logging.*;
 
@@ -40,10 +40,10 @@ public class ComponentProgram extends BuilderProgram
   private static final Logger log
     = Logger.getLogger(ComponentProgram.class.getName());
 
-  private WbComponent _component;
+  private ComponentImpl _component;
   private AccessibleInject _inject;
 
-  public ComponentProgram(WbComponent component,
+  public ComponentProgram(ComponentImpl component,
 			  AccessibleInject inject)
   {
     _component = component;

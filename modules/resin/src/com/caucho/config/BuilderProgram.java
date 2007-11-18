@@ -29,6 +29,8 @@
 
 package com.caucho.config;
 
+import com.caucho.webbeans.context.DependentScope;
+
 /**
  * A saved program for configuring an object.
  */

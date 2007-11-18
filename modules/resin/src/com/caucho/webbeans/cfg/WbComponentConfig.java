@@ -154,7 +154,7 @@ public class WbComponentConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      _scope = SingletonScoped.class;
+      _scope = Singleton.class;
     else if ("dependent".equals(scope))
       _scope = Dependent.class;
     else if ("request".equals(scope))
@@ -207,32 +207,34 @@ public class WbComponentConfig {
 
     introspect();
     
-    WbComponent comp;
+    ClassComponent comp;
 
-    if (SingletonScoped.class.equals(_scope))
+    if (Singleton.class.equals(_scope))
       comp = new SingletonClassComponent(_webbeans);
     else
-      comp = new WbClassComponent(_webbeans);
+      comp = new ClassComponent(_webbeans);
 
-    comp.setClass(_cl);
+    comp.setInstanceClass(_cl);
+    comp.setTargetType(_cl);
 
     if (_name != null)
       comp.setName(_name);
 
-    for (WbBinding binding : _bindingList)
-      comp.addBinding(binding);
+    comp.setBindingList(_bindingList);
+    System.out.println("BL: " + _bindingList);
 
     if (_type != null)
-      comp.setComponentType(_type);
+      comp.setType(_type);
+    else
+      comp.setType(_webbeans.createComponentType(Component.class));
 
     if (_scope != null)
-      comp.setScope(_scope);
+      comp.setScope(_webbeans.getScopeContext(_scope));
 
     if (_init != null)
       comp.setInit(_init);
 
     comp.init();
-
     _webbeans.addWbComponent(comp);
   }
 

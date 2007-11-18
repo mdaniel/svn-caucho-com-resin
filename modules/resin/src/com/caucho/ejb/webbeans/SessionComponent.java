@@ -34,23 +34,27 @@ import javax.webbeans.*;
 
 import com.caucho.ejb.AbstractServer;
 
-import com.caucho.webbeans.cfg.WbComponent;
+import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 /**
  * Component for session beans
  */
-public class SessionComponent extends WbComponent {
+public class SessionComponent extends ComponentImpl {
   private static final Object []NULL_ARGS = new Object[0];
 
   private AbstractServer _server;
 
   public SessionComponent(AbstractServer server)
   {
+    super(WebBeansContainer.create().getWbWebBeans());
+    
     _server = server;
   }
 
   @Override
-  public void setScope(Class scope)
+  public void setScope(ScopeContext scope)
   {
   }
 

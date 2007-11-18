@@ -27,15 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.webbeans.component;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -47,18 +49,18 @@ import javax.webbeans.*;
 /**
  * Configuration for a @Produces method
  */
-public class WbProducesComponent extends WbComponent {
-  private static final L10N L = new L10N(WbProducesComponent.class);
+public class ProducesComponent extends ComponentImpl {
+  private static final L10N L = new L10N(ProducesComponent.class);
 
   private static final Object []NULL_ARGS = new Object[0];
-  private final WbComponent _producer;
+  private final ComponentImpl _producer;
   private final Method _method;
 
-  private WbComponent []_args;
+  private ComponentImpl []_args;
 
-  public WbProducesComponent(WbWebBeans webbeans,
-			     WbComponent producer,
-			     Method method)
+  public ProducesComponent(WbWebBeans webbeans,
+			   ComponentImpl producer,
+			   Method method)
   {
     super(webbeans);
 
@@ -100,11 +102,13 @@ public class WbProducesComponent extends WbComponent {
     introspect();
     
     if (getType() == null)
-      setComponentType(_producer.getType());
+      setType(_producer.getType());
   }
 
   public void introspect()
   {
+    ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+    
     for (Annotation ann : _method.getAnnotations()) {
       if (ann instanceof Named) {
 	setName(((Named) ann).value());
@@ -117,25 +121,30 @@ public class WbProducesComponent extends WbComponent {
 	
       if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
 	if (getScope() == null)
-	  setScope(ann.annotationType());
+	  setScope(_webbeans.getScopeContext(ann.annotationType()));
       }
 	
       if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
-	addBinding(new WbBinding(ann));
+	bindingList.add(new WbBinding(ann));
       }
     }
+
+    if (bindingList.size() > 0)
+      setBindingList(bindingList);
   }
 
   @Override
   public void bind()
   {
+    String loc = WebBeansContainer.location(_method);
+    
     Class []param = _method.getParameterTypes();
     Annotation [][]paramAnn = _method.getParameterAnnotations();
 
-    _args = new WbComponent[param.length];
+    _args = new ComponentImpl[param.length];
 
     for (int i = 0; i < param.length; i++) {
-      _args[i] = _webbeans.bindParameter(param[i], paramAnn[i]);
+      _args[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
 
       if (_args[i] == null)
 	throw new NullPointerException();

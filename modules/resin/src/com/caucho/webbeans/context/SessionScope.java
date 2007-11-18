@@ -30,35 +30,39 @@
 package com.caucho.webbeans.context;
 
 import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.webbeans.component.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.webbeans.*;
 
 /**
  * The session scope value
  */
 public class SessionScope extends ScopeContext {
-  public Object get(String name)
+  public <T> T get(ComponentFactory<T> component)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
+      ComponentImpl comp = (ComponentImpl) component;
       
-      return session.getAttribute(name);
+      return (T) session.getAttribute(comp.getScopeId());
     }
     else
       return null;
   }
   
-  public void set(String name, Object value)
+  public <T> void put(ComponentFactory<T> component, T value)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
+      ComponentImpl comp = (ComponentImpl) component;
       
-      session.setAttribute(name, value);
+      session.setAttribute(comp.getScopeId(), value);
     }
   }
 

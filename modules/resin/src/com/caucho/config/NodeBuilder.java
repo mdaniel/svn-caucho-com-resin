@@ -36,6 +36,7 @@ import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
+import com.caucho.webbeans.context.DependentScope;
 import com.caucho.xml.*;
 
 import org.w3c.dom.*;
@@ -78,6 +79,8 @@ public class NodeBuilder {
 
   private ConfigELContext _elContext;
   private ELResolver _varResolver;
+
+  private DependentScope _dependentScope;
 
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
@@ -481,6 +484,14 @@ public class NodeBuilder {
     }
     else
       return value;
+  }
+
+  public DependentScope getDependentScope()
+  {
+    if (_dependentScope == null)
+      _dependentScope = new DependentScope();
+
+    return _dependentScope;
   }
 
   ArrayList<Dependency> getDependencyList()

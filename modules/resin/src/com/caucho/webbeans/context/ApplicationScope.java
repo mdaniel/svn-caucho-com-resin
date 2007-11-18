@@ -30,31 +30,37 @@
 package com.caucho.webbeans.context;
 
 import com.caucho.server.webapp.WebApp;
+import com.caucho.webbeans.component.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.webbeans.*;
 
 /**
  * The application scope value
  */
 public class ApplicationScope extends ScopeContext {
-  public Object get(String name)
+  public <T> T get(ComponentFactory<T> component)
   {
     WebApp webApp = WebApp.getLocal();
 
     if (webApp != null) {
-      return webApp.getAttribute(name);
+      ComponentImpl comp = (ComponentImpl) component;
+      
+      return (T) webApp.getAttribute(comp.getScopeId());
     }
     else
       return null;
   }
   
-  public void set(String name, Object value)
+  public <T> void put(ComponentFactory<T> component, T value)
   {
     WebApp webApp = WebApp.getLocal();
 
     if (webApp != null) {
-      webApp.setAttribute(name, value);
+      ComponentImpl comp = (ComponentImpl) component;
+      
+      webApp.setAttribute(comp.getScopeId(), value);
     }
   }
 

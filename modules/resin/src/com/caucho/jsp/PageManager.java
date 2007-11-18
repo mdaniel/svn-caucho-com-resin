@@ -29,6 +29,7 @@
 
 package com.caucho.jsp;
 
+import com.caucho.config.j2ee.Inject;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -42,6 +43,7 @@ import com.caucho.util.LruCache;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
+import com.caucho.webbeans.context.DependentScope;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -253,8 +255,17 @@ abstract public class PageManager {
       page._caucho_setUpdateInterval(_updateInterval);
 
       try {
-	InjectIntrospector.configure(page);
-      } catch (Throwable e) {
+	ArrayList<Inject> injectList = new ArrayList<Inject>();
+	InjectIntrospector.introspectInject(injectList, page.getClass());
+
+	DependentScope scope = new DependentScope();
+	
+	for (Inject inject : injectList) {
+	  inject.inject(page, scope);
+	}
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
 	throw new RuntimeException(e);
       }
 

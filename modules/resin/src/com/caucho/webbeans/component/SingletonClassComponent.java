@@ -29,8 +29,8 @@
 
 package com.caucho.webbeans.component;
 
-import com.caucho.webbeans.cfg.WbClassComponent;
 import com.caucho.webbeans.cfg.WbWebBeans;
+import com.caucho.webbeans.context.DependentScope;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -42,22 +42,20 @@ import javax.webbeans.*;
 /**
  * Configuration for a singleton component.
  */
-public class SingletonClassComponent extends WbClassComponent {
+public class SingletonClassComponent extends ClassComponent {
   private Object _value;
-  
-  public SingletonClassComponent()
-  {
-  }
   
   public SingletonClassComponent(WbWebBeans webbeans)
   {
     super(webbeans);
   }
 
+  /*
   @Override
   public void setScope(Class ann)
   {
   }
+  */
 
   /**
    * Returns the singleton object
@@ -68,7 +66,7 @@ public class SingletonClassComponent extends WbClassComponent {
     if (_value == null) {
       _value = createNew();
 
-      init(_value);
+      init(_value, new DependentScope(this, _value, null));
     }
 
     return _value;

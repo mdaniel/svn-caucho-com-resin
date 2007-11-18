@@ -29,6 +29,7 @@
 package com.caucho.j2ee.appclient;
 
 import com.caucho.config.*;
+import com.caucho.config.j2ee.Inject;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.types.*;
 import com.caucho.ejb.cfg.PostConstructConfig;
@@ -366,14 +367,12 @@ public class AppClient implements EnvironmentBean
 
       Class<?> mainClass = Class.forName(_mainClassName, false, _loader);
 
-      ArrayList<BuilderProgram> programList
-        = InjectIntrospector.introspectStatic(mainClass);
+      ArrayList<Inject> injectList = new ArrayList<Inject>();
+      // XXX: static
+      InjectIntrospector.introspectInject(injectList, mainClass);
 
-      for (BuilderProgram program : programList) {
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, "configure: " + program);
-
-        program.configure((Object) null);
+      for (Inject inject : injectList) {
+        inject.inject((Object) null, null);
       }
 
       _mainMethod = mainClass.getMethod("main", String[].class);

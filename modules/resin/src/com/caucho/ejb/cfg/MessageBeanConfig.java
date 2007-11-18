@@ -39,7 +39,7 @@ import com.caucho.config.*;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
 import com.caucho.webbeans.cfg.AbstractBeanConfig;
-import com.caucho.webbeans.cfg.WbComponent;
+import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import com.caucho.util.*;
@@ -93,16 +93,17 @@ public class MessageBeanConfig extends AbstractBeanConfig
 
     WebBeansContainer webBeans = WebBeansContainer.create();
     
-    WbComponent destComp;
+    ComponentImpl destComp;
+    String loc = getInstanceClass().getName() + ": ";
 
     if (_destinationName != null)
-      destComp = webBeans.bind(_destinationType, _destinationName);
+      destComp = webBeans.bind(loc, _destinationType, _destinationName);
     else
-      destComp = webBeans.bind(_destinationType);
+      destComp = webBeans.bind(loc, _destinationType);
 
     bean.setDestinationValue((Destination) destComp.get());
-    
-    WbComponent comp = webBeans.bind(ConnectionFactory.class);
+
+    ComponentImpl comp = webBeans.bind(loc, ConnectionFactory.class);
 
     bean.setConnectionFactoryValue((ConnectionFactory) comp.get());
 

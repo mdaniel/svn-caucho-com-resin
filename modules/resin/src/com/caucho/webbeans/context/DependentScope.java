@@ -30,7 +30,7 @@
 package com.caucho.webbeans.context;
 
 import com.caucho.server.webapp.WebApp;
-import com.caucho.webbeans.cfg.WbComponent;
+import com.caucho.webbeans.component.ComponentImpl;
 
 import java.util.*;
 
@@ -41,16 +41,25 @@ import javax.servlet.http.*;
 /**
  * The application scope value
  */
-public class DependentScope extends ScopeContext {
+public class DependentScope {
   private static final ThreadLocal<DependentScope> _threadScope
     = new ThreadLocal<DependentScope>();
 
+  private ComponentImpl _owner;
+  private Object _value;
   private ScopeContext _scope;
-  private final IdentityHashMap<WbComponent,Object> _map
-    = new IdentityHashMap<WbComponent,Object>(8);
 
-  private DependentScope(ScopeContext scope)
+  private IdentityHashMap<ComponentImpl,Object> _map;
+
+  public DependentScope()
   {
+  }
+  
+  public DependentScope(ComponentImpl owner, Object value, ScopeContext scope)
+  {
+    _owner = owner;
+    _value = value;
+    
     _scope = scope;
   }
   
@@ -67,11 +76,13 @@ public class DependentScope extends ScopeContext {
    */
   public static DependentScope begin(ScopeContext ownerScope)
   {
-    DependentScope scope = new DependentScope(ownerScope);
+    throw new UnsupportedOperationException();
+    
+    //DependentScope scope = new DependentScope(ownerScope);
 
-    _threadScope.set(scope);
+    //_threadScope.set(scope);
 
-    return scope;
+    //return scope;
   }
 
   /**
@@ -85,35 +96,27 @@ public class DependentScope extends ScopeContext {
   /**
    * Returns the object with the given name.
    */
-  public Object get(WbComponent comp)
+  public Object get(ComponentImpl comp)
   {
-    return _map.get(comp);
+    if (comp == _owner)
+      return _value;
+    else if (_map != null)
+      return _map.get(comp);
+    else
+      return null;
   }
 
   /**
    * Sets the object with the given name.
    */
-  public void set(WbComponent comp, Object value)
+  public void put(ComponentImpl comp, Object value)
   {
+    if (_map == null)
+      _map = new IdentityHashMap<ComponentImpl,Object>(8);
+    
     _map.put(comp, value);
   }
 
-  /**
-   * Sets the object with the given name.
-   */
-  public Object get(String name)
-  {
-    return null;
-  }
-
-  /**
-   * Sets the object with the given name.
-   */
-  public void set(String name, Object value)
-  {
-  }
-
-  @Override
   public boolean canInject(ScopeContext scope)
   {
     if (scope == null)

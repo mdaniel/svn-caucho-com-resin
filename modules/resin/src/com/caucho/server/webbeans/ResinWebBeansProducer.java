@@ -46,7 +46,7 @@ import javax.webbeans.*;
  */
 
 @Standard
-@SingletonScoped  
+@Singleton
 public class ResinWebBeansProducer
 {
   /**

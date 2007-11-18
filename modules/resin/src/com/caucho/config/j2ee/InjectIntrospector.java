@@ -31,10 +31,11 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import org.omg.CORBA.ORB;
 
@@ -67,132 +68,6 @@ import java.util.concurrent.*;
 public class InjectIntrospector {
   private static final L10N L = new L10N(InjectIntrospector.class);
   private static final Logger log = Log.open(InjectIntrospector.class);
-
-  /**
-   * Analyzes a bean for @Inject tags, building an init program for them.
-   */
-  public static void configure(Object obj)
-    throws Throwable
-  {
-    if (obj != null) {
-      for (BuilderProgram program : introspect(obj.getClass())) {
-        program.configure(obj);
-      }
-    }
-  }
-
-  /**
-   * Analyzes a bean for @Inject tags, building an init program for them.
-   */
-  public static InjectProgram introspectProgram(Class type)
-    throws ConfigException
-  {
-    return new InjectProgram(introspect(type));
-  }
-
-  /**
-   * Analyzes a bean for @Inject tags, building an init program for them.
-   */
-  public static ArrayList<BuilderProgram> introspectStatic(Class type)
-    throws ConfigException
-  {
-    return introspect(type);
-  }
-
-  /**
-   * Analyzes a bean for @Inject tags, building an init program for them.
-   */
-  public static ArrayList<BuilderProgram> introspect(Class type)
-    throws ConfigException
-  {
-    return introspect(type, null);
-  }
-
-  /**
-   * Analyzes a bean for @Inject tags, building an init program for them.
-   */
-  public static ArrayList<BuilderProgram> introspect(Class type, String localJndiPrefix)
-    throws ConfigException
-  {
-    ArrayList<BuilderProgram> initList = new ArrayList<BuilderProgram>();
-
-    try {
-      introspectImpl(initList, type, localJndiPrefix);
-
-      introspectConstruct(initList, type);
-    } catch (ClassNotFoundException e) {
-    } catch (Error e) {
-    }
-
-    return initList;
-  }
-
-  /**
-   * Analyzes a bean for @Inject tags, building an init program for them.
-   */
-  public static ArrayList<BuilderProgram> introspectNoInit(Class type)
-    throws ConfigException
-  {
-    ArrayList<BuilderProgram> initList = new ArrayList<BuilderProgram>();
-
-    try {
-      introspectImpl(initList, type);
-    } catch (ClassNotFoundException e) {
-    } catch (Error e) {
-    }
-
-    return initList;
-  }
-
-  private static void introspectImpl(ArrayList<BuilderProgram> initList,
-                                     Class type)
-    throws ConfigException, ClassNotFoundException
-  {
-    introspectImpl(initList, type, null);
-  }
-
-  private static void introspectImpl(ArrayList<BuilderProgram> initList,
-                                     Class type,
-                                     String localJndiPrefix)
-    throws ConfigException, ClassNotFoundException
-  {
-    if (type == null || type.equals(Object.class))
-      return;
-
-    introspectImpl(initList, type.getSuperclass());
-
-    configureClassResources(initList, type, localJndiPrefix);
-
-    for (Method method : type.getDeclaredMethods()) {
-      String fieldName = method.getName();
-      Class []param = method.getParameterTypes();
-
-      if (hasBindingAnnotation(method)) {
-        WebBeansContainer webBeans = WebBeansContainer.create();
-
-        webBeans.createProgram(initList, method);
-
-        continue;
-      }
-
-      if (param.length != 1)
-        continue;
-
-      if (fieldName.startsWith("set") && fieldName.length() > 3) {
-        fieldName = fieldName.substring(3);
-
-        char ch = fieldName.charAt(0);
-
-        if (Character.isUpperCase(ch) &&
-            (fieldName.length() == 1 ||
-             Character.isLowerCase(fieldName.charAt(1)))) {
-          fieldName = Character.toLowerCase(ch) + fieldName.substring(1);
-        }
-      }
-
-      configure(initList, method, fieldName, param[0]);
-    }
-  }
 
   public static void
     introspectConstruct(ArrayList<BuilderProgram> initList, Class type)
@@ -227,17 +102,92 @@ public class InjectIntrospector {
   }
 
   public static void
-    configureClassResources(ArrayList<BuilderProgram> initList,
-                            Class type)
+    introspectDestroy(ArrayList<BuilderProgram> initList, Class type)
     throws ConfigException
   {
-    configureClassResources(initList, type, null);
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectDestroy(initList, type.getSuperclass());
+
+    for (Method method : type.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(PreDestroy.class)) {
+        if (method.getParameterTypes().length != 0)
+          throw new ConfigException(L.l("{0}: @PreDestroy is requires zero arguments",
+                                        method.getName()));
+
+        initList.add(new PreDestroyProgram(method));
+      }
+    }
+  }
+
+  public static void introspectInject(ArrayList<Inject> injectList,
+				      Class type)
+    throws ConfigException
+  {
+    try {
+      introspectInjectImpl(injectList, type);
+    } catch (ClassNotFoundException e) {
+    }
+  }
+
+  private static void introspectInjectImpl(ArrayList<Inject> injectList,
+					   Class type)
+    throws ConfigException, ClassNotFoundException
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectInjectImpl(injectList, type.getSuperclass());
+
+    configureClassResources(injectList, type);
+
+    for (Field field : type.getDeclaredFields()) {
+      if (hasBindingAnnotation(field)) {
+        WebBeansContainer webBeans = WebBeansContainer.create();
+
+        webBeans.createProgram(injectList, field);
+
+        continue;
+      }
+      
+      introspect(injectList, field);
+    }
+
+    for (Method method : type.getDeclaredMethods()) {
+      String fieldName = method.getName();
+      Class []param = method.getParameterTypes();
+
+      if (hasBindingAnnotation(method)) {
+        WebBeansContainer webBeans = WebBeansContainer.create();
+
+        webBeans.createProgram(injectList, method);
+
+        continue;
+      }
+
+      if (param.length != 1)
+        continue;
+
+      if (fieldName.startsWith("set") && fieldName.length() > 3) {
+        fieldName = fieldName.substring(3);
+
+        char ch = fieldName.charAt(0);
+
+        if (Character.isUpperCase(ch)
+	    && (fieldName.length() == 1
+		|| Character.isLowerCase(fieldName.charAt(1)))) {
+          fieldName = Character.toLowerCase(ch) + fieldName.substring(1);
+        }
+      }
+
+      // configure(injectList, method, fieldName, param[0]);
+    }
   }
 
   public static void
-    configureClassResources(ArrayList<BuilderProgram> initList,
-                            Class type,
-                            String localJndiPrefix)
+    configureClassResources(ArrayList<Inject> initList,
+                            Class type)
     throws ConfigException
   {
     Resources resources = (Resources) type.getAnnotation(Resources.class);
@@ -279,33 +229,30 @@ public class InjectIntrospector {
                                      ejb.beanInterface()));
       */
     } else if (ejbs != null) {
+      /*
       for (EJB e : ejbs.value()) {
         initList.add(new EjbRefProgram("java:comp/env/" + e.name(),
                                        e.beanName(),
                                        e.beanInterface()));
       }
-    }
-
-    for (Field field : type.getDeclaredFields()) {
-      configure(initList, field, field.getName(), field.getType());
+      */
     }
   }
 
   private static void
-    introspectClassResource(ArrayList<BuilderProgram> initList,
+    introspectClassResource(ArrayList<Inject> initList,
                             Class type,
                             Resource resource)
     throws ConfigException
   {
+    /*
     String name = resource.name();
 
     Field field = findField(type, name);
 
     if (field != null) {
-      initList.add(configureResource(field, field.getName(), field.getType(),
-                                     resource.name(),
-                                     resource.type().getName(),
-                                     resource.name()));
+      ValueGenerator gen
+	= createResourceGenertor(location(field), field.getType(), resource);
 
       return;
     }
@@ -313,13 +260,262 @@ public class InjectIntrospector {
     Method method = findMethod(type, name);
 
     if (method != null) {
-      initList.add(configureResource(method, method.getName(),
-                                     method.getParameterTypes()[0],
-                                     resource.name(),
-                                     resource.type().getName(),
-                                     resource.name()));
+      ValueGenerator gen
+	= createResourceGenerator(location(method),
+				  method.getParameterTypes()[0],
+				  resource);
 
       return;
+    }
+    */
+  }
+
+  private static void introspect(ArrayList<Inject> injectList,
+				 Field field)
+    throws ConfigException
+  {
+    String location = location(field);
+    ValueGenerator gen = null;
+
+    if (field.isAnnotationPresent(Resource.class)) {
+      Resource resource = field.getAnnotation(Resource.class);
+
+      gen = generateResource(location, field.getType(), resource);
+    }
+    else if (field.isAnnotationPresent(EJB.class)) {
+      EJB ejb = field.getAnnotation(EJB.class);
+
+      gen = generateEjb(location, field.getType(), ejb);
+    }
+    else if (field.isAnnotationPresent(PersistenceUnit.class)) {
+      PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
+
+      gen = generatePersistenceUnit(location, field.getType(), pUnit);
+    }
+    else if (field.isAnnotationPresent(PersistenceContext.class)) {
+      PersistenceContext pContext
+	= field.getAnnotation(PersistenceContext.class);
+
+      gen = generatePersistenceContext(location, field.getType(), pContext);
+    }
+    else if (field.isAnnotationPresent(WebServiceRef.class)) {
+      WebServiceRef webService
+	= field.getAnnotation(WebServiceRef.class);
+
+      gen = generateWebService(location, field.getType(), webService);
+    }
+    else if (hasBindingAnnotation(field))
+      introspectWebBean(injectList, field);
+
+    if (gen != null)
+      injectList.add(new FieldInject(field, gen));
+  }
+
+  private static ValueGenerator
+    generateWebService(String location,
+		       Class type,
+		       WebServiceRef ref)
+    throws ConfigException
+  {
+    String jndiName = ref.name();
+    String mappedName = ref.mappedName();
+
+    /*
+    if (Service.class.isAssignableFrom(fieldType)) {
+      program = new ServiceInjectProgram(name,
+                                         fieldType,
+                                         inject);
+    }
+    else {
+      program = new ServiceProxyInjectProgram(name,
+                                              fieldType,
+                                              inject);
+    }
+    */
+
+    return null;
+  }
+
+  private static ValueGenerator
+    generatePersistenceContext(String location,
+			       Class type,
+			       PersistenceContext pContext)
+    throws ConfigException
+  {
+    if (! type.isAssignableFrom(EntityManager.class)) {
+      throw new ConfigException(location + L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", type.getName()));
+    }
+
+    String unitName = pContext.unitName();
+    String jndiName = pContext.name();
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    ComponentImpl component;
+
+    if ("".equals(unitName))
+      component = webBeans.bind(location, EntityManager.class);
+    else
+      component = webBeans.bind(location, EntityManager.class, unitName);
+
+
+    bindJndi(location, jndiName, component);
+
+    return new ComponentGenerator(location, component);
+  }
+
+  private static ValueGenerator
+    generatePersistenceUnit(String location,
+			    Class type,
+			    PersistenceUnit pUnit)
+    throws ConfigException
+  {
+    if (! type.isAssignableFrom(EntityManagerFactory.class)) {
+      throw new ConfigException(location + L.l("@PersistenceUnit field type '{0}' must be assignable from EntityManagerFactory", type.getName()));
+    }
+
+    String unitName = pUnit.unitName();
+    String jndiName = pUnit.name();
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    ComponentImpl component;
+
+    if ("".equals(unitName))
+      component = webBeans.bind(location, EntityManager.class);
+    else
+      component = webBeans.bind(location, EntityManager.class, unitName);
+
+    bindJndi(location, jndiName, component);
+
+    return new ComponentGenerator(location, component);
+  }
+
+  private static ValueGenerator generateEjb(String location,
+					    Class fieldType,
+					    EJB ejb)
+    throws ConfigException
+  {
+    Class type = ejb.beanInterface();
+    String jndiName = ejb.name();
+    String mappedName = ejb.mappedName();
+    String beanName = ejb.beanName();
+
+    return generateJndiComponent(location, fieldType, type,
+				 jndiName, mappedName, beanName);
+  }
+
+  private static ValueGenerator generateResource(String location,
+						 Class fieldType,
+						 Resource resource)
+    throws ConfigException
+  {
+    String mappedName = resource.mappedName();
+    String jndiName = resource.name();
+    Class type = resource.type();
+
+    return generateJndiComponent(location, fieldType, type,
+				 jndiName, mappedName, "");
+  }
+
+  private static void introspectWebBean(ArrayList<Inject> injectList,
+					Field field)
+    throws ConfigException
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    webBeans.createProgram(injectList, field);
+  }
+
+  private static void introspectWebBean(ArrayList<Inject> injectList,
+					Method method)
+    throws ConfigException
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    webBeans.createProgram(injectList, method);
+  }
+
+  /**
+   * Creates the value.
+   */
+  private static ValueGenerator
+    generateJndiComponent(String location,
+			    Class fieldType,
+			    Class type,
+			    String jndiName,
+			    String mappedName,
+			    String beanName)
+  {
+    if (! fieldType.isAssignableFrom(type))
+      type = fieldType;
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    ComponentImpl component = null;
+
+    if (mappedName != null && ! "".equals(mappedName)) {
+      component = webBeans.bind(location, type, mappedName);
+
+      if (component != null) {
+	bindJndi(location, jndiName, component);
+      
+	return new ComponentGenerator(location, component);
+      }
+    }
+    else if (beanName != null && ! "".equals(beanName)) {
+      component = webBeans.bind(location, type, beanName);
+
+      if (component != null) {
+	bindJndi(location, jndiName, component);
+      
+	return new ComponentGenerator(location, component);
+      }
+    }
+    
+    if (jndiName != null && ! "".equals(jndiName)) {
+      component = webBeans.bind(location, type, jndiName);
+
+      if (component != null) {
+	bindJndi(location, jndiName, component);
+      
+	return new ComponentGenerator(location, component);
+      }
+    }
+    
+    component = webBeans.bind(location, type);
+
+    if (component != null) {
+      bindJndi(location, jndiName, component);
+      
+      return new ComponentGenerator(location, component);
+    }
+
+    throw new UnsupportedOperationException();
+
+    /*
+      if (_component != null && _jndiName != null && ! "".equals(_jndiName)) {
+	try {
+	  Jndi.bindDeepShort(_jndiName, _component);
+	} catch (NamingException e) {
+	  throw new ConfigException(e);
+	}
+      }
+    }
+
+    if (component != null)
+      return component.get();
+    else
+      return getJndiValue(_type);
+    */
+  }
+
+  private static void bindJndi(String location, String name, Object value)
+  {
+    try {
+      Jndi.bindDeepShort(name, value);
+    } catch (NamingException e) {
+      throw new ConfigException(location + e.getMessage(), e);
     }
   }
 
@@ -352,58 +548,17 @@ public class InjectIntrospector {
     return null;
   }
 
-  public static void configure(ArrayList<BuilderProgram> initList,
-                               AccessibleObject field,
-                               String fieldName,
-                               Class fieldType)
-    throws ConfigException
+  private static boolean hasBindingAnnotation(Field field)
   {
+    if (field.isAnnotationPresent(In.class))
+      return true;
 
-    AccessibleInject inject = createInject(field);
-
-    if (field.isAnnotationPresent(Resource.class))
-      configureResource(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(EJB.class)) {
-      EJB ejb = field.getAnnotation(EJB.class);
-
-      Class type = ejb.beanInterface();
-      if (type == null || Object.class.equals(type))
-	type = fieldType;
-      
-      EjbGenerator gen = new EjbGenerator(type,
-					  ejb.mappedName(),
-					  ejb.beanName(),
-					  ejb.name(),
-					  location(field));
-      
-      initList.add(new GeneratorInjectProgram(inject, gen));
+    for (Annotation ann : field.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	return true;
     }
-    else if (field.isAnnotationPresent(PersistenceUnit.class)) {
-      PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
 
-      PersistenceUnitGenerator gen
-        = new PersistenceUnitGenerator(location(field), pUnit);
-
-      initList.add(new GeneratorInjectProgram(inject, gen));
-    }
-    else if (field.isAnnotationPresent(PersistenceContext.class))
-      configurePersistenceContext(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(WebServiceRef.class))
-      configureWebServiceRef(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(In.class))
-      configureWebBean(initList, field, fieldName, fieldType);
-    else {
-      boolean isWebBean = false;
-
-      for (Annotation ann : field.getDeclaredAnnotations()) {
-        if (ann.annotationType().isAnnotationPresent(BindingType.class))
-          isWebBean = true;
-      }
-
-
-      if (isWebBean)
-        configureWebBean(initList, field, fieldName, fieldType);
-    }
+    return false;
   }
 
   private static boolean hasBindingAnnotation(Method method)
@@ -426,300 +581,6 @@ public class InjectIntrospector {
     return false;
   }
 
-  private static void configureResource(ArrayList<BuilderProgram> initList,
-                                        AccessibleObject field,
-                                        String fieldName,
-                                        Class fieldType)
-    throws ConfigException
-  {
-    Resource resource = field.getAnnotation(Resource.class);
-
-    initList.add(configureResource(field,
-                                   fieldName, fieldType,
-                                   resource.name(),
-                                   resource.type().getName(),
-                                   resource.name()));
-  }
-
-  public static BuilderProgram
-    introspectResource(AccessibleObject field,
-                       String fieldName,
-                       Class fieldType)
-    throws ConfigException
-  {
-    Resource resource = field.getAnnotation(Resource.class);
-
-    if (resource != null)
-      return configureResource(field,
-                               fieldName, fieldType,
-                               resource.name(),
-                               resource.type().getName(),
-                               resource.name());
-    else
-      return null;
-  }
-
-  private static void configureEJB(ArrayList<BuilderProgram> initList,
-                                   AccessibleObject field,
-                                   String fieldName,
-                                   Class fieldType)
-    throws ConfigException
-  {
-    EJB ejb = (EJB) field.getAnnotation(javax.ejb.EJB.class);
-
-    String name = ejb.name();
-    String beanName = ejb.beanName();
-    String mappedName = ejb.mappedName();
-
-    // ejb/0f62
-    /*
-      if ("".equals(jndiName))
-      jndiName = fieldName;
-    */
-
-    AccessibleInject inject;
-
-    if (field instanceof Field)
-      inject = new FieldInject((Field) field);
-    else
-      inject = new PropertyInject((Method) field);
-
-    BuilderProgram program;
-
-    program = new EjbInjectProgram(name, beanName, mappedName,
-                                   fieldType, inject);
-
-    initList.add(program);
-  }
-
-  private static void
-    configureWebServiceRef(ArrayList<BuilderProgram> initList,
-                           AccessibleObject field,
-                           String fieldName,
-                           Class fieldType)
-    throws ConfigException
-  {
-    WebServiceRef ref
-      = (WebServiceRef) field.getAnnotation(WebServiceRef.class);
-
-    String name = ref.name();
-    name = ref.name();
-
-    if ("".equals(name))
-      name = fieldName;
-
-    name = toFullName(name);
-    // XXX: types
-
-    AccessibleInject inject;
-
-    if (field instanceof Field)
-      inject = new FieldInject((Field) field);
-    else
-      inject = new PropertyInject((Method) field);
-
-    BuilderProgram program;
-
-    if (Service.class.isAssignableFrom(fieldType)) {
-      program = new ServiceInjectProgram(name,
-                                         fieldType,
-                                         inject);
-    }
-    else {
-      program = new ServiceProxyInjectProgram(name,
-                                              fieldType,
-                                              inject);
-    }
-
-    initList.add(program);
-  }
-
-  private static void
-    configurePersistenceContext(ArrayList<BuilderProgram> initList,
-                                AccessibleObject prop,
-                                String fieldName,
-                                Class fieldType)
-    throws ConfigException
-  {
-    PersistenceContext pContext = prop.getAnnotation(PersistenceContext.class);
-
-    if (! fieldType.isAssignableFrom(EntityManager.class)) {
-      throw error(prop, L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", fieldType.getName()));
-    }
-
-    PersistenceContextGenerator gen
-      = new PersistenceContextGenerator(location(prop), pContext);
-
-    initList.add(new GeneratorInjectProgram(createInject(prop), gen));
-  }
-
-  private static String findPersistenceContextName(String jndiName,
-                                                   String unitName)
-    throws ConfigException
-  {
-    String jndiPrefix = "java:comp/env/persistence";
-
-    try {
-      if (! unitName.equals(""))
-        return jndiPrefix + '/' + unitName;
-      else {
-        InitialContext ic = new InitialContext();
-
-        NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
-
-        if (iter == null) {
-          throw new ConfigException(L.l("Can't find configured PersistenceContext"));
-        }
-
-        String ejbJndiName = null;
-        while (iter.hasMore()) {
-          NameClassPair pair = iter.next();
-
-          // Skip reserved prefixes.
-          // See com.caucho.amber.manager.AmberContainer
-          if (pair.getName().startsWith("_amber"))
-            continue;
-
-          if (pair.getName().equals("resin-ejb"))
-            ejbJndiName = jndiPrefix + '/' + pair.getName();
-          else {
-            jndiName = jndiPrefix + '/' + pair.getName();
-            break;
-          }
-        }
-
-        if (jndiName == null)
-          jndiName = ejbJndiName;
-
-        return jndiName;
-      }
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ConfigException(e);
-    }
-  }
-
-  private static
-    BuilderProgram configureResource(AccessibleObject field,
-                                     String fieldName,
-                                     Class fieldType,
-                                     String name,
-                                     String resourceType,
-                                     String jndiName)
-    throws ConfigException
-  {
-    String prefix = "";
-
-    if (name.equals(""))
-      name = fieldName;
-
-    if (resourceType.equals("") || resourceType.equals("java.lang.Object"))
-      resourceType = fieldType.getName();
-
-    AccessibleInject inject;
-
-    if (field instanceof Field)
-      inject = new FieldInject((Field) field);
-    else
-      inject = new PropertyInject((Method) field);
-
-    if (Executor.class.equals(fieldType)
-        || ExecutorService.class.equals(fieldType)
-        || ScheduledExecutorService.class.equals(fieldType)) {
-      return new ExecutorInjectProgram(inject);
-    }
-
-    if (true) {
-      // TCK indicates this logic is incorrect
-    }
-    else if (resourceType.equals("javax.sql.DataSource"))
-      prefix = "jdbc/";
-    else if (resourceType.startsWith("javax.jms."))
-      prefix = "jms/";
-    else if (resourceType.startsWith("javax.mail."))
-      prefix = "mail/";
-    else if (resourceType.equals("java.net.URL"))
-      prefix = "url/";
-    else if (resourceType.startsWith("javax.ejb."))
-      prefix = "ejb/";
-
-    // ejb/0f53: @Resource(name="null"). TCK: ejb30/bb/session/stateful/sessioncontext/annotated
-    if (! jndiName.equals("") && ! jndiName.equals("null")) {
-    }
-    else if (UserTransaction.class.equals(fieldType)) {
-      jndiName = "java:comp/UserTransaction";
-    }
-    else if (ORB.class.equals(fieldType)) {
-      jndiName = "java:comp/ORB";
-    }
-    else {
-      jndiName = prefix + name;
-    }
-
-    if (SessionContext.class.equals(fieldType)) {
-      jndiName = "java:comp/env/sessionContext";
-    }
-    else if (MessageDrivenContext.class.equals(fieldType)) {
-      jndiName = "java:comp/env/messageDrivenContext";
-    }
-    else if (UserTransaction.class.equals(fieldType)) {
-      jndiName = "java:comp/UserTransaction";
-    }
-    else if (QueueConnectionFactory.class.equals(fieldType)) {
-      jndiName = "java:comp/env/jms/QueueConnectionFactory";
-    }
-
-    int colon = jndiName.indexOf(':');
-    int slash = jndiName.indexOf('/');
-
-    if (colon < 0 || slash > 0 && slash < colon)
-      jndiName = "java:comp/env/" + jndiName;
-
-    BuilderProgram program;
-
-    PersistenceContext pc
-      = (PersistenceContext) field.getAnnotation(PersistenceContext.class);
-
-    if (pc != null)
-      program = new PersistenceContextInjectProgram(createInject(field), pc);
-    else if (field instanceof Method)
-      program = new JndiInjectProgram(jndiName, (Method) field);
-    else
-      program = new JndiFieldInjectProgram(jndiName, (Field) field);
-
-    if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST,  String.valueOf(program));
-
-    return program;
-  }
-
-  private static AccessibleInject createInject(AccessibleObject prop)
-  {
-    if (prop instanceof Field)
-      return new FieldInject((Field) prop);
-    else
-      return new PropertyInject((Method) prop);
-  }
-
-  private static void configureWebBean(ArrayList<BuilderProgram> initList,
-                                       AccessibleObject field,
-                                       String fieldName,
-                                       Class fieldType)
-    throws ConfigException
-  {
-    WebBeansContainer webBeans = WebBeansContainer.create();
-
-    AccessibleInject inject;
-
-    if (field instanceof Field)
-      inject = new FieldInject((Field) field);
-    else
-      inject = new PropertyInject((Method) field);
-
-    webBeans.createProgram(initList, field, fieldName, fieldType, inject);
-  }
-
   private static String toFullName(String jndiName)
   {
     int colon = jndiName.indexOf(':');
@@ -731,33 +592,27 @@ public class InjectIntrospector {
     return jndiName;
   }
 
-  private static ConfigException error(AccessibleObject prop, String msg)
+  private static ConfigException error(Field field, String msg)
   {
-    return new ConfigException(location(prop) + msg);
+    return new ConfigException(location(field) + msg);
   }
 
-  private static String location(AccessibleObject prop)
+  private static ConfigException error(Method method, String msg)
   {
-    if (prop instanceof Field) {
-      Field field = (Field) prop;
+    return new ConfigException(location(method) + msg);
+  }
 
-      String className = field.getDeclaringClass().getName();
-      int p = className.lastIndexOf('.');
-      className = className.substring(p + 1);
+  private static String location(Field field)
+  {
+    String className = field.getDeclaringClass().getName();
 
-      return className + "." + field.getName() + ": ";
-    }
-    else if (prop instanceof Method) {
-      Method method = (Method) prop;
+    return className + "." + field.getName() + ": ";
+  }
 
-      String className = method.getDeclaringClass().getName();
-      int p = className.lastIndexOf('.');
-      className = className.substring(p + 1);
+  private static String location(Method method)
+  {
+    String className = method.getDeclaringClass().getName();
 
-      return className + "." + method.getName() + ": ";
-    }
-    else {
-      return "";
-    }
+    return className + "." + method.getName() + ": ";
   }
 }

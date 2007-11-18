@@ -30,6 +30,7 @@
 package com.caucho.config.jaxb;
 
 import com.caucho.config.*;
+import com.caucho.config.j2ee.Inject;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
@@ -64,8 +65,8 @@ public class JaxbBeanType extends TypeStrategy
   private static final HashMap<Class,PrimType> _primTypes
     = new HashMap<Class,PrimType>();
 
-  private ArrayList<BuilderProgram> _injectList
-    = new ArrayList<BuilderProgram>();
+  private ArrayList<Inject> _injectList
+    = new ArrayList<Inject>();
 
   private ArrayList<Method> _preDestroyList
     = new ArrayList<Method>();
@@ -146,7 +147,7 @@ public class JaxbBeanType extends TypeStrategy
     NodeBuilder builder = NodeBuilder.getCurrentBuilder();
     
     for (int i = 0; i < _injectList.size(); i++) {
-      _injectList.get(i).configureImpl(builder, bean);
+      _injectList.get(i).inject(bean, builder.getDependentScope());
     }
   }
 
@@ -190,6 +191,7 @@ public class JaxbBeanType extends TypeStrategy
     introspectMethods(accessType);
     introspectFields(accessType);
 
+    /*
     try {
       InjectIntrospector.introspectConstruct(_injectList, _type);
     } catch (RuntimeException e) {
@@ -197,6 +199,7 @@ public class JaxbBeanType extends TypeStrategy
     } catch (Exception e) {
       throw new ConfigException(e);
     }
+    */
   }
 
   private void introspectClassResources(Class type)
@@ -250,13 +253,15 @@ public class JaxbBeanType extends TypeStrategy
 
       Method setter = findSetter(_type, setterName, retType);
       if (setter != null) {
-	InjectIntrospector.configure(_injectList,
-				     setter,
-				     propName,
-				     retType);
+	/* ???
+	InjectIntrospector.introspectInject(_injectList,
+					    setter,
+					    propName,
+					    retType);
+	*/
       }
-      else if (! Collection.class.isAssignableFrom(retType) &&
-	       ! Map.class.isAssignableFrom(retType))
+      else if (! Collection.class.isAssignableFrom(retType)
+	       && ! Map.class.isAssignableFrom(retType))
 	continue;
 
       if (hasAnnotation(XmlTransient.class, getter, setter))
@@ -430,11 +435,13 @@ public class JaxbBeanType extends TypeStrategy
     for (int i = 0; i < fields.length; i++) {
       Field field = fields[i];
       String name = field.getName();
-      
-      InjectIntrospector.configure(_injectList,
-				   field,
-				   name,
-				   field.getType());
+
+      /*
+      InjectIntrospector.introspectInject(_injectList,
+					  field,
+					  name,
+					  field.getType());
+      */
 
       if (field.isAnnotationPresent(XmlTransient.class))
 	continue;

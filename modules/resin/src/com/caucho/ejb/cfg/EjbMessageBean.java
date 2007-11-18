@@ -508,10 +508,11 @@ public class EjbMessageBean extends EjbBean {
     try {
       thread.setContextClassLoader(server.getClassLoader());
 
+      BuilderProgramContainer initContainer = getInitProgram();
+
+      /*
       ArrayList<BuilderProgram> initList;
       initList = InjectIntrospector.introspect(beanClass);
-
-      BuilderProgramContainer initContainer = getInitProgram();
 
       if (initList != null && initList.size() > 0) {
         if (initContainer == null)
@@ -521,6 +522,7 @@ public class EjbMessageBean extends EjbBean {
           initContainer.addProgram(init);
         }
       }
+      */
 
       server.setInitProgram(initContainer);
 

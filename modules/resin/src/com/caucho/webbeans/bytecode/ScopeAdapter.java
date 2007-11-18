@@ -36,6 +36,7 @@ import java.lang.reflect.*;
 import com.caucho.bytecode.*;
 import com.caucho.loader.*;
 import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.component.*;
 import com.caucho.vfs.*;
 
 /**
@@ -61,7 +62,7 @@ public class ScopeAdapter {
     return adapter;
   }
     
-  public Object wrap(WbComponent comp)
+  public Object wrap(ComponentImpl comp)
   {
     try {
       Object v = _proxyCtor.newInstance(comp);
@@ -94,12 +95,12 @@ public class ScopeAdapter {
       jClass.setThisClass(thisClassName);
 
       JavaField jField
-	= jClass.createField("_cxt", "Lcom/caucho/webbeans/cfg/WbComponent;");
+	= jClass.createField("_cxt", "Lcom/caucho/webbeans/component/ComponentImpl;");
       jField.setAccessFlags(Modifier.PRIVATE);
 
       JavaMethod ctor
 	= jClass.createMethod("<init>",
-			      "(Lcom/caucho/webbeans/cfg/WbComponent;)V");
+			      "(Lcom/caucho/webbeans/component/ComponentImpl;)V");
       ctor.setAccessFlags(Modifier.PUBLIC);
       
       CodeWriterAttribute code = ctor.createCodeWriter();
@@ -132,9 +133,11 @@ public class ScopeAdapter {
 
       byte []buffer = bos.toByteArray();
       
+      /*
       out = Vfs.lookup("file:/tmp/caucho/qa/temp.class").openWrite();
       out.write(buffer, 0, buffer.length);
       out.close();
+      */
 
       String cleanName = thisClassName.replace('/', '.');
       _proxyClass = new ProxyClassLoader().loadClass(cleanName, buffer);
@@ -162,9 +165,9 @@ public class ScopeAdapter {
 
     code.pushObjectVar(0);
     code.getField(jClass.getThisClass(), "_cxt",
-		  "Lcom/caucho/webbeans/cfg/WbComponent;");
+		  "Lcom/caucho/webbeans/component/ComponentImpl;");
     
-    code.invoke("com/caucho/webbeans/cfg/WbComponent",
+    code.invoke("com/caucho/webbeans/component/ComponentImpl",
 		"get", "()Ljava/lang/Object;", 1, 1);
     
     code.cast(method.getDeclaringClass().getName().replace('.', '/'));

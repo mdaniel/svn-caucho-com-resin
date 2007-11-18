@@ -34,63 +34,68 @@ import com.caucho.util.L10N;
 import com.caucho.webbeans.context.DependentScope;
 
 import javax.rmi.PortableRemoteObject;
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 import java.util.logging.Logger;
 
 
-public class FieldInject extends Inject
+public class MethodInject extends Inject
 {
   private static final Logger log
-    = Logger.getLogger(FieldInject.class.getName());
-  private static final L10N L = new L10N(FieldInject.class);
+    = Logger.getLogger(MethodInject.class.getName());
+  private static final L10N L = new L10N(MethodInject.class);
 
-  private Field _field;
+  private Method _method;
   private ValueGenerator _gen;
 
-  public FieldInject(Field field, ValueGenerator gen)
+  public MethodInject(Method method, ValueGenerator gen)
   {
-    _field = field;
-    _field.setAccessible(true);
+    _method = method;
+    _method.setAccessible(true);
 
     _gen = gen;
   }
 
   String getName()
   {
-    return _field.getName();
+    return _method.getName();
   }
 
   Class getType()
   {
-    return _field.getType();
+    return _method.getParameterTypes()[0];
   }
 
   Class getDeclaringClass()
   {
-    return _field.getDeclaringClass();
+    return _method.getDeclaringClass();
   }
 
   public void inject(Object bean, DependentScope scope)
     throws ConfigException
   {
     try {
+      Class type = getType();
+      
       Object value = _gen.create();
       
       // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1, needs QA
-      if (! _field.getType().isAssignableFrom(value.getClass())) {
-        value = PortableRemoteObject.narrow(value, _field.getType());
+      if (! type.isAssignableFrom(value.getClass())) {
+        value = PortableRemoteObject.narrow(value, getType());
       }
 
-      if (! _field.getType().isAssignableFrom(value.getClass())) {
+      if (! type.isAssignableFrom(value.getClass())) {
 
         throw new ConfigException(location()
-				  + L.l("Resource type {0} is not assignable to field '{1}' of type {2}.",
+				  + L.l("Resource type {0} is not assignable to method '{1}' of type {2}.",
 					value.getClass().getName(),
-					_field.getName(),
-					_field.getType().getName()));
+					_method.getName(),
+					type.getName()));
       }
 
-      _field.set(bean, value);
+      _method.invoke(bean, value);
+    } catch (InvocationTargetException e) {
+      throw new ConfigException(location() + e.getCause().getMessage(),
+				e.getCause());
     } catch (Exception e) {
       throw new ConfigException(location() + e.getMessage(), e);
     }
@@ -98,6 +103,6 @@ public class FieldInject extends Inject
 
   private String location()
   {
-    return _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
+    return _method.getDeclaringClass().getName() + "." + _method.getName() + ": ";
   }
 }

@@ -30,6 +30,7 @@
 package com.caucho.config;
 
 import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.j2ee.Inject;
 import com.caucho.config.types.Validator;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
@@ -65,8 +66,8 @@ public class BeanTypeStrategy extends TypeStrategy {
     = new HashMap<QName,AttributeStrategy>();
   private final Class _type;
 
-  private ArrayList<BuilderProgram> _injectList
-    = new ArrayList<BuilderProgram>();
+  private ArrayList<Inject> _injectList
+    = new ArrayList<Inject>();
 
   private ArrayList<BuilderProgram> _initProgramList
     = new ArrayList<BuilderProgram>();
@@ -86,7 +87,7 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     Method setParent = null;
 
-    _injectList = InjectIntrospector.introspectNoInit(type);
+    InjectIntrospector.introspectInject(_injectList, type);
     InjectIntrospector.introspectConstruct(_initProgramList, type);
 
     setParent = findMethod("setParent", new Class[] { null });
@@ -205,7 +206,7 @@ public class BeanTypeStrategy extends TypeStrategy {
       }
        
       for (int i = 0; i < _injectList.size(); i++) {
-        _injectList.get(i).configure(builder, bean);
+        _injectList.get(i).inject(bean, builder.getDependentScope());
       }
     } catch (RuntimeException e) {
       throw e;
