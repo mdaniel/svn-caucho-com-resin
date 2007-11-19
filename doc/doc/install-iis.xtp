@@ -6,7 +6,7 @@
 
     <description>
       <p>For sites requiring the use of IIS, Resin provides a fast servlet
-runner, allowing IIS to run servlets and JSP files..</p>
+runner, allowing IIS to run servlets and JSP files.</p>
 
     </description>
   </header>

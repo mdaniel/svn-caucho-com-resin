@@ -1,0 +1,20 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 3.1</version>
+    <title>Command-Line Configuration</title>
+    <description>
+      <p>While most configuration options have been made available in
+        resin.conf, this section describes some common command-line
+        options.</p>
+    </description>
+  </header>
+  <body>
+    <s1 title="./configure Options">
+      <p>here</p>
+    </s1>
+    <s1 title="Startup Options">
+      <p>here</p>
+    </s1>
+  </body>
+</document>

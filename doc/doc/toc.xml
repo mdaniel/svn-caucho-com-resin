@@ -26,6 +26,7 @@
     <!--
       <item link="config-overview.xtp" title="overview"/>
       -->
+      <item link="config-cmdline.xtp" title="Command-Line Options" />
       <item link="tags.xtp"  title="tags">
         <item link="env-tags.xtp" title="env tags"
 	      description="database, classloader, resource, bean, and IoC"/>
@@ -189,9 +190,9 @@
        - Performance
       -->
     <item link="performance.xtp" title="Performance">
+      <item link="performance-benchmarks.xtp" title="Benchmarks"/>
       <item link="jvm-tuning.xtp" title="JVM Tuning"/>
       <item link="proxy-cache.xtp" title="Proxy Caching"/>
-
       <item link="performance-faq.xtp" title="Performance FAQ"/>
       <item link="performance-scrapbook.xtp" title="Performance Scrapbook"/>
     </item>
@@ -203,8 +204,6 @@
       <item link="hessian-overview.xtp" title="Hessian"/>
       <item link="hessian-1.0-spec.xtp" title="Hessian 1.0 spec"/>
       <item link="hessian-2.0-spec.xtp" title="Hessian 2.0 draft spec"/>
-      <item link="hessian-serialization.html" title="Hessian 2.0 serialization"/>
-      <item link="hessian-ws.html" title="Hessian 2.0 protocol"/>
       <item link="hessian-java-binding-draft-spec.xtp" title="Java Binding"/>
       <item link="burlap.xtp" title="Burlap"/>
       <item link="burlap-1.0-spec.xtp" title="Burlap 1.0 Spec"/>
