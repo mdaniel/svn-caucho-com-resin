@@ -16,14 +16,20 @@ and reliability.
 <s1 name="resin" title="Using Resin as the Load Balancer">
 
 <p>Resin Professional includes a
-<a href="javadoc|com.caucho.servlets.LoadBalanceServlet">LoadBalanceServlet</a> that can balance
-requests to backend servers.
+<a href="javadoc|com.caucho.servlets.LoadBalanceServlet">LoadBalanceServlet</a>
+that can balance requests to backend servers.
 Because it is implemented as a servlet,
-this configuration is the most flexible.  A site might use 192.168.0.1 as 
+this configuration is the most flexible. A site might use 192.168.0.1 as 
 the frontend load balancer, and send all requests for /foo to the backend host
-192.168.0.10  and all requests to /bar to the backend host 192.168.0.11.  Since
+192.168.0.10 and all requests to /bar to the backend host 192.168.0.11. Since
 Resin has an integrated HTTP proxy cache, the web-tier machine can cache
 results for the backend servers.</p>
+
+<p>Load balancing divides the Resin servers into two clusters:
+the web-tier and the app-tier. In Resin 3.1, all the cluster 
+and load balance configuration is in a single resin.conf.
+The actual deployed server is selected with the <var>-server web-a</var>
+<a href="config-cmdline.xtp">command-line argument</a>.</p>
 
 <p>Using Resin as the load balancing web server requires a minimum
 of two configuration files: one for the load balancing server, and one

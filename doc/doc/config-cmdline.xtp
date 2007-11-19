@@ -10,11 +10,155 @@
     </description>
   </header>
   <body>
-    <s1 title="./configure Options">
-      <p>here</p>
+    <s1 title="./configure options">
+
+    <deftable>
+    <tr><td>--enable-64bit</td><td>Compiles the JNI using 64-bits</td></tr>
+    </deftable>
+
+    <p>The 64-bit JNI compilation must match the JDK you're using, i.e.
+    you'll need to use something like <code>-J-d64</code> to properly enable 64 bit JDKs.
+    </p>
+
     </s1>
+    
     <s1 title="Startup Options">
-      <p>here</p>
+      <s2 name="command-line" title="Command-line arguments">
+
+      <deftable>
+      <tr>
+        <th>Argument</th>
+        <th>Meaning</th>
+        <th>Default</th>
+      </tr>
+      <tr>
+        <td>-conf <var>xxx</var></td>
+        <td>Selects the Resin configuration file</td>
+        <td>conf/resin.conf</td>
+      </tr>
+      <tr>
+        <td>-resin-home <var>xxx</var></td>
+        <td>Sets the Resin home directory (also recognizes the environment variable RESIN_HOME.)</td>
+        <td>The parent directory of resin.jar</td>
+      </tr>
+      <tr>
+        <td>-server <var>xxx</var></td>
+        <td>Selects the &lt;server> in the resin.conf</td>
+        <td>""</td>
+      </tr>
+      <tr>
+        <td>-verbose</td>
+        <td>Show the Java environment before starting Resin.</td>
+        <td>off</td>
+      </tr>
+      <tr>
+        <td>start</td>
+        <td>Starts Resin as a daemon, starting the watchdog if necessary</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>stop</td>
+        <td>Stops Resin as a daemon by contacting the watchdog.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>restart</td>
+        <td>Restarts Resin as a daemon by contacting the watchdog.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-install</td>
+        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-install-as <var>xxx</var></td>
+        <td>(Windows) install Resin as a named service (but doesn't automatically start.)</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-remove</td>
+        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
+         <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-remove-as <var>xxx</var></td>
+        <td>(Windows) remove Resin as a named service (but doesn't automatically start.)</td>
+        <td>n/a</td>
+      </tr>
+      </deftable>
+      </s2>
+
+      <s2 title="Memory Configuration">
+
+      <p>Memory configuration is part of the JVM's arguments.  For most JVMs,
+      you can find the full list by starting "java -X".</p>
+
+      <deftable title="Memory Configuration">
+      <tr>
+        <td>-Xms&lt;size&gt;</td>
+        <td>Initial Java heap size, e.g. -Xms32m</td>
+        </tr>
+      <tr>
+        <td>-Xmx&lt;size&gt;</td>
+        <td>Maximum Java heap size, e.g. -Xmx128m</td>
+      </tr>
+      </deftable>
+
+      </s2>
+
+      <s2 title="JDK arguments">
+
+      <p>Resin 3.1 has moved all JDK arguments into the resin.conf
+      file, in the &lt;<a href="server-tags.xtp#jvm-args">jvm-args</a>&gt;
+      tag. Because the Resin 3.1 watchdog JVM starts the Resin server instance,
+      it can pass the arguments defined in the configuration file.  By moving
+      the Java arguments to the configuration file, the site configuraion
+      is easier and more maintainable.</p>
+
+      <example title="resin.conf with Java arguments">
+      &lt;resin xmlns="http://caucho.com/ns/resin">
+        &lt;cluster id="app-tier">
+
+          &lt;server-default>
+            &lt;jvm-args>-Xmx512m&lt;/jvm-args>
+            &lt;jvm-args>-Xss1m&lt;/jvm-args>
+            &lt;jvm-args>-verbosegc&lt;/jvm-args>
+
+            &lt;http port="8080"/>
+          &lt;/server-default>
+
+          &lt;server id="a" address="192.168.2.1" port="6800"/>
+
+          ...
+        &lt;/cluster>
+      &lt;/resin>
+      </example>
+
+      <deftable-childtags>
+      <tr>
+        <td>-verbosegc</td>
+        <td>Writes garbage collection information to standard error (recommended)</td>
+        <td>conf/resin.conf</td>
+      </tr>
+      <tr>
+        <td>-Dfoo=bar</td>
+        <td>Sets a system property</td>
+        <td/>
+      </tr>
+      <tr>
+        <td>-Xss1m</td>
+        <td>Sets the maximum thread stack size</td>
+        <td>1m</td>
+      </tr>
+      <tr>
+        <td>-Xmx256m</td>
+        <td>Sets the maximum java heap size</td>
+        <td>256m</td>
+      </tr>
+      </deftable-childtags>
+
+      </s2>
     </s1>
   </body>
 </document>
