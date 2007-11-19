@@ -5,7 +5,7 @@ import java.io.*;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Path;
 
 /**
  * Simple protocol that sends the contents of a specified file as soon
@@ -18,7 +18,7 @@ public class SocketPolicyProtocol extends Protocol
   private String _protocolName = "socketPolicy";
   private ByteArrayOutputStream _policy = null;
 
-  public void setSocketPolicyFile(String file)
+  public void setSocketPolicyFile(Path path)
     throws IOException
   {
     // XXX Make this dependency-based in case the file changes
@@ -26,7 +26,7 @@ public class SocketPolicyProtocol extends Protocol
     InputStream is = null;
     
     try {
-      is = Vfs.openRead(file);
+      is = path.openRead();
       _policy = new ByteArrayOutputStream();
 
       for (int ch = is.read(); ch >= 0; ch = is.read())
