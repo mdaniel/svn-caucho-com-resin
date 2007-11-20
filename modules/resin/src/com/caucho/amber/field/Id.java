@@ -166,7 +166,7 @@ public class Id {
 
   public boolean isIdentityGenerator()
   {
-    return _keys.size() == 0 && "identity".equals(_keys.get(0).getGenerator());
+    return _keys.size() == 1 && "identity".equals(_keys.get(0).getGenerator());
   }
 
   /**

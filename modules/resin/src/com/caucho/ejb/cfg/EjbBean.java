@@ -106,14 +106,18 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   // the server loader
   private ApiClass _ejbClass;
 
+  protected ApiClass _remoteHome21;
+  protected ApiClass _remote21;
+  
   protected ApiClass _remoteHome;
   protected ArrayList<ApiClass> _remoteList = new ArrayList<ApiClass>();
-  protected ApiClass _remote21;
 
+  protected ApiClass _localHome21;
+  protected ApiClass _local21;
+  
   protected ApiClass _localHome;
   protected ArrayList<ApiClass> _localList = new ArrayList<ApiClass>();
   protected ArrayList<ApiClass> _localApiList = new ArrayList<ApiClass>();
-  protected ApiClass _local21;
 
 
   protected EjbView _remoteHomeView;

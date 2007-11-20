@@ -1307,7 +1307,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
             continue;
 
           if (ann != null) {
-            throw new ConfigException(L.l("'{0}' is not a valid annotation for {1}.  Only public persistent property getters with matching setters may have property annotations.",
+            throw error(method, L.l("'{0}' is not a valid annotation for {1}.  Only public persistent property getters with matching setters may have property annotations.",
                                           ann.getType(), method.getFullName()));
           }
 
@@ -1433,7 +1433,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     if ((idConfig != null)
 	|| field.isAnnotationPresent(javax.persistence.Id.class)) {
-      validateAnnotations(field, _idAnnotations);
+      validateAnnotations(field, "@Id", _idAnnotations);
 
       if (! _idTypes.contains(fieldType.getName())) {
         throw error(field, L.l("{0} is an invalid @Id type for {1}.",
@@ -1442,20 +1442,20 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
     else if ((basicConfig != null)
 	     || field.isAnnotationPresent(javax.persistence.Basic.class)) {
-      validateAnnotations(field, _basicAnnotations);
+      validateAnnotations(field, "@Basic", _basicAnnotations);
 
       addBasic(sourceType, field, fieldName, fieldType, basicConfig);
     }
     else if ((versionConfig != null)
 	     || field.isAnnotationPresent(javax.persistence.Version.class)) {
-      validateAnnotations(field, _versionAnnotations);
+      validateAnnotations(field, "@Version", _versionAnnotations);
 
       addVersion((RelatedType) sourceType, field,
                  fieldName, fieldType, versionConfig);
     }
     else if ((manyToOneConfig != null)
 	     || field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
-      validateAnnotations(field, _manyToOneAnnotations);
+      validateAnnotations(field, "@ManyToOne", _manyToOneAnnotations);
 
       JAnnotation ann = field.getAnnotation(ManyToOne.class);
 
@@ -1503,7 +1503,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
     else if ((oneToManyConfig != null)
 	     || field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
-      validateAnnotations(field, _oneToManyAnnotations);
+      validateAnnotations(field, "@OneToMany", _oneToManyAnnotations);
 
       if (field.isAnnotationPresent(javax.persistence.MapKey.class)) {
         if (!fieldType.getName().equals("java.util.Map")) {
@@ -1528,7 +1528,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
     else if ((oneToOneConfig != null)
 	     || field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
-      validateAnnotations(field, _oneToOneAnnotations);
+      validateAnnotations(field, "@OneToOne", _oneToOneAnnotations);
 
       RelatedType relatedType = (RelatedType) sourceType;
 
@@ -1600,7 +1600,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         _depCompletions.add(completion);
     }
     else if (field.isAnnotationPresent(javax.persistence.Embedded.class)) {
-      validateAnnotations(field, _embeddedAnnotations);
+      validateAnnotations(field, "@Embedded", _embeddedAnnotations);
 
       RelatedType relatedType = (RelatedType) sourceType;
 
@@ -1613,7 +1613,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                                  false));
     }
     else if (field.isAnnotationPresent(javax.persistence.EmbeddedId.class)) {
-      validateAnnotations(field, _embeddedIdAnnotations);
+      validateAnnotations(field, "@EmbeddedId", _embeddedIdAnnotations);
 
       _depCompletions.add(new EmbeddedCompletion((RelatedType) sourceType,
                                                  field,

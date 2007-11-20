@@ -1006,7 +1006,7 @@ public class NodeBuilder {
 	     && e.getMessage() != null
 	     && filename != null) {
       String sourceLines = getSourceLines(systemId, line);
-      
+
       return new LineConfigException(filename, line,
 				     e.getMessage() + sourceLines,
 				     e);

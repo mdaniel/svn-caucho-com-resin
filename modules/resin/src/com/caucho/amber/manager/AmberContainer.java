@@ -39,8 +39,7 @@ import com.caucho.bytecode.JClassLoader;
 import com.caucho.bytecode.JClassLoaderWrapper;
 import com.caucho.bytecode.ByteCodeClassMatcher;
 import com.caucho.bytecode.ByteCodeClassScanner;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.enhancer.ScanListener;
@@ -137,12 +136,15 @@ public class AmberContainer implements ScanListener {
   {
     _parentAmberContainer = _localContainer.get(loader);
     _parentLoader = Environment.getEnvironmentClassLoader(loader);
-    //_jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
 
     _localContainer.set(this, _parentLoader);
-    
+
+    // XXX: change after the 3.1.4 release
+    _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
+    /*
     _jClassLoader
       = JClassLoaderWrapper.create(_parentLoader.getNewTempClassLoader());
+    */
 
     _enhancer = new AmberEnhancer(this);
 
@@ -842,7 +844,7 @@ public class AmberContainer implements ScanListener {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw LineConfigException.create(e);
     } finally {
       try {
         if (is != null)

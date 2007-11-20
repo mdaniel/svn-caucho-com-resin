@@ -36,6 +36,7 @@ import com.caucho.amber.type.RelatedType;
 import com.caucho.bytecode.JAccessibleObject;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.lang.reflect.*;
 
 
 /**
@@ -113,12 +115,12 @@ abstract public class AbstractConfigIntrospector {
     throws ConfigException
   {
     if (method.isFinal())
-      throw new ConfigException(L.l("'{0}' must not be final.  @{1} methods may not be final.",
+      throw error(method, L.l("'{0}' must not be final.  @{1} methods may not be final.",
                                     method.getFullName(),
                                     callbackName));
 
     if (method.isStatic())
-      throw new ConfigException(L.l("'{0}' must not be static.  @{1} methods may not be static.",
+      throw error(method, L.l("'{0}' must not be static.  @{1} methods may not be static.",
                                     method.getFullName(),
                                     callbackName));
 
@@ -126,12 +128,12 @@ abstract public class AbstractConfigIntrospector {
 
     if (isListener) {
       if (params.length != 1) {
-        throw new ConfigException(L.l("'{0}' must have the <METHOD>(Object) signature for entity listeners.",
+        throw error(method, L.l("'{0}' must have the <METHOD>(Object) signature for entity listeners.",
                                       method.getFullName()));
       }
     }
     else if (params.length != 0) {
-      throw new ConfigException(L.l("'{0}' must not have any arguments.  @{1} methods have zero arguments for entities or mapped superclasses.",
+      throw error(method, L.l("'{0}' must not have any arguments.  @{1} methods have zero arguments for entities or mapped superclasses.",
                                     method.getFullName(),
                                     callbackName));
     }
@@ -231,6 +233,7 @@ abstract public class AbstractConfigIntrospector {
   }
 
   static void validateAnnotations(JAccessibleObject field,
+				  String fieldType,
                                   HashSet<String> validAnnotations)
     throws ConfigException
   {
@@ -241,9 +244,11 @@ abstract public class AbstractConfigIntrospector {
         continue;
 
       if (! validAnnotations.contains(name)) {
-        throw error(field, L.l("{0} may not have a @{1} annotation.",
+        throw error(field, L.l("{0} may not have a @{1} annotation.  {2} does not allow @{3}.",
                                field.getName(),
-                               name));
+                               name,
+			       fieldType,
+			       name));
       }
     }
   }
@@ -260,7 +265,7 @@ abstract public class AbstractConfigIntrospector {
     if (line > 0)
       return new ConfigException(className + ":" + line + ": " + msg);
     else
-      return new ConfigException(className + ": " + msg);
+      return new ConfigException(className + "." + field.getName() + ": " + msg);
   }
 
   static String toFieldName(String name)
@@ -416,6 +421,26 @@ abstract public class AbstractConfigIntrospector {
     }
 
     return columns;
+  }
+
+  protected static String loc(JMethod method)
+  {
+    return method.getDeclaringClass().getName() + "." + method.getName() + ": ";
+  }
+
+  protected static String loc(Method method)
+  {
+    return method.getDeclaringClass().getSimpleName() + "." + method.getName() + ": ";
+  }
+
+  protected static String loc(JField field)
+  {
+    return field.getDeclaringClass().getName() + "." + field.getName() + ": ";
+  }
+
+  protected static String loc(Field field)
+  {
+    return field.getDeclaringClass().getSimpleName() + "." + field.getName() + ": ";
   }
 
   public static String toSqlName(String name)

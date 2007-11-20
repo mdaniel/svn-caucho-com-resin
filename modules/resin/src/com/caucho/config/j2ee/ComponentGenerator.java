@@ -61,6 +61,9 @@ public class ComponentGenerator extends ValueGenerator {
 
   ComponentGenerator(String location, ComponentImpl comp)
   {
+    if (comp == null)
+      throw new NullPointerException();
+    
     _location = location;
 
     _comp = comp;

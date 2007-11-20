@@ -450,11 +450,19 @@ public class InjectIntrospector {
     
     ComponentImpl component;
 
-    if ("".equals(unitName))
+    if ("".equals(unitName)) {
       component = webBeans.bind(location, EntityManager.class);
-    else
+
+      if (component == null)
+	throw new ConfigException(location + L.l("@PersistenceContext cannot find any persistence contexts.  No JPA persistence-units have been deployed"));
+    }
+    else {
       component = webBeans.bind(location, EntityManager.class, unitName);
 
+      if (component == null)
+	throw new ConfigException(location + L.l("'{0}' is an unknown @PersistenceContext.",
+						 unitName));
+    }
 
     bindJndi(location, jndiName, component);
 
@@ -481,10 +489,18 @@ public class InjectIntrospector {
     
     ComponentImpl component;
 
-    if ("".equals(unitName))
-      component = webBeans.bind(location, EntityManager.class);
-    else
-      component = webBeans.bind(location, EntityManager.class, unitName);
+    if ("".equals(unitName)) {
+      component = webBeans.bind(location, EntityManagerFactory.class);
+
+      if (component == null)
+	throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed"));
+    }
+    else {
+      component = webBeans.bind(location, EntityManagerFactory.class, unitName);
+
+      if (component == null)
+	throw new ConfigException(location + L.l("@PersistenceUnit(unitName='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", unitName));
+    }
 
     bindJndi(location, jndiName, component);
 

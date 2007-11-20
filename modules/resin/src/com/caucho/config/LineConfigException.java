@@ -28,7 +28,7 @@
 
 package com.caucho.config;
 
-import com.caucho.util.LineCompileException;
+import com.caucho.util.*;
 
 /**
  * Thrown by the various Builders
@@ -108,5 +108,27 @@ public class LineConfigException extends ConfigException
   public String toString()
   {
     return getMessage();
+  }
+
+  public static RuntimeException create(String filename, int line, Throwable e)
+  {
+    String loc = filename + ": " + line + ": ";
+    
+    if (e instanceof LineException)
+      return new LineConfigException(filename, line, e.getMessage(), e);
+    else if (e instanceof DisplayableException)
+      return new LineConfigException(filename, line, loc + e.getMessage(), e);
+    else
+      return new LineConfigException(filename, line, loc + e, e);
+  }
+
+  public static RuntimeException create(Throwable e)
+  {
+    if (e instanceof LineCompileException)
+      return new LineConfigException(e.getMessage(), e);
+    else if (e instanceof DisplayableException)
+      return new ConfigException(e.getMessage(), e);
+    else
+      return new ConfigException(e.toString(), e);
   }
 }

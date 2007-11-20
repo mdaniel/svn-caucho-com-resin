@@ -852,7 +852,7 @@ public class EntityManyToOneField extends CascadableField {
       String thisContextEntity = "(" + _targetField.getJavaTypeName() /* getSourceType().getInstanceClassName() */ + ") contextEntity";
 
       // jpa/0o05
-      out.println(varName + "." + _targetField.generateSuperSetter(thisContextEntity) + ";");
+      out.println(_targetField.generateSuperSetter(varName, thisContextEntity) + ";");
     }
   }
 

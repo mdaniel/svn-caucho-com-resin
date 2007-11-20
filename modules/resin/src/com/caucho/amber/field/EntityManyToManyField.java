@@ -266,8 +266,8 @@ public class EntityManyToManyField extends AssociationField {
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
     if (! dst.equals("super")) { // || isLazy())) {
-      out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
-                  generateSuperSetter(generateSuperGetter()) + ";");
+      String oThis = "((" + getRelatedType().getInstanceClassName() + ") " + dst + ")";
+      out.println(generateSuperSetter(oThis, generateSuperGetter()) + ";");
     }
   }
 
