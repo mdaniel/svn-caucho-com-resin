@@ -230,14 +230,22 @@ abstract public class StringValue extends Value implements CharSequence {
       double r = rValue.toDouble();
 
       if (l == r)
-	return 0;
+        return 0;
       else if (l < r)
-	return -1;
+        return -1;
       else
-	return 1;
+        return 1;
     }
-    else
-      return toString().compareTo(rValue.toString());
+    else {
+      int result = toString().compareTo(rValue.toString());
+      
+      if (result == 0)
+        return 0;
+      else if (result > 0)
+        return 1;
+      else
+        return -1;
+    }
   }
 
   /**

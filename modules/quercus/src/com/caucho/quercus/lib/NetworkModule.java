@@ -144,7 +144,7 @@ public class NetworkModule extends AbstractQuercusModule {
 
       return stream;
     } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
 
       if (errstr != null)
         errstr.set(env.createString(e.toString()));

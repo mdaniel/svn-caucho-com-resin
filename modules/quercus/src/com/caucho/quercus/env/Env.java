@@ -696,17 +696,17 @@ public class Env {
     Connection conn;
     
     if (oldEntry == null
-	|| (conn = oldEntry.getConnection()) == null
-	|| conn.isClosed()) {
+        || (conn = oldEntry.getConnection()) == null
+        || conn.isClosed()) {
       if (userName == null || userName.equals(""))
-	conn = database.getConnection();
+        conn = database.getConnection();
       else
-	conn = database.getConnection(userName, password);
+        conn = database.getConnection(userName, password);
 
       entry.setConnection(conn);
-    }
 
-    _connMap.put(entry, entry);
+      _connMap.put(entry, entry);
+    }
       
     return conn;
   }

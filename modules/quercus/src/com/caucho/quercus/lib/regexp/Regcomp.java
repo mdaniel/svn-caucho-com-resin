@@ -314,7 +314,12 @@ class Regcomp {
 	    _groupTail = groupTail;
 
 	    return concat(tail, parseRec(pattern, next));
-	    
+	  
+	  // XXX: once-only subpatterns (mostly an optimization feature)
+	  case '>':
+	    pattern.read();
+	    return parseGroup(pattern, tail, 0);
+
 	  case 'P':
 	    pattern.read();
 	    return parseNamedGroup(pattern, tail);

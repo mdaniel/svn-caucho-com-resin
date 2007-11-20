@@ -39,6 +39,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
 
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -852,7 +853,16 @@ public class DateModule extends AbstractQuercusModule {
    */
   public static Value microtime(Env env, @Optional boolean getAsFloat)
   {
-    long now = Alarm.getExactTimeNanoseconds() / 1000;
+    long now;
+
+    // windows System.nanoTime() does not return the system time,
+    // so just return milliseconds multiplied by 1000
+    if (Path.isWindows()) {
+      now = System.currentTimeMillis() * 1000L;
+    }
+    else {
+      now = System.nanoTime() / 1000L;
+    }
 
     if (getAsFloat) {
       return new DoubleValue(((double) now) / 1e6);

@@ -2869,22 +2869,9 @@ public class StringModule extends AbstractQuercusModule {
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strcmp(String a, String b)
+  public static int strcmp(StringValue a, StringValue b)
   {
-    if (a == null)
-      a = "";
-    
-    if (b == null)
-      b = "";
-    
-    int cmp = a.compareTo(b);
-
-    if (cmp == 0)
-      return 0;
-    else if (cmp < 0)
-      return -1;
-    else
-      return 1;
+    return a.cmp(b);
   }
 
   /**
@@ -3145,28 +3132,15 @@ public class StringModule extends AbstractQuercusModule {
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strncmp(String a, String b, int length)
+  public static int strncmp(StringValue a, StringValue b, int length)
   {
-    if (a == null)
-      a = "";
-    
-    if (b == null)
-      b = "";
-    
     if (length < a.length())
       a = a.substring(0, length);
 
     if (length < b.length())
       b = b.substring(0, length);
 
-    int cmp = a.compareTo(b);
-
-    if (cmp == 0)
-      return 0;
-    else if (cmp < 0)
-      return -1;
-    else
-      return 1;
+    return a.cmp(b);
   }
 
   /**
@@ -3882,12 +3856,35 @@ public class StringModule extends AbstractQuercusModule {
         end = start + len;
 
       if (end <= start)
-        return env.createEmptyString();
+        return string.getEmptyString();
       else if (strLen <= end)
         return string.substring(start);
       else
         return string.substring(start, end);
     }
+  }
+  
+  public static Value substr_compare(Env env,
+                                     StringValue mainStr,
+                                     StringValue str,
+                                     int offset,
+                                     @Optional Value lenV,
+                                     @Optional boolean isCaseInsensitive)
+  {
+    int strLen = mainStr.length();
+    
+    if (lenV.toInt() > strLen
+        || offset > strLen
+        || lenV.toInt() + offset > strLen) {
+      return BooleanValue.FALSE;
+    }
+
+    mainStr = substr(env, mainStr, offset, lenV).toStringValue();
+
+    if (isCaseInsensitive)
+      return LongValue.create(strcasecmp(mainStr, str));
+    else
+      return LongValue.create(strcmp(mainStr, str));
   }
 
   public static Value substr_count(Env env,

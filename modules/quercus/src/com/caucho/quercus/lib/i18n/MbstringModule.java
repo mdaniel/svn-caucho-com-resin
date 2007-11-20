@@ -991,14 +991,14 @@ public class MbstringModule
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.convertToUnicode(env, encoding);
+    StringValue unicodeStr = str.convertToUnicode(env, encoding);
 
-    Value val = StringModule.substr(env, str, start, lengthV);
+    Value val = StringModule.substr(env, unicodeStr, start, lengthV);
 
     if (val == BooleanValue.FALSE)
-      return StringValue.EMPTY;
-
-    return val.toStringValue().toBinaryValue(env, encoding);
+      return str.getEmptyString();
+    
+    return str.create(env, val.toStringValue(), encoding);
   }
 
 

@@ -197,7 +197,7 @@ public class MiscModule extends AbstractQuercusModule {
       ArrayValue array = new ArrayValueImpl();
 
       for (PackSegment segment : segments) {
-	segment.unpack(env, array, is);
+        segment.unpack(env, array, is);
       }
 
       return array;
@@ -1376,8 +1376,8 @@ public class MiscModule extends AbstractQuercusModule {
 
 	// XXX: check key type with unicode semantics
 
-	if (_name == "")
-	  key = LongValue.create(j);
+	if (_name.length() == 0)
+	  key = LongValue.create(j + 1);
 	else if (_length == 1)
 	  key = new StringBuilderValue(_name);
 	else {
