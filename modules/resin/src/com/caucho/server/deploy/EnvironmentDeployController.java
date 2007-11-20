@@ -66,7 +66,7 @@ abstract public class
 {
   private static final L10N L = new L10N(EnvironmentDeployController.class);
   private static final Logger log
-    = Log.open(EnvironmentDeployController.class);
+    = Logger.getLogger(EnvironmentDeployController.class.getName());
 
   // The JMX identity
   private LinkedHashMap<String,String> _jmxContext;

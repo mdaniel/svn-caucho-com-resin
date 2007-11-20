@@ -1142,7 +1142,7 @@ public class Server extends ProtocolDispatchServer
 	startPorts();
       }
 
-      _lifecycle.toActive();
+      _lifecycle.toStarting();
 
       _classLoader.start();
 
@@ -1155,9 +1155,15 @@ public class Server extends ProtocolDispatchServer
       }
 
       _alarm.queue(ALARM_INTERVAL);
+      
+      _lifecycle.toActive();
     } catch (RuntimeException e) {
+      _lifecycle.toError();
+      
       throw e;
-    } catch (Throwable e) {
+    } catch (Exception e) {
+      _lifecycle.toError();
+      
       // if the server can't start, it needs to completely fail, especially
       // for the watchdog
       throw new RuntimeException(e);
@@ -1205,7 +1211,7 @@ public class Server extends ProtocolDispatchServer
    * Start the ports.
    */
   public void startPorts()
-    throws Throwable
+    throws Exception
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

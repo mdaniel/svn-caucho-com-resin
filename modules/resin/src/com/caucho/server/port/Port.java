@@ -1057,7 +1057,7 @@ public class Port
    * Starts the port listening.
    */
   public void start()
-    throws Throwable
+    throws Exception
   {
     if (_port == 0)
       return;
@@ -1065,6 +1065,7 @@ public class Port
     if (! _lifecycle.toStarting())
       return;
 
+    boolean isValid = false;
     try {
       bind();
       postBind();
@@ -1079,12 +1080,11 @@ public class Port
 
       _suspendAlarm = new Alarm(new SuspendReaper());
       _suspendAlarm.queue(60000);
-    } catch (Throwable e) {
-      close();
 
-      log.log(Level.WARNING, e.toString(), e);
-
-      throw e;
+      isValid = true;
+    } finally {
+      if (! isValid)
+	close();
     }
   }
 

@@ -109,6 +109,8 @@ public class ManagedConnectionImpl
   private boolean _autoCommit = true;
   // old value for getReadOnly
   private boolean _readOnly = false;
+
+  private boolean _hasCatalog;
   // old value for getCatalog
   private String _catalogOrig = null;
   // current value for getCatalog
@@ -313,10 +315,9 @@ public class ManagedConnectionImpl
     if (_connConfig.isReadOnly())
       _driverConnection.setReadOnly(true);
 
-    _catalogOrig = _driverConnection.getCatalog();
-
     String configCatalog = _connConfig.getCatalog();
-    if (configCatalog != null && ! configCatalog.equals(_catalogOrig)) {
+    if (configCatalog != null) {
+      _hasCatalog = true;
       _catalogOrig = configCatalog;
       _driverConnection.setCatalog(_catalogOrig);
     }
@@ -583,6 +584,12 @@ public class ManagedConnectionImpl
     throws SQLException
   {
     try {
+      if (! _hasCatalog) {
+	_hasCatalog = true;
+	_catalogOrig = _driverConnection.getCatalog();
+	_catalog = _catalogOrig;
+      }
+      
       // only call catalog if changed
       if (_catalog != null && ! _catalog.equals(catalog)) {
 	_catalog = catalog;

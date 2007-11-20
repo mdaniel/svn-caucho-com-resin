@@ -211,9 +211,6 @@ public class DeploymentService
       throw new RuntimeException(e);
     }
 
-    if (mxbean == null) {
-      log.warning(L.l("jsr88 cannot deploy '{0}'", moduleID));
-    }
 
     boolean failed = false;
     StringBuilder message = new StringBuilder();
@@ -226,67 +223,72 @@ public class DeploymentService
     
     TargetModuleIDImpl childModuleID
       = new TargetModuleIDImpl(childTarget, moduleID);
+    
+    if (mxbean != null) {
+      try {
+	Path deployPath = Vfs.lookup(mxbean.getArchivePath(name));
 
-    try {
-      Path deployPath = Vfs.lookup(mxbean.getArchivePath(name));
+	deployPath.getParent().mkdirs();
 
-      deployPath.getParent().mkdirs();
+	if (archivePath == null) {
+	  createArchive(deployPath, plan, archiveIs);
+	  archivePath = deployPath;
+	}
+	else {
+	  WriteStream deployStream = deployPath.openWrite();
 
-      if (archivePath == null) {
-        createArchive(deployPath, plan, archiveIs);
-        archivePath = deployPath;
+	  try {
+	    deployStream.writeFile(archivePath);
+	  }
+	  finally {
+	    deployStream.close();
+	  }
+	}
+
+	mxbean.update();
+
+	exception = mxbean.getConfigException(name);
+      }
+      catch (Exception e) {
+	if (log.isLoggable(Level.INFO))
+	  log.log(Level.INFO, e.toString(), e);
+
+	exception = e;
+      }
+
+      if (exception != null) {
+	failed = true;
+	describe(message, childModuleID, false, getExceptionMessage(exception));
+
+	/*
+	  if (mxbean != null) {
+	  try {
+	  mxbean.undeploy(moduleID);
+	  }
+	  catch (Throwable t) {
+	  log.log(Level.FINE, t.toString(), t);
+	  }
+	  }
+	*/
       }
       else {
-        WriteStream deployStream = deployPath.openWrite();
+	if ("ear".equals(plan.getArchiveType())) {
+	  try {
+	    EAppMXBean eApp = (EAppMXBean) Jmx.find(moduleID);
 
-        try {
-          deployStream.writeFile(archivePath);
-        }
-        finally {
-          deployStream.close();
-        }
+	    if (eApp != null)
+	      childTarget.setClientRefs(eApp.getClientRefs());
+	  } catch (Exception e) {
+	    log.log(Level.FINEST, e.toString(), e);
+	  }
+	}
+
+	describe(message, childModuleID, true);
       }
-
-      mxbean.update();
-
-      exception = mxbean.getConfigException(name);
-    }
-    catch (Exception e) {
-      if (log.isLoggable(Level.INFO))
-        log.log(Level.INFO, e.toString(), e);
-
-      exception = e;
-    }
-
-    if (exception != null) {
-      failed = true;
-      describe(message, childModuleID, false, getExceptionMessage(exception));
-
-      /*
-        if (mxbean != null) {
-        try {
-        mxbean.undeploy(moduleID);
-        }
-        catch (Throwable t) {
-        log.log(Level.FINE, t.toString(), t);
-        }
-        }
-      */
     }
     else {
-      if ("ear".equals(plan.getArchiveType())) {
-        try {
-          EAppMXBean eApp = (EAppMXBean) Jmx.find(moduleID);
-
-          childTarget.setClientRefs(eApp.getClientRefs());
-          
-          System.out.println("REFS: " + eApp.getClientRefs());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-
-      describe(message, childModuleID, true);
+      failed = true;
+      log.warning(L.l("jsr88 cannot deploy '{0}'", moduleID));
     }
     
     TargetModuleID []targetModuleIDs
