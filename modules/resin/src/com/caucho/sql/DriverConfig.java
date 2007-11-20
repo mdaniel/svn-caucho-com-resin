@@ -649,7 +649,9 @@ public class DriverConfig
   @PostConstruct
   public void init()
   {
-    if (_driverClass == null) {
+    if (_driverClass == null
+	&& _poolDataSource == null
+	&& _xaDataSource == null) {
       if (_driverURL == null)
 	throw new ConfigException(L.l("<driver> requires a 'type' or 'url'"));
 

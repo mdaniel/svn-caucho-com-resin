@@ -2432,9 +2432,9 @@ public class WebApp extends ServletContextImpl
   public void log(String message, Throwable e)
   {
     if (e != null)
-      log.log(Level.WARNING, message, e);
+      log.log(Level.WARNING, this + " " + message, e);
     else
-      log.info(message);
+      log.info(this + " " + message);
   }
 
   /**
