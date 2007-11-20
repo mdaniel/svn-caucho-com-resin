@@ -236,8 +236,9 @@ public class FileQueue extends AbstractQueue implements Topic
 	   entry = entry._next) {
         MessageImpl msg = entry.getMessage();
         
-	if (msg.getJMSMessageID().equals(msgId)
-            && entry.isRead()) {
+	if (msg != null
+	    && msgId.equals(msg.getJMSMessageID())
+	    && entry.isRead()) {
 	  entry.setRead(false);
 	  msg.setJMSRedelivered(true);
 	  return;
