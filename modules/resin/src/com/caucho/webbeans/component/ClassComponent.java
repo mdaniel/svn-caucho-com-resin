@@ -121,6 +121,14 @@ public class ClassComponent extends ComponentImpl {
       }
     }
 
+    if (getName() == null) {
+      String name = cl.getSimpleName();
+
+      name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+	
+      setName(name);
+    }
+
     introspectProduces();
     introspectConstructor();
 

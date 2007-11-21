@@ -33,6 +33,7 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 /**
@@ -84,12 +85,12 @@ public class WebBeansELResolver extends ELResolver {
 
     String name = (String) property;
 
-    Object value = _webBeans.findByName(name);
+    ComponentImpl value = _webBeans.findByName(name);
 
     if (value != null) {
       context.setPropertyResolved(true);
 
-      return value;
+      return value.get();
     }
     else
       return null;
