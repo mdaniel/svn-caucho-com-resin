@@ -52,6 +52,8 @@ public class SingletonComponent extends ClassComponent {
 
     setInstanceClass(value.getClass());
     setTargetType(value.getClass());
+
+    super.setScope(new SingletonScope());
   }
 
   public SingletonComponent(WebBeansContainer webBeans, Object value)
@@ -62,23 +64,13 @@ public class SingletonComponent extends ClassComponent {
 
     setInstanceClass(value.getClass());
     setTargetType(value.getClass());
+    
+    super.setScope(new SingletonScope());
   }
 
   @Override
   public void setScope(ScopeContext scope)
   {
-  }
-
-  @Override
-  public Object getByName()
-  {
-    return _value;
-  }
-
-  @Override
-  public Object getInject()
-  {
-    return _value;
   }
 
   @Override

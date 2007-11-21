@@ -72,12 +72,12 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
-  private ScopeContext _scope;
+  protected ScopeContext _scope;
 
   protected Inject []_injectProgram = NULL_INJECT;
+  protected Inject []_destroyProgram = NULL_INJECT;
   
   private InitProgram _init;
-  private Object _scopeAdapter;
 
   public ComponentImpl(WbWebBeans webbeans)
   {
@@ -280,36 +280,6 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     return false;
   }
 
-  public Object getByName()
-  {
-    if (_scope != null) {
-      Object value = _scope.get(this);
-
-      if (value != null)
-	return value;
-      else
-	return get();
-    }
-    else
-      throw new IllegalStateException();
-  }
-
-  public Object getInject()
-  {
-    DependentScope scope = DependentScope.getCurrent();
-
-    if (scope == null
-	|| _scope == null
-	|| scope.canInject(_scope)) {
-      return get();
-    }
-
-    if (_scopeAdapter == null)
-      _scopeAdapter = ScopeAdapter.create(getTargetType()).wrap(this);
-    
-    return _scopeAdapter;
-  }
-
   /**
    * Returns the component object, creating if necessary
    */
@@ -331,9 +301,8 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     if (_scope != null) {
       Object value = _scope.get(this);
 
-      if (value != null) {
+      if (value != null)
 	return value;
-      }
     }
     else {
       Object value = scope.get(this);
@@ -342,7 +311,18 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
 	return value;
     }
 
-    return create(scope);
+    Object value = createNew();
+
+    if (_scope != null) {
+      _scope.put(this, value);
+      scope = new DependentScope(this, value, _scope);
+    }
+    else
+      scope.put(this, value);
+
+    init(value, scope);
+
+    return value;
   }
 
   /**
@@ -356,30 +336,8 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
       DependentScope scope = new DependentScope(this, value, _scope);
       scope.put(this, value);
 
-      init(value, scope);
-
-      return value;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Creates a new instance of the component.
-   */
-  public Object create(DependentScope scope)
-  {
-    try {
-      Object value = createNew();
-
-      if (_scope != null) {
+      if (_scope != null)
 	_scope.put(this, value);
-	scope = new DependentScope(this, value, _scope);
-      }
-      else
-	scope.put(this, value);
 
       init(value, scope);
 
@@ -389,13 +347,6 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * Destroys an instance of the component
-   */
-  public void destroy(Object obj)
-  {
   }
 
   protected Object createNew()
@@ -408,14 +359,36 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
    */
   protected Object init(Object value, DependentScope scope)
   {
-    for (Inject inject : _injectProgram) {
-      inject.inject(value, scope);
-    }
-
     if (_init != null)
       _init.configure(value);
+    else {
+      for (Inject inject : _injectProgram) {
+	inject.inject(value, scope);
+      }
+    }
+
+    if (_destroyProgram.length > 0) {
+      scope.addDestructor(this, value);
+    }
 
     return value;
+  }
+
+  /**
+   * Destroys the value
+   */
+  public void destroy(Object value, DependentScope scope)
+  {
+    for (Inject inject : _destroyProgram)
+      inject.inject(value, scope);
+  }
+
+  /**
+   * Destroys the value
+   */
+  public void destroy(Object value)
+  {
+    destroy(value, null);
   }
 
   /**

@@ -59,18 +59,6 @@ public class StatelessComponent extends ComponentImpl {
   }
 
   @Override
-  public Object getByName()
-  {
-    return _server.getLocalObject();
-  }
-
-  @Override
-  public Object getInject()
-  {
-    return _server.getLocalObject();
-  }
-
-  @Override
   public Object get()
   {
     return _server.getLocalObject();

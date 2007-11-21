@@ -29,24 +29,28 @@
 
 package com.caucho.webbeans.context;
 
-import javax.webbeans.*;
-
+import com.caucho.loader.*;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.webbeans.component.*;
 
+import java.util.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.webbeans.*;
+
 /**
- * Context for a named EL bean scope
+ * The singleton scope value
  */
-abstract public class ScopeContext {
-  abstract public <T> T get(ComponentFactory<T> comp);
+public class ScopeMap<T> {
+  private transient final HashMap _map = new HashMap();
   
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
-
-  public boolean canInject(ScopeContext scope)
+  public <T> T get(ComponentFactory<T> component)
   {
-    return getClass().equals(scope.getClass());
+    return (T) _map.get(component);
   }
-
-  public void addDestructor(ComponentImpl comp, Object value)
+  
+  public <T> void put(ComponentFactory<T> component, T value)
   {
+    _map.put(component, value);
   }
 }

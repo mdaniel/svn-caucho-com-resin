@@ -29,7 +29,8 @@
 
 package com.caucho.webbeans.context;
 
-import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.loader.*;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.webbeans.component.*;
 
 import javax.servlet.*;
@@ -37,18 +38,20 @@ import javax.servlet.http.*;
 import javax.webbeans.*;
 
 /**
- * The session scope value
+ * The singleton scope value
  */
-public class SessionScope extends ScopeContext {
+public class SingletonScope extends ScopeContext {
+  private final static EnvironmentLocal<ScopeMap> _localScopeMap
+    = new EnvironmentLocal<ScopeMap>();
+  
   public <T> T get(ComponentFactory<T> component)
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
+    ScopeMap map = _localScopeMap.get();
 
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
+    if (map != null) {
       ComponentImpl comp = (ComponentImpl) component;
       
-      return (T) session.getAttribute(comp.getScopeId());
+      return (T) map.get(comp);
     }
     else
       return null;
@@ -56,35 +59,32 @@ public class SessionScope extends ScopeContext {
   
   public <T> void put(ComponentFactory<T> component, T value)
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
+    ScopeMap map;
+    
+    synchronized (this) {
+      map = _localScopeMap.getLevel();
 
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
-      ComponentImpl comp = (ComponentImpl) component;
-      
-      session.setAttribute(comp.getScopeId(), value);
+      if (map == null) {
+	map = new ScopeMap();
+	_localScopeMap.set(map);
+      }
     }
-  }
 
-  @Override
-  public boolean canInject(ScopeContext scope)
-  {
-    return (scope instanceof ApplicationScope
-	    || scope instanceof SessionScope);
+    map.put(component, value);
   }
 
   public void addDestructor(ComponentImpl comp, Object value)
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
+    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
+    if (loader != null) {
       DestructionListener listener
-	= (DestructionListener) session.getAttribute("caucho.destroy");
+	= (DestructionListener) loader.getAttribute("caucho.destroy");
 
       if (listener == null) {
 	listener = new DestructionListener();
-	session.setAttribute("caucho.destroy", listener);
+	loader.setAttribute("caucho.destroy", listener);
+	loader.addListener(listener);
       }
       
       listener.addValue(comp, value);

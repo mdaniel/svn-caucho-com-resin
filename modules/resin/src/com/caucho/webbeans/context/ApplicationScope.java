@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.context;
 
+import com.caucho.loader.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.webbeans.component.*;
 
@@ -68,5 +69,23 @@ public class ApplicationScope extends ScopeContext {
   public boolean canInject(ScopeContext scope)
   {
     return (scope instanceof ApplicationScope);
+  }
+
+  public void addDestructor(ComponentImpl comp, Object value)
+  {
+    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
+
+    if (loader != null) {
+      DestructionListener listener
+	= (DestructionListener) loader.getAttribute("caucho.destroy");
+
+      if (listener == null) {
+	listener = new DestructionListener();
+	loader.setAttribute("caucho.destroy", listener);
+	loader.addListener(listener);
+      }
+      
+      listener.addValue(comp, value);
+    }
   }
 }

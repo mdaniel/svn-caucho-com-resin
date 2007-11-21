@@ -277,7 +277,7 @@ public class WebBeansContainer
     else if (ConversationScoped.class.equals(scope))
       return new ConversationScope();
     else if (Singleton.class.equals(scope))
-      return null;
+      return new SingletonScope();
     else if (Dependent.class.equals(scope))
       return null;
     else
@@ -294,7 +294,7 @@ public class WebBeansContainer
 
     if (component == null)
       throw injectError(field, L.l("Can't find a component for '{0}'",
-				   field.getName()));
+				   field.getType().getName()));
 
     component.createProgram(injectList, field);
   }

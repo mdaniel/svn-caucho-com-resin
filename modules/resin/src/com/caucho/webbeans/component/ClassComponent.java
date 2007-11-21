@@ -34,6 +34,7 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
+import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.inject.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
@@ -58,6 +59,8 @@ public class ClassComponent extends ComponentImpl {
 
   private Constructor _ctor;
   private ComponentImpl []_ctorArgs;
+
+  private ScopeAdapter _scopeAdapter;
 
   public ClassComponent(WbWebBeans webbeans)
   {
@@ -192,6 +195,64 @@ public class ClassComponent extends ComponentImpl {
     }
   }
 
+  /**
+   * Creates a new instance of the component.
+   */
+  public Object get(DependentScope scope)
+  {
+    try {
+      Object value;
+      boolean isNew = false;
+
+      if (scope == null || _scope == null || scope.canInject(_scope)) {
+	if (_scope != null) {
+	  value = _scope.get(this);
+	  
+	  if (value != null)
+	    return value;
+	}
+	else if (scope != null) {
+	  value = scope.get(this);
+	  
+	  if (value != null)
+	    return value;
+	}
+      
+	value = createNew();
+	
+	if (_scope != null) {
+	  _scope.put(this, value);
+	  scope = new DependentScope(this, value, _scope);
+	}
+	else
+	  scope.put(this, value);
+	
+	init(value, scope);
+      }
+      else {
+	if (scope != null) {
+	  value = scope.get(this);
+	  
+	  if (value != null)
+	    return value;
+	}
+      
+	if (_scopeAdapter == null)
+	  _scopeAdapter = ScopeAdapter.create(getInstanceClass());
+
+	value = _scopeAdapter.wrap(this);
+
+	scope.put(this, value);
+      }
+
+      return value;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   protected Object createNew()
   {
     try {
@@ -227,11 +288,17 @@ public class ClassComponent extends ComponentImpl {
 
       ArrayList<Inject> injectList = new ArrayList<Inject>();
       InjectIntrospector.introspectInject(injectList, _cl);
+      InjectIntrospector.introspectInit(injectList, _cl);
       
       // InjectIntrospector.introspectInit(injectList, _cl);
 
       _injectProgram = new Inject[injectList.size()];
       injectList.toArray(_injectProgram);
+      
+      ArrayList<Inject> destroyList = new ArrayList<Inject>();
+      InjectIntrospector.introspectDestroy(destroyList, _cl);
+      _destroyProgram = new Inject[destroyList.size()];
+      destroyList.toArray(_destroyProgram);
 
       String loc = _ctor.getDeclaringClass().getName() + "(): ";
       Class []param = _ctor.getParameterTypes();
@@ -257,6 +324,9 @@ public class ClassComponent extends ComponentImpl {
     for (Annotation ann : getInstanceClass().getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	bindings.add(new WbBinding(ann));
+
+      if (ann instanceof Named)
+	setName(((Named) ann).value());
     }
 
     if (bindings.size() > 0)

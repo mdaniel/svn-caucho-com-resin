@@ -2153,6 +2153,10 @@ public abstract class AbstractHttpRequest
 
       _attributeListeners[i].attributeRemoved(event);
     }
+
+    if (oldValue instanceof ScopeRemoveListener) {
+      ((ScopeRemoveListener) oldValue).removeEvent(this, name);
+    }
   }
 
   /**
@@ -2506,8 +2510,17 @@ public abstract class AbstractHttpRequest
     if (comet == null) {
       _session = null;
       
-      if (_attributes.size() > 0)
+      if (_attributes.size() > 0) {
+	for (Map.Entry<String,Object> entry : _attributes.entrySet()) {
+	  Object value = entry.getValue();
+
+	  if (value instanceof ScopeRemoveListener) {
+	    ((ScopeRemoveListener) value).removeEvent(this, entry.getKey());
+	  }
+	}
+	
 	_attributes.clear();
+      }
     }
   }
 

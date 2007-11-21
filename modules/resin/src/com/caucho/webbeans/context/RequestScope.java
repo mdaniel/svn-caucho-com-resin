@@ -72,4 +72,21 @@ public class RequestScope extends ScopeContext {
 	    || scope instanceof ConversationScope
 	    || scope instanceof RequestScope);
   }
+
+  public void addDestructor(ComponentImpl comp, Object value)
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request != null) {
+      DestructionListener listener
+	= (DestructionListener) request.getAttribute("caucho.destroy");
+
+      if (listener == null) {
+	listener = new DestructionListener();
+	request.setAttribute("caucho.destroy", listener);
+      }
+      
+      listener.addValue(comp, value);
+    }
+  }
 }

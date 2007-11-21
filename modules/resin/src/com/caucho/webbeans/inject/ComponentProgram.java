@@ -54,7 +54,7 @@ public class ComponentProgram extends BuilderProgram
     throws ConfigException
   {
     try {
-      Object value = _component.getInject();
+      Object value = null;//_component.getInject();
 
       _inject.inject(bean, value);
     } catch (RuntimeException e) {

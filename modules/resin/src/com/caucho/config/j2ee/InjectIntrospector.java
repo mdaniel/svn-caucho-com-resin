@@ -87,13 +87,35 @@ public class InjectIntrospector {
           throw new ConfigException(location(method)
 				    + L.l("{0}: @PostConstruct is requires zero arguments"));
 	
-	/*
         PostConstructProgram initProgram
           = new PostConstructProgram(method);
 
         if (! initList.contains(initProgram))
           initList.add(initProgram);
-	*/
+      }
+    }
+  }
+  
+  public static void
+    introspectDestroy(ArrayList<Inject> destroyList, Class type)
+    throws ConfigException
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectDestroy(destroyList, type.getSuperclass());
+
+    for (Method method : type.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(PreDestroy.class)) {
+        if (method.getParameterTypes().length != 0)
+          throw new ConfigException(location(method)
+				    + L.l("{0}: @PreDestroy is requires zero arguments"));
+	
+        PreDestroyInject destroyProgram
+          = new PreDestroyInject(method);
+
+        if (! destroyList.contains(destroyProgram))
+          destroyList.add(destroyProgram);
       }
     }
   }
@@ -128,26 +150,6 @@ public class InjectIntrospector {
     }
     
     introspectConstruct(initList, type.getSuperclass());
-  }
-
-  public static void
-    introspectDestroy(ArrayList<BuilderProgram> initList, Class type)
-    throws ConfigException
-  {
-    if (type == null || type.equals(Object.class))
-      return;
-
-    introspectDestroy(initList, type.getSuperclass());
-
-    for (Method method : type.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(PreDestroy.class)) {
-        if (method.getParameterTypes().length != 0)
-          throw new ConfigException(L.l("{0}: @PreDestroy is requires zero arguments",
-                                        method.getName()));
-
-        initList.add(new PreDestroyProgram(method));
-      }
-    }
   }
 
   public static void introspectInject(ArrayList<Inject> injectList,

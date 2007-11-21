@@ -31,6 +31,7 @@ package com.caucho.webbeans.component;
 
 import com.caucho.webbeans.cfg.WbWebBeans;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.webbeans.context.SingletonScope;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -48,14 +49,9 @@ public class SingletonClassComponent extends ClassComponent {
   public SingletonClassComponent(WbWebBeans webbeans)
   {
     super(webbeans);
+    
+    super.setScope(new SingletonScope());
   }
-
-  /*
-  @Override
-  public void setScope(Class ann)
-  {
-  }
-  */
 
   /**
    * Returns the singleton object
@@ -66,7 +62,7 @@ public class SingletonClassComponent extends ClassComponent {
     if (_value == null) {
       _value = createNew();
 
-      init(_value, new DependentScope(this, _value, null));
+      init(_value, new DependentScope(this, _value, new SingletonScope()));
     }
 
     return _value;

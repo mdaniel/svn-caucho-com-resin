@@ -112,7 +112,6 @@ public class ProducesComponent extends ComponentImpl {
     for (Annotation ann : _method.getAnnotations()) {
       if (ann instanceof Named) {
 	setName(((Named) ann).value());
-	continue;
       }
       
       if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {

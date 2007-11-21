@@ -126,4 +126,16 @@ public class DependentScope {
     else
       return _scope.canInject(scope);
   }
+
+  /**
+   * Adds a @PreDestroy destructor
+   */
+  public void addDestructor(ComponentImpl comp, Object value)
+  {
+    if (_scope != null)
+      _scope.addDestructor(comp, value);
+    else {
+      // add to env?
+    }
+  }
 }

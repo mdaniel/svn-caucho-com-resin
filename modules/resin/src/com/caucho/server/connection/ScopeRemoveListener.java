@@ -27,26 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
-
-import javax.webbeans.*;
-
-import com.caucho.webbeans.component.*;
+package com.caucho.server.connection;
 
 /**
- * Context for a named EL bean scope
+ * Called when the object is removed from a scope.
  */
-abstract public class ScopeContext {
-  abstract public <T> T get(ComponentFactory<T> comp);
-  
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
-
-  public boolean canInject(ScopeContext scope)
-  {
-    return getClass().equals(scope.getClass());
-  }
-
-  public void addDestructor(ComponentImpl comp, Object value)
-  {
-  }
+public interface ScopeRemoveListener
+{
+  public void removeEvent(Object scope, String name);
 }
+

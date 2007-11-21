@@ -63,18 +63,6 @@ public class ObjectProxyComponent extends ComponentImpl {
   }
 
   @Override
-  public Object getByName()
-  {
-    return get();
-  }
-
-  @Override
-  public Object getInject()
-  {
-    return get();
-  }
-
-  @Override
   public Object get()
   {
     try {
