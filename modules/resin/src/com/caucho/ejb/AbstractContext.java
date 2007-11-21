@@ -84,7 +84,8 @@ abstract public class AbstractContext implements EJBContext {
     try {
       EJBHome home = getServer().getEJBHome();
 
-      if (home == null)
+      // ejb/0f61
+      if (home == null && getServer().getEJBLocalHome() == null)
         throw new IllegalStateException("getEJBHome() is only allowed through EJB 2.1 interfaces");
 
       return home;
@@ -103,9 +104,10 @@ abstract public class AbstractContext implements EJBContext {
   public EJBLocalHome getEJBLocalHome()
   {
     try {
-      Object obj = getServer().getEJBLocalHome();
+      Object localHome = getServer().getEJBLocalHome();
 
-      if (obj == null)
+      // ejb/0f61
+      if (localHome == null && getServer().getEJBHome() == null)
         throw new IllegalStateException("getEJBLocalHome() is only allowed through EJB 2.1 interfaces");
 
       return null;

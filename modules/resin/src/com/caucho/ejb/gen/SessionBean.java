@@ -191,9 +191,9 @@ public class SessionBean extends ClassComponent {
       // XXX TCK: bb/session/stateful/cm/allowed/afterBeginSetRollbackOnlyTest (infinite recursion issue)
 
       if (isStateless())
-	out.println("Bean bean = new Bean(cxt);");
+        out.println("Bean bean = new Bean(cxt);");
       else
-	out.println("Bean bean = new Bean(cxt, scope);");
+        out.println("Bean bean = new Bean(cxt, scope);");
 
       out.println("cxt._ejb_free(bean);");
 
@@ -302,7 +302,7 @@ public class SessionBean extends ClassComponent {
 
     out.println("if (__caucho_isFiner) {");
     out.pushDepth();
-      
+
     out.println("synchronized (" + _ejbClass.getName() + ".class) {");
     out.println("  __caucho_id = \"" + _ejbClass.getName() + "[\" + __caucho_dbg_id++ + \"]\";");
     out.println("}");
@@ -322,8 +322,9 @@ public class SessionBean extends ClassComponent {
       out.println("invokeMethod(this, \"setSessionContext\", new Class[] { javax.ejb.SessionContext.class }, new Object[] { context });");
     }
 
-    //out.println();
-    //out.println("__caucho_initInjection();");
+    // ejb/0fd0
+    out.println();
+    out.println("__caucho_initInjection();");
 
     out.println();
     if (isStateless())
@@ -645,7 +646,21 @@ public class SessionBean extends ClassComponent {
     out.println("} catch (NoSuchMethodException e1) {");
     out.pushDepth();
 
-    if (cl.isPrimitive()) { // if (! cl.equals(String.class)) {
+    java.lang.reflect.Field field = null;
+
+    try {
+      field = cl.getDeclaredField("TYPE");
+    } catch (NoSuchFieldException e) {
+    }
+
+    boolean isPrimitiveWrapper = false;
+
+    if (field != null && Class.class.isAssignableFrom(field.getType())) { //if (cl.isPrimitive())
+      isPrimitiveWrapper = true;
+    }
+
+    // ejb/0fd2
+    if (isPrimitiveWrapper) {
       out.println("try {");
       out.pushDepth();
 
@@ -678,7 +693,7 @@ public class SessionBean extends ClassComponent {
     out.println(");");
 
     // ejb/0fd2 vs ejb/0fd3
-    if (cl.isPrimitive()) { // if (! cl.equals(String.class)) {
+    if (isPrimitiveWrapper) { // if (! cl.equals(String.class)) {
       out.popDepth();
       out.println("}");
     }
