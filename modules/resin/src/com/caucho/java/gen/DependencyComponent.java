@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,9 +98,6 @@ public class DependencyComponent extends ClassComponent {
 		_dependList.size() + "];");
 
     Path searchPath = _searchPath;
-
-    if (searchPath == null)
-      searchPath = JavaClassGenerator.getDefaultSearchPath();
     
     for (int i = 0; i < _dependList.size(); i++) {
       PersistentDependency dependency = _dependList.get(i);
@@ -110,8 +108,20 @@ public class DependencyComponent extends ClassComponent {
 
         out.print("_caucho_depend[" + i + "] = new com.caucho.vfs.Depend(");
 
+	// php/3b33
 	String relativePath;
-	relativePath = searchPath.lookup(path.getRelativePath()).getRelativePath();
+	if (searchPath != null)
+	  relativePath = searchPath.lookup(path.getRelativePath()).getRelativePath();
+	else {
+	  String fullPath = path.getFullPath();
+	  String pwd = Vfs.lookup().getFullPath();
+
+	  if (fullPath.startsWith(pwd))
+	    relativePath = "./" + fullPath.substring(pwd.length());
+	  else
+	    relativePath = fullPath;
+	}
+	
 	out.print("path.lookup(\"" + relativePath + "\"), ");
 	  
 	out.println(depend.getDigest() + "L, " +

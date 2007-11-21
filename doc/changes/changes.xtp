@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>quercus: Dependency printing not properly handling static paths (#2185, rep by koreth)</li>
 <li>jsp: allow EL expression for non-rtexprvalue String for old-style JSTL (#2112, rep by T Harris)</li>
 <li>jms: add JmsQueueMXBean and JmsTopicMXBean (#2049, rep by P Tripathy)</li>
 <li>hessian: HessianProxy updates to simplify subclassing (#2155, fixed! by mate)</li>
