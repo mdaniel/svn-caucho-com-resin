@@ -39,7 +39,7 @@ import javax.webbeans.*;
  * Configuration for the xml web bean component.
  */
 public class RequestScope extends ScopeContext {
-  public <T> T get(ComponentFactory<T> component)
+  public <T> T get(ComponentFactory<T> component, boolean create)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
@@ -60,6 +60,20 @@ public class RequestScope extends ScopeContext {
       ComponentImpl comp = (ComponentImpl) component;
       
       request.setAttribute(comp.getScopeId(), value);
+    }
+  }
+
+  /**
+   * Removes the scope value for the given component.
+   */
+  public <T> void remove(ComponentFactory<T> component)
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request != null) {
+      ComponentImpl comp = (ComponentImpl) component;
+      
+      request.removeAttribute(comp.getScopeId());
     }
   }
 

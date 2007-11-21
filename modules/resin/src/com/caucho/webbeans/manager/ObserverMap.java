@@ -27,26 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.webbeans.manager;
 
-import javax.webbeans.*;
-
+import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.util.*;
+import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.event.*;
+import com.caucho.webbeans.inject.*;
+
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+import java.util.ArrayList;
 
 /**
- * Context for a named EL bean scope
+ * Matches bindings
  */
-abstract public class ScopeContext implements Context {
-  abstract public <T> T get(ComponentFactory<T> comp, boolean create);
+public class ObserverMap {
+  private static L10N L = new L10N(ObserverMap.class);
   
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
-  
-  public boolean canInject(ScopeContext scope)
+  private Class _type;
+
+  private ArrayList<ObserverImpl> _observerList
+    = new ArrayList<ObserverImpl>();
+
+  public ObserverMap(Class type)
   {
-    return getClass().equals(scope.getClass());
+    _type = type;
   }
 
-  public void addDestructor(ComponentImpl comp, Object value)
+  public void addObserver(ObserverImpl observer)
   {
+    for (int i = _observerList.size() - 1; i >= 0; i--) {
+      ObserverImpl oldObserver = _observerList.get(i);
+
+      if (observer.equals(oldObserver)) {
+	return;
+      }
+    }
+
+    _observerList.add(observer);
+  }
+
+  public void raiseEvent(Object event, Annotation []bindList)
+  {
+    for (int i = 0; i < _observerList.size(); i++) {
+      ObserverImpl observer = _observerList.get(i);
+
+      if (observer.isMatch(bindList))
+	observer.raiseEvent(event);
+    }
   }
 }

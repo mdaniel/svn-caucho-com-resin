@@ -35,9 +35,11 @@ import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
-import com.caucho.webbeans.inject.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.event.*;
+import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.manager.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -310,6 +312,8 @@ public class ClassComponent extends ComponentImpl {
 	_ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
       }
 
+      introspectObservers();
+
       _isBound = true;
     }
   }
@@ -333,6 +337,23 @@ public class ClassComponent extends ComponentImpl {
       setBindingList(bindings);
   }
 
+  /**
+   * Introspects any observers.
+   */
+  protected void introspectObservers()
+  {
+    for (Method method : getInstanceClass().getDeclaredMethods()) {
+      int param = findObserverAnnotation(method);
+
+      if (param < 0)
+	continue;
+
+      ObserverImpl observer = new ObserverImpl(this, method, param);
+
+      _webbeans.getContainer().addObserver(observer);
+    }
+  }
+
   private boolean hasBindingAnnotation(Constructor ctor)
   {
     if (ctor.isAnnotationPresent(In.class))
@@ -348,5 +369,24 @@ public class ClassComponent extends ComponentImpl {
     }
 
     return false;
+  }
+
+  private int findObserverAnnotation(Method method)
+  {
+    Annotation [][]paramAnn = method.getParameterAnnotations();
+    int observer = -1;
+
+    for (int i = 0; i < paramAnn.length; i++) {
+      for (Annotation ann : paramAnn[i]) {
+	if (ann instanceof Observes) {
+	  if (observer >= 0)
+	    throw WebBeansContainer.error(method, L.l("Only one param may have an @Observer"));
+	  
+	  observer = i;
+	}
+      }
+    }
+
+    return observer;
   }
 }

@@ -44,4 +44,6 @@ public interface Container {
   public void addContext(Class<Annotation> scopeType, Context context);
   
   public Context getContext(Class<Annotation> scopeType);
+
+  public void raiseEvent(Object event, Annotation... bindings);
 }

@@ -40,6 +40,7 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.event.*;
 import com.caucho.webbeans.inject.*;
 
 import java.io.*;
@@ -84,6 +85,12 @@ public class WebBeansContainer
   private HashMap<Path,WebBeansRootContext> _rootContextMap
     = new HashMap<Path,WebBeansRootContext>();
 
+  private HashMap<Class,Context> _contextMap
+    = new HashMap<Class,Context>();
+
+  private HashMap<Class,ObserverMap> _observerMap
+    = new HashMap<Class,ObserverMap>();
+
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
 
@@ -100,6 +107,12 @@ public class WebBeansContainer
     _tempClassLoader = _classLoader.getNewTempClassLoader();
     
     _wbWebBeans = new WbWebBeans(this, null);
+
+    _contextMap.put(RequestScoped.class, new RequestScope());
+    _contextMap.put(SessionScoped.class, new SessionScope());
+    _contextMap.put(ConversationScoped.class, new ConversationScope());
+    _contextMap.put(ApplicationScoped.class, new ApplicationScope());
+    _contextMap.put(Singleton.class, new SingletonScope());
 
     _classLoader.addScanListener(this);
     
@@ -420,6 +433,24 @@ public class WebBeansContainer
   }
 
   //
+  // events
+  //
+  
+  public void addObserver(ObserverImpl observer)
+  {
+    synchronized (_observerMap) {
+      ObserverMap map = _observerMap.get(observer.getType());
+      
+      if (map == null) {
+	map = new ObserverMap(observer.getType());
+	_observerMap.put(observer.getType(), map);
+      }
+
+      map.addObserver(observer);
+    }
+  }
+
+  //
   // javax.webbeans.Container
   //
 
@@ -434,12 +465,30 @@ public class WebBeansContainer
   
   public void addContext(Class<Annotation> scopeType, Context context)
   {
+    _contextMap.put(scopeType, context);
   }
   
   public Context getContext(Class<Annotation> scopeType)
   {
-    return null;
+    return _contextMap.get(scopeType);
   }
+
+  public void raiseEvent(Object event, Annotation... bindings)
+  {
+    Class type = event.getClass();
+
+    for (; type != null; type = type.getSuperclass()) {
+      ObserverMap observer = _observerMap.get(type);
+
+      if (observer != null) {
+	observer.raiseEvent(event, bindings);
+      }
+    }
+  }
+
+  //
+  // class loader updates
+  //
 
   public void update()
   {
@@ -553,6 +602,11 @@ public class WebBeansContainer
   {
     return (method.getDeclaringClass().getName()
 	    + "." + method.getName() + ": ");
+  }
+
+  public static ConfigException error(Method method, String msg)
+  {
+    return new ConfigException(location(method) + msg);
   }
 
   //

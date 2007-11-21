@@ -41,7 +41,7 @@ import javax.webbeans.*;
  * The application scope value
  */
 public class ApplicationScope extends ScopeContext {
-  public <T> T get(ComponentFactory<T> component)
+  public <T> T get(ComponentFactory<T> component, boolean create)
   {
     WebApp webApp = WebApp.getLocal();
 
@@ -62,6 +62,17 @@ public class ApplicationScope extends ScopeContext {
       ComponentImpl comp = (ComponentImpl) component;
       
       webApp.setAttribute(comp.getScopeId(), value);
+    }
+  }
+  
+  public <T> void remove(ComponentFactory<T> component)
+  {
+    WebApp webApp = WebApp.getLocal();
+
+    if (webApp != null) {
+      ComponentImpl comp = (ComponentImpl) component;
+      
+      webApp.removeAttribute(comp.getScopeId());
     }
   }
 

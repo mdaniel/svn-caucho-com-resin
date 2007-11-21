@@ -83,6 +83,14 @@ public class WbWebBeans {
     
     _root = root;
   }
+
+  /**
+   * returns the owning container.
+   */
+  public WebBeansContainer getContainer()
+  {
+    return _webBeansContainer;
+  }
   
   /**
    * Gets the web beans root directory

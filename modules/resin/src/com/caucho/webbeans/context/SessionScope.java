@@ -40,7 +40,7 @@ import javax.webbeans.*;
  * The session scope value
  */
 public class SessionScope extends ScopeContext {
-  public <T> T get(ComponentFactory<T> component)
+  public <T> T get(ComponentFactory<T> component, boolean create)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
@@ -63,6 +63,18 @@ public class SessionScope extends ScopeContext {
       ComponentImpl comp = (ComponentImpl) component;
       
       session.setAttribute(comp.getScopeId(), value);
+    }
+  }
+  
+  public <T> void remove(ComponentFactory<T> component)
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request != null) {
+      HttpSession session = ((HttpServletRequest) request).getSession();
+      ComponentImpl comp = (ComponentImpl) component;
+      
+      session.removeAttribute(comp.getScopeId());
     }
   }
 

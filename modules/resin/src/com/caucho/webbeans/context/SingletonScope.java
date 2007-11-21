@@ -44,7 +44,7 @@ public class SingletonScope extends ScopeContext {
   private final static EnvironmentLocal<ScopeMap> _localScopeMap
     = new EnvironmentLocal<ScopeMap>();
   
-  public <T> T get(ComponentFactory<T> component)
+  public <T> T get(ComponentFactory<T> component, boolean create)
   {
     ScopeMap map = _localScopeMap.get();
 
@@ -71,6 +71,17 @@ public class SingletonScope extends ScopeContext {
     }
 
     map.put(component, value);
+  }
+  
+  public <T> void remove(ComponentFactory<T> component)
+  {
+    ScopeMap map = _localScopeMap.getLevel();
+
+    if (map != null) {
+      synchronized (map) {
+	map.remove(component);
+      }
+    }
   }
 
   public void addDestructor(ComponentImpl comp, Object value)

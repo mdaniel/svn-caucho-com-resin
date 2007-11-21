@@ -41,12 +41,17 @@ import javax.webbeans.*;
 public class ConversationScope extends ScopeContext {
   private static final L10N L = new L10N(ConversationScope.class);
   
-  public <T> T get(ComponentFactory<T> component)
+  public <T> T get(ComponentFactory<T> component, boolean create)
   {
     throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
   }
   
   public <T> void put(ComponentFactory<T> component, T value)
+  {
+    throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+  }
+  
+  public <T> void remove(ComponentFactory<T> component)
   {
     throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
   }

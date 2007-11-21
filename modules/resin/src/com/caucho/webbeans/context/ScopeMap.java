@@ -53,4 +53,9 @@ public class ScopeMap<T> {
   {
     _map.put(component, value);
   }
+  
+  public <T> void remove(ComponentFactory<T> component)
+  {
+    _map.remove(component);
+  }
 }
