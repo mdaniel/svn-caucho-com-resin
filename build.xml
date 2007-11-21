@@ -83,7 +83,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, jaxrpc, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
+          depends="init, hessian, jaxrpc, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
   </target>
 
   <target name="ant" depends="init">
@@ -106,6 +106,14 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jpa"/>
       <param name="module.jar" value="jpa-15.jar"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
+  <target name="hessian" depends="init, jsdk">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="hessian"/>
+      <param name="module.jar" value="hessian.jar"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
