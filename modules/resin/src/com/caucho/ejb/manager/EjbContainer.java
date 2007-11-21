@@ -61,7 +61,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 
   private final EnvironmentClassLoader _classLoader;
   private final ClassLoader _tempClassLoader;
-  
+
   private final EjbContainer _parentContainer;
 
   private final EjbConfigManager _configManager;
@@ -219,16 +219,16 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   {
     if (_ejbPersistenceUnit == null) {
       try {
-	AmberContainer amber = AmberContainer.create(_classLoader);
-	
-	_ejbPersistenceUnit = amber.createPersistenceUnit("resin-ejb");
-	_ejbPersistenceUnit.setBytecodeGenerator(false);
-	_ejbPersistenceUnit.initLoaders();
-	// _ejbPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
+        AmberContainer amber = AmberContainer.create(_classLoader);
+
+        _ejbPersistenceUnit = amber.createPersistenceUnit("resin-ejb");
+        _ejbPersistenceUnit.setBytecodeGenerator(false);
+        _ejbPersistenceUnit.initLoaders();
+        // _ejbPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new ConfigException(e);
+        throw new ConfigException(e);
       }
     }
 
@@ -270,7 +270,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   {
     return _workDir;
   }
-  
+
   /**
    * The JMS connection factory for the container.
    */
@@ -349,7 +349,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   public AbstractServer getServer(Path path, String ejbName)
   {
     String mappedName = path.getFullPath() + "#" + ejbName;
-    
+
     for  (AbstractServer server : _serverList) {
       if (mappedName.equals(server.getId())) {
         return server;
@@ -374,7 +374,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     StringBuilder sb = new StringBuilder();
 
     sb.append("<!-- test references -->");
-    
+
     for (AbstractServer server : _serverList) {
       server.addClientRemoteConfig(sb);
     }
@@ -393,7 +393,12 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   {
     if (root.getURL().endsWith(".jar"))
       root = JarPath.create(root);
-    
+
+    // XXX: ejb/0fbn
+    Path ejbJar = root.lookup("META-INF/ejb-jar.xml");
+    if (ejbJar.canRead())
+      getConfigManager().addEjbPath(ejbJar);
+
     _ejbUrls.add(root.getURL());
   }
 
@@ -428,13 +433,13 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     else
       return false;
   }
-  
+
   /**
    * Callback to note the class matches
    */
   public void classMatchEvent(EnvironmentClassLoader loader,
-			      Path root,
-			      String className)
+                              Path root,
+                              String className)
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
 
@@ -459,13 +464,13 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       for (AbstractServer server : _serverList) {
-	try {
-	  thread.setContextClassLoader(server.getClassLoader());
+        try {
+          thread.setContextClassLoader(server.getClassLoader());
 
- 	  server.start();
-	} finally {
-	  thread.setContextClassLoader(oldLoader);
-	}
+          server.start();
+        } finally {
+          thread.setContextClassLoader(oldLoader);
+        }
       }
     } catch (RuntimeException e) {
       throw e;
@@ -480,14 +485,14 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   public void destroy()
   {
     /*
-    if (! _lifecycle.toDestroy())
-      return;
+      if (! _lifecycle.toDestroy())
+        return;
     */
 
     try {
       ArrayList<AbstractServer> servers;
       servers = new ArrayList<AbstractServer>(_serverList);
-      
+
       _serverList.clear();
 
       // only purpose of the sort is to make the qa order consistent
