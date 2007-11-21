@@ -71,6 +71,7 @@ public class AmberContainer implements ScanListener {
     = new EnvironmentLocal<AmberContainer>();
 
   private EnvironmentClassLoader _parentLoader;
+  private ClassLoader _tempLoader;
   // private EnhancingClassLoader _enhancedLoader;
   private AmberContainer _parentAmberContainer;
 
@@ -128,6 +129,9 @@ public class AmberContainer implements ScanListener {
   private ArrayList<RootContext> _pendingRootList
     = new ArrayList<RootContext>();
   
+  private ArrayList<AmberPersistenceUnit> _pendingUnitList
+    = new ArrayList<AmberPersistenceUnit>();
+  
   private HashSet<URL> _persistenceURLSet = new HashSet<URL>();
 
   private ArrayList<String> _pendingClasses = new ArrayList<String>();
@@ -136,8 +140,9 @@ public class AmberContainer implements ScanListener {
   {
     _parentAmberContainer = _localContainer.get(loader);
     _parentLoader = Environment.getEnvironmentClassLoader(loader);
-
     _localContainer.set(this, _parentLoader);
+
+    _tempLoader = _parentLoader.getNewTempClassLoader();
 
     // XXX: change after the 3.1.4 release
     _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
@@ -666,7 +671,7 @@ public class AmberContainer implements ScanListener {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_parentLoader);
+      thread.setContextClassLoader(_tempLoader);
 
       ArrayList<RootContext> rootList
 	= new ArrayList<RootContext>(_pendingRootList);
@@ -763,7 +768,10 @@ public class AmberContainer implements ScanListener {
             }
           }
 
-          AmberPersistenceUnit unit = unitConfig.init(this, entityMappingsList);
+          AmberPersistenceUnit unit
+	    = unitConfig.init(this, entityMappingsList);
+
+	  _pendingUnitList.add(unit);
 
           _unitMap.put(unit.getName(), unit);
         } catch (Exception e) {
@@ -796,18 +804,24 @@ public class AmberContainer implements ScanListener {
       Map props = null;
       factory = provider.createContainerEntityManagerFactory(unit, null);
 
+      String unitName = unit.getName();
+
       if (factory == null)
 	throw new ConfigException(L.l("'{0}' must return an EntityManagerFactory",
 				      provider.getClass().getName()));
 
       if (log.isLoggable(Level.FINE)) {
 	log.fine(L.l("Amber creating persistence unit '{0}' created with provider '{1}'",
-		     unit.getName(), provider.getClass().getName()));
+		     unitName, provider.getClass().getName()));
       }
       
-      _factoryMap.put(unit.getName(), factory);
-      _persistenceContextMap.put(unit.getName(),
-				 factory.createEntityManager(props));
+      _factoryMap.put(unitName, factory);
+      _persistenceContextMap.put(unitName, factory.createEntityManager(props));
+
+
+      WebBeansContainer webBeans = WebBeansContainer.create(_parentLoader);
+      webBeans.addComponent(new EntityManagerFactoryComponent(factory, unitName));
+      webBeans.addComponent(new EntityManagerComponent(factory, unitName, props));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -824,6 +838,8 @@ public class AmberContainer implements ScanListener {
 
     if (! persistenceXml.canRead())
       return null;
+
+    persistenceXml.setUserPath(persistenceXml.getURL());
 
     InputStream is = null;
 
@@ -967,5 +983,10 @@ public class AmberContainer implements ScanListener {
     }
       
     context.addClassName(className);
+  }
+
+  public String toString()
+  {
+    return "AmberContainer[" + _parentLoader.getId() + "]";
   }
 }

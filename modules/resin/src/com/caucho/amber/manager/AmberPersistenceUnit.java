@@ -233,13 +233,7 @@ public class AmberPersistenceUnit {
     if (name == null || "".equals(name))
       name = "default";
 
-    Jndi.bindDeep(_amberContainer.getPersistenceUnitJndiPrefix() + name,
-                  new FactoryProxy(this));
-
-    Jndi.bindDeep(_amberContainer.getPersistenceContextJndiPrefix() + name,
-                  new EntityManagerNamingProxy(this));
-
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    WebBeansContainer webBeans = WebBeansContainer.create(_amberContainer.getParentClassLoader());
     webBeans.addSingleton(new AmberEntityManagerFactory(this), name);
     webBeans.addSingleton(new EntityManagerProxy(this), name);
   }
@@ -278,8 +272,11 @@ public class AmberPersistenceUnit {
       return _jtaDataSource;
     else if (_nonJtaDataSource != null)
       return _nonJtaDataSource;
-    else
+    else if (_dataSource != null)
       return _dataSource;
+    else {
+      return _amberContainer.getDataSource();
+    }
   }
 
   /**
@@ -974,8 +971,6 @@ public class AmberPersistenceUnit {
     }
 
     try {
-      initTables();
-
       getGenerator().compile();
     } catch (Exception e) {
       _amberContainer.addException(e);
@@ -1390,7 +1385,8 @@ public class AmberPersistenceUnit {
       Table table = _lazyTable.remove(0);
 
       if (getDataSource() == null)
-        throw new ConfigException(L.l("No configured data-source found for <ejb-server>."));
+        throw new ConfigException(L.l("{0}: No configured data-source found.",
+				      this));
 
       if (getCreateDatabaseTables())
         table.createDatabaseTable(this);
@@ -1804,10 +1800,8 @@ public class AmberPersistenceUnit {
     return getMetaData().getCreateColumnSQL(sqlType, length, precision, scale);
   }
 
-  /*
   public String toString()
   {
-    return "AmberPersistenceUnit[" + _defaultListeners + "]";
+    return "AmberPersistenceUnit[" + _name + "]";
   }
-  */
 }

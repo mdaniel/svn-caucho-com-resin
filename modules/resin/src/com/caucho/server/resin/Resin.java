@@ -73,6 +73,8 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.manager.WebBeansAddLoaderListener;
+import com.caucho.amber.manager.AmberContainer;
+import com.caucho.amber.manager.PersistenceEnvironmentListener;
 
 import javax.annotation.PostConstruct;
 import javax.el.ELResolver;
@@ -253,6 +255,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       webBeans.addSingleton(new ResinWebBeansProducer());
       webBeans.update();
+      
+      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
 
       _threadPoolAdmin = ThreadPoolAdmin.create();
       _resinAdmin = new ResinAdmin(this);

@@ -531,6 +531,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 	scanManager.scan(this, url);
       }
     }
+
+    sendAddLoaderEventImpl();
   }
 
   /**

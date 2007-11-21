@@ -280,8 +280,10 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
 
     unit.setJPA(true);
 
-    unit.setJtaDataSource(_jtaDataSource);
-    unit.setNonJtaDataSource(_nonJtaDataSource);
+    if (_jtaDataSource != null)
+      unit.setJtaDataSource(_jtaDataSource);
+    if (_nonJtaDataSource != null)
+      unit.setNonJtaDataSource(_nonJtaDataSource);
 
     unit.setEntityMappingsList(entityMappings);
 
