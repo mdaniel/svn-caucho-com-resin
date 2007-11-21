@@ -78,7 +78,7 @@ public class StatelessPoolChain extends SessionPoolChain {
     throws IOException
   {
     boolean hasInterceptors = false;
-    
+
     ArrayList<Interceptor> interceptors
       = _bean.getInvokeInterceptors(_apiMethod.getMethodName());
     ArrayList<Interceptor> beanInterceptors
@@ -86,8 +86,9 @@ public class StatelessPoolChain extends SessionPoolChain {
 
     if (interceptors != null && interceptors.size() > 0)
       hasInterceptors = true;
-
-    if (beanInterceptors != null && beanInterceptors.size() > 0)
+    else if (_bean.getAroundInvokeMethodName() != null)
+      hasInterceptors = true; // ejb/0fb8
+    else if (beanInterceptors != null && beanInterceptors.size() > 0)
       hasInterceptors = true;
 
     out.println("Bean ptr = _context._ejb_begin(trans);");
