@@ -60,6 +60,16 @@ public class ResinWebBeansProducer
   }
   
   /**
+   * Returns the web beans conversation controller
+   */
+  @Produces
+  @Standard
+  public Conversation getConversation()
+  {
+    return WebBeansContainer.create().createConversation();
+  }
+  
+  /**
    * Returns the jms ConnectionFactory
    */
   @Produces

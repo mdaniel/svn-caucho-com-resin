@@ -37,6 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @ConversationScoped represents the JSF conversation scope
  */
+@ScopeType
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface ConversationScoped {

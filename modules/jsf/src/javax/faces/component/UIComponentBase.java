@@ -628,10 +628,25 @@ public abstract class UIComponentBase extends UIComponent
     if (! isRendered())
       return;
 
-    Renderer renderer = getRenderer(context);
+    try {
+      Renderer renderer = getRenderer(context);
 
-    if (renderer != null)
-      renderer.encodeBegin(context, this);
+      if (renderer != null)
+	renderer.encodeBegin(context, this);
+
+    } catch (IOException e) {
+      if (e.getMessage().startsWith("id="))
+	throw e;
+      else
+	throw new IOExceptionWrapper("id=" + getClientId(context)
+				     + " " + e.toString(), e);
+    } catch (RuntimeException e) {
+      if (e.getMessage().startsWith("id="))
+	throw e;
+      else
+	throw new FacesException("id=" + getClientId(context)
+				 + " " + e.toString(), e);
+    }
   }
 
   public void encodeChildren(FacesContext context)
@@ -1600,6 +1615,22 @@ public abstract class UIComponentBase extends UIComponent
     public String toString()
     {
       return "ValueBindingAdapter[" + _expr + "]";
+    }
+  }
+
+  static class IOExceptionWrapper extends IOException {
+    private Throwable _cause;
+
+    IOExceptionWrapper(String msg, Throwable cause)
+    {
+      super(msg);
+
+      _cause = cause;
+    }
+
+    public Throwable getCause()
+    {
+      return _cause;
     }
   }
 

@@ -73,6 +73,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     = new ArrayList<WbBinding>();
 
   protected ScopeContext _scope;
+  private String _scopeId;
 
   protected Inject []_injectProgram = NULL_INJECT;
   protected Inject []_destroyProgram = NULL_INJECT;
@@ -206,23 +207,26 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     if (_type == null)
       _type = _webbeans.createComponentType(Component.class);
 
-    /*
-    if (_name == null) {
-      Named named = (Named) _cl.getAnnotation(Named.class);
+    generateScopeId();
+  }
 
-      if (named != null)
-	_name = named.value();
+  private void generateScopeId()
+  {
+    long crc64 = 17;
 
-      if (_name == null || "".equals(_name)) {
-	String className = _targetType.getName();
-	int p = className.lastIndexOf('.');
-      
-	char ch = Character.toLowerCase(className.charAt(p + 1));
-      
-	_name = ch + className.substring(p + 2);
-      }
+    crc64 = Crc64.generate(crc64, _targetType.getName());
+
+    if (_name != null)
+      crc64 = Crc64.generate(crc64, _name);
+
+    for (WbBinding binding : _bindingList) {
+      crc64 = binding.generateCrc64(crc64);
     }
-    */
+
+    StringBuilder sb = new StringBuilder();
+    Base64.encode(sb, crc64);
+
+    _scopeId = sb.toString();
   }
 
   /**
@@ -286,7 +290,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   public Object get()
   {
     if (_scope != null) {
-      Object value = _scope.get(this);
+      Object value = _scope.get(this, false);
 
       if (value != null) {
 	return value;
@@ -299,7 +303,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   public Object get(DependentScope scope)
   {
     if (_scope != null) {
-      Object value = _scope.get(this);
+      Object value = _scope.get(this, false);
 
       if (value != null)
 	return value;
@@ -406,7 +410,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
 
   public String getScopeId()
   {
-    return _name;
+    return _scopeId;
   }
 
   //

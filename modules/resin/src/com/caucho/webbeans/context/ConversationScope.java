@@ -30,6 +30,10 @@
 package com.caucho.webbeans.context;
 
 import com.caucho.util.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.server.dispatch.ServletInvocation;
+
+import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -38,29 +42,153 @@ import javax.webbeans.*;
 /**
  * The conversation scope value
  */
-public class ConversationScope extends ScopeContext {
+public class ConversationScope extends ScopeContext
+  implements Conversation, java.io.Serializable
+{
   private static final L10N L = new L10N(ConversationScope.class);
-  
-  public <T> T get(ComponentFactory<T> component, boolean create)
+
+  private static final ThreadLocal<ConversationScope> _currentScope
+    = new ThreadLocal<ConversationScope>();
+
+  private final String _id;
+  private final HashMap<String,Object> _map
+    = new HashMap<String,Object>();
+
+  private boolean _isExtended;
+
+  public ConversationScope()
   {
-    throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
-  }
-  
-  public <T> void put(ComponentFactory<T> component, T value)
-  {
-    throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
-  }
-  
-  public <T> void remove(ComponentFactory<T> component)
-  {
-    throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+    _id = "environment";
   }
 
+  public ConversationScope(String id)
+  {
+    _id = id;
+  }
+
+  /**
+   * Returns the current value of the component in the conversation scope.
+   */
+  public <T> T get(ComponentFactory<T> component, boolean create)
+  {
+    ConversationScope currentScope = _currentScope.get();
+
+    if (currentScope == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+
+    ComponentImpl comp = (ComponentImpl) component;
+    T value = (T) currentScope._map.get(comp.getScopeId());
+
+    return value;
+  }
+  
+  /**
+   * Sets the current value of the component in the conversation scope.
+   */
+  public <T> void put(ComponentFactory<T> component, T value)
+  {
+    ConversationScope currentScope = _currentScope.get();
+
+    if (currentScope == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+
+    ComponentImpl comp = (ComponentImpl) component;
+    currentScope._map.put(comp.getScopeId(), value);
+  }
+  
+  /**
+   * Removes the current value of the component in the conversation scope.
+   */
+  public <T> void remove(ComponentFactory<T> component)
+  {
+    ConversationScope currentScope = _currentScope.get();
+
+    if (currentScope == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+
+    ComponentImpl comp = (ComponentImpl) component;
+    currentScope._map.remove(comp.getScopeId());
+  }
+
+  /**
+   * returns true if the argument scope can be safely injected in a
+   * scope-instance.
+   */
   @Override
   public boolean canInject(ScopeContext scope)
   {
     return (scope instanceof ApplicationScope
 	    || scope instanceof SessionScope
 	    || scope instanceof ConversationScope);
+  }
+
+  //
+  // Conversation API
+  //
+
+  /**
+   * Begins an extended conversation
+   */
+  public void begin()
+  {
+    ConversationScope currentScope = _currentScope.get();
+
+    if (currentScope == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+    
+    HttpServletRequest request
+      = (HttpServletRequest) ServletInvocation.getContextRequest();
+    HttpSession session = request.getSession();
+
+    session.setAttribute("caucho.conversation", currentScope);
+
+    _isExtended = true;
+  }
+
+  /**
+   * Ends an extended conversation
+   */
+  public void end()
+  {
+    HttpServletRequest request
+      = (HttpServletRequest) ServletInvocation.getContextRequest();
+    HttpSession session = request.getSession();
+
+    session.removeAttribute("caucho.conversation");
+    
+    _isExtended = false;
+  }
+
+  //
+  // JSF routines (LifecycleImpl)
+  //
+
+  /**
+   * Activates the conversation scope.
+   */
+  public static ConversationScope beginRender(String id)
+  {
+    ConversationScope oldScope = _currentScope.get();
+    ConversationScope scope;
+    
+    HttpServletRequest request
+      = (HttpServletRequest) ServletInvocation.getContextRequest();
+    HttpSession session = request.getSession();
+
+    scope = (ConversationScope) session.getAttribute("caucho.conversation");
+    if (scope == null)
+      scope = new ConversationScope(id);
+
+    _currentScope.set(scope);
+
+    return oldScope;
+  }
+
+  /**
+   * Restores the old scope
+   */
+  public static void endRender(ConversationScope oldScope)
+  {
+    _currentScope.set(oldScope);
   }
 }

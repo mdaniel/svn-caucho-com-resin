@@ -47,6 +47,7 @@ import javax.faces.render.*;
 import javax.servlet.http.*;
 
 import com.caucho.jsf.application.*;
+import com.caucho.webbeans.context.ConversationScope;
 
 /**
  * The default lifecycle implementation
@@ -96,12 +97,17 @@ public class LifecycleImpl extends Lifecycle
   public void execute(FacesContext context)
     throws FacesException
   {
+    boolean isFiner = log.isLoggable(Level.FINER);
+    
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
 
     beforePhase(context, PhaseId.RESTORE_VIEW);
 
     try {
+      if (isFiner)
+	log.finer("JSF[] before restore view");
+      
       restoreView(context);
     } finally {
       afterPhase(context, PhaseId.RESTORE_VIEW);
@@ -115,6 +121,9 @@ public class LifecycleImpl extends Lifecycle
     beforePhase(context, PhaseId.APPLY_REQUEST_VALUES);
     
     try {
+      if (isFiner)
+	log.finer(context.getViewRoot() + " before process decodes");
+      
       viewRoot.processDecodes(context);
     } finally {
       afterPhase(context, PhaseId.APPLY_REQUEST_VALUES);
@@ -130,6 +139,9 @@ public class LifecycleImpl extends Lifecycle
     beforePhase(context, PhaseId.PROCESS_VALIDATIONS);
 
     try {
+      if (isFiner)
+	log.finer(context.getViewRoot() + " before process validators");
+      
       viewRoot.processValidators(context);
     } finally {
       afterPhase(context, PhaseId.PROCESS_VALIDATIONS);
@@ -145,6 +157,9 @@ public class LifecycleImpl extends Lifecycle
     beforePhase(context, PhaseId.UPDATE_MODEL_VALUES);
 
     try {
+      if (isFiner)
+	log.finer(context.getViewRoot() + " before process updates");
+      
       viewRoot.processUpdates(context);
     } catch (RuntimeException e) {
       if (sendError(context, "processUpdates", e))
@@ -163,6 +178,9 @@ public class LifecycleImpl extends Lifecycle
     beforePhase(context, PhaseId.INVOKE_APPLICATION);
 
     try {
+      if (isFiner)
+	log.finer(context.getViewRoot() + " before process application");
+      
       viewRoot.processApplication(context);
     } finally {
       afterPhase(context, PhaseId.INVOKE_APPLICATION);
@@ -258,20 +276,38 @@ public class LifecycleImpl extends Lifecycle
   {
     if (context.getResponseComplete())
       return;
-    
+
     Application app = context.getApplication();
     ViewHandler view = app.getViewHandler();
 
-    beforePhase(context, PhaseId.RENDER_RESPONSE);
+    UIViewRoot viewRoot = context.getViewRoot();
+
+    ConversationScope oldScope
+      = ConversationScope.beginRender(viewRoot.getViewId());
 
     try {
-      view.renderView(context, context.getViewRoot());
-    } catch (java.io.IOException e) {
-      throw new FacesException(e);
-    } finally {
-      afterPhase(context, PhaseId.RENDER_RESPONSE);
+      beforePhase(context, PhaseId.RENDER_RESPONSE);
 
-      logMessages(context);
+      try {
+	if (log.isLoggable(Level.FINER))
+	  log.finer(context.getViewRoot() + " before render view");
+      
+	view.renderView(context, context.getViewRoot());
+      } catch (java.io.IOException e) {
+	if (sendError(context, "renderView", e))
+	  return;
+      
+	throw new FacesException(e);
+      } catch (RuntimeException e) {
+	if (sendError(context, "renderView", e))
+	  return;
+      } finally {
+	afterPhase(context, PhaseId.RENDER_RESPONSE);
+
+	logMessages(context);
+      }
+    } finally {
+      ConversationScope.endRender(oldScope);
     }
   }
 
@@ -284,7 +320,6 @@ public class LifecycleImpl extends Lifecycle
       if (id == phase || id == PhaseId.ANY_PHASE) {
 	PhaseEvent event = new PhaseEvent(context, phase, this);
 
-	System.out.println("BEFORE: " + id + " " + listener);
 	listener.beforePhase(event);
       }
     }
@@ -299,7 +334,6 @@ public class LifecycleImpl extends Lifecycle
       if (phase == id || id == PhaseId.ANY_PHASE) {
 	PhaseEvent event = new PhaseEvent(context, phase, this);
 	
-	System.out.println("AFTER: " + id + " " + listener);
 	listener.afterPhase(event);
       }
     }
@@ -329,16 +363,22 @@ public class LifecycleImpl extends Lifecycle
 
   private boolean sendError(FacesContext context,
 			    String lifecycle,
-			    RuntimeException e)
+			    Exception e)
   {
     ExternalContext extContext = context.getExternalContext();
     Object response = extContext.getResponse();
 
     if (! (response instanceof HttpServletResponse)) {
       context.renderResponse();
-      return false;
+
+      if (e instanceof RuntimeException)
+	throw (RuntimeException) e;
+      else
+	throw new RuntimeException(e);
     }
 
+    log.log(Level.WARNING, e.toString(), e);
+    
     HttpServletResponse res = (HttpServletResponse) response;
 
     try {
@@ -398,10 +438,7 @@ public class LifecycleImpl extends Lifecycle
 
       return true;
     } catch (IOException e1) {
-      log.log(Level.FINE, e.toString(), e1);
-      
-      throw e;
-    } finally {
+      throw new RuntimeException(e);
     }
   }
 

@@ -62,7 +62,7 @@ public class ClassComponent extends ComponentImpl {
   private Constructor _ctor;
   private ComponentImpl []_ctorArgs;
 
-  private ScopeAdapter _scopeAdapter;
+  private Object _scopeAdapter;
 
   public ClassComponent(WbWebBeans webbeans)
   {
@@ -208,7 +208,7 @@ public class ClassComponent extends ComponentImpl {
 
       if (scope == null || _scope == null || scope.canInject(_scope)) {
 	if (_scope != null) {
-	  value = _scope.get(this);
+	  value = _scope.get(this, false);
 	  
 	  if (value != null)
 	    return value;
@@ -238,11 +238,13 @@ public class ClassComponent extends ComponentImpl {
 	  if (value != null)
 	    return value;
 	}
-      
-	if (_scopeAdapter == null)
-	  _scopeAdapter = ScopeAdapter.create(getInstanceClass());
 
-	value = _scopeAdapter.wrap(this);
+	value = _scopeAdapter;
+	if (value == null) {
+	  ScopeAdapter scopeAdapter = ScopeAdapter.create(getInstanceClass());
+	  _scopeAdapter = scopeAdapter.wrap(this);
+	  value = _scopeAdapter;
+	}
 
 	scope.put(this, value);
       }
@@ -348,7 +350,18 @@ public class ClassComponent extends ComponentImpl {
       if (param < 0)
 	continue;
 
+      ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+      
+      Annotation [][]annList = method.getParameterAnnotations();
+      if (annList != null && annList[param] != null) {
+	for (Annotation ann : annList[param]) {
+	  if (ann.annotationType().isAnnotationPresent(EventBindingType.class))
+	    bindingList.add(new WbBinding(ann));
+	}
+      }
+
       ObserverImpl observer = new ObserverImpl(this, method, param);
+      observer.setBindingList(bindingList);
 
       _webbeans.getContainer().addObserver(observer);
     }

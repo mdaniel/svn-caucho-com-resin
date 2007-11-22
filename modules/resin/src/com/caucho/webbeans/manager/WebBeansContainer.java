@@ -91,6 +91,9 @@ public class WebBeansContainer
   private HashMap<Class,ObserverMap> _observerMap
     = new HashMap<Class,ObserverMap>();
 
+  private HashMap<Class,ArrayList<ObserverMap>> _observerListCache
+    = new HashMap<Class,ArrayList<ObserverMap>>();
+
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
 
@@ -281,18 +284,13 @@ public class WebBeansContainer
   {
     if (scope == null)
       throw new NullPointerException();
-    else if (RequestScoped.class.equals(scope))
-      return new RequestScope();
-    else if (SessionScoped.class.equals(scope))
-      return new SessionScope();
-    else if (ApplicationScoped.class.equals(scope))
-      return new ApplicationScope();
-    else if (ConversationScoped.class.equals(scope))
-      return new ConversationScope();
-    else if (Singleton.class.equals(scope))
-      return new SingletonScope();
     else if (Dependent.class.equals(scope))
       return null;
+
+    Context context = _contextMap.get(scope);
+
+    if (context != null)
+      return (ScopeContext) context;
     else
       throw new IllegalArgumentException(L.l("'{0}' is an unknown scope.",
 					     scope.getName()));
@@ -325,16 +323,19 @@ public class WebBeansContainer
 
       for (int i = 0; i < args.length; i++) {
 	args[i] = bind(location(method), paramTypes[i], paramAnn[i]);
+
+	if (args[i] == null) {
+	  throw new LineConfigException(location(method)
+					+ L.l("Injection method '{0}' argument '{1}' has no matching component.",
+					      method.getName(), i));
+	}
       }
 
       injectList.add(new InjectMethodProgram(method, args));
     } catch (Exception e) {
       String loc = location(method);
 
-      if (e instanceof ConfigException)
-	throw new ConfigException(loc + e.getMessage(), e);
-      else
-	throw new ConfigException(loc + e, e);
+      throw LineConfigException.create(loc, e);
     }
   }
 
@@ -475,15 +476,47 @@ public class WebBeansContainer
 
   public void raiseEvent(Object event, Annotation... bindings)
   {
-    Class type = event.getClass();
+    if (_parent != null)
+      _parent.raiseEvent(event, bindings);
 
-    for (; type != null; type = type.getSuperclass()) {
-      ObserverMap observer = _observerMap.get(type);
+    ArrayList<ObserverMap> observerList;
 
-      if (observer != null) {
-	observer.raiseEvent(event, bindings);
+    synchronized (_observerListCache) {
+      observerList = _observerListCache.get(event.getClass());
+
+      if (observerList == null) {
+	observerList = new ArrayList<ObserverMap>();
+	
+	fillObserverList(observerList, event.getClass());
+	_observerListCache.put(event.getClass(), observerList);
       }
     }
+
+    int size = observerList.size();
+    for (int i = 0; i < size; i++) {
+      observerList.get(i).raiseEvent(event, bindings);
+    }
+  }
+
+  public Conversation createConversation()
+  {
+    return (Conversation) _contextMap.get(ConversationScoped.class);
+  }
+
+  private void fillObserverList(ArrayList<ObserverMap> list, Class cl)
+  {
+    if (cl == null)
+      return;
+
+    fillObserverList(list, cl.getSuperclass());
+
+    for (Class iface : cl.getInterfaces())
+      fillObserverList(list, iface);
+
+    ObserverMap map = _observerMap.get(cl);
+
+    if (map != null)
+      list.add(map);
   }
 
   //

@@ -85,7 +85,6 @@ public class Crc64 {
     return crc;
   }
 
-
   /**
    * Calculates CRC from a char buffer
    */
@@ -94,6 +93,23 @@ public class Crc64 {
     for (int i = 0; i < len; i++) {
       crc = next(crc, buffer[offset + i]);
     }
+
+    return crc;
+  }
+
+  /**
+   * Calculates CRC from a long
+   */
+  public static long generate(long crc, long value)
+  {
+    crc = next(crc, (byte) (value >> 56));
+    crc = next(crc, (byte) (value >> 48));
+    crc = next(crc, (byte) (value >> 40));
+    crc = next(crc, (byte) (value >> 32));
+    crc = next(crc, (byte) (value >> 24));
+    crc = next(crc, (byte) (value >> 16));
+    crc = next(crc, (byte) (value >> 8));
+    crc = next(crc, (byte) (value >> 0));
 
     return crc;
   }

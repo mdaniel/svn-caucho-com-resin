@@ -181,6 +181,18 @@ public class WbBinding {
     return false;
   }
 
+  public long generateCrc64(long crc64)
+  {
+    crc64 = Crc64.generate(crc64, _cl.getName());
+
+    for (WbBindingValue value : _valueList) {
+      crc64 = Crc64.generate(crc64, value.getName());
+      crc64 = Crc64.generate(crc64, String.valueOf(value.getValue()));
+    }
+
+    return crc64;
+  }
+
   public boolean equals(Object o)
   {
     if (this == o)

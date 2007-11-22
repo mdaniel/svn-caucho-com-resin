@@ -709,17 +709,20 @@ public class InjectIntrospector {
     else if (method.isAnnotationPresent(In.class))
       return true;
 
+    boolean hasBinding = false;
     for (Annotation []annList : method.getParameterAnnotations()) {
       if (annList == null)
         continue;
 
       for (Annotation ann : annList) {
-        if (ann.annotationType().isAnnotationPresent(BindingType.class))
-          return true;
+	if (ann.annotationType().equals(Observes.class))
+	  return false;
+        else if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	  hasBinding = true;
       }
     }
 
-    return false;
+    return hasBinding;
   }
 
   private static String toFullName(String jndiName)

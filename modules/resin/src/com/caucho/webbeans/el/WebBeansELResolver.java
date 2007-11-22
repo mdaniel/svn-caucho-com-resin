@@ -90,7 +90,9 @@ public class WebBeansELResolver extends ELResolver {
     if (value != null) {
       context.setPropertyResolved(true);
 
-      return value.get();
+      Object result = value.get();
+
+      return result;
     }
     else
       return null;

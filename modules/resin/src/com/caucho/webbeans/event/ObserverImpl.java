@@ -111,6 +111,26 @@ public class ObserverImpl {
 
   public boolean isMatch(Annotation []bindList)
   {
+    int size = _bindingList.size();
+    
+    if (bindList.length < size)
+      return false;
+    
+    for (int i = 0; i < size; i++) {
+      WbBinding binding = _bindingList.get(i);
+
+      boolean isMatch = false;
+      for (Annotation ann : bindList) {
+	if (binding.isMatch(ann)) {
+	  isMatch = true;
+	  break;
+	}
+      }
+
+      if (! isMatch)
+	return false;
+    }
+    
     return true;
   }
 

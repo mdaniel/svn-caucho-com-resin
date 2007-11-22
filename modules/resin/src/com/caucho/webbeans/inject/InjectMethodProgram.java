@@ -52,6 +52,13 @@ public class InjectMethodProgram extends Inject
   {
     _method = method;
     _args = args;
+    
+    if (_method == null)
+      throw new NullPointerException();
+
+    for (int i = 0; i < args.length; i++)
+      if (args[i] == null)
+	throw new NullPointerException();
   }
 
   public void inject(Object bean, DependentScope scope)
@@ -71,10 +78,9 @@ public class InjectMethodProgram extends Inject
       
       _method.invoke(bean, args);
     } catch (InvocationTargetException e) {
-      throw new ConfigException(loc() + e.getCause().getMessage(),
-				e.getCause());
+      throw LineConfigException.create(loc(), e);
     } catch (Exception e) {
-      throw new ConfigException(loc() + e.getMessage(), e);
+      throw LineConfigException.create(loc(), e);
     }
   }
 

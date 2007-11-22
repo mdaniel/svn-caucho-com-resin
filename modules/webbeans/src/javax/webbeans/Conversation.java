@@ -28,24 +28,12 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 /**
  * The web bean conversation
  */
 
-@Component
-public class Conversation {
-  public void begin()
-  {
-    throw new UnsupportedOperationException();
-  }
+public interface Conversation {
+  public void begin();
   
-  public void end()
-  {
-    throw new UnsupportedOperationException();
-  }
+  public void end();
 }
