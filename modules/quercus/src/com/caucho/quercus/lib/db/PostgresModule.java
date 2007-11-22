@@ -2487,7 +2487,7 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   public static Value pg_parameter_status(Env env,
                                           @NotNull Postgres conn,
-                                          @NotNull String paramName)
+                                          @NotNull StringValue paramName)
   {
     try {
 
@@ -2509,6 +2509,16 @@ public class PostgresModule extends AbstractQuercusModule {
       log.log(Level.FINE, ex.toString(), ex);
       return BooleanValue.FALSE;
     }
+  }
+
+  /**
+   * Looks up a current parameter setting of the server
+   */
+  public static Value pg_parameter_status(Env env,
+                                          @NotNull StringValue paramName)
+  {
+    Postgres conn = getConnection(env);
+    return pg_parameter_status(env, conn, paramName);
   }
 
   /**
