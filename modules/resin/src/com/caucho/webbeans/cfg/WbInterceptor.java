@@ -29,8 +29,77 @@
 
 package com.caucho.webbeans.cfg;
 
+import java.util.*;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import javax.webbeans.*;
+import javax.interceptor.*;
+
+import com.caucho.config.*;
+import com.caucho.util.*;
+
 /**
  * Configuration for the xml interceptor.
  */
 public class WbInterceptor {
+  private static final L10N L = new L10N(WbInterceptor.class);
+  
+  private Class _cl;
+  
+  private ArrayList<WbBinding> _bindingList
+    = new ArrayList<WbBinding>();
+  
+  private Method _invokeMethod;
+
+  WbInterceptor(Class cl)
+  {
+    if (! cl.isAnnotationPresent(Interceptor.class))
+      throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation to be declared as an interceptor.",
+				    cl.getName()));
+
+    _cl = cl;
+
+    for (Annotation ann : cl.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)) {
+	_bindingList.add(new WbBinding(ann));
+      }
+    }
+
+    if (_bindingList.size() == 0) {
+      throw new ConfigException(L.l("'{0}' must have at least one @InterceptorBindingType annotation to be declared as an interceptor.",
+				    cl.getName()));
+    }
+
+    for (Method method : cl.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(AroundInvoke.class)) {
+	if (_invokeMethod != null) {
+	  throw new ConfigException(L.l("'{0}' has two @AroundInvoke methods: '{1}' and '{2}'.",
+					cl.getName(), _invokeMethod, method));
+	}
+	  
+	_invokeMethod = method;
+      }
+    }
+
+    if (_invokeMethod == null) {
+      throw new ConfigException(L.l("'{0}' must have at least one @AroundInvoke method",
+				    cl.getName()));
+    }
+  }
+
+  public Method getMethod()
+  {
+    return _invokeMethod;
+  }
+
+  public Object getObject()
+  {
+    try {
+      return _cl.newInstance();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
 }

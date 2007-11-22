@@ -122,7 +122,7 @@ public class DependentScope {
     if (scope == null)
       return true;
     else if (_scope == null)
-      return false;
+      return scope instanceof SingletonScope;
     else
       return _scope.canInject(scope);
   }

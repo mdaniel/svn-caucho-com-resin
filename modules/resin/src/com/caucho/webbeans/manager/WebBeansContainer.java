@@ -97,6 +97,9 @@ public class WebBeansContainer
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
 
+  private ArrayList<WebBeansRootContext> _pendingBindList
+    = new ArrayList<WebBeansRootContext>();
+
   private RuntimeException _configException;
 
   private WebBeansContainer(ClassLoader loader)
@@ -567,9 +570,33 @@ public class WebBeansContainer
 	webBeans.update();
 
 	webBeans.init();
+
+	_pendingBindList.add(context);
       }
     
       _wbWebBeans.init();
+    } catch (ConfigException e) {
+      if (_configException == null)
+	_configException = e;
+      
+      throw e;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  public void bind()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      ArrayList<WebBeansRootContext> rootContextList
+	= new ArrayList<WebBeansRootContext>(_pendingBindList);
+      
+      _pendingBindList.clear();
       
       for (WebBeansRootContext context : rootContextList) {
 	WbWebBeans webBeans = _webBeansMap.get(context.getRoot());
@@ -588,6 +615,15 @@ public class WebBeansContainer
     }
   }
 
+  public Class loadClass(String className)
+  {
+    try {
+      return Class.forName(className, false, _classLoader);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * Handles the case where the environment is starting (after init).
    */
@@ -595,6 +631,7 @@ public class WebBeansContainer
     throws Exception
   {
     update();
+    bind();
     
     _wbWebBeans.init();
   }

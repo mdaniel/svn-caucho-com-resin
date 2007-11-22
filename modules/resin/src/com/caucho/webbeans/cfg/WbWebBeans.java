@@ -69,7 +69,10 @@ public class WbWebBeans {
   private ArrayList<ComponentImpl> _pendingBindList
     = new ArrayList<ComponentImpl>();
   
-  private ArrayList<WbInterceptor> _interceptorList
+  private ArrayList<WbInterceptor> _interceptorBindingList
+    = new ArrayList<WbInterceptor>();
+
+  private ArrayList<WbInterceptor> _enabledInterceptors
     = new ArrayList<WbInterceptor>();
 
   private ArrayList<Class> _pendingClasses
@@ -124,6 +127,10 @@ public class WbWebBeans {
     _isConfigured = isConfigured;
   }
 
+  //
+  // web-beans syntax
+  //
+
   /**
    * Adds a component.
    */
@@ -146,6 +153,43 @@ public class WbWebBeans {
     return new WbComponentTypes();
   }
 
+  /**
+   * Adds the interceptors
+   */
+  public Interceptors createInterceptors()
+  {
+    return new Interceptors();
+  }
+
+  /**
+   * Returns the enabled interceptors
+   */
+  public ArrayList<WbInterceptor> getEnabledInterceptors()
+  {
+    return _enabledInterceptors;
+  }
+
+  /**
+   * Returns matching interceptors
+   */
+  public ArrayList<WbInterceptor>
+    findInterceptors(ArrayList<Annotation> bindingList)
+  {
+    ArrayList<WbInterceptor> list = null;
+
+    for (WbInterceptor interceptor : _enabledInterceptors) {
+      if (list == null)
+	list = new ArrayList<WbInterceptor>();
+
+      list.add(interceptor);
+    }
+    
+    return list;
+  }
+
+  /**
+   * Initialization and validation on parse completion.
+   */
   @PostConstruct
   public void init()
   {
@@ -286,6 +330,13 @@ public class WbWebBeans {
       type.setPriority(priority);
       
       _componentTypeList.add(type);
+    }
+  }
+
+  public class Interceptors {
+    public void addInterceptor(Class cl)
+    {
+      _enabledInterceptors.add(new WbInterceptor(cl));
     }
   }
 }

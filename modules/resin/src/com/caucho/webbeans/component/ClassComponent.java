@@ -43,7 +43,7 @@ import com.caucho.webbeans.manager.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-import java.util.ArrayList;
+import java.util.*;
 
 import javax.annotation.*;
 import javax.webbeans.*;
@@ -63,6 +63,9 @@ public class ClassComponent extends ComponentImpl {
   private ComponentImpl []_ctorArgs;
 
   private Object _scopeAdapter;
+
+  private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
+  private Class _proxyClass;
 
   public ClassComponent(WbWebBeans webbeans)
   {
@@ -289,6 +292,7 @@ public class ClassComponent extends ComponentImpl {
     synchronized (this) {
       if (_isBound)
 	return;
+      _isBound = true;
 
       ArrayList<Inject> injectList = new ArrayList<Inject>();
       InjectIntrospector.introspectInject(injectList, _cl);
@@ -315,8 +319,18 @@ public class ClassComponent extends ComponentImpl {
       }
 
       introspectObservers();
+      introspectInterceptors();
 
-      _isBound = true;
+      if (_interceptorMap != null) {
+	_proxyClass = InterceptorGenerator.gen(getInstanceClass(),
+					       _ctor, _interceptorMap);
+
+	Constructor proxyCtor = _proxyClass.getConstructors()[0];
+
+	_ctor = proxyCtor;
+	System.out.println("PC: " + _proxyClass + " " + _ctor);
+      }
+
     }
   }
 
@@ -367,6 +381,48 @@ public class ClassComponent extends ComponentImpl {
     }
   }
 
+  /**
+   * Introspects any intercepted methods
+   */
+  protected void introspectInterceptors()
+  {
+    for (Method method : getInstanceClass().getMethods()) {
+      if (method.getDeclaringClass().equals(Object.class))
+	continue;
+      
+      ArrayList<Annotation> interceptorTypes = findInterceptorTypes(method);
+
+      if (interceptorTypes == null)
+	continue;
+
+      ArrayList<WbInterceptor> interceptors
+	= _webbeans.findInterceptors(interceptorTypes);
+
+      if (interceptors != null) {
+	if (_interceptorMap == null)
+	  _interceptorMap = new HashMap<Method,ArrayList<WbInterceptor>>();
+
+	_interceptorMap.put(method, interceptors);
+      }
+    }
+  }
+
+  private ArrayList<Annotation> findInterceptorTypes(Method method)
+  {
+    ArrayList<Annotation> types = null;
+
+    for (Annotation ann : method.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)) {
+	if (types == null)
+	  types = new ArrayList<Annotation>();
+
+	types.add(ann);
+      }
+    }
+
+    return types;
+  }
+  
   private boolean hasBindingAnnotation(Constructor ctor)
   {
     if (ctor.isAnnotationPresent(In.class))

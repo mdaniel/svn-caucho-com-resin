@@ -81,7 +81,8 @@ public class RequestScope extends ScopeContext {
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof ApplicationScope
+    return (scope instanceof SingletonScope
+	    || scope instanceof ApplicationScope
 	    || scope instanceof SessionScope
 	    || scope instanceof ConversationScope
 	    || scope instanceof RequestScope);

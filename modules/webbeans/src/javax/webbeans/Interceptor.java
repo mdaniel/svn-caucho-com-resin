@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,35 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package javax.webbeans;
 
-import javax.webbeans.*;
-
-import com.caucho.webbeans.component.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Context for a named EL bean scope
+ * The @Interceptor marks an interceptor
  */
-abstract public class ScopeContext implements Context {
-  abstract public <T> T get(ComponentFactory<T> comp, boolean create);
-  
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
-  
-  public boolean canInject(ScopeContext scope)
-  {
-    return (getClass().equals(scope.getClass())
-	    || scope instanceof SingletonScope);
-  }
-
-  public void addDestructor(ComponentImpl comp, Object value)
-  {
-  }
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface Interceptor {
 }

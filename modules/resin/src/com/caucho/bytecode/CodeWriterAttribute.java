@@ -84,6 +84,34 @@ public class CodeWriterAttribute extends CodeAttribute {
     write(index);
   }
 
+  public void getStatic(String className, String fieldName, String sig)
+  {
+    int index = addFieldRef(className, fieldName, sig);
+
+    write(CodeVisitor.GETSTATIC);
+    write(index >> 8);
+    write(index);
+  }
+
+  public void putStatic(String className, String fieldName, String sig)
+  {
+    int index = addFieldRef(className, fieldName, sig);
+
+    write(CodeVisitor.PUTSTATIC);
+    write(index >> 8);
+    write(index);
+  }
+
+  public void getArrayObject()
+  {
+    write(CodeVisitor.AALOAD);
+  }
+
+  public void setArrayObject()
+  {
+    write(CodeVisitor.AASTORE);
+  }
+
   public void pushObjectVar(int index)
   {
     _stack++;
@@ -154,6 +182,22 @@ public class CodeWriterAttribute extends CodeAttribute {
     }
   }
 
+  public void pushNull()
+  {
+    _stack += 1;
+      
+    write(CodeVisitor.ACONST_NULL);
+  }
+
+  public void pushInt(int value)
+  {
+    _stack += 1;
+      
+    write(CodeVisitor.SIPUSH);
+    write(value >> 8);
+    write(value);
+  }
+
   public void invoke(String className,
 		     String methodName,
 		     String signature,
@@ -167,6 +211,35 @@ public class CodeWriterAttribute extends CodeAttribute {
     write(CodeVisitor.INVOKEVIRTUAL);
     write(index >> 8);
     write(index);
+  }
+
+  public void newInstance(String className)
+  {
+    _stack += 1;
+
+    int index = addClass(className);
+    
+    write(CodeVisitor.NEW);
+    write(index >> 8);
+    write(index);
+  }
+
+  public void newObjectArray(String className)
+  {
+    _stack += 1;
+
+    int index = addClass(className);
+    
+    write(CodeVisitor.ANEWARRAY);
+    write(index >> 8);
+    write(index);
+  }
+
+  public void dup()
+  {
+    _stack += 1;
+    
+    write(CodeVisitor.DUP);
   }
 
   public void invokespecial(String className,
@@ -230,9 +303,11 @@ public class CodeWriterAttribute extends CodeAttribute {
     return ref.getIndex();
   }
 
-  public void addUTF8(String code)
+  public int addUTF8(String code)
   {
-    getConstantPool().addUTF8(code);
+    Utf8Constant value = getConstantPool().addUTF8(code);
+
+    return value.getIndex();
   }
 
   public int addClass(String className)

@@ -45,7 +45,7 @@ w_interceptor = element interceptor {
 }
 
 w_interceptors = element interceptors {
-  w_interceptor*
+  element interceptor { string }*
 }
 
 w_producer = element producer {
@@ -60,11 +60,12 @@ w_scope = element scope {
   string
 }
 
-
 w_web-beans = element web-beans {
   w_component*
 
   & w_component-types*
+
+  & w_interceptor*
 
   & w_interceptors?
 }
