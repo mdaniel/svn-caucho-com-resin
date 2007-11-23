@@ -328,9 +328,7 @@ public class ClassComponent extends ComponentImpl {
 	Constructor proxyCtor = _proxyClass.getConstructors()[0];
 
 	_ctor = proxyCtor;
-	System.out.println("PC: " + _proxyClass + " " + _ctor);
       }
-
     }
   }
 

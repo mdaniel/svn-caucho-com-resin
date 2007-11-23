@@ -95,7 +95,6 @@ public class InvocationContextImpl implements InvocationContext {
       if (_index < _chainMethods.length) {
 	int i = _index++;
 
-	System.out.println("CM: " + _chainMethods[i] + " " + _chainObjects[i]);
 	return _chainMethods[i].invoke(_chainObjects[i], this);
       }
       else

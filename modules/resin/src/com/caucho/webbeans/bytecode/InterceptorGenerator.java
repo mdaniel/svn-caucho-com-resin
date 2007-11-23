@@ -343,7 +343,13 @@ public class InterceptorGenerator {
 	  || short.class.equals(type)
 	  || int.class.equals(type)) {
 	code.dup();
+	code.pushInt(i);
+	code.newInstance(_boxClass.get(type));
+	code.dup();
 	code.pushIntVar(index);
+	code.invokespecial(_boxClass.get(type), "<init>",
+			   "(" + _prim.get(type) + ")V", 2, 0);
+	code.setArrayObject();
 	index += 1;
 	stack += 1;
       }
@@ -380,10 +386,24 @@ public class InterceptorGenerator {
   {
     Class retType = method.getReturnType();
     
-    if (boolean.class.equals(retType)
-	|| byte.class.equals(retType)
-	|| short.class.equals(retType)
-	|| int.class.equals(retType)) {
+    if (boolean.class.equals(retType)) {
+      code.cast("java/lang/Boolean");
+      code.invoke("java/lang/Boolean", "booleanValue", "()Z", 1, 1);
+      code.addIntReturn();
+    }
+    else if (byte.class.equals(retType)) {
+      code.cast("java/lang/Byte");
+      code.invoke("java/lang/Byte", "byteValue", "()B", 1, 1);
+      code.addIntReturn();
+    }
+    else if (short.class.equals(retType)) {
+      code.cast("java/lang/Short");
+      code.invoke("java/lang/Short", "shortValue", "()S", 1, 1);
+      code.addIntReturn();
+    }
+    else if (int.class.equals(retType)) {
+      code.cast("java/lang/Integer");
+      code.invoke("java/lang/Integer", "intValue", "()I", 1, 1);
       code.addIntReturn();
     }
     else if (long.class.equals(retType)) {
@@ -399,6 +419,7 @@ public class InterceptorGenerator {
       code.addReturn();
     }
     else {
+      code.cast(retType.getName().replace('.', '/'));
       code.addObjectReturn();
     }
   }
@@ -530,13 +551,13 @@ public class InterceptorGenerator {
     _prim.put(double.class, "D");
     _prim.put(void.class, "V");
     
-    _boxClass.put(boolean.class, "L/java/lang/Boolean;");
-    _boxClass.put(byte.class, "L/java/lang/Byte;");
-    _boxClass.put(char.class, "L/java/lang/Character;");
-    _boxClass.put(short.class, "L/java/lang/Short;");
-    _boxClass.put(int.class, "L/java/lang/Integer;");
-    _boxClass.put(long.class, "L/java/lang/Long;");
-    _boxClass.put(float.class, "L/java/lang/Float;");
-    _boxClass.put(double.class, "L/java/lang/Double;");
+    _boxClass.put(boolean.class, "java/lang/Boolean");
+    _boxClass.put(byte.class, "java/lang/Byte");
+    _boxClass.put(char.class, "java/lang/Character");
+    _boxClass.put(short.class, "java/lang/Short");
+    _boxClass.put(int.class, "java/lang/Integer");
+    _boxClass.put(long.class, "java/lang/Long");
+    _boxClass.put(float.class, "java/lang/Float");
+    _boxClass.put(double.class, "java/lang/Double");
   }
 }
