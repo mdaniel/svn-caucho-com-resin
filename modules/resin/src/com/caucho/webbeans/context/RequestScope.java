@@ -45,8 +45,16 @@ public class RequestScope extends ScopeContext {
 
     if (request != null) {
       ComponentImpl comp = (ComponentImpl) component;
+
+      Object value = request.getAttribute(comp.getScopeId());
+
+      if (value == null && create) {
+	value = component.create();
+	
+	request.setAttribute(comp.getScopeId(), value);
+      }
       
-      return (T) request.getAttribute(comp.getScopeId());
+      return (T) value;
     }
     else
       return null;

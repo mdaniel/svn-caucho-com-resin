@@ -47,6 +47,7 @@ import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
+import javax.webbeans.*;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -128,14 +129,25 @@ public class SessionServer extends AbstractServer
       WebBeansContainer webBeans = WebBeansContainer.create();
       StatefulComponent comp = new StatefulComponent(this);
     
-      comp.setTargetType(beanClass);
+      comp.setTargetType(getEjbClass());
     
-      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class)) {
-	comp.setName(getEJBName());
-        comp.addNameBinding(getEJBName());
+      Named named = (Named) beanClass.getAnnotation(Named.class);
+
+      String name;
+
+      if (named != null) {
+	name = named.value();
+      }
+      else {
+	name = getEJBName();
+
+	comp.setName(name);
+        comp.addNameBinding(name);
       }
 
       comp.init();
+
+      webBeans.addComponentByName(name, comp);
 
       for (Class api : localApiList) {
 	webBeans.addComponentByType(api, comp);

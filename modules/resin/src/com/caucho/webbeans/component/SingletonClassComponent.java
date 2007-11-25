@@ -57,7 +57,29 @@ public class SingletonClassComponent extends ClassComponent {
    * Returns the singleton object
    */
   @Override
+  public Object getIfExists()
+  {
+    return get();
+  }
+
+  /**
+   * Returns the singleton object
+   */
+  @Override
   public Object get()
+  {
+    if (_value == null) {
+      return get(null);
+    }
+
+    return _value;
+  }
+
+  /**
+   * Returns the singleton object
+   */
+  @Override
+  public Object get(DependentScope scope)
   {
     if (_value == null) {
       _value = createNew();

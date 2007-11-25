@@ -70,6 +70,56 @@ public class ProducesComponent extends ComponentImpl {
     setTargetType(method.getReturnType());
   }
 
+  /**
+   * Initialization.
+   */
+  public void init()
+  {
+    super.init();
+  }
+
+  public void introspect()
+  {
+    ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+    
+    for (Annotation ann : _method.getAnnotations()) {
+      if (ann instanceof Named) {
+	setName(((Named) ann).value());
+      }
+      
+      if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
+	if (getType() == null)
+	  setType(_webbeans.createComponentType(ann.annotationType()));
+      }
+	
+      if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	if (getScope() == null)
+	  setScope(_webbeans.getScopeContext(ann.annotationType()));
+      }
+	
+      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+	bindingList.add(new WbBinding(ann));
+      }
+    }
+
+    if (getName() == null) {
+      String methodName = _method.getName();
+      
+      if (methodName.startsWith("get") && methodName.length() > 3) {
+	setName(Character.toLowerCase(methodName.charAt(3))
+		+ methodName.substring(4));
+      }
+      else
+	setName(methodName);
+    }
+
+    if (bindingList.size() > 0)
+      setBindingList(bindingList);
+    
+    if (getType() == null)
+      setType(_producer.getType());
+  }
+
   @Override
   public Object createNew()
   {
@@ -94,44 +144,6 @@ public class ProducesComponent extends ComponentImpl {
     }
   }
 
-  /**
-   * Initialization.
-   */
-  public void init()
-  {
-    introspect();
-    
-    if (getType() == null)
-      setType(_producer.getType());
-  }
-
-  public void introspect()
-  {
-    ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
-    
-    for (Annotation ann : _method.getAnnotations()) {
-      if (ann instanceof Named) {
-	setName(((Named) ann).value());
-      }
-      
-      if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
-	//compTypeAnn = ann;
-      }
-	
-      if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	if (getScope() == null)
-	  setScope(_webbeans.getScopeContext(ann.annotationType()));
-      }
-	
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
-	bindingList.add(new WbBinding(ann));
-      }
-    }
-
-    if (bindingList.size() > 0)
-      setBindingList(bindingList);
-  }
-
   @Override
   public void bind()
   {
@@ -146,7 +158,8 @@ public class ProducesComponent extends ComponentImpl {
       _args[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
 
       if (_args[i] == null)
-	throw new NullPointerException();
+	throw error(_method, L.l("Type '{0}' for method parameter #{1} has no matching component.",
+				 param[i].getSimpleName(), i));
     }
   }
 

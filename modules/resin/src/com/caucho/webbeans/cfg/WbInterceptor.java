@@ -102,4 +102,28 @@ public class WbInterceptor {
       throw new ConfigException(e);
     }
   }
+
+  public boolean isMatch(ArrayList<Annotation> bindList)
+  {
+    for (int i = 0; i < _bindingList.size(); i++) {
+      if (! isMatch(_bindingList.get(i), bindList))
+	return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Returns true if at least one of this component's bindings match
+   * the injection binding.
+   */
+  public boolean isMatch(WbBinding binding, ArrayList<Annotation> bindList)
+  {
+    for (int i = 0; i < bindList.size(); i++) {
+      if (binding.isMatch(bindList.get(i)))
+	return true;
+    }
+    
+    return false;
+  }
 }

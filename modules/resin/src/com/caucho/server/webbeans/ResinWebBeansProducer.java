@@ -29,6 +29,7 @@
 
 package com.caucho.server.webbeans;
 
+import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jmx.Jmx;
@@ -37,6 +38,7 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.server.util.ScheduledThreadPool;
 
 import java.util.concurrent.*;
+import javax.ejb.*;
 import javax.management.*;
 import javax.transaction.*;
 import javax.webbeans.*;
@@ -117,5 +119,15 @@ public class ResinWebBeansProducer
   public ScheduledExecutorService getScheduledExecutorService()
   {
     return ScheduledThreadPool.getLocal();
+  }
+  
+  /**
+   * Returns the javax.ejb.TimerService
+   */
+  @Produces
+  @Standard
+  public TimerService getTimerService()
+  {
+    return EjbTimerService.getCurrent();
   }
 }

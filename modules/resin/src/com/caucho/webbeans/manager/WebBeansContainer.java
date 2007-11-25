@@ -112,7 +112,7 @@ public class WebBeansContainer
 
     _tempClassLoader = _classLoader.getNewTempClassLoader();
     
-    _wbWebBeans = new WbWebBeans(this, null);
+    _wbWebBeans = new WbWebBeans(this, Vfs.lookup());
 
     _contextMap.put(RequestScoped.class, new RequestScope());
     _contextMap.put(SessionScoped.class, new SessionScope());
@@ -214,6 +214,11 @@ public class WebBeansContainer
     if (name != null && comp.getScope() != null)
       _namedComponentMap.put(name, comp);
   }
+  
+  public void addComponentByName(String name, ComponentImpl comp)
+  {
+    _namedComponentMap.put(name, comp);
+  }
 
   /**
    * Adds a component by the interface type
@@ -303,8 +308,9 @@ public class WebBeansContainer
 			    Field field)
     throws ConfigException
   {
-    ComponentImpl component
-      = bind(location(field), field.getType(), field.getAnnotations());
+    ComponentImpl component;
+      
+    component = bind(location(field), field.getType(), field.getAnnotations());
 
     if (component == null)
       throw injectError(field, L.l("Can't find a component for '{0}'",
@@ -317,6 +323,9 @@ public class WebBeansContainer
 			    Method method)
     throws ConfigException
   {
+    if (method.isAnnotationPresent(Produces.class))
+      throw error(method, "An injection method may not have the @Produces annotation.");
+
     // XXX: lazy binding
     try {
       Class []paramTypes = method.getParameterTypes();
@@ -328,17 +337,17 @@ public class WebBeansContainer
 	args[i] = bind(location(method), paramTypes[i], paramAnn[i]);
 
 	if (args[i] == null) {
-	  throw new LineConfigException(location(method)
-					+ L.l("Injection method '{0}' argument '{1}' has no matching component.",
-					      method.getName(), i));
+	  throw error(method,
+		      L.l("Injection for type '{0}' of method parameter #{1} has no matching component.",
+			  paramTypes[i].getSimpleName(), i));
 	}
       }
 
       injectList.add(new InjectMethodProgram(method, args));
+    } catch (ConfigException e) {
+      throw e;
     } catch (Exception e) {
-      String loc = location(method);
-
-      throw LineConfigException.create(loc, e);
+      throw LineConfigException.create(method, e);
     }
   }
 
@@ -378,12 +387,40 @@ public class WebBeansContainer
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
+    boolean isNew = false;
     for (Annotation ann : paramAnn) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      if (ann instanceof New)
+	isNew = true;
+      else if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	bindingList.add(ann);
     }
 
-    return bind(location, type, bindingList);
+    if (isNew)
+      return bindNew(location, type);
+    else
+      return bind(location, type, bindingList);
+  }
+
+  /**
+   * Binds for the @New expression
+   */
+  private ComponentImpl bindNew(String location,
+				Class type)
+  {
+    ComponentImpl component = bind(location, type, new Annotation[0]);
+
+    if (component == null) {
+      ClassComponent newComp = new ClassComponent(_wbWebBeans);
+      newComp.setInstanceClass(type);
+      newComp.setTargetType(type);
+      newComp.init();
+
+      addComponent(newComp);
+
+      component = newComp;
+    }
+
+    return component;
   }
 
   /**
@@ -424,6 +461,9 @@ public class WebBeansContainer
       return null;
   }
 
+  /**
+   * Finds a component by its component name.
+   */
   public ComponentImpl findByName(String name)
   {
     ComponentImpl comp = _namedComponentMap.get(name);
@@ -670,8 +710,7 @@ public class WebBeansContainer
 
   public static String location(Method method)
   {
-    return (method.getDeclaringClass().getName()
-	    + "." + method.getName() + ": ");
+    return LineConfigException.loc(method);
   }
 
   public static ConfigException error(Method method, String msg)

@@ -159,6 +159,9 @@ public class ClassComponent extends ComponentImpl {
       if (! method.isAnnotationPresent(Produces.class))
 	continue;
 
+      if (method.isAnnotationPresent(In.class))
+	throw error(method, L.l("@Produces method may not have an @In annotation."));
+
       ProducesComponent comp = new ProducesComponent(_webbeans, this, method);
 
       _webbeans.addWbComponent(comp);
@@ -191,6 +194,10 @@ public class ClassComponent extends ComponentImpl {
 	  second = ctor;
 	}
       }
+
+      if (second != null)
+	throw new ConfigException(L.l("{0}: WebBean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
+				      _cl.getName()));
 
       _ctor = best;
     } catch (RuntimeException e) {
@@ -361,6 +368,9 @@ public class ClassComponent extends ComponentImpl {
 
       if (param < 0)
 	continue;
+
+      if (method.isAnnotationPresent(In.class))
+	throw error(method, "@Observer may not have an @In attribute");
 
       ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
       

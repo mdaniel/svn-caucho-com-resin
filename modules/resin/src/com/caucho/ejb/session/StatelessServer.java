@@ -43,6 +43,7 @@ import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
+import javax.webbeans.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.logging.Level;
@@ -161,12 +162,23 @@ public class StatelessServer extends AbstractServer {
     
       comp.setTargetType(beanClass);
     
-      if (! beanClass.isAnnotationPresent(javax.webbeans.Named.class)) {
-	comp.setName(getEJBName());
-        comp.addNameBinding(getEJBName());
+      Named named = (Named) beanClass.getAnnotation(Named.class);
+
+      String name;
+
+      if (named != null) {
+	name = named.value();
+      }
+      else {
+	name = getEJBName();
+
+	comp.setName(name);
+        comp.addNameBinding(name);
       }
 
       comp.init();
+
+      webBeans.addComponentByName(name, comp);
 
       for (Class api : localApiList) {
 	webBeans.addComponentByType(api, comp);

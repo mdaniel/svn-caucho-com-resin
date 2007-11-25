@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * The @In binding annotation for web beans
  */
 
-@Target({METHOD, FIELD, PARAMETER, TYPE})
+@Target({CONSTRUCTOR, METHOD, FIELD, PARAMETER, TYPE})
 @Retention(RUNTIME)
 public @interface In {
 }

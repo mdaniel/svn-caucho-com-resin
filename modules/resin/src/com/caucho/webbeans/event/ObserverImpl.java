@@ -32,6 +32,7 @@ package com.caucho.webbeans.event;
 import java.util.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
+import javax.webbeans.*;
 
 import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
@@ -51,6 +52,7 @@ public class ObserverImpl {
   private final int _paramIndex;
 
   private boolean _hasBinding;
+  private boolean _ifExists;
   
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
@@ -63,6 +65,11 @@ public class ObserverImpl {
     _method = method;
     _method.setAccessible(true);
     _paramIndex = paramIndex;
+
+    for (Annotation ann : method.getParameterAnnotations()[paramIndex]) {
+      if (ann instanceof IfExists)
+	_ifExists = true;
+    }
   }
 
   public Class getType()
@@ -136,10 +143,16 @@ public class ObserverImpl {
 
   public void raiseEvent(Object event)
   {
-    Object obj = _component.get();
+    Object obj;
+
+    if (_ifExists)
+      obj = _component.getIfExists();
+    else
+      obj = _component.get();
 
     try {
-      _method.invoke(obj, event);
+      if (obj != null)
+	_method.invoke(obj, event);
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {

@@ -24,60 +24,47 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.webbeans.manager;
+package com.caucho.webbeans.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
-import com.caucho.util.*;
-import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.event.*;
-import com.caucho.webbeans.inject.*;
+import com.caucho.webbeans.context.DependentScope;
 
-import java.lang.annotation.*;
+import java.util.logging.*;
 import java.lang.reflect.*;
-import java.util.ArrayList;
 
 /**
- * Matches bindings
+ * Injects a new instance of the component as by @New
  */
-public class ObserverMap {
-  private static L10N L = new L10N(ObserverMap.class);
-  
-  private Class _type;
+public class NewComponentInject extends Inject
+{
+  private static final Logger log
+    = Logger.getLogger(ComponentInject.class.getName());
 
-  private ArrayList<ObserverImpl> _observerList
-    = new ArrayList<ObserverImpl>();
+  private ComponentImpl _component;
+  private Field _field;
 
-  public ObserverMap(Class type)
+  public NewComponentInject(ComponentImpl component,
+			    Field field)
   {
-    _type = type;
+    _component = component;
+    _field = field;
+
+    field.setAccessible(true);
   }
 
-  public void addObserver(ObserverImpl observer)
+  public void inject(Object bean, DependentScope scope)
   {
-    for (int i = _observerList.size() - 1; i >= 0; i--) {
-      ObserverImpl oldObserver = _observerList.get(i);
+    try {
+      Object value = _component.get();
 
-      if (observer.equals(oldObserver)) {
-	return;
-      }
-    }
-
-    _observerList.add(observer);
-  }
-
-  public void raiseEvent(Object event, Annotation []bindList)
-  {
-    for (int i = 0; i < _observerList.size(); i++) {
-      ObserverImpl observer = _observerList.get(i);
-
-      if (observer.isMatch(bindList)) {
-	observer.raiseEvent(event);
-      }
+      _field.set(bean, value);
+    } catch (Exception e) {
+      throw LineConfigException.create(_field, e);
     }
   }
 }

@@ -35,6 +35,9 @@ import com.caucho.server.dispatch.ServletInvocation;
 
 import java.util.*;
 
+import javax.faces.*;
+import javax.faces.context.*;
+import javax.faces.component.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.webbeans.*;
@@ -47,23 +50,8 @@ public class ConversationScope extends ScopeContext
 {
   private static final L10N L = new L10N(ConversationScope.class);
 
-  private static final ThreadLocal<ConversationScope> _currentScope
-    = new ThreadLocal<ConversationScope>();
-
-  private final String _id;
-  private final HashMap<String,Object> _map
-    = new HashMap<String,Object>();
-
-  private boolean _isExtended;
-
   public ConversationScope()
   {
-    _id = "environment";
-  }
-
-  public ConversationScope(String id)
-  {
-    _id = id;
   }
 
   /**
@@ -71,15 +59,36 @@ public class ConversationScope extends ScopeContext
    */
   public <T> T get(ComponentFactory<T> component, boolean create)
   {
-    ConversationScope currentScope = _currentScope.get();
+    FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    if (currentScope == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
 
-    ComponentImpl comp = (ComponentImpl) component;
-    T value = (T) currentScope._map.get(comp.getScopeId());
+    ExternalContext extContext = facesContext.getExternalContext();
+    Map<String,Object> sessionMap = extContext.getSessionMap();
 
-    return value;
+    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+
+    // XXX: create
+    if (scope == null)
+      return null;
+
+    UIViewRoot root = facesContext.getViewRoot();
+    String id = root.getViewId();
+
+    HashMap map = scope._conversationMap.get(id);
+
+    if (map == null) {
+      map = scope._extendedConversation;
+
+      if (map != null)
+	scope._conversationMap.put(id, map);
+    }
+
+    if (map != null)
+      return (T) map.get(((ComponentImpl) component).getScopeId());
+    else
+      return null;
   }
   
   /**
@@ -87,13 +96,36 @@ public class ConversationScope extends ScopeContext
    */
   public <T> void put(ComponentFactory<T> component, T value)
   {
-    ConversationScope currentScope = _currentScope.get();
+    FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    if (currentScope == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
 
-    ComponentImpl comp = (ComponentImpl) component;
-    currentScope._map.put(comp.getScopeId(), value);
+    ExternalContext extContext = facesContext.getExternalContext();
+    Map<String,Object> sessionMap = extContext.getSessionMap();
+
+    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+
+    if (scope == null) {
+      scope = new Scope();
+      sessionMap.put("caucho.conversation", scope);
+    }
+
+    UIViewRoot root = facesContext.getViewRoot();
+    String id = root.getViewId();
+
+    HashMap map = scope._conversationMap.get(id);
+
+    if (map == null) {
+      if (scope._extendedConversation != null)
+	map = scope._extendedConversation;
+      else
+	map = new HashMap(8);
+      
+      scope._conversationMap.put(id, map);
+    }
+    
+    map.put(((ComponentImpl) component).getScopeId(), value);
   }
   
   /**
@@ -101,13 +133,26 @@ public class ConversationScope extends ScopeContext
    */
   public <T> void remove(ComponentFactory<T> component)
   {
-    ConversationScope currentScope = _currentScope.get();
+    FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    if (currentScope == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
 
-    ComponentImpl comp = (ComponentImpl) component;
-    currentScope._map.remove(comp.getScopeId());
+    ExternalContext extContext = facesContext.getExternalContext();
+    Map<String,Object> sessionMap = extContext.getSessionMap();
+
+    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+
+    if (scope == null)
+      return;
+
+    UIViewRoot root = facesContext.getViewRoot();
+    String id = root.getViewId();
+
+    HashMap map = scope._conversationMap.get(id);
+
+    if (map != null)
+      map.remove(((ComponentImpl) component).getScopeId());
   }
 
   /**
@@ -117,7 +162,8 @@ public class ConversationScope extends ScopeContext
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof ApplicationScope
+    return (scope instanceof SingletonScope
+	    || scope instanceof ApplicationScope
 	    || scope instanceof SessionScope
 	    || scope instanceof ConversationScope);
   }
@@ -131,18 +177,32 @@ public class ConversationScope extends ScopeContext
    */
   public void begin()
   {
-    ConversationScope currentScope = _currentScope.get();
+    FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    if (currentScope == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available in this context"));
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
+
+    ExternalContext extContext = facesContext.getExternalContext();
+    Map<String,Object> sessionMap = extContext.getSessionMap();
+
+    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+
+    if (scope == null) {
+      scope = new Scope();
+      sessionMap.put("caucho.conversation", scope);
+    }
+
+    UIViewRoot root = facesContext.getViewRoot();
+    String id = root.getViewId();
+
+    HashMap map = scope._conversationMap.get(id);
     
-    HttpServletRequest request
-      = (HttpServletRequest) ServletInvocation.getContextRequest();
-    HttpSession session = request.getSession();
+    if (map == null) {
+      map = new HashMap(8);
+      scope._conversationMap.put(id, map);
+    }
 
-    session.setAttribute("caucho.conversation", currentScope);
-
-    _isExtended = true;
+    scope._extendedConversation = map;
   }
 
   /**
@@ -150,45 +210,26 @@ public class ConversationScope extends ScopeContext
    */
   public void end()
   {
-    HttpServletRequest request
-      = (HttpServletRequest) ServletInvocation.getContextRequest();
-    HttpSession session = request.getSession();
+    FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    session.removeAttribute("caucho.conversation");
-    
-    _isExtended = false;
-  }
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
 
-  //
-  // JSF routines (LifecycleImpl)
-  //
+    ExternalContext extContext = facesContext.getExternalContext();
+    Map<String,Object> sessionMap = extContext.getSessionMap();
 
-  /**
-   * Activates the conversation scope.
-   */
-  public static ConversationScope beginRender(String id)
-  {
-    ConversationScope oldScope = _currentScope.get();
-    ConversationScope scope;
-    
-    HttpServletRequest request
-      = (HttpServletRequest) ServletInvocation.getContextRequest();
-    HttpSession session = request.getSession();
+    Scope scope = (Scope) sessionMap.get("caucho.conversation");
 
-    scope = (ConversationScope) session.getAttribute("caucho.conversation");
     if (scope == null)
-      scope = new ConversationScope(id);
+      return;
 
-    _currentScope.set(scope);
-
-    return oldScope;
+    scope._extendedConversation = null;
   }
 
-  /**
-   * Restores the old scope
-   */
-  public static void endRender(ConversationScope oldScope)
-  {
-    _currentScope.set(oldScope);
+  static class Scope implements java.io.Serializable {
+    final HashMap<String,HashMap> _conversationMap
+      = new HashMap<String,HashMap>();
+
+    HashMap _extendedConversation;
   }
 }

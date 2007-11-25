@@ -57,6 +57,8 @@ public class WbWebBeans {
   
   private WebBeansContainer _webBeansContainer;
   private Path _root;
+  
+  private Path _webBeansFile;
 
   private HashMap<String,WbComponentType> _componentTypeMap
     = new HashMap<String,WbComponentType>();
@@ -85,6 +87,8 @@ public class WbWebBeans {
     _webBeansContainer = webBeansContainer;
     
     _root = root;
+    _webBeansFile = root.lookup("META-INF/web-beans.xml");
+    _webBeansFile.setUserPath(_webBeansFile.getURL());
   }
 
   /**
@@ -178,6 +182,9 @@ public class WbWebBeans {
     ArrayList<WbInterceptor> list = null;
 
     for (WbInterceptor interceptor : _enabledInterceptors) {
+      if (! interceptor.isMatch(bindingList))
+	continue;
+      
       if (list == null)
 	list = new ArrayList<WbInterceptor>();
 
@@ -211,45 +218,49 @@ public class WbWebBeans {
   {
     WebBeansContainer webBeans = _webBeansContainer;
 
-    if (_pendingClasses.size() > 0) {
-      ArrayList<Class> pendingClasses = new ArrayList<Class>(_pendingClasses);
-      _pendingClasses.clear();
+    try {
+      if (_pendingClasses.size() > 0) {
+	ArrayList<Class> pendingClasses = new ArrayList<Class>(_pendingClasses);
+	_pendingClasses.clear();
 
-      for (Class cl : pendingClasses) {
-	/*
-	  if (_componentTypeMap.get(cl.getName()) != null)
-	  continue;
-	*/
+	for (Class cl : pendingClasses) {
+	  /*
+	    if (_componentTypeMap.get(cl.getName()) != null)
+	    continue;
+	  */
 
-	ClassComponent component;
+	  ClassComponent component;
 
-	if (cl.isAnnotationPresent(Singleton.class))
-	  component = new SingletonClassComponent(this);
-	else
-	  component = new ClassComponent(this);
+	  if (cl.isAnnotationPresent(Singleton.class))
+	    component = new SingletonClassComponent(this);
+	  else
+	    component = new ClassComponent(this);
 	
-	component.setInstanceClass(cl);
-	component.setTargetType(cl);
-	component.setFromClass(true);
-	component.introspect();
-	component.init();
+	  component.setInstanceClass(cl);
+	  component.setTargetType(cl);
+	  component.setFromClass(true);
+	  component.introspect();
+	  component.init();
 
-	_pendingComponentList.add(component);
-      }
-    }
-
-    if (_pendingComponentList.size() > 0) {
-      ArrayList<ComponentImpl> componentList
-	= new ArrayList<ComponentImpl>(_pendingComponentList);
-      _pendingComponentList.clear();
-
-      for (ComponentImpl comp : componentList) {
-	if (comp.getType().isEnabled()) {
-	  webBeans.addComponent(comp);
-
-	  _pendingBindList.add(comp);
+	  _pendingComponentList.add(component);
 	}
       }
+
+      if (_pendingComponentList.size() > 0) {
+	ArrayList<ComponentImpl> componentList
+	  = new ArrayList<ComponentImpl>(_pendingComponentList);
+	_pendingComponentList.clear();
+
+	for (ComponentImpl comp : componentList) {
+	  if (comp.getType().isEnabled()) {
+	    webBeans.addComponent(comp);
+
+	    _pendingBindList.add(comp);
+	  }
+	}
+      }
+    } catch (Exception e) {
+      throw LineConfigException.create(_webBeansFile.getURL(), 1, e);
     }
   }
 
@@ -287,22 +298,7 @@ public class WbWebBeans {
 				     Class type,
 				     Annotation []annotations)
   {
-    return _webBeansContainer.bind(loc, type, getBindList(annotations));
-  }
-
-  /**
-   * Returns the binding annotations
-   */
-  private ArrayList<Annotation> getBindList(Annotation []annotations)
-  {
-    ArrayList<Annotation> bindList = new ArrayList<Annotation>();
-
-    for (Annotation ann : annotations) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	bindList.add(ann);
-    }
-
-    return bindList;
+    return _webBeansContainer.bind(loc, type, annotations);
   }
 
   public String toString()

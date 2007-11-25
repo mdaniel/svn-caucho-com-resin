@@ -202,12 +202,16 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
    */
   public void init()
   {
-    // _webbeans.addWbComponent(this);
+    introspect();
     
     if (_type == null)
       _type = _webbeans.createComponentType(Component.class);
 
     generateScopeId();
+  }
+
+  protected void introspect()
+  {
   }
 
   private void generateScopeId()
@@ -227,6 +231,29 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     Base64.encode(sb, crc64);
 
     _scopeId = sb.toString();
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  protected void introspectScope(Class type)
+  {
+    Class scopeClass = null;
+
+    if (getScope() == null) {
+      for (Annotation ann : type.getDeclaredAnnotations()) {
+	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	  if (scopeClass != null)
+	    throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ScopeType.",
+					  type.getName(),
+					  scopeClass.getName(),
+					  ann.annotationType().getName()));
+
+	  scopeClass = ann.annotationType();
+	  setScope(_webbeans.getScopeContext(scopeClass));
+	}
+      }
+    }
   }
 
   /**
@@ -282,6 +309,17 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     }
     
     return false;
+  }
+
+  /**
+   * Returns the component object if it already exists
+   */
+  public Object getIfExists()
+  {
+    if (_scope != null)
+      return _scope.get(this, false);
+    else
+      return get();
   }
 
   /**
@@ -423,6 +461,11 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   public Object createObject(Hashtable env)
   {
     return get();
+  }
+
+  protected ConfigException error(Method method, String msg)
+  {
+    return new ConfigException(LineConfigException.loc(method) + msg);
   }
 
   public boolean equals(Object obj)

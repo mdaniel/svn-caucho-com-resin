@@ -66,6 +66,8 @@ public class InterceptorGenerator {
     for (Map.Entry<Method,ArrayList<WbInterceptor>> entry : map.entrySet()) {
       _methodList[i] = entry.getKey();
       _interceptorList[i] = entry.getValue();
+
+      i += 1;
     }
   }
 
@@ -355,19 +357,34 @@ public class InterceptorGenerator {
       }
       else if (long.class.equals(type)) {
 	code.dup();
+	code.pushInt(i);
+	code.newInstance("java/lang/Long");
+	code.dup();
 	code.pushLongVar(index);
+	code.invokespecial("java/lang/Long", "<init>", "(J)V", 3, 0);
+	code.setArrayObject();
 	index += 2;
 	stack += 2;
       }
       else if (float.class.equals(type)) {
 	code.dup();
+	code.pushInt(i);
+	code.newInstance("java/lang/Float");
+	code.dup();
 	code.pushFloatVar(index);
+	code.invokespecial("java/lang/Float", "<init>", "(F)V", 2, 0);
+	code.setArrayObject();
 	index += 1;
 	stack += 1;
       }
       else if (double.class.equals(type)) {
 	code.dup();
+	code.pushInt(i);
+	code.newInstance("java/lang/Double");
+	code.dup();
 	code.pushDoubleVar(index);
+	code.invokespecial("java/lang/Double", "<init>", "(D)V", 3, 0);
+	code.setArrayObject();
 	index += 2;
 	stack += 2;
       }
@@ -407,12 +424,18 @@ public class InterceptorGenerator {
       code.addIntReturn();
     }
     else if (long.class.equals(retType)) {
+      code.cast("java/lang/Long");
+      code.invoke("java/lang/Long", "longValue", "()J", 1, 2);
       code.addLongReturn();
     }
     else if (float.class.equals(retType)) {
+      code.cast("java/lang/Float");
+      code.invoke("java/lang/Float", "floatValue", "()F", 1, 1);
       code.addFloatReturn();
     }
     else if (double.class.equals(retType)) {
+      code.cast("java/lang/Double");
+      code.invoke("java/lang/Double", "doubleValue", "()D", 1, 2);
       code.addDoubleReturn();
     }
     else if (void.class.equals(retType)) {

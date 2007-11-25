@@ -63,6 +63,9 @@ public class WbBinding {
 
     try {
       for (Method method : _cl.getDeclaredMethods()) {
+	if (method.isAnnotationPresent(NonBinding.class))
+	  continue;
+	
 	Object value = method.invoke(ann);
 	
 	_valueList.add(new WbBindingValue(method, value));

@@ -30,6 +30,8 @@ package com.caucho.config;
 
 import com.caucho.util.*;
 
+import java.lang.reflect.*;
+
 /**
  * Thrown by the various Builders
  */
@@ -114,12 +116,40 @@ public class LineConfigException extends ConfigException
   {
     String loc = filename + ": " + line + ": ";
     
-    if (e instanceof LineException)
-      return new LineConfigException(filename, line, e.getMessage(), e);
+    if (e instanceof LineException) {
+      if (e instanceof RuntimeException)
+	throw (RuntimeException) e;
+      else
+	return new LineConfigException(filename, line, e.getMessage(), e);
+    }
     else if (e instanceof DisplayableException)
-      return new LineConfigException(filename, line, loc + e.getMessage(), e);
+      return new LineConfigException(filename, line, e.getMessage(), e);
     else
-      return new LineConfigException(filename, line, loc + e, e);
+      return new LineConfigException(filename, line, e.toString(), e);
+  }
+
+  public static RuntimeException create(Field field, Throwable e)
+  {
+    return create(loc(field), e);
+  }
+
+  public static RuntimeException create(Method method, Throwable e)
+  {
+    return create(loc(method), e);
+  }
+
+  public static RuntimeException create(String loc, Throwable e)
+  {
+    if (e instanceof LineException) {
+      if (e instanceof RuntimeException)
+	return (RuntimeException) e;
+      else
+	return new LineConfigException(e.getMessage(), e);
+    }
+    else if (e instanceof DisplayableException)
+      return new LineConfigException(loc + e.getMessage(), e);
+    else
+      return new LineConfigException(loc + e, e);
   }
 
   public static RuntimeException create(Throwable e)
@@ -130,5 +160,15 @@ public class LineConfigException extends ConfigException
       return new ConfigException(e.getMessage(), e);
     else
       return new ConfigException(e.toString(), e);
+  }
+
+  public static String loc(Field field)
+  {
+    return field.getDeclaringClass().getName() + "." + field.getName() + ": ";
+  }
+
+  public static String loc(Method method)
+  {
+    return method.getDeclaringClass().getName() + "." + method.getName() + "(): ";
   }
 }

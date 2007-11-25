@@ -47,7 +47,6 @@ import javax.faces.render.*;
 import javax.servlet.http.*;
 
 import com.caucho.jsf.application.*;
-import com.caucho.webbeans.context.ConversationScope;
 
 /**
  * The default lifecycle implementation
@@ -282,32 +281,25 @@ public class LifecycleImpl extends Lifecycle
 
     UIViewRoot viewRoot = context.getViewRoot();
 
-    ConversationScope oldScope
-      = ConversationScope.beginRender(viewRoot.getViewId());
+    beforePhase(context, PhaseId.RENDER_RESPONSE);
 
     try {
-      beforePhase(context, PhaseId.RENDER_RESPONSE);
-
-      try {
-	if (log.isLoggable(Level.FINER))
-	  log.finer(context.getViewRoot() + " before render view");
+      if (log.isLoggable(Level.FINER))
+	log.finer(context.getViewRoot() + " before render view");
       
-	view.renderView(context, context.getViewRoot());
-      } catch (java.io.IOException e) {
-	if (sendError(context, "renderView", e))
-	  return;
+      view.renderView(context, context.getViewRoot());
+    } catch (java.io.IOException e) {
+      if (sendError(context, "renderView", e))
+	return;
       
-	throw new FacesException(e);
-      } catch (RuntimeException e) {
-	if (sendError(context, "renderView", e))
-	  return;
-      } finally {
-	afterPhase(context, PhaseId.RENDER_RESPONSE);
-
-	logMessages(context);
-      }
+      throw new FacesException(e);
+    } catch (RuntimeException e) {
+      if (sendError(context, "renderView", e))
+	return;
     } finally {
-      ConversationScope.endRender(oldScope);
+      afterPhase(context, PhaseId.RENDER_RESPONSE);
+
+      logMessages(context);
     }
   }
 

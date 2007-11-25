@@ -77,6 +77,16 @@ public class EjbTimerService implements TimerService {
     }
   }
 
+  public static EjbTimerService getCurrent()
+  {
+    return getCurrent(Thread.currentThread().getContextClassLoader());
+  }
+
+  public static EjbTimerService getCurrent(ClassLoader loader)
+  {
+    return _localTimer.get(loader);
+  }
+
   /**
    * Creates a timer for a duration.
    */

@@ -410,7 +410,7 @@ public class UIViewRoot extends UIComponentBase
       super.saveState(context),
       _viewId,
       _renderKitId,
-      _locale,
+      _locale.toString(),
       _unique,
       _afterPhaseListener,
       _beforePhaseListener,
@@ -426,7 +426,7 @@ public class UIViewRoot extends UIComponentBase
 
     _viewId = (String) state[1];
     _renderKitId = (String) state[2];
-    _locale = (Locale) state[3];
+    _locale = toLocale((String) state[3]);
     _unique = (Integer) state[4];
     _afterPhaseListener = (MethodExpression) state[5];
     _beforePhaseListener = (MethodExpression) state[6];

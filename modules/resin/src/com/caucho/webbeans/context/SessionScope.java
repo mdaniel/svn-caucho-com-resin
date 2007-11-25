@@ -81,7 +81,8 @@ public class SessionScope extends ScopeContext {
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof ApplicationScope
+    return (scope instanceof SingletonScope
+	    || scope instanceof ApplicationScope
 	    || scope instanceof SessionScope);
   }
 

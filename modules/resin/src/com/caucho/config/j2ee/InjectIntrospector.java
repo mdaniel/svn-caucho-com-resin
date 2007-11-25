@@ -706,6 +706,8 @@ public class InjectIntrospector {
   {
     if (method.isAnnotationPresent(Produces.class))
       return false;
+    else if (method.isAnnotationPresent(Destroys.class))
+      return false;
     else if (method.isAnnotationPresent(In.class))
       return true;
 
@@ -716,6 +718,8 @@ public class InjectIntrospector {
 
       for (Annotation ann : annList) {
 	if (ann.annotationType().equals(Observes.class))
+	  return false;
+	if (ann.annotationType().equals(Disposes.class))
 	  return false;
         else if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	  hasBinding = true;

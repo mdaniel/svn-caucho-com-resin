@@ -40,6 +40,8 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.webbeans.component.ComponentImpl;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -94,6 +96,21 @@ public class ResinModule
 
       return BooleanValue.FALSE;
     }
+  }
+
+  /**
+   * Returns the matchding webbeans.
+   */
+  public static Object java_bean(String name)
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    ComponentImpl comp = webBeans.findByName(name);
+
+    if (comp != null)
+      return comp.get();
+    else
+      return null;
   }
 
   /**
