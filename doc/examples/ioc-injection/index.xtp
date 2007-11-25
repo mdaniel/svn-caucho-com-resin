@@ -22,19 +22,42 @@ resource dependencies.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>Configures the movie application
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Movie.java"/>
-    </td><td>The movie bean.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieFinder.java"/>
-    </td><td>The MovieFinder interface
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieFinderImpl.java"/>
-    </td><td>A MovieFinder implementation
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieLister.java"/>
-    </td><td>The MovieLister to be configured with the finder implementation
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MovieServlet.java"/>
-    </td><td>The MovieServlet to be configured with the finder implementation
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>Configures the movie application</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/Movie.java"/></td>
+  <td>The movie bean.</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MovieFinder.java"/></td>
+  <td>The MovieFinder interface</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MovieFinderImpl.java"/></td>
+  <td>A MovieFinder implementation</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MovieLister.java"/></td>
+  <td>The MovieLister to be configured with the finder implementation</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MovieServlet.java"/></td>
+  <td>The MovieServlet to be configured with the finder implementation</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/web-beans.xml"/></td>
+  <td>web-beans.xml marks the directory as containing components.</td>
+</tr>
+
+</deftable>
 
 </s1>
 
@@ -68,25 +91,27 @@ Injection</a> article.</p>
 the Assembly pattern because it resembles an assembly
 line making cars.</p><p>
 
-</p><ul>
+</p>
+
+<ul>
 <li>Parts are interchangable components like wheels.  The parts might
-also be assembled like an engine in a car.
-</li><li>Parts are attached to the Chassis like a car's frame receiving an
-engine.
-</li><li>The Registry is holds partially-completed parts like a factory
-conveyor belt.
-</li><li>The Assembler provides the Registry and assembles the Chassis and
-Parts into a completed resource.
-</li></ul>
+also be assembled like an engine in a car.</li>
+<li>Parts are attached to the Chassis like a car's frame receiving an
+engine.</li>
+<li>The Registry is holds partially-completed parts like a factory
+conveyor belt.</li>
+<li>The Assembler provides the Registry and assembles the Chassis and
+Parts into a completed resource.</li>
+</ul>
 
 <p>Some important points:</p>
 
 <ul>
 <li>The application code (Chassis and Parts) is independent of the
-Assembler.
-</li><li>Parts are interchangeable.
-</li><li>The code needs to select an assembly pattern, e.g. Setter Injection.
-</li></ul>
+Assembler.</li>
+<li>Parts are interchangeable.</li>
+<li>The code needs to select an assembly pattern, e.g. Setter Injection.</li>
+</ul>
 
 <p>Because the Assembler is independent of the code, a project could
 change the Assembler from Spring to Resin with no code changes.
@@ -118,18 +143,17 @@ no additional code would be required.</p>
 
 <p>Either an interface or a class can be used
 for the dependent resource, depending on the application's
-architecture.  This example uses both: the MovieListener uses a dependent
+architecture.  This example uses both: the MovieLister uses a dependent
 MovieFinder interface, and the MovieServlet uses the dependent
 MovieListener class.</p>
 
 <example>
-public class MovieListener {
-  private MovieFinder _finder;
+import javax.webbeans.Component;
+import javax.webbeans.In;
 
-  public void setMovieFinder(MovieFinder finder)
-  {
-    _finder = finder;
-  }
+@Component
+public class MovieListener {
+  @In private MovieFinder _finder;
 
   ...
 }
@@ -139,9 +163,8 @@ public class MovieListener {
 
 <s1 title="Configuration">
 
-<example title="Configuring the MovieFinder">
-&lt;resource jndi-name="movie-finder"
-          type="example.MovieFinderImpl"&gt;
+<example title="Configuring the MovieFinder Service">
+&lt;bean class="example.MovieFinderImpl"&gt;
   &lt;init&gt;
     &lt;movie director="Jackson" title="Fellowship of the Ring"/&gt;
     &lt;movie director="Jackson" title="The Two Towers"/&gt;
@@ -150,52 +173,8 @@ public class MovieListener {
 
     &lt;movie director="Gilliam" title="Brazil"/&gt;
   &lt;/init&gt;
-&lt;/resource&gt;
+&lt;/bean&gt;
 </example>
-
-<example title="Configuring the MovieLister">
-&lt;resource jndi-name="movie-lister"
-          type="example.MovieLister"&gt;
-  &lt;init&gt;
-    &lt;movie-finder&gt;\${jndi("movie-finder")}&lt;/movie-finder&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
-</example>
-
-</s1>
-
-<s1 title="JMX as a Registry">
-
-<p>Resin can use JMX as the registry instead of JNDI. In this example,
-only the configuration needs to be changed.  JMX uses the mbean-name
-instead of the jndi-name, and the jndi uses the "mbean:" schema.
-</p>
-
-<example title="Configuring the MovieFinder">
-&lt;resource mbean-name="example:type=MovieFinder"
-          mbean-interface="example.MovieFinder"
-          type="example.MovieFinderImpl"&gt;
-  &lt;init&gt;
-    &lt;movie director="Jackson" title="Fellowship of the Ring"/&gt;
-    &lt;movie director="Jackson" title="The Two Towers"/&gt;
-
-    &lt;movie director="Lucas" title="Star Wars"/&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
-
-&lt;resource jndi-name="movie-lister"
-          type="example.MovieLister"&gt;
-  &lt;init&gt;
-    &lt;movie-finder&gt;\${jndi("mbean:example:type=MovieFinder")}&lt;/movie-finder&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
-</example>
-
-<p>Using JMX as the registry has some restrictions over JNDI.
-JMX requires an interface class. So the servlet's &lt;movie-lister&gt;
-setting can't be stored in JMX.  JMX also can't support object references.
-All JMX getters and method values are value objects, never references.
-This limits the kinds of structures you can use easily with JMX.</p>
 
 </s1>
 
@@ -210,19 +189,21 @@ the servlet with the appropriate MovieLister</p>
 the same as for the resource:</p>
 
 <ul>
-<li>The servlet code becomes simpler.
-</li><li>The servlet is no longer dependent on JNDI.
-</li><li>The servlet is more easily testable by configuring it with test
-versions of the MovieListener.
-</li></ul>
+<li>The servlet code becomes simpler.</li>
+<li>The servlet is no longer dependent on JNDI.</li>
+<li>The servlet is more easily testable by configuring it with test
+versions of the MovieListener.</li>
+</ul>
 
 <example title="Configuring the MovieServlet">
-&lt;servlet servlet-name="movies"
-         type="example.MovieServlet"&gt;
-  &lt;init&gt;
-    &lt;movie-lister&gt;\${jndi("movie-lister")}&lt;/movie-lister&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
+import javax.webbeans.In;
+
+public class MovieServlet extends HttpServlet {
+  // Inject the MovieLister service
+  @In private MovieLister _movieLister;
+
+  ...
+}
 </example>
 
 <s2 title="Compatibility">

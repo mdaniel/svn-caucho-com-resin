@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class MovieFinderImpl implements MovieFinder {
-  private ArrayList _list = new ArrayList();
+  private ArrayList<Movie> _list = new ArrayList<Movie>();
 
   /**
    * Adds a movie to the list.
@@ -17,8 +17,8 @@ public class MovieFinderImpl implements MovieFinder {
   /**
    * Returns all the movies.
    */
-  public List findAll()
+  public List<Movie> findAll()
   {
-    return new ArrayList(_list);
+    return new ArrayList<Movie>(_list);
   }
 }

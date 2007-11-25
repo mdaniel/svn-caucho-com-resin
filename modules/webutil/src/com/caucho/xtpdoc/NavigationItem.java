@@ -158,7 +158,7 @@ public class NavigationItem {
 
       // System.out.println("LINK: " + linkPath);
       
-      if (linkPath.exists()) {
+      if (linkPath.exists() && linkPath.getPath().endsWith(".xtp")) {
         Config config = new Config();
 
         try {

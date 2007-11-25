@@ -4,9 +4,10 @@ import java.io.*;
 
 import javax.annotation.*;
 import javax.servlet.*;
+import javax.webbeans.In;
 
 public class TestServlet extends GenericServlet {
-  @Resource(name="beans/theater")
+  @In
   private Theater _theater;
   
   public void service(ServletRequest req,

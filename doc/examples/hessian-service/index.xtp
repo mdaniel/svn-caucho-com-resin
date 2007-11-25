@@ -92,7 +92,7 @@ public interface MathService {
     &lt;protocol type="hessian"/>
   &lt;/servlet-mapping>
 
-  &lt;web-service-client jndi-name="hessian/MathService">
+  &lt;web-service-client>
     &lt;url>hessian:http://localhost:8080/resin-doc/hessian/tutorial/hessian-service/math/&lt;/url>
     &lt;interface>example.MathService&lt;/interface>
   &lt;/web-service-client>
@@ -107,11 +107,10 @@ public interface MathService {
 <p>The client is identical to the basic example.</p>
 
 <example title="demo.jsp">
-&lt;%@ page import="javax.annotation.Resource" %>
+&lt;%@ page import="javax.webbeans.In" %>
 &lt;%@ page import="example.MathService" %>
 &lt;%!
-@Resource(name="hessian/MathService")
-MathService math;
+@In MathService math;
 %>
 &lt;pre>
 3 + 2 = &lt;%= math.add(3, 2) %>

@@ -6,21 +6,15 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.SUPPORTS;
 
+import javax.webbeans.Named;
+
 /**
  * Implementation of the Hello bean.
  */
 @Stateless
 public class HelloBean implements Hello {
-  private String _greeting = "Default Hello";
-
-  /**
-   * Injector to set the greeting.
-   */
-  @Resource
-  public void setGreeting(String greeting)
-  {
-    _greeting = greeting;
-  }
+  @Named("greeting")
+  private String _greeting;
   
   /**
    * Returns a hello, world string.

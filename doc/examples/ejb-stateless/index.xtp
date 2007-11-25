@@ -1,6 +1,5 @@
 <document>
 <header>
-<product>resin-ee</product>
 <type>tutorial</type>
 <tutorial-startpage>stateless</tutorial-startpage>
 <title>Local Stateless Session Hello</title>
@@ -14,13 +13,6 @@ method as a read-only transaction boundary.</p>
 
 <p>See also:</p>
 <ul>
-<!--
-  <li>The <a href="../resin-xa/index.xtp">Resin Transaction</a> example for a more detailed description of method transaction enhancement.
-  </li>
-
-  <li>The <a href="examples|amber-xa/index.xtp">Amber Transaction</a> example for a traditional session bean pattern.  </li>
--->
-
 <li>The <a href="doc|ejb-annotations.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
 </li></ul>
 
@@ -35,16 +27,16 @@ method as a read-only transaction boundary.</p>
 versions of EJB.  To implement the EJB you need to implement:</p>
 
 <ul>
-<li>A local interface
-</li><li>The bean implementation
-</li></ul>
+<li>A local interface</li>
+<li>The bean implementation</li>
+</ul>
 
 <p>To configure Resin to be a server for the EJB you need to:</p>
 
 <ul>
-<li>Configure the ejb-server
-</li><li>Configure the client
-</li></ul>
+<li>Configure the ejb-stateless-bean</li>
+<li>Inject the bean into the application servlet</li>
+</ul>
 
 <p>In this tutorial, a simple "Hello" EJB is created and
 deployed within Resin.</p>
@@ -95,19 +87,18 @@ the functionality provided by the remote interface.</p>
 <example title="HelloBean.java">
 package example;
 
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.SUPPORTS;
 
-@javax.ejb.Stateless
+import javax.webbeans.Named;
+
+@Stateless
 public class HelloBean implements Hello {
-  private String _greeting = "Default Hello";
+  @Named("greeting")
+  private String _greeting;
 
-  @javax.ejb.Resource
-  public void setGreeting(String greeting)
-  {
-    _greeting = greeting;
-  }
-
-  @javax.ejb.TransactionAttribute(SUPPORTS)
+  @TransactionAttribute(SUPPORTS)
   public String hello()
   {
     return _greeting;
@@ -119,19 +110,20 @@ public class HelloBean implements Hello {
 
 <p>The @Stateless annotation marks the bean as a stateless session
 bean.  Resin will create a stub implementing <code>Hello</code> and
-store it in JNDI at "java:comp/env/ejb/HelloBean".</p>
+store it in the WebBeans directory with type <code>Hello</code> and
+name <code>@Named("HelloBean")</code>.</p>
 
 <p>The @Stateless annotation can have an optional <code>name</code>
 value which overrides the default name of "HelloBean".</p>
 
 </s2>
 
-<s2 title="@Inject">
+<s2 title="@Named">
 
-<p>The <a href="doc|ejb-annotations.xtp#@Resource">@javax.ejb.Resource</a>
-annotation tells Resin to lookup the greeting from JNDI when the
-session bean is created.  The JNDI name will be
-java:comp/env/greeting.</p>
+<p>The <a href="doc|webbeans-annotations.xtp#@Named">@javax.webbeans.Named</a>
+annotation tells Resin to lookup the greeting <code>String</code>
+in the WebBeans directory with the name binding "greeting" when the
+session bean is created.</p>
 
 <p>In this example, the greeting is configured with an &lt;env-entry&gt;
 in the web.xml.</p>
@@ -140,19 +132,21 @@ in the web.xml.</p>
 
 <s2 title="Alternate Dependency Injection">
 
-<p>The EJB 3.0 draft spec's dependency injection is somewhat
-inflexible since the greeting is required to be in JNDI.  Resin
-offers a more flexible dependency injection configuration based
-on the configuration file.  By setting the value in the configuration
-file, Resin's alternate dependency injection adds more flexibility and
-some clarity.</p>
+<p>In some cases, it may be clearer to configure the session bean directly,
+rather than using WebBeans injection.  Instead of creating a separate
+&lt;env-entry>, you can configure the greeting value using XML
+straight from the resin-web.xml file.</p>
 
-<example>
-&lt;ejb-server jndi-name="java:comp/env/ejb"&gt;
-  &lt;bean type="qa.TestBean"&gt;
-    &lt;init greeting="Hello, World from web.xml"/&gt;
-  &lt;/bean&gt;
-&lt;/ejb-server&gt;
+<example title="resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;ejb-stateless-bean class="qa.TestBean">
+    &lt;init>
+      &lt;greeting>Hello, World from web.xml&lt;/greeting>
+    &lt;/init>
+  &lt;/ejb-stateless-bean&gt;
+
+&lt;/web-app>
 </example>
 
 </s2>
@@ -178,56 +172,56 @@ own, but will participate in any transaction that already exists.</p>
 already exists.  It's used when updating database values.</p>
 
 <deftable>
-<tr><th>TransactionAttribute</th><th>meaning
-</th></tr><tr><td>REQUIRED</td><td>Start a new transaction if necessary
-</td></tr><tr><td>SUPPORTS</td><td>Don't start a new transaction, but use one if it
-exists
-</td></tr></deftable>
+<tr>
+  <th>TransactionAttribute</th>
+  <th>meaning</th>
+</tr>
+<tr>
+  <td>REQUIRED</td>
+  <td>Start a new transaction if necessary</td>
+</tr>
+<tr>
+  <td>SUPPORTS</td>
+  <td>Don't start a new transaction, but use one if it exists</td>
+</tr>
+</deftable>
 
 </s2>
 
 </s1>
 
-<s1 title="Configuring the Resin EJB server">
+<s1 title="Configuring the EJB stateless bean">
 
-<p><code>&lt;ejb-server&gt;</code> configure the Resin EJB server.
-Typically it configures the EJB root using jndi-name and configures
-a number of EJB classes using &lt;bean&gt;.  The &lt;bean&gt; entry will
+<p><code>&lt;ejb-stateless-bean&gt;</code> configure the session bean
+from the resin-web.xml.
+The &lt;ejb-statelss-bean&gt; entry will
 look at the bean's annotations to enhance the class.</p>
 
-<example title="ejb-server in web.xml">
+<example title="ejb-stateless-bean in web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
-  ...
   &lt;env-entry env-entry-name="greeting"
              env-entry-type="java.lang.String"
              env-entry-value="Hello, World."/&gt;
 
-  &lt;ejb-server jndi-name="java:comp/env/ejb"&gt;
-    &lt;bean type="qa.TestBean"/&gt;
-  &lt;/ejb-server&gt;
-    
-  ...
+  &lt;ejb-session-bean class="qa.TestBean"/>
 
 &lt;/web-app&gt;
 </example>
 
-<p>The &lt;bean&gt; can optionally configure the bean instances with an
-&lt;init&gt; tag as described in the alternate dependency injection section.</p>
+<p>The &lt;ejb-session-bean&gt; can optionally configure the bean
+directly with an &lt;init&gt; tag as described in the alternate
+dependency injection section.</p>
 
 </s1>
 
 <s1 title="Client">
 
 <example title="HelloServlet.java">
-public class HelloServlet extends GenericServlet {
-  private Hello _hello;
+import javax.webbeans.In;
 
-  @javax.ejb.EJB
-  public void setHello(Hello hello)
-  {
-    _hello = hello;
-  }
+public class HelloServlet extends GenericServlet {
+  @In private Hello _hello;
 
   public void service(HttpServletRequest req, HttpServletResponse res)
     throws IOException, ServletException
@@ -241,9 +235,9 @@ public class HelloServlet extends GenericServlet {
 
 <s2 title="@EJB">
 
-<p>The <a href="doc|ejb-annotations.xtp#@EJB">@EJB</a> annotation tells
-Resin to lookup the session bean in JNDI with name
-"java:comp/env/ejb/HelloBean".</p>
+<p>The <a href="doc|webbeans-annotations.xtp#@In">@In</a> annotation tells
+Resin to look for a <code>Hello</code> component in the WebBeans directory.
+</p>
 
 <p>The servlet could also lookup the Hello bean with JNDI in the
 <code>init()</code> method or use an &lt;init&gt; configuration in the
@@ -251,7 +245,7 @@ web.xml:
 
 <example title="alternative configuration">
 &lt;servlet servlet-name="hello" servlet-class="example.HelloServlet"&gt;
-  &lt;init hello="\${jndi('java:comp/env/ejb/HelloBean')}"/&gt;
+  &lt;init hello="${HelloBean}"/&gt;
 &lt;/servlet&gt;
 </example>
 

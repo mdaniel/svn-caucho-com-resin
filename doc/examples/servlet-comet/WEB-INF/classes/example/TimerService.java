@@ -1,24 +1,23 @@
 package example;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import javax.annotation.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.webbeans.Component;
+import javax.webbeans.In;
 
 import com.caucho.servlet.comet.*;
 
+@Component
 public class TimerService implements Runnable {
-  @Resource ScheduledExecutorService _timer;
-
+  private ScheduledExecutorService _timer;
+  
   private Future _timerFuture;
   
   private ArrayList<CometState> _stateList
     = new ArrayList<CometState>();
 
-  public TimerService(ScheduledExecutorService timer)
+  public TimerService(@In ScheduledExecutorService timer)
   {
     _timer = timer;
     

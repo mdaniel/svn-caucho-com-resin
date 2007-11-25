@@ -18,18 +18,9 @@
      - Configures the initialization servlet.  The bean-style init
      - it used to look up the JNDI DataSource in the configuration file.
     -->
-  <servlet servlet-name="init" servlet-class="example.InitServlet">
-    <init>
-      <data-source>${jndi:lookup('jdbc/basic')}</data-source>
-    </init>
-    <load-on-startup/>
-  </servlet>
+  <servlet servlet-name="init" servlet-class="example.InitServlet"/>
 
-  <servlet servlet-name="basic" servlet-class="example.BasicServlet">
-    <init>
-      <data-source>${jndi:lookup('jdbc/basic')}</data-source>
-    </init>
-  </servlet>
+  <servlet servlet-name="basic" servlet-class="example.BasicServlet"/>
 
   <servlet-mapping url-pattern="/basic" servlet-name="basic"/>
 </web-app>

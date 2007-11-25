@@ -69,6 +69,11 @@ public class SingletonComponent extends ClassComponent {
   }
 
   @Override
+  public void introspectConstructor()
+  {
+  }
+
+  @Override
   public void setScope(ScopeContext scope)
   {
   }

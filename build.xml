@@ -675,6 +675,7 @@
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
         <include name="lib/ejb-15.jar"/>
+        <include name="lib/hessian.jar"/>
         <include name="lib/jaxb-api.jar"/>
         <!--
         <include name="lib/jaxb-xjc.jar"/>

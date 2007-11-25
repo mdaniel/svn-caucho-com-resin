@@ -41,14 +41,16 @@ like the resin-web.xml.</p>
 
 <s1 title="Configuration">
 
-<p>The <a href="doc|env-tags.xtp#%3Cbean%3E">&lt;bean&gt;</a> configuration
-sets the movies and theater name.</p>
+<p>The <a href="doc|env-tags.xtp#%3Cbean%3E">&lt;bean&gt;</a> tag creates
+a singleton component for the Theater, which can be used by any servlet,
+JSP, JSF, EJB or WebBeans component by using the WebBeans injection
+annotations..</p>
 
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;bean jndi-name="beans/theater"
-        type="example.Theater">
+  &lt;bean name="beans/theater"
+        class="example.Theater">
     &lt;init>
       &lt;name>Balboa Theater&lt;/name>
       
@@ -127,11 +129,11 @@ public class Movie
 <example title="WEB-INF/classes/example/TestServlet.java">
 package example;
 
-import javax.annotation.Resource;
 import javax.servlet.*;
+import javax.webbeans.In;
 
 public class TestServlet extends GenericServlet {
-  @Resource(name="beans/theater")
+  @In
   private Theater _theater;
 
   ...

@@ -2,14 +2,15 @@
    - web.xml configuration file for the Hessian addition example.
   -->
 <web-app xmlns="http://caucho.com/ns/resin">
+
   <servlet-mapping url-pattern="/math/*"
                    servlet-class="example.MathServiceImpl">
-    <protocol type="hessian">
-    </protocol>
+    <protocol type="hessian"/>
   </servlet-mapping>
 
-  <web-service-client jndi-name="hessian/MathService">
+  <web-service-client>
     <url>hessian:${webApp.url}/math/</url>
     <interface>example.MathService</interface>
   </web-service-client>
+  
 </web-app>

@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.webbeans.In;
 
 /**
  * The InitServlet initializes the database.
@@ -24,15 +25,7 @@ public class InitServlet extends HttpServlet {
   /**
    * The DataSource for the table.
    */
-  private DataSource _ds = null;
-
-  /**
-   * Sets the data source.
-   */
-  public void setDataSource(DataSource ds)
-  {
-    _ds = ds;
-  }
+  @In private DataSource _ds;
 
   /**
    * Initializes the reference to the CourseBean home interface.
@@ -41,9 +34,6 @@ public class InitServlet extends HttpServlet {
     throws ServletException
   {
     try {
-      if (_ds == null)
-	throw new ServletException("data-source must be specified");
-
       Connection conn = _ds.getConnection();
 
       try {

@@ -173,7 +173,7 @@ public class ClassComponent extends ComponentImpl {
   /**
    * Introspects the constructor
    */
-  private void introspectConstructor()
+  protected void introspectConstructor()
   {
     try {
       Constructor best = null;

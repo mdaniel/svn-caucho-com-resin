@@ -10,16 +10,13 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import javax.naming.InitialContext;
-import javax.naming.Context;
-import javax.naming.NamingException;
-
 import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.webbeans.In;
 
 /**
  * The BasicServlet executes a simple JDBC query.
@@ -31,29 +28,7 @@ public class BasicServlet extends HttpServlet {
   /**
    * The saved DataSource for the database
    */
-  private DataSource _ds = null;
-
-  /**
-   * Sets the data source.  The &lt;init data-source="jdbc/test"/> will
-   * call this method at configuration time.
-   */
-  public void setDataSource(DataSource ds)
-  {
-    _ds = ds;
-  }
-
-  /**
-   * The init() method checks if the DataSource has been properly configured.
-   */
-  public void init()
-    throws ServletException
-  {
-    if (_ds == null) {
-      // servlets can also create an assemble() method as in the jdbc-basic
-      // tutorial to support the init-param configuration.
-      throw new ServletException("data-source must be configured in an init tag.");
-    }
-  }
+  @In private DataSource _ds;
 
   /**
    * Respond to a request by doing a query and returning the results.

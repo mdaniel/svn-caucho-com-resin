@@ -1,9 +1,9 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Comet/Reverse-AJAX Servlet</title>
+    <title>Server-Push Servlet</title>
     <description>
-<p>Resin's Comet servlet API enables streaming communication such
+<p>Resin's server-push (Comet) servlet API enables streaming communication such
 as reverse AJAX dynamic updates for browser/JavaScript applications.  The API
 encapsulates of the threading and communications issues between the
 request threads and the rest of the application.
@@ -18,7 +18,7 @@ request threads and the rest of the application.
 
 <s1>
 
-<p>Resin's Comet API lets server application push new data to
+<p>Resin's server-push (Comet) API lets server application push new data to
 the client as it becomes available.  Administration and monitoring
 applications need to continually update the client when new information
 becomes available to the server.
@@ -42,6 +42,10 @@ application sending Hessian packets to update the monitoring display.</p>
 <tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>resin-web.xml configuration</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/web-beans.xml"/></td>
+  <td>web-beans.xml marker for class scanning</td>
 </tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/TestCometServlet.java"/></td>

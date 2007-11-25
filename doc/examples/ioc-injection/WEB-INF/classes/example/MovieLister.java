@@ -1,32 +1,26 @@
 package example;
 
-import java.util.List;
+import java.util.ArrayList;
 
+import javax.webbeans.Component;
+import javax.webbeans.In;
+
+@Component
 public class MovieLister {
-  private MovieFinder _finder;
-  
-  /**
-   * Sets the finder.
-   */
-  public void setFinder(MovieFinder finder)
-  {
-    _finder = finder;
-  }
+  @In private MovieFinder _finder;
   
   /**
    * Returns movies by a particular director.
    */
   public Movie []moviesDirectedBy(String director)
   {
-    List movies = _finder.findAll();
-
-    for (int i = movies.size() - 1; i >= 0; i--) {
-      Movie movie = (Movie) movies.get(i);
-
-      if (! director.equals(movie.getDirector()))
-	movies.remove(i);
+    ArrayList<Movie> movieList = new ArrayList<Movie>();
+    
+    for (Movie movie : _finder.findAll()) {
+      if (director.equals(movie.getDirector()))
+	movieList.add(movie);
     }
 
-    return (Movie []) movies.toArray(new Movie[movies.size()]);
+    return (Movie []) movieList.toArray(new Movie[movieList.size()]);
   }
 }

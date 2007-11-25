@@ -1,10 +1,9 @@
 <web-app xmlns="http://caucho.com/ns/resin">
 
   <!--
-     - Configures the movie finder with some movies.
+     - Configures the movie finder singleton with some movies.
     -->
-  <resource jndi-name="movie-finder"
-            type="example.MovieFinderImpl">
+  <bean class="example.MovieFinderImpl">
     <init>
       <movie director="Jackson" title="LOTR: Fellowship of the Ring"/>
       <movie director="Jackson" title="LOTR: The Two Towers"/>
@@ -15,26 +14,13 @@
       <movie director="Gilliam" title="Monty Python's Holy Grail"/>
       <movie director="Gilliam" title="Brazil"/>
     </init>
-  </resource>
-
-  <!--
-     - Configures the movie lister with the configured movie finder.
-    -->
-  <resource jndi-name="movie-lister"
-            type="example.MovieLister">
-    <init>
-      <finder>${jndi("movie-finder")}</finder>
-    </init>
-  </resource>
+  </bean>
 
   <!--
      - Configures the movie servlet with the lister.
     -->
   <servlet servlet-name="movies"
            servlet-class="example.MovieServlet">
-    <init>
-      <movie-lister>${jndi("movie-lister")}</movie-lister>
-    </init>
   </servlet>
 
   <servlet-mapping url-pattern="/movies" servlet-name="movies"/>

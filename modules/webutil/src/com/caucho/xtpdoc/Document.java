@@ -175,51 +175,48 @@ public class Document {
     for (NavigationItem child : navItem.getChildren()) {
       fillChildNavigation(child);
     }
-    
-    String link = navItem.getLink();
 
-    if (link.indexOf('/') > 0) {
-      ServletContext rootWebApp = _webApp.getContext("/");
-      String uri = navItem.getUri();
-      String realPath = rootWebApp.getRealPath(uri);
+    try {
+      String link = navItem.getLink();
+
+      if (link.indexOf('/') > 0) {
+	ServletContext rootWebApp = _webApp.getContext("/");
+	String uri = navItem.getUri();
+	String realPath = rootWebApp.getRealPath(uri);
       
-      Path path = Vfs.lookup(realPath);
+	Path path = Vfs.lookup(realPath);
 
-      Path pwd = path.getParent();
-      Path toc = pwd.lookup("toc.xml");
+	Path pwd = path.getParent();
+	Path toc = pwd.lookup("toc.xml");
 
-      if (toc.canRead()) {
-	Config config = new Config();
+	if (toc.canRead()) {
+	  Config config = new Config();
 
-	int p = uri.lastIndexOf('/');
-	if (p > 0)
-	  uri = uri.substring(0, p + 1);
+	  int p = uri.lastIndexOf('/');
+	  if (p > 0)
+	    uri = uri.substring(0, p + 1);
 
-	Navigation navigation = new Navigation(this, uri, pwd, 0);
+	  Navigation navigation = new Navigation(this, uri, pwd, 0);
       
-	navigation.setChild(navItem);
+	  navigation.setChild(navItem);
 
-	try {
 	  config.configure(navigation, toc);
 
 	  if (navigation.getRootItem() != null)
 	    navItem.addChildren(navigation.getRootItem().getChildren());
 
 	  //navList.add(navigation);
-	} catch (Exception e) {
-	  e.printStackTrace();
-	  log.log(Level.FINE, e.toString(), e);
-	
-	  navigation = null;
-	}
 
-	/*
-	if (navigation != null)
-	  child = navigation.getRootItem();
-	else
-	  child = null;
-	*/
+	  /*
+	    if (navigation != null)
+	    child = navigation.getRootItem();
+	    else
+	    child = null;
+	  */
+	}
       }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 

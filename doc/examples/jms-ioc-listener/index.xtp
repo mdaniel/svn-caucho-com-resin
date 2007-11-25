@@ -14,13 +14,19 @@
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    </td><td>Configures the Queue, MessageSender, MessageListener.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MyListener.java"/>
-    </td><td>The message listener.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/MessageServlet.java"/>
-    </td><td>The message servlet
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/web.xml"/></td>
+  <td>Configures the Queue, MessageSender, MessageListener.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MyListener.java"/></td>
+  <td>The message listener.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MessageServlet.java"/></td>
+  <td>The message servlet</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="Overview">

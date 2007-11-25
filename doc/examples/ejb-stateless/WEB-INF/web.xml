@@ -1,14 +1,12 @@
 <web-app xmlns="http://caucho.com/ns/resin">
   <!--
-     - configuration for the JNDI server.
+     - Configures a string constant.
     -->
   <env-entry env-entry-name="greeting"
              env-entry-type="java.lang.String"
              env-entry-value="Hello, World."/>
 
-  <ejb-server jndi-local-prefix="java:comp/env/ejb">
-    <bean type="example.HelloBean"/>
-  </ejb-server>
+  <ejb-stateless-bean class="example.HelloBean"/>
 
   <!--
      - configuration for the client.

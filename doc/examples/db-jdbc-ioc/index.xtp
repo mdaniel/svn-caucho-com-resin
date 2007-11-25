@@ -6,7 +6,7 @@
     <title>Using Dependency-Injection with JDBC Databases</title>
     <description>
     <p>This tutorial describes the standard pattern
-for using a database in Resin, following the Dependency-Injection/Inversion-of-Control pattern.</p>
+for using a database in Resin, following the Dependency-Injection/Inversion-of-Control pattern using WebBeans annotations.</p>
     </description>
   </header>
 
@@ -17,30 +17,35 @@ for using a database in Resin, following the Dependency-Injection/Inversion-of-C
 <p>Using a JDBC database is a three step process:</p>
 
 <ul>
-<li>Configuring the &lt;database&gt; in the resin-web.xml or resin.conf
-</li><li>Retrieving the <code>DataSource</code> from the global JNDI
-resource map.
-</li><li>Using a <code>Connection</code> from the <code>DataSource</code>
-to execute the SQL.
-</li></ul>
+<li>Configuring the &lt;database&gt; in the resin-web.xml or resin.conf</li>
+<li>Injecting the <code>DataSource</code> to a field with a <code>@javax.webbeans.Id</code> annotation.</li>
+<li>Using a <code>Connection</code> from the <code>DataSource</code>
+to execute the SQL.</li>
+</ul>
 
 <p>JDBC database access is based around the Factory pattern.
 With JDBC, <code>javax.sql.DataSource</code> is the Factory object.
 The &lt;database&gt; configures the <code>DataSource</code> and stores it
-in the JNDI resource map.  The servlet will retrieve the
+in the WebBeans directory.  The servlet will retrieve the
 <code>DataSource</code> and use it as a factory to obtain
 <code>Connection</code> objects, the main workhorse for using databases.</p>
 </s1>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>resin-web.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/BasicServlet.java"/>
-    </td><td>The JDBC query servlet.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/>
-    </td><td>The JDBC initialization servlet.
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>resin-web.xml configuration</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/BasicServlet.java"/></td>
+  <td>The JDBC query servlet.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/></td>
+  <td>The JDBC initialization servlet.</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="Database Schema">
@@ -67,9 +72,9 @@ INSERT INTO jdbc_basic_brooms (name, cost) VALUES ('shooting star', 50)
 <s1 title="Database Configuration">
 
 <p>In Resin 3.0, the &lt;database&gt; tag configures the database
-pool and driver and saves the connection factory (DataSource) in JNDI.
-JNDI is just a global lookup tree available to
-all classes, making it straightforward to separate resource
+pool and driver and saves the connection factory (DataSource) in
+the Resin WebBeans directory.  WebBeans is an IoC (inversion-of-control)
+configuration system, making it straightforward to separate resource
 configuration from the application code.</p>
 
 <p>The &lt;driver&gt; tag configures the database driver.  The database
@@ -86,12 +91,12 @@ following order, after checking your database vendor's recommendations:</p>
 <ol>
 <li>JCA - Java Connection Architecture - this is a common driver
 interface for more than just JDBC.  If possible, it's generally the
-best to choose.
-</li><li>ConnectionPoolDataSource - JDBC driver which has extra hooks to
-help Resin pool the connections.
-</li><li>Driver - old-style JDBC driver.  Its main benefit is that it's
-generally always available as a fallback.
-</li></ol>
+best to choose.</li>
+<li>ConnectionPoolDataSource - JDBC driver which has extra hooks to
+help Resin pool the connections.</li>
+<li>Driver - old-style JDBC driver.  Its main benefit is that it's
+generally always available as a fallback.</li>
+</ol>
 
 <example>
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -122,31 +127,15 @@ intended for examples and testing.</p>
 
 <p>The servlet is configured with a <code>DataSource</code> to
 access JDBC.  Resin allows two styles of configuration: Dependency Injection
-using bean-style setters and standard
-servlet &lt;init-param&gt; configuration.  The Dependency Injection style is
-simpler, while the &lt;init-param&gt; style will work on
-all servlet engines. By creating a separate <code>assemble()</code> method,
-a servlet can take advantage of Resin's Dependency Injection and still
-be fully compatible with other servlet engines.</p>
+using WebBeans injection and standard servlet &lt;init-param&gt;
+configuration with JNDI lookups.  The Dependency Injection style is
+simpler, cleaner and makes the application more testable and robust.</p>
 
 <example>
+import javax.webbeans.In;
+
 public class BasicServlet extends HttpServlet {
-  private DataSource _ds;
-
-  public void setDataSource(DataSource ds)
-  {
-    _ds = ds;
-  }
-
-  public void init()
-    throws IOException, ServletException
-  {
-    if (_ds == null) {
-      // the servlet could also create an assemble() method as
-      // in the jdbc-basic tutorial
-      throw new ServletException("data-source must be assigned");
-    }
-  }
+  @In private DataSource _ds;
 
   ...
 }
@@ -158,37 +147,28 @@ public class BasicServlet extends HttpServlet {
 over the init-param method:</p>
 
 <ol>
+<li>The configuration is type-safe.  Resin's dependency injection will
+check the DataSource type before injecting the value.  Resin will also
+inform you of any conflicts, e.g. configuration of multiple matching
+databases.</li>
 <li>The servlet initialization code is simpler.
-The servlet doesn't need JNDI code.
-</li><li>The configured values can be more complicated than the string-limitation of &lt;init-param&gt;.
-</li><li>The DataSource itself isn't tied to JNDI, although JNDI will certainly
+The servlet doesn't need JNDI code.</li>
+<li>The configured values can be more complicated than the string-limitation of &lt;init-param&gt;.</li>
+<li>The DataSource itself isn't tied to JNDI, although JNDI will certainly
 remain the primary registry.
 </li></ol>
 
 <p>Enabling the Dependency Injection pattern is trivial: just
-add a <code>setDataSource</code> method as in the example above.</p>
+add the <code>@javax.webbeans.In</code> annotation to your
+<code>DataSource</code> field.</p>
 
 <example title="resin-web.xml">
 &lt;servlet servlet-name="my-servlet"
          servlet-class="example.BasicServlet"&gt;
-  &lt;init&gt;
-    &lt;data-source&gt;\${jndi("jdbc/basic")}&lt;/data-source&gt;
-  &lt;/init&gt;
 &lt;/servlet&gt;
 </example>
 
 </s2>
-
-<s2 title="Standard configuration">
-
-<example title="web.xml">
-...
-&lt;servlet servlet-name="my-servlet"
-         servlet-class="example.BasicServlet"&gt;
-  &lt;init-param data-source="java:comp/env/jdbc/basic"/&gt;
-&lt;/servlet&gt;
-...
-</example>
 
 </s2>
 
@@ -265,11 +245,11 @@ private void doQuery(PrintWriter out)
 <s1 title="See also">
 
 <ul>
-<li><a href="doc|config-database.xtp">Database configuration</a> reference
-</li><li><a href="doc|db-thirdparty.xtp">Sample configurations</a> for several database drivers
-</li><li>Using <a href="../db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
-</li><li>The <a href="../ioc-injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.
-</li></ul>
+  <li><a href="doc|config-database.xtp">Database configuration</a> reference</li>
+  <li><a href="doc|db-thirdparty.xtp">Sample configurations</a> for several database drivers</li>
+  <li>Using <a href="../db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a></li>
+  <li>The <a href="../ioc-injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.</li>
+</ul>
 
 </s1>
 

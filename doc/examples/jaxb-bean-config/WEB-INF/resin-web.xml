@@ -1,6 +1,6 @@
 <web-app xmlns="http://caucho.com/ns/resin">
 
-  <bean var="movie3" type="example.Movie">
+  <bean name="movie3" class="example.Movie">
     <init>
       <title>The Maltese Falcon</title>
       <star>Humphrey Bogart</star>
@@ -10,7 +10,7 @@
     </init>
   </bean>
   
-  <bean jndi-name="beans/theater" type="example.Theater">
+  <bean name="beans/theater" class="example.Theater">
     <init>
       <name>Balboa Theater</name>
       

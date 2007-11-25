@@ -1,8 +1,7 @@
-<%@ page import="javax.annotation.Resource" %>
+<%@ page import="javax.webbeans.In" %>
 <%@ page import="example.MathService" %>
 <%!
-@Resource(name="hessian/MathService")
-MathService math;
+@In MathService math;
 %>
 <pre>
 3 + 2 = <%= math.add(3, 2) %>

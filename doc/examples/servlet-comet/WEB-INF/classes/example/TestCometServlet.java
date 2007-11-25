@@ -4,25 +4,19 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import javax.annotation.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+
+import javax.webbeans.In;
 
 import com.caucho.servlet.comet.*;
 
 public class TestCometServlet extends GenericCometServlet
 {
-  private @Resource ScheduledExecutorService _timer;
-
-  private TimerService _timerService;
+  @In private TimerService _timerService;
   
   private ArrayList<CometState> _itemList
     = new ArrayList<CometState>();
-
-  public void init()
-  {
-    _timerService = new TimerService(_timer);
-  }
   
   @Override
   public boolean service(ServletRequest request,
@@ -83,10 +77,5 @@ public class TestCometServlet extends GenericCometServlet
     out.println("</script>");
 
     return true;
-  }
-
-  public void destroy()
-  {
-    _timerService.close();
   }
 }

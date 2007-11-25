@@ -100,11 +100,9 @@ registered as an MBean by specifying an <var>mbean-name</var>.
 Although it is less convenient than Resin's proxy interface, it has the
 advantage of being part of the JMX standard.</p>
 
-<p>Resin stores the MBeanServer it uses for resources in JNDI under
-the name java:comp/env/jmx/MBeanServer.  Applications will use JNDI
-to get the MBeanServer.  This JNDI name is not specified in any standard,
-so applications might want to encapsulate getting the MBeanServer in
-a class that can be changed easily.</p>
+<p>Resin stores the MBeanServer it uses for resources in WebBeans.
+Since MBeanServer is unique, the application can use <code>@In</code>
+to inject the server.</p>
 
 <p>All management of an MBean uses the MBeanServer and the MBean's
 ObjectName.  In this case, the ObjectName is "example:name=test".</p>
@@ -115,15 +113,14 @@ and <code>invoke</code>.  This example just uses <code>getAttribute</code>.
 </p>
 
 <example title="index.jsp">
-&lt;%@ page import='javax.naming.*, javax.management.*, example.TestAdmin' %&gt;
-&lt;%
-Context ic = new InitialContext();
-
-MBeanServer server = (MBeanServer) ic.lookup("java:comp/env/jmx/MBeanServer");
+&lt;%@ page import='javax.webbeans.In, javax.management.*, example.TestAdmin' %&gt;
+&lt;%!
+@In MBeanServer _server;
+%>&lt;%
 
 ObjectName name = new ObjectName("example:name=test");
 
-out.println("data: " + server.getAttribute(name, "Data"));
+out.println("data: " + _server.getAttribute(name, "Data"));
 %&gt;
 </example>
 <results>

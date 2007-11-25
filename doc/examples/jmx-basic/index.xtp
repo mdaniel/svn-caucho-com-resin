@@ -18,15 +18,24 @@
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/web.xml"/>
-    </td><td>Configures the JMX-managed bean
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Basic.java"/>
-    </td><td>The resource bean implementation.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/BasicMBean.java"/>
-    </td><td>The management interface for the bean.
-</td></tr><tr><td><viewfile-link file="index.jsp"/>
-    </td><td>Using the managed bean.
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/web.xml"/></td>
+  <td>Configures the JMX-managed bean</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/Basic.java"/></td>
+  <td>The resource bean implementation.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/BasicMBean.java"/></td>
+  <td>The management interface for the bean.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="index.jsp"/></td>
+  <td>Using the managed bean.</td>
+</tr>
+</deftable>
+
 </s1>
 
 <s1 title="JMX Resource">

@@ -10,14 +10,13 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import javax.annotation.Resource;
-
 import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.webbeans.Named;
 
 /**
  * The BasicServlet executes a simple JDBC query.
@@ -29,16 +28,8 @@ public class BasicServlet extends HttpServlet {
   /**
    * The saved DataSource for the database
    */
-  @Resource(name="jdbc/basic")
+  @Named("jdbc/basic")
   private DataSource _ds;
-
-  /**
-   * Sets the data source.
-   */
-  public void setDataSource(DataSource ds)
-  {
-    _ds = ds;
-  }
 
   /**
    * Respond to a request by doing a query and returning the results.

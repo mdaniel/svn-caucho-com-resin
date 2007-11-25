@@ -45,7 +45,7 @@
     <!--
        - SOA/WebServices
       -->
-    <item link="soa.xtp" title="WebServices/SOA">
+    <item link="soa.xtp" title="WebServices">
       <item link="soa-hello-world/index.xtp" title="Simple Service"/>
       <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
       <item link="esb-servlet-client/index.xtp" title="An ESB client"/>

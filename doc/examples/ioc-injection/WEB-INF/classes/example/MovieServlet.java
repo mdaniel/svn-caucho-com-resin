@@ -9,16 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
 
-public class MovieServlet extends HttpServlet {
-  private MovieLister _movieLister;
+import javax.webbeans.In;
 
-  /**
-   * Sets the movie lister.
-   */
-  public void setMovieLister(MovieLister lister)
-  {
-    _movieLister = lister;
-  }
+public class MovieServlet extends HttpServlet {
+  // Inject the MovieLister service
+  @In private MovieLister _movieLister;
   
   /**
    * Returns movies by a particular director.
@@ -40,9 +35,8 @@ public class MovieServlet extends HttpServlet {
 
     out.println("<h1>Director: " + director + "</h1>");
 
-    Movie []movies = _movieLister.moviesDirectedBy(director);
-
-    for (int i = 0; i < movies.length; i++)
-      out.println(movies[i].getTitle() + "<br>");
+    for (Movie movie : _movieLister.moviesDirectedBy(director)) {
+      out.println(movie.getTitle() + "<br>");
+    }
   }
 }

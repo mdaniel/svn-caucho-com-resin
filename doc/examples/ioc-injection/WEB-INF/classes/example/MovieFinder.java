@@ -6,5 +6,5 @@ public interface MovieFinder {
   /**
    * Returns all the movies.
    */
-  public List findAll();
+  public List<Movie> findAll();
 }
