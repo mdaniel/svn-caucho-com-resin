@@ -58,6 +58,8 @@ public class ProducesComponent extends ComponentImpl {
 
   private ComponentImpl []_args;
 
+  private boolean _isBound;
+
   public ProducesComponent(WbWebBeans webbeans,
 			   ComponentImpl producer,
 			   Method method)
@@ -126,6 +128,9 @@ public class ProducesComponent extends ComponentImpl {
     try {
       Object factory = _producer.get();
 
+      if (_args == null)
+	bind();
+
       Object []args;
       if (_args.length > 0) {
 	args = new Object[_args.length];
@@ -147,19 +152,26 @@ public class ProducesComponent extends ComponentImpl {
   @Override
   public void bind()
   {
-    String loc = WebBeansContainer.location(_method);
+    synchronized (this) {
+      if (_isBound)
+	return;
+
+      _isBound = true;
+      
+      String loc = WebBeansContainer.location(_method);
     
-    Class []param = _method.getParameterTypes();
-    Annotation [][]paramAnn = _method.getParameterAnnotations();
+      Class []param = _method.getParameterTypes();
+      Annotation [][]paramAnn = _method.getParameterAnnotations();
 
-    _args = new ComponentImpl[param.length];
+      _args = new ComponentImpl[param.length];
 
-    for (int i = 0; i < param.length; i++) {
-      _args[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
+      for (int i = 0; i < param.length; i++) {
+	_args[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
 
-      if (_args[i] == null)
-	throw error(_method, L.l("Type '{0}' for method parameter #{1} has no matching component.",
-				 param[i].getSimpleName(), i));
+	if (_args[i] == null)
+	  throw error(_method, L.l("Type '{0}' for method parameter #{1} has no matching component.",
+				   param[i].getSimpleName(), i));
+      }
     }
   }
 

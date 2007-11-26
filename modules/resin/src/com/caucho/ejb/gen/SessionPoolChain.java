@@ -48,12 +48,16 @@ abstract public class SessionPoolChain extends FilterCallChain {
   private static L10N L = new L10N(SessionPoolChain.class);
 
   protected BaseMethod _apiMethod;
+  protected boolean _isRemote;
   
-  protected SessionPoolChain(CallChain next, BaseMethod apiMethod)
+  protected SessionPoolChain(CallChain next,
+			     BaseMethod apiMethod,
+			     boolean isRemote)
   {
     super(next);
 
     _apiMethod = apiMethod;
+    _isRemote = isRemote;
   }
 
   protected void generateFilterCall(JavaWriter out, String retVar,
@@ -66,6 +70,11 @@ abstract public class SessionPoolChain extends FilterCallChain {
   protected void generateMethodCall(JavaWriter out, String []args)
     throws IOException
   {
+  }
+
+  protected boolean isRemote()
+  {
+    return _isRemote;
   }
 
   protected void generateCallInterceptors(JavaWriter out, String []args)

@@ -191,15 +191,13 @@ public class JaxbBeanType extends TypeStrategy
     introspectMethods(accessType);
     introspectFields(accessType);
 
-    /*
     try {
-      InjectIntrospector.introspectConstruct(_injectList, _type);
+      InjectIntrospector.introspectInit(_injectList, _type);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new ConfigException(e);
     }
-    */
   }
 
   private void introspectClassResources(Class type)

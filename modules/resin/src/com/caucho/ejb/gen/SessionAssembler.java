@@ -102,7 +102,29 @@ public class SessionAssembler extends BeanAssembler
                                        fullClassName,
                                        viewPrefix,
                                        viewSuffix,
-                                       false);
+                                       false,
+				       false);
+
+    _genClass.addComponent(view);
+
+    return view;
+  }
+
+  /**
+   * Creates the home view.
+   */
+  public ViewClass createRemoteView(ArrayList<ApiClass> apiList,
+				    String fullClassName,
+				    String viewPrefix,
+				    String viewSuffix)
+  {
+    SessionView view = new SessionView(_sessionBean,
+                                       apiList,
+                                       fullClassName,
+                                       viewPrefix,
+                                       viewSuffix,
+                                       false,
+				       true);
 
     _genClass.addComponent(view);
 

@@ -417,9 +417,9 @@ public class EJBServer
     Object obj = factory.getObject();
 
     if (! (obj instanceof ConnectionFactory))
-      throw new ConfigException(L.l("`{0}' must be a JMS ConnectionFactory.", obj));
+      throw new ConfigException(L.l("'{0}' must be a JMS ConnectionFactory.", obj));
 
-    _jmsConnectionFactory = (ConnectionFactory) obj;
+    _ejbContainer.setJmsConnectionFactory((ConnectionFactory) obj);
   }
 
   /**

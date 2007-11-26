@@ -37,8 +37,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
-import javax.ejb.SessionContext;
-import javax.ejb.SessionSynchronization;
+import javax.ejb.*;
 import java.io.IOException;
 
 /**

@@ -3,9 +3,10 @@
     <product>resin-ee</product>
     <title>Field-based Persistent Objects</title>
         <description>
-          <p>Amber's persistence supports a field-based relational model: each
-Java field represents a database column.  The tutorial
-shows the configuration, classes, and client code for a single-table entity. </p>
+          <p>Amber's persistence based on JPA (the Java Persistence
+Architecture)  supports a field-based relational model: each Java field
+represents a database column.  The tutorial shows the configuration,
+classes, and client code for a single-table entity. </p>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>basic</tutorial-startpage>
@@ -38,8 +39,7 @@ updating the database in a object-oriented fashion, and also provides
 caching.  Still, viewing Amber as a SQL extension supporting
 relations and objects is a good starting model.</p> 
 
-<p>The tutorial uses "entity" to mean a persistent object.
-Amber's entities are far simpler than the "EntityBean" of EJB 2.1.</p>
+<p>The tutorial uses "entity" to mean a persistent object.</p>
 
 </s1>
 
@@ -285,7 +285,77 @@ default column name is the field name.</p>
 
 </s1>
 
-<s1 title="Client Servlet">
+<s1 title="Creating an entry">
+
+<p>With Amber, you create a new database row by creating the model
+object and then calling <code>persist()</code> on the
+<code>EntityManager</code>.  The <code>EntityManager</code> is the main
+facade for creating, querying and removing JPA objects.  Normally,
+the application will use injection to get an <code>EntityManager</code>.</p>
+
+<example title="Creating an instance">
+import javax.persistence.EntityManager;
+import javax.webbeans.In;
+
+public class MyServlet {
+  @In EntityManager _manager;
+
+  public void create()
+  {
+    _manager.getTransation().begin();
+    try {
+      _manager.persist(new Course("Potions", "Severus Snape"));
+    } finally {
+      _manager.getTransation().commit();
+    }
+  }
+}
+</example>
+
+<p>As mentioned above, the servlet gets its <code>EntityManager</code>
+using WebBeans injection annotated by <code>@In</code> since there is only
+one <code>EntityManager</code> in the application.</p>
+
+<p>The <code>persist()</code> must be enclosed in a transaction, as required
+by the JPA specification.  The transaction ensures that the database update
+is safe and consistent.  In this example, we've used an explicit transaction.
+Many applications will use session beans to handle the transactions
+automatically.</p>
+
+</s1>
+
+<s1 title="Finding a row by the primary key">
+
+<p>Once the Course is in the database, we can read it by its primary key using
+the <code>EntityManager</code> <code>find()</code> method.</p>
+
+<example title="Find by primary key">
+import javax.persistence.EntityManager;
+import javax.webbeans.In;
+
+public class MyServlet {
+  @In EntityManager _manager;
+
+  public void find(PrintWriter out)
+  {
+    Course course = _manager.find(Course.class, 1);
+
+    out.println(course.course + " " + course.teacher());
+  }
+}
+</example>
+
+<p>Notice that the read doesn't require a transaction.  In fact, Amber
+generally generally caches reads and only accesses the database when the
+cache expires or the data changes.</p>
+
+<p>Of course, the find method is generally only useful if you already
+know the primary key.  Usually, your application will need to query
+the database using some other criteria, like the name of the Course.</p>
+
+</s1>
+
+<s1 title="Querying the data">
 
 <p>The client servlet queries the database for all courses and lists
 them.  It uses the <code>EntityManager</code> API to create a
@@ -331,19 +401,12 @@ instructor: Minerva McGonagall
 <s2 title="EntityManager">
 
 <p><code>EntityManager</code> is the primary interface for
-finding, querying, adding and deleting persistent beans.  It is stored
-in JNDI at java:comp/env/persistence/PersistenceContext/example.</p>
+finding, querying, adding and deleting persistent beans.  You can use
+the WebBeans <code>@In</code> annotation or use the older
+<code>@PersistenceContext</code> annotation.</p>
 
 <example>
 @PersistenceContext(name="example")
-</example>
-
-<p>The example uses dependency injection to configure the entity
-manager.</p>
-
-<example title="web.xml configuration">
-&lt;servlet servlet-name="basic" servlet-class="example.CourseServlet"&gt;
-&lt;/servlet&gt;
 </example>
 
 </s2>
@@ -371,6 +434,36 @@ Queries which return a single value can
 use <code>getSingleResult()</code>.</p>
 
 </s2>
+
+</s1>
+
+<s1 title="Removing an entry">
+
+<p>Finally, the application will use <code>remove()</code> in
+the <code>EntityManager</code> object to remove the entry.</p>
+
+<example title="Removing an instance">
+import javax.persistence.EntityManager;
+import javax.webbeans.In;
+
+public class MyServlet {
+  @In EntityManager _manager;
+
+  public void remove(Course course)
+  {
+    _manager.getTransation().begin();
+    try {
+      _manager.remove(course);
+    } finally {
+      _manager.getTransation().commit();
+    }
+  }
+}
+</example>
+
+<p>The <code>remove()</code> must be enclosed in a transaction, just like
+the <code>persist()</code> call.  Again, the transaction ensures that
+the database update is safe and consistent.</p>
 
 </s1>
 

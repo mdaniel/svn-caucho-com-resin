@@ -607,22 +607,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     ApiClass home = new ApiClass(homeClass);
     
     setHomeWrapper(home);
-
-    /*
-    // ejb/0ff0
-    // Adds the 2.1 remote interface
-    ApiMethod method = findFirstCreateMethod(home);
-
-    if (method != null) {
-      ApiClass remoteWrapper;
-
-      remoteWrapper = new ApiClass(method.getReturnType());
-
-      // Order is important.
-      setRemote21(remoteWrapper);
-      setRemoteWrapper(remoteWrapper);
-    }
-    */
   }
 
   /**
@@ -800,16 +784,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     ApiClass localHome = new ApiClass(localHomeClass);
     
     setLocalHomeWrapper(localHome);
-
-    // ejb/0ff4
-    // Adds the 2.1 local interface
-    ApiMethod method = findFirstCreateMethod(localHome);
-
-    ApiClass localWrapper = new ApiClass(method.getReturnType());
-
-    // Order is important.
-    setLocal21(localWrapper);
-    setLocalWrapper(localWrapper);
   }
 
   /**
@@ -1293,7 +1267,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.add(_remote21);
 
-      _remoteView21 = createObjectView(list, "Remote", "21");
+      _remoteView21 = createRemoteObjectView(list, "Remote", "21");
       _remoteView21.introspect();
     }
 
@@ -1303,7 +1277,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       list.remove(_remote21);
 
       if (list.size() > 0) {
-        _remoteView = createObjectView(list, "Remote", "");
+        _remoteView = createRemoteObjectView(list, "Remote", "");
         _remoteView.introspect();
       }
     }
@@ -1350,7 +1324,15 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
                                            String suffix)
     throws ConfigException
   {
-    return new EjbObjectView(this, apiList, prefix, suffix);
+    return new EjbObjectView(this, apiList, prefix, suffix, false);
+  }
+  
+  protected EjbObjectView createRemoteObjectView(ArrayList<ApiClass> apiList,
+						 String prefix,
+						 String suffix)
+    throws ConfigException
+  {
+    return new EjbObjectView(this, apiList, prefix, suffix, true);
   }
 
   /**

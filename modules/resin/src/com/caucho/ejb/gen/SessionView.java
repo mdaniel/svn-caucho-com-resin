@@ -37,6 +37,7 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.ejb.*;
 
 /**
  * Generates the skeleton for a session view.
@@ -50,15 +51,17 @@ public class SessionView extends ViewClass {
   private String _suffix;
   private String _contextClassName;
   private boolean _isStateless;
+  private boolean _isRemote;
 
   public SessionView(EjbBean bean,
 		     ArrayList<ApiClass> apiList,
                      String contextClassName,
                      String prefix,
                      String suffix, // "21" for EJB 2.1 only
-                     boolean isStateless)
+                     boolean isStateless,
+		     boolean isRemote)
   {
-    super(prefix + suffix, (isStateless ? "StatelessObject" : "SessionObject") + suffix);
+    super(prefix + getSuffix(apiList), getSuperclass(isStateless, apiList));
 
     _bean = bean;
 
@@ -69,21 +72,43 @@ public class SessionView extends ViewClass {
 
     _contextClassName = contextClassName;
     _prefix = prefix;
-    _suffix = suffix;
+    _suffix = getSuffix(apiList);
     _isStateless = isStateless;
+    _isRemote = isRemote;
 
     setStatic(true);
   }
 
+  private static String getSuperclass(boolean isStateless,
+				      ArrayList<ApiClass> apiList)
+  {
+    if (isStateless)
+      return "StatelessObject" + getSuffix(apiList);
+    else
+      return "SessionObject" + getSuffix(apiList);
+  }
+
+  private static String getSuffix(ArrayList<ApiClass> apiList)
+  {
+    for (ApiClass api : apiList) {
+      if (EJBObject.class.isAssignableFrom(api.getJavaClass()))
+	return "21";
+      else if (EJBLocalObject.class.isAssignableFrom(api.getJavaClass()))
+	return "21";
+    }
+
+    return "";
+  }
+  
   /**
    * Adds the pool chaining.
    */
   public CallChain createPoolChain(CallChain call, BaseMethod method)
   {
     if (_isStateless)
-      return new StatelessPoolChain(_bean, call, method);
+      return new StatelessPoolChain(_bean, call, method, _isRemote);
     else
-      return new StatefulPoolChain(_bean, call, method);
+      return new StatefulPoolChain(_bean, call, method, _isRemote);
   }
 
   public void generate(JavaWriter out)

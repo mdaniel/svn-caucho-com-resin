@@ -146,6 +146,14 @@ abstract public class BeanAssembler {
                                        String viewSuffix);
 
   /**
+   * Creates the home view.
+   */
+  abstract public ViewClass createRemoteView(ArrayList<ApiClass> apiList,
+					     String fullClassName,
+					     String viewPrefix,
+					     String viewSuffix);
+
+  /**
    * Checks for the existence of a method.
    */
   public static boolean hasMethod(ApiClass cl, String methodName, Class []args)

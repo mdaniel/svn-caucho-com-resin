@@ -98,7 +98,29 @@ public class StatelessAssembler extends SessionAssembler
                                        fullClassName,
                                        viewPrefix,
                                        viewSuffix,
-                                       true);
+                                       true,
+				       false);
+
+    _genClass.addComponent(view);
+
+    return view;
+  }
+
+  /**
+   * Creates the home view.
+   */
+  public ViewClass createRemoteView(ArrayList<ApiClass> apiList,
+				    String fullClassName,
+				    String viewPrefix,
+				    String viewSuffix)
+  {
+    SessionView view = new SessionView(_sessionBean,
+                                       apiList,
+                                       fullClassName,
+                                       viewPrefix,
+                                       viewSuffix,
+                                       true,
+				       true);
 
     _genClass.addComponent(view);
 
@@ -116,7 +138,8 @@ public class StatelessAssembler extends SessionAssembler
 
     CallChain call = method.getCall();
 
-    call = new StatelessPoolChain(_sessionBean, call, method);
+    boolean isRemote = false;
+    call = new StatelessPoolChain(_sessionBean, call, method, isRemote);
 
     method.setCall(call);
 

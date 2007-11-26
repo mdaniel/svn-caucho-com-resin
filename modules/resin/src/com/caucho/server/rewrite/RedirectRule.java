@@ -67,13 +67,7 @@ public class RedirectRule
                               FilterChain accept,
                               FilterChainMapper next)
   {
-    if (queryString == null)
-      return new RedirectFilterChain(uri);
-
-    if (uri.indexOf('?') >= 0)
-      return new RedirectFilterChain(uri + "&" + queryString);
-    else
-      return new RedirectFilterChain(uri + "?" + queryString);
+    return new RedirectQueryFilterChain(uri);
   }
 
   @Override

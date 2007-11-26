@@ -244,6 +244,11 @@ public class MBeanContext
       throw new MBeanRegistrationException(e);
     }
 
+    if (log.isLoggable(Level.FINER)
+	&& ! name.equals(_mbeanServer.SERVER_DELEGATE_NAME)) {
+      log.finer(getDebugName(name, mbean) + " registered in " + this);
+    }
+
     addMBean(name, mbean);
 
     try {
@@ -361,8 +366,11 @@ public class MBeanContext
       log.warning(L.l("'{0}' is an empty mbean", name));
       return;
     }
-    
-    log.finer(getDebugName(name, mbean) + " registered in " + this);
+
+    // at finest to avoid double logging for context and global
+    if (log.isLoggable(Level.FINEST))
+      log.finest(getDebugName(name, mbean) + " registered in " + this);
+
     //log.fine(L.l("{0} registered in {1}", getDebugName(name, mbean), this));
 
     _mbeans.put(name, mbean);

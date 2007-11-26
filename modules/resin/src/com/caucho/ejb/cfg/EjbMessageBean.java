@@ -78,7 +78,7 @@ public class EjbMessageBean extends EjbBean {
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
   private String _selector;
   private String _subscriptionName;
-  private int _consumerMax = 5;
+  private int _consumerMax = -1;
   private String _messageDestinationLink;
   private Class _messagingType;
 
@@ -88,8 +88,6 @@ public class EjbMessageBean extends EjbBean {
   public EjbMessageBean(EjbConfig config, String ejbModuleName)
   {
     super(config, ejbModuleName);
-
-    _consumerMax = config.getEjbContainer().getMessageConsumerMax();
   }
 
   /**
@@ -500,7 +498,11 @@ public class EjbMessageBean extends EjbBean {
 
     server.setMessageSelector(_messageSelector);
     server.setMessageDestinationLink(_messageDestinationLink);
-    server.setConsumerMax(_consumerMax);
+
+    if (_consumerMax > 0)
+      server.setConsumerMax(_consumerMax);
+    else
+      server.setConsumerMax(getEjbContainer().getMessageConsumerMax());
 
     Class beanClass = javaGen.loadClass(getEJBClass().getName());
 

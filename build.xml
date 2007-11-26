@@ -260,7 +260,7 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, ejb, hessian, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util, webbeans, version">
 
     <!-- build module -->
 

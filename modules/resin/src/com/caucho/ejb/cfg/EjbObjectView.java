@@ -47,16 +47,21 @@ public class EjbObjectView extends EjbView
   private static final Logger log = Log.open(EjbObjectView.class);
   private static final L10N L = new L10N(EjbObjectView.class);
 
+  private boolean _isRemote;
+  
   /**
    * Creates a new entity bean configuration.
    */
   public EjbObjectView(EjbBean bean,
 		       ArrayList<ApiClass> apiList,
 		       String prefix,
-		       String suffix)
+		       String suffix,
+		       boolean isRemote)
     throws ConfigException
   {
     super(bean, apiList, prefix, suffix);
+
+    _isRemote = isRemote;
   }
 
   /**
@@ -66,10 +71,20 @@ public class EjbObjectView extends EjbView
                               String fullClassName)
     throws ConfigException
   {
-    ViewClass viewClass = assembler.createView(getApiList(),
-                                               fullClassName,
-                                               getPrefix(),
-                                               getSuffix());
+    ViewClass viewClass;
+
+    if (_isRemote) {
+      viewClass = assembler.createRemoteView(getApiList(),
+					     fullClassName,
+					     getPrefix(),
+					     getSuffix());
+    }
+    else {
+      viewClass = assembler.createView(getApiList(),
+				       fullClassName,
+				       getPrefix(),
+				       getSuffix());
+    }
 
     assembleMethods(assembler, viewClass, fullClassName);
   }

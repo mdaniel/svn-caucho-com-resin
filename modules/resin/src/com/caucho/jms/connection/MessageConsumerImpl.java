@@ -309,8 +309,7 @@ public class MessageConsumerImpl
 
       if (msg != null) {
         if (log.isLoggable(Level.FINE)) {
-          log.fine(_queue + " receive message " + msg
-                   + " for listener " + listener);
+          log.fine(_queue + " deliver " + msg + " to listener " + listener);
         }
 
         msg.setSession(_session);

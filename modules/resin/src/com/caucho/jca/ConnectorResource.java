@@ -360,7 +360,7 @@ public class ConnectorResource implements EnvironmentListener {
     if (_name == null)
       _name = _jndiName;
 
-    if (_name == null)
+    if (_name == null && _rar != null)
       _name = _rar.getDisplayName() + "-" + _idGen++;
 
     // create a default outbound factory

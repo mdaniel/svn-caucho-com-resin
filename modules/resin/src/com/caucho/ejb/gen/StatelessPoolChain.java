@@ -52,9 +52,12 @@ public class StatelessPoolChain extends SessionPoolChain {
   private BaseMethod _apiMethod;
   private Method _implMethod;
 
-  public StatelessPoolChain(EjbBean bean, CallChain next, BaseMethod apiMethod)
+  public StatelessPoolChain(EjbBean bean,
+			    CallChain next,
+			    BaseMethod apiMethod,
+			    boolean isRemote)
   {
-    super(next, apiMethod);
+    super(next, apiMethod, isRemote);
 
     _bean = bean;
     _apiMethod = apiMethod;

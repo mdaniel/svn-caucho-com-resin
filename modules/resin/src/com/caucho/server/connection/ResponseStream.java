@@ -550,7 +550,7 @@ class ResponseStream extends ToByteResponseStream {
 					"" + ch));
 
 	if (app != null)
-	  app.log(exn.getMessage(), exn);
+	  app.log(exn.toString(), exn);
 	else
 	  exn.printStackTrace();
 	break;

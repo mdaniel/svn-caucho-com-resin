@@ -50,9 +50,12 @@ public class StatefulPoolChain extends SessionPoolChain {
   private final EjbBean _bean;
   private Method _implMethod;
 
-  public StatefulPoolChain(EjbBean bean, CallChain next, BaseMethod apiMethod)
+  public StatefulPoolChain(EjbBean bean,
+			   CallChain next,
+			   BaseMethod apiMethod,
+			   boolean isRemote)
   {
-    super(next, apiMethod);
+    super(next, apiMethod, isRemote);
 
     _bean = bean;
 
@@ -207,7 +210,8 @@ public class StatefulPoolChain extends SessionPoolChain {
         }
       }
 
-      out.println("_server.remove(_context.getPrimaryKey());");
+      if (isRemote())
+	out.println("_server.remove(_context.getPrimaryKey());");
     }
 
     out.println("ptr = null;");
