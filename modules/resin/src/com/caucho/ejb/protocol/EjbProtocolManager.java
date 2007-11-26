@@ -431,7 +431,7 @@ public class EjbProtocolManager {
       prefix = prefix + "/";
     
     if (eApp != null)
-      prefix = prefix + eApp.getName();
+      prefix = prefix + eApp.getName() + "/";
 
     prefix = prefix + server.getEJBName();
 

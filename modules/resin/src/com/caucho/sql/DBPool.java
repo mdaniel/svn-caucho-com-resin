@@ -657,10 +657,8 @@ public class DBPool implements DataSource {
 
     if (_jndiName != null) {
       String name = _jndiName;
-      if (! name.startsWith("java:"))
-        name = "java:comp/env/" + name;
 
-      Jndi.bindDeep(name, this);
+      Jndi.bindDeepShort(name, this);
     }
 
     String name = _name;

@@ -458,6 +458,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     throws ConfigException
   {
     try {
+      AmberContainer.create().start();
+      
       _configManager.start();
 
       Thread thread = Thread.currentThread();

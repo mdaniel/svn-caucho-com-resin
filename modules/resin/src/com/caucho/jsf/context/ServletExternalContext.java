@@ -418,7 +418,6 @@ public class ServletExternalContext extends ExternalContext {
   public void redirect(String url)
     throws IOException
   {
-    Thread.dumpStack();
     _response.sendRedirect(url);
 
     FacesContext.getCurrentInstance().responseComplete();

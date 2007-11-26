@@ -673,7 +673,9 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_tempLoader);
+      // jpa/1630
+      // thread.setContextClassLoader(_tempLoader);
+      thread.setContextClassLoader(_parentLoader);
 
       ArrayList<RootContext> rootList
 	= new ArrayList<RootContext>(_pendingRootList);

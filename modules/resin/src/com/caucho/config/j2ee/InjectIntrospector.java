@@ -29,6 +29,7 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.amber.manager.*;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
@@ -439,6 +440,8 @@ public class InjectIntrospector {
 			       PersistenceContext pContext)
     throws ConfigException
   {
+    AmberContainer.create().start();
+    
     if (! type.isAssignableFrom(EntityManager.class)) {
       throw new ConfigException(location + L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", type.getName()));
     }

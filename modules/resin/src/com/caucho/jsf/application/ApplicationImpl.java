@@ -198,6 +198,12 @@ public class ApplicationImpl extends Application
     addComponent(HtmlMessages.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlMessages");
 
+    addComponent(HtmlOutputFormat.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlOutputFormat");
+
+    addComponent(HtmlOutputLabel.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlOutputLabel");
+
     addComponent(HtmlOutputLink.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlOutputLink");
 
