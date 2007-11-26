@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
+import com.caucho.naming.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
@@ -52,8 +53,50 @@ import javax.webbeans.*;
 public class BeanConfig extends WbComponentConfig {
   private static final L10N L = new L10N(BeanConfig.class);
 
+  private String _jndiName;
+  private String _mbeanName;
+  
   public BeanConfig()
   {
     setScope("singleton");
+  }
+
+  public void setJndiName(String jndiName)
+  {
+    _jndiName = jndiName;
+  }
+
+  public void setMBeanName(String mbeanName)
+  {
+    _mbeanName = mbeanName;
+  }
+
+  public void init()
+  {
+    super.init();
+
+    try {
+      if (_comp == null) {
+      }
+      else if (_jndiName != null) {
+	Jndi.bindDeepShort(_jndiName, _comp);
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+
+    /*
+    if (_mbeanName != null) {
+      Object mbean = _object;
+
+      if (_mbeanInterface != null)
+	mbean = new IntrospectionMBean(mbean, _mbeanInterface);
+      
+      Jmx.register(mbean, mbeanName);
+      _mbeanInfo = mbeanServer.getMBeanInfo(mbeanName);
+    }
+    */
   }
 }

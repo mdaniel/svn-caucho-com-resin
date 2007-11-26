@@ -342,7 +342,7 @@ public class AmberPersistenceUnit {
   {
     if (_jdbcMetaData == null) {
       if (getDataSource() == null)
-        throw new NullPointerException("No data-source specified for PersistenceUnit");
+        throw new ConfigException("No data-source specified for PersistenceUnit");
 
       _jdbcMetaData = JdbcMetaData.create(getDataSource());
     }

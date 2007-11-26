@@ -12,7 +12,7 @@ shows the configuration, classes, and client code for a single-table entity. </p
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="Overview">
 
@@ -45,15 +45,27 @@ Amber's entities are far simpler than the "EntityBean" of EJB 2.1.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>resin-web.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    </td><td>persistence.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/Course.java"/>
-    </td><td>The course bean
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
-    </td><td>The course servlet
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>resin-web.xml configuration</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/></td>
+  <td>META-INF/persistence.xml configuration</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/Course.java"/></td>
+  <td>The course bean</td>
+</tr>
+
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/></td>
+  <td>The course servlet</td>
+</tr>
+</deftable>
+
 </s1>
 
 <s1 title="Database Model">
@@ -123,9 +135,9 @@ made it available to the application in the persistence-unit "example".</p>
 <p>A servlet will then lookup the CourseBean with the following procedure:</p>
 
 <ol>
-<li>Obtain an EntityManager for the persistence unit from JNDI either directly as java:comp/env/persistence/PersistenceContext/example, or using the @PersistenceUnit injection annotation.
-</li><li>Use the EntityManager to find the instance of the bean.
-</li></ol>
+<li>Obtain an EntityManager for the persistence unit either using WebBeans @In (or @Named) or using the @PersistenceUnit injection annotation.</li>
+<li>Use the EntityManager to find the instance of the bean.</li>
+</ol>
 
 </s1>
 
@@ -135,13 +147,14 @@ made it available to the application in the persistence-unit "example".</p>
 produce a maintainable persistent object:</p>
 
 <ul>
-<li>A annotation to mark the class as persistent.
-</li><li>An annotation naming the relational table for the class.
-</li><li>An annotation to mark the primary key and any auto-generation
-capability.
-</li><li>Annotations to mark each persistent field.
-</li><li>Annotations naming the columns for the table.
-</li></ul>
+<li>A annotation to mark the class as persistent.</li>
+<li>An annotation naming the relational table for the class.</li>
+<li>An annotation to mark the primary key and any auto-generation capability.
+</li>
+<li>Annotations to mark each persistent field.</li>
+<li>Annotations naming the columns for the table.
+</li>
+</ul>
 
 <p>The following code shows the Amber annotations for the course
 entity.  As a quick comparison with the minimal Java class shows,
@@ -200,11 +213,10 @@ persistent object.</p>
 <p><a href="doc|amber-table.xtp#@Entity">@javax.persistence.Entity</a> declares
 a Java class as an entity bean.</p>
 
-<p>Since the @Id annotation marks a field, the
-bean's fields are persistent, as in JDO.  Unlike JDO, only
-the bean itself or its children may access the fields.  Other classes
-must use the bean's methods, like getters or setters, to
-indirectly access the fields.</p>
+<p>Since the @Id annotation marks a field, the bean's fields
+are persistent.  Only the bean itself or its children may access the
+fields.  Other classes must use the bean's methods, like getters or
+setters, to indirectly access the fields.</p>
 
 <p>If the @Id annotation had marked a property method,
 the methods would be enhanced. </p>
@@ -271,31 +283,6 @@ default column name is the field name.</p>
 
 </s2>
 
-<s2 title="Under the covers: bytecode enhancement">
-
-<p>Amber processes the bean's class to implement field-enhancement.
-In practice, this means replacing setting a field with a Resin setter
-and getting a field with an Amber getter.</p>
-
-<example>
-public String course()
-{
-  return _course;
-}
-</example>
-
-<p>For example, Resin would process the above method and produce
-something like:</p>
-
-<example>
-public String course()
-{
-  return __caucho_get_course();
-}
-</example>
-
-</s2>
-
 </s1>
 
 <s1 title="Client Servlet">
@@ -306,8 +293,11 @@ them.  It uses the <code>EntityManager</code> API to create a
 
 
 <example title="CourseServlet.java">
+import javax.persistence.*;
+import javax.webbeans.In;
+
 public class CourseServlet extends HttpServlet {
-  @PersistenceUnit(name="example")
+  @In
   private EntityManager _manager;
 
   public void service(HttpServletRequest req, HttpServletResponse res)

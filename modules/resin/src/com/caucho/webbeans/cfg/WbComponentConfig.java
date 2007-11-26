@@ -69,6 +69,8 @@ public class WbComponentConfig {
   
   private InitProgram _init;
 
+  protected ComponentImpl _comp;
+
   public WbComponentConfig()
   {
     _webbeans = WebBeansContainer.create().getWbWebBeans();
@@ -235,6 +237,8 @@ public class WbComponentConfig {
 
     comp.init();
     _webbeans.addWbComponent(comp);
+
+    _comp = comp;
   }
 
   private void introspect()

@@ -1,11 +1,11 @@
 <document>
   <header>
     <product>resin</product>
-    <title>A frontend client for a service on the Resin ESB</title>
+    <title>A frontend client for a Hessian service</title>
     <description>
-      <p>This tutorial shows how to access services on the Resin Enterprise 
-      Service Bus (ESB) using J2EE injection.  A servlet does frontend 
-      presentation for the results of an ESB service.
+      <p>This tutorial shows how to access services with Resin
+      WebBeans injection.  A servlet does frontend 
+      presentation for the results of a Hessian web service.
       </p>
     </description>
     <type>tutorial</type>

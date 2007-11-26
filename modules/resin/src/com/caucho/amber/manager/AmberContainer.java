@@ -62,7 +62,7 @@ import java.util.zip.ZipInputStream;
 /**
  * Environment-based container.
  */
-public class AmberContainer implements ScanListener {
+public class AmberContainer implements ScanListener, EnvironmentListener {
   private static final L10N L = new L10N(AmberContainer.class);
   private static final Logger log
     = Logger.getLogger(AmberContainer.class.getName());
@@ -159,6 +159,8 @@ public class AmberContainer implements ScanListener {
       copyContainerDefaults(_parentAmberContainer);
 
     _parentLoader.addScanListener(this);
+
+    Environment.addEnvironmentListener(this);
 
     try {
       if (_parentLoader instanceof DynamicClassLoader)
@@ -983,6 +985,26 @@ public class AmberContainer implements ScanListener {
     }
       
     context.addClassName(className);
+  }
+
+  //
+  // EnvironmentListener
+  //
+  
+  /**
+   * Handles the case where the environment is starting (after init).
+   */
+  public void environmentStart(EnvironmentClassLoader loader)
+    throws Throwable
+  {
+    start();
+  }
+
+  /**
+   * Handles the case where the environment is stopping
+   */
+  public void environmentStop(EnvironmentClassLoader loader)
+  {
   }
 
   public String toString()

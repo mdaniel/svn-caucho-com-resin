@@ -1020,10 +1020,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       try {
         metaData = persistenceUnit.getMetaData();
+      } catch (ConfigException e) {
+	throw e;
       } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-
-        throw new ConfigException(L.l("Unable to get meta data for database. Meta data is needed for generated values."));
+        throw new ConfigException(L.l("Unable to get meta data for database. Meta data is needed for generated values."), e);
       }
 
       if (GenerationType.IDENTITY.equals(gen.get("strategy"))) {

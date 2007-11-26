@@ -75,6 +75,9 @@ public class ClassComponent extends ComponentImpl {
   public void setInstanceClass(Class cl)
   {
     _cl = cl;
+
+    if (getTargetType() == null)
+      setTargetType(cl);
   }
 
   public Class getInstanceClass()

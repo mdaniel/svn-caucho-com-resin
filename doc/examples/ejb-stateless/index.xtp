@@ -204,12 +204,12 @@ look at the bean's annotations to enhance the class.</p>
              env-entry-type="java.lang.String"
              env-entry-value="Hello, World."/&gt;
 
-  &lt;ejb-session-bean class="qa.TestBean"/>
+  &lt;ejb-stateless-bean class="qa.TestBean"/>
 
 &lt;/web-app&gt;
 </example>
 
-<p>The &lt;ejb-session-bean&gt; can optionally configure the bean
+<p>The &lt;ejb-stateless-bean&gt; can optionally configure the bean
 directly with an &lt;init&gt; tag as described in the alternate
 dependency injection section.</p>
 
