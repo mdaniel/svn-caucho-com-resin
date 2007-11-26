@@ -23,6 +23,9 @@
     </s1>
     
     <s1 title="Startup Options">
+      <p>As of Resin 3.1, startup options should be declared in the
+        configuration file. However, some startup options are available
+        via the command line.</p>
       <s2 name="command-line" title="Command-line arguments">
 
       <deftable>
@@ -37,11 +40,6 @@
         <td>conf/resin.conf</td>
       </tr>
       <tr>
-        <td>-resin-home <var>xxx</var></td>
-        <td>Sets the Resin home directory (also recognizes the environment variable RESIN_HOME.)</td>
-        <td>The parent directory of resin.jar</td>
-      </tr>
-      <tr>
         <td>-server <var>xxx</var></td>
         <td>Selects the &lt;server> in the resin.conf</td>
         <td>""</td>
@@ -50,6 +48,12 @@
         <td>-verbose</td>
         <td>Show the Java environment before starting Resin.</td>
         <td>off</td>
+      </tr>
+      <tr>
+        <td>-resin-home <var>xxx</var></td>
+        <td>Sets the Resin home directory. (Deprecated. Use environment variable <var>RESIN_HOME</var> or
+          <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.conf.)</td>
+        <td>The parent directory of resin.jar</td>
       </tr>
       <tr>
         <td>start</td>
@@ -88,32 +92,14 @@
       </tr>
       </deftable>
       </s2>
-
-      <s2 title="Memory Configuration">
-
-      <p>Memory configuration is part of the JVM's arguments.  For most JVMs,
-      you can find the full list by starting "java -X".</p>
-
-      <deftable title="Memory Configuration">
-      <tr>
-        <td>-Xms&lt;size&gt;</td>
-        <td>Initial Java heap size, e.g. -Xms32m</td>
-        </tr>
-      <tr>
-        <td>-Xmx&lt;size&gt;</td>
-        <td>Maximum Java heap size, e.g. -Xmx128m</td>
-      </tr>
-      </deftable>
-
-      </s2>
-
-      <s2 title="JDK arguments">
+    </s1>
+      <s1 title="JDK arguments">
 
       <p>Resin 3.1 has moved all JDK arguments into the resin.conf
-      file, in the &lt;<a href="server-tags.xtp#jvm-args">jvm-args</a>&gt;
-      tag. Because the Resin 3.1 watchdog JVM starts the Resin server instance,
-      it can pass the arguments defined in the configuration file.  By moving
-      the Java arguments to the configuration file, the site configuraion
+      file, in the &lt;<a href="server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
+      tag. Because the Resin 3.1 watchdog starts each Resin server instance,
+      it can pass the arguments defined in the configuration file to the JVM.
+      By moving the Java arguments to the configuration file, server configuration
       is easier and more maintainable.</p>
 
       <example title="resin.conf with Java arguments">
@@ -121,10 +107,14 @@
         &lt;cluster id="app-tier">
 
           &lt;server-default>
-            &lt;jvm-args>-Xmx512m&lt;/jvm-args>
-            &lt;jvm-args>-Xss1m&lt;/jvm-args>
-            &lt;jvm-args>-verbosegc&lt;/jvm-args>
-
+            &lt;jvm-arg>-Xms32m&lt;/jvm-arg>
+            &lt;jvm-arg>-Xmx512m&lt;/jvm-arg>
+            &lt;jvm-arg>-Xss1m&lt;/jvm-arg>
+            &lt;jvm-arg>-verbosegc&lt;/jvm-arg>
+            &lt;jvm-arg>-Dfoo=bar&lt;/jvm-arg>
+            &lt;jvm-arg>-agentlib:resin&lt;/jvm-arg>
+            &lt;jvm-arg>-Xdebug&lt;/jvm-arg>
+            
             &lt;http port="8080"/>
           &lt;/server-default>
 
@@ -135,30 +125,6 @@
       &lt;/resin>
       </example>
 
-      <deftable-childtags>
-      <tr>
-        <td>-verbosegc</td>
-        <td>Writes garbage collection information to standard error (recommended)</td>
-        <td>conf/resin.conf</td>
-      </tr>
-      <tr>
-        <td>-Dfoo=bar</td>
-        <td>Sets a system property</td>
-        <td/>
-      </tr>
-      <tr>
-        <td>-Xss1m</td>
-        <td>Sets the maximum thread stack size</td>
-        <td>1m</td>
-      </tr>
-      <tr>
-        <td>-Xmx256m</td>
-        <td>Sets the maximum java heap size</td>
-        <td>256m</td>
-      </tr>
-      </deftable-childtags>
-
-      </s2>
-    </s1>
+      </s1>
   </body>
 </document>

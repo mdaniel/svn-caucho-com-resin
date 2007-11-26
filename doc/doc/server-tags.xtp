@@ -764,7 +764,7 @@ server instances and therefore belong in a server-default.</p>
         &lt;server-default&gt;
            &lt;thread-max>512&lt;/thread-max>
 
-           &lt;jvm-args>-Xmx512m -Xss1m&lt;/jvm-args>
+           &lt;jvm-arg>-Xmx512m -Xss1m&lt;/jvm-arg>
 
            &lt;http port="8080"/&gt;
         &lt;/server-default&gt;
@@ -848,7 +848,7 @@ creating a thread and then  immediately destroying it.</p>
       &lt;thread-idle-min>10&lt;/thread-idle-min>
       &lt;thread-idle-max>20&lt;/thread-idle-max>
 
-      &lt;jvm-args>-Xss1m -Xmx1024m&lt;/jvm-args>
+      &lt;jvm-arg>-Xss1m -Xmx1024m&lt;/jvm-arg>
     &lt;/server-default&gt;
 
     &lt;server id="web-a" address="192.168.0.10"/>
@@ -889,7 +889,7 @@ because of &lt;thread-idle-max>.</p>
       &lt;thread-idle-min>10&lt;/thread-idle-min>
       &lt;thread-idle-max>20&lt;/thread-idle-max>
 
-      &lt;jvm-args>-Xss1m -Xmx1024m&lt;/jvm-args>
+      &lt;jvm-arg>-Xss1m -Xmx1024m&lt;/jvm-arg>
     &lt;/server-default&gt;
 
     &lt;server id="web-a" address="192.168.0.10"/>
@@ -930,7 +930,7 @@ to limit the number of threads to avoid running out of memory,
     &lt;server-default&gt;
       &lt;thread-max>512&lt;/thread-max>
 
-      &lt;jvm-args>-Xss1m -Xmx1024m&lt;/jvm-args>
+      &lt;jvm-arg>-Xss1m -Xmx1024m&lt;/jvm-arg>
     &lt;/server-default&gt;
 
     &lt;server id="web-a" address="192.168.0.10"/>

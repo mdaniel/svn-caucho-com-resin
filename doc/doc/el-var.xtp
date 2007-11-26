@@ -24,7 +24,7 @@ ability to use system properties.</p>
 methods are called directly (See <a href="doc|ioc-bean.xtp">Bean-style
 init)</a>.</p>
 
-<p>One example use use for the bean-style servlet initialization is to avoid
+<p>One example use for the bean-style servlet initialization is to avoid
 JNDI lookup inside the servlet code.  For example, a servlet that that uses a
 JDBC DataSource might look like:</p>
 

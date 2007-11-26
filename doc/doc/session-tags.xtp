@@ -5,6 +5,7 @@
   <version>Resin 3.0</version>
 
   <description>
+    <p>Resin adds a number of additions to the standard <var>session-config</var> tag.</p>
   </description>
 </header>
 
@@ -15,7 +16,7 @@
 <defun title="&lt;cookie-domain>">
 <parents>session-config</parents>
 
-<p>&lt;cookie-comaind> configures the host domain to use for sessions,
+<p>&lt;cookie-domain> configures the host domain to use for sessions,
 i.e. value of the Domain cookie attributes.</p>
 
 <p>By default, browsers only send cookies back to the exact host

@@ -217,7 +217,7 @@ C:\&gt; net start ResinA
 
 <s1 title="Running Resin">
 <s2 title="Processes Overview">
-<p>Resin runs as multiple processes that begin with the following jvm command:</p>
+<p>Resin runs as multiple processes that begin with the following JVM command:</p>
 
 <example>
 unix> java -jar /usr/local/share/resin/lib/resin.jar \
@@ -228,26 +228,30 @@ unix> java -jar /usr/local/share/resin/lib/resin.jar \
 <p>The <var>-jar</var> argument tells java to run the Main-Class defined
 in resin.jar's manifest. The <var>-conf</var> argument specifies the 
 path to your Resin configuration file. Lastly, Resin accepts <var>start</var>,
-<var>stop</var>, and <var>restart</var> arguments which are passed to the <a href="#The Watchdog Process">Watchdog
+<var>stop</var>, and <var>restart</var> arguments which are passed to the <a href="#The Watchdog Process">watchdog
 process</a>. An additional command-line option, <var>-server</var> is used
 in <a href="resin-load-balance.xtp">load-balanced deployments</a>.</p>
 
-<p>JDK 1.5 includes a <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/jps.html">jps</a> command which will show the
-pids of any java processes.</p>
+<p>JDK 1.5 includes a
+<a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/jps.html">jps</a>
+command which will show the pids of any java processes.</p>
 
-<example title="Example Java jps Process List">
+<example title="Example jps Process List">
 unix&gt; jps
 2098 Jps
-2064 resin.jar
+2064 ResinWatchdogManager
 2097 Resin
 </example>
 
-<p><var>resin.jar</var> is the watchdog and <var>Resin</var> is the actual Resin instance.</p>
+<p>When running as a daemon (eg, <code>httpd.sh start</code>)
+<var>ResinWatchdogManager</var> is the watchdog and <var>Resin</var>
+is the actual Resin instance. When running Resin as a foreground process,
+the process list displays <var>resin.jar</var>, which acts as the watchdog.</p>
 
 <p>The first process that starts is the actual startup program,
 <code>java -jar resin.jar</code>. It passes command-line arguments to
-the second process, the ResinWatchdog. This watchdog process takes care of
-starting the actual Resin process(es). ResinWatchdog monitors the state
+the second process, the ResinWatchdogManager. This watchdog process takes care of
+starting the actual Resin process(es). ResinWatchdogManager monitors the state
 of Resin and restarts it if necessary, improving reliability.</p>
 
 <figure src="startup-watchdog.png"/>
@@ -255,50 +259,51 @@ of Resin and restarts it if necessary, improving reliability.</p>
 </s2>
 
 <s2 title="The Watchdog Process">
-<p>The ResinWatchdog is the parent process, providing automatic restarting
+<p>The ResinWatchdogManager is the parent process, providing automatic restarting
 Resin in cases of failure, and providing a single point of control for
 the <var>start</var>, <var>stop</var> and <var>restart</var> of all Resin
 processes. It is responsible for launching
 Resin with the correct JVM arguments and environment options such as starting
 Resin as the specified user, e.g. for <a href="server-tags.xtp#user-name">&lt;user-name&gt;</a> on unix.</p>
 
-<p>ResinWatchdog watches Resin via a Socket connection. When
-the Watchdog socket closes, Resin shuts itself down gracefully. The 
-ResinWatchdog closes the socket on a <var>stop</var> or <var>restart</var>
-or if the ResinWatchdog itself is killed. If Resin exits for any reason,
-ResinWatchdog will automatically start a new Resin process. This socket connection
+<p>ResinWatchdogManager watches Resin via a Socket connection. When
+the watchdog socket closes, Resin shuts itself down gracefully. The 
+watchdog closes the socket on a <var>stop</var> or <var>restart</var>
+or if the watchdog itself is killed. If Resin exits for any reason,
+the watchdog will automatically start a new Resin process. This socket connection
 approach avoids the need for any signals or actual killing of Resin from the watchdog,
 and also makes it easy to stop all the Resins if necessary by just killing
-the ResinWatchdog.</p>
+the watchdog.</p>
 
-<p>The ResinWatchdog doesn't actually kill Resin or even check Resin's status,
+<p>The ResinWatchdogManager doesn't actually kill Resin or even check Resin's status,
 it just checks to see if Resin is alive or not. So if the JVM were to completely
-lock up, ResinWatchdog would still think Resin was okay and would take no action.</p>
+lock up, the watchdog would still think Resin was okay and would take no action.</p>
 </s2>
 
 <s2 title="Resin Processes">
 <p>If Resin detects a major error (like running out of memory) or if the resin.conf changes,
-it will exit and the ResinWatchdog would start a new Resin instance. Reasons a Resin instance
+it will exit and the watchdog would start a new Resin instance. Reasons a Resin instance
 might exit include:</p>
 
 <ul>
-  <li>severe error</li>
   <li>resin.conf changes</li>
-  <li>(additional reasons Resin exits here)</li>
+  <li>out of memory error</li>
+  <li>detected deadlocks</li>
+  <li>segv and other severe errors</li>
 </ul>
 
-<p>Because the ResinWatchdog is always managing Resin processes, if you ever
+<p>Because the watchdog is always managing Resin processes, if you ever
 need to stop Resin with <var>kill</var>, you must kill the watchdog. Just killing
 the Resin process results in the watchdog restarting it automatically.</p>
 </s2>
 
 <s2 title="Logging">
 
-<p>The ResinWatchdog will log to <var>log/watchdog-manager.log</var>.
+<p>The watchdog will log to <var>log/watchdog-manager.log</var>.
 The Resin standard out/err is <var>log/jvm-servername.log</var>.
-ResinWatchdog is responsible for creating both of these log files,
-so <var>jvm-servername.log</var> is not really under the control of Resin.
-This makes it somewhat more reliable than other logs, in case of JVM deadlocks, etc.</p>
+ResinWatchdogManager is responsible for creating both of these log files,
+so <var>jvm-servername.log</var> is not really under the control of the Resin instance.
+This makes it somewhat more reliable in case of JVM deadlocks, etc.</p>
 </s2>
 
 </s1>

@@ -2,6 +2,11 @@
 <header>
   <title>database: Database tag configuration</title>
   <version>Resin 3.1</version>
+  <description>
+    <p>The <var>database</var> tag configures a database as a javax.sql.DataSource with numerous options.
+      Resin offers robust database connection pooling.
+    </p>
+  </description>
 </header>
 <body>
 
@@ -11,6 +16,7 @@
 
 <ul>
 <li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="config-database.xtp">Database Configuration</a> for a detailed overview of databases and Resin.</li>
 </ul>
 
 </s1>

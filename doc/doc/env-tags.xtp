@@ -9,7 +9,7 @@
 EL variables and control,
 and resources like databases, JMS queues, EJB servers, and web service
 clients.  Many of the resources are stored in JNDI or in EL variables
-for later assemply.</p>
+for later assembly.</p>
 
 <p>Any environment resource can appear in any
 of Resin environments: &lt;resin>, &lt;cluster>, &lt;host> and &lt;web-app>.

@@ -7,7 +7,7 @@
   <description>
 
   <p>The top-level &lt;resin> tag contains any
-the &lt;<a href="cluster-tags.xtp">cluster</a>&gt; defined for a deployment.
+&lt;<a href="cluster-tags.xtp">cluster</a>&gt; defined for a deployment.
 It also provides an <a href="env-tags.xtp">environment</a> for
 class-loaders, logging and shared resources.</p>
 
