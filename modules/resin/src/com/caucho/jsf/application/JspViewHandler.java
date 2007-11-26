@@ -410,22 +410,6 @@ public class JspViewHandler extends ViewHandler
     context.setResponseWriter(oldOut);
   }
 
-  /*
-  @Override
-  public void initView(FacesContext context)
-    throws FacesException
-  {
-    super.initView(context);
-
-    String viewId = createViewId(context);
-
-    UIViewRoot viewRoot = restoreView(context, viewId);
-
-    if (viewRoot != null)
-      context.setViewRoot(viewRoot);
-  }
-  */
-
   @Override
   public UIViewRoot restoreView(FacesContext context,
 				String viewId)

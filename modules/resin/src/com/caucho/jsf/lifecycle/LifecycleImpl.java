@@ -46,7 +46,9 @@ import javax.faces.render.*;
 
 import javax.servlet.http.*;
 
+import com.caucho.config.*;
 import com.caucho.jsf.application.*;
+import com.caucho.util.*;
 
 /**
  * The default lifecycle implementation
@@ -296,6 +298,8 @@ public class LifecycleImpl extends Lifecycle
     } catch (RuntimeException e) {
       if (sendError(context, "renderView", e))
 	return;
+
+      throw e;
     } finally {
       afterPhase(context, PhaseId.RENDER_RESPONSE);
 
@@ -357,6 +361,15 @@ public class LifecycleImpl extends Lifecycle
 			    String lifecycle,
 			    Exception e)
   {
+    for (Throwable cause = e; cause != null; cause = cause.getCause()) {
+      if (cause instanceof DisplayableException) {
+	if (e instanceof RuntimeException)
+	  throw (RuntimeException) e;
+	else
+	  throw new FacesException(e);
+      }
+    }
+    
     ExternalContext extContext = context.getExternalContext();
     Object response = extContext.getResponse();
 
@@ -387,7 +400,7 @@ public class LifecycleImpl extends Lifecycle
       out.println("<h3>JSF exception detected in " + lifecycle + " phase</h3>");
 
       String msg = e.getMessage();
-      out.println("<span style='color:red;font:bold'>" + msg + "</span><br/>");
+      out.println("<span style='color:red;font:bold'>" + Html.escapeHtml(msg) + "</span><br/>");
 
       out.println("<h3>Context: " + context.getViewRoot() + "</h3>");
       out.println("<code><pre>");

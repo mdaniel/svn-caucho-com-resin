@@ -6,5 +6,7 @@
     <h:inputText value="#{calc.a}" size="4"/>
      + <h:inputText value="#{calc.b}" size="4"/>
      = <h:outputText value="#{calc.sum}" style="color:red"/>
+    <br>
+    <h:commandButton value="Add"/>
   </h:form>
 </f:view>

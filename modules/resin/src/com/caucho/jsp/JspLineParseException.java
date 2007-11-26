@@ -28,11 +28,13 @@
 
 package com.caucho.jsp;
 
+import java.io.*;
+
 import com.caucho.java.LineMapException;
-import com.caucho.util.LineCompileException;
+import com.caucho.util.*;
 
 public class JspLineParseException extends JspParseException
-  implements LineCompileException, LineMapException {
+  implements LineCompileException, LineMapException, DisplayableException {
 
   public JspLineParseException()
   {
@@ -51,5 +53,10 @@ public class JspLineParseException extends JspParseException
   public JspLineParseException(String msg, Throwable e)
   {
     super(msg, e);
+  }
+
+  public void print(PrintWriter out)
+  {
+    out.println(Html.escapeHtml(getMessage()));
   }
 }
