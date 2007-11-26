@@ -44,13 +44,14 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.ClusterMXBean;
+import com.caucho.server.admin.Management;
 import com.caucho.server.port.Port;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.*;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -103,11 +104,11 @@ public class Cluster
   private long _clientMaxIdleTime = 30000L;
   private long _clientFailRecoverTime = 15000L;
   private long _clientWarmupTime = 60000L;
-  private long _clientBusyTime = 15000L;
-  
+
   private long _clientReadTimeout = 60000L;
-  private long _clientWriteTimeout = 60000L;
   private long _clientConnectTimeout = 5000L;
+
+  private Management _management;
 
   private BuilderProgramContainer _serverProgram
     = new BuilderProgramContainer();
@@ -538,6 +539,26 @@ public class Cluster
     return store;
   }
 
+  public Management createManagement()
+  {
+    if (_management == null) {
+      try {
+        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
+
+        _management = (Management) cl.newInstance();
+      } catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+
+      if (_management == null)
+        _management = new Management();
+
+      _management.setCluster(this);
+    }
+
+    return _management;
+  }
+
   /**
    * Adds a program.
    */
@@ -557,14 +578,21 @@ public class Cluster
     if (serverId == null)
       serverId = "";
 
+    boolean isActive;
+
     ClusterServer self = findServer(serverId);
 
-    if (self != null)
+    if (self != null) {
       _clusterLocal.set(this);
+      isActive = true;
+    }
     else if (_clusterLocal.get() == null && _serverList.size() == 0) {
       // if it's the empty cluster, add it
       _clusterLocal.set(this);
+      isActive = true;
     }
+    else
+      isActive = false;
 
     try {
       String name = _id;
@@ -591,22 +619,12 @@ public class Cluster
       }
     }
 
-    if (_resin.isManagementRemote()) {
-      RemoteAdministration admin = null;
-      
-      try {
-	Class proAdmin = Class.forName("com.caucho.server.cluster.ProRemoteAdministration");
+    // backwards compat
+    if (_resin.getManagementPath() != null)
+      createManagement().setManagementPath(_resin.getManagementPath());
 
-	admin = (RemoteAdministration) proAdmin.newInstance();
-      } catch (Exception e) {
-	log.fine("management remote requires Resin Professional.");
-      }
-
-      if (admin != null) {
-	admin.setCluster(this);
-	admin.init();
-      }
-    }
+    if (_management != null && isActive)
+      _management.start();
   }
 
   /**

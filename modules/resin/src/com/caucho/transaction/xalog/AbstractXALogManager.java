@@ -29,9 +29,9 @@
 package com.caucho.transaction.xalog;
 
 import com.caucho.transaction.XidImpl;
+import com.caucho.vfs.Path;
 
 import java.io.IOException;
-import com.caucho.vfs.Path;
 
 /**
  * Implements a single log stream.  Each log stream has two associated
@@ -44,7 +44,7 @@ abstract public class AbstractXALogManager
    */
   abstract public void setPath(Path path)
     throws java.io.IOException;
-  
+
   /**
    * Initialize the log manager.
    */
@@ -75,4 +75,5 @@ abstract public class AbstractXALogManager
    * Closes the log manager.
    */
   abstract public void close();
+
 }

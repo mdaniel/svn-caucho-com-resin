@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,39 +23,70 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.transaction.cfg;
+package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.cluster.Cluster;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Configures the transaction manager.
- */
-public class TransactionManagerConfig {
-  private static L10N L = new L10N(TransactionManagerConfig.class);
-  private static Logger log = Log.open(TransactionManagerConfig.class);
+public class TransactionLog
+{
+  private static final Logger log = Logger.getLogger(TransactionLog.class.getName());
+  private static final L10N L = new L10N(TransactionLog.class);
 
+  private final TransactionManager _manager;
+
+  private boolean _isEnable = true;
+  private String _path;
   private AbstractXALogManager _xaLog;
 
-  /**
-   * Configures the xa log.
-   */
-  public AbstractXALogManager createTransactionLog()
-    throws ConfigException
+  public TransactionLog(TransactionManager manager)
   {
+    _manager = manager;
+  }
+
+  public void setPath(String path)
+    throws IOException
+  {
+    _path = path;
+  }
+
+  public boolean isEnable()
+  {
+    return _isEnable;
+  }
+
+  public void setEnable(boolean enable)
+  {
+    _isEnable = enable;
+  }
+
+  public void start()
+  {
+    if (_path == null) {
+      String serverId = Cluster.getServerId();
+
+      if (serverId == null || serverId.length() == 0)
+        serverId = "default";
+
+      _path = "xa-" + serverId + ".log";
+    }
+
+    if (!_isEnable)
+      return;
+
     try {
       Class cl = Class.forName("com.caucho.transaction.xalog.XALogManager");
-      
+
       _xaLog = (AbstractXALogManager) cl.newInstance();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
@@ -64,16 +95,9 @@ public class TransactionManagerConfig {
     if (_xaLog == null)
       throw new ConfigException(L.l("<transaction-log> requires Resin Professional.  See http://www.caucho.com for information and licensing."));
 
-    return _xaLog;
-  }
-
-  /**
-   * Initializes the XA manager.
-   */
-  public void start()
-    throws ConfigException
-  {
     try {
+      _xaLog.setPath(_manager.getPath().lookup(_path));
+
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
 
       tm.setXALogManager(_xaLog);
@@ -82,5 +106,22 @@ public class TransactionManagerConfig {
     } catch (IOException e) {
       throw new ConfigException(e);
     }
+  }
+
+
+  public void destroy()
+  {
+    AbstractXALogManager xaLog = _xaLog;
+    _xaLog = null;
+
+    if (xaLog != null) {
+      try {
+        xaLog.close();
+      }
+      catch (Exception ex) {
+        log.log(Level.INFO, ex.toString(), ex);
+      }
+    }
+
   }
 }

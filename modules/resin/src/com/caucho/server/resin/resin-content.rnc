@@ -75,11 +75,11 @@ r_cluster-Basis =
 
   & r_machine*
 
+  & r_management?
+
   & r_persistent-store?
 
   & r_ping*
-
-  & r_remote-administration?
 
   & r_rewrite-dispatch?
 
@@ -119,6 +119,10 @@ r_cluster-Content = r_cluster-Flow
 
 r_cluster-port = element cluster-port {
   r_port-Content
+}
+
+r_deploy-service = element deploy-service {
+  empty
 }
 
 r_enable =
@@ -236,6 +240,10 @@ r_ignore-client-disconnect =
   attribute ignore-client-disconnect { string }
   | element ignore-client-disconnect { string }
 
+r_jmx-service = element jmx-service {
+  empty
+}
+
 r_jsse-ssl = element jsse-ssl {
   (attribute alias { string }
    | element alias { r_string-Group })?
@@ -286,6 +294,20 @@ r_machine = element machine {
 }
 
 r_management = element management {
+  r_path?
+
+  & r_deploy-service?
+
+  & r_jmx-service?
+
+  & r_persistent-log?
+
+  & r_ping?
+
+  & r_xa-log?
+}
+
+r_management-compat = element management {
   r_path?
 
   & (attribute remote-enable { r_boolean-Type }
@@ -341,11 +363,18 @@ r_openssl = element openssl {
 
   & (attribute unclean-shutdown { r_boolean-Type }
      | element unclean-shutdown { r_boolean-Type } )?
-
   & r_verify-client?
 
   & (attribute verify-depth { r_int }
      | element verify-depth { r_int })?
+}
+
+r_persistent-log = element persistent-log {
+
+  (attribute level { string }
+   | element level { string })?
+     
+  & r_path?
 }
 
 r_persistent-store = element persistent-store {
@@ -432,10 +461,6 @@ r_protocol =
     & r_init?
   }
 
-r_remote-administration = element remote-administration {
-  r_enable?
-}
-
 r_resin = element resin {
   r_root-directory?,
 
@@ -453,7 +478,7 @@ r_resin-Basis =
   & (attribute environment-system-properties { r_boolean-Type }
      | element environment-system-properties { r_boolean-Type })?
 
-  & r_management?
+  & r_management-compat?
 
   & r_min-free-memory?
 
@@ -631,7 +656,9 @@ r_thread-idle-min =
   | element thread-idle-min { string }
 
 r_transaction-log = element transaction-log {
-  r_path+
+  r_enable?
+
+  & r_path?
 }
 
 r_transaction-manager = element transaction-manager {
@@ -645,3 +672,10 @@ r_url-character-encoding =
 r_user-name =
   attribute user-name { string }
   | element user-name { string }
+
+r_xa-log = element xa-log {
+  r_enable?
+
+  & r_path?
+}
+

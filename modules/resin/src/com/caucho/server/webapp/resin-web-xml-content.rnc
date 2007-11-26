@@ -606,7 +606,10 @@ r_rewrite-dispatch-Contents =
            | element full-url-regexp { string })
 
         & (attribute target { string }
-           | element target { string })),
+           | element target { string })
+           
+        & (attribute target-host { string }
+           | element target-host { string })?),
 
        r_rewrite-conditions-Type
      }*

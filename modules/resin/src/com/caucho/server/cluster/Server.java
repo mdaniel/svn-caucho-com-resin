@@ -33,7 +33,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
-import com.caucho.jca.ResourceManagerImpl;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -42,7 +41,8 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
-import com.caucho.management.server.*;
+import com.caucho.management.server.CacheItem;
+import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.dispatch.ErrorFilterChain;
@@ -57,12 +57,11 @@ import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.port.AbstractSelectManager;
-import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.resin.Resin;
-import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.rewrite.RewriteDispatch;
+import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
@@ -73,10 +72,13 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import javax.resource.spi.ResourceAdapter;
 import javax.servlet.http.HttpServletResponse;
+import javax.resource.spi.ResourceAdapter;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -734,31 +736,23 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Adds the ping.
+   * Creates the ping.
    */
-  public Object createPing()
+  @Deprecated
+  public ResourceAdapter createPing()
     throws ConfigException
   {
-    try {
-      Class pingClass = Class.forName("com.caucho.server.admin.PingThread");
-
-      return pingClass.newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new ConfigException(L.l("<ping> is only available in Resin Professional."));
-    } catch (Throwable e) {
-      log.fine(e.toString());
-
-      throw new ConfigException(e);
-    }
+    return getCluster().createManagement().createPing();
   }
 
   /**
    * Adds the ping.
    */
+  @Deprecated
   public void addPing(ResourceAdapter ping)
     throws ConfigException
   {
-    ResourceManagerImpl.addResource(ping);
+    getCluster().createManagement().addPing(ping);
   }
 
   /**

@@ -37,6 +37,7 @@ import javax.enterprise.deploy.spi.exceptions.TargetException;
 import javax.enterprise.deploy.spi.status.ProgressObject;
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -68,7 +69,7 @@ public interface DeploymentManager {
    */
   public TargetModuleID []getAvailableModules(ModuleType moduleType,
 					      Target []targetList)
-    throws TargetException, IllegalStateException;
+    throws TargetException, IllegalStateException, IOException;
   
   /**
    * Returns a configuration for the deployable object.

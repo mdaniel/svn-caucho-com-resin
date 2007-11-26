@@ -31,14 +31,19 @@ package javax.enterprise.deploy.shared.factories;
 import javax.enterprise.deploy.spi.DeploymentManager;
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
 import javax.enterprise.deploy.spi.factories.DeploymentFactory;
+import java.util.ArrayList;
 
 /**
  * Factory for the implementation classes.
  */
 public final class DeploymentFactoryManager {
-  private final static DeploymentFactoryManager _manager
-    = new DeploymentFactoryManager();
-  
+
+  private final static DeploymentFactoryManager _manager =
+    new DeploymentFactoryManager();
+
+  private final ArrayList<DeploymentFactory> _deploymentFactories
+     = new ArrayList<DeploymentFactory>();
+
   private DeploymentFactoryManager()
   {
   }
@@ -55,9 +60,24 @@ public final class DeploymentFactoryManager {
    */
   public DeploymentFactory []getDeploymentFactories()
   {
-    throw new UnsupportedOperationException();
+    synchronized  (_deploymentFactories) {
+      return _deploymentFactories.toArray(new DeploymentFactory[_deploymentFactories.size()]);
+    }
   }
 
+  private DeploymentFactory getDeploymentFactory(String uri)
+    throws DeploymentManagerCreationException
+  {
+    synchronized (_deploymentFactories) {
+      for (DeploymentFactory deploymentFactory : _deploymentFactories) {
+        if (deploymentFactory.handlesURI(uri))
+          return deploymentFactory;
+      }
+    }
+
+    throw new DeploymentManagerCreationException("uri '" + uri + "' is not supported by any known DeploymentFactory");
+  }
+  
   /**
    * Returns the matchnig manager.
    */
@@ -66,7 +86,7 @@ public final class DeploymentFactoryManager {
 						String password)
     throws DeploymentManagerCreationException
   {
-    throw new UnsupportedOperationException();
+    return getDeploymentFactory(uri).getDeploymentManager(uri, username, password);
   }
 
   /**
@@ -74,7 +94,9 @@ public final class DeploymentFactoryManager {
    */
   public void registerDeploymentFactory(DeploymentFactory factory)
   {
-    throw new UnsupportedOperationException();
+    synchronized  (_deploymentFactories) {
+      _deploymentFactories.add(factory);
+    }
   }
 
   /**
@@ -83,7 +105,7 @@ public final class DeploymentFactoryManager {
   public DeploymentManager getDisconnectedDeploymentManager(String uri)
     throws DeploymentManagerCreationException
   {
-    throw new UnsupportedOperationException();
+    return getDeploymentFactory(uri).getDisconnectedDeploymentManager(uri);
   }
 }
 

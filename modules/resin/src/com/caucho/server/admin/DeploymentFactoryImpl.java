@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,25 +23,21 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.j2ee.deployclient;
+package com.caucho.server.admin;
 
 import javax.enterprise.deploy.spi.DeploymentManager;
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
 import javax.enterprise.deploy.spi.factories.DeploymentFactory;
 
-/**
- * Factory for the implementation classes.
- */
-public class DeploymentFactoryImpl implements DeploymentFactory {
-  /**
-   * Returns true if the deployment manager handles the URI.
-   */
+public class DeploymentFactoryImpl
+  implements DeploymentFactory
+{
   public boolean handlesURI(String uri)
   {
-    return uri.startsWith("resin:http");
+    return uri.startsWith("resin://");
   }
 
   /**

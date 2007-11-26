@@ -29,6 +29,7 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
@@ -53,14 +54,15 @@ import com.caucho.log.RotateStream;
 import com.caucho.management.j2ee.J2EEDomain;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JVM;
-import com.caucho.management.server.*;
+import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.ResinMXBean;
+import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.naming.Jndi;
+import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.webbeans.ResinWebBeansProducer;
-import com.caucho.transaction.cfg.TransactionManagerConfig;
-import com.caucho.transaction.xalog.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
@@ -71,10 +73,8 @@ import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.manager.WebBeansAddLoaderListener;
-import com.caucho.amber.manager.AmberContainer;
-import com.caucho.amber.manager.PersistenceEnvironmentListener;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.el.ELResolver;
@@ -158,7 +158,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
 
-  private Management _management;
+  private Path _managementPath;
 
   private ThreadPoolAdmin _threadPoolAdmin;
   private ResinAdmin _resinAdmin;
@@ -415,28 +415,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
-   * Returns the management directory.
-   */
-  public Path getManagementPath()
-  {
-    if (_management != null)
-      return _management.getPath();
-    else
-      return null;
-  }
-
-  /**
-   * Return true if remote management is enabled.
-   */
-  public boolean isManagementRemote()
-  {
-    if (_management != null)
-      return _management.isRemoteEnable();
-    else
-      return false;
-  }
-
-  /**
    * Returns the cluster names.
    */
   public ClusterMXBean []getClusters()
@@ -555,40 +533,33 @@ public class Resin implements EnvironmentBean, SchemaBean
     _isGlobalSystemProperties = isGlobal;
   }
 
-  /**
-   * Configures the TM.
-   */
-  public void addTransactionManager(TransactionManagerConfig tm)
-    throws ConfigException
-  {
-    // the start is necessary to handle the QA tests
-
-    tm.start();
-  }
-
   public SecurityManagerConfig createSecurityManager()
   {
     return new SecurityManagerConfig();
   }
 
-  public Management createManagement()
+  /**
+   * Configures the TM.
+   */
+  @Deprecated
+  public TransactionManager createTransactionManager()
+    throws ConfigException
   {
-    if (_management == null) {
-      try {
-        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
+    log().warning(L().l("<transaction-manager> tag belongs in <management>"));
 
-        _management = (Management) cl.newInstance();
-      } catch (Exception e) {
-        log().log(Level.FINEST, e.toString(), e);
-      }
+    return new TransactionManager(this);
+  }
 
-      if (_management == null)
-        _management = new Management();
+  @Deprecated
+  public void setManagement(ManagementCompatConfig management)
+  {
+    _managementPath = management.getPath();
+  }
 
-      _management.setResin(this);
-    }
-
-    return _management;
+  @Deprecated
+  public Path getManagementPath()
+  {
+    return _managementPath;
   }
 
   /**
@@ -1132,10 +1103,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   {
     _j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
     _jvmManagedObject = J2EEManagedObject.register(new JVM());
-
-    if (_management != null)
-      _management.start();
-
   }
 
   private void addRandom()
