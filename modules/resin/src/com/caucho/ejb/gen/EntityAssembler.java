@@ -135,4 +135,21 @@ public class EntityAssembler extends BeanAssembler {
 
     return view;
   }
+
+  /**
+   * Creates the home view.
+   */
+  public ViewClass createRemoteView(ArrayList<ApiClass> homeClass,
+				    String fullClassName,
+				    String viewPrefix,
+				    String viewSuffix)
+  {
+    EntityView view = new EntityView(homeClass.get(0),
+                                     fullClassName,
+                                     viewPrefix);
+
+    _genClass.addComponent(view);
+
+    return view;
+  }
 }

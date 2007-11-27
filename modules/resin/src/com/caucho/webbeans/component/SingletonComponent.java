@@ -67,7 +67,7 @@ public class SingletonComponent extends ClassComponent {
     
     super.setScope(new SingletonScope());
   }
-
+  
   @Override
   public void introspectConstructor()
   {

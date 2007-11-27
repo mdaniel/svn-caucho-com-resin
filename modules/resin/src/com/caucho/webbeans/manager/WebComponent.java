@@ -46,12 +46,12 @@ import java.util.ArrayList;
 public class WebComponent {
   private static L10N L = new L10N(WebComponent.class);
   
-  private Class _type;
+  private Type _type;
 
   private ArrayList<ComponentImpl> _componentList
     = new ArrayList<ComponentImpl>();
 
-  public WebComponent(Class type)
+  public WebComponent(Type type)
   {
     _type = type;
   }
@@ -131,7 +131,7 @@ public class WebComponent {
   }
   
   public ComponentImpl bindByBindings(String location,
-				      Class type,
+				      Type type,
 				      ArrayList<Binding> bindList)
     throws ConfigException
   {
@@ -171,9 +171,17 @@ public class WebComponent {
     else if (matchComp != null && secondComp != null) {
       throw new ConfigException(location
 				+ L.l("Injection of '{0}' conflicts between '{1}' and '{2}'.  WebBean injection must match uniquely.",
-				      type.getName(), matchComp, secondComp));
+				      getName(type), matchComp, secondComp));
     }
     
     return matchComp;
+  }
+
+  static String getName(Type type)
+  {
+    if (type instanceof Class)
+      return ((Class) type).getName();
+    else
+      return String.valueOf(type);
   }
 }

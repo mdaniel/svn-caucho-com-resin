@@ -61,7 +61,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   
   private WbComponentType _type;
 
-  private Class _targetType;
+  private Type _targetType;
 
   private boolean _isFromClass;
 
@@ -83,6 +83,11 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   public ComponentImpl(WbWebBeans webbeans)
   {
     _webbeans = webbeans;
+  }
+
+  public WbWebBeans getWebBeans()
+  {
+    return _webbeans;
   }
 
   /**
@@ -129,19 +134,40 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     _type = type;
   }
   
-  public void setTargetType(Class type)
+  public void setTargetType(Type type)
   {
     _targetType = type;
   }
   
-  public Class getTargetType()
+  public Type getTargetType()
   {
     return _targetType;
+  }
+  
+  public String getTargetSimpleName()
+  {
+    if (_targetType instanceof Class)
+      return ((Class) _targetType).getSimpleName();
+    else
+      return String.valueOf(_targetType);
+  }
+  
+  public Class getTargetClass()
+  {
+    if (_targetType instanceof Class)
+      return ((Class) _targetType);
+    else if (_targetType instanceof ParameterizedType)
+      return (Class) ((ParameterizedType) _targetType).getRawType();
+    else
+      return (Class) _targetType;
   }
 
   public String getClassName()
   {
-    return _targetType.getName();
+    if (_targetType instanceof Class)
+      return ((Class) _targetType).getName();
+    else
+      return String.valueOf(_targetType);
   }
 
   /**
@@ -218,7 +244,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   {
     long crc64 = 17;
 
-    crc64 = Crc64.generate(crc64, _targetType.getName());
+    crc64 = Crc64.generate(crc64, String.valueOf(_targetType));
 
     if (_name != null)
       crc64 = Crc64.generate(crc64, _name);
@@ -500,7 +526,10 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(_targetType != null ? _targetType.getSimpleName() : "null");
+    if (_targetType instanceof Class)
+      sb.append(((Class) _targetType).getSimpleName());
+    else
+      sb.append(String.valueOf(_targetType));
     sb.append("[");
 
     for (WbBinding binding : _bindingList) {
@@ -532,8 +561,10 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     sb.append(getClass().getSimpleName());
     sb.append("[");
 
-    Class targetType = getTargetType();
-    sb.append(targetType != null ? targetType.getSimpleName() : "null");
+    if (_targetType instanceof Class)
+      sb.append(((Class) _targetType).getSimpleName());
+    else
+      sb.append(String.valueOf(_targetType));
     sb.append(", ");
 
     if (_type != null) {
@@ -557,5 +588,13 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     sb.append("]");
 
     return sb.toString();
+  }
+
+  protected static String getSimpleName(Type type)
+  {
+    if (type instanceof Class)
+      return ((Class) type).getSimpleName();
+    else
+      return String.valueOf(type);
   }
 }

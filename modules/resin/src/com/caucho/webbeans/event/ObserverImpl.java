@@ -34,9 +34,11 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import javax.webbeans.*;
 
+import com.caucho.config.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 /**
  * Implements a single observer.
@@ -53,6 +55,8 @@ public class ObserverImpl {
 
   private boolean _hasBinding;
   private boolean _ifExists;
+
+  private ComponentImpl []_args;
   
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
@@ -70,6 +74,8 @@ public class ObserverImpl {
       if (ann instanceof IfExists)
 	_ifExists = true;
     }
+
+    bind();
   }
 
   public Class getType()
@@ -116,6 +122,47 @@ public class ObserverImpl {
     */
   }
 
+  public void bind()
+  {
+    synchronized (this) {
+      if (_args != null)
+	return;
+      
+      Type []param = _method.getGenericParameterTypes();
+      Annotation [][]annList = _method.getParameterAnnotations();
+
+      _args = new ComponentImpl[param.length];
+
+      WebBeansContainer webBeans = _component.getWebBeans().getContainer();
+      String loc = LineConfigException.loc(_method);
+      
+      for (int i = 0; i < param.length; i++) {
+	if (hasObserves(annList[i]))
+	  continue;
+
+	ComponentImpl comp = webBeans.bind(loc, param[i], annList[i]);
+
+	if (comp == null) {
+	  throw new ConfigException(loc
+				    + L.l("Parameter '{0}' binding does not have a matching component",
+					  getSimpleName(param[i])));
+	}
+
+	_args[i] = comp;
+      }
+    }
+  }
+
+  private boolean hasObserves(Annotation []annList)
+  {
+    for (Annotation ann : annList) {
+      if (ann instanceof Observes)
+	return true;
+    }
+
+    return false;
+  }
+
   public boolean isMatch(Annotation []bindList)
   {
     int size = _bindingList.size();
@@ -151,8 +198,20 @@ public class ObserverImpl {
       obj = _component.get();
 
     try {
-      if (obj != null)
-	_method.invoke(obj, event);
+      if (obj != null) {
+	Object []args = new Object[_args.length];
+
+	for (int i = 0; i < _args.length; i++) {
+	  ComponentImpl comp = _args[i];
+	  
+	  if (comp != null)
+	    args[i] = comp.get();
+	  else
+	    args[i] = event;
+	}
+	
+	_method.invoke(obj, args);
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {
@@ -200,9 +259,17 @@ public class ObserverImpl {
     sb.append("[");
 
     ComponentImpl comp = _component;
-    sb.append(comp.getTargetType().getSimpleName());
+    sb.append(comp.getTargetSimpleName());
     sb.append("]");
 
     return sb.toString();
+  }
+
+  protected static String getSimpleName(Type type)
+  {
+    if (type instanceof Class)
+      return ((Class) type).getSimpleName();
+    else
+      return String.valueOf(type);
   }
 }

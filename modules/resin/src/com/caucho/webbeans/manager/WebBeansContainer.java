@@ -76,8 +76,8 @@ public class WebBeansContainer
   private HashMap<Path,WbWebBeans> _webBeansMap
     = new HashMap<Path,WbWebBeans>();
 
-  private HashMap<Class,WebComponent> _componentMap
-    = new HashMap<Class,WebComponent>();
+  private HashMap<Type,WebComponent> _componentMap
+    = new HashMap<Type,WebComponent>();
 
   private HashMap<String,ComponentImpl> _namedComponentMap
     = new HashMap<String,ComponentImpl>();
@@ -107,7 +107,7 @@ public class WebBeansContainer
     _classLoader = Environment.getEnvironmentClassLoader(loader);
 
     _parent = WebBeansContainer.getCurrent(_classLoader.getParent());
-
+    
     _localContainer.set(this, _classLoader);
 
     _tempClassLoader = _classLoader.getNewTempClassLoader();
@@ -226,7 +226,7 @@ public class WebBeansContainer
    * @param type the interface type to expose the component
    * @param comp the component to register
    */
-  public void addComponentByType(Class type, ComponentImpl comp)
+  public void addComponentByType(Type type, ComponentImpl comp)
   {
     if (type == null)
       return;
@@ -238,7 +238,7 @@ public class WebBeansContainer
     addComponentRec(type, comp);
   }
     
-  private void addComponentRec(Class type, ComponentImpl comp)
+  private void addComponentRec(Type type, ComponentImpl comp)
   {
     if (type == null || Object.class.equals(type))
       return;
@@ -252,9 +252,22 @@ public class WebBeansContainer
 
     webComponent.addComponent(comp);
 
-    addComponentRec(type.getSuperclass(), comp);
+    Class cl;
 
-    for (Class subClass : type.getInterfaces()) {
+    if (type instanceof Class)
+      cl = (Class) type;
+    else if (type instanceof ParameterizedType) {
+      cl = (Class) ((ParameterizedType) type).getRawType();
+      addComponentRec(cl, comp);
+      return;
+    }
+    else {
+      return;
+    }
+
+    addComponentRec(cl.getSuperclass(), comp);
+
+    for (Class subClass : cl.getInterfaces()) {
       addComponentRec(subClass, comp);
     }
   }
@@ -310,7 +323,9 @@ public class WebBeansContainer
   {
     ComponentImpl component;
       
-    component = bind(location(field), field.getType(), field.getAnnotations());
+    component = bind(location(field),
+		     field.getGenericType(),
+		     field.getAnnotations());
 
     if (component == null)
       throw injectError(field, L.l("Can't find a component for '{0}'",
@@ -328,7 +343,7 @@ public class WebBeansContainer
 
     // XXX: lazy binding
     try {
-      Class []paramTypes = method.getParameterTypes();
+      Type []paramTypes = method.getGenericParameterTypes();
       Annotation[][]paramAnn = method.getParameterAnnotations();
       
       ComponentImpl []args = new ComponentImpl[paramTypes.length];
@@ -339,7 +354,7 @@ public class WebBeansContainer
 	if (args[i] == null) {
 	  throw error(method,
 		      L.l("Injection for type '{0}' of method parameter #{1} has no matching component.",
-			  paramTypes[i].getSimpleName(), i));
+			  getSimpleName(paramTypes[i]), i));
 	}
       }
 
@@ -355,7 +370,7 @@ public class WebBeansContainer
    * Returns the web beans component corresponding to a method
    * and a @Named value
    */
-  public ComponentImpl bind(String location, Class type, String name)
+  public ComponentImpl bind(String location, Type type, String name)
   {
     ArrayList<Binding> bindingList = new ArrayList<Binding>();
 
@@ -370,7 +385,7 @@ public class WebBeansContainer
   /**
    * Returns the web beans component corresponding to the return type.
    */
-  public ComponentImpl bind(String location, Class type)
+  public ComponentImpl bind(String location, Type type)
   {
     ArrayList<Binding> bindingList = new ArrayList<Binding>();
 
@@ -382,7 +397,7 @@ public class WebBeansContainer
    * parameter.
    */
   public ComponentImpl bind(String location,
-			    Class type,
+			    Type type,
 			    Annotation []paramAnn)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
@@ -396,7 +411,7 @@ public class WebBeansContainer
     }
 
     if (isNew)
-      return bindNew(location, type);
+      return bindNew(location, (Class) type);
     else
       return bind(location, type, bindingList);
   }
@@ -404,8 +419,7 @@ public class WebBeansContainer
   /**
    * Binds for the @New expression
    */
-  private ComponentImpl bindNew(String location,
-				Class type)
+  private ComponentImpl bindNew(String location, Class type)
   {
     ComponentImpl component = bind(location, type, new Annotation[0]);
 
@@ -427,7 +441,7 @@ public class WebBeansContainer
    * Returns the web beans component with a given binding list.
    */
   public ComponentImpl bind(String location,
-			    Class type,
+			    Type type,
 			    ArrayList<Annotation> bindingList)
   {
     _wbWebBeans.init();
@@ -446,7 +460,7 @@ public class WebBeansContainer
    * Returns the web beans component with a given binding list.
    */
   public ComponentImpl bindByBindings(String location,
-				      Class type,
+				      Type type,
 				      ArrayList<Binding> bindingList)
   {
     _wbWebBeans.init();
@@ -787,5 +801,13 @@ public class WebBeansContainer
       return "WebBeansContainer[" + _classLoader.getId() + "]";
     else
       return "WebBeansContainer[]";
+  }
+
+  static String getSimpleName(Type type)
+  {
+    if (type instanceof Class)
+      return ((Class) type).getSimpleName();
+    else
+      return String.valueOf(type);
   }
 }

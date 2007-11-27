@@ -69,7 +69,7 @@ public class ProducesComponent extends ComponentImpl {
     _producer = producer;
     _method = method;
 
-    setTargetType(method.getReturnType());
+    setTargetType(method.getGenericReturnType());
   }
 
   /**
@@ -160,7 +160,7 @@ public class ProducesComponent extends ComponentImpl {
       
       String loc = WebBeansContainer.location(_method);
     
-      Class []param = _method.getParameterTypes();
+      Type []param = _method.getGenericParameterTypes();
       Annotation [][]paramAnn = _method.getParameterAnnotations();
 
       _args = new ComponentImpl[param.length];
@@ -170,7 +170,7 @@ public class ProducesComponent extends ComponentImpl {
 
 	if (_args[i] == null)
 	  throw error(_method, L.l("Type '{0}' for method parameter #{1} has no matching component.",
-				   param[i].getSimpleName(), i));
+				   getSimpleName(param[i]), i));
       }
     }
   }
@@ -188,7 +188,7 @@ public class ProducesComponent extends ComponentImpl {
       sb.append(", ");
     }
 
-    sb.append(getTargetType().getSimpleName());
+    sb.append(getTargetSimpleName());
     sb.append(", ");
     sb.append(_method.getDeclaringClass().getSimpleName());
     sb.append(".");

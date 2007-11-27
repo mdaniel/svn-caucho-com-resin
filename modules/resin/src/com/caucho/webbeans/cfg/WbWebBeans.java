@@ -40,6 +40,7 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.io.IOException;
 import java.lang.annotation.*;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 import java.util.zip.*;
@@ -295,7 +296,7 @@ public class WbWebBeans {
   }
 
   public ComponentImpl bindParameter(String loc,
-				     Class type,
+				     Type type,
 				     Annotation []annotations)
   {
     return _webBeansContainer.bind(loc, type, annotations);

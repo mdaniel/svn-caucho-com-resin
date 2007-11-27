@@ -51,6 +51,7 @@ public class InjectMethodProgram extends Inject
 			     ComponentImpl []args)
   {
     _method = method;
+    _method.setAccessible(true);
     _args = args;
     
     if (_method == null)

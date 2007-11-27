@@ -319,7 +319,7 @@ public class ClassComponent extends ComponentImpl {
       destroyList.toArray(_destroyProgram);
 
       String loc = _ctor.getDeclaringClass().getName() + "(): ";
-      Class []param = _ctor.getParameterTypes();
+      Type []param = _ctor.getGenericParameterTypes();
       Annotation [][]paramAnn = _ctor.getParameterAnnotations();
 
       _ctorArgs = new ComponentImpl[param.length];
