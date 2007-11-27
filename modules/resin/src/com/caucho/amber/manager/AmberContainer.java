@@ -568,6 +568,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   public void start()
   {
     configurePersistenceRoots();
+    startPersistenceUnits();
   }
 
   public AmberPersistenceUnit getPersistenceUnit(String name)
@@ -788,6 +789,31 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       throw e;
     } catch (Exception e) {
       throw new ConfigException(e);
+    }
+  }
+  
+  /**
+   * Adds the URLs for the classpath.
+   */
+  public void startPersistenceUnits()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      // jpa/1630
+      // thread.setContextClassLoader(_tempLoader);
+      thread.setContextClassLoader(_parentLoader);
+
+      ArrayList<AmberPersistenceUnit> unitList
+	= new ArrayList<AmberPersistenceUnit>(_pendingUnitList);
+      _pendingUnitList.clear();
+      
+      for (AmberPersistenceUnit unit : unitList) {
+	unit.initEntityHomes();
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 

@@ -910,9 +910,6 @@ public class AmberPersistenceUnit {
   public void initType(AbstractEnhancedType type)
     throws Exception
   {
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, "Initiating type: " + type.getInstanceClassName());
-
     type.init();
 
     getGenerator().generate(type);
@@ -1358,7 +1355,7 @@ public class AmberPersistenceUnit {
   }
 
   public void initEntityHomes()
-    throws AmberException, ConfigException
+    throws AmberRuntimeException, ConfigException
   {
     synchronized (this) {
       if (_isInit)

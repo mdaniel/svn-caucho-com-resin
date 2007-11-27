@@ -474,6 +474,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
           thread.setContextClassLoader(oldLoader);
         }
       }
+      
+      AmberContainer.create().start();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
