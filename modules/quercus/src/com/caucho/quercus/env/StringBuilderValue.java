@@ -934,6 +934,39 @@ public class StringBuilderValue
 
     return this;
   }
+  
+  /**
+   * Returns the first index of the match string, starting from the head.
+   */
+  @Override
+  public int indexOf(CharSequence match, int head)
+  {
+    int length = length();
+    int matchLength = match.length();
+
+    if (matchLength <= 0)
+      return -1;
+    else if (head < 0)
+      return -1;
+    
+    int end = length - matchLength;
+    char first = match.charAt(0);
+
+    loop:
+    for (; head <= end; head++) {
+      if (_buffer[head] != first)
+    continue;
+
+      for (int i = 1; i < matchLength; i++) {
+    if (_buffer[head + i] != match.charAt(i))
+      continue loop;
+      }
+
+      return head;
+    }
+
+    return -1;
+  }
 
   /**
    * Append a Java value to the value.

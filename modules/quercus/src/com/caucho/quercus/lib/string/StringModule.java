@@ -51,6 +51,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.Iterator;
 import java.util.Locale;
@@ -3782,45 +3784,70 @@ public class StringModule extends AbstractQuercusModule {
 
     StringValue []from = new StringValue[size];
     StringValue []to = new StringValue[size];
-    int k = 0;
 
+    Map.Entry<Value,Value> [] entryArray = new Map.Entry[size];
+
+    int i = 0;
     for (Map.Entry<Value,Value> entry : map.entrySet()) {
-      from[k] = entry.getKey().toStringValue();
-      to[k] = entry.getValue().toStringValue();
+      entryArray[i++] = entry;
+    }
 
-      k++;
+    // sort entries in descending fashion
+    Arrays.sort(entryArray, new StrtrComparator<Map.Entry<Value,Value>>());
+
+    for (i = 0; i < size; i++) {
+      from[i] = entryArray[i].getKey().toStringValue();
+      to[i] = entryArray[i].getValue().toStringValue();
     }
 
     StringValue result = string.createStringBuilder();
     int len = string.length();
     int head = 0;
 
+    top:
     while (head < len) {
-      int bestHead = len;
-      int bestI = -1;
-      int bestLength = 0;
-
-      for (int i = 0; i < from.length; i++) {
-        int p = string.indexOf(from[i], head);
-
-        if (p >= 0 && (p < bestHead
-		       || p == bestHead && bestLength < from[i].length())) {
-          bestHead = p;
-          bestI = i;
-          bestLength = from[i].length();
+      fromLoop:
+      for (i = 0; i < from.length; i++) {
+        int fromLen = from[i].length();
+        
+        if (head + fromLen > len)
+          continue;
+        
+        for (int j = 0; j < fromLen; j++) {
+          if (string.charAt(head + j) != from[i].charAt(j))
+            continue fromLoop;
         }
+
+        result = result.append(to[i]);
+        head = head + from[i].length();
+
+        continue top;
       }
 
-      if (head != bestHead)
-        result = result.append(string.substring(head, bestHead));
-
-      if (bestI >= 0)
-        result = result.append(to[bestI]);
-
-      head = bestHead + bestLength;
+      result = result.append(string.charAt(head++));
     }
 
     return result;
+  }
+  
+  /*
+   * Comparator for sorting in descending fashion based on length.
+   */
+  static class StrtrComparator<T extends Map.Entry<Value,Value>>
+    implements Comparator<T>
+  {
+    public int compare(T a, T b)
+    {
+      int lenA = a.getKey().length();
+      int lenB = b.getKey().length();
+      
+      if (lenA < lenB)
+        return 1;
+      else if (lenA == lenB)
+        return 0;
+      else
+        return -1;
+    }
   }
 
   /**
