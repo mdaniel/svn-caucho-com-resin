@@ -182,9 +182,10 @@ public class FileQueueStore
       try {
 	_sendStmt.setLong(1, _queueId);
 	_sendStmt.setLong(2, expireTime);
-	_sendStmt.setBinaryStream(3, msg.propertiesToInputStream(), 0);
-	_sendStmt.setInt(4, msg.getType().ordinal());
-	_sendStmt.setBinaryStream(5, msg.bodyToInputStream(), 0);
+	_sendStmt.setString(3, msg.getJMSMessageID());
+	_sendStmt.setBinaryStream(4, msg.propertiesToInputStream(), 0);
+	_sendStmt.setInt(5, msg.getType().ordinal());
+	_sendStmt.setBinaryStream(6, msg.bodyToInputStream(), 0);
 
 	_sendStmt.executeUpdate();
 
@@ -269,15 +270,20 @@ public class FileQueueStore
 	    msg = new MessageImpl();
 	    break;
 	  }
+	  
+	  String msgId = rs.getString(2);
 
-	  InputStream is = rs.getBinaryStream(2);
+	  msg.setJMSMessageID(msgId);
+
+	  InputStream is = rs.getBinaryStream(3);
 	  if (is != null) {
 	    msg.readProperties(is);
 
 	    is.close();
 	  }
 
-	  is = rs.getBinaryStream(3);
+
+	  is = rs.getBinaryStream(4);
 	  if (is != null) {
 	    msg.readBody(is);
 
@@ -375,6 +381,7 @@ public class FileQueueStore
 	   + "  expire datetime,"
 	   + "  refcount integer,"
 	   + "  owner bigint,"
+	   + "  msg_id varchar(64),"
 	   + "  header blob,"
 	   + "  type integer,"
 	   + "  body blob"
@@ -424,16 +431,16 @@ public class FileQueueStore
     throws SQLException
   {
     String sql = ("insert into " + _messageTable
-		  + " (queue,expire,header,type,body) VALUES(?,?,?,?,?)");
+		  + " (queue,expire,msg_id,header,type,body) VALUES(?,?,?,?,?,?)");
     
     _sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
     
-    sql = ("select id,header,body from " + _messageTable
+    sql = ("select id,msg_id,header,body from " + _messageTable
 	   + " WHERE queue=? LIMIT 1");
     
     _receiveStmt = _conn.prepareStatement(sql);
     
-    sql = ("select type,header,body from " + _messageTable
+    sql = ("select type,msg_id,header,body from " + _messageTable
 	   + " WHERE id=?");
     
     _readStmt = _conn.prepareStatement(sql);

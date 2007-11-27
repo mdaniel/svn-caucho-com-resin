@@ -321,6 +321,12 @@ public class BeanTypeStrategy extends TypeStrategy {
 
       return strategy;
     }
+    // jms/6500
+    else if (setterMethod.getParameterTypes()[0].equals(BuilderProgram.class)) {
+      strategy = new ProgramAttributeStrategy(setterMethod);
+
+      return strategy;
+    }
     else {
       strategy = new SetterAttributeStrategy(setterMethod);
 

@@ -29,8 +29,9 @@
 
 package com.caucho.el;
 
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.*;
+import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
@@ -45,10 +46,16 @@ public class EnvironmentLevelELResolver extends ELResolver {
     = new EnvironmentLocal<EnvironmentLevelELResolver>();
   
   private final ClassLoader _loader;
+  private final WebBeansContainer _webBeans;
 
   private EnvironmentLevelELResolver(ClassLoader loader)
   {
     _loader = loader;
+
+    if (Environment.getEnvironmentClassLoader(loader) != null)
+      _webBeans = WebBeansContainer.create(loader);
+    else
+      _webBeans = null;
   }
   
   /**
@@ -141,6 +148,16 @@ public class EnvironmentLevelELResolver extends ELResolver {
 
     String var = (String) property;
 
+    if (_webBeans != null) {
+      ComponentImpl comp = _webBeans.findByName(var);
+
+      if (comp != null) {
+	Object value = comp.get();
+	env.setPropertyResolved(true);
+	return value;
+      }
+    }
+
     Object value = EL.getLevelVar(var, _loader);
 
     if (value == null)
@@ -171,6 +188,18 @@ public class EnvironmentLevelELResolver extends ELResolver {
     String name = (String) property;
 
     EL.putVar(name, value, _loader);
+  }
+
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof EnvironmentLevelELResolver))
+      return false;
+
+    EnvironmentLevelELResolver resolver = (EnvironmentLevelELResolver) o;
+
+    return _loader == resolver._loader;
   }
 
   public String toString()

@@ -242,6 +242,8 @@ public class NodeBuilder {
       typeStrategy.beforeConfigure(this, bean, attribute);
 
       configureChildNode(attribute, qName, bean, typeStrategy);
+      
+      typeStrategy.afterConfigure(this, bean);
     }
     catch (LineConfigException e) {
       throw e;
@@ -298,6 +300,8 @@ public class NodeBuilder {
         
         configureChildNode(childNode, qName, bean, typeStrategy);
       }
+
+      typeStrategy.afterConfigure(this, bean);
     } catch (LineConfigException e) {
       throw e;
     } catch (Exception e) {

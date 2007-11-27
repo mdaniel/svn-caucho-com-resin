@@ -1230,24 +1230,27 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
   class ReceiveMessage extends TransactedMessage {
     private final AbstractDestination _queue;
-    private final MessageImpl _message;
+    private final String _msgId;
     
     ReceiveMessage(AbstractDestination queue, MessageImpl message)
     {
       _queue = queue;
-      _message = message;
+      _msgId = message.getJMSMessageID();
+
+      if (_msgId == null)
+	throw new NullPointerException();
     }
 
     void commit()
       throws JMSException
     {
-      _queue.acknowledge(_message.getJMSMessageID());
+      _queue.acknowledge(_msgId);
     }
 
     void rollback()
       throws JMSException
     {
-      _queue.rollback(_message.getJMSMessageID());
+      _queue.rollback(_msgId);
     }
     
     void close()

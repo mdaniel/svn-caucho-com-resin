@@ -270,6 +270,9 @@ public class MessageConsumerImpl
       }
 
       else {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(_queue + " receiving message " + msg);
+	
         if (! _isAutoAcknowledge)
           _session.addTransactedReceive(_queue, msg);
 

@@ -129,6 +129,7 @@ public class ConnectionImpl implements XAConnection
     _clientId = clientId;
     _isClientIdSet = true;
     _lifecycle.setName(toString());
+    _lifecycle.setLevel(Level.FINER);
   }
 
   /**
