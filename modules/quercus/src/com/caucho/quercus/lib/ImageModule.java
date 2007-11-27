@@ -1838,42 +1838,64 @@ public class ImageModule extends AbstractQuercusModule {
       yq.add(starty);
       color &= 0x00ffffff;
       border &= 0x00ffffff;
+      
+      int height = getHeight();
+
       while(xq.size() > 0)
-	{
-	  int x = xq.poll();
-	  int y = yq.poll();
-	  int p = (getPixel(x, y) & 0x00ffffff);
-	  if (useBorder ? (p==border||p==color) : (p != 0)) continue;
-	  setPixel(x, y, color);
-	  for(int i=x-1; i>=0; i--)
-	    {
-	      p = (getPixel(i, y) & 0x00ffffff);
-	      if (useBorder ? (p==border||p==color) : (p!= 0)) break;
-	      setPixel(i, y, color);
-	      xq.add(i);
-	      yq.add(y+1);
-	      xq.add(i);
-	      yq.add(y-1);
-	    }
-	  for(int i=x+1; i<getWidth(); i++)
-	    {
-	      p = (getPixel(i, y) & 0x00ffffff);
-	      if (useBorder ? (p==border||p==color) : (p != 0)) break;
-	      setPixel(i, y, color);
-	      xq.add(i);
-	      yq.add(y+1);
-	      xq.add(i);
-	      yq.add(y-1);
-	    }
-	  xq.add(x);
-	  yq.add(y+1);
-	  xq.add(x);
-	  yq.add(y-1);
-	}
+      {
+        int x = xq.poll();
+        int y = yq.poll();
+        int p = (getPixel(x, y) & 0x00ffffff);
+        if (useBorder ? (p==border||p==color) : (p != 0)) continue;
+        setPixel(x, y, color);
+
+        for(int i = x - 1; i >= 0; i--)
+        {
+          p = (getPixel(i, y) & 0x00ffffff);
+          if (useBorder ? (p==border||p==color) : (p!= 0)) break;
+          setPixel(i, y, color);
+
+          if (y + 1 < height) {
+            xq.add(i);
+            yq.add(y+1);
+          }
+          
+          if (y - 1 >= 0) {
+            xq.add(i);
+            yq.add(y-1);
+          }
+        }
+
+        for(int i = x + 1; i < getWidth(); i++)
+        {
+          p = (getPixel(i, y) & 0x00ffffff);
+          if (useBorder ? (p==border||p==color) : (p != 0)) break;
+          setPixel(i, y, color);
+          
+          if (y + 1 < height) {
+            xq.add(i);
+            yq.add(y+1);
+          }
+          
+          if (y - 1 >= 0) {
+            xq.add(i);
+            yq.add(y-1);
+          }
+        }
+
+        if (y + 1 < height) {
+          xq.add(x);
+          yq.add(y+1);
+        }
+        
+        if (y - 1 >= 0) {
+          xq.add(x);
+          yq.add(y-1);
+        }
+      }
     }
 
   }
-
 
 
 }
