@@ -74,7 +74,7 @@ abstract public class DeployGenerator<E extends DeployController>
     _container = container;
 
     _lifecycle.setName(toString());
-    _lifecycle.setLevel(Level.FINER);
+    _lifecycle.setLevel(Level.FINEST);
   }
 
   /**

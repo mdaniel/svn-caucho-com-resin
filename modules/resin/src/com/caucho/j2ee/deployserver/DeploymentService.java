@@ -194,9 +194,9 @@ public class DeploymentService
         mxbean = loadArchiveMXBean(jmxName);
       }
       else if ("war".equals(plan.getArchiveType())) {
-        moduleID = "resin:name=" + name + ",type=WebApp,Host=" + hostName;
+        moduleID = "resin:name=/" + name + ",type=WebApp,Host=" + hostName;
       
-        String jmxName = "resin:type=WarDeploy,Host=" + hostName + ",*";
+        String jmxName = "resin:type=WebAppDeploy,Host=" + hostName + ",*";
         mxbean = loadArchiveMXBean(jmxName);
       }
       else if ("rar".equals(plan.getArchiveType())) {
@@ -288,7 +288,7 @@ public class DeploymentService
     }
     else {
       failed = true;
-      log.warning(L.l("jsr88 cannot deploy '{0}'", moduleID));
+      log.warning(L.l("jsr88 cannot deploy '{0}', can't find deployment resource (e.g. web-app-deploy, ear-deploy).", moduleID));
     }
     
     TargetModuleID []targetModuleIDs
@@ -493,25 +493,30 @@ public class DeploymentService
         log.log(Level.FINE, L.l("jsr88 starting {0}", targetModuleID.getModuleID()));
 
       Throwable exception = null;
-      ArchiveDeployMXBean mxbean = null;
+      DeployControllerMXBean mxbean = null;
 
       try {
-        ObjectName objectName
-          = new ObjectName(targetModuleID.getTarget().getName());
-        mxbean = getMXBean(objectName);
-        mxbean.start(objectName.getKeyProperty("name"));
+        ObjectName objectName = new ObjectName(targetModuleID.getModuleID());
+        mxbean = (DeployControllerMXBean) Jmx.find(objectName);
+	if (mxbean != null)
+	  mxbean.start();
+	else {
+	  log.finer("Jsr88[] " + objectName + " is an unknown module");
+	  failed = true;
+	}
       }
       catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
         // XXX: need to handle depending on type
-        //exception = t;
+        exception = t;
       }
 
+      /*
       if (exception == null && mxbean != null) {
-        exception = mxbean.getConfigException(targetModuleID.getModuleID());
         // XXX: temp for types
         exception = null;
       }
+      */
 
       if (exception != null) {
         failed  = true;
@@ -538,21 +543,33 @@ public class DeploymentService
 
     for (TargetModuleID targetModuleID : ids) {
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("stopping {0}", targetModuleID.getModuleID()));
+        log.log(Level.FINE, L.l("jsr88 stopping {0}", targetModuleID.getModuleID()));
 
       Throwable exception = null;
-      ArchiveDeployMXBean mxbean = null;
+      DeployControllerMXBean mxbean = null;
 
       try {
-        ObjectName objectName
-          = new ObjectName(targetModuleID.getTarget().getName());
-        mxbean = getMXBean(objectName);
-        mxbean.stop(objectName.getKeyProperty("name"));
+        ObjectName objectName = new ObjectName(targetModuleID.getModuleID());
+        mxbean = (DeployControllerMXBean) Jmx.find(objectName);
+	if (mxbean != null)
+	  mxbean.stop();
+	else {
+	  log.finer("Jsr88[] " + objectName + " is an unknown module");
+	  failed = true;
+	}
       }
       catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
+        // XXX: need to handle depending on type
         exception = t;
       }
+
+      /*
+      if (exception == null && mxbean != null) {
+        // XXX: temp for types
+        exception = null;
+      }
+      */
 
       if (exception != null) {
         failed  = true;
@@ -587,9 +604,10 @@ public class DeploymentService
 
       try {
         ObjectName objectName
-          = new ObjectName(targetModuleID.getTarget().getName());
+          = new ObjectName(targetModuleID.getModuleID());
         mxbean = getMXBean(objectName);
-        mxbean.undeploy(objectName.getKeyProperty("name"));
+	if (mxbean != null)
+	  mxbean.undeploy(objectName.getKeyProperty("name"));
       }
       catch (Throwable t) {
         log.log(Level.INFO, t.toString(), t);

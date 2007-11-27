@@ -535,7 +535,8 @@ public class Config {
 
     QName attrName = new QName(attr);
     AttributeStrategy attrStrategy = strategy.getAttributeStrategy(attrName);
-    attrStrategy.setAttribute(obj, attrName, value);
+    if (attrStrategy != null)
+      attrStrategy.setAttribute(obj, attrName, value);
   }
 
   /**

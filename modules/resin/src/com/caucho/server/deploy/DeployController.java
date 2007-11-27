@@ -97,7 +97,7 @@ abstract public class DeployController<I extends DeployInstance>
     
     _parentLoader = parentLoader;
 
-    _lifecycle = new Lifecycle(getLog(), toString(), Level.FINER);
+    _lifecycle = new Lifecycle(getLog(), toString(), Level.FINEST);
   }
 
   public void addLifecycleListener(LifecycleListener listener)
