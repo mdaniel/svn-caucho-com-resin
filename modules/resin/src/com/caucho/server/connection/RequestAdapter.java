@@ -373,6 +373,11 @@ public class RequestAdapter extends RequestWrapper
     else
       return false;
   }
+
+  public HttpSession getMemorySession()
+  {
+    return getSession(false);
+  }
       
   public HttpSession getSession(boolean create)
   {
