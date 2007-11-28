@@ -128,7 +128,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
     // TCK (ejb/0f6f)
     // Multiple remote interfaces
-    for (Class cl : server.getRemoteObjectList()) {
+    for (Class cl : server.getRemoteApiList()) {
       String s = cl.getName().replace(".", "_");
 
       name = remoteJndiName + "#" + s;

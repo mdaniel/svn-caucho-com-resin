@@ -157,7 +157,7 @@ abstract public class AbstractSessionContext extends AbstractContext
     if (businessInterface == null)
       throw new IllegalStateException("SessionContext.getBusinessObject(null) is not allowed");
 
-    ArrayList<Class> apiList = getSessionServer().getRemoteObjectList();
+    ArrayList<Class> apiList = getSessionServer().getRemoteApiList();
 
     if (apiList.contains(businessInterface))
       return;

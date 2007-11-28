@@ -399,7 +399,7 @@ public class EjbSessionBean extends EjbBean {
 	classList.add(loadClass(apiClass.getName()));
       }
       
-      server.setRemoteObjectList(classList);
+      server.setRemoteApiList(classList);
     }
 
     if (getRemote21() != null)

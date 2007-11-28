@@ -102,7 +102,7 @@ public class EjbIiopRemoteService extends IiopRemoteService {
       return list;
     }
     else
-      return _server.getRemoteObjectList();
+      return _server.getRemoteApiList();
   }
 
   /**
@@ -117,7 +117,7 @@ public class EjbIiopRemoteService extends IiopRemoteService {
       return list;
     }
 
-    return _server.getRemoteObjectList();
+    return _server.getRemoteApiList();
   }
 
   /**

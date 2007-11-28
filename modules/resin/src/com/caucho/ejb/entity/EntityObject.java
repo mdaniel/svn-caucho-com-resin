@@ -174,12 +174,10 @@ abstract public class EntityObject extends AbstractEJBObject
   /**
    * Remove the object.
    */
-  /*
-  public void remove() throws RemoveException
+  public void remove() throws javax.ejb.RemoveException
   {
-    _caucho_getServer().remove(getHandle());
+    //_caucho_getServer().remove(getHandle());
   }
-  */
 
   /**
    * Returns the server.

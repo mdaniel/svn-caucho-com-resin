@@ -1290,7 +1290,7 @@ public class EjbEntityBean extends EjbBean {
       if (name.startsWith("create")) {
         validateException(method, CreateException.class);
 
-        if (! retType.equals(objectClass))
+        if (! retType.equals(objectClass.getJavaClass()))
           throw error(L.l("{0}: '{1}' must return {2}.  Create methods must return the local or remote interface.",
                           homeName,
                           method.getFullName(),

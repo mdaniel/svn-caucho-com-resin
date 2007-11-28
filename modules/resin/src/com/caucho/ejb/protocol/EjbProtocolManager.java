@@ -233,182 +233,41 @@ public class EjbProtocolManager {
       String ejbName = server.getEJBName();
       String mappedName = server.getMappedName();
 
-      String localJndiName = null;
-
       // ejb/0g11
       // remote without a local interface should not get bound
       // with the local prefix
 
-      if (_localJndiPrefix == null)
-	bindDefaultJndi(_jndiPrefix, server);
+      bindDefaultJndi(_jndiPrefix, server);
 
-      if (server.isLocal()) {
-        Object localObj = server.getClientLocalHome();
+      // backward compat
+      if (server.isLocal() && _localJndiPrefix != null) {
+        Object localHome = server.getClientLocalHome();
 
-        // ejb/0f00
-        // EJB 3.0 does not require home interfaces, e.g
-        // for stateless session beans
+	Class api = null;
 
-        // ejb/0fe2
+	String jndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
+	
         if (server.getLocal21() != null) {
-          localObj = server.getClientObject(null);
+	  Jndi.bindDeep(jndiName, localHome);
         } else {
-          Class businessInterface = server.getLocalApiList().get(0);
-          localObj = server.getLocalObject(businessInterface);
-        }
-
-        if (localObj != null) {
-          if (_localJndiPrefix != null) {
-            // ejb/0g43
-            localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + mappedName);
-
-            if (log.isLoggable(Level.FINER))
-              log.finer(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
-
-            bindServer(localJndiName, localObj);
-
-            // ejb/0f6d (tck)
-            if (server.getRemoteObject21() == null && ejbName != null) {
-              // ejb/0f30, ejb/0f6c (tck) vs ejb/0g01
-              if (! (ejbName.equals(mappedName) || _localJndiPrefix.endsWith("/env"))) {
-                localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
-
-                if (log.isLoggable(Level.FINER))
-                  log.finer(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
-
-                bindServer(localJndiName, localObj);
-              }
-            }
-
-            // ejb/0ff4 (TCK): multiple local interfaces
-            for (Class cl : server.getLocalApiList()) {
-              // ejb/0fe1
-              if (cl == server.getLocal21())
-                continue;
-
-              String s = cl.getName().replace(".", "_");
-
-              Object obj;
-
-              if (server.getLocalApiList().size() == 1) {
-                // ejb/0fe1: it is the same object.
-                obj = localObj;
-              } // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceLocalIllegal
-              else {
-                if (server.getLocal21() == null
-                    || ! server.getLocal21().getName().equals(cl.getName())) {
-                  // ejb/0ff4
-                  obj = server.getLocalObject(cl);
-                }
-                else {
-                  obj = server.getClientObject(server.getLocal21());
-
-                  if (obj instanceof com.caucho.naming.ObjectProxy) {
-                    // OK
-                  } else {
-                    try {
-                      // XXX TCK: switch to method.getName().startsWith("create")
-                      Method method = obj.getClass().getDeclaredMethod("create",
-                                                                       new Class[] {});
-                      obj = method.invoke(obj, null);
-                    } catch (Exception e) {
-                      log.config(L.l("local home {0} has no create method", obj.getClass().getName()));
-                      continue;
-                    }
-                  }
-                }
-              }
-
-              String jndiName = localJndiName + "#" + s;
-
-              bindServer(jndiName, obj);
-
-              if (log.isLoggable(Level.FINER))
-                log.finer(L.l("local ejb {0} has JNDI binding {1}", obj, jndiName));
-            }
-          }
-          else {
-            if (log.isLoggable(Level.FINER))
-              log.finer(L.l("local ejb {0} has no JNDI binding", localObj));
-          }
+          api = server.getLocalApiList().get(0);
+	  bindServer(jndiName, server, api);
         }
       }
 
-      Object remoteObj = null;
-      Class businessInterface = null;
+      // backward compat
+      if (server.isRemote() && _remoteJndiPrefix != null) {
+        Object remoteHome = server.getEJBHome();
 
-      // ejb/0fe-
-      if (server.getRemote21() != null) {
-        remoteObj = server.getRemoteObject21();
-      } else if (server.hasRemoteObject()) {
-        businessInterface = server.getRemoteObjectList().get(0);
-        remoteObj = server.getRemoteObject(businessInterface);
-      }
+	Class api = null;
 
-      if (remoteObj != null) {
-        if (_remoteJndiPrefix != null) {
-          String remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + mappedName);
-
-          if (!remoteJndiName.equals(localJndiName)) {
-            if (log.isLoggable(Level.FINER))
-              log.finer(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
-
-            bindServer(remoteJndiName, remoteObj);
-
-            if (ejbName != null) {
-              if (! (ejbName.equals(mappedName) || _remoteJndiPrefix.endsWith("/env"))) {
-                remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
-
-                if (log.isLoggable(Level.FINER))
-                  log.finer(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
-
-                bindServer(remoteJndiName, remoteObj);
-              }
-            }
-
-            // ejb/0f6f (TCK): multiple remote interfaces
-            for (Class cl : server.getRemoteObjectList()) {
-              String s = cl.getName().replace(".", "_");
-
-              Object obj;
-
-              if (server.getRemoteObjectList().size() == 1) {
-                // It is the same object.
-                obj = remoteObj;
-              } else {
-                // ejb/0ff0
-                // TCK: ejb30/bb/session/stateful/sessioncontext/annotated/getInvokedBusinessInterfaceRemoteIllegal
-                if (server.getRemote21() == null
-                    || ! server.getRemote21().getName().equals(cl.getName())) {
-                  obj = server.getRemoteObject(cl);
-                }
-                else {
-                  obj = server.getRemoteObject21();
-
-                  try {
-                    // XXX TCK: switch to method.getName().startsWith("create")
-                    Method method = obj.getClass().getDeclaredMethod("create",
-                                                                     new Class[] {});
-                    obj = method.invoke(obj, null);
-                  } catch (Exception e) {
-                    log.config(L.l("remote home {0} has no create method", obj.getClass().getName()));
-                    continue;
-                  }
-                }
-              }
-
-              String jndiName = remoteJndiName + "#" + s;
-
-              bindServer(jndiName, obj);
-
-              if (log.isLoggable(Level.FINER))
-                log.finer(L.l("remote ejb {0} has JNDI binding {1}", obj, jndiName));
-            }
-          }
-        }
-        else {
-          if (localJndiName == null && log.isLoggable(Level.FINER))
-            log.finer(L.l("remote ejb {0} has no JNDI binding", remoteObj));
+	String jndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
+	
+        if (server.getRemote21() != null) {
+	  Jndi.bindDeep(jndiName, remoteHome);
+        } else {
+          api = server.getRemoteApiList().get(0);
+	  bindRemoteServer(jndiName, server, api);
         }
       }
     } catch (RuntimeException e) {
@@ -449,7 +308,9 @@ public class EjbProtocolManager {
     }
   }
 
-  private void bindServer(String jndiName, Object obj)
+  private void bindServer(String jndiName,
+			  AbstractServer server,
+			  Class api)
     throws NamingException
   {
     Thread thread = Thread.currentThread();
@@ -458,13 +319,25 @@ public class EjbProtocolManager {
     try {
       Thread.currentThread().setContextClassLoader(_loader);
 
-      Jndi.bindDeep(jndiName, obj);
+      Jndi.bindDeep(jndiName, new ServerLocalProxy(server, api));
+    }
+    finally {
+      Thread.currentThread().setContextClassLoader(loader);
+    }
+  }
 
-      for (AbstractServer server : _serverMap.values()) {
-        Thread.currentThread().setContextClassLoader(server.getClassLoader());
+  private void bindRemoteServer(String jndiName,
+				AbstractServer server,
+				Class api)
+    throws NamingException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
 
-        Jndi.bindDeep(jndiName, obj);
-      }
+    try {
+      Thread.currentThread().setContextClassLoader(_loader);
+
+      Jndi.bindDeep(jndiName, new ServerRemoteProxy(server, api));
     }
     finally {
       Thread.currentThread().setContextClassLoader(loader);

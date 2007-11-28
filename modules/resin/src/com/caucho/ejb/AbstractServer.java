@@ -94,7 +94,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected DataSource _dataSource;
 
-  protected DynamicClassLoader _loader;
+  protected EnvironmentClassLoader _loader;
 
   protected SameJVMClientContainer _jvmClient;
 
@@ -109,7 +109,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected Class _remoteHomeClass;
   protected Class _remoteObjectClass;
-  protected ArrayList<Class> _remoteObjectList;
+  protected ArrayList<Class> _remoteApiList;
   protected Class _primaryKeyClass;
   protected Class _localHomeClass;
   protected ArrayList<Class> _localApiList;
@@ -349,20 +349,20 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Sets the remote object list.
    */
-  public void setRemoteObjectList(ArrayList<Class> list)
+  public void setRemoteApiList(ArrayList<Class> list)
   {
-    _remoteObjectList = new ArrayList<Class>(list);
+    _remoteApiList = new ArrayList<Class>(list);
 
-    if (_remoteObjectList.size() > 0)
-      _remoteObjectClass = _remoteObjectList.get(0);
+    if (_remoteApiList.size() > 0)
+      _remoteObjectClass = _remoteApiList.get(0);
   }
 
   /**
    * Returns the remote object list.
    */
-  public ArrayList<Class> getRemoteObjectList()
+  public ArrayList<Class> getRemoteApiList()
   {
-    return _remoteObjectList;
+    return _remoteApiList;
   }
 
   /**
@@ -370,10 +370,10 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public boolean hasRemoteObject()
   {
-    if (_remoteObjectList == null)
+    if (_remoteApiList == null)
       return false;
 
-    if (_remoteObjectList.size() == 0)
+    if (_remoteApiList.size() == 0)
       return false;
 
     return true;
@@ -386,9 +386,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     _remoteObjectClass = cl;
 
-    if (_remoteObjectList == null) {
-      _remoteObjectList = new ArrayList<Class>();
-      _remoteObjectList.add(cl);
+    if (_remoteApiList == null) {
+      _remoteApiList = new ArrayList<Class>();
+      _remoteApiList.add(cl);
     }
   }
 
@@ -636,14 +636,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   public DynamicClassLoader getClassLoader()
   {
     return _loader;
-  }
-
-  /**
-   * Sets the class loader
-   */
-  public void setClassLoader(DynamicClassLoader loader)
-  {
-    _loader = loader;
   }
 
   /**
@@ -944,6 +936,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void init()
     throws Exception
   {
+    _loader.init();
     // _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
   }
 
@@ -960,6 +953,8 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     try {
       thread.setContextClassLoader(_loader);
+
+      _loader.start();
 
       if (_serverProgram != null)
         _serverProgram.configure(this);
@@ -1072,14 +1067,14 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void addClientRemoteConfig(StringBuilder sb)
   {
-    if (_remoteObjectList != null && _remoteObjectList.size() > 0) {
+    if (_remoteApiList != null && _remoteApiList.size() > 0) {
       sb.append("<ejb-ref>\n");
       sb.append("<ejb-ref-name>" + getEJBName() + "</ejb-ref-name>\n");
 
       if (_remoteHomeClass != null)
         sb.append("<home>" + _remoteHomeClass.getName() + "</home>\n");
       
-      sb.append("<remote>" + _remoteObjectList.get(0).getName() + "</remote>\n");
+      sb.append("<remote>" + _remoteApiList.get(0).getName() + "</remote>\n");
       sb.append("</ejb-ref>\n");
     }
   }

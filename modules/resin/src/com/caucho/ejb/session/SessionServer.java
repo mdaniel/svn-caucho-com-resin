@@ -235,7 +235,7 @@ public class SessionServer extends AbstractServer
     if (businessInterface == null) {
       if (getRemote21() == null) {
         // Assumes EJB 3.0
-        businessInterface = getRemoteObjectList().get(0);
+        businessInterface = getRemoteApiList().get(0);
       }
     }
 
