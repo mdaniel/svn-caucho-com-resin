@@ -72,10 +72,13 @@ public class CourseServlet extends HttpServlet {
     }
 
     out.println("<h3>Add a Course</h3>");
+
+    Course course;
     
     _manager.getTransaction().begin();
     try {
-      _manager.persist(new Course("Charms", "Professor Flitwick"));
+      course = new Course("Charms", "Professor Flitwick");
+      _manager.persist(course);
     } finally {
       _manager.getTransaction().commit();
     }
@@ -84,6 +87,13 @@ public class CourseServlet extends HttpServlet {
       out.println("course: " + course.course() + "<br>");
       out.println("teacher: " + course.teacher() + "<br>");
       out.println("<br>");
+    }
+    
+    _manager.getTransaction().begin();
+    try {
+      _manager.remove(course);
+    } finally {
+      _manager.getTransaction().commit();
     }
   }
 }
