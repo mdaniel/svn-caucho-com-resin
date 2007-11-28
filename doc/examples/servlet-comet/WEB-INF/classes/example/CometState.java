@@ -12,9 +12,9 @@ public class CometState {
     _controller = controller;
   }
 
-  public boolean isActive()
+  public boolean isClosed()
   {
-    return _controller.isActive();
+    return _controller.isClosed();
   }
 
   public boolean wake()
@@ -24,7 +24,7 @@ public class CometState {
     if (_count <= 10) {
       _controller.wake();
     
-      return _controller.isActive();
+      return ! _controller.isClosed();
     }
     else {
       _controller.close();
