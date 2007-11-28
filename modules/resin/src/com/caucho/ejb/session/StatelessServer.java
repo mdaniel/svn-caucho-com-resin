@@ -102,6 +102,9 @@ public class StatelessServer extends AbstractServer {
 
       SingletonComponent comp
         = new SingletonComponent(webBeans, getStatelessContext());
+      
+      _component = comp;
+    
       comp.setTargetType(SessionContext.class);
       comp.init();
       webBeans.addComponent(comp);

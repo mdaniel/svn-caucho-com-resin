@@ -2063,7 +2063,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	handleNotModified(_isTopCache);
       }
 
-      if (controller != null && controller.isActive())
+      if (controller != null && ! controller.isClosed())
 	isClose = false;
 
       // include() files finish too, but shouldn't force a flush, hence

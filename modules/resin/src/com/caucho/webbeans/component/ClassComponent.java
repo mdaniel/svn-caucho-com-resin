@@ -233,7 +233,7 @@ public class ClassComponent extends ComponentImpl {
 	    return value;
 	}
       
-	value = createNew();
+	value = createNew(scope);
 	
 	if (_scope != null) {
 	  _scope.put(this, value);
@@ -270,7 +270,7 @@ public class ClassComponent extends ComponentImpl {
     }
   }
 
-  protected Object createNew()
+  protected Object createNew(DependentScope scope)
   {
     try {
       if (! _isBound)
@@ -286,7 +286,12 @@ public class ClassComponent extends ComponentImpl {
       else
 	args = NULL_ARGS;
       
-      return _ctor.newInstance(args);
+      Object value = _ctor.newInstance(args);
+
+      if (scope != null)
+	scope.put(this, value);
+
+      return value;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

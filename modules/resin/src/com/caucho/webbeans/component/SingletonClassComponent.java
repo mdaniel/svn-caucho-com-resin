@@ -82,7 +82,7 @@ public class SingletonClassComponent extends ClassComponent {
   public Object get(DependentScope scope)
   {
     if (_value == null) {
-      _value = createNew();
+      _value = createNew(null);
 
       init(_value, new DependentScope(this, _value, new SingletonScope()));
     }

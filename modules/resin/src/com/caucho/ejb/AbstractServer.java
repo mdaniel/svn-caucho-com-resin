@@ -52,6 +52,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.component.*;
 
 import javax.ejb.*;
 import javax.naming.Context;
@@ -125,6 +126,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected Class _serviceEndpointClass;
 
   protected long _transactionTimeout;
+
+  protected ComponentImpl _component;
 
   private TimerService _timerService;
 
@@ -915,6 +918,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void initInstance(Object instance, DependentScope scope)
     throws Exception
   {
+    /*
+    if (scope != null)
+      scope.put(_component, scope);
+    */
+    
     if (_initInject != null) {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();

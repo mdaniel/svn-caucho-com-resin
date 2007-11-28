@@ -29,6 +29,7 @@
 
 package com.caucho.server.connection;
 
+import java.util.*;
 import javax.servlet.*;
 
 import com.caucho.servlet.comet.CometController;
@@ -44,6 +45,7 @@ public class HttpConnectionController extends ConnectionController
   implements CometController
 {
   private AbstractHttpRequest _request;
+  private HashMap<String,Object> _map = new HashMap<String,Object>(8);
   
   private long _maxIdleTime;
 
@@ -70,7 +72,8 @@ public class HttpConnectionController extends ConnectionController
    */
   public void setMaxIdleTime(long idleTime)
   {
-    _maxIdleTime = idleTime;
+    if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
+      _maxIdleTime = Long.MAX_VALUE / 2;
   }
   
   /**
@@ -86,11 +89,9 @@ public class HttpConnectionController extends ConnectionController
    */
   public Object getAttribute(String name)
   {
-    AbstractHttpRequest request = _request;
-
-    if (request != null) {
-      synchronized (request) {
-	return request.getAttribute(name);
+    if (_map != null) {
+      synchronized (_map) {
+	return _map.get(name);
       }
     }
     else
@@ -102,11 +103,9 @@ public class HttpConnectionController extends ConnectionController
    */
   public void setAttribute(String name, Object value)
   {
-    AbstractHttpRequest request = _request;
-
-    if (request != null) {
-      synchronized (request) {
-	request.setAttribute(name, value);
+    if (_map != null) {
+      synchronized (_map) {
+	_map.put(name, value);
       }
     }
   }
@@ -116,11 +115,9 @@ public class HttpConnectionController extends ConnectionController
    */
   public void removeAttribute(String name)
   {
-    AbstractHttpRequest request = _request;
-
-    if (request != null) {
-      synchronized (request) {
-	request.removeAttribute(name);
+    if (_map != null) {
+      synchronized (_map) {
+	_map.remove(name);
       }
     }
   }

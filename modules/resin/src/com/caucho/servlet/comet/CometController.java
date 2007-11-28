@@ -57,16 +57,16 @@ public interface CometController {
    * Remove a request attribute.
    */
   public void removeAttribute(String name);
-
-  /**
-   * Returns true if the connection is active.
-   */
-  public boolean isActive();
   
   /**
    * Wakes the connection.
    */
   public boolean wake();
+
+  /**
+   * Returns true if the connection is closed.
+   */
+  public boolean isClosed();
   
   /**
    * Closes the connection.

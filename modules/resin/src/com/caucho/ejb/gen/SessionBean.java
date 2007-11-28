@@ -321,9 +321,11 @@ public class SessionBean extends ClassComponent {
       out.println("invokeMethod(this, \"setSessionContext\", new Class[] { javax.ejb.SessionContext.class }, new Object[] { context });");
     }
 
+    /*
     // ejb/0fd0
     out.println();
     out.println("__caucho_initInjection();");
+    */
 
     out.println();
     if (isStateless())

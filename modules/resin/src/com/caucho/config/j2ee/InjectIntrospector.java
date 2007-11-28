@@ -240,11 +240,9 @@ public class InjectIntrospector {
 
     PersistenceContext pc
       = (PersistenceContext) type.getAnnotation(PersistenceContext.class);
-    /*
+
     if (pc != null)
-      introspectClassPersistenceContext(initList, type);
-    }
-    */
+      introspectClassPersistenceContext(initList, type, pc);
 
     // ejb/0f66
     EJB ejb = (EJB) type.getAnnotation(EJB.class);
@@ -286,14 +284,13 @@ public class InjectIntrospector {
                             Resource resource)
     throws ConfigException
   {
-    /*
     String name = resource.name();
 
     Field field = findField(type, name);
 
     if (field != null) {
       ValueGenerator gen
-	= createResourceGenertor(location(field), field.getType(), resource);
+	= generateResource(location(field), field.getType(), "", resource);
 
       return;
     }
@@ -302,13 +299,25 @@ public class InjectIntrospector {
 
     if (method != null) {
       ValueGenerator gen
-	= createResourceGenerator(location(method),
-				  method.getParameterTypes()[0],
-				  resource);
+	= generateResource(location(method),
+			   method.getParameterTypes()[0],
+			   "", resource);
 
       return;
     }
-    */
+  }
+
+  private static void
+    introspectClassPersistenceContext(ArrayList<Inject> initList,
+				      Class type,
+				      PersistenceContext pContext)
+    throws ConfigException
+  {
+    String location = type.getSimpleName() + ": ";
+
+    ValueGenerator gen
+      = generatePersistenceContext(location, EntityManager.class,
+				   "", pContext);
   }
 
   private static void introspect(ArrayList<Inject> injectList,

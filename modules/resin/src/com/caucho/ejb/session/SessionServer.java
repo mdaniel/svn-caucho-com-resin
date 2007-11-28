@@ -128,6 +128,8 @@ public class SessionServer extends AbstractServer
     if (beanClass != null && localApiList != null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
       StatefulComponent comp = new StatefulComponent(this);
+
+      _component = comp;
     
       comp.setTargetType(getEjbClass());
     

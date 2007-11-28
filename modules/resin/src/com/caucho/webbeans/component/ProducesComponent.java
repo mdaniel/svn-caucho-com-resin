@@ -123,7 +123,7 @@ public class ProducesComponent extends ComponentImpl {
   }
 
   @Override
-  public Object createNew()
+  public Object createNew(DependentScope scope)
   {
     try {
       Object factory = _producer.get();
@@ -141,7 +141,12 @@ public class ProducesComponent extends ComponentImpl {
       else
 	args = NULL_ARGS;
       
-      return _method.invoke(factory, args);
+      Object value = _method.invoke(factory, args);
+
+      if (scope != null)
+	scope.put(this, value);
+
+      return value;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

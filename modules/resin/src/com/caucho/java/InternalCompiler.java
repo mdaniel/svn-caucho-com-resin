@@ -122,7 +122,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
 	Path javaPath = _compiler.getSourceDir().lookup(path[i]);
 	argList.add(javaPath.getNativePath());
       }
-
+      
       if (log.isLoggable(Level.FINE)) {
         CharBuffer msg = new CharBuffer();
 	msg.append("javac(int)");

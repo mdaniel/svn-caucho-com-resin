@@ -41,6 +41,7 @@ import com.caucho.vfs.ReadStream;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +54,7 @@ public class ConnectionController
     = Logger.getLogger(ConnectionController.class.getName());
 
   private Connection _conn;
+  private boolean _isTimeout;
 
   /**
    * Creates a new TcpConnectionController.
@@ -85,11 +87,35 @@ public class ConnectionController
   }
 
   /**
+   * Sets the timeout.
+   */
+  public final void timeout()
+  {
+    _isTimeout = true;
+  }
+
+  /**
+   * Return true if timed out
+   */
+  public final boolean isTimeout()
+  {
+    return _isTimeout;
+  }
+
+  /**
    * Returns true if the connection is active.
    */
   public final boolean isActive()
   {
-    return _conn != null;
+    return _conn != null && ! _isTimeout;
+  }
+
+  /**
+   * Returns true if the connection is active.
+   */
+  public final boolean isClosed()
+  {
+    return _conn == null;
   }
 
   /**

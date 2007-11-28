@@ -35,6 +35,7 @@ import javax.webbeans.*;
 import com.caucho.ejb.AbstractServer;
 
 import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 /**
@@ -53,8 +54,8 @@ public class StatefulComponent extends ComponentImpl {
   }
 
   @Override
-  public Object createNew()
+  public Object createNew(DependentScope scope)
   {
-    return _server.getLocalObject();
+    return _server.getLocalObject(scope);
   }
 }

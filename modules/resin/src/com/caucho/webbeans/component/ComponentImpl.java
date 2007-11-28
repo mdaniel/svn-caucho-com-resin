@@ -379,14 +379,16 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
 	return value;
     }
 
-    Object value = createNew();
+    Object value;
 
     if (_scope != null) {
+      value = createNew(null);
       _scope.put(this, value);
       scope = new DependentScope(this, value, _scope);
     }
-    else
-      scope.put(this, value);
+    else {
+      value = createNew(scope);
+    }
 
     init(value, scope);
 
@@ -399,7 +401,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   public Object create()
   {
     try {
-      Object value = createNew();
+      Object value = createNew(null);
       
       DependentScope scope = new DependentScope(this, value, _scope);
       scope.put(this, value);
@@ -417,7 +419,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     }
   }
 
-  protected Object createNew()
+  protected Object createNew(DependentScope scope)
   {
     throw new UnsupportedOperationException();
   }

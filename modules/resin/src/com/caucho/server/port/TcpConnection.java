@@ -470,7 +470,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   {
     ConnectionController controller = getController();
 
-    return controller != null && controller.isActive();
+    return controller != null && ! controller.isClosed();
   }
 
   /**

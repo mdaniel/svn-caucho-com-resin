@@ -222,7 +222,7 @@ function partition_threads($threads)
     else if (is_keepalive_thread($info)) {
       $partition["keepalive"][] = $info;
     }
-    else if (preg_match("/^resin-(http|hmux)/", $info->threadName)) {
+    else if (preg_match("/^(http|hmux)/", $info->threadName)) {
       $partition["active"][] = $info;
     }
     else {

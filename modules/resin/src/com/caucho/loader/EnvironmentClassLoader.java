@@ -511,7 +511,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public void validate()
   {
     super.validate();
+  }
 
+  @Override
+  public void scan()
+  {
     ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
     _pendingScanUrls.clear();
     

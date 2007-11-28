@@ -68,8 +68,8 @@ public class JaxbBeanType extends TypeStrategy
   private ArrayList<Inject> _injectList
     = new ArrayList<Inject>();
 
-  private ArrayList<Method> _preDestroyList
-    = new ArrayList<Method>();
+  private ArrayList<Inject> _destroyList
+    = new ArrayList<Inject>();
 
   private HashMap<String,AttributeStrategy> _attributeMap
     = new HashMap<String,AttributeStrategy>();
@@ -192,7 +192,14 @@ public class JaxbBeanType extends TypeStrategy
     introspectFields(accessType);
 
     try {
+      InjectIntrospector.introspectInject(_injectList, _type);
       InjectIntrospector.introspectInit(_injectList, _type);
+      
+      InjectIntrospector.introspectDestroy(_destroyList, _type);
+      if (_destroyList.size() == 0)
+	_destroyList = null;
+      
+      System.out.println("DL: " + _destroyList);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

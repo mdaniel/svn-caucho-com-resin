@@ -115,7 +115,11 @@ abstract public class HmuxClient
       //server.setPort(clusterPort);
       server.init();
 
-      return server.getServerConnector();
+      ServerConnector conn = server.getServerConnector();
+
+      conn.init();
+
+      return conn;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
