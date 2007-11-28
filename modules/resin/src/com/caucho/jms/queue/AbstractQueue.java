@@ -67,6 +67,11 @@ abstract public class AbstractQueue extends AbstractDestination
   {
   }
 
+  public void setQueueName(String name)
+  {
+    setName(name);
+  }
+
   //
   // JMX statistics
   //

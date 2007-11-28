@@ -104,7 +104,7 @@ abstract public class AbstractField implements AmberField {
   {
     _name = name;
 
-    if (! getSourceType().isFieldAccess()) {
+    if (! isFieldAccess()) {
       char ch = name.charAt(0);
       if (Character.isLowerCase(ch))
         name = Character.toUpperCase(ch) + name.substring(1);
@@ -304,7 +304,7 @@ abstract public class AbstractField implements AmberField {
    */
   public String getGetterName()
   {
-    if (getSourceType().isFieldAccess())
+    if (isFieldAccess())
       return "__caucho_get_" + getName();
     else
       return _getterMethod.getName();
@@ -350,7 +350,7 @@ abstract public class AbstractField implements AmberField {
    */
   public String getSetterName()
   {
-    if (getSourceType().isFieldAccess())
+    if (isFieldAccess())
       return "__caucho_set_" + getName();
     else if (_setterMethod != null)
       return _setterMethod.getName();
@@ -373,7 +373,7 @@ abstract public class AbstractField implements AmberField {
   {
     // jpa/0u21
 
-    if (getSourceType().isFieldAccess() || getSourceType().isIdClass())
+    if (isFieldAccess() || getSourceType().isIdClass())
       return true;
     else if (_getterMethod == null)
       return false;
@@ -606,7 +606,7 @@ abstract public class AbstractField implements AmberField {
     if (obj.equals("super"))
       return generateSuperSetter(value);
     else if (isAbstract()) {
-      if (getSourceType().isFieldAccess()) {
+      if (isFieldAccess()) {
         // jpa/0h09
         return obj + "." + getSetterName() + "(" + value + ")";
       }
@@ -687,10 +687,12 @@ abstract public class AbstractField implements AmberField {
   {
     if (! getSourceType().isEmbeddable())
       return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
-    else if (isFieldAccess())
+    else if (isFieldAccess()) {
       return objThis + "." + getName() + " = " + value;
-    else
+    }
+    else {
       return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
+    }
   }
 
   /**
@@ -930,6 +932,6 @@ abstract public class AbstractField implements AmberField {
 
   public String toString()
   {
-    return getClass().getName() + "[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "," + getSourceType() + "]";
   }
 }

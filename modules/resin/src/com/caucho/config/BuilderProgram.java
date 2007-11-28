@@ -79,6 +79,19 @@ public abstract class BuilderProgram extends Inject {
   /**
    * Configures the object.
    */
+  public void configure(Object bean, DependentScope scope)
+    throws ConfigException
+  {
+    NodeBuilder builder = NodeBuilder.createForProgram();
+
+    builder.setDependentScope(scope);
+    
+    configureImpl(builder, bean);
+  }
+
+  /**
+   * Configures the object.
+   */
   public void configure(NodeBuilder builder, Object bean)
     throws ConfigException
   {

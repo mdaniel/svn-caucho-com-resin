@@ -430,7 +430,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   protected Object init(Object value, DependentScope scope)
   {
     if (_init != null)
-      _init.configure(value);
+      _init.configure(value, scope);
     else {
       for (Inject inject : _injectProgram) {
 	inject.inject(value, scope);

@@ -34,6 +34,7 @@ import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
+import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
 import javax.naming.InitialContext;
@@ -47,7 +48,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class PersistenceContextGenerator extends ValueGenerator {
+public class PersistenceContextGenerator
+  extends ValueGenerator
+{
   private static final Logger log
     = Logger.getLogger(PersistenceContextGenerator.class.getName());
   private static final L10N L = new L10N(PersistenceContextGenerator.class);

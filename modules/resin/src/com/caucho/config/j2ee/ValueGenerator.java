@@ -29,13 +29,21 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.naming.*;
+import java.util.*;
+
 /**
  * Creates a new value.
  */
-abstract public class ValueGenerator {
+abstract public class ValueGenerator implements ObjectProxy {
   public Class getType()
   {
     return null;
+  }
+  
+  public Object createObject(Hashtable env)
+  {
+    return create();
   }
   
   abstract public Object create();

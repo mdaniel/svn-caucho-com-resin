@@ -72,6 +72,16 @@ public class InjectIntrospector {
 
   private static HashMap<Class,Class> _primitiveTypeMap
     = new HashMap<Class,Class>();
+
+  public static InjectProgram introspectProgram(Class type)
+  {
+    ArrayList<Inject> injectList = new ArrayList<Inject>();
+
+    introspectInject(injectList, type);
+    introspectInit(injectList, type);
+
+    return new InjectProgram(injectList);
+  }
   
   public static void
     introspectInit(ArrayList<Inject> initList, Class type)

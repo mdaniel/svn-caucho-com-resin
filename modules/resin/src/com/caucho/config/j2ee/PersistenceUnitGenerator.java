@@ -34,6 +34,7 @@ import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
+import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
 import javax.naming.InitialContext;
@@ -47,11 +48,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class PersistenceUnitGenerator extends ValueGenerator {
+public class PersistenceUnitGenerator extends ValueGenerator
+  implements ObjectProxy {
   private static final Logger log
     = Logger.getLogger(PersistenceUnitGenerator.class.getName());
   private static final L10N L = new L10N(PersistenceUnitGenerator.class);
 
+  private AmberContainer _amber;
+  
   private String _location;
   private String _jndiName;
   private String _unitName;
@@ -89,12 +93,10 @@ public class PersistenceUnitGenerator extends ValueGenerator {
    */
   public Object create()
   {
-    if (_factory != null)
-      return _factory;
+    if (_amber == null)
+      _amber = AmberContainer.getCurrent();
 
-    AmberContainer amber = AmberContainer.getCurrent();
-
-    EntityManagerFactory factory = amber.getEntityManagerFactory(_unitName);
+    EntityManagerFactory factory = _amber.getEntityManagerFactory(_unitName);
 
     if (factory == null)
       throw new ConfigException(_location

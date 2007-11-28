@@ -34,6 +34,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.context.*;
 
 /**
  * Configuration for an init program
@@ -91,6 +92,16 @@ public class InitProgram {
   {
     if (_init != null)
       _init.configure(obj);
+  }
+
+  /**
+   * Initialize the object
+   */
+  public void configure(Object obj, DependentScope scope)
+    throws ConfigException
+  {
+    if (_init != null)
+      _init.configure(obj, scope);
   }
 
   /**

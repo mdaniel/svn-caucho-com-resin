@@ -30,25 +30,32 @@
 package com.caucho.amber.manager;
 
 import javax.persistence.*;
+import javax.persistence.spi.*;
 
+import com.caucho.amber.cfg.*;
 import com.caucho.webbeans.component.*;
 
 /**
  * The Entity manager webbeans component
  */
 public class EntityManagerFactoryComponent extends FactoryComponent {
-  private EntityManagerFactory _emf;
+  private PersistenceProvider _provider;
+  private PersistenceUnitConfig _unit;
+  private String _unitName;
 
-  public EntityManagerFactoryComponent(EntityManagerFactory emf, String name)
+  public EntityManagerFactoryComponent(PersistenceProvider provider,
+				       PersistenceUnitConfig unit,
+				       String unitName)
   {
-    super(EntityManagerFactory.class, name);
-    
-    _emf = emf;
+    super(EntityManagerFactory.class, unitName);
+
+    _provider = provider;
+    _unitName = unitName;
   }
 
   @Override
   public Object create()
   {
-    return _emf;
+    return _provider.createContainerEntityManagerFactory(_unit, null);
   }
 }

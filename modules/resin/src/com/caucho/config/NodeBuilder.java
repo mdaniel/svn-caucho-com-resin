@@ -490,6 +490,11 @@ public class NodeBuilder {
       return value;
   }
 
+  public void setDependentScope(DependentScope scope)
+  {
+    _dependentScope = scope;
+  }
+
   public DependentScope getDependentScope()
   {
     if (_dependentScope == null)

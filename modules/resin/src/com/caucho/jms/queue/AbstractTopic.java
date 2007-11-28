@@ -49,6 +49,11 @@ abstract public class AbstractTopic extends AbstractDestination
   public static final L10N L = new L10N(AbstractTopic.class);
 
   private TopicAdmin _admin;
+
+  public void setTopicName(String name)
+  {
+    setName(name);
+  }
   
   public String getTopicName()
   {

@@ -517,7 +517,8 @@ public class CompositeId extends Id {
 
         Column column = key.getColumn();
 
-        if (column == null) {
+	// jpa/0j55
+        if (true || column == null) {
           ArrayList<IdField> fields = getKeys();
           for (int j = 0; j < fields.size(); j++) {
             IdField id = fields.get(j);

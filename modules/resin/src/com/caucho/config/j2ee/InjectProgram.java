@@ -32,6 +32,7 @@ package com.caucho.config.j2ee;
 import com.caucho.config.BuilderProgram;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.webbeans.context.*;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -43,11 +44,11 @@ public class InjectProgram {
   private static final L10N L = new L10N(InjectProgram.class);
   private static final Logger log = Log.open(InjectProgram.class);
 
-  private final BuilderProgram []_program;
+  private final Inject []_program;
 
-  public InjectProgram(ArrayList<BuilderProgram> program)
+  public InjectProgram(ArrayList<Inject> program)
   {
-    _program = new BuilderProgram[program.size()];
+    _program = new Inject[program.size()];
     program.toArray(_program);
   }
 
@@ -57,8 +58,10 @@ public class InjectProgram {
   public void configure(Object bean)
   {
     if (bean != null) {
+      DependentScope scope = new DependentScope();
+      
       for (int i = 0; i < _program.length; i++)
-	_program[i].configure(bean);
+	_program[i].inject(bean, scope);
     }
   }
 }
