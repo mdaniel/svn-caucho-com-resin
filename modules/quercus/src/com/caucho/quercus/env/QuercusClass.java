@@ -136,6 +136,7 @@ public class QuercusClass {
     ClassDef []classDefList;
     
     if (_parent != null) {
+      System.out.println("1");
       classDefList = new ClassDef[parent._classDefList.length + 1];
 
       System.arraycopy(parent._classDefList, 0, classDefList, 1,
@@ -144,11 +145,14 @@ public class QuercusClass {
       classDefList[0] = classDef;
     }
     else {
+      System.out.println("2");
       classDefList = new ClassDef[] { classDef };
     }
 	  
     _classDefList = classDefList;
 
+    System.out.println("3: " + _classDefList);
+    
     for (int i = 0; i < classDefList.length; i++) {
       if (classDefList[i] instanceof JavaClassDef)
         javaClassDef = (JavaClassDef) classDefList[i];

@@ -125,11 +125,11 @@ public class ResinQuercusServlet extends QuercusServletImpl
       quercus.setServletContext(_servletContext);
       
       try {
+        env.start();
+        
         env.setGlobalValue("request", env.wrapJava(request));
         env.setGlobalValue("response", env.wrapJava(response));
         env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
-
-        env.start();
 
         String prepend = env.getIniString("auto_prepend_file");
         if (prepend != null) {
