@@ -1727,7 +1727,7 @@ public class FileModule extends AbstractQuercusModule {
       Matcher matcher = compiledGlobRegex.matcher(entry);
 
       if (matcher.matches()) {
-        UnicodeBuilderValue sb = new UnicodeBuilderValue();
+        StringValue sb = env.createUnicodeBuilder();
 
         sb.append(prefix);
 

@@ -111,8 +111,10 @@ public class SimpleXMLElement
                                              @Optional Value namespaceV,
                                              @Optional boolean isPrefix)
   { 
-    if (data.length() == 0)
+    if (data.length() == 0) {
+      env.warning(L.l("xml data must have length greater than 0"));
       return null;
+    }
     
     try {
       String namespace = null;
@@ -122,8 +124,9 @@ public class SimpleXMLElement
       
       Node node = parse(env, data, options, dataIsUrl, namespace, isPrefix);
       
-      if (node == null)
+      if (node == null) {
         return null;
+      }
       
       SimpleNode simpleNode = buildNode(env, null, node, namespace, isPrefix);
       

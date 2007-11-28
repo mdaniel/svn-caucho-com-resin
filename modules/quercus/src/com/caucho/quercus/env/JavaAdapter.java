@@ -329,7 +329,7 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public Value getArg(Value index)
   {
-    throw new UnsupportedOperationException();
+    return get(index);
   }
 
   /**
