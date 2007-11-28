@@ -1202,9 +1202,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (_lifecycle.isBeforeInit())
       init();
 
-    if (_hasNewLoader)
-      sendAddLoaderEvent();
-
     if (normalJdkOrder) {
       try {
         ClassLoader parent = getParent();
