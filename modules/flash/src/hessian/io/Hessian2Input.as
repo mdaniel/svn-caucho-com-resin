@@ -1624,7 +1624,7 @@ package hessian.io
      */
     private function readObjectDefinition():void
     {
-      var type:String = readLenString();
+      var type:String = readString();
       var len:int = readInt();
 
       var fieldNames:Array = new Array();

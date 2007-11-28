@@ -55,6 +55,7 @@ package hessian.client
   import flash.net.URLRequest;
   import flash.net.URLStream;
   import flash.net.Socket;
+  import flash.system.Security;
   import flash.utils.describeType;
   import flash.utils.Timer;
 
@@ -83,6 +84,7 @@ package hessian.client
     private var _responder:IResponder;
     private var _readHTTPHeader:Boolean = false;
     private var _headerHistory:Array = new Array(4);
+    private var _policyPort:int = -1;
 
     /**
      * Constructor.
@@ -91,9 +93,9 @@ package hessian.client
      * @param api The API associated with this HessianStreamingService, if any.
      *
      */
-    public function HessianStreamingService(destination:String = null)
+    public function HessianStreamingService(dst:String = null)
     {
-      _destination = destination;
+      destination = dst;
     }
     
     private function handleCreation(event:Event):void
@@ -103,7 +105,9 @@ package hessian.client
 
     private function handleConnect(event:Event):void
     {
-      _socket.writeUTFBytes("GET " + _url.path + " HTTP/1.0\r\n\r\n");
+      _socket.writeUTFBytes("GET " + _url.path + " HTTP/1.0\r\n");
+      _socket.writeUTFBytes("Host: " + _url.host + ":" + _url.port + "\r\n");
+      _socket.writeUTFBytes("\r\n");
       _socket.addEventListener(ProgressEvent.SOCKET_DATA, handleData);
     }
 
@@ -167,10 +171,29 @@ package hessian.client
       initSocket();
     }
 
+    /**
+     * Sets the port on which the XMLSocket server is listening to serve
+     * the policy file.
+     */
+    public function get policyPort():int
+    {
+      return _policyPort;
+    }
+
+    public function set policyPort(policyPort:int):void
+    {
+      _policyPort = policyPort;
+    }
+
     private function initSocket():void
     {
       _url = 
         new URL(URLUtil.getFullURL(Application.application.url, destination));
+
+      var policy:String = "xmlsocket://" + _url.host + ":" + 
+                          (_policyPort < 0 ? _url.port : _policyPort);
+
+      Security.loadPolicyFile(policy);
 
       _socket = new Socket(_url.host, _url.port);
       _socket.addEventListener(Event.CONNECT, handleConnect);

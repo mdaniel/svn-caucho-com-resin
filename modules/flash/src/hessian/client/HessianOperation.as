@@ -50,6 +50,7 @@
 package hessian.client
 {
   import flash.events.Event;
+  import flash.events.IOErrorEvent;
   import flash.net.URLRequest;
   import flash.net.URLStream;
   import flash.utils.ByteArray;
@@ -130,12 +131,19 @@ package hessian.client
 
       clearResult(true);
       stream.addEventListener(Event.COMPLETE, handleComplete);
+      stream.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
       stream.load(request);
 
       var invoke:Event = new InvokeEvent("Hessian", false, false, token, msg);
       service.dispatchEvent(invoke);
 
       return token;
+    }
+
+    /** @private */
+    public function handleIOError(event:IOErrorEvent):void
+    {
+      trace(event);
     }
 
     /** @private */
