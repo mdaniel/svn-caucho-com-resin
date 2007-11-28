@@ -150,8 +150,6 @@ public class Post {
 
         if (filename.length() > 0) {
           Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");
-          tmpName = tmpPath.getFullPath();
-          tmpLength = tmpPath.getLength();
 
           env.addRemovePath(tmpPath);
 
@@ -161,6 +159,9 @@ public class Post {
           } finally {
             os.close();
           }
+
+          tmpName = tmpPath.getFullPath();
+          tmpLength = tmpPath.getLength();
         }
 
         addFormFile(env,
@@ -206,11 +207,12 @@ public class Post {
 
     // php/1667
     long uploadMaxFilesize = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
-    
-    if (fileLength > uploadMaxFilesize)
-      error = FileModule.UPLOAD_ERR_INI_SIZE;
-    else if (fileLength == 0)
+
+    if (fileName.length() == 0)
+      // php/0864
       error = FileModule.UPLOAD_ERR_NO_FILE;
+    else if (fileLength > uploadMaxFilesize)
+      error = FileModule.UPLOAD_ERR_INI_SIZE;
     else
       error = FileModule.UPLOAD_ERR_OK;
 
