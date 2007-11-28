@@ -53,6 +53,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Encoding;
+import com.caucho.vfs.NullPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -4359,6 +4360,11 @@ public class Env {
   {
     if (path == null)
       return null;
+    else if (path instanceof NullPath) {
+      // for QuercusScriptEngine.eval() where only a Reader is passed in
+      // XXX: not too pretty
+      return null;
+    }
 
     ReadStream is = null;
 
