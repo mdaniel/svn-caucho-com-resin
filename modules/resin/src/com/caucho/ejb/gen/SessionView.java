@@ -182,7 +182,7 @@ public class SessionView extends ViewClass {
     else
       out.println("  super(context.getSessionServer());");
     out.println("  _context = context;");
-    out.println("  _xaManager = _server.getTransactionManager();");
+    out.println("  _xaManager = _context.getTransactionManager();");
     out.println("}");
 
     out.println();

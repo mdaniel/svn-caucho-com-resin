@@ -30,6 +30,7 @@ package com.caucho.ejb.session;
 
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.config.j2ee.Inject;
 
 import java.util.ArrayList;
@@ -73,6 +74,11 @@ abstract public class AbstractStatelessContext extends AbstractContext
   public AbstractServer getServer()
   {
     return _server;
+  }
+
+  public EjbTransactionManager getTransactionManager()
+  {
+    return _server.getTransactionManager();
   }
 
   /**

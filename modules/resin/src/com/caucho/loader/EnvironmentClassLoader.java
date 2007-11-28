@@ -553,6 +553,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     }
 
     try {
+      sendAddLoaderEvent();
+      
       ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
       int size = listeners.size();

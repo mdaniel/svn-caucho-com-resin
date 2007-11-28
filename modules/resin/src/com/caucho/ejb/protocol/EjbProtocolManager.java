@@ -247,7 +247,7 @@ public class EjbProtocolManager {
 
 	String jndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
 	
-        if (server.getLocal21() != null) {
+        if (localHome != null) {
 	  Jndi.bindDeep(jndiName, localHome);
         } else {
           api = server.getLocalApiList().get(0);

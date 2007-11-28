@@ -859,8 +859,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (! local.isInterface())
       throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
 
-    if (! EJBLocalObject.class.isAssignableFrom(local.getJavaClass())
-	&& ! isAllowPOJO())
+    if (EJBLocalObject.class.isAssignableFrom(local.getJavaClass()))
+      _isEJB21 = true;
+    else if (! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
 
     if (! _localList.contains(local)) {
@@ -1745,6 +1746,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   protected void assembleBeanMethods()
     throws ConfigException
   {
+    if (getEJBClassWrapper() == null)
+      return;
+    
     // find API methods matching an implementation method
     for (ApiMethod method : getEJBClassWrapper().getMethods()) {
       EjbBaseMethod ejbMethod = null;

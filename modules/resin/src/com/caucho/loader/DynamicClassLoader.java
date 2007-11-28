@@ -703,7 +703,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Adds a listener to detect class loader changes.
    */
-  private void sendAddLoaderEvent()
+  protected void sendAddLoaderEvent()
   {
     if (_hasNewLoader) {
       _hasNewLoader = false;

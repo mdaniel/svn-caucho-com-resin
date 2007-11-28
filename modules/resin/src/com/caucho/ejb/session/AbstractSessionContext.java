@@ -30,6 +30,7 @@ package com.caucho.ejb.session;
 
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.xa.*;
 import com.caucho.naming.ObjectProxy;
 
 import java.util.ArrayList;
@@ -71,6 +72,11 @@ abstract public class AbstractSessionContext extends AbstractContext
   public SessionServer getSessionServer()
   {
     return _server;
+  }
+
+  public EjbTransactionManager getTransactionManager()
+  {
+    return _server.getTransactionManager();
   }
 
   /**

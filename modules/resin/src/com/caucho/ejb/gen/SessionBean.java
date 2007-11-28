@@ -69,10 +69,10 @@ public class SessionBean extends ClassComponent {
   {
     generateContext(out);
 
-    if (_bean.isEJB21())
+    if (_bean.getLocalHome() != null
+	&& EJBLocalHome.class.isAssignableFrom(_bean.getLocalHome().getJavaClass()))
       generateNewInstance(out, "21");
-
-    if (_bean.isEJB30())
+    else
       generateNewInstance(out, "");
 
     if (_bean.isEJB21())
