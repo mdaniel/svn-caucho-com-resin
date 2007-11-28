@@ -83,7 +83,7 @@ public class CourseServlet extends HttpServlet {
       _manager.getTransaction().commit();
     }
     
-    for (Course course : (List<Course>) query.getResultList()) {
+    for (course : (List<Course>) query.getResultList()) {
       out.println("course: " + course.course() + "<br>");
       out.println("teacher: " + course.teacher() + "<br>");
       out.println("<br>");
