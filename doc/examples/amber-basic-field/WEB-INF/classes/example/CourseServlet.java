@@ -73,17 +73,16 @@ public class CourseServlet extends HttpServlet {
 
     out.println("<h3>Add a Course</h3>");
 
-    Course course;
-    
+    Course newCourse = new Course("Charms", "Professor Flitwick");
+
     _manager.getTransaction().begin();
     try {
-      course = new Course("Charms", "Professor Flitwick");
-      _manager.persist(course);
+      _manager.persist(newCourse);
     } finally {
       _manager.getTransaction().commit();
     }
     
-    for (course : (List<Course>) query.getResultList()) {
+    for (Course course : (List<Course>) query.getResultList()) {
       out.println("course: " + course.course() + "<br>");
       out.println("teacher: " + course.teacher() + "<br>");
       out.println("<br>");
@@ -91,6 +90,8 @@ public class CourseServlet extends HttpServlet {
     
     _manager.getTransaction().begin();
     try {
+      Course course = _manager.find(Course.class, newCourse.getId());
+      
       _manager.remove(course);
     } finally {
       _manager.getTransaction().commit();

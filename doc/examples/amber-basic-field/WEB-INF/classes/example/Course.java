@@ -47,6 +47,14 @@ public class Course {
     _course = course;
     _teacher = teacher;
   }
+
+  /**
+   * Returns the generated database id.
+   */
+  public int getId()
+  {
+    return _id;
+  }
   
   /**
    * Returns the course name.
