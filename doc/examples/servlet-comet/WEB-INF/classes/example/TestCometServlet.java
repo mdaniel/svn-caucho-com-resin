@@ -70,7 +70,7 @@ public class TestCometServlet extends GenericCometServlet
     
     PrintWriter out = res.getWriter();
 
-    Object count = req.getAttribute("comet.count");
+    Object count = controller.getAttribute("comet.count");
 
     out.println("<script type='text/javascript'>");
     out.println("comet_update(" + count + ");");
