@@ -543,6 +543,9 @@ r_server-default = element server-default {
 r_server-Basis =
   r_group-name?
 
+  & (attribute backup { r_boolean-Type }
+     | element backup { r_boolean-Type })?
+
   & (attribute bind-ports-after-start { r_boolean-Type }
      | element bind-ports-after-start { r_boolean-Type })?
 

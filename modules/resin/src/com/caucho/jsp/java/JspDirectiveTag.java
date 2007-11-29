@@ -95,13 +95,14 @@ public class JspDirectiveTag extends JspNode {
       String oldEncoding = _parseState.getPageEncoding();
       
       if (oldEncoding != null && ! value.equals(oldEncoding))
-        throw error(L.l("pageEncoding `{0}' conflicts with previous value of pageEncoding `{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
-      
+        throw error(L.l("pageEncoding '{0}' conflicts with previous value of pageEncoding '{1}'.  Check the .jsp and any included .jsp files for conflicts.", value, oldEncoding));
+
       _parseState.setPageEncoding(value);
+      _parseState.setCharEncoding(value);
     }
     else if (LANGUAGE.equals(name)) {
       if (! value.equals("java"))
-        throw error(L.l("`{0}' is not supported as a JSP scripting language.",
+        throw error(L.l("'{0}' is not supported as a JSP scripting language.",
                         value));
     }
     else if (IMPORT.equals(name)) {

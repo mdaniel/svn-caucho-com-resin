@@ -53,6 +53,7 @@ import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XADataSource;
+import java.lang.reflect.*;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -698,12 +699,12 @@ public class DriverConfig
 
     try {
       // server/14g1
-      if (_driverURL != null) { // && ! (driverObject instanceof Driver)) {
+      if (_driverURL != null) {
         StringAttributeProgram program;
         program = new StringAttributeProgram("url", _driverURL);
         program.configure(driverObject);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       if (driverObject instanceof Driver)
         log.log(Level.FINEST, e.toString(), e);
       else
@@ -747,6 +748,26 @@ public class DriverConfig
       log.log(Level.FINE, e.toString(), e);
       throw new SQLExceptionWrapper(e);
     }
+  }
+
+  private boolean hasSetter(Class cl, String name)
+  {
+    if (true) return true;
+    for (Method method : cl.getMethods()) {
+      String methodName = method.getName();
+      
+      if (! methodName.startsWith("set"))
+	continue;
+      else if (method.getParameterTypes().length != 1)
+	continue;
+
+      methodName = methodName.substring(3).toLowerCase();
+
+      if (methodName.equals(name))
+	return true;
+    }
+
+    return false;
   }
 
   //

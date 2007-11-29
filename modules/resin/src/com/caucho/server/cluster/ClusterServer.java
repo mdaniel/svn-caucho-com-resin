@@ -185,6 +185,15 @@ public class ClusterServer {
   }
 
   /**
+   * Sets true for backups
+   */
+  public void setBackup(boolean isBackup)
+  {
+    if (isBackup)
+      setLoadBalanceWeight(1);
+  }
+
+  /**
    * Sets the loadBalance connection time.
    */
   public void setLoadBalanceConnectTimeout(Period period)

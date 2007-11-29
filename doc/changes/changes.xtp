@@ -12,6 +12,9 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>added backup attribute to server, with meaning the same as load-balance-weight='1' (#2178)</li>
+<li>jsp: tag-file pageEncoding not properly picked up (#2170, rep by Takahiro Fukuda)</li>
+<li>database: update error message when driver does not have URL (#2173, rep by B Au)</li>
 <li>comet: API cleanup, isClosed() replaces isActive()</li>
 <li>(2007-11-25) quercus: Dependency printing not properly handling static paths (#2185, rep by koreth)</li>
 <li>jsp: allow EL expression for non-rtexprvalue String for old-style JSTL (#2112, rep by T Harris)</li>

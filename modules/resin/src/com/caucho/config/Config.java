@@ -537,6 +537,10 @@ public class Config {
     AttributeStrategy attrStrategy = strategy.getAttributeStrategy(attrName);
     if (attrStrategy != null)
       attrStrategy.setAttribute(obj, attrName, value);
+    else
+      throw new ConfigException(L.l("{0}: '{1}' is an unknown attribute.",
+				    obj.getClass().getName(),
+				    attrName.getName()));
   }
 
   /**
