@@ -2498,7 +2498,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if ((value == null) || value.isNull())
         return BooleanValue.FALSE;
 
-      if ("server_encoding".equals(paramName)) {
+      if (paramName.toString().equals("server_encoding")) {
         if (value.equals(env.createString("UNICODE")))
           value = env.createString("UTF8");
       }
