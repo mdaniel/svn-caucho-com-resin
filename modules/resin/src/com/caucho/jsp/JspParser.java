@@ -1161,7 +1161,8 @@ public class JspParser {
     setLocation();
     _jspBuilder.endElement(qname.getName());
 
-    if (qname.equals(JSP_DIRECTIVE_PAGE)) {
+    if (qname.equals(JSP_DIRECTIVE_PAGE)
+        || qname.equals(JSP_DIRECTIVE_TAG)) {
       String contentEncoding = _parseState.getPageEncoding();
       if (contentEncoding == null)
         contentEncoding = _parseState.getCharEncoding();
