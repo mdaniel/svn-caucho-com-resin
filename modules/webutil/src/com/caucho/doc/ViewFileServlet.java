@@ -28,8 +28,7 @@
 
 package com.caucho.doc;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
@@ -106,7 +105,7 @@ public class ViewFileServlet extends GenericServlet {
       out.println("<html>");
       out.println("<head>");
       out.print("<title>");
-      out.print(file);
+      out.print(Html.escapeHtml(file));
       out.println("</title>");
       out.println("<style type='text/css'>");
       out.println("  .code-highlight { color: #1764FF; }");
@@ -116,7 +115,7 @@ public class ViewFileServlet extends GenericServlet {
       out.println("<body bgcolor=white>");
       out.print("<code>");
       out.print("<b>");
-      out.print(file);
+      out.print(Html.escapeHtml(file));
       out.print("</b>");
       out.print("</code>");
       out.println("<p>");
@@ -125,7 +124,7 @@ public class ViewFileServlet extends GenericServlet {
       try {
         is = path.openRead();
       } catch (java.io.FileNotFoundException ex) {
-        out.println("<font color='red'><b>File not found " + path.getPath() + "</b></font>");
+        out.println("<font color='red'><b>File not found: " + Html.escapeHtml(path.getPath()) + "</b></font>");
         out.println("</body>");
         out.println("</html>");
         return;

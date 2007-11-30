@@ -12,6 +12,9 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>jndi-appconfig sanitization (#2215, rep by Coolflame Wu and Alan Lee)</li>
+<li>viewfile sanitization of file attribute (#2214)</li>
+<li>response.getCharacterEncoding must return iso-8859-1 as a default (#2180, rep by Takahiro Fukuda)</li>
 <li>keepalive/chunking: chunking error when exact buffer match reported by Confluence (#2131, rep by Chris Chen)</li>
 <li>added backup attribute to server, with meaning the same as load-balance-weight='1' (#2178)</li>
 <li>jsp: tag-file pageEncoding not properly picked up (#2170, rep by Takahiro Fukuda)</li>

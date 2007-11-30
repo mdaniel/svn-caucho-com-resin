@@ -1110,10 +1110,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     WebApp app = _request.getWebApp();
 
+    String encoding = null;
+    
     if (app != null)
-      return app.getCharacterEncoding();
+      encoding = app.getCharacterEncoding();
+
+    if (encoding != null)
+      return encoding;
     else
-      return null;
+      return "iso-8859-1";
   }
 
   /**

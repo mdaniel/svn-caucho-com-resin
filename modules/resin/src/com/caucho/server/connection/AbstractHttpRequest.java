@@ -113,6 +113,8 @@ public abstract class AbstractHttpRequest
   private static final char []CONTINUE_100 = "100-continue".toCharArray();
   private static final char []CLOSE = "close".toCharArray();
 
+  private static final boolean []TOKEN;
+
   private static final ServletRequestAttributeListener []NULL_LISTENERS
     = new ServletRequestAttributeListener[0];
 
@@ -1144,9 +1146,10 @@ public abstract class AbstractHttpRequest
 
       for (; j < end; j++) {
 	ch = buf[j];
-	if (ch == ' ' || ch == '=' || ch == ';' || ch == ',')
+	if (ch < 128 && TOKEN[ch])
+	  cbName.append(ch);
+	else
 	  break;
-	cbName.append(ch);
       }
 
       for (; j < end && (ch = buf[j]) == ' '; j++) {
@@ -1188,9 +1191,10 @@ public abstract class AbstractHttpRequest
       else {
         for (; j < end; j++) {
           ch = buf[j];
-          if (ch == ' ' || ch == ';' || ch == ',')
-            break;
-          cbValue.append(ch);
+          if (ch < 128 && TOKEN[ch])
+	    cbValue.append(ch);
+	  else
+	    break;
         }
       }
 
@@ -2531,5 +2535,38 @@ public abstract class AbstractHttpRequest
 
   static {
     _headerCodes = new CaseInsensitiveIntMap();
+
+    TOKEN = new boolean[256];
+
+    for (int i = 0; i < 256; i++) {
+      TOKEN[i] = true;
+    }
+
+    for (int i = 0; i < 32; i++) {
+      TOKEN[i] = false;
+    }
+
+    for (int i = 127; i < 256; i++) {
+      TOKEN[i] = false;
+    }
+
+    TOKEN['('] = false;
+    TOKEN[')'] = false;
+    TOKEN['<'] = false;
+    TOKEN['>'] = false;
+    TOKEN['@'] = false;
+    TOKEN[','] = false;
+    TOKEN[';'] = false;
+    TOKEN[':'] = false;
+    TOKEN['\\'] = false;
+    TOKEN['"'] = false;
+    TOKEN['/'] = false;
+    TOKEN['['] = false;
+    TOKEN[']'] = false;
+    TOKEN['?'] = false;
+    TOKEN['='] = false;
+    TOKEN['{'] = false;
+    TOKEN['}'] = false;
+    TOKEN[' '] = false;
   }
 }
