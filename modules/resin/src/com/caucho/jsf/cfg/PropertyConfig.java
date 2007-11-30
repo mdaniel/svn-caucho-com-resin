@@ -79,8 +79,6 @@ public class PropertyConfig extends DescriptionGroupConfig
   public void setPropertyClass(Class cl)
     throws ConfigException
   {
-    Config.checkCanInstantiate(cl);
-
     _class = cl;
   }
 
