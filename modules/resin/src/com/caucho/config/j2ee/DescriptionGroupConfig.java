@@ -34,6 +34,7 @@ public class DescriptionGroupConfig
   private String _id;
   private String _description;
   private String _displayName;
+  private Icon   _icon;
 
   public void setId(String id)
   {
@@ -48,5 +49,57 @@ public class DescriptionGroupConfig
   public void setDisplayName(String displayName)
   {
     _displayName = displayName;
+  }
+
+  public Icon createIcon()
+  {
+    return (_icon = new Icon());
+  }
+
+  public class Icon {
+      private String _id;
+      private String _lang;
+      private String _smallIcon;
+      private String _largeIcon;
+
+    public String getId()
+    {
+      return _id;
+    }
+
+    public void setId(String id)
+    {
+      _id = id;
+    }
+
+    public String getLang()
+    {
+        return _lang;
+    }
+
+    public void setLang(String lang)
+    {
+        _lang = lang;
+    }
+
+    public String getSmallIcon()
+    {
+       return _smallIcon;
+    }
+      
+    public void setSmallIcon(String icon)
+    {
+      _smallIcon = icon;
+    }
+
+    public String getLargeIcon()
+    {
+      return _largeIcon;
+    }
+
+    public void setLargeIcon(String largeIcon)
+    {
+      _largeIcon = largeIcon;
+    }
   }
 }
