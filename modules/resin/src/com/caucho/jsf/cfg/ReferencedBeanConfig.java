@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,7 +23,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.jsf.cfg;
@@ -49,8 +49,7 @@ import com.caucho.config.j2ee.*;
 import com.caucho.jsf.el.*;
 import com.caucho.util.*;
 
-public class ReferencedBeanConfig extends DescriptionGroupConfig
-{
+public class ReferencedBeanConfig extends DescriptionGroupConfig {
   private static final L10N L = new L10N(ReferencedBeanConfig.class);
 
   private String _configLocation;
@@ -61,22 +60,21 @@ public class ReferencedBeanConfig extends DescriptionGroupConfig
   {
     _class = cl;
   }
-  
+
   public void setReferencedBeanName(String referencedBeanName)
   {
     _referencedBeanName = referencedBeanName;
   }
-  
-  public String getReferencedBeanName() 
+
+  public String getReferencedBeanName()
   {
-	return _referencedBeanName;
+    return _referencedBeanName;
   }
-  
+
   public void setReferencedBeanClass(Class cl)
   {
-	setClass(cl);  
+    setClass(cl);
   }
-  
 
   public void configure(Application app)
   {

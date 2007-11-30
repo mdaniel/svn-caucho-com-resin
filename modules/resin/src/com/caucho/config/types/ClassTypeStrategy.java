@@ -66,25 +66,27 @@ public class ClassTypeStrategy extends TypeStrategy {
     ClassLoader loader = thread.getContextClassLoader();
 
     if (className != null && ! className.equals("")) { 
-      int pi = className.indexOf('[');
-      
-      if (pi > 0) {
-    	String cn = className.substring(0, pi);
-    	Class cl1 = _primitiveTypes.get(cn);
+      int parIdx = className.indexOf('[');
 
-    	if (cl1 == null) 
-    	  cl1 = Class.forName(cn, false, loader);
-    	
-    	while (pi > 0) {
-    	  cl1 = Array.newInstance(cl1, 0).getClass();
-    	  pi = className.indexOf('[', (pi + 1));
-    	}
-    	
-    	return cl1;
+      if (parIdx > 0) {
+        String cn = className.substring(0, parIdx);
+        cl = _primitiveTypes.get(cn);
+
+        if (cl == null) 
+          cl = Class.forName(cn, false, loader);
+
+        while (parIdx > 0) {
+          cl = Array.newInstance(cl, 0).getClass();
+          parIdx = className.indexOf('[', (parIdx + 1));
+        }
+
+        return cl;
       } else {
-    	return Class.forName(className, false, loader);
+
+        return Class.forName(className, false, loader);
       }
     } else {
+
       return null;
     }
   }

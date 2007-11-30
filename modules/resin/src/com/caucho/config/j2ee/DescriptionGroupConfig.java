@@ -57,10 +57,10 @@ public class DescriptionGroupConfig
   }
 
   public class Icon {
-      private String _id;
-      private String _lang;
-      private String _smallIcon;
-      private String _largeIcon;
+    private String _id;
+    private String _lang;
+    private String _smallIcon;
+    private String _largeIcon;
 
     public String getId()
     {
@@ -74,19 +74,19 @@ public class DescriptionGroupConfig
 
     public String getLang()
     {
-        return _lang;
+      return _lang;
     }
 
     public void setLang(String lang)
     {
-        _lang = lang;
+      _lang = lang;
     }
 
     public String getSmallIcon()
     {
-       return _smallIcon;
+      return _smallIcon;
     }
-      
+
     public void setSmallIcon(String icon)
     {
       _smallIcon = icon;
