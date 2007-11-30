@@ -77,8 +77,8 @@ public class FacetConfig extends DescriptionGroupConfig
   {
     _suggestedValue = suggestedValue;
   }
-
-  public void setApplicationExtension(BuilderProgram program)
+  
+  public void setFacetExtension(BuilderProgram program)
     throws ConfigException
   {
   }
