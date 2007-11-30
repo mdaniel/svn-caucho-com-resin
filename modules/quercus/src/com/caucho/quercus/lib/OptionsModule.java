@@ -553,7 +553,7 @@ public class OptionsModule extends AbstractQuercusModule {
   private static void phpinfoVariables(Env env)
   {
     if (hasRequest(env)) {
-      env.println("<h2>PHP Variables</h2");
+      env.println("<h2>PHP Variables</h2>");
       env.println("<table>");
       env.println("<tr><th>Variable</th><th>Value</th></tr>");
     }
