@@ -37,6 +37,8 @@ import org.w3c.dom.Node;
 
 import java.util.HashMap;
 
+import java.lang.reflect.Array;
+
 public class ClassTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(ClassTypeStrategy.class);
 
@@ -63,10 +65,28 @@ public class ClassTypeStrategy extends TypeStrategy {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
 
-    if (className != null && ! className.equals(""))
-      return Class.forName(className, false, loader);
-    else
+    if (className != null && ! className.equals("")) { 
+      int pi = className.indexOf('[');
+      
+      if (pi > 0) {
+    	String cn = className.substring(0, pi);
+    	Class cl1 = _primitiveTypes.get(cn);
+
+    	if (cl1 == null) 
+    	  cl1 = Class.forName(cn, false, loader);
+    	
+    	while (pi > 0) {
+    	  cl1 = Array.newInstance(cl1, 0).getClass();
+    	  pi = className.indexOf('[', (pi + 1));
+    	}
+    	
+    	return cl1;
+      } else {
+    	return Class.forName(className, false, loader);
+      }
+    } else {
       return null;
+    }
   }
 
   static {
