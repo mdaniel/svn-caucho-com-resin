@@ -57,4 +57,9 @@ abstract public class AbstractFilterChain implements CometFilterChain
   {
     return false;
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

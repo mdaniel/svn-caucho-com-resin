@@ -1157,16 +1157,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded classes
    */
-  // XXX: added synchronized for RSN-373
-  protected synchronized Class loadClass(String name, boolean resolve)
+  protected Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
-    Class cl = loadClassImpl(name, resolve);
+    synchronized (this) {
+      Class cl = loadClassImpl(name, resolve);
 
-    if (cl != null)
-      return cl;
-    else
-      throw new ClassNotFoundException(name);
+      if (cl != null)
+	return cl;
+      else
+	throw new ClassNotFoundException(name + " in " + this);
+    }
   }
 
   /**
@@ -1177,7 +1178,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded classes
    */
-  // XXX: added synchronized for RSN-373
   protected Class loadClassImpl(String name, boolean resolve)
     throws ClassNotFoundException
   {

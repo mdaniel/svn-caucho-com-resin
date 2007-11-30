@@ -279,6 +279,9 @@ public class DirectoryLoader extends Loader implements Dependency
       Path path = jarEntry.getJarPath();
 
       Path filePath = path.lookup(pathName);
+
+      if (pathName.equals("org/dom4j/xpath/DefaultXPath.class"))
+	System.out.println(filePath.canRead() + " " + filePath.getLength() + " " + filePath.getURL());
       
       if (filePath.canRead() && filePath.getLength() > 0) {
         ClassEntry entry = new ClassEntry(getLoader(), name, filePath,

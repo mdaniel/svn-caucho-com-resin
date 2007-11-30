@@ -220,6 +220,13 @@
       <param name="module.jar" value="resin-util.jar"/>
     </antcall>
   </target>
+  
+  <target name="compat" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="compat"/>
+      <param name="module.jar" value="resin-compat.jar"/>
+    </antcall>
+  </target>
 
   <target name="experiment" depends="init">
     <antcall target="module" inheritRefs="true">

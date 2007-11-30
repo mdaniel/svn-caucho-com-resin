@@ -34,6 +34,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.util.logging.*;
 
 import com.caucho.servlet.comet.CometFilterChain;
 
@@ -43,11 +44,16 @@ import com.caucho.servlet.comet.CometFilterChain;
  */
 public class FilterFilterChain extends AbstractFilterChain
 {
+  private static final Logger log
+    = Logger.getLogger(FilterFilterChain.class.getName());
+  
   // Next filter chain
   private FilterChain _next;
   
   // filter
   private Filter _filter;
+
+  private boolean _isFinest;
 
   /**
    * Creates a new FilterChainFilter.
@@ -59,6 +65,8 @@ public class FilterFilterChain extends AbstractFilterChain
   {
     _next = next;
     _filter = filter;
+
+    _isFinest = log.isLoggable(Level.FINEST);
   }
   
   /**
@@ -73,8 +81,12 @@ public class FilterFilterChain extends AbstractFilterChain
                        ServletResponse response)
     throws ServletException, IOException
   {
+    if (_isFinest)
+      log.finest("Dispatch " + request + " filter=" + _filter + " next=" + _next);
+    
     _filter.doFilter(request, response, _next);
   }
+  
   /**
    * Resumes the request.
    *
@@ -95,5 +107,10 @@ public class FilterFilterChain extends AbstractFilterChain
     }
     else
       return false;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _filter + "]";
   }
 }

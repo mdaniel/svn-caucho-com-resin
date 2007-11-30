@@ -39,6 +39,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * A repository for request information gleaned from the uri.
@@ -47,6 +48,8 @@ public class ServletInvocation {
   static final Logger log
     = Logger.getLogger(ServletInvocation.class.getName());
   static final L10N L = new L10N(ServletInvocation.class);
+
+  private final boolean _isFiner;
 
   private static final ThreadLocal<ServletRequest> _requestThreadLocal
     = new ThreadLocal<ServletRequest>();
@@ -76,6 +79,8 @@ public class ServletInvocation {
   public ServletInvocation()
   {
     _classLoader = Thread.currentThread().getContextClassLoader();
+
+    _isFiner = log.isLoggable(Level.FINER);
   }
 
   /**
@@ -254,6 +259,9 @@ public class ServletInvocation {
 
     try {
       requestThreadLocal.set(request);
+
+      if (_isFiner)
+	log.finer("Dispatch '" + _contextUri + "' to " + _filterChain);
       
       _filterChain.doFilter(request, response);
     } finally {

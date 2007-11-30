@@ -294,4 +294,9 @@ public class WebAppFilterChain extends AbstractFilterChain {
       thread.setContextClassLoader(oldLoader);
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _app.getURL() + ", next=" + _next + "]";
+  }
 }

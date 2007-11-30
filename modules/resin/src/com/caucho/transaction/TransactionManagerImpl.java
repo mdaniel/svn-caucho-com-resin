@@ -175,12 +175,13 @@ public class TransactionManagerImpl
     throws SystemException
   {
     TransactionImpl trans = _threadTransaction.get();
-
-    if (trans == null ||
-        trans.getStatus() == Status.STATUS_NO_TRANSACTION ||
-        trans.getStatus() == Status.STATUS_UNKNOWN ||
-        trans.isSuspended())
+    
+    if (trans == null
+	|| trans.getStatus() == Status.STATUS_NO_TRANSACTION
+	|| trans.getStatus() == Status.STATUS_UNKNOWN
+	|| trans.isSuspended()) {
       return null;
+    }
     else {
       return trans;
     }

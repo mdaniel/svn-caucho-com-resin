@@ -126,8 +126,8 @@ public class LoadGroupGenerator extends ClassComponent {
       // jpa/0o09
       // needs to be after load to prevent loop if toString() expects data
       out.println();
-      out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-      out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this.getClass().getName());");
+      out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINER))");
+      out.println("  __caucho_log.finer(\"amber loaded-" + _index + " \" + this.getClass().getName());");
 
       out.println("if (! isLoaded) {");
       out.pushDepth();

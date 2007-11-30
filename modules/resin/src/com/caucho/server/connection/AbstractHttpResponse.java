@@ -616,7 +616,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     
     setHeader("Location", path);
     setHeader("Content-Type", "text/html");
-    
+
     // The data is required for some WAP devices that can't handle an
     // empty response.
     ServletOutputStream out = getOutputStream();

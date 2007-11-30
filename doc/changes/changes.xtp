@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>keepalive/chunking: chunking error when exact buffer match reported by Confluence (#2131, rep by Chris Chen)</li>
 <li>added backup attribute to server, with meaning the same as load-balance-weight='1' (#2178)</li>
 <li>jsp: tag-file pageEncoding not properly picked up (#2170, rep by Takahiro Fukuda)</li>
 <li>database: update error message when driver does not have URL (#2173, rep by B Au)</li>
