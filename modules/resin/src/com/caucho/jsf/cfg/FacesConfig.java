@@ -72,6 +72,9 @@ public class FacesConfig
   private ArrayList<ValidatorConfig> _validatorList
     = new ArrayList<ValidatorConfig>();
 
+  private ArrayList<ReferencedBeanConfig> _referencedBeanList 
+  = new ArrayList<ReferencedBeanConfig>();
+  
   private ArrayList<RenderKitConfig> _renderKitList
     = new ArrayList<RenderKitConfig>();
 
@@ -80,7 +83,7 @@ public class FacesConfig
 
   private NavigationHandlerImpl _navigation
     = new NavigationHandlerImpl();
-
+  
   public void setId(String id)
   {
   }
@@ -117,6 +120,11 @@ public class FacesConfig
   public void addComponent(ComponentConfig component)
   {
     _componentList.add(component);
+  }
+  
+  public void addReferencedBean(ReferencedBeanConfig referencedBean)
+  {
+    _referencedBeanList.add(referencedBean);
   }
 
   public void addConverter(ConverterConfig converter)
