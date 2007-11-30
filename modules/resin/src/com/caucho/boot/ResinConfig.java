@@ -136,14 +136,15 @@ public class ResinConfig implements EnvironmentBean
   {
   }
     
-  /**
-   * Ignore items we can't understand.
-   */
   public void setSecurityManager(BuilderProgram program)
   {
   }
 
   public void addSecurityProvider(Class providerClass)
+  {
+  }
+
+  public void setEnvironmentSystemProperties(BuilderProgram program)
   {
   }
 
