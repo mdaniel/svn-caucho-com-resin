@@ -67,7 +67,9 @@ public class SimpleXMLModule
   {
     if (data.isNull())
       return null;
-    
+    else if (data.isBoolean() && data.toBoolean() == false)
+      return null;
+
     return SimpleXMLElement.__construct(env,
                                         data,
                                         options,
