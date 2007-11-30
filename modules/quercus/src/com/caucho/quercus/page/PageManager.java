@@ -38,7 +38,7 @@ import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Each "page" refers to a quercus file.
@@ -207,6 +207,9 @@ public class PageManager
 
   protected QuercusPage compilePage(QuercusProgram program, Path path)
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine("Quercus[" + path + "] loading interpreted page");
+    
     return new InterpretedPage(program);
   }
 

@@ -134,4 +134,9 @@ public class ServletFilterChain extends AbstractFilterChain {
   {
     return false;
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getServletName() + "]";
+  }
 }

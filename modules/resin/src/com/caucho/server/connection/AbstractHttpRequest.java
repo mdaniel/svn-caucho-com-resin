@@ -78,7 +78,8 @@ import java.util.logging.Logger;
 public abstract class AbstractHttpRequest
   implements CauchoRequest, SecurityContextProvider
 {
-  protected static final Logger log = Log.open(AbstractHttpRequest.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractHttpRequest.class.getName());
 
   static final L10N L = new L10N(AbstractHttpRequest.class);
 
@@ -1200,7 +1201,7 @@ public abstract class AbstractHttpRequest
 
       if (! isSpecial) {
         if (cbName.length() == 0)
-          getWebApp().log("bad cookie: " + rawCookie);
+          log.warning("bad cookie: " + rawCookie);
         else {
           cookie = new Cookie(cbName.toString(), cbValue.toString());
           cookie.setVersion(version);
@@ -2555,14 +2556,14 @@ public abstract class AbstractHttpRequest
     TOKEN['<'] = false;
     TOKEN['>'] = false;
     TOKEN['@'] = false;
-    TOKEN[','] = false;
+    // TOKEN[','] = false;
     TOKEN[';'] = false;
     TOKEN[':'] = false;
     TOKEN['\\'] = false;
     TOKEN['"'] = false;
     TOKEN['/'] = false;
-    TOKEN['['] = false;
-    TOKEN[']'] = false;
+    //TOKEN['['] = false;
+    //TOKEN[']'] = false;
     TOKEN['?'] = false;
     TOKEN['='] = false;
     TOKEN['{'] = false;

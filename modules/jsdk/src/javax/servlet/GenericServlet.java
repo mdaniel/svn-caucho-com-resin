@@ -66,7 +66,7 @@ public abstract class GenericServlet
   public void init(ServletConfig config) throws ServletException
   {
     _config = config;
-    log("init");
+    // log("init");
     init();
   }
   
@@ -179,6 +179,6 @@ public abstract class GenericServlet
    */
   public void destroy()
   {
-    log("destroy");
+    // log("destroy");
   }
 }
