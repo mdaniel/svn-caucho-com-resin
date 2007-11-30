@@ -123,6 +123,8 @@ public class ServerConnector
   
   private volatile long _lastFailTime;
   private volatile long _lastBusyTime;
+
+  private volatile long _failTime;
   private volatile long _firstSuccessTime;
   private volatile long _lastSuccessTime;
   private volatile long _prevSuccessTime;
@@ -491,7 +493,7 @@ public class ServerConnector
       return false;
 
     case ST_FAIL:
-      return (_lastFailTime + _failRecoverTime <= Alarm.getCurrentTime());
+      return (_failTime + _failRecoverTime <= Alarm.getCurrentTime());
       
     default:
       return false;
@@ -580,7 +582,7 @@ public class ServerConnector
       int warmupState = _warmupState;
 
       if (warmupState < 0) {
-	return (_lastFailTime - warmupState * _failChunkTime < now);
+	return (_failTime - warmupState * _failChunkTime < now);
       }
       else if (WARMUP_MAX <= warmupState)
 	return true;
@@ -631,7 +633,8 @@ public class ServerConnector
   
   public void toFail()
   {
-    _lastFailTime = Alarm.getCurrentTime();
+    _failTime = Alarm.getCurrentTime();
+    _lastFailTime = _failTime;
     _firstSuccessTime = 0;
     
     synchronized (this) {
@@ -656,9 +659,10 @@ public class ServerConnector
       _firstSuccessTime = 0;
 
       // only degrade one per 100ms
-      if (now - _lastFailTime >= 100) {
+      if (now - _failTime >= 100) {
 	_warmupState--;
-	_lastFailTime = now;
+	_failTime = now;
+	_lastFailTime = _failTime;
       }
 
       if (_warmupState < WARMUP_MIN)
@@ -682,7 +686,8 @@ public class ServerConnector
       // only degrade one per 100ms
       _warmupState--;
       long now = Alarm.getCurrentTime();
-      _lastFailTime = now;
+      _failTime = now;
+      _lastFailTime = _failTime;
       _lastFailConnectTime = now;
       _dynamicFailRecoverTime *= 2;
       if (_failRecoverTime < _dynamicFailRecoverTime)
@@ -795,7 +800,7 @@ public class ServerConnector
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _lastFailTime + _failRecoverTime) {
+    if (now < _failTime + _failRecoverTime) {
       return null;
     }
 
@@ -821,7 +826,7 @@ public class ServerConnector
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _lastFailTime + _failRecoverTime) {
+    if (now < _failTime + _failRecoverTime) {
       return null;
     }
     
@@ -938,11 +943,11 @@ public class ServerConnector
   public void wake()
   {
     synchronized (this) {
-      _lastFailTime = 0;
-      
       if (_state == ST_FAIL) {
 	_state = ST_STARTING;
       }
+
+      _failTime = 0;
     }
   }
 

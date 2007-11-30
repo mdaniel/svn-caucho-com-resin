@@ -751,32 +751,32 @@ public class Resin implements EnvironmentBean, SchemaBean
       return;
 
     try {
-      // notify watchdog thread before starting shutdown
-      synchronized (this) {
-	notifyAll();
+      try {
+	// notify watchdog thread before starting shutdown
+	synchronized (this) {
+	  notifyAll();
+	}
+
+	Socket socket = _pingSocket;
+
+	if (socket != null)
+	  socket.setSoTimeout(1000);
+      } catch (Throwable e) {
+	log().log(Level.WARNING, e.toString(), e);
       }
 
-      Socket socket = _pingSocket;
+      try {
+	Server server = _server;
+	_server = null;
 
-      if (socket != null)
-	socket.setSoTimeout(1000);
-    } catch (Throwable e) {
-      log().log(Level.WARNING, e.toString(), e);
-    }
+	if (server != null)
+	  server.destroy();
+      } catch (Throwable e) {
+	log().log(Level.WARNING, e.toString(), e);
+      }
 
-    try {
-      Server server = _server;
-      _server = null;
+      _threadPoolAdmin.unregister();
 
-      if (server != null)
-	server.destroy();
-    } catch (Throwable e) {
-      log().log(Level.WARNING, e.toString(), e);
-    }
-
-    _threadPoolAdmin.unregister();
-
-    try {
       if (_isGlobal)
 	Environment.closeGlobal();
       else
@@ -1703,7 +1703,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	}
       }
       
-      System.err.println(L().l("closing server"));
+      EnvironmentStream.logStderr("closing server");
       
       _resin.destroy();
     }

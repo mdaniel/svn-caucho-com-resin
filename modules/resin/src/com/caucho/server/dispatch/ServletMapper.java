@@ -294,7 +294,7 @@ public class ServletMapper {
     }
 
     if (servletName == null) {
-      log.fine(L.l("no default servlet defined for URL: '{0}'", contextURI));
+      log.fine(L.l("'{0}' has no default servlet defined", contextURI));
       
       return new ErrorFilterChain(404);
     }
