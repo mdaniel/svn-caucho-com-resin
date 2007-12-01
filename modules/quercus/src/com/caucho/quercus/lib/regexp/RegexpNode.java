@@ -635,6 +635,111 @@ class RegexpNode {
     }
   }
   
+  static class CharUngreedyLoop extends RegexpNode {
+    private final RegexpNode _node;
+    private RegexpNode _next = N_END;
+
+    private int _min;
+    private int _max;
+
+    CharUngreedyLoop(RegexpNode node, int min, int max)
+    {
+      _node = node.getHead();
+      _min = min;
+      _max = max;
+
+      if (_min < 0)
+	throw new IllegalStateException();
+    }
+
+    @Override
+    RegexpNode concat(RegexpNode next)
+    {
+      if (next == null)
+	throw new NullPointerException();
+      
+      if (_next != null)
+	_next = _next.concat(next);
+      else
+	_next = next.getHead();
+
+      return this;
+    }
+
+    @Override
+    RegexpNode createLoop(Regcomp parser, int min, int max)
+    {
+      if (min == 0 && max == 1) {
+	_min = 0;
+      
+	return this;
+      }
+      else
+	return new LoopHead(parser, this, min, max);
+    }
+
+    @Override
+    int minLength()
+    {
+      return _min;
+    }
+
+    @Override
+    boolean []firstSet(boolean []firstSet)
+    {
+      firstSet = _node.firstSet(firstSet);
+
+      if (_min > 0 && ! _node.isNullable())
+	return firstSet;
+
+      firstSet = _next.firstSet(firstSet);
+      
+      return firstSet;
+    }
+
+    //
+    // match functions
+    //
+
+    @Override
+    int match(StringValue string, int offset, RegexpState state)
+    {
+      RegexpNode next = _next;
+      RegexpNode node = _node;
+      int min = _min;
+      int max = _max;
+
+      int i;
+      
+      int headOffset = offset;
+      int tail;
+      
+      for (i = 0; i < min; i++) {
+	tail = node.match(string, offset + i, state);
+	if (tail < 0)
+	  return tail;
+      }
+
+      for (; i <= max; i++) {
+	tail = next.match(string, offset + i, state);
+
+	if (tail >= 0)
+	  return tail;
+	
+	if (node.match(string, offset + i, state) < 0) {
+	  return -1;
+	}
+      }
+
+      return -1;
+    }
+
+    public String toString()
+    {
+      return "CharUngreedyLoop[" + _min + ", " + _max + ", " + _node + ", " + _next + "]";
+    }
+  }
+  
   static class Concat extends RegexpNode {
     private final RegexpNode _head;
     private RegexpNode _next;
@@ -2250,7 +2355,7 @@ class RegexpNode {
     RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
     {
       if (_length == 1)
-	return super.createLoopUngreedy(parser, min, max);
+	return new CharUngreedyLoop(this, min, max);
       else {
 	char ch = _buffer[_length - 1];
 	
@@ -2373,7 +2478,7 @@ class RegexpNode {
     RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
     {
       if (_length == 1)
-	return super.createLoopUngreedy(parser, min, max);
+	return new CharUngreedyLoop(this, min, max);
       else {
 	char ch = _buffer[_length - 1];
 	

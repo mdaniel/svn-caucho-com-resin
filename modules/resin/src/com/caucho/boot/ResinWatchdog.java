@@ -785,9 +785,8 @@ public class ResinWatchdog extends AbstractManagedObject
     list.add(getJavaExe());
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     // #1970 - this confuses Terracotta
-    // Is this needed for anything?  Resin 3.0 didn't need the system
-    // classloader
-    // list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
+    // This is needed for JMX to work correctly.
+    list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
 
