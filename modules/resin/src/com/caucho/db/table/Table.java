@@ -615,8 +615,8 @@ public class Table extends Store {
 		     ArrayList<Expr> values)
     throws IOException, SQLException
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine("db table " + getName() + " insert row xa:" + xa);
+    if (log.isLoggable(Level.FINEST))
+      log.finest("db table " + getName() + " insert row xa:" + xa);
     
     Block block = null;
     

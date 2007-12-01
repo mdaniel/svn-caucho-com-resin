@@ -195,14 +195,17 @@ public class TcpConnection extends PortConnection implements ThreadTask
     
     long timeout = port.getKeepaliveTimeout();
 
-    boolean isSelectManager = port.getServer().isEnableSelectManager();
+    boolean isSelectManager = port.getServer().isSelectManagerEnabled();
     
     if (isSelectManager) {
       timeout = port.getKeepaliveSelectThreadTimeout();
     }
 
-    if (timeout > 0 && timeout < port.getSocketTimeout())
-      return is.fillWithTimeout(timeout);
+    if (timeout > 0 && timeout < port.getSocketTimeout()) {
+      boolean isKeepalive = is.fillWithTimeout(timeout);
+
+      return isKeepalive;
+    }
     else if (isSelectManager)
       return false;
     else

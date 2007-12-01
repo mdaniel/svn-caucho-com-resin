@@ -1003,7 +1003,7 @@ public class Port
     if (_keepaliveMax < 0)
       _keepaliveMax = 256;
 
-    if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
+    if (_serverSocket.isJNI() && _server.isSelectManagerEnabled()) {
       _selectManager = _server.getSelectManager();
 
       if (_selectManager == null) {

@@ -35,10 +35,10 @@ import com.caucho.config.ConfigException;
  * Interface for the persistent logging.
  *
  * <pre>
- * resin:type=LoggingManagement
+ * resin:type=LoggingManager
  * </pre>
  */
-public interface LoggingManagementMXBean extends ManagedObjectMXBean
+public interface LoggingManagerMXBean extends ManagedObjectMXBean
 {
   public LogMessage []findMessages(long minTime, long maxTime);
 }

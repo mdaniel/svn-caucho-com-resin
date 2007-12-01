@@ -201,9 +201,7 @@ if ($ports) {
   <tr>
     <th colspan='2'>&nbsp;</th>
   <th colspan='3'>Threads</th>
-  <th colspan='2'>&nbsp;</th>
-  <th colspan='2'>Keepalive</th>
-  <th colspan='1'>Socket</th>
+  <th colspan='3'>Keepalive</th>
 
   <tr>
     <th>&nbsp;</th>
@@ -213,13 +211,9 @@ if ($ports) {
     <th>Idle</th>
     <th>Total</th>
 
-    <th>Keepalive</th>
+    <th>Total</th>
+    <th>Select</th>
     <th>Comet</th>
-
-    <th>max</th>
-    <th>timeout</th>
-
-    <th>timeout</th>
   </tr>
 <?php
   $count = 0;
@@ -233,16 +227,9 @@ if ($ports) {
     <td><?= $port->ThreadIdleCount ?></td>
     <td><?= $port->ThreadCount ?></td>
 
-    <td><?= $port->ThreadKeepaliveCount ?>
-        <?= $port->SelectKeepaliveCount < 0
-            ? ""
-            : ("(" . $port->SelectKeepaliveCount . ")") ?></td>
-
+    <td><?= $port->ThreadKeepaliveCount ?></td>
+    <td><?= $port->SelectKeepaliveCount ?></td>
     <td><?= $port->CometIdleCount ?>
-    <td><?= $port->KeepaliveMax ?></td>
-    <td><?= $port->KeepaliveTimeout ?></td>
-
-    <td><?= $port->SocketTimeout ?></td>
   </tr>
 <?php 
   }
@@ -361,7 +348,7 @@ if ($db_pools) {
 <?php
 
 if ($mbean_server) {
-  $mbean = $mbean_server->lookup("resin:type=LoggerManager");
+  $mbean = $mbean_server->lookup("resin:type=LoggingManager");
 }
 
 //

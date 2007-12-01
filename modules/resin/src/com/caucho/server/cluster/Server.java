@@ -44,6 +44,7 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.CacheItem;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.PermissionManager;
+import com.caucho.server.admin.Management;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
@@ -127,6 +128,8 @@ public class Server extends ProtocolDispatchServer
   
   private boolean _keepaliveSelectEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
+
+  private Management _management;
   
   private long _suspendTimeMax = 600000;
 
@@ -385,6 +388,26 @@ public class Server extends ProtocolDispatchServer
   public long getKeepaliveSelectThreadTimeout()
   {
     return _keepaliveSelectThreadTimeout;
+  }
+
+  public Management createManagement()
+  {
+    if (_management == null) {
+      try {
+        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
+
+        _management = (Management) cl.newInstance();
+      } catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+
+      if (_management == null)
+        _management = new Management();
+
+      _management.setCluster(getCluster());
+    }
+
+    return _management;
   }
 
   /**
@@ -742,7 +765,7 @@ public class Server extends ProtocolDispatchServer
   public ResourceAdapter createPing()
     throws ConfigException
   {
-    return getCluster().createManagement().createPing();
+    return createManagement().createPing();
   }
 
   /**
@@ -752,12 +775,13 @@ public class Server extends ProtocolDispatchServer
   public void addPing(ResourceAdapter ping)
     throws ConfigException
   {
-    getCluster().createManagement().addPing(ping);
+    createManagement().addPing(ping);
   }
 
   /**
    * Sets true if the select manager should be enabled
    */
+  @Override
   public boolean isSelectManagerEnabled()
   {
     return getSelectManager() != null;
@@ -1044,6 +1068,13 @@ public class Server extends ProtocolDispatchServer
     _classLoader.init();
 
     super.init();
+
+    // backwards compat
+    if (_resin.getManagementPath() != null)
+      createManagement().setManagementPath(_resin.getManagementPath());
+
+    if (_management != null)
+      _management.start();
 
     if (_threadMax < _threadIdleMax)
       throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",

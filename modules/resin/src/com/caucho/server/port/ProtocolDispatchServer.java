@@ -54,7 +54,7 @@ public class ProtocolDispatchServer extends DispatchServer {
   /**
    * Returns true if the select manager is enabled.
    */
-  public boolean isEnableSelectManager()
+  public boolean isSelectManagerEnabled()
   {
     return false;
   }

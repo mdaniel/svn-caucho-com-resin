@@ -108,8 +108,6 @@ public class Cluster
   private long _clientReadTimeout = 60000L;
   private long _clientConnectTimeout = 5000L;
 
-  private Management _management;
-
   private BuilderProgramContainer _serverProgram
     = new BuilderProgramContainer();
 
@@ -539,26 +537,6 @@ public class Cluster
     return store;
   }
 
-  public Management createManagement()
-  {
-    if (_management == null) {
-      try {
-        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
-
-        _management = (Management) cl.newInstance();
-      } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
-      }
-
-      if (_management == null)
-        _management = new Management();
-
-      _management.setCluster(this);
-    }
-
-    return _management;
-  }
-
   /**
    * Adds a program.
    */
@@ -618,13 +596,6 @@ public class Cluster
         throw new ConfigException(e);
       }
     }
-
-    // backwards compat
-    if (_resin.getManagementPath() != null)
-      createManagement().setManagementPath(_resin.getManagementPath());
-
-    if (_management != null && isActive)
-      _management.start();
   }
 
   /**
