@@ -41,15 +41,15 @@ public interface WatchdogAPI {
    * Starts the server with the given arguments.  If the
    * start fails, a ConfigException is thrown.
    */
-  public void start(String []argv)
+  public void start(String password, String []argv)
     throws ConfigException, IllegalStateException, IOException;
   
-  public void restart(String serverId, String []argv)
+  public void restart(String password, String serverId, String []argv)
     throws ConfigException, IllegalStateException, IOException;
   
-  public void stop(String serverId)
+  public void stop(String password, String serverId)
     throws ConfigException, IllegalStateException, IOException;
   
-  public boolean shutdown()
+  public boolean shutdown(String password)
     throws IOException;
 }

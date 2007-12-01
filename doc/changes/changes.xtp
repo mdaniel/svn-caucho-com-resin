@@ -12,6 +12,8 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>watchdog issues with multiple servers and configuration files (#2212, rep by Bill Au)</li>
+<li>watchdog-password (#2201, rep by Chris Chen)</li>
 <li>jndi-appconfig sanitization (#2215, rep by Coolflame Wu and Alan Lee)</li>
 <li>viewfile sanitization of file attribute (#2214)</li>
 <li>response.getCharacterEncoding must return iso-8859-1 as a default (#2180, rep by Takahiro Fukuda)</li>

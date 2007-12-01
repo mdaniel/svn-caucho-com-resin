@@ -73,6 +73,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
   private Lifecycle _lifecycle = new Lifecycle();
 
   private ResinConfig _resin;
+  private String _password;
 
   private Server _dispatchServer;
 
@@ -113,12 +114,12 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
     ResinWatchdog server = _resin.findServer(_args.getServerId());
 
+    _password = server.getWatchdogPassword();
+
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
-    if (server != null) {
-      clusterServer.setAddress(server.getAddress().getHostAddress());
+    if (server != null)
       clusterServer.setPort(server.getWatchdogPort());
-    }
     else
       clusterServer.setPort(6600);
 
@@ -171,6 +172,12 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
   Path getLogDirectory()
   {
     return _args.getLogDirectory();
+  }
+
+  boolean authenticate(String password)
+  {
+    return (password == _password
+	    || password != null && password.equals(_password));
   }
 
   void startServer(String []argv)

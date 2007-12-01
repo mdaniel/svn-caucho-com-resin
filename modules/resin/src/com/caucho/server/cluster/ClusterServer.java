@@ -326,11 +326,41 @@ public class ClusterServer {
   }
 
   /**
+   * Arguments on boot
+   */
+  public void addWatchdogJvmArg(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogPassword(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogPort(int port)
+  {
+  }
+
+  /**
    * Sets a port.
    */
   public void setPort(int port)
   {
     _clusterPort.setPort(port);
+  }
+
+
+  /**
+   * Gets the port.
+   */
+  public int getPort()
+  {
+    return _clusterPort.getPort();
   }
 
   /**

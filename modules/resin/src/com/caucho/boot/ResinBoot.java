@@ -387,8 +387,9 @@ public class ResinBoot {
 	System.out.println(L().l("Resin/{0} started -server '{1}'.",
 				 Version.VERSION, _server.getId()));
       } catch (Exception e) {
-	System.out.println(L().l("Resin/{0} can't start -server '{1}'.\n{2}",
+	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
 				 Version.VERSION, _server.getId(),
+				 _server.getWatchdogPort(),
 				 e.toString()));
 
 	log().log(Level.FINE, e.toString(), e);
@@ -405,8 +406,9 @@ public class ResinBoot {
 	System.out.println(L().l("Resin/{0} stopped -server '{1}'.",
 				 Version.VERSION, _server.getId()));
       } catch (Exception e) {
-	System.out.println(L().l("Resin/{0} can't stop -server '{1}'.\n{2}",
+	System.out.println(L().l("Resin/{0} can't stop -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
 				 Version.VERSION, _server.getId(),
+				 _server.getWatchdogPort(),
 				 e.toString()));
 
 	log().log(Level.FINE, e.toString(), e);

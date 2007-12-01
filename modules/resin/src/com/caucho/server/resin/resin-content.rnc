@@ -609,6 +609,12 @@ r_server-Basis =
   & (attribute watchdog-arg { string }
      | element watchdog-arg { string })*
 
+  & (attribute watchdog-jvm-arg { string }
+     | element watchdog-jvm-arg { string })*
+
+  & (attribute watchdog-password { string }
+     | element watchdog-password { string })?
+
   & (attribute watchdog-port { r_int-Type }
      | element watchdog-port { r_int-Type })?
 

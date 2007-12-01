@@ -31,43 +31,66 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.hessian.server.HessianServlet;
+import com.caucho.util.*;
 
 import java.util.logging.Logger;
 
 /**
  * Process responsible for watching a backend server.
  */
-public class ResinWatchdogServlet extends HessianServlet implements WatchdogAPI {
+public class ResinWatchdogServlet extends HessianServlet
+  implements WatchdogAPI {
+  private final static L10N L = new L10N(ResinWatchdogServlet.class);
   private static final Logger log
     = Logger.getLogger(ResinWatchdogServlet.class.getName());
 
   private ResinWatchdogManager _watchdogManager;
-  
+
   public void init()
   {
     _watchdogManager = ResinWatchdogManager.getWatchdog();
   }
     
-  public void start(String []argv)
+  public void start(String password, String []argv)
     throws ConfigException, IllegalStateException
   {
+    if (! _watchdogManager.authenticate(password)) {
+      log.warning("watchdog start authentication failure");
+      throw new ConfigException(L.l("watchdog start forbidden - authentication failed : " + password));
+    }
+    
     _watchdogManager.startServer(argv);
   }
   
-  public void restart(String serverId, String []argv)
+  public void restart(String password, String serverId, String []argv)
   {
+    if (! _watchdogManager.authenticate(password)) {
+      log.warning("watchdog restart authentication failure");
+      throw new ConfigException(L.l("watchdog restart forbidden - authentication failed"));
+    }
+    
     _watchdogManager.restartServer(serverId, argv);
   }
 
-  public void stop(String serverId)
+  public void stop(String password, String serverId)
   {
+    if (! _watchdogManager.authenticate(password)) {
+      log.warning("watchdog stop authentication failure");
+      throw new ConfigException(L.l("watchdog stop forbidden - authentication failed"));
+    }
+    
     log.info("Watchdog stop: " + serverId);
     
     _watchdogManager.stopServer(serverId);
   }
   
-  public boolean shutdown()
+  public boolean shutdown(String password)
   {
+    if (! _watchdogManager.authenticate(password)) {
+      log.warning("watchdog stop authentication failure");
+      throw new ConfigException(L.l("watchdog shutdown forbidden - authentication failed"));
+    }
+    
     log.info("Watchdog shutdown");
 
     new Thread(new Shutdown()).start();

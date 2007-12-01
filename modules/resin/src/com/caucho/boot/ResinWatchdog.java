@@ -76,7 +76,7 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private String _javaExe;
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
-  private ArrayList<String> _watchdogArgs = new ArrayList<String>();
+  private ArrayList<String> _watchdogJvmArgs = new ArrayList<String>();
 
   private boolean _is64bit;
   private boolean _hasXss;
@@ -94,6 +94,8 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private InetAddress _address;
   private int _watchdogPort = 6600;
+  
+  private String _password = "";
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
   
@@ -158,6 +160,16 @@ public class ResinWatchdog extends AbstractManagedObject
     return _address;
   }
 
+  public void setWatchdogPassword(String password)
+  {
+    _password = password;
+  }
+
+  public String getWatchdogPassword()
+  {
+    return _password;
+  }
+
   public void setWatchdogPort(int port)
   {
     _watchdogPort = port;
@@ -187,7 +199,12 @@ public class ResinWatchdog extends AbstractManagedObject
   
   public void addWatchdogArg(String arg)
   {
-    _watchdogArgs.add(arg);
+    addWatchdogJvmArg(arg);
+  }
+  
+  public void addWatchdogJvmArg(String arg)
+  {
+    _watchdogJvmArgs.add(arg);
     
     if (arg.startsWith("-Xss"))
       _hasWatchdogXss = true;
@@ -259,7 +276,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      watchdog.start(argv);
+      watchdog.start(_password, argv);
 
       return;
     } catch (ConfigException e) {
@@ -279,7 +296,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      watchdog.stop(getId());
+      watchdog.stop(_password, getId());
     } catch (ConfigException e) {
       throw e;
     } catch (IllegalStateException e) {
@@ -311,7 +328,15 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      return watchdog.shutdown();
+      return watchdog.shutdown(_password);
+    } catch (ConfigException e) {
+      throw e;
+    } catch (IllegalStateException e) {
+      throw e;
+    } catch (IOException e) {
+      throw new IllegalStateException(L.l("Can't connect to ResinWatchdogManager.\n{1}",
+					  Version.VERSION, e.toString()),
+				      e);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -321,8 +346,8 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private WatchdogAPI getProxy()
   {
-    String url = ("hmux://" + getAddress().getHostAddress()
-		  + ":" + getWatchdogPort()
+    String url = ("hmux://127.0.0.1:"
+		  + getWatchdogPort()
 		  + "/watchdog");
     
     HashMap<String,Object> attr = new HashMap<String,Object>();
@@ -391,7 +416,7 @@ public class ResinWatchdog extends AbstractManagedObject
     if (! _hasWatchdogXmx)
       list.add("-Xmx32m");
 
-    list.addAll(_watchdogArgs);
+    list.addAll(_watchdogJvmArgs);
 
     if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
       list.add("-d64");
@@ -759,7 +784,10 @@ public class ResinWatchdog extends AbstractManagedObject
 
     list.add(getJavaExe());
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
-    list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
+    // #1970 - this confuses Terracotta
+    // Is this needed for anything?  Resin 3.0 didn't need the system
+    // classloader
+    // list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
 

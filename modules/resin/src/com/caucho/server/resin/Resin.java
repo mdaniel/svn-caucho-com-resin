@@ -1302,6 +1302,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       Server server = resin.getServer();
 
       DestroyThread destroyThread = new DestroyThread(resin);
+      destroyThread.start();
 
       resin.waitForExit();
 
@@ -1682,6 +1683,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       _resin = resin;
       
       setName("resin-destroy");
+      setDaemon(true);
     }
 
     public void shutdown()
