@@ -376,8 +376,8 @@ public class ResinStatusServlet extends GenericServlet {
           out.print("    <td>" + port.getThreadActiveCount());
           out.print("<td>" + port.getThreadIdleCount());
           out.print("<td>" + port.getThreadActiveCount());
-          out.print("<td>" + port.getThreadKeepaliveCount());
-          out.print("<td>" + port.getSelectKeepaliveCount());
+          out.print("<td>" + port.getKeepaliveThreadCount());
+          out.print("<td>" + port.getKeepaliveSelectCount());
           out.println();
 
           out.println();
