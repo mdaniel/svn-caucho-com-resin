@@ -36,6 +36,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.server.util.ScheduledThreadPool;
+import com.caucho.transaction.*;
 
 import java.util.concurrent.*;
 import javax.ejb.*;
@@ -106,7 +107,7 @@ public class ResinWebBeansProducer
    */
   @Produces
   @Standard
-  public TransactionManager getUserTransaction()
+  public TransactionManager getTransactionManager()
   {
     return TransactionManagerImpl.getInstance();
   }
