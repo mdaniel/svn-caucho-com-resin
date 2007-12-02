@@ -139,6 +139,8 @@ public class Port
 
   private Alarm _suspendAlarm;
 
+  // statistics
+
   private volatile int _threadCount;
   private final Object _threadCountLock = new Object();
 
@@ -154,7 +156,10 @@ public class Port
   private volatile long _lifetimeReadBytes;
   private volatile long _lifetimeWriteBytes;
 
+  // total keepalive
   private volatile int _keepaliveCount;
+  // thread-based
+  private volatile int _keepaliveThreadCount;
   private final Object _keepaliveCountLock = new Object();
 
   // True if the port has been bound
@@ -845,6 +850,16 @@ public class Port
   }
 
   /**
+   * Returns the number of keepalive connections
+   */
+  public int getKeepaliveThreadCount()
+  {
+    synchronized (_keepaliveCountLock) {
+      return _keepaliveThreadCount;
+    }
+  }
+
+  /**
    * Returns the number of connections in the select.
    */
   public int getSelectConnectionCount()
@@ -1227,12 +1242,24 @@ public class Port
     synchronized (_keepaliveCountLock) {
       if (! _lifecycle.isActive())
         return false;
-      else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
+      else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(conn + " failed keepalive delay " + (Alarm.getCurrentTime() - acceptStartTime));
+	
 	return false;
-      else if (_keepaliveMax <= _keepaliveCount)
+      }
+      else if (_keepaliveMax <= _keepaliveCount) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(conn + " failed keepalive max " + _keepaliveCount);
+	
         return false;
-      else if (_connectionMax <= _connectionCount + _minSpareConnection)
+      }
+      else if (_connectionMax <= _connectionCount + _minSpareConnection) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(conn + " failed keepalive max " + _keepaliveCount);
+	
         return false;
+      }
 
       _keepaliveCount++;
 
@@ -1254,6 +1281,26 @@ public class Port
 
         log.warning("internal error: negative keepalive count " + count);
       }
+    }
+  }
+  
+  /**
+   * Starts a keepalive thread.
+   */
+  void keepaliveThreadBegin()
+  {
+    synchronized (_keepaliveCountLock) {
+      _keepaliveThreadCount++;
+    }
+  }
+  
+  /**
+   * Ends a keepalive thread.
+   */
+  void keepaliveThreadEnd()
+  {
+    synchronized (_keepaliveCountLock) {
+      _keepaliveThreadCount--;
     }
   }
 

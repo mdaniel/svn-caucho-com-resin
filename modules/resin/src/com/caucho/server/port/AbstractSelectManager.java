@@ -57,7 +57,7 @@ abstract public class AbstractSelectManager {
   /**
    * Starts the manager.
    */
-  abstract public void start();
+  abstract public boolean start();
   
   /**
    * Adds a keepalive connection.

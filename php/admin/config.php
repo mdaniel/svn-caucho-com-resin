@@ -150,24 +150,13 @@ if ($ports) {
 ?>
 </table>
 </div>
-
-<!-- cluster ports -->
-
 <?php
-$cluster = $server->Cluster;
-
-$cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
-
-echo "<h2>Cluster: $cluster_name</h2>";
-echo "<div class='section'>";
-
-$servers = $cluster->Servers;
-
 echo "<h2>ServerConnectors</h2>"
 echo "<div class='section'>";
 
 echo "<table class='data'>\n";
 
+$servers = $mbean_server->query("resin:*,type=ServerConnector");
 foreach ($servers as $srun) {
 ?>
   <tr>
@@ -210,6 +199,18 @@ foreach ($servers as $srun) {
 </table>
 </div>
 
+<!-- cluster ports -->
+
+<?php
+$cluster = $server->Cluster;
+
+$cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
+
+echo "<h2>Cluster: $cluster_name</h2>";
+echo "<div class='section'>";
+
+$servers = $cluster->Servers;
+?>
 <!-- host data -->
 
 <?php

@@ -1070,7 +1070,7 @@ public class Server extends ProtocolDispatchServer
     super.init();
 
     // backwards compat
-    if (_resin.getManagementPath() != null)
+    if (_resin != null && _resin.getManagementPath() != null)
       createManagement().setManagementPath(_resin.getManagementPath());
 
     if (_management != null)
@@ -1159,8 +1159,11 @@ public class Server extends ProtocolDispatchServer
       }
 
       AbstractSelectManager selectManager = getSelectManager();
-      if (_keepaliveSelectEnable && selectManager != null)
-        selectManager.start();
+      if (! _keepaliveSelectEnable
+	  || selectManager == null
+	  || ! selectManager.start()) {
+	initSelectManager(null);
+      }
 
       if (! _isBindPortsAtEnd) {
         bindPorts();

@@ -709,27 +709,29 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     if (Alarm.getCurrentTime() < _nextInitTime)
       throw _initException;
 
-    if (log.isLoggable(Level.FINE))
-      log.fine("Servlet[" + _servletName + "] starting");
-
     try {
-      servlet = createServletImpl();
-
       synchronized (this) {
-	if (_servlet == null && ! isNew)
+	if (! isNew && _servlet != null)
+	  return _servlet;
+	  
+	// XXX: this was outside of the sync block
+	servlet = createServletImpl();
+
+	if (! isNew)
 	  _servlet = servlet;
       }
 
+      if (log.isLoggable(Level.FINE))
+        log.finer("Servlet[" + _servletName + "] active");
+
       //J2EEManagedObject.register(new com.caucho.management.j2ee.Servlet(this));
 
-      if (_servlet == servlet) {
+      if (! isNew) {
 	// If the servlet has an MBean, register it
 	try {
 	  Hashtable<String,String> props = new Hashtable<String,String>();
 
-	  String className = _servlet.getClass().getName();
-	  int p = className.lastIndexOf('.');
-	  props.put("type", className.substring(p + 1));
+	  props.put("type", _servlet.getClass().getSimpleName());
 	  props.put("name", _servletName);
 	  Jmx.register(_servlet, props);
 	} catch (Exception e) {
@@ -742,8 +744,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 	}
       }
 
-      if (log.isLoggable(Level.FINER))
-        log.finer("Servlet[" + _servletName + "] started");
+      if (log.isLoggable(Level.FINE))
+        log.finer("Servlet[" + _servletName + "] active");
 
       return servlet;
     } catch (ServletException e) {

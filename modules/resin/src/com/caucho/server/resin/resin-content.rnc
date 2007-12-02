@@ -241,7 +241,8 @@ r_ignore-client-disconnect =
   | element ignore-client-disconnect { string }
 
 r_jmx-service = element jmx-service {
-  empty
+  (attribute password { string }
+   | element password { string })?
 }
 
 r_jsse-ssl = element jsse-ssl {
@@ -313,8 +314,8 @@ r_management-compat = element management {
   & (attribute remote-enable { r_boolean-Type }
      | element remote-enable { r_boolean-Type })?
 
-  & (attribute remote-enable-cookie { string }
-     | element remote-enable-cookie { string })?
+  & (attribute remote-enable-password { string }
+     | element remote-enable-password { string })?
 }
 
 r_memory-free-min =

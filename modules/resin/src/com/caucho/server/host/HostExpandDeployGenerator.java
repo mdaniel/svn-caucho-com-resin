@@ -187,9 +187,9 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
 
       controller.addDepend(jarPath);
     } catch (Throwable e) {
-      controller.setConfigException(e);
-      
       log.log(Level.WARNING, e.toString(), e);
+      
+      controller.setConfigException(e);
     }
 
     return controller;
@@ -208,14 +208,14 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
       for (int i = 0; i < _hostDefaults.size(); i++)
 	controller.addConfigDefault(_hostDefaults.get(i));
     } catch (ConfigException e) {
-      controller.setConfigException(e);
-      
       log.warning(e.toString());
       log.log(Level.FINER, e.toString(), e);
-    } catch (Throwable e) {
-      controller.setConfigException(e);
       
+      controller.setConfigException(e);
+    } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
+      
+      controller.setConfigException(e);
     }
 
     return controller;

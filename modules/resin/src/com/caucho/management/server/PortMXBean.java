@@ -164,12 +164,20 @@ public interface PortMXBean extends ManagedObjectMXBean {
 
   /**
    * Returns the current number of connections that are in the keepalive
+   * state
+   */
+  @Description("The current number of connections that are" +
+               " in the keepalive state")
+  public int getKeepaliveCount();
+
+  /**
+   * Returns the current number of connections that are in the keepalive
    * state and are using a thread to maintain the connection.
    */
   @Description("The current number of connections that are" +
                " in the keepalive state and are using" +
                " a thread to maintain the connection")
-  public int getThreadKeepaliveCount();
+  public int getKeepaliveThreadCount();
 
   /**
    * Returns the current number of connections that are in the keepalive
@@ -178,7 +186,7 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The current number of connections that are" +
                " in the keepalive state and are using" +
                " select to maintain the connection")
-  public int getSelectKeepaliveCount();
+  public int getKeepaliveSelectCount();
 
   /**
    * Returns the current number of comet-socket idle and

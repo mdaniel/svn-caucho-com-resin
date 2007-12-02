@@ -202,9 +202,15 @@ public class TcpConnection extends PortConnection implements ThreadTask
     }
 
     if (timeout > 0 && timeout < port.getSocketTimeout()) {
-      boolean isKeepalive = is.fillWithTimeout(timeout);
+      port.keepaliveThreadBegin();
 
-      return isKeepalive;
+      try {
+	boolean isKeepalive = is.fillWithTimeout(timeout);
+
+	return isKeepalive;
+      } finally {
+	port.keepaliveThreadEnd();
+      }
     }
     else if (isSelectManager)
       return false;
@@ -408,27 +414,32 @@ public class TcpConnection extends PortConnection implements ThreadTask
     ConnectionController controller = getController();
     
     if (controller != null) {
+      // comet suspension
       _suspendTime = Alarm.getCurrentTime();
       
       if (port.suspend(this)) {
 	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "suspend");
+	  log.fine(dbgId() + " suspend");
       }
       else {
 	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "suspend fail");
+	  log.fine(dbgId() + " suspend fail");
 	
 	free();
       }
     }
     else if (! port.keepaliveBegin(this, _connectionStartTime)) {
       if (log.isLoggable(Level.FINE))
-        log.fine(dbgId() + "failed keepalive");
+        log.fine(dbgId() + " failed keepalive");
 
       free();
     }
     else if (port.getSelectManager() != null) {
-      if (! port.getSelectManager().keepalive(this)) {
+      if (port.getSelectManager().keepalive(this)) {
+        if (log.isLoggable(Level.FINE))
+          log.fine(dbgId() + "keepalive (select)");
+      }
+      else {
         // XXX: s/b
         // setKeepalive();
         // ThreadPool.schedule(this);
@@ -437,10 +448,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
         port.keepaliveEnd(this);
 	free();
-      }
-      else {
-        if (log.isLoggable(Level.FINE))
-          log.fine(dbgId() + "keepalive (select)");
       }
     }
     else {
@@ -631,7 +638,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	  
 	  if (log.isLoggable(Level.FINE))
 	    log.log(Level.FINE, dbgId() + e, e);
-	  
         }
 	finally {
 	  thread.setContextClassLoader(systemLoader);
@@ -649,8 +655,9 @@ public class TcpConnection extends PortConnection implements ThreadTask
       //_admin.unregister();
       
       port.threadEnd(this);
-      if (isKeepalive)
+      if (isKeepalive) {
 	keepalive();
+      }
       else
 	free();
 
@@ -713,8 +720,10 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
       Port port = getPort();
 
-      if (isKeepalive)
+      if (isKeepalive) {
 	port.keepaliveEnd(this);
+	Thread.dumpStack();
+      }
       
       if (log.isLoggable(Level.FINE) && _isInUse) {
 	if (port != null)

@@ -41,8 +41,6 @@ package javax.servlet;
  * </code></pre>
  */
 public class ServletException extends Exception {
-  private Throwable _rootCause;
-
   /**
    * Basic exception constructor.
    */
@@ -63,9 +61,7 @@ public class ServletException extends Exception {
    */
   public ServletException(String message, Throwable cause)
   {
-    super(message);
-
-    _rootCause = cause;
+    super(message, cause);
   }
 
 
@@ -74,28 +70,11 @@ public class ServletException extends Exception {
    */
   public ServletException(Throwable cause)
   {
-    super(String.valueOf(cause));
-
-    _rootCause = cause;
+    super(cause);
   }
 
   public Throwable getRootCause()
   {
-    return _rootCause;
-  }
-
-  public Throwable initCause(Throwable cause)
-  {
-    _rootCause = cause;
-
-    return cause;
-  }
-
-  /**
-   * Returns any wrapped exception.
-   */
-  public Throwable getCause()
-  {
-    return getRootCause();
+    return getCause();
   }
 }

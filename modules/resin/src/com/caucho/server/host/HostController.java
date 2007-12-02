@@ -424,7 +424,8 @@ public class HostController
 					newController.getHostName(),
 					getRootDirectory()));
 
-	  log.log(Level.FINE, e.toString(), e);
+	  log.warning(e.getMessage());
+	  log.log(Level.FINEST, e.toString(), e);
 
 	  mergedController.setConfigException(e);
 	}

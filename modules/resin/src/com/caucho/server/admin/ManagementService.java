@@ -57,10 +57,12 @@ import java.util.logging.Logger;
 abstract public class ManagementService
 {
   private static final L10N L = new L10N(ManagementService.class);
-  protected final Logger log;
+  protected final Logger log = Logger.getLogger(getClass().getName());
 
   private final Management _management;
   private final String _serviceName;
+
+  private String _password;
 
   private InetNetwork[]_allowedNetworks;
 
@@ -68,12 +70,20 @@ abstract public class ManagementService
   {
     _management = management;
     _serviceName = serviceName;
+  }
 
-    log = Logger.getLogger(getClass().getName());
+  public void setPassword(String password)
+  {
+    _password = password;
   }
 
   public void start()
   {
+    if (_password == null) {
+      log.info("jmx-remote requires a password attribute to activate");
+      return;
+    }
+    
     HostConfig hostConfig = _management.getHostConfig();
 
     Path path = _management.getPath().lookup(_serviceName);

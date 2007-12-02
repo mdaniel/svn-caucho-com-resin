@@ -212,6 +212,7 @@ if ($ports) {
     <th>Total</th>
 
     <th>Total</th>
+    <th>Thread</th>
     <th>Select</th>
     <th>Comet</th>
   </tr>
@@ -227,8 +228,9 @@ if ($ports) {
     <td><?= $port->ThreadIdleCount ?></td>
     <td><?= $port->ThreadCount ?></td>
 
-    <td><?= $port->ThreadKeepaliveCount ?></td>
-    <td><?= $port->SelectKeepaliveCount ?></td>
+    <td><?= $port->KeepaliveCount ?></td>
+    <td><?= $port->KeepaliveThreadCount ?></td>
+    <td><?= $port->KeepaliveSelectCount ?></td>
     <td><?= $port->CometIdleCount ?>
   </tr>
 <?php 

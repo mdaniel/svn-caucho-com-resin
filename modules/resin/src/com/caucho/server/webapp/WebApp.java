@@ -1816,7 +1816,7 @@ public class WebApp extends ServletContextImpl
         _servletManager.init();
         _filterManager.init();
       } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
+	log.log(Level.WARNING, e.toString(), e);
         setConfigException(e);
       }
 

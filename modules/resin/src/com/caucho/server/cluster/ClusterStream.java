@@ -171,4 +171,9 @@ public class ClusterStream {
       log.log(Level.FINER, e.toString(), e);
     }
   }
+
+  public String toString()
+  {
+    return "ClusterStream[" + _debugId + "]";
+  }
 }

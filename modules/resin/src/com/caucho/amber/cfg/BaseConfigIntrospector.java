@@ -615,30 +615,37 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         try {
           completion.complete();
         } catch (Exception e) {
+	  if (e instanceof ConfigException) {
+	    log.warning(e.getMessage());
+	    log.log(Level.FINEST, e.toString(), e);
+	  }
+	  else
+	    log.log(Level.WARNING, e.toString(), e);
+	  
           completion.getRelatedType().setConfigException(e);
 
           if (exn == null)
             exn = new ConfigException(e);
-          else
-            log.log(Level.WARNING, e.toString(), e);
         }
       }
 
       if (_depCompletions.size() > 0) {
         Completion completion = _depCompletions.remove(0);
 
-
         try {
           completion.complete();
         } catch (Exception e) {
-          completion.getRelatedType().setConfigException(e);
+	  if (e instanceof ConfigException) {
+	    log.warning(e.getMessage());
+	    log.log(Level.FINEST, e.toString(), e);
+	  }
+	  else
+	    log.log(Level.WARNING, e.toString(), e);
 
-          log.log(Level.WARNING, e.toString(), e);
+          completion.getRelatedType().setConfigException(e);
 
           if (exn == null)
             exn = new ConfigException(e);
-          else
-            log.log(Level.WARNING, e.toString(), e);
         }
       }
     }

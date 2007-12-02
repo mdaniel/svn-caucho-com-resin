@@ -648,7 +648,7 @@ abstract public class DeployController<I extends DeployInstance>
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
       log.severe(e.toString());
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
 
       _lifecycle.toError();
 

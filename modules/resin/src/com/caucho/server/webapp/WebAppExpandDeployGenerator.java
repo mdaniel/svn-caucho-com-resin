@@ -394,14 +394,12 @@ public class WebAppExpandDeployGenerator
       if (cfg != null)
         controller.addConfigDefault(cfg);
     } catch (ConfigException e) {
-      controller.setConfigException(e);
-
-      log.log(Level.FINER, e.toString(), e);
       log.warning(e.toString());
-    } catch (Throwable e) {
+      log.log(Level.FINEST, e.toString(), e);
       controller.setConfigException(e);
-
+    } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
+      controller.setConfigException(e);
     }
 
     return controller;

@@ -141,12 +141,17 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getIdleThreadCount();
   }
 
-  public int getThreadKeepaliveCount()
+  public int getKeepaliveCount()
   {
     return _port.getKeepaliveConnectionCount();
   }
 
-  public int getSelectKeepaliveCount()
+  public int getKeepaliveThreadCount()
+  {
+    return _port.getKeepaliveThreadCount();
+  }
+
+  public int getKeepaliveSelectCount()
   {
     return _port.getSelectConnectionCount();
   }
