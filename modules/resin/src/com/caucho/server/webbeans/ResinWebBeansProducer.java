@@ -102,6 +102,16 @@ public class ResinWebBeansProducer
   }
   
   /**
+   * Returns the TransactionManager
+   */
+  @Produces
+  @Standard
+  public TransactionManager getUserTransaction()
+  {
+    return TransactionManagerImpl.getInstance();
+  }
+  
+  /**
    * Returns the UserTransaction
    */
   @Produces

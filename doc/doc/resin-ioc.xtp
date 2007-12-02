@@ -1,0 +1,275 @@
+<document>
+<header>
+<title>Resin Dependency Injection</title>
+<description>
+
+<p>Resin's dependency injection framework gives your application
+a type-safe architecture for designing and assembling services and components.
+Since injection is annotation-based, most components can avoid XML
+configuration, while XML is still available for components.</p>
+
+</description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Injecting Resources">
+
+<p>Before dependency injection, applications needed to use JNDI to
+grab resources managed by Resin: database connections, JMS queues, JCA
+<code>EntityManagers</code>, timers, <code>UserTransaction</code>, the
+JMX <code>MBeanServer</code>, etc.  The JNDI lookup had two main
+flaws: it required a good chunk of boilerplate code to solve a simple
+problem, and it was untyped.  Since JNDI is essentially a big HashMap,
+the only way of making sure your <code>DataSource</code> name didn't
+conflict with your JMS <code>Queue</code> was strictly structuring the
+JNDI names with patterns like <code>java:comp/env/jdbc/foo</code>.
+</p>
+
+<p>With dependency injection, Resin will lookup, verify and inject
+the resource when it creates your managed class, for example when creating
+a servlet.  In the following example, when Resin creates MyServlet, the <code>@In</code> annotation tells it to look for a <code>UserTransaction</code>
+and <code>DataSource</code> and use reflection to set the fields,
+before calling the servlet's <code>init()</code> method.</p>
+
+<example>
+import javax.sql.DataSource;
+import javax.transaction.UserTransaction;
+import javax.webbeans.In;
+
+public class MyServlet extends GenericServlet {
+  @In private DataSource _ds;
+  @In private UserTransaction _ut;
+
+  ...
+}
+</example>
+
+<s2 title="@Named and bindings">
+
+<p>Since many applications use multiple resources like named databases,
+your injection may need to specify a name or other binding to uniquely
+identify the resource you want.  In the case of a unique resource like
+<code>UserTransaction</code> or <code>MBeanServer</code> or an application
+with a single <code>DataSource</code>, the <code>@In</code> is enough
+information.  When you have multiple databases, you'll want to
+use <code>@Named</code> to specify the database name.</p>
+
+<example>
+import javax.sql.DataSource;
+import javax.webbeans.Named;
+
+public class MyServlet extends GenericServlet {
+  @Named("foo") private DataSource _ds;
+
+  ...
+}
+</example>
+<example title="resin-web.xml database configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;database>
+    &lt;name>foo&lt;/name>
+    &lt;driver type="org.gjt.mm.mysql.Driver">
+      &lt;url>jdbc:mysql://localhost:3306/foo&lt;/url>
+    &lt;/driver>
+  &lt;/database>
+
+  &lt;database>
+    &lt;name>bar&lt;/name>
+    &lt;driver type="org.gjt.mm.mysql.Driver">
+      &lt;url>jdbc:mysql://localhost:3306/bar&lt;/url>
+    &lt;/driver>
+  &lt;/database>
+
+&lt;/web-app>
+</example>
+
+<p>Injection using a <code>@Named</code> binding annotation is still
+typed.  You can have a database with <code>@Named("foo")</code> and
+a JMS queue with <code>@Named("foo")</code>, i.e. each type has its own
+namespace.  The typed injection is a big improvement from the JNDI
+<code>java:comp/env/jdbc/foo</code> vs <code>java:comp/env/jms/foo</code>
+conventions.</p>
+
+<p>Although many applications will just use <code>@In</code>
+and <code>@Named</code>, you can also create your
+own <code>BindingType</code> annotations to match resources
+and components.</p>
+
+</s2>
+
+<s2 title="WebBeans-enabled components">
+
+<p>Any Resin-managed object can use the entire WebBeans
+dependency-injection system and all of the managed objects, while objects
+you create using <code>new</code> are still plain Java objects.
+Once you've got a root object managed by the system, any futher
+WebBeans components or singletons you bring in will also be managed.
+The starting set of managed objects is pretty broad and includes:</p>
+
+<ul>
+<li>&lt;bean> (singletons) defined in the resin.conf or resin-web.xml</li>
+<li>&lt;component> (WebBeans components) defined in the resin.conf,
+resin-web.xml or web-beans.xml</li>
+<li>EJB message-driven beans</li>
+<li>EJB session beans</li>
+<li>Filters (servlet)</li>
+<li>JSF resources (currently only model beans)</li>
+<li>JSP pages</li>
+<li>JSP tag libraries</li>
+<li>&lt;resource> components (Resin will be migrating to use &lt;bean> for resources in the future.)</li>
+<li>Servlets</li>
+<li>Servlet Listeners defined in the web.xml</li>
+<li>WebBeans annotated components (<code>@Component</code>)
+discovered through the classpath scan (see below)</li>
+<li>WebBeans components injected with <code>@New</code> (see below)</li>
+<li>Remote services defined by &lt;servlet> (e.g. Hessian or SOAP).</li>
+</ul>
+
+</s2>
+
+<s2 title="Resin global resources">
+
+<p>Resin automatically provides several global resources to any
+injectable code. Since these resources are unique, your application
+will use <code>@In</code> as the annotation.</p>
+
+<p><b><code>javax.webbeans.Container</code></b> provides a reference to
+the WebBeans container itself.  Applications can use the
+<code>Container</code> to raise <code>WebBeans</code> events, and
+lookup components programmatically.</p>
+
+<p><b><code>javax.webbeans.Conversation</code></b> injects the WebBeans
+conversation scope for a JSF application.  The conversatio scope lets
+JSF views store data local to the page itself, separate from the
+HTTP session scope.</p>
+
+<p><b><code>javax.management.MBeanServer</code></b> injects the JMX
+management server.  JMX manages Resin's resources, so an application
+can use JMX to view the current state of Resin.  See the
+<a href="http://caucho.com/resin-javadoc/com/caucho/management/server/package-summary.html">JavaDoc</a> for an overview of Resin's resources.</p>
+
+<p><b><code>javax.transaction.TransactionManager</code></b> injects the
+XA transaction manager.  Advanced applications which want to add their
+own <code>XAResource</code> or <code>Synchronization</code> objects
+to an active transaction can use <code>@In TransactionManager</code>.</p>
+
+<p><b><code>javax.transaction.UserTransaction</code></b> injects the
+XA user transaction manager.  Applications controlling XA transactions
+programmatically will use the <code>UserTransaction</code>
+to <code>begin()</code>, <code>rollback()</code>, and
+<code>commit()</code> distributed transactions.</p>
+
+<p><b><code>java.util.concurrent.ScheduledExecutorService</code></b>
+lets applications schedule threads and timed events controlled by
+Resin's thread pool, and restricted by the thread-max configuration
+in the resin.conf.  This <code>ScheduleExecutorService</code> is
+classloader-safe, so Resin will automatically close your scheduled
+tasks when restarting a web-app.</p>
+
+</s2>
+
+<s2 title="Resin configured resources">
+
+<p>All Resin configured resources are available through WebBeans, since
+Resin uses WebBeans as its internal registry.</p>
+
+<p><b><code>&lt;bean></code></b> singletons are application-specific
+custom services.  They are exactly like the &lt;component> beans but
+default to singleton scope.  Like &lt;component> they can
+either use WebBeans annotations or just be POJO objects.
+The &lt;bean> tag makes the beans available to any other WebBeans
+component.  The bean default to <code>@Singleton</code> scope, which
+means that a unique instance is created at Resin start time.
+The injected type will depend on the <code>class</code> attribute of
+the bean.</p>
+
+<p><b><code>&lt;component></code></b> objects are application-specific custom
+beans.  They can either use WebBeans annotations or just be POJO objects.
+The &lt;component> tag makes the beans available to any other WebBeans
+component.  The components default to <code>@Dependent</code> scope, which
+means a new instance is created each time they're referenced or injected.
+The injected type will depend on the <code>class</code> attribute of
+the bean.</p>
+
+<p><b><code>&lt;database></code></b> is a JDBC pooled database.
+The <code>name</code> attribute is assigned to the <code>@Named</code>
+binding. Databases are injected as <code>javax.sql.DataSource</code> types.</p>
+
+<p><b>EJB stateless beans</b> are automatically registered the
+WebBeans.  The default <code>@Named</code> value is the ejb-name.
+Stateless beans can use the &lt;ejb-stateless-bean> tag for custom
+configuration, or rely on the standard EJB discovery mechanism.
+Each EJB 3.0 <code>@Local</code> interface is registered separately
+in the WebBeans registry.</p>
+
+<p><b>EJB stateful beans</b> are automatically registered with
+WebBeans.  The default <code>@Named</code> value is the ejb-name.
+Stateful beans can use the &lt;ejb-stateful-bean> tag for custom
+configuration, or rely on the standard EJB discovery mechanism.
+Each injection or bean lookup will return a new stateful bean
+reference, modified by the bean's scope (see below.)
+Each EJB 3.0 <code>@Local</code> interface is registered separately
+in the WebBeans registry.</p>
+
+<p><b>EntityManager</b> and <b>EntityManagerFactory</b> objects
+from JPA are automatically registered with WebBeans.  The default
+<code>@Named</code> value is the <code>persistence-unit</code> name.</p>
+
+<p><b>&lt;env-entry></b> tags register their values with
+WebBeans.  The default <code>@Named</code> value is
+the <code>env-entry-name</code>.  The registered type is the
+<code>env-entry-type</code>.</p>
+
+<p><b>&lt;jms-connection-factory></b> automatically registers the configured
+factory with WebBeans. 
+Connection factories can also be configured with &lt;bean> or &lt;resource>,
+depending on the JMS provider.  The registered type is the <code>class</code>
+of the connection factory, usually <code>javax.jms.ConnectionFactory</code></p>
+
+<p><b>&lt;jms-topic></b> automatically registers the configured
+topic with WebBeans.  The default <code>@Named</code> value is the
+topic name.  Topic can also be configured with &lt;bean> or &lt;resource>,
+depending on the JMS provider.  The registered type is
+<code>javax.jms.Topic</code></p>
+
+<p><b>&lt;jms-queue></b> automatically registers the configured
+queue with WebBeans.  The default <code>@Named</code> value is the
+queue name.  Queue can also be configured with &lt;bean> or &lt;resource>,
+depending on the JMS provider.  The registered type is
+<code>javax.jms.Queue</code></p>
+
+<p><b>&lt;resource></b> automatically registers the configured
+resource with WebBeans.  In the future, the resource tag will likely be
+replaced by &lt;bean> instances.  The registered type is the resource
+type.</p>
+
+<p><b>&lt;web-service-client></b> registers remoting clients with WebBeans.
+The &lt;web-service-client> tag will configure the protocol used and the
+expected proxy class.  The registered type is the API <code>class</code>
+of the remote service.</p>
+
+<example title="resin-web.xml for web-service-client">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;web-service-client class="example.HelloService">
+    &lt;url>hessian:http://localhost:8080/hello/&lt;/url>
+  &lt;/web-service-client>
+
+&lt;/web-app>
+</example>
+<example title="Injecting for web-service-client">
+public class MyServlet extends GenericServlet {
+  @In example.HelloService _hello;
+  ...
+}
+</example>
+
+</s2>
+
+</s1>
+
+</body>
+</document>
