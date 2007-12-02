@@ -100,7 +100,7 @@ and components.</p>
 
 </s2>
 
-<s2 title="WebBeans-enabled components">
+<s2 title="WebBeans-enabled components (injectable objects)">
 
 <p>Any Resin-managed object can use the entire WebBeans
 dependency-injection system and all of the managed objects, while objects
