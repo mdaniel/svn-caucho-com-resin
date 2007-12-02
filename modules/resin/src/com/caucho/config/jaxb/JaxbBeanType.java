@@ -198,8 +198,6 @@ public class JaxbBeanType extends TypeStrategy
       InjectIntrospector.introspectDestroy(_destroyList, _type);
       if (_destroyList.size() == 0)
 	_destroyList = null;
-      
-      System.out.println("DL: " + _destroyList);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

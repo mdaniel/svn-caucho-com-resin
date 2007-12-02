@@ -87,6 +87,10 @@ public class CreateAttributeStrategy extends AttributeStrategy {
     if (child == null)
       child = _createMethod.invoke(bean);
 
+    if (child == null)
+      throw new IllegalStateException(L.l("{0} did not create an object for {1}",
+                                          _createMethod, bean));
+    
     TypeStrategy childStrategy;
 
     childStrategy = TypeStrategyFactory.getTypeStrategy(child.getClass());

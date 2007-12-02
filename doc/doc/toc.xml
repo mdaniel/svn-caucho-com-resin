@@ -60,9 +60,8 @@
 	        description="alphabetical list of tags" />
       </item>
       
-      <item link="resin-ioc.xtp" title="Resin IoC"/>
-
       <item title="Common Tasks" link="commontasks.xtp">
+        <item link="resin-ioc.xtp" title="Resin IoC"/>
         <item link="virtual-host.xtp" title="Virtual Hosting"/>
         <item link="config-database.xtp" title="Database"/>
         <item link="resin-load-balance.xtp" title="Load Balancing"/>
