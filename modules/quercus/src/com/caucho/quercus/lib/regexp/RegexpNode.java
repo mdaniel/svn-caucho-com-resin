@@ -318,6 +318,12 @@ class RegexpNode {
     {
       return new CharLoop(this, min, max);
     }
+    
+    @Override
+    RegexpNode createLoopUngreedy(Regcomp parser, int min, int max)
+    {
+      return new CharUngreedyLoop(this, min, max);
+    }
 
     @Override
     int minLength()
