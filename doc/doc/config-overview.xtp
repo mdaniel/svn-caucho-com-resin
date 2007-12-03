@@ -104,9 +104,9 @@ help debug resin.conf files.</p>
 
 <p>The namespace declaration of <var>http://caucho.com/ns/resin/core</var>
 enables Resin control tags like
-<a href="env-tags.xtp#resin:import">&lt;resin:import&gt;</a>,
-<a href="env-tags.xtp#resin:set">&lt;resin:set&gt;</a>, and 
-<a href="env-tags.xtp#resin:if">&lt;resin:if&gt;</a>.  These control
+<a href="config-control.xtp#resin:import">&lt;resin:import&gt;</a>,
+<a href="config-control.xtp#resin:set">&lt;resin:set&gt;</a>, and 
+<a href="config-control.xtp#resin:if">&lt;resin:if&gt;</a>.  These control
 tags can help organize configuration files, but you should take care not
 to overuse them, which might overcomplicate the configuration file.
 </p>
@@ -165,7 +165,7 @@ the configuration for all servers in a cluster.</p>
 
 <s2 title="&lt;resin:import&gt;">
 
-<p>The <a href="env-tags.xtp#resin:import">&lt;resin:import&gt;</a> can
+<p>The <a href="config-control.xtp#resin:import">&lt;resin:import&gt;</a> can
 import other configuration files to help organize complicated
 configurations.  The <var>app-default.xml</var> file in the example
 defines the usual servlets that applications expect, like the

@@ -341,7 +341,7 @@ different object. Called after the @PostConstruct methods. </p>
 
 <s1 title="See also">
 <ul>
-<li><a href="env-tags.xtp#resin:import">resin:import</a>
+<li><a href="config-control.xtp#resin:import">resin:import</a>
 </li><li><a href="examples|ioc-injection/index.xtp">Dependency Injection Tutorial</a>
 </li></ul>
 </s1> <!-- import -->
