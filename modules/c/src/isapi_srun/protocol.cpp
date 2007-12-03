@@ -656,8 +656,8 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 				info.cchHeader = header_ptr - headers;
 				info.pszHeader = headers;
 				info.pszStatus = status;
-				/* #1802 */
-				info.fKeepConn = 1;
+				/* #1802, #2150 */
+				info.fKeepConn = http11;
 				/*
 			r->dwHttpStatusCode = atoi(status_ptr);
 			r->ServerSupportFunction(r->ConnID, HSE_REQ_SEND_RESPONSE_HEADER, status, &size, (unsigned long *) headers);

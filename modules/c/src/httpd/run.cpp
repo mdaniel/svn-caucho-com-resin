@@ -100,11 +100,14 @@ stop_server()
 {
 	g_is_started = 0;
 	int handle = g_keepalive_handle;
+
 	g_keepalive_handle = -1;
 	if (handle >= 0)
 		closesocket(handle);
 
+	fprintf(stderr, "Stopping Resin\n");
 	if (g_procInfo) {
+		WaitForSingleObject(g_procInfo_buf.hProcess, 5000);
 		TerminateProcess(g_procInfo_buf.hProcess, 1);
 	}
 
