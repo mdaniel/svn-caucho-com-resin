@@ -29,7 +29,7 @@
       <item link="config-cmdline.xtp" title="Command-Line Options" />
       <item link="tags.xtp"  title="Tags">
         <item link="env-tags.xtp" title="Environment tags"
-	      description="database, classloader, resource, bean, IoC, and control-tags"/>
+	      description="database, classloader, resource, bean, and IoC"/>
         <item link="resin-tags.xtp" title="&lt;resin>"
 	      description="top-level configuration container"/>
         <item link="cluster-tags.xtp" title="&lt;cluster>"
@@ -52,10 +52,10 @@
 	      description="web service configuration"/>
         <item link="config-log.xtp" title="Log tags"
 	      description="access log, java.util.logging, and stdout" />
-        <item link="el-var.xtp" title="EL variables"
+        <item link="el-var.xtp" title="EL variables and functions"
 	      description="configuration variables"/>
-        <item link="config-control.xtp" title="EL control"
-	      description="if, choose, and set"/>
+        <item link="config-control.xtp" title="Control tags"
+	      description="if, choose, set, etc"/>
 	      <item link="index-tags.xtp" title="Tag Index"
 	        description="alphabetical list of tags" />
       </item>
