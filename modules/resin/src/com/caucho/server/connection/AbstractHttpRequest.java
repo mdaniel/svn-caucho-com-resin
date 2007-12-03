@@ -115,6 +115,7 @@ public abstract class AbstractHttpRequest
   private static final char []CLOSE = "close".toCharArray();
 
   private static final boolean []TOKEN;
+  private static final boolean []VALUE;
 
   private static final ServletRequestAttributeListener []NULL_LISTENERS
     = new ServletRequestAttributeListener[0];
@@ -2538,6 +2539,7 @@ public abstract class AbstractHttpRequest
     _headerCodes = new CaseInsensitiveIntMap();
 
     TOKEN = new boolean[256];
+    VALUE = new boolean[256];
 
     for (int i = 0; i < 256; i++) {
       TOKEN[i] = true;
@@ -2551,23 +2553,27 @@ public abstract class AbstractHttpRequest
       TOKEN[i] = false;
     }
 
-    TOKEN['('] = false;
-    TOKEN[')'] = false;
-    TOKEN['<'] = false;
-    TOKEN['>'] = false;
-    TOKEN['@'] = false;
-    // TOKEN[','] = false;
+    //TOKEN['('] = false;
+    //TOKEN[')'] = false;
+    //TOKEN['<'] = false;
+    //TOKEN['>'] = false;
+    //TOKEN['@'] = false;
+    TOKEN[','] = false;
     TOKEN[';'] = false;
-    TOKEN[':'] = false;
+    //TOKEN[':'] = false;
     TOKEN['\\'] = false;
     TOKEN['"'] = false;
-    TOKEN['/'] = false;
+    //TOKEN['/'] = false;
     //TOKEN['['] = false;
     //TOKEN[']'] = false;
-    TOKEN['?'] = false;
+    //TOKEN['?'] = false;
     TOKEN['='] = false;
-    TOKEN['{'] = false;
-    TOKEN['}'] = false;
+    //TOKEN['{'] = false;
+    //TOKEN['}'] = false;
     TOKEN[' '] = false;
+
+    System.arraycopy(TOKEN, 0, VALUE, 0, TOKEN.length);
+
+    VALUE['='] = true;
   }
 }
