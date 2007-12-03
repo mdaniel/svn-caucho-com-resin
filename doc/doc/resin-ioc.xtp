@@ -783,5 +783,238 @@ public class TimerService {
 
 </s1>
 
+<s1 title="Scripting: PHP, JSF and JSP">
+
+<p>If your application is using a scripting language like PHP for the
+presentation layer, the WebBeans registry provides a simple interface to
+use your components and services.  Although WebBeans injection is typed,
+each WebBean is also registered under its name for scripting applications.
+The name must be globally unique, of course, unlike the typed injection
+binding.</p>
+
+<p>The default scripting name is the name of the component's class, with
+the first character lowercased.  You can change the name by adding
+a <code>@Named</code> or setting a <code>name</code> attribute in the
+<code>&lt;component></code> or <code>&lt;bean></code>.</p>
+
+<example title="Movie.java">
+@Component
+@RequestScoped
+public class Movie {
+  ...
+}
+</example>
+
+<s2 title="Quercus/PHP">
+
+<p>In Quercus/PHP, the <code>java_bean(name)</code> method returns the
+component with the given name.  For singletons, Resin will return the unique
+bean.  For other beans, Resin will create the bean if necessary and
+store it in the configured scope.</p>
+
+<example title="accessing the movie from PHP">
+&lt;?php
+
+$movie = java_bean("movie");
+
+echo "title: " . $movie->title . "\n";
+
+?>
+</example>
+
+</s2>
+
+<s2 title="JSP/JSF EL">
+
+<p>Resin automatically provides the WebBeans variables to EL expressions
+for both JSP and JSF.</p>
+
+<example title="accessing the movie from JSP">
+&lt;c:out value="${movie.title}"/>
+</example>
+
+<p>The JSF also uses the expression language, but uses the deferred syntax,
+since JSF needs to build a component tree first.</p>
+
+<example title="accessing the movie from JSF">
+&lt;f:view>
+  &lt;h:outputText value="#{movie.title}"/>
+&lt;/f:view>
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="@BindingType: custom injection binding">
+
+<p>Although many applications will just use <code>@In</code> and
+<code>@Named</code> injection binding, applications can create their
+own binding annotations.  Some bindings might be more
+logical, for example an <code>@XA</code> annotation might mark the
+transactional <code>DataSource</code>, while <code>@ReadOnly</code> might
+mark a read-only <code>DataSource</code>.  Drivers might
+use <code>Scheme("mysql")</code> to allow for URL-based configuration,
+like the "jdbc:mysql://localhost:3306/test" of JDBC.</p>
+
+<example title="ReadOnly and XA databases">
+import com.foo.webbeans.ReadOnly;
+import com.foo.webbeans.XA;
+
+public class MyServlet extends GenericServlet {
+  @ReadOnly DataSource _readDatabase;
+  @XA DataSource _xaDatabase;
+
+  ...
+}
+</example>
+
+<p>You can create a custom binding annotation using
+the <code>@BindingType</code> annotation.  When Resin introspects the
+injection point and the components, it will look for any annotation
+with the <code>@BindingType</code> meta-annotation.</p>
+
+<p>The annotation can also have annotation parameters.  If they exist,
+Resin will make sure only matching components will be injected.</p>
+
+<p>The custom binding annotation can be used anywhere predefined
+binding annotations can, including fields, methods, constructor,
+producers, or event observers.</p>
+
+<example title="ReadOnly.java">
+package com.foo.webbeans;
+
+@BindingType
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RUNTIME)
+public @interface ReadOnly {
+}
+</example>
+
+</s1>
+
+<s1 title="@Produces methods">
+
+<p>Some components are more easily produced using a factory method rather
+than getting instantiated directly.  In those cases, your application
+can mark a factory component's method with the <code>@Produces</code>
+annotation.  Resin will register the results of the method with WebBeans.</p>
+
+<example title="@Produces">
+import javax.webbeans.Component;
+import javax.webbeans.Produces;
+import com.caucho.webbeans.Singleton;
+
+@Component
+@Singleton
+public class MyFactory {
+  @Produces public List&lt;Movie> currentMovies()
+  {
+    ...
+  }
+</example>
+
+<p>The produces method can be marked with <code>@ScopeType</code>,
+<code>@ComponentType</code> or <code>@BindingType</code> annotations just
+like a class-based component can.</p>
+
+</s1>
+
+<s1 title="AOP/Method Interception">
+
+<p>Some functions like security, logging and transaction handing need
+to be used for each method invidually, but require a common
+implementation pattern.  The WebBeans AOP use use a single method as
+a interceptor for each method invocation.</p>
+
+<p>Your method will use an <code>@InterceptorType</code> annotation
+letting Resin know where it should apply the interceptor:</p>
+
+<example title="secure method">
+import com.foo.webbeans.Secure;
+
+@Component
+public class MyBean {
+  @Secure
+  public void doSomethingSafely() { ... }
+}
+</example>
+
+<p>The implementation class will use the
+<code>javax.interceptor.*</code> API to implement the
+interceptor.</p>
+
+<example title="security implementation">
+import javax.interceptor.*;
+import javax.webbeans.Interceptor;
+
+@Secure @Interceptor
+public class MySecureInterceptor {
+  @AroundInvoke
+  public Object checkSecurity(InvocationContext inv) throws Exception
+  {
+    if (! myContextIsSecure())
+      throw new MySecurityException("permissiong denied");
+
+    return inv.proceed();
+  }
+}
+</example>
+
+<p>The interceptors must be enabled in the
+<code>META-INF/web-beans.xml</code> file.  This protects your code
+from any surprising interceptors.</p>
+
+<example title="web-beans.xml">
+&lt;web-beans xmlns="http://caucho.com/ns/resin">
+  &lt;interceptors>
+    &lt;interceptor>com.foo.MySecureInterceptor&lt;/interceptor>
+  &lt;/interceptors>
+&lt;/web-beans>
+</example>
+
+</s1>
+
+<s1 title="Event Handling">
+
+<p>Your components can also handle events thrown through the WebBeans API.
+Any method with an <code>@Observes</code> parameter will receive events
+with the proper type.  The event can be any Java class.</p>
+
+<example title="Event Handler">
+import javax.webbeans.Component;
+import javax.webbeans.Observes;
+
+@Component
+public class MyHandler {
+  public void myHandlerMethod(@Observes Movie movie)
+  {
+    ...
+  }
+}
+</example>
+
+<p>Your application can throw events through the WebBeans
+<code>Container</code> API, which is available through injection:</p>
+
+<example title="Throwing events">
+import javax.webbeans.Container;
+
+public void MyServlet extends GenericServlet {
+  @In Container _webbeans;
+
+  public void service(ServletRequest req, ServletResponse res)
+  {
+    _webbeans.raiseEvent(new Movie("A Bridge Too Far"));
+  }
+}
+</example>
+
+<p>For the above example, Resin will look for all components which
+have an <code>@Observes</code> method receiving a <code>Movie</code>
+and deliver the event to that component.</p>
+
+</s1>
+
 </body>
 </document>
