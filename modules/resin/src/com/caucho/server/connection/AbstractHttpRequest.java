@@ -1193,7 +1193,7 @@ public abstract class AbstractHttpRequest
       else {
         for (; j < end; j++) {
           ch = buf[j];
-          if (ch < 128 && TOKEN[ch])
+          if (ch < 128 && VALUE[ch])
 	    cbValue.append(ch);
 	  else
 	    break;
