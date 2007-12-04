@@ -26,7 +26,9 @@
     <item link="amber.xtp" title="Amber">
       <item link="amber-basic-field/index.xtp" title="Field"/>
       <item link="amber-basic/index.xtp" title="Property"/>
+      <!--
       <item link="amber-create/index.xtp" title="Create"/>
+      -->
       <item link="amber-query/index.xtp" title="Query"/>
       <item link="amber-many2one/index.xtp" title="Many-to-One"/>
       <item link="amber-one2many/index.xtp" title="One-to-Many"/>
@@ -45,10 +47,12 @@
     <!--
        - SOA/WebServices
       -->
-    <item link="soa.xtp" title="WebServices">
+    <item link="soa.xtp" title="Remoting">
       <item link="soa-hello-world/index.xtp" title="Simple Service"/>
+      <!--
       <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
-      <item link="esb-servlet-client/index.xtp" title="An ESB client"/>
+      -->
+      <item link="esb-servlet-client/index.xtp" title="Client Injection"/>
       <item link="rest-flickr/index.xtp" title="Flickr REST"/>
       <item link="soa-jaxws/index.xtp" title="JAX-WS example"/>
     </item>
@@ -57,8 +61,8 @@
        - IoC
       -->
     <item link="ioc.xtp" title="IoC">
-      <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
       <!--
+      <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
       <item link="ioc-services/index.xtp" title="Services"/>
       -->
       <item link="ioc-basic/index.xtp" title="Basic Resource"/>
