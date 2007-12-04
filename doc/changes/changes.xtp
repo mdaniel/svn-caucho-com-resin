@@ -12,6 +12,7 @@
 
 <s2 title="3.1.4 snapshot">
 <ul>
+<li>isapi plugin needs to set fKeepConn=0 for non-200 responses (#2150, rep by Ove Halset)</li>
 <li>load-balance issues with short cookies (#2221, rep by B Cleave)</li>
 <li>watchdog issues with multiple servers and configuration files (#2212, rep by Bill Au)</li>
 <li>watchdog-password (#2201, rep by Chris Chen)</li>

@@ -7,11 +7,11 @@ CPU=i386
 LDFLAGS=
 LDFLAGS_SHLIB=-shared -L/usr/lib
 PROXY_LIBS=-lpthread -lc
-APACHE_INC=-I
-resin_conf=
-resin_libexec=
+APACHE_INC=-I/usr/local/apache22/include  -I/usr/local/apache22/include 
+resin_conf=/usr/local/apache22/conf/httpd.conf
+resin_libexec=/usr/local/apache22/modules
 LIBEXEC=libexec
-resin_home=/home/ferg/ws/test-resin
+resin_home=/home/ferg/ws/resin
 JNI_INCLUDE=-I/usr/java/include -I/usr/java/include/linux
 INCLUDES =  -I/usr/include $(JNI_INCLUDE) -I../common
 CFLAGS = -g -O2 -DPOLL -DEPOLL -D_POSIX_PTHREAD_SEMANTICS -DHAS_SOCK_TIMEOUT -DHAS_JVMTI -DHAS_JVMDI  -D_FILE_OFFSET_BITS=64 -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS)

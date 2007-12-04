@@ -1,9 +1,9 @@
 <document>
   <header>
     <product>resin</product>
-    <title>A Simple Service for the Resin SOA</title>
+    <title>A Simple Service for the Resin Remoting</title>
     <description>
-      <p>Writing a service for the Resin SOA as a plain-old Java object (POJO)
+      <p>Writing a service for the Resin remoting as a plain-old Java object (POJO)
       eliminates protocol dependencies and simplifies service testing.
       </p>
     </description>
@@ -15,7 +15,7 @@
     <summary/>
 
   <s1>
-<p>With the Resin Service-Oriented Architecture, services can be written as 
+<p>With the Resin remoting, services can be written as 
 plain-old Java objects (POJOs) and made available to many different protocols
 using simple configuration changes.
 </p>
@@ -36,11 +36,11 @@ using simple configuration changes.
 </td></tr></deftable>
 </s1>
 
-<s1 title="What is a Service-Oriented Architecture?">
+<s1 title="Introduction?">
 <p></p>
 <figure src="soa.png"/>
 <p>
-The Resin Service-Oriented Architecture is an infrastructure that
+The Resin remoting is an infrastructure that
 allows a service to be exposed via many different service protocols.
 For example in this tutorial, there is a plain-old Java object (POJO) that
 implements a service and this service is made available using REST, SOAP,
