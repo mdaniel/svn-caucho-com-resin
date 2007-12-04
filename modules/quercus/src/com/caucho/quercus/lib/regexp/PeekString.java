@@ -70,6 +70,11 @@ class PeekString extends PeekStream {
   {
     return ((StringValue) _string).createStringBuilder();
   }
+
+  public String toString()
+  {
+    return "PeekString[" + _string + "]";
+  }
 }
 
 

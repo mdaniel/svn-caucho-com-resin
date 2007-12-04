@@ -722,7 +722,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
       if (isKeepalive) {
 	port.keepaliveEnd(this);
-	Thread.dumpStack();
       }
       
       if (log.isLoggable(Level.FINE) && _isInUse) {
