@@ -38,6 +38,8 @@ import com.caucho.quercus.env.StringValue;
  */
 public class SimpleResultSet extends SimpleElement
 {
+  private boolean _attributesOnly;
+
   public SimpleResultSet(String name)
   {
     super(null);
@@ -80,4 +82,21 @@ public class SimpleResultSet extends SimpleElement
       getAttributes().get(0).toXMLImpl(sb);
     }
   }
+
+  // Invoked to indicate that this SimpleResultSet contains
+  // only attributes for a single XML element.
+
+  public void setAttributesOnly()
+  {
+    _attributesOnly = true;
+  }
+
+  // Returns true for a SimpleResultSet that contains only attributes
+  // for a single XML element.
+
+  public boolean isAttributesOnlySet()
+  {
+    return _attributesOnly;
+  }
+
 }

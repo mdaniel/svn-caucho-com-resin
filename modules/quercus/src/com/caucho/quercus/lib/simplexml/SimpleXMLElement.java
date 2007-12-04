@@ -309,7 +309,8 @@ public class SimpleXMLElement
       namespace = namespaceV.toString();
     
     SimpleResultSet result = new SimpleResultSet(getNode().getName());
-    
+    result.setAttributesOnly();
+
     for (SimpleAttribute attr : getNode().getAttributes()) {
       if (attr.isSameNamespace(namespace))
         result.addAttribute(attr);
@@ -560,23 +561,27 @@ public class SimpleXMLElement
   }
   
   /**
-   * Required for 'foreach' loops with only values specified in the loop.
-   * i.e. <code>foreach($a as $b)</code>
+   * Required for 'foreach'. When only values are specified in
+   * the loop <code>foreach($a as $b)</code>, this method
+   * should return an iterator that contains Java objects
+   * that will be wrapped in a Value.
+   *
+   * When a 'foreach' loop with name/value pairs
+   * i.e. <code>foreach($a as $b=>$c)</code>
+   * invokes this method, it expects an iterator that
+   * contains objects that implement Map.Entry.
    */
   public Iterator iterator()
   {
-    return new SimpleXMLElementIterator(getNode().iterator());
+    // php/1x05
+
+    if ((getNode() instanceof SimpleResultSet) &&
+         ((SimpleResultSet) getNode()).isAttributesOnlySet())
+      return getNode().getAttributeMap().entrySet().iterator();
+    else
+      return new SimpleXMLElementIterator(getNode().iterator());
   }
-  
-  /**
-   * Required for 'foreach' loops with name/value pairs.
-   * i.e. <code>foreach($a as $b=>$c)</code>
-   */
-  public Set<String> keySet()
-  {
-    return getNode().getAttributeMap().keySet();
-  }
-  
+    
   /**
    * var_dump() implementation
    */

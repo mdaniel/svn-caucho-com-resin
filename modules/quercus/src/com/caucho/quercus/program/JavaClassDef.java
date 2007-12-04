@@ -110,7 +110,6 @@ public class JavaClassDef extends ClassDef {
   private CountDelegate _countDelegate;
 
   private Method _iteratorMethod;
-  private Method _keySetMethod;
 
   private Marshal _marshal;
 
@@ -798,15 +797,6 @@ public class JavaClassDef extends ClassDef {
       if (method != null
 	  && Iterator.class.isAssignableFrom(method.getReturnType()))
         _iteratorMethod = method;
-    } catch (Exception e) {
-    }
-
-    try {
-      Method method = _type.getMethod("keySet", new Class[0]);
-
-      if (method != null &&
-          Set.class.isAssignableFrom(method.getReturnType()))
-        _keySetMethod = method;
     } catch (Exception e) {
     }
   }
