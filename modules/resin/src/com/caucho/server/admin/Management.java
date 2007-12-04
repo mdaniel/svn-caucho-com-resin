@@ -81,9 +81,6 @@ public class Management
   
   protected Path getPath()
   {
-    if (_path == null)
-      return Vfs.lookup("admin");
-
     return _path;
   }
 
@@ -171,7 +168,8 @@ public class Management
   public void start()
   {
     try {
-      getPath().mkdirs();
+      if (getPath() != null)
+        getPath().mkdirs();
     } catch (Exception e) {
       throw new ConfigException(e);
     }
@@ -189,7 +187,7 @@ public class Management
     if (_hostConfig == null) {
       HostConfig hostConfig = new HostConfig();
       hostConfig.setId(HOST_NAME);
-      hostConfig.setRootDirectory(new RawString(getPath().getNativePath()));
+      hostConfig.setRootDirectory(new RawString("bogus-root"));
 
       hostConfig.init();
 

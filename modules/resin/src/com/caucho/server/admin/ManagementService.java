@@ -86,11 +86,9 @@ abstract public class ManagementService
     
     HostConfig hostConfig = _management.getHostConfig();
 
-    Path path = _management.getPath().lookup(_serviceName);
-
     WebAppConfig webAppConfig = new WebAppConfig();
     webAppConfig.setId(_serviceName);
-    webAppConfig.setRootDirectory(new RawString(path.getNativePath()));
+    webAppConfig.setRootDirectory(new RawString("admin-dummy-root"));
 
     hostConfig.addBuilderProgram(new ObjectAttributeProgram("web-app",
                                                             webAppConfig));
