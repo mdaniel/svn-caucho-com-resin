@@ -1,9 +1,8 @@
 <web-app xmlns="http://caucho.com/ns/resin">
   <!-- make an example.AppConfig object, available with the
-     - JNDI name "java:comp/env/config/Application"
+     - @In AppConfig
     -->
-  <resource jndi-name='config/Application'>
-    <type>example.AppConfig</type>
+  <bean class="example.AppConfig">
 
     <!-- config-files-location
        -
@@ -16,18 +15,12 @@
        - to write files then.
       -->
     <init>
-      <config-files-location>${app.docDir}/WEB-INF/config</config-files-location>
-      <!-- <config-files-location>http://hogwarts.com/config</config-files-location> -->
+      <config-files-location>${webApp.root}/WEB-INF/config</config-files-location>
     </init>
-  </resource>
-
-  <servlet>
-    <servlet-name>test</servlet-name>
-    <servlet-class>example.TestServlet</servlet-class>
-  </servlet>
+  </bean>
 
   <servlet-mapping>
     <url-pattern>/test</url-pattern>
-    <servlet-name>test</servlet-name>
+    <servlet-class>example.TestServlet</servlet-class>
   </servlet-mapping>
 </web-app>

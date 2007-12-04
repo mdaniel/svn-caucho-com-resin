@@ -5,27 +5,10 @@ import javax.servlet.http.*;
 
 import java.io.*;
 import java.util.*;
-import javax.naming.*;
+import javax.webbeans.*;
 
 public class TestServlet extends HttpServlet {
-  AppConfig _appConfig;
-  final static String JNDI_NAME = "java:comp/env/config/Application";
-
-  /**
-   * _appConfig is set from a JNDI lookup only once 
-   */
-  public void init()
-    throws ServletException
-  {
-    try {
-      _appConfig = (AppConfig) new InitialContext().lookup(JNDI_NAME);
-
-      if (_appConfig == null)
-        throw new ServletException("`" + JNDI_NAME + "' is an unknown JNDI resource");
-    } catch (NamingException e) {
-      throw new ServletException(e);
-    }
-  }
+  @In AppConfig _appConfig;
 
   public void doGet(HttpServletRequest req,
                     HttpServletResponse res)
@@ -38,9 +21,7 @@ public class TestServlet extends HttpServlet {
     String outputFile = req.getParameter("outputFile");
 
     // stop browser from caching the page
-    res.setHeader("Cache-Control","no-cache,post-check=0,pre-check=0,no-store");
-    res.setHeader("Pragma","no-cache");
-    res.setHeader("Expires","Thu,01Dec199416:00:00GMT");
+    res.setHeader("Cache-Control","no-cache");
 
     out.println("<pre>");
     if (inputFile != null && inputFile.length() > 0) {

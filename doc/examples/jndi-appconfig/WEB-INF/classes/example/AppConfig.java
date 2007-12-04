@@ -1,10 +1,14 @@
 package example;
 
+import javax.annotation.*;
 import java.net.*;
 import java.io.*;
 
 import com.caucho.vfs.*;
 
+/**
+ * AppConfig is a singleton &lt;bean> service containing configuration.
+ */
 public class AppConfig {
   ConfigFilesLocation _cfl = null;
 
@@ -21,6 +25,7 @@ public class AppConfig {
     _cfl.setLocation(location);
   }
 
+  @PostConstruct
   public void init()
     throws Exception
   {
@@ -65,7 +70,7 @@ public class AppConfig {
 
     public void setLocation(String location) 
     {
-      _path = Vfs.lookup().createRoot().lookup(location);
+      _path = Vfs.lookup().lookup(location);
     }
 
     public ReadStream openRead(String file)

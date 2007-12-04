@@ -41,10 +41,6 @@ in the WebBeans directory.  The servlet will retrieve the
   <td><viewfile-link file="WEB-INF/classes/example/BasicServlet.java"/></td>
   <td>The JDBC query servlet.</td>
 </tr>
-<tr>
-  <td><viewfile-link file="WEB-INF/classes/example/InitServlet.java"/></td>
-  <td>The JDBC initialization servlet.</td>
-</tr>
 </deftable>
 </s1>
 

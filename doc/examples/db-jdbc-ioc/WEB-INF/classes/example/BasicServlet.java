@@ -31,6 +31,57 @@ public class BasicServlet extends HttpServlet {
   @In private DataSource _ds;
 
   /**
+   * Initializes the database if necessary and fill it with the example
+   * values.
+   */
+  public void init()
+    throws ServletException
+  {
+    try {
+      Connection conn = _ds.getConnection();
+
+      try {
+	Statement stmt = conn.createStatement();
+
+	try {
+	  ResultSet rs = stmt.executeQuery("SELECT id FROM jdbc_basic_brooms");
+
+	  if (rs.next()) {
+	    rs.close();
+	    stmt.close();
+	    return;  // already initialized
+	  }
+	} catch (SQLException e) {
+	}
+
+	stmt.executeUpdate("CREATE TABLE jdbc_basic_brooms (" +
+	                   "  id INTEGER PRIMARY KEY auto_increment," +
+	                   "  name VARCHAR(128)," +
+	                   "  cost INTEGER" +
+	                   ")");
+	stmt.executeUpdate("INSERT INTO jdbc_basic_brooms (name, cost) " +
+			   "VALUES ('firebolt', 4000)");
+	stmt.executeUpdate("INSERT INTO jdbc_basic_brooms (name, cost) " +
+			   "VALUES ('nimbus 2001', 500)");
+	stmt.executeUpdate("INSERT INTO jdbc_basic_brooms (name, cost) " +
+			   "VALUES ('nimbus 2000', 300)");
+	stmt.executeUpdate("INSERT INTO jdbc_basic_brooms (name, cost) " +
+			   "VALUES ('cleansweep 7', 150)");
+	stmt.executeUpdate("INSERT INTO jdbc_basic_brooms (name, cost) " +
+			   "VALUES ('cleansweep 5', 100)");
+	stmt.executeUpdate("INSERT INTO jdbc_basic_brooms (name, cost) " +
+			   "VALUES ('shooting star', 50)");
+
+	stmt.close();
+      } finally {
+	conn.close();
+      }
+    } catch (SQLException e) {
+      throw new ServletException(e);
+    }
+  }
+
+  /**
    * Respond to a request by doing a query and returning the results.
    */
   public void service(HttpServletRequest req, HttpServletResponse res)
