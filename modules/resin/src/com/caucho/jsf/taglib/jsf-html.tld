@@ -3133,6 +3133,78 @@
     </attribute>
   </tag>
 
+  <!-- h:outputFormat -->
+  <tag>
+    <name>outputFormat</name>
+    <tag-class>com.caucho.jsf.taglib.HtmlOutputFormatTag</tag-class>
+    <body-content>JSP</body-content>
+
+    <!-- common attributes -->
+
+    <attribute>
+      <name>id</name>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+
+    <attribute>
+      <name>binding</name>
+      <deferred-value>
+        <type>javax.faces.component.UIComponent</type>
+      </deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>rendered</name>
+      <deferred-value><type>boolean</type></deferred-value>
+    </attribute>
+
+    <!-- UIOutput values -->
+
+    <attribute>
+      <name>converter</name>
+      <deferred-value>
+        <type>javax.faces.convert.Converter</type>
+      </deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>value</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>escape</name>
+      <deferred-value><type>boolean</type></deferred-value>
+    </attribute>
+
+    <!-- passthrough values -->
+
+    <attribute>
+      <name>dir</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>lang</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>style</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>styleClass</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>title</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+  </tag>
+
   <!-- h:outputLink -->
   <tag>
     <name>outputLink</name>

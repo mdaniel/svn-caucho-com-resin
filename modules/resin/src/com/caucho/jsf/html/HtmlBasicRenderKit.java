@@ -95,7 +95,10 @@ public class HtmlBasicRenderKit extends RenderKit
     
     addRenderer("javax.faces.Output", "javax.faces.Text",
 		HtmlOutputTextRenderer.RENDERER);
-    
+
+    addRenderer("javax.faces.Output", "javax.faces.Format",
+		HtmlOutputFormatRenderer.RENDERER);
+
     addRenderer("javax.faces.Panel", "javax.faces.Grid",
 		HtmlPanelGridRenderer.RENDERER);
     

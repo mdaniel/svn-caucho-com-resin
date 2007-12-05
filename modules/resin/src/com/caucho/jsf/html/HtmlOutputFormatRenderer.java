@@ -30,11 +30,15 @@ package com.caucho.jsf.html;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
+
+import java.text.MessageFormat;
 
 import javax.faces.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
+import javax.faces.convert.*;
 import javax.faces.render.*;
 
 /**
@@ -42,6 +46,9 @@ import javax.faces.render.*;
  */
 class HtmlOutputFormatRenderer extends Renderer
 {
+  private static final Logger log
+    = Logger.getLogger(HtmlOutputFormatRenderer.class.getName());
+
   public static final Renderer RENDERER = new HtmlOutputFormatRenderer();
 
   /**
@@ -128,7 +135,29 @@ class HtmlOutputFormatRenderer extends Renderer
       if (value == null)
 	return;
 
-      out.writeText(value, "value");
+      List<String> paramList = new ArrayList<String>();
+
+      List children = component.getChildren();
+
+      for (int i = 0; i < children.size(); i++) {
+        Object child = children.get(i);
+        if (child instanceof UIParameter) {
+          UIParameter param = (UIParameter) child;
+          Object paramValue = param.getValue();
+          String string = toString(context, param, paramValue);
+          paramList.add(string);
+        }
+      }
+
+      String []params = paramList.toArray(new String[paramList.size()]);
+
+      String pattern = toString(context, component, value);
+
+      String string
+        = new MessageFormat(pattern, context.getViewRoot().getLocale())
+        .format(params);
+
+      out.writeText(string, "value");
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -171,6 +200,26 @@ class HtmlOutputFormatRenderer extends Renderer
 	out.endElement("span");
       }
     }
+  }
+
+  protected String toString(FacesContext context,
+                            UIComponent component,
+                            Object value)
+  {
+    if (component instanceof ValueHolder) {
+      Converter converter = ((ValueHolder) component).getConverter();
+
+      if (converter != null) {
+        String result = converter.getAsString(context, component, value);
+
+        return result;
+      }
+    }
+
+    if (value != null)
+      return value.toString();
+    else
+      return "";
   }
 
   public String toString()
