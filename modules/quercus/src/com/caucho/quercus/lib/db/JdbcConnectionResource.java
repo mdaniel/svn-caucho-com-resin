@@ -930,7 +930,9 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       TableKey key = (TableKey) o;
 
-      if (! _url.equals(key._url))
+      if ((_url == null) != (key._url == null))
+        return false;
+      else if (_url != null && ! _url.equals(key._url))
         return false;
 
       if ((_catalog == null) != (key._catalog == null))
