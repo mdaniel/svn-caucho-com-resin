@@ -54,7 +54,9 @@ public class BeanConfig extends WbComponentConfig {
   private static final L10N L = new L10N(BeanConfig.class);
 
   private String _jndiName;
+  
   private String _mbeanName;
+  private Class _mbeanClass;
   
   public BeanConfig()
   {
@@ -71,6 +73,11 @@ public class BeanConfig extends WbComponentConfig {
     _mbeanName = mbeanName;
   }
 
+  public void setMBeanClass(Class cl)
+  {
+    _mbeanClass = cl;
+  }
+
   public void init()
   {
     super.init();
@@ -81,22 +88,22 @@ public class BeanConfig extends WbComponentConfig {
       else if (_jndiName != null) {
 	Jndi.bindDeepShort(_jndiName, _comp);
       }
+
+      /*
+      if (_mbeanName != null) {
+	Object mbean = _object;
+
+	if (_mbeanInterface != null)
+	  mbean = new IntrospectionMBean(mbean, _mbeanInterface);
+      
+	Jmx.register(mbean, mbeanName);
+	_mbeanInfo = mbeanServer.getMBeanInfo(mbeanName);
+      }
+      */
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new ConfigException(e);
     }
-
-    /*
-    if (_mbeanName != null) {
-      Object mbean = _object;
-
-      if (_mbeanInterface != null)
-	mbean = new IntrospectionMBean(mbean, _mbeanInterface);
-      
-      Jmx.register(mbean, mbeanName);
-      _mbeanInfo = mbeanServer.getMBeanInfo(mbeanName);
-    }
-    */
   }
 }

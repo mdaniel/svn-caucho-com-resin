@@ -35,9 +35,10 @@ import com.caucho.util.L10N;
 import java.net.MalformedURLException;
 
 public class HessianEncodingProxyFactory implements EncodingProxyFactory {
-  private static HessianProxyFactory _proxyFactory;
   private static final L10N L = new L10N(HessianEncodingProxyFactory.class);
 
+  private static HessianProxyFactory _proxyFactory;
+  
   public Object getProxy(Class serviceInterface, String url)
     throws MalformedURLException
   {
@@ -47,7 +48,7 @@ public class HessianEncodingProxyFactory implements EncodingProxyFactory {
     return proxyFactory.create(serviceInterface, url);
   }
 
-  private static HessianProxyFactory getProxyFactory()
+  private HessianProxyFactory getProxyFactory()
   {
     if (_proxyFactory == null)
       _proxyFactory = new HessianProxyFactory();

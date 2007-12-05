@@ -121,7 +121,7 @@ public class WebServiceFilterChain implements FilterChain {
     } catch (RuntimeException e) {
       request.setAttribute(SERVLET_NAME, _config.getServletName());
       throw e;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       request.setAttribute(SERVLET_NAME, _config.getServletName());
       throw new ServletException(e);
     }

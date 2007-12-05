@@ -33,6 +33,7 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -96,7 +97,10 @@ public class TransactionLog
       throw new ConfigException(L.l("<transaction-log> requires Resin Professional.  See http://www.caucho.com for information and licensing."));
 
     try {
-      _xaLog.setPath(_manager.getPath().lookup(_path));
+      if (_manager.getPath() != null)
+	_xaLog.setPath(_manager.getPath().lookup(_path));
+      else
+	_xaLog.setPath(Vfs.lookup(_path));
 
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
 

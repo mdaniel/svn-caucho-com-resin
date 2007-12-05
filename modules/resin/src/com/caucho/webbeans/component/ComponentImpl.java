@@ -431,10 +431,9 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   {
     if (_init != null)
       _init.configure(value, scope);
-    else {
-      for (Inject inject : _injectProgram) {
-	inject.inject(value, scope);
-      }
+
+    for (Inject inject : _injectProgram) {
+      inject.inject(value, scope);
     }
 
     if (_destroyProgram.length > 0) {
@@ -549,6 +548,11 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     if (_scope != null) {
       sb.append(", @");
       sb.append(_scope.getClass().getSimpleName());
+    }
+    
+    if (_name != null) {
+      sb.append(", name=");
+      sb.append(_name);
     }
 
     sb.append("]");

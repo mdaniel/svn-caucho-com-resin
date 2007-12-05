@@ -47,11 +47,16 @@ import java.util.logging.Logger;
  */
 public class MessageSenderResource implements MessageSender {
   private static final L10N L = new L10N(MessageSenderResource.class);
-  private static final Logger log = Log.open(MessageSenderResource.class);
+  private static final Logger log
+    = Logger.getLogger(MessageSenderResource.class.getName());
 
   private ConnectionFactory _connFactory;
   private Connection _conn;
   private Destination _destination;
+
+  public MessageSenderResource()
+  {
+  }
 
   /**
    * Sets the JMS connection factory.
@@ -92,6 +97,9 @@ public class MessageSenderResource implements MessageSender {
       throw new ConfigException(L.l("'connection-factory' required for message sender"));
 
     _conn = _connFactory.createConnection();
+
+    if (_conn == null)
+      throw new NullPointerException();
   }
 
   /**
