@@ -1,5 +1,10 @@
-<%@ page import='javax.naming.*' %>
-
 <h1>Test Resource</h1>
 
-<%= new InitialContext().lookup("java:comp/env/test/basic") %>
+JSP: ${testResource}
+
+<ul>
+<li><a href="test">Test Servlet</a>
+<li><a href="test.php">Test PHP</a>
+</ul>
+
+

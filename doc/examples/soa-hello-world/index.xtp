@@ -1,7 +1,7 @@
 <document>
   <header>
     <product>resin</product>
-    <title>A Simple Service for the Resin Remoting</title>
+    <title>A Simple Service for Resin Remoting</title>
     <description>
       <p>Writing a service for the Resin remoting as a plain-old Java object (POJO)
       eliminates protocol dependencies and simplifies service testing.
@@ -12,7 +12,7 @@
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
   <s1>
 <p>With the Resin remoting, services can be written as 
@@ -23,20 +23,34 @@ using simple configuration changes.
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/classes/example/HelloService.java"/>
-    </td><td>Interface for the hello service.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloServiceImpl.java"/>
-    </td><td>The main service implementation.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/HelloResult.java"/>
-    </td><td>The result object
-</td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>Configures the environment
-</td></tr><tr><td><viewfile-link file="demo.jsp"/>
-    </td><td>Client JSP
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/HelloService.java"/></td>
+  <td>Interface for the hello service.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/HelloServiceImpl.java"/></td>
+  <td>The main service implementation.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/HelloResult.java"/></td>
+  <td>The result object</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>Configures the environment</td>
+</tr>
+<tr>
+  <td><viewfile-link file="demo.jsp"/></td>
+  <td>Client JSP</td>
+</tr>
+<tr>
+  <td><viewfile-link file="demo.php"/></td>
+  <td>Client PHP</td>
+</tr>
+</deftable>
 </s1>
 
-<s1 title="Introduction?">
+<s1 title="Introduction">
 <p></p>
 <figure src="soa.png"/>
 <p>
@@ -44,7 +58,7 @@ The Resin remoting is an infrastructure that
 allows a service to be exposed via many different service protocols.
 For example in this tutorial, there is a plain-old Java object (POJO) that
 implements a service and this service is made available using REST, SOAP,
-Hessian, and JNDI.  The service is implemented once and these protocols
+Hessian, and WebBeans.  The service is implemented once and these protocols
 are activated with a few simple changes to the configuration file.
 </p>
 </s1>
@@ -131,7 +145,7 @@ public class HelloServiceImpl implements HelloService {
 tag.  The implementation class is given as
 the <code>servlet-class</code> attribute.
 It is possible to allow access to the service within the same virtual machine
-by registering the service in JNDI using a &lt;jndi-name> child tag.
+by registering the service as a WebBeans singleton with &lt;bean>.
 </p>
 
 <p>
@@ -156,28 +170,44 @@ Finally, a SOAP interface is available. <!-- XXX -->
 </p>
 
 <example title="web-service for hessian">
-&lt;servlet-mapping url-pattern="/hello/hessian/*"
-                 jndi-name="service/HelloService"
-                 servlet-name="hello-hessian"
-                 servlet-class="example.HelloServiceImpl">
-  &lt;protocol type="hessian"/>
-&lt;/servlet-mapping>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;servlet-mapping url-pattern="/hello/hessian/*"
+                   servlet-class="example.HelloServiceImpl">
+    &lt;protocol type="hessian"/>
+  &lt;/servlet-mapping>
+
+&lt;/web-app>
 </example>
 
 <example title="web-service for rest">
-&lt;servlet-mapping url-pattern="/hello/rest/*"
-                 servlet-name="hello-rest"
-                 servlet-class="example.HelloServiceImpl">
-  &lt;protocol type="rest"/>
-&lt;/servlet-mapping>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;servlet-mapping url-pattern="/hello/hessian/*"
+                   servlet-class="example.HelloServiceImpl">
+    &lt;protocol type="rest"/>
+  &lt;/servlet-mapping>
+
+&lt;/web-app>
 </example>
 
 <example title="web-service for soap">
-&lt;servlet-mapping url-pattern="/hello/rest/*"
-                 servlet-name="hello-soap"
-                 servlet-class="example.HelloServiceImpl">
-  &lt;protocol type="soap"/>
-&lt;/servlet-mapping>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;servlet-mapping url-pattern="/hello/hessian/*"
+                   servlet-class="example.HelloServiceImpl">
+    &lt;protocol type="soap"/>
+  &lt;/servlet-mapping>
+
+&lt;/web-app>
+</example>
+
+<example title="web-service as WebBeans singleton">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;bean class="example.HelloServiceImpl" name="vm"/>
+
+&lt;/web-app>
 </example>
 
 </s1>
@@ -189,26 +219,27 @@ Resin also makes it easy to access services using the
 &lt;web-service-client> tag.  This tag connects to a service
 using a URL of the form <i>&lt;encoding>:&lt;protocol>:&lt;location></i>.
 The example below shows just such a URL.  The interface of the service
-and a JNDI name must also be given.  The &lt;web-service-client> tag
+is required.  The &lt;web-service-client> tag
 creates a proxy client instance for the service and registers the
-proxy with the given JNDI name.
+proxy with WebBeans.
 </p>
 
 <example title="<web-service-client>">
-&lt;web-service-client jndi-name="hessian/HelloService">
-  &lt;url>hessian:${webApp.url}/hello/hessian/&lt;/url>
-  &lt;interface>example.HelloService&lt;/interface>
-&lt;/web-service-client>  
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-&lt;web-service-client jndi-name="rest/HelloService">
-  &lt;url>rest:${webApp.url}/hello/rest/&lt;/url>
-  &lt;interface>example.HelloService&lt;/interface>
-&lt;/web-service-client>
+  &lt;web-service-client class="example.HelloService" name="hessian">
+    &lt;url>hessian:${webApp.url}/hello/hessian/&lt;/url>
+  &lt;/web-service-client>  
 
-&lt;web-service-client jndi-name="soap/HelloService">
-  &lt;url>soap:${webApp.url}/hello/soap/&lt;/url>
-  &lt;interface>example.HelloService&lt;/interface>
-&lt;/web-service-client>
+  &lt;web-service-client class="example.HelloService" name="rest">
+    &lt;url>rest:${webApp.url}/hello/rest/&lt;/url>
+  &lt;/web-service-client>
+
+  &lt;web-service-client class="example.HelloService" name="soap">
+      &lt;url>soap:${webApp.url}/hello/soap/&lt;/url>
+  &lt;/web-service-client>
+
+&lt;/web-app>
 </example>
 
 </s1>
@@ -216,22 +247,50 @@ proxy with the given JNDI name.
 <s1 title="JSP Client Script">
 
 <p>The client can now connect to the HelloService using any supported
-encoding simply by doing a lookup in JNDI.</p>
+encoding simply by doing a WebBeans injection.</p>
 
 <example title="demo.jsp">
-&lt;%@ page import="com.caucho.naming.Jndi" %>
+&lt;%@ page import="javax.webbeans.Named" %>
 &lt;%@ page import="example.HelloService" %>
-&lt;%
-HelloService hessianHello = (HelloService) Jndi.lookup("hessian/HelloService");
-HelloService restHello = (HelloService) Jndi.lookup("rest/HelloService");
-HelloService soapHello = (HelloService) Jndi.lookup("soap/HelloService");
-HelloService vmHello = (HelloService) Jndi.lookup("service/HelloService");
+&lt;%!
+@Named("hessian") HelloService _hessianHello;
+@Named("rest") HelloService _restHello;
+@Named("soap") HelloService _soapHello;
+@Named("vm") HelloService _vmHello;
 %>
 &lt;pre>
-From Hessian: &lt;%= hessianHello.hello() %>
-From REST: &lt;%= restHello.hello() %>
-From SOAP: &lt;%= soapHello.hello() %>
-From VM: &lt;%= vmHello.hello() %>
+From Hessian: &lt;%= _hessianHello.hello() %>
+From REST: &lt;%= _restHello.hello() %>
+From SOAP: &lt;%= _soapHello.hello() %>
+From VM: &lt;%= _vmHello.hello() %>
+&lt;/pre>
+</example>
+<results>
+From Hessian: hello, world
+From REST: hello, world
+From SOAP: hello, world
+From VM: hello, world
+</results>
+
+</s1>
+
+<s1 title="PHP Client Script">
+
+<p>The client can now connect to the HelloService
+using PHP with the <code>java_bean()</code> method.</p>
+
+<example title="demo.php">
+&lt;?php
+$hessian = java_bean("hessian");
+$rest = java_bean("rest");
+$soap = java_bean("soap");
+$vm = java_bean("vm");
+?>
+&lt;pre>
+From Hessian: &lt;?= $hessian->hello() ?>
+From REST: &lt;?= $rest->hello() ?>
+From SOAP: &lt;?= $soap->hello() ?>
+From VM: &lt;?= $vm->hello() ?>
 &lt;/pre>
 </example>
 <results>

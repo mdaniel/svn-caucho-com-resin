@@ -14,10 +14,9 @@ import java.util.logging.Logger;
 
 import java.util.concurrent.Executor;
 
-import javax.annotation.Resource;
-
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.webbeans.In;
 
 /**
  * A Servlet that provides a user interface for managing a PeriodicTask.
@@ -28,9 +27,10 @@ public class PeriodicTaskServlet extends HttpServlet {
 
   int _refreshRate = 5;
 
-  @Resource
+  @In
   private Executor _executor;
 
+  @In
   private PeriodicTask _periodicTask;
 
   private NumberFormat _numberFormat ;
@@ -38,11 +38,6 @@ public class PeriodicTaskServlet extends HttpServlet {
 
   public PeriodicTaskServlet()
   {
-  }
-
-  public void setPeriodicTask(PeriodicTask periodicTask)
-  {
-    _periodicTask = periodicTask;
   }
 
   /**
@@ -65,9 +60,6 @@ public class PeriodicTaskServlet extends HttpServlet {
     p = getInitParameter("refresh-rate");
     if (p != null)
       setRefreshRate(Integer.parseInt(p));
-
-    if (_periodicTask == null)
-      throw new ServletException("`period-task' is required");
   }
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -83,7 +75,7 @@ public class PeriodicTaskServlet extends HttpServlet {
       else {
         // It's tricky to start another Thread from a Servlet.  Here
         // the Resin ThreadPool class is used.  ThreadPool will interrupt a
-        // thread and stop it if it run's for too long.
+        // thread and stop it if it runs for too long.
         ThreadTask threadTask = new ThreadTask() {
           public void run()
           {

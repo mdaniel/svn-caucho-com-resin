@@ -7,13 +7,14 @@
     - The interface for PeriodicTaskImpl is PeriodicTask, which is the
     - view of the object provided to users of the service.
     -->
-  <resource type="example.PeriodicTask" jndi-name="PeriodicTask" 
-            mbean-name="type=PeriodicTask,name=PeriodicTask"
-            mbean-interface="example.PeriodicTask">
+  <bean class="example.PeriodicTask"
+        name="periodicTask"
+        mbean-name="type=PeriodicTask"
+        mbean-class="example.PeriodicTask">
     <init>
       <estimated-average-time>5</estimated-average-time>
     </init>
-  </resource>
+  </bean>
 
   <!-- 
      - servlet to manage the PeriodicTask
@@ -22,9 +23,6 @@
   <servlet>
     <servlet-name>PeriodicTaskServlet</servlet-name>
     <servlet-class>example.PeriodicTaskServlet</servlet-class>
-    <init>
-      <periodic-task>${jndi:lookup("PeriodicTask")}</periodic-task>
-    </init>
   </servlet>
 
   <servlet-mapping>
@@ -35,12 +33,12 @@
   <!-- 
      - run() the PeriodicTask every minute 
     -->
-  <resource type="com.caucho.resources.CronResource">
+  <bean class="com.caucho.resources.CronResource">
     <init>
       <cron>*</cron>
-      <work>${jndi:lookup("PeriodicTask")}</work>
+      <work>${periodicTask}</work>
     </init>
-  </resource>
+  </bean>
 
   <!-- 
      - filter to show an unavailable page if the PeriodicTask is active 
@@ -50,7 +48,7 @@
     <filter-name>PeriodicTaskFilter</filter-name>
     <filter-class>example.PeriodicTaskFilter</filter-class>
     <init>
-      <periodic-task>${jndi:lookup("PeriodicTask")}</periodic-task>
+      <periodic-task>${periodicTask}</periodic-task>
       <!-- optional url, if not specified a 503 response is sent. -->
       <url>/unavailable.jsp</url>
     </init>

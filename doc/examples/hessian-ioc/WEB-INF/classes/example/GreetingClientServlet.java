@@ -8,39 +8,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 
+import javax.webbeans.In;
+
 /**
- * The injection filter adds configuration objects to the request
- * attributes.
+ * The greeting client calls the GreetingAPI client.
  */
 public class GreetingClientServlet extends GenericServlet {
-  private String _name = "generic";
-  private GreetingAPI _greeting;
-
-  /**
-   * Sets the client servlet name.
-   */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  /**
-   * Sets the client greeting.
-   */
-  public void setGreeting(GreetingAPI greeting)
-  {
-    _greeting = greeting;
-  }
-
-  /**
-   * Servlet init
-   */
-  public void init()
-    throws ServletException
-  {
-    if (_greeting == null)
-      throw new ServletException("GreetingClientServlet needs a configured greeting");
-  }
+  @In private GreetingAPI _greeting;
 
   /**
    * Runs the servlet
@@ -50,6 +24,6 @@ public class GreetingClientServlet extends GenericServlet {
   {
     PrintWriter out = res.getWriter();
 
-    out.println(_name + ": " + _greeting.greeting());
+    out.println("Greeting: " + _greeting.greeting());
   }
 }

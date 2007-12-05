@@ -21,9 +21,45 @@
     </item>
 
     <!--
+       - IoC
+      -->
+    <item link="ioc.xtp" title="IoC">
+      <!--
+      <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
+      <item link="ioc-services/index.xtp" title="Services"/>
+      -->
+      <item link="ioc-basic/index.xtp" title="Basic Resource"/>
+      <item link="ioc-injection/index.xtp" title="Injection"/>
+      <item link="ioc-periodictask/index.xtp" title="Periodic Task"/>
+      <item link="ioc-appconfig/index.xtp" title="IoC appconfig"/>
+    </item>
+
+    <!--
+       - Remoting
+      -->
+    <item link="remoting.xtp" title="Remoting">
+      <item link="hessian-serialize/index.xtp" title="Hessian Serialization"/>
+      <item link="hessian-add/index.xtp" title="Hessian Addition"/>
+      <item link="hessian-service/index.xtp" title="Service Addition"/>
+      <item link="hessian-ioc/index.xtp" title="Hessian with DI"/>
+      <item link="burlap-add/index.xtp" title="Burlap Addition"/>
+      <item link="custom-protocol/index.xtp" title="custom-protocol"/>
+
+      <item link="soa-hello-world/index.xtp" title="Simple Service"/>
+      <!--
+      <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
+      -->
+      <item link="esb-servlet-client/index.xtp" title="Client Injection"/>
+      <item link="rest-flickr/index.xtp" title="Flickr REST"/>
+      <!--
+      <item link="soa-jaxws/index.xtp" title="JAX-WS example"/>
+      -->
+    </item>
+
+    <!--
        - Amber
       -->
-    <item link="amber.xtp" title="Amber">
+    <item link="amber.xtp" title="Amber (JPA)">
       <item link="amber-basic-field/index.xtp" title="Field"/>
       <item link="amber-basic/index.xtp" title="Property"/>
       <!--
@@ -45,33 +81,6 @@
     </item>
 
     <!--
-       - SOA/WebServices
-      -->
-    <item link="soa.xtp" title="Remoting">
-      <item link="soa-hello-world/index.xtp" title="Simple Service"/>
-      <!--
-      <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
-      -->
-      <item link="esb-servlet-client/index.xtp" title="Client Injection"/>
-      <item link="rest-flickr/index.xtp" title="Flickr REST"/>
-      <item link="soa-jaxws/index.xtp" title="JAX-WS example"/>
-    </item>
-
-    <!--
-       - IoC
-      -->
-    <item link="ioc.xtp" title="IoC">
-      <!--
-      <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
-      <item link="ioc-services/index.xtp" title="Services"/>
-      -->
-      <item link="ioc-basic/index.xtp" title="Basic Resource"/>
-      <item link="ioc-injection/index.xtp" title="Injection"/>
-      <item link="ioc-periodictask/index.xtp" title="Periodic Task"/>
-      <item link="jndi-appconfig/index.xtp" title="JNDI appconfig"/>
-    </item>
-
-    <!--
        - JSF
       -->
     <item link="jsf.xtp" title="JSF">
@@ -84,7 +93,9 @@
     <item link="jms.xtp" title="JMS">
       <item link="jms-php-queue-send/index.xtp" title="JMS/PHP Send"/>
       <item link="jms-php-queue-receive/index.xtp" title="JMS/PHP Receive"/>
+      <!--
       <item link="jms-listener/index.xtp" title="JMS Listener"/>
+        -->
       <item link="jms-ioc-listener/index.xtp" title="JMS IOC Listener"/>
      </item>
      
@@ -105,18 +116,6 @@
       <item link="jmx-listener/index.xtp" title="Listener"/>
       <item link="jmx-registration/index.xtp" title="Registration"/>
       <item link="jmx-mbean-server/index.xtp" title="MBeanServer"/>
-    </item>
-
-    <!--
-       - Hessian
-      -->
-    <item link="hessian.xtp" title="Hessian">
-      <item link="hessian-serialize/index.xtp" title="Hessian Serialization"/>
-      <item link="hessian-add/index.xtp" title="Hessian Addition"/>
-      <item link="hessian-service/index.xtp" title="Service Addition"/>
-      <item link="hessian-ioc/index.xtp" title="Hessian with DI"/>
-      <item link="burlap-add/index.xtp" title="Burlap Addition"/>
-      <item link="custom-protocol/index.xtp" title="custom-protocol"/>
     </item>
     
     <item link="security-basic/index.xtp" title="Security"/>

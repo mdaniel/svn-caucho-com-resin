@@ -2,48 +2,29 @@
   <!--
      - Configures the JDBC-backed Queue.
     -->
-  <resource var="queue" type="com.caucho.jms.jdbc.JdbcQueue">
-    <init>
-      <queue-name>resin</queue-name>
-      <data-source>jdbc/resin</data-source>
-    </init>
-  </resource>
+  <jms-queue name="my_queue" url="file:path=WEB-INF/db"/>
 
   <!--
      - Configures the JMS connectionAbstract factory
     -->
-  <resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl">
-  </resource>
+  <jms-connection-factory class="com.caucho.jms.JmsConnectionFactory"/>
 
-  <resource type="com.caucho.jms.resource.ListenerResource">
+  <ejb-message-bean class="example.MyListener">
+    <destination-type>javax.jms.Queue</destination-type>
+    
+    <destination-name>my_queue</destination-name>
+  </ejb-message-bean>
+
+  <bean class="com.caucho.jms.resource.MessageSenderResource">
     <init>
-      <connection-factory>${jmsFactory}</connection-factory>
+      <connection-factory>${jmsConnectionFactory}</connection-factory>
 
-      <destination>${queue}</destination>
-
-      <listener type="example.MyListener"/>
+      <destination>${my_queue}</destination>
     </init>
-  </resource>
-
-  <resource jndi-name="jms/sender"
-        type="com.caucho.jms.resource.MessageSenderResource">
-    <init>
-      <connection-factory>${jmsFactory}</connection-factory>
-
-      <destination>${queue}</destination>
-    </init>
-  </resource>
+  </bean>
 
   <!--
-     - The test servlet uses bean-style init to simplify the code.
-     - Applications may want to use a standard init-param and
-     - JNDI lookup in the init() method.
+     - The test servlet uses will use injection to get the Queue
     -->
-  <servlet servlet-name="send" servlet-class="example.MessageServlet">
-    <init>
-      <sender>${jndi:lookup("jms/sender")}</sender>
-    </init>
-  </servlet>
-
-  <servlet-mapping url-pattern="/send" servlet-name="send"/>
+  <servlet-mapping url-pattern="/send" servlet-class="example.MessageServlet"/>
 </web-app>

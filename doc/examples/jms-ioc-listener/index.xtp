@@ -37,16 +37,21 @@ and sends it to a queue.  The servlet immediately completes and when the
 batch process is ready, it processes the message.</p>
 
 <p>Messaging is therefore comprised of three main components:
-</p><ul>
+</p>
+
+<ul>
 <li>A <var>Producer</var> creates messages and sends them to
 a <var>Queue</var>.  The Producer could be something like a Servlet.
-</li><li>A <var>Queue</var> stores the messages from the Produces and provides
+</li>
+<li>A <var>Queue</var> stores the messages from the Produces and provides
 them to a Consumer when ready.  The Queue is implemented by the
 messaging provider.
-</li><li>A <var>Consumer</var> processes messages as they become
+</li>
+<li>A <var>Consumer</var> processes messages as they become
 available in the Queue.  The <var>Consumer</var> is typically a bean
 implementing the <code>MessageListener</code> interface.
-</li></ul>
+</li>
+</ul>
 
 </s1>
 
@@ -57,11 +62,15 @@ The Producer uses a <code>MessageSender</code> configured in the web.xml
 to send the message.</p>
 
 <example title="MessageServlet">
-String message = "sample message";
+import javax.webbeans.In;
 
-MessageSender sender = ...; // JNDI lookup
+public class MessageServlet extends GenericServlet {
+  String message = "sample message";
+  @In MessageSender sender = ...;
 
-sender.send(null, message);
+  ...
+  sender.send(null, message);
+}
 </example>
 
 <p>In this configuration, the <code>MessageSender</code> is a
@@ -112,7 +121,7 @@ public class MyListener implements MessageListener {
       log.info("received: " + textMessage.getText());
 
       _lastMessage = textMessage.getText();
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
@@ -124,77 +133,91 @@ public class MyListener implements MessageListener {
 <s1 title="Configuration">
 
 <p>Since Resin is an inversion of control container (IoC), it can
- configure the JMS resources in the standard Resin configuration file.</p>
+ configure the JMS resources in the standard Resin configuration file.
+The <a href="../../doc/resin-ioc.xtp">Resin IoC</a> documentation gives
+more information.</p>
 
 <p>The configuration is responsible for three things:</p>
 <ul>
-<li>Configuring the Queue
-</li><li>Configuring the MessageSender
-</li><li>Configuring the MessageListener
-</li></ul>
+  <li>Configuring the Queue</li>
+  <li>Configuring the MessageSender</li>
+  <li>Configuring the MessageListener</li>
+</ul>
 
-<p>The <code>Queue</code> is configured directly in a &lt;resource&gt;
+<p>The <code>Queue</code> is configured directly in a &lt;jms-queue&gt;
 tag, together with any configuration setters.  This example uses a
-local JDBC store.</p>
+local file store.</p>
 
 <p>Because the listener and sender need a reference to the queue,
-the resource stores it in the "queue" variable.  (It could also have
-used jndi-name to store the queue in JNDI.)</p>
+the jms-queue stores it in the "my_queue" variable.</p>
 
 <example title="Queue resin-web.xml fragment">
-&lt;resource var="queue" type="com.caucho.jms.jdbc.JdbcQueue"&gt;
-  &lt;init&gt;
-     &lt;queue-name&gt;resin&lt;/queue-name&gt;
-     &lt;data-source&gt;jdbc/resin&lt;/data-source&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="my_queue"
+             type="file:path=WEB-INF/db"/&gt;
+
+&lt;/web-app&gt;
 </example>
 
 <p>JMS also needs a configured ConnectionFactory, so the sender
 and listener can create JMS connections.</p>
 
 <example title="ConnectionFactory resin-web.xml fragment">
-&lt;resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl"&gt;
-&lt;/resource&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory class="com.caucho.jms.JmsConnectionFactory"/>
+
+&lt;/web-app&gt;
 </example>
 
-<p>The MessageListener is configured and registered with Resin's
-MessageListenerResource.  That resource instantiates the listeners
+<p>The MessageListener is configured as an EJB message bean.
+Resin's EJB support instantiates the listeners
 and receives messages from the queue.</p>
 
 <example title="MyListener configuration resin-web.xml">
-&lt;resource type="com.caucho.jms.resource.ListenerResource"&gt;
-  &lt;init&gt;
-     &lt;connection-factory&gt;\${jmsFactory}&lt;/connection-factory&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-     &lt;destination&gt;\${queue}&lt;/destination&gt;
+  &lt;ejb-message-bean class="example.MyListener">
+    &lt;destination-type>javax.jms.Queue&lt;/destination-type>
+    
+    &lt;destination-name>my_queue&lt;/destination-name>
+  &lt;/ejb-message-bean>
 
-     &lt;listener type="example.MyListener"/&gt;
-     &lt;listener-max&gt;10&lt;/listener-max&gt; &lt;!-- 5 is the default --&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
+&lt;/web-app>
 </example>
 
-<p>Finally, we configure a MessageSender.  This step is optional,
-since the application could use the JMS ConnectionFactory with
-the Queue directly, if it wanted.</p>
+<p>Finally, we configure a MessageSender.  The MessageSender is a
+singleton bean which encapsulates the JMS work.  Many applications will
+write their own MessageSender facade class.</p>
 
 <example title="MessageSender configuration resin-web.xml">
-&lt;resource jndi-name="jms/sender"
-        type="com.caucho.jms.resource.MessageSenderResource"&gt;
- &lt;init&gt;
-    &lt;connection-factory&gt;\${jmsFactory}&lt;/connection-factory&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-    &lt;destination&gt;\${queue}&lt;/destination&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
+  &lt;bean class="com.caucho.jms.resource.MessageSenderResource">
+    &lt;init>
+      &lt;connection-factory>${jmsConnectionFactory}&lt;/connection-factory>
+
+      &lt;destination>${my_queue}&lt;/destination>
+    &lt;/init>
+  &lt;/bean>
+
+&lt;/web-app&gt;
 </example>
 
 <deftable>
-<tr><th>tag</th><th>meaning
-</th></tr><tr><td>resource</td><td>Configures a bean using Resin's IoC configuration
-</td></tr><tr><td>type</td><td>The type of a resource to be configured
-</td></tr></deftable>
+<tr>
+  <th>tag</th>
+  <th>meaning</th>
+</tr>
+<tr>
+  <td>bean</td>
+  <td>Configures a bean using Resin's IoC configuration</td>
+</tr>
+<tr>
+  <td>class</td><td>The class name of a resource to be configured</td>
+</tr>
+</deftable>
 
 </s1>
 

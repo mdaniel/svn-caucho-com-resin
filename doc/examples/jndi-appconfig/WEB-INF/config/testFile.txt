@@ -1,1 +1,0 @@
-Configuration file made from 'TestServlet' Tue Dec 04 12:10:20 PST 2007

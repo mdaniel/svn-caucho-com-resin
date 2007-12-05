@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import javax.webbeans.In;
+
 /**
  * Filter to show a maintenance page if the MaintenanceRunner is active.
  *
@@ -28,7 +30,7 @@ public class PeriodicTaskFilter implements Filter {
   private String _url = null;
   private int _minEstimatedTime = 5;;
 
-  private PeriodicTask _periodicTask;
+  @In private PeriodicTask _periodicTask;
 
   public PeriodicTaskFilter()
   {
@@ -69,9 +71,6 @@ public class PeriodicTaskFilter implements Filter {
     p = filterConfig.getInitParameter("min-estimated-time");
     if (p != null)
       setMinEstimatedTime(Integer.parseInt(p));
-
-    if (_periodicTask == null)
-      throw new ServletException("`period-task' is required");
   }
 
   public void doFilter(ServletRequest request,
@@ -91,7 +90,8 @@ public class PeriodicTaskFilter implements Filter {
    * Disptach to a page that shows a "temporarily unavailable" message, or
    * respond with 503.
    */
-  protected void dispatch(HttpServletRequest request, HttpServletResponse response)
+  protected void dispatch(HttpServletRequest request,
+			  HttpServletResponse response)
     throws ServletException, IOException
   { 
     long remaining = _periodicTask.getEstimatedTimeRemaining();

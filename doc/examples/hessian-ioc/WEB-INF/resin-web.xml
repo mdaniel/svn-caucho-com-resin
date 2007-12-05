@@ -1,32 +1,24 @@
 <web-app xmlns="http://caucho.com/ns/resin">
 
-  <resource jndi-name="service/greeting"
-            type="example.GreetingImpl">
-    <init>
-      <greeting>Hello from web.xml</greeting>
-    </init>
-  </resource>
-
+  <!--
+     - Export the service as a Hessian service
+    -->
   <servlet-mapping url-pattern="/hessian/greeting"
-           servlet-class="com.caucho.hessian.server.HessianServlet">
+                   servlet-class="example.GreetingImpl">
+    <protocol type="hessian"/>
+    
     <init>
-      <home>${jndi("service/greeting")}</home>
-      <home-api>example.GreetingAPI</home-api>
+      <greeting>Hello from resin-web.xml</greeting>
     </init>
   </servlet-mapping>
 
-  <reference jndi-name="client/greeting"
-             factory="com.caucho.hessian.client.HessianProxyFactory">
-    <init-param url="${webApp.url}/hessian/greeting"/>
-    <init-param type="example.GreetingAPI"/>
-  </reference>
+  <!--
+     - Define the client
+    -->
+  <web-service-client class="example.GreetingAPI"
+                      url="hessian:${webApp.url}/hessian/greeting"/>
 
   <servlet-mapping url-pattern="/client/greeting"
-                   servlet-class="example.GreetingClientServlet">
-    <init>
-      <name>Hessian</name>
-      <greeting>${jndi("client/greeting")}</greeting>
-    </init>
-  </servlet-mapping>
+                   servlet-class="example.GreetingClientServlet"/>
 
 </web-app>

@@ -1,27 +1,20 @@
 <web-app xmlns="http://caucho.com/ns/resin">
   <!--
-     - Instantiates the resource.  The resource will have its
+     - Instantiates the singleton service.  The service will have its
      - setValue called for the value parameter.
      -
-     - The resource will have its start(ctx) method called when
+     - The resource will have its start() method called when
      - the web-app starts and the stop() method called when the
      - web-app stops.
     -->
-  <resource jndi-name="test/basic" type="test.TestResource">
+  <bean class="test.TestResource">
     <init>
       <value>Tutorial Example</value>
     </init>
-  </resource>
+  </bean>
 
   <!--
-     - Configures the sample servlet.  Here we're using the bean-style
-     - init, although that's not necessary for the example.
+     - Configures the sample servlet
     -->
-  <servlet servlet-name="test" servlet-class="test.TestServlet">
-    <init>
-      <resource>${jndi:lookup("java:comp/env/test/basic")}</resource>
-    </init>
-  </servlet>
-
-  <servlet-mapping url-pattern="/test" servlet-name="test"/>
+  <servlet-mapping url-pattern="/test" servlet-class="test.TestServlet"/>
 </web-app>

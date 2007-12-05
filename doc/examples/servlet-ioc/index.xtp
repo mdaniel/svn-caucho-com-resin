@@ -1,11 +1,11 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Bean-style servlet</title>
+    <title>Dependency-injection servlet configuration</title>
     <type>tutorial</type>
     <description>
       <p>
-      Resin allows servlets to be configured with bean-style setters.
+      Resin allows servlets to be configured using dependency injection.
       </p>
     </description>
     <tutorial-startpage>hello</tutorial-startpage>

@@ -14,19 +14,27 @@ the service, protocol, and client.</p>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/classes/example/GreetingAPI.java"/>
-    </td><td>Interface for the greeting service.
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/GreetingImpl.java"/>
-    </td><td>The service implementation as a Java object
-</td></tr><tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>Configures the environment
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/GreetingClientServlet.java"/>
-    </td><td>Client Servlet
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/GreetingAPI.java"/></td>
+  <td>Interface for the greeting service.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/GreetingImpl.java"/></td>
+  <td>The service implementation as a Java object</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>Configures the environment</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/GreetingClientServlet.java"/></td>
+  <td>Client Servlet</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="Service Implementation">
@@ -46,9 +54,12 @@ the MatchService API.  Making the service a plain class offers a number of advan
 
 <ul>
 <li><b>Simplicity:</b> It can concentrate on its business logic because it doesn't need to implement any protocol-dependent code.
-</li><li><b>Independence:</b> It can be reused more easily because it isn't tied to a distributed framework (e.g. in contrast to EJB).
-</li><li><b>Testability:</b> It is more easily tested since the test harness doesn't need to implement the protocol or its stubs.  The harness can just test the service as a plain old Java object.
-</li></ul>
+</li>
+<li><b>Independence:</b> It can be reused more easily because it isn't tied to a distributed framework (e.g. in contrast to EJB).
+</li>
+<li><b>Testability:</b> It is more easily tested since the test harness doesn't need to implement the protocol or its stubs.  The harness can just test the service as a plain old Java object.
+</li>
+</ul>
 
 <example title="GreetingImpl.java">
 package example;
@@ -70,23 +81,26 @@ public class GreetingImpl implements GreetingAPI {
 
 </s2>
 
-<s2 title="Configuration using Dependency Injection">
+<s2 title="Configuring the Service">
+
+<p>URL-based services can use the servlet configuration to define the
+service.  The service class can use
+<a href="../../doc/resin-ioc.xtp">Resin IoC</a> to inject its
+own dependencies.</p>
 
 <example title="resin-web.xml">
-&lt;resource jndi-name="service/greeting"
-          type="example.GreetingImpl"&gt;
-  &lt;init&gt;
-    &lt;greeting&gt;Hello, web.xml&lt;/greeting&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-&lt;servlet url-pattern="/hessian/greeting"
-         servlet-class="com.caucho.hessian.server.HessianServlet"&gt;
-  &lt;init&gt;
-    &lt;home&gt;\${jndi("service/greeting")}&lt;/home&gt;
-    &lt;home-api&gt;example.GreetingAPI&lt;/home-api&gt;
-  &lt;/init&gt;
-&lt;/servlet&gt;
+  &lt;servlet-mapping url-pattern="/hessian/greeting"
+                   servlet-class="example.GreetingImpl">
+    &lt;protocol type="hessian"/>
+    
+    &lt;init>
+      &lt;greeting>Hello from resin-web.xml&lt;/greeting>
+    &lt;/init>
+  &lt;/servlet-mapping>
+
+&lt;/web-app>
 </example>
 
 </s2>
@@ -101,66 +115,54 @@ can use any proxy/stub which implements the GreetingAPI without change,
 for example:</p>
 
 <ul>
-<li>Hessian proxy
-</li><li>Burlap proxy
-</li><li>EJB local object stub
-</li><li>JMX proxy
-</li><li>Java bean instance
-</li></ul>
+  <li>Hessian proxy</li>
+  <li>Burlap proxy</li>
+  <li>EJB local object stub</li>
+  <li>JMX proxy</li>
+  <li>Java bean instance</li>
+</ul>
 
-<p>Using the Dependency Injection patter, the servlet doesn't care
+<p>Using the Dependency Injection pattern, the servlet doesn't care
 how the proxy is implemented, or how the greeting service is
 discovered.</p>
 
 <example title="GreetingClientServlet.java">
+import javax.webbeans.In;
+
 public class GreetingClientServlet extends GenericServlet {
-  private String _name = "generic";
-  private GreetingAPI _greeting;
-
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  public void setGreeting(GreetingAPI greeting)
-  {
-    _greeting = greeting;
-  }
+  @In private GreetingAPI _greeting;
 
   public void service(ServletRequest req, ServletResponse res)
     throws IOException, ServletException
   {
     PrintWriter out = res.getWriter();
 
-    out.println(_name + ": " + _greeting.greeting());
+    out.println("Hello: " + _greeting.greeting());
   }
 }
 </example>
 
 <s2 title="Hessian Client using Dependency Injection">
 
-<p>The following example stores a &lt;reference&gt;
-to the Hessian proxy in JNDI for the service.  The servlet configuration
-looks up the Hessian proxy in JNDI.</p> 
+<p>The following code defines the client in the resin.web.xml.
+The servlet defined above will inject the <code>GreetingAPI</code>
+directly with the WebBeans <code>@In</code> annotation.  Because the
+<code>GreetingAPI</code> is unique, there's no need to give it a name.</p>
 
 <example title="resin-web.xml">
-&lt;reference jndi-name="client/greeting"
-           factory="com.caucho.hessian.client.HessianProxyFactory"&gt;
-  &lt;init-param url="\${app.getURL()}/hessian/greeting"/&gt;
-  &lt;init-param type="example.GreetingAPI"/&gt;
-&lt;/reference&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-&lt;servlet-mapping url-pattern="/client/greeting"
-                 servlet-class="example.GreetingClientServlet"&gt;
-  &lt;init&gt;
-    &lt;name&gt;Hessian Client&lt;/name&gt;
-    &lt;greeting&gt;\${jndi("client/greeting")}&lt;/greeting&gt;
-  &lt;/init&gt;
-&lt;/servlet-mapping&gt;
+  &lt;web-service-client class="example.GreetingAPI"
+                      url="hessian:${webApp.url}/hessian/greeting"/>
+
+  &lt;servlet-mapping url-pattern="/client/greeting"
+                   servlet-class="example.GreetingClientServlet"/>
+
+&lt;/web-app>
 </example>
 
 </s2>
-
+<!--
 <s2 title="JMX Configuration">
 
 <p>The following JMX configuration shows the flexibility of
@@ -187,7 +189,7 @@ a JMX bean used by and the client to use a JMX proxy.</p>
 </example>
 
 </s2>
-
+-->
 </s1>
 
   </body>

@@ -2,34 +2,53 @@
    - web.xml configuration file for the Hessian addition example.
   -->
 <web-app xmlns="http://caucho.com/ns/resin">
-  <servlet-mapping url-pattern="/hello/soap/*"
-                   jndi-name="service/HelloService"
-                   servlet-class="example.HelloServiceImpl">
-    <protocol type="soap"/>
-  </servlet-mapping>
+  <!--
+     - WebBeans singleton bean for the service.
+    -->
+  <bean class="example.HelloServiceImpl" name="vm"/>
 
+  <!--
+     - Hessian protocol service
+    -->
   <servlet-mapping url-pattern="/hello/hessian/*"
                    servlet-class="example.HelloServiceImpl">
     <protocol type="hessian"/>
   </servlet-mapping>
 
+  <!--
+     - SOAP protocol service
+    -->
+  <servlet-mapping url-pattern="/hello/soap/*"
+                   servlet-class="example.HelloServiceImpl">
+    <protocol type="soap"/>
+  </servlet-mapping>
+
+  <!--
+     - REST protocol service
+    -->
   <servlet-mapping url-pattern="/hello/rest/*"
                    servlet-class="example.HelloServiceImpl">
     <protocol type="rest"/>
   </servlet-mapping>
 
-  <web-service-client jndi-name="hessian/HelloService">
+  <!--
+     - Hessian client
+    -->
+  <web-service-client class="example.HelloService" name="hessian">
     <url>hessian:${webApp.url}/hello/hessian/</url>
-    <interface>example.HelloService</interface>
   </web-service-client>  
   
-  <web-service-client jndi-name="rest/HelloService">
-    <url>rest:${webApp.url}/hello/rest/</url>
-    <interface>example.HelloService</interface>
+  <!--
+     - SOAP client
+    -->
+  <web-service-client class="example.HelloService" name="soap">
+    <url>soap:${webApp.url}/hello/soap/</url>
   </web-service-client>
   
-  <web-service-client jndi-name="soap/HelloService">
-    <url>soap:${webApp.url}/hello/soap/</url>
-    <interface>example.HelloService</interface>
+  <!--
+     - REST client
+    -->
+  <web-service-client class="example.HelloService" name="rest">
+    <url>rest:${webApp.url}/hello/rest/</url>
   </web-service-client>
 </web-app>

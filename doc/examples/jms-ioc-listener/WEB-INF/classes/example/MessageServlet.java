@@ -10,22 +10,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 
+import javax.webbeans.In;
+
 import com.caucho.services.message.MessageSender;
 
 public class MessageServlet extends GenericServlet {
   private static final Logger log =
     Logger.getLogger(MessageServlet.class.getName());
 
-  private MessageSender _sender;
+  @In private MessageSender _sender;
   private int _count;
-
-  /**
-   * Sets the message sender (called by IoC configuration)
-   */
-  public void setSender(MessageSender sender)
-  {
-    _sender = sender;
-  }
   
   /**
    * Sends the message.

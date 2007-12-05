@@ -2,11 +2,7 @@ package test;
 
 import java.util.logging.Logger;
 
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ResourceAdapterInternalException;
-import javax.resource.spi.BootstrapContext;
-
-import com.caucho.jca.AbstractResourceAdapter;
+import javax.annotation.PostConstruct;
 
 /**
  * Implements a resource which is a plain-old bean.
@@ -15,19 +11,17 @@ import com.caucho.jca.AbstractResourceAdapter;
  * bean-style configuration and saved in JNDI.
  *
  * <pre>
- * &lt;resource name="test/basic"
- *           type="test.TestResource">
+ * &lt;bean class="test.TestResource">
  *  &lt;init>
  *    &lt;value>sample configuration&lt;/value>
  *  &lt;/init>
  * &lt;/resource>
  * </pre>
  *
- * <p>Applications will use JNDI to retrieve the resource:</p>
+ * <p>Applications will use WebBeans to retrieve the resource:</p>
  *
  * <code><pre>
- * Context ic = new InitialContext();
- * TestResource resource = (TestResource) ic.lookup("java:comp/env/test/basic");
+ * @In TestResource resource;
  * </pre></code>
  */
 public class TestResource {
@@ -50,6 +44,7 @@ public class TestResource {
   /**
    * init() is called at the end of the configuration.
    */
+  @PostConstruct
   public void init()
   {
     log.config("TestResource[" + _value + "] init");
