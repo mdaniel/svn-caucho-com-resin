@@ -158,6 +158,116 @@ check for threads that are caught in tight loops.
 
 <s2 title="Sessions become null, losing session">
 
+<s3 title="Debug logging">
+<p>
+A first step is to enable <a href="#debug-log">debug
+logging</a>.  In particular the headers submitted by the browser for a request
+can reveal the state of the JSESSIONID for a client, and logging will also show
+when Resin recognizes, creates, and/or invalidates a session.
+</p>
+
+</s3>
+
+<s3 title="Resin configuration for sessions">
+
+<p>Another possiblity is that the <a config-tag="session-max"/> setting is too
+low, and you are getting more users establishing sessions than you have
+configured Resin for.</p>
+
+<p>Yet another possibility is that the session is timing out, you can use the
+<a config-tag="session-timeout"/> tag to configure this.</p>
+
+<example>
+&lt;web-app id='/'&gt;
+  ...
+  &lt;session-config&gt;
+    &lt;!-- timeout after 120 minutes --&gt;
+    &lt;session-timeout&gt;120&lt;/session-timeout&gt;
+    &lt;!-- up to 4096 sessions at once --&gt;
+    &lt;session-max&gt;4096&lt;/session-max&gt;
+  &lt;/session-config&gt;
+  ...
+&lt;/web-app&gt;
+</example>
+</s3>
+
+
+<s3 title="Application reloading">
+
+<p>Whenever a java source file, web.xml, or resin.conf changes then Resin will
+restart the application.  If this happens, your current sessions will be lost
+unless you have configured a persistent session store.</p>
+
+</s3>
+
+<s3 title="Browser cookie limitations">
+
+<p>Some users have reported that if their application uses a lot of cookies,
+the browser will start to discard older cookies to make room for the new.  This
+may result in the browser discarding the cookie that Resin is using to keep
+track of the session.</p>
+
+<p>Internet Explorer users are particularily prone to encountering this problem.</p>
+
+<p>If your application uses a lot of cookies, the best solution is to reduce
+the number of cookies and size of cookie data.  Resin uses a single cookie with
+a relatively small amount of data for tracking the session id of the user.
+Information that the application stores in cookies can be stored in the
+HttpSession object instead.</p>
+
+<p>
+As a last resort, you may need to configure Resin
+to always use URL rewriting by setting <a config-tag="enable-cookies"/> to
+false.  However URL rewriting is not recommended because of security issues,
+the high probabilty that the application is missing calls to cause the
+rewriting on some pages, and because of the effect that rewriting has on the
+url.
+</p>
+
+<example>
+&lt;web-app id='/'&gt;
+  ...
+  &lt;session-config&gt;
+    &lt;enable-cookies&gt;false&lt;/enable-cookies&gt;
+    &lt;enable-url-rewriting&gt;true&lt;/enable-url-rewriting&gt;
+  &lt;/session-config&gt;
+  ...
+&lt;/web-app&gt;
+</example>
+
+</s3>
+
+<s3 title="Problems with cookie domains">
+
+<p>You may also lose your sessions if your cookie domains are incompatible.
+For example, if you have one server that uses cookie domain "hogwarts.com" and
+another that uses "qa.hogwarts.com", the cookie in the browser for
+"hogwarts.com" will interfere with sessions on "qa.hogwarts.com".  The solution
+is to change the cookie domain "hogwarts.com" to "www.hogwarts.com".</p>
+
+<p>You set the cookie domain in <a config-tag="session-config"/>.
+(Thanks Laura for providing this)</p>
+
+</s3>
+
+<s3 title="Conflicting cookie names">
+
+<p>If you are using Resin and another application server (such as Tomcat), you
+may encounter a conflict because both of them are using the same cookie name
+(usually JSESSIONID) for the session tracking cookie.</p>
+
+<p>Resin provides <a config-tag="session-cookie"/> and <a config-tag="ssl-session-cookie"/>
+to let you change the name of the cookie that Resin uses.</p>
+
+<example title="Change the name of the cookie used for session tracking">
+  &lt;cluster&gt;
+
+    ...
+
+    &lt;session-cookie&gt;RJESSESSIONID&lt;/session-cookie&gt;
+</example>
+</s3>
+
 <s3 title="URL rewriting">
 
 <p>If you forget to rewrite a URL, a user who requires rewriting will lose their
@@ -202,93 +312,6 @@ String homeUrl = response.encodeURL("home.jsp");
 Time to go &lt;a href="&lt;%= homeUrl %&gt;"&gt;Home&lt;/a&gt;!
 </example>
 
-</s3>
-
-<s3 title="Resin configuration for sessions">
-
-<p>Another possiblity is that the <a config-tag="session-max"/> setting is too
-low, and you are getting more users establishing sessions than you have
-configured Resin for.</p>
-
-<p>Yet another possibility is that the session is timing out, you can use the
-<a config-tag="session-timeout"/> tag to configure this.</p>
-
-<example>
-&lt;web-app id='/'&gt;
-  ...
-  &lt;session-config&gt;
-    &lt;!-- timeout after 120 minutes --&gt;
-    &lt;session-timeout&gt;120&lt;/session-timeout&gt;
-    &lt;!-- up to 4096 sessions at once --&gt;
-    &lt;session-max&gt;4096&lt;/session-max&gt;
-  &lt;/session-config&gt;
-  ...
-&lt;/web-app&gt;
-</example>
-</s3>
-
-
-<s3 title="Application reloading">
-
-<p>Whenever a java source file, web.xml, or resin.conf changes then Resin will
-restart the application.  If this happens, your current sessions will be lost
-unless you have configured a persistent session store.</p>
-
-</s3>
-
-<s3 title="Browser cookie limitations">
-
-<p>Some users have reported that if their applciation uses a lot of cookies,
-the browser will start to discard older cookies to make room for the new.  This
-may result in the browser discarding the cookie that Resin is using to keep
-track of the session.</p>
-
-<p>If your application uses a lot of cookies, you may need to configure Resin
-to always use URL rewritting by setting <a config-tag="enable-cookies"/> to
-false.</p>
-
-<example>
-&lt;web-app id='/'&gt;
-  ...
-  &lt;session-config&gt;
-    &lt;enable-cookies&gt;false&lt;/enable-cookies&gt;
-    &lt;enable-url-rewriting&gt;true&lt;/enable-url-rewriting&gt;
-  &lt;/session-config&gt;
-  ...
-&lt;/web-app&gt;
-</example>
-
-</s3>
-
-<s3 title="Problems with cookie domains">
-
-<p>You may also lose your sessions if your cookie domains are incompatible.
-For example, if you have one server that uses cookie domain "hogwarts.com" and
-another that uses "qa.hogwarts.com", the cookie in the browser for
-"hogwarts.com" will interfere with sessions on "qa.hogwarts.com".  The solution
-is to change the cookie domain "hogwarts.com" to "www.hogwarts.com".</p>
-
-<p>You set the cookie domain in <a config-tag="session-config"/>.
-(Thanks Laura for providing this)</p>
-
-</s3>
-
-<s3 title="Conflicting cookie names">
-
-<p>If you are using Resin and another application server (such as Tomcat), you
-may encounter a conflict because both of them are using the same cookie name
-(usually JSESSIONID) for the session tracking cookie.</p>
-
-<p>Resin provides <a config-tag="session-cookie"/> to let you change the name
-of the cookie that Resin uses.</p>
-
-<example title="Change the name of the cookie used for session tracking">
-  &lt;server&gt;
-
-    ...
-
-    &lt;session-cookie&gt;RJESSESSIONID&lt;/session-cookie&gt;
-</example>
 </s3>
 
 </s2> <!-- losing sessions -->
@@ -388,11 +411,10 @@ log messages are found in the file <var>$RESIN_HOME/log/debug.log</var>.</p>
 <example title="Full debug logging of the server to $RESIN_HOME/log/debug.log">
 &lt;!-- resin.conf --&gt;
 &lt;resin&gt;
-  ...
-  &lt;log name='' level='finer' path='log/debug.log'
-       timestamp="[%H:%M:%S.%s]"
-       rollover-period='1D'/&gt;
-  ...
+  &lt;log name="" path="log/debug.log" timestamp="[%H:%M:%S.%s] {%{thread}} "/>
+
+  &lt;logger name="" level="finer"/>
+
 &lt;/resin&gt;
 </example>
 
@@ -417,9 +439,9 @@ web application will go to the log file.</p>
 
 &lt;web-app&gt;
   ...
-  &lt;log name='' level='finer' path='WEB-INF/work/debug.log'
-       timestamp="[%H:%M:%S.%s]"
-       rollover-period='1D'/&gt;
+  &lt;log name="" path="WEB-INF/work/debug.log" timestamp="[%H:%M:%S.%s] {%{thread}} "/>
+
+  &lt;logger name="" level="finer"/>
   ...
 &lt;/web-app&gt;
 </example>
