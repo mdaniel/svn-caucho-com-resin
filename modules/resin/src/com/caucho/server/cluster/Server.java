@@ -392,17 +392,8 @@ public class Server extends ProtocolDispatchServer
 
   public Management createManagement()
   {
-    if (_management == null) {
-      try {
-        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
-
-        _management = (Management) cl.newInstance();
-      } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
-      }
-
-      if (_management == null)
-        _management = new Management();
+    if (_management == null && _resin != null) {
+      _management = _resin.createManagement();
 
       _management.setCluster(getCluster());
     }
@@ -1073,8 +1064,11 @@ public class Server extends ProtocolDispatchServer
     if (_resin != null && _resin.getManagementPath() != null)
       createManagement().setManagementPath(_resin.getManagementPath());
 
-    if (_management != null)
-      _management.start();
+    if (_resin != null) {
+      createManagement().setCluster(getCluster());
+      createManagement().setServer(this);
+      createManagement().init();
+    }
 
     if (_threadMax < _threadIdleMax)
       throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",

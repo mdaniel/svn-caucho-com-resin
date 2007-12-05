@@ -367,8 +367,13 @@ public class JAXBContextImpl extends JAXBContext {
     }
     else {
       // XXX
-      if (c.isEnum() || c.isInterface())
-        return null;
+      if (c.isEnum() || c.isInterface()) {
+	return null;
+	/*
+        throw new IllegalStateException(L.l("{0}: Can't create skeleton for an interface or enum",
+					    c.getName()));
+	*/
+      }
 
       skeleton = new ClassSkeleton(this, c);
 
@@ -388,9 +393,7 @@ public class JAXBContextImpl extends JAXBContext {
   public ClassSkeleton getSkeleton(Class c)
     throws JAXBException
   {
-    createSkeleton(c);
-
-    return _classSkeletons.get(c);
+    return createSkeleton(c);
   }
 
   public boolean hasSkeleton(Class c)
@@ -563,7 +566,13 @@ public class JAXBContextImpl extends JAXBContext {
           return new CollectionProperty(property);
       }
 
-      return new SkeletonProperty(getSkeleton(cl));
+      ClassSkeleton skel = getSkeleton(cl);
+
+      // XXX: interfaces
+      if (skel != null)
+	return new SkeletonProperty(skel);
+      else
+	return null;
     }
     else if (type instanceof ParameterizedType) {
       ParameterizedType ptype = (ParameterizedType) type;

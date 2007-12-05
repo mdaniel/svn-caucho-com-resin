@@ -59,6 +59,7 @@ import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.server.admin.TransactionManager;
+import com.caucho.server.admin.Management;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
@@ -159,6 +160,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     = new ArrayList<BoundPort>();
 
   private Path _managementPath;
+  private Management _management;
 
   private ThreadPoolAdmin _threadPoolAdmin;
   private ResinAdmin _resinAdmin;
@@ -550,10 +552,22 @@ public class Resin implements EnvironmentBean, SchemaBean
     return new TransactionManager(this);
   }
 
-  @Deprecated
-  public void setManagement(ManagementCompatConfig management)
+  public Management createManagement()
   {
-    _managementPath = management.getPath();
+    if (_management == null) {
+      try {
+        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
+
+        _management = (Management) cl.newInstance();
+      } catch (Exception e) {
+        log().log(Level.FINEST, e.toString(), e);
+      }
+
+      if (_management == null)
+        _management = new Management();
+    }
+
+    return _management;
   }
 
   @Deprecated

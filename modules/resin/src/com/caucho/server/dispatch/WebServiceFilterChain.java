@@ -37,11 +37,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.*;
 
 /**
  * Represents the final servlet in a filter chain.
  */
 public class WebServiceFilterChain implements FilterChain {
+  private static final Logger log
+    = Logger.getLogger(WebServiceFilterChain.class.getName());
+  
   public static final String SERVLET_NAME
     = "javax.servlet.error.servlet_name";
   
@@ -95,6 +99,9 @@ public class WebServiceFilterChain implements FilterChain {
     if (_skeleton == null) {
       try {
         _skeleton = _config.createWebServiceSkeleton();
+
+	if (log.isLoggable(Level.FINER))
+	  log.finer("WebService " + _skeleton + " created");
       } catch (ServletException e) {
         throw e;
       } catch (RuntimeException e) {
@@ -125,5 +132,10 @@ public class WebServiceFilterChain implements FilterChain {
       request.setAttribute(SERVLET_NAME, _config.getServletName());
       throw new ServletException(e);
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _skeleton + "]";
   }
 }

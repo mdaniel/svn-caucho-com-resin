@@ -288,7 +288,9 @@ if ($live_count < 2) {
   echo "<h3>resin.conf</h3>";
   echo "<pre>\n";
   echo "&lt;resin xmlns='http://caucho.com/ns/resin'>\n";
-  echo "  &lt;management remote-enable-cookie='j9N3z19p3'>\n";
+  echo "  &lt;management>\n";
+  echo "    &lt;jmx-server password='changeme'/>\n";
+  echo "  &lt;/management>\n";
   echo "  ...\n";
   echo "  &lt;cluster id='...'>\n";
   echo "    ...\n";

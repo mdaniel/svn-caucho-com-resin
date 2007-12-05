@@ -247,7 +247,9 @@ public abstract class XmlMapping implements Namer {
       attributes.add(NilWrapper.INSTANCE);
     }
 
-    _property.write(m, out, value, this, obj, attributes);
+    // XXX: interface/enum
+    if (_property != null)
+      _property.write(m, out, value, this, obj, attributes);
   }
 
   public void write(Marshaller m, XMLStreamWriter out,

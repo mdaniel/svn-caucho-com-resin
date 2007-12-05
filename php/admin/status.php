@@ -201,7 +201,7 @@ if ($ports) {
   <tr>
     <th colspan='2'>&nbsp;</th>
   <th colspan='3'>Threads</th>
-  <th colspan='3'>Keepalive</th>
+  <th colspan='4'>Keepalive</th>
 
   <tr>
     <th>&nbsp;</th>

@@ -58,6 +58,9 @@ public class SkeletonProperty extends Property {
   public SkeletonProperty(ClassSkeleton skeleton)
   {
     _skeleton = skeleton;
+
+    if (_skeleton == null)
+      throw new NullPointerException();
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)

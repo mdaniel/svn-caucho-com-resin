@@ -34,7 +34,9 @@ import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.DeployManagementService;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostConfig;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -53,6 +55,7 @@ public class Management
   public static final String HOST_NAME = "admin.caucho";
 
   private Cluster _cluster;
+  private Server _server;
   private Path _path;
 
   private HostConfig _hostConfig;
@@ -63,6 +66,11 @@ public class Management
   public void setCluster(Cluster cluster)
   {
     _cluster = cluster;
+  }
+  
+  public void setServer(Server server)
+  {
+    _server = server;
   }
 
   public String getServerId()
@@ -79,7 +87,7 @@ public class Management
     _path = path;
   }
   
-  protected Path getPath()
+  public Path getPath()
   {
     return _path;
   }
@@ -100,10 +108,7 @@ public class Management
    */
   public Object createJmxService()
   {
-    log.fine(L.l("'{0}' management requires Resin Professional",
-                 "persistent-logger"));
-
-    return null;
+    throw new ConfigException(L.l("jmx-service requires Resin Professional"));
   }
 
   /**
@@ -111,16 +116,12 @@ public class Management
    */
   public ResourceAdapter createPing()
   {
-    log.fine(L.l("'{0}' management requires Resin Professional",
-                 "ping"));
-
-    return null;
+    throw new ConfigException(L.l("ping requires Resin Professional"));
   }
 
   public void addPing(ResourceAdapter ping)
   {
-    log.fine(L.l("'{0}' management requires Resin Professional",
-                 "ping"));
+    throw new ConfigException(L.l("ping requires Resin Professional"));
   }
 
   /**
@@ -165,6 +166,11 @@ public class Management
     return _transactionManager;
   }
 
+  public void init()
+  {
+    start();
+  }
+  
   public void start()
   {
     try {
@@ -191,12 +197,26 @@ public class Management
 
       hostConfig.init();
 
-      _cluster.addBuilderProgram(new ObjectAttributeProgram("host", hostConfig));
+      try {
+	_server.addHost(hostConfig);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
 
       _hostConfig = hostConfig;
     }
 
     return _hostConfig;
+  }
+
+  protected Cluster getCluster()
+  {
+    if (_cluster == null)
+      _cluster = Cluster.getLocal();
+
+    return _cluster;
   }
 
   public void destroy()

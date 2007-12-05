@@ -167,10 +167,15 @@ public class JAXBRestProtocolServlet extends RestProtocolServlet
       _marshaller.marshal(result, writer);
     } 
     catch (JAXBException e) {
-      ws.print(result);
+      throw new RuntimeException(e);
     }
     finally {
       ws.close();
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

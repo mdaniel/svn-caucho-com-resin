@@ -29,6 +29,7 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
@@ -80,8 +81,7 @@ abstract public class ManagementService
   public void start()
   {
     if (_password == null) {
-      log.info("jmx-remote requires a password attribute to activate");
-      return;
+      throw new ConfigException(L.l("jmx-remote requires a password attribute to activate"));
     }
     
     HostConfig hostConfig = _management.getHostConfig();

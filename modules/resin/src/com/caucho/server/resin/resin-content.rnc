@@ -479,7 +479,7 @@ r_resin-Basis =
   & (attribute environment-system-properties { r_boolean-Type }
      | element environment-system-properties { r_boolean-Type })?
 
-  & r_management-compat?
+  & r_management?
 
   & r_min-free-memory?
 
