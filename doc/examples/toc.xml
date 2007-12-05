@@ -45,7 +45,7 @@
       <item link="burlap-add/index.xtp" title="Burlap Addition"/>
       <item link="custom-protocol/index.xtp" title="custom-protocol"/>
 
-      <item link="soa-hello-world/index.xtp" title="Simple Service"/>
+      <item link="remote-hello-world/index.xtp" title="Simple Service"/>
       <!--
       <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
       -->
