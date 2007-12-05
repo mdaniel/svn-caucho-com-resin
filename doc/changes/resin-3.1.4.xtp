@@ -31,11 +31,11 @@ database pools.</p>
 
 <p>The two methods are:</p>
 
-<code><pre>
+<pre>
   DataSource DatabaseManager.findDatabase(String url);
 
   DataSource DatabaseManager.findDatabase(String url, String driver);
-</pre></code>
+</pre>
 
 <p>The first method is only allowed if the driver has a META-INF/services.</p>
 
