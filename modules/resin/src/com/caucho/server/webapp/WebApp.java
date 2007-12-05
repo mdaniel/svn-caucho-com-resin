@@ -1521,6 +1521,24 @@ public class WebApp extends ServletContextImpl
    */
   public void setConfigException(Throwable e)
   {
+    if (e != null) {
+      e.printStackTrace();
+      log.log(Level.WARNING, e.toString(), e);
+
+      Throwable e1 = e;
+      for (;
+           e1 != null
+             && e1.getCause() != null
+             && e1.getCause() != e1;
+           e1 = e1.getCause()) {
+      }
+      
+      if (e1 != null) {
+        log.log(Level.WARNING, e1.toString(), e1);
+        e1.printStackTrace();
+      }
+    }
+    
     if (_configException == null)
       _configException = e;
 

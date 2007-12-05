@@ -37,7 +37,7 @@ import java.net.MalformedURLException;
 public class HessianEncodingProxyFactory implements EncodingProxyFactory {
   private static final L10N L = new L10N(HessianEncodingProxyFactory.class);
 
-  private static HessianProxyFactory _proxyFactory;
+  private HessianProxyFactory _proxyFactory;
   
   public Object getProxy(Class serviceInterface, String url)
     throws MalformedURLException
