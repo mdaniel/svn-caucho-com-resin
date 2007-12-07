@@ -28,22 +28,50 @@
 
 package com.caucho.jsf.html;
 
+import javax.faces.component.*;
+import javax.faces.context.*;
+import javax.faces.model.*;
 import java.io.*;
 import java.util.*;
-
-import javax.faces.*;
-import javax.faces.component.*;
-import javax.faces.component.html.*;
-import javax.faces.context.*;
-import javax.faces.convert.*;
-import javax.faces.render.*;
-import javax.faces.model.*;
 
 /**
  * The base renderer
  */
 abstract class SelectRenderer extends BaseRenderer
 {
+  private ArrayList<SelectItem> getSelectItems(UISelectItems selectItems)
+  {
+    ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+
+    Object value = selectItems.getValue();
+
+    if (value instanceof SelectItem)
+      items.add((SelectItem) value);
+    else if (value instanceof Collection) {
+
+      for (Object o : ((Collection) value)) {
+
+        if (o instanceof SelectItem)
+          items.add((SelectItem) o);
+      }
+    }
+    else if (value instanceof Map) {
+      Map map = (Map) value;
+
+      for (Object o : map.entrySet()) {
+        Map.Entry entry = (Map.Entry) o;
+
+        items.add(new SelectItem(entry.getValue(),
+                                 String.valueOf(entry.getKey())));
+      }
+    }
+    else if (value instanceof SelectItem[]) {
+      SelectItem[] items_ = (SelectItem[]) value;
+      items.addAll(Arrays.asList(items_));
+    }
+    return items;
+  }
+
   protected ArrayList<SelectItem> getSelectItems(UIComponent component)
   {
     ArrayList<SelectItem> items = new ArrayList<SelectItem>();
@@ -70,33 +98,7 @@ abstract class SelectRenderer extends BaseRenderer
 	items.add(item);
       }
       else if (child instanceof UISelectItems) {
-	UISelectItems selectItems = (UISelectItems) child;
-
-	Object value = selectItems.getValue();
-
-	if (value instanceof SelectItem)
-	  items.add((SelectItem) value);
-	else if (value instanceof Collection) {
-	  Iterator iter = ((Collection) value).iterator();
-
-	  while (iter.hasNext()) {
-	    Object subValue = iter.next();
-
-	    if (subValue instanceof SelectItem)
-	      items.add((SelectItem) subValue);
-	  }
-	}
-	else if (value instanceof Map) {
-	  Map map = (Map) value;
-
-	  Iterator iter = map.entrySet().iterator();
-	  while (iter.hasNext()) {
-	    Map.Entry entry = (Map.Entry) iter.next();
-	    
-	    items.add(new SelectItem(entry.getValue(),
-				     String.valueOf(entry.getKey())));
-	  }
-	}
+        items.addAll(getSelectItems((UISelectItems)child));
       }
     }
 
@@ -155,9 +157,52 @@ abstract class SelectRenderer extends BaseRenderer
 	out.writeAttribute("value",
                            String.valueOf(selectItem.getItemValue()),
 			   "value");
-      
+
+        out.writeText(selectItem.getItemLabel(), "label");
+
 	out.endElement("option");
         out.write("\n");
+      }
+      else if (child instanceof UISelectItems) {
+        UISelectItems uiSelectItems = (UISelectItems) child;
+        List<SelectItem> items = getSelectItems(uiSelectItems);
+
+        for (SelectItem selectItem : items) {
+
+          if (child.getId() != null)
+            childId = child.getClientId(context);
+
+          out.startElement("option", child);
+
+          if (selectItem.isDisabled()) {
+            out.writeAttribute("disabled", "disabled", "disabled");
+
+            if (disabledClass != null)
+              out.writeAttribute("class", disabledClass, "disabledClass");
+          }
+          else {
+            if (enabledClass != null)
+              out.writeAttribute("class", enabledClass, "enabledClass");
+          }
+
+          if (values != null) {
+            for (int j = 0; j < values.length; j++) {
+              if (values[j].equals(selectItem.getValue())) {
+                out.writeAttribute("selected", "selected", "selected");
+                break;
+              }
+            }
+          }
+
+          out.writeAttribute("value",
+                             String.valueOf(selectItem.getValue()),
+                             "value");
+
+          out.writeText(selectItem.getLabel(), "label");
+
+          out.endElement("option");
+          out.write("\n");
+        }
       }
     }
   }
