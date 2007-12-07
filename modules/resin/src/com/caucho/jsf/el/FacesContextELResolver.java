@@ -29,18 +29,13 @@
 
 package com.caucho.jsf.el;
 
-import com.caucho.el.AbstractVariableResolver;
-import com.caucho.jsp.el.*;
 import com.caucho.jsf.cfg.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.el.*;
 
 import javax.el.*;
-import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 import java.beans.FeatureDescriptor;
 import java.util.*;
@@ -66,8 +61,10 @@ public class FacesContextELResolver extends CompositeELResolver {
   private final MapELResolver _mapResolver = new MapELResolver();
   private final ListELResolver _listResolver = new ListELResolver();
   private final ArrayELResolver _arrayResolver = new ArrayELResolver();
-  private final JsfResourceBundleELResolver _bundleResolver;
+  private final JsfResourceBundleELResolver _jsfBundleResolver;
   private final BeanELResolver _beanResolver = new BeanELResolver();
+  private final ResourceBundleELResolver _bundleResolver
+    = new ResourceBundleELResolver();  
 
   private final WebBeansELResolver _webBeansResolver
     = new WebBeansELResolver();
@@ -76,10 +73,10 @@ public class FacesContextELResolver extends CompositeELResolver {
     = new ManagedBeanELResolver();
 
   public FacesContextELResolver(ELResolver []customResolvers,
-				JsfResourceBundleELResolver bundleResolver)
+				JsfResourceBundleELResolver jsfBundleResolver)
   {
     _customResolvers = customResolvers;
-    _bundleResolver = bundleResolver;
+    _jsfBundleResolver = jsfBundleResolver;
   }
 
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
@@ -94,7 +91,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 
   public ELResolver getResourceBundleResolver()
   {
-    return _bundleResolver;
+    return _jsfBundleResolver;
   }
 
   public void addELResolver(ELResolver elResolver)
@@ -133,6 +130,7 @@ public class FacesContextELResolver extends CompositeELResolver {
     common = common(common, _listResolver.getCommonPropertyType(env, base));
     common = common(common, _arrayResolver.getCommonPropertyType(env, base));
     common = common(common, _beanResolver.getCommonPropertyType(env, base));
+    common = common(common, _jsfBundleResolver.getCommonPropertyType(env, base));
     common = common(common, _bundleResolver.getCommonPropertyType(env, base));
 
     return common;
@@ -175,14 +173,14 @@ public class FacesContextELResolver extends CompositeELResolver {
 		     _managedBeanResolver.getFeatureDescriptors(env, base));
 
       addDescriptors(descriptors,
-		     _bundleResolver.getFeatureDescriptors(env, base));
+		     _jsfBundleResolver.getFeatureDescriptors(env, base));
     }
     
     addDescriptors(descriptors, _mapResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
 		   _beanResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
-		   _bundleResolver.getFeatureDescriptors(env, base));
+		   _jsfBundleResolver.getFeatureDescriptors(env, base));
     /*
     addDescriptors(descriptors,
 		   _implicitResolver.getFeatureDescriptors(env, base));
@@ -220,7 +218,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return Object.class;
       }
 
-      Class type = _bundleResolver.getType(env, base, property);
+      Class type = _jsfBundleResolver.getType(env, base, property);
 
       if (env.isPropertyResolved())
 	return type;
@@ -249,7 +247,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return expr.getValue(env);
       }
 
-      Object value = _bundleResolver.getValue(env, base, property);
+      Object value = _jsfBundleResolver.getValue(env, base, property);
       if (env.isPropertyResolved())
 	return value;
     }
@@ -274,7 +272,6 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return _beanResolver.getValue(env, base, property);
     }
     else if (property instanceof String) {
-      String key = (String) property;
       
       FacesContext facesContext
 	= (FacesContext) env.getContext(FacesContext.class);
@@ -341,7 +338,7 @@ public class FacesContextELResolver extends CompositeELResolver {
       else if (base instanceof ResourceBundle) {
 	env.setPropertyResolved(true);
 	
-	return _bundleResolver.isReadOnly(env, base, property);
+	return _jsfBundleResolver.isReadOnly(env, base, property);
       }
       else {
 	env.setPropertyResolved(true);
@@ -358,7 +355,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return true;
       }
 
-      boolean value = _bundleResolver.isReadOnly(env, base, property);
+      boolean value = _jsfBundleResolver.isReadOnly(env, base, property);
       if (env.isPropertyResolved())
 	return value;
     }
@@ -390,7 +387,7 @@ public class FacesContextELResolver extends CompositeELResolver {
       else if (base.getClass().isArray())
 	_arrayResolver.setValue(env, base, property, value);
       else if (base instanceof ResourceBundle)
-	_bundleResolver.setValue(env, base, property, value);
+	_jsfBundleResolver.setValue(env, base, property, value);
       else
 	_beanResolver.setValue(env, base, property, value);
     }
@@ -401,7 +398,7 @@ public class FacesContextELResolver extends CompositeELResolver {
       if (expr != null)
 	throw new PropertyNotWritableException(key);
       
-      _bundleResolver.setValue(env, base, property, value);
+      _jsfBundleResolver.setValue(env, base, property, value);
       if (env.isPropertyResolved())
 	return;
       
