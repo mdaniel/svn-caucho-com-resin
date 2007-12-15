@@ -73,7 +73,7 @@ public class WbBinding {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -142,7 +142,7 @@ public class WbBinding {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -299,10 +299,8 @@ public class WbBinding {
 	  return value.equals(_value);
       } catch (RuntimeException e) {
 	throw e;
-      } catch (InvocationTargetException e) {
-	throw new ConfigException(e.getCause());
       } catch (Exception e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
     }
 

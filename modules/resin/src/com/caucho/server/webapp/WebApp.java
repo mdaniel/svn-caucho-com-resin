@@ -875,7 +875,7 @@ public class WebApp extends ServletContextImpl
     try {
       Jndi.bindDeep("java:comp/env/" + contextRefName, obj);
     } catch (NamingException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -1816,7 +1816,7 @@ public class WebApp extends ServletContextImpl
         try {
           addListenerObject(listener.createListenerObject(), false);
         } catch (Exception e) {
-          throw new ConfigException(e);
+          throw ConfigException.create(e);
         }
       }
 
@@ -1825,7 +1825,7 @@ public class WebApp extends ServletContextImpl
 
         try {
           listener.contextInitialized(event);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }
       }
@@ -1833,7 +1833,7 @@ public class WebApp extends ServletContextImpl
       try {
         _servletManager.init();
         _filterManager.init();
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
         setConfigException(e);
       }

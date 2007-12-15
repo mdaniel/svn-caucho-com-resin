@@ -77,7 +77,7 @@ public class ServiceInjectProgram extends BuilderProgram {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -111,7 +111,7 @@ public class ServiceInjectProgram extends BuilderProgram {
       log.finer(String.valueOf(e));
       log.log(Level.FINEST, e.toString(), e);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

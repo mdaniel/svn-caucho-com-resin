@@ -727,7 +727,7 @@ abstract public class RelatedType extends AbstractStatefulType {
 	  ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
 	}
       } catch (SQLException e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
     }
 
@@ -798,7 +798,7 @@ abstract public class RelatedType extends AbstractStatefulType {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

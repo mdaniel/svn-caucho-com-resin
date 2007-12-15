@@ -119,8 +119,8 @@ public class ResourceManagerConfig {
       }
     } catch (ConfigException e) {
       throw e;
-    } catch (Throwable e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
 
     for (int i = 0; i < _connList.size(); i++) {
@@ -147,7 +147,7 @@ public class ResourceManagerConfig {
 
       _rm.addResource(ra);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 }

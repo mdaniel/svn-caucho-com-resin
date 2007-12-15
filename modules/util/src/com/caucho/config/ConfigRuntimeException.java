@@ -37,21 +37,20 @@ import java.io.PrintWriter;
 /**
  * Thrown by the various Builders
  */
-public class ConfigException
-  extends ConfigRuntimeException
-  implements CompileException, DisplayableException
+public class ConfigRuntimeException
+  extends RuntimeException
 {
   /**
    * Create a null exception
    */
-  public ConfigException()
+  public ConfigRuntimeException()
   {
   }
 
   /**
    * Creates an exception with a message
    */
-  public ConfigException(String msg)
+  public ConfigRuntimeException(String msg)
   {
     super(msg);
   }
@@ -59,7 +58,7 @@ public class ConfigException
   /**
    * Creates an exception with a message and throwable
    */
-  public ConfigException(String msg, Throwable e)
+  public ConfigRuntimeException(String msg, Throwable e)
   {
     super(msg, e);
   }
@@ -67,12 +66,10 @@ public class ConfigException
   /**
    * Creates an exception with a throwable
    */
-  /*
-  public ConfigException(Throwable e)
+  public ConfigRuntimeException(Throwable e)
   {
     super(getMessage(e), e);
   }
-  */
 
   private static String getMessage(Throwable e)
   {
@@ -80,28 +77,6 @@ public class ConfigException
       return e.getMessage();
     else
       return e.toString();
-  }
-
-  public static RuntimeException create(String location, Throwable e)
-  {
-    if (e instanceof DisplayableException)
-      return new ConfigException(location + e.getMessage(), e);
-    else
-      return new ConfigException(location + e, e);
-  }
-
-  public static RuntimeException create(Throwable e)
-  {
-    if (e instanceof InstantiationException && e.getCause() != null)
-      e = e.getCause();
-    
-    if (e instanceof RuntimeException)
-      return (RuntimeException) e;
-    else if (e instanceof DisplayableException
-	     || e instanceof CompileException)
-      return new ConfigException(e.getMessage(), e);
-    else
-      return new ConfigRuntimeException(e);
   }
 
   public void print(PrintWriter out)

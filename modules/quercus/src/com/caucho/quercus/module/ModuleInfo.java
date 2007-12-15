@@ -81,7 +81,7 @@ public class ModuleInfo {
     try {
       introspectPhpModuleClass(module.getClass());
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

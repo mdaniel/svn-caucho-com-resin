@@ -108,7 +108,7 @@ public class ManagedBeanConfig
 	
 	_type = Class.forName(_typeName, false, loader);
       } catch (Exception e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
     }
     

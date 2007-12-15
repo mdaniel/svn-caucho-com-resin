@@ -201,7 +201,7 @@ public class JaxbBeanType extends TypeStrategy
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -732,7 +732,7 @@ public class JaxbBeanType extends TypeStrategy
     try {
       return TypeStrategyFactory.getTypeStrategy(valueType);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -850,7 +850,7 @@ public class JaxbBeanType extends TypeStrategy
       try {
 	_adapter = _adapterClass.newInstance();
       } catch (Exception e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
     }
 

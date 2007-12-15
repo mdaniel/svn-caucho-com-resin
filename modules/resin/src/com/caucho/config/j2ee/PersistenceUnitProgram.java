@@ -101,7 +101,7 @@ public class PersistenceUnitProgram extends BuilderProgram
     try {
       ic = new InitialContext();
     } catch (NamingException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     if (_jndiName != null) {

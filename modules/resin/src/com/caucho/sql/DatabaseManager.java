@@ -143,7 +143,7 @@ public class DatabaseManager {
     } catch (SQLException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

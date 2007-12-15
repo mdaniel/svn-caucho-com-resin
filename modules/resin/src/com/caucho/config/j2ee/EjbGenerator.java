@@ -141,7 +141,7 @@ public class EjbGenerator extends ValueGenerator {
 	try {
 	  Jndi.bindDeepShort(_jndiName, _component);
 	} catch (NamingException e) {
-	  throw new ConfigException(e);
+	  throw ConfigException.create(e);
 	}
       }
     }

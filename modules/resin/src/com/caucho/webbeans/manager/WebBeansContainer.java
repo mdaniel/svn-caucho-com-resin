@@ -186,7 +186,7 @@ public class WebBeansContainer
       
       throw _configException;
     } catch (Exception e) {
-      _configException = new ConfigException(e);
+      _configException = ConfigException.create(e);
 
       throw _configException;
     }

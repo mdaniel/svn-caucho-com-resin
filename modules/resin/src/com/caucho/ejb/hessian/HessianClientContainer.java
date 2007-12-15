@@ -124,10 +124,8 @@ class HessianClientContainer implements HessianRemoteResolver {
       homeStub._init(_serverId, this);
 
       return homeStub;
-    } catch (IllegalAccessException e) {
-      throw new ConfigException(e);
-    } catch (InstantiationException e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 
@@ -145,10 +143,8 @@ class HessianClientContainer implements HessianRemoteResolver {
       ObjectStub objStub = (ObjectStub) _remoteStubClass.newInstance();
       objStub._init(url, this);
       return objStub;
-    } catch (IllegalAccessException e) {
-      throw new ConfigException(e);
-    } catch (InstantiationException e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 
@@ -241,7 +237,7 @@ class HessianClientContainer implements HessianRemoteResolver {
         _homeClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
     
     return _homeClass;
@@ -269,7 +265,7 @@ class HessianClientContainer implements HessianRemoteResolver {
 
       return (String) MetaStub.call(path, "_hessian_getAttribute", "home-class");
     } catch (Throwable e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -296,7 +292,7 @@ class HessianClientContainer implements HessianRemoteResolver {
         _remoteClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     return _remoteClass;
@@ -325,7 +321,7 @@ class HessianClientContainer implements HessianRemoteResolver {
       return (String) MetaStub.call(path, "_hessian_getAttribute",
                                     "remote-class");
     } catch (Throwable e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
   
@@ -349,7 +345,7 @@ class HessianClientContainer implements HessianRemoteResolver {
         _primaryKeyClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
     
     return _primaryKeyClass;
@@ -377,7 +373,7 @@ class HessianClientContainer implements HessianRemoteResolver {
 
       return (String) MetaStub.call(path, "_hessian_getAttribute", "primary-key-class");
     } catch (Throwable e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
   

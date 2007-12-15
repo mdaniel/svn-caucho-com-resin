@@ -119,7 +119,7 @@ public class ImportRule
       throw e;
     }
     catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     super.init();

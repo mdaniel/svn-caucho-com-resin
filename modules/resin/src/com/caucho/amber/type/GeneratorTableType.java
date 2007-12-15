@@ -139,7 +139,7 @@ public class GeneratorTableType extends Type {
       try {
         gen.init(getAmberManager());
       } catch (SQLException e) {
-        throw new ConfigException(e);
+        throw ConfigException.create(e);
       }
     }
   }

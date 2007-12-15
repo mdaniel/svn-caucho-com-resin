@@ -76,7 +76,7 @@ public class JavaMailConfig {
       throw new ConfigException(L.l("javax.mail.Session is not available.  JavaMail must be downloaded separately from Sun."),
 				e);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 }

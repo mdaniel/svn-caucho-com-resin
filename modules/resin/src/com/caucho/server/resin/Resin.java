@@ -249,7 +249,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	_variableMap.put("jndi", Jndi.class.getMethod("lookup", new Class[] { String.class }));
 	_variableMap.put("jndi:lookup", Jndi.class.getMethod("lookup", new Class[] { String.class }));
       } catch (Exception e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
 
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());

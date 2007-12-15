@@ -30,6 +30,7 @@
 package com.caucho.server.admin;
 
 import java.lang.reflect.*;
+import java.util.logging.*;
 import javax.management.MBeanServerConnection;
 
 import com.caucho.config.*;
@@ -41,6 +42,8 @@ import com.caucho.util.*;
  */
 public class RemoteMBeanConnectionFactory {
   private static final L10N L = new L10N(RemoteMBeanConnectionFactory.class);
+  private static final Logger log
+    = Logger.getLogger(RemoteMBeanConnectionFactory.class.getName());
   
   private static Constructor _constructor;
   
@@ -57,11 +60,10 @@ public class RemoteMBeanConnectionFactory {
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException)
-	throw (RuntimeException) e.getCause();
-      else
-	throw new ConfigException(e.getCause());
+      throw ConfigException.create(e);
     } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+      
       throw new ConfigException(L.l("remote mbeans require Resin Professional"));
     }
   }

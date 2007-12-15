@@ -158,8 +158,8 @@ public class TypeStrategyFactory {
       }
     } catch (RuntimeException e) {
       throw e;
-    } catch (Throwable e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 

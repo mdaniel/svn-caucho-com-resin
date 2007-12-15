@@ -210,7 +210,7 @@ public class ApplicationConfig
     try {
       _elResolverList.add((ELResolver) elResolver.newInstance());
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -294,10 +294,8 @@ public class ApplicationConfig
       } catch (NoSuchMethodException e) {
       } catch (RuntimeException e) {
         throw e;
-      } catch (InvocationTargetException e) {
-        throw new ConfigException(e.getCause());
       } catch (Exception e) {
-        throw new ConfigException(e);
+        throw ConfigException.create(e);
       }
 
       if (handler == null) {
@@ -306,7 +304,7 @@ public class ApplicationConfig
         } catch (RuntimeException e) {
           throw e;
         } catch (Exception e) {
-          throw new ConfigException(e);
+          throw ConfigException.create(e);
         }
       }
 
@@ -329,10 +327,8 @@ public class ApplicationConfig
       } catch (NoSuchMethodException e) {
       } catch (RuntimeException e) {
         throw e;
-      } catch (InvocationTargetException e) {
-        throw new ConfigException(e.getCause());
       } catch (Exception e) {
-        throw new ConfigException(e);
+        throw ConfigException.create(e);
       }
 
       if (handler == null) {
@@ -341,7 +337,7 @@ public class ApplicationConfig
         } catch (RuntimeException e) {
           throw e;
         } catch (Exception e) {
-          throw new ConfigException(e);
+          throw ConfigException.create(e);
         }
       }
 
@@ -364,10 +360,8 @@ public class ApplicationConfig
       } catch (NoSuchMethodException e) {
       } catch (RuntimeException e) {
         throw e;
-      } catch (InvocationTargetException e) {
-        throw new ConfigException(e.getCause());
       } catch (Exception e) {
-        throw new ConfigException(e);
+        throw ConfigException.create(e);
       }
 
       if (manager == null) {
@@ -376,7 +370,7 @@ public class ApplicationConfig
         } catch (RuntimeException e) {
           throw e;
         } catch (Exception e) {
-          throw new ConfigException(e);
+          throw ConfigException.create(e);
         }
       }
 

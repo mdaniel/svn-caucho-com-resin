@@ -170,7 +170,7 @@ public class LibraryLoader extends Loader implements Dependency {
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

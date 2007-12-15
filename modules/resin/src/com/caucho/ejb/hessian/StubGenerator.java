@@ -103,7 +103,7 @@ class StubGenerator extends MarshalGenerator {
     
       return compile();
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

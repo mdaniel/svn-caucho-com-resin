@@ -606,7 +606,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   public void configure()
     throws ConfigException
   {
-    ConfigException exn = null;
+    RuntimeException exn = null;
 
     while (_depCompletions.size() > 0 || _linkCompletions.size() > 0) {
       while (_linkCompletions.size() > 0) {
@@ -625,7 +625,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
           completion.getRelatedType().setConfigException(e);
 
           if (exn == null)
-            exn = new ConfigException(e);
+            exn = ConfigException.create(e);
         }
       }
 
@@ -645,7 +645,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
           completion.getRelatedType().setConfigException(e);
 
           if (exn == null)
-            exn = new ConfigException(e);
+            exn = ConfigException.create(e);
         }
       }
     }
@@ -3368,7 +3368,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                 introspectIdMethod(_persistenceUnit, _relatedType, null,
                                    parent.getBeanClass(), null, null);
             } catch (SQLException e) {
-              throw new ConfigException(e);
+              throw ConfigException.create(e);
             }
 
             field = _relatedType.getId().getKeys().get(0);

@@ -102,7 +102,7 @@ public class FacesServletImpl extends GenericServlet
 	initPath(app, Vfs.lookup(url.toString()));
       }
     } catch (IOException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     String path = config.getServletContext().getInitParameter(FacesServlet.CONFIG_FILES_ATTR);

@@ -210,7 +210,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
       
       _jarFileUrls.add(url);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

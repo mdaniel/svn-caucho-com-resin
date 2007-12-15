@@ -124,9 +124,9 @@ class BurlapClientContainer implements BurlapRemoteResolver {
 
       return homeStub;
     } catch (IllegalAccessException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     } catch (InstantiationException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -144,10 +144,10 @@ class BurlapClientContainer implements BurlapRemoteResolver {
       ObjectStub objStub = (ObjectStub) remoteStubClass.newInstance();
       objStub._init(url, this);
       return objStub;
-    } catch (IllegalAccessException e) {
-      throw new ConfigException(e);
-    } catch (InstantiationException e) {
-      throw new ConfigException(e);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 
@@ -240,7 +240,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
         homeClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
     
     return homeClass;
@@ -268,7 +268,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
 
       return (String) MetaStub.call(path, "_burlap_getAttribute", "java.home.class");
     } catch (Throwable e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -295,7 +295,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
         remoteClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     return remoteClass;
@@ -324,7 +324,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
       return (String) MetaStub.call(path, "_burlap_getAttribute",
                                     "java.object.class");
     } catch (Throwable e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
   
@@ -348,7 +348,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
         primaryKeyClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
     
     return primaryKeyClass;
@@ -376,7 +376,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
 
       return (String) MetaStub.call(path, "_burlap_getAttribute", "primary-key-class");
     } catch (Throwable e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
   

@@ -475,12 +475,10 @@ public class EjbSessionBean extends EjbBean {
         // ejb/0fd0, ejb/0g03
         for (EnvEntry envEntry : getEnvEntries())
           envEntry.init();
-      } catch (ConfigException e) {
-        throw e;
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
-        throw new ConfigException(e);
+        throw ConfigException.create(e);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

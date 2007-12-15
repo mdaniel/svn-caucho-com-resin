@@ -365,7 +365,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     try {
       return Class.forName(className, false, _loader);
     } catch (ClassNotFoundException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -556,7 +556,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -2434,7 +2434,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

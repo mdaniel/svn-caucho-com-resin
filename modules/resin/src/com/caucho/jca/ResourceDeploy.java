@@ -247,8 +247,8 @@ public class ResourceDeploy {
       }
     } catch (ConfigException e) {
       throw e;
-    } catch (Throwable e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 

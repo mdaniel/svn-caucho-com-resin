@@ -106,7 +106,7 @@ public class FileQueueStore
       try {
 	path.mkdirs();
       } catch (IOException e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
     }
     
@@ -169,7 +169,7 @@ public class FileQueueStore
 
       initStatements();
     } catch (SQLException e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

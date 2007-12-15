@@ -63,15 +63,8 @@ public class PreDestroyInject extends Inject
       _destroy.invoke(value);
     } catch (RuntimeException e) {
       throw e;
-    } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException)
-        throw (RuntimeException) e.getCause();
-      else if (e.getCause() instanceof LineCompileException)
-        throw new LineConfigException(e.getCause().getMessage(), e.getCause());
-      else
-        throw new ConfigException(e.getCause());
-    } catch (IllegalAccessException e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 

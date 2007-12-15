@@ -209,7 +209,7 @@ public class ResourceArchive implements EnvironmentBean
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     log.info("ResourceArchive[" + _config.getDisplayName() + "] loaded");

@@ -593,7 +593,7 @@ public class Cluster
       try {
         server.init();
       } catch (Exception e) {
-        throw new ConfigException(e);
+        throw ConfigException.create(e);
       }
     }
   }

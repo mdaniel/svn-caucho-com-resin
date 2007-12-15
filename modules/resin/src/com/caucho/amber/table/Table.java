@@ -547,12 +547,12 @@ public class Table {
       return new ConfigException(msg, e);
   }
 
-  protected ConfigException error(Throwable e)
+  protected RuntimeException error(Throwable e)
   {
     if (_configLocation != null)
-      return new LineConfigException(_configLocation + e.getMessage(), e);
+      return ConfigException.create(_configLocation, e);
     else
-      return new ConfigException(e);
+      return ConfigException.create(e);
   }
 
   /**

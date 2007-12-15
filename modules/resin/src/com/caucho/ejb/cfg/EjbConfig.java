@@ -173,7 +173,7 @@ public class EjbConfig {
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -396,7 +396,7 @@ public class EjbConfig {
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -591,7 +591,7 @@ public class EjbConfig {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -631,8 +631,8 @@ public class EjbConfig {
       deployBeans(deployingBeans, javaGen);
     } catch (RuntimeException e) {
       throw e;
-    } catch (Throwable e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 

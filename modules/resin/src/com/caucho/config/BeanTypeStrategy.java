@@ -211,7 +211,7 @@ public class BeanTypeStrategy extends TypeStrategy {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
   /**
@@ -236,7 +236,7 @@ public class BeanTypeStrategy extends TypeStrategy {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -749,10 +749,10 @@ public class BeanTypeStrategy extends TypeStrategy {
       throw new ConfigException(L.l("{0}: parameter type mismatch invoking method `{1}'.", bean.getClass().getName(), method.toString()), e);
     }
     catch (IllegalAccessException e) {
-      throw new ConfigException(L.l("Bean method `{0}' isn't accessible.", method.toString()), e);
+      throw new ConfigException(L.l("Bean method '{0}' isn't accessible.", method.toString()), e);
     }
     catch (InvocationTargetException e) {
-      throw new ConfigException(e.getCause());
+      throw ConfigException.create(e);
     }
   }
 

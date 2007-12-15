@@ -67,10 +67,12 @@ public class LineConfigException extends ConfigException
   /**
    * Creates an exception with a message
    */
+  /*
   public LineConfigException(Throwable cause)
   {
     super(cause);
   }
+  */
 
   public LineConfigException(String filename, int line, String message)
   {

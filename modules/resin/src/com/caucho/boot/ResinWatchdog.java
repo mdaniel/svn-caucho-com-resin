@@ -123,7 +123,7 @@ public class ResinWatchdog extends AbstractManagedObject
     try {
       _address = InetAddress.getByName("127.0.0.1");
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));

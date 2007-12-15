@@ -300,7 +300,7 @@ public class EnvServerManager implements EnvironmentListener
       if (_amberPersistenceUnit != null)
 	_amberPersistenceUnit.init();
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

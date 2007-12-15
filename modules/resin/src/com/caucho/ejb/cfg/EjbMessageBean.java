@@ -354,7 +354,7 @@ public class EjbMessageBean extends EjbBean {
         setDestination(jndiBuilder);
       }
       catch (NamingException e) {
-        throw new ConfigException(e);
+        throw ConfigException.create(e);
       }
     }
     else if ("messageSelector".equals(name)) {
@@ -535,8 +535,8 @@ public class EjbMessageBean extends EjbBean {
           getServerProgram().configure(server);
       } catch (ConfigException e) {
         throw e;
-      } catch (Throwable e) {
-        throw new ConfigException(e);
+      } catch (Exception e) {
+        throw ConfigException.create(e);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

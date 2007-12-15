@@ -89,11 +89,9 @@ public class TldListener {
     
       app.addListener(listener);
     } catch (RuntimeException e) {
-      e.printStackTrace();
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 }

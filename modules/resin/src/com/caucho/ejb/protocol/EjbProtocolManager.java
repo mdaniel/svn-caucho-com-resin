@@ -273,7 +273,7 @@ public class EjbProtocolManager {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
     finally {
       Thread.currentThread().setContextClassLoader(loader);

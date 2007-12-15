@@ -70,7 +70,7 @@ public class ELFormatter extends MessageFormatter {
       try {
         _expr = (new ELParser(new ConfigELContext(), _format)).parse();
       } catch (Exception ex) {
-        throw new ConfigException(ex);
+        throw ConfigException.create(ex);
       }
     }
   }

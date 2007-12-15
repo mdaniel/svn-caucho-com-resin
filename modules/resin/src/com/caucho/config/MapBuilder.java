@@ -82,12 +82,10 @@ public class MapBuilder {
       TypeStrategy type = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
       return configure(type, bean, map, doInit);
-    } catch (ConfigException e) {
-      throw e;
     } catch (RuntimeException e) {
       throw e;
-    } catch (Throwable e) {
-      throw new ConfigException(e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     } finally {
       NodeBuilder.setCurrentBuilder(oldBuilder);
     }
@@ -97,7 +95,7 @@ public class MapBuilder {
 				 Object bean,
 				 Map<String,Object> map,
 				 boolean doInit)
-    throws Throwable
+    throws Exception
   {
     /*
     // XXX: make common

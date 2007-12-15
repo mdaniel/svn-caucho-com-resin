@@ -82,7 +82,7 @@ public class PersistenceConfig {
 
       return unit;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

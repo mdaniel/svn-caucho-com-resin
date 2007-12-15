@@ -59,7 +59,7 @@ abstract public class ResinELContext
       setValue("jndi", Jndi.class.getMethod("lookup", new Class[] { String.class }));
       setValue("jndi:lookup", Jndi.class.getMethod("lookup", new Class[] { String.class }));
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

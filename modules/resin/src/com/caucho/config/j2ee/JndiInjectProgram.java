@@ -61,10 +61,8 @@ public class JndiInjectProgram extends BuilderProgram {
       _method.invoke(bean, value);
     } catch (RuntimeException e) {
       throw e;
-    } catch (InvocationTargetException e) {
-      throw new ConfigException(e.getCause());
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

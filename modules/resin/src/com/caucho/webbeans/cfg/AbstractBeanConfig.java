@@ -264,7 +264,7 @@ abstract public class AbstractBeanConfig {
       try {
 	Jndi.bindDeepShort(_jndiName, comp);
       } catch (NamingException e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
     }
   }

@@ -177,7 +177,7 @@ public class Management
       if (getPath() != null)
         getPath().mkdirs();
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
 
     // the start is necessary for the qa tests
@@ -202,7 +202,7 @@ public class Management
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
 
       _hostConfig = hostConfig;

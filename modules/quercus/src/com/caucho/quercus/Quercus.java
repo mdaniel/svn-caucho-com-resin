@@ -478,7 +478,7 @@ public class Quercus
     try {
       introspectPhpModuleClass(module.getClass());
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -494,7 +494,7 @@ public class Quercus
       else
         introspectJavaClass(name, type, null, null);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -525,7 +525,7 @@ public class Quercus
     try {
       introspectJavaImplClass(name, type, null);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -1458,7 +1458,7 @@ public class Quercus
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

@@ -99,7 +99,7 @@ public class ProxyRule
       _webApp.addServlet(_servlet);
     }
     catch (ServletException ex) {
-      throw new ConfigException(ex);
+      throw ConfigException.create(ex);
     }
     catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);

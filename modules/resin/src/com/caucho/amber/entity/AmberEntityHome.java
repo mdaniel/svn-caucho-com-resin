@@ -70,7 +70,7 @@ public class AmberEntityHome {
 
   private volatile boolean _isInit;
 
-  private ConfigException _configException;
+  private RuntimeException _configException;
 
   private Method _cauchoGetBeanMethod;
 
@@ -190,7 +190,7 @@ public class AmberEntityHome {
     } catch (Exception e) {
       _entityType.setConfigException(e);
 
-      _configException = new ConfigException(e);
+      _configException = ConfigException.create(e);
       throw _configException;
     }
 

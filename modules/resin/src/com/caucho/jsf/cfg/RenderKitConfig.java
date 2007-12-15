@@ -121,10 +121,8 @@ public class RenderKitConfig extends DescriptionGroupConfig
 	} catch (NoSuchMethodException e) {
 	} catch (RuntimeException e) {
 	  throw e;
-	} catch (InvocationTargetException e) {
-	  throw new ConfigException(e.getCause());
 	} catch (Exception e) {
-	  throw new ConfigException(e);
+	  throw ConfigException.create(e);
 	}
       }
 
@@ -133,7 +131,7 @@ public class RenderKitConfig extends DescriptionGroupConfig
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {
-	throw new ConfigException(e);
+	throw ConfigException.create(e);
       }
 
       if (_name == null)

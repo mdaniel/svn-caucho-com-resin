@@ -90,7 +90,7 @@ public class ServiceProxyInjectProgram extends BuilderProgram {
       log.finer(String.valueOf(e));
       log.log(Level.FINEST, e.toString(), e);
     } catch (Exception e) {
-      throw new ConfigException(e);
+      throw ConfigException.create(e);
     }
   }
 

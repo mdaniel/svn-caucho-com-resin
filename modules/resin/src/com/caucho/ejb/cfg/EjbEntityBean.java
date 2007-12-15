@@ -1087,8 +1087,8 @@ public class EjbEntityBean extends EjbBean {
           getServerProgram().configure(server);
       } catch (ConfigException e) {
         throw e;
-      } catch (Throwable e) {
-        throw new ConfigException(e);
+      } catch (Exception e) {
+        throw ConfigException.create(e);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
