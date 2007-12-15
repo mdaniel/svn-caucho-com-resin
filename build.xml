@@ -83,7 +83,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jaxrpc, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
+          depends="init, hessian, jaxrpc, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
   </target>
 
   <target name="ant" depends="init">
@@ -218,6 +218,13 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="util"/>
       <param name="module.jar" value="resin-util.jar"/>
+    </antcall>
+  </target>
+  
+  <target name="support" depends="init, compat">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="support"/>
+      <param name="module.jar" value="resin-support.jar"/>
     </antcall>
   </target>
   
@@ -703,6 +710,7 @@
         <include name="lib/quercus.jar"/>
         <include name="lib/resin-util.jar"/>
         <include name="lib/resin.jar"/>
+        <include name="lib/resin-support.jar"/>
 	<!--
         <include name="lib/resinboot.jar"/>
 	-->
