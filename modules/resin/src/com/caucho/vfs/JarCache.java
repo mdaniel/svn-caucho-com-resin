@@ -53,7 +53,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 /**
- * Entry for a Jar.
+ * Maps Jar entries to the Jar
  */
 public class JarCache
 {

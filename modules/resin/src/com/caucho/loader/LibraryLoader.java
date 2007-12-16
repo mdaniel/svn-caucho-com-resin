@@ -41,18 +41,19 @@ import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Vector;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.*;
+import java.util.zip.*;
 
 /**
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
  */
-public class LibraryLoader extends Loader implements Dependency {
+public class LibraryLoader extends JarListLoader {
   private static final Logger log
-    = Logger.getLogger(DirectoryLoader.class.getName());
+    = Logger.getLogger(LibraryLoader.class.getName());
   
   // Configured path.
   private Path _path;
@@ -69,12 +70,6 @@ public class LibraryLoader extends Loader implements Dependency {
 
   // list of the matching paths
   private ArrayList<Path> _newPathList = new ArrayList<Path>();
-  
-  // list of the jars in the directory
-  private ArrayList<JarEntry> _jarList;
-  
-  // list of dependencies
-  private DependencyContainer _dependencyList = new DependencyContainer();
 
   /**
    * Creates a new directory loader.
@@ -144,14 +139,17 @@ public class LibraryLoader extends Loader implements Dependency {
    * Initialize
    */
   @PostConstruct
+  @Override
   public void init()
     throws ConfigException
   {
+    super.init();
+    
     try {
       if (_fileSet != null) {
       }
-      else if (_path.getPath().endsWith(".jar") ||
-	       _path.getPath().endsWith(".zip")) {
+      else if (_path.getPath().endsWith(".jar")
+	       || _path.getPath().endsWith(".zip")) {
 	_fileSet = new FileSetType();
 	_fileSet.setDir(_path.getParent());
 	_fileSet.addInclude(new PathPatternType(_path.getTail()));
@@ -162,9 +160,6 @@ public class LibraryLoader extends Loader implements Dependency {
 	_fileSet.addInclude(new PathPatternType("*.jar"));
 	_fileSet.addInclude(new PathPatternType("*.zip"));
       }
-
-      _jarList = new ArrayList<JarEntry>();
-      _dependencyList = new DependencyContainer();
 
       fillJars();
     } catch (ConfigException e) {
@@ -183,17 +178,6 @@ public class LibraryLoader extends Loader implements Dependency {
 
     for (int i = 0; i < _jarList.size(); i++)
       loader.addURL(_jarList.get(i).getJarPath());
-  }
-
-  /**
-   * Validates the loader.
-   */
-  public void validate()
-    throws ConfigException
-  {
-    for (int i = 0; i < _jarList.size(); i++) {
-      _jarList.get(i).validate();
-    }
   }
   
   /**
@@ -239,119 +223,6 @@ public class LibraryLoader extends Loader implements Dependency {
     }
   }
 
-  private void addJar(Path jar)
-  {
-    JarPath jarPath = JarPath.create(jar);
-    _jarList.add(new JarEntry(jarPath));
-
-    _dependencyList.add(new Depend(jarPath));
-
-    if (getLoader() != null)
-      getLoader().addURL(jarPath);
-  }
-
-  /**
-   * Fill data for the class path.  fillClassPath() will add all 
-   * .jar and .zip files in the directory list.
-   */
-  @Override
-  protected void buildClassPath(ArrayList<String> pathList)
-  {
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      JarPath jar = jarEntry.getJarPath();
-      
-      String path = jar.getContainer().getNativePath();
-
-      if (! pathList.contains(path))
-	pathList.add(path);
-    }
-  }
-
-  /**
-   * Returns the class entry.
-   *
-   * @param name name of the class
-   */
-  protected ClassEntry getClassEntry(String name, String pathName)
-    throws ClassNotFoundException
-  {
-    String pkg = "";
-    int p = pathName.lastIndexOf('/');
-    if (p > 0)
-      pkg = pathName.substring(0, p + 1);
-
-    Path classPath = null;
-    
-    // Find the path corresponding to the class
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      Path path = jarEntry.getJarPath();
-
-      Path filePath = path.lookup(pathName);
-      
-      if (filePath.canRead() && filePath.getLength() > 0) {
-        ClassEntry entry = new ClassEntry(getLoader(), name, filePath,
-                                          filePath,
-					  jarEntry.getCodeSource(pathName));
-
-        ClassPackage classPackage = jarEntry.getPackage(pkg);
-
-        entry.setClassPackage(classPackage);
-
-        return entry;
-      }
-    }
-
-    return null;
-  }
-  
-  /**
-   * Adds resources to the enumeration.
-   */
-  public void getResources(Vector<URL> vector, String name)
-  {
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      Path path = jarEntry.getJarPath();
-
-      path = path.lookup(name);
-
-      if (path.exists()) {
-	try {
-	  URL url = new URL(path.getURL());
-
-	  if (! vector.contains(url))
-	    vector.add(url);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-    }
-  }
-
-  /**
-   * Find a given path somewhere in the classpath
-   *
-   * @param pathName the relative resourceName
-   *
-   * @return the matching path or null
-   */
-  public Path getPath(String pathName)
-  {
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      Path path = jarEntry.getJarPath();
-
-      Path filePath = path.lookup(pathName);
-
-      if (filePath.exists())
-	return filePath;
-    }
-
-    return null;
-  }
-
   public Path getCodePath()
   {
     return _fileSet.getDir();
@@ -365,25 +236,8 @@ public class LibraryLoader extends Loader implements Dependency {
     clearJars();
   }
 
-  /**
-   * Closes the jars.
-   */
-  private void clearJars()
-  {
-    ArrayList<JarEntry> jars = new ArrayList<JarEntry>(_jarList);
-    _jarList.clear();
-    
-    for (int i = 0; i < jars.size(); i++) {
-      JarEntry jarEntry = jars.get(i);
-
-      JarPath jarPath = jarEntry.getJarPath();
-
-      jarPath.closeJar();
-    }
-  }
-
   public String toString()
   {
-    return "LibraryLoader[" + _fileSet + "]";
+    return getClass().getSimpleName() + "[" + _fileSet + "]";
   }
 }

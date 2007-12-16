@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,47 +19,39 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.config.attribute;
 
-import com.caucho.config.ConfigException;
-import com.caucho.make.DependencyContainer;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
+import com.caucho.config.type.*;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.w3c.dom.Node;
 
-/**
- * Class loader which checks for changes in class files and automatically
- * picks up new jars.
- */
-public class DirectoryLoader extends LibraryLoader
-{
+import javax.el.ELContext;
+
+public abstract class Attribute {
   /**
-   * Creates a new directory loader.
+   * Returns the config type of the attribute.
    */
-  public DirectoryLoader()
-  {
-  }
+  abstract public ConfigType getConfigType();
+  
+  /**
+   * Sets the value of the attribute
+   */
+  abstract public void setAttribute(Object bean, Object value)
+    throws Exception;
 
   /**
-   * Creates a new directory loader.
+   * Creates the child bean.
    */
-  public DirectoryLoader(Path dir)
-  {
-    super(dir);
-  }
+  abstract public Object create(Object parent)
+    throws Exception;
 }

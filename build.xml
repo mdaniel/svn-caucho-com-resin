@@ -93,6 +93,13 @@
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
+  
+  <target name="compat" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="compat"/>
+      <param name="module.jar" value="resin-compat.jar"/>
+    </antcall>
+  </target>
 
   <target name="ejb" depends="init, jta">
     <antcall target="module" inheritRefs="true">
@@ -207,13 +214,6 @@
     </antcall>
   </target>
   
-  <target name="script" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="script"/>
-      <param name="module.jar" value="script-10.jar"/>
-    </antcall>
-  </target>
-  
   <target name="resin-util" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="util"/>
@@ -221,17 +221,17 @@
     </antcall>
   </target>
   
+  <target name="script" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="script"/>
+      <param name="module.jar" value="script-10.jar"/>
+    </antcall>
+  </target>
+  
   <target name="support" depends="init, compat">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="support"/>
       <param name="module.jar" value="resin-support.jar"/>
-    </antcall>
-  </target>
-  
-  <target name="compat" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="compat"/>
-      <param name="module.jar" value="resin-compat.jar"/>
     </antcall>
   </target>
 

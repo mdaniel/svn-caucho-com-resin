@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,47 +19,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.config.type;
 
-import com.caucho.config.ConfigException;
-import com.caucho.make.DependencyContainer;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.config.attribute.*;
+import com.caucho.util.*;
+import com.caucho.xml.QName;
 
 /**
- * Class loader which checks for changes in class files and automatically
- * picks up new jars.
+ * Represents an introspected bean type for configuration.
  */
-public class DirectoryLoader extends LibraryLoader
+public class BeanType extends ConfigType
 {
-  /**
-   * Creates a new directory loader.
-   */
-  public DirectoryLoader()
-  {
-  }
+  private static final L10N L = new L10N(BeanType.class);
+  private static final Logger log
+    = Logger.getLogger(BeanType.class.getName());
+  
+  private HashMap<QName,Attribute> _nsAttributeMap
+    = new HashMap<QName,Attribute>();
 
-  /**
-   * Creates a new directory loader.
-   */
-  public DirectoryLoader(Path dir)
+  public Attribute getAttribute(QName name)
   {
-    super(dir);
+    return null;
   }
 }

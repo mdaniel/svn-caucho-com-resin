@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
  */
-public class TreeLoader extends Loader implements Dependency
+public class TreeLoader extends JarListLoader implements Dependency
 {
   private static final Logger log
     = Logger.getLogger(TreeLoader.class.getName());
@@ -60,14 +60,8 @@ public class TreeLoader extends Loader implements Dependency
 
   private String []_fileNames;
 
-  // list of the jars in the directory
-  private ArrayList<JarEntry> _jarList;
-
   private HashSet<Path> _files = new HashSet<Path>();
   private HashSet<Path> _tempFiles = new HashSet<Path>();
-  
-  // list of dependencies
-  private DependencyContainer _dependencyList = new DependencyContainer();
 
   /**
    * Creates a new directory loader.
@@ -125,8 +119,11 @@ public class TreeLoader extends Loader implements Dependency
    * Initialize
    */
   @PostConstruct
+  @Override
   public void init()
   {
+    super.init();
+    
     _lastModified = _dir.getLastModified();
     
     try {
@@ -134,19 +131,7 @@ public class TreeLoader extends Loader implements Dependency
     } catch (IOException e) {
     }
 
-    _jarList = new ArrayList<JarEntry>();
-    _dependencyList = new DependencyContainer();
-
     fillJars();
-  }
-  
-  /**
-   * True if any of the loaded classes have been modified.  If true, the
-   * caller should drop the classpath and create a new one.
-   */
-  public boolean isModified()
-  {
-    return _dependencyList.isModified();
   }
   
   /**
@@ -206,122 +191,6 @@ public class TreeLoader extends Loader implements Dependency
     }
   }
 
-  private void addJar(Path jar)
-  {
-    JarPath jarPath = JarPath.create(jar);
-    JarEntry jarEntry = new JarEntry(jarPath);
-
-    if (_jarList.contains(jarEntry))
-      return;
-
-    _jarList.add(jarEntry);
-    _dependencyList.add(jarPath.getDepend());
-  }
-  
-  /**
-   * Adds resources to the enumeration.
-   */
-  public void getResources(Vector<URL> vector, String name)
-  {
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      Path path = jarEntry.getJarPath();
-
-      path = path.lookup(name);
-
-      // server/249i
-      if (path.exists()) {
-	try {
-	  URL url = new URL(path.getURL());
-
-	  if (! vector.contains(url))
-	    vector.add(url);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-    }
-  }
-
-  /**
-   * Fill data for the class path.  fillClassPath() will add all 
-   * .jar and .zip files in the directory list.
-   */
-  @Override
-  protected void buildClassPath(ArrayList<String> pathList)
-  {
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      JarPath jar = jarEntry.getJarPath();
-
-      String path = jar.getContainer().getNativePath();
-
-      if (! pathList.contains(path))
-	pathList.add(path);
-    }
-  }
-
-  /**
-   * Returns the class entry.
-   *
-   * @param name name of the class
-   */
-  @Override
-  protected ClassEntry getClassEntry(String name, String pathName)
-    throws ClassNotFoundException
-  {
-    String pkg = "";
-    int p = pathName.lastIndexOf('/');
-    if (p > 0)
-      pkg = pathName.substring(0, p + 1);
-
-    Path classPath = null;
-    
-    // Find the path corresponding to the class
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      Path path = jarEntry.getJarPath();
-
-      Path filePath = path.lookup(pathName);
-      
-      if (filePath.canRead() && filePath.getLength() > 0) {
-        ClassEntry entry = new ClassEntry(getLoader(), name, filePath,
-                                          filePath,
-					  jarEntry.getCodeSource(pathName));
-
-        ClassPackage classPackage = jarEntry.getPackage(pkg);
-
-        entry.setClassPackage(classPackage);
-
-        return entry;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Find a given path somewhere in the classpath
-   *
-   * @param pathName the relative resourceName
-   *
-   * @return the matching path or null
-   */
-  public Path getPath(String pathName)
-  {
-    for (int i = 0; i < _jarList.size(); i++) {
-      JarEntry jarEntry = _jarList.get(i);
-      Path path = jarEntry.getJarPath();
-
-      Path filePath = path.lookup(pathName);
-
-      if (filePath.canRead())
-	return filePath;
-    }
-
-    return null;
-  }
-
   public Path getCodePath()
   {
     return _dir;
@@ -333,23 +202,6 @@ public class TreeLoader extends Loader implements Dependency
   protected void destroy()
   {
     clearJars();
-  }
-
-  /**
-   * Closes the jars.
-   */
-  private void clearJars()
-  {
-    ArrayList<JarEntry> jars = new ArrayList<JarEntry>(_jarList);
-    _jarList.clear();
-    
-    for (int i = 0; i < jars.size(); i++) {
-      JarEntry jarEntry = jars.get(i);
-
-      JarPath jarPath = jarEntry.getJarPath();
-
-      jarPath.closeJar();
-    }
   }
 
   public String toString()

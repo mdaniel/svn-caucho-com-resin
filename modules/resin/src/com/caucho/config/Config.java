@@ -54,9 +54,7 @@ import javax.el.ELResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -706,6 +704,30 @@ public class Config {
       return new EnvironmentContext(varMap);
     else
       return new EnvironmentContext();
+  }
+
+  public static ConfigException error(Field field, String msg)
+  {
+    return new ConfigException(location(field) + msg);
+  }
+
+  public static ConfigException error(Method method, String msg)
+  {
+    return new ConfigException(location(method) + msg);
+  }
+
+  public static String location(Field field)
+  {
+    String className = field.getDeclaringClass().getName();
+
+    return className + "." + field.getName() + ": ";
+  }
+
+  public static String location(Method method)
+  {
+    String className = method.getDeclaringClass().getName();
+
+    return className + "." + method.getName() + ": ";
   }
 }
 

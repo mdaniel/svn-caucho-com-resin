@@ -10,7 +10,13 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.4">
+<s2 title="3.1.5 - snapshot">
+<ul>
+<li>Quercus: added spring_bean("...")</li>
+</ul>
+</s2>
+
+<s2 title="3.1.4 - Dec 5, 2007">
 <ul>
 <li>isapi plugin needs to set fKeepConn=0 for non-200 responses (#2150, rep by Ove Halset)</li>
 <li>load-balance issues with short cookies (#2221, rep by B Cleave)</li>

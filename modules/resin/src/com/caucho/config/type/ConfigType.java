@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,47 +19,19 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
-
-import com.caucho.config.ConfigException;
-import com.caucho.make.DependencyContainer;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+package com.caucho.config.type;
 
 /**
- * Class loader which checks for changes in class files and automatically
- * picks up new jars.
+ * Represents an introspected configuration type.
  */
-public class DirectoryLoader extends LibraryLoader
+abstract public class ConfigType
 {
-  /**
-   * Creates a new directory loader.
-   */
-  public DirectoryLoader()
-  {
-  }
-
-  /**
-   * Creates a new directory loader.
-   */
-  public DirectoryLoader(Path dir)
-  {
-    super(dir);
-  }
 }
