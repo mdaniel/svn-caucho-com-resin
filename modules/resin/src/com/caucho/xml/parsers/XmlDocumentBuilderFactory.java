@@ -33,8 +33,8 @@ import com.caucho.xml.Xml;
 
 import org.w3c.dom.DOMImplementation;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.*;
+import javax.xml.validation.*;
 
 /**
  * JAXP document builder factory for strict XML parsing.
@@ -58,6 +58,10 @@ public class XmlDocumentBuilderFactory extends DocumentBuilderFactory {
   }
 
   public void setAttribute(String key, Object value)
+  {
+  }
+
+  public void setSchema(Schema schema)
   {
   }
 

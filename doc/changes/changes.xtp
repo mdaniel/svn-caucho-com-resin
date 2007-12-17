@@ -12,6 +12,8 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>Quercus: array_key_exists (#2254, fixed! by koreth)</li>
+<li>XmlDocumentFactory needs setSchema (#2174, rep by sgudiboina)</li>
 <li>JCA: updated &lt;connector> syntax (#2209, rep by Serge Sozonoff)</li>
 <li>Quercus: added spring_bean("...")</li>
 </ul>

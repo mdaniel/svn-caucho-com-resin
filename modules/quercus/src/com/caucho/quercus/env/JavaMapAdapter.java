@@ -205,6 +205,17 @@ public class JavaMapAdapter
     return val;
   }
 
+  /**
+   * Returns the corresponding valeu if this array contains the given key
+   *
+   * @param key  the key to search for in the array
+   *
+   * @return the value if it is found in the array, NULL otherwise
+   */
+  public Value containsKey(Value key)
+  {
+    return BooleanValue.create(_map.containsKey(key.toJavaObject()));
+  }
   
   @Override
   public Iterator<Value> getKeyIterator(Env env)

@@ -583,7 +583,7 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public Value containsKey(Value key)
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
