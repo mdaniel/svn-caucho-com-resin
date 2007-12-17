@@ -116,6 +116,12 @@ public class SetterAttributeStrategy extends AttributeStrategy {
     }
   }
 
+  @Override
+  public Object convert(String string)
+  {
+    return _typeStrategy.convert(string);
+  }
+
   public String toString()
   {
     return "SetterAttributeStrategy[" + _setter + "]";

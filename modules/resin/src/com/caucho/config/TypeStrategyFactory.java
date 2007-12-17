@@ -275,6 +275,18 @@ public class TypeStrategyFactory {
       else
 	return builder.evalBoolean(value) ? Boolean.TRUE : Boolean.FALSE;
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Boolean.TRUE;
+      else if ("false".equals(value)
+	       || "no".equals(value)
+	       || "0".equals(value))
+	return Boolean.FALSE;
+      else
+	return Boolean.TRUE;
+    }
   }
 
   private static class PrimitiveByteTypeStrategy extends TypeStrategy {
@@ -290,10 +302,17 @@ public class TypeStrategyFactory {
     {
       String value = builder.configureString(node);
 
-      if (value == null || value.equals(""))
-	return new Byte((byte) 0);
+      return convert(value);
+    }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Byte.valueOf((byte) 0);
+      else if (value instanceof String)
+	return Byte.valueOf((String) value);
       else
-	return new Byte(value);
+	return (Byte) value;
     }
   }
 
@@ -315,6 +334,16 @@ public class TypeStrategyFactory {
       else
 	return new Short(value);
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Short.valueOf((short) 0);
+      else if (value instanceof String)
+	return Short.valueOf((String) value);
+      else
+	return (Short) value;
+    }
   }
 
   private static class PrimitiveIntTypeStrategy extends TypeStrategy {
@@ -334,6 +363,16 @@ public class TypeStrategyFactory {
 	return new Integer(0);
       else
 	return new Integer(value);
+    }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Integer.valueOf((int) 0);
+      else if (value instanceof String)
+	return Integer.valueOf((String) value);
+      else
+	return (Integer) value;
     }
   }
 
@@ -355,6 +394,16 @@ public class TypeStrategyFactory {
       else
 	return new Long(value);
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Long.valueOf((long) 0);
+      else if (value instanceof String)
+	return Long.valueOf((String) value);
+      else
+	return (Long) value;
+    }
   }
 
   private static class PrimitiveFloatTypeStrategy extends TypeStrategy {
@@ -375,6 +424,16 @@ public class TypeStrategyFactory {
       else
 	return new Float(value);
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Float.valueOf((float) 0);
+      else if (value instanceof String)
+	return Float.valueOf((String) value);
+      else
+	return (Float) value;
+    }
   }
 
   private static class PrimitiveDoubleTypeStrategy extends TypeStrategy {
@@ -394,6 +453,16 @@ public class TypeStrategyFactory {
 	return new Double(0);
       else
 	return new Double(value);
+    }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Double.valueOf((double) 0);
+      else if (value instanceof String)
+	return Double.valueOf((String) value);
+      else
+	return (Double) value;
     }
   }
 
@@ -438,6 +507,18 @@ public class TypeStrategyFactory {
       else
 	return builder.evalBoolean(value) ? Boolean.TRUE : Boolean.FALSE;
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Boolean.TRUE;
+      else if ("false".equals(value)
+	       || "no".equals(value)
+	       || "0".equals(value))
+	return Boolean.FALSE;
+      else
+	return Boolean.TRUE;
+    }
   }
 
   private static class ByteTypeStrategy extends TypeStrategy {
@@ -457,6 +538,16 @@ public class TypeStrategyFactory {
 	return null;
       else
 	return new Byte(value);
+    }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Byte.valueOf((byte) 0);
+      else if (value instanceof String)
+	return Byte.valueOf((String) value);
+      else
+	return (Byte) value;
     }
   }
 
@@ -478,6 +569,16 @@ public class TypeStrategyFactory {
       else
 	return new Short(value);
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Short.valueOf((short) 0);
+      else if (value instanceof String)
+	return Short.valueOf((String) value);
+      else
+	return (Short) value;
+    }
   }
 
   private static class IntegerTypeStrategy extends TypeStrategy {
@@ -497,6 +598,16 @@ public class TypeStrategyFactory {
 	return null;
       else
 	return new Integer(value);
+    }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Integer.valueOf((int) 0);
+      else if (value instanceof String)
+	return Integer.valueOf((String) value);
+      else
+	return (Integer) value;
     }
   }
 
@@ -518,6 +629,16 @@ public class TypeStrategyFactory {
       else
 	return new Long(value);
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Long.valueOf((long) 0);
+      else if (value instanceof String)
+	return Long.valueOf((String) value);
+      else
+	return (Long) value;
+    }
   }
 
   private static class FloatTypeStrategy extends TypeStrategy {
@@ -538,6 +659,16 @@ public class TypeStrategyFactory {
       else
 	return new Float(value);
     }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Float.valueOf((float) 0);
+      else if (value instanceof String)
+	return Float.valueOf((String) value);
+      else
+	return (Float) value;
+    }
   }
 
   private static class DoubleTypeStrategy extends TypeStrategy {
@@ -557,6 +688,16 @@ public class TypeStrategyFactory {
 	return null;
       else
 	return new Double(value);
+    }
+
+    public Object convert(Object value)
+    {
+      if (value == null || "".equals(value))
+	return Double.valueOf((double) 0);
+      else if (value instanceof String)
+	return Double.valueOf((String) value);
+      else
+	return (Double) value;
     }
   }
 

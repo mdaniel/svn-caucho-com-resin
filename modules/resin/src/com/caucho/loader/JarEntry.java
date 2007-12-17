@@ -253,4 +253,9 @@ class JarEntry {
 
     return _jarPath.equals(entry._jarPath);
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _jarPath + "]";
+  }
 }

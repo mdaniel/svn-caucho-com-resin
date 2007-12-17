@@ -169,6 +169,11 @@ public class ResourceAdapterConfig extends ObjectConfig {
       
       if (cl != null && cl.getName().equals(type))
 	return cfg;
+
+      cl = cfg.getConnectionFactoryImpl();
+      
+      if (cl != null && cl.getName().equals(type))
+	return cfg;
     }
 
     return null;

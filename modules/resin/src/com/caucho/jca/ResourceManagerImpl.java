@@ -137,7 +137,7 @@ public class ResourceManagerImpl implements BootstrapContext {
   {
     try {
       resource.start(this);
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 

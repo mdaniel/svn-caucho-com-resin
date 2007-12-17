@@ -39,6 +39,7 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.ActivationSpec;
@@ -66,16 +67,16 @@ public class ConnectorResource implements EnvironmentListener {
   private ResourceArchive _rar;
 
   private ResourceAdapterConfig _resourceAdapter = new ResourceAdapterConfig();
-  private InitProgram _resourceAdapterInit;
+  private InitProgram _init;
 
-  private ArrayList<ConnectionFactory> _outboundList =
-    new ArrayList<ConnectionFactory>();
+  private ArrayList<ConnectionFactory> _outboundList
+    = new ArrayList<ConnectionFactory>();
 
-  private ArrayList<ConnectionListener> _inboundList =
-    new ArrayList<ConnectionListener>();
+  private ArrayList<ConnectionListener> _inboundList
+    = new ArrayList<ConnectionListener>();
 
-  private ArrayList<ConnectionResource> _resourceList =
-    new ArrayList<ConnectionResource>();
+  private ArrayList<ConnectorBean> _beanList
+    = new ArrayList<ConnectorBean>();
 
   private ResourceAdapter _ra;
   private boolean _isInitRA;
@@ -112,6 +113,15 @@ public class ConnectorResource implements EnvironmentListener {
   public void setType(String type)
     throws Exception
   {
+    setClass(type);
+  }
+
+  /**
+   * Sets the type of the connector.
+   */
+  public void setClass(String type)
+    throws Exception
+  {
     _type = type;
 
     _rar = ResourceArchiveManager.findResourceArchive(_type);
@@ -129,9 +139,10 @@ public class ConnectorResource implements EnvironmentListener {
 	Class raClass = Class.forName(_type, false, loader);
 	
 	_ra = (ResourceAdapter) raClass.newInstance();
-      } catch (Throwable e) {
-	throw new ConfigException(L.l("`{0}' is not a known connector.  The type must match the resource adaptor or managed connection factory of one of the installed *.rar files or specify a ResourceAdapter implementation.",
-				      _type));
+      } catch (Exception e) {
+	throw new ConfigException(L.l("'{0}' is not a known connector.  The type must match the resource adaptor or managed connection factory of one of the installed *.rar files or specify a ResourceAdapter implementation.",
+				      _type),
+				  e);
       }
     }
   }
@@ -144,6 +155,11 @@ public class ConnectorResource implements EnvironmentListener {
     return _type;
   }
 
+  public void addInit(InitProgram init)
+  {
+    _init = init;
+  }
+
   /**
    * Configures the resource adapter.
    */
@@ -151,7 +167,7 @@ public class ConnectorResource implements EnvironmentListener {
     throws ConfigException
   {
     if (_ra == null)
-      throw new ConfigException(L.l("`{0}' may not have a <resource-adapter> section.  Old-style connectors must use <connection-factory>, but not <resource-adapter>.",
+      throw new ConfigException(L.l("'{0}' may not have a <resource-adapter> section.  Old-style connectors must use <connection-factory>, but not <resource-adapter>.",
 				    _type));
     return _resourceAdapter;
   }
@@ -160,19 +176,8 @@ public class ConnectorResource implements EnvironmentListener {
    * Sets the configured resource adapter.
    */
   public void setResourceAdapter(ResourceAdapterConfig raConfig)
-    throws Throwable
+    throws Exception
   {
-    if (raConfig.getInit() != null)
-      raConfig.getInit().configure(_ra);
-    
-    /*
-      TypeBuilderFactory.init(_ra);
-    */
-
-    initRA();
-    
-    if (raConfig.getName() != null)
-      Jndi.bindDeepShort(raConfig.getName(), _ra);
   }
 
   /**
@@ -192,55 +197,7 @@ public class ConnectorResource implements EnvironmentListener {
   public void addConnectionFactory(ConnectionFactory factory)
     throws Exception
   {
-    ManagedConnectionFactory managedFactory = factory.getFactory();
-    
-    if (factory.getInit() != null)
-      factory.getInit().configure(managedFactory);
-
-    if (_ra != null)
-      managedFactory.setResourceAdapter(_ra);
-
-    initRA();
-      
-    ResourceManagerImpl rm = ResourceManagerImpl.createLocalManager();
-	
-    ConnectionPool cm = rm.createConnectionPool();
-
-    if (_name != null)
-      cm.setName(_name);
-
-    if (_rar != null) {
-      String trans = _rar.getTransactionSupport();
-
-      if (trans == null) { // guess XA
-	cm.setXATransaction(true);
-	cm.setLocalTransaction(true);
-      }
-      else if (trans.equals("XATransaction")) {
-	cm.setXATransaction(true);
-	cm.setLocalTransaction(true);
-      }
-      else if (trans.equals("NoTransaction")) {
-	cm.setXATransaction(false);
-	cm.setLocalTransaction(false);
-      }
-      else if (trans.equals("LocalTransaction")) {
-	cm.setXATransaction(false);
-	cm.setLocalTransaction(true);
-      }
-    }
-
-    cm.setLocalTransactionOptimization(factory.getLocalTransactionOptimization());
-    cm.setShareable(factory.getShareable());
-    Object connectionFactory = cm.init(managedFactory);
-    cm.start();
-
     _outboundList.add(factory);
-
-    if (factory.getName() != null)
-      Jndi.bindDeepShort(factory.getName(), connectionFactory);
-    else if (_jndiName != null)
-      Jndi.bindDeepShort(_jndiName, connectionFactory);
   }
 
   /**
@@ -324,27 +281,17 @@ public class ConnectorResource implements EnvironmentListener {
   /**
    * Configures a connection-resource
    */
-  public ConnectionResource createResource()
+  public ConnectorBean createBean()
   {
-    return new ConnectionResource();
+    return new ConnectorBean();
   }
 
   /**
    * Configures a connection-resource
    */
-  public void addResource(ConnectionResource resource)
-    throws Exception
+  public ConnectorBean createResource()
   {
-    Object resourceObject = resource.getObject();
-    
-    if (resource.getInit() != null)
-	resource.getInit().configure(resourceObject);
-
-    if (_ra != null && resourceObject instanceof ResourceAdapterAssociation)
-      ((ResourceAdapterAssociation) resourceObject).setResourceAdapter(_ra);
-
-    if (resource.getName() != null)
-      Jndi.bindDeepShort(resource.getName(), resourceObject);
+    return createBean();
   }
 
   /**
@@ -362,6 +309,27 @@ public class ConnectorResource implements EnvironmentListener {
 
     if (_name == null && _rar != null)
       _name = _rar.getDisplayName() + "-" + _idGen++;
+
+    if (_ra == null)
+      throw new ConfigException(L.l("<connector> does not have a resource adapter."));
+    
+    if (_resourceAdapter.getInit() != null)
+      _resourceAdapter.getInit().configure(_ra);
+
+    if (_init != null)
+      _init.configure(_ra);
+
+    ResourceManagerImpl.addResource(_ra);
+
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    if (_resourceAdapter.getName() != null) {
+      Jndi.bindDeepShort(_resourceAdapter.getName(), _ra);
+
+      webBeans.addSingleton(_ra, _resourceAdapter.getName());
+    }
+    else
+      webBeans.addSingleton(_ra, _name);
 
     // create a default outbound factory
     if (_outboundList.size() == 0 && _jndiName != null && _rar != null) {
@@ -381,11 +349,12 @@ public class ConnectorResource implements EnvironmentListener {
       Environment.addEnvironmentListener(new CloseListener(obj, close));
     */
     initRA();
+    
     Environment.addEnvironmentListener(this);
     
     start();
 
-    log.info("Connector[" + _type + "] initialized");
+    log.fine("Connector[" + _type + "] active");
   }
 
   /**
@@ -398,6 +367,12 @@ public class ConnectorResource implements EnvironmentListener {
       return;
     
     initRA();
+    
+    for (int i = 0; i < _outboundList.size(); i++) {
+      ConnectionFactory factory = _outboundList.get(i);
+
+      factory.start();
+    }
     
     for (int i = 0; i < _inboundList.size(); i++) {
       ConnectionListener listener = _inboundList.get(i);
@@ -413,6 +388,7 @@ public class ConnectorResource implements EnvironmentListener {
   public void initRA()
     throws Exception
   {
+    /*
     if (! _isInitRA) {
       _isInitRA = true;
       
@@ -421,6 +397,7 @@ public class ConnectorResource implements EnvironmentListener {
 	ResourceManagerImpl.addResource(_ra);
       }
     }
+    */
   }
 
   /**
@@ -505,12 +482,23 @@ public class ConnectorResource implements EnvironmentListener {
       _name = name;
     }
 
+    public void setName(String name)
+    {
+      _name = name;
+    }
+
     public String getName()
     {
       return _name;
     }
 
     public void setType(String type)
+      throws Exception
+    {
+      setClass(type);
+    }
+
+    public void setClass(String type)
       throws Exception
     {
       _type = type;
@@ -537,7 +525,7 @@ public class ConnectorResource implements EnvironmentListener {
 	}
 
 	if (! ManagedConnectionFactory.class.isAssignableFrom(factoryClass)) {
-	  throw new ConfigException(L.l("`{0}' does not implement javax.resource.spi.ManagedConnectionFactory.  <connection-factory> classes must implement ManagedConnectionFactory.",
+	  throw new ConfigException(L.l("'{0}' does not implement javax.resource.spi.ManagedConnectionFactory.  <connection-factory> classes must implement ManagedConnectionFactory.",
 					factoryClass.getName()));
 	}
 	
@@ -610,6 +598,65 @@ public class ConnectorResource implements EnvironmentListener {
       
       if (_factory == null)
 	throw new ConfigException(L.l("connection-factory requires a valid type."));
+    }
+
+  /**
+   * Configures a connection-factory
+   */
+  public void start()
+    throws Exception
+    {
+      ManagedConnectionFactory managedFactory = getFactory();
+    
+      if (getInit() != null)
+	getInit().configure(managedFactory);
+
+      if (_ra != null)
+	managedFactory.setResourceAdapter(_ra);
+
+      ResourceManagerImpl rm = ResourceManagerImpl.createLocalManager();
+	
+      ConnectionPool cm = rm.createConnectionPool();
+
+      if (_name != null)
+	cm.setName(_name);
+
+      if (_rar != null) {
+	String trans = _rar.getTransactionSupport();
+
+	if (trans == null) { // guess XA
+	  cm.setXATransaction(true);
+	  cm.setLocalTransaction(true);
+	}
+	else if (trans.equals("XATransaction")) {
+	  cm.setXATransaction(true);
+	  cm.setLocalTransaction(true);
+	}
+	else if (trans.equals("NoTransaction")) {
+	  cm.setXATransaction(false);
+	  cm.setLocalTransaction(false);
+	}
+	else if (trans.equals("LocalTransaction")) {
+	  cm.setXATransaction(false);
+	  cm.setLocalTransaction(true);
+	}
+      }
+
+      cm.setLocalTransactionOptimization(getLocalTransactionOptimization());
+      cm.setShareable(getShareable());
+
+      Object connectionFactory = cm.init(managedFactory);
+      cm.start();
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      if (getName() != null) {
+	Jndi.bindDeepShort(getName(), connectionFactory);
+
+	webBeans.addSingleton(connectionFactory, getName());
+      }
+      else
+	webBeans.addSingleton(connectionFactory);
     }
   }
 
@@ -732,7 +779,7 @@ public class ConnectorResource implements EnvironmentListener {
     }
   }
 
-  public class ConnectionResource {
+  public class ConnectorBean {
     private String _name;
     private String _type;
     private InitProgram _init;
@@ -745,12 +792,23 @@ public class ConnectorResource implements EnvironmentListener {
       _name = name;
     }
 
+    public void setName(String name)
+    {
+      _name = name;
+    }
+
     public String getName()
     {
       return _name;
     }
 
     public void setType(String type)
+      throws Exception
+    {
+      setClass(type);
+    }
+
+    public void setClass(String type)
       throws Exception
     {
       _type = type;
@@ -772,7 +830,7 @@ public class ConnectorResource implements EnvironmentListener {
 	  Class resourceClass = Class.forName(type, false, loader);
 	  
 	  _object = resourceClass.newInstance();
-	} catch (Throwable e) {
+	} catch (Exception e) {
 	  throw new ConfigException(L.l("`{0}' is not a known resource.  The type must match the adminobject of one of the installed *.rar files.",
 					_type), e);
 	}
@@ -802,10 +860,28 @@ public class ConnectorResource implements EnvironmentListener {
 
     @PostConstruct
     public void init()
-      throws ConfigException
+      throws Exception
     {
       if (_object == null)
-	throw new ConfigException(L.l("<type> must be set for a resource."));
+	throw new ConfigException(L.l("<class> must be set for a bean."));
+      
+      Object resourceObject = getObject();
+    
+      if (getInit() != null)
+	getInit().configure(resourceObject);
+
+      if (_ra != null && resourceObject instanceof ResourceAdapterAssociation)
+	((ResourceAdapterAssociation) resourceObject).setResourceAdapter(_ra);
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+
+      if (getName() != null) {
+	Jndi.bindDeepShort(getName(), resourceObject);
+
+	webBeans.addSingleton(resourceObject, getName());
+      }
+      else
+	webBeans.addSingleton(resourceObject);
     }
   }
 }

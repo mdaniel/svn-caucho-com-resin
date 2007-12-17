@@ -533,12 +533,14 @@ public class Config {
 
     QName attrName = new QName(attr);
     AttributeStrategy attrStrategy = strategy.getAttributeStrategy(attrName);
-    if (attrStrategy != null)
-      attrStrategy.setAttribute(obj, attrName, value);
-    else
+    if (attrStrategy == null)
       throw new ConfigException(L.l("{0}: '{1}' is an unknown attribute.",
 				    obj.getClass().getName(),
 				    attrName.getName()));
+    else if (value instanceof String)
+      attrStrategy.setAttribute(obj, attrName, attrStrategy.convert((String) value));
+    else
+      attrStrategy.setAttribute(obj, attrName, value);
   }
 
   /**

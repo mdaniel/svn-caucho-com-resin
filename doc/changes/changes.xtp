@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>JCA: updated &lt;connector> syntax (#2209, rep by Serge Sozonoff)</li>
 <li>Quercus: added spring_bean("...")</li>
 </ul>
 </s2>

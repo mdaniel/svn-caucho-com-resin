@@ -42,7 +42,7 @@ public class ConnectionDefinition extends ObjectConfig {
 
   private Class _managedConnectionFactoryClass;
   private Class _connectionFactoryInterface;
-  private String _connectionFactoryImplClass;
+  private Class _connectionFactoryImplClass;
   private Class _connectionInterface;
   private String _connectionImplClass;
   
@@ -84,10 +84,18 @@ public class ConnectionDefinition extends ObjectConfig {
   /**
    * Sets the connection factory implementation class.
    */
-  public void setConnectionfactoryImplClass(String cl)
+  public void setConnectionfactoryImplClass(Class cl)
     throws ConfigException
   {
     _connectionFactoryImplClass = cl;
+  }
+
+  /**
+   * Returns the application-view for the connection factory.
+   */
+  public Class getConnectionFactoryImpl()
+  {
+    return _connectionFactoryImplClass;
   }
     
   /**

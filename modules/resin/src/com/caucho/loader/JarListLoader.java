@@ -222,7 +222,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
       ArrayList<JarEntry> jarEntryList = _pathMap.get(name);
 
       for (int i = 0; jarEntryList != null && i < jarEntryList.size(); i++) {
-	JarEntry jarEntry = _jarList.get(i);
+	JarEntry jarEntry = jarEntryList.get(i);
 	Path path = jarEntry.getJarPath();
 
 	path = path.lookup(name);

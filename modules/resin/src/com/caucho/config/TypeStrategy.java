@@ -123,6 +123,11 @@ public abstract class TypeStrategy {
                                    Object parent)
     throws Exception;
 
+  public Object convert(Object source)
+  {
+    return source;
+  }
+
   /**
    * Configures as an attribute.
    */

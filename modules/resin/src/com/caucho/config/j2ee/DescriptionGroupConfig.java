@@ -51,6 +51,11 @@ public class DescriptionGroupConfig
     _displayName = displayName;
   }
 
+  public String getDisplayName()
+  {
+    return _displayName;
+  }
+
   public Icon createIcon()
   {
     return (_icon = new Icon());

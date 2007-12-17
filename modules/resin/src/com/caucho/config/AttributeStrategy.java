@@ -83,6 +83,11 @@ public abstract class AttributeStrategy {
   {
   }
 
+  public Object convert(String string)
+  {
+    return string;
+  }
+
   /**
    * Creates the child node.
    */

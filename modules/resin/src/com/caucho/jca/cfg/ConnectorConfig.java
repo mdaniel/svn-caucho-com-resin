@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,6 +29,7 @@
 
 package com.caucho.jca.cfg;
 
+import com.caucho.config.j2ee.DescriptionGroupConfig;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -36,9 +38,10 @@ import java.util.logging.Logger;
 /**
  * Configuration for a connector.
  */
-public class ConnectorConfig {
+public class ConnectorConfig extends DescriptionGroupConfig {
   private static final L10N L = new L10N(ConnectorConfig.class);
-  private static final Logger log = Log.open(ConnectorConfig.class);
+  private static final Logger log
+    = Logger.getLogger(ConnectorConfig.class.getName());
 
   private String _id;
 
@@ -95,37 +98,6 @@ public class ConnectorConfig {
   }
 
   /**
-   * Sets the display-name of the resource.
-   */
-  public void setDisplayName(String displayName)
-  {
-    _displayName = displayName;
-  }
-
-  /**
-   * Gets the display-name of the resource.
-   */
-  public String getDisplayName()
-  {
-    return _displayName;
-  }
-
-  /**
-   * Sets the description of the resource.
-   */
-  public void setDescription(String description)
-  {
-  }
-
-  /**
-   * Sets the icon.
-   */
-  public Icon createIcon()
-  {
-    return new Icon();
-  }
-
-  /**
    * Sets the license.
    */
   public License createLicense()
@@ -174,16 +146,6 @@ public class ConnectorConfig {
 
   public void init()
   {
-  }
-
-  public static class Icon {
-    public void setSmallIcon(String value)
-    {
-    }
-    
-    public void setLargeIcon(String value)
-    {
-    }
   }
 
   public static class License {

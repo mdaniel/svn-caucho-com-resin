@@ -708,10 +708,13 @@ class PoolItem implements ConnectionEventListener, XAResource {
     }
 
     // local transaction optimization
-    if (! _isXATransaction && flags != TMJOIN && _localTransaction != null) {
+    if (! _isXATransaction
+	&& flags != TMJOIN
+	&& _localTransaction != null
+	&& _xaResource == null) { // XXX: temp disable for ActiveMQ
       try {
 	if (log.isLoggable(Level.FINER))
-	  log.finer("begin-local-XA: " + _localTransaction);
+	  log.finer("begin-local-XA: " + xid + " " + _localTransaction);
 
 	_localTransaction.begin();
       } catch (ResourceException e) {
@@ -728,11 +731,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
       if (log.isLoggable(Level.FINER))
 	log.finer("start-XA: " + xid + " " + _xaResource);
 
-      try {
-	_xaResource.start(xid, flags);
-      } catch (XAException e) {
-	throw e;
-      }
+      _xaResource.start(xid, flags);
+      _isXATransaction = true;
     }
     else {
       if (log.isLoggable(Level.FINER))
@@ -1119,6 +1119,12 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
   public String toString()
   {
-    return "PoolItem[" + _cm.getName() + "," + _id + "," + _mConn + "]";
+    if (_mConn != null) {
+      return ("PoolItem[" + _cm.getName() + "," + _id + ","
+	      + _mConn.getClass().getSimpleName() + "]");
+    }
+    else {
+      return ("PoolItem[" + _cm.getName() + "," + _id + ",null]");
+    }
   }
 }
