@@ -64,7 +64,7 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value ereg(Env env,
-                           StringValue pattern,
+                           Value pattern,
                            StringValue string,
                            @Optional @Reference Value regsV)
   {
@@ -80,7 +80,7 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value eregi(Env env,
-                            StringValue pattern,
+                            Value pattern,
                             StringValue string,
                             @Optional @Reference Value regsV)
   {
@@ -178,28 +178,32 @@ public class RegexpModule
    * Replaces values using regexps
    */
   public static Value ereg_replace(Env env,
-                                   StringValue patternString,
-                                   StringValue replacement,
+                                   Value pattern,
+                                   Value replacement,
                                    StringValue subject)
   {
     if (useJavaRegexp(env))
-      return JavaRegexpModule.ereg_replace(env, patternString, replacement, subject);
+      return JavaRegexpModule.ereg_replace(env, pattern,
+        replacement, subject);
     else
-      return CauchoRegexpModule.ereg_replace(env, patternString, replacement, subject);
+      return CauchoRegexpModule.ereg_replace(env, pattern,
+        replacement, subject);
   }
 
   /**
    * Replaces values using regexps
    */
   public static Value eregi_replace(Env env,
-                                    StringValue patternString,
-                                    StringValue replacement,
+                                    Value pattern,
+                                    Value replacement,
                                     StringValue subject)
   {
     if (useJavaRegexp(env))
-      return JavaRegexpModule.eregi_replace(env, patternString, replacement, subject);
+      return JavaRegexpModule.eregi_replace(env, pattern,
+        replacement, subject);
     else
-      return CauchoRegexpModule.eregi_replace(env, patternString, replacement, subject);
+      return CauchoRegexpModule.eregi_replace(env, pattern,
+        replacement, subject);
   }
 
   /**

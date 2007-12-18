@@ -93,11 +93,11 @@ public class JavaRegexpModule
    * @param env the calling environment
    */
   public static Value ereg(Env env,
-          StringValue pattern,
+          Value pattern,
           StringValue string,
           @Optional @Reference Value regsV)
   {
-    return ereg(env, pattern, string, regsV, 0);
+    return eregImpl(env, pattern, string, regsV, 0);
   }
 
   /**
@@ -106,11 +106,11 @@ public class JavaRegexpModule
    * @param env the calling environment
    */
   public static Value eregi(Env env,
-          StringValue pattern,
+          Value pattern,
           StringValue string,
           @Optional @Reference Value regsV)
   {
-    return ereg(env, pattern, string, regsV, Pattern.CASE_INSENSITIVE);
+    return eregImpl(env, pattern, string, regsV, Pattern.CASE_INSENSITIVE);
   }
 
   /**
@@ -118,13 +118,31 @@ public class JavaRegexpModule
    *
    * @param env the calling environment
    */
-  protected static Value ereg(Env env,
-          StringValue rawPattern,
+  protected static Value eregImpl(Env env,
+          Value rawPattern,
           StringValue string,
           Value regsV,
           int flags)
   {
-    String cleanPattern = cleanEregRegexp(rawPattern, false);
+    // php/1511 : error when pattern argument is null or an empty string
+
+    if (rawPattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+
+    StringValue rawPatternStr;
+
+    // php/1512.qa : non-string pattern argument is converted to
+    // an integer value and formatted as a string.
+
+    if (!(rawPattern instanceof StringValue)) {
+      rawPatternStr = rawPattern.toLongValue().toStringValue();
+    } else {
+      rawPatternStr = rawPattern.toStringValue();
+    }
+
+    String cleanPattern = cleanEregRegexp(rawPatternStr, false);
 
     Pattern pattern = Pattern.compile(cleanPattern, flags);
     Matcher matcher = pattern.matcher(string);
@@ -239,7 +257,7 @@ public class JavaRegexpModule
           for (int j = regs.getSize(); j < i; j++) {
             ArrayValue part = new ArrayValueImpl();
 
-            part.append(StringValue.EMPTY);
+            part.append(env.createEmptyString());
             part.append(LongValue.MINUS_ONE);
 
             regs.put(new LongValue(j), part);
@@ -467,7 +485,7 @@ public class JavaRegexpModule
             for (int j = matchResult.getSize(); j < i; j++) {
               ArrayValue part = new ArrayValueImpl();
 
-              part.append(StringValue.EMPTY);
+              part.append(env.createEmptyString());
               part.append(LongValue.MINUS_ONE);
 
               matchResult.put(LongValue.create(j), part);
@@ -483,7 +501,7 @@ public class JavaRegexpModule
             // php/
             // add unmatched groups that was skipped
             for (int j = matchResult.getSize(); j < i; j++) {
-              matchResult.put(LongValue.create(j), StringValue.EMPTY);
+              matchResult.put(LongValue.create(j), env.createEmptyString());
             }
 
             result = groupValue;
@@ -572,7 +590,7 @@ public class JavaRegexpModule
       return pregReplace(env, pattern, replacement, subject.toStringValue(),
               limit, count);
     } else
-      return StringValue.EMPTY;
+      return env.createEmptyString();
 
   }
 
@@ -598,10 +616,17 @@ public class JavaRegexpModule
       Iterator<Value> patternIter = patternArray.values().iterator();
       Iterator<Value> replacementIter = replacementArray.values().iterator();
 
-      while (patternIter.hasNext() && replacementIter.hasNext()) {
+      while (patternIter.hasNext()) {
+        StringValue replacementStr;
+
+        if (replacementIter.hasNext())
+          replacementStr = replacementIter.next().toStringValue();
+        else
+          replacementStr = env.createEmptyString();
+
         string = pregReplaceString(env,
                 patternIter.next().toStringValue(),
-                replacementIter.next().toStringValue(),
+                replacementStr,
                 string,
                 limit,
                 countV);
@@ -728,54 +753,89 @@ public class JavaRegexpModule
             isEval);
   }
 
-  /**
-   * Replaces values using regexps
-   */
   public static Value ereg_replace(Env env,
-          StringValue patternString,
-          StringValue replacement,
+          Value pattern,
+          Value replacement,
           StringValue subject)
   {
-    Pattern pattern = Pattern.compile(cleanRegexp(patternString, false));
-
-    ArrayList<Replacement> replacementProgram
-    = _replacementCache.get(replacement);
-
-    if (replacementProgram == null) {
-      replacementProgram = compileReplacement(env, replacement, false);
-      _replacementCache.put(replacement, replacementProgram);
-    }
-
-    return pregReplaceStringImpl(env,
-            pattern,
-            replacementProgram,
-            subject,
-            -1,
-            NullValue.NULL,
-            false);
+    return eregReplaceImpl(env, pattern, replacement, subject, false);
   }
 
   /**
    * Replaces values using regexps
    */
   public static Value eregi_replace(Env env,
-          StringValue patternString,
-          StringValue replacement,
+          Value pattern,
+          Value replacement,
           StringValue subject)
   {
-    Pattern pattern = Pattern.compile(cleanRegexp(patternString, false),
-            Pattern.CASE_INSENSITIVE);
+    return eregReplaceImpl(env, pattern, replacement, subject, true);
+  }
 
-    ArrayList<Replacement> replacementProgram
-    = _replacementCache.get(replacement);
+  /**
+   * Replaces values using regexps
+   */
+  public static Value eregReplaceImpl(Env env,
+                                  Value pattern,
+                                  Value replacement,
+                                  StringValue subject,
+                                  boolean isCaseInsensitive)
+  {
+    StringValue patternStr;
+    StringValue replacementStr;
 
-    if (replacementProgram == null) {
-      replacementProgram = compileReplacement(env, replacement, false);
-      _replacementCache.put(replacement, replacementProgram);
+    // php/1511 : error when pattern argument is null or an empty string
+
+    if (pattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
     }
 
-    return pregReplaceStringImpl(env, pattern, replacementProgram,
-            subject, -1, NullValue.NULL, false);
+    // php/150u : If a non-string type argument is passed
+    // for the pattern or replacement argument, it is
+    // converted to a string of length 1 that contains
+    // a single character.
+
+    if (pattern instanceof StringValue) {
+      patternStr = pattern.toStringValue();
+    } else {
+      patternStr = env.createString(
+        String.valueOf((char) pattern.toLong()));
+    }
+
+    if (replacement instanceof NullValue) {
+      replacementStr = env.createEmptyString();
+    } else if (replacement instanceof StringValue) {
+      replacementStr = replacement.toStringValue();
+    } else {
+      replacementStr = env.createString(
+        String.valueOf((char) replacement.toLong()));
+    }
+
+    Pattern patternObj;
+
+    if (isCaseInsensitive) {
+      patternObj = Pattern.compile(cleanRegexp(patternStr, false),
+            Pattern.CASE_INSENSITIVE);
+    } else {
+      patternObj = Pattern.compile(cleanRegexp(patternStr, false));
+    }
+
+    ArrayList<Replacement> replacementProgram
+    = _replacementCache.get(replacementStr);
+
+    if (replacementProgram == null) {
+      replacementProgram = compileReplacement(env, replacementStr, false);
+      _replacementCache.put(replacementStr, replacementProgram);
+    }
+
+    return pregReplaceStringImpl(env,
+            patternObj,
+            replacementProgram,
+            subject,
+            -1,
+            NullValue.NULL,
+            false);
   }
 
   /**
@@ -883,7 +943,7 @@ public class JavaRegexpModule
 
       return result;
 
-    } else if (subject instanceof StringValue) {
+    } else if (subject.isset()) {
       return pregReplaceCallback(env,
               pattern.toStringValue(),
               fun,
@@ -891,7 +951,7 @@ public class JavaRegexpModule
               limit,
               count);
     } else {
-      return NullValue.NULL;
+      return env.createEmptyString();
     }
   }
 
@@ -922,7 +982,7 @@ public class JavaRegexpModule
 
       return subject;
 
-    } else if (patternValue instanceof StringValue) {
+    } else if (subject.isset()) {
       return pregReplaceCallbackImpl(env,
               patternValue.toStringValue(),
               fun,
@@ -930,7 +990,7 @@ public class JavaRegexpModule
               limit,
               countV);
     } else {
-      return NullValue.NULL;
+      return env.createEmptyString();
     }
   }
 
@@ -1024,13 +1084,13 @@ public class JavaRegexpModule
               if (isCaptureOffset) {
                 ArrayValue part = new ArrayValueImpl();
 
-                part.put(StringValue.EMPTY);
+                part.put(env.createEmptyString());
                 part.put(LongValue.create(startPosition));
 
                 result.put(part);
               }
               else {
-                result.put(StringValue.EMPTY);
+                result.put(env.createEmptyString());
               }
             }
           }

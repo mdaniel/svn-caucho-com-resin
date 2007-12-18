@@ -95,7 +95,7 @@ public class CauchoRegexpModule
    * @param env the calling environment
    */
   public static Value ereg(Env env,
-          StringValue pattern,
+          Value pattern,
           StringValue string,
           @Optional @Reference Value regsV)
   {
@@ -108,7 +108,7 @@ public class CauchoRegexpModule
    * @param env the calling environment
    */
   public static Value eregi(Env env,
-          StringValue pattern,
+          Value pattern,
           StringValue string,
           @Optional @Reference Value regsV)
   {
@@ -121,13 +121,31 @@ public class CauchoRegexpModule
    * @param env the calling environment
    */
   protected static Value eregImpl(Env env,
-                                  StringValue rawPattern,
+                                  Value rawPattern,
                                   StringValue string,
                                   Value regsV,
                                   boolean isCaseInsensitive)
   {
-    StringValue cleanPattern = cleanEregRegexp(env, rawPattern, false);
-    
+    // php/1511 : error when pattern argument is null or an empty string
+
+    if (rawPattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+
+    // php/1512 : non-string pattern argument is converted to
+    // an integer value and formatted as a string.
+
+    StringValue rawPatternStr;
+
+    if (!(rawPattern instanceof StringValue)) {
+      rawPatternStr = rawPattern.toLongValue().toStringValue();
+    } else {
+      rawPatternStr = rawPattern.toStringValue();
+    }
+
+    StringValue cleanPattern = cleanEregRegexp(env, rawPatternStr, false);
+
     if (isCaseInsensitive)
       cleanPattern = addDelimiters(env, cleanPattern, "/", "/i");
     else
@@ -292,7 +310,7 @@ public class CauchoRegexpModule
   }
 
   /**
-   * Returns the index of the first match.
+   * Returns the number of full pattern matches or FALSE on error.
    *
    * @param env the calling environment
    */
@@ -591,7 +609,7 @@ public class CauchoRegexpModule
         return pregReplace(env, pattern, replacement, subject.toStringValue(),
                            limit, count);
       } else
-        return subject.toStringValue().getEmptyString();
+        return env.createEmptyString();
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -625,10 +643,17 @@ public class CauchoRegexpModule
       Iterator<Value> patternIter = patternArray.values().iterator();
       Iterator<Value> replacementIter = replacementArray.values().iterator();
 
-      while (patternIter.hasNext() && replacementIter.hasNext()) {
+      while (patternIter.hasNext()) {
+        StringValue replacementStr;
+
+        if (replacementIter.hasNext())
+          replacementStr = replacementIter.next().toStringValue();
+        else
+          replacementStr = env.createEmptyString();
+
         string = pregReplaceString(env,
 				   patternIter.next().toStringValue(),
-				   replacementIter.next().toStringValue(),
+				   replacementStr,
 				   string,
 				   limit,
 				   countV);
@@ -763,23 +788,81 @@ public class CauchoRegexpModule
    * Replaces values using regexps
    */
   public static Value ereg_replace(Env env,
-          StringValue patternString,
-          StringValue replacement,
+          Value pattern,
+          Value replacement,
           StringValue subject)
   {
+    return eregReplaceImpl(env, pattern, replacement, subject, false);
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+  public static Value eregi_replace(Env env,
+          Value pattern,
+          Value replacement,
+          StringValue subject)
+  {
+    return eregReplaceImpl(env, pattern, replacement, subject, true);
+  }
+
+  /**
+   * Replaces values using regexps
+   */
+
+  protected static Value eregReplaceImpl(Env env,
+                                  Value pattern,
+                                  Value replacement,
+                                  StringValue subject,
+                                  boolean isCaseInsensitive)
+  {
+    StringValue patternStr;
+    StringValue replacementStr;
+
+    // php/1511 : error when pattern argument is null or an empty string
+
+    if (pattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+
+    // php/150u : If a non-string type argument is passed
+    // for the pattern or replacement argument, it is
+    // converted to a string of length 1 that contains
+    // a single character.
+
+    if (pattern instanceof StringValue) {
+      patternStr = pattern.toStringValue();
+    } else {
+      patternStr = env.createString(
+        String.valueOf((char) pattern.toLong()));
+    }
+
+    if (replacement instanceof NullValue) {
+      replacementStr = env.createEmptyString();
+    } else if (replacement instanceof StringValue) {
+      replacementStr = replacement.toStringValue();
+    } else {
+      replacementStr = env.createString(
+        String.valueOf((char) replacement.toLong()));
+    }
+
     try {
-      patternString = cleanEregRegexp(env, patternString, false);
-      patternString = addDelimiters(env, patternString, "/", "/");
-      
-      Regexp regexp = getRegexp(env, patternString);
+      patternStr = cleanEregRegexp(env, patternStr, false);
+      if (isCaseInsensitive)
+        patternStr = addDelimiters(env, patternStr, "/", "/i");
+      else
+        patternStr = addDelimiters(env, patternStr, "/", "/");
+
+      Regexp regexp = getRegexp(env, patternStr);
       RegexpState regexpState = new RegexpState(env, regexp, subject);
 
       ArrayList<Replacement> replacementProgram
-        = _replacementCache.get(replacement);
+        = _replacementCache.get(replacementStr);
 
       if (replacementProgram == null) {
-        replacementProgram = compileReplacement(env, replacement, false);
-        _replacementCache.put(replacement, replacementProgram);
+        replacementProgram = compileReplacement(env, replacementStr, false);
+        _replacementCache.put(replacementStr, replacementProgram);
       }
 
       return pregReplaceStringImpl(env,
@@ -790,41 +873,6 @@ public class CauchoRegexpModule
 				   -1,
 				   NullValue.NULL,
 				   false);
-    }
-    catch (IllegalRegexpException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e);
-      
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * Replaces values using regexps
-   */
-  public static Value eregi_replace(Env env,
-          StringValue patternString,
-          StringValue replacement,
-          StringValue subject)
-  {
-    try {
-      patternString = cleanEregRegexp(env, patternString, false);
-      patternString = addDelimiters(env, patternString, "/", "/i");
-      
-      Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = new RegexpState(env, regexp, subject);
-
-      ArrayList<Replacement> replacementProgram
-        = _replacementCache.get(replacement);
-
-      if (replacementProgram == null) {
-        replacementProgram = compileReplacement(env, replacement, false);
-        _replacementCache.put(replacement, replacementProgram);
-      }
-
-      return pregReplaceStringImpl(env, regexp, regexpState,
-				   replacementProgram,
-				   subject, -1, NullValue.NULL, false);
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -944,7 +992,7 @@ public class CauchoRegexpModule
 
         return result;
 
-      } else if (subject instanceof StringValue) {
+      } else if (subject.isset()) {
         return pregReplaceCallback(env,
             pattern.toStringValue(),
             fun,
@@ -952,7 +1000,7 @@ public class CauchoRegexpModule
             limit,
             count);
       } else {
-        return NullValue.NULL;
+        return env.createEmptyString();
       }
     }
     catch (IllegalRegexpException e) { 
@@ -991,7 +1039,7 @@ public class CauchoRegexpModule
 
       return subject;
 
-    } else if (patternValue instanceof StringValue) {
+    } else if (subject.isset()) {
       return pregReplaceCallbackImpl(env,
               patternValue.toStringValue(),
               fun,
@@ -999,7 +1047,7 @@ public class CauchoRegexpModule
               limit,
               countV);
     } else {
-      return NullValue.NULL;
+      return env.createEmptyString();
     }
   }
 
@@ -1183,21 +1231,62 @@ public class CauchoRegexpModule
   }
 
   /**
-   * Returns the index of the first match.
+   * Returns an array of strings produces from splitting the passed string
+   * around the provided pattern.  The pattern is case sensitive.
    *
-   * @param env the calling environment
+   * @param patternString the pattern
+   * @param string the string to split
+   * @param limit if specified, the maximum number of elements in the array
+   * @return an array of strings split around the pattern string
    */
   public static Value split(Env env,
 			    StringValue patternString,
 			    StringValue string,
 			    @Optional("-1") long limit)
   {
+    return splitImpl(env, patternString, string, limit, false);
+  }
+
+  /**
+   * Returns an array of strings produces from splitting the passed string
+   * around the provided pattern.  The pattern is case insensitive.
+   *
+   * @param patternString the pattern
+   * @param string the string to split
+   * @param limit if specified, the maximum number of elements in the array
+   * @return an array of strings split around the pattern string
+   */
+  public static Value spliti(Env env,
+			    StringValue patternString,
+			    StringValue string,
+			    @Optional("-1") long limit)
+  {
+    return splitImpl(env, patternString, string, limit, true);
+  }
+
+  /**
+   * Split string into array by regular expression
+   *
+   * @param env the calling environment
+   */
+
+  private static Value splitImpl(Env env,
+			    StringValue patternString,
+			    StringValue string,
+			    long limit,
+                            boolean isCaseInsensitive)
+  {
     try {
       if (limit < 0)
         limit = Long.MAX_VALUE;
 
-      patternString = addDelimiters(env, patternString, "/", "/");
-      
+      // php/151c
+
+      if (isCaseInsensitive)
+        patternString = addDelimiters(env, patternString, "/", "/i");
+      else
+        patternString = addDelimiters(env, patternString, "/", "/");
+
       Regexp regexp = getRegexp(env, patternString);
       RegexpState regexpState = new RegexpState(env, regexp, string);
 
@@ -1280,65 +1369,6 @@ public class CauchoRegexpModule
     }
   }
 
-  /**
-   * Returns an array of strings produces from splitting the passed string
-   * around the provided pattern.  The pattern is case insensitive.
-   *
-   * @param patternString the pattern
-   * @param string the string to split
-   * @param limit if specified, the maximum number of elements in the array
-   * @return an array of strings split around the pattern string
-   */
-  public static Value spliti(Env env,
-			     StringValue patternString,
-			     StringValue string,
-			     @Optional("-1") long limit)
-  {
-    try {
-      if (limit < 0)
-        limit = Long.MAX_VALUE;
-
-      // php/151c
-
-      patternString = addDelimiters(env, patternString, "/", "/i");
-      
-      Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = new RegexpState(env, regexp, string);
-
-      ArrayValue result = new ArrayValueImpl();
-
-      long count = 0;
-      int head = 0;
-
-      while (regexpState.find() && count < limit) {
-        StringValue value;
-        if (count == limit - 1) {
-          value = string.substring(head);
-          head = string.length();
-        } else {
-          value = string.substring(head, regexpState.start());
-          head = regexpState.end();
-        }
-
-        result.put(value);
-
-        count++;
-      }
-
-      if (head <= string.length() && count != limit) {
-        result.put(string.substring(head));
-      }
-
-      return result;
-
-    } catch (IllegalRegexpException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e);
-      
-      return BooleanValue.FALSE;
-    }
-  }
-  
   private static Regexp getRegexp(Env env,
                                   StringValue rawRegexp,
                                   StringValue subject)
