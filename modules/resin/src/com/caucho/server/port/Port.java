@@ -1237,7 +1237,7 @@ public class Port
   /**
    * Returns true if the keepalive is allowed
    */
-  boolean allowKeepalive(long acceptStartTime)
+  public boolean allowKeepalive(long acceptStartTime)
   {
     synchronized (_keepaliveCountLock) {
       if (! _lifecycle.isActive())

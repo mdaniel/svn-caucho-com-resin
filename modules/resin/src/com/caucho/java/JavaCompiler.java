@@ -651,8 +651,8 @@ public class JavaCompiler {
   public void mergeSmap(Path classPath, Path smapPath)
   {
     try {
-      if (smapPath.length() >= 65536) {
-	log.warning(".smap for " + classPath.getTail() + " is too large (" + smapPath.length() + " bytes)");
+      if (smapPath.getLength() >= 65536) {
+	log.warning(".smap for " + classPath.getTail() + " is too large (" + smapPath.getLength() + " bytes)");
 	return;
       }
 	

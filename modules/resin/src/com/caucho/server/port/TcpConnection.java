@@ -399,9 +399,9 @@ public class TcpConnection extends PortConnection implements ThreadTask
       return -1;
   }
 
-  public boolean allowKeppalive()
+  public boolean allowKeepalive()
   {
-    return _port.allowKeepalive(_connectionStartTime);
+    return getPort().allowKeepalive(_connectionStartTime);
   }
 
   /**
