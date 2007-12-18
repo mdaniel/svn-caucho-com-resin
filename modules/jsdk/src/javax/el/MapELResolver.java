@@ -108,13 +108,13 @@ public class MapELResolver extends ELResolver {
 			  Object base,
 			  Object property)
   {
+    if (context == null)
+      throw new NullPointerException();
+    
     if (base instanceof Map) {
-      Object value = getValue(context, base, property);
-
-      if (value != null)
-	return value.getClass();
-      else
-	return null;
+      context.setPropertyResolved(true);
+      
+      return Object.class;
     }
     else
       return null;

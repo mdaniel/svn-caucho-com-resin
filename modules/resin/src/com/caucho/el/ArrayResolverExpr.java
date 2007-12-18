@@ -99,6 +99,33 @@ public class ArrayResolverExpr extends Expr
   }
   
   /**
+   * Evaluates the expression as applicable to the provided context, and returns
+   * the most general type that can be accepted by the setValue(javax.el.ELContext,
+   * java.lang.Object) method.
+   *
+   * @param env
+   * @return
+   * @throws PropertyNotFoundException
+   * @throws ELException
+   */
+  @Override
+  public Class<?> getType(ELContext env)
+    throws PropertyNotFoundException, ELException
+  {
+    Object aObj = _left.getValue(env);
+
+    if (aObj == null)
+      return null;
+
+    Object fieldObj = _right.getValue(env);
+
+    if (fieldObj == null)
+      return null;
+
+    return env.getELResolver().getType(env, aObj, fieldObj);
+  }
+
+  /**
    * Evaluate the expression as an object.
    *
    * @param env the variable environment

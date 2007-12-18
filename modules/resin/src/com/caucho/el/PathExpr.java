@@ -31,9 +31,7 @@ package com.caucho.el;
 
 import com.caucho.vfs.WriteStream;
 
-import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.MethodInfo;
+import javax.el.*;
 import java.io.IOException;
 
 /**
@@ -107,7 +105,28 @@ public class PathExpr extends Expr {
       
     return new FunctionExpr(this, args);
   }
-  
+
+  /**
+   * Evaluates the expression as applicable to the provided context, and returns the
+   * most general type that can be accepted by the
+   * setValue(javax.el.ELContext, java.lang.Object) method. 
+   * @param env
+   * @return
+   * @throws PropertyNotFoundException
+   * @throws ELException
+   */
+  @Override
+  public Class<?> getType(ELContext env)
+    throws PropertyNotFoundException, ELException
+  {
+    Class value = _expr.getType(env);
+    if (env.isPropertyResolved()) {
+      return value;
+    }
+
+    return env.getELResolver().getType(env, _path, null);
+  }
+
   /**
    * Evaluate the expression as an object.
    *

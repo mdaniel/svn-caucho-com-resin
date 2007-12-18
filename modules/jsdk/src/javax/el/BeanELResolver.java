@@ -108,17 +108,57 @@ public class BeanELResolver extends ELResolver {
     return descriptors.iterator();
   }
 
+  /**
+   * If the base object is not null, returns the most general type of the
+   * property
+   *
+   * @param context
+   * @param base
+   * @param property
+   * @return
+   */
   @Override
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
-    Object value = getValue(context, base, property);
-
-    if (value != null)
-      return value.getClass();
-    else
+    if (base == null || property == null)
       return null;
+
+    if (!(property instanceof String))
+      return null;
+
+    String fieldName = (String) property;
+
+    if (fieldName.length() == 0)
+      return null;
+
+    Class cl = base.getClass();
+    BeanProperties props = getProps(cl);
+
+    if (props == null) {
+      if (cl.isArray()
+          || Collection.class.isAssignableFrom(cl)
+          || Map.class.isAssignableFrom(cl)) {
+        return null;
+      }
+
+      props = new BeanProperties(cl);
+      setProps(cl, props);
+    }
+
+    BeanProperty prop = props.getBeanProperty(fieldName);
+
+    context.setPropertyResolved(true);
+
+    if (prop == null || prop.getWriteMethod() == null)
+      throw new PropertyNotFoundException("'" +
+                                          property +
+                                          "' is an unknown bean property of '" +
+                                          base.getClass().getName() +
+                                          "'");
+
+    return prop.getWriteMethod().getParameterTypes()[0];
   }
 
   @Override

@@ -208,6 +208,16 @@ public class FacesContextELResolver extends CompositeELResolver {
   public Class getType(ELContext env, Object base, Object property)
   {
     if (base != null) {
+      if (base instanceof Map)
+        return _mapResolver.getType(env, base, property);
+      else if (base instanceof List)
+        return _listResolver.getType(env, base, property);
+      else if (base.getClass().isArray())
+        return _arrayResolver.getType(env, base, property);
+      else if (base instanceof ResourceBundle)
+        return _bundleResolver.getType(env, base, property);
+      else
+        return _beanResolver.getType(env, base, property);
     }
     else if (base == null && property instanceof String) {
       ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);

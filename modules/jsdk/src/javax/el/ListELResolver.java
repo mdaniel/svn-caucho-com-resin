@@ -84,13 +84,13 @@ public class ListELResolver extends ELResolver {
 			  Object base,
 			  Object property)
   {
-    if (base instanceof List) {
-      Object value = getValue(context, base, property);
+    if (context == null)
+      throw new NullPointerException();
 
-      if (value != null)
-	return value.getClass();
-      else
-	return null;
+    if (base instanceof List) {
+      context.setPropertyResolved(true);
+
+      return Object.class;
     }
     else
       return null;
