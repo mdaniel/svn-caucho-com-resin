@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
+import com.caucho.quercus.*;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.UnsetValue;
@@ -180,6 +180,8 @@ public class FunctionExpr extends Expr {
 	return fun.callCopy(env, args);
       else
 	return fun.call(env, args);
+    } catch (Exception e) {
+      throw QuercusException.create(e, env.getStackTrace());
     } finally {
       env.popCall();
       // XXX: qa/1d14 env.setThis(oldThis);

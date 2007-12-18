@@ -1235,6 +1235,25 @@ public class Port
   }
 
   /**
+   * Returns true if the keepalive is allowed
+   */
+  boolean allowKeepalive(long acceptStartTime)
+  {
+    synchronized (_keepaliveCountLock) {
+      if (! _lifecycle.isActive())
+	return false;
+      else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
+	return false;
+      else if (_keepaliveMax <= _keepaliveCount)
+	return false;
+      else if (_connectionMax <= _connectionCount + _minSpareConnection)
+	return false;
+      else
+	return true;
+    }
+  }
+
+  /**
    * Marks a keepalive as starting running.  Called only from TcpConnection.
    */
   boolean keepaliveBegin(TcpConnection conn, long acceptStartTime)
@@ -1242,21 +1261,23 @@ public class Port
     synchronized (_keepaliveCountLock) {
       if (! _lifecycle.isActive())
         return false;
-      else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(conn + " failed keepalive delay " + (Alarm.getCurrentTime() - acceptStartTime));
-	
-	return false;
-      }
-      else if (_keepaliveMax <= _keepaliveCount) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(conn + " failed keepalive max " + _keepaliveCount);
+      else if (_connectionMax <= _connectionCount + _minSpareConnection) {
+	log.warning(conn + " failed keepalive connection max " + _connectionCount);
 	
         return false;
       }
-      else if (_connectionMax <= _connectionCount + _minSpareConnection) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(conn + " failed keepalive max " + _keepaliveCount);
+      else if (false &&
+	       acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
+	// #2262 - skip this check to avoid confusing the load balancer
+	// the keepalive check is in allowKeepalive
+	log.warning(conn + " failed keepalive delay " + (Alarm.getCurrentTime() - acceptStartTime));
+	
+	return false;
+      }
+      else if (false && _keepaliveMax <= _keepaliveCount) {
+	// #2262 - skip this check to avoid confusing the load balancer
+	// the keepalive check is in allowKeepalive
+	log.warning(conn + " failed keepalive max " + _keepaliveCount);
 	
         return false;
       }

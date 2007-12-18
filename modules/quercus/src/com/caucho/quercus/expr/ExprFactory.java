@@ -839,6 +839,17 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a new method A::$f()
+   */
+  public Expr createStaticVarMethod(Location loc,
+				    String className,
+				    Expr var,
+				    ArrayList<Expr> args)
+  {
+    return new StaticVarMethodExpr(loc, className, var, args);
+  }
+
+  /**
    * Creates a new method call.
    */
   public Expr createMethodCall(Location loc,

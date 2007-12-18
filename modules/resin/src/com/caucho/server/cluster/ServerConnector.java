@@ -144,18 +144,6 @@ public class ServerConnector
     _server = server;
     _cluster = _server.getCluster();
     _port = server.getClusterPort();
-
-    _warmupTime = server.getLoadBalanceWarmupTime();
-    _warmupChunkTime = _warmupTime / WARMUP_MAX;
-    if (_warmupChunkTime <= 0)
-      _warmupChunkTime = 1;
-      
-    _failRecoverTime = server.getLoadBalanceRecoverTime();
-    _failChunkTime = _failRecoverTime / WARMUP_MAX;
-    if (_failChunkTime <= 0)
-      _failChunkTime = 1;
-
-    _state = ST_STARTING;
   }
 
   /**
@@ -278,6 +266,18 @@ public class ServerConnector
   public void init()
     throws Exception
   {
+    _warmupTime = _server.getLoadBalanceWarmupTime();
+    _warmupChunkTime = _warmupTime / WARMUP_MAX;
+    if (_warmupChunkTime <= 0)
+      _warmupChunkTime = 1;
+      
+    _failRecoverTime = _server.getLoadBalanceRecoverTime();
+    _failChunkTime = _failRecoverTime / WARMUP_MAX;
+    if (_failChunkTime <= 0)
+      _failChunkTime = 1;
+
+    _state = ST_STARTING;
+    
     String address = getAddress();
 
     if (address == null)
@@ -987,7 +987,11 @@ public class ServerConnector
 
       if (_firstSuccessTime <= 0) {
 	if (ST_STARTING <= _state && _state < ST_ACTIVE) {
-	  _state = ST_WARMUP;
+	  if (_warmupTime > 0)
+	    _state = ST_WARMUP;
+	  else
+	    _state = ST_ACTIVE;
+
 	  _firstSuccessTime = now;
 	}
 
@@ -1037,7 +1041,7 @@ public class ServerConnector
     
       long now = Alarm.getCurrentTime();
       int warmupState = _warmupState;
-    
+
       if (warmupState >= 0 && _firstSuccessTime > 0) {
 	warmupState = (int) ((now - _firstSuccessTime) / _warmupChunkTime);
 

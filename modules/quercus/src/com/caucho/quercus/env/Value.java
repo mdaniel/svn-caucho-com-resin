@@ -1664,7 +1664,7 @@ abstract public class Value implements java.io.Serializable
    */
   public int length()
   {
-    return toString().length();
+    return toStringValue().length();
   }
 
   //

@@ -674,7 +674,7 @@ abstract public class StringValue extends Value implements CharSequence {
       return sb;
     }
     else
-      return LongValue.ZERO;
+      return LongValue.create(toLong() & rValue.toLong());
   }
   
   /*
@@ -704,7 +704,7 @@ abstract public class StringValue extends Value implements CharSequence {
       return sb;
     }
     else
-      return rValue;
+      return LongValue.create(toLong() | rValue.toLong());
   }
   
   /*
@@ -729,7 +729,7 @@ abstract public class StringValue extends Value implements CharSequence {
       return sb;
     }
     else
-      return rValue;
+      return LongValue.create(toLong() ^ rValue.toLong());
   }
   
   /**

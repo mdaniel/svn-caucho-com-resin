@@ -372,10 +372,6 @@ public class HttpResponse extends AbstractHttpResponse {
       */
 
       if (! _request.allowKeepalive()) {
-/* XXX:   ||            ! req.conn.allocateKeepalive() &&
-               req.rawStream.getOffset() >=
-               req.rawStream.getLength()) {
-*/
         os.write(_connectionCloseBytes, 0, _connectionCloseBytes.length);
         _request.killKeepalive();
 

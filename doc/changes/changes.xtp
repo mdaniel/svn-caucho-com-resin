@@ -12,6 +12,19 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>Quercus: .smap files larger than 64k cannot be merged (#2146, rep by koreth)</li>
+<li>JAX replacement issue with FactoryLoader and win32 (#2187, fixed! by dibo)</li>
+<li>JNI gave misleading error message when license was not available (#2235)</li>
+<li>Keepalive must only use a single check when preparing response to avoid confusing the load balancer (#2262)</li>
+<li>JNI/std.c: on some servers an EAGAIN on send is like EINTR (#2239, rep by B Cleave)</li>
+<li>thread-idle-min and thread-idle-max defaults need lazy init (#2229, rep by mate)</li>
+<li>LoadBalance: load-balance-warmup-time=0 not properly skipping warmup (#2240, rep by A Balandran)</li>
+<li>LoadBalance: client disconnect from browser was causing failover (#2236, rep by A Balandran)</li>
+<li>Quercus: improve exception reporting in interpreted mode</li>
+<li>Quercus: handle A::$f() calls (#2257, rep by jredden)</li>
+<li>Quercus: handle IllegalStateException thrown by JDBC on close (#2184, rep by koreth)</li>
+<li>Quercus: "15" & 3 not properly converted (#2251, rep by koreth)</li>
+<li>Quercus: class static fields need to be stored in Env (#2253, rep by koreth)</li>
 <li>Quercus: array_key_exists (#2254, fixed! by koreth)</li>
 <li>XmlDocumentFactory needs setSchema (#2174, rep by sgudiboina)</li>
 <li>JCA: updated &lt;connector> syntax (#2209, rep by Serge Sozonoff)</li>

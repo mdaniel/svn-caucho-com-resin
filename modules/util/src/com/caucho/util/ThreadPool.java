@@ -45,14 +45,18 @@ public class ThreadPool {
   
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
 
+  private static final int DEFAULT_THREAD_MAX = 8192;
+  private static final int DEFAULT_THREAD_IDLE_MIN = 10;
+  private static final int DEFAULT_THREAD_IDLE_GAP = 5;
+
   private static ThreadPool _globalThreadPool;
 
   private int _g_id;
     
-  private int _threadMax = 8192;
+  private int _threadMax = -1;
   
-  private int _threadIdleMax = 15;
-  private int _threadIdleMin = 10;
+  private int _threadIdleMax = -1;
+  private int _threadIdleMin = -1;
 
   private int _executorTaskMax = -1;
   
@@ -74,7 +78,7 @@ public class ThreadPool {
 
   private final ThreadLauncher _launcher = new ThreadLauncher();
   private final ScheduleThread _scheduler = new ScheduleThread();
-  
+
   private boolean _isQueuePriority;
   
   private Item _idleHead;
@@ -93,6 +97,7 @@ public class ThreadPool {
   private ExecutorQueueItem _executorQueueTail;
 
   private int _scheduleWaitCount;
+  private boolean _isInit;
 
   private ThreadPool()
   {
@@ -117,7 +122,7 @@ public class ThreadPool {
    */
   public void setThreadMax(int max)
   {
-    if (max < _threadIdleMax)
+    if (max < _threadIdleMax && _threadIdleMax >= 0)
       throw new ConfigException(L.l("lt;thread-max> ({0}) must be less than &lt;thread-idle-max> ({1})", max, _threadIdleMax));
 	
     _threadMax = max;
@@ -137,7 +142,7 @@ public class ThreadPool {
    */
   public void setThreadIdleMin(int min)
   {
-    if (_threadIdleMax < min)
+    if (_threadIdleMax < min && _threadIdleMax >= 0)
       throw new ConfigException(L.l("lt;thread-idle-min> ({0}) must be less than &lt;thread-idle-max> ({1})", min, _threadIdleMax));
     
     _threadIdleMin = min;
@@ -156,11 +161,11 @@ public class ThreadPool {
    */
   public void setThreadIdleMax(int max)
   {
-    if (max < _threadIdleMin)
+    if (max < _threadIdleMin && _threadIdleMin >= 0)
       throw new ConfigException(L.l("lt;thread-idle-max> ({0}) must be greater than &lt;thread-idle-min> ({1})",
 				    max, _threadIdleMin));
     
-    if (_threadMax < max)
+    if (_threadMax < max && _threadMax >= 0)
       throw new ConfigException(L.l("lt;thread-idle-max> ({0}) must be less than &lt;thread-max> ({1})",
 				    max, _threadMax));
     
@@ -187,7 +192,7 @@ public class ThreadPool {
    */
   public void setExecutorTaskMax(int max)
   {
-    if (_threadMax < max)
+    if (_threadMax < max && _threadMax >= 0)
       throw new ConfigException(L.l("lt;thread-executor-max> ({0}) must be less than &lt;thread-max> ({1})",
 				    max, _threadMax));
     
@@ -315,6 +320,9 @@ public class ThreadPool {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     synchronized (_executorLock) {
+      if (! _isInit)
+	init();
+      
       _executorTaskCount++;
 
       if (_executorTaskCount <= _executorTaskMax || _executorTaskMax < 0)
@@ -449,6 +457,9 @@ public class ThreadPool {
     while (poolItem == null) {
       try {
 	synchronized (_idleLock) {
+	  if (! _isInit)
+	    init();
+      
 	  int idleCount = _idleCount;
 	  int freeCount = idleCount + _threadMax - _threadCount;
 	  boolean startNew = false;
@@ -517,6 +528,26 @@ public class ThreadPool {
     poolItem.start(task, loader);
 
     return true;
+  }
+
+  private void init()
+  {
+    if (_threadMax < 0)
+      _threadMax = DEFAULT_THREAD_MAX;
+
+    if (_threadIdleMin < 0 && _threadIdleMax < 0) {
+      _threadIdleMin = DEFAULT_THREAD_IDLE_MIN;
+      _threadIdleMax = _threadIdleMin + DEFAULT_THREAD_IDLE_GAP;
+    }
+    else if (_threadIdleMax < 0) {
+      _threadIdleMax = _threadIdleMin + DEFAULT_THREAD_IDLE_GAP;
+    }
+    else if (_threadIdleMin < 0) {
+      _threadIdleMin = DEFAULT_THREAD_IDLE_MIN;
+
+      if (_threadIdleMax < _threadIdleMin)
+	_threadIdleMin = 1;
+    }
   }
 
   class Item implements Runnable {

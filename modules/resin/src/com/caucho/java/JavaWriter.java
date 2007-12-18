@@ -513,7 +513,6 @@ public class JavaWriter extends Writer {
 	out.close();
       }
     }
-    
   }
 
   /**

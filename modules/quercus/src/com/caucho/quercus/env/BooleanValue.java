@@ -220,6 +220,15 @@ public class BooleanValue extends Value
   }
 
   /**
+   * Return the length as a string.
+   */
+  @Override
+  public int length()
+  {
+    return _value ? 1 : 0;
+  }
+
+  /**
    * Prints the value.
    * @param env
    */

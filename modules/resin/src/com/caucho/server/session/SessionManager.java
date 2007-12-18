@@ -1700,8 +1700,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     _alarm.dequeue();
     
-    _sessionList.clear();
-
     ArrayList<SessionImpl> list = new ArrayList<SessionImpl>();
     
     boolean isError = false;
@@ -1744,6 +1742,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (_admin != null)
       _admin.unregister();
+
+    _sessionList = null;
 
     /*
     if (_clusterManager != null)

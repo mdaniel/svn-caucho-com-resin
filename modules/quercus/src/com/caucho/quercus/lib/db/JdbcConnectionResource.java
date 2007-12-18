@@ -649,6 +649,11 @@ public abstract class JdbcConnectionResource implements Closeable {
         log.log(Level.WARNING, e.toString(), e);
         return null;
       }
+    } catch (IllegalStateException e) {
+      // #2184, some drivers return this on closed connection
+      saveErrors(new SQLExceptionWrapper(e));
+
+      return null;
     }
 
     return _rs;

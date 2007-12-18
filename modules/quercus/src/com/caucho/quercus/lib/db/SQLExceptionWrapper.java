@@ -27,40 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus;
+package com.caucho.quercus.lib.db;
 
-import java.lang.reflect.*;
+import java.sql.*;
 
 /**
- * Java exception caught and rethrown by modules.
+ * SQLException wrapper
  */
-public class QuercusModuleException extends QuercusException {
-  public QuercusModuleException()
+public class SQLExceptionWrapper extends SQLException {
+  private Throwable _cause;
+
+  public SQLExceptionWrapper(Throwable cause)
   {
+    _cause = cause;
   }
 
-  public QuercusModuleException(String msg)
+  @Override
+  public Throwable getCause()
   {
-    super(msg);
-  }
-
-  public QuercusModuleException(Throwable cause)
-  {
-    super(cause);
-  }
-
-  public QuercusModuleException(String msg, Throwable cause)
-  {
-    super(msg, cause);
-  }
-
-  public static RuntimeException create(Throwable e)
-  {
-    if (e instanceof RuntimeException)
-      return (RuntimeException) e;
-    else if (e instanceof InvocationTargetException && e.getCause() != null)
-      return new QuercusModuleException(e.getCause());
-    else
-      return new QuercusModuleException(e);
+    return _cause;
   }
 }

@@ -413,7 +413,7 @@ public class ErrorPageManager {
       out.println(escapeHtml(rootExn.toString()));
 
     if (doStackTrace || log.isLoggable(Level.FINE)) {
-      printStackTrace(out, lineMessage, rootExn, lineMap);
+      printStackTrace(out, lineMessage, e, rootExn, lineMap);
     }
 
     out.println("</pre></code>");
@@ -663,6 +663,7 @@ public class ErrorPageManager {
   private void printStackTrace(PrintWriter out,
 			       String lineMessage,
 			       Throwable e,
+			       Throwable rootExn,
                                LineMap lineMap)
   {
     CharArrayWriter writer = new CharArrayWriter();

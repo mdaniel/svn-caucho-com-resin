@@ -1611,6 +1611,14 @@ public class Env {
   }
 
   /**
+   * Returns the raw global lookup.
+   */
+  public Var getGlobalRaw(String name)
+  {
+    return _globalMap.get(name);
+  }
+  
+  /**
    * Gets a global value.
    */
   public Var getGlobalRef(String name)
@@ -2034,37 +2042,13 @@ public class Env {
   {
     QuercusClass cl = findAbstractClass(className);
     
-    Var var = cl.getStaticField(name);
+    Var var = cl.getStaticField(this, name);
     
     if (var == null) {
       error(L.l("{0}::${1} is an undeclared static property", className, name));
     }
-    
-    return var;
-    
-    /*
-    Var var = _globalMap.get(name);
-
-    if (var == null) {
-      // import in class fields and functions
-      QuercusClass cl = findAbstractClass(className);
-      cl.init(this);
-
-      var = _globalMap.get(name);
-    }
-    
-    if (var != null)
-      return var;
-    
-    if (var == null) {
-      var = new Var();
-      var.setGlobal();
-    }
-    
-    _globalMap.put(name, var);
 
     return var;
-    */
   }
 
   /**
@@ -2126,6 +2110,35 @@ public class Env {
       return _callThisStack[_callStackTop - depth - 1];
     else
       return null;
+  }
+
+  public ArrayList<String> getStackTrace()
+  {
+    ArrayList<String> trace = new ArrayList<String>();
+
+    for (int i = _callStackTop - 1; i >= 0; i--) {
+      String entry;
+      Location location = _callStack[i].getLocation();
+      String loc;
+
+      if (location != null && location.getFileName() != null) {
+	loc = (" (at " + location.getFileName()
+	       + ":" + location.getLineNumber() + ")");
+      }
+      else
+	loc = "";
+      
+      if (_callThisStack[i] != null
+	  && ! "".equals(_callThisStack[i].toString())) {
+	entry = _callThisStack[i] + "." + _callStack[i].toString() + loc;
+      }
+      else
+	entry = _callStack[i].toString() + loc;
+
+      trace.add(entry);
+    }
+
+    return trace;
   }
 
   /**

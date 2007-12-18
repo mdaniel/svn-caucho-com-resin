@@ -2997,8 +2997,8 @@ public class QuercusParser {
 
         boolean isInstantiated = false;
 
-	    if (token == SCOPE) {
-	      _peekToken = -1;
+	if (token == SCOPE) {
+	  _peekToken = -1;
 
           className = name;
 
@@ -3019,18 +3019,17 @@ public class QuercusParser {
 
           token = parseToken();
           if (token == '$')
-              return parseStaticClassField(className);
-	      else
-	        _peekToken = token;
+	    return parseStaticClassField(className);
+	  else
+	    _peekToken = token;
 	  
-	      name = parseIdentifier();
+	  name = parseIdentifier();
 
-	      token = parseToken();
-	      _peekToken = token;
-
-	    }
+	  token = parseToken();
+	  _peekToken = token;
+	}
 	    
-        if (token == '(') {
+	if (token == '(') {
           if (_isNewExpr && className == null
               && ("self".equals(name) || "parent".equals(name))) {
             if ("self".equals(name))
@@ -3277,7 +3276,19 @@ public class QuercusParser {
   {
     String var = parseIdentifier();
 
-    return _factory.createStaticFieldGet(getLocation(), className, var);
+    _peekToken = parseToken();
+    if (_peekToken == '(') {
+      parseToken();
+
+      Expr varExpr = _factory.createVar(_function.createVar(var));
+
+      ArrayList<Expr> args = parseArgs();
+
+      return _factory.createStaticVarMethod(getLocation(), className,
+					    varExpr, args);
+    }
+    else
+      return _factory.createStaticFieldGet(getLocation(), className, var);
   }
   
   private ArrayList<Expr> parseArgs()

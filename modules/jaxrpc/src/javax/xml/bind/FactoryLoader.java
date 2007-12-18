@@ -110,9 +110,10 @@ class FactoryLoader {
     String[] pkgs = contextPath.split(":");
 
     for (int i = 0; i < pkgs.length; i++) {
-      String pkg = pkgs[i].replaceAll("\\.", File.separator);
-      String fileName = /*File.separatorChar + */pkg + 
-                        File.separatorChar + "jaxb.properties";
+      String pkg = pkgs[i].replaceAll("\\.",
+				      escapeSeparator(File.separator));
+      
+      String fileName = pkg + File.separatorChar + "jaxb.properties";
 
       String className = classNameFromPropertiesFile(classLoader, fileName);
 
@@ -127,6 +128,14 @@ class FactoryLoader {
     }
 
     return getFactoryClass(classLoader);
+  }
+
+  private static String escapeSeparator(String separator)
+  {
+    if ("\\".equals(separator))
+      return "\\" + separator;
+    else
+      return separator;
   }
 
   public Class getFactoryClass(ClassLoader classLoader)
@@ -259,7 +268,7 @@ class FactoryLoader {
         }
       }
     } 
-    catch (Throwable e) {
+    catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } 
     finally {

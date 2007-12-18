@@ -2441,11 +2441,7 @@ public abstract class AbstractHttpRequest
     if (tcpConn == null)
       return true;
 
-    Port port = tcpConn.getPort();
-
-    // the 16 is spare space for threading, since the keepalive connection
-    // isn't actually allocated here
-    if (port.getFreeKeepalive() < 16)
+    if (! tcpConn.allowKeepalive())
       _keepalive = false;
 
     return _keepalive;

@@ -399,6 +399,11 @@ public class TcpConnection extends PortConnection implements ThreadTask
       return -1;
   }
 
+  public boolean allowKeppalive()
+  {
+    return _port.allowKeepalive(_connectionStartTime);
+  }
+
   /**
    * Tries to mark the connection as a keepalive connection
    *
@@ -429,9 +434,6 @@ public class TcpConnection extends PortConnection implements ThreadTask
       }
     }
     else if (! port.keepaliveBegin(this, _connectionStartTime)) {
-      if (log.isLoggable(Level.FINE))
-        log.fine(dbgId() + " failed keepalive");
-
       free();
     }
     else if (port.getSelectManager() != null) {
@@ -443,8 +445,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
         // XXX: s/b
         // setKeepalive();
         // ThreadPool.schedule(this);
-        if (log.isLoggable(Level.FINE))
-          log.fine(dbgId() + "failed keepalive (select)");
+	log.warning(dbgId() + "failed keepalive (select)");
 
         port.keepaliveEnd(this);
 	free();

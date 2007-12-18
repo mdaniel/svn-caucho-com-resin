@@ -137,8 +137,6 @@ public class StaticFunction extends JavaInvoker {
       throw new IllegalArgumentException(sb.toString(), e);
     } catch (RuntimeException e) {
       throw e;
-    } catch (InvocationTargetException e) {
-      throw QuercusModuleException.create(e.getCause());
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }
