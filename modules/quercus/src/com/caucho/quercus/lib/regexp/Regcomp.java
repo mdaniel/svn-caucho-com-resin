@@ -133,8 +133,8 @@ class Regcomp {
     if (_maxGroup < _nGroup)
       _maxGroup = _nGroup;
 
-    if (log.isLoggable(Level.FINER))
-      log.finer("regexp[] " + value);
+    if (log.isLoggable(Level.FINEST))
+      log.finest("regexp[] " + value);
 
     return value;
   }

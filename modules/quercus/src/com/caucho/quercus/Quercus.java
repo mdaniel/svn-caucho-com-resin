@@ -753,7 +753,7 @@ public class Quercus
   /**
    * Returns the definition cache miss count.
    */
-  public long getDefCacheMisstCount()
+  public long getDefCacheMissCount()
   {
     return _defCacheMissCount;
   }
@@ -787,6 +787,14 @@ public class Quercus
                                  DefinitionState defState)
   {
     _defCache.put(key, new SoftReference<DefinitionState>(defState.copy()));
+  }
+
+  /**
+   * Clears the definition cache.
+   */
+  public void clearDefinitionCache()
+  {
+    _defCache.clear();
   }
 
   /**

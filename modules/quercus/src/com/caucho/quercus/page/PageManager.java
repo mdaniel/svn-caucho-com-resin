@@ -203,6 +203,10 @@ public class PageManager
   protected void clearProgram(Path path, QuercusProgram program)
   {
     _programCache.remove(path);
+
+    // php/0b36
+    if (program != null)
+      _quercus.clearDefinitionCache();
   }
 
   protected QuercusPage compilePage(QuercusProgram program, Path path)

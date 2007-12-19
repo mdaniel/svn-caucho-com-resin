@@ -221,6 +221,15 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Returns true if the value is empty
+   */
+  @Override
+  public boolean isEmpty()
+  {
+    return length() == 0 || length() == 1 && charAt(0) == '0';
+  }
+
+  /**
    * Returns true for equality
    */
   public int cmp(Value rValue)

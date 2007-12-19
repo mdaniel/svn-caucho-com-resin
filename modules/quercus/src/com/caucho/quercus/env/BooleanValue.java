@@ -112,6 +112,15 @@ public class BooleanValue extends Value
   }
 
   /**
+   * Returns true if the value is empty
+   */
+  @Override
+  public boolean isEmpty()
+  {
+    return ! _value;
+  }
+
+  /**
    * Converts to a long.
    */
   public long toLong()

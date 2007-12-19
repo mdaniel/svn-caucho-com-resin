@@ -133,30 +133,12 @@ public class Var extends Value
   }
 
   /**
-   * Returns true for a set type.
-   */
-  @Override
-  public boolean isset()
-  {
-    return _value.isset();
-  }
-
-  /**
    * Returns true for an implementation of a class
    */
   @Override
   public boolean isA(String name)
   {
     return _value.isA(name);
-  }
-
-  /**
-   * True for a number
-   */
-  @Override
-  public boolean isNull()
-  {
-    return _value.isNull();
   }
 
   /**
@@ -248,6 +230,33 @@ public class Var extends Value
   public boolean isDefault()
   {
     return _value.isDefault();
+  }
+
+  /**
+   * Returns true if the value is set
+   */
+  @Override
+  public boolean isset()
+  {
+    return _value.isset();
+  }
+
+  /**
+   * Returns true if the value is empty
+   */
+  @Override
+  public boolean isEmpty()
+  {
+    return _value.isEmpty();
+  }
+
+  /**
+   * True if the object is null
+   */
+  @Override
+  public boolean isNull()
+  {
+    return _value.isNull();
   }
 
   //

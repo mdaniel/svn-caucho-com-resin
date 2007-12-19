@@ -467,10 +467,10 @@ public class QuercusParser {
     statementList = parseStatementList();
 
     return _factory.createFunction(Location.UNKNOWN,
-				       "anonymous",
-				       _function,
-				       args,
-				       statementList);
+				   "anonymous",
+				   _function,
+				   args,
+				   statementList);
   }
 
   /**
@@ -1579,8 +1579,8 @@ public class QuercusParser {
 						     args, statementList);
 	else
 	  function = _factory.createFunction(location, name,
-						 _function, args,
-						 statementList);
+					     _function, args,
+					     statementList);
       }
 
       function.setGlobal(oldTop);
@@ -2437,7 +2437,7 @@ public class QuercusParser {
       case PLUS_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createAdd(expr.createCopy(_factory),
+                                   _factory.createAdd(expr,
 						      parseConditionalExpr()));
 	else // php/03d4
 	  expr = expr.createAssign(this, parseConditionalExpr());
@@ -2446,7 +2446,7 @@ public class QuercusParser {
       case MINUS_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createSub(expr.createCopy(_factory),
+                                   _factory.createSub(expr,
 						      parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
@@ -2455,8 +2455,8 @@ public class QuercusParser {
       case APPEND_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-				   _factory.createAppend(expr.createCopy(_factory),
-                                                           parseConditionalExpr()));
+				   _factory.createAppend(expr,
+							 parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
 	break;
@@ -2464,8 +2464,8 @@ public class QuercusParser {
       case MUL_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createMul(expr.createCopy(_factory),
-                                               parseConditionalExpr()));
+                                   _factory.createMul(expr,
+						      parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
 	break;
@@ -2473,8 +2473,8 @@ public class QuercusParser {
       case DIV_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createDiv(expr.createCopy(_factory),
-                                               parseConditionalExpr()));
+                                   _factory.createDiv(expr,
+						      parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
 	break;
@@ -2482,8 +2482,8 @@ public class QuercusParser {
       case MOD_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createMod(expr.createCopy(_factory),
-                                               parseConditionalExpr()));
+                                   _factory.createMod(expr,
+						      parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
 	break;
@@ -2491,8 +2491,8 @@ public class QuercusParser {
       case LSHIFT_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createLeftShift(expr.createCopy(_factory),
-                                                     parseConditionalExpr()));
+                                   _factory.createLeftShift(expr,
+							    parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
 	break;
@@ -2500,7 +2500,7 @@ public class QuercusParser {
       case RSHIFT_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createRightShift(expr.createCopy(_factory),
+                                   _factory.createRightShift(expr,
 							     parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
@@ -2509,7 +2509,7 @@ public class QuercusParser {
       case AND_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createBitAnd(expr.createCopy(_factory),
+                                   _factory.createBitAnd(expr,
 							 parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
@@ -2518,7 +2518,7 @@ public class QuercusParser {
       case OR_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createBitOr(expr.createCopy(_factory),
+                                   _factory.createBitOr(expr,
 							parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
@@ -2527,8 +2527,8 @@ public class QuercusParser {
       case XOR_ASSIGN:
 	if (expr.canRead())
 	  expr = expr.createAssign(this,
-                                   _factory.createBitXor(expr.createCopy(_factory),
-                                                  parseConditionalExpr()));
+                                   _factory.createBitXor(expr,
+							 parseConditionalExpr()));
 	else
 	  expr = expr.createAssign(this, parseConditionalExpr());
 	break;
@@ -5099,7 +5099,11 @@ public class QuercusParser {
 
     public Location getLocation()
     {
-      String currentFunctionName = _function == null || _function.isPageMain() ? null : _function.getName();
+      String currentFunctionName
+	= (_function == null || _function.isPageMain()
+	   ? null
+	   : _function.getName());
+      
       String currentClassName = _classDef == null ? null : _classDef.getName();
 
       if (_location != null) {

@@ -115,6 +115,15 @@ public class LongValue extends NumberValue
   }
 
   /**
+   * Returns true if the value is empty
+   */
+  @Override
+  public boolean isEmpty()
+  {
+    return _value == 0;
+  }
+
+  /**
    * Converts to a boolean.
    */
   public boolean toBoolean()

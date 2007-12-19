@@ -158,28 +158,7 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static boolean empty(@ReadOnly Value v)
   {
-    v = v.toValue();
-
-    if (v instanceof NullValue)
-      return true;
-    else if (v instanceof StringValue) {
-      String s = v.toString();
-
-      return (s.equals("") || s.equals("0"));
-    }
-    else if (v instanceof LongValue) {
-      return v.toLong() == 0;
-    }
-    else if (v instanceof BooleanValue) {
-      return ! v.toBoolean();
-    }
-    else if (v instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) v;
-
-      return array.getSize() == 0;
-    }
-    else
-      return false;
+    return v.isEmpty();
   }
 
   /**
@@ -660,8 +639,10 @@ public class VariableModule extends AbstractQuercusModule {
   {
     Value v = _unserializeCache.get(s);
 
-    if (v != null)
-      return v.copy(env);
+    if (v != null) {
+      // return v.copy(env);
+      return v.copyTree(env);
+    }
     
     try {
       UnserializeReader is = new UnserializeReader(s);
@@ -675,7 +656,8 @@ public class VariableModule extends AbstractQuercusModule {
       v = BooleanValue.FALSE;
     }
 
-    _unserializeCache.put(s, v.copy(env));
+    // _unserializeCache.put(s, v.copy(env));
+    _unserializeCache.put(s, v.copyTree(env));
 
     return v;
   }

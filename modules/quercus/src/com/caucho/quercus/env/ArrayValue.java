@@ -317,6 +317,15 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Returns true if the value is empty
+   */
+  @Override
+  public boolean isEmpty()
+  {
+    return getSize() == 0;
+  }
+
+  /**
    * Clears the array
    */
   abstract public void clear();

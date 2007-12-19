@@ -27,29 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus;
+package com.caucho.quercus.expr;
+
+import com.caucho.quercus.Location;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BooleanValue;
 
 /**
- * Parent of PHP runtime exceptions
+ * Represents a PHP isset call
  */
-public class QuercusRuntimeException extends QuercusException {
-  public QuercusRuntimeException()
+public class IssetExpr extends UnaryExpr {
+  public IssetExpr(Location location, Expr expr)
   {
+    super(location, expr);
   }
 
-  public QuercusRuntimeException(String msg)
+  public IssetExpr(Expr expr)
   {
-    super(msg);
+    super(expr);
   }
 
-  public QuercusRuntimeException(Throwable cause)
+  /**
+   * Return true as a boolean.
+   */
+  public boolean isBoolean()
   {
-    super(cause);
+    return true;
   }
 
-  public QuercusRuntimeException(String msg, Throwable cause)
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value eval(Env env)
   {
-    super(msg, cause);
+    return _expr.eval(env).isset() ? BooleanValue.TRUE : BooleanValue.FALSE;
+  }
+
+  public String toString()
+  {
+    return "isset(" + _expr + ")";
   }
 }
 

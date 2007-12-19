@@ -143,14 +143,6 @@ abstract public class Value implements java.io.Serializable
   {
     return false;
   }
-
-  /**
-   * Returns true for a set type.
-   */
-  public boolean isset()
-  {
-    return true;
-  }
   
   /**
    * Returns true for a StringValue.
@@ -188,6 +180,22 @@ abstract public class Value implements java.io.Serializable
    * Returns true for a DefaultValue
    */
   public boolean isDefault()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the value is set.
+   */
+  public boolean isset()
+  {
+    return true;
+  }
+
+  /**
+   * Returns true if the value is empty
+   */
+  public boolean isEmpty()
   {
     return false;
   }
@@ -863,6 +871,14 @@ abstract public class Value implements java.io.Serializable
    * Copy for serialization
    */
   public Value copy(Env env, IdentityHashMap<Value,Value> map)
+  {
+    return this;
+  }
+
+  /**
+   * Copy for serialization
+   */
+  public Value copyTree(Env env)
   {
     return this;
   }

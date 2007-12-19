@@ -799,9 +799,9 @@ public class ExprFactory {
   /**
    * Creates a new function call.
    */
-  public FunctionExpr createFunction(Location loc,
-				     String name,
-				     ArrayList<Expr> args)
+  public Expr createFunction(Location loc,
+			     String name,
+			     ArrayList<Expr> args)
   {
     return new FunctionExpr(loc, name, args);
   }

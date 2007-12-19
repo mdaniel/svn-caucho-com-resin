@@ -90,6 +90,15 @@ public class NullValue extends Value
   }
 
   /**
+   * Returns true if the value is empty
+   */
+  @Override
+  public boolean isEmpty()
+  {
+    return true;
+  }
+
+  /**
    * Converts to a boolean.
    */
   @Override

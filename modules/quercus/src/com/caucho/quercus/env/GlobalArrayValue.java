@@ -98,6 +98,15 @@ public class GlobalArrayValue extends ArrayValueImpl {
   {
     return getRef(index);
   }
+
+  /**
+   * Unsets a value.
+   */
+  @Override
+  public Value remove(Value key)
+  {
+    return _env.unsetGlobalVar(key.toString());
+  }
   
   /**
    * Copy for assignment.

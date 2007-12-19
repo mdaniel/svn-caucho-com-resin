@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
@@ -81,7 +82,15 @@ public class Regexp {
           rawRegexp));
     }
 
-    char delim = rawRegexp.charAt(0);
+    int head = 0;
+    
+    char delim = '/';
+
+    for (;
+	 head < rawRegexp.length()
+	   && Character.isWhitespace((delim = rawRegexp.charAt(head)));
+	 head++) {
+    }
 
     if (delim == '{')
       delim = '}';
@@ -92,7 +101,7 @@ public class Regexp {
     else if (delim == '<')
       delim = '>';
     else if (delim == '\\' || Character.isLetterOrDigit(delim)) {
-      throw new IllegalStateException(L.l(
+      throw new QuercusException(L.l(
           "Delimiter {0} in regexp '{1}' must not be backslash or alphanumeric.",
           String.valueOf(delim),
           rawRegexp));
@@ -101,13 +110,13 @@ public class Regexp {
     int tail = rawRegexp.lastIndexOf(delim);
 
     if (tail <= 0)
-      throw new IllegalStateException(L.l(
+      throw new QuercusException(L.l(
           "Can't find second {0} in regexp '{1}'.",
           String.valueOf(delim),
           rawRegexp));
 
     StringValue sflags = rawRegexp.substring(tail);
-    StringValue pattern = rawRegexp.substring(1, tail); 
+    StringValue pattern = rawRegexp.substring(head + 1, tail); 
     
     int flags = 0;
     

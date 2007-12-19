@@ -124,6 +124,18 @@ public class ArrayValueImpl extends ArrayValue
     }
   }
 
+  /**
+   * Copy for unserialization.  Unserialization is guaranteed to be a tree
+   */
+  public ArrayValueImpl(Env env, ArrayValue copy)
+  {
+    this();
+    
+    for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
+      put(ptr._key, ptr._value.toValue().copyTree(env));
+    }
+  }
+
   public ArrayValueImpl(Value []keys, Value []values)
   {
     this();
@@ -248,6 +260,15 @@ public class ArrayValueImpl extends ArrayValue
       return oldValue;
 
     return new ArrayValueImpl(env, map, this);
+  }
+  
+  /**
+   * Copy for serialization
+   */
+  @Override
+  public Value copyTree(Env env)
+  {
+    return new ArrayValueImpl(env, this);
   }
   
   /**
