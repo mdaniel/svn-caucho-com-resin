@@ -1002,7 +1002,7 @@ public class StringBuilderValue
     char []charBuffer = _buffer;
     int charLength = _length;
 
-    for (int i = 0; i < length; i++) {
+    for (int i = length - 1; i >= 0; i--) {
       charBuffer[charLength + i] = (char) (buf[offset + i] & 0xff);
     }
 

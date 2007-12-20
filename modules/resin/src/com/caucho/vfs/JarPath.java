@@ -103,6 +103,12 @@ public class JarPath extends FilesystemPath {
     return "jar";
   }
 
+  @Override
+  public boolean isPathCacheable()
+  {
+    return true;
+  }
+
   /**
    * Returns the full url.
    *
@@ -225,7 +231,7 @@ public class JarPath extends FilesystemPath {
 
   public int hashCode()
   {
-    return 65531 * getFullPath().hashCode() + getContainer().hashCode();
+    return 65531 * getPath().hashCode() + getContainer().hashCode();
   }
 
   /**
@@ -240,7 +246,7 @@ public class JarPath extends FilesystemPath {
 
     JarPath jarPath = (JarPath) o;
 
-    return (_backing.equals(jarPath._backing) &&
-	    getFullPath().equals(jarPath.getFullPath()));
+    return (_backing.equals(jarPath._backing)
+	    && getPath().equals(jarPath.getPath()));
   }
 }

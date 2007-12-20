@@ -3782,8 +3782,8 @@ public class StringModule extends AbstractQuercusModule {
   {
     int size = map.getSize();
 
-    StringValue []from = new StringValue[size];
-    StringValue []to = new StringValue[size];
+    StringValue []fromList = new StringValue[size];
+    StringValue []toList = new StringValue[size];
 
     Map.Entry<Value,Value> [] entryArray = new Map.Entry[size];
 
@@ -3795,9 +3795,13 @@ public class StringModule extends AbstractQuercusModule {
     // sort entries in descending fashion
     Arrays.sort(entryArray, new StrtrComparator<Map.Entry<Value,Value>>());
 
+    boolean []charSet = new boolean[256];
+
     for (i = 0; i < size; i++) {
-      from[i] = entryArray[i].getKey().toStringValue();
-      to[i] = entryArray[i].getValue().toStringValue();
+      fromList[i] = entryArray[i].getKey().toStringValue();
+      toList[i] = entryArray[i].getValue().toStringValue();
+
+      charSet[fromList[i].charAt(0)] = true;
     }
 
     StringValue result = string.createStringBuilder();
@@ -3806,25 +3810,34 @@ public class StringModule extends AbstractQuercusModule {
 
     top:
     while (head < len) {
-      fromLoop:
-      for (i = 0; i < from.length; i++) {
-        int fromLen = from[i].length();
-        
-        if (head + fromLen > len)
-          continue;
-        
-        for (int j = 0; j < fromLen; j++) {
-          if (string.charAt(head + j) != from[i].charAt(j))
-            continue fromLoop;
-        }
+      char ch = string.charAt(head);
 
-        result = result.append(to[i]);
-        head = head + from[i].length();
+      if (charSet.length <= ch || charSet[ch]) {
+	fromLoop:
+	for (i = 0; i < fromList.length; i++) {
+	  StringValue from = fromList[i];
+	  int fromLen = from.length();
+        
+	  if (head + fromLen > len)
+	    continue;
 
-        continue top;
+	  if (ch != from.charAt(0))
+	    continue;
+        
+	  for (int j = 0; j < fromLen; j++) {
+	    if (string.charAt(head + j) != from.charAt(j))
+	      continue fromLoop;
+	  }
+
+	  result = result.append(toList[i]);
+	  head = head + fromLen;
+
+	  continue top;
+	}
       }
 
-      result = result.append(string.charAt(head++));
+      result.append(ch);
+      head++;
     }
 
     return result;

@@ -129,27 +129,53 @@ public abstract class Path {
     else if (userPath == null)
       return this;
 
-    synchronized (_key) {
-      _key.init(this, userPath);
+    if (isPathCacheable()) {
+      synchronized (_key) {
+	_key.init(this, userPath);
 
-      Path path = _pathLookupCache.get(_key);
+	Path path = _pathLookupCache.get(_key);
 
-      if (path != null) {
-        return path.cacheCopy();
+	if (path != null) {
+	  return path.cacheCopy();
+	}
       }
     }
 
     Path path = lookupImpl(userPath, null);
 
-    synchronized (_key) {
-      Path copy = path.cacheCopy();
+    if (_startTime == 0)
+      _startTime = System.currentTimeMillis();
 
-      if (copy != null) {
-        _pathLookupCache.putIfNew(new PathKey(this, userPath), copy);
+    /*
+    if (System.currentTimeMillis() > 15000) {
+      if (path.getPath().endsWith("UIRepeat.class")) {
+	Thread.dumpStack();
+	System.out.println("PATH: " + path);
+      }
+    }
+    */
+
+    if (isPathCacheable()) {
+      synchronized (_key) {
+	Path copy = path.cacheCopy();
+
+	if (copy != null) {
+	  _pathLookupCache.putIfNew(new PathKey(this, userPath), copy);
+	}
       }
     }
 
     return path;
+  }
+
+  static long _startTime;
+
+  /**
+   * Returns true if the path itself is cacheable
+   */
+  protected boolean isPathCacheable()
+  {
+    return false;
   }
 
   /**
@@ -1478,7 +1504,7 @@ public abstract class Path {
     public int hashCode()
     {
       if (_parent != null)
-	return System.identityHashCode(_parent) * 65521 + _lookup.hashCode();
+	return _parent.hashCode() * 65521 + _lookup.hashCode();
       else
 	return _lookup.hashCode();
     }
@@ -1490,7 +1516,10 @@ public abstract class Path {
 
       PathKey key = (PathKey) test;
 
-      return (_parent == key._parent && _lookup.equals(key._lookup));
+      if (_parent != null)
+	return (_parent.equals(key._parent) && _lookup.equals(key._lookup));
+      else
+	return (key._parent == null && _lookup.equals(key._lookup));
     }
   }
 

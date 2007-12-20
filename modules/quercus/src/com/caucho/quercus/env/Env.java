@@ -42,15 +42,9 @@ import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.ClassDef;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.quercus.program.*;
 import com.caucho.quercus.resources.StreamContextResource;
-import com.caucho.util.Alarm;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
+import com.caucho.util.*;
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.NullPath;
@@ -158,6 +152,9 @@ public class Env {
 
   private static ThreadLocal<Env> _threadEnv = new ThreadLocal<Env>();
 
+  private static final FreeList<AbstractFunction[]> _freeFunList
+    = new FreeList<AbstractFunction[]>(256);
+
   protected final Quercus _quercus;
   private final boolean _isUnicodeSemantics; 
   private QuercusPage _page;
@@ -178,29 +175,11 @@ public class Env {
   
   private HashMap<String, Var> _map = _globalMap;
 
-  private DefinitionState _defState;
-
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>(1024);
 
   private HashMap<String, Value> _lowerConstMap
     = new HashMap<String, Value>(1024);
-
-  /*
-  private HashMap<String, AbstractFunction> _funMap
-    = new HashMap<String, AbstractFunction>(8192, 0.5F);
-
-  private HashMap<String, AbstractFunction> _lowerFunMap
-    = new HashMap<String, AbstractFunction>(8192, 0.5F);
-  */
-
-  /*
-  private HashMap<String, ClassDef> _classDefMap
-    = new HashMap<String, ClassDef>();
-
-  private HashMap<String, ClassDef> _lowerClassDefMap
-    = new HashMap<String, ClassDef>();
-  */
 
   private HashMap<String, QuercusClass> _classMap
     = new HashMap<String, QuercusClass>();
@@ -210,6 +189,12 @@ public class Env {
 
   private HashSet<String> _initializedClassSet
     = new HashSet<String>();
+
+  // Function map
+  public AbstractFunction []_fun;
+  // Class map
+  public ClassDef []_classDef;
+  public QuercusClass []_qClass;
 
   private IdentityHashMap<String, Value> _iniMap;
 
@@ -226,7 +211,8 @@ public class Env {
   private ArrayList<String> _includePathList;
   private HashMap<Path,ArrayList<Path>> _includePathMap;
 
-  private HashSet<Path> _includeSet = new HashSet<Path>();
+  private HashMap<Path,QuercusPage> _includeMap
+    = new HashMap<Path,QuercusPage>();
   
   private HashMap<StringValue,Path> _lookupCache
     = new HashMap<StringValue,Path>();
@@ -246,6 +232,7 @@ public class Env {
   private Value [] _functionArgs;
 
   private Path _selfPath;
+  private Path _selfDirectory;
   private Path _pwd;
   private Path _uploadPath;
   private ArrayList<Path> _removePaths;
@@ -307,7 +294,18 @@ public class Env {
     _page = page;
 
     // XXX: grab initial from page
-    _defState = new DefinitionState(quercus);
+    // _defState = new DefinitionState(quercus);
+
+    AbstractFunction []defFuns = quercus.getFunctionMap();
+    _fun = _freeFunList.allocate();
+    if (_fun == null || _fun.length != defFuns.length)
+      _fun = new AbstractFunction[defFuns.length];
+    System.arraycopy(defFuns, 0, _fun, 0, defFuns.length);
+
+    ClassDef []defClasses = quercus.getClassDefMap();
+
+    _classDef = new ClassDef[defClasses.length];
+    _qClass = new QuercusClass[_classDef.length];
     
     _originalOut = out;
     _out = out;
@@ -318,16 +316,16 @@ public class Env {
     if (page != null) {
       _page.init(this);
 
-      importPage(_page);
+      _page.importDefinitions(this);
     }
 
     setPwd(_quercus.getPwd());
 
     if (_page != null) {
-      _selfPath = _page.getSelfPath(null);
+      setSelfPath(_page.getSelfPath(null));
 
       // php/0b32
-      _includeSet.add(_selfPath);
+      _includeMap.put(_selfPath, _page);
     }
 
     if (_request != null && _request.getMethod().equals("POST")) {
@@ -1012,7 +1010,7 @@ public class Env {
    */
   public Path getSelfDirectory()
   {
-    return _selfPath.getParent();
+    return _selfDirectory;
   }
 
   /**
@@ -1021,6 +1019,7 @@ public class Env {
   public void setSelfPath(Path path)
   {
     _selfPath = path;
+    _selfDirectory = _selfPath.getParent();
   }
 
   /**
@@ -2367,103 +2366,52 @@ public class Env {
 
     return _defaultStreamContext;
   }
-
-  /**
-   * Returns an array of the defined functions.
-   */
-  /*
-  public ArrayValue getDefinedFunctions()
-  {
-    ArrayValue result = new ArrayValueImpl();
-
-    ArrayValue internal = _quercus.getDefinedFunctions();
-    ArrayValue user = new ArrayValueImpl();
-
-    result.put(new StringValueImpl("internal"), internal);
-    result.put(new StringValueImpl("user"), user);
-
-    for (String name : _funMap.keySet()) {
-      StringValue key = new StringValueImpl(name);
-
-      if (! internal.contains(key).isset())
-        user.put(name);
-    }
-
-    return result;
-  }
-  */
   
   public ArrayValue getDefinedFunctions()
   {
-    return _defState.getDefinedFunctions();
+    // return _defState.getDefinedFunctions();
+    return new ArrayValueImpl();
   }
 
   /**
-   * Finds the java reflection method for the function with the given name.
+   * Returns the function with a given name.
    *
-   * @param name the method name
-   * @return the found method or null if no method found.
+   * Compiled mode normally uses the _fun array directly, so this call
+   * is rare.
    */
-  /*
   public AbstractFunction findFunction(String name)
   {
-    AbstractFunction fun = _funMap.get(name);
+    int id = _quercus.findFunctionId(name);
+
+    if (id >= 0) {
+      if (id < _fun.length && ! (_fun[id] instanceof UndefinedFunction))
+	return _fun[id];
+      else
+	return null;
+    }
+	
+    AbstractFunction fun = _quercus.findFunctionImpl(name);
 
     if (fun != null)
       return fun;
+
+    name = name.toLowerCase();
     
-    if (! isStrict()) {
-      fun = _lowerFunMap.get(name.toLowerCase());
+    id = _quercus.findFunctionId(name);
 
-      if (fun != null) {
-	_funMap.put(name, fun);
-
-	return fun;
-      }
+    if (id >= 0) {
+      if (id < _fun.length && ! (_fun[id] instanceof UndefinedFunction))
+	return _fun[id];
+      else
+	return null;
     }
-
-    fun = findFunctionImpl(name);
-
-    if (fun != null) {
-      _funMap.put(name, fun);
-
-      return fun;
-    }
-    else
-      return null;
+	
+    return _quercus.findLowerFunctionImpl(name);
   }
-  */
-  public AbstractFunction findFunction(String name)
-  {
-    return _defState.findFunction(name);
-  }
-
-  /**
-   * Finds the java reflection method for the function with the given name.
-   *
-   * @param name the method name
-   * @return the found method or null if no method found.
-   */
-  /*
+  
   public AbstractFunction getFunction(String name)
   {
-    AbstractFunction fun = _funMap.get(name);
-
-    if (fun != null)
-      return fun;
-    
-    fun = findFunction(name);
-    
-    if (fun != null) {
-      return fun;
-    }
-
-    throw createErrorException(L.l("'{0}' is an unknown function.", name));
-  }
-  */
-  public AbstractFunction getFunction(String name)
-  {
-    AbstractFunction fun = _defState.findFunction(name);
+    AbstractFunction fun = findFunction(name);
 
     if (fun != null)
       return fun;
@@ -2484,62 +2432,40 @@ public class Env {
     if (name instanceof CallbackFunction)
       return ((CallbackFunction) name).getFunction();
 
-    AbstractFunction fun = _defState.findFunction(name.toString());
-
-    if (fun != null)
-      return fun;
-
-    throw createErrorException(L.l("'{0}' is an unknown function.", name));
+    return getFunction(name.toString());
   }
 
-  /**
-   * Finds the java reflection method for the function with the given name.
-   *
-   * @param name the method name
-   * @return the found method or null if no method found.
-   */
   /*
-  private AbstractFunction findFunctionImpl(String name)
-  {
-    AbstractFunction fun = null;
-
-    fun = _quercus.findFunction(name);
-    if (fun != null)
-      return fun;
-
-    return fun;
-  }
-  */
-
-  /**
-   * Adds a function, e.g. from an include.
-   */
-  /*
-  public Value addFunction(String name, AbstractFunction fun)
-  {
-    AbstractFunction oldFun = findFunction(name);
-
-    if (oldFun != null) {
-      throw new QuercusException(L.l("can't redefine function {0}", name));
-    }
-
-    _funMap.put(name, fun);
-
-    if (! isStrict())
-      _lowerFunMap.put(name.toLowerCase(), fun);
-
-    return BooleanValue.TRUE;
-  }
-  */
-
   public DefinitionState getDefinitionState()
   {
     return _defState;
   }
+  */
   
   public Value addFunction(String name, AbstractFunction fun)
   {
-    return _defState.addFunction(name, fun);
+    AbstractFunction staticFun
+      = _quercus.findLowerFunctionImpl(name.toLowerCase());
+
+    if (staticFun != null)
+      throw new QuercusException(L.l("can't redefine function {0}", name));
+    
+    int id = _quercus.getFunctionId(name);
+
+    // XXX: anonymous/generated functions(?), e.g. like foo2431
+
+    if (_fun.length <= id) {
+      AbstractFunction []funMap = new AbstractFunction[id + 256];
+      System.arraycopy(_fun, 0, funMap, 0, _fun.length);
+      _fun = funMap;
+    }
+
+    if (_fun[id] != null && ! (_fun[id] instanceof UndefinedFunction))
+      throw new QuercusException(L.l("can't redefine function {0}", name));
+
+    _fun[id] = fun;
+
+    return BooleanValue.TRUE;
   }
 
   /**
@@ -2548,7 +2474,8 @@ public class Env {
    * @param name the function name, must be an intern() string
    * @param lowerName the function name, must be an intern() string
    */
-  public Value addFunctionFromPage(String name, String lowerName, AbstractFunction fun)
+  public Value addFunctionFromPage(String name, String lowerName,
+				   AbstractFunction fun)
   {
     // XXX: skip the old function check since the include for compiled
     // pages is already verified.  Might have a switch here?
@@ -2860,12 +2787,25 @@ public class Env {
    */
   public void addClassDef(String name, ClassDef cl)
   {
-    _defState.addClassDef(name, cl);
+    int id = _quercus.getClassId(name);
+
+    if (_classDef.length <= id) {
+      ClassDef []def = new ClassDef[id + 256];
+      System.arraycopy(_classDef, 0, def, 0, _classDef.length);
+      _classDef = def;
+    }
+
+    _classDef[id] = cl;
   }
 
   public ClassDef findClassDef(String name)
   {
-    return _defState.findClassDef(name);
+    int id = _quercus.getClassId(name);
+
+    if (id < _classDef.length)
+      return _classDef[id];
+    else
+      return null;
   }
 
   /**
@@ -3234,7 +3174,9 @@ public class Env {
                                        boolean useAutoload,
                                        boolean useImport)
   {
-    ClassDef classDef = _defState.findClassDef(name);
+    int id = _quercus.getClassId(name);
+    
+    ClassDef classDef = _classDef[id];
 
     if (classDef != null) {
       String parentName = classDef.getParentName();
@@ -3332,7 +3274,8 @@ public class Env {
    */
   public Value getDeclaredClasses()
   {
-    return _defState.getDeclaredClasses(this);
+    // return _defState.getDeclaredClasses(this);
+    return NullValue.NULL;
   }
 
   /**
@@ -3546,38 +3489,21 @@ public class Env {
 	return NullValue.NULL;
       }
 
-      if (isOnce && _includeSet.contains(path))
+      QuercusPage page = _includeMap.get(path);
+      
+      if (page == null) {
+	page = _quercus.parse(path);
+	
+	page.importDefinitions(this);
+	
+	_includeMap.put(path, page);
+      }
+      else if (isOnce)
 	return NullValue.NULL;
-
-      _includeSet.add(path);
-
-      QuercusPage page;
-
-      page = _quercus.parse(path);
-
-      importPage(page);
 
       return page.execute(this);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
-    }
-  }
-
-  private void importPage(QuercusPage page)
-  {
-    long crc = _defState.getCrc();
-
-    DefinitionKey key = new DefinitionKey(crc, page);
-      
-    DefinitionState defState = _quercus.getDefinitionCache(key);
-
-    if (defState != null) {
-      _defState = defState;
-    }
-    else {
-      page.importDefinitions(this);
-
-      _quercus.putDefinitionCache(key, _defState);
     }
   }
 
@@ -3773,8 +3699,8 @@ public class Env {
   {
     ArrayValue array = new ArrayValueImpl();
 
-    for (Path path : _includeSet) {
-      array.put(path.toString());
+    for (Path path : _includeMap.keySet()) {
+      array.put(createString(path.toString()));
     }
     
     return array;
@@ -4617,6 +4543,8 @@ public class Env {
       while (_outputBuffer != null) {
         popOutputBuffer();
       }
+
+      _freeFunList.free(_fun);
     }
     //catch (Exception e) {
       //throw new RuntimeException(e);

@@ -41,10 +41,10 @@ public class CopyArrayValue extends ArrayValue {
   private static final Logger log
     = Logger.getLogger(CopyArrayValue.class.getName());
 
-  private final ConstArrayValue _constArray;
+  private final ArrayValue _constArray;
   private ArrayValue _copyArray;
 
-  public CopyArrayValue(ConstArrayValue constArray)
+  public CopyArrayValue(ArrayValue constArray)
   {
     _constArray = constArray;
   }

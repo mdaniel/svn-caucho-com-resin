@@ -190,6 +190,15 @@ public class FilePath extends FilesystemPath {
     return new FilePath(_root, userPath, path);
   }
 
+  /**
+   * Returns true if the path itself is cacheable
+   */
+  @Override
+  protected boolean isPathCacheable()
+  {
+    return true;
+  }
+
   public String getScheme()
   {
     return "file";
@@ -517,7 +526,7 @@ public class FilePath extends FilesystemPath {
 
   public int hashCode()
   {
-    return getFullPath().hashCode();
+    return getPath().hashCode();
   }
 
   public boolean equals(Object b)
@@ -530,7 +539,7 @@ public class FilePath extends FilesystemPath {
 
     FilePath file = (FilePath) b;
 
-    return getFullPath().equals(file.getFullPath());
+    return getPath().equals(file.getPath());
   }
 
   /**

@@ -57,6 +57,7 @@ public class SystemClassLoader
   implements EnvironmentBean
 {
   private boolean _isInit;
+  private boolean _hasBootClassPath;
 
   private URLClassLoader _loader;
 
@@ -106,22 +107,59 @@ public class SystemClassLoader
 
   private void initClasspath()
   {
-    String classpath = System.getProperty("java.class.path");
+    String boot = System.getProperty("sun.boot.class.path");
+    if (boot != null) {
+      initClasspath(boot);
+      _hasBootClassPath = true;
+    }
+    
+    initClasspath(System.getProperty("java.class.path"));
+  }
 
+  private void initClasspath(String classpath)
+  {
     String[] classpathElements = classpath.split(File.pathSeparator, 512);
 
     for (String classpathElement : classpathElements) {
-      SimpleLoader loader = new SimpleLoader(Vfs.lookup(classpathElement));
+      Path root = Vfs.lookup(classpathElement);
 
       try {
-        loader.init();
-        addLoader(loader);
-      }
-      catch (ConfigException ex) {
-        System.err.println("bad classpath elenent " + classpathElement);
-        ex.printStackTrace();
+	if (root.exists())
+	  addRoot(root);
+      } catch (Throwable e) {
+	e.printStackTrace();
       }
     }
+  }
+
+  /**
+   * Load a class using this class loader
+   *
+   * @param name the classname to load
+   * @param resolve if true, resolve the class
+   *
+   * @return the loaded classes
+   */
+  protected Class loadClassImpl(String name, boolean resolve)
+    throws ClassNotFoundException
+  {
+    // The JVM has already cached the classes, so we don't need to
+    Class cl = findLoadedClass(name);
+
+    if (cl != null) {
+      if (resolve)
+        resolveClass(cl);
+      return cl;
+    }
+
+    if (_hasBootClassPath) {
+      String className = name.replace('.', '/') + ".class";
+
+      if (findPath(className) == null)
+	return null;
+    }
+
+    return super.loadClassImpl(name, resolve);
   }
 
   protected String getSchema()

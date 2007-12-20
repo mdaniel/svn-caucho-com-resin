@@ -416,7 +416,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (_lifecycle.isDestroyed())
       throw new IllegalStateException(L().l("can't add roots after closing"));
 
-    if (root instanceof JarPath || root.isFile()) {
+    if (root instanceof JarPath
+	|| root.getPath().endsWith(".jar")
+	|| root.getPath().endsWith(".zip")) {
       if (_jarLoader == null) {
         _jarLoader = new JarLoader();
         addLoader(_jarLoader);

@@ -802,17 +802,18 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value filemtime(Env env, Path path)
   {
-    if (!path.canRead()) {
-      env.warning(L.l("{0} cannot be read", path.getFullPath()));
-      return BooleanValue.FALSE;
-    }
-
     long time = path.getLastModified();
 
-    if (time <= 24 * 3600 * 1000L)
-      return BooleanValue.FALSE;
-    else
+    if (24 * 3600 * 1000L < time)
       return new LongValue(time / 1000L);
+    else {
+      if (!path.canRead()) {
+	env.warning(L.l("{0} cannot be read", path.getFullPath()));
+	return BooleanValue.FALSE;
+      }
+
+      return BooleanValue.FALSE;
+    }
   }
 
   /**

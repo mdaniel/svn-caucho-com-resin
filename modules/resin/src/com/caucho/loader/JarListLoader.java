@@ -70,6 +70,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
    */
   public JarListLoader()
   {
+    _jarList = new ArrayList<JarEntry>();
+    _dependencyList = new DependencyContainer();
   }
 
   /**
@@ -77,8 +79,17 @@ abstract public class JarListLoader extends Loader implements Dependency {
    */
   protected void init()
   {
-    _jarList = new ArrayList<JarEntry>();
-    _dependencyList = new DependencyContainer();
+  }
+
+  /**
+   * Sets the owning class loader.
+   */
+  public void setLoader(DynamicClassLoader loader)
+  {
+    super.setLoader(loader);
+
+    for (int i = 0; i < _jarList.size(); i++)
+      loader.addURL(_jarList.get(i).getJarPath());
   }
   
   /**
@@ -88,6 +99,15 @@ abstract public class JarListLoader extends Loader implements Dependency {
   public boolean isModified()
   {
     return _dependencyList.isModified();
+  }
+  
+  /**
+   * True if any of the loaded classes have been modified.  If true, the
+   * caller should drop the classpath and create a new one.
+   */
+  public boolean logModified(Logger log)
+  {
+    return _dependencyList.logModified(log);
   }
 
   /**

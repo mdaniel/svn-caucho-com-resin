@@ -49,6 +49,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.util.IntMap;
 import com.caucho.util.TimedCache;
 import com.caucho.vfs.*;
 
@@ -130,14 +131,22 @@ public class Quercus
   private HashMap<Value, Value> _serverEnvMap
     = new HashMap<Value, Value>();
 
+  private IntMap _classNameMap = new IntMap();
+  private ClassDef []_classMap = new ClassDef[256];
+  
+  private IntMap _constantNameMap = new IntMap();
+  
+  private IntMap _functionNameMap = new IntMap();
+  private AbstractFunction []_functionMap = new AbstractFunction[256];
+
   private LruCache<String, QuercusProgram> _evalCache
-    = new LruCache<String, QuercusProgram>(256);
+    = new LruCache<String, QuercusProgram>(4096);
 
   private TimedCache<IncludeKey, Path> _includeCache
     = new TimedCache<IncludeKey, Path>(4096, 10000);
 
-  private LruCache<DefinitionKey,SoftReference<DefinitionState>> _defCache
-    = new LruCache<DefinitionKey,SoftReference<DefinitionState>>(4096);
+  //private LruCache<DefinitionKey,SoftReference<DefinitionState>> _defCache
+  //    = new LruCache<DefinitionKey,SoftReference<DefinitionState>>(4096);
 
   private long _defCacheHitCount;
   private long _defCacheMissCount;
@@ -761,6 +770,7 @@ public class Quercus
   /**
    * Returns the definition state for an include.
    */
+  /*
   public DefinitionState getDefinitionCache(DefinitionKey key)
   {
     SoftReference<DefinitionState> defStateRef = _defCache.get(key);
@@ -779,22 +789,25 @@ public class Quercus
 
     return null;
   }
+  */
 
   /**
    * Returns the definition state for an include.
    */
+  /*
   public void putDefinitionCache(DefinitionKey key,
                                  DefinitionState defState)
   {
     _defCache.put(key, new SoftReference<DefinitionState>(defState.copy()));
   }
+  */
 
   /**
    * Clears the definition cache.
    */
   public void clearDefinitionCache()
   {
-    _defCache.clear();
+    // _defCache.clear();
   }
 
   /**
@@ -937,6 +950,147 @@ public class Quercus
     }
 
     return internal;
+  }
+
+  //
+  // name to id mappings
+  //
+
+  /**
+   * Returns the id for a function name.
+   */
+  public int getFunctionId(String name)
+  {
+    name = name.toLowerCase();
+
+    synchronized (_functionNameMap) {
+      int id = _functionNameMap.get(name);
+
+      if (id < 0) {
+	id = _functionNameMap.size();
+
+	_functionNameMap.put(name, id);
+
+	if (_functionMap.length <= id) {
+	  AbstractFunction []functionMap = new AbstractFunction[id + 256];
+	  System.arraycopy(_functionMap, 0,
+			   functionMap, 0, _functionMap.length);
+	  _functionMap = functionMap;
+	}
+
+	_functionMap[id] = new UndefinedFunction(name);
+      }
+
+      return id;
+    }
+  }
+
+  /**
+   * Returns the id for a function name.
+   */
+  public int findFunctionId(String name)
+  {
+    synchronized (_functionNameMap) {
+      return _functionNameMap.get(name);
+    }
+  }
+
+  /**
+   * Returns the number of functions
+   */
+  public int getFunctionIdCount()
+  {
+    return _functionNameMap.size();
+  }
+
+  /**
+   * Returns the undefined functions
+   */
+  public AbstractFunction []getFunctionMap()
+  {
+    return _functionMap;
+  }
+
+  /**
+   * Returns the id for a class name.
+   */
+  public int getClassId(String name)
+  {
+    name = name.toLowerCase();
+
+    synchronized (_classNameMap) {
+      int id = _classNameMap.get(name);
+
+      if (id < 0) {
+	id = _classNameMap.size();
+
+	_classNameMap.put(name, id);
+
+	if (_classMap.length <= id) {
+	  ClassDef []classMap = new ClassDef[id + 256];
+	  System.arraycopy(_classMap, 0, classMap, 0, _classMap.length);
+	  _classMap = classMap;
+	}
+
+	// _classMap[id] = new UndefinedClass(name);
+      }
+
+      return id;
+    }
+  }
+
+  /**
+   * Returns the id for a function name.
+   */
+  public int findClassId(String name)
+  {
+    synchronized (_classNameMap) {
+      return _classNameMap.get(name);
+    }
+  }
+
+  /**
+   * Returns the number of classes
+   */
+  public int getClassIdCount()
+  {
+    return _classNameMap.size();
+  }
+
+  /**
+   * Returns the undefined functions
+   */
+  public ClassDef []getClassDefMap()
+  {
+    return _classMap;
+  }
+
+  /**
+   * Returns the id for a constant
+   */
+  public int getConstantId(String name)
+  {
+    name = name.toLowerCase();
+
+    synchronized (_constantNameMap) {
+      int id = _constantNameMap.get(name);
+
+      if (id < 0) {
+	id = _constantNameMap.size();
+
+	_constantNameMap.put(name, id);
+      }
+
+      return id;
+    }
+  }
+
+  /**
+   * Returns the number of defined constants
+   */
+  public int getConstantIdSize()
+  {
+    return _constantNameMap.size();
   }
 
   /**

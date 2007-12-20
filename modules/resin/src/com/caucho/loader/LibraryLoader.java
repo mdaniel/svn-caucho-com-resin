@@ -168,17 +168,6 @@ public class LibraryLoader extends JarListLoader {
       throw ConfigException.create(e);
     }
   }
-
-  /**
-   * Sets the owning class loader.
-   */
-  public void setLoader(DynamicClassLoader loader)
-  {
-    super.setLoader(loader);
-
-    for (int i = 0; i < _jarList.size(); i++)
-      loader.addURL(_jarList.get(i).getJarPath());
-  }
   
   /**
    * True if any of the loaded classes have been modified.  If true, the

@@ -675,10 +675,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       hashCode = "$" + System.identityHashCode(this);
     
     if (getId() != null)
-      return "EnvironmentClassLoader" + hashCode + "[" + getId() + "]";
+      return getClass().getSimpleName() + hashCode + "[" + getId() + "]";
     else {
-      // return "EnvironmentClassLoader$" + System.identityHashCode(this) + getLoaders();
-      return "EnvironmentClassLoader" + hashCode + "[]";
+      return getClass().getSimpleName() + hashCode + "[]";
     }
   }
 

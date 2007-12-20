@@ -368,6 +368,6 @@ abstract public class FilesystemPath extends Path {
 
   public String toString()
   {
-    return getPath();
+    return _pathname;
   }
 }

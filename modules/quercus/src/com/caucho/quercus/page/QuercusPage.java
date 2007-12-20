@@ -221,7 +221,7 @@ abstract public class QuercusPage
   
   public String toString()
   {
-    return "QuercusPage[]";
+    return getClass().getSimpleName() + "[]";
   }
 }
 
