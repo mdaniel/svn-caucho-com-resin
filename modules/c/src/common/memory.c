@@ -131,6 +131,7 @@ cse_free_pool(mem_pool_t *pool)
 
   cse_unlock(pool->lock);
   cse_free_lock(pool->config, pool->lock);
+  pool->lock = 0;
 
   cse_free(pool);
 }

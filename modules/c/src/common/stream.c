@@ -886,9 +886,9 @@ cse_find_config_srun(config_t *config, const char *hostname, int port, int ssl)
   for (i = 0; i < config->srun_capacity; i++) {
     srun = config->srun_list[i];
     
-    if (! strcmp(srun->hostname, hostname) &&
-	srun->port == port &&
-	(srun->ssl != 0) == ssl) {
+    if (! strcmp(srun->hostname, hostname)
+	&& srun->port == port
+	&& (srun->ssl != 0) == ssl) {
       return srun;
     }
   }
@@ -992,7 +992,7 @@ cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
  * Adds a new host to the configuration
  */
 cluster_srun_t *
-cse_add_cluster_server(cluster_t *cluster,
+cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
 		       const char *hostname, int port, const char *id,
 		       int index, int is_backup, int is_ssl)
 {
@@ -1012,7 +1012,7 @@ cse_add_cluster_server(cluster_t *cluster,
       capacity = 16;
 
     srun_list =
-      (cluster_srun_t *) cse_alloc(config->p,
+      (cluster_srun_t *) cse_alloc(pool,
 				   2 * capacity * sizeof(cluster_srun_t));
     
     memset(srun_list, 0, 2 * capacity * sizeof(cluster_srun_t));
@@ -1032,7 +1032,7 @@ cse_add_cluster_server(cluster_t *cluster,
     cluster_srun = &cluster->srun_list[index];
     cluster_srun->srun = srun;
     cluster_srun->is_backup = is_backup;
-    cluster_srun->id = cse_strdup(config->p, id);
+    cluster_srun->id = cse_strdup(pool, id);
     cluster_srun->index = index;
     cluster_srun->is_valid = 1;
 

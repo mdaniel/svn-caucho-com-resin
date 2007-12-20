@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2008 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -334,27 +334,30 @@ cse_add_ignore_pattern(mem_pool_t *pool, web_app_t *app, char *pattern)
  * Adds a new backup to the configuration
  */
 cluster_srun_t *
-cse_add_host(cluster_t *cluster, const char *hostname, int port)
+cse_add_host(mem_pool_t *pool, cluster_t *cluster,
+	     const char *hostname, int port)
 {
-  return cse_add_cluster_server(cluster, hostname, port, "", -1, 0, 0);
+  return cse_add_cluster_server(pool, cluster, hostname, port, "", -1, 0, 0);
 }
 
 /**
  * Adds a new backup to the configuration
  */
 cluster_srun_t *
-cse_add_ssl(cluster_t *cluster, const char *hostname, int port)
+cse_add_ssl(mem_pool_t *pool, cluster_t *cluster,
+	    const char *hostname, int port)
 {
-  return cse_add_cluster_server(cluster, hostname, port, "", -1, 0, 1);
+  return cse_add_cluster_server(pool, cluster, hostname, port, "", -1, 0, 1);
 }
 
 /**
  * Adds a new backup to the configuration
  */
 cluster_srun_t *
-cse_add_backup(cluster_t *cluster, const char *hostname, int port)
+cse_add_backup(mem_pool_t *pool, cluster_t *cluster,
+	       const char *hostname, int port)
 {
-  return cse_add_cluster_server(cluster, hostname, port, "", -1, 1, 0);
+  return cse_add_cluster_server(pool, cluster, hostname, port, "", -1, 1, 0);
 }
 
 /**
@@ -399,7 +402,6 @@ static resin_host_t *
 cse_create_host(config_t *config, const char *host_name, int port)
 {
   resin_host_t *host;
-  web_app_t *web_app = 0;
   mem_pool_t *pool = 0;
 
   for (host = config->hosts; host; host = host->next) {
@@ -495,9 +497,11 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   memset(&cluster, 0, sizeof(cluster));
   cluster.config = config;
   cluster.round_robin_index = -1;
+  pool = cse_create_pool(config);
 
   strncpy(etag, host->etag, sizeof(etag));
   etag[sizeof(etag) - 1] = 0;
+
 
   error_page[0] = 0;
 
@@ -544,10 +548,6 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       break;
       
     case HMUX_DISPATCH_WEB_APP:
-      if (! pool) {
-	pool = cse_create_pool(host->config);
-      }
-	
       if (hmux_read_string(s, buffer, sizeof(buffer)) >= 0) {
 	LOG(("%s:%d:read_config(): hmux web-app %s\n",
 	     __FILE__, __LINE__, buffer));
@@ -702,11 +702,11 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  }
 
 	  if (code == HMUX_SRUN_BACKUP)
-	    srun = cse_add_backup(&cluster, host, port);
+	    srun = cse_add_backup(pool, &cluster, host, port);
 	  else if (code == HMUX_SRUN_SSL)
-	    srun = cse_add_ssl(&cluster, host, port);
+	    srun = cse_add_ssl(pool, &cluster, host, port);
 	  else
-	    srun = cse_add_host(&cluster, host, port);
+	    srun = cse_add_host(pool, &cluster, host, port);
 
 	  if (! srun || ! srun->srun) {
 	    ERR(("srun value for host %s cannot be resolved"));
@@ -874,7 +874,7 @@ write_config(config_t *config)
     else
       hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
     
-    sprintf(buffer, "%d", host->last_update);
+    sprintf(buffer, "%d", (int) host->last_update);
     hmux_write_string(&s, HMUX_HEADER, "last-update");
     hmux_write_string(&s, HMUX_STRING, buffer);
     
@@ -970,7 +970,6 @@ read_all_config_impl(config_t *config)
   char value[1024];
   int code;
   int  ch;
-  int is_change = 1;
   struct stat st;
   int mtime = time(0);
 
@@ -1062,8 +1061,6 @@ read_all_config(config_t *config)
   if (! read_all_config_impl(config)) {
     /* match all to ensure will not show source if can't connect. */
     resin_host_t *host = 0;
-    mem_pool_t *pool = 0;
-    web_app_t *web_app = 0;
     time_t now = 0;
     
     host = cse_match_host_impl(config, "", 0, now);
@@ -1217,11 +1214,10 @@ cse_init_config(config_t *config)
 }
 
 void
-cse_add_config_server(config_t *config, const char *host, int port)
+cse_add_config_server(mem_pool_t *pool, config_t *config,
+		      const char *host, int port)
 {
-  char buffer[1024];
-  
-  cse_add_host(&config->config_cluster, host, port);
+  cse_add_host(pool, &config->config_cluster, host, port);
 
   if (! *config->config_file) {
     sprintf(config->config_file, "%s_%d", host, port);
@@ -1593,8 +1589,6 @@ cse_match_request(config_t *config, const char *host, int port,
   int test_port;
   int test_count;
   resin_host_t *test_match_host;
-  int no_host_update_interval = 2000;
-  
   resin_host_t *match_host;
 
   /* If no ResinConfigServer, never match unless explicit, bug #3 */

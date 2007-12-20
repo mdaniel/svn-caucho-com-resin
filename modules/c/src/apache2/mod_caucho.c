@@ -72,6 +72,9 @@ cse_log(char *fmt, ...)
   char buffer[8192];
   time_t t;
   int pid;
+  FILE *file;
+
+  file = fopen("/tmp/mod_caucho.log", "w+");
 
   pid = (int) getpid();
 
@@ -90,9 +93,15 @@ cse_log(char *fmt, ...)
    vsprintf(buffer + strlen(buffer), fmt, args);
    va_end(args);
 
-   fputs(buffer, stderr);
+   if (file) {
+     fputs(buffer, file);
+     fclose(file);
+   }
+   else {
+     fputs(buffer, stderr);
 
-   fflush(stderr);
+     fflush(stderr);
+   }
 #endif
 }
 
@@ -109,7 +118,7 @@ cse_create_lock(config_t *config)
 void
 cse_free_lock(config_t *config, void *vlock)
 {
-
+  apr_thread_mutex_destroy(vlock);
 }
 
 int
@@ -144,7 +153,10 @@ cse_error(config_t *config, char *format, ...)
 
   LOG(("ERROR: %s\n", buf));
 
-  config->error = cse_strdup(config->p, buf);
+  if (config->error && *config->error)
+    free(config->error);
+  
+  config->error = strdup(buf);
 }
 
 void
@@ -298,7 +310,7 @@ resin_config_server_command(cmd_parms *cmd, void *pconfig,
     host_arg = strdup(host_arg);
   }
   
-  cse_add_config_server(config, host_arg, port);
+  cse_add_config_server(config->p, config, host_arg, port);
 
   return 0;
 }
@@ -385,7 +397,7 @@ cse_host_command(cmd_parms *cmd, void *pconfig,
     config->manual_host = host;
   }
 
-  cse_add_host(&host->cluster, host_arg, port);
+  cse_add_host(config->p, &host->cluster, host_arg, port);
 
   return 0;
 }
@@ -420,7 +432,7 @@ cse_backup_command(cmd_parms *cmd, void *pconfig,
     config->manual_host = host;
   }
 
-  cse_add_backup(&host->cluster, host_arg, port);
+  cse_add_backup(config->p, &host->cluster, host_arg, port);
 
   return 0;
 }
@@ -1018,7 +1030,6 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
   web_app_t *app;
   location_t *loc;
   unsigned int now = (unsigned int) (r->request_time / 1000000);
-  time_t time_now = time(0);
   
   /* check updates as appropriate */
   cse_match_host(config, host->name, host->port, now);
@@ -1048,7 +1059,7 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
   else if (host->canonical->port)
     ap_rprintf(r, " -> %s:%d", host->canonical->name, host->canonical->port);
   else if (! host->canonical->name[0])
-    ap_rprintf(r, " -> default", host->canonical->name);
+    ap_rprintf(r, " -> default");
   else
     ap_rprintf(r, " -> %s", host->canonical->name);
   

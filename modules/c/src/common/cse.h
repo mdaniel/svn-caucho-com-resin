@@ -358,14 +358,17 @@ resin_host_t *cse_match_host(config_t *config,
 			     time_t now);
 
 cluster_srun_t *
-cse_add_cluster_server(cluster_t *cluster,
+cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
 		       const char *host, int port, const char *id,
 		       int index, int is_backup, int is_ssl);
 
-cluster_srun_t *cse_add_host(cluster_t *cluster, const char *host, int port);
-cluster_srun_t *cse_add_backup(cluster_t *cluster, const char *host, int port);
+cluster_srun_t *cse_add_host(mem_pool_t *pool, cluster_t *cluster,
+			     const char *host, int port);
+cluster_srun_t *cse_add_backup(mem_pool_t *pool, cluster_t *cluster,
+			       const char *host, int port);
 
-void cse_add_config_server(config_t *config, const char *host, int port);
+void cse_add_config_server(mem_pool_t *pool, config_t *config,
+			   const char *host, int port);
 
 void cse_log(char *fmt, ...);
 
