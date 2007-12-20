@@ -12,7 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
-<li>Quercus: compiled-mode generation of array(&$foo) (#2258, rep by koreth)</li>
+<li>Quercus: compiled-mode generation of array(&amp;$foo) (#2258, rep by koreth)</li>
 <li>Quercus: clear definition cache on page reload (#2252, rep by koreth)</li>
 <li>Quercus: regexp fix for Drupal 6</li>
 <li>Quercus: .smap files larger than 64k cannot be merged (#2146, rep by koreth)</li>
