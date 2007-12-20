@@ -111,7 +111,7 @@ public class JsfTagNode extends JsfNode
   /**
    * Adds a JspAttribute attribute.
    *
-   * @param name the name of the attribute.
+   * @param qName the name of the attribute.
    * @param value the value of the attribute.
    */
   public void addAttribute(QName qName, JspAttribute value)
@@ -183,6 +183,10 @@ public class JsfTagNode extends JsfNode
     else if (ActionSource2.class.isAssignableFrom(_componentClass))
       return true;
     else if (_bindingAttr != null)
+      return true;
+    else if (UISelectItem.class.isAssignableFrom(_componentClass))
+      return true;
+    else if (UISelectItems.class.isAssignableFrom(_componentClass))
       return true;
     
     JspNode parent = _parent;
