@@ -26,7 +26,7 @@
 <li>Quercus: improve exception reporting in interpreted mode</li>
 <li>Quercus: handle A::$f() calls (#2257, rep by jredden)</li>
 <li>Quercus: handle IllegalStateException thrown by JDBC on close (#2184, rep by koreth)</li>
-<li>Quercus: "15" & 3 not properly converted (#2251, rep by koreth)</li>
+<li>Quercus: "15" &amp; 3 not properly converted (#2251, rep by koreth)</li>
 <li>Quercus: class static fields need to be stored in Env (#2253, rep by koreth)</li>
 <li>Quercus: array_key_exists (#2254, fixed! by koreth)</li>
 <li>XmlDocumentFactory needs setSchema (#2174, rep by sgudiboina)</li>

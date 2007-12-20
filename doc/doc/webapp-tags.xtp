@@ -1110,6 +1110,7 @@ to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
 </td></tr><tr><td>cookie-length</td><td>Maximum length of the cookie. (resin 2.1.1)</td><td>Integer.MAX_VALUE
 </td></tr><tr><td>file-store</td><td>Persistent sessions using a file store. (resin 1.2)</td><td>none
 </td></tr><tr><td>use-persistent-store</td><td>Uses the current <a href="resin.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)</td><td>none
+</td></tr><tr><td>serialization-type</td><td>Use one of "java" or "hessian" for serialization, hessian is significantly faster and smaller (resin 3.1.2)</td><td>java
 </td></tr><tr><td>always-load-session</td><td>Reload data from the store on every request. (resin 1.2)</td><td>false
 </td></tr><tr><td>always-save-session</td><td>Save session data to the store on every request. (resin 1.2)</td><td>false
 </td></tr><tr><td>save-mode</td><td>When to save sessions, one of "before-headers", "after-request", or "on-shutdown"</td><td>after-request

@@ -1,5 +1,6 @@
 <web-app xmlns="http://caucho.com/ns/resin"
          xmlns:resin="http://caucho.com/ns/resin/core">
+
   <class-loader>
     <simple-loader path="WEB-INF/xsl"/>
     <compiling-loader path="WEB-INF/classes" source="WEB-INF/src"/>
