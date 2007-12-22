@@ -33,12 +33,14 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.util.*;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
 
 public class ComponentInject extends Inject
 {
+  private static final L10N L = new L10N(ComponentInject.class);
   private static final Logger log
     = Logger.getLogger(ComponentInject.class.getName());
 
@@ -56,14 +58,15 @@ public class ComponentInject extends Inject
 
   public void inject(Object bean, DependentScope scope)
   {
+    Object value = null;
     try {
-      Object value = _component.get(scope);
+      value = _component.get(scope);
 
       _field.set(bean, value);
-    } catch (RuntimeException e) {
-      throw e;
+    } catch (IllegalArgumentException e) {
+      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", value), e);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
     }
   }
 }

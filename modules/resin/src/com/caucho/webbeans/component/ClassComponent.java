@@ -32,6 +32,7 @@ package com.caucho.webbeans.component;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
+import com.caucho.ejb3.gen.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;

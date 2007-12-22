@@ -32,6 +32,7 @@ package com.caucho.webbeans.cfg;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
+import com.caucho.ejb3.gen.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.component.*;
@@ -234,6 +235,12 @@ public class WbComponentConfig {
 
     if (_init != null)
       comp.setInit(_init);
+
+    PojoBean bean = new PojoBean(_cl);
+
+    Class instanceClass = bean.generateClass();
+
+    comp.setInstanceClass(instanceClass);
 
     comp.init();
     _webbeans.addWbComponent(comp);

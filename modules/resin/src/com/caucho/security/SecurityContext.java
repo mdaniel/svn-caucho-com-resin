@@ -32,14 +32,14 @@ package com.caucho.security;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import java.security.Principal;
+import java.security.*;
 import java.util.logging.Logger;
 
 /**
  * Defines a proxy for the current security context.
  */
 public class SecurityContext {
-  static final Logger log = Log.open(SecurityContext.class);
+  static final Logger log = Logger.getLogger(SecurityContext.class.getName());
   static final L10N L = new L10N(SecurityContext.class);
 
   /**
@@ -103,6 +103,40 @@ public class SecurityContext {
     }
 
     return false;
+  }
+
+  /**
+   * Returns true if the user principal is in the specified role.
+   *
+   * @param roleSet a set of roles to test.
+   */
+  public static void checkUserInRole(String []roleSet)
+  {
+    SecurityContextProvider provider = getProvider();
+
+    if (provider != null && roleSet != null) {
+      for (int i = 0; i < roleSet.length; i++) {
+	if (provider.isUserInRole(roleSet[i]))
+	  return;
+      }
+
+      throw new AccessControlException(L.l("permission denied"));
+    }
+  }
+
+  /**
+   * Returns true if the user principal is in the specified role.
+   *
+   * @param roleSet a set of roles to test.
+   */
+  public static String runAs(String role)
+  {
+    SecurityContextProvider provider = getProvider();
+
+    if (provider != null)
+      return provider.runAs(role);
+    else
+      return null;
   }
 
   /**

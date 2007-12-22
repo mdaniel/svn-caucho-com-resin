@@ -626,7 +626,8 @@ public class EJBServer
     */
 
     Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
-    _ejbContainer.start();
+    
+    // _ejbContainer.start();
 
     if ("manual".equals(_startupMode))
       return;

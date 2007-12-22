@@ -34,4 +34,13 @@ package com.caucho.config.type;
  */
 abstract public class ConfigType
 {
+  /**
+   * Returns the Java type.
+   */
+  abstract public Class getType();
+  
+  /**
+   * Converts the string to a value of the type.
+   */
+  abstract public Object valueOf(String text);
 }

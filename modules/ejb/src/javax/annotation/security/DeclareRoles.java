@@ -28,7 +28,7 @@
 
 package javax.annotation.security;
 
-import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 /**
  * Deny all users.
  */
-@Target({METHOD})
+@Target({TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DeclareRoles {
   String []value();

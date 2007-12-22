@@ -80,7 +80,7 @@ public class JavaClassGenerator {
    */
   public static String cleanClassName(String className)
   {
-    CharBuffer cb = new CharBuffer();
+    StringBuilder cb = new StringBuilder();
     
     for (int i = 0; i < className.length(); i++) {
       char ch = className.charAt(i);

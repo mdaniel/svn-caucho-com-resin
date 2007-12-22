@@ -12,7 +12,9 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
-<li>mod_caucho config reload of servers could leak memory</li>
+<li>mod_caucho: not properly grabbing backup server from session (#2268, rep by D Wigenfors)</li>
+<li>EJB initialization order vs Amber (rep by Bill Au)</li>
+<li>mod_caucho config reload of servers could leak memory (#2247, rep by vladdy)</li>
 <li>(2007-12-18) Quercus: compiled-mode generation of array(&amp;$foo) (#2258, rep by koreth)</li>
 <li>Quercus: clear definition cache on page reload (#2252, rep by koreth)</li>
 <li>Quercus: regexp fix for Drupal 6</li>

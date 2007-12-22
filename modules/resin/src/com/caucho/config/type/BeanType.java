@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
@@ -45,12 +46,39 @@ public class BeanType extends ConfigType
   private static final L10N L = new L10N(BeanType.class);
   private static final Logger log
     = Logger.getLogger(BeanType.class.getName());
+
+  private final Class _beanClass;
   
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
 
+  public BeanType(Class beanClass)
+  {
+    _beanClass = beanClass;
+  }
+
+  /**
+   * Returns the given type.
+   */
+  public Class getType()
+  {
+    return _beanClass;
+  }
+
+  /**
+   * Returns the attribute based on the given name.
+   */
   public Attribute getAttribute(QName name)
   {
     return null;
+  }
+  
+  /**
+   * Converts the string to the given value.
+   */
+  public Object valueOf(String text)
+  {
+    throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
+				  _beanClass.getName(), text));
   }
 }

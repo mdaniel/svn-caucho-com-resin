@@ -33,6 +33,7 @@ import com.caucho.util.DisplayableException;
 import com.caucho.util.Html;
 
 import java.io.PrintWriter;
+import java.lang.reflect.*;
 
 /**
  * Thrown by the various Builders
@@ -84,10 +85,23 @@ public class ConfigException
 
   public static RuntimeException create(String location, Throwable e)
   {
+    if (e instanceof InstantiationException && e.getCause() != null)
+      e = e.getCause();
+    
     if (e instanceof DisplayableException)
       return new ConfigException(location + e.getMessage(), e);
     else
       return new ConfigException(location + e, e);
+  }
+
+  public static RuntimeException create(Field field, Throwable e)
+  {
+    return create(loc(field), e);
+  }
+
+  public static RuntimeException create(Method method, Throwable e)
+  {
+    return create(loc(method), e);
   }
 
   public static RuntimeException create(Throwable e)
@@ -107,5 +121,15 @@ public class ConfigException
   public void print(PrintWriter out)
   {
     out.println(Html.escapeHtml(getMessage()));
+  }
+
+  public static String loc(Field field)
+  {
+    return field.getDeclaringClass().getName() + "." + field.getName() + ": ";
+  }
+
+  public static String loc(Method method)
+  {
+    return method.getDeclaringClass().getName() + "." + method.getName() + "(): ";
   }
 }

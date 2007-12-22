@@ -270,19 +270,23 @@ r_entity = element entity {
 
   r_mapped-name?,
 
-  ((r_home, r_remote?)?,
+  r_home?,
 
-   (r_local-home, r_local?)?,
+  r_remote?,
 
-   r_ejb-class?,
+  r_local-home?,
 
-   r_persistence-type?,
+  r_local?,
 
-   r_prim-key-class?,
+  r_ejb-class?,
 
-   r_reentrant?,
+  r_persistence-type?,
 
-   r_cmp-version?)?,
+  r_prim-key-class?,
+
+  r_reentrant?,
+
+  r_cmp-version?,
 
   (r_abstract-schema-name? & r_sql-table?),
 
@@ -564,9 +568,13 @@ r_session = element session {
 
   r_mapped-name?,
 
-  (r_home, r_remote)?,
+  r_home?,
 
-  (r_local-home, r_local)?,
+  r_remote?,
+
+  r_local-home?,
+
+  r_local?,
 
   element service-endpoint { j2ee_class }?,
 

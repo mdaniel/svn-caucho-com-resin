@@ -29,29 +29,32 @@
 
 package com.caucho.config.attribute;
 
+import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-import org.w3c.dom.Node;
-
-import javax.el.ELContext;
-
 public abstract class Attribute {
   /**
-   * Returns the config type of the attribute.
+   * Returns the config type of the attribute value.
    */
   abstract public ConfigType getConfigType();
   
   /**
+   * Sets the value of the attribute as text
+   */
+  abstract public void setText(Object bean, String value)
+    throws ConfigException;
+  
+  /**
    * Sets the value of the attribute
    */
-  abstract public void setAttribute(Object bean, Object value)
-    throws Exception;
+  abstract public void setValue(Object bean, Object value)
+    throws ConfigException;
 
   /**
    * Creates the child bean.
    */
   abstract public Object create(Object parent)
-    throws Exception;
+    throws ConfigException;
 }

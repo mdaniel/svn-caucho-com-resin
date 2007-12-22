@@ -128,10 +128,12 @@ public abstract class AbstractHttpRequest
   protected final Connection _conn;
   protected final TcpConnection _tcpConn;
 
-  private SecurityContextProvider _oldProvider;
   protected AbstractHttpResponse _response;
 
   protected Invocation _invocation;
+  
+  private SecurityContextProvider _oldProvider;
+  private String _runAs;
 
   private boolean _keepalive;
 
@@ -286,6 +288,7 @@ public abstract class AbstractHttpRequest
     _isSessionIdFromCookie = false;
 
     _oldProvider = null;
+    _runAs = null;
 
     _attributeListeners = NULL_LISTENERS;
 
@@ -1748,6 +1751,18 @@ public abstract class AbstractHttpRequest
   }
   
   /**
+   * Sets the overriding role.
+   */
+  public String runAs(String role)
+  {
+    String oldRunAs = _runAs;
+
+    _runAs = role;
+
+    return oldRunAs;
+  }
+  
+  /**
    * Returns true if the user represented by the current request
    * plays the named role.
    *
@@ -1764,6 +1779,9 @@ public abstract class AbstractHttpRequest
       if (linkRole != null)
 	role = linkRole;
     }
+
+    if (_runAs != null)
+      return _runAs.equals(role);
     
     WebApp app = getWebApp();
     AbstractLogin login = app == null ? null : app.getLogin();

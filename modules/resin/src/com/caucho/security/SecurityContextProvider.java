@@ -45,9 +45,18 @@ public interface SecurityContextProvider {
   /**
    * Returns true if the user principal plays the named role.
    *
-   * @param roleName the role to test against.
+   * @param permission the permission to test against.
    */
-  public boolean isUserInRole(String roleName);
+  public boolean isUserInRole(String permission);
+  
+  /**
+   * Sets the current runAs role/principal.  This should affect
+   * <code>isUserInRole</code> and <code>getUserPrincipal</code>.
+   *
+   * @param roleName the new role
+   * @return the old run-as role
+   */
+  public String runAs(String roleName);
   
   /**
    * Returns true if the transport context is secure (SSL).

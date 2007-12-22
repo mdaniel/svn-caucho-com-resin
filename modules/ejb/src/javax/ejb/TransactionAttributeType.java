@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,9 +34,9 @@ package javax.ejb;
  */
 public enum TransactionAttributeType {
   MANDATORY,
-  NEVER,
-  NOT_SUPPORTED,
   REQUIRED,
   REQUIRES_NEW,
-  SUPPORTS
+  SUPPORTS,
+  NOT_SUPPORTED,
+  NEVER,
 }

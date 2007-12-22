@@ -1403,38 +1403,34 @@ open_session_host(stream_t *s, cluster_t *cluster,
 {
   int host;
   int size = cluster->srun_size;
+  cluster_srun_t *owner = 0;
+  cluster_srun_t *backup = 0;
 
-  if (size > 0)
+  if (size > 0) {
     session_index = session_index % size;
-
-  for (host = 0; host < size; host++) {
-    if (cluster->srun_list[host].index == session_index) {
-      cluster_srun_t *owner = &cluster->srun_list[host];
-
-      /* try to open a connection to the session owner */
-      if (open_connection_group(s, cluster, owner, -1,
-                                now, web_pool, 1))
-        return 1;
-      /* or the backup */
-      else if (open_connection_group(s, cluster, owner, backup_index, 
-                                     now, web_pool, 1))
-        return 1;
-#if 0      
-      /* try the original, but force a connect */
-      else if (open_connection_group(s, cluster, owner, -1,
-                                     now, web_pool, 0))
-        return 1;
-      /* try the backup, but force a connect */
-      else if (open_connection_group(s, cluster, owner, backup_index,
-                                     now, web_pool, 0))
-        return 1;
-#endif
-
-      return 0;
-    }
+    backup_index = backup_index % size;
   }
 
-  return 0;
+  for (host = 0; host < size; host++) {
+    if (cluster->srun_list[host].index == session_index)
+      owner = &cluster->srun_list[host];
+    else if (cluster->srun_list[host].index == backup_index)
+      backup = &cluster->srun_list[host];
+  }
+
+  /* try to open a connection to the session owner */
+  if (owner
+      && open_connection_group(s, cluster, owner, -1, now, web_pool, 1)) {
+        return 1;
+  }
+  /* or the backup */
+  else if (backup
+	   && open_connection_group(s, cluster, backup, -1,
+				    now, web_pool, 1)) {
+    return 1;
+  }
+  else
+    return 0;
 }
 
 static int
