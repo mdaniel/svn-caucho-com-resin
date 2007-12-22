@@ -12,6 +12,8 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>WebBeans add xwork2 support as com.caucho.xwork2.ResinObjectFactory</li>
+<li>WebBeans: add createTransient to support framework object factories</li> 
 <li>mod_caucho: not properly grabbing backup server from session (#2268, rep by D Wigenfors)</li>
 <li>EJB initialization order vs Amber (rep by Bill Au)</li>
 <li>mod_caucho config reload of servers could leak memory (#2247, rep by vladdy)</li>

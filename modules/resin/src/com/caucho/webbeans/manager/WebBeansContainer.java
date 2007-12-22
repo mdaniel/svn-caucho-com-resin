@@ -94,6 +94,9 @@ public class WebBeansContainer
   private HashMap<Class,ArrayList<ObserverMap>> _observerListCache
     = new HashMap<Class,ArrayList<ObserverMap>>();
 
+  private HashMap<Class,ClassComponent> _transientMap
+    = new HashMap<Class,ClassComponent>();
+
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
 
@@ -574,6 +577,27 @@ public class WebBeansContainer
 
     if (map != null)
       list.add(map);
+  }
+
+  /**
+   * Returns a ComponentFactory for a class, but does not register the
+   * component with webbeans.
+   */
+  public <T> ComponentFactory<T> createTransient(Class<T> type)
+  {
+    synchronized (_transientMap) {
+      ClassComponent comp = _transientMap.get(type);
+
+      if (comp == null) {
+	comp = new ClassComponent(_wbWebBeans);
+	comp.setInstanceClass(type);
+	comp.init();
+
+	_transientMap.put(type, comp);
+      }
+
+      return comp;
+    }
   }
 
   //
