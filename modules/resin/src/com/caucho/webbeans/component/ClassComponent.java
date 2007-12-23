@@ -86,6 +86,11 @@ public class ClassComponent extends ComponentImpl {
     return _cl;
   }
 
+  public void setConstructor(Constructor ctor)
+  {
+    _ctor = ctor;
+  }
+
   public void init()
   {
     introspect();
@@ -179,6 +184,9 @@ public class ClassComponent extends ComponentImpl {
    */
   protected void introspectConstructor()
   {
+    if (_ctor != null)
+      return;
+    
     try {
       Constructor best = null;
       Constructor second = null;

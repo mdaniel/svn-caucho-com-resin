@@ -710,7 +710,6 @@
         <include name="lib/quercus.jar"/>
         <include name="lib/resin-util.jar"/>
         <include name="lib/resin.jar"/>
-        <include name="lib/resin-support.jar"/>
 	<!--
         <include name="lib/resinboot.jar"/>
 	-->
@@ -733,6 +732,12 @@
         <include name="description-pak"/>
       </fileset>
     </copy>
+    
+    <copy todir="${dist}/${dist.name}/ext" preservelastmodified="true">
+      <fileset dir="${install}/lib">
+        <include name="resin-support.jar"/>
+      </fileset>
+    </copy >
 
     <chmod perm="ugo+rx">
       <fileset dir="${dist}/${dist.name}">

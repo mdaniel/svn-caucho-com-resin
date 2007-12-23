@@ -591,6 +591,16 @@ public class WebBeansContainer
       if (comp == null) {
 	comp = new ClassComponent(_wbWebBeans);
 	comp.setInstanceClass(type);
+
+	try {
+	  Constructor nullCtor = type.getConstructor(new Class[0]);
+
+	  if (nullCtor != null)
+	    comp.setConstructor(nullCtor);
+	} catch (NoSuchMethodException e) {
+	  // if the type doesn't have a null-arg constructor
+	}
+
 	comp.init();
 
 	_transientMap.put(type, comp);
