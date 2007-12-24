@@ -70,6 +70,7 @@
     <property name="product" value="Resin"/>
     <property name="shortproduct" value="resin"/>
     <property name="version" value="3.1.s${snapshotdate}"/>
+    <property name="maven.version" value="3.1-SNAPSHOT"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${build}"/>
@@ -83,7 +84,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jaxrpc, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
+          depends="init, hessian, jaxrpc, jws, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
   </target>
 
   <target name="ant" depends="init">
@@ -147,6 +148,14 @@
     </antcall>
   </target>
 
+  <target name="jws" depends="init,saaj,jsdk">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jws"/>
+      <param name="module.jar" value="jws-15.jar"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
   <target name="jca" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jca"/>
@@ -206,6 +215,27 @@
     </antcall>
   </target>
   -->
+
+  <target name="maven-plugin" depends="init">
+    <property name="module.src" value="${modules}/maven/src"/>
+    <property name="module.build" value="${modules}/maven/classes"/>
+    
+    <mkdir dir="${module.build}" />
+
+    <copy tofile="${module.build}/META-INF/maven/com.caucho/resin-maven-plugin/pom.xml"
+          file="${modules}/maven/maven2/pom.xml"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${maven.version}"/>
+      </filterset>
+    </copy>
+   
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="maven"/>
+      <param name="module.jar" value="resin-maven-plugin.jar"/>
+    </antcall>
+  </target>
   
   <target name="portlet" depends="init">
     <antcall target="module" inheritRefs="true">
@@ -642,7 +672,7 @@
   </target>
 
   <target name="dist.build" 
-          depends="compile, webapps, win32, configure, javadoc, relaxng">
+          depends="compile, maven-plugin, webapps, win32, configure, javadoc, relaxng">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>
@@ -697,6 +727,7 @@
         <include name="lib/jaxb1-impl.jar"/>
         -->
         <include name="lib/jaxrpc-15.jar"/>
+        <include name="lib/jws-15.jar"/>
         <include name="lib/jpa-15.jar"/>
         <include name="lib/j2ee-deploy-10.jar"/>
         <include name="lib/j2ee-management-10.jar"/>
@@ -979,6 +1010,143 @@
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
   </target>
 
+  <target name="maven-dist" depends="init">
+    <property name="maven" value="${dist}/maven2/com/caucho/"/>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="webbeans"/>
+      <param name="jar.name" value="webbeans-16.jar"/>
+      <param name="maven.name" value="resin-webbeans"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="util"/>
+      <param name="jar.name" value="resin-util.jar"/>
+      <param name="maven.name" value="resin-util"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="ejb"/>
+      <param name="jar.name" value="ejb-15.jar"/>
+      <param name="maven.name" value="resin-ejb"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="hessian"/>
+      <param name="jar.name" value="hessian.jar"/>
+      <param name="maven.name" value="resin-hessian"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jca"/>
+      <param name="jar.name" value="jca-15.jar"/>
+      <param name="maven.name" value="resin-jca"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jms"/>
+      <param name="jar.name" value="jms-11.jar"/>
+      <param name="maven.name" value="resin-jms"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jpa"/>
+      <param name="jar.name" value="jpa-15.jar"/>
+      <param name="maven.name" value="resin-jpa"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jsdk"/>
+      <param name="jar.name" value="jsdk-15.jar"/>
+      <param name="maven.name" value="resin-jsdk"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jsf"/>
+      <param name="jar.name" value="jsf-12.jar"/>
+      <param name="maven.name" value="resin-jsf"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jta"/>
+      <param name="jar.name" value="jta-101.jar"/>
+      <param name="maven.name" value="resin-jta"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jws"/>
+      <param name="jar.name" value="jws-15.jar"/>
+      <param name="maven.name" value="resin-jws"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="quercus"/>
+      <param name="jar.name" value="quercus.jar"/>
+      <param name="maven.name" value="resin-quercus"/>
+    </antcall>
+    
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="resin"/>
+      <param name="maven.name" value="resin"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="support"/>
+      <param name="jar.name" value="resin-support.jar"/>
+      <param name="maven.name" value="resin-support"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="maven"/>
+      <param name="jar.name" value="resin-maven-plugin.jar"/>
+      <param name="maven.name" value="resin-maven-plugin"/>
+    </antcall>
+  </target>
+
+  <target name="maven-rsync" depends="init,maven-dist">
+    <exec executable="rsync">
+      <arg value="-av"/>
+      <arg value="--rsh=ssh"/>
+      <arg value="${maven}"/>
+      <arg value="weasley.caucho.com:/var/www/hosts/www.caucho.com/webapps/ROOT/maven2/com/caucho/"/>
+    </exec>
+  </target>
+
+  <target name="maven2-module">
+    <property name="module.src" value="${modules}/${module.name}/src"/>
+    <property name="jar.name" value="${module.name}.jar"/>
+    <property name="maven.name" value="resin-${module.name}"/>
+    <property name="maven.dist" value="${maven}/${maven.name}/${maven.version}"/>
+
+    <mkdir dir="${maven.dist}"/>
+
+    <copy file="${modules}/${module.name}/maven2/pom.xml"
+          tofile="${maven.dist}/${maven.name}-${maven.version}.pom"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${maven.version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+      </filterset>
+    </copy>
+
+    <checksum file="${maven.dist}/${maven.name}-${maven.version}.pom"
+              algorithm="sha1"/>
+    <checksum file="${maven.dist}/${maven.name}-${maven.version}.pom"
+              algorithm="md5"/>
+
+    <copy file="${lib}/${jar.name}"
+          tofile="${maven.dist}/${maven.name}-${maven.version}.jar"
+          preservelastmodified="true"
+          overwrite="true"/>
+
+    <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
+              algorithm="sha1"/>
+    <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
+              algorithm="md5"/>
+  </target>
+  
   <target name="rest-jar" depends="init, compile">
     <property name="dist.name" value="${shortproduct}-${version}"/>
     <mkdir dir="${dist}/${dist.name}"/>
