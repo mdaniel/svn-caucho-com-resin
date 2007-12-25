@@ -73,27 +73,6 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
     if (value != null && value.length > 0)
       ((EditableValueHolder) component).setSubmittedValue(value[0]);
   }
-
-  public Object getConvertedValue(FacesContext context,
-				  UIComponent component,
-				  Object submittedValue)
-    throws ConverterException
-  {
-    Converter converter = null;//component.getConverter();
-
-    UISelectOne uiSelectOne = (UISelectOne) component;
-
-    Object value = submittedValue;
-    /*
-    if (converter != null)
-      value = converter.getAsObject(context, component, value);
-    */
-
-    uiSelectOne.setValue(value);
-    uiSelectOne.setValid(true);
-
-    return value;
-  }
   
   /**
    * Renders the open tag for the text.

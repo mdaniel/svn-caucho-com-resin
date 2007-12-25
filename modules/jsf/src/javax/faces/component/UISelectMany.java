@@ -33,6 +33,8 @@ import java.util.*;
 import javax.el.*;
 import javax.faces.application.*;
 import javax.faces.context.*;
+import javax.faces.model.SelectItem;
+import javax.faces.model.SelectItemGroup;
 
 public class UISelectMany extends UIInput
 {
@@ -110,26 +112,30 @@ public class UISelectMany extends UIInput
       return;
 
     boolean hasValue = false;
+
+    ValueExpression ve = getValueExpression("value");
+
+    Class type = null;
+    if (ve != null) {
+      type = ve.getType(context.getELContext());
+      if (type != null)
+        type = type.getComponentType();
+    }
     
+    ExpressionFactory exprFactory
+      = context.getApplication().getExpressionFactory();
+
     if (value instanceof Object[]) {
-      Object []values = (Object []) value;
+      Object[] values = (Object[]) value;
 
       for (int i = 0; i < values.length; i++) {
-	hasValue = false;
-	
-	for (UIComponent child : getChildren()) {
-	  if (child instanceof UISelectItem) {
-	    UISelectItem item = (UISelectItem) child;
+        hasValue = UISelectOne.matchChildren(exprFactory,
+                                             this,
+                                             values[i],
+                                             type);
 
-	    if (values[i].equals(item.getItemValue())) {
-	      hasValue = true;
-	      break;
-	    }
-	  }
-	}
-
-	if (! hasValue)
-	  break;
+        if (!hasValue)
+          break;
       }
     }
 

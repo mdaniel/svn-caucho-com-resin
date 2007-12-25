@@ -73,39 +73,6 @@ class HtmlSelectManyMenuRenderer extends SelectRenderer
       ((EditableValueHolder) component).setSubmittedValue(value);
     }
   }
-
-  public Object getConvertedValue(FacesContext context,
-				  UIComponent component,
-				  Object submittedValue)
-    throws ConverterException
-  {
-    Converter converter = null;//component.getConverter();
-
-    UISelectMany uiSelectMany = (UISelectMany) component;
-
-    Object value = submittedValue;
-    /*
-    if (converter != null)
-      value = converter.getAsObject(context, component, value);
-    */
-
-    Object []values = null;
-    if (value instanceof String []) {
-      String []strValue = (String []) value;
-      
-      values = new Object[strValue.length];
-
-      for (int i = 0; i < strValue.length; i++)
-	values[i] = strValue[i];
-    }
-    else if (value instanceof Object[])
-      values = (Object []) values;
-
-    uiSelectMany.setSelectedValues(values);
-    uiSelectMany.setValid(true);
-
-    return values;
-  }
   
   /**
    * Renders the open tag for the text.

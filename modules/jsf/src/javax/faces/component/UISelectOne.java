@@ -62,7 +62,14 @@ public class UISelectOne extends UIInput
     if (! isValid() || value == null)
       return;
 
-    boolean hasValue = matchChildren(this, value);
+    ValueExpression ve = getValueExpression("value");
+
+    Class type = null;
+    if (ve != null) {
+      type = ve.getType(context.getELContext());
+    }
+
+    boolean hasValue = matchChildren(context.getApplication().getExpressionFactory(), this, value, type);
 
     if (! hasValue) {
       String summary = Util.l10n(context, INVALID_MESSAGE_ID,
@@ -80,7 +87,7 @@ public class UISelectOne extends UIInput
     }
   }
 
-  static boolean matchChildren(UIComponent comp, Object value)
+  static boolean matchChildren(ExpressionFactory expressionFactory, UIComponent comp, Object value, Class type)
   {
     int count = comp.getChildCount();
 
@@ -95,14 +102,29 @@ public class UISelectOne extends UIInput
       if (child instanceof UISelectItem) {
 	UISelectItem item = (UISelectItem) child;
 
-	if (value.equals(item.getItemValue())) {
+        SelectItem selectItem = (SelectItem) item.getValue();
+
+        if (selectItem == null) {
+          selectItem = new SelectItem(item.getItemValue());
+        }
+        
+        Object optionValue;
+
+        if (type != null) {
+          optionValue = expressionFactory.coerceToType(selectItem.getValue(), type);
+        }
+        else {
+          optionValue = selectItem.getValue();
+        }
+        
+	if (value.equals(optionValue)) {
 	  return true;
 	}
       }
       else if (child instanceof UISelectItems) {
 	UISelectItems items = (UISelectItems) child;
 
-	if (matchItems(items.getValue(), value))
+	if (matchItems(expressionFactory, items.getValue(), value, type))
 	  return true;
       }
     }
@@ -110,14 +132,16 @@ public class UISelectOne extends UIInput
     return false;
   }
 
-  private static boolean matchItems(Object selectValue, Object value)
+  private static boolean matchItems(ExpressionFactory expressionFactory,
+                                    Object selectValue, Object value,
+                                    Class type)
   {
     if (selectValue instanceof SelectItemGroup) {
       SelectItem []items = ((SelectItemGroup) selectValue).getSelectItems();
 
       if (items != null) {
 	for (int i = 0; i < items.length; i++) {
-	  if (matchItems(items[i], value))
+	  if (matchItems(expressionFactory, items[i], value, type))
 	    return true;
 	}
       }
@@ -125,13 +149,32 @@ public class UISelectOne extends UIInput
     else if (selectValue instanceof SelectItem) {
       SelectItem item = (SelectItem) selectValue;
 
-      return value.equals(item.getValue()) && ! item.isDisabled();
+      Object optionValue;
+
+      if (type != null) {
+        optionValue = expressionFactory.coerceToType(item.getValue(), type);
+      }
+      else {
+        optionValue = item.getValue();
+      }
+
+      return value.equals(optionValue) && ! item.isDisabled();
     }
     else if (selectValue instanceof SelectItem[]) {
       SelectItem []item = (SelectItem[]) selectValue;
 
       for (int i = 0; i < item.length; i++) {
-	if (value.equals(item[i].getValue()) && ! item[i].isDisabled())
+
+        Object optionValue;
+
+        if (type != null) {
+          optionValue = expressionFactory.coerceToType(item[i].getValue(), type);
+        }
+        else {
+          optionValue = item[i].getValue();
+        }
+
+        if (value.equals(optionValue) && ! item[i].isDisabled())
 	  return true;
       }
     }
@@ -140,8 +183,19 @@ public class UISelectOne extends UIInput
 
       int size = list.size();
       for (int i = 0; i < size; i++) {
-	if (matchItems(list.get(i), value))
+	if (matchItems(expressionFactory, list.get(i), value, type))
 	  return true;
+      }
+    }
+    else if (selectValue instanceof Map) {
+      Map map = (Map) selectValue;
+      Collection collection = map.values();
+      for (Iterator iterator = collection.iterator(); iterator.hasNext();) {
+        Object o = iterator.next();
+        if (type != null) {
+          o = expressionFactory.coerceToType(o, type);
+        }
+        if (value.equals(o)) return true;
       }
     }
 

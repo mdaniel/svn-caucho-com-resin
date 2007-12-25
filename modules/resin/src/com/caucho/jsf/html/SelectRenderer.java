@@ -31,15 +31,88 @@ package com.caucho.jsf.html;
 import javax.faces.component.*;
 import javax.faces.context.*;
 import javax.faces.model.*;
+import javax.faces.convert.*;
+import javax.el.*;
 import java.io.*;
 import java.util.*;
+import java.lang.reflect.*;
 
 /**
  * The base renderer
  */
 abstract class SelectRenderer extends BaseRenderer
 {
-  private ArrayList<SelectItem> getSelectItems(UISelectItems selectItems)
+  private static Map<Class, Class> _primitiveTypeMap
+    = new HashMap<Class, Class>();
+
+  @Override
+  public Object getConvertedValue(FacesContext context,
+                                  UIComponent component,
+                                  Object submittedValue)
+    throws ConverterException
+  {
+    if (component instanceof UISelectMany) {
+      return getConvertedValue(context, (UISelectMany)component, submittedValue);
+    }
+    return super.getConvertedValue(context, component, submittedValue);
+  }
+
+  private Object getConvertedValue(FacesContext context,
+                                   UISelectMany uiSelectMany,
+                                   Object submittedValue)
+    throws ConverterException
+  {
+    String []strValues = (String[]) submittedValue;
+
+    Converter converter = uiSelectMany.getConverter();
+
+    Object []values = null;
+
+    ValueExpression valueExpr = uiSelectMany.getValueExpression("value");
+
+    if (valueExpr != null) {
+      Class cl;
+      cl = valueExpr.getType(context.getELContext());
+      if (cl.isArray()) {
+        cl = cl.getComponentType();
+        if (cl.isPrimitive()) {
+          cl = _primitiveTypeMap.get(cl);
+        }
+        converter = context.getApplication().createConverter(cl);
+        values = (Object []) Array.newInstance(cl, strValues.length);
+      }
+      else if (java.util.List.class.isAssignableFrom(cl)) {
+        values = strValues;
+
+        uiSelectMany.setSelectedValues(values);
+        uiSelectMany.setValid(true);
+
+        return values;
+      }
+      else {
+        //todo should never happen as per spec. should an exception be thrown?
+      }
+    }
+    else {
+      values = new Object[strValues.length];
+    }
+
+    for (int i = 0; i < strValues.length; i++) {
+      if (converter != null) {
+        values[i] = converter.getAsObject(context, uiSelectMany, strValues[i]);
+      }
+      else {
+        values[i] = strValues[i];
+      }
+    }
+
+    uiSelectMany.setSelectedValues(values);
+    uiSelectMany.setValid(true);
+
+    return values;
+  }
+
+  public static ArrayList<SelectItem> getSelectItems(UISelectItems selectItems)
   {
     ArrayList<SelectItem> items = new ArrayList<SelectItem>();
 
@@ -114,13 +187,13 @@ abstract class SelectRenderer extends BaseRenderer
     throws IOException
   {
     String clientId = component.getClientId(context);
-    
+
     int childCount = component.getChildCount();
     for (int i = 0; i < childCount; i++) {
       UIComponent child = component.getChildren().get(i);
 
       String childId = clientId + ":" + i;
-      
+
       if (child instanceof UISelectItem) {
 	UISelectItem selectItem = (UISelectItem) child;
 
@@ -217,15 +290,21 @@ abstract class SelectRenderer extends BaseRenderer
   {
     String clientId = component.getClientId(context);
 
+    ValueExpression ve = component.getValueExpression("value");
+
+    Class type = null;
+    if (ve != null) {
+      type = ve.getType(context.getELContext());
+    }
+
     ArrayList<SelectItem> items = getSelectItems(component);
     for (int i = 0; i < items.size(); i++) {
       String childId = clientId + ":" + i;
-      
+
       SelectItem selectItem = items.get(i);
 
       String itemLabel = selectItem.getLabel();
       Object itemValue = selectItem.getValue();
-      String itemDescription = selectItem.getDescription();
 
       out.startElement("option", component);
 
@@ -235,7 +314,17 @@ abstract class SelectRenderer extends BaseRenderer
       //out.writeAttribute("name", child.getClientId(context), "name");
       */
 
-      if (value != null && value.equals(itemValue))
+      Object optionValue;
+       if (type != null) {
+          optionValue = context.getApplication()
+            .getExpressionFactory()
+            .coerceToType(itemValue, type);
+        }
+        else {
+          optionValue = selectItem.getValue();
+        }
+
+      if (value != null && value.equals(optionValue))
 	out.writeAttribute("selected", "selected", "selected");
 
       if (selectItem.isDisabled()) {
@@ -248,17 +337,28 @@ abstract class SelectRenderer extends BaseRenderer
 	if (enabledClass != null)
 	  out.writeAttribute("class", enabledClass, "enabledClass");
       }
-      
+
       String itemValueString = toString(context, component, itemValue);
       out.writeAttribute("value", itemValueString, "value");
-      
+
       if (itemLabel == null)
         itemLabel = itemValueString;
 
       out.writeText(itemLabel, "label");
-	
+
       out.endElement("option");
       out.write("\n");
     }
+  }
+
+  static {
+    _primitiveTypeMap.put(boolean.class, Boolean.class);
+    _primitiveTypeMap.put(byte.class, Byte.class);
+    _primitiveTypeMap.put(char.class, Character.class);
+    _primitiveTypeMap.put(short.class, Short.class);
+    _primitiveTypeMap.put(int.class, Integer.class);
+    _primitiveTypeMap.put(long.class, Long.class);
+    _primitiveTypeMap.put(float.class, Float.class);
+    _primitiveTypeMap.put(double.class, Double.class);
   }
 }
