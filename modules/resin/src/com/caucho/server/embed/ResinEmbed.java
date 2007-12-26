@@ -32,7 +32,7 @@ package com.caucho.server.embed;
 /**
  * Embeddable version of the Resin server.
  */
-public class ResinEmbed implements EnvironmentBean
+public class ResinEmbed
 {
   /**
    * Creates a new resin server.
