@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
- * The configuration for a web.app in the resin.conf
+ * The configuration for a web-app in the resin.conf
  */
 public class WebAppConfig extends DeployConfig {
   static final L10N L = new L10N(WebAppConfig.class);

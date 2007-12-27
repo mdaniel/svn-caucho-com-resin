@@ -1,0 +1,29 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.1.5 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 3.1.x">
+
+<p>Resin 3.1.x is a development branch.  New capabilities will be added
+along with bug fixes for future versions of the Resin 3.1.x branch.</p>
+
+<p>Deployments which need a Resin version with only bug fixes should
+use the Resin 3.0.x branch.</p>
+
+</s1>
+
+<s1 title="ResinEmbed">
+
+<p>com.caucho.resin.ResinEmbed now exists to simplify embedded servers and
+testing.</p>
+
+</s1>
+
+</body>
+</document>

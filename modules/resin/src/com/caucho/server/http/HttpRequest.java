@@ -117,7 +117,7 @@ public class HttpRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  HttpRequest(DispatchServer server, Connection conn)
+  public HttpRequest(DispatchServer server, Connection conn)
   {
     super(server, conn);
 
