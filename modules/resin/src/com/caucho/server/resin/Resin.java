@@ -435,7 +435,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   public Cluster createCluster()
-    throws Throwable
+    throws ConfigException
   {
     Cluster cluster = new Cluster(this);
 
@@ -704,6 +704,15 @@ public class Resin implements EnvironmentBean, SchemaBean
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  /**
+   * Starts the server.
+   */
+  public void stop()
+  {
+    if (! _lifecycle.toStop())
+      return;
   }
 
   public Cluster findCluster(String id)
