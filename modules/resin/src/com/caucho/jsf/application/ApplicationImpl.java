@@ -29,6 +29,7 @@
 package com.caucho.jsf.application;
 
 import java.util.*;
+import java.lang.reflect.Constructor;
 
 import javax.el.*;
 
@@ -263,7 +264,10 @@ public class ApplicationImpl extends Application
 		 DateTimeConverter.class.getName());
     addConverter(NumberConverter.CONVERTER_ID,
 		 NumberConverter.class.getName());
-    
+
+    addConverter(Enum.class, EnumConverter.class.getName());
+    addConverter(EnumConverter.CONVERTER_ID, EnumConverter.class.getName());
+
     addValidator(DoubleRangeValidator.VALIDATOR_ID,
 		 DoubleRangeValidator.class.getName());
     addValidator(LengthValidator.VALIDATOR_ID,
@@ -680,6 +684,13 @@ public class ApplicationImpl extends Application
       return null;
 
     try {
+
+      try {
+        Constructor constructor = cl.getConstructor(Class.class);
+
+        return (Converter) constructor.newInstance(type);
+      } catch (NoSuchMethodException ignore) {}
+      
       return (Converter) cl.newInstance();
     } catch (RuntimeException e) {
       throw e;
