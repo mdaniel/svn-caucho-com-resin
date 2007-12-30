@@ -20,46 +20,62 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.config.type;
 
+import com.caucho.config.*;
+import com.caucho.el.ELParser;
+import com.caucho.el.Expr;
+import com.caucho.naming.*;
 import com.caucho.util.L10N;
-import com.caucho.xml.QElement;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import org.w3c.dom.Node;
 
-/**
- * Stored configuration program for an attribute.
- */
-public class NodeBuilderProgram extends BuilderProgram {
-  static final L10N L = new L10N(NodeBuilderChildProgram.class);
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.sql.*;
 
-  public static final NodeBuilderProgram NULL
-    = new NodeBuilderProgram(null, new QElement());
+public class DataSourceType extends ConfigType
+{
+  private static final L10N L = new L10N(PathType.class);
 
-  private final Node _node;
+  public static final DataSourceType TYPE = new DataSourceType();
 
-  public NodeBuilderProgram(NodeBuilder builder, Node node)
+  private DataSourceType()
   {
-    super(builder);
-
-    _node = node;
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
-    throws ConfigException
+  /**
+   * Returns the path class.
+   */
+  
+  public Class getType()
   {
-    builder.configureBeanNew(bean, _node);
+    return DataSource.class;
   }
 
-  public String toString()
+  /**
+   * Returns the type's configured value
+   *
+   * @param builder the context builder
+   * @param node the configuration node
+   * @param parent
+   */
+  @Override
+  public Object valueOf(String text)
   {
-    return getClass().getSimpleName() + "[" + _node + "]";
+    try {
+      return Jndi.lookup(text);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 }

@@ -39,6 +39,7 @@ import com.caucho.java.WorkDir;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.loader.*;
 import com.caucho.loader.enhancer.ClassEnhancer;
 import com.caucho.loader.enhancer.EnhancerPrepare;
 import com.caucho.log.Log;
@@ -66,6 +67,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
   private EnhancerPrepare _prepare;
   private Path _workDir;
+  private Path _postWorkDir;
 
   private ArrayList<String> _pendingClassNames = new ArrayList<String>();
 
@@ -73,6 +75,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   {
     _amberContainer = amberContainer;
     _workDir = WorkDir.getLocalWorkDir().lookup("pre-enhance");
+    _postWorkDir = WorkDir.getLocalWorkDir().lookup("post-enhance");
 
     _prepare = new EnhancerPrepare();
     _prepare.setClassLoader(Thread.currentThread().getContextClassLoader());
@@ -94,6 +97,14 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public Path getWorkDir()
   {
     return _workDir;
+  }
+
+  /**
+   * Returns the work directory.
+   */
+  public Path getPostWorkDir()
+  {
+    return _postWorkDir;
   }
 
   /**
@@ -272,8 +283,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     if (type != null) {
       // type is EntityType or MappedSuperclassType
 
-      if (log.isLoggable(Level.INFO))
-        log.log(Level.INFO, "Amber enhancing class " + className);
+      log.info("Amber enhancing class " + className);
 
       // XXX: _amberContainerenceUnitenceUnit.configure();
 
@@ -354,6 +364,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void generate(AbstractEnhancedType type)
     throws Exception
   {
+    String className = type.getBeanClass().getName();
+
+    if (! isModified(className))
+      return;
+    
     JavaClassGenerator javaGen = new JavaClassGenerator();
 
     javaGen.setWorkDir(getWorkDir());
@@ -445,6 +460,35 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     // _pendingClassNames.add(extClassName);
   }
 
+  private boolean isModified(String className)
+  {
+    try {
+      ClassLoader loader = _amberContainer.getParentClassLoader();
+      ClassLoader tempLoader
+	= ((DynamicClassLoader) loader).getNewTempClassLoader();
+      DynamicClassLoader workLoader
+	= SimpleLoader.create(tempLoader, getPostWorkDir());
+      workLoader.setServletHack(true);
+	
+      Class cl = Class.forName(className.replace('/', '.'),
+			       false,
+			       workLoader);
+	  
+      Method init = cl.getMethod("_caucho_init", new Class[] { Path.class });
+      Method modified = cl.getMethod("_caucho_is_modified", new Class[0]);
+
+      init.invoke(null, Vfs.lookup());
+
+      return (Boolean) modified.invoke(null);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    return true;
+  }
+
   /**
    * Compiles the pending classes.
    */
@@ -460,11 +504,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     String []javaFiles = new String[classNames.size()];
 
     for (int i = 0; i < classNames.size(); i++) {
-      String name = classNames.get(i);
+      String className = classNames.get(i);
 
-      name = name.replace('.', '/') + ".java";
+      String javaName = className.replace('.', '/') + ".java";
 
-      javaFiles[i] = name;
+      javaFiles[i] = javaName;
     }
 
     EntityGenerator gen = new EntityGenerator();

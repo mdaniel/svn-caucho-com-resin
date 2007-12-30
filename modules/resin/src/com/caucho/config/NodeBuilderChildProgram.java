@@ -55,7 +55,7 @@ public class NodeBuilderChildProgram extends BuilderProgram {
       builder.putVar("__FILE__", ((QNode) _node).getBaseURI());
     }
     
-    builder.configureAttribute(bean, _node);
+    builder.configureAttributeNew(bean, _node);
   }
 
   /*

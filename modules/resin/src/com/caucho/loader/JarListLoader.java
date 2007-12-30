@@ -34,10 +34,7 @@ import com.caucho.config.types.PathPatternType;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
 import java.net.URL;
@@ -133,27 +130,63 @@ abstract public class JarListLoader extends Loader implements Dependency {
       getLoader().addURL(jarPath);
 
     if (_pathMap != null) {
+      ZipScanner scan = null;
+      
       try {
-	ZipFile file = new ZipFile(jar.getNativePath());
 	HashMap<String,ArrayList<JarEntry>> pathMap = _pathMap;
 
-	Enumeration<? extends ZipEntry> e = file.entries();
-	while (e.hasMoreElements()) {
-	  ZipEntry entry = e.nextElement();
-	  String name = entry.getName();
+	boolean isScan = true;
+	boolean isValidScan = false;
 
-	  ArrayList<JarEntry> entryList = pathMap.get(name);
-	  if (entryList == null) {
-	    entryList = new ArrayList<JarEntry>();
-	    pathMap.put(name, entryList);
+	try {
+	  if (isScan)
+	    scan = new ZipScanner(jar);
+	
+	  if (scan != null && scan.open()) {
+	    while (scan.next()) {
+	      String name = scan.getName();
+
+	      ArrayList<JarEntry> entryList = pathMap.get(name);
+	      if (entryList == null) {
+		entryList = new ArrayList<JarEntry>();
+		pathMap.put(name, entryList);
+	      }
+
+	      entryList.add(jarEntry);
+	    }
+
+	    isValidScan = true;
+	  }
+	} catch (Exception e) {
+	  log.log(Level.INFO, e.toString(), e);
+
+	  isScan = false;
+	}
+	
+	if (! isValidScan) {
+	  ZipFile file = new ZipFile(jar.getNativePath());
+
+	  Enumeration<? extends ZipEntry> e = file.entries();
+	  while (e.hasMoreElements()) {
+	    ZipEntry entry = e.nextElement();
+	    String name = entry.getName();
+
+	    ArrayList<JarEntry> entryList = pathMap.get(name);
+	    if (entryList == null) {
+	      entryList = new ArrayList<JarEntry>();
+	      pathMap.put(name, entryList);
+	    }
+
+	    entryList.add(jarEntry);
 	  }
 
-	  entryList.add(jarEntry);
+	  file.close();
 	}
-
-	file.close();
       } catch (IOException e) {
 	throw ConfigException.create(e);
+      } finally {
+	if (scan != null)
+	  scan.close();
       }
     }
   }

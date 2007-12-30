@@ -29,25 +29,29 @@
 
 package com.caucho.config.attribute;
 
+import java.lang.reflect.*;
+
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public abstract class Attribute {
-  private static final L10N L = new L10N(Attribute.class);
+public class ProgramAttribute extends Attribute {
+  private final Method _setter;
+  private final ConfigType _type;
+
+  public ProgramAttribute(Method setter, ConfigType type)
+  {
+    _setter = setter;
+    _type = type;
+  }
   
   /**
    * Returns the config type of the attribute value.
    */
-  abstract public ConfigType getConfigType();
-
-  /**
-   * Returns true for a bean-style attribute.
-   */
-  public boolean isBean()
+  public ConfigType getConfigType()
   {
-    return getConfigType().isBean();
+    return _type;
   }
 
   /**
@@ -55,32 +59,20 @@ public abstract class Attribute {
    */
   public boolean isProgram()
   {
-    return getConfigType().isProgram();
-  }
-  
-  /**
-   * Sets the value of the attribute as text
-   */
-  public void setText(Object bean, QName name, String value)
-    throws ConfigException
-  {
-    throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
-				  getConfigType().getTypeName(),
-				  name));
+    return true;
   }
   
   /**
    * Sets the value of the attribute
    */
-  abstract public void setValue(Object bean, QName name, Object value)
-    throws ConfigException;
-
-  /**
-   * Creates the child bean.
-   */
-  public Object create(Object parent)
+  @Override
+  public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    return null;
+    try {
+      _setter.invoke(bean, value);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 }

@@ -29,12 +29,19 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.*;
+import com.caucho.util.*;
+
 /**
  * Represents a byte or Byte type.
  */
 public final class ByteType extends ConfigType
 {
+  private static final L10N L = new L10N(IntegerType.class);
+  
   public static final ByteType TYPE = new ByteType();
+  
+  private static final Byte ZERO = new Byte((byte) 0);
   
   /**
    * The ByteType is a singleton
@@ -56,6 +63,27 @@ public final class ByteType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    return Byte.valueOf(text);
+    if (text == null || text.length() == 0)
+      return ZERO;
+    else
+      return Byte.valueOf(text);
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Byte)
+      return value;
+    else if (value == null)
+      return ZERO;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else if (value instanceof Number)
+      return new Byte(((Number) value).byteValue());
+    else
+      throw new ConfigException(L.l("'{0}' cannot be converted to a Byte",
+				    value));
   }
 }

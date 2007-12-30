@@ -51,7 +51,7 @@ public class QName implements Comparable, Serializable {
   
   public QName(String qName, String namespace)
   {
-    _fullName = qName.intern();
+    _fullName = qName;
 
     if (namespace == null) {
       _prefix = null;
@@ -64,12 +64,12 @@ public class QName implements Comparable, Serializable {
       _localName = _fullName;
     }
     else {
-      _namespace = namespace.intern();
+      _namespace = namespace;
       
       int p = qName.indexOf(':');
       if (p > 0) {
-	_prefix = qName.substring(0, p).intern();
-	_localName = qName.substring(p + 1).intern();
+	_prefix = qName.substring(0, p);
+	_localName = qName.substring(p + 1);
       }
       else {
 	_prefix = null;
@@ -85,25 +85,16 @@ public class QName implements Comparable, Serializable {
     
   public QName(String qName, String prefix, String localName, String namespace)
   {
-    _fullName = qName.intern();
+    _fullName = qName;
     
     if (prefix != null)
-      _prefix = prefix.intern();
+      _prefix = prefix;
     
     if (localName != null)
-      _localName = localName.intern();
-    /*
-    else {
-      int colon = qName.indexOf(':');
-
-      if (colon > 0)
-        _localName = qName.substring(0, colon).intern();
-      else
-        _localName = qName;
-    }*/
+      _localName = localName;
     
     if (namespace != null)
-      _namespace = namespace.intern();
+      _namespace = namespace;
   }
 
   private void init(String prefix, String localName, String namespace)
@@ -114,12 +105,12 @@ public class QName implements Comparable, Serializable {
     if (prefix == null || prefix.equals(""))
       _prefix = null;
     else
-      _prefix = prefix.intern();
+      _prefix = prefix;
 
-    _localName = localName.intern();
+    _localName = localName;
 
     if (_prefix != null && _prefix != "")
-      _fullName = (_prefix + ":" + localName).intern();
+      _fullName = (_prefix + ":" + localName);
     else
       _fullName = _localName;
 
@@ -128,7 +119,7 @@ public class QName implements Comparable, Serializable {
       _localName = _fullName;
     }
     else if (namespace != null)
-      _namespace = namespace.intern();
+      _namespace = namespace;
   }
 
   public String getName()
@@ -150,7 +141,7 @@ public class QName implements Comparable, Serializable {
   {
     if (_canonicalName == null) {
       if (_namespace != null)
-        _canonicalName = ("{" + _namespace + "}" + _localName).intern();
+        _canonicalName = ("{" + _namespace + "}" + _localName);
       else
         _canonicalName = _fullName;
     }
@@ -192,13 +183,13 @@ public class QName implements Comparable, Serializable {
 
     QName name = (QName) b;
 
-    if (_localName != name._localName)
+    if (! _localName.equals(name._localName))
       return false;
     
-    if (_namespace != name._namespace)
-      return false;
-
-    return true;
+    if (_namespace == name._namespace)
+      return true;
+    else
+      return _namespace != null && _namespace.equals(name._namespace);
   }
 
   public int compareTo(Object b)

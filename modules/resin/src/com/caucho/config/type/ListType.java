@@ -35,55 +35,74 @@ import java.util.logging.*;
 
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
-import com.caucho.loader.*;
-import com.caucho.el.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
-
-import org.w3c.dom.Node;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 /**
  * Represents an introspected bean type for configuration.
  */
-public class EnvironmentBeanType extends BeanType
+public class ListType extends ConfigType
 {
-  private static final L10N L = new L10N(EnvironmentBeanType.class);
+  private static final L10N L = new L10N(ListType.class);
   private static final Logger log
-    = Logger.getLogger(EnvironmentBeanType.class.getName());
+    = Logger.getLogger(ListType.class.getName());
 
-  public EnvironmentBeanType(Class beanClass)
+  private final Class _listClass;
+  private final Class _instanceClass;
+
+  public ListType()
   {
-    super(beanClass);
+    this(ArrayList.class);
+  }
+
+  public ListType(Class listClass)
+  {
+    _listClass = listClass;
+
+    if (! _listClass.isInterface()
+	&& Modifier.isAbstract(_listClass.getModifiers())) {
+      _instanceClass = _listClass;
+    }
+    else
+      _instanceClass = ArrayList.class;
   }
 
   /**
-   * Called before the children are configured.
+   * Returns the given type.
    */
-  @Override
-  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
+  public Class getType()
   {
-    super.beforeConfigure(builder, bean, node);
-    
-    EnvironmentBean envBean = (EnvironmentBean) bean;
-    ClassLoader loader = envBean.getClassLoader();
-    
-    Thread thread = Thread.currentThread();
-    
-    thread.setContextClassLoader(loader);
-
-    builder.getELContext().push(EnvironmentLevelELResolver.create(loader));
-    // XXX: builder.setClassLoader?
-
-    // XXX: addDependencies(builder);
+    return _listClass;
   }
 
   /**
-   * Called after the children are configured.
+   * Creates a new instance
    */
-  public void afterConfigure(NodeBuilder builder, Object bean)
+  public Object create(Object parent)
   {
-    super.afterConfigure(builder, bean);
-    
-    builder.getELContext().pop();
+    try {
+      return _instanceClass.newInstance();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Returns the attribute based on the given name.
+   */
+  public Attribute getAttribute(QName name)
+  {
+    return TypeFactory.getFactory().getListAttribute(name);
+  }
+  
+  /**
+   * Converts the string to the given value.
+   */
+  public Object valueOf(String text)
+  {
+    throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
+				  _listClass.getName(), text));
   }
 }

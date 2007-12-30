@@ -29,12 +29,11 @@
 
 package com.caucho.config;
 
+import com.caucho.config.attribute.*;
+import com.caucho.config.type.*;
 import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-import com.caucho.relaxng.Schema;
-import com.caucho.relaxng.Verifier;
-import com.caucho.relaxng.VerifierFilter;
+import com.caucho.relaxng.*;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
@@ -177,6 +176,23 @@ public class Config {
   /**
    * Configures a bean with a configuration file.
    */
+  public Object configureNew(Object obj, Path path)
+    throws ConfigException
+  {
+    try {
+      QDocument doc = parseDocument(path, null);
+
+      return configureNew(obj, doc.getDocumentElement());
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Configures a bean with a configuration file.
+   */
   public Object configure(Object obj, InputStream is)
     throws Exception
   {
@@ -263,7 +279,27 @@ public class Config {
 
       NodeBuilder builder = createBuilder();
 
-      return builder.configure(obj, topNode);
+      return builder.configureNew(obj, topNode);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
+   * Configures a bean with a DOM.
+   */
+  public Object configureNew(Object obj, Node topNode)
+    throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      NodeBuilder builder = createBuilder();
+
+      return builder.configureNew(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -310,7 +346,7 @@ public class Config {
 
       NodeBuilder builder = createBuilder();
 
-      builder.configureBean(obj, topNode);
+      builder.configureBeanNew(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -529,6 +565,24 @@ public class Config {
   public static void setAttribute(Object obj, String attr, Object value)
     throws Exception
   {
+    ConfigType type = TypeFactory.getType(obj.getClass());
+
+    QName attrName = new QName(attr);
+    Attribute attrStrategy = type.getAttribute(attrName);
+    if (attrStrategy == null)
+      throw new ConfigException(L.l("{0}: '{1}' is an unknown attribute.",
+				    obj.getClass().getName(),
+				    attrName.getName()));
+
+    value = attrStrategy.getConfigType().valueOf(value);
+
+    attrStrategy.setValue(obj, attrName, value);
+  }
+  
+  /*
+  public static void setAttribute(Object obj, String attr, Object value)
+    throws Exception
+  {
     TypeStrategy strategy = TypeStrategyFactory.getTypeStrategy(obj.getClass());
 
     QName attrName = new QName(attr);
@@ -542,6 +596,7 @@ public class Config {
     else
       attrStrategy.setAttribute(obj, attrName, value);
   }
+  */
 
   /**
    * Sets an attribute with a value.
@@ -559,7 +614,21 @@ public class Config {
 
     builder.configureAttribute(obj, qAttr);
   }
+  
+  public static void init(Object bean)
+    throws ConfigException
+  {
+    try {
+      ConfigType type = TypeFactory.getType(bean.getClass());
 
+      type.init(bean);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  /*
   public static void init(Object bean)
     throws ConfigException
   {
@@ -575,13 +644,23 @@ public class Config {
       throw ConfigException.create(e);
     }
   }
+  */
+  
+  public static Object replaceObject(Object bean) throws Exception
+  {
+    ConfigType type = TypeFactory.getType(bean.getClass());
 
+    return type.replaceObject(bean);
+  }
+
+  /*
   public static Object replaceObject(Object bean) throws Exception
   {
     TypeStrategy strategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
     return strategy.replaceObject(bean);
   }
+  */
 
   /**
    * Returns the variable resolver.

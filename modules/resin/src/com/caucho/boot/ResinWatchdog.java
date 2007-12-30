@@ -152,7 +152,8 @@ public class ResinWatchdog extends AbstractManagedObject
   public void setAddress(String address)
     throws UnknownHostException
   {
-    _address = InetAddress.getByName(address);
+    if (! "*".equals(address))
+      _address = InetAddress.getByName(address);
   }
 
   public InetAddress getAddress()

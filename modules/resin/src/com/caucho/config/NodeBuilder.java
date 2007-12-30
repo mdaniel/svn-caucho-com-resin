@@ -29,23 +29,20 @@ package com.caucho.config;
 
 import com.caucho.config.types.ResinType;
 import com.caucho.config.types.Validator;
+import com.caucho.config.type.*;
+import com.caucho.config.attribute.*;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.*;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 import com.caucho.webbeans.context.DependentScope;
 import com.caucho.xml.*;
 
 import org.w3c.dom.*;
 
-import javax.el.ELException;
-import javax.el.ELResolver;
+import javax.el.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,12 +60,18 @@ public class NodeBuilder {
   private final static Logger log
     = Logger.getLogger(NodeBuilder.class.getName());
 
-  private final static QName RESIN_TYPE = new QName("resin:type");
+  private final static QName RESIN_TYPE = new QName("resin:type", null);
   private final static QName RESIN_TYPE_NS
     = new QName("resin:type", "http://caucho.com/ns/resin/core");
+
+  private final static QName RESIN_CLASS = new QName("resin:class", null);
+  private final static QName RESIN_CLASS_NS
+    = new QName("resin:class", "http://caucho.com/ns/resin/core");
   
   private final static QName TEXT = new QName("#text");
   private final static QName VALUE = new QName("value");
+
+  private final static HashSet<QName> _resinClassSet = new HashSet<QName>();
 
   private static ThreadLocal<NodeBuilder> _currentBuilder
     = new ThreadLocal<NodeBuilder>();
@@ -115,6 +118,11 @@ public class NodeBuilder {
   }
 
   public static NodeBuilder getCurrentBuilder()
+  {
+    return _currentBuilder.get();
+  }
+
+  public static NodeBuilder getCurrent()
   {
     return _currentBuilder.get();
   }
@@ -175,6 +183,40 @@ public class NodeBuilder {
   }
 
   /**
+   * External call to configure a bean based on a top-level node.
+   * The init() and replaceObject() are not called.
+   *
+   * @param bean the object to be configured.
+   */
+  public Object configureNew(Object bean, Node top)
+    throws LineConfigException
+  {
+    if (bean == null)
+      throw new NullPointerException();
+    
+    NodeBuilder oldBuilder = _currentBuilder.get();
+    try {
+      _currentBuilder.set(this);
+
+      //ConfigType type = TypeFactory.getType(bean.getClass());
+
+      configureBeanNew(bean, top);
+
+      //typeStrategy.init(bean);
+
+      //return typeStrategy.replaceObject(bean);
+
+      return bean;
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, top);
+    } finally {
+      _currentBuilder.set(oldBuilder);
+    }
+  }
+
+  /**
    * External call to configure a bean based on a top-level node, calling
    * init() and replaceObject() when done.
    *
@@ -204,6 +246,43 @@ public class NodeBuilder {
       typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
       configureNode(top, bean, typeStrategy);
+    } finally {
+      _currentBuilder.set(oldBuilder);
+
+      _dependList = oldDependList;
+      _elContext.setValue("__FILE__", oldFile);
+    }
+  }
+
+  /**
+   * External call to configure a bean based on a top-level node, calling
+   * init() and replaceObject() when done.
+   *
+   * @param bean the bean to be configured
+   * @param top the top-level XML configuration node
+   * @return the configured object, or the factory generated object
+   */
+  public void configureBeanNew(Object bean, Node top)
+    throws LineConfigException
+  {
+    NodeBuilder oldBuilder = _currentBuilder.get();
+    Object oldFile = _elContext.getValue("__FILE__");
+    ArrayList<Dependency> oldDependList = _dependList;
+
+    try {
+      _currentBuilder.set(this);
+
+      if (top instanceof QNode) {
+        QNode qNode = (QNode) top;
+        
+	_elContext.setValue("__FILE__", qNode.getBaseURI());
+      }
+
+      _dependList = getDependencyList(top);
+
+      ConfigType type = TypeFactory.getType(bean.getClass());
+
+      configureNode(top, bean, type);
     } finally {
       _currentBuilder.set(oldBuilder);
 
@@ -245,6 +324,50 @@ public class NodeBuilder {
       configureChildNode(attribute, qName, bean, typeStrategy);
       
       typeStrategy.afterConfigure(this, bean);
+    }
+    catch (LineConfigException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw error(e, attribute);
+    } finally {
+      setCurrentBuilder(oldBuilder);
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
+   * External call to configure a bean's attribute.
+   *
+   * @param bean the bean to be configured
+   * @param attribute the node representing the configured attribute
+   * @throws LineConfigException
+   */
+  public void configureAttributeNew(Object bean, Node attribute)
+    throws LineConfigException
+  {
+    String attrName = attribute.getNodeName();
+
+    if (attrName.equals("resin:type"))
+      return;
+    else if (attrName.startsWith("xmlns"))
+      return;
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    NodeBuilder oldBuilder = getCurrentBuilder();
+    try {
+      setCurrentBuilder(this);
+      
+      ConfigType type = TypeFactory.getType(bean.getClass());
+
+      QName qName = ((QAbstractNode) attribute).getQName();
+      
+      type.beforeConfigure(this, bean, attribute);
+
+      configureChildNode(attribute, qName, bean, type);
+      
+      type.afterConfigure(this, bean);
     }
     catch (LineConfigException e) {
       throw e;
@@ -323,6 +446,49 @@ public class NodeBuilder {
    * @return the configured bean, possibly the replaced object
    * @throws LineConfigException
    */
+  private Object configureNode(Node node,
+                               Object bean,
+                               ConfigType type)
+    throws LineConfigException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      type.beforeConfigure(this, bean, node);
+      type.beforeConfigureBean(this, bean, node);
+      
+      configureNodeAttributes(node, bean, type);
+
+      for (Node childNode = node.getFirstChild();
+           childNode != null;
+           childNode = childNode.getNextSibling()) {
+        QName qName = ((QAbstractNode) childNode).getQName();
+        
+        configureChildNode(childNode, qName, bean, type);
+      }
+
+      type.afterConfigure(this, bean);
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, node);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+
+    return bean;
+  }
+
+  /**
+   * Configures a bean, calling its init() and replaceObject() methods.
+   *
+   * @param typeStrategy the strategy for handling the bean's type
+   * @param bean the bean instance
+   * @param top the configuration top
+   * @return the configured bean, possibly the replaced object
+   * @throws LineConfigException
+   */
   private void configureNodeAttributes(Node node,
                                        Object bean,
                                        TypeStrategy typeStrategy)
@@ -347,6 +513,44 @@ public class NodeBuilder {
           QName qName = ((QNode) attr).getQName();
 
           configureChildNode(attr, qName, bean, typeStrategy);
+        }
+      }
+    }
+  }
+
+  /**
+   * Configures a bean, calling its init() and replaceObject() methods.
+   *
+   * @param typeStrategy the strategy for handling the bean's type
+   * @param bean the bean instance
+   * @param top the configuration top
+   * @return the configured bean, possibly the replaced object
+   * @throws LineConfigException
+   */
+  private void configureNodeAttributes(Node node,
+                                       Object bean,
+                                       ConfigType type)
+    throws Exception
+  {
+    if (node instanceof QAttributedNode) {
+      Node child = ((QAttributedNode) node).getFirstAttribute();
+
+      for (; child != null; child = child.getNextSibling()) {
+        Attr attr = (Attr) child;
+        QName qName = ((QNode) attr).getQName();
+        
+        configureChildNode(attr, qName, bean, type);
+      }
+    }
+    else {
+      NamedNodeMap attrList = node.getAttributes();
+      if (attrList != null) {
+        int length = attrList.getLength();
+        for (int i = 0; i < length; i++) {
+          Attr attr = (Attr) attrList.item(i);
+          QName qName = ((QNode) attr).getQName();
+
+          configureChildNode(attr, qName, bean, type);
         }
       }
     }
@@ -425,6 +629,138 @@ public class NodeBuilder {
       else {
 	attrStrategy.configure(this, bean, qName, childNode);
       }
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, childNode);
+    }
+  }
+  
+  private void configureChildNode(Node childNode,
+                                  QName qName,
+                                  Object bean,
+                                  ConfigType type)
+    throws Exception
+  {
+    if (childNode instanceof Attr
+        && (qName.getName().startsWith("xmlns")
+            || _resinClassSet.contains(qName))) {
+      return;
+    }
+
+    Attribute attrStrategy;
+
+    try {
+      attrStrategy = type.getAttribute(qName);
+
+      if (attrStrategy == null)
+	attrStrategy = type.getProgramAttribute();
+
+      if (attrStrategy == null)
+	attrStrategy = TypeFactory.getFactory().getEnvironmentAttribute(qName);
+
+      if (attrStrategy == null) {
+	if (childNode instanceof Element
+	    || childNode instanceof Attr) {
+	  throw error(L.l("'{0}' is an unknown property of '{1}'.",
+			  qName.getName(), type.getTypeName()),
+		      childNode);
+	}
+
+	return;
+      }
+
+      if (attrStrategy.isProgram()) {
+	attrStrategy.setValue(bean, qName,
+			      buildProgram(attrStrategy, childNode));
+	return;
+      }
+
+      ConfigType childType = null;
+
+      if (childNode instanceof Element)
+	childType = createResinTypeNew(attrStrategy, (Element) childNode);
+
+      Object childBean;
+
+      if (childType != null)
+	childBean = childType.create(bean);
+      else
+	childBean = attrStrategy.create(bean);
+
+      if (childBean != null) {
+	childType = TypeFactory.getType(childBean.getClass());
+	
+	if (childNode instanceof Element)
+	  configureNode(childNode, childBean, childType);
+	else
+	  configureChildNode(childNode, TEXT, childBean, childType);
+
+	childType.init(childBean);
+
+	childBean = childType.replaceObject(childBean);
+
+	attrStrategy.setValue(bean, qName, childBean);
+      }
+      else if ((childBean = getElementValue(attrStrategy, childNode)) != null) {
+	attrStrategy.setValue(bean, qName, childBean);
+      }
+      else {
+	String textValue = textValue(childNode);
+
+	if (textValue.indexOf("${") >= 0) {
+	  childType = attrStrategy.getConfigType();
+	  
+	  Object value = childType.valueOf(evalObject(textValue));
+	  
+	  attrStrategy.setValue(bean, qName, value);
+	}
+	else
+	  attrStrategy.setText(bean, qName, textValue);
+      }
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, childNode);
+    }
+  }
+
+  private BuilderProgram buildProgram(Attribute attr, Node node)
+  {
+    return new NodeBuilderChildProgram(this, node);
+  }
+  
+  private void configureChildAttribute(Attr childNode,
+				       QName qName,
+				       Object bean,
+				       ConfigType type)
+    throws Exception
+  {
+    if (qName.getName().startsWith("xmlns")
+	|| _resinClassSet.contains(qName)) {
+      return;
+    }
+
+    Attribute attrStrategy;
+
+    try {
+      attrStrategy = type.getAttribute(qName);
+
+      if (attrStrategy == null) {
+	throw error(L.l("'{0}' is an unknown property of '{1}'.",
+			qName.getName(), type.getTypeName()),
+		    childNode);
+      }
+
+      if (attrStrategy.isProgram()) {
+	attrStrategy.setValue(bean, qName,
+			      buildProgram(attrStrategy, childNode));
+	return;
+      }
+
+      String textValue = childNode.getValue();
+
+      attrStrategy.setText(bean, qName, textValue);
     } catch (LineConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -676,6 +1012,60 @@ public class NodeBuilder {
   }
 
   /**
+   * Create a custom resin:type value.
+   */
+  ConfigType createResinTypeNew(Attribute attrStrategy, Element node)
+    throws Exception
+  {
+    ConfigType childType = attrStrategy.getConfigType();
+    
+    String type = null;
+
+    if (node instanceof QAttributedNode) {
+      Node child = ((QAttributedNode) node).getFirstAttribute();
+
+      for (; child != null; child = child.getNextSibling()) {
+        Attr attr = (Attr) child;
+        QName qName = ((QNode) attr).getQName();
+
+	if (_resinClassSet.contains(qName)) {
+	  type = attr.getValue();
+	  break;
+	}
+      }
+    }
+    else {
+      NamedNodeMap attrList = node.getAttributes();
+      if (attrList != null) {
+        int length = attrList.getLength();
+        for (int i = 0; i < length; i++) {
+          Attr attr = (Attr) attrList.item(i);
+          QName qName = ((QNode) attr).getQName();
+
+	  if (_resinClassSet.contains(qName)) {
+	    type = attr.getValue();
+	    break;
+	  }
+        }
+      }
+    }
+
+    if (type != null) {
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	Class cl = Class.forName(type, false, loader);
+
+	return TypeFactory.getType(cl);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+    
+    return null;
+  }
+
+  /**
    * Configures a new object given the object's type.
    *
    * @param type the expected type of the object
@@ -792,6 +1182,68 @@ public class NodeBuilder {
     }
 
     return defaultValue;
+  }
+
+  /**
+   * Returns the text value of the node.
+   */
+  Object getElementValue(Attribute attr, Node node)
+  {
+    if (! (node instanceof Element))
+      return null;
+
+    Element elt = (Element) node;
+    Element childElt = null;
+
+    for (Node child = elt.getFirstChild();
+	 child != null;
+	 child = child.getNextSibling()) {
+      if (child instanceof Element) {
+	if (childElt != null)
+	  return null;
+	
+	childElt = (Element) child;
+      }
+      
+      else if (child instanceof CharacterData
+	       && ! XmlUtil.isWhitespace(((CharacterData) child).getData())) {
+	String data = ((CharacterData) child).getData();
+
+	if (childElt == null
+	    && child.getNextSibling() == null
+	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
+	  ELContext elContext = getELContext();
+    
+	  ELParser parser = new ELParser(elContext, data);
+    
+	  ValueExpression value = parser.parse();
+
+	  return attr.getConfigType().valueOf(value.getValue(elContext));
+	}
+	
+	return null;
+      }
+    }
+
+    if (childElt == null)
+      return null;
+
+    TypeFactory factory = TypeFactory.getFactory();
+
+    ConfigType childType
+      = factory.getEnvironmentType(((QElement) childElt).getQName());
+
+    if (childType != null) {
+      Object childBean = childType.create(null);
+      
+      configureNode(childElt, childBean, childType);
+      
+      childType.init(childBean);
+
+      return childType.replaceObject(childBean);
+    }
+
+    return null;
   }
 
   /**
@@ -1103,5 +1555,12 @@ public class NodeBuilder {
 	thread.setContextClassLoader(oldLoader);
       }
     }
+  }
+
+  static {
+    _resinClassSet.add(RESIN_CLASS_NS);
+    _resinClassSet.add(RESIN_CLASS);
+    _resinClassSet.add(RESIN_TYPE_NS);
+    _resinClassSet.add(RESIN_TYPE);
   }
 }

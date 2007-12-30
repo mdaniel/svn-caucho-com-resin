@@ -28,8 +28,9 @@
 
 package com.caucho.loader;
 
+import com.caucho.config.*;
 import com.caucho.make.DependencyContainer;
-import com.caucho.util.CharBuffer;
+import com.caucho.util.*;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
@@ -49,6 +50,8 @@ import java.util.logging.Logger;
  */
 public class TreeLoader extends JarListLoader implements Dependency
 {
+  private static final L10N L = new L10N(TreeLoader.class);
+  
   private static final Logger log
     = Logger.getLogger(TreeLoader.class.getName());
   
@@ -123,6 +126,9 @@ public class TreeLoader extends JarListLoader implements Dependency
   public void init()
   {
     super.init();
+
+    if (_dir == null)
+      throw new ConfigException(L.l("<tree-loader> requires a 'path' attribute"));
     
     _lastModified = _dir.getLastModified();
     

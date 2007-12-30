@@ -926,14 +926,19 @@ public class AmberPersistenceUnit {
     AbstractEnhancedType type = null;
 
     try {
-      for (MappedSuperclassType mappedType : _mappedSuperclassTypes)
-        initType(type = mappedType);
+      for (MappedSuperclassType mappedType : _mappedSuperclassTypes) {
+	type = mappedType;
+	
+        initType(mappedType);
+      }
 
       while (_lazyGenerate.size() > 0) {
         EntityType entityType = _lazyGenerate.remove(0);
 
+	type = entityType;
+
         // Entity
-        initType(type = entityType);
+        initType(entityType);
 
         ArrayList<ListenerType> listeners;
 
@@ -945,18 +950,26 @@ public class AmberPersistenceUnit {
           continue;
 
         // Entity Listeners
-        for (ListenerType listenerType : listeners)
-          initType(type = listenerType);
+        for (ListenerType listenerType : listeners) {
+	  type = listenerType;
+	  
+          initType(listenerType);
+	}
       }
 
       // Embeddable
-      for (EmbeddableType embeddableType : _embeddableTypes)
-        initType(type = embeddableType);
+      for (EmbeddableType embeddableType : _embeddableTypes) {
+	type = embeddableType;
+	
+        initType(embeddableType);
+      }
 
       // Default Listeners
-      for (ListenerType listenerType : _defaultListeners)
-        initType(type = listenerType);
-
+      for (ListenerType listenerType : _defaultListeners) {
+	type = listenerType;
+	
+        initType(listenerType);
+      }
     } catch (Exception e) {
       if (type != null) {
         type.setConfigException(e);

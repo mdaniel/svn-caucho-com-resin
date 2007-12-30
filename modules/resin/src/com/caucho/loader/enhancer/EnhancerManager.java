@@ -38,16 +38,15 @@ import com.caucho.bytecode.JavaClassLoader;
 import com.caucho.java.WorkDir;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.*;
 
-import java.io.ByteArrayInputStream;
+import java.io.*;
 import java.lang.instrument.*;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.security.*;
 import java.util.logging.Level;
@@ -193,6 +192,38 @@ public class EnhancerManager implements ClassFileTransformer
   {
     if (isClassMatch(className)) {
       try {
+	ClassLoader tempLoader
+	  = ((DynamicClassLoader) loader).getNewTempClassLoader();
+	DynamicClassLoader workLoader
+	  = SimpleLoader.create(tempLoader, getPostWorkPath());
+	workLoader.setServletHack(true);
+	boolean isModified = true;
+	
+	try {
+	  Class cl = Class.forName(className.replace('/', '.'),
+				   false,
+				   workLoader);
+	  
+	  Method init = cl.getMethod("_caucho_init", new Class[] { Path.class });
+	  Method modified = cl.getMethod("_caucho_is_modified", new Class[0]);
+
+	  init.invoke(null, Vfs.lookup());
+
+	  isModified = (Boolean) modified.invoke(null);
+	} catch (Exception e) {
+	  log.log(Level.FINEST, e.toString(), e);
+	} catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
+
+	if (! isModified) {
+	  try {
+	    return load(className);
+	  } catch (Exception e) {
+	    log.log(Level.FINER, e.toString(), e);
+	  }
+	}
+	
 	ByteCodeParser parser = new ByteCodeParser();
 	parser.setClassLoader(_jClassLoader);
 	
@@ -277,17 +308,7 @@ public class EnhancerManager implements ClassFileTransformer
       
       fixup.fixup(className, extClassName);
 
-      Path path = getPostWorkPath().lookup(className.replace('.', '/') + ".class");
-      byte []buffer = new byte[(int) path.getLength()];
-      
-      ReadStream is = path.openRead();
-      try {
-	is.readAll(buffer, 0, buffer.length);
-      } finally {
-	is.close();
-      }
-
-      return buffer;
+      return load(className);
     } catch (RuntimeException e) {
       e.printStackTrace();
       
@@ -300,6 +321,22 @@ public class EnhancerManager implements ClassFileTransformer
     }
 
     // return null;
+  }
+
+  private byte []load(String className)
+    throws IOException
+  {
+    Path path = getPostWorkPath().lookup(className.replace('.', '/') + ".class");
+    byte []buffer = new byte[(int) path.getLength()];
+      
+    ReadStream is = path.openRead();
+    try {
+      is.readAll(buffer, 0, buffer.length);
+    } finally {
+      is.close();
+    }
+
+    return buffer;
   }
 
   /**

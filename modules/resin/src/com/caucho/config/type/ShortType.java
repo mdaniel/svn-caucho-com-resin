@@ -36,6 +36,8 @@ public final class ShortType extends ConfigType
 {
   public static final ShortType TYPE = new ShortType();
   
+  private static final Short ZERO = new Short((short) 0);
+  
   /**
    * The ShortType is a singleton
    */
@@ -56,6 +58,9 @@ public final class ShortType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    return Short.valueOf(text);
+    if (text == null || text.length() == 0)
+      return ZERO;
+    else
+      return Short.valueOf(text);
   }
 }

@@ -88,6 +88,9 @@ public class ConfigException
     if (e instanceof InstantiationException && e.getCause() != null)
       e = e.getCause();
     
+    if (e instanceof InvocationTargetException && e.getCause() != null)
+      e = e.getCause();
+    
     if (e instanceof DisplayableException)
       return new ConfigException(location + e.getMessage(), e);
     else
@@ -102,6 +105,11 @@ public class ConfigException
   public static RuntimeException create(Method method, Throwable e)
   {
     return create(loc(method), e);
+  }
+
+  public static RuntimeException create(Method method, String msg, Throwable e)
+  {
+    return new ConfigException(loc(method) + msg, e);
   }
 
   public static RuntimeException create(Throwable e)

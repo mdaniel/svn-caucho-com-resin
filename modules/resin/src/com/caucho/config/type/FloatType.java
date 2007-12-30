@@ -36,6 +36,8 @@ public final class FloatType extends ConfigType
 {
   public static final FloatType TYPE = new FloatType();
   
+  private static final Float ZERO = new Float(0F);
+  
   /**
    * The FloatType is a singleton
    */
@@ -56,6 +58,9 @@ public final class FloatType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    return Float.valueOf(text);
+    if (text == null || text.length() == 0)
+      return ZERO;
+    else
+      return Float.valueOf(text);
   }
 }

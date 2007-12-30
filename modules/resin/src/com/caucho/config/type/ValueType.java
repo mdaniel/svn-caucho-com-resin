@@ -27,60 +27,61 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.type;
+
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.util.L10N;
+import com.caucho.config.attribute.*;
+import com.caucho.util.*;
 import com.caucho.xml.QName;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
-public abstract class Attribute {
-  private static final L10N L = new L10N(Attribute.class);
-  
-  /**
-   * Returns the config type of the attribute value.
-   */
-  abstract public ConfigType getConfigType();
+/**
+ * Represents a &lt;value> type.
+ */
+public class ValueType extends ConfigType
+{
+  private static final L10N L = new L10N(ListType.class);
+  private static final Logger log
+    = Logger.getLogger(ListType.class.getName());
 
-  /**
-   * Returns true for a bean-style attribute.
-   */
-  public boolean isBean()
+  public ValueType()
   {
-    return getConfigType().isBean();
   }
 
   /**
-   * Returns true for a program-style attribute.
+   * Returns the given type.
    */
-  public boolean isProgram()
+  public Class getType()
   {
-    return getConfigType().isProgram();
+    return Object.class;
   }
-  
-  /**
-   * Sets the value of the attribute as text
-   */
-  public void setText(Object bean, QName name, String value)
-    throws ConfigException
-  {
-    throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
-				  getConfigType().getTypeName(),
-				  name));
-  }
-  
-  /**
-   * Sets the value of the attribute
-   */
-  abstract public void setValue(Object bean, QName name, Object value)
-    throws ConfigException;
 
   /**
-   * Creates the child bean.
+   * Creates a new instance
    */
   public Object create(Object parent)
-    throws ConfigException
   {
     return null;
+  }
+
+  /**
+   * Returns the attribute based on the given name.
+   */
+  public Attribute getAttribute(QName name)
+  {
+    return null;
+  }
+  
+  /**
+   * Converts the string to the given value.
+   */
+  public Object valueOf(String text)
+  {
+    return text;
   }
 }

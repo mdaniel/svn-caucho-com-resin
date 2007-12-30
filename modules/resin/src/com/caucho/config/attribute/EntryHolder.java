@@ -29,58 +29,47 @@
 
 package com.caucho.config.attribute;
 
+import java.lang.reflect.*;
+import java.util.*;
+
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public abstract class Attribute {
-  private static final L10N L = new L10N(Attribute.class);
-  
-  /**
-   * Returns the config type of the attribute value.
-   */
-  abstract public ConfigType getConfigType();
+public class EntryHolder<K,V> {
+  private K _key;
+  private V _value;
 
   /**
-   * Returns true for a bean-style attribute.
+   * The holder's key
    */
-  public boolean isBean()
+  public void setKey(K key)
   {
-    return getConfigType().isBean();
+    _key = key;
   }
 
   /**
-   * Returns true for a program-style attribute.
+   * The holder's key
    */
-  public boolean isProgram()
+  public K getKey()
   {
-    return getConfigType().isProgram();
+    return _key;
   }
-  
-  /**
-   * Sets the value of the attribute as text
-   */
-  public void setText(Object bean, QName name, String value)
-    throws ConfigException
-  {
-    throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
-				  getConfigType().getTypeName(),
-				  name));
-  }
-  
-  /**
-   * Sets the value of the attribute
-   */
-  abstract public void setValue(Object bean, QName name, Object value)
-    throws ConfigException;
 
   /**
-   * Creates the child bean.
+   * The holder's value
    */
-  public Object create(Object parent)
-    throws ConfigException
+  public void setValue(V value)
   {
-    return null;
+    _value = value;
+  }
+
+  /**
+   * The holder's value
+   */
+  public V getValue()
+  {
+    return _value;
   }
 }

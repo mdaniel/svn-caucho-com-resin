@@ -109,11 +109,15 @@ public class WebBeansContainer
   {
     _classLoader = Environment.getEnvironmentClassLoader(loader);
 
-    _parent = WebBeansContainer.getCurrent(_classLoader.getParent());
+    if (_classLoader != null)
+      _parent = WebBeansContainer.getCurrent(_classLoader.getParent());
     
     _localContainer.set(this, _classLoader);
 
-    _tempClassLoader = _classLoader.getNewTempClassLoader();
+    if (_classLoader != null)
+      _tempClassLoader = _classLoader.getNewTempClassLoader();
+    else
+      _tempClassLoader = new DynamicClassLoader(null);
     
     _wbWebBeans = new WbWebBeans(this, Vfs.lookup());
 
@@ -123,7 +127,8 @@ public class WebBeansContainer
     _contextMap.put(ApplicationScoped.class, new ApplicationScope());
     _contextMap.put(Singleton.class, new SingletonScope());
 
-    _classLoader.addScanListener(this);
+    if (_classLoader != null)
+      _classLoader.addScanListener(this);
     
     Environment.addEnvironmentListener(this, _classLoader);
   }
@@ -589,6 +594,11 @@ public class WebBeansContainer
       ClassComponent comp = _transientMap.get(type);
 
       if (comp == null) {
+	if (type.isInterface())
+	  throw new ConfigException(L.l("'{0}' cannot be an interface.  createTransient requires a concrete type.", type.getName()));
+	else if (Modifier.isAbstract(type.getModifiers()))
+	  throw new ConfigException(L.l("'{0}' cannot be an abstract.  createTransient requires a concrete type.", type.getName()));
+	
 	comp = new ClassComponent(_wbWebBeans);
 	comp.setInstanceClass(type);
 

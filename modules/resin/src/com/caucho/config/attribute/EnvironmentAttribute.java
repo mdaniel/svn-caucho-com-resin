@@ -55,7 +55,8 @@ public class EnvironmentAttribute extends Attribute {
   /**
    * Sets the value of the attribute
    */
-  public void setText(Object bean, String value)
+  @Override
+  public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -64,18 +65,19 @@ public class EnvironmentAttribute extends Attribute {
   /**
    * Sets the value of the attribute
    */
-  public void setValue(Object bean, Object value)
+  @Override
+  public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
    * Creates the child bean.
    */
+  @Override
   public Object create(Object parent)
     throws ConfigException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _type.create(parent);
   }
 }

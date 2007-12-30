@@ -36,6 +36,8 @@ public final class LongType extends ConfigType
 {
   public static final LongType TYPE = new LongType();
   
+  private static final Long ZERO = new Long(0);
+  
   /**
    * The LongType is a singleton
    */
@@ -56,6 +58,9 @@ public final class LongType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    return Long.valueOf(text);
+    if (text == null || text.length() == 0)
+      return ZERO;
+    else
+      return Long.valueOf(text);
   }
 }

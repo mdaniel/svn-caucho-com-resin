@@ -151,6 +151,7 @@ public class TypeStrategyFactory {
 	InputStream is = url.openStream();
 	
 	try {
+	  Thread.dumpStack();
 	  new Config(loader).configure(this, is);
 	} finally {
 	  is.close();

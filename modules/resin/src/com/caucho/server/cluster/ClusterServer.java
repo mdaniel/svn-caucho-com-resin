@@ -316,6 +316,13 @@ public class ClusterServer {
   /**
    * Arguments on boot
    */
+  public void addJavaExe(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
   public void addJvmArg(String args)
   {
   }

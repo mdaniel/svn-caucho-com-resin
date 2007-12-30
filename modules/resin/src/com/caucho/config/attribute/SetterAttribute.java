@@ -57,7 +57,8 @@ public class SetterAttribute extends Attribute {
   /**
    * Sets the value of the attribute
    */
-  public void setText(Object bean, String value)
+  @Override
+  public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
     try {
@@ -70,7 +71,8 @@ public class SetterAttribute extends Attribute {
   /**
    * Sets the value of the attribute
    */
-  public void setValue(Object bean, Object value)
+  @Override
+  public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
     try {
@@ -83,9 +85,14 @@ public class SetterAttribute extends Attribute {
   /**
    * Creates the child bean.
    */
+  @Override
   public Object create(Object parent)
     throws ConfigException
   {
-    return null;
+    try {
+      return _type.create(parent);
+    } catch (Exception e) {
+      throw ConfigException.create(_setter, e);
+    }
   }
 }

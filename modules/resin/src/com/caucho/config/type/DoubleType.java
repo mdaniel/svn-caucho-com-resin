@@ -36,6 +36,8 @@ public final class DoubleType extends ConfigType
 {
   public static final DoubleType TYPE = new DoubleType();
   
+  private static final Double ZERO = new Double(0);
+  
   /**
    * The DoubleType is a singleton
    */
@@ -56,6 +58,9 @@ public final class DoubleType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    return Double.valueOf(text);
+    if (text == null || text.length() == 0)
+      return ZERO;
+    else
+      return Double.valueOf(text);
   }
 }

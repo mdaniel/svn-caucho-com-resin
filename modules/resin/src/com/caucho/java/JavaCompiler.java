@@ -491,8 +491,8 @@ public class JavaCompiler {
     Path classPath = getClassDir().lookup(className);
 
     synchronized (LOCK) {
-      if (ifModified &&
-          javaPath.getLastModified() <= classPath.getLastModified())
+      if (ifModified
+	  && javaPath.getLastModified() <= classPath.getLastModified())
         return;
       
       if (javaPath.canRead() && classPath.exists())

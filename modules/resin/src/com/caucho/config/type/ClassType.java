@@ -27,60 +27,66 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.type;
 
 import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.util.L10N;
-import com.caucho.xml.QName;
+import com.caucho.util.*;
 
-public abstract class Attribute {
-  private static final L10N L = new L10N(Attribute.class);
+/**
+ * Represents a class type.
+ */
+public final class ClassType extends ConfigType
+{
+  private static final L10N L = new L10N(ClassType.class);
+  
+  public static final ClassType TYPE = new ClassType();
   
   /**
-   * Returns the config type of the attribute value.
+   * The ClassType is a singleton
    */
-  abstract public ConfigType getConfigType();
-
-  /**
-   * Returns true for a bean-style attribute.
-   */
-  public boolean isBean()
+  private ClassType()
   {
-    return getConfigType().isBean();
-  }
-
-  /**
-   * Returns true for a program-style attribute.
-   */
-  public boolean isProgram()
-  {
-    return getConfigType().isProgram();
   }
   
   /**
-   * Sets the value of the attribute as text
+   * Returns the Java type.
    */
-  public void setText(Object bean, QName name, String value)
-    throws ConfigException
+  public Class getType()
   {
-    throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
-				  getConfigType().getTypeName(),
-				  name));
+    return Class.class;
   }
   
   /**
-   * Sets the value of the attribute
+   * Converts the string to a value of the type.
    */
-  abstract public void setValue(Object bean, QName name, Object value)
-    throws ConfigException;
-
-  /**
-   * Creates the child bean.
-   */
-  public Object create(Object parent)
-    throws ConfigException
+  public Object valueOf(String text)
   {
-    return null;
+    if (text == null || text.length() == 0)
+      return null;
+    else {
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	return Class.forName(text, false, loader);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Class)
+      return value;
+    else if (value == null)
+      return null;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else
+      throw new ConfigException(L.l("'{0}' cannot be converted to an Class",
+				    value));
   }
 }

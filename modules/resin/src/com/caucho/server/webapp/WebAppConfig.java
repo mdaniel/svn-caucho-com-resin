@@ -43,8 +43,9 @@ import java.util.regex.Pattern;
  * The configuration for a web-app in the resin.conf
  */
 public class WebAppConfig extends DeployConfig {
-  static final L10N L = new L10N(WebAppConfig.class);
-  static final Logger log = Log.open(WebAppConfig.class);
+  private static final L10N L = new L10N(WebAppConfig.class);
+  private static final Logger log
+    = Logger.getLogger(WebAppConfig.class.getName());
 
   // Any regexp
   private Pattern _urlRegexp;

@@ -269,7 +269,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
       return _password;
     }
 
-    public void setPassword(Principal principal)
+    public void setPrincipal(Principal principal)
     {
       _principal = principal;
     }

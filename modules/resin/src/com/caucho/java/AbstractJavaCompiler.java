@@ -94,7 +94,7 @@ abstract public class AbstractJavaCompiler implements Runnable {
   {
     try {
       Thread.currentThread().setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
+
       compileInt(_path, _lineMap);
     } catch (Throwable e) {
       _exception = e;

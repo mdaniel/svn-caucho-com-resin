@@ -27,60 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.type;
 
 import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.util.L10N;
-import com.caucho.xml.QName;
+import com.caucho.util.*;
 
-public abstract class Attribute {
-  private static final L10N L = new L10N(Attribute.class);
+/**
+ * Represents a Character type.
+ */
+public final class CharacterType extends ConfigType
+{
+  private static final L10N L = new L10N(CharacterType.class);
+  
+  public static final CharacterType TYPE = new CharacterType();
   
   /**
-   * Returns the config type of the attribute value.
+   * The CharacterType is a singleton
    */
-  abstract public ConfigType getConfigType();
-
-  /**
-   * Returns true for a bean-style attribute.
-   */
-  public boolean isBean()
+  private CharacterType()
   {
-    return getConfigType().isBean();
-  }
-
-  /**
-   * Returns true for a program-style attribute.
-   */
-  public boolean isProgram()
-  {
-    return getConfigType().isProgram();
   }
   
   /**
-   * Sets the value of the attribute as text
+   * Returns the Java type.
    */
-  public void setText(Object bean, QName name, String value)
-    throws ConfigException
+  public Class getType()
   {
-    throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
-				  getConfigType().getTypeName(),
-				  name));
+    return Character.class;
   }
   
   /**
-   * Sets the value of the attribute
+   * Converts the string to a value of the type.
    */
-  abstract public void setValue(Object bean, QName name, Object value)
-    throws ConfigException;
-
-  /**
-   * Creates the child bean.
-   */
-  public Object create(Object parent)
-    throws ConfigException
+  public Object valueOf(String text)
   {
-    return null;
+    if (text == null || text.equals(""))
+      return null;
+    else if (text.length() == 1)
+      return new Character(text.charAt(0));
+    else
+      throw new ConfigException(L.l("A Character value must be a single character."));
   }
 }

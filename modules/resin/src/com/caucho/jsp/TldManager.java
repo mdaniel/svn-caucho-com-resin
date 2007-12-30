@@ -40,10 +40,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -400,41 +397,70 @@ public class TldManager {
     else
       zipFile = new ZipFile(nativePath);
 
+    ArrayList<Path> tldPaths = new ArrayList<Path>();
+
+    boolean isValidScan = false;
+
+    ZipScanner scan = null;
     try {
-      Enumeration<? extends ZipEntry> en = zipFile.entries();
-      while (en.hasMoreElements()) {
-	ZipEntry entry = en.nextElement();
-	String name = entry.getName();
-
-	if (name.startsWith(prefix)
-	    && (name.endsWith(".tld") || name.endsWith(".ftld"))) {
-	  Path path = jar.lookup(name);
-
-	  try {
-	    TldPreload taglib = parseTldPreload(path);
-
-	    taglibs.add(taglib);
-
-	    if (taglib.getURI() == null
-		&& taglib.getConfigException() != null
-		&& _loadAllTldException == null)
-	      _loadAllTldException = new JspLineParseException(taglib.getConfigException());
-	  } catch (Exception e) {
-	    /*
-	      if (_loadAllTldException == null) {
-	      }
-	      else if (e instanceof JspParseException)
-	      _loadAllTldException = (JspParseException) e;
-	      else
-	      _loadAllTldException = new JspParseException(e);
-	    */
+      if (true)
+	scan = new ZipScanner(jarBacking);
 	
-	    log.warning(e.getMessage());
+      if (scan != null && scan.open()) {
+	while (scan.next()) {
+	  String name = scan.getName();
+
+	  if (name.startsWith(prefix)
+	      && name.endsWith(".tld") || name.endsWith(".ftld")) {
+	    tldPaths.add(jar.lookup(name));
 	  }
 	}
+
+	isValidScan = true;
       }
-    } finally {
-      zipFile.close();
+    } catch (Exception e) {
+      log.log(Level.INFO, e.toString(), e);
+    }
+
+    if (! isValidScan) {
+      try {
+	Enumeration<? extends ZipEntry> en = zipFile.entries();
+	while (en.hasMoreElements()) {
+	  ZipEntry entry = en.nextElement();
+	  String name = entry.getName();
+
+	  if (name.startsWith(prefix)
+	      && (name.endsWith(".tld") || name.endsWith(".ftld"))) {
+	    tldPaths.add(jar.lookup(name));
+	  }
+	}
+      } finally {
+	zipFile.close();
+      }
+    }
+
+    for (Path path : tldPaths) {
+      try {
+	TldPreload taglib = parseTldPreload(path);
+
+	taglibs.add(taglib);
+
+	if (taglib.getURI() == null
+	    && taglib.getConfigException() != null
+	    && _loadAllTldException == null)
+	  _loadAllTldException = new JspLineParseException(taglib.getConfigException());
+      } catch (Exception e) {
+	/*
+	  if (_loadAllTldException == null) {
+	  }
+	  else if (e instanceof JspParseException)
+	  _loadAllTldException = (JspParseException) e;
+	  else
+	  _loadAllTldException = new JspParseException(e);
+	*/
+	
+	log.warning(e.getMessage());
+      }
     }
   }
 

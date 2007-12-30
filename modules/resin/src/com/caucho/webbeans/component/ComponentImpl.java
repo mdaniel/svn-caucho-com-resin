@@ -76,6 +76,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   private String _scopeId;
 
   protected Inject []_injectProgram = NULL_INJECT;
+  protected Inject []_initProgram = NULL_INJECT;
   protected Inject []_destroyProgram = NULL_INJECT;
   
   private InitProgram _init;
@@ -419,6 +420,30 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     }
   }
 
+  /**
+   * Creates a new instance of the component.
+   */
+  public Object createNoInit()
+  {
+    try {
+      Object value = createNew(null);
+
+      if (_injectProgram.length > 0) {
+	DependentScope scope = new DependentScope(this, value, null);
+
+	for (Inject inject : _injectProgram) {
+	  inject.inject(value, scope);
+	}
+      }
+
+      return value;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   protected Object createNew(DependentScope scope)
   {
     throw new UnsupportedOperationException();
@@ -433,6 +458,10 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
       _init.configure(value, scope);
 
     for (Inject inject : _injectProgram) {
+      inject.inject(value, scope);
+    }
+
+    for (Inject inject : _initProgram) {
       inject.inject(value, scope);
     }
 

@@ -320,12 +320,13 @@ public class ClassComponent extends ComponentImpl {
 
       ArrayList<Inject> injectList = new ArrayList<Inject>();
       InjectIntrospector.introspectInject(injectList, _cl);
-      InjectIntrospector.introspectInit(injectList, _cl);
-      
-      // InjectIntrospector.introspectInit(injectList, _cl);
-
       _injectProgram = new Inject[injectList.size()];
       injectList.toArray(_injectProgram);
+      
+      ArrayList<Inject> initList = new ArrayList<Inject>();
+      InjectIntrospector.introspectInit(initList, _cl);
+      _initProgram = new Inject[initList.size()];
+      initList.toArray(_initProgram);
       
       ArrayList<Inject> destroyList = new ArrayList<Inject>();
       InjectIntrospector.introspectDestroy(destroyList, _cl);
@@ -340,6 +341,10 @@ public class ClassComponent extends ComponentImpl {
 
       for (int i = 0; i < param.length; i++) {
 	_ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
+
+	if (_ctorArgs[i] == null)
+	  throw new ConfigException(L.l("{0} does not have valid arguments",
+					_ctor));
       }
 
       introspectObservers();
