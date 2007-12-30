@@ -56,7 +56,8 @@ public class EntryAttribute extends Attribute {
   /**
    * Sets the value of the attribute
    */
-  public void setValue(Object bean, Object value)
+  @Override
+  public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
     try {
@@ -71,6 +72,7 @@ public class EntryAttribute extends Attribute {
   /**
    * Creates the child bean.
    */
+  @Override
   public Object create(Object parent)
     throws ConfigException
   {
