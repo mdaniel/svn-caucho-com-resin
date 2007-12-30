@@ -55,7 +55,7 @@ public class NodeBuilderProgram extends BuilderProgram {
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
-    builder.configureBeanNew(bean, _node);
+    builder.configureBean(bean, _node);
   }
 
   public String toString()

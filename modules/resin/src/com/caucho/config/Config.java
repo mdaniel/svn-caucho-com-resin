@@ -176,23 +176,6 @@ public class Config {
   /**
    * Configures a bean with a configuration file.
    */
-  public Object configureNew(Object obj, Path path)
-    throws ConfigException
-  {
-    try {
-      QDocument doc = parseDocument(path, null);
-
-      return configureNew(obj, doc.getDocumentElement());
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
-  /**
-   * Configures a bean with a configuration file.
-   */
   public Object configure(Object obj, InputStream is)
     throws Exception
   {
@@ -279,27 +262,7 @@ public class Config {
 
       NodeBuilder builder = createBuilder();
 
-      return builder.configureNew(obj, topNode);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  /**
-   * Configures a bean with a DOM.
-   */
-  public Object configureNew(Object obj, Node topNode)
-    throws Exception
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_classLoader);
-
-      NodeBuilder builder = createBuilder();
-
-      return builder.configureNew(obj, topNode);
+      return builder.configure(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -346,7 +309,7 @@ public class Config {
 
       NodeBuilder builder = createBuilder();
 
-      builder.configureBeanNew(obj, topNode);
+      builder.configureBean(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -501,11 +464,13 @@ public class Config {
   /**
    * Configures a bean with a configuration map.
    */
+  /*
   public Object configureMap(Object obj, Map<String,Object> map)
     throws Exception
   {
     return new MapBuilder().configure(obj, map);
   }
+  */
   
   /**
    * Returns true if the class can be instantiated.

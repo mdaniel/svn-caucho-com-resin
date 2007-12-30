@@ -161,36 +161,6 @@ public class NodeBuilder {
   public Object configure(Object bean, Node top)
     throws LineConfigException
   {
-    NodeBuilder oldBuilder = _currentBuilder.get();
-    try {
-      _currentBuilder.set(this);
-
-      TypeStrategy typeStrategy;
-      typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
-      configureBean(bean, top);
-
-      typeStrategy.init(bean);
-
-      return typeStrategy.replaceObject(bean);
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, top);
-    } finally {
-      _currentBuilder.set(oldBuilder);
-    }
-  }
-
-  /**
-   * External call to configure a bean based on a top-level node.
-   * The init() and replaceObject() are not called.
-   *
-   * @param bean the object to be configured.
-   */
-  public Object configureNew(Object bean, Node top)
-    throws LineConfigException
-  {
     if (bean == null)
       throw new NullPointerException();
     
@@ -198,15 +168,13 @@ public class NodeBuilder {
     try {
       _currentBuilder.set(this);
 
-      //ConfigType type = TypeFactory.getType(bean.getClass());
+      ConfigType type = TypeFactory.getType(bean.getClass());
 
-      configureBeanNew(bean, top);
+      configureBean(bean, top);
 
-      //typeStrategy.init(bean);
+      type.init(bean);
 
-      //return typeStrategy.replaceObject(bean);
-
-      return bean;
+      return type.replaceObject(bean);
     } catch (LineConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -225,44 +193,6 @@ public class NodeBuilder {
    * @return the configured object, or the factory generated object
    */
   public void configureBean(Object bean, Node top)
-    throws LineConfigException
-  {
-    NodeBuilder oldBuilder = _currentBuilder.get();
-    Object oldFile = _elContext.getValue("__FILE__");
-    ArrayList<Dependency> oldDependList = _dependList;
-
-    try {
-      _currentBuilder.set(this);
-
-      if (top instanceof QNode) {
-        QNode qNode = (QNode) top;
-        
-	_elContext.setValue("__FILE__", qNode.getBaseURI());
-      }
-
-      _dependList = getDependencyList(top);
-
-      TypeStrategy typeStrategy;
-      typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
-      configureNode(top, bean, typeStrategy);
-    } finally {
-      _currentBuilder.set(oldBuilder);
-
-      _dependList = oldDependList;
-      _elContext.setValue("__FILE__", oldFile);
-    }
-  }
-
-  /**
-   * External call to configure a bean based on a top-level node, calling
-   * init() and replaceObject() when done.
-   *
-   * @param bean the bean to be configured
-   * @param top the top-level XML configuration node
-   * @return the configured object, or the factory generated object
-   */
-  public void configureBeanNew(Object bean, Node top)
     throws LineConfigException
   {
     NodeBuilder oldBuilder = _currentBuilder.get();
@@ -314,51 +244,6 @@ public class NodeBuilder {
     try {
       setCurrentBuilder(this);
       
-      TypeStrategy typeStrategy
-        = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
-      QName qName = ((QAbstractNode) attribute).getQName();
-      
-      typeStrategy.beforeConfigure(this, bean, attribute);
-
-      configureChildNode(attribute, qName, bean, typeStrategy);
-      
-      typeStrategy.afterConfigure(this, bean);
-    }
-    catch (LineConfigException e) {
-      throw e;
-    }
-    catch (Exception e) {
-      throw error(e, attribute);
-    } finally {
-      setCurrentBuilder(oldBuilder);
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  /**
-   * External call to configure a bean's attribute.
-   *
-   * @param bean the bean to be configured
-   * @param attribute the node representing the configured attribute
-   * @throws LineConfigException
-   */
-  public void configureAttributeNew(Object bean, Node attribute)
-    throws LineConfigException
-  {
-    String attrName = attribute.getNodeName();
-
-    if (attrName.equals("resin:type"))
-      return;
-    else if (attrName.startsWith("xmlns"))
-      return;
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    NodeBuilder oldBuilder = getCurrentBuilder();
-    try {
-      setCurrentBuilder(this);
-      
       ConfigType type = TypeFactory.getType(bean.getClass());
 
       QName qName = ((QAbstractNode) attribute).getQName();
@@ -378,63 +263,6 @@ public class NodeBuilder {
       setCurrentBuilder(oldBuilder);
       thread.setContextClassLoader(oldLoader);
     }
-  }
-
-  /**
-   * External call to configure a bean's attribute.
-   *
-   * @param bean the bean to be configured
-   * @param attribute the node representing the configured attribute
-   * @throws LineConfigException
-   */
-  public void configureAttributeImpl(Object bean, Node node,
-				     TypeStrategy typeStrategy)
-    throws LineConfigException
-  {
-    configureNode(node, bean, typeStrategy);
-  }
-
-  /**
-   * Configures a bean, calling its init() and replaceObject() methods.
-   *
-   * @param typeStrategy the strategy for handling the bean's type
-   * @param bean the bean instance
-   * @param top the configuration top
-   * @return the configured bean, possibly the replaced object
-   * @throws LineConfigException
-   */
-  private Object configureNode(Node node,
-                               Object bean,
-                               TypeStrategy typeStrategy)
-    throws LineConfigException
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    
-    try {
-      typeStrategy.beforeConfigure(this, bean, node);
-      typeStrategy.beforeConfigureBean(this, bean, node);
-      
-      configureNodeAttributes(node, bean, typeStrategy);
-
-      for (Node childNode = node.getFirstChild();
-           childNode != null;
-           childNode = childNode.getNextSibling()) {
-        QName qName = ((QAbstractNode) childNode).getQName();
-        
-        configureChildNode(childNode, qName, bean, typeStrategy);
-      }
-
-      typeStrategy.afterConfigure(this, bean);
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, node);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-
-    return bean;
   }
 
   /**
@@ -491,44 +319,6 @@ public class NodeBuilder {
    */
   private void configureNodeAttributes(Node node,
                                        Object bean,
-                                       TypeStrategy typeStrategy)
-    throws Exception
-  {
-    if (node instanceof QAttributedNode) {
-      Node child = ((QAttributedNode) node).getFirstAttribute();
-
-      for (; child != null; child = child.getNextSibling()) {
-        Attr attr = (Attr) child;
-        QName qName = ((QNode) attr).getQName();
-        
-        configureChildNode(attr, qName, bean, typeStrategy);
-      }
-    }
-    else {
-      NamedNodeMap attrList = node.getAttributes();
-      if (attrList != null) {
-        int length = attrList.getLength();
-        for (int i = 0; i < length; i++) {
-          Attr attr = (Attr) attrList.item(i);
-          QName qName = ((QNode) attr).getQName();
-
-          configureChildNode(attr, qName, bean, typeStrategy);
-        }
-      }
-    }
-  }
-
-  /**
-   * Configures a bean, calling its init() and replaceObject() methods.
-   *
-   * @param typeStrategy the strategy for handling the bean's type
-   * @param bean the bean instance
-   * @param top the configuration top
-   * @return the configured bean, possibly the replaced object
-   * @throws LineConfigException
-   */
-  private void configureNodeAttributes(Node node,
-                                       Object bean,
                                        ConfigType type)
     throws Exception
   {
@@ -553,86 +343,6 @@ public class NodeBuilder {
           configureChildNode(attr, qName, bean, type);
         }
       }
-    }
-  }
-  
-  private void configureChildNode(Node childNode,
-                                  QName qName,
-                                  Object bean,
-                                  TypeStrategy typeStrategy)
-    throws Exception
-  {
-    if (childNode instanceof Attr
-        && (qName.getName().startsWith("xmlns")
-            || qName.getName().equals("resin:type"))) {
-      return;
-    }
-
-    AttributeStrategy attrStrategy;
-
-    try {
-      attrStrategy = typeStrategy.getAttributeStrategy(qName);
-
-      if (attrStrategy != null) {
-      }
-      else if (childNode instanceof Element
-	       || childNode instanceof Attr) {
-	throw error(L.l("'{0}' is an unknown property of '{1}'.",
-			qName.getName(), typeStrategy.getTypeName()),
-		    childNode);
-      }
-      else
-	return;
-
-      if (attrStrategy.isProgram()) {
-	attrStrategy.configure(this, bean, qName, childNode);
-	return;
-      }
-
-      Object childBean = createResinType(childNode);
-    
-      if (childBean == null
-	  && attrStrategy.isBean()
-	  && ! hasChildren(childNode)) {
-	String value = textValue(childNode);
-
-	if (isEL() && value != null
-	    && value.startsWith("${") && value.endsWith("}")) {
-	  childBean = evalObject(value);
-
-	  attrStrategy.setAttribute(bean, qName, childBean);
-        
-	  return;
-	}
-      }
-
-      if (childBean == null)
-	childBean = attrStrategy.create(this, bean);
-
-      if (childBean != null) {
-	TypeStrategy childTypeStrategy
-	  = TypeStrategyFactory.getTypeStrategy(childBean.getClass());
-
-	childTypeStrategy.setParent(childBean, bean);
-
-	if (childNode instanceof Element)
-	  configureNode(childNode, childBean, childTypeStrategy);
-	else
-	  configureChildNode(childNode, TEXT, childBean, childTypeStrategy);
-
-	childTypeStrategy.init(childBean);
-
-	childBean = childTypeStrategy.replaceObject(childBean);
-
-	attrStrategy.setAttribute(bean, qName, childBean);
-      }
-      else {
-	attrStrategy.configure(this, bean, qName, childNode);
-      }
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, childNode);
     }
   }
   
@@ -679,7 +389,7 @@ public class NodeBuilder {
       ConfigType childType = null;
 
       if (childNode instanceof Element)
-	childType = createResinTypeNew(attrStrategy, (Element) childNode);
+	childType = createResinType(attrStrategy, (Element) childNode);
 
       Object childBean;
 
@@ -768,53 +478,6 @@ public class NodeBuilder {
     }
   }
 
-  /**
-   * instantiates and configures a child bean
-   *
-   * @param typeStrategy the type strategy known to the parent
-   * @param top the configuration top
-   * @param parent the parent top
-   *
-   * @return the configured child
-   *
-   * @throws Exception
-   */
-  Object configureChildImpl(TypeStrategy typeStrategy, Node top, Object parent)
-    throws Exception
-  {
-    Object bean = createResinType(top);
-
-    if (bean == null && ! hasChildren(top)) {
-      String value = textValue(top);
-
-      if (isEL() && value != null
-          && value.startsWith("${") && value.endsWith("}")) {
-        bean = evalObject(value);
-
-	return bean;
-      }
-    }
-
-    if (bean == null)
-      bean = typeStrategy.create();
-
-    if (bean == null)
-      throw new NullPointerException();
-
-    typeStrategy.setParent(bean, parent);
-
-    if (top instanceof Element)
-      configureNode(top, bean, typeStrategy);
-    else
-      configureChildNode(top, TEXT, bean, typeStrategy);
-
-    typeStrategy.init(bean);
-
-    bean = typeStrategy.replaceObject(bean);
-
-    return bean;
-  }
-
   Object configureValue(Node node)
   {
     String value = textValue(node);
@@ -884,13 +547,15 @@ public class NodeBuilder {
     return dependList;
   }
 
-  /** Configures a node, expecting an object in return.
+  /**
+   * Configures a node, expecting an object in return.
    *
    * @param node the configuration node
    * @param parent
    * @return the configured object
    * @throws Exception
    */
+  /*
   public Object configureObject(Node node, Object parent)
     throws Exception
   {
@@ -917,104 +582,12 @@ public class NodeBuilder {
     else
       return value;
   }
-
-  public String configureString(Node child)
-    throws Exception
-  {
-    String value = configureRawString(child);
-
-    if (value == null)
-      return "";
-    else if (isEL() && value.indexOf("${") >= 0)
-      return evalString(value);
-    else
-      return value;
-  }
-
-  public String configureRawString(Node child)
-    throws Exception
-  {
-    Object resinTypeValue = createResinType(child);
-
-    if (resinTypeValue != null) {
-      TypeStrategy typeStrategy
-	= TypeStrategyFactory.getTypeStrategy(resinTypeValue.getClass());
-
-      return String.valueOf(configureImpl(typeStrategy, resinTypeValue, child));
-    }
-
-    if (hasChildren(child))
-      throw error(L.l("unexpected child nodes"), child); // XXX: qa
-
-    String value = textValue(child);
-
-    return value;
-  }
-
-  public String configureRawStringNoTrim(Node child)
-    throws Exception
-  {
-    Object resinTypeValue = createResinType(child);
-
-    if (resinTypeValue != null) {
-      TypeStrategy typeStrategy
-	= TypeStrategyFactory.getTypeStrategy(resinTypeValue.getClass());
-
-      return String.valueOf(configureImpl(typeStrategy, resinTypeValue, child));
-    }
-
-    if (hasChildren(child))
-      throw error(L.l("unexpected child nodes"), child); // XXX: qa
-
-    String value = textValueNoTrim(child);
-
-    return value;
-  }
-  
-  Object configureImpl(TypeStrategy typeStrategy,
-                       Object bean,
-		       Node top)
-    throws LineConfigException
-  {
-    try {
-      typeStrategy.configureAttribute(this, bean, top);
-
-      typeStrategy.init(bean);
-
-      return typeStrategy.replaceObject(bean);
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, top);
-    }
-  }
+  */
 
   /**
    * Create a custom resin:type value.
    */
-  Object createResinType(Node child)
-    throws Exception
-  {
-    String type = getValue(RESIN_TYPE, child, null);
-
-    type = getValue(RESIN_TYPE_NS, child, type);
-
-    if (type == null)
-      return null;
-
-    ResinType resinType = null;
-
-    resinType = new ResinType();
-    resinType.addText(type);
-    resinType.init();
-
-    return resinType.create(null);
-  }
-
-  /**
-   * Create a custom resin:type value.
-   */
-  ConfigType createResinTypeNew(Attribute attrStrategy, Element node)
+  ConfigType createResinType(Attribute attrStrategy, Element node)
     throws Exception
   {
     ConfigType childType = attrStrategy.getConfigType();

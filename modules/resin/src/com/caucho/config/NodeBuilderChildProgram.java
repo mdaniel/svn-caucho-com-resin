@@ -55,27 +55,8 @@ public class NodeBuilderChildProgram extends BuilderProgram {
       builder.putVar("__FILE__", ((QNode) _node).getBaseURI());
     }
     
-    builder.configureAttributeNew(bean, _node);
+    builder.configureAttribute(bean, _node);
   }
-
-  /*
-  protected Object configure(Class type, TypeBuilderFactory factory)
-    throws Exception
-  {
-    TypeBuilder typeBuilder = factory.getTypeBuilder(type);
-
-    if (NodeBuilder.hasChildren(_node)) {
-      Object bean = typeBuilder.create();
-
-      NodeBuilder.configureChild(typeBuilder, bean, _node);
-
-      return bean;
-    }
-    else {
-      return typeBuilder.create(NodeBuilder.textValue(_node));
-    }
-  }
-  */
 
   public String toString()
   {
