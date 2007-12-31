@@ -40,6 +40,7 @@ import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.inject.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
+import java.beans.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
@@ -141,6 +142,9 @@ public class WbComponentConfig {
   public void setClass(Class cl)
   {
     _cl = cl;
+
+    if (_name == null)
+      _name = Introspector.decapitalize(cl.getSimpleName());
   }
 
   /**

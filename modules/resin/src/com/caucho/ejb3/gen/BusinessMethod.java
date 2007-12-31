@@ -51,6 +51,8 @@ public class BusinessMethod {
   private String _roleVar;
 
   private String _runAs;
+
+  private TransactionAttributeType _xa;
   
   public BusinessMethod(Method method)
   {
@@ -58,12 +60,19 @@ public class BusinessMethod {
 
     introspect();
   }
+  
+  public boolean hasXA()
+  {
+    return (_xa != null && ! _xa.equals(TransactionAttributeType.SUPPORTS));
+  }
 
   public boolean isPlain()
   {
     if (_roles != null)
       return false;
     else if (_runAs != null)
+      return false;
+    else if (_xa != null && ! _xa.equals(TransactionAttributeType.SUPPORTS))
       return false;
 
     return true;
@@ -73,6 +82,12 @@ public class BusinessMethod {
   {
     Class cl = _method.getDeclaringClass();
 
+    introspectSecurity(cl);
+    introspectTransaction(cl);
+  }
+  
+  protected void introspectSecurity(Class cl)
+  {
     RunAs runAs = (RunAs) cl.getAnnotation(RunAs.class);
 
     if (runAs != null)
@@ -110,6 +125,21 @@ public class BusinessMethod {
 
     if (denyAll != null)
       _roles = new String[0];
+  }
+  
+  protected void introspectTransaction(Class cl)
+  {
+    TransactionAttribute xaAttr;
+    
+    xaAttr = _method.getAnnotation(TransactionAttribute.class);
+
+    if (xaAttr == null) {
+      xaAttr = (TransactionAttribute)
+	cl.getAnnotation(TransactionAttribute.class);
+    }
+
+    if (xaAttr != null)
+      _xa = xaAttr.value();
   }
 
   public void generate(JavaWriter out)
@@ -199,13 +229,95 @@ public class BusinessMethod {
       out.pushDepth();
     }
     
-    generateSuper(out);
+    generateXA(out);
 
     if (_runAs != null) {
       out.popDepth();
       out.println("} finally {");
       out.println("  com.caucho.security.SecurityContext.runAs(oldRunAs);");
       out.println("}");
+    }
+  }
+
+  protected void generateXA(JavaWriter out)
+    throws IOException
+  {
+    if (_xa != null) {
+      switch (_xa) {
+      case MANDATORY:
+	{
+	  out.println("_xa.beginMandatory();");
+	}
+	break;
+	
+      case NEVER:
+	{
+	  out.println("_xa.beginNever();");
+	}
+	break;
+	
+      case NOT_SUPPORTED:
+	{
+	  out.println("Transaction xa = _xa.beginNotSupported();");
+	  out.println();
+	  out.println("try {");
+	  out.pushDepth();
+	}
+	break;
+	
+      case REQUIRED:
+	{
+	  out.println("Transaction xa = _xa.beginRequired();");
+	  out.println();
+	  out.println("try {");
+	  out.pushDepth();
+	}
+	break;
+	
+      case REQUIRES_NEW:
+	{
+	  out.println("Transaction xa = _xa.beginRequiresNew();");
+	  out.println();
+	  out.println("try {");
+	  out.pushDepth();
+	}
+	break;
+      }
+    }
+    
+    generateSuper(out);
+    
+    if (_xa != null) {
+      switch (_xa) {
+      case NOT_SUPPORTED:
+	{
+	  out.popDepth();
+	  out.println("} finally {");
+	  out.println("  if (xa != null)");
+	  out.println("    _xa.resume(xa);");
+	  out.println("}");
+	}
+	break;
+      
+      case REQUIRED:
+	{
+	  out.popDepth();
+	  out.println("} finally {");
+	  out.println("  if (xa == null)");
+	  out.println("    _xa.commit();");
+	  out.println("}");
+	}
+	break;
+      
+      case REQUIRES_NEW:
+	{
+	  out.popDepth();
+	  out.println("} finally {");
+	  out.println("  _xa.endRequiresNew(xa);");
+	  out.println("}");
+	}
+	break;
+      }
     }
   }
 

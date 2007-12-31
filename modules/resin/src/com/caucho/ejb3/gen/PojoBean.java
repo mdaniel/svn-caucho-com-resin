@@ -50,11 +50,15 @@ public class PojoBean extends GenClass {
   private ArrayList<BusinessMethod> _businessMethods
     = new ArrayList<BusinessMethod>();
 
-  private boolean _isPlain = false;
+  private boolean _isPlain = true;
+  private boolean _hasXA;
   
   public PojoBean(Class beanClass)
   {
     super(beanClass.getName() + "__Resin");
+
+    addImport("javax.ejb.*");
+    addImport("javax.transaction.*");
 
     setSuperClassName(beanClass.getName());    
     
@@ -77,8 +81,16 @@ public class PojoBean extends GenClass {
 	continue;
       if (Modifier.isFinal(modifiers))
 	continue;
-      
-      _businessMethods.add(new BusinessMethod(method));
+
+      BusinessMethod bizMethod = new BusinessMethod(method);
+
+      if (! bizMethod.isPlain()) {
+	_isPlain = false;
+	_businessMethods.add(bizMethod);
+      }
+
+      if (bizMethod.hasXA())
+	_hasXA = true;
     }
   }
 
@@ -138,6 +150,12 @@ public class PojoBean extends GenClass {
     out.println("  = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
     out.println("private static final boolean __isFiner");
     out.println("  = __log.isLoggable(java.util.logging.Level.FINER);");
+
+    if (_hasXA) {
+      out.println();
+      out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
+      out.println("  = new com.caucho.ejb3.xa.XAManager();");
+    }
   }
   
   protected void generateConstructor(JavaWriter out, Constructor ctor)
