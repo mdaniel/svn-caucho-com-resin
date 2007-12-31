@@ -37,7 +37,6 @@ public final class WebServicePermission extends BasicPermission {
   public WebServicePermission(String name)
   {
     super(name);
-    throw new UnsupportedOperationException();
   }
 
 
@@ -45,7 +44,6 @@ public final class WebServicePermission extends BasicPermission {
   public WebServicePermission(String name, String actions)
   {
     super(name);
-    throw new UnsupportedOperationException();
   }
 
 }

@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>admin: update tables for log storage to improve startup time (#2161, rep by koreth)</li>
 <li>WebBeans add xwork2 support as com.caucho.xwork2.ResinObjectFactory</li>
 <li>WebBeans: add createTransient to support framework object factories</li> 
 <li>mod_caucho: not properly grabbing backup server from session (#2268, rep by D Wigenfors)</li>

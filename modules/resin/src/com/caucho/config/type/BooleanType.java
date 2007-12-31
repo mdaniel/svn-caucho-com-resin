@@ -63,4 +63,19 @@ public final class BooleanType extends ConfigType
     else
       return Boolean.TRUE;
   }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Boolean)
+      return value;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else if (value == null)
+      return Boolean.FALSE;
+    else
+      return valueOf(String.valueOf(value));
+  }
 }

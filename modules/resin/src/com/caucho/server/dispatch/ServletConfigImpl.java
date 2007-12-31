@@ -43,18 +43,13 @@ import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.comet.CometServlet;
-//import com.caucho.soa.servlet.ProtocolServlet;
-//import com.caucho.soa.servlet.ProviderServlet;
-//import com.caucho.soa.servlet.SoapProtocolServlet;
 import com.caucho.util.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
-import javax.jws.WebService;
 import javax.naming.NamingException;
 import javax.servlet.*;
-import javax.xml.ws.WebServiceProvider;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -517,24 +512,20 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
       Config.checkCanInstantiate(_servletClass);
 
-      if (_servletClass.isAnnotationPresent(WebService.class)) {
-	/*
-        if (_protocolClass == null)
-          _protocolClass = SoapProtocolServlet.class;
-	*/
-      } 
-      else if (_servletClass.isAnnotationPresent(WebServiceProvider.class)) {
-	/*
-        if (_protocolClass == null)
-          _protocolClass = ProviderServlet.class;
-	*/
-      }
-      else if (Servlet.class.isAssignableFrom(_servletClass)) {
+      if (Servlet.class.isAssignableFrom(_servletClass)) {
       }
       else if (_protocolConfig != null) {
       }
+      /*
+      else if (_servletClass.isAnnotationPresent(WebService.class)) {
+	// update protocol for "soap"?
+      } 
+      else if (_servletClass.isAnnotationPresent(WebServiceProvider.class)) {
+	// update protocol for "soap"?
+      }
+      */
       else
-        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a <protocol> or @WebService or @WebServiceProvider annotation.  All servlets must implement the Servlet interface.", _servletClassName));
+        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a <protocol>.  All servlets must implement the Servlet interface.", _servletClassName));
 
       /*
       if (Modifier.isAbstract(_servletClass.getModifiers()))

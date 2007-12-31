@@ -45,7 +45,6 @@ public abstract class Endpoint {
 
   public Endpoint()
   {
-    throw new UnsupportedOperationException();
   }
 
 
