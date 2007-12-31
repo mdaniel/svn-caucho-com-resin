@@ -33,8 +33,6 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.types.*;
-import com.caucho.soa.client.WebServiceClient;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.util.L10N;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.naming.*;

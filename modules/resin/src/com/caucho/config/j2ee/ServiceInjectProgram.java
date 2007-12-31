@@ -32,7 +32,7 @@ package com.caucho.config.j2ee;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
-import com.caucho.soa.client.WebServiceClient;
+//import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.L10N;
 
 import javax.naming.InitialContext;
@@ -90,11 +90,13 @@ public class ServiceInjectProgram extends BuilderProgram {
       if (value == null)
 	return;
 
+      /* XXX:
       if (value instanceof WebServiceClient) {
 	WebServiceClient client = (WebServiceClient) value;
 
 	value = client.createService(_constructor);
       }
+      */
 
       if (! _field.getType().isAssignableFrom(value.getClass())) {
 	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",

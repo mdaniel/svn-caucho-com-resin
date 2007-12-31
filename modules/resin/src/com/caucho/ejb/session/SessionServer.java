@@ -39,7 +39,6 @@ import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
 import com.caucho.ejb.webbeans.StatefulComponent;
 import com.caucho.naming.Jndi;
-import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.webbeans.component.*;
@@ -443,11 +442,13 @@ public class SessionServer extends AbstractServer
   /**
    * Adds a web service client.
    */
+  /*
   public WebServiceClient createWebServiceClient()
   {
     return new WebServiceClient();
   }
 
+  */
   public PostActivateConfig getPostActivate()
   {
     return _postActivateConfig;

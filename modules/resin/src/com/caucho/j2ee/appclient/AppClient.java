@@ -42,7 +42,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.soa.client.WebServiceClient;
+//import com.caucho.soa.client.WebServiceClient;
 import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -175,10 +175,12 @@ public class AppClient implements EnvironmentBean
   /**
    * Adds a web service client.
    */
+  /*
   public WebServiceClient createWebServiceClient()
   {
     return new WebServiceClient();
   }
+  */
 
   private void addConfig(Path path)
     throws Exception

@@ -38,18 +38,17 @@ import com.caucho.jmx.Jmx;
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
 import com.caucho.naming.Jndi;
+import com.caucho.remote.server.*;
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.comet.CometServlet;
-import com.caucho.soa.servlet.ProtocolServlet;
-import com.caucho.soa.servlet.ProviderServlet;
-import com.caucho.soa.servlet.SoapProtocolServlet;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.CompileException;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+//import com.caucho.soa.servlet.ProtocolServlet;
+//import com.caucho.soa.servlet.ProviderServlet;
+//import com.caucho.soa.servlet.SoapProtocolServlet;
+import com.caucho.util.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.jws.WebService;
@@ -94,8 +93,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
   private RunAt _runAt;
 
-  private Class _protocolClass;
-  private BuilderProgram _protocolInit;
+  private ServletProtocolConfig _protocolConfig;
+  private ProtocolServletFactory _protocolFactory;
   
   private Alarm _alarm;
 
@@ -409,8 +408,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    */
   public void setProtocol(ServletProtocolConfig protocol)
   {
-    _protocolClass = protocol.getType();
-    _protocolInit = protocol.getProgram();
+    _protocolConfig = protocol;
   }
 
   /**
@@ -452,13 +450,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
     if (_servletName != null) {
     }
-    else if (_protocolClass != null) {
-      String protocol = _protocolClass.getName();
+    else if (_protocolConfig != null) {
+      String protocolName = _protocolConfig.getType();
       
-      int p = protocol.lastIndexOf('.');
-      protocol = protocol.substring(p + 1);
-      
-      setServletName(_servletClassName + "-" + protocol);
+      setServletName(_servletClassName + "-" + protocolName);
     }
     else
       setServletName(_servletClassName);
@@ -523,17 +518,23 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       Config.checkCanInstantiate(_servletClass);
 
       if (_servletClass.isAnnotationPresent(WebService.class)) {
+	/*
         if (_protocolClass == null)
           _protocolClass = SoapProtocolServlet.class;
+	*/
       } 
       else if (_servletClass.isAnnotationPresent(WebServiceProvider.class)) {
+	/*
         if (_protocolClass == null)
           _protocolClass = ProviderServlet.class;
+	*/
       }
       else if (Servlet.class.isAssignableFrom(_servletClass)) {
       }
+      else if (_protocolConfig != null) {
+      }
       else
-        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a @WebService or @WebServiceProvider annotation.  All servlets must implement the Servlet interface.", _servletClassName));
+        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a <protocol> or @WebService or @WebServiceProvider annotation.  All servlets must implement the Servlet interface.", _servletClassName));
 
       /*
       if (Modifier.isAbstract(_servletClass.getModifiers()))
@@ -636,9 +637,9 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     else if (SingleThreadModel.class.isAssignableFrom(servletClass)) {
       servletChain = new SingleThreadServletFilterChain(this);
     }
-    else if (servletClass.isAnnotationPresent(WebServiceProvider.class)
-	     || servletClass.isAnnotationPresent(WebService.class))
+    else if (_protocolConfig != null) {
       servletChain = new WebServiceFilterChain(this);
+    }
     else if (CometServlet.class.isAssignableFrom(servletClass))
       servletChain = new CometServletFilterChain(this);
     else {
@@ -663,6 +664,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    *
    * @return the initialized servlet.
    */
+  /*
   ProtocolServlet createWebServiceSkeleton()
     throws ServletException
   {
@@ -689,6 +691,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       throw new ServletException(e);
     }
   }
+  */
 
   /**
    * Instantiates a servlet given its configuration.
@@ -757,8 +760,31 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     }
   }
 
+  Servlet createProtocolServlet()
+    throws ServletException
+  {
+    try {
+      Object service = createServletImpl();
+
+      if (_protocolFactory == null)
+	_protocolFactory = _protocolConfig.createFactory();
+
+      Servlet servlet = _protocolFactory.createServlet(_servletClass, service);
+
+      servlet.init(this);
+
+      return servlet;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (ServletException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+  }
+
   private Object createServletImpl()
-    throws Throwable
+    throws Exception
   {
     Class servletClass = getServletClass();
 
@@ -771,9 +797,14 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
                                        _jspFile));
     }
 
-    else if (servletClass != null)
-      servlet = servletClass.newInstance();
-
+    else if (servletClass != null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      ComponentImpl comp
+	= (ComponentImpl) webBeans.createTransient(servletClass);
+      
+      servlet = comp.createNoInit();
+    }
     else
       throw new ServletException(L.l("Null servlet class for '{0}'.",
                                      _servletName));
@@ -803,7 +834,6 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    *  instantiation but before servlet.init()
    */
   void configureServlet(Object servlet)
-    throws Throwable
   {
     //InjectIntrospector.configure(servlet);
 

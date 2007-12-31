@@ -69,7 +69,7 @@ import com.caucho.server.security.ServletAuthenticator;
 import com.caucho.server.security.TransportConstraint;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.soa.client.WebServiceClient;
+//import com.caucho.soa.client.WebServiceClient;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -795,10 +795,12 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a web service client.
    */
+  /*
   public WebServiceClient createWebServiceClient()
   {
     return new WebServiceClient();
   }
+  */
 
   /**
    * Adds a servlet-regexp configuration.

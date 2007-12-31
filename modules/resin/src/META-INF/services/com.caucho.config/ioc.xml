@@ -108,6 +108,9 @@
     <bean name="reference"
           class="com.caucho.config.types.ReferenceConfig"/>
 
+    <bean name="remote-client"
+          class="com.caucho.remote.client.RemoteClient"/>
+
     <bean name="resource"
           class="com.caucho.jca.Resource"/>
 
@@ -154,7 +157,7 @@
           class="com.caucho.config.type.ValueType"/>
 
     <bean name="web-service-client"
-          class="com.caucho.soa.client.WebServiceClient"/>
+          class="com.caucho.remote.client.RemoteClient"/>
     
     <bean name="work-dir"
           class="com.caucho.java.WorkDir"/>

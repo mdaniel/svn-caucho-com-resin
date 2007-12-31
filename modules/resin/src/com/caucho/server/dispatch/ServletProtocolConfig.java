@@ -33,22 +33,29 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.soa.rest.RestProtocolServlet;
-import com.caucho.soa.rest.JAXBRestProtocolServlet;
-import com.caucho.soa.rest.HessianRestProtocolServlet;
-import com.caucho.soa.servlet.HessianProtocolServlet;
-import com.caucho.soa.servlet.ProtocolServlet;
-import com.caucho.soa.servlet.SoapProtocolServlet;
-import com.caucho.util.L10N;
+//import com.caucho.soa.rest.RestProtocolServlet;
+//import com.caucho.soa.rest.JAXBRestProtocolServlet;
+//import com.caucho.soa.rest.HessianRestProtocolServlet;
+//import com.caucho.soa.servlet.HessianProtocolServlet;
+//import com.caucho.soa.servlet.ProtocolServlet;
+//import com.caucho.soa.servlet.SoapProtocolServlet;
+import com.caucho.remote.server.ProtocolServletFactory;
+import com.caucho.util.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
+import java.util.*;
 import javax.annotation.PostConstruct;
+
 /**
  * Configuration for a servlet web-service protocol.
  */
 public class ServletProtocolConfig {
   private static L10N L = new L10N(ServletProtocolConfig.class);
 
-  private Class _type;
+  private String _type;
+
+  private Class _factoryClass;
 
   private BuilderProgramContainer _program
     = new BuilderProgramContainer();
@@ -62,32 +69,28 @@ public class ServletProtocolConfig {
 
   public void setType(String type)
   {
-    if ("soap".equals(type))
-      _type = SoapProtocolServlet.class;
-    else if ("rest".equals(type))
-      _type = JAXBRestProtocolServlet.class;
-    else if ("jaxb-rest".equals(type))
-      _type = JAXBRestProtocolServlet.class;
-    else if ("hessian-rest".equals(type))
-      _type = HessianRestProtocolServlet.class;
-    else if ("hessian".equals(type))
-      _type = HessianProtocolServlet.class;
-    else {
-      try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	_type = Class.forName(type, false, loader);
+    try {
+      _type = type;
 
-	Config.validate(_type, ProtocolServlet.class);
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Exception e) {
-	throw ConfigException.create(e);
-      }
+      String name = ProtocolServletFactory.class.getName() + "/" + type;
+    
+      ArrayList<String> drivers = Services.getServices(name);
+
+      if (drivers.size() == 0)
+	throw new ConfigException(L.l("'{0}' is an unknown servlet protocol.",
+				      type));
+
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      _factoryClass = Class.forName(drivers.get(0), false, loader);
+
+      Config.validate(_factoryClass, ProtocolServletFactory.class);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 
-  public Class getType()
+  public String getType()
   {
     return _type;
   }
@@ -107,5 +110,19 @@ public class ServletProtocolConfig {
   {
     if (_type == null)
       throw new ConfigException(L.l("'type' is a required attribute of <protocol>")); 
+  }
+  
+  public ProtocolServletFactory createFactory()
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    ComponentImpl comp
+      = (ComponentImpl) webBeans.createTransient(_factoryClass);
+
+    Object factory = comp.createNoInit();
+
+    _program.configure(factory);
+
+    return (ProtocolServletFactory) factory;
   }
 }

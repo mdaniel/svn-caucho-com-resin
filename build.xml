@@ -84,7 +84,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jaxrpc, jws, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
+          depends="init, hessian, jws, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
   </target>
 
   <target name="ant" depends="init">
@@ -102,7 +102,7 @@
     </antcall>
   </target>
 
-  <target name="ejb" depends="init, jta">
+  <target name="ejb" depends="init, jta, jaxrpc">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ejb"/>
       <param name="module.jar" value="ejb-15.jar"/>
@@ -148,7 +148,7 @@
     </antcall>
   </target>
 
-  <target name="jws" depends="init,saaj,jsdk">
+  <target name="jws" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jws"/>
       <param name="module.jar" value="jws-15.jar"/>
@@ -304,7 +304,7 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, hessian, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, ejb, hessian, jca, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, portlet, script, resin-util, webbeans, version">
 
     <!-- build module -->
 
@@ -547,7 +547,9 @@
       <packageset dir="${modules}/portlet/src"/>
       <packageset dir="${modules}/quercus/src"/>
       <packageset dir="${modules}/resin/src"/>
+      <!--
       <packageset dir="${modules}/saaj/src"/>
+      -->
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
       <packageset dir="${modules}/util/src"/>
@@ -720,8 +722,8 @@
         <include name="lib/javamail-14.jar"/>
         <include name="lib/ejb-15.jar"/>
         <include name="lib/hessian.jar"/>
-        <include name="lib/jaxb-api.jar"/>
         <!--
+        <include name="lib/jaxb-api.jar"/>
         <include name="lib/jaxb-xjc.jar"/>
         <include name="lib/jaxb-impl.jar"/>
         <include name="lib/jaxb1-impl.jar"/>
@@ -743,8 +745,8 @@
         <include name="lib/resin.jar"/>
 	<!--
         <include name="lib/resinboot.jar"/>
-	-->
         <include name="lib/saaj.jar"/>
+	-->
         <include name="lib/script-10.jar"/>
         <include name="lib/webbeans-16.jar"/>
         <include name="lib/webutil.jar"/>

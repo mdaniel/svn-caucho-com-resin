@@ -28,13 +28,9 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.soa.servlet.ProtocolServlet;
+//import com.caucho.soa.servlet.ProtocolServlet;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.UnavailableException;
+import javax.servlet.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.*;
@@ -53,7 +49,8 @@ public class WebServiceFilterChain implements FilterChain {
   private ServletConfigImpl _config;
   
   // protocol skeleton
-  private ProtocolServlet _skeleton;
+  // private ProtocolServlet _skeleton;
+  private Servlet _skeleton;
 
   /**
    * Create the filter chain servlet.
@@ -97,18 +94,7 @@ public class WebServiceFilterChain implements FilterChain {
     throws ServletException, IOException
   {
     if (_skeleton == null) {
-      try {
-        _skeleton = _config.createWebServiceSkeleton();
-
-	if (log.isLoggable(Level.FINER))
-	  log.finer("WebService " + _skeleton + " created");
-      } catch (ServletException e) {
-        throw e;
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new ServletException(e);
-      }
+      _skeleton = _config.createProtocolServlet();
     }
     
     try {
