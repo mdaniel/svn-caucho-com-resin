@@ -94,7 +94,7 @@ public class Header {
   {
   }
 
-  public void setTutorialStartPage(String startPage)
+  public void setTutorialStartpage(String startPage)
   {
     _tutorial = startPage;
   }

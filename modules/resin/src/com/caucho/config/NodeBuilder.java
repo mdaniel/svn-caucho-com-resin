@@ -416,7 +416,14 @@ public class NodeBuilder {
 	attrStrategy.setValue(bean, qName, childBean);
       }
       else {
-	String textValue = textValue(childNode);
+	ConfigType attrType = attrStrategy.getConfigType();
+	
+	String textValue;
+
+	if (attrType.isNoTrim())
+	  textValue = textValueNoTrim(childNode);
+	else
+	  textValue = textValue(childNode);
 
 	if (textValue.indexOf("${") >= 0) {
 	  childType = attrStrategy.getConfigType();

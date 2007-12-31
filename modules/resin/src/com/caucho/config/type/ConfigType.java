@@ -111,6 +111,14 @@ abstract public class ConfigType
   }
 
   /**
+   * Return true for non-trim.
+   */
+  public boolean isNoTrim()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for a program type.
    */
   public boolean isProgram()
@@ -123,8 +131,6 @@ abstract public class ConfigType
    */
   public Attribute getAttribute(QName qName)
   {
-    Thread.dumpStack();
-    
     throw new ConfigException(L.l("{0} does not allow attributes at '{1}'",
 				  getTypeName(), qName));
   }

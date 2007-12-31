@@ -37,6 +37,7 @@ import java.util.logging.*;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
 import com.caucho.webbeans.component.*;
@@ -261,7 +262,8 @@ public class BeanType extends ConfigType
 	Attribute attr;
 	
 	if ((propName.equals("text") || propName.equals("value"))
-	    && paramTypes[0].equals(String.class)) {
+	    && (paramTypes[0].equals(String.class)
+		|| paramTypes[0].equals(RawString.class))) {
 	  attr = new TextAttribute(method, type);
 	  _addText = attr;
 	  _attributeMap.put("#text", attr);

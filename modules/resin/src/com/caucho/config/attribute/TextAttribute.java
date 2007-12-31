@@ -62,7 +62,7 @@ public class TextAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      _setter.invoke(bean, value);
+      _setter.invoke(bean, _type.valueOf(value));
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

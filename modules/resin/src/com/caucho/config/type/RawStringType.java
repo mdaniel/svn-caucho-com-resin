@@ -52,10 +52,20 @@ public final class RawStringType extends ConfigType
   {
     return String.class;
   }
+
+  /**
+   * Return true for non-trim.
+   */
+  @Override
+  public boolean isNoTrim()
+  {
+    return true;
+  }
   
   /**
    * Converts the string to a value of the type.
    */
+  @Override
   public Object valueOf(String text)
   {
     return new RawString(text);
