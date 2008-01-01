@@ -31,6 +31,8 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.util.L10N;
@@ -47,7 +49,11 @@ abstract public class AbstractFunction {
   private final Location _location;
 
   private boolean _isGlobal = true;
-
+  private boolean _isFinal = false;
+  
+  protected Visibility _visibility = Visibility.PUBLIC;
+  protected String _declaringClassName;
+  
   public AbstractFunction()
   {
     // XXX:
@@ -62,6 +68,27 @@ abstract public class AbstractFunction {
   public String getName()
   {
     return "unknown";
+  }
+  
+  /*
+   * Returns the name of the implementing class.
+   */
+  public String getDeclaringClassName()
+  {
+    return _declaringClassName;
+  }
+  
+  public void setDeclaringClassName(String name)
+  {
+    _declaringClassName = name;
+  }
+  
+  /*
+   * Returns the implementing class.
+   */
+  public ClassDef getDeclaringClass()
+  {
+    return null;
   }
 
   /**
@@ -79,7 +106,57 @@ abstract public class AbstractFunction {
   {
     return false;
   }
+  
+  /*
+   * Returns true for a static function.
+   */
+  public boolean isStatic()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns true for a final function.
+   */
+  public final boolean isFinal()
+  {
+    return _isFinal;
+  }
+  
+  public final void setFinal(boolean isFinal)
+  {
+    _isFinal = isFinal;
+  }
 
+  /*
+   * Returns true for a protected function.
+   */
+  public final boolean isPublic()
+  {
+    return _visibility == Visibility.PUBLIC;
+  }
+  
+  /*
+   * Returns true for a protected function.
+   */
+  public final boolean isProtected()
+  {
+    return _visibility == Visibility.PROTECTED;
+  }
+  
+  /*
+   * Returns true for a private function.
+   */
+  public final boolean isPrivate()
+  {
+    return _visibility == Visibility.PRIVATE;
+  }
+  
+  public final void setVisibility(Visibility v)
+  {
+    _visibility = v;
+  }
+  
   public final Location getLocation()
   {
     return _location;
@@ -202,13 +279,51 @@ abstract public class AbstractFunction {
     Value oldThis = env.getThis();
 
     try {
-      if (obj != null)
-	env.setThis(obj);
+      if (obj != null) {
+        env.setThis(obj);
+        
+        if (isPublic()) {
+        }
+        else if (isProtected()) {
+          if (oldThis != null
+              && oldThis.isA(getDeclaringClassName())) {
+          }
+          else {
+            errorProtectedAccess(env, oldThis);
+          }
+        }
+        else {
+          //private
+          
+          if (oldThis != null
+              && getDeclaringClassName().equals(oldThis.getClassName())) {
+          }
+          else {
+            errorPrivateAccess(env, oldThis);
+          }
+        }
+      }
 
       return call(env, args);
     } finally {
       env.setThis(oldThis);
     }
+  }
+  
+  protected Value errorProtectedAccess(Env env, Value oldThis)
+  {
+    return env.error(L.l("Cannot call protected method {0}::{1}() from '{2}' context",
+                         getDeclaringClassName(),
+                         getName(),
+                         oldThis != null ? oldThis.getClassName() : null));
+  }
+  
+  protected Value errorPrivateAccess(Env env, Value oldThis)
+  {
+    return env.error(L.l("Cannot call private method {0}::{1}() from '{2}' context",
+                         getDeclaringClassName(),
+                         getName(),
+                         oldThis != null ? oldThis.getClassName() : null));
   }
   
   /**

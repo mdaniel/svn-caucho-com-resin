@@ -43,7 +43,7 @@ abstract public class CompiledMethod extends CompiledFunction {
   private static final Logger log
     = Logger.getLogger(CompiledMethod.class.getName());
   private static final L10N L = new L10N(CompiledMethod.class);
-  
+
   /**
    * Evaluates the method as a static function
    */

@@ -1557,11 +1557,11 @@ public class QuercusParser {
       Function function;
       
       if (isAbstract) {
-	expect(';');
+        expect(';');
 
-	function = _factory.createMethodDeclaration(location,
-                                                    _classDef, name,
-							_function, args);
+        function = _factory.createMethodDeclaration(location,
+	                                                _classDef, name,
+	                                                _function, args);
       }
       else {
 	expect('{');
@@ -1573,10 +1573,10 @@ public class QuercusParser {
 	expect('}');
 
 	if (_classDef != null)
-	  function = _factory.createObjectMethod(location,
-                                                 _classDef,
-						     name, _function,
-						     args, statementList);
+      function = _factory.createObjectMethod(location,
+                                             _classDef,
+                                             name, _function,
+                                             args, statementList);
 	else
 	  function = _factory.createFunction(location, name,
 					     _function, args,
@@ -1585,6 +1585,12 @@ public class QuercusParser {
 
       function.setGlobal(oldTop);
       function.setStatic((modifiers & M_STATIC) != 0);
+      function.setFinal((modifiers & M_FINAL) != 0);
+      
+      if ((modifiers & M_PROTECTED) != 0)
+        function.setVisibility(Visibility.PROTECTED);
+      else if ((modifiers & M_PRIVATE) != 0)
+        function.setVisibility(Visibility.PRIVATE);
 
       _scope.addFunction(name, function);
 
@@ -1748,10 +1754,12 @@ public class QuercusParser {
       _classDef = oldScope.addClass(getLocation(), name, parentName, ifaceList);
 
       if ((modifiers & M_ABSTRACT) != 0)
-	_classDef.setAbstract(true);
+        _classDef.setAbstract(true);
       if ((modifiers & M_INTERFACE) != 0)
-	_classDef.setInterface(true);
-    
+        _classDef.setInterface(true);
+      if ((modifiers & M_FINAL) != 0)
+        _classDef.setFinal(true);
+
       _scope = new ClassScope(_classDef);
 
       expect('{');
@@ -1820,14 +1828,14 @@ public class QuercusParser {
 	  else {
 	    _peekToken = token2;
 	    
-	    parseClassVarDefinition((modifiers & M_STATIC) != 0);
+	    parseClassVarDefinition(modifiers);
 	  }
 	}
 	break;
 
       case IDENTIFIER:
 	if (_lexeme.equals("var")) {
-	  parseClassVarDefinition(false);
+	  parseClassVarDefinition(0);
 	}
 	else {
 	  _peekToken = token;
@@ -1847,7 +1855,7 @@ public class QuercusParser {
   /**
    * Parses a function definition
    */
-  private void parseClassVarDefinition(boolean isStatic)
+  private void parseClassVarDefinition(int modifiers)
     throws IOException
   {
     int token;
@@ -1868,7 +1876,7 @@ public class QuercusParser {
 	expr = _factory.createNull();
       }
 
-      if (isStatic)
+      if ((modifiers & M_STATIC) != 0)
 	((ClassScope) _scope).addStaticVar(name, expr);
       else
 	((ClassScope) _scope).addVar(name, expr);
@@ -2746,10 +2754,15 @@ public class QuercusParser {
       parseFunctionArgs(args);
 
       if (nameExpr != null)
-	return _factory.createVarMethodCall(getLocation(), term,
-					    nameExpr, args);
+	return _factory.createVarMethodCall(getLocation(),
+	                                    term,
+	                                    nameExpr,
+	                                    args);
       else
-	return _factory.createMethodCall(getLocation(), term, name, args);
+	return _factory.createMethodCall(getLocation(),
+	                                 term,
+	                                 name,
+	                                 args);
     }
     else if (nameExpr != null) {
       _peekToken = token;

@@ -46,6 +46,9 @@ public class InterpretedClassDef extends ClassDef
 {
   protected boolean _isAbstract;
   protected boolean _isInterface;
+  protected boolean _isFinal;
+  
+  protected boolean _hasNonPublicMethods;
   
   protected final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
@@ -67,8 +70,8 @@ public class InterpretedClassDef extends ClassDef
 
   public InterpretedClassDef(Location location,
                              String name,
-			     String parentName,
-			     String []ifaceList)
+                             String parentName,
+                             String []ifaceList)
   {
     super(location, name, parentName, ifaceList);
   }
@@ -110,6 +113,30 @@ public class InterpretedClassDef extends ClassDef
   public boolean isInterface()
   {
     return _isInterface;
+  }
+  
+  /*
+   * True for a final class.
+   */
+  public void setFinal(boolean isFinal)
+  {
+    _isFinal = isFinal;
+  }
+  
+  /*
+   * Returns true for a final class.
+   */
+  public boolean isFinal()
+  {
+    return _isFinal;
+  }
+  
+  /*
+   * Returns true if class has protected or private methods.
+   */
+  public boolean getHasNonPublicMethods()
+  {
+    return _hasNonPublicMethods;
   }
 
   /**
@@ -165,6 +192,10 @@ public class InterpretedClassDef extends ClassDef
   public void addFunction(String name, Function fun)
   {
     _functionMap.put(name.intern(), fun);
+    
+    if (! fun.isPublic()) {
+      _hasNonPublicMethods = true;
+    }
 
     if (name.equals("__construct"))
       _constructor = fun;

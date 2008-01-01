@@ -55,6 +55,7 @@ public class CompiledClassDef extends ClassDef {
   
   protected ArrayValue _extFields = new ArrayValueImpl();
   protected Value _parent;
+  protected boolean _isFinal;
   
   public CompiledClassDef(String name, String parent, String []ifaceList,
 			  Class compiledClass)
@@ -72,6 +73,18 @@ public class CompiledClassDef extends ClassDef {
 
     _compiledClass = compiledClass;
   }
+  
+  public CompiledClassDef(Location location,
+                          String name,
+                          String parent,
+                          String []ifaceList,
+                          Class compiledClass,
+                          boolean isFinal)
+  {
+    this(location, name, parent, ifaceList, compiledClass);
+
+    _isFinal = isFinal;
+  }
 
   /**
    * Initialize the quercus class.
@@ -86,6 +99,15 @@ public class CompiledClassDef extends ClassDef {
     } catch (Exception e) {
       throw new QuercusRuntimeException(e);
     }
+  }
+  
+  /*
+   * Returns true for a final class.
+   */
+  @Override
+  public boolean isFinal()
+  {
+    return _isFinal;
   }
 
   /**

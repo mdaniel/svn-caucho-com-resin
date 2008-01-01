@@ -31,6 +31,7 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullThisValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
@@ -111,6 +112,29 @@ public class Function extends AbstractFunction {
   {
     return _name;
   }
+  
+  /*
+   * Returns the declaring class
+   */
+  @Override
+  public ClassDef getDeclaringClass()
+  {
+    return _info.getDeclaringClass();
+  }
+  
+  /*
+   * Returns the declaring class
+   */
+  @Override
+  public String getDeclaringClassName()
+  {
+    ClassDef declaringClass = _info.getDeclaringClass();
+    
+    if (declaringClass != null)
+      return declaringClass.getName();
+    else
+      return null;
+  }
 
   /**
    * Returns the args.
@@ -125,6 +149,7 @@ public class Function extends AbstractFunction {
     _isStatic = isStatic;
   }
 
+  @Override
   public boolean isStatic()
   {
     return _isStatic;
@@ -141,11 +166,6 @@ public class Function extends AbstractFunction {
   public boolean isReturnsReference()
   {
     return _isReturnsReference;
-  }
-
-  public String getClassName()
-  {
-    throw new UnsupportedOperationException();
   }
 
   public Value execute(Env env)
@@ -248,7 +268,7 @@ public class Function extends AbstractFunction {
 
     if (isStatic()) {
       // php/0967
-      oldThis = env.setThis(UnsetValue.NULL);
+      oldThis = env.setThis(new NullThisValue(getDeclaringClass()));
     }
     else
       oldThis = env.getThis();
@@ -324,8 +344,8 @@ public class Function extends AbstractFunction {
     Value oldThis;
 
     if (isStatic()) {
-      // php/0967
-      oldThis = env.setThis(UnsetValue.NULL);
+      // php/0967, php/091i
+      oldThis = env.setThis(new NullThisValue(getDeclaringClass()));
     }
     else
       oldThis = env.getThis();

@@ -37,6 +37,7 @@ import com.caucho.quercus.env.NullValue;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class IniDefinitions {
@@ -144,6 +145,17 @@ public class IniDefinitions {
       return Collections.emptySet();
     else
       return _defaultMap.keySet();
+  }
+  
+  /*
+   * Returns the set of all ini name/value pairs.
+   */
+  public Set<Map.Entry<String, IniDefinition>> entrySet()
+  {
+    if (_defaultMap == null)
+      return null;
+    else
+      return _defaultMap.entrySet();
   }
 
   public IniDefinition get(String name)

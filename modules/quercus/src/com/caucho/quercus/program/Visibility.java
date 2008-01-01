@@ -27,12 +27,10 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.lib.reflection;
+package com.caucho.quercus.program;
 
-import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.lib.ExceptionClass;
+/**
+ * Function and field visibility.
+ */
 
-@ClassImplementation
-public class ReflectionExceptionClass extends ExceptionClass
-{
-}
+public enum Visibility {PUBLIC, PROTECTED, PRIVATE};

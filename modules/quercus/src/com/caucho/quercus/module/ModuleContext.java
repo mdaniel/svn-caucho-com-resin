@@ -43,6 +43,7 @@ import com.caucho.util.L10N;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -91,6 +92,9 @@ public class ModuleContext
 
   private HashMap<String, StringValue> _iniMap
     = new HashMap<String, StringValue>();
+  
+  private HashMap<String, HashSet<String>> _extensionClasses
+    = new HashMap<String, HashSet<String>>();
 
   protected MarshalFactory _marshalFactory;
   protected ExprFactory _exprFactory;
@@ -179,10 +183,10 @@ public class ModuleContext
         def = (JavaClassDef) constructor.newInstance(this, name, type);
       }
       else {
-	def = JavaClassDef.create(this, name, type);
+        def = JavaClassDef.create(this, name, type);
 
-	if (def == null)
-	  def = createDefaultJavaClassDef(name, type);
+        if (def == null)
+          def = createDefaultJavaClassDef(name, type, extension);
       }
 
       _javaClassWrappers.put(name, def);
@@ -272,9 +276,16 @@ public class ModuleContext
 
 
   protected JavaClassDef createDefaultJavaClassDef(String className,
-						   Class type)
+                                                   Class type)
   {
     return new JavaClassDef(this, className, type);
+  }
+  
+  protected JavaClassDef createDefaultJavaClassDef(String className,
+                                                   Class type,
+                                                   String extension)
+  {
+    return new JavaClassDef(this, className, type, extension);
   }
   
   /**
@@ -372,6 +383,29 @@ public class ModuleContext
   public HashSet<String> getLoadedExtensions()
   {
     return _extensionSet;
+  }
+  
+  /*
+   * Adds a class to the extension's list of classes.
+   */
+  public void addExtensionClass(String ext, String clsName)
+  {
+    HashSet<String> list = _extensionClasses.get(ext);
+    
+    if (list == null) {
+      list = new HashSet<String>();
+      _extensionClasses.put(ext, list);
+    }
+    
+    list.add(clsName);
+  }
+  
+  /*
+   * Returns the list of the classes that are part of this extension.
+   */
+  public HashSet<String> getExtensionClasses(String ext)
+  {
+    return _extensionClasses.get(ext);
   }
 
   public HashMap<String, Value> getConstMap()

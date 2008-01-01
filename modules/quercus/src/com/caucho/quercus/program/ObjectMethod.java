@@ -70,9 +70,15 @@ public class ObjectMethod extends Function {
   }
 
   @Override
-  public String getClassName()
+  public String getDeclaringClassName()
   {
     return _quercusClass.getName();
+  }
+  
+  @Override
+  public ClassDef getDeclaringClass()
+  {
+    return _quercusClass;
   }
 
   @Override

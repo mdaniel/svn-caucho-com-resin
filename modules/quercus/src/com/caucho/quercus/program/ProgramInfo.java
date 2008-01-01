@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,18 +24,47 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Nam Nguyen
+ * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.reflection;
+package com.caucho.quercus.program;
 
-import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.expr.VarInfo;
 
-@ClassImplementation
-public interface Reflector
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+
+/**
+ * Information about the entire Quercus program
+ */
+public class ProgramInfo
 {
+  private final Quercus _quercus;
+  private boolean _hasNonPublicMethods;
+  
+  public ProgramInfo(Quercus quercus)
+  {
+    _quercus = quercus;
+  }
+  
+  /**
+   * Returns the owning quercus.
+   */
+  public Quercus getPhp()
+  {
+    return _quercus;
+  }
+  
+  public boolean getHasNonPublicMethods()
+  {
+    return _hasNonPublicMethods;
+  }
+  
+  public void setHasNonPublicMethods(boolean val)
+  {
+    _hasNonPublicMethods = val;
+  }
 }
+

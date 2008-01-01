@@ -30,48 +30,28 @@
 package com.caucho.quercus.lib.reflection;
 
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.annotation.ClassImplementation;
+import com.caucho.quercus.lib.ExceptionClass;
 
-public class ReflectionObject extends ReflectionClass
+public class ReflectionException extends QuercusException
 {
-  final private void __clone()
+  public ReflectionException()
   {
-    
   }
- 
-  protected ReflectionObject(QuercusClass cls)
+
+  public ReflectionException(String msg)
   {
-    super(cls);
+    super(msg);
   }
-  
-  public static ReflectionObject __construct(Env env, Value val)
+
+  public ReflectionException(Throwable cause)
   {
-    if (! val.isObject())
-      throw new ReflectionException("parameter must be an object");
-    
-    ObjectValue obj = (ObjectValue) val.toObject(env);
-    
-    return new ReflectionObject(obj.getQuercusClass());
+    super(cause);
   }
-  
-  public String __toString()
+
+  public ReflectionException(String msg, Throwable cause)
   {
-    return null;
+    super(msg, cause);
   }
   
-  public static String export(Env env,
-                              Value object,
-                              @Optional boolean isReturn)
-  {
-    return null;
-  }
-  
-  public String toString()
-  {
-    return "ReflectionObject[" + getQuercusClass().getName() + "]";
-  }
 }

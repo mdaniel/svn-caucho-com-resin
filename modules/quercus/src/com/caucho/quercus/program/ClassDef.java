@@ -83,6 +83,14 @@ abstract public class ClassDef {
   {
     return _parentName;
   }
+  
+  /*
+   * Returns the name of the extension that this class is part of.
+   */
+  public String getExtension()
+  {
+    return null;
+  }
 
   protected void addInterface(String iface)
   {
@@ -125,7 +133,23 @@ abstract public class ClassDef {
   {
     return false;
   }
-
+  
+  /*
+   * Returns true for a final class.
+   */
+  public boolean isFinal()
+  {
+    return false;
+  }
+  
+  /*
+   * 
+   */
+  public boolean hasNonPublicMethods()
+  {
+    return false;
+  }
+  
   /**
    * Initialize the quercus class.
    */

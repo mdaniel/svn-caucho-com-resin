@@ -54,7 +54,7 @@ public class SimpleXMLModule
 
   public String []getLoadedExtensions()
   {
-    return new String[] { "simplexml" };
+    return new String[] { "SimpleXML" };
   }
   
   @ReturnNullAsFalse

@@ -29,23 +29,67 @@
 
 package com.caucho.quercus.lib.reflection;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.ClassDef;
+import com.caucho.util.L10N;
 
 public class ReflectionClass
   implements Reflector
 {
-  final private void __clone()
+  private static final L10N L = new L10N(ReflectionClass.class);
+  
+  public static int IS_IMPLICIT_ABSTRACT = 16;
+  public static int IS_EXPLICIT_ABSTRACT = 32;
+  public static int IS_FINAL = 64;
+  
+  public String _name;
+  private QuercusClass _cls;
+  
+  protected ReflectionClass(QuercusClass cls)
   {
-    
+    _cls = cls;
+    _name = cls.getName();
   }
   
-  public ReflectionClass __construct(String name)
+  protected ReflectionClass(Env env, String name)
   {
-    return null;
+    _cls = env.findClass(name);
+    _name = name;
+  }
+  
+  protected QuercusClass getQuercusClass()
+  {
+    return _cls;
+  }
+  
+  final private ReflectionClass __clone()
+  {
+    return new ReflectionClass(_cls);
+  }
+  
+  public static ReflectionClass __construct(Env env, String name)
+  {
+    QuercusClass cls = env.findClass(name);
+    
+    return new ReflectionClass(cls);
   }
   
   public String __toString()
@@ -62,39 +106,29 @@ public class ReflectionClass
   
   public String getName()
   {
-    return null;
+    return _name;
   }
   
   public boolean isInternal()
   {
-    return false;
+    throw new UnimplementedException("ReflectionClass->isInternal()");
   }
   
   public boolean isUserDefined()
   {
-    return false;
+    throw new UnimplementedException("ReflectionClass->isUserDefined()");
   }
   
   public boolean isInstantiable()
   {
-    return false;
+    return ! _cls.isInterface();
   }
   
   public boolean hasConstant(String name)
   {
-    return false;
+    return _cls.hasConstant(name);
   }
-  
-  public boolean hasMethod(String name)
-  {
-    return false;
-  }
-  
-  public boolean hasProperty(String name)
-  {
-    return false;
-  }
-  
+
   public String getFileName()
   {
     return null;
@@ -117,123 +151,297 @@ public class ReflectionClass
   
   public ReflectionMethod getConstructor()
   {
-    return null;
+    AbstractFunction cons = _cls.getConstructor();
+    
+    if (cons != null)
+      return new ReflectionMethod(_name, cons);
+    else
+      return null;
+  }
+  
+  public boolean hasMethod(String name)
+  {
+    MethodMap<AbstractFunction> map = _cls.getMethodMap();
+    
+    return map.get(name) != null;
   }
   
   public ReflectionMethod getMethod(String name)
   {
-    return null;
+    return new ReflectionMethod(_name, _cls.getFunction(name));
+    
+    /*
+    MethodMap<AbstractFunction> map = _cls.getMethodMap();
+    
+    return new ReflectionMethod(_name, map.get(name));
+    */
   }
   
-  public ArrayValue getMethods()
+  public ArrayValue getMethods(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    MethodMap<AbstractFunction> map = _cls.getMethodMap();
+    
+    for (AbstractFunction method : map.values()) {
+      array.put(env.wrapJava(new ReflectionMethod(method)));
+    }
+    
+    return array;
   }
   
-  public ReflectionProperty getProperty(String name)
+  public boolean hasProperty(StringValue name)
   {
-    return null;
+    return _cls.findFieldIndex(name) >= 0;
   }
   
-  public ArrayValue getProperties()
+  public ReflectionProperty getProperty(Env env, StringValue name)
   {
-    return null;
+    return new ReflectionProperty(env, _cls, name);
   }
   
-  public ArrayValue getConstants()
+  public ArrayValue getProperties(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    ArrayList<StringValue> list = _cls.getFieldNames();
+    
+    int size = list.size();
+    
+    for (int i = 0; i < size; i++) {
+      array.put(env.wrapJava(new ReflectionProperty(env, _cls, list.get(i))));
+    }
+    
+    return array;
   }
   
-  public Value getConstant(String name)
+  public ArrayValue getConstants(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    HashMap<String, Expr> _constMap = _cls.getConstantMap();
+    
+    for (Map.Entry<String, Expr> entry : _constMap.entrySet()) {
+      Value name = StringValue.create(entry.getKey());
+      
+      array.put(name, entry.getValue().eval(env));
+    }
+
+    return array;
   }
   
-  public ArrayValue getInterfaces()
+  public Value getConstant(Env env, String name)
   {
-    return null;
+    if (hasConstant(name))
+      return _cls.getConstant(env, name);
+    else
+      return BooleanValue.FALSE;
+  }
+  
+  public ArrayValue getInterfaces(Env env)
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    findInterfaces(env, array, _cls);
+    
+    return array;
+  }
+
+  private void findInterfaces(Env env, ArrayValue array, QuercusClass cls)
+  {
+    if (cls.isInterface()) {
+      array.put(StringValue.create(cls.getName()),
+                env.wrapJava(new ReflectionClass(cls)));
+    }
+    else {
+      ClassDef []defList = cls.getClassDefList();
+      
+      for (int i = 0; i < defList.length; i++) {
+        findInterfaces(env, array, defList[i]);
+      }
+    }
+  }
+  
+  private void findInterfaces(Env env, ArrayValue array, ClassDef def)
+  {
+    String name = def.getName();
+    
+    if (def.isInterface()) {
+      addInterface(env, array, name);
+    }
+    else {
+      String []defList = def.getInterfaces();
+      
+      for (int i = 0; i < defList.length; i++) {
+        QuercusClass cls = env.findClass(defList[i]);
+        
+        findInterfaces(env, array, cls);
+      }
+    }
+  }
+  
+  private void addInterface(Env env, ArrayValue array, String name)
+  {
+    QuercusClass cls = env.findClass(name);
+
+    array.put(StringValue.create(name),
+              env.wrapJava(new ReflectionClass(cls)));
   }
   
   public boolean isInterface()
   {
-    return false;
+    return _cls.isInterface();
   }
   
   public boolean isAbstract()
   {
-    return false;
+    return _cls.isAbstract();
   }
   
   public boolean isFinal()
   {
-    return false;
+    return _cls.isFinal();
   }
   
   public int getModifiers()
   {
-    return -1;
+    int flag = 0;
+    
+    if (isFinal())
+      flag |= IS_FINAL;
+    
+    return flag;
   }
   
   public boolean isInstance(ObjectValue obj)
   {
-    return false;
+    return obj.getQuercusClass().getName().equals(_name);
   }
   
-  public Value newInstance(Value args)
+  public Value newInstance(Env env, @Optional Value []args)
   {
-    return null;
+    return _cls.callNew(env, args);
   }
   
-  public Value newInstanceArgs(ArrayValue args)
+  public Value newInstanceArgs(Env env, @Optional ArrayValue args)
   {
-    return null;
+    if (args == null)
+      return _cls.callNew(env, new Value []{});
+    else
+      return _cls.callNew(env, args.getValueArray(env));
   }
   
+  @ReturnNullAsFalse
   public ReflectionClass getParentClass()
   {
-    return null;
+    QuercusClass parent = _cls.getParent();
+    
+    if (parent == null)
+      return null;
+    else
+      return new ReflectionClass(parent);
   }
   
   public boolean isSubclassOf(ReflectionClass cls)
   {
-    return false;
+    // php/520p
+    if (_cls.getName().equals(cls.getName()))
+      return false;
+    
+    return _cls.isA(cls.getName());
   }
   
-  public ArrayValue getStaticProperties()
+  public ArrayValue getStaticProperties(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    addStaticFields(env, array, _cls);
+    
+    return array;
   }
   
-  public Value getStaticPropertyValue(String name,
+  private void addStaticFields(Env env, ArrayValue array, QuercusClass cls)
+  {
+    if (cls == null)
+      return;
+    
+    HashMap<String, Value> fieldMap = cls.getStaticFieldMap();
+    
+    for (Map.Entry<String, Value> entry : fieldMap.entrySet()) {
+      String name = entry.getKey();
+      
+      Var field = cls.getStaticField(env, name);
+
+      array.put(StringValue.create(name), field.toValue());
+    }
+    
+    addStaticFields(env, array, cls.getParent());
+  }
+  
+  public Value getStaticPropertyValue(Env env,
+                                      String name,
                                       @Optional Value defaultV)
   {
-    return null;
+    Var field = _cls.getStaticField(env, name);
+    
+    if (field == null) {
+      if (! defaultV.isDefault())
+        return defaultV;
+      else {
+        throw new ReflectionException(L.l("Class '{0}' does not have property named '{1}'", _name, name));
+      }
+    }
+
+    return field.toValue();
   }
   
-  public ArrayValue getDefaultProperties()
+  public void setStaticPropertyValue(Env env, String name, Value value)
   {
-    return null;
+    _cls.getStaticField(env, name).set(value);
+  }
+  
+  public ArrayValue getDefaultProperties(Env env)
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    addStaticFields(env, array, _cls);
+    
+    HashMap<StringValue, Expr> fieldMap = _cls.getClassVars();
+    
+    for (Map.Entry<StringValue, Expr> entry : fieldMap.entrySet()) {
+      array.put(entry.getKey(), entry.getValue().eval(env));
+    }
+    
+    return array;
   }
   
   public boolean isIterateable()
   {
-    return false;
+    return _cls.getTraversableDelegate() != null;
   }
   
-  public boolean implementsInterface(String name)
+  public boolean implementsInterface(Env env, String name)
   {
-    return false;
+    return _cls.implementsInterface(env, name);
   }
   
-  public ReflectionExtension getExtension()
+  public ReflectionExtension getExtension(Env env)
   {
-    return null;
+    String extName = getExtensionName();
+    
+    if (extName != null)
+      return new ReflectionExtension(env, extName);
+    else
+      return null;
   }
   
   public String getExtensionName()
   {
-    return null;
+    return _cls.getExtension();
   }
   
+  public String toString()
+  {
+    return "ReflectionClass[" + _name + "]";
+  }
 }

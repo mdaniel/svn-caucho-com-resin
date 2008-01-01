@@ -70,6 +70,14 @@ public class StaticFunction extends JavaInvoker {
     _argLength = method.getParameterTypes().length;
     _quercusModule = quercusModule;
   }
+  
+  /*
+   * Returns true for a static function.
+   */
+  public boolean isStatic()
+  {
+    return true;
+  }
 
   private static String getName(Method method)
   {

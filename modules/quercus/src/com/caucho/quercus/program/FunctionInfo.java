@@ -133,6 +133,14 @@ public class FunctionInfo
   {
     _isGlobal = isGlobal;
   }
+  
+  /*
+   * True for a final function.
+   */
+  public boolean isFinal()
+  {
+    return _fun.isFinal();
+  }
 
   /**
    * True for a main function (top-level script).

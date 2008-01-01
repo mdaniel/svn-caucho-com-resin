@@ -32,19 +32,43 @@ package com.caucho.quercus.lib.reflection;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
 public class ReflectionProperty
   implements Reflector
 {
-  final private void __clone()
+  private static final L10N L = new L10N(ReflectionProperty.class);
+  
+  public static final int IS_STATIC = 1;
+  public static final int IS_PUBLIC = 256;
+  public static final int IS_PROTECTED = 512;
+  public static final int IS_PRIVATE = 1024;
+
+  private Property _prop;
+  
+  protected ReflectionProperty(Env env, QuercusClass cls, StringValue nameV)
   {
-    
+    _prop = Property.create(env, cls, nameV);
   }
   
-  public Value __construct(Value cls, String name)
+  final private void __clone()
   {
-    return null;
+  }
+  
+  public static ReflectionProperty __construct(Env env,
+                                               String clsName,
+                                               StringValue propName)
+  {
+    QuercusClass cls = env.findClass(clsName);
+
+    if (cls == null) {
+      throw new ReflectionException(L.l("Cannot find class '{0}'", clsName));
+    }
+    
+    return new ReflectionProperty(env, cls, propName);
   }
   
   public String __toString()
@@ -60,9 +84,9 @@ public class ReflectionProperty
     return null;
   }
   
-  public String getName()
+  public StringValue getName()
   {
-    return null;
+    return _prop.getName();
   }
   
   public boolean isPublic()
@@ -82,12 +106,15 @@ public class ReflectionProperty
   
   public boolean isStatic()
   {
-    return false;
+    return _prop.isStatic();
   }
   
+  /*
+   * XXX: no documentation whatsoever
+   */
   public boolean isDefault()
   {
-    return false;
+    return true;
   }
   
   public int getModifiers()
@@ -95,23 +122,159 @@ public class ReflectionProperty
     return -1;
   }
   
-  public Value getValue(ObjectValue obj)
+  public Value getValue(Env env, ObjectValue obj)
   {
-    return null;
+    return _prop.getValue(env, obj);
   }
   
-  public void setValue(ObjectValue obj, Value value)
+  public void setValue(Env env, ObjectValue obj, Value value)
   {
-
+    _prop.setValue(env, obj, value);
   }
   
-  public ReflectionClass getDeclaringClass()
+  public ReflectionClass getDeclaringClass(Env env)
   {
-    return null;
+    return _prop.getDeclaringClass(env);
   }
   
   public String getDocComment()
   {
     return null;
+  }
+  
+  public String toString()
+  {
+    return "ReflectionProperty[" + _prop.toString() + "]";
+  }
+
+  static class Property
+  {
+    final QuercusClass _cls;
+    final StringValue _nameV;
+    
+    public static Property create(Env env, QuercusClass cls, StringValue nameV)
+    { 
+      if (cls.findFieldIndex(nameV) >= 0)
+        return new Property(cls, nameV);
+      else if (cls.getStaticField(env, nameV.toString()) != null)
+        return new StaticProperty(cls, nameV);
+      else
+        throw new ReflectionException(L.l("Property {0}->${1} does not exist",
+                                          cls.getName(), nameV));
+    }
+    
+    protected Property(QuercusClass cls, StringValue nameV)
+    {
+      _cls = cls;
+      _nameV = nameV;
+    }
+    
+    public boolean isStatic()
+    {
+      return false;
+    }
+    
+    public final StringValue getName()
+    {
+      return _nameV;
+    }
+    
+    public Value getValue(Env env, ObjectValue obj)
+    {
+      return obj.getField(env, _nameV);
+    }
+    
+    public void setValue(Env env, ObjectValue obj, Value value)
+    {
+      obj.putField(env, _nameV, value);
+    }
+    
+    public ReflectionClass getDeclaringClass(Env env)
+    {
+      return getDeclaringClass(env, _cls);
+    }
+    
+    protected ReflectionClass getDeclaringClass(Env env, QuercusClass cls)
+    {
+      if (cls == null)
+        return null;
+      
+      ReflectionClass refClass = getDeclaringClass(env, cls.getParent());
+
+      if (refClass != null)
+        return refClass;
+      else if (cls.findFieldIndex(_nameV) >= 0)
+        return new ReflectionClass(cls);
+
+      return null;
+    }
+    
+    public String toString()
+    {
+      if (_cls.getName() != null)
+        return _cls.getName() + "->" + _nameV;
+      else
+        return _nameV.toString();
+    }
+  }
+  
+  static class StaticProperty extends Property
+  {
+    String _name;
+    
+    public StaticProperty(QuercusClass cls, StringValue nameV)
+    {
+      super(cls, nameV);
+      
+      _name = nameV.toString();
+    }
+    
+    @Override
+    public boolean isStatic()
+    {
+      return true;
+    }
+    
+    @Override
+    public Value getValue(Env env, ObjectValue obj)
+    {
+      return _cls.getStaticField(env, _name).toValue();
+    }
+    
+    @Override
+    public void setValue(Env env, ObjectValue obj, Value value)
+    {
+      _cls.getStaticField(env, _name).set(value);
+    }
+    
+    @Override
+    public ReflectionClass getDeclaringClass(Env env)
+    {
+      return getDeclaringClass(env, _cls);
+    }
+    
+    @Override
+    protected ReflectionClass getDeclaringClass(Env env, QuercusClass cls)
+    {
+      if (cls == null)
+        return null;
+      
+      ReflectionClass refClass = getDeclaringClass(env, cls.getParent());
+
+      if (refClass != null)
+        return refClass;
+      else if (cls.getStaticField(env, _name) != null)
+        return new ReflectionClass(cls);
+
+      return null;
+    }
+    
+    public String toString()
+    {
+      if (_cls.getName() != null)
+        return _cls.getName() + "::" + _name;
+      else
+        return _name;
+    }
   }
 }

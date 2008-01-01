@@ -30,16 +30,34 @@
 package com.caucho.quercus.lib.reflection;
 
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.expr.RequiredExpr;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.Arg;
 
 public abstract class ReflectionFunctionAbstract
 {
+  private AbstractFunction _fun;
+  
+  protected ReflectionFunctionAbstract(AbstractFunction fun)
+  {
+    _fun = fun;
+  }
+  
+  protected AbstractFunction getFunction()
+  {
+    return _fun;
+  }
+  
   private void __clone()
   {
   }
   
   public String getName()
   {
-    return null;
+    return _fun.getName();
   }
     
   public boolean isInternal()
@@ -79,21 +97,37 @@ public abstract class ReflectionFunctionAbstract
   
   public boolean returnsReference()
   {
-    return false;
+    return _fun.isReturnsReference();
   }
   
-  public ArrayValue getParameters()
+  public ArrayValue getParameters(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    Arg []args = _fun.getArgs();
+    
+    for (int i = 0; i < args.length; i++) {
+      array.put(env.wrapJava(new ReflectionParameter(_fun, args[i])));
+    }
+    
+    return array;
   }
   
   public int getNumberOfParameters()
   {
-    return -1;
+    return _fun.getArgs().length;
   }
   
   public int getNumberOfRequiredParameters()
   {
-    return -1;
+    Arg []args = _fun.getArgs();
+    
+    int requiredParams = 0;
+    for (int i = 0; i < args.length; i++) {
+      if (args[i].getDefault() instanceof RequiredExpr)
+        requiredParams++;
+    }
+    
+    return requiredParams;
   }
 }

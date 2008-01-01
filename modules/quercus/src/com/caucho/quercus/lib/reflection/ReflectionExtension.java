@@ -29,22 +29,42 @@
 
 package com.caucho.quercus.lib.reflection;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.ModuleInfo;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.util.L10N;
 
 public class ReflectionExtension
   implements Reflector
 {
+  private static final L10N L = new L10N(ReflectionExtension.class);
+  
+  private String _name;
+  
+  protected ReflectionExtension(Env env, String extension)
+  {
+    _name = extension;
+  }
+  
   final private void __clone()
   {
     
   }
   
-  public Value __construct(String name)
+  public static ReflectionExtension __construct(Env env, String name)
   {
-    return null;
+    return new ReflectionExtension(env, name);
   }
   
   public String __toString()
@@ -61,7 +81,7 @@ public class ReflectionExtension
   
   public String getName()
   {
-    return null;
+    return _name;
   }
   
   public String getVersion()
@@ -69,28 +89,99 @@ public class ReflectionExtension
     return null;
   }
   
-  public ArrayValue getFunctions()
+  public ArrayValue getFunctions(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    for (ModuleInfo moduleInfo : env.getQuercus().getModules()) {
+      Set<String> extensionSet = moduleInfo.getLoadedExtensions();
+
+      if (extensionSet.contains(_name)) {
+        for (String functionName : moduleInfo.getFunctions().keySet()) {
+          AbstractFunction fun = env.findFunction(functionName);
+          
+          array.put(env.wrapJava(new ReflectionFunction(fun)));
+        }
+      }
+    }
+    
+    return array;
   }
   
-  public ArrayValue getConstants()
+  public ArrayValue getConstants(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    for (ModuleInfo moduleInfo : env.getQuercus().getModules()) {
+      Set<String> extensionSet = moduleInfo.getLoadedExtensions();
+
+      if (extensionSet.contains(_name)) {
+        for (Map.Entry<String, Value> entry : moduleInfo.getConstMap().entrySet()) {
+          array.put(StringValue.create(entry.getKey()), entry.getValue());
+        }
+      }
+    }
+    
+    return array;
   }
   
-  public ArrayValue getINIEntries()
+  public ArrayValue getINIEntries(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    for (ModuleInfo moduleInfo : env.getQuercus().getModules()) {
+      Set<String> extensionSet = moduleInfo.getLoadedExtensions();
+
+      if (extensionSet.contains(_name)) {
+        IniDefinitions iniDefs = moduleInfo.getIniDefinitions();
+        
+        Set<Map.Entry<String, IniDefinition>> entrySet = iniDefs.entrySet();
+        
+        if (entrySet != null) {
+          for (Map.Entry<String, IniDefinition> entry : entrySet) {
+            array.put(StringValue.create(entry.getKey()),
+                      entry.getValue().getValue(env));
+          }
+        }
+      }
+    }
+    
+    return array;
   }
   
-  public ArrayValue getClasses()
+  public ArrayValue getClasses(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    HashSet<String> exts = env.getModuleContext().getExtensionClasses(_name);
+    
+    if (exts != null) {
+      for (String name : exts) {
+        array.put(StringValue.create(name),
+                  env.wrapJava(new ReflectionClass(env, name)));
+      }
+    }
+
+    return array;
   }
   
-  public ArrayValue getClassNames()
+  public ArrayValue getClassNames(Env env)
   {
-    return null;
+    ArrayValue array = new ArrayValueImpl();
+    
+    HashSet<String> exts = env.getModuleContext().getExtensionClasses(_name);
+    
+    if (exts != null) {
+      for (String name : exts) {
+        array.put(name);
+      }
+    }
+    
+    return array;
+  }
+  
+  public String toString()
+  {
+    return "ReflectionExtension[" + _name + "]";
   }
 }

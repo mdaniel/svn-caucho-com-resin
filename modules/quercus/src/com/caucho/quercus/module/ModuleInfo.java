@@ -66,7 +66,15 @@ public class ModuleInfo {
     = new HashMap<String, AbstractFunction>();
 
   private IniDefinitions _iniDefinitions = new IniDefinitions();
+  
+  private HashSet<String> _extensionClassMap
+    = new HashSet<String>();
 
+  public void addExtensionClass(String name)
+  {
+    _extensionClassMap.add(name);
+  }
+  
   /**
    * Constructor.
    */

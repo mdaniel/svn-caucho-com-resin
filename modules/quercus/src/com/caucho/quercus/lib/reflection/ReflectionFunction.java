@@ -34,17 +34,30 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.AbstractFunction;
 
 public class ReflectionFunction extends ReflectionFunctionAbstract
   implements Reflector
 {
+  public static final int IS_DEPRECATED = 1024 * 256; //262144;  //2^18
+  
+  protected ReflectionFunction(AbstractFunction fun)
+  {
+    super(fun);
+  }
+  
   final private void __clone()
   {
   }
   
-  public ObjectValue __construct(String name)
+  public static ReflectionFunction __construct(Env env, String name)
   {
-    return null;
+    AbstractFunction fun = env.findFunction(name);
+
+    if (fun != null)
+      return new ReflectionFunction(fun);
+    else
+      return null;
   }
   
   public String __toString()
@@ -59,13 +72,18 @@ public class ReflectionFunction extends ReflectionFunctionAbstract
     return null;
   }
   
-  public Value invoke(Value []args)
+  public Value invoke(Env env, Value []args)
   {
-    return null;
+    return getFunction().call(env, args);
   }
   
-  public Value invokeArgs(ArrayValue args)
+  public Value invokeArgs(Env env, ArrayValue args)
   {
-    return null;
+    return getFunction().call(env, args.getValueArray(env));
+  }
+  
+  public String toString()
+  {
+    return "ReflectionFunction[" + getName() + "]";
   }
 }

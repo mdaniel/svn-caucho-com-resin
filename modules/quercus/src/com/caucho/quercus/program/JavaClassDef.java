@@ -112,6 +112,8 @@ public class JavaClassDef extends ClassDef {
   private Method _iteratorMethod;
 
   private Marshal _marshal;
+  
+  private String _extension;
 
   public JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
@@ -125,6 +127,18 @@ public class JavaClassDef extends ClassDef {
     _isArray = type.isArray();
     _isInterface = type.isInterface();
     _isDelegate = type.isAnnotationPresent(ClassImplementation.class);
+  }
+  
+  public JavaClassDef(ModuleContext moduleContext,
+                      String name,
+                      Class type,
+                      String extension)
+  {
+    this(moduleContext, name, type);
+    
+    _extension = extension;
+    
+    moduleContext.addExtensionClass(extension, name);
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
@@ -168,6 +182,15 @@ public class JavaClassDef extends ClassDef {
   public Class getType()
   {
     return _type;
+  }
+  
+  /*
+   * Returns the name of the extension that this class is part of.
+   */
+  @Override
+  public String getExtension()
+  {
+    return _extension;
   }
 
   @Override

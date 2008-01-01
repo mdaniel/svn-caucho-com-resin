@@ -50,9 +50,9 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
   private Expr _default_2;
 
   public CompiledMethod_3(String name,
-			  Expr default_0,
-			  Expr default_1,
-			  Expr default_2)
+                          Expr default_0,
+                          Expr default_1,
+                          Expr default_2)
   {
     _name = name;
     _default_0 = default_0;

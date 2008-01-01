@@ -39,6 +39,7 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.util.IdentityIntMap;
+import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
 import java.util.*;
@@ -78,8 +79,8 @@ public class QuercusClass {
   private final ArrayList<StringValue> _fieldNames
     = new ArrayList<StringValue>();
   
-  private final IdentityIntMap _fieldMap
-    = new IdentityIntMap();
+  private final IntMap _fieldMap
+    = new IntMap();
   
   private final HashMap<StringValue,Expr> _fieldInitMap
     = new HashMap<StringValue,Expr>();
@@ -95,8 +96,8 @@ public class QuercusClass {
   private final MethodMap<AbstractFunction> _methodMap
     = new MethodMap<AbstractFunction>();
 
-  private final IdentityHashMap<String,Expr> _constMap
-    = new IdentityHashMap<String,Expr>();
+  private final HashMap<String,Expr> _constMap
+    = new HashMap<String,Expr>();
 
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap
     = new LinkedHashMap<String,ArrayList<StaticField>>();
@@ -198,7 +199,7 @@ public class QuercusClass {
     return _classDef;
   }
 
-  MethodMap<AbstractFunction> getMethodMap()
+  public MethodMap<AbstractFunction> getMethodMap()
   {
     return _methodMap;
   }
@@ -218,10 +219,36 @@ public class QuercusClass {
   {
     return _parent;
   }
+  
+  /*
+   * Returns the class definitions for this class.
+   */
+  public ClassDef []getClassDefList()
+  {
+    return _classDefList;
+  }
+  
+  /*
+   * Returns the name of the extension that this class is part of.
+   */
+  public String getExtension()
+  {
+    return _classDef.getExtension();
+  }
 
   public boolean isInterface()
   {
     return _classDef.isInterface();
+  }
+  
+  public boolean isAbstract()
+  {
+    return _classDef.isAbstract();
+  }
+  
+  public boolean isFinal()
+  {
+    return _classDef.isFinal();
   }
 
   /**
@@ -341,7 +368,7 @@ public class QuercusClass {
   }
 
   /**
-   * Sets the __call
+   * Gets the __call
    */
   public AbstractFunction getCall()
   {
@@ -516,6 +543,16 @@ public class QuercusClass {
       env.addInitializedClass(map.getKey());
     }
   }
+  
+  /*
+  public void setStaticField(String name, Value val)
+  {
+    Var var = new Var();
+    var.set(val);
+    
+    _staticFieldMap.put(name, var);
+  }
+  */
 
   public Var getStaticField(Env env, String name)
   {
@@ -527,8 +564,8 @@ public class QuercusClass {
       Var var = env.getGlobalRaw(fullName);
 
       if (var == null) {
-	var = env.getGlobalVar(fullName);
-	var.set(value);
+        var = env.getGlobalVar(fullName);
+        var.set(value);
       }
       
       return var;
@@ -540,6 +577,14 @@ public class QuercusClass {
       return parent.getStaticField(env, name);
     else
       return null;
+  }
+  
+  /*
+   * Returns the static fields.
+   */
+  public HashMap<String, Value> getStaticFieldMap()
+  {
+    return _staticFieldMap;
   }
   
   //
@@ -637,6 +682,38 @@ public class QuercusClass {
 
     return false;
   }
+  
+  /*
+   * Returns true if implements interface.
+   */
+  public boolean implementsInterface(Env env, String name)
+  {
+    if (isInterface())
+      return false;
+    
+    ClassDef [] defList = _classDefList;
+    
+    for (int i = 0; i < defList.length; i++) {
+      ClassDef def = defList[i];
+      
+      if (def.isInterface()) {
+        if (def.getName().equals(name))
+          return true;
+      }
+      else {
+        String []defNames = def.getInterfaces();
+        
+        for (int j = 0; j < defNames.length; j++) {
+          QuercusClass cls = env.findClass(defNames[j]);
+          
+          if (cls.getName().equals(name))
+            return true;
+        }
+      }
+    }
+    
+    return false;
+  }
 
   /**
    * Finds the matching constructor.
@@ -656,7 +733,7 @@ public class QuercusClass {
   public Value getField(Env env, Value qThis, StringValue name)
   {
     if (_fieldGet != null)
-      return _fieldGet.callMethod(env, qThis, name);
+      return _fieldGet.callMethod(env, null, qThis, name);
     else
       return UnsetValue.UNSET;
   }
@@ -667,7 +744,7 @@ public class QuercusClass {
   public void setField(Env env, Value qThis, StringValue name, Value value)
   {
     if (_fieldSet != null)
-      _fieldSet.callMethod(env, qThis, name, value);
+      _fieldSet.callMethod(env, null, qThis, name, value);
   }
 
   /**
@@ -814,6 +891,7 @@ public class QuercusClass {
   public Value callMethod(Env env,
                           Value thisValue,
                           StringValue name,
+
                           Value []args)
   {
     AbstractFunction fun = _methodMap.get(name.toString());
@@ -880,7 +958,7 @@ public class QuercusClass {
    */
   public Value callMethod(Env env, Value thisValue,
                           int hash, char []name, int nameLen,
-			  Value a1, Value a2)
+                          Value a1, Value a2)
   {
     AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
@@ -1249,6 +1327,22 @@ public class QuercusClass {
 
     throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown constant",
 					getName(), name));
+  }
+  
+  /**
+   * Returns true if the constant exists.
+   */
+  public final boolean hasConstant(String name)
+  {
+    return _constMap.get(String.valueOf(name)) != null;
+  }
+  
+  /*
+   * Returns the constants defined in this class.
+   */
+  public final HashMap<String, Expr> getConstantMap()
+  {
+    return _constMap;
   }
 
   public String toString()

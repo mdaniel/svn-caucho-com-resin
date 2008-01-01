@@ -48,7 +48,9 @@ abstract public class CompiledMethod_2 extends CompiledMethod {
   private Expr _default_0;
   private Expr _default_1;
 
-  public CompiledMethod_2(String name, Expr default_0, Expr default_1)
+  public CompiledMethod_2(String name,
+                          Expr default_0,
+                          Expr default_1)
   {
     _name = name;
     _default_0 = default_0;

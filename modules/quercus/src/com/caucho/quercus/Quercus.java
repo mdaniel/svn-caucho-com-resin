@@ -1195,6 +1195,11 @@ public class Quercus
     else
       return BooleanValue.FALSE;
   }
+  
+  public Collection<ModuleInfo> getModules()
+  {
+    return _modules.values();
+  }
 
   public HashMap<String, Value> getConstMap()
   {

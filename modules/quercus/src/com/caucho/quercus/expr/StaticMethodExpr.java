@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullThisValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.MethodMap;
@@ -134,10 +135,12 @@ public class StaticMethodExpr extends Expr {
       env.error(getLocation(), L.l("no matching class {0}", _className));
     }
 
-    // qa/0954 - what appears to be a static call may be a call to a super constructor
+    /*
+    // php/0954 - what appears to be a static call may be a call to a super constructor
     Value thisValue = env.getThis();
-
-    return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
+    */
+    
+    return cl.callMethod(env, null, _hash, _name, _name.length, _args);
   }
   
   /**

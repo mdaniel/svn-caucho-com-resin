@@ -32,25 +32,63 @@ package com.caucho.quercus.env;
 import java.io.Serializable;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.program.ClassDef;
 
 /**
- * Represents a PHP null value.
+ * Represents a PHP null value, used for 
  */
 public class NullThisValue extends NullValue
   implements Serializable
 {
   public static final NullThisValue NULL = new NullThisValue();
 
+  private ClassDef _classDef;
+  
   protected NullThisValue()
   {
   }
 
+  public NullThisValue(ClassDef classDef)
+  {
+    _classDef = classDef;
+  }
+  
+  public NullThisValue(Env env, String clsName)
+  {
+    if (clsName != null)
+      _classDef = env.findClassDef(clsName);
+  }
+  
   /**
-   * Returns the null value singleton.
+   * Creates a null this context.
    */
   public static NullThisValue create()
   {
     return NULL;
+  }
+
+  /**
+   * Returns true for an implementation of a class
+   */
+  @Override
+  public boolean isA(String name)
+  {
+    if (_classDef != null)
+      return _classDef.isA(name);
+    else
+      return false;
+  }
+  
+  /*
+   * Returns the object name of this value.
+   */
+  @Override
+  public String getClassName()
+  {
+    if (_classDef != null)
+      return _classDef.getName();
+    else
+      return null;
   }
 
   /**
