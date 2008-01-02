@@ -161,7 +161,7 @@ Quercus defaults to UTF-8 encoding, the ISO-8859-1 encoding is set in the Quercu
 </p>
 
 <example title="WEB-INF/resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns"&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet-mapping url-pattern="*.php"
                    servlet-class="com.caucho.quercus.servlet.QuercusServlet"&gt;
     &lt;init&gt;
