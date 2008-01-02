@@ -33,20 +33,18 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents a char type.
  */
-public final class IntegerType extends ConfigType
+public final class CharacterPrimitiveType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(CharacterPrimitiveType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  public static final CharacterPrimitiveType TYPE = new CharacterPrimitiveType();
   
   /**
-   * The IntegerType is a singleton
+   * The CharacterPrimitiveType is a singleton
    */
-  private IntegerType()
+  private CharacterPrimitiveType()
   {
   }
   
@@ -55,7 +53,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return char.class;
   }
   
   /**
@@ -63,10 +61,11 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || text.length() == 0)
-      return null;
+    if (text != null && text.length() == 1)
+      return new Character(text.charAt(0));
     else
-      return Integer.valueOf(text);
+      throw new ConfigException(L.l("A Character value must be a single character at '{0}'.",
+				    text));
   }
   
   /**
@@ -74,16 +73,11 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
+    if (value instanceof Character)
       return value;
     else if (value == null)
-      return null;
-    else if (value instanceof String)
-      return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
+      return new Character((char) 0);
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+      return valueOf(String.valueOf(value));
   }
 }

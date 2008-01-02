@@ -95,6 +95,9 @@
 
     <bean name="message-destination-ref"
           class="com.caucho.config.types.MessageDestinationRef"/>
+    
+    <bean name="null"
+          class="com.caucho.config.type.NullType"/>
 
     <bean name="persistent-store"
           class="com.caucho.server.cluster.PersistentStoreConfig"/>

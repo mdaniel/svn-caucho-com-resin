@@ -31,22 +31,24 @@ package com.caucho.config.type;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import java.util.*;
+import java.util.regex.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents a Properties type.
  */
-public final class IntegerType extends ConfigType
+public final class PropertiesType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(LocaleType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
-  
+  public static final PropertiesType TYPE = new PropertiesType();
+
   /**
-   * The IntegerType is a singleton
+   * The PropertiesType is a singleton
    */
-  private IntegerType()
+  private PropertiesType()
   {
   }
   
@@ -55,7 +57,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return Properties.class;
   }
   
   /**
@@ -63,10 +65,20 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || text.length() == 0)
+    if (text == null)
       return null;
-    else
-      return Integer.valueOf(text);
+
+    try {
+      Properties props = new Properties();
+
+      ReadStream is = Vfs.openString(text);
+
+      props.load(is);
+
+      return props;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
   
   /**
@@ -74,16 +86,14 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
+    if (value instanceof Properties)
       return value;
     else if (value == null)
       return null;
     else if (value instanceof String)
       return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
+      throw new ConfigException(L.l("'{0}' is not a valid Properties value.",
 				    value));
   }
 }

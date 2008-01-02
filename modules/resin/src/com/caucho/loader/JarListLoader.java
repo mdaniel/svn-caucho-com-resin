@@ -158,7 +158,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	    isValidScan = true;
 	  }
 	} catch (Exception e) {
-	  log.log(Level.INFO, e.toString(), e);
+	  log.log(Level.FINER, e.toString(), e);
 
 	  isScan = false;
 	}
@@ -183,7 +183,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	  file.close();
 	}
       } catch (IOException e) {
-	throw ConfigException.create(e);
+	log.info(e.toString());
+	log.log(Level.FINER, e.toString(), e);
       } finally {
 	if (scan != null)
 	  scan.close();

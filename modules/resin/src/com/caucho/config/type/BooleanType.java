@@ -29,6 +29,12 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.*;
+import com.caucho.el.*;
+import com.caucho.util.*;
+
+import javax.el.*;
+
 /**
  * Represents a boolean or Boolean type.
  */
@@ -56,8 +62,10 @@ public final class BooleanType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || "".equals(text))
-      return Boolean.FALSE;
+    if (text == null)
+      return null;
+    else if ("".equals(text))
+      return Boolean.TRUE;
     else if ("no".equals(text) || "0".equals(text) || "false".equals(text))
       return Boolean.FALSE;
     else
@@ -74,8 +82,17 @@ public final class BooleanType extends ConfigType
     else if (value instanceof String)
       return valueOf((String) value);
     else if (value == null)
-      return Boolean.FALSE;
+      return null;
     else
       return valueOf(String.valueOf(value));
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  @Override
+  public Object valueOf(ELContext env, Expr expr)
+  {
+    return expr.evalBoolean(env);
   }
 }

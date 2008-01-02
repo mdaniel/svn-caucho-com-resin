@@ -29,11 +29,16 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.*;
+import com.caucho.util.*;
+
 /**
  * Represents a long or Long type.
  */
 public final class LongType extends ConfigType
 {
+  private static final L10N L = new L10N(LongType.class);
+  
   public static final LongType TYPE = new LongType();
   
   private static final Long ZERO = new Long(0);
@@ -59,8 +64,26 @@ public final class LongType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return ZERO;
+      return null;
     else
       return Long.valueOf(text);
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Long)
+      return value;
+    else if (value == null)
+      return null;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else if (value instanceof Number)
+      return new Long(((Number) value).longValue());
+    else
+      throw new ConfigException(L.l("'{0}' cannot be converted to an Long",
+				    value));
   }
 }

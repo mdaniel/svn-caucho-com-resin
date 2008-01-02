@@ -36,12 +36,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -155,6 +150,8 @@ public class DeployContainer<C extends DeployController>
 
     synchronized (_controllerList) {
       controllerList = new ArrayList<C>(_controllerList);
+
+      Collections.sort(controllerList, new StartupPriorityComparator());
     }
 
     for (int i = 0; i < controllerList.size(); i++) {
@@ -375,9 +372,11 @@ public class DeployContainer<C extends DeployController>
 
     synchronized (_controllerList) {
       controllers = new ArrayList<C>(_controllerList);
+
+      Collections.sort(controllers, new StartupPriorityComparator());
     }
 
-    for (int i = 0; i < controllers.size(); i++)
+    for (int i = controllers.size() - 1; i >= 0; i--)
       controllers.get(i).stop();
   }
   
@@ -398,9 +397,11 @@ public class DeployContainer<C extends DeployController>
     synchronized (_controllerList) {
       controllerList = new ArrayList<C>(_controllerList);
       _controllerList.clear();
+
+      Collections.sort(controllerList, new StartupPriorityComparator());
     }
 
-    for (int i = 0; i < controllerList.size(); i++) {
+    for (int i = controllerList.size() - 1; i >= 0; i--) {
       C controller = controllerList.get(i);
 
       controller.destroy();
@@ -410,5 +411,19 @@ public class DeployContainer<C extends DeployController>
   public String toString()
   {
     return "DeployContainer$" + System.identityHashCode(this) + "[]";
+  }
+
+  public class StartupPriorityComparator
+    implements Comparator<C>
+  {
+    public int compare(C a, C b)
+    {
+      if (a.getStartupPriority() == b.getStartupPriority())
+	return 0;
+      else if (a.getStartupPriority() < b.getStartupPriority())
+	return -1;
+      else
+	return 1;
+    }
   }
 }

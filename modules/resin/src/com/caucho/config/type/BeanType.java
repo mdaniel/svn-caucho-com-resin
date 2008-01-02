@@ -64,6 +64,7 @@ public class BeanType extends ConfigType
 
   private Method _valueOf;
   private Method _setParent;
+  private Method _replaceObject;
   
   private Attribute _addText;
   private Attribute _addProgram;
@@ -167,6 +168,22 @@ public class BeanType extends ConfigType
   }
   
   /**
+   * Replace the type with the generated object
+   */
+  public Object replaceObject(Object bean)
+  {
+    if (_replaceObject != null) {
+      try {
+	return _replaceObject.invoke(bean);
+      } catch (Exception e) {
+	throw ConfigException.create(_replaceObject, e);
+      }
+    }
+    else
+      return bean;
+  }
+  
+  /**
    * Converts the string to the given value.
    */
   public Object valueOf(String text)
@@ -216,6 +233,14 @@ public class BeanType extends ConfigType
 
       if (Modifier.isStatic(valueOf.getModifiers()))
 	_valueOf = valueOf;
+    } catch (NoSuchMethodException e) {
+    }
+    
+    try {
+      Method replaceObject = _beanClass.getMethod("replaceObject",
+						  new Class[] { } );
+
+      _replaceObject = replaceObject;
     } catch (NoSuchMethodException e) {
     }
     

@@ -64,7 +64,7 @@ public final class ByteType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return ZERO;
+      return null;
     else
       return Byte.valueOf(text);
   }
@@ -77,7 +77,7 @@ public final class ByteType extends ConfigType
     if (value instanceof Byte)
       return value;
     else if (value == null)
-      return ZERO;
+      return null;
     else if (value instanceof String)
       return valueOf((String) value);
     else if (value instanceof Number)

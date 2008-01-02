@@ -33,20 +33,20 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents a short type.
  */
-public final class IntegerType extends ConfigType
+public final class ShortPrimitiveType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(ShortPrimitiveType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
+  public static final ShortPrimitiveType TYPE = new ShortPrimitiveType();
   
-  private static final Integer ZERO = new Integer(0);
+  private static final Short ZERO = new Short((short) 0);
   
   /**
-   * The IntegerType is a singleton
+   * The ShortPrimitiveType is a singleton
    */
-  private IntegerType()
+  private ShortPrimitiveType()
   {
   }
   
@@ -55,7 +55,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return short.class;
   }
   
   /**
@@ -64,9 +64,9 @@ public final class IntegerType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return null;
+      return ZERO;
     else
-      return Integer.valueOf(text);
+      return Short.valueOf(text);
   }
   
   /**
@@ -74,16 +74,16 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
+    if (value instanceof Short)
       return value;
     else if (value == null)
-      return null;
+      return ZERO;
     else if (value instanceof String)
       return valueOf((String) value);
     else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
+      return new Short(((Number) value).shortValue());
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
+      throw new ConfigException(L.l("'{0}' cannot be converted to a short",
 				    value));
   }
 }

@@ -32,22 +32,34 @@ package com.caucho.config.type;
 import com.caucho.config.*;
 import com.caucho.util.*;
 
+import java.beans.*;
+import java.util.*;
+
 /**
- * Represents an int or Integer type.
+ * Represents an enumeration type
  */
-public final class IntegerType extends ConfigType
+public final class EnumType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
-  
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  private static final L10N L = new L10N(EnumType.class);
+
+  private Class _type;
+
+  private HashMap<String,Object> _nameMap = new HashMap<String,Object>();
   
   /**
-   * The IntegerType is a singleton
+   * The enumeration type
    */
-  private IntegerType()
+  public EnumType(Class type)
   {
+    _type = type;
+
+    for (Object value : type.getEnumConstants()) {
+      Enum enumValue = (Enum) value;
+
+      String name = enumValue.name();
+
+      _nameMap.put(name, enumValue);
+    }
   }
   
   /**
@@ -55,7 +67,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return _type;
   }
   
   /**
@@ -63,10 +75,17 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || text.length() == 0)
+    if (text == null)
       return null;
-    else
-      return Integer.valueOf(text);
+
+    Object value = _nameMap.get(text);
+
+    if (value != null)
+      return value;
+
+    Thread.dumpStack();
+    throw new ConfigException(L.l("{0}: '{1}' is an unknown enumeration value.",
+				  _type.getName(), text));
   }
   
   /**
@@ -74,16 +93,13 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
-      return value;
-    else if (value == null)
+    if (value == null)
       return null;
     else if (value instanceof String)
       return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
+    else if (_type.isAssignableFrom(value.getClass()))
+      return value;
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+      return valueOf(String.valueOf(value));
   }
 }

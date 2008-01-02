@@ -196,11 +196,16 @@ echo "&lt;/pre&gt;"
 <s1 title="DirectoryServlet">
 
 <p>The directory servlet provides the basic directory browsing.
+The servlet-name must be "directory" for the servlet to take effect.
 Sites will normally disable it.</p>
 
 <deftable-parameters>
-<tr><td>enable</td><td>Enable or disable the servlet</td><td>true
-</td></tr></deftable-parameters>
+<tr>
+  <td>enable</td>
+  <td>Enable or disable the servlet</td>
+  <td>true</td>
+</tr>
+</deftable-parameters>
 
 <example>
 &lt;servlet servlet-name="directory"

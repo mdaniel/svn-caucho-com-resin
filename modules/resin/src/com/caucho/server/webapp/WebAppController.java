@@ -65,7 +65,7 @@ public class WebAppController
   // The context path is the URL prefix for the web-app
   private String _contextPath;
   private String _version = "";
-  
+
   // Any old version web-app
   private WebAppController _oldWebAppController;
   private long _oldWebAppExpireTime;

@@ -482,19 +482,19 @@ public abstract class Path {
         
     if ((lastCh = lower.charAt(lower.length() - 1)) == '.'
 	|| lastCh == ' ' || lastCh == '*' || lastCh == '?'
-            || lastCh == '/' || lastCh == '\\'
-            || lower.endsWith("::$data")
-            || isWindowsSpecial(lower, "/con")
-            || isWindowsSpecial(lower, "/aux")
-            || isWindowsSpecial(lower, "/prn")
-            || isWindowsSpecial(lower, "/nul")
-            || isWindowsSpecial(lower, "/com1")
-            || isWindowsSpecial(lower, "/com2")
-            || isWindowsSpecial(lower, "/com3")
-            || isWindowsSpecial(lower, "/com4")
-            || isWindowsSpecial(lower, "/lpt1")
-            || isWindowsSpecial(lower, "/lpt2")
-            || isWindowsSpecial(lower, "/lpt3")) {
+	|| ((lastCh == '/' || lastCh == '\\') && ! isDirectory())
+	|| lower.endsWith("::$data")
+	|| isWindowsSpecial(lower, "/con")
+	|| isWindowsSpecial(lower, "/aux")
+	|| isWindowsSpecial(lower, "/prn")
+	|| isWindowsSpecial(lower, "/nul")
+	|| isWindowsSpecial(lower, "/com1")
+	|| isWindowsSpecial(lower, "/com2")
+	|| isWindowsSpecial(lower, "/com3")
+	|| isWindowsSpecial(lower, "/com4")
+	|| isWindowsSpecial(lower, "/lpt1")
+	|| isWindowsSpecial(lower, "/lpt2")
+	|| isWindowsSpecial(lower, "/lpt3")) {
       return true;
     }
 

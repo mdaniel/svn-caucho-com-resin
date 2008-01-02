@@ -29,11 +29,16 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.*;
+import com.caucho.util.*;
+
 /**
  * Represents a double or Double type.
  */
 public final class DoubleType extends ConfigType
 {
+  private static final L10N L = new L10N(DoubleType.class);
+  
   public static final DoubleType TYPE = new DoubleType();
   
   private static final Double ZERO = new Double(0);
@@ -59,8 +64,26 @@ public final class DoubleType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return ZERO;
+      return null;
     else
       return Double.valueOf(text);
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Double)
+      return value;
+    else if (value == null)
+      return null;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else if (value instanceof Number)
+      return new Double(((Number) value).doubleValue());
+    else
+      throw new ConfigException(L.l("'{0}' cannot be converted to an Double",
+				    value));
   }
 }

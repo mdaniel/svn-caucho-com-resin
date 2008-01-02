@@ -62,6 +62,9 @@ public class DeployConfig {
   // startup mode
   private String _startupMode;
 
+  // startup priority
+  private int _startupPriority;
+
   // redeploy mode
   private String _redeployMode;
   
@@ -134,6 +137,23 @@ public class DeployConfig {
   public String getStartupMode()
   {
     return _startupMode;
+  }
+
+  /**
+   * Sets the startup-priority
+   */
+  public void setStartupPriority(int priority)
+    throws ConfigException
+  {
+    _startupPriority = priority;
+  }
+
+  /**
+   * Gets the startup priority.
+   */
+  public int getStartupPriority()
+  {
+    return _startupPriority;
   }
 
   /**

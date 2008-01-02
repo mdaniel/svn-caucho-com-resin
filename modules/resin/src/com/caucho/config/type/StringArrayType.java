@@ -33,20 +33,18 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents a String[] type.
  */
-public final class IntegerType extends ConfigType
+public final class StringArrayType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(StringArrayType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  public static final StringArrayType TYPE = new StringArrayType();
   
   /**
-   * The IntegerType is a singleton
+   * The StringArrayType is a singleton
    */
-  private IntegerType()
+  private StringArrayType()
   {
   }
   
@@ -55,7 +53,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return String[].class;
   }
   
   /**
@@ -63,10 +61,7 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || text.length() == 0)
-      return null;
-    else
-      return Integer.valueOf(text);
+    return text.split(",");
   }
   
   /**
@@ -74,16 +69,14 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
+    if (value instanceof String[])
       return value;
     else if (value == null)
       return null;
     else if (value instanceof String)
       return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
+      throw new ConfigException(L.l("'{0}' is not a valid String[] value",
 				    value));
   }
 }

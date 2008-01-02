@@ -31,23 +31,27 @@ package com.caucho.config.type;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
+import com.caucho.webbeans.*;
+import com.caucho.webbeans.manager.*;
+
+import javax.webbeans.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents an interface.  The interface will try to lookup the
+ * value in webbeans.
  */
-public final class IntegerType extends ConfigType
+public final class InterfaceType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
-  
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  private static final L10N L = new L10N(InterfaceType.class);
+
+  private final Class _type;
   
   /**
-   * The IntegerType is a singleton
+   * Create the interface type
    */
-  private IntegerType()
+  public InterfaceType(Class type)
   {
+    _type = type;
   }
   
   /**
@@ -55,7 +59,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return _type;
   }
   
   /**
@@ -63,10 +67,23 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || text.length() == 0)
+    if (text == null)
       return null;
+
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    ComponentFactory factory;
+
+    if (! text.equals(""))
+      factory = webBeans.resolveByType(_type, Names.create(text));
     else
-      return Integer.valueOf(text);
+      factory = webBeans.resolveByType(_type);
+
+    if (factory != null)
+      return factory.get();
+
+    throw new ConfigException(L.l("{0}: '{1}' is an unknown bean.",
+				  _type.getName(), text));
   }
   
   /**
@@ -74,16 +91,14 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
-      return value;
-    else if (value == null)
+    if (value == null)
       return null;
     else if (value instanceof String)
       return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
+    else if (_type.isAssignableFrom(value.getClass()))
+      return value;
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+      throw new ConfigException(L.l("{0}: '{1}' is an invalid value.",
+				    _type.getName(), value));
   }
 }

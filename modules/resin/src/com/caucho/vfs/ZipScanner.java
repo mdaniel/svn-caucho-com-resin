@@ -30,12 +30,15 @@
 package com.caucho.vfs;
 
 import java.io.*;
+import java.util.logging.*;
 
 /**
  * Scans a zip file, returning the names
  */
 public class ZipScanner
 {
+  private static Logger _log;
+  
   private char []_cbuf = new char[256];
 
   private Path _path;
@@ -56,44 +59,47 @@ public class ZipScanner
    * @param path canonical path
    */
   public ZipScanner(Path path)
-    throws IOException
   {
-    _path = path;
-    
-    int length = (int) path.getLength();
-    
-    ReadStream is = path.openRead();
-
     try {
-      // PACK200 is a standard comment, so try skipping it first
-      is.skip(length - 22 - 7);
+      _path = path;
+    
+      int length = (int) path.getLength();
+    
+      ReadStream is = path.openRead();
 
-      if (is.read() != 0x50) {
-	is.skip(6);
+      try {
+	// PACK200 is a standard comment, so try skipping it first
+	is.skip(length - 22 - 7);
 
-	if (is.read() != 0x50)
-	  return;
+	if (is.read() != 0x50) {
+	  is.skip(6);
+
+	  if (is.read() != 0x50)
+	    return;
 	
-      }
+	}
       
-      if (is.read() == 0x4b
-	  && is.read() == 0x05
-	  && is.read() == 0x06) {
-	_isValid = true;
-      }
+	if (is.read() == 0x4b
+	    && is.read() == 0x05
+	    && is.read() == 0x06) {
+	  _isValid = true;
+	}
 
-      if (_isValid) {
-	is.skip(6);
+	if (_isValid) {
+	  is.skip(6);
 
-	_entries = is.read() + (is.read() << 8);
-	is.skip(4);
-	_offset = (is.read()
-		   + (is.read() << 8)
-		   + (is.read() << 16)
-		   + (is.read() << 24));
+	  _entries = is.read() + (is.read() << 8);
+	  is.skip(4);
+	  _offset = (is.read()
+		     + (is.read() << 8)
+		     + (is.read() << 16)
+		     + (is.read() << 24));
+	}
+      } finally {
+	is.close();
       }
-    } finally {
-      is.close();
+    } catch (Exception e) {
+      log().log(Level.FINER, e.toString(), e);
     }
   }
 
@@ -187,5 +193,13 @@ public class ZipScanner
 	throw new RuntimeException(e);
       }
     }
+  }
+
+  private static Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(ZipScanner.class.getName());
+
+    return _log;
   }
 }

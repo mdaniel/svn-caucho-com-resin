@@ -33,20 +33,16 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents the null value
  */
-public final class IntegerType extends ConfigType
+public final class NullType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
-  
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  private static final L10N L = new L10N(NullType.class);
   
   /**
-   * The IntegerType is a singleton
+   * The NullType is a singleton
    */
-  private IntegerType()
+  public NullType()
   {
   }
   
@@ -55,7 +51,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return void.class;
   }
   
   /**
@@ -66,7 +62,8 @@ public final class IntegerType extends ConfigType
     if (text == null || text.length() == 0)
       return null;
     else
-      return Integer.valueOf(text);
+      throw new ConfigException(L.l("'{0}' is an illegal value for <null/>",
+				    text));
   }
   
   /**
@@ -74,16 +71,9 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
-      return value;
-    else if (value == null)
+    if (value == null)
       return null;
-    else if (value instanceof String)
-      return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+      return valueOf(String.valueOf(value));
   }
 }

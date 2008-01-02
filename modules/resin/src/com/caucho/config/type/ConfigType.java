@@ -31,8 +31,11 @@ package com.caucho.config.type;
 
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
+import com.caucho.el.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
+
+import javax.el.*;
 
 import org.w3c.dom.Node;
 
@@ -100,6 +103,14 @@ abstract public class ConfigType
       return valueOf((String) value);
     else
       return value;
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(ELContext env, Expr value)
+  {
+    return valueOf(value.getValue(env));
   }
 
   /**

@@ -12,7 +12,12 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
-<li>admin: update tables for log storage to improve startup time (#2161, rep by koreth)</li>
+<li>windows security was not allowing directory servlet (#2228, rep by drsskelkar)</li>
+<li>add startup-priority to web-app to force startup order (#2204, rep by S Patronis)</li>
+<li>hessian: issues with deserializing StackTraceElement (#2273, rep by kitepad)</li>
+<li>hessian: change default setChunkedPost to true (#2225, #2260, rep by L Geller, ckchris)</li>
+<li>soap/jaxrpc: removed javax.xml.ws from jaxrpc.jar (#2270, rep by plsoft)</li>
+<li>(2007-12-31) admin: update tables for log storage to improve startup time (#2161, rep by koreth)</li>
 <li>WebBeans add xwork2 support as com.caucho.xwork2.ResinObjectFactory</li>
 <li>WebBeans: add createTransient to support framework object factories</li> 
 <li>mod_caucho: not properly grabbing backup server from session (#2268, rep by D Wigenfors)</li>

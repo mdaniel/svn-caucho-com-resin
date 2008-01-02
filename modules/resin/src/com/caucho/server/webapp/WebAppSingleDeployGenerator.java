@@ -224,6 +224,8 @@ public class WebAppSingleDeployGenerator
 
     _controller.setPrologue(_config.getPrologue());
 
+    _controller.setStartupPriority(_config.getStartupPriority());
+
     _controller.setSourceType("single");
 
     Environment.addEnvironmentListener(this, _parentLoader);

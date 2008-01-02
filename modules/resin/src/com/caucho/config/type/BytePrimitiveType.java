@@ -33,20 +33,20 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents a byte type.
  */
-public final class IntegerType extends ConfigType
+public final class BytePrimitiveType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(BytePrimitiveType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
+  public static final BytePrimitiveType TYPE = new BytePrimitiveType();
   
-  private static final Integer ZERO = new Integer(0);
+  private static final Byte ZERO = new Byte((byte) 0);
   
   /**
-   * The IntegerType is a singleton
+   * The BytePrimitiveType is a singleton
    */
-  private IntegerType()
+  private BytePrimitiveType()
   {
   }
   
@@ -55,7 +55,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return byte.class;
   }
   
   /**
@@ -64,9 +64,9 @@ public final class IntegerType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return null;
+      return ZERO;
     else
-      return Integer.valueOf(text);
+      return Byte.valueOf(text);
   }
   
   /**
@@ -74,16 +74,16 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
+    if (value instanceof Byte)
       return value;
     else if (value == null)
-      return null;
+      return ZERO;
     else if (value instanceof String)
       return valueOf((String) value);
     else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
+      return new Byte(((Number) value).byteValue());
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
+      throw new ConfigException(L.l("'{0}' cannot be converted to a byte",
 				    value));
   }
 }

@@ -29,11 +29,16 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.*;
+import com.caucho.util.*;
+
 /**
  * Represents a float or Float type.
  */
 public final class FloatType extends ConfigType
 {
+  private static final L10N L = new L10N(FloatType.class);
+  
   public static final FloatType TYPE = new FloatType();
   
   private static final Float ZERO = new Float(0F);
@@ -59,8 +64,26 @@ public final class FloatType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return ZERO;
+      return null;
     else
       return Float.valueOf(text);
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Float)
+      return value;
+    else if (value == null)
+      return null;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else if (value instanceof Number)
+      return new Float(((Number) value).floatValue());
+    else
+      throw new ConfigException(L.l("'{0}' cannot be converted to an Float",
+				    value));
   }
 }

@@ -30,23 +30,24 @@
 package com.caucho.config.type;
 
 import com.caucho.config.*;
+import com.caucho.el.*;
 import com.caucho.util.*;
 
+import javax.el.*;
+
 /**
- * Represents an int or Integer type.
+ * Represents a boolean type.
  */
-public final class IntegerType extends ConfigType
+public final class BooleanPrimitiveType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(BooleanPrimitiveType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  public static final BooleanPrimitiveType TYPE = new BooleanPrimitiveType();
   
   /**
-   * The IntegerType is a singleton
+   * The BooleanPrimitiveType is a singleton
    */
-  private IntegerType()
+  private BooleanPrimitiveType()
   {
   }
   
@@ -55,7 +56,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return boolean.class;
   }
   
   /**
@@ -63,10 +64,12 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || text.length() == 0)
-      return null;
+    if (text == null || "".equals(text))
+      return Boolean.TRUE;
+    else if ("no".equals(text) || "0".equals(text) || "false".equals(text))
+      return Boolean.FALSE;
     else
-      return Integer.valueOf(text);
+      return Boolean.TRUE;
   }
   
   /**
@@ -74,16 +77,22 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
+    if (value instanceof Boolean)
       return value;
-    else if (value == null)
-      return null;
     else if (value instanceof String)
       return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
+    else if (value == null)
+      return Boolean.FALSE;
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+      return valueOf(String.valueOf(value));
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  @Override
+  public Object valueOf(ELContext env, Expr expr)
+  {
+    return expr.evalBoolean(env);
   }
 }

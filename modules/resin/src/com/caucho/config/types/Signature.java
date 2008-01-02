@@ -142,10 +142,14 @@ public class Signature {
   public void init()
     throws ConfigException
   {
-    if (_signature == null)
+    // jsp/18v2
+    /*
+    if (signature == null)
       throw new ConfigException(L.l("A Signature requires the method signature."));
+    */
 
-    parseSignature();
+    if (_signature != null)
+      parseSignature();
   }
 
   /**

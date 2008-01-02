@@ -29,11 +29,16 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.*;
+import com.caucho.util.*;
+
 /**
  * Represents a short or Short type.
  */
 public final class ShortType extends ConfigType
 {
+  private static final L10N L = new L10N(ShortType.class);
+  
   public static final ShortType TYPE = new ShortType();
   
   private static final Short ZERO = new Short((short) 0);
@@ -59,8 +64,26 @@ public final class ShortType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return ZERO;
+      return null;
     else
       return Short.valueOf(text);
+  }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Short)
+      return value;
+    else if (value == null)
+      return null;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else if (value instanceof Number)
+      return new Short(((Number) value).shortValue());
+    else
+      throw new ConfigException(L.l("'{0}' cannot be converted to a Short",
+				    value));
   }
 }

@@ -71,6 +71,8 @@ public class NodeBuilder {
   private final static QName TEXT = new QName("#text");
   private final static QName VALUE = new QName("value");
 
+  private static final Object NULL = new Object();
+
   private final static HashSet<QName> _resinClassSet = new HashSet<QName>();
 
   private static ThreadLocal<NodeBuilder> _currentBuilder
@@ -413,7 +415,10 @@ public class NodeBuilder {
 	attrStrategy.setValue(bean, qName, childBean);
       }
       else if ((childBean = getElementValue(attrStrategy, childNode)) != null) {
-	attrStrategy.setValue(bean, qName, childBean);
+	if (childBean != NULL)
+	  attrStrategy.setValue(bean, qName, childBean);
+	else
+	  attrStrategy.setValue(bean, qName, null);
       }
       else {
 	ConfigType attrType = attrStrategy.getConfigType();
@@ -796,9 +801,14 @@ public class NodeBuilder {
     
 	  ELParser parser = new ELParser(elContext, data);
     
-	  ValueExpression value = parser.parse();
+	  Expr expr = parser.parse();
 
-	  return attr.getConfigType().valueOf(value.getValue(elContext));
+	  Object value = attr.getConfigType().valueOf(elContext, expr);
+
+	  if (value != null)
+	    return value;
+	  else
+	    return NULL;
 	}
 	
 	return null;
@@ -820,7 +830,12 @@ public class NodeBuilder {
       
       childType.init(childBean);
 
-      return childType.replaceObject(childBean);
+      Object value = childType.replaceObject(childBean);
+
+      if (value != null)
+	return value;
+      else
+	return NULL;
     }
 
     return null;

@@ -33,20 +33,20 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 
 /**
- * Represents an int or Integer type.
+ * Represents an int type.
  */
-public final class IntegerType extends ConfigType
+public final class IntegerPrimitiveType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(IntegerPrimitiveType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
+  public static final IntegerPrimitiveType TYPE = new IntegerPrimitiveType();
   
   private static final Integer ZERO = new Integer(0);
   
   /**
-   * The IntegerType is a singleton
+   * The IntegerPrimitiveType is a singleton
    */
-  private IntegerType()
+  private IntegerPrimitiveType()
   {
   }
   
@@ -55,7 +55,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return int.class;
   }
   
   /**
@@ -64,7 +64,7 @@ public final class IntegerType extends ConfigType
   public Object valueOf(String text)
   {
     if (text == null || text.length() == 0)
-      return null;
+      return ZERO;
     else
       return Integer.valueOf(text);
   }
@@ -77,13 +77,13 @@ public final class IntegerType extends ConfigType
     if (value instanceof Integer)
       return value;
     else if (value == null)
-      return null;
+      return ZERO;
     else if (value instanceof String)
       return valueOf((String) value);
     else if (value instanceof Number)
       return new Integer(((Number) value).intValue());
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
+      throw new ConfigException(L.l("'{0}' cannot be converted to an int",
 				    value));
   }
 }

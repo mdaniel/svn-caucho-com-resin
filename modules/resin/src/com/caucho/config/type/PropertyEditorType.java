@@ -32,22 +32,25 @@ package com.caucho.config.type;
 import com.caucho.config.*;
 import com.caucho.util.*;
 
+import java.beans.*;
+
 /**
- * Represents an int or Integer type.
+ * Represents a type with a PropertyEditor
  */
-public final class IntegerType extends ConfigType
+public final class PropertyEditorType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
-  
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  private static final L10N L = new L10N(PropertyEditorType.class);
+
+  private Class _type;
+  private PropertyEditor _editor;
   
   /**
-   * The IntegerType is a singleton
+   * The FloatType is a singleton
    */
-  private IntegerType()
+  public PropertyEditorType(Class type, PropertyEditor editor)
   {
+    _type = type;
+    _editor = editor;
   }
   
   /**
@@ -55,7 +58,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return _type;
   }
   
   /**
@@ -63,10 +66,14 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text == null || text.length() == 0)
+    if (text == null)
       return null;
-    else
-      return Integer.valueOf(text);
+    
+    synchronized (_editor) {
+      _editor.setAsText(text);
+
+      return _editor.getValue();
+    }
   }
   
   /**
@@ -74,16 +81,13 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
-      return value;
-    else if (value == null)
+    if (value == null)
       return null;
     else if (value instanceof String)
       return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
+    else if (_type.isAssignableFrom(value.getClass()))
+      return value;
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+      return valueOf(String.valueOf(value));
   }
 }

@@ -73,6 +73,8 @@ abstract public class DeployController<I extends DeployInstance>
   private String _startupMode = STARTUP_DEFAULT;
   private String _redeployMode = REDEPLOY_DEFAULT;
 
+  private int _startupPriority = Integer.MAX_VALUE;
+
   private DeployControllerStrategy _strategy;
 
   protected final Lifecycle _lifecycle;
@@ -134,11 +136,30 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Sets the startup priority.
+   */
+  public void setStartupPriority(int priority)
+  {
+    _startupPriority = priority;
+  }
+
+  /**
+   * Gets the startup priority.
+   */
+  public int getStartupPriority()
+  {
+    return _startupPriority;
+  }
+
+  /**
    * Merges with the old controller.
    */
-  protected void mergeController(DeployController newController)
+  protected void mergeController(DeployController oldController)
   {
-    newController._parentLoader = _parentLoader;
+    _parentLoader = oldController._parentLoader = _parentLoader;
+
+    if (oldController._startupPriority < _startupPriority)
+      _startupPriority = oldController._startupPriority;
   }
 
   /**

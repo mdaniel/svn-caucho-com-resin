@@ -68,4 +68,17 @@ public final class CharacterType extends ConfigType
     else
       throw new ConfigException(L.l("A Character value must be a single character."));
   }
+  
+  /**
+   * Converts the value to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value instanceof Character)
+      return value;
+    else if (value == null)
+      return null;
+    else
+      return valueOf(String.valueOf(value));
+  }
 }

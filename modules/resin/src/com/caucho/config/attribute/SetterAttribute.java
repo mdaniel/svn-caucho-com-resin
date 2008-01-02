@@ -37,6 +37,8 @@ import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
 public class SetterAttribute extends Attribute {
+  private final L10N L = new L10N(SetterAttribute.class);
+  
   private final Method _setter;
   private final ConfigType _type;
 
@@ -77,6 +79,11 @@ public class SetterAttribute extends Attribute {
   {
     try {
       _setter.invoke(bean, value);
+    } catch (IllegalArgumentException e) {
+      throw ConfigException.create(_setter,
+				L.l("'{0}' is an illegal value.",
+				    value),
+				e);
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

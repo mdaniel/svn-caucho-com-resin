@@ -1099,6 +1099,10 @@ r_startup-mode =
   attribute startup-mode { string }
   | element startup-mode { string }
 
+r_startup-priority =
+  attribute startup-priority { string }
+  | element startup-priority { string }
+
 r_strict-mapping =
   attribute strict-mapping { r_boolean-Type }
   | element strict-mapping { r_boolean-Type }
@@ -1359,7 +1363,9 @@ rc_web-app = element web-app {
       r_web-app-Content
     }?
 
-  & r_startup-mode?),
+  & r_startup-mode?
+
+  & r_startup-priority?),
 
   r_web-app-Content
 }

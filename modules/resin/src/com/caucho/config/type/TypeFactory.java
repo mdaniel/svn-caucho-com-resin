@@ -41,6 +41,7 @@ import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
+import java.beans.*;
 import java.io.InputStream;
 import java.net.URL;
 import java.lang.reflect.*;
@@ -227,6 +228,8 @@ public class TypeFactory
 
   private ConfigType createType(Class type)
   {
+    PropertyEditor editor = null;
+
     if (ConfigType.class.isAssignableFrom(type)) {
       try {
 	return (ConfigType) type.newInstance();
@@ -234,12 +237,18 @@ public class TypeFactory
 	throw ConfigException.create(e);
       }
     }
+    else if ((editor = PropertyEditorManager.findEditor(type)) != null)
+      return new PropertyEditorType(type, editor);
+    else if (type.getEnumConstants() != null)
+      return new EnumType(type);
     else if (Collection.class.isAssignableFrom(type))
       return new ListType(type);
     else if (Map.class.isAssignableFrom(type))
       return new MapType(type);
     else if (EnvironmentBean.class.isAssignableFrom(type))
       return new EnvironmentBeanType(type);
+    else if (type.isInterface())
+      return new InterfaceType(type);
     else
       return new BeanType(type);
   }
@@ -382,14 +391,14 @@ public class TypeFactory
   }
 
   static {
-    _primitiveTypes.put(boolean.class, BooleanType.TYPE);
-    _primitiveTypes.put(byte.class, ByteType.TYPE);
-    _primitiveTypes.put(short.class, ShortType.TYPE);
-    _primitiveTypes.put(int.class, IntegerType.TYPE);
-    _primitiveTypes.put(long.class, LongType.TYPE);
-    _primitiveTypes.put(float.class, FloatType.TYPE);
-    _primitiveTypes.put(double.class, DoubleType.TYPE);
-    _primitiveTypes.put(char.class, CharacterType.TYPE);
+    _primitiveTypes.put(boolean.class, BooleanPrimitiveType.TYPE);
+    _primitiveTypes.put(byte.class, BytePrimitiveType.TYPE);
+    _primitiveTypes.put(short.class, ShortPrimitiveType.TYPE);
+    _primitiveTypes.put(int.class, IntegerPrimitiveType.TYPE);
+    _primitiveTypes.put(long.class, LongPrimitiveType.TYPE);
+    _primitiveTypes.put(float.class, FloatPrimitiveType.TYPE);
+    _primitiveTypes.put(double.class, DoublePrimitiveType.TYPE);
+    _primitiveTypes.put(char.class, CharacterPrimitiveType.TYPE);
 
     _primitiveTypes.put(Boolean.class, BooleanType.TYPE);
     _primitiveTypes.put(Byte.class, ByteType.TYPE);
@@ -401,13 +410,19 @@ public class TypeFactory
     _primitiveTypes.put(Character.class, CharacterType.TYPE);
 
     _primitiveTypes.put(Object.class, ObjectType.TYPE);
+    
     _primitiveTypes.put(String.class, StringType.TYPE);
+    _primitiveTypes.put(RawString.class, RawStringType.TYPE);
+    
+    _primitiveTypes.put(String[].class, StringArrayType.TYPE);
     
     _primitiveTypes.put(Class.class, ClassType.TYPE);
     _primitiveTypes.put(Path.class, PathType.TYPE);
-    _primitiveTypes.put(RawString.class, RawStringType.TYPE);
-    _primitiveTypes.put(DataSource.class, DataSourceType.TYPE);
     _primitiveTypes.put(Pattern.class, PatternType.TYPE);
+    _primitiveTypes.put(Locale.class, LocaleType.TYPE);
+    _primitiveTypes.put(Properties.class, PropertiesType.TYPE);
+    
+    _primitiveTypes.put(DataSource.class, DataSourceType.TYPE);
     
     /*
     _primitiveTypes.put("org.w3c.dom.Node", new NodeType());

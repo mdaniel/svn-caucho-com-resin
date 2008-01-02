@@ -32,21 +32,25 @@ package com.caucho.config.type;
 import com.caucho.config.*;
 import com.caucho.util.*;
 
+import java.util.*;
+import java.util.regex.*;
+
 /**
- * Represents an int or Integer type.
+ * Represents a Locale type.
  */
-public final class IntegerType extends ConfigType
+public final class LocaleType extends ConfigType
 {
-  private static final L10N L = new L10N(IntegerType.class);
+  private static final L10N L = new L10N(LocaleType.class);
   
-  public static final IntegerType TYPE = new IntegerType();
-  
-  private static final Integer ZERO = new Integer(0);
+  public static final LocaleType TYPE = new LocaleType();
+
+  private final HashMap<String,Locale> _localeMap
+    = new HashMap<String,Locale>();
   
   /**
-   * The IntegerType is a singleton
+   * The LocaleType is a singleton
    */
-  private IntegerType()
+  private LocaleType()
   {
   }
   
@@ -55,7 +59,7 @@ public final class IntegerType extends ConfigType
    */
   public Class getType()
   {
-    return Integer.class;
+    return Locale.class;
   }
   
   /**
@@ -65,8 +69,27 @@ public final class IntegerType extends ConfigType
   {
     if (text == null || text.length() == 0)
       return null;
-    else
-      return Integer.valueOf(text);
+
+    synchronized (_localeMap) {
+      Locale locale = _localeMap.get(text);
+
+      if (locale == null) {
+	String []values = text.split("[-_]");
+
+	if (values.length == 1)
+	  locale = new Locale(values[0]);
+	else if (values.length == 2)
+	  locale = new Locale(values[0], values[1]);
+	else if (values.length == 3)
+	  locale = new Locale(values[0], values[1], values[2]);
+	else
+	  throw new ConfigException(L.l("'{0}' is an invalid Locale", text));
+
+	_localeMap.put(text, locale);
+      }
+	
+      return locale;
+    }
   }
   
   /**
@@ -74,16 +97,11 @@ public final class IntegerType extends ConfigType
    */
   public Object valueOf(Object value)
   {
-    if (value instanceof Integer)
+    if (value instanceof Locale)
       return value;
     else if (value == null)
       return null;
-    else if (value instanceof String)
-      return valueOf((String) value);
-    else if (value instanceof Number)
-      return new Integer(((Number) value).intValue());
     else
-      throw new ConfigException(L.l("'{0}' cannot be converted to an Integer",
-				    value));
+      return valueOf(String.valueOf(value));
   }
 }
