@@ -29,6 +29,7 @@
 package javax.faces;
 
 import java.lang.reflect.*;
+import java.lang.ref.*;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
@@ -60,8 +61,8 @@ public class FactoryFinder
     = new WeakHashMap<ClassLoader,HashMap<String,String>>();
 
   private static final
-    WeakHashMap<ClassLoader,HashMap<String,Object>> _factoryMap
-    = new WeakHashMap<ClassLoader,HashMap<String,Object>>();
+    WeakHashMap<ClassLoader,HashMap<String,SoftReference<Object>>> _factoryMap
+    = new WeakHashMap<ClassLoader,HashMap<String,SoftReference<Object>>>();
 
   public static Object getFactory(String factoryName)
   {
@@ -77,12 +78,13 @@ public class FactoryFinder
     ClassLoader loader = thread.getContextClassLoader();
     
     synchronized (_factoryNameMap) {
-      HashMap<String,Object> objMap = _factoryMap.get(loader);
+      HashMap<String,SoftReference<Object>> objMap = _factoryMap.get(loader);
 
       if (objMap != null) {
-	Object factory = objMap.get(factoryName);
+	SoftReference<Object> factoryRef = objMap.get(factoryName);
+	Object factory;
 
-	if (factory != null)
+	if (factoryRef != null && (factory = factoryRef.get()) != null)
 	  return factory;
       }
 
@@ -104,11 +106,11 @@ public class FactoryFinder
 	throw new FacesException("No factory found for " + factoryName);
 
       if (objMap == null) {
-	objMap = new HashMap<String,Object>();
+	objMap = new HashMap<String,SoftReference<Object>>();
 	_factoryMap.put(loader, objMap);
       }
 
-      objMap.put(factoryName, factory);
+      objMap.put(factoryName, new SoftReference<Object>(factory));
 
       return factory;
     }
@@ -128,17 +130,18 @@ public class FactoryFinder
     ClassLoader loader = thread.getContextClassLoader();
     
     synchronized (_factoryNameMap) {
-      HashMap<String,Object> objectMap = _factoryMap.get(loader);
+      HashMap<String,SoftReference<Object>> objectMap = _factoryMap.get(loader);
 
       if (objectMap == null) {
-	objectMap = new HashMap<String,Object>();
+	objectMap = new HashMap<String,SoftReference<Object>>();
 	_factoryMap.put(loader, objectMap);
       }
 
-      Object oldFactory = objectMap.get(factoryName);
-
-      if (oldFactory == null)
-	oldFactory = _factoryMap.get(factoryName);
+      SoftReference<Object> oldFactoryRef = objectMap.get(factoryName);
+      Object oldFactory = null;
+	
+      if (oldFactoryRef != null)
+	oldFactory = oldFactoryRef.get();
       
       HashMap<String,String> map = _factoryNameMap.get(loader);
 
@@ -155,7 +158,7 @@ public class FactoryFinder
       if (factory == null)
 	throw new FacesException("No factory found for " + factoryName);
 
-      objectMap.put(factoryName, factory);
+      objectMap.put(factoryName, new SoftReference<Object>(factory));
     }
   }
 

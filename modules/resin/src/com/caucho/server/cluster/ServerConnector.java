@@ -921,6 +921,22 @@ public class ServerConnector
       
       if (log.isLoggable(Level.FINER))
 	log.finer("connect " + stream);
+
+      System.out.println("FST: " + _firstSuccessTime + " " + _state);
+      if (_firstSuccessTime <= 0) {
+	if (ST_STARTING <= _state && _state < ST_ACTIVE) {
+	  if (_warmupTime > 0)
+	    _state = ST_WARMUP;
+	  else
+	    _state = ST_ACTIVE;
+
+	  _firstSuccessTime = Alarm.getCurrentTime();
+	}
+
+	if (_warmupState < 0)
+	  _warmupState = 0;
+      }
+      System.out.println("FST2: " + _firstSuccessTime + " " + _state);
       
       return stream;
     } catch (IOException e) {
@@ -984,20 +1000,6 @@ public class ServerConnector
 	_prevSuccessTime = 0;
 	
       _lastSuccessTime = now;
-
-      if (_firstSuccessTime <= 0) {
-	if (ST_STARTING <= _state && _state < ST_ACTIVE) {
-	  if (_warmupTime > 0)
-	    _state = ST_WARMUP;
-	  else
-	    _state = ST_ACTIVE;
-
-	  _firstSuccessTime = now;
-	}
-
-	if (_warmupState < 0)
-	  _warmupState = 0;
-      }
     }
     
     updateWarmup();

@@ -22,7 +22,7 @@
 
   <login-config auth-method="form">
      <form-login-config form-login-page='/login.php'
-                        form-error-page='/login.php'/>
+                        form-error-page='/error.php'/>
   </login-config>
 
   <security-constraint>

@@ -12,6 +12,11 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>resin-admin: login failure needs to report error message (#2263)</li>
+<li>load-balance: start warmup timeout immediately (#2241, rep by A Balandran)</li>
+<li>security-manager: disable custom PolicyImpl (#2281, rep by norlab)</li>
+<li>load-balance: support load-balance-recover-time=0s (#2279, rep by A Balandran)</li>
+<li>classloader updates to help support Terracotta (#1970, rep by S Sozonoff)</li>
 <li>windows security was not allowing directory servlet (#2228, rep by drsskelkar)</li>
 <li>add startup-priority to web-app to force startup order (#2204, rep by S Patronis)</li>
 <li>hessian: issues with deserializing StackTraceElement (#2273, rep by kitepad)</li>

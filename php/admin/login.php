@@ -6,6 +6,10 @@ $title = "Resin Admin Login";
 
 display_header("login.php", $title, null);
 
+if ($error) {
+  echo "<h3 class='fail'>Error: $error</h3>";
+}
+
 ?><form method="POST" action="j_security_check?j_uri=status.php">
 <table border='0'>
 <tr>

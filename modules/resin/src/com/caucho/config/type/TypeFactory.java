@@ -34,8 +34,7 @@ import com.caucho.config.attribute.*;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.loader.*;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.QName;
 
@@ -420,6 +419,8 @@ public class TypeFactory
     _primitiveTypes.put(Path.class, PathType.TYPE);
     _primitiveTypes.put(Pattern.class, PatternType.TYPE);
     _primitiveTypes.put(Locale.class, LocaleType.TYPE);
+    _primitiveTypes.put(QDate.class, QDateType.TYPE);
+    _primitiveTypes.put(Date.class, DateType.TYPE);
     _primitiveTypes.put(Properties.class, PropertiesType.TYPE);
     
     _primitiveTypes.put(DataSource.class, DataSourceType.TYPE);

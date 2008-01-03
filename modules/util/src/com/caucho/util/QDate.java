@@ -150,6 +150,16 @@ public class QDate {
   }
 
   /**
+   * Creates the date for GMT.
+   */
+  public QDate(long time)
+  {
+    this(_localTimeZone);
+
+    setGMTTime(time);
+  }
+
+  /**
    * Creates the date form local or GMT.
    */
   public QDate(boolean isLocal)

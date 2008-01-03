@@ -698,7 +698,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       ClassLoader loader = thread.getContextClassLoader();
 
-      PolicyImpl.init();
+      // #2281
+      // PolicyImpl.init();
 
       EnvironmentStream.setStdout(System.out);
       EnvironmentStream.setStderr(System.err);
