@@ -32,6 +32,7 @@ import java.util.*;
 import java.io.*;
 
 import javax.xml.parsers.*;
+import javax.xml.validation.*;
 
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -60,6 +61,10 @@ public class XmlDocumentBuilderFactory extends DocumentBuilderFactory {
   }
 
   public void setAttribute(String key, Object value)
+  {
+  }
+
+  public void setSchema(Schema schema)
   {
   }
 

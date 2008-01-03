@@ -65,13 +65,17 @@ public class AppConfig {
 
     public void setLocation(String location) 
     {
-      _path = Vfs.lookup(location);
+      _path = Vfs.lookup().createRoot().lookup(location);
     }
 
     public ReadStream openRead(String file)
       throws IOException
     {
       Path p = _path.lookup(file);
+
+      if (! p.getFullPath().startsWith(_path.getFullPath()))
+	throw new IllegalStateException();
+      
       return p.openRead();
     }
 
@@ -79,6 +83,10 @@ public class AppConfig {
       throws IOException
     {
       Path p = _path.lookup(file);
+
+      if (! p.getFullPath().startsWith(_path.getFullPath()))
+	throw new IllegalStateException();
+      
       return p.openWrite();
     }
   }

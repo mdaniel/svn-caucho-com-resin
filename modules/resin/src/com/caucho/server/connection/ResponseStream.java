@@ -682,6 +682,10 @@ class ResponseStream extends ToByteResponseStream {
 
 	  writeChunk(buffer, bufferStart, bufferOffset - bufferStart);
 	}
+	else {
+	  // server/05b3
+	  _next.setBufferOffset(0);
+	}
 	
 	_isCommitted = true;
 	_next.write(_tailChunked, 0, _tailChunkedLength);
