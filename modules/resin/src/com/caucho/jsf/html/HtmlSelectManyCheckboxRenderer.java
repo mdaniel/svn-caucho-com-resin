@@ -28,21 +28,25 @@
 
 package com.caucho.jsf.html;
 
+import com.caucho.jsf.SelectOptionsHelper;
+import com.caucho.jsf.SelectOptionsRenderer;
+
 import java.io.*;
 import java.util.*;
 
-import javax.faces.*;
-import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.convert.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
+import javax.faces.model.SelectItemGroup;
+import javax.faces.model.SelectItem;
 
 /**
  * The HTML selectMany/checkbox renderer
  */
-class HtmlSelectManyCheckboxRenderer extends Renderer
+class HtmlSelectManyCheckboxRenderer
+  extends Renderer
 {
   public static final Renderer RENDERER
     = new HtmlSelectManyCheckboxRenderer();
@@ -65,17 +69,17 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     String clientId = component.getClientId(context);
 
     ExternalContext ext = context.getExternalContext();
-    Map<String,String[]> paramMap = ext.getRequestParameterValuesMap();
+    Map<String, String[]> paramMap = ext.getRequestParameterValuesMap();
 
-    String []value = paramMap.get(clientId);
+    String[] value = paramMap.get(clientId);
 
     if (value != null)
       ((EditableValueHolder) component).setSubmittedValue(value);
   }
 
   public Object getConvertedValue(FacesContext context,
-				  UIComponent component,
-				  Object submittedValue)
+                                  UIComponent component,
+                                  Object submittedValue)
     throws ConverterException
   {
     Converter converter = null;//component.getConverter();
@@ -88,56 +92,56 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       value = converter.getAsObject(context, component, value);
     */
 
-    uiSelectMany.setSelectedValues((Object []) value);
+    uiSelectMany.setSelectedValues((Object[]) value);
     uiSelectMany.setValid(true);
 
     return value;
   }
-  
+
   /**
    * Renders the open tag for the text.
    */
   @Override
-  public void encodeBegin(FacesContext context, UIComponent component)
+  public void encodeBegin(FacesContext context, final UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
+    final ResponseWriter out = context.getResponseWriter();
 
     String id = component.getId();
 
-    String accesskey;
-    int border;
-    String dir;
-    boolean disabled;
-    String disabledClass;
-    String enabledClass;
-    String lang;
-    String layout;
-    
-    String onblur;
-    String onchange;
-    String onclick;
-    String ondblclick;
-    String onfocus;
-    
-    String onkeydown;
-    String onkeypress;
-    String onkeyup;
-    
-    String onmousedown;
-    String onmousemove;
-    String onmouseout;
-    String onmouseover;
-    String onmouseup;
-    
-    String onselect;
+    final String accesskey;
+    final int border;
+    final String dir;
+    final boolean disabled;
+    final String disabledClass;
+    final String enabledClass;
+    final String lang;
+    final String layout;
 
-    boolean readonly;
-    String style;
-    String styleClass;
-    String tabindex;
-    String title;
-    Object value;
+    final String onblur;
+    final String onchange;
+    final String onclick;
+    final String ondblclick;
+    final String onfocus;
+
+    final String onkeydown;
+    final String onkeypress;
+    final String onkeyup;
+
+    final String onmousedown;
+    final String onmousemove;
+    final String onmouseout;
+    final String onmouseover;
+    final String onmouseup;
+
+    final String onselect;
+
+    final boolean readonly;
+    final String style;
+    final String styleClass;
+    final String tabindex;
+    final String title;
+    final Object value;
 
     if (component instanceof HtmlSelectManyCheckbox) {
       HtmlSelectManyCheckbox htmlComponent
@@ -157,19 +161,19 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       onclick = htmlComponent.getOnclick();
       ondblclick = htmlComponent.getOndblclick();
       onfocus = htmlComponent.getOnfocus();
-      
+
       onkeydown = htmlComponent.getOnkeydown();
       onkeypress = htmlComponent.getOnkeypress();
       onkeyup = htmlComponent.getOnkeyup();
-      
+
       onmousedown = htmlComponent.getOnmousedown();
       onmousemove = htmlComponent.getOnmousemove();
       onmouseout = htmlComponent.getOnmouseout();
       onmouseover = htmlComponent.getOnmouseover();
       onmouseup = htmlComponent.getOnmouseup();
-      
+
       onselect = htmlComponent.getOnselect();
-      
+
       readonly = htmlComponent.isReadonly();
       style = htmlComponent.getStyle();
       styleClass = htmlComponent.getStyleClass();
@@ -180,7 +184,7 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
-    
+
       accesskey = (String) attrMap.get("accesskey");
       border = (Integer) attrMap.get("border");
       dir = (String) attrMap.get("dir");
@@ -189,7 +193,7 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       enabledClass = (String) attrMap.get("enabledClass");
       lang = (String) attrMap.get("lang");
       layout = (String) attrMap.get("layout");
-      
+
       onblur = (String) attrMap.get("onblur");
       onchange = (String) attrMap.get("onchange");
       onclick = (String) attrMap.get("onclick");
@@ -230,14 +234,6 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     if (styleClass != null)
       out.writeAttribute("class", styleClass, "class");
 
-    String clientId = component.getClientId(context);
-    /*
-    out.writeAttribute("name", clientId, "name");
-    
-    if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
-      out.writeAttribute("id", clientId, "id");
-    */
-
     if (disabled)
       out.writeAttribute("disabled", "disabled", "disabled");
 
@@ -248,136 +244,205 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       out.write("\n");
     }
 
-    int childCount = component.getChildCount();
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = component.getChildren().get(i);
+    final String clientId = component.getClientId(context);
 
-      String childId = clientId + ":" + i;
-	
-      if ("pageDirection".equals(layout)) {
-	out.startElement("tr", child);
+    SelectOptionsHelper.render(component, new SelectOptionsRenderer() {
+      private int counter;
+
+      public void renderItemGroupStart(SelectItemGroup parentGroup,
+                                       SelectItemGroup itemGroup)
+        throws IOException
+      {
+
+        if ("pageDirection".equals(layout)) {
+          out.startElement("tr", component);
+          out.write("\n");
+        }
+
+        out.startElement("td", component);
+        
         out.write("\n");
+
+        out.startElement("table", component);
+
+        if (border > 0)
+          out.writeAttribute("border", border, "border");
+
+        if (style != null)
+          out.writeAttribute("style", style, "style");
+
+        if (styleClass != null)
+          out.writeAttribute("class", styleClass, "class");
+
+        if (disabled)
+          out.writeAttribute("disabled", "disabled", "disabled");
+
+        out.write("\n");
+
+        if (! "pageDirection".equals(layout)) {
+          out.startElement("tr", component);
+          out.write("\n");
+        }
       }
-      
-      out.startElement("td", child);
 
-      if (child instanceof UISelectItem) {
-	UISelectItem selectItem = (UISelectItem) child;
+      public void renderItemGroupEnd(SelectItemGroup parentGroup,
+                                     SelectItemGroup itemGroup)
+        throws IOException
+      {
+        if (! "pageDirection".equals(layout)) {
+          out.endElement("tr");
+          out.write("\n");
+        }
 
-	out.startElement("input", child);
-	out.writeAttribute("id", childId, "id");
-	out.writeAttribute("name", clientId, "name");
-	out.writeAttribute("type", "checkbox", "type");
+        out.endElement("table");
+        out.write("\n");
 
-	if (selectItem.isItemDisabled() || disabled)
-	  out.writeAttribute("disabled", "disabled", "disabled");
+        out.endElement("td");
+        out.write("\n");
 
-	if (value instanceof String[]) {
-	  String []values = (String []) value;
-
-	  for (int j = 0; j < values.length; j++) {
-	    if (values[j].equals(selectItem.getItemValue())) {
-	      out.writeAttribute("checked", "checked", "value");
-	      break;
-	    }
-	  }
-	}
-
-	if (accesskey != null)
-	  out.writeAttribute("accesskey", accesskey, "accesskey");
-
-	if (dir != null)
-	  out.writeAttribute("dir", dir, "dir");
-
-	if (lang != null)
-	  out.writeAttribute("lang", lang, "lang");
-
-	if (onblur != null)
-	  out.writeAttribute("onblur", onblur, "onblur");
-
-	if (onchange != null)
-	  out.writeAttribute("onchange", onchange, "onchange");
-
-	if (onclick != null)
-	  out.writeAttribute("onclick", onclick, "onclick");
-
-	if (ondblclick != null)
-	  out.writeAttribute("ondblclick", ondblclick, "ondblclick");
-
-	if (onfocus != null)
-	  out.writeAttribute("onfocus", onfocus, "onfocus");
-
-	if (onkeydown != null)
-	  out.writeAttribute("onkeydown", onkeydown, "onkeydown");
-
-	if (onkeypress != null)
-	  out.writeAttribute("onkeypress", onkeypress, "onkeypress");
-
-	if (onkeyup != null)
-	  out.writeAttribute("onkeyup", onkeyup, "onkeyup");
-
-	if (onmousedown != null)
-	  out.writeAttribute("onmousedown", onmousedown, "onmousedown");
-
-	if (onmousemove != null)
-	  out.writeAttribute("onmousemove", onmousemove, "onmousemove");
-
-	if (onmouseout != null)
-	  out.writeAttribute("onmouseout", onmouseout, "onmouseout");
-
-	if (onmouseover != null)
-	  out.writeAttribute("onmouseover", onmouseover, "onmouseover");
-
-	if (onmouseup != null)
-	  out.writeAttribute("onmouseup", onmouseup, "onmouseup");
-
-	if (onselect != null)
-	  out.writeAttribute("onselect", onselect, "onselect");
-
-	if (readonly)
-	  out.writeAttribute("readonly", "readonly", "readonly");
-
-	if (tabindex != null)
-	  out.writeAttribute("tabindex", tabindex, "tabindex");
-
-	if (title != null)
-	  out.writeAttribute("title", title, "title");
-
-	Object itemValue = selectItem.getItemValue();
-	if (itemValue != null)
-	  out.writeAttribute("value", String.valueOf(itemValue), "value");
-      
-	out.endElement("input");
-
-	if (selectItem.getItemLabel() != null) {
-	  out.startElement("label", child);
-	  out.writeAttribute("for", childId, "for");
-
-	  if (selectItem.isItemDisabled() || disabled) {
-	    if (disabledClass != null)
-	      out.writeAttribute("class", disabledClass, "disabledClass");
-	  }
-	  else {
-	    if (enabledClass != null)
-	      out.writeAttribute("class", enabledClass, "enabledClass");
-	  }
-	
-	  out.writeText(selectItem.getItemLabel(), "itemLabel");
-	
-	  out.endElement("label");
-	}
+        if ("pageDirection".equals(layout)) {
+          out.endElement("tr");
+          out.write("\n");
+        }
       }
-      
-      out.endElement("td");
-      out.write("\n");
 
-      if ("pageDirection".equals(layout)) {
-	out.endElement("tr");
-	out.write("\n");
+      public void render(UISelectItem item)
+        throws IOException
+      {
+        SelectItem selectItem = new SelectItem(item.getItemValue(),
+                                               item.getItemLabel());
+        selectItem.setDisabled(item.isItemDisabled());
+        selectItem.setEscape(item.isItemEscaped());
+        this.render(item, null, selectItem);
       }
-    }
 
-    if (! "pageDirection".equals(layout)) {
+      public void render(UIComponent component,
+                         SelectItemGroup selectItemGroup,
+                         SelectItem selectItem)
+        throws IOException
+      {
+        String childId = clientId + ":" + counter++;
+        if ("pageDirection".equals(layout)) {
+          out.startElement("tr", component);
+          out.write("\n");
+        }
+
+        out.startElement("td", component);
+
+        out.startElement("input", component);
+        out.writeAttribute("id", childId, "id");
+        out.writeAttribute("name", clientId, "name");
+        out.writeAttribute("type", "checkbox", "type");
+
+        if (selectItem.isDisabled() || disabled)
+          out.writeAttribute("disabled", "disabled", "disabled");
+
+        if (value instanceof String[]) {
+          String[] values = (String[]) value;
+
+          for (int j = 0; j < values.length; j++) {
+            if (values[j].equals(selectItem.getValue())) {
+              //todo alex need to coerse to getType of ValueExpression
+              out.writeAttribute("checked", "checked", "value");
+              break;
+            }
+          }
+        }
+
+        if (accesskey != null)
+          out.writeAttribute("accesskey", accesskey, "accesskey");
+
+        if (dir != null)
+          out.writeAttribute("dir", dir, "dir");
+
+        if (lang != null)
+          out.writeAttribute("lang", lang, "lang");
+
+        if (onblur != null)
+          out.writeAttribute("onblur", onblur, "onblur");
+
+        if (onchange != null)
+          out.writeAttribute("onchange", onchange, "onchange");
+
+        if (onclick != null)
+          out.writeAttribute("onclick", onclick, "onclick");
+
+        if (ondblclick != null)
+          out.writeAttribute("ondblclick", ondblclick, "ondblclick");
+
+        if (onfocus != null)
+          out.writeAttribute("onfocus", onfocus, "onfocus");
+
+        if (onkeydown != null)
+          out.writeAttribute("onkeydown", onkeydown, "onkeydown");
+
+        if (onkeypress != null)
+          out.writeAttribute("onkeypress", onkeypress, "onkeypress");
+
+        if (onkeyup != null)
+          out.writeAttribute("onkeyup", onkeyup, "onkeyup");
+
+        if (onmousedown != null)
+          out.writeAttribute("onmousedown", onmousedown, "onmousedown");
+
+        if (onmousemove != null)
+          out.writeAttribute("onmousemove", onmousemove, "onmousemove");
+
+        if (onmouseout != null)
+          out.writeAttribute("onmouseout", onmouseout, "onmouseout");
+
+        if (onmouseover != null)
+          out.writeAttribute("onmouseover", onmouseover, "onmouseover");
+
+        if (onmouseup != null)
+          out.writeAttribute("onmouseup", onmouseup, "onmouseup");
+
+        if (onselect != null)
+          out.writeAttribute("onselect", onselect, "onselect");
+
+        if (readonly)
+          out.writeAttribute("readonly", "readonly", "readonly");
+
+        if (tabindex != null)
+          out.writeAttribute("tabindex", tabindex, "tabindex");
+
+        if (title != null)
+          out.writeAttribute("title", title, "title");
+
+        Object itemValue = selectItem.getValue();
+        if (itemValue != null)
+          out.writeAttribute("value", String.valueOf(itemValue), "value");
+
+        out.endElement("input");
+
+        if (selectItem.getLabel() != null) {
+          out.startElement("label", component);
+          out.writeAttribute("for", childId, "for");
+
+          if (selectItem.isDisabled() || disabled) {
+            if (disabledClass != null)
+              out.writeAttribute("class", disabledClass, "disabledClass");
+          }
+          else {
+            if (enabledClass != null)
+              out.writeAttribute("class", enabledClass, "enabledClass");
+          }
+
+          out.writeText(selectItem.getLabel(), "itemLabel");
+
+          out.endElement("label");
+        }
+        out.endElement("td");
+        out.write("\n");
+
+        if ("pageDirection".equals(layout)) {
+          out.endElement("tr");
+          out.write("\n");
+        }
+      }
+    });
+
+    if (!"pageDirection".equals(layout)) {
       out.endElement("tr");
       out.write("\n");
     }
