@@ -29,66 +29,65 @@
 
 package com.caucho.config.attribute;
 
+import java.lang.reflect.*;
+import java.util.*;
+
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public abstract class Attribute {
-  private static final L10N L = new L10N(Attribute.class);
+public class SetValueAttribute extends Attribute {
+  private final ConfigType _type;
+
+  public SetValueAttribute(ConfigType type)
+  {
+    _type = type;
+  }
   
   /**
    * Returns the config type of the attribute value.
    */
-  abstract public ConfigType getConfigType();
-
-  /**
-   * Returns true for a bean-style attribute.
-   */
-  public boolean isBean()
+  public ConfigType getConfigType()
   {
-    return getConfigType().isBean();
-  }
-
-  /**
-   * Returns true for a program-style attribute.
-   */
-  public boolean isProgram()
-  {
-    return getConfigType().isProgram();
-  }
-  
-  /**
-   * Sets the value of the attribute as text
-   */
-  public void setText(Object bean, QName name, String value)
-    throws ConfigException
-  {
-    throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
-				  getConfigType().getTypeName(),
-				  name));
+    return _type;
   }
   
   /**
    * Sets the value of the attribute
    */
-  abstract public void setValue(Object bean, QName name, Object value)
-    throws ConfigException;
+  @Override
+  public void setText(Object bean, QName name, String value)
+    throws ConfigException
+  {
+    try {
+      ((Set) bean).add(_type.valueOf(value));
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
+  /**
+   * Sets the value of the attribute
+   */
+  @Override
+  public void setValue(Object bean, QName name, Object value)
+    throws ConfigException
+  {
+    try {
+      ((Set) bean).add(value);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
 
   /**
    * Creates the child bean.
    */
+  @Override
   public Object create(Object parent)
     throws ConfigException
   {
-    return null;
-  }
-
-  /**
-   * Replaces the given bean.
-   */
-  public Object replaceObject(Object bean)
-  {
-    return getConfigType().replaceObject(bean);
+    return _type.create(parent);
   }
 }

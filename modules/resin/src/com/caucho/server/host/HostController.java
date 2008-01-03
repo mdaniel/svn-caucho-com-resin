@@ -548,8 +548,8 @@ public class HostController
 	return host.getURL();
       else if (_hostName.equals(""))
 	return "";
-      else if (_hostName.startsWith("http:") ||
-	       _hostName.startsWith("https:"))
+      else if (_hostName.startsWith("http:")
+	       || _hostName.startsWith("https:"))
 	return _hostName;
       else
 	return "http://" + _hostName;

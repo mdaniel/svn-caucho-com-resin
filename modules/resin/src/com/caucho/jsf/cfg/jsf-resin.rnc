@@ -24,7 +24,7 @@ rjsf12_application = element application {
 
   & element state-manager { javaee-class }?
 
-  & element el-resolver { javaee-class }?
+  & element el-resolver { javaee-class }*
 
   & element property-resolver { javaee-class }?
 

@@ -186,7 +186,10 @@ public class ResinBoot {
         for (int i = 0; i < jvmArgs.length; i++) {
           String arg = jvmArgs[i];
 
-          if (arg.startsWith("-D"))
+	  if (arg.startsWith("-Djava.class.path=")) {
+	    // IBM JDK
+	  }
+          else if (arg.startsWith("-D"))
             args.add("-J" + arg);
         }
       }

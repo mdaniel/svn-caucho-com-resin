@@ -1280,8 +1280,11 @@ public abstract class Path {
 
           int ch;
 
-          while ((ch = is.read()) >= 0) {
-            digest = Crc64.next(digest, ch);
+	  byte []buffer = is.getBuffer();
+	  while (is.fillBuffer() > 0) {
+	    int length = is.getLength();
+
+            digest = Crc64.generate(digest, buffer, 0, length);
           }
 
           return digest;

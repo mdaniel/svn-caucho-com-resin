@@ -1415,7 +1415,8 @@ public class Resin implements EnvironmentBean, SchemaBean
       cl = Class.forName(className);
     } catch (Throwable e) {
       throw new ConfigException(L().l("class {0} is not loadable on startup.  Resin requires {0} to be in the classpath on startup.",
-				    className));
+				      className),
+				e);
 
     }
 

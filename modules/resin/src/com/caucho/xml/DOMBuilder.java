@@ -175,7 +175,7 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
     if (_node == null || _node == _top)
       _doc.addNamespace(prefix, url);
 
-    if (prefix.equals("")) {
+    if (prefix == null || prefix.equals("")) {
       _prefixNames.add(new QName(null, "xmlns", XmlParser.XMLNS));
       _prefixValues.add(url);
     }

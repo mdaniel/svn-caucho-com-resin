@@ -471,7 +471,7 @@ abstract public class
   {
     try {
       start();
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }

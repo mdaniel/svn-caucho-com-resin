@@ -114,7 +114,8 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
     ResinWatchdog server = _resin.findServer(_args.getServerId());
 
-    _password = server.getWatchdogPassword();
+    if (server != null)
+      _password = server.getWatchdogPassword();
 
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);

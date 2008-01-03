@@ -95,7 +95,7 @@ public class TransportConstraint extends AbstractConstraint {
     
     String url = request.getRequestURL().toString();
 
-    if (url.startsWith("http:")) {
+    if (url.startsWith("http:") && request.getServerPort() == 80) {
       url = "https:" + url.substring(5);
       String queryString = request.getQueryString();
       if (queryString != null)

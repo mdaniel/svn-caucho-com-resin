@@ -767,27 +767,30 @@ r_rewrite-dispatch-Contents =
      }*
 
    & element proxy {
-       ((attribute disable-at { string }
-         | element disable-at { string })?
-
-        & (attribute enable-at { string }
-           | element enable-at { string })?
-
-        & (attribute enabled { r_boolean-Type }
-           | element enabled { r_boolean-Type })?
-
-        & (attribute name { string }
-           | element name { string })?
-
-        & (attribute regexp { string }
-           | element regexp { string }
-           | attribute full-url-regexp { string }
-           | element full-url-regexp { string })),
-
        (attribute address { string }
-        | element address { string })+,
+        | element address { string })+
 
-       r_rewrite-conditions-Type
+       & (attribute disable-at { string }
+          | element disable-at { string })?
+
+       & (attribute enable-at { string }
+          | element enable-at { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
+
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute regexp { string }
+          | element regexp { string }
+          | attribute full-url-regexp { string }
+          | element full-url-regexp { string })
+
+       & (attribute target { string }
+          | element target { string })?
+
+       & r_rewrite-conditions-Type
      }*
 
    & element redirect {

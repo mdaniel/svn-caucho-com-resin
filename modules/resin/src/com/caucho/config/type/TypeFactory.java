@@ -81,6 +81,9 @@ public class TypeFactory
   private final HashMap<QName,Attribute> _listAttrMap
     = new HashMap<QName,Attribute>();
 
+  private final HashMap<QName,Attribute> _setAttrMap
+    = new HashMap<QName,Attribute>();
+
   private final HashMap<QName,Attribute> _envAttrMap
     = new HashMap<QName,Attribute>();
   
@@ -186,6 +189,30 @@ public class TypeFactory
   /**
    * Returns an environment type.
    */
+  public Attribute getSetAttribute(QName name)
+  {
+    synchronized (_setAttrMap) {
+      Attribute attr = _setAttrMap.get(name);
+
+      if (attr != null)
+	return attr;
+
+      ConfigType type = getEnvironmentType(name);
+
+      if (type == null)
+	return null;
+
+      attr = new SetValueAttribute(type);
+
+      _setAttrMap.put(name, attr);
+
+      return attr;
+    }
+  }
+
+  /**
+   * Returns an environment type.
+   */
   public Attribute getEnvironmentAttribute(QName name)
   {
     synchronized (_envAttrMap) {
@@ -240,12 +267,19 @@ public class TypeFactory
       return new PropertyEditorType(type, editor);
     else if (type.getEnumConstants() != null)
       return new EnumType(type);
+    else if (Set.class.isAssignableFrom(type))
+      return new SetType(type);
     else if (Collection.class.isAssignableFrom(type))
       return new ListType(type);
     else if (Map.class.isAssignableFrom(type))
       return new MapType(type);
     else if (EnvironmentBean.class.isAssignableFrom(type))
       return new EnvironmentBeanType(type);
+    else if (type.isArray()) {
+      Class compType = type.getComponentType();
+      
+      return new ArrayType(getType(compType), compType);
+    }
     else if (type.isInterface())
       return new InterfaceType(type);
     else

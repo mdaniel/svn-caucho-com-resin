@@ -43,30 +43,30 @@ import com.caucho.webbeans.manager.*;
 /**
  * Represents an introspected bean type for configuration.
  */
-public class ListType extends ConfigType
+public class SetType extends ConfigType
 {
-  private static final L10N L = new L10N(ListType.class);
+  private static final L10N L = new L10N(SetType.class);
   private static final Logger log
-    = Logger.getLogger(ListType.class.getName());
+    = Logger.getLogger(SetType.class.getName());
 
-  private final Class _listClass;
+  private final Class _setClass;
   private final Class _instanceClass;
 
-  public ListType()
+  public SetType()
   {
-    this(ArrayList.class);
+    this(TreeSet.class);
   }
 
-  public ListType(Class listClass)
+  public SetType(Class setClass)
   {
-    _listClass = listClass;
+    _setClass = setClass;
 
-    if (! _listClass.isInterface()
-	&& Modifier.isAbstract(_listClass.getModifiers())) {
-      _instanceClass = _listClass;
+    if (! _setClass.isInterface()
+	&& Modifier.isAbstract(_setClass.getModifiers())) {
+      _instanceClass = _setClass;
     }
     else
-      _instanceClass = ArrayList.class;
+      _instanceClass = TreeSet.class;
   }
 
   /**
@@ -74,7 +74,7 @@ public class ListType extends ConfigType
    */
   public Class getType()
   {
-    return _listClass;
+    return _setClass;
   }
 
   /**
@@ -94,7 +94,7 @@ public class ListType extends ConfigType
    */
   public Attribute getAttribute(QName name)
   {
-    return TypeFactory.getFactory().getListAttribute(name);
+    return TypeFactory.getFactory().getSetAttribute(name);
   }
   
   /**
@@ -103,11 +103,6 @@ public class ListType extends ConfigType
   public Object valueOf(String text)
   {
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
-				  _listClass.getName(), text));
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _listClass.getName() + "]";
+				  _setClass.getName(), text));
   }
 }

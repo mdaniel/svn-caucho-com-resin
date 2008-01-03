@@ -32,6 +32,8 @@ package com.caucho.config.type;
 import com.caucho.config.*;
 import com.caucho.util.*;
 
+import java.util.*;
+
 /**
  * Represents a class type.
  */
@@ -40,6 +42,9 @@ public final class ClassType extends ConfigType
   private static final L10N L = new L10N(ClassType.class);
   
   public static final ClassType TYPE = new ClassType();
+
+  private static final HashMap<String,Class> _primitiveTypes
+    = new HashMap<String,Class>();
   
   /**
    * The ClassType is a singleton
@@ -64,6 +69,11 @@ public final class ClassType extends ConfigType
     if (text == null || text.length() == 0)
       return null;
     else {
+      Class type = _primitiveTypes.get(text);
+
+      if (type != null)
+	return type;
+      
       try {
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
 	
@@ -88,5 +98,29 @@ public final class ClassType extends ConfigType
     else
       throw new ConfigException(L.l("'{0}' cannot be converted to an Class",
 				    value));
+  }
+
+  static {
+    _primitiveTypes.put("void", void.class);
+    _primitiveTypes.put("boolean", boolean.class);
+    _primitiveTypes.put("char", char.class);
+    _primitiveTypes.put("byte", byte.class);
+    _primitiveTypes.put("short", short.class);
+    _primitiveTypes.put("int", int.class);
+    _primitiveTypes.put("long", long.class);
+    _primitiveTypes.put("float", float.class);
+    _primitiveTypes.put("double", double.class);
+    
+    _primitiveTypes.put(Boolean.class.getName(), Boolean.class);
+    _primitiveTypes.put(Character.class.getName(), Character.class);
+    _primitiveTypes.put(Byte.class.getName(), Byte.class);
+    _primitiveTypes.put(Short.class.getName(), Short.class);
+    _primitiveTypes.put(Integer.class.getName(), Integer.class);
+    _primitiveTypes.put(Long.class.getName(), Long.class);
+    _primitiveTypes.put(Float.class.getName(), Float.class);
+    _primitiveTypes.put(Double.class.getName(), Double.class);
+    
+    _primitiveTypes.put(String.class.getName(), String.class);
+    _primitiveTypes.put(Class.class.getName(), Class.class);
   }
 }

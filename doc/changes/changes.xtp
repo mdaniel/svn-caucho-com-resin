@@ -12,6 +12,13 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>jsf: faces-cofnig.xml needs to allow multiple render-kit (#2278, rep by Andreas Fischer)</li>
+<li>jsf: faces-config.xml needs to allow multiple el-resolver tags (#2287, rep by Andreas Fischer)</li>
+<li>boot: boot issues with IBM JDK and java.class.path (#2284, rep by Surekha Bhartiya)</li>
+<li>xml: update DOMBuilder to handle null prefixes (#2286, fixed! by atifmk)</li>
+<li>admin: missing resin_admin_insecure needs to redirect to https only on port 80 or with host-secure (#2244, rep by B Cleave)</li>
+<li>jsp: fragment generation with scripting elements must support request (#2261, rep by extremia)</li>
+<li>watchdog: NPE check for missing server</li>
 <li>resin-admin: login failure needs to report error message (#2263)</li>
 <li>load-balance: start warmup timeout immediately (#2241, rep by A Balandran)</li>
 <li>security-manager: disable custom PolicyImpl (#2281, rep by norlab)</li>

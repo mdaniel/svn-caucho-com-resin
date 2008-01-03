@@ -84,6 +84,18 @@ public class JstlCoreOut extends JstlNode {
   }
 
   /**
+   * Returns true if the tag has scripting values.
+   */
+  @Override
+  public boolean hasScripting()
+  {
+    return (super.hasScripting()
+            || hasScripting(_value) || hasScripting(_valueAttr)
+            || hasScripting(_escapeXml) || hasScripting(_escapeXmlAttr)
+            || hasScripting(_default) || hasScripting(_defaultAttr));
+  }
+
+  /**
    * Generates the XML text representation for the tag validation.
    *
    * @param os write stream to the generated XML.

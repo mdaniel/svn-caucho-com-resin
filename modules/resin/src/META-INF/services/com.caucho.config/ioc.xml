@@ -140,6 +140,9 @@
 
     <bean name="servlet-classloader-hack"
           class="com.caucho.loader.ServletClassloaderHack"/>
+    
+    <bean name="set"
+          class="com.caucho.config.type.SetType"/>
 
     <bean name="stderr-log"
           class="com.caucho.log.StderrLog"/>

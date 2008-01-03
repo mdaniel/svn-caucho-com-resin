@@ -51,6 +51,7 @@ public class ProxyRule
   private final WebApp _webApp;
 
   private ServletConfigImpl _servlet;
+  private String _target;
 
   private BuilderProgramContainer _program = new BuilderProgramContainer();
 
@@ -64,6 +65,11 @@ public class ProxyRule
   public String getTagName()
   {
     return "proxy";
+  }
+
+  public void setTarget(String target)
+  {
+    _target = target;
   }
 
   public void addBuilderProgram(BuilderProgram program)

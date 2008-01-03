@@ -594,28 +594,56 @@ public class ResinWatchdog extends AbstractManagedObject
         Process process = createProcess(pwd, resinHome, rootDirectory,
                                         port, jvmOut);
 
-	ss.setSoTimeout(120000);
+	InputStream stdIs = process.getInputStream();
+	OutputStream stdOs = process.getOutputStream();
+	
+	ss.setSoTimeout(1000);
+	
+	boolean isLive = true;
+	int stdoutTimeoutMax = 10;
+	int stdoutTimeout = stdoutTimeoutMax;
+	byte []data = new byte[1024];
+	int len;
 
 	Socket s = null;
+
 	try {
-	  s = ss.accept();
+	  for (int i = 0; i < 120 && s == null && isLive; i++) {
+	    try {
+	      s = ss.accept();
+	    } catch (SocketTimeoutException e) {
+	    }
+
+	    while (stdIs.available() > 0) {
+	      len = stdIs.read(data, 0, data.length);
+
+	      if (len < 0)
+		break;
+
+	      stdoutTimeout = stdoutTimeoutMax;
+	      
+	      jvmOut.write(data, 0, len);
+	      jvmOut.flush();
+	    }
+
+	    try {
+	      int status = process.exitValue();
+
+	      isLive = false;
+	    } catch (IllegalThreadStateException e) {
+	    }
+	  }
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	} finally {
 	  ss.close();
 	}
 
+	if (s == null)
+	  log.warning("watchdog socket timed out");
+	  
 	if (s != null)
 	  watchdogIs = s.getInputStream();
-	
-	InputStream stdIs = process.getInputStream();
-	OutputStream stdOs = process.getOutputStream();
-
-	byte []data = new byte[1024];
-	int len;
-	boolean isLive = true;
-	int stdoutTimeoutMax = 10;
-	int stdoutTimeout = stdoutTimeoutMax;
 
 	while (isLive && _lifecycle.isActive()) {
 	  int available = 0;
@@ -798,15 +826,19 @@ public class ResinWatchdog extends AbstractManagedObject
       list.add("-Xmx256m");
 
     for (String arg : getJvmArgs()) {
-      list.add(arg);
+      if (! arg.startsWith("-Djava.class.path"))
+	list.add(arg);
     }
 
     ArrayList<String> resinArgs = new ArrayList<String>();
     for (int i = 0; i < _argv.length; i++) {
-      if (_argv[i].startsWith("-J")) {
+      if (_argv[i].startsWith("-Djava.class.path=")) {
+	// IBM JDK startup issues
+      }
+      else if (_argv[i].startsWith("-J")) {
 	list.add(_argv[i].substring(2));
       }
-      else
+      else if (! _argv[i].startsWith("-Djava.class.path"))
 	resinArgs.add(_argv[i]);
     }
 

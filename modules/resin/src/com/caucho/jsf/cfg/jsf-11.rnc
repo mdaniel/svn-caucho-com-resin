@@ -25,7 +25,7 @@ jsf11_application = element application {
 
   & element state-manager { j2ee-class }?
 
-  & element el-resolver { j2ee-class }?
+  & element el-resolver { j2ee-class }*
 
   & element property-resolver { j2ee-class }?
 
@@ -64,7 +64,7 @@ jsf11_faces-config = element faces-config {
 
   & jsf11_referenced-bean*
 
-  & jsf11_render-kit?
+  & jsf11_render-kit*
 
   & jsf11_validator*
 

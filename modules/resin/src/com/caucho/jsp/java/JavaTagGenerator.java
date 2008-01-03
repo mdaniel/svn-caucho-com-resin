@@ -543,6 +543,15 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.pushDepth();
 
     out.println("javax.el.ELContext _jsp_env = pageContext.getELContext();");
+
+    if (node.hasScripting()) {
+      out.println("javax.servlet.http.HttpServletRequest request = (javax.servlet.http.HttpServletRequest) pageContext.getRequest();");
+      out.println("javax.servlet.http.HttpServletResponse response = (javax.servlet.http.HttpServletResponse) pageContext.getResponse();");
+      out.println("javax.servlet.http.HttpSession session = pageContext.getSession();");
+      out.println("javax.servlet.ServletContext application = pageContext.getServletContext();");
+      out.println("javax.servlet.ServletConfig config = pageContext.getServletConfig();");
+    }
+    
     generatePrologue(out);
 
     out.println("try {");

@@ -140,6 +140,7 @@ public class SystemClassLoader
    *
    * @return the loaded classes
    */
+
   protected Class loadClassImpl(String name, boolean resolve)
     throws ClassNotFoundException
   {
@@ -152,7 +153,8 @@ public class SystemClassLoader
       return cl;
     }
 
-    if (_hasBootClassPath) {
+    // This causes problems with JCE
+    if (false && _hasBootClassPath) {
       String className = name.replace('.', '/') + ".class";
 
       if (findPath(className) == null)

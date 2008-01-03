@@ -41,32 +41,30 @@ import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 /**
- * Represents an introspected bean type for configuration.
+ * Represents an array of values for configuration.
  */
-public class ListType extends ConfigType
+public class ArrayType extends ConfigType
 {
-  private static final L10N L = new L10N(ListType.class);
+  private static final L10N L = new L10N(ArrayType.class);
   private static final Logger log
     = Logger.getLogger(ListType.class.getName());
 
-  private final Class _listClass;
-  private final Class _instanceClass;
+  private final ConfigType _componentType;
+  private final Class _componentClass;
+  private final Class _type;
 
-  public ListType()
+  public ArrayType(ConfigType componentType, Class componentClass)
   {
-    this(ArrayList.class);
-  }
+    _componentType = componentType;
+    _componentClass = componentClass;
 
-  public ListType(Class listClass)
-  {
-    _listClass = listClass;
-
-    if (! _listClass.isInterface()
-	&& Modifier.isAbstract(_listClass.getModifiers())) {
-      _instanceClass = _listClass;
+    Class type = null;
+    try {
+      type = Array.newInstance(componentClass, 0).getClass();
+    } catch (Exception e) {
     }
-    else
-      _instanceClass = ArrayList.class;
+
+    _type = type;
   }
 
   /**
@@ -74,27 +72,46 @@ public class ListType extends ConfigType
    */
   public Class getType()
   {
-    return _listClass;
+    return _type;
   }
 
   /**
    * Creates a new instance
    */
+  @Override
   public Object create(Object parent)
   {
-    try {
-      return _instanceClass.newInstance();
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    return new ArrayList();
   }
 
   /**
    * Returns the attribute based on the given name.
    */
+  @Override
   public Attribute getAttribute(QName name)
   {
+    // XXX: type
+    
     return TypeFactory.getFactory().getListAttribute(name);
+  }
+
+  /**
+   * Replaces the object.
+   */
+  @Override
+  public Object replaceObject(Object value)
+  {
+    if (value == null)
+      return null;
+
+    List list = (List) value;
+
+    Object []array
+      = (Object []) Array.newInstance(_componentClass, list.size());
+
+    list.toArray(array);
+    
+    return array;
   }
   
   /**
@@ -103,11 +120,11 @@ public class ListType extends ConfigType
   public Object valueOf(String text)
   {
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
-				  _listClass.getName(), text));
+				  _type.getName(), text));
   }
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _listClass.getName() + "]";
+    return getClass().getSimpleName() + "[" + _componentClass.getName() + "]";
   }
 }

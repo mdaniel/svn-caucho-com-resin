@@ -729,6 +729,7 @@
         <include name="lib/jaxb1-impl.jar"/>
         -->
         <include name="lib/jaxrpc-15.jar"/>
+        <include name="lib/jaxws-api.jar"/>
         <include name="lib/jws-15.jar"/>
         <include name="lib/jpa-15.jar"/>
         <include name="lib/j2ee-deploy-10.jar"/>

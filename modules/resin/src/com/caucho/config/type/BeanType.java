@@ -375,4 +375,9 @@ public class BeanType extends ConfigType
   {
     return Introspector.decapitalize(name);
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _beanClass.getName() + "]";
+  }
 }

@@ -1183,6 +1183,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   protected Class loadClassImpl(String name, boolean resolve)
     throws ClassNotFoundException
   {
+    if (_entryCache != null) {
+      ClassEntry entry = _entryCache.get(name);
+
+      if (entry != null) {
+	Class cl = entry.getEntryClass();
+
+	if (cl != null)
+	  return cl;
+      }
+    }
+    
     // The JVM has already cached the classes, so we don't need to
     Class cl = findLoadedClass(name);
 

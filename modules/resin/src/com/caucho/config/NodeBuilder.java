@@ -401,16 +401,17 @@ public class NodeBuilder {
 	childBean = attrStrategy.create(bean);
 
       if (childBean != null) {
-	childType = TypeFactory.getType(childBean.getClass());
+	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
 	
 	if (childNode instanceof Element)
-	  configureNode(childNode, childBean, childType);
+	  configureNode(childNode, childBean, childBeanType);
 	else
-	  configureChildNode(childNode, TEXT, childBean, childType);
+	  configureChildNode(childNode, TEXT, childBean, childBeanType);
 
-	childType.init(childBean);
+	childBeanType.init(childBean);
 
-	childBean = childType.replaceObject(childBean);
+	childBean = childBeanType.replaceObject(childBean);
+	childBean = attrStrategy.replaceObject(childBean);
 
 	attrStrategy.setValue(bean, qName, childBean);
       }
@@ -430,7 +431,7 @@ public class NodeBuilder {
 	else
 	  textValue = textValue(childNode);
 
-	if (textValue.indexOf("${") >= 0) {
+	if (isEL() && textValue.indexOf("${") >= 0) {
 	  childType = attrStrategy.getConfigType();
 	  
 	  Object value = childType.valueOf(evalObject(textValue));
@@ -558,43 +559,6 @@ public class NodeBuilder {
 
     return dependList;
   }
-
-  /**
-   * Configures a node, expecting an object in return.
-   *
-   * @param node the configuration node
-   * @param parent
-   * @return the configured object
-   * @throws Exception
-   */
-  /*
-  public Object configureObject(Node node, Object parent)
-    throws Exception
-  {
-    Object resinTypeValue = createResinType(node);
-
-    if (resinTypeValue != null) {
-      Class type = resinTypeValue.getClass();
-      TypeStrategy typeStrategy = TypeStrategyFactory.getTypeStrategy(type);
-
-      typeStrategy.setParent(resinTypeValue, parent);
-
-      return configureImpl(typeStrategy, resinTypeValue, node);
-    }
-
-    if (hasChildren(node))
-      throw error(L.l("unexpected node {0}", node.getNodeName()), node); // XXX: qa
-
-    String value = textValue(node);
-
-    if (value == null)
-      return null;
-    else if (isEL() && value.indexOf("${") >= 0)
-      return evalObject(value);
-    else
-      return value;
-  }
-  */
 
   /**
    * Create a custom resin:type value.
@@ -794,7 +758,7 @@ public class NodeBuilder {
 	       && ! XmlUtil.isWhitespace(((CharacterData) child).getData())) {
 	String data = ((CharacterData) child).getData();
 
-	if (childElt == null
+	if (isEL() && childElt == null
 	    && child.getNextSibling() == null
 	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
 	  ELContext elContext = getELContext();
@@ -887,7 +851,7 @@ public class NodeBuilder {
   public String evalString(String exprString)
     throws ELException
   {
-    if (exprString.indexOf("${") >= 0 && isEL()) {
+    if (isEL() && exprString.indexOf("${") >= 0 && isEL()) {
       ELParser parser = new ELParser(getELContext(), exprString);
       parser.setCheckEscape(true);
       Expr expr = parser.parse();
