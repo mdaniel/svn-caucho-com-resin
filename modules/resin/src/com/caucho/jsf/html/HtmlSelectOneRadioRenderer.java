@@ -31,11 +31,8 @@ package com.caucho.jsf.html;
 import java.io.*;
 import java.util.*;
 
-import javax.faces.*;
-import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
-import javax.faces.convert.*;
 import javax.faces.context.*;
 import javax.faces.model.*;
 import javax.faces.render.*;
@@ -225,7 +222,7 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
       out.write("\n");
     }
 
-    ArrayList<SelectItem> items = getSelectItems(component);
+    List<SelectItem> items = accrueSelectItems(component);
 
     for (int i = 0; i < items.size(); i++) {
       SelectItem selectItem = items.get(i);

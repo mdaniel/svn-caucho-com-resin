@@ -641,7 +641,8 @@ public abstract class UIComponentBase extends UIComponent
 	throw new IOExceptionWrapper("id=" + getClientId(context)
 				     + " " + e.toString(), e);
     } catch (RuntimeException e) {
-      if (e.getMessage().startsWith("id="))
+      if (e.getMessage() != null
+	  && e.getMessage().startsWith("id="))
 	throw e;
       else
 	throw new FacesException("id=" + getClientId(context)

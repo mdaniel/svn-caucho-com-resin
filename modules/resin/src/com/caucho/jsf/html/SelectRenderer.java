@@ -112,46 +112,13 @@ abstract class SelectRenderer extends BaseRenderer
     return values;
   }
 
-  public static ArrayList<SelectItem> getSelectItems(UISelectItems selectItems)
+  public List<SelectItem> accrueSelectItems(UIComponent component)
   {
-    ArrayList<SelectItem> items = new ArrayList<SelectItem>();
-
-    Object value = selectItems.getValue();
-
-    if (value instanceof SelectItem)
-      items.add((SelectItem) value);
-    else if (value instanceof Collection) {
-
-      for (Object o : ((Collection) value)) {
-
-        if (o instanceof SelectItem)
-          items.add((SelectItem) o);
-      }
-    }
-    else if (value instanceof Map) {
-      Map map = (Map) value;
-
-      for (Object o : map.entrySet()) {
-        Map.Entry entry = (Map.Entry) o;
-
-        items.add(new SelectItem(entry.getValue(),
-                                 String.valueOf(entry.getKey())));
-      }
-    }
-    else if (value instanceof SelectItem[]) {
-      SelectItem[] items_ = (SelectItem[]) value;
-      items.addAll(Arrays.asList(items_));
-    }
-    return items;
-  }
-
-  protected ArrayList<SelectItem> getSelectItems(UIComponent component)
-  {
-    ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+    ArrayList<SelectItem> itemList = new ArrayList<SelectItem>();
 
     int count = component.getChildCount();
     if (count == 0)
-      return items;
+      return itemList;
 
     List<UIComponent> children = component.getChildren();
 
@@ -161,21 +128,56 @@ abstract class SelectRenderer extends BaseRenderer
       if (child instanceof UISelectItem) {
 	UISelectItem uiSelectItem = (UISelectItem) child;
 
-	SelectItem item = new SelectItem();
+	SelectItem item = (SelectItem) uiSelectItem.getValue();
 
-	item.setValue(uiSelectItem.getItemValue());
-	item.setLabel(uiSelectItem.getItemLabel());
-	item.setDescription(uiSelectItem.getItemDescription());
-	item.setDisabled(uiSelectItem.isItemDisabled());
+	if (item == null) {
+	  item = new SelectItem(uiSelectItem.getItemValue(),
+				uiSelectItem.getItemLabel(),
+				uiSelectItem.getItemDescription(),
+				uiSelectItem.isItemDisabled(),
+				uiSelectItem.isItemEscaped());
+	}
 
-	items.add(item);
+	itemList.add(item);
       }
       else if (child instanceof UISelectItems) {
-        items.addAll(getSelectItems((UISelectItems)child));
+	UISelectItems selectedItems = (UISelectItems) child;
+
+	Object value = selectedItems.getValue();
+
+	if (value instanceof SelectItem) {
+	  itemList.add((SelectItem) value);
+	}
+	else if (value instanceof SelectItem []) {
+	  SelectItem []items = (SelectItem []) value;
+
+	  itemList.ensureCapacity(itemList.size() + items.length);
+
+	  for (SelectItem item : items) {
+	    itemList.add(item);
+	  }
+	}
+	else if (value instanceof Collection) {
+	  Collection items = (Collection) value;
+
+	  itemList.ensureCapacity(itemList.size() + items.size());
+
+	  itemList.addAll(items);
+	}
+	else if (value instanceof Map) {
+	  Map map = (Map) value;
+
+	  itemList.ensureCapacity(itemList.size() + map.size());
+
+	  Set<Map.Entry> entries = map.entrySet();
+	  for (Map.Entry entry : entries) {
+	    itemList.add(new SelectItem(entry.getValue(),
+					String.valueOf(entry.getKey())));
+	  }
+	}
       }
     }
-
-    return items;
+    return itemList;
   }
 
   protected void encodeChildren(ResponseWriter out,
@@ -186,97 +188,49 @@ abstract class SelectRenderer extends BaseRenderer
                               String disabledClass)
     throws IOException
   {
-    String clientId = component.getClientId(context);
 
-    int childCount = component.getChildCount();
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = component.getChildren().get(i);
+    List<SelectItem> list = accrueSelectItems(component);
+    
+    for (int i = 0; i < list.size(); i++) {
+      SelectItem selectItem = list.get(i);
 
-      String childId = clientId + ":" + i;
+      out.startElement("option", component);
 
-      if (child instanceof UISelectItem) {
-	UISelectItem selectItem = (UISelectItem) child;
+      // jsf/31c4
+      /*
+      out.writeAttribute("id", childId, "id");
+      //out.writeAttribute("name", child.getClientId(context), "name");
+      */
 
-	if (child.getId() != null)
-	  childId = child.getClientId(context);
+      if (selectItem.isDisabled()) {
+	out.writeAttribute("disabled", "disabled", "disabled");
 
-	out.startElement("option", child);
+	if (disabledClass != null)
+	  out.writeAttribute("class", disabledClass, "disabledClass");
+      }
+      else {
+	if (enabledClass != null)
+	  out.writeAttribute("class", enabledClass, "enabledClass");
+      }
 
-	/*
-	out.writeAttribute("id", childId, "id");
-	out.writeAttribute("name", childId, "name");
-	*/
-
-	if (selectItem.isItemDisabled()) {
-	  out.writeAttribute("disabled", "disabled", "disabled");
-
-	  if (disabledClass != null)
-	    out.writeAttribute("class", disabledClass, "disabledClass");
-	}
-	else {
-	  if (enabledClass != null)
-	    out.writeAttribute("class", enabledClass, "enabledClass");
-	}
-
-	if (values != null) {
-	  for (int j = 0; j < values.length; j++) {
-	    if (values[j].equals(selectItem.getItemValue())) {
-	      out.writeAttribute("selected", "selected", "selected");
-	      break;
-	    }
+      if (values != null) {
+	for (int j = 0; j < values.length; j++) {
+	  if (values[j].equals(selectItem.getValue())) {
+	    out.writeAttribute("selected", "selected", "selected");
+	    break;
 	  }
 	}
-
-	out.writeAttribute("value",
-                           String.valueOf(selectItem.getItemValue()),
-			   "value");
-
-        out.writeText(selectItem.getItemLabel(), "label");
-
-	out.endElement("option");
-        out.write("\n");
       }
-      else if (child instanceof UISelectItems) {
-        UISelectItems uiSelectItems = (UISelectItems) child;
-        List<SelectItem> items = getSelectItems(uiSelectItems);
 
-        for (SelectItem selectItem : items) {
+      out.writeAttribute("value",
+			 String.valueOf(selectItem.getValue()),
+			 "value");
 
-          if (child.getId() != null)
-            childId = child.getClientId(context);
+      out.writeText(selectItem.getLabel(), "label");
 
-          out.startElement("option", child);
+      out.endElement("option");
+      out.write("\n");
 
-          if (selectItem.isDisabled()) {
-            out.writeAttribute("disabled", "disabled", "disabled");
-
-            if (disabledClass != null)
-              out.writeAttribute("class", disabledClass, "disabledClass");
-          }
-          else {
-            if (enabledClass != null)
-              out.writeAttribute("class", enabledClass, "enabledClass");
-          }
-
-          if (values != null) {
-            for (int j = 0; j < values.length; j++) {
-              if (values[j].equals(selectItem.getValue())) {
-                out.writeAttribute("selected", "selected", "selected");
-                break;
-              }
-            }
-          }
-
-          out.writeAttribute("value",
-                             String.valueOf(selectItem.getValue()),
-                             "value");
-
-          out.writeText(selectItem.getLabel(), "label");
-
-          out.endElement("option");
-          out.write("\n");
-        }
-      }
     }
   }
 
@@ -297,7 +251,7 @@ abstract class SelectRenderer extends BaseRenderer
       type = ve.getType(context.getELContext());
     }
 
-    ArrayList<SelectItem> items = getSelectItems(component);
+    List<SelectItem> items = accrueSelectItems(component);
     for (int i = 0; i < items.size(); i++) {
       String childId = clientId + ":" + i;
 
