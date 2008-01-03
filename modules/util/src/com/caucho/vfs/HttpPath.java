@@ -50,8 +50,8 @@ import java.util.Map;
 public class HttpPath extends FilesystemPath {
   protected static L10N L = new L10N(HttpPath.class);
 
-  protected static LruCache<String,CacheEntry> _cache =
-    new LruCache<String,CacheEntry>(1024);
+  protected static LruCache<String,CacheEntry> _cache
+    = new LruCache<String,CacheEntry>(1024);
   
   protected String _host;
   protected int _port;

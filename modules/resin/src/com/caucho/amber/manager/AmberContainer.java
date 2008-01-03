@@ -144,6 +144,8 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
     _tempLoader = _parentLoader.getNewTempClassLoader();
 
+    // --- ok
+    
     // XXX: change after the 3.1.4 release
     _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
     /*
@@ -153,14 +155,18 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
     _enhancer = new AmberEnhancer(this);
 
-    EnhancerManager.create().addClassEnhancer(_enhancer);
+    EnhancerManager.create(_parentLoader).addClassEnhancer(_enhancer);
 
     if (_parentAmberContainer != null)
       copyContainerDefaults(_parentAmberContainer);
 
+    // --- ok
+    
     _parentLoader.addScanListener(this);
 
-    Environment.addEnvironmentListener(this);
+    // --- bad
+
+    Environment.addEnvironmentListener(this, _parentLoader);
 
     try {
       if (_parentLoader instanceof DynamicClassLoader)
@@ -981,6 +987,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       return false;
     else {
       context.setScanComplete(true);
+      
       return true;
     }
   }

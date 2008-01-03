@@ -61,8 +61,8 @@ public class FactoryFinder
     = new WeakHashMap<ClassLoader,HashMap<String,String>>();
 
   private static final
-    WeakHashMap<ClassLoader,HashMap<String,SoftReference<Object>>> _factoryMap
-    = new WeakHashMap<ClassLoader,HashMap<String,SoftReference<Object>>>();
+    WeakHashMap<ClassLoader,HashMap<String,WeakReference<Object>>> _factoryMap
+    = new WeakHashMap<ClassLoader,HashMap<String,WeakReference<Object>>>();
 
   public static Object getFactory(String factoryName)
   {
@@ -78,10 +78,10 @@ public class FactoryFinder
     ClassLoader loader = thread.getContextClassLoader();
     
     synchronized (_factoryNameMap) {
-      HashMap<String,SoftReference<Object>> objMap = _factoryMap.get(loader);
+      HashMap<String,WeakReference<Object>> objMap = _factoryMap.get(loader);
 
       if (objMap != null) {
-	SoftReference<Object> factoryRef = objMap.get(factoryName);
+	WeakReference<Object> factoryRef = objMap.get(factoryName);
 	Object factory;
 
 	if (factoryRef != null && (factory = factoryRef.get()) != null)
@@ -106,11 +106,11 @@ public class FactoryFinder
 	throw new FacesException("No factory found for " + factoryName);
 
       if (objMap == null) {
-	objMap = new HashMap<String,SoftReference<Object>>();
+	objMap = new HashMap<String,WeakReference<Object>>();
 	_factoryMap.put(loader, objMap);
       }
 
-      objMap.put(factoryName, new SoftReference<Object>(factory));
+      objMap.put(factoryName, new WeakReference<Object>(factory));
 
       return factory;
     }
@@ -130,14 +130,14 @@ public class FactoryFinder
     ClassLoader loader = thread.getContextClassLoader();
     
     synchronized (_factoryNameMap) {
-      HashMap<String,SoftReference<Object>> objectMap = _factoryMap.get(loader);
+      HashMap<String,WeakReference<Object>> objectMap = _factoryMap.get(loader);
 
       if (objectMap == null) {
-	objectMap = new HashMap<String,SoftReference<Object>>();
+	objectMap = new HashMap<String,WeakReference<Object>>();
 	_factoryMap.put(loader, objectMap);
       }
 
-      SoftReference<Object> oldFactoryRef = objectMap.get(factoryName);
+      WeakReference<Object> oldFactoryRef = objectMap.get(factoryName);
       Object oldFactory = null;
 	
       if (oldFactoryRef != null)
@@ -158,7 +158,7 @@ public class FactoryFinder
       if (factory == null)
 	throw new FacesException("No factory found for " + factoryName);
 
-      objectMap.put(factoryName, new SoftReference<Object>(factory));
+      objectMap.put(factoryName, new WeakReference<Object>(factory));
     }
   }
 

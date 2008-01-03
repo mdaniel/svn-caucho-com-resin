@@ -80,6 +80,12 @@ public class MemoryPath extends FilesystemPath {
     return getScheme() + ":" + getFullPath();
   }
 
+  @Override
+  public boolean isPathCacheable()
+  {
+    return false;
+  }
+
   public boolean exists()
   {
     synchronized (_rootNode) {

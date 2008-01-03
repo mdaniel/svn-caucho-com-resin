@@ -98,8 +98,9 @@ public class BeanType extends ConfigType
 	if (_beanClass.isInterface())
 	  throw new ConfigException(L.l("{0} cannot be instantiated because it is an interface",
 					_beanClass.getName()));
-	
-	WebBeansContainer webBeans = WebBeansContainer.create();
+
+	WebBeansContainer webBeans
+	  = WebBeansContainer.create(_beanClass.getClassLoader());
 
 	_component = (ComponentImpl) webBeans.createTransient(_beanClass);
       }

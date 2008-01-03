@@ -165,7 +165,7 @@ public class WebBeansContainer
   public static WebBeansContainer create(ClassLoader loader)
   {
     WebBeansContainer webBeans = null;
-    
+
     synchronized (_localContainer) {
       webBeans = _localContainer.getLevel(loader);
 
@@ -739,6 +739,8 @@ public class WebBeansContainer
    */
   public void environmentStop(EnvironmentClassLoader loader)
   {
+    _componentMap = null;
+    _namedComponentMap = null;
   }
 
   public static ConfigException injectError(AccessibleObject prop, String msg)
@@ -841,7 +843,7 @@ public class WebBeansContainer
 
   public String toString()
   {
-    if (_classLoader.getId() != null)
+    if (_classLoader != null && _classLoader.getId() != null)
       return "WebBeansContainer[" + _classLoader.getId() + "]";
     else
       return "WebBeansContainer[]";

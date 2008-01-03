@@ -61,7 +61,6 @@ public class TimedCache<K,V> {
   public TimedCache(int capacity, long expireInterval)
   {
     _cache = new LruCache<K,Entry<V>>(capacity);
-
     _expireInterval = expireInterval;
   }
 

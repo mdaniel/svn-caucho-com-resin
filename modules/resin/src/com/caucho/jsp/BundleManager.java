@@ -56,8 +56,8 @@ public class BundleManager {
   static LocalizationContext NULL_BUNDLE =
     new LocalizationContext();
 
-  private static EnvironmentLocal<BundleManager> _envBundle =
-    new EnvironmentLocal<BundleManager>();
+  private static EnvironmentLocal<BundleManager> _envBundle
+    = new EnvironmentLocal<BundleManager>();
 
   private TimedCache<String,LocalizationContext> _bundleCache;
 

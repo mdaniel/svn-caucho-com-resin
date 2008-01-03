@@ -665,6 +665,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _owner = null;
       _attributes = null;
       _listeners = null;
+      _scanListeners = null;
     }
   }
 
