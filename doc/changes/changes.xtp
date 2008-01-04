@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>xa: issues with PoolItem handling XA_RDONLY (#2227, rep by mackd2)</li>
 <li>jsf: faces-cofnig.xml needs to allow multiple render-kit (#2278, rep by Andreas Fischer)</li>
 <li>jsf: faces-config.xml needs to allow multiple el-resolver tags (#2287, rep by Andreas Fischer)</li>
 <li>boot: boot issues with IBM JDK and java.class.path (#2284, rep by Surekha Bhartiya)</li>

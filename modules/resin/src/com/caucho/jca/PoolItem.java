@@ -805,7 +805,16 @@ class PoolItem implements ConnectionEventListener, XAResource {
 	if (log.isLoggable(Level.FINER))
 	  log.finer("prepare-XA: " + xid + " " + _xaResource);
 
-	return _xaResource.prepare(xid);
+	int result = _xaResource.prepare(xid);
+
+	if (result == XA_RDONLY) {
+	  if (_xaResource != null)
+	    _isXATransaction = true;
+      
+	  clearXid();
+	}
+
+	return result;
       } catch (XAException e) {
 	if (log.isLoggable(Level.FINER))
 	  log.finer("failed prepare-XA: " + xid + " " + _xaResource + " " + e);
