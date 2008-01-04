@@ -1524,7 +1524,6 @@ public class WebApp extends ServletContextImpl
   public void setConfigException(Throwable e)
   {
     if (e != null) {
-      e.printStackTrace();
       log.log(Level.WARNING, e.toString(), e);
 
       Throwable e1 = e;

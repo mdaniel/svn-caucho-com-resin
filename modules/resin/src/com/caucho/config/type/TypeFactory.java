@@ -296,7 +296,7 @@ public class TypeFactory
   {
     try {
       Enumeration<URL> urls
-	= loader.getResources("META-INF/services/com.caucho.config/ioc.xml");
+	= loader.getResources("META-INF/services/com.caucho.config/default.xml");
 
       while (urls.hasMoreElements()) {
 	URL url = urls.nextElement();

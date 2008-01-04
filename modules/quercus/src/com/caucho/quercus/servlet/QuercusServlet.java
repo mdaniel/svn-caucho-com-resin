@@ -386,7 +386,7 @@ public class QuercusServlet
     /**
      * Sets an arbitrary property.
      */
-    public void put(String key, String value)
+    public void setProperty(String key, String value)
     {
       _quercus.setIni(key, value);
     }
