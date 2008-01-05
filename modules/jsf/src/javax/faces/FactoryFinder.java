@@ -29,7 +29,6 @@
 package javax.faces;
 
 import java.lang.reflect.*;
-import java.lang.ref.*;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
@@ -43,7 +42,7 @@ public class FactoryFinder
 {
   private static final Logger log
     = Logger.getLogger(FactoryFinder.class.getName());
-  
+
   public static final String APPLICATION_FACTORY
     = "javax.faces.application.ApplicationFactory";
   public static final String FACES_CONTEXT_FACTORY
@@ -61,14 +60,14 @@ public class FactoryFinder
     = new WeakHashMap<ClassLoader,HashMap<String,String>>();
 
   private static final
-    WeakHashMap<ClassLoader,HashMap<String,WeakReference<Object>>> _factoryMap
-    = new WeakHashMap<ClassLoader,HashMap<String,WeakReference<Object>>>();
+    WeakHashMap<ClassLoader,HashMap<String,Object>> _factoryMap
+    = new WeakHashMap<ClassLoader,HashMap<String,Object>>();
 
   public static Object getFactory(String factoryName)
   {
     if (factoryName == null)
       throw new NullPointerException();
-    
+
     Class factoryClass = _factoryClassMap.get(factoryName);
 
     if (factoryClass == null)
@@ -76,15 +75,14 @@ public class FactoryFinder
 
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     synchronized (_factoryNameMap) {
-      HashMap<String,WeakReference<Object>> objMap = _factoryMap.get(loader);
+      HashMap<String,Object> objMap = _factoryMap.get(loader);
 
       if (objMap != null) {
-	WeakReference<Object> factoryRef = objMap.get(factoryName);
-	Object factory;
+	Object factory = objMap.get(factoryName);
 
-	if (factoryRef != null && (factory = factoryRef.get()) != null)
+	if (factory != null)
 	  return factory;
       }
 
@@ -106,11 +104,11 @@ public class FactoryFinder
 	throw new FacesException("No factory found for " + factoryName);
 
       if (objMap == null) {
-	objMap = new HashMap<String,WeakReference<Object>>();
+	objMap = new HashMap<String,Object>();
 	_factoryMap.put(loader, objMap);
       }
 
-      objMap.put(factoryName, new WeakReference<Object>(factory));
+      objMap.put(factoryName, factory);
 
       return factory;
     }
@@ -120,29 +118,28 @@ public class FactoryFinder
   {
     if (log.isLoggable(Level.FINER))
       log.finer("FactoryFinder[] setting '" + factoryName + "' to implementation '" + implName + "'");
-    
+
     Class factoryClass = _factoryClassMap.get(factoryName);
-    
+
     if (factoryClass == null)
       throw new IllegalArgumentException(factoryName + " is an unknown JSF factory");
 
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     synchronized (_factoryNameMap) {
-      HashMap<String,WeakReference<Object>> objectMap = _factoryMap.get(loader);
+      HashMap<String,Object> objectMap = _factoryMap.get(loader);
 
       if (objectMap == null) {
-	objectMap = new HashMap<String,WeakReference<Object>>();
+	objectMap = new HashMap<String,Object>();
 	_factoryMap.put(loader, objectMap);
       }
 
-      WeakReference<Object> oldFactoryRef = objectMap.get(factoryName);
-      Object oldFactory = null;
-	
-      if (oldFactoryRef != null)
-	oldFactory = oldFactoryRef.get();
-      
+      Object oldFactory = objectMap.get(factoryName);
+
+      if (oldFactory == null)
+	oldFactory = _factoryMap.get(factoryName);
+
       HashMap<String,String> map = _factoryNameMap.get(loader);
 
       if (map == null) {
@@ -158,7 +155,7 @@ public class FactoryFinder
       if (factory == null)
 	throw new FacesException("No factory found for " + factoryName);
 
-      objectMap.put(factoryName, new WeakReference<Object>(factory));
+      objectMap.put(factoryName, factory);
     }
   }
 
@@ -198,13 +195,13 @@ public class FactoryFinder
   {
     if (className == null)
       return previous;
-      
+
     try {
       Class cl = Class.forName(className, false, loader);
 
       if (! factoryClass.isAssignableFrom(cl))
 	throw new FacesException(className + " is not assignable to " + factoryClass.getName());
-	
+
       Constructor ctor0 = null;
       Constructor ctor1 = null;
 
