@@ -45,6 +45,7 @@ public class ServerLogAction
   protected void performAction(Node[] nodes)
   {
     for (Node node : nodes) {
+        /*
       ResinManagerNode managerNode
         = (ResinManagerNode) node.getCookie( ResinManagerNode.class);
 
@@ -56,12 +57,14 @@ public class ServerLogAction
         if (console != null)
           console.takeFocus();
       }
+         */
     }
   }
 
   protected boolean enable(Node[] nodes)
   {
     for (Node node : nodes) {
+        /*
       ResinManagerNode managerNode
         = (ResinManagerNode) node.getCookie(ResinManagerNode.class);
 
@@ -71,6 +74,7 @@ public class ServerLogAction
         if (manager == null ||  manager.getResinProcess().getConsole() == null)
           return false;
       }
+         */
     }
 
     return true;

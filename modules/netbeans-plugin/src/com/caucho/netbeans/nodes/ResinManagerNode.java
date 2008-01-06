@@ -51,27 +51,39 @@ public class ResinManagerNode
 {
   private static final Logger log
     = Logger.getLogger(ResinManagerNode.class.getName());
-  
+
+  private Lookup _lookup;
   private ResinDeploymentManager _manager;
 
-  public ResinManagerNode(Lookup lookup)
+  public ResinManagerNode(Children children, Lookup lookup)
   {
-    super(new Children.Array());
+    super(children);
 
     log.info("ResinManagerNode: " + lookup);
+
+    _lookup = lookup;
     
-    _manager
-      = (ResinDeploymentManager) lookup.lookup(ResinDeploymentManager.class);
     getCookieSet().add(this);
+
+    /*
     setIconBaseWithExtension("com/caucho/netbeans/resources/resin.png"); // NOI18N
+    */
   }
 
-    @Override
+  @Override
   public String getShortDescription()
   {
-    return _manager.getResinConfiguration().getDisplayName();
+    return "Resin";
+    
+    // return _manager.getResinConfiguration().getDisplayName();
   }
 
+  @Override
+  public String getDisplayName()
+  {
+    return "Resin InstanceNode";
+  }
+  /*
     @Override
   public javax.swing.Action[] getActions(boolean context)
   {
@@ -95,9 +107,14 @@ public class ResinManagerNode
   {
     return super.getCustomizer();
   }
+  */
 
   public ResinDeploymentManager getManger()
   {
+    if (_manager == null) {
+      _manager = (ResinDeploymentManager) _lookup.lookup(ResinDeploymentManager.class);
+    }
+    
     return _manager;
   }
 }

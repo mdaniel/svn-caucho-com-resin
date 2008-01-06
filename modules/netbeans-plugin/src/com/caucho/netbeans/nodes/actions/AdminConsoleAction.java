@@ -54,6 +54,7 @@ public class AdminConsoleAction
   protected void performAction(Node[] nodes)
   {
     for (Node node : nodes) {
+        /*
       ResinManagerNode managerNode
         = (ResinManagerNode) node.getCookie(ResinManagerNode.class);
 
@@ -70,6 +71,7 @@ public class AdminConsoleAction
           log.log(Level.INFO, e);
         }
       }
+         */
     }
   }
 

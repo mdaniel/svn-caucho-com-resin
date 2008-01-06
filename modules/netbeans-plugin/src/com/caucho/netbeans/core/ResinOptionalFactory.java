@@ -29,7 +29,7 @@
 
 package com.caucho.netbeans.core;
 
-//import com.caucho.netbeans.AddInstanceIterator;
+import com.caucho.netbeans.core.AddInstanceIterator;
 import com.caucho.netbeans.ResinStartServer;
 
 import org.netbeans.modules.j2ee.deployment.plugins.spi.FindJSPServlet;
@@ -40,34 +40,46 @@ import org.netbeans.modules.j2ee.deployment.plugins.spi.TargetModuleIDResolver;
 import org.openide.WizardDescriptor.InstantiatingIterator;
 
 import javax.enterprise.deploy.spi.DeploymentManager;
+import java.util.logging.*;
 
 public class ResinOptionalFactory
   extends OptionalDeploymentManagerFactory
 {
+  private static final Logger log = Logger.getLogger(ResinOptionalFactory.class.getName());
 
   public StartServer getStartServer(DeploymentManager deploymentManager)
   {
-    return new ResinStartServer(deploymentManager);
+    //log.info("start-server");
+    //return new ResinStartServer(deploymentManager);
+    return null;
   }
 
   public IncrementalDeployment getIncrementalDeployment(DeploymentManager deploymentManager)
   {
+    //log.info("incr-server");
     return null;
   }
 
+  /*
   public TargetModuleIDResolver getTargetModuleIDResolver(DeploymentManager deploymentManager)
   {
+    log.info("foo-server");
     return new ResinTargetModuleIDResolver(deploymentManager);
   }
+  */
 
   public FindJSPServlet getFindJSPServlet(DeploymentManager deploymentManager)
   {
-    return new ResinFindJSPServlet(deploymentManager);
+    //log.info("foo1-server");
+    // return new ResinFindJSPServlet(deploymentManager);
+
+    return null;
   }
 
   public InstantiatingIterator getAddInstanceIterator()
   {
-    //return new AddInstanceIterator();
+    //log.info("foo12-add");
+    //    return new AddInstanceIterator();
     return null;
   }
 }

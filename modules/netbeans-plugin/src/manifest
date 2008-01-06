@@ -1,6 +1,6 @@
 Implementation-Vendor: Caucho Technology, Inc.
 Implementation-Version: 3.1.0
-AutoUpdate-Show-In-Client: true
+AutoUpdate-Show-In-Client: false
 OpenIDE-Module: com.caucho.netbeans
 OpenIDE-Module-Dependencies: org.netbeans.modules.j2eeapis/1,  org.netbeans.modules.j2ee.common/1,  org.netbeans.modules.j2eeserver/4,  org.openide.nodes
 OpenIDE-Module-Display-Category: "Web &amp; Java EE"

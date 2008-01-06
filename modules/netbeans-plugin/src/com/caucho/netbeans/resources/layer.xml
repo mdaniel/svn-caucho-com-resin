@@ -3,58 +3,47 @@
 <filesystem>
   <folder name="J2EE">
     <folder name="DeploymentPlugins">
+    
       <folder name="Resin">
         <file name="Descriptor" url="nbdep.xml"/>
-	
+
         <file name="Factory.instance">
           <attr name="instanceCreate" methodvalue="com.caucho.netbeans.ResinDeploymentFactory.create"/>
           <attr name="instanceClass" stringvalue="com.caucho.netbeans.ResinDeploymentFactory"/>
           <attr name="instanceOf" stringvalue="javax.enterprise.deploy.spi.factories.DeploymentFactory"/>
         </file>
-	
+
         <file name="RegistryNodeFactory.instance">
+          <attr name="instanceCreate" newvalue="com.caucho.netbeans.nodes.ResinRegistryNodeFactory"/>
           <attr name="instanceClass" stringvalue="com.caucho.netbeans.nodes.ResinRegistryNodeFactory"/>
           <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.spi.RegistryNodeFactory"/>
         </file>
-	
-        <file name="ResinModuleConfigurationFactory.instance">
-          <attr name="instanceCreate" stringvalue="com.caucho.netbeans.ResinModuleConfigurationFactory.create"/>
+        <!--
+        <file name="ModuleConfigurationFactory.instance">
           <attr name="instanceClass" stringvalue="com.caucho.netbeans.ResinModuleConfigurationFactory"/>
           <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfigurationFactory"/>
         </file>
-	
-	<!--
-        <file name="ConfigurationSupport.instance">
-          <attr name="instanceClass"
-                stringvalue="com.caucho.netbeans.ConfigurationSupportImpl"/>
-          <attr name="instanceOf"
-                stringvalue="org.netbeans.modules.j2ee.deployment.plugins.api.ConfigurationSupport"/>
-        </file>
 	-->
-	
+	<!--
         <file name="J2eePlatformFactory.instance">
           <attr name="instanceCreate" newvalue="com.caucho.netbeans.ResinPlatformFactory"/>
           <attr name="instanceClass" stringvalue="com.caucho.netbeans.ResinPlatformFactory"/>
-          <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.spi.J2eePlatformFactory"/>
+          <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.sp.J2eePlatformFactory"/>
         </file>
-	
+	-->
+
         <file name="OptionalFactory.instance">
           <attr name="instanceCreate" newvalue="com.caucho.netbeans.core.ResinOptionalFactory"/>
           <attr name="instanceClass" stringvalue="com.caucho.netbeans.core.ResinOptionalFactory"/>
           <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.spi.OptionalDeploymentManagerFactory"/>
         </file>
-	
+
         <folder name="DeploymentFileNames">
           <folder name="WAR">
-o            <file name="WEB-INF\resin-web.xml"/>
+            <file name="WEB-INF\resin-web.xml"/>
           </folder>
-          <folder name="EJB">
-            <file name="META-INF\resin-ejb-jar.xml"/>
-          </folder>
-          <folder name="EAR"/>
         </folder>
       </folder>
     </folder>
   </folder>
-    <file name="J2EE_hidden"/>
 </filesystem>

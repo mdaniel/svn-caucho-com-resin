@@ -59,11 +59,16 @@ public class ResinPlatformImpl
   private static final Set<String> SUPPORTED_JAVA_PLATFORM_VERSIONS
     = new LinkedHashSet<String>();
 
-  private final String _displayName;
-  private final ResinConfiguration _resinConfiguration;
+  private String _displayName;
+  private ResinConfiguration _resinConfiguration;
 
   private final List<LibraryImplementation> _libraries
     = new ArrayList<LibraryImplementation>();
+
+
+  public ResinPlatformImpl()
+  {
+  }
 
   public ResinPlatformImpl(ResinConfiguration resinConfiguration)
   {
@@ -95,21 +100,25 @@ public class ResinPlatformImpl
 
   public void notifyLibrariesChanged()
   {
+    /*
     LibraryImplementation libraryImplementation = _libraries.get(0);
 
     initLibrary(libraryImplementation);
 
     firePropertyChange(PROP_LIBRARIES, null, _libraries);
+    */
   }
 
   public LibraryImplementation[] getLibraries()
   {
-    return _libraries.toArray(new LibraryImplementation[_libraries.size()]);
+    //return _libraries.toArray(new LibraryImplementation[_libraries.size()]);
+    return new LibraryImplementation[0];
   }
 
   public String getDisplayName()
   {
-    return _displayName;
+    // return _displayName;
+    return "Resin Server Platform";
   }
 
   public Image getIcon()
@@ -119,12 +128,13 @@ public class ResinPlatformImpl
 
   public File[] getPlatformRoots()
   {
-    return new File[] { _resinConfiguration.getResinHome() };
+    // return new File[] { _resinConfiguration.getResinHome() };
+    return new File[0];
   }
 
   public File[] getToolClasspathEntries(String toolName)
   {
-    return null;
+    return new File[0];
   }
 
   public boolean isToolSupported(String toolName)
@@ -149,7 +159,8 @@ public class ResinPlatformImpl
 
   public JavaPlatform getJavaPlatform()
   {
-    return _resinConfiguration.getJavaPlatform();
+    // return _resinConfiguration.getJavaPlatform();
+    return null;
   }
 
   static {
@@ -163,7 +174,5 @@ public class ResinPlatformImpl
 
     SUPPORTED_JAVA_PLATFORM_VERSIONS.add("1.5");
     SUPPORTED_JAVA_PLATFORM_VERSIONS.add("1.6");
-
   }
-
 }

@@ -41,6 +41,7 @@ import org.openide.util.actions.SystemAction;
 
 import javax.enterprise.deploy.shared.ModuleType;
 import java.awt.*;
+import org.openide.util.lookup.Lookups;
 
 /**
  * Node that represents a container, holder of J2EE modules of the same type
@@ -48,8 +49,7 @@ import java.awt.*;
 public final class ResinModuleContainerNode
   extends AbstractNode
 {
-
-  private ModuleType moduleType;
+  private ModuleType _moduleType;
 
   /**
    * Creates a new instance of ResinModuleContainerNode
@@ -57,21 +57,23 @@ public final class ResinModuleContainerNode
   public ResinModuleContainerNode(Lookup lookup, ModuleType moduleType)
   {
     this(new ResinModuleChildren(lookup, moduleType));
-    this.moduleType = moduleType;
+    
+    _moduleType = moduleType;
   }
 
   private ResinModuleContainerNode(ResinModuleChildren resinWebModuleChildren)
   {
     super(resinWebModuleChildren);
+    
     getCookieSet().add(resinWebModuleChildren);
   }
 
   public Image getIcon(int type)
   {
-    if (ModuleType.WAR.equals(moduleType)) {
+    if (ModuleType.WAR.equals(_moduleType)) {
       return UISupport.getIcon(ServerIcon.WAR_FOLDER);
     }
-    else if (ModuleType.EJB.equals(moduleType)) {
+    else if (ModuleType.EJB.equals(_moduleType)) {
       return UISupport.getIcon(ServerIcon.EJB_FOLDER);
     }
     else {
@@ -81,10 +83,10 @@ public final class ResinModuleContainerNode
 
   public Image getOpenedIcon(int type)
   {
-    if (ModuleType.WAR.equals(moduleType)) {
+    if (ModuleType.WAR.equals(_moduleType)) {
       return UISupport.getIcon(ServerIcon.WAR_OPENED_FOLDER);
     }
-    else if (ModuleType.EJB.equals(moduleType)) {
+    else if (ModuleType.EJB.equals(_moduleType)) {
       return UISupport.getIcon(ServerIcon.EJB_OPENED_FOLDER);
     }
     else {
@@ -94,11 +96,11 @@ public final class ResinModuleContainerNode
 
   public String getDisplayName()
   {
-    if (ModuleType.WAR.equals(moduleType)) {
+    if (ModuleType.WAR.equals(_moduleType)) {
       return NbBundle.getMessage(ResinModuleContainerNode.class,
                                  "LBL_WebContainer");
     }
-    else if (ModuleType.EJB.equals(moduleType)) {
+    else if (ModuleType.EJB.equals(_moduleType)) {
       return NbBundle.getMessage(ResinModuleContainerNode.class,
                                  "LBL_EJBContainer");
     }

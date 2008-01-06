@@ -46,6 +46,7 @@ public class ResinDeploymentFactory
     = Logger.getLogger(ResinDeploymentFactory.class.getName());
   private static final PluginL10N L = new PluginL10N(ResinDeploymentFactory.class);
 
+  private static final String RESIN_PREFIX = "resin"; // NOI18N
   private static final String DISCONNECTED_URI = "resin:virtual";
 
   private static DeploymentFactory _instance;
@@ -55,9 +56,9 @@ public class ResinDeploymentFactory
 
   public static synchronized DeploymentFactory create()
   {
-    log.info("create deployment factory");
-    
     if (_instance == null) {
+      //log.fine("Create Resin Deployment Factory");
+    
       _instance = new ResinDeploymentFactory();
 
       DeploymentFactoryManager.getInstance().registerDeploymentFactory(_instance);
@@ -68,17 +69,21 @@ public class ResinDeploymentFactory
 
   public boolean handlesURI(String uri)
   {
-    return (uri != null) && uri.startsWith("resin");
+    log.info("URI: " + uri);
+    
+    return (uri != null) && uri.startsWith(RESIN_PREFIX);
   }
 
-  public synchronized DeploymentManager getDeploymentManager(String uri,
-                                                             String username,
-                                                             String password)
+  public DeploymentManager getDeploymentManager(String uri,
+						String username,
+						String password)
     throws DeploymentManagerCreationException
   {
+    //log.info("MGR: " + uri);
+
     if (!handlesURI(uri))
       throw new DeploymentManagerCreationException(L.l("''{0}'' is not a Resin URI",  uri));
-
+    /*
     InstanceProperties ip = InstanceProperties.getInstanceProperties(uri);
 
     if (ip == null) {
@@ -100,14 +105,16 @@ public class ResinDeploymentFactory
         throw (DeploymentManagerCreationException) t.initCause(e);
       }
     }
+    */
 
-    return manager;
+    return new ResinDeploymentManager();
   }
 
   public DeploymentManager getDisconnectedDeploymentManager(String uri)
     throws DeploymentManagerCreationException
   {
-    return getDeploymentManager(uri, null, null);
+    // return getDeploymentManager(uri, null, null);
+    return null;
   }
 
   public String getDisplayName()

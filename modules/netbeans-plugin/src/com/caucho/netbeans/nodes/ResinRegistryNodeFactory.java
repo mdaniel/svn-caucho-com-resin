@@ -34,16 +34,34 @@ import org.netbeans.modules.j2ee.deployment.plugins.spi.RegistryNodeFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
+import java.util.logging.*;
+import org.openide.nodes.Children;
+
 public final class ResinRegistryNodeFactory
   implements RegistryNodeFactory
 {
+  //private static final Logger log
+  //  = Logger.getLogger(ResinRegistryNodeFactory.class.getName());
+  
+  public ResinRegistryNodeFactory()
+  {
+    //log.warning("RRN-FACTORY:");
+  }
+  
   public Node getTargetNode(Lookup lookup)
   {
-    return new ResinTargetNode(lookup);
+    //log.warning("GetTargetNode:" + lookup);
+    //return new ResinTargetNode(lookup);
+
+    return null;
   }
 
   public Node getManagerNode(Lookup lookup)
   {
-    return new ResinManagerNode(lookup);
+    //log.warning("GetManagerNode:" + lookup);
+    
+    //return new ResinManagerNode(new Children.Map(), lookup);
+
+    return null;
   }
 }

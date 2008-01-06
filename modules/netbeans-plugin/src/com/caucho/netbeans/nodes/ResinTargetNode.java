@@ -36,6 +36,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 
 import javax.enterprise.deploy.shared.ModuleType;
+import javax.swing.Action;
 
 /**
  * The node that holds the J2EE module containers EAR, WAR, EJB
@@ -47,11 +48,17 @@ public final class ResinTargetNode
   public ResinTargetNode(final Lookup lookup)
   {
     super(new Children.Array());
-    
+
     getChildren().add(new Node[]{
       new ResinModuleContainerNode(lookup, ModuleType.EAR),
       new ResinModuleContainerNode(lookup, ModuleType.WAR),
       new ResinModuleContainerNode(lookup, ModuleType.EJB),
     });
+  }
+
+  @Override
+  public Action []getActions(boolean b)
+  {
+    return new Action[0];
   }
 }

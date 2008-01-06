@@ -64,6 +64,13 @@ public final class ResinDeploymentManager
 
   private ResinPlatformImpl _j2eePlatform;
 
+  public ResinDeploymentManager()
+  {
+    _uri = null;
+    _resinConfiguration = null;
+    _resinProcess = null;
+  }
+    
   public ResinDeploymentManager(String uri, boolean connected)
   {
     _uri = uri;
@@ -126,6 +133,9 @@ public final class ResinDeploymentManager
     throws InvalidModuleException
   {
     log.info("createConfiguration");
+    
+    return null;
+    /*
     ModuleType type = deployableObject.getType();
 
     if (type == ModuleType.WAR)
@@ -137,12 +147,13 @@ public final class ResinDeploymentManager
     else {
       throw new InvalidModuleException(L.l("Unsupported module type ''{0}''", type));
     }
+    */
   }
 
   public ProgressObject distribute(Target[] target, File file, File file0)
     throws IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
   public ProgressObject distribute(Target[] target,
@@ -150,7 +161,7 @@ public final class ResinDeploymentManager
                                    InputStream inputStream0)
     throws IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
   public ProgressObject distribute(Target[] target,
@@ -159,25 +170,25 @@ public final class ResinDeploymentManager
                                    InputStream inputStream0)
     throws IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
   public ProgressObject start(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
   public ProgressObject stop(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
   public ProgressObject undeploy(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
   public boolean isRedeploySupported()
@@ -185,20 +196,20 @@ public final class ResinDeploymentManager
     return false;
   }
 
+  @Override
   public ProgressObject redeploy(TargetModuleID[] targetModuleID,
                                  File file,
                                  File file0)
-    throws UnsupportedOperationException, IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
+  @Override
   public ProgressObject redeploy(TargetModuleID[] targetModuleID,
                                  InputStream inputStream,
                                  InputStream inputStream0)
-    throws UnsupportedOperationException, IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return null;
   }
 
   public void release()
@@ -250,14 +261,17 @@ public final class ResinDeploymentManager
   {
   }
 
-  public synchronized ResinPlatformImpl getJ2eePlatform()
+  public ResinPlatformImpl getJ2eePlatform()
   {
+    /*
     log.info("GET j2ee-platform");
     
     if (_j2eePlatform == null)
       _j2eePlatform = new ResinPlatformImpl(_resinConfiguration);
 
     return _j2eePlatform;
+    */
+    return null;
   }
 
   public String getUri()
