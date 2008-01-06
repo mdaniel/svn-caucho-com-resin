@@ -30,7 +30,7 @@
 package com.caucho.netbeans;
 
 import org.netbeans.modules.j2ee.deployment.common.api.OriginalCMPMapping;
-import org.netbeans.modules.j2ee.deployment.plugins.api.ConfigurationSupport;
+//import org.netbeans.modules.j2ee.deployment.plugins.api.ConfigurationSupport;
 
 import javax.enterprise.deploy.model.DDBean;
 import javax.enterprise.deploy.model.DeployableObject;
@@ -39,7 +39,7 @@ import javax.enterprise.deploy.spi.exceptions.ConfigurationException;
 import java.io.File;
 
 public class ConfigurationSupportImpl
-  extends ConfigurationSupport
+  //  extends ConfigurationSupport
 {
 
   public void setMappingInfo(DeploymentConfiguration config,

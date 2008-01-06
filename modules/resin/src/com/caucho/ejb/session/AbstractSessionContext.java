@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,7 +39,6 @@ import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
-
 import javax.xml.rpc.handler.MessageContext;
 
 /**
@@ -185,15 +184,6 @@ abstract public class AbstractSessionContext extends AbstractContext
   }
 
   /**
-   * Obtain a reference to the JAX-RPC MessageContext.
-   */
-  public MessageContext getMessageContext()
-    throws IllegalStateException
-  {
-    throw new IllegalStateException("Operation not supported");
-  }
-
-  /**
    * Looks up an object in the current JNDI context.
    */
   @Override
@@ -204,5 +194,10 @@ abstract public class AbstractSessionContext extends AbstractContext
       throw new IllegalArgumentException("Cannot call SessionContext.lookup(null)");
 
     return super.lookup(name);
+  }
+  
+  public MessageContext getMessageContext()
+  {
+      throw new UnsupportedOperationException();
   }
 }

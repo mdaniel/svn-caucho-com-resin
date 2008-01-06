@@ -37,10 +37,13 @@ import javax.enterprise.deploy.spi.DeploymentManager;
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
 import javax.enterprise.deploy.spi.factories.DeploymentFactory;
 import java.util.WeakHashMap;
+import java.util.logging.*;
 
 public class ResinDeploymentFactory
   implements DeploymentFactory
 {
+  private static final Logger log
+    = Logger.getLogger(ResinDeploymentFactory.class.getName());
   private static final PluginL10N L = new PluginL10N(ResinDeploymentFactory.class);
 
   private static final String DISCONNECTED_URI = "resin:virtual";
@@ -52,6 +55,8 @@ public class ResinDeploymentFactory
 
   public static synchronized DeploymentFactory create()
   {
+    log.info("create deployment factory");
+    
     if (_instance == null) {
       _instance = new ResinDeploymentFactory();
 
@@ -112,7 +117,7 @@ public class ResinDeploymentFactory
 
   public String getProductVersion()
   {
-    return "1.0";
+    return "3.1";
   }
 
 }

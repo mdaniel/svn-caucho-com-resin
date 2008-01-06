@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -821,4 +821,224 @@ public class UserCallableStatement extends UserPreparedStatement
     
     super.close();
   }
+
+    public boolean isClosed() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setPoolable(boolean poolable) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isPoolable() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setRowId(int parameterIndex, RowId x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNString(int parameterIndex, String value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(int parameterIndex, NClob value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClob(int parameterIndex, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(int parameterIndex, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public RowId getRowId(int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public RowId getRowId(String parameterName) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setRowId(String parameterName, RowId x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNString(String parameterName, String value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNCharacterStream(String parameterName, Reader value, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(String parameterName, NClob value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClob(String parameterName, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(String parameterName, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public NClob getNClob(int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public NClob getNClob(String parameterName) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public SQLXML getSQLXML(int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public SQLXML getSQLXML(String parameterName) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public String getNString(int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public String getNString(String parameterName) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Reader getNCharacterStream(int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Reader getNCharacterStream(String parameterName) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Reader getCharacterStream(int parameterIndex) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Reader getCharacterStream(String parameterName) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBlob(String parameterName, Blob x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClob(String parameterName, Clob x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setAsciiStream(String parameterName, InputStream x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBinaryStream(String parameterName, InputStream x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setCharacterStream(String parameterName, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNCharacterStream(String parameterName, Reader value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClob(String parameterName, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBlob(String parameterName, InputStream inputStream) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(String parameterName, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

@@ -32,7 +32,7 @@ package com.caucho.netbeans.core;
 
 import com.caucho.netbeans.util.JspNameUtil;
 
-import org.netbeans.modules.j2ee.deployment.plugins.api.FindJSPServlet;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.FindJSPServlet;
 
 import javax.enterprise.deploy.spi.DeploymentManager;
 import java.io.File;

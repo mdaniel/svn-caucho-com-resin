@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -166,4 +166,12 @@ public class ClobImpl implements java.sql.Clob {
   {
     return "ClobImpl[]";
   }
+
+    public void free() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Reader getCharacterStream(long pos, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

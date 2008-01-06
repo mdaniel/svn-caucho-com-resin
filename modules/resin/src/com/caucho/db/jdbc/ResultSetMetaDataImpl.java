@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -32,6 +32,7 @@ import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.SelectResult;
 
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * Metadata for the result
@@ -227,4 +228,12 @@ public class ResultSetMetaDataImpl implements ResultSetMetaData {
   {
     return _rs.getExprs()[column - 1];
   }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

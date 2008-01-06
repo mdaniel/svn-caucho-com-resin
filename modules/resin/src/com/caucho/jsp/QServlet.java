@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -62,7 +62,7 @@ import java.util.logging.Logger;
  */
 abstract public class QServlet implements Servlet {
   static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+    "Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.";
 
   private static final Logger log = Log.open(QServlet.class);
   private static final L10N L = new L10N(QServlet.class);

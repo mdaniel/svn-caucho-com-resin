@@ -40,6 +40,7 @@ import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
 
 import java.awt.*;
+import java.util.logging.*;
 
 /**
  * The main server node representing the server instance.
@@ -48,30 +49,40 @@ public class ResinManagerNode
   extends AbstractNode
   implements Node.Cookie
 {
-
-  private ResinDeploymentManager manager;
+  private static final Logger log
+    = Logger.getLogger(ResinManagerNode.class.getName());
+  
+  private ResinDeploymentManager _manager;
 
   public ResinManagerNode(Lookup lookup)
   {
     super(new Children.Array());
-    manager
+
+    log.info("ResinManagerNode: " + lookup);
+    
+    _manager
       = (ResinDeploymentManager) lookup.lookup(ResinDeploymentManager.class);
     getCookieSet().add(this);
     setIconBaseWithExtension("com/caucho/netbeans/resources/resin.png"); // NOI18N
   }
 
+    @Override
   public String getShortDescription()
   {
-    return manager.getResinConfiguration().getDisplayName();
+    return _manager.getResinConfiguration().getDisplayName();
   }
 
+    @Override
   public javax.swing.Action[] getActions(boolean context)
   {
-    return new javax.swing.Action[]{null,
-                                    SystemAction.get(AdminConsoleAction.class),
-                                    SystemAction.get(ServerLogAction.class),};
+    return new javax.swing.Action[]{
+      null,
+      SystemAction.get(AdminConsoleAction.class),
+      SystemAction.get(ServerLogAction.class),
+    };
   }
 
+    @Override
   public boolean hasCustomizer()
   {
     // XXX: return true and implement getCustomizer to enable a
@@ -87,6 +98,6 @@ public class ResinManagerNode
 
   public ResinDeploymentManager getManger()
   {
-    return manager;
+    return _manager;
   }
 }

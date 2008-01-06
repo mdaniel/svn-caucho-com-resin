@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -145,4 +145,12 @@ public class BlobImpl implements java.sql.Blob {
   {
     return "BlobImpl[]";
   }
+
+    public void free() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public InputStream getBinaryStream(long pos, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

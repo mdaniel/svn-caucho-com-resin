@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -60,7 +60,7 @@ public class IiopProtocol extends Protocol {
     = Logger.getLogger(IiopProtocol.class.getName());
 
   static final String COPYRIGHT =
-    "Copyright (c) 1998-2006 Caucho Technology.  All rights reserved.";
+    "Copyright (c) 1998-2008 Caucho Technology.  All rights reserved.";
 
   private String _protocolName = "iiop";
 

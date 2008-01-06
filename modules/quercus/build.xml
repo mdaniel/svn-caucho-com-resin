@@ -1,133 +1,69 @@
-<project name="php" default="compile" basedir=".">
-  <property file="local.properties"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="quercus" default="default" basedir=".">
+    <description>Builds, tests, and runs the project quercus.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <!--
 
-  <property name="install" location="${basedir}/"/>
+    There exist several targets which are by default empty and which can be 
+    used for execution of your tasks. These targets are usually executed 
+    before and after some main targets. They are: 
 
-  <property name="src" location="${basedir}/src"/>
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
 
-  <property name="resin" location="../resin"/>
-  <property name="resin.lib" location="${resin}/lib"/>
+    (Targets beginning with '-' are not intended to be called on their own.)
 
-  <property name="build" location="${install}/build"/>
-  <property name="lib" location="${install}/lib"/>
-  <property name="clientlib" location="${install}/clientlib"/>
-  <property name="dist" location="${install}/dist"/>
+    Example of inserting an obfuscator after compilation could look like this:
 
-  <property name="resin.src" location="${resin}/src"/>
-  <property name="resin.build" location="${resin}/build"/>
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
 
-  <property name="javac.verbose" value="no"/>
-  <property name="javac.debug" value="on"/>
-  <property name="javac.optimize" value="off"/>
-  <property name="javac.deprecation" value="off"/>
-  <property name="javac.nowarn" value="on"/>
-  <property name="javac.memoryMaximumSize" value="256m"/>
-  <property name="javac.source" value="1.4"/>
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
 
-  <property name="jar.compress" value="false"/>
-  <property name="jar.index" value="true"/>
-  <property name="jar.update" value="true"/>
 
-  <property name="shell" value="bash"/>
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
 
-  <target name="tstamp">
-    <tstamp/>
-    <tstamp>
-      <format property="date" pattern="EEE, dd MMM yyyy hh:mm:ss zzz"/>
-    </tstamp>
-    <tstamp>
-      <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
-    </tstamp>
-    <tstamp>
-      <format property="snapshotdate" pattern="yyMMdd"/>
-    </tstamp>
-  </target>
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar-with-manifest:    JAR building (if you are using a manifest)
+      -do-jar-without-manifest: JAR building (if you are not using a manifest)
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
 
-  <target name="init" depends="tstamp">
-    <property name="product" value="Resin"/>
-    <property name="shortproduct" value="resin-pro"/>
-    <property name="version" value="3.0.s${snapshotdate}"/>
+    An example of overriding the target for project execution could look like this:
 
-    <mkdir dir="${build}"/>
-    <mkdir dir="${build}/webapps"/>
+        <target name="run" depends="quercus-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
 
-    <condition property="unix">
-      <os family="unix"/>
-    </condition>
-  </target>
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
 
-  <target name="compile" 
-          depends="init, php">
-  </target>
-
-  <target name="php" depends="init">
-    <!-- build module -->
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="quercus"/>
-      <param name="javac.source" value="1.5"/>
-    </antcall>
-  </target>
-
-  <target name="module">
-    <property name="module.src" value="${basedir}/modules/${module.name}/src"/>
-    <property name="module.build" value="${basedir}/modules/${module.name}/classes"/>
-    <property name="openmodule.build" value="${resin.build}/${module.name}"/>
-    <property name="module.dist" value="${lib}"/>
-    <property name="module.jar" value="${module.name}.jar"/>
-
-    <property file="${module.src}/module.properties"/>
-
-    <mkdir dir="${module.build}" />
-
-    <copy todir="${module.build}">
-      <fileset dir="${module.src}">
-        <exclude name="**/*.svn/**"/>
-
-        <include name="**/*.xml"/>
-        <include name="**/*.rnc"/>
-        <include name="**/*.tld"/>
-        <include name="**/*.properties"/>
-        <include name="META-INF/**"/>
-      </fileset>
-    </copy>
-
-    <javac srcdir="${module.src}" destdir="${module.build}"
-           excludes="**/.svn/**"
-           fork="true" 
-           verbose="${javac.verbose}" 
-           debug="${javac.debug}" optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
-           source="${javac.source}"
-           memoryMaximumSize="${javac.memoryMaximumSize}">
-      <classpath>
-        <fileset dir="${resin.lib}">
-          <include name="*.jar"/>
-       </fileset>
-      </classpath>
-    </javac>
-
-    <mkdir dir="${module.dist}" />
-    <mkdir dir="${openmodule.build}"/>
-
-    <jar jarfile="${module.dist}/${module.jar}"
-         compress="${jar.compress}" index="${jar.index}" update="${jar.update}">
-      <fileset dir="${openmodule.build}">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svn"/>
-      </fileset>
-      <fileset dir="${module.build}">
-        <exclude name=".svn"/>
-      </fileset>
-    </jar>
-  </target>
-
-  <target name="clean" depends="init">
-    <delete>
-      <fileset dir=".">
-        <include name="**/*.class"/>
-      </fileset>
-    </delete>
-    <delete dir="${dist}"/>
-  </target>
+    -->
 </project>
-

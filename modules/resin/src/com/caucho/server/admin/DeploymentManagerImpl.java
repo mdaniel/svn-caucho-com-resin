@@ -162,7 +162,7 @@ public class DeploymentManagerImpl
    */
   public TargetModuleID []getAvailableModules(ModuleType moduleType,
                                               Target []targetList)
-    throws TargetException, IllegalStateException, IOException
+    throws TargetException, IllegalStateException
   {
     validateConnection();
 
@@ -172,6 +172,8 @@ public class DeploymentManagerImpl
       thread.setContextClassLoader(getClass().getClassLoader());
 
       return _client.getAvailableModules(moduleType.toString());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -453,5 +455,13 @@ public class DeploymentManagerImpl
       throws Exception;
 
   }
+
+    public ProgressObject distribute(Target[] arg0, ModuleType arg1, InputStream arg2, InputStream arg3) throws IllegalStateException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setDConfigBeanVersion(DConfigBeanVersionType arg0) throws DConfigBeanVersionUnsupportedException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
 

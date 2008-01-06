@@ -30,16 +30,22 @@
 
 package com.caucho.netbeans;
 
-import org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformFactory;
-import org.netbeans.modules.j2ee.deployment.plugins.api.J2eePlatformImpl;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.J2eePlatformFactory;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.J2eePlatformImpl;
 
 import javax.enterprise.deploy.spi.DeploymentManager;
+import java.util.logging.*;
 
 public class ResinPlatformFactory
   extends J2eePlatformFactory
 {
+  private static final Logger log
+    = Logger.getLogger(ResinPlatformFactory.class.getName());
+  
   public J2eePlatformImpl getJ2eePlatformImpl(DeploymentManager deploymentManager)
   {
+    log.info("j2ee platform");
+    
     return ((ResinDeploymentManager) deploymentManager).getJ2eePlatform();
   }
 }

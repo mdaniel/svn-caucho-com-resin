@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -421,5 +421,13 @@ public class DeploymentManagerImpl implements DeploymentManager {
   {
     return "DeploymentManagerImpl[" + _uri + "]";
   }
+
+    public ProgressObject distribute(Target[] arg0, ModuleType arg1, InputStream arg2, InputStream arg3) throws IllegalStateException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setDConfigBeanVersion(DConfigBeanVersionType arg0) throws DConfigBeanVersionUnsupportedException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
 

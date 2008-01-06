@@ -33,6 +33,7 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.StatementEventListener;
 
 public final class PooledConnectionWrapper
   implements PooledConnection
@@ -78,6 +79,14 @@ public final class PooledConnectionWrapper
   {
     return "PooledConnectionWrapper[" + _profilerPoint.getName() + "]";
   }
+
+    public void addStatementEventListener(StatementEventListener listener) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void removeStatementEventListener(StatementEventListener listener) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
 
 

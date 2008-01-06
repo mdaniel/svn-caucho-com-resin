@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -118,7 +118,7 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
-  public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks)
+  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
   {
     throw new UnsupportedOperationException();
   }
@@ -126,28 +126,31 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
-  public <T> List<Future<T>> invokeAll(Collection<Callable<T>> tasks,
+  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
 				       long timeout,
 				       TimeUnit unit)
   {
+    // XXX: todo
     throw new UnsupportedOperationException();
   }
 
   /**
    * Invokes a set of tasks.
    */
-  public <T> T invokeAny(Collection<Callable<T>> tasks)
+  public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
   {
+    // XXX: todo
     throw new UnsupportedOperationException();
   }
 
   /**
    * Invokes a set of tasks.
    */
-  public <T> T invokeAny(Collection<Callable<T>> tasks,
+  public <T> T invokeAny(Collection<? extends Callable<T>> tasks,
 			 long timeout,
 			 TimeUnit unit)
   {
+    // XXX: todo
     throw new UnsupportedOperationException();
   }
 

@@ -547,4 +547,24 @@ public final class StatementWrapper
   {
     return "StatementWrapper[" + _profilerPoint.getName() + "]";
   }
+
+    public boolean isClosed() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setPoolable(boolean poolable) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isPoolable() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

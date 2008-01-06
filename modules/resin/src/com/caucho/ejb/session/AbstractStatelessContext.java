@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,16 +31,12 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.xa.EjbTransactionManager;
-import com.caucho.config.j2ee.Inject;
 
 import java.util.ArrayList;
 
-import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import javax.ejb.SessionContext;
-
-import javax.xml.rpc.handler.MessageContext;
 
 /**
  * Abstract base class for an session context
@@ -183,15 +179,6 @@ abstract public class AbstractStatelessContext extends AbstractContext
   public Class getInvokedBusinessInterface()
   {
     return super.getInvokedBusinessInterface();
-  }
-
-  /**
-   * Obtain a reference to the JAX-RPC MessageContext
-   */
-  public MessageContext getMessageContext()
-    throws IllegalStateException
-  {
-    throw new IllegalStateException("Operation not supported");
   }
 
   /**

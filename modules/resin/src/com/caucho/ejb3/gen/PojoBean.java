@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -82,7 +82,8 @@ public class PojoBean extends GenClass {
       if (Modifier.isFinal(modifiers))
 	continue;
 
-      BusinessMethod bizMethod = new BusinessMethod(method);
+      int index = _businessMethods.size();
+      BusinessMethod bizMethod = new BusinessMethod(method, index);
 
       if (! bizMethod.isPlain()) {
 	_isPlain = false;

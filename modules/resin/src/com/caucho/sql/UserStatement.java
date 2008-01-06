@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -431,4 +431,24 @@ public class UserStatement implements Statement {
   {
     return "UserStatement[" + _stmt + "]";
   }
+
+    public boolean isClosed() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setPoolable(boolean poolable) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isPoolable() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -453,5 +453,13 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
     public void setLoginTimeout(int timeout)
     {
     }
+
+        public <T> T unwrap(Class<T> iface) throws SQLException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean isWrapperFor(Class<?> iface) throws SQLException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
   }
 }

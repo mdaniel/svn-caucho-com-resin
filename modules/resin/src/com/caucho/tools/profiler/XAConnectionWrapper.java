@@ -30,6 +30,7 @@
 package com.caucho.tools.profiler;
 
 import javax.sql.ConnectionEventListener;
+import javax.sql.StatementEventListener;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 import java.sql.Connection;
@@ -92,4 +93,12 @@ public final class XAConnectionWrapper
   {
     return "XAConnectionWrapper[" + _profilerPoint.getName() + "]";
   }
+
+    public void addStatementEventListener(StatementEventListener listener) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void removeStatementEventListener(StatementEventListener listener) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

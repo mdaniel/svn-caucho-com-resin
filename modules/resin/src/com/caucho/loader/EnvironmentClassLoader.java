@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -399,7 +399,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Adds a child listener.
    */
-  void addLoaderListener(AddLoaderListener listener)
+  public void addLoaderListener(AddLoaderListener listener)
   {
     synchronized (_addLoaderListeners) {
       ArrayList<AddLoaderListener> listeners

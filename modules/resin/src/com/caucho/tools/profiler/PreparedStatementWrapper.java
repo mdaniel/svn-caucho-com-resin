@@ -1020,4 +1020,96 @@ public class PreparedStatementWrapper
   {
     return "PreparedStatementWrapper[" + _profilerPoint.getName() + "]";
   }
+
+    public void setRowId(int parameterIndex, RowId x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNString(int parameterIndex, String value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(int parameterIndex, NClob value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClob(int parameterIndex, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setNClob(int parameterIndex, Reader reader) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isClosed() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setPoolable(boolean poolable) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isPoolable() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

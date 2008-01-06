@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,6 +30,8 @@ package com.caucho.db.jdbc;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -1224,4 +1226,40 @@ class DatabaseMetaDataImpl implements DatabaseMetaData {
   {
     return "DatabaseMetaDataImpl[]";
   }
+
+    public RowIdLifetime getRowIdLifetime() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public ResultSet getClientInfoProperties() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

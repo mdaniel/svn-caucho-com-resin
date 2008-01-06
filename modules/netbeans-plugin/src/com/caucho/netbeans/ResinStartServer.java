@@ -36,7 +36,7 @@ import com.caucho.netbeans.ProgressEventSupport;
 import com.caucho.netbeans.DeploymentStatusImpl;
 
 import org.netbeans.modules.j2ee.deployment.plugins.api.ServerDebugInfo;
-import org.netbeans.modules.j2ee.deployment.plugins.api.StartServer;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.StartServer;
 import org.openide.util.RequestProcessor;
 
 import javax.enterprise.deploy.shared.CommandType;

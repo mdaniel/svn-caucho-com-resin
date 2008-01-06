@@ -84,7 +84,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jws, ejb, jpa, j2ee-deploy, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
+          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
   </target>
 
   <target name="ant" depends="init">
@@ -237,6 +237,41 @@
     </antcall>
   </target>
   
+  <target name="netbeans-plugin" depends="init">
+    <property name="module.name" value="netbeans-plugin"/>
+    <property name="jar.name" value="resin-netbeans-plugin"/>
+    
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="${module.name}"/>
+      <param name="module.jar" value="${jar.name}.jar"/>
+    </antcall>
+
+    <property name="nbm.build" location="${modules}/${module.name}/dist"/>
+    
+    <mkdir dir="${nbm.build}/Info" />
+    <mkdir dir="${nbm.build}/netbeans/modules" />
+    
+    <copy file="${lib}/${jar.name}.jar"
+          tofile="${nbm.build}/netbeans/modules/${jar.name}.jar"/>
+    
+    <copy file="${modules}/${module.name}/Info/info.xml"
+          tofile="${nbm.build}/Info/info.xml"/>
+    
+    <copy todir="${nbm.build}/netbeans">
+      <fileset dir="${modules}/${module.name}/netbeans">
+        <include name="**/*.xml"/>
+      </fileset>
+    </copy>
+	  
+    <jar jarfile="${lib}/${jar.name}.nbm">
+      <fileset dir="${nbm.build}">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+    </jar>
+	  
+  </target>
+  
   <target name="portlet" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="portlet"/>
@@ -304,7 +339,7 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, hessian, jca, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, portlet, script, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, ejb, hessian, jca, jms, jsdk, jstl, jsf, jta, j2ee-management, portlet, script, resin-util, webbeans, version">
 
     <!-- build module -->
 
@@ -534,7 +569,9 @@
       <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/ejb/src"/>
       <packageset dir="${modules}/jpa/src"/>
+      <!--
       <packageset dir="${modules}/j2ee-deploy/src"/>
+      -->
       <packageset dir="${modules}/j2ee-management/src"/>
       <!--
       <packageset dir="${modules}/jaf/src"/>
@@ -732,11 +769,11 @@
         <include name="lib/jaxws-api.jar"/>
         <include name="lib/jws-15.jar"/>
         <include name="lib/jpa-15.jar"/>
-        <include name="lib/j2ee-deploy-10.jar"/>
         <include name="lib/j2ee-management-10.jar"/>
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
         <include name="lib/jsdk-15.jar"/>
+        <include name="lib/jsr88.jar"/>
         <include name="lib/jsf-12.jar"/>
         <include name="lib/jstl-11.jar"/>
         <include name="lib/jta-101.jar"/>
@@ -1227,6 +1264,7 @@
     <delete>
       <fileset dir="modules">
         <include name="*/classes"/>
+        <include name="*/dist"/>
       </fileset>
     </delete>
     <delete>

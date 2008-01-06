@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -36,6 +36,7 @@ import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.*;
+import javax.sql.StatementEventListener;
 
 /**
  * Spying on a connection.
@@ -113,4 +114,12 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
   {
     return "SpyPooledConnection[id=" + _id + ",conn=" + _pconn + "]";
   }
+
+    public void addStatementEventListener(StatementEventListener listener) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void removeStatementEventListener(StatementEventListener listener) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

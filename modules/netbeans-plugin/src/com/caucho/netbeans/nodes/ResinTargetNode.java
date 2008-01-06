@@ -47,11 +47,11 @@ public final class ResinTargetNode
   public ResinTargetNode(final Lookup lookup)
   {
     super(new Children.Array());
-    getChildren().add(new Node[]{new ResinModuleContainerNode(lookup,
-                                                              ModuleType.EAR),
-                                 new ResinModuleContainerNode(lookup,
-                                                              ModuleType.WAR),
-                                 new ResinModuleContainerNode(lookup,
-                                                              ModuleType.EJB),});
+    
+    getChildren().add(new Node[]{
+      new ResinModuleContainerNode(lookup, ModuleType.EAR),
+      new ResinModuleContainerNode(lookup, ModuleType.WAR),
+      new ResinModuleContainerNode(lookup, ModuleType.EJB),
+    });
   }
 }

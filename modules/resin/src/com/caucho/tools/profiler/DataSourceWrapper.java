@@ -123,4 +123,12 @@ public final class DataSourceWrapper
   {
     return "DataSourceWrapper[" + _profilerPoint.getName() + "]";
   }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

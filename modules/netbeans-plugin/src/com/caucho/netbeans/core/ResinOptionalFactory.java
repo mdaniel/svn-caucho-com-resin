@@ -29,14 +29,14 @@
 
 package com.caucho.netbeans.core;
 
-import com.caucho.netbeans.AddInstanceIterator;
+//import com.caucho.netbeans.AddInstanceIterator;
 import com.caucho.netbeans.ResinStartServer;
 
-import org.netbeans.modules.j2ee.deployment.plugins.api.FindJSPServlet;
-import org.netbeans.modules.j2ee.deployment.plugins.api.IncrementalDeployment;
-import org.netbeans.modules.j2ee.deployment.plugins.api.OptionalDeploymentManagerFactory;
-import org.netbeans.modules.j2ee.deployment.plugins.api.StartServer;
-import org.netbeans.modules.j2ee.deployment.plugins.api.TargetModuleIDResolver;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.FindJSPServlet;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.IncrementalDeployment;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.OptionalDeploymentManagerFactory;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.StartServer;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.TargetModuleIDResolver;
 import org.openide.WizardDescriptor.InstantiatingIterator;
 
 import javax.enterprise.deploy.spi.DeploymentManager;
@@ -67,6 +67,7 @@ public class ResinOptionalFactory
 
   public InstantiatingIterator getAddInstanceIterator()
   {
-    return new AddInstanceIterator();
+    //return new AddInstanceIterator();
+    return null;
   }
 }

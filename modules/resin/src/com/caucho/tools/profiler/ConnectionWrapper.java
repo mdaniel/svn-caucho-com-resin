@@ -31,6 +31,7 @@ package com.caucho.tools.profiler;
 
 import java.sql.*;
 import java.util.Map;
+import java.util.Properties;
 
 public final class ConnectionWrapper
   implements Connection
@@ -489,4 +490,56 @@ public final class ConnectionWrapper
   {
     return "ConnectionWrapper[" + _profilerPoint.getName() + "]";
   }
+
+    public Clob createClob() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Blob createBlob() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public NClob createNClob() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public SQLXML createSQLXML() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isValid(int timeout) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClientInfo(String name, String value) throws SQLClientInfoException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public String getClientInfo(String name) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Properties getClientInfo() throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

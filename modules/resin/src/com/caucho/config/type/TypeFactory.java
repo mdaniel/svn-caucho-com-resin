@@ -54,7 +54,7 @@ import javax.sql.*;
 /**
  * Factory for returning type strategies.
  */
-public class TypeFactory
+public class TypeFactory implements AddLoaderListener
 {
   private static final Logger log
     = Logger.getLogger(TypeFactory.class.getName());
@@ -66,7 +66,7 @@ public class TypeFactory
   private static final EnvironmentLocal<TypeFactory> _localFactory
     = new EnvironmentLocal<TypeFactory>();
 
-  private final ClassLoader _loader;
+  private final EnvironmentClassLoader _loader;
   private final TypeFactory _parent;
 
   private final HashSet<URL> _configSet
@@ -91,10 +91,15 @@ public class TypeFactory
   {
     _loader = Environment.getEnvironmentClassLoader(loader);
 
-    if (_loader != null)
+    if (_loader != null) {
       _parent = getFactory(_loader.getParent());
+
+      _loader.addLoaderListener(this);
+    }
     else
       _parent = null;
+
+
   }
 
   /**
@@ -330,6 +335,22 @@ public class TypeFactory
     else
       return false;
   }
+
+  //
+  // AddLoaderListener
+  //
+  
+  /**
+   * Called with the loader config changes.
+   */
+  public void addLoader(EnvironmentClassLoader loader)
+  {
+    init(loader);
+  }
+
+  //
+  // Configuration methods
+  //
 
   /**
    * Adds an new environment attribute.

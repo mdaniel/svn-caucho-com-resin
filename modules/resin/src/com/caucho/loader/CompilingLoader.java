@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -108,8 +108,8 @@ public class CompilingLoader extends Loader implements Make {
   public CompilingLoader(Path classDir, Path sourceDir,
                          String args, String encoding)
   {
-    if (classDir.getScheme().equals("http") ||
-        classDir.getScheme().equals("https"))
+    if (classDir.getScheme().equals("http")
+	|| classDir.getScheme().equals("https"))
       throw new RuntimeException("compiling class loader can't be http.  Use compile=false.");
 
     _sourceDir = sourceDir;
@@ -755,6 +755,7 @@ public class CompilingLoader extends Loader implements Make {
    *
    * @param name the name of the class
    */
+  @Override
   public Path getPath(String name)
   {
     Path path = _classDir.lookup(name);

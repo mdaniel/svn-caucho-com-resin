@@ -48,10 +48,14 @@ import javax.enterprise.deploy.spi.status.ProgressObject;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Locale;
+import java.util.logging.*;
 
 public final class ResinDeploymentManager
   implements DeploymentManager
 {
+  private static final Logger log
+    = Logger.getLogger(ResinDeploymentManager.class.getName());
+  
   private static final PluginL10N L = new PluginL10N(ResinStartServer.class);
 
   private final String _uri;
@@ -64,6 +68,7 @@ public final class ResinDeploymentManager
   {
     _uri = uri;
 
+    
     // XXX: what is connected for?
 
     InstanceProperties instanceProperties = InstanceProperties.getInstanceProperties(_uri);
@@ -90,33 +95,37 @@ public final class ResinDeploymentManager
   public Target[] getTargets()
     throws IllegalStateException
   {
-    return new ResinTarget[]{new ResinTarget(_uri, _resinConfiguration.getDisplayName())};
+    log.info("get targets");
+    return new ResinTarget[]{
+      new ResinTarget(_uri, _resinConfiguration.getDisplayName())
+    };
   }
 
   public TargetModuleID[] getRunningModules(ModuleType moduleType,
                                             Target[] target)
     throws TargetException, IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return new TargetModuleID[0];
   }
 
   public TargetModuleID[] getNonRunningModules(ModuleType moduleType,
                                                Target[] target)
     throws TargetException, IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return new TargetModuleID[0];
   }
 
   public TargetModuleID[] getAvailableModules(ModuleType moduleType,
                                               Target[] target)
     throws TargetException, IllegalStateException
   {
-    throw new UnsupportedOperationException("XXX: unimplemented");
+    return new TargetModuleID[0];
   }
 
   public DeploymentConfiguration createConfiguration(DeployableObject deployableObject)
     throws InvalidModuleException
   {
+    log.info("createConfiguration");
     ModuleType type = deployableObject.getType();
 
     if (type == ModuleType.WAR)
@@ -137,6 +146,15 @@ public final class ResinDeploymentManager
   }
 
   public ProgressObject distribute(Target[] target,
+                                   InputStream inputStream,
+                                   InputStream inputStream0)
+    throws IllegalStateException
+  {
+    throw new UnsupportedOperationException("XXX: unimplemented");
+  }
+
+  public ProgressObject distribute(Target[] target,
+				   ModuleType type,
                                    InputStream inputStream,
                                    InputStream inputStream0)
     throws IllegalStateException
@@ -234,6 +252,8 @@ public final class ResinDeploymentManager
 
   public synchronized ResinPlatformImpl getJ2eePlatform()
   {
+    log.info("GET j2ee-platform");
+    
     if (_j2eePlatform == null)
       _j2eePlatform = new ResinPlatformImpl(_resinConfiguration);
 

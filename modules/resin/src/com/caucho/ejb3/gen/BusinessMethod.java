@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -36,14 +36,20 @@ import com.caucho.util.L10N;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.*;
 import javax.annotation.security.*;
 import javax.ejb.*;
+import javax.interceptor.*;
 
 /**
  * Represents a business method
  */
 public class BusinessMethod {
+  private static final L10N L = new L10N(BusinessMethod.class);
+  
   private Method _method;
+
+  private String _uniqueName;
 
   private boolean _isPlain = true;
 
@@ -54,9 +60,13 @@ public class BusinessMethod {
 
   private TransactionAttributeType _xa;
   
-  public BusinessMethod(Method method)
+  private ArrayList<Class> _interceptors = new ArrayList<Class>();
+  
+  public BusinessMethod(Method method, int index)
   {
     _method = method;
+
+    _uniqueName = "_" + _method.getName() + "_" + index;
 
     introspect();
   }
@@ -74,6 +84,8 @@ public class BusinessMethod {
       return false;
     else if (_xa != null && ! _xa.equals(TransactionAttributeType.SUPPORTS))
       return false;
+    else if (_interceptors != null && _interceptors.size() > 0)
+      return false;
 
     return true;
   }
@@ -84,6 +96,12 @@ public class BusinessMethod {
 
     introspectSecurity(cl);
     introspectTransaction(cl);
+    introspectInterceptors(cl);
+  }
+
+  public ArrayList<Class> getInterceptors()
+  {
+    return _interceptors;
   }
   
   protected void introspectSecurity(Class cl)
@@ -126,7 +144,11 @@ public class BusinessMethod {
     if (denyAll != null)
       _roles = new String[0];
   }
-  
+
+  /**
+   * Introspects the @TransactionAttribute annotation on the method
+   * and the class.
+   */
   protected void introspectTransaction(Class cl)
   {
     TransactionAttribute xaAttr;
@@ -140,6 +162,25 @@ public class BusinessMethod {
 
     if (xaAttr != null)
       _xa = xaAttr.value();
+  }
+  
+  /**
+   * Introspects the @Interceptors annotation on the method
+   * and the class.
+   */
+  protected void introspectInterceptors(Class cl)
+  {
+    ArrayList<Class> interceptorList = new ArrayList<Class>();
+    
+    Interceptors interceptors
+      = _method.getAnnotation(Interceptors.class);
+
+    if (interceptors != null) {
+      for (Class interceptorClass : interceptors.value())
+	interceptorList.add(interceptorClass);
+    }
+
+    _interceptors = interceptorList;
   }
 
   public void generate(JavaWriter out)
@@ -203,6 +244,76 @@ public class BusinessMethod {
 
       out.println("};");
     }
+
+    if (_interceptors != null && _interceptors.size() > 0) {
+      generateInterceptorsPrologue(out);
+    }
+  }
+
+  protected void generateInterceptorsPrologue(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private static java.lang.reflect.Method " + _uniqueName + "_method;");
+    out.println("private static java.lang.reflect.Method []" + _uniqueName + "_methodChain;");
+
+    Class cl = _method.getDeclaringClass();
+    
+    out.println();
+    out.println("static {");
+    out.pushDepth();
+    
+    out.println("try {");
+    out.pushDepth();
+    
+    out.print(_uniqueName + "_method = ");
+    generateGetMethod(out, _method);
+    out.println(";");
+
+    out.println(_uniqueName + "_methodChain = new java.lang.reflect.Method[] {");
+    out.pushDepth();
+    
+    for (Class iClass : _interceptors) {
+      Method method = findInterceptorMethod(iClass);
+      
+      generateGetMethod(out, method);
+      out.println(", ");
+    }
+    out.popDepth();
+    out.println("};");
+    
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  throw new RuntimeException(e);");
+    out.println("}");
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected Method findInterceptorMethod(Class cl)
+  {
+    for (Method method : cl.getMethods()) {
+      if (method.isAnnotationPresent(AroundInvoke.class))
+	return method;
+    }
+
+    throw new IllegalStateException(L.l("Can't find @AroundInvoke in '{0}'",
+					cl.getName()));
+  }
+
+  protected void generateGetMethod(JavaWriter out, Method method)
+    throws IOException
+  {
+    Class cl = method.getDeclaringClass();
+    
+    out.print(cl.getName() + ".class");
+    out.print(".getMethod(\"" + method.getName() + "\", new Class[] { ");
+    
+    for (Class type : method.getParameterTypes()) {
+      out.printClass(type);
+      out.print(".class, ");
+    }
+    out.print("})");
   }
 
   protected void generateSecurity(JavaWriter out)
@@ -285,7 +396,7 @@ public class BusinessMethod {
       }
     }
     
-    generateSuper(out);
+    generateInterceptors(out);
     
     if (_xa != null) {
       switch (_xa) {
@@ -319,6 +430,66 @@ public class BusinessMethod {
 	break;
       }
     }
+  }
+
+  protected void generateInterceptors(JavaWriter out)
+    throws IOException
+  {
+    if (_interceptors == null || _interceptors.size() == 0) {
+      generateSuper(out);
+      return;
+    }
+
+    out.println("try {");
+    out.pushDepth();
+    
+    if (! void.class.equals(_method.getReturnType())) {
+      out.print("return (");
+      printCastClass(out, _method.getReturnType());
+      out.print(") ");
+    }
+    
+    out.print("new com.caucho.ejb3.gen.InvocationContextImpl(this, ");
+    out.print(_uniqueName + "_method, ");
+    out.print(_uniqueName + "_methodChain, ");
+    out.print("null, ");
+    out.print("new Object[] { ");
+    for (int i = 0; i < _method.getParameterTypes().length; i++) {
+      out.print("a" + i + ", ");
+    }
+    out.println("}).proceed();");
+    
+    out.popDepth();
+    out.println("} catch (RuntimeException e) {");
+    out.println("  throw e;");
+    out.println("} catch (Exception e) {");
+    out.println("  throw new RuntimeException(e);");
+    out.println("}");
+  }
+
+  protected void printCastClass(JavaWriter out, Class type)
+    throws IOException
+  {
+    if (! type.isPrimitive())
+      out.printClass(type);
+    else if (boolean.class.equals(type))
+      out.print("Boolean");
+    else if (char.class.equals(type))
+      out.print("Character");
+    else if (byte.class.equals(type))
+      out.print("Byte");
+    else if (short.class.equals(type))
+      out.print("Short");
+    else if (int.class.equals(type))
+      out.print("Integer");
+    else if (long.class.equals(type))
+      out.print("Long");
+    else if (float.class.equals(type))
+      out.print("Float");
+    else if (double.class.equals(type))
+      out.print("Double");
+    else
+      throw new IllegalStateException(type.getName());
   }
 
   protected void generateThrows(JavaWriter out, Class []exnCls)
