@@ -30,8 +30,9 @@
 package com.caucho.netbeans;
 
 import com.caucho.netbeans.PluginL10N;
-import com.caucho.netbeans.core.ResinTarget;
+import com.caucho.netbeans.ide.ResinTarget;
 
+import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
 import org.netbeans.modules.j2ee.deployment.plugins.api.InstanceProperties;
 
 import javax.enterprise.deploy.model.DeployableObject;
@@ -60,33 +61,18 @@ public final class ResinDeploymentManager
 
   private final String _uri;
   private final ResinConfiguration _resinConfiguration;
-  private final ResinProcess _resinProcess;
+  private ResinProcess _resinProcess;
 
   private ResinPlatformImpl _j2eePlatform;
 
-  public ResinDeploymentManager()
-  {
-    _uri = null;
-    _resinConfiguration = null;
-    _resinProcess = null;
-  }
     
-  public ResinDeploymentManager(String uri, boolean connected)
+  public ResinDeploymentManager(String uri, InstanceProperties ip) throws DeploymentManagerCreationException
   {
     _uri = uri;
 
     
     // XXX: what is connected for?
-
-    InstanceProperties instanceProperties = InstanceProperties.getInstanceProperties(_uri);
-
-    _resinConfiguration = new ResinConfiguration(instanceProperties);
-
-    ResinProcess resinProcess = new ResinProcess(_uri, _resinConfiguration);
-
-    resinProcess.init();
-
-    _resinProcess = resinProcess;
+    _resinConfiguration = new ResinConfiguration(ip);
   }
 
   public ResinConfiguration getResinConfiguration()
@@ -96,6 +82,10 @@ public final class ResinDeploymentManager
 
   public ResinProcess getResinProcess()
   {
+    if (_resinProcess == null) {
+      _resinProcess = new ResinProcess(_uri, _resinConfiguration);
+      _resinProcess.init();
+    }
     return _resinProcess;
   }
 

@@ -24,38 +24,29 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 
-package com.caucho.netbeans.nodes;
+package com.caucho.netbeans;
 
-import org.netbeans.modules.j2ee.deployment.plugins.spi.RegistryNodeFactory;
-import org.openide.nodes.Node;
-import org.openide.util.Lookup;
+import org.netbeans.modules.j2ee.deployment.common.api.ConfigurationException;
+import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eeModule;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfiguration;
+import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfigurationFactory;
 
 import java.util.logging.*;
-import org.openide.nodes.Children;
 
-public final class ResinRegistryNodeFactory
-  implements RegistryNodeFactory
+public class ResinModuleConfigurationFactory
+  implements ModuleConfigurationFactory
 {
   private static final Logger log
-    = Logger.getLogger(ResinRegistryNodeFactory.class.getName());
+    = Logger.getLogger(ResinModuleConfigurationFactory.class.getName());
   
-  public ResinRegistryNodeFactory()
+  public ModuleConfiguration create(J2eeModule module)
+          throws ConfigurationException
   {
-  }
-  
-  public Node getTargetNode(Lookup lookup)
-  {
-    log.info("get target node: " + lookup);
-    return new ResinTargetNode(lookup);
-  }
-
-  public Node getManagerNode(Lookup lookup)
-  {
-    log.info("get manager node: " + lookup);
-    return new ResinManagerNode(new Children.Map(), lookup);
+    log.info("MOD_FACTORY: " + module);
+    return new ResinModuleConfiguration(module);
   }
 }

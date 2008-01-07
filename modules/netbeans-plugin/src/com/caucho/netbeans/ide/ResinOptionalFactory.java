@@ -27,9 +27,10 @@
  * @author Sam
  */
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans.ide;
 
-import com.caucho.netbeans.core.AddInstanceIterator;
+import com.caucho.netbeans.ide.*;
+import com.caucho.netbeans.ide.AddInstanceIterator;
 import com.caucho.netbeans.ResinStartServer;
 
 import org.netbeans.modules.j2ee.deployment.plugins.spi.FindJSPServlet;
@@ -79,7 +80,6 @@ public class ResinOptionalFactory
   public InstantiatingIterator getAddInstanceIterator()
   {
     //log.info("foo12-add");
-    //    return new AddInstanceIterator();
-    return null;
+    return new AddInstanceIterator();
   }
 }

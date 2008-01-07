@@ -46,7 +46,7 @@ public class ResinDeploymentFactory
     = Logger.getLogger(ResinDeploymentFactory.class.getName());
   private static final PluginL10N L = new PluginL10N(ResinDeploymentFactory.class);
 
-  private static final String RESIN_PREFIX = "resin"; // NOI18N
+  private static final String RESIN_PREFIX = "resin:"; // NOI18N
   private static final String DISCONNECTED_URI = "resin:virtual";
 
   private static DeploymentFactory _instance;
@@ -69,7 +69,7 @@ public class ResinDeploymentFactory
 
   public boolean handlesURI(String uri)
   {
-    log.info("URI: " + uri);
+    log.info("URI:" + uri);
     
     return (uri != null) && uri.startsWith(RESIN_PREFIX);
   }
@@ -79,52 +79,52 @@ public class ResinDeploymentFactory
 						String password)
     throws DeploymentManagerCreationException
   {
-    //log.info("MGR: " + uri);
+    log.info("MGR: " + uri);
 
     if (!handlesURI(uri))
-      throw new DeploymentManagerCreationException(L.l("''{0}'' is not a Resin URI",  uri));
-    /*
+      throw new DeploymentManagerCreationException(L.l("'{0}' is not a Resin URI",  uri));
+    
     InstanceProperties ip = InstanceProperties.getInstanceProperties(uri);
 
+    log.info("URL: " + uri + " " + ip);
     if (ip == null) {
       if (!DISCONNECTED_URI.equals(uri))
-        throw new DeploymentManagerCreationException(L.l("Resin instance ''{0}'' is not registered.", uri));
+        throw new DeploymentManagerCreationException(L.l("Resin instance '{0}' is not registered.", uri));
     }
-
+    
     ResinDeploymentManager manager = _managerCache.get(ip);
 
     if (manager == null) {
       try {
-        manager = new ResinDeploymentManager(uri,
-                                             !DISCONNECTED_URI.equals(uri));
+        manager = new ResinDeploymentManager(uri, ip);
         _managerCache.put(ip, manager);
       }
       catch (IllegalArgumentException e) {
-        Throwable t = new DeploymentManagerCreationException(L.l("Cannot create deployment manager for Resin instance: {0}", uri));
+        Exception t = new DeploymentManagerCreationException(L.l("Cannot create deployment manager for Resin instance: {0}", uri));
 
         throw (DeploymentManagerCreationException) t.initCause(e);
       }
     }
-    */
+    
 
-    return new ResinDeploymentManager();
+    return manager;
   }
 
   public DeploymentManager getDisconnectedDeploymentManager(String uri)
     throws DeploymentManagerCreationException
   {
-    // return getDeploymentManager(uri, null, null);
-    return null;
+    log.info("DISCONN: " + uri);
+    // called on initialization and configuration
+    return getDeploymentManager(uri, null, null);
   }
 
   public String getDisplayName()
   {
-    return "Resin Application Server";
+    return "Resin 3.1";
   }
 
   public String getProductVersion()
   {
     return "3.1";
   }
-
 }

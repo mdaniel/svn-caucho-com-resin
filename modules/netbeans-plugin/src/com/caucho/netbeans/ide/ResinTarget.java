@@ -28,7 +28,7 @@
  */
 
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans.ide;
 
 import javax.enterprise.deploy.spi.Target;
 

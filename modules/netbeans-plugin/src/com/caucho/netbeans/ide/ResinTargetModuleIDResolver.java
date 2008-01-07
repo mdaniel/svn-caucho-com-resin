@@ -28,7 +28,7 @@
  */
 
 
-package com.caucho.netbeans.core;
+package com.caucho.netbeans.ide;
 
 import com.caucho.netbeans.ResinDeploymentManager;
 

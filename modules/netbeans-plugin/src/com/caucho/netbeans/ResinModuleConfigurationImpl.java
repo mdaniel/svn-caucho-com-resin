@@ -24,38 +24,14 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
+package com.caucho.netbeans;
 
-package com.caucho.netbeans.nodes;
+import com.caucho.netbeans.PluginL10N;
+import com.caucho.netbeans.PluginLogger;
 
-import org.netbeans.modules.j2ee.deployment.plugins.spi.RegistryNodeFactory;
-import org.openide.nodes.Node;
-import org.openide.util.Lookup;
-
-import java.util.logging.*;
-import org.openide.nodes.Children;
-
-public final class ResinRegistryNodeFactory
-  implements RegistryNodeFactory
+public class ResinModuleConfigurationImpl
 {
-  private static final Logger log
-    = Logger.getLogger(ResinRegistryNodeFactory.class.getName());
-  
-  public ResinRegistryNodeFactory()
-  {
-  }
-  
-  public Node getTargetNode(Lookup lookup)
-  {
-    log.info("get target node: " + lookup);
-    return new ResinTargetNode(lookup);
-  }
-
-  public Node getManagerNode(Lookup lookup)
-  {
-    log.info("get manager node: " + lookup);
-    return new ResinManagerNode(new Children.Map(), lookup);
-  }
 }

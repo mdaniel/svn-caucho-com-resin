@@ -47,12 +47,15 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
 
 public class ResinConfiguration
   implements Cloneable
 {
   private static final PluginL10N L = new PluginL10N(ResinConfiguration.class);
-  private static final PluginLogger log = new PluginLogger(ResinConfiguration.class);
+  private static final Logger log
+    = Logger.getLogger(ResinConfiguration.class.getName());
 
 
   private static final String PROPERTY_AUTOLOAD_ENABLED = "autoload_enabled";
@@ -82,6 +85,9 @@ public class ResinConfiguration
   private String _displayName = "Resin";
   private String _username = "Username";
   private String _password = "Password";
+  
+  private String _uri;
+  private InstanceProperties _ip;
 
   public ResinConfiguration()
   {
@@ -89,11 +95,13 @@ public class ResinConfiguration
     _javaPlatform = platformManager.getDefaultPlatform();
   }
 
-  public ResinConfiguration(InstanceProperties ip)
+  public ResinConfiguration(InstanceProperties ip) throws DeploymentManagerCreationException
   {
-    String uri = ip.getProperty(InstanceProperties.URL_ATTR);
+    _ip = ip;
+    
+    _uri = ip.getProperty(InstanceProperties.URL_ATTR);
 
-    parseURI(uri);
+    parseURI(_uri);
 
     setUsername(ip.getProperty(InstanceProperties.USERNAME_ATTR));
     setPassword(ip.getProperty(InstanceProperties.PASSWORD_ATTR));
@@ -101,6 +109,14 @@ public class ResinConfiguration
 
     setJavaPlatformByName(ip.getProperty(PROPERTY_JAVA_PLATFORM));
 
+    /*
+    String resinHome = ip.getProperty("resin.home");
+    log.info("get resin.home: " + resinHome + " " + ip);
+    
+    if (resinHome == null)
+      throw new DeploymentManagerCreationException("resin.home is invalid");
+    
+    _resinHome = new File(resinHome);
     String debugPort = ip.getProperty(PROPERTY_DEBUG_PORT);
 
     if (debugPort != null) {
@@ -111,6 +127,7 @@ public class ResinConfiguration
         // no-op
       }
     }
+     */
   }
 
   protected Object clone()
@@ -387,7 +404,7 @@ public class ResinConfiguration
     throws IllegalStateException
   {
     requiredFile("resin-home", _resinHome);
-    requiredFile("resin-conf", _resinConf);
+    //requiredFile("resin-conf", _resinConf);
 
     try {
       InetAddress.getByName(getServerAddress());
@@ -448,7 +465,7 @@ public class ResinConfiguration
       }
     }
     catch (Exception ex) {
-      log.log(Level.FINER, ex);
+      log.log(Level.FINER, ex.toString(), ex);
 
       throw new IllegalArgumentException(L.l("problem parsing URI ''{0}'': {1}",
                                              uri, ex));
