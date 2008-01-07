@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2008 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -470,8 +470,9 @@ cse_write_response(stream_t *s, unsigned long len, EXTENSION_CONTROL_BLOCK *r)
 		unsigned long sublen;
 
 		if (s->read_offset >= s->read_length) {
-			if (cse_fill_buffer(s) < 0)
+			if (cse_fill_buffer(s) < 0) {
 				return -1;
+			}
 		}
 
 		sublen = s->read_length - s->read_offset;
@@ -532,8 +533,12 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 		unsigned long size;
 
 		code = cse_read_byte(s);
-		if (code < 0 || s->socket < 0)
+		if (code < 0 || s->socket < 0) {
+			if (status_ptr == status)
+				connection_error(s->config, r);
+
 			return -1;
+		}
 
 		LOG(("code %c(%d)\n", code, code));
 
@@ -601,6 +606,13 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 				strcpy(header_ptr, chunked);
 				header_ptr += sizeof(chunked) - 1;
 			}
+			/*
+			else {
+				char closed[] = "Connection: closed\r\n";
+				strcpy(header_ptr, closed);
+				header_ptr += sizeof(closed) - 1;
+			}
+			*/
             *header_ptr++ = '\r';
             *header_ptr++ = '\n';
             *header_ptr++ = 0;
@@ -615,10 +627,7 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 				info.cchHeader = header_ptr - headers;
 				info.pszHeader = headers;
 				info.pszStatus = status;
-				/*
-			r->dwHttpStatusCode = atoi(status_ptr);
-			r->ServerSupportFunction(r->ConnID, HSE_REQ_SEND_RESPONSE_HEADER, status, &size, (unsigned long *) headers);
-			*/
+				info.fKeepConn = 0;
 				r->dwHttpStatusCode = statusCode;
 				r->ServerSupportFunction(r->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &info, &info_size, 0);
 			}

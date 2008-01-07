@@ -73,16 +73,30 @@ std_open(stream_t *stream)
 static int
 poll_read(int fd, int s)
 {
-  fd_set read_set;
-  struct timeval timeout;
+	if (s <= 0)
+		return 1;
 
-  FD_ZERO(&read_set);
-  FD_SET(fd, &read_set);
+	while (s >= 0) {
+		fd_set read_set;
+		struct timeval timeout;
+		int sec = s;
 
-  timeout.tv_sec = s;
-  timeout.tv_usec = 0;
+		FD_ZERO(&read_set);
+		FD_SET(fd, &read_set);
 
-  return select(fd + 1, &read_set, 0, 0, &timeout);
+		if (sec >= 3600)
+			sec = 3600;
+
+		timeout.tv_sec = sec;
+		timeout.tv_usec = 0;
+
+		if (select(fd + 1, &read_set, 0, 0, &timeout) > 0)
+			return 1;
+
+		s -= sec;
+	}
+
+	return -1;
 }
 
 /**
