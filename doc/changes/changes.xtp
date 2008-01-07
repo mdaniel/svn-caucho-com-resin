@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>update jdbc wrappers for jdk 6 (#2189, rep by koreth)</li>
 <li>xa: issues with PoolItem handling XA_RDONLY (#2227, rep by mackd2)</li>
 <li>jsf: faces-cofnig.xml needs to allow multiple render-kit (#2278, rep by Andreas Fischer)</li>
 <li>jsf: faces-config.xml needs to allow multiple el-resolver tags (#2287, rep by Andreas Fischer)</li>
