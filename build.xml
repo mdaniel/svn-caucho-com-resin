@@ -800,9 +800,10 @@
         <include name="LICENSE"/>
         <include name="README"/>
         <include name="build.xml"/>
+        <include name="Makefile.am"/>
         <include name="Makefile.in"/>
         <include name="configure"/>
-        <include name="configure.in"/>
+        <include name="configure.ac"/>
         <include name="httpd.exe"/>
         <include name="setup.exe"/>
         <include name="description-pak"/>
