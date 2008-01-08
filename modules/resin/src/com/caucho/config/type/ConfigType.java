@@ -63,7 +63,7 @@ abstract public class ConfigType
    */
   public String getTypeName()
   {
-    return getType().getSimpleName();
+    return getType().getName();
   }
   
   /**

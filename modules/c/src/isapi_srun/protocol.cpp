@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2008 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -502,8 +502,10 @@ cse_write_response(stream_t *s, unsigned long len, EXTENSION_CONTROL_BLOCK *r)
 		unsigned long sublen;
 
 		if (s->read_offset >= s->read_length) {
-			if (cse_fill_buffer(s) < 0)
-				return -1;
+		  if (cse_fill_buffer(s) < 0) {
+		    connection_error(s->config, r);
+		    return -1;
+		  }
 		}
 
 		sublen = s->read_length - s->read_offset;
@@ -564,8 +566,12 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 		unsigned long size;
 
 		code = cse_read_byte(s);
-		if (code < 0 || s->socket < 0)
+		if (code < 0 || s->socket < 0) {
+		  if (status == status_ptr)
+		    connection_error(s->config, r);
+		  
 			return -1;
+		}
 
 		LOG(("code %c(%d)\n", code, code));
 

@@ -1,10 +1,13 @@
 package com.caucho.protocols.flash;
 
+import javax.annotation.*;
 import java.io.*;
 
+import com.caucho.config.*;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
+import com.caucho.util.*;
 import com.caucho.vfs.Path;
 
 /**
@@ -15,27 +18,22 @@ import com.caucho.vfs.Path;
  **/
 public class SocketPolicyProtocol extends Protocol
 {
-  private String _protocolName = "socketPolicy";
-  private ByteArrayOutputStream _policy = null;
+  private final static L10N L = new L10N(SocketPolicyRequest.class);
+  
+  private String _protocolName = "http";
+  private Path _policy;
 
   public void setSocketPolicyFile(Path path)
-    throws IOException
   {
-    // XXX Make this dependency-based in case the file changes
+    setPolicyFile(path);
+  }
 
-    InputStream is = null;
-    
-    try {
-      is = path.openRead();
-      _policy = new ByteArrayOutputStream();
-
-      for (int ch = is.read(); ch >= 0; ch = is.read())
-        _policy.write(ch);
-    }
-    finally {
-      if (is != null)
-        is.close();
-    }
+  /**
+   * Sets the flash socket policy file.
+   */
+  public void setPolicyFile(Path path)
+  {
+    _policy = path;
   }
 
   /**
@@ -54,8 +52,15 @@ public class SocketPolicyProtocol extends Protocol
     _protocolName = name;
   }
 
-  public ServerRequest createRequest(Connection connection)
+  @PostConstruct
+  public void init()
   {
-    return new SocketPolicyRequest(_policy, connection);
+    if (_policy == null)
+      throw new ConfigException(L.l("flash requires a policy-file"));
+  }
+
+  public ServerRequest createRequest(Connection conn)
+  {
+    return new SocketPolicyRequest(getServer(), conn, _policy);
   }
 }

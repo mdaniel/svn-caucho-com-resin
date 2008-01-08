@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.util.regex.*;
 
 /**
  * Represents an log of every top-level request to the server.
@@ -80,6 +81,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
   private String _format;
   private Segment []_segments;
+
+  private ArrayList<Pattern> _excludeList = new ArrayList<Pattern>();
+  private Pattern []_excludes = new Pattern[0];
 
   private boolean _isAutoFlush;
   
@@ -192,6 +196,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   {
     _isSharedBuffer = isSharedBuffer;
   }
+
+  /**
+   * Adds an exclusion pattern.
+   */
+  public void addExclude(Pattern pattern)
+  {
+    _excludeList.add(pattern);
+    _excludes = new Pattern[_excludeList.size()];
+    _excludeList.toArray(_excludes);
+  }
   
   /**
    * Initialize the log.
@@ -300,6 +314,20 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   {
     AbstractHttpRequest request = (AbstractHttpRequest) req;
     AbstractHttpResponse response = (AbstractHttpResponse) res;
+
+    // skip excluded urls
+    if (_excludes.length > 0) {
+      byte []data = request.getUriBuffer();
+      int sublen = request.getUriLength();
+
+      String uri = new String(data, 0, sublen);
+
+      for (Pattern pattern : _excludes) {
+	if (pattern.matcher(uri).find()) {
+	  return;
+	}
+      }
+    }
 
     if (_isSharedBuffer && ! _isAutoFlush) {
       synchronized (_sharedBufferLock) {

@@ -3,16 +3,25 @@ package com.caucho.protocols.flash;
 import java.io.*;
 
 import com.caucho.server.connection.Connection;
+import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.port.ServerRequest;
+import com.caucho.server.http.HttpRequest;
+import com.caucho.vfs.*;
+import com.caucho.util.*;
 
-public class SocketPolicyRequest implements ServerRequest
+public class SocketPolicyRequest extends HttpRequest
 {
-  private final ByteArrayOutputStream _policy;
+  private final static L10N L = new L10N(SocketPolicyRequest.class);
+  
+  private final Path _policy;
   private final Connection _connection;
 
-  public SocketPolicyRequest(ByteArrayOutputStream policy,
-                             Connection connection)
+  public SocketPolicyRequest(DispatchServer server,
+			     Connection connection,
+			     Path policy)
   {
+    super(server, connection);
+    
     _policy = policy;
     _connection = connection;
   }
@@ -23,15 +32,7 @@ public class SocketPolicyRequest implements ServerRequest
    */
   public void init()
   {
-  }
-
-  /**
-   * Return true if the connection should wait for a read before
-   * handling the request.
-   */
-  public boolean isWaitForRead()
-  {
-    return true;
+    super.init();
   }
   
   /**
@@ -42,30 +43,22 @@ public class SocketPolicyRequest implements ServerRequest
   public boolean handleRequest() 
     throws IOException
   {
-    if (_policy == null)
+    ReadStream is = _connection.getReadStream();
+
+    int ch = is.read();
+
+    if (ch == '<') {
+      OutputStream out = _connection.getWriteStream();
+      _policy.writeToStream(out);
+      out.write(0); // null byte required
+      out.flush();
+
       return false;
-    
-    OutputStream out = _connection.getWriteStream();
-    _policy.writeTo(out);
-    out.write(0); // null byte required
-    out.flush();
+    }
+    else {
+      is.unread();
 
-    return false;
-  }
-  
-  /**
-   * Resumes processing after a wair.
-   */
-  public boolean handleResume() 
-    throws IOException
-  {
-    return false;
-  }
-
-  /**
-   * Handles a close event when the connection is closed.
-   */
-  public void protocolCloseEvent()
-  {
+      return super.handleRequest();
+    }
   }
 }

@@ -55,7 +55,8 @@ import java.util.logging.Logger;
  */
 public class DeploymentManagerImpl implements DeploymentManager {
   private static final L10N L = new L10N(DeploymentManagerImpl.class);
-  private static final Logger log = Logger.getLogger(DeploymentManagerImpl.class.getName());
+  private static final Logger log
+    = Logger.getLogger(DeploymentManagerImpl.class.getName());
 
   private String _uri;
 
@@ -64,8 +65,9 @@ public class DeploymentManagerImpl implements DeploymentManager {
   DeploymentManagerImpl(String uri)
   {
     int p = uri.indexOf("http");
+    
     if (p < 0)
-      throw new IllegalArgumentException(uri);
+      throw new IllegalArgumentException(L.l("'{0}' is an illegal URI for DeploymentManager.", uri));
 
     _uri = uri.substring(p);
   }
@@ -82,6 +84,9 @@ public class DeploymentManagerImpl implements DeploymentManager {
       factory.setUser(user);
       factory.setPassword(password);
       factory.setReadTimeout(120000);
+
+      if (log.isLoggable(Level.FINE))
+	log.fine("DeploymentManager[" + _uri + "] creating proxy");
 
       _proxy =
         (DeploymentProxyAPI) factory.create(DeploymentProxyAPI.class, _uri);
@@ -109,17 +114,19 @@ public class DeploymentManagerImpl implements DeploymentManager {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(getClass().getClassLoader());
-
+      
       Target []targets = _proxy.getTargets();
 
       if (targets == null)
         return new Target[0];
 
       return targets;
-    } catch (Throwable e) {
-      log.log(Level.INFO, e.toString(), e);
-
-      return new Target[0];
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      e.printStackTrace();
+      
+      throw new RuntimeException(e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

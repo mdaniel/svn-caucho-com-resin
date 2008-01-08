@@ -12,6 +12,11 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>flash: SocketPolicyProtocol now falls back to HTTP, allowing port 80 (#2291, rep by Vic Cekvenich)</li>
+<li>access-log: add &lt;exclude>\.gif$&lt;/exclude> to access-log (#2157, rep by B Cleave)</li>
+<li>hessian: improve error message with non-hessian response (#2200, rep by pelikt1)</li>
+<li>openssl: cleanup of SSL_free code to ensure no link to old connection (#2188, rep by J Kaur)</li>
+<li>isapi: send 503 on timeout to Resin (#2264, rep by T Fukuda)</li>
 <li>update jdbc wrappers for jdk 6 (#2189, rep by koreth)</li>
 <li>xa: issues with PoolItem handling XA_RDONLY (#2227, rep by mackd2)</li>
 <li>jsf: faces-cofnig.xml needs to allow multiple render-kit (#2278, rep by Andreas Fischer)</li>
