@@ -18,12 +18,11 @@
           <attr name="instanceClass" stringvalue="com.caucho.netbeans.nodes.ResinRegistryNodeFactory"/>
           <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.spi.RegistryNodeFactory"/>
         </file>
-        <!--
+
         <file name="ModuleConfigurationFactory.instance">
           <attr name="instanceClass" stringvalue="com.caucho.netbeans.ResinModuleConfigurationFactory"/>
           <attr name="instanceOf" stringvalue="org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfigurationFactory"/>
         </file>
-	-->
 
         <file name="J2eePlatformFactory.instance">
           <attr name="instanceCreate" newvalue="com.caucho.netbeans.ResinPlatformFactory"/>

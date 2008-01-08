@@ -118,7 +118,7 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
-  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+  public List invokeAll(Collection tasks)
   {
     throw new UnsupportedOperationException();
   }
@@ -126,9 +126,7 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
-  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
-				       long timeout,
-				       TimeUnit unit)
+  public List invokeAll(Collection tasks, long timeout, TimeUnit unit)
   {
     // XXX: todo
     throw new UnsupportedOperationException();
@@ -137,7 +135,7 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
+  public Object invokeAny(Collection tasks)
   {
     // XXX: todo
     throw new UnsupportedOperationException();
@@ -146,9 +144,9 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks,
-			 long timeout,
-			 TimeUnit unit)
+  public Object invokeAny(Collection tasks,
+			  long timeout,
+			  TimeUnit unit)
   {
     // XXX: todo
     throw new UnsupportedOperationException();

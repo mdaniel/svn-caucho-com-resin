@@ -43,11 +43,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 
 public class ResinPlatformImpl
   extends J2eePlatformImpl
 {
+  private static final Logger log
+    = Logger.getLogger(ResinPlatformImpl.class.getName());
   private static final PluginL10N L = new PluginL10N(ResinPlatformImpl.class);
 
   private static final Set<Object> SUPPORTED_MODULE_TYPES
@@ -65,15 +68,10 @@ public class ResinPlatformImpl
   private final List<LibraryImplementation> _libraries
     = new ArrayList<LibraryImplementation>();
 
-
-  public ResinPlatformImpl()
+  ResinPlatformImpl(ResinDeploymentManager resinDeploymentManager)
   {
-  }
-
-  public ResinPlatformImpl(ResinConfiguration resinConfiguration)
-  {
-    _resinConfiguration = resinConfiguration;
-    _displayName = resinConfiguration.getDisplayName();
+    _resinConfiguration = resinDeploymentManager.getResinConfiguration();
+    _displayName = _resinConfiguration.getDisplayName();
 
     J2eeLibraryTypeProvider libProvider = new J2eeLibraryTypeProvider();
 
@@ -100,36 +98,33 @@ public class ResinPlatformImpl
 
   public void notifyLibrariesChanged()
   {
-    /*
     LibraryImplementation libraryImplementation = _libraries.get(0);
 
     initLibrary(libraryImplementation);
 
     firePropertyChange(PROP_LIBRARIES, null, _libraries);
-    */
   }
 
   public LibraryImplementation[] getLibraries()
   {
-    //return _libraries.toArray(new LibraryImplementation[_libraries.size()]);
-    return new LibraryImplementation[0];
+    return _libraries.toArray(new LibraryImplementation[_libraries.size()]);
   }
 
   public String getDisplayName()
   {
-    // return _displayName;
-    return "Resin Server Platform";
+    return _displayName;
   }
 
   public Image getIcon()
   {
+    log.info("ICON");
     return Utilities.loadImage("com/caucho/netbeans/resources/resin.png");
   }
 
   public File[] getPlatformRoots()
   {
-    // return new File[] { _resinConfiguration.getResinHome() };
-    return new File[0];
+    log.info("ROOTS");
+    return new File[] { _resinConfiguration.getResinHome() };
   }
 
   public File[] getToolClasspathEntries(String toolName)
@@ -159,8 +154,7 @@ public class ResinPlatformImpl
 
   public JavaPlatform getJavaPlatform()
   {
-    // return _resinConfiguration.getJavaPlatform();
-    return null;
+    return _resinConfiguration.getJavaPlatform();
   }
 
   static {

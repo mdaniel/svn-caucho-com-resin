@@ -30,19 +30,22 @@
 
 package com.caucho.netbeans.ide;
 
+import com.caucho.netbeans.ResinConfiguration;
+import com.caucho.netbeans.ResinProcess;
 import javax.enterprise.deploy.spi.Target;
 
 public final class ResinTarget
   implements Target
 {
-
   private final String _name;
-  private final String _description;
+  private final ResinConfiguration _config;
+  private final ResinProcess _process;
 
-  public ResinTarget(String name, String desc)
+  public ResinTarget(String uri, ResinConfiguration resinConfiguration)
   {
-    _name = name;
-    _description = desc;
+    _name = uri;
+    _config = resinConfiguration;
+    _process = new ResinProcess(uri, resinConfiguration);
   }
 
   public String getName()
@@ -52,11 +55,11 @@ public final class ResinTarget
 
   public String getDescription()
   {
-    return _description;
+    return _config.getDisplayName();
   }
 
   public String toString()
   {
-    return _description;
+    return "ResinTarget[" + getDescription() + "]";
   }
 }

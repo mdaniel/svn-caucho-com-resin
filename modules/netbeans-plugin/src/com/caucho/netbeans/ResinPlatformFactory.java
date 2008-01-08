@@ -46,6 +46,6 @@ public class ResinPlatformFactory
   {
     log.info("Resin j2ee platform");
 
-    return new ResinPlatformImpl();
+    return new ResinPlatformImpl((ResinDeploymentManager) deploymentManager);
   }
 }

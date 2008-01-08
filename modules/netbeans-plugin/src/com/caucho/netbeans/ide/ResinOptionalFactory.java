@@ -29,6 +29,7 @@
 
 package com.caucho.netbeans.ide;
 
+import com.caucho.netbeans.ResinDeploymentManager;
 import com.caucho.netbeans.ide.*;
 import com.caucho.netbeans.ide.AddInstanceIterator;
 import com.caucho.netbeans.ResinStartServer;
@@ -50,9 +51,8 @@ public class ResinOptionalFactory
 
   public StartServer getStartServer(DeploymentManager deploymentManager)
   {
-    //log.info("start-server");
-    //return new ResinStartServer(deploymentManager);
-    return null;
+    log.info("start-server");
+    return new ResinStartServer((ResinDeploymentManager) deploymentManager);
   }
 
   public IncrementalDeployment getIncrementalDeployment(DeploymentManager deploymentManager)

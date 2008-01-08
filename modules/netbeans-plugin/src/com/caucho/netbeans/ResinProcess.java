@@ -40,11 +40,13 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.InetAddress;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ResinProcess
 {
   private static final PluginL10N L = new PluginL10N(ResinProcess.class);
-  private static final PluginLogger log = new PluginLogger(ResinProcess.class);
+  private static final Logger log
+    = Logger.getLogger(ResinProcess.class.getName());
 
   public static final int LIFECYCLE_NEW = 0;
   public static final int LIFECYCLE_INITIALIZING = 1;
@@ -181,7 +183,7 @@ public class ResinProcess
     File resinHome = _resinConfiguration.getResinHome();
     File resinConf = _resinConfiguration.getResinConf();
     String serverId = _resinConfiguration.getServerId();
-
+    log.info("Resin starting on " + serverPort);
     if (!isPortFree(serverPort))
       throw new IllegalStateException(L.l("Cannot start Resin, server-port {0} is already in use", serverPort));
 
@@ -293,8 +295,7 @@ public class ResinProcess
         Thread.sleep(TIMEOUT_TICK);
       }
       catch (InterruptedException ex) {
-        if (log.isLoggable(Level.WARNING))
-          log.log(Level.WARNING, ex);
+        log.log(Level.WARNING, ex.toString(), ex);
       }
     }
 
@@ -307,7 +308,7 @@ public class ResinProcess
         stopImpl(false);
       }
       catch (Exception ex) {
-        log.log(Level.WARNING, ex);
+        log.log(Level.WARNING, ex.toString(), ex);
       }
 
       throw new IOException(msg);
@@ -477,13 +478,13 @@ public class ResinProcess
           stop();
         }
         catch (Exception ex) {
-          log.log(Level.WARNING, ex);
+          log.log(Level.WARNING, ex.toString(), ex);
 
           try {
             stopImpl(false);
           }
           catch (Exception ex2) {
-            log.log(Level.WARNING, ex2);
+            log.log(Level.WARNING, ex2.toString(), ex);
           }
         }
       }

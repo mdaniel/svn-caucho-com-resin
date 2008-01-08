@@ -29,7 +29,6 @@
 
 package com.caucho.netbeans;
 
-import com.caucho.netbeans.PluginL10N;
 import com.caucho.netbeans.ide.ResinTarget;
 
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
@@ -57,22 +56,25 @@ public final class ResinDeploymentManager
   private static final Logger log
     = Logger.getLogger(ResinDeploymentManager.class.getName());
   
-  private static final PluginL10N L = new PluginL10N(ResinStartServer.class);
+  private static final PluginL10N L = new PluginL10N(ResinDeploymentManager.class);
 
   private final String _uri;
+  private final InstanceProperties _ip;
   private final ResinConfiguration _resinConfiguration;
   private ResinProcess _resinProcess;
 
   private ResinPlatformImpl _j2eePlatform;
 
     
-  public ResinDeploymentManager(String uri, InstanceProperties ip) throws DeploymentManagerCreationException
+  public ResinDeploymentManager(String uri, InstanceProperties ip) 
+    throws DeploymentManagerCreationException
   {
     _uri = uri;
-
+    _ip = ip;
     
     // XXX: what is connected for?
     _resinConfiguration = new ResinConfiguration(ip);
+    _resinProcess = new ResinProcess(_uri, _resinConfiguration);
   }
 
   public ResinConfiguration getResinConfiguration()
@@ -93,8 +95,8 @@ public final class ResinDeploymentManager
     throws IllegalStateException
   {
     log.info("get targets");
-    return new ResinTarget[]{
-      new ResinTarget(_uri, _resinConfiguration.getDisplayName())
+    return new ResinTarget[] {
+      new ResinTarget(_uri, _resinConfiguration),
     };
   }
 
@@ -102,6 +104,7 @@ public final class ResinDeploymentManager
                                             Target[] target)
     throws TargetException, IllegalStateException
   {
+    log.info("get running modules");
     return new TargetModuleID[0];
   }
 
@@ -109,6 +112,7 @@ public final class ResinDeploymentManager
                                                Target[] target)
     throws TargetException, IllegalStateException
   {
+    log.info("get non-running modules");
     return new TargetModuleID[0];
   }
 
@@ -116,13 +120,14 @@ public final class ResinDeploymentManager
                                               Target[] target)
     throws TargetException, IllegalStateException
   {
+    log.info("get modules: " + moduleType);
     return new TargetModuleID[0];
   }
 
   public DeploymentConfiguration createConfiguration(DeployableObject deployableObject)
     throws InvalidModuleException
   {
-    log.info("createConfiguration");
+    log.info("Resin createConfiguration " + deployableObject);
     
     return null;
     /*
@@ -143,6 +148,7 @@ public final class ResinDeploymentManager
   public ProgressObject distribute(Target[] target, File file, File file0)
     throws IllegalStateException
   {
+    log.info("dist1");
     return null;
   }
 
@@ -151,6 +157,7 @@ public final class ResinDeploymentManager
                                    InputStream inputStream0)
     throws IllegalStateException
   {
+    log.info("dist2");
     return null;
   }
 
@@ -160,24 +167,28 @@ public final class ResinDeploymentManager
                                    InputStream inputStream0)
     throws IllegalStateException
   {
+    log.info("dist3");
     return null;
   }
 
   public ProgressObject start(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
+    log.info("start: " + targetModuleIDs.length);
     return null;
   }
 
   public ProgressObject stop(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
+    log.info("stop: " + targetModuleIDs.length);
     return null;
   }
 
   public ProgressObject undeploy(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
+    log.info("undeploy: " + targetModuleIDs.length);
     return null;
   }
 
@@ -253,9 +264,8 @@ public final class ResinDeploymentManager
 
   public ResinPlatformImpl getJ2eePlatform()
   {
-    /*
     log.info("GET j2ee-platform");
-    
+    /*
     if (_j2eePlatform == null)
       _j2eePlatform = new ResinPlatformImpl(_resinConfiguration);
 

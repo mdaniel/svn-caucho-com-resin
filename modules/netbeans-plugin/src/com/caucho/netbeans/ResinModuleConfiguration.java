@@ -29,15 +29,11 @@
 
 package com.caucho.netbeans;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import org.netbeans.modules.j2ee.deployment.devmodules.api.J2eeModule;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.config.ModuleConfiguration;
 import org.openide.util.Lookup;
 
 import java.util.logging.*;
-import org.openide.util.Lookup.Result;
-import org.openide.util.LookupListener;
 import org.openide.util.lookup.Lookups;
 
 public class ResinModuleConfiguration
@@ -70,44 +66,5 @@ public class ResinModuleConfiguration
   }
 
   public void dispose() {
-  }
-
-  class ResinLookup extends Lookup {
-    public <T> T lookup(Class<T> clazz)
-    {
-      log.info("lookup " + clazz);
-      
-      return (T) ResinModuleConfiguration.this;
-    }
-    
-    public <T> Result<T> lookup(Template<T> template)
-    {
-      log.info("lookup " + template);
-      
-      return new ResinResult();
-    }
-  }
-
-  class ResinResult extends Result
-  {
-    public void addLookupListener(LookupListener l)
-    {
-      log.info("ADD:");
-    }
-    
-    public void removeLookupListener(LookupListener l)
-    {
-    }
-
-    @Override
-    public Collection allInstances()
-    {
-      log.info("ALL:");
-      ArrayList list = new ArrayList();
-
-      list.add(ResinModuleConfiguration.this);
-
-      return list;
-    }
   }
 }

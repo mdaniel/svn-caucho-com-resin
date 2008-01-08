@@ -47,6 +47,11 @@ public class ResinModuleConfigurationFactory
           throws ConfigurationException
   {
     log.info("MOD_FACTORY: " + module);
-    return new ResinModuleConfiguration(module);
+    if (J2eeModule.WAR == module.getModuleType())
+      return new WarConfiguration(module);
+    else {
+      log.warning("UNKNWON: " + module);
+      return null;
+    }
   }
 }

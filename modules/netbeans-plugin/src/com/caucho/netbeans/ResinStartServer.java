@@ -30,10 +30,6 @@
 
 package com.caucho.netbeans;
 
-import com.caucho.netbeans.PluginL10N;
-import com.caucho.netbeans.PluginLogger;
-import com.caucho.netbeans.ProgressEventSupport;
-import com.caucho.netbeans.DeploymentStatusImpl;
 
 import org.netbeans.modules.j2ee.deployment.plugins.api.ServerDebugInfo;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.StartServer;
@@ -41,7 +37,6 @@ import org.openide.util.RequestProcessor;
 
 import javax.enterprise.deploy.shared.CommandType;
 import javax.enterprise.deploy.shared.StateType;
-import javax.enterprise.deploy.spi.DeploymentManager;
 import javax.enterprise.deploy.spi.Target;
 import javax.enterprise.deploy.spi.TargetModuleID;
 import javax.enterprise.deploy.spi.exceptions.OperationUnsupportedException;
@@ -50,20 +45,22 @@ import javax.enterprise.deploy.spi.status.DeploymentStatus;
 import javax.enterprise.deploy.spi.status.ProgressListener;
 import javax.enterprise.deploy.spi.status.ProgressObject;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class ResinStartServer
   extends StartServer
 {
   private static final PluginL10N L = new PluginL10N(ResinStartServer.class);
-  private static final PluginLogger log = new PluginLogger(ResinStartServer.class);
+  private static final Logger log
+    = Logger.getLogger(ResinStartServer.class.getName());
 
   private enum Mode { RUN, DEBUG }
 
   private final ResinDeploymentManager _manager;
 
-  public ResinStartServer(DeploymentManager manager)
+  public ResinStartServer(ResinDeploymentManager manager)
   {
-    _manager = (ResinDeploymentManager) manager;
+    _manager = manager;
   }
 
   public boolean isAlsoTargetServer(Target target)
@@ -187,11 +184,11 @@ public final class ResinStartServer
         }
         catch (IllegalStateException ex) {
           fireProgressEvent(StateType.FAILED, ex.getLocalizedMessage());
-          log.log(Level.FINE, ex);
+          log.log(Level.FINE, ex.toString(), ex);
         }
         catch (Exception ex) {
           fireProgressEvent(StateType.FAILED, ex.toString());
-          log.log(Level.WARNING, ex);
+          log.log(Level.WARNING, ex.toString(), ex);
         }
       }
       else if (_command == CommandType.STOP) {
@@ -207,7 +204,7 @@ public final class ResinStartServer
             fireProgressEvent(StateType.COMPLETED, L.l("Resin stop completed."));
           }
           catch (Exception ex) {
-            log.log(Level.WARNING, ex);
+            log.log(Level.WARNING, ex.toString(), ex);
 
             fireProgressEvent(StateType.COMPLETED,
                               L.l("Error stopping Resin: {0}", ex.toString()));

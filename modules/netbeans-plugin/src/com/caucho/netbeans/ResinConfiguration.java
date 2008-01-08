@@ -88,6 +88,7 @@ public class ResinConfiguration
   
   private String _uri;
   private InstanceProperties _ip;
+  private boolean _isInit;
 
   public ResinConfiguration()
   {
@@ -102,22 +103,29 @@ public class ResinConfiguration
     _uri = ip.getProperty(InstanceProperties.URL_ATTR);
 
     parseURI(_uri);
+  }
+  
+  private void init()
+  {
+    if (_isInit)
+      return;
+    
+    _isInit = true;
+    
+    setUsername(_ip.getProperty(InstanceProperties.USERNAME_ATTR));
+    setPassword(_ip.getProperty(InstanceProperties.PASSWORD_ATTR));
+    setDisplayName(_ip.getProperty(InstanceProperties.DISPLAY_NAME_ATTR));
 
-    setUsername(ip.getProperty(InstanceProperties.USERNAME_ATTR));
-    setPassword(ip.getProperty(InstanceProperties.PASSWORD_ATTR));
-    setDisplayName(ip.getProperty(InstanceProperties.DISPLAY_NAME_ATTR));
-
-    setJavaPlatformByName(ip.getProperty(PROPERTY_JAVA_PLATFORM));
-
-    /*
-    String resinHome = ip.getProperty("resin.home");
-    log.info("get resin.home: " + resinHome + " " + ip);
+    setJavaPlatformByName(_ip.getProperty(PROPERTY_JAVA_PLATFORM));
+    
+    String resinHome = _ip.getProperty("resin.home");
+    log.info("get resin.home: " + resinHome + " " + _ip);
     
     if (resinHome == null)
-      throw new DeploymentManagerCreationException("resin.home is invalid");
+      throw new RuntimeException("resin.home is invalid");
     
     _resinHome = new File(resinHome);
-    String debugPort = ip.getProperty(PROPERTY_DEBUG_PORT);
+    String debugPort = _ip.getProperty(PROPERTY_DEBUG_PORT);
 
     if (debugPort != null) {
       try {
@@ -127,7 +135,15 @@ public class ResinConfiguration
         // no-op
       }
     }
-     */
+    
+    String port = _ip.getProperty("resin.port");
+    if (port != null) {
+      try {
+        _serverPort = Integer.parseInt(port);
+      } catch (NumberFormatException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   protected Object clone()
@@ -174,6 +190,8 @@ public class ResinConfiguration
 
   public File getResinConf()
   {
+    init();
+    
     return _resinConf;
   }
 
@@ -181,7 +199,7 @@ public class ResinConfiguration
   {
     if (!resinConf.isAbsolute()) {
       if (_resinHome == null)
-        throw new IllegalArgumentException(L.l("no resin-home set for relative conf {0}", resinConf));
+        throw new IllegalArgumentException(L.l("no resin.home set for relative conf {0}", resinConf));
 
       resinConf = new File(_resinHome, resinConf.getPath());
     }
@@ -191,6 +209,8 @@ public class ResinConfiguration
 
   public File getResinHome()
   {
+    init();
+    
     return _resinHome;
   }
 
@@ -403,9 +423,10 @@ public class ResinConfiguration
   public void validate()
     throws IllegalStateException
   {
-    requiredFile("resin-home", _resinHome);
+    log.info("validate");
+    requiredFile("resin.home", getResinHome());
     //requiredFile("resin-conf", _resinConf);
-
+/*
     try {
       InetAddress.getByName(getServerAddress());
     }
@@ -414,7 +435,7 @@ public class ResinConfiguration
                                              getServerAddress(),
                                              e.getLocalizedMessage()));
     }
-
+*/
     if (!(0 < _serverPort && _serverPort < 65536))
       throw new IllegalStateException(L.l("''server-port'' must have a value between 0 and 65536"));
 
