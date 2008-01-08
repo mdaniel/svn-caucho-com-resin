@@ -703,7 +703,11 @@
   <target name="dist" depends="dist.build, dist.package"/>
   
   <target name="configure">
+     <mkdir dir="automake"/>
      <exec executable="aclocal"/>
+     <exec executable="libtoolize">
+        <arg line="-f -c"/>
+     </exec>
      <exec executable="automake">
         <arg line="-f -a -c"/>
      </exec>
