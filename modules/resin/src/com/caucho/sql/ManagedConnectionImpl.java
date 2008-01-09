@@ -330,6 +330,22 @@ public class ManagedConnectionImpl
   {
     return _driverConnection;
   }
+  
+  /*
+   * Returns the driver.
+   */
+  public Class getDriverClass()
+  {
+    return _driver.getDriverClass();
+  }
+  
+  /*
+   * Returns the driver URL.
+   */
+  public String getURL()
+  {
+    return getDBPool().getURL();
+  }
 
   /**
    * Returns the XA resource for the connection.
@@ -767,7 +783,7 @@ public class ManagedConnectionImpl
    */
   public void destroy()
     throws ResourceException
-  {
+  { 
     log.finer("destroy " + this);
 
     PooledConnection poolConn = _pooledConnection;

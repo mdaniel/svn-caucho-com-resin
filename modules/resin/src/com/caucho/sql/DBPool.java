@@ -711,6 +711,14 @@ public class DBPool implements DataSource {
     if (connectionPool != null)
       connectionPool.clear();
   }
+  
+  /*
+   * Closes the specified connection and removes from the pool.
+   */
+  public void markForPoolRemoval(ManagedConnectionImpl mConn)
+  {
+    _connectionPool.markForPoolRemoval(mConn);
+  }
 
   /**
    * Returns the login timeout

@@ -34,6 +34,7 @@ import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ConnectionPoolMXBean;
+import com.caucho.sql.ManagedConnectionImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
@@ -1010,6 +1011,19 @@ public class ConnectionPool extends AbstractManagedObject
       item.destroy();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+  
+  /*
+   * Removes a connection from the pool.
+   */
+  public void markForPoolRemoval(ManagedConnectionImpl mConn)
+  {
+    for (PoolItem poolItem : _pool) {
+      if (poolItem.getManagedConnection() == mConn) {
+        poolItem.setConnectionError();
+        break;
+      }
     }
   }
 

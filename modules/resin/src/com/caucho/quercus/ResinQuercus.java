@@ -29,50 +29,19 @@
 
 package com.caucho.quercus;
 
-import com.caucho.config.ConfigException;
 import com.caucho.loader.*;
-import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.file.FileModule;
-import com.caucho.quercus.lib.session.QuercusSessionManager;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ResinModuleContext;
-import com.caucho.quercus.module.ModuleInfo;
-import com.caucho.quercus.module.ModuleStartupListener;
-import com.caucho.quercus.module.QuercusModule;
-import com.caucho.quercus.module.StaticFunction;
-import com.caucho.quercus.page.InterpretedPage;
-import com.caucho.quercus.page.PageManager;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.quercus.program.ClassDef;
-import com.caucho.quercus.program.InterpretedClassDef;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.server.webapp.*;
 import com.caucho.server.session.*;
 import com.caucho.sql.*;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.util.LruCache;
-import com.caucho.util.TimedCache;
 import com.caucho.vfs.*;
 import com.caucho.java.*;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.SoftReference;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.sql.*;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -184,6 +153,22 @@ public class ResinQuercus extends Quercus
     } catch (Exception e) {
       throw new QuercusModuleException(e);
     }
+  }
+  
+  /*
+   * Marks the connection for removal from the connection pool.
+   */
+  @Override
+  public void markForPoolRemoval(Connection conn)
+  {
+    ManagedConnectionImpl mConn = ((UserConnection) conn).getMConn();
+    
+    String url = mConn.getURL();
+    String driver = mConn.getDriverClass().getCanonicalName();
+    
+    DataSource ds = findDatabase(driver, url);
+    
+    ((DBPool) ds).markForPoolRemoval(mConn);
   }
 
   /**

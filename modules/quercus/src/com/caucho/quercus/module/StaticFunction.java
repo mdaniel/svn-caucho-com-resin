@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.module;
 
+import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.JavaInvoker;
@@ -134,10 +135,10 @@ public class StaticFunction extends JavaInvoker {
       sb.append("(");
 
       for (int i = 0; i < javaArgs.length; i++) {
-	if (i != 0)
-	  sb.append(", ");
+        if (i != 0)
+          sb.append(", ");
 
-	sb.append(javaArgs[i]);
+        sb.append(javaArgs[i]);
       }
       
       sb.append(")");
@@ -145,6 +146,19 @@ public class StaticFunction extends JavaInvoker {
       throw new IllegalArgumentException(sb.toString(), e);
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      // php/03k5
+      // exceptions from invoked calls are wrapped inside
+      // InvocationTargetException
+
+      Throwable cause = e.getCause();
+
+      if (cause instanceof QuercusExitException)
+        throw ((QuercusExitException) cause);
+      else if (cause != null)
+        throw QuercusModuleException.create(cause);
+      else
+        throw QuercusModuleException.create(e);
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }

@@ -453,7 +453,15 @@ public class Quercus
   {
     return conn;
   }
-
+  
+  /*
+   * Marks the connection for removal from the connection pool.
+   */
+  public void markForPoolRemoval(Connection conn)
+  {
+    return;
+  }
+  
   /**
    * Unwrap statement if necessary.
    */

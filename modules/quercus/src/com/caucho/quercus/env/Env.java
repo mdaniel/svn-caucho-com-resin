@@ -673,8 +673,8 @@ public class Env {
 
       Connection conn;
       if (oldEntry != null
-	  && (conn = oldEntry.getConnection()) != null
-	  && ! conn.isClosed())
+          && (conn = oldEntry.getConnection()) != null
+          && ! conn.isClosed())
         return conn;
 
       entry.setConnection(database.getConnection());
@@ -4536,7 +4536,7 @@ public class Env {
    * Called when the Env is no longer needed.
    */
   public void close()
-  { 
+  {
     try {
       // php/1l0t
       // output buffers callbacks may throw an exception
@@ -4559,7 +4559,7 @@ public class Env {
       }
 
       try {
-	sessionWriteClose();
+        sessionWriteClose();
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }

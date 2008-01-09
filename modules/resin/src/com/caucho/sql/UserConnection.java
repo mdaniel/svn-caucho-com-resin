@@ -87,6 +87,11 @@ public class UserConnection implements java.sql.Connection {
     return conn;
   }
 
+  public Class getDriverClass()
+  {
+    return getMConn().getDriverClass();
+  }
+  
   public String getURL()
   {
     return getMConn().getDBPool().getURL();
@@ -679,6 +684,7 @@ public class UserConnection implements java.sql.Connection {
     try {
       // Clean up the connection and put it back in the pool
       resetConnection(mConn);
+
     } catch (Throwable e) {
       mConn.fatalEvent();
 
@@ -825,7 +831,7 @@ public class UserConnection implements java.sql.Connection {
   /**
    * Returns the underlying connection.
    */
-  private ManagedConnectionImpl getMConn()
+  public ManagedConnectionImpl getMConn()
   {
     ManagedConnectionImpl mConn = _mConn;
 

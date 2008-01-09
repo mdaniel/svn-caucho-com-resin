@@ -30,7 +30,6 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
@@ -501,8 +500,8 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       // php/1418
       if (! _isUsed || _isCloseOnClose) {
-	env.removeClose(this);
-	close();
+        env.removeClose(this);
+        close();
       }
     }
 
@@ -530,65 +529,11 @@ public abstract class JdbcConnectionResource implements Closeable {
 
     Statement stmt = null;
 
-    char ch;
-
-    // clear table metadata cache if tables are deleted/altered
-    if (sql != null) {
-      int i = 0;
-      int len = sql.length();
-      
-      while (i < len &&
-          Character.isWhitespace(sql.charAt(i))) {
-        i++;
-      }
-      
-      if (i + 1 < len) {
-        ch = sql.charAt(i);
-        
-        switch (ch) {
-        case 'a': case 'A':
-          // drop/alter clears metadata cache
-          _tableMetadataMap.clear();
-          break;
-        case 'd': case 'D':
-          if ((ch = sql.charAt(i + 1)) == 'r' || ch == 'R') {
-            // drop/alter clears metadata cache
-            _tableMetadataMap.clear();
-          }
-          break;
-          /*
-        case 'b': case 'B':
-          // convert "begin" to begin
-          // Test for mediawiki performance
-          if (sql.equalsIgnoreCase("begin")) {
-            setAutoCommit(false);
-            return null;
-          }
-          break;
-        case 'c': case 'C':
-          // convert "commit" to begin
-          if (sql.equalsIgnoreCase("commit")) {
-            commit();
-            setAutoCommit(true);
-            return null;
-          }
-          break;
-        case 'r': case 'R':
-          // convert "rollback" to begin
-          if (sql.equalsIgnoreCase("rollback")) {
-            rollback();
-            setAutoCommit(true);
-            return null;
-          }
-          break;
-          */
-        }
-      }
-    }
-
     try {
       Connection conn = getConnection();
 
+      checkSql(conn, sql);
+      
       // XXX: test for performance
       boolean canSeek = true;
       if (canSeek)
@@ -626,7 +571,7 @@ public abstract class JdbcConnectionResource implements Closeable {
         // _warnings = stmt.getWarnings();
 
         // for php/430a
-        if (!keepStatementOpen()) {
+        if (! keepStatementOpen()) {
           stmt.close();
         }
       }
@@ -657,6 +602,69 @@ public abstract class JdbcConnectionResource implements Closeable {
     }
 
     return _rs;
+  }
+  
+  private void checkSql(Connection conn, String sql)
+  {
+    char ch;
+
+    // clear table metadata cache if tables are deleted/altered
+    if (sql != null) {
+      int i = 0;
+      int len = sql.length();
+      
+      while (i < len &&
+          Character.isWhitespace(sql.charAt(i))) {
+        i++;
+      }
+      
+      if (i + 1 < len) {
+        ch = sql.charAt(i);
+        
+        switch (ch) {
+        case 'a': case 'A':
+          // drop/alter clears metadata cache
+          _tableMetadataMap.clear();
+          break;
+        case 'd': case 'D':
+          if ((ch = sql.charAt(i + 1)) == 'r' || ch == 'R') {
+            // drop/alter clears metadata cache
+            _tableMetadataMap.clear();
+          }
+          break;
+        case 'c': case 'C':
+          if ((ch = sql.charAt(i + 1)) == 'r' || ch == 'R') {
+            _env.getQuercus().markForPoolRemoval(conn);
+          }
+          /*
+        case 'b': case 'B':
+          // convert "begin" to begin
+          // Test for mediawiki performance
+          if (sql.equalsIgnoreCase("begin")) {
+            setAutoCommit(false);
+            return null;
+          }
+          break;
+        case 'c': case 'C':
+          // convert "commit" to begin
+          if (sql.equalsIgnoreCase("commit")) {
+            commit();
+            setAutoCommit(true);
+            return null;
+          }
+          break;
+        case 'r': case 'R':
+          // convert "rollback" to begin
+          if (sql.equalsIgnoreCase("rollback")) {
+            rollback();
+            setAutoCommit(true);
+            return null;
+          }
+          break;
+          */
+        }
+      }
+    }
   }
 
   /**
@@ -746,7 +754,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       _isConnected = false;
       
       if (conn != null)
-	conn.close();
+        conn.close();
 
       _dbname = name;
       
@@ -798,11 +806,14 @@ public abstract class JdbcConnectionResource implements Closeable {
 
     try {
       Connection conn = _conn;
+
       // XXX: since the above code doesn't check for _conn == null can't null
       // _conn = null;
 
-      if (conn != null)
+      if (conn != null) {
         conn.close();
+      }
+      
     } catch (SQLException e) {
       log.log(Level.FINER, e.toString(), e);
     }
