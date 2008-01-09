@@ -142,76 +142,81 @@ class HtmlMessageRenderer extends Renderer
     
     Iterator<FacesMessage> iter;
 
-    if (forValue != null)
-      iter = context.getMessages(forValue);
-    else
-      iter = context.getMessages();
+    UIComponent forComponent = component.findComponent(forValue);
 
-    if (iter.hasNext()) {
-      FacesMessage msg = iter.next();
+    if (forComponent != null) {
+      iter = context.getMessages(forComponent.getClientId(context));
 
-      if (FacesMessage.SEVERITY_ERROR.equals(msg.getSeverity())) {
-	if (errorClass != null)
-	  styleClass = errorClass;
-	
-	if (errorStyle != null)
-	  style = errorStyle;
+      if (iter.hasNext()) {
+	FacesMessage msg = iter.next();
+
+	if (FacesMessage.SEVERITY_ERROR.equals(msg.getSeverity())) {
+	  if (errorClass != null)
+	    styleClass = errorClass;
+
+	  if (errorStyle != null)
+	    style = errorStyle;
+	}
+	else if (FacesMessage.SEVERITY_FATAL.equals(msg.getSeverity())) {
+	  if (fatalClass != null)
+	    styleClass = fatalClass;
+
+	  if (fatalStyle != null)
+	    style = fatalStyle;
+	}
+	else if (FacesMessage.SEVERITY_INFO.equals(msg.getSeverity())) {
+	  if (infoClass != null)
+	    styleClass = infoClass;
+
+	  if (errorStyle != null)
+	    style = infoStyle;
+	}
+	else if (FacesMessage.SEVERITY_WARN.equals(msg.getSeverity())) {
+	  if (warnClass != null)
+	    styleClass = warnClass;
+
+	  if (warnStyle != null)
+	    style = warnStyle;
+	}
+
+	boolean hasSpan = (dir != null
+			   || lang != null
+			   || style != null
+			   || styleClass != null
+			   || title != null
+			   || tooltip);
+
+	if (hasSpan)
+	  out.startElement("span", component);
+
+	if (dir != null)
+	  out.writeAttribute("dir", dir, "dir");
+
+	if (lang != null)
+	  out.writeAttribute("lang", lang, "lang");
+
+	if (style != null)
+	  out.writeAttribute("style", style, "style");
+
+	if (styleClass != null)
+	  out.writeAttribute("class", styleClass, "styleClass");
+
+	if (tooltip && isShowSummary && isShowDetail) {
+	  out.writeAttribute("title", msg.getSummary(), "title");
+	}
+	else if (title != null) {
+	  out.writeAttribute("title", title, "title");
+	}
+	else if (isShowSummary) {
+	  out.writeText(msg.getSummary(), "summary");
+	}
+
+	if (isShowDetail)
+	  out.writeText(msg.getDetail(), "detail");
+
+	if (hasSpan)
+	  out.endElement("span");
       }
-      else if (FacesMessage.SEVERITY_FATAL.equals(msg.getSeverity())) {
-	if (fatalClass != null)
-	  styleClass = fatalClass;
-	
-	if (fatalStyle != null)
-	  style = fatalStyle;
-      }
-      else if (FacesMessage.SEVERITY_INFO.equals(msg.getSeverity())) {
-	if (infoClass != null)
-	  styleClass = infoClass;
-	
-	if (errorStyle != null)
-	  style = infoStyle;
-      }
-      else if (FacesMessage.SEVERITY_WARN.equals(msg.getSeverity())) {
-	if (warnClass != null)
-	  styleClass = warnClass;
-	
-	if (warnStyle != null)
-	  style = warnStyle;
-      }
-
-      boolean hasSpan = (dir != null
-			 || lang != null
-			 || style != null
-			 || styleClass != null
-			 || title != null
-			 || tooltip);
-
-      if (hasSpan)
-	out.startElement("span", component);
-      
-      if (dir != null)
-	out.writeAttribute("dir", dir, "dir");
-
-      if (lang != null)
-	out.writeAttribute("lang", lang, "lang");
-
-      if (style != null)
-	out.writeAttribute("style", style, "style");
-
-      if (styleClass != null)
-	out.writeAttribute("class", styleClass, "styleClass");
-
-      if (title != null)
-	out.writeAttribute("title", title, "title");
-	
-      if (isShowSummary)
-	out.writeText(msg.getSummary(), "summary");
-      
-      if (isShowDetail)
-	out.writeText(msg.getDetail(), "detail");
-      
-      if (hasSpan)
-	out.endElement("span");
     }
   }
 
