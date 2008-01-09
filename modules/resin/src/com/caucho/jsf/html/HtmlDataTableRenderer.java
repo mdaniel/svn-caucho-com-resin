@@ -51,8 +51,6 @@ class HtmlDataTableRenderer extends BaseRenderer
   public void encodeBegin(FacesContext context, UIComponent component)
     throws IOException
   {
-    //System.out.println("ENCODE: " + component);
-    
     ResponseWriter out = context.getResponseWriter();
 
     String bgcolor = null;
@@ -449,7 +447,6 @@ class HtmlDataTableRenderer extends BaseRenderer
     int count = 0;
 
     int dataCount = uiData.getRowCount();
-    //System.out.println("DATA: " + dataCount);
 
     if (dataCount > 0)
       out.startElement("tbody", uiData);
