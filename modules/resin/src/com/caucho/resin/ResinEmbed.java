@@ -50,7 +50,7 @@ import com.caucho.vfs.*;
  * <code><pre>
  * ResinEmbed resin = new ResinEmbed();
  *
- * HttpEmbed http = new Http(8080);
+ * HttpEmbed http = new HttpEmbed(8080);
  * resin.addPort(http);
  *
  * WebAppEmbed webApp = new WebAppEmbed("/foo", "/home/ferg/ws/foo");
@@ -192,6 +192,19 @@ public class ResinEmbed
   }
 
   /**
+   * Waits for the Resin process to exit.
+   */
+  public void join()
+  {
+    while (! _resin.isClosed()) {
+      try {
+	Thread.sleep(1000);
+      } catch (Exception e) {
+      }
+    }
+  }
+
+  /**
    * Destroys the embedded server
    */
   public void destroy()
@@ -261,6 +274,30 @@ public class ResinEmbed
     super.finalize();
     
     destroy();
+  }
+
+  /**
+   * Basic embedding server.
+   */
+  public static void main(String []args)
+    throws Exception
+  {
+    ResinEmbed resin = new ResinEmbed();
+
+    for (int i = 0; i < args.length; i++) {
+      if ("-port".equals(args[i])) {
+	int port = Integer.parseInt(args[i + 1]);
+
+	HttpEmbed http = new HttpEmbed(port);
+	resin.addPort(http);
+
+	i++;
+      }
+    }
+
+    resin.start();
+
+    resin.join();
   }
 
   /**

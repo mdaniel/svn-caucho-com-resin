@@ -59,6 +59,16 @@ public final class ResinTargetModuleID
     _childTargetModuleID = childTargetModuleID;
     _path = path;
   }
+  
+  public ResinTargetModuleID(ResinTarget target)
+  {
+    _target = target;
+    _moduleID = "test-module";
+    _webURL = "/";
+    _parentTargetModuleID = null;
+    _childTargetModuleID = new TargetModuleID[0];
+    _path = "path";
+  }
 
   public Target getTarget()
   {
@@ -75,7 +85,7 @@ public final class ResinTargetModuleID
     return _webURL;
   }
 
-  public synchronized TargetModuleID getParentTargetModuleID()
+  public TargetModuleID getParentTargetModuleID()
   {
     return _parentTargetModuleID;
   }

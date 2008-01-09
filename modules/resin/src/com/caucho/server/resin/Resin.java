@@ -213,6 +213,8 @@ public class Resin implements EnvironmentBean, SchemaBean
       else
 	setResinHome(Vfs.getPwd());
 
+      setRootDirectory(getResinHome());
+
       // server.root backwards compat
       String serverRoot = System.getProperty("server.root");
 

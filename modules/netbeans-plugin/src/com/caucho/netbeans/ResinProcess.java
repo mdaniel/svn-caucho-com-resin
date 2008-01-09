@@ -205,27 +205,23 @@ public class ResinProcess
       if (!isPortFree(debugPort))
         throw new IllegalStateException(L.l("Cannot start Resin, debug-port {0} is already in use", debugPort));
     }
+    
+    StringBuilder cp = new StringBuilder();
+    File lib = new File(resinHome, "lib");
+    for (String jar : lib.list()) {
+      if (jar.endsWith(".jar")) {
+        cp.append(File.pathSeparatorChar);
+        cp.append(new File(lib, jar).getAbsolutePath());
+      }
+    }
 
     StringBuilder args = new StringBuilder();
 
-    args.append("-jar ");
-    args.append('"');
-    args.append(_resinJar.getAbsolutePath());
-    args.append('"');
-
-    args.append(' ');
-    args.append("-conf ");
-    args.append('"');
-    args.append(resinConf.getAbsolutePath());
-    args.append('"');
-
-    if (serverId != null && serverId.length() > 0) {
-      args.append(' ');
-      args.append("-server ");
-      args.append('"');
-      args.append(serverId);
-      args.append('"');
-    }
+    args.append(" -Dresin.home='" + resinHome + "'");
+    args.append(" com.caucho.resin.ResinEmbed");
+    
+    args.append(" -port ");
+    args.append(serverPort);
 
     if (_isDebug)
       throw new IllegalStateException("debug mode not implemented");
@@ -240,6 +236,10 @@ public class ResinProcess
       }
     }
 
+    String classpath = null;
+    
+    String []envp = new String[] { "CLASSPATH=" + cp };
+    
     String displayName = _resinConfiguration.getDisplayName();
 
     NbProcessDescriptor processDescriptor
@@ -253,7 +253,7 @@ public class ResinProcess
 
     _console.flush();
 
-    _process = processDescriptor.exec(null, null, true, resinHome);
+    _process = processDescriptor.exec(null, envp, true, resinHome);
 
     _console.println();
 

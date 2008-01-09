@@ -62,6 +62,7 @@ public final class ResinDeploymentManager
   private final InstanceProperties _ip;
   private final ResinConfiguration _resinConfiguration;
   private ResinProcess _resinProcess;
+  private TargetModuleID []_runningModules = new TargetModuleID[0];
 
   private ResinPlatformImpl _j2eePlatform;
 
@@ -105,7 +106,7 @@ public final class ResinDeploymentManager
     throws TargetException, IllegalStateException
   {
     log.info("get running modules");
-    return new TargetModuleID[0];
+    return _runningModules;
   }
 
   public TargetModuleID[] getNonRunningModules(ModuleType moduleType,
@@ -149,7 +150,7 @@ public final class ResinDeploymentManager
     throws IllegalStateException
   {
     log.info("dist1");
-    return null;
+    return new SuccessProgressObject(target);
   }
 
   public ProgressObject distribute(Target[] target,
@@ -158,7 +159,7 @@ public final class ResinDeploymentManager
     throws IllegalStateException
   {
     log.info("dist2");
-    return null;
+    return new SuccessProgressObject(target);
   }
 
   public ProgressObject distribute(Target[] target,
@@ -175,21 +176,25 @@ public final class ResinDeploymentManager
     throws IllegalStateException
   {
     log.info("start: " + targetModuleIDs.length);
-    return null;
+    _runningModules = targetModuleIDs;
+    
+    return new SuccessProgressObject(targetModuleIDs);
   }
 
   public ProgressObject stop(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
     log.info("stop: " + targetModuleIDs.length);
-    return null;
+    _runningModules = new TargetModuleID[0];
+    
+    return new SuccessProgressObject();
   }
 
   public ProgressObject undeploy(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
     log.info("undeploy: " + targetModuleIDs.length);
-    return null;
+    return new SuccessProgressObject();
   }
 
   public boolean isRedeploySupported()
