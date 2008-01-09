@@ -762,7 +762,7 @@ public class NodeBuilder {
 	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
 	  ELContext elContext = getELContext();
     
-	  ELParser parser = new ELParser(elContext, data);
+	  ELParser parser = new ELParser(elContext, data.trim());
     
 	  Expr expr = parser.parse();
 
@@ -860,32 +860,6 @@ public class NodeBuilder {
     else
       return exprString;
   }
-
-  /**
-   * Evaluate as an object
-   */
-  /*
-  public Object evalELObject(Node node)
-    throws ELException
-  {
-    if (hasChildren(node))
-      return null;
-
-    String value = textValue(node);
-
-    if (value == null)
-      return null;
-    else if (isEL() && value.indexOf("${") >= 0) {
-      ELParser parser = new ELParser(getELContext(), value);
-      parser.setCheckEscape(true);
-      Expr expr = parser.parse();
-
-      return expr.getValue(getELContext());
-    }
-    else
-      return null;
-  }
-  */
 
   public static RuntimeException error(String msg, Node node)
   {

@@ -146,7 +146,9 @@ public final class ResinDeploymentManager
     */
   }
 
-  public ProgressObject distribute(Target[] target, File file, File file0)
+  public ProgressObject distribute(Target[] target, 
+                                   File archive,
+                                   File plan)
     throws IllegalStateException
   {
     log.info("dist1");
@@ -154,8 +156,8 @@ public final class ResinDeploymentManager
   }
 
   public ProgressObject distribute(Target[] target,
-                                   InputStream inputStream,
-                                   InputStream inputStream0)
+                                   InputStream archive,
+                                   InputStream plan)
     throws IllegalStateException
   {
     log.info("dist2");
@@ -164,8 +166,8 @@ public final class ResinDeploymentManager
 
   public ProgressObject distribute(Target[] target,
 				   ModuleType type,
-                                   InputStream inputStream,
-                                   InputStream inputStream0)
+                                   InputStream archive,
+                                   InputStream plan)
     throws IllegalStateException
   {
     log.info("dist3");
@@ -204,16 +206,16 @@ public final class ResinDeploymentManager
 
   @Override
   public ProgressObject redeploy(TargetModuleID[] targetModuleID,
-                                 File file,
-                                 File file0)
+                                 File archive,
+                                 File plan)
   {
     return null;
   }
 
   @Override
   public ProgressObject redeploy(TargetModuleID[] targetModuleID,
-                                 InputStream inputStream,
-                                 InputStream inputStream0)
+                                 InputStream archive,
+                                 InputStream plan)
   {
     return null;
   }

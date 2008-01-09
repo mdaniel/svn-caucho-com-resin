@@ -116,7 +116,7 @@ public class ConnectorConfig extends DescriptionGroupConfig {
   /**
    * Sets the version of the resource adapter.
    */
-  public void setResourceAdapterVersion(String version)
+  public void setResourceadapterVersion(String version)
   {
     _resourceAdapterVersion = version;
   }

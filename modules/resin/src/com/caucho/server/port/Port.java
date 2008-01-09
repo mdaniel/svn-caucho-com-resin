@@ -966,6 +966,8 @@ public class Port
       log.info(_protocol.getProtocolName() + " listening to *:" + _port);
     }
 
+    assert(_serverSocket != null);
+
     postBind();
   }
 

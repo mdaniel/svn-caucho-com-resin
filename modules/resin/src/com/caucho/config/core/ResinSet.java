@@ -86,7 +86,7 @@ public class ResinSet {
   /**
    * The EL value to be set.
    */
-  public void setAttribute(String name, Object value)
+  public void setProperty(String name, Object value)
   {
     Config.setCurrentVar(name, value);
   }

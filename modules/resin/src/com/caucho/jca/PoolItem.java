@@ -710,8 +710,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
     // local transaction optimization
     if (! _isXATransaction
 	&& flags != TMJOIN
-	&& _localTransaction != null
-	&& _xaResource == null) { // XXX: temp disable for ActiveMQ
+	&& _localTransaction != null) {
+      // XXX: server/1810, etc
+      // && _xaResource == null) { // XXX: temp disable for ActiveMQ
       try {
 	if (log.isLoggable(Level.FINER))
 	  log.finer("begin-local-XA: " + xid + " " + _localTransaction);

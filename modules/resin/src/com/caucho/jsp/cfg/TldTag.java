@@ -267,6 +267,14 @@ public class TldTag implements DependencyBean {
   }
 
   /**
+   * Sets the bodycontent (backwards compat)
+   */
+  public void setBodycontent(String bodyContent)
+  {
+    setBodyContent(bodyContent);
+  }
+
+  /**
    * Gets the body-content
    */
   public String getBodyContent()

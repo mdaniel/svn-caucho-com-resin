@@ -58,4 +58,12 @@ public final class StringType extends ConfigType
   {
     return text;
   }
+  
+  /**
+   * Converts the string to a value of the type.
+   */
+  public Object valueOf(Object value)
+  {
+    return String.valueOf(value);
+  }
 }

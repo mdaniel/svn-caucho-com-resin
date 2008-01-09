@@ -105,6 +105,14 @@ public class TldTaglib implements DependencyBean
   {
     _tlibVersion = tlibVersion;
   }
+  
+  /**
+   * Sets the taglib version (backwards compat).
+   */
+  public void setTlibversion(String tlibVersion)
+  {
+    setTlibVersion(tlibVersion);
+  }
 
   /**
    * Gets the taglib version.
@@ -120,6 +128,14 @@ public class TldTaglib implements DependencyBean
   public void setJspVersion(String jspVersion)
   {
     _jspVersion = jspVersion;
+  }
+
+  /**
+   * Sets the JSP version (backwards compat).
+   */
+  public void setJspversion(String jspVersion)
+  {
+    setJspVersion(jspVersion);
   }
 
   /**
@@ -152,6 +168,14 @@ public class TldTaglib implements DependencyBean
   public void setShortName(String shortName)
   {
     _shortName = shortName;
+  }
+
+  /**
+   * Sets the short name (backwards compat)
+   */
+  public void setShortname(String shortName)
+  {
+    setShortName(shortName);
   }
 
   /**
