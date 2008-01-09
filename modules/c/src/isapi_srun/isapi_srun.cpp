@@ -110,7 +110,7 @@ parseResinIni(FILE *file, config_t *config)
 		  /*
 		  cse_add_host(&config->config_cluster, host, port);
 		  */
-		  cse_add_config_server(config, host, port);
+		  cse_add_config_server((mem_pool_t *) config->p, config, host, port);
 
 		  has_host = 1;
 		}
@@ -177,7 +177,7 @@ findResinIni(char *pwd, config_t *config)
 	else
 	  config->enable_caucho_status = 1;
 
-	cse_add_config_server(config, "localhost", 6800);
+	cse_add_config_server((mem_pool_t *) config->p, config, "localhost", 6800);
 }
 
 BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO* pVer)
