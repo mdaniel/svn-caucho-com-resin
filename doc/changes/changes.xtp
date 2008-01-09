@@ -12,6 +12,9 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>rewrite-dispath proxy now has target field (#2171)</li>
+<li>burlap: use getDeserializer pattern matching Hessian (#2298, rep by M Vandamme)</li>
+<li>configure: build updates for solaris (#2050 ksvee, #2294, #2295, rep by ksvee, np23dcx, norlab)</li>
 <li>flash: SocketPolicyProtocol now falls back to HTTP, allowing port 80 (#2291, rep by Vic Cekvenich)</li>
 <li>access-log: add &lt;exclude>\.gif$&lt;/exclude> to access-log (#2157, rep by B Cleave)</li>
 <li>hessian: improve error message with non-hessian response (#2200, rep by pelikt1)</li>
@@ -19,7 +22,7 @@
 <li>isapi: send 503 on timeout to Resin (#2264, rep by T Fukuda)</li>
 <li>update jdbc wrappers for jdk 6 (#2189, rep by koreth)</li>
 <li>xa: issues with PoolItem handling XA_RDONLY (#2227, rep by mackd2)</li>
-<li>jsf: faces-cofnig.xml needs to allow multiple render-kit (#2278, rep by Andreas Fischer)</li>
+<li>jsf: faces-config.xml needs to allow multiple render-kit (#2278, rep by Andreas Fischer)</li>
 <li>jsf: faces-config.xml needs to allow multiple el-resolver tags (#2287, rep by Andreas Fischer)</li>
 <li>boot: boot issues with IBM JDK and java.class.path (#2284, rep by Surekha Bhartiya)</li>
 <li>xml: update DOMBuilder to handle null prefixes (#2286, fixed! by atifmk)</li>

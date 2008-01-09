@@ -51,6 +51,14 @@ public abstract class Attribute {
   }
 
   /**
+   * Returns true for an EL attribute.
+   */
+  public boolean isEL()
+  {
+    return getConfigType().isEL();
+  }
+
+  /**
    * Returns true for a program-style attribute.
    */
   public boolean isProgram()

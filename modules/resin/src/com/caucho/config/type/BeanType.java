@@ -287,7 +287,7 @@ public class BeanType extends ConfigType
 	
 	Attribute attr;
 	
-	if ((propName.equals("text") || propName.equals("value"))
+	if (propName.equals("text")
 	    && (paramTypes[0].equals(String.class)
 		|| paramTypes[0].equals(RawString.class))) {
 	  attr = new TextAttribute(method, type);
@@ -298,6 +298,9 @@ public class BeanType extends ConfigType
 	  attr = new SetterAttribute(method, type);
 
 	_attributeMap.put(propName, attr);
+
+	if (propName.equals("value"))
+	  _attributeMap.put("#text", attr);
 
 	propName = toCamelName(name.substring(3));
 	_attributeMap.put(propName, attr);

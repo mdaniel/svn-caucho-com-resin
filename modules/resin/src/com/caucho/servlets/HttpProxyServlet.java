@@ -126,7 +126,6 @@ public class HttpProxyServlet extends GenericServlet {
     if (req.getQueryString() != null)
       uri += '?' + req.getQueryString();
 
-
     int count = _tcpPool.getServerCount();
 
     for (int i = 0; i < count; i++) {

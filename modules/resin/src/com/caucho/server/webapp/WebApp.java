@@ -1536,7 +1536,6 @@ public class WebApp extends ServletContextImpl
       
       if (e1 != null) {
         log.log(Level.WARNING, e1.toString(), e1);
-        e1.printStackTrace();
       }
     }
     

@@ -61,6 +61,15 @@ public final class RawStringType extends ConfigType
   {
     return true;
   }
+
+  /**
+   * Return true for EL
+   */
+  @Override
+  public boolean isEL()
+  {
+    return false;
+  }
   
   /**
    * Converts the string to a value of the type.

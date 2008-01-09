@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,18 +29,17 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.dispatch.ServletConfigImpl;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.*;
+import com.caucho.config.types.*;
+import com.caucho.server.connection.*;
+import com.caucho.server.dispatch.*;
+import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.util.logging.*;
 
 public class ProxyRule
   extends AbstractRuleWithConditions
@@ -84,7 +83,12 @@ public class ProxyRule
                               FilterChainMapper next)
     throws ServletException
   {
-    return _servlet.createServletChain();
+    if (_target != null)
+      return new ProxyFilterChain(_servlet.createServletChain(),
+				  _target, queryString);
+    else
+      return new ProxyFilterChain(_servlet.createServletChain(),
+				  uri, queryString);
   }
 
   @Override
@@ -111,6 +115,58 @@ public class ProxyRule
       log.log(Level.FINER, e.toString(), e);
 
       throw new ConfigException(L.l("load-balance requires Resin Professional"));
+    }
+  }
+
+  public static class ProxyFilterChain extends AbstractFilterChain {
+    private final FilterChain _next;
+    private final String _uri;
+    private final String _queryString;
+
+    ProxyFilterChain(FilterChain next, String uri, String queryString)
+    {
+      _next = next;
+
+      _uri = uri;
+      _queryString = queryString;
+    }
+
+    public void doFilter(ServletRequest req,
+			 ServletResponse res)
+      throws IOException, ServletException
+    {
+      _next.doFilter(new ProxyRequest(req, _uri, _queryString), res);
+    }
+  }
+
+  public static class ProxyRequest extends HttpServletRequestWrapper {
+    private String _uri;
+    private String _queryString;
+    
+    ProxyRequest(ServletRequest req,
+		 String uri,
+		 String queryString)
+    {
+      super((HttpServletRequest) req);
+
+      _uri = uri;
+      _queryString = queryString;
+    }
+
+    /**
+     * Returns the proxy uri
+     */
+    public String getRequestURI()
+    {
+      return _uri;
+    }
+
+    /**
+     * Returns the proxy query string
+     */
+    public String getQueryString()
+    {
+      return _queryString;
     }
   }
 }

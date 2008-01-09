@@ -372,8 +372,7 @@ public class NodeBuilder {
 	attrStrategy = TypeFactory.getFactory().getEnvironmentAttribute(qName);
 
       if (attrStrategy == null) {
-	if (childNode instanceof Element
-	    || childNode instanceof Attr) {
+	if (childNode instanceof Element || childNode instanceof Attr) {
 	  throw error(L.l("'{0}' is an unknown property of '{1}'.",
 			  qName.getName(), type.getTypeName()),
 		      childNode);
@@ -431,7 +430,7 @@ public class NodeBuilder {
 	else
 	  textValue = textValue(childNode);
 
-	if (isEL() && textValue.indexOf("${") >= 0) {
+	if (isEL() && attrType.isEL() && textValue.indexOf("${") >= 0) {
 	  childType = attrStrategy.getConfigType();
 	  
 	  Object value = childType.valueOf(evalObject(textValue));
@@ -758,7 +757,7 @@ public class NodeBuilder {
 	       && ! XmlUtil.isWhitespace(((CharacterData) child).getData())) {
 	String data = ((CharacterData) child).getData();
 
-	if (isEL() && childElt == null
+	if (isEL() && attr.isEL() && childElt == null
 	    && child.getNextSibling() == null
 	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
 	  ELContext elContext = getELContext();
@@ -846,80 +845,6 @@ public class NodeBuilder {
   }
 
   /**
-   * Evaluate as a string.
-   */
-  public String evalString(String exprString)
-    throws ELException
-  {
-    if (isEL() && exprString.indexOf("${") >= 0 && isEL()) {
-      ELParser parser = new ELParser(getELContext(), exprString);
-      parser.setCheckEscape(true);
-      Expr expr = parser.parse();
-
-      return expr.evalString(getELContext());
-    }
-    else
-      return exprString;
-  }
-
-  /**
-   * Evaluate as a string.
-   */
-  public boolean evalBoolean(String exprString)
-    throws ELException
-  {
-    if (exprString.indexOf("${") >= 0 && isEL()) {
-      ELParser parser = new ELParser(getELContext(), exprString);
-      parser.setCheckEscape(true);
-      Expr expr = parser.parse();
-
-      return expr.evalBoolean(getELContext());
-    }
-    else if (exprString.equals("false")
-	     || exprString.equals("no")
-	     || exprString.equals("")
-	     || exprString.equals("0")) {
-      return false;
-    }
-    else
-      return true;
-  }
-
-  /**
-   * Evaluate as a long.
-   */
-  public long evalLong(String exprString)
-    throws ELException
-  {
-    if (exprString.indexOf("${") >= 0 && isEL()) {
-      ELParser parser = new ELParser(getELContext(), exprString);
-      parser.setCheckEscape(true);
-      Expr expr = parser.parse();
-      
-      return expr.evalLong(getELContext());
-    }
-    else
-      return Expr.toLong(exprString, null);
-  }
-
-  /**
-   * Evaluate as a double.
-   */
-  public double evalDouble(String exprString)
-    throws ELException
-  {
-    if (exprString.indexOf("${") >= 0 && isEL()) {
-      ELParser parser = new ELParser(getELContext(), exprString);
-      parser.setCheckEscape(true);
-      Expr expr = parser.parse();
-      
-      return expr.evalDouble(getELContext());
-    }
-    else
-      return Expr.toDouble(exprString, null);
-  }
-
-  /**
    * Evaluate as an object
    */
   public Object evalObject(String exprString)
@@ -939,6 +864,7 @@ public class NodeBuilder {
   /**
    * Evaluate as an object
    */
+  /*
   public Object evalELObject(Node node)
     throws ELException
   {
@@ -959,6 +885,7 @@ public class NodeBuilder {
     else
       return null;
   }
+  */
 
   public static RuntimeException error(String msg, Node node)
   {

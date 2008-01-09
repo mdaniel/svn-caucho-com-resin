@@ -130,6 +130,14 @@ abstract public class ConfigType
   }
 
   /**
+   * Return true for EL evaluation
+   */
+  public boolean isEL()
+  {
+    return true;
+  }
+
+  /**
    * Returns true for a program type.
    */
   public boolean isProgram()
