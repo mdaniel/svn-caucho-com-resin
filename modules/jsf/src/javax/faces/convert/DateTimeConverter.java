@@ -35,7 +35,8 @@ import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
-public class DateTimeConverter implements Converter
+public class DateTimeConverter
+  implements Converter, StateHolder
 {
   public static final String CONVERTER_ID
     = "javax.faces.DateTime";
@@ -145,11 +146,25 @@ public class DateTimeConverter implements Converter
 
   public void restoreState(FacesContext context, Object state)
   {
+    Object []values = (Object []) state;
+    _dateStyle = (String) values [0];
+    _timeStyle = (String) values [1];
+    _locale = (Locale) values [2];
+    _pattern = (String) values [3];
+    _timeZone = (TimeZone) values [4];
+    _type = (String) values [5];
   }
 
   public Object saveState(FacesContext context)
   {
-    return null;
+    Object []state = new Object [6];
+    state[0] = _dateStyle;
+    state[1] = _timeStyle;
+    state[2] = _locale;
+    state[3] = _pattern;
+    state[4] = _timeZone;
+    state[5] = _type;
+    return state;
   }
   
   public Object getAsObject(FacesContext context,
@@ -244,7 +259,7 @@ public class DateTimeConverter implements Converter
     else
       return String.valueOf(value);
   }
-  
+
   private DateFormat getFormat(FacesContext context)
   {
     synchronized (this) {

@@ -35,7 +35,8 @@ import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
-public class NumberConverter implements Converter
+public class NumberConverter
+  implements Converter, StateHolder
 {
   public static final String CONVERTER_ID = "javax.faces.Number";
   public static final String CURRENCY_ID
@@ -216,11 +217,35 @@ public class NumberConverter implements Converter
 
   public void restoreState(FacesContext context, Object state)
   {
+    Object []values = (Object []) state;
+    _currencyCode = (String) values [0];
+    _currencySymbol = (String) values [1];
+    _locale = (Locale) values [2];
+    _maxFractionDigits = (Integer) values [3];
+    _minFractionDigits = (Integer) values [4];
+    _maxIntegerDigits = (Integer) values [5];
+    _minIntegerDigits = (Integer) values [6];
+    _pattern = (String) values [7];
+    _type = (String) values [8];
+    _isGroupingUsed = ((Boolean) values [9]).booleanValue();
+    _isIntegerOnly = ((Boolean) values [10]).booleanValue();
   }
 
   public Object saveState(FacesContext context)
   {
-    return null;
+    Object []state = new Object [11];
+    state [0] = _currencyCode;
+    state [1] = _currencySymbol;
+    state [2] = _locale;
+    state [3] = _maxFractionDigits;
+    state [4] = _minFractionDigits;
+    state [5] = _maxIntegerDigits;
+    state [6] = _minIntegerDigits;
+    state [7] = _pattern;
+    state [8] = _type;
+    state [9] = _isGroupingUsed ? Boolean.TRUE : Boolean.FALSE;
+    state [10] = _isIntegerOnly ? Boolean.TRUE : Boolean.FALSE;
+    return state;
   }
   
   public Object getAsObject(FacesContext context,

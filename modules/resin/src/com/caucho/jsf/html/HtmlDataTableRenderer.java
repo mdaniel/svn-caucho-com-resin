@@ -51,7 +51,7 @@ class HtmlDataTableRenderer extends BaseRenderer
   public void encodeBegin(FacesContext context, UIComponent component)
     throws IOException
   {
-    System.out.println("ENCODE: " + component);
+    //System.out.println("ENCODE: " + component);
     
     ResponseWriter out = context.getResponseWriter();
 
@@ -449,7 +449,7 @@ class HtmlDataTableRenderer extends BaseRenderer
     int count = 0;
 
     int dataCount = uiData.getRowCount();
-    System.out.println("DATA: " + dataCount);
+    //System.out.println("DATA: " + dataCount);
 
     if (dataCount > 0)
       out.startElement("tbody", uiData);
@@ -503,6 +503,8 @@ class HtmlDataTableRenderer extends BaseRenderer
 
     if (dataCount > 0)
       out.endElement("tbody");
+
+    uiData.setRowIndex(-1);
   }
 
   /**

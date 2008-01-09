@@ -278,7 +278,7 @@ public class UIData extends UIComponentBase
 	  _state.set(oldRow, oldList);
 	}
 
-	while (oldList.size() < valueIndex)
+	while (oldList.size() < (valueIndex + 1))
 	  oldList.add(null);
 
 	State state = oldList.get(valueIndex);
