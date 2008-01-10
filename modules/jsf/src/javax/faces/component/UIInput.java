@@ -658,14 +658,22 @@ public class UIInput extends UIOutput
       }
     }
     else if (isRequired()) {
-      String summary = Util.l10n(context, REQUIRED_MESSAGE_ID,
-				 "{0}: UIInput validation Error: Value is required.",
-				 Util.getLabel(context, this));
+      final FacesMessage msg;
 
-      String detail = summary;
+      String requiredMessage = getRequiredMessage();
 
-      FacesMessage msg = new FacesMessage(summary, detail);
-	
+      if (requiredMessage != null)
+	msg = new FacesMessage(requiredMessage, requiredMessage);
+      else {
+	String summary = Util.l10n(context,
+				   REQUIRED_MESSAGE_ID,
+				   "{0}: UIInput validation Error: Value is required.",
+				   Util.getLabel(context, this));
+
+	String detail = summary;
+	msg = new FacesMessage(summary, detail);
+      }
+
       context.addMessage(getClientId(context), msg);
 
       setValid(false);
