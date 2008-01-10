@@ -33,7 +33,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.el.EL;
 import com.caucho.util.CompileException;
-import com.caucho.loader.Environment;
+import com.caucho.loader.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -473,6 +473,8 @@ public class ResinBoot {
   public static void main(String []argv)
   {
     try {
+      EnvironmentClassLoader.initializeResinEnvironment();
+      
       ResinBoot boot = new ResinBoot(argv);
 
       while (boot.start()) {

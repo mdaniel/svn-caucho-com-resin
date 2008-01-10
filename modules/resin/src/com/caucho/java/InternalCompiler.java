@@ -32,12 +32,7 @@ package com.caucho.java;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Encoding;
-import com.caucho.vfs.IOExceptionWrapper;
-import com.caucho.vfs.MemoryStream;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,14 +65,32 @@ public class InternalCompiler extends AbstractJavaCompiler {
     throws IOException, JavaCompileException
   {
     if (! _hasCompiler) {
+      /*
+      JavaCompileException exn = null;
       try {
         Class.forName("com.sun.tools.javac.Main",
                       false, Thread.currentThread().getContextClassLoader());
 
         _hasCompiler = true;
       } catch (Exception e) {
-        e.printStackTrace();
-        throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)));
+      }
+      */
+
+      try {
+	EnvironmentClassLoader env;
+	env = new EnvironmentClassLoader(ClassLoader.getSystemClassLoader());
+
+	Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+	Path jar = javaHome.lookup("./lib/tools.jar");
+	env.addJar(jar);
+	jar = javaHome.lookup("../lib/tools.jar");
+	env.addJar(jar);
+	  
+	Class.forName("com.sun.tools.javac.Main", false, env);
+
+	_hasCompiler = true;
+      } catch (ClassNotFoundException e) {
+	throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)), e);
       }
     }
 
@@ -97,12 +110,6 @@ public class InternalCompiler extends AbstractJavaCompiler {
       // String parent = javaPath.getParent().getNativePath();
 
       ArrayList<String> argList = new ArrayList<String>();
-      /* This isn't needed since srcDirName is in the classpath
-      if ("1.2".compareTo(System.getProperty("java.version")) <= 0) {
-        argList.add("-sourcepath");
-        argList.add(srcDirName);
-      }
-      */
       argList.add("-d");
       argList.add(_compiler.getClassDirName());
       if (_compiler.getEncoding() != null) {
@@ -142,7 +149,14 @@ public class InternalCompiler extends AbstractJavaCompiler {
       ClassLoader oldLoader = thread.getContextClassLoader();
       try {
 	EnvironmentClassLoader env;
-	env = new EnvironmentClassLoader(ClassLoader.getSystemClassLoader());
+	env = new EnvironmentClassLoader(oldLoader);
+
+	Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+	Path jar = javaHome.lookup("./lib/tools.jar");
+	env.addJar(jar);
+	jar = javaHome.lookup("../lib/tools.jar");
+	env.addJar(jar);
+	  
         thread.setContextClassLoader(env);
 
         try {

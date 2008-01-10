@@ -44,12 +44,13 @@ import com.caucho.util.ResinThreadPoolExecutor;
 import com.caucho.vfs.Vfs;
 
 import javax.management.MBeanServerFactory;
+import javax.naming.*;
 import java.net.URL;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -61,6 +62,8 @@ import java.util.logging.Level;
  */
 public class EnvironmentClassLoader extends DynamicClassLoader
 {
+  private static Logger _log;
+
   private static boolean _isStaticInit;
 
   // listeners invoked at the start of any child environment
@@ -715,25 +718,61 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       Properties props = System.getProperties();
 
+      /*
       if (props.get("java.util.logging.manager") == null) {
         props.put("java.util.logging.manager",
                   "com.caucho.log.LogManagerImpl");
       }
+      */
+      
+      ClassLoader envClassLoader
+	= EnvironmentClassLoader.class.getClassLoader();
+      
+      if (envClassLoader == loader || envClassLoader == null) {
+	// These properties require Resin to be at the system loader
+	
+	if (props.get("java.naming.factory.initial") == null) {
+	  props.put("java.naming.factory.initial",
+		    "com.caucho.naming.InitialContextFactoryImpl");
+	}
 
-      if (props.get("java.naming.factory.initial") == null) {
-        props.put("java.naming.factory.initial",
-                  "com.caucho.naming.InitialContextFactoryImpl");
+	props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
+
+	EnvironmentProperties.enableEnvironmentSystemProperties(true);
+
+	String oldBuilder = props.getProperty("javax.management.builder.initial");
+	if (oldBuilder == null)
+	  oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
+
+	/*
+	  props.put("javax.management.builder.initial",
+	  "com.caucho.jmx.EnvironmentMBeanServerBuilder");
+	*/
+
+	props.put("javax.management.builder.initial", oldBuilder);
+
+	if (MBeanServerFactory.findMBeanServer(null).size() == 0)
+	  MBeanServerFactory.createMBeanServer("Resin");
+
+	try {
+	  Class cl = Class.forName("java.lang.management.ManagementFactory");
+	  Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
+	  method.invoke(null, new Object[0]);
+	} catch (Throwable e) {
+	}
       }
-
-      props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
-
-      EnvironmentProperties.enableEnvironmentSystemProperties(true);
 
       TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
       // TransactionManagerImpl.setLocal(tm);
       //Jndi.bindDeep("java:comp/TransactionManager", tm);
 
       UserTransactionProxy ut = UserTransactionProxy.getInstance();
+
+      Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
+                    Jmx.getContextMBeanServer());
+      Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
+                    Jmx.getGlobalMBeanServer());
+      
       Jndi.bindDeep("java:comp/UserTransaction", ut);
 
       // server/16g0
@@ -745,32 +784,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       Jndi.bindDeep("java:comp/ThreadPool",
 		    ResinThreadPoolExecutor.getThreadPool());
 
-      String oldBuilder = props.getProperty("javax.management.builder.initial");
-      if (oldBuilder == null)
-        oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
-
-      /*
-      props.put("javax.management.builder.initial",
-		"com.caucho.jmx.EnvironmentMBeanServerBuilder");
-      */
-
-      props.put("javax.management.builder.initial", oldBuilder);
-
-      if (MBeanServerFactory.findMBeanServer(null).size() == 0)
-        MBeanServerFactory.createMBeanServer("Resin");
-
-      try {
-        Class cl = Class.forName("java.lang.management.ManagementFactory");
-        Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
-        method.invoke(null, new Object[0]);
-      } catch (Throwable e) {
-      }
-
-      Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
-                    Jmx.getContextMBeanServer());
-      Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
-                    Jmx.getGlobalMBeanServer());
-
       try {
         Jndi.rebindDeep("java:comp/ORB",
                         new com.caucho.iiop.orb.ORBImpl());
@@ -779,11 +792,20 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       }
 
       J2EEManagedObject.register(new JTAResource(tm));
-
+    } catch (NamingException e) {
+      log().log(Level.FINE, e.toString(), e);
     } catch (Throwable e) {
       e.printStackTrace();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  private static final Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(EnvironmentClassLoader.class.getName());
+
+    return _log;
   }
 }

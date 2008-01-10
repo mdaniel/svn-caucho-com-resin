@@ -40,6 +40,8 @@ import java.util.logging.Logger;
 abstract public class AbstractJavaCompiler implements Runnable {
   protected static final L10N L = new L10N(AbstractJavaCompiler.class);
   protected static final Logger log = Log.open(AbstractJavaCompiler.class);
+
+  private ClassLoader _loader;
   
   protected JavaCompiler _compiler;
   private volatile boolean _isDone;
@@ -52,6 +54,8 @@ abstract public class AbstractJavaCompiler implements Runnable {
   
   public AbstractJavaCompiler(JavaCompiler compiler)
   {
+    _loader = Thread.currentThread().getContextClassLoader();
+    
     _compiler = compiler;
   }
 
@@ -93,12 +97,14 @@ abstract public class AbstractJavaCompiler implements Runnable {
   public void run()
   {
     try {
-      Thread.currentThread().setContextClassLoader(ClassLoader.getSystemClassLoader());
+      Thread.currentThread().setContextClassLoader(_loader);
 
       compileInt(_path, _lineMap);
     } catch (Throwable e) {
       _exception = e;
     } finally {
+      Thread.currentThread().setContextClassLoader(null);
+      
       _isDone = true;
 
       synchronized (this) {

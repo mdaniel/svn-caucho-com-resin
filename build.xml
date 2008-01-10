@@ -1057,7 +1057,7 @@
   </target>
 
   <target name="maven-dist" depends="init">
-    <property name="maven" value="${dist}/maven2/com/caucho/"/>
+    <property name="maven" value="${dist}/m2-snapshot/com/caucho/"/>
 
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="webbeans"/>
@@ -1084,6 +1084,12 @@
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="j2ee-management"/>
+      <param name="jar.name" value="j2ee-management-10.jar"/>
+      <param name="maven.name" value="resin-j2ee-management"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="jca"/>
       <param name="jar.name" value="jca-15.jar"/>
       <param name="maven.name" value="resin-jca"/>
@@ -1105,6 +1111,12 @@
       <param name="module.name" value="jsdk"/>
       <param name="jar.name" value="jsdk-15.jar"/>
       <param name="maven.name" value="resin-jsdk"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jstl"/>
+      <param name="jar.name" value="jstl-11.jar"/>
+      <param name="maven.name" value="resin-jstl"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
@@ -1154,7 +1166,7 @@
       <arg value="-av"/>
       <arg value="--rsh=ssh"/>
       <arg value="${maven}"/>
-      <arg value="weasley.caucho.com:/var/www/hosts/www.caucho.com/webapps/ROOT/maven2/com/caucho/"/>
+      <arg value="caucho@weasley.caucho.com:/var/www/hosts/www.caucho.com/webapps/ROOT/m2-snapshot/com/caucho/"/>
     </exec>
   </target>
 
@@ -1190,6 +1202,23 @@
     <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
               algorithm="sha1"/>
     <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
+              algorithm="md5"/>
+
+    <copy file="maven2/snapshot-metadata.xml"
+          tofile="${maven}/${maven.name}/maven-metadata.xml"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${maven.version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+        <filter token="ARTIFACT" value="${maven.name}"/>
+      </filterset>
+    </copy>
+    
+    <checksum file="${maven}/${maven.name}/maven-metadata.xml"
+              algorithm="sha1"/>
+    <checksum file="${maven}/${maven.name}/maven-metadata.xml"
               algorithm="md5"/>
   </target>
   

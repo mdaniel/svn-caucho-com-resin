@@ -29,8 +29,9 @@
 
 package com.caucho.maven;
 
-import com.caucho.server.resin.Resin;
+import com.caucho.resin.*;
 
+import java.io.*;
 import org.apache.maven.plugin.*;
 
 /**
@@ -39,10 +40,59 @@ import org.apache.maven.plugin.*;
  */
 public class MavenRun extends AbstractMojo
 {
+  private int _port = 8080;
+  private String _contextPath = "/";
+  private File _rootDirectory;
+
+  /**
+   * Sets the HTTP port that resin:run will listen to
+   */
+  public void setPort(int port)
+  {
+    _port = port;
+  }
+
+  /**
+   * Sets the context-path (defaults to "/")
+   */
+  public void setContextPath(String contextPath)
+  {
+    _contextPath = contextPath;
+  }
+
+  /**
+   * Sets the web-app's root directory
+   */
+  public void setRootDirectory(File rootDirectory)
+  {
+    _rootDirectory = rootDirectory;
+  }
+
+  /**
+   * Executes the maven resin:run task
+   */
   public void execute() throws MojoExecutionException
   {
-    Resin resin = new Resin();
+    ResinEmbed resin = new ResinEmbed();
+
+    HttpEmbed http = new HttpEmbed(_port);
+    resin.addPort(http);
+
+    File rootDirectory = _rootDirectory;
+
+    if (rootDirectory == null)
+      rootDirectory = new File("target/test");
+
+    WebAppEmbed webApp = new WebAppEmbed(_contextPath,
+					 rootDirectory.getAbsolutePath());
+
+    resin.addWebApp(webApp);
     
-    getLog().info("Resin: " + resin);
+    resin.start();
+    try {
+      resin.join();
+    } finally {
+      resin.destroy();
+    }
   }
 }

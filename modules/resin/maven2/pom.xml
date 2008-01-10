@@ -29,6 +29,12 @@
     
     <dependency>
       <groupId>com.caucho</groupId>
+      <artifactId>resin-j2ee-management</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.caucho</groupId>
       <artifactId>resin-jca</artifactId>
       <version>@VERSION@</version>
     </dependency>
@@ -48,6 +54,12 @@
     <dependency>
       <groupId>com.caucho</groupId>
       <artifactId>resin-jsf</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.caucho</groupId>
+      <artifactId>resin-jstl</artifactId>
       <version>@VERSION@</version>
     </dependency>
     

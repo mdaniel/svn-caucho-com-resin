@@ -33,6 +33,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
 import com.caucho.log.RotateStream;
@@ -282,6 +283,8 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     throws Throwable
   {
     try {
+      EnvironmentClassLoader.initializeResinEnvironment();
+      
       ResinWatchdogManager manager = new ResinWatchdogManager(argv);
       manager.startServer(argv);
     } catch (Exception e) {

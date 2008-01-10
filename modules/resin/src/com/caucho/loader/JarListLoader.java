@@ -183,8 +183,10 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	  file.close();
 	}
       } catch (IOException e) {
-	log.info(e.toString());
-	log.log(Level.FINER, e.toString(), e);
+	if (jar.canRead())
+	  log.log(Level.WARNING, e.toString(), e);
+	else
+	  log.log(Level.FINER, e.toString(), e);
       } finally {
 	if (scan != null)
 	  scan.close();

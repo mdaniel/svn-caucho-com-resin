@@ -51,7 +51,7 @@ import javax.annotation.PostConstruct;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.*;
 import java.security.*;
 import java.lang.instrument.*;
 import java.util.ArrayList;
@@ -834,8 +834,22 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (parent instanceof DynamicClassLoader)
       ((DynamicClassLoader) parent).buildClassPath(head);
-    else
+    else {
       head.append(CauchoSystem.getClassPath());
+
+      for (; parent != null; parent = parent.getParent()) {
+	// XXX: should be reverse order
+	if (parent instanceof URLClassLoader) {
+	  URLClassLoader urlLoader = (URLClassLoader) parent;
+
+	  for (URL url : urlLoader.getURLs()) {
+	    if (head.length() > 0)
+	      head.append(CauchoSystem.getPathSeparatorChar());
+	    head.append(url);
+	  }
+	}
+      }
+    }
 
     ArrayList<Loader> loaders = getLoaders();
     for (int i = 0; i < loaders.size(); i++) {
@@ -1894,7 +1908,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     return _L;
   }
 
-  protected static Logger log()
+  private static Logger log()
   {
     if (_log == null)
       _log = Logger.getLogger(DynamicClassLoader.class.getName());
