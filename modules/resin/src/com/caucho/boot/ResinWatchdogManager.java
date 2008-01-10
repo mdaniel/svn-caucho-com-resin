@@ -283,8 +283,6 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     throws Throwable
   {
     try {
-      EnvironmentClassLoader.initializeResinEnvironment();
-      
       ResinWatchdogManager manager = new ResinWatchdogManager(argv);
       manager.startServer(argv);
     } catch (Exception e) {

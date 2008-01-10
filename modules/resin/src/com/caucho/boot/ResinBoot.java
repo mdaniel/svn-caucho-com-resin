@@ -473,8 +473,6 @@ public class ResinBoot {
   public static void main(String []argv)
   {
     try {
-      EnvironmentClassLoader.initializeResinEnvironment();
-      
       ResinBoot boot = new ResinBoot(argv);
 
       while (boot.start()) {
