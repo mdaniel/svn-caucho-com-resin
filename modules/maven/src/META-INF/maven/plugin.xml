@@ -34,9 +34,16 @@
 	  <required>true</required>
 	  <editable>true</editable>
         </parameter>
+        <parameter>
+	  <name>rootDirectory</name>
+	  <type>java.io.File</type>
+	  <required>true</required>
+	  <editable>true</editable>
+        </parameter>
       </parameters>
       <configuration>
         <contextPath implementation="java.lang.String">/${project.artifactId}</contextPath>
+        <rootDirectory implementation="java.io.File">${project.build.directory}/${project.artifactId}</rootDirectory>
       </configuration>
     </mojo>
   </mojos>

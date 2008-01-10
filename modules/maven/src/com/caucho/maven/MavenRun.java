@@ -78,13 +78,10 @@ public class MavenRun extends AbstractMojo
     HttpEmbed http = new HttpEmbed(_port);
     resin.addPort(http);
 
-    File rootDirectory = _rootDirectory;
-
-    if (rootDirectory == null)
-      rootDirectory = new File("target/test");
+    System.out.println("ROOT: " + _rootDirectory);
 
     WebAppEmbed webApp = new WebAppEmbed(_contextPath,
-					 rootDirectory.getAbsolutePath());
+					 _rootDirectory.getAbsolutePath());
 
     resin.addWebApp(webApp);
     
