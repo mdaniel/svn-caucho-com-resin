@@ -756,9 +756,9 @@ public class JspCompiler implements EnvironmentBean {
 	compileDirectory(subpath, appDir, compiler, pendingClasses);
       }
     }
-    else if (path.getPath().endsWith(".jsp") ||
-	     path.getPath().endsWith(".jsfx") ||
-	     path.getPath().endsWith(".jspx") ||
+    else if (path.getPath().endsWith(".jsp")
+	     || path.getPath().endsWith(".jsfx")
+	     || path.getPath().endsWith(".jspx") ||
 	     path.getPath().endsWith(".jsfx")) {
       compileJsp(path, appDir, compiler, pendingClasses);
     }

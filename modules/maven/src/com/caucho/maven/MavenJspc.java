@@ -29,36 +29,19 @@
 
 package com.caucho.maven;
 
-import com.caucho.resin.*;
+import com.caucho.jsp.*;
 
 import java.io.*;
 import org.apache.maven.plugin.*;
 
 /**
- * The MavenRun
- * @goal run
+ * The MavenJspc to precompile .jsp files
+ *
+ * @goal jspc
  */
-public class MavenRun extends AbstractMojo
+public class MavenJspc extends AbstractMojo
 {
-  private int _port = 8080;
-  private String _contextPath = "/";
   private File _rootDirectory;
-
-  /**
-   * Sets the HTTP port that resin:run will listen to
-   */
-  public void setPort(int port)
-  {
-    _port = port;
-  }
-
-  /**
-   * Sets the context-path (defaults to "/")
-   */
-  public void setContextPath(String contextPath)
-  {
-    _contextPath = contextPath;
-  }
 
   /**
    * Sets the web-app's root directory
@@ -69,25 +52,18 @@ public class MavenRun extends AbstractMojo
   }
 
   /**
-   * Executes the maven resin:run task
+   * Executes the maven resin:jspc task
    */
   public void execute() throws MojoExecutionException
   {
-    ResinEmbed resin = new ResinEmbed();
-
-    HttpEmbed http = new HttpEmbed(_port);
-    resin.addPort(http);
-
-    WebAppEmbed webApp = new WebAppEmbed(_contextPath,
-					 _rootDirectory.getAbsolutePath());
-
-    resin.addWebApp(webApp);
-    
-    resin.start();
     try {
-      resin.join();
-    } finally {
-      resin.destroy();
+      JspCompiler.main(new String[] {
+	"-app-dir", _rootDirectory.getAbsolutePath(),
+      });
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new MojoExecutionException(e.toString(), e);
     }
   }
 }

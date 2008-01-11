@@ -46,6 +46,33 @@
         <rootDirectory implementation="java.io.File">${project.build.directory}/${project.artifactId}</rootDirectory>
       </configuration>
     </mojo>
+    
+    <mojo>
+      <goal>jspc</goal>
+      <description>Precompiles JSP files</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>compile</executePhase>
+      <implementation>com.caucho.maven.MavenJspc</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+	  <name>rootDirectory</name>
+	  <type>java.io.File</type>
+	  <required>true</required>
+	  <editable>true</editable>
+        </parameter>
+      </parameters>
+      <configuration>
+        <rootDirectory implementation="java.io.File">${project.build.directory}/${project.artifactId}</rootDirectory>
+      </configuration>
+    </mojo>
   </mojos>
     
   <dependencies>

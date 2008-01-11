@@ -72,7 +72,6 @@ public class InternalCompiler extends AbstractJavaCompiler {
 
         _hasCompiler = true;
       } catch (Exception e) {
-	e.printStackTrace();
       }
 
       try {
@@ -89,8 +88,6 @@ public class InternalCompiler extends AbstractJavaCompiler {
 
 	_hasCompiler = true;
       } catch (ClassNotFoundException e) {
-	e.printStackTrace();
-	
 	throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)), e);
       }
     }
