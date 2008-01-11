@@ -42,6 +42,7 @@ import com.caucho.util.L10N;
 
 import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -77,6 +78,9 @@ public class Mysqli extends JdbcConnectionResource {
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
 
+  private static boolean _checkedDriverVersion = false;
+  private static Object _checkDriverLock = new Object();
+
   public Mysqli(Env env,
                 @Optional("localhost") String host,
                 @Optional String user,
@@ -96,6 +100,73 @@ public class Mysqli extends JdbcConnectionResource {
   protected Mysqli(Env env)
   {
     super(env);
+  }
+
+  /**
+   * Verify that the ConnectorJ driver version is 3.1.14 or newer.
+   * Older versions of this driver return incorrect type information
+   * and suffer from encoding related bugs.
+   */
+
+  protected static void checkDriverVersion(Env env, Connection conn)
+    throws SQLException
+  {
+    if (_checkedDriverVersion == false) {
+      synchronized (_checkDriverLock) {
+        DatabaseMetaData databaseMetaData = conn.getMetaData();
+        String full_version = databaseMetaData.getDriverVersion();
+        String version = full_version;
+
+        // Extract full version number.
+
+        boolean valid = false;
+
+        int start;
+        int end = version.indexOf(' ');
+
+        if (end != -1) {
+          version = version.substring(0, end);
+
+          start = version.lastIndexOf('-');
+
+          if (start != -1) {
+            version = version.substring(start + 1);
+
+            // version string should look like "3.1.14"
+
+            int major;
+            int minor;
+            int release;
+
+            start = version.indexOf('.');
+            end = version.lastIndexOf('.');
+
+            major = Integer.valueOf(version.substring(0, start));
+            minor = Integer.valueOf(version.substring(start+1, end));
+            release = Integer.valueOf(version.substring(end+1));
+
+            if ((major >= 3) && (minor >= 1) && (release >= 14)) {
+              valid = true;
+
+              // If the mysql verison has not been explicitly
+              // set (by the test harness) then define it now.
+
+              if (env.getQuercus().getMysqlVersion() == null) {
+                env.getQuercus().setMysqlVersion(
+                  major + "." + minor + "." + release);
+              }
+            }
+          }
+        }
+
+        if (! valid) {
+          throw new SQLException("invalid Connector/J version \"" +
+            version + "\" found in \"" + full_version + "\", must be 3.1.14 or newer");
+        }
+
+        _checkedDriverVersion = true;
+      }
+    }
   }
 
   public String getResourceType()
@@ -152,6 +223,8 @@ public class Mysqli extends JdbcConnectionResource {
       }
 
       Connection jConn = env.getConnection(driver, url, userName, password);
+
+      checkDriverVersion(env, jConn);
 
       return jConn;
     } catch (SQLException e) {
