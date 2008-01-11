@@ -97,7 +97,6 @@ public interface DeploymentManager {
   
   /**
    * Deploys the object.
-   * @Deprecated
    */
   public ProgressObject distribute(Target []targetList,
 				   ModuleType type,

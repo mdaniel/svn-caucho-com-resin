@@ -105,9 +105,9 @@ abstract public class AbstractJavaCompiler implements Runnable {
     } finally {
       Thread.currentThread().setContextClassLoader(null);
       
-      _isDone = true;
-
       synchronized (this) {
+	_isDone = true;
+
 	notifyAll();
       }
     }

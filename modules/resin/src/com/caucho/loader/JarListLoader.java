@@ -139,7 +139,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	boolean isValidScan = false;
 
 	try {
-	  if (isScan)
+	  if (isScan && jar.canRead())
 	    scan = new ZipScanner(jar);
 	
 	  if (scan != null && scan.open()) {
@@ -163,7 +163,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	  isScan = false;
 	}
 	
-	if (! isValidScan) {
+	if (! isValidScan && jar.canRead()) {
 	  ZipFile file = new ZipFile(jar.getNativePath());
 
 	  Enumeration<? extends ZipEntry> e = file.entries();

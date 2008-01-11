@@ -94,4 +94,10 @@ public interface ProxyCacheMXBean extends ManagedObjectMXBean {
     @Name("urlRegexp")
     @Description("A regular expression that matches a url, null to match all urls")
     String urlRegexp);
+
+  /**
+   * Clears the expires timers for the cache.
+   */
+  @Description("Clear expires")
+  public void clearExpires();
 }

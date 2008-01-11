@@ -41,7 +41,8 @@ import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class HttpResponse extends AbstractHttpResponse {
+public class HttpResponse extends AbstractHttpResponse
+{
   static final byte []_http10ok = "HTTP/1.0 200 OK".getBytes();
   static final byte []_http11ok = "HTTP/1.1 200 OK".getBytes();
   static final byte []_contentLengthBytes = "\r\nContent-Length: ".getBytes();

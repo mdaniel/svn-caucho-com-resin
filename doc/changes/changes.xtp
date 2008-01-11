@@ -12,6 +12,9 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>cache: add clearExpires to clear the expire time, but not the cache (#2300)</li>
+<li>add com.caucho.filters.MD5Filter (#1668, rep by E Bowman)</li>
+<li>security: authenticator needs to work with webbeans/jpa (#2304, rep by Andreas Fischer)</li>
 <li>rewrite-dispath proxy now has target field (#2171)</li>
 <li>burlap: use getDeserializer pattern matching Hessian (#2298, rep by M Vandamme)</li>
 <li>configure: build updates for solaris (#2050 ksvee, #2294, #2295, rep by ksvee, np23dcx, norlab)</li>

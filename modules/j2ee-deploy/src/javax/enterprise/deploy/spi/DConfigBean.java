@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,7 +39,7 @@ import java.beans.PropertyChangeListener;
  */
 public interface DConfigBean {
   /**
-   * Returns the deploytment descriptor.
+   * Returns the deployment descriptor.
    */
   public DDBean getDDBean();
 

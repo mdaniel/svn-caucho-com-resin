@@ -72,7 +72,8 @@ import java.util.logging.Logger;
  * response stream.
  */
 abstract public class AbstractHttpResponse implements CauchoResponse {
-  static final protected Logger log = Log.open(AbstractHttpResponse.class);
+  static final protected Logger log
+    = Logger.getLogger(AbstractHttpResponse.class.getName());
   static final L10N L = new L10N(AbstractHttpResponse.class);
 
   static final HashMap<String,String> _errors;
@@ -98,6 +99,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   
   protected final ArrayList<String> _headerKeys = new ArrayList<String>();
   protected final ArrayList<String> _headerValues = new ArrayList<String>();
+  
+  protected final ArrayList<String> _footerKeys = new ArrayList<String>();
+  protected final ArrayList<String> _footerValues = new ArrayList<String>();
 
   protected final ArrayList<Cookie> _cookiesOut = new ArrayList<Cookie>();
 
@@ -295,6 +299,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _headerKeys.clear();
     _headerValues.clear();
+    
+    _footerKeys.clear();
+    _footerValues.clear();
 
     _hasSessionCookie = false;
     _cookiesOut.clear();
@@ -1198,6 +1205,63 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     // XXX: server/1315 vs server/0506 vs server/170k
     // could also set the nocache=JSESSIONID
     setPrivateOrResinCache(true);
+  }
+
+  /**
+   * Sets a footer, replacing an already-existing footer
+   *
+   * @param key the header key to set.
+   * @param value the header value to set.
+   */
+  public void setFooter(String key, String value)
+  {
+    if (_disableHeaders)
+      return;
+    else if (value == null)
+      throw new NullPointerException();
+
+    int i = 0;
+    boolean hasFooter = false;
+
+    for (i = _footerKeys.size() - 1; i >= 0; i--) {
+      String oldKey = _footerKeys.get(i);
+
+      if (oldKey.equalsIgnoreCase(key)) {
+	if (hasFooter) {
+	  _footerKeys.remove(i);
+	  _footerValues.remove(i);
+	}
+	else {
+	  hasFooter = true;
+
+	  _footerValues.set(i, value);
+	}
+      }
+    }
+
+    if (! hasFooter) {
+      _footerKeys.add(key);
+      _footerValues.add(value);
+    }
+  }
+
+  /**
+   * Adds a new footer.  If an old footer with that name exists,
+   * both footers are output.
+   *
+   * @param key the footer key.
+   * @param value the footer value.
+   */
+  public void addFooter(String key, String value)
+  {
+    if (_disableHeaders)
+      return;
+
+    if (setSpecial(key, value))
+      return;
+
+    _footerKeys.add(key);
+    _footerValues.add(value);
   }
 
   /**

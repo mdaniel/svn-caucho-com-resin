@@ -401,4 +401,20 @@ public class ResponseWrapper implements ServletResponse {
   {
     return encodeRedirectURL(url);
   }
+
+  //
+  // caucho response
+  //
+  
+  public void setFooter(String key, String value)
+  {
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).setFooter(key, value);
+  }
+
+  public void addFooter(String key, String value)
+  {
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).addFooter(key, value);
+  }
 }

@@ -65,16 +65,15 @@ public class InternalCompiler extends AbstractJavaCompiler {
     throws IOException, JavaCompileException
   {
     if (! _hasCompiler) {
-      /*
       JavaCompileException exn = null;
       try {
-        Class.forName("com.sun.tools.javac.Main",
-                      false, Thread.currentThread().getContextClassLoader());
+	ClassLoader loader = ClassLoader.getSystemClassLoader();
+        Class.forName("com.sun.tools.javac.Main", false, loader);
 
         _hasCompiler = true;
       } catch (Exception e) {
+	e.printStackTrace();
       }
-      */
 
       try {
 	EnvironmentClassLoader env;
@@ -90,6 +89,8 @@ public class InternalCompiler extends AbstractJavaCompiler {
 
 	_hasCompiler = true;
       } catch (ClassNotFoundException e) {
+	e.printStackTrace();
+	
 	throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)), e);
       }
     }
@@ -147,16 +148,17 @@ public class InternalCompiler extends AbstractJavaCompiler {
       
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
-      try {
-	EnvironmentClassLoader env;
-	env = new EnvironmentClassLoader(oldLoader);
+      
+      EnvironmentClassLoader env;
+      env = new EnvironmentClassLoader(ClassLoader.getSystemClassLoader());
 
-	Path javaHome = Vfs.lookup(System.getProperty("java.home"));
-	Path jar = javaHome.lookup("./lib/tools.jar");
-	env.addJar(jar);
-	jar = javaHome.lookup("../lib/tools.jar");
-	env.addJar(jar);
+      Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+      Path jar = javaHome.lookup("./lib/tools.jar");
+      env.addJar(jar);
+      jar = javaHome.lookup("../lib/tools.jar");
+      env.addJar(jar);
 	  
+      try {
         thread.setContextClassLoader(env);
 
         try {
@@ -178,11 +180,12 @@ public class InternalCompiler extends AbstractJavaCompiler {
 	    compile = cl.getMethod("compile", new Class[] { String[].class });
 	    value = compile.invoke(compiler, new Object[] { argArray });
 	  }
-
+	  
           if (value instanceof Integer)
             status = ((Integer) value).intValue();
         } catch (ClassNotFoundException e) {
-          throw new JavaCompileException(L.l("Can't find internal Java compiler.  Either configure an external compiler with <javac> or use a JDK which contains a Java compiler."));
+	  e.printStackTrace();
+          throw new JavaCompileException(L.l("Can't find internal Java compiler.  Either configure an external compiler with <javac> or use a JDK which contains a Java compiler."), e);
         } catch (NoSuchMethodException e) {
           throw new JavaCompileException(e);
         } catch (InstantiationException e) {

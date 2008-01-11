@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -26,25 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
+package com.caucho.server.security;
 
-import com.caucho.jca.Resource;
+import com.caucho.config.*;
+import com.caucho.webbeans.cfg.*;
 import com.caucho.util.L10N;
 
 /**
  * The authenticator is the same as resource, but has a default.
  */
-public class Authenticator extends Resource {
+public class Authenticator extends BeanConfig {
   private static L10N L = new L10N(Authenticator.class);
 
   public Authenticator()
   {
-    setJndiName("caucho/auth");
+    setScope("singleton");
+  }
+
+  /**
+   * Override the old meaning of type for backward compat.
+   */
+  @Override
+  public void setType(Class cl)
+  {
+    setClass(cl);
+  }
+
+  /**
+   * Check for correct type.
+   */
+  @Override
+  public void setClass(Class cl)
+  {
+    super.setClass(cl);
+
+    if (! ServletAuthenticator.class.isAssignableFrom(cl))
+      throw new ConfigException(L.l("<authenticator> class '{0}' must implement com.caucho.server.security.ServletAuthenticator"));
   }
 
   public String toString()
   {
-    return "Authenticator[" + getJndiName() + "]";
+    return "Authenticator[]";
   }
 }
 

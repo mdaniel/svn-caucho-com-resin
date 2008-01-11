@@ -1048,6 +1048,15 @@ public class WebAppContainer
   }
 
   /**
+   * Finds the web-app for the entry, not checking for sub-apps.
+   * (used by LocalDeployServlet)
+   */
+  public WebAppController findController(String subURI)
+  {
+    return _appDeploy.findController(subURI);
+  }
+
+  /**
    * Returns a list of the webApps.
    */
   public ArrayList<WebAppController> getWebAppList()

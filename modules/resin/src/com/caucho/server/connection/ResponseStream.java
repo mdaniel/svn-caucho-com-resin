@@ -38,11 +38,12 @@ import com.caucho.vfs.WriteStream;
 import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class ResponseStream extends ToByteResponseStream {
-  static final Logger log = Log.open(ResponseStream.class);
+  static final Logger log = Logger.getLogger(ResponseStream.class.getName());
   
   static final L10N L = new L10N(ResponseStream.class);
 
@@ -690,9 +691,27 @@ class ResponseStream extends ToByteResponseStream {
 	  // server/05b3
 	  _next.setBufferOffset(0);
 	}
-	
+
 	_isCommitted = true;
-	_next.write(_tailChunked, 0, _tailChunkedLength);
+	
+	ArrayList<String> footerKeys = _response._footerKeys;
+
+	if (footerKeys.size() == 0)
+	  _next.write(_tailChunked, 0, _tailChunkedLength);
+	else {
+	  ArrayList<String> footerValues = _response._footerValues;
+	  
+	  _next.print("\r\n0\r\n");
+
+	  for (int i = 0; i < footerKeys.size(); i++) {
+	    _next.print(footerKeys.get(i));
+	    _next.print(": ");
+	    _next.print(footerValues.get(i));
+	    _next.print("\r\n");
+	  }
+	  
+	  _next.print("\r\n");
+	}
 
 	if (log.isLoggable(Level.FINE))
           log.fine(dbgId() + "write-chunk(" + _tailChunkedLength + ")");

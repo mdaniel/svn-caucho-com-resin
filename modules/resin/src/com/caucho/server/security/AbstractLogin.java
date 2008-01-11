@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,7 +29,8 @@
 
 package com.caucho.server.security;
 
-import com.caucho.log.Log;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
@@ -37,6 +39,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.webbeans.*;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.logging.Level;
@@ -79,7 +82,8 @@ import java.util.logging.Logger;
  * @since Resin 2.0.2
  */
 public abstract class AbstractLogin {
-  protected final static Logger log = Log.open(AbstractLogin.class);
+  protected final static Logger log
+    = Logger.getLogger(AbstractLogin.class.getName());
 
   /**
    * The configured authenticator for the login.  Implementing classes will
@@ -103,8 +107,13 @@ public abstract class AbstractLogin {
   {
     if (_auth == null) {
       try {
-        Context ic = new InitialContext();
-        _auth = (ServletAuthenticator) ic.lookup("java:comp/env/caucho/auth");
+	WebBeansContainer webBeans = WebBeansContainer.create();
+
+	ComponentFactory factory
+	  = webBeans.resolveByType(ServletAuthenticator.class);
+
+	if (factory != null)
+	  _auth = (ServletAuthenticator) factory.get();
       } catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
       }

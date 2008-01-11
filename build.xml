@@ -84,7 +84,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
+          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
   </target>
 
   <target name="ant" depends="init">
@@ -279,6 +279,13 @@
     </antcall>
   </target>
   
+  <target name="resin-deploy" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="deploy"/>
+      <param name="module.jar" value="resin-deploy.jar"/>
+    </antcall>
+  </target>
+  
   <target name="resin-util" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="util"/>
@@ -339,7 +346,7 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, compat, ejb, hessian, jca, jms, jsdk, jstl, jsf, jta, j2ee-management, portlet, script, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, compat, ejb, hessian, jca, jms, jsdk, jstl, jsf, jta, j2ee-management, portlet, script, resin-deploy, resin-util, webbeans, version">
 
     <!-- build module -->
 
@@ -784,6 +791,7 @@
         <include name="lib/jws-15.jar"/>
         <include name="lib/portlet-10.jar"/>
         <include name="lib/quercus.jar"/>
+        <include name="lib/resin-deploy.jar"/>
         <include name="lib/resin-util.jar"/>
         <include name="lib/resin.jar"/>
 	<!--
@@ -1063,6 +1071,12 @@
       <param name="module.name" value="webbeans"/>
       <param name="jar.name" value="webbeans-16.jar"/>
       <param name="maven.name" value="resin-webbeans"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="deploy"/>
+      <param name="jar.name" value="resin-deploy.jar"/>
+      <param name="maven.name" value="resin-deploy"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">

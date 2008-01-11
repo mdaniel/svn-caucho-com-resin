@@ -229,6 +229,14 @@ public class ResponseAdapter extends ResponseWrapper
     return false;
   }
 
+  public void setFooter(String key, String value)
+  {
+  }
+
+  public void addFooter(String key, String value)
+  {
+  }
+
   public int getRemaining()
   {
     return _responseStream.getRemaining();
