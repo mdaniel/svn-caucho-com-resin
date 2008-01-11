@@ -695,12 +695,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     _isStaticInit = true;
 
+    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
-      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-
-      ClassLoader loader = thread.getContextClassLoader();
+      thread.setContextClassLoader(systemLoader);
 
       // #2281
       // PolicyImpl.init();
@@ -727,8 +727,19 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       
       ClassLoader envClassLoader
 	= EnvironmentClassLoader.class.getClassLoader();
-      
-      if (envClassLoader == loader || envClassLoader == null) {
+
+      boolean isGlobalLoadable = false;
+      try {
+	Class cl = Class.forName("com.caucho.naming.InitialContextFactoryImpl",
+				 false,
+				 systemLoader);
+
+	isGlobalLoadable = (cl != null);
+      } catch (Exception e) {
+	log().log(Level.FINER, e.toString(), e);
+      }
+	
+      if (isGlobalLoadable) {
 	// These properties require Resin to be at the system loader
 	
 	if (props.get("java.naming.factory.initial") == null) {
