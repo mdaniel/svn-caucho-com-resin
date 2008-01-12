@@ -31,7 +31,7 @@ package com.caucho.ejb.session;
 
 import java.util.*;
 
-import com.caucho.config.j2ee.Inject;
+import com.caucho.config.j2ee.ConfigProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.ejb.manager.EjbContainer;
 

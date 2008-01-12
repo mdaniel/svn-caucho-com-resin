@@ -28,7 +28,7 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.BeanBuilderException;
+import com.caucho.config.ConfigException;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
@@ -110,12 +110,12 @@ public class JndiLink {
     throws Exception
   {
     if (_name == null)
-      throw new BeanBuilderException(L.l("<jndi-link> configuration needs a <name>.  The <name> is the JNDI name where the context will be linked."));
+      throw new ConfigException(L.l("<jndi-link> configuration needs a <name>.  The <name> is the JNDI name where the context will be linked."));
     
     Class factory = _factoryClass;
 
     if (factory == null)
-      throw new BeanBuilderException(L.l("<jndi-link> configuration need a <factory>.  The <factory> is the class name of the InitialContextFactory bean."));
+      throw new ConfigException(L.l("<jndi-link> configuration need a <factory>.  The <factory> is the class name of the InitialContextFactory bean."));
 
     Object obj = factory.newInstance();
 

@@ -19,47 +19,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Yoritaka Sakakura
+ * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.config.program;
+
+import com.caucho.config.ConfigContext;
 
 /**
- * Thrown by the various Builders
+ * A saved program to configure a bean
  */
-public class BeanBuilderException extends Exception {
+abstract public class ConfigProgram {
   /**
-   * Create a null exception
+   * Configures the bean instance
    */
-  public BeanBuilderException()
-  {
-  }
-
-  /**
-   * Creates an exception with a message
-   */
-  public BeanBuilderException(String msg)
-  {
-    super(msg);
-  }
-
-  /**
-   * Wraps an exception in the config exception
-   */
-  public BeanBuilderException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
-
-  /**
-   * Wraps an exception in the config exception
-   */
-  public BeanBuilderException(Throwable e)
-  {
-    super(e);
-  }
+  abstract public void inject(Object bean,ConfigContext env);
 }
+

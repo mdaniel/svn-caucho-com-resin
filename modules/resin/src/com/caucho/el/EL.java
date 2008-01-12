@@ -138,16 +138,6 @@ public class EL {
     return expr.getValue(getEnvironment());
   }
 
-  public static Object evalObject(String value, ELContext env)
-    throws ELParseException, ELException
-  {
-    ELParser parser = new ELParser(getEnvironment(), value);
-
-    Expr expr = parser.parse();
-
-    return expr.getValue(env);
-  }
-
   public static String evalString(String value, ELContext env)
     throws ELParseException, ELException
   {
@@ -156,5 +146,15 @@ public class EL {
     Expr expr = parser.parse();
 
     return expr.evalString(env);
+  }
+  
+  public static boolean evalBoolean(String value, ELContext env)
+    throws ELParseException, ELException
+  {
+    ELParser parser = new ELParser(getEnvironment(), value);
+
+    Expr expr = parser.parse();
+
+    return expr.evalBoolean(env);
   }
 }

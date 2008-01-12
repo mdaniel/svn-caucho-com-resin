@@ -29,13 +29,13 @@
 
 package com.caucho.config;
 
-import com.caucho.config.j2ee.Inject;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.webbeans.context.DependentScope;
 
 /**
  * A saved program for configuring an object.
  */
-public abstract class BuilderProgram extends Inject {
+public abstract class BuilderProgram extends ConfigProgram {
   //private ConfigContext _nodeBuilder;
   private ConfigContext _nodeBuilder;
   private ClassLoader _loader;
@@ -89,15 +89,6 @@ public abstract class BuilderProgram extends Inject {
     configureImpl(builder, bean);
   }
 
-  /**
-   * Configures the object.
-   */
-  public void configure(ConfigContext builder, Object bean)
-    throws ConfigException
-  {
-    configureImpl(ConfigContext.getCurrentBuilder(), bean);
-  }
-
   public Object configure(Class type)
     throws ConfigException
   {
@@ -113,7 +104,7 @@ public abstract class BuilderProgram extends Inject {
   public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
-    inject(bean, builder.getDependentScope());
+    inject(bean, builder);
   }
 
   /**
@@ -149,7 +140,7 @@ public abstract class BuilderProgram extends Inject {
    * Configures the object.
    */
   @Override
-  public void inject(Object bean, DependentScope scope)
+  public void inject(Object bean, ConfigContext env)
     throws ConfigException
   {
     configure(bean);

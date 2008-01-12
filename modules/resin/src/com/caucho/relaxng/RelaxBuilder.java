@@ -28,7 +28,7 @@
 
 package com.caucho.relaxng;
 
-import com.caucho.config.BeanBuilderException;
+import com.caucho.config.ConfigException;
 import com.caucho.relaxng.pattern.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -272,7 +272,7 @@ public class RelaxBuilder extends DefaultHandler {
             child = new RefPattern(_grammar, name);
           }
           else
-            throw new BeanBuilderException(L.l("<{0}> is an unknown relax element.",
+            throw new ConfigException(L.l("<{0}> is an unknown relax element.",
                                                localName));
 
           child.setParent(_pattern);

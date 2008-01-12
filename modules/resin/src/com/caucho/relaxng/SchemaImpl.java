@@ -28,7 +28,6 @@
 
 package com.caucho.relaxng;
 
-import com.caucho.config.BeanConfigException;
 import com.caucho.relaxng.pattern.GrammarPattern;
 import com.caucho.relaxng.program.Item;
 import com.caucho.util.L10N;
@@ -60,7 +59,6 @@ public class SchemaImpl implements Schema {
    * Returns the program.
    */
   public Item getStartItem()
-    throws BeanConfigException
   {
     return _startItem;
   }

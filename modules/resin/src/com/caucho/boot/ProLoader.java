@@ -29,35 +29,12 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.enhancer.ByteCodeEnhancer;
-import com.caucho.loader.enhancer.EnhancerRuntimeException;
-import com.caucho.make.AlwaysModified;
-import com.caucho.make.DependencyContainer;
-import com.caucho.make.Make;
-import com.caucho.make.MakeContainer;
 import com.caucho.management.server.*;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.ByteBuffer;
-import com.caucho.util.L10N;
-import com.caucho.util.TimedCache;
 import com.caucho.vfs.*;
 
-import javax.annotation.PostConstruct;
 import java.io.*;
-import java.net.URL;
 import java.security.*;
 import java.lang.instrument.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * Class loader which checks for changes in class files and automatically

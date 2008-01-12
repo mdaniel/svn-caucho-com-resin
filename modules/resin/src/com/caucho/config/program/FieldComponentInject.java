@@ -62,12 +62,13 @@ public class FieldComponentInject extends NamedInject
     return _field.getName();
   }
 
-  public void inject(Object bean, DependentScope scope)
+  @Override
+  public void inject(Object bean, ConfigContext env)
   {
     Object value = null;
     
     try {
-      value = _component.get(scope);
+      value = _component.get(env);
 
       _field.set(bean, value);
     } catch (IllegalArgumentException e) {

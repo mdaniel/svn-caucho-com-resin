@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.webbeans;
 
+import com.caucho.config.ConfigContext;
 import java.lang.annotation.*;
 import javax.webbeans.*;
 
@@ -65,17 +66,17 @@ public class SessionComponent extends ComponentImpl {
   }
 
   @Override
-  public Object get(DependentScope scope)
+  public Object get(ConfigContext env)
   {
-    if (scope == null)
+    if (env == null)
       return _server.getLocalObject();
     
-    Object obj = scope.get(this);
+    Object obj = env.get(this);
     if (obj != null)
       return obj;
 
     obj = _server.getLocalObject();
-    scope.put(this, obj);
+    env.put(this, obj);
 
     return obj;
   }

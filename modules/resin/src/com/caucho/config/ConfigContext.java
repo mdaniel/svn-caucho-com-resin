@@ -84,7 +84,7 @@ public class ConfigContext {
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
 
-  ConfigContext()
+  public ConfigContext()
   {
     _elContext = new ConfigELContext();
     _varResolver = _elContext.getVariableResolver();
@@ -903,9 +903,7 @@ public class ConfigContext {
     for (; e.getCause() != null; e = e.getCause()) {
       if (e instanceof LineCompileException)
         break;
-      else if (e instanceof LineConfigRuntimeException)
-        break;
-      else if (e instanceof LineRuntimeException)
+      else if (e instanceof LineConfigException)
         break;
       else if (e instanceof CompileException)
         break;
@@ -913,10 +911,6 @@ public class ConfigContext {
 
     if (e instanceof LineConfigException)
       return (LineConfigException) e;
-    else if (e instanceof LineConfigRuntimeException)
-      throw (LineConfigRuntimeException) e;
-    else if (e instanceof LineRuntimeException)
-      throw (LineRuntimeException) e;
     else if (e instanceof ConfigException
 	     && e.getMessage() != null
 	     && filename != null) {
@@ -938,11 +932,11 @@ public class ConfigContext {
       String msg = filename + ":" + line + ": " + e + sourceLines;
 
       if (e instanceof RuntimeException) {
-	throw new LineRuntimeException(msg, e);
+	throw new LineConfigException(msg, e);
       }
       else if (e instanceof Error) {
 	// server/1711
-	throw new LineRuntimeException(msg, e);
+	throw new LineConfigException(msg, e);
 	// throw (Error) e;
       }
       else

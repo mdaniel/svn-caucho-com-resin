@@ -32,34 +32,27 @@ package com.caucho.config.j2ee;
 import com.caucho.amber.manager.*;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
-import org.omg.CORBA.ORB;
 
 import javax.annotation.*;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
-import javax.ejb.SessionContext;
-import javax.ejb.MessageDrivenContext;
-import javax.jms.QueueConnectionFactory;
 import javax.naming.*;
 import javax.persistence.*;
-import javax.transaction.UserTransaction;
 import javax.webbeans.*;
-import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceRef;
 
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.*;
 
@@ -75,7 +68,7 @@ public class InjectIntrospector {
 
   public static InjectProgram introspectProgram(Class type)
   {
-    ArrayList<Inject> injectList = new ArrayList<Inject>();
+    ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
 
     introspectInject(injectList, type);
     introspectInit(injectList, type);
@@ -84,7 +77,7 @@ public class InjectIntrospector {
   }
   
   public static void
-    introspectInit(ArrayList<Inject> initList, Class type)
+    introspectInit(ArrayList<ConfigProgram> initList, Class type)
     throws ConfigException
   {
     if (type == null || type.equals(Object.class))
@@ -108,7 +101,7 @@ public class InjectIntrospector {
   }
   
   public static void
-    introspectDestroy(ArrayList<Inject> destroyList, Class type)
+    introspectDestroy(ArrayList<ConfigProgram> destroyList, Class type)
     throws ConfigException
   {
     if (type == null || type.equals(Object.class))
@@ -163,7 +156,7 @@ public class InjectIntrospector {
     introspectConstruct(initList, type.getSuperclass());
   }
 
-  public static void introspectInject(ArrayList<Inject> injectList,
+  public static void introspectInject(ArrayList<ConfigProgram> injectList,
 				      Class type)
     throws ConfigException
   {
@@ -175,7 +168,7 @@ public class InjectIntrospector {
     }
   }
 
-  private static void introspectInjectImpl(ArrayList<Inject> injectList,
+  private static void introspectInjectImpl(ArrayList<ConfigProgram> injectList,
 					   Class type)
     throws ConfigException, ClassNotFoundException
   {
@@ -230,7 +223,7 @@ public class InjectIntrospector {
   }
 
   public static void
-    configureClassResources(ArrayList<Inject> initList,
+    configureClassResources(ArrayList<ConfigProgram> initList,
                             Class type)
     throws ConfigException
   {
@@ -289,7 +282,7 @@ public class InjectIntrospector {
   }
 
   private static void
-    introspectClassResource(ArrayList<Inject> initList,
+    introspectClassResource(ArrayList<ConfigProgram> initList,
                             Class type,
                             Resource resource)
     throws ConfigException
@@ -318,7 +311,7 @@ public class InjectIntrospector {
   }
 
   private static void
-    introspectClassPersistenceContext(ArrayList<Inject> initList,
+    introspectClassPersistenceContext(ArrayList<ConfigProgram> initList,
 				      Class type,
 				      PersistenceContext pContext)
     throws ConfigException
@@ -330,7 +323,7 @@ public class InjectIntrospector {
 				   "", pContext);
   }
 
-  private static void introspect(ArrayList<Inject> injectList,
+  private static void introspect(ArrayList<ConfigProgram> injectList,
 				 Field field)
     throws ConfigException
   {
@@ -375,7 +368,7 @@ public class InjectIntrospector {
       injectList.add(new FieldInject(field, gen));
   }
 
-  private static void introspect(ArrayList<Inject> injectList,
+  private static void introspect(ArrayList<ConfigProgram> injectList,
 				 Method method)
     throws ConfigException
   {
@@ -564,7 +557,7 @@ public class InjectIntrospector {
 				 jndiName, mappedName, "");
   }
 
-  private static void introspectWebBean(ArrayList<Inject> injectList,
+  private static void introspectWebBean(ArrayList<ConfigProgram> injectList,
 					Field field)
     throws ConfigException
   {
@@ -573,7 +566,7 @@ public class InjectIntrospector {
     webBeans.createProgram(injectList, field);
   }
 
-  private static void introspectWebBean(ArrayList<Inject> injectList,
+  private static void introspectWebBean(ArrayList<ConfigProgram> injectList,
 					Method method)
     throws ConfigException
   {

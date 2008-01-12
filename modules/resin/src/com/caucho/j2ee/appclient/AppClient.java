@@ -29,8 +29,8 @@
 package com.caucho.j2ee.appclient;
 
 import com.caucho.config.*;
-import com.caucho.config.j2ee.Inject;
 import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
@@ -369,11 +369,11 @@ public class AppClient implements EnvironmentBean
 
       Class<?> mainClass = Class.forName(_mainClassName, false, _loader);
 
-      ArrayList<Inject> injectList = new ArrayList<Inject>();
+      ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
       // XXX: static
       InjectIntrospector.introspectInject(injectList, mainClass);
 
-      for (Inject inject : injectList) {
+      for (ConfigProgram inject : injectList) {
         inject.inject((Object) null, null);
       }
 

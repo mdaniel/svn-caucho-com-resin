@@ -318,19 +318,19 @@ public class ClassComponent extends ComponentImpl {
 	return;
       _isBound = true;
 
-      ArrayList<Inject> injectList = new ArrayList<Inject>();
+      ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
       InjectIntrospector.introspectInject(injectList, _cl);
-      _injectProgram = new Inject[injectList.size()];
+      _injectProgram = new ConfigProgram[injectList.size()];
       injectList.toArray(_injectProgram);
       
-      ArrayList<Inject> initList = new ArrayList<Inject>();
+      ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
       InjectIntrospector.introspectInit(initList, _cl);
-      _initProgram = new Inject[initList.size()];
+      _initProgram = new ConfigProgram[initList.size()];
       initList.toArray(_initProgram);
       
-      ArrayList<Inject> destroyList = new ArrayList<Inject>();
+      ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
       InjectIntrospector.introspectDestroy(destroyList, _cl);
-      _destroyProgram = new Inject[destroyList.size()];
+      _destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(_destroyProgram);
 
       String loc = _ctor.getDeclaringClass().getName() + "(): ";

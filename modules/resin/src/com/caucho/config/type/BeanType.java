@@ -37,6 +37,7 @@ import java.util.logging.*;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
@@ -73,7 +74,7 @@ public class BeanType extends ConfigType
 
   private ComponentImpl _component;
 
-  private ArrayList<Inject> _initList = new ArrayList<Inject>();
+  private ArrayList<ConfigProgram> _initList = new ArrayList<ConfigProgram>();
 
   public BeanType(Class beanClass)
   {
@@ -91,6 +92,7 @@ public class BeanType extends ConfigType
   /**
    * Creates a new instance
    */
+  @Override
   public Object create(Object parent)
   {
     try {
@@ -129,6 +131,7 @@ public class BeanType extends ConfigType
   /**
    * Returns the attribute based on the given name.
    */
+  @Override
   public Attribute getAttribute(QName name)
   {
     synchronized (_nsAttributeMap) {
@@ -151,6 +154,7 @@ public class BeanType extends ConfigType
   /**
    * Returns the program attribute.
    */
+  @Override
   public Attribute getProgramAttribute()
   {
     if (_setProperty != null)
@@ -162,6 +166,7 @@ public class BeanType extends ConfigType
   /**
    * Initialize the type
    */
+  @Override
   public void init(Object bean)
   {
     for (int i = 0; i < _initList.size(); i++)
@@ -171,6 +176,7 @@ public class BeanType extends ConfigType
   /**
    * Replace the type with the generated object
    */
+  @Override
   public Object replaceObject(Object bean)
   {
     if (_replaceObject != null) {
@@ -216,6 +222,7 @@ public class BeanType extends ConfigType
   /**
    * Introspect the bean for configuration
    */
+  @Override
   public void introspect()
   {
     introspectMethods();
@@ -379,6 +386,7 @@ public class BeanType extends ConfigType
     return Introspector.decapitalize(name);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _beanClass.getName() + "]";

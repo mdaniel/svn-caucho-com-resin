@@ -31,6 +31,7 @@ package com.caucho.webbeans.component;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
@@ -55,7 +56,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   private static final L10N L = new L10N(ComponentImpl.class);
 
   private static final Object []NULL_ARGS = new Object[0];
-  private static final Inject []NULL_INJECT = new Inject[0];
+  private static final ConfigProgram []NULL_INJECT = new ConfigProgram[0];
 
   protected WbWebBeans _webbeans;
   
@@ -75,9 +76,9 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   protected ScopeContext _scope;
   private String _scopeId;
 
-  protected Inject []_injectProgram = NULL_INJECT;
-  protected Inject []_initProgram = NULL_INJECT;
-  protected Inject []_destroyProgram = NULL_INJECT;
+  protected ConfigProgram []_injectProgram = NULL_INJECT;
+  protected ConfigProgram []_initProgram = NULL_INJECT;
+  protected ConfigProgram []_destroyProgram = NULL_INJECT;
   
   private InitProgram _init;
 
@@ -365,7 +366,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     return create();
   }
 
-  public Object get(DependentScope scope)
+  public Object get(ConfigContext env)
   {
     if (_scope != null) {
       Object value = _scope.get(this, false);
@@ -374,7 +375,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
 	return value;
     }
     else {
-      Object value = scope.get(this);
+      Object value = env.getDependentScope().get(this);
 
       if (value != null)
 	return value;
@@ -388,10 +389,10 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
       scope = new DependentScope(this, value, _scope);
     }
     else {
-      value = createNew(scope);
+      value = createNew(env);
     }
 
-    init(value, scope);
+    init(value, env);
 
     return value;
   }
@@ -430,9 +431,10 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
 
       if (_injectProgram.length > 0) {
 	DependentScope scope = new DependentScope(this, value, null);
+        ConfigContext env = new ConfigContext();
 
-	for (Inject inject : _injectProgram) {
-	  inject.inject(value, scope);
+	for (ConfigProgram program : _injectProgram) {
+	  program.inject(value, env);
 	}
       }
 
@@ -452,17 +454,17 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   /**
    * Initialize the created value
    */
-  protected Object init(Object value, DependentScope scope)
+  protected Object init(Object value, ConfigContext env)
   {
     if (_init != null)
-      _init.configure(value, scope);
+      _init.configure(value, env);
 
-    for (Inject inject : _injectProgram) {
-      inject.inject(value, scope);
+    for (ConfigProgram inject : _injectProgram) {
+      inject.inject(value, env);
     }
 
-    for (Inject inject : _initProgram) {
-      inject.inject(value, scope);
+    for (ConfigProgram inject : _initProgram) {
+      inject.inject(value, env);
     }
 
     if (_destroyProgram.length > 0) {
@@ -475,10 +477,10 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   /**
    * Destroys the value
    */
-  public void destroy(Object value, DependentScope scope)
+  public void destroy(Object value, ConfigContext env)
   {
-    for (Inject inject : _destroyProgram)
-      inject.inject(value, scope);
+    for (ConfigProgram inject : _destroyProgram)
+      inject.inject(value, env);
   }
 
   /**
@@ -496,7 +498,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   {
   }
 
-  public void createProgram(ArrayList<Inject> initList, Field field)
+  public void createProgram(ArrayList<ConfigProgram> initList, Field field)
     throws ConfigException
   {
     initList.add(new ComponentInject(this, field));

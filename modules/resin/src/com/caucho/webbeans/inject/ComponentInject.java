@@ -31,6 +31,7 @@ package com.caucho.webbeans.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
 import com.caucho.util.*;
@@ -38,7 +39,7 @@ import com.caucho.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class ComponentInject extends Inject
+public class ComponentInject extends ConfigProgram
 {
   private static final L10N L = new L10N(ComponentInject.class);
   private static final Logger log
@@ -56,11 +57,11 @@ public class ComponentInject extends Inject
     field.setAccessible(true);
   }
 
-  public void inject(Object bean, DependentScope scope)
+  public void inject(Object bean, ConfigContext env)
   {
     Object value = null;
     try {
-      value = _component.get(scope);
+      value = _component.get(env);
 
       _field.set(bean, value);
     } catch (IllegalArgumentException e) {

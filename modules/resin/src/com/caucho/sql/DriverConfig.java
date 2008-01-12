@@ -33,7 +33,7 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.StringAttributeProgram;
+import com.caucho.config.PropertyValueProgram;
 import com.caucho.config.types.InitParam;
 import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
@@ -700,8 +700,8 @@ public class DriverConfig
     try {
       // server/14g1
       if (_driverURL != null) {
-        StringAttributeProgram program;
-        program = new StringAttributeProgram("url", _driverURL);
+        PropertyValueProgram program;
+        program = new PropertyValueProgram("url", _driverURL);
         program.configure(driverObject);
       }
     } catch (Exception e) {
@@ -713,8 +713,8 @@ public class DriverConfig
 
     try {
       if (_user != null) { // && ! (driverObject instanceof Driver)) {
-        StringAttributeProgram program;
-        program = new StringAttributeProgram("user", _user);
+        PropertyValueProgram program;
+        program = new PropertyValueProgram("user", _user);
         program.configure(driverObject);
       }
     } catch (Throwable e) {
@@ -726,8 +726,8 @@ public class DriverConfig
 
     try {
       if (_password != null) { // && ! (driverObject instanceof Driver)) {
-        StringAttributeProgram program;
-        program = new StringAttributeProgram("password", _password);
+        PropertyValueProgram program;
+        program = new PropertyValueProgram("password", _password);
         program.configure(driverObject);
       }
     } catch (Throwable e) {

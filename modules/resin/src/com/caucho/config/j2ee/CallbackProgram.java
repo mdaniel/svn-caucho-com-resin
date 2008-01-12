@@ -29,11 +29,11 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 
 /**
  * Base class for callback programs: PostConstructProgram, etc.
  */
-public class CallbackProgram extends BuilderProgram
+abstract public class CallbackProgram extends ConfigProgram
 {
 }

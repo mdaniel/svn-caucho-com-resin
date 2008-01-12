@@ -31,6 +31,7 @@ package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.ObjectAttributeProgram;
+import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.server.dispatch.ServletMapping;
@@ -90,8 +91,7 @@ abstract public class ManagementService
     webAppConfig.setId(_serviceName);
     webAppConfig.setRootDirectory(new RawString("admin-dummy-root"));
 
-    hostConfig.addBuilderProgram(new ObjectAttributeProgram("web-app",
-                                                            webAppConfig));
+    hostConfig.addBuilderProgram(new PropertyValueProgram("web-app", webAppConfig));
 
     ServletMapping servlet = new ServletMapping();
 
@@ -101,19 +101,16 @@ abstract public class ManagementService
     servlet.setServletClass(ManagementServlet.class.getName());
 
     InitProgram servletInit = new InitProgram();
-    servletInit.addBuilderProgram(new ObjectAttributeProgram("service",
-                                                             this));
+    servletInit.addBuilderProgram(new PropertyValueProgram("service", this));
     servlet.setInit(servletInit);
 
-    webAppConfig.addBuilderProgram(new ObjectAttributeProgram("servlet-mapping",
-                                                              servlet));
+    webAppConfig.addBuilderProgram(new PropertyValueProgram("servlet-mapping", servlet));
 
     SecurityConstraint constraint = new SecurityConstraint();
     constraint.setURLPattern("/*");
     constraint.addConstraint(new HmuxConstraint(this));
     constraint.init();
-    webAppConfig.addBuilderProgram(new ObjectAttributeProgram("security-constraint",
-                                                              constraint));
+    webAppConfig.addBuilderProgram(new PropertyValueProgram("security-constraint", constraint));
 
     try {
       _allowedNetworks = new InetNetwork[] {

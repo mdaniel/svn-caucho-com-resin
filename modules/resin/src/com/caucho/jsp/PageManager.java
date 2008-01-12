@@ -29,7 +29,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.j2ee.Inject;
+import com.caucho.config.j2ee.ConfigProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -255,12 +255,12 @@ abstract public class PageManager {
       page._caucho_setUpdateInterval(_updateInterval);
 
       try {
-	ArrayList<Inject> injectList = new ArrayList<Inject>();
+	ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
 	InjectIntrospector.introspectInject(injectList, page.getClass());
 
 	DependentScope scope = new DependentScope();
 	
-	for (Inject inject : injectList) {
+	for (ConfigProgram inject : injectList) {
 	  inject.inject(page, scope);
 	}
       } catch (RuntimeException e) {

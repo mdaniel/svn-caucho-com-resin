@@ -716,7 +716,7 @@ public class Config {
   public static String evalString(String str)
     throws ELException
   {
-    return AttributeStrategy.evalString(str);
+    return EL.evalString(str, getEnvironment());
   }
 
   /**
@@ -734,7 +734,7 @@ public class Config {
   public static boolean evalBoolean(String str)
     throws ELException
   {
-    return AttributeStrategy.evalBoolean(str);
+    return EL.evalBoolean(str, getEnvironment());
   }
 
   public static ELContext getEnvironment(HashMap<String,Object> varMap)

@@ -30,15 +30,12 @@
 package com.caucho.config.type;
 
 import com.caucho.config.Config;
-import com.caucho.config.ConfigContext;
-import com.caucho.config.TypeStrategy;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import org.w3c.dom.Node;
 
 import javax.el.ELContext;
 import javax.el.ELException;

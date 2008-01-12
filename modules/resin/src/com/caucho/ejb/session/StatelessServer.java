@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.j2ee.Inject;
+import com.caucho.config.j2ee.ConfigProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;

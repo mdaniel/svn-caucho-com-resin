@@ -29,24 +29,12 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.Config;
 import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.naming.Jndi;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.lang.reflect.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -78,7 +66,7 @@ public class PostConstructType
     _methodName = name;
   }
 
-  public BuilderProgram getProgram(Class cl)
+  public ConfigProgram getProgram(Class cl)
   {
     if (cl == null) {
       throw new ConfigException(L.l("'{0}' is an unknown callback method.",

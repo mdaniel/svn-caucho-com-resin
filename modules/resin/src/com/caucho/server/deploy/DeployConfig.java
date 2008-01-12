@@ -33,6 +33,7 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ObjectAttributeProgram;
+import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.RawString;
@@ -218,7 +219,7 @@ public class DeployConfig {
    */
   public void addPropertyProgram(String name, Object value)
   {
-    _program.addProgram(new ObjectAttributeProgram(name, value));
+    _program.addProgram(new PropertyValueProgram(name, value));
   }
 
   /**

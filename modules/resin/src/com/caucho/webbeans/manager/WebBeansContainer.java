@@ -325,7 +325,7 @@ public class WebBeansContainer
 					     scope.getName()));
   }
 
-  public void createProgram(ArrayList<Inject> injectList,
+  public void createProgram(ArrayList<ConfigProgram> injectList,
 			    Field field)
     throws ConfigException
   {
@@ -342,7 +342,7 @@ public class WebBeansContainer
     component.createProgram(injectList, field);
   }
 
-  public void createProgram(ArrayList<Inject> injectList,
+  public void createProgram(ArrayList<ConfigProgram> injectList,
 			    Method method)
     throws ConfigException
   {

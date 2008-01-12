@@ -44,8 +44,8 @@ import java.util.*;
  */
 abstract class AbstractBeanEmbed
 {
-  private ArrayList<Inject> _propertyList
-    = new ArrayList<Inject>();
+  private ArrayList<ConfigProgram> _propertyList
+    = new ArrayList<ConfigProgram>();
 
   /**
    * Adds a property.
@@ -60,8 +60,8 @@ abstract class AbstractBeanEmbed
    */
   protected void configure(Object bean, DependentScope scope)
   {
-    for (Inject program : _propertyList) {
-      program.inject(bean, scope);
+    for (ConfigProgram program : _propertyList) {
+      program.inject(bean, env);
     }
   }
 }

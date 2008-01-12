@@ -29,19 +29,16 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.LineConfigException;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.*;
-import com.caucho.webbeans.context.DependentScope;
 
 import java.lang.reflect.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class PreDestroyInject extends Inject
+public class PreDestroyInject extends ConfigProgram
 {
   private static final Logger log
     = Logger.getLogger(PreDestroyInject.class.getName());
@@ -56,7 +53,7 @@ public class PreDestroyInject extends Inject
   }
 
   @Override
-  public void inject(Object value, DependentScope scope)
+  public void inject(Object value, ConfigContext env)
     throws ConfigException
   {
     try {

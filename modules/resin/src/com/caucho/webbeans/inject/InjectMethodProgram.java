@@ -37,7 +37,7 @@ import com.caucho.webbeans.context.DependentScope;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class InjectMethodProgram extends Inject
+public class InjectMethodProgram extends ConfigProgram
 {
   private static final Logger log
     = Logger.getLogger(InjectMethodProgram.class.getName());

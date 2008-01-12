@@ -32,14 +32,12 @@ package com.caucho.config.program;
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.attribute.*;
-import com.caucho.config.j2ee.Inject;
-import com.caucho.webbeans.context.DependentScope;
 import com.caucho.xml.*;
 
 /**
  * A saved program for configuring an object.
  */
-public class PropertyValueProgram extends BuilderProgram {
+public class PropertyValueProgram extends ConfigProgram {
   private final String _name;
   private final QName _qName;
   private final Object _value;
@@ -66,7 +64,8 @@ public class PropertyValueProgram extends BuilderProgram {
   /**
    * Injects the bean with the dependencies
    */
-  public void inject(Object bean, DependentScope scope)
+  @Override
+  public void inject(Object bean, ConfigContext env)
   {
     try {
       ConfigType type = TypeFactory.getType(bean.getClass());

@@ -75,7 +75,7 @@ public class WebComponent {
     _componentList.add(comp);
   }
   
-  public void createProgram(ArrayList<Inject> initList,
+  public void createProgram(ArrayList<ConfigProgram> initList,
 			    Field field,
 			    ArrayList<Annotation> bindList)
     throws ConfigException

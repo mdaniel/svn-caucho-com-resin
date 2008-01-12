@@ -40,7 +40,7 @@ import java.lang.reflect.*;
 /**
  * Injects a new instance of the component as by @New
  */
-public class NewComponentInject extends Inject
+public class NewComponentInject extends ConfigProgram
 {
   private static final Logger log
     = Logger.getLogger(ComponentInject.class.getName());

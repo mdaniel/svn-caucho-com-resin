@@ -64,7 +64,7 @@ public class PropertyValueInject extends NamedInject {
   /**
    * Injects the bean with the dependencies
    */
-  public void inject(Object bean, DependentScope scope)
+  public void inject(Object bean, ConfigContext env)
   {
     try {
       ConfigType type = TypeFactory.getType(bean.getClass());

@@ -29,7 +29,9 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.ConfigContext;
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.context.DependentScope;
 
@@ -38,7 +40,7 @@ import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
 
-public class FieldInject extends Inject
+public class FieldInject extends ConfigProgram
 {
   private static final Logger log
     = Logger.getLogger(FieldInject.class.getName());
@@ -70,7 +72,8 @@ public class FieldInject extends Inject
     return _field.getDeclaringClass();
   }
 
-  public void inject(Object bean, DependentScope scope)
+  @Override
+  public void inject(Object bean, ConfigContext env)
     throws ConfigException
   {
     try {

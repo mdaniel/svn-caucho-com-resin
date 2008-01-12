@@ -28,8 +28,6 @@
 
 package com.caucho.config;
 
-import com.caucho.util.LineCompileException;
-
 /**
  * Thrown by the various Builders
  */

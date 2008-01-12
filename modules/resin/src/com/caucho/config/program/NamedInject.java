@@ -32,7 +32,7 @@ package com.caucho.config.program;
 /**
  * A program with a name
  */
-abstract public class NamedInject extends Inject {
+abstract public class NamedInject extends ConfigProgram {
   /**
    * Returns the injection name.
    */

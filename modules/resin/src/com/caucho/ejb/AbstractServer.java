@@ -30,8 +30,9 @@
 package com.caucho.ejb;
 
 import com.caucho.config.BuilderProgram;
-import com.caucho.config.j2ee.Inject;
+import com.caucho.config.ConfigContext;
 import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
@@ -39,7 +40,6 @@ import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
 import com.caucho.ejb.protocol.SameJVMClientContainer;
 import com.caucho.ejb.session.AbstractSessionContext;
-import com.caucho.ejb.session.AbstractSessionObject;
 import com.caucho.ejb.session.SessionServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.ejb.timer.EjbTimerService;
@@ -60,9 +60,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -132,7 +129,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   private TimerService _timerService;
 
   protected BuilderProgram _initProgram;
-  protected Inject []_initInject;
+  protected ConfigProgram []_initInject;
 
   private AroundInvokeConfig _aroundInvokeConfig;
 
@@ -907,7 +904,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Initialize an instance
    */
-  public void initInstance(Object instance, DependentScope scope)
+  public void initInstance(Object instance, ConfigContext env)
     throws Exception
   {
     /*
@@ -922,11 +919,11 @@ abstract public class AbstractServer implements EnvironmentBean {
       try {
         thread.setContextClassLoader(_loader);
 
-	if (scope == null)
-	  scope = new DependentScope();
+	if (env == null)
+	  env = new ConfigContext();
 
-	for (Inject inject : _initInject)
-	  inject.inject(instance, scope);
+	for (ConfigProgram inject : _initInject)
+	  inject.inject(instance, env);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -971,7 +968,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     // Injection binding occurs in the start phase
 
-    ArrayList<Inject> injectList = new ArrayList<Inject>();
+    ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
     InjectIntrospector.introspectInject(injectList, getEjbClass());
     // XXX: add inject from xml here
 
@@ -981,7 +978,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     InjectIntrospector.introspectInit(injectList, getEjbClass());
     // XXX: add init from xml here
 
-    Inject []injectArray = new Inject[injectList.size()];
+    ConfigProgram []injectArray = new ConfigProgram[injectList.size()];
     injectList.toArray(injectArray);
 
     if (injectArray.length > 0)

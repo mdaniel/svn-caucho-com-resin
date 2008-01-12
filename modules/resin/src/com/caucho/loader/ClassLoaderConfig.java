@@ -31,7 +31,6 @@ package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
 import com.caucho.loader.enhancer.EnhancerManager;
-import com.caucho.make.MakeLoader;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -111,14 +110,6 @@ public class ClassLoaderConfig {
    * Adds a tree loader.
    */
   public void addTreeLoader(TreeLoader loader)
-  {
-    _classLoader.addLoader(loader, _index++);
-  }
-
-  /**
-   * Adds a make class loader.
-   */
-  public void addMakeLoader(MakeLoader loader)
   {
     _classLoader.addLoader(loader, _index++);
   }

@@ -29,14 +29,11 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.LineConfigException;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
 import com.caucho.util.*;
 
 import java.lang.reflect.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -55,7 +52,7 @@ public class PostConstructProgram extends CallbackProgram
   }
 
   @Override
-  public void configureImpl(ConfigContext builder, Object bean)
+  public void inject(Object bean, ConfigContext env)
     throws ConfigException
   {
     try {
@@ -65,13 +62,6 @@ public class PostConstructProgram extends CallbackProgram
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
-  }
-
-  @Override
-  public Object configureImpl(ConfigContext builder, Class type)
-    throws ConfigException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public int hashCode()
