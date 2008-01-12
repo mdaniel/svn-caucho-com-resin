@@ -449,6 +449,19 @@ public class JsfTagNode extends JsfNode
 	
 	out.println(_var + ".addActionListener(new javax.faces.event.MethodExpressionActionListener(" + exprVar + "));");
       }
+      else if ("validator".equals(attr.getName())
+	       && UIInput.class.isAssignableFrom(_componentClass)) {
+	out.print(_var + ".addValidator(new javax.faces.validator.MethodExpressionValidator(");
+
+	String signature
+	  = "void foo(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)";
+
+	String exprVar = "_caucho_method_expr_" +
+			 _gen.addMethodExpr(value, signature);
+
+	out.println(exprVar + "));");
+	
+      }
       else if (_bindingAttr != null && ! "id".equals(attr.getName())
 	       || (value.indexOf("#{") >= 0
 		   && ! ValueExpression.class.isAssignableFrom(type)
