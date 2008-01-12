@@ -12,12 +12,15 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>plugins: add ant Jspc task [<a href="http://wiki.caucho.com/Ant">wiki: Ant and Resin</a>] (#97, rep by D Becker)</li>
+<li>plugins: add struts2 ObjectFactory support [<a href="http://wiki.caucho.com/Struts2">wiki: Struts2 and Resin</a>]</li>
+<li>plugins: add maven2 resin:run and resin:jspc [<a href="http://wiki.caucho.com/Maven2">wiki: Maven2 and Resin</a>] (#2231, rep by Daniel Glenn)</li>
 <li>cache: add clearExpires to clear the expire time, but not the cache (#2300)</li>
 <li>add com.caucho.filters.MD5Filter (#1668, rep by E Bowman)</li>
 <li>security: authenticator needs to work with webbeans/jpa (#2304, rep by Andreas Fischer)</li>
 <li>rewrite-dispath proxy now has target field (#2171)</li>
 <li>burlap: use getDeserializer pattern matching Hessian (#2298, rep by M Vandamme)</li>
-<li>configure: build updates for solaris (#2050 ksvee, #2294, #2295, rep by ksvee, np23dcx, norlab)</li>
+<li>configure: build updates for solaris (#2050, #2294, #2295, rep by ksvee, np23dcx, norlab)</li>
 <li>flash: SocketPolicyProtocol now falls back to HTTP, allowing port 80 (#2291, rep by Vic Cekvenich)</li>
 <li>access-log: add &lt;exclude>\.gif$&lt;/exclude> to access-log (#2157, rep by B Cleave)</li>
 <li>hessian: improve error message with non-hessian response (#2200, rep by pelikt1)</li>

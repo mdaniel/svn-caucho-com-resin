@@ -818,9 +818,10 @@
       </fileset>
     </copy>
     
-    <copy todir="${dist}/${dist.name}/ext" preservelastmodified="true">
+    <copy todir="${dist}/${dist.name}/plugins" preservelastmodified="true">
       <fileset dir="${install}/lib">
         <include name="resin-support.jar"/>
+        <include name="resin-ant.jar"/>
       </fileset>
     </copy >
 
