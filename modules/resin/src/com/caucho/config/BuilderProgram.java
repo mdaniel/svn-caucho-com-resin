@@ -113,7 +113,7 @@ public abstract class BuilderProgram extends Inject {
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    inject(bean, builder.getDependentScope());
   }
 
   /**

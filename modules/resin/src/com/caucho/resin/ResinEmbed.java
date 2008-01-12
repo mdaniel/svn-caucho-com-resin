@@ -43,6 +43,7 @@ import com.caucho.server.port.*;
 import com.caucho.server.resin.*;
 import com.caucho.server.webapp.*;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.context.*;
 
 /**
  * Embeddable version of the Resin server.
@@ -133,6 +134,8 @@ public class ResinEmbed
       WebAppConfig config = new WebAppConfig();
       config.setContextPath(webApp.getContextPath());
       config.setRootDirectory(new RawString(webApp.getRootDirectory()));
+
+      config.addBuilderProgram(new WebAppProgram(webApp));
 
       _host.addWebApp(config);
     } catch (Exception e) {
@@ -424,6 +427,25 @@ public class ResinEmbed
 
     public void close()
     {
+    }
+  }
+
+  static class WebAppProgram extends BuilderProgram {
+    private final WebAppEmbed _config;
+
+    WebAppProgram(WebAppEmbed webAppConfig)
+    {
+      _config = webAppConfig;
+    }
+    
+    /**
+     * Configures the object.
+     */
+    @Override
+    public void inject(Object bean, DependentScope scope)
+      throws ConfigException
+    {
+      _config.configure((WebApp) bean);
     }
   }
 }

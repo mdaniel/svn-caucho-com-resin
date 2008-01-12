@@ -25,5 +25,29 @@ testing.</p>
 
 </s1>
 
+<s1 title="Struts 2 Integration">
+
+<p>Resin's WebBeans can be integrated with Struts 2 with the
+Struts 2 ObjectFactory.  More details are
+at <a href="http://wiki.caucho.com/Struts2">wiki: Resin and Struts2</a>.</p>
+
+</s1>
+
+<s1 title="Maven 2 snapshot repository">
+
+<p>The Resin 3.1 snapshots are now available in a Maven2 snapshot repository
+at http://caucho.com/m2-snapshot.  Details and information on the resin-maven-plugin capabilityes (resin:run and resin:jspc) are
+at <a href="http://wiki.caucho.com/Maven2">wiki: Resin and Maven2</a>.</p>
+
+</s1>
+
+<s1 title="Ant tasks">
+
+<p>Resin ant tasks are now available in the resin/plugins/resin-ant.jar class.
+Information is available
+in <a href="http://wiki.caucho.com/Ant">wiki: Resin and Ant</a>.</p>
+
+</s1>
+
 </body>
 </document>

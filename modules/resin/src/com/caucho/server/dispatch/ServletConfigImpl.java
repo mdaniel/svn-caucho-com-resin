@@ -63,9 +63,11 @@ import java.util.logging.Logger;
 /**
  * Configuration for a servlet.
  */
-public class ServletConfigImpl implements ServletConfig, AlarmListener {
+public class ServletConfigImpl implements ServletConfig, AlarmListener
+{
   static L10N L = new L10N(ServletConfigImpl.class);
-  protected static final Logger log = Log.open(ServletConfigImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(ServletConfigImpl.class.getName());
 
   private String _location;
 

@@ -51,6 +51,7 @@ public class ServletMapping extends ServletConfigImpl {
 
   private ArrayList<Mapping> _mappingList
     = new ArrayList<Mapping>();
+  
   private boolean _isStrictMapping;
   
   /**

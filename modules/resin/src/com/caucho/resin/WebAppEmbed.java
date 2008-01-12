@@ -29,7 +29,12 @@
 
 package com.caucho.resin;
 
+import com.caucho.config.*;
 import com.caucho.server.cluster.*;
+import com.caucho.server.dispatch.*;
+import com.caucho.server.webapp.*;
+
+import java.util.*;
 
 /**
  * Embeddable version of a Resin web-app.
@@ -44,9 +49,15 @@ import com.caucho.server.cluster.*;
  */
 public class WebAppEmbed
 {
-  private String _contextPath = "";
+  private String _contextPath = "/";
   private String _rootDirectory = ".";
   private String _archivePath;
+
+  private final ArrayList<ServletEmbed> _servletList
+    = new ArrayList<ServletEmbed>();
+
+  private final ArrayList<ServletMappingEmbed> _servletMappingList
+    = new ArrayList<ServletMappingEmbed>();
 
   /**
    * Creates a new embedded webapp
@@ -96,5 +107,69 @@ public class WebAppEmbed
   public String getRootDirectory()
   {
     return _rootDirectory;
+  }
+
+  /**
+   * The path to the archive war file
+   */
+  public void setArchivePath(String archivePath)
+  {
+    _archivePath = archivePath;
+  }
+
+  /**
+   * The path to the archive war file
+   */
+  public String getArchivePath()
+  {
+    return _archivePath;
+  }
+
+  /**
+   * Adds a servlet definition
+   */
+  public void addServlet(ServletEmbed servlet)
+  {
+    if (servlet == null)
+      throw new NullPointerException();
+    
+    _servletList.add(servlet);
+  }
+
+  /**
+   * Adds a servlet-mapping definition
+   */
+  public void addServletMapping(ServletMappingEmbed servletMapping)
+  {
+    if (servletMapping == null)
+      throw new NullPointerException();
+    
+    _servletMappingList.add(servletMapping);
+  }
+
+  /**
+   * Configures the web-app (for internal use)
+   */
+  protected void configure(WebApp webApp)
+  {
+    try {
+      for (ServletEmbed servletEmbed : _servletList) {
+	ServletConfigImpl servlet = webApp.createServlet();
+
+	servletEmbed.configure(servlet);
+
+	webApp.addServlet(servlet);
+      }
+    
+      for (ServletMappingEmbed servletMappingEmbed : _servletMappingList) {
+	ServletMapping servletMapping = webApp.createServletMapping();
+
+	servletMappingEmbed.configure(servletMapping);
+
+	webApp.addServletMapping(servletMapping);
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 }
