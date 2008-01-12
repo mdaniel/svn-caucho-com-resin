@@ -29,8 +29,8 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -108,8 +108,8 @@ public class Cluster
   private long _clientReadTimeout = 60000L;
   private long _clientConnectTimeout = 5000L;
 
-  private BuilderProgramContainer _serverProgram
-    = new BuilderProgramContainer();
+  private ContainerProgram _serverProgram
+    = new ContainerProgram();
 
   private Server _server;
 
@@ -540,7 +540,7 @@ public class Cluster
   /**
    * Adds a program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _serverProgram.addProgram(program);
   }

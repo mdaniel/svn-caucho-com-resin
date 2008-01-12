@@ -33,8 +33,8 @@ import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
@@ -512,7 +512,7 @@ public class EjbMessageBean extends EjbBean {
     try {
       thread.setContextClassLoader(server.getClassLoader());
 
-      BuilderProgramContainer initContainer = getInitProgram();
+      ContainerProgram initContainer = getInitProgram();
 
       /*
       ArrayList<BuilderProgram> initList;
@@ -520,7 +520,7 @@ public class EjbMessageBean extends EjbBean {
 
       if (initList != null && initList.size() > 0) {
         if (initContainer == null)
-          initContainer = new BuilderProgramContainer();
+          initContainer = new ContainerProgram();
 
         for (BuilderProgram init : initList) {
           initContainer.addProgram(init);

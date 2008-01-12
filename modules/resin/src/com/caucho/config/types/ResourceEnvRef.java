@@ -28,8 +28,10 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.FieldValueProgram;
+import com.caucho.config.program.MethodValueProgram;
 import com.caucho.ejb.*;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
@@ -111,12 +113,12 @@ public class ResourceEnvRef extends BaseRef {
         AccessibleObject field = getFieldOrMethod(cl, fieldName);
 
         if (field != null) {
-          BuilderProgram program;
+          ConfigProgram program;
 
           if (field instanceof Method)
-            program = new JndiInjectProgram(jndiName, (Method) field);
+            program = new MethodValueProgram((Method) field, targetValue);
           else
-            program = new JndiFieldInjectProgram(jndiName, (Field) field);
+            program = new FieldValueProgram((Field) field, targetValue);
 
           ejbServer.getInitProgram().addProgram(program);
         }

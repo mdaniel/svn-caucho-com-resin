@@ -20,46 +20,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.config.program;
 
-import com.caucho.util.L10N;
-import com.caucho.xml.QElement;
-
-import org.w3c.dom.Node;
+import com.caucho.naming.*;
+import java.util.*;
 
 /**
- * Stored configuration program for an attribute.
+ * Creates a new value.
  */
-public class NodeBuilderProgram extends BuilderProgram {
-  static final L10N L = new L10N(NodeBuilderChildProgram.class);
-
-  public static final NodeBuilderProgram NULL
-    = new NodeBuilderProgram(null, new QElement());
-
-  private final Node _node;
-
-  public NodeBuilderProgram(ConfigContext builder, Node node)
+abstract public class ValueGenerator implements ObjectProxy {
+  public Class getType()
   {
-    super(builder);
-
-    _node = node;
+    return null;
   }
-
-  public void configureImpl(ConfigContext builder, Object bean)
-    throws ConfigException
+  
+  public Object createObject(Hashtable env)
   {
-    builder.configureBean(bean, _node);
+    return create();
   }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _node + "]";
-  }
+  
+  abstract public Object create();
 }

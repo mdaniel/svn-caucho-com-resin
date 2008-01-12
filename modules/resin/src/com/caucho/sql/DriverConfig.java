@@ -29,13 +29,12 @@
 
 package com.caucho.sql;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.PropertyValueProgram;
+import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.InitParam;
-import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JDBCDriver;
 import com.caucho.naming.Jndi;
@@ -104,7 +103,7 @@ public class DriverConfig
   private String _password;
   private Properties _info;
 
-  private BuilderProgramContainer _init = new BuilderProgramContainer();
+  private ContainerProgram _init = new ContainerProgram();
 
   private int _driverType;
   private Object _driverObject;
@@ -243,7 +242,7 @@ public class DriverConfig
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _init.addProgram(program);
   }

@@ -28,6 +28,7 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
 import java.util.*;
 
 import javax.annotation.*;

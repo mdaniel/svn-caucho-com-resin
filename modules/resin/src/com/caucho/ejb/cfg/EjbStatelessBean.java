@@ -29,32 +29,9 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-import com.caucho.config.j2ee.EjbInjectProgram;
-import com.caucho.config.j2ee.InjectIntrospector;
-import com.caucho.config.j2ee.JndiBindProgram;
-import com.caucho.config.types.EjbLocalRef;
-import com.caucho.config.types.EjbRef;
-import com.caucho.config.types.EnvEntry;
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EjbServerManager;
-import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.SessionAssembler;
-import com.caucho.ejb.gen.StatelessAssembler;
-import com.caucho.ejb.session.SessionServer;
-import com.caucho.ejb.session.StatelessServer;
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.StatefulSessionBean;
-import com.caucho.management.j2ee.StatelessSessionBean;
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.*;
-import java.util.ArrayList;
 import java.lang.reflect.*;
 
 /**

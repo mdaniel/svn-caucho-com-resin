@@ -29,10 +29,9 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
@@ -73,7 +72,7 @@ public class DeployConfig {
   private Period _redeployCheckInterval;
 
   // The configuration program
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
 
   /**
    * Sets the id.
@@ -201,7 +200,7 @@ public class DeployConfig {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }
@@ -209,7 +208,7 @@ public class DeployConfig {
   /**
    * Returns the program.
    */
-  public BuilderProgram getBuilderProgram()
+  public ConfigProgram getBuilderProgram()
   {
     return _program;
   }

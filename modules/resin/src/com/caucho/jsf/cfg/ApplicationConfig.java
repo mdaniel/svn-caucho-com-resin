@@ -28,6 +28,7 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
@@ -267,7 +268,7 @@ public class ApplicationConfig
     return _resourceBundleList;
   }
 
-  public void setApplicationExtension(BuilderProgram program)
+  public void setApplicationExtension(ConfigProgram program)
   {
   }
 

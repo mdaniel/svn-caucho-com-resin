@@ -31,6 +31,7 @@ package com.caucho.webbeans.component;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.ejb3.gen.*;
 import com.caucho.util.*;
@@ -222,40 +223,41 @@ public class ClassComponent extends ComponentImpl {
   /**
    * Creates a new instance of the component.
    */
-  public Object get(DependentScope scope)
+  @Override
+  public Object get(ConfigContext env)
   {
     try {
       Object value;
       boolean isNew = false;
 
-      if (scope == null || _scope == null || scope.canInject(_scope)) {
+      if (env.canInject(_scope)) {
 	if (_scope != null) {
 	  value = _scope.get(this, false);
 	  
 	  if (value != null)
 	    return value;
 	}
-	else if (scope != null) {
-	  value = scope.get(this);
+	else {
+	  value = env.get(this);
 	  
 	  if (value != null)
 	    return value;
 	}
       
-	value = createNew(scope);
+	value = createNew(env);
 	
 	if (_scope != null) {
 	  _scope.put(this, value);
-	  scope = new DependentScope(this, value, _scope);
+	  env = new ConfigContext(this, value, _scope);
 	}
 	else
-	  scope.put(this, value);
+	  env.put(this, value);
 	
-	init(value, scope);
+	init(value, env);
       }
       else {
-	if (scope != null) {
-	  value = scope.get(this);
+	if (env != null) {
+	  value = env.get(this);
 	  
 	  if (value != null)
 	    return value;
@@ -268,7 +270,7 @@ public class ClassComponent extends ComponentImpl {
 	  value = _scopeAdapter;
 	}
 
-	scope.put(this, value);
+	env.put(this, value);
       }
 
       return value;
@@ -279,7 +281,8 @@ public class ClassComponent extends ComponentImpl {
     }
   }
 
-  protected Object createNew(DependentScope scope)
+  @Override
+  protected Object createNew(ConfigContext env)
   {
     try {
       if (! _isBound)
@@ -297,8 +300,8 @@ public class ClassComponent extends ComponentImpl {
       
       Object value = _ctor.newInstance(args);
 
-      if (scope != null)
-	scope.put(this, value);
+      if (env != null)
+	env.put(this, value);
 
       return value;
     } catch (RuntimeException e) {

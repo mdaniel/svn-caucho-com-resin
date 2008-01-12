@@ -29,7 +29,7 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
@@ -61,7 +61,7 @@ public class ResourceRef implements Validator {
   private String _description;
   private boolean _sharing;
 
-  private BuilderProgram _init;
+  private ConfigProgram _init;
   private HashMap<String,String> _params = new HashMap<String,String>();
 
   private InjectionTarget _injectionTarget;
@@ -162,7 +162,7 @@ public class ResourceRef implements Validator {
   /**
    * Sets the init program
    */
-  public void setInit(BuilderProgram init)
+  public void setInit(ConfigProgram init)
   {
     _init = init;
   }
@@ -170,7 +170,7 @@ public class ResourceRef implements Validator {
   /**
    * Gets the init program;
    */
-  public BuilderProgram getInit()
+  public ConfigProgram getInit()
   {
     return _init;
   }

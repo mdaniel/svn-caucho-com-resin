@@ -28,8 +28,8 @@
 
 package com.caucho.config.core;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
 
 /**
@@ -38,7 +38,7 @@ import com.caucho.util.L10N;
 public class ResinWhen extends ResinControl {
   private static final L10N L = new L10N(ResinWhen.class);
 
-  private BuilderProgramContainer _init = new BuilderProgramContainer();
+  private ContainerProgram _init = new ContainerProgram();
 
   private boolean _test;
   
@@ -53,7 +53,7 @@ public class ResinWhen extends ResinControl {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _init.addProgram(program);
   }

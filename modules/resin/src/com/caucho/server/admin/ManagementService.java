@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,7 +30,6 @@
 package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
@@ -42,7 +41,6 @@ import com.caucho.server.security.SecurityConstraint;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

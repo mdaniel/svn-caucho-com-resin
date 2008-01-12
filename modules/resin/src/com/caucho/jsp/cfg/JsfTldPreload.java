@@ -29,7 +29,7 @@
 
 package com.caucho.jsp.cfg;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 

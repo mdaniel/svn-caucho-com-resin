@@ -29,8 +29,9 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.j2ee.ConfigProgram;
+import com.caucho.config.ConfigContext;
 import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
@@ -258,10 +259,10 @@ abstract public class PageManager {
 	ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
 	InjectIntrospector.introspectInject(injectList, page.getClass());
 
-	DependentScope scope = new DependentScope();
+	ConfigContext env = new ConfigContext();
 	
 	for (ConfigProgram inject : injectList) {
-	  inject.inject(page, scope);
+	  inject.inject(page, env);
 	}
       } catch (RuntimeException e) {
 	throw e;

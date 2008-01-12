@@ -29,8 +29,8 @@
 
 package com.caucho.config.core;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -41,7 +41,7 @@ import javax.annotation.PostConstruct;
 public class ResinIf extends ResinControl {
   private static final L10N L = new L10N(ResinIf.class);
 
-  private BuilderProgramContainer _init = new BuilderProgramContainer();
+  private ContainerProgram _init = new ContainerProgram();
 
   private boolean _test = false;
   
@@ -56,7 +56,7 @@ public class ResinIf extends ResinControl {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _init.addProgram(program);
   }

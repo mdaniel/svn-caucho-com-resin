@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.component;
 
+import com.caucho.config.ConfigContext;
 import java.lang.annotation.*;
 import javax.webbeans.*;
 
@@ -85,7 +86,7 @@ public class SingletonComponent extends ClassComponent {
   }
 
   @Override
-  public Object get(DependentScope scope)
+  public Object get(ConfigContext env)
   {
     return _value;
   }
@@ -97,7 +98,7 @@ public class SingletonComponent extends ClassComponent {
   }
 
   @Override
-  protected Object createNew(DependentScope scope)
+  protected Object createNew(ConfigContext env)
   {
     throw new IllegalStateException();
   }

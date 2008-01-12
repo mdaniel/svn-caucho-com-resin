@@ -31,25 +31,25 @@ package com.caucho.webbeans.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.util.*;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-/**
- * Injects a new instance of the component as by @New
- */
-public class NewComponentInject extends ConfigProgram
+public class FieldComponentProgram extends ConfigProgram
 {
+  private static final L10N L = new L10N(FieldComponentProgram.class);
   private static final Logger log
-    = Logger.getLogger(ComponentInject.class.getName());
+    = Logger.getLogger(FieldComponentProgram.class.getName());
 
   private ComponentImpl _component;
   private Field _field;
 
-  public NewComponentInject(ComponentImpl component,
-			    Field field)
+  public FieldComponentProgram(ComponentImpl component,
+			 Field field)
   {
     _component = component;
     _field = field;
@@ -57,14 +57,17 @@ public class NewComponentInject extends ConfigProgram
     field.setAccessible(true);
   }
 
-  public void inject(Object bean, DependentScope scope)
+  public void inject(Object bean, ConfigContext env)
   {
+    Object value = null;
     try {
-      Object value = _component.get();
+      value = _component.get(env);
 
       _field.set(bean, value);
+    } catch (IllegalArgumentException e) {
+      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", value), e);
     } catch (Exception e) {
-      throw LineConfigException.create(_field, e);
+      throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
     }
   }
 }

@@ -29,6 +29,7 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.el.*;
@@ -142,7 +143,7 @@ abstract public class ConfigType
    */
   public boolean isProgram()
   {
-    return BuilderProgram.class.isAssignableFrom(getType());
+    return ConfigProgram.class.isAssignableFrom(getType());
   }
 
   /**

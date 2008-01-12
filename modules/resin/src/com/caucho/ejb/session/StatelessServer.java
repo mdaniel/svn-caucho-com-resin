@@ -28,17 +28,12 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.j2ee.ConfigProgram;
-import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.webbeans.StatelessComponent;
-import com.caucho.naming.Jndi;
-import com.caucho.util.Log;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 

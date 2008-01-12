@@ -28,6 +28,7 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.annotation.*;
@@ -103,7 +104,7 @@ public class FacesConfig
   }
 
   @XmlElement(name="faces-config-extension")
-  public void setFacesConfigExtension(BuilderProgram program)
+  public void setFacesConfigExtension(ConfigProgram program)
   {
   }
 

@@ -31,6 +31,7 @@ package com.caucho.webbeans.manager;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.*;
 import com.caucho.util.*;
@@ -48,7 +49,6 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
-import java.net.URL;
 
 import javax.webbeans.*;
 
@@ -366,7 +366,7 @@ public class WebBeansContainer
 	}
       }
 
-      injectList.add(new InjectMethodProgram(method, args));
+      injectList.add(new MethodComponentProgram(method, args));
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {

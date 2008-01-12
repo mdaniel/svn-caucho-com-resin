@@ -29,9 +29,9 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
-import com.caucho.config.NodeBuilderProgram;
+import com.caucho.config.program.NodeBuilderProgram;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.InitProgram;
 import com.caucho.jmx.Jmx;
@@ -832,7 +832,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
 
     // Initialize bean properties
     InitProgram init = getInit();
-    BuilderProgram program;
+    ConfigProgram program;
 
     if (init != null)
       program = init.getBuilderProgram();
@@ -840,7 +840,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       program = NodeBuilderProgram.NULL;
 
     program.configure(servlet);
-    program.init(servlet);
+    Config.init(servlet);
   }
 
   /**

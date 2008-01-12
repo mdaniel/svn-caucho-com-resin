@@ -52,13 +52,13 @@ abstract class AbstractBeanEmbed
    */
   public void addProperty(String name, Object value)
   {
-    _propertyList.add(new PropertyValueInject(name, value));
+    _propertyList.add(new PropertyValueProgram(name, value));
   }
 
   /**
    * Configures the object
    */
-  protected void configure(Object bean, DependentScope scope)
+  protected void configure(Object bean, ConfigContext env)
   {
     for (ConfigProgram program : _propertyList) {
       program.inject(bean, env);

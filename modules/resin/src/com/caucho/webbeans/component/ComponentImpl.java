@@ -375,7 +375,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
 	return value;
     }
     else {
-      Object value = env.getDependentScope().get(this);
+      Object value = env.get(this);
 
       if (value != null)
 	return value;
@@ -386,7 +386,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     if (_scope != null) {
       value = createNew(null);
       _scope.put(this, value);
-      scope = new DependentScope(this, value, _scope);
+      env = new ConfigContext(this, value, _scope);
     }
     else {
       value = createNew(env);
@@ -405,13 +405,12 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     try {
       Object value = createNew(null);
       
-      DependentScope scope = new DependentScope(this, value, _scope);
-      scope.put(this, value);
+      ConfigContext env = new ConfigContext(this, value, _scope);
 
       if (_scope != null)
 	_scope.put(this, value);
 
-      init(value, scope);
+      init(value, env);
 
       return value;
     } catch (RuntimeException e) {
@@ -430,8 +429,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
       Object value = createNew(null);
 
       if (_injectProgram.length > 0) {
-	DependentScope scope = new DependentScope(this, value, null);
-        ConfigContext env = new ConfigContext();
+        ConfigContext env = new ConfigContext(this, value, null);
 
 	for (ConfigProgram program : _injectProgram) {
 	  program.inject(value, env);
@@ -446,9 +444,15 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     }
   }
 
-  protected Object createNew(DependentScope scope)
+  /**
+   * Creates a new instance of the component
+   * 
+   * @param env the configuration environment
+   * @return the new object
+   */
+  protected Object createNew(ConfigContext env)
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -468,7 +472,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     }
 
     if (_destroyProgram.length > 0) {
-      scope.addDestructor(this, value);
+      env.addDestructor(this, value);
     }
 
     return value;
@@ -501,7 +505,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   public void createProgram(ArrayList<ConfigProgram> initList, Field field)
     throws ConfigException
   {
-    initList.add(new ComponentInject(this, field));
+    initList.add(new FieldComponentProgram(this, field));
   }
 
   public String getScopeId()

@@ -29,7 +29,7 @@
 
 package com.caucho.ejb;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
@@ -84,7 +84,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   private Context _jndiEnv;
 
-  private BuilderProgram _serverProgram;
+  private ConfigProgram _serverProgram;
 
   protected HashMap<String,HandleEncoder> _protocolEncoderMap;
   protected HandleEncoder _handleEncoder;
@@ -128,7 +128,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   private TimerService _timerService;
 
-  protected BuilderProgram _initProgram;
+  protected ConfigProgram _initProgram;
   protected ConfigProgram []_initInject;
 
   private AroundInvokeConfig _aroundInvokeConfig;
@@ -561,7 +561,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Sets the server program.
    */
-  public void setServerProgram(BuilderProgram serverProgram)
+  public void setServerProgram(ConfigProgram serverProgram)
   {
     _serverProgram = serverProgram;
   }
@@ -569,7 +569,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Sets the server program.
    */
-  public BuilderProgram getServerProgram()
+  public ConfigProgram getServerProgram()
   {
     return _serverProgram;
   }
@@ -888,7 +888,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Sets the init program.
    */
-  public void setInitProgram(BuilderProgram init)
+  public void setInitProgram(ConfigProgram init)
   {
     _initProgram = init;
   }
@@ -896,7 +896,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Gets the init program.
    */
-  public BuilderProgram getInitProgram()
+  public ConfigProgram getInitProgram()
   {
     return _initProgram;
   }

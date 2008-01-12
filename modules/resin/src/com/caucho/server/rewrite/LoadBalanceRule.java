@@ -31,8 +31,8 @@ package com.caucho.server.rewrite;
 
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.dispatch.ServletConfigImpl;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitProgram;
 import com.caucho.util.L10N;
@@ -52,7 +52,7 @@ public class LoadBalanceRule
 
   private ServletConfigImpl _servlet;
 
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
 
   LoadBalanceRule(RewriteDispatch rewriteDispatch, WebApp webApp)
   {
@@ -66,7 +66,7 @@ public class LoadBalanceRule
     return "load-balance";
   }
 
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }

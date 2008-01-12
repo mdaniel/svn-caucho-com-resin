@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.component;
 
+import com.caucho.config.ConfigContext;
 import java.lang.annotation.*;
 import javax.webbeans.*;
 
@@ -62,17 +63,17 @@ abstract public class FactoryComponent extends ComponentImpl {
   }
 
   @Override
-  public Object get(DependentScope scope)
+  public Object get(ConfigContext env)
   {
-    if (scope != null) {
-      Object value = scope.get(this);
+    if (env != null) {
+      Object value = env.get(this);
 
       if (value != null)
 	return value;
 
       value = create();
       
-      scope.put(this, value);
+      env.put(this, value);
 
       return value;
     }

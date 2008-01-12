@@ -29,8 +29,8 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.SchemaBean;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
@@ -54,8 +54,8 @@ public class ServerCompatConfig implements SchemaBean {
   private ArrayList<HttpCompatConfig> _httpList
     = new ArrayList<HttpCompatConfig>();
 
-  private BuilderProgramContainer _program
-    = new BuilderProgramContainer();
+  private ContainerProgram _program
+    = new ContainerProgram();
 
   /**
    * Creates a new resin server.
@@ -76,7 +76,7 @@ public class ServerCompatConfig implements SchemaBean {
     return "com/caucho/server/resin/server.rnc";
   }
 
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }
@@ -137,8 +137,8 @@ public class ServerCompatConfig implements SchemaBean {
   public class HttpCompatConfig {
     private String _id = "";
 
-    private BuilderProgramContainer _program
-      = new BuilderProgramContainer();
+    private ContainerProgram _program
+      = new ContainerProgram();
 
     HttpCompatConfig()
     {
@@ -154,7 +154,7 @@ public class ServerCompatConfig implements SchemaBean {
       setId(id);
     }
 
-    public void addBuilderProgram(BuilderProgram program)
+    public void addBuilderProgram(ConfigProgram program)
     {
       _program.addProgram(program);
     }

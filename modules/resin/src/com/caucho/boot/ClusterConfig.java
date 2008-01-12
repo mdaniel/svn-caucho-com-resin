@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitProgram;
 import com.caucho.util.L10N;
@@ -101,7 +101,7 @@ public class ClusterConfig {
   /**
    * Ignore items we can't understand.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
   }
 

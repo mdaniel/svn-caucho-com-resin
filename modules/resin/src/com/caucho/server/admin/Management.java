@@ -30,16 +30,13 @@
 package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.DeployManagementService;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostConfig;
-import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 import javax.resource.spi.ResourceAdapter;
 import java.util.logging.Logger;

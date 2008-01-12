@@ -29,7 +29,7 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.config.j2ee.DescriptionGroupConfig;
+import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 

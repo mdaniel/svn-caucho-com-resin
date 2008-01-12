@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.InitProgram;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -116,27 +116,27 @@ public class ResinConfig implements EnvironmentBean
   /**
    * Ignore items we can't understand.
    */
-  public void addThreadPool(BuilderProgram program)
+  public void addThreadPool(ConfigProgram program)
   {
   }
   
-  public void setGroupName(BuilderProgram program)
+  public void setGroupName(ConfigProgram program)
   {
   }
   
-  public void setUserName(BuilderProgram program)
+  public void setUserName(ConfigProgram program)
   {
   }
 
-  public void setMinFreeMemory(BuilderProgram program)
+  public void setMinFreeMemory(ConfigProgram program)
   {
   }
 
-  public void setManagement(BuilderProgram program)
+  public void setManagement(ConfigProgram program)
   {
   }
     
-  public void setSecurityManager(BuilderProgram program)
+  public void setSecurityManager(ConfigProgram program)
   {
   }
 
@@ -144,7 +144,7 @@ public class ResinConfig implements EnvironmentBean
   {
   }
 
-  public void setEnvironmentSystemProperties(BuilderProgram program)
+  public void setEnvironmentSystemProperties(ConfigProgram program)
   {
   }
 
@@ -194,7 +194,7 @@ public class ResinConfig implements EnvironmentBean
     /**
      * Ignore items we can't understand.
      */
-    public void addBuilderProgram(BuilderProgram program)
+    public void addBuilderProgram(ConfigProgram program)
     {
     }
   }
@@ -208,7 +208,7 @@ public class ResinConfig implements EnvironmentBean
     /**
      * Ignore items we can't understand.
      */
-    public void addBuilderProgram(BuilderProgram program)
+    public void addBuilderProgram(ConfigProgram program)
     {
     }
   }
@@ -229,7 +229,7 @@ public class ResinConfig implements EnvironmentBean
     /**
      * Ignore items we can't understand.
      */
-    public void addBuilderProgram(BuilderProgram program)
+    public void addBuilderProgram(ConfigProgram program)
     {
     }
 

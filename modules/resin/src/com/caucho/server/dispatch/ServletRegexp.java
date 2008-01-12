@@ -28,8 +28,8 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.types.RawString;
 import com.caucho.el.EL;
@@ -53,7 +53,7 @@ public class ServletRegexp {
   private String _servletClassName;
   
   // The configuration program
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
   
   /**
    * Creates a new servlet regexp object.
@@ -113,7 +113,7 @@ public class ServletRegexp {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }
@@ -121,7 +121,7 @@ public class ServletRegexp {
   /**
    * Returns the program.
    */
-  public BuilderProgram getBuilderProgram()
+  public ConfigProgram getBuilderProgram()
   {
     return _program;
   }

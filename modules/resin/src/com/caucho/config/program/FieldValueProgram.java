@@ -24,50 +24,55 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.inject;
+package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.DependentScope;
-import com.caucho.util.*;
-
-import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class ComponentInject extends ConfigProgram
-{
-  private static final L10N L = new L10N(ComponentInject.class);
-  private static final Logger log
-    = Logger.getLogger(ComponentInject.class.getName());
+import com.caucho.config.*;
+import com.caucho.util.*;
+import com.caucho.webbeans.context.DependentScope;
 
-  private ComponentImpl _component;
-  private Field _field;
+/**
+ * Injects a field with a constant value
+ */
+public class FieldValueProgram extends NamedProgram {
+  private static final L10N L = new L10N(FieldValueProgram.class);
+  
+  private final Field _field;
+  private final Object _value;
 
-  public ComponentInject(ComponentImpl component,
-			 Field field)
+  public FieldValueProgram(Field field, Object value)
   {
-    _component = component;
     _field = field;
+    _value = value;
 
-    field.setAccessible(true);
+    _field.setAccessible(true);
   }
-
+  
+  /**
+   * Returns the injection name.
+   */
+  public String getName()
+  {
+    return _field.getName();
+  }
+  
+  /**
+   * Injects the bean with the dependencies
+   */
+  @Override
   public void inject(Object bean, ConfigContext env)
   {
-    Object value = null;
     try {
-      value = _component.get(env);
-
-      _field.set(bean, value);
+      _field.set(bean, _value);
     } catch (IllegalArgumentException e) {
-      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", value), e);
+      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", _value), e);
     } catch (Exception e) {
       throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
     }
   }
 }
+

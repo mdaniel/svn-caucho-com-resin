@@ -28,6 +28,7 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 import java.lang.reflect.*;
 
@@ -150,7 +151,7 @@ public class FactoryConfig
     return _renderKitFactory;
   }
 
-  public void setFactoryExtension(BuilderProgram program)
+  public void setFactoryExtension(ConfigProgram program)
     throws ConfigException
   {
   }

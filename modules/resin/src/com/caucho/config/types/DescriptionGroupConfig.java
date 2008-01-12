@@ -27,7 +27,7 @@
  * @author Scott Ferguson;
  */
 
-package com.caucho.config.j2ee;
+package com.caucho.config.types;
 
 public class DescriptionGroupConfig
 {

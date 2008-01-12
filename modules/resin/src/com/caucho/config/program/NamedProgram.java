@@ -24,16 +24,26 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.j2ee;
-
-import com.caucho.config.program.ConfigProgram;
+package com.caucho.config.program;
 
 /**
- * Base class for callback programs: PostConstructProgram, etc.
+ * A program with a name
  */
-abstract public class CallbackProgram extends ConfigProgram
-{
+abstract public class NamedProgram extends ConfigProgram {
+  /**
+   * Returns the injection name.
+   */
+  abstract public String getName();
+
+  /**
+   * Returns the string representation.
+   */
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getName() + "]";
+  }
 }
+

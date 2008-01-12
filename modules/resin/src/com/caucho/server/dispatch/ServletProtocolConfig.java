@@ -29,8 +29,8 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 //import com.caucho.soa.rest.RestProtocolServlet;
@@ -57,8 +57,8 @@ public class ServletProtocolConfig {
 
   private Class _factoryClass;
 
-  private BuilderProgramContainer _program
-    = new BuilderProgramContainer();
+  private ContainerProgram _program
+    = new ContainerProgram();
 
   /**
    * Creates a new protocol configuration object.
@@ -95,12 +95,12 @@ public class ServletProtocolConfig {
     return _type;
   }
 
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }
 
-  public BuilderProgram getProgram()
+  public ConfigProgram getProgram()
   {
     return _program;
   }

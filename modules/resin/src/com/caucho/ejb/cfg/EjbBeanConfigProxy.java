@@ -28,8 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.util.L10N;
@@ -54,7 +54,7 @@ public class EjbBeanConfigProxy implements DependencyBean {
   private String _location = "";
   
   // The configuration program
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
 
   private EjbBean _bean;
   
@@ -144,7 +144,7 @@ public class EjbBeanConfigProxy implements DependencyBean {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }
@@ -152,7 +152,7 @@ public class EjbBeanConfigProxy implements DependencyBean {
   /**
    * Returns the program.
    */
-  public BuilderProgram getBuilderProgram()
+  public ConfigProgram getBuilderProgram()
   {
     return _program;
   }

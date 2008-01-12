@@ -31,23 +31,24 @@ package com.caucho.webbeans.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class InjectMethodProgram extends ConfigProgram
+public class MethodComponentProgram extends ConfigProgram
 {
   private static final Logger log
-    = Logger.getLogger(InjectMethodProgram.class.getName());
+    = Logger.getLogger(MethodComponentProgram.class.getName());
 
   private static final Object []NULL_ARGS = new Object[0];
 
   private Method _method;
   private ComponentImpl []_args;
 
-  public InjectMethodProgram(Method method,
+  public MethodComponentProgram(Method method,
 			     ComponentImpl []args)
   {
     _method = method;
@@ -62,7 +63,8 @@ public class InjectMethodProgram extends ConfigProgram
 	throw new NullPointerException();
   }
 
-  public void inject(Object bean, DependentScope scope)
+  @Override
+  public void inject(Object bean, ConfigContext env)
     throws ConfigException
   {
     try {
@@ -72,7 +74,7 @@ public class InjectMethodProgram extends ConfigProgram
 	args = new Object[_args.length];
 	
 	for (int i = 0; i < args.length; i++)
-	  args[i] = _args[i].get(scope);
+	  args[i] = _args[i].get(env);
       }
       else
 	args = NULL_ARGS;

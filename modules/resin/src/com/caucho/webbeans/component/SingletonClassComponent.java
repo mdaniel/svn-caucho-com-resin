@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.component;
 
+import com.caucho.config.ConfigContext;
 import com.caucho.webbeans.cfg.WbWebBeans;
 import com.caucho.webbeans.context.DependentScope;
 import com.caucho.webbeans.context.SingletonScope;
@@ -79,12 +80,12 @@ public class SingletonClassComponent extends ClassComponent {
    * Returns the singleton object
    */
   @Override
-  public Object get(DependentScope scope)
+  public Object get(ConfigContext env)
   {
     if (_value == null) {
       _value = createNew(null);
 
-      init(_value, new DependentScope(this, _value, new SingletonScope()));
+      init(_value, new ConfigContext()); // DependentScope(this, _value, new SingletonScope()));
     }
 
     return _value;

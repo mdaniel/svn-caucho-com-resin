@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.el.*;
@@ -78,7 +80,7 @@ public class FacetConfig extends DescriptionGroupConfig
     _suggestedValue = suggestedValue;
   }
   
-  public void setFacetExtension(BuilderProgram program)
+  public void setFacetExtension(ConfigProgram program)
     throws ConfigException
   {
   }

@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.annotation.*;
@@ -91,7 +93,7 @@ public class ValidatorConfig extends DescriptionGroupConfig
   {
   }
 
-  public void setValidatorExtension(BuilderProgram program)
+  public void setValidatorExtension(ConfigProgram program)
     throws ConfigException
   {
   }

@@ -29,7 +29,7 @@
 
 package com.caucho.jca;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
@@ -55,7 +55,7 @@ public class ResourceDefault {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _config.addBuilderProgram(program);
   }

@@ -29,6 +29,7 @@
 
 package com.caucho.config.type;
 
+import com.caucho.config.program.ConfigProgram;
 import java.beans.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -265,7 +266,7 @@ public class BeanType extends ConfigType
 
       if (name.equals("addBuilderProgram")
 	  && paramTypes.length == 1
-	  && paramTypes[0].equals(BuilderProgram.class)) {
+	  && paramTypes[0].equals(ConfigProgram.class)) {
 	ConfigType type = TypeFactory.getType(paramTypes[0]);
 	
 	_addProgram = new ProgramAttribute(method, type);

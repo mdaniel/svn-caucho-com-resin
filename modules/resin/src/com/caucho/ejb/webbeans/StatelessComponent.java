@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.webbeans;
 
+import com.caucho.config.ConfigContext;
 import java.lang.annotation.*;
 import javax.webbeans.*;
 
@@ -65,7 +66,7 @@ public class StatelessComponent extends ComponentImpl {
   }
 
   @Override
-  public Object get(DependentScope scope)
+  public Object get(ConfigContext env)
   {
     return _server.getLocalObject();
   }

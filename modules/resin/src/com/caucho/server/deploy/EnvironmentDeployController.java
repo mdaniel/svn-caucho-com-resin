@@ -29,7 +29,7 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
@@ -382,7 +382,7 @@ abstract public class
         Environment.addDependency(getArchivePath());
 
       for (DeployConfig config : initList) {
-        BuilderProgram program = config.getBuilderProgram();
+        ConfigProgram program = config.getBuilderProgram();
 
         if (program != null)
           program.configure(instance);

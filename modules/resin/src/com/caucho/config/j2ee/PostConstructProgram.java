@@ -31,13 +31,14 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.*;
 
 import java.lang.reflect.*;
 import java.util.logging.Logger;
 
 
-public class PostConstructProgram extends CallbackProgram
+public class PostConstructProgram extends ConfigProgram
 {
   private static final Logger log
     = Logger.getLogger(PostConstructProgram.class.getName());

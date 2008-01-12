@@ -28,8 +28,9 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.NodeBuilderProgram;
+import com.caucho.config.Config;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.NodeBuilderProgram;
 import com.caucho.config.types.InitProgram;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
@@ -127,13 +128,13 @@ public class FilterManager {
 
         // Initialize bean properties
         InitProgram init = config.getInit();
-	BuilderProgram program = NodeBuilderProgram.NULL;
+	ConfigProgram program = NodeBuilderProgram.NULL;
         
         if (init != null)
           program = init.getBuilderProgram();
 
 	program.configure(filter);
-	program.init(filter);
+	Config.init(filter);
 
         filter.init(config);
         

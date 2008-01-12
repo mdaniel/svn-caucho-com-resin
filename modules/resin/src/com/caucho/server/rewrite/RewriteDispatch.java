@@ -29,6 +29,8 @@
 
 package com.caucho.server.rewrite;
 
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.webapp.WebApp;
@@ -56,7 +58,7 @@ public class RewriteDispatch
 
   private MatchRule _matchRule;
 
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
 
   private final boolean _isFiner;
   private final boolean _isFinest;
@@ -88,7 +90,7 @@ public class RewriteDispatch
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }

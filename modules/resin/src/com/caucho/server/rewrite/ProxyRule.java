@@ -29,6 +29,8 @@
 
 package com.caucho.server.rewrite;
 
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.config.types.*;
 import com.caucho.server.connection.*;
@@ -52,7 +54,7 @@ public class ProxyRule
   private ServletConfigImpl _servlet;
   private String _target;
 
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
 
   ProxyRule(RewriteDispatch rewriteDispatch, WebApp webApp)
   {
@@ -71,7 +73,7 @@ public class ProxyRule
     _target = target;
   }
 
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }

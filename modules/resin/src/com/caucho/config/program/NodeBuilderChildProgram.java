@@ -19,31 +19,44 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
 package com.caucho.config.program;
 
-/**
- * A program with a name
- */
-abstract public class NamedInject extends ConfigProgram {
-  /**
-   * Returns the injection name.
-   */
-  abstract public String getName();
+import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.util.L10N;
+import com.caucho.xml.*;
 
-  /**
-   * Returns the string representation.
-   */
+import org.w3c.dom.Node;
+
+/**
+ * Stored configuration program for an attribute.
+ */
+public class NodeBuilderChildProgram extends ConfigProgram {
+  static final L10N L = new L10N(NodeBuilderChildProgram.class);
+
+  private final Node _node;
+
+  public NodeBuilderChildProgram( Node node)
+  {
+     _node = node;
+  }
+
+  @Override
+  public void inject(Object bean, ConfigContext env)
+    throws ConfigException
+  {
+    env.configureAttribute(bean, _node);
+  }
+
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getName() + "]";
+    return "NodeBuilderChildProgram[" + _node + "]";
   }
 }
-

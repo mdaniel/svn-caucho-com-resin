@@ -28,7 +28,7 @@
 
 package com.caucho.jmx;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -58,7 +58,7 @@ public class MBeanConfig {
   private ObjectName _name;
   private MBeanInfo _mbeanInfo;
 
-  private ArrayList<BuilderProgram> _args = new ArrayList<BuilderProgram>();
+  private ArrayList<ConfigProgram> _args = new ArrayList<ConfigProgram>();
 
   private boolean _isInit;
 
@@ -121,7 +121,7 @@ public class MBeanConfig {
   /**
    * Adds an argument.
    */
-  public void addArg(BuilderProgram builder)
+  public void addArg(ConfigProgram builder)
   {
     _args.add(builder);
   }
@@ -223,7 +223,7 @@ public class MBeanConfig {
   }
 
   public class Init {
-    public void setProperty(String attrName, BuilderProgram program)
+    public void setProperty(String attrName, ConfigProgram program)
       throws Throwable
     {
       MBeanAttributeInfo attr = getAttribute(attrName);

@@ -29,6 +29,8 @@
 
 package com.caucho.sql;
 
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.loader.*;
 
@@ -50,12 +52,12 @@ public class DatabaseConfig {
     = new EnvironmentLocal<ArrayList<DatabaseConfig>>();
 
   // The configuration program
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
 
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }
@@ -63,7 +65,7 @@ public class DatabaseConfig {
   /**
    * Returns the program.
    */
-  public BuilderProgram getBuilderProgram()
+  public ConfigProgram getBuilderProgram()
   {
     return _program;
   }

@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.annotation.*;
@@ -102,7 +104,7 @@ public class ConverterConfig extends DescriptionGroupConfig
   {
   }
 
-  public void setConverterExtension(BuilderProgram program)
+  public void setConverterExtension(ConfigProgram program)
     throws ConfigException
   {
   }

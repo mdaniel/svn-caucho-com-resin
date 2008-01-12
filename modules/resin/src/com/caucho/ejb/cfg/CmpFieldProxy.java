@@ -28,8 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -47,7 +47,7 @@ public class CmpFieldProxy {
   private String _name;
   
   // The configuration program
-  private BuilderProgramContainer _program = new BuilderProgramContainer();
+  private ContainerProgram _program = new ContainerProgram();
   
   /**
    * Creates a new entity bean configuration.
@@ -69,7 +69,7 @@ public class CmpFieldProxy {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _program.addProgram(program);
   }

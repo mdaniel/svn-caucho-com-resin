@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.annotation.*;
@@ -65,7 +67,7 @@ public class LifecycleConfig extends DescriptionGroupConfig
     
     _phaseListenerList.add(cl);
   }
-  public void setLifecycleExtension(BuilderProgram program)
+  public void setLifecycleExtension(ConfigProgram program)
     throws ConfigException
   {
   }

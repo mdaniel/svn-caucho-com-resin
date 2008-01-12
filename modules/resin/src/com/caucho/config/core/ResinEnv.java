@@ -28,8 +28,8 @@
 
 package com.caucho.config.core;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
@@ -44,7 +44,7 @@ public class ResinEnv extends ResinControl implements EnvironmentBean {
 
   private EnvironmentClassLoader _loader;
 
-  private BuilderProgramContainer _init = new BuilderProgramContainer();
+  private ContainerProgram _init = new ContainerProgram();
 
   private boolean _test;
 
@@ -76,7 +76,7 @@ public class ResinEnv extends ResinControl implements EnvironmentBean {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _init.addProgram(program);
   }

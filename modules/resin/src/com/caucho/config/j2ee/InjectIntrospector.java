@@ -29,8 +29,13 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.program.SingletonGenerator;
+import com.caucho.config.program.ComponentValueGenerator;
+import com.caucho.config.program.FieldGeneratorProgram;
+import com.caucho.config.program.MethodGeneratorProgram;
+import com.caucho.config.program.ValueGenerator;
 import com.caucho.amber.manager.*;
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.naming.Jndi;
@@ -125,7 +130,7 @@ public class InjectIntrospector {
   }
 
   public static void
-    introspectConstruct(ArrayList<BuilderProgram> initList, Class type)
+    introspectConstruct(ArrayList<ConfigProgram> initList, Class type)
     throws ConfigException
   {
     if (type == null || type.equals(Object.class))
@@ -365,7 +370,7 @@ public class InjectIntrospector {
       introspectWebBean(injectList, field);
 
     if (gen != null)
-      injectList.add(new FieldInject(field, gen));
+      injectList.add(new FieldGeneratorProgram(field, gen));
   }
 
   private static void introspect(ArrayList<ConfigProgram> injectList,
@@ -414,7 +419,7 @@ public class InjectIntrospector {
       introspectWebBean(injectList, method);
 
     if (gen != null)
-      injectList.add(new MethodInject(method, gen));
+      injectList.add(new MethodGeneratorProgram(method, gen));
   }
 
   private static ValueGenerator
@@ -483,7 +488,7 @@ public class InjectIntrospector {
 
     bindJndi(location, jndiName, component);
 
-    return new ComponentGenerator(location, component);
+    return new ComponentValueGenerator(location, component);
   }
 
   private static ValueGenerator
@@ -521,7 +526,7 @@ public class InjectIntrospector {
 
     bindJndi(location, jndiName, component);
 
-    return new ComponentGenerator(location, component);
+    return new ComponentValueGenerator(location, component);
   }
 
   private static ValueGenerator generateEjb(String location,
@@ -609,7 +614,7 @@ public class InjectIntrospector {
       if (component != null) {
 	bindJndi(location, jndiName, component);
       
-	return new ComponentGenerator(location, component);
+	return new ComponentValueGenerator(location, component);
       }
     }
     
@@ -618,7 +623,7 @@ public class InjectIntrospector {
       if (component != null) {
 	bindJndi(location, jndiName, component);
       
-	return new ComponentGenerator(location, component);
+	return new ComponentValueGenerator(location, component);
       }
     }
     
@@ -628,7 +633,7 @@ public class InjectIntrospector {
       if (component != null) {
 	bindJndi(location, jndiName, component);
       
-	return new ComponentGenerator(location, component);
+	return new ComponentValueGenerator(location, component);
       }
     }
 
@@ -638,7 +643,7 @@ public class InjectIntrospector {
     if (component != null) {
       bindJndi(location, jndiName, component);
       
-      return new ComponentGenerator(location, component);
+      return new ComponentValueGenerator(location, component);
     }
 
     else

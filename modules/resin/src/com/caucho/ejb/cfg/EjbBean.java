@@ -30,8 +30,8 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.bytecode.*;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
@@ -145,10 +145,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private HashMap<String,EjbBaseMethod> _methodMap
     = new HashMap<String,EjbBaseMethod>();
 
-  private BuilderProgramContainer _initProgram;
-  private ArrayList<BuilderProgram> _postConstructList
-    = new ArrayList<BuilderProgram>();
-  private BuilderProgramContainer _serverProgram;
+  private ContainerProgram _initProgram;
+  private ArrayList<ConfigProgram> _postConstructList
+    = new ArrayList<ConfigProgram>();
+  private ContainerProgram _serverProgram;
 
   private ArrayList<Interceptor> _interceptors
     = new ArrayList<Interceptor>();
@@ -1073,10 +1073,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Adds an init program.
    */
-  public void addInitProgram(BuilderProgram init)
+  public void addInitProgram(ConfigProgram init)
   {
     if (_initProgram == null)
-      _initProgram = new BuilderProgramContainer();
+      _initProgram = new ContainerProgram();
 
     _initProgram.addProgram(init);
   }
@@ -1084,10 +1084,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Adds an undefined value, e.g. env-entry
    */
-  public void addBuilderProgram(BuilderProgram init)
+  public void addBuilderProgram(ConfigProgram init)
   {
     if (_serverProgram == null)
-      _serverProgram = new BuilderProgramContainer();
+      _serverProgram = new ContainerProgram();
 
     _serverProgram.addProgram(init);
   }
@@ -1095,7 +1095,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void setInit(InitProgram init)
   {
     if (_initProgram == null)
-      _initProgram = new BuilderProgramContainer();
+      _initProgram = new ContainerProgram();
 
     _initProgram.addProgram(init.getBuilderProgram());
   }
@@ -1108,13 +1108,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the init program.
    */
-  public BuilderProgramContainer getInitProgram()
+  public ContainerProgram getInitProgram()
   {
     if (_postConstructList != null) {
       if (_initProgram == null)
-        _initProgram = new BuilderProgramContainer();
+        _initProgram = new ContainerProgram();
 
-      for (BuilderProgram program : _postConstructList)
+      for (ConfigProgram program : _postConstructList)
         _initProgram.addProgram(program);
 
       _postConstructList = null;
@@ -1126,7 +1126,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Gets the server program.
    */
-  public BuilderProgramContainer getServerProgram()
+  public ContainerProgram getServerProgram()
   {
     return _serverProgram;
   }

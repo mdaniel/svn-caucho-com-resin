@@ -29,12 +29,12 @@
 
 package com.caucho.webbeans.component;
 
+import com.caucho.config.ConfigContext;
 import java.lang.annotation.*;
 import javax.naming.*;
 import javax.webbeans.*;
 
 import com.caucho.naming.*;
-import com.caucho.webbeans.cfg.WbWebBeans;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.*;
 
@@ -73,7 +73,7 @@ public class ObjectProxyComponent extends ComponentImpl {
   }
 
   @Override
-  public Object get(DependentScope scope)
+  public Object get(ConfigContext env)
   {
     return get();
   }

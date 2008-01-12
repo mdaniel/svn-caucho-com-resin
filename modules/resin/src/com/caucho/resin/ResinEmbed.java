@@ -29,6 +29,7 @@
 
 package com.caucho.resin;
 
+import com.caucho.config.program.ConfigProgram;
 import java.io.*;
 import java.net.*;
 
@@ -430,7 +431,7 @@ public class ResinEmbed
     }
   }
 
-  static class WebAppProgram extends BuilderProgram {
+  static class WebAppProgram extends ConfigProgram {
     private final WebAppEmbed _config;
 
     WebAppProgram(WebAppEmbed webAppConfig)
@@ -442,7 +443,7 @@ public class ResinEmbed
      * Configures the object.
      */
     @Override
-    public void inject(Object bean, DependentScope scope)
+    public void inject(Object bean, ConfigContext env)
       throws ConfigException
     {
       _config.configure((WebApp) bean);

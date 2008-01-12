@@ -28,12 +28,12 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilderProgram;
+import com.caucho.config.program.NodeBuilderProgram;
 import com.caucho.config.types.InitProgram;
-import com.caucho.config.j2ee.DescriptionGroupConfig;
+import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.util.L10N;
 
 import javax.servlet.ServletContextAttributeListener;
@@ -123,7 +123,7 @@ public class Listener extends DescriptionGroupConfig {
       _object = _listenerClass.newInstance();
     
     InitProgram init = getInit();
-    BuilderProgram program;
+    ConfigProgram program;
 
     if (init != null)
       program = init.getBuilderProgram();
@@ -131,7 +131,7 @@ public class Listener extends DescriptionGroupConfig {
       program = NodeBuilderProgram.NULL;
 
     program.configure(_object);
-    program.init(_object);
+    Config.init(_object);
 
     return _object;
   }

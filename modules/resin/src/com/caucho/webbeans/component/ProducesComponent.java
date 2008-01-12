@@ -123,7 +123,7 @@ public class ProducesComponent extends ComponentImpl {
   }
 
   @Override
-  public Object createNew(DependentScope scope)
+  public Object createNew(ConfigContext env)
   {
     try {
       Object factory = _producer.get();
@@ -143,8 +143,8 @@ public class ProducesComponent extends ComponentImpl {
       
       Object value = _method.invoke(factory, args);
 
-      if (scope != null)
-	scope.put(this, value);
+      if (env != null)
+	env.put(this, value);
 
       return value;
     } catch (RuntimeException e) {

@@ -29,8 +29,8 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
@@ -41,7 +41,7 @@ public class ConditionConfig {
   private static final L10N L = new L10N(ConditionConfig.class);
 
   private Condition _condition;
-  private BuilderProgramContainer _builderProgram;
+  private ContainerProgram _builderProgram;
 
   private void setCondition(Condition condition)
   {
@@ -128,10 +128,10 @@ public class ConditionConfig {
   /**
    * Adds an init program.
    */
-  public void addBuilderProgram(BuilderProgram init)
+  public void addBuilderProgram(ConfigProgram init)
   {
     if (_builderProgram == null)
-      _builderProgram = new BuilderProgramContainer();
+      _builderProgram = new ContainerProgram();
 
     _builderProgram.addProgram(init);
   }

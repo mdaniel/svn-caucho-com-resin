@@ -28,8 +28,8 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
@@ -42,14 +42,14 @@ import com.caucho.webbeans.context.*;
 public class InitProgram {
   private static L10N L = new L10N(InitProgram.class);
 
-  private BuilderProgramContainer _init;
+  private ContainerProgram _init;
 
   public InitProgram()
   {
-    _init = new BuilderProgramContainer(ConfigContext.getCurrentBuilder());
+    _init = new ContainerProgram();
   }
 
-  public InitProgram(BuilderProgram program)
+  public InitProgram(ConfigProgram program)
   {
     this();
     
@@ -59,7 +59,7 @@ public class InitProgram {
   /**
    * Adds to the builder program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _init.addProgram(program);
   }
@@ -67,7 +67,7 @@ public class InitProgram {
   /**
    * Sets the param-value.
    */
-  public BuilderProgram getBuilderProgram()
+  public ConfigProgram getBuilderProgram()
   {
     return _init;
   }
@@ -97,25 +97,22 @@ public class InitProgram {
   /**
    * Initialize the object
    */
-  public void configure(Object obj, DependentScope scope)
+  public void configure(Object obj, ConfigContext env)
     throws ConfigException
   {
     if (_init != null)
-      _init.configure(obj, scope);
+      _init.inject(obj, env);
   }
 
   /**
    * Initialize the object
    */
   public void init(Object obj)
-    throws Throwable
   {
     configure(obj);
 
-    if (_init != null)
-      _init.init(obj);
-    else
-      Config.init(obj);
+
+    Config.init(obj);
   }
 
   public String toString()

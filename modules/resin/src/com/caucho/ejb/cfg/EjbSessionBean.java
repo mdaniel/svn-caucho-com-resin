@@ -29,23 +29,15 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-import com.caucho.config.j2ee.EjbInjectProgram;
-import com.caucho.config.j2ee.InjectIntrospector;
-import com.caucho.config.j2ee.JndiBindProgram;
-import com.caucho.config.types.EjbLocalRef;
-import com.caucho.config.types.EjbRef;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.SessionAssembler;
 import com.caucho.ejb.gen.StatelessAssembler;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.session.SessionServer;
 import com.caucho.ejb.session.StatefulServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -427,7 +419,7 @@ public class EjbSessionBean extends EjbBean {
       thread.setContextClassLoader(server.getClassLoader());
 
 
-      BuilderProgramContainer initContainer = getInitProgram();
+      ContainerProgram initContainer = getInitProgram();
 
       /*
       ArrayList<BuilderProgram> initList;
@@ -435,7 +427,7 @@ public class EjbSessionBean extends EjbBean {
 
       if (initList != null && initList.size() > 0) {
         if (initContainer == null)
-          initContainer = new BuilderProgramContainer();
+          initContainer = new ContainerProgram();
 
         for (BuilderProgram init : initList) {
           String foreignName = null;

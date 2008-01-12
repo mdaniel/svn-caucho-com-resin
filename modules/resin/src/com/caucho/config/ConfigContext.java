@@ -27,14 +27,19 @@
 
 package com.caucho.config;
 
+import com.caucho.config.program.NodeBuilderChildProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Validator;
 import com.caucho.config.type.*;
 import com.caucho.config.attribute.*;
+import com.caucho.ejb.webbeans.SessionComponent;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.webbeans.context.ScopeContext;
 import com.caucho.xml.*;
 
 import org.w3c.dom.*;
@@ -90,6 +95,11 @@ public class ConfigContext {
     _varResolver = _elContext.getVariableResolver();
   }
 
+  public ConfigContext(ComponentImpl component, Object value, ScopeContext scope)
+  {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
   ConfigContext(ConfigELContext context)
   {
     _elContext = context;
@@ -99,12 +109,22 @@ public class ConfigContext {
   ConfigContext(Config config)
   {
     _config = config;
-    _elContext = config.getELContext();
+    _elContext = Config.getELContext();
 
     if (_elContext == null)
       _elContext = new ConfigELContext();
     
     _varResolver = _elContext.getVariableResolver();
+  }
+  
+  public static ConfigContext create()
+  {
+    ConfigContext env = _currentBuilder.get();
+    
+    if (env != null)
+      return env;
+    else
+      return new ConfigContext();
   }
 
   public static ConfigContext createForProgram()
@@ -128,9 +148,47 @@ public class ConfigContext {
     _currentBuilder.set(builder);
   }
 
+  /**
+   * WebBeans method
+   * 
+   * @param aThis
+   * @param value
+   */
+  public void addDestructor(ComponentImpl aThis, Object value)
+  {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  public boolean canInject(ScopeContext _scope)
+  {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  /**
+   * Returns the component value for the dependent scope
+   * 
+   * @param aThis
+   * @return
+   */
+  public Object get(ComponentImpl aThis)
+  {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
   public Config getConfig()
   {
     return _config;
+  }
+
+  /**
+   * WebBeans dependent scope setting
+   * 
+   * @param aThis
+   * @param obj
+   */
+  public void put(ComponentImpl aThis, Object obj)
+  {
+    throw new UnsupportedOperationException("Not yet implemented");
   }
 
   /**
@@ -440,9 +498,9 @@ public class ConfigContext {
     }
   }
 
-  private BuilderProgram buildProgram(Attribute attr, Node node)
+  private ConfigProgram buildProgram(Attribute attr, Node node)
   {
-    return new NodeBuilderChildProgram(this, node);
+    return new NodeBuilderChildProgram(node);
   }
   
   private void configureChildAttribute(Attr childNode,

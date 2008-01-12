@@ -29,9 +29,10 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.program.ValueGenerator;
 import com.caucho.amber.manager.EntityManagerProxy;
 import com.caucho.amber.manager.AmberContainer;
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
 import com.caucho.naming.*;

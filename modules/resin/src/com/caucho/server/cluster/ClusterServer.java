@@ -29,8 +29,8 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.log.Log;
@@ -80,8 +80,8 @@ public class ClusterServer {
   
   private int _loadBalanceWeight = 100;
 
-  private BuilderProgramContainer _serverProgram
-    = new BuilderProgramContainer();
+  private ContainerProgram _serverProgram
+    = new ContainerProgram();
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
@@ -495,7 +495,7 @@ public class ClusterServer {
   /**
    * Adds a program.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
     _serverProgram.addProgram(program);
   }
@@ -503,7 +503,7 @@ public class ClusterServer {
   /**
    * Adds a program.
    */
-  public BuilderProgram getServerProgram()
+  public ConfigProgram getServerProgram()
   {
     return _serverProgram;
   }

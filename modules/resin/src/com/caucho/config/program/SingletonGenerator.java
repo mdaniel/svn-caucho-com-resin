@@ -24,49 +24,24 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.inject;
+package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.webbeans.component.*;
+/**
+ * Returns a constant
+ */
+public class SingletonGenerator extends ValueGenerator {
+  private final Object _value;
 
-import java.util.logging.*;
-
-public class ComponentProgram extends BuilderProgram
-{
-  private static final Logger log
-    = Logger.getLogger(ComponentProgram.class.getName());
-
-  private ComponentImpl _component;
-  private AccessibleInject _inject;
-
-  public ComponentProgram(ComponentImpl component,
-			  AccessibleInject inject)
+  public SingletonGenerator(Object value)
   {
-    _component = component;
-    _inject = inject;
+    _value = value;
   }
-
-  public void configureImpl(ConfigContext builder, Object bean)
-    throws ConfigException
+  
+  public Object create()
   {
-    try {
-      Object value = null;//_component.getInject();
-
-      _inject.inject(bean, value);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
-  public Object configure(ConfigContext builder, Class type)
-    throws ConfigException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _value;
   }
 }

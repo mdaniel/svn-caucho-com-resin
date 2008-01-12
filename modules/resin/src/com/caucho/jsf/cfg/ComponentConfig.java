@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.el.*;
@@ -92,7 +94,7 @@ public class ComponentConfig extends DescriptionGroupConfig
   {
   }
 
-  public void setComponentExtension(BuilderProgram program)
+  public void setComponentExtension(ConfigProgram program)
     throws ConfigException
   {
   }

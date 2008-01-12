@@ -30,6 +30,8 @@
 package com.caucho.jsp;
 
 import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.java.*;
 import com.caucho.jsp.cfg.JspConfig;
@@ -791,7 +793,7 @@ public class JspCompiler implements EnvironmentBean {
 
   public class ApplicationConfig {
     private Path _rootDir;
-    private BuilderProgramContainer _builder = new BuilderProgramContainer();
+    private ContainerProgram _program = new ContainerProgram();
 
     ApplicationConfig()
     {
@@ -813,9 +815,9 @@ public class JspCompiler implements EnvironmentBean {
       _rootDir = path;
     }
 
-    public void addBuilderProgram(BuilderProgram program)
+    public void addBuilderProgram(ConfigProgram program)
     {
-      _builder.addProgram(program);
+      _program.addProgram(program);
     }
 
     @PostConstruct
@@ -823,7 +825,8 @@ public class JspCompiler implements EnvironmentBean {
       throws Exception
     {
       WebApp webApp = createWebApp(_rootDir);
-      _builder.configure(webApp);
+      _program.configure(webApp);
+      Config.init(webApp);
 
       webApp.init();
       webApp.start();

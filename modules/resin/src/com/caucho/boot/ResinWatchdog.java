@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.RotateStream;
@@ -259,7 +259,7 @@ public class ResinWatchdog extends AbstractManagedObject
   /**
    * Ignore items we can't understand.
    */
-  public void addBuilderProgram(BuilderProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
   }
 

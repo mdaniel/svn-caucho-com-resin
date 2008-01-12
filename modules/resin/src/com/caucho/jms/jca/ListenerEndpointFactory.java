@@ -28,7 +28,7 @@
 
 package com.caucho.jms.jca;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
@@ -47,11 +47,11 @@ public class ListenerEndpointFactory implements MessageEndpointFactory {
   private static final Logger log = Log.open(ListenerEndpointFactory.class);
   private static final L10N L = new L10N(ListenerEndpointFactory.class);
 
-  private BuilderProgram _program;
+  private ConfigProgram _program;
   
   private ListenerEndpoint _initialEndpoint;
 
-  public void setListener(BuilderProgram program)
+  public void setListener(ConfigProgram program)
     throws Throwable
   {
     _program = program;

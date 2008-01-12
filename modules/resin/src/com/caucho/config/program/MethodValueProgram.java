@@ -24,67 +24,54 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
+package com.caucho.config.program;
+
+import java.lang.reflect.*;
 
 import com.caucho.config.*;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 
-import java.lang.reflect.Method;
-import java.util.logging.Logger;
+/**
+ * Injects a method with a constant value
+ */
+public class MethodValueProgram extends NamedProgram {
+  private static final L10N L = new L10N(MethodValueProgram.class);
+  
+  private final Method _method;
+  private final Object _value;
 
-
-public class PropertyInjectProgram extends BuilderProgram {
-  private static final Logger log
-    = Logger.getLogger(PropertyInjectProgram.class.getName());
-  private static final L10N L = new L10N(PropertyInjectProgram.class);
-
-  private Method _method;
-  private Class _type;
-  private Object _value;
-
-  public PropertyInjectProgram(Method method, Object value)
+  public MethodValueProgram(Method method, Object value)
   {
     _method = method;
     _value = value;
 
-    Class []paramTypes = method.getParameterTypes();
-    _type = paramTypes[0];
-    
     _method.setAccessible(true);
-
-    if (value != null && ! _type.isAssignableFrom(value.getClass())) {
-      throw new ConfigException(L.l("Resource type {0} is not assignable to method '{1}' of type {2}.",
-				    value.getClass().getName(),
-				    _method.getName(),
-				    _type.getName()));
-    }
   }
-
-  String getName()
+  
+  /**
+   * Returns the injection name.
+   */
+  public String getName()
   {
     return _method.getName();
   }
-
-  Class getType()
-  {
-    return _type;
-  }
-
+  
   /**
-   * Configures the object.
+   * Injects the bean with the dependencies
    */
-  public void configureImpl(ConfigContext builder, Object bean)
-    throws ConfigException
+  @Override
+  public void inject(Object bean, ConfigContext env)
   {
     try {
       _method.invoke(bean, _value);
-    } catch (RuntimeException e) {
-      throw e;
+    } catch (IllegalArgumentException e) {
+      throw new ConfigException(ConfigException.loc(_method) + L.l("Can't set method value '{0}'", _value), e);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw new ConfigException(ConfigException.loc(_method) + e.toString(), e);
     }
   }
 }
+

@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -26,40 +27,40 @@
  * @author Scott Ferguson;
  */
 
-package com.caucho.config;
+package com.caucho.config.program;
 
+import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
-import com.caucho.xml.*;
+import com.caucho.xml.QElement;
 
 import org.w3c.dom.Node;
 
 /**
  * Stored configuration program for an attribute.
  */
-public class NodeBuilderChildProgram extends BuilderProgram {
-  static final L10N L = new L10N(NodeBuilderChildProgram.class);
+public class NodeBuilderProgram extends ConfigProgram {
+  static final L10N L = new L10N(NodeBuilderProgram.class);
+
+  public static final NodeBuilderProgram NULL
+    = new NodeBuilderProgram( new QElement());
 
   private final Node _node;
 
-  public NodeBuilderChildProgram(ConfigContext builder, Node node)
+  public NodeBuilderProgram( Node node)
   {
-    super(builder);
-
     _node = node;
   }
 
-  public void configureImpl(ConfigContext builder, Object bean)
+  @Override
+  public void inject(Object bean, ConfigContext env)
     throws ConfigException
   {
-    if (_node instanceof QNode) {
-      builder.putVar("__FILE__", ((QNode) _node).getBaseURI());
-    }
-    
-    builder.configureAttribute(bean, _node);
+    env.configureBean(bean, _node);
   }
 
   public String toString()
   {
-    return "NodeBuilderChildProgram[" + _node + "]";
+    return getClass().getSimpleName() + "[" + _node + "]";
   }
 }

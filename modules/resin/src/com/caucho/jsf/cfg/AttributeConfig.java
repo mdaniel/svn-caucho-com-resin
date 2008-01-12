@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.el.*;
@@ -94,7 +96,7 @@ public class AttributeConfig extends DescriptionGroupConfig
     _suggestedValue = suggestedValue;
   }
 
-  public void setAttributeExtension(BuilderProgram program)
+  public void setAttributeExtension(ConfigProgram program)
     throws ConfigException
   {
   }

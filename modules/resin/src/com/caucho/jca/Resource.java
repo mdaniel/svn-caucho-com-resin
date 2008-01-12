@@ -29,7 +29,7 @@
 
 package com.caucho.jca;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitProgram;
@@ -500,7 +500,7 @@ public class Resource {
   }
 
   public class MBeanInit {
-    public void setProperty(String attrName, BuilderProgram program)
+    public void setProperty(String attrName, ConfigProgram program)
       throws Throwable
     {
       MBeanAttributeInfo attr = getAttribute(attrName);

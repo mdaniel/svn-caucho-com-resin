@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.cfg;
 
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.config.program.ConfigProgram;
 import java.util.*;
 
 import javax.annotation.*;
@@ -104,7 +106,7 @@ public class RendererConfig extends DescriptionGroupConfig
   {
   }
 
-  public void setRendererExtension(BuilderProgram program)
+  public void setRendererExtension(ConfigProgram program)
     throws ConfigException
   {
   }
