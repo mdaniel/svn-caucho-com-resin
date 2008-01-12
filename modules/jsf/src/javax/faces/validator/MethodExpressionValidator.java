@@ -32,6 +32,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.component.UIComponent;
 import javax.faces.component.StateHolder;
 import javax.el.MethodExpression;
+import javax.el.ELException;
 
 public class MethodExpressionValidator
   implements Validator, StateHolder
@@ -55,10 +56,21 @@ public class MethodExpressionValidator
 		       Object value)
     throws ValidatorException
   {
-    _expression.invoke(
+    try {
+      _expression.invoke(
       context.getELContext(),
       new Object []{context, component, value}
-    );
+      );
+    }
+    catch (ELException e) {
+      Throwable t = e.getCause();
+
+      if (t instanceof ValidatorException) {
+	throw (ValidatorException) t;
+      }
+      
+      throw e;
+    }
   }
 
   public Object saveState(FacesContext context)

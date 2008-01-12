@@ -451,7 +451,7 @@ public class JsfTagNode extends JsfNode
       }
       else if ("validator".equals(attr.getName())
 	       && UIInput.class.isAssignableFrom(_componentClass)) {
-	out.print(_var + ".addValidator(new javax.faces.validator.MethodExpressionValidator(");
+	out.print("((javax.faces.component.UIInput)" + _var + ").addValidator(new javax.faces.validator.MethodExpressionValidator(");
 
 	String signature
 	  = "void foo(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)";
