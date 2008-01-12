@@ -33,7 +33,7 @@ import com.caucho.amber.manager.EntityManagerProxy;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.ConfigContext;
 import com.caucho.naming.*;
 import com.caucho.util.L10N;
 

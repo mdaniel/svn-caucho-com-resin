@@ -24,33 +24,34 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.config.inject;
-
-import java.lang.reflect.*;
+package com.caucho.config.program;
 
 import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.config.attribute.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.util.*;
 
-/**
- * Injects a property with a constant value
- */
-public class PropertyValueInject extends NamedInject {
-  private final String _name;
-  private final QName _qName;
-  private final Object _value;
+import java.util.logging.*;
+import java.lang.reflect.*;
 
-  public PropertyValueInject(String name, Object value)
+public class FieldComponentInject extends NamedInject
+{
+  private static final L10N L = new L10N(FieldComponentInject.class);
+
+  private Field _field;
+  private ComponentImpl _component;
+
+  public FieldComponentInject(Field field,
+			      ComponentImpl component)
   {
-    _name = name;
-    _qName = new QName(name);
-    _value = value;
+    _field = field;
+    _component = component;
+
+    field.setAccessible(true);
   }
   
   /**
@@ -58,23 +59,21 @@ public class PropertyValueInject extends NamedInject {
    */
   public String getName()
   {
-    return _name;
+    return _field.getName();
   }
-  
-  /**
-   * Injects the bean with the dependencies
-   */
+
   public void inject(Object bean, DependentScope scope)
   {
+    Object value = null;
+    
     try {
-      ConfigType type = TypeFactory.getType(bean.getClass());
+      value = _component.get(scope);
 
-      Attribute attr = type.getAttribute(_qName);
-
-      attr.setValue(bean, _qName, _value);
+      _field.set(bean, value);
+    } catch (IllegalArgumentException e) {
+      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", value), e);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
     }
   }
 }
-

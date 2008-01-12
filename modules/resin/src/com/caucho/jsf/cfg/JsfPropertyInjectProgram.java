@@ -78,7 +78,7 @@ public class JsfPropertyInjectProgram extends BuilderProgram {
   /**
    * Configures the object.
    */
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     try {

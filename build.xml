@@ -722,7 +722,7 @@
   </target>
 
   <target name="dist.build" 
-          depends="compile, configure, ant, netbeans-plugin maven-plugin, webapps, win32, configure, javadoc, relaxng">
+          depends="compile, configure, ant, netbeans-plugin, maven-plugin, webapps, win32, configure, javadoc, relaxng">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>

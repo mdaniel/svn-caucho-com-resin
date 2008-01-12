@@ -45,7 +45,7 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
   }
 
   @Override
-  public Object create(NodeBuilder builder, Object parent)
+  public Object create(ConfigContext builder, Object parent)
     throws Exception
   {
     if (builder.isIgnoreEnvironment())
@@ -54,7 +54,7 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
       return _typeStrategy.create();
   }
 
-  public void configure(NodeBuilder builder, Object bean,
+  public void configure(ConfigContext builder, Object bean,
 			QName name, Node node)
           throws Exception
   {

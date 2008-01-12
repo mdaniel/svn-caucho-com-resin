@@ -32,7 +32,7 @@ package com.caucho.config.j2ee;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.ConfigContext;
 import com.caucho.util.*;
 
 import java.lang.reflect.*;
@@ -55,7 +55,7 @@ public class PostConstructProgram extends CallbackProgram
   }
 
   @Override
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     try {
@@ -68,7 +68,7 @@ public class PostConstructProgram extends CallbackProgram
   }
 
   @Override
-  public Object configureImpl(NodeBuilder builder, Class type)
+  public Object configureImpl(ConfigContext builder, Class type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

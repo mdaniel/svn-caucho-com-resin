@@ -31,7 +31,7 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.ConfigContext;
 import com.caucho.loader.*;
 import com.caucho.util.L10N;
 

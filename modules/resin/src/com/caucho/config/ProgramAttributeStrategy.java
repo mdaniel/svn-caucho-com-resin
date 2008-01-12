@@ -79,7 +79,7 @@ public class ProgramAttributeStrategy extends AttributeStrategy {
   /**
    * Return true if the attribute builder adds a program.
    */
-  public void configure(NodeBuilder builder, Object bean, QName name, Node node)
+  public void configure(ConfigContext builder, Object bean, QName name, Node node)
     throws Exception
   {
     try {

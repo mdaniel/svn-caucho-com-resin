@@ -75,7 +75,7 @@ public abstract class TypeStrategy {
   /**
    * Called before the children are configured.
    */
-  public void beforeConfigureBean(NodeBuilder builder, Object bean, Node node)
+  public void beforeConfigureBean(ConfigContext builder, Object bean, Node node)
   {
   }
 
@@ -83,14 +83,14 @@ public abstract class TypeStrategy {
    * Called before the children are configured.  Also called for
    * attribute configuration, e.g. for macros and web-app-default.
    */
-  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
+  public void beforeConfigure(ConfigContext builder, Object bean, Node node)
   {
   }
 
   /**
    * Called after the children are configured.
    */
-  public void afterConfigure(NodeBuilder builder, Object bean)
+  public void afterConfigure(ConfigContext builder, Object bean)
   {
   }
 
@@ -118,7 +118,7 @@ public abstract class TypeStrategy {
    * @param node the configuration node
    * @param parent
    */
-  abstract public Object configure(NodeBuilder builder,
+  abstract public Object configure(ConfigContext builder,
                                    Node node,
                                    Object parent)
     throws Exception;
@@ -131,7 +131,7 @@ public abstract class TypeStrategy {
   /**
    * Configures as an attribute.
    */
-  public void configureAttribute(NodeBuilder builder, Object bean, Node attr)
+  public void configureAttribute(ConfigContext builder, Object bean, Node attr)
     throws Exception
   {
     //builder.configureAttributeImpl(this, bean, attr);

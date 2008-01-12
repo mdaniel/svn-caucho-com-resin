@@ -27,23 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.program;
+
+import com.caucho.webbeans.context.DependentScope;
 
 /**
- * A program with a name
+ * A program to inject dependencies
  */
-abstract public class NamedInject extends Inject {
+abstract public class Inject {
   /**
-   * Returns the injection name.
+   * Injects the bean with the dependencies
    */
-  abstract public String getName();
-
-  /**
-   * Returns the string representation.
-   */
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getName() + "]";
-  }
+  abstract public void inject(Object bean, DependentScope scope);
 }
 

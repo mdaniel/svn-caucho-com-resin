@@ -41,14 +41,14 @@ public class NodeBuilderChildProgram extends BuilderProgram {
 
   private final Node _node;
 
-  public NodeBuilderChildProgram(NodeBuilder builder, Node node)
+  public NodeBuilderChildProgram(ConfigContext builder, Node node)
   {
     super(builder);
 
     _node = node;
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     if (_node instanceof QNode) {

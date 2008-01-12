@@ -27,17 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.program;
 
+import java.lang.reflect.*;
+
+import com.caucho.config.*;
+import com.caucho.util.*;
 import com.caucho.webbeans.context.DependentScope;
 
 /**
- * A program to inject dependencies
+ * Injects a field with a constant value
  */
-abstract public class Inject {
+public class FieldValueInject extends NamedInject {
+  private static final L10N L = new L10N(FieldComponentInject.class);
+  
+  private final Field _field;
+  private final Object _value;
+
+  public FieldValueInject(Field field, Object value)
+  {
+    _field = field;
+    _value = value;
+
+    _field.setAccessible(true);
+  }
+  
+  /**
+   * Returns the injection name.
+   */
+  public String getName()
+  {
+    return _field.getName();
+  }
+  
   /**
    * Injects the bean with the dependencies
    */
-  abstract public void inject(Object bean, DependentScope scope);
+  public void inject(Object bean, DependentScope scope)
+  {
+    try {
+      _field.set(bean, _value);
+    } catch (IllegalArgumentException e) {
+      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", _value), e);
+    } catch (Exception e) {
+      throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
+    }
+  }
 }
 

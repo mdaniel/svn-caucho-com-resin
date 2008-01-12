@@ -260,7 +260,7 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      NodeBuilder builder = createBuilder();
+      ConfigContext builder = createBuilder();
 
       return builder.configure(obj, topNode);
     } finally {
@@ -307,7 +307,7 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      NodeBuilder builder = createBuilder();
+      ConfigContext builder = createBuilder();
 
       builder.configureBean(obj, topNode);
     } finally {
@@ -315,9 +315,9 @@ public class Config {
     }
   }
 
-  private NodeBuilder createBuilder()
+  private ConfigContext createBuilder()
   {
-    NodeBuilder builder = new NodeBuilder(this);
+    ConfigContext builder = new ConfigContext(this);
 
     for (String var : _vars.keySet())
       builder.putVar(var, _vars.get(var));
@@ -573,7 +573,7 @@ public class Config {
   public static void setStringAttribute(Object obj, String attr, String value)
     throws Exception
   {
-    NodeBuilder builder = new NodeBuilder();
+    ConfigContext builder = new ConfigContext();
     QAttr qAttr = new QAttr(attr);
     qAttr.setValue(value);
 
@@ -632,7 +632,7 @@ public class Config {
    */
   public static ELContext getEnvironment()
   {
-    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
+    ConfigContext builder = ConfigContext.getCurrentBuilder();
 
     if (builder != null) {
       return builder.getELContext();
@@ -646,7 +646,7 @@ public class Config {
    */
   public static ConfigELContext getELContext()
   {
-    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
+    ConfigContext builder = ConfigContext.getCurrentBuilder();
 
     if (builder != null) {
       return builder.getELContext();
@@ -660,7 +660,7 @@ public class Config {
    */
   public static void setELContext(ConfigELContext context)
   {
-    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
+    ConfigContext builder = ConfigContext.getCurrentBuilder();
 
     if (builder != null) {
       builder.setELContext(context);
@@ -682,7 +682,7 @@ public class Config {
    */
   public static void setCurrentVar(String var, Object value)
   {
-    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
+    ConfigContext builder = ConfigContext.getCurrentBuilder();
 
     if (builder != null)
       builder.putVar(var, value);
@@ -693,7 +693,7 @@ public class Config {
    */
   public static Object getCurrentVar(String var)
   {
-    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
+    ConfigContext builder = ConfigContext.getCurrentBuilder();
 
     if (builder != null)
       return builder.getVar(var);

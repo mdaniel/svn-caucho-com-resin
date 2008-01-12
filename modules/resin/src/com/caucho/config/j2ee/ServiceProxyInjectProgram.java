@@ -31,7 +31,7 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.ConfigContext;
 //import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.L10N;
 
@@ -60,7 +60,7 @@ public class ServiceProxyInjectProgram extends BuilderProgram {
     _field = field;
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     try {
@@ -96,7 +96,7 @@ public class ServiceProxyInjectProgram extends BuilderProgram {
     }
   }
 
-  public Object configure(NodeBuilder builder, Class type)
+  public Object configure(ConfigContext builder, Class type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

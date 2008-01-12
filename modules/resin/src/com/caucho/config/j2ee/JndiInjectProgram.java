@@ -30,7 +30,7 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.ConfigContext;
 import com.caucho.util.L10N;
 
 import javax.naming.InitialContext;
@@ -52,7 +52,7 @@ public class JndiInjectProgram extends BuilderProgram {
   }
 
   @Override
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     try {
@@ -67,7 +67,7 @@ public class JndiInjectProgram extends BuilderProgram {
   }
 
   @Override
-  public Object configureImpl(NodeBuilder builder, Class type)
+  public Object configureImpl(ConfigContext builder, Class type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

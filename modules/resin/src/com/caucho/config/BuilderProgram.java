@@ -36,23 +36,23 @@ import com.caucho.webbeans.context.DependentScope;
  * A saved program for configuring an object.
  */
 public abstract class BuilderProgram extends Inject {
-  //private NodeBuilder _nodeBuilder;
-  private NodeBuilder _nodeBuilder;
+  //private ConfigContext _nodeBuilder;
+  private ConfigContext _nodeBuilder;
   private ClassLoader _loader;
 
   protected BuilderProgram()
   {
-    this(NodeBuilder.getCurrentBuilder());
+    this(ConfigContext.getCurrentBuilder());
   }
 
-  protected BuilderProgram(NodeBuilder builder)
+  protected BuilderProgram(ConfigContext builder)
   {
     // server/13co
     /*
     _nodeBuilder = builder;
 
     if (builder == null)
-      _nodeBuilder = new NodeBuilder(); // XXX:
+      _nodeBuilder = new ConfigContext(); // XXX:
     */
 
     _loader = Thread.currentThread().getContextClassLoader();
@@ -70,10 +70,10 @@ public abstract class BuilderProgram extends Inject {
     throws ConfigException
   {
     // server/23e7
-    if (NodeBuilder.getCurrentBuilder() != null)
-      configureImpl(NodeBuilder.getCurrentBuilder(), bean);
+    if (ConfigContext.getCurrentBuilder() != null)
+      configureImpl(ConfigContext.getCurrentBuilder(), bean);
     else
-      configureImpl(NodeBuilder.createForProgram(), bean);
+      configureImpl(ConfigContext.createForProgram(), bean);
   }
 
   /**
@@ -82,7 +82,7 @@ public abstract class BuilderProgram extends Inject {
   public void configure(Object bean, DependentScope scope)
     throws ConfigException
   {
-    NodeBuilder builder = NodeBuilder.createForProgram();
+    ConfigContext builder = ConfigContext.createForProgram();
 
     builder.setDependentScope(scope);
     
@@ -92,25 +92,25 @@ public abstract class BuilderProgram extends Inject {
   /**
    * Configures the object.
    */
-  public void configure(NodeBuilder builder, Object bean)
+  public void configure(ConfigContext builder, Object bean)
     throws ConfigException
   {
-    configureImpl(NodeBuilder.getCurrentBuilder(), bean);
+    configureImpl(ConfigContext.getCurrentBuilder(), bean);
   }
 
   public Object configure(Class type)
     throws ConfigException
   {
-    if (NodeBuilder.getCurrentBuilder() != null)
-      return configureImpl(NodeBuilder.getCurrentBuilder(), type);
+    if (ConfigContext.getCurrentBuilder() != null)
+      return configureImpl(ConfigContext.getCurrentBuilder(), type);
     else
-      return configureImpl(NodeBuilder.createForProgram(), type);
+      return configureImpl(ConfigContext.createForProgram(), type);
   }
 
   /**
    * Configures the object.
    */
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     inject(bean, builder.getDependentScope());
@@ -119,7 +119,7 @@ public abstract class BuilderProgram extends Inject {
   /**
    * Configures a bean given a class to instantiate.
    */
-  protected Object configureImpl(NodeBuilder builder, Class type)
+  protected Object configureImpl(ConfigContext builder, Class type)
     throws ConfigException
   {
     try {

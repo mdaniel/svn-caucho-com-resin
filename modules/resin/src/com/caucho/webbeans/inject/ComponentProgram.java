@@ -50,7 +50,7 @@ public class ComponentProgram extends BuilderProgram
     _inject = inject;
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     try {
@@ -64,7 +64,7 @@ public class ComponentProgram extends BuilderProgram
     }
   }
 
-  public Object configure(NodeBuilder builder, Class type)
+  public Object configure(ConfigContext builder, Class type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

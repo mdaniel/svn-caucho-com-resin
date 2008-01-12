@@ -60,7 +60,7 @@ public class EnvironmentBeanType extends BeanType
    * Called before the children are configured.
    */
   @Override
-  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
+  public void beforeConfigure(ConfigContext builder, Object bean, Node node)
   {
     super.beforeConfigure(builder, bean, node);
     
@@ -80,7 +80,7 @@ public class EnvironmentBeanType extends BeanType
   /**
    * Called after the children are configured.
    */
-  public void afterConfigure(NodeBuilder builder, Object bean)
+  public void afterConfigure(ConfigContext builder, Object bean)
   {
     super.afterConfigure(builder, bean);
     

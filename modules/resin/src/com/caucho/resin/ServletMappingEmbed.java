@@ -30,7 +30,7 @@
 package com.caucho.resin;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.*;
+import com.caucho.config.program.*;
 import com.caucho.config.types.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;

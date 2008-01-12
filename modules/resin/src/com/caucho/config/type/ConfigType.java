@@ -165,7 +165,7 @@ abstract public class ConfigType
   /**
    * Called before the children are configured.
    */
-  public void beforeConfigureBean(NodeBuilder builder, Object bean, Node node)
+  public void beforeConfigureBean(ConfigContext builder, Object bean, Node node)
   {
   }
 
@@ -173,14 +173,14 @@ abstract public class ConfigType
    * Called before the children are configured.  Also called for
    * attribute configuration, e.g. for macros and web-app-default.
    */
-  public void beforeConfigure(NodeBuilder builder, Object bean, Node node)
+  public void beforeConfigure(ConfigContext builder, Object bean, Node node)
   {
   }
 
   /**
    * Called after the children are configured.
    */
-  public void afterConfigure(NodeBuilder builder, Object bean)
+  public void afterConfigure(ConfigContext builder, Object bean)
   {
   }
 }

@@ -24,34 +24,33 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.DependentScope;
-import com.caucho.util.*;
-
-import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class FieldComponentInject extends NamedInject
-{
-  private static final L10N L = new L10N(FieldComponentInject.class);
+import com.caucho.config.*;
+import com.caucho.config.type.*;
+import com.caucho.config.attribute.*;
+import com.caucho.util.*;
+import com.caucho.xml.*;
+import com.caucho.webbeans.context.DependentScope;
 
-  private Field _field;
-  private ComponentImpl _component;
+/**
+ * Injects a property with a constant value
+ */
+public class PropertyValueInject extends NamedInject {
+  private final String _name;
+  private final QName _qName;
+  private final Object _value;
 
-  public FieldComponentInject(Field field,
-			      ComponentImpl component)
+  public PropertyValueInject(String name, Object value)
   {
-    _field = field;
-    _component = component;
-
-    field.setAccessible(true);
+    _name = name;
+    _qName = new QName(name);
+    _value = value;
   }
   
   /**
@@ -59,21 +58,23 @@ public class FieldComponentInject extends NamedInject
    */
   public String getName()
   {
-    return _field.getName();
+    return _name;
   }
-
+  
+  /**
+   * Injects the bean with the dependencies
+   */
   public void inject(Object bean, DependentScope scope)
   {
-    Object value = null;
-    
     try {
-      value = _component.get(scope);
+      ConfigType type = TypeFactory.getType(bean.getClass());
 
-      _field.set(bean, value);
-    } catch (IllegalArgumentException e) {
-      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", value), e);
+      Attribute attr = type.getAttribute(_qName);
+
+      attr.setValue(bean, _qName, _value);
     } catch (Exception e) {
-      throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
+      throw ConfigException.create(e);
     }
   }
 }
+

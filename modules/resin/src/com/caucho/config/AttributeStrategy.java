@@ -62,7 +62,7 @@ public abstract class AttributeStrategy {
    * @param name the name of the property
    * @param node the configuration node for the value
    */
-  public void configure(NodeBuilder builder,
+  public void configure(ConfigContext builder,
                         Object bean,
                         QName name,
                         Node node)
@@ -91,7 +91,7 @@ public abstract class AttributeStrategy {
   /**
    * Creates the child node.
    */
-  public Object create(NodeBuilder builder, Object parent)
+  public Object create(ConfigContext builder, Object parent)
     throws Exception
   {
     return null;

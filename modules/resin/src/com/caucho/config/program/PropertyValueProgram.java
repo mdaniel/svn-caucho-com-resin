@@ -27,7 +27,7 @@
  * @author Scott Ferguson;
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;

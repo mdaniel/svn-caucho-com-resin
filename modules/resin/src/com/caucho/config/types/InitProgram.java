@@ -32,7 +32,7 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.ConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.context.*;
 
@@ -46,7 +46,7 @@ public class InitProgram {
 
   public InitProgram()
   {
-    _init = new BuilderProgramContainer(NodeBuilder.getCurrentBuilder());
+    _init = new BuilderProgramContainer(ConfigContext.getCurrentBuilder());
   }
 
   public InitProgram(BuilderProgram program)

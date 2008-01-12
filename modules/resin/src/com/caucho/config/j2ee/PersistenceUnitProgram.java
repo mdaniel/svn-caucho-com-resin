@@ -91,7 +91,7 @@ public class PersistenceUnitProgram extends BuilderProgram
   }
 
   @Override
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     EntityManagerFactory factory = null;
@@ -151,7 +151,7 @@ public class PersistenceUnitProgram extends BuilderProgram
   }
 
   @Override
-  public Object configureImpl(NodeBuilder builder, Class type)
+  public Object configureImpl(ConfigContext builder, Class type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

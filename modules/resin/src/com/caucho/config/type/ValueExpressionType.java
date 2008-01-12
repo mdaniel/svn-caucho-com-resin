@@ -60,7 +60,7 @@ public final class ValueExpressionType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    ELContext elContext = NodeBuilder.getCurrent().getELContext();
+    ELContext elContext = ConfigContext.getCurrent().getELContext();
     
     ELParser parser = new ELParser(elContext, text);
     

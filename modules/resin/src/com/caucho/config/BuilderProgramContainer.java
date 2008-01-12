@@ -41,10 +41,10 @@ public class BuilderProgramContainer extends BuilderProgram {
 
   public BuilderProgramContainer()
   {
-    this(NodeBuilder.getCurrentBuilder());
+    this(ConfigContext.getCurrentBuilder());
   }
 
-  public BuilderProgramContainer(NodeBuilder builder)
+  public BuilderProgramContainer(ConfigContext builder)
   {
     super(builder);
   }
@@ -54,7 +54,7 @@ public class BuilderProgramContainer extends BuilderProgram {
     _programList.add(program);
   }
 
-  public void configureImpl(NodeBuilder builder, Object bean)
+  public void configureImpl(ConfigContext builder, Object bean)
     throws ConfigException
   {
     // ejb/4102
@@ -67,7 +67,7 @@ public class BuilderProgramContainer extends BuilderProgram {
     }
   }
 
-  protected Object configureImpl(NodeBuilder builder, Class type)
+  protected Object configureImpl(ConfigContext builder, Class type)
     throws ConfigException
   {
     reorderProgramList();

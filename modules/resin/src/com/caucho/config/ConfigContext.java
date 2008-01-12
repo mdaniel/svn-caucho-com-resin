@@ -27,7 +27,6 @@
 
 package com.caucho.config;
 
-import com.caucho.config.types.ResinType;
 import com.caucho.config.types.Validator;
 import com.caucho.config.type.*;
 import com.caucho.config.attribute.*;
@@ -47,18 +46,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * DOM builder is the interface for the
- * Node as input.
- * The other classes need to be independent of
- * Node because they might be moving to
- * something like XML schema.
- *
- * NodeBuilder will call routines in BeanBuilder.
+ * The ConfigContext contains the state of the current configuration.
  */
-public class NodeBuilder {
-  private final static L10N L = new L10N(NodeBuilder.class);
+public class ConfigContext {
+  private final static L10N L = new L10N(ConfigContext.class);
   private final static Logger log
-    = Logger.getLogger(NodeBuilder.class.getName());
+    = Logger.getLogger(ConfigContext.class.getName());
 
   private final static QName RESIN_TYPE = new QName("resin:type", null);
   private final static QName RESIN_TYPE_NS
@@ -75,8 +68,8 @@ public class NodeBuilder {
 
   private final static HashSet<QName> _resinClassSet = new HashSet<QName>();
 
-  private static ThreadLocal<NodeBuilder> _currentBuilder
-    = new ThreadLocal<NodeBuilder>();
+  private static ThreadLocal<ConfigContext> _currentBuilder
+    = new ThreadLocal<ConfigContext>();
 
   private Config _config;
 
@@ -91,19 +84,19 @@ public class NodeBuilder {
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
 
-  NodeBuilder()
+  ConfigContext()
   {
     _elContext = new ConfigELContext();
     _varResolver = _elContext.getVariableResolver();
   }
 
-  NodeBuilder(ConfigELContext context)
+  ConfigContext(ConfigELContext context)
   {
     _elContext = context;
     _varResolver = _elContext.getVariableResolver();
   }
   
-  NodeBuilder(Config config)
+  ConfigContext(Config config)
   {
     _config = config;
     _elContext = config.getELContext();
@@ -114,23 +107,23 @@ public class NodeBuilder {
     _varResolver = _elContext.getVariableResolver();
   }
 
-  public static NodeBuilder createForProgram()
+  public static ConfigContext createForProgram()
   {
-    return new NodeBuilder(new ConfigELContext((ELResolver) null));
+    return new ConfigContext(new ConfigELContext((ELResolver) null));
   }
 
-  public static NodeBuilder getCurrentBuilder()
+  public static ConfigContext getCurrentBuilder()
   {
     return _currentBuilder.get();
   }
 
-  public static NodeBuilder getCurrent()
+  public static ConfigContext getCurrent()
   {
     return _currentBuilder.get();
   }
 
   // s/b private?
-  static void setCurrentBuilder(NodeBuilder builder)
+  static void setCurrentBuilder(ConfigContext builder)
   {
     _currentBuilder.set(builder);
   }
@@ -166,7 +159,7 @@ public class NodeBuilder {
     if (bean == null)
       throw new NullPointerException();
     
-    NodeBuilder oldBuilder = _currentBuilder.get();
+    ConfigContext oldBuilder = _currentBuilder.get();
     try {
       _currentBuilder.set(this);
 
@@ -197,7 +190,7 @@ public class NodeBuilder {
   public void configureBean(Object bean, Node top)
     throws LineConfigException
   {
-    NodeBuilder oldBuilder = _currentBuilder.get();
+    ConfigContext oldBuilder = _currentBuilder.get();
     Object oldFile = _elContext.getValue("__FILE__");
     ArrayList<Dependency> oldDependList = _dependList;
 
@@ -242,7 +235,7 @@ public class NodeBuilder {
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    NodeBuilder oldBuilder = getCurrentBuilder();
+    ConfigContext oldBuilder = getCurrentBuilder();
     try {
       setCurrentBuilder(this);
       

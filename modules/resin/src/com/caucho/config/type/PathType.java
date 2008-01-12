@@ -30,7 +30,7 @@
 package com.caucho.config.type;
 
 import com.caucho.config.Config;
-import com.caucho.config.NodeBuilder;
+import com.caucho.config.ConfigContext;
 import com.caucho.config.TypeStrategy;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
