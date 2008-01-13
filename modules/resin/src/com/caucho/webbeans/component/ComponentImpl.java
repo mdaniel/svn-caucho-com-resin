@@ -32,6 +32,7 @@ package com.caucho.webbeans.component;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
@@ -80,7 +81,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   protected ConfigProgram []_initProgram = NULL_INJECT;
   protected ConfigProgram []_destroyProgram = NULL_INJECT;
   
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   public ComponentImpl(WbWebBeans webbeans)
   {
@@ -204,7 +205,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   /**
    * Sets the init program.
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -461,7 +462,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   protected Object init(Object value, ConfigContext env)
   {
     if (_init != null)
-      _init.configure(value, env);
+      _init.inject(value, env);
 
     for (ConfigProgram inject : _injectProgram) {
       inject.inject(value, env);

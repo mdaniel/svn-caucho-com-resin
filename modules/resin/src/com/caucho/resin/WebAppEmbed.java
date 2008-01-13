@@ -30,6 +30,8 @@
 package com.caucho.resin;
 
 import com.caucho.config.*;
+import com.caucho.config.program.*;
+import com.caucho.config.types.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
@@ -53,11 +55,25 @@ public class WebAppEmbed
   private String _rootDirectory = ".";
   private String _archivePath;
 
+  private HashMap<String,String> _contextParamMap
+    = new HashMap<String,String>();
+  
+  private ContainerProgram _init = new ContainerProgram();
+
+  private final ArrayList<BeanEmbed> _beanList
+    = new ArrayList<BeanEmbed>();
+
   private final ArrayList<ServletEmbed> _servletList
     = new ArrayList<ServletEmbed>();
 
   private final ArrayList<ServletMappingEmbed> _servletMappingList
     = new ArrayList<ServletMappingEmbed>();
+
+  private final ArrayList<FilterEmbed> _filterList
+    = new ArrayList<FilterEmbed>();
+
+  private final ArrayList<FilterMappingEmbed> _filterMappingList
+    = new ArrayList<FilterMappingEmbed>();
 
   /**
    * Creates a new embedded webapp
@@ -148,11 +164,58 @@ public class WebAppEmbed
   }
 
   /**
+   * Adds a filter definition
+   */
+  public void addFilter(FilterEmbed filter)
+  {
+    if (filter == null)
+      throw new NullPointerException();
+    
+    _filterList.add(filter);
+  }
+
+  /**
+   * Adds a filter-mapping definition
+   */
+  public void addFilterMapping(FilterMappingEmbed filterMapping)
+  {
+    if (filterMapping == null)
+      throw new NullPointerException();
+    
+    _filterMappingList.add(filterMapping);
+  }
+
+  /**
+   * Adds a web bean.
+   */
+  public void addBean(BeanEmbed bean)
+  {
+    _beanList.add(bean);
+  }
+
+  /**
+   * Sets a context-param.
+   */
+  public void setContextParam(String name, String value)
+  {
+    _contextParamMap.put(name, value);
+  }
+
+  /**
    * Configures the web-app (for internal use)
    */
   protected void configure(WebApp webApp)
   {
     try {
+      for (Map.Entry<String,String> entry : _contextParamMap.entrySet()) {
+	InitParam initParam = new InitParam(entry.getKey(), entry.getValue());
+	webApp.addContextParam(initParam);
+      }
+
+      for (BeanEmbed beanEmbed : _beanList) {
+	beanEmbed.configure();
+      }
+	
       for (ServletEmbed servletEmbed : _servletList) {
 	ServletConfigImpl servlet = webApp.createServlet();
 
@@ -167,6 +230,22 @@ public class WebAppEmbed
 	servletMappingEmbed.configure(servletMapping);
 
 	webApp.addServletMapping(servletMapping);
+      }
+	
+      for (FilterEmbed filterEmbed : _filterList) {
+	FilterConfigImpl filter = new FilterConfigImpl();
+
+	filterEmbed.configure(filter);
+
+	webApp.addFilter(filter);
+      }
+    
+      for (FilterMappingEmbed filterMappingEmbed : _filterMappingList) {
+	FilterMapping filterMapping = new FilterMapping();
+
+	filterMappingEmbed.configure(filterMapping);
+
+	webApp.addFilterMapping(filterMapping);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

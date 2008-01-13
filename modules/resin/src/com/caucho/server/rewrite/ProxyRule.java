@@ -106,7 +106,7 @@ public class ProxyRule
       Class cl = Class.forName("com.caucho.servlets.HttpProxyServlet");
       _servlet.setServletClass("com.caucho.servlets.HttpProxyServlet");
 
-      _servlet.setInit(new InitProgram(_program));
+      _servlet.setInit(_program);
 
       _webApp.addServlet(_servlet);
     }

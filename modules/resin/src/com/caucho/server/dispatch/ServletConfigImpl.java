@@ -31,9 +31,9 @@ package com.caucho.server.dispatch;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.NodeBuilderProgram;
 import com.caucho.config.types.InitParam;
-import com.caucho.config.types.InitProgram;
 import com.caucho.jmx.Jmx;
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
@@ -86,7 +86,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
 
   private HashMap<String,String> _roleMap;
 
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   private RunAt _runAt;
 
@@ -286,7 +286,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   /**
    * Sets the init block
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -294,7 +294,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   /**
    * Gets the init block
    */
-  public InitProgram getInit()
+  public ContainerProgram getInit()
   {
     return _init;
   }
@@ -831,15 +831,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     //InjectIntrospector.configure(servlet);
 
     // Initialize bean properties
-    InitProgram init = getInit();
-    ConfigProgram program;
+    ConfigProgram init = getInit();
 
     if (init != null)
-      program = init.getBuilderProgram();
-    else
-      program = NodeBuilderProgram.NULL;
+      init.configure(servlet);
 
-    program.configure(servlet);
     Config.init(servlet);
   }
 

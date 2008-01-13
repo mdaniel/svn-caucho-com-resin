@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -41,8 +41,8 @@ public class ClusterConfig {
   
   private ResinConfig _resin;
 
-  private ArrayList<InitProgram> _serverDefaultList
-    = new ArrayList<InitProgram>();
+  private ArrayList<ContainerProgram> _serverDefaultList
+    = new ArrayList<ContainerProgram>();
 
   private ArrayList<ResinWatchdog> _serverList
     = new ArrayList<ResinWatchdog>();
@@ -72,7 +72,7 @@ public class ClusterConfig {
   /**
    * Adds a new server to the cluster.
    */
-  public void addServerDefault(InitProgram program)
+  public void addServerDefault(ContainerProgram program)
     throws Throwable
   {
     _serverDefaultList.add(program);

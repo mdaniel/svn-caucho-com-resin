@@ -38,95 +38,86 @@ import com.caucho.server.dispatch.*;
 import java.util.*;
 
 /**
- * Embeddable version of a servlet
+ * Embeddable version of a filter
  *
  * <code><pre>
  * ResinEmbed resin = new ResinEmbed();
  *
  * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/www/foo");
  *
- * ServletEmbed myServlet = new ServletEmbed("my-servlet", "qa.MyServlet");
- * webApp.addServlet(myServlet);
+ * FilterEmbed myFilter = new FilterEmbed("my-filter", "qa.MyFilter");
+ * webApp.addFilter(myFilter);
  *
  * resin.addWebApp(webApp);
  * </pre></code>
  */
-public class ServletEmbed
+public class FilterEmbed
 {
-  private String _servletName;
-  private String _servletClass;
-  private int _loadOnStartup = -1;
+  private String _filterName;
+  private String _filterClass;
   
   private HashMap<String,String> _initParamMap = new HashMap<String,String>();
   private ContainerProgram _init = new ContainerProgram();
 
   /**
-   * Creates a new embedded servlet
+   * Creates a new embedded filter
    */
-  public ServletEmbed()
+  public FilterEmbed()
   {
   }
 
   /**
-   * Creates a new embedded servlet
+   * Creates a new embedded filter
    *
-   * @param servletClass the servlet-class
+   * @param filterClass the filter-class
    */
-  public ServletEmbed(String servletClass)
+  public FilterEmbed(String filterClass)
   {
-    setServletClass(servletClass);
+    setFilterClass(filterClass);
   }
 
   /**
-   * Creates a new embedded servlet
+   * Creates a new embedded filter
    *
-   * @param servletClass the servlet-class
-   * @param servletName the servlet-name
+   * @param filterClass the filter-class
+   * @param filterName the filter-name
    */
-  public ServletEmbed(String servletClass, String servletName)
+  public FilterEmbed(String filterClass, String filterName)
   {
-    setServletClass(servletClass);
-    setServletName(servletName);
+    setFilterClass(filterClass);
+    setFilterName(filterName);
   }
 
   /**
-   * The servlet-name
+   * The filter-name
    */
-  public void setServletName(String servletName)
+  public void setFilterName(String filterName)
   {
-    _servletName = servletName;
+    _filterName = filterName;
   }
 
   /**
-   * The servlet-name
+   * The filter-name
    */
-  public String getServletName()
+  public String getFilterName()
   {
-    return _servletName;
+    return _filterName;
   }
 
   /**
-   * The servlet-class
+   * The filter-class
    */
-  public void setServletClass(String servletClass)
+  public void setFilterClass(String filterClass)
   {
-    _servletClass = servletClass;
+    _filterClass = filterClass;
   }
 
   /**
-   * The servlet-class
+   * The filter-class
    */
-  public String getServletClass()
+  public String getFilterClass()
   {
-    return _servletClass;
-  }
-
-  /**
-   * Sets the load-on-startup parameter.
-   */
-  public void setLoadOnStartup(int loadOnStartup)
-  {
-    _loadOnStartup = loadOnStartup;
+    return _filterClass;
   }
 
   /**
@@ -145,22 +136,19 @@ public class ServletEmbed
     _init.addProgram(new PropertyValueProgram(name, value));
   }
 
-  protected void configure(ServletConfigImpl servletConfig)
+  protected void configure(FilterConfigImpl filterConfig)
   {
     try {
-      servletConfig.setServletName(_servletName);
-      servletConfig.setServletClass(_servletClass);
+      filterConfig.setFilterName(_filterName);
+      filterConfig.setFilterClass(_filterClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {
-	servletConfig.setInitParam(entry.getKey(), entry.getValue());
+	filterConfig.setInitParam(entry.getKey(), entry.getValue());
       }
 
-      servletConfig.setInit(_init);
+      filterConfig.setInit(_init);
 
-      if (_loadOnStartup >= 0)
-	servletConfig.setLoadOnStartup(_loadOnStartup);
-
-      servletConfig.init();
+      // filterConfig.init();
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

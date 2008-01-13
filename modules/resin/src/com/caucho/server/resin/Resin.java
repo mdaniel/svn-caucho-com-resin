@@ -34,8 +34,8 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
-import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.Period;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
@@ -133,8 +133,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
-  private ArrayList<InitProgram> _clusterDefaults
-    = new ArrayList<InitProgram>();
+  private ArrayList<ContainerProgram> _clusterDefaults
+    = new ArrayList<ContainerProgram>();
 
   private ArrayList<Cluster> _clusters
     = new ArrayList<Cluster>();
@@ -431,7 +431,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     return clusters;
   }
 
-  public void addClusterDefault(InitProgram program)
+  public void addClusterDefault(ContainerProgram program)
   {
     _clusterDefaults.add(program);
   }
@@ -602,7 +602,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   /**
    * Ignore the boot configuration
    */
-  public void addBoot(InitProgram program)
+  public void addBoot(ContainerProgram program)
     throws Exception
   {
   }

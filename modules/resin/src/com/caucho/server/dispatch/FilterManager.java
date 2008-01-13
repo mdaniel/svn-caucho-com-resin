@@ -29,9 +29,7 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.config.Config;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.NodeBuilderProgram;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -127,13 +125,11 @@ public class FilterManager {
 	// InjectIntrospector.configure(filter);
 
         // Initialize bean properties
-        InitProgram init = config.getInit();
-	ConfigProgram program = NodeBuilderProgram.NULL;
+        ContainerProgram init = config.getInit();
         
         if (init != null)
-          program = init.getBuilderProgram();
+          init.configure(filter);
 
-	program.configure(filter);
 	Config.init(filter);
 
         filter.init(config);

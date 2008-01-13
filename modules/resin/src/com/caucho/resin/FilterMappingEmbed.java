@@ -39,106 +39,108 @@ import com.caucho.server.webapp.*;
 import java.util.*;
 
 /**
- * Embeddable version of a servlet-mapping
+ * Embeddable version of a filter-mapping
  *
  * <code><pre>
  * ResinEmbed resin = new ResinEmbed();
  *
  * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/www/foo");
  *
- * ServletMappingEmbed myServlet
- *   = new ServletMappingEmbed("my-servlet", "/my-servlet", "qa.MyServlet");
+ * FilterMappingEmbed myFilter
+ *   = new FilterMappingEmbed("/my-filter", "*.jsp", "qa.MyFilter");
  *
- * webApp.addServletMapping(myServlet);
+ * webApp.addFilterMapping(myFilter);
  *
  * resin.addWebApp(webApp);
  * </pre></code>
  */
-public class ServletMappingEmbed
+public class FilterMappingEmbed
 {
   private String _urlPattern;
   private String _servletName;
-  private String _servletClass;
-  private int _loadOnStartup = -1;
+  
+  private String _filterName;
+  private String _filterClass;
 
   private HashMap<String,String> _initParamMap = new HashMap<String,String>();
   private ContainerProgram _init = new ContainerProgram();
 
   /**
-   * Creates a new embedded servlet-mapping
+   * Creates a new embedded filter-mapping
    */
-  public ServletMappingEmbed()
+  public FilterMappingEmbed()
   {
   }
 
   /**
-   * Creates a new embedded servlet-mapping
+   * Creates a new embedded filter-mapping
    *
-   * @param servletName the servlet-name
+   * @param filterName the filter-name
    */
-  public ServletMappingEmbed(String servletName)
+  public FilterMappingEmbed(String filterName)
   {
-    setServletName(servletName);
+    setFilterName(filterName);
   }
 
   /**
-   * Creates a new embedded servlet-mapping
+   * Creates a new embedded filter-mapping
    *
-   * @param servletName the servlet-name
+   * @param filterName the filter-name
    * @param urlPattern the url-pattern
    */
-  public ServletMappingEmbed(String servletName, String urlPattern)
+  public FilterMappingEmbed(String filterName,
+			    String urlPattern)
   {
-    setServletName(servletName);
+    setFilterName(filterName);
     setUrlPattern(urlPattern);
   }
 
   /**
-   * Creates a new embedded servlet-mapping
+   * Creates a new embedded filter-mapping
    *
+   * @param filterName the filter-name
    * @param urlPattern the url-pattern
-   * @param servletName the servlet-name
-   * @param servletClass the servlet-class
+   * @param filterClass the filter-class
    */
-  public ServletMappingEmbed(String servletName,
-			     String urlPattern,
-			     String servletClass)
+  public FilterMappingEmbed(String filterName,
+			    String urlPattern,
+			    String filterClass)
   {
+    setFilterName(filterName);
     setUrlPattern(urlPattern);
-    setServletName(servletName);
-    setServletClass(servletClass);
+    setFilterClass(filterClass);
   }
 
   /**
-   * The servlet-name
+   * The filter-name
    */
-  public void setServletName(String servletName)
+  public void setFilterName(String filterName)
   {
-    _servletName = servletName;
+    _filterName = filterName;
   }
 
   /**
-   * The servlet-name
+   * The filter-name
    */
-  public String getServletName()
+  public String getFilterName()
   {
-    return _servletName;
+    return _filterName;
   }
 
   /**
-   * The servlet-class
+   * The filter-class
    */
-  public void setServletClass(String servletClass)
+  public void setFilterClass(String filterClass)
   {
-    _servletClass = servletClass;
+    _filterClass = filterClass;
   }
 
   /**
-   * The servlet-class
+   * The filter-class
    */
-  public String getServletClass()
+  public String getFilterClass()
   {
-    return _servletClass;
+    return _filterClass;
   }
 
   /**
@@ -158,11 +160,11 @@ public class ServletMappingEmbed
   }
 
   /**
-   * Sets the load-on-startup parameter.
+   * The servlet-name
    */
-  public void setLoadOnStartup(int loadOnStartup)
+  public void setServletName(String servletName)
   {
-    _loadOnStartup = loadOnStartup;
+    _servletName = servletName;
   }
 
   /**
@@ -181,27 +183,27 @@ public class ServletMappingEmbed
     _init.addProgram(new PropertyValueProgram(name, value));
   }
 
-  protected void configure(ServletMapping servletMapping)
+  protected void configure(FilterMapping filterMapping)
   {
     try {
       if (_urlPattern != null)
-	servletMapping.addURLPattern(_urlPattern);
-    
-      servletMapping.setServletName(_servletName);
+	filterMapping.createUrlPattern().addText(_urlPattern).init();
 
-      if (_servletClass != null)
-	servletMapping.setServletClass(_servletClass);
+      if (_servletName != null)
+	filterMapping.addServletName(_servletName);
+    
+      filterMapping.setFilterName(_filterName);
+
+      if (_filterClass != null)
+	filterMapping.setFilterClass(_filterClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {
-	servletMapping.setInitParam(entry.getKey(), entry.getValue());
+	filterMapping.setInitParam(entry.getKey(), entry.getValue());
       }
 
-      servletMapping.setInit(_init);
+      filterMapping.setInit(_init);
 
-      if (_loadOnStartup >= 0)
-	servletMapping.setLoadOnStartup(_loadOnStartup);
-
-      servletMapping.init();
+      // filterMapping.init();
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

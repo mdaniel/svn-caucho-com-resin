@@ -95,9 +95,13 @@ public class ConfigContext {
     _varResolver = _elContext.getVariableResolver();
   }
 
-  public ConfigContext(ComponentImpl component, Object value, ScopeContext scope)
+  public ConfigContext(ComponentImpl component,
+		       Object value,
+		       ScopeContext scope)
   {
-    throw new UnsupportedOperationException("Not yet implemented");
+    this();
+
+    _dependentScope = new DependentScope(component, value, scope);
   }
 
   ConfigContext(ConfigELContext context)
@@ -154,14 +158,15 @@ public class ConfigContext {
    * @param aThis
    * @param value
    */
-  public void addDestructor(ComponentImpl aThis, Object value)
+  public void addDestructor(ComponentImpl comp, Object value)
   {
-    throw new UnsupportedOperationException("Not yet implemented");
+    if (_dependentScope != null)
+      _dependentScope.addDestructor(comp, value);
   }
 
-  public boolean canInject(ScopeContext _scope)
+  public boolean canInject(ScopeContext scope)
   {
-    throw new UnsupportedOperationException("Not yet implemented");
+    return _dependentScope == null || _dependentScope.canInject(scope);
   }
 
   /**
@@ -170,9 +175,12 @@ public class ConfigContext {
    * @param aThis
    * @return
    */
-  public Object get(ComponentImpl aThis)
+  public Object get(ComponentImpl comp)
   {
-    throw new UnsupportedOperationException("Not yet implemented");
+    if (_dependentScope != null)
+      return _dependentScope.get(comp);
+    else
+      return null;
   }
 
   public Config getConfig()
@@ -186,9 +194,12 @@ public class ConfigContext {
    * @param aThis
    * @param obj
    */
-  public void put(ComponentImpl aThis, Object obj)
+  public void put(ComponentImpl comp, Object obj)
   {
-    throw new UnsupportedOperationException("Not yet implemented");
+    if (_dependentScope == null)
+      _dependentScope = new DependentScope();
+
+    _dependentScope.put(comp, obj);
   }
 
   /**

@@ -155,10 +155,12 @@ public class LocalDeployServlet extends GenericServlet
       war = null;
 
     if (contextPath == null || "".equals(contextPath)) {
-      log.warning(L.l("LocalDeployServlet[] add-web-app required context-path from IP='{0}'",
+      log.warning(L.l("LocalDeployServlet[] add-web-app requires context-path from IP='{0}'",
 		      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+      return;
     }
 
     if (root == null && war == null) {
@@ -166,6 +168,8 @@ public class LocalDeployServlet extends GenericServlet
 		      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+      return;
     }
 
     WebAppContainer container = getWebAppContainer();
@@ -180,6 +184,15 @@ public class LocalDeployServlet extends GenericServlet
     else
       rootDirectory = containerRoot.lookup(root);
 
+    if (war != null) {
+      Path warPath = containerRoot.lookup(war);
+
+      if (! warPath.exists()) {
+	log.warning(L.l("LocalDeployServlet[] add-web-app war='{0}' cannot be read, from IP='{0}'",
+		      warPath.getURL(), req.getRemoteAddr()));
+      }
+    }
+
     WebAppController controller = container.findController(contextPath);
 
     PrintWriter out = res.getWriter();
@@ -192,7 +205,10 @@ public class LocalDeployServlet extends GenericServlet
 
     WebAppConfig webApp = new WebAppConfig();
     webApp.setContextPath(contextPath);
-    webApp.setRootDirectory(new RawString(rootDirectory.getFullPath()));
+    webApp.setRootDirectory(new RawString(rootDirectory.getURL()));
+
+    if (war != null)
+      webApp.setArchivePath(new RawString(war));
 
     try {
       container.addWebApp(webApp);

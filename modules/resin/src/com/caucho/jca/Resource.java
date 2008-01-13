@@ -32,7 +32,7 @@ package com.caucho.jca;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.jca.cfg.JavaMailConfig;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.jmx.Jmx;
@@ -216,8 +216,7 @@ public class Resource {
   /**
    * Adds the init program
    */
-  public void addInit(InitProgram init)
-    throws Throwable
+  public void addInit(ContainerProgram init)
   {
     preInit();
 
@@ -228,7 +227,7 @@ public class Resource {
    * Adds the listener program
    */
   public Object createListener()
-    throws Throwable
+    throws Exception
   {
     return createMbeanListener();
   }
@@ -237,7 +236,7 @@ public class Resource {
    * Adds the listener program
    */
   public Object createMbeanListener()
-    throws Throwable
+    throws Exception
   {
     preInit();
 
@@ -248,7 +247,7 @@ public class Resource {
   }
 
   ObjectName getObjectName()
-    throws Throwable
+    throws Exception
   {
     preInit();
 
@@ -259,7 +258,7 @@ public class Resource {
   }
 
   MBeanInfo getMBeanInfo()
-    throws Throwable
+    throws Exception
   {
     preInit();
 
@@ -270,67 +269,70 @@ public class Resource {
    * Initialize the resource.
    */
   private void preInit()
-    throws Throwable
   {
-    if (_isPreInit)
-      return;
-    _isPreInit = true;
+    try {
+      if (_isPreInit)
+	return;
+      _isPreInit = true;
 
-    Object oldObject = null;
+      Object oldObject = null;
 
-    if (_jndiName != null) {
-      try {
-	String jndiName = Jndi.getFullName(_jndiName);
+      if (_jndiName != null) {
+	try {
+	  String jndiName = Jndi.getFullName(_jndiName);
 
-	Context ic = new InitialContext();
-	oldObject = ic.lookup(_jndiName);
-      } catch (Exception e) {
+	  Context ic = new InitialContext();
+	  oldObject = ic.lookup(_jndiName);
+	} catch (Exception e) {
+	}
       }
-    }
     
-    MBeanServer mbeanServer = Jmx.getMBeanServer();
+      MBeanServer mbeanServer = Jmx.getMBeanServer();
 
-    ObjectName mbeanName = null;
+      ObjectName mbeanName = null;
 
-    if (_mbeanName != null)
-      mbeanName = Jmx.getObjectName(_mbeanName);
+      if (_mbeanName != null)
+	mbeanName = Jmx.getObjectName(_mbeanName);
 
-    if (_type != null) {
-    }
-    else if (oldObject != null) {
-      _object = oldObject;
-      return;
-    }
-    else if (mbeanName != null &&
-	     mbeanServer.getMBeanInfo(mbeanName) != null) {
-      return;
-    }
-    else
-      throw new ConfigException(L.l("<resource> configuration needs a <type>.  The <type> is the class name of the resource bean."));
+      if (_type != null) {
+      }
+      else if (oldObject != null) {
+	_object = oldObject;
+	return;
+      }
+      else if (mbeanName != null &&
+	       mbeanServer.getMBeanInfo(mbeanName) != null) {
+	return;
+      }
+      else
+	throw new ConfigException(L.l("<resource> configuration needs a <type>.  The <type> is the class name of the resource bean."));
 
-    Constructor constructor = getConstructor(_args.size());
+      Constructor constructor = getConstructor(_args.size());
 
-    Class []params = constructor.getParameterTypes();
+      Class []params = constructor.getParameterTypes();
       
-    Object []args = new Object[_args.size()];
+      Object []args = new Object[_args.size()];
 
-    /*
-    for (int i = 0; i < args.length; i++)
-      args[i] = _args.get(i).configure(params[i]);
-    */
-    for (int i = 0; i < args.length; i++)
-      args[i] = _args.get(i);
+      /*
+	for (int i = 0; i < args.length; i++)
+	args[i] = _args.get(i).configure(params[i]);
+      */
+      for (int i = 0; i < args.length; i++)
+	args[i] = _args.get(i);
 
-    _object = constructor.newInstance(args);
+      _object = constructor.newInstance(args);
 
-    if (mbeanName != null) {
-      Object mbean = _object;
+      if (mbeanName != null) {
+	Object mbean = _object;
 
-      if (_mbeanInterface != null)
-	mbean = new IntrospectionMBean(mbean, _mbeanInterface);
+	if (_mbeanInterface != null)
+	  mbean = new IntrospectionMBean(mbean, _mbeanInterface);
       
-      Jmx.register(mbean, mbeanName);
-      _mbeanInfo = mbeanServer.getMBeanInfo(mbeanName);
+	Jmx.register(mbean, mbeanName);
+	_mbeanInfo = mbeanServer.getMBeanInfo(mbeanName);
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 
@@ -598,22 +600,26 @@ public class Resource {
 
     @PostConstruct
     public void init()
-      throws Throwable
     {
-      if (_mbeanName != null) {
-	ObjectName mbeanName = Jmx.getObjectName(_mbeanName);
+      try {
+	if (_mbeanName != null) {
+	  ObjectName mbeanName = Jmx.getObjectName(_mbeanName);
 
-	ObjectName listenerName = getObjectName();
+	  ObjectName listenerName = getObjectName();
 
-	MBeanServer server = Jmx.getMBeanServer();
+	  MBeanServer server = Jmx.getMBeanServer();
 
-	server.addNotificationListener(mbeanName, listenerName,
-				       _filter, _handback);
+	  server.addNotificationListener(mbeanName, listenerName,
+					 _filter, _handback);
 
+	}
+	else
+	  throw new ConfigException(L.l("mbean name is required"));
+      } catch (Exception e) {
+	throw ConfigException.create(e);
       }
-      else
-	throw new ConfigException(L.l("mbean name is required"));
     }
   }
 }
 
+  

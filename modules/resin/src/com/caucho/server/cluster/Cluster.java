@@ -34,7 +34,6 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.Period;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.DynamicClassLoader;
@@ -44,7 +43,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.ClusterMXBean;
-import com.caucho.server.admin.Management;
 import com.caucho.server.port.Port;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
@@ -87,8 +85,8 @@ public class Cluster
   private ClusterAdmin _admin;
   private ObjectName _objectName;
 
-  private ArrayList<InitProgram> _serverDefaultList
-    = new ArrayList<InitProgram>();
+  private ArrayList<ContainerProgram> _serverDefaultList
+    = new ArrayList<ContainerProgram>();
 
   private ArrayList<Machine> _machineList
     = new ArrayList<Machine>();
@@ -244,7 +242,7 @@ public class Cluster
   /**
    * Adds a new server to the cluster.
    */
-  public void addServerDefault(InitProgram program)
+  public void addServerDefault(ContainerProgram program)
     throws Throwable
   {
     _serverDefaultList.add(program);

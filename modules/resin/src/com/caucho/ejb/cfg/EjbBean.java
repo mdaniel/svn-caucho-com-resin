@@ -1092,12 +1092,12 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _serverProgram.addProgram(init);
   }
 
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     if (_initProgram == null)
       _initProgram = new ContainerProgram();
 
-    _initProgram.addProgram(init.getBuilderProgram());
+    _initProgram.addProgram(init);
   }
 
   public void addPostConstruct(PostConstructType postConstruct)

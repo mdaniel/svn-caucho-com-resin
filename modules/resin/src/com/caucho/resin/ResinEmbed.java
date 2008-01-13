@@ -391,37 +391,43 @@ public class ResinEmbed
       throws Exception
     {
       Thread.yield();
-      
-      ByteArrayInputStream is;
 
-      int len = input.length();
-      if (_chars.length < len) {
-        _chars = new char[len];
-        _bytes = new byte[len];
-      }
-
-      input.getChars(0, len, _chars, 0);
-      for (int i = 0; i < len; i++)
-        _bytes[i] = (byte) _chars[i];
-
-      is = new ByteArrayInputStream(_bytes, 0, len);
-
-      _vfsStream.init(is, os);
-      _conn.setStream(is, os);
-      _conn.setLocalAddress(_localAddress);
-      _conn.setLocalPort(_port);
-      _conn.setRemoteAddress(_remoteAddress);
-      _conn.setRemotePort(9666);
-      // _conn.setSecure(_isSecure);
-
-      Thread.sleep(10);
+      WriteStream out = Vfs.openWrite(os);
+      out.setDisableClose(true);
 
       ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
       try {
+	ByteArrayInputStream is;
+
+	int len = input.length();
+	if (_chars.length < len) {
+	  _chars = new char[len];
+	  _bytes = new byte[len];
+	}
+
+	input.getChars(0, len, _chars, 0);
+	for (int i = 0; i < len; i++)
+	  _bytes[i] = (byte) _chars[i];
+
+	is = new ByteArrayInputStream(_bytes, 0, len);
+
+	_vfsStream.init(is, os);
+	_conn.setStream(is, os);
+	_conn.setLocalAddress(_localAddress);
+	_conn.setLocalPort(_port);
+	_conn.setRemoteAddress(_remoteAddress);
+	_conn.setRemotePort(9666);
+	// _conn.setSecure(_isSecure);
+
+	Thread.sleep(10);
+
         while (_request.handleRequest()) {
+	  out.flush();
         }
       } catch (EOFException e) {
       } finally {
+	out.flush();
+	
         Thread.currentThread().setContextClassLoader(oldLoader);
       }
     }

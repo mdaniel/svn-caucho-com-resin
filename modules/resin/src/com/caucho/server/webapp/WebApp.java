@@ -76,7 +76,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Encoding;
-import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.webbeans.el.WebBeansELResolver;
@@ -92,7 +91,6 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -814,7 +812,7 @@ public class WebApp extends ServletContextImpl
     mapping.setServletName(servletRegexp.getServletName());
     mapping.setServletClass(servletRegexp.getServletClass());
     mapping.setServletContext(this);
-    mapping.setInit(new InitProgram(servletRegexp.getBuilderProgram()));
+    mapping.setInit(servletRegexp.getBuilderProgram());
     mapping.setStrictMapping(getStrictMapping());
     mapping.init(_servletMapper);
 

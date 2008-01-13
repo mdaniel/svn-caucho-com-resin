@@ -30,7 +30,7 @@
 package com.caucho.boot;
 
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.vfs.Path;
@@ -40,8 +40,8 @@ import java.util.ArrayList;
 
 public class ResinConfig implements EnvironmentBean
 {
-  private ArrayList<InitProgram> _clusterDefaultList
-    = new ArrayList<InitProgram>();
+  private ArrayList<ContainerProgram> _clusterDefaultList
+    = new ArrayList<ContainerProgram>();
   
   private ArrayList<ClusterConfig> _clusterList
     = new ArrayList<ClusterConfig>();
@@ -90,7 +90,7 @@ public class ResinConfig implements EnvironmentBean
   /**
    * Adds a new default to the cluster.
    */
-  public void addClusterDefault(InitProgram program)
+  public void addClusterDefault(ContainerProgram program)
     throws Throwable
   {
     _clusterDefaultList.add(program);

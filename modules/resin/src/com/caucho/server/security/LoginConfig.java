@@ -30,7 +30,7 @@ package com.caucho.server.security;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -47,8 +47,8 @@ public class LoginConfig {
   private String _authMethod = "basic";
   private String _realmName;
   private Class _customType;
-  private InitProgram _formLoginConfig;
-  private InitProgram _init;
+  private ContainerProgram _formLoginConfig;
+  private ContainerProgram _init;
 
   private ServletAuthenticator _authenticator;
 
@@ -113,10 +113,10 @@ public class LoginConfig {
   /**
    * Creates the form-login-config
    */
-  public InitProgram createFormLoginConfig()
+  public ContainerProgram createFormLoginConfig()
   {
     if (_formLoginConfig == null)
-      _formLoginConfig = new InitProgram();
+      _formLoginConfig = new ContainerProgram();
     
     return _formLoginConfig;
   }
@@ -124,10 +124,10 @@ public class LoginConfig {
   /**
    * Creates the init
    */
-  public InitProgram createInit()
+  public ContainerProgram createInit()
   {
     if (_init == null)
-      _init = new InitProgram();
+      _init = new ContainerProgram();
     
     return _init;
   }
@@ -149,7 +149,7 @@ public class LoginConfig {
       login = (AbstractLogin) _customType.newInstance();
       
       if (_init != null)
-        _init.getBuilderProgram().configure(login);
+        _init.configure(login);
     }
     else if (_authMethod.equalsIgnoreCase("basic")) {
       BasicLogin basicLogin = new BasicLogin();

@@ -32,6 +32,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.*;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
@@ -40,15 +41,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.KeyStore;
+import java.util.logging.*;
+import java.security.*;
 import java.security.cert.Certificate;
+
+import java.net.*;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 public class JsseSSLFactory implements SSLFactory {
+  private static final Logger log
+    = Logger.getLogger(JsseSSLFactory.class.getName());
+  
   private static final L10N L = new L10N(JsseSSLFactory.class);
   
   private Path _keyStoreFile;
@@ -163,11 +168,17 @@ public class JsseSSLFactory implements SSLFactory {
   public void init()
     throws ConfigException, IOException, GeneralSecurityException
   {
-    if (_keyStoreFile == null)
-      throw new ConfigException(L.l("`key-store-file' is required for JSSE."));
-    if (_password == null)
-      throw new ConfigException(L.l("`password' is required for JSSE."));
+    if (_keyStoreFile != null && _password == null)
+      throw new ConfigException(L.l("'password' is required for JSSE."));
+    if (_password != null && _keyStoreFile == null)
+      throw new ConfigException(L.l("'key-store-file' is required for JSSE."));
 
+    if (_alias != null && _keyStoreFile == null)
+      throw new ConfigException(L.l("'alias' requires a key store for JSSE."));
+
+    if (_keyStoreFile == null)
+      return;
+    
     _keyStore = KeyStore.getInstance(_keyStoreType);
     
     InputStream is = _keyStoreFile.openRead();
@@ -203,19 +214,29 @@ public class JsseSSLFactory implements SSLFactory {
   public QServerSocket create(InetAddress host, int port)
     throws IOException, GeneralSecurityException
   {
-    if (_keyStore == null)
-      throw new IOException(L.l("key store is missing"));
-
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance(_keyManagerFactory);
+    SSLServerSocketFactory factory = null;
     
-    kmf.init(_keyStore, _password.toCharArray());
-      
     SSLContext sslContext = SSLContext.getInstance(_sslContext);
 
-    sslContext.init(kmf.getKeyManagers(), null, null);
+    if (_keyStore != null) {
+      KeyManagerFactory kmf
+	= KeyManagerFactory.getInstance(_keyManagerFactory);
+    
+      kmf.init(_keyStore, _password.toCharArray());
+      
+      sslContext.init(kmf.getKeyManagers(), null, null);
 
-    SSLServerSocketFactory factory;
-    factory = sslContext.getServerSocketFactory();
+      factory = sslContext.getServerSocketFactory();
+    }
+    else {
+      factory = createAnonymousFactory();
+
+      ServerSocket ss;
+      ss = factory.createServerSocket(8666, 100);
+
+      Socket s = ss.accept();
+      System.out.println(s);
+    }
 
     ServerSocket serverSocket;
 
@@ -258,6 +279,57 @@ public class JsseSSLFactory implements SSLFactory {
     */
 
     return new QServerSocketWrapper(serverSocket);
+  }
+
+  private SSLServerSocketFactory createAnonymousFactory()
+    throws IOException, GeneralSecurityException
+  {
+    throw new ConfigException(L.l("jsse-ssl requires a 'key-store-file'"));
+    
+    /*
+    KeyManagerFactory kmf
+      = KeyManagerFactory.getInstance(_keyManagerFactory);
+
+    KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+    ks.load(null, "password".toCharArray());
+
+    KeyPairGenerator gen = null;
+
+    try {
+      gen = KeyPairGenerator.getInstance("DSA");
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    try {
+      if (gen == null)
+	gen = KeyPairGenerator.getInstance("DiffieHellman");
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    if (gen == null)
+      throw new ConfigException(L.l("Cannot generate anonymous certificate"));
+
+    KeyPair pair = gen.generateKeyPair();
+
+    PrivateKey privateKey = pair.getPrivate();
+    PublicKey publicKey = pair.getPublic();
+
+    ks.setKeyEntry("anonymous", privateKey,
+		   "key-password".toCharArray(), null);
+    
+    kmf.init(ks, "key-password".toCharArray());
+      
+    // sslContext.init(kmf.getKeyManagers(), null, null);
+
+    SSLServerSocketFactory factory;
+    
+    factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+
+    return factory;
+    */
   }
   
   /**

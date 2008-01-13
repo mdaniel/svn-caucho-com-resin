@@ -31,8 +31,7 @@ package com.caucho.server.webapp;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.program.NodeBuilderProgram;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.util.L10N;
 
@@ -56,7 +55,7 @@ public class Listener extends DescriptionGroupConfig {
   // The listener object
   private Object _object;
   
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   /**
    * Sets the listener class.
@@ -98,7 +97,7 @@ public class Listener extends DescriptionGroupConfig {
   /**
    * Sets the init block
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -106,7 +105,7 @@ public class Listener extends DescriptionGroupConfig {
   /**
    * Gets the init block
    */
-  public InitProgram getInit()
+  public ContainerProgram getInit()
   {
     return _init;
   }
@@ -122,15 +121,12 @@ public class Listener extends DescriptionGroupConfig {
     
       _object = _listenerClass.newInstance();
     
-    InitProgram init = getInit();
+    ContainerProgram init = getInit();
     ConfigProgram program;
 
     if (init != null)
-      program = init.getBuilderProgram();
-    else
-      program = NodeBuilderProgram.NULL;
+      init.configure(_object);
 
-    program.configure(_object);
     Config.init(_object);
 
     return _object;

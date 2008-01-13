@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -34,7 +34,6 @@ import com.caucho.server.dispatch.ServletConfigImpl;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
 import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
@@ -94,7 +93,7 @@ public class LoadBalanceRule
       Class cl = Class.forName("com.caucho.servlets.LoadBalanceServlet");
       _servlet.setServletClass("com.caucho.servlets.LoadBalanceServlet");
 
-      _servlet.setInit(new InitProgram(_program));
+      _servlet.setInit(_program);
 
       _webApp.addServlet(_servlet);
     }

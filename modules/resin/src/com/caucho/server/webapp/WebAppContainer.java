@@ -375,6 +375,8 @@ public class WebAppContainer
     deploy.deploy();
 
     _appDeploy.add(deploy);
+
+    clearCache();
   }
 
   /**

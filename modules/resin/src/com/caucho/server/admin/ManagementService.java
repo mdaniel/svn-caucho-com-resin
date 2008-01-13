@@ -30,8 +30,8 @@
 package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.hmux.HmuxRequest;
@@ -98,8 +98,8 @@ abstract public class ManagementService
     servlet.addURLRegexp(".*");
     servlet.setServletClass(ManagementServlet.class.getName());
 
-    InitProgram servletInit = new InitProgram();
-    servletInit.addBuilderProgram(new PropertyValueProgram("service", this));
+    ContainerProgram servletInit = new ContainerProgram();
+    servletInit.addProgram(new PropertyValueProgram("service", this));
     servlet.setInit(servletInit);
 
     webAppConfig.addBuilderProgram(new PropertyValueProgram("servlet-mapping", servlet));

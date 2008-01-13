@@ -29,6 +29,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
@@ -50,7 +51,7 @@ public class ReferenceConfig {
   private Class _factory;
   private String _description;
 
-  private InitProgram _init;
+  private ContainerProgram _init;
   private HashMap<String,String> _params;
   
   private ObjectFactory _objectFactory;
@@ -90,7 +91,7 @@ public class ReferenceConfig {
   /**
    * Sets the init program
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -98,7 +99,7 @@ public class ReferenceConfig {
   /**
    * Gets the init program;
    */
-  public InitProgram getInit()
+  public ContainerProgram getInit()
   {
     return _init;
   }

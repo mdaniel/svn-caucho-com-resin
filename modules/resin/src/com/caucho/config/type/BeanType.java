@@ -264,7 +264,7 @@ public class BeanType extends ConfigType
 
       String name = method.getName();
 
-      if (name.equals("addBuilderProgram")
+      if ((name.equals("addBuilderProgram") || name.equals("addProgram"))
 	  && paramTypes.length == 1
 	  && paramTypes[0].equals(ConfigProgram.class)) {
 	ConfigType type = TypeFactory.getType(paramTypes[0]);

@@ -108,8 +108,13 @@ public class FilterMapper {
       if (filterName == null)
 	filterName = mapping.getFilterClassName();
 
+      if (mapping.getFilterClassName() != null
+	  && _filterManager.getFilter(filterName) == null) {
+	_filterManager.addFilter(mapping);
+      }
+
       if (_filterManager.getFilter(filterName) == null)
-        throw new ServletConfigException(L.l("`{0}' is an unknown filter-name.  filter-mapping requires that the named filter be defined in a <filter> configuration before the <filter-mapping>.", filterName));
+        throw new ServletConfigException(L.l("'{0}' is an unknown filter-name.  filter-mapping requires that the named filter be defined in a <filter> configuration before the <filter-mapping>.", filterName));
 
       _filterMap.add(mapping);
 

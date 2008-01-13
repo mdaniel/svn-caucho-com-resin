@@ -31,8 +31,8 @@ package com.caucho.server.dispatch;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.InitParam;
-import com.caucho.config.types.InitProgram;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 
@@ -56,7 +56,7 @@ public class FilterConfigImpl implements FilterConfig {
   private String _displayName;
   private HashMap<String,String> _initParams = new HashMap<String,String>();
 
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   private ServletContext _servletContext;
   
@@ -175,7 +175,7 @@ public class FilterConfigImpl implements FilterConfig {
   /**
    * Sets the init block
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -183,7 +183,7 @@ public class FilterConfigImpl implements FilterConfig {
   /**
    * Gets the init block
    */
-  public InitProgram getInit()
+  public ContainerProgram getInit()
   {
     return _init;
   }

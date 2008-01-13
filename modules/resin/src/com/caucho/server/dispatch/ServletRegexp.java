@@ -121,7 +121,7 @@ public class ServletRegexp {
   /**
    * Returns the program.
    */
-  public ConfigProgram getBuilderProgram()
+  public ContainerProgram getBuilderProgram()
   {
     return _program;
   }

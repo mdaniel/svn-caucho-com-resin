@@ -31,6 +31,7 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
@@ -66,7 +67,7 @@ abstract public class AbstractBeanConfig {
 
   private Class _scope;
   
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   protected AbstractBeanConfig()
   {
@@ -199,7 +200,7 @@ abstract public class AbstractBeanConfig {
   /**
    * Sets the init program.
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -207,7 +208,7 @@ abstract public class AbstractBeanConfig {
   /**
    * Sets the init program.
    */
-  public InitProgram getInit()
+  public ContainerProgram getInit()
   {
     return _init;
   }

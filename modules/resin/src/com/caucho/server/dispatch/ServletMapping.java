@@ -31,7 +31,7 @@ package com.caucho.server.dispatch;
 
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.el.EL;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
@@ -191,7 +191,7 @@ public class ServletMapping extends ServletConfigImpl {
       config.setServletClass(className);
       config.setServletContext(webApp);
 
-      InitProgram program = getInit();
+      ContainerProgram program = getInit();
       if (program != null)
 	program.init(config);
 

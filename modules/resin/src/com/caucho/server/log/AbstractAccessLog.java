@@ -29,8 +29,9 @@
 
 package com.caucho.server.log;
 
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 
@@ -45,7 +46,8 @@ import java.util.logging.Logger;
  * Represents an log of every top-level request to the server.
  */
 abstract public class AbstractAccessLog {
-  protected static final Logger log = Log.open(AbstractAccessLog.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractAccessLog.class.getName());
 
   protected Path _path;
 
@@ -92,10 +94,10 @@ abstract public class AbstractAccessLog {
     setPath(path);
   }
 
-  public void addInit(InitProgram init)
-    throws Throwable
+  public void addInit(ContainerProgram init)
   {
-    init.init(this);
+    init.configure(this);
+    Config.init(this);
   }
 
   /**

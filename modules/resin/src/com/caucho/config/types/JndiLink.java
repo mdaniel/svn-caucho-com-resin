@@ -29,6 +29,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
@@ -52,7 +53,7 @@ public class JndiLink {
 
   private Hashtable _properties = new Hashtable();
 
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   /**
    * Sets the name
@@ -89,7 +90,7 @@ public class JndiLink {
   /**
    * Sets the init program
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -97,7 +98,7 @@ public class JndiLink {
   /**
    * Gets the init program;
    */
-  public InitProgram getInit()
+  public ContainerProgram getInit()
   {
     return _init;
   }

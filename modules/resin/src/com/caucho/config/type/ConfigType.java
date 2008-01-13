@@ -143,7 +143,7 @@ abstract public class ConfigType
    */
   public boolean isProgram()
   {
-    return ConfigProgram.class.isAssignableFrom(getType());
+    return ConfigProgram.class.equals(getType());
   }
 
   /**

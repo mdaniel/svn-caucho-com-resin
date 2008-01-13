@@ -31,6 +31,7 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.ejb3.gen.*;
 import com.caucho.util.*;
@@ -69,7 +70,7 @@ public class WbComponentConfig {
 
   private Class _scope;
   
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   protected ComponentImpl _comp;
 
@@ -198,7 +199,7 @@ public class WbComponentConfig {
   /**
    * Sets the init program.
    */
-  public void setInit(InitProgram init)
+  public void setInit(ContainerProgram init)
   {
     _init = init;
   }

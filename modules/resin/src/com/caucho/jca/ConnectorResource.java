@@ -30,7 +30,7 @@ package com.caucho.jca;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.jca.cfg.ObjectConfig;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
@@ -67,7 +67,7 @@ public class ConnectorResource implements EnvironmentListener {
   private ResourceArchive _rar;
 
   private ResourceAdapterConfig _resourceAdapter = new ResourceAdapterConfig();
-  private InitProgram _init;
+  private ContainerProgram _init;
 
   private ArrayList<ConnectionFactory> _outboundList
     = new ArrayList<ConnectionFactory>();
@@ -155,7 +155,7 @@ public class ConnectorResource implements EnvironmentListener {
     return _type;
   }
 
-  public void addInit(InitProgram init)
+  public void addInit(ContainerProgram init)
   {
     _init = init;
   }
@@ -446,7 +446,7 @@ public class ConnectorResource implements EnvironmentListener {
 
   public class ResourceAdapterConfig {
     private String _name;
-    private InitProgram _init;
+    private ContainerProgram _init;
 
     public void setJndiName(String name)
     {
@@ -458,12 +458,12 @@ public class ConnectorResource implements EnvironmentListener {
       return _name;
     }
     
-    public void setInit(InitProgram init)
+    public void setInit(ContainerProgram init)
     {
       _init = init;
     }
 
-    public InitProgram getInit()
+    public ContainerProgram getInit()
     {
       return _init;
     }
@@ -475,7 +475,7 @@ public class ConnectorResource implements EnvironmentListener {
     private ManagedConnectionFactory _factory;
     private boolean _localTransactionOptimization = true;
     private boolean _shareable = true;
-    private InitProgram _init;
+    private ContainerProgram _init;
 
     public void setJndiName(String name)
     {
@@ -576,12 +576,12 @@ public class ConnectorResource implements EnvironmentListener {
       return _factory;
     }
     
-    public void setInit(InitProgram init)
+    public void setInit(ContainerProgram init)
     {
       _init = init;
     }
 
-    public InitProgram getInit()
+    public ContainerProgram getInit()
     {
       return _init;
     }
@@ -663,7 +663,7 @@ public class ConnectorResource implements EnvironmentListener {
   public class ConnectionListener {
     private String _name;
     private String _type;
-    private InitProgram _init;
+    private ContainerProgram _init;
     private EndpointFactory _endpointFactory;
 
     private MessageEndpointFactory _endpoint;
@@ -689,12 +689,12 @@ public class ConnectorResource implements EnvironmentListener {
       return _type;
     }
     
-    public void setInit(InitProgram init)
+    public void setInit(ContainerProgram init)
     {
       _init = init;
     }
 
-    public InitProgram getInit()
+    public ContainerProgram getInit()
     {
       return _init;
     }
@@ -743,7 +743,7 @@ public class ConnectorResource implements EnvironmentListener {
   public class EndpointFactory {
     private String _name;
     private Class _type;
-    private InitProgram _init;
+    private ContainerProgram _init;
 
     public void setJndiName(String name)
     {
@@ -768,12 +768,12 @@ public class ConnectorResource implements EnvironmentListener {
       return _type;
     }
     
-    public void setInit(InitProgram init)
+    public void setInit(ContainerProgram init)
     {
       _init = init;
     }
 
-    public InitProgram getInit()
+    public ContainerProgram getInit()
     {
       return _init;
     }
@@ -782,7 +782,7 @@ public class ConnectorResource implements EnvironmentListener {
   public class ConnectorBean {
     private String _name;
     private String _type;
-    private InitProgram _init;
+    private ContainerProgram _init;
 
     private ObjectConfig _objectConfig;
     private Object _object;
@@ -843,12 +843,12 @@ public class ConnectorResource implements EnvironmentListener {
       return _type;
     }
     
-    public void setInit(InitProgram init)
+    public void setInit(ContainerProgram init)
     {
       _init = init;
     }
 
-    public InitProgram getInit()
+    public ContainerProgram getInit()
     {
       return _init;
     }

@@ -29,26 +29,15 @@
 
 package com.caucho.ejb.metadata;
 
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
-import com.caucho.ejb.EjbServerManager;
-import com.caucho.ejb.cfg.EjbBean;
-import com.caucho.ejb.cfg.EjbMethod;
-import com.caucho.ejb.cfg.EjbMethodPattern;
-import com.caucho.ejb.cfg.EjbSessionBean;
-import com.caucho.ejb.cfg.EjbMessageBean;
-import com.caucho.ejb.cfg.MethodSignature;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
-import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -66,7 +55,7 @@ public class Bean implements EnvironmentBean {
   private Class _type;
   private String _name;
 
-  private ArrayList<InitProgram> _initList = new ArrayList<InitProgram>();
+  private ArrayList<ContainerProgram> _initList = new ArrayList<ContainerProgram>();
 
   public Bean(EjbContainer ejbContainer)
   {
@@ -107,7 +96,7 @@ public class Bean implements EnvironmentBean {
   /**
    * Adds an init.
    */
-  public void addInit(InitProgram init)
+  public void addInit(ContainerProgram init)
   {
     _initList.add(init);
   }

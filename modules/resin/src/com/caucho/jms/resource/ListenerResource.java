@@ -31,11 +31,10 @@ package com.caucho.jms.resource;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
 import javax.annotation.*;
 import javax.jms.*;
@@ -141,7 +140,7 @@ public class ListenerResource {
 
   public static class ListenerConfig {
     private Class _type;
-    private InitProgram _init;
+    private ContainerProgram _init;
 
     /**
      * Sets the listener's type.
@@ -160,7 +159,7 @@ public class ListenerResource {
     /**
      * Sets the init program.
      */
-    public void setInit(InitProgram init)
+    public void setInit(ContainerProgram init)
     {
       _init = init;
     }

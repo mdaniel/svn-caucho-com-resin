@@ -314,7 +314,7 @@ public class FilterMapping extends FilterConfigImpl {
     /**
      * Sets the singleton url-pattern.
      */
-    public void addText(String pattern)
+    public URLPattern addText(String pattern)
       throws ServletException
     {
       pattern = pattern.trim();
@@ -331,6 +331,8 @@ public class FilterMapping extends FilterConfigImpl {
       _hasInclude = true;
       
       _matchList.add(Match.createInclude(regexp));
+
+      return this;
     }
 
     /**

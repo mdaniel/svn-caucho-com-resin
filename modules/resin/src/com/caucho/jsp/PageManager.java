@@ -247,8 +247,11 @@ abstract public class PageManager {
 
       page = createPage(path, pageURI, className, config, dependList);
 
-      if (page == null)
+      if (page == null) {
+	log.fine("Jsp[] cannot create page " + path.getURL());
+	
         throw new FileNotFoundException(getWebApp().getContextPath() + pageURI);
+      }
 
       if (_autoCompile == false)
         page._caucho_setNeverModified(true);

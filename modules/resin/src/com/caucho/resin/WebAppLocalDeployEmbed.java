@@ -29,6 +29,7 @@
 
 package com.caucho.resin;
 
+import com.caucho.resin.deploy.*;
 import com.caucho.server.cluster.*;
 
 /**
@@ -50,6 +51,14 @@ public class WebAppLocalDeployEmbed extends WebAppEmbed
   public WebAppLocalDeployEmbed()
   {
     super.setContextPath(LOCAL_DEPLOY_CONTEXT_PATH);
+
+    ServletMappingEmbed deployServlet = new ServletMappingEmbed();
+    deployServlet.setServletClass(LocalDeployServlet.class.getName());
+    deployServlet.setServletName(LocalDeployServlet.class.getName());
+    deployServlet.setUrlPattern("/");
+    deployServlet.addProperty("enable", true);
+
+    addServletMapping(deployServlet);
   }
 
   /**

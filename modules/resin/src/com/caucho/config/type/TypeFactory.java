@@ -31,14 +31,12 @@ package com.caucho.config.type;
 
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
-import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.QName;
 
-import org.w3c.dom.Node;
 
 import java.beans.*;
 import java.io.InputStream;
@@ -483,7 +481,7 @@ public class TypeFactory implements AddLoaderListener
     /*
     _primitiveTypes.put("org.w3c.dom.Node", new NodeType());
 
-    _primitiveTypes.put("com.caucho.config.types.InitProgram",
+    _primitiveTypes.put("com.caucho.config.types.ContainerProgram",
                         new InitProgramType());
     _primitiveTypes.put("com.caucho.config.BuilderProgram",
                         new BuilderProgramType());
