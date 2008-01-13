@@ -281,7 +281,8 @@ abstract public class AbstractFunction {
     try {
       if (obj != null) {
         env.setThis(obj);
-        
+
+        /*
         if (isPublic()) {
         }
         else if (isProtected()) {
@@ -302,6 +303,7 @@ abstract public class AbstractFunction {
             errorPrivateAccess(env, oldThis);
           }
         }
+	*/
       }
 
       return call(env, args);

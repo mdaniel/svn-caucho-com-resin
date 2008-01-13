@@ -64,6 +64,8 @@ public class ServletMappingEmbed
   private HashMap<String,String> _initParamMap = new HashMap<String,String>();
   private ContainerProgram _init = new ContainerProgram();
 
+  private ServletProtocolEmbed _protocol;
+
   /**
    * Creates a new embedded servlet-mapping
    */
@@ -166,7 +168,7 @@ public class ServletMappingEmbed
   }
 
   /**
-   * Sets an init-param.
+   * Sets an init-param value.
    */
   public void setInitParam(String name, String value)
   {
@@ -174,11 +176,19 @@ public class ServletMappingEmbed
   }
 
   /**
-   * Adds a property.
+   * Adds an init/ioc property.
    */
   public void addProperty(String name, Object value)
   {
     _init.addProgram(new PropertyValueProgram(name, value));
+  }
+
+  /**
+   * Sets the remoting protocol
+   */
+  public void setProtocol(ServletProtocolEmbed protocol)
+  {
+    _protocol = protocol;
   }
 
   protected void configure(ServletMapping servletMapping)
@@ -200,6 +210,10 @@ public class ServletMappingEmbed
 
       if (_loadOnStartup >= 0)
 	servletMapping.setLoadOnStartup(_loadOnStartup);
+
+      if (_protocol != null) {
+	servletMapping.setProtocol(_protocol.createProtocol());
+      }
 
       servletMapping.init();
     } catch (Exception e) {

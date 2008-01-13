@@ -271,6 +271,8 @@ public class JavaClassGenerator {
     try {
       if (_encoding != null)
 	os.setEncoding(_encoding);
+      else
+	os.setEncoding("JAVA");
       
       JavaWriter out = new JavaWriter(os);
 

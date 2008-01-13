@@ -767,8 +767,12 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Enable or disable interlace
    */
-  public static boolean imageinterlace(QuercusImage image, boolean enable)
+  public static boolean imageinterlace(QuercusImage image,
+				       @Optional Boolean enable)
   {
+    if (enable != null)
+      image.setInterlace(enable);
+    
     // no-op, can safely ignore (just makes images that load top-down)
     return true;
   }
@@ -1641,6 +1645,7 @@ public class ImageModule extends AbstractQuercusModule {
     private int _height;
     BufferedImage _bufferedImage;
     private Graphics2D _graphics;
+    private boolean _isInterlace;
 
     private BufferedImage _brush;
     private int[] _style;
@@ -1684,6 +1689,16 @@ public class ImageModule extends AbstractQuercusModule {
     public String toString()
     {
       return "resource(Image)";
+    }
+
+    public void setInterlace(boolean isInterlace)
+    {
+      _isInterlace = isInterlace;
+    }
+
+    public boolean isInterlace()
+    {
+      return _isInterlace;
     }
 
     public int getPixel(int x, int y)

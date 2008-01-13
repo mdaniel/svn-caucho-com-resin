@@ -79,6 +79,20 @@ abstract public class Value implements java.io.Serializable
   {
     return false;
   }
+  
+  /**
+   * Checks if 'this' is a valid protected call for 'className'
+   */
+  public void checkProtected(Env env, String className)
+  {
+  }
+  
+  /**
+   * Checks if 'this' is a valid private call for 'className'
+   */
+  public void checkPrivate(Env env, String className)
+  {
+  }
 
   /**
    * Returns the ValueType.

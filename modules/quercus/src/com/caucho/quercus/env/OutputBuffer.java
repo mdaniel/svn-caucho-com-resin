@@ -85,7 +85,7 @@ public class OutputBuffer {
 
     if (encoding != null) {
       try {
-        _out.setEncoding(env.getOutputEncoding());
+        _out.setEncoding(encoding);
       }
       catch (UnsupportedEncodingException e) {
         if (log.isLoggable(Level.WARNING))

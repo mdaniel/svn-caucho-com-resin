@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -41,33 +42,52 @@ public class IntMap {
    * Encoding of a null entry.  Since NULL is equal to Integer.MIN_VALUE, 
    * it's impossible to distinguish between the two.
    */
+  private final static Object NULL_KEY = new Object();
+  
   public final static int NULL = -65536; // Integer.MIN_VALUE + 1;
+  
   private static int DELETED = 0x1;
-  private Object []_keys;
-  private int _nullValue;
-  private int []_values;
+  
+  private final Item []_entries;
+  private final int _mask;
+
   private int _size;
-  private int _mask;
 
   /**
-   * Create a new IntMap.  Default size is 16.
+   * Create a new IntMap.  Default size is 256
    */
   public IntMap()
   {
-    _keys = new Object[16];
-    _values = new int[16];
-
-    _mask = _keys.length - 1;
-    _size = 0;
-
-    _nullValue = NULL;
+    this(256);
   }
 
   /**
-   * Create a new IntMap for cloning.
+   * Create a new IntMap.
    */
-  private IntMap(boolean dummy)
+  public IntMap(int initialCapacity)
   {
+    int capacity;
+
+    for (capacity = 16; capacity < 2 * initialCapacity; capacity *= 2) {
+    }
+
+    _entries = new Item[capacity];
+    _mask = capacity - 1;
+  }
+
+  /**
+   * Create copy of an IntMap
+   */
+  private IntMap(Item []entries)
+  {
+    _entries = new Item[entries.length];
+    _mask = _entries.length - 1;
+
+    for (Item item : entries) {
+      for (; item != null; item = item._next) {
+	put(item._key, item._value);
+      }
+    }
   }
 
   /**
@@ -75,13 +95,13 @@ public class IntMap {
    */
   public void clear()
   {
-    _nullValue = NULL;
-    for (int i = 0; i < _values.length; i++) {
-      _keys[i] = null;
-      _values[i] = 0;
+    for (int i = 0; i < _entries.length; i++) {
+      _entries[i] = null;
     }
+
     _size = 0;
   }
+  
   /**
    * Returns the current number of entries in the map.
    */
@@ -96,55 +116,18 @@ public class IntMap {
   public int get(Object key)
   {
     if (key == null)
-      return _nullValue;
+      key = NULL_KEY;
 
     int hash = key.hashCode() & _mask;
-    Object []keys = _keys;
 
-    for (int i = keys.length; i >= 0; i--) {
-      Object mapKey = keys[hash];
-
-      if (mapKey == key)
-	return _values[hash];
-      else if (mapKey == null)
-	return NULL;
-      else if (mapKey.equals(key))
-	return _values[hash];
-
-      hash = (hash + 1) & _mask;
+    for (Item item = _entries[hash]; item != null; item = item._next) {
+      Object itemKey = item._key;
+      
+      if (itemKey == key || itemKey.equals(key))
+	return item._value;
     }
 
     return NULL;
-  }
-
-  /**
-   * Expands the property table
-   */
-  private void resize(int newSize)
-  {
-    Object []newKeys = new Object[newSize];
-    int []newValues = new int[newSize];
-
-    _mask = newKeys.length - 1;
-
-    for (int i = 0; i < _keys.length; i++) {
-      if (_keys[i] == null)
-	continue;
-
-      int hash = _keys[i].hashCode() & _mask;
-
-      for (int j = _mask; j >= 0; j--) {
-	if (newKeys[hash] == null) {
-	  newKeys[hash] = _keys[i];
-	  newValues[hash] = _values[i];
-	  break;
-	}
-	hash = (hash + 1) & _mask;
-      }
-    }
-
-    _keys = newKeys;
-    _values = newValues;
   }
 
   /**
@@ -152,39 +135,30 @@ public class IntMap {
    */
   public int put(Object key, int value)
   {
-    if (key == null) {
-      int old = _nullValue;
-      _nullValue = value;
-      return old;
-    }
+    if (key == null)
+      key = NULL_KEY;
 
-    int hash = key.hashCode() & _mask;
+    synchronized (this) {
+      int hash = key.hashCode() & _mask;
 
-    for (int count = _size; count >= 0; count--) {
-      Object testKey = _keys[hash];
+      for (Item item = _entries[hash]; item != null; item = item._next) {
+	Object testKey = item._key;
 
-      if (testKey == null) {
-	_keys[hash] = key;
-	_values[hash] = value;
+	if (testKey == key || testKey.equals(key)) {
+	  int oldValue = item._value;
+	
+	  item._value = value;
 
-	_size++;
-
-	if (_keys.length <= 4 * _size)
-	  resize(4 * _keys.length);
-
-	return NULL;
+	  return oldValue;
+	}
       }
-      else if (key != testKey && ! testKey.equals(key)) {
-	hash = (hash + 1) & _mask;
-	continue;
-      }
-      else {
-	int old = _values[hash];
 
-	_values[hash] = value;
+      Item item = new Item(key, value);
+      item._next = _entries[hash];
 
-	return old;
-      }
+      _entries[hash] = item;
+
+      _size++;
     }
 
     return NULL;
@@ -195,75 +169,40 @@ public class IntMap {
    */
   public int remove(Object key)
   {
-    if (key == null) {
-      int old = _nullValue;
-      _nullValue = NULL;
-      return old;
-    }
+    if (key == null)
+      key = NULL_KEY;
 
     int hash = key.hashCode() & _mask;
 
-    for (int j = _size; j >= 0; j--) {
-      Object mapKey = _keys[hash];
+    synchronized (this) {
+      Item prev = null;
+      for (Item item = _entries[hash]; item != null; item = item._next) {
+	Object itemKey = item._key;
+      
+	if (itemKey == key || itemKey.equals(key)) {
+	  int oldValue = item._value;
+	
+	  if (prev != null)
+	    prev._next = item._next;
+	  else
+	    _entries[hash] = item._next;
 
-      if (mapKey == null)
-	return NULL;
-      else if (mapKey.equals(key)) {
-	_size--;
+	  _size--;
 
-	_keys[hash] = null;
+	  return oldValue;
+	}
 
-	int value = _values[hash];
-
-	refillEntries(hash);
-
-	return value;
+	prev = item;
       }
-
-      hash = (hash + 1) & _mask;
     }
 
     return NULL;
   }
-
-  /**
-   * Put the item in the best location available in the hash table.
-   */
-  private void refillEntries(int hash)
-  {
-    for (int count = _size; count >= 0; count--) {
-      hash = (hash + 1) & _mask;
-
-      if (_keys[hash] == null)
-	return;
-
-      refillEntry(hash);
-    }
-  }
-  
-  /**
-   * Put the item in the best location available in the hash table.
-   */
-  private void refillEntry(int baseHash)
-  {
-    Object key = _keys[baseHash];
-    int value = _values[baseHash];
     
-    int hash = key.hashCode();
-    
-    for (int count = _size; count >= 0; count--) {
-      if (_keys[hash] == null) {
-	_keys[hash] = key;
-	_values[hash] = value;
-	return;
-      }
-
-      hash = (hash + 1) & _mask;
-    }
-  }
   /**
    * Returns an iterator of the keys.
    */
+
   public Iterator iterator()
   {
     return new IntMapIterator();
@@ -271,24 +210,13 @@ public class IntMap {
 
   public Object clone()
   {
-    IntMap clone = new IntMap(true);
-
-    clone._keys = new Object[_keys.length];
-    System.arraycopy(_keys, 0, clone._keys, 0, _keys.length);
-    
-    clone._values = new int[_values.length];
-    System.arraycopy(_values, 0, clone._values, 0, _values.length);
-    
-    clone._mask = _mask;
-    clone._size = _size;
-
-    clone._nullValue = _nullValue;
-
-    return clone;
+    return new IntMap(_entries);
   }
 
   public String toString()
   {
+    return "IntMap[]";
+    /*
     StringBuffer sbuf = new StringBuffer();
 
     sbuf.append("IntMap[");
@@ -305,25 +233,47 @@ public class IntMap {
     }
     sbuf.append("]");
     return sbuf.toString();
+    */
   }
 
   class IntMapIterator implements Iterator {
-    int index;
+    int _index = -1;
+    Item _item;
 
     public boolean hasNext()
     {
-      for (; index < _keys.length; index++)
-	if (_keys[index] != null)
+      if (_item != null)
+	return true;
+      
+      for (_index++; _index < _entries.length; _index++) {
+	_item = _entries[_index];
+      
+	if (_item != null)
 	  return true;
+      }
 
       return false;
     }
 
     public Object next()
     {
-      for (; index < _keys.length; index++)
-	if (_keys[index] != null)
-	  return _keys[index++];
+      if (_item != null) {
+	Object key = _item._key;
+	_item = _item._next;
+
+	return key;
+      }
+      
+      for (_index++; _index < _entries.length; _index++) {
+	_item = _entries[_index];
+      
+	if (_item != null) {
+	  Object key = _item._key;
+	  _item = _item._next;
+	  
+	  return key;
+	}
+      }
 
       return null;
     }
@@ -331,6 +281,19 @@ public class IntMap {
     public void remove()
     {
       throw new RuntimeException();
+    }
+  }
+
+  static class Item {
+    final Object _key;
+    int _value;
+    
+    Item _next;
+
+    Item(Object key, int value)
+    {
+      _key = key;
+      _value = value;
     }
   }
 }

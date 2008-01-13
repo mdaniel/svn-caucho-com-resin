@@ -64,7 +64,7 @@ public class LocalDeployServlet extends GenericServlet
   private static final L10N L = new L10N(LocalDeployServlet.class);
   
   private boolean _isEnable;
-  private String _role;
+  private String _role = "manager";
 
   private HashMap<String,WebAppContainer> _webAppMap
     = new HashMap<String,WebAppContainer>();
@@ -75,6 +75,18 @@ public class LocalDeployServlet extends GenericServlet
   public void setEnable(boolean isEnable)
   {
     _isEnable = isEnable;
+  }
+
+  /**
+   * Role is a login requirement.  The default is 'manager', so applications
+   * which don't want a login requirement will need to set this null.
+   */
+  public void setRole(String role)
+  {
+    if ("*".equals(role) || "".equals(role) || "any".equals(role))
+      _role = null;
+    else
+      _role = role;
   }
 
   /**
@@ -115,6 +127,16 @@ public class LocalDeployServlet extends GenericServlet
     
     if (! addr.startsWith("127.")) {
       log.warning(L.l("LocalDeployServlet[] non-local access from IP='{0}'",
+		      req.getRemoteAddr()));
+      
+      res.sendError(HttpServletResponse.SC_FORBIDDEN);
+      
+      return;
+    }
+
+    if (_role != null && ! req.isUserInRole(_role)) {
+      log.warning(L.l("LocalDeployServlet[] user not in role '{0}' from IP='{1}'",
+		      _role,
 		      req.getRemoteAddr()));
       
       res.sendError(HttpServletResponse.SC_FORBIDDEN);

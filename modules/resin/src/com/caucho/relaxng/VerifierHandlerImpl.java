@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -404,7 +405,7 @@ public class VerifierHandlerImpl extends DefaultHandler
     if (currentItem == null)
       return name.toString();
 
-    HashSet<QName> values = new HashSet<QName>();
+    HashSet<QName> values = new LinkedHashSet<QName>();
     currentItem.firstSet(values);
 
     for (QName value : values) {
@@ -432,7 +433,7 @@ public class VerifierHandlerImpl extends DefaultHandler
     if (currentItem == null)
       currentItem = parentItem;
 
-    HashSet<QName> values = new HashSet<QName>();
+    HashSet<QName> values = new LinkedHashSet<QName>();
     currentItem.firstSet(values);
 
     String expected = null;
@@ -455,7 +456,7 @@ public class VerifierHandlerImpl extends DefaultHandler
     if (currentItem == null)
       currentItem = parentItem;
 
-    HashSet<QName> values = new HashSet<QName>();
+    HashSet<QName> values = new LinkedHashSet<QName>();
     currentItem.requiredFirstSet(values);
       
     String expected = null;
@@ -564,7 +565,7 @@ public class VerifierHandlerImpl extends DefaultHandler
     if (item == null)
       return "";
 
-    HashSet<QName> values = new HashSet<QName>();
+    HashSet<QName> values = new LinkedHashSet<QName>();
     item.requiredFirstSet(values);
 
     return namesToString(values, parentName, qName, item.allowEmpty());
@@ -637,7 +638,7 @@ public class VerifierHandlerImpl extends DefaultHandler
     if (item == null)
       return "";
 
-    HashSet<QName> values = new HashSet<QName>();
+    HashSet<QName> values = new LinkedHashSet<QName>();
     item.attributeSet(values);
 
     CharBuffer cb = new CharBuffer();

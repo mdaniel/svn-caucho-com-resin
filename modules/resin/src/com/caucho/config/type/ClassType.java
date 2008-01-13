@@ -122,5 +122,18 @@ public final class ClassType extends ConfigType
     
     _primitiveTypes.put(String.class.getName(), String.class);
     _primitiveTypes.put(Class.class.getName(), Class.class);
+    
+    _primitiveTypes.put("Boolean", Boolean.class);
+    _primitiveTypes.put("Character", Character.class);
+    _primitiveTypes.put("Byte", Byte.class);
+    _primitiveTypes.put("Short", Short.class);
+    _primitiveTypes.put("Integer", Integer.class);
+    _primitiveTypes.put("Long", Long.class);
+    _primitiveTypes.put("Float", Float.class);
+    _primitiveTypes.put("Double", Double.class);
+    
+    _primitiveTypes.put("String", String.class);
+    _primitiveTypes.put("Date", Date.class);
+    _primitiveTypes.put("Class", Class.class);
   }
 }

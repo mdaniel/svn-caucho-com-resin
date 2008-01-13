@@ -371,6 +371,22 @@ public class StringBuilderValue
     // XXX: can this just return this, or does it need to return a copy?
     return new StringBuilderValue(_buffer, 0, _length);
   }
+
+  /**
+   * Writes to a stream
+   */
+  @Override
+  public void writeTo(OutputStream os)
+  {
+    try {
+      int len = _length;
+
+      for (int i = 0; i < len; i++)
+	os.write(_buffer[i]);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
   
   /**
    * Append to a string builder.

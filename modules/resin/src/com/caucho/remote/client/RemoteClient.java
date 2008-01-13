@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -66,9 +66,9 @@ public class RemoteClient extends AbstractBeanConfig
 				    type.getName()));
   }
 
-  public void setInterface(Class serviceClass)
+  public void setInterface(Class type)
   {
-    setClass(_type);
+    setClass(type);
   }
 
   /**

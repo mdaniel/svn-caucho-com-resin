@@ -67,15 +67,15 @@ public class FormLogin extends AbstractLogin {
   public void setFormLoginPage(String formLoginPage)
     throws ConfigException
   {
-    _loginPage = formLoginPage;
-
     int colon = formLoginPage.indexOf(':');
     int slash = formLoginPage.indexOf('/');
 
     if (colon > 0 && colon < slash) {
     }
     else if (slash != 0)
-      throw new ConfigException(L.l("form-login-page `{0}' must start with '/'.  The form-login-page is relative to the web-app root.", formLoginPage));
+      throw new ConfigException(L.l("form-login-page '{0}' must start with '/'.  The form-login-page is relative to the web-app root.", formLoginPage));
+    
+    _loginPage = formLoginPage;
   }
   
   /**
@@ -92,10 +92,10 @@ public class FormLogin extends AbstractLogin {
   public void setFormErrorPage(String formErrorPage)
     throws ConfigException
   {
-    _errorPage = formErrorPage;
-
     if (! formErrorPage.startsWith("/"))
       throw new ConfigException(L.l("form-error-page `{0}' must start with '/'.  The form-error-page is relative to the web-app root.", formErrorPage));
+    
+    _errorPage = formErrorPage;
   }
   
   /**
@@ -157,7 +157,7 @@ public class FormLogin extends AbstractLogin {
       _loginPage = _errorPage;
 
     if (_loginPage == null)
-      throw new ServletException("FormLogin needs an form-login-page");
+      throw new ConfigException(L.l("FormLogin needs an form-login-page"));
   }
 
   /**

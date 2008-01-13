@@ -139,8 +139,10 @@ public class StaticMethodExpr extends Expr {
     // php/0954 - what appears to be a static call may be a call to a super constructor
     Value thisValue = env.getThis();
     */
+
+    Value thisValue = NullThisValue.NULL;
     
-    return cl.callMethod(env, null, _hash, _name, _name.length, _args);
+    return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
   }
   
   /**

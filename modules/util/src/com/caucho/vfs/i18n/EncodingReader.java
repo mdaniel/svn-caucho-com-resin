@@ -44,16 +44,16 @@ import java.io.UnsupportedEncodingException;
  * <p/>Implementations should not buffer the bytes.
  */
 abstract public class EncodingReader extends Reader {
-  private String javaEncoding;
+  private String _javaEncoding;
 
   public String getJavaEncoding()
   {
-    return javaEncoding;
+    return _javaEncoding;
   }
 
   public void setJavaEncoding(String encoding)
   {
-    this.javaEncoding = encoding;
+    _javaEncoding = encoding;
   }
   
   /**

@@ -34,6 +34,7 @@ import com.caucho.config.types.*;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;
+import com.caucho.util.*;
 
 import java.util.*;
 
@@ -53,12 +54,16 @@ import java.util.*;
  */
 public class ServletEmbed
 {
+  private static final L10N L = new L10N(ServletEmbed.class);
+  
   private String _servletName;
   private String _servletClass;
   private int _loadOnStartup = -1;
   
   private HashMap<String,String> _initParamMap = new HashMap<String,String>();
   private ContainerProgram _init = new ContainerProgram();
+
+  private ServletProtocolEmbed _protocol;
 
   /**
    * Creates a new embedded servlet
@@ -138,18 +143,31 @@ public class ServletEmbed
   }
 
   /**
-   * Adds a property.
+   * Adds an init/ioc property.
    */
   public void addProperty(String name, Object value)
   {
     _init.addProgram(new PropertyValueProgram(name, value));
   }
 
+  /**
+   * Sets the remoting protocol
+   */
+  public void setProtocol(ServletProtocolEmbed protocol)
+  {
+    _protocol = protocol;
+  }
+
   protected void configure(ServletConfigImpl servletConfig)
   {
     try {
-      servletConfig.setServletName(_servletName);
+      if (_servletClass == null)
+	throw new ConfigException(L.l("servlet-class is required for ServletEmbed."));
+      
       servletConfig.setServletClass(_servletClass);
+
+      if (_servletName == null)
+	servletConfig.setServletName(_servletClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {
 	servletConfig.setInitParam(entry.getKey(), entry.getValue());
@@ -159,6 +177,10 @@ public class ServletEmbed
 
       if (_loadOnStartup >= 0)
 	servletConfig.setLoadOnStartup(_loadOnStartup);
+
+      if (_protocol != null) {
+	servletConfig.setProtocol(_protocol.createProtocol());
+      }
 
       servletConfig.init();
     } catch (Exception e) {

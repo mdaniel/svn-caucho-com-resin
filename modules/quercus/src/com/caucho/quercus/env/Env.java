@@ -278,6 +278,8 @@ public class Env {
 
   private TimeZone _defaultTimeZone;
 
+  private Object _gzStream;
+
   private Env _oldThreadEnv;
   
   public Env(Quercus quercus,
@@ -575,6 +577,7 @@ public class Env {
     
     // quercus/1b06
     String encoding = getOutputEncoding();
+    
     String type = getIniString("default_mimetype");
     
     if ("".equals(type) || _response == null) {
@@ -882,6 +885,7 @@ public class Env {
   public final void println(String v)
   {
     try {
+      System.out.println("PRINTLN: " + v);
       getOut().println(v);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -919,6 +923,7 @@ public class Env {
   public final void write(byte []buffer, int offset, int length)
   {
     try {
+      System.out.println("WRITE:");
       getOut().write(buffer, offset, length);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -4530,6 +4535,18 @@ public class Env {
   public void addShutdown(Callback callback, Value []args)
   {
     _shutdownList.add(new Shutdown(callback, args));
+  }
+
+  // XXX: hack until can clean up
+  public void setGzStream(Object obj)
+  {
+    _gzStream = obj;
+  }
+
+  // XXX: hack until can clean up
+  public Object getGzStream()
+  {
+    return _gzStream;
   }
 
   /**

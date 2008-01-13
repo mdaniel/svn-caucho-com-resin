@@ -131,12 +131,12 @@ public class Quercus
   private HashMap<Value, Value> _serverEnvMap
     = new HashMap<Value, Value>();
 
-  private IntMap _classNameMap = new IntMap();
+  private IntMap _classNameMap = new IntMap(8192);
   private ClassDef []_classMap = new ClassDef[256];
   
-  private IntMap _constantNameMap = new IntMap();
+  private IntMap _constantNameMap = new IntMap(8192);
   
-  private IntMap _functionNameMap = new IntMap();
+  private IntMap _functionNameMap = new IntMap(8192);
   private AbstractFunction []_functionMap = new AbstractFunction[256];
 
   private LruCache<String, QuercusProgram> _evalCache

@@ -87,6 +87,17 @@ public class WebAppEmbed
    *
    * @param contextPath the URL prefix of the web-app
    */
+  public WebAppEmbed(String contextPath)
+  {
+    setContextPath(contextPath);
+  }
+
+  /**
+   * Creates a new embedded webapp
+   *
+   * @param contextPath the URL prefix of the web-app
+   * @param rootDirectory the root directory of the web-app
+   */
   public WebAppEmbed(String contextPath, String rootDirectory)
   {
     setContextPath(contextPath);

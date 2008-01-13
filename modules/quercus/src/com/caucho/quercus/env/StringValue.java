@@ -38,12 +38,7 @@ import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.IdentityHashMap;
 
 /**
@@ -1739,6 +1734,21 @@ abstract public class StringValue extends Value implements CharSequence {
   public StringValue toStringBuilder(Env env)
   {
     return createStringBuilder().append(this);
+  }
+
+  /**
+   * Writes to a stream
+   */
+  public void writeTo(OutputStream os)
+  {
+    try {
+      int len = length();
+
+      for (int i = 0; i < len; i++)
+	os.write(charAt(i));
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   //

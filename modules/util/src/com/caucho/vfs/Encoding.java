@@ -52,8 +52,8 @@ public class Encoding {
   static HashMap<String,String> _localeName;
 
   // map from an encoding name to its EncodingReader factory.
-  static final HashMap<String,EncodingReader> _readEncodingFactories =
-    new HashMap<String,EncodingReader>();
+  static final HashMap<String,EncodingReader> _readEncodingFactories
+    = new HashMap<String,EncodingReader>();
   
   // map from an encoding name to its EncodingWriter factory.
   static final HashMap<String,EncodingWriter> _writeEncodingFactories =

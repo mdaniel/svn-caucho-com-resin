@@ -136,7 +136,7 @@ public class LoginConfig {
    * Returns the login.
    */
   public AbstractLogin getLogin()
-    throws Throwable
+    throws Exception
   {
     /*
     if (auth == null)
@@ -167,11 +167,14 @@ public class LoginConfig {
     }
     else if (_authMethod.equalsIgnoreCase("form")) {
       login = new FormLogin();
-      if (_formLoginConfig != null)
-        _formLoginConfig.init(login);
+
+      if (_formLoginConfig == null)
+	throw new ConfigException(L.l("'form' authentication requires form-login"));
+
+      _formLoginConfig.configure(login);
     }
     else
-      throw new ServletException(L.l("`{0}' is an unknown auth-type.",
+      throw new ServletException(L.l("'{0}' is an unknown auth-type.",
                                      _authMethod));
 
     if (_authenticator != null)

@@ -114,8 +114,11 @@ public class ConfigException
 
   public static RuntimeException create(Throwable e)
   {
-    if (e instanceof InstantiationException && e.getCause() != null)
+    if (e.getCause() != null
+	&& (e instanceof InstantiationException
+	    || e instanceof InvocationTargetException)) {
       e = e.getCause();
+    }
     
     if (e instanceof RuntimeException)
       return (RuntimeException) e;

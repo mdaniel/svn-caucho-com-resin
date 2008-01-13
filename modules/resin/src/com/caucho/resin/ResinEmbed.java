@@ -32,6 +32,7 @@ package com.caucho.resin;
 import com.caucho.config.program.ConfigProgram;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 import com.caucho.config.*;
 import com.caucho.config.types.*;
@@ -74,6 +75,12 @@ public class ResinEmbed
   private ClusterServer _clusterServer;
   private Host _host;
   private Server _server;
+
+  private final ArrayList<BeanEmbed> _beanList
+    = new ArrayList<BeanEmbed>();
+
+  private final ArrayList<WebAppEmbed> _webAppList
+    = new ArrayList<WebAppEmbed>();
 
   private Lifecycle _lifecycle = new Lifecycle();
   
@@ -129,19 +136,10 @@ public class ResinEmbed
    */
   public void addWebApp(WebAppEmbed webApp)
   {
-    try {
-      start();
+    if (webApp == null)
+      throw new NullPointerException();
 
-      WebAppConfig config = new WebAppConfig();
-      config.setContextPath(webApp.getContextPath());
-      config.setRootDirectory(new RawString(webApp.getRootDirectory()));
-
-      config.addBuilderProgram(new WebAppProgram(webApp));
-
-      _host.addWebApp(config);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    _webAppList.add(webApp);
   }
 
   /**
@@ -151,6 +149,31 @@ public class ResinEmbed
   {
     for (WebAppEmbed webApp : webApps)
       addWebApp(webApp);
+  }
+
+  /**
+   * Adds a web bean.
+   */
+  public void addBean(BeanEmbed bean)
+  {
+    _beanList.add(bean);
+    
+    if (_lifecycle.isActive()) {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(_server.getClassLoader());
+      
+	bean.configure();
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Throwable e) {
+	throw ConfigException.create(e);
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
+    }
   }
 
   //
@@ -165,16 +188,38 @@ public class ResinEmbed
     if (! _lifecycle.toActive())
       return;
       
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+      
     try {
       _resin.start();
       _server = _resin.getServer();
+
+      thread.setContextClassLoader(_server.getClassLoader());
+      
+      for (BeanEmbed beanEmbed : _beanList) {
+	beanEmbed.configure();
+      }
+      
       HostConfig hostConfig = new HostConfig();
       _server.addHost(hostConfig);
       _host = _server.getHost("", 0);
-    } catch (RuntimeException e) {
-      throw e;
+
+      thread.setContextClassLoader(_host.getClassLoader());
+
+      for (WebAppEmbed webApp : _webAppList) {
+	WebAppConfig config = new WebAppConfig();
+	config.setContextPath(webApp.getContextPath());
+	config.setRootDirectory(new RawString(webApp.getRootDirectory()));
+
+	config.addBuilderProgram(new WebAppProgram(webApp));
+
+	_host.addWebApp(config);
+      }
     } catch (Throwable e) {
       throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 

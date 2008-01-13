@@ -1078,5 +1078,7 @@ public class ConfigContext {
     _resinClassSet.add(RESIN_CLASS);
     _resinClassSet.add(RESIN_TYPE_NS);
     _resinClassSet.add(RESIN_TYPE);
+    _resinClassSet.add(new QName("resin:type", "http://caucho.com/ns/resin"));
+    _resinClassSet.add(new QName("resin:class", "http://caucho.com/ns/resin"));
   }
 }

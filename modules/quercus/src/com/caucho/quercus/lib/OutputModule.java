@@ -64,8 +64,8 @@ public class OutputModule extends AbstractQuercusModule
   private enum Encoding {NONE, GZIP, DEFLATE};
 
   private static class GZOutputPair {
-    public TempStream tempStream;
-    public OutputStream outputStream;
+    public StringOutputStream _tempStream;
+    public OutputStream _outputStream;
   }
 
   private static HashMap<Env,GZOutputPair> _gzOutputPairs 
@@ -86,8 +86,7 @@ public class OutputModule extends AbstractQuercusModule
 
     if (handlerName != null
         && ! "".equals(handlerName)
-        && env.getFunction(handlerName) != null)
-    {
+        && env.getFunction(handlerName) != null) {
       Callback callback = env.createCallback(env.createString(handlerName));
 
       ob_start(env, callback, 0, true);
@@ -141,9 +140,6 @@ public class OutputModule extends AbstractQuercusModule
       Callback callback = ob.getCallback();
 
       if (callback != null) {
-        if (callback.getCallbackName().equals("ob_gzhandler"))
-          _gzOutputPairs.remove(env);
-
         ob.setCallback(null);
       }
     }
@@ -410,7 +406,8 @@ public class OutputModule extends AbstractQuercusModule
                                  @Optional int chunkSize,
                                  @Optional("true") boolean erase)
   {
-    if (callback != null && callback.getCallbackName().equals("ob_gzhandler")) {
+    if (callback != null
+	&& callback.getCallbackName().equals("ob_gzhandler")) {
       OutputBuffer ob = env.getOutputBuffer();
 
       for (; ob != null; ob = ob.getNext()) {
@@ -509,64 +506,76 @@ public class OutputModule extends AbstractQuercusModule
 
     GZOutputPair pair = null;
 
+    StringValue result = env.createBinaryBuilder();
+    
     if ((state & (1 << OutputBuffer.PHP_OUTPUT_HANDLER_START)) != 0) {
       HttpModule.header(env, "Vary: Accept-Encoding", true, 0);
 
       int encodingFlag = 0;
 
       pair = new GZOutputPair();
-      pair.tempStream = new TempStream();
-      StreamImplOutputStream siout = 
-        new StreamImplOutputStream(pair.tempStream);
+      pair._tempStream = new StringOutputStream();
+      pair._tempStream.setResult(result);
 
       try {
         if (encoding == Encoding.GZIP) {
           HttpModule.header(env, "Content-Encoding: gzip", true, 0);
 
-          pair.outputStream = new GZIPOutputStream(siout);
+          pair._outputStream = new GZIPOutputStream(pair._tempStream);
         } else if (encoding == Encoding.DEFLATE) {
           HttpModule.header(env, "Content-Encoding: deflate", true, 0);
 
-          pair.outputStream = new DeflaterOutputStream(siout);
+          pair._outputStream = new DeflaterOutputStream(pair._tempStream);
         }
       } catch (IOException e) {
         return BooleanValue.FALSE;
       }
 
-      _gzOutputPairs.put(env, pair);
+      env.setGzStream(pair);
     } else {
-      pair = _gzOutputPairs.get(env);
+      pair = (GZOutputPair) env.getGzStream();
       
       if (pair == null)
         return BooleanValue.FALSE;
+      
+      pair._tempStream.setResult(result);
     }
-
+    
     try {
-      pair.outputStream.write(buffer.toString().getBytes());
-      pair.outputStream.flush();
+      buffer.writeTo(pair._outputStream);
+      pair._outputStream.flush();
 
       if ((state & (1 << OutputBuffer.PHP_OUTPUT_HANDLER_END)) != 0) {
-        pair.outputStream.close();
-
-        _gzOutputPairs.remove(env);
+        pair._outputStream.close();
       }
-      
     } catch (IOException e) {
       return BooleanValue.FALSE;
     }
 
-    //Value result = new TempBufferBytesValue(pair.tempStream.getHead());
-
-    StringValue result = env.createBinaryBuilder();
-    for (TempBuffer ptr = pair.tempStream.getHead();
-         ptr != null;
-         ptr = ptr.getNext()) {
-      result.append(ptr.getBuffer(), 0, ptr.getLength());
-    }
-
-    pair.tempStream.clearWrite();
+    pair._tempStream.setResult(null);
 
     return result;
+  }
+
+  static class StringOutputStream extends OutputStream {
+    private StringValue _result;
+
+    void setResult(StringValue result)
+    {
+      _result = result;
+    }
+
+    public void write(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      _result.append(buffer, offset, length);
+    }
+
+    public void write(int ch)
+      throws IOException
+    {
+      _result.append(ch);
+    }
   }
 
   static final IniDefinition INI_OUTPUT_BUFFERING
