@@ -716,7 +716,7 @@
         <arg line="-f -c"/>
      </exec>
      <exec executable="automake">
-        <arg line="-f -a -c"/>
+        <arg line="-f -a -c --foreign"/>
      </exec>
      <exec executable="autoconf"/>
   </target>
