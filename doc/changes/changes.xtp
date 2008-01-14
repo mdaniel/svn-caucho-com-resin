@@ -12,7 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
-<li>added com.caucho.resin.ResinEmbed embedding [<a href="http://caucho.com/resin/doc/resin-embedding.xtp">Resin Embedding</a>]</li>
+<li>(2008-01-14) added com.caucho.resin.ResinEmbed embedding [<a href="http://caucho.com/resin/doc/resin-embedding.xtp">Resin Embedding</a>]</li>
 <li>plugins: add spring/webbeans bridge [<a href="http://wiki.caucho.com/Spring">wiki: Spring and Resin/WebBeans</a>]</li>
 <li>plugins: add ant Jspc task [<a href="http://wiki.caucho.com/Ant">wiki: Ant and Resin</a>] (#97, rep by D Becker)</li>
 <li>plugins: add struts2 ObjectFactory support [<a href="http://wiki.caucho.com/Struts2">wiki: Struts2 and Resin</a>]</li>
