@@ -1,0 +1,88 @@
+<document>
+<header>
+<title>Embedding Resin</title>
+<description>
+
+<p>Resin's embedding API lets developers embed Resin as the web interface
+for an existing application, simplifies unit testing, and improves
+IDE integration capabilities.</p>
+
+</description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Creating a standalone Web Server">
+
+<ol>
+<li>Download Resin from http://caucho.com/download</li>
+<li>Unzip Resin in /usr/local/share and make a symlink
+to /usr/local/share/resin</li>
+<li>Add the jars in resin/lib/*.jar to the CLASSPATH</li>
+<li>Create and compile a TestResin class as described below</li>
+<li>Browse http://localhost:8080</li>
+</ol>
+
+<example title="example/TestResin.java">
+package example;
+
+import com.caucho.resin.*;
+
+public class TestResin {
+
+  public void main(String []args)
+  {
+    ResinEmbed resin = new ResinEmbed();
+
+    HttpEmbed http = new HttpEmbed(8080);
+    resin.addHttp(http);
+
+    WebAppEmbed webApp = new WebAppEmbed("/", "/var/www/htdocs");
+    resin.addWebApp(webApp);
+
+    resin.start();
+    resin.join();
+  }
+}
+</example>
+
+</s1>
+
+<s1 title="Embedding Resin for Testing">
+
+<p>For testing, you can create an embedded Resin instance and browse
+URLs programmatically using the <code>resin.request()</code> method.
+Since the <code>request</code> method runs Resin's normal HTTP processing,
+you can use any HTTP requests or headers.</p>
+
+<example title="example/TestResin.java">
+package example;
+
+import com.caucho.resin.*;
+
+public class TestResin {
+
+  public void main(String []args)
+  {
+    ResinEmbed resin = new ResinEmbed();
+
+    WebAppEmbed webApp = new WebAppEmbed("/", "/var/www/htdocs");
+    resin.addWebApp(webApp);
+
+    resin.start();
+
+    String result = resin.request("GET /test.jsp");
+    System.out.println(result);
+  }
+}
+</example>
+
+</s1>
+
+<s1 title="com.caucho.resin.ResinEmbed">
+
+</s1>
+
+</body>
+</document>

@@ -61,7 +61,10 @@
       </item>
       
       <item title="Common Tasks" link="commontasks.xtp">
-        <item link="resin-ioc.xtp" title="Resin IoC"/>
+        <item link="resin-ioc.xtp" title="Resin IoC"
+	      description="Resin's IoC/Dependency Injection with WebBeans"/>
+        <item link="resin-embedding.xtp" title="Embedding"
+	      description="embedding Resin in an Application or for unit testing"/>
         <item link="virtual-host.xtp" title="Virtual Hosting"/>
         <item link="config-database.xtp" title="Database"/>
         <item link="resin-load-balance.xtp" title="Load Balancing"/>

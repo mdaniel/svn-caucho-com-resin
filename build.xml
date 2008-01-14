@@ -716,7 +716,10 @@
         <arg line="-f -c"/>
      </exec>
      <exec executable="automake">
-        <arg line="-f -a -c --foreign"/>
+        <arg line="-a -i -c"/>
+     </exec>
+     <exec executable="automake">
+        <arg line="-a -i -c --foreign"/>
      </exec>
      <exec executable="autoconf"/>
   </target>
@@ -840,6 +843,7 @@
 
     <mkdir dir="${dist}/${dist.name}/licenses"/>
     <mkdir dir="${dist}/${dist.name}/keys"/>
+    <mkdir dir="${dist}/${dist.name}/ext-lib"/>
     <mkdir dir="${dist}/${dist.name}/log"/>
     <mkdir dir="${dist}/${dist.name}/logs"/>
   </target>
