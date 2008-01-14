@@ -824,7 +824,7 @@
       </fileset>
     </copy >
     
-    <copy todir="${dist}/${dist.name}/ext-webapps" preservelastmodified="true">
+    <copy todir="${dist}/${dist.name}/ext-webapp" preservelastmodified="true">
       <fileset dir="${install}/lib">
         <include name="resin-support.jar"/>
       </fileset>
@@ -839,6 +839,7 @@
     </chmod>
 
     <mkdir dir="${dist}/${dist.name}/licenses"/>
+    <mkdir dir="${dist}/${dist.name}/keys"/>
     <mkdir dir="${dist}/${dist.name}/log"/>
     <mkdir dir="${dist}/${dist.name}/logs"/>
   </target>
