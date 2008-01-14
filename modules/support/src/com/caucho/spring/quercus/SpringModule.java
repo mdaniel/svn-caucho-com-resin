@@ -65,9 +65,11 @@ public class SpringModule
       context = WebApplicationContextUtils.getWebApplicationContext(webApp);
       _webAppContext = context;
 
-      if (context == null)
-	throw new NullPointerException(L.l("Can't find Spring context in '{0}'",
-					   webApp));
+      if (context == null) {
+	env.notice(L.l("Can't find Spring context in '{0}'", webApp));
+
+	return null;
+      }
     }
 
     return context.getBean(name);

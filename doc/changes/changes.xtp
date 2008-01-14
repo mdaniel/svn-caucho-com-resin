@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>plugins: add spring/webbeans bridge [<a href="http://wiki.caucho.com/Spring">wiki: Spring and Resin/WebBeans</a>]</li>
 <li>plugins: add ant Jspc task [<a href="http://wiki.caucho.com/Ant">wiki: Ant and Resin</a>] (#97, rep by D Becker)</li>
 <li>plugins: add struts2 ObjectFactory support [<a href="http://wiki.caucho.com/Struts2">wiki: Struts2 and Resin</a>]</li>
 <li>plugins: add maven2 resin:run and resin:jspc [<a href="http://wiki.caucho.com/Maven2">wiki: Maven2 and Resin</a>] (#2231, rep by Daniel Glenn)</li>

@@ -39,7 +39,7 @@ import com.caucho.xml.QName;
 
 
 import java.beans.*;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.lang.reflect.*;
 import java.util.*;
@@ -470,6 +470,8 @@ public class TypeFactory implements AddLoaderListener
     
     _primitiveTypes.put(Class.class, ClassType.TYPE);
     _primitiveTypes.put(Path.class, PathType.TYPE);
+    _primitiveTypes.put(File.class, FileType.TYPE);
+    _primitiveTypes.put(URL.class, UrlType.TYPE);
     _primitiveTypes.put(Pattern.class, PatternType.TYPE);
     _primitiveTypes.put(Locale.class, LocaleType.TYPE);
     _primitiveTypes.put(QDate.class, QDateType.TYPE);
@@ -480,11 +482,6 @@ public class TypeFactory implements AddLoaderListener
     
     /*
     _primitiveTypes.put("org.w3c.dom.Node", new NodeType());
-
-    _primitiveTypes.put("com.caucho.config.types.ContainerProgram",
-                        new InitProgramType());
-    _primitiveTypes.put("com.caucho.config.BuilderProgram",
-                        new BuilderProgramType());
     */
   }
 }
