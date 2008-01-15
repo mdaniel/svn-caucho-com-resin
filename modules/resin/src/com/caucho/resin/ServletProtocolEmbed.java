@@ -41,7 +41,7 @@ import com.caucho.webbeans.manager.*;
 import java.util.*;
 
 /**
- * Embeddable version of a servlet remoting protocol, e.g. hessian or burlap.
+ * Embeddable version of a servlet remoting protocol like hessian or burlap.
  * The service class can be any Java class.  Typically the class will have an
  * interface marked with a @javax.ejb.Remote annotation.
  *

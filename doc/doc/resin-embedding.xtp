@@ -266,5 +266,26 @@ webApp.addServletMapping(servlet);
 
 </s1>
 
+<s1 title="com.caucho.resin.ServletProtocolEmbed">
+
+<p><code>ServletProtocolEmbed</code> lets you export remote services using
+Hessian, Burlap, or any other protocol implementation which provides a
+driver for Resin.  The configuration for a remote service is exactly
+the same as for a servlet, i.e. using <code>ServletMappingEmbed</code>, and
+just adds a <code>ServletProtocolEmbed</code> to select the protocol.</p>
+
+<example title="Hessian service">
+service = new ServletMappingEmbed("my-service", "/hessian",
+                                  "example.MyService");
+
+protocol = new ServletProtocolEmbed("hessian");
+
+service.addProtocol(protocol);
+
+webApp.addServlet(service);
+</example>
+
+</s1>
+
 </body>
 </document>
