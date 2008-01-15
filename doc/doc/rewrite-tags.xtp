@@ -743,24 +743,6 @@ Form parameters submitted in the body of a POST are not available for the compar
 
 </defun>
 
-<defun title="&lt;real-path>">
-<parents>rewrite-real-path</parents>
-
-<p>&lt;real-path> maps a URL to a filesystem path inside a
-&lt;rewrite-real-path tag.</p>
-
-<p>The source path is a URL, the target path is a real filesystem path.</p>
-
-<example title="/images located outside of /var/www">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;rewrite-real-path>
-    &lt;real-path regexp="^/images" target="/usr/local/share/images"/>
-  &lt;/rewrite-real-path>
-</example>
-
-</defun>
-
 <defun title="&lt;redirect>">
 <parents>rewrite-dispatch, match</parents>
 
@@ -879,7 +861,7 @@ to the &lt;path-mapping> tag.</p>
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;rewrite-real-path>
-    &lt;real-path regexp="^/images" real-path="/usr/local/share/images"/>
+    &lt;real-path regexp="^/images" target="/usr/local/share/images"/>
   &lt;/rewrite-real-path>
 </example>
 
