@@ -45,7 +45,7 @@ import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.java.WorkDir;
-import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
@@ -305,7 +305,6 @@ public class EnvServerManager implements EnvironmentListener
   }
 
   public void start()
-    throws Exception
   {
     for (EjbConfig cfg : _ejbConfigList)
       cfg.deploy();
@@ -320,6 +319,10 @@ public class EnvServerManager implements EnvironmentListener
         log.fine(server + " starting");
 
         server.start();
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new StartLifecycleException(e);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -501,7 +504,6 @@ public class EnvServerManager implements EnvironmentListener
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
-    throws Exception
   {
     start();
   }

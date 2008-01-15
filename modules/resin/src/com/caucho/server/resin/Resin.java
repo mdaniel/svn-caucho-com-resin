@@ -660,7 +660,6 @@ public class Resin implements EnvironmentBean, SchemaBean
    * Starts the server.
    */
   public void start()
-    throws Throwable
   {
     if (! _lifecycle.toActive())
       return;

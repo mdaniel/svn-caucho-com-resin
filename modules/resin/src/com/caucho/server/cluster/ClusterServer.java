@@ -33,6 +33,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.log.Log;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.Port;
@@ -524,7 +525,7 @@ public class ClusterServer {
    * Starts the server.
    */
   public Server startServer()
-    throws Throwable
+    throws StartLifecycleException
   {
     return _cluster.startServer(this);
   }

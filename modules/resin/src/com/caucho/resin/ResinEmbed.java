@@ -216,7 +216,7 @@ public class ResinEmbed
 
 	_host.addWebApp(config);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       throw ConfigException.create(e);
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -334,13 +334,29 @@ public class ResinEmbed
     ResinEmbed resin = new ResinEmbed();
 
     for (int i = 0; i < args.length; i++) {
-      if ("-port".equals(args[i])) {
-	int port = Integer.parseInt(args[i + 1]);
+      if (args[i].startsWith("--port=")) {
+	int port = Integer.parseInt(args[i].substring("--port=".length()));
 
 	HttpEmbed http = new HttpEmbed(port);
 	resin.addPort(http);
+      }
+      else if (args[i].startsWith("--deploy:")) {
+	String valueString = args[i].substring("--deploy:".length());
 
-	i++;
+	String []values = valueString.split("[=,]");
+
+	String role = null;
+
+	for (int j = 0; j < values.length; j += 2) {
+	  if (values[j].equals("role"))
+	    role = values[j + 1];
+	}
+
+	WebAppLocalDeployEmbed webApp = new WebAppLocalDeployEmbed();
+	if (role != null)
+	  webApp.setRole(role);
+
+	resin.addWebApp(webApp);
       }
     }
 

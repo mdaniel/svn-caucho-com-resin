@@ -104,6 +104,22 @@ public class ResinConfiguration
 
     parseURI(_uri);
   }
+
+  String getContextPath()
+  {
+    return "/test";
+  }
+
+  int getPort()
+  {
+    String port = _ip.getProperty("resin.port");
+    
+    try {
+      return Integer.parseInt(port);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
   
   private void init()
   {

@@ -59,7 +59,6 @@ public class DestroyListener implements EnvironmentListener
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
-    throws Throwable
   {
   }
 

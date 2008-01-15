@@ -29,11 +29,11 @@
 
 package com.caucho.loader;
 
+import com.caucho.lifecycle.StartLifecycleException;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
-
-import com.caucho.server.util.CauchoSystem;
 
 import java.security.Permission;
 import java.util.ArrayList;
@@ -272,7 +272,7 @@ public class Environment {
    * Starts the current environment.
    */
   public static void start()
-    throws Throwable
+    throws StartLifecycleException
   {
     start(Thread.currentThread().getContextClassLoader());
   }
@@ -281,7 +281,7 @@ public class Environment {
    * Starts the current environment.
    */
   public static void start(ClassLoader loader)
-    throws Throwable
+    throws StartLifecycleException
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {

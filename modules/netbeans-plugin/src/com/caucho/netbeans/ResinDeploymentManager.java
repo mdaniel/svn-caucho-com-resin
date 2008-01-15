@@ -47,6 +47,7 @@ import javax.enterprise.deploy.spi.exceptions.TargetException;
 import javax.enterprise.deploy.spi.status.ProgressObject;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Locale;
 import java.util.logging.*;
 
@@ -63,6 +64,7 @@ public final class ResinDeploymentManager
   private final ResinConfiguration _resinConfiguration;
   private ResinProcess _resinProcess;
   private TargetModuleID []_runningModules = new TargetModuleID[0];
+  private int _port;
 
   private ResinPlatformImpl _j2eePlatform;
 
@@ -76,6 +78,7 @@ public final class ResinDeploymentManager
     // XXX: what is connected for?
     _resinConfiguration = new ResinConfiguration(ip);
     _resinProcess = new ResinProcess(_uri, _resinConfiguration);
+    
   }
 
   public ResinConfiguration getResinConfiguration()
@@ -151,8 +154,34 @@ public final class ResinDeploymentManager
                                    File plan)
     throws IllegalStateException
   {
-    log.info("dist1");
-    return new SuccessProgressObject(target);
+    try {
+      String urlString = "http://localhost:" + _resinConfiguration.getPort()
+        + "/resin:local-deploy/deploy?action=add-web-app"
+        + "&context-path=" + _resinConfiguration.getContextPath()
+        + "&war=" + archive.getAbsolutePath();
+      
+      if (plan != null)
+        urlString += "&resin-web=" + plan.getAbsolutePath();
+    
+      log.info("Dist: " + urlString);
+    
+      URL url = new URL(urlString);
+      
+      StringBuilder sb = new StringBuilder();
+      InputStream is = url.openStream();
+      int ch;
+      while ((ch = is.read()) >= 0) {
+        sb.append((char) ch);
+      }
+      
+      is.close();
+      
+      log.info("Complete: " + sb);
+    
+      return new SuccessProgressObject(target);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public ProgressObject distribute(Target[] target,

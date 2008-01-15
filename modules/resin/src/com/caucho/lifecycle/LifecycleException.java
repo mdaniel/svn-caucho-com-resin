@@ -19,31 +19,36 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
-
-import com.caucho.lifecycle.StartLifecycleException;
+package com.caucho.lifecycle;
 
 /**
- * Interface for receiving environment events.
+ * Lifecycle exception.
  */
-public interface EnvironmentListener {
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void environmentStart(EnvironmentClassLoader loader)
-    throws StartLifecycleException;
-
-  /**
-   * Handles the case where the environment is stopping
-   */
-  public void environmentStop(EnvironmentClassLoader loader);
+public class LifecycleException extends RuntimeException {
+  public LifecycleException()
+  {
+  }
+  
+  public LifecycleException(String msg)
+  {
+    super(msg);
+  }
+  
+  public LifecycleException(Throwable e)
+  {
+    super(e);
+  }
+  
+  public LifecycleException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
 }
-
-

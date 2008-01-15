@@ -47,18 +47,20 @@ public class WebAppLocalDeployEmbed extends WebAppEmbed
 {
   public static final String LOCAL_DEPLOY_CONTEXT_PATH
     = "/resin:local-deploy";
+
+  private final ServletMappingEmbed _deploy;
   
   public WebAppLocalDeployEmbed()
   {
     super.setContextPath(LOCAL_DEPLOY_CONTEXT_PATH);
 
-    ServletMappingEmbed deployServlet = new ServletMappingEmbed();
-    deployServlet.setServletClass(LocalDeployServlet.class.getName());
-    deployServlet.setServletName(LocalDeployServlet.class.getName());
-    deployServlet.setUrlPattern("/");
-    deployServlet.addProperty("enable", true);
+    _deploy = new ServletMappingEmbed();
+    _deploy.setServletClass(LocalDeployServlet.class.getName());
+    _deploy.setServletName(LocalDeployServlet.class.getName());
+    _deploy.setUrlPattern("/");
+    _deploy.addProperty("enable", true);
 
-    addServletMapping(deployServlet);
+    addServletMapping(_deploy);
   }
 
   /**
@@ -75,5 +77,13 @@ public class WebAppLocalDeployEmbed extends WebAppEmbed
   @Override
   public void setRootDirectory(String rootDirectory)
   {
+  }
+
+  /**
+   * Sets the deploy role.
+   */
+  public void setRole(String role)
+  {
+    _deploy.addProperty("role", role);
   }
 }

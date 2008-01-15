@@ -528,7 +528,6 @@ public class EjbServerManager implements EnvironmentListener
   }
 
   public void start()
-    throws Exception
   {
     _envServerManager.start();
   }
@@ -645,7 +644,6 @@ public class EjbServerManager implements EnvironmentListener
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
-    throws Throwable
   {
     start();
   }

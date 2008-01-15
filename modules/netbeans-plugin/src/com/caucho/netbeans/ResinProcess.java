@@ -220,8 +220,9 @@ public class ResinProcess
     args.append(" -Dresin.home='" + resinHome + "'");
     args.append(" com.caucho.resin.ResinEmbed");
     
-    args.append(" -port ");
+    args.append(" --port=");
     args.append(serverPort);
+    args.append(" --deploy:role=any");
 
     if (_isDebug)
       throw new IllegalStateException("debug mode not implemented");

@@ -1030,7 +1030,6 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
-    throws Throwable
   {
     start();
   }

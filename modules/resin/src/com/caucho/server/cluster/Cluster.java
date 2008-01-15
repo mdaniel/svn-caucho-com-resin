@@ -36,6 +36,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Period;
 import com.caucho.jmx.Jmx;
+import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
@@ -693,7 +694,7 @@ public class Cluster
    * Starts the server.
    */
   Server startServer(ClusterServer clusterServer)
-    throws Throwable
+    throws StartLifecycleException
   {
     synchronized (this) {
       if (_server != null)
