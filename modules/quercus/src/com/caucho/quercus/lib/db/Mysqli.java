@@ -43,6 +43,8 @@ import com.caucho.util.L10N;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -78,7 +80,7 @@ public class Mysqli extends JdbcConnectionResource {
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
 
-  private static boolean _checkedDriverVersion = false;
+  private static String _checkedDriverVersion = null;
   private static Object _checkDriverLock = new Object();
 
   public Mysqli(Env env,
@@ -111,7 +113,7 @@ public class Mysqli extends JdbcConnectionResource {
   protected static void checkDriverVersion(Env env, Connection conn)
     throws SQLException
   {
-    if (_checkedDriverVersion == false) {
+    if (_checkedDriverVersion == null) {
       synchronized (_checkDriverLock) {
         DatabaseMetaData databaseMetaData = conn.getMetaData();
         String full_version = databaseMetaData.getDriverVersion();
@@ -145,16 +147,10 @@ public class Mysqli extends JdbcConnectionResource {
             minor = Integer.valueOf(version.substring(start+1, end));
             release = Integer.valueOf(version.substring(end+1));
 
-            if ((major >= 3) && (minor >= 1) && (release >= 14)) {
+            if ((major > 3) ||
+                ((major == 3) && (minor >= 1) && (release >= 14))) {
               valid = true;
-
-              // If the mysql verison has not been explicitly
-              // set (by the test harness) then define it now.
-
-              if (env.getQuercus().getMysqlVersion() == null) {
-                env.getQuercus().setMysqlVersion(
-                  major + "." + minor + "." + release);
-              }
+              _checkedDriverVersion = major + "." + minor + "." + release;
             }
           }
         }
@@ -163,8 +159,6 @@ public class Mysqli extends JdbcConnectionResource {
           throw new SQLException("invalid Connector/J version \"" +
             version + "\" found in \"" + full_version + "\", must be 3.1.14 or newer");
         }
-
-        _checkedDriverVersion = true;
       }
     }
   }
@@ -361,17 +355,52 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'client_info'.
    */
-  public String getclient_info(Env env)
+  public StringValue getclient_info(Env env)
   {
-    return get_client_info(env);
+    return getClientInfo(env);
   }
-  
+
   /**
    * Returns the client information.
    */
-  public String get_client_info(Env env)
+
+  static StringValue getClientInfo(Env env)
   {
-    return MysqlModule.mysql_get_client_info(env);
+    String version = env.getQuercus().getMysqlVersion();
+
+    if (version != null) {
+      // php/1f2h
+
+      // Initialized to a specific version via:
+      // <init mysql-version="X.X.X">
+    } else {
+      // php/142h
+
+      if (_checkedDriverVersion != null) {
+        // A connection has already been made and the driver
+        // version has been validated.
+
+        version = _checkedDriverVersion;
+      } else {
+        // A connection has not been made or a valid driver
+        // version was not found. The JDBC API provides no
+        // way to get the release number without a connection,
+        // so just grab the major and minor number and use
+        // zero for the release number.
+
+        try {
+          Driver driver = DriverManager.getDriver("jdbc:mysql://localhost/");
+
+          version = driver.getMajorVersion() + "." +
+                    driver.getMinorVersion() + ".00";
+        }
+        catch (SQLException e) {
+          version = "0.00.00";
+        }
+      }
+    }
+
+    return env.createString(version);
   }
 
   /**

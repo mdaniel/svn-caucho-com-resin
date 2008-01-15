@@ -586,9 +586,9 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns the MySQL client version.
    */
-  public static String mysqli_get_client_info(Env env)
+  public static StringValue mysqli_get_client_info(Env env)
   {
-    return MysqlModule.mysql_get_client_info(env);
+    return Mysqli.getClientInfo(env);
   }
 
   /**
@@ -601,7 +601,8 @@ public class MysqliModule extends AbstractQuercusModule {
    */
    public static int mysqli_get_client_version(Env env)
    {
-     return Mysqli.infoToVersion(mysqli_get_client_info(env));
+     return Mysqli.infoToVersion(
+       mysqli_get_client_info(env).toString());
    }
 
   /**
