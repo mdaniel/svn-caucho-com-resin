@@ -29,21 +29,23 @@
 
 package com.caucho.config.type;
 
-import com.caucho.config.program.ConfigProgram;
 import java.beans.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
-import com.caucho.xml.QName;
+import com.caucho.xml.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
+
+import org.w3c.dom.*;
 
 /**
  * Represents an introspected bean type for configuration.
@@ -67,6 +69,7 @@ public class BeanType extends ConfigType
   private Method _valueOf;
   private Method _setParent;
   private Method _replaceObject;
+  private Method _setConfigLocation;
   
   private Attribute _addText;
   private Attribute _addProgram;
@@ -126,6 +129,26 @@ public class BeanType extends ConfigType
       return bean;
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Called before the children are configured.
+   */
+  @Override
+  public void beforeConfigure(ConfigContext env, Object bean, Node node)
+  {
+    super.beforeConfigure(env, bean, node);
+
+    if (_setConfigLocation != null && node instanceof QNode) {
+      String filename = ((QNode) node).getFilename();
+      int line = ((QNode) node).getLine();
+
+      try {
+	_setConfigLocation.invoke(bean, filename, line);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
     }
   }
 
@@ -270,6 +293,12 @@ public class BeanType extends ConfigType
 	ConfigType type = TypeFactory.getType(paramTypes[0]);
 	
 	_addProgram = new ProgramAttribute(method, type);
+      }
+      else if ((name.equals("setConfigLocation")
+		&& paramTypes.length == 2
+		&& paramTypes[0].equals(String.class)
+		&& paramTypes[1].equals(int.class))) {
+	_setConfigLocation = method;
       }
       else if (name.equals("setProperty")
 	       && paramTypes.length == 2

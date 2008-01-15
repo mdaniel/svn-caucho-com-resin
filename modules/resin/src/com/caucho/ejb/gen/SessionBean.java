@@ -181,7 +181,7 @@ public class SessionBean extends ClassComponent {
     if (! isStateless()) {
       out.println();
       out.print("protected Object _caucho_newInstance" + suffix);
-      out.println("(com.caucho.webbeans.context.DependentScope scope)");
+      out.println("(com.caucho.config.ConfigContext env)");
       out.println("{");
       out.pushDepth();
 
@@ -192,7 +192,7 @@ public class SessionBean extends ClassComponent {
       if (isStateless())
         out.println("Bean bean = new Bean(cxt);");
       else
-        out.println("Bean bean = new Bean(cxt, scope);");
+        out.println("Bean bean = new Bean(cxt, env);");
 
       out.println("cxt._ejb_free(bean);");
 
@@ -295,7 +295,7 @@ public class SessionBean extends ClassComponent {
     if (isStateless())
       out.println("Bean(" + _contextClassName + " context)");
     else
-      out.println("Bean(" + _contextClassName + " context, com.caucho.webbeans.context.DependentScope scope)");
+      out.println("Bean(" + _contextClassName + " context, com.caucho.config.ConfigContext env)");
     out.println("{");
     out.pushDepth();
 
@@ -331,7 +331,7 @@ public class SessionBean extends ClassComponent {
     if (isStateless())
       out.println("context.getServer().initInstance(this, null);");
     else
-      out.println("context.getServer().initInstance(this, scope);");
+      out.println("context.getServer().initInstance(this, env);");
 
     out.println();
     out.println("__caucho_callInterceptorsPostConstruct();");

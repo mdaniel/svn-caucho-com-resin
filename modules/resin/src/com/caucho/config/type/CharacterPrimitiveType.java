@@ -61,7 +61,7 @@ public final class CharacterPrimitiveType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    if (text != null && text.length() == 1)
+    if (text != null && text.length() > 0)
       return new Character(text.charAt(0));
     else
       throw new ConfigException(L.l("A Character value must be a single character at '{0}'.",

@@ -75,7 +75,7 @@ public class NamespacePattern extends AbstractPattern {
 
     String prefix = node.getPrefix();
 
-    if (prefix != _prefix)
+    if (prefix != _prefix && (prefix == null || ! prefix.equals(_prefix)))
       return false;
 
     return _parent.match(node, env);

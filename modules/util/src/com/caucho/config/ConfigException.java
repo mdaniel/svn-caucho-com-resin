@@ -28,9 +28,7 @@
 
 package com.caucho.config;
 
-import com.caucho.util.CompileException;
-import com.caucho.util.DisplayableException;
-import com.caucho.util.Html;
+import com.caucho.util.*;
 
 import java.io.PrintWriter;
 import java.lang.reflect.*;
@@ -122,6 +120,8 @@ public class ConfigException
     
     if (e instanceof RuntimeException)
       return (RuntimeException) e;
+    else if (e instanceof LineCompileException)
+      return new LineConfigException(e.getMessage(), e);
     else if (e instanceof DisplayableException
 	     || e instanceof CompileException)
       return new ConfigException(e.getMessage(), e);

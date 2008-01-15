@@ -980,6 +980,9 @@ public class ConfigContext {
 
     if (e instanceof LineConfigException)
       return (LineConfigException) e;
+    else if (e instanceof LineCompileException) {
+      return new LineConfigException(e.getMessage(), e);
+    }
     else if (e instanceof ConfigException
 	     && e.getMessage() != null
 	     && filename != null) {
@@ -988,9 +991,6 @@ public class ConfigContext {
       return new LineConfigException(filename, line,
 				     e.getMessage() + sourceLines,
 				     e);
-    }
-    else if (e instanceof LineCompileException) {
-      return new LineConfigException(e.getMessage(), e);
     }
     else if (e instanceof CompileException && e.getMessage() != null) {
       return new LineConfigException(filename, line, e);

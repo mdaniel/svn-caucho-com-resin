@@ -5,7 +5,7 @@
 
 <p>Resin's embedding API lets developers embed Resin as the web interface
 for an existing application, simplifies unit testing, and improves
-IDE integration capabilities.  The <a href="http://caucho.com/javadoc/com/caucho/resin/package.html">ResinEmbed JavaDoc</a> gives more details.</p>
+IDE integration capabilities.  The <a href="http://caucho.com/resin-javadoc/com/caucho/resin/package-summary.html">ResinEmbed JavaDoc</a> gives more details.</p>
 
 </description>
 </header>

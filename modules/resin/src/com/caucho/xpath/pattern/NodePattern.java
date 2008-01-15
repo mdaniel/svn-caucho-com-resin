@@ -91,7 +91,7 @@ public class NodePattern extends AbstractPattern {
 
     if (node.getNodeType() != _nodeType)
       return false;
-    else if (node.getNodeName() != _tag)
+    else if (! node.getNodeName().equals(_tag))
       return false;
     else if (node.getNamespaceURI() != null)
       return false;
@@ -126,10 +126,10 @@ public class NodePattern extends AbstractPattern {
 
     NodePattern bPattern = (NodePattern) b;
     
-    return (_nodeType == bPattern._nodeType &&
-            _tag.equals(bPattern._tag) &&
-            (_parent == bPattern._parent ||
-             (_parent != null && _parent.equals(bPattern._parent))));
+    return (_nodeType == bPattern._nodeType
+	    && _tag.equals(bPattern._tag)
+	    && (_parent == bPattern._parent
+		|| (_parent != null && _parent.equals(bPattern._parent))));
   }
 
   /**

@@ -177,9 +177,9 @@ public class NodeTypePattern extends AbstractPattern {
 
     NodeTypePattern bPattern = (NodeTypePattern) b;
     
-    return (_nodeType == bPattern._nodeType &&
-            (_parent == bPattern._parent ||
-             (_parent != null && _parent.equals(bPattern._parent))));
+    return (_nodeType == bPattern._nodeType
+	    && (_parent == bPattern._parent
+		|| (_parent != null && _parent.equals(bPattern._parent))));
   }
 
   /**

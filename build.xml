@@ -707,7 +707,7 @@
     </java>
   </target>
 
-  <target name="dist" depends="dist.build, dist.package"/>
+  <target name="dist" depends="configure, dist.build, dist.package"/>
   
   <target name="configure">
      <mkdir dir="automake"/>
