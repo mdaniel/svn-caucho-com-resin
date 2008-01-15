@@ -33,9 +33,7 @@ import java.sql.ResultSet;
 
 import javax.el.*;
 
-import javax.faces.*;
 import javax.faces.context.*;
-import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.model.*;
 
@@ -727,6 +725,9 @@ public class UIData extends UIComponentBase
       return;
 
     resetDataModel();
+
+    if (! context.getRenderResponse() || ! context.getResponseComplete())
+      _state = null;
 
     super.encodeBegin(context);
   }
