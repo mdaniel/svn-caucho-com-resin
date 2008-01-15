@@ -287,5 +287,17 @@ webApp.addServlet(service);
 
 </s1>
 
+<s1 title="command-line, ResinEmbed main()">
+
+<p>The <code>ResinEmbed</code> class contains a <code>main()</code>
+method which can be used to launch an trivial instance of Resin.
+It's main use is for IDEs which want to launch a testing instance of Resin.</p>
+
+<example title="Launching Embedded Resin from the command line">
+resin> java -classpath $CP com.caucho.resin.ResinEmbed --port=8080
+</example>
+
+</s1>
+
 </body>
 </document>
