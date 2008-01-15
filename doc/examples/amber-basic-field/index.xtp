@@ -302,11 +302,11 @@ public class MyServlet {
 
   public void create()
   {
-    _manager.getTransation().begin();
+    _manager.getTransaction().begin();
     try {
       _manager.persist(new Course("Potions", "Severus Snape"));
     } finally {
-      _manager.getTransation().commit();
+      _manager.getTransaction().commit();
     }
   }
 }
@@ -451,11 +451,11 @@ public class MyServlet {
 
   public void remove(Course course)
   {
-    _manager.getTransation().begin();
+    _manager.getTransaction().begin();
     try {
       _manager.remove(course);
     } finally {
-      _manager.getTransation().commit();
+      _manager.getTransaction().commit();
     }
   }
 }
