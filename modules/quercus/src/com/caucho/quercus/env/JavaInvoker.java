@@ -488,7 +488,7 @@ abstract public class JavaInvoker
     if (_hasThis) {
       values[k++] = qThis;
     }
-    else
+    else if (qThis != null)
       obj = qThis.toJavaObject();
 
     for (int i = 0; i < _marshalArgs.length; i++) {

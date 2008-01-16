@@ -38,6 +38,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import javax.mail.Address;
+import javax.mail.AuthenticationFailedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -141,22 +142,38 @@ public class MailModule extends AbstractQuercusModule {
       log.log(Level.FINER, e.toString(), e);
 
       throw e;
-    } catch (MessagingException e) {
-      log.warning(L.l("Quercus[] mail could not send mail to '" + to + "'"
-		      + "\n" + e.getMessage()));
-		  
+    } catch (AuthenticationFailedException e) {
+      log.warning(L.l("Quercus[] mail could not send mail to '{0}' because authentication failed\n{1}",
+                      to,
+                      e.getMessage()));
+
       log.log(Level.FINE, e.toString(), e);
 
       env.warning(e.getMessage());
 
       return false;
-    } catch (Exception e) {
-      log.warning(L.l("Quercus[] mail could not send mail to '" + to + "'"
-		      + "\n" + e.getMessage()));
-		  
-      log.log(Level.FINE, e.toString(), e);
+    } catch (MessagingException e) {
+      Throwable cause = e;
 
-      env.warning(e.toString());
+      log.warning(L.l("Quercus[] mail could not send mail to '{0}'\n{1}",
+                      to,
+                      cause.getMessage()));
+
+      log.log(Level.FINE, cause.toString(), cause);
+
+      env.warning(cause.getMessage());
+
+      return false;
+    } catch (Exception e) {
+      Throwable cause = e;
+      
+      log.warning(L.l("Quercus[] mail could not send mail to '{0}'\n{1}",
+                  to,
+                  cause.getMessage()));
+
+      log.log(Level.FINE, cause.toString(), cause);
+
+      env.warning(cause.toString());
 
       return false;
     } finally {
