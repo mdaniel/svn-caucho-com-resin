@@ -115,8 +115,38 @@ public class Mysqli extends JdbcConnectionResource {
   {
     if (_checkedDriverVersion == null) {
       synchronized (_checkDriverLock) {
-        DatabaseMetaData databaseMetaData = conn.getMetaData();
-        String full_version = databaseMetaData.getDriverVersion();
+        DatabaseMetaData databaseMetaData = null;
+
+        try {
+          databaseMetaData = conn.getMetaData();
+        } catch (SQLException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+
+        // If getMetaData() returns null or raises a SQLException,
+        // then we can't verify the driver version.
+
+        if (databaseMetaData == null) {
+          _checkedDriverVersion = "";
+          return;
+        }
+
+        String full_version = null;
+
+        try {
+          full_version = databaseMetaData.getDriverVersion();
+        } catch (SQLException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+
+        // If getDriverVersion() returns null or raises a SQLException,
+        // then we can't verify the driver version.
+
+        if (full_version == null) {
+          _checkedDriverVersion = "";
+          return;
+        }
+
         String version = full_version;
 
         // Extract full version number.
@@ -376,7 +406,7 @@ public class Mysqli extends JdbcConnectionResource {
     } else {
       // php/142h
 
-      if (_checkedDriverVersion != null) {
+      if (_checkedDriverVersion != null && _checkedDriverVersion != "") {
         // A connection has already been made and the driver
         // version has been validated.
 
