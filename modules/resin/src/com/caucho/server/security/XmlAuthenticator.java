@@ -277,7 +277,11 @@ public class XmlAuthenticator extends AbstractPasswordAuthenticator {
 
     public PasswordUser getPasswordUser()
     {
-      return new PasswordUser(_principal, _password, _isDisabled, _roles);
+      boolean isAnonymous = false;
+      
+      return new PasswordUser(_principal, _password,
+			      _isDisabled, isAnonymous,
+			      _roles);
     }
   }
 }

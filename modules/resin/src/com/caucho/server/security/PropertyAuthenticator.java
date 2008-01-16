@@ -182,11 +182,12 @@ public class PropertyAuthenticator extends AbstractPasswordAuthenticator {
     Principal principal = new BasicPrincipal(name);
 
     if (values.length < 1) {
-      return new PasswordUser(principal, "", true, new String[0]);
+      return new PasswordUser(principal, "", true, false, new String[0]);
     }
 
     String password = values[0].trim();
     boolean isDisabled = false;
+    boolean isAnonymous = false;
     ArrayList<String> roles = new ArrayList<String>();
       
     for (int i = 1; i < values.length; i++) {
@@ -204,7 +205,9 @@ public class PropertyAuthenticator extends AbstractPasswordAuthenticator {
     String []roleArray = new String[roles.size()];
     roles.toArray(roleArray);
 
-    return new PasswordUser(principal, password, isDisabled, roleArray);
+    return new PasswordUser(principal, password,
+			    isDisabled, isAnonymous,
+			    roleArray);
   }
 
   private boolean isModified()

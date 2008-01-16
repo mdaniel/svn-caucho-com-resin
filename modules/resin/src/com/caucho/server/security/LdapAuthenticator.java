@@ -150,8 +150,12 @@ public class LdapAuthenticator extends AbstractPasswordAuthenticator {
       String ldapPassword = (String) passwordAttr.get();
 
       Principal principal = new BasicPrincipal(userName);
+
+      boolean isDisabled = false;
+      boolean isAnonymous = false;
       
-      return new PasswordUser(principal, ldapPassword, false,
+      return new PasswordUser(principal, ldapPassword,
+			      isDisabled, isAnonymous,
 			      new String[] { "user" });
     } catch (NamingException e) {
       log.log(Level.FINE, e.toString(), e);
