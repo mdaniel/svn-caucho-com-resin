@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PropertyResourceBundle;
 
 /**
  * Variable resolution for JSP variables
@@ -168,6 +169,8 @@ public class PageContextELResolver extends AbstractVariableResolver {
 	return _listResolver.getValue(env, base, property);
       else if (base.getClass().isArray())
 	return _arrayResolver.getValue(env, base, property);
+      else if (base instanceof PropertyResourceBundle)
+      	return _bundleResolver.getValue(env, base, property);
       else
 	return _beanResolver.getValue(env, base, property);
     }
