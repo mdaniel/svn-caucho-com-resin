@@ -97,10 +97,17 @@ class HtmlCommandButtonRenderer extends Renderer
       component.queueEvent(event);
     }
     else {
-      String valueX = clientId + ".x";
-      String valueY = clientId + ".y";
+      String valueX = paramMap.get(clientId + ".x");
+      String valueY = paramMap.get(clientId + ".y");
+      
+      if (valueX != null || valueY != null) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(component + " action [" + valueX + "," + valueY + "]");
+	
+	ActionEvent event = new ActionEvent(component);
 
-      // ??
+	component.queueEvent(event);
+      }
     }
   }
   
