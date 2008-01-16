@@ -90,6 +90,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   private boolean _isSharedBuffer = true;
   private Object _sharedBufferLock;
 
+  private long _autoFlushTime = 60000;
+
   private final CharBuffer _cb = new CharBuffer();
   
   private final CharBuffer _timeCharBuffer = new CharBuffer();
@@ -190,6 +192,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   }
 
   /**
+   * Sets the autoFlushTime
+   */
+  public void setAutoFlushTime(Period period)
+  {
+    _autoFlushTime = period.getPeriod();
+  }
+
+  /**
    * Sets the shared buffer attribute.
    */
   public void setSharedBuffer(boolean isSharedBuffer)
@@ -234,7 +244,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     _logWriter.init();
     _sharedBufferLock = _logWriter.getBufferLock();
 
-    _alarm.queue(60000);
+    if (_autoFlushTime > 0)
+      _alarm.queue(_autoFlushTime);
   }
 
   /**
@@ -329,7 +340,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       }
     }
 
-    if (_isSharedBuffer && ! _isAutoFlush) {
+    if (_isSharedBuffer && (! _isAutoFlush || _autoFlushTime <= 0)) {
       synchronized (_sharedBufferLock) {
 	byte []buffer = _logWriter.getBuffer(BUFFER_GAP);
 	int length = _logWriter.getLength();
@@ -345,7 +356,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
       int length = log(request, response, buffer, 0, buffer.length);
 
-      if (_isAutoFlush)
+      if (_isAutoFlush && _autoFlushTime > 0)
 	_logWriter.writeThrough(buffer, 0, length);
       else
 	_logWriter.writeBuffer(buffer, 0, length);
@@ -650,8 +661,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       flush();
     } finally {
       alarm = _alarm;
-      if (alarm != null)
-	alarm.queue(60000);
+      if (alarm != null && _autoFlushTime > 0)
+	alarm.queue(_autoFlushTime);
     }
   }
 

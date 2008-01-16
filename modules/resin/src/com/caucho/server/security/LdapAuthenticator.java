@@ -54,7 +54,7 @@ import java.util.logging.*;
  * &lt;/authenticator>
  * </code></pre>
  */
-public class LdapAuthenticator extends AbstractAuthenticator {
+public class LdapAuthenticator extends AbstractPasswordAuthenticator {
   private static final Logger log
     = Logger.getLogger(LdapAuthenticator.class.getName());
   
@@ -91,7 +91,7 @@ public class LdapAuthenticator extends AbstractAuthenticator {
 
   public void setURL(String url)
   {
-   _jndiEnv.put(Context.PROVIDER_URL, url);
+    _jndiEnv.put(Context.PROVIDER_URL, url);
   }
 
   public void setUserAttribute(String user)
@@ -108,7 +108,7 @@ public class LdapAuthenticator extends AbstractAuthenticator {
    * Initialize the authenticator.
    */
   @PostConstruct
-  public synchronized void init()
+  public void init()
     throws ServletException
   {
     super.init();
@@ -117,11 +117,7 @@ public class LdapAuthenticator extends AbstractAuthenticator {
   /**
    * Authenticate (login) the user.
    */
-  protected Principal loginImpl(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application,
-                                String userName, String password)
-    throws ServletException
+  protected PasswordUser getUser(String userName)
   {
     try {
       Hashtable env = new Hashtable();
@@ -153,32 +149,14 @@ public class LdapAuthenticator extends AbstractAuthenticator {
       
       String ldapPassword = (String) passwordAttr.get();
 
-      if (! password.equals(ldapPassword))
-	return null;
-
-      return new BasicPrincipal(userName);
+      Principal principal = new BasicPrincipal(userName);
+      
+      return new PasswordUser(principal, ldapPassword, false,
+			      new String[] { "user" });
     } catch (NamingException e) {
       log.log(Level.FINE, e.toString(), e);
 
       return null;
-    } catch (Throwable e) {
-      throw new ServletException(e);
     }
-  }
-
-  /**
-   * Returns true if the user plays the named role.
-   *
-   * @param request the servlet request
-   * @param user the user to test
-   * @param role the role to test
-   */
-  public boolean isUserInRole(HttpServletRequest request,
-                              HttpServletResponse response,
-                              ServletContext application,
-                              Principal principal, String role)
-    throws ServletException
-  {
-    return principal != null;
   }
 }

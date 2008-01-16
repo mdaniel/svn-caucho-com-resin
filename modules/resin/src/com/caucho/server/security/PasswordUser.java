@@ -56,16 +56,20 @@ public class PasswordUser
   private final String _password;
   
   private final boolean _isDisabled;
+  private final boolean _isAnonymous;
   private final String []_roles;
 
   public PasswordUser(Principal principal,
 		      String password,
 		      boolean isDisabled,
+		      boolean isAnonymous,
 		      String []roles)
   {
     _principal = principal;
     _password = password;
+    
     _isDisabled = isDisabled;
+    _isAnonymous = isAnonymous;
 
     _roles = roles;
   }
@@ -84,6 +88,14 @@ public class PasswordUser
   public boolean isDisabled()
   {
     return _isDisabled;
+  }
+
+  /**
+   * Returns true if the user is anonymous, i.e. no password
+   */
+  public boolean isAnonymous()
+  {
+    return _isAnonymous;
   }
 
   /**

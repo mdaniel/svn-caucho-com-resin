@@ -54,7 +54,14 @@ import java.util.Set;
 import java.util.logging.*;
 
 /**
- * The JAAS authenticator uses an underlying JAAS.
+ * The JAAS authenticator uses an existing JAAS LoginModule.  Applications
+ * which have existing JAAS modules can use the JaasAuthenticator to
+ * log users in based on the old login.
+ *
+ * <code><pre>
+ * &lt;authenticator url="jaas:">
+ *   &lt;init login-module="example.MyLogin"/>
+ * &lt;/authenticator>
  */
 public class JaasAuthenticator extends AbstractAuthenticator {
   private static final Logger log
@@ -62,8 +69,13 @@ public class JaasAuthenticator extends AbstractAuthenticator {
   
   private Class _loginModuleClass;
 
-  private HashMap<String,String> _options =
-    new HashMap<String,String>();
+  private HashMap<String,String> _options
+    = new HashMap<String,String>();
+
+  public JaasAuthenticator()
+  {
+    setPasswordDigest(null);
+  }
 
   /**
    * Sets the JAAS spi login module class.
@@ -76,7 +88,7 @@ public class JaasAuthenticator extends AbstractAuthenticator {
     Config.checkCanInstantiate(loginModuleClass);
 
     if (! LoginModule.class.isAssignableFrom(loginModuleClass))
-      throw new ConfigException(L.l("`{0}' must implement javax.security.auth.spi.LoginModule",
+      throw new ConfigException(L.l("'{0}' must implement javax.security.auth.spi.LoginModule",
 				    loginModuleClass.getName()));
   }
 
@@ -147,10 +159,10 @@ public class JaasAuthenticator extends AbstractAuthenticator {
       log.log(Level.FINE, e.toString(), e);
 
       return null;
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-      
-      return null;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -170,31 +182,10 @@ public class JaasAuthenticator extends AbstractAuthenticator {
     if (principal == null)
       return false;
 
-    Class principalCl = principal.getClass();
-    
-    try {
-      Method isUserInRole = principalCl.getMethod("isUserInRole",
-						  new Class[] { String.class });
-
-      if (isUserInRole != null)
-	return Boolean.TRUE.equals(isUserInRole.invoke(principal, role));
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-      
-    try {
-      Method getRoles = principalCl.getMethod("getRoles", new Class[] { });
-	
-      if (getRoles != null) {
-	Set roles = (Set) getRoles.invoke(principal);
-
-	return roles != null && roles.contains(role);
-      }
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-      
-    return principal != null;
+    if (principal instanceof RolePrincipal)
+      return ((RolePrincipal) principal).isUserInRole(role);
+    else
+      return "user".equals(role);
   }
 
   static class Handler implements CallbackHandler {

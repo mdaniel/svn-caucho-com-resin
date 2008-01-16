@@ -46,6 +46,11 @@ import java.io.*;
 
 /**
  * Base class for authenticators which lookup passwords from a database.
+ *
+ * Implementations only need to override the <code>getUser</code> method
+ * and return a populated <code>PasswordUser</code>.  Since
+ * <code>PasswordUser</code> already contains role information, the
+ * abstract authenticator can handle any authentication or authorization.
  */
 abstract public class AbstractPasswordAuthenticator
   extends AbstractAuthenticator

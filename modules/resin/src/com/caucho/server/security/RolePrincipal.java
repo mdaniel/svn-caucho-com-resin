@@ -28,23 +28,12 @@
 
 package com.caucho.server.security;
 
-/**
- * The null authenticator always fails
- *
- * <code><pre>
- * &lt;authenticator url="null:"/>
- * </pre></code>
- */
-public class NullAuthenticator extends AbstractPasswordAuthenticator {
+import java.security.Principal;
 
-  /**
-   * Abstract method to return a user based on the name
-   *
-   * @param userName the string user name
-   * @return the populated PasswordUser value
-   */
-  protected PasswordUser getUser(String userName)
-  {
-    return null;
-  }
+/**
+ * Principal which has role methods.
+ */
+public interface RolePrincipal extends Principal
+{
+  public boolean isUserInRole(String role);
 }

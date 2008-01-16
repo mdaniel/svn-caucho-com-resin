@@ -28,7 +28,7 @@
 
 package com.caucho.server.security;
 
-import com.caucho.config.Config;
+import com.caucho.config.*;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Depend;
@@ -55,7 +55,7 @@ import java.util.logging.*;
  * <code><pre>
  * &lt;users>
  *   &lt;user name="h.potter" password="quidditch" roles="user,captain"/>
- * ...
+ *   ...
  * &lt;/users>
  * </pre></code>
  *
@@ -69,12 +69,13 @@ import java.util.logging.*;
  * &lt;/authenticator>
  * </pre></code>
  */
-public class XmlAuthenticator extends AbstractAuthenticator {
+public class XmlAuthenticator extends AbstractPasswordAuthenticator {
   private static final Logger log =
     Logger.getLogger(XmlAuthenticator.class.getName());
   
   private Path _path;
-  private Hashtable<String,User> _userMap = new Hashtable<String,User>();
+  private Hashtable<String,PasswordUser> _userMap
+    = new Hashtable<String,PasswordUser>();
 
   private Depend _depend;
   private long _lastCheck;
@@ -99,12 +100,12 @@ public class XmlAuthenticator extends AbstractAuthenticator {
    * Adds a user from the configuration.
    *
    * <pre>
-   * &lt;init-param user='Harry Potter:quidditch:user,webdav'/>
+   * &lt;init user='Harry Potter:quidditch:user,webdav'/>
    * </pre>
    */
   public void addUser(User user)
   {
-    _userMap.put(user.getName(), user);
+    _userMap.put(user.getName(), user.getPasswordUser());
   }
 
   /**
@@ -118,20 +119,26 @@ public class XmlAuthenticator extends AbstractAuthenticator {
 
     reload();
   }
-
+  
   /**
-   * Returns the number of users that are available.
+   * Returns the PasswordUser
    */
-  public int getUserCount()
+  @Override
+  protected PasswordUser getUser(String userName)
   {
-    return _userMap.size();
+    if  (userName == null)
+      return null;
+    
+    if (isModified())
+      reload();
+
+    return _userMap.get(userName);
   }
 
   /**
    * Reload the authenticator.
    */
   public synchronized void reload()
-    throws ServletException
   {
     if (_path == null)
       return;
@@ -143,85 +150,12 @@ public class XmlAuthenticator extends AbstractAuthenticator {
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " loading users from " + _path);
       
-      _userMap = new Hashtable<String,User>();
+      _userMap = new Hashtable<String,PasswordUser>();
       
       new Config().configureBean(this, _path);
     } catch (Exception e) {
-      throw new ServletException(e);
+      throw ConfigException.create(e);
     }
-  }
-  
-  /**
-   * Authenticate (login) the user.
-   */
-  protected Principal loginImpl(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application,
-                                String userName, String password)
-    throws ServletException
-  {
-    if (isModified())
-      reload();
-
-    if  (userName == null)
-      return null;
-
-    User user = _userMap.get(userName);
-    if (user == null)
-      return null;
-
-    if (user.getPassword().equals(password))
-      return user.getPrincipal();
-    else
-      return null;
-  }
-  
-  protected String getDigestPassword(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     ServletContext application,
-                                     String userName, String realm)
-    throws ServletException
-  {
-    if (isModified())
-      reload();
-
-    User user = (User) _userMap.get(userName);
-    if (user == null)
-      return null;
-    else
-      return user.getPassword();
-  }
-
-  /**
-   * Returns true if the user plays the named role.
-   *
-   * @param request the servlet request
-   * @param user the user to test
-   * @param role the role to test
-   */
-  public boolean isUserInRole(HttpServletRequest request,
-                              HttpServletResponse response,
-                              ServletContext application,
-                              Principal principal, String role)
-    throws ServletException
-  {
-    if (principal == null)
-      return false;
-
-    String name = principal.getName();
-
-    User user = (User) _userMap.get(name);
-    if (user == null)
-      return false;
-
-    String []roles = user.getRoles();
-
-    for (int i = roles.length - 1; i >= 0; i--)
-      // server/12h2
-      if (roles[i].equalsIgnoreCase(role))
-        return true;
-    
-    return false;
   }
 
   private boolean isModified()
@@ -245,6 +179,8 @@ public class XmlAuthenticator extends AbstractAuthenticator {
     private Principal _principal;
     private String []_roles = new String[0];
 
+    private boolean _isDisabled;
+
     public User()
     {
     }
@@ -264,7 +200,7 @@ public class XmlAuthenticator extends AbstractAuthenticator {
 	_principal = new BasicPrincipal(name);
     }
 
-    String getName()
+    public String getName()
     {
       return _name;
     }
@@ -272,11 +208,6 @@ public class XmlAuthenticator extends AbstractAuthenticator {
     public void setPassword(String password)
     {
       _password = password;
-    }
-
-    String getPassword()
-    {
-      return _password;
     }
 
     public void setPrincipal(Principal principal)
@@ -291,38 +222,21 @@ public class XmlAuthenticator extends AbstractAuthenticator {
 
     public void addRoles(String roles)
     {
-      int head = 0;
-      int length = roles.length();
-
-      while (head < length) {
-        int ch;
-        
-        for (;
-             head < length && ((ch = roles.charAt(head)) == ' ' || ch == ',');
-             head++) {
-        }
-
-        if (head >= length)
-          return;
-
-        int tail;
-        for (tail = head;
-             tail < length &&
-               (ch = roles.charAt(tail)) != ' ' &&
-               (ch != ',');
-             tail++) {
-        }
-
-        String role = roles.substring(head, tail);
-
+      for (String role : roles.split("[ ,]")) {
         addRole(role);
-
-        head = tail;
       }
+    }
+
+    public void setDisabled(boolean isDisabled)
+    {
+      _isDisabled = isDisabled;
     }
     
     public void addRole(String role)
     {
+      if ("disabled".equals(role))
+	_isDisabled = true;
+      
       String []newRoles = new String[_roles.length + 1];
       System.arraycopy(_roles, 0, newRoles, 0, _roles.length);
       newRoles[_roles.length] = role;
@@ -359,6 +273,11 @@ public class XmlAuthenticator extends AbstractAuthenticator {
       setName(name);
       setPassword(password);
       addRoles(roles);
+    }
+
+    public PasswordUser getPasswordUser()
+    {
+      return new PasswordUser(_principal, _password, _isDisabled, _roles);
     }
   }
 }
