@@ -28,8 +28,8 @@
 
 package com.caucho.server.security;
 
+import com.caucho.config.*;
 import com.caucho.config.types.Period;
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.dispatch.ServletConfigException;
 import com.caucho.server.session.SessionManager;
@@ -57,7 +57,7 @@ import java.util.logging.Logger;
 /**
  * An authenticator using JDBC.
  *
- * <p/>The default table schema looks something like:
+ * <p>The default table schema looks something like:
  * <pre>
  * CREATE TABLE LOGIN (
  *   username VARCHAR(250) NOT NULL,
@@ -66,10 +66,16 @@ import java.util.logging.Logger;
  *   PRIMARY KEY (username)
  * );
  * </pre>
+ *
+ * <code><pre>
+ * &lt;authenticator url="jdbc:database=jdbc/user">
+ * &lt;/authenticator>
+ * </pre></code>
  */
 
 public class JdbcAuthenticator extends AbstractAuthenticator {
-  private static final Logger log = Log.open(JdbcAuthenticator.class);
+  private static final Logger log
+    = Logger.getLogger(JdbcAuthenticator.class.getName());
   private static final L10N L = new L10N(JdbcAuthenticator.class);
   
   private DataSource _dataSource;
@@ -271,25 +277,21 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
 
     int i = _passwordQuery.indexOf('?');
     if (i < 0)
-      throw new ServletConfigException(L.l("`{0}' expects a parameter",
-                                     "password-query"));
+      throw new ConfigException(L.l("'password-query' expects a parameter"));
 
     if (_cookieQuery != null) {
       i = _cookieQuery.indexOf('?');
       if (i < 0)
-        throw new ServletConfigException(L.l("`{0}' expects a parameter",
-                                       "cookie-auth-query"));
+        throw new ConfigException(L.l("'cookie-auth-query' expects a parameter"));
     }
     
     if (_cookieUpdate != null) {
       i = _cookieUpdate.indexOf('?');
       if (i < 0)
-        throw new ServletConfigException(L.l("`{0}' expects two parameters",
-                                       "cookie-auth-update"));
+        throw new ConfigException(L.l("'cookie-auth-update' expects two parameters"));
       int j = _cookieUpdate.indexOf('?', i + 1);
       if (j < 0)
-        throw new ServletConfigException(L.l("`{0}' expects two parameters",
-                                       "cookie-auth-update"));
+        throw new ConfigException(L.l("'cookie-auth-update' expects two parameters"));
     }
 
     if ((_cookieUpdate != null) && (_cookieQuery == null))
@@ -299,8 +301,7 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
     if (_roleQuery != null) {
       i = _roleQuery.indexOf('?');
       if (i < 0)
-        throw new ServletConfigException(L.l("`{0}' expects a parameter",
-                                             "role-query"));
+        throw new ConfigException(L.l("'role-query' expects a parameter"));
     }
   }
 
@@ -327,8 +328,8 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
     if (cookieAuth == null)
       cookieAuth = (String) request.getParameter("j_use_cookie_auth");
 
-    if ("true".equals(cookieAuth) || "on".equals(cookieAuth) ||
-	_useCookie && cookieAuth == null)
+    if ("true".equals(cookieAuth) || "on".equals(cookieAuth)
+	|| _useCookie && cookieAuth == null)
       addAuthCookie(request, response, application, user);
 
     return user;

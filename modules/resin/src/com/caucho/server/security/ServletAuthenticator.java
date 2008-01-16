@@ -52,9 +52,10 @@ import java.security.Principal;
  * it can be configured with &lt;init-param foo='bar'/>.
  *
  * <code><pre>
- * &lt;authenticator id='name'>
- *   &lt;class-name>test.MyAuthenticator&lt;/class-name>
- *   &lt;init-param foo='bar'/>
+ * &lt;authenticator url='scheme:param1=value1;param2=value2'>
+ *   &lt;init>
+ *     &lt;param3>value4&lt;/param3>
+ *   &lt;/init>
  * &lt;/authenticator>
  * </pre></code>
  *

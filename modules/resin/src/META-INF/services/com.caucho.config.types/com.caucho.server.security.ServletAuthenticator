@@ -1,1 +1,2 @@
+property=com.caucho.server.security.PropertyAuthenticator
 xml=com.caucho.server.security.XmlAuthenticator

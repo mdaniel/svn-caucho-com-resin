@@ -1,7 +1,7 @@
 <config xmlns="http://caucho.com/ns/resin">
   <namespace name="http://caucho.com/ns/resin" default="true">
     <bean name="authenticator"
-          class="com.caucho.server.security.Authenticator"/>
+          class="com.caucho.server.security.AuthenticatorConfig"/>
 
     <bean name="bean"
           class="com.caucho.webbeans.cfg.BeanConfig"/>

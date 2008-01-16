@@ -1,22 +1,18 @@
 <web-app xmlns="http://caucho.com/ns/resin"
          xmlns:resin="http://caucho.com/ns/resin/core">
 
+  <servlet-mapping url-pattern="*.php"
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+  </servlet-mapping>
+
   <!--
-     - Configuration for the administration application
+     - Security configuration
     -->
 
-  <resin:if test="${empty(resin_admin_user)}">
-    <resin:set var="resin_admin_user" value="admin"/>
-  </resin:if>
-
-  <authenticator>
-    <type>com.caucho.server.security.XmlAuthenticator</type>
-
+  <authenticator url="xml:">
     <init>
-      <resin:if test="${not empty(resin_admin_password)}">
-        <user name="${resin_admin_user}"
-	      password="${resin_admin_password}" roles="read,write"/>
-      </resin:if>
+      <user name="${resin_admin_user?resin_admin_user:'admin'}"
+            password="${resin_admin_password}" roles="read,write"/>
     </init>
   </authenticator>
 
@@ -41,41 +37,4 @@
     
     <auth-constraint role-name="*"/>
   </security-constraint>
-
-  <servlet servlet-name="resin-php"
-           servlet-class="com.caucho.quercus.servlet.QuercusServlet">
-  </servlet>
-
-  <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
-  
-  <security-constraint>
-    <web-resource-collection url-pattern="*.php"/>
-      
-    <auth-constraint role-name="*"/>
-  </security-constraint>
-
-  <!--
-     - Provide a remote interface for instances of the administration 
-     - application on other servers.
-    -->
-  <servlet servlet-name='remote'
-           servlet-class='com.caucho.hessian.server.HessianServlet'>
-    <init>
-      <service resin:type="com.caucho.services.jmx.JMXService">
-        <mbean-server>${jndi("jmx/MBeanServer")}</mbean-server>
-      </service>
-     </init>
-  </servlet>
-
-  <servlet-mapping url-pattern='/remote' servlet-name='remote'/>
-
-  <!--
-    - Provide a remote interface for jsr88 deployment
-   -->
-
-  <servlet servlet-name='deploy'
-           servlet-class='com.caucho.j2ee.deployserver.DeploymentServlet'>
-  </servlet>
-
-  <servlet-mapping url-pattern='/deploy' servlet-name='deploy'/>
 </web-app>

@@ -19,7 +19,8 @@
 </header>
 
 <body>
-<summary/>
+
+<localtoc/>
 
 <s1 title="Quick Start">
 <p>The easiest authenticator to understand is the 
@@ -45,9 +46,9 @@ he has the password "quidditch".  He also plays the
     &lt;/init&gt;
   &lt;/authenticator&gt;
 
-  &lt;login-config auth-method='basic'/&gt;
+  &lt;login-config auth-method="basic"/&gt;
 
-  &lt;security-constraint url-pattern='/users-only/*' role-name='user'/&gt;
+  &lt;security-constraint url-pattern="/users-only/*" role-name="user"/&gt;
 
   ...
 

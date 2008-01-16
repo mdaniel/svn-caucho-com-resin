@@ -43,12 +43,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Hashtable;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 /**
- * The LDAP authenticator uses the underlying LDAP services provided by the JDK.
+ * The LDAP authenticator uses the underlying LDAP services
+ * provided by the JDK.
+ *
+ * <code><pre>
+ * &lt;authenticator url="ldap:url=ldap://localhost:389">
+ * &lt;/authenticator>
+ * </code></pre>
  */
 public class LdapAuthenticator extends AbstractAuthenticator {
+  private static final Logger log
+    = Logger.getLogger(LdapAuthenticator.class.getName());
+  
   private String _userAttribute = "uid";
   private String _passwordAttribute = "userPassword";
   private String _dnPrefix;

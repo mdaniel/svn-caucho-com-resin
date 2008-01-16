@@ -51,12 +51,15 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 /**
  * The JAAS authenticator uses an underlying JAAS.
  */
 public class JaasAuthenticator extends AbstractAuthenticator {
+  private static final Logger log
+    = Logger.getLogger(JaasAuthenticator.class.getName());
+  
   private Class _loginModuleClass;
 
   private HashMap<String,String> _options =

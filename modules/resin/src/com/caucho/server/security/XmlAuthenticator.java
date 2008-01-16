@@ -46,27 +46,33 @@ import java.util.logging.*;
 /**
  * The XML authenticator reads a static file for authentication.
  *
+ * <code><pre>
+ * &lt;authenticator url="xml:path=WEB-INF/users.xml"/>
+ * </pre></code>
+ *
  * <p>The format of the static file is as follows:
  *
  * <code><pre>
- * &lt;authenticator>
- * &lt;user name='Harry Potter' password='quidditch'>
- *   &lt;role>user&lt;/role>
- *   &lt;role>gryffindor&lt;/role>
- * &lt;/user>
+ * &lt;users>
+ *   &lt;user name="h.potter" password="quidditch" roles="user,captain"/>
  * ...
- * &lt;/authenticator>
+ * &lt;/users>
  * </pre></code>
  *
- * <p>The authenticator can also be configured in the web.xml:
+ * <p>The authenticator can also be configured in the resin-web.xml:
  *
  * <code><pre>
- * &lt;authenticator class-name='com.caucho.http.security.XmlAuthenticator'>
- *   &lt;init-param user='Harry Potter:quidditch:user,gryffindor'/>
+ * &lt;authenticator url="xml:password-digest=none">
+ *   &lt;init>
+ *     &lt;user name="Harry Potter" password="quidditch" roles="user,captain"/>
+ *   &lt;/init>
  * &lt;/authenticator>
  * </pre></code>
  */
 public class XmlAuthenticator extends AbstractAuthenticator {
+  private static final Logger log =
+    Logger.getLogger(XmlAuthenticator.class.getName());
+  
   private Path _path;
   private Hashtable<String,User> _userMap = new Hashtable<String,User>();
 

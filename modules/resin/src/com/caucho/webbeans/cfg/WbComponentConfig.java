@@ -203,8 +203,8 @@ public class WbComponentConfig {
   {
     if (_init != null)
       _init.addProgram(init);
-    
-    _init = init;
+    else
+      _init = init;
   }
 
   /**

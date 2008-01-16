@@ -80,4 +80,9 @@ public class ContainerProgram extends ConfigProgram {
       program.inject(bean, env);
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + _programList;
+  }
 }

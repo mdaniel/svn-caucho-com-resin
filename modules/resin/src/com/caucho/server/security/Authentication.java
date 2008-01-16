@@ -32,12 +32,14 @@ package com.caucho.server.security;
 import java.security.*;
 
 /**
- * Base implementation to log in a user.
+ * Representes an authenticated user
  */
-public interface Authenticator
+public interface Authentication extends Principal
 {
-  public AuthenticatedUser authenticate(Principal user,
-					Object credentials,
-					Object details);
+  public Principal getPrincipal();
+  
+  public boolean isUserInRole(String role);
+
+  public void logout();
 }
 

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -60,11 +61,11 @@ import java.util.logging.Logger;
  * logged into one web-app will share the same principal.
  */
 public class AbstractAuthenticator implements ServletAuthenticator {
-  static final Logger log = Log.open(AbstractAuthenticator.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractAuthenticator.class.getName());
   static final L10N L = new L10N(AbstractAuthenticator.class);
   
   public static final String LOGIN_NAME = "com.caucho.servlet.login.name";
-  
   
   protected int _principalCacheSize = 4096;
   protected LruCache<String,PrincipalEntry> _principalCache;
@@ -175,12 +176,12 @@ public class AbstractAuthenticator implements ServletAuthenticator {
       _principalCache = new LruCache<String,PrincipalEntry>(_principalCacheSize);
 
     if (_passwordDigest != null) {
-      if (_passwordDigest.getAlgorithm() == null ||
-	  _passwordDigest.getAlgorithm().equals("none"))
+      if (_passwordDigest.getAlgorithm() == null
+	  || _passwordDigest.getAlgorithm().equals("none"))
 	_passwordDigest = null;
     }
-    else if (_passwordDigestAlgorithm == null ||
-	     _passwordDigestAlgorithm.equals("none")) {
+    else if (_passwordDigestAlgorithm == null
+	     || _passwordDigestAlgorithm.equals("none")) {
     }
     else {
       int p = _passwordDigestAlgorithm.indexOf('-');
