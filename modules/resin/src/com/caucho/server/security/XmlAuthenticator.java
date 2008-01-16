@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Hashtable;
+import java.util.logging.*;
 
 /**
  * The XML authenticator reads a static file for authentication.
@@ -132,6 +133,9 @@ public class XmlAuthenticator extends AbstractAuthenticator {
     try {
       _lastCheck = Alarm.getCurrentTime();
       _depend = new Depend(_path);
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " loading users from " + _path);
       
       _userMap = new Hashtable<String,User>();
       

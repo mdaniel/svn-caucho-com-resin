@@ -198,6 +198,6 @@ abstract public class AbstractSessionContext extends AbstractContext
   
   public MessageContext getMessageContext()
   {
-      throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException();
   }
 }

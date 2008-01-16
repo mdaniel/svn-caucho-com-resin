@@ -103,6 +103,9 @@ public class WebBeansContainer
   private ArrayList<WebBeansRootContext> _pendingBindList
     = new ArrayList<WebBeansRootContext>();
 
+  private ArrayList<ComponentImpl> _pendingSingletonList
+    = new ArrayList<ComponentImpl>();
+
   private RuntimeException _configException;
 
   private WebBeansContainer(ClassLoader loader)
@@ -185,6 +188,11 @@ public class WebBeansContainer
     return _wbWebBeans;
   }
 
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+
   private void init()
   {
     try {
@@ -221,6 +229,10 @@ public class WebBeansContainer
 
     if (name != null && comp.getScope() != null)
       _namedComponentMap.put(name, comp);
+
+    if (comp.getScope() instanceof SingletonScope) {
+      _pendingSingletonList.add(comp);
+    }
   }
   
   public void addComponentByName(String name, ComponentImpl comp)
@@ -456,12 +468,20 @@ public class WebBeansContainer
     
     WebComponent component = _componentMap.get(type);
 
-    if (component != null)
-      return component.bind(location, bindingList);
-    else if (_parent != null)
+    if (component != null) {
+      ComponentImpl comp = component.bind(location, bindingList);
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " bind(" + getSimpleName(type) + ") returns " + comp);
+      
+      return comp;
+    }
+    else if (_parent != null) {
       return _parent.bind(location, type, bindingList);
-    else
+    }
+    else {
       return null;
+    }
   }
 
   /**
@@ -731,6 +751,25 @@ public class WebBeansContainer
     bind();
     
     _wbWebBeans.init();
+
+    startSingletons();
+  }
+
+  private void startSingletons()
+  {
+    ArrayList<ComponentImpl> singletons;
+
+    synchronized (_pendingSingletonList) {
+      if (_pendingSingletonList.size() == 0)
+	return;
+
+      singletons = new ArrayList<ComponentImpl>();
+      singletons.addAll(_pendingSingletonList);
+      _pendingSingletonList.clear();
+    }
+
+    for (ComponentImpl singleton : singletons)
+      singleton.get();
   }
 
   /**

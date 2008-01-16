@@ -1335,12 +1335,12 @@ public abstract class Path {
     else if (! (o instanceof Path))
       return false;
     else
-      return getPath().equals(((Path) o).getPath());
+      return getURL().equals(((Path) o).getURL());
   }
 
   public String toString()
   {
-    return getPath();
+    return getURL();
   }
 
   public StreamImpl openReadImpl() throws IOException

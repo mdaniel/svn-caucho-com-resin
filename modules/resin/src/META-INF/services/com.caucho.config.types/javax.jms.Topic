@@ -1,0 +1,3 @@
+memory=com.caucho.jms.memory.MemoryTopic
+file=com.caucho.jms.file.FileTopic
+jdbc=com.caucho.jms.jdbc.JdbcTopic

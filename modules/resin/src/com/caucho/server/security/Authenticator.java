@@ -29,6 +29,7 @@
 
 package com.caucho.server.security;
 
+import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.util.L10N;
@@ -37,11 +38,17 @@ import com.caucho.util.L10N;
  * The authenticator is the same as resource, but has a default.
  */
 public class Authenticator extends BeanConfig {
-  private static L10N L = new L10N(Authenticator.class);
+  private static final L10N L = new L10N(Authenticator.class);
 
   public Authenticator()
   {
     setScope("singleton");
+  }
+
+  @Override
+  public Class getBeanConfigClass()
+  {
+    return ServletAuthenticator.class;
   }
 
   /**

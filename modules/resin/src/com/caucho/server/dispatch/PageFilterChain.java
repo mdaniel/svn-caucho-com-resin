@@ -266,4 +266,12 @@ public class PageFilterChain implements FilterChain
       }
     }
   }
+
+  public String toString()
+  {
+    if (_config != null)
+      return getClass().getSimpleName() + "[" + _config + "]";
+    else
+      return getClass().getSimpleName() + "[" + _servlet + "]";
+  }
 }

@@ -48,7 +48,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FormLoginServlet extends GenericServlet {
-  private final Logger log = Log.open(FormLoginServlet.class);
+  private final Logger log
+    = Logger.getLogger(FormLoginServlet.class.getName());
   static final L10N L = new L10N(FormLoginServlet.class);
   
   public void service(ServletRequest request, ServletResponse response)
@@ -76,7 +77,7 @@ public class FormLoginServlet extends GenericServlet {
     Principal user = auth.login(req, res, app, username, password);
 
     if (log.isLoggable(Level.FINE))
-      log.fine("auth: " + user);
+      log.fine(this + " login " + user);
 
     if (user == null) {
       // A failure internally redirects to the error page (not redirect)

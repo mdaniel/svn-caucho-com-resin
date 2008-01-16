@@ -181,4 +181,9 @@ public abstract class GenericServlet
   {
     // log("destroy");
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getServletContext() + "]";
+  }
 }

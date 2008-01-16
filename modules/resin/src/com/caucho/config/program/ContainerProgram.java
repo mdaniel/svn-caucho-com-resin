@@ -52,6 +52,16 @@ public class ContainerProgram extends ConfigProgram {
   }
 
   /**
+   * Adds a new program to the container
+   * 
+   * @param program the new program
+   */
+  public void addProgram(int index, ConfigProgram program)
+  {
+    _programList.add(index, program);
+  }
+
+  /**
    * Invokes the child programs on the bean
    * 
    * @param bean the bean to configure

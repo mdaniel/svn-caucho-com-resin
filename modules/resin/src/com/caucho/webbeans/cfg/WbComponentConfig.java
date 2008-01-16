@@ -31,7 +31,7 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.*;
 import com.caucho.config.types.*;
 import com.caucho.ejb3.gen.*;
 import com.caucho.util.*;
@@ -201,7 +201,32 @@ public class WbComponentConfig {
    */
   public void setInit(ContainerProgram init)
   {
+    if (_init != null)
+      _init.addProgram(init);
+    
     _init = init;
+  }
+
+  /**
+   * Adds an init property
+   */
+  public void addStringProperty(String name, String value)
+  {
+    if (_init == null)
+      _init = new ContainerProgram();
+
+    _init.addProgram(new PropertyStringProgram(name, value));
+  }
+
+  /**
+   * Adds an init property
+   */
+  public void addOptionalStringProperty(String name, String value)
+  {
+    if (_init == null)
+      _init = new ContainerProgram();
+
+    _init.addProgram(0, new PropertyStringProgram(name, value, true));
   }
 
   /**
@@ -225,8 +250,11 @@ public class WbComponentConfig {
     comp.setInstanceClass(_cl);
     comp.setTargetType(_cl);
 
-    if (_name != null)
+    if (_name != null) {
       comp.setName(_name);
+
+      addOptionalStringProperty("name", _name);
+    }
 
     comp.setBindingList(_bindingList);
 

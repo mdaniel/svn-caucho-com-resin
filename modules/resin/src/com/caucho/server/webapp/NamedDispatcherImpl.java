@@ -148,5 +148,10 @@ class NamedDispatcherImpl implements RequestDispatcher {
       ((Response) res).finish(true);
     */
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _includeFilterChain + "]";
+  }
 }
 

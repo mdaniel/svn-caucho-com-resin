@@ -115,11 +115,14 @@ public abstract class AbstractLogin {
 	if (factory != null)
 	  _auth = (ServletAuthenticator) factory.get();
       } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
 
       if (_auth == null)
         _auth = new NullAuthenticator();
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(toString() + " using " + _auth);
     }
     
     return _auth;
@@ -230,5 +233,10 @@ public abstract class AbstractLogin {
 				null,
 				request.getRequestedSessionId(),
                                 principal);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

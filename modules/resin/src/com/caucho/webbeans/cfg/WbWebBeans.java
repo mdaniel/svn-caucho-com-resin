@@ -99,6 +99,14 @@ public class WbWebBeans {
   {
     return _webBeansContainer;
   }
+
+  /**
+   * Returns the owning classloader.
+   */
+  public ClassLoader getClassLoader()
+  {
+    return getContainer().getClassLoader();
+  }
   
   /**
    * Gets the web beans root directory

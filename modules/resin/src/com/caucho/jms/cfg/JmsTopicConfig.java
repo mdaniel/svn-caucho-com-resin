@@ -29,118 +29,24 @@
 
 package com.caucho.jms.cfg;
 
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
 import javax.jms.*;
 
-import com.caucho.config.*;
 import com.caucho.config.types.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
-import com.caucho.jms.queue.AbstractTopic;
-import com.caucho.naming.*;
-import com.caucho.webbeans.cfg.AbstractBeanConfig;
-
-import com.caucho.util.*;
 
 /**
  * jms-topic configuration
  */
-public class JmsTopicConfig extends AbstractBeanConfig
+public class JmsTopicConfig extends BeanConfig
 {
-  private static final L10N L = new L10N(JmsTopicConfig.class);
-  private static final Logger log
-    = Logger.getLogger(JmsTopicConfig.class.getName());
-
-  private static HashMap<String,Class> _urlMap
-    = new  HashMap<String,Class>();
-
-  private String _url;
-
-  /**
-   * Sets the JMS URL for the topic
-   */
-  public void setUrl(String url)
+  public JmsTopicConfig()
   {
-    _url = url;
+    setScope("singleton");
   }
 
-  /**
-   * Initialize the topic.
-   */
-  @PostConstruct
-  public void init()
-    throws Exception
+  @Override
+  public Class getBeanConfigClass()
   {
-    if (getInstanceClass() != null) {
-      register();
-
-      return;
-    }
-    
-    if (_url == null)
-      throw new ConfigException(L.l("<jms-topic> requires a url attribute"));
-
-    int p = _url.indexOf(':');
-    if (p < 0)
-      throw new ConfigException(L.l("'{0}' expects a 'scheme:' syntax.  The <jms-topic> url syntax is 'scheme:prop1=value1;prop2=value2'"));
-
-    String scheme = _url.substring(0, p);
-    String param = _url.substring(p + 1);
-    Class cl = _urlMap.get(scheme);
-
-    if (cl == null) {
-      throw new ConfigException(L.l("'{0}' is an unknown <jms-topic> scheme.",
-				    _url));
-    }
-
-    AbstractTopic topic = (AbstractTopic) cl.newInstance();
-
-    if (getName() != null)
-      topic.setName(getName());
-    else if (getJndiName() != null)
-      topic.setName(getJndiName());
-
-    for (String paramValue : param.split(";")) {
-      if (paramValue.equals(""))
-	continue;
-      
-      p = paramValue.indexOf('=');
-
-      if (p < 0)
-	throw new ConfigException(L.l("'{0}' has an incorrect parameter syntax.  The <jms-topic> url syntax is 'scheme:prop1=value1;prop2=value2'"));
-
-      String name = paramValue.substring(0, p);
-      String value = paramValue.substring(p + 1);
-
-      Config.setStringAttribute(topic, name, value);
-    }
-
-    if (getInit() != null)
-      getInit().configure(topic);
-
-    topic.postConstruct();
-
-    register(topic);
-  }
-
-  static {
-    try {
-      Class cl = Class.forName("com.caucho.jms.cluster.ClientTopic");
-      _urlMap.put("client", cl);
-      
-      cl = Class.forName("com.caucho.jms.cluster.ServerTopic");
-      _urlMap.put("cluster", cl);
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    
-    _urlMap.put("file", com.caucho.jms.file.FileTopic.class);
-    _urlMap.put("jdbc", com.caucho.jms.jdbc.JdbcTopic.class);
-    _urlMap.put("memory", com.caucho.jms.memory.MemoryTopic.class);
+    return Topic.class;
   }
 }
 

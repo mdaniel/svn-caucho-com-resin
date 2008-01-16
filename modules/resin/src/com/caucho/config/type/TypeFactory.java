@@ -84,6 +84,12 @@ public class TypeFactory implements AddLoaderListener
 
   private final HashMap<QName,Attribute> _envAttrMap
     = new HashMap<QName,Attribute>();
+
+  private final HashSet<URL> _driverTypeSet
+    = new HashSet<URL>();
+  
+  private final HashMap<String,HashMap<String,String>> _driverTypeMap
+    = new HashMap<String,HashMap<String,String>>();
   
   private TypeFactory(ClassLoader loader)
   {
@@ -96,8 +102,6 @@ public class TypeFactory implements AddLoaderListener
     }
     else
       _parent = null;
-
-
   }
 
   /**
@@ -108,6 +112,11 @@ public class TypeFactory implements AddLoaderListener
     TypeFactory factory = getFactory(type.getClassLoader());
 
     return factory.getConfigTypeImpl(type);
+  }
+
+  public static TypeFactory create()
+  {
+    return getFactory();
   }
 
   public static TypeFactory getFactory()
@@ -298,6 +307,9 @@ public class TypeFactory implements AddLoaderListener
   private void init(ClassLoader loader)
   {
     try {
+      _driverTypeSet.clear();
+      _driverTypeMap.clear();
+      
       Enumeration<URL> urls
 	= loader.getResources("META-INF/services/com.caucho.config/default.xml");
 
@@ -332,6 +344,126 @@ public class TypeFactory implements AddLoaderListener
       return _parent.hasConfig(url);
     else
       return false;
+  }
+
+  /**
+   * Returns the classname of the given driver.
+   *
+   * @param apiType the driver API
+   * @param scheme the configuration scheme
+   */
+  public String getDriverType(String apiType, String scheme)
+  {
+    HashMap<String,String> driverMap = getDriverTypeMap(apiType);
+    
+    return driverMap.get(scheme);
+  }
+
+  /**
+   * Returns a list of schemes supported by the api type.
+   *
+   * @param schemes the return list of schemes scheme
+   * @param apiType the driver API
+   */
+  public void getDriverSchemes(ArrayList<String> schemes, String apiType)
+  {
+    HashMap<String,String> driverMap = getDriverTypeMap(apiType);
+
+    ClassLoader loader = _loader;
+    if (_loader == null)
+      loader = ClassLoader.getSystemClassLoader();
+    
+    for (Map.Entry<String,String> entry : driverMap.entrySet()) {
+      String scheme = entry.getKey();
+      String type = entry.getValue();
+
+      try {
+	Class cl = Class.forName(type, false, loader);
+
+	if (cl != null)
+	  schemes.add(scheme);
+      } catch (Exception e) {
+	log.finest(apiType + " schmes: " + e.toString());
+      }
+    }
+  }
+
+  /**
+   * Loads the map for a driver.
+   */
+  private HashMap<String,String> getDriverTypeMap(String apiType)
+  {
+    synchronized (_driverTypeMap) {
+      HashMap<String,String> driverMap = _driverTypeMap.get(apiType);
+
+      if (driverMap == null) {
+	driverMap = new HashMap<String,String>();
+
+	if (_parent != null)
+	  driverMap.putAll(_parent.getDriverTypeMap(apiType));
+
+	loadDriverTypeMap(driverMap, apiType);
+
+	_driverTypeMap.put(apiType, driverMap);
+      }
+
+      return driverMap;
+    }
+  }
+
+  /**
+   * Reads the drivers from the META-INF/services
+   */
+  private void loadDriverTypeMap(HashMap<String,String> driverMap,
+				 String apiType)
+  {
+    try {
+      ClassLoader loader = _loader;
+
+      if (loader == null)
+	loader = ClassLoader.getSystemClassLoader();
+      
+      Enumeration<URL> urls
+	= loader.getResources("META-INF/services" +
+			      "/com.caucho.config.types/" + apiType);
+
+      while (urls.hasMoreElements()) {
+	URL url = urls.nextElement();
+
+	if (hasDriver(url))
+	  continue;
+
+	_driverTypeSet.add(url);
+
+	InputStream is = url.openStream();
+
+	try {
+	  Properties props = new Properties();
+
+	  props.load(is);
+
+	  for (Map.Entry entry : props.entrySet()) {
+	    driverMap.put((String) entry.getKey(), (String) entry.getValue());
+	  }
+	} finally {
+	  is.close();
+	}
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  protected boolean hasDriver(URL url)
+  {
+    synchronized (_driverTypeSet) {
+      if (_driverTypeSet.contains(url))
+	return true;
+      else if (_parent != null)
+	return _parent.hasDriver(url);
+      else
+	return false;
+    }
   }
 
   //

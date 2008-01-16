@@ -72,7 +72,7 @@ public class PropertyValueProgram extends ConfigProgram {
 
       Attribute attr = type.getAttribute(_qName);
 
-      attr.setValue(bean, _qName, _value);
+      attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

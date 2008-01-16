@@ -113,5 +113,10 @@ public class JspServlet extends QServlet {
   {
     return "JSP";
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getServletContext() + "]";
+  }
 }
 

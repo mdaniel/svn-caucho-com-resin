@@ -90,4 +90,44 @@ public class SingletonClassComponent extends ClassComponent {
 
     return _value;
   }
+
+  /**
+   * The singleton instance is created in its original class loader context
+   */
+  @Override
+  protected Object createNew(ConfigContext env)
+  {
+    ClassLoader loader = getWebBeans().getClassLoader();
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(loader);
+
+      return super.createNew(env);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
+   * The singleton instance is initialized in its original class loader context
+   */
+  @Override
+  protected Object init(Object value, ConfigContext env)
+  {
+    ClassLoader loader = getWebBeans().getClassLoader();
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(loader);
+
+      return super.init(value, env);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
 }

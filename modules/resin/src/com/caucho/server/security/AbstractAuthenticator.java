@@ -790,4 +790,11 @@ public class AbstractAuthenticator implements ServletAuthenticator {
       }
     }
   }
+
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[" + _passwordDigestAlgorithm
+	    + "," + _passwordDigestRealm + "]");
+  }
 }

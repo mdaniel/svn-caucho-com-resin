@@ -365,9 +365,4 @@ abstract public class FilesystemPath extends Path {
 
     return getURL().equals(bPath.getURL());
   }
-
-  public String toString()
-  {
-    return _pathname;
-  }
 }

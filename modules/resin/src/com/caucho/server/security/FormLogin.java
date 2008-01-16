@@ -53,8 +53,10 @@ import java.util.logging.Level;
 public class FormLogin extends AbstractLogin {
   static L10N L = new L10N(FormLogin.class);
   
-  public static final String LOGIN_SAVED_PATH = "com.caucho.servlet.login.path";
-  public static final String LOGIN_SAVED_QUERY = "com.caucho.servlet.login.query";
+  public static final String LOGIN_SAVED_PATH
+    = "com.caucho.servlet.login.path";
+  public static final String LOGIN_SAVED_QUERY
+    = "com.caucho.servlet.login.query";
   
   protected String _loginPage;
   protected String _errorPage;
