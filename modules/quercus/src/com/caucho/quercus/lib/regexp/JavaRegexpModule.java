@@ -34,6 +34,7 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -564,6 +565,7 @@ public class JavaRegexpModule
    * @param count
    * @return
    */
+  @UsesSymbolTable
   public static Value preg_replace(Env env,
           Value pattern,
           Value replacement,

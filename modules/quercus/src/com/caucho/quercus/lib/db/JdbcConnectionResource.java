@@ -581,7 +581,7 @@ public abstract class JdbcConnectionResource implements Closeable {
         _warnings = stmt.getWarnings();
       } catch (SQLException e) {
         saveErrors(e);
-        log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
         return null;
       }
     } catch (SQLException e) {
@@ -591,7 +591,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       if (keepStatementOpen()) {
         keepResourceValues(stmt);
       } else {
-        log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
         return null;
       }
     } catch (IllegalStateException e) {
