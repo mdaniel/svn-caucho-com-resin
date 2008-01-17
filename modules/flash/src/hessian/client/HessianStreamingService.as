@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -89,13 +89,15 @@ package hessian.client
     /**
      * Constructor.
      *
-     * @param destination The URL of the destination service.
-     * @param api The API associated with this HessianStreamingService, if any.
+     * @param dst  The URL of the destination service.
+     * @param port The port of the policy server, if any.
      *
      */
-    public function HessianStreamingService(dst:String = null)
+    public function HessianStreamingService(dst:String = null, 
+                                            port:int = -1)
     {
       destination = dst;
+      policyPort = port;
     }
     
     private function handleCreation(event:Event):void
