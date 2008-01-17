@@ -310,6 +310,10 @@ r_machine = element machine {
 }
 
 r_management = element management {
+  r_management-Content
+}
+
+r_management-Content =
   r_path?
 
   & r_deploy-service?
@@ -323,7 +327,14 @@ r_management = element management {
   & r_user-Management*
 
   & r_xa-log-service?
-}
+
+  & element rcore:if { rcore_if-Args, r_management-Content }*
+
+  & element rcore:choose {
+      element rcore:when { rcore_when-Args, r_management-Content }+,
+      element rcore:otherwise { r_management-Content }?
+    }*
+
 
 r_management-compat = element management {
   r_path?
@@ -386,6 +397,10 @@ r_openssl = element openssl {
   & (attribute verify-depth { r_int }
      | element verify-depth { r_int })?
 }
+
+r_password =
+  attribute password { string}
+  | element password { string}
 
 r_persistent-log = element persistent-log {
 
