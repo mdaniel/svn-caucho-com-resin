@@ -32,7 +32,7 @@ package com.caucho.ejb.cfg;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.gen.EntityBean;
+import com.caucho.ejb.gen21.EntityBean;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 

@@ -404,9 +404,11 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   public Object create()
   {
     try {
-      Object value = createNew(null);
+      ConfigContext env = new ConfigContext(_scope);
       
-      ConfigContext env = new ConfigContext(this, value, _scope);
+      Object value = createNew(env);
+
+      env.put(this, value);
 
       if (_scope != null)
 	_scope.put(this, value);

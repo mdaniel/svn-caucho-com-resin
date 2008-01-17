@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.gen.AmberGetter;
+import com.caucho.ejb.gen21.AmberGetter;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;

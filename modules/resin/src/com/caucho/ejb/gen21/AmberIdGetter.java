@@ -27,36 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.webbeans;
+package com.caucho.ejb.gen21;
 
-import com.caucho.config.ConfigContext;
-import java.lang.annotation.*;
-import javax.webbeans.*;
+import com.caucho.ejb.cfg.*;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.util.L10N;
 
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import java.io.IOException;
 
 /**
- * Component for session beans
+ * Generates the skeleton for the create method.
  */
-public class StatefulComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
+public class AmberIdGetter extends BaseMethod {
+  private static final L10N L = new L10N(AmberIdGetter.class);
 
-  private AbstractServer _server;
+  private ApiMethod _method;
+  private String _implClassName;
 
-  public StatefulComponent(AbstractServer server)
+  public AmberIdGetter(ApiMethod method,
+                       String implClassName)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
-    
-    _server = server;
+    super(method.getMethod());
+
+    _method = method;
+    _implClassName = implClassName;
   }
 
-  @Override
-  public Object createNew(ConfigContext env)
+  /**
+   * Prints the create method
+   *
+   * @param method the create method
+   */
+  public void generateCall(JavaWriter out, String []args)
+    throws IOException
   {
-    return _server.getLocalObject(env);
+    // ejb/0604
+    out.println("  _context.__caucho_getAmberCacheItem().loadEntity(0);");
+
+    out.println("  return _context.__caucho_getAmberCacheEntity()." + _method.getName() + "();");
   }
 }

@@ -29,6 +29,7 @@
 
 package com.caucho.ejb3.gen;
 
+import com.caucho.ejb.gen.BusinessMethodGenerator;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -47,8 +48,8 @@ public class PojoBean extends GenClass {
 
   private Class _beanClass;
 
-  private ArrayList<BusinessMethod> _businessMethods
-    = new ArrayList<BusinessMethod>();
+  private ArrayList<BusinessMethodGenerator> _businessMethods
+    = new ArrayList<BusinessMethodGenerator>();
 
   private boolean _isPlain = true;
   private boolean _hasXA;
@@ -83,9 +84,9 @@ public class PojoBean extends GenClass {
 	continue;
 
       int index = _businessMethods.size();
-      BusinessMethod bizMethod = new BusinessMethod(method, index);
+      BusinessMethodGenerator bizMethod = new BusinessMethodGenerator(method, index);
 
-      if (! bizMethod.isPlain()) {
+      if (! bizMethod.isEnhanced()) {
 	_isPlain = false;
 	_businessMethods.add(bizMethod);
       }
@@ -134,7 +135,7 @@ public class PojoBean extends GenClass {
 	generateConstructor(out, ctor);
     }
 
-    for (BusinessMethod method : _businessMethods) {
+    for (BusinessMethodGenerator method : _businessMethods) {
       method.generate(out);
     }
 

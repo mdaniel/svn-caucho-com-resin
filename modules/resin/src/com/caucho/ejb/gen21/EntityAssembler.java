@@ -27,9 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.ejb.gen21;
 
+import com.caucho.ejb.gen.*;
 import com.caucho.ejb.cfg.*;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -37,27 +40,28 @@ import java.util.ArrayList;
 /**
  * Assembles the generator structure.
  */
-public class SessionAssembler extends BeanAssembler
-{
-  private static final L10N L = new L10N(SessionAssembler.class);
+public class EntityAssembler extends BeanAssembler {
+  private static final L10N L = new L10N(EntityAssembler.class);
 
-  protected final EjbSessionBean _sessionBean;
+  private EjbEntityBean _bean;
 
-  public SessionAssembler(EjbSessionBean bean, String fullClassName)
+  protected EntityBean _entityBean;
+
+  public EntityAssembler(EjbEntityBean bean, String fullClassName)
   {
     super(bean, fullClassName);
 
-    _sessionBean = bean;
+    _bean = bean;
 
     setSuperClass();
   }
 
   /**
-   * Sets the superclass.
+   * Sets the superclas.
    */
   protected void setSuperClass()
   {
-    _genClass.setSuperClassName("com.caucho.ejb.session.StatefulContext");
+    _genClass.setSuperClassName("QEntityContext");
   }
 
   /**
@@ -67,9 +71,36 @@ public class SessionAssembler extends BeanAssembler
                                  String contextClassName,
                                  String implClassName)
   {
-    _genClass.addComponent(new StatefulBean(_sessionBean,
-					    beanClass,
-					    contextClassName));
+    _entityBean = new EntityBean(beanClass,
+                                 contextClassName,
+                                 implClassName);
+    _entityBean.setBean(_bean);
+
+    _genClass.addComponent(_entityBean);
+  }
+
+  /**
+   * Returns the entity bean.
+   */
+  public EjbEntityBean getBean()
+  {
+    return _bean;
+  }
+
+  /**
+   * Adds the bean method
+   */
+  public void addMethod(BaseMethod method)
+  {
+    _entityBean.addMethod(method);
+  }
+
+  /**
+   * Adds the bean component
+   */
+  public void addComponent(ClassComponent component)
+  {
+    _entityBean.addComponent(component);
   }
 
   /**
@@ -79,10 +110,10 @@ public class SessionAssembler extends BeanAssembler
                                   String fullClassName,
                                   String viewPrefix)
   {
-    SessionHomeView homeView = new SessionHomeView(homeClass,
-                                                   fullClassName,
-                                                   viewPrefix,
-                                                   false);
+    EntityHomeView homeView = new EntityHomeView(homeClass,
+                                                 fullClassName,
+                                                 viewPrefix,
+                                                 false);
 
     _genClass.addComponent(homeView);
 
@@ -92,18 +123,14 @@ public class SessionAssembler extends BeanAssembler
   /**
    * Creates the home view.
    */
-  public ViewClass createView(ArrayList<ApiClass> apiList,
+  public ViewClass createView(ArrayList<ApiClass> homeClass,
                               String fullClassName,
                               String viewPrefix,
                               String viewSuffix)
   {
-    SessionView view = new SessionView(_sessionBean,
-                                       apiList,
-                                       fullClassName,
-                                       viewPrefix,
-                                       viewSuffix,
-                                       false,
-				       false);
+    EntityView view = new EntityView(homeClass.get(0),
+                                     fullClassName,
+                                     viewPrefix);
 
     _genClass.addComponent(view);
 
@@ -113,18 +140,14 @@ public class SessionAssembler extends BeanAssembler
   /**
    * Creates the home view.
    */
-  public ViewClass createRemoteView(ArrayList<ApiClass> apiList,
+  public ViewClass createRemoteView(ArrayList<ApiClass> homeClass,
 				    String fullClassName,
 				    String viewPrefix,
 				    String viewSuffix)
   {
-    SessionView view = new SessionView(_sessionBean,
-                                       apiList,
-                                       fullClassName,
-                                       viewPrefix,
-                                       viewSuffix,
-                                       false,
-				       true);
+    EntityView view = new EntityView(homeClass.get(0),
+                                     fullClassName,
+                                     viewPrefix);
 
     _genClass.addComponent(view);
 

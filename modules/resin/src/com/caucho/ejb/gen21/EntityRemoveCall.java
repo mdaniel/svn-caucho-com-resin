@@ -19,51 +19,60 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.ejb.gen21;
 
-import com.caucho.ejb.gen21.CollectionSetter;
-import com.caucho.ejb.gen.ViewClass;
-import com.caucho.java.gen.BaseMethod;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.CallChain;
 import com.caucho.util.L10N;
 
-/**
- * Configuration for a method of a view.
- */
-public class CmpCollectionSetter extends EjbMethod {
-  private static final L10N L = new L10N(CmpCollectionSetter.class);
+import java.io.IOException;
 
-  /**
-   * Creates a new method.
-   *
-   * @param view the owning view
-   * @param apiMethod the method from the view
-   * @param implMethod the method from the implementation
-   */
-  public CmpCollectionSetter(EjbView view,
-			     ApiMethod apiMethod,
-			     ApiMethod implMethod)
+/**
+ * Generates the skeleton for the remove method.
+ */
+public class EntityRemoveCall extends CallChain {
+  private static L10N L = new L10N(EntityRemoveCall.class);
+
+  private EjbEntityBean _bean;
+  
+  private String _contextClassName;
+
+  private boolean _isCMP;
+
+  public EntityRemoveCall(EjbEntityBean bean,
+			  String contextClassName)
   {
-    super(view, apiMethod, implMethod);
+    _bean = bean;
+    
+    _contextClassName = contextClassName;
+  }
+  
+  public void setCMP(boolean isCMP)
+  {
+    _isCMP = isCMP;
   }
 
   /**
-   * Assembles the method.
+   * Prints the remove method
+   *
+   * @param method the remove method
    */
-  public BaseMethod assemble(ViewClass viewAssembler, String fullClassName)
+  public void generateCall(JavaWriter out, String retVar,
+			   String var, String []args)
+    throws IOException
   {
-    BaseMethod method = new CollectionSetter(getApiMethod(),
-					     getView().getImplClass().getName());
+    out.println("Bean ptr = _context._ejb_begin(trans, false, true);");
     
-    method.setCall(assembleCallChain(method.getCall()));
-    
-    return method;
+    out.println("ptr.ejbRemove();");
+
+    out.println("ptr._ejb_state = QEntity._CAUCHO_IS_REMOVED;");
   }
 }

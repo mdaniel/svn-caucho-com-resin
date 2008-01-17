@@ -30,7 +30,7 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.gen.AmberQueryMethod;
+import com.caucho.ejb.gen21.AmberQueryMethod;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.ejb.ql.EjbSelectQuery;
 import com.caucho.ejb.ql.QLParser;

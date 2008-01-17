@@ -33,15 +33,16 @@ import com.caucho.java.JavaWriter;
 import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
 
+import javax.ejb.*;
 import java.io.IOException;
 
 /**
  * Generates the skeleton for a session bean.
  */
-public class StatelessBean extends SessionBean {
-  private static final L10N L = new L10N(StatelessBean.class);
+public class StatefulBean extends SessionBean {
+  private static final L10N L = new L10N(StatefulBean.class);
 
-  public StatelessBean(EjbSessionBean bean,
+  public StatefulBean(EjbSessionBean bean,
                        ApiClass ejbClass,
                        String contextClassName)
   {
@@ -50,10 +51,9 @@ public class StatelessBean extends SessionBean {
 
   public boolean isStateless()
   {
-    return true;
+    return false;
   }
-  
-  @Override
+
   protected void generateContext(JavaWriter out)
     throws IOException
   {
@@ -63,17 +63,13 @@ public class StatelessBean extends SessionBean {
     if (p > 0)
       shortContextName = shortContextName.substring(p + 1);
 
-    int freeStackMax = 16;
-
-    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(" + _contextClassName + ".class.getName());");
+    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + _contextClassName + "\");");
     out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
     out.println();
     out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
-
-    out.println("private Bean []_freeBeanStack = new Bean[" + freeStackMax + "];");
-    out.println("private int _freeBeanTop;");
+    out.println("private Bean _freeBean;");
     out.println();
-    out.println("public " + shortContextName + "(com.caucho.ejb.session.StatelessServer server)");
+    out.println("public " + shortContextName + "(com.caucho.ejb.session.SessionServer server)");
     out.println("{");
     out.println("  super(server);");
     out.println("  _xaManager = server.getTransactionManager();");
@@ -84,26 +80,20 @@ public class StatelessBean extends SessionBean {
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
+
     out.println("Bean bean;");
     out.println("synchronized (this) {");
-    out.println("  if (_freeBeanTop > 0) {");
-    out.println("    bean = _freeBeanStack[--_freeBeanTop];");
+    out.println("  bean = _freeBean;");
+    out.println("  if (bean != null) {");
+    out.println("    _freeBean = null;");
+    if (SessionSynchronization.class.isAssignableFrom(_ejbClass.getJavaClass()))
+      out.println("    trans.addSession(bean);");
     out.println("    return bean;");
     out.println("  }");
     out.println("}");
     out.println();
-    out.println("try {");
-    out.println("  bean = new Bean(this);");
 
-    if (hasMethod("ejbCreate", new Class[0])) {
-      // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");
-      out.println("  invokeMethod(bean, \"ejbCreate\", new Class[] {}, new Object[] {});");
-    }
-
-    out.println("  return bean;");
-    out.println("} catch (Exception e) {");
-    out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-    out.println("}");
+    out.println("throw new EJBException(\"session bean is not reentrant\");");
     out.popDepth();
     out.println("}");
 
@@ -116,17 +106,11 @@ public class StatelessBean extends SessionBean {
     out.println("  return;");
     out.println();
     out.println("synchronized (this) {");
-    out.println("  if (_freeBeanTop < _freeBeanStack.length) {");
-    out.println("    _freeBeanStack[_freeBeanTop++] = bean;");
+    out.println("  if (_freeBean == null) {");
+    out.println("    _freeBean = bean;");
     out.println("    return;");
     out.println("  }");
     out.println("}");
-
-    if (hasMethod("ejbRemove", new Class[0])) {
-      out.println();
-      // ejb/0fe0: ejbRemove() can be private, out.println("bean.ejbRemove();");
-      out.println("invokeMethod(bean, \"ejbRemove\", new Class[] {}, new Object[] {});");
-    }
 
     out.popDepth();
     out.println("}");
@@ -136,62 +120,84 @@ public class StatelessBean extends SessionBean {
     out.println("{");
     out.pushDepth();
     out.println("Bean ptr;");
-    out.println("Bean []freeBeanStack;");
-    out.println("int freeBeanTop;");
-
     out.println("synchronized (this) {");
-    out.println("  freeBeanStack = _freeBeanStack;");
-    out.println("  freeBeanTop = _freeBeanTop;");
-    out.println("  _freeBeanStack = null;");
-    out.println("  _freeBeanTop = 0;");
+    out.println("  ptr = _freeBean;");
+    out.println("  _freeBean = null;");
     out.println("}");
 
     if (hasMethod("ejbRemove", new Class[0])) {
       out.println();
-      out.println("for (int i = 0; i < freeBeanTop; i++) {");
-      out.pushDepth();
-
       out.println("try {");
-      out.println("  if (freeBeanStack[i] != null)");
-      // ejb/0fe0: ejbRemove() can be private out.println("    freeBeanStack[i].ejbRemove();");
-      out.println("    invokeMethod(freeBeanStack[i], \"ejbRemove\", new Class[] {}, new Object[] {});");
+      out.println("  if (ptr != null)");
+      // ejb/0fe0: ejbRemove() can be private, out.println("    ptr.ejbRemove();");
+      out.println("    invokeMethod(ptr, \"ejbRemove\", new Class[] {}, new Object[] {});");
       out.println("} catch (Throwable e) {");
       out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
-      out.println("}");
-
-      out.popDepth();
       out.println("}");
     }
     out.popDepth();
     out.println("}");
 
-    if (_bean.getTimeoutMethodName() != null) {
-      String methodName = _bean.getTimeoutMethodName();
+    generateInvokeMethod(out);
+  }
 
-      // ejb/0fj0
+  @Override
+  protected void generateNewInstance(JavaWriter out, String suffix)
+    throws IOException
+  {
+    // ejb/0g27
+    if (_bean.getLocalHome() == null && _bean.getLocalList().size() == 0)
+      return;
+
+    if (! isStateless()) {
       out.println();
-      out.println("public void __caucho_timeout_callback(javax.ejb.Timer timer)");
+      out.print("protected Object _caucho_newInstance" + suffix);
+      out.println("(com.caucho.config.ConfigContext env)");
       out.println("{");
       out.pushDepth();
 
-      out.println("Bean bean = _ejb_begin(null);");
+      out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
+
+      // XXX TCK: bb/session/stateful/cm/allowed/afterBeginSetRollbackOnlyTest (infinite recursion issue)
+
+      if (isStateless())
+        out.println("Bean bean = new Bean(cxt);");
+      else
+        out.println("Bean bean = new Bean(cxt, env);");
+
+      out.println("cxt._ejb_free(bean);");
 
       out.println();
-      out.println("try {");
-      out.println("  bean." + methodName + "(timer);");
-      out.println("} finally {");
-      out.println("  _ejb_free(bean);");
-      out.println("}");
+
+      out.println();
+
+      out.println("return cxt.createLocalObject" + suffix + "();");
 
       out.popDepth();
       out.println("}");
     }
 
-    generateInvokeMethod(out);
-  }
+    out.println();
+    out.println("protected Object _caucho_newInstance" + suffix + "()");
+    out.println("{");
+    out.pushDepth();
 
-  protected void generateNewInstance(JavaWriter out)
-    throws IOException
-  {
+    out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
+
+    // XXX TCK: bb/session/stateful/cm/allowed/afterBeginSetRollbackOnlyTest (infinite recursion issue)
+
+    if (isStateless())
+      out.println("Bean bean = new Bean(cxt);");
+    else
+      out.println("Bean bean = new Bean(cxt, null);");
+
+    out.println("cxt._ejb_free(bean);");
+
+    out.println();
+
+    out.println("return cxt.createLocalObject" + suffix + "();");
+
+    out.popDepth();
+    out.println("}");
   }
 }

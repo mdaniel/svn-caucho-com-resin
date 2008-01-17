@@ -19,52 +19,54 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.ejb.gen21;
 
-import com.caucho.ejb.gen21.AmberIdGetter;
-import com.caucho.ejb.gen.ViewClass;
-import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.CallChain;
+import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
 
+import java.io.IOException;
+
 /**
- * Configuration for a method of a view.
+ * Generates the bean instance for a method call.
  */
-public class CmpIdGetter extends EjbMethod {
-  private static final L10N L = new L10N(CmpIdGetter.class);
+public class EntityPoolChain extends FilterCallChain {
+  private static final L10N L = new L10N(EntityPoolChain.class);
 
-  /**
-   * Creates a new method.
-   *
-   * @param view the owning view
-   * @param apiMethod the method from the view
-   * @param implMethod the method from the implementation
-   */
-  public CmpIdGetter(EjbView view, ApiMethod apiMethod, ApiMethod implMethod)
+  private boolean _isHome;
+  private boolean _doLoad;
+
+  public EntityPoolChain(CallChain next, boolean isHome)
   {
-    super(view, apiMethod, implMethod);
+    super(next);
+
+    _isHome = isHome;
+    _doLoad = ! isHome;
+    // _doLoad = false;
   }
-
+  
   /**
-   * Assembles the method.
+   * Prints a call within the same JVM
+   *
+   * @param out the java source stream
+   * @param retVar the variable to store the return value in
+   * @param var the object with the method
+   * @param args the call's arguments
    */
-  public BaseMethod assemble(ViewClass viewAssembler, String fullClassName)
+  public void generateCall(JavaWriter out, String retVar,
+			   String var, String []args)
+    throws IOException
   {
-    BaseMethod method = new AmberIdGetter(getApiMethod(),
-					  getView().getImplClass().getName());
-
-    CallChain call = method.getCall();
-    if (call != null)
-      method.setCall(assembleCallChain(call));
+    out.println("Bean ptr = _context._ejb_begin(trans, " + _isHome +", " + _doLoad + ");");
     
-    return method;
+    super.generateCall(out, retVar, "ptr", args);
   }
 }

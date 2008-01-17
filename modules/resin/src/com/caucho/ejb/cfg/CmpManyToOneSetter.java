@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.gen.ManyToOneSetter;
+import com.caucho.ejb.gen21.ManyToOneSetter;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;

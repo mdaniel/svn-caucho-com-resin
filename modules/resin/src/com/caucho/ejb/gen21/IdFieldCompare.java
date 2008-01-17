@@ -19,44 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.webbeans;
+package com.caucho.ejb.gen21;
 
-import com.caucho.config.ConfigContext;
-import java.lang.annotation.*;
-import javax.webbeans.*;
+import com.caucho.amber.field.IdField;
+import com.caucho.util.L10N;
 
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import java.util.Comparator;
 
 /**
- * Component for session beans
+ * Sorts ID fields.
  */
-public class StatefulComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
+public class IdFieldCompare implements Comparator<IdField> {
+  private static final L10N L = new L10N(IdFieldCompare.class);
 
-  private AbstractServer _server;
-
-  public StatefulComponent(AbstractServer server)
+  /**
+   * Compares the fields.
+   */
+  public int compare(IdField a, IdField b)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
-    
-    _server = server;
-  }
-
-  @Override
-  public Object createNew(ConfigContext env)
-  {
-    return _server.getLocalObject(env);
+    return a.getName().compareTo(b.getName());
   }
 }

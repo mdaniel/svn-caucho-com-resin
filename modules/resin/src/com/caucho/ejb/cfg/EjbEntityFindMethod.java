@@ -29,6 +29,12 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.ejb.gen21.EntityHomeSync;
+import com.caucho.ejb.gen21.EntityHomePoolChain;
+import com.caucho.ejb.gen21.EntityFindMethod;
+import com.caucho.ejb.gen21.EntityFindCollectionMethod;
+import com.caucho.ejb.gen21.CMP10FindMethod;
+import com.caucho.ejb.gen21.AmberFindMethod;
 import com.caucho.ejb.gen.*;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;

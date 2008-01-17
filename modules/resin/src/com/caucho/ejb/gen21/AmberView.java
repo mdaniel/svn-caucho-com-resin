@@ -27,36 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.webbeans;
+package com.caucho.ejb.gen21;
 
-import com.caucho.config.ConfigContext;
-import java.lang.annotation.*;
-import javax.webbeans.*;
-
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.ejb.gen.*;
+import com.caucho.ejb.gen21.AmberCreateMethod;
+import com.caucho.ejb.cfg.*;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.util.L10N;
 
 /**
- * Component for session beans
+ * Generates the skeleton for a session view.
  */
-public class StatefulComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
+public class AmberView extends EntityView {
+  private static L10N L = new L10N(AmberView.class);
 
-  private AbstractServer _server;
-
-  public StatefulComponent(AbstractServer server)
+  public AmberView(ApiClass remoteClass,
+		   String contextClassName,
+		   String prefix)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
-    
-    _server = server;
+    super(remoteClass, contextClassName, prefix);
   }
 
-  @Override
-  public Object createNew(ConfigContext env)
+  public BaseMethod createCreateMethod(EjbEntityBean bean,
+				       ApiMethod api,
+				       ApiMethod create,
+				       ApiMethod postCreate,
+				       String fullClassName)
   {
-    return _server.getLocalObject(env);
+    return new AmberCreateMethod(bean, api, create, postCreate, fullClassName);
   }
 }

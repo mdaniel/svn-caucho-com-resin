@@ -779,7 +779,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the 3.0 local stub for the container
    */
-  public Object getLocalObject(DependentScope scope)
+  public Object getLocalObject(ConfigContext env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

@@ -27,36 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.webbeans;
+package com.caucho.ejb.gen21;
 
-import com.caucho.config.ConfigContext;
-import java.lang.annotation.*;
-import javax.webbeans.*;
+import com.caucho.ejb.gen21.EntityRemoveCall;
+import com.caucho.ejb.cfg.*;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.util.L10N;
 
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import javax.ejb.RemoveException;
+import java.io.IOException;
 
 /**
- * Component for session beans
+ * Generates the skeleton for the create method.
  */
-public class StatefulComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
+public class EntityRemoveMethod extends BaseMethod {
+  private static L10N L = new L10N(EntityRemoveMethod.class);
 
-  private AbstractServer _server;
+  private String _contextClassName;
 
-  public StatefulComponent(AbstractServer server)
+  public EntityRemoveMethod(EjbEntityBean bean,
+			    ApiMethod apiMethod,
+			    String contextClassName)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
-    
-    _server = server;
+    super(apiMethod.getMethod(),
+	  new EntityRemoveCall(bean, contextClassName));
+
+    _contextClassName = contextClassName;
   }
 
-  @Override
-  public Object createNew(ConfigContext env)
+  /**
+   * Returns the exception types.
+   */
+  public Class []getExceptionTypes()
   {
-    return _server.getLocalObject(env);
+    return new Class[] { RemoveException.class };
+  }
+
+  /**
+   * Prints the create method
+   *
+   * @param method the create method
+   */
+  public void generateCall(JavaWriter out, String []args)
+    throws IOException
+  {
+    getCall().generateCall(out, null, "cxt", args);
   }
 }

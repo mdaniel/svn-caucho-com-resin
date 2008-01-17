@@ -104,6 +104,13 @@ public class ConfigContext {
     _dependentScope = new DependentScope(component, value, scope);
   }
 
+  public ConfigContext(ScopeContext scope)
+  {
+    this();
+
+    _dependentScope = new DependentScope(scope);
+  }
+
   ConfigContext(ConfigELContext context)
   {
     _elContext = context;

@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.*;
@@ -296,9 +297,9 @@ public class SessionServer extends AbstractServer
    * Returns the 3.0 local stub for the container
    */
   @Override
-  public Object getLocalObject(DependentScope scope)
+  public Object getLocalObject(ConfigContext env)
   {
-    return _homeContext._caucho_newInstance(scope);
+    return _homeContext._caucho_newInstance(env);
   }
 
   /**

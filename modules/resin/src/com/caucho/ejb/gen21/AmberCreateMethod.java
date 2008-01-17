@@ -27,36 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.webbeans;
+package com.caucho.ejb.gen21;
 
-import com.caucho.config.ConfigContext;
-import java.lang.annotation.*;
-import javax.webbeans.*;
-
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.ejb.gen.*;
+import com.caucho.ejb.cfg.*;
+import com.caucho.util.L10N;
 
 /**
- * Component for session beans
+ * Generates the skeleton for the create method.
  */
-public class StatefulComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
+public class AmberCreateMethod extends EntityCreateMethod {
+  private static final L10N L = new L10N(AmberCreateMethod.class);
 
-  private AbstractServer _server;
-
-  public StatefulComponent(AbstractServer server)
+  public AmberCreateMethod(EjbEntityBean bean,
+			   ApiMethod apiMethod,
+			   ApiMethod beanCreateMethod,
+			   ApiMethod beanPostCreateMethod,
+			   String contextClassName)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
-    
-    _server = server;
-  }
+    super(bean, apiMethod, beanCreateMethod, beanPostCreateMethod,
+	  contextClassName);
 
-  @Override
-  public Object createNew(ConfigContext env)
-  {
-    return _server.getLocalObject(env);
+    EntityCreateCall call = (EntityCreateCall) getCall();
+
+    call.setCMP(true);
   }
 }

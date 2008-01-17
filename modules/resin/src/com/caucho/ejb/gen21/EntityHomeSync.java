@@ -19,44 +19,47 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.webbeans;
+package com.caucho.ejb.gen21;
 
-import com.caucho.config.ConfigContext;
-import java.lang.annotation.*;
-import javax.webbeans.*;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.CallChain;
+import com.caucho.java.gen.FilterCallChain;
+import com.caucho.util.L10N;
 
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import java.io.IOException;
 
 /**
- * Component for session beans
+ * Generates the bean instance for a method call.
  */
-public class StatefulComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
+public class EntityHomeSync extends FilterCallChain {
+  private static final L10N L = new L10N(EntityHomeSync.class);
 
-  private AbstractServer _server;
-
-  public StatefulComponent(AbstractServer server)
+  public EntityHomeSync(CallChain next)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
-    
-    _server = server;
+    super(next);
   }
-
-  @Override
-  public Object createNew(ConfigContext env)
+  
+  /**
+   * Prints a call within the same JVM
+   *
+   * @param out the java source stream
+   * @param retVar the variable to store the return value in
+   * @param var the object with the method
+   * @param args the call's arguments
+   */
+  public void generateCall(JavaWriter out, String retVar,
+			   String var, String []args)
+    throws IOException
   {
-    return _server.getLocalObject(env);
+    out.println("trans.sync();");
+    
+    super.generateCall(out, retVar, var, args);
   }
 }

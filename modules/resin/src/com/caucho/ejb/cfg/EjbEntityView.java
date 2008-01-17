@@ -31,7 +31,7 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.EntityRemoveMethod;
+import com.caucho.ejb.gen21.EntityRemoveMethod;
 import com.caucho.ejb.gen.TransactionChain;
 import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.CallChain;

@@ -63,6 +63,11 @@ public class DependentScope {
     _scope = scope;
   }
   
+  public DependentScope(ScopeContext scope)
+  {
+    _scope = scope;
+  }
+  
   /**
    * Returns the current dependent scope.
    */
