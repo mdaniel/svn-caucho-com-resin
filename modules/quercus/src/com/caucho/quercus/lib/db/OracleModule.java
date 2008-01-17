@@ -208,7 +208,7 @@ public class OracleModule extends AbstractQuercusModule {
    */
   public String []getLoadedExtensions()
   {
-    return new String[] { "oracle" };
+    return new String[] { "oci8" };
   }
 
   /**

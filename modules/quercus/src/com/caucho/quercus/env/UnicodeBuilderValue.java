@@ -306,7 +306,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
   @Override
   public StringValue toBinaryValue(Env env)
   {
-    return toBinaryValue(env, env.getRuntimeEncoding().toString());
+    return toBinaryValue(env, env.getRuntimeEncoding());
   }
 
   /**

@@ -1587,7 +1587,7 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     try {
       //XXX: refactor so that env is passed in
-      return toInputStream(Env.getInstance().getRuntimeEncoding().toString());
+      return toInputStream(Env.getInstance().getRuntimeEncoding());
     }
     catch (UnsupportedEncodingException e) {
       throw new QuercusRuntimeException(e);

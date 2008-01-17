@@ -49,7 +49,7 @@ public class GettextDomain
     _name = name;
     _path = env.getPwd();
 
-    _charset = env.getRuntimeEncoding().toString();
+    _charset = env.getRuntimeEncoding();
   }
   
   public String getName()

@@ -62,7 +62,7 @@ public class Post {
         String encoding = request.getCharacterEncoding();
         
         if (encoding == null)
-          encoding = env.getHttpInputEncoding().toString();
+          encoding = env.getHttpInputEncoding();
 
         String contentType = request.getHeader("Content-Type");
 
@@ -87,7 +87,9 @@ public class Post {
 
           ReadStream rs = new ReadStream(new VfsStream(is, null));
           MultipartStream ms = new MultipartStream(rs, boundary);
-          ms.setEncoding(encoding);
+          
+          if (encoding != null)
+            ms.setEncoding(encoding);
 
           readMultipartStream(env, ms, post, files, addSlashesToValues);
 

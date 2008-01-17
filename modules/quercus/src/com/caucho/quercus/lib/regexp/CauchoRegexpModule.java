@@ -423,6 +423,7 @@ public class CauchoRegexpModule
         ArrayValue values = matchList[j];
         
         if (! regexpState.isMatchedGroup(j)) {
+          /*
           if (j == groupCount || (flags & PREG_OFFSET_CAPTURE) == 0)
             values.put(emptyStr);
           else {
@@ -433,6 +434,9 @@ public class CauchoRegexpModule
             
             values.put(result);
           }
+          */
+          
+          values.put(emptyStr);
             
           continue;
         }

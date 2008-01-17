@@ -70,7 +70,9 @@ public class StringUtility
   {
     try {
       ByteToChar byteToChar = env.getByteToChar();
-      byteToChar.setEncoding(encoding);
+      
+      if (encoding != null)
+        byteToChar.setEncoding(encoding);
       
       int len = str.length();
 

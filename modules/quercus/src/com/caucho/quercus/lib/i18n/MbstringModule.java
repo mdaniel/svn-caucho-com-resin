@@ -1044,7 +1044,7 @@ public class MbstringModule
     if (encoding.length() > 0)
       return encoding.toString();
     else
-      return env.getRuntimeEncoding().toString();
+      return env.getRuntimeEncoding();
   }
 
   private static String getEncoding(Env env, String encoding)

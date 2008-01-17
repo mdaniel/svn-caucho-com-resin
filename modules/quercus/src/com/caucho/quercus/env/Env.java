@@ -395,8 +395,11 @@ public class Env {
    * Returns the encoding used for runtime conversions, e.g. files
    * XXX: ISO-8859-1 when unicode.semantics is OFF
    */
-  public StringValue getRuntimeEncoding()
+  public String getRuntimeEncoding()
   {
+    if (! _isUnicodeSemantics)
+      return "iso-8859-1";
+    
     StringValue encoding = getIni("unicode.runtime_encoding");
 
     if (encoding.length() == 0) {
@@ -406,7 +409,7 @@ public class Env {
         encoding = UTF8_STRING;
     }
 
-    return encoding;
+    return encoding.toString();
   }
 
   /**
@@ -423,14 +426,18 @@ public class Env {
   public EncodingReader getRuntimeEncodingFactory()
     throws IOException
   {
-    return Encoding.getReadFactory(getRuntimeEncoding().toString());
+    return Encoding.getReadFactory(getRuntimeEncoding());
   }
 
   /**
-   * Returns the encoding used for input, i.e. post
+   * Returns the encoding used for input, i.e. post,
+   * null if unicode.semantics is off.
    */
-  public StringValue getHttpInputEncoding()
+  public String getHttpInputEncoding()
   {
+    if (! _isUnicodeSemantics)
+      return null;
+    
     StringValue encoding = getIni("unicode.http_input_encoding");
 
     if (encoding.length() == 0) {
@@ -440,7 +447,7 @@ public class Env {
         encoding = UTF8_STRING;
     }
 
-    return encoding;
+    return encoding.toString();
   }
 
   /**
@@ -1725,7 +1732,7 @@ public class Env {
                              queryString,
                              array,
                              true,
-                             getHttpInputEncoding().toString());
+                             getHttpInputEncoding());
 
       return var;
     }
@@ -1743,9 +1750,14 @@ public class Env {
         return var;
       
       try {
-	_request.setCharacterEncoding(getHttpInputEncoding().toString());
+        String encoding = getHttpInputEncoding();
+        
+        if (encoding == null)
+          encoding = "iso-8859-1";
+        
+        _request.setCharacterEncoding(encoding);
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
 	  
       ArrayList<String> keys = new ArrayList<String>();

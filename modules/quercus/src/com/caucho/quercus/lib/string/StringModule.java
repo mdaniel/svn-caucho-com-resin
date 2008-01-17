@@ -1283,7 +1283,7 @@ public class StringModule extends AbstractQuercusModule {
                                   str,
                                   result,
                                   isRef,
-                                  env.getHttpInputEncoding().toString());
+                                  env.getHttpInputEncoding());
   }
 
   /**
