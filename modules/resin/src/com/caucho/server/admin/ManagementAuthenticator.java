@@ -31,6 +31,7 @@ package com.caucho.server.admin;
 import com.caucho.config.*;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.server.security.*;
+import com.caucho.util.*;
 
 import java.security.Principal;
 import java.util.Hashtable;
@@ -46,12 +47,15 @@ public class ManagementAuthenticator extends AbstractPasswordAuthenticator {
   private Hashtable<String,PasswordUser> _userMap
     = new Hashtable<String,PasswordUser>();
 
+  private String _remoteCookie;
+
   /**
    * Adds a password user from the configuration.
    */
   public void addUser(String name, PasswordUser user)
   {
     _userMap.put(name, user);
+    _remoteCookie = null;
   }
   
   /**
@@ -64,5 +68,33 @@ public class ManagementAuthenticator extends AbstractPasswordAuthenticator {
       return null;
 
     return _userMap.get(userName);
+  }
+
+  /**
+   * Creates a cookie based on the user hash.
+   */
+  String getHash()
+  {
+    if (_remoteCookie == null) {
+      long crc64 = 0;
+
+      for (PasswordUser user : _userMap.values()) {
+	if (user.isDisabled())
+	  continue;
+
+	String item = user.getPrincipal().getName() + ":" + user.getPassword();
+
+	crc64 = Crc64.generate(crc64, item); 
+      }
+
+      if (crc64 != 0) {
+	CharBuffer cb = new CharBuffer();
+	Base64.encode(cb, crc64);
+
+	_remoteCookie = cb.toString();
+      }
+    }
+
+    return _remoteCookie;
   }
 }

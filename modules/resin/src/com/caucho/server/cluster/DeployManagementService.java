@@ -41,6 +41,11 @@ public class DeployManagementService
   public DeployManagementService(Management management)
   {
   }
+  
+  public void setEnable(boolean isEnable)
+  {
+  }
+  
 
   @PostConstruct
   public void init()

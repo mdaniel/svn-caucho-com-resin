@@ -72,15 +72,13 @@ abstract public class ManagementService
     _serviceName = serviceName;
   }
 
-  public void setPassword(String password)
-  {
-    _password = password;
-  }
-
   public void start()
   {
+    _password = _management.getRemoteCookie();
+    
     if (_password == null) {
-      throw new ConfigException(L.l("jmx-remote requires a password attribute to activate"));
+      log.warning(L.l("jmx-remote disabled.  jmx-remote requires at least one enabled management <user>"));
+      return;
     }
     
     HostConfig hostConfig = _management.getHostConfig();

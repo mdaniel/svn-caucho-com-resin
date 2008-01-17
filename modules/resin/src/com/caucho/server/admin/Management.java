@@ -110,6 +110,17 @@ public class Management
   }
 
   /**
+   * Returns the management cookie.
+   */
+  public String getRemoteCookie()
+  {
+    if (_auth != null)
+      return _auth.getHash();
+    else
+      return null;
+  }
+
+  /**
    * Create and configure the j2ee deploy service.
    */
   public DeployManagementService createDeployService()
@@ -152,7 +163,7 @@ public class Management
   /**
    * Create and configure the transaction log.
    */
-  public TransactionLog createXaLog()
+  public TransactionLog createXaLogService()
   {
     return createTransactionManager().createTransactionLog();
   }
