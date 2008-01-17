@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -107,9 +107,14 @@ package hessian.client
     public override function send(...args):AsyncToken
     {
       var data:ByteArray = new ByteArray();
+      var callArguments:Array = args;
+
+      if (callArguments == null || callArguments.length == 0) {
+        callArguments = arguments as Array;
+      }
 
       _output.init(data);
-      _output.call(name, args == null ? arguments as Array : args);
+      _output.call(name, callArguments);
       data.position = 0;
 
       var request:URLRequest = new URLRequest();
