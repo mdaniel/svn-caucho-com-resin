@@ -61,12 +61,7 @@ import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
-import com.caucho.server.security.AbstractLogin;
-import com.caucho.server.security.ConstraintManager;
-import com.caucho.server.security.LoginConfig;
-import com.caucho.server.security.SecurityConstraint;
-import com.caucho.server.security.ServletAuthenticator;
-import com.caucho.server.security.TransportConstraint;
+import com.caucho.server.security.*;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 //import com.caucho.soa.client.WebServiceClient;
@@ -207,7 +202,11 @@ public class WebApp extends ServletContextImpl
 
   private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
 
-  // The login manager
+  // login configuration factory for lazy start
+  private Login _loginFactory;
+  private AbstractLogin _login;
+  
+  // Old login manager for compat
   private AbstractLogin _loginManager;
 
   // The security constraints
@@ -1086,6 +1085,23 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
+   * Sets the login
+   */
+  public void setLoginConfig(LoginConfig loginConfig)
+    throws Throwable
+  {
+    _loginManager = loginConfig.getLogin();
+  }
+
+  /**
+   * Sets the login
+   */
+  public void setLogin(Login login)
+  {
+    _loginFactory = login;
+  }
+
+  /**
    * Adds rewrite-dispatch.
    */
   public RewriteDispatch createRewriteDispatch()
@@ -1123,15 +1139,6 @@ public class WebApp extends ServletContextImpl
       createRewriteRealPath().addPathRegexp(urlRegexp, realPath);
     else
       throw new NullPointerException();
-  }
-
-  /**
-   * Sets the login
-   */
-  public void setLoginConfig(LoginConfig loginConfig)
-    throws Throwable
-  {
-    _loginManager = loginConfig.getLogin();
   }
 
   /**
@@ -2458,7 +2465,15 @@ public class WebApp extends ServletContextImpl
    */
   public AbstractLogin getLogin()
   {
-    return _loginManager;
+    if (_loginFactory != null) {
+      synchronized (_loginFactory) {
+	_login = _loginFactory.getLoginObject();
+      }
+
+      return _login;
+    }
+    else
+      return _loginManager;
   }
 
   /**

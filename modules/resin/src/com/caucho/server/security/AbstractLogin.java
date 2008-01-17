@@ -81,7 +81,7 @@ import java.util.logging.Logger;
  *
  * @since Resin 2.0.2
  */
-public abstract class AbstractLogin {
+public abstract class AbstractLogin implements LoginFilter {
   protected final static Logger log
     = Logger.getLogger(AbstractLogin.class.getName());
 

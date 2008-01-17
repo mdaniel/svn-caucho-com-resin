@@ -342,6 +342,10 @@ r_listener = element listener {
   r_init?
 }
 
+r_login = element login {
+  r_bean-Content
+}
+
 r_login-config = element login-config {
   r_type?,
 
@@ -1277,6 +1281,8 @@ r_web-app-Basis =
      | element lazy-servlet-validate { r_boolean-Type })?
 
   & r_listener*
+
+  & r_login?
 
   & r_login-config?
 

@@ -57,9 +57,12 @@ import java.util.logging.*;
 public class LdapAuthenticator extends AbstractPasswordAuthenticator {
   private static final Logger log
     = Logger.getLogger(LdapAuthenticator.class.getName());
+
+  private String _host = "ldap://localhost:389";
   
   private String _userAttribute = "uid";
   private String _passwordAttribute = "userPassword";
+  private String _baseDn;
   private String _dnPrefix;
   private String _dnSuffix;
   
@@ -82,6 +85,19 @@ public class LdapAuthenticator extends AbstractPasswordAuthenticator {
   public void setDNSuffix(String suffix)
   {
     _dnSuffix = suffix;
+  }
+
+  public void setBaseDn(String baseDn)
+  {
+    _baseDn = baseDn;
+  }
+  
+  public void setHost(String host)
+  {
+    if (! host.startsWith("ldap:"))
+      host = "ldap://" + host;
+    
+    setURL(host);
   }
   
   public void addJNDIEnv(InitParam init)
@@ -127,6 +143,9 @@ public class LdapAuthenticator extends AbstractPasswordAuthenticator {
       InitialDirContext ic = new InitialDirContext(env);
 
       String query = _userAttribute + '=' + userName;
+
+      if (_baseDn != null && ! _baseDn.equals(""))
+	query = _baseDn + ',' + query;
 
       if (_dnPrefix != null && ! _dnPrefix.equals(""))
 	query = _dnPrefix + ',' + query;

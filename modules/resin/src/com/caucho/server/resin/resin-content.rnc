@@ -122,8 +122,12 @@ r_cluster-port = element cluster-port {
 }
 
 r_deploy-service = element deploy-service {
-  empty
+  r_enable?
 }
+
+r_disable =
+  attribute disable { r_boolean-Type }
+  | element disable { r_boolean-Type }
 
 r_enable =
   attribute enable { r_boolean-Type }
@@ -241,8 +245,10 @@ r_ignore-client-disconnect =
   | element ignore-client-disconnect { string }
 
 r_jmx-service = element jmx-service {
-  (attribute password { string }
-   | element password { string })?
+  r_enable?
+
+  & (attribute password { string }
+     | element password { string })?
 }
 
 r_jsse-ssl = element jsse-ssl {
@@ -288,6 +294,15 @@ r_keepalive-select-enable =
   attribute keepalive-select-enable { r_boolean-Type }
   | element keepalive-select-enable { r_boolean-Type }
 
+r_log-service = element log-service {
+  r_enable?
+
+  & (attribute level { string }
+     | element level { string })?
+     
+  & r_path?
+}
+
 r_machine = element machine {
   attribute id { string }?
 
@@ -301,11 +316,13 @@ r_management = element management {
 
   & r_jmx-service?
 
-  & r_persistent-log?
+  & r_log-service?
 
-  & r_ping?
+  & r_secure?
 
-  & r_xa-log?
+  & r_user-Management*
+
+  & r_xa-log-service?
 }
 
 r_management-compat = element management {
@@ -389,6 +406,7 @@ r_persistent-store = element persistent-store {
      | element max-idle-time { r_period })?
 }
 
+## backwards compatiblity
 r_ping = element ping {
   r_any-Group*
 }
@@ -679,11 +697,26 @@ r_url-character-encoding =
   attribute url-character-encoding { string }
   | element url-character-encoding { string }
 
+r_user-Management = element user {
+  r_name
+
+  & r_password
+
+  & r_disable?
+}
+
 r_user-name =
   attribute user-name { string }
   | element user-name { string }
 
+## backwards compat
 r_xa-log = element xa-log {
+  r_enable?
+
+  & r_path?
+}
+
+r_xa-log-service = element xa-log-service {
   r_enable?
 
   & r_path?

@@ -79,6 +79,11 @@ public class FormLogin extends AbstractLogin {
     
     _loginPage = formLoginPage;
   }
+
+  public void setLoginPage(String loginPage)
+  {
+    setFormLoginPage(loginPage);
+  }
   
   /**
    * Gets the login page.
@@ -95,9 +100,14 @@ public class FormLogin extends AbstractLogin {
     throws ConfigException
   {
     if (! formErrorPage.startsWith("/"))
-      throw new ConfigException(L.l("form-error-page `{0}' must start with '/'.  The form-error-page is relative to the web-app root.", formErrorPage));
+      throw new ConfigException(L.l("form-error-page '{0}' must start with '/'.  The form-error-page is relative to the web-app root.", formErrorPage));
     
     _errorPage = formErrorPage;
+  }
+
+  public void setErrorPage(String errorPage)
+  {
+    setFormErrorPage(errorPage);
   }
   
   /**

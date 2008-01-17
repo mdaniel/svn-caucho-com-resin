@@ -230,6 +230,14 @@ public class WbComponentConfig {
   }
 
   /**
+   * Returns the configured component factory.
+   */
+  public ComponentImpl getComponentFactory()
+  {
+    return _comp;
+  }
+
+  /**
    * Initialization.
    */
   @PostConstruct
