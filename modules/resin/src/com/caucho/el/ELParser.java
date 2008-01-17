@@ -220,7 +220,7 @@ public class ELParser
 	  Expr trueExpr = parseExpr();
 	  token = scanToken();
 	  if (token != ':')
-	    throw error(L.l("Expected `:' at {0}.  Conditional syntax is 'expr ? expr : expr'.", badChar(token)));
+	    throw error(L.l("Expected ':' at {0}.  Conditional syntax is 'expr ? expr : expr'.", badChar(token)));
 	  Expr falseExpr = parseExpr();
 
 	  left = new ConditionalExpr(left, trueExpr, falseExpr);

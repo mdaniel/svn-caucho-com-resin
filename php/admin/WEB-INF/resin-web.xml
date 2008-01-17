@@ -2,28 +2,16 @@
          xmlns:resin="http://caucho.com/ns/resin/core">
 
   <servlet-mapping url-pattern="*.php"
-                   servlet-class="com.caucho.quercus.servlet.QuercusServlet">
-  </servlet-mapping>
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet"/>
 
   <!--
      - Security configuration
     -->
+  <login url="form:">
+     <init login-page="/login.php" error-page="/error.php"/>
+  </login>
 
-  <authenticator url="xml:">
-    <init>
-      <user name="${resin_admin_user?resin_admin_user:'admin'}"
-            password="${resin_admin_password}" roles="read,write"/>
-    </init>
-  </authenticator>
-
-  <login-config auth-method="form">
-     <form-login-config form-login-page='/login.php'
-                        form-error-page='/error.php'/>
-  </login-config>
-
-  <security-constraint>
-    <web-resource-collection url-pattern="*.php"/>
-      
+  <security-constraint url-pattern="*.php">
     <resin:if test="${! resin_admin_external}">
       <ip-constraint>
         <allow>127.0.0.1</allow>

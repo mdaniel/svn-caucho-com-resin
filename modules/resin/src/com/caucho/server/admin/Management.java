@@ -31,13 +31,18 @@ package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
+import com.caucho.lifecycle.*;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.DeployManagementService;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostConfig;
+import com.caucho.security.*;
+import com.caucho.server.security.*;
+import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
+import javax.annotation.*;
 import javax.resource.spi.ResourceAdapter;
 import java.util.logging.Logger;
 
@@ -57,8 +62,12 @@ public class Management
 
   private HostConfig _hostConfig;
 
+  private ManagementAuthenticator _auth;
+
   private DeployManagementService _deployService;
   protected TransactionManager _transactionManager;
+
+  private Lifecycle _lifecycle = new Lifecycle();
 
   public void setCluster(Cluster cluster)
   {
@@ -87,6 +96,17 @@ public class Management
   public Path getPath()
   {
     return _path;
+  }
+
+  /**
+   * Adds a user
+   */
+  public void addUser(User user)
+  {
+    if (_auth == null)
+      _auth = new ManagementAuthenticator();
+
+    _auth.addUser(user.getName(), user.getPasswordUser());
   }
 
   /**
@@ -124,12 +144,9 @@ public class Management
   /**
    * Create and configure the persistent logger.
    */
-  public Object createPersistentLog()
+  public Object createLogService()
   {
-    log.fine(L.l("'{0}' management requires Resin Professional",
-                 "persistent-logger"));
-
-    return null;
+    throw new ConfigException(L.l("'log-service' management requires Resin Professional"));
   }
 
   /**
@@ -163,9 +180,24 @@ public class Management
     return _transactionManager;
   }
 
+  @PostConstruct
   public void init()
   {
-    start();
+    try {
+      if (! _lifecycle.toInit())
+	return;
+      
+      if (_auth != null) {
+	_auth.init();
+      
+	WebBeansContainer webBeans = WebBeansContainer.create();
+
+	// XXX: s/b at @Standard level
+	webBeans.addSingleton(_auth, "resin-admin");
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
   
   public void start()
@@ -226,5 +258,53 @@ public class Management
 
     if (transactionManager != null)
       transactionManager.destroy();
+  }
+
+  public static class User {
+    private String _name;
+    private String _password;
+    private boolean _isDisabled;
+
+    public void setName(String name)
+    {
+      _name = name;
+    }
+
+    public String getName()
+    {
+      return _name;
+    }
+
+    public void setPassword(String password)
+    {
+      _password = password;
+    }
+
+    public String getPassword()
+    {
+      return _password;
+    }
+
+    public void setDisable(boolean isDisabled)
+    {
+      _isDisabled = isDisabled;
+    }
+
+    public boolean isDisable()
+    {
+      return _isDisabled;
+    }
+
+    PasswordUser getPasswordUser()
+    {
+      if (_name == null)
+	throw new ConfigException(L.l("management <user> requires a 'name' attribute"));
+      
+      boolean isAnonymous = false;
+      
+      return new PasswordUser(new BasicPrincipal(_name), _password,
+			      _isDisabled, isAnonymous,
+			      new String[] { "resin-admin" });
+    }
   }
 }
