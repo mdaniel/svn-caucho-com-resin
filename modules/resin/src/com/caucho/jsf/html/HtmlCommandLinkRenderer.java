@@ -30,9 +30,8 @@ package com.caucho.jsf.html;
 
 import java.io.*;
 import java.util.*;
+import java.net.URLEncoder;
 
-import javax.faces.*;
-import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
@@ -164,6 +163,8 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       title = htmlCommandLink.getTitle();
       type = htmlCommandLink.getType();
 
+      target = htmlCommandLink.getTarget();
+
       value = htmlCommandLink.getValue();
     }
     else {
@@ -200,7 +201,9 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       tabindex = (String) attrMap.get("tabindex");
       title = (String) attrMap.get("title");
       type = (String) attrMap.get("type");
-      
+
+      target = (String)attrMap.get("target");
+
       value = attrMap.get("value");
     }
 
@@ -208,8 +211,12 @@ class HtmlCommandLinkRenderer extends BaseRenderer
     String formClientId = getFormId(context, component);
     String hiddenFieldName = clientId + ":link";
 
-    if (disabled)
+    if (disabled) {
       out.startElement("span", component);
+
+      if (target != null)
+	out.writeAttribute("target", target, "target");
+    }
     else {
       out.startElement("a", component);
 
@@ -233,11 +240,6 @@ class HtmlCommandLinkRenderer extends BaseRenderer
     if (dir != null)
       out.writeAttribute("dir", dir, "dir");
 
-    /*
-    if (disabled)
-      out.writeAttribute("disabled", "disabled", "disabled");
-    */
-
     if (hreflang != null)
       out.writeAttribute("hreflang", hreflang, "hreflang");
 
@@ -247,31 +249,71 @@ class HtmlCommandLinkRenderer extends BaseRenderer
     if (onblur != null)
       out.writeAttribute("onblur", onblur, "onblur");
 
-    StringBuilder clickJs = new StringBuilder();
-    clickJs.append("document.forms['");
-    clickJs.append(formClientId);
-    clickJs.append("']['");
-    clickJs.append(hiddenFieldName);
-    clickJs.append("'].value='");
-    clickJs.append(clientId);
-    clickJs.append("';");
-
-    // uiparam
-
-    clickJs.append("document.forms['");
-    clickJs.append(formClientId);
-    clickJs.append("'].submit();");
-
-    clickJs.append("return false;");
 
     if (disabled) {
     }
     else {
+      StringBuilder clickJs = new StringBuilder();
+      clickJs.append("document.forms['");
+      clickJs.append(formClientId);
+      clickJs.append("']['");
+      clickJs.append(hiddenFieldName);
+      clickJs.append("'].value='");
+      clickJs.append(clientId);
+      clickJs.append("';");
+
+      final int childCount = component.getChildCount();
+
+      if (childCount > 0 && !disabled) {
+	List<UIComponent> children = component.getChildren();
+
+	for (int i = 0; i < childCount; i++) {
+	  UIComponent child = children.get(i);
+
+	  if (child instanceof UIParameter) {
+	    UIParameter param = (UIParameter) child;
+	    String enc = out.getCharacterEncoding();
+
+	    clickJs.append("document.forms['");
+	    clickJs.append(formClientId);
+	    clickJs.append("']['");
+
+	    String name = param.getName();
+	    String encodedName = URLEncoder.encode(name, enc);
+
+	    HtmlFormRenderer.addCommandLinkParam(context, formClientId, name);
+
+	    clickJs.append(encodedName);
+	    clickJs.append("'].value='");
+
+	    String val = toString(context, param, param.getValue());
+	    String encodedVal = URLEncoder.encode(val, enc);
+	    
+	    clickJs.append(encodedVal);
+	    clickJs.append("';");
+	  }
+	}
+      }
+
+      if (target != null) {
+	clickJs.append("document.forms['");
+	clickJs.append(formClientId);
+	clickJs.append("'].target='");
+	clickJs.append(target);
+	clickJs.append("';");
+      }
+
+      clickJs.append("document.forms['");
+      clickJs.append(formClientId);
+      clickJs.append("'].submit();");
+
+      clickJs.append("return false;");
+
       if (onclick != null) {
 	String code = ("var a = function(){" + onclick + "};"
 		       + "var b = function() {" + clickJs + "};"
 		       + "return a() && b();");
-      
+
 	out.writeAttribute("onclick", code, "onclick");
       }
       else
@@ -335,8 +377,8 @@ class HtmlCommandLinkRenderer extends BaseRenderer
     if (value != null)
       out.writeText(toString(context, component, value), "value");
 
-    int childCount = component.getChildCount();
-
+    final int childCount = component.getChildCount();
+    
     if (childCount > 0) {
       List<UIComponent> children = component.getChildren();
 
@@ -344,29 +386,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
 	UIComponent child = children.get(i);
 
 	if (child instanceof UIParameter) {
-	  UIParameter param = (UIParameter) child;
-	  
-	  if (! disabled) {
-	    out.startElement("input", param);
-
-	    out.writeAttribute("type", "hidden", "type");
-
-	    String paramName = param.getName();
-
-	    out.writeAttribute("name", paramName, "name");
-
-	    /*
-	    Object paramValue = param.getValue();
-
-	    out.writeAttribute("value",
-			       toString(context, param, paramValue),
-			       "value");
-	    */
-	    
-	    out.endElement("input");
-	  }
 	}
-      
 	else if (child.isRendered()) {
 	  child.encodeBegin(context);
 	  child.encodeChildren(context);

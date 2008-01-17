@@ -32,7 +32,6 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
-import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
@@ -289,7 +288,45 @@ class HtmlFormRenderer extends BaseRenderer
 
     ResponseWriter out = context.getResponseWriter();
 
+    Set<String> params = findCommandLinkParamSet(context,
+						 component.getClientId(context),
+						 false);
+    if (params != null) {
+      for (String param : params) {
+	out.startElement("input", component);
+
+	out.writeAttribute("name", param, "name");
+	out.writeAttribute("id", param, "id");
+	out.writeAttribute("type", "hidden", "type");
+	
+	out.endElement("input");
+      }
+    }
+
     out.endElement("form");
     out.write("\n");
+  }
+
+  static void addCommandLinkParam(FacesContext context,
+				  String formClientId,
+				  String name)
+  {
+    findCommandLinkParamSet(context, formClientId, true).add(name);
+  }
+
+  private static Set<String> findCommandLinkParamSet(FacesContext context,
+						     String formClientId,
+						     boolean create)
+  {
+    final String setKey = "com.caucho.jsf.html.form." +
+			  formClientId +
+			  ".commandLinkParams";
+    Map requestMap = context.getExternalContext().getRequestMap();
+    Set<String> params = (Set<String>) requestMap.get(setKey);
+    if (params == null && create) {
+      params = new HashSet<String>();
+      requestMap.put(setKey, params);
+    }
+    return params;
   }
 }
