@@ -4,7 +4,7 @@
           class="com.caucho.server.security.AuthenticatorConfig"/>
 
     <bean name="bean"
-          class="com.caucho.webbeans.cfg.BeanConfig"/>
+          class="com.caucho.config.types.BeanConfig"/>
 
     <bean name="case-insensitive"
           class="com.caucho.vfs.CaseInsensitive"/>
