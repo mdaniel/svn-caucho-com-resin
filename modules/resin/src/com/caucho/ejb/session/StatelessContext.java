@@ -35,12 +35,12 @@ import com.caucho.ejb.*;
 import com.caucho.webbeans.context.*;
 
 /**
- * Abstract base class for an session context
+ * Abstract base class for an stateless session context
  */
-abstract public class StatefulContext extends AbstractSessionContext {
-  private transient StatefulServer _server;
+abstract public class StatelessContext extends AbstractSessionContext {
+  private transient StatelessServer _server;
 
-  public StatefulContext(StatefulServer server)
+  public StatelessContext(StatelessServer server)
   {
     assert(server != null);
 
@@ -50,7 +50,7 @@ abstract public class StatefulContext extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public StatefulServer getStatefulServer()
+  public StatelessServer getStatelessServer()
   {
     return _server;
   }
@@ -63,19 +63,19 @@ abstract public class StatefulContext extends AbstractSessionContext {
     return _server;
   }
   
-  public SessionProvider getProvider(Class api)
-  {
-    throw new IllegalStateException(L.l("'{0}' is an unknown interface",
-      api));
-  }
-  
   /**
    * Returns the timer service.
    */
   public TimerService getTimerService()
     throws IllegalStateException
   {
-    throw new IllegalStateException("Stateful session beans cannot call SessionContext.getTimerService()");
+    throw new IllegalStateException("Stateless session beans cannot call SessionContext.getTimerService()");
+  }
+  
+  public StatelessProvider getProvider(Class api)
+  {
+    throw new IllegalStateException(L.l("'{0}' is an unknown interface",
+      api));
   }
 
   /**

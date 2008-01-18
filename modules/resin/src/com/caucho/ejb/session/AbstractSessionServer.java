@@ -49,7 +49,6 @@ abstract public class AbstractSessionServer extends AbstractServer {
   private AbstractSessionContext _homeContext;
 
   public AbstractSessionServer(EjbContainer container)
-    throws Exception
   {
     super(container);
   }

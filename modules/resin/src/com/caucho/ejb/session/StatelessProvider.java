@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,29 +29,11 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.*;
-import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.xa.*;
-
-import javax.ejb.SessionContext;
-import javax.xml.rpc.handler.MessageContext;
+import com.caucho.config.ConfigContext;
 
 /**
- * Abstract base class for an session context
+ * Creates a new instance of a stateless bean
  */
-abstract public class AbstractSessionContext extends AbstractContext
-  implements SessionContext
-{
-  public <T> T getBusinessObject(Class<T> type)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Obsolete jaxrpc
-   */
-  public MessageContext getMessageContext()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+public interface StatelessProvider {
+  public Object __caucho_get();
 }

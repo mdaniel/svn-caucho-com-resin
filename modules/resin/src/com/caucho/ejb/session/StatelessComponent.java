@@ -43,15 +43,13 @@ import com.caucho.webbeans.manager.WebBeansContainer;
  * Component for session beans
  */
 public class StatelessComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
+  private final StatelessProvider _provider;
 
-  private AbstractServer _server;
-
-  public StatelessComponent(AbstractServer server)
+  public StatelessComponent(StatelessProvider provider)
   {
     super(WebBeansContainer.create().getWbWebBeans());
     
-    _server = server;
+    _provider = provider;
   }
 
   @Override
@@ -62,18 +60,18 @@ public class StatelessComponent extends ComponentImpl {
   @Override
   public Object get()
   {
-    return _server.getLocalObject();
+    return _provider.__caucho_get();
   }
 
   @Override
   public Object get(ConfigContext env)
   {
-    return _server.getLocalObject();
+    return _provider.__caucho_get();
   }
 
   @Override
   public Object create()
   {
-    return _server.getLocalObject();
+    return _provider.__caucho_get();
   }
 }

@@ -122,9 +122,7 @@ abstract public class SessionServer extends AbstractServer
 	beanName = named.value();
       
       for (Class api : localApiList) {
-	SessionProvider provider = getSessionContext().getProvider(api);
-	  
-	SessionComponent comp = new SessionComponent(provider);
+	ComponentImpl comp = createSessionComponent(api);
 
 	comp.setTargetType(getEjbClass());
 
@@ -132,12 +130,13 @@ abstract public class SessionServer extends AbstractServer
 	comp.addNameBinding(beanName);
 
 	comp.init();
-
 	webBeans.addComponentByName(beanName, comp);
 	webBeans.addComponentByType(api, comp);
       }
     }
   }
+
+  abstract protected ComponentImpl createSessionComponent(Class api);
 
   /**
    * Returns the object key from a handle.

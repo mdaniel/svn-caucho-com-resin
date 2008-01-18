@@ -2573,4 +2573,9 @@ public class EjbBean extends DescriptionGroupConfig
     else
       return new ConfigException(msg);
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _ejbName + "]";
+  }
 }

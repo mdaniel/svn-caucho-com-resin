@@ -79,7 +79,7 @@ public class StatelessBeanConfig extends AbstractBeanConfig
     configManager.setBeanConfig(name, bean);
 
     // XXX: timing?
-    configManager.start();
+    // configManager.start();
   }
 }
 

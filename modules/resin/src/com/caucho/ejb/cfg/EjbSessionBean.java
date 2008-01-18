@@ -443,45 +443,7 @@ public class EjbSessionBean extends EjbBean {
     try {
       thread.setContextClassLoader(server.getClassLoader());
 
-
       ContainerProgram initContainer = getInitProgram();
-
-      /*
-      ArrayList<BuilderProgram> initList;
-      initList = InjectIntrospector.introspect(beanClass);
-
-      if (initList != null && initList.size() > 0) {
-        if (initContainer == null)
-          initContainer = new ContainerProgram();
-
-        for (BuilderProgram init : initList) {
-          String foreignName = null;
-
-          if (init instanceof JndiBindProgram) {
-            // ejb/0f6c
-            JndiBindProgram jndiBind = (JndiBindProgram) init;
-
-            foreignName = jndiBind.getForeignName();
-          }
-          else if (init instanceof EjbInjectProgram) {
-            // ejb/0g1c
-            EjbInjectProgram ejbInject = (EjbInjectProgram) init;
-
-            foreignName = ejbInject.getBeanName();
-          }
-
-          if (foreignName != null) {
-            int index = foreignName.lastIndexOf("/");
-
-            foreignName = foreignName.substring(++index);
-
-            addBeanDependency(foreignName);
-          }
-
-          initContainer.addProgram(init);
-        }
-      }
-      */
 
       server.setInitProgram(initContainer);
 
@@ -492,11 +454,14 @@ public class EjbSessionBean extends EjbBean {
         // ejb/0fd0, ejb/0g03
         for (EnvEntry envEntry : getEnvEntries())
           envEntry.init();
+
+	server.init();
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
         throw ConfigException.create(e);
       }
+
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

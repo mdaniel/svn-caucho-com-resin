@@ -47,11 +47,11 @@ import java.util.logging.Logger;
 /**
  * Server home container for a stateless session bean
  */
-public class StatelessServer extends AbstractServer {
+public class StatelessServer extends SessionServer {
   protected static Logger log
     = Logger.getLogger(StatelessServer.class.getName());
 
-  private AbstractStatelessContext _homeContext;
+  private StatelessContext _homeContext;
 
   // EJB 2.1
   private EJBObject _remoteObject21;
@@ -77,111 +77,12 @@ public class StatelessServer extends AbstractServer {
   {
     return "stateless:";
   }
-
-  /**
-   * Initialize the server
-   */
-  @Override
-  public void init()
-    throws Exception
+  
+  protected ComponentImpl createSessionComponent(Class api)
   {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
+    StatelessProvider provider = getStatelessContext().getProvider(api);
 
-    try {
-      thread.setContextClassLoader(_loader);
-
-      super.init();
-
-      WebBeansContainer webBeans = WebBeansContainer.create();
-
-      SingletonComponent comp
-        = new SingletonComponent(webBeans, getStatelessContext());
-      
-      _component = comp;
-    
-      comp.setTargetType(SessionContext.class);
-      comp.init();
-      webBeans.addComponent(comp);
-
-      // EJB 2.1
-      _localHome = getStatelessContext().createLocalHome();
-      _remoteHomeView = getStatelessContext().createRemoteHomeView();
-
-      try {
-        _localObject21 = getStatelessContext().getEJBLocalObject();
-      } catch (Exception e) {
-      }
-
-      try {
-        _remoteObject21 = getStatelessContext().getEJBObject();
-      } catch (Exception e) {
-      }
-
-      // EJB 3.0
-      try {
-        _localObject = getStatelessContext().createLocalObject();
-      } catch (Exception e) {
-      }
-
-      try {
-        _remoteObject = getStatelessContext().createRemoteView();
-      } catch (Exception e) {
-      }
-
-      /*
-        if (_config.getLocalHomeClass() != null)
-        _localHome = _homeContext.createLocalHome();
-
-        if (_homeStubClass != null) {
-        _remoteHomeView = _homeContext.createRemoteHomeView();
-
-        if (_config.getJndiName() != null) {
-        Context ic = new InitialContext();
-        ic.rebind(_config.getJndiName(), this);
-        }
-        }
-      */
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-
-    registerWebBeans();
-  }
-
-  private void registerWebBeans()
-  {
-    Class beanClass = getBeanSkelClass();
-    ArrayList<Class> localApiList = getLocalApiList();
-
-    if (beanClass != null && localApiList != null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
-      StatelessComponent comp = new StatelessComponent(this);
-    
-      comp.setTargetType(beanClass);
-    
-      Named named = (Named) beanClass.getAnnotation(Named.class);
-
-      String name;
-
-      if (named != null) {
-	name = named.value();
-      }
-      else {
-	name = getEJBName();
-
-	comp.setName(name);
-        comp.addNameBinding(name);
-      }
-
-      comp.init();
-
-      webBeans.addComponentByName(name, comp);
-
-      for (Class api : localApiList) {
-	webBeans.addComponentByType(api, comp);
-      }
-    }
+    return new StatelessComponent(provider);
   }
 
   @Override
@@ -284,8 +185,8 @@ public class StatelessServer extends AbstractServer {
 
           // ejb/0ff4 TCK: ejb30/bb/session/stateless/sessioncontext/annotated/getInvokedBusinessInterfaceLocal1
           // Creates a new instance to store the invoked business interface.
-          obj = getStatelessContext().createLocalObject();
-          setBusinessInterface(obj, businessInterface);
+          //obj = getStatelessContext().createLocalObject();
+          //setBusinessInterface(obj, businessInterface);
 
           // XXX TCK: ejb30/bb/session/stateless/equals/annotated/testBeanotherEquals, needs QA
           _localObject = obj;
@@ -347,7 +248,7 @@ public class StatelessServer extends AbstractServer {
     return getStatelessContext();
   }
 
-  private AbstractStatelessContext getStatelessContext()
+  private StatelessContext getStatelessContext()
   {
     synchronized (this) {
       if (_homeContext == null) {
@@ -355,7 +256,7 @@ public class StatelessServer extends AbstractServer {
           Class []param = new Class[] { StatelessServer.class };
           Constructor cons = _contextImplClass.getConstructor(param);
 
-          _homeContext = (AbstractStatelessContext) cons.newInstance(this);
+          _homeContext = (StatelessContext) cons.newInstance(this);
         } catch (Exception e) {
           throw new EJBExceptionWrapper(e);
         }

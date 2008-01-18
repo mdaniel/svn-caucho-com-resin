@@ -37,6 +37,7 @@ import java.util.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.util.LruCache;
+import com.caucho.webbeans.component.*;
 import java.lang.reflect.Constructor;
 import java.util.logging.Level;
 import javax.ejb.FinderException;
@@ -90,6 +91,13 @@ public class StatefulServer extends SessionServer
     }
 
     return _homeContext;
+  }
+
+  protected ComponentImpl createSessionComponent(Class api)
+  {
+    SessionProvider provider = getStatefulContext().getProvider(api);
+
+    return new SessionComponent(provider);
   }
   
   /**

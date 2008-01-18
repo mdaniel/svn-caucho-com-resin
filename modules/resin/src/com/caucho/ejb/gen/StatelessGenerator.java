@@ -50,39 +50,106 @@ public class StatelessGenerator extends SessionGenerator {
   {
     return true;
   }
+
+  protected View generateLocalView(ApiClass api)
+  {
+    return new StatelessLocalView(this, api);
+  }
+
+  /**
+   * Generates the stateful session bean
+   */
+  @Override
+  public void generate(JavaWriter out)
+    throws IOException
+  {
+    generateTopComment(out);
+
+    out.println();
+    out.println("package " + getPackageName() + ";");
+
+    out.println();
+    out.println("import com.caucho.config.*;");
+    out.println("import com.caucho.ejb.session.*;");
+    out.println();
+    out.println("import javax.ejb.*;");
+    out.println("import javax.transaction.*;");
+    
+    out.println();
+    out.println("public class " + getClassName());
+    out.println("  extends StatelessContext");
+    out.println("{");
+    out.pushDepth();
+
+    generateContext(out);
+    generateCreateProvider(out);
+    generateViews(out);
+    
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected void generateCreateProvider(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public StatelessProvider getProvider(Class api)");
+    out.println("{");
+    out.pushDepth();
+    
+    for (View view : getViews()) {
+      StatelessLocalView sView = (StatelessLocalView) view;
+
+      sView.generateCreateProvider(out, "api");
+    }
+
+    out.println();
+    out.println("return super.getProvider(api);");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected void generateViews(JavaWriter out)
+    throws IOException
+  {
+    for (View view : getViews()) {
+      out.println();
+
+      view.generate(out);
+    }
+  }
   
   @Override
   protected void generateContext(JavaWriter out)
     throws IOException
   {
-    String shortContextName = _contextClassName;
-    int p = shortContextName.lastIndexOf('.');
-
-    if (p > 0)
-      shortContextName = shortContextName.substring(p + 1);
+    String shortContextName = getEjbClass().getSimpleName();
 
     int freeStackMax = 16;
 
-    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(" + _contextClassName + ".class.getName());");
+    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
     out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
     out.println();
     out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
 
-    out.println("private Bean []_freeBeanStack = new Bean[" + freeStackMax + "];");
+    String beanClass = getEjbClass().getName();
+
+    out.println("private " + beanClass + " []_freeBeanStack = new "
+		+ beanClass + "[" + freeStackMax + "];");
     out.println("private int _freeBeanTop;");
     out.println();
-    out.println("public " + shortContextName + "(com.caucho.ejb.session.StatelessServer server)");
+    out.println("public " + getClassName() + "(StatelessServer server)");
     out.println("{");
     out.println("  super(server);");
     out.println("  _xaManager = server.getTransactionManager();");
     out.println("}");
 
     out.println();
-    out.println("Bean _ejb_begin(com.caucho.ejb.xa.TransactionContext trans)");
-    out.println("  throws javax.ejb.EJBException");
+    out.println(beanClass + " _ejb_begin()");
     out.println("{");
     out.pushDepth();
-    out.println("Bean bean;");
+    out.println(beanClass + " bean;");
     out.println("synchronized (this) {");
     out.println("  if (_freeBeanTop > 0) {");
     out.println("    bean = _freeBeanStack[--_freeBeanTop];");
@@ -91,12 +158,16 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("}");
     out.println();
     out.println("try {");
-    out.println("  bean = new Bean(this);");
+    out.println("  bean = new " + beanClass + "();");
 
+    out.println("  getStatelessServer().initInstance(bean);");
+
+    /*
     if (hasMethod("ejbCreate", new Class[0])) {
       // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");
       out.println("  invokeMethod(bean, \"ejbCreate\", new Class[] {}, new Object[] {});");
     }
+    */
 
     out.println("  return bean;");
     out.println("} catch (Exception e) {");
@@ -106,7 +177,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("}");
 
     out.println();
-    out.println("void _ejb_free(Bean bean)");
+    out.println("void _ejb_free(" + beanClass + " bean)");
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
@@ -120,11 +191,13 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("  }");
     out.println("}");
 
+    /*
     if (hasMethod("ejbRemove", new Class[0])) {
       out.println();
       // ejb/0fe0: ejbRemove() can be private, out.println("bean.ejbRemove();");
       out.println("invokeMethod(bean, \"ejbRemove\", new Class[] {}, new Object[] {});");
     }
+    */
 
     out.popDepth();
     out.println("}");
@@ -133,8 +206,8 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("public void destroy()");
     out.println("{");
     out.pushDepth();
-    out.println("Bean ptr;");
-    out.println("Bean []freeBeanStack;");
+    out.println(beanClass + " ptr;");
+    out.println(beanClass + " []freeBeanStack;");
     out.println("int freeBeanTop;");
 
     out.println("synchronized (this) {");
@@ -144,6 +217,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("  _freeBeanTop = 0;");
     out.println("}");
 
+    /*
     if (hasMethod("ejbRemove", new Class[0])) {
       out.println();
       out.println("for (int i = 0; i < freeBeanTop; i++) {");
@@ -160,6 +234,7 @@ public class StatelessGenerator extends SessionGenerator {
       out.popDepth();
       out.println("}");
     }
+    */
     out.popDepth();
     out.println("}");
 /*
@@ -185,7 +260,7 @@ public class StatelessGenerator extends SessionGenerator {
       out.println("}");
     }
 */
-    generateInvokeMethod(out);
+    // generateInvokeMethod(out);
   }
 
   protected void generateNewInstance(JavaWriter out)

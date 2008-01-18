@@ -40,15 +40,15 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateful view
+ * Represents a public interface to a bean, e.g. a local stateless view
  */
-public class StatefulLocalView extends View {
-  private static final L10N L = new L10N(StatefulLocalView.class);
+public class StatelessLocalView extends View {
+  private static final L10N L = new L10N(StatelessLocalView.class);
 
-  private ArrayList<StatefulLocalMethod> _businessMethods
-    = new ArrayList<StatefulLocalMethod>();
+  private ArrayList<StatelessLocalMethod> _businessMethods
+    = new ArrayList<StatelessLocalMethod>();
 
-  public StatefulLocalView(BeanGenerator bean, ApiClass api)
+  public StatelessLocalView(BeanGenerator bean, ApiClass api)
   {
     super(bean, api);
 
@@ -80,10 +80,11 @@ public class StatefulLocalView extends View {
 
       int index = _businessMethods.size();
       
-      StatefulLocalMethod bizMethod
-	= new StatefulLocalMethod(apiMethod.getMethod(),
-				  implMethod.getMethod(),
-				  index);
+      StatelessLocalMethod bizMethod
+	= new StatelessLocalMethod(implClass,
+				   apiMethod.getMethod(),
+				   implMethod.getMethod(),
+				   index);
 
       _businessMethods.add(bizMethod);
     }
@@ -97,7 +98,7 @@ public class StatefulLocalView extends View {
   {
     out.println();
     out.println("if (" + var + " == " + getApi().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "(getStatefulServer());");
+    out.println("  return new " + getViewClassName() + "(this);");
   }
 
   /**
@@ -109,36 +110,25 @@ public class StatefulLocalView extends View {
     out.println();
     out.println("public static class " + getViewClassName());
     out.print("  implements " + getApi().getName());
-    out.println(", SessionProvider");
+    out.println(", StatelessProvider");
     out.println("{");
     out.pushDepth();
-
-    out.println("private StatefulServer _server;");
-    out.println("private " + getEjbClass().getName() + " _bean;");
+    
+    out.println("private " + getBean().getClassName() + " _cxt;");
 
     out.println();
-    out.println("public " + getViewClassName() + "(StatefulServer server)");
+    out.println(getViewClassName() + "(" + getBean().getClassName() + " cxt)");
     out.println("{");
-    out.println("  _server = server;");
+    out.println("  _cxt = cxt;");
     out.println("}");
 
-    out.println();
-    out.println("public " + getViewClassName() + "(ConfigContext env)");
+    out.println("public Object __caucho_get()");
     out.println("{");
-    out.println("  _bean = new " + getEjbClass().getName() + "();");
-    out.println("}");
-
-    out.println();
-    out.println("public Object __caucho_createNew(ConfigContext env)");
-    out.println("{");
-    out.print("  " + getViewClassName() + " bean"
-	      + " = new " + getViewClassName() + "(env);");
-    out.println("  _server.initInstance(bean._bean, env);");
-    out.println("  return bean;");
+    out.println("  return this;");
     out.println("}");
 
     HashMap map = new HashMap();
-    for (StatefulLocalMethod method : _businessMethods) {
+    for (StatelessLocalMethod method : _businessMethods) {
       method.generate(out, map);
     }
     

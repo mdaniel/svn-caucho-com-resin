@@ -904,6 +904,14 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Initialize an instance
    */
+  public void initInstance(Object instance)
+  {
+    initInstance(instance, new ConfigContext());
+  }
+
+  /**
+   * Initialize an instance
+   */
   public void initInstance(Object instance, ConfigContext env)
   {
     /*
