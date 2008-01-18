@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.ql;
 
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import java.lang.reflect.*;
 import javax.ejb.*;
 

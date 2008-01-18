@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.ejb.gen21.ViewClass;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
@@ -63,9 +64,7 @@ public class StatelessAssembler extends SessionAssembler
                                  String contextClassName,
                                  String implClassName)
   {
-    _genClass.addComponent(new StatelessBean(_sessionBean,
-                                             beanClass,
-                                             contextClassName));
+    // _genClass.addComponent(new StatelessGenerator(beanClass));
   }
 
   /**
@@ -93,6 +92,7 @@ public class StatelessAssembler extends SessionAssembler
                               String viewPrefix,
                               String viewSuffix)
   {
+    /*
     SessionView view = new SessionView(_sessionBean,
                                        apiList,
                                        fullClassName,
@@ -104,6 +104,8 @@ public class StatelessAssembler extends SessionAssembler
     _genClass.addComponent(view);
 
     return view;
+     */
+    return null;
   }
 
   /**
@@ -114,6 +116,7 @@ public class StatelessAssembler extends SessionAssembler
 				    String viewPrefix,
 				    String viewSuffix)
   {
+    /*
     SessionView view = new SessionView(_sessionBean,
                                        apiList,
                                        fullClassName,
@@ -125,6 +128,8 @@ public class StatelessAssembler extends SessionAssembler
     _genClass.addComponent(view);
 
     return view;
+     */
+    return null;
   }
 
   /**

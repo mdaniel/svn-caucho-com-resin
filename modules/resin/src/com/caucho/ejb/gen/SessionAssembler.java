@@ -29,6 +29,8 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.ejb.gen21.BeanAssembler;
+import com.caucho.ejb.gen21.ViewClass;
 import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
 
@@ -67,9 +69,7 @@ public class SessionAssembler extends BeanAssembler
                                  String contextClassName,
                                  String implClassName)
   {
-    _genClass.addComponent(new StatefulBean(_sessionBean,
-					    beanClass,
-					    contextClassName));
+    //_genClass.addComponent(new StatefulGenerator(beanClass));
   }
 
   /**
@@ -97,6 +97,7 @@ public class SessionAssembler extends BeanAssembler
                               String viewPrefix,
                               String viewSuffix)
   {
+    /*
     SessionView view = new SessionView(_sessionBean,
                                        apiList,
                                        fullClassName,
@@ -108,6 +109,8 @@ public class SessionAssembler extends BeanAssembler
     _genClass.addComponent(view);
 
     return view;
+     */
+    return null;
   }
 
   /**
@@ -118,6 +121,7 @@ public class SessionAssembler extends BeanAssembler
 				    String viewPrefix,
 				    String viewSuffix)
   {
+    /*
     SessionView view = new SessionView(_sessionBean,
                                        apiList,
                                        fullClassName,
@@ -129,5 +133,8 @@ public class SessionAssembler extends BeanAssembler
     _genClass.addComponent(view);
 
     return view;
+     */
+    
+    return null;
   }
 }

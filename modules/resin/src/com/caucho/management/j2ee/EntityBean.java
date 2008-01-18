@@ -29,7 +29,7 @@
 
 package com.caucho.management.j2ee;
 
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg21.EjbEntityBean;
 
 import javax.management.j2ee.statistics.CountStatistic;
 import javax.management.j2ee.statistics.EntityBeanStats;

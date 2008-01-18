@@ -28,7 +28,9 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.ejb.cfg21.CmpRelation;
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.Signature;
 import com.caucho.util.L10N;
 
@@ -37,7 +39,7 @@ import javax.annotation.PostConstruct;
 /**
  * Configuration for an ejb bean.
  */
-public class EjbJar {
+public class EjbJar extends DescriptionGroupConfig {
   private static final L10N L = new L10N(EjbJar.class);
 
   private final EjbConfig _config;
@@ -62,14 +64,6 @@ public class EjbJar {
   public void setMetadataComplete(boolean isMetadataComplete)
   {
     _isMetadataComplete = isMetadataComplete;
-  }
-
-  public void setDescription(String value)
-  {
-  }
-
-  public void setDisplayName(String value)
-  {
   }
 
   public EjbEnterpriseBeans createEnterpriseBeans()

@@ -29,6 +29,8 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.gen21.ViewClass;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
@@ -42,18 +44,19 @@ import javax.ejb.*;
 /**
  * Generates the skeleton for a session view.
  */
-public class SessionView extends ViewClass {
+public class SessionView extends View {
   private static L10N L = new L10N(SessionView.class);
-
-  private EjbBean _bean;
-  private ArrayList<ApiClass> _apiList;
+ 
+  private ArrayList<BusinessMethodGenerator> _methods
+    = new ArrayList<BusinessMethodGenerator>();
+  
+  private String _suffix = "";
   private String _prefix;
-  private String _suffix;
   private String _contextClassName;
   private boolean _isStateless;
   private boolean _isRemote;
 
-  public SessionView(EjbBean bean,
+  public SessionView(BeanGenerator bean,
 		     ArrayList<ApiClass> apiList,
                      String contextClassName,
                      String prefix,
@@ -61,63 +64,91 @@ public class SessionView extends ViewClass {
                      boolean isStateless,
 		     boolean isRemote)
   {
-    super(prefix + getSuffix(apiList), getSuperclass(isStateless, apiList));
-
-    _bean = bean;
-
-    for (ApiClass api : apiList)
-      addInterfaceName(api.getName());
-
-    _apiList = apiList;
+    super(bean, apiList.get(0));
+    
+    // super(prefix + getSuffix(apiList), getSuperclass(isStateless, apiList));
 
     _contextClassName = contextClassName;
     _prefix = prefix;
-    _suffix = getSuffix(apiList);
     _isStateless = isStateless;
     _isRemote = isRemote;
-
-    setStatic(true);
-  }
-
-  private static String getSuperclass(boolean isStateless,
-				      ArrayList<ApiClass> apiList)
-  {
-    if (isStateless)
-      return "StatelessObject" + getSuffix(apiList);
-    else
-      return "SessionObject" + getSuffix(apiList);
-  }
-
-  private static String getSuffix(ArrayList<ApiClass> apiList)
-  {
-    for (ApiClass api : apiList) {
-      if (EJBObject.class.isAssignableFrom(api.getJavaClass()))
-	return "21";
-      else if (EJBLocalObject.class.isAssignableFrom(api.getJavaClass()))
-	return "21";
-    }
-
-    return "";
+    
+    introspect();
   }
   
   /**
-   * Adds the pool chaining.
+   * Introspects the methods in the API list to generate business methods.
    */
-  public CallChain createPoolChain(CallChain call, BaseMethod method)
+  protected void introspect()
   {
-    if (_isStateless)
-      return new StatelessPoolChain(_bean, call, method, _isRemote);
-    else
-      return new StatefulPoolChain(_bean, call, method, _isRemote);
+    /*
+    for (ApiClass api : _apiList) {
+      for (ApiMethod method : api.getMethods()) {
+        introspectMethod(method);
+      }
+    }
+    */
   }
+  
+  protected void introspectMethod(ApiMethod apiMethod)
+  {
+    if (findMethod(apiMethod) != null)
+      return;
+    
+    ApiMethod implMethod = getEjbClass().getMethod(apiMethod);
+    
+    if (implMethod == null) {
+      throw new ConfigException(L.l("'{0}' does not have a corresponding method in '{1}'",
+        apiMethod, getEjbClass()));
+    }
 
+    /*
+    BusinessMethodGenerator businessMethod
+      = createBusinessMethod(apiMethod, implMethod);
+    
+    _methods.add(businessMethod);
+    
+    businessMethod.introspect();
+    */
+  }
+  
+  /**
+   * Creates a new business method instance
+   * 
+   * @param apiMethod the interface method
+   * @param implMethod the implementation method
+   * @return the new business method
+   */
+  protected BusinessMethodGenerator createBusinessMethod(ApiMethod apiMethod,
+    ApiMethod implMethod)
+  {
+    return new SessionBusinessMethod(apiMethod, implMethod, _methods.size());
+  }
+  
+  /**
+   * Returns the business method matching the given interface method
+   * 
+   * @param method the interface method to match
+   * 
+   * @return the matching method or null if none match
+   */
+  protected BusinessMethodGenerator findMethod(ApiMethod method)
+  {
+    for (BusinessMethodGenerator oldMethod : _methods) {
+      if (oldMethod.matches(method.getName(), method.getParameterTypes()))
+        return oldMethod;
+    }
+    
+    return null;
+  }
+  
   public void generate(JavaWriter out)
     throws IOException
   {
     generateGetter(out);
 
     out.println();
-    super.generate(out);
+    // super.generate(out);
   }
 
   private void generateGetter(JavaWriter out)
@@ -200,6 +231,5 @@ public class SessionView extends ViewClass {
     }
 
     out.println();
-    generateComponents(out);
   }
 }

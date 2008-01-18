@@ -29,6 +29,13 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.ejb.cfg21.EjbEntityBean;
+import com.caucho.ejb.cfg21.CmrMap;
+import com.caucho.ejb.cfg21.CmpRelationRole;
+import com.caucho.ejb.cfg21.CmpRelation;
+import com.caucho.ejb.cfg21.CmrManyToOne;
+import com.caucho.ejb.cfg21.CmrOneToMany;
+import com.caucho.ejb.cfg21.CmrManyToMany;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
@@ -36,11 +43,9 @@ import com.caucho.config.types.EjbLocalRef;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.ResourceEnvRef;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.ql.FunExpr;
-import com.caucho.java.WorkDir;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;

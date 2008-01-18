@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.gen21;
 
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.ejb.gen21.AbstractQueryMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.*;

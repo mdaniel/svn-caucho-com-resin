@@ -42,10 +42,11 @@ import javax.interceptor.*;
 /**
  * Represents a business method
  */
-public class BusinessMethodGenerator {
+public class BusinessMethodGenerator implements EjbCallChain {
   private static final L10N L = new L10N(BusinessMethodGenerator.class);
   
-  private Method _method;
+  private Method _apiMethod;
+  private Method _implMethod;
 
   private String _uniqueName;
 
@@ -56,17 +57,22 @@ public class BusinessMethodGenerator {
 
   private String _runAs;
 
-  private TransactionAttributeType _xa;
+  private XaCallChain _xa;
   
   private ArrayList<Class> _interceptors = new ArrayList<Class>();
   
-  public BusinessMethodGenerator(Method method, int index)
+  public BusinessMethodGenerator(Method apiMethod,
+				 Method implMethod,
+				 int index)
   {
-    _method = method;
+    _apiMethod = apiMethod;
+    _implMethod = implMethod;
 
-    _uniqueName = "_" + _method.getName() + "_" + index;
+    _uniqueName = "_" + _apiMethod.getName() + "_" + index;
 
-    introspect();
+    _xa = new XaCallChain(this);
+
+    introspect(apiMethod, implMethod);
   }
   
   /**
@@ -74,7 +80,15 @@ public class BusinessMethodGenerator {
    */
   public boolean hasXA()
   {
-    return (_xa != null && ! _xa.equals(TransactionAttributeType.SUPPORTS));
+    return _xa.isEnhanced();
+  }
+
+  /**
+   * Returns the xa call chain
+   */
+  public XaCallChain getXa()
+  {
+    return _xa;
   }
 
   /**
@@ -86,7 +100,7 @@ public class BusinessMethodGenerator {
       return true;
     else if (_runAs != null)
       return true;
-    else if (_xa != null && ! _xa.equals(TransactionAttributeType.SUPPORTS))
+    else if (_xa.isEnhanced())
       return true;
     else if (_interceptors != null && _interceptors.size() > 0)
       return true;
@@ -94,12 +108,12 @@ public class BusinessMethodGenerator {
     return false;
   }
 
-  protected void introspect()
+  public void introspect(Method apiMethod, Method implMethod)
   {
-    Class cl = _method.getDeclaringClass();
+    Class cl = implMethod.getDeclaringClass();
 
     introspectSecurity(cl);
-    introspectTransaction(cl);
+    _xa.introspect(apiMethod, implMethod);
     introspectInterceptors(cl);
   }
 
@@ -140,41 +154,22 @@ public class BusinessMethodGenerator {
 
     // 
     
-    rolesAllowed = _method.getAnnotation(RolesAllowed.class);
+    rolesAllowed = _apiMethod.getAnnotation(RolesAllowed.class);
 
     if (rolesAllowed != null)
       _roles = rolesAllowed.value();
     
-    permitAll = (PermitAll) _method.getAnnotation(PermitAll.class);
+    permitAll = (PermitAll) _apiMethod.getAnnotation(PermitAll.class);
 
     if (permitAll != null)
       _roles = null;
     
-    denyAll = (DenyAll) _method.getAnnotation(DenyAll.class);
+    denyAll = (DenyAll) _apiMethod.getAnnotation(DenyAll.class);
 
     if (denyAll != null)
       _roles = new String[0];
   }
 
-  /**
-   * Introspects the @TransactionAttribute annotation on the method
-   * and the class.
-   */
-  protected void introspectTransaction(Class cl)
-  {
-    TransactionAttribute xaAttr;
-    
-    xaAttr = _method.getAnnotation(TransactionAttribute.class);
-
-    if (xaAttr == null) {
-      xaAttr = (TransactionAttribute)
-	cl.getAnnotation(TransactionAttribute.class);
-    }
-
-    if (xaAttr != null)
-      _xa = xaAttr.value();
-  }
-  
   /**
    * Introspects the @Interceptors annotation on the method
    * and the class.
@@ -184,7 +179,7 @@ public class BusinessMethodGenerator {
     ArrayList<Class> interceptorList = new ArrayList<Class>();
     
     Interceptors interceptors
-      = _method.getAnnotation(Interceptors.class);
+      = _apiMethod.getAnnotation(Interceptors.class);
 
     if (interceptors != null) {
       for (Class interceptorClass : interceptors.value())
@@ -194,28 +189,28 @@ public class BusinessMethodGenerator {
     _interceptors = interceptorList;
   }
 
-  public void generate(JavaWriter out)
+  public void generate(JavaWriter out, HashMap prologueMap)
     throws IOException
   {
-    if (isEnhanced())
+    if (! isEnhanced())
       return;
 
-    generatePrologue(out);
+    generatePrologue(out, prologueMap);
 
     out.println();
-    if (Modifier.isPublic(_method.getModifiers()))
+    if (Modifier.isPublic(_apiMethod.getModifiers()))
       out.print("public ");
-    else if (Modifier.isProtected(_method.getModifiers()))
+    else if (Modifier.isProtected(_apiMethod.getModifiers()))
       out.print("protected ");
     else
-      throw new IllegalStateException(_method.toString() + " must be public or protected");
+      throw new IllegalStateException(_apiMethod.toString() + " must be public or protected");
 
-    out.printClass(_method.getReturnType());
+    out.printClass(_apiMethod.getReturnType());
     out.print(" ");
-    out.print(_method.getName());
+    out.print(_apiMethod.getName());
     out.print("(");
 
-    Class []types = _method.getParameterTypes();
+    Class []types = _apiMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
       if (i != 0)
 	out.print(", ");
@@ -225,7 +220,7 @@ public class BusinessMethodGenerator {
     }
     
     out.println(")");
-    generateThrows(out, _method.getExceptionTypes());
+    generateThrows(out, _apiMethod.getExceptionTypes());
 
     out.println("{");
     out.pushDepth();
@@ -236,7 +231,7 @@ public class BusinessMethodGenerator {
     out.println("}");
   }
 
-  protected void generatePrologue(JavaWriter out)
+  public void generatePrologue(JavaWriter out, HashMap map)
     throws IOException
   {
     if (_roles != null) {
@@ -256,6 +251,8 @@ public class BusinessMethodGenerator {
       out.println("};");
     }
 
+    _xa.generatePrologue(out, map);
+
     if (_interceptors != null && _interceptors.size() > 0) {
       generateInterceptorsPrologue(out);
     }
@@ -268,7 +265,7 @@ public class BusinessMethodGenerator {
     out.println("private static java.lang.reflect.Method " + _uniqueName + "_method;");
     out.println("private static java.lang.reflect.Method []" + _uniqueName + "_methodChain;");
 
-    Class cl = _method.getDeclaringClass();
+    Class cl = _apiMethod.getDeclaringClass();
     
     out.println();
     out.println("static {");
@@ -278,7 +275,7 @@ public class BusinessMethodGenerator {
     out.pushDepth();
     
     out.print(_uniqueName + "_method = ");
-    generateGetMethod(out, _method);
+    generateGetMethod(out, _apiMethod);
     out.println(";");
 
     out.println(_uniqueName + "_methodChain = new java.lang.reflect.Method[] {");
@@ -350,8 +347,8 @@ public class BusinessMethodGenerator {
       out.println("try {");
       out.pushDepth();
     }
-    
-    generateXA(out);
+
+    _xa.generateCall(out);
 
     if (_runAs != null) {
       out.popDepth();
@@ -361,102 +358,20 @@ public class BusinessMethodGenerator {
     }
   }
 
-  protected void generateXA(JavaWriter out)
-    throws IOException
-  {
-    if (_xa != null) {
-      switch (_xa) {
-      case MANDATORY:
-	{
-	  out.println("_xa.beginMandatory();");
-	}
-	break;
-	
-      case NEVER:
-	{
-	  out.println("_xa.beginNever();");
-	}
-	break;
-	
-      case NOT_SUPPORTED:
-	{
-	  out.println("Transaction xa = _xa.beginNotSupported();");
-	  out.println();
-	  out.println("try {");
-	  out.pushDepth();
-	}
-	break;
-	
-      case REQUIRED:
-	{
-	  out.println("Transaction xa = _xa.beginRequired();");
-	  out.println();
-	  out.println("try {");
-	  out.pushDepth();
-	}
-	break;
-	
-      case REQUIRES_NEW:
-	{
-	  out.println("Transaction xa = _xa.beginRequiresNew();");
-	  out.println();
-	  out.println("try {");
-	  out.pushDepth();
-	}
-	break;
-      }
-    }
-    
-    generateInterceptors(out);
-    
-    if (_xa != null) {
-      switch (_xa) {
-      case NOT_SUPPORTED:
-	{
-	  out.popDepth();
-	  out.println("} finally {");
-	  out.println("  if (xa != null)");
-	  out.println("    _xa.resume(xa);");
-	  out.println("}");
-	}
-	break;
-      
-      case REQUIRED:
-	{
-	  out.popDepth();
-	  out.println("} finally {");
-	  out.println("  if (xa == null)");
-	  out.println("    _xa.commit();");
-	  out.println("}");
-	}
-	break;
-      
-      case REQUIRES_NEW:
-	{
-	  out.popDepth();
-	  out.println("} finally {");
-	  out.println("  _xa.endRequiresNew(xa);");
-	  out.println("}");
-	}
-	break;
-      }
-    }
-  }
-
   protected void generateInterceptors(JavaWriter out)
     throws IOException
   {
     if (_interceptors == null || _interceptors.size() == 0) {
-      generateSuper(out);
+      generateCall(out);
       return;
     }
 
     out.println("try {");
     out.pushDepth();
     
-    if (! void.class.equals(_method.getReturnType())) {
+    if (! void.class.equals(_apiMethod.getReturnType())) {
       out.print("return (");
-      printCastClass(out, _method.getReturnType());
+      printCastClass(out, _apiMethod.getReturnType());
       out.print(") ");
     }
     
@@ -465,7 +380,7 @@ public class BusinessMethodGenerator {
     out.print(_uniqueName + "_methodChain, ");
     out.print("null, ");
     out.print("new Object[] { ");
-    for (int i = 0; i < _method.getParameterTypes().length; i++) {
+    for (int i = 0; i < _apiMethod.getParameterTypes().length; i++) {
       out.print("a" + i + ", ");
     }
     out.println("}).proceed();");
@@ -519,15 +434,16 @@ public class BusinessMethodGenerator {
     }
   }
 
-  protected void generateSuper(JavaWriter out)
+  public void generateCall(JavaWriter out)
     throws IOException
   {
-    if (! void.class.equals(_method.getReturnType()))
+    if (! void.class.equals(_implMethod.getReturnType()))
       out.print("return ");
-    
-    out.print("super." + _method.getName() + "(");
 
-    Class []types = _method.getParameterTypes();
+    generateThis(out);
+    out.print("." + _implMethod.getName() + "(");
+
+    Class []types = _implMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
       if (i != 0)
 	out.print(", ");
@@ -536,5 +452,31 @@ public class BusinessMethodGenerator {
     }
     
     out.println(");");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generateThis(JavaWriter out)
+    throws IOException
+  {
+    out.print("super");
+  }
+
+  boolean matches(String name, Class[] parameterTypes)
+  {
+    if (! _apiMethod.getName().equals(name))
+      return false;
+    
+    Class []methodTypes = _apiMethod.getParameterTypes();
+    if (methodTypes.length != parameterTypes.length)
+      return false;
+    
+    for (int i = 0; i < parameterTypes.length; i++) {
+      if (! methodTypes[i].equals(parameterTypes[i]))
+        return false;
+    }
+    
+    return true;
   }
 }

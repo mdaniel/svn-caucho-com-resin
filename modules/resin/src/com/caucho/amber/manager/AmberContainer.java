@@ -36,9 +36,6 @@ import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.*;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
-import com.caucho.bytecode.JClassLoaderWrapper;
-import com.caucho.bytecode.ByteCodeClassMatcher;
-import com.caucho.bytecode.ByteCodeClassScanner;
 import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;
@@ -50,14 +47,11 @@ import com.caucho.webbeans.manager.*;
 import javax.sql.DataSource;
 import javax.persistence.*;
 import javax.persistence.spi.*;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Environment-based container.

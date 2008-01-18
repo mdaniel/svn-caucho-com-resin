@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.gen21;
 
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.CallChain;
 import com.caucho.util.L10N;

@@ -33,7 +33,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.ejb.webbeans.StatelessComponent;
+import com.caucho.ejb.session.StatelessComponent;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
@@ -296,52 +296,6 @@ public class StatelessServer extends AbstractServer {
     }
 
     return _localObject;
-
-    /*
-    Class local21 = getLocal21();
-    Class remote30 = null;
-
-    if (getLocalApiList().size() > 0)
-      remote30 = getLocalApiList().get(0);
-
-    Object obj = getClientLocalHome();
-
-    if (obj != null) {
-      if (businessInterface != null
-          && businessInterface.isAssignableFrom(obj.getClass())) {
-        return obj;
-      }
-
-      if (local21 != null
-          && local21.isAssignableFrom(obj.getClass())) {
-        return obj;
-      }
-    }
-
-    if (businessInterface == null)
-      businessInterface = remote30;
-
-    if (_localObject != null) {
-      obj = _localObject;
-
-      if (obj instanceof AbstractSessionObject) {
-        AbstractSessionObject sessionObject = (AbstractSessionObject) obj;
-
-        if (sessionObject.__caucho_getBusinessInterface() == businessInterface)
-          return obj;
-      }
-
-      // ejb/0ff4 TCK: ejb30/bb/session/stateless/sessioncontext/annotated/getInvokedBusinessInterfaceLocal1
-      // Creates a new instance to store the invoked business interface.
-      obj = getStatelessContext().createLocalObject();
-      setBusinessInterface(obj, businessInterface);
-
-      // XXX TCK: ejb30/bb/session/stateless/equals/annotated/testBeanotherEquals, needs QA
-      _localObject = (EJBLocalObject) obj;
-    }
-
-    return obj;
-    */
   }
 
   /**
@@ -360,22 +314,6 @@ public class StatelessServer extends AbstractServer {
   public Object getLocalObject(Class businessInterface)
   {
     return getClientObject(businessInterface);
-
-    /*
-    if (_localObject == null)
-      return null;
-
-    if (businessInterface == null)
-      return _localObject;
-
-    if (businessInterface.isAssignableFrom(_localObject.getClass())) {
-      setBusinessInterface(_localObject, businessInterface);
-
-      return _localObject;
-    }
-
-    return null;
-    */
   }
 
   /**
@@ -399,6 +337,12 @@ public class StatelessServer extends AbstractServer {
 
   @Override
   public AbstractContext getContext(Object key, boolean forceLoad)
+  {
+    return getStatelessContext();
+  }
+
+  @Override
+  public AbstractSessionContext getSessionContext()
   {
     return getStatelessContext();
   }

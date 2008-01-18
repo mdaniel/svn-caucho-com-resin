@@ -28,17 +28,11 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.xa.*;
-import com.caucho.naming.ObjectProxy;
 
-import java.util.ArrayList;
-
-import javax.ejb.EJBObject;
-import javax.ejb.Handle;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 import javax.xml.rpc.handler.MessageContext;
 
 /**
@@ -47,157 +41,22 @@ import javax.xml.rpc.handler.MessageContext;
 abstract public class AbstractSessionContext extends AbstractContext
   implements SessionContext
 {
-  protected final SessionServer _server;
-
-  private String _primaryKey;
-  private EJBObject _remote;
-
-  protected AbstractSessionContext(SessionServer server)
+  public SessionProvider getProvider(Class api)
   {
-    _server = server;
+    throw new IllegalStateException(L.l("'{0}' is an unknown interface",
+      api));
+  }
+
+  public <T> T getBusinessObject(Class<T> type)
+  {
+    return (T) getProvider(type).__caucho_createNew(new ConfigContext());
   }
 
   /**
-   * Returns the owning server.
+   * Obsolete jaxrpc
    */
-  public AbstractServer getServer()
-  {
-    return _server;
-  }
-
-  /**
-   * Returns the owning server.
-   */
-  public SessionServer getSessionServer()
-  {
-    return _server;
-  }
-
-  public EjbTransactionManager getTransactionManager()
-  {
-    return _server.getTransactionManager();
-  }
-
-  /**
-   * Returns the object's handle.
-   */
-  public Handle getHandle()
-  {
-    return getSessionServer().createHandle(this);
-  }
-
-  /**
-   * For session beans, returns the object.  For the home, return an
-   * illegal state exception.
-   */
-  public EJBObject getEJBObject()
-    throws IllegalStateException
-  {
-    EJBObject obj = getRemoteView();
-
-    if (obj == null)
-      throw new IllegalStateException("getEJBObject() is only allowed through EJB 2.1 interfaces");
-
-    return obj;
-  }
-
-  public String getPrimaryKey()
-  {
-    if (_primaryKey == null)
-      _primaryKey = getSessionServer().createSessionKey(this);
-
-    return _primaryKey;
-  }
-
-  public <T> T getBusinessObject(Class<T> businessInterface)
-    throws IllegalStateException
-  {
-    validateBusinessInterface(businessInterface);
-
-    Object obj = getSessionServer().getRemoteObject(businessInterface);
-
-    if (validateObject(obj, businessInterface))
-      return (T) obj;
-
-    obj = getSessionServer().getClientObject(businessInterface);
-
-    if (obj == null)
-      return null;
-
-    if (obj instanceof ObjectProxy) {
-      try {
-        obj = ((ObjectProxy) obj).createObject(null);
-      } catch (NamingException e) {
-        throw new IllegalStateException(e);
-      }
-    }
-
-    if (validateObject(obj, businessInterface))
-      return (T) obj;
-
-    //getSessionServer().setBusinessInterface(obj, businessInterface);
-
-    //return (T) validateObject(obj, businessInterface);
-
-    throw new IllegalStateException(L.l("Trying to get business object with invalid business interface: {0}",
-                                        businessInterface.getName()));
-  }
-
-  private boolean validateObject(Object obj, Class businessInterface)
-  {
-    if (obj == null)
-      return false;
-
-    if (businessInterface == null)
-      return true;
-
-    if (businessInterface.isAssignableFrom(obj.getClass()))
-      return true;
-
-    return false;
-  }
-
-  private void validateBusinessInterface(Class businessInterface)
-  {
-    if (businessInterface == null)
-      throw new IllegalStateException("SessionContext.getBusinessObject(null) is not allowed");
-
-    ArrayList<Class> apiList = getSessionServer().getRemoteApiList();
-
-    if (apiList.contains(businessInterface))
-      return;
-
-    apiList = getSessionServer().getLocalApiList();
-
-    if (apiList.contains(businessInterface))
-      return;
-
-    throw new IllegalStateException(L.l("Trying to get business object with invalid business interface: {0}",
-                                        businessInterface.getName()));
-  }
-
-  @Override
-  public Class getInvokedBusinessInterface()
-    throws IllegalStateException
-  {
-    return super.getInvokedBusinessInterface();
-  }
-
-  /**
-   * Looks up an object in the current JNDI context.
-   */
-  @Override
-  public Object lookup(String name)
-  {
-    // ejb/0ff2 TCK: ejb30/bb/session/stateful/sessioncontext/annotated/lookupIllegalArgumentException
-    if (name == null)
-      throw new IllegalArgumentException("Cannot call SessionContext.lookup(null)");
-
-    return super.lookup(name);
-  }
-  
   public MessageContext getMessageContext()
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

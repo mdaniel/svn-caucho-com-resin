@@ -29,9 +29,9 @@
 package com.caucho.ejb.ql;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.CmpField;
-import com.caucho.ejb.cfg.CmpRelation;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg21.CmpField;
+import com.caucho.ejb.cfg21.CmpRelation;
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.util.CharBuffer;
 
 /**

@@ -31,9 +31,9 @@ package com.caucho.ejb.ql;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.CmpField;
-import com.caucho.ejb.cfg.CmrRelation;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg21.CmpField;
+import com.caucho.ejb.cfg21.CmrRelation;
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.util.CharBuffer;
 
 import java.util.ArrayList;

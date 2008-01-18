@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.ql;
 
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.ejb.cfg.*;

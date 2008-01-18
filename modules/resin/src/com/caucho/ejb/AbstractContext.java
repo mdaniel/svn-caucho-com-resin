@@ -32,7 +32,6 @@ import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
 import javax.ejb.*;
 import javax.transaction.UserTransaction;

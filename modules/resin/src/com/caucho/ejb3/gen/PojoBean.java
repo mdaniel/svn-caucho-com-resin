@@ -84,7 +84,8 @@ public class PojoBean extends GenClass {
 	continue;
 
       int index = _businessMethods.size();
-      BusinessMethodGenerator bizMethod = new BusinessMethodGenerator(method, index);
+      BusinessMethodGenerator bizMethod
+	= new BusinessMethodGenerator(method, method, index);
 
       if (! bizMethod.isEnhanced()) {
 	_isPlain = false;
@@ -135,8 +136,9 @@ public class PojoBean extends GenClass {
 	generateConstructor(out, ctor);
     }
 
+    HashMap map = new HashMap();
     for (BusinessMethodGenerator method : _businessMethods) {
-      method.generate(out);
+      method.generate(out, map);
     }
 
     super.generateClassContent(out);

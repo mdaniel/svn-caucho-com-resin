@@ -28,6 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.ejb.cfg21.EjbEntityConfigProxy;
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 

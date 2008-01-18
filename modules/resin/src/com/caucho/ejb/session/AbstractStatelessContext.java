@@ -41,8 +41,7 @@ import javax.ejb.SessionContext;
 /**
  * Abstract base class for an session context
  */
-abstract public class AbstractStatelessContext extends AbstractContext
-  implements SessionContext
+abstract public class AbstractStatelessContext extends AbstractSessionContext
 {
   protected final StatelessServer _server;
 

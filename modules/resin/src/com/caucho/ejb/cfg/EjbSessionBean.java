@@ -29,21 +29,23 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.ejb.cfg21.EjbHomeView;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.gen.BeanAssembler;
+import com.caucho.ejb.gen.BeanGenerator;
+import com.caucho.ejb.gen21.BeanAssembler;
 import com.caucho.ejb.gen.SessionAssembler;
+import com.caucho.ejb.gen.SessionGenerator;
+import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.gen.StatelessAssembler;
+import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.session.StatefulServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.StatefulSessionBean;
-import com.caucho.management.j2ee.StatelessSessionBean;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -62,6 +64,8 @@ public class EjbSessionBean extends EjbBean {
   // Default is container managed transaction.
   private boolean _isContainerTransaction = true;
 
+  private SessionGenerator _sessionBean;
+  
   /**
    * Creates a new session bean configuration.
    */
@@ -92,6 +96,11 @@ public class EjbSessionBean extends EjbBean {
     if (ejbClass.isAbstract())
       throw error(L.l("'{0}' must not be abstract.  Session bean implementations must be fully implemented.", ejbClass.getName()));
 
+    if (ejbClass.isAnnotationPresent(Stateless.class))
+      _isStateless = true;
+    else if (ejbClass.isAnnotationPresent(Stateful.class))
+      _isStateless = false;
+    
     /*
       if (! ejbClass.isAssignableTo(SessionBean.class)
           && ! ejbClass.isAnnotationPresent(Stateless.class)
@@ -99,7 +108,7 @@ public class EjbSessionBean extends EjbBean {
         throw error(L.l("'{0}' must implement SessionBean or @Stateless or @Stateful.  Session beans must implement javax.ejb.SessionBean.", ejbClass.getName()));
     */
 
-    introspectSession();
+    // introspectSession();
   }
 
   /**
@@ -191,10 +200,26 @@ public class EjbSessionBean extends EjbBean {
       throw new LineConfigException(getLocation() + e.getMessage(), e);
     }
 
+    /*
     if (isStateless())
       J2EEManagedObject.register(new StatelessSessionBean(this));
     else
       J2EEManagedObject.register(new StatefulSessionBean(this));
+     */
+  }
+  
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  @Override
+  protected BeanGenerator createBeanGenerator()
+  {
+    if (_isStateless)
+      _sessionBean = new StatelessGenerator(getEJBName(), getEJBClassWrapper());
+    else
+      _sessionBean = new StatefulGenerator(getEJBName(), getEJBClassWrapper());
+    
+    return _sessionBean;
   }
 
   /**
@@ -393,7 +418,7 @@ public class EjbSessionBean extends EjbBean {
     if (localHome != null)
       server.setLocalHomeClass(loadClass(localHome.getName()));
 
-    ArrayList<ApiClass> localList = getLocalList();
+    ArrayList<ApiClass> localList = _sessionBean.getLocalApi();
     if (localList.size() > 0) {
       ArrayList<Class> classList = new ArrayList<Class>();
       for (ApiClass apiClass : localList) {

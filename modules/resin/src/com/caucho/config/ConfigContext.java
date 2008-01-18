@@ -32,7 +32,6 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Validator;
 import com.caucho.config.type.*;
 import com.caucho.config.attribute.*;
-import com.caucho.ejb.webbeans.SessionComponent;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.*;

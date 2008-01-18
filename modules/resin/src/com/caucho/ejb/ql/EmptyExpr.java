@@ -29,7 +29,7 @@
 package com.caucho.ejb.ql;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.util.CharBuffer;
 
 import java.lang.reflect.Method;

@@ -54,8 +54,8 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
    * Initializes and configures the session bean.
    */
   @PostConstruct
+  @Override
   public void init()
-    throws Throwable
   {
     EjbBean oldBean = getConfig().getBeanConfig(getEJBName());
 

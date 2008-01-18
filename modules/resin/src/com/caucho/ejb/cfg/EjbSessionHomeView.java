@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.ejb.cfg21.EjbHomeView;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;

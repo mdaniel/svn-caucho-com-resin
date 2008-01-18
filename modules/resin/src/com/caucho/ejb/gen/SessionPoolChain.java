@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ * 
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,13 +33,10 @@ import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
-import com.caucho.java.gen.MethodCallChain;
 import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
 
-import javax.ejb.Remove;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.lang.reflect.*;
 
 /**

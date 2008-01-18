@@ -30,7 +30,6 @@
 package com.caucho.ejb.gen21;
 
 import com.caucho.ejb.gen.*;
-import com.caucho.ejb.gen21.EntityPoolChain;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;

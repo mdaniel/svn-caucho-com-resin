@@ -29,6 +29,10 @@
 
 package com.caucho.ejb.gen21;
 
+import com.caucho.ejb.cfg21.EjbEntityBean;
+import com.caucho.ejb.cfg21.CmrRelation;
+import com.caucho.ejb.cfg21.CmrManyToOne;
+import com.caucho.ejb.cfg21.CmrManyToMany;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseClass;

@@ -905,7 +905,6 @@ abstract public class AbstractServer implements EnvironmentBean {
    * Initialize an instance
    */
   public void initInstance(Object instance, ConfigContext env)
-    throws Exception
   {
     /*
     if (scope != null)

@@ -34,10 +34,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 import com.caucho.java.gen.MethodCallChain;
-import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
 
-import javax.ejb.Remove;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.lang.reflect.*;

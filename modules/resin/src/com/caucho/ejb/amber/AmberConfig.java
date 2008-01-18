@@ -29,6 +29,10 @@
 
 package com.caucho.ejb.amber;
 
+import com.caucho.ejb.cfg21.EjbEntityBean;
+import com.caucho.ejb.cfg21.CmrRelation;
+import com.caucho.ejb.cfg21.CmpProperty;
+import com.caucho.ejb.cfg21.CmpField;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.CompositeId;
 import com.caucho.amber.field.Id;

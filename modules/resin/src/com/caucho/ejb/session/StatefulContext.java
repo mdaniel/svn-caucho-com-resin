@@ -31,17 +31,38 @@ package com.caucho.ejb.session;
 import javax.ejb.TimerService;
 
 import com.caucho.config.*;
+import com.caucho.ejb.*;
 import com.caucho.webbeans.context.*;
 
 /**
  * Abstract base class for an session context
  */
 abstract public class StatefulContext extends AbstractSessionContext {
-  protected StatefulContext(SessionServer server)
+  private transient StatefulServer _server;
+
+  public StatefulContext(StatefulServer server)
   {
-    super(server);
+    assert(server != null);
+
+    _server = server;
   }
 
+  /**
+   * Returns the server which owns this bean.
+   */
+  public StatefulServer getStatefulServer()
+  {
+    return _server;
+  }
+
+  /**
+   * Returns the server which owns this bean.
+   */
+  public AbstractServer getServer()
+  {
+    return _server;
+  }
+  
   /**
    * Returns the timer service.
    */

@@ -110,6 +110,11 @@ public class ConfigException
     return new ConfigException(loc(method) + msg, e);
   }
 
+  public static RuntimeException create(Method method, String msg)
+  {
+    return new ConfigException(loc(method) + msg);
+  }
+
   public static RuntimeException create(Throwable e)
   {
     if (e.getCause() != null
