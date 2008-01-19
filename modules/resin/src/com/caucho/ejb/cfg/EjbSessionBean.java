@@ -96,10 +96,25 @@ public class EjbSessionBean extends EjbBean {
     if (ejbClass.isAbstract())
       throw error(L.l("'{0}' must not be abstract.  Session bean implementations must be fully implemented.", ejbClass.getName()));
 
-    if (ejbClass.isAnnotationPresent(Stateless.class))
+    if (type.isAnnotationPresent(Stateless.class)) {
+      Stateless stateless = (Stateless) type.getAnnotation(Stateless.class);
+
+      if (getEJBName() == null && ! "".equals(stateless.name()))
+	setEJBName(stateless.name());
+      
       _isStateless = true;
-    else if (ejbClass.isAnnotationPresent(Stateful.class))
+    }
+    else if (ejbClass.isAnnotationPresent(Stateful.class)) {
+      Stateful stateful = (Stateful) type.getAnnotation(Stateful.class);
+
+      if (getEJBName() == null && ! "".equals(stateful.name()))
+	setEJBName(stateful.name());
+      
       _isStateless = false;
+    }
+
+    if (getEJBName() == null)
+      setEJBName(ejbClass.getSimpleName());
     
     /*
       if (! ejbClass.isAssignableTo(SessionBean.class)
@@ -401,7 +416,7 @@ public class EjbSessionBean extends EjbBean {
     if (remoteHome != null)
       server.setRemoteHomeClass(loadClass(remoteHome.getName()));
 
-    ArrayList<ApiClass> remoteList = getRemoteList();
+    ArrayList<ApiClass> remoteList = _sessionBean.getRemoteApi();
     if (remoteList.size() > 0) {
       ArrayList<Class> classList = new ArrayList<Class>();
       for (ApiClass apiClass : remoteList) {
@@ -454,8 +469,6 @@ public class EjbSessionBean extends EjbBean {
         // ejb/0fd0, ejb/0g03
         for (EnvEntry envEntry : getEnvEntries())
           envEntry.init();
-
-	server.init();
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {

@@ -93,6 +93,17 @@ public class StatefulServer extends SessionServer
     return _homeContext;
   }
 
+  /**
+   * Returns the JNDI proxy object to create instances of the
+   * local interface.
+   */
+  public Object getLocalProxy(Class api)
+  {
+    SessionProvider provider = getStatefulContext().getProvider(api);
+
+    return new StatefulProviderProxy(provider);
+  }
+
   protected ComponentImpl createSessionComponent(Class api)
   {
     SessionProvider provider = getStatefulContext().getProvider(api);

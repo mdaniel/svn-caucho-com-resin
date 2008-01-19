@@ -19,25 +19,40 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.resource.spi;
+package com.caucho.ejb.session;
 
-import javax.resource.ResourceException;
+import java.util.*;
+import com.caucho.naming.*;
 
 /**
- * Indicates that the ConnectionManager implements the lazy enlistable
- * connection implementation.
+ * Component for session beans
  */
-public interface LazyEnlistableConnectionManager {
+public class StatelessProviderProxy implements ObjectProxy
+{
+  private final StatelessProvider _provider;
+
+  public StatelessProviderProxy(StatelessProvider provider)
+  {
+    _provider = provider;
+  }
+
   /**
-   * Lazily associate a connection object with a managed connection.
+   * Creates the object from the proxy.
+   *
+   * @param env the calling environment
+   *
+   * @return the object named by the proxy.
    */
-  public void lazyEnlist(ManagedConnection mc)
-    throws ResourceException;
+  public Object createObject(Hashtable env)
+  {
+    return _provider.__caucho_get();
+  }
 }

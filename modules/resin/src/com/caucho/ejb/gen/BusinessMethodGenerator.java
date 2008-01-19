@@ -58,8 +58,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   private String _runAs;
 
   private XaCallChain _xa;
-  
-  private ArrayList<Class> _interceptors = new ArrayList<Class>();
+  private InterceptorCallChain _interceptor;
   
   public BusinessMethodGenerator(Method apiMethod,
 				 Method implMethod,
@@ -70,7 +69,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     _uniqueName = "_" + _apiMethod.getName() + "_" + index;
 
-    _xa = new XaCallChain(this);
+    _interceptor = new InterceptorCallChain(this);
+    _xa = new XaCallChain(_interceptor);
 
     introspect(apiMethod, implMethod);
   }
@@ -92,6 +92,14 @@ public class BusinessMethodGenerator implements EjbCallChain {
   }
 
   /**
+   * Returns the interceptor call chain
+   */
+  public InterceptorCallChain getInterceptor()
+  {
+    return _interceptor;
+  }
+
+  /**
    * Returns true if any interceptors enhance the business method
    */
   public boolean isEnhanced()
@@ -102,7 +110,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
       return true;
     else if (_xa.isEnhanced())
       return true;
-    else if (_interceptors != null && _interceptors.size() > 0)
+    else if (_interceptor.isEnhanced())
       return true;
 
     return false;
@@ -114,12 +122,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     introspectSecurity(cl);
     _xa.introspect(apiMethod, implMethod);
-    introspectInterceptors(cl);
-  }
-
-  public ArrayList<Class> getInterceptors()
-  {
-    return _interceptors;
+    _interceptor.introspect(apiMethod, implMethod);
   }
   
   /**
@@ -168,25 +171,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     if (denyAll != null)
       _roles = new String[0];
-  }
-
-  /**
-   * Introspects the @Interceptors annotation on the method
-   * and the class.
-   */
-  protected void introspectInterceptors(Class cl)
-  {
-    ArrayList<Class> interceptorList = new ArrayList<Class>();
-    
-    Interceptors interceptors
-      = _apiMethod.getAnnotation(Interceptors.class);
-
-    if (interceptors != null) {
-      for (Class interceptorClass : interceptors.value())
-	interceptorList.add(interceptorClass);
-    }
-
-    _interceptors = interceptorList;
   }
 
   public void generate(JavaWriter out, HashMap prologueMap)
@@ -252,76 +236,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
 
     _xa.generatePrologue(out, map);
-
-    if (_interceptors != null && _interceptors.size() > 0) {
-      generateInterceptorsPrologue(out);
-    }
-  }
-
-  protected void generateInterceptorsPrologue(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("private static java.lang.reflect.Method " + _uniqueName + "_method;");
-    out.println("private static java.lang.reflect.Method []" + _uniqueName + "_methodChain;");
-
-    Class cl = _apiMethod.getDeclaringClass();
-    
-    out.println();
-    out.println("static {");
-    out.pushDepth();
-    
-    out.println("try {");
-    out.pushDepth();
-    
-    out.print(_uniqueName + "_method = ");
-    generateGetMethod(out, _apiMethod);
-    out.println(";");
-
-    out.println(_uniqueName + "_methodChain = new java.lang.reflect.Method[] {");
-    out.pushDepth();
-    
-    for (Class iClass : _interceptors) {
-      Method method = findInterceptorMethod(iClass);
-      
-      generateGetMethod(out, method);
-      out.println(", ");
-    }
-    out.popDepth();
-    out.println("};");
-    
-    out.popDepth();
-    out.println("} catch (Exception e) {");
-    out.println("  throw new RuntimeException(e);");
-    out.println("}");
-    out.popDepth();
-    out.println("}");
-  }
-
-  protected Method findInterceptorMethod(Class cl)
-  {
-    for (Method method : cl.getMethods()) {
-      if (method.isAnnotationPresent(AroundInvoke.class))
-	return method;
-    }
-
-    throw new IllegalStateException(L.l("Can't find @AroundInvoke in '{0}'",
-					cl.getName()));
-  }
-
-  protected void generateGetMethod(JavaWriter out, Method method)
-    throws IOException
-  {
-    Class cl = method.getDeclaringClass();
-    
-    out.print(cl.getName() + ".class");
-    out.print(".getMethod(\"" + method.getName() + "\", new Class[] { ");
-    
-    for (Class type : method.getParameterTypes()) {
-      out.printClass(type);
-      out.print(".class, ");
-    }
-    out.print("})");
   }
 
   protected void generateSecurity(JavaWriter out)
@@ -358,66 +272,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
   }
 
-  protected void generateInterceptors(JavaWriter out)
-    throws IOException
-  {
-    if (_interceptors == null || _interceptors.size() == 0) {
-      generateCall(out);
-      return;
-    }
-
-    out.println("try {");
-    out.pushDepth();
-    
-    if (! void.class.equals(_apiMethod.getReturnType())) {
-      out.print("return (");
-      printCastClass(out, _apiMethod.getReturnType());
-      out.print(") ");
-    }
-    
-    out.print("new com.caucho.ejb3.gen.InvocationContextImpl(this, ");
-    out.print(_uniqueName + "_method, ");
-    out.print(_uniqueName + "_methodChain, ");
-    out.print("null, ");
-    out.print("new Object[] { ");
-    for (int i = 0; i < _apiMethod.getParameterTypes().length; i++) {
-      out.print("a" + i + ", ");
-    }
-    out.println("}).proceed();");
-    
-    out.popDepth();
-    out.println("} catch (RuntimeException e) {");
-    out.println("  throw e;");
-    out.println("} catch (Exception e) {");
-    out.println("  throw new RuntimeException(e);");
-    out.println("}");
-  }
-
-  protected void printCastClass(JavaWriter out, Class type)
-    throws IOException
-  {
-    if (! type.isPrimitive())
-      out.printClass(type);
-    else if (boolean.class.equals(type))
-      out.print("Boolean");
-    else if (char.class.equals(type))
-      out.print("Character");
-    else if (byte.class.equals(type))
-      out.print("Byte");
-    else if (short.class.equals(type))
-      out.print("Short");
-    else if (int.class.equals(type))
-      out.print("Integer");
-    else if (long.class.equals(type))
-      out.print("Long");
-    else if (float.class.equals(type))
-      out.print("Float");
-    else if (double.class.equals(type))
-      out.print("Double");
-    else
-      throw new IllegalStateException(type.getName());
-  }
-
   protected void generateThrows(JavaWriter out, Class []exnCls)
     throws IOException
   {
@@ -437,10 +291,17 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public void generateCall(JavaWriter out)
     throws IOException
   {
+    if (! void.class.equals(_implMethod.getReturnType())) {
+      out.printClass(_implMethod.getReturnType());
+      out.println(" result;");
+    }
+    
+    generatePreCall(out);
+    
     if (! void.class.equals(_implMethod.getReturnType()))
-      out.print("return ");
+      out.print("result = ");
 
-    generateThis(out);
+    generateSuper(out);
     out.print("." + _implMethod.getName() + "(");
 
     Class []types = _implMethod.getParameterTypes();
@@ -452,6 +313,28 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
     
     out.println(");");
+
+    generatePostCall(out);
+    
+    if (! void.class.equals(_implMethod.getReturnType()))
+      out.println("return result;");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generatePreCall(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generateSuper(JavaWriter out)
+    throws IOException
+  {
+    out.print("super");
   }
 
   /**
@@ -460,7 +343,15 @@ public class BusinessMethodGenerator implements EjbCallChain {
   protected void generateThis(JavaWriter out)
     throws IOException
   {
-    out.print("super");
+    out.print("this");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generatePostCall(JavaWriter out)
+    throws IOException
+  {
   }
 
   boolean matches(String name, Class[] parameterTypes)

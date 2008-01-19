@@ -88,45 +88,45 @@ public class EjbProtocolManager {
     _ejbContainer = ejbContainer;
     _loader = _ejbContainer.getClassLoader();
 
-     ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
+    ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
 
-     if (iiop != null)
-       _protocolMap.put("iiop", iiop);
-   }
+    if (iiop != null)
+      _protocolMap.put("iiop", iiop);
+  }
 
-   public void setJndiPrefix(String name)
-   {
-     _jndiPrefix = name;
-   }
+  public void setJndiPrefix(String name)
+  {
+    _jndiPrefix = name;
+  }
 
-   public String getJndiPrefix()
-   {
-     return _jndiPrefix;
-   }
+  public String getJndiPrefix()
+  {
+    return _jndiPrefix;
+  }
 
-   public void setLocalJndiPrefix(String name)
-   {
-     _localJndiPrefix = name;
-   }
+  public void setLocalJndiPrefix(String name)
+  {
+    _localJndiPrefix = name;
+  }
 
-   public String getLocalJndiPrefix()
-   {
-     return _localJndiPrefix;
-   }
+  public String getLocalJndiPrefix()
+  {
+    return _localJndiPrefix;
+  }
 
-   public void setRemoteJndiPrefix(String name)
-   {
-     _remoteJndiPrefix = name;
-   }
+  public void setRemoteJndiPrefix(String name)
+  {
+    _remoteJndiPrefix = name;
+  }
 
-   public String getRemoteJndiPrefix()
-   {
-     return _remoteJndiPrefix;
-   }
+  public String getRemoteJndiPrefix()
+  {
+    return _remoteJndiPrefix;
+  }
 
-   /**
-    * Returns the EJB server.
-    */
+  /**
+   * Returns the EJB server.
+   */
   public EjbContainer getEjbContainer()
   {
     return _ejbContainer;
@@ -240,7 +240,7 @@ public class EjbProtocolManager {
       bindDefaultJndi(_jndiPrefix, server);
 
       // backward compat
-      if (server.isLocal() && _localJndiPrefix != null) {
+      if (_localJndiPrefix != null) {
         Object localHome = server.getClientLocalHome();
 
 	Class api = null;
@@ -249,14 +249,21 @@ public class EjbProtocolManager {
 	
         if (localHome != null) {
 	  Jndi.bindDeep(jndiName, localHome);
-        } else {
-          api = server.getLocalApiList().get(0);
-	  bindServer(jndiName, server, api);
+        }
+	else {
+	  if (server.getLocalApiList().size() == 1) {
+	    api = server.getLocalApiList().get(0);
+	    bindServer(jndiName, server, api);
+	  }
+
+	  for (Class localApi : server.getLocalApiList()) {
+	    bindServer(jndiName + '#' + localApi.getName(), server, localApi);
+	  }
         }
       }
 
       // backward compat
-      if (server.isRemote() && _remoteJndiPrefix != null) {
+      if (_remoteJndiPrefix != null) {
         Object remoteHome = server.getEJBHome();
 
 	Class api = null;
@@ -266,8 +273,15 @@ public class EjbProtocolManager {
         if (server.getRemote21() != null) {
 	  Jndi.bindDeep(jndiName, remoteHome);
         } else {
-          api = server.getRemoteApiList().get(0);
-	  bindRemoteServer(jndiName, server, api);
+	  if (server.getLocalApiList().size() == 1) {
+	    api = server.getLocalApiList().get(0);
+	    bindRemoteServer(jndiName, server, api);
+	  }
+
+	  for (Class localApi : server.getLocalApiList()) {
+	    bindRemoteServer(jndiName + '#' + localApi.getName(),
+			     server, localApi);
+	  }
         }
       }
     } catch (RuntimeException e) {
@@ -319,7 +333,10 @@ public class EjbProtocolManager {
     try {
       Thread.currentThread().setContextClassLoader(_loader);
 
-      Jndi.bindDeep(jndiName, new ServerLocalProxy(server, api));
+      if (log.isLoggable(Level.FINER))
+	log.finer(server + " binding to " + jndiName);
+
+      Jndi.bindDeep(jndiName, server.getLocalProxy(api));
     }
     finally {
       Thread.currentThread().setContextClassLoader(loader);
@@ -509,4 +526,3 @@ public class EjbProtocolManager {
   {
   }
 }
-

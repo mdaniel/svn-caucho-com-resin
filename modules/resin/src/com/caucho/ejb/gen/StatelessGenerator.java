@@ -56,6 +56,11 @@ public class StatelessGenerator extends SessionGenerator {
     return new StatelessLocalView(this, api);
   }
 
+  protected View generateRemoteView(ApiClass api)
+  {
+    return new StatelessRemoteView(this, api);
+  }
+
   /**
    * Generates the stateful session bean
    */

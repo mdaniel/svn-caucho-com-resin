@@ -58,7 +58,7 @@ public class StatelessServer extends SessionServer {
   private EJBLocalObject _localObject21;
 
   // EJB 3.0
-  private Object _remoteObject;
+  private StatelessProvider _remoteProvider;
   private Object _localObject;
 
   /**
@@ -77,24 +77,23 @@ public class StatelessServer extends SessionServer {
   {
     return "stateless:";
   }
+
+  /**
+   * Returns the JNDI proxy object to create instances of the
+   * local interface.
+   */
+  public Object getLocalProxy(Class api)
+  {
+    StatelessProvider provider = getStatelessContext().getProvider(api);
+
+    return new StatelessProviderProxy(provider);
+  }
   
   protected ComponentImpl createSessionComponent(Class api)
   {
     StatelessProvider provider = getStatelessContext().getProvider(api);
 
     return new StatelessComponent(provider);
-  }
-
-  @Override
-  public boolean isLocal()
-  {
-    return super.isLocal() || _localObject != null || _localObject21 != null;
-  }
-
-  @Override
-  public boolean isRemote()
-  {
-    return super.isRemote() || _remoteObject != null || _remoteObject21 != null;
   }
 
   /**
@@ -117,8 +116,10 @@ public class StatelessServer extends SessionServer {
     if (home != null)
       return home;
 
+    /*
     if (_remoteObject != null)
       return _remoteObject21;
+    */
 
     return null;
   }
@@ -128,27 +129,25 @@ public class StatelessServer extends SessionServer {
    */
   public Object getRemoteObject()
   {
-    return _remoteObject;
+    if (_remoteProvider != null)
+      return _remoteProvider.__caucho_get();
+    else
+      return null;
   }
 
   /**
    * Returns the 3.0 remote stub for the container
    */
-  public Object getRemoteObject(Class businessInterface)
+  public Object getRemoteObject(Class api)
   {
-    if (_remoteObject == null)
+    StatelessProvider provider = getStatelessContext().getProvider(api);
+    
+    if (provider != null)
+      return provider.__caucho_get();
+    else {
+      log.fine(this + " unknown api " + api.getName());
       return null;
-
-    if (businessInterface == null)
-      return _remoteObject;
-
-    if (businessInterface.isAssignableFrom(_remoteObject.getClass())) {
-      setBusinessInterface(_remoteObject, businessInterface);
-
-      return _remoteObject;
     }
-
-    return null;
   }
 
   /**
@@ -217,6 +216,21 @@ public class StatelessServer extends SessionServer {
     return getClientObject(businessInterface);
   }
 
+  
+  public void init()
+    throws Exception
+  {
+    super.init();
+
+    ArrayList<Class> remoteApiList = getRemoteApiList();
+
+    if (remoteApiList != null && remoteApiList.size() > 0) {
+      Class api = remoteApiList.get(0);
+      
+      _remoteProvider = getStatelessContext().getProvider(api);
+    }
+  }
+  
   /**
    * Finds the remote bean by its key.
    *

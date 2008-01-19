@@ -50,17 +50,46 @@ abstract public class SessionGenerator extends BeanGenerator {
   private ArrayList<ApiClass> _localApi
     = new ArrayList<ApiClass>();
 
+  private ArrayList<ApiClass> _remoteApi
+    = new ArrayList<ApiClass>();
+
   private ArrayList<View> _views = new ArrayList<View>();
   
   protected String _contextClassName = "dummy";
 
   public SessionGenerator(String ejbName, ApiClass ejbClass)
   {
-    super("_ejb." + ejbName.replace('/', '.')
-	  + "." + ejbClass.getSimpleName() + "__EJB",
+    super(toFullClassName(ejbName, ejbClass.getSimpleName()),
           ejbClass);
     
     _contextClassName = "dummy";
+  }
+
+  private static String toFullClassName(String ejbName, String className)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("_ejb.");
+
+    if (! Character.isJavaIdentifierStart(ejbName.charAt(0)))
+      sb.append('_');
+
+    for (int i = 0; i < ejbName.length(); i++) {
+      char ch = ejbName.charAt(i);
+
+      if (ch == '/')
+	sb.append('.');
+      else if (Character.isJavaIdentifierPart(ch))
+	sb.append(ch);
+      else
+	sb.append('_');
+    }
+
+    sb.append(".");
+    sb.append(className);
+    sb.append("__EJB");
+
+    return sb.toString();
   }
 
   public boolean isStateless()
@@ -74,6 +103,14 @@ abstract public class SessionGenerator extends BeanGenerator {
   public ArrayList<ApiClass> getLocalApi()
   {
     return _localApi;
+  }
+
+  /**
+   * Returns the remote API list.
+   */
+  public ArrayList<ApiClass> getRemoteApi()
+  {
+    return _remoteApi;
   }
 
   /**
@@ -93,6 +130,9 @@ abstract public class SessionGenerator extends BeanGenerator {
 
     if (_localApi.size() == 0)
       _localApi = introspectLocalApi();
+
+    if (_remoteApi.size() == 0)
+      _remoteApi = introspectRemoteApi();
   }
 
   /**
@@ -105,9 +145,26 @@ abstract public class SessionGenerator extends BeanGenerator {
 
       _views.add(view);
     }
+    
+    for (ApiClass api : _remoteApi) {
+      View view = generateRemoteView(api);
+
+      _views.add(view);
+    }
   }
 
+  /**
+   * Generates the local view for the given class
+   */
   protected View generateLocalView(ApiClass api)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Generates the remote view for the given class
+   */
+  protected View generateRemoteView(ApiClass api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -134,7 +191,11 @@ abstract public class SessionGenerator extends BeanGenerator {
 	continue;
       if (api.equals(java.io.Externalizable.class))
 	continue;
+      if (api.equals(javax.ejb.SessionBean.class))
+	continue;
       if (api.getName().startsWith("javax.ejb."))
+	continue;
+      if (api.isAnnotationPresent(Remote.class))
 	continue;
 
       if (singleApi != null) {
@@ -156,6 +217,25 @@ abstract public class SessionGenerator extends BeanGenerator {
     // XXX: only for stateful?
     apiList.add(getEjbClass());
 
+    return apiList;
+  }
+
+  /**
+   * Scans for the @Remote interfaces
+   */
+  private ArrayList<ApiClass> introspectRemoteApi()
+  {
+    ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
+
+    Class []apiClasses = getEjbClass().getInterfaces();
+    for (Class api : apiClasses) {
+      if (api.isAnnotationPresent(Remote.class))
+	apiList.add(new ApiClass(api));
+    }
+
+    if (apiList.size() > 0)
+      return apiList;
+    
     return apiList;
   }
 

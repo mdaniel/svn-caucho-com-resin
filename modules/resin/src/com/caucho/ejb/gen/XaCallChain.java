@@ -114,6 +114,8 @@ public class XaCallChain implements EjbCallChain {
     out.println();
     out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
     out.println("  = new com.caucho.ejb3.xa.XAManager();");
+    
+    _next.generatePrologue(out, map);
   }
 
   /**

@@ -19,25 +19,42 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.resource.spi;
+package com.caucho.ejb.gen;
 
-import javax.resource.ResourceException;
+import com.caucho.config.*;
+import com.caucho.ejb.cfg.*;
+import com.caucho.java.JavaWriter;
+import com.caucho.util.L10N;
+
+import javax.ejb.*;
+import java.io.IOException;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
- * Indicates that the ConnectionManager implements the lazy enlistable
- * connection implementation.
+ * Represents a public interface to a bean, e.g. a local stateless view
  */
-public interface LazyEnlistableConnectionManager {
-  /**
-   * Lazily associate a connection object with a managed connection.
-   */
-  public void lazyEnlist(ManagedConnection mc)
-    throws ResourceException;
+public class StatelessRemoteView extends StatelessLocalView {
+  private static final L10N L = new L10N(StatelessRemoteView.class);
+
+  private ArrayList<StatelessLocalMethod> _businessMethods
+    = new ArrayList<StatelessLocalMethod>();
+
+  public StatelessRemoteView(BeanGenerator bean, ApiClass api)
+  {
+    super(bean, api);
+  }
+
+  protected String getViewClassName()
+  {
+    return getApi().getSimpleName() + "__EJBRemote";
+  }
 }

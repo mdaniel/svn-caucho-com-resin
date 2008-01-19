@@ -40,8 +40,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,6 +60,9 @@ public class HessianProtocol extends ProtocolContainer
 
   private HashMap<AbstractServer,Class> _objectSkeletonMap
     = new HashMap<AbstractServer,Class>();
+
+  private WeakHashMap<Class,Class> _skeletonMap
+    = new WeakHashMap<Class,Class>();
 
   private HessianRemoteResolver _resolver;
 
@@ -181,26 +183,13 @@ public class HessianProtocol extends ProtocolContainer
       return new MessageSkeleton((MessageServer) server);
     }
     else {
-      // ejb/02l0
-      Object remote = server.getRemoteObject21();
+      Class api = server.getRemoteObjectClass();
 
-      if (remote == null)
-        remote = server.getRemoteObject();
+      if (api != null) {
+	Object remote = server.getRemoteObject();
+        Class skeletonClass = getSkeletonClass(api);
 
-      if (remote instanceof EJBHome) {
-        Class homeSkelClass = getHomeSkelClass(server);
-
-        HessianSkeleton skel = (HessianSkeleton) homeSkelClass.newInstance();
-        skel._setServer(server);
-        skel._setResolver(_resolver);
-        skel._setObject(remote);
-
-        return skel;
-      }
-      else if (remote instanceof EJBObject) {
-        Class skelClass = getObjectSkelClass(server);
-
-        HessianSkeleton skel = (HessianSkeleton) skelClass.newInstance();
+        HessianSkeleton skel = (HessianSkeleton) skeletonClass.newInstance();
         skel._setServer(server);
         skel._setResolver(_resolver);
         skel._setObject(remote);
@@ -252,5 +241,23 @@ public class HessianProtocol extends ProtocolContainer
     _objectSkeletonMap.put(server, objectSkelClass);
 
     return objectSkelClass;
+  }
+
+  /**
+   * Returns the class for home skeletons.
+   */
+  protected Class getSkeletonClass(Class api)
+    throws Exception
+  {
+    Class skeletonClass = (Class) _skeletonMap.get(api);
+
+    if (skeletonClass != null)
+      return skeletonClass;
+
+    skeletonClass = HessianSkeletonGenerator.generate(api, getWorkPath());
+
+    _skeletonMap.put(api, skeletonClass);
+
+    return skeletonClass;
   }
 }

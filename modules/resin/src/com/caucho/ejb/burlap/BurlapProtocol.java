@@ -43,6 +43,7 @@ import javax.ejb.EJBObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import java.util.*;
 /**
  * Server containing all the EJBs for a given configuration.
  *
@@ -63,6 +64,9 @@ public class BurlapProtocol extends ProtocolContainer {
 
   private HashMap<String,AbstractServer> _serverMap =
     new HashMap<String,AbstractServer>();
+
+  private WeakHashMap<Class,Class> _skeletonMap
+    = new WeakHashMap<Class,Class>();
 
   private HessianRemoteResolver _resolver;
 
@@ -132,8 +136,11 @@ public class BurlapProtocol extends ProtocolContainer {
 
       if (children != null && children.size() > 0)
         return new NameContextSkeleton(this, serverId);
-      else
+      else {
+	log.fine(this + " can't find server for " + serverId);
+	
         return null; // XXX: should return error skeleton
+      }
       /*
         ArrayList children = getServerContainer().getRemoteChildren(serverId);
 
@@ -161,12 +168,20 @@ public class BurlapProtocol extends ProtocolContainer {
       return new MessageSkeleton((MessageServer) server);
     }
     else {
-      // ejb/0200
-      Object remote = server.getRemoteObject21();
+      Class api = server.getRemoteObjectClass();
 
-      if (remote == null)
-        remote = server.getRemoteObject();
+      if (api != null) {
+	Object remote = server.getRemoteObject();
+        Class skeletonClass = getSkeletonClass(api);
 
+        BurlapSkeleton skel = (BurlapSkeleton) skeletonClass.newInstance();
+        skel._setServer(server);
+        skel._setResolver(_resolver);
+        skel._setObject(remote);
+
+        return skel;
+      }
+      /*
       if (remote instanceof EJBHome) {
         Class homeSkelClass = getHomeSkelClass(server);
 
@@ -187,6 +202,17 @@ public class BurlapProtocol extends ProtocolContainer {
 
         return skel;
       }
+      else {
+        Class skelClass = getHomeSkelClass(server);
+
+        BurlapSkeleton skel = (BurlapSkeleton) skelClass.newInstance();
+        skel._setServer(server);
+        skel._setResolver(_resolver);
+        skel._setObject(remote);
+
+        return skel;
+      }
+      */
     }
 
     return null;
@@ -241,5 +267,23 @@ public class BurlapProtocol extends ProtocolContainer {
     _objectSkeletonMap.put(server, objectSkelClass);
 
     return objectSkelClass;
+  }
+
+  /**
+   * Returns the class for home skeletons.
+   */
+  protected Class getSkeletonClass(Class api)
+    throws Exception
+  {
+    Class skeletonClass = (Class) _skeletonMap.get(api);
+
+    if (skeletonClass != null)
+      return skeletonClass;
+
+    skeletonClass = BurlapSkeletonGenerator.generate(api, getWorkPath());
+
+    _skeletonMap.put(api, skeletonClass);
+
+    return skeletonClass;
   }
 }

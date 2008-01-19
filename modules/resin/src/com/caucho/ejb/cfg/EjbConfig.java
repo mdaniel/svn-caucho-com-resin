@@ -381,7 +381,7 @@ public class EjbConfig {
 	EjbStatelessBean bean = new EjbStatelessBean(this, "resin-ejb");
 	bean.setEJBClass(type);
 	bean.setAllowPOJO(true);
-	
+
 	setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.Stateful.class)) {

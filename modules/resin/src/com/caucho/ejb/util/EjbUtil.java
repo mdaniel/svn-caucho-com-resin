@@ -61,6 +61,8 @@ public class EjbUtil {
     if (method == null)
       throw firstException;
 
+    method.setAccessible(true);
+    
     return method;
   }
 }

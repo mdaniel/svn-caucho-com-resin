@@ -80,11 +80,36 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
-  protected void generateThis(JavaWriter out)
+  protected void generatePreCall(JavaWriter out)
     throws IOException
   {
     out.println(_ejbClass.getName() + " bean = _cxt._ejb_begin();");
-    
+  }
+  
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generateThis(JavaWriter out)
+    throws IOException
+  {
     out.print("bean");
+  }
+  
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generateSuper(JavaWriter out)
+    throws IOException
+  {
+    out.print("bean");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generatePostCall(JavaWriter out)
+    throws IOException
+  {
+    out.println("_cxt._ejb_free(bean);");
   }
 }

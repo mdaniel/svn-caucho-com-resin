@@ -776,6 +776,11 @@ abstract public class AbstractServer implements EnvironmentBean {
     throw new UnsupportedOperationException("3.0 local interface not found");
   }
 
+  public Object getLocalProxy(Class api)
+  {
+    throw new UnsupportedOperationException("3.0 local interface not found");
+  }
+
   /**
    * Returns the 3.0 local stub for the container
    */
@@ -950,8 +955,6 @@ abstract public class AbstractServer implements EnvironmentBean {
     if (! _lifecycle.toActive())
       return false;
 
-    log.config(this + " starting");
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -964,6 +967,8 @@ abstract public class AbstractServer implements EnvironmentBean {
         _serverProgram.configure(this);
       
       bindInjection();
+      
+      log.config(this + " active");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

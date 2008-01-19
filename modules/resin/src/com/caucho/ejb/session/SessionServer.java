@@ -98,13 +98,13 @@ abstract public class SessionServer extends AbstractServer
 
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();
-
-      log.config(this + " starting");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
 
     registerWebBeans();
+
+    log.fine(this + " initialized");
   }
 
   private void registerWebBeans()
@@ -135,7 +135,7 @@ abstract public class SessionServer extends AbstractServer
       }
     }
   }
-
+  
   abstract protected ComponentImpl createSessionComponent(Class api);
 
   /**

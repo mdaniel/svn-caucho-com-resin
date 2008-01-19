@@ -69,16 +69,29 @@ public class StatefulLocalMethod extends BusinessMethodGenerator
     return true;
   }
 
+  protected void generatePreCall(JavaWriter out)
+    throws IOException
+  {
+    // XXX: need correct exception
+    out.println("if (_bean == null) throw new EJBException();");
+    out.println();
+  }
+
   /**
    * Generates the underlying bean instance
    */
   protected void generateThis(JavaWriter out)
     throws IOException
   {
-    // XXX: need correct exception
-    out.println("if (_bean == null) throw new EJBException();");
+    out.print("_bean");
+  }
 
-    out.println();
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generateSuper(JavaWriter out)
+    throws IOException
+  {
     out.print("_bean");
   }
 }
