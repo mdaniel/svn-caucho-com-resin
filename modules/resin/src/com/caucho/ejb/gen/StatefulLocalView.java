@@ -47,8 +47,8 @@ public class StatefulLocalView extends StatefulView {
 
   private StatefulGenerator _sessionBean;
   
-  private ArrayList<StatefulLocalMethod> _businessMethods
-    = new ArrayList<StatefulLocalMethod>();
+  private ArrayList<StatefulMethod> _businessMethods
+    = new ArrayList<StatefulMethod>();
 
   public StatefulLocalView(StatefulGenerator bean, ApiClass api)
   {
@@ -85,7 +85,7 @@ public class StatefulLocalView extends StatefulView {
 
       int index = _businessMethods.size();
       
-      StatefulLocalMethod bizMethod = createMethod(apiMethod, index);
+      StatefulMethod bizMethod = createMethod(apiMethod, index);
       
       if (bizMethod != null)
 	_businessMethods.add(bizMethod);
@@ -127,7 +127,7 @@ public class StatefulLocalView extends StatefulView {
     generateClassContent(out);
 
     HashMap map = new HashMap();
-    for (StatefulLocalMethod method : _businessMethods) {
+    for (StatefulMethod method : _businessMethods) {
       method.generate(out, map);
     }
     
@@ -180,7 +180,7 @@ public class StatefulLocalView extends StatefulView {
     out.println();
   }
 
-  protected StatefulLocalMethod createMethod(ApiMethod apiMethod, int index)
+  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
   {
     ApiMethod implMethod = findImplMethod(apiMethod);
 
@@ -190,8 +190,8 @@ public class StatefulLocalView extends StatefulView {
 				       getEjbClass().getName()));
     }
 
-    StatefulLocalMethod bizMethod
-      = new StatefulLocalMethod(apiMethod.getMethod(),
+    StatefulMethod bizMethod
+      = new StatefulMethod(apiMethod.getMethod(),
 				implMethod.getMethod(),
 				index);
 

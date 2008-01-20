@@ -155,6 +155,7 @@ public class StatefulServer extends SessionServer
   /**
    * Returns the remote object.
    */
+  @Override
   public Object getRemoteObject(Object key)
   {
     StatefulObject remote = null;

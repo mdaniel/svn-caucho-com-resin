@@ -132,11 +132,6 @@ abstract public class StatefulHome extends AbstractEJBHome
   {
     return new HomeSkeletonWrapper(getHomeHandle());
   }
-
-  protected SessionObject21 _caucho_getStatelessObject()
-  {
-    return null;
-  }
 }
 
 

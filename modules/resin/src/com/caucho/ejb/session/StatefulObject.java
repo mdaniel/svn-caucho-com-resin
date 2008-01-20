@@ -46,7 +46,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Abstract base class for a 2.1 session object
+ * Abstract base class for a stateful session object
  */
 abstract public class StatefulObject extends AbstractEJBObject
   implements Serializable

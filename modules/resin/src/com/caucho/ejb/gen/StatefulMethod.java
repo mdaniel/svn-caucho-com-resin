@@ -42,9 +42,9 @@ import javax.interceptor.*;
 /**
  * Represents a stateful local business method
  */
-public class StatefulLocalMethod extends BusinessMethodGenerator
+public class StatefulMethod extends BusinessMethodGenerator
 {
-  public StatefulLocalMethod(Method apiMethod, Method implMethod, int index)
+  public StatefulMethod(Method apiMethod, Method implMethod, int index)
   {
     super(apiMethod, implMethod, index);
   }

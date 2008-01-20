@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.session;
 
-import javax.ejb.TimerService;
+import javax.ejb.*;
 
 import com.caucho.config.*;
 import com.caucho.ejb.*;
@@ -79,6 +79,14 @@ abstract public class StatelessContext extends AbstractSessionContext {
   {
     throw new IllegalStateException(L.l("'{0}' is an unknown interface",
       api));
+  }
+  
+  /**
+   * Returns the EJBObject stub for the container.
+   */
+  public EJBObject getEJBObject()
+  {
+    return (EJBObject) getStatelessServer().getRemoteObject();
   }
 
   /**

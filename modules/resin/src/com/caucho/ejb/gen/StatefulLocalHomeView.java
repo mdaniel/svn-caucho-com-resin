@@ -56,7 +56,7 @@ public class StatefulLocalHomeView extends StatefulLocalView {
   }
 
   @Override
-  protected StatefulLocalMethod createMethod(ApiMethod apiMethod, int index)
+  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
   {
     if (apiMethod.getName().equals("create")) {
       ApiMethod implMethod = getEjbClass().getMethod("ejbCreate",
@@ -105,6 +105,6 @@ public class StatefulLocalHomeView extends StatefulLocalView {
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    out.println("  extends SessionHome");
+    out.println("  extends StatefulHome");
   }
 }

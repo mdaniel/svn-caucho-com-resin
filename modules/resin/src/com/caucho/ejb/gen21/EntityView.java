@@ -42,7 +42,7 @@ import java.io.IOException;
  * Generates the skeleton for a session view.
  */
 public class EntityView extends ViewClass {
-  private static L10N L = new L10N(SessionView.class);
+  private static L10N L = new L10N(EntityView.class);
 
   private ApiClass _remoteClass;
   private String _prefix;

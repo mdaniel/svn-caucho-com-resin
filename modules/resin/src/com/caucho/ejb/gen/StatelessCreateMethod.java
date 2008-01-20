@@ -31,67 +31,78 @@ package com.caucho.ejb.gen;
 
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
-import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+import javax.annotation.security.*;
+import javax.ejb.*;
+import javax.interceptor.*;
 
 /**
- * Generates the skeleton for the create method.
+ * Represents a stateless create business method
  */
-public class StatelessCreateMethod extends BaseMethod {
-  private static final L10N L = new L10N(StatelessCreateMethod.class);
-
-  private ApiMethod _method;
-  private String _contextClassName;
-  private String _prefix;
+public class StatelessCreateMethod extends BusinessMethodGenerator
+{
+  private StatelessGenerator _bean;
+  private View _objectView;
   
-  public StatelessCreateMethod(ApiMethod method,
-			       String contextClassName,
-			       String prefix)
+  public StatelessCreateMethod(StatelessGenerator bean,
+			      View objectView,
+			      Method apiMethod,
+			      Method implMethod,
+			      int index)
   {
-    super(method.getMethod());
+    super(apiMethod, implMethod, index);
 
-    _method = method;
-    _contextClassName = contextClassName;
-    _prefix = prefix;
+    _bean = bean;
+    _objectView = objectView;
+
+    if (_objectView == null)
+      throw new NullPointerException();
   }
 
-  /**
-   * Gets the parameter types
-   */
-  public Class []getParameterTypes()
+  @Override
+  public boolean isEnhanced()
   {
-    return _method.getParameterTypes();
+    return true;
   }
 
-  /**
-   * Gets the return type.
-   */
-  public Class getReturnType()
-  {
-    return _method.getReturnType();
-  }
-
-  /**
-   * Prints the create method
-   *
-   * @param method the create method
-   */
-  public void generateCall(JavaWriter out, String []args)
+  protected void generateContent(JavaWriter out)
     throws IOException
   {
-    out.println(_contextClassName + " cxt = _context;");
-    
-    out.println();
+    out.println("return  new " + _objectView.getViewClassName() + "(_context);");
+  }
 
-    Class retType = getReturnType();
-    if ("RemoteHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getEJBObject();");
-    else if ("LocalHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getEJBLocalObject();");
-    else
-      throw new IOException(L.l("trying to create unknown type {0}",
-				_prefix));
+  protected void generatePreCall(JavaWriter out)
+    throws IOException
+  {
+    out.println("return  new " + _objectView.getViewClassName() + "(_context);");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generateThis(JavaWriter out)
+    throws IOException
+  {
+    out.print("bean");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generateSuper(JavaWriter out)
+    throws IOException
+  {
+    out.print("bean");
+  }
+
+  @Override
+  protected void generatePostCall(JavaWriter out)
+    throws IOException
+  {
+    out.println("return remote;");
   }
 }

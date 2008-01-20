@@ -43,7 +43,7 @@ import javax.interceptor.*;
 /**
  * Represents a stateful create business method
  */
-public class StatefulCreateMethod extends StatefulLocalMethod
+public class StatefulCreateMethod extends StatefulMethod
 {
   private StatefulGenerator _bean;
   private View _objectView;

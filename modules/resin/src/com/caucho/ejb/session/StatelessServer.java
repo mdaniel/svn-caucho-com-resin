@@ -141,13 +141,28 @@ public class StatelessServer extends SessionServer {
   public Object getRemoteObject(Class api)
   {
     StatelessProvider provider = getStatelessContext().getProvider(api);
-    
-    if (provider != null)
-      return provider.__caucho_get();
+
+    if (provider != null) {
+      Object result = provider.__caucho_get();
+      
+      return result;
+    }
     else {
       log.fine(this + " unknown api " + api.getName());
       return null;
     }
+  }
+
+  /**
+   * Returns the remote object.
+   */
+  @Override
+  public Object getRemoteObject(Object key)
+  {
+    if (_remoteProvider != null)
+      return _remoteProvider.__caucho_get();
+    else
+      return null;
   }
 
   /**

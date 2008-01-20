@@ -59,8 +59,11 @@ public class EjbStatelessCreateMethod extends EjbMethod {
    */
   public BaseMethod assemble(BeanAssembler assembler, String fullClassName)
   {
+    /*
     return new StatelessCreateMethod(getApiMethod(),
 				     fullClassName,
 				     getViewPrefix());
+    */
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

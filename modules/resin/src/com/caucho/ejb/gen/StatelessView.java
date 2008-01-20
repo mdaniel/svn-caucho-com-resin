@@ -40,40 +40,42 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * Represents a public interface to a stateful bean, e.g. a stateful view
+ * Represents any stateless view.
  */
-abstract public class StatefulView extends View {
-  private static final L10N L = new L10N(StatefulView.class);
+public class StatelessView extends View {
+  private static final L10N L = new L10N(StatelessView.class);
 
-  private StatefulGenerator _sessionBean;
-  
-  private ArrayList<StatefulMethod> _businessMethods
-    = new ArrayList<StatefulMethod>();
+  private StatelessGenerator _statelessBean;
 
-  public StatefulView(StatefulGenerator bean, ApiClass api)
+  private ArrayList<BusinessMethodGenerator> _businessMethods
+    = new ArrayList<BusinessMethodGenerator>();
+
+  public StatelessView(StatelessGenerator bean, ApiClass api)
   {
     super(bean, api);
 
-    _sessionBean = bean;
+    _statelessBean = bean;
   }
 
-  public StatefulGenerator getSessionBean()
+  public StatelessGenerator getStatelessBean()
   {
-    return _sessionBean;
+    return _statelessBean;
   }
 
   public String getContextClassName()
   {
-    return getSessionBean().getClassName();
+    return getStatelessBean().getClassName();
   }
 
-  abstract protected String getViewClassName();
+  protected String getViewClassName()
+  {
+    return getApi().getSimpleName() + "__EJBLocal";
+  }
 
   /**
    * Introspects the APIs methods, producing a business method for
    * each.
    */
-  @Override
   public void introspect()
   {
     ApiClass implClass = getEjbClass();
@@ -87,16 +89,11 @@ abstract public class StatefulView extends View {
 
       int index = _businessMethods.size();
       
-      StatefulMethod bizMethod = createMethod(apiMethod, index);
+      BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
       
       if (bizMethod != null)
 	_businessMethods.add(bizMethod);
     }
-  }
-
-  protected ApiMethod findImplMethod(ApiMethod apiMethod)
-  {
-    return getEjbClass().getMethod(apiMethod);
   }
 
   /**
@@ -107,7 +104,7 @@ abstract public class StatefulView extends View {
   {
     out.println();
     out.println("if (" + var + " == " + getApi().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "(getStatefulServer());");
+    out.println("  return new " + getViewClassName() + "(this);");
   }
 
   /**
@@ -118,18 +115,28 @@ abstract public class StatefulView extends View {
   {
     out.println();
     out.println("public static class " + getViewClassName());
-
     generateExtends(out);
-    
     out.print("  implements " + getApi().getName());
-    out.println(", SessionProvider");
+    out.println(", StatelessProvider");
     out.println("{");
     out.pushDepth();
+    
+    out.println("private " + getBean().getClassName() + " _context;");
 
-    generateClassContent(out);
+    out.println();
+    out.println(getViewClassName() + "(" + getBean().getClassName() + " context)");
+    out.println("{");
+    generateSuper(out, "context.getStatelessServer()");
+    out.println("  _context = context;");
+    out.println("}");
+
+    out.println("public Object __caucho_get()");
+    out.println("{");
+    out.println("  return this;");
+    out.println("}");
 
     HashMap map = new HashMap();
-    for (StatefulMethod method : _businessMethods) {
+    for (BusinessMethodGenerator method : _businessMethods) {
       method.generate(out, map);
     }
     
@@ -137,72 +144,14 @@ abstract public class StatefulView extends View {
     out.println("}");
   }
 
-  protected void generateClassContent(JavaWriter out)
+  protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    out.println("private StatefulContext _context;");
-    out.println("private StatefulServer _server;");
-    out.println("private " + getEjbClass().getName() + " _bean;");
-
-    out.println();
-    out.println(getViewClassName() + "(StatefulServer server)");
-    out.println("{");
-    out.pushDepth();
-    
-    generateSuper(out, "server");
-    
-    out.println("_server = server;");
-    
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public " + getViewClassName() + "(ConfigContext env)");
-    out.println("{");
-    generateSuper(out, "null");
-    out.println("  _bean = new " + getEjbClass().getName() + "();");
-    out.println("}");
-
-    generateSessionProvider(out);
-
-    out.println();
-    out.println("public " + getViewClassName()
-		+ "(StatefulServer server, "
-		+ getEjbClass().getName() + " bean)");
-    out.println("{");
-    generateSuper(out, "server");
-    out.println("  _server = server;");
-    out.println("  _bean = bean;");
-    out.println("}");
-
-    out.println();
-    out.println("public StatefulServer getStatefulServer()");
-    out.println("{");
-    out.println("  return _server;");
-    out.println("}");
-    out.println();
-
-    out.println();
-    out.println("void __caucho_setContext(StatefulContext context)");
-    out.println("{");
-    out.println("  _context = context;");
-    out.println("}");
+    out.println("extends StatelessObject");
   }
 
-  protected void generateSessionProvider(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("public Object __caucho_createNew(ConfigContext env)");
-    out.println("{");
-    out.print("  " + getViewClassName() + " bean"
-	      + " = new " + getViewClassName() + "(env);");
-    out.println("  _server.initInstance(bean._bean, env);");
-    out.println("  return bean;");
-    out.println("}");
-  }
-
-  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator createMethod(ApiMethod apiMethod,
+						 int index)
   {
     ApiMethod implMethod = findImplMethod(apiMethod);
 
@@ -212,10 +161,11 @@ abstract public class StatefulView extends View {
 				       getEjbClass().getName()));
     }
 
-    StatefulMethod bizMethod
-      = new StatefulMethod(apiMethod.getMethod(),
-				implMethod.getMethod(),
-				index);
+    StatelessLocalMethod bizMethod
+      = new StatelessLocalMethod(getEjbClass(),
+				 apiMethod.getMethod(),
+				 implMethod.getMethod(),
+				 index);
 
     return bizMethod;
   }
@@ -223,10 +173,11 @@ abstract public class StatefulView extends View {
   protected void generateSuper(JavaWriter out, String serverVar)
     throws IOException
   {
+    out.println("super(" + serverVar + ");");
   }
 
-  protected void generateExtends(JavaWriter out)
-    throws IOException
+  protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
+    return getEjbClass().getMethod(apiMethod);
   }
 }

@@ -28,14 +28,23 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.*;
+import com.caucho.ejb.protocol.*;
 
-import javax.ejb.RemoveException;
+import java.util.logging.*;
+import java.io.*;
+import java.rmi.*;
+import javax.ejb.*;
 
 /**
  * Abstract base class for a 3.0 session object
  */
-abstract public class StatelessObject extends AbstractSessionObject {
+abstract public class StatelessObject extends AbstractEJBObject
+  implements EJBLocalObject, EJBObject
+{
+  private static final Logger log
+    = Logger.getLogger(StatelessObject.class.getName());
+  
   protected final StatelessServer _server;
 
   protected StatelessObject(StatelessServer server)
@@ -50,19 +59,106 @@ abstract public class StatelessObject extends AbstractSessionObject {
   {
     return _server;
   }
-
-  /**
-   * Returns the key.
+  
+  /*
+   * Returns the handle.
    */
-  public String __caucho_getId()
+  public Handle getHandle()
   {
-    return "::ejb:stateless";
+    return getServer().getHandleEncoder().createHandle(__caucho_getId());
   }
 
   /**
-   * Removes the bean from the underlying store.
+   * Returns the EJBHome stub for the container.
    */
-  public void remove() throws Exception
+  public EJBHome getEJBHome()
+  {
+    try {
+      return getServer().getEJBHome();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
+  }
+
+  /**
+   * Returns the EJBLocalHome stub for the container.
+   */
+  public EJBLocalHome getEJBLocalHome()
+  {
+    try {
+      return (EJBLocalHome) getServer().getEJBLocalHome();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
+  }
+
+  public Object getPrimaryKey()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the SessionBean's primary stub
+   */
+  public EJBObject getEJBObject()
+  {
+    return this;
+  }
+
+  /**
+   * Returns the SessionBean's primary stub
+   */
+  public EJBLocalObject getEJBLocalObject()
+  {
+    return this;
+  }
+
+  /**
+   * Returns the server.
+   */
+  public AbstractServer __caucho_getServer()
+  {
+    return getServer();
+  }
+
+  /**
+   * The home id is null.
+   */
+  public String __caucho_getId()
+  {
+    return "stateless";
+  }
+
+  /**
+   * Returns true if the two objects are identical.
+   */
+  public boolean isIdentical(EJBObject obj) throws RemoteException
+  {
+    return getHandle().equals(obj.getHandle());
+  }
+
+  /**
+   * Returns true if the two objects are identical.
+   */
+  public boolean isIdentical(EJBLocalObject obj)
+  {
+    return this == obj;
+  }
+
+  /**
+   * Serialize the HomeSkeletonWrapper in place of this object.
+   *
+   * @return the matching skeleton wrapper.
+   */
+  public Object writeReplace() throws ObjectStreamException
+  {
+    return new ObjectSkeletonWrapper(getHandle());
+  }
+
+  public void remove()
+    throws javax.ejb.RemoveException
   {
   }
 }

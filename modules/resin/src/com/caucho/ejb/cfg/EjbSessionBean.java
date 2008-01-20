@@ -37,10 +37,8 @@ import com.caucho.config.types.EnvEntry;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.gen.BeanGenerator;
 import com.caucho.ejb.gen21.BeanAssembler;
-import com.caucho.ejb.gen.SessionAssembler;
 import com.caucho.ejb.gen.SessionGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
-import com.caucho.ejb.gen.StatelessAssembler;
 import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.session.StatefulServer;
@@ -348,10 +346,13 @@ public class EjbSessionBean extends EjbBean {
    */
   protected BeanAssembler createAssembler(String fullClassName)
   {
+    throw new IllegalStateException(getClass().getName());
+    /*
     if (isStateless())
       return new StatelessAssembler(this, fullClassName);
     else
       return new SessionAssembler(this, fullClassName);
+     */
   }
 
   /**

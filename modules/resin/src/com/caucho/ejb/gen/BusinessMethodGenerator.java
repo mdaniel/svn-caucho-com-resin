@@ -205,14 +205,20 @@ public class BusinessMethodGenerator implements EjbCallChain {
     
     out.println(")");
     generateThrows(out, _apiMethod.getExceptionTypes());
-
+    out.println();
     out.println("{");
     out.pushDepth();
 
-    generateSecurity(out);
+    generateContent(out);
 
     out.popDepth();
     out.println("}");
+  }
+
+  protected void generateContent(JavaWriter out)
+    throws IOException
+  {
+    generateSecurity(out);
   }
 
   public void generatePrologue(JavaWriter out, HashMap map)
@@ -369,5 +375,10 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
     
     return true;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _apiMethod + "]";
   }
 }

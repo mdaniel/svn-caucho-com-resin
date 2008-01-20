@@ -43,10 +43,10 @@ import java.util.*;
  * Represents a public interface to a bean's home interface, i.e. the
  * EJB 2.1-style factory
  */
-abstract public class StatefulHomeView extends StatefulView {
-  private static final L10N L = new L10N(StatefulHomeView.class);
+abstract public class StatelessHomeView extends StatelessView {
+  private static final L10N L = new L10N(StatelessHomeView.class);
 
-  public StatefulHomeView(StatefulGenerator bean, ApiClass api)
+  public StatelessHomeView(StatelessGenerator bean, ApiClass api)
   {
     super(bean, api);
   }
@@ -68,17 +68,17 @@ abstract public class StatefulHomeView extends StatefulView {
     throws IOException
   {
     out.println("private " + getContextClassName() + " _context;");
-    out.println("private StatefulServer _server;");
+    out.println("private StatelessServer _server;");
 
     out.println();
     out.println(getViewClassName() + "(" + getContextClassName() + " context)");
     out.println("{");
     out.pushDepth();
     
-    generateSuper(out, "context.getStatefulServer()");
+    generateSuper(out, "context.getStatelessServer()");
 
     out.println("_context = context;");
-    out.println("_server = context.getStatefulServer();");
+    out.println("_server = context.getStatelessServer();");
     
     out.popDepth();
     out.println("}");
@@ -90,7 +90,7 @@ abstract public class StatefulHomeView extends StatefulView {
     out.println("}");
 
     out.println();
-    out.println("public StatefulServer getStatefulServer()");
+    out.println("public StatelessServer getStatelessServer()");
     out.println("{");
     out.println("  return _server;");
     out.println("}");
@@ -98,7 +98,8 @@ abstract public class StatefulHomeView extends StatefulView {
   }
 
   @Override
-  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator createMethod(ApiMethod apiMethod,
+						 int index)
   {
     if (apiMethod.getName().equals("create")) {
       ApiMethod implMethod = getEjbClass().getMethod("ejbCreate",
@@ -108,14 +109,14 @@ abstract public class StatefulHomeView extends StatefulView {
 	throw ConfigException.create(apiMethod.getMethod(),
 				     L.l("can't find ejbCreate"));
 
-      View localView = getSessionBean().getView(apiMethod.getReturnType());
+      View localView = getStatelessBean().getView(apiMethod.getReturnType());
 
       if (localView == null)
 	throw ConfigException.create(apiMethod.getMethod(),
 				     L.l("'{0}' is an unknown object interface",
 					 apiMethod.getReturnType()));
       
-      return new StatefulCreateMethod(getSessionBean(),
+      return new StatelessCreateMethod(getStatelessBean(),
 				      localView,
 				      apiMethod.getMethod(),
 				      implMethod.getMethod(),
@@ -144,6 +145,6 @@ abstract public class StatefulHomeView extends StatefulView {
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    out.println("  extends StatefulHome");
+    out.println("  extends StatelessHome");
   }
 }

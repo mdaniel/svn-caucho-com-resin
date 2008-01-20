@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.cfg21.EjbView;
 import com.caucho.ejb.cfg21.EjbHomeView;
 import com.caucho.bytecode.*;
 import com.caucho.config.program.ConfigProgram;
@@ -43,7 +42,6 @@ import com.caucho.ejb.amber.AmberConfig;
 import com.caucho.ejb.gen.BeanGenerator;
 import com.caucho.ejb.gen21.BeanAssembler;
 import com.caucho.ejb.gen.TransactionChain;
-import com.caucho.ejb.gen.UserInRoleChain;
 import com.caucho.ejb.gen21.ViewClass;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.gen.BaseClass;
@@ -54,7 +52,6 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.MethodCallChain;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.make.ClassDependency;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
@@ -1892,10 +1889,13 @@ public class EjbBean extends DescriptionGroupConfig
         roles = ejbMethod.getRoles();
     }
 
+    /*
     if (roles != null)
       return new UserInRoleChain(next, roles);
     else
       return next;
+     */
+    return next;
   }
 
   /**

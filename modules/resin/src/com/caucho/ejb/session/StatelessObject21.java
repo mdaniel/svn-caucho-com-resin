@@ -36,33 +36,4 @@ import javax.ejb.RemoveException;
  * Abstract base class for a 2.1 session object
  */
 abstract public class StatelessObject21 extends AbstractSessionObject21 {
-  protected final StatelessServer _server;
-
-  protected StatelessObject21(StatelessServer server)
-  {
-    _server = server;
-  }
-
-  /**
-   * Returns the stateless server.
-   */
-  public AbstractServer getServer()
-  {
-    return _server;
-  }
-
-  /**
-   * Returns the key.
-   */
-  public String __caucho_getId()
-  {
-    return "::ejb:stateless";
-  }
-
-  /**
-   * Removes the bean from the underlying store.
-   */
-  public void remove() throws RemoveException
-  {
-  }
 }

@@ -157,6 +157,8 @@ public class BurlapProtocol extends ProtocolContainer {
       // ejb/0604 vs ejb/0500
       Object obj = server.getRemoteObject(key);
 
+      System.out.println("OBJ: " + obj + " " + key);
+
       Class api = server.getRemoteObjectClass();
       
       com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(api);

@@ -45,7 +45,8 @@ import java.util.logging.Logger;
 abstract public class StatelessHome extends AbstractEJBHome
   implements EJBHome, EJBLocalHome, Serializable
 {
-  protected static final Logger log = Log.open(StatelessHome.class);
+  protected static final Logger log
+    = Logger.getLogger(StatelessHome.class.getName());
 
   protected final StatelessServer _server;
 
@@ -55,9 +56,12 @@ abstract public class StatelessHome extends AbstractEJBHome
   }
 
   /**
-   * Returns the owning context
+   * Returns the owning server.
    */
-  abstract public AbstractContext getContext();
+  public StatelessServer getStatelessServer()
+  {
+    return _server;
+  }
 
   /**
    * Returns the owning server.
@@ -96,7 +100,8 @@ abstract public class StatelessHome extends AbstractEJBHome
    */
   public Handle getHandle()
   {
-    return getContext().getHandle();
+    //return getServer().getHandle();
+    return null;
   }
 
   /**
@@ -141,11 +146,6 @@ abstract public class StatelessHome extends AbstractEJBHome
   public Object writeReplace() throws ObjectStreamException
   {
     return new HomeSkeletonWrapper(getHomeHandle());
-  }
-
-  protected SessionObject21 _caucho_getStatelessObject()
-  {
-    return null;
   }
 }
 
