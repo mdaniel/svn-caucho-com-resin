@@ -69,7 +69,7 @@ import java.util.logging.Logger;
  * Base server for a single home/object bean pair.
  */
 abstract public class AbstractServer implements EnvironmentBean {
-  protected final static Logger log = Log.open(AbstractServer.class);
+  private final static Logger log = Log.open(AbstractServer.class);
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected final EjbContainer _ejbContainer;

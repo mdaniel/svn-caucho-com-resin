@@ -29,13 +29,11 @@
 package com.caucho.ejb.session;
 
 import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.session.StatelessComponent;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
 import javax.webbeans.*;
@@ -103,25 +101,6 @@ public class StatelessServer extends SessionServer {
   public EJBHome getEJBHome()
   {
     return _remoteHomeView;
-  }
-
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  @Override
-  public Object getRemoteObject21()
-  {
-    Object home = getEJBHome();
-
-    if (home != null)
-      return home;
-
-    /*
-    if (_remoteObject != null)
-      return _remoteObject21;
-    */
-
-    return null;
   }
 
   /**

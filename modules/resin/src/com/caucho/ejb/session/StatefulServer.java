@@ -92,18 +92,19 @@ public class StatefulServer extends SessionServer
    * Returns the JNDI proxy object to create instances of the
    * local interface.
    */
+  @Override
   public Object getLocalProxy(Class api)
   {
-    SessionProvider provider = getStatefulContext().getProvider(api);
+    StatefulProvider provider = getStatefulContext().getProvider(api);
 
     return new StatefulProviderProxy(provider);
   }
 
   protected ComponentImpl createSessionComponent(Class api)
   {
-    SessionProvider provider = getStatefulContext().getProvider(api);
+    StatefulProvider provider = getStatefulContext().getProvider(api);
 
-    return new SessionComponent(provider);
+    return new StatefulComponent(provider);
   }
   
   /**
@@ -221,7 +222,7 @@ public class StatefulServer extends SessionServer
   @Override
   public Object getRemoteObject(Class api)
   {
-    SessionProvider provider = getStatefulContext().getProvider(api);
+    StatefulProvider provider = getStatefulContext().getProvider(api);
 
     if (provider != null) {
       Object value = provider.__caucho_createNew(null);

@@ -41,10 +41,10 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 /**
  * Component for session beans
  */
-public class SessionComponent extends ComponentImpl {
-  private final SessionProvider _provider;
+public class StatefulComponent extends ComponentImpl {
+  private final StatefulProvider _provider;
 
-  public SessionComponent(SessionProvider provider)
+  public StatefulComponent(StatefulProvider provider)
   {
     super(WebBeansContainer.create().getWbWebBeans());
     

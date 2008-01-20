@@ -35,9 +35,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
-import com.caucho.util.LruCache;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
@@ -45,8 +43,6 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 import javax.ejb.*;
 import javax.webbeans.*;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

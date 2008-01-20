@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,35 +29,11 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.protocol.AbstractHandle;
-
-import javax.ejb.RemoveException;
+import com.caucho.config.ConfigContext;
 
 /**
- * Abstract base class for a 2.1 session object
+ * Creates a new instance of a stateful bean
  */
-abstract public class SessionObject21 extends AbstractSessionObject21 {
-  protected final SessionServer _server;
-
-  protected SessionObject21(SessionServer server)
-  {
-    _server = server;
-  }
-
-  /**
-   * Returns the session server.
-   */
-  public AbstractServer getServer()
-  {
-    return _server;
-  }
-
-  /**
-   * Removes the bean from the underlying store.
-   */
-  public void remove() throws RemoveException
-  {
-    getServer().remove((AbstractHandle) getHandle());
-  }
+public interface StatefulProvider {
+  public Object __caucho_createNew(ConfigContext env);
 }

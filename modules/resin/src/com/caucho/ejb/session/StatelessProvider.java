@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.ConfigContext;
-
 /**
  * Creates a new instance of a stateless bean
  */

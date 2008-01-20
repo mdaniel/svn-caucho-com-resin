@@ -39,9 +39,9 @@ import com.caucho.naming.*;
  */
 public class StatefulProviderProxy implements ObjectProxy
 {
-  private final SessionProvider _provider;
+  private final StatefulProvider _provider;
 
-  public StatefulProviderProxy(SessionProvider provider)
+  public StatefulProviderProxy(StatefulProvider provider)
   {
     _provider = provider;
   }

@@ -59,12 +59,15 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 /**
  * EntityServer is a container for the instances of an entity bean.
  */
 public class EntityServer extends AbstractServer {
+  private static final Logger log
+    = Logger.getLogger(EntityServer.class.getName());
+  
   private static final L10N L = new L10N(EntityServer.class);
 
   private EntityCache _entityCache;
