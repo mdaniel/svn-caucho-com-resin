@@ -426,8 +426,10 @@ public class EjbSessionBean extends EjbBean {
       server.setRemoteApiList(classList);
     }
 
+    /*
     if (getRemote21() != null)
       server.setRemote21(loadClass(getRemote21().getName()));
+     */
 
     ApiClass localHome = getLocalHome();
     if (localHome != null)
@@ -443,9 +445,11 @@ public class EjbSessionBean extends EjbBean {
       server.setLocalApiList(classList);
     }
 
+    /*
     if (getLocal21() != null)
       server.setLocal21(loadClass(getLocal21().getName()));
-
+     */
+    
     Class contextImplClass = javaGen.loadClass(getSkeletonName());
 
     server.setContextImplClass(contextImplClass);

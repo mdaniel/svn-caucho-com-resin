@@ -79,7 +79,8 @@ public class SessionView extends View {
   /**
    * Introspects the methods in the API list to generate business methods.
    */
-  protected void introspect()
+  @Override
+  public void introspect()
   {
     /*
     for (ApiClass api : _apiList) {

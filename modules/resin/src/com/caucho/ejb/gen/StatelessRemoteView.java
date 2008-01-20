@@ -45,9 +45,6 @@ import java.util.*;
 public class StatelessRemoteView extends StatelessLocalView {
   private static final L10N L = new L10N(StatelessRemoteView.class);
 
-  private ArrayList<StatelessLocalMethod> _businessMethods
-    = new ArrayList<StatelessLocalMethod>();
-
   public StatelessRemoteView(BeanGenerator bean, ApiClass api)
   {
     super(bean, api);

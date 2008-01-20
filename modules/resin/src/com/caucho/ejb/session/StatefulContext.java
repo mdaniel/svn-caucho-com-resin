@@ -32,12 +32,15 @@ import javax.ejb.TimerService;
 
 import com.caucho.config.*;
 import com.caucho.ejb.*;
+import com.caucho.util.*;
 import com.caucho.webbeans.context.*;
 
 /**
  * Abstract base class for an session context
  */
 abstract public class StatefulContext extends AbstractSessionContext {
+  private static final L10N L = new L10N(StatefulContext.class);
+    
   private transient StatefulServer _server;
 
   public StatefulContext(StatefulServer server)
@@ -58,6 +61,7 @@ abstract public class StatefulContext extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
+  @Override
   public AbstractServer getServer()
   {
     return _server;

@@ -42,17 +42,24 @@ import java.util.*;
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class StatefulLocalView extends View {
+public class StatefulLocalView extends StatefulView {
   private static final L10N L = new L10N(StatefulLocalView.class);
 
+  private StatefulGenerator _sessionBean;
+  
   private ArrayList<StatefulLocalMethod> _businessMethods
     = new ArrayList<StatefulLocalMethod>();
 
-  public StatefulLocalView(BeanGenerator bean, ApiClass api)
+  public StatefulLocalView(StatefulGenerator bean, ApiClass api)
   {
     super(bean, api);
 
-    introspect();
+    _sessionBean = bean;
+  }
+
+  public StatefulGenerator getSessionBean()
+  {
+    return _sessionBean;
   }
 
   protected String getViewClassName()
@@ -64,29 +71,30 @@ public class StatefulLocalView extends View {
    * Introspects the APIs methods, producing a business method for
    * each.
    */
-  protected void introspect()
+  @Override
+  public void introspect()
   {
     ApiClass implClass = getEjbClass();
     ApiClass apiClass = getApi();
     
     for (ApiMethod apiMethod : apiClass.getMethods()) {
-      ApiMethod implMethod = implClass.getMethod(apiMethod);
-
-      if (implMethod == null) {
-	throw ConfigException.create(apiMethod.getMethod(),
-				     L.l("api method has no corresponding implementation in '{0}'",
-					 implClass.getName()));
-      }
+      if (apiMethod.getDeclaringClass().equals(Object.class))
+	continue;
+      if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
+	continue;
 
       int index = _businessMethods.size();
       
-      StatefulLocalMethod bizMethod
-	= new StatefulLocalMethod(apiMethod.getMethod(),
-				  implMethod.getMethod(),
-				  index);
-
-      _businessMethods.add(bizMethod);
+      StatefulLocalMethod bizMethod = createMethod(apiMethod, index);
+      
+      if (bizMethod != null)
+	_businessMethods.add(bizMethod);
     }
+  }
+
+  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  {
+    return getEjbClass().getMethod(apiMethod);
   }
 
   /**
@@ -108,23 +116,42 @@ public class StatefulLocalView extends View {
   {
     out.println();
     out.println("public static class " + getViewClassName());
+
+    generateExtends(out);
+    
     out.print("  implements " + getApi().getName());
     out.println(", SessionProvider");
     out.println("{");
     out.pushDepth();
 
+    generateClassContent(out);
+
+    HashMap map = new HashMap();
+    for (StatefulLocalMethod method : _businessMethods) {
+      method.generate(out, map);
+    }
+    
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected void generateClassContent(JavaWriter out)
+    throws IOException
+  {
     out.println("private StatefulServer _server;");
     out.println("private " + getEjbClass().getName() + " _bean;");
 
     out.println();
     out.println("public " + getViewClassName() + "(StatefulServer server)");
     out.println("{");
+    generateSuper(out, "server");
     out.println("  _server = server;");
     out.println("}");
 
     out.println();
     out.println("public " + getViewClassName() + "(ConfigContext env)");
     out.println("{");
+    generateSuper(out, "null");
     out.println("  _bean = new " + getEjbClass().getName() + "();");
     out.println("}");
 
@@ -137,12 +164,47 @@ public class StatefulLocalView extends View {
     out.println("  return bean;");
     out.println("}");
 
-    HashMap map = new HashMap();
-    for (StatefulLocalMethod method : _businessMethods) {
-      method.generate(out, map);
-    }
-    
-    out.popDepth();
+    out.println();
+    out.println("public " + getViewClassName()
+		+ "(" + getEjbClass().getName() + " bean)");
+    out.println("{");
+    generateSuper(out, "null");
+    out.println("  _bean = bean;");
     out.println("}");
+
+    out.println();
+    out.println("public StatefulServer getStatefulServer()");
+    out.println("{");
+    out.println("  return _server;");
+    out.println("}");
+    out.println();
+  }
+
+  protected StatefulLocalMethod createMethod(ApiMethod apiMethod, int index)
+  {
+    ApiMethod implMethod = findImplMethod(apiMethod);
+
+    if (implMethod == null) {
+      throw ConfigException.create(apiMethod.getMethod(),
+				   L.l("api method has no corresponding implementation in '{0}'",
+				       getEjbClass().getName()));
+    }
+
+    StatefulLocalMethod bizMethod
+      = new StatefulLocalMethod(apiMethod.getMethod(),
+				implMethod.getMethod(),
+				index);
+
+    return bizMethod;
+  }
+
+  protected void generateSuper(JavaWriter out, String serverVar)
+    throws IOException
+  {
+  }
+
+  protected void generateExtends(JavaWriter out)
+    throws IOException
+  {
   }
 }

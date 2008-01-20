@@ -36,6 +36,7 @@ import com.caucho.ejb.protocol.AbstractHandle;
  */
 abstract public class SessionObject extends AbstractSessionObject {
   protected final SessionServer _server;
+  private String _primaryKey;
 
   protected SessionObject(SessionServer server)
   {

@@ -31,6 +31,7 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.xa.EjbTransactionManager;
+import com.caucho.util.*;
 
 import java.util.ArrayList;
 
@@ -43,6 +44,8 @@ import javax.ejb.SessionContext;
  */
 abstract public class AbstractStatelessContext extends AbstractSessionContext
 {
+  private static final L10N L = new L10N(AbstractSessionContext.class);
+  
   protected final StatelessServer _server;
 
   private EJBObject _remote;
@@ -59,7 +62,7 @@ abstract public class AbstractStatelessContext extends AbstractSessionContext
   public Object createLocalObject()
     throws IllegalStateException
   {
-    throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
+    throw new IllegalStateException(L.l("'{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
                                         getServer()));
   }
 

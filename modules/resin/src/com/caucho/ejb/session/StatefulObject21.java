@@ -48,20 +48,26 @@ import java.util.logging.Logger;
 /**
  * Abstract base class for a 2.1 session object
  */
-abstract public class AbstractSessionObject21 extends AbstractEJBObject
+abstract public class StatefulObject21 extends StatefulObject
   implements EJBObject, EJBLocalObject, Serializable
 {
-  private static final Logger log = Log.open(AbstractSessionObject21.class);
+  private static final Logger log
+    = Logger.getLogger(StatefulObject.class.getName());
+  
+  /**
+   * Returns the server.
+   */
+  public AbstractServer getServer()
+  {
+    return getStatefulServer();
+  }
+
+  public abstract StatefulServer getStatefulServer();
 
   public SessionBean _getObject()
   {
     throw new UnsupportedOperationException("_getObject is not implemented");
   }
-
-  /**
-   * Returns the server.
-   */
-  abstract public AbstractServer getServer();
 
   /**
    * Returns the handle.
@@ -127,14 +133,6 @@ abstract public class AbstractSessionObject21 extends AbstractEJBObject
   }
 
   /**
-   * The home id is null.
-   */
-  public String __caucho_getId()
-  {
-    return getServer().encodeId(getPrimaryKey());
-  }
-
-  /**
    * Returns true if the two objects are identical.
    */
   public boolean isIdentical(EJBObject obj) throws RemoteException
@@ -148,20 +146,5 @@ abstract public class AbstractSessionObject21 extends AbstractEJBObject
   public boolean isIdentical(EJBLocalObject obj)
   {
     return this == obj;
-  }
-
-  /**
-   * Serialize the HomeSkeletonWrapper in place of this object.
-   *
-   * @return the matching skeleton wrapper.
-   */
-  public Object writeReplace() throws ObjectStreamException
-  {
-    return new ObjectSkeletonWrapper(getHandle());
-  }
-
-  public void remove()
-    throws javax.ejb.RemoveException
-  {
   }
 }

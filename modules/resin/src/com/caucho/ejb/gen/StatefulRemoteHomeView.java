@@ -29,63 +29,38 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.config.*;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateful view
+ * Represents a public interface to a bean, e.g. a remote stateful view
  */
-abstract public class View {
-  private static final L10N L = new L10N(View.class);
+public class StatefulRemoteHomeView extends StatefulHomeView {
+  private static final L10N L = new L10N(StatefulRemoteHomeView.class);
 
-  protected final BeanGenerator _bean;
-  protected final ApiClass _api;
-
-  protected View(BeanGenerator bean, ApiClass api)
+  public StatefulRemoteHomeView(StatefulGenerator bean, ApiClass api)
   {
-    _bean = bean;
-    _api = api;
+    super(bean, api);
   }
 
-  /**
-   * Returns the owning bean.
-   */
-  protected BeanGenerator getBean()
-  {
-    return _bean;
-  }
-  
-  /**
-   * Returns the bean's ejbclass
-   */
-  protected ApiClass getEjbClass()
-  {
-    return _bean.getEjbClass();
-  }
-
+  @Override
   protected String getViewClassName()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return getApi().getSimpleName() + "__EJBRemoteHome";
   }
 
-  /**
-   * Returns the API class.
-   */
-  protected ApiClass getApi()
+  @Override
+  protected void generateExtends(JavaWriter out)
+    throws IOException
   {
-    return _api;
-  }
-
-  /**
-   * Introspects the view
-   */
-  public void introspect()
-  {
+    out.println("  extends StatefulHome");
   }
 
   /**
@@ -94,27 +69,45 @@ abstract public class View {
   public void generateContextPrologue(JavaWriter out)
     throws IOException
   {
+    out.println();
+    out.println("private " + getViewClassName() + " _remoteHome;");
+
+    out.println();
+    out.println("@Override");
+    out.println("public EJBHome getEJBHome()");
+    out.println("{");
+    out.println("  return _remoteHome;");
+    out.println("}");
   }
 
   /**
    * Generates context home's constructor
    */
+  @Override
   public void generateContextHomeConstructor(JavaWriter out)
     throws IOException
   {
+    out.println("_remoteHome = new " + getViewClassName() + "(this);");
   }
 
   /**
-   * Generates context object's constructor
+   * Generates context home's constructor
    */
+  @Override
   public void generateContextObjectConstructor(JavaWriter out)
     throws IOException
   {
+    out.println("_remoteHome = context._remoteHome;");
   }
 
   /**
-   * Generates the view code.
+   * Generates code to create the provider
    */
-  abstract public void generate(JavaWriter out)
-    throws IOException;
+  public void generateCreateProvider(JavaWriter out, String var)
+    throws IOException
+  {
+    out.println();
+    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("  return _remoteHome;");
+  }
 }

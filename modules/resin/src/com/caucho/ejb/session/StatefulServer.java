@@ -51,13 +51,8 @@ public class StatefulServer extends SessionServer
   private StatefulContext _homeContext;
   
   // XXX: need real lifecycle
-  private LruCache<Object,AbstractSessionContext> _sessions
-    = new LruCache<Object,AbstractSessionContext>(8192);
+  private LruCache<String,StatefulObject> _remoteSessions;
 
-  private Object _remoteObject21;
-  private Object _remoteObject;
-  private boolean _isInitRemote;
- 
   public StatefulServer(EjbContainer ejbContainer)
   {
     super(ejbContainer);
@@ -124,9 +119,9 @@ public class StatefulServer extends SessionServer
      */
   }
 
-  public void addSession(AbstractSessionContext context)
+  public void addSession(StatefulObject remoteObject)
   {
-    createSessionKey(context);
+    createSessionKey(remoteObject);
   }
 
   /**
@@ -140,10 +135,12 @@ public class StatefulServer extends SessionServer
   public AbstractContext getContext(Object key, boolean forceLoad)
     throws FinderException
   {
+    throw new NoSuchEJBException("no matching object:" + key);
+    /*
     if (key == null)
       return null;
 
-    AbstractSessionContext cxt = _sessions.get(key);
+    StatefulContext cxt = _sessions.get(key);
 
     // ejb/0fe4
     if (cxt == null)
@@ -152,18 +149,33 @@ public class StatefulServer extends SessionServer
     // throw new FinderException("no matching object:" + key);
 
     return cxt;
+    */
+  }
+
+  /**
+   * Returns the remote object.
+   */
+  public Object getRemoteObject(Object key)
+  {
+    StatefulObject remote = null;
+    if (_remoteSessions != null) {
+      remote = _remoteSessions.get(String.valueOf(key));
+    }
+
+    return remote;
   }
 
   /**
    * Creates a handle for a new session.
    */
-  public String createSessionKey(AbstractSessionContext context)
+  public String createSessionKey(StatefulObject remote)
   {
     String key = getHandleEncoder().createRandomStringKey();
 
-    //System.out.println("SESSION-KEY: " + key);
-
-    _sessions.put(key, context);
+    if (_remoteSessions == null)
+      _remoteSessions = new LruCache<String,StatefulObject>(8192);
+    
+    _remoteSessions.put(key, remote);
 
     return key;
   }
@@ -206,58 +218,29 @@ public class StatefulServer extends SessionServer
    * Returns the remote stub for the container
    */
   @Override
-  public Object getRemoteObject(Class businessInterface)
+  public Object getRemoteObject(Class api)
   {
-    if (! hasRemoteObject())
+    SessionProvider provider = getStatefulContext().getProvider(api);
+
+    if (provider != null) {
+      Object value = provider.__caucho_createNew(null);
+      
+      return value;
+    }
+    else
       return null;
-
-    if (_isInitRemote)
-      return null;
-
-    _isInitRemote = true;
-
-    // EJB 3.0 only.
-    if (businessInterface == null) {
-      if (getRemote21() == null) {
-        // Assumes EJB 3.0
-        businessInterface = getRemoteApiList().get(0);
-      }
-    }
-
-    if (businessInterface != null)
-      _remoteObject = _homeContext._caucho_newRemoteInstance();
-
-    // EJB 2.1
-    if (_remoteObject == null) {
-      _remoteObject21 = _homeContext._caucho_newRemoteInstance21();
-
-      _isInitRemote = false;
-
-      return _remoteObject21;
-    }
-
-    _isInitRemote = false;
-
-    // EJB 3.0 only.
-    if (businessInterface == null)
-      return _remoteObject;
-
-    if (businessInterface.isAssignableFrom(_remoteObject.getClass())) {
-      setBusinessInterface(_remoteObject, businessInterface);
-
-      return _remoteObject;
-    }
-
-    return null;
   }
   
-    /**
+  /**
    * Remove an object by its handle.
    */
   @Override
   public Object remove(AbstractHandle handle)
   {
-    return _sessions.remove(handle.getObjectId());
+    if (_remoteSessions != null)
+      return _remoteSessions.remove(handle.getObjectId());
+    else
+      return null;
     // _ejbManager.remove(handle);
   }
 
@@ -267,11 +250,15 @@ public class StatefulServer extends SessionServer
   @Override
   public void remove(Object key)
   {
-    AbstractSessionContext cxt = _sessions.remove(key);
+    if (_remoteSessions != null) {
+      _remoteSessions.remove(String.valueOf(key));
 
-    // ejb/0fe2
-    if (cxt == null)
-      throw new NoSuchEJBException("no matching object:" + key);
+      /*
+      // ejb/0fe2
+      if (cxt == null)
+	throw new NoSuchEJBException("no matching object:" + key);
+      */
+    }
   }
   
   
@@ -282,25 +269,26 @@ public class StatefulServer extends SessionServer
   public void destroy()
   {
     super.destroy();
- 
-    ArrayList<AbstractSessionContext> values;
-    values = new ArrayList<AbstractSessionContext>();
 
-    Iterator<AbstractSessionContext> iter = _sessions.values();
-    while (iter.hasNext()) {
-      values.add(iter.next());
+    ArrayList<StatefulObject> values = new ArrayList<StatefulObject>();
+    
+    if (_remoteSessions != null) {
+      Iterator<StatefulObject> iter = _remoteSessions.values();
+      while (iter.hasNext()) {
+	values.add(iter.next());
+      }
     }
 
-    _sessions = null;
+    _remoteSessions = null;
 
-    log.fine(this + " closing");
-
-    for (AbstractSessionContext cxt : values) {
+    for (StatefulObject obj : values) {
       try {
-        cxt.destroy();
+        obj.remove();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
     }
+    
+    log.fine(this + " closed");
   }
 }

@@ -42,10 +42,7 @@ import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ResourceAdapterAssociation;
+import javax.resource.spi.*;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -611,8 +608,10 @@ public class ConnectorResource implements EnvironmentListener {
       if (getInit() != null)
 	getInit().configure(managedFactory);
 
-      if (_ra != null)
-	managedFactory.setResourceAdapter(_ra);
+      if (_ra != null
+	  && managedFactory instanceof ResourceAdapterAssociation) {
+	((ResourceAdapterAssociation) managedFactory).setResourceAdapter(_ra);
+      }
 
       ResourceManagerImpl rm = ResourceManagerImpl.createLocalManager();
 	

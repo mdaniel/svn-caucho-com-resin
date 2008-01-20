@@ -80,21 +80,7 @@ abstract public class AbstractContext implements EJBContext {
    */
   public EJBHome getEJBHome()
   {
-    try {
-      EJBHome home = getServer().getEJBHome();
-
-      // ejb/0f61
-      if (home == null && getServer().getEJBLocalHome() == null)
-        throw new IllegalStateException("getEJBHome() is only allowed through EJB 2.1 interfaces");
-
-      return home;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-
-      return null;
-    }
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

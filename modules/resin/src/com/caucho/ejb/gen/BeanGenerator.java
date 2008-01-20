@@ -54,6 +54,36 @@ abstract public class BeanGenerator extends GenClass {
   {
     return _ejbClass;
   }
+  
+  /**
+   * Sets the remote name
+   */
+  public void setRemoteHome(ApiClass homeClass)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+ 
+  /**
+   * Sets the local name
+   */
+  public void setLocalHome(ApiClass homeClass)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Adds a remote
+   */
+  public void addRemote(ApiClass remoteApi)
+  {
+  }
+
+  /**
+   * Adds a local
+   */
+  public void addLocal(ApiClass localApi)
+  {
+  }
 
   /**
    * Introspects the bean.

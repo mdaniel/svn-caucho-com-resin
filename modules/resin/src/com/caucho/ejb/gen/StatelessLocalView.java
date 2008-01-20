@@ -51,8 +51,6 @@ public class StatelessLocalView extends View {
   public StatelessLocalView(BeanGenerator bean, ApiClass api)
   {
     super(bean, api);
-
-    introspect();
   }
 
   protected String getViewClassName()
@@ -64,7 +62,7 @@ public class StatelessLocalView extends View {
    * Introspects the APIs methods, producing a business method for
    * each.
    */
-  protected void introspect()
+  public void introspect()
   {
     ApiClass implClass = getEjbClass();
     ApiClass apiClass = getApi();

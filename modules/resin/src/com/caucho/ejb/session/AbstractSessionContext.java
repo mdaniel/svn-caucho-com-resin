@@ -31,8 +31,9 @@ package com.caucho.ejb.session;
 import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.xa.*;
+import com.caucho.util.*;
 
-import javax.ejb.SessionContext;
+import javax.ejb.*;
 import javax.xml.rpc.handler.MessageContext;
 
 /**
@@ -41,6 +42,24 @@ import javax.xml.rpc.handler.MessageContext;
 abstract public class AbstractSessionContext extends AbstractContext
   implements SessionContext
 {
+  private static final L10N L = new L10N(AbstractSessionContext.class);
+  
+  /**
+   * Returns the EJBHome stub for the container.
+   */
+  public EJBHome getEJBHome()
+  {
+    throw new EJBException(L.l("EJBHome does not exist for this class"));
+  }
+  
+  /**
+   * Returns the EJBLocalHome stub for the container.
+   */
+  public EJBLocalHome getEJBLocalHome()
+  {
+    throw new EJBException(L.l("EJBLocalHome does not exist for this class"));
+  }
+  
   public <T> T getBusinessObject(Class<T> type)
   {
     throw new UnsupportedOperationException(getClass().getName());

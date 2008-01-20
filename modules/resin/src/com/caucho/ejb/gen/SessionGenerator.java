@@ -47,6 +47,12 @@ import java.util.*;
 abstract public class SessionGenerator extends BeanGenerator {
   private static final L10N L = new L10N(SessionGenerator.class);
 
+  private ApiClass _localHome;
+  private ApiClass _remoteHome;
+
+  private ApiClass _localObject;
+  private ApiClass _remoteObject;
+  
   private ArrayList<ApiClass> _localApi
     = new ArrayList<ApiClass>();
 
@@ -98,11 +104,75 @@ abstract public class SessionGenerator extends BeanGenerator {
   }
 
   /**
+   * Sets the local home
+   */
+  public void setLocalHome(ApiClass homeApi)
+  {
+    _localHome = homeApi;
+  }
+
+  /**
+   * Sets the remote home
+   */
+  public void setRemoteHome(ApiClass homeApi)
+  {
+    _remoteHome = homeApi;
+  }
+  
+  /**
+   * Sets the local object
+   */
+  public void setLocalObject(ApiClass objectApi)
+  {
+    _localObject = objectApi;
+  }
+
+  /**
+   * the local object
+   */
+  public ApiClass getLocalObject()
+  {
+    return _localObject;
+  }
+
+  /**
+   * Sets the remote object
+   */
+  public void setRemoteObject(ApiClass objectApi)
+  {
+    _remoteObject = objectApi;
+  }
+
+  /**
+   * Gets the remote object
+   */
+  public ApiClass getRemoteObject()
+  {
+    return _remoteObject;
+  }
+
+  /**
+   * Adds a local
+   */
+  public void addLocal(ApiClass localApi)
+  {
+    _localApi.add(localApi);
+  }
+
+  /**
    * Returns the local API list.
    */
   public ArrayList<ApiClass> getLocalApi()
   {
     return _localApi;
+  }
+
+  /**
+   * Adds a remote
+   */
+  public void addRemote(ApiClass remoteApi)
+  {
+    _remoteApi.add(remoteApi);
   }
 
   /**
@@ -122,16 +192,29 @@ abstract public class SessionGenerator extends BeanGenerator {
   }
 
   /**
+   * Returns the view matching the given class
+   */
+  public View getView(Class api)
+  {
+    for (View view : _views) {
+      if (view.getApi().getName().equals(api.getName()))
+	return view;
+    }
+
+    return null;
+  }
+
+  /**
    * Introspects the bean.
    */
   public void introspect()
   {
     super.introspect();
 
-    if (_localApi.size() == 0)
+    if (_localHome == null && _localApi.size() == 0)
       _localApi = introspectLocalApi();
 
-    if (_remoteApi.size() == 0)
+    if (_remoteHome == null && _remoteApi.size() == 0)
       _remoteApi = introspectRemoteApi();
   }
 
@@ -140,8 +223,20 @@ abstract public class SessionGenerator extends BeanGenerator {
    */
   public void generateViews()
   {
+    if (_localHome != null) {
+      View view = generateLocalHomeView(_localHome);
+
+      _views.add(view);
+    }
+    
     for (ApiClass api : _localApi) {
       View view = generateLocalView(api);
+
+      _views.add(view);
+    }
+    
+    if (_remoteHome != null) {
+      View view = generateRemoteHomeView(_remoteHome);
 
       _views.add(view);
     }
@@ -151,6 +246,25 @@ abstract public class SessionGenerator extends BeanGenerator {
 
       _views.add(view);
     }
+
+    for (View view : _views)
+      view.introspect();
+  }
+
+  /**
+   * Generates the local home view for the given class
+   */
+  protected View generateLocalHomeView(ApiClass api)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Generates the remote home view for the given class
+   */
+  protected View generateRemoteHomeView(ApiClass api)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -215,7 +329,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     }
 
     // XXX: only for stateful?
-    apiList.add(getEjbClass());
+    // apiList.add(getEjbClass());
 
     return apiList;
   }

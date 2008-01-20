@@ -108,31 +108,15 @@ public class EjbBean extends DescriptionGroupConfig
   // the server loader
   private ApiClass _ejbClass;
 
-  protected ApiClass _remoteHome21;
-  protected ApiClass _remote21;
-  
   protected ApiClass _remoteHome;
+  
   protected ArrayList<ApiClass> _remoteList = new ArrayList<ApiClass>();
 
-  protected ApiClass _localHome21;
-  protected ApiClass _local21;
-  
   protected ApiClass _localHome;
+  
   protected ArrayList<ApiClass> _localList = new ArrayList<ApiClass>();
-  protected ArrayList<ApiClass> _localApiList = new ArrayList<ApiClass>();
 
   protected BeanGenerator _bean;
-  
-  protected EjbView _remoteHomeView;
-  protected EjbView _remoteView21;
-  protected EjbView _remoteView;
-  protected EjbView _localHomeView;
-  protected EjbView _localView21;
-  protected EjbView _localView;
-
-  // Can be both with multiple interfaces.
-  protected boolean _isEJB21;
-  protected boolean _isEJB30;
 
   private boolean _isAllowPOJO = true;
 
@@ -146,7 +130,8 @@ public class EjbBean extends DescriptionGroupConfig
 
   ArrayList<String> _beanDependList = new ArrayList<String>();
 
-  protected ArrayList<EjbMethodPattern> _methodList = new ArrayList<EjbMethodPattern>();
+  protected ArrayList<EjbMethodPattern> _methodList
+    = new ArrayList<EjbMethodPattern>();
 
   private HashMap<String,EjbBaseMethod> _methodMap
     = new HashMap<String,EjbBaseMethod>();
@@ -413,22 +398,6 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   /**
-   * Returns true if this EJB has a 2.1 interface.
-   */
-  public boolean isEJB21()
-  {
-    return _isEJB21;
-  }
-
-  /**
-   * Returns true if this EJB has a 3.0 interface.
-   */
-  public boolean isEJB30()
-  {
-    return _isEJB30;
-  }
-
-  /**
    * Adds a description
    */
   public void addDescription(String description)
@@ -609,13 +578,13 @@ public class EjbBean extends DescriptionGroupConfig
   {
     ApiClass home = new ApiClass(homeClass);
     
-    setHomeWrapper(home);
+    setRemoteHomeWrapper(home);
   }
 
   /**
    * Sets the remote home interface class.
    */
-  public void setHomeWrapper(ApiClass remoteHome)
+  public void setRemoteHomeWrapper(ApiClass remoteHome)
     throws ConfigException
   {
     _remoteHome = remoteHome;
@@ -627,7 +596,6 @@ public class EjbBean extends DescriptionGroupConfig
       throw error(L.l("'{0}' must be an interface. <home> interfaces must be interfaces.", remoteHome.getName()));
 
     if (EJBHome.class.isAssignableFrom(remoteHome.getJavaClass())) {
-      _isEJB21 = true;
     }
     else if (! isAllowPOJO()) {
       // XXX: does descriptor still have this requirement?
@@ -669,29 +637,6 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   /**
-   * Adds a remote interface class
-   */
-  public void addBusinessRemote(Class remoteClass)
-  {
-    ApiClass remote = new ApiClass(remoteClass);
-    
-    if (! remote.isPublic())
-      throw error(L.l("'{0}' must be public.  <business-remote> interfaces must be public.", remote.getName()));
-
-    if (! remote.isInterface())
-      throw error(L.l("'{0}' must be an interface. <business-remote> interfaces must be interfaces.", remote.getName()));
-
-    if (! _remoteList.contains(remote)) {
-      _remoteList.add(remote);
-
-      if (remote == _remote21)
-        _isEJB21 = true;
-      else
-        _isEJB30 = true;
-    }
-  }
-
-  /**
    * Sets the remote interface class.
    */
   public void setRemoteWrapper(ApiClass remote)
@@ -709,48 +654,25 @@ public class EjbBean extends DescriptionGroupConfig
 
     if (! _remoteList.contains(remote)) {
       _remoteList.add(remote);
-
-      if (remote == _remote21)
-        _isEJB21 = true;
-      else
-        _isEJB30 = true;
     }
   }
 
   /**
-   * Gets the 2.1 remote interface.
+   * Adds a remote interface class
    */
-  public ApiClass getRemote21()
+  public void addBusinessRemote(Class remoteClass)
   {
-    return _remote21;
-  }
+    ApiClass remote = new ApiClass(remoteClass);
+    
+    if (! remote.isPublic())
+      throw error(L.l("'{0}' must be public.  <business-remote> interfaces must be public.", remote.getName()));
 
-  /**
-   * Sets the 2.1 remote interface.
-   */
-  public void setRemote21(ApiClass remote21)
-  {
-    _isEJB21 = true;
+    if (! remote.isInterface())
+      throw error(L.l("'{0}' must be an interface. <business-remote> interfaces must be interfaces.", remote.getName()));
 
-    _remote21 = remote21;
-  }
-
-  /**
-   * Gets the 2.1 local interface.
-   */
-  public ApiClass getLocal21()
-  {
-    return _local21;
-  }
-
-  /**
-   * Sets the 2.1 local interface.
-   */
-  public void setLocal21(ApiClass local21)
-  {
-    _isEJB21 = true;
-
-    _local21 = local21;
+    if (! _remoteList.contains(remote)) {
+      _remoteList.add(remote);
+    }
   }
 
   /**
@@ -827,6 +749,28 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   /**
+   * Sets the local interface class.
+   */
+  public void setLocalWrapper(ApiClass local)
+    throws ConfigException
+  {
+    if (! local.isPublic())
+      throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", local.getName()));
+
+    if (! local.isInterface())
+      throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
+
+    if (EJBLocalObject.class.isAssignableFrom(local.getJavaClass())) {
+    }
+    else if (! isAllowPOJO())
+      throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
+
+    if (! _localList.contains(local)) {
+      _localList.add(local);
+    }
+  }
+
+  /**
    * Adds a local interface class
    */
   public void addBusinessLocal(Class localClass)
@@ -841,40 +785,6 @@ public class EjbBean extends DescriptionGroupConfig
 
     if (! _localList.contains(local)) {
       _localList.add(local);
-      _localApiList.add(local);
-
-      if (local == _local21)
-        _isEJB21 = true;
-      else
-        _isEJB30 = true;
-    }
-  }
-
-  /**
-   * Sets the local interface class.
-   */
-  public void setLocalWrapper(ApiClass local)
-    throws ConfigException
-  {
-    if (! local.isPublic())
-      throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", local.getName()));
-
-    if (! local.isInterface())
-      throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
-
-    if (EJBLocalObject.class.isAssignableFrom(local.getJavaClass()))
-      _isEJB21 = true;
-    else if (! isAllowPOJO())
-      throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
-
-    if (! _localList.contains(local)) {
-      _localList.add(local);
-      _localApiList.add(new ApiClass(local.getJavaClass()));
-
-      if (local == _local21)
-        _isEJB21 = true;
-      else
-        _isEJB30 = true;
     }
   }
 
@@ -1150,6 +1060,20 @@ public class EjbBean extends DescriptionGroupConfig
       _isInit = true;
       
       _bean = createBeanGenerator();
+
+      if (getLocalHome() != null)
+	_bean.setLocalHome(getLocalHome());
+
+      for (ApiClass localApi : _localList) {
+	_bean.addLocal(localApi);
+      }
+
+      if (getRemoteHome() != null)
+	_bean.setRemoteHome(getRemoteHome());
+
+      for (ApiClass remoteApi : _remoteList) {
+	_bean.addRemote(remoteApi);
+      }
 
       // XXX: add local api
       

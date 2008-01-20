@@ -53,7 +53,7 @@ public class EjbHomeView extends EjbView {
 		     String prefix)
     throws ConfigException
   {
-    super(bean, apiClass, prefix, bean.isEJB21() ? "21" : "");
+    super(bean, apiClass, prefix, "");
   }
 
   /**

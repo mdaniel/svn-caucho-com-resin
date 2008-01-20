@@ -32,12 +32,15 @@ import javax.ejb.TimerService;
 
 import com.caucho.config.*;
 import com.caucho.ejb.*;
+import com.caucho.util.*;
 import com.caucho.webbeans.context.*;
 
 /**
  * Abstract base class for an stateless session context
  */
 abstract public class StatelessContext extends AbstractSessionContext {
+  private static final L10N L = new L10N(StatelessContext.class);
+  
   private transient StatelessServer _server;
 
   public StatelessContext(StatelessServer server)

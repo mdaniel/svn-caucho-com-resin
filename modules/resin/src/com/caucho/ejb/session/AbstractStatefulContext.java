@@ -31,6 +31,7 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.xa.*;
 import com.caucho.naming.ObjectProxy;
+import com.caucho.util.*;
 
 import java.util.ArrayList;
 
@@ -43,6 +44,8 @@ import javax.naming.NamingException;
  */
 abstract public class AbstractStatefulContext extends AbstractSessionContext
 {
+  private static final L10N L = new L10N(AbstractStatefulContext.class);
+  
   protected final StatefulServer _server;
 
   private String _primaryKey;
@@ -109,10 +112,13 @@ abstract public class AbstractStatefulContext extends AbstractSessionContext
 
   public String getPrimaryKey()
   {
+    /*
     if (_primaryKey == null)
       _primaryKey = getStatefulServer().createSessionKey(this);
 
     return _primaryKey;
+    */
+    return null;
   }
 
   public <T> T getBusinessObject(Class<T> businessInterface)

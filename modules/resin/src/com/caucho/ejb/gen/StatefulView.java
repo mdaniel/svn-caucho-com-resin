@@ -29,28 +29,74 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.config.*;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateful view
+ * Represents a public interface to a stateful bean, e.g. a stateful view
  */
-public class StatefulView extends View {
+abstract public class StatefulView extends View {
   private static final L10N L = new L10N(StatefulView.class);
 
-  public StatefulView(BeanGenerator bean, ApiClass api)
+  private StatefulGenerator _sessionBean;
+  
+  private ArrayList<StatefulLocalMethod> _businessMethods
+    = new ArrayList<StatefulLocalMethod>();
+
+  public StatefulView(StatefulGenerator bean, ApiClass api)
   {
     super(bean, api);
+
+    _sessionBean = bean;
   }
 
-  protected String getViewClassName()
+  public StatefulGenerator getSessionBean()
   {
-    return getApi().getSimpleName() + "__EJBLocal";
+    return _sessionBean;
+  }
+
+  public String getContextClassName()
+  {
+    return getSessionBean().getClassName();
+  }
+
+  abstract protected String getViewClassName();
+
+  /**
+   * Introspects the APIs methods, producing a business method for
+   * each.
+   */
+  @Override
+  public void introspect()
+  {
+    ApiClass implClass = getEjbClass();
+    ApiClass apiClass = getApi();
+    
+    for (ApiMethod apiMethod : apiClass.getMethods()) {
+      if (apiMethod.getDeclaringClass().equals(Object.class))
+	continue;
+      if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
+	continue;
+
+      int index = _businessMethods.size();
+      
+      StatefulLocalMethod bizMethod = createMethod(apiMethod, index);
+      
+      if (bizMethod != null)
+	_businessMethods.add(bizMethod);
+    }
+  }
+
+  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  {
+    return getEjbClass().getMethod(apiMethod);
   }
 
   /**
@@ -61,7 +107,7 @@ public class StatefulView extends View {
   {
     out.println();
     out.println("if (" + var + " == " + getApi().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "();");
+    out.println("  return new " + getViewClassName() + "(getStatefulServer());");
   }
 
   /**
@@ -72,8 +118,115 @@ public class StatefulView extends View {
   {
     out.println();
     out.println("public static class " + getViewClassName());
-    out.println("  implements " + getApi().getName());
+
+    generateExtends(out);
+    
+    out.print("  implements " + getApi().getName());
+    out.println(", SessionProvider");
     out.println("{");
+    out.pushDepth();
+
+    generateClassContent(out);
+
+    HashMap map = new HashMap();
+    for (StatefulLocalMethod method : _businessMethods) {
+      method.generate(out, map);
+    }
+    
+    out.popDepth();
     out.println("}");
+  }
+
+  protected void generateClassContent(JavaWriter out)
+    throws IOException
+  {
+    out.println("private StatefulContext _context;");
+    out.println("private StatefulServer _server;");
+    out.println("private " + getEjbClass().getName() + " _bean;");
+
+    out.println();
+    out.println(getViewClassName() + "(StatefulServer server)");
+    out.println("{");
+    out.pushDepth();
+    
+    generateSuper(out, "server");
+    
+    out.println("_server = server;");
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public " + getViewClassName() + "(ConfigContext env)");
+    out.println("{");
+    generateSuper(out, "null");
+    out.println("  _bean = new " + getEjbClass().getName() + "();");
+    out.println("}");
+
+    generateSessionProvider(out);
+
+    out.println();
+    out.println("public " + getViewClassName()
+		+ "(StatefulServer server, "
+		+ getEjbClass().getName() + " bean)");
+    out.println("{");
+    generateSuper(out, "server");
+    out.println("  _server = server;");
+    out.println("  _bean = bean;");
+    out.println("}");
+
+    out.println();
+    out.println("public StatefulServer getStatefulServer()");
+    out.println("{");
+    out.println("  return _server;");
+    out.println("}");
+    out.println();
+
+    out.println();
+    out.println("void __caucho_setContext(StatefulContext context)");
+    out.println("{");
+    out.println("  _context = context;");
+    out.println("}");
+  }
+
+  protected void generateSessionProvider(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public Object __caucho_createNew(ConfigContext env)");
+    out.println("{");
+    out.print("  " + getViewClassName() + " bean"
+	      + " = new " + getViewClassName() + "(env);");
+    out.println("  _server.initInstance(bean._bean, env);");
+    out.println("  return bean;");
+    out.println("}");
+  }
+
+  protected StatefulLocalMethod createMethod(ApiMethod apiMethod, int index)
+  {
+    ApiMethod implMethod = findImplMethod(apiMethod);
+
+    if (implMethod == null) {
+      throw ConfigException.create(apiMethod.getMethod(),
+				   L.l("api method has no corresponding implementation in '{0}'",
+				       getEjbClass().getName()));
+    }
+
+    StatefulLocalMethod bizMethod
+      = new StatefulLocalMethod(apiMethod.getMethod(),
+				implMethod.getMethod(),
+				index);
+
+    return bizMethod;
+  }
+
+  protected void generateSuper(JavaWriter out, String serverVar)
+    throws IOException
+  {
+  }
+
+  protected void generateExtends(JavaWriter out)
+    throws IOException
+  {
   }
 }

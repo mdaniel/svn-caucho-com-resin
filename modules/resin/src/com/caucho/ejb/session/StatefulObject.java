@@ -48,20 +48,28 @@ import java.util.logging.Logger;
 /**
  * Abstract base class for a 2.1 session object
  */
-abstract public class AbstractSessionObject21 extends AbstractEJBObject
-  implements EJBObject, EJBLocalObject, Serializable
+abstract public class StatefulObject extends AbstractEJBObject
+  implements Serializable
 {
-  private static final Logger log = Log.open(AbstractSessionObject21.class);
-
-  public SessionBean _getObject()
-  {
-    throw new UnsupportedOperationException("_getObject is not implemented");
-  }
-
+  private String _primaryKey;
+  
   /**
    * Returns the server.
    */
-  abstract public AbstractServer getServer();
+  public AbstractServer getServer()
+  {
+    return getStatefulServer();
+  }
+
+  public abstract StatefulServer getStatefulServer();
+
+  public String __caucho_getId()
+  {
+    if (_primaryKey == null)
+      _primaryKey = getStatefulServer().createSessionKey(this);
+    
+    return _primaryKey;
+  }
 
   /**
    * Returns the handle.
@@ -71,83 +79,9 @@ abstract public class AbstractSessionObject21 extends AbstractEJBObject
     return getServer().getHandleEncoder().createHandle(__caucho_getId());
   }
 
-  /**
-   * Returns the EJBHome stub for the container.
-   */
-  public EJBHome getEJBHome()
+  public void remove()
+    throws javax.ejb.RemoveException
   {
-    try {
-      return getServer().getEJBHome();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-    }
-  }
-
-  /**
-   * Returns the EJBLocalHome stub for the container.
-   */
-  public EJBLocalHome getEJBLocalHome()
-  {
-    try {
-      return (EJBLocalHome) getServer().getEJBLocalHome();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-    }
-  }
-
-  public Object getPrimaryKey()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the SessionBean's primary stub
-   */
-  public EJBObject getEJBObject()
-  {
-    return this;
-  }
-
-  /**
-   * Returns the SessionBean's primary stub
-   */
-  public EJBLocalObject getEJBLocalObject()
-  {
-    return this;
-  }
-
-  /**
-   * Returns the server.
-   */
-  public AbstractServer __caucho_getServer()
-  {
-    return getServer();
-  }
-
-  /**
-   * The home id is null.
-   */
-  public String __caucho_getId()
-  {
-    return getServer().encodeId(getPrimaryKey());
-  }
-
-  /**
-   * Returns true if the two objects are identical.
-   */
-  public boolean isIdentical(EJBObject obj) throws RemoteException
-  {
-    return getHandle().equals(obj.getHandle());
-  }
-
-  /**
-   * Returns true if the two objects are identical.
-   */
-  public boolean isIdentical(EJBLocalObject obj)
-  {
-    return this == obj;
   }
 
   /**
@@ -158,10 +92,5 @@ abstract public class AbstractSessionObject21 extends AbstractEJBObject
   public Object writeReplace() throws ObjectStreamException
   {
     return new ObjectSkeletonWrapper(getHandle());
-  }
-
-  public void remove()
-    throws javax.ejb.RemoveException
-  {
   }
 }
