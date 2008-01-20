@@ -74,6 +74,22 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     introspect(apiMethod, implMethod);
   }
+
+  /**
+   * Returns the api method
+   */
+  public Method getApiMethod()
+  {
+    return _apiMethod;
+  }
+
+  /**
+   * Returns the implementation method
+   */
+  public Method getImplMethod()
+  {
+    return _implMethod;
+  }
   
   /**
    * Returns true if the business method has any active XA annotation.

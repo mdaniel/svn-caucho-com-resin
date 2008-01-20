@@ -36,10 +36,7 @@ import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
-import javax.ejb.EJBHome;
-import javax.ejb.EJBObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -53,15 +50,6 @@ public class BurlapProtocol extends ProtocolContainer {
   private static final L10N L = new L10N(BurlapProtocol.class);
   private static final Logger log
     = Logger.getLogger(BurlapProtocol.class.getName());
-
-  private Class _objectSkelClass;
-  private Class _homeSkelClass;
-
-  private HashMap<AbstractServer,Class> _homeSkeletonMap =
-    new HashMap<AbstractServer,Class>();
-
-  private HashMap<AbstractServer,Class> _objectSkeletonMap =
-    new HashMap<AbstractServer,Class>();
 
   private HashMap<String,AbstractServer> _serverMap =
     new HashMap<String,AbstractServer>();
@@ -102,6 +90,7 @@ public class BurlapProtocol extends ProtocolContainer {
     _serverMap.remove(server.getProtocolId());
   }
 
+  @Override
   protected HandleEncoder createHandleEncoder(AbstractServer server,
                                               Class primaryKeyClass)
     throws ConfigException
@@ -157,13 +146,11 @@ public class BurlapProtocol extends ProtocolContainer {
       // ejb/0604 vs ejb/0500
       Object obj = server.getRemoteObject(key);
 
-      System.out.println("OBJ: " + obj + " " + key);
-
       Class api = server.getRemoteObjectClass();
       
       com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(api);
 
-      return new BurlapEjbSkeleton(obj, skel, server, _resolver);
+      return new BurlapEjbSkeleton(obj, skel, _resolver);
     }
     else if (server instanceof MessageServer) {
       return new MessageSkeleton((MessageServer) server);
@@ -178,7 +165,7 @@ public class BurlapProtocol extends ProtocolContainer {
 	
         com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(api);
 
-	return new BurlapEjbSkeleton(remote, skel, server, _resolver);
+	return new BurlapEjbSkeleton(remote, skel, _resolver);
       }
       
       api = server.getRemoteObjectClass();
@@ -188,94 +175,21 @@ public class BurlapProtocol extends ProtocolContainer {
 	
         com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(api);
 
-	return new BurlapEjbSkeleton(remote, skel, server, _resolver);
+	return new BurlapEjbSkeleton(remote, skel, _resolver);
       }
-      /*
-      if (remote instanceof EJBHome) {
-        Class homeSkelClass = getHomeSkelClass(server);
-
-        BurlapSkeleton skel = (BurlapSkeleton) homeSkelClass.newInstance();
-        skel._setServer(server);
-        skel._setResolver(_resolver);
-        skel._setObject(remote);
-
-        return skel;
-      }
-      else if (remote instanceof EJBObject) {
-        Class skelClass = getObjectSkelClass(server);
-
-        BurlapSkeleton skel = (BurlapSkeleton) skelClass.newInstance();
-        skel._setServer(server);
-        skel._setResolver(_resolver);
-        skel._setObject(remote);
-
-        return skel;
-      }
-      else {
-        Class skelClass = getHomeSkelClass(server);
-
-        BurlapSkeleton skel = (BurlapSkeleton) skelClass.newInstance();
-        skel._setServer(server);
-        skel._setResolver(_resolver);
-        skel._setObject(remote);
-
-        return skel;
-      }
-      */
     }
 
     return null;
   }
 
   /**
-   * Returns the skeleton
+   * Returns the skeleton to use to return configuration exceptions
    */
+  @Override
   public Skeleton getExceptionSkeleton()
     throws Exception
   {
     return new ExceptionSkeleton();
-  }
-
-  /**
-   * Returns the class for home skeletons.
-   */
-  protected Class getHomeSkelClass(AbstractServer server)
-    throws Exception
-  {
-    Class homeSkelClass = (Class) _homeSkeletonMap.get(server);
-
-    if (homeSkelClass != null)
-      return homeSkelClass;
-
-    Class remoteHomeClass = server.getRemoteHomeClass();
-
-    homeSkelClass = BurlapSkeletonGenerator.generate(remoteHomeClass,
-                                                     getWorkPath());
-
-    _homeSkeletonMap.put(server, homeSkelClass);
-
-    return homeSkelClass;
-  }
-
-  /**
-   * Returns the class for home skeletons.
-   */
-  protected Class getObjectSkelClass(AbstractServer server)
-    throws Exception
-  {
-    Class objectSkelClass = (Class) _objectSkeletonMap.get(server);
-
-    if (objectSkelClass != null)
-      return objectSkelClass;
-
-    Class remoteObjectClass = server.getRemoteObjectClass();
-
-    objectSkelClass = BurlapSkeletonGenerator.generate(remoteObjectClass,
-                                                       getWorkPath());
-
-    _objectSkeletonMap.put(server, objectSkelClass);
-
-    return objectSkelClass;
   }
 
   /**

@@ -33,6 +33,7 @@ import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
 import com.caucho.java.gen.GenClass;
 
+import java.util.ArrayList;
 import javax.ejb.*;
 
 /**
@@ -93,9 +94,17 @@ abstract public class BeanGenerator extends GenClass {
   }
 
   /**
+   * Returns the views.
+   */
+  public ArrayList<View> getViews()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Generates the views for the bean
    */
-  public void generateViews()
+  public void createViews()
   {
   }
 

@@ -124,25 +124,4 @@ abstract public class AbstractSessionServer extends AbstractServer {
   {
     return _remoteHomeView;
   }
-
-  /**
-   * Creates the local stub for the object in the context.
-   */
-  SessionObject getEJBLocalObject(SessionBean bean)
-  {
-    try {
-      SessionObject obj = null;
-
-      /*
-      obj = (SessionObject) bean.getLocal();
-      obj._setObject(bean);
-      */
-      if (obj == null)
-        throw new IllegalStateException("bean has no local interface");
-
-      return obj;
-    } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
-    }
-  }
 }

@@ -1076,7 +1076,11 @@ public class EjbBean extends DescriptionGroupConfig
       
       _bean.introspect();
 
-      _bean.generateViews();
+      _bean.createViews();
+
+      for (EjbMethodPattern method : _methodList) {
+	method.configure(_bean);
+      }
       
       // initIntrospect();
 
@@ -1854,10 +1858,13 @@ public class EjbBean extends DescriptionGroupConfig
                                           ApiMethod implMethod,
                                           String prefix)
   {
+    /*
     return TransactionChain.create(next,
 				   getTransactionAttribute(implMethod, prefix),
                                    apiMethod, implMethod, isEJB3(),
                                    _ejbConfig.getApplicationExceptions());
+    */
+    return null;
   }
 
   public CallChain getSecurityChain(CallChain next,
@@ -1955,12 +1962,14 @@ public class EjbBean extends DescriptionGroupConfig
   /**
    * Returns the matching transaction attribute.
    */
-  public int getTransactionAttribute(ApiMethod method, String intf)
+  public TransactionAttributeType
+    getTransactionAttribute(ApiMethod method, String intf)
   {
     if (! isContainerTransaction())
-      return EjbMethod.TRANS_BEAN;
+      return null;
 
-    int transaction = EjbMethod.TRANS_REQUIRED;
+    TransactionAttributeType transaction
+      = TransactionAttributeType.REQUIRED;
 
     EjbMethodPattern ejbMethod = getMethodPattern(null, null);
 
@@ -2416,34 +2425,7 @@ public class EjbBean extends DescriptionGroupConfig
   {
     TransactionAttributeType xaType = xa.value();
 
-    switch (xaType) {
-    case REQUIRED:
-      pattern.setTransaction(EjbMethod.TRANS_REQUIRED);
-      break;
-
-    case REQUIRES_NEW:
-      pattern.setTransaction(EjbMethod.TRANS_REQUIRES_NEW);
-      break;
-
-    case MANDATORY:
-      pattern.setTransaction(EjbMethod.TRANS_MANDATORY);
-      break;
-
-    case SUPPORTS:
-      pattern.setTransaction(EjbMethod.TRANS_SUPPORTS);
-      break;
-
-    case NOT_SUPPORTED:
-      pattern.setTransaction(EjbMethod.TRANS_NOT_SUPPORTED);
-      break;
-
-    case NEVER:
-      pattern.setTransaction(EjbMethod.TRANS_NEVER);
-      break;
-
-    default:
-      throw new IllegalStateException();
-    }
+    pattern.setTransaction(xaType);
   }
 
   private MethodSignature getSignature(ApiMethod method)

@@ -31,19 +31,10 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
-import com.caucho.util.Log;
 
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
 import javax.ejb.Handle;
-import javax.ejb.SessionBean;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Abstract base class for a stateful session object

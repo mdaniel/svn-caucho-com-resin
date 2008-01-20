@@ -33,9 +33,7 @@ import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.*;
-import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.protocol.JVMObject;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
@@ -52,11 +50,6 @@ abstract public class SessionServer extends AbstractServer
 {
   protected final static Logger log
     = Logger.getLogger(SessionServer.class.getName());
-
-  private boolean _isClosed;
-  
-  private PrePassivateConfig _prePassivateConfig;
-  private PostActivateConfig _postActivateConfig;
 
   public SessionServer(EjbContainer manager)
   {
@@ -162,30 +155,6 @@ abstract public class SessionServer extends AbstractServer
   }
 
   /**
-   * Returns the home object for jndi.
-   */
-  @Override
-  public Object getHomeObject()
-  {
-    return _remoteHomeView;
-  }
-
-  /**
-   * Returns the EJBRemote stub for the container
-   */
-  @Override
-  public Object getRemoteObject21()
-  {
-    if (_remoteHomeView != null)
-      return _remoteHomeView;
-
-    //if (_remoteHomeView == null)
-    //  return null;
-
-    return getRemoteObject();
-  }
-
-  /**
    * Returns the EJBRemote stub for the container
    */
   @Override
@@ -194,103 +163,8 @@ abstract public class SessionServer extends AbstractServer
     return getRemoteObject(null);
   }
 
-
-  /**
-   * Returns the 3.0 local stub for the container
-   */
-  @Override
-  public Object getLocalObject()
-  {
-    return getClientObject(null);
-  }
-
-  /**
-   * Returns the 3.0 local stub for the container
-   */
-  @Override
-  public Object getLocalObject(Class businessInterface)
-  {
-    return getClientObject(businessInterface);
-  }
-
-  /**
-   * Creates the local stub for the object in the context.
-   */
-  SessionObject getEJBLocalObject(SessionBean bean)
-  {
-    try {
-      SessionObject obj = null;
-
-      /*
-        obj = (SessionObject) bean.getLocal();
-        obj._setObject(bean);
-      */
-      if (obj == null)
-        throw new IllegalStateException("bean has no local interface");
-
-      return obj;
-    } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
-    }
-  }
-
-  /**
-   * Creates a handle for a new session.
-   */
-  JVMObject createEJBObject(Object primaryKey)
-  {
-    try {
-      JVMObject obj = (JVMObject) _remoteStubClass.newInstance();
-      obj._init(this, primaryKey);
-
-      return obj;
-    } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
-    }
-  }
-
-
   public AbstractContext getContext()
   {
     return getSessionContext();
-  }
-
-  @Override
-  public void setBusinessInterface(Object obj, Class businessInterface)
-  {
-    if (obj instanceof AbstractSessionObject) {
-      AbstractSessionObject sessionObject = (AbstractSessionObject) obj;
-      sessionObject.__caucho_setBusinessInterface(businessInterface);
-    }
-  }
-
-  /**
-   * Adds a web service client.
-   */
-  /*
-  public WebServiceClient createWebServiceClient()
-  {
-    return new WebServiceClient();
-  }
-
-  */
-  public PostActivateConfig getPostActivate()
-  {
-    return _postActivateConfig;
-  }
-
-  public PrePassivateConfig getPrePassivate()
-  {
-    return _prePassivateConfig;
-  }
-
-  public void setPostActivate(PostActivateConfig postActivate)
-  {
-    _postActivateConfig = postActivate;
-  }
-
-  public void setPrePassivate(PrePassivateConfig prePassivate)
-  {
-    _prePassivateConfig = prePassivate;
   }
 }

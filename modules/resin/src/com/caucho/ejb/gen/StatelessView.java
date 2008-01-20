@@ -73,6 +73,14 @@ public class StatelessView extends View {
   }
 
   /**
+   * Returns the introspected methods
+   */
+  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  {
+    return _businessMethods;
+  }
+
+  /**
    * Introspects the APIs methods, producing a business method for
    * each.
    */

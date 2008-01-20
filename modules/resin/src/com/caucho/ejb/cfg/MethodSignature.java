@@ -200,7 +200,13 @@ public class MethodSignature {
   {
     if (_methodIntf != null && ! _methodIntf.equals(intf))
       return false;
-    else if (_methodName == null)
+    else
+      return isMatch(methodName, params);
+  }
+  
+  public boolean isMatch(String methodName, Class []params)
+  {
+    if (_methodName == null)
       return false;
     else if (_methodName.equals("*"))
       return true;

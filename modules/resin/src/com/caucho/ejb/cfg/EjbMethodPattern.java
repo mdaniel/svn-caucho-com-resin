@@ -29,9 +29,13 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
+import com.caucho.ejb.gen.*;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
+import java.lang.reflect.*;
+
+import javax.ejb.*;
 
 /**
  * Configuration for a method.
@@ -58,7 +62,7 @@ public class EjbMethodPattern {
   private String _query;
   private String _queryLocation;
   
-  private int _transactionType = -1;
+  private TransactionAttributeType _transactionType = null;
   private ArrayList _roles;
 
   /**
@@ -212,17 +216,17 @@ public class EjbMethodPattern {
   /**
    * Returns the method's transaction type, e.g. Required.
    */
-  public int getTransactionType()
+  public TransactionAttributeType getTransactionType()
   {
-    if (_transactionType >= 0)
+    if (_transactionType != null)
       return _transactionType;
     else if (isReadOnly())
-      return EjbMethod.TRANS_SUPPORTS;
+      return TransactionAttributeType.SUPPORTS;
     else
-      return EjbMethod.TRANS_REQUIRED;
+      return TransactionAttributeType.REQUIRED;
   }
 
-  public void setTransaction(int type)
+  public void setTransaction(TransactionAttributeType type)
     throws ConfigException
   {
     _transactionType = type;
@@ -235,17 +239,17 @@ public class EjbMethodPattern {
     throws ConfigException
   {
     if ("Required".equals(type))
-      _transactionType = EjbMethod.TRANS_REQUIRED;
+      _transactionType = TransactionAttributeType.REQUIRED;
     else if ("RequiresNew".equals(type))
-      _transactionType = EjbMethod.TRANS_REQUIRES_NEW;
+      _transactionType = TransactionAttributeType.REQUIRES_NEW;
     else if ("Mandatory".equals(type))
-      _transactionType = EjbMethod.TRANS_MANDATORY;
+      _transactionType = TransactionAttributeType.MANDATORY;
     else if ("NotSupported".equals(type))
-      _transactionType = EjbMethod.TRANS_NOT_SUPPORTED;
+      _transactionType = TransactionAttributeType.NOT_SUPPORTED;
     else if ("Never".equals(type))
-      _transactionType = EjbMethod.TRANS_NEVER;
+      _transactionType = TransactionAttributeType.NEVER;
     else if ("Supports".equals(type))
-      _transactionType = EjbMethod.TRANS_SUPPORTS;
+      _transactionType = TransactionAttributeType.SUPPORTS;
     else
       throw new ConfigException(L.l("'{0}' is an unknown transaction type.  The transaction types are:\n  Required - creates a new transaction if none is active.\n  RequiresNew - always creates a new transaction.\n  Mandatory - requires an active transaction.\n  NotSupported - suspends any active transaction.\n  Never - forbids any active transaction.\n  Supports - allows a transaction or no transaction.", type));
   }
@@ -311,6 +315,35 @@ public class EjbMethodPattern {
 	_roles.add(role);
       }
     }
+  }
+
+  /**
+   * Configures the bean with the override values
+   */
+  public void configure(BeanGenerator bean)
+  {
+    for (View view : bean.getViews()) {
+      // XXX: check for type
+      
+      for (BusinessMethodGenerator bizMethod : view.getMethods()) {
+	Method apiMethod = bizMethod.getApiMethod();
+	
+	if (_signature.isMatch(apiMethod.getName(),
+			       apiMethod.getParameterTypes())) {
+	  configureXA(bizMethod);
+	}
+      }
+    }
+  }
+
+  private void configureXA(BusinessMethodGenerator bizMethod)
+  {
+    if (_transactionType == null)
+      return;
+
+    XaCallChain xa = bizMethod.getXa();
+
+    xa.setTransactionType(_transactionType);
   }
 
   /**

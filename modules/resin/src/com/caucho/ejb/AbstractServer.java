@@ -320,30 +320,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Sets the 2.1 remote interface.
-   */
-  public void setRemote21(Class remote21)
-  {
-    _remote21 = remote21;
-  }
-
-  /**
-   * Gets the 2.1 local interface.
-   */
-  public Class getLocal21()
-  {
-    return _local21;
-  }
-
-  /**
-   * Sets the 2.1 local interface.
-   */
-  public void setLocal21(Class local21)
-  {
-    _local21 = local21;
-  }
-
-  /**
    * Sets the remote object list.
    */
   public void setRemoteApiList(ArrayList<Class> list)

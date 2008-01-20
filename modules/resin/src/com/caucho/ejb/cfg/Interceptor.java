@@ -30,10 +30,6 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.bytecode.*;
-import com.caucho.config.ConfigException;
-import com.caucho.java.gen.GenClass;
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
@@ -43,7 +39,6 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.interceptor.AroundInvoke;

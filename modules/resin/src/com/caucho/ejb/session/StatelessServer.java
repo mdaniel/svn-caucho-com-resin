@@ -50,14 +50,7 @@ public class StatelessServer extends SessionServer {
     = Logger.getLogger(StatelessServer.class.getName());
 
   private StatelessContext _homeContext;
-
-  // EJB 2.1
-  private EJBObject _remoteObject21;
-  private EJBLocalObject _localObject21;
-
-  // EJB 3.0
   private StatelessProvider _remoteProvider;
-  private Object _localObject;
 
   /**
    * Creates a new stateless server.
@@ -71,6 +64,7 @@ public class StatelessServer extends SessionServer {
     super(ejbContainer);
   }
 
+  @Override
   protected String getType()
   {
     return "stateless:";
@@ -80,6 +74,7 @@ public class StatelessServer extends SessionServer {
    * Returns the JNDI proxy object to create instances of the
    * local interface.
    */
+  @Override
   public Object getLocalProxy(Class api)
   {
     StatelessProvider provider = getStatelessContext().getProvider(api);
@@ -143,74 +138,8 @@ public class StatelessServer extends SessionServer {
     else
       return null;
   }
-
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  @Override
-  public Object getClientObject(Class businessInterface)
-  {
-    Object obj = getClientLocalHome();
-
-    if (obj != null) {
-      if (businessInterface == null)
-        return obj;
-
-      if (businessInterface.isAssignableFrom(obj.getClass()))
-        return obj;
-
-      if (_localObject != null) {
-        Class local21 = getLocal21();
-
-        if (businessInterface.isAssignableFrom(local21))
-          return _localObject;
-      }
-    }
-
-    for (Class cl : getLocalApiList()) {
-      if (businessInterface == null
-          || businessInterface.isAssignableFrom(cl)) {
-        if (_localObject instanceof AbstractSessionObject) {
-          AbstractSessionObject sessionObject = (AbstractSessionObject) _localObject;
-
-          if (sessionObject.__caucho_getBusinessInterface() == businessInterface)
-            break;
-
-          // ejb/0ff4 TCK: ejb30/bb/session/stateless/sessioncontext/annotated/getInvokedBusinessInterfaceLocal1
-          // Creates a new instance to store the invoked business interface.
-          //obj = getStatelessContext().createLocalObject();
-          //setBusinessInterface(obj, businessInterface);
-
-          // XXX TCK: ejb30/bb/session/stateless/equals/annotated/testBeanotherEquals, needs QA
-          _localObject = obj;
-
-          break;
-        }
-      }
-    }
-
-    return _localObject;
-  }
-
-  /**
-   * Returns the 3.0 local stub for the container
-   */
-  @Override
-  public Object getLocalObject()
-  {
-    return getClientObject(null);
-  }
-
-  /**
-   * Returns the 3.0 local stub for the container
-   */
-  @Override
-  public Object getLocalObject(Class businessInterface)
-  {
-    return getClientObject(businessInterface);
-  }
-
   
+  @Override
   public void init()
     throws Exception
   {

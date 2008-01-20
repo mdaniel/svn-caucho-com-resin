@@ -53,25 +53,25 @@ public class StatelessGenerator extends SessionGenerator {
   }
 
   @Override
-  protected View generateLocalView(ApiClass api)
+  protected View createLocalView(ApiClass api)
   {
     return new StatelessLocalView(this, api);
   }
 
   @Override
-  protected View generateLocalHomeView(ApiClass api)
+  protected View createLocalHomeView(ApiClass api)
   {
     return new StatelessLocalHomeView(this, api);
   }
 
   @Override
-  protected View generateRemoteView(ApiClass api)
+  protected View createRemoteView(ApiClass api)
   {
     return new StatelessRemoteView(this, api);
   }
 
   @Override
-  protected View generateRemoteHomeView(ApiClass api)
+  protected View createRemoteHomeView(ApiClass api)
   {
     return new StatelessRemoteHomeView(this, api);
   }

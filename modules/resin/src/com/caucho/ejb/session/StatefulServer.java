@@ -183,40 +183,6 @@ public class StatefulServer extends SessionServer
   }
 
   /**
-   * Returns the 3.0 local stub for the container
-   */
-  @Override
-  public Object getLocalObject(ConfigContext env)
-  {
-    return _homeContext._caucho_newInstance(env);
-  }
-  
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  @Override
-  public Object getClientObject(Class businessInterface)
-  {
-    return newInstance();
-  }
-
-  /**
-   * Returns a new instance.
-   */
-  Object newInstance()
-  {
-    return _homeContext._caucho_newInstance();
-  }
-
-  /**
-   * Returns a new 2.1 instance.
-   */
-  Object newInstance21()
-  {
-    return _homeContext._caucho_newInstance21();
-  }
-
-  /**
    * Returns the remote stub for the container
    */
   @Override

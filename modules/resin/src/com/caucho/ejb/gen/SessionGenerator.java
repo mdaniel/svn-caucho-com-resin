@@ -30,9 +30,7 @@
 package com.caucho.ejb.gen;
 
 import com.caucho.config.*;
-import com.caucho.config.types.EnvEntry;
 import com.caucho.config.types.InjectionTarget;
-import com.caucho.config.types.ResourceRef;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -170,6 +168,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Adds a remote
    */
+  @Override
   public void addRemote(ApiClass remoteApi)
   {
     _remoteApi.add(remoteApi);
@@ -207,6 +206,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Introspects the bean.
    */
+  @Override
   public void introspect()
   {
     super.introspect();
@@ -221,28 +221,29 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates the views for the bean
    */
-  public void generateViews()
+  @Override
+  public void createViews()
   {
     if (_localHome != null) {
-      View view = generateLocalHomeView(_localHome);
+      View view = createLocalHomeView(_localHome);
 
       _views.add(view);
     }
     
     for (ApiClass api : _localApi) {
-      View view = generateLocalView(api);
+      View view = createLocalView(api);
 
       _views.add(view);
     }
     
     if (_remoteHome != null) {
-      View view = generateRemoteHomeView(_remoteHome);
+      View view = createRemoteHomeView(_remoteHome);
 
       _views.add(view);
     }
     
     for (ApiClass api : _remoteApi) {
-      View view = generateRemoteView(api);
+      View view = createRemoteView(api);
 
       _views.add(view);
     }
@@ -254,7 +255,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates the local home view for the given class
    */
-  protected View generateLocalHomeView(ApiClass api)
+  protected View createLocalHomeView(ApiClass api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -262,7 +263,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates the remote home view for the given class
    */
-  protected View generateRemoteHomeView(ApiClass api)
+  protected View createRemoteHomeView(ApiClass api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -270,7 +271,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates the local view for the given class
    */
-  protected View generateLocalView(ApiClass api)
+  protected View createLocalView(ApiClass api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -278,7 +279,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates the remote view for the given class
    */
-  protected View generateRemoteView(ApiClass api)
+  protected View createRemoteView(ApiClass api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -352,28 +353,6 @@ abstract public class SessionGenerator extends BeanGenerator {
     
     return apiList;
   }
-
-  /*
-  public void generate(JavaWriter out)
-    throws IOException
-  {
-    generateContext(out);
-
-    if (_bean.getLocalHome() != null
-	&& EJBLocalHome.class.isAssignableFrom(_bean.getLocalHome().getJavaClass()))
-      generateNewInstance(out, "21");
-    else
-      generateNewInstance(out, "");
-
-    if (_bean.isEJB21())
-      generateNewRemoteInstance(out, "21");
-
-    if (_bean.isEJB30())
-      generateNewRemoteInstance(out, "");
-
-    generateBean(out);
-  }
-  */
 
   abstract protected void generateContext(JavaWriter out)
     throws IOException;

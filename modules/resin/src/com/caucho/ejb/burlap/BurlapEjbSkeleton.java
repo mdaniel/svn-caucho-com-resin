@@ -57,19 +57,16 @@ public class BurlapEjbSkeleton extends Skeleton {
 
   private Object _object;
   private BurlapSkeleton _skel;
-  private AbstractServer _server;
-  private HessianRemoteResolver _resolver;
+   private HessianRemoteResolver _resolver;
 
   public BurlapEjbSkeleton(Object object,
 			   BurlapSkeleton skel,
-			   AbstractServer server,
 			   HessianRemoteResolver resolver)
   {
     assert(object != null);
       
     _object = object;
     _skel = skel;
-    _server = server;
     _resolver = resolver;
   }
 

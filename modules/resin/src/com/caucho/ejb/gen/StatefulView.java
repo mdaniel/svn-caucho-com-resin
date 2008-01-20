@@ -70,6 +70,14 @@ abstract public class StatefulView extends View {
   abstract protected String getViewClassName();
 
   /**
+   * Returns the introspected methods
+   */
+  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  {
+    return _businessMethods;
+  }
+
+  /**
    * Introspects the APIs methods, producing a business method for
    * each.
    */

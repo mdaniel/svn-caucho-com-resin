@@ -89,6 +89,14 @@ abstract public class View {
   }
 
   /**
+   * Returns the introspected methods
+   */
+  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Generates prologue for the context.
    */
   public void generateContextPrologue(JavaWriter out)

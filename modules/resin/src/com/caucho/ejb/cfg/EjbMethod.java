@@ -29,8 +29,9 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.cfg21.EjbView;
 import com.caucho.config.ConfigException;
+import com.caucho.ejb.cfg21.EjbView;
+import com.caucho.ejb.gen.BeanGenerator;
 import com.caucho.ejb.gen21.BeanAssembler;
 import com.caucho.ejb.gen21.ViewClass;
 import com.caucho.java.JavaWriter;
