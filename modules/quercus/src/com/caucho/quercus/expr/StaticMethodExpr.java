@@ -135,12 +135,10 @@ public class StaticMethodExpr extends Expr {
       env.error(getLocation(), L.l("no matching class {0}", _className));
     }
 
-    /*
     // php/0954 - what appears to be a static call may be a call to a super constructor
-    Value thisValue = env.getThis();
-    */
+    Value thisValue = env.getThis();    
 
-    Value thisValue = NullThisValue.NULL;
+    //Value thisValue = NullThisValue.NULL;
     
     return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
   }

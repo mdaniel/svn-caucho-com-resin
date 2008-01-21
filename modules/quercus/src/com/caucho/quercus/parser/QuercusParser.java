@@ -3043,6 +3043,17 @@ public class QuercusParser {
 	}
 	    
 	if (token == '(') {
+	  
+	  if (_isNewExpr) {
+	    if ("self".equals(name))
+	      return createString(_classDef.getName());
+	    else if ("parent".equals(name))
+	      return createString(_classDef.getParentName());
+	    else
+	      return createString(name);
+	  }
+	  
+	  /*
           if (_isNewExpr && className == null
               && ("self".equals(name) || "parent".equals(name))) {
             if ("self".equals(name))
@@ -3050,6 +3061,7 @@ public class QuercusParser {
             else
               return createString(_classDef.getParentName());
           }
+          */
           else
             return parseFunction(className, name, isInstantiated);
         }
@@ -3290,11 +3302,10 @@ public class QuercusParser {
     String var = parseIdentifier();
 
     _peekToken = parseToken();
-    if (_peekToken == '(') {
+    if (_peekToken == '(' && ! _isNewExpr) {
       parseToken();
 
       Expr varExpr = _factory.createVar(_function.createVar(var));
-
       ArrayList<Expr> args = parseArgs();
 
       return _factory.createStaticVarMethod(getLocation(), className,
@@ -3363,30 +3374,22 @@ public class QuercusParser {
   private Expr parseNew()
     throws IOException
   {
-    int token = parseToken();
-
     String name = null;
     Expr nameExpr = null;
-    
-    if (token == IDENTIFIER
-        && !"self".equals(_lexeme) // /php/096i
-        && !"parent".equals(_lexeme)) // php/0956
-    {
-      name = _lexeme;
-    }
-    else {
-      _peekToken = token;
-      
+
       boolean isNewExpr = _isNewExpr;
       _isNewExpr = true;
 
-      // nameExpr = parseTermBase();
+      //nameExpr = parseTermBase();
       nameExpr = parseTermDeref();
 
       _isNewExpr = isNewExpr;
-    }
+    
+    // XX: unicode issues?
+    if (nameExpr.isString())
+      name = nameExpr.evalConstant().toString();
 
-    token = parseToken();
+    int token = parseToken();
     
     ArrayList<Expr> args = new ArrayList<Expr>();
 
@@ -3637,7 +3640,7 @@ public class QuercusParser {
     else
       throw error(L.l("expected identifier at {0}.", tokenName(token)));
   }
-
+  
   /**
    * Parses the next token.
    */
