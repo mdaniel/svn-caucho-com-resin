@@ -123,9 +123,7 @@ public class StatefulGenerator extends SessionGenerator {
     
     out.println("super(context.getStatefulServer());");
 
-    for (View view : getViews()) {
-      view.generateContextObjectConstructor(out);
-    }
+    generateContextObjectConstructor(out);
 
     out.popDepth();
     out.println("}");
@@ -163,13 +161,14 @@ public class StatefulGenerator extends SessionGenerator {
     out.println("}");
   }
 
-  protected void generateViews(JavaWriter out)
+  /**
+   * Creates any additional code in the constructor
+   */
+  public void generateContextObjectConstructor(JavaWriter out)
     throws IOException
   {
     for (View view : getViews()) {
-      out.println();
-
-      view.generate(out);
+      view.generateContextObjectConstructor(out);
     }
   }
 

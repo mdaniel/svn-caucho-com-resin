@@ -49,12 +49,13 @@ public class StatefulCreateMethod extends StatefulMethod
   private View _objectView;
   
   public StatefulCreateMethod(StatefulGenerator bean,
+			      StatefulView homeView,
 			      View objectView,
 			      Method apiMethod,
 			      Method implMethod,
 			      int index)
   {
-    super(apiMethod, implMethod, index);
+    super(homeView, apiMethod, implMethod, index);
 
     _bean = bean;
     _objectView = objectView;

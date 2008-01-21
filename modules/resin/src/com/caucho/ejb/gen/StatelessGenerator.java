@@ -136,7 +136,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("}");
   }
 
-  protected void generateViews(JavaWriter out)
+  public void generateViews(JavaWriter out)
     throws IOException
   {
     for (View view : getViews()) {

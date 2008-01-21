@@ -42,7 +42,7 @@ import javax.interceptor.*;
 /**
  * Represents the security interception
  */
-public class SecurityCallChain implements EjbCallChain {
+public class SecurityCallChain extends AbstractCallChain {
   private static final L10N L = new L10N(SecurityCallChain.class);
 
   private BusinessMethodGenerator _bizMethod;
@@ -56,6 +56,8 @@ public class SecurityCallChain implements EjbCallChain {
   public SecurityCallChain(BusinessMethodGenerator bizMethod,
 			   EjbCallChain next)
   {
+    super(next);
+    
     _bizMethod = bizMethod;
     _next = next;
   }

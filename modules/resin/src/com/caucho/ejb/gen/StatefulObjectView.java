@@ -60,7 +60,8 @@ abstract public class StatefulObjectView extends StatefulView {
       if (implMethod == null)
 	return null;
 
-      return new StatefulRemoveMethod(apiMethod.getMethod(),
+      return new StatefulRemoveMethod(this,
+				      apiMethod.getMethod(),
 				      implMethod.getMethod(),
 				      index);
     }

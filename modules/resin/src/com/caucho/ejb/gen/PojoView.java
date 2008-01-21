@@ -29,45 +29,36 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import javax.annotation.security.*;
 import javax.ejb.*;
-import javax.interceptor.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
- * Represents a filter for invoking a method
+ * Represents a public interface to a bean, e.g. a local stateful view
  */
-public interface EjbCallChain {
-  /**
-   * Returns true if this filter will generate code.
-   */
-  public boolean isEnhanced();
+public class PojoView extends View {
+  private static final L10N L = new L10N(PojoView.class);
+
+  public PojoView(BeanGenerator bean, ApiClass api)
+  {
+    super(bean, api);
+  }
+
+  protected String getViewClassName()
+  {
+    return getBean().getFullClassName();
+  }
 
   /**
-   * Introspects the method for the default values
+   * Generates the view code.
    */
-  public void introspect(Method apiMethod, Method implMethod);
-
-  /**
-   * Generates the static class prologue
-   */
-  public void generatePrologue(JavaWriter out, HashMap map)
-    throws IOException;
-
-  /**
-   * Generates initialization in the constructor
-   */
-  public void generateConstructor(JavaWriter out, HashMap map)
-    throws IOException;
-
-  /**
-   * Generates the method interception code
-   */
-  public void generateCall(JavaWriter out)
-    throws IOException;
+  public void generate(JavaWriter out)
+    throws IOException
+  {
+    
+  }
 }

@@ -48,11 +48,12 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   private ApiClass _ejbClass;
   
   public StatelessLocalMethod(ApiClass ejbClass,
+			      StatelessView view,
 			      Method apiMethod,
 			      Method implMethod,
 			      int index)
   {
-    super(apiMethod, implMethod, index);
+    super(view, apiMethod, implMethod, index);
 
     _ejbClass = ejbClass;
   }

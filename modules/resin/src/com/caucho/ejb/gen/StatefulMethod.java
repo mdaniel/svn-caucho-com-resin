@@ -44,9 +44,12 @@ import javax.interceptor.*;
  */
 public class StatefulMethod extends BusinessMethodGenerator
 {
-  public StatefulMethod(Method apiMethod, Method implMethod, int index)
+  public StatefulMethod(StatefulView view,
+			Method apiMethod,
+			Method implMethod,
+			int index)
   {
-    super(apiMethod, implMethod, index);
+    super(view, apiMethod, implMethod, index);
   }
 
   /**

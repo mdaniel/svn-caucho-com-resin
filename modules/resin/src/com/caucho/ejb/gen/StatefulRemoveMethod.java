@@ -46,11 +46,12 @@ import javax.interceptor.*;
  */
 public class StatefulRemoveMethod extends StatefulMethod
 {
-  public StatefulRemoveMethod(Method apiMethod,
+  public StatefulRemoveMethod(StatefulView view,
+			      Method apiMethod,
 			      Method implMethod,
 			      int index)
   {
-    super(apiMethod, implMethod, index);
+    super(view, apiMethod, implMethod, index);
   }
 
   /*

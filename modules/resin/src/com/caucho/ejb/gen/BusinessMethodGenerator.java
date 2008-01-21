@@ -44,9 +44,11 @@ import javax.interceptor.*;
  */
 public class BusinessMethodGenerator implements EjbCallChain {
   private static final L10N L = new L10N(BusinessMethodGenerator.class);
+
+  private final View _view;
   
-  private Method _apiMethod;
-  private Method _implMethod;
+  private final Method _apiMethod;
+  private final Method _implMethod;
 
   private String _uniqueName;
 
@@ -61,10 +63,13 @@ public class BusinessMethodGenerator implements EjbCallChain {
   private SecurityCallChain _security;
   private InterceptorCallChain _interceptor;
   
-  public BusinessMethodGenerator(Method apiMethod,
+  public BusinessMethodGenerator(View view,
+				 Method apiMethod,
 				 Method implMethod,
 				 int index)
   {
+    _view = view;
+    
     _apiMethod = apiMethod;
     _implMethod = implMethod;
 
@@ -73,8 +78,14 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _interceptor = new InterceptorCallChain(this);
     _xa = new XaCallChain(this, _interceptor);
     _security = new SecurityCallChain(this, _xa);
+  }
 
-    introspect(apiMethod, implMethod);
+  /**
+   * Returns the owning view.
+   */
+  public View getView()
+  {
+    return _view;
   }
 
   /**
@@ -149,13 +160,29 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _interceptor.introspect(apiMethod, implMethod);
   }
 
-  public void generate(JavaWriter out, HashMap prologueMap)
+  public final void generatePrologueTop(JavaWriter out, HashMap prologueMap)
     throws IOException
   {
     if (! isEnhanced())
       return;
 
     _security.generatePrologue(out, prologueMap);
+  }
+
+  public final void generateConstructorTop(JavaWriter out, HashMap prologueMap)
+    throws IOException
+  {
+    if (! isEnhanced())
+      return;
+
+    _security.generateConstructor(out, prologueMap);
+  }
+
+  public final void generate(JavaWriter out, HashMap prologueMap)
+    throws IOException
+  {
+    if (! isEnhanced())
+      return;
 
     out.println();
     if (Modifier.isPublic(_apiMethod.getModifiers()))
@@ -181,7 +208,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
     
     out.println(")");
     generateThrows(out, _implMethod.getExceptionTypes());
-    out.println();
     out.println("{");
     out.pushDepth();
 
@@ -189,6 +215,42 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     out.popDepth();
     out.println("}");
+
+    if (_interceptor.isEnhanced()) {
+      out.println();
+      out.print("private ");
+      out.printClass(_implMethod.getReturnType());
+      out.print(" __caucho_");
+      out.print(_apiMethod.getName());
+      out.print("(");
+
+      for (int i = 0; i < types.length; i++) {
+	if (i != 0)
+	  out.print(", ");
+
+	out.printClass(types[i]);
+	out.print(" a" + i);
+      }
+    
+      out.println(")");
+      generateThrows(out, _implMethod.getExceptionTypes());
+      out.println();
+      out.println("{");
+      out.pushDepth();
+
+      generateCall(out);
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
+
+  /**
+   * Generates any additional configuration in the constructor
+   */
+  public void generateConstructor(JavaWriter out, HashMap map)
+    throws IOException
+  {
   }
 
   public void generatePrologue(JavaWriter out, HashMap map)
@@ -210,6 +272,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
       out.printClass(exnCls[i]);
     }
+    out.println();
   }
 
   public void generateCall(JavaWriter out)

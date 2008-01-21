@@ -116,6 +116,7 @@ abstract public class StatefulHomeView extends StatefulView {
 					 apiMethod.getReturnType()));
       
       return new StatefulCreateMethod(getSessionBean(),
+				      this,
 				      localView,
 				      apiMethod.getMethod(),
 				      implMethod.getMethod(),
@@ -134,10 +135,7 @@ abstract public class StatefulHomeView extends StatefulView {
     }
     else if (apiMethod.getName().equals("remove")
 	     && apiMethod.getDeclaringClass().getName().startsWith("javax.ejb")) {
-      if (apiMethod.getParameterTypes().length != 0)
-	return null;
-
-      return getEjbClass().getMethod("ejbRemove", new Class[0]);
+      return null;
     }
     else
       return super.findImplMethod(apiMethod);

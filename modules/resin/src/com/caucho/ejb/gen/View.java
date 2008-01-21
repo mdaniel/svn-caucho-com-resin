@@ -35,7 +35,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
@@ -102,6 +102,7 @@ abstract public class View {
   public void generateContextPrologue(JavaWriter out)
     throws IOException
   {
+    
   }
 
   /**
@@ -125,4 +126,40 @@ abstract public class View {
    */
   abstract public void generate(JavaWriter out)
     throws IOException;
+
+  /**
+   * Generates constructor addiontions
+   */
+  public void generateBusinessConstructor(JavaWriter out)
+    throws IOException
+  {
+    HashMap map = new HashMap();
+    for (BusinessMethodGenerator method : getMethods()) {
+      method.generateConstructorTop(out, map);
+    }
+  }
+
+  /**
+   * Generates prologue additions
+   */
+  public void generateBusinessPrologue(JavaWriter out)
+    throws IOException
+  {
+    HashMap map = new HashMap();
+    for (BusinessMethodGenerator method : getMethods()) {
+      method.generatePrologueTop(out, map);
+    }
+  }
+
+  /**
+   * Generates view's business methods
+   */
+  public void generateBusinessMethods(JavaWriter out)
+    throws IOException
+  {
+    HashMap map = new HashMap();
+    for (BusinessMethodGenerator method : getMethods()) {
+      method.generate(out, map);
+    }
+  }
 }

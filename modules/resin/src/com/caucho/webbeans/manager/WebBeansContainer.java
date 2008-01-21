@@ -60,11 +60,13 @@ public class WebBeansContainer
   private static final L10N L = new L10N(WebBeansContainer.class);
   private static final Logger log
     = Logger.getLogger(WebBeansContainer.class.getName());
-  
+
   private static final String SCHEMA = "com/caucho/webbeans/cfg/webbeans.rnc";
 
   private static final EnvironmentLocal<WebBeansContainer> _localContainer
     = new EnvironmentLocal<WebBeansContainer>();
+  
+  private static final Annotation []NULL_ANN = new Annotation[0];
 
   private WebBeansContainer _parent;
   
@@ -96,6 +98,9 @@ public class WebBeansContainer
 
   private HashMap<Class,ClassComponent> _transientMap
     = new HashMap<Class,ClassComponent>();
+
+  private HashMap<FactoryBinding,ComponentFactory> _objectFactoryMap
+    = new HashMap<FactoryBinding,ComponentFactory>();
 
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
@@ -640,6 +645,87 @@ public class WebBeansContainer
     }
   }
 
+  /**
+   * Returns a new instance for a class, but does not register the
+   * component with webbeans.
+   */
+  public <T> T getObject(Class<T> type, Annotation ... ann)
+  {
+    return (T) createFactory(type, ann).get();
+  }
+
+  /**
+   * Returns a new instance for a class, but does not register the
+   * component with webbeans.
+   */
+  public <T> T getObject(Class<T> type, String name)
+  {
+    Annotation []ann = new Annotation[] { Names.create(name) };
+    
+    return (T) createFactory(type, ann).get();
+  }
+
+  /**
+   * Returns a new instance for a class, but does not register the
+   * component with webbeans.
+   */
+  public <T> T createFactory(Class<T> type, String name)
+  {
+    Annotation []ann = new Annotation[] { Names.create(name) };
+    
+    return (T) createFactory(type, ann);
+  }
+
+  /**
+   * Returns a new instance for a class, but does not register the
+   * component with webbeans.
+   */
+  public ComponentFactory createFactory(Class type, Annotation ... ann)
+  {
+    FactoryBinding binding = new FactoryBinding(type, ann);
+    
+    synchronized (_objectFactoryMap) {
+      ComponentFactory factory = _objectFactoryMap.get(binding);
+
+      if (factory != null)
+	return factory;
+
+      if (ann == null)
+	ann = NULL_ANN;
+      
+      factory = resolveByType(type, ann);
+
+      if (factory != null) {
+	_objectFactoryMap.put(binding, factory);
+
+	return factory;
+      }
+      
+      if (type.isInterface())
+	throw new ConfigException(L.l("'{0}' cannot be an interface.  createTransient requires a concrete type.", type.getName()));
+      else if (Modifier.isAbstract(type.getModifiers()))
+	throw new ConfigException(L.l("'{0}' cannot be an abstract.  createTransient requires a concrete type.", type.getName()));
+	
+      ClassComponent comp = new ClassComponent(_wbWebBeans);
+      comp.setInstanceClass(type);
+
+      try {
+	Constructor nullCtor = type.getConstructor(new Class[0]);
+
+	if (nullCtor != null)
+	  comp.setConstructor(nullCtor);
+      } catch (NoSuchMethodException e) {
+	// if the type doesn't have a null-arg constructor
+      }
+
+      comp.init();
+
+      _objectFactoryMap.put(binding, comp);
+
+      return comp;
+    }
+  }
+
   //
   // class loader updates
   //
@@ -893,5 +979,55 @@ public class WebBeansContainer
       return ((Class) type).getSimpleName();
     else
       return String.valueOf(type);
+  }
+
+  static class FactoryBinding {
+    private static final Annotation []NULL = new Annotation[0];
+    
+    private final Type _type;
+    private final Annotation []_ann;
+
+    FactoryBinding(Type type, Annotation []ann)
+    {
+      _type = type;
+
+      if (ann != null)
+	_ann = ann;
+      else
+	_ann = NULL;
+    }
+
+    @Override
+    public int hashCode()
+    {
+      int hash = _type.hashCode();
+
+      for (Annotation ann : _ann)
+	hash = 65521 * hash + ann.hashCode();
+
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      if (! (obj instanceof FactoryBinding))
+	return false;
+
+      FactoryBinding binding = (FactoryBinding) obj;
+
+      if (_type != binding._type)
+	return false;
+
+      if (_ann.length != binding._ann.length)
+	return false;
+
+      for (int i = 0; i < _ann.length; i++) {
+	if (! _ann[i].equals(binding._ann[i]))
+	  return false;
+      }
+
+      return true;
+    }
   }
 }

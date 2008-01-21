@@ -42,32 +42,53 @@ import javax.interceptor.*;
 /**
  * Represents a filter for invoking a method
  */
-public interface EjbCallChain {
+abstract public class AbstractCallChain implements EjbCallChain {
+  private EjbCallChain _next;
+
+  AbstractCallChain(EjbCallChain next)
+  {
+    if (next == null)
+      throw new NullPointerException();
+    
+    _next = next;
+  }
+  
   /**
    * Returns true if this filter will generate code.
    */
-  public boolean isEnhanced();
+  abstract public boolean isEnhanced();
 
   /**
    * Introspects the method for the default values
    */
-  public void introspect(Method apiMethod, Method implMethod);
+  public void introspect(Method apiMethod, Method implMethod)
+  {
+  }
 
   /**
    * Generates the static class prologue
    */
   public void generatePrologue(JavaWriter out, HashMap map)
-    throws IOException;
+    throws IOException
+  {
+    _next.generatePrologue(out, map);
+  }
 
   /**
    * Generates initialization in the constructor
    */
   public void generateConstructor(JavaWriter out, HashMap map)
-    throws IOException;
+    throws IOException
+  {
+    _next.generateConstructor(out, map);
+  }
 
   /**
    * Generates the method interception code
    */
   public void generateCall(JavaWriter out)
-    throws IOException;
+    throws IOException
+  {
+    _next.generateCall(out);
+  }
 }

@@ -117,10 +117,11 @@ abstract public class StatelessHomeView extends StatelessView {
 					 apiMethod.getReturnType()));
       
       return new StatelessCreateMethod(getStatelessBean(),
-				      localView,
-				      apiMethod.getMethod(),
-				      implMethod.getMethod(),
-				      index);
+				       this,
+				       localView,
+				       apiMethod.getMethod(),
+				       implMethod.getMethod(),
+				       index);
     }
     else {
       return super.createMethod(apiMethod, index);

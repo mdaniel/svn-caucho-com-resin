@@ -99,8 +99,12 @@ public class StatelessView extends View {
       
       BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
       
-      if (bizMethod != null)
+      if (bizMethod != null) {
+	bizMethod.introspect(bizMethod.getApiMethod(),
+			     bizMethod.getImplMethod());
+	
 	_businessMethods.add(bizMethod);
+      }
     }
   }
 
@@ -131,11 +135,17 @@ public class StatelessView extends View {
     
     out.println("private " + getBean().getClassName() + " _context;");
 
+    generateBusinessPrologue(out);
+    
     out.println();
     out.println(getViewClassName() + "(" + getBean().getClassName() + " context)");
     out.println("{");
     generateSuper(out, "context.getStatelessServer()");
     out.println("  _context = context;");
+
+    // XXX: technically not correct.  Is associated with the instance itself
+    generateBusinessConstructor(out);
+    
     out.println("}");
 
     out.println("public Object __caucho_get()");
@@ -143,10 +153,7 @@ public class StatelessView extends View {
     out.println("  return this;");
     out.println("}");
 
-    HashMap map = new HashMap();
-    for (BusinessMethodGenerator method : _businessMethods) {
-      method.generate(out, map);
-    }
+    generateBusinessMethods(out);
     
     out.popDepth();
     out.println("}");
@@ -171,6 +178,7 @@ public class StatelessView extends View {
 
     StatelessLocalMethod bizMethod
       = new StatelessLocalMethod(getEjbClass(),
+				 this,
 				 apiMethod.getMethod(),
 				 implMethod.getMethod(),
 				 index);

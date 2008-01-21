@@ -98,8 +98,12 @@ abstract public class StatefulView extends View {
       
       StatefulMethod bizMethod = createMethod(apiMethod, index);
       
-      if (bizMethod != null)
+      if (bizMethod != null) {
+	bizMethod.introspect(bizMethod.getApiMethod(),
+			     bizMethod.getImplMethod());
+	
 	_businessMethods.add(bizMethod);
+      }
     }
   }
 
@@ -131,11 +135,6 @@ abstract public class StatefulView extends View {
     out.pushDepth();
 
     generateClassContent(out);
-
-    HashMap map = new HashMap();
-    for (StatefulMethod method : _businessMethods) {
-      method.generate(out, map);
-    }
     
     out.popDepth();
     out.println("}");
@@ -147,6 +146,8 @@ abstract public class StatefulView extends View {
     out.println("private StatefulContext _context;");
     out.println("private StatefulServer _server;");
     out.println("private " + getEjbClass().getName() + " _bean;");
+    
+    generateBusinessPrologue(out);
 
     out.println();
     out.println(getViewClassName() + "(StatefulServer server)");
@@ -165,6 +166,7 @@ abstract public class StatefulView extends View {
     out.println("{");
     generateSuper(out, "null");
     out.println("  _bean = new " + getEjbClass().getName() + "();");
+    generateBusinessConstructor(out);
     out.println("}");
 
     generateSessionProvider(out);
@@ -191,6 +193,8 @@ abstract public class StatefulView extends View {
     out.println("{");
     out.println("  _context = context;");
     out.println("}");
+    
+    generateBusinessMethods(out);
   }
 
   protected void generateSessionProvider(JavaWriter out)
@@ -214,7 +218,8 @@ abstract public class StatefulView extends View {
       return null;
     
     StatefulMethod bizMethod
-      = new StatefulMethod(apiMethod.getMethod(),
+      = new StatefulMethod(this,
+			   apiMethod.getMethod(),
 			   implMethod.getMethod(),
 			   index);
 

@@ -29,7 +29,8 @@
 
 package com.caucho.ejb3.gen;
 
-import com.caucho.ejb.gen.BusinessMethodGenerator;
+import com.caucho.ejb.cfg.ApiClass;
+import com.caucho.ejb.gen.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -43,10 +44,12 @@ import javax.ejb.*;
 /**
  * Generates the skeleton for a session bean.
  */
-public class PojoBean extends GenClass {
+public class PojoBean extends BeanGenerator {
   private static final L10N L = new L10N(PojoBean.class);
 
   private Class _beanClass;
+
+  private PojoView _view;
 
   private ArrayList<BusinessMethodGenerator> _businessMethods
     = new ArrayList<BusinessMethodGenerator>();
@@ -56,19 +59,18 @@ public class PojoBean extends GenClass {
   
   public PojoBean(Class beanClass)
   {
-    super(beanClass.getName() + "__Resin");
+    super(beanClass.getName() + "__Resin", new ApiClass(beanClass));
 
-    addImport("javax.ejb.*");
-    addImport("javax.transaction.*");
-
-    setSuperClassName(beanClass.getName());    
+    setSuperClassName(beanClass.getName());
+    
+    _view = new PojoView(this, getEjbClass());
     
     _beanClass = beanClass;
 
     introspect();
   }
 
-  protected void introspect()
+  public void introspect()
   {
     for (Method method : _beanClass.getMethods()) {
       if (Object.class.equals(method.getDeclaringClass()))
@@ -85,7 +87,7 @@ public class PojoBean extends GenClass {
 
       int index = _businessMethods.size();
       BusinessMethodGenerator bizMethod
-	= new BusinessMethodGenerator(method, method, index);
+	= new BusinessMethodGenerator(_view, method, method, index);
 
       bizMethod.introspect(method, method);
 
@@ -130,17 +132,20 @@ public class PojoBean extends GenClass {
   {
     generateHeader(out);
 
+    HashMap map = new HashMap();
+    for (BusinessMethodGenerator method : _businessMethods) {
+      method.generatePrologueTop(out, map);
+    }
+
     for (Constructor ctor : _beanClass.getDeclaredConstructors()) {
       if (Modifier.isPublic(ctor.getModifiers()))
 	generateConstructor(out, ctor);
     }
 
-    HashMap map = new HashMap();
+    map = new HashMap();
     for (BusinessMethodGenerator method : _businessMethods) {
       method.generate(out, map);
     }
-
-    super.generateClassContent(out);
   }
 
   /**
@@ -192,6 +197,11 @@ public class PojoBean extends GenClass {
       out.print("a" + i);
     }
     out.println(");");
+
+    HashMap map = new HashMap();
+    for (BusinessMethodGenerator method : _businessMethods) {
+      method.generateConstructorTop(out, map);
+    }
     
     out.popDepth();
     out.println("}");

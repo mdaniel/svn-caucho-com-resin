@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.*;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -38,21 +39,36 @@ import java.util.*;
 import javax.annotation.security.*;
 import javax.ejb.*;
 import javax.interceptor.*;
+import javax.webbeans.*;
 
 /**
  * Represents the interception
  */
-public class InterceptorCallChain implements EjbCallChain {
+public class InterceptorCallChain extends AbstractCallChain {
   private static final L10N L = new L10N(InterceptorCallChain.class);
 
   private BusinessMethodGenerator _next;
 
   private String _uniqueName;
   private Method _implMethod;
+  
+  private ArrayList<Class> _defaultInterceptors = new ArrayList<Class>();
+  private ArrayList<Class> _classInterceptors = new ArrayList<Class>();
+  private ArrayList<Class> _methodInterceptors = new ArrayList<Class>();
+  
   private ArrayList<Class> _interceptors = new ArrayList<Class>();
+
+  // map from the interceptor class to the local variable for the interceptor
+  private HashMap<Class,String> _interceptorVarMap
+    = new HashMap<Class,String>();
+  
+  // interceptors we're responsible for initializing
+  private ArrayList<Class> _ownInterceptors = new ArrayList<Class>();
 
   public InterceptorCallChain(BusinessMethodGenerator next)
   {
+    super(next);
+    
     _next = next;
   }
   
@@ -61,7 +77,9 @@ public class InterceptorCallChain implements EjbCallChain {
    */
   public boolean isEnhanced()
   {
-    return (_interceptors != null && _interceptors.size() > 0);
+    return (_defaultInterceptors.size() > 0
+	    || _classInterceptors.size() > 0
+	    || _methodInterceptors.size() > 0);
   }
 
   public ArrayList<Class> getInterceptors()
@@ -75,68 +93,60 @@ public class InterceptorCallChain implements EjbCallChain {
    */
   public void introspect(Method apiMethod, Method implMethod)
   {
-    ArrayList<Class> interceptorList = new ArrayList<Class>();
-    
-    Interceptors interceptors
-      = apiMethod.getAnnotation(Interceptors.class);
+    Class apiClass = apiMethod.getDeclaringClass();
+    Class implClass = implMethod.getDeclaringClass();
 
-    if (interceptors != null) {
-      for (Class interceptorClass : interceptors.value())
-	interceptorList.add(interceptorClass);
+    Interceptors iAnn;
+    
+    iAnn = (Interceptors) apiClass.getAnnotation(Interceptors.class);
+
+    if (iAnn != null) {
+      for (Class iClass : iAnn.value())
+	_classInterceptors.add(iClass);
     }
     
-    if (interceptors == null) {
-      Class apiClass = apiMethod.getDeclaringClass();
-      
-      interceptors
-	= (Interceptors) apiClass.getAnnotation(Interceptors.class);
+    iAnn = (Interceptors) implClass.getAnnotation(Interceptors.class);
 
-      if (interceptors != null) {
-	for (Class interceptorClass : interceptors.value())
-	  interceptorList.add(interceptorClass);
-      }
+    if (apiMethod != implMethod && iAnn != null) {
+      for (Class iClass : iAnn.value())
+	_classInterceptors.add(iClass);
     }
     
-    if (interceptors == null) {
-      interceptors = implMethod.getAnnotation(Interceptors.class);
+    iAnn = (Interceptors) apiMethod.getAnnotation(Interceptors.class);
 
-      if (interceptors != null) {
-	for (Class interceptorClass : interceptors.value())
-	  interceptorList.add(interceptorClass);
-      }
+    if (iAnn != null) {
+      for (Class iClass : iAnn.value())
+	_methodInterceptors.add(iClass);
     }
     
-    if (interceptors == null) {
-      Class implClass = implMethod.getDeclaringClass();
+    iAnn = (Interceptors) implMethod.getAnnotation(Interceptors.class);
 
-      interceptors
-	= (Interceptors) implClass.getAnnotation(Interceptors.class);
-
-      if (interceptors != null) {
-	for (Class interceptorClass : interceptors.value())
-	  interceptorList.add(interceptorClass);
-      }
+    if (apiMethod != implMethod && iAnn != null) {
+      for (Class iClass : iAnn.value())
+	_methodInterceptors.add(iClass);
     }
 
     _implMethod = implMethod;
-    _interceptors = interceptorList;
   }
 
   @Override
   public void generatePrologue(JavaWriter out, HashMap map)
     throws IOException
   {
-    if (_interceptors.size() == 0) {
+    if (! isEnhanced()) {
       _next.generatePrologue(out, map);
       return;
     }
+
+    _interceptors.addAll(_classInterceptors);
+    _interceptors.addAll(_methodInterceptors);
     
     _uniqueName = "_v" + out.generateId();
     
     out.println();
     out.println("private static java.lang.reflect.Method " + _uniqueName + "_method;");
     out.println("private static java.lang.reflect.Method []" + _uniqueName + "_methodChain;");
-    out.println("private static Object []" + _uniqueName + "_objectChain;");
+    out.println("private transient Object []" + _uniqueName + "_objectChain;");
 
     Class cl = _implMethod.getDeclaringClass();
     
@@ -148,9 +158,12 @@ public class InterceptorCallChain implements EjbCallChain {
     out.pushDepth();
     
     out.print(_uniqueName + "_method = ");
-    generateGetMethod(out, _implMethod);
+    generateGetMethod(out,
+		      _next.getView().getViewClassName(),
+		      "__caucho_" + _implMethod.getName(),
+		      _implMethod.getParameterTypes());
     out.println(";");
-    out.print(_uniqueName + "_method.setAccessible(true);");
+    out.println(_uniqueName + "_method.setAccessible(true);");
 
     generateMethodChain(out);
     
@@ -160,8 +173,49 @@ public class InterceptorCallChain implements EjbCallChain {
     out.println("}");
     out.popDepth();
     out.println("}");
+
+    for (Class iClass : _interceptors) {
+      String var = (String) map.get("interceptor-" + iClass.getName());
+
+      if (var == null) {
+	var = "__caucho_i" + out.generateId();
+
+	out.println();
+	out.print("private static ");
+	out.printClass(ComponentFactory.class);
+	out.println(" " + var + "_f;");
+	
+	out.print("private transient ");
+	out.printClass(iClass);
+	out.println(" " + var + ";");
+
+	map.put("interceptor-" + iClass.getName(), var);
+
+	_ownInterceptors.add(iClass);
+      }
+
+      _interceptorVarMap.put(iClass, var);
+    }
     
     _next.generatePrologue(out, map);
+  }
+
+  @Override
+  public void generateConstructor(JavaWriter out, HashMap map)
+    throws IOException
+  {
+    for (Class iClass : _ownInterceptors) {
+      String var = _interceptorVarMap.get(iClass);
+
+      out.println("if (" + var + "_f == null)");
+      out.println("  " + var + "_f = com.caucho.webbeans.manager.WebBeansContainer.create().createTransient(" + iClass.getName() + ".class);");
+
+      out.print(var + " = (");
+      out.printClass(iClass);
+      out.println(")" + var + "_f.get();");
+    }
+    
+    _next.generateConstructor(out, map);
   }
 
   @Override
@@ -176,7 +230,6 @@ public class InterceptorCallChain implements EjbCallChain {
     out.println("try {");
     out.pushDepth();
 
-
     out.println("if (" + _uniqueName + "_objectChain == null) {");
     out.pushDepth();
     generateObjectChain(out);
@@ -188,8 +241,6 @@ public class InterceptorCallChain implements EjbCallChain {
       out.println(" result;");
     }
       
-    _next.generatePreCall(out);
-    
     if (! void.class.equals(_implMethod.getReturnType())) {
       out.print("result = (");
       printCastClass(out, _implMethod.getReturnType());
@@ -197,8 +248,7 @@ public class InterceptorCallChain implements EjbCallChain {
     }
     
     out.print("new com.caucho.ejb3.gen.InvocationContextImpl(");
-    _next.generateThis(out);
-    out.print(", ");
+    out.print("this, ");
     out.print(_uniqueName + "_method, ");
     out.print(_uniqueName + "_methodChain, ");
     out.print(_uniqueName + "_objectChain, ");
@@ -207,8 +257,6 @@ public class InterceptorCallChain implements EjbCallChain {
       out.print("a" + i + ", ");
     }
     out.println("}).proceed();");
-    
-    _next.generatePostCall(out);
     
     if (! void.class.equals(_implMethod.getReturnType())) {
       out.println("return result;");
@@ -259,26 +307,33 @@ public class InterceptorCallChain implements EjbCallChain {
     throws IOException
   {
     out.println(_uniqueName + "_objectChain = new Object[] {");
-    out.pushDepth();
 
     for (Class iClass : _interceptors) {
-      out.println("new " + iClass.getName() + "(),");
+      out.print(_interceptorVarMap.get(iClass) + ", ");
     }
-    
-    out.popDepth();
     out.println("};");
   }
   
   protected void generateGetMethod(JavaWriter out, Method method)
     throws IOException
   {
-    Class cl = method.getDeclaringClass();
-
+    generateGetMethod(out,
+		      method.getDeclaringClass().getName(),
+		      method.getName(),
+		      method.getParameterTypes());
+  }
+  
+  protected void generateGetMethod(JavaWriter out,
+				   String className,
+				   String methodName,
+				   Class []paramTypes)
+    throws IOException
+  {
     out.print("com.caucho.ejb.util.EjbUtil.getMethod(");
-    out.print(cl.getName() + ".class");
-    out.print(", \"" + method.getName() + "\", new Class[] { ");
+    out.print(className + ".class");
+    out.print(", \"" + methodName + "\", new Class[] { ");
     
-    for (Class type : method.getParameterTypes()) {
+    for (Class type : paramTypes) {
       out.printClass(type);
       out.print(".class, ");
     }

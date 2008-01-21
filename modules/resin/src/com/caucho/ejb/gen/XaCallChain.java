@@ -42,7 +42,8 @@ import javax.interceptor.*;
 /**
  * Represents the xa interception
  */
-public class XaCallChain implements EjbCallChain {
+public class XaCallChain extends AbstractCallChain
+{
   private static final L10N L = new L10N(XaCallChain.class);
 
   private BusinessMethodGenerator _bizMethod;
@@ -52,6 +53,8 @@ public class XaCallChain implements EjbCallChain {
 
   public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next)
   {
+    super(next);
+    
     _bizMethod = bizMethod;
     _next = next;
   }
@@ -108,14 +111,13 @@ public class XaCallChain implements EjbCallChain {
   public void generatePrologue(JavaWriter out, HashMap map)
     throws IOException
   {
-    if (map.get("caucho.ejb.xa") != null)
-      return;
+    if (map.get("caucho.ejb.xa") == null) {
+      map.put("caucho.ejb.xa", "done");
 
-    map.put("caucho.ejb.xa", "done");
-
-    out.println();
-    out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
-    out.println("  = new com.caucho.ejb3.xa.XAManager();");
+      out.println();
+      out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
+      out.println("  = new com.caucho.ejb3.xa.XAManager();");
+    }
     
     _next.generatePrologue(out, map);
   }
