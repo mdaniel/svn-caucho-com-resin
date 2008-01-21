@@ -90,7 +90,8 @@ abstract public class StatefulView extends View {
     for (ApiMethod apiMethod : apiClass.getMethods()) {
       if (apiMethod.getDeclaringClass().equals(Object.class))
 	continue;
-      if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
+      if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
+	  && ! apiMethod.getName().equals("remove"))
 	continue;
 
       int index = _businessMethods.size();
@@ -100,11 +101,6 @@ abstract public class StatefulView extends View {
       if (bizMethod != null)
 	_businessMethods.add(bizMethod);
     }
-  }
-
-  protected ApiMethod findImplMethod(ApiMethod apiMethod)
-  {
-    return getEjbClass().getMethod(apiMethod);
   }
 
   /**
@@ -130,7 +126,7 @@ abstract public class StatefulView extends View {
     generateExtends(out);
     
     out.print("  implements " + getApi().getName());
-    out.println(", SessionProvider");
+    out.println(", StatefulProvider");
     out.println("{");
     out.pushDepth();
 
@@ -214,16 +210,13 @@ abstract public class StatefulView extends View {
   {
     ApiMethod implMethod = findImplMethod(apiMethod);
 
-    if (implMethod == null) {
-      throw ConfigException.create(apiMethod.getMethod(),
-				   L.l("api method has no corresponding implementation in '{0}'",
-				       getEjbClass().getName()));
-    }
-
+    if (implMethod == null)
+      return null;
+    
     StatefulMethod bizMethod
       = new StatefulMethod(apiMethod.getMethod(),
-				implMethod.getMethod(),
-				index);
+			   implMethod.getMethod(),
+			   index);
 
     return bizMethod;
   }
@@ -236,5 +229,17 @@ abstract public class StatefulView extends View {
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
+  }
+
+  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  {
+    ApiMethod implMethod = getEjbClass().getMethod(apiMethod);
+
+    if (implMethod != null)
+      return implMethod;
+  
+    throw ConfigException.create(apiMethod.getMethod(),
+				 L.l("api method has no corresponding implementation in '{0}'",
+				     getEjbClass().getName()));
   }
 }

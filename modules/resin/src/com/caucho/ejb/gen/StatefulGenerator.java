@@ -145,7 +145,8 @@ public class StatefulGenerator extends SessionGenerator {
     throws IOException
   {
     out.println();
-    out.println("public SessionProvider getProvider(Class api)");
+    out.println("@Override");
+    out.println("public StatefulProvider getProvider(Class api)");
     out.println("{");
     out.pushDepth();
     

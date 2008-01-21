@@ -26,37 +26,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.burlap;
+package com.caucho.ejb.hessian;
 
-import com.caucho.burlap.io.BurlapInput;
-import com.caucho.burlap.io.BurlapOutput;
-import com.caucho.burlap.server.BurlapSkeleton;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.server.HessianSkeleton;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Base class for any bean skeleton capable of handling a Burlap request.
+ * Base class for any bean skeleton capable of handling a Hessian request.
  *
  * <p/>Once selected, the calling servlet will dispatch the request through
  * the <code>_service</code> call.  After parsing the request headers,
  * <code>_service</code> calls the generated entry <code>_execute</code>
  * to execute the request.
  */
-public class BurlapEjbSkeleton extends Skeleton {
+public class HessianEjbSkeleton extends Skeleton {
   protected static Logger log
-    = Logger.getLogger(BurlapEjbSkeleton.class.getName());
+    = Logger.getLogger(HessianEjbSkeleton.class.getName());
 
   private Object _object;
-  private BurlapSkeleton _skel;
+  private HessianSkeleton _skel;
   private HessianRemoteResolver _resolver;
 
-  public BurlapEjbSkeleton(Object object,
-			   BurlapSkeleton skel,
+  public HessianEjbSkeleton(Object object,
+			   HessianSkeleton skel,
 			   HessianRemoteResolver resolver)
   {
     assert(object != null);
@@ -70,12 +74,12 @@ public class BurlapEjbSkeleton extends Skeleton {
   public void _service(InputStream is, OutputStream os)
     throws Exception
   {
-    BurlapInput in = new BurlapReader(is);
-    BurlapOutput out = new BurlapWriter(os);
+    HessianInput in = new HessianReader(is);
+    HessianOutput out = new HessianWriter(os);
 
     in.setRemoteResolver(_resolver);
     
-    String oldProtocol = EjbProtocolManager.setThreadProtocol("burlap");
+    String oldProtocol = EjbProtocolManager.setThreadProtocol("hessian");
 
     try {
       _skel.invoke(_object, in, out);
@@ -84,5 +88,3 @@ public class BurlapEjbSkeleton extends Skeleton {
     }
   }
 }
-
-

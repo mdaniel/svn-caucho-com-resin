@@ -63,7 +63,7 @@ public class EjbMethodPattern {
   private String _queryLocation;
   
   private TransactionAttributeType _transactionType = null;
-  private ArrayList _roles;
+  private ArrayList<String> _roles;
 
   /**
    * Creates a new method.
@@ -289,7 +289,7 @@ public class EjbMethodPattern {
   /**
    * Returns the roles allowed for the method.
    */
-  public ArrayList getRoles()
+  public ArrayList<String> getRoles()
   {
     return _roles;
   }
@@ -297,7 +297,7 @@ public class EjbMethodPattern {
   /**
    * Set the roles allowed for the method.
    */
-  public void setRoles(ArrayList roles)
+  public void setRoles(ArrayList<String> roles)
   {
     _roles = roles;
   }
@@ -327,9 +327,9 @@ public class EjbMethodPattern {
       
       for (BusinessMethodGenerator bizMethod : view.getMethods()) {
 	Method apiMethod = bizMethod.getApiMethod();
-	
 	if (_signature.isMatch(apiMethod.getName(),
 			       apiMethod.getParameterTypes())) {
+	  configureSecurity(bizMethod);
 	  configureXA(bizMethod);
 	}
       }
@@ -344,6 +344,16 @@ public class EjbMethodPattern {
     XaCallChain xa = bizMethod.getXa();
 
     xa.setTransactionType(_transactionType);
+  }
+
+  private void configureSecurity(BusinessMethodGenerator bizMethod)
+  {
+    if (_roles == null)
+      return;
+
+    SecurityCallChain security = bizMethod.getSecurity();
+
+    security.setRoles(_roles);
   }
 
   /**

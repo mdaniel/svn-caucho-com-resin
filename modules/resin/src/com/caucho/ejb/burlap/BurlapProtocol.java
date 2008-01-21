@@ -28,6 +28,7 @@
 
 package com.caucho.ejb.burlap;
 
+import com.caucho.burlap.server.BurlapSkeleton;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.message.MessageServer;
@@ -51,11 +52,11 @@ public class BurlapProtocol extends ProtocolContainer {
   private static final Logger log
     = Logger.getLogger(BurlapProtocol.class.getName());
 
-  private HashMap<String,AbstractServer> _serverMap =
-    new HashMap<String,AbstractServer>();
+  private HashMap<String,AbstractServer> _serverMap
+    = new HashMap<String,AbstractServer>();
 
-  private WeakHashMap<Class,com.caucho.burlap.server.BurlapSkeleton> _skeletonMap
-    = new WeakHashMap<Class,com.caucho.burlap.server.BurlapSkeleton>();
+  private WeakHashMap<Class,BurlapSkeleton> _skeletonMap
+    = new WeakHashMap<Class,BurlapSkeleton>();
 
   private HessianRemoteResolver _resolver;
 
@@ -146,9 +147,12 @@ public class BurlapProtocol extends ProtocolContainer {
       // ejb/0604 vs ejb/0500
       Object obj = server.getRemoteObject(key);
 
-      Class api = server.getRemoteObjectClass();
+      Class remoteApi = server.getRemoteObjectClass();
+      Class homeApi = server.getRemoteHomeClass();
       
-      com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(api);
+      com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(remoteApi,
+								 homeApi,
+								 remoteApi);
 
       return new BurlapEjbSkeleton(obj, skel, _resolver);
     }
@@ -156,24 +160,28 @@ public class BurlapProtocol extends ProtocolContainer {
       return new MessageSkeleton((MessageServer) server);
     }
     else {
-      Class api;
+      Class homeApi;
+      Class remoteApi;
       
-      api = server.getRemoteHomeClass();
+      homeApi = server.getRemoteHomeClass();
+      remoteApi = server.getRemoteObjectClass();
 
-      if (api != null) {
-	Object remote = server.getRemoteObject(api);
+      if (homeApi != null) {
+	Object remote = server.getRemoteObject(homeApi);
 	
-        com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(api);
+        com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(homeApi,
+								   homeApi,
+								   remoteApi);
 
 	return new BurlapEjbSkeleton(remote, skel, _resolver);
       }
       
-      api = server.getRemoteObjectClass();
-
-      if (api != null) {
-	Object remote = server.getRemoteObject(api);
+      if (remoteApi != null) {
+	Object remote = server.getRemoteObject(remoteApi);
 	
-        com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(api);
+        com.caucho.burlap.server.BurlapSkeleton skel = getSkeleton(remoteApi,
+								   remoteApi,
+								   remoteApi);
 
 	return new BurlapEjbSkeleton(remote, skel, _resolver);
       }
@@ -195,16 +203,19 @@ public class BurlapProtocol extends ProtocolContainer {
   /**
    * Returns the class for home skeletons.
    */
-  protected com.caucho.burlap.server.BurlapSkeleton getSkeleton(Class api)
+  protected BurlapSkeleton getSkeleton(Class api, Class homeApi, Class remoteApi)
     throws Exception
   {
-    com.caucho.burlap.server.BurlapSkeleton skel;
+    BurlapSkeleton skel;
 
     synchronized (_skeletonMap) {
       skel = _skeletonMap.get(api);
 
       if (skel == null) {
-	skel = new com.caucho.burlap.server.BurlapSkeleton(api);
+	skel = new BurlapSkeleton(api);
+
+	skel.setHomeClass(homeApi);
+	skel.setObjectClass(remoteApi);
 
 	_skeletonMap.put(api, skel);
       }

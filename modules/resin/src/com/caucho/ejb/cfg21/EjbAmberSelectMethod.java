@@ -34,7 +34,6 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JClassWrapper;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.gen21.AbstractQueryMethod;
 import com.caucho.ejb.gen21.AmberSelectCollectionMethod;
 import com.caucho.ejb.gen21.AmberSelectMethod;

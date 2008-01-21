@@ -37,6 +37,10 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 
 public class BurlapSerializerFactory extends QSerializerFactory {
+  public static final BurlapSerializerFactory FACTORY
+    = new BurlapSerializerFactory();
+  
+  @Override
   public Serializer getSerializer(Class cl)
     throws HessianProtocolException
   {

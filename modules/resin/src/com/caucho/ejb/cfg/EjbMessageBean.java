@@ -29,27 +29,19 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.message.MessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
-import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
-import javax.ejb.MessageDrivenBean;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.interceptor.AroundInvoke;
@@ -61,7 +53,6 @@ import javax.naming.NamingException;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.ArrayList;
 
 /**
  * Configuration for an ejb entity bean.

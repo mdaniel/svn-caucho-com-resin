@@ -42,17 +42,44 @@ import java.util.*;
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class StatefulLocalView extends StatefulObjectView {
-  private static final L10N L = new L10N(StatefulLocalView.class);
+abstract public class StatefulObjectView extends StatefulView {
+  private static final L10N L = new L10N(StatefulObjectView.class);
 
-  public StatefulLocalView(StatefulGenerator bean, ApiClass api)
+  public StatefulObjectView(StatefulGenerator bean, ApiClass api)
   {
     super(bean, api);
   }
 
   @Override
-  protected String getViewClassName()
+  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
   {
-    return getApi().getSimpleName() + "__EJBLocal";
+    if (apiMethod.getName().equals("remove")
+	&& apiMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
+      ApiMethod implMethod = findImplMethod(apiMethod);
+      
+      if (implMethod == null)
+	return null;
+
+      return new StatefulRemoveMethod(apiMethod.getMethod(),
+				      implMethod.getMethod(),
+				      index);
+    }
+    else {
+      return super.createMethod(apiMethod, index);
+    }
+  }
+
+  @Override
+  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  {
+    if (apiMethod.getName().equals("remove")
+	&& apiMethod.getDeclaringClass().getName().startsWith("javax.ejb")) {
+      if (apiMethod.getParameterTypes().length != 0)
+	return null;
+
+      return getEjbClass().getMethod("ejbRemove", new Class[0]);
+    }
+    else
+      return super.findImplMethod(apiMethod);
   }
 }

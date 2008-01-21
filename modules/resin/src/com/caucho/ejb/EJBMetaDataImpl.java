@@ -115,7 +115,8 @@ public class EJBMetaDataImpl implements EJBMetaData, Serializable {
   {
     CharBuffer cb = new CharBuffer();
 
-    cb.append("MetaData[");
+    cb.append(getClass().getSimpleName());
+    cb.append("[");
     if (isSession() && isStatelessSession())
       cb.append("stateless-session");
     else if (isSession())

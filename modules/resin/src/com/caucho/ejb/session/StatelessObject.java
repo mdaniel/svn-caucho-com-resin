@@ -128,7 +128,7 @@ abstract public class StatelessObject extends AbstractEJBObject
    */
   public String __caucho_getId()
   {
-    return "stateless";
+    return "::ejb:stateless";
   }
 
   /**

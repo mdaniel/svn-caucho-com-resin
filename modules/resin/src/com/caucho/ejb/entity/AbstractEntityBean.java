@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb;
+package com.caucho.ejb.entity;
 
 import javax.ejb.EJBException;
 import javax.ejb.EntityBean;

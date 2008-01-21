@@ -701,13 +701,14 @@ public class EjbConfig {
   private void initResources(EjbBean bean, AbstractServer server)
     throws Exception
   {
+    /*
     for (ResourceEnvRef ref : bean.getResourceEnvRefs())
       ref.initBinding(server);
 
     // XXX TCK, needs QA probably ejb/0gc4 ejb/0gc5
     for (EjbLocalRef ref : bean.getEjbLocalRefs())
       ref.initBinding(server);
-
+      */
     _ejbContainer.addServer(server);
   }
 

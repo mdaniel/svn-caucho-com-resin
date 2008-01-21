@@ -114,7 +114,7 @@ public class BurlapHandle extends AbstractHandle {
       try {
         BurlapClientContainer client;
         client = BurlapClientContainer.find(getServerId());
-        object = client.createObjectStub(url);
+        object = (EJBObject) client.createObjectStub(url);
       } catch (Exception e) {
         throw RemoteExceptionWrapper.create(e);
       }

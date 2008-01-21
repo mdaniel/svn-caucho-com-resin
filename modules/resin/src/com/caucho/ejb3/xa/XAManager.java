@@ -64,7 +64,7 @@ public class XAManager
       Transaction xa = tm.getTransaction();
 
       if (xa == null)
-	throw new EJBTransactionRequiredException(L.l("No transaction found for mandatory TransactionAttribute"));
+	throw new EJBTransactionRequiredException(L.l("Transaction required for for 'Mandatory' TransactionAttribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -83,7 +83,7 @@ public class XAManager
       Transaction xa = tm.getTransaction();
 
       if (xa != null)
-	throw new EJBException(L.l("Transaction forbidden for 'never' TransactionAttribute"));
+	throw new EJBException(L.l("Transaction forbidden for 'Never' TransactionAttribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -182,6 +182,14 @@ public class XAManager
     } catch (Exception e) {
       throw new EJBException(e);
     }
+  }
+
+  /**
+   * Mark the transaction for rollback
+   */
+  public void markRollback(Exception e)
+  {
+    _ut.setRollbackOnly(e);
   }
 
   /**

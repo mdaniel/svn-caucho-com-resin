@@ -233,6 +233,14 @@ public class TransactionManagerImpl
   {
     getCurrent().setRollbackOnly();
   }
+  
+  /**
+   * Force any completion to be a rollback.
+   */
+  public void setRollbackOnly(Exception e)
+  {
+    getCurrent().setRollbackOnly(e);
+  }
 
   /**
    * Returns the transaction's status

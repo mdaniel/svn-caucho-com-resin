@@ -34,8 +34,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.logging.*;
 
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.util.L10N;
 
 /**
@@ -71,6 +69,7 @@ public class EjbTimerHandle implements TimerHandle {
   public Timer getTimer()
     throws NoSuchObjectLocalException, EJBException
   {
+    /*
     try {
       EjbServerManager manager = EjbServerManager.getLocal();
 
@@ -97,6 +96,8 @@ public class EjbTimerHandle implements TimerHandle {
       log.log(Level.FINE, e.toString(), e);
       throw new EJBException(e);
     }
+     */
+    return null;
   }
 
   private void checkNotNull(Object obj)

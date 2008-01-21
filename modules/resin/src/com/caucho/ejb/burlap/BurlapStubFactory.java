@@ -28,6 +28,7 @@
 
 package com.caucho.ejb.burlap;
 
+import com.caucho.burlap.client.BurlapProxyFactory;
 import com.caucho.burlap.io.BurlapInput;
 import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.AbstractHessianOutput;
@@ -55,6 +56,8 @@ import java.io.OutputStream;
  */
 
 public class BurlapStubFactory implements HessianRemoteResolver {
+  private BurlapProxyFactory _proxyFactory
+    = new BurlapProxyFactory();
   private HessianRemoteResolver _resolver;
   private Path _workPath;
   
@@ -68,7 +71,7 @@ public class BurlapStubFactory implements HessianRemoteResolver {
    */
   public HessianRemoteResolver getRemoteResolver()
   {
-    return _resolver;
+    return this;
   }
 
   public void setWorkPath(Path path)
@@ -98,17 +101,7 @@ public class BurlapStubFactory implements HessianRemoteResolver {
   public Object create(Class api, String url)
     throws Exception
   {
-    StubGenerator gen = new StubGenerator();
-    gen.setClassDir(getWorkPath());
-      
-    Class cl = gen.createStub(api);
-
-    BurlapStub stub = (BurlapStub) cl.newInstance();
-
-    stub._burlap_setURLPath(Vfs.lookup(url));
-    stub._burlap_setClientContainer(this);
-
-    return stub;
+    return _proxyFactory.create(api, url);
   }
 
   public AbstractHessianInput getBurlapInput(InputStream is)

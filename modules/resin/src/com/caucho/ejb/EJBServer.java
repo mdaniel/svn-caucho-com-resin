@@ -72,16 +72,13 @@ import java.util.logging.Logger;
  * <p>Each protocol will extend the container to override Handle creation.
  */
 public class EJBServer
-  implements EJBServerInterface, EnvironmentBean
+  implements EnvironmentBean
 {
   static final L10N L = new L10N(EJBServer.class);
   protected static final Logger log = Log.open(EJBServer.class);
 
   private static EnvironmentLocal<EJBServer> _localServer
     = new EnvironmentLocal<EJBServer>("caucho.ejb-server");
-
-  private static EnvironmentLocal<EjbServerManager> _localManager
-    = new EnvironmentLocal<EjbServerManager>();
 
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
@@ -93,13 +90,9 @@ public class EJBServer
   private String _remoteJndiPrefix; // = "java:comp/env/ejb";
 
   private String _entityManagerJndiName = "java:comp/EntityManager";
-
-  private ArrayList<Path> _descriptors;
   private ArrayList<Path> _ejbJars = new ArrayList<Path>();
 
   private ArrayList<Bean> _beanList = new ArrayList<Bean>();
-
-  private EntityIntrospector _entityIntrospector;
 
   private MergePath _mergePath;
 
@@ -109,18 +102,12 @@ public class EJBServer
     new ArrayList<FileSetType>();
 
   private DataSource _dataSource;
-  private boolean _createDatabaseSchema;
   private boolean _validateDatabaseSchema = true;
-
-  private boolean _entityLoadLazyOnTransaction = true;
 
   private String _resinIsolation;
   private String _jdbcIsolation;
 
   private ConnectionFactory _jmsConnectionFactory;
-
-  private int _entityCacheSize = 32 * 1024;
-  private long _entityCacheTimeout = 5000;
 
   private boolean _forbidJVMCall;
   private boolean _autoCompile = true;
@@ -570,11 +557,6 @@ public class EJBServer
   public static EJBServer getLocal()
   {
     return _localServer.get();
-  }
-
-  public static EjbServerManager getLocalManager()
-  {
-    return _localManager.get();
   }
 
   /**

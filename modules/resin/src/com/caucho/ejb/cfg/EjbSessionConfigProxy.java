@@ -66,7 +66,7 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
       _session.setAllowPOJO(getConfig().isAllowPOJO());
     }
     else if (! (oldBean instanceof EjbSessionBean)) {
-      throw new ConfigException(L.l("session bean `{0}' conflicts with prior {1} bean at {2}.",
+      throw new ConfigException(L.l("session bean '{0}' conflicts with prior {1} bean at {2}.",
 				    getEJBName(), oldBean.getEJBKind(),
 				    oldBean.getLocation()));
     }

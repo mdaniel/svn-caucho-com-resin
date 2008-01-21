@@ -95,6 +95,8 @@ abstract public class BaseRef {
   public AccessibleObject getFieldOrMethod(Class cl, String fieldName)
     throws Exception
   {
+    return null;
+    /*
     EjbServerManager manager = EjbServerManager.getLocal();
 
     if (manager == null)
@@ -106,5 +108,6 @@ abstract public class BaseRef {
       return method;
 
     return cl.getDeclaredField(fieldName);
+     */
   }
 }

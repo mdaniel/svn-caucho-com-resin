@@ -257,7 +257,6 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("  _freeBeanTop = 0;");
     out.println("}");
 
-    /*
     if (hasMethod("ejbRemove", new Class[0])) {
       out.println();
       out.println("for (int i = 0; i < freeBeanTop; i++) {");
@@ -266,7 +265,7 @@ public class StatelessGenerator extends SessionGenerator {
       out.println("try {");
       out.println("  if (freeBeanStack[i] != null)");
       // ejb/0fe0: ejbRemove() can be private out.println("    freeBeanStack[i].ejbRemove();");
-      out.println("    invokeMethod(freeBeanStack[i], \"ejbRemove\", new Class[] {}, new Object[] {});");
+      out.println("    freeBeanStack[i].ejbRemove();");
       out.println("} catch (Throwable e) {");
       out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
       out.println("}");
@@ -274,7 +273,7 @@ public class StatelessGenerator extends SessionGenerator {
       out.popDepth();
       out.println("}");
     }
-    */
+    
     out.popDepth();
     out.println("}");
   }

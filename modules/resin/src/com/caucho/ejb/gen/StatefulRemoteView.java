@@ -42,7 +42,7 @@ import java.util.*;
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class StatefulRemoteView extends StatefulView {
+public class StatefulRemoteView extends StatefulObjectView {
   private static final L10N L = new L10N(StatefulRemoteView.class);
 
   public StatefulRemoteView(StatefulGenerator bean, ApiClass api)

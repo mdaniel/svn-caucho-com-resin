@@ -98,6 +98,7 @@ public class EJBCompiler {
     Thread.currentThread().setContextClassLoader(loader);
 
     try {
+      /*
       EjbServerManager container = new EjbServerManager();
       container.setValidateDatabaseSchema(false);
       if (_classDir == null)
@@ -121,6 +122,7 @@ public class EJBCompiler {
       }
 
       container.build();
+       */
     } finally {
       Thread.currentThread().setContextClassLoader(oldLoader);
     }

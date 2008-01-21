@@ -194,7 +194,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       _xid = _manager.createXID();
 
     if (log.isLoggable(Level.FINE))
-      log.fine("begin Transaction" + _xid);
+      log.fine(this + " begin");
 
     if (_timeout > 0) {
       _alarm.queue(_timeout + EXTRA_TIMEOUT);
@@ -305,9 +305,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
       if (log.isLoggable(Level.FINER)) {
         if (flags == XAResource.TMJOIN)
-          log.finer("join-XA " + xid + " " + resource);
+          log.finer(this + " join-XA " + resource);
         else
-          log.finer("start-XA " + xid + " " + resource);
+          log.finer(this + " start-XA " + resource);
       }
 
       resource.start(xid, flags);
@@ -467,7 +467,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       _suspendState = _userTransaction.userSuspend();
 
     if (log.isLoggable(Level.FINER))
-      log.fine(_xid + " suspended");
+      log.fine(this + " suspended");
   }
 
   /**
@@ -499,7 +499,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     _isSuspended = false;
 
     if (log.isLoggable(Level.FINE))
-      log.fine(_xid + " resume");
+      log.fine(this + " resume");
   }
 
   /**
@@ -519,16 +519,16 @@ public class TransactionImpl implements Transaction, AlarmListener {
   public void setRollbackOnly()
     throws SystemException
   {
-    if (_status != Status.STATUS_ACTIVE &&
-        _status != Status.STATUS_MARKED_ROLLBACK)
+    if (_status != Status.STATUS_ACTIVE
+	&& _status != Status.STATUS_MARKED_ROLLBACK)
       throw new IllegalStateException(L.l("can't set rollback-only"));
 
     _status = Status.STATUS_MARKED_ROLLBACK;
 
     _timeout = 0;
 
-    if (log.isLoggable(Level.FINER))
-      log.finer("setting rollback-only");
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " rollback-only");
   }
 
   /**
@@ -536,8 +536,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   public void setRollbackOnly(Throwable exn)
   {
-    if (_status != Status.STATUS_ACTIVE &&
-        _status != Status.STATUS_MARKED_ROLLBACK)
+    if (_status != Status.STATUS_ACTIVE
+	&& _status != Status.STATUS_MARKED_ROLLBACK)
       throw new IllegalStateException(L.l("can't set rollback-only"));
 
     _status = Status.STATUS_MARKED_ROLLBACK;
@@ -545,8 +545,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     if (_rollbackException == null)
       _rollbackException = exn;
 
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, "setting rollback-only: " + exn.toString(), exn);
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " rollback-only: " + exn.toString());
   }
 
   /**
@@ -588,7 +588,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
 
       if (log.isLoggable(Level.FINE))
-        log.fine("committing Transaction" + _xid);
+        log.fine(this + " committing");
 
       if (_resourceCount > 0) {
         _status = Status.STATUS_PREPARING;
@@ -619,7 +619,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
                 _resourceState[i] |= RES_COMMIT;
               }
               else {
-                log.finer("unexpected prepare result " + prepare);
+                log.finer(this + " unexpected prepare result " + prepare);
                 rollbackInt();
               }
             } catch (XAException e) {
@@ -691,7 +691,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
 
       if (heuristicExn != null && log.isLoggable(Level.FINE))
-        log.fine("failed Transaction[" + _xid + "]: " + heuristicExn);
+        log.fine(this + " " + heuristicExn);
 
       if (heuristicExn == null)
         _status = Status.STATUS_COMMITTED;
@@ -795,7 +795,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     _status = Status.STATUS_ROLLING_BACK;
 
     if (log.isLoggable(Level.FINE))
-      log.fine("rollback Transaction[" + _xid + "]");
+      log.fine(this + " rollback");
 
     for (int i = 0; i < _resourceCount; i++) {
       XAResource resource = (XAResource) _resources[i];

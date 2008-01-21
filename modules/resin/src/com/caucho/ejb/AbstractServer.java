@@ -106,10 +106,10 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected Class _remoteHomeClass;
   protected Class _remoteObjectClass;
-  protected ArrayList<Class> _remoteApiList;
+  protected ArrayList<Class> _remoteApiList = new ArrayList<Class>();
   protected Class _primaryKeyClass;
   protected Class _localHomeClass;
-  protected ArrayList<Class> _localApiList;
+  protected ArrayList<Class> _localApiList = new ArrayList<Class>();
 
   protected Class _remoteStubClass;
   protected Class _homeStubClass;
@@ -640,8 +640,10 @@ abstract public class AbstractServer implements EnvironmentBean {
                                         getRemoteHomeClass(),
                                         getRemoteObjectClass(),
                                         getPrimaryKeyClass());
+      } catch (RuntimeException e) {
+	throw e;
       } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
+        throw new EJBException(e);
       }
 
       if (this instanceof StatelessServer) {

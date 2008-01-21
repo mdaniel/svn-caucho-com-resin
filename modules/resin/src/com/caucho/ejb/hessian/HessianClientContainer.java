@@ -28,12 +28,13 @@
 
 package com.caucho.ejb.hessian;
 
+import com.caucho.hessian.client.*;
+import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
-import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -44,7 +45,6 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Map;
 
 /**
  * Container for Hessian clients in the same JVM, but not the same
@@ -53,11 +53,13 @@ import java.util.Map;
 class HessianClientContainer implements HessianRemoteResolver {
   protected static L10N L = new L10N(HessianClientContainer.class);
 
-  private static EnvironmentLocal<Map<String,HessianClientContainer>> _hessianClient =
-  new EnvironmentLocal<Map<String,HessianClientContainer>>("caucho.hessian.client");
+  private static EnvironmentLocal _hessianClient =
+  new EnvironmentLocal("caucho.hessian.client");
   
   private String _serverId;
   private HessianHandleEncoder _handleEncoder;
+
+  private HessianProxyFactory _proxyFactory;
   // the home stub
   EJBHome _ejbHome;
 
@@ -75,31 +77,30 @@ class HessianClientContainer implements HessianRemoteResolver {
   /**
    * Creates a client container for same-JVM connections.
    *
-   * @param serverId the server id
+   * @param _serverId the server id
    */
   HessianClientContainer(String serverId)
     throws ConfigException
   {
     _serverId = serverId;
 
-    _remoteStubClass = getRemoteStubClass();
-    _homeStubClass = getHomeStubClass();
-  }
+    _proxyFactory = new HessianProxyFactory();
+   }
 
   static HessianClientContainer find(String serverId)
   {
     try {
-      Map<String,HessianClientContainer> map = _hessianClient.getLevel();
+      Hashtable map = (Hashtable) _hessianClient.getLevel();
       HessianClientContainer client = null;
 
       if (map != null)
-        client = map.get(serverId);
+        client = (HessianClientContainer) map.get(serverId);
 
       // sync doesn't matter since it's okay to load a dup
       if (client == null) {
         client = new HessianClientContainer(serverId);
         if (map == null)
-          map = new Hashtable<String,HessianClientContainer>();
+          map = new Hashtable();
         map.put(serverId, client);
         _hessianClient.set(map);
       }
@@ -119,11 +120,7 @@ class HessianClientContainer implements HessianRemoteResolver {
     throws ConfigException
   {
     try {
-      HomeStub homeStub = (HomeStub) _homeStubClass.newInstance();
-
-      homeStub._init(_serverId, this);
-
-      return homeStub;
+      return (EJBHome) _proxyFactory.create(getHomeClass(), _serverId);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -136,13 +133,11 @@ class HessianClientContainer implements HessianRemoteResolver {
    *
    * @return the bean's remote stub
    */
-  protected EJBObject createObjectStub(String url)
+  protected Object createObjectStub(String url)
     throws ConfigException
   {
     try {
-      ObjectStub objStub = (ObjectStub) _remoteStubClass.newInstance();
-      objStub._init(url, this);
-      return objStub;
+      return _proxyFactory.create(getRemoteClass(), url);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -163,58 +158,12 @@ class HessianClientContainer implements HessianRemoteResolver {
     try {
       if (_handleEncoder == null)
         _handleEncoder = new HessianHandleEncoder(null, _serverId,
-                                                  getPrimaryKeyClass());
+                                                 getPrimaryKeyClass());
 
       return _handleEncoder;
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
     }
-  }
-
-  /**
-   * Returns the bean's home stub class, creating it if necessary
-   */
-  Class getHomeStubClass()
-    throws ConfigException
-  {
-    if (_homeStubClass != null)
-      return _homeStubClass;
-
-    synchronized (this) {
-      if (_homeStubClass != null)
-        return _homeStubClass;
-
-      StubGenerator gen = new StubGenerator();
-      
-      _homeStubClass = gen.createHomeStub(getHomeClass());
-    }
-
-    return _homeStubClass;
-  }
-
-  /**
-   * Returns the bean's remote stub class, creating it if necessary
-   */
-  Class getRemoteStubClass()
-    throws ConfigException
-  {
-    if (_remoteStubClass != null)
-      return _remoteStubClass;
-
-    synchronized (this) {
-      if (_remoteStubClass != null)
-        return _remoteStubClass;
-
-      Class remoteClass = getRemoteClass();
-      if (remoteClass == null)
-        return null;
-
-      StubGenerator gen = new StubGenerator();
-
-      _remoteStubClass = gen.createObjectStub(remoteClass);
-    }
-
-    return _remoteStubClass;
   }
   
   /**
@@ -256,14 +205,14 @@ class HessianClientContainer implements HessianRemoteResolver {
       if (cl != null)
         return cl.getName();
       else
-        throw new ConfigException(L.l("`{0}' has no remote interface.",
+        throw new ConfigException(L.l("'{0}' has no remote interface.",
                                       _serverId));
     }
         
     try {
       Path path = Vfs.lookup(_serverId);
 
-      return (String) MetaStub.call(path, "_hessian_getAttribute", "home-class");
+      return (String) MetaStub.call(path, "_hessian_getAttribute", "java.home.class");
     } catch (Throwable e) {
       throw ConfigException.create(e);
     }
@@ -319,7 +268,7 @@ class HessianClientContainer implements HessianRemoteResolver {
       Path path = Vfs.lookup(_serverId);
 
       return (String) MetaStub.call(path, "_hessian_getAttribute",
-                                    "remote-class");
+                                    "java.object.class");
     } catch (Throwable e) {
       throw ConfigException.create(e);
     }
@@ -409,15 +358,7 @@ class HessianClientContainer implements HessianRemoteResolver {
   public Object create(Class api, String url)
     throws Exception
   {
-    StubGenerator gen = new StubGenerator();
-      
-    Class cl = gen.createStub(api);
-
-    HessianStub stub = (HessianStub) cl.newInstance();
-
-    stub._init(url, this);
-
-    return stub;
+    return _proxyFactory.create(api, url);
   }
 
   /**

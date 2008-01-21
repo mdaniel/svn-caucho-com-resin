@@ -392,6 +392,15 @@ public class UserTransactionImpl
   }
   
   /**
+   * Marks the transaction as rollback only.
+   */
+  public void setRollbackOnly(Exception e)
+    throws IllegalStateException
+  {
+    _transactionManager.setRollbackOnly(e);
+  }
+  
+  /**
    * Commits the transaction
    */
   public void commit()

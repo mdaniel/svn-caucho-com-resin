@@ -584,6 +584,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
 
   private Object lookupLocal(Class type)
   {
+    /*
     EjbServerManager manager = EjbServerManager.getLocal();
 
     if (manager != null) {
@@ -601,7 +602,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       else
         return manager.getRemoteByInterface(type);
     }
-
+*/
     /*
       EjbRefContext context = EjbRefContext.getLocal();
 

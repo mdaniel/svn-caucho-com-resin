@@ -45,12 +45,14 @@ import javax.interceptor.*;
 public class XaCallChain implements EjbCallChain {
   private static final L10N L = new L10N(XaCallChain.class);
 
+  private BusinessMethodGenerator _bizMethod;
   private EjbCallChain _next;
 
   private TransactionAttributeType _xa;
 
-  public XaCallChain(EjbCallChain next)
+  public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next)
   {
+    _bizMethod = bizMethod;
     _next = next;
   }
   
@@ -168,8 +170,38 @@ public class XaCallChain implements EjbCallChain {
     }
     
     _next.generateCall(out);
-    
+
     if (_xa != null) {
+      for (Class exn : _bizMethod.getApiMethod().getExceptionTypes()) {
+	ApplicationException appExn
+	  = (ApplicationException) exn.getAnnotation(ApplicationException.class);
+
+	if (appExn == null)
+	  continue;
+	
+	if (! RuntimeException.class.isAssignableFrom(exn)
+	    && appExn.rollback()) {
+	  out.println("} catch (" + exn.getName() + " e) {");
+	  out.println("  _xa.markRollback(e);");
+	  out.println("  throw e;");
+	}
+	else if (RuntimeException.class.isAssignableFrom(exn)
+		 && ! appExn.rollback()) {
+	  out.println("} catch (" + exn.getName() + " e) {");
+	  out.println("  throw e;");
+	}
+      }
+
+      switch (_xa) {
+      case REQUIRED:
+      case REQUIRES_NEW:
+	{
+	  out.println("} catch (RuntimeException e) {");
+	  out.println("  _xa.markRollback(e);");
+	  out.println("  throw e;");
+	}
+      }
+
       switch (_xa) {
       case NOT_SUPPORTED:
 	{

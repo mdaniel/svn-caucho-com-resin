@@ -30,13 +30,10 @@ package com.caucho.ejb.session;
 
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.util.Log;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
-import javax.ejb.SessionBean;
 import java.util.logging.Logger;
 
 /**

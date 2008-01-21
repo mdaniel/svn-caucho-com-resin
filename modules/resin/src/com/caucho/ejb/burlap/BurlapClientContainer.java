@@ -28,6 +28,7 @@
 
 package com.caucho.ejb.burlap;
 
+import com.caucho.burlap.client.*;
 import com.caucho.burlap.io.BurlapRemoteResolver;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
@@ -52,43 +53,44 @@ import java.util.Hashtable;
 class BurlapClientContainer implements BurlapRemoteResolver {
   protected static L10N L = new L10N(BurlapClientContainer.class);
 
-  private static EnvironmentLocal burlapClient =
+  private static EnvironmentLocal _burlapClient =
   new EnvironmentLocal("caucho.burlap.client");
   
-  private String serverId;
-  private BurlapHandleEncoder handleEncoder;
-  // the home stub
-  EJBHome ejbHome;
+  private String _serverId;
+  private BurlapHandleEncoder _handleEncoder;
 
-  Class homeClass;
-  Class remoteClass;
+  private BurlapProxyFactory _proxyFactory;
+  // the home stub
+  EJBHome _ejbHome;
+
+  Class _homeClass;
+  Class _remoteClass;
   // the home stub class
-  Class homeStubClass;
+  Class _homeStubClass;
   // the remote stub class
-  Class remoteStubClass;
+  Class _remoteStubClass;
   // the primary key class
-  Class primaryKeyClass;
+  Class _primaryKeyClass;
 
   private String _basicAuth;
 
   /**
    * Creates a client container for same-JVM connections.
    *
-   * @param serverId the server id
+   * @param _serverId the server id
    */
   BurlapClientContainer(String serverId)
     throws ConfigException
   {
-    this.serverId = serverId;
+    _serverId = serverId;
 
-    remoteStubClass = getRemoteStubClass();
-    homeStubClass = getHomeStubClass();
-  }
+    _proxyFactory = new BurlapProxyFactory();
+   }
 
   static BurlapClientContainer find(String serverId)
   {
     try {
-      Hashtable map = (Hashtable) burlapClient.getLevel();
+      Hashtable map = (Hashtable) _burlapClient.getLevel();
       BurlapClientContainer client = null;
 
       if (map != null)
@@ -100,7 +102,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
         if (map == null)
           map = new Hashtable();
         map.put(serverId, client);
-        burlapClient.set(map);
+        _burlapClient.set(map);
       }
       
       return client;
@@ -118,14 +120,8 @@ class BurlapClientContainer implements BurlapRemoteResolver {
     throws ConfigException
   {
     try {
-      HomeStub homeStub = (HomeStub) homeStubClass.newInstance();
-
-      homeStub._init(serverId, this);
-
-      return homeStub;
-    } catch (IllegalAccessException e) {
-      throw ConfigException.create(e);
-    } catch (InstantiationException e) {
+      return (EJBHome) _proxyFactory.create(getHomeClass(), _serverId);
+    } catch (Exception e) {
       throw ConfigException.create(e);
     }
   }
@@ -137,15 +133,11 @@ class BurlapClientContainer implements BurlapRemoteResolver {
    *
    * @return the bean's remote stub
    */
-  protected EJBObject createObjectStub(String url)
+  protected Object createObjectStub(String url)
     throws ConfigException
   {
     try {
-      ObjectStub objStub = (ObjectStub) remoteStubClass.newInstance();
-      objStub._init(url, this);
-      return objStub;
-    } catch (RuntimeException e) {
-      throw e;
+      return _proxyFactory.create(getRemoteClass(), url);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -153,7 +145,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
 
   BurlapHomeHandle getHomeHandle()
   {
-    return new BurlapHomeHandle(ejbHome, serverId);
+    return new BurlapHomeHandle(_ejbHome, _serverId);
   }
 
   BurlapHandle createHandle(String url)
@@ -164,60 +156,14 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   public HandleEncoder getHandleEncoder()
   {
     try {
-      if (handleEncoder == null)
-        handleEncoder = new BurlapHandleEncoder(null, serverId,
+      if (_handleEncoder == null)
+        _handleEncoder = new BurlapHandleEncoder(null, _serverId,
                                                  getPrimaryKeyClass());
 
-      return handleEncoder;
+      return _handleEncoder;
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
     }
-  }
-
-  /**
-   * Returns the bean's home stub class, creating it if necessary
-   */
-  Class getHomeStubClass()
-    throws ConfigException
-  {
-    if (homeStubClass != null)
-      return homeStubClass;
-
-    synchronized (this) {
-      if (homeStubClass != null)
-        return homeStubClass;
-
-      StubGenerator gen = new StubGenerator();
-      
-      homeStubClass = gen.createHomeStub(getHomeClass());
-    }
-
-    return homeStubClass;
-  }
-
-  /**
-   * Returns the bean's remote stub class, creating it if necessary
-   */
-  Class getRemoteStubClass()
-    throws ConfigException
-  {
-    if (remoteStubClass != null)
-      return remoteStubClass;
-
-    synchronized (this) {
-      if (remoteStubClass != null)
-        return remoteStubClass;
-
-      Class remoteClass = getRemoteClass();
-      if (remoteClass == null)
-        return null;
-
-      StubGenerator gen = new StubGenerator();
-
-      remoteStubClass = gen.createObjectStub(remoteClass);
-    }
-
-    return remoteStubClass;
   }
   
   /**
@@ -227,23 +173,23 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   Class getHomeClass()
     throws ConfigException
   {
-    if (homeClass != null)
-      return homeClass;
+    if (_homeClass != null)
+      return _homeClass;
 
     try {
       synchronized (this) {
-        if (homeClass != null)
-          return homeClass;
+        if (_homeClass != null)
+          return _homeClass;
 
         String className = getHomeClassName();
 
-        homeClass = CauchoSystem.loadClass(className, false, null);
+        _homeClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
       throw ConfigException.create(e);
     }
     
-    return homeClass;
+    return _homeClass;
   }
 
   /**
@@ -252,19 +198,19 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   String getHomeClassName()
     throws ConfigException
   {
-    AbstractServer server = EjbProtocolManager.getJVMServer(serverId);
+    AbstractServer server = EjbProtocolManager.getJVMServer(_serverId);
 
     if (server != null) {
       Class cl = server.getRemoteHomeClass();
       if (cl != null)
         return cl.getName();
       else
-        throw new ConfigException(L.l("`{0}' has no remote interface.",
-                                      serverId));
+        throw new ConfigException(L.l("'{0}' has no remote interface.",
+                                      _serverId));
     }
         
     try {
-      Path path = Vfs.lookup(serverId);
+      Path path = Vfs.lookup(_serverId);
 
       return (String) MetaStub.call(path, "_burlap_getAttribute", "java.home.class");
     } catch (Throwable e) {
@@ -279,26 +225,26 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   Class getRemoteClass()
     throws ConfigException
   {
-    if (remoteClass != null)
-      return remoteClass;
+    if (_remoteClass != null)
+      return _remoteClass;
 
     try {
       synchronized (this) {
-        if (remoteClass != null)
-          return remoteClass;
+        if (_remoteClass != null)
+          return _remoteClass;
 
         String className = getRemoteClassName();
 
         if (className == null || className.equals("null"))
           return null;
 
-        remoteClass = CauchoSystem.loadClass(className, false, null);
+        _remoteClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
       throw ConfigException.create(e);
     }
 
-    return remoteClass;
+    return _remoteClass;
   }
 
   /**
@@ -307,7 +253,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   String getRemoteClassName()
     throws ConfigException
   {
-    AbstractServer server = EjbProtocolManager.getJVMServer(serverId);
+    AbstractServer server = EjbProtocolManager.getJVMServer(_serverId);
 
     if (server != null) {
       Class cl = server.getRemoteObjectClass();
@@ -315,11 +261,11 @@ class BurlapClientContainer implements BurlapRemoteResolver {
         return cl.getName();
       else
         throw new ConfigException(L.l("`{0}' has no remote interface.",
-                                      serverId));
+                                      _serverId));
     }
     
     try {
-      Path path = Vfs.lookup(serverId);
+      Path path = Vfs.lookup(_serverId);
 
       return (String) MetaStub.call(path, "_burlap_getAttribute",
                                     "java.object.class");
@@ -335,23 +281,23 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   Class getPrimaryKeyClass()
     throws ConfigException
   {
-    if (primaryKeyClass != null)
-      return primaryKeyClass;
+    if (_primaryKeyClass != null)
+      return _primaryKeyClass;
 
     try {
       synchronized (this) {
-        if (primaryKeyClass != null)
-          return primaryKeyClass;
+        if (_primaryKeyClass != null)
+          return _primaryKeyClass;
 
         String className = getPrimaryKeyClassName();
 
-        primaryKeyClass = CauchoSystem.loadClass(className, false, null);
+        _primaryKeyClass = CauchoSystem.loadClass(className, false, null);
       }
     } catch (ClassNotFoundException e) {
       throw ConfigException.create(e);
     }
     
-    return primaryKeyClass;
+    return _primaryKeyClass;
   }
 
   /**
@@ -360,7 +306,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   String getPrimaryKeyClassName()
     throws ConfigException
   {
-    AbstractServer server = EjbProtocolManager.getJVMServer(serverId);
+    AbstractServer server = EjbProtocolManager.getJVMServer(_serverId);
 
     if (server != null) {
       Class cl = server.getPrimaryKeyClass();
@@ -368,11 +314,11 @@ class BurlapClientContainer implements BurlapRemoteResolver {
         return cl.getName();
       else
         throw new ConfigException(L.l("`{0}' has no remote interface.",
-                                      serverId));
+                                      _serverId));
     }
         
     try {
-      Path path = Vfs.lookup(serverId);
+      Path path = Vfs.lookup(_serverId);
 
       return (String) MetaStub.call(path, "_burlap_getAttribute", "primary-key-class");
     } catch (Throwable e) {
@@ -412,16 +358,7 @@ class BurlapClientContainer implements BurlapRemoteResolver {
   public Object create(Class api, String url)
     throws Exception
   {
-    StubGenerator gen = new StubGenerator();
-    gen.setClassDir(CauchoSystem.getWorkPath());
-      
-    Class cl = gen.createStub(api);
-
-    BurlapStub stub = (BurlapStub) cl.newInstance();
-
-    stub._init(url, this);
-
-    return stub;
+    return _proxyFactory.create(api, url);
   }
 
   /**
@@ -448,6 +385,6 @@ class BurlapClientContainer implements BurlapRemoteResolver {
    */
   public String toString()
   {
-    return "BurlapClientContainer[" + serverId + "]";
+    return "BurlapClientContainer[" + _serverId + "]";
   }
 }

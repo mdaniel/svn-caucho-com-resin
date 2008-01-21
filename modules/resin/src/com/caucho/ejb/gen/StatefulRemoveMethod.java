@@ -19,22 +19,55 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.burlap;
+package com.caucho.ejb.gen;
 
-import com.caucho.util.CompileException;
+import com.caucho.ejb.cfg.*;
+import com.caucho.java.JavaWriter;
+import com.caucho.util.L10N;
+
+import java.io.*;
+import java.lang.reflect.*;
+import java.rmi.*;
+import java.util.*;
+import javax.annotation.security.*;
+import javax.ejb.*;
+import javax.interceptor.*;
 
 /**
- * An exception for server messages, e.g. 500 codes.
+ * Represents a stateful remove business method
  */
-public class BurlapServerException extends BurlapProtocolException
-  implements CompileException {
-  public BurlapServerException() {}
-  public BurlapServerException(String s) { super(s); }
+public class StatefulRemoveMethod extends StatefulMethod
+{
+  public StatefulRemoveMethod(Method apiMethod,
+			      Method implMethod,
+			      int index)
+  {
+    super(apiMethod, implMethod, index);
+  }
+
+  /*
+  protected void generateThrows(JavaWriter out, Class []exnCls)
+    throws IOException
+  {
+    ArrayList<Class> list = new ArrayList<Class>();
+
+    for (Class cl : exnCls) {
+      if (! RemoteException.class.equals(cl))
+	list.add(cl);
+    }
+
+    Class []shortList = new Class[list.size()];
+    list.toArray(shortList);
+
+    super.generateThrows(out, shortList);
+  }
+  */
 }

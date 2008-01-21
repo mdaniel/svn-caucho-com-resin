@@ -114,7 +114,7 @@ public class HessianHandle extends AbstractHandle {
       try {
         HessianClientContainer client;
         client = HessianClientContainer.find(getServerId());
-        object = client.createObjectStub(url);
+        object = (EJBObject) client.createObjectStub(url);
       } catch (Exception e) {
         throw RemoteExceptionWrapper.create(e);
       }

@@ -29,7 +29,6 @@
 
 package com.caucho.management.j2ee;
 
-import com.caucho.ejb.AbstractSessionBean;
 import com.caucho.jmx.AbstractMBeanServer;
 import com.caucho.jmx.Jmx;
 
@@ -40,7 +39,7 @@ import java.rmi.RemoteException;
 import java.util.Set;
 
 public class ManagementImpl
-  extends AbstractSessionBean
+//  extends AbstractSessionBean
 {
   private final ListenerRegistration _listenerRegistrationImpl
     = new ListenerRegistrationImpl();

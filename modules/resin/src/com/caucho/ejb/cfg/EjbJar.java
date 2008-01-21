@@ -34,6 +34,7 @@ import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.Signature;
 import com.caucho.util.L10N;
 
+import java.util.*;
 import javax.annotation.PostConstruct;
 
 /**
@@ -103,6 +104,8 @@ public class EjbJar extends DescriptionGroupConfig {
 
   public static class MethodPermission {
     EjbConfig _config;
+    MethodSignature _method;
+    ArrayList<String> _roles;
 
     MethodPermission(EjbConfig config)
     {
@@ -119,10 +122,31 @@ public class EjbJar extends DescriptionGroupConfig {
 
     public void setRoleName(String roleName)
     {
+      if (_roles == null)
+	_roles = new ArrayList<String>();
+
+      _roles.add(roleName);
     }
 
     public void setMethod(MethodSignature method)
     {
+      _method = method;
+    }
+
+    @PostConstruct
+      public void init()
+      throws ConfigException
+    {
+      EjbBean bean = _config.getBeanConfig(_method.getEJBName());
+
+      if (bean == null)
+	throw new ConfigException(L.l("'{0}' is an unknown bean.",
+				      _method.getEJBName()));
+
+      EjbMethodPattern method = bean.createMethod(_method);
+
+      if (_roles != null)
+	method.setRoles(_roles);
     }
   }
 

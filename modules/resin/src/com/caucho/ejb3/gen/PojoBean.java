@@ -51,7 +51,7 @@ public class PojoBean extends GenClass {
   private ArrayList<BusinessMethodGenerator> _businessMethods
     = new ArrayList<BusinessMethodGenerator>();
 
-  private boolean _isPlain = true;
+  private boolean _isEnhanced;
   private boolean _hasXA;
   
   public PojoBean(Class beanClass)
@@ -87,19 +87,18 @@ public class PojoBean extends GenClass {
       BusinessMethodGenerator bizMethod
 	= new BusinessMethodGenerator(method, method, index);
 
-      if (! bizMethod.isEnhanced()) {
-	_isPlain = false;
+      bizMethod.introspect(method, method);
+
+      if (bizMethod.isEnhanced()) {
+	_isEnhanced = true;
 	_businessMethods.add(bizMethod);
       }
-
-      if (bizMethod.hasXA())
-	_hasXA = true;
     }
   }
 
   public Class generateClass()
   {
-    if (isPlain())
+    if (! isEnhanced())
       return _beanClass;
     
     try {
@@ -120,9 +119,9 @@ public class PojoBean extends GenClass {
     }
   }
 
-  protected boolean isPlain()
+  protected boolean isEnhanced()
   {
-    return _isPlain;
+    return _isEnhanced;
   }
 
   @Override

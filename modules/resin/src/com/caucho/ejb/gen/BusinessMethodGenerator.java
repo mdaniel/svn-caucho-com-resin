@@ -58,6 +58,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   private String _runAs;
 
   private XaCallChain _xa;
+  private SecurityCallChain _security;
   private InterceptorCallChain _interceptor;
   
   public BusinessMethodGenerator(Method apiMethod,
@@ -70,7 +71,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _uniqueName = "_" + _apiMethod.getName() + "_" + index;
 
     _interceptor = new InterceptorCallChain(this);
-    _xa = new XaCallChain(_interceptor);
+    _xa = new XaCallChain(this, _interceptor);
+    _security = new SecurityCallChain(this, _xa);
 
     introspect(apiMethod, implMethod);
   }
@@ -108,6 +110,14 @@ public class BusinessMethodGenerator implements EjbCallChain {
   }
 
   /**
+   * Returns the security call chain
+   */
+  public SecurityCallChain getSecurity()
+  {
+    return _security;
+  }
+
+  /**
    * Returns the interceptor call chain
    */
   public InterceptorCallChain getInterceptor()
@@ -120,9 +130,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
    */
   public boolean isEnhanced()
   {
-    if (_roles != null)
-      return true;
-    else if (_runAs != null)
+    if (_security.isEnhanced())
       return true;
     else if (_xa.isEnhanced())
       return true;
@@ -136,57 +144,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
   {
     Class cl = implMethod.getDeclaringClass();
 
-    introspectSecurity(cl);
+    _security.introspect(apiMethod, implMethod);
     _xa.introspect(apiMethod, implMethod);
     _interceptor.introspect(apiMethod, implMethod);
-  }
-  
-  /**
-   * Introspect EJB security annotations:
-   *   @RunAs
-   *   @RolesAllowed
-   *   @PermitAll
-   *   @DenyAll
-   */
-  protected void introspectSecurity(Class cl)
-  {
-    RunAs runAs = (RunAs) cl.getAnnotation(RunAs.class);
-
-    if (runAs != null)
-      _runAs = runAs.value();
-    
-    RolesAllowed rolesAllowed
-      = (RolesAllowed) cl.getAnnotation(RolesAllowed.class);
-    
-    if (rolesAllowed != null)
-      _roles = rolesAllowed.value();
-    
-    PermitAll permitAll = (PermitAll) cl.getAnnotation(PermitAll.class);
-
-    if (permitAll != null)
-      _roles = null;
-    
-    DenyAll denyAll = (DenyAll) cl.getAnnotation(DenyAll.class);
-
-    if (denyAll != null)
-      _roles = new String[0];
-
-    // 
-    
-    rolesAllowed = _apiMethod.getAnnotation(RolesAllowed.class);
-
-    if (rolesAllowed != null)
-      _roles = rolesAllowed.value();
-    
-    permitAll = (PermitAll) _apiMethod.getAnnotation(PermitAll.class);
-
-    if (permitAll != null)
-      _roles = null;
-    
-    denyAll = (DenyAll) _apiMethod.getAnnotation(DenyAll.class);
-
-    if (denyAll != null)
-      _roles = new String[0];
   }
 
   public void generate(JavaWriter out, HashMap prologueMap)
@@ -195,7 +155,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     if (! isEnhanced())
       return;
 
-    generatePrologue(out, prologueMap);
+    _security.generatePrologue(out, prologueMap);
 
     out.println();
     if (Modifier.isPublic(_apiMethod.getModifiers()))
@@ -220,78 +180,20 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
     
     out.println(")");
-    generateThrows(out, _apiMethod.getExceptionTypes());
+    generateThrows(out, _implMethod.getExceptionTypes());
     out.println();
     out.println("{");
     out.pushDepth();
 
-    generateContent(out);
+    _security.generateCall(out);
 
     out.popDepth();
     out.println("}");
   }
 
-  protected void generateContent(JavaWriter out)
-    throws IOException
-  {
-    generateSecurity(out);
-  }
-
   public void generatePrologue(JavaWriter out, HashMap map)
     throws IOException
   {
-    if (_roles != null) {
-      _roleVar = "_role_" + out.generateId();
-
-      out.print("private static String []" + _roleVar + " = new String[] {");
-
-      for (int i = 0; i < _roles.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-
-	out.print("\"");
-	out.printJavaString(_roles[i]);
-	out.print("\"");
-      }
-
-      out.println("};");
-    }
-
-    _xa.generatePrologue(out, map);
-  }
-
-  protected void generateSecurity(JavaWriter out)
-    throws IOException
-  {
-    if (_roleVar != null) {
-      out.println("com.caucho.security.SecurityContext.checkUserInRole(" + _roleVar + ");");
-      out.println();
-    }
-
-    generateRunAs(out);
-  }
-
-  protected void generateRunAs(JavaWriter out)
-    throws IOException
-  {
-    if (_runAs != null) {
-      out.print("String oldRunAs ="
-		+ " com.caucho.security.SecurityContext.runAs(\"");
-      out.printJavaString(_runAs);
-      out.println("\");");
-
-      out.println("try {");
-      out.pushDepth();
-    }
-
-    _xa.generateCall(out);
-
-    if (_runAs != null) {
-      out.popDepth();
-      out.println("} finally {");
-      out.println("  com.caucho.security.SecurityContext.runAs(oldRunAs);");
-      out.println("}");
-    }
   }
 
   protected void generateThrows(JavaWriter out, Class []exnCls)

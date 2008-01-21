@@ -129,6 +129,15 @@ public class UserTransactionProxy
   }
   
   /**
+   * Marks the transaction as rollback only.
+   */
+  public void setRollbackOnly(Exception e)
+    throws IllegalStateException
+  {
+    getUserTransaction().setRollbackOnly(e);
+  }
+  
+  /**
    * Commits the transaction
    */
   public void commit()

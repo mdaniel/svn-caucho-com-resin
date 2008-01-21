@@ -85,8 +85,10 @@ abstract public class SessionServer extends AbstractServer
       comp.init();
       webBeans.addComponent(comp);
 
-      _localHome = getSessionContext().createLocalHome();
-      _remoteHomeView = getSessionContext().createRemoteHomeView();
+      if (_localHomeClass != null)
+	_localHome = (EJBLocalHome) getLocalObject(_localHomeClass);
+      if (_remoteHomeClass != null)
+	_remoteHome = (EJBHome) getRemoteObject(_remoteHomeClass);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -151,7 +153,7 @@ abstract public class SessionServer extends AbstractServer
   @Override
   public EJBHome getEJBHome()
   {
-    return _remoteHomeView;
+    return _remoteHome;
   }
 
   /**
