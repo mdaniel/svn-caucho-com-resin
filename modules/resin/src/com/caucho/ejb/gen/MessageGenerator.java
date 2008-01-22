@@ -46,7 +46,7 @@ public class MessageGenerator extends BeanGenerator {
   {
     super(toFullClassName(ejbName, ejbClass.getSimpleName()), ejbClass);
 
-    addView(new MessageView(this));
+    //    addView(new MessageView(this));
   }
 
   private static String toFullClassName(String ejbName, String className)
