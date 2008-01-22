@@ -31,10 +31,12 @@ package com.caucho.jms.queue;
 
 import java.util.*;
 import java.util.logging.*;
+import java.io.Serializable;
 
 import javax.annotation.*;
 import javax.jms.*;
 
+import com.caucho.jms.JmsRuntimeException;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 
@@ -62,6 +64,12 @@ abstract public class AbstractQueue extends AbstractDestination
   // stats
   private long _listenerFailCount;
   private long _listenerFailLastTime;
+  
+  // queue api
+  private ConnectionFactoryImpl _connectionFactory;
+  private Connection _conn;
+
+  private JmsSession _session;
 
   protected AbstractQueue()
   {
@@ -200,6 +208,61 @@ abstract public class AbstractQueue extends AbstractDestination
     throws JMSException
   {
     return new MessageBrowserImpl(this, messageSelector);
+  }
+
+  //
+  // BlockingQueue api
+  //
+
+  public boolean add(Object value)
+  {
+    try {
+      synchronized (this) {
+	JmsSession session = getSession();
+
+	Message msg = session.createObjectMessage((Serializable) value);
+	
+	session.send(this, msg, 0, 0, Integer.MAX_VALUE);
+
+	return true;
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new JmsRuntimeException(e);
+    }
+  }
+
+  public boolean offer(Object value)
+  {
+    return add(value);
+  }
+
+  public boolean put(Object value)
+  {
+    return add(value);
+  }
+
+  public int remainingCapacity()
+  {
+    return Integer.MAX_VALUE;
+  }
+
+  private JmsSession getSession()
+    throws JMSException
+  {
+    if (_conn == null) {
+      _connectionFactory = new ConnectionFactoryImpl();
+      _conn = _connectionFactory.createConnection();
+      _conn.start();
+    }
+    
+    if (_session == null) {
+      _session =
+	(JmsSession) _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    }
+
+    return _session;
   }
 
   public String toString()

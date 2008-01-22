@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import java.io.IOException;
+import java.util.*;
 
 /**
  * Generates the skeleton for a message bean.
@@ -42,11 +43,13 @@ import java.io.IOException;
 public class MessageGenerator extends BeanGenerator {
   private static final L10N L = new L10N(BeanGenerator.class);
 
+  private ArrayList<View> _views = new ArrayList<View>();
+  
   public MessageGenerator(String ejbName, ApiClass ejbClass)
   {
     super(toFullClassName(ejbName, ejbClass.getSimpleName()), ejbClass);
 
-    //    addView(new MessageView(this));
+    _views.add(new MessageView(this, ejbClass));
   }
 
   private static String toFullClassName(String ejbName, String className)
@@ -75,6 +78,11 @@ public class MessageGenerator extends BeanGenerator {
 
     return sb.toString();
   }
+
+  public ArrayList<View> getViews()
+  {
+    return _views;
+  }
   
   /**
    * Generates the message session bean
@@ -91,13 +99,15 @@ public class MessageGenerator extends BeanGenerator {
     out.println();
     out.println("import com.caucho.config.*;");
     out.println("import com.caucho.ejb.*;");
-    out.println("import com.caucho.ejb.session.*;");
+    out.println("import com.caucho.ejb.message.*;");
     out.println();
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
     
     out.println();
-    out.println("public class " + getClassName());
+    out.println("public class " + getClassName()
+		+ " extends " + getEjbClass().getName());
+
     out.println("{");
     out.pushDepth();
 
@@ -106,18 +116,6 @@ public class MessageGenerator extends BeanGenerator {
     out.println("{");
     out.pushDepth();
     
-    out.println("super(server);");
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public " + getClassName() + "(" + getClassName() + " context)");
-    out.println("{");
-    out.pushDepth();
-    
-    out.println("super(context.getMessageServer());");
-
     out.popDepth();
     out.println("}");
 
