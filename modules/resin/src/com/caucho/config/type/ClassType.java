@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 
 import java.util.*;
+import java.lang.reflect.Array;
 
 /**
  * Represents a class type.
@@ -77,7 +78,26 @@ public final class ClassType extends ConfigType
       try {
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
 	
-	return Class.forName(text, false, loader);
+	int bracketIdx = text.indexOf('[');
+
+	if (bracketIdx > 0) {
+	  String componentTypeName = text.substring(0, bracketIdx);
+	  
+	  Class componentClass = _primitiveTypes.get(componentTypeName);
+
+	  if (componentClass == null)
+	    componentClass = Class.forName(componentTypeName, false, loader);
+
+	  while (bracketIdx > 0) {
+	    componentClass = Array.newInstance(componentClass, 0).getClass();
+	    bracketIdx = text.indexOf('[', (bracketIdx + 1));
+	  }
+
+	  return componentClass;
+	}
+	else {
+	  return Class.forName(text, false, loader);
+	}
       } catch (Exception e) {
 	throw ConfigException.create(e);
       }
