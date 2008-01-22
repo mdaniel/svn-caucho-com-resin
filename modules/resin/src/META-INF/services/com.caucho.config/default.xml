@@ -60,6 +60,9 @@
     <bean name="env-entry"
           class="com.caucho.config.types.EnvEntry"/>
 
+    <bean name="interceptor"
+          class="com.caucho.webbeans.cfg.InterceptorConfig"/>
+
     <bean name="java"
           class="com.caucho.java.JavacConfig"/>
 

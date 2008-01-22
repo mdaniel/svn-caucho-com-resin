@@ -326,6 +326,28 @@ public class WebBeansContainer
     addComponent(comp);
   }
 
+  public void addEnabledInterceptor(Class cl)
+  {
+    _wbWebBeans.addEnabledInterceptor(cl);
+  }
+
+  public ArrayList<Class> findInterceptors(ArrayList<Annotation> annList)
+  {
+    ArrayList<Class> list = new ArrayList<Class>();
+
+    ArrayList<WbInterceptor> interceptors
+      = _wbWebBeans.findInterceptors(annList);
+
+    if (interceptors == null)
+      return list;
+
+    for (WbInterceptor interceptor : interceptors) {
+      list.add(interceptor.getInterceptorClass());
+    }
+
+    return list;
+  }
+
   public ScopeContext getScopeContext(Class scope)
   {
     if (scope == null)

@@ -32,8 +32,10 @@ package com.caucho.ejb.gen;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 import java.io.*;
+import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.*;
 import javax.annotation.security.*;
@@ -55,6 +57,9 @@ public class InterceptorCallChain extends AbstractCallChain {
   private ArrayList<Class> _defaultInterceptors = new ArrayList<Class>();
   private ArrayList<Class> _classInterceptors = new ArrayList<Class>();
   private ArrayList<Class> _methodInterceptors = new ArrayList<Class>();
+
+  private boolean _isExcludeDefaultInterceptors;
+  private boolean _isExcludeClassInterceptors;
   
   private ArrayList<Class> _interceptors = new ArrayList<Class>();
 
@@ -96,6 +101,8 @@ public class InterceptorCallChain extends AbstractCallChain {
     Class apiClass = apiMethod.getDeclaringClass();
     Class implClass = implMethod.getDeclaringClass();
 
+    _implMethod = implMethod;
+
     Interceptors iAnn;
     
     iAnn = (Interceptors) apiClass.getAnnotation(Interceptors.class);
@@ -126,7 +133,36 @@ public class InterceptorCallChain extends AbstractCallChain {
 	_methodInterceptors.add(iClass);
     }
 
-    _implMethod = implMethod;
+    if (apiMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
+      _isExcludeClassInterceptors = true;
+
+    if (implMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
+      _isExcludeClassInterceptors = true;
+
+    if (apiMethod.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+      _isExcludeDefaultInterceptors = true;
+
+    if (implMethod.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+      _isExcludeDefaultInterceptors = true;
+
+    // webbeans annotations
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    ArrayList<Annotation> interceptorTypes = new ArrayList<Annotation>();
+    for (Annotation ann : implMethod.getAnnotations()) {
+      Class annType = ann.annotationType();
+      
+      if (annType.isAnnotationPresent(InterceptorBindingType.class))
+	interceptorTypes.add(ann);
+    }
+
+    if (interceptorTypes.size() > 0) {
+      ArrayList<Class> interceptors
+	= webBeans.findInterceptors(interceptorTypes);
+
+      if (interceptors != null)
+	_methodInterceptors.addAll(interceptors);
+    }
   }
 
   @Override
@@ -138,8 +174,15 @@ public class InterceptorCallChain extends AbstractCallChain {
       return;
     }
 
-    _interceptors.addAll(_classInterceptors);
+    if (! _isExcludeDefaultInterceptors)
+      _interceptors.addAll(_defaultInterceptors);
+    if (! _isExcludeClassInterceptors)
+      _interceptors.addAll(_classInterceptors);
+    
     _interceptors.addAll(_methodInterceptors);
+
+    if (_interceptors.size() == 0)
+      return;
     
     _uniqueName = "_v" + out.generateId();
     

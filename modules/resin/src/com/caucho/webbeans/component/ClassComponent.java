@@ -351,6 +351,8 @@ public class ClassComponent extends ComponentImpl {
       }
 
       introspectObservers();
+
+      /*
       introspectInterceptors();
 
       if (_interceptorMap != null) {
@@ -361,6 +363,7 @@ public class ClassComponent extends ComponentImpl {
 
 	_ctor = proxyCtor;
       }
+      */
     }
   }
 

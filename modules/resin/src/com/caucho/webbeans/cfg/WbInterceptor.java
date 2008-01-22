@@ -87,6 +87,11 @@ public class WbInterceptor {
     }
   }
 
+  public Class getInterceptorClass()
+  {
+    return _cl;
+  }
+
   public Method getMethod()
   {
     return _invokeMethod;

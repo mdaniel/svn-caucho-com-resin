@@ -338,6 +338,11 @@ public class WbWebBeans {
     }
   }
 
+  public void addEnabledInterceptor(Class cl)
+  {
+    _enabledInterceptors.add(new WbInterceptor(cl));
+  }
+
   public class Interceptors {
     public void addInterceptor(Class cl)
     {
