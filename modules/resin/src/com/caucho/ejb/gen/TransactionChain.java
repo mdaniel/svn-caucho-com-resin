@@ -40,8 +40,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.*;
 
+import javax.ejb.*;
 import javax.ejb.ApplicationException;
-
 /**
  * Generates the skeleton for a method call.
  */
@@ -56,14 +56,14 @@ public class TransactionChain extends FilterCallChain
 
   private ApiClass _businessInterface;
 
-  private int _xaType;
+  private TransactionAttributeType _xaType;
 
   private boolean _isEJB3;
 
   private ArrayList<ApplicationExceptionConfig> _appExceptions;
 
   public TransactionChain(CallChain next,
-                          int xaType,
+                          TransactionAttributeType xaType,
                           ApiMethod apiMethod,
                           ApiMethod implMethod)
   {
@@ -71,7 +71,7 @@ public class TransactionChain extends FilterCallChain
   }
 
   public TransactionChain(CallChain next,
-                          int xaType,
+                          TransactionAttributeType xaType,
                           ApiMethod apiMethod,
                           ApiMethod implMethod,
                           boolean isEJB3,
@@ -90,7 +90,7 @@ public class TransactionChain extends FilterCallChain
   }
 
   public static TransactionChain create(CallChain next,
-                                        int xaType,
+                                        TransactionAttributeType xaType,
                                         ApiMethod apiMethod,
                                         ApiMethod implMethod)
   {
@@ -98,7 +98,7 @@ public class TransactionChain extends FilterCallChain
   }
 
   public static TransactionChain create(CallChain next,
-                                        int xaType,
+                                        TransactionAttributeType xaType,
                                         ApiMethod apiMethod,
                                         ApiMethod implMethod,
                                         boolean isEJB3,
@@ -135,31 +135,35 @@ public class TransactionChain extends FilterCallChain
 
     out.print("com.caucho.ejb.xa.TransactionContext trans");
 
-    switch (_xaType) {
-    case EjbMethod.TRANS_SINGLE_READ:
-      out.println(" = _xaManager.beginSingleRead();");
-      break;
+    if (_xaType != null) {
+      switch (_xaType) {
+	/*
+	  case EjbMethod.TRANS_SINGLE_READ:
+	  out.println(" = _xaManager.beginSingleRead();");
+	  break;
+	*/
 
-    case EjbMethod.TRANS_REQUIRES_NEW:
-      out.println(" = _xaManager.beginRequiresNew();");
-      break;
-    case EjbMethod.TRANS_BEAN:
-    case EjbMethod.TRANS_NOT_SUPPORTED:
-       out.println(" = _xaManager.suspend();");
-      break;
-    case EjbMethod.TRANS_NEVER:
-      out.println(" = _xaManager.beginNever();");
-      break;
-    case EjbMethod.TRANS_REQUIRED:
-      out.println(" = _xaManager.beginRequired();");
-      break;
-    case EjbMethod.TRANS_MANDATORY:
-      out.println(" = _xaManager.beginMandatory();");
-      break;
-    default:
-    case EjbMethod.TRANS_SUPPORTS:
-      out.println(" = _xaManager.beginSupports();");
-      break;
+      case REQUIRES_NEW:
+	out.println(" = _xaManager.beginRequiresNew();");
+	break;
+	//case EjbMethod.TRANS_BEAN:
+      case NOT_SUPPORTED:
+	out.println(" = _xaManager.suspend();");
+	break;
+      case NEVER:
+	out.println(" = _xaManager.beginNever();");
+	break;
+      case REQUIRED:
+	out.println(" = _xaManager.beginRequired();");
+	break;
+      case MANDATORY:
+	out.println(" = _xaManager.beginMandatory();");
+	break;
+      default:
+      case SUPPORTS:
+	out.println(" = _xaManager.beginSupports();");
+	break;
+      }
     }
 
     out.println("try {");
@@ -195,7 +199,8 @@ public class TransactionChain extends FilterCallChain
     out.println();
 
     // TCK: needs QA, ejb30/bb/localaccess/statefulclient/exceptionTest1
-    if (_xaType != EjbMethod.TRANS_BEAN) {
+    //if (_xaType != EjbMethod.TRANS_BEAN) {
+    if (_xaType != null) {
       out.println("if (trans.getTransaction() != oldTrans) {");
       out.println("  throw trans.setRollbackOnly(e);");
       out.println("}");
@@ -230,7 +235,8 @@ public class TransactionChain extends FilterCallChain
   protected void generateExceptionHandling(JavaWriter out)
     throws IOException
   {
-    boolean isCmt = _xaType != EjbMethod.TRANS_BEAN;
+    // boolean isCmt = _xaType != EjbMethod.TRANS_BEAN;
+    boolean isCmt = _xaType != null;
 
     // ejb/0fb9
     out.println("if (e instanceof com.caucho.ejb.EJBExceptionWrapper)");

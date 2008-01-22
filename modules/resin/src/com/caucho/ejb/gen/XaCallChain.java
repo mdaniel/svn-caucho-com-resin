@@ -108,6 +108,7 @@ public class XaCallChain extends AbstractCallChain
   /**
    * Generates the static class prologue
    */
+  @Override
   public void generatePrologue(JavaWriter out, HashMap map)
     throws IOException
   {
@@ -174,6 +175,7 @@ public class XaCallChain extends AbstractCallChain
     _next.generateCall(out);
 
     if (_xa != null) {
+      out.popDepth();
       for (Class exn : _bizMethod.getApiMethod().getExceptionTypes()) {
 	ApplicationException appExn
 	  = (ApplicationException) exn.getAnnotation(ApplicationException.class);
@@ -207,7 +209,6 @@ public class XaCallChain extends AbstractCallChain
       switch (_xa) {
       case NOT_SUPPORTED:
 	{
-	  out.popDepth();
 	  out.println("} finally {");
 	  out.println("  if (xa != null)");
 	  out.println("    _xa.resume(xa);");
@@ -217,7 +218,6 @@ public class XaCallChain extends AbstractCallChain
       
       case REQUIRED:
 	{
-	  out.popDepth();
 	  out.println("} finally {");
 	  out.println("  if (xa == null)");
 	  out.println("    _xa.commit();");
@@ -227,7 +227,6 @@ public class XaCallChain extends AbstractCallChain
       
       case REQUIRES_NEW:
 	{
-	  out.popDepth();
 	  out.println("} finally {");
 	  out.println("  _xa.endRequiresNew(xa);");
 	  out.println("}");

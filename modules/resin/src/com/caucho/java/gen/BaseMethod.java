@@ -138,14 +138,13 @@ public class BaseMethod extends ClassComponent {
   public Class []getParameterTypes()
   {
     // ejb/0f7a
-    return _call.getParameterTypes();
-    /*
+
     if (_parameterTypes != null)
       return _parameterTypes;
     else if (_method != null)
       return _method.getParameterTypes();
     else
-    */
+      return _call.getParameterTypes();
   }
 
   /**
@@ -153,12 +152,10 @@ public class BaseMethod extends ClassComponent {
    */
   public Class getReturnType()
   {
-    return _call.getReturnType();
-    /*
     if (_method != null)
       return _method.getReturnType();
     else
-    */
+      return _call.getReturnType();
   }
 
   /**

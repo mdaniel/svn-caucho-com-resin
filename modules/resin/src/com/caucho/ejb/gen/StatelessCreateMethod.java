@@ -73,13 +73,13 @@ public class StatelessCreateMethod extends BusinessMethodGenerator
   protected void generateContent(JavaWriter out)
     throws IOException
   {
-    out.println("return  new " + _objectView.getViewClassName() + "(_context);");
+    out.println("return new " + _objectView.getViewClassName() + "(_context);");
   }
 
   protected void generatePreCall(JavaWriter out)
     throws IOException
   {
-    out.println("return  new " + _objectView.getViewClassName() + "(_context);");
+    out.println("bean = new " + _objectView.getViewClassName() + "(_context);");
   }
 
   /**
@@ -104,6 +104,6 @@ public class StatelessCreateMethod extends BusinessMethodGenerator
   protected void generatePostCall(JavaWriter out)
     throws IOException
   {
-    out.println("return remote;");
+    out.println("return bean;");
   }
 }

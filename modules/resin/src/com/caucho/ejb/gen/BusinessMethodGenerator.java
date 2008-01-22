@@ -211,7 +211,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     out.println("{");
     out.pushDepth();
 
-    _security.generateCall(out);
+    generateContent(out);
 
     out.popDepth();
     out.println("}");
@@ -243,6 +243,12 @@ public class BusinessMethodGenerator implements EjbCallChain {
       out.popDepth();
       out.println("}");
     }
+  }
+
+  protected void generateContent(JavaWriter out)
+    throws IOException
+  {
+    _security.generateCall(out);
   }
 
   /**

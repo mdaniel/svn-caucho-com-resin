@@ -113,6 +113,7 @@ public class EntityServer extends AbstractServer {
     super(ejbContainer);
 
     _entityCache = _ejbContainer.getEntityCache();
+    _entityCache.start();
     
     // getPersistentManager().setHome(config.getName(), this);
     // _dataSource = config.getDataSource();
@@ -296,6 +297,33 @@ public class EntityServer extends AbstractServer {
 
       throw e;
     }
+  }
+
+  /**
+   * Returns the 3.0 remote stub for the container
+   */
+  @Override
+  public Object getRemoteObject(Class api)
+  {
+    if (api == getRemoteHomeClass())
+      return _remoteHomeView;
+    else
+      return null;
+  }
+
+  /**
+   * Returns the 3.0 remote stub for the container
+   */
+  @Override
+  public Object getRemoteObject(Object key)
+    throws FinderException
+  {
+    AbstractContext cxt = getContext(key);
+
+    if (cxt != null)
+      return cxt.getRemoteView();
+    else
+      return null;
   }
 
   /**

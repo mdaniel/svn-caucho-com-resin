@@ -33,12 +33,7 @@ import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.xa.EjbTransactionManager;
 
-import javax.ejb.EJBObject;
-import javax.ejb.EntityContext;
-import javax.ejb.FinderException;
-import javax.ejb.Handle;
-import javax.ejb.HomeHandle;
-import javax.ejb.RemoveException;
+import javax.ejb.*;
 import javax.transaction.UserTransaction;
 import java.util.logging.Level;
 
@@ -88,6 +83,14 @@ public abstract class QEntityContext extends AbstractContext
   public HomeHandle getHomeHandle()
   {
     return getServer().getHomeHandle();
+  }
+
+  /**
+   * Returns the home interface
+   */
+  public EJBHome getEJBHome()
+  {
+    return getServer().getEJBHome();
   }
 
   public void setPrimaryKey(Object key)

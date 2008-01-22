@@ -99,6 +99,9 @@ public class EjbBean extends DescriptionGroupConfig
   private String _mappedName;
 
   private String _location = "";
+  private String _filename;
+  private int _line;
+  
   private boolean _isInit; // used for error messsage line #
 
   // these classes are loaded with the parent (configuration) loader, not
@@ -359,7 +362,13 @@ public class EjbBean extends DescriptionGroupConfig
    */
   public void setConfigLocation(String filename, int line)
   {
-    _location = filename + ":" + line + ": ";
+    if (_filename == null) {
+      _filename = filename;
+      _line = line;
+    }
+
+    if (_location == null)
+      _location = filename + ":" + line + ": ";
   }
 
   /**
@@ -1086,11 +1095,9 @@ public class EjbBean extends DescriptionGroupConfig
 
       // assembleBeanMethods();
 
-      createViews();
-    } catch (LineConfigException e) {
-      throw e;
+      // createViews();
     } catch (ConfigException e) {
-      throw new LineConfigException(_location, e);
+      throw ConfigException.createLine(_location, e);
     }
   }
   
@@ -1193,13 +1200,21 @@ public class EjbBean extends DescriptionGroupConfig
   /**
    * Creates the views.
    */
-  protected void createViews()
+  protected void createViews21()
     throws ConfigException
   {
     /*
     if (_remoteHome != null) {
       _remoteHomeView = createHomeView(_remoteHome, "RemoteHome");
       _remoteHomeView.introspect();
+    }
+    
+    if (_remote != null) {
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
+      list.add(_remote);
+
+      _remoteView = createRemoteObjectView(list, "Remote", "21");
+      _remoteView.introspect();
     }
 
     if (_remote21 != null) {
@@ -1244,7 +1259,7 @@ public class EjbBean extends DescriptionGroupConfig
         _localView.introspect();
       }
     }
-     */
+    */
   }
 
   /**
@@ -1597,7 +1612,7 @@ public class EjbBean extends DescriptionGroupConfig
   /**
    * Assembles the generator.
    */
-  protected GenClass assembleGenerator(String fullClassName)
+  public GenClass assembleGenerator(String fullClassName)
     throws NoSuchMethodException, ConfigException
   {
     int p = fullClassName.lastIndexOf('.');
@@ -1620,6 +1635,8 @@ public class EjbBean extends DescriptionGroupConfig
 
     // getEJBClassName());
 
+    assembleViews(assembler, fullClassName);
+    
     /*
     if (_remoteHomeView != null)
       _remoteHomeView.assembleView(assembler, fullClassName);
@@ -1687,7 +1704,7 @@ public class EjbBean extends DescriptionGroupConfig
   /**
    * Introspects the bean's methods.
    */
-  protected void assembleBeanMethods()
+  public void assembleBeanMethods()
     throws ConfigException
   {
     if (getEJBClassWrapper() == null)
@@ -1720,6 +1737,15 @@ public class EjbBean extends DescriptionGroupConfig
     for (EjbBaseMethod method : _methodMap.values()) {
       assembler.addMethod(method.assemble(assembler, fullClassName));
     }
+  }
+
+  /**
+   * Assembles the generator methods.
+   */
+  protected void assembleViews(BeanAssembler assembler,
+                                 String fullClassName)
+    throws ConfigException
+  {
   }
 
   /**
@@ -1829,6 +1855,12 @@ public class EjbBean extends DescriptionGroupConfig
           baseClass.addMethod(new BaseMethod(methods[i], call));
           }
         */
+	/*
+          CallChain call = new MethodCallChain(beanMethod);
+          call = getTransactionChain(call, beanMethod, prefix);
+
+          baseClass.addMethod(new BaseMethod(methods[i], call));
+	*/
 
         //printCreate(methods[i], prefix);
       }
@@ -1858,13 +1890,10 @@ public class EjbBean extends DescriptionGroupConfig
                                           ApiMethod implMethod,
                                           String prefix)
   {
-    /*
     return TransactionChain.create(next,
 				   getTransactionAttribute(implMethod, prefix),
                                    apiMethod, implMethod, isEJB3(),
                                    _ejbConfig.getApplicationExceptions());
-    */
-    return null;
   }
 
   public CallChain getSecurityChain(CallChain next,
@@ -2386,7 +2415,7 @@ public class EjbBean extends DescriptionGroupConfig
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.createLine(_location, e);
     }
   }
 

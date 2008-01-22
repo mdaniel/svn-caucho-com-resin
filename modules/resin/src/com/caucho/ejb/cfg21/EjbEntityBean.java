@@ -39,6 +39,7 @@ import com.caucho.config.types.Period;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.amber.AmberConfig;
 import com.caucho.ejb.entity.EntityServer;
+import com.caucho.ejb.gen.*;
 import com.caucho.ejb.gen21.AmberAssembler;
 import com.caucho.ejb.gen21.BeanAssembler;
 import com.caucho.ejb.gen21.EntityAssembler;
@@ -81,6 +82,8 @@ public class EjbEntityBean extends Ejb21Bean {
 
   private DataSource _dataSource;
 
+  private EntityGenerator _entityBean;
+
   private String _abstractSchemaName;
   private String _sqlTable;
 
@@ -96,6 +99,10 @@ public class EjbEntityBean extends Ejb21Bean {
 
   private ArrayList<CmrRelation> _relations = new ArrayList<CmrRelation>();
   private ArrayList<ApiMethod> _stubMethods = new ArrayList<ApiMethod>();
+
+  // EJB 2.1
+  private EjbHomeView _remoteHomeView;
+  private EjbObjectView _remoteView;
 
   /**
    * Creates a new entity bean configuration.
@@ -600,6 +607,17 @@ public class EjbEntityBean extends Ejb21Bean {
   {
     return _methodList;
   }
+  
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  @Override
+  protected BeanGenerator createBeanGenerator()
+  {
+    _entityBean = new EntityGenerator(this);
+    
+    return _entityBean;
+  }
 
   /**
    * Configure initialization.
@@ -630,13 +648,105 @@ public class EjbEntityBean extends Ejb21Bean {
         validateRemote(local);
 
       validateMethods();
-    } catch (LineConfigException e) {
-      throw e;
     } catch (ConfigException e) {
-      throw new LineConfigException(getLocation() + e.getMessage(), e);
+      throw ConfigException.create(getLocation(), e);
     }
 
-    J2EEManagedObject.register(new com.caucho.management.j2ee.EntityBean(this));
+    //J2EEManagedObject.register(new com.caucho.management.j2ee.EntityBean(this));
+  }
+
+  /**
+   * Creates the views.
+   */
+  protected void createViews21()
+    throws ConfigException
+  {
+    if (_remoteHome != null) {
+      _remoteHomeView = createHomeView(_remoteHome, "RemoteHome");
+      _remoteHomeView.introspect();
+    }
+    
+    if (_remoteList.size() > 0) {
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
+      list.addAll(_remoteList);
+
+      _remoteView = createRemoteObjectView(list, "Remote", "21");
+      _remoteView.introspect();
+    }
+
+    /*
+    if (_remote21 != null) {
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
+      list.add(_remote21);
+
+      _remoteView21 = createRemoteObjectView(list, "Remote", "21");
+      _remoteView21.introspect();
+    }
+
+    else if (_remoteList.size() > 0) {
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
+      list.addAll(_remoteList);
+      list.remove(_remote21);
+
+      if (list.size() > 0) {
+        _remoteView = createRemoteObjectView(list, "Remote", "");
+        _remoteView.introspect();
+      }
+    }
+
+    if (_localHome != null) {
+      _localHomeView = createHomeView(_localHome, "LocalHome");
+      _localHomeView.introspect();
+    }
+
+    if (_local21 != null) {
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
+      list.add(_local21);
+
+      _localView21 = createObjectView(list, "Local", "21");
+      _localView21.introspect();
+    }
+
+    if (_localList.size() > 0) {
+      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
+      list.addAll(_localList);
+      list.remove(_local21);
+
+      if (list.size() > 0) {
+        _localView = createObjectView(list, "Local", "");
+        _localView.introspect();
+      }
+    }
+    */
+  }
+
+
+  /**
+   * Assembles the generator methods.
+   */
+  protected void assembleViews(BeanAssembler assembler,
+                                 String fullClassName)
+    throws ConfigException
+  {
+    if (_remoteHomeView != null)
+      _remoteHomeView.assembleView(assembler, fullClassName);
+
+    if (_remoteView != null)
+      _remoteView.assembleView(assembler, fullClassName);
+
+    /*
+    if (_remoteView21 != null)
+      _remoteView21.assembleView(assembler, fullClassName);
+
+    if (_localHomeView != null)
+      _localHomeView.assembleView(assembler, fullClassName);
+
+    if (_localView21 != null)
+      _localView21.assembleView(assembler, fullClassName);
+
+    if (_localView != null)
+      _localView.assembleView(assembler, fullClassName);
+      */
   }
 
   /**
@@ -890,10 +1000,8 @@ public class EjbEntityBean extends Ejb21Bean {
     if (isCMP()) {
       try {
         config.addBean(this);
-      } catch (LineConfigException e) {
-        throw e;
       } catch (Exception e) {
-        throw new LineConfigException(getLocation() + e.getMessage(), e);
+        throw ConfigException.create(getLocation(), e);
       }
     }
   }

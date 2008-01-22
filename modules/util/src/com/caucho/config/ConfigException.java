@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -88,11 +89,31 @@ public class ConfigException
     
     if (e instanceof InvocationTargetException && e.getCause() != null)
       e = e.getCause();
-    
-    if (e instanceof DisplayableException)
+
+    if (e instanceof LineConfigException)
+      throw (LineConfigException) e;
+    else if (e instanceof DisplayableException) {
       return new ConfigException(location + e.getMessage(), e);
+    }
     else
       return new ConfigException(location + e, e);
+  }
+
+  public static RuntimeException createLine(String line, Throwable e)
+  {
+    if (e instanceof InstantiationException && e.getCause() != null)
+      e = e.getCause();
+    
+    if (e instanceof InvocationTargetException && e.getCause() != null)
+      e = e.getCause();
+
+    if (e instanceof LineConfigException)
+      throw (LineConfigException) e;
+    else if (e instanceof DisplayableException) {
+      return new LineConfigException(line + e.getMessage(), e);
+    }
+    else
+      return new LineConfigException(line + e, e);
   }
 
   public static RuntimeException create(Field field, Throwable e)

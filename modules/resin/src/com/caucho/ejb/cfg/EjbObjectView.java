@@ -68,7 +68,7 @@ public class EjbObjectView extends EjbView
   /**
    * Assembles the generator.
    */
-  protected void assembleView(BeanAssembler assembler,
+  public void assembleView(BeanAssembler assembler,
                               String fullClassName)
     throws ConfigException
   {
