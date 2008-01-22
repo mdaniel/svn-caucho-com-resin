@@ -108,6 +108,11 @@ final class NamespaceBinding
     }
   }
 
+  boolean isEmit()
+  {
+    return _emit;
+  }
+
   void setEmit(boolean emit)
   {
     _emit = emit;
