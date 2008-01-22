@@ -55,6 +55,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
 
   private Class _destinationType;
   private String _destinationName;
+  private Object _destination;
 
   public void setDestinationType(Class type)
   {
@@ -64,6 +65,11 @@ public class MessageBeanConfig extends AbstractBeanConfig
   public void setDestinationName(String name)
   {
     _destinationName = name;
+  }
+
+  public void setDestination(Object destination)
+  {
+    _destination = destination;
   }
 
   @PostConstruct
@@ -91,28 +97,40 @@ public class MessageBeanConfig extends AbstractBeanConfig
     if (getInit() != null)
       bean.setInit(getInit());
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
-    
-    ComponentImpl destComp;
     String loc = getInstanceClass().getName() + ": ";
+    WebBeansContainer webBeans = WebBeansContainer.create();
 
-    if (_destinationName != null)
-      destComp = webBeans.bind(loc, _destinationType, _destinationName);
-    else
-      destComp = webBeans.bind(loc, _destinationType);
+    if (_destination != null) {
+      bean.setDestinationValue((Destination) _destination);
+    }
+    else {
+      ComponentImpl destComp;
 
-    bean.setDestinationValue((Destination) destComp.get());
+      if (_destinationType == null)
+	throw new ConfigException(L.l("'destination-type' must be specified"));
+
+      if (_destinationName != null)
+	destComp = webBeans.bind(loc, _destinationType, _destinationName);
+      else
+	destComp = webBeans.bind(loc, _destinationType);
+
+      if (destComp == null)
+	throw new ConfigException(L.l("'{0}' is an unknown destination type",
+				      _destinationType.getName()));
+
+      bean.setDestinationValue((Destination) destComp.get());
+    }
 
     ComponentImpl comp = webBeans.bind(loc, ConnectionFactory.class);
 
     bean.setConnectionFactoryValue((ConnectionFactory) comp.get());
 
-    bean.init();
+    // bean.init();
 
     configManager.setBeanConfig(name, bean);
 
     // XXX: timing?
-    configManager.start();
+    // configManager.start();
   }
 }
 

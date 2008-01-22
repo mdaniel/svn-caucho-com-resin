@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.gen.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.message.MessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -72,6 +73,8 @@ public class EjbMessageBean extends EjbBean {
   private int _consumerMax = -1;
   private String _messageDestinationLink;
   private Class _messagingType;
+
+  private MessageGenerator _messageBean;
 
   /**
    * Creates a new message bean configuration.
@@ -383,6 +386,17 @@ public class EjbMessageBean extends EjbBean {
                       isAllowPOJO() ? "messaging-type" : "messageListenerInterface"));
 
     // J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
+  }
+  
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  @Override
+  protected BeanGenerator createBeanGenerator()
+  {
+    _messageBean = new MessageGenerator(getEJBName(), getEJBClassWrapper());
+    
+    return _messageBean;
   }
 
   /**

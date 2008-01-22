@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>ejb: webbeans and session bean merge for security, xa, and interception [<a href="http://caucho.com/resin/doc/resin-ioc.xtp">resin-ioc</a></li>
 <li>access-log: add auto-flush-time as a configuration parameter (rep by Michael O'Dea)</li>
 <li>(2008-01-14) added com.caucho.resin.ResinEmbed embedding [<a href="http://caucho.com/resin/doc/resin-embedding.xtp">Resin Embedding</a>]</li>
 <li>plugins: add spring/webbeans bridge [<a href="http://wiki.caucho.com/Spring">wiki: Spring and Resin/WebBeans</a>]</li>
