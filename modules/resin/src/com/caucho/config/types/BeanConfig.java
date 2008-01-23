@@ -121,6 +121,13 @@ public class BeanConfig extends WbComponentConfig {
    */
   public void setUrl(String url)
   {
+    Class beanConfigClass = getBeanConfigClass();
+
+    if (beanConfigClass == null) {
+      throw new ConfigException(L.l("'{0}' does not support the 'url' attribute because its bean-config-class is undefined",
+				    getClass().getName()));
+    }
+
     String scheme;
     String properties = "";
 
@@ -132,44 +139,9 @@ public class BeanConfig extends WbComponentConfig {
     else
       scheme = url;
 
-    Class beanConfigClass = getBeanConfigClass();
-
-    if (beanConfigClass == null) {
-      throw new ConfigException(L.l("'{0}' does not support the 'url' attribute because its bean-config-class is undefined",
-				    getClass().getName()));
-    }
-
     TypeFactory factory = TypeFactory.create();
-
-    String typeName = factory.getDriverType(beanConfigClass.getName(), scheme);
-
-    if (typeName == null) {
-      ArrayList<String> schemes = new ArrayList<String>();
-
-      factory.getDriverSchemes(schemes, beanConfigClass.getName());
-
-      Collections.sort(schemes);
-      
-      throw new ConfigException(L.l("'{0}' is an unknown scheme for driver '{1}'.  The available schemes are '{2}'",
-				    scheme, beanConfigClass.getName(), schemes));
-    }
-
-    try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class cl = Class.forName(typeName, false, loader);
-
-      if (! beanConfigClass.isAssignableFrom(cl))
-	throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
-				      cl.getName(), beanConfigClass.getName(),
-				      scheme));
-
-      setClass(cl);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ConfigException(L.l("'{0}' is an undefined class for scheme '{1}'",
-				    typeName, scheme), e);
-    }
+    
+    setClass(factory.getDriverClassByUrl(beanConfigClass, url));
 
     String []props = properties.split("[;]");
 

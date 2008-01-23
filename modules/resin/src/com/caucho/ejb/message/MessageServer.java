@@ -47,6 +47,7 @@ import javax.ejb.MessageDrivenContext;
 import javax.interceptor.InvocationContext;
 import javax.jms.*;
 import javax.naming.*;
+import javax.resource.spi.*;
 import javax.transaction.*;
 import javax.transaction.xa.*;
 import java.lang.reflect.InvocationTargetException;
@@ -60,8 +61,11 @@ import java.util.logging.Logger;
  */
 public class MessageServer extends AbstractServer {
   private static final L10N L = new L10N(MessageServer.class);
-  protected static final Logger log = Log.open(MessageServer.class);
+  protected static final Logger log
+    = Logger.getLogger(MessageServer.class.getName());
 
+  private ActivationSpec _activationSpec;
+  
   private ConnectionFactory _connectionFactory;
   private Connection _connection;
   private Destination _destination;
@@ -119,6 +123,14 @@ public class MessageServer extends AbstractServer {
   public void setInterceptors(ArrayList<Interceptor> interceptors)
   {
     _interceptors = interceptors;
+  }
+  
+  /**
+   * Sets the activation spec
+   */
+  public void setActivationSpec(ActivationSpec activationSpec)
+  {
+    _activationSpec = activationSpec;
   }
 
   /**

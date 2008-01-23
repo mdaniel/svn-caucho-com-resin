@@ -31,6 +31,7 @@ package com.caucho.config.type;
 
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
+import com.caucho.config.program.*;
 import com.caucho.config.types.RawString;
 import com.caucho.loader.*;
 import com.caucho.util.*;
@@ -344,6 +345,82 @@ public class TypeFactory implements AddLoaderListener
       return _parent.hasConfig(url);
     else
       return false;
+  }
+
+  /**
+   * Returns a driver by the url
+   */
+  public Class getDriverClassByUrl(Class api, String url)
+  {
+    String scheme;
+
+    int p = url.indexOf(':');
+    if (p >= 0)
+      scheme = url.substring(0, p);
+    else
+      scheme = url;
+
+    String typeName = getDriverType(api.getName(), scheme);
+
+    if (typeName == null) {
+      ArrayList<String> schemes = new ArrayList<String>();
+
+      getDriverSchemes(schemes, api.getName());
+
+      Collections.sort(schemes);
+      
+      throw new ConfigException(L.l("'{0}' is an unknown scheme for driver '{1}'.  The available schemes are '{2}'",
+				    scheme, api.getName(), schemes));
+    }
+
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      Class cl = Class.forName(typeName, false, loader);
+
+      if (! api.isAssignableFrom(cl))
+	throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
+				      cl.getName(), api.getName(),
+				      scheme));
+
+      return cl;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(L.l("'{0}' is an undefined class for scheme '{1}'",
+				    typeName, scheme), e);
+    }
+  }
+
+  public ContainerProgram getUrlProgram(String url)
+  {
+    String properties = "";
+
+    int p = url.indexOf(':');
+    if (p >= 0) {
+      properties = url.substring(p + 1);
+    }
+    else
+      return null;
+
+    String []props = properties.split("[;]");
+
+    if (props.length == 0)
+      return null;
+
+    ContainerProgram program = new ContainerProgram();
+    for (String prop : props) {
+      if (prop.length() == 0)
+	continue;
+      
+      String []values = prop.split("[=]");
+
+      if (values.length != 2)
+	throw new ConfigException(L.l("'{0}' is an invalid URL.  Bean URL syntax is 'scheme:prop1=value1;prop2=value2'", url));
+
+      program.addProgram(new PropertyStringProgram(values[0], values[1]));
+    }
+
+    return program;
   }
 
   /**

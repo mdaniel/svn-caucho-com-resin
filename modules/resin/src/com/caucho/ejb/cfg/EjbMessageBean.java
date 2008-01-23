@@ -39,6 +39,7 @@ import com.caucho.ejb.message.MessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.ActivationConfigProperty;
@@ -50,6 +51,7 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.MessageListener;
 import javax.jms.Session;
+import javax.resource.spi.ActivationSpec;
 import javax.naming.NamingException;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
@@ -64,6 +66,8 @@ public class EjbMessageBean extends EjbBean {
   private static final L10N L = new L10N(EjbMessageBean.class);
 
   private ConnectionFactory _connectionFactory;
+
+  private ActivationSpec _activationSpec;
   private Destination _destination;
   private String _messageSelector;
   private boolean _isContainerTransaction = true;
@@ -144,6 +148,14 @@ public class EjbMessageBean extends EjbBean {
   public MessageDrivenDestination createMessageDrivenDestination()
   {
     return new MessageDrivenDestination();
+  }
+
+  /**
+   * Sets the JCA activation spec.
+   */
+  public void setActivationSpec(ActivationSpec activationSpec)
+  {
+    _activationSpec = activationSpec;
   }
 
   /**
@@ -378,9 +390,17 @@ public class EjbMessageBean extends EjbBean {
   {
     super.init();
 
-    if (! MessageListener.class.isAssignableFrom(getEJBClass())
-        && _messagingType == null)
+    if (_messagingType != null) {
+    }
+    else if (_activationSpec != null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
 
+      
+    }
+    else if (MessageListener.class.isAssignableFrom(getEJBClass())) {
+      _messagingType = MessageListener.class;
+    }
+    else
       throw error(L.l("'{0}' must implement javax.jms.MessageListener or specify {1}.",
                       getEJBClass().getName(),
                       isAllowPOJO() ? "messaging-type" : "messageListenerInterface"));
@@ -498,6 +518,9 @@ public class EjbMessageBean extends EjbBean {
     else
       server.setConnectionFactory(getEjbContainer().getJmsConnectionFactory());
 
+    if (_activationSpec != null)
+      server.setActivationSpec(_activationSpec);
+      
     if (_destination != null)
       server.setDestination(_destination);
 

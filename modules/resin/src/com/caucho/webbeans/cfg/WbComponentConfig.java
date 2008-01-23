@@ -284,9 +284,20 @@ public class WbComponentConfig {
     comp.setInstanceClass(instanceClass);
 
     comp.init();
-    _webbeans.addWbComponent(comp);
 
     _comp = comp;
+
+    deploy();
+  }
+
+  protected void deploy()
+  {
+    _webbeans.addWbComponent(_comp);
+  }
+
+  public Object getObject()
+  {
+    return _comp.get();
   }
 
   private void introspect()

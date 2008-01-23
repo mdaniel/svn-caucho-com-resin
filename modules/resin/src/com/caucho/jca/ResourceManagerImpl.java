@@ -29,11 +29,7 @@
 package com.caucho.jca;
 
 import com.caucho.config.ConfigException;
-import com.caucho.loader.CloseListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
+import com.caucho.loader.*;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -53,21 +49,24 @@ import java.util.logging.Logger;
  */
 public class ResourceManagerImpl implements BootstrapContext {
   private static final L10N L = new L10N(ResourceManagerImpl.class);
-  private static final Logger log = Log.open(ResourceManagerImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ResourceManagerImpl.class.getName());
 
-  private static EnvironmentLocal<ResourceManagerImpl> _localManager =
-    new EnvironmentLocal<ResourceManagerImpl>();
+  private static EnvironmentLocal<ResourceManagerImpl> _localManager
+    = new EnvironmentLocal<ResourceManagerImpl>();
+
+  private final EnvironmentClassLoader _loader;
 
   private UserTransactionProxy _tm;
 
-  private ArrayList<ResourceAdapter> _resources =
-    new ArrayList<ResourceAdapter>();
+  private ArrayList<ResourceAdapter> _resources
+    = new ArrayList<ResourceAdapter>();
 
-  private ArrayList<ConnectionPool> _connectionManagers =
-    new ArrayList<ConnectionPool>();
+  private ArrayList<ConnectionPool> _connectionManagers
+    = new ArrayList<ConnectionPool>();
 
-  private ArrayList<SoftReference<Timer>> _timers =
-    new ArrayList<SoftReference<Timer>>();
+  private ArrayList<SoftReference<Timer>> _timers
+    = new ArrayList<SoftReference<Timer>>();
 
   private WorkManagerImpl _workManager;
 
@@ -79,17 +78,14 @@ public class ResourceManagerImpl implements BootstrapContext {
    */
   private ResourceManagerImpl()
   {
+    _loader = Environment.getEnvironmentClassLoader();
+    
     Environment.addClassLoaderListener(new CloseListener(this));
 
-    try {
-      Context ic = new InitialContext();
+    _tm = UserTransactionProxy.getInstance();
 
-      _tm = (UserTransactionProxy) ic.lookup("java:comp/UserTransaction");
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-      
-      throw new RuntimeException(e);
-    }
+    if (_tm == null)
+      throw new IllegalStateException();
   }
 
   /**
@@ -311,5 +307,13 @@ public class ResourceManagerImpl implements BootstrapContext {
 
       super.cancel();
     }
+  }
+
+  public String toString()
+  {
+    if (_loader != null)
+      return getClass().getSimpleName() + "[" + _loader.getId() + "]";
+    else
+      return getClass().getSimpleName() + "[]";
   }
 }

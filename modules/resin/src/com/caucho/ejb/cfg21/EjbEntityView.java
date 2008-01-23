@@ -42,6 +42,7 @@ import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import javax.ejb.*;
 
 /**
  * Configuration for a cmp view.
@@ -91,7 +92,7 @@ public class EjbEntityView extends EjbObjectView {
 
       // XXX: can be supports if there's no auto-update
       call = TransactionChain.create(call,
-                                     EjbMethod.TRANS_REQUIRED,
+                                     TransactionAttributeType.REQUIRED,
                                      removeApiMethod,
                                      removeApiMethod);
 

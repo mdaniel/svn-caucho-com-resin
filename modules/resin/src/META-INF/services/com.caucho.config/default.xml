@@ -25,7 +25,7 @@
           class="com.caucho.webbeans.cfg.WbComponentConfig"/>
 
     <bean name="connector"
-          class="com.caucho.jca.ConnectorResource"/>
+          class="com.caucho.jca.ConnectorConfig"/>
 
     <bean name="database"
           class="com.caucho.sql.DBPool"/>

@@ -34,6 +34,7 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.jms.*;
+import javax.resource.spi.*;
 
 import com.caucho.config.*;
 import com.caucho.config.types.*;
@@ -53,10 +54,20 @@ public class MessageBeanConfig extends AbstractBeanConfig
   private static final Logger log
     = Logger.getLogger(MessageBeanConfig.class.getName());
 
+  private ActivationSpec _activationSpec;
+  
   private Class _destinationType;
   private String _destinationName;
   private Object _destination;
 
+  /**
+   * Sets the activation spec
+   */
+  public void setActivationSpec(ActivationSpecConfig spec)
+  {
+    _activationSpec = (ActivationSpec) spec.getObject();
+  }
+  
   public void setDestinationType(Class type)
   {
     _destinationType = type;
@@ -102,6 +113,9 @@ public class MessageBeanConfig extends AbstractBeanConfig
 
     if (_destination != null) {
       bean.setDestinationValue((Destination) _destination);
+    }
+    else if (_activationSpec != null) {
+      bean.setActivationSpec(_activationSpec);
     }
     else {
       ComponentImpl destComp;

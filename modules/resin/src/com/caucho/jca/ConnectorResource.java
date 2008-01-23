@@ -53,10 +53,12 @@ import java.util.logging.Logger;
  */
 public class ConnectorResource implements EnvironmentListener {
   private static L10N L = new L10N(ConnectorResource.class);
-  private static Logger log = Log.open(ConnectorResource.class);
+  private static Logger log
+    = Logger.getLogger(ConnectorResource.class.getName());
 
   private static int _idGen;
 
+  private String _url;
   private String _name;
   private String _jndiName;
   private String _type;
@@ -111,6 +113,15 @@ public class ConnectorResource implements EnvironmentListener {
     throws Exception
   {
     setClass(type);
+  }
+
+  /**
+   * Sets the type of the connector using known types.
+   */
+  public void setURL(String url)
+    throws Exception
+  {
+    
   }
 
   /**
