@@ -97,13 +97,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
 
   public void close() throws XMLStreamException
   {
-    try {
-      flushPending();
-      _out.close();
-    }
-    catch (IOException e) {
-      throw new XMLStreamException(e);
-    }
+    flushPending();
+    // DO NOT close _out!  
+    // This will cause XFire/CXF and possibly others to blow up.
   }
 
   public void flush() throws XMLStreamException
