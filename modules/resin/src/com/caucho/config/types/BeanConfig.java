@@ -53,6 +53,9 @@ import javax.webbeans.*;
 public class BeanConfig extends WbComponentConfig {
   private static final L10N L = new L10N(BeanConfig.class);
 
+  private String _filename;
+  private int _line;
+
   private String _jndiName;
   
   private String _mbeanName;
@@ -63,6 +66,22 @@ public class BeanConfig extends WbComponentConfig {
   public BeanConfig()
   {
     setScope("singleton");
+  }
+
+  public void setConfigLocation(String filename, int line)
+  {
+    _filename = filename;
+    _line = line;
+  }
+
+  public String getFilename()
+  {
+    return _filename;
+  }
+
+  public int getLine()
+  {
+    return _line;
   }
 
   public void setJndiName(String jndiName)

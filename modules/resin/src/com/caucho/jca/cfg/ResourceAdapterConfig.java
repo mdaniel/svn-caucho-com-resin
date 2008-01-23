@@ -47,11 +47,11 @@ public class ResourceAdapterConfig extends ObjectConfig {
   private ArrayList<ConnectionDefinition> _outboundConnections =
     new ArrayList<ConnectionDefinition>();
 
-  private ArrayList<MessageListenerConfig> _inboundConnections =
-    new ArrayList<MessageListenerConfig>();
+  private ArrayList<MessageListenerConfig> _inboundConnections
+    = new ArrayList<MessageListenerConfig>();
 
-  private ArrayList<AdminObjectConfig> _resources =
-    new ArrayList<AdminObjectConfig>();
+  private ArrayList<AdminObjectConfig> _resources
+    = new ArrayList<AdminObjectConfig>();
 
   private ConnectionDefinition _connectionDefinition;
 
@@ -205,7 +205,8 @@ public class ResourceAdapterConfig extends ObjectConfig {
     for (int i = 0; i < _inboundConnections.size(); i++) {
       MessageListenerConfig cfg = _inboundConnections.get(i);
 
-      Class cl = cfg.getMessageListenerType();
+      //Class cl = cfg.getMessageListenerType();
+      Class cl = cfg.getActivationSpecClass();
 
       if (cl != null && cl.getName().equals(type))
 	return cfg;

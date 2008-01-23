@@ -29,8 +29,8 @@
 
 package com.caucho.ejb;
 
+import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.ConfigContext;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.*;
@@ -73,6 +73,10 @@ abstract public class AbstractServer implements EnvironmentBean {
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected final EjbContainer _ejbContainer;
+
+  protected String _filename;
+  protected int _line;
+  protected String _location;
   
   protected String _id;
   protected String _ejbName;
@@ -172,6 +176,17 @@ abstract public class AbstractServer implements EnvironmentBean {
       _loader.setId(getType() + id.substring(p + 1));
     else
       _loader.setId(getType() + id);
+  }
+
+  public void setConfigLocation(String filename, int line)
+  {
+    _filename = filename;
+    _line = line;
+  }
+
+  public void setLocation(String location)
+  {
+    _location = location;
   }
 
   protected String getType()
@@ -1064,6 +1079,14 @@ abstract public class AbstractServer implements EnvironmentBean {
       sb.append("<remote>" + _remoteApiList.get(0).getName() + "</remote>\n");
       sb.append("</ejb-ref>\n");
     }
+  }
+
+  public ConfigException error(String msg)
+  {
+    if (_filename != null)
+      throw new LineConfigException(_filename, _line, msg);
+    else
+      throw new ConfigException(msg);
   }
 
   public String toString()

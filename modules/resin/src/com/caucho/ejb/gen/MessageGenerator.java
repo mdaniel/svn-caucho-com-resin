@@ -103,21 +103,37 @@ public class MessageGenerator extends BeanGenerator {
     out.println();
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
+    out.println("import javax.resource.spi.endpoint.*;");
     
     out.println();
     out.println("public class " + getClassName()
-		+ " extends " + getEjbClass().getName());
+		+ " extends " + getEjbClass().getName()
+		+ " implements MessageEndpoint");
 
     out.println("{");
     out.pushDepth();
 
     out.println();
-    out.println("public " + getClassName() + "(MessageServer server)");
+    out.println("public " + getClassName() + "()");
     out.println("{");
     out.pushDepth();
     
     out.popDepth();
     out.println("}");
+
+    out.println();
+    out.println("public void beforeDelivery(java.lang.reflect.Method method)");
+    out.println("{");
+    out.println("}");
+
+    out.println("public void afterDelivery()");
+    out.println("{");
+    out.println("}");
+
+    out.println("public void release()");
+    out.println("{");
+    out.println("}");
+    
 
     for (View view : getViews()) {
       view.generateContextPrologue(out);

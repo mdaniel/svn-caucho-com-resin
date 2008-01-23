@@ -54,6 +54,9 @@ import javax.webbeans.*;
  */
 abstract public class AbstractBeanConfig {
   private static final L10N L = new L10N(AbstractBeanConfig.class);
+
+  private String _filename;
+  private int _line;
   
   private String _name;
   private String _jndiName;
@@ -71,6 +74,25 @@ abstract public class AbstractBeanConfig {
 
   protected AbstractBeanConfig()
   {
+  }
+
+  /**
+   * Sets the configuration location
+   */
+  public void setConfigLocation(String filename, int line)
+  {
+    _filename = filename;
+    _line = line;
+  }
+
+  public String getFilename()
+  {
+    return _filename;
+  }
+
+  public int getLine()
+  {
+    return _line;
   }
 
   /**

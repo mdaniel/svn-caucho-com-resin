@@ -93,6 +93,8 @@ public class MessageBeanConfig extends AbstractBeanConfig
     EjbConfigManager configManager = ejbContainer.getConfigManager();
 
     EjbMessageBean bean = new EjbMessageBean(configManager, "config");
+    bean.setConfigLocation(getFilename(), getLine());
+    
     bean.setEJBClass(getInstanceClass());
 
     String name = getName();

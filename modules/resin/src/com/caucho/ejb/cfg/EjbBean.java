@@ -388,6 +388,22 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   /**
+   * Gets the file name
+   */
+  public String getFilename()
+  {
+    return _filename;
+  }
+
+  /**
+   * Gets the line
+   */
+  public int getLine()
+  {
+    return _line;
+  }
+
+  /**
    * Sets true if POJO are allowed.
    */
   public void setAllowPOJO(boolean allowPOJO)
@@ -2507,6 +2523,19 @@ public class EjbBean extends DescriptionGroupConfig
       return new LineConfigException(_location + msg);
     else
       return new ConfigException(msg);
+  }
+
+  /**
+   * Returns an error.
+   */
+  public RuntimeException error(Exception e)
+  {
+    if (_filename != null)
+      return LineConfigException.create(_filename, _line, e);
+    else if (_location != null)
+      return ConfigException.createLine(_location, e);
+    else
+      return ConfigException.create(e);
   }
 
   public String toString()

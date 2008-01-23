@@ -48,7 +48,8 @@ import javax.ejb.*;
  * Configuration for a cmp view.
  */
 public class EjbEntityView extends EjbObjectView {
-  private static final Logger log = Log.open(EjbEntityView.class);
+  private static final Logger log
+    = Logger.getLogger(EjbEntityView.class.getName());
   private static final L10N L = new L10N(EjbEntityView.class);
 
   /**

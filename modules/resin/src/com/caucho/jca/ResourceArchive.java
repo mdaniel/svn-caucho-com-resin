@@ -126,6 +126,14 @@ public class ResourceArchive implements EnvironmentBean
   }
 
   /**
+   * Returns the resource adapter class.
+   */
+  public Class getResourceAdapterClass()
+  {
+    return _config.getResourceAdapter().getResourceadapterClass();
+  }
+
+  /**
    * Returns the transaction support.
    */
   public String getTransactionSupport()

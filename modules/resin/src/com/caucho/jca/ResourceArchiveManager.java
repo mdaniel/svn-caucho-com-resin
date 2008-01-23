@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -42,13 +43,14 @@ import java.util.logging.Logger;
  */
 public class ResourceArchiveManager {
   static final L10N L = new L10N(ResourceArchiveManager.class);
-  static final Logger log = Log.open(ResourceArchiveManager.class);
+  static final Logger log
+    = Logger.getLogger(ResourceArchiveManager.class.getName());
 
-  private static final EnvironmentLocal<ResourceArchiveManager> _localManager =
-    new EnvironmentLocal<ResourceArchiveManager>();
+  private static final EnvironmentLocal<ResourceArchiveManager> _localManager
+    = new EnvironmentLocal<ResourceArchiveManager>();
 
-  private ArrayList<ResourceArchive> _resources =
-    new ArrayList<ResourceArchive>();
+  private ArrayList<ResourceArchive> _resources
+    = new ArrayList<ResourceArchive>();
 
   /**
    * Creates the application.
@@ -137,14 +139,21 @@ public class ResourceArchiveManager {
 
       Class resourceAdapterClass = raConfig.getResourceadapterClass();
 
-      if (resourceAdapterClass != null &&
-	  type.equals(resourceAdapterClass.getName()))
+      if (resourceAdapterClass != null
+	  && type.equals(resourceAdapterClass.getName()))
 	return ra;
     }
     
     for (int i = 0; i < _resources.size(); i++) {
       ResourceArchive ra = _resources.get(i);
       if (ra.getConnectionDefinition(type) != null)
+	return ra;
+    }
+    
+    for (int i = 0; i < _resources.size(); i++) {
+      ResourceArchive ra = _resources.get(i);
+      
+      if (ra.getMessageListener(type) != null)
 	return ra;
     }
 
@@ -172,6 +181,13 @@ public class ResourceArchiveManager {
     for (int i = 0; i < _resources.size(); i++) {
       ResourceArchive ra = _resources.get(i);
       if (ra.getConnectionDefinition(type.getName()) != null)
+	return ra;
+    }
+    
+    for (int i = 0; i < _resources.size(); i++) {
+      ResourceArchive ra = _resources.get(i);
+      
+      if (ra.getMessageListener(type.getName()) != null)
 	return ra;
     }
 

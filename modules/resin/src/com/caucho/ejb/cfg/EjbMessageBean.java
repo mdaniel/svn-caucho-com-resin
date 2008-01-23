@@ -36,6 +36,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.gen.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.message.MessageServer;
+import com.caucho.ejb.message.ActivationMessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
@@ -494,6 +495,9 @@ public class EjbMessageBean extends EjbBean {
                                      JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
+    if (_activationSpec != null)
+      return deployActivationSpecServer(ejbManager, javaGen);
+    
     MessageServer server = new MessageServer(ejbManager);
 
     server.setModuleName(getEJBModuleName());
@@ -531,8 +535,12 @@ public class EjbMessageBean extends EjbBean {
       server.setConsumerMax(_consumerMax);
     else
       server.setConsumerMax(getEjbContainer().getMessageConsumerMax());
+    
+    Class contextImplClass = javaGen.loadClass(getSkeletonName());
 
-    Class beanClass = javaGen.loadClass(getEJBClass().getName());
+    server.setContextImplClass(contextImplClass);
+
+    // server.setBeanClass(beanClass);
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -568,6 +576,70 @@ public class EjbMessageBean extends EjbBean {
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+
+    return server;
+  }
+
+  /**
+   * Deploys the bean.
+   */
+  public AbstractServer deployActivationSpecServer(EjbContainer ejbManager,
+						   JavaClassGenerator javaGen)
+    throws ClassNotFoundException
+  {
+    ActivationMessageServer server;
+    
+    try {
+      if (_activationSpec == null)
+	throw new ConfigException(L.l("ActivationSpec is required for ActivationSpecServer"));
+
+    
+      server = new ActivationMessageServer(ejbManager);
+
+      server.setConfigLocation(getFilename(), getLine());
+      
+      server.setModuleName(getEJBModuleName());
+      server.setEJBName(getEJBName());
+      server.setMappedName(getMappedName());
+      server.setId(getEJBModuleName() + "#" + getMappedName());
+
+      server.setContainerTransaction(getContainerTransaction());
+
+      server.setEjbClass(getEJBClass());
+    
+      Class contextImplClass = javaGen.loadClass(getSkeletonName());
+
+      server.setContextImplClass(contextImplClass);
+
+      server.setActivationSpec(_activationSpec);
+    
+      // server.setMessageListenerType(_messagingType);
+
+      if (_consumerMax > 0)
+	server.setConsumerMax(_consumerMax);
+      else
+	server.setConsumerMax(getEjbContainer().getMessageConsumerMax());
+
+      Class beanClass = javaGen.loadClass(getEJBClass().getName());
+
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(server.getClassLoader());
+
+	ContainerProgram initContainer = getInitProgram();
+
+	server.setInitProgram(initContainer);
+
+	if (getServerProgram() != null)
+	  getServerProgram().configure(server);
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
+    } catch (Exception e) {
+      throw error(e);
     }
 
     return server;
