@@ -379,13 +379,15 @@ public class HmuxDispatchRequest {
     if (cluster == null)
       return 0;
 
+    boolean isLoggable = log.isLoggable(Level.FINE);
+
     writeString(os, HMUX_CLUSTER, cluster.getId());
 
     crc64 = Crc64.generate(crc64, cluster.getId());
 
     writeString(os, HmuxRequest.HMUX_HEADER, "live-time");
     writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientMaxIdleTime() / 1000));
-
+    
     writeString(os, HmuxRequest.HMUX_HEADER, "dead-time");
     writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientFailRecoverTime() / 1000));
     

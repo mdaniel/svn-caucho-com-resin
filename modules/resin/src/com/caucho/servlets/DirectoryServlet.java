@@ -141,6 +141,11 @@ public class DirectoryServlet extends HttpServlet {
 
     String filename = getServletContext().getRealPath(relPath);
     Path path = _context.lookupNative(filename);
+
+    if (CauchoSystem.isWindows() && path.isWindowsInsecure()) {
+      res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      return;
+    }
     
     String rawpath = java.net.URLDecoder.decode(uri);
 

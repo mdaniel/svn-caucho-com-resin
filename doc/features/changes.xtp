@@ -2,7 +2,17 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title="3.0.25 - Dec 05, 2007">
+<s2 title="3.0.snap - Jan 23, 2008">
+<ul>
+
+<li>DirectoryServlet: windows URL scanning changes</li>
+<li>isapi: poll updates to handle read times > 3600s (#2264, rep by T Fukuda)</li>
+<li>isapi: send 503 on timeout to Resin (#2264, rep by T Fukuda)</li>
+<li>allow secure='true' for srun (#2234, rep by T Fukuda)</li>
+</ul>
+</s2>
+
+<s2 title="3.0.25 - Dec 5, 2007">
 <ul>
 <li>jsp: tag-file pageEncoding not properly picked up (#2170, rep by Takahiro Fukuda)</li>
 <li>configure.in fix with -lc for linux (#2082, rep by marcusherou)</li>

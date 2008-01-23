@@ -845,6 +845,10 @@ write_config(config_t *config)
       hmux_write_string(&s, HMUX_HEADER, "dead-time");
       hmux_write_string(&s, HMUX_STRING, buffer);
 
+      sprintf(buffer, "%d", srun->srun->read_timeout);
+      hmux_write_string(&s, HMUX_HEADER, "read-timeout");
+      hmux_write_string(&s, HMUX_STRING, buffer);
+
       code = srun->is_backup ? HMUX_SRUN_BACKUP : HMUX_SRUN;
 
       if (srun->srun->port) {
