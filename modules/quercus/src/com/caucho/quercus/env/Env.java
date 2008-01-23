@@ -892,7 +892,6 @@ public class Env {
   public final void println(String v)
   {
     try {
-      System.out.println("PRINTLN: " + v);
       getOut().println(v);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -930,7 +929,6 @@ public class Env {
   public final void write(byte []buffer, int offset, int length)
   {
     try {
-      System.out.println("WRITE:");
       getOut().write(buffer, offset, length);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
