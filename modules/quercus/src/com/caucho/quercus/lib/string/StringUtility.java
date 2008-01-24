@@ -84,7 +84,7 @@ public class StringUtility
         }
       
         for (; i < len && (ch = str.charAt(i)) != '='; i++) {
-          i = addQueryChar(byteToChar, str, len, i, ch);
+          i = addQueryChar(byteToChar, str, len, i, ch, true);
         }
 
         String key = byteToChar.getConvertedString();
@@ -94,7 +94,7 @@ public class StringUtility
         String value;
         if (ch == '=') {
           for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
-            i = addQueryChar(byteToChar, str, len, i, ch);
+            i = addQueryChar(byteToChar, str, len, i, ch, false);
           }
 
           value = byteToChar.getConvertedString();
@@ -149,7 +149,8 @@ public class StringUtility
                                     String str,
                                     int len,
                                     int i,
-                                    int ch)
+                                    int ch,
+                                    boolean isConvertDots)
     throws IOException
   {
     if (str == null)
@@ -174,6 +175,14 @@ public class StringUtility
         byteToChar.addByte((byte) ch);
         return i;
       }
+
+    case '.':
+      if (isConvertDots)
+        byteToChar.addChar('_');
+      else
+        byteToChar.addByte((byte) ch);
+
+      return i;
 
     default:
       byteToChar.addByte((byte) ch);

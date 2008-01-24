@@ -1769,7 +1769,7 @@ public class Env {
         String []value = _request.getParameterValues(key);
 
         Post.addFormValue(this,
-			  array,
+                          array,
                           key,
                           value,
                           isMagicQuotes);

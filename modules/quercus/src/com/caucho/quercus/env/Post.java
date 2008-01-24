@@ -252,7 +252,7 @@ public class Post {
   }
   
   public static void addFormValue(Env env,
-				  ArrayValue array,
+                                  ArrayValue array,
                                   String key,
                                   String []formValueList,
                                   boolean addSlashesToValues)
@@ -273,12 +273,15 @@ public class Post {
   }
 
   public static void addFormValue(Env env,
-				  ArrayValue array,
+                                  ArrayValue array,
                                   String key,
                                   Value formValue,
                                   String []formValueList,
                                   boolean addSlashesToValues)
   {
+    // php/081h
+    key = key.replaceAll("\\.", "_");
+    
     int p = key.indexOf('[');
     int q = key.indexOf(']', p);
 
@@ -289,21 +292,21 @@ public class Post {
       Value existingValue;
 
       if (p > 0) {
-	key = key.substring(0, p);
+        key = key.substring(0, p);
+        
+        keyValue = env.createString(key);
+        existingValue = array.get(keyValue);
 
-	keyValue = env.createString(key);
-	existingValue = array.get(keyValue);
+        if (existingValue == null || ! existingValue.isset()) {
+          existingValue = new ArrayValueImpl();
+          array.put(keyValue, existingValue);
+        }
+        else if (! existingValue.isArray()) {
+          existingValue = new ArrayValueImpl().put(existingValue);
+          array.put(keyValue, existingValue);
+        }
 
-	if (existingValue == null || ! existingValue.isset()) {
-	  existingValue = new ArrayValueImpl();
-	  array.put(keyValue, existingValue);
-	}
-	else if (! existingValue.isArray()) {
-	  existingValue = new ArrayValueImpl().put(existingValue);
-	  array.put(keyValue, existingValue);
-	}
-
-	array = (ArrayValue) existingValue;
+        array = (ArrayValue) existingValue;
       }
 
       int p1;
