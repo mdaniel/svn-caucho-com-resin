@@ -64,7 +64,6 @@ public class XAManager
     
       Transaction xa = tm.getTransaction();
 
-      System.out.println("ENLIST: " + xa + " " + xaResource);
       if (xa != null && xaResource != null)
 	xa.enlistResource(xaResource);
     } catch (RuntimeException e) {

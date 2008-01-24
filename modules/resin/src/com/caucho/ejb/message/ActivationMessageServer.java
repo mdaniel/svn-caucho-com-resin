@@ -69,6 +69,7 @@ public class ActivationMessageServer extends AbstractServer
   protected static final Logger log
     = Logger.getLogger(ActivationMessageServer.class.getName());
 
+  private ResourceArchive _ra;
   private ActivationSpec _activationSpec;
 
   private boolean _isContainerTransaction;

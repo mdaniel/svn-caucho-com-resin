@@ -59,6 +59,9 @@ public class ClasspathPath extends FilesystemPath {
 		       String path)
   {
     super(root, userPath, path);
+
+    if (_root == null)
+      _root = this;
   }
   
   /**

@@ -112,6 +112,8 @@ public class MessageView extends View {
     throws IOException
   {
     HashMap map = new HashMap();
+    map.put("caucho.ejb.xa", "done");
+    
     for (BusinessMethodGenerator bizMethod : _businessMethods) {
       bizMethod.generatePrologueTop(out, map);
     }

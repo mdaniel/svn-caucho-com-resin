@@ -34,7 +34,9 @@ import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
+import static javax.ejb.TransactionAttributeType.*;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -43,6 +45,7 @@ import java.util.*;
 public class MessageGenerator extends BeanGenerator {
   private static final L10N L = new L10N(BeanGenerator.class);
 
+  private MessageView _view;
   private ArrayList<View> _views = new ArrayList<View>();
   
   public MessageGenerator(String ejbName, ApiClass ejbClass)
@@ -79,7 +82,8 @@ public class MessageGenerator extends BeanGenerator {
 
   public void setApi(ApiClass api)
   {
-    _views.add(new MessageView(this, api));
+    _view = new MessageView(this, api);
+    _views.add(_view);
   }
 
   public ArrayList<View> getViews()
@@ -113,6 +117,8 @@ public class MessageGenerator extends BeanGenerator {
     out.println("import com.caucho.ejb.*;");
     out.println("import com.caucho.ejb.message.*;");
     out.println();
+    out.println("import java.util.*;");
+    out.println("import java.lang.reflect.*;");
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
     out.println("import javax.transaction.xa.*;");
@@ -124,13 +130,52 @@ public class MessageGenerator extends BeanGenerator {
 		+ " implements MessageEndpoint, CauchoMessageEndpoint");
     out.println("{");
     out.pushDepth();
+    
+    out.println();
+    out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
+    out.println("  = new com.caucho.ejb3.xa.XAManager();");
 
+    out.println("private static HashSet<Method> _xaMethods = new HashSet<Method>();");
     out.println("private XAResource _xaResource;");
+    out.println("private boolean _isXa;");
+
 
     out.println();
     out.println("public " + getClassName() + "()");
     out.println("{");
     out.pushDepth();
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("static {");
+    out.pushDepth();
+    out.println("try {");
+    out.pushDepth();
+
+    for (BusinessMethodGenerator bizMethod : _view.getMethods()) {
+      if (REQUIRED.equals(bizMethod.getXa().getTransactionType())) {
+	Method api = bizMethod.getApiMethod();
+	
+	out.print("_xaMethods.add(");
+	out.printClass(api.getDeclaringClass());
+	out.print(".class.getMethod(\"");
+	out.print(api.getName());
+	out.print("\", new Class[] { ");
+
+	for (Class cl : api.getParameterTypes()) {
+	  out.printClass(cl);
+	  out.print(".class, ");
+	}
+	out.println("}));");
+      }
+    }
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  throw new RuntimeException(e);");
+    out.println("}");
     
     out.popDepth();
     out.println("}");
@@ -145,10 +190,17 @@ public class MessageGenerator extends BeanGenerator {
     out.println();
     out.println("public void beforeDelivery(java.lang.reflect.Method method)");
     out.println("{");
+    out.println("  if (_xaMethods.contains(method)) {");
+    out.println("    _isXa = (_xa.beginRequired() == null);");
+    out.println("  }");
     out.println("}");
 
     out.println("public void afterDelivery()");
     out.println("{");
+    out.println("  if (_isXa) {");
+    out.println("    _isXa = false;");
+    out.println("    _xa.commit();");
+    out.println("  }");
     out.println("}");
 
     out.println("public void release()");
