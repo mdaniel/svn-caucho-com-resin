@@ -32,6 +32,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.logging.Logger;
 import java.security.*;
 
 import javax.faces.*;
@@ -45,7 +46,11 @@ import com.caucho.util.*;
 
 public class ServletExternalContext extends ExternalContext {
   private static final L10N L = new L10N(ServletExternalContext.class);
-  
+
+  private static final Logger log
+       = Logger.getLogger(ServletFacesContextImpl.class.getName());
+
+
   private ServletContext _webApp;
   private HttpServletRequest _request;
   private HttpServletResponse _response;
@@ -161,7 +166,13 @@ public class ServletExternalContext extends ExternalContext {
    */
   public void setRequest(Object request)
   {
-    _request = (HttpServletRequest) request;
+    //hack: trinidad passes an instance of ServerRequest
+    // for an internal check that does not seem to affect
+    // further operation
+    if (request instanceof HttpServletRequest)
+      _request = (HttpServletRequest) request;
+    else
+       log.warning("parameter request is not HttpServletRequest");
   }
 
   /**

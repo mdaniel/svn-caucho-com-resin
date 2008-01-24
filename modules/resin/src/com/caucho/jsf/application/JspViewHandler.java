@@ -37,7 +37,6 @@ import javax.faces.component.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
 
-import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.jstl.core.*;
 
@@ -302,14 +301,14 @@ public class JspViewHandler extends ViewHandler
     HttpServletRequest request
       = (HttpServletRequest) extContext.getRequest();
 
-    String contextPath = request.getContextPath();
+    final String contextPath = request.getContextPath();
     
-    String servletPath = request.getServletPath();
-    String pathInfo = request.getPathInfo();
+    final String servletPath = request.getServletPath();
+    final String pathInfo = request.getPathInfo();
 
     int lastDot = viewId.lastIndexOf('.');
 
-    String path;
+    final String path;
 
     if (servletPath == null)
       path = pathInfo;
@@ -320,10 +319,12 @@ public class JspViewHandler extends ViewHandler
 
     // jsf/1118
     if (lastDot > 0 && path != null && path.indexOf('.') > 0) {
-      return (contextPath + viewId.substring(0, lastDot)
-              + path.substring(path.indexOf('.')));
+      return (contextPath +
+	      (pathInfo == null ? "" : servletPath) +
+	      viewId.substring(0, lastDot) +
+	      path.substring(path.indexOf('.')));
     }
-    
+
     return contextPath + viewId;
   }
 

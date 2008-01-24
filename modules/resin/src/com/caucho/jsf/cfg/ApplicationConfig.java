@@ -282,6 +282,9 @@ public class ApplicationConfig
     if (_localeConfig != null)
       _localeConfig.configure(app);
 
+    if (_defaultRenderKitId != null)
+      app.setDefaultRenderKitId(_defaultRenderKitId); 
+
     if (_viewHandler != null) {
       ViewHandler handler = null;
       
