@@ -52,7 +52,7 @@ public class HtmlModule extends AbstractQuercusModule {
   public static final int ENT_HTML_QUOTE_DOUBLE = 2;
 
   public static final int ENT_COMPAT = ENT_HTML_QUOTE_DOUBLE;
-  public static final int ENT_QUOTES = ENT_HTML_QUOTE_SINGLE|ENT_HTML_QUOTE_DOUBLE;
+  public static final int ENT_QUOTES = ENT_HTML_QUOTE_SINGLE | ENT_HTML_QUOTE_DOUBLE;
   public static final int ENT_NOQUOTES = ENT_HTML_QUOTE_NONE;
 
   private final static ArrayValue HTML_SPECIALCHARS_ARRAY
@@ -140,9 +140,9 @@ public class HtmlModule extends AbstractQuercusModule {
    * @return the trimmed string
    */
   public static Value htmlspecialchars(Env env,
-				       StringValue string,
-                                       @Optional Value quoteStyleV,
-                                       @Optional Value charsetV)
+                                       StringValue string,
+                                       @Optional("ENT_COMPAT") int quoteStyle,
+                                       @Optional String charset)
   {
     int len = string.length();
     
@@ -156,10 +156,16 @@ public class HtmlModule extends AbstractQuercusModule {
         sb.append("&amp;");
         break;
       case '"':
-        sb.append("&quot;");
+        if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) > 0)
+          sb.append("&quot;");
+        else
+          sb.append(ch);
         break;
       case '\'':
-        sb.append("'");
+        if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) > 0)
+          sb.append("&#039;");
+        else
+          sb.append(ch);
         break;
       case '<':
         sb.append("&lt;");
@@ -186,12 +192,12 @@ public class HtmlModule extends AbstractQuercusModule {
    * @return the trimmed string
    */
   public static Value htmlentities(Env env,
-				   StringValue stringV,
-                                   @Optional Value quoteStyleV,
-                                   @Optional Value charsetV)
+                                   StringValue string,
+                                   @Optional int quoteStyle,
+                                   @Optional String charset)
   {
-    // XXX: other entities
-    return htmlspecialchars(env, stringV, quoteStyleV, charsetV);
+    //XXX: other entities
+    return htmlspecialchars(env, string, quoteStyle, charset);
   }
 
   /**
