@@ -48,8 +48,6 @@ public class MessageGenerator extends BeanGenerator {
   public MessageGenerator(String ejbName, ApiClass ejbClass)
   {
     super(toFullClassName(ejbName, ejbClass.getSimpleName()), ejbClass);
-
-    _views.add(new MessageView(this, ejbClass));
   }
 
   private static String toFullClassName(String ejbName, String className)
@@ -79,9 +77,23 @@ public class MessageGenerator extends BeanGenerator {
     return sb.toString();
   }
 
+  public void setApi(ApiClass api)
+  {
+    _views.add(new MessageView(this, api));
+  }
+
   public ArrayList<View> getViews()
   {
     return _views;
+  }
+
+  /**
+   * Introspects the bean.
+   */
+  public void introspect()
+  {
+    for (View view : getViews())
+      view.introspect();
   }
   
   /**
@@ -103,15 +115,17 @@ public class MessageGenerator extends BeanGenerator {
     out.println();
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
+    out.println("import javax.transaction.xa.*;");
     out.println("import javax.resource.spi.endpoint.*;");
     
     out.println();
     out.println("public class " + getClassName()
 		+ " extends " + getEjbClass().getName()
-		+ " implements MessageEndpoint");
-
+		+ " implements MessageEndpoint, CauchoMessageEndpoint");
     out.println("{");
     out.pushDepth();
+
+    out.println("private XAResource _xaResource;");
 
     out.println();
     out.println("public " + getClassName() + "()");
@@ -120,6 +134,13 @@ public class MessageGenerator extends BeanGenerator {
     
     out.popDepth();
     out.println("}");
+
+    out.println();
+    out.println("public void __caucho_setXAResource(XAResource xaResource)");
+    out.println("{");
+    out.println("  _xaResource = xaResource;");
+    out.println("}");
+
 
     out.println();
     out.println("public void beforeDelivery(java.lang.reflect.Method method)");

@@ -27,47 +27,69 @@
  * @author Scott Ferguson;
  */
 
-package com.caucho.webbeans.inject;
+package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
-import com.caucho.util.*;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class FieldComponentProgram extends ConfigProgram
+public class MethodComponentProgram extends ConfigProgram
 {
-  private static final L10N L = new L10N(FieldComponentProgram.class);
   private static final Logger log
-    = Logger.getLogger(FieldComponentProgram.class.getName());
+    = Logger.getLogger(MethodComponentProgram.class.getName());
 
-  private ComponentImpl _component;
-  private Field _field;
+  private static final Object []NULL_ARGS = new Object[0];
 
-  public FieldComponentProgram(ComponentImpl component,
-			 Field field)
+  private Method _method;
+  private ComponentImpl []_args;
+
+  public MethodComponentProgram(Method method,
+			     ComponentImpl []args)
   {
-    _component = component;
-    _field = field;
+    _method = method;
+    _method.setAccessible(true);
+    _args = args;
+    
+    if (_method == null)
+      throw new NullPointerException();
 
-    field.setAccessible(true);
+    for (int i = 0; i < args.length; i++)
+      if (args[i] == null)
+	throw new NullPointerException();
   }
 
+  @Override
   public void inject(Object bean, ConfigContext env)
+    throws ConfigException
   {
-    Object value = null;
     try {
-      value = _component.get(env);
+      Object []args;
 
-      _field.set(bean, value);
-    } catch (IllegalArgumentException e) {
-      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", value), e);
+      if (_args.length > 0) {
+	args = new Object[_args.length];
+	
+	for (int i = 0; i < args.length; i++)
+	  args[i] = _args[i].get(env);
+      }
+      else
+	args = NULL_ARGS;
+      
+      _method.invoke(bean, args);
+    } catch (InvocationTargetException e) {
+      throw LineConfigException.create(loc(), e);
     } catch (Exception e) {
-      throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
+      throw LineConfigException.create(loc(), e);
     }
+  }
+
+  private String loc()
+  {
+    return (_method.getDeclaringClass().getSimpleName()
+	    + "." + _method.getName() + ": ");
   }
 }

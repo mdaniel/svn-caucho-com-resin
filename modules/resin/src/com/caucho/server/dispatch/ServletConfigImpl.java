@@ -473,7 +473,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       
       Object servlet = createServlet(false);
 
-      Config.setCurrentVar(_var, servlet);
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      webBeans.addSingleton(servlet, _var);
     }
   }
 

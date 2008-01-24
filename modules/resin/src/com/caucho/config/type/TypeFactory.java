@@ -38,7 +38,6 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.QName;
 
-
 import java.beans.*;
 import java.io.*;
 import java.net.URL;
@@ -501,8 +500,8 @@ public class TypeFactory implements AddLoaderListener
 	loader = ClassLoader.getSystemClassLoader();
       
       Enumeration<URL> urls
-	= loader.getResources("META-INF/services" +
-			      "/com.caucho.config.types/" + apiType);
+	= loader.getResources("META-INF/services/com.caucho.config.uri/"
+			      + apiType);
 
       while (urls.hasMoreElements()) {
 	URL url = urls.nextElement();

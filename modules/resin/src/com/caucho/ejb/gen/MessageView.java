@@ -82,10 +82,9 @@ public class MessageView extends View {
   @Override
   public void introspect()
   {
-    /*
     ApiClass implClass = getEjbClass();
     ApiClass apiClass = getApi();
-    
+
     for (ApiMethod apiMethod : apiClass.getMethods()) {
       if (apiMethod.getDeclaringClass().equals(Object.class))
 	continue;
@@ -95,7 +94,7 @@ public class MessageView extends View {
 
       int index = _businessMethods.size();
       
-      StatefulMethod bizMethod = createMethod(apiMethod, index);
+      BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
       
       if (bizMethod != null) {
 	bizMethod.introspect(bizMethod.getApiMethod(),
@@ -104,7 +103,6 @@ public class MessageView extends View {
 	_businessMethods.add(bizMethod);
       }
     }
-    */
   }
 
   /**
@@ -113,5 +111,42 @@ public class MessageView extends View {
   public void generate(JavaWriter out)
     throws IOException
   {
+    HashMap map = new HashMap();
+    for (BusinessMethodGenerator bizMethod : _businessMethods) {
+      bizMethod.generatePrologueTop(out, map);
+    }
+    
+    for (BusinessMethodGenerator bizMethod : _businessMethods) {
+      bizMethod.generate(out, map);
+    }
+  }
+
+  protected BusinessMethodGenerator
+    createMethod(ApiMethod apiMethod, int index)
+  {
+    ApiMethod implMethod = findImplMethod(apiMethod);
+
+    if (implMethod == null)
+      return null;
+    
+    BusinessMethodGenerator bizMethod
+      = new MessageMethod(this,
+			  apiMethod.getMethod(),
+			  implMethod.getMethod(),
+			  index);
+
+    return bizMethod;
+  }
+  
+  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  {
+    ApiMethod implMethod = getEjbClass().getMethod(apiMethod);
+
+    if (implMethod != null)
+      return implMethod;
+  
+    throw ConfigException.create(apiMethod.getMethod(),
+				 L.l("api method has no corresponding implementation in '{0}'",
+				     getEjbClass().getName()));
   }
 }

@@ -36,6 +36,7 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.DeployManagementService;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostConfig;
+import com.caucho.server.resin.*;
 import com.caucho.security.*;
 import com.caucho.server.security.*;
 import com.caucho.webbeans.manager.*;
@@ -44,6 +45,7 @@ import com.caucho.vfs.Path;
 
 import javax.annotation.*;
 import javax.resource.spi.ResourceAdapter;
+import javax.webbeans.*;
 import java.util.logging.Logger;
 
 /**
@@ -57,6 +59,7 @@ public class Management
   public static final String HOST_NAME = "admin.caucho";
 
   private Cluster _cluster;
+  private Resin _resin;
   private Server _server;
   private Path _path;
 
@@ -72,6 +75,11 @@ public class Management
   public void setCluster(Cluster cluster)
   {
     _cluster = cluster;
+  }
+  
+  public void setResin(Resin resin)
+  {
+    _resin = resin;
   }
   
   public void setServer(Server server)
@@ -203,8 +211,7 @@ public class Management
       
 	WebBeansContainer webBeans = WebBeansContainer.create();
 
-	// XXX: s/b at @Standard level
-	webBeans.addSingleton(_auth, "resin-admin");
+	webBeans.addSingleton(_auth, "resin-admin", Standard.class);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -238,7 +245,11 @@ public class Management
       hostConfig.init();
 
       try {
-	_server.addHost(hostConfig);
+	if (_server == null)
+	  _server = _resin.getServer();
+	
+	if (_server != null)
+	  _server.addHost(hostConfig);
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {

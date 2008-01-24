@@ -36,6 +36,7 @@ import com.caucho.util.*;
 import java.util.logging.*;
 import javax.ejb.*;
 import javax.transaction.*;
+import javax.transaction.xa.*;
 
 /**
  * Manages XA for bean methods.
@@ -51,6 +52,26 @@ public class XAManager
   public XAManager()
   {
     _ut = UserTransactionProxy.getInstance();
+  }
+
+  /**
+   * Enlists a resource
+   */
+  public void enlist(XAResource xaResource)
+  {
+    try {
+      TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
+    
+      Transaction xa = tm.getTransaction();
+
+      System.out.println("ENLIST: " + xa + " " + xaResource);
+      if (xa != null && xaResource != null)
+	xa.enlistResource(xaResource);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBException(e);
+    }
   }
 
   /**

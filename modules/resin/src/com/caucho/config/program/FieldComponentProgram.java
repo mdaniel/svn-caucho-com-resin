@@ -27,69 +27,47 @@
  * @author Scott Ferguson;
  */
 
-package com.caucho.webbeans.inject;
+package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.util.*;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class MethodComponentProgram extends ConfigProgram
+public class FieldComponentProgram extends ConfigProgram
 {
+  private static final L10N L = new L10N(FieldComponentProgram.class);
   private static final Logger log
-    = Logger.getLogger(MethodComponentProgram.class.getName());
+    = Logger.getLogger(FieldComponentProgram.class.getName());
 
-  private static final Object []NULL_ARGS = new Object[0];
+  private ComponentImpl _component;
+  private Field _field;
 
-  private Method _method;
-  private ComponentImpl []_args;
-
-  public MethodComponentProgram(Method method,
-			     ComponentImpl []args)
+  public FieldComponentProgram(ComponentImpl component,
+			 Field field)
   {
-    _method = method;
-    _method.setAccessible(true);
-    _args = args;
-    
-    if (_method == null)
-      throw new NullPointerException();
+    _component = component;
+    _field = field;
 
-    for (int i = 0; i < args.length; i++)
-      if (args[i] == null)
-	throw new NullPointerException();
+    field.setAccessible(true);
   }
 
-  @Override
   public void inject(Object bean, ConfigContext env)
-    throws ConfigException
   {
+    Object value = null;
     try {
-      Object []args;
+      value = _component.get(env);
 
-      if (_args.length > 0) {
-	args = new Object[_args.length];
-	
-	for (int i = 0; i < args.length; i++)
-	  args[i] = _args[i].get(env);
-      }
-      else
-	args = NULL_ARGS;
-      
-      _method.invoke(bean, args);
-    } catch (InvocationTargetException e) {
-      throw LineConfigException.create(loc(), e);
+      _field.set(bean, value);
+    } catch (IllegalArgumentException e) {
+      throw new ConfigException(ConfigException.loc(_field) + L.l("Can't set field value '{0}'", value), e);
     } catch (Exception e) {
-      throw LineConfigException.create(loc(), e);
+      throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
     }
-  }
-
-  private String loc()
-  {
-    return (_method.getDeclaringClass().getSimpleName()
-	    + "." + _method.getName() + ": ");
   }
 }

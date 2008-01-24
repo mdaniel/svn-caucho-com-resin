@@ -35,9 +35,9 @@ import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
 import com.caucho.relaxng.*;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.xml.DOMBuilder;
 import com.caucho.xml.QDocument;
 import com.caucho.xml.QName;
@@ -49,7 +49,6 @@ import org.xml.sax.InputSource;
 
 import javax.el.ELContext;
 import javax.el.ELException;
-import javax.el.ELResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
@@ -66,20 +65,12 @@ public class Config {
   private static final L10N L = new L10N(Config.class);
   private static final Logger log
     = Logger.getLogger(Config.class.getName());
-
-  private static LruCache<Path,SoftReference<QDocument>> _parseCache
-    = new LruCache<Path,SoftReference<QDocument>>(32);
-
-  // Copied from parent for resin:import, server/13jk
-  private ConfigVariableResolver _varResolver;
   
   private HashMap<String,Object> _vars
     = new HashMap<String,Object>();
   
   // the context class loader of the config
   private ClassLoader _classLoader;
-
-  private ConfigLibrary _configLibrary;
 
   private boolean _isEL = true;
   private boolean _isIgnoreEnvironment;
@@ -96,9 +87,7 @@ public class Config {
   public Config(ClassLoader loader)
   {
     _classLoader = loader;
-
-    _configLibrary = ConfigLibrary.getLocal(_classLoader);
-  }
+ }
 
   /**
    * Set true if resin:include should be allowed.
@@ -138,22 +127,6 @@ public class Config {
   public void setIgnoreEnvironment(boolean isIgnore)
   {
     _isIgnoreEnvironment = isIgnore;
-  }
-
-  /**
-   * Sets the variable resolver.
-   */
-  public void setConfigVariableResolver(ConfigVariableResolver varResolver)
-  {
-    _varResolver = varResolver;
-  }
-
-  /**
-   * Gets the variable resolver.
-   */
-  public ConfigVariableResolver getConfigVariableResolver()
-  {
-    return _varResolver;
   }
 
   /**
@@ -317,20 +290,7 @@ public class Config {
 
   private ConfigContext createBuilder()
   {
-    ConfigContext builder = new ConfigContext(this);
-
-    for (String var : _vars.keySet())
-      builder.putVar(var, _vars.get(var));
-
-    ConfigLibrary lib = ConfigLibrary.getLocal();
-
-    HashMap<String,Method> methodMap = lib.getMethodMap();
-
-    for (Map.Entry<String,Method> entry : methodMap.entrySet()) {
-      builder.putVar(entry.getKey(), entry.getValue());
-    }
-
-    return builder;
+    return new ConfigContext(this);
   }
 
   /**
@@ -460,17 +420,6 @@ public class Config {
       throw ConfigException.create(e);
     }
   }
-
-  /**
-   * Configures a bean with a configuration map.
-   */
-  /*
-  public Object configureMap(Object obj, Map<String,Object> map)
-    throws Exception
-  {
-    return new MapBuilder().configure(obj, map);
-  }
-  */
   
   /**
    * Returns true if the class can be instantiated.
@@ -544,25 +493,6 @@ public class Config {
     attrStrategy.setValue(obj, attrName, value);
   }
   
-  /*
-  public static void setAttribute(Object obj, String attr, Object value)
-    throws Exception
-  {
-    TypeStrategy strategy = TypeStrategyFactory.getTypeStrategy(obj.getClass());
-
-    QName attrName = new QName(attr);
-    AttributeStrategy attrStrategy = strategy.getAttributeStrategy(attrName);
-    if (attrStrategy == null)
-      throw new ConfigException(L.l("{0}: '{1}' is an unknown attribute.",
-				    obj.getClass().getName(),
-				    attrName.getName()));
-    else if (value instanceof String)
-      attrStrategy.setAttribute(obj, attrName, attrStrategy.convert((String) value));
-    else
-      attrStrategy.setAttribute(obj, attrName, value);
-  }
-  */
-
   /**
    * Sets an attribute with a value.
    *
@@ -593,23 +523,6 @@ public class Config {
       throw ConfigException.create(e);
     }
   }
-  /*
-  public static void init(Object bean)
-    throws ConfigException
-  {
-    try {
-      TypeStrategy strategy;
-
-      strategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
-      strategy.init(bean);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-  */
   
   public static Object replaceObject(Object bean) throws Exception
   {
@@ -617,15 +530,6 @@ public class Config {
 
     return type.replaceObject(bean);
   }
-
-  /*
-  public static Object replaceObject(Object bean) throws Exception
-  {
-    TypeStrategy strategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
-    return strategy.replaceObject(bean);
-  }
-  */
 
   /**
    * Returns the variable resolver.
@@ -656,58 +560,11 @@ public class Config {
   }
 
   /**
-   * Returns the variable resolver.
-   */
-  public static void setELContext(ConfigELContext context)
-  {
-    ConfigContext builder = ConfigContext.getCurrentBuilder();
-
-    if (builder != null) {
-      builder.setELContext(context);
-    }
-  }
-
-  /**
-   * Sets an EL configuration variable.
-   */
-  public void setVar(String var, Object value)
-  {
-    setCurrentVar(var, value);
-
-    _vars.put(var, value);
-  }
-
-  /**
-   * Sets an EL configuration variable.
-   */
-  public static void setCurrentVar(String var, Object value)
-  {
-    ConfigContext builder = ConfigContext.getCurrentBuilder();
-
-    if (builder != null)
-      builder.putVar(var, value);
-  }
-
-  /**
    * Sets an EL configuration variable.
    */
   public static Object getCurrentVar(String var)
   {
-    ConfigContext builder = ConfigContext.getCurrentBuilder();
-
-    if (builder != null)
-      return builder.getVar(var);
-    else
-      return null;
-  }
-
-  /**
-   * Gets an EL configuration variable.
-   */
-  public static Object getVar(String var) throws ELException
-  {
-    return getEnvironment().getELResolver().getValue(getEnvironment(),
-						     var, null);
+    return WebBeansContainer.create().findByName(var);
   }
 
   /**
@@ -739,13 +596,6 @@ public class Config {
 
   public static ELContext getEnvironment(HashMap<String,Object> varMap)
   {
-    ELContext context = Config.getEnvironment();
-
-    ELResolver parent = null;
-
-    if (context != null)
-      parent = context.getELResolver();
-
     if (varMap != null)
       return new EnvironmentContext(varMap);
     else

@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.component;
 
+import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
@@ -40,8 +41,6 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.inject.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

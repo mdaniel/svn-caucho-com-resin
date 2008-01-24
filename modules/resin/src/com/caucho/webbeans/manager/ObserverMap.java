@@ -35,7 +35,6 @@ import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.event.*;
-import com.caucho.webbeans.inject.*;
 
 import java.lang.annotation.*;
 import java.lang.reflect.*;

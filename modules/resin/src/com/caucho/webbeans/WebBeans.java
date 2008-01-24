@@ -37,7 +37,6 @@ import com.caucho.vfs.*;
 import com.caucho.server.util.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.inject.*;
 
 import java.io.*;
 import java.util.*;

@@ -41,7 +41,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 abstract public class ResinELContext
-  extends ConfigELContext
 {
   private final JavaVar _javaVar = new JavaVar();
   private final ResinVar _resinVar = new ResinVar();
@@ -49,18 +48,6 @@ abstract public class ResinELContext
 
   public ResinELContext()
   {
-    setValue("java", new JavaVar());
-    setValue("resin", new ResinVar());
-    setValue("server", new ServerVar());
-
-    setValue("fmt", new com.caucho.config.functions.FmtFunctions());
-
-    try {
-      setValue("jndi", Jndi.class.getMethod("lookup", new Class[] { String.class }));
-      setValue("jndi:lookup", Jndi.class.getMethod("lookup", new Class[] { String.class }));
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
   }
 
   public JavaVar getJavaVar()
@@ -76,19 +63,6 @@ abstract public class ResinELContext
   public ServerVar getServerVar()
   {
     return _serverVar;
-  }
-
-  public Object getValue(String var)
-  {
-    // backwards compatibility
-
-    if ("resinHome".equals(var) || "resin-home".equals(var))
-      return getResinHome();
-
-    if ("serverRoot".equals(var) || "server-root".equals(var))
-      return getRootDirectory();
-
-    return super.getValue(var);
   }
 
   public String toString()

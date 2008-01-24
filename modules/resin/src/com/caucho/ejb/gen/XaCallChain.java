@@ -58,6 +58,11 @@ public class XaCallChain extends AbstractCallChain
     _bizMethod = bizMethod;
     _next = next;
   }
+
+  protected BusinessMethodGenerator getBusinessMethod()
+  {
+    return _bizMethod;
+  }
   
   /**
    * Returns true if the business method has any active XA annotation.
@@ -73,6 +78,11 @@ public class XaCallChain extends AbstractCallChain
   public void setTransactionType(TransactionAttributeType xa)
   {
     _xa = xa;
+  }
+
+  protected TransactionAttributeType getTransactionType()
+  {
+    return _xa;
   }
 
   /**
@@ -102,7 +112,7 @@ public class XaCallChain extends AbstractCallChain
     }
 
     if (xaAttr != null)
-      _xa = xaAttr.value();
+      setTransactionType(xaAttr.value());
   }
 
   /**
@@ -171,8 +181,8 @@ public class XaCallChain extends AbstractCallChain
 	break;
       }
     }
-    
-    _next.generateCall(out);
+
+    generateNext(out);
 
     if (_xa != null) {
       out.popDepth();
@@ -234,5 +244,11 @@ public class XaCallChain extends AbstractCallChain
 	break;
       }
     }
+  }
+
+  protected void generateNext(JavaWriter out)
+    throws IOException
+  {
+    _next.generateCall(out);
   }
 }

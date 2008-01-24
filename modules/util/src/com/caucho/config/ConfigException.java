@@ -62,6 +62,7 @@ public class ConfigException
   public ConfigException(String msg, Throwable e)
   {
     super(msg, e);
+    e.printStackTrace();
   }
 
   /**

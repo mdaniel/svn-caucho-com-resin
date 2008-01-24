@@ -45,6 +45,12 @@ public class StackELResolver extends ELResolver {
   public StackELResolver()
   {
   }
+  
+  public StackELResolver(ELResolver a, ELResolver b)
+  {
+    push(b);
+    push(a);
+  }
 
   public void push(ELResolver elResolver)
   {

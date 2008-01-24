@@ -7,7 +7,7 @@
   <!--
      - Security configuration
     -->
-  <login url="form:">
+  <login uri="form:">
      <init login-page="/login.php" error-page="/error.php"/>
   </login>
 

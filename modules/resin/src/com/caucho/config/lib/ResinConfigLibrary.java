@@ -30,10 +30,17 @@
 package com.caucho.config.lib;
 
 import com.caucho.naming.Jndi;
+import com.caucho.webbeans.manager.*;
+
+import java.lang.reflect.*;
+import java.util.logging.*;
+
 /**
  * Library of static config functions.
  */
 public class ResinConfigLibrary {
+  private static Logger _log;
+  
   public static boolean class_exists(String className)
   {
     try {
@@ -44,6 +51,7 @@ public class ResinConfigLibrary {
 
       return cl != null;
     } catch (Throwable e) {
+      log().log(Level.FINEST, e.toString(), e);
     }
 
     return false;
@@ -57,5 +65,31 @@ public class ResinConfigLibrary {
   public static Object jndi_lookup(String jndiName)
   {
     return Jndi.lookup(jndiName);
+  }
+
+  public static void configure(WebBeansContainer webBeans)
+  {
+    try {
+      for (Method m : ResinConfigLibrary.class.getMethods()) {
+	if (! Modifier.isStatic(m.getModifiers()))
+	  continue;
+	if (! Modifier.isPublic(m.getModifiers()))
+	  continue;
+	if (m.getName().equals("configure"))
+	  continue;
+
+	webBeans.addSingletonByName(m, m.getName());
+      }
+    } catch (Exception e) {
+      log().log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  private static Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(ResinConfigLibrary.class.getName());
+
+    return _log;
   }
 }

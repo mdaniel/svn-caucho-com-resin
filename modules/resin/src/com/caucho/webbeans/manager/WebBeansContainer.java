@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.manager;
 
+import com.caucho.config.program.MethodComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
@@ -42,7 +43,6 @@ import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.event.*;
-import com.caucho.webbeans.inject.*;
 
 import java.io.*;
 import java.util.*;
@@ -117,8 +117,9 @@ public class WebBeansContainer
   {
     _classLoader = Environment.getEnvironmentClassLoader(loader);
 
-    if (_classLoader != null)
-      _parent = WebBeansContainer.getCurrent(_classLoader.getParent());
+    if (_classLoader != null) {
+      _parent = WebBeansContainer.create(_classLoader.getParent());
+    }
     
     _localContainer.set(this, _classLoader);
 
@@ -325,6 +326,46 @@ public class WebBeansContainer
 
     addComponent(comp);
   }
+
+  public void addSingleton(Object object,
+			   String name,
+			   Class componentType)
+  {
+    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
+
+    comp.setName(name);
+    comp.setType(_wbWebBeans.createComponentType(componentType));
+
+    WbBinding binding = new WbBinding();
+    binding.setClass(Named.class);
+    binding.addValue("value", name);
+
+    ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+    bindingList.add(binding);
+    
+    comp.setBindingList(bindingList);
+    
+    comp.init();
+
+    addComponent(comp);
+  }
+  
+  /**
+   * Adds a singleton only to the name map
+   * 
+   * @param object the singleton value
+   * @param name the singleton's name
+   */
+  public void addSingletonByName(Object object, String name)
+  {
+    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
+
+    comp.setName(name);
+    comp.init();
+    
+    _namedComponentMap.put(name, comp);
+  }
+
 
   public void addEnabledInterceptor(Class cl)
   {
@@ -536,7 +577,6 @@ public class WebBeansContainer
   public ComponentImpl findByName(String name)
   {
     ComponentImpl comp = _namedComponentMap.get(name);
-
     if (comp != null)
       return comp;
     else if (_parent != null)

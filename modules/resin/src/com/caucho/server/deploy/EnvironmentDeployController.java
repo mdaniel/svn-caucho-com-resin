@@ -39,7 +39,6 @@ import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -82,9 +81,6 @@ abstract public class
   private C _config;
   private DeployConfig _prologue;
 
-  // The configuration variable resolver
-  private ELResolver _parentELResolver;
-
   // The variable mapping
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
@@ -114,11 +110,6 @@ abstract public class
   {
     super(id, null, rootDirectory);
 
-    ELContext elContext = EL.getEnvironment(getParentClassLoader());
-
-    if (elContext != null)
-      _parentELResolver = elContext.getELResolver();
-
     _jmxContext = Jmx.copyContextProperties(getParentClassLoader());
   }
 
@@ -139,12 +130,6 @@ abstract public class
 
     if (_prologue == null)
       setPrologue(config.getPrologue());
-
-    /* XXX: config is at the end
-    if (config != null) {
-      addConfigDefault(config);
-    }
-    */
   }
 
   /**
@@ -174,6 +159,7 @@ abstract public class
   /**
    * Returns the configure exception.
    */
+  @Override
   public Throwable getConfigException()
   {
     Throwable configException = super.getConfigException();
@@ -250,6 +236,7 @@ abstract public class
   /**
    * Initialize the controller.
    */
+  @Override
   protected void initEnd()
   {
     super.initEnd();
@@ -261,6 +248,7 @@ abstract public class
   /**
    * Returns true if the entry matches.
    */
+  @Override
   public boolean isNameMatch(String url)
   {
     return url.equals(getId());
@@ -269,6 +257,7 @@ abstract public class
   /**
    * Merges with the old controller.
    */
+  @Override
   protected void mergeController(DeployController oldControllerV)
   {
     super.mergeController(oldControllerV);
@@ -308,6 +297,7 @@ abstract public class
   /**
    * Returns the application object.
    */
+  @Override
   public boolean destroy()
   {
     if (! super.destroy())
@@ -333,6 +323,7 @@ abstract public class
   /**
    * Configures the instance.
    */
+  @Override
   protected void configureInstance(I instance)
     throws Throwable
   {
@@ -348,19 +339,6 @@ abstract public class
 
       // set from external error, like .ear
       instance.setConfigException(_configException);
-
-      HashMap<String,Object> varMap = new HashMap<String,Object>();
-      varMap.putAll(_variableMap);
-
-      for (Map.Entry<String,Object> entry : varMap.entrySet()) {
-	Config.setCurrentVar(entry.getKey(), entry.getValue());
-      }
-
-      EL.setVariableMap(varMap, classLoader);
-      ConfigELContext elContext = new ConfigELContext(varMap);
-      
-      EL.setEnvironment(elContext, classLoader);
-      Config.setELContext(elContext);
 
       configureInstanceVariables(instance);
 
@@ -440,6 +418,7 @@ abstract public class
     instance.setRootDirectory(rootDirectory);
   }
 
+  @Override
   public Path getArchivePath()
   {
     Path path = super.getArchivePath();
@@ -487,12 +466,9 @@ abstract public class
   /**
    * Returns a printable view.
    */
+  @Override
   public String toString()
   {
-    String name = getClass().getName();
-
-    name = name.substring(name.lastIndexOf('.') + 1);
-
-    return name + "" + System.identityHashCode(this) + "[" + getId() + "]";
+    return getClass().getSimpleName() + "$" + System.identityHashCode(this) + "[" + getId() + "]";
   }
 }

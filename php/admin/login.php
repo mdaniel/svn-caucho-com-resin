@@ -47,14 +47,20 @@ if (! empty($digest)) {
   /** XXX:
 <p>
 The following can now be added to the file
-<code><b><?= $password_file ?></b></code>
+<code><b>resin.conf</b></code>
 to enable administration functionality. 
 </p>
 
 <pre>
-&lt;authenticator>
- &lt;user name='<?= $digest_username ?>' password='<?= $digest ?>' roles='read,write'/>
-&lt;/authenticator>
+&lt;resin xmlns="http://caucho.com">
+
+  &lt;management>
+     &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
+  &lt;/management>
+
+  ...
+
+&lt;/resin>
 </pre>
   */
 ?>
@@ -65,8 +71,16 @@ to enable administration functionality.
 </p>
 
 <pre>
-  &lt;resin:set var="resin_admin_user" value="<?= $digest_username ?>"/&gt;
-  &lt;resin:set var="resin_admin_password" value="<?= $digest ?>"/&gt;
+&lt;resin xmlns="http://caucho.com">
+
+  &lt;management path="admin">
+     &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
+     ...
+  &lt;/management>
+
+  ...
+
+&lt;/resin>
 </pre>
 
 <p>

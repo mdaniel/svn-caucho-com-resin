@@ -396,9 +396,8 @@ public class AppClient implements EnvironmentBean
       HashMap<String,Object> variableMap = new HashMap<String,Object>();
       variableMap.put("resin", new ResinVar());
 
-      ELResolver varResolver = new SystemPropertiesResolver();
+      ELResolver varResolver = new MapVariableResolver(variableMap);
       ConfigELContext elContext = new ConfigELContext(varResolver);
-      elContext.push(new MapVariableResolver(variableMap));
 
       EL.setEnvironment(elContext, _loader);
       EL.setVariableMap(variableMap, _loader);

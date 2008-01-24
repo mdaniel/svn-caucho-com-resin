@@ -12,6 +12,10 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>ioc/config: system properties like 'foo.bar' were not properly resolved (#2361, rep by Curtis Taylor)</li>
+<li>webbeans/ejb @Interceptor refactor (#2344, rep by wesley)</li>
+<li>httpd.sh: update JAVA_HOME handling (#2343, rep by tusker)</li>
+<li>admin: admin password is now configured through the &lt;management> user (#2316, #2315)</li>
 <li>ejb: webbeans and session bean merge for security, xa, and interception [<a href="http://caucho.com/resin/doc/resin-ioc.xtp">resin-ioc</a></li>
 <li>access-log: add auto-flush-time as a configuration parameter (rep by Michael O'Dea)</li>
 <li>(2008-01-14) added com.caucho.resin.ResinEmbed embedding [<a href="http://caucho.com/resin/doc/resin-embedding.xtp">Resin Embedding</a>]</li>

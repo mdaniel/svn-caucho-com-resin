@@ -1078,7 +1078,7 @@ public class EjbBean extends DescriptionGroupConfig
   {
     try {
       if (_isInit)
-        throw new IllegalStateException("can't call init twice");
+        return;
       _isInit = true;
       
       _bean = createBeanGenerator();
@@ -1098,8 +1098,8 @@ public class EjbBean extends DescriptionGroupConfig
       }
 
       // XXX: add local api
-      
-      _bean.introspect();
+
+      introspect();
 
       _bean.createViews();
 
@@ -1115,6 +1115,11 @@ public class EjbBean extends DescriptionGroupConfig
     } catch (ConfigException e) {
       throw ConfigException.createLine(_location, e);
     }
+  }
+
+  protected void introspect()
+  {
+    _bean.introspect();
   }
   
   /**

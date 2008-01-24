@@ -27,44 +27,54 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.ejb.gen;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.naming.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.java.JavaWriter;
+import com.caucho.util.L10N;
 
+import java.io.*;
 import java.lang.reflect.*;
-import java.lang.annotation.*;
-
-import javax.annotation.*;
-import javax.webbeans.*;
+import java.util.*;
+import javax.annotation.security.*;
+import javax.ejb.*;
+import javax.interceptor.*;
 
 /**
- * Configuration for the xml interceptor component.
+ * Represents a message local business method
  */
-public class InterceptorConfig {
-  private static final L10N L = new L10N(InterceptorConfig.class);
-
-  private Class _class;
-
-  public void setClass(Class cl)
+public class MessageMethod extends BusinessMethodGenerator
+{
+  public MessageMethod(MessageView view,
+			Method apiMethod,
+			Method implMethod,
+			int index)
   {
-    _class = cl;
+    super(view, apiMethod, implMethod, index);
   }
 
-  @PostConstruct
-  public void init()
+  @Override
+  protected XaCallChain createXa(EjbCallChain next)
   {
-    if (_class == null)
-      throw new ConfigException(L.l("'class' is a required attribute of <interceptor>"));
-    
-    WebBeansContainer webBeans = WebBeansContainer.create();
-    webBeans.addEnabledInterceptor(_class);
+    return new MessageXaCallChain(this, next);
+  }
+
+  /**
+   * Session bean default is REQUIRED
+   */
+  @Override
+  public void introspect(Method apiMethod, Method implMethod)
+  {
+    getXa().setTransactionType(TransactionAttributeType.REQUIRED);
+
+    super.introspect(apiMethod, implMethod);
+  }
+
+  /**
+   * Returns true if any interceptors enhance the business method
+   */
+  @Override
+  public boolean isEnhanced()
+  {
+    return true;
   }
 }

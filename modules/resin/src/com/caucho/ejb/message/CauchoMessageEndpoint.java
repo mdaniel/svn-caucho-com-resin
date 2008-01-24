@@ -27,44 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.ejb.message;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.naming.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
-
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-
-import javax.annotation.*;
-import javax.webbeans.*;
+import javax.transaction.xa.*;
 
 /**
- * Configuration for the xml interceptor component.
+ * Caucho messaging API
  */
-public class InterceptorConfig {
-  private static final L10N L = new L10N(InterceptorConfig.class);
-
-  private Class _class;
-
-  public void setClass(Class cl)
-  {
-    _class = cl;
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    if (_class == null)
-      throw new ConfigException(L.l("'class' is a required attribute of <interceptor>"));
-    
-    WebBeansContainer webBeans = WebBeansContainer.create();
-    webBeans.addEnabledInterceptor(_class);
-  }
+public interface CauchoMessageEndpoint {
+  public void __caucho_setXAResource(XAResource xaResource);
 }

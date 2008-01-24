@@ -32,7 +32,6 @@ package com.caucho.webbeans.cfg;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.inject.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

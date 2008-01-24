@@ -40,6 +40,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.Version;
 
+import com.caucho.webbeans.manager.WebBeansContainer;
 import java.io.*;
 import java.net.URL;
 import java.lang.management.*;
@@ -138,15 +139,14 @@ public class ResinBoot {
 
     ResinELContext elContext = new ResinBootELContext();
 
-    EL.setEnvironment(elContext, conf.getClassLoader());
-
     /**
      * XXX: the following setVar calls should not be necessary, but the
      * EL.setEnviornment() call above is not effective:
      */
-    config.setVar("java", elContext.getJavaVar());
-    config.setVar("resin", elContext.getResinVar());
-    config.setVar("server", elContext.getServerVar());
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    webBeans.addSingletonByName(elContext.getJavaVar(), "java");
+    webBeans.addSingletonByName(elContext.getResinVar(), "resin");
+    webBeans.addSingletonByName(elContext.getServerVar(), "server");
 
     config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");
 

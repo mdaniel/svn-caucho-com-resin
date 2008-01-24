@@ -32,12 +32,15 @@ package com.caucho.config.program;
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.attribute.*;
+import com.caucho.util.*;
 import com.caucho.xml.*;
 
 /**
  * A saved program for configuring an object.
  */
 public class PropertyValueProgram extends ConfigProgram {
+  private static final L10N L = new L10N(PropertyValueProgram.class);
+  
   private final String _name;
   private final QName _qName;
   private final Object _value;
@@ -72,7 +75,11 @@ public class PropertyValueProgram extends ConfigProgram {
 
       Attribute attr = type.getAttribute(_qName);
 
-      attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
+      if (attr != null)
+	attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
+      else
+	throw new ConfigException(L.l("'{0}' is an unknown attribute of '{1}'",
+				      _qName, bean.getClass().getName()));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

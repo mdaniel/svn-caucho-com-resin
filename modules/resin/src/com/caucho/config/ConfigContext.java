@@ -68,7 +68,7 @@ public class ConfigContext {
   private final static QName TEXT = new QName("#text");
   private final static QName VALUE = new QName("value");
 
-  private static final Object NULL = new Object();
+  private final static Object NULL = new Object();
 
   private final static HashSet<QName> _resinClassSet = new HashSet<QName>();
 
@@ -80,9 +80,8 @@ public class ConfigContext {
   private ArrayList<ValidatorEntry> _validators
     = new ArrayList<ValidatorEntry>();
 
-  private ConfigELContext _elContext;
-  private ELResolver _varResolver;
-
+  private ConfigELContext _elContext = new ConfigELContext();
+  
   private DependentScope _dependentScope;
 
   private ArrayList<Dependency> _dependList;
@@ -90,8 +89,6 @@ public class ConfigContext {
 
   public ConfigContext()
   {
-    _elContext = new ConfigELContext();
-    _varResolver = _elContext.getVariableResolver();
   }
 
   public ConfigContext(ComponentImpl component,
@@ -109,22 +106,10 @@ public class ConfigContext {
 
     _dependentScope = new DependentScope(scope);
   }
-
-  ConfigContext(ConfigELContext context)
-  {
-    _elContext = context;
-    _varResolver = _elContext.getVariableResolver();
-  }
   
   ConfigContext(Config config)
   {
     _config = config;
-    _elContext = Config.getELContext();
-
-    if (_elContext == null)
-      _elContext = new ConfigELContext();
-    
-    _varResolver = _elContext.getVariableResolver();
   }
   
   public static ConfigContext create()
@@ -139,7 +124,7 @@ public class ConfigContext {
 
   public static ConfigContext createForProgram()
   {
-    return new ConfigContext(new ConfigELContext((ELResolver) null));
+    return new ConfigContext();
   }
 
   public static ConfigContext getCurrentBuilder()
@@ -266,7 +251,7 @@ public class ConfigContext {
     throws LineConfigException
   {
     ConfigContext oldBuilder = _currentBuilder.get();
-    Object oldFile = _elContext.getValue("__FILE__");
+    // Object oldFile = _elContext.getValue("__FILE__");
     ArrayList<Dependency> oldDependList = _dependList;
 
     try {
@@ -275,7 +260,7 @@ public class ConfigContext {
       if (top instanceof QNode) {
         QNode qNode = (QNode) top;
         
-	_elContext.setValue("__FILE__", qNode.getBaseURI());
+	// _elContext.setValue("__FILE__", qNode.getBaseURI());
       }
 
       _dependList = getDependencyList(top);
@@ -287,7 +272,7 @@ public class ConfigContext {
       _currentBuilder.set(oldBuilder);
 
       _dependList = oldDependList;
-      _elContext.setValue("__FILE__", oldFile);
+      // _elContext.setValue("__FILE__", oldFile);
     }
   }
 
@@ -464,6 +449,15 @@ public class ConfigContext {
 
       if (childType != null)
 	childBean = childType.create(bean);
+      else if ((childBean = getELValue(attrStrategy, childNode)) != null) {
+	// ioc/2410
+	if (childBean != NULL)
+	  attrStrategy.setValue(bean, qName, childBean);
+	else
+	  attrStrategy.setValue(bean, qName, null);
+
+	return;
+      }
       else
 	childBean = attrStrategy.create(bean);
 
@@ -705,37 +699,11 @@ public class ConfigContext {
     return _elContext;
   }
 
-  /**
-   * Returns the variable resolver.
-   */
-  public void setELContext(ConfigELContext elContext)
-  {
-    _elContext = elContext;
-  }
-
-  /**
-   * Returns the variable resolver.
-   */
-  public Object putVar(String name, Object value)
-  {
-    ELResolver resolver = _elContext.getELResolver();
-    Object oldValue = resolver.getValue(_elContext, null, name);
-
-    resolver.setValue(_elContext, null, name, value);
-    
-    return oldValue;
-  }
-
-  /**
-   * Returns the variable resolver.
-   */
-  public Object getVar(String name)
-  {
-    return _elContext.getELResolver().getValue(_elContext, null, name);
-  }
-
   void addValidator(Validator validator)
   {
+    if (_validators == null)
+      _validators = new ArrayList<ValidatorEntry>();
+    
     _validators.add(new ValidatorEntry(validator));
   }
 
@@ -798,6 +766,55 @@ public class ConfigContext {
     }
 
     return defaultValue;
+  }
+
+  /**
+   * Returns the text value of the node.
+   */
+  Object getELValue(Attribute attr, Node node)
+  {
+    if (! (node instanceof Element))
+      return null;
+
+    Element elt = (Element) node;
+    Element childElt = null;
+
+    for (Node child = elt.getFirstChild();
+	 child != null;
+	 child = child.getNextSibling()) {
+      if (child instanceof Element) {
+	if (childElt != null)
+	  return null;
+	
+	childElt = (Element) child;
+      }
+      
+      else if (child instanceof CharacterData
+	       && ! XmlUtil.isWhitespace(((CharacterData) child).getData())) {
+	String data = ((CharacterData) child).getData();
+
+	if (isEL() && attr.isEL() && childElt == null
+	    && child.getNextSibling() == null
+	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
+	  ELContext elContext = getELContext();
+    
+	  ELParser parser = new ELParser(elContext, data.trim());
+    
+	  Expr expr = parser.parse();
+
+	  Object value = attr.getConfigType().valueOf(elContext, expr);
+
+	  if (value != null)
+	    return value;
+	  else
+	    return NULL;
+	}
+	
+	return null;
+      }
+    }
+
+    return null;
   }
 
   /**

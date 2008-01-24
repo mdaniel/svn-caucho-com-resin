@@ -38,7 +38,6 @@ import com.caucho.config.attribute.*;
 import com.caucho.loader.*;
 import com.caucho.el.*;
 import com.caucho.util.*;
-import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
@@ -71,19 +70,8 @@ public class EnvironmentBeanType extends BeanType
     
     thread.setContextClassLoader(loader);
 
-    builder.getELContext().push(EnvironmentLevelELResolver.create(loader));
     // XXX: builder.setClassLoader?
 
     // XXX: addDependencies(builder);
-  }
-
-  /**
-   * Called after the children are configured.
-   */
-  public void afterConfigure(ConfigContext builder, Object bean)
-  {
-    super.afterConfigure(builder, bean);
-    
-    builder.getELContext().pop();
   }
 }

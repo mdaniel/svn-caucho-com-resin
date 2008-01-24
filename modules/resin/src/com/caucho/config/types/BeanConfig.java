@@ -38,7 +38,6 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.inject.*;
 
 import java.util.*;
 import java.lang.reflect.*;
@@ -136,31 +135,31 @@ public class BeanConfig extends WbComponentConfig {
   }
 
   /**
-   * url-style configuration like the jms-queue url="memory:"
+   * uri-style configuration like the jms-queue url="memory:"
    */
-  public void setUrl(String url)
+  public void setUri(String uri)
   {
     Class beanConfigClass = getBeanConfigClass();
 
     if (beanConfigClass == null) {
-      throw new ConfigException(L.l("'{0}' does not support the 'url' attribute because its bean-config-class is undefined",
+      throw new ConfigException(L.l("'{0}' does not support the 'uri' attribute because its bean-config-class is undefined",
 				    getClass().getName()));
     }
 
     String scheme;
     String properties = "";
 
-    int p = url.indexOf(':');
+    int p = uri.indexOf(':');
     if (p >= 0) {
-      scheme = url.substring(0, p);
-      properties = url.substring(p + 1);
+      scheme = uri.substring(0, p);
+      properties = uri.substring(p + 1);
     }
     else
-      scheme = url;
+      scheme = uri;
 
     TypeFactory factory = TypeFactory.create();
     
-    setClass(factory.getDriverClassByUrl(beanConfigClass, url));
+    setClass(factory.getDriverClassByUrl(beanConfigClass, uri));
 
     String []props = properties.split("[;]");
 
@@ -171,7 +170,7 @@ public class BeanConfig extends WbComponentConfig {
       String []values = prop.split("[=]");
 
       if (values.length != 2)
-	throw new ConfigException(L.l("'{0}' is an invalid URL.  Bean URL syntax is 'scheme:prop1=value1;prop2=value2'", url));
+	throw new ConfigException(L.l("'{0}' is an invalid URI.  Bean URI syntax is 'scheme:prop1=value1;prop2=value2'", uri));
 
       addStringProperty(values[0], values[1]);
     }

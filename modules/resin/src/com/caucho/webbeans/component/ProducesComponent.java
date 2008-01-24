@@ -36,7 +36,6 @@ import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.inject.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;

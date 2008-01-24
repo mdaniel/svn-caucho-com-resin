@@ -31,10 +31,7 @@ package com.caucho.config.types;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigELContext;
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
-import com.caucho.el.MapVariableResolver;
-import com.caucho.util.CharBuffer;
+import com.caucho.el.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -89,16 +86,16 @@ public class PathBuilder {
   public static Path lookupPath(String string, Map<String,Object> map)
     throws ELException
   {
-    ELContext context = Config.getEnvironment();
-    ELResolver parent = context != null ? context.getELResolver() : null;
-    ELResolver resolver;
+    ELContext context;
 
-    if (map != null)
-      resolver = new MapVariableResolver(map);
+    if (map != null) {
+      ELResolver resolver = new MapVariableResolver(map);
+      context = new ConfigELContext(resolver);
+    }
     else
-      resolver = parent;
+      context = new ConfigELContext();
 
-    return lookupPath(string, new ConfigELContext(resolver));
+    return lookupPath(string, context);
   }
 
   public static Path lookupPath(String string, ELContext env)

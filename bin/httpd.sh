@@ -15,7 +15,12 @@
 # To install, you'll need to configure JAVA_HOME and RESIN_HOME and
 # copy contrib/init.resin to /etc/rc.d/init.d/resin.  Then
 # use "unix# /sbin/chkconfig resin on"
-java=java
+
+if test -n "${JAVA_HOME}"; then
+  if test -z "${JAVA_EXE}"; then
+    JAVA_EXE=$JAVA_HOME/bin/java
+  fi
+fi  
 
 #
 # trace script and simlinks to find the wrapper
@@ -32,4 +37,4 @@ if test -z "${RESIN_HOME}"; then
   RESIN_HOME="$bin/.."
 fi  
 
-exec $java -jar ${RESIN_HOME}/lib/resin.jar $*
+exec $JAVA_EXE -jar ${RESIN_HOME}/lib/resin.jar $*

@@ -39,6 +39,7 @@ import com.caucho.ejb.message.MessageServer;
 import com.caucho.ejb.message.ActivationMessageServer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
+import com.caucho.jca.cfg.*;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.*;
 
@@ -389,14 +390,22 @@ public class EjbMessageBean extends EjbBean {
   public void init()
     throws ConfigException
   {
-    super.init();
-
     if (_messagingType != null) {
     }
     else if (_activationSpec != null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
-
+      String specName = _activationSpec.getClass().getName();
       
+      ResourceArchive ra
+	= ResourceArchiveManager.findResourceArchive(specName);
+
+      if (ra == null) {
+	throw new ConfigException(L.l("'{0}' is an unknown activation-spec.  Make sure the JCA adapter is deployed in a .rar file",
+				      specName));
+      }
+
+      MessageListenerConfig listener = ra.getMessageListener(specName);
+
+      _messagingType = listener.getMessageListenerType();
     }
     else if (MessageListener.class.isAssignableFrom(getEJBClass())) {
       _messagingType = MessageListener.class;
@@ -406,7 +415,16 @@ public class EjbMessageBean extends EjbBean {
                       getEJBClass().getName(),
                       isAllowPOJO() ? "messaging-type" : "messageListenerInterface"));
 
+    super.init();
+    
     // J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
+  }
+
+  protected void introspect()
+  {
+    _messageBean.setApi(new ApiClass(_messagingType));
+    
+    super.introspect();
   }
   
   /**

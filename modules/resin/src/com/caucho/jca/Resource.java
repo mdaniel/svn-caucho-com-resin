@@ -421,9 +421,6 @@ public class Resource {
     if (_jndiName != null)
       Jndi.bindDeepShort(_jndiName, jndiObject);
 
-    if (_var != null)
-      Config.setCurrentVar(_var, jndiObject);
-
     if (isStart) {
     }
     else if (start != null || stop != null)

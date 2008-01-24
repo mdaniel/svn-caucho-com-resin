@@ -62,6 +62,7 @@ public class PojoBean extends BeanGenerator {
     super(beanClass.getName() + "__Resin", new ApiClass(beanClass));
 
     setSuperClassName(beanClass.getName());
+    addImport("javax.transaction.*");
     
     _view = new PojoView(this, getEjbClass());
     

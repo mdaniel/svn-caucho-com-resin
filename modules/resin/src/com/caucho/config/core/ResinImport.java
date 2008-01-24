@@ -29,7 +29,6 @@
 package com.caucho.config.core;
 
 import com.caucho.config.Config;
-import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.FileSetType;
@@ -40,7 +39,6 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
-import javax.el.ELContext;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -128,11 +126,6 @@ public class ResinImport extends ResinControl
       Config config = new Config();
       // server/10hc
       // config.setResinInclude(true);
-
-      ELContext elContext = Config.getEnvironment();
-      if (elContext instanceof ConfigELContext) {
-	config.setELContext((ConfigELContext) elContext);
-      }
 
       config.configureBean(object, path, schema);
     }

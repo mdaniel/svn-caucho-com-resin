@@ -135,9 +135,9 @@ public class FileServlet extends GenericServlet {
     res = (HttpServletResponse) response;
     
     String method = req.getMethod();
-    if (! method.equalsIgnoreCase("GET") &&
-	! method.equalsIgnoreCase("HEAD") &&
-	! method.equalsIgnoreCase("POST")) {
+    if (! method.equalsIgnoreCase("GET")
+	&& ! method.equalsIgnoreCase("HEAD")
+	&& ! method.equalsIgnoreCase("POST")) {
       res.sendError(res.SC_NOT_IMPLEMENTED, "Method not implemented");
       return;
     }

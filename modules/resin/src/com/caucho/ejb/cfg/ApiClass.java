@@ -56,6 +56,9 @@ public class ApiClass {
    */
   public ApiClass(Class apiClass)
   {
+    if (apiClass == null)
+      throw new NullPointerException();
+    
     _apiClass = apiClass;
 
     HashMap<String,Type> typeMap = new HashMap<String,Type>();

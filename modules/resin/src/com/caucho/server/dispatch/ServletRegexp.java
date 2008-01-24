@@ -33,6 +33,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.types.RawString;
 import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
 import com.caucho.util.L10N;
 
 import javax.el.ELContext;
@@ -139,7 +140,7 @@ public class ServletRegexp {
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("regexp", vars);
 
-    ELContext mapEnv = new ConfigELContext(map);
+    ELContext mapEnv = new ConfigELContext(new MapVariableResolver(map));
 
     String rawName = _servletName;
     String rawClassName = _servletClassName;

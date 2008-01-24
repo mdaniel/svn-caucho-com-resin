@@ -31,15 +31,11 @@ package com.caucho.server.resin;
 
 import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.Config;
-import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-import com.caucho.el.SystemPropertiesResolver;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
@@ -52,7 +48,6 @@ import com.caucho.loader.EnvironmentProperties;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.RotateStream;
 import com.caucho.management.j2ee.J2EEDomain;
-import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JVM;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
@@ -78,11 +73,11 @@ import com.caucho.webbeans.manager.WebBeansAddLoaderListener;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
-import javax.el.ELResolver;
 import javax.management.ObjectName;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.lang.reflect.Method;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -95,6 +90,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.webbeans.Standard;
 
 /**
  * The Resin class represents the top-level container for Resin.
@@ -234,28 +230,22 @@ public class Resin implements EnvironmentBean, SchemaBean
       // else
       //  setRootDirectory(Vfs.getPwd());
 
-      _variableMap.put("resin", new Var());
-      _variableMap.put("server", new Var());
-      _variableMap.put("java", new JavaVar());
+      Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
+      WebBeansContainer webBeans = WebBeansContainer.create();
 
-      ELResolver varResolver = new SystemPropertiesResolver();
-      ConfigELContext elContext = new ConfigELContext(varResolver);
-      elContext.push(new MapVariableResolver(_variableMap));
+      webBeans.addSingleton(new Var(), "resin", Standard.class);
+      webBeans.addSingleton(new Var(), "server", Standard.class);
+      webBeans.addSingleton(new JavaVar(), "java", Standard.class);
 
-      EL.setEnvironment(elContext);
-      EL.setVariableMap(_variableMap, _classLoader);
-
-      _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
+      webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
 
       try {
-	_variableMap.put("jndi", Jndi.class.getMethod("lookup", new Class[] { String.class }));
-	_variableMap.put("jndi:lookup", Jndi.class.getMethod("lookup", new Class[] { String.class }));
+        Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
+        webBeans.addSingleton(method, "jndi", Standard.class);
+        webBeans.addSingleton(method, "jndi:lookup", Standard.class);
       } catch (Exception e) {
 	throw ConfigException.create(e);
       }
-
-      Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
-      WebBeansContainer webBeans = WebBeansContainer.create();
 
       webBeans.addSingleton(new ResinWebBeansProducer());
       webBeans.update();
@@ -323,7 +313,7 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void setServerId(String serverId)
   {
-    _variableMap.put("serverId", serverId);
+    WebBeansContainer.create().addSingletonByName(serverId, "serverId");
 
     _serverId = serverId;
     _serverIdLocal.set(serverId);
@@ -362,9 +352,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setResinHome(Path home)
   {
     _resinHome = home;
-
-    _variableMap.put("resinHome", _resinHome);
-    _variableMap.put("resin-home", _resinHome);
   }
 
   /**
@@ -381,9 +368,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setRootDirectory(Path root)
   {
     _rootDirectory = root;
-
-    _variableMap.put("serverRoot", root);
-    _variableMap.put("server-root", root);
   }
 
   /**
@@ -567,6 +551,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       if (_management == null)
         _management = new Management();
+
+      _management.setResin(this);
     }
 
     return _management;
@@ -678,7 +664,6 @@ public class Resin implements EnvironmentBean, SchemaBean
       System.gc();
 
       // XXX: get the server
-
       for (Cluster cluster : _clusters) {
 	cluster.start();
       }
@@ -1125,8 +1110,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   
   private void startManagement()
   {
-    _j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
-    _jvmManagedObject = J2EEManagedObject.register(new JVM());
+    //_j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
+    //_jvmManagedObject = J2EEManagedObject.register(new JVM());
   }
 
   private void addRandom()

@@ -141,7 +141,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
 
     bean.setConnectionFactoryValue((ConnectionFactory) comp.get());
 
-    // bean.init();
+    bean.init();
 
     configManager.setBeanConfig(name, bean);
 

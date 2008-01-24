@@ -33,6 +33,7 @@ import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
@@ -156,7 +157,7 @@ public class ServletMapping extends ServletConfigImpl {
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("regexp", vars);
 
-    ELContext mapEnv = new ConfigELContext(map);
+    ELContext mapEnv = new ConfigELContext(new MapVariableResolver(map));
 
     String rawName = getServletName();
     String rawClassName = getServletClassName();

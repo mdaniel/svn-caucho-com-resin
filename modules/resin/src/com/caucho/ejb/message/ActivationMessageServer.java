@@ -215,7 +215,11 @@ public class ActivationMessageServer extends AbstractServer
     throws UnavailableException
   {
     try {
-      return (MessageEndpoint) createMessageListener();
+      Object listener = createMessageListener();
+
+      ((CauchoMessageEndpoint) listener).__caucho_setXAResource(xaResource);
+      
+      return (MessageEndpoint) listener;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -238,8 +242,6 @@ public class ActivationMessageServer extends AbstractServer
   {
     Class beanClass = getBeanSkelClass();
 
-    System.out.println("BC: " + beanClass);
-    
     Object listener = beanClass.newInstance();
 
     return listener;

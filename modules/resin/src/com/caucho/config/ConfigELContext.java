@@ -29,89 +29,39 @@
 
 package com.caucho.config;
 
-import com.caucho.el.EnvironmentELResolver;
-import com.caucho.el.MapVariableResolver;
 import com.caucho.el.StackELResolver;
 import com.caucho.el.SystemPropertiesResolver;
+import com.caucho.webbeans.el.WebBeansContextResolver;
 
 import javax.el.*;
-import java.util.Map;
 
 /**
  * Creates a variable resolver based on the classloader.
  */
 public class ConfigELContext extends ELContext {
-  private final StackELResolver _stackResolver = new StackELResolver();
-  private final ELResolver _varResolver;
+  private static final StackELResolver _stackResolver;
+
+  private ELResolver _resolver = _stackResolver;
   
   /**
    * Creates the resolver
    */
   public ConfigELContext()
   {
-    this(new MapVariableResolver());
   }
   
   /**
    * Creates the resolver
    */
-  public ConfigELContext(Map<String,Object> map)
+  public ConfigELContext(ELResolver resolver)
   {
-    this(new MapVariableResolver(map));
-  }
-  
-  /**
-   * Creates the resolver
-   */
-  public ConfigELContext(ELResolver varResolver)
-  {
-    _varResolver = varResolver;
-
-    _stackResolver.push(new BeanELResolver());
-    _stackResolver.push(new ArrayELResolver());
-    _stackResolver.push(new MapELResolver());
-    _stackResolver.push(new ListELResolver());
-    
-    _stackResolver.push(new SystemPropertiesResolver());
-    _stackResolver.push(EnvironmentELResolver.create());
-
-    if (varResolver != null)
-      _stackResolver.push(varResolver);
-  }
-
-  public void push(ELResolver elResolver)
-  {
-    _stackResolver.push(elResolver);
-  }
-
-  public ELResolver pop()
-  {
-    return _stackResolver.pop();
-  }
-
-  public ELResolver getVariableResolver()
-  {
-    return _varResolver;
-  }
-
-  public Object getValue(String var)
-  {
-    if (_varResolver != null)
-      return _varResolver.getValue(this, var, null);
-    else
-      return null;
-  }
-
-  public void setValue(String var, Object value)
-  {
-    if (_varResolver != null)
-      _varResolver.setValue(this, var, null, value);
+    _resolver = new StackELResolver(resolver, _resolver);
   }
 
   @Override
   public ELResolver getELResolver()
   {
-    return _stackResolver;
+    return _resolver;
   }
 
   @Override
@@ -129,5 +79,16 @@ public class ConfigELContext extends ELContext {
   public String toString()
   {
     return "ConfigELContext[]";
+  }
+
+  static {
+    _stackResolver = new StackELResolver();
+    _stackResolver.push(new BeanELResolver());
+    _stackResolver.push(new ArrayELResolver());
+    _stackResolver.push(new MapELResolver());
+    _stackResolver.push(new ListELResolver());
+    
+    _stackResolver.push(new SystemPropertiesResolver());
+    _stackResolver.push(new WebBeansContextResolver());
   }
 }

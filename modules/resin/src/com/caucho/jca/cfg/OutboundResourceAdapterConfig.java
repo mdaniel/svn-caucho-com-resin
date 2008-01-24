@@ -63,7 +63,15 @@ public class OutboundResourceAdapterConfig {
    */
   public void setTransactionSupport(String trans)
   {
-    _trans = trans;
+    if ("XATransaction".equals(trans))
+      _trans = trans;
+    else if ("NoTransaction".equals(trans))
+      _trans = trans;
+    else if ("LocalTransaction".equals(trans))
+      _trans = trans;
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown transaction-support type",
+				    trans));
   }
 
   /**

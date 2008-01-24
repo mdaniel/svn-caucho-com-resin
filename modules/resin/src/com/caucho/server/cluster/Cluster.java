@@ -50,6 +50,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.webbeans.manager.*;
 
 import javax.management.ObjectName;
 import java.util.ArrayList;
@@ -128,8 +129,8 @@ public class Cluster
     _clusterLocal.set(this, _classLoader);
   
     Environment.addEnvironmentListener(this, _classLoader);
-    
-    Config.setCurrentVar("cluster", new Var());
+
+    WebBeansContainer.create().addSingletonByName(new Var(), "cluster");
 
     _rootDirectory = Vfs.getPwd();
   }
@@ -301,8 +302,11 @@ public class Cluster
 
     ClusterServer selfServer = getSelfServer();
 
-    if (selfServer == server)
-      Config.setCurrentVar("server", new ServerVar(server));
+    if (selfServer == server) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      webBeans.addSingletonByName(new ServerVar(server), "server");
+    }
   }
 
   /**
