@@ -59,6 +59,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
   private Class _destinationType;
   private String _destinationName;
   private Object _destination;
+  private int _messageConsumerMax;
 
   /**
    * Sets the activation spec
@@ -81,6 +82,11 @@ public class MessageBeanConfig extends AbstractBeanConfig
   public void setDestination(Object destination)
   {
     _destination = destination;
+  }
+
+  public void setMessageConsumerMax(int messageConsumerMax)
+  {
+    _messageConsumerMax = messageConsumerMax;
   }
 
   @PostConstruct
@@ -135,6 +141,8 @@ public class MessageBeanConfig extends AbstractBeanConfig
 				      _destinationType.getName()));
 
       bean.setDestinationValue((Destination) destComp.get());
+
+      bean.setMessageConsumerMax(_messageConsumerMax);
     }
 
     ComponentImpl comp = webBeans.bind(loc, ConnectionFactory.class);

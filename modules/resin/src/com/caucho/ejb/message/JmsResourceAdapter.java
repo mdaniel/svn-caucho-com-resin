@@ -248,6 +248,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
     private void destroy()
       throws JMSException
     {
+      _endpoint.release();
     }
   }
 }

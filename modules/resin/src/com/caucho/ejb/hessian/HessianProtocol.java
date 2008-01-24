@@ -157,7 +157,7 @@ public class HessianProtocol extends ProtocolContainer {
       return new HessianEjbSkeleton(obj, skel, _resolver);
     }
     else if (server instanceof MessageServer) {
-      return new MessageSkeleton((MessageServer) server);
+      throw new IllegalStateException(getClass().getName());
     }
     else {
       Class homeApi;

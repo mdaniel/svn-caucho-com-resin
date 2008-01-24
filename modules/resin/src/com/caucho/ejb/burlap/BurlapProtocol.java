@@ -155,7 +155,7 @@ public class BurlapProtocol extends ProtocolContainer {
       return new BurlapEjbSkeleton(obj, skel, _resolver);
     }
     else if (server instanceof MessageServer) {
-      return new MessageSkeleton((MessageServer) server);
+      throw new IllegalStateException();
     }
     else {
       Class homeApi;

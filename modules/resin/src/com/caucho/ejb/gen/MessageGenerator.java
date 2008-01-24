@@ -136,14 +136,26 @@ public class MessageGenerator extends BeanGenerator {
     out.println("  = new com.caucho.ejb3.xa.XAManager();");
 
     out.println("private static HashSet<Method> _xaMethods = new HashSet<Method>();");
+    out.println();
+    out.println("private MessageServer _server;");
     out.println("private XAResource _xaResource;");
     out.println("private boolean _isXa;");
 
 
     out.println();
-    out.println("public " + getClassName() + "()");
+    out.println("public " + getClassName() + "(MessageServer server)");
     out.println("{");
     out.pushDepth();
+
+    out.println("_server = server;");
+
+    if (MessageDrivenBean.class.isAssignableFrom(getEjbClass().getJavaClass())) {
+      out.println("setMessageDrivenContext(server.getMessageContext());");
+    }
+
+    if (getEjbClass().hasMethod("ejbCreate", new Class[0])) {
+      out.println("ejbCreate();");
+    }
     
     out.popDepth();
     out.println("}");
@@ -203,10 +215,17 @@ public class MessageGenerator extends BeanGenerator {
     out.println("  }");
     out.println("}");
 
+    out.println();
     out.println("public void release()");
     out.println("{");
-    out.println("}");
+    out.pushDepth();
+
+    if (getEjbClass().hasMethod("ejbRemove", new Class[0])) {
+      out.println("ejbRemove();");
+    }
     
+    out.popDepth();
+    out.println("}");
 
     for (View view : getViews()) {
       view.generateContextPrologue(out);

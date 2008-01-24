@@ -525,16 +525,6 @@ public class EjbMessageBean extends EjbBean {
     else
       throw new ConfigException(L.l("Can't find destination"));
 
-    /*
-    server.setMessageSelector(_messageSelector);
-    server.setMessageDestinationLink(_messageDestinationLink);
-
-    if (_consumerMax > 0)
-      server.setConsumerMax(_consumerMax);
-    else
-      server.setConsumerMax(getEjbContainer().getMessageConsumerMax());
-    */
-
     JmsResourceAdapter ra
       = new JmsResourceAdapter(getEJBName(), factory, destination);
 
@@ -603,7 +593,7 @@ public class EjbMessageBean extends EjbBean {
 					    ActivationSpec spec)
     throws ClassNotFoundException
   {
-    ActivationMessageServer server;
+    MessageServer server;
     
     try {
       if (spec == null)
@@ -613,7 +603,7 @@ public class EjbMessageBean extends EjbBean {
 	throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
 
     
-      server = new ActivationMessageServer(ejbManager);
+      server = new MessageServer(ejbManager);
 
       server.setConfigLocation(getFilename(), getLine());
       
