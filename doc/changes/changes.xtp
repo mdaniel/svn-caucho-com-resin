@@ -79,6 +79,13 @@
 <li>XmlDocumentFactory needs setSchema (#2174, rep by sgudiboina)</li>
 <li>JCA: updated &lt;connector> syntax (#2209, rep by Serge Sozonoff)</li>
 <li>Quercus: added spring_bean("...")</li>
+<li>Quercus: htmlentities handled incorrecty between mod_php and quercus (#2348, rep by rvt)</li>
+<li>Quercus: strcmp function fails with comparing comparing empty strings with numbers (#2356, rep by rvt)</li>
+<li>Quercus: Cannot create a BigDecimal, seems to call wrong constructor (#2345, rep by gorck)</li>
+<li>Quercus: xml_parse_into_struct exceptions (#2353, rep by rvt)</li>
+<li>Quercus: append string operation cannot be doen with a string is retreived from file_get_contents (#2350, rep by rvt)</li>
+<li>Quercus: oracle module reporting incorrect extension name (#2338, rep by buckyball)</li>
+<li>Quercus: drupal - table temp_search_sids already exists (CREATE TEMPORARY TABLE) (#2293, rep by Dan)</li>
 </ul>
 </s2>
 
