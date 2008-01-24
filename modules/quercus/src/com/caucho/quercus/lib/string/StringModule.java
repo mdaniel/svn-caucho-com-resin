@@ -2873,7 +2873,30 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static int strcmp(StringValue a, StringValue b)
   {
-    return a.cmp(b);
+    int aLen = a.length();
+    int bLen = b.length();
+
+    for (int i = 0; i < aLen && i < bLen; i++) {
+      char chA = a.charAt(i);
+      char chB = b.charAt(i);
+
+      if (chA == chB)
+        continue;
+
+      if (chA == chB)
+        continue;
+      else if (chA < chB)
+        return -1;
+      else
+        return 1;
+    }
+
+    if (aLen == bLen)
+      return 0;
+    else if (aLen < bLen)
+      return -1;
+    else
+      return 1;
   }
 
   /**
@@ -3142,7 +3165,7 @@ public class StringModule extends AbstractQuercusModule {
     if (length < b.length())
       b = b.substring(0, length);
 
-    return a.cmp(b);
+    return strcmp(a, b);
   }
 
   /**

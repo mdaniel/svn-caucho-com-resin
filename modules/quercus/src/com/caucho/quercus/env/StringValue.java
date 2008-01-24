@@ -286,18 +286,6 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public int cmpString(StringValue rValue)
   {
-    if (isNumberConvertible() && rValue.isNumberConvertible()) {
-      double thisDouble = toDouble();
-      
-      double rDouble = rValue.toDouble();
-      
-      if (thisDouble < rDouble)
-	return -1;
-      else if (thisDouble > rDouble)
-	return 1;
-      else
-	return 0;
-    }
     return toString().compareTo(rValue.toString());
   }
 
