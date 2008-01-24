@@ -35,12 +35,12 @@ import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.gen.*;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.message.MessageServer;
-import com.caucho.ejb.message.ActivationMessageServer;
+import com.caucho.ejb.message.*;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
 import com.caucho.jca.cfg.*;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
@@ -53,8 +53,9 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.MessageListener;
 import javax.jms.Session;
-import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.*;
 import javax.naming.NamingException;
+import javax.webbeans.*;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -163,16 +164,10 @@ public class EjbMessageBean extends EjbBean {
   /**
    * Sets the JMS destination.
    */
-  public void setDestination(JndiBuilder destination)
-    throws ConfigException, NamingException
+  public void setDestination(Destination destination)
+    throws ConfigException
   {
-    Object obj = destination.getObject();
-
-    if (! (obj instanceof Destination))
-      throw new ConfigException(L.l("'{0}' needs to implement javax.jms.Destination.",
-                                    obj));
-
-    _destination = (Destination) obj;
+    _destination = destination;
   }
 
   /**
@@ -200,10 +195,11 @@ public class EjbMessageBean extends EjbBean {
   /**
    * @deprecated for compat with TCK
    */
-  public void setMappedName(JndiBuilder destination)
-    throws ConfigException, NamingException
+  public void setMappedName(String mappedName)
+    throws ConfigException
   {
-    setDestination(destination);
+    // XXX:
+    // setDestination(destination);
   }
 
   /**
@@ -353,20 +349,13 @@ public class EjbMessageBean extends EjbBean {
       throw new ConfigException(L.l("'{0}' is an unknown resource-adapter"));
   }
 
-  private void addActivationConfigProperty(String name, String value)
+  private void addActivationConfigProperty(String name, Object value)
   {
     if ("destination".equals(name)) {
-      JndiBuilder jndiBuilder = new JndiBuilder();
-      jndiBuilder.addText(value);
-      try {
-        setDestination(jndiBuilder);
-      }
-      catch (NamingException e) {
-        throw ConfigException.create(e);
-      }
+      setDestination((Destination) value);
     }
     else if ("messageSelector".equals(name)) {
-      _messageSelector = value;
+      _messageSelector = (String) value;
     }
     else
       log.log(Level.FINE, L.l("activation-config-property '{0}' is unknown, ignored",
@@ -515,37 +504,28 @@ public class EjbMessageBean extends EjbBean {
   {
     if (_activationSpec != null)
       return deployActivationSpecServer(ejbManager, javaGen);
-    
-    MessageServer server = new MessageServer(ejbManager);
-
-    server.setModuleName(getEJBModuleName());
-    server.setEJBName(getEJBName());
-    server.setMappedName(getMappedName());
-    server.setId(getEJBModuleName() + "#" + getMappedName());
-
-    //Class contextImplClass = javaGen.loadClass(getSkeletonName());
-    //server.setContextImplClass(contextImplClass);
-
-    server.setContainerTransaction(getContainerTransaction());
-
-    server.setEjbClass(getEJBClass());
-
-    server.setContextImplClass(getEJBClass());
-    server.setMessageListenerType(_messagingType);
-    server.setAroundInvokeMethodName(getAroundInvokeMethodName());
-    server.setInterceptors(getInterceptors());
-
-    if (_connectionFactory != null)
-      server.setConnectionFactory(_connectionFactory);
     else
-      server.setConnectionFactory(getEjbContainer().getJmsConnectionFactory());
+      return deployJmsServer(ejbManager, javaGen);
+  }
 
-    if (_activationSpec != null)
-      server.setActivationSpec(_activationSpec);
+  private AbstractServer deployJmsServer(EjbContainer ejbManager,
+					 JavaClassGenerator javaGen)
+    throws ClassNotFoundException
+  {
+    ConnectionFactory factory;
+    Destination destination;
+    
+    if (_connectionFactory != null)
+      factory = _connectionFactory;
+    else
+      factory = getEjbContainer().getJmsConnectionFactory();
       
     if (_destination != null)
-      server.setDestination(_destination);
+      destination = _destination;
+    else
+      throw new ConfigException(L.l("Can't find destination"));
 
+    /*
     server.setMessageSelector(_messageSelector);
     server.setMessageDestinationLink(_messageDestinationLink);
 
@@ -553,50 +533,24 @@ public class EjbMessageBean extends EjbBean {
       server.setConsumerMax(_consumerMax);
     else
       server.setConsumerMax(getEjbContainer().getMessageConsumerMax());
+    */
+
+    JmsResourceAdapter ra
+      = new JmsResourceAdapter(getEJBName(), factory, destination);
+
+    JmsActivationSpec spec
+      = new JmsActivationSpec();
+
+    ra.setAcknowledgeMode(_acknowledgeMode);
+    ra.setMessageSelector(_messageSelector);
+    ra.setSubscriptionName(_subscriptionName);
     
-    Class contextImplClass = javaGen.loadClass(getSkeletonName());
+    if (_consumerMax > 0)
+      ra.setConsumerMax(_consumerMax);
+    else
+      ra.setConsumerMax(getEjbContainer().getMessageConsumerMax());
 
-    server.setContextImplClass(contextImplClass);
-
-    // server.setBeanClass(beanClass);
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(server.getClassLoader());
-
-      ContainerProgram initContainer = getInitProgram();
-
-      /*
-      ArrayList<BuilderProgram> initList;
-      initList = InjectIntrospector.introspect(beanClass);
-
-      if (initList != null && initList.size() > 0) {
-        if (initContainer == null)
-          initContainer = new ContainerProgram();
-
-        for (BuilderProgram init : initList) {
-          initContainer.addProgram(init);
-        }
-      }
-      */
-
-      server.setInitProgram(initContainer);
-
-      try {
-        if (getServerProgram() != null)
-          getServerProgram().configure(server);
-      } catch (ConfigException e) {
-        throw e;
-      } catch (Exception e) {
-        throw ConfigException.create(e);
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-
-    return server;
+    return deployMessageServer(ejbManager, javaGen, ra, spec);
   }
 
   /**
@@ -606,11 +560,57 @@ public class EjbMessageBean extends EjbBean {
 						   JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
+    if (_activationSpec == null)
+      throw new ConfigException(L.l("ActivationSpec is required for ActivationSpecServer"));
+
+      String specType = _activationSpec.getClass().getName();
+
+      ResourceArchive raCfg = ResourceArchiveManager.findResourceArchive(specType);
+
+      if (raCfg == null)
+	throw error(L.l("'{0}' is an unknown activation-spec.  Make sure the .rar file for the driver is properly installed.",
+			specType));
+
+      Class raClass = raCfg.getResourceAdapterClass();
+
+      if (raClass == null)
+	throw error(L.l("resource-adapter class does not exist for activation-spec '{0}'.  Make sure the .rar file for the driver is properly installed.",
+			raClass.getName()));
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+
+      ComponentFactory raFactory = webBeans.resolveByType(raClass);
+
+      if (raFactory == null) {
+	throw error(L.l("resource-adapter '{0}' must be configured in a <connector> tag.",
+			raClass.getName()));
+      }
+
+      ResourceAdapter ra = (ResourceAdapter) raFactory.get();
+
+      if (ra == null)
+	throw new NullPointerException();
+
+    return deployMessageServer(ejbManager, javaGen, ra, _activationSpec);
+  }
+
+  /**
+   * Deploys the bean.
+   */
+  public AbstractServer deployMessageServer(EjbContainer ejbManager,
+					    JavaClassGenerator javaGen,
+					    ResourceAdapter ra,
+					    ActivationSpec spec)
+    throws ClassNotFoundException
+  {
     ActivationMessageServer server;
     
     try {
-      if (_activationSpec == null)
-	throw new ConfigException(L.l("ActivationSpec is required for ActivationSpecServer"));
+      if (spec == null)
+	throw new ConfigException(L.l("ActivationSpec is required for MessageServer"));
+      
+      if (ra == null)
+	throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
 
     
       server = new ActivationMessageServer(ejbManager);
@@ -630,14 +630,10 @@ public class EjbMessageBean extends EjbBean {
 
       server.setContextImplClass(contextImplClass);
 
-      server.setActivationSpec(_activationSpec);
+      server.setActivationSpec(spec);
+      server.setResourceAdapter(ra);
     
       // server.setMessageListenerType(_messagingType);
-
-      if (_consumerMax > 0)
-	server.setConsumerMax(_consumerMax);
-      else
-	server.setConsumerMax(getEjbContainer().getMessageConsumerMax());
 
       Class beanClass = javaGen.loadClass(getEJBClass().getName());
 
@@ -713,7 +709,7 @@ public class EjbMessageBean extends EjbBean {
     public void setJndiName(JndiBuilder destination)
       throws ConfigException, NamingException
     {
-      setDestination(destination);
+      setDestination((Destination) destination.getObject());
     }
   }
 }

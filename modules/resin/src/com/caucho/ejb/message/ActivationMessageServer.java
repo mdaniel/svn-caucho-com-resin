@@ -69,7 +69,7 @@ public class ActivationMessageServer extends AbstractServer
   protected static final Logger log
     = Logger.getLogger(ActivationMessageServer.class.getName());
 
-  private ResourceArchive _ra;
+  private ResourceAdapter _ra;
   private ActivationSpec _activationSpec;
 
   private boolean _isContainerTransaction;
@@ -78,11 +78,7 @@ public class ActivationMessageServer extends AbstractServer
 
   private MessageDrivenContext _context;
 
-  private ResourceAdapter _ra;
-
   private UserTransaction _ut;
-
-  private ArrayList<Consumer> _consumers = new ArrayList<Consumer>();
 
   public ActivationMessageServer(EjbContainer ejbContainer)
   {
@@ -103,6 +99,14 @@ public class ActivationMessageServer extends AbstractServer
   public void setActivationSpec(ActivationSpec activationSpec)
   {
     _activationSpec = activationSpec;
+  }
+  
+  /**
+   * Sets the resource adapter
+   */
+  public void setResourceAdapter(ResourceAdapter ra)
+  {
+    _ra = ra;
   }
 
   /**
@@ -141,43 +145,9 @@ public class ActivationMessageServer extends AbstractServer
 			getEJBName()));
 
 
-      String specType = _activationSpec.getClass().getName();
-
-      ResourceArchive raCfg = ResourceArchiveManager.findResourceArchive(specType);
-
-      if (raCfg == null)
-	throw error(L.l("'{0}' is an unknown activation-spec.  Make sure the .rar file for the driver is properly installed.",
-			specType));
-
-      Class raClass = raCfg.getResourceAdapterClass();
-
-      if (raClass == null)
-	throw error(L.l("resource-adapter class does not exist for activation-spec '{0}'.  Make sure the .rar file for the driver is properly installed.",
-			raClass.getName()));
-
-      WebBeansContainer webBeans = WebBeansContainer.create();
-
-      ComponentFactory raFactory = webBeans.resolveByType(raClass);
-
-      if (raFactory == null) {
-	throw error(L.l("resource-adapter '{0}' must be configured in a <connector> tag.",
-			raClass.getName()));
-      }
-
-      _ra = (ResourceAdapter) raFactory.get();
-
       if (_ra == null)
-	throw new NullPointerException();
-
-      /*
-      SingletonComponent comp
-        = new SingletonComponent(webBeans, _context);
-      comp.setTargetType(MessageDrivenContext.class);
-      comp.init();
-      webBeans.addComponent(comp);
-      */
-
-      // log.fine(this + " init");
+	throw error(L.l("ResourceAdapter is missing from message-driven bean '{0}'.",
+			getEJBName()));
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -254,225 +224,6 @@ public class ActivationMessageServer extends AbstractServer
   @Override
   public void destroy()
   {
-    try {
-      ArrayList<Consumer> consumers = new ArrayList<Consumer>(_consumers);
-      _consumers = null;
-
-      for (Consumer consumer : consumers) {
-        consumer.destroy();
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    _ra.endpointDeactivation(this, _activationSpec);
   }
-
-  class Consumer {
-    private MessageDrivenContextImpl _context;
-
-    Consumer()
-      throws Exception
-    {
-      /*
-      _context = new MessageDrivenContextImpl(ActivationMessageServer.this, _ut,
-                                              _isContainerTransaction);
-      */
-    }
-
-    /**
-     * Creates the session.
-     */
-    void start()
-      throws Exception
-    {
-      
-      /*
-      if (_isContainerTransaction) {
-        XAResource xaResource = ((XASession) _session).getXAResource();
-
-        XAListener xaListener = new XAListener(_listener,
-                                               _context,
-                                               _ut,
-                                               _session,
-                                               xaResource);
-
-        xaListener.setAroundInvokeMethodName(_aroundInvokeMethodName);
-        xaListener.setInterceptors(_interceptors);
-
-        _consumer.setMessageListener(xaListener);
-      }
-      else
-        _consumer.setMessageListener(_listener);
-      */
-    }
-
-    /**
-     * Destroys the listener.
-     */
-    private void destroy()
-      throws JMSException
-    {
-      /*
-      Session session = _session;
-      _session = null;
-
-      try {
-        if (session != null)
-          session.close();
-      } finally {
-        if (_listener instanceof MessageDrivenBean) {
-          MessageDrivenBean bean = (MessageDrivenBean) _listener;
-          _listener = null;
-          bean.ejbRemove();
-        }
-      }
-      */
-    }
-  }
-
-  /*
-  static class XAListener implements MessageListener {
-    private MessageListener _listener;
-    private MessageDrivenContextImpl _context;
-    private UserTransaction _ut;
-    private Session _session;
-    private XAResource _xaResource;
-    private EjbTransactionManager _xaManager;
-    private String _aroundInvokeMethodName;
-    private Method _aroundInvokeMethod;
-    private ArrayList<Interceptor> _interceptors;
-
-    XAListener(MessageListener listener,
-               MessageDrivenContextImpl context,
-               UserTransaction ut,
-               Session session,
-               XAResource xaResource)
-    {
-      _listener = listener;
-      _context = context;
-      _ut = ut;
-      _session = session;
-      _xaResource = xaResource;
-
-      if (_ut != null)
-        _xaManager = _context.getServer().getTransactionManager();
-    }
-
-    public void setAroundInvokeMethodName(String aroundInvokeMethodName)
-    {
-      _aroundInvokeMethodName = aroundInvokeMethodName;
-    }
-
-    public void setInterceptors(ArrayList<Interceptor> interceptors)
-    {
-      _interceptors = interceptors;
-    }
-
-    private boolean hasInterceptors()
-    {
-      if (_aroundInvokeMethodName != null)
-        return true;
-
-      if (_interceptors != null && _interceptors.size() > 0)
-        return true;
-
-      return false;
-    }
-
-    private void callInterceptors(Message msg)
-    {
-      if (_aroundInvokeMethodName != null && _aroundInvokeMethod == null) {
-        _aroundInvokeMethod =
-          Interceptor.getAroundInvokeMethod(_listener.getClass(),
-                                            _aroundInvokeMethodName);
-      }
-
-      int c = 0;
-
-      if (_aroundInvokeMethod != null)
-        c++;
-
-      if (_interceptors != null)
-        c += _interceptors.size();
-
-      Object interceptors[] = new Object[c];
-      Method interceptorMethods[] = new Method[c];
-
-      try {
-        int i = 0;
-
-        // ejb/0fbm
-        for (Interceptor interceptor : _interceptors) {
-          String name = interceptor.getAroundInvokeMethodName();
-
-          if (name == null)
-            continue;
-
-          Method method = interceptor.getAroundInvokeMethod();
-          Class cl = interceptor.getInterceptorJClass().getJavaClass();
-
-          interceptors[i] = cl.newInstance();
-          interceptorMethods[i] = method;
-
-          i++;
-        }
-
-        // ejb/0fbl, ejb/0fbm
-        if (_aroundInvokeMethod != null) {
-          interceptors[i] = _listener;
-          interceptorMethods[i] = _aroundInvokeMethod;
-        }
-
-        InvocationContext invocationContext;
-
-        // ejb/0fbl, ejb/0fbm
-        invocationContext = new InvocationContextImpl(_listener,
-                                                      _listener,
-                                                      "onMessage",
-                                                      new Class[] { Message.class },
-                                                      interceptors,
-                                                      interceptorMethods);
-
-        invocationContext.setParameters(new Object[] { msg });
-
-        invocationContext.proceed();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    public void onMessage(Message msg)
-    {
-      try {
-        TransactionContext xa = null;
-        Transaction trans = null;
-
-        if (_context.isCMT()) {
-          xa = _xaManager.beginRequired();
-          trans = xa.getTransaction();
-        }
-
-        if (trans != null)
-          trans.enlistResource(_xaResource);
-
-        try {
-          if (hasInterceptors())
-            callInterceptors(msg);
-          else
-            _listener.onMessage(msg);
-        } finally {
-          if (trans != null)
-            trans.delistResource(_xaResource, 0);
-
-          if (xa != null) {
-            xa.commit();
-          }
-        }
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-*/
 }
