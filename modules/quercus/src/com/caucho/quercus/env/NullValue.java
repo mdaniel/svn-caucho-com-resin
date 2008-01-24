@@ -34,6 +34,8 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.IdentityHashMap;
 import java.util.Calendar;
@@ -319,6 +321,24 @@ public class NullValue extends Value
   }
   
   /**
+   * Converts to a Java BigDecimal.
+   */
+  @Override
+  public BigDecimal toBigDecimal()
+  {
+    return BigDecimal.ZERO;
+  }
+  
+  /**
+   * Converts to a Java BigInteger.
+   */
+  @Override
+  public BigInteger toBigInteger()
+  {
+    return BigInteger.ZERO;
+  }
+  
+  /**
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
@@ -537,6 +557,15 @@ public class NullValue extends Value
    */
   @Override
   public StringValue appendTo(StringBuilderValue sb)
+  {
+    return sb;
+  }
+  
+  /**
+   * Append to a string builder.
+   */
+  @Override
+  public StringValue appendTo(LargeStringBuilderValue sb)
   {
     return sb;
   }

@@ -326,8 +326,9 @@ public class Xml {
    * @throws SAXException
    * @throws ParserConfigurationException
    */
-  public boolean xml_parse(Env env, String data,
-                           @Optional("true") boolean isFinal)
+  public int xml_parse(Env env,
+                       String data,
+                       @Optional("true") boolean isFinal)
     throws Exception
   {
     _xmlString.append(data);
@@ -338,20 +339,20 @@ public class Xml {
         _xmlOptionTargetEncoding = is.getEncoding();
       
       try {
-	_errorCode = XmlModule.XML_ERROR_NONE;
-	_errorString = null;
-	
+        _errorCode = XmlModule.XML_ERROR_NONE;
+        _errorString = null;
+    
         SAXParser saxParser = _factory.newSAXParser();
         saxParser.parse(is, new XmlHandler());
-      } catch (Exception ex) {
-	ArrayValue array = new ArrayValueImpl();
-	_errorCode = XmlModule.XML_ERROR_SYNTAX;
-	
-        throw ex;
+      } catch (Exception e) {
+        _errorCode = XmlModule.XML_ERROR_SYNTAX;
+
+        log.log(Level.FINE, e.getMessage(), e);
+        return 0;
       }
     }
 
-    return true;
+    return 1;
   }
 
   /**
@@ -362,28 +363,33 @@ public class Xml {
    * @param indexV
    * @return 0 for failure, 1 for success
    */
-  public int xml_parse_into_struct(String data,
+  public int xml_parse_into_struct(Env env,
+                                   String data,
                                    @Reference Value valsV,
                                    @Optional @Reference Value indexV)
     throws Exception
   {
+    ArrayValueImpl valueArray = new ArrayValueImpl();
+    ArrayValueImpl indexArray = new ArrayValueImpl();
+    
+    valsV.set(valueArray);
+    indexV.set(indexArray);
+    
+    if (data == null || data.length() == 0)
+      return 0;
+    
     _xmlString.append(data);
 
     InputSource is = new InputSource(new StringReader(_xmlString.toString()));
 
-    ArrayValueImpl valueArray = new ArrayValueImpl();
-    ArrayValueImpl indexArray = new ArrayValueImpl();
-
     try {
       SAXParser saxParser = _factory.newSAXParser();
       saxParser.parse(is, new StructHandler(valueArray, indexArray));
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
-      throw new Exception(L.l(ex.getMessage()));
-    }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
 
-    valsV.set(valueArray);
-    indexV.set(indexArray);
+      return 0;
+    }
 
     return 1;
   }

@@ -409,6 +409,17 @@ public class StringBuilderValue
     
     return bb;
   }
+  
+  /**
+   * Append to a string builder.
+   */
+  @Override
+  public StringValue appendTo(LargeStringBuilderValue bb)
+  {
+    bb.append(_buffer, 0, _length);
+    
+    return bb;
+  }
 
   
   /**

@@ -37,6 +37,8 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
@@ -63,19 +65,19 @@ public class MarshalFactory {
   }
 
   public Marshal create(Class argType,
-			boolean isNotNull)
+                        boolean isNotNull)
   {
     return create(argType, isNotNull, false);
   }
 
   public Marshal create(Class argType,
-			boolean isNotNull,
-			boolean isNullAsFalse)
+                        boolean isNotNull,
+                        boolean isNullAsFalse)
   {
     final Marshal marshal;
 
     // optimized cases, new types should be added to JavaMarshall
-    
+
     if (String.class.equals(argType)) {
       marshal = StringMarshal.MARSHAL;
     }
@@ -126,6 +128,12 @@ public class MarshalFactory {
     }
     else if (DoubleValue.class.equals(argType)) {
       marshal = DoubleValueMarshal.MARSHAL;
+    }
+    else if (BigDecimal.class.equals(argType)) {
+      marshal = BigDecimalMarshal.MARSHAL;
+    }
+    else if (BigInteger.class.equals(argType)) {
+      marshal = BigIntegerMarshal.MARSHAL;
     }
     else if (char.class.equals(argType)) {
       marshal = CharacterMarshal.MARSHAL;

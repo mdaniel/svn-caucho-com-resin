@@ -96,7 +96,7 @@ public class DoubleValue extends NumberValue
    */
   public boolean isLongConvertible()
   {
-    return _value == (double)((long)_value);
+    return _value == (double)((long) _value);
   }
 
   /**

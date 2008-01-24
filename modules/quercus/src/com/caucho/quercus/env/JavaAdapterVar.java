@@ -35,6 +35,8 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.*;
 
@@ -404,6 +406,22 @@ public class JavaAdapterVar extends Var
   }
   
   /**
+   * Converts to a Java BigDecimal.
+   */
+  public BigDecimal toBigDecimal()
+  {
+    return getValue().toBigDecimal();
+  }
+  
+  /**
+   * Converts to a Java BigInteger.
+   */
+  public BigInteger toBigInteger()
+  {
+    return getValue().toBigInteger();
+  }
+  
+  /**
    * Append to a string builder.
    */
   @Override
@@ -426,6 +444,15 @@ public class JavaAdapterVar extends Var
    */
   @Override
   public StringValue appendTo(StringBuilderValue sb)
+  {
+    return getValue().appendTo(sb);
+  }
+  
+  /**
+   * Append to a string builder.
+   */
+  @Override
+  public StringValue appendTo(LargeStringBuilderValue sb)
   {
     return getValue().appendTo(sb);
   }

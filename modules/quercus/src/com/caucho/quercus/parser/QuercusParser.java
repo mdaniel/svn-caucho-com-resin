@@ -1785,69 +1785,68 @@ public class QuercusParser {
       int token = parseToken();
 
       switch (token) {
-      case ';':
-	break;
+        case ';':
+          break;
 
-      case FUNCTION:
-	{
+        case FUNCTION:
+        {
           Function fun = parseFunctionDefinition(0);
-	  fun.setStatic(false);
-	  break;
-	}
+          fun.setStatic(false);
+          break;
+        }
 
-      case CLASS:
-	parseClassDefinition(0);
-	break;
+        case CLASS:
+          parseClassDefinition(0);
+          break;
 
-	/* quercus/0260
-      case VAR:
-	parseClassVarDefinition(false);
-	break;
-	*/
+	    /* quercus/0260
+        case VAR:
+	      parseClassVarDefinition(false);
+	      break;
+        */
 
-      case CONST:
-	parseClassConstDefinition();
-	break;
+        case CONST:
+          parseClassConstDefinition();
+          break;
 
-      case PUBLIC:
-      case PRIVATE:
-      case PROTECTED:
-      case STATIC:
-      case FINAL:
-      case ABSTRACT:
-	{
-	  _peekToken = token;
+        case PUBLIC:
+        case PRIVATE:
+        case PROTECTED:
+        case STATIC:
+        case FINAL:
+        case ABSTRACT:
+        {
+          _peekToken = token;
+          int modifiers = parseModifiers();
+          
+          int token2 = parseToken();
 
-	  int modifiers = parseModifiers();
-	  
-	  int token2 = parseToken();
+          if (token2 == FUNCTION) {
+            Function fun = parseFunctionDefinition(modifiers);
+          }
+          else {
+            _peekToken = token2;
+            
+            parseClassVarDefinition(modifiers);
+          }
+        }
+        break;
 
-	  if (token2 == FUNCTION) {
-	    Function fun = parseFunctionDefinition(modifiers);
-	  }
-	  else {
-	    _peekToken = token2;
-	    
-	    parseClassVarDefinition(modifiers);
-	  }
-	}
-	break;
+        case IDENTIFIER:
+          if (_lexeme.equals("var")) {
+            parseClassVarDefinition(0);
+          }
+          else {
+            _peekToken = token;
+            return;
+          }
+          break;
 
-      case IDENTIFIER:
-	if (_lexeme.equals("var")) {
-	  parseClassVarDefinition(0);
-	}
-	else {
-	  _peekToken = token;
-	  return;
-	}
-	break;
-
-      case -1:
-      case '}':
-      default:
-	_peekToken = token;
-	return;
+        case -1:
+        case '}':
+        default:
+          _peekToken = token;
+          return;
       }
     }
   }

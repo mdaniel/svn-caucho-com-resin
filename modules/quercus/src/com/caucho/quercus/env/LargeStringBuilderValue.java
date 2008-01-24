@@ -469,6 +469,23 @@ public class LargeStringBuilderValue
   {
     return append(buf, offset, length);
   }
+  
+  /**
+   * Append a Java buffer to the value.
+   */
+  @Override
+  public final StringValue append(char []buf, int offset, int length)
+  {
+    ensureCapacity(_length + length);
+
+    for (int i = offset; i < length + offset; i++) {
+      _bufferList[_length / SIZE][_length % SIZE] = (byte) buf[i];
+      
+      _length++;
+    }
+
+    return this;
+  }
 
   /**
    * Append a buffer to the value.
@@ -561,6 +578,17 @@ public class LargeStringBuilderValue
   public StringValue append(double v)
   {
     return append(String.valueOf(v));
+  }
+  
+  /**
+   * Append a Java value to the value.
+   */
+  @Override
+  public final StringValue append(Value v)
+  {
+    v.appendTo(this);
+
+    return this;
   }
 
   /**

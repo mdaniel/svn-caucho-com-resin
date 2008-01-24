@@ -40,6 +40,8 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -613,6 +615,22 @@ abstract public class Value implements java.io.Serializable
       return null;
     }
   }
+  
+  /**
+   * Converts to a Java BigDecimal.
+   */
+  public BigDecimal toBigDecimal()
+  {
+    return new BigDecimal(toString());
+  }
+  
+  /**
+   * Converts to a Java BigInteger.
+   */
+  public BigInteger toBigInteger()
+  {
+    return new BigInteger(toString());
+  }
 
   /**
    * Converts to an exception.
@@ -845,6 +863,14 @@ abstract public class Value implements java.io.Serializable
   public StringValue appendTo(BinaryBuilderValue sb)
   {
     return sb.appendBytes(toString());
+  }
+  
+  /**
+   * Append to a binary builder.
+   */
+  public StringValue appendTo(LargeStringBuilderValue sb)
+  {
+    return sb.append(toString());
   }
 
   /**

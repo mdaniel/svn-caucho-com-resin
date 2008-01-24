@@ -36,6 +36,8 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.*;
 
@@ -406,6 +408,22 @@ public class Var extends Value
   }
 
   /**
+   * Converts to a Java BigDecimal.
+   */
+  public BigDecimal toBigDecimal()
+  {
+    return _value.toBigDecimal();
+  }
+  
+  /**
+   * Converts to a Java BigInteger.
+   */
+  public BigInteger toBigInteger()
+  {
+    return _value.toBigInteger();
+  }
+  
+  /**
    * Converts to an array
    */
   @Override
@@ -466,6 +484,15 @@ public class Var extends Value
    */
   @Override
   public StringValue appendTo(StringBuilderValue sb)
+  {
+    return _value.appendTo(sb);
+  }
+  
+  /**
+   * Append to a string builder.
+   */
+  @Override
+  public StringValue appendTo(LargeStringBuilderValue sb)
   {
     return _value.appendTo(sb);
   }

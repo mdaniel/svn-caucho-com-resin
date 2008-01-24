@@ -50,6 +50,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -145,10 +147,14 @@ public class JavaClassDef extends ClassDef {
 				    String name, Class type)
   {
     if (Double.class.isAssignableFrom(type)
-	|| Float.class.isAssignableFrom(type))
+        || Float.class.isAssignableFrom(type))
       return new DoubleClassDef(moduleContext);
-    else if (Number.class.isAssignableFrom(type))
+    else if (Long.class.isAssignableFrom(type))
       return new LongClassDef(moduleContext);
+    else if (BigDecimal.class.isAssignableFrom(type))
+      return new BigDecimalClassDef(moduleContext);
+    else if (BigInteger.class.isAssignableFrom(type))
+      return new BigIntegerClassDef(moduleContext);
     else if (String.class.isAssignableFrom(type)
 	     || Character.class.isAssignableFrom(type))
       return new StringClassDef(moduleContext);
@@ -1429,6 +1435,32 @@ public class JavaClassDef extends ClassDef {
     public Value wrap(Env env, Object obj)
     {
       return new DoubleValue(((Number) obj).doubleValue());
+    }
+  }
+  
+  private static class BigIntegerClassDef extends JavaClassDef {
+    BigIntegerClassDef(ModuleContext module)
+    {
+      super(module, "BigInteger", BigInteger.class);
+    }
+
+    @Override
+    public Value wrap(Env env, Object obj)
+    {
+      return new BigIntegerValue(env, (BigInteger) obj, this);
+    }
+  }
+  
+  private static class BigDecimalClassDef extends JavaClassDef {
+    BigDecimalClassDef(ModuleContext module)
+    {
+      super(module, "BigDecimal", BigDecimal.class);
+    }
+
+    @Override
+    public Value wrap(Env env, Object obj)
+    {
+      return new BigDecimalValue(env, (BigDecimal) obj, this);
     }
   }
   

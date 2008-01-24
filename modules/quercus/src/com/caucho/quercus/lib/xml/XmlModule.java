@@ -193,13 +193,13 @@ public class XmlModule extends AbstractQuercusModule {
    * @return false if parser == null
    * @throws Exception
    */
-  public boolean xml_parse(Env env,
-			   @NotNull Xml parser,
+  public int xml_parse(Env env,
+                           @NotNull Xml parser,
                            String data,
                            @Optional("true") boolean isFinal)
   {
     if (parser == null)
-      return false;
+      return 0;
 
     try {
       return parser.xml_parse(env, data, isFinal);
@@ -404,16 +404,17 @@ public class XmlModule extends AbstractQuercusModule {
    * @return false if parser == null
    * @throws Exception
    */
-  public int xml_parse_into_struct(@NotNull Xml parser,
+  public int xml_parse_into_struct(Env env,
+                                   @NotNull Xml parser,
                                    @NotNull String data,
                                    @Reference Value valueArray,
                                    @Optional @Reference Value indexArray)
   {
     try {
       if (parser == null)
-	return 0;
+        return 0;
 
-      return parser.xml_parse_into_struct(data, valueArray, indexArray);
+      return parser.xml_parse_into_struct(env, data, valueArray, indexArray);
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }
