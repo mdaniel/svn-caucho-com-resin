@@ -1310,7 +1310,6 @@ public class Quercus
       HashSet<URL> urlSet = new HashSet<URL>();
 
       // get rid of duplicate entries found by multiple classloaders
-      // XXX: test
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
 
