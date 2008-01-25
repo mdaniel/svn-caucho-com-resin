@@ -302,7 +302,10 @@ public class Post {
           array.put(keyValue, existingValue);
         }
         else if (! existingValue.isArray()) {
-          existingValue = new ArrayValueImpl().put(existingValue);
+          //existing is overwritten
+          // php/115g
+          
+          existingValue = new ArrayValueImpl();
           array.put(keyValue, existingValue);
         }
 
