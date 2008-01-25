@@ -62,7 +62,7 @@ public class ServletProtocolEmbed
 {
   private static final L10N L = new L10N(ServletProtocolEmbed.class);
   
-  private String _type;
+  private String _uri;
   private ContainerProgram _init = new ContainerProgram();
 
   /**
@@ -75,19 +75,19 @@ public class ServletProtocolEmbed
   /**
    * Creates a new servlet protocol
    *
-   * @param type the protocol type, e.g. "hessian" or "burlap"
+   * @param uri the protocol uri, e.g. "hessian:" or "burlap:"
    */
-  public ServletProtocolEmbed(String type)
+  public ServletProtocolEmbed(String uri)
   {
-    setType(type);
+    setUri(uri);
   }
 
   /**
-   * Sets the protocol's name
+   * Sets the protocol's uri
    */
-  public void setType(String type)
+  public void setUri(String uri)
   {
-    _type = type;
+    _uri = uri;
   }
 
   /**
@@ -101,8 +101,8 @@ public class ServletProtocolEmbed
   ServletProtocolConfig createProtocol()
   {
     ServletProtocolConfig protocol = new ServletProtocolConfig();
-    protocol.setType(_type);
-    protocol.addBuilderProgram(_init);
+    protocol.setUri(_uri);
+    protocol.setInit(_init);
 
     return protocol;
   }

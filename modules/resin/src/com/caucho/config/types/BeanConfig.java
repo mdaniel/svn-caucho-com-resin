@@ -55,6 +55,8 @@ public class BeanConfig extends WbComponentConfig {
   private String _filename;
   private int _line;
 
+  private String _uri;
+  
   private String _jndiName;
   
   private String _mbeanName;
@@ -146,6 +148,8 @@ public class BeanConfig extends WbComponentConfig {
 				    getClass().getName()));
     }
 
+    _uri = uri;
+    
     String scheme;
     String properties = "";
 
@@ -175,6 +179,15 @@ public class BeanConfig extends WbComponentConfig {
       addStringProperty(values[0], values[1]);
     }
   }
+
+  /**
+   * Returns the uri
+   */
+  public String getUri()
+  {
+    return _uri;
+  }
+  
 
   public void init()
   {

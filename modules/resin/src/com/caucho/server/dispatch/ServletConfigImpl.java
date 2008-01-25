@@ -448,7 +448,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     if (_servletName != null) {
     }
     else if (_protocolConfig != null) {
-      String protocolName = _protocolConfig.getType();
+      String protocolName = _protocolConfig.getUri();
       
       setServletName(_servletClassName + "-" + protocolName);
     }
