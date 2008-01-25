@@ -1,0 +1,198 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Resin Remoting</title>
+  <description>
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<p>Currently supports Hessian, Burlap, CXF (SOAP), with pluggable
+architecture, so adding new protocols is easy.</p>
+
+<s1 title="Quick Start">
+
+<s2 title="Server">
+
+<example title="WEB-INF/resin-web.xml - Hessian Service">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;servlet-mapping url-pattern="/hello" servlet-class="qa.MyService">
+    &lt;protocol uri="hessian:"/>
+  &lt;/servlet-mapping>
+
+&lt;/web-app>
+</example>
+
+<example title="WEB-INF/resin-web.xml - CXF Service">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;servlet-mapping url-pattern="/hello" servlet-class="qa.MyService">
+    &lt;protocol uri="cxf:"/>
+  &lt;/servlet-mapping>
+
+&lt;/web-app>
+</example>
+
+<example title="MyService.java - Service">
+package qa;
+
+public class MyService implements Hello {
+  public String hello()
+  {
+    return "hello, world";
+  }
+}
+</example>
+
+<example title="Hello.java - API">
+package qa;
+
+public interface Hello {
+  public String hello();
+}
+</example>
+
+</s2>
+
+<s2 title="Client">
+
+<example title="WEB-INF/resin-web.xml - Hessian Client">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;remote-client class="qa.Hello"
+                 uri="hessian:url=http://localhost:8080/hello"/>
+
+  &lt;servlet-mapping url-pattern="/demo"
+                   servlet-class="qa.MyServlet"/>
+
+&lt;/web-app>
+</example>
+
+<example title="WEB-INF/resin-web.xml - CXF Client">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;remote-client class="qa.Hello"
+                 uri="cxf:url=http://localhost:8080/hello"/>
+
+  &lt;servlet-mapping url-pattern="/demo"
+                   servlet-class="qa.MyServlet"/>
+
+&lt;/web-app>
+</example>
+
+<example title="qa/MyServlet.java - Servlet Client">
+package qa;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.webbeans.*;
+
+public class MyServlet extends GenericServlet {
+  @In private Hello _hello;
+
+  public void service(ServletRequest request,
+                      ServletResponse response)
+    throws IOException
+  {
+    out.println("hello: " + _hello.hello());
+  }
+}
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="Protocol Plugin Architecture">
+
+<s2 title="Server plugins">
+
+<example title="ProtocolServletFactory.java">
+package com.caucho.remote.server;
+
+public interface ProtocolServletFactory {
+
+  public Servlet createServlet(Class serviceClass, Object service)
+    throws ServiceException;
+
+}
+</example>
+
+<example title="HessianProtocolServletFactory.java">
+package com.caucho.remote.hessian;
+
+import com.caucho.hessian.server.*;
+import com.caucho.remote.*;
+import com.caucho.remote.server.*;
+
+import javax.servlet.*;
+
+public class HessianProtocolServletFactory
+  extends AbstractProtocolServletFactory
+{
+  public Servlet createServlet(Class serviceClass, Object service)
+    throws ServiceException
+  {
+    HessianServlet servlet = new HessianServlet();
+
+    servlet.setHome(service);
+    servlet.setHomeAPI(getRemoteAPI(serviceClass));
+    
+    return servlet;
+  }
+}
+</example>
+
+</s2>
+
+<s2 title="Client plugins">
+
+<example title="ProtocolProxyFactory.java">
+package com.caucho.remote.client;
+
+public interface ProtocolProxyFactory
+{
+  public Object createProxy(Class api);
+}
+</example>
+
+<example title="HessianProtocolProxyFactory.java">
+package com.caucho.remote.hessian;
+
+import com.caucho.hessian.client.*;
+import com.caucho.remote.*;
+import com.caucho.remote.client.*;
+
+public class HessianProtocolProxyFactory
+  implements ProtocolProxyFactory
+{
+  private HessianProxyFactory _factory = new HessianProxyFactory();
+
+  private String _url;
+
+  public void setURL(String url)
+  {
+    _url = url;
+  }
+  
+  public Object createProxy(Class api)
+  {
+    try {
+      return _factory.create(api, _url);
+    } catch (Exception e) {
+      throw ServiceException(e);
+    }
+  }
+}
+</example>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

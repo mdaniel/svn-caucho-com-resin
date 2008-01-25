@@ -63,10 +63,7 @@ public class XFireProtocolProxyFactory
     try {
       Service service = new ObjectServiceFactory().create(api);
 
-      int p = _url.indexOf(':');
-      String url = _url.substring(p + 1);
-
-      return new XFireProxyFactory().create(service, url);
+      return new XFireProxyFactory().create(service, _url);
     }
     catch (Exception e) {
       throw ConfigException.create(e);

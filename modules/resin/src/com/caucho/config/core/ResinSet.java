@@ -101,7 +101,7 @@ public class ResinSet {
     if (_var != null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
       
-      if (_hasValue)
+      if (_value != null)
 	webBeans.addSingletonByName(_value, _var);
       else if (_default != null && webBeans.findByName(_var) == null)
 	webBeans.addSingletonByName(_default, _var);

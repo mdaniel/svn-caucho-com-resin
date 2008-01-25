@@ -877,6 +877,7 @@
       <include name="${dist.name}/README"/>
       <include name="${dist.name}/Makefile.in"/>
       <include name="${dist.name}/Makefile.am"/>
+      <include name="${dist.name}/configure.ac"/>
 
       <include name="modules/**/src/**"/>
     </patternset>
@@ -887,6 +888,7 @@
       <include name="${dist.name}/bin/*.sh"/>
       <include name="${dist.name}/bin/*.pl"/>
       <include name="${dist.name}/configure"/>
+      <include name="${dist.name}/configure.ac"/>
 
       <include name="${dist.name}/modules/c/src/common/**"/>
       <include name="${dist.name}/modules/c/src/apache1/**"/>
@@ -1322,9 +1324,9 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete>
-      <fileset dir="modules">
-        <include name="*/classes"/>
-        <include name="*/dist"/>
+      <fileset dir="${modules}">
+        <include name="*/classes/**"/>
+        <include name="*/dist/**"/>
       </fileset>
     </delete>
     <delete>

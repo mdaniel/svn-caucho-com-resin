@@ -68,6 +68,7 @@
         <item link="virtual-host.xtp" title="Virtual Hosting"/>
         <item link="config-database.xtp" title="Database"/>
         <item link="resin-load-balance.xtp" title="Load Balancing"/>
+        <item link="resin-security.xtp" title="Security"/>
         <item link="config-sessions.xtp" title="Sessions"/>
         <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
         <item link="tuning.xtp" title="Tuning"/>

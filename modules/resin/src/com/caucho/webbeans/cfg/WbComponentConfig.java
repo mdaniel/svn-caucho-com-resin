@@ -155,6 +155,11 @@ public class WbComponentConfig {
     _bindingList.add(binding);
   }
 
+  public ArrayList<WbBinding> getBindingList()
+  {
+    return _bindingList;
+  }
+
   /**
    * Sets the scope attribute.
    */

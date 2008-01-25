@@ -37,11 +37,6 @@ import com.caucho.remote.*;
 public interface ProtocolProxyFactory
 {
   /**
-   * Sets the proxy URL
-   */
-  public void setURL(String url);
-  
-  /**
    * Creates a new proxy based on an API.
    *
    * @param api the remote api for the proxy

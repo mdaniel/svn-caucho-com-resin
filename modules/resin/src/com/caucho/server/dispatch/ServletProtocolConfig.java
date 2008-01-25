@@ -33,12 +33,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-//import com.caucho.soa.rest.RestProtocolServlet;
-//import com.caucho.soa.rest.JAXBRestProtocolServlet;
-//import com.caucho.soa.rest.HessianRestProtocolServlet;
-//import com.caucho.soa.servlet.HessianProtocolServlet;
-//import com.caucho.soa.servlet.ProtocolServlet;
-//import com.caucho.soa.servlet.SoapProtocolServlet;
+import com.caucho.config.types.BeanConfig;
 import com.caucho.remote.server.ProtocolServletFactory;
 import com.caucho.util.*;
 import com.caucho.webbeans.component.*;
@@ -50,79 +45,23 @@ import javax.annotation.PostConstruct;
 /**
  * Configuration for a servlet web-service protocol.
  */
-public class ServletProtocolConfig {
+public class ServletProtocolConfig extends BeanConfig {
   private static L10N L = new L10N(ServletProtocolConfig.class);
-
-  private String _type;
-
-  private Class _factoryClass;
-
-  private ContainerProgram _program
-    = new ContainerProgram();
 
   /**
    * Creates a new protocol configuration object.
    */
   public ServletProtocolConfig()
   {
-  }
-
-  public void setType(String type)
-  {
-    try {
-      _type = type;
-
-      String name = ProtocolServletFactory.class.getName() + "/" + type;
-    
-      ArrayList<String> drivers = Services.getServices(name);
-
-      if (drivers.size() == 0)
-	throw new ConfigException(L.l("'{0}' is an unknown servlet protocol.",
-				      type));
-
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-      _factoryClass = Class.forName(drivers.get(0), false, loader);
-
-      Config.validate(_factoryClass, ProtocolServletFactory.class);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
-  public String getType()
-  {
-    return _type;
-  }
-
-  public void addBuilderProgram(ConfigProgram program)
-  {
-    _program.addProgram(program);
-  }
-
-  public ConfigProgram getProgram()
-  {
-    return _program;
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    if (_type == null)
-      throw new ConfigException(L.l("'type' is a required attribute of <protocol>")); 
+    setBeanConfigClass(ProtocolServletFactory.class);
   }
   
   public ProtocolServletFactory createFactory()
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
-    
-    ComponentImpl comp
-      = (ComponentImpl) webBeans.createTransient(_factoryClass);
+    return (ProtocolServletFactory) getObject();
+  }
 
-    Object factory = comp.createNoInit();
-
-    _program.configure(factory);
-
-    return (ProtocolServletFactory) factory;
+  protected void deploy()
+  {
   }
 }

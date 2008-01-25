@@ -40,6 +40,7 @@ public class XFireProtocolServletFactory extends AbstractProtocolServletFactory
 {
   private static final Logger log = 
     Logger.getLogger(XFireProtocolServletFactory.class.getName());
+  
   /**
    * Creates a new servlet skeleton based on an API and an object
    *

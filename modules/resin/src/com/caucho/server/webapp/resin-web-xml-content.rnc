@@ -417,10 +417,7 @@ r_persistent_store =
   | element persistent-store { string }
 
 r_protocol-Servlet = element protocol {
-  (attribute type { string }
-   | element type { string })
-
-  & r_any
+  r_bean-Content
 }
 
 r_redeploy-check-interval =

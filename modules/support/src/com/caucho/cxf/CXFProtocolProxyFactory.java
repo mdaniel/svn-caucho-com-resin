@@ -62,10 +62,7 @@ public class CXFProtocolProxyFactory
       JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
       factory.setServiceClass(api);
 
-      int p = _url.indexOf(':');
-      String url = _url.substring(p + 1);
-
-      factory.setAddress(url);
+      factory.setAddress(_url);
 
       return factory.create();
     }

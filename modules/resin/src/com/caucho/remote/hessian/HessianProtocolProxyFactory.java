@@ -38,7 +38,7 @@ import com.caucho.remote.client.*;
  * Hessian factory for creating remote-client proxies
  */
 public class HessianProtocolProxyFactory
-  implements ProtocolProxyFactory
+  extends AbstractProtocolProxyFactory
 {
   private HessianProxyFactory _factory = new HessianProxyFactory();
 
@@ -60,13 +60,11 @@ public class HessianProtocolProxyFactory
   public Object createProxy(Class api)
   {
     try {
-      int p = _url.indexOf(':');
-
-      String url = _url.substring(p + 1);
-
-      return _factory.create(api, url);
+      return _factory.create(api, _url);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw new ServiceException(e);
     }
   }
 }

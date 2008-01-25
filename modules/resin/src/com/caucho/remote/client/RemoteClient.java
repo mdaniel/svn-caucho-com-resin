@@ -30,115 +30,76 @@
 package com.caucho.remote.client;
 
 import com.caucho.config.*;
+import com.caucho.config.types.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.cfg.AbstractBeanConfig;
+import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
+import javax.webbeans.*;
+
 /**
  * Configuration class for a remote client
  */
-public class RemoteClient extends AbstractBeanConfig
+public class RemoteClient extends BeanConfig
 {
   private static final Logger log 
     = Logger.getLogger(RemoteClient.class.getName());
   private static final L10N L = new L10N(RemoteClient.class);
 
-  private Class _type;
-  
-  private String _url;
-  private Class _factoryClass;
+  private Class _interface;
 
+  /**
+   * Creates a new protocol configuration object.
+   */
+  public RemoteClient()
+  {
+    setBeanConfigClass(ProtocolProxyFactory.class);
+  }
+  
   /**
    * Sets the proxy interface class.
    */
-  public void setClass(Class type)
+  public void setInterface(Class type)
   {
-    _type = type;
+    _interface = type;
 
     if (! type.isInterface())
-      throw new ConfigException(L.l("remote-client class '{0}' must be an interface",
+      throw new ConfigException(L.l("remote-client interface '{0}' must be an interface",
 				    type.getName()));
   }
 
-  public void setInterface(Class type)
+  protected void deploy()
   {
-    setClass(type);
-  }
+    ProtocolProxyFactory factory = (ProtocolProxyFactory) getObject();
 
-  /**
-   * Sets the remote URL
-   */
-  public void setUrl(String url)
-  {
-    _url = url;
+    Object proxy = factory.createProxy(_interface);
     
-    int p = _url.indexOf(':');
-
-    if (p < 0)
-      throw new ConfigException(L.l("'{0}' is an invalid URL for <remote-client>.  <remote-client> requires a valid scheme.",
-				    _url));
-
-    String scheme = _url.substring(0, p);
-    
-    try {
-      String name = ProtocolProxyFactory.class.getName() + "/" + scheme;
-    
-      ArrayList<String> drivers = Services.getServices(name);
-
-      if (drivers.size() == 0)
-	throw new ConfigException(L.l("'{0}' is an unknown remote-client protocol.",
-				      _url));
-
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-      _factoryClass = Class.forName(drivers.get(0), false, loader);
-
-      Config.validate(_factoryClass, ProtocolProxyFactory.class);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
-  /**
-   * Called at initialization time
-   */
-  @PostConstruct
-  public void init()
-  {
-    if (_type == null)
-      throw new ConfigException(L.l("remote-client requires a 'type' attribute"));
-    
-    if (_url == null)
-      throw new ConfigException(L.l("remote-client requires a 'url' attribute"));
-    
-    register(createProxy(), _type);
-  }
-
-  /**
-   * Creates the object from the proxy.
-   *
-   * @param env the calling environment
-   *
-   * @return the object named by the proxy.
-   */
-  protected Object createProxy()
-  {
     WebBeansContainer webBeans = WebBeansContainer.create();
 
-    ComponentImpl comp
-      = (ComponentImpl) webBeans.createTransient(_factoryClass);
+    ClassComponent comp = new SingletonComponent(webBeans, proxy);
 
-    ProtocolProxyFactory factory = (ProtocolProxyFactory) comp.createNoInit();
+    if (getName() != null) {
+      comp.setName(getName());
 
-    factory.setURL(_url);
-    
-    return factory.createProxy(_type);
+      addOptionalStringProperty("name", getName());
+    }
+
+    comp.setBindingList(getBindingList());
+
+    if (getType() != null)
+      comp.setType(getType());
+    else
+      comp.setType(webBeans.createComponentType(Component.class));
+
+    comp.init();
+
+    webBeans.addComponent(comp);
   }
 }
 

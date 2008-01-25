@@ -29,7 +29,6 @@
 
 package com.caucho.remote.burlap;
 
-import com.caucho.config.*;
 import com.caucho.burlap.client.*;
 import com.caucho.remote.*;
 import com.caucho.remote.client.*;
@@ -38,7 +37,7 @@ import com.caucho.remote.client.*;
  * Burlap factory for creating remote-client proxies
  */
 public class BurlapProtocolProxyFactory
-  implements ProtocolProxyFactory
+  extends AbstractProtocolProxyFactory
 {
   private BurlapProxyFactory _factory = new BurlapProxyFactory();
 
@@ -60,13 +59,11 @@ public class BurlapProtocolProxyFactory
   public Object createProxy(Class api)
   {
     try {
-      int p = _url.indexOf(':');
-
-      String url = _url.substring(p + 1);
-
-      return _factory.create(api, url);
+      return _factory.create(api, _url);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw new ServiceException(e);
     }
   }
 }

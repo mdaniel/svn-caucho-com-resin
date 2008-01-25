@@ -1,0 +1,114 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Resin Security</title>
+  <description>
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Quick Start">
+
+<example title="WEB-INF/resin-web.xml - Simple Password Protection">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;security-constraint url-pattern="/secure/*">
+    &lt;role>*</role>
+
+    &lt;login url="form:login-page=/test.jsp"/>
+  &lt;/security-constraint>
+
+  &lt;authenticator url="property:password-digest=none">
+     &lt;init>
+       harry=quidditch
+     &lt;/init>
+  &lt;/authenticator>
+
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="Management">
+
+<example title="resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;management">
+     &lt;user name="admin" password="MD5HASH=="/>
+
+     ...
+  &lt;/management>
+
+  ...
+
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="Authentication">
+
+<s2 title="properties: - properties authentication">
+
+<example title="WEB-INF/resin-web.xml - inline property">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;authenticator url="properties:password-digest=none">
+     &lt;init>
+       harry=quidditch
+     &lt;/init>
+  &lt;/authenticator>
+
+&lt;/web-app>
+</example>
+
+<example title="WEB-INF/resin-web.xml - file property">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;authenticator url="properties:path=WEB-INF/users.properties"/>
+
+&lt;/web-app>
+</example>
+<example title="WEB-INF/users.properties">
+harry=MD5HASH==,user,admin
+</example>
+
+</s2>
+
+<s2 title="xml: - xml authentication">
+
+<example title="WEB-INF/resin-web.xml - inline xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;authenticator url="properties:password-digest=none">
+     &lt;init>
+       &lt;user name="harry" password="quidditch"/>
+     &lt;/init>
+  &lt;/authenticator>
+
+&lt;/web-app>
+</example>
+
+<example title="WEB-INF/resin-web.xml - file xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;authenticator url="properties:path=WEB-INF/users.xml"/>
+
+&lt;/web-app>
+</example>
+<example title="WEB-INF/users.xml">
+&lt;users>
+  &lt;user name="harry password="MD5HASH==" roles="user,admin"/>
+&lt;users>
+</example>
+
+</s2>
+
+</s1>
+
+</body>
+</document>
