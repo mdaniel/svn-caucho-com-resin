@@ -4598,15 +4598,10 @@ public class QuercusParser {
     if (ch < 0)
       return false;
     else
-      return isIdentifierStart((char) ch);
-  }
-
-  private boolean isIdentifierStart(char ch)
-  {
-    return (ch >= 'a' && ch <= 'z' ||
-	    ch >= 'A' && ch <= 'Z' ||
-	    ch == '_' ||
-	    Character.isLetter(ch));
+      return (ch >= 'a' && ch <= 'z' ||
+	      ch >= 'A' && ch <= 'Z' ||
+	      ch == '_' ||
+	      Character.isLetter(ch));
   }
 
   private boolean isIdentifierPart(int ch)
@@ -4614,16 +4609,11 @@ public class QuercusParser {
     if (ch < 0)
       return false;
     else
-      return isIdentifierPart((char) ch);
-  }
-
-  private boolean isIdentifierPart(char ch)
-  {
-    return (ch >= 'a' && ch <= 'z' ||
-	    ch >= 'A' && ch <= 'Z' ||
-	    ch >= '0' && ch <= '9' ||
-	    ch == '_' ||
-	    Character.isLetterOrDigit(ch));
+      return (ch >= 'a' && ch <= 'z' ||
+	      ch >= 'A' && ch <= 'Z' ||
+	      ch >= '0' && ch <= '9' ||
+	      ch == '_' ||
+	      Character.isLetterOrDigit(ch));
   }
 
   private int parseOctalEscape(int ch)
