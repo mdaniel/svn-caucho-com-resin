@@ -67,8 +67,6 @@ public class PojoBean extends BeanGenerator {
     _view = new PojoView(this, getEjbClass());
     
     _beanClass = beanClass;
-
-    introspect();
   }
 
   public void introspect()

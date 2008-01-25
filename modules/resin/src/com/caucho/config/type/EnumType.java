@@ -83,7 +83,6 @@ public final class EnumType extends ConfigType
     if (value != null)
       return value;
 
-    Thread.dumpStack();
     throw new ConfigException(L.l("{0}: '{1}' is an unknown enumeration value.",
 				  _type.getName(), text));
   }

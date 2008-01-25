@@ -75,8 +75,7 @@ public class WbWebBeans {
   private ArrayList<WbInterceptor> _interceptorBindingList
     = new ArrayList<WbInterceptor>();
 
-  private ArrayList<WbInterceptor> _enabledInterceptors
-    = new ArrayList<WbInterceptor>();
+  private ArrayList<WbInterceptor> _enabledInterceptors;
 
   private ArrayList<Class> _pendingClasses
     = new ArrayList<Class>();
@@ -190,14 +189,16 @@ public class WbWebBeans {
   {
     ArrayList<WbInterceptor> list = null;
 
-    for (WbInterceptor interceptor : _enabledInterceptors) {
-      if (! interceptor.isMatch(bindingList))
-	continue;
+    if (_enabledInterceptors != null) {
+      for (WbInterceptor interceptor : _enabledInterceptors) {
+	if (! interceptor.isMatch(bindingList))
+	  continue;
       
-      if (list == null)
-	list = new ArrayList<WbInterceptor>();
+	if (list == null)
+	  list = new ArrayList<WbInterceptor>();
 
-      list.add(interceptor);
+	list.add(interceptor);
+      }
     }
     
     return list;
@@ -340,12 +341,18 @@ public class WbWebBeans {
 
   public void addEnabledInterceptor(Class cl)
   {
+    if (_enabledInterceptors == null)
+      _enabledInterceptors = new ArrayList<WbInterceptor>();
+    
     _enabledInterceptors.add(new WbInterceptor(cl));
   }
 
   public class Interceptors {
     public void addInterceptor(Class cl)
     {
+      if (_enabledInterceptors == null)
+	_enabledInterceptors = new ArrayList<WbInterceptor>();
+    
       _enabledInterceptors.add(new WbInterceptor(cl));
     }
   }

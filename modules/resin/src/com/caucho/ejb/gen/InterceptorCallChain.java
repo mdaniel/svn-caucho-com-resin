@@ -159,7 +159,7 @@ public class InterceptorCallChain extends AbstractCallChain {
     if (interceptorTypes.size() > 0) {
       ArrayList<Class> interceptors
 	= webBeans.findInterceptors(interceptorTypes);
-
+      
       if (interceptors != null)
 	_methodInterceptors.addAll(interceptors);
     }

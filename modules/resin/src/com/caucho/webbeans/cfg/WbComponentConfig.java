@@ -281,12 +281,6 @@ public class WbComponentConfig {
     if (_init != null)
       comp.setInit(_init);
 
-    PojoBean bean = new PojoBean(_cl);
-
-    Class instanceClass = bean.generateClass();
-
-    comp.setInstanceClass(instanceClass);
-
     comp.init();
 
     _comp = comp;

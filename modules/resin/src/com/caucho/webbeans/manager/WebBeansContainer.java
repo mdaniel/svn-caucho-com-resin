@@ -379,14 +379,29 @@ public class WebBeansContainer
     ArrayList<WbInterceptor> interceptors
       = _wbWebBeans.findInterceptors(annList);
 
-    if (interceptors == null)
+    // root interceptors take priority
+    if (interceptors != null) {
+      addInterceptorClasses(list, interceptors);
+      
       return list;
+    }
 
-    for (WbInterceptor interceptor : interceptors) {
-      list.add(interceptor.getInterceptorClass());
+    for (WbWebBeans wbWebBeans : _webBeansMap.values()) {
+      interceptors = wbWebBeans.findInterceptors(annList);
+
+      if (interceptors != null)
+	addInterceptorClasses(list, interceptors);
     }
 
     return list;
+  }
+
+  private void addInterceptorClasses(ArrayList<Class> classes,
+				     ArrayList<WbInterceptor> interceptors)
+  {
+    for (WbInterceptor interceptor : interceptors) {
+      classes.add(interceptor.getInterceptorClass());
+    }
   }
 
   public ScopeContext getScopeContext(Class scope)

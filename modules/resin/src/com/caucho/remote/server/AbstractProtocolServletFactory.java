@@ -45,10 +45,10 @@ abstract public class AbstractProtocolServletFactory
   /**
    * Creates a new servlet skeleton based on an API and an object
    *
-   * @param serviceClass the remoteApi exposed to the server
+   * @param serviceApi the remoteApi exposed to the server
    * @param service the managed service object
    */
-  abstract public Servlet createServlet(Class serviceClass, Object service)
+  abstract public Servlet createServlet(Class serviceApi, Object service)
     throws ServiceException;
 
   /**

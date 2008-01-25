@@ -363,6 +363,21 @@ public class ClassComponent extends ComponentImpl {
 	_ctor = proxyCtor;
       }
       */
+
+      PojoBean bean = new PojoBean(_cl);
+      bean.introspect();
+
+      Class instanceClass = bean.generateClass();
+
+      if (instanceClass != _cl) {
+	try {
+	  _ctor = instanceClass.getConstructor(_ctor.getParameterTypes());
+	  
+	  setInstanceClass(instanceClass);
+	} catch (Exception e) {
+	  throw ConfigException.create(e);
+	}
+      }
     }
   }
 
