@@ -3,15 +3,16 @@
   <product>resin</product>
   <title>Resin Remoting</title>
   <description>
+
+<p>Currently supports Hessian, Burlap, CXF (SOAP), with pluggable
+architecture, so adding new protocols is easy.</p>
+
   </description>
 </header>
 
 <body>
 
 <localtoc/>
-
-<p>Currently supports Hessian, Burlap, CXF (SOAP), with pluggable
-architecture, so adding new protocols is easy.</p>
 
 <s1 title="Quick Start">
 
@@ -145,6 +146,13 @@ public class HessianProtocolServletFactory
     return servlet;
   }
 }
+</example>
+
+<p>To add an alias, add a file in <code>WEB-INF/services/com.caucho.config/com.caucho.remote.server.ProtocolServletFactory</code>:</p>
+
+<example title="com.caucho.remote.serverProtocolServletFactory">
+burlap=com.caucho.remote.burlap.BurlapProtocolServletFactory
+hessian=com.caucho.remote.hessian.HessianProtocolServletFactory
 </example>
 
 </s2>

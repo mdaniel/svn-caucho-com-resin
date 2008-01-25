@@ -16,7 +16,7 @@
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;security-constraint url-pattern="/secure/*">
-    &lt;role>*</role>
+    &lt;role>*&lt;/role>
 
     &lt;login url="form:login-page=/test.jsp"/>
   &lt;/security-constraint>
