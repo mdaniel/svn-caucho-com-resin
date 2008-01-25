@@ -10,29 +10,57 @@
 
 <localtoc/>
 
+<s1 title="Overview">
+
+</s1>
+
 <s1 title="Quick Start">
+
+<p>The following sample shows how to protect a section of a web-site
+with a password, using a login form.</p>
 
 <example title="WEB-INF/resin-web.xml - Simple Password Protection">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;security-constraint url-pattern="/secure/*">
-    &lt;role>*&lt;/role>
+    &lt;auth-constraint role-name="*"/>
 
-    &lt;login url="form:login-page=/test.jsp"/>
+    &lt;login uri="form:login-page=/login.jsp"/>
   &lt;/security-constraint>
 
-  &lt;authenticator url="property:password-digest=none">
+  &lt;authenticator uri="properties:password-digest=none">
      &lt;init>
-       harry=quidditch
+       harry=quidditch,user
      &lt;/init>
   &lt;/authenticator>
 
 &lt;/web-app>
 </example>
 
+<ul>
+<li>&lt;security-constraint> protects a section of the web-app, i.e.
+providing an authorization context.</li>
+<li>&lt;url-pattern> matches the URLs to be protected</li>
+<li>&lt;auth-constraint> protects the web-app through login (as opposed to
+by IP address or by SSL)</li>
+<li>&lt;login> specifies the login method</li>
+<li>&lt;authenticator> defines the login users and passwords.
+The "properties:" authenticator specifies a simple .properties file user definition.</li>
+<li>password-digest=none disables the default MD5-digest for the
+passwords.  Only recommended for examples.</li>
+</ul>
+
 </s1>
 
 <s1 title="Management">
+
+<p>Since all Resin users will want to protect
+the <code>/resin-admin</code> pages with an administration password,
+and protect any clustered management and deployment, Resin's top-level
+&lt;management> tag includes a static, XML-based authentication context.
+The authenticator is automatically shared for all hosts and web-apps, so
+simple sites can even use this authenticator configuration for their
+site-wide authentication.</p>
 
 <example title="resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -48,18 +76,29 @@
 &lt;/resin>
 </example>
 
+<p>The password is a hash of the user name, password, and the "resin"
+realm.  The <code>/resin-admin</code> page includes a form to easily generate
+the MD5 hash.  You can also use the
+<a href="http://caucho.com/resin-javadoc/com/caucho/server/security/PasswordDigest.html">PasswordDigest</a> class to generate the digest
+programmatically.</p>
+
 </s1>
 
 <s1 title="Authentication">
 
+<p>Resin provides a basic set of authenticators covering the most
+common cases.  Applications which need custom authenticators can easily
+write their own extensions, described below.</p>
+
 <s2 title="properties: - properties authentication">
 
-<example title="WEB-INF/resin-web.xml - inline property">
+<example title="WEB-INF/resin-web.xml - inline properties">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;authenticator url="properties:password-digest=none">
+  &lt;authenticator uri="properties:password-digest=none">
      &lt;init>
-       harry=quidditch
+       harry=quidditch,user,admin
+       draco=mudblood,disabled,user
      &lt;/init>
   &lt;/authenticator>
 
@@ -69,7 +108,7 @@
 <example title="WEB-INF/resin-web.xml - file property">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;authenticator url="properties:path=WEB-INF/users.properties"/>
+  &lt;authenticator uri="properties:path=WEB-INF/users.properties"/>
 
 &lt;/web-app>
 </example>
@@ -84,7 +123,7 @@ harry=MD5HASH==,user,admin
 <example title="WEB-INF/resin-web.xml - inline xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;authenticator url="properties:password-digest=none">
+  &lt;authenticator uri="properties:password-digest=none">
      &lt;init>
        &lt;user name="harry" password="quidditch"/>
      &lt;/init>
@@ -96,14 +135,65 @@ harry=MD5HASH==,user,admin
 <example title="WEB-INF/resin-web.xml - file xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;authenticator url="properties:path=WEB-INF/users.xml"/>
+  &lt;authenticator uri="properties:path=WEB-INF/users.xml"/>
 
 &lt;/web-app>
 </example>
+
 <example title="WEB-INF/users.xml">
 &lt;users>
   &lt;user name="harry password="MD5HASH==" roles="user,admin"/>
 &lt;users>
+</example>
+
+</s2>
+
+<s2 title="custom authentication">
+
+<example title="WEB-INF/resin-web.xml - custom">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;authenticator class="com.foo.MyAuthenticator">
+    &lt;init>
+      &lt;foo>bar&lt;/foo>
+    &lt;/init>
+  &lt;/authenticator>
+
+&lt;/web-app>
+</example>
+
+<example title="MyAuthenticator.java">
+package com.foo;
+
+import com.caucho.server.security;
+
+public class MyAuthenticator extends AbstractPasswordAuthenticator {
+  private PasswordUser _user;
+
+  public MyAuthenticator()
+  {
+    _user = new PasswordUser("harry", "quidditch",
+                             new String[] { "user" });
+  }
+
+  public PasswordUser getUser(String userName)
+  {
+    if (userName.equals(_user.getName()))
+      return _user;
+    else
+      return null;
+  }
+}
+</example>
+
+<p>It's also possible to register your custom authenticatr with Resin's
+uri-based configuration.  You'll add a file in the 
+<code>META-INF/services/com.caucho.config.uri</code> named
+<code>com.caucho.server.security.ServletAuthenticator</code> in the
+.jar file with the following contents:</p>
+
+<example title="com.caucho.server.security.ServletAuthenticator">
+foo.my=com.foo.MyAuthenticator
 </example>
 
 </s2>

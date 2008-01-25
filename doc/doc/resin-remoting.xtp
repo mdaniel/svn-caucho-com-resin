@@ -4,8 +4,8 @@
   <title>Resin Remoting</title>
   <description>
 
-<p>Currently supports Hessian, Burlap, CXF (SOAP), with pluggable
-architecture, so adding new protocols is easy.</p>
+<p>Resin currently supports Hessian, Burlap, CXF (SOAP), with pluggable
+architecture.</p>
 
   </description>
 </header>
@@ -148,9 +148,14 @@ public class HessianProtocolServletFactory
 }
 </example>
 
-<p>To add an alias, add a file in <code>WEB-INF/services/com.caucho.config/com.caucho.remote.server.ProtocolServletFactory</code>:</p>
+<p>Resin's URI aliases are configured by property files in
+<code>WEB-INF/services/com.caucho.config.uri</code>.  Each interface
+has its property file specifying the implementation class for each
+URI scheme.  In this case, the interface
+is <code>com.caucho.remote.server.ProtocolServletFactory</code>, so it
+the scheme mappings are added to a file with the same name:</p>
 
-<example title="com.caucho.remote.serverProtocolServletFactory">
+<example title="com.caucho.remote.server.ProtocolServletFactory">
 burlap=com.caucho.remote.burlap.BurlapProtocolServletFactory
 hessian=com.caucho.remote.hessian.HessianProtocolServletFactory
 </example>
@@ -176,7 +181,7 @@ import com.caucho.remote.*;
 import com.caucho.remote.client.*;
 
 public class HessianProtocolProxyFactory
-  implements ProtocolProxyFactory
+  extends AbstractProtocolProxyFactory
 {
   private HessianProxyFactory _factory = new HessianProxyFactory();
 

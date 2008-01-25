@@ -74,6 +74,27 @@ public class PasswordUser
     _roles = roles;
   }
 
+  public PasswordUser(Principal principal,
+		      String password,
+		      String []roles)
+  {
+    this(principal, password, false, false, roles);
+  }
+
+  public PasswordUser(String user,
+		      String password,
+		      String []roles)
+  {
+    this(new BasicPrincipal(user), password, false, false, roles);
+  }
+
+  public PasswordUser(String user,
+		      String password)
+  {
+    this(new BasicPrincipal(user), password,
+	 false, false, new String[] { "user" });
+  }
+
   /**
    * Returns the logged-in user principal
    */
