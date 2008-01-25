@@ -3991,18 +3991,11 @@ public class QuercusParser {
             _peek = ch2;
         }
 
-	if ('a' <= ch && ch <= 'z' ||
-	    'A' <= ch && ch <= 'Z' ||
-	    ch == '_') {
+	if (isIdentifierStart(ch)) {
 	  _sb.setLength(0);
 	  _sb.append((char) ch);
 
-	  for (ch = read();
-	       ('a' <= ch && ch <= 'z' ||
-		'A' <= ch && ch <= 'Z' ||
-		'0' <= ch && ch <= '9' ||
-		ch == '_');
-	       ch = read()) {
+	  for (ch = read(); isIdentifierPart(ch); ch = read()) {
 	    _sb.append((char) ch);
 	  }
 
@@ -4318,7 +4311,7 @@ public class QuercusParser {
 	
 	_sb.setLength(0);
 
-	for (; ch > 0 && isIdentifierPart((char) ch); ch = read()) {
+	for (; isIdentifierPart(ch); ch = read()) {
 	  _sb.append((char) ch);
 	}
 
@@ -4342,9 +4335,9 @@ public class QuercusParser {
 	    if ((ch = read()) != '>') {
 	      tail = _factory.createAppend(tail, createString("-"));
 	    }
-	    else if (isIdentifierPart((char) (ch = read()))) {
+	    else if (isIdentifierPart(ch = read())) {
 	      _sb.clear();
-	      for (; isIdentifierPart((char) ch); ch = read()) {
+	      for (; isIdentifierPart(ch); ch = read()) {
 		_sb.append((char) ch);
 	      }
 
@@ -4397,9 +4390,7 @@ public class QuercusParser {
     _sb.clear();
 
     if (ch == '$') {
-      for (ch = read();
-	   ch > 0 && isIdentifierPart((char) ch);
-	   ch = read()) {
+      for (ch = read(); isIdentifierPart(ch); ch = read()) {
 	_sb.append((char) ch);
       }
 
@@ -4418,10 +4409,8 @@ public class QuercusParser {
 
       tail = _factory.createArrayGet(getLocation(), tail, _factory.createLong(index));
     }
-    else if (isIdentifierPart((char) ch)) {
-      for (;
-	   ch > 0 && isIdentifierPart((char) ch);
-	   ch = read()) {
+    else if (isIdentifierPart(ch)) {
+      for (; isIdentifierPart(ch); ch = read()) {
 	_sb.append((char) ch);
       }
 
@@ -4550,7 +4539,7 @@ public class QuercusParser {
 	  _lexeme = _sb.toString();
 	  return COMPLEX_STRING_ESCAPE;
 	}
-	else if (isIdentifierStart((char) ch)) {
+	else if (isIdentifierStart(ch)) {
 	  _peek = ch;
 	  _lexeme = _sb.toString();
 	  return SIMPLE_STRING_ESCAPE;
@@ -4603,20 +4592,38 @@ public class QuercusParser {
 
     return STRING;
   }
- 
+
+  private boolean isIdentifierStart(int ch)
+  {
+    if (ch < 0)
+      return false;
+    else
+      return isIdentifierStart((char) ch);
+  }
+
   private boolean isIdentifierStart(char ch)
   {
     return (ch >= 'a' && ch <= 'z' ||
 	    ch >= 'A' && ch <= 'Z' ||
-	    ch == '_');
+	    ch == '_' ||
+	    Character.isLetter(ch));
   }
- 
+
+  private boolean isIdentifierPart(int ch)
+  {
+    if (ch < 0)
+      return false;
+    else
+      return isIdentifierPart((char) ch);
+  }
+
   private boolean isIdentifierPart(char ch)
   {
     return (ch >= 'a' && ch <= 'z' ||
 	    ch >= 'A' && ch <= 'Z' ||
 	    ch >= '0' && ch <= '9' ||
-	    ch == '_');
+	    ch == '_' ||
+	    Character.isLetterOrDigit(ch));
   }
 
   private int parseOctalEscape(int ch)
