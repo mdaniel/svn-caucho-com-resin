@@ -33,6 +33,7 @@ import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.lib.*;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
@@ -238,6 +239,8 @@ public class Resin implements EnvironmentBean, SchemaBean
       webBeans.addSingleton(new JavaVar(), "java", Standard.class);
 
       webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
+
+      ResinConfigLibrary.configure(webBeans);
 
       try {
         Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });

@@ -75,6 +75,8 @@ public class ClusterStream {
    */
   public ReadStream getReadStream()
   {
+    _freeTime = 0;
+    
     return _is;
   }
 
@@ -83,11 +85,13 @@ public class ClusterStream {
    */
   public WriteStream getWriteStream()
   {
+    _freeTime = 0;
+    
     return _os;
   }
 
   /**
-   * Returns the free time.
+   * Returns the free time, i.e. the time the connection was last idle.
    */
   public long getFreeTime()
   {
@@ -132,7 +136,9 @@ public class ClusterStream {
    */
   public void free()
   {
-    if (_is != null)
+    // #2369 - the load balancer might set its own view of the free
+    // time
+    if (_is != null && _freeTime <= 0)
       _freeTime = _is.getReadTime();
 
     _srun.free(this);

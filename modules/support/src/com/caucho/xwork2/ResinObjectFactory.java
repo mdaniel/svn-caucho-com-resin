@@ -42,34 +42,17 @@ import javax.webbeans.*;
  */
 public class ResinObjectFactory extends ObjectFactory
 {
-  private final WeakHashMap<Class,ComponentFactory> _componentMap
-    = new WeakHashMap<Class,ComponentFactory>();
-
   private final WebBeansContainer _webBeans = WebBeansContainer.create();
   
   /**
-   * Returns the defined bean if available, otherwise creates a new factory.
+   * Returns the defined bean if available, otherwise
+   * creates a new WebBeans-enabled instance.
    */
   
   @Override
   public Object buildBean(Class clazz, Map extraContext)
     throws Exception
   {
-    ComponentFactory component = null;
-
-    synchronized (_componentMap) {
-      component = _componentMap.get(clazz);
-
-      if (component == null) {
-	component = _webBeans.resolveByType(clazz);
-
-	if (component == null)
-	  component = _webBeans.createTransient(clazz);
-
-	_componentMap.put(clazz, component);
-      }
-    }
-
-    return component.get();
+    return _webBeans.getObject(clazz);
   }
 }
