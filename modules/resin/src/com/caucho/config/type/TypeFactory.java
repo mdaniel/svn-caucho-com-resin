@@ -94,6 +94,8 @@ public class TypeFactory implements AddLoaderListener
   
   private final HashMap<String,HashMap<String,String>> _driverTypeMap
     = new HashMap<String,HashMap<String,String>>();
+
+  private final AtomicBoolean _isInInit = new AtomicBoolean();
   
   private TypeFactory(ClassLoader loader)
   {
@@ -106,6 +108,8 @@ public class TypeFactory implements AddLoaderListener
     }
     else
       _parent = null;
+
+    init(loader);
   }
 
   /**
@@ -155,8 +159,7 @@ public class TypeFactory implements AddLoaderListener
       if (type != null)
 	return type;
 
-      if (_parent != null)
-	type = _parent.getEnvironmentTypeRec(name);
+      type = getEnvironmentTypeRec(name);
 
       if (type != null) {
 	_attrMap.put(name, type);
@@ -164,10 +167,17 @@ public class TypeFactory implements AddLoaderListener
 	return type;
       }
 
-      if (! "".equals(name.getNamespaceURI()))
-	return getEnvironmentType(new QName(name.getLocalName()));
-      else
-	return null;
+      if (! "".equals(name.getNamespaceURI())) {
+	type = getEnvironmentType(new QName(name.getLocalName()));
+
+	if (type != null) {
+	  _attrMap.put(name, type);
+	
+	  return type;
+	}
+      }
+
+      return null;
     }
   }
 
@@ -345,7 +355,11 @@ public class TypeFactory implements AddLoaderListener
    */
   private void init(ClassLoader loader)
   {
+    if (! _isInInit.getAndSet(true))
+      return;
+
     try {
+      _nsMap.clear();
       _driverTypeSet.clear();
       _driverTypeMap.clear();
       
@@ -372,6 +386,8 @@ public class TypeFactory implements AddLoaderListener
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);
+    } finally {
+      _isInInit.set(false);
     }
   }
 
@@ -629,6 +645,9 @@ public class TypeFactory implements AddLoaderListener
 
     public void setName(String ns)
     {
+      if ("default".equals(ns))
+	ns = "";
+      
       _ns = ns;
     }
 
