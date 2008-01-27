@@ -66,10 +66,13 @@ public abstract class FacesEvent extends EventObject
 
   public void queue()
   {
-    if (! (getComponent() instanceof UIViewRoot))
-      throw new IllegalStateException("FacesEvent component must descent from UIViewRoot to use queue()");
+    //the spec dictates that the exception be thrown. but Trinidad uses
+    //facesevent.queue all over... so removing the check for now.
+    getComponent().queueEvent(this);
+    //if (! (getComponent() instanceof UIViewRoot))
+     // throw new IllegalStateException("FacesEvent component must descent from UIViewRoot to use queue()");
     
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
   }
 
   public abstract boolean isAppropriateListener(FacesListener listener);

@@ -395,7 +395,7 @@ public class JspViewHandler extends ViewHandler
 
     context.setResponseWriter(out);
     
-    context.getApplication().getViewHandler().writeState(context);
+    //context.getApplication().getViewHandler().writeState(context);
 
     // XXX: save view
 

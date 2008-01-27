@@ -79,6 +79,11 @@ public class SessionStateManager extends StateManager
 	  debugState(state);
       }
 
+      if (! isSavingStateInClient(context)) {
+	context.getExternalContext().getSessionMap().put("caucho.jsf.view", state);
+	return "!";
+      }
+
       return state;
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -91,36 +96,53 @@ public class SessionStateManager extends StateManager
   {
     return new SerializedView(saveView(context), null);
   }
-  
-  @Override
-  public void writeState(FacesContext context, Object state)
-  {
-    Map<String,Object> sessionMap
-      = context.getExternalContext().getSessionMap();
-
-    //sessionMap.put(context.getViewRoot().getViewId(), state);
-    
-    sessionMap.put("caucho.jsf.view", state);
-  }
 
   @Deprecated
   public void writeState(FacesContext context,
 			 SerializedView state)
     throws IOException
   {
-    writeState(context, (Object) state.getStructure());
+    ResponseStateManager rsm =
+      context.getRenderKit().getResponseStateManager();
+
+    Object [] stateArray = new Object [2];
+    stateArray [0] = state.getStructure();
+    stateArray [1] = state.getState();
+
+    rsm.writeState(context, stateArray);
   }
-  
+
+  public void writeState(FacesContext context, Object state)
+    throws IOException
+  {
+    writeState(context, new SerializedView(state, null));
+  }
+
   @Override
   public UIViewRoot restoreView(FacesContext context,
 				String viewId,
 				String renderKitId)
   {
-    Map<String,Object> sessionMap
-      = context.getExternalContext().getSessionMap();
 
-    Object state = sessionMap.get("caucho.jsf.view");
+    RenderKit renderKit = context.getRenderKit();
+    
+    if (renderKit == null) {
+      RenderKitFactory renderKitFactory
+	= (RenderKitFactory) FactoryFinder.getFactory(
+	FactoryFinder.RENDER_KIT_FACTORY);
+      
+      renderKit = renderKitFactory.getRenderKit(context, renderKitId);
+    }
+    
+    ResponseStateManager rsm =
+      renderKit.getResponseStateManager();
 
+    Object state = rsm.getState(context, viewId);//sessionMap.get("caucho.jsf.view");
+
+    if (!isSavingStateInClient(context) && "!".equals(((Object [])state) [0])) {
+      state = context.getExternalContext().getSessionMap().get("caucho.jsf.view"); 
+    }
+    
     if (state == null)
       return null;
     else if (state instanceof byte[])

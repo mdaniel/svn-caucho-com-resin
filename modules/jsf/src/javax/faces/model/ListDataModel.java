@@ -65,7 +65,7 @@ public class ListDataModel extends DataModel
   
   public boolean isRowAvailable()
   {
-    return _value != null && getRowIndex() < _value.size();
+    return _value != null && getRowIndex() >=0 && getRowIndex() < _value.size();
   }
 
   public Object getWrappedData()

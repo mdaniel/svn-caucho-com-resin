@@ -28,13 +28,13 @@
 
 package com.caucho.jsf.html;
 
+import com.caucho.util.Base64;
+
 import java.io.*;
 
 import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
-
-import javax.servlet.http.*;
 
 public class ResponseStateManagerImpl extends ResponseStateManager
 {
@@ -42,6 +42,23 @@ public class ResponseStateManagerImpl extends ResponseStateManager
 			 Object state)
     throws IOException
   {
+    if (Object [].class.isAssignableFrom(state.getClass())) {
+      String value = encode(((Object [])state) [0]);
+      
+      ResponseWriter rw = context.getResponseWriter();
+      
+      rw.startElement("input", null);
+
+      rw.writeAttribute("type", "hidden", null);
+      rw.writeAttribute("name", VIEW_STATE_PARAM, null);
+      rw.writeAttribute("value", value, null);
+      
+      rw.endElement("input");
+      
+      rw.write("\n");
+    } else {
+      throw new IllegalArgumentException();
+    }
   }
 
   @Deprecated
@@ -57,7 +74,16 @@ public class ResponseStateManagerImpl extends ResponseStateManager
   public Object getState(FacesContext context,
 			 String viewId)
   {
-    return null;
+    ExternalContext extContext = context.getExternalContext();
+    
+    String data = extContext.getRequestParameterMap().get(VIEW_STATE_PARAM);
+    
+    if (data.charAt(0) == '!') {
+      return new Object []{data.substring(1), null};
+    }
+    else {
+      return new Object []{Base64.decodeToByteArray(data), null};
+    }
   }
 
   @Deprecated
@@ -80,9 +106,20 @@ public class ResponseStateManagerImpl extends ResponseStateManager
   {
     ExternalContext extContext = context.getExternalContext();
     
-    HttpServletRequest request
-      = (HttpServletRequest) extContext.getRequest();
+    return extContext.getRequestParameterMap().containsKey(VIEW_STATE_PARAM);
+  }
 
-    return "POST".equals(request.getMethod());
+  private String encode(Object obj) {
+    if (byte [].class.isAssignableFrom(obj.getClass())) {
+      
+      return Base64.encodeFromByteArray((byte []) obj);
+    }
+    else if (obj instanceof String) {
+
+      return "!"+obj.toString();
+    }
+    else {
+      throw new IllegalArgumentException();
+    }
   }
 }
