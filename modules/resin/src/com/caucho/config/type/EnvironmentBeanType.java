@@ -36,8 +36,10 @@ import java.util.logging.*;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.loader.*;
+import com.caucho.make.*;
 import com.caucho.el.*;
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import org.w3c.dom.Node;
 
@@ -59,9 +61,9 @@ public class EnvironmentBeanType extends BeanType
    * Called before the children are configured.
    */
   @Override
-  public void beforeConfigure(ConfigContext builder, Object bean, Node node)
+  public void beforeConfigure(ConfigContext env, Object bean, Node node)
   {
-    super.beforeConfigure(builder, bean, node);
+    super.beforeConfigure(env, bean, node);
     
     EnvironmentBean envBean = (EnvironmentBean) bean;
     ClassLoader loader = envBean.getClassLoader();
@@ -72,6 +74,13 @@ public class EnvironmentBeanType extends BeanType
 
     // XXX: builder.setClassLoader?
 
+    ArrayList<Dependency> dependencyList = env.getDependencyList();
+    if (dependencyList != null) {
+      for (Dependency depend : dependencyList) {
+	Environment.addDependency(depend);
+      }
+    }
+    
     // XXX: addDependencies(builder);
   }
 }

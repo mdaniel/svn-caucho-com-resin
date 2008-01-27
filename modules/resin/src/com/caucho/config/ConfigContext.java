@@ -577,7 +577,7 @@ public class ConfigContext {
     return _dependentScope;
   }
 
-  ArrayList<Dependency> getDependencyList()
+  public ArrayList<Dependency> getDependencyList()
   {
     return _dependList;
   }

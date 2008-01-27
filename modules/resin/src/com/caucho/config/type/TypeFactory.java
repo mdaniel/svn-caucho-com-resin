@@ -43,6 +43,7 @@ import java.io.*;
 import java.net.URL;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 import java.util.regex.Pattern;
 import java.util.logging.Logger;
 
@@ -84,6 +85,9 @@ public class TypeFactory implements AddLoaderListener
 
   private final HashMap<QName,Attribute> _envAttrMap
     = new HashMap<QName,Attribute>();
+
+  private final HashMap<String,NamespaceConfig> _nsMap
+    = new HashMap<String,NamespaceConfig>();
 
   private final HashSet<URL> _driverTypeSet
     = new HashSet<URL>();
@@ -152,7 +156,7 @@ public class TypeFactory implements AddLoaderListener
 	return type;
 
       if (_parent != null)
-	type = _parent.getEnvironmentType(name);
+	type = _parent.getEnvironmentTypeRec(name);
 
       if (type != null) {
 	_attrMap.put(name, type);
@@ -160,14 +164,49 @@ public class TypeFactory implements AddLoaderListener
 	return type;
       }
 
-      QName baseName = new QName(name.getLocalName());
+      if (! "".equals(name.getNamespaceURI()))
+	return getEnvironmentType(new QName(name.getLocalName()));
+      else
+	return null;
+    }
+  }
 
-      type = _attrMap.get(baseName);
+  /**
+   * Returns an environment type.
+   */
+  public ConfigType getEnvironmentTypeRec(QName name)
+  {
+    synchronized (_attrMap) {
+      ConfigType type = _attrMap.get(name);
+
+      if (type != null)
+	return type;
+
+      if (_parent != null)
+	type = _parent.getEnvironmentTypeRec(name);
 
       if (type != null) {
 	_attrMap.put(name, type);
 	
 	return type;
+      }
+
+      NamespaceConfig ns = _nsMap.get(name.getNamespaceURI());
+
+      if (ns == null) {
+	// XXX: xbeans and spring would go here
+      }
+
+      if (ns != null) {
+	ns.loadBeans();
+
+	type = ns.getBean(name.getLocalName());
+	
+	if (type != null) {
+	  _attrMap.put(name, type);
+	
+	  return type;
+	}
       }
 
       return null;
@@ -292,7 +331,7 @@ public class TypeFactory implements AddLoaderListener
       
       return new ArrayType(getType(compType), compType);
     }
-    else if (type.isInterface())
+    else if (type.isInterface() || Modifier.isAbstract(type.getModifiers()))
       return new InterfaceType(type);
     else
       return new BeanType(type);
@@ -311,7 +350,7 @@ public class TypeFactory implements AddLoaderListener
       _driverTypeMap.clear();
       
       Enumeration<URL> urls
-	= loader.getResources("META-INF/services/com.caucho.config/default.xml");
+	= loader.getResources("META-INF/services/com.caucho.config.namespace.xml");
 
       while (urls.hasMoreElements()) {
 	URL url = urls.nextElement();
@@ -566,10 +605,27 @@ public class TypeFactory implements AddLoaderListener
     return new NamespaceConfig();
   }
 
+  /**
+   * Adds an new environment attribute.
+   */
+  public void addNamespace(NamespaceConfig ns)
+  {
+    _nsMap.put(ns.getName(), ns);
+
+    if (ns.isDefault())
+      _nsMap.put(ns.getName(), ns);
+  }
+
   // configuration types
   public class NamespaceConfig {
     private String _ns = "";
     private boolean _isDefault;
+    private Path _path;
+    
+    private AtomicBoolean _isBeansLoaded = new AtomicBoolean();;
+
+    private HashMap<String,ConfigType> _beanMap
+      = new HashMap<String,ConfigType>();
 
     public void setName(String ns)
     {
@@ -591,9 +647,40 @@ public class TypeFactory implements AddLoaderListener
       return _isDefault;
     }
 
+    public void setPath(String path)
+    {
+      if (path.indexOf(':') < 0)
+	_path = Vfs.lookup("classpath:" + path);
+      else
+	_path = Vfs.lookup(path);
+    }
+
+    public Path getPath()
+    {
+      return _path;
+    }
+
+    public void loadBeans()
+    {
+      if (_isBeansLoaded.getAndSet(true))
+	return;
+
+      new Config().configure(this, _path);
+    }
+
+    public ConfigType getBean(String name)
+    {
+      return _beanMap.get(name);
+    }
+
     public BeanConfig createBean()
     {
       return new BeanConfig(_ns, _isDefault);
+    }
+
+    public void addBean(BeanConfig bean)
+    {
+      _beanMap.put(bean.getName(), bean.getConfigType());
     }
   }
 
@@ -603,6 +690,8 @@ public class TypeFactory implements AddLoaderListener
 
     private String _name;
     private Class _type;
+
+    private ConfigType _configType;
 
     BeanConfig(String ns, boolean isDefault)
     {
@@ -615,10 +704,19 @@ public class TypeFactory implements AddLoaderListener
       _name = name;
     }
 
+    public String getName()
+    {
+      return _name;
+    }
+
     public void setClass(Class type)
     {
       _type = type;
-      Config.checkCanInstantiate(type);
+    }
+
+    public ConfigType getConfigType()
+    {
+      return _configType;
     }
 
     @PostConstruct
@@ -636,12 +734,7 @@ public class TypeFactory implements AddLoaderListener
 
       type.introspect();
 
-      _attrMap.put(qName, type);
-
-      if (_isDefault) {
-	qName = new QName(_name);
-	_attrMap.put(qName, type);
-      }
+      _configType = type;
     }
   }
 

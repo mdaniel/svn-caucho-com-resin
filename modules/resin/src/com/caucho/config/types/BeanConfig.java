@@ -32,8 +32,9 @@ package com.caucho.config.types;
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.j2ee.*;
-import com.caucho.util.*;
+import com.caucho.jca.program.*;
 import com.caucho.naming.*;
+import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
@@ -44,6 +45,9 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
+
+import javax.resource.spi.*;
+
 import javax.webbeans.*;
 
 /**
@@ -215,6 +219,19 @@ public class BeanConfig extends WbComponentConfig {
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Introspection after the init has been set and before the @PostConstruct
+   * for additional interception
+   */
+  @Override
+  protected void introspectPostInit()
+  {
+    System.out.println("IPRI: " + getClassType());
+    if (ResourceAdapterAssociation.class.isAssignableFrom(getClassType())) {
+      _comp.addProgram(new ResourceAdapterAssociationProgram(getClassType()));
     }
   }
 }

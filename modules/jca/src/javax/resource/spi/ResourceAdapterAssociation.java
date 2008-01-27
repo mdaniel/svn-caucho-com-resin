@@ -31,7 +31,7 @@ package javax.resource.spi;
 import javax.resource.ResourceException;
 
 /**
- * The associates and object with a resource adapter resource.
+ * Associates an object with a resource adapter resource.
  */
 public interface ResourceAdapterAssociation {
   /**

@@ -147,6 +147,16 @@ public class WbComponentConfig {
       _name = Introspector.decapitalize(cl.getSimpleName());
   }
 
+  public Class getClassType()
+  {
+    return _cl;
+  }
+
+  public ComponentImpl getComponent()
+  {
+    return _comp;
+  }
+
   /**
    * Adds a component binding.
    */
@@ -281,11 +291,21 @@ public class WbComponentConfig {
     if (_init != null)
       comp.setInit(_init);
 
-    comp.init();
-
     _comp = comp;
 
+    introspectPostInit();
+
+    comp.init();
+
     deploy();
+  }
+
+  /**
+   * Introspection after the init has been set and before the @PostConstruct
+   * for additional interception
+   */
+  protected void introspectPostInit()
+  {
   }
 
   protected void deploy()

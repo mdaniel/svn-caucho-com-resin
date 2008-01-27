@@ -12,6 +12,8 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>load-balance: update timeout counting from app-tier</li>
+<li>configure: libtool fixes on build machine</li>
 <li>ejb: message driven bean support for NOT_SUPPORTED XA (#2308, rep by ddalessa)</li>
 <li>ioc/config: system properties like 'foo.bar' were not properly resolved (#2361, rep by Curtis Taylor)</li>
 <li>webbeans/ejb @Interceptor refactor (#2344, rep by wesley)</li>

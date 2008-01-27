@@ -30,6 +30,7 @@
 package com.caucho.config.type;
 
 import com.caucho.config.*;
+import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.manager.*;
@@ -61,10 +62,20 @@ public final class InterfaceType extends ConfigType
   {
     return _type;
   }
+
+  /**
+   * Returns an InterfaceConfig object
+   */
+  @Override
+  public Object create(Object parent)
+  {
+    return new InterfaceConfig(_type);
+  }
   
   /**
    * Converts the string to a value of the type.
    */
+  @Override
   public Object valueOf(String text)
   {
     if (text == null)

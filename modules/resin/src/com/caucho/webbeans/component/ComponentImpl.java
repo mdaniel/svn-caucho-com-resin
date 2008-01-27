@@ -210,6 +210,17 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   }
 
   /**
+   * Add to the init program.
+   */
+  public void addProgram(ConfigProgram program)
+  {
+    if (_init == null)
+      _init = new ContainerProgram();
+    
+    _init.addProgram(program);
+  }
+
+  /**
    * True if the component was defined by class introspection.
    */
   public void setFromClass(boolean isFromClass)

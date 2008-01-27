@@ -455,4 +455,9 @@ public class ResourceArchive implements EnvironmentBean
       log.log(Level.WARNING, e.toString(), e);
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getResourceAdapterClass() + "]";
+  }
 }

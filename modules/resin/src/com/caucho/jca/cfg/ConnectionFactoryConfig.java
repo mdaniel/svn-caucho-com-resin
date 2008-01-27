@@ -1,0 +1,159 @@
+/*
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jca.cfg;
+
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.types.*;
+import com.caucho.jca.*;
+import com.caucho.jca.cfg.JavaMailConfig;
+import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.jmx.Jmx;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.CloseListener;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.StartListener;
+import com.caucho.naming.Jndi;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
+
+import javax.annotation.PostConstruct;
+import javax.management.Attribute;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.NotificationFilter;
+import javax.management.ObjectName;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.ResourceAdapter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Configuration for the connection-factory pattern.
+ */
+public class ConnectionFactoryConfig extends BeanConfig {
+  private static final Logger log
+    = Logger.getLogger(ConnectionFactoryConfig.class.getName());
+  
+  private static L10N L = new L10N(ConnectionFactoryConfig.class);
+
+  public ConnectionFactoryConfig()
+  {
+    setBeanConfigClass(ManagedConnectionFactory.class);
+  }
+
+  public void init()
+  {
+    super.init();
+
+    ComponentImpl comp = getComponent();
+    
+    ManagedConnectionFactory managedFactory
+      = (ManagedConnectionFactory) comp.get();
+
+    /*
+      if (_ra != null
+	  && managedFactory instanceof ResourceAdapterAssociation) {
+	((ResourceAdapterAssociation) managedFactory).setResourceAdapter(_ra);
+      }
+    */
+
+    ResourceManagerImpl rm = ResourceManagerImpl.create();
+	
+    ConnectionPool cm = rm.createConnectionPool();
+
+    if (getName() != null)
+      cm.setName(getName());
+
+    ResourceArchive rar = null;
+
+    if (rar != null) {
+      String trans = rar.getTransactionSupport();
+
+      if (trans == null) { // guess XA
+	cm.setXATransaction(true);
+	cm.setLocalTransaction(true);
+      }
+      else if (trans.equals("XATransaction")) {
+	cm.setXATransaction(true);
+	cm.setLocalTransaction(true);
+      }
+      else if (trans.equals("NoTransaction")) {
+	cm.setXATransaction(false);
+	cm.setLocalTransaction(false);
+      }
+      else if (trans.equals("LocalTransaction")) {
+	cm.setXATransaction(false);
+	cm.setLocalTransaction(true);
+      }
+    }
+    /*
+    cm.setLocalTransactionOptimization(getLocalTransactionOptimization());
+    cm.setShareable(getShareable());
+    */
+
+    Object connectionFactory;
+
+    try {
+      connectionFactory = cm.init(managedFactory);
+      cm.start();
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      if (getName() != null) {
+	Jndi.bindDeepShort(getName(), connectionFactory);
+
+	webBeans.addSingleton(connectionFactory, getName());
+      }
+      else
+	webBeans.addSingleton(connectionFactory);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  @Override
+  public void deploy()
+  {
+  }
+}
+
+  

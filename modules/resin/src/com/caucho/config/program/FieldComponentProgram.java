@@ -48,8 +48,7 @@ public class FieldComponentProgram extends ConfigProgram
   private ComponentImpl _component;
   private Field _field;
 
-  public FieldComponentProgram(ComponentImpl component,
-			 Field field)
+  public FieldComponentProgram(ComponentImpl component, Field field)
   {
     _component = component;
     _field = field;

@@ -165,7 +165,12 @@ public class ResourceAdapterConfig extends ObjectConfig {
     for (int i = 0; i < _outboundConnections.size(); i++) {
       ConnectionDefinition cfg = _outboundConnections.get(i);
 
-      Class cl = cfg.getConnectionFactoryInterface();
+      Class cl = cfg.getManagedConnectionFactoryClass();
+      
+      if (cl != null && cl.getName().equals(type))
+	return cfg;
+
+      cl = cfg.getConnectionFactoryInterface();
       
       if (cl != null && cl.getName().equals(type))
 	return cfg;

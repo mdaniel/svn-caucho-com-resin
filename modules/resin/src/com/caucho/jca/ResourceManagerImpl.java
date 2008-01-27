@@ -93,6 +93,14 @@ public class ResourceManagerImpl implements BootstrapContext {
    */
   public static ResourceManagerImpl createLocalManager()
   {
+    return create();
+  }
+
+  /**
+   * Returns the impl.
+   */
+  public static ResourceManagerImpl create()
+  {
     ResourceManagerImpl rm;
     
     synchronized (_localManager) {
