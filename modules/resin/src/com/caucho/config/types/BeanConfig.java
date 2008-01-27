@@ -229,8 +229,5 @@ public class BeanConfig extends WbComponentConfig {
   @Override
   protected void introspectPostInit()
   {
-    if (ResourceAdapterAssociation.class.isAssignableFrom(getClassType())) {
-      _comp.addProgram(new ResourceAdapterAssociationProgram(getClassType()));
-    }
   }
 }

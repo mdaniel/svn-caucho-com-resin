@@ -46,8 +46,9 @@ import com.caucho.loader.StartListener;
 import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.*;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.management.Attribute;
@@ -58,8 +59,8 @@ import javax.management.NotificationFilter;
 import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.*;
+import javax.webbeans.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -88,13 +89,42 @@ public class ConnectionFactoryConfig extends BeanConfig {
     
     ManagedConnectionFactory managedFactory
       = (ManagedConnectionFactory) comp.get();
+    
+    if (managedFactory instanceof ResourceAdapterAssociation) {
+      Class cl = managedFactory.getClass();
+      
+      ResourceArchive ra
+	= ResourceArchiveManager.findResourceArchive(cl.getName());
 
-    /*
-      if (_ra != null
-	  && managedFactory instanceof ResourceAdapterAssociation) {
-	((ResourceAdapterAssociation) managedFactory).setResourceAdapter(_ra);
+      if (ra == null) {
+	throw new ConfigException(L.l("'{0}' does not have a defined resource-adapter.  Check the rar or META-INF/resin-ra.xml files",
+				      cl.getName()));
       }
-    */
+      
+      WebBeansContainer webBeans = WebBeansContainer.create();
+    
+      ComponentFactory<ResourceAdapterController> raComp
+	= webBeans.resolveByType(ResourceAdapterController.class,
+				 Names.create(ra.getResourceAdapterClass().getName()));
+
+      if (raComp == null) {
+	throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
+				      ra.getResourceAdapterClass().getName(),
+				      cl.getName()));
+      }
+
+      ResourceAdapterController raController
+	= (ResourceAdapterController) raComp.get();
+
+      ResourceAdapterAssociation factoryAssoc
+	= (ResourceAdapterAssociation) managedFactory;
+
+      try {
+	factoryAssoc.setResourceAdapter(raController.getResourceAdapter());
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
 
     ResourceManagerImpl rm = ResourceManagerImpl.create();
 	

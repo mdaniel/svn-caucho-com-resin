@@ -69,7 +69,7 @@ public class ResourceAdapterAssociationProgram extends ConfigProgram {
 			       Names.create(ra.getResourceAdapterClass().getName()));
 
     if (comp == null) {
-      throw new ConfigException(L.l("'{0}' does not have a configured resource-adpater for '{1}'.",
+      throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
 				    ra.getResourceAdapterClass().getName(),
 				    cl.getName()));
     }

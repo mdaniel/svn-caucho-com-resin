@@ -391,7 +391,13 @@ public class EjbMessageBean extends EjbBean {
 	throw new ConfigException(L.l("'{0}' is an unknown activation-spec.  Make sure the JCA adapter is deployed in a .rar file",
 				      specName));
       }
-
+      
+      try {
+	_activationSpec.validate();
+      } catch (Exception e) {
+	throw error(e);
+      }
+      
       MessageListenerConfig listener = ra.getMessageListener(specName);
 
       _messagingType = listener.getMessageListenerType();
