@@ -229,7 +229,6 @@ public class BeanConfig extends WbComponentConfig {
   @Override
   protected void introspectPostInit()
   {
-    System.out.println("IPRI: " + getClassType());
     if (ResourceAdapterAssociation.class.isAssignableFrom(getClassType())) {
       _comp.addProgram(new ResourceAdapterAssociationProgram(getClassType()));
     }

@@ -138,7 +138,6 @@ public class ResourceArchiveManager {
 	continue;
 
       Class resourceAdapterClass = raConfig.getResourceadapterClass();
-      System.out.println("MATCH: " + type + " " + resourceAdapterClass);
       if (resourceAdapterClass != null
 	  && type.equals(resourceAdapterClass.getName()))
 	return ra;
