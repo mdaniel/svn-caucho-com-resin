@@ -92,7 +92,9 @@ abstract public class AbstractPasswordAuthenticator
     if (user == null || user.isDisabled())
       return null;
 
-    if (user.getPassword().equals(password)) {
+    char []userPassword = user.getPassword();
+
+    if (isMatch(password, user.getPassword())) {
       return user.getPrincipal();
     }
     else {
@@ -101,6 +103,21 @@ abstract public class AbstractPasswordAuthenticator
       
       return null;
     }
+  }
+
+  private boolean isMatch(String password, char []userPassword)
+  {
+    int len = password.length();
+
+    if (len != userPassword.length)
+      return false;
+
+    for (int i = 0; i < len; i++) {
+      if (password.charAt(i) != userPassword[i])
+	return false;
+    }
+
+    return true;
   }
   
   /**
@@ -116,7 +133,7 @@ abstract public class AbstractPasswordAuthenticator
     if (user == null || user.isDisabled())
       return null;
     else
-      return user.getPassword();
+      return new String(user.getPassword());
   }
 
   /**
