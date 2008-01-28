@@ -1340,7 +1340,7 @@ public abstract class Path {
 
   public String toString()
   {
-    return getURL();
+    return getNativePath();
   }
 
   public StreamImpl openReadImpl() throws IOException

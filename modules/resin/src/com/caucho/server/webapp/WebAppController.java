@@ -41,6 +41,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
+import com.caucho.webbeans.manager.*;
 
 import javax.servlet.jsp.el.ELException;
 import java.io.IOException;
@@ -49,6 +50,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.webbeans.*;
 /**
  * A configuration entry for a web-app.
  */
@@ -425,6 +427,14 @@ public class WebAppController
   }
 
   /**
+   * Returns the var.
+   */
+  public Var getVar()
+  {
+    return new Var();
+  }
+
+  /**
    * Returns the webApp object.
    */
   public boolean destroy()
@@ -505,6 +515,11 @@ public class WebAppController
   protected void configureInstanceVariables(WebApp app)
     throws Throwable
   {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    webBeans.addSingleton(app, getContextPath(), Standard.class);
+    webBeans.addSingleton(getVar(), "webApp", Standard.class);
+    webBeans.addSingleton(getVar(), "app", Standard.class);
+    
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());
 

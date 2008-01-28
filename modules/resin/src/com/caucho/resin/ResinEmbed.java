@@ -68,7 +68,7 @@ import com.caucho.webbeans.context.*;
 public class ResinEmbed
 {
   private static final String EMBED_CONF
-    = "com/caucho/resin/resin-embed.xml";
+    = "classpath:com/caucho/resin/resin-embed.xml";
   
   private Resin _resin = new Resin();
   private Cluster _cluster;
@@ -89,20 +89,20 @@ public class ResinEmbed
    */
   public ResinEmbed()
   {
-    InputStream is = null;
+    this(EMBED_CONF);
+  }
+  
+  /**
+   * Creates a new resin server.
+   */
+  public ResinEmbed(String configFile)
+  {
     try {
       Config config = new Config();
       
-      is = _resin.getClassLoader().getResourceAsStream(EMBED_CONF);
-
-      config.configure(_resin, is);
+      config.configure(_resin, Vfs.lookup(configFile));
     } catch (Exception e) {
       throw ConfigException.create(e);
-    } finally {
-      try {
-	is.close();
-      } catch (IOException e) {
-      }
     }
 
     _cluster = _resin.findCluster("");
@@ -111,6 +111,7 @@ public class ResinEmbed
 
   //
   // Configuration/Injection methods
+  //
 
   /**
    * Adds a port to the server, e.g. a HTTP port.

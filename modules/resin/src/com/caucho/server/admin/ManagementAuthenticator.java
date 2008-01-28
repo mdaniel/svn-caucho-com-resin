@@ -67,7 +67,9 @@ public class ManagementAuthenticator extends AbstractPasswordAuthenticator {
     if  (userName == null)
       return null;
 
-    return _userMap.get(userName);
+    // The caller should clear the password in the returned PasswordUser,
+    // so we need to return a copy
+    return _userMap.get(userName).copy();
   }
 
   /**

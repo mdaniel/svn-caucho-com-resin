@@ -75,7 +75,7 @@
 
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/webapps"/>
-    <mkdir dir="${build}/ext-webapp"/>
+    <mkdir dir="${build}/ext-webapp-lib"/>
 
     <condition property="unix">
       <os family="unix"/>
@@ -827,7 +827,7 @@
       </fileset>
     </copy >
     
-    <copy todir="${dist}/${dist.name}/ext-webapp" preservelastmodified="true">
+    <copy todir="${dist}/${dist.name}/ext-webapp-lib" preservelastmodified="true">
       <fileset dir="${install}/lib">
         <include name="resin-support.jar"/>
       </fileset>

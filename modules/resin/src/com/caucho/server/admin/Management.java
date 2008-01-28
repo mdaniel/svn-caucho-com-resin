@@ -324,7 +324,8 @@ public class Management
       
       boolean isAnonymous = false;
       
-      return new PasswordUser(new BasicPrincipal(_name), _password,
+      return new PasswordUser(new BasicPrincipal(_name),
+			      _password.toCharArray(),
 			      _isDisabled, isAnonymous,
 			      new String[] { "resin-admin" });
     }

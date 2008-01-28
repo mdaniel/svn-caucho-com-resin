@@ -53,14 +53,14 @@ public class PasswordUser
     Logger.getLogger(PasswordUser.class.getName());
 
   private final Principal _principal;
-  private final String _password;
+  private final char []_password;
   
   private final boolean _isDisabled;
   private final boolean _isAnonymous;
   private final String []_roles;
 
   public PasswordUser(Principal principal,
-		      String password,
+		      char []password,
 		      boolean isDisabled,
 		      boolean isAnonymous,
 		      String []roles)
@@ -75,21 +75,21 @@ public class PasswordUser
   }
 
   public PasswordUser(Principal principal,
-		      String password,
+		      char []password,
 		      String []roles)
   {
     this(principal, password, false, false, roles);
   }
 
   public PasswordUser(String user,
-		      String password,
+		      char []password,
 		      String []roles)
   {
     this(new BasicPrincipal(user), password, false, false, roles);
   }
 
   public PasswordUser(String user,
-		      String password)
+		      char []password)
   {
     this(new BasicPrincipal(user), password,
 	 false, false, new String[] { "user" });
@@ -122,9 +122,18 @@ public class PasswordUser
   /**
    * Returns the password
    */
-  public String getPassword()
+  public char []getPassword()
   {
     return _password;
+  }
+
+  /**
+   * Clears the password
+   */
+  public void clearPassword()
+  {
+    for (int i = _password.length - 1; i >= 0; i--)
+      _password[i] = 0;
   }
 
   /**
@@ -133,6 +142,16 @@ public class PasswordUser
   public String []getRoles()
   {
     return _roles;
+  }
+
+  /**
+   * Creates a copy
+   */
+  public PasswordUser copy()
+  {
+    return new PasswordUser(_principal, _password,
+			    _isDisabled, _isAnonymous,
+			    _roles);
   }
 
   public String toString()

@@ -74,6 +74,7 @@ import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.webbeans.el.WebBeansELResolver;
+import com.caucho.webbeans.manager.*;
 import com.caucho.java.WorkDir;
 
 import javax.annotation.PostConstruct;
@@ -85,6 +86,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
+import javax.webbeans.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
