@@ -255,7 +255,9 @@ public class UIData extends UIComponentBase
 			       boolean isTransient,
 			       int valueIndex)
   {
-    comp.setId(comp.getId());
+    //skip self
+    if (comp != this)
+      comp.setId(comp.getId());
 
     if (comp.isTransient())
       isTransient = true;
