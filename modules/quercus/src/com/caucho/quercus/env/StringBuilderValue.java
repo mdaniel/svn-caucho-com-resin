@@ -190,7 +190,21 @@ public class StringBuilderValue
     else
       return new StringBuilderValue(value);
   }
-  
+
+  /**
+   * Creates a PHP string from a Java String.
+   * If the value is null then NullValue is returned.
+   */
+  public static Value create(String value)
+  {
+    if (value == null)
+      return NullValue.NULL;
+    else if (value.length() == 0)
+      return StringBuilderValue.EMPTY;
+    else
+      return new StringBuilderValue(value);
+  }
+
   /*
    * Creates an empty string builder of the same type.
    */

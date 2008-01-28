@@ -122,7 +122,21 @@ public class UnicodeBuilderValue extends StringBuilderValue
     else
       return new UnicodeBuilderValue(value);
   }
-  
+
+  /**
+   * Creates a PHP string from a Java String.
+   * If the value is null then NullValue is returned.
+   */
+  public static Value create(String value)
+  {
+    if (value == null)
+      return NullValue.NULL;
+    else if (value.length() == 0)
+      return UnicodeBuilderValue.EMPTY;
+    else
+      return new UnicodeBuilderValue(value);
+  }
+
   /*
    * Decodes the Unicode str from charset.
    * 

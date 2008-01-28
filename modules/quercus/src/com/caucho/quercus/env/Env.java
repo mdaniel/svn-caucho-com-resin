@@ -2848,7 +2848,7 @@ public class Env {
   }
   
   /**
-   * Creates a string from a byte.
+   * Creates a PHP string from a byte buffer.
    */
   public StringValue createString(byte []buffer, int offset, int length)
   {
@@ -2859,7 +2859,7 @@ public class Env {
   }
   
   /**
-   * Creates a string from a byte.
+   * Creates a PHP string from a byte buffer.
    */
   public StringValue createString(char []buffer, int length)
   {
@@ -2870,7 +2870,7 @@ public class Env {
   }
   
   /**
-   * Creates a string from a byte.
+   * Creates a PHP string from a char buffer.
    */
   public StringValue createString(char []buffer, int offset, int length)
   {
@@ -2881,7 +2881,7 @@ public class Env {
   }
 
   /**
-   * Creates a php string from a java string.
+   * Creates a PHP string from a java String.
    */
   public StringValue createString(String s)
   {
@@ -2908,9 +2908,9 @@ public class Env {
     else
       return new StringBuilderValue(String.valueOf(ch));
   }
-  
+
   /**
-   * Creates a string from a byte.
+   * Creates a PHP string from a buffer.
    */
   public StringValue createBinaryString(TempBuffer head)
   {
