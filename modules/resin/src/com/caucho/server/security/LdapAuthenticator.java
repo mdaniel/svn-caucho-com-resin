@@ -173,7 +173,7 @@ public class LdapAuthenticator extends AbstractPasswordAuthenticator {
       boolean isDisabled = false;
       boolean isAnonymous = false;
       
-      return new PasswordUser(principal, ldapPassword,
+      return new PasswordUser(principal, ldapPassword.toCharArray(),
 			      isDisabled, isAnonymous,
 			      new String[] { "user" });
     } catch (NamingException e) {

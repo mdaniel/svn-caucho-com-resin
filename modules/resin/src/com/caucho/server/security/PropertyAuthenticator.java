@@ -136,7 +136,12 @@ public class PropertyAuthenticator extends AbstractPasswordAuthenticator {
     if (isModified())
       reload();
 
-    return _userMap.get(userName);
+    PasswordUser user = _userMap.get(userName).copy();
+
+    if (user != null)
+      return user.copy();
+    else
+      return null;
   }
 
   /**
@@ -182,7 +187,9 @@ public class PropertyAuthenticator extends AbstractPasswordAuthenticator {
     Principal principal = new BasicPrincipal(name);
 
     if (values.length < 1) {
-      return new PasswordUser(principal, "", true, false, new String[0]);
+      return new PasswordUser(principal, new char[0],
+			      true, false,
+			      new String[0]);
     }
 
     String password = values[0].trim();
@@ -205,7 +212,7 @@ public class PropertyAuthenticator extends AbstractPasswordAuthenticator {
     String []roleArray = new String[roles.size()];
     roles.toArray(roleArray);
 
-    return new PasswordUser(principal, password,
+    return new PasswordUser(principal, password.toCharArray(),
 			    isDisabled, isAnonymous,
 			    roleArray);
   }

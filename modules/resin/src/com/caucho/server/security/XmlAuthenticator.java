@@ -132,7 +132,12 @@ public class XmlAuthenticator extends AbstractPasswordAuthenticator {
     if (isModified())
       reload();
 
-    return _userMap.get(userName);
+    PasswordUser user = _userMap.get(userName);
+
+    if (user != null)
+      return user.copy();
+    else
+      return null;
   }
 
   /**
@@ -279,7 +284,7 @@ public class XmlAuthenticator extends AbstractPasswordAuthenticator {
     {
       boolean isAnonymous = false;
       
-      return new PasswordUser(_principal, _password,
+      return new PasswordUser(_principal, _password.toCharArray(),
 			      _isDisabled, isAnonymous,
 			      _roles);
     }
