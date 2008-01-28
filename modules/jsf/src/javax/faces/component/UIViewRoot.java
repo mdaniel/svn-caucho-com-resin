@@ -410,7 +410,7 @@ public class UIViewRoot extends UIComponentBase
       super.saveState(context),
       _viewId,
       _renderKitId,
-      _locale.toString(),
+      _locale == null ? null : _locale.toString(),
       _unique,
       _afterPhaseListener,
       _beforePhaseListener,
