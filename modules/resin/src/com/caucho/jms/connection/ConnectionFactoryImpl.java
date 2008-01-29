@@ -33,6 +33,7 @@ import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JMSResource;
 import com.caucho.jms.memory.*;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.HandleAware;
 
 import javax.jms.*;
 import javax.sql.DataSource;
@@ -47,7 +48,8 @@ import java.util.logging.Logger;
  * A sample connection factory.
  */
 public class ConnectionFactoryImpl
-  implements XAQueueConnectionFactory, XATopicConnectionFactory
+  implements XAQueueConnectionFactory, XATopicConnectionFactory,
+	     java.io.Serializable, HandleAware
 {
   private static final Logger log
     = Logger.getLogger(ConnectionFactoryImpl.class.getName());
@@ -61,14 +63,16 @@ public class ConnectionFactoryImpl
 
   // private JdbcManager _jdbcManager;
 
-  private List<ConnectionImpl> _connections =
-    Collections.synchronizedList(new ArrayList<ConnectionImpl>());
+  private List<ConnectionImpl> _connections
+    = Collections.synchronizedList(new ArrayList<ConnectionImpl>());
 
-  private HashMap<String,Queue> _queues =
-    new HashMap<String,Queue>();
+  private HashMap<String,Queue> _queues
+    = new HashMap<String,Queue>();
 
-  private HashMap<String,Topic> _topics =
-    new HashMap<String,Topic>();
+  private HashMap<String,Topic> _topics
+    = new HashMap<String,Topic>();
+
+  private Object _serializationHandle;
 
   public ConnectionFactoryImpl()
   {
@@ -138,6 +142,14 @@ public class ConnectionFactoryImpl
     return new JdbcManager();
   }
   */
+
+  /**
+   * Sets the serialization handle
+   */
+  public void setSerializationHandle(Object handle)
+  {
+    _serializationHandle = handle;
+  }
 
   /**
    * Initialize the connection factory.
@@ -437,6 +449,14 @@ public class ConnectionFactoryImpl
     addConnection(conn);
 
     return conn;
+  }
+
+  /**
+   * Serialization code
+   */
+  private Object writeReplace()
+  {
+    return _serializationHandle;
   }
 
   public String toString()

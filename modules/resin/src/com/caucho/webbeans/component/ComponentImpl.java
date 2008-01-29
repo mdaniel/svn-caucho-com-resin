@@ -73,6 +73,8 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
+  private WebBeansHandle _handle;
+
   protected ScopeContext _scope;
   private String _scopeId;
 
@@ -237,6 +239,14 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   }
 
   /**
+   * Returns the serialization handle
+   */
+  public WebBeansHandle getHandle()
+  {
+    return _handle;
+  }
+
+  /**
    * Initialization.
    */
   public void init()
@@ -247,6 +257,8 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
       _type = _webbeans.createComponentType(Component.class);
 
     generateScopeId();
+
+    _handle = new WebBeansHandle(_targetType, _bindingList);
   }
 
   protected void introspect()

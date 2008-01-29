@@ -56,7 +56,9 @@ import javax.webbeans.*;
  * The web beans container for a given environment.
  */
 public class WebBeansContainer
-  implements ScanListener, EnvironmentListener, Container {
+  implements ScanListener, EnvironmentListener, Container,
+	     java.io.Serializable
+{
   private static final L10N L = new L10N(WebBeansContainer.class);
   private static final Logger log
     = Logger.getLogger(WebBeansContainer.class.getName());
@@ -211,12 +213,6 @@ public class WebBeansContainer
       _configException = ConfigException.create(e);
 
       throw _configException;
-    }
-
-    try {
-      
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
     }
     
     Environment.addEnvironmentListener(this);
@@ -404,6 +400,11 @@ public class WebBeansContainer
     }
   }
 
+  /**
+   * Returns the scope context corresponding to the scope annotation type.
+   *
+   * @param scope the scope annotation type identifying the scope
+   */
   public ScopeContext getScopeContext(Class scope)
   {
     if (scope == null)
@@ -420,6 +421,9 @@ public class WebBeansContainer
 					     scope.getName()));
   }
 
+  /**
+   * Creates an injection program for the given field
+   */
   public void createProgram(ArrayList<ConfigProgram> injectList,
 			    Field field)
     throws ConfigException
@@ -437,6 +441,9 @@ public class WebBeansContainer
     component.createProgram(injectList, field);
   }
 
+  /**
+   * Creates an injection program for the given method
+   */
   public void createProgram(ArrayList<ConfigProgram> injectList,
 			    Method method)
     throws ConfigException
@@ -641,6 +648,9 @@ public class WebBeansContainer
     return _contextMap.get(scopeType);
   }
 
+  /**
+   * Sends the specified event to any observer instances in the scope
+   */
   public void raiseEvent(Object event, Annotation... bindings)
   {
     if (_parent != null)
@@ -866,6 +876,9 @@ public class WebBeansContainer
     }
   }
 
+  /**
+   * Starts the bind phase
+   */
   public void bind()
   {
     Thread thread = Thread.currentThread();
@@ -918,6 +931,9 @@ public class WebBeansContainer
     startSingletons();
   }
 
+  /**
+   * Initialize all the singletons
+   */
   private void startSingletons()
   {
     ArrayList<ComponentImpl> singletons;
@@ -1040,6 +1056,14 @@ public class WebBeansContainer
     }
       
     context.addClassName(className);
+  }
+
+  /**
+   * Serialization rewriting
+   */
+  public Object writeReplace()
+  {
+    return new WebBeansHandle(Container.class);
   }
 
   public String toString()

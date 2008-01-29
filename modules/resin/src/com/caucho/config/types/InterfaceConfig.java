@@ -44,10 +44,12 @@ public class InterfaceConfig extends BeanConfig {
   
   public InterfaceConfig()
   {
+    setScope("singleton");
   }
   
   public InterfaceConfig(Class type)
   {
+    setScope("singleton");
     setBeanConfigClass(type);
   }
 

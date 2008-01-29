@@ -39,12 +39,13 @@ import com.caucho.jms.connection.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.RandomUtil;
+import com.caucho.webbeans.component.*;
 
 /**
  * Implements an abstract queue.
  */
 abstract public class AbstractDestination
-  implements javax.jms.Destination
+  implements javax.jms.Destination, java.io.Serializable, HandleAware
 {
   private static final Logger log
     = Logger.getLogger(AbstractDestination.class.getName());
@@ -55,6 +56,8 @@ abstract public class AbstractDestination
   private String _name = "default";
 
   protected MessageFactory _messageFactory = new MessageFactory();
+
+  private Object _serializationHandle;
 
   protected AbstractDestination()
   {
@@ -84,6 +87,14 @@ abstract public class AbstractDestination
   public String getTopicName()
   {
     return getName();
+  }
+
+  /**
+   * Serialization callback to set the handle
+   */
+  public void setSerializationHandle(Object handle)
+  {
+    _serializationHandle = handle;
   }
 
   //
@@ -171,18 +182,21 @@ abstract public class AbstractDestination
     return new DestinationHandle(toString());
   }
 
-  protected Object writeReplace()
-  {
-    return new DestinationHandle(toString());
-  }
-
   public void close()
   {
   }
 
+  /**
+   * Serialization handle
+   */
+  private Object writeReplace()
+  {
+    return _serializationHandle;
+  }
+
   public String toString()
   {
-    return getClass().getName() + "[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }
 

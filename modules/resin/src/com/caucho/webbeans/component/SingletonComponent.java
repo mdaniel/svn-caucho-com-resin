@@ -74,6 +74,18 @@ public class SingletonComponent extends ClassComponent {
   {
   }
 
+  /**
+   * Complete initialization
+   */
+  @Override
+  public void init()
+  {
+    super.init();
+
+    if (_value instanceof HandleAware)
+      ((HandleAware) _value).setSerializationHandle(getHandle());
+  }
+
   @Override
   public void setScope(ScopeContext scope)
   {

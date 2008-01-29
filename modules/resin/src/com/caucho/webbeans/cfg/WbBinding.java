@@ -116,6 +116,14 @@ public class WbBinding {
   }
 
   /**
+   * Returns the binding values
+   */
+  public ArrayList<WbBindingValue> getValueList()
+  {
+    return _valueList;
+  }
+
+  /**
    * Parses the function signature.
    */
   @PostConstruct
@@ -223,6 +231,93 @@ public class WbBinding {
     return true;
   }
 
+  /**
+   * Converts to a binding object
+   */
+  public Binding toBinding()
+  {
+    Binding binding = new Binding(_cl);
+
+    for (WbBindingValue value : _valueList) {
+      binding.put(value.getName(), value.getValue());
+    }
+
+    return binding;
+  }
+
+  /**
+   * Converts to a string signature
+   */
+  public String toSignature()
+  {
+    if (_signature == null) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(_cl.getName());
+      sb.append("(");
+
+      for (int i = 0; i < _valueList.size(); i++) {
+	WbBindingValue value = _valueList.get(i);
+
+	if (value.getValue() == null)
+	  continue;
+
+	if (i != 0)
+	  sb.append(",");
+
+	sb.append(value.getName());
+	sb.append("=");
+
+	addValue(sb, value.getValue());
+      }
+      
+      sb.append(")");
+
+      _signature = sb.toString();
+    }
+
+    return _signature;
+  }
+
+  private void addValue(StringBuilder sb, Object value)
+  {
+    if (value.getClass().isArray()) {
+      sb.append("{");
+      Object []array = (Object []) value;
+      for (int i = 0; i < array.length; i++) {
+	if (i != 0)
+	  sb.append(",");
+	
+	addValue(sb, array[i]);
+      }
+      sb.append("}");
+    }
+    else if (value instanceof String) {
+      String string = (String) value;
+      
+      sb.append("\"");
+
+      for (int i = 0; i < string.length(); i++) {
+	char ch = string.charAt(i);
+
+	switch (ch) {
+	case '\\':
+	  sb.append("\\\\");
+	  break;
+	case '\"':
+	  sb.append("\\\"");
+	  break;
+	default:
+	  sb.append(ch);
+	  break;
+	}
+      }
+      
+      sb.append("\"");
+    }
+    else
+      sb.append(value);
+  }
+
   public String toDebugString()
   {
     StringBuilder sb = new StringBuilder();
@@ -265,7 +360,7 @@ public class WbBinding {
     return toDebugString();
   }
 
-  static class WbBindingValue {
+  public static class WbBindingValue {
     private Method _method;
     private Object _value;
 

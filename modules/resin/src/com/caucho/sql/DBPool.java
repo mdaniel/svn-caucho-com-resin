@@ -42,6 +42,7 @@ import com.caucho.management.j2ee.JDBCResource;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.HandleAware;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
@@ -104,8 +105,11 @@ import java.util.logging.Logger;
  * that they will be removed and closed.  This reduces the load on the DB
  * and also protects against the database dropping old connections.
  */
-public class DBPool implements DataSource {
-  protected static final Logger log = Log.open(DBPool.class);
+public class DBPool
+  implements DataSource, java.io.Serializable, HandleAware
+{
+  protected static final Logger log
+    = Logger.getLogger(DBPool.class.getName());
   private static final L10N L = new L10N(DBPool.class);
 
   private static int _g_id;
@@ -124,6 +128,9 @@ public class DBPool implements DataSource {
   private DBPoolImpl _poolImpl;
   private DataSource _dataSource;
   private DataSourceImpl _resinDataSource;
+
+  // serialization handle
+  private Object _serializationHandle;
 
   /**
    * Null constructor for the Driver interface; called by the JNDI
@@ -629,6 +636,14 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * HandleAware callback to set the webbeans handle for serialization
+   */
+  public void setSerializationHandle(Object handle)
+  {
+    _serializationHandle = handle;
+  }
+
+  /**
    * Initialize the pool.
    */
   @PostConstruct
@@ -790,6 +805,22 @@ public class DBPool implements DataSource {
     return _dataSource;
   }
 
+  public <T> T unwrap(Class<T> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  /**
+   * For serialization, return the handle
+   */
+  private Object writeReplace()
+  {
+    return _serializationHandle;
+  }
+
   /**
    * Returns a string description of the pool.
    */
@@ -797,13 +828,5 @@ public class DBPool implements DataSource {
   {
     return "DBPool[" + getName() + "]";
   }
-
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }
 

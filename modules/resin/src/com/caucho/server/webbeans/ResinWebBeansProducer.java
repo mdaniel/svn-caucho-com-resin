@@ -73,16 +73,6 @@ public class ResinWebBeansProducer
   }
   
   /**
-   * Returns the jms ConnectionFactory
-   */
-  @Produces
-  @Standard
-  public JmsConnectionFactory getJmsConnectionFactory()
-  {
-    return new JmsConnectionFactory();
-  }
-  
-  /**
    * Returns the MBeanServer
    */
   @Produces
