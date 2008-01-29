@@ -831,7 +831,7 @@
       <fileset dir="${install}/lib">
         <include name="resin-support.jar"/>
       </fileset>
-    </copy >
+    </copy>
 
     <chmod perm="ugo+rx">
       <fileset dir="${dist}/${dist.name}">
@@ -1281,10 +1281,32 @@
       <source-path path-element="${modules}/flash/src"/>
       <include-sources 
         dir="${modules}/flash/src" 
-        includes="hessian/client/*.as hessian/io/*.as hessian/mxml/*.as"/>
+        includes="hessian/client/HessianProxy.as 
+                  hessian/client/HessianAsyncToken.as 
+                  hessian/io/AbstractHessianInput.as 
+                  hessian/io/AbstractHessianOutput.as 
+                  hessian/io/Double.as 
+                  hessian/io/Float.as 
+                  hessian/io/Hessian2Constants.as
+                  hessian/io/Hessian2Input.as
+                  hessian/io/HessianOutput.as
+                  hessian/io/HessianProtocolError.as
+                  hessian/io/HessianServiceError.as
+                  hessian/io/ObjectDefinition.as
+                  hessian/events/*.as "/>
     </compc>
 
-    <jar destfile="${dist}/${dist.name}/hessian-flash-${version}-src.jar">
+    <compc output="${dist}/${dist.name}/hessian-flex-${version}.swc">
+      <source-path path-element="${modules}/flash/src"/>
+      <include-sources 
+        dir="${modules}/flash/src" 
+        includes="hessian/client/*.as 
+                  hessian/io/*.as 
+                  hessian/events/*.as 
+                  hessian/mxml/*.as"/>
+    </compc>
+
+    <jar destfile="${dist}/${dist.name}/hessian-flex-${version}-src.jar">
       <fileset dir="${modules}/flash/src">
         <exclude name=".cvsignore"/>
         <exclude name=".svnignore"/>
