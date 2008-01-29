@@ -65,7 +65,8 @@ public class WebBeansHandle implements Serializable {
   
   public WebBeansHandle(Type type, ArrayList<WbBinding> bindingList)
   {
-    _type = (Class) type;
+    if (type instanceof Class)
+      _type = (Class) type;
 
     _binding = new HashMap<Class,HashMap<String,Object>>();
 

@@ -50,6 +50,8 @@ import java.util.logging.Logger;
 import javax.annotation.*;
 import javax.sql.*;
 
+import org.w3c.dom.Node;
+
 /**
  * Factory for returning type strategies.
  */
@@ -794,6 +796,7 @@ public class TypeFactory implements AddLoaderListener
     _primitiveTypes.put(URL.class, UrlType.TYPE);
     _primitiveTypes.put(Pattern.class, PatternType.TYPE);
     _primitiveTypes.put(Locale.class, LocaleType.TYPE);
+    _primitiveTypes.put(Node.class, NodeType.TYPE);
     _primitiveTypes.put(QDate.class, QDateType.TYPE);
     _primitiveTypes.put(Date.class, DateType.TYPE);
     _primitiveTypes.put(Properties.class, PropertiesType.TYPE);

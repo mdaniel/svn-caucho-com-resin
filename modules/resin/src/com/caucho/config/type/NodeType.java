@@ -29,58 +29,57 @@
 
 package com.caucho.config.type;
 
+import java.beans.*;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
+
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
+import com.caucho.config.attribute.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.types.*;
 import com.caucho.util.*;
+import com.caucho.xml.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
+
+import org.w3c.dom.*;
 
 /**
- * Represents a char type.
+ * Represents an introspected bean type for configuration.
  */
-public final class CharacterPrimitiveType extends ConfigType
+public class NodeType extends ConfigType
 {
-  private static final L10N L = new L10N(CharacterPrimitiveType.class);
-  
-  public static final CharacterPrimitiveType TYPE = new CharacterPrimitiveType();
-  
-  /**
-   * The CharacterPrimitiveType is a singleton
-   */
-  private CharacterPrimitiveType()
+  private static final L10N L = new L10N(NodeType.class);
+  private static final Logger log
+    = Logger.getLogger(NodeType.class.getName());
+
+  public static final ConfigType TYPE = new NodeType();
+
+  private NodeType()
   {
   }
-  
+
   /**
-   * Returns the Java type.
+   * Returns the given type.
    */
   public Class getType()
   {
-    return char.class;
+    return Node.class;
   }
-  
+
   /**
-   * Converts the string to a value of the type.
+   * Handles DOM nodes.
    */
+  public boolean isNode()
+  {
+    return true;
+  }
+
   public Object valueOf(String text)
   {
-    if (text != null && text.length() > 0)
-      return new Character(text.charAt(0));
-    else
-      return new Character((char) 0);
-
-    // ioc/23h0
-    //throw new ConfigException(L.l("A Character value must be a single character at '{0}'.",
-    // text));
-  }
-  
-  /**
-   * Converts the value to a value of the type.
-   */
-  public Object valueOf(Object value)
-  {
-    if (value instanceof Character)
-      return value;
-    else if (value == null)
-      return new Character((char) 0);
-    else
-      return valueOf(String.valueOf(value));
+    return new QText(text);
   }
 }

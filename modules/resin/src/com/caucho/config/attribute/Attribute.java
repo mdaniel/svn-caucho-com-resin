@@ -59,6 +59,14 @@ public abstract class Attribute {
   }
 
   /**
+   * Returns true for a node attribute.
+   */
+  public boolean isNode()
+  {
+    return getConfigType().isNode();
+  }
+
+  /**
    * Returns true for a program-style attribute.
    */
   public boolean isProgram()

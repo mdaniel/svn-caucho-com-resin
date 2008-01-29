@@ -443,6 +443,10 @@ public class ConfigContext {
 			      buildProgram(attrStrategy, childNode));
 	return;
       }
+      else if (attrStrategy.isNode()) {
+	attrStrategy.setValue(bean, qName, childNode);
+	return;
+      }
 
       ConfigType childType = null;
 
@@ -543,6 +547,10 @@ public class ConfigContext {
       if (attrStrategy.isProgram()) {
 	attrStrategy.setValue(bean, qName,
 			      buildProgram(attrStrategy, childNode));
+	return;
+      }
+      else if (attrStrategy.isNode()) {
+	attrStrategy.setValue(bean, qName, childNode);
 	return;
       }
 

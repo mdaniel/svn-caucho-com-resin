@@ -123,6 +123,14 @@ abstract public class ConfigType
   }
 
   /**
+   * Returns true for an XML node type.
+   */
+  public boolean isNode()
+  {
+    return false;
+  }
+
+  /**
    * Return true for non-trim.
    */
   public boolean isNoTrim()

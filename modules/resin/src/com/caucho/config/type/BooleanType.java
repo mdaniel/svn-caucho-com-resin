@@ -65,7 +65,7 @@ public final class BooleanType extends ConfigType
     if (text == null)
       return null;
     else if ("".equals(text))
-      return Boolean.TRUE;
+      return null;
     else if ("no".equals(text) || "0".equals(text) || "false".equals(text))
       return Boolean.FALSE;
     else

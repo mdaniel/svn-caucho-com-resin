@@ -128,7 +128,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
 	argList.add(javaPath.getNativePath());
       }
       
-      if (log.isLoggable(Level.FINE)) {
+      if (log.isLoggable(Level.FINER)) {
         CharBuffer msg = new CharBuffer();
 	msg.append("javac(int)");
 	for (int i = 0; i < argList.size(); i++) {
@@ -136,7 +136,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
 	  msg.append(argList.get(i));
 	}
 
-        log.fine(msg.toString());
+        log.finer(msg.toString());
       }
 
       String []argArray = argList.toArray(new String[argList.size()]);
