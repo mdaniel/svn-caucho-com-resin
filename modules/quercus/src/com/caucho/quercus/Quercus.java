@@ -1412,8 +1412,14 @@ public class Quercus
     _iniDefinitions.addAll(info.getIniDefinitions());
 
     for (Map.Entry<String, AbstractFunction> entry : info.getFunctions().entrySet()) {
-      _funMap.put(entry.getKey(), entry.getValue());
-      _lowerFunMap.put(entry.getKey().toLowerCase(), entry.getValue());
+      String funName = entry.getKey();
+      AbstractFunction fun = entry.getValue();
+      
+      _funMap.put(funName, fun);
+      _lowerFunMap.put(funName.toLowerCase(), fun);
+      
+      int id = getFunctionId(funName);
+      _functionMap[id] = fun;
     }
   }
 

@@ -1933,6 +1933,8 @@ public class Env {
         i += 2;
         sb.append((char) v);
       }
+      else if (ch == '+')
+        sb.append(' ');
       else
         sb.append(ch);
     }

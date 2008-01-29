@@ -206,34 +206,35 @@ public class HttpModule extends AbstractQuercusModule {
 
     StringBuilder sb = new StringBuilder();
     int len = value.length();
+
     for (int i = 0; i < len; i++) {
       char ch = value.charAt(i);
 
-      switch (ch) {
-      case '%': case ';': case ':': case '{':  case '}':
-      case ' ': case '\t': case '\n': case '\r':
-      case '"': case '\'':
-        {
-          sb.append('%');
-
-          int d = (ch / 16) & 0xf;
-          if (d < 10)
-            sb.append((char) ('0' + d));
-          else
-            sb.append((char) ('A' + d - 10));
-
-          d = ch & 0xf;
-          if (d < 10)
-            sb.append((char) ('0' + d));
-          else
-            sb.append((char) ('A' + d - 10));
-
-          break;
-        }
-
-      default:
+      if ('0' <= ch && ch <= '9' ||
+          'a' <= ch && ch <= 'z' ||
+          'A' <= ch && ch <= 'Z' ||
+          ch == '-' ||
+          ch == '.' ||
+          ch == '_') {
         sb.append(ch);
-        break;
+      }
+      else if (ch == ' ') {
+        sb.append('+');
+      }
+      else {
+        sb.append('%');
+
+        int d = (ch / 16) & 0xf;
+        if (d < 10)
+          sb.append((char) ('0' + d));
+        else
+          sb.append((char) ('A' + d - 10));
+
+        d = ch & 0xf;
+        if (d < 10)
+          sb.append((char) ('0' + d));
+        else
+          sb.append((char) ('A' + d - 10));
       }
     }
 
@@ -243,7 +244,11 @@ public class HttpModule extends AbstractQuercusModule {
 
     if (expire > 0) {
       maxAge = (int) (expire - now / 1000);
-      cookie.setMaxAge(maxAge);
+      
+      if (maxAge > 0)
+        cookie.setMaxAge(maxAge);
+      else
+        cookie.setMaxAge(0); //php/1b0i
     }
 
     if (path != null && ! path.equals(""))
