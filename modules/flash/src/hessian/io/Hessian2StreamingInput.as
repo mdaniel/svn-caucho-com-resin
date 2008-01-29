@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -49,25 +49,8 @@
 
 package hessian.io
 {
-  import flash.events.Event;
-  import flash.events.ProgressEvent;
-  import flash.net.URLRequest;
-  import flash.net.URLStream;
   import flash.utils.ByteArray;
-  import flash.utils.describeType;
 	import flash.utils.IDataInput;
-
-  import mx.core.mx_internal;
-
-  import mx.rpc.AbstractOperation;
-  import mx.rpc.AbstractService;
-  import mx.rpc.AsyncToken;
-  import mx.rpc.Fault;
-  import mx.rpc.events.FaultEvent;
-  import mx.rpc.events.ResultEvent;
-  import mx.rpc.events.InvokeEvent;
-
-  use namespace mx_internal;
 
   /**
    * An input for streaming Hessian data.  Data that is sent in Hessian
