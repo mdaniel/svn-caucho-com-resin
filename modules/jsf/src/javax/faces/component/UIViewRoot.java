@@ -193,7 +193,7 @@ public class UIViewRoot extends UIComponentBase
 
   public void addPhaseListener(PhaseListener listener)
   {
-    if (_phaseListeners != null)
+    if (_phaseListeners == null)
       _phaseListeners = new ArrayList<PhaseListener>();
 	
     _phaseListeners.add(listener);
