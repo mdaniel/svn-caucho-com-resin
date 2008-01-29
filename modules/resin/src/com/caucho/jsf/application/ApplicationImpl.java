@@ -130,6 +130,9 @@ public class ApplicationImpl extends Application
     addComponent(UIColumn.COMPONENT_TYPE,
 		 "javax.faces.component.UIColumn");
 
+    addComponent(UIData.COMPONENT_TYPE,
+		 "javax.faces.component.UIData");
+
     addComponent(UIGraphic.COMPONENT_TYPE,
 		 "javax.faces.component.UIGraphic");
 
