@@ -29,16 +29,14 @@
 
 package com.caucho.management.server;
 
-import com.caucho.config.ConfigException;
-
 /**
  * Interface for the persistent logging.
  *
  * <pre>
- * resin:type=LoggingManager
+ * resin:type=LogServiceManager
  * </pre>
  */
-public interface LoggingManagerMXBean extends ManagedObjectMXBean
+public interface LogServiceMXBean extends ManagedObjectMXBean
 {
   public LogMessage []findMessages(long minTime, long maxTime);
 }

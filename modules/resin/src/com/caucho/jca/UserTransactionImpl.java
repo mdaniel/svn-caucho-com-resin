@@ -33,6 +33,7 @@ import com.caucho.log.Log;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.*;
 
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;

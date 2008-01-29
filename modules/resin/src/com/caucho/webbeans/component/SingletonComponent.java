@@ -30,6 +30,7 @@
 package com.caucho.webbeans.component;
 
 import com.caucho.config.ConfigContext;
+import java.io.Closeable;
 import java.lang.annotation.*;
 import javax.webbeans.*;
 
@@ -40,7 +41,9 @@ import com.caucho.webbeans.manager.*;
 /**
  * Component for a singleton beans
  */
-public class SingletonComponent extends ClassComponent {
+public class SingletonComponent extends ClassComponent
+  implements Closeable
+{
   private static final Object []NULL_ARGS = new Object[0];
 
   private Object _value;
@@ -113,5 +116,14 @@ public class SingletonComponent extends ClassComponent {
   protected Object createNew(ConfigContext env)
   {
     throw new IllegalStateException();
+  }
+
+  /**
+   * Frees the singleton on environment shutdown
+   */
+  public void close()
+  {
+    if (_value != null)
+      destroy(_value);
   }
 }

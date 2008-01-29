@@ -34,6 +34,7 @@ import com.caucho.config.type.*;
 import com.caucho.config.attribute.*;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
+import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.component.ComponentImpl;
@@ -44,6 +45,7 @@ import com.caucho.xml.*;
 import org.w3c.dom.*;
 
 import javax.el.*;
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -153,6 +155,8 @@ public class ConfigContext {
   {
     if (_dependentScope != null)
       _dependentScope.addDestructor(comp, value);
+    else if (comp instanceof Closeable)
+      Environment.addCloseListener((Closeable) comp);
   }
 
   public boolean canInject(ScopeContext scope)

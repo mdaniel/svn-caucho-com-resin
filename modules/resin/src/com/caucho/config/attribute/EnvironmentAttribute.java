@@ -81,8 +81,10 @@ public class EnvironmentAttribute extends Attribute {
   {
     Object value = _type.create(parent);
 
-    if (value instanceof InterfaceConfig)
+    if (value instanceof InterfaceConfig) {
       ((InterfaceConfig) value).setDeploy(true);
+      ((InterfaceConfig) value).setFactory(false);
+    }
 
     return value;
   }

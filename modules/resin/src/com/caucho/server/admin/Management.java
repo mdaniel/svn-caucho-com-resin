@@ -217,8 +217,11 @@ public class Management
       throw ConfigException.create(e);
     }
   }
-  
-  public void start()
+
+  /**
+   * Starts the management server
+   */
+  public void start(Server server)
   {
     try {
       if (getPath() != null)
@@ -247,7 +250,7 @@ public class Management
       try {
 	if (_server == null)
 	  _server = _resin.getServer();
-	
+
 	if (_server != null)
 	  _server.addHost(hostConfig);
       } catch (RuntimeException e) {

@@ -32,6 +32,7 @@ package com.caucho.jca;
 import com.caucho.log.Log;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.*;
 
 import javax.transaction.*;
 import javax.transaction.xa.*;
@@ -41,7 +42,7 @@ import java.util.logging.Logger;
  * Implementation of the UserTransactionImpl for a thread instance.
  */
 public class UserTransactionProxy
-  implements UserTransaction, TransactionManager
+  implements UserTransaction, TransactionManager, java.io.Serializable
 {
   private static final Logger log
     = Logger.getLogger(UserTransactionProxy.class.getName());
@@ -227,6 +228,14 @@ public class UserTransactionProxy
     throws IllegalStateException, InvalidTransactionException, SystemException
   {
     TransactionManagerImpl.getLocal().resume(transaction);
+  }
+
+  /**
+   * Serialization handle
+   */
+  private Object writeReplace()
+  {
+    return new WebBeansHandle(UserTransaction.class);
   }
 
   public String toString()

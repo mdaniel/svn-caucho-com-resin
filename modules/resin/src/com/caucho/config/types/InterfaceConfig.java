@@ -41,6 +41,7 @@ public class InterfaceConfig extends BeanConfig {
   private static final L10N L = new L10N(InterfaceConfig.class);
 
   private boolean _isDeploy;
+  private boolean _isFactory = true;
   
   public InterfaceConfig()
   {
@@ -84,6 +85,14 @@ public class InterfaceConfig extends BeanConfig {
   }
 
   /**
+   * Sets the default factory value
+   */
+  public void setFactory(boolean isFactory)
+  {
+    _isFactory = isFactory;
+  }
+
+  /**
    * If the name is set, the bean will get deployed
    */
   @Override
@@ -101,9 +110,15 @@ public class InterfaceConfig extends BeanConfig {
       super.deploy();
   }
 
+  /**
+   * Returns the configured object for configuration
+   */
   public Object replaceObject()
   {
-    return getObject();
+    if (_isFactory)
+      return getObject();
+    else
+      return this;
   }
 
   public String toString()

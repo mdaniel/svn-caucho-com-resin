@@ -55,6 +55,8 @@ public class FilterManager {
 
   private Hashtable<String,FilterConfigImpl> _filters
     = new Hashtable<String,FilterConfigImpl>();
+
+  private ComponentImpl _comp;
   
   private Hashtable<String,Filter> _instances
     = new Hashtable<String,Filter>();
@@ -125,10 +127,9 @@ public class FilterManager {
 	
 	WebBeansContainer webBeans = WebBeansContainer.create();
       
-	ComponentImpl comp
-	  = (ComponentImpl) webBeans.createTransient(filterClass);
+	_comp = (ComponentImpl) webBeans.createTransient(filterClass);
       
-	filter = (Filter) comp.createNoInit();
+	filter = (Filter) _comp.createNoInit();
 
 	// InjectIntrospector.configure(filter);
 
@@ -194,9 +195,12 @@ public class FilterManager {
       Filter filter = filterList.get(i);
 
       try {
+	if (_comp != null)
+	  _comp.destroy(filter);
+
         filter.destroy();
       } catch (Throwable e) {
-        // log(String.valueOf(e), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

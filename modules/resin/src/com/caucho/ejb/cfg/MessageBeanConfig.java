@@ -143,11 +143,13 @@ public class MessageBeanConfig extends AbstractBeanConfig
       bean.setDestinationValue((Destination) destComp.get());
 
       bean.setMessageConsumerMax(_messageConsumerMax);
+
+      ComponentImpl comp = webBeans.bind(loc, ConnectionFactory.class);
+
+      if (comp == null)
+	throw new ConfigException(L.l("ejb-message-bean requires a configured JMS ConnectionFactory"));
+      bean.setConnectionFactoryValue((ConnectionFactory) comp.get());
     }
-
-    ComponentImpl comp = webBeans.bind(loc, ConnectionFactory.class);
-
-    bean.setConnectionFactoryValue((ConnectionFactory) comp.get());
 
     bean.init();
 

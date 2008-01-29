@@ -37,6 +37,7 @@ import com.caucho.webbeans.context.SingletonScope;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
+import java.io.Closeable;
 
 import javax.annotation.*;
 import javax.webbeans.*;
@@ -44,7 +45,9 @@ import javax.webbeans.*;
 /**
  * Configuration for a singleton component.
  */
-public class SingletonClassComponent extends ClassComponent {
+public class SingletonClassComponent extends ClassComponent
+  implements Closeable
+{
   private Object _value;
   
   public SingletonClassComponent(WbWebBeans webbeans)
@@ -132,5 +135,14 @@ public class SingletonClassComponent extends ClassComponent {
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  /**
+   * Frees the singleton on environment shutdown
+   */
+  public void close()
+  {
+    if (_value != null)
+      destroy(_value);
   }
 }

@@ -94,6 +94,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   private ProtocolServletFactory _protocolFactory;
   
   private Alarm _alarm;
+  private ComponentImpl _comp;
 
   private ServletContext _servletContext;
   private ServletManager _servletManager;
@@ -794,10 +795,9 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     else if (servletClass != null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
       
-      ComponentImpl comp
-	= (ComponentImpl) webBeans.createTransient(servletClass);
+      _comp = (ComponentImpl) webBeans.createTransient(servletClass);
       
-      servlet = comp.createNoInit();
+      servlet = _comp.createNoInit();
     }
     else
       throw new ServletException(L.l("Null servlet class for '{0}'.",
@@ -871,8 +871,14 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     Object servlet = _servlet;
     _servlet = null;
 
-    if (_alarm != null)
-      _alarm.dequeue();
+    Alarm alarm = _alarm;
+    _alarm = null;
+    
+    if (alarm != null)
+      alarm.dequeue();
+    
+    if (_comp != null)
+      _comp.destroy(servlet);
 
     if (servlet instanceof Servlet) {
       ((Servlet) servlet).destroy();

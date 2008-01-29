@@ -236,6 +236,11 @@ public class XmlAuthenticator extends AbstractPasswordAuthenticator {
     {
       _isDisabled = ! isEnabled;
     }
+
+    public void setDisable(boolean isDisabled)
+    {
+      _isDisabled = isDisabled;
+    }
     
     public void addRole(String role)
     {

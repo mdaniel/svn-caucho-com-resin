@@ -1152,6 +1152,11 @@ public class Server extends ProtocolDispatchServer
         log.info("");
       }
 
+      _lifecycle.toStarting();
+
+      if (_resin.getManagement() != null)
+	_resin.getManagement().start(this);
+
       AbstractSelectManager selectManager = getSelectManager();
       if (! _keepaliveSelectEnable
 	  || selectManager == null
@@ -1163,8 +1168,6 @@ public class Server extends ProtocolDispatchServer
         bindPorts();
 	startPorts();
       }
-
-      _lifecycle.toStarting();
 
       _classLoader.start();
 

@@ -646,6 +646,14 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Returns the management api.
+   */
+  public Management getManagement()
+  {
+    return _management;
+  }
+
+  /**
    * Starts the server.
    */
   public void start()

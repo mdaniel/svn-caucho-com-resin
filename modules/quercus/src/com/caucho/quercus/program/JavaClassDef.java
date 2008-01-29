@@ -149,7 +149,10 @@ public class JavaClassDef extends ClassDef {
     if (Double.class.isAssignableFrom(type)
         || Float.class.isAssignableFrom(type))
       return new DoubleClassDef(moduleContext);
-    else if (Long.class.isAssignableFrom(type))
+    else if (Long.class.isAssignableFrom(type)
+	     || Integer.class.isAssignableFrom(type)
+	     || Short.class.isAssignableFrom(type)
+	     || Byte.class.isAssignableFrom(type))
       return new LongClassDef(moduleContext);
     else if (BigDecimal.class.isAssignableFrom(type))
       return new BigDecimalClassDef(moduleContext);
