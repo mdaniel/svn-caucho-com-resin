@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,19 +34,15 @@ import com.caucho.util.L10N;
 import com.caucho.loader.*;
 
 import javax.management.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * The view for administration.
  */
 public class MBeanView {
-  private static final Logger log = Log.open(MBeanView.class);
+  private static final Logger log
+    = Logger.getLogger(MBeanView.class.getName());
   private static final L10N L = new L10N(MBeanView.class);
 
 
@@ -55,8 +52,8 @@ public class MBeanView {
 
   private MBeanServerDelegateImpl _delegate;
   
-  private HashMap<ObjectName,MBeanWrapper> _mbeans =
-    new HashMap<ObjectName,MBeanWrapper>(8);
+  private TreeMap<ObjectName,MBeanWrapper> _mbeans
+    = new TreeMap<ObjectName,MBeanWrapper>();
 
   MBeanView(AbstractMBeanServer mbeanServer,
             ClassLoader loader,

@@ -211,6 +211,7 @@ public class InjectIntrospector {
       if (param.length != 1)
         continue;
 
+      /*
       if (fieldName.startsWith("set") && fieldName.length() > 3) {
         fieldName = fieldName.substring(3);
 
@@ -222,6 +223,7 @@ public class InjectIntrospector {
           fieldName = Character.toLowerCase(ch) + fieldName.substring(1);
         }
       }
+      */
 
       introspect(injectList, method);
     }
@@ -608,14 +610,15 @@ public class InjectIntrospector {
 
     ComponentImpl component = null;
 
-    if (mappedName != null && ! "".equals(mappedName)) {
-      component = webBeans.bind(location, type, mappedName);
+    if (mappedName == null || "".equals(mappedName))
+      mappedName = jndiName;
 
-      if (component != null) {
-	bindJndi(location, jndiName, component);
+    component = webBeans.bind(location, type, mappedName);
+
+    if (component != null) {
+      bindJndi(location, jndiName, component);
       
-	return new ComponentValueGenerator(location, component);
-      }
+      return new ComponentValueGenerator(location, component);
     }
     
     if (component == null && beanName != null && ! "".equals(beanName)) {

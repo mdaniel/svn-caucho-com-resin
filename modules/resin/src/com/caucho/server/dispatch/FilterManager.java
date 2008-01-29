@@ -32,10 +32,13 @@ import com.caucho.config.Config;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
+import javax.webbeans.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -46,7 +49,7 @@ import java.util.logging.Logger;
  * Manages the servlets.
  */
 public class FilterManager {
-  static final Logger log = Log.open(FilterManager.class);
+  static final Logger log = Logger.getLogger(FilterManager.class.getName());
   
   static final L10N L = new L10N(FilterManager.class);
 
@@ -119,8 +122,13 @@ public class FilterManager {
 
         if (filter != null)
           return filter;
-
-        filter = (Filter) filterClass.newInstance();
+	
+	WebBeansContainer webBeans = WebBeansContainer.create();
+      
+	ComponentImpl comp
+	  = (ComponentImpl) webBeans.createTransient(filterClass);
+      
+	filter = (Filter) comp.createNoInit();
 
 	// InjectIntrospector.configure(filter);
 

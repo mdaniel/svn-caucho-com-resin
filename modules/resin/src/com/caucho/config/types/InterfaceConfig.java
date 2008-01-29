@@ -40,7 +40,7 @@ import com.caucho.util.L10N;
 public class InterfaceConfig extends BeanConfig {
   private static final L10N L = new L10N(InterfaceConfig.class);
 
-  private boolean _isNameSet;
+  private boolean _isDeploy;
   
   public InterfaceConfig()
   {
@@ -74,6 +74,14 @@ public class InterfaceConfig extends BeanConfig {
   }
 
   /**
+   * Sets the default deploy value
+   */
+  public void setDeploy(boolean isDeploy)
+  {
+    _isDeploy = isDeploy;
+  }
+
+  /**
    * If the name is set, the bean will get deployed
    */
   @Override
@@ -81,13 +89,13 @@ public class InterfaceConfig extends BeanConfig {
   {
     super.setName(name);
 
-    _isNameSet = true;
+    _isDeploy = true;
   }
 
   @Override
   public void deploy()
   {
-    if (_isNameSet)
+    if (_isDeploy)
       super.deploy();
   }
 

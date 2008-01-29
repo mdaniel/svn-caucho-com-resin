@@ -14,7 +14,7 @@
 <ul>
 <li>support: Wicket support for Resin/WebBeans for WebApplication object [<a href="http://wiki.caucho.com/Wicket">wiki: Resin and Wicket</a>]</li>
 <li>jca: AssociationResourceAdapter fixes for Jackrabbit [<a href="http://wiki.caucho.com/Jackrabbit">wiki: Resin and Jackrabbit</a>] (#2346, rep by pegli)</li>
-<li>load-balance: update timeout counting from app-tier</li>
+<li>load-balance: update timeout counting from app-tier (#2639, rep by Anthony Balandran)</li>
 <li>configure: libtool fixes on build machine</li>
 <li>ejb: message driven bean support for NOT_SUPPORTED XA (#2308, rep by ddalessa)</li>
 <li>ioc/config: system properties like 'foo.bar' were not properly resolved (#2361, rep by Curtis Taylor)</li>

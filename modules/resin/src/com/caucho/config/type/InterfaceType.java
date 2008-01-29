@@ -69,7 +69,9 @@ public final class InterfaceType extends ConfigType
   @Override
   public Object create(Object parent)
   {
-    return new InterfaceConfig(_type);
+    InterfaceConfig cfg = new InterfaceConfig(_type);
+    
+    return cfg;
   }
   
   /**
@@ -111,5 +113,10 @@ public final class InterfaceType extends ConfigType
     else
       throw new ConfigException(L.l("{0}: '{1}' is an invalid value.",
 				    _type.getName(), value));
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _type.getName() + "]";
   }
 }

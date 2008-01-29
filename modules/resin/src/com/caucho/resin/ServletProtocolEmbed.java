@@ -103,6 +103,7 @@ public class ServletProtocolEmbed
     ServletProtocolConfig protocol = new ServletProtocolConfig();
     protocol.setUri(_uri);
     protocol.setInit(_init);
+    protocol.init();
 
     return protocol;
   }

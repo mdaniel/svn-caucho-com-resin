@@ -34,11 +34,14 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.*;
 
 /**
  * Basic class generation.
  */
 public class GenClass extends BaseClass {
+  private static final Logger log
+    = Logger.getLogger(GenClass.class.getName());
   private static L10N L = new L10N(GenClass.class);
 
   private String _packageName;
@@ -60,8 +63,12 @@ public class GenClass extends BaseClass {
       setClassName(fullClassName.substring(p + 1));
     }
     else {
-      throw new IllegalArgumentException(L.l("Class '{0}' must belong to a package.",
-					     fullClassName));
+      log.warning(L.l("Class '{0}' must belong to a package.",
+		      fullClassName));
+
+      _packageName = "_dummy";
+      setClassName(fullClassName);
+      _fullClassName = "_dummy." + fullClassName;
     }
   }
 

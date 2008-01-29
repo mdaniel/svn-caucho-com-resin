@@ -119,7 +119,7 @@ public class ConnectorConfig implements EnvironmentListener {
   /**
    * Sets the type of the connector using known types.
    */
-  public void setURL(String url)
+  public void setURI(String url)
     throws Exception
   {
     TypeFactory factory = TypeFactory.create();

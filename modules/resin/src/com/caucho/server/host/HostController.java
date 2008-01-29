@@ -44,6 +44,7 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.webbeans.manager.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.webbeans.*;
 
 /**
  * A configuration entry for a host
@@ -479,7 +481,10 @@ public class HostController
     _hostAliases.clear();
     _hostAliases.addAll(_entryHostAliases);
 
-    getVariableMap().put("host-root", getRootDirectory());
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    webBeans.addSingleton(_hostVar, "host", Standard.class);
+    
+    // getVariableMap().put("host-root", getRootDirectory());
 
     if (_container != null) {
       for (EarConfig config : _container.getEarDefaultList())

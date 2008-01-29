@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;
+import com.caucho.config.types.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
@@ -78,6 +79,11 @@ public class EnvironmentAttribute extends Attribute {
   public Object create(Object parent)
     throws ConfigException
   {
-    return _type.create(parent);
+    Object value = _type.create(parent);
+
+    if (value instanceof InterfaceConfig)
+      ((InterfaceConfig) value).setDeploy(true);
+
+    return value;
   }
 }

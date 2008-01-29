@@ -282,7 +282,7 @@ public class ResinEmbed
    * @param os output stream to receive the request
    */
   public void request(String httpRequest, OutputStream os)
-    throws Exception
+    throws IOException
   {
     start();
 
@@ -299,7 +299,7 @@ public class ResinEmbed
    * @return the HTTP result string
    */
   public String request(String httpRequest)
-    throws Exception
+    throws IOException
   {
     start();
 
@@ -435,7 +435,7 @@ public class ResinEmbed
       _conn.setSecure(isSecure);
     }
 
-    public String request(String input) throws Exception
+    public String request(String input) throws IOException
     {
       OutputStream os = new ByteArrayOutputStream();
 
@@ -450,7 +450,7 @@ public class ResinEmbed
     }
 
     public void request(String input, OutputStream os)
-      throws Exception
+      throws IOException
     {
       Thread.yield();
 
@@ -481,7 +481,10 @@ public class ResinEmbed
 	_conn.setRemotePort(9666);
 	// _conn.setSecure(_isSecure);
 
-	Thread.sleep(10);
+	try {
+	  Thread.sleep(10);
+	} catch (Exception e) {
+	}
 
         while (_request.handleRequest()) {
 	  out.flush();

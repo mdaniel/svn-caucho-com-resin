@@ -234,7 +234,7 @@ public class BeanType extends ConfigType
       
       return bean;
     }
-    
+
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
 				  _beanClass.getName(), text));
   }
