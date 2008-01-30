@@ -206,6 +206,9 @@ class HtmlMessageRenderer extends Renderer
 	}
 	else if (title != null) {
 	  out.writeAttribute("title", title, "title");
+
+	  if (isShowSummary)
+	    out.writeText(msg.getSummary(), "summary");
 	}
 	else if (isShowSummary) {
 	  out.writeText(msg.getSummary(), "summary");

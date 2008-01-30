@@ -226,7 +226,10 @@ abstract class SelectRenderer extends BaseRenderer
 			 String.valueOf(selectItem.getValue()),
 			 "value");
 
-      out.writeText(selectItem.getLabel(), "label");
+      String label = selectItem.getLabel();
+      
+      if (label != null)
+        out.writeText(label, "label");
 
       out.endElement("option");
       out.write("\n");
