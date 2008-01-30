@@ -52,8 +52,8 @@ public class MBeanView {
 
   private MBeanServerDelegateImpl _delegate;
   
-  private TreeMap<ObjectName,MBeanWrapper> _mbeans
-    = new TreeMap<ObjectName,MBeanWrapper>();
+  private HashMap<ObjectName,MBeanWrapper> _mbeans
+    = new HashMap<ObjectName,MBeanWrapper>();
 
   MBeanView(AbstractMBeanServer mbeanServer,
             ClassLoader loader,

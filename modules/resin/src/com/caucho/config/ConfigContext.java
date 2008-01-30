@@ -89,6 +89,8 @@ public class ConfigContext {
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
 
+  private String _baseUri;
+
   public ConfigContext()
   {
   }
@@ -143,6 +145,14 @@ public class ConfigContext {
   static void setCurrentBuilder(ConfigContext builder)
   {
     _currentBuilder.set(builder);
+  }
+
+  /**
+   * Returns the file var
+   */
+  public String getBaseUri()
+  {
+    return _baseUri;
   }
 
   /**
@@ -255,7 +265,7 @@ public class ConfigContext {
     throws LineConfigException
   {
     ConfigContext oldBuilder = _currentBuilder.get();
-    // Object oldFile = _elContext.getValue("__FILE__");
+    String oldFile = _baseUri;
     ArrayList<Dependency> oldDependList = _dependList;
 
     try {
@@ -264,7 +274,7 @@ public class ConfigContext {
       if (top instanceof QNode) {
         QNode qNode = (QNode) top;
         
-	// _elContext.setValue("__FILE__", qNode.getBaseURI());
+	_baseUri = qNode.getBaseURI();
       }
 
       _dependList = getDependencyList(top);
@@ -276,7 +286,7 @@ public class ConfigContext {
       _currentBuilder.set(oldBuilder);
 
       _dependList = oldDependList;
-      // _elContext.setValue("__FILE__", oldFile);
+      _baseUri = oldFile;
     }
   }
 

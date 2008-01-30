@@ -42,6 +42,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.*;
+import com.caucho.vfs.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
@@ -148,6 +149,17 @@ public class BeanType extends ConfigType
 	_setConfigLocation.invoke(bean, filename, line);
       } catch (Exception e) {
 	throw ConfigException.create(e);
+      }
+    }
+
+    if (bean instanceof DependencyBean) {
+      DependencyBean dependencyBean = (DependencyBean) bean;
+      
+      ArrayList<Dependency> dependencyList = env.getDependencyList();
+      if (dependencyList != null) {
+	for (Dependency depend : dependencyList) {
+	  dependencyBean.addDependency((PersistentDependency) depend);
+	}
       }
     }
   }
@@ -310,8 +322,7 @@ public class BeanType extends ConfigType
 	_setProperty = attr;
       }
       else if (name.equals("setParent")
-	       && paramTypes.length == 1
-	       && paramTypes[0].equals(Object.class)) {
+	       && paramTypes.length == 1) {
 	// XXX: use annotation
 	_setParent = method;
       }

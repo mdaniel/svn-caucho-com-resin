@@ -31,6 +31,7 @@ package com.caucho.config;
 
 import com.caucho.config.attribute.*;
 import com.caucho.config.type.*;
+import com.caucho.config.types.*;
 import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
 import com.caucho.relaxng.*;
@@ -234,6 +235,11 @@ public class Config {
       thread.setContextClassLoader(_classLoader);
 
       ConfigContext builder = createBuilder();
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+
+      if (webBeans != null && webBeans.findByName("__FILE__") == null)
+	webBeans.addSingleton(FileVar.__FILE__, "__FILE__");
 
       return builder.configure(obj, topNode);
     } finally {

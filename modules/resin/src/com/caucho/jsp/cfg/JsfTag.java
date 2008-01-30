@@ -29,21 +29,14 @@
 package com.caucho.jsp.cfg;
 
 import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.DependencyBean;
 import com.caucho.jsp.JspParseException;
-import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
 
-import javax.servlet.jsp.tagext.SimpleTag;
-import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TagExtraInfo;
 import javax.servlet.jsp.tagext.TagVariableInfo;
-import javax.servlet.jsp.tagext.VariableInfo;
 import javax.faces.component.UIComponent;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Configuration for the taglib tag in the .tld
