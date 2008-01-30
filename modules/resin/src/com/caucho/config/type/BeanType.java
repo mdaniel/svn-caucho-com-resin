@@ -114,7 +114,9 @@ public class BeanType extends ConfigType
 
       Object bean = _component.createNoInit();
 
-      if (_setParent != null) {
+      if (_setParent != null
+	  && parent != null
+	  && _setParent.getParameterTypes()[0].isAssignableFrom(parent.getClass())) {
 	try {
 	  _setParent.invoke(bean, parent);
 	} catch (IllegalArgumentException e) {
