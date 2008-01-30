@@ -193,7 +193,7 @@ abstract public class StatefulView extends View {
     out.println("{");
     out.println("  _context = context;");
     out.println("}");
-    
+
     generateBusinessMethods(out);
   }
 

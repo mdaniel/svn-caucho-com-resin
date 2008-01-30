@@ -33,8 +33,6 @@ import com.caucho.config.ConfigContext;
 import java.lang.annotation.*;
 import javax.webbeans.*;
 
-import com.caucho.ejb.AbstractServer;
-
 import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;

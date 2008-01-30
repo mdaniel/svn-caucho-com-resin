@@ -36,12 +36,16 @@ import com.caucho.ejb.xa.EjbTransactionManager;
 import javax.ejb.*;
 import javax.transaction.UserTransaction;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract base class for an EntityHome.
  */
 public abstract class QEntityContext extends AbstractContext
   implements EntityContext {
+  private static final Logger log
+    = Logger.getLogger(QEntityContext.class.getName());
+  
   protected final EntityServer _server;
   public Object _primaryKey;
   

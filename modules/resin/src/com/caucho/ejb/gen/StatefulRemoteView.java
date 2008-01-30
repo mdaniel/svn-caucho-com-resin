@@ -59,12 +59,15 @@ public class StatefulRemoteView extends StatefulObjectView {
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
+    /*
     if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass()))
       out.println("  extends StatefulObject21");
     else if (EJBObject.class.isAssignableFrom(getApi().getJavaClass()))
       out.println("  extends StatefulObject21");
     else
       out.println("  extends StatefulObject");
+    */
+    out.println("  extends StatefulObject");
   }
 
   /**

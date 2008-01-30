@@ -35,6 +35,8 @@ import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
 import javax.ejb.Handle;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.rmi.RemoteException;
+import javax.ejb.*;
 
 /**
  * Abstract base class for a stateful session object
@@ -52,6 +54,15 @@ abstract public class StatefulObject extends AbstractEJBObject
     return getStatefulServer();
   }
 
+  /**
+   * Returns the server which owns this bean.
+   */
+  @Override
+  public AbstractServer __caucho_getServer()
+  {
+    return getStatefulServer();
+  }
+
   public abstract StatefulServer getStatefulServer();
 
   public String __caucho_getId()
@@ -62,12 +73,56 @@ abstract public class StatefulObject extends AbstractEJBObject
     return _primaryKey;
   }
 
+  //
+  // EJB 2.1 methods
+  //
+
+  /**
+   * Returns the primary key
+   */
+  public Object getPrimaryKey()
+  {
+    return __caucho_getId();
+  }
+
+  /**
+   * Returns the EJBHome
+   */
+  public EJBHome getEJBHome()
+  {
+    return getServer().getEJBHome();
+  }
+
+  /**
+   * Returns the EJBLocalHome
+   */
+  public EJBLocalHome getEJBLocalHome()
+  {
+    return getServer().getEJBLocalHome();
+  }
+
   /**
    * Returns the handle.
    */
   public Handle getHandle()
   {
     return getServer().getHandleEncoder().createHandle(__caucho_getId());
+  }
+
+  /**
+   * Returns true if the two objects are identical.
+   */
+  public boolean isIdentical(EJBObject obj) throws RemoteException
+  {
+    return getHandle().equals(obj.getHandle());
+  }
+
+  /**
+   * Returns true if the two objects are identical.
+   */
+  public boolean isIdentical(EJBLocalObject obj)
+  {
+    return this == obj;
   }
 
   public void remove()

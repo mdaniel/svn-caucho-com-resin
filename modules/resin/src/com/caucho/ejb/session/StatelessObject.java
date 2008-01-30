@@ -131,6 +131,10 @@ abstract public class StatelessObject extends AbstractEJBObject
     return "::ejb:stateless";
   }
 
+  //
+  // EJB 2.1 methods
+  //
+
   /**
    * Returns true if the two objects are identical.
    */

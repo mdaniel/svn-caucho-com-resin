@@ -76,6 +76,7 @@ abstract public class StatefulContext extends AbstractSessionContext {
   /**
    * Returns the timer service.
    */
+  @Override
   public TimerService getTimerService()
     throws IllegalStateException
   {

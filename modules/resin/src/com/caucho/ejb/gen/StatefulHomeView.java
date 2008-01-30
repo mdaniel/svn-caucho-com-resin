@@ -56,6 +56,7 @@ abstract public class StatefulHomeView extends StatefulView {
   /**
    * Generates code to create the provider
    */
+  @Override
   public void generateCreateProvider(JavaWriter out, String var)
     throws IOException
   {
@@ -97,8 +98,18 @@ abstract public class StatefulHomeView extends StatefulView {
     out.println("  return _server;");
     out.println("}");
     out.println();
+
+    generateCreate(out);
     
     generateBusinessMethods(out);
+  }
+
+  /**
+   * Generates any create() method
+   */
+  protected void generateCreate(JavaWriter out)
+    throws IOException
+  {
   }
 
   @Override

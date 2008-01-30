@@ -31,15 +31,11 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
-import com.caucho.util.Log;
 
 import javax.ejb.Handle;
 import javax.ejb.SessionBean;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Abstract base class for a 3.0 session object
@@ -47,8 +43,6 @@ import java.util.logging.Logger;
 abstract public class AbstractSessionObject extends AbstractEJBObject
     implements Serializable
 {
-  private static final Logger log = Log.open(AbstractSessionObject.class);
-
   // ejb/0ff0
   protected Class _businessInterface;
 

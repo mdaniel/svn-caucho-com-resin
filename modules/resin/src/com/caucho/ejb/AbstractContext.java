@@ -46,8 +46,8 @@ import java.util.logging.Logger;
  * Base class for an abstract context
  */
 abstract public class AbstractContext implements EJBContext {
-  protected static final L10N L = new L10N(AbstractContext.class);
-  protected static final Logger log
+  private static final L10N L = new L10N(AbstractContext.class);
+  private static final Logger log
     = Logger.getLogger(AbstractContext.class.getName());
 
   private boolean _isDead;

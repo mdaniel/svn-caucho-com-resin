@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  */
 abstract public class SessionServer extends AbstractServer
 {
-  protected final static Logger log
+  private final static Logger log
     = Logger.getLogger(SessionServer.class.getName());
 
   public SessionServer(EjbContainer manager)
@@ -165,6 +165,7 @@ abstract public class SessionServer extends AbstractServer
     return getRemoteObject(null);
   }
 
+  @Override
   public AbstractContext getContext()
   {
     return getSessionContext();

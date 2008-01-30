@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.ConfigContext;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import java.util.*;
@@ -40,6 +39,7 @@ import com.caucho.util.LruCache;
 import com.caucho.webbeans.component.*;
 import java.lang.reflect.Constructor;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
 
@@ -48,6 +48,9 @@ import javax.ejb.NoSuchEJBException;
  */
 public class StatefulServer extends SessionServer
 {
+  private static final Logger log
+    = Logger.getLogger(StatefulServer.class.getName());
+  
   private StatefulContext _homeContext;
   
   // XXX: need real lifecycle

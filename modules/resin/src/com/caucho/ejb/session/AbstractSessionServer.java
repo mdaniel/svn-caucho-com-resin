@@ -43,8 +43,6 @@ abstract public class AbstractSessionServer extends AbstractServer {
   protected final static Logger log
     = Logger.getLogger(AbstractSessionServer.class.getName());
 
-  private AbstractSessionContext _homeContext;
-
   public AbstractSessionServer(EjbContainer container)
   {
     super(container);
@@ -88,6 +86,7 @@ abstract public class AbstractSessionServer extends AbstractServer {
   /**
    * Returns the object key from a handle.
    */
+  @Override
   public Class getPrimaryKeyClass()
   {
     return String.class;
@@ -96,6 +95,7 @@ abstract public class AbstractSessionServer extends AbstractServer {
   /**
    * Returns the EJBLocalHome stub for the container
    */
+  @Override
   public EJBLocalHome getEJBLocalHome()
   {
     return _localHome;
@@ -104,6 +104,7 @@ abstract public class AbstractSessionServer extends AbstractServer {
   /**
    * Returns the EJBHome stub for the container
    */
+  @Override
   public EJBHome getEJBHome()
   {
     if (_remoteHome == null) {
@@ -117,6 +118,7 @@ abstract public class AbstractSessionServer extends AbstractServer {
     return _remoteHome;
   }
 
+  @Override
   public Object getHomeObject()
   {
     return _remoteHomeView;

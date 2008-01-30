@@ -27,40 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
-
-import com.caucho.config.*;
-import com.caucho.ejb.cfg.*;
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
+package com.caucho.ejb;
 
 import javax.ejb.*;
-import java.io.IOException;
-import java.lang.reflect.*;
-import java.util.*;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateful view
+ * Convenience class implementing the EJB 2.1 session bean API
  */
-public class StatefulLocalView extends StatefulObjectView {
-  private static final L10N L = new L10N(StatefulLocalView.class);
+abstract public class AbstractSessionBean implements SessionBean {
+  protected SessionContext sessionContext;
 
-  public StatefulLocalView(StatefulGenerator bean, ApiClass api)
+  public void setSessionContext(SessionContext sessionContext)
+    throws EJBException
   {
-    super(bean, api);
+    this.sessionContext = sessionContext;
   }
 
-  @Override
-  protected void generateExtends(JavaWriter out)
-    throws IOException
+  public SessionContext getSessionContext()
   {
-    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass()))
-      out.println("  extends StatefulObject");
+    return sessionContext;
   }
-
-  @Override
-  protected String getViewClassName()
+  
+  public void ejbActivate() throws EJBException
   {
-    return getApi().getSimpleName() + "__EJBLocal";
+  }
+  
+  public void ejbPassivate() throws EJBException
+  {
+  }
+  
+  public void ejbRemove() throws EJBException
+  {
   }
 }
