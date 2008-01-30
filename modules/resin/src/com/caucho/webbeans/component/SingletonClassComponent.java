@@ -88,7 +88,7 @@ public class SingletonClassComponent extends ClassComponent
     if (_value == null) {
       _value = createNew(null);
 
-      init(_value, new ConfigContext()); // DependentScope(this, _value, new SingletonScope()));
+      init(_value, new ConfigContext(this, _value, new SingletonScope()));
 
       if (_value instanceof HandleAware)
 	((HandleAware) _value).setSerializationHandle(getHandle());

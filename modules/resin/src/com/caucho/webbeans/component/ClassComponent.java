@@ -257,7 +257,6 @@ public class ClassComponent extends ComponentImpl {
       else {
 	if (env != null) {
 	  value = env.get(this);
-	  
 	  if (value != null)
 	    return value;
 	}

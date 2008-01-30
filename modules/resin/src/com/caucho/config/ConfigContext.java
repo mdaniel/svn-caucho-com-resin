@@ -1091,6 +1091,11 @@ public class ConfigContext {
     }
   }
 
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _dependentScope + "]";
+  }
+
   static class ValidatorEntry {
     private Validator _validator;
     private ClassLoader _loader;

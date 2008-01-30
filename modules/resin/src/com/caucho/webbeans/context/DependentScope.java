@@ -143,4 +143,9 @@ public class DependentScope {
       // add to env?
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _owner + "," + _scope + "]";
+  }
 }

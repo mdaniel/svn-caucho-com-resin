@@ -19,39 +19,36 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.types;
 
-import javax.webbeans.*;
-
-import com.caucho.webbeans.component.*;
+import com.caucho.config.*;
+import com.caucho.util.*;
 
 /**
- * Context for a named EL bean scope
+ * Variable for __FILE__
  */
-abstract public class ScopeContext implements Context {
-  abstract public <T> T get(ComponentFactory<T> comp, boolean create);
-  
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
+public class FileVar {
+  private static final L10N L = new L10N(FileVar.class);
 
-  /**
-   * Returns true if a value in the target scope can be safely be injected
-   * into this scope
-   */
-  public boolean canInject(ScopeContext scope)
+  public static final FileVar __FILE__ = new FileVar();
+    
+  private FileVar()
   {
-    return (getClass().equals(scope.getClass())
-	    || scope instanceof SingletonScope);
   }
-
-  public void addDestructor(ComponentImpl comp, Object value)
+  public String toString()
   {
+    ConfigContext env = ConfigContext.getCurrent();
+
+    if (env != null)
+      return env.getBaseUri();
+    else
+      throw new IllegalStateException(L.l("__FILE__ is only available during configuration"));
   }
 }
