@@ -356,4 +356,9 @@ public class PasswordDigest {
 
     return cb.close();
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

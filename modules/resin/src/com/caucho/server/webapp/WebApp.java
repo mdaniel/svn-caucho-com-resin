@@ -75,6 +75,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.webbeans.el.WebBeansELResolver;
 import com.caucho.webbeans.manager.*;
+import com.caucho.webbeans.component.*;
 import com.caucho.java.WorkDir;
 
 import javax.annotation.PostConstruct;
@@ -100,7 +101,7 @@ import java.util.logging.Logger;
  */
 public class WebApp extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
-             EnvironmentDeployInstance
+             EnvironmentDeployInstance, java.io.Serializable
 {
   private static final String DEFAULT_VERSION = "2.5";
 
@@ -2763,11 +2764,18 @@ public class WebApp extends ServletContextImpl
     return _status500LastTime;
   }
 
+  /**
+   * Serialize to a handle
+   */
+  private Object writeReplace()
+  {
+    return new WebBeansHandle(WebApp.class);
+  }
+
   public String toString()
   {
     return "WebApp[" + getURL() + "]";
   }
-
 
   static class FilterChainEntry {
     FilterChain _filterChain;

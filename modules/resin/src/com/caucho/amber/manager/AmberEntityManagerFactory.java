@@ -33,16 +33,22 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.Map;
 import java.util.logging.Logger;
+import com.caucho.webbeans.component.*;
 
 /**
  * Amber's EntityManagerFactory container.
  */
-public class AmberEntityManagerFactory implements EntityManagerFactory {
+public class AmberEntityManagerFactory
+  implements EntityManagerFactory, java.io.Serializable,
+	     HandleAware
+{
   private static final Logger log
     = Logger.getLogger(AmberEntityManagerFactory.class.getName());
 
   private AmberPersistenceUnit _unit;
   private boolean _isOpen = true;
+
+  private Object _serializationHandle;
 
   AmberEntityManagerFactory(AmberPersistenceUnit unit)
   {
@@ -79,6 +85,22 @@ public class AmberEntityManagerFactory implements EntityManagerFactory {
   public boolean isOpen()
   {
     return _isOpen;
+  }
+
+  /**
+   * Sets the serializable handle
+   */
+  public void setSerializationHandle(Object handle)
+  {
+    _serializationHandle = handle;
+  }
+
+  /**
+   * Serializes to the handle
+   */
+  private Object writeReplace()
+  {
+    return _serializationHandle;
   }
 
   public String toString()

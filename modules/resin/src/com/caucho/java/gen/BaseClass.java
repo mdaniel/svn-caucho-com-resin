@@ -49,11 +49,11 @@ public class BaseClass extends ClassComponent {
   private boolean _isStatic;
   private String _visibility = "public";
   
-  private ArrayList<String> _interfaceNames =
-    new ArrayList<String>();
+  private ArrayList<String> _interfaceNames
+    = new ArrayList<String>();
 
-  private ArrayList<ClassComponent> _components =
-    new ArrayList<ClassComponent>();
+  private ArrayList<ClassComponent> _components
+    = new ArrayList<ClassComponent>();
 
   private DependencyComponent _dependencyComponent;
 

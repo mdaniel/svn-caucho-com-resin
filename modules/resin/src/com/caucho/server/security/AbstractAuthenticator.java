@@ -38,6 +38,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.webbeans.component.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -60,7 +61,9 @@ import java.util.logging.Logger;
  * <p>The AbstractAuthenticator provides a single-signon cache.  Users
  * logged into one web-app will share the same principal.
  */
-public class AbstractAuthenticator implements ServletAuthenticator {
+public class AbstractAuthenticator
+  implements ServletAuthenticator, HandleAware, java.io.Serializable
+{
   private static final Logger log
     = Logger.getLogger(AbstractAuthenticator.class.getName());
   static final L10N L = new L10N(AbstractAuthenticator.class);
@@ -75,6 +78,8 @@ public class AbstractAuthenticator implements ServletAuthenticator {
   protected PasswordDigest _passwordDigest;
 
   private boolean _logoutOnTimeout = true;
+
+  private Object _serializationHandle;
 
   /**
    * Returns the size of the principal cache.
@@ -790,6 +795,22 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 	}
       }
     }
+  }
+
+  /**
+   * Sets the serialization handle
+   */
+  public void setSerializationHandle(Object handle)
+  {
+    _serializationHandle = handle;
+  }
+
+  /**
+   * Serialize to the handle
+   */
+  public Object writeReplace()
+  {
+    return _serializationHandle;
   }
 
   public String toString()

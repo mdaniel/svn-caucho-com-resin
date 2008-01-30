@@ -38,6 +38,7 @@ import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
+import com.caucho.webbeans.component.*;
 
 import javax.transaction.*;
 import javax.transaction.xa.XAException;
@@ -425,6 +426,14 @@ public class TransactionManagerImpl
 
     if (logManager != null)
       logManager.close();
+  }
+
+  /**
+   * Serialize to a handle
+   */
+  private Object writeReplace()
+  {
+    return new WebBeansHandle(TransactionManager.class);
   }
 
   public String toString()

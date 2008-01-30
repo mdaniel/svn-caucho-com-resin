@@ -31,15 +31,20 @@ package com.caucho.jmx;
 
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.WebBeansHandle;
 
 import java.util.logging.Logger;
+import javax.management.*;
 
 /**
  * JNDI object for the Resin mbean server.
  */
-public class GlobalMBeanServer extends AbstractMBeanServer {
+public class GlobalMBeanServer extends AbstractMBeanServer
+  implements java.io.Serializable
+{
   private static final L10N L = new L10N(GlobalMBeanServer.class);
-  private static final Logger log = Log.open(GlobalMBeanServer.class);
+  private static final Logger log
+    = Logger.getLogger(GlobalMBeanServer.class.getName());
 
   private ClassLoader _loader;
   
@@ -91,10 +96,18 @@ public class GlobalMBeanServer extends AbstractMBeanServer {
   }
 
   /**
+   * Serialization.
+   */
+  private Object writeReplace()
+  {
+    return new WebBeansHandle(MBeanServer.class);
+  }
+
+  /**
    * Returns the string form.
    */
   public String toString()
   {
-    return "GlobalMBeanServer[]";
+    return getClass().getSimpleName() +  "[]";
   }
 }

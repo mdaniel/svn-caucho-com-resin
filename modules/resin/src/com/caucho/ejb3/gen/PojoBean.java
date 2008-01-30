@@ -35,11 +35,14 @@ import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.*;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.lang.annotation.*;
 import java.util.*;
 import javax.ejb.*;
+import javax.webbeans.*;
 
 /**
  * Generates the skeleton for a session bean.
@@ -56,10 +59,12 @@ public class PojoBean extends BeanGenerator {
 
   private boolean _isEnhanced;
   private boolean _hasXA;
+  private boolean _hasReadResolve;
+  private boolean _isReadResolveEnhanced;
   
   public PojoBean(Class beanClass)
   {
-    super(beanClass.getName() + "__Resin", new ApiClass(beanClass));
+    super(beanClass.getName() + "$ResinWebBean", new ApiClass(beanClass));
 
     setSuperClassName(beanClass.getName());
     addImport("javax.transaction.*");
@@ -74,6 +79,11 @@ public class PojoBean extends BeanGenerator {
     for (Method method : _beanClass.getMethods()) {
       if (Object.class.equals(method.getDeclaringClass()))
 	continue;
+
+      if (method.getName().equals("readResolve")
+	  && method.getParameterTypes().length == 0) {
+	_hasReadResolve = true;
+      }
       
       int modifiers = method.getModifiers();
 
@@ -95,6 +105,40 @@ public class PojoBean extends BeanGenerator {
 	_businessMethods.add(bizMethod);
       }
     }
+    
+    if (Serializable.class.isAssignableFrom(_beanClass)
+	&& ! _hasReadResolve
+	&& hasTransientInject(_beanClass)) {
+      _isReadResolveEnhanced = true;
+      _isEnhanced = true;
+    }
+  }
+
+  private boolean hasTransientInject(Class cl)
+  {
+    if (cl == null || Object.class.equals(cl))
+      return false;
+
+    for (Field field : cl.getDeclaredFields()) {
+      if (! Modifier.isTransient(field.getModifiers()))
+	continue;
+      if (Modifier.isStatic(field.getModifiers()))
+	continue;
+
+      Annotation []annList = field.getDeclaredAnnotations();
+      if (annList == null)
+	continue;
+
+      for (Annotation ann : annList) {
+	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	  return true;
+
+	if (In.class.equals(ann.annotationType()))
+	  return true;
+      }
+    }
+
+    return hasTransientInject(cl.getSuperclass());
   }
 
   public Class generateClass()
@@ -163,6 +207,21 @@ public class PojoBean extends BeanGenerator {
       out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
       out.println("  = new com.caucho.ejb3.xa.XAManager();");
     }
+
+    if (_isReadResolveEnhanced)
+      generateReadResolve(out);
+  }
+
+  protected void generateReadResolve(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private Object readResolve()");
+    out.println("{");
+    out.println("  System.out.println(\"resolve-me\");");
+    
+    out.println("  return this;");
+    out.println("}");
   }
   
   protected void generateConstructor(JavaWriter out, Constructor ctor)

@@ -30,6 +30,7 @@
 package com.caucho.amber.manager;
 
 import com.caucho.util.L10N;
+import com.caucho.webbeans.component.HandleAware;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -41,7 +42,9 @@ import java.util.logging.Logger;
 /**
  * The Entity manager
  */
-public class EntityManagerProxy implements EntityManager {
+public class EntityManagerProxy
+  implements EntityManager, java.io.Serializable, HandleAware
+{
   private static final L10N L = new L10N(EntityManagerProxy.class);
   private static final Logger log
     = Logger.getLogger(EntityManagerProxy.class.getName());
@@ -49,6 +52,7 @@ public class EntityManagerProxy implements EntityManager {
   private AmberPersistenceUnit _persistenceUnit;
 
   private boolean _isExtended;
+  private Object _serializationHandle;
 
   public EntityManagerProxy(AmberPersistenceUnit persistenceUnit)
   {
@@ -257,6 +261,22 @@ public class EntityManagerProxy implements EntityManager {
   private AmberConnection getCurrent()
   {
     return _persistenceUnit.getThreadConnection(_isExtended);
+  }
+
+  /**
+   * Serialization handle
+   */
+  public void setSerializationHandle(Object handle)
+  {
+    _serializationHandle = handle;
+  }
+
+  /**
+   * Serialize to the handle.
+   */
+  private Object writeReplace()
+  {
+    return _serializationHandle;
   }
 
   public String toString()

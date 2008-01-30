@@ -35,13 +35,15 @@ import java.util.concurrent.*;
 
 import com.caucho.loader.*;
 import com.caucho.util.*;
+import com.caucho.webbeans.component.WebBeansHandle;
 
 /**
  * A wrapper for Caucho system variables, allowing tests to override
  * the default variables.
  */
 public class ScheduledThreadPool
-  implements ScheduledExecutorService, EnvironmentListener
+  implements ScheduledExecutorService, EnvironmentListener,
+	     java.io.Serializable
 {
   private static Logger log
     = Logger.getLogger(ScheduledThreadPool.class.getName());
@@ -422,6 +424,14 @@ public class ScheduledThreadPool
   public void environmentStop(EnvironmentClassLoader loader)
   {
     stop();
+  }
+
+  /**
+   * Serialize to a webbeans handle
+   */
+  public Object writeReplace()
+  {
+    return new WebBeansHandle(ScheduledExecutorService.class);
   }
 
   public String toString()
