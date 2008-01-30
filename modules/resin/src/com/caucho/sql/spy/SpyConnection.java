@@ -148,9 +148,17 @@ public class SpyConnection implements java.sql.Connection {
   {
     try {
       DatabaseMetaData metaData = _conn.getMetaData();
-      
-      log.fine(getId() + ":getMetaData() -> " + metaData);
-      
+
+      // Avoid logging result of metaData.toString() here
+      // because it may not be overloaded. The default
+      // toString() result contains a hex representation
+      // of the memory location that can't be matched in a
+      // regression test.
+
+      String ident = metaData.getClass().getName();
+
+      log.fine(getId() + ":getMetaData() -> " + ident);
+
       return metaData;
     } catch (SQLException e) {
       log.fine(getId() + ":exn-getMetaData(" + e + ")");
