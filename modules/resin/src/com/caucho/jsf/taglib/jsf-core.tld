@@ -298,6 +298,25 @@
     </attribute>
   </tag>
 
+  <!-- f:setPropertyActionListener -->
+  <tag>
+    <name>setPropertyActionListener</name>
+    <tag-class>com.caucho.jsf.taglib.SetPropertyActionListenerTag</tag-class>
+    <body-content>empty</body-content>
+
+    <attribute>
+      <name>value</name>
+      <required>true</required>
+      <deferred-value/>
+    </attribute>
+
+    <attribute>
+      <name>target</name>
+      <required>true</required>
+      <deferred-value/>
+    </attribute>
+  </tag>
+  
   <!-- f:subview -->
   <tag>
     <name>subview</name>
