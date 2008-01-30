@@ -32,6 +32,7 @@ package com.caucho.config.types;
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
 
 /**
@@ -42,6 +43,11 @@ public class InterfaceConfig extends BeanConfig {
 
   private boolean _isDeploy;
   private boolean _isFactory = true;
+
+  private String _tagName = "bean";
+
+  private String _valueName;
+  private Object _value;
   
   public InterfaceConfig()
   {
@@ -52,6 +58,13 @@ public class InterfaceConfig extends BeanConfig {
   {
     setScope("singleton");
     setBeanConfigClass(type);
+  }
+  
+  public InterfaceConfig(Class type, String tagName)
+  {
+    setScope("singleton");
+    setBeanConfigClass(type);
+    setTagName(tagName);
   }
 
   /**
@@ -93,6 +106,23 @@ public class InterfaceConfig extends BeanConfig {
   }
 
   /**
+   * Sets the tag name.
+   */
+  public void setTagName(String tagName)
+  {
+    _tagName = tagName;
+  }
+
+  /**
+   * Sets the tag name.
+   */
+  @Override
+  public String getTagName()
+  {
+    return _tagName;
+  }
+
+  /**
    * If the name is set, the bean will get deployed
    */
   @Override
@@ -102,6 +132,34 @@ public class InterfaceConfig extends BeanConfig {
 
     _isDeploy = true;
   }
+
+  /**
+   * Sets the value for old-style jndi lookup
+   */
+  public void setValue(String value)
+  {
+    _valueName = value;
+  }
+
+  /**
+   * Override init to handle value
+   */
+  @Override
+  public void init()
+  {
+    if (_valueName != null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      _comp = webBeans.findByName(_valueName);
+
+      if (_comp == null)
+	throw new ConfigException(L.l("'{0}' is an unknown bean",
+				      _valueName));
+    }
+    else
+      super.init();
+  }
+  
 
   @Override
   public void deploy()

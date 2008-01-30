@@ -101,12 +101,13 @@ public class ConfigException
 
   public static RuntimeException createLine(String line, Throwable e)
   {
-    if (e instanceof InstantiationException && e.getCause() != null)
+    while (e.getCause() != null
+	   && (e instanceof InstantiationException
+	       || e instanceof InvocationTargetException
+	       || e.getClass().equals(ConfigRuntimeException.class))) {
       e = e.getCause();
+    }
     
-    if (e instanceof InvocationTargetException && e.getCause() != null)
-      e = e.getCause();
-
     if (e instanceof LineConfigException)
       throw (LineConfigException) e;
     else if (e instanceof DisplayableException) {
@@ -138,9 +139,10 @@ public class ConfigException
 
   public static RuntimeException create(Throwable e)
   {
-    if (e.getCause() != null
-	&& (e instanceof InstantiationException
-	    || e instanceof InvocationTargetException)) {
+    while (e.getCause() != null
+	   && (e instanceof InstantiationException
+	       || e instanceof InvocationTargetException
+	       || e.getClass().equals(ConfigRuntimeException.class))) {
       e = e.getCause();
     }
     

@@ -63,6 +63,11 @@ abstract public class SessionServer extends AbstractServer
   }
 
   /**
+   * Returns the object corresponding to the given api
+   */
+  abstract protected Object getObject(Class api);
+
+  /**
    * Initialize the server
    */
   @Override
@@ -86,9 +91,9 @@ abstract public class SessionServer extends AbstractServer
       webBeans.addComponent(comp);
 
       if (_localHomeClass != null)
-	_localHome = (EJBLocalHome) getLocalObject(_localHomeClass);
+	_localHome = (EJBLocalHome) getObject(_localHomeClass);
       if (_remoteHomeClass != null)
-	_remoteHome = (EJBHome) getRemoteObject(_remoteHomeClass);
+	_remoteHome = (EJBHome) getObject(_remoteHomeClass);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

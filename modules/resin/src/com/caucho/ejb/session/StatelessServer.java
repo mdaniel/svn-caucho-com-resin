@@ -81,6 +81,15 @@ public class StatelessServer extends SessionServer {
 
     return new StatelessProviderProxy(provider);
   }
+
+  /**
+   * Returns the object implementation
+   */
+  @Override
+  public Object getObject(Class api)
+  {
+    return getStatelessContext().getProvider(api);
+  }
   
   protected ComponentImpl createSessionComponent(Class api)
   {

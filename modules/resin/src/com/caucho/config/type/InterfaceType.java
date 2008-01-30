@@ -69,7 +69,7 @@ public final class InterfaceType extends ConfigType
   @Override
   public Object create(Object parent)
   {
-    InterfaceConfig cfg = new InterfaceConfig(_type);
+    InterfaceConfig cfg = new InterfaceConfig(_type, _type.getSimpleName());
     
     return cfg;
   }

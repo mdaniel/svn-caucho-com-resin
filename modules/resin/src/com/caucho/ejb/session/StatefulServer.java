@@ -103,6 +103,15 @@ public class StatefulServer extends SessionServer
     return new StatefulProviderProxy(provider);
   }
 
+  /**
+   * Returns the object implementation
+   */
+  @Override
+  public Object getObject(Class api)
+  {
+    return getStatefulContext().getProvider(api);
+  }
+
   protected ComponentImpl createSessionComponent(Class api)
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);

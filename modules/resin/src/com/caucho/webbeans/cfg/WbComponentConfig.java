@@ -258,7 +258,8 @@ public class WbComponentConfig {
   public void init()
   {
     if (_cl == null)
-      throw new ConfigException(L.l("<component> requires a class attribute"));
+      throw new ConfigException(L.l("<{0}> requires a class attribute",
+				    getTagName()));
 
     introspect();
     
@@ -298,6 +299,14 @@ public class WbComponentConfig {
     comp.init();
 
     deploy();
+  }
+
+  /**
+   * Returns the XML tag name for debugging.
+   */
+  protected String getTagName()
+  {
+    return "component";
   }
 
   /**
