@@ -31,6 +31,7 @@ package com.caucho.quercus.resources;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.vfs.ReadStream;
@@ -41,7 +42,9 @@ import java.io.IOException;
 /**
  * Represents read/write stream
  */
-public class StreamReadWrite extends StreamResource {
+public class StreamReadWrite extends StreamResource
+    implements EnvCleanup
+{
   private Env _env;
   private ReadStream _is;
   private WriteStream _os;
@@ -50,14 +53,12 @@ public class StreamReadWrite extends StreamResource {
   {
     _env = env;
     
-    env.addClose(this);
+    _env.addCleanup(this);
   }
 
   public StreamReadWrite(Env env, ReadStream is, WriteStream os)
   {
     this(env);
-    
-    _env = env;
 
     init(is, os);
   }
@@ -235,6 +236,16 @@ public class StreamReadWrite extends StreamResource {
    */
   public void close()
   {
+    _env.removeCleanup(this);
+
+    cleanup();
+  }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+  public void cleanup()
+  {
     ReadStream is = _is;
     _is = null;
     
@@ -250,5 +261,6 @@ public class StreamReadWrite extends StreamResource {
     } catch (IOException e) {
     }
   }
+
 }
 

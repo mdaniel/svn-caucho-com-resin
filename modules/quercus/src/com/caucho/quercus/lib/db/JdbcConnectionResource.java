@@ -32,12 +32,12 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import java.io.Closeable;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +45,9 @@ import java.util.logging.Logger;
 /**
  * Represents a JDBC Connection value.
  */
-public abstract class JdbcConnectionResource implements Closeable {
+public abstract class JdbcConnectionResource
+    implements EnvCleanup
+{
   private static final L10N L = new L10N(JdbcConnectionResource.class);
   private static final Logger log
     = Logger.getLogger(JdbcConnectionResource.class.getName());
@@ -83,6 +85,8 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   private boolean _isUsed;
   private boolean _isConnected;
+
+  protected boolean _connectionLog = false;
 
   public JdbcConnectionResource(Env env)
   {
@@ -146,6 +150,17 @@ public abstract class JdbcConnectionResource implements Closeable {
   }
 
   /**
+   * Invoke this method to indicate that connection
+   * lifetime logging should be enabled. This method
+   * is used for regression testing connection lifetime.
+   */  
+
+  public void enableConnectionLog()
+  {
+    _connectionLog = true;
+  }
+
+  /**
    * Set the current underlying connection and
    * corresponding information: host, port and
    * database name.
@@ -183,7 +198,7 @@ public abstract class JdbcConnectionResource implements Closeable {
       
       _isConnected = true;
 
-      _env.addClose(this);
+      _env.addCleanup(this);
     }
 
     return conn != null;
@@ -495,17 +510,58 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   public boolean close(Env env)
   {
+    if (_connectionLog)
+      log.log(Level.FINER, "close()");
+
     if (_isConnected) {
       _isConnected = false;
 
       // php/1418
       if (! _isUsed || _isCloseOnClose) {
-        env.removeClose(this);
-        close();
+        env.removeCleanup(this);
+        cleanup();
       }
     }
 
     return true;
+  }
+
+  /**
+   * Implements the EnvCleanup interface. This method
+   * will deallocate resources associated with this
+   * connection. This method can be invoked via a
+   * call to close(), or it can be invoked when the
+   * environment is being cleaned up after a quercus
+   * request has been processed.
+   */
+  public void cleanup()
+  {
+    if (_connectionLog)
+      log.log(Level.FINER, "cleanup()");
+
+    try {
+      Statement stmt = _stmt;
+      _stmt = null;
+
+      if (stmt != null)
+        stmt.close();
+    } catch (SQLException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    try {
+      Connection conn = _conn;
+
+      // XXX: since the above code doesn't check for _conn == null can't null
+      // _conn = null;
+
+      if (conn != null) {
+        conn.close();
+      }
+      
+    } catch (SQLException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   public JdbcConnectionResource validateConnection()
@@ -787,36 +843,6 @@ public abstract class JdbcConnectionResource implements Closeable {
   public String toString()
   {
     return _conn.toString();
-  }
-
-  /**
-   * Closes the connection.
-   */
-  public void close()
-  {
-    try {
-      Statement stmt = _stmt;
-      _stmt = null;
-
-      if (stmt != null)
-        stmt.close();
-    } catch (SQLException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    try {
-      Connection conn = _conn;
-
-      // XXX: since the above code doesn't check for _conn == null can't null
-      // _conn = null;
-
-      if (conn != null) {
-        conn.close();
-      }
-      
-    } catch (SQLException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
 
   /**

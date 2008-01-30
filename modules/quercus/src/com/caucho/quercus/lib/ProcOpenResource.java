@@ -30,9 +30,9 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.lib.file.BinaryStream;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +40,8 @@ import java.util.logging.Logger;
 /*
  * Represents a resource opened by proc_open().
  */
-public class ProcOpenResource implements Closeable
+public class ProcOpenResource
+    implements EnvCleanup
 {
   private static final Logger log
   = Logger.getLogger(ProcOpenResource.class.getName());
@@ -65,15 +66,10 @@ public class ProcOpenResource implements Closeable
     _in = in;
     _out = out;
     _err = err;
-    
-    env.addClose(this);
+
+    env.addCleanup(this);
   }
-  
-  public void close()
-  {
-    pclose();
-  }
-  
+
   public int pclose()
   {
     try {
@@ -92,7 +88,7 @@ public class ProcOpenResource implements Closeable
       return -1;
     }
     finally {
-      _env.removeClose(this);
+      _env.removeCleanup(this);
     }
   }
   
@@ -106,8 +102,18 @@ public class ProcOpenResource implements Closeable
   
     _process.destroy();
     
-    _env.removeClose(this);
+    _env.removeCleanup(this);
     
     return true;
   }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+
+  public void cleanup()
+  {
+    pclose();
+  }
+
 }

@@ -38,9 +38,27 @@ import java.util.IdentityHashMap;
 /**
  * Represents a PHP resource
  */
-public class ResourceValue extends Value implements Closeable {
+public class ResourceValue extends Value
+    implements EnvCleanup
+{
+  /**
+   * Implements the EnvCleanup interface.
+   */
+
+  public void cleanup()
+  {
+  }
+
+  /**
+   * By default close() will call cleanup().
+   * If implementation specific logic is
+   * needed to clean up resources it should
+   * be defined in an overloaded cleanup().
+   */
+
   public void close()
   {
+    cleanup();
   }
 
   /**

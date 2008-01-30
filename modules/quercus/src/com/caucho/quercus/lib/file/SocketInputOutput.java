@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketStream;
 import com.caucho.vfs.WriteStream;
@@ -46,6 +47,7 @@ import java.util.logging.Logger;
  */
 public class SocketInputOutput
   extends AbstractBinaryInputOutput
+    implements EnvCleanup
 {
   private static final Logger log
     = Logger.getLogger(SocketInputOutput.class.getName());
@@ -61,9 +63,9 @@ public class SocketInputOutput
   public SocketInputOutput(Env env, Socket socket, Domain domain)
   {
     super(env);
-    
-    env.addClose(this);
-    
+
+    env.addCleanup(this);
+
     _socket = socket;
     _domain = domain;
   }
@@ -149,8 +151,18 @@ public class SocketInputOutput
    */
   public void close()
   {
+    getEnv().removeCleanup(this);
+
+    cleanup();
+  }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+  public void cleanup()
+  {
     super.close();
-    
+
     Socket s = _socket;
     _socket = null;
 
@@ -158,6 +170,7 @@ public class SocketInputOutput
       if (s != null)
         s.close();
     } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 

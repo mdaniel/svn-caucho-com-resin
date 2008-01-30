@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
@@ -47,7 +48,7 @@ import java.util.logging.Logger;
  * Represents a PHP open file
  */
 public class FileOutput extends AbstractBinaryOutput
-    implements LockableStream
+    implements LockableStream, EnvCleanup
 {
   private static final Logger log
     = Logger.getLogger(FileOutput.class.getName());
@@ -68,7 +69,7 @@ public class FileOutput extends AbstractBinaryOutput
   {
     _env = env;
     
-    env.addClose(this);
+    env.addCleanup(this);
     
     _path = path;
 
@@ -158,8 +159,16 @@ public class FileOutput extends AbstractBinaryOutput
    */
   public void close()
   {
-    _env.removeClose(this);
+    _env.removeCleanup(this);
 
+    cleanup();
+  }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+  public void cleanup()
+  {
     try {
       WriteStream os = _os;
       _os = null;

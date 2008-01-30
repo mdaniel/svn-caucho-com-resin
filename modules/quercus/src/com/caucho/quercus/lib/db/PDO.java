@@ -35,6 +35,7 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -57,7 +58,7 @@ import java.util.logging.Logger;
 /**
  * PDO object oriented API facade.
  */
-public class PDO implements java.io.Closeable {
+public class PDO implements EnvCleanup {
   private static final Logger log = Logger.getLogger(PDO.class.getName());
   private static final L10N L = new L10N(PDO.class);
 
@@ -159,7 +160,7 @@ public class PDO implements java.io.Closeable {
     _error = new PDOError(_env);
 
     // XXX: following would be better as annotation on destroy() method
-    _env.addClose(this);
+    _env.addCleanup(this);
 
     try {
       DataSource ds = getDataSource(env, dsn);
@@ -249,6 +250,14 @@ public class PDO implements java.io.Closeable {
   }
 
   public void close()
+  {
+    cleanup();
+  }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+  public void cleanup()
   {
     Connection conn = _conn;
 

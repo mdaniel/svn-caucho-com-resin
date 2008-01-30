@@ -24,47 +24,25 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Nam Nguyen
+ * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.file;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.vfs.Path;
+public interface EnvCleanup {
 
-import java.io.IOException;
+  /*
+   * This method is invoked after a Quercus request has been
+   * processed and the environment is being cleaned up.
+   * An object that implements the EnvCleanup interface
+   * will register itself with via Env.addCleanup() to
+   * ensure that resources are released when the script
+   * has finished executing. If an object's resources
+   * are explicitly cleaned up, the Env.removeCleanup()
+   * method should be invoked.
+   */
 
-public class Directory {
-  public DirectoryValue handle;
-  public String path;
+  public void cleanup() throws Throwable;
 
-  protected Directory(Env env, Path path)
-    throws IOException
-  {
-    handle = new DirectoryValue(env, path);
-    env.addCleanup(handle);
-
-    this.path = path.toString();
-  }
-
-  public Value read(Env env)
-  {
-    return handle.readdir();
-  }
-
-  public void rewind()
-  {
-    handle.rewinddir();
-  }
-
-  public void close()
-  {
-    handle.close();
-  }
-
-  public String toString()
-  {
-    return "Directory[]";
-  }
 }
+

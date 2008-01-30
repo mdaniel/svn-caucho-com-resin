@@ -62,7 +62,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -161,8 +160,8 @@ public class Env {
 
   private Value _this = NullThisValue.NULL;
 
-  private ArrayList<SoftReference<Closeable>> _closeList
-    = new ArrayList<SoftReference<Closeable>>();
+  private ArrayList<SoftReference<EnvCleanup>> _cleanupList
+    = new ArrayList<SoftReference<EnvCleanup>>();
   
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
@@ -611,27 +610,29 @@ public class Env {
   }
 
   /**
-   * add resource to _closeList
+   * add resource to the list of refrences that are
+   * cleaned up when finished with this environment.
    */
-  public void addClose(Closeable closeable)
+  public void addCleanup(EnvCleanup envCleanup)
   {
-    _closeList.add(new SoftReference<Closeable>(closeable));
+    _cleanupList.add(new SoftReference<EnvCleanup>(envCleanup));
   }
 
   /**
-   * remove resource from _resourceList
+   * remove resource from the list of refrences that are
+   * cleaned up when finished with this environment.
    *
    * @param resource
    */
-  public void removeClose(Closeable closeable)
+  public void removeCleanup(EnvCleanup envCleanup)
   {
-    for (int i = _closeList.size() - 1; i >= 0; i--) {
-      SoftReference<Closeable> ref = _closeList.get(i);
+    for (int i = _cleanupList.size() - 1; i >= 0; i--) {
+      SoftReference<EnvCleanup> ref = _cleanupList.get(i);
 
-      Closeable res = ref.get();
+      EnvCleanup res = ref.get();
 
-      if (closeable.equals(res)) {
-        _closeList.remove(i);
+      if (envCleanup.equals(res)) {
+        _cleanupList.remove(i);
         break;
       }
     }
@@ -4594,15 +4595,15 @@ public class Env {
         log.log(Level.FINE, e.toString(), e);
       }
 
-      ArrayList<SoftReference<Closeable>> closeList;
-      closeList = new ArrayList<SoftReference<Closeable>>(_closeList);
-      
-      for (SoftReference<Closeable> ref : closeList) {
-        try {
-          Closeable close = ref.get();
+      ArrayList<SoftReference<EnvCleanup>> cleanupList = _cleanupList;
+      _cleanupList = new ArrayList<SoftReference<EnvCleanup>>(_cleanupList);
 
-          if (close != null)
-            close.close();
+      for (SoftReference<EnvCleanup> ref : cleanupList) {
+        try {
+          EnvCleanup envCleanup = ref.get();
+
+          if (envCleanup != null)
+            envCleanup.cleanup();
         }
         catch (Throwable e) {
           log.log(Level.FINER, e.toString(), e);

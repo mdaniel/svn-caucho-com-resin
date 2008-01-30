@@ -30,6 +30,8 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
+
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.FileInput;
 import com.caucho.quercus.lib.file.FileOutput;
@@ -45,7 +47,9 @@ import java.util.logging.Logger;
 /**
  * Represents an input stream for a proc_open process.
  */
-public class ProcOpenInput extends ReadStreamInput {
+public class ProcOpenInput extends ReadStreamInput
+    implements EnvCleanup
+{
   private static final Logger log
     = Logger.getLogger(FileInput.class.getName());
 
@@ -61,7 +65,7 @@ public class ProcOpenInput extends ReadStreamInput {
     _env = env;
     _in = in;
     
-    env.addClose(this);
+    env.addCleanup(this);
 
     init(new ReadStream(new VfsStream(in, null)));
   }
@@ -69,15 +73,18 @@ public class ProcOpenInput extends ReadStreamInput {
   public ProcOpenInput(Env env, InputStream in, FileOutput out)
   {
     super(env);
-    
+
     _env = env;
     _in = in;
-    
-    //XXX: env.removeClose(out) to make sure 'out' is not closed?
-    env.removeClose(out);
+
+    // Invoke removeCleanup() to ensure that out is not closed
+    // before cleanup() is invoked for this object.
+
+    env.removeCleanup(out);
+
     _out = out;
-    
-    env.addClose(this);
+
+    env.addCleanup(this);
 
     init(new ReadStream(new VfsStream(in, null)));
   }
@@ -112,13 +119,24 @@ public class ProcOpenInput extends ReadStreamInput {
 
   public void close()
   {
+    _env.removeCleanup(this);
+
+    cleanup();
+  }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+
+  public void cleanup()
+  {
     try {
       if (_out != null) {
         int ch;
         while ((ch = _in.read()) >= 0) {
           _out.write(ch);
         }
-        
+
         _out.close();
       }
 
@@ -128,9 +146,7 @@ public class ProcOpenInput extends ReadStreamInput {
       log.log(Level.FINE, e.toString(), e);
       _env.warning(e);
     }
-    finally {
-      _env.removeClose(this);
-    }
   }
+
 }
 

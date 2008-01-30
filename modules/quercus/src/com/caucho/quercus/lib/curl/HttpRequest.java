@@ -31,10 +31,10 @@ package com.caucho.quercus.lib.curl;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
@@ -54,7 +54,7 @@ import java.util.zip.InflaterInputStream;
  * Represents a generic Http request.
  */
 public class HttpRequest
-  implements Closeable
+  implements EnvCleanup
 {
   private static final Logger log
     = Logger.getLogger(HttpRequest.class.getName());
@@ -337,9 +337,9 @@ public class HttpRequest
   }
 
   /**
-   * Disconnects the connection.
+   * Cleanup resources associated with this connection.
    */
-  public void close()
+  public void cleanup()
   {
     if (_conn != null)
       _conn.close();

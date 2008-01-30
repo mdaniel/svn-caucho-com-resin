@@ -56,7 +56,7 @@ import java.util.logging.Logger;
  * PDO object oriented API facade.
  */
 public class PDOStatement
-  implements Iterable<Value>, java.io.Closeable
+  implements Iterable<Value>, EnvCleanup
 {
   private static final Logger log = Logger.getLogger(PDOStatement.class.getName());
   private static final L10N L = new L10N(PDOStatement.class);
@@ -96,7 +96,7 @@ public class PDOStatement
 
     _query = query;
 
-    env.addClose(this);
+    env.addCleanup(this);
 
     if (options != null && options.getSize() > 0) {
       _env.notice(L.l("PDOStatement options unsupported"));
@@ -340,6 +340,14 @@ public class PDOStatement
   }
 
   public void close()
+  {
+    cleanup();
+  }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+  public void cleanup()
   {
     ResultSet resultSet = _resultSet;
     Statement statement = _statement;

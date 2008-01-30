@@ -35,7 +35,6 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,7 +46,7 @@ import java.util.logging.Logger;
  * Represents a Quercus file open for reading
  */
 public class AbstractBinaryInputOutput
-  implements BinaryInput, BinaryOutput, Closeable
+  implements BinaryInput, BinaryOutput
 {
   private static final Logger log
     = Logger.getLogger(AbstractBinaryInputOutput.class.getName());
@@ -432,6 +431,11 @@ public class AbstractBinaryInputOutput
   public String getResourceType()
   {
     return "stream";
+  }
+
+  protected Env getEnv()
+  {
+    return _env;
   }
 
   /**

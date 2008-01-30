@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
 
@@ -41,7 +42,9 @@ import java.util.logging.Logger;
 /**
  * Represents an output stream for a popen'ed process.
  */
-public class PopenOutput extends AbstractBinaryOutput {
+public class PopenOutput extends AbstractBinaryOutput
+    implements EnvCleanup
+{
   private static final Logger log
     = Logger.getLogger(PopenOutput.class.getName());
 
@@ -54,7 +57,7 @@ public class PopenOutput extends AbstractBinaryOutput {
   {
     _env = env;
 
-    _env.addClose(this);
+    _env.addCleanup(this);
     
     _process = process;
 
@@ -131,14 +134,6 @@ public class PopenOutput extends AbstractBinaryOutput {
   {
     close();
   }
-  
-  /**
-   * Closes the file.
-   */
-  public void close()
-  {
-    pclose();
-  }
 
   public int pclose()
   {
@@ -155,8 +150,25 @@ public class PopenOutput extends AbstractBinaryOutput {
 
       return -1;
     } finally {
-      _env.removeClose(this);
+      _env.removeCleanup(this);
     }
+  }
+
+  /**
+   * Closes the file.
+   */
+  public void close()
+  {
+    pclose();
+  }
+
+  /**
+   * Implements the EnvCleanup interface.
+   */
+
+  public void cleanup()
+  {
+    pclose();
   }
 
   /**
