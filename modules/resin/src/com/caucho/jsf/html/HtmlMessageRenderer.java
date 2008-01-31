@@ -31,7 +31,6 @@ package com.caucho.jsf.html;
 import java.io.*;
 import java.util.*;
 
-import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
@@ -201,17 +200,17 @@ class HtmlMessageRenderer extends Renderer
 	if (styleClass != null)
 	  out.writeAttribute("class", styleClass, "styleClass");
 
-	if (tooltip && isShowSummary && isShowDetail) {
-	  out.writeAttribute("title", msg.getSummary(), "title");
-	}
-	else if (title != null) {
-	  out.writeAttribute("title", title, "title");
-
-	  if (isShowSummary)
+	if (isShowSummary) {
+	  if (tooltip && isShowDetail) {
+	    out.writeAttribute("title", msg.getSummary(), "title");
+	  }
+	  else if (title != null) {
+	    out.writeAttribute("title", title, "title");
 	    out.writeText(msg.getSummary(), "summary");
-	}
-	else if (isShowSummary) {
-	  out.writeText(msg.getSummary(), "summary");
+	  }
+	  else {
+	    out.writeText(msg.getSummary(), "summary");
+	  }
 	}
 
 	if (isShowDetail)
