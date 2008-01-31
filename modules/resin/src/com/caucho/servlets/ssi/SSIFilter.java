@@ -28,39 +28,51 @@
 
 package com.caucho.servlets.ssi;
 
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.log.Log;
-import com.caucho.server.connection.*;
-import com.caucho.filters.*;
-import com.caucho.util.CompileException;
+import com.caucho.filters.CauchoResponseWrapper;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Filters the result as SSI.
- *
- * @since Resin 2.0.6
  */
 public class SSIFilter implements Filter {
   private static final L10N L = new L10N(SSIFilter.class);
   private static final Logger log
     = Logger.getLogger(SSIFilter.class.getName());
-  
+
+  private SSIFactory _factory;
+
+  /**
+   * Set's the SSIFactory, default is a factory that handles
+   * the standard Apache SSI commands.
+   */
+  public void setFactory(SSIFactory factory)
+  {
+    _factory = factory;
+  }
+
   public void init(FilterConfig config)
     throws ServletException
   {
+    if (_factory == null)
+      _factory = new SSIFactory();
   }
-  
+
   /**
    * Creates a wrapper to save the output.
    */
@@ -130,7 +142,7 @@ public class SSIFilter implements Filter {
       ReadStream is = _tempStream.openRead(true);
       Statement stmt = null;
       try {
-	stmt = new SSIParser().parse(is);
+	stmt = new SSIParser(_factory).parse(is);
       } finally {
 	is.close();
       }

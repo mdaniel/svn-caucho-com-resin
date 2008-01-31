@@ -29,9 +29,7 @@
 
 package com.caucho.servlets.ssi;
 
-import com.caucho.util.ByteBuffer;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
@@ -40,9 +38,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Serves server-side include files.
@@ -51,7 +48,27 @@ public class SSIServlet extends HttpServlet
 {
   private static final Logger log
     = Logger.getLogger(SSIServlet.class.getName());
-  
+
+  private SSIFactory _factory;
+
+  /**
+   * Set's the SSIFactory, default is a factory that handles
+   * the standard Apache SSI commands.
+   */
+  public void setFactory(SSIFactory factory)
+  {
+    _factory = factory;
+  }
+
+  public void init()
+    throws ServletException
+  {
+    super.init();
+
+    if (_factory == null)
+      _factory = new SSIFactory();
+  }
+
   public void doGet(HttpServletRequest request,
 		    HttpServletResponse response)
     throws ServletException, IOException
@@ -87,7 +104,7 @@ public class SSIServlet extends HttpServlet
 
     response.setContentType("text/html");
 
-    Statement stmt = new SSIParser().parse(path);
+    Statement stmt = new SSIParser(_factory).parse(path);
 
     WriteStream out = Vfs.openWrite(response.getOutputStream());
 

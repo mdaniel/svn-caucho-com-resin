@@ -122,7 +122,7 @@ public class MyBean {
 <p>Method injection can use any binding annotation on any of the parameters.
 When Resin introspects the component class and it finds
 any <code>@BindingType</code> or <code>@In</code> parameter on a method, it
-will add that schedule that method to be injected.  Method parameters can
+will schedule that method to be injected.  Method parameters can
 also use <code>@New</code>.  The method does not need to follow bean-style
 setting conventions; any method will work.</p>
 
@@ -924,7 +924,7 @@ like a class-based component can.</p>
 
 <p>Some functions like security, logging and transaction handing need
 to be used for each method invidually, but require a common
-implementation pattern.  The WebBeans AOP use use a single method as
+implementation pattern.  The WebBeans AOP uses a single method as
 a interceptor for each method invocation.</p>
 
 <p>Your method will use an <code>@InterceptorType</code> annotation

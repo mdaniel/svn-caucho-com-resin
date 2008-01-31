@@ -32,13 +32,7 @@ package com.caucho.servlets.ssi;
 import com.caucho.util.ByteBuffer;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +42,18 @@ import java.util.HashMap;
  */
 public class SSIParser {
   private int _line;
+
+  private final SSIFactory _factory;
+
+  public SSIParser()
+  {
+    _factory = new SSIFactory();
+  }
+
+  public SSIParser(SSIFactory factory)
+  {
+    _factory = factory;
+  }
 
   Statement parse(Path path)
     throws IOException
@@ -159,16 +165,12 @@ public class SSIParser {
     else if ((ch = is.read()) != '>') {
     }
 
-    if ("config".equals(cmd))
-      return ConfigStatement.create(attr, is.getPath());
-    else if ("echo".equals(cmd))
-      return EchoStatement.create(attr, is.getPath());
-    else if ("include".equals(cmd))
-      return IncludeStatement.create(attr, is.getPath());
-    else if ("set".equals(cmd))
-      return SetStatement.create(attr, is.getPath());
-    else
-      return new ErrorStatement("['" + cmd + "' is an unknown command.]");
+    Statement statement = _factory.createStatement(cmd, attr, is.getPath());
+
+    if (statement == null)
+      statement = new ErrorStatement("['" + cmd + "' is an unknown command.]");
+
+    return statement;
   }
 
   private HashMap<String,String> parseAttributes(ReadStream is)

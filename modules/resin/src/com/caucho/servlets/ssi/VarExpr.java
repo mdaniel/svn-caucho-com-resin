@@ -91,7 +91,7 @@ public class VarExpr extends SSIExpr {
     }
     else
       code = ATTRIBUTE;
-    
+
     _code = code;
     _var = var;
 
