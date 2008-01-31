@@ -40,6 +40,8 @@ public class SnmpParsingException extends IOException
   
   public SnmpParsingException(Exception e)
   {
-    super(e);
+    this(e.getMessage());
+    
+    initCause(e);
   }
 }
