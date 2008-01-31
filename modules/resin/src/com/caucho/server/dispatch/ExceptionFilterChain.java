@@ -39,7 +39,8 @@ import java.io.IOException;
  */
 public class ExceptionFilterChain implements FilterChain {
   // servlet
-  private ServletException _exception;
+  private RuntimeException _runtimeException;
+  private ServletException _servletException;
 
   /**
    * Create the exception filter chain.
@@ -48,10 +49,12 @@ public class ExceptionFilterChain implements FilterChain {
    */
   public ExceptionFilterChain(Throwable exn)
   {
-    if (exn instanceof ServletException)
-      _exception = (ServletException) exn;
+    if (exn instanceof RuntimeException)
+      _runtimeException = (RuntimeException) exn;
+    else if (exn instanceof ServletException)
+      _servletException = (ServletException) exn;
     else
-      _exception = new ServletException(exn);
+      _servletException = new ServletException(exn);
   }
   
   /**
@@ -64,6 +67,9 @@ public class ExceptionFilterChain implements FilterChain {
                        ServletResponse response)
     throws ServletException, IOException
   {
-    throw _exception;
+    if (_runtimeException != null)
+      throw _runtimeException;
+    else
+      throw _servletException;
   }
 }

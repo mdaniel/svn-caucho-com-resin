@@ -389,7 +389,6 @@ public class WebApp extends ServletContextImpl
 
       _jspApplicationContext = new JspApplicationContextImpl(this);
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
       setConfigException(e);
     } finally {
       _lifecycle = new Lifecycle(log, toString(), Level.INFO);
@@ -1532,8 +1531,6 @@ public class WebApp extends ServletContextImpl
   public void setConfigException(Throwable e)
   {
     if (e != null) {
-      log.log(Level.WARNING, e.toString(), e);
-
       Throwable e1 = e;
       for (;
            e1 != null
@@ -1842,7 +1839,6 @@ public class WebApp extends ServletContextImpl
         _servletManager.init();
         _filterManager.init();
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
         setConfigException(e);
       }
 

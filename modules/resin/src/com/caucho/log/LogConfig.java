@@ -103,7 +103,7 @@ public class LogConfig extends RotateLog {
   /**
    * Sets the mbean-name of the logger to configure.
    */
-  public void setMBeanName(String name)
+  public void setMbeanName(String name)
   {
     _mbeanName = name;
   }

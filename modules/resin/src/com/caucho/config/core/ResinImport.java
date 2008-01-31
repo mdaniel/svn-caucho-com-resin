@@ -60,6 +60,9 @@ public class ResinImport extends ResinControl
    */
   public void setPath(Path path)
   {
+    if (path == null)
+      throw new NullPointerException(L.l("'path' may not be null for resin:import"));
+    
     _path = path;
   }
 

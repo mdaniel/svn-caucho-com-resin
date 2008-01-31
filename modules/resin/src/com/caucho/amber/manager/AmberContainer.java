@@ -1021,6 +1021,14 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   //
   
   /**
+   * Handles the environment config phase
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+    // config();
+  }
+  
+ /**
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)

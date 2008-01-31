@@ -483,7 +483,10 @@ public class HostController
 
     WebBeansContainer webBeans = WebBeansContainer.create();
     webBeans.addSingleton(_hostVar, "host", Standard.class);
-    
+
+    for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {
+      webBeans.addSingleton(entry.getValue(), entry.getKey(), Standard.class);
+    }
     // getVariableMap().put("host-root", getRootDirectory());
 
     if (_container != null) {

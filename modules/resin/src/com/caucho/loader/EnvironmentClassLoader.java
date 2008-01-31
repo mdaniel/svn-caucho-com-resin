@@ -31,6 +31,7 @@ package com.caucho.loader;
 
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.loader.enhancer.ScanManager;
 import com.caucho.loader.enhancer.ScanListener;
@@ -90,14 +91,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private ArrayList<EnvironmentListener> _listeners;
   private WeakStopListener _stopListener;
 
-  // Returns true once the environment has started
-  private volatile boolean _isStarted;
-
-  // Returns true if the environment is active
-  private volatile boolean _isActive;
-
-  // Returns true if the environment is stopped
-  private volatile boolean _isStopped;
+  // The state of the environment
+  private volatile Lifecycle _lifecycle = new Lifecycle();
 
   private Throwable _configException;
 
@@ -178,7 +173,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public boolean isActive()
   {
-    return _isActive;
+    return _lifecycle.isActive();
   }
 
   /**
@@ -258,14 +253,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _listeners.add(listener);
     }
 
-    if (_isStarted) {
-      try {
-        listener.environmentStart(this);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Throwable e) {
-        throw new StartRuntimeException(e);
-      }
+    if (_lifecycle.isStarting()) {
+      listener.environmentConfig(this);
+    }
+
+    if (_lifecycle.isActive()) {
+      listener.environmentStart(this);
     }
   }
 
@@ -330,16 +323,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       listeners.add(listener);
     }
 
-    if (_lifecycle.isStarting()) {
-      try {
-	listener.environmentStart(this);
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Error e) {
-	throw e;
-      } catch (Throwable e) {
-	throw new RuntimeException(e);
-      }
+    if (_lifecycle.isActive()) {
+      listener.environmentStart(this);
     }
   }
 
@@ -543,38 +528,45 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   }
 
   /**
+   * Starts the config phase of the environment.
+   */
+  private void config()
+  {
+    sendAddLoaderEvent();
+      
+    ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
+
+    int size = listeners.size();
+    for (int i = 0; listeners != null && i < size; i++) {
+      EnvironmentListener listener = listeners.get(i);
+
+      listener.environmentConfig(this);
+    }
+  }
+
+  /**
    * Marks the environment of the class loader as started.  The
    * class loader itself doesn't use this, but a callback might.
    */
   public void start()
   {
-    synchronized (this) {
-      if (_isStarted)
-        return;
+    if (! _lifecycle.toStarting())
+      return;
+    
+    config();
 
-      _isStarted = true;
-    }
-
-    try {
-      sendAddLoaderEvent();
+    sendAddLoaderEvent();
       
-      ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
+    ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
-      int size = listeners.size();
-      for (int i = 0; listeners != null && i < size; i++) {
-        EnvironmentListener listener = listeners.get(i);
+    int size = listeners.size();
+    for (int i = 0; listeners != null && i < size; i++) {
+      EnvironmentListener listener = listeners.get(i);
 
-        listener.environmentStart(this);
-      }
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Error e) {
-      throw e;
-    } catch (Throwable e) {
-      throw new StartRuntimeException(e);
-    } finally {
-      _isActive = true;
+      listener.environmentStart(this);
     }
+
+    _lifecycle.toActive();
   }
 
   /**
@@ -584,13 +576,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public void stop()
   {
-    synchronized (this) {
-      if (_isStopped)
-        return;
-
-      _isStopped = true;
-      _isActive = false;
-    }
+    if (! _lifecycle.toDestroy())
+      return;
 
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
@@ -605,9 +592,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
           EnvironmentListener listener = listeners.get(i);
 
           try {
-            listener.environmentStop(this);
+	    listener.environmentStop(this);
           } catch (Throwable e) {
-            e.printStackTrace();
             log().log(Level.WARNING, e.toString(), e);
           }
         }
@@ -637,9 +623,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       source._listeners.clear();
     }
 
+    /*
     _isStarted = source._isStarted;
     _isActive = source._isActive;
     _isStopped = source._isStopped;
+    */
   }
 
   /**

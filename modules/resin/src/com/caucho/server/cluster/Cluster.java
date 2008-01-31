@@ -31,7 +31,6 @@ package com.caucho.server.cluster;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Period;
@@ -913,12 +912,19 @@ public class Cluster
   /**
    * Handles the case where the environment is starting (after init).
    */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+  }
+  
+ /**
+   * Handles the case where the environment is starting (after init).
+   */
   public void environmentStart(EnvironmentClassLoader loader)
   {
     try {
       if (_clusterStore != null)
         _clusterStore.start();
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }

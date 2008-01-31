@@ -55,6 +55,14 @@ public class DestroyListener implements EnvironmentListener
     _destroy = destroy;
     _destroy.setAccessible(true);
   }
+  
+  /**
+   * Handles the case where the environment is starting (after init).
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+  }
+
   /**
    * Handles the case where the environment is starting (after init).
    */

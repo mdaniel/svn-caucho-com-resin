@@ -108,7 +108,7 @@ public class DirectoryServlet extends HttpServlet {
         uri = req.getRequestURI();
     }
 
-    CharBuffer cb = CharBuffer.allocate();
+    StringBuilder cb = new StringBuilder();
     String servletPath;
 
     if (cauchoReq != null)
@@ -132,8 +132,7 @@ public class DirectoryServlet extends HttpServlet {
     if (pathInfo != null)
       cb.append(pathInfo);
     
-    String relPath = cb.close();
-
+    String relPath = cb.toString();
     String filename = getServletContext().getRealPath(relPath);
     Path path = _context.lookupNative(filename);
 

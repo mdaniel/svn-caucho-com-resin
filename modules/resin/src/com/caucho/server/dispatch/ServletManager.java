@@ -149,11 +149,12 @@ public class ServletManager {
       try {
 	config.createServlet(false);
       } catch (ServletException e) {
-        log.log(Level.WARNING, e.toString(), e);
-
 	// XXX: should JSP failure also cause a system failure?
 	if (config.getJspFile() == null)
 	  throw e;
+	else {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
       }
     }
   }

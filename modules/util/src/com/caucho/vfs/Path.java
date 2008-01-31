@@ -479,7 +479,7 @@ public abstract class Path {
     String lower = getPath().toLowerCase();
 
     int lastCh;
-        
+
     if ((lastCh = lower.charAt(lower.length() - 1)) == '.'
 	|| lastCh == ' ' || lastCh == '*' || lastCh == '?'
 	|| ((lastCh == '/' || lastCh == '\\') && ! isDirectory())

@@ -28,6 +28,7 @@
 
 package com.caucho.loader;
 
+import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.StartLifecycleException;
 
 /**
@@ -35,13 +36,19 @@ import com.caucho.lifecycle.StartLifecycleException;
  */
 public interface EnvironmentListener {
   /**
+   * Handles the case where the environment is initializing
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+    throws ConfigException;
+  
+  /**
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
     throws StartLifecycleException;
-
+  
   /**
-   * Handles the case where the environment is stopping
+   * Handles the case where the environment is stopping (after init).
    */
   public void environmentStop(EnvironmentClassLoader loader);
 }

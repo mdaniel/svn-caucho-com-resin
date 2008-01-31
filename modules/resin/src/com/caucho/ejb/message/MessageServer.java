@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.message;
 
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
@@ -201,6 +201,8 @@ public class MessageServer extends AbstractServer
     Constructor ctor = beanClass.getConstructor(new Class[] { MessageServer.class });
     
     Object listener = ctor.newInstance(this);
+
+    initInstance(listener, new ConfigContext());
 
     return listener;
   }

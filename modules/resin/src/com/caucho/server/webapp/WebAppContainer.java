@@ -675,7 +675,12 @@ public class WebAppContainer
 
     try {
       _appDeploy.start();
-    } catch (Throwable e) {
+    } catch (ConfigException e) {
+      log.warning(e.toString());
+      
+      if (log.isLoggable(Level.FINE))
+	log.log(Level.FINE, e.toString(), e);
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
@@ -1160,6 +1165,13 @@ public class WebAppContainer
     destroy();
   }
 
+  /**
+   * Handles the environment config phase
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+  }
+  
   /**
    * Handles the case where the environment is starting (after init).
    */

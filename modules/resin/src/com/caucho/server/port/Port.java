@@ -1439,11 +1439,19 @@ public class Port
   }
 
   /**
+   * Handles the environment config phase
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+  }
+
+  /**
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
   {
   }
+
 
   /**
    * Handles the case where the environment is stopping

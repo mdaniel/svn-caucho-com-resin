@@ -37,7 +37,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.log.Log;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.*;
@@ -442,6 +441,13 @@ public class ConnectorConfig implements EnvironmentListener {
   }
   
   /**
+   * Handles the configure phase.
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+  }
+  
+  /**
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
@@ -461,6 +467,7 @@ public class ConnectorConfig implements EnvironmentListener {
     stop();
   }
 
+  @Override
   public String toString()
   {
     return "ConnectorResource[" + _name + "]";

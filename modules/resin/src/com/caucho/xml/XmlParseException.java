@@ -28,41 +28,30 @@
 
 package com.caucho.xml;
 
+import com.caucho.config.*;
 import com.caucho.util.LineCompileException;
 
 import org.xml.sax.SAXException;
 
-public class XmlParseException extends SAXException
-  implements LineCompileException
+public class XmlParseException extends LineConfigException
 {
-  private Throwable _cause;
+  XmlParseException()
+  {
+    super();
+  }
   
   XmlParseException(String msg)
   {
     super(msg);
   }
-
-  XmlParseException()
+  
+  XmlParseException(String filename, int line, String msg)
   {
-    super("generic");
+    super(filename, line, msg);
   }
   
   XmlParseException(String msg, Throwable cause)
   {
-    super(msg);
-
-    _cause = cause;
-  }
-
-  XmlParseException(Throwable cause)
-  {
-    super("generic");
-
-    _cause = cause;
-  }
-
-  public Throwable getCause()
-  {
-    return _cause;
+    super(msg, cause);
   }
 }

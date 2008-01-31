@@ -31,7 +31,6 @@ package com.caucho.jca;
 
 import com.caucho.lifecycle.*;
 import com.caucho.loader.*;
-import com.caucho.server.deploy.DeployConfig;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.component.*;
 
@@ -109,6 +108,14 @@ public class ResourceAdapterController implements EnvironmentListener {
   }
   
   /**
+   * Handles the environment config phase.
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+    throws StartLifecycleException
+  {
+  }
+  
+  /**
    * Handles the case where the environment is starting (after init).
    */
   public void environmentStart(EnvironmentClassLoader loader)
@@ -117,6 +124,7 @@ public class ResourceAdapterController implements EnvironmentListener {
     start();
   }
 
+ 
   /**
    * Handles the case where the environment is stopping
    */

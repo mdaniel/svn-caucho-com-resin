@@ -504,6 +504,14 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   }
 
   /**
+   * Returns true if there's a destroy program.
+   */
+  public boolean isDestroyPresent()
+  {
+    return _destroyProgram.length > 0;
+  }
+
+  /**
    * Destroys the value
    */
   public void destroy(Object value, ConfigContext env)

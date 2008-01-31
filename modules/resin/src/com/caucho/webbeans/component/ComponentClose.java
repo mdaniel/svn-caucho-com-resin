@@ -26,55 +26,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.webbeans.component;
 
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
+import java.lang.ref.*;
 
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.config.*;
+import com.caucho.loader.*;
 
 /**
- * Waits for the stop event and calls a @PreDestroy
+ * Waits for the close event and calls a destroy() method.
  */
-public class DestroyListener implements EnvironmentListener {
-  private static final L10N L = new L10N(WeakDestroyListener.class);
-  private static final Logger log = Log.open(WeakDestroyListener.class);
+public class ComponentClose implements ClassLoaderListener {
+  private final WeakReference<Object> _ref;
+  private final ComponentImpl _comp;
 
-  private Method _preDestroy;
-  private Object _bean;
-
-  /**
-   * Creates the new stop listener.
-   *
-   * @param resource the resource which needs closing
-   */
-  public DestroyListener(Method preDestroy, Object obj)
+  public ComponentClose(Object value, ComponentImpl comp)
   {
-    _preDestroy = preDestroy;
-    
-    _bean = obj;
+    _comp = comp;
+    _ref = new WeakReference<Object>(value);
   }
 
   /**
    * Handles the case where a class loader is activated.
    */
-  public void environmentStart(EnvironmentClassLoader loader)
+  public void classLoaderInit(DynamicClassLoader loader)
   {
   }
   
   /**
    * Handles the case where a class loader is dropped.
    */
-  public void environmentStop(EnvironmentClassLoader loader)
+  public void classLoaderDestroy(DynamicClassLoader loader)
   {
-    try {
-      _preDestroy.invoke(_bean, (Object []) null);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    Object obj = _ref.get();
+
+    if (obj != null)
+      _comp.destroy(obj, new ConfigContext());
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _comp + "]";
   }
 }
 

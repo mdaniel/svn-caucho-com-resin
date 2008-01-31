@@ -30,11 +30,8 @@
 package com.caucho.server.deploy;
 
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
-import com.caucho.el.EL;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -43,9 +40,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import javax.el.ELContext;
 import javax.el.ELException;
-import javax.el.ELResolver;
 import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -441,6 +436,13 @@ abstract public class
     }
 
     return path;
+  }
+
+  /**
+   * Handles config phase.
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
   }
 
   /**

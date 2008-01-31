@@ -55,6 +55,13 @@ public class StartListener implements EnvironmentListener {
   }
 
   /**
+   * Configuration callback
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {  
+  }
+  
+  /**
    * Handles the case where a class loader is activated.
    */
   public void environmentStart(EnvironmentClassLoader loader)

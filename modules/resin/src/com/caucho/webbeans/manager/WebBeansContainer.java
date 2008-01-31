@@ -767,6 +767,22 @@ public class WebBeansContainer
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
+  public <T> T getEnvironmentObject(Class<T> type, Annotation ... ann)
+  {
+    ComponentImpl comp = (ComponentImpl) createFactory(type, ann);
+
+    Object value = comp.get();
+
+    if (comp.isDestroyPresent())
+      Environment.addClassLoaderListener(new ComponentClose(value, comp));
+    
+    return (T) value;
+  }
+
+  /**
+   * Returns a new instance for a class, but does not register the
+   * component with webbeans.
+   */
   public ComponentFactory createFactory(Class type, Annotation ... ann)
   {
     FactoryBinding binding = new FactoryBinding(type, ann);
@@ -916,6 +932,14 @@ public class WebBeansContainer
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Handles the case the environment config phase
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+    update();
   }
 
   /**

@@ -2969,7 +2969,7 @@ public class XmlParser extends AbstractParser {
       }
     }
     
-    return new XmlParseException(_filename + ":" + _line + ": " + text);
+    return new XmlParseException(_filename, _line, text);
   }
 
   public void free()

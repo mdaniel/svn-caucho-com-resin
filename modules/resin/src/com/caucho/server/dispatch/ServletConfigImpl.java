@@ -29,8 +29,8 @@
 
 package com.caucho.server.dispatch;
 
+import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.Config;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.NodeBuilderProgram;
 import com.caucho.config.types.InitParam;
@@ -749,8 +749,6 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     } catch (ServletException e) {
       throw e;
     } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-
       throw new ServletException(e);
     }
   }
@@ -892,20 +890,20 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     _alarm = null;
   }
 
-  protected ServletException error(String msg)
+  protected ConfigException error(String msg)
   {
     if (_location != null)
-      return new ServletLineConfigException(_location + msg);
+      return new LineConfigException(_location + msg);
     else
-      return new ServletConfigException(msg);
+      return new ConfigException(msg);
   }
 
-  protected ServletException error(Throwable e)
+  protected RuntimeException error(Throwable e)
   {
     if (_location != null)
-      return new ServletLineConfigException(_location + e.getMessage(), e);
+      return new LineConfigException(_location + e.getMessage(), e);
     else
-      return new ServletConfigException(e);
+      return ConfigException.create(e);
   }
 
   /**

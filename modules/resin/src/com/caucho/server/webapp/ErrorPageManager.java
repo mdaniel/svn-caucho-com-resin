@@ -401,7 +401,13 @@ public class ErrorPageManager {
     }
     else
     */
+    
+    if (log.isLoggable(Level.FINE) || ! Alarm.isTest())
+      doStackTrace = true;
 
+    if (doStackTrace)
+      out.print("<a style=\"text-decoration\" href=\"javascript:document.getElementById('trace').style.display='';\">[show]</a> ");
+    
     if (compileException instanceof DisplayableException) {
       DisplayableException dispExn = (DisplayableException) compileException;
 
@@ -409,12 +415,20 @@ public class ErrorPageManager {
     }
     else if (compileException != null)
       out.println(escapeHtml(compileException.getMessage()));
-    else if (! doStackTrace)
+    else
       out.println(escapeHtml(rootExn.toString()));
 
-    if (doStackTrace || log.isLoggable(Level.FINE)) {
+    if (doStackTrace) {
+      out.println("<span id=\"trace\" style=\"display:none\">");
       printStackTrace(out, lineMessage, e, rootExn, lineMap);
+      out.println("</span>");
     }
+    
+    /*
+     *if (doStackTrace || log.isLoggable(Level.FINE)) {
+        printStackTrace(out, lineMessage, e, rootExn, lineMap);
+      }
+    */
 
     out.println("</pre></code>");
 

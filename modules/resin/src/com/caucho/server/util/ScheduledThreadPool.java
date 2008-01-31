@@ -412,6 +412,13 @@ public class ScheduledThreadPool
   //
 
   /**
+   * Called when the environment config phase
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+  }
+
+  /**
    * Called when the environment starts.
    */
   public void environmentStart(EnvironmentClassLoader loader)
@@ -434,6 +441,7 @@ public class ScheduledThreadPool
     return new WebBeansHandle(ScheduledExecutorService.class);
   }
 
+  @Override
   public String toString()
   {
     if (_loader instanceof EnvironmentClassLoader)

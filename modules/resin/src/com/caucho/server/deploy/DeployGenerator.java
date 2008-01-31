@@ -35,7 +35,6 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.vfs.Dependency;
 
 import javax.annotation.PostConstruct;
@@ -299,6 +298,13 @@ abstract public class DeployGenerator<E extends DeployController>
   protected void destroyImpl()
   {
     _container.remove(this);
+  }
+
+  /**
+   * Handles the case where the environment is starting (after init).
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
   }
 
   /**

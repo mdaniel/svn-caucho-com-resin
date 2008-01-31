@@ -601,12 +601,16 @@ public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
     String loc = "";
     
     if (_extLocator != null) {
-      loc = (_extLocator.getFilename() + ":"
-	     + _extLocator.getLineNumber() + ": ");
+      return new XmlParseException(_extLocator.getFilename(),
+				   _extLocator.getLineNumber(),
+				   text);
     }
-    else if (_locator != null)
-      loc = _locator.getSystemId() + ":" + _locator.getLineNumber() + ": ";
+    else if (_locator != null) {
+      return new XmlParseException(_locator.getSystemId(),
+				   _locator.getLineNumber(),
+				   text);
+    }
 
-    return new XmlParseException(loc + text);
+    return new XmlParseException(text);
   }
 }

@@ -519,6 +519,10 @@ public class WebAppController
     webBeans.addSingleton(app, getContextPath(), Standard.class);
     webBeans.addSingleton(getVar(), "webApp", Standard.class);
     webBeans.addSingleton(getVar(), "app", Standard.class);
+
+    for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {
+      webBeans.addSingleton(entry.getValue(), entry.getKey(), Standard.class);
+    }
     
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());

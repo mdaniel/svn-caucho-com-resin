@@ -40,7 +40,6 @@ import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.TempStream;
 
@@ -329,7 +328,7 @@ abstract public class StoreManager
       _cluster = Cluster.getLocal();
     
     if (_cluster != null) {
-      _serverId = _cluster.getServerId();
+      _serverId = Cluster.getServerId();
       ClusterServer selfServer = _cluster.getSelfServer();
 
       if (selfServer != null)
@@ -720,6 +719,13 @@ abstract public class StoreManager
   /**
    * Handles the case where the environment is activated.
    */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+  }
+  
+  /**
+   * Handles the case where the environment is activated.
+   */
   public void environmentStart(EnvironmentClassLoader loader)
   {
     try {
@@ -781,11 +787,13 @@ abstract public class StoreManager
       _objectId = objectId;
     }
 
+    @Override
     public int hashCode()
     {
       return _storeId.hashCode() * 65521 + _objectId.hashCode();
     }
 
+    @Override
     public boolean equals(Object o)
     {
       if (this == o)

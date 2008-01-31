@@ -81,6 +81,8 @@ r_cluster-Basis =
 
   & r_ping*
 
+  & r_redeploy-mode?
+
   & r_rewrite-dispatch?
 
   & r_root-directory?

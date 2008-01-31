@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.*;
 
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
@@ -118,16 +119,10 @@ public class Listener extends DescriptionGroupConfig {
   {
     if (_object != null)
       return _object;
-    
-      _object = _listenerClass.newInstance();
-    
-    ContainerProgram init = getInit();
-    ConfigProgram program;
 
-    if (init != null)
-      init.configure(_object);
-
-    Config.init(_object);
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    _object = webBeans.getEnvironmentObject(_listenerClass);
 
     return _object;
   }

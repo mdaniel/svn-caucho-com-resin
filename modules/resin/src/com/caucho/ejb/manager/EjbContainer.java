@@ -51,7 +51,8 @@ import com.caucho.vfs.*;
 /**
  * Environment-based container.
  */
-public class EjbContainer implements ScanListener, EnvironmentListener {
+public class EjbContainer implements ScanListener, EnvironmentListener
+{
   private static final L10N L = new L10N(EjbContainer.class);
   private static final Logger log
     = Logger.getLogger(EjbContainer.class.getName());
@@ -454,13 +455,16 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   {
   }
 
+  private void config()
+  {
+    _configManager.start();
+  }
+
   public void start()
     throws ConfigException
   {
     try {
       AmberContainer.create().start();
-      
-      _configManager.start();
 
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
@@ -520,6 +524,14 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+  }
+
+  /**
+   * Handles the case where the environment is configuring
+   */
+  public void environmentConfig(EnvironmentClassLoader loader)
+  {
+    config();
   }
 
   /**
