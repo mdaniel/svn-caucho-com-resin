@@ -344,8 +344,8 @@ public class TransactionManagerImpl
       
       XidImpl xidImpl = new XidImpl(xids[i].getGlobalTransactionId());
 
-      if (_xaLogManager != null &&
-	  _xaLogManager.hasCommittedXid(xidImpl)) {
+      if (_xaLogManager != null
+	  && _xaLogManager.hasCommittedXid(xidImpl)) {
 	log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));
 
 	try {

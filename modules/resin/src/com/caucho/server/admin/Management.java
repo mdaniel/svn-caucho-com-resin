@@ -213,6 +213,9 @@ public class Management
 
 	webBeans.addSingleton(_auth, "resin-admin", Standard.class);
       }
+
+      if (_transactionManager != null)
+	_transactionManager.start();
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -229,10 +232,6 @@ public class Management
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
-
-    // the start is necessary for the qa tests
-    if (_transactionManager != null)
-      _transactionManager.start();
 
     if (_deployService != null)
       _deployService.start();

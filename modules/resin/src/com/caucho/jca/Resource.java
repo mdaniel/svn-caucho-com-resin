@@ -575,7 +575,7 @@ public class Resource {
     private Object _handback;
     private NotificationFilter _filter;
 
-    public void setMBeanName(String name)
+    public void setMbeanName(String name)
     {
       _mbeanName = name;
     }
