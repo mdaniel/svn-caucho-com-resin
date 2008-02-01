@@ -169,9 +169,6 @@ public class Server extends ProtocolDispatchServer
     _clusterServer = clusterServer;
     _resin = _clusterServer.getCluster().getResin();
 
-    if (_resin == null)
-      throw new NullPointerException();
-
     try {
       Thread thread = Thread.currentThread();
 
@@ -1164,7 +1161,7 @@ public class Server extends ProtocolDispatchServer
 
       _lifecycle.toStarting();
 
-      if (_resin.getManagement() != null)
+      if (_resin != null && _resin.getManagement() != null)
 	_resin.getManagement().start(this);
 
       AbstractSelectManager selectManager = getSelectManager();
