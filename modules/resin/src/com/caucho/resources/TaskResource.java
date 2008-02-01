@@ -38,12 +38,13 @@ import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 /**
- * The task resource starts a backgroun task on initialization.
+ * The task resource starts a background task on initialization.
  * intervals.
  */
 public class TaskResource {
   private static final L10N L = new L10N(TaskResource.class);
-  private static final Logger log = Log.open(TaskResource.class);
+  private static final Logger log
+    = Logger.getLogger(TaskResource.class.getName());
 
   @Resource
   private Executor _executor;

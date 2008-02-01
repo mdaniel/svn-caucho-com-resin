@@ -79,7 +79,7 @@ public class PropertyValueProgram extends ConfigProgram {
 	attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
       else
 	throw new ConfigException(L.l("'{0}' is an unknown attribute of '{1}'",
-				      _qName, bean.getClass().getName()));
+				      _qName.getName(), bean.getClass().getName()));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

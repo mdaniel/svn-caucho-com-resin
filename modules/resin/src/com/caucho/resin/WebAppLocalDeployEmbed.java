@@ -59,6 +59,7 @@ public class WebAppLocalDeployEmbed extends WebAppEmbed
     _deploy.setServletName(LocalDeployServlet.class.getName());
     _deploy.setUrlPattern("/");
     _deploy.addProperty("enable", true);
+    _deploy.addProperty("role", "*");
 
     addServletMapping(_deploy);
   }

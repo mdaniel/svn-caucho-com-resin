@@ -79,6 +79,8 @@ public class BeanType extends ConfigType
 
   private ComponentImpl _component;
 
+  private ArrayList<ConfigProgram> _injectList
+    = new ArrayList<ConfigProgram>();
   private ArrayList<ConfigProgram> _initList = new ArrayList<ConfigProgram>();
 
   public BeanType(Class beanClass)
@@ -205,6 +207,16 @@ public class BeanType extends ConfigType
    * Initialize the type
    */
   @Override
+  public void inject(Object bean)
+  {
+    for (int i = 0; i < _injectList.size(); i++)
+      _injectList.get(i).inject(bean, null);
+  }
+
+  /**
+   * Initialize the type
+   */
+  @Override
   public void init(Object bean)
   {
     for (int i = 0; i < _initList.size(); i++)
@@ -244,7 +256,8 @@ public class BeanType extends ConfigType
       Object bean = create(null);
       _addText.setText(bean, TEXT, text);
 
-      // XXX: init
+      inject(bean);
+      init(bean);
       
       return bean;
     }
@@ -264,6 +277,8 @@ public class BeanType extends ConfigType
   public void introspect()
   {
     introspectMethods();
+
+    InjectIntrospector.introspectInject(_injectList, _beanClass);
 
     InjectIntrospector.introspectInit(_initList, _beanClass);
   }
@@ -349,8 +364,13 @@ public class BeanType extends ConfigType
 
 	_attributeMap.put(propName, attr);
 
-	if (propName.equals("value"))
+	if (propName.equals("value")) {
 	  _attributeMap.put("#text", attr);
+
+	  // server/12aa
+	  if (_addText == null)
+	    _addText = attr;
+	}
 
 	propName = toCamelName(name.substring(3));
 	_attributeMap.put(propName, attr);

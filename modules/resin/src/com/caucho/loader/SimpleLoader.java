@@ -221,7 +221,10 @@ public class SimpleLoader extends Loader {
     if (_pathPrefix != null && ! name.startsWith(_pathPrefix))
       return null;
 
-    return _path.lookup(name);
+    if (name.startsWith("/"))
+      return _path.lookup("." + name);
+    else
+      return _path.lookup(name);
   }
 
   /**

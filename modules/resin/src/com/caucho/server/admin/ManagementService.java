@@ -92,7 +92,7 @@ abstract public class ManagementService
     ServletMapping servlet = new ServletMapping();
 
     servlet.setServletName(_serviceName);
-    servlet.addURLPattern("*");
+    servlet.addURLPattern("/*");
     servlet.addURLRegexp(".*");
     servlet.setServletClass(ManagementServlet.class.getName());
 

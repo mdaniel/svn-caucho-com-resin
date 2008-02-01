@@ -162,7 +162,7 @@ public class AmberBean extends EntityBean {
       out.println("  try {");
       out.println("    ejbLoad();");
       out.println("  } catch (Throwable e) {");
-      out.println("    log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+      out.println("    __caucho_log.log(java.util.logging.Level.WARNING, e.toString(), e);");
       out.println("  }");
       out.println("}");
     }
@@ -196,7 +196,7 @@ public class AmberBean extends EntityBean {
 
       out.popDepth();
       out.println("} catch (Exception e) {");
-      out.println("  log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+      out.println("  __caucho_log.log(java.util.logging.Level.WARNING, e.toString(), e);");
       out.println("}");
 
       out.popDepth();

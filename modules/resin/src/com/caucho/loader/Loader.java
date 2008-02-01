@@ -101,10 +101,7 @@ abstract public class Loader {
   {
     Path path;
 
-    if (name.startsWith("/"))
-      path = getPath("." + name);
-    else
-      path = getPath(name);
+    path = getPath(name);
 
     if (path != null && path.exists()) {
       try {
@@ -126,10 +123,7 @@ abstract public class Loader {
   {
     Path path;
 
-    if (name.startsWith("/"))
-      path = getPath("." + name);
-    else
-      path = getPath(name);
+    path = getPath(name);
 
     if (path != null && path.canRead()) {
       try {
@@ -148,10 +142,7 @@ abstract public class Loader {
   {
     Path path;
 
-    if (name.startsWith("/"))
-      path = getPath("." + name);
-    else
-      path = getPath(name);
+    path = getPath(name);
 
     if (path != null && path.canRead()) {
       try {

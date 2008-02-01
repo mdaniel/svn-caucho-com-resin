@@ -52,9 +52,14 @@ public class JavaMailConfig {
   /**
    * Sets an attribute.
    */
-  public void setAttribute(String name, String value)
+  public void setProperty(String name, String value)
   {
     _props.put(name, value);
+  }
+
+  public void setProperties(Properties props)
+  {
+    _props.putAll(props);
   }
 
   public Object replaceObject()

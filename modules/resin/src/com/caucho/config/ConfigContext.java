@@ -795,6 +795,19 @@ public class ConfigContext {
    */
   Object getELValue(Attribute attr, Node node)
   {
+    if (node instanceof Attr) {
+      Attr attrNode = (Attr) node;
+      String data = attrNode.getNodeValue();
+
+      // server/12h6
+      if (data != null && isEL() && attr.isEL()
+	  && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
+	return eval(attr, data);
+      }
+
+      return null;
+    }
+
     if (! (node instanceof Element))
       return null;
 
@@ -818,18 +831,7 @@ public class ConfigContext {
 	if (isEL() && attr.isEL() && childElt == null
 	    && child.getNextSibling() == null
 	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
-	  ELContext elContext = getELContext();
-    
-	  ELParser parser = new ELParser(elContext, data.trim());
-    
-	  Expr expr = parser.parse();
-
-	  Object value = attr.getConfigType().valueOf(elContext, expr);
-
-	  if (value != null)
-	    return value;
-	  else
-	    return NULL;
+	  return eval(attr, data.trim());
 	}
 	
 	return null;
@@ -837,6 +839,22 @@ public class ConfigContext {
     }
 
     return null;
+  }
+
+  private Object eval(Attribute attr, String data)
+  {
+    ELContext elContext = getELContext();
+    
+    ELParser parser = new ELParser(elContext, data);
+    
+    Expr expr = parser.parse();
+
+    Object value = attr.getConfigType().valueOf(elContext, expr);
+
+    if (value != null)
+      return value;
+    else
+      return NULL;
   }
 
   /**

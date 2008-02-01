@@ -84,7 +84,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext, support">
+          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
   </target>
 
   <target name="ant" depends="init">

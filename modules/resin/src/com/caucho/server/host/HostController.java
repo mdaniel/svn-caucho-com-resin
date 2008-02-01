@@ -482,10 +482,13 @@ public class HostController
     _hostAliases.addAll(_entryHostAliases);
 
     WebBeansContainer webBeans = WebBeansContainer.create();
-    webBeans.addSingleton(_hostVar, "host", Standard.class);
+    //webBeans.addSingleton(_hostVar, "host", Standard.class);
 
     for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {
-      webBeans.addSingleton(entry.getValue(), entry.getKey(), Standard.class);
+      Object value = entry.getValue();
+      
+      if (value != null)
+	webBeans.addSingleton(value, entry.getKey(), Standard.class);
     }
     // getVariableMap().put("host-root", getRootDirectory());
 

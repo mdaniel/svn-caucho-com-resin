@@ -43,6 +43,10 @@ public class ResinLog {
   private String _name = "com.caucho.config.core.ResinLog";
   private CharBuffer _text = new CharBuffer();
 
+  public ResinLog()
+  {
+  }
+
   /**
    * Sets the log name.
    */

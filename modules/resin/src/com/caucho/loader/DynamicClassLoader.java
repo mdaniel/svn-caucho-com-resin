@@ -1520,6 +1520,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     
     if (name.startsWith("/"))
       name = name.substring(1);
+    
+    if (name.endsWith("/"))
+      name = name.substring(0, name.length() - 1);
 
     boolean isNormalJdkOrder = isNormalJdkOrder(name);
 
@@ -1599,6 +1602,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (name.startsWith("/"))
       name = name.substring(1);
     
+    if (name.endsWith("/"))
+      name = name.substring(0, name.length() - 1);
+    
     boolean isNormalJdkOrder = isNormalJdkOrder(name);
     InputStream is = null;
 
@@ -1659,6 +1665,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (name.startsWith("/"))
       name = name.substring(1);
+    
+    if (name.endsWith("/"))
+      name = name.substring(0, name.length() - 1);
     
     Vector<URL> resources = new Vector<URL>();
 

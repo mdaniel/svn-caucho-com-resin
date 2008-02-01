@@ -169,6 +169,9 @@ public class Server extends ProtocolDispatchServer
     _clusterServer = clusterServer;
     _resin = _clusterServer.getCluster().getResin();
 
+    if (_resin == null)
+      throw new NullPointerException();
+
     try {
       Thread thread = Thread.currentThread();
 
@@ -399,6 +402,13 @@ public class Server extends ProtocolDispatchServer
     }
 
     return _management;
+  }
+
+  /**
+   * Sets the redeploy mode
+   */
+  public void setRedeployMode(String redeployMode)
+  {
   }
 
   /**

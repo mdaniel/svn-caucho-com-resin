@@ -530,6 +530,20 @@ public class Config {
     }
   }
   
+  public static void inject(Object bean)
+    throws ConfigException
+  {
+    try {
+      ConfigType type = TypeFactory.getType(bean.getClass());
+
+      type.inject(bean);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
   public static Object replaceObject(Object bean) throws Exception
   {
     ConfigType type = TypeFactory.getType(bean.getClass());

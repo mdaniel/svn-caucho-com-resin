@@ -193,8 +193,9 @@ public class ServletMapping extends ServletConfigImpl {
       config.setServletContext(webApp);
 
       ContainerProgram program = getInit();
+
       if (program != null)
-	program.init(config);
+	config.setInit(program);
 
       config.init();
 

@@ -76,6 +76,13 @@ abstract public class ConfigType
   }
   
   /**
+   * Inject and initialize the type
+   */
+  public void inject(Object bean)
+  {
+  }
+  
+  /**
    * Initialize the type
    */
   public void init(Object bean)

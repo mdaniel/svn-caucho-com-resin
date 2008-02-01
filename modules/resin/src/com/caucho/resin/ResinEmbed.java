@@ -76,6 +76,8 @@ public class ResinEmbed
   private Host _host;
   private Server _server;
 
+  private String _serverHeader;
+
   private final ArrayList<BeanEmbed> _beanList
     = new ArrayList<BeanEmbed>();
 
@@ -130,6 +132,14 @@ public class ResinEmbed
   {
     for (PortEmbed port : ports)
       addPort(port);
+  }
+
+  /**
+   * Sets the server header
+   */
+  public void setServerHeader(String serverName)
+  {
+    _serverHeader = serverName;
   }
 
   /**
@@ -197,6 +207,9 @@ public class ResinEmbed
       _server = _resin.getServer();
 
       thread.setContextClassLoader(_server.getClassLoader());
+
+      if (_serverHeader != null)
+	_server.setServerHeader(_serverHeader);
       
       for (BeanEmbed beanEmbed : _beanList) {
 	beanEmbed.configure();

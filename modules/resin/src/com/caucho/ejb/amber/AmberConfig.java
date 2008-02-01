@@ -125,7 +125,7 @@ public class AmberConfig {
     if (bean.getSQLTable() != null)
       sqlTable = bean.getSQLTable();
 
-    Table table = _manager.createTable(sqlTable);
+    Table table = getManager().createTable(sqlTable);
     table.setConfigLocation(bean.getLocation());
 			    
     type.setTable(table);

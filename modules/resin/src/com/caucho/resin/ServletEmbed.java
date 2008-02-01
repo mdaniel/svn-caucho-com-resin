@@ -166,7 +166,9 @@ public class ServletEmbed
       
       servletConfig.setServletClass(_servletClass);
 
-      if (_servletName == null)
+      if (_servletName != null)
+	servletConfig.setServletName(_servletName);
+      else
 	servletConfig.setServletName(_servletClass);
 
       for (Map.Entry<String,String> entry : _initParamMap.entrySet()) {

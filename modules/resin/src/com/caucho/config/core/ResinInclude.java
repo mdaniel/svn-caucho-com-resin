@@ -32,6 +32,7 @@ package com.caucho.config.core;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.types.*;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -67,10 +68,7 @@ public class ResinInclude extends ResinControl {
    */
   public void setHref(String path)
   {
-    if (_systemId != null)
-      _path = Vfs.lookup().lookup(_systemId).getParent().lookup(path);
-    else
-      _path = Vfs.lookup().lookup(path);
+    _path = Vfs.lookup().lookup(FileVar.__FILE__.toString()).getParent().lookup(path);
   }
   
   /**

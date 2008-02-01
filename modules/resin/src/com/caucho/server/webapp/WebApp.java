@@ -506,6 +506,15 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
+   * Sets the redeploy-mode of the controller
+   */
+  public void setRedeployMode(String mode)
+  {
+    if (_controller != null)
+      _controller.setRedeployMode(mode);
+  }
+
+  /**
    * Returns the relax schema.
    */
   public String getSchema()
@@ -813,7 +822,7 @@ public class WebApp extends ServletContextImpl
     mapping.setServletName(servletRegexp.getServletName());
     mapping.setServletClass(servletRegexp.getServletClass());
     mapping.setServletContext(this);
-    mapping.setInit(servletRegexp.getBuilderProgram());
+    servletRegexp.getBuilderProgram().configure(mapping);
     mapping.setStrictMapping(getStrictMapping());
     mapping.init(_servletMapper);
 
@@ -1217,7 +1226,7 @@ public class WebApp extends ServletContextImpl
 
         try {
           scListener.contextInitialized(event);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.FINE, e.toString(), e);
         }
       }
@@ -1534,13 +1543,22 @@ public class WebApp extends ServletContextImpl
       Throwable e1 = e;
       for (;
            e1 != null
+	     && ! (e1 instanceof ConfigException)
              && e1.getCause() != null
              && e1.getCause() != e1;
            e1 = e1.getCause()) {
       }
       
       if (e1 != null) {
-        log.log(Level.WARNING, e1.toString(), e1);
+	if (e1 instanceof ConfigException) {
+	  if (log.isLoggable(Level.FINE))
+	    log.log(Level.WARNING, e1.toString(), e1);
+	  else
+	    log.warning(e1.getMessage());
+	}
+	else {
+	  log.log(Level.WARNING, e1.toString(), e1);
+	}
       }
     }
     
