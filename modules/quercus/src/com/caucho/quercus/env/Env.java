@@ -2435,7 +2435,7 @@ public class Env {
     if (fun != null)
       return fun;
     else
-      throw createErrorException(L.l("'{0}' is an unknown function", name));
+      throw createErrorException(L.l("'{0}' is an unknown function.", name));
   }
 
   /**

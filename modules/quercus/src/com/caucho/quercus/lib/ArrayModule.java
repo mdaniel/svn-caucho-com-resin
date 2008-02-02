@@ -1208,7 +1208,7 @@ public class ArrayModule
                             @Optional("NULL") Value userData)
   {
     if (callback == null || ! callback.isValid()) {
-      env.error(L.l("'{0}' is an unknown function", callback.getCallbackName()));
+      env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
       return false;
     }
 
@@ -1251,7 +1251,7 @@ public class ArrayModule
                                       @Optional("NULL") Value extra)
   {
     if (callback == null || ! callback.isValid()) {
-      env.error(L.l("'{0}' is an unknown function", callback.getCallbackName()));
+      env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
       return false;
     }
 
