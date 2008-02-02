@@ -71,7 +71,6 @@ public abstract class JdbcConnectionResource
 
   private Env _env;
   protected String _host;
-  private String _dbname;
   protected int _port;
   private String _userName;
   private String _password;
@@ -87,6 +86,8 @@ public abstract class JdbcConnectionResource
   private boolean _isConnected;
 
   protected boolean _connectionLog = false;
+
+  protected SqlParseToken _sqlParseToken = new SqlParseToken();
 
   public JdbcConnectionResource(Env env)
   {
@@ -131,7 +132,7 @@ public abstract class JdbcConnectionResource
 
   public String getDbName()
   {
-    return _dbname;
+    return getCatalog().toString();
   }
 
   public int getPort()
@@ -183,7 +184,6 @@ public abstract class JdbcConnectionResource
     _host = host;
     _userName = userName;
     _password = password;
-    _dbname = dbname;
     _port = port;
     _socket = socket;
     _flags = flags;
@@ -195,7 +195,7 @@ public abstract class JdbcConnectionResource
 
     if (conn != null) {
       _conn = conn;
-      
+
       _isConnected = true;
 
       _env.addCleanup(this);
@@ -659,68 +659,105 @@ public abstract class JdbcConnectionResource
 
     return _rs;
   }
-  
+
   private void checkSql(Connection conn, String sql)
   {
-    char ch;
+    SqlParseToken tok = parseSqlToken(sql, null);
 
-    // clear table metadata cache if tables are deleted/altered
-    if (sql != null) {
-      int i = 0;
-      int len = sql.length();
-      
-      while (i < len &&
-          Character.isWhitespace(sql.charAt(i))) {
-        i++;
+    if (tok == null)
+      return;
+
+    switch (tok.getFirstChar()) {
+      case 'a': case 'A': {
+        // drop/alter clears metadata cache
+        _tableMetadataMap.clear();
+        break;
       }
-      
-      if (i + 1 < len) {
-        ch = sql.charAt(i);
-        
-        switch (ch) {
-        case 'a': case 'A':
+      case 'd': case 'D': {
+        if (tok.matchesToken("DROP")) {
           // drop/alter clears metadata cache
           _tableMetadataMap.clear();
-          break;
-        case 'd': case 'D':
-          if ((ch = sql.charAt(i + 1)) == 'r' || ch == 'R') {
-            // drop/alter clears metadata cache
-            _tableMetadataMap.clear();
-          }
-          break;
-        case 'c': case 'C':
-          if ((ch = sql.charAt(i + 1)) == 'r' || ch == 'R') {
-            _env.getQuercus().markForPoolRemoval(conn);
-          }
-          /*
-        case 'b': case 'B':
-          // convert "begin" to begin
-          // Test for mediawiki performance
-          if (sql.equalsIgnoreCase("begin")) {
-            setAutoCommit(false);
-            return null;
-          }
-          break;
-        case 'c': case 'C':
-          // convert "commit" to begin
-          if (sql.equalsIgnoreCase("commit")) {
-            commit();
-            setAutoCommit(true);
-            return null;
-          }
-          break;
-        case 'r': case 'R':
-          // convert "rollback" to begin
-          if (sql.equalsIgnoreCase("rollback")) {
-            rollback();
-            setAutoCommit(true);
-            return null;
-          }
-          break;
-          */
         }
+        break;
       }
+      case 'c': case 'C': {
+        if (tok.matchesToken("CREATE")) {
+          // don't pool connections that create tables
+          _env.getQuercus().markForPoolRemoval(conn);
+        }
+        break;
+      }
+/*
+      case 'b': case 'B': {
+        if (tok.matchesToken("BEGIN")) {
+          // Test for mediawiki performance
+          setAutoCommit(false);
+        }
+        break;
+      }
+      case 'c': case 'C': {
+        if (tok.matchesToken("COMMIT")) {
+          commit();
+          setAutoCommit(true);
+        }
+        break;
+      }
+      case 'r': case 'R': {
+        if (tok.matchesToken("ROLLBACK")) {
+          rollback();
+          setAutoCommit(true);
+        }
+        break;
+      }
+*/
     }
+  }
+
+  /**
+   * Parse a token from a string containing a SQL statement.
+   * If the prevToken is null, then the first token in parsed.
+   * If a SQL token can't be found in the string, then null
+   * is returned. If a SQL token is found, data is captured in
+   * the returned SqlParseToken result.
+   */
+  protected SqlParseToken parseSqlToken(String sql, SqlParseToken prevToken)
+  {
+    if (sql == null) {
+      _sqlParseToken.init();
+      return null;
+    }
+
+    final int len = sql.length();
+    int i, start;
+
+    // Start at index 0, or where we left off last time
+
+    if (prevToken == null)
+      i = 0;
+    else
+      i = prevToken.end;
+
+    while (i < len &&
+        Character.isWhitespace(sql.charAt(i))) {
+      i++;
+    }
+
+    // Must be at least 1 non-whitespace character
+
+    if ((i + 1) >= len) {
+      _sqlParseToken.init();
+      return null;
+    }
+
+    start = i;
+
+    while (i < len && !Character.isWhitespace(sql.charAt(i))) {
+      i++;
+    }
+
+    _sqlParseToken.assign(sql, start, i);
+
+    return _sqlParseToken;
   }
 
   /**
@@ -796,9 +833,9 @@ public abstract class JdbcConnectionResource
   public void setCatalog(String name)
     throws SQLException
   {
-    if (name != null && name.equals(_dbname))
+    if (name == null || name.length() == 0)
       return;
-    
+
     clearErrors();
 
     if (! _isUsed && _isCatalogOptimEnabled) {
@@ -812,21 +849,20 @@ public abstract class JdbcConnectionResource
       if (conn != null)
         conn.close();
 
-      _dbname = name;
-      
-      connectInternal(_env, 
+      connectInternal(_env,
 		      _host,
 		      _userName,
 		      _password,
-		      _dbname,
+		      name,
 		      _port,
 		      _socket,
 		      _flags,
 		      _driver,
 		      _url);
     }
-    else
+    else {
       _conn.setCatalog(name);
+    }
   }
 
   /**
@@ -993,6 +1029,67 @@ public abstract class JdbcConnectionResource
         return false;
 
       return true;
+    }
+  }
+
+  /*
+   * This class enables efficient parsing of a SQL token from
+   * a String. An SQL statement can be parsed one token at a
+   * time. One can efficiently check that first letter of
+   * the parse token via matchesFirstChar() without creating
+   * a substring from the original.
+   */
+
+  protected
+  static class SqlParseToken {
+    private String query;
+    private String token;
+    private int start;
+    private int end;
+    private char firstChar;
+
+    public
+    void init() {
+      query = null;
+      token = null;
+      start = -1;
+      end = -1;
+      firstChar = '\0';
+    }
+
+    public
+    void assign(String query, int start, int end) {
+      this.query = query;
+      this.token = null;
+      this.start = start;
+      this.end = end;
+      this.firstChar = query.charAt(start);
+    }
+
+    public
+    boolean matchesFirstChar(char upper, char lower) {
+      return (this.firstChar == upper) || (this.firstChar == lower);
+    }
+
+    public
+    char getFirstChar() {
+      return this.firstChar;
+    }
+
+    // Case insensitive compare of token string
+
+    public
+    boolean matchesToken(String token) {
+      if (token == null)
+        token = query.substring(start, end);
+      return token.equalsIgnoreCase(token);
+    }
+
+    public
+    String toString() {
+      if (token == null)
+        token = query.substring(start, end);
+      return token;
     }
   }
 }

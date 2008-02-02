@@ -605,16 +605,18 @@ public class ManagedConnectionImpl
 	_catalogOrig = _driverConnection.getCatalog();
 	_catalog = _catalogOrig;
       }
-      
-      // only call catalog if changed
+
+      // only call setCatalog() if changed and only set _catalog
+      // when we know setCatalog() worked.
+
       if (_catalog != null && ! _catalog.equals(catalog)) {
-	_catalog = catalog;
 	_driverConnection.setCatalog(catalog);
+	_catalog = catalog;
       }
       else if (_catalog == null
 	       && (_catalogOrig == null || ! _catalogOrig.equals(catalog))) {
-	_catalog = catalog;
 	_driverConnection.setCatalog(catalog);
+	_catalog = catalog;
       }
     } catch (SQLException e) {
       fatalEvent();

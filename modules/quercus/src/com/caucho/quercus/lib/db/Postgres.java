@@ -151,17 +151,27 @@ public class Postgres extends JdbcConnectionResource {
    */
   public PostgresResult query(String sql)
   {
-    if (sql.charAt(0) == ' ')
-      sql = sql.trim();
+    SqlParseToken tok = parseSqlToken(sql, null);
 
-    if (sql.charAt(0) == 'S' &&
-        sql.startsWith("SET CLIENT_ENCODING TO")) {
-      // Ignore any attempt to change the CLIENT_ENCODING since
-      // the JDBC driver for Postgres only supports UNICODE.
-      // Execute no-op SQL statement since we need to return
-      // a valid SQL result to the caller.
+    if (tok != null &&
+        tok.matchesFirstChar('S', 's') &&
+        tok.matchesToken("SET")) {
+      // Check for "SET CLIENT_ENCODING TO ..."
 
-      sql = "SET CLIENT_ENCODING TO 'UNICODE'";
+      tok = parseSqlToken(sql, tok);
+
+      if (tok != null && tok.matchesToken("CLIENT_ENCODING")) {
+        tok = parseSqlToken(sql, tok);
+
+        if (tok != null && tok.matchesToken("TO")) {
+          // Ignore any attempt to change the CLIENT_ENCODING since
+          // the JDBC driver for Postgres only supports UNICODE.
+          // Execute no-op SQL statement since we need to return
+          // a valid SQL result to the caller.
+
+          sql = "SET CLIENT_ENCODING TO 'UNICODE'";
+        }
+      }
     }
 
     return (PostgresResult) realQuery(sql);

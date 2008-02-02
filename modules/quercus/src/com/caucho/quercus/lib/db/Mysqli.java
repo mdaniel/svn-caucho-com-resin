@@ -688,6 +688,63 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * Intercept Mysql specific query before sending to JDBC driver
+   * to handle any special cases.
+   */
+
+  protected JdbcResultResource realQuery(String sql)
+  {
+    clearErrors();
+
+    setResultResource(null);
+
+    try {
+      // Check for valid conneciton
+
+      getConnection();
+
+      SqlParseToken tok = parseSqlToken(sql, null);
+
+      if (tok != null &&
+          tok.matchesFirstChar('U', 'u') &&
+          tok.matchesToken("USE")) {
+        // Mysql "USE DBNAME" statement.
+        //
+        // The Mysql JDBC driver does not properly implement getCatalog()
+        // when calls to setCatalog() are mixed with SQL USE statements.
+        // Work around this problem by translating a SQL USE statement
+        // into a JDBC setCatalog() invocation. The setCatalog() API in
+        // the ConnectorJ implementation just creates a USE statement
+        // anyway. This also makes sure the database pool logic knows
+        // which database is currently selected. If a second call to
+        // select the current database is found, it is a no-op.
+
+        tok = parseSqlToken(sql, tok);
+
+        if (tok != null) {
+          String dbname = tok.toString();
+
+          setCatalog(dbname);
+
+          return null;
+        }
+      }
+
+      return super.realQuery(sql);
+    } catch (SQLException e) {
+      saveErrors(e);
+
+      log.log(Level.FINEST, e.toString(), e);
+      return null;
+    } catch (IllegalStateException e) {
+      // #2184, some drivers return this on closed connection
+      saveErrors(new SQLExceptionWrapper(e));
+
+      return null;
+    }
+  }
+
+  /**
    * returns a prepared statement
    */
   public MysqliStatement prepare(Env env, String query)
