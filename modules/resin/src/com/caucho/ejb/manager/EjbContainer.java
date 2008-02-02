@@ -224,6 +224,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener
 
         _ejbPersistenceUnit = amber.createPersistenceUnit("resin-ejb");
         _ejbPersistenceUnit.setBytecodeGenerator(false);
+	ClassLoader loader = SimpleLoader.create(getWorkDir());
+	_ejbPersistenceUnit.setEnhancedLoader(loader);
         _ejbPersistenceUnit.initLoaders();
         // _ejbPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
       } catch (RuntimeException e) {
@@ -443,7 +445,6 @@ public class EjbContainer implements ScanListener, EnvironmentListener
                               String className)
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
-
     config.addClassName(className);
   }
 

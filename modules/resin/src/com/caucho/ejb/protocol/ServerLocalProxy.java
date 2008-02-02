@@ -63,6 +63,6 @@ public class ServerLocalProxy implements ObjectProxy, java.io.Serializable {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    return _server.getClientObject(_clientApi);
+    return _server.getObject(_clientApi);
   }
 }

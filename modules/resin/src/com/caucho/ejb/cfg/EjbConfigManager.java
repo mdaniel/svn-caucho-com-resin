@@ -32,7 +32,9 @@ package com.caucho.ejb.cfg;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.config.*;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -49,6 +51,8 @@ public class EjbConfigManager extends EjbConfig {
 
   private ArrayList<EjbRootConfig> _rootPendingList
     = new ArrayList<EjbRootConfig>();
+  
+  private ArrayList<Path> _pathPendingList = new ArrayList<Path>();
 
   public EjbConfigManager(EjbContainer ejbContainer)
   {
@@ -66,6 +70,10 @@ public class EjbConfigManager extends EjbConfig {
       rootConfig = new EjbRootConfig(root);
       _rootConfigMap.put(root, rootConfig);
       _rootPendingList.add(rootConfig);
+
+      Path ejbJar = root.lookup("META-INF/ejb-jar.xml");
+      if (ejbJar.canRead())
+	addEjbPath(ejbJar);
     }
 
     return rootConfig;
@@ -83,8 +91,54 @@ public class EjbConfigManager extends EjbConfig {
       }
     }
 
+    configurePaths();
+
     configure();
 
     deploy();
+  }
+
+  /**
+   * Adds a path for an EJB config file to the config list.
+   */
+  @Override
+  public void addEjbPath(Path path)
+  {
+    if (_pathPendingList.contains(path))
+      return;
+
+    _pathPendingList.add(path);
+  }
+
+  private void configurePaths()
+  {
+    ArrayList<Path> pathList = new ArrayList<Path>(_pathPendingList);
+    _pathPendingList.clear();
+
+    for (Path path : pathList) {
+      if (path.getScheme().equals("jar"))
+	path.setUserPath(path.getURL());
+
+      Environment.addDependency(path);
+
+      String ejbModuleName;
+
+      if (path instanceof JarPath) {
+	ejbModuleName = ((JarPath) path).getContainer().getPath();
+      }
+      else {
+	ejbModuleName = path.getPath();
+      }
+
+      EjbJar ejbJar = new EjbJar(this, ejbModuleName);
+
+      try {
+	new Config().configure(ejbJar, path, getSchema());
+      } catch (ConfigException e) {
+	throw e;
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
   }
 }

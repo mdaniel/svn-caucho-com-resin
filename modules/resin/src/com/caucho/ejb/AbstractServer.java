@@ -722,11 +722,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Returns the EJBHome stub for the container
+   * Returns the EJBObject stub for the container
    */
   public Object getRemoteObject21()
   {
-    return getHomeObject();
+    return null;
   }
 
   /**
@@ -740,9 +740,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the 3.0 remote stub for the container
    */
-  public Object getRemoteObject(Class businessInterface)
+  public Object getRemoteObject(Class api)
   {
-    return null;
+    return getObject(api);
   }
 
   /**
@@ -772,6 +772,19 @@ abstract public class AbstractServer implements EnvironmentBean {
   public Object getLocalProxy(Class api)
   {
     throw new UnsupportedOperationException("3.0 local interface not found");
+  }
+
+  /**
+   * Returns the object instance for the container
+   */
+  public Object getObject(Class api)
+  {
+    if (api == _localHomeClass)
+      return _localHome;
+    else if (api == _remoteHomeClass)
+      return _remoteHome;
+    else
+      return null;
   }
 
   /**

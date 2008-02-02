@@ -270,7 +270,7 @@ public class EjbProtocolManager {
 
 	String jndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
 	
-        if (server.getRemote21() != null) {
+        if (remoteHome != null) {
 	  Jndi.bindDeep(jndiName, remoteHome);
         } else {
 	  if (server.getLocalApiList().size() == 1) {
@@ -296,29 +296,44 @@ public class EjbProtocolManager {
 
   private void bindDefaultJndi(String prefix, AbstractServer server)
   {
-    EnterpriseApplication eApp = EnterpriseApplication.getLocal();
+    try {
+      EnterpriseApplication eApp = EnterpriseApplication.getLocal();
 
-    if (prefix == null)
-      prefix = "";
-    else if (! prefix.endsWith("/"))
-      prefix = prefix + "/";
+      if (prefix == null)
+	prefix = "";
+      else if (! prefix.endsWith("/"))
+	prefix = prefix + "/";
     
-    if (eApp != null)
-      prefix = prefix + eApp.getName() + "/";
+      if (eApp != null)
+	prefix = prefix + eApp.getName() + "/";
 
-    prefix = prefix + server.getEJBName();
+      prefix = prefix + server.getEJBName();
 
-    ArrayList<Class> apiList = server.getLocalApiList();
-    if (apiList != null && apiList.size() > 0) {
-      String jndiName = prefix + "/local";
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      try {
+      ArrayList<Class> apiList = server.getLocalApiList();
+      if (apiList != null && apiList.size() > 0) {
+	String jndiName = prefix + "/local";
+
 	Jndi.bindDeep(jndiName, new ServerLocalProxy(server, apiList.get(0)));
 
-	log.fine(server + " local binding to '" + jndiName + "'");
-      } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+	log.fine(server + " local binding to '" + jndiName + "' " + loader);
       }
+
+      Object localHome = null;
+
+      if (server.getLocalHomeClass() != null)
+	localHome = server.getObject(server.getLocalHomeClass());
+
+      if (localHome != null) {
+	String jndiName = prefix + "/local-home";
+
+	Jndi.bindDeep(jndiName, localHome);
+
+	log.fine(server + " local-home binding to '" + jndiName + "' " + loader);
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 

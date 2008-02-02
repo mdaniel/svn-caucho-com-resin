@@ -63,11 +63,6 @@ abstract public class SessionServer extends AbstractServer
   }
 
   /**
-   * Returns the object corresponding to the given api
-   */
-  abstract protected Object getObject(Class api);
-
-  /**
    * Initialize the server
    */
   @Override

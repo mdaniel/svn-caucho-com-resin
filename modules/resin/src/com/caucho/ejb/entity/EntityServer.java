@@ -291,7 +291,7 @@ public class EntityServer extends AbstractServer {
         _primaryKeyFields = primaryKeyClass.getFields();
       }
 
-      log.config("initialized entity bean: " + this);
+      log.config(this + " initialized");
     } catch (Exception e) {
       _exception = e;
 
@@ -309,6 +309,18 @@ public class EntityServer extends AbstractServer {
       return _remoteHomeView;
     else
       return null;
+  }
+
+  /**
+   * Returns the 3.0 remote stub for the container
+   */
+  @Override
+  public Object getObject(Class api)
+  {
+    if (api == getRemoteHomeClass())
+      return _remoteHomeView;
+    else
+      return super.getObject(api);
   }
 
   /**

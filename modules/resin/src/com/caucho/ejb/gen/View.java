@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -162,4 +163,38 @@ abstract public class View {
       method.generate(out, map);
     }
   }
+
+  /**
+   * Returns a full method name with arguments.
+   */
+  public static String getFullMethodName(ApiMethod method)
+  {
+    return getFullMethodName(method.getName(), method.getParameterTypes());
+  }
+
+  /**
+   * Returns a full method name with arguments.
+   */
+  public static String getFullMethodName(Method method)
+  {
+    return getFullMethodName(method.getName(), method.getParameterTypes());
+  }
+
+  /**
+   * Returns a full method name with arguments.
+   */
+  public static String getFullMethodName(String methodName, Class []params)
+  {
+    String name = methodName + "(";
+
+    for (int i = 0; i < params.length; i++) {
+      if (i != 0)
+        name += ", ";
+
+      name += params[i].getSimpleName();
+    }
+
+    return name + ")";
+  }
+
 }

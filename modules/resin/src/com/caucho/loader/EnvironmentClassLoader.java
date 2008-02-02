@@ -506,7 +506,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
     _pendingScanUrls.clear();
-    
+
     if (_scanListeners != null && urlList.size() > 0) {
       try {
 	make();
@@ -552,10 +552,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     if (! _lifecycle.toStarting())
       return;
-    
-    config();
 
     sendAddLoaderEvent();
+    
+    config();
       
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 

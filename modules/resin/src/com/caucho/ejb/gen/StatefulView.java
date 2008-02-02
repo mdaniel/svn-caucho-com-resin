@@ -243,8 +243,9 @@ abstract public class StatefulView extends View {
     if (implMethod != null)
       return implMethod;
   
-    throw ConfigException.create(apiMethod.getMethod(),
-				 L.l("api method has no corresponding implementation in '{0}'",
-				     getEjbClass().getName()));
+    throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
+				  apiMethod.getMethod().getDeclaringClass().getSimpleName(),
+				  getFullMethodName(apiMethod),
+				  getEjbClass().getName()));
   }
 }

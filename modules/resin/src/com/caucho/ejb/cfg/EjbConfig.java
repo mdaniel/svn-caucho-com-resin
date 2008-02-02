@@ -72,7 +72,6 @@ public class EjbConfig {
   private final EjbContainer _ejbContainer;
 
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
-  private ArrayList<Path> _pathList = new ArrayList<Path>();
 
   private HashMap<String,EjbBean> _cfgBeans = new HashMap<String,EjbBean>();
   private ArrayList<CmpRelation> _relations = new ArrayList<CmpRelation>();
@@ -118,7 +117,7 @@ public class EjbConfig {
     _fileSetList.add(fileSet);
     
     for (Path path : fileSet.getPaths()) {
-      addEJBPath(fileSet.getDir(), path);
+      addEjbPath(path);
     }
   }
 
@@ -128,58 +127,7 @@ public class EjbConfig {
   public void addEjbPath(Path path)
     throws ConfigException
   {
-    addEJBPath(path, path);
-  }
-
-  /**
-   * Adds a path for an EJB config file to the config list.
-   */
-  public void addEJBPath(Path ejbModulePath, Path path)
-    throws ConfigException
-  {
-    if (_pathList.contains(path))
-      return;
-
-    _pathList.add(path);
-
-    if (path.getScheme().equals("jar"))
-      path.setUserPath(path.getURL());
-
-    Environment.addDependency(path);
-
-    String ejbModuleName;
-
-    if (path instanceof JarPath) {
-      ejbModuleName = ((JarPath) path).getContainer().getPath();
-    }
-    else {
-      ejbModuleName = path.getPath();
-    }
-
-    /* XXX: ejb/0g7a requires full path for module name
-       String pwd = Vfs.getPwd().getPath();
-
-       if (ejbModuleName.startsWith(pwd))
-       ejbModuleName = ejbModuleName.substring(pwd.length());
-
-       if (ejbModuleName.startsWith("/"))
-       ejbModuleName = ejbModuleName.substring(1);
-    */
-
-    /*
-    if (_ejbManager != null)
-      _ejbManager.addEJBModule(ejbModuleName);
-    */
-
-    EjbJar ejbJar = new EjbJar(this, ejbModuleName);
-
-    try {
-      new Config().configure(ejbJar, path, getSchema());
-    } catch (ConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    throw new UnsupportedOperationException();
   }
 
   public void addProxy(EjbBeanConfigProxy proxy)
@@ -254,9 +202,16 @@ public class EjbConfig {
     if (name == null || bean == null)
       throw new NullPointerException();
 
-    if (_cfgBeans.get(name) == null)
-      _pendingBeans.add(bean);
+    EjbBean oldBean = _cfgBeans.get(name);
 
+    if (oldBean == bean)
+      return;
+    else if (oldBean != null) {
+      throw new IllegalStateException(L.l("Duplicate bean '{0}'",
+					  name));
+    }
+
+    _pendingBeans.add(bean);
     _cfgBeans.put(name, bean);
   }
 
@@ -609,7 +564,7 @@ public class EjbConfig {
   {
     for (FileSetType fileSet : _fileSetList) {
       for (Path path : fileSet.getPaths()) {
-        addEJBPath(fileSet.getDir(), path);
+        addEjbPath(path);
       }
     }
   }

@@ -121,6 +121,9 @@ public class AmberPersistenceUnit {
 
   private TypeManager _typeManager = new TypeManager();
 
+  // loader override for ejb
+  private ClassLoader _enhancedLoader;
+
   private HashMap<String,Table> _tableMap
     = new HashMap<String,Table>();
 
@@ -252,7 +255,18 @@ public class AmberPersistenceUnit {
 
   public ClassLoader getEnhancedLoader()
   {
-    return _amberContainer.getEnhancedLoader();
+    if (_enhancedLoader != null)
+      return _enhancedLoader;
+    else
+      return _amberContainer.getEnhancedLoader();
+  }
+
+  /**
+   * EJB/CMP needs to set a special enhanced loader.
+   */
+  public void setEnhancedLoader(ClassLoader loader)
+  {
+    _enhancedLoader = loader;
   }
 
   /**

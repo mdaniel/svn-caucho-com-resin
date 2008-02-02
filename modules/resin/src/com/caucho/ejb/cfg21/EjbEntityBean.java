@@ -103,6 +103,9 @@ public class EjbEntityBean extends Ejb21Bean {
   // EJB 2.1
   private EjbHomeView _remoteHomeView;
   private EjbObjectView _remoteView;
+  
+  private EjbHomeView _localHomeView;
+  private EjbObjectView _localView;
 
   /**
    * Creates a new entity bean configuration.
@@ -693,12 +696,14 @@ public class EjbEntityBean extends Ejb21Bean {
         _remoteView.introspect();
       }
     }
+    */
 
     if (_localHome != null) {
       _localHomeView = createHomeView(_localHome, "LocalHome");
       _localHomeView.introspect();
     }
 
+    /*
     if (_local21 != null) {
       ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.add(_local21);
@@ -706,18 +711,18 @@ public class EjbEntityBean extends Ejb21Bean {
       _localView21 = createObjectView(list, "Local", "21");
       _localView21.introspect();
     }
+    */
 
     if (_localList.size() > 0) {
       ArrayList<ApiClass> list = new ArrayList<ApiClass>();
       list.addAll(_localList);
-      list.remove(_local21);
+      //list.remove(_local21);
 
       if (list.size() > 0) {
         _localView = createObjectView(list, "Local", "");
         _localView.introspect();
       }
     }
-    */
   }
 
 
@@ -737,16 +742,18 @@ public class EjbEntityBean extends Ejb21Bean {
     /*
     if (_remoteView21 != null)
       _remoteView21.assembleView(assembler, fullClassName);
+    */
 
     if (_localHomeView != null)
       _localHomeView.assembleView(assembler, fullClassName);
 
+    /*
     if (_localView21 != null)
       _localView21.assembleView(assembler, fullClassName);
+    */
 
     if (_localView != null)
       _localView.assembleView(assembler, fullClassName);
-      */
   }
 
   /**

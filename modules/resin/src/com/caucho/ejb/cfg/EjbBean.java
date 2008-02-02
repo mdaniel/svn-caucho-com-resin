@@ -1080,6 +1080,10 @@ public class EjbBean extends DescriptionGroupConfig
       if (_isInit)
         return;
       _isInit = true;
+
+      if (getEJBClassWrapper() == null)
+	throw error(L.l("ejb-class is not defined for '{0}'",
+			getEJBName()));
       
       _bean = createBeanGenerator();
 

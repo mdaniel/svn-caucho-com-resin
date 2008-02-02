@@ -199,7 +199,7 @@ public class ContextImpl implements Context {
       else if (value instanceof Context)
         return ((Context) value).lookup(rest);
       else if (value != null)
-        throw new NotContextException(L.l("{0}: expected intermediate context at `{1}'",
+        throw new NotContextException(L.l("{0}: expected intermediate context at '{1}'",
                                           getFullPath(name), value));
       else
         throw new NameNotFoundException(getFullPath(name));
