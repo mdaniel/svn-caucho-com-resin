@@ -2408,11 +2408,14 @@ public class Env {
       else
 	return null;
     }
-	
+
     AbstractFunction fun = _quercus.findFunctionImpl(name);
 
     if (fun != null)
       return fun;
+
+    if (isStrict())
+      return null;
 
     name = name.toLowerCase();
     

@@ -920,7 +920,7 @@ public class Quercus
   {
     AbstractFunction fun = _funMap.get(name);
 
-    if (fun == null)
+    if ((fun == null) && ! isStrict())
       fun = _lowerFunMap.get(name.toLowerCase());
 
     return fun;
@@ -969,7 +969,8 @@ public class Quercus
    */
   public int getFunctionId(String name)
   {
-    name = name.toLowerCase();
+    if (! isStrict())
+      name = name.toLowerCase();
 
     synchronized (_functionNameMap) {
       int id = _functionNameMap.get(name);
@@ -998,6 +999,9 @@ public class Quercus
    */
   public int findFunctionId(String name)
   {
+    if (! isStrict())
+      name = name.toLowerCase();
+
     synchronized (_functionNameMap) {
       return _functionNameMap.get(name);
     }
