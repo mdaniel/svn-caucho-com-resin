@@ -1,13 +1,11 @@
 <?php
 $hessian = java_bean("hessian");
-$rest = java_bean("rest");
-$soap = java_bean("soap");
+$burlap = java_bean("burlap");
 $vm = java_bean("vm");
 ?>
 
 From Hessian: <?= $hessian->hello() ?><br>
-From REST: <?= $rest->hello() ?><br>
-From SOAP: <?= $soap->hello() ?><br>
+From Burlap: <?= $burlap->hello() ?><br>
 From VM: <?= $vm->hello() ?><br>
 
 <ul>

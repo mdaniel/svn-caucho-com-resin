@@ -128,8 +128,15 @@ public class ClasspathPath extends FilesystemPath {
   public StreamImpl openReadImpl() throws IOException
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    InputStream is = loader.getResourceAsStream(getPath());
+
+    String path = getPath();
+    if (path.startsWith("/"))
+      path = path.substring(1);
+
+    InputStream is = loader.getResourceAsStream(path);
+
+    if (is == null)
+      throw new FileNotFoundException(path);
     
     return new VfsStream(is, null);
   }

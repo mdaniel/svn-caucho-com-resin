@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary-in-localtoc="1"/>
+<localtoc/>
 <s1 title="Can I use different SSL certificates for each virtual host?" type="faq">
 <description>
 We have two domains on one server.  Is there an example config file showing

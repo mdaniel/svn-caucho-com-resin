@@ -50,33 +50,20 @@ public class Def extends VerboseFormattedTextWithAnchors {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("table");
-    out.writeAttribute("class", "egpad");
-    out.writeAttribute("cellspacing", "0");
-    out.writeAttribute("width", "90%");
-
     if (_title != null) {
-      out.writeStartElement("caption");
-      out.writeStartElement("font");
-      out.writeAttribute("size", "+1");
+      out.writeStartElement("center");
+      out.writeStartElement("b");
       out.writeCharacters(_title);
       out.writeEndElement();
       out.writeEndElement();
     }
 
-    out.writeStartElement("tr");
-    out.writeStartElement("td");
-    out.writeAttribute("class", "def");
-    out.writeAttribute("bgcolor", "#cccccc");
-    out.writeStartElement("pre");
     out.writeStartElement("div");
-    out.writeAttribute("class", "def");
+    out.writeAttribute("class", "definition");
+    out.writeStartElement("pre");
 
     super.writeHtml(out);
 
-    out.writeEndElement();
-    out.writeEndElement();
-    out.writeEndElement();
     out.writeEndElement();
     out.writeEndElement();
   }

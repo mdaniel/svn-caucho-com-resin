@@ -234,6 +234,11 @@ public class NavigationItem {
     _title = title;
   }
 
+  public String getTitle()
+  {
+    return _title;
+  }
+
   public void setDescription(String description)
   {
     _description = description;
@@ -392,11 +397,12 @@ public class NavigationItem {
       _parent.writeLeftNav(out);
     }
     else {
-      writeLeftNavItem(out);
+      // writeLeftNavItem(out);
     }
       
     if (_items.size() > 0) {
-      out.writeEmptyElement("hr");
+      if (_parent != null)
+	out.writeEmptyElement("hr");
 
       for (NavigationItem item : _items) {
 	item.writeLeftNavItem(out);
@@ -410,7 +416,7 @@ public class NavigationItem {
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
     out.writeAttribute("class", "leftnav");
-    out.writeCharacters(_title);
+    out.writeCharacters(_title.toLowerCase());
     out.writeEndElement(); // a
 
     out.writeEmptyElement("br");
@@ -421,7 +427,7 @@ public class NavigationItem {
   {
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
-    out.writeCharacters(_title);
+    out.writeCharacters(_title.toLowerCase());
     out.writeEndElement(); // a
   }
 

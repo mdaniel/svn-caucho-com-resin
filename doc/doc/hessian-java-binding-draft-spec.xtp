@@ -1,13 +1,12 @@
 <document>
   <header>
     <product>resin-ee</product>
-    <resin-2.0>$ee/ejb-ref/java-binding-draft-spec.xtp</resin-2.0>
     <title>Hessian/Burlap Java Binding Draft Spec</title>
 <date>December 02, 2003</date>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 
 <s1 title="Introduction">

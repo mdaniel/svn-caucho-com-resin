@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>embed: classpath config file lookup depended on Resin (rep by 
 <li>(2008-02-1) regression cleanup</li>
 <li>(2008-01-30) support: Wicket support for Resin/WebBeans for WebApplication object [<a href="http://wiki.caucho.com/Wicket">wiki: Resin and Wicket</a>]</li>
 <li>jca: AssociationResourceAdapter fixes for Jackrabbit [<a href="http://wiki.caucho.com/Jackrabbit">wiki: Resin and Jackrabbit</a>] (#2346, rep by pegli)</li>

@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/caching.xtp</resin-2.0>
     <title>Server Caching</title>
     <description>
       <p>Server caching can speed dynamic pages to
@@ -22,7 +21,7 @@
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 
 <s1 title="Cache-Control: max-age">

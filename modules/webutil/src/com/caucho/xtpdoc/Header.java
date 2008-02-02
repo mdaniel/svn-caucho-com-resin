@@ -156,6 +156,10 @@ public class Header {
     out.writeAttribute("type", "text/css");
     out.writeAttribute("href", _document.getContextPath() + "/css/default.css");
 
+    out.writeEmptyElement("link");
+    out.writeAttribute("rel", "shortcut icon");
+    out.writeAttribute("href", _document.getContextPath() + "/images/favicon.ico");
+
     out.writeStartElement("title");
 
     NavigationItem nav = _document.getNavigation();

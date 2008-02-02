@@ -1,13 +1,12 @@
 <document>
   <header>
     <product>resin-ee</product>
-    <resin-2.0>$ee/ejb-ref/burlap-draft-spec.xtp</resin-2.0>
     <title>Burlap 1.0 Specification</title>
     <date>Aug 9, 2003</date>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 
 <s1 title="Design Goals">

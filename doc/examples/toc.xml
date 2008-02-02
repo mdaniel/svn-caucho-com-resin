@@ -50,8 +50,8 @@
       <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
       -->
       <item link="esb-servlet-client/index.xtp" title="Client Injection"/>
-      <item link="rest-flickr/index.xtp" title="Flickr REST"/>
       <!--
+      <item link="rest-flickr/index.xtp" title="Flickr REST"/>
       <item link="soa-jaxws/index.xtp" title="JAX-WS example"/>
       -->
     </item>

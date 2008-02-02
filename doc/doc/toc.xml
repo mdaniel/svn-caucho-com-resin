@@ -68,7 +68,8 @@
         <item link="virtual-host.xtp" title="Virtual Hosting"/>
         <item link="config-database.xtp" title="Database"/>
         <item link="resin-load-balance.xtp" title="Load Balancing"/>
-        <item link="resin-remoting.xtp" title="Remoting"/>
+        <item link="resin-remoting.xtp" title="Remoting"
+	      description="exposing Java services as HTTP/Web protocols"/>
         <item link="resin-security.xtp" title="Security"/>
         <item link="config-sessions.xtp" title="Sessions"/>
         <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
@@ -241,7 +242,7 @@
        - Third party
       -->      
     <item link="thirdparty.xtp" title="Third-party">
-      <item link="ide.xtp" title="IDE's">
+      <item link="ide.xtp" title="IDEs">
       <!--
         <item link="ide-jbuilder.xtp" title="JBuilder (OpenTool)"/>
 	-->

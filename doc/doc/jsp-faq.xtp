@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary-in-localtoc="1"/>
+<localtoc/>
 
 <s1 title="Why I am getting extra whitespace in the output of my JSP?" type="faq">
 <description>

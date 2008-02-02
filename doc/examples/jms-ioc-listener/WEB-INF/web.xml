@@ -2,12 +2,12 @@
   <!--
      - Configures the JDBC-backed Queue.
     -->
-  <jms-queue name="my_queue" url="file:path=WEB-INF/db"/>
+  <jms-queue name="my_queue" uri="file:path=WEB-INF/db"/>
 
   <!--
      - Configures the JMS connectionAbstract factory
     -->
-  <jms-connection-factory class="com.caucho.jms.JmsConnectionFactory"/>
+  <jms-connection-factory uri="resin:"/>
 
   <ejb-message-bean class="example.MyListener">
     <destination-type>javax.jms.Queue</destination-type>

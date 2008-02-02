@@ -11,7 +11,7 @@
   </header>
 
   <body>
-    <summary objsummary-in-localtoc="1"/>
+    <localtoc/>
 
       <s1 title="What is the class I get as a DataSource?" type="faq">
 

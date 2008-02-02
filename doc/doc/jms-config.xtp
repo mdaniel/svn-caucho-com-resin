@@ -8,7 +8,7 @@
   </header>
 
   <body>
-    <summary no-objsummary="1"/>
+    <localtoc/>
 
 <s1 title="ConnectionFactory">
 

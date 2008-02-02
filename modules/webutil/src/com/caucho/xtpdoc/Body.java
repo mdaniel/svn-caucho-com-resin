@@ -129,115 +129,34 @@ public class Body extends ContainerNode {
     out.writeAttribute("cellspacing", "0");
     out.writeAttribute("cellpadding", "0");
     out.writeAttribute("summary", "");
-
-    // logo block
-    out.writeStartElement("tr");
-
-    // spacer
-    out.writeStartElement("td");
-    out.writeAttribute("width", "2");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "2");
-    out.writeAttribute("height", "1");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-    out.writeEndElement(); // </td>
-
-    // logo
-    out.writeStartElement("td");
-    out.writeAttribute("width", "150");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "150");
-    out.writeAttribute("height", "63");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-white.jpg");
-    out.writeEndElement(); // </img>
-    out.writeEndElement(); // </td>
-
-    // spacer
-    out.writeStartElement("td");
-    out.writeAttribute("width", "10");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "10");
-    out.writeAttribute("height", "1");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-    out.writeEndElement(); // </td>
-
-    // top label
-    out.writeStartElement("td");
-    out.writeStartElement("table");
-    out.writeAttribute("width", "100%");
-    out.writeAttribute("cellspacing", "0");
-    out.writeAttribute("cellpadding", "0");
-    out.writeAttribute("border", "0");
-    out.writeStartElement("tr");
-    out.writeAttribute("class", "toptitle");
-    out.writeStartElement("td");
-    //out.writeAttribute("rowspan", "2");
-    out.writeAttribute("width", "90%");
-    out.writeAttribute("background", getDocument().getContextPath() + "/images/hbleed.gif");
-    out.writeStartElement("font");
-    out.writeAttribute("class", "toptitle");
-    out.writeAttribute("size", "+3");
-    out.writeEntityRef("nbsp");
-    if (getDocument().getHeader() != null)
-      out.writeCharacters(getDocument().getHeader().getTitle());
-    out.writeEndElement(); // </font>
-    out.writeEndElement(); // </td>
-    out.writeEndElement(); // </tr>
-    out.writeEndElement(); // </table>
-    out.writeEndElement(); // </td>
     
-    out.writeEndElement(); // </tr>
+    NavigationItem item = getDocument().getNavigation();
 
-    // space
     out.writeStartElement("tr");
     out.writeStartElement("td");
-    out.writeAttribute("colspan", "4");
+    out.writeAttribute("colspan", "3");
+    //    writePixel(out, 1, 1);
+    out.writeEndElement();
     
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "1");
-    out.writeAttribute("height", "5");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
+    out.writeStartElement("td");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "breadcrumb");
     
-    out.writeEndElement(); // </td>
-    out.writeEndElement(); // </tr>
+    writeBreadcrumb(out, item);
+    out.writeEndElement();
+
+    out.writeEndElement();
+    out.writeEndElement();
+
+    writeTitleRow(out);
+
+    writeSpaceRow(out, 20);
 
     String cp = getDocument().getContextPath();
 
     // left
-    out.writeStartElement("tr");
-    out.writeStartElement("td");
-    //out.writeAttribute("bgcolor", "#b9cef7");
-    //out.writeAttribute("class", "section");
-    out.writeAttribute("colspan", "2");
-    out.writeAttribute("background", cp + "/images/left_background.gif");
-    
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "1");
-    out.writeAttribute("height", "20");
-    out.writeAttribute("src", cp + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-    
-    out.writeEndElement(); // </td>
-    
-    out.writeStartElement("td");
-    out.writeAttribute("colspan", "2");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "1");
-    out.writeAttribute("height", "20");
-    out.writeAttribute("src", cp + "/images/pixel.gif");
-    out.writeEndElement(); // </td>
-    out.writeEndElement(); // </tr>
 
-    // navigation
+    // left navigation
     out.writeStartElement("tr");
     out.writeAttribute("valign", "top");
     out.writeStartElement("td");
@@ -259,14 +178,31 @@ public class Body extends ContainerNode {
     out.writeEndElement();
     
     out.writeStartElement("td");
+    
     // actual body
 
-    NavigationItem item = getDocument().getNavigation();
+    /*
+    out.writeStartElement("div");
+    out.writeAttribute("class", "breadcrumb");
+    
+    writeBreadcrumb(out, item);
+    out.writeEndElement();
+    */
+
+    out.writeStartElement("h1");
+    out.writeAttribute("class", "toptitle");
+    if (getDocument().getHeader() != null)
+      out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase());
+    out.writeEndElement();
+    
+    out.writeStartElement("div");
+    out.writeAttribute("class", "breadcrumb");
+    out.writeEmptyElement("hr");
 
     if (item != null) {
-      writeThreadNavigation(out, item);
-      out.writeEmptyElement("hr");
+      writeThreadNavigation(out, item, false);
     }
+    out.writeEndElement();
 
     Header header = getDocument().getHeader();
       
@@ -297,12 +233,17 @@ public class Body extends ContainerNode {
       out.writeEndElement();
     }
 
+    out.writeStartElement("div");
+    out.writeAttribute("class", "breadcrumb");
+    
     out.writeStartElement("hr");
     out.writeEndElement();
 
     if (item != null) {
-      writeThreadNavigation(out, item);
+      writeThreadNavigation(out, item, true);
     }
+    
+    out.writeEndElement();
     
     // nav
 
@@ -351,9 +292,197 @@ public class Body extends ContainerNode {
     out.writeEndElement(); //body
   }
   
-  public void writeThreadNavigation(XMLStreamWriter out, NavigationItem item)
+  private void writeSpaceRow(XMLStreamWriter out, int height)
     throws XMLStreamException
   {
+    // space row
+    out.writeStartElement("tr");
+    out.writeStartElement("td");
+    out.writeAttribute("colspan", "4");
+
+    writePixel(out, 1, height);
+    
+    out.writeEndElement(); // </td>
+    out.writeEndElement(); // </tr>
+  }
+
+  private void writePixel(XMLStreamWriter out, int width, int height)
+    throws XMLStreamException
+  {
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", String.valueOf(width));
+    out.writeAttribute("height", String.valueOf(height));
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
+    out.writeEndElement(); // </img>
+  }
+  
+  private void writeTitleRow(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    // logo block
+    out.writeStartElement("tr");
+
+    // spacer
+    out.writeStartElement("td");
+    out.writeAttribute("width", "2");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "2");
+    out.writeAttribute("height", "1");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
+    out.writeEndElement(); // </img>
+    out.writeEndElement(); // </td>
+
+    // logo
+    out.writeStartElement("td");
+    // old logo area
+    out.writeEndElement(); // </td>
+
+    // spacer
+    out.writeStartElement("td");
+    out.writeAttribute("width", "10");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "10");
+    out.writeAttribute("height", "1");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
+    out.writeEndElement(); // </img>
+    out.writeEndElement(); // </td>
+
+    // top label
+    out.writeStartElement("td");
+    out.writeAttribute("align", "right");
+
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "Caucho Technology");
+    out.writeAttribute("align", "right");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-title-logo.jpg");
+    out.writeEndElement(); // </img>
+
+    /*
+    out.writeStartElement("h1");
+    out.writeAttribute("class", "toptitle");
+    if (getDocument().getHeader() != null)
+      out.writeCharacters(getDocument().getHeader().getTitle());
+    out.writeEndElement();
+    */
+    out.writeEndElement(); // </td>
+    
+    out.writeEndElement(); // </tr>
+  }
+  
+  private void writeOldTitleRow(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    // logo block
+    out.writeStartElement("tr");
+
+    // spacer
+    out.writeStartElement("td");
+    out.writeAttribute("width", "2");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "2");
+    out.writeAttribute("height", "1");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
+    out.writeEndElement(); // </img>
+    out.writeEndElement(); // </td>
+
+    // logo
+    out.writeStartElement("td");
+    /*
+    out.writeAttribute("width", "150");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "150");
+    out.writeAttribute("height", "63");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-white.jpg");
+    out.writeEndElement(); // </img>
+    */
+    out.writeEndElement(); // </td>
+
+    // spacer
+    out.writeStartElement("td");
+    out.writeAttribute("width", "10");
+    out.writeStartElement("img");
+    out.writeAttribute("alt", "");
+    out.writeAttribute("width", "10");
+    out.writeAttribute("height", "1");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
+    out.writeEndElement(); // </img>
+    out.writeEndElement(); // </td>
+
+    // top label
+    out.writeStartElement("td");
+
+    out.writeStartElement("h1");
+    out.writeAttribute("class", "toptitle");
+    if (getDocument().getHeader() != null)
+      out.writeCharacters(getDocument().getHeader().getTitle());
+    out.writeEndElement();
+    
+    /*
+    out.writeStartElement("table");
+    out.writeAttribute("width", "100%");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("cellpadding", "0");
+    out.writeAttribute("border", "0");
+    out.writeStartElement("tr");
+    out.writeAttribute("class", "toptitle");
+    out.writeStartElement("td");
+    //out.writeAttribute("rowspan", "2");
+    out.writeAttribute("width", "90%");
+    out.writeAttribute("background", getDocument().getContextPath() + "/images/hbleed.gif");
+    out.writeStartElement("font");
+    out.writeAttribute("class", "toptitle");
+    out.writeAttribute("size", "+3");
+    out.writeEntityRef("nbsp");
+    if (getDocument().getHeader() != null)
+      out.writeCharacters(getDocument().getHeader().getTitle());
+    out.writeEndElement(); // </font>
+    out.writeEndElement(); // </td>
+    out.writeEndElement(); // </tr>
+    out.writeEndElement(); // </table>
+    */
+    out.writeEndElement(); // </td>
+    
+    out.writeEndElement(); // </tr>
+  }
+  
+  public void writeBreadcrumb(XMLStreamWriter out, NavigationItem item)
+    throws XMLStreamException
+  {
+    out.writeCharacters("\n");
+    out.writeStartElement("a");
+    out.writeAttribute("href", "/");
+    out.writeCharacters("home");
+    out.writeEndElement();
+
+    writeBreadcrumbRec(out, item);
+  }
+  
+  public void writeBreadcrumbRec(XMLStreamWriter out, NavigationItem item)
+    throws XMLStreamException
+  {
+    if (item == null || item.getParent() == null)
+      return;
+
+    writeBreadcrumbRec(out, item.getParent());
+    
+    out.writeCharacters(" / ");
+    out.writeStartElement("a");
+    out.writeAttribute("href", item.getLink());
+    out.writeCharacters(item.getTitle().toLowerCase());
+    out.writeEndElement();
+  }
+  
+  public void writeThreadNavigation(XMLStreamWriter out,
+				    NavigationItem item,
+				    boolean writeCenter)
+    throws XMLStreamException
+  {
+    out.writeCharacters("\n");
     out.writeStartElement("table");
     out.writeAttribute("border", "0");
     out.writeAttribute("cellspacing", "0");
@@ -371,7 +500,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("td");
     out.writeAttribute("width", "40%");
     out.writeStartElement("center");
-    if (item.getParent() != null) {
+    if (item.getParent() != null && writeCenter) {
       item.getParent().writeLink(out);
     }
     out.writeEndElement();

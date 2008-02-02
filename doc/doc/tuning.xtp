@@ -1,12 +1,11 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/java_tut/tuning.xtp</resin-2.0>
     <title>Performance Tuning</title>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="Resin Threads">
 

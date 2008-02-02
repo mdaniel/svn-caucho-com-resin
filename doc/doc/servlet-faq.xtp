@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary-in-localtoc="1"/>
+<localtoc/>
 
 <s1 title="Can I put a filter in resin.conf that get's executed before the filters in web.xml?" type="faq">
 <description>

@@ -14,7 +14,7 @@
 
 <body>
 
-<summary localtoc="1"/>
+<localtoc/>
 
 <s1 title="Cross-site scripting">
 <p>Cross-site scripting occurs when a web-site inadvertantly

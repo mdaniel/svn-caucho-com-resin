@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/jsp-actions.xtp</resin-2.0>
     <title>Actions</title>
     <description type="brief">
       <p>

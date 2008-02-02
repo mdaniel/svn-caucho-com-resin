@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$article/hessian-messaging.xtp</resin-2.0>
     <title>Hessian Messaging</title>
     <description>
       <p>The Hessian binary web service protocol can

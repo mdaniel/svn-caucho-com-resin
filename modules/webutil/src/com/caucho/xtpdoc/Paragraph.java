@@ -43,6 +43,7 @@ public class Paragraph extends FormattedTextWithAnchors {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
     out.writeStartElement("p");
 
     super.writeHtml(out);

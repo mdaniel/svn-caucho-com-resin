@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/jsp-directives.xtp</resin-2.0>
     <title>Directives</title>
     <description>
       <p>

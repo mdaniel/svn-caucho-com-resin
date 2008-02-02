@@ -67,6 +67,10 @@ public class Summary implements ContentItem {
   {
   }
 
+  public void setObjsummary(String objSummary)
+  {
+  }
+
   public void setNoObjSummary(String noObjSummary)
   {
   }

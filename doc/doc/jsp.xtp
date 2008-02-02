@@ -4,7 +4,6 @@
     <title>JSP</title>
     <level>toplevel-topic</level>
     <type>contents</type>
-    <resin-2.0>$resin/ref/jsp.xtp</resin-2.0>
     <description>
       <p>
       JSP creates output (such as HTML) from <em>template</em>

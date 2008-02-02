@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/hessian.xtp</resin-2.0>
     <title>Hessian 1.0.2 Specification</title>
     <date>May 12, 2006</date>
     <description>

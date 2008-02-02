@@ -11,7 +11,7 @@
   </header>
 
   <body>
-    <summary objsummary-in-localtoc="1"/>
+    <localtoc/>
 
 <s1 name="port80" title="How do I handle port 80 and root issues on Linux?" type="faq">
 

@@ -2,14 +2,12 @@
 <%@ page import="example.HelloService" %>
 <%!
 @Named("hessian") HelloService _hessianHello; 
-@Named("rest") HelloService _restHello; 
-@Named("soap") HelloService _soapHello; 
+@Named("burlap") HelloService _burlapHello; 
 @Named("vm") HelloService _vmHello; 
 %>
 <pre>
 From Hessian: <%= _hessianHello.hello() %>
-From REST: <%= _restHello.hello() %>
-From SOAP: <%= _soapHello.hello() %>
+From Burlap: <%= _burlapHello.hello() %>
 From VM: <%= _vmHello.hello() %>
 </pre>
 

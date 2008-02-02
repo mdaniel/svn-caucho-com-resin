@@ -202,6 +202,11 @@ public class ClassComponent extends ComponentImpl {
 	  best = ctor;
 	  second = null;
 	}
+	else if (ctor.getParameterTypes().length == 0) {
+	  best = ctor;
+	}
+	else if (best.getParameterTypes().length == 0) {
+	}
 	else {
 	  second = ctor;
 	}

@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/servlet-config.xtp</resin-2.0>
     <title>Servlets</title>
     <description>
       <p>Servlets are Java classes which service HTTP requests.  The only
@@ -18,7 +17,7 @@
   </header>
 
   <body>
-    <summary no-objsummary="1"/>
+    <localtoc/>
 
 <s1 title="Examples">
 

@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/virtual-host.xtp</resin-2.0>
     <title>Virtual Hosting</title>
     <description>
       <p>Each Resin instance can serve many virtual hosts.  The virtual
@@ -40,7 +39,7 @@ use real virtual host names that are registered as internet sites, and resolve
 to an internet-available IP address.    OS-level features on the test client
 machine can be used to map a virtual host name to an IP address.  
 
-</p><p>For example, developer's often run the Resin server and the test client
+</p><p>For example, developers often run the Resin server and the test client
 (usually a browser) on the same machine.  The OS is configured to map the "www.gryffindor.com" and
 "www.slytherin.com" names to "127.0.0.1", pointing these host names back to
 computer that the client is running on.</p>

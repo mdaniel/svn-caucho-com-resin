@@ -1,6 +1,5 @@
 <document>
 <header>
-  <resin-2.0>$resin/faq/ssl.xtp</resin-2.0>
   <product>resin</product>
   <title>SSL with Resin</title>
   <description>

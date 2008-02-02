@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/xpath.xtp</resin-2.0>
     <title>XML Path Language (XPath)</title>
     <description>
       <p>Resin can use XPath, the XML Path Language, to select nodes

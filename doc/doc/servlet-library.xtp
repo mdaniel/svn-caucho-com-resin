@@ -1,7 +1,6 @@
 <document>
 <header>
   <product>resin</product>
-  <resin-2.0>$resin/ref/servlet-library.xtp</resin-2.0>
   <title>Servlet Library</title>
   <description>
     <p>

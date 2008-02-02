@@ -12,7 +12,7 @@ java code to provide a response to a client that makes an HTTP request.
 
 <body>
 
-<summary localtoc="3"/>
+<localtoc/>
 
 <s1 title="Web applications">
 
@@ -308,7 +308,6 @@ performs the desired action.
 EL and JSTL are used throughout this discussion, the <a href="jsp.xtp">Resin JSP documentation</a>, the <a href="jstl.xtp">JSTL documentation</a> provide
 more information.
 </p>
-
 
 <example title="x.jsp - Example JSP file using EL and JSTL">
 &lt;%@page session="false" contentType="text/html" %&gt;

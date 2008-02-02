@@ -1,12 +1,11 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/filter-config.xtp</resin-2.0>
     <title>Filters</title>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="Filter Configuration">
 <p>Filter configuration follows the Servlet 2.3 deployment descriptors.

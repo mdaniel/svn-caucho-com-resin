@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/jsp-variables.xtp</resin-2.0>
     <title>Variables</title>
     <description>
       <p>
@@ -14,7 +13,7 @@
   </header>
 
   <body>
-  <summary/>
+  <localtoc/>
 
   <s1 title="JSP Variables">
 

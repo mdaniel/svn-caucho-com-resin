@@ -178,7 +178,7 @@ public class Resource {
   /**
    * Sets the class
    */
-  public void setMBeanInterface(Class cl)
+  public void setMbeanInterface(Class cl)
   {
     _mbeanInterface = cl;
   }

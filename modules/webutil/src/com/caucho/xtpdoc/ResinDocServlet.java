@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -73,6 +73,7 @@ public class ResinDocServlet extends HttpServlet {
     super.init(config);
 
     _config = new Config();
+    _config.setEL(false);
     _pwd = Vfs.lookup().createRoot();
 
     if (_contextPath == null)
@@ -104,7 +105,8 @@ public class ResinDocServlet extends HttpServlet {
 
     try {
       response.setContentType("text/html");
-      response.addHeader("Cache-Control", "max-age=3600");
+      //response.addHeader("Cache-Control", "max-age=3600");
+      //response.addHeader("Cache-Control", "max-age=60");
 
       XMLStreamWriter xmlOut
         = _outputFactory.createXMLStreamWriter(os, _encoding);

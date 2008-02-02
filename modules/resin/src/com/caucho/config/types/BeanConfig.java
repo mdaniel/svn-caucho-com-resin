@@ -97,12 +97,12 @@ public class BeanConfig extends WbComponentConfig {
       setName(jndiName);
   }
 
-  public void setMBeanName(String mbeanName)
+  public void setMbeanName(String mbeanName)
   {
     _mbeanName = mbeanName;
   }
 
-  public void setMBeanClass(Class cl)
+  public void setMbeanClass(Class cl)
   {
     _mbeanClass = cl;
   }

@@ -9,7 +9,7 @@
 </header>
 
 <body>
-<summary objsummary-in-localtoc="1"/>
+<localtoc/>
 
 <s1 title="Mac OS X startup script" type="faq">
 <description>

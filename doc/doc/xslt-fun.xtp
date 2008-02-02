@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/xsl.xtp</resin-2.0>
     <title>XSLT Extensible Stylesheet Language</title>
     <keywords>
       <keyword>xslt</keyword>
@@ -16,7 +15,7 @@
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="Introduction">
 <p>XSLT processes the input document recursively from the top down,

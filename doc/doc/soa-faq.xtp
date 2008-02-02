@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary="localtoc"/>
+<localtoc/>
 
 
 <s1 title="Can I link one JNDI name to another?" type="faq">

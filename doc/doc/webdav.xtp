@@ -1,7 +1,6 @@
 <document>
 <header>
 <product>resin</product>
-<resin-2.0>$resin/ref/webdav.xtp</resin-2.0>
 <title>WebDAV</title>
 <version>Resin 3.0</version>
 <description>

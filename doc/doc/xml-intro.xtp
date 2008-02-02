@@ -1,12 +1,11 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/xtp-index.xtp</resin-2.0>
     <title>Introduction</title>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="XML Parsing">
 <p>

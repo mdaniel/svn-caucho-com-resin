@@ -12,43 +12,58 @@
     -->
   <servlet-mapping url-pattern="/hello/hessian/*"
                    servlet-class="example.HelloServiceImpl">
-    <protocol type="hessian"/>
+    <protocol uri="hessian"/>
+  </servlet-mapping>
+
+  <!--
+     - Hessian protocol service
+    -->
+  <servlet-mapping url-pattern="/hello/burlap/*"
+                   servlet-class="example.HelloServiceImpl">
+    <protocol uri="burlap"/>
   </servlet-mapping>
 
   <!--
      - SOAP protocol service
-    -->
   <servlet-mapping url-pattern="/hello/soap/*"
                    servlet-class="example.HelloServiceImpl">
-    <protocol type="soap"/>
+    <protocol uri="cxf"/>
   </servlet-mapping>
+    -->
 
   <!--
      - REST protocol service
-    -->
   <servlet-mapping url-pattern="/hello/rest/*"
                    servlet-class="example.HelloServiceImpl">
-    <protocol type="rest"/>
+    <protocol uri="rest"/>
   </servlet-mapping>
+    -->
 
   <!--
      - Hessian client
     -->
-  <web-service-client class="example.HelloService" name="hessian">
-    <url>hessian:${webApp.url}/hello/hessian/</url>
-  </web-service-client>  
+  <remote-client interface="example.HelloService" name="hessian">
+    <uri>hessian:url=${webApp.url}/hello/hessian/</uri>
+  </remote-client>  
+
+  <!--
+     - Burlap client
+    -->
+  <remote-client interface="example.HelloService" name="burlap">
+    <uri>burlap:url=${webApp.url}/hello/burlap/</uri>
+  </remote-client>  
   
   <!--
      - SOAP client
-    -->
-  <web-service-client class="example.HelloService" name="soap">
-    <url>soap:${webApp.url}/hello/soap/</url>
+  <web-service-client interface="example.HelloService" name="soap">
+    <uri>cxf:url=${webApp.url}/hello/soap/</uri>
   </web-service-client>
+    -->
   
   <!--
      - REST client
-    -->
-  <web-service-client class="example.HelloService" name="rest">
-    <url>rest:${webApp.url}/hello/rest/</url>
+  <web-service-client interfce="example.HelloService" name="rest">
+    <uri>rest:url=${webApp.url}/hello/rest/</uri>
   </web-service-client>
+    -->
 </web-app>

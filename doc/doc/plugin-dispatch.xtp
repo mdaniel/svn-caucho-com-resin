@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/java_tut/plugin-dispatch.xtp</resin-2.0>
     <title>How the Plugins Dispatch to Resin</title>
     <description>
       <p>When used with another web server, Resin serves JSPs and Servlets

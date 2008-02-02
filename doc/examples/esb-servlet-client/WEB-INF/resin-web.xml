@@ -7,13 +7,13 @@
                    servlet-class="example.HelloServiceImpl"
                    jndi-name="service/HelloService">
 
-    <protocol type="hessian"/>
+    <protocol uri="hessian"/>
   </servlet-mapping>
 
-  <web-service-client jndi-name="hessian/HelloService">
-    <url>hessian:${webApp.url}/hello/</url>
+  <remote-client jndi-name="hessian/HelloService">
+    <uri>hessian:url=${webApp.url}/hello/</uri>
     <interface>example.HelloService</interface>
-  </web-service-client>
+  </remote-client>
 
   <servlet servlet-name="service-frontend" 
            servlet-class="example.ServiceFrontendServlet" />

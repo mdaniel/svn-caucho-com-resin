@@ -18,15 +18,19 @@ user's browser using JavaScript's <code>eval()</code> function.
 
 <body>
 
-<summary localtoc="3"/>
+<localtoc/>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="json.html"/>
-    </td><td>The JSON example page
-</td></tr><tr><td><viewfile-link file="json.php"/>
-    </td><td>The JSON PHP page
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="json.html"/></td>
+  <td>The JSON example page</td>
+</tr>
+<tr>
+  <td><viewfile-link file="json.php"/></td>
+  <td>The JSON PHP page</td>
+</tr>
+</deftable>
 </s1>
 
 <s1 title="Using JSON in Quercus">

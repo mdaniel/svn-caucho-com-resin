@@ -5,12 +5,12 @@
 
   <servlet-mapping url-pattern="/math/*"
                    servlet-class="example.MathServiceImpl">
-    <protocol type="hessian"/>
+    <protocol uri="hessian:"/>
   </servlet-mapping>
 
-  <web-service-client>
-    <url>hessian:${webApp.url}/math/</url>
+  <remote-client>
+    <uri>hessian:url=${webApp.url}/math/</uri>
     <interface>example.MathService</interface>
-  </web-service-client>
+  </remote-client>
   
 </web-app>

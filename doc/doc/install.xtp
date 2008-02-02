@@ -2,7 +2,6 @@
   <header>
     <product>resin</product>
     <version>Resin 3.0</version>
-    <resin-2.0>$resin/ref/starting.xtp</resin-2.0>
     <title>Resin Installation Quick Start</title>
   </header>
 

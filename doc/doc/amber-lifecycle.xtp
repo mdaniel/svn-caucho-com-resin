@@ -24,22 +24,26 @@ has two properties: <code>getData()</code> which returns a string, and
 
 <example title="orm.xml">
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm orm_1_0.xsd" version="1.0"&gt;
-	&lt;package&gt;qa&lt;/package&gt;
-	&lt;entity name="Test" class="qa.Test" access="PROPERTY"&gt;
-		&lt;table name="TEST"/&gt;
-		&lt;attributes&gt;
-			&lt;id name="id"&gt;
-				&lt;column name="ID"/&gt;
-			&lt;/id&gt;
-			&lt;basic name="data"&gt;
-				&lt;column name="DATA"/&gt;
-			&lt;/basic&gt;
-			&lt;many-to-one name="parent"&gt;
-				&lt;join-column name="FK_PARENT"/&gt;
-			&lt;/many-to-one&gt;
-		&lt;/attributes&gt;
-	&lt;/entity&gt;
+&lt;entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm orm_1_0.xsd"
+   version="1.0"&gt;
+  &lt;package&gt;qa&lt;/package&gt;
+  &lt;entity name="Test" class="qa.Test" access="PROPERTY"&gt;
+    &lt;table name="TEST"/&gt;
+      &lt;attributes&gt;
+        &lt;id name="id"&gt;
+          &lt;column name="ID"/&gt;
+        &lt;/id&gt;
+        &lt;basic name="data"&gt;
+          &lt;column name="DATA"/&gt;
+        &lt;/basic&gt;
+        &lt;many-to-one name="parent"&gt;
+          &lt;join-column name="FK_PARENT"/&gt;
+        &lt;/many-to-one&gt;
+     &lt;/attributes&gt;
+   &lt;/table&gt;
+  &lt;/entity&gt;
 &lt;/entity-mappings&gt;
 </example>
 

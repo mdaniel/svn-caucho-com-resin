@@ -55,9 +55,22 @@ public class Localtoc implements ContentItem {
   {
     if (container == null)
       return;
-    
+
+    out.writeCharacters("\n");
     out.writeStartElement("div");
     out.writeAttribute("class", "toc");
+
+    writeContainerRec(out, container);
+    
+    out.writeEndElement(); // div
+  }
+  
+  private void writeContainerRec(XMLStreamWriter out, ContainerNode container)
+    throws XMLStreamException
+  {
+    if (container == null)
+      return;
+
     out.writeStartElement("ol");
 
     for (ContentItem item : container.getItems()) {
@@ -73,12 +86,11 @@ public class Localtoc implements ContentItem {
 	  out.writeEndElement();
 	  out.writeEndElement();
 	
-	  writeContainer(out, section);
+	  writeContainerRec(out, section);
 	}
       }
     }
     out.writeEndElement(); // </ul>
-    out.writeEndElement(); //
   }
 
   public void writeLaTeX(PrintWriter writer)

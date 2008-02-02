@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/velocity.xtp</resin-2.0>
     <title>Velocity-Style Syntax</title>
     <keywords>
        <keyword>velocity</keyword>

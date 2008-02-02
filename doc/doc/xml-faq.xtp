@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary="localtoc"/>
+<localtoc/>
 
 <s1 title="How do I configure Resin 3 to apply a server-side XSLT transformation?" type="faq">
 <description>

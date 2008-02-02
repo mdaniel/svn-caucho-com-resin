@@ -7,7 +7,7 @@
 </header>
 
 <body>
-<summary objsummary="localtoc"/>
+<localtoc/>
 
 <s1 title="Where can I put .jar files so that they are available to all of my web applications?" type="faq">
 <description>

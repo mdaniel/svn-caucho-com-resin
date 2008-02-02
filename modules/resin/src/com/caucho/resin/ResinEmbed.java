@@ -291,6 +291,22 @@ public class ResinEmbed
   /**
    * Sends a HTTP request to the embedded server for testing.
    *
+   * @param is input stream containing the HTTP request
+   * @param os output stream to receive the request
+   */
+  public void request(InputStream is, OutputStream os)
+    throws IOException
+  {
+    start();
+
+    TestConnection conn = createConnection();
+
+    conn.request(is, os);
+  }
+
+  /**
+   * Sends a HTTP request to the embedded server for testing.
+   *
    * @param httpRequest HTTP request string, e.g. "GET /test.jsp"
    * @param os output stream to receive the request
    */
@@ -465,6 +481,26 @@ public class ResinEmbed
     public void request(String input, OutputStream os)
       throws IOException
     {
+      ByteArrayInputStream is;
+
+      int len = input.length();
+      if (_chars.length < len) {
+	_chars = new char[len];
+	_bytes = new byte[len];
+      }
+
+      input.getChars(0, len, _chars, 0);
+      for (int i = 0; i < len; i++)
+	_bytes[i] = (byte) _chars[i];
+
+      is = new ByteArrayInputStream(_bytes, 0, len);
+
+      request(is, os);
+    }
+
+    public void request(InputStream is, OutputStream os)
+      throws IOException
+    {
       Thread.yield();
 
       WriteStream out = Vfs.openWrite(os);
@@ -472,20 +508,6 @@ public class ResinEmbed
 
       ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
       try {
-	ByteArrayInputStream is;
-
-	int len = input.length();
-	if (_chars.length < len) {
-	  _chars = new char[len];
-	  _bytes = new byte[len];
-	}
-
-	input.getChars(0, len, _chars, 0);
-	for (int i = 0; i < len; i++)
-	  _bytes[i] = (byte) _chars[i];
-
-	is = new ByteArrayInputStream(_bytes, 0, len);
-
 	_vfsStream.init(is, os);
 	_conn.setStream(is, os);
 	_conn.setLocalAddress(_localAddress);

@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/burlap.xtp</resin-2.0>
     <title>Burlap</title>
     <description>
       <p>Burlap is a simple XML-based protocol for connecting web

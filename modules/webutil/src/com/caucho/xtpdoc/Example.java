@@ -62,6 +62,7 @@ public class Example extends VerboseFormattedTextWithAnchors {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
     if (_title != null) {
       out.writeStartElement("center");
       out.writeStartElement("b");

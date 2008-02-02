@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/xml.xtp</resin-2.0>
     <title>XML and XSLT</title>
     <type>contents</type>
     <keywords>

@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/java_tut/run-at.xtp</resin-2.0>
     <title>run-at: Periodic Services</title>
     <description>
       <p>Some web applications need a task to be run at regular intervals, e.g. once

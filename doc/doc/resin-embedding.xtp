@@ -18,9 +18,9 @@ IDE integration capabilities.  The <a href="http://caucho.com/resin-javadoc/com/
 <ol>
 <li>Download Resin from http://caucho.com/download</li>
 <li>Unzip Resin in /usr/local/share and make a symlink
-to /usr/local/share/resin</li>
+from /usr/local/share/resin</li>
 <li>Add the jars in resin/lib/*.jar to the CLASSPATH</li>
-<li>Create and compile a TestResin class as described below</li>
+<li>Create and compile a <code>TestResin</code> class as described below</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 
@@ -111,6 +111,33 @@ public static void main(String [])
   System.out.println(result);
 }
 </example>
+
+<p>See also the <a href="http://caucho.com/resin-javadoc/com/caucho/resin/ResinEmbed.html">ResinEmbed JavaDoc</a>.</p>
+
+<def title="ResinEmbed.java">
+package com.caucho.resin;
+
+public class ResinEmbed {
+  public ResinEmbed();
+  public ResinEmbed(String resinConfPath);
+
+  public void addBean(BeanEmbed bean);
+  public void addPort(PortEmbed port);
+  public void setServerHeader(String serverName);
+  public void addWebApp(WebAppEmbed webApp);
+
+  public void join();
+  public void destroy();
+  public void start();
+
+  public void request(InputStream is, OutputStream os)
+    throws IOException;
+  public void request(String request, OutputStream os)
+    throws IOException;
+  public String request(String request)
+    throws IOException;
+}
+</def>
 
 </s1>
 
@@ -291,11 +318,22 @@ webApp.addServlet(service);
 
 <p>The <code>ResinEmbed</code> class contains a <code>main()</code>
 method which can be used to launch an trivial instance of Resin.
-It's main use is for IDEs which want to launch a testing instance of Resin.</p>
+Its main use is for IDEs which want to launch a testing instance of Resin.</p>
 
 <example title="Launching Embedded Resin from the command line">
 resin> java -classpath $CP com.caucho.resin.ResinEmbed --port=8080
 </example>
+
+<deftable title="command-line arguments">
+<tr>
+  <td>--port=8080</td>
+  <td>TCP port to listen to</td>
+</tr>
+<tr>
+  <td>--deploy:</td>
+  <td>Enables the local deployment web-app for IDEs</td>
+</tr>
+</deftable>
 
 </s1>
 

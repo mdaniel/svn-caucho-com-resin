@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/java_tut/servlets.xtp</resin-2.0>
     <title>A Hello, World Servlet</title>
     <description><p>A trivial "hello, world" servlet</p></description>
     <type>tutorial</type>

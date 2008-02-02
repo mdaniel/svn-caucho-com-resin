@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/java_tut/xsl-filter.xtp</resin-2.0>
     <title>XSLT Filter</title>
     <description>
       <p>XSLT filters can be applied to the output of a JSP page or a
@@ -18,7 +17,7 @@
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="web.xml Configuration">
 

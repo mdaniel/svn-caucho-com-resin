@@ -1,7 +1,6 @@
 <document>
 <header>
 <product>resin</product>
-<resin-2.0>$resin/ref/filter-library.xtp</resin-2.0>
 <title>Filter Library</title>
 <description>
 <p>
@@ -12,7 +11,7 @@ Resin provides a set of convenient filters in the com.caucho.filters.* package.
 
 <body>
 
-<summary/>
+<localtoc/>
 <s1 title="GzipFilter">
 
 <p>The GzipFilter compresses the output of pages for browsers which understand

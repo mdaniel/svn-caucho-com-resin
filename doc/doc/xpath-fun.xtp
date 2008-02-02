@@ -1,12 +1,11 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/xpath-fun.xtp</resin-2.0>
     <title>XPath Functions</title>
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 name="node-set" title="Node Set Functions">
 

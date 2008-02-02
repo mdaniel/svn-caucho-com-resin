@@ -74,7 +74,7 @@ war expantion.</p>
 
 </defun>
 
-<defun title="&lt;auth-constraint>" localtoc-indent="1" version="Servlet">
+<defun title="&lt;auth-constraint>" version="Servlet">
 <parents>security-constraint</parents>
 
 <p>Requires that authenticated users fill the specified role.
@@ -145,7 +145,7 @@ cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-M
 </example>
 </defun>
 
-<defun title="&lt;constraint>" localtoc-indent="1" version="Resin">
+<defun title="&lt;constraint>" version="Resin">
 <parents>security-constraint</parents>
 
 <p>
@@ -500,7 +500,7 @@ purposes of the regular expression match, because "/baz" is the context path.
 
 </defun>
 
-<defun title="&lt;form-login-config>" localtoc-indent="1" version="Servlet" type="defun">
+<defun title="&lt;form-login-config>" version="Servlet" type="defun">
 <parents>login-config</parents>
 
 <p>Configures authentication using forms.  The login form has
@@ -717,7 +717,7 @@ Digest</a>.</p>
 <p>Resin has a long list of default mime types in <var>$RESIN_HOME/conf/app-default.xml</var></p>
 </defun>
 
-<defun title="&lt;multipart-form>" version="Resin 1.2" localtoc-indent="1">
+<defun title="&lt;multipart-form>" version="Resin 1.2">
 <parents>web-app</parents>
 
 <p>Enables multipart-mime for forms and file uploads.  multipart-mime
@@ -1182,7 +1182,7 @@ PATH_INFO. Value is <var>true</var> or <var>false</var>.</p>
 </example>
 </defun>
 
-<defun title="&lt;user-data-constraint>" localtoc-indent="1" version="Servlet" type="defun">
+<defun title="&lt;user-data-constraint>" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 
 <p>Restricts access to secure transports, such as SSL</p>
@@ -1315,7 +1315,7 @@ a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
 
 </defun>
 
-<defun title="&lt;web-resource-collection>" localtoc-indent="1" version="Servlet" type="defun">
+<defun title="&lt;web-resource-collection>" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 
 <p>Specifies a collection of areas of the web site.</p>

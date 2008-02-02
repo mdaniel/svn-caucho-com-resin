@@ -5,7 +5,7 @@
     -->
   <servlet-mapping url-pattern="/hessian/greeting"
                    servlet-class="example.GreetingImpl">
-    <protocol type="hessian"/>
+    <protocol uri="hessian:"/>
     
     <init>
       <greeting>Hello from resin-web.xml</greeting>
@@ -15,8 +15,8 @@
   <!--
      - Define the client
     -->
-  <web-service-client class="example.GreetingAPI"
-                      url="hessian:${webApp.url}/hessian/greeting"/>
+  <remote-client interface="example.GreetingAPI"
+                 uri="hessian:url=${webApp.url}/hessian/greeting"/>
 
   <servlet-mapping url-pattern="/client/greeting"
                    servlet-class="example.GreetingClientServlet"/>

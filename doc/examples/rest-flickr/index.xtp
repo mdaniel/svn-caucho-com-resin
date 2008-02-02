@@ -9,11 +9,13 @@
       </p>
     </description>
     <type>tutorial</type>
+<!--
     <tutorial-startpage>demo.jsp</tutorial-startpage>
+-->
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1>
 <p>

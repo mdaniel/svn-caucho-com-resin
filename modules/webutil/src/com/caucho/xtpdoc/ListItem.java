@@ -92,6 +92,7 @@ public class ListItem extends FormattedTextWithAnchors {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
     out.writeStartElement("li");
 
     super.writeHtml(out);

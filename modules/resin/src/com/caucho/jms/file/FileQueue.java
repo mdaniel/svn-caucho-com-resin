@@ -35,6 +35,7 @@ import java.sql.*;
 
 import javax.jms.*;
 import javax.annotation.*;
+import javax.webbeans.*;
 
 import com.caucho.jms.queue.*;
 import com.caucho.jms.message.*;
@@ -55,7 +56,7 @@ import com.caucho.vfs.*;
  *
  * It is configured as:
  * <pre>
- * &lt;queue jndi-name="jms/my-name" url="file:path=WEB-INF/jms"/>
+ * &lt;jms-queue jndi-name="jms/my-name" uri="file:path=WEB-INF/jms"/>
  * </pre>
  */
 public class FileQueue extends AbstractQueue implements Topic
@@ -71,7 +72,7 @@ public class FileQueue extends AbstractQueue implements Topic
   private FileQueueEntry _head;
   private FileQueueEntry _tail;
 
-  public FileQueue()
+  @In public FileQueue()
   {
     _store = new FileQueueStore(_messageFactory);
   }

@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/hessian.xtp</resin-2.0>
     <title>Hessian</title>
     <description>
       <p>Hessian is a simple binary protocol for connecting web
