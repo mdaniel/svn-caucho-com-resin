@@ -165,7 +165,7 @@ public class BurlapProtocol extends ProtocolContainer {
       remoteApi = server.getRemoteObjectClass();
 
       if (homeApi != null) {
-	Object remote = server.getRemoteObject(homeApi);
+	Object remote = server.getObject(homeApi);
 	
         BurlapSkeleton skel = getSkeleton(homeApi, homeApi, remoteApi);
 
@@ -173,7 +173,7 @@ public class BurlapProtocol extends ProtocolContainer {
       }
       
       if (remoteApi != null) {
-	Object remote = server.getRemoteObject(remoteApi);
+	Object remote = server.getObject(remoteApi);
 	
         BurlapSkeleton skel = getSkeleton(remoteApi, remoteApi, remoteApi);
 

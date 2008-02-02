@@ -77,9 +77,9 @@ public class NameContextSkeleton extends Skeleton {
     String method = in.getMethod();
 
     try {
-      if (method.equals("lookup") ||
-          method.equals("lookup_string") ||
-          method.equals("lookup_1"))
+      if (method.equals("lookup")
+	  || method.equals("lookup_string")
+	  || method.equals("lookup_1"))
         executeLookup(in, out);
       else if (method.equals("list"))
         executeList(in, out);
