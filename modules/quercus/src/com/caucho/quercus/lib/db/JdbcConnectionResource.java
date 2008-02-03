@@ -1079,9 +1079,9 @@ public abstract class JdbcConnectionResource
 
     public boolean matchesToken(String token)
     {
-      if (token == null)
-        token = _query.substring(_start, _end);
-      
+      if (_token == null)
+        _token = _query.substring(_start, _end);
+
       return _token.equalsIgnoreCase(token);
     }
 
