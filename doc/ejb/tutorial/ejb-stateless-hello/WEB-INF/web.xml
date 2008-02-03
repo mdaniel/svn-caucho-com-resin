@@ -4,7 +4,7 @@
 
   <ejb-server config-directory="WEB-INF"/>
     
-  <servlet servlet-name='hessian' servlet-class='com.caucho.hessian.EJBServlet'/>   
+  <servlet servlet-name='hessian' servlet-class='com.caucho.ejb.hessian.EJBServlet'/>   
   <servlet-mapping url-pattern='/hessian/*' servlet-name='hessian'/>
 
   <!-- Configuration for the client.
@@ -27,7 +27,7 @@
   <servlet-mapping url-pattern='/hello-jndi/*' servlet-name='hello-jndi'/>
 
   <jndi-link jndi-name='java:comp/env/ejb'
-             factory='com.caucho.hessian.HessianContextFactory'>
+             factory='com.caucho.ejb.hessian.HessianContextFactory'>
     <init-param java.naming.provider.url='${app.url}/hessian'/>
   </jndi-link>
 
