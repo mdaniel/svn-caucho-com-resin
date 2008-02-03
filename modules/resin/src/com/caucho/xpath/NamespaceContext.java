@@ -29,37 +29,37 @@
 package com.caucho.xpath;
 
 public class NamespaceContext {
-  private NamespaceContext prev;
-  private String prefix;
-  private String url;
+  private NamespaceContext _prev;
+  private String _prefix;
+  private String _url;
 
   public NamespaceContext(NamespaceContext prev, String prefix, String url)
   {
-    this.prev = prev;
-    this.prefix = prefix.intern();
-    this.url = url.intern();
+    _prev = prev;
+    _prefix = prefix;
+    _url = url;
   }
 
   public NamespaceContext getPrev()
   {
-    return prev;
+    return _prev;
   }
 
   public String getPrefix()
   {
-    return prefix;
+    return _prefix;
   }
 
   public String getUrl()
   {
-    return url;
+    return _url;
   }
 
   public static String find(NamespaceContext ns, String prefix)
   {
-    for (; ns != null; ns = ns.prev) {
-      if (ns.prefix.equals(prefix))
-        return ns.url;
+    for (; ns != null; ns = ns._prev) {
+      if (ns._prefix.equals(prefix))
+        return ns._url;
     }
 
     return null;

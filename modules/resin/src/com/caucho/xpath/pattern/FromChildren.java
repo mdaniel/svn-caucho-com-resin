@@ -165,8 +165,8 @@ public class FromChildren extends Axis {
 
     FromChildren bPattern = (FromChildren) b;
     
-    return (_parent == bPattern._parent ||
-            (_parent != null && _parent.equals(bPattern._parent)));
+    return (_parent == bPattern._parent
+	    || (_parent != null && _parent.equals(bPattern._parent)));
   }
 
   public String toString()

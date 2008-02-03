@@ -259,7 +259,6 @@ public abstract class XslNode {
     
     String localName = name.getLocalName();
 
-
     _outputNamespace = new NamespaceContext(_outputNamespace, localName, url);
 
     if (! localName.equals("xmlns")) {
@@ -764,8 +763,8 @@ public abstract class XslNode {
     if (select == null)
       throw new NullPointerException();
     
-    if (select instanceof FromContext &&
-        ((FromContext) select).getCount() == 0)
+    if (select instanceof FromContext
+	&& ((FromContext) select).getCount() == 0)
       return "node";
 
     else if (select instanceof FromRoot)
@@ -838,7 +837,7 @@ public abstract class XslNode {
       
       NodePattern pat = (NodePattern) select;
       
-      out.println("if (" + name + ".getNodeName() == \"" + pat.getNodeName() + "\" &&");
+      out.println("if (" + name + ".getNodeName().equals(\"" + pat.getNodeName() + "\") &&");
       out.println("    " + name + " instanceof Element) {");
       out.pushDepth();
       _gen.pushSelectDepth();
