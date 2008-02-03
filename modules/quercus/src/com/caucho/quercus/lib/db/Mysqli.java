@@ -724,6 +724,12 @@ public class Mysqli extends JdbcConnectionResource {
         if (tok != null) {
           String dbname = tok.toString();
 
+	  // XXX: breaks mediawiki
+	  if (dbname.length() > 0 && dbname.charAt(0) == '`')
+	    dbname = dbname.substring(1);
+	  if (dbname.length() > 0 && dbname.charAt(dbname.length() - 1) == '`')
+	    dbname = dbname.substring(0, dbname.length() - 1);
+
           setCatalog(dbname);
 
           return null;
@@ -1011,7 +1017,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     if (getWarnings() != null) {
       JdbcResultResource warningResult;
-      warningResult = metaQuery("SHOW WARNINGS",getCatalog().toString());
+      warningResult = metaQuery("SHOW WARNINGS", getCatalog().toString());
       int warningCount = 0;
 
       if (warningResult != null) {
