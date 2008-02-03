@@ -29,8 +29,7 @@
 
 package com.caucho.xtpdoc;
 
-import com.caucho.config.Config;
-import com.caucho.config.LineConfigException;
+import com.caucho.config.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
@@ -113,48 +112,16 @@ public class ResinDocServlet extends HttpServlet {
 
       _config.configure(document, path);
 
+      if (document.getRedirect() != null) {
+	response.sendRedirect(document.getRedirect());
+	return;
+      }
+      
       document.writeHtml(xmlOut);
 
       xmlOut.flush();
-    } catch (LineConfigException e) {
-      if (e.getLineNumber() < 0)
-        throw new ServletException("Error configuring document", e);
-
-      try {
-        PrintWriter out = response.getWriter();
-
-        out.println("<html>");
-        out.println("<body>");
-
-        out.println("Error configuring document: " + e);
-
-        ReadStream readStream = path.openRead();
-
-        String line = readStream.readLine();
-
-        out.println("<pre>");
-
-        for (int i = 1; line != null; i++, line = readStream.readLine()) {
-          if (i == e.getLineNumber())
-            out.print("<div style='background-color: fa8072'>");
-
-          line = line.replace("<", "&lt;");
-          line = line.replace(">", "&gt;");
-          out.print(line);
-
-          if (i == e.getLineNumber())
-            out.print("</div>");
-          else
-            out.println();
-        }
-
-        out.println("</pre>");
-
-        out.println("</body>");
-        out.println("</html>");
-      } catch (IOException iOException) {
-        throw new ServletException("Error configuring document", e);
-      }
+    } catch (ConfigException e) {
+      throw e;
     } catch (Exception e) {
       throw new ServletException("Error configuring document", e);
     }

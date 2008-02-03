@@ -31,10 +31,10 @@ used for development or evaluation.  The steps are:</p>
       installation sets JAVA_HOME correctly.</li>
 </ul></li>
 
-<li>unzip/untar the Resin download.  It will unzip into resin-3.1.0/.
+<li>unzip/untar the Resin download.  It will unzip into resin-3.1.x/.
 
 <ul>
-  <li>resin-3.1.0 is resin.home, the location of the Resin distribution.</li>
+  <li>resin-3.1.x is resin.home, the location of the Resin distribution.</li>
   <li>For now, it is also resin.root, the location of your content.
 Soon, you will want to move resin.root to
 something like <var>/var/www</var>.</li>
@@ -42,7 +42,7 @@ something like <var>/var/www</var>.</li>
 
 <li>On Unix, execute use ./configure; make; make install</li>
 
-<li>Start <var>java -jar resin-3.1.0/lib/resin.jar</var></li>
+<li>Start in development mode <var>java -jar resin-3.1.x/lib/resin.jar</var></li>
 
 <li>Browse <code>http://localhost:8080</code></li>
 </ol>

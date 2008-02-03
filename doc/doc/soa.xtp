@@ -1,10 +1,1 @@
-<document>
-  <header>
-    <title>Inversion of Control</title>
-    <type>contents</type>
-  </header>
-
-  <body>
-    <summary/>
-  </body>
-</document>
+<document redirect="resin-remoting.xtp"/>

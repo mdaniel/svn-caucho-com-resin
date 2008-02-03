@@ -1,11 +1,1 @@
-<document>
-  <header>
-    <product>resin</product>
-    <type>contents</type>
-    <title>Using Resin with some IDEs</title>
-  </header>
-
-  <body>
-    <summary/>
-  </body>
-</document>
+<document redirect="http://wiki.caucho.com/IDE"/>

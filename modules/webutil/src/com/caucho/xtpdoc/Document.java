@@ -57,6 +57,8 @@ public class Document {
   private String _encoding;
   private boolean _hasChildren;
 
+  private String _redirect;
+
   Document()
   {
     this(null, null, null, null, "utf-8");
@@ -263,6 +265,16 @@ public class Document {
     return _body;
   }
 
+  public void setRedirect(String href)
+  {
+    _redirect = href;
+  }
+
+  public String getRedirect()
+  {
+    return _redirect;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -277,7 +289,9 @@ public class Document {
 
     if (_header != null)
       _header.writeHtml(out);
-    _body.writeHtml(out);
+
+    if (_body != null)
+      _body.writeHtml(out);
 
     out.writeEndElement(); // html
   }

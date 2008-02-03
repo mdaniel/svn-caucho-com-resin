@@ -6,18 +6,47 @@
     <item link="overview.xtp" title="Overview"/>
     
     <!--
+       - Quick Start
+      -->    
+    <item link="starting.xtp" title="Quick Start"/>
+    
+    <!--
        - Installation
       -->    
     <item link="install.xtp" title="Installation">
-      <item link="starting.xtp" title="Quick Start"/>
       <item link="resin-web-server.xtp" title="Resin Web Server"/>
       <item link="install-apache.xtp" title="Apache"/>
       <item link="install-iis.xtp" title="IIS"/>
       <item link="plugin-dispatch.xtp" title="Plugin Dispatch"/>
       <item link="linux-boot.xtp" title="Linux Boot"/>
-      <item link="install-faq.xtp" title="FAQ"/>
-      <item link="install-scrapbook.xtp" title="Scrapbook"/>
+      <!--
+      <item link="isp.xtp" title="ISP"/>
+      -->
     </item>
+
+    <!-- line/rule goes here? -->
+    
+    <!--
+       - Admin/JMX
+      -->
+    <item link="jmx.xtp" title="Admin"/>
+    
+    <!--
+       - Amber
+      -->
+    <item link="amber.xtp" title="Amber">
+      <item title="Amber" link="amber-overview.xtp"/>
+      <item title="Lifecycle" link="amber-lifecycle.xtp"/>
+      <item title="@Table" link="amber-table.xtp"/>
+    </item>
+      
+    <item link="cluster.xtp" title="Clustering">
+      <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
+      <item link="config-sessions.xtp" title="Sessions"/>
+      <item link="resin-load-balance.xtp" title="Load Balancing"/>
+    </item>
+    
+    <item link="proxy-cache.xtp" title="Cache"/>
 
     <!--
        - Configuration
@@ -59,25 +88,6 @@
 	      <item link="index-tags.xtp" title="Tag Index"
 	        description="alphabetical list of tags" />
       </item>
-      
-      <item title="Common Tasks" link="commontasks.xtp">
-        <item link="resin-ioc.xtp" title="Resin IoC"
-	      description="Resin's IoC/Dependency Injection with WebBeans"/>
-        <item link="resin-embedding.xtp" title="Embedding"
-	      description="embedding Resin in an Application or for unit testing"/>
-        <item link="virtual-host.xtp" title="Virtual Hosting"/>
-        <item link="config-database.xtp" title="Database"/>
-        <item link="resin-load-balance.xtp" title="Load Balancing"/>
-        <item link="resin-remoting.xtp" title="Remoting"
-	      description="exposing Java services as HTTP/Web protocols"/>
-        <item link="resin-security.xtp" title="Security"/>
-        <item link="config-sessions.xtp" title="Sessions"/>
-        <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
-        <item link="tuning.xtp" title="Tuning"/>
-        <item link="isp.xtp" title="ISP"/>
-        <item link="webapp-overview.xtp" title="WebApp"/>
-        <item link="webapp-deploy.xtp" title="Deploy"/>
-      </item>
 
       <item title="Relax Schema" link="schema.xtp">
         <item link="env-schema.xtp" title="Environment"/>
@@ -88,40 +98,38 @@
         <item link="j2ee-schema.xtp" title="J2EE Common"/>
         <item link="j2ee-web-xml-schema.xtp" title="J2EE web.xml"/>
       </item>
-
-      <item link="howto.xtp" title="howto"/>
-      <item link="config-faq.xtp" title="Config FAQ"/>
-      <item link="config-scrapbook.xtp" title="Scrapbook"/>
-      <item link="db-scrapbook.xtp" title="DB Scrapbook"/>
     </item>
-
+      
+    <item link="config-database.xtp" title="Database"/>
+      
+    <item link="webapp-deploy.xtp" title="Deployment"/>
+    
     <!--
-       - Quercus
+       - EJB
       -->
-    <item link="quercus.xtp" title="Quercus">
-      <item title="Overview" link="quercus-overview.xtp"/>
-      <item title="Security" link="quercus-security.xtp"/>
-      <item title="Java Integration" link="quercus-java-integration.xtp"/>
-      <item title="Resin Module" link="quercus-resin-module.xtp"/>
-      <item title="Module Status" link="quercus-module-status.xtp"/>
-      <item title="List of PHP Applications" link="quercus-list-of-applications.xtp"/>
-      <item title="Troubleshooting/FAQ" link="quercus-troubleshoot.xtp"/>
+    <item link="ejb.xtp" title="EJB">
+    <item title="Annotation" link="ejb-annotations.xtp"/>
     </item>
-
+      
+    <item link="resin-embedding.xtp" title="Embedding"
+          description="embedding Resin in an Application or for unit testing"/>
+    
     <!--
-       - soa
+       - Hessian
       -->
-    <item link="soa.xtp" title="SOA/IoC">
-      <item link="jaxb-annotations.xtp" title="JAXB Annotations"/>
-      <item link="ioc-annotations.xtp" title="IoC Annotations"/>
-      <item link="jaxws-annotations.xtp" title="JAX-WS Annotations"/>
-      <item link="jms-config.xtp" title="JMS Configuration"/>
-      <item link="ioc-bean.xtp" title="init"/>
-      <item link="ioc-bean-patterns.xtp" title="bean"/>
-      <item link="soa-cron.xtp" title="CronResource"/>
-      <item link="soa-rmi.xtp" title="RMI"/>
-      <item link="soa-faq.xtp" title="Resource FAQ"/>
+    <item link="hessian.xtp" title="Hessian">
+      <item link="hessian-overview.xtp" title="Hessian"/>
+      <item link="hessian-1.0-spec.xtp" title="Hessian 1.0 spec"/>
+      <item link="hessian-2.0-spec.xtp" title="Hessian 2.0 draft spec"/>
+      <item link="hessian-java-binding-draft-spec.xtp" title="Java Binding"/>
+      <item link="burlap.xtp" title="Burlap"/>
+      <item link="burlap-1.0-spec.xtp" title="Burlap 1.0 Spec"/>
+      <item link="burlap-notes.xtp" title="Burlap Design Notes"/>
+      <item link="hessian-messaging.xtp" title="Hessian Messaging"/>
     </item>
+	  
+    <item link="resin-ioc.xtp" title="IoC"
+          description="Resin's IoC/Dependency Injection"/>
 
     <!--
        - JSP
@@ -143,6 +151,62 @@
       <item link="jsp-faq.xtp" title="FAQ"/>
     </item>
     
+    <item link="jms-config.xtp" title="Messaging"/>
+     
+    <!--
+    <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>
+    -->
+    
+    <!--
+       - Performance
+      -->
+    <item link="performance.xtp" title="Performance">
+      <item link="performance-benchmarks.xtp" title="Benchmarks"/>
+      <item link="jvm-tuning.xtp" title="JVM Tuning"/>
+      <item link="performance-faq.xtp" title="Performance FAQ"/>
+      <item link="performance-scrapbook.xtp" title="Performance Scrapbook"/>
+      <item link="tuning.xtp" title="Tuning"/>
+    </item>
+
+    <!--
+       - Quercus
+      -->
+    <item link="quercus.xtp" title="Quercus/PHP">
+      <item title="Overview" link="quercus-overview.xtp"/>
+      <item title="Security" link="quercus-security.xtp"/>
+      <item title="Java Integration" link="quercus-java-integration.xtp"/>
+      <item title="Resin Module" link="quercus-resin-module.xtp"/>
+      <item title="Module Status" link="quercus-module-status.xtp"/>
+      <item title="List of PHP Applications" link="quercus-list-of-applications.xtp"/>
+      <item title="Troubleshooting/FAQ" link="quercus-troubleshoot.xtp"/>
+    </item>
+      
+    <item link="resin-remoting.xtp" title="Remoting"
+          description="exposing Java services as HTTP/Web protocols"/>
+    
+    <!--
+       - Security
+    <item link="security.xtp" title="Security">
+    </item>
+      -->
+	    
+    <item link="resin-security.xtp" title="Security">
+      <item title="Authentication" link="authentication.xtp"/>
+      <item title="Digest Passwords" link="security-digest.xtp"/>
+      <item title="Authorization" link="authorization.xtp"/>
+      <item title="SSL" link="ssl.xtp"/>
+      <item title="Security Manager" link="securitymanager.xtp"/>
+      <item title="Malicious Attacks" link="security-malicious.xtp"/>
+    </item>
+
+    <!--
+       - resources
+      -->
+    <item link="resources.xtp" title="Resources">
+      <item link="resource-cron.xtp" title="CronResource"/>
+      <item link="resource-rmi.xtp" title="RMI"/>
+    </item>
+    
     <!--
        - Servlet
       -->
@@ -153,72 +217,24 @@
       <item link="servlet-run-at.xtp" title="run-at"/>
       <item link="config-filter.xtp" title="Filters"/>
       <item link="filter-library.xtp" title="Filter Lib"/>
-      <item link="servlet-faq.xtp" title="FAQ"/>
     </item>
-    
+
     <!--
-    <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>
+       - Third party
+      -->      
+    <item link="thirdparty.xtp" title="Third-party"/>
+    
+    <item link="troubleshoot.xtp" title="Troubleshooting/FAQ"/>
+    <!--
+      <item link="troubleshoot-technique.xtp" title="Techniques"/>
+      <item link="troubleshoot-symptoms.xtp" title="Symptoms"/>
+      <item link="troubleshoot-common-problems.xtp" title="Common Problems"/>
+    </item>
     -->
-    
-    <!--
-       - Admin/JMX
-      -->
-    <item link="jmx.xtp" title="Admin (JMX)"/>
-    
-    <!--
-       - EJB
-      -->
-    <item link="ejb.xtp" title="EJB">
-    <item title="Annotation" link="ejb-annotations.xtp"/>
-    </item>
-    
-    <!--
-       - Amber
-      -->
-    <item link="amber.xtp" title="Amber">
-      <item title="Amber" link="amber-overview.xtp"/>
-      <item title="Lifecycle" link="amber-lifecycle.xtp"/>
-      <item title="@Table" link="amber-table.xtp"/>
-    </item>
-    
-    <!--
-       - Security
-      -->
-    <item link="security.xtp" title="Security">
-      <item title="Authentication" link="authentication.xtp"/>
-      <item title="Digest Passwords" link="security-digest.xtp"/>
-      <item title="Authorization" link="authorization.xtp"/>
-      <item title="SSL" link="ssl.xtp"/>
-      <item title="Security Manager" link="securitymanager.xtp"/>
-      <item title="Malicious Attacks" link="security-malicious.xtp"/>
-      <item title="FAQ" link="security-faq.xtp"/>
-      <item title="Scrapbook" link="security-scrapbook.xtp"/>
-    </item>
-    
-    <!--
-       - Performance
-      -->
-    <item link="performance.xtp" title="Performance">
-      <item link="performance-benchmarks.xtp" title="Benchmarks"/>
-      <item link="jvm-tuning.xtp" title="JVM Tuning"/>
-      <item link="proxy-cache.xtp" title="Proxy Caching"/>
-      <item link="performance-faq.xtp" title="Performance FAQ"/>
-      <item link="performance-scrapbook.xtp" title="Performance Scrapbook"/>
-    </item>
-    
-    <!--
-       - Hessian
-      -->
-    <item link="hessian.xtp" title="Hessian">
-      <item link="hessian-overview.xtp" title="Hessian"/>
-      <item link="hessian-1.0-spec.xtp" title="Hessian 1.0 spec"/>
-      <item link="hessian-2.0-spec.xtp" title="Hessian 2.0 draft spec"/>
-      <item link="hessian-java-binding-draft-spec.xtp" title="Java Binding"/>
-      <item link="burlap.xtp" title="Burlap"/>
-      <item link="burlap-1.0-spec.xtp" title="Burlap 1.0 Spec"/>
-      <item link="burlap-notes.xtp" title="Burlap Design Notes"/>
-      <item link="hessian-messaging.xtp" title="Hessian Messaging"/>
-    </item>
+      
+    <item link="virtual-host.xtp" title="Virtual Hosting"/>
+      
+    <item link="webapp-overview.xtp" title="WebApp"/>
     
     <!--
        - XML
@@ -237,39 +253,6 @@
       <item link="xml-faq.xtp" title="FAQ"/>
       <item link="xml-scrapbook.xtp" title="Scrapbook"/>
     </item>
-
-    <!--
-       - Third party
-      -->      
-    <item link="thirdparty.xtp" title="Third-party">
-      <item link="ide.xtp" title="IDEs">
-      <!--
-        <item link="ide-jbuilder.xtp" title="JBuilder (OpenTool)"/>
-	-->
-        <item link="ide-eclipse.xtp" title="Eclipse"/>
-        <item link="ide-intellij.xtp" title="IntelliJ"/>
-      </item>
-
-      <item link="scottit.xtp" title="Scottit"/>
-
-      <item link="groovy.xtp" title="Groovy"/>
-
-      <item link="swiftmq.xtp" title="SwiftMQ" />
-      <item link="openjms.xtp" title="OpenJMS" />
-      <item link="hibernate.xtp" title="Hibernate" />
-      <!--
-      <item link="sslhardware.xtp" title="SSL Accelerators"/>
-      -->
-      <item link="db-thirdparty.xtp" title="Database"/>
-    </item>
-    
-    <item link="troubleshoot.xtp" title="Troubleshooting/FAQ"/>
-    <!--
-      <item link="troubleshoot-technique.xtp" title="Techniques"/>
-      <item link="troubleshoot-symptoms.xtp" title="Symptoms"/>
-      <item link="troubleshoot-common-problems.xtp" title="Common Problems"/>
-    </item>
-    -->
     <!--
     <item link="" title="PDF Manuals" atoc-descend="true"/>
     -->
