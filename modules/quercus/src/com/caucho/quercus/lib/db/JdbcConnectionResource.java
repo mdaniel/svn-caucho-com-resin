@@ -735,7 +735,7 @@ public abstract class JdbcConnectionResource
     if (prevToken == null)
       i = 0;
     else
-      i = prevToken.end;
+      i = prevToken._end;
 
     while (i < len &&
         Character.isWhitespace(sql.charAt(i))) {
@@ -1040,56 +1040,57 @@ public abstract class JdbcConnectionResource
    * a substring from the original.
    */
 
-  protected
-  static class SqlParseToken {
-    private String query;
-    private String token;
-    private int start;
-    private int end;
-    private char firstChar;
+  protected static class SqlParseToken {
+    private String _query;
+    private String _token;
+    private int _start;
+    private int _end;
+    private char _firstChar;
 
-    public
-    void init() {
-      query = null;
-      token = null;
-      start = -1;
-      end = -1;
-      firstChar = '\0';
+    public void init()
+    {
+      _query = null;
+      _token = null;
+      _start = -1;
+      _end = -1;
+      _firstChar = '\0';
     }
 
-    public
-    void assign(String query, int start, int end) {
-      this.query = query;
-      this.token = null;
-      this.start = start;
-      this.end = end;
-      this.firstChar = query.charAt(start);
+    public void assign(String query, int start, int end)
+    {
+      _query = query;
+      _token = null;
+      _start = start;
+      _end = end;
+      _firstChar = query.charAt(start);
     }
 
-    public
-    boolean matchesFirstChar(char upper, char lower) {
-      return (this.firstChar == upper) || (this.firstChar == lower);
+    public boolean matchesFirstChar(char upper, char lower)
+    {
+      return (_firstChar == upper) || (_firstChar == lower);
     }
 
-    public
-    char getFirstChar() {
-      return this.firstChar;
+    public char getFirstChar()
+    {
+      return _firstChar;
     }
 
     // Case insensitive compare of token string
 
-    public
-    boolean matchesToken(String token) {
+    public boolean matchesToken(String token)
+    {
       if (token == null)
-        token = query.substring(start, end);
-      return token.equalsIgnoreCase(token);
+        token = _query.substring(_start, _end);
+      
+      return _token.equalsIgnoreCase(token);
     }
 
-    public
-    String toString() {
-      if (token == null)
-        token = query.substring(start, end);
-      return token;
+    public String toString()
+    {
+      if (_token == null)
+        _token = _query.substring(_start, _end);
+      
+      return _token;
     }
   }
 }
