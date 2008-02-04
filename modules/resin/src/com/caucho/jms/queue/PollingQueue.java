@@ -80,14 +80,14 @@ abstract public class PollingQueue extends AbstractQueue
   public void handleAlarm(Alarm alarm)
   {
     try {
-      poll();
+      pollImpl();
     } finally {
       if (_isPolling)
         _alarm.queue(_pollPeriod);
     }
   }
 
-  protected void poll()
+  protected void pollImpl()
   {
   }
 }
