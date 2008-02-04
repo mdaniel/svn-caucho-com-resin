@@ -169,6 +169,10 @@ public class ManagedBeanConfig
     throws FacesException
   {
     try {
+      ELContext elContext = context.getELContext();
+
+      boolean isPropertyResolved = elContext.isPropertyResolved();
+
       Object value = getType().newInstance();
 
       if (createScope.getScope() < _scope.ordinal())
@@ -197,6 +201,8 @@ public class ManagedBeanConfig
 	break;
       }
 
+      elContext.setPropertyResolved(isPropertyResolved);
+      
       return value;
     } catch (RuntimeException e) {
       throw e;

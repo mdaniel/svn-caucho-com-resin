@@ -831,7 +831,21 @@ public class ConfigContext {
 	if (isEL() && attr.isEL() && childElt == null
 	    && child.getNextSibling() == null
 	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
-	  return eval(attr, data.trim());
+
+	  String exprString = data.trim();
+
+	  ELContext elContext = getELContext();
+
+	  ELParser parser = new ELParser(elContext, exprString);
+
+	  Expr expr = parser.parse();
+
+	  Object value = expr.getValue(elContext);
+
+	  if (elContext.isPropertyResolved())
+	    return attr.getConfigType().valueOf(value);
+	  else
+	    return data;
 	}
 	
 	return null;
@@ -886,7 +900,7 @@ public class ConfigContext {
 	    && child.getNextSibling() == null
 	    && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
 	  ELContext elContext = getELContext();
-    
+
 	  ELParser parser = new ELParser(elContext, data.trim());
     
 	  Expr expr = parser.parse();

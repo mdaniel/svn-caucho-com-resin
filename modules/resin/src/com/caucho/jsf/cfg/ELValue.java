@@ -91,8 +91,13 @@ public class ELValue implements AbstractValue
       if (scope != null && scope.getScope() < _scope)
 	throw new ELException(L.l("implicit scope is too short."));
     }
+
+    Object value = _expr.getValue(elContext);
     
-    return _expr.getValue(elContext);
+    if (elContext.isPropertyResolved())
+      return value;
+    else
+      return null;
   }
 
   class ScopeELContext extends ELContext
