@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>jms: basic BlockingQueue support [<a href="http://caucho.com/resin/doc/resin-messaging.xtp">Resin Messaging</a>] (#2310)</li>
 <li>(2008-02-02) embed: classpath config file lookup depended on Resin (rep by 
 <li>(2008-02-01) regression cleanup</li>
 <li>(2008-01-30) support: Wicket support for Resin/WebBeans for WebApplication object [<a href="http://wiki.caucho.com/Wicket">wiki: Resin and Wicket</a>]</li>

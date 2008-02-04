@@ -215,7 +215,7 @@ public class ApiMethod {
 
       Type value = typeMap.get(var.getName());
 
-      if (value != null)
+      if (value != null && value != type)
 	return resolve(value, typeMap);
 
       Type []bounds = var.getBounds();

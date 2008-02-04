@@ -1,0 +1,153 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin Messaging</title>
+    <description>
+      <p>Configuration for Resin's JMS provider implementation.  The JDBC Queues and Topics provide a persistent messaging store.  The Memory Queues and Topics provide a low-overhead memory-based store.</p>
+    </description>
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="ConnectionFactory">
+
+<p>The <code>ConnectionFactory</code> resource defines the JMS factory
+for creating JMS connections.</p>
+
+<example title="resin-web.xml - ConnectionFactory resource">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory name="jms/factory" uri="resin:"/>
+
+&lt;/web-app>
+</example>
+
+<!-- XXX: ??
+<p>
+If an application creates a named queue or topic using the the JMS Session,
+Resin's default behaviour is to create a memory queue or topic.  The 
+<a href="#jdbc-manager">jdbc-manager</a> configuration of the connection factory 
+causes creation of a jdbc queue or topic instead.
+</p>
+
+<example title="ConnectionFactory resource">
+&lt;resource jndi-name="jms/factory"
+           type="com.caucho.jms.ConnectionFactoryImpl"/&gt;
+  &lt;init&gt;
+    &lt;jdbc-manager&gt;
+      &lt;data-source&gt;jdbc/database&lt;/data-source&gt;
+    &lt;/jdbc-manager&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
+</example>
+
+<deftable-childtags>
+<tr><td>client-id</td>
+    <td>clientID value for durable subscriptions</td>
+    <td>pseudo-random generated value</td>
+    </tr>
+<tr><td>jdbc-manager</td>
+    <td>Use jdbc queues and topics for queues and topics created using the JMS Session object,
+        see <a href="#jdbc-manager">jdbc-manager</a></td>
+    <td>use a memory queue for created queues and topics</td>
+    </tr>
+</deftable-childtags>
+-->
+</s1>
+
+<s1 title="Memory Queue/Topic">
+
+<p>
+The Memory Queue and Topic store the messages in memory.  The memory
+queue is typically used for testing and situations where losing a message
+on server crash is acceptable.
+</p>
+
+<s2 title="MemoryQueue configuration">
+
+<example title="resin-web.xml - Memory Queue configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory uri="resin:"/>
+
+  &lt;jms-queue name="jms/my-queue" uri="memory:"/>
+
+&lt;/web-app&gt;
+</example>
+
+<deftable-childtags>
+<tr>
+  <td>queue-name</td>
+  <td>Name of the queue</td>
+</tr>
+</deftable-childtags>
+</s2>
+
+<s2 title="MemoryTopic configuration">
+
+<example title="resin-web.xml - Memory Topic configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory uri="resin:"/>
+
+  &lt;jms-topic name="jms/my-topic" uri="memory:"/>
+
+&lt;/web-app&gt;
+</example>
+
+<deftable-childtags>
+<tr>
+  <td>topic-name</td>
+  <td>Name of the topic</td>
+  <td></td>
+</tr>
+</deftable-childtags>
+</s2>
+
+</s1>
+
+<s1 title="BlockingQueue API">
+
+<p>Resin's queues implement
+the <code>java.util.concurrent.BlockingQueue</code> API.
+Since the queues are registered with <a href="resin-ioc.xtp">Resin-IoC</a>
+it's possible to use the <code>BlockingQueue</code> API directly
+without the JMS API.</p>
+
+<example title="TestServlet for JMS/BlockingQueue">
+package example;
+
+import java.util.concurrent.BlockingQueue;
+import java.io.*;
+import javax.servlet.*;
+import javax.webbeans.*;
+
+public class TestServlet extends GenericServlet {
+  private @In BlockingQueue _queue;
+
+  public void service(ServletRequest req, ServletResponse res)
+    throws IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+
+    _queue.offer("test message");
+
+    out.println("receive: " + _queue.poll());
+  }
+}
+</example>
+
+<example title="resin-web.xml configuration for memory BlockingQueue">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue uri="memory:"/>
+
+&lt;/web-app>
+</example>
+
+
+</s1>
+
+</body>
+</document>

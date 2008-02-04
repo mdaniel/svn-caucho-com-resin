@@ -163,7 +163,7 @@
       <item link="jsp-templates.xtp" title="JSP Templates"/>
     </item>
     
-    <item link="jms-config.xtp" title="Messaging"/>
+    <item link="resin-messaging.xtp" title="Messaging"/>
      
     <!--
     <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>
