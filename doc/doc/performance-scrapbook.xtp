@@ -73,7 +73,7 @@ between the other web server and Resin.</p>
 </s1>
 
 <s1 title="Caching">
-<s2 title="what get's cached when a servlet does a forward?" type="faq">
+<s2 title="What gets cached when a servlet does a forward?" type="faq">
 <description>
 I'm a bit unclear as to how to ensure that a servlet that forward to a JSP
 page caches its output. Of course at the top of my JSP page (and any of its

@@ -167,7 +167,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("td");
     // out.writeAttribute("bgcolor", "#b9cef7");
     out.writeAttribute("class", "leftnav");
-    out.writeAttribute("width", "150");
+    out.writeAttribute("width", "130");
     
     parseNavigation();
 
@@ -258,7 +258,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("small");
     out.writeCharacters("Copyright ");
     out.writeEntityRef("copy");
-    out.writeCharacters(" 1998-2006 Caucho Technology, Inc. All rights reserved.");
+    out.writeCharacters(" 1998-2008 Caucho Technology, Inc. All rights reserved.");
     out.writeEmptyElement("br");
     out.writeCharacters("Resin ");
     out.writeStartElement("sup");

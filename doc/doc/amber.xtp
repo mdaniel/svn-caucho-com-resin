@@ -15,7 +15,894 @@
 
 <body>
 
-    <summary/>
+<localtoc/>
+
+
+<s1 title="See Also">
+
+<ul>
+<li>See <a href="../examples/amber-basic/index.xtp">Basic tutorial</a> for
+a complete single-table example.</li>
+<li>See <a href="../examples/amber-many2one/index.xtp">Many-to-one tutorial</a> for basic relations.</li>
+</ul>
+
+</s1>
+
+<s1 title="Amber Goals">
+
+<ul>
+<li>Use Java beans for the application model.</li>
+<li>Leverage JDBC APIs.</li>
+<li>Make persistence connections and transactions explicit</li>
+<li>Simplify configuration files</li>
+</ul>
+
+<s2 title="Java beans as the application model">
+
+<p>The application's data model should drive the Java
+classes and architecture.  As much as possible, Amber
+stays out of the way and defers to the application's needs.
+At the same time, it must be clear how the objects map to the database.
+</p>
+
+<p>Persistent objects for Amber have bean-style
+properties (<code>getXXX</code> and <code>setXXX</code>) which correspond
+to columns in the database.  No additional classes or interfaces are
+required for Amber. In this respect, Amber is identical to Hibernate's
+persistence model.  Classes designed for Hibernate can be used for
+Amber without modification.</p><p>
+
+</p><p>Amber contrasts with J2EE CMP by eliminating the home
+and local interfaces and eliminating the special J2EE methods
+like <code>ejbCreate</code> and <code>ejbPostCreate</code>.  Applications
+using J2EE must twist their data model to fit the J2EE CMP rules, and must
+deal with the extra interfaces and methods.  By eliminating the J2EE
+complexity, can simplify application code, making it easier and cheaper
+to design and maintain.</p>
+
+<p>In contrast with JDO, Amber requires bean-style properties
+and commits to a relational database.  For Amber, the database design is
+primary and the Java model is just a view of the database.  JDO aims at
+making persistence invisible, hiding the existence of the database
+from the application and bytecode enhancing all field references.
+By hiding the database, JDO makes the persistence opaque, making the
+mental model of JDO more complicated.
+By committing to a relational model, Amber gains the power of
+the relational queries and keeps the persistence model concrete.</p>
+
+</s2>
+
+<s2 title="Explicit Persistence">
+
+<p>Developers are familiar with obtaining a JDBC <code>Connection</code>
+from a <code>DataSource</code>, doing some work, and closing
+the <code>Connection</code> when work is done.  Amber's model maps
+directly to the JDBC model, avoiding a complicated mental model.</p>
+
+<p>The <code>AmberConnection</code> is based on an underlying
+JDBC <code>Connection</code>.  Beans used with the <code>AmberConnection</code>
+are enlisted with that connection.  The connection's close delists the
+beans.  Unregistered beans act like any normal Java object.  Only when the
+application explicitly enlists them with the <code>AmberConnection</code> will
+they become persistent.</p>
+
+<p>By making the persistence explicit, Amber works at making persistence
+transparent, not opaque or invisible.
+Persistence should be a clear box, not a black box.  It should be clear
+to a code reviewer how the application code is persisted without
+referring to external design documents.  With invisible or hidden persistence,
+it's not always clear how objects are reflected in the database.</p>
+
+<p>In contrast to Amber's explicit persistence connection, J2EE's CMP uses
+a hidden connection, invisible to the J2EE developer.  J2EE beans are enlisted
+and delisted automatically: magic occuring behind the J2EE stub. By hiding
+its connection and bean instance, J2EE requires a more complicated mental
+model for even the most simple beans.</p>
+
+<p>Amber's explicit model not only makes it easier to learn, but makes
+application code easier to debug and maintain.  Because the connection
+is explicit, it's visible in the code.  With an explicit connection a code
+review can follow the persistence just by inspecting the code.</p>
+
+</s2>
+
+<s2 title="JDBC APIs">
+
+<p>Amber uses JDBC classes like ResultSet both to simplify the interfaces
+and to take advantage of database driver capability.  Since the
+ResultSet can already flexibly scan through results and return columns in
+their proper types, there's no need to invent a new API.</p>
+
+<p>To handle objects, Amber implements the
+<code>ResultSet.getObject</code> method to return the loaded object.</p>
+
+<example>
+AmberConnection conn = ...;
+
+ResultSet rs = conn.query("SELECT o FROM qa.Test o WHERE o.data='test-data'");
+
+while (rs.next()) {
+  ...
+}
+</example>
+
+</s2>
+
+<s2 title="Configuration Files">
+
+<p>Amber follows the JPA specification and supports persistence.xml and orm.xml configuration files.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="Amber Lifecycle">
+
+<s2 title="Example configuration">
+
+<p>The lifecycle description uses a single running example, Test, which
+has two properties: <code>getData()</code> which returns a string, and
+<code>getParent()</code> which is a pointer to another Test object.</p>
+
+<example title="orm.xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm orm_1_0.xsd"
+   version="1.0"&gt;
+  &lt;package&gt;qa&lt;/package&gt;
+  &lt;entity name="Test" class="qa.Test" access="PROPERTY"&gt;
+    &lt;table name="TEST"/&gt;
+      &lt;attributes&gt;
+        &lt;id name="id"&gt;
+          &lt;column name="ID"/&gt;
+        &lt;/id&gt;
+        &lt;basic name="data"&gt;
+          &lt;column name="DATA"/&gt;
+        &lt;/basic&gt;
+        &lt;many-to-one name="parent"&gt;
+          &lt;join-column name="FK_PARENT"/&gt;
+        &lt;/many-to-one&gt;
+     &lt;/attributes&gt;
+   &lt;/table&gt;
+  &lt;/entity&gt;
+&lt;/entity-mappings&gt;
+</example>
+
+</s2>
+
+<s2 title="Non-Transactional Lifecycle">
+
+<p>Amber's non-transactional lifecycle has three important states:</p>
+
+<ul>
+<li><b>clean:</b> the bean is loaded from the database
+</li><li><b>dirty:</b> the bean has unwritten changes
+</li><li><b>hollow:</b> the bean is unloaded (lazily-loaded)
+</li></ul>
+
+<p>In the diagram below, the red methods (<code>load()</code>,
+<code>getXXX()</code>, and <code>flush()</code>) query and
+update the database.</p>
+
+<figure src="amber-non-xa.gif" width="356" height="140"/>
+
+<p>The <code>aConn.load("1")</code> method loads the bean from the
+database and transitions to the <var>clean</var> state.</p>
+
+<p>Calling <code>test.setData("foo")</code> will change to
+the <var>dirty</var> state.</p>
+
+<p>Calling <code>aConn.flush()</code> writes the changes to
+the database and changes to the <var>clean</var> state.  Amber may
+also flush the changes and change to the clean state
+at any time.  <code>flush()</code> merely guarantees that the changes
+will be flushed to the database.</p>
+
+<p>The <var>hollow</var> state represents lazily-loaded entities.  many-to-one
+relations and some queries will return the unloaded bean instead of
+a loaded bean.  When the application calls a <code>getXXX()</code> method,
+the bean will load from the database and change to the <var>clean</var> state.
+When the application calls a <code>setXXX()</code> method, the bean
+will change to the <var>dirty</var> state.</p>
+
+<example title="sample code">
+// load() queries the database and puts test in the clean state
+qa.Test test = aConn.load(qa.Test.class, "1");
+
+// getter calls remain in the clean state
+System.out.println(test.getData());
+
+// setters change to the dirty state
+test.setData("foo");
+
+// parent is lazily-loaded in the hollow state.
+qa.Test parent = test.getParent();
+
+// the getter loads parent from the database and changes to the clean state
+System.out.println(parent.getData());
+
+// the flush updates test and changes back to the clean state
+aConn.flush();
+
+// closing the connection changes all beans to the transient state
+aConn.close();
+</example>
+
+</s2>
+
+<s2 title="Transactional Lifecycle">
+
+<p>In a transaction, Amber loads the bean from the
+database, even if it was loaded outside of the transaction.
+(Exceptions exist for cases like read-only beans.) By loading the
+bean in the transaction, Amber lets the database handle the
+transactional locking and state consistency.</p>
+
+<p>Just like the non-transactional <var>clean</var> and <var>dirty</var>
+states, Amber has transactional <var>clean</var> and <var>dirty</var> states
+called <var>Persistent-clean</var> and <var>Persistent-dirty</var>.  As in
+the non-transactional case, the <var>hollow</var> state represents
+lazily-loaded beans.</p>
+<ul>
+<li><b>persistent-clean:</b> the bean is loaded from the database
+within the transaction
+</li><li><b>persistent-dirty:</b> the bean has been changed
+</li><li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)
+</li><li><b>persistent-nonXA:</b> the bean was loaded outside of the
+transaction (and would need reloading if used in the transaction)
+</li></ul>
+
+<figure src="amber-lifecycle.gif" width="511" height="285"/>
+
+<p>The main differences from the non-transactional lifecycle
+are:</p>
+<ul>
+<li>Transactions need a load from inside the transaction.  Loads
+before the transaction cannot be reused.
+</li><li>Updates occur during the commit() call and change to the
+nonXA-clean state
+</li><li>Rollbacks change to the hollow state.
+</li></ul>
+
+</s2>
+</s1>
+
+
+<s1 title="Annotations">
+
+<s2 title="Table Annotations">
+
+<s3 title="@Entity">
+
+<p>Annotates the class as an entity bean.</p>
+
+<p>See the <a href="../examples/amber-basic/index.xtp">basic property tutorial</a>
+and the <a href="../examples/amber-basic-field/index.xtp">basic field tutorial</a>
+for an introduction.</p>
+
+<deftable-childtags>
+<tr>
+  <td>name</td>
+  <td>The name of the bean</td><td>The class name (unqualified)</td>
+</tr>
+</deftable-childtags>
+
+<p>The fields or properties will be annotated by @Id, @Basic, etc.
+Amber will detect either field or property annotation by the
+type for the @Id.  In other words, if Amber sees an @Id on a field,
+it will use field access.  If Amber sees @Id on a method, it will use
+property access.</p>
+
+<def>
+package javax.persistence;
+
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Entity {
+  String name() default "";
+}
+</def>
+
+</s3>
+
+<s3 title="@SecondaryTable">
+
+<p>Specifies a secondary database table for an entity bean.
+The secondary table will contain the fields with a secondaryTable
+in the @Column.</p>
+
+<deftable-childtags>
+<tr>
+  <td>name</td>
+  <td>The name of the table</td><td>The unqualified class name.</td>
+</tr>
+<tr>
+  <td>catalog</td>
+  <td>the table's catalog</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>schema</td>
+  <td>the table's schema</td><td>none</td>
+</tr>
+<tr>
+  <td>pkJoinColumns</td>
+  <td>join column to the primary table</td>
+  <td>joins the primary key</td>
+</tr>
+<tr>
+  <td>uniqueConstraint</td>
+  <td>unique constraints during generation</td>
+  <td>none</td>
+</tr>
+</deftable-childtags>
+
+<def>
+package javax.persistence;
+
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface SecondaryTable {
+  String name() default "";
+  String catalog() default "";
+  String schema() default "";
+  PrimaryKeyJoinColumn []pkJoinColumns() default {};
+  UniqueConstraint []uniqueConstraints() default {};
+}
+</def>
+
+</s3>
+
+<s3 title="@Table">
+
+<p>Specifies the database table for an entity bean.  The
+default table name is the class name.</p>
+
+<deftable-childtags>
+<tr><td>name</td><td>The name of the table</td><td>The unqualified class name.
+</td></tr><tr><td>catalog</td><td>the table's catalog</td><td>none
+</td></tr><tr><td>schema</td><td>the table's schema</td><td>none
+</td></tr><tr><td>uniqueConstraint</td><td>unique constraints during generation</td><td>none
+</td></tr></deftable-childtags>
+
+<def>
+package javax.persistence;
+
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Table {
+  String name() default "";
+  String catalog() default "";
+  String schema() default "";
+  UniqueConstraint []uniqueConstraints() default {};
+}
+</def>
+
+</s3>
+
+</s2>
+
+<s2 title="Property Annotations">
+
+<s3 title="@Basic">
+
+<p>Marks a field as a persistent field.</p>
+
+<deftable-childtags>
+<tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>optional</td><td>if true, the column may be null</td><td>true
+</td></tr></deftable-childtags>
+
+<p>The fetch types are:
+</p><ul>
+<li>EAGER - fetch the field when the bean is loaded
+</li><li>LAZY - fetch the field only when the field is used
+</li></ul>
+
+<example title="String property ">
+@Entity
+public class Course {
+  @Basic
+  public String getName()
+
+  ...
+}
+</example>
+
+<example title="Lazy-loaded property ">
+@Entity
+public class Course {
+  @Basic(fetch=FetchType.LAZY)
+  public String getMassiveText()
+
+  ...
+}
+</example>
+
+<def title="javax.persistence.Basic">
+package javax.persistence;
+
+@Target({Method, FIELD})
+@Retention(RUNTIME)
+public @interface Basic {
+  FetchType fetch() default EAGER;
+  boolean optional() default true;
+}
+</def>
+
+</s3>
+
+<s3 title="@Column">
+
+<p>Specifies the field's SQL column name as well as any CREATE TABLE
+properties for auto generation.</p>
+
+<deftable-childtags>
+<tr><td>name</td><td>The SQL name of the column</td><td>the field name
+</td></tr><tr><td>unique</td><td>True for UNIQUE columns</td><td>false
+</td></tr><tr><td>nullable</td><td>False for IS NOT NULL columns</td><td>true
+</td></tr><tr><td>insertable</td><td>True if column is inserted on a <code>create</code> call</td><td>true
+</td></tr><tr><td>updatable</td><td>True if column is updated when the field is modified</td><td>false
+</td></tr><tr><td>columnDefinition</td><td>SQL to create the column in a CREATE TABLE</td><td>none
+</td></tr><tr><td>table</td><td>specified if column is stored in a secondary table</td><td>none
+</td></tr><tr><td>length</td><td>the default length for a VARCHAR for a CREATE TABLE</td><td>255
+</td></tr><tr><td>precision</td><td>the default length for a number definition for a CREATE TABLE</td><td>0
+</td></tr><tr><td>scale</td><td>the default length for a number definition for a CREATE TABLE</td><td>0
+</td></tr></deftable-childtags>
+
+<example title="String property ">
+@Entity
+public class Course {
+  @Basic
+  @Column(unique=true,
+          nullable=false,
+          length=32)
+  public String getName()
+
+  ...
+}
+</example>
+
+<def title="javax.persistence.Column">
+@Target({Method, FIELD})
+@Retention(RUNTIME)
+public @interface Column {
+  String name() default "";
+  boolean unique() default false;
+  boolean nullable() default true;
+  boolean insertable() default true;
+  boolean updateable() default true;
+  String columnDefinition() default "";
+  String table() default "";
+  int length() default 255;
+  int precision() default 0;
+  int scale() default 0;
+  boolean specified() default true;
+}
+</def>
+
+</s3>
+
+</s2>
+
+<s2 title="Primary Key Annotations">
+
+<s3 title="@Id">
+
+<p>Marks a field as a primary key.  The <code>@Id</code>
+may be used in combination with <code>@GeneratedValue</code> to specify a generator for automatic key generation when new
+objects are created.</p>
+
+<p>The default column name is "ID".</p>
+
+<example title="automatic generation">
+import javax.persistence.*;
+
+@Entity
+public class Course {
+  @Id
+  @Column(name="t_id")
+  @GeneratedValue
+  public long getId()
+
+  ...
+}
+</example>
+
+<def title="javax.persistence.Id">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface Id {
+}
+</def>
+
+</s3>
+
+<s3 title="@GeneratedValue">
+
+<p>Used with @Id to specify a generator for automatic key generation when new
+objects are created.</p>
+
+<deftable-childtags>
+<tr><td>strategy</td><td>The auto-generation type</td><td>AUTO
+</td></tr><tr><td>generator</td><td>The sequence or table generator name</td><td>\${table}_cseq
+</td></tr></deftable-childtags>
+
+<p>The generator types are:
+</p><ul>
+<li>IDENTITY - the database supplies the new key, e.g. auto_increment, SERIAL, or IDENTITY
+</li><li>SEQUENCE - use a SEQUENCE type to generate the key
+</li><li>TABLE - use a @TableGenerator for the key
+</li><li>AUTO - choose the generator based on the database
+<ul>
+<li>MySQL - IDENTITY using auto_increment
+</li><li>Resin - IDENTITY using auto_increment
+</li><li>Postgres - SEQUENCE
+</li><li>Oracle - SEQUENCE
+</li></ul>
+</li></ul>
+
+<p>For SEQUENCE and TABLE, Resin will create the sequence
+name as "\${table}_cseq".</p>
+
+<example title="automatic generation">
+import javax.persistence.*;
+
+@Entity
+public class Course {
+  @Id
+  @GeneratedValue
+  public long getId()
+
+  ...
+}
+</example>
+
+<example title="sequence generation">
+import javax.persistence.*;
+
+@Entity
+public class Course {
+  @Id
+  @GeneratedValue(strategy=GeneratorType.AUTO
+                  generator="COURSE_SEQ")
+  public long getId()
+
+  ...
+}
+</example>
+
+<def title="javax.persistence.GeneratedValue">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface GeneratedValue {
+  GenerationType strategy() default AUTO;
+  String generator() default "";
+}
+</def>
+
+</s3>
+
+</s2>
+
+<s2 title="Relation annotations">
+
+<s3 title="@JoinTable">
+
+<p>Defines an association table for a many-to-many relation.</p>
+
+<deftable-childtags>
+<tr><td>name</td><td>Table definition for the association table</td><td>concatening the source and target table names
+</td></tr><tr><td>catalog</td><td>Database catalog</td><td>""
+</td></tr><tr><td>schema</td><td>Database schema</td><td>""
+</td></tr><tr><td>joinColumns</td><td>Columns from from the association table to the source table</td><td>Uses the source table primary key
+</td></tr><tr><td>inverseJoinColumns</td><td>Columns from from the association table to the target table</td><td>Uses the target table primary key
+</td></tr></deftable-childtags>
+
+<def title="javax.persistence.JoinTable">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface JoinTable {
+  String table() default "";
+  String catalog() default "";
+  String schema() default "";
+  JoinColumn []joinColumns() default {};
+  JoinColumn []inverseJoinColumns() default {};
+  UniqueContraint []uniqueConstraint() default {};
+}
+</def>
+
+</s3>
+
+<s3 title="@JoinColumn">
+
+<p>Defines a join (foreign) columns.  Used for <a href="#@ManyToOne">@ManyToOne</a>.</p>
+
+<p>See also <a href="#@Column">@Column</a> for
+corresponding definition for <a href="#@Basic">@Basic</a> columns.</p>
+
+<p>See the <a href="../examples/amber-many2one/index.xtp">Many-to-One
+tutorial</a> for a full example.</p>
+
+<deftable-childtags>
+<tr><td>name</td><td>The column name of the source table</td><td>the column name of the target key
+</td></tr><tr><td>referencedColumnName</td><td>The target column for composite keys</td><td>the single primary key
+</td></tr><tr><td>unique</td><td>True if unique</td><td>false
+</td></tr><tr><td>nullable</td><td>False if IS NOT NULL</td><td>true
+</td></tr><tr><td>insertable</td><td>True if the column is inserted on a <code>create</code></td><td>true
+</td></tr><tr><td>updateable</td><td>True if the column is updated on field changes</td><td>true
+</td></tr><tr><td>columnDefinition</td><td>SQL column definition</td><td>false
+</td></tr><tr><td>table</td><td>specifies a secondary table if not in the primary</td><td>none
+</td></tr></deftable-childtags>
+
+<example title="Student to House link">
+public class Student {
+  @Id
+  @Column(name="student_id")
+  long getId()
+
+  @ManyToOne
+  @JoinColumn(name="house_id")
+  public House getHouse()
+}
+</example>
+
+<example title="Student SQL">
+CREATE TABLE Student {
+  student_id BIGINT PRIMARY KEY auto_increment
+
+  house_id BIGINT REFERENCES House(id)
+)
+</example>
+
+<def title="javax.persistence.JoinColumn">
+@Target({TYPE, METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface JoinColumn {
+  String name() default "";
+  String referencedColumnName() default "";
+  boolean unique() default false;
+  boolean nullable() default false;
+  boolean insertable() default true;
+  boolean updateable() default true;
+  String columnDefinition() default "";
+  String table() default "";
+}
+</def>
+
+</s3>
+
+<s3 title="@JoinColumns">
+
+<p>Defines a set of join (foreign) columns for composite keys.</p>
+
+<def title="javax.persistence.ManyToOne">
+@Target({TYPE,METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface JoinColumns {
+  JoinColumn [] value() default{}
+}
+</def>
+
+</s3>
+
+<s3 title="@ManyToMany">
+
+<p>Marks a field as a many-to-many (association) relation.</p>
+
+<p>The column names are the key columns of the source and target tables.</p>
+
+<p>See the <a href="../examples/amber-many2many/index.xtp">many-to-many tutorial</a> for an example.</p>
+
+<deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>mappedBy</td><td>Specifies the source relation if a target</td><td>
+</td></tr></deftable-childtags>
+
+<example title="Simple link ">
+@Entity
+public class Student {
+  @ManyToMany
+  @JoinTable(
+    name="student_course_map",
+    joinColumns={@JoinColumn(name="student_id")},
+    inverseJoinColumns={@JoinColumn(name="course_id")}
+  )
+  public Collection getCourses()
+
+  ...
+}
+</example>
+
+<def title="javax.persistence.ManyToMany">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface ManyToMany {
+  String targetEntity default "";
+  CascadeType []cascade() default {};
+  FetchType fetch() default LAZY;
+  String mappedBy isInverse() default "";
+}
+</def>
+
+</s3>
+
+<s3 title="@ManyToOne">
+
+<p>Marks a field as a many-to-one (link) relation.</p>
+
+<p>The default column name is the column name of the target key.</p>
+
+<p>See the <a href="../examples/amber-many2one/index.xtp">many-to-one tutorial</a> for an example.</p>
+
+<deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>optional</td><td>If false, the relation must always have a value</td><td>true
+</td></tr></deftable-childtags>
+
+<example title="Simple link ">
+@Entity
+public class Student {
+  @ManyToOne
+  @JoinColumn(name="house")
+  public House getHouse()
+
+  ...
+}
+</example>
+
+<def title="javax.persistence.ManyToOne">
+@Target({Method, FIELD})
+@Retention(RUNTIME)
+public @interface ManyToOne {
+  String targetEntity default "";
+  CascadeType []cascade() default {};
+  FetchType fetch() default EAGER;
+  boolean optional() default true;
+}
+</def>
+
+</s3>
+
+<s3 title="@OneToMany">
+
+<p>Marks a field as a one-to-many (collection) relation.
+Because a one-to-many field is dependent, it
+needs a @ManyToOne relation on the source table which defines the column.</p>
+
+<deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>mappedBy</td><td>Specifies the owning @ManyToOne property</td><td>
+</td></tr></deftable-childtags>
+
+<example title="Collection java">
+@Entity
+public class House {
+  ...
+  @OneToMany(targetEntity=Student.class,
+             mappedBy="house")
+  public Collection getStudents()
+}
+
+@Entity
+public class Student {
+  ...
+  @ManyToOne
+  @JoinColumn(name="house")
+  public House getHouse()
+}
+</example>
+
+<example title="Collection SQL">
+CREATE TABLE House {
+  id BIGINT PRIMARY KEY
+)
+
+CREATE TABLE Student {
+  id BIGINT PRIMARY KEY,
+
+  house BIGINT REFERENCES House(id)
+)
+</example>
+
+<def title="javax.persistence.OneToMany">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface OneToMany {
+  String targetEntity default "";
+  CascadeType []cascade() default {};
+  FetchType fetch() default EAGER;
+  String mappedBy() default "";
+}
+</def>
+
+</s3>
+
+<s3 title="@OneToOne">
+
+<p>Marks a field as a one-to-one (dependent link) relation.
+Because a one-to-one field is dependent, it
+needs a @ManyToOne relation on the source table which defines the column.</p>
+
+<deftable-childtags>
+<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
+</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
+</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
+</td></tr><tr><td>mappedBy</td><td>Specifies the owning relation</td><td>
+</td></tr></deftable-childtags>
+
+<def title="javax.persistence.OneToOne">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface OneToOne {
+  String targetEntity default "";
+  CascadeType []cascade() default {};
+  FetchType fetch() default EAGER;
+  boolean optional() default true;
+  String mappedBy() default "";
+}
+</def>
+
+</s3>
+
+</s2>
+
+<s2 title="Inheritance annotations">
+
+<s3 title="@DiscriminatorColumn">
+
+<p>Configures the discriminator column.</p>
+
+<def title="javax.persistence.DiscriminatorColumn">
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface DiscriminatorColumn {
+  String name() default "";
+  DiscriminatorType discriminatorType() default STRING;
+  String columnDefinition() default "";
+  int length() default 31;
+}
+</def>
+
+</s3>
+
+<s3 title="@Inheritance">
+
+<p>@Inheritance marks the entity bean as supporting inheritance,
+i.e. the database maps to different Java classes depending on
+a discriminator value.</p>
+
+<def title="javax.persistence.Inheritance">
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Inheritance {
+  InteritanceType strategy() default SINGLE_TABLE;
+}
+</def>
+
+</s3>
+
+<s3 title="InheritanceType">
+
+<def title="javax.persistence.InheritanceType">
+public enum InheritanceType {
+  SINGLE_TABLE,
+  JOINED,
+  TABLE_PER_CLASS
+}
+</def>
+
+</s3>
+</s2>
+
+</s1>
 
   </body>
 </document>
