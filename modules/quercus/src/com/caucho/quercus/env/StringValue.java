@@ -431,6 +431,15 @@ abstract public class StringValue extends Value implements CharSequence {
 
     return LongValue.create(sign * value);
   }
+  
+  /**
+   * Converts to an object.
+   */
+  @Override
+  final public Value toAutoObject(Env env)
+  {
+    return env.createObject();
+  }
 
   /**
    * Converts to a Java object.

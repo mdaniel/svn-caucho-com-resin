@@ -1971,10 +1971,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the directory to make
    */
-  public static boolean mkdir(Env env, StringValue dirname,
-			      @Optional int mode,
-			      @Optional boolean recursive,
-			      @Optional Value context)
+  public static boolean mkdir(Env env,
+                              StringValue dirname,
+                              @Optional int mode,
+                              @Optional boolean recursive,
+                              @Optional Value context)
   {
     ProtocolWrapper wrapper = getProtocolWrapper(env, dirname);
 
@@ -1984,7 +1985,7 @@ public class FileModule extends AbstractQuercusModule {
                            LongValue.create(mode), LongValue.ZERO);
 
     Path path = env.getPwd().lookup(dirname.toString());
-
+    
     try {
       if (recursive)
         return path.mkdirs();
@@ -1992,7 +1993,7 @@ public class FileModule extends AbstractQuercusModule {
         return path.mkdir();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-
+      
       return false;
     }
   }
@@ -2639,15 +2640,23 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value tempnam(Env env, Path dir, String prefix)
   {
-    // quercus/160u
+    // php/160u
+    
+    if (dir == null || ! dir.isDirectory())
+      dir = env.getTempDirectory();
 
-    if (!dir.isDirectory()) {
-      env.warning(L.l("{0} is not a directory", dir.getFullPath()));
+    try {
+      dir.mkdirs();
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
       return BooleanValue.FALSE;
     }
 
     try {
       Path path = dir.createTempFile(prefix, ".tmp");
+      
       return env.createString(path.getTail());
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -2663,9 +2672,7 @@ public class FileModule extends AbstractQuercusModule {
   public static FileInputOutput tmpfile(Env env)
   {
     try {
-      // XXX: location of tmp files s/b configurable
-
-      Path tmp = env.getPwd().lookup("file:/tmp");
+      Path tmp = env.getTempDirectory();
 
       tmp.mkdirs();
 

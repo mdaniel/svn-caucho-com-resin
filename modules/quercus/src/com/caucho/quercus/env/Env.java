@@ -72,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.TimeZone;
@@ -210,8 +211,8 @@ public class Env {
   private ArrayList<String> _includePathList;
   private HashMap<Path,ArrayList<Path>> _includePathMap;
 
-  private HashMap<Path,QuercusPage> _includeMap
-    = new HashMap<Path,QuercusPage>();
+  private LinkedHashMap<Path,QuercusPage> _includeMap
+    = new LinkedHashMap<Path,QuercusPage>();
   
   private HashMap<StringValue,Path> _lookupCache
     = new HashMap<StringValue,Path>();
@@ -234,6 +235,7 @@ public class Env {
   private Path _selfDirectory;
   private Path _pwd;
   private Path _uploadPath;
+  private Path _tmpPath;
   private ArrayList<Path> _removePaths;
 
   private final boolean _isStrict;
@@ -1059,6 +1061,33 @@ public class Env {
     }
 
     return _uploadPath;
+  }
+  
+  /*
+   * Returns the temp directory (used by tmpfile()).
+   */
+  public Path getTempDirectory()
+  {
+    String realPath;
+    
+    if (_tmpPath == null) {
+      if (getRequest() != null)
+        realPath = getRequest().getRealPath("/WEB-INF/tmp");
+      else
+        realPath = "file:/tmp";
+      
+      _tmpPath = getPwd().lookup(realPath);
+      
+      try {
+        if (! _tmpPath.isDirectory())
+          _tmpPath.mkdirs();
+      }
+      catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+    
+    return _tmpPath;
   }
 
   /**
@@ -3590,7 +3619,7 @@ public class Env {
   private String getDefaultIncludePath()
   {
     String includePath = _includePath;
-    
+
     if (_includePathIniCount != _iniCount) {
       includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
       _includePath = null;
@@ -3702,6 +3731,9 @@ public class Env {
       _defaultIncludePath = prevIncludePath;
 
     Quercus.INI_INCLUDE_PATH.set(this, path);
+    
+    // reset include path cache count
+    _includePathIniCount = -1;
 
     return prevIncludePath;
   }

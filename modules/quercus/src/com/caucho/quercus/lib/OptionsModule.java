@@ -41,6 +41,7 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -745,6 +746,16 @@ public class OptionsModule extends AbstractQuercusModule {
   public static Value set_magic_quotes_runtime(Env env, Value value)
   {
     return BooleanValue.FALSE; // PHP 6 removes magic_quotes
+  }
+  
+  /*
+   * Returns the directory used for temp files like uploads.
+   */
+  public static String sys_get_temp_dir(Env env)
+  {
+    Path tmp = env.getTempDirectory();
+    
+    return tmp.getNativePath() + Path.getFileSeparatorChar();
   }
 
   /**

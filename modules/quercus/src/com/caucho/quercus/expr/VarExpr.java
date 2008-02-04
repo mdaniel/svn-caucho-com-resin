@@ -203,7 +203,8 @@ public class VarExpr
   }
 
   /**
-   * Evaluates the expression, converting to an object if unset.
+   * Evaluates the expression, converting to an object if is unset, NULL,
+   * or is a string.
    *
    * @param env the calling environment.
    * @return the expression value.
@@ -215,7 +216,7 @@ public class VarExpr
     if (_var.isGlobal()) {
       value = env.getGlobalValue(_name);
 
-      if (value == null || ! value.isset()) {
+      if (value == null || value.isString() || value.isNull()) {
         value = env.createObject();
 
         env.setGlobalValue(_name, value);
@@ -223,7 +224,7 @@ public class VarExpr
     } else {
       value = env.getValue(_name);
 
-      if (value == null || ! value.isset()) {
+      if (value == null || value.isString() || value.isNull()) {
         value = env.createObject();
 
         env.setValue(_name, value);

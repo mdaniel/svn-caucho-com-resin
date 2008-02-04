@@ -315,7 +315,7 @@ public abstract class JdbcConnectionResource
         return null;
     } catch (SQLException e) {
       saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
       return null;
     }
   }
@@ -331,7 +331,7 @@ public abstract class JdbcConnectionResource
       return _env.createString(_conn.getCatalog());
     } catch (SQLException e) {
       saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
       return BooleanValue.FALSE;
     }
   }
@@ -782,7 +782,7 @@ public abstract class JdbcConnectionResource
       _conn.setAutoCommit(mode);
     } catch (SQLException e) {
       saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
       return false;
     }
 
@@ -800,7 +800,7 @@ public abstract class JdbcConnectionResource
       _conn.commit();
     } catch (SQLException e) {
       saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
       return false;
     }
 
@@ -821,7 +821,7 @@ public abstract class JdbcConnectionResource
       _conn.rollback();
     } catch (SQLException e) {
       saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
       return false;
     }
 

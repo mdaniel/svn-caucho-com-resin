@@ -439,7 +439,7 @@ public class Xml {
       case XmlModule.XML_OPTION_CASE_FOLDING:
         return (_xmlOptionCaseFolding ? BooleanValue.TRUE : BooleanValue.FALSE);
       case XmlModule.XML_OPTION_SKIP_TAGSTART:
-        return new LongValue(_xmlOptionSkipTagstart);
+        return LongValue.create(_xmlOptionSkipTagstart);
       case XmlModule.XML_OPTION_SKIP_WHITE:
         return (_xmlOptionSkipWhite ? BooleanValue.TRUE : BooleanValue.FALSE);
       case XmlModule.XML_OPTION_TARGET_ENCODING:
@@ -524,14 +524,14 @@ public class Xml {
 
       elementArray.put(_env.createString("tag"), _env.createString(eName));
       elementArray.put(_env.createString("type"), _env.createString("open"));
-      elementArray.put(_env.createString("level"), new DoubleValue((double) _level));
+      elementArray.put(_env.createString("level"), LongValue.create(_level));
       _paramHashMap.put(_level, eName);
 
       if (attrs.getLength() > 0) {
         elementArray.put(_env.createString("attributes"), createAttributeArray(attrs));
       }
 
-      _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+      _valueArray.put(LongValue.create(_valueArrayIndex), elementArray);
 
       addToIndexArrayHashMap(eName);
 
@@ -551,7 +551,7 @@ public class Xml {
       _level--;
 
       if (_isComplete) {
-        elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
+        elementArray = _valueArray.get(LongValue.create(_valueArrayIndex - 1));
         elementArray.put(_env.createString("type"), _env.createString("complete"));
       } else {
         elementArray = new ArrayValueImpl();
@@ -560,8 +560,8 @@ public class Xml {
         if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
         elementArray.put(_env.createString("tag"), _env.createString(eName));
         elementArray.put(_env.createString("type"), _env.createString("close"));
-        elementArray.put(_env.createString("level"), new DoubleValue((double) _level));
-        _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+        elementArray.put(_env.createString("level"), LongValue.create(_level));
+        _valueArray.put(LongValue.create(_valueArrayIndex), elementArray);
 
         addToIndexArrayHashMap(eName);
         _valueArrayIndex++;
@@ -581,7 +581,7 @@ public class Xml {
         _indexArrayKeys.add(key);
       }
 
-      indexArray.put(new DoubleValue((double) _valueArrayIndex));
+      indexArray.put(LongValue.create(_valueArrayIndex));
       _indexArrayHashMap.put(key, indexArray);
     }
 
@@ -597,15 +597,15 @@ public class Xml {
         elementArray.put(_env.createString("tag"), _env.createString(_paramHashMap.get(_level - 1)));
         elementArray.put(_env.createString("value"), _env.createString(s));
         elementArray.put(_env.createString("type"), _env.createString("cdata"));
-        elementArray.put(_env.createString("level"), new DoubleValue((double) _level - 1));
-        _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
+        elementArray.put(_env.createString("level"), LongValue.create(_level - 1));
+        _valueArray.put(LongValue.create(_valueArrayIndex), elementArray);
 
         Value indexArray = _indexArray.get(_env.createString(_paramHashMap.get(_level - 1)));
-        indexArray.put(new DoubleValue((double) _valueArrayIndex));
+        indexArray.put(LongValue.create(_valueArrayIndex));
 
         _valueArrayIndex++;
       } else {
-        Value elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
+        Value elementArray = _valueArray.get(LongValue.create(_valueArrayIndex - 1));
         elementArray.put(_env.createString("value"), _env.createString(s));
       }
     }

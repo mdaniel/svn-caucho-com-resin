@@ -2738,7 +2738,7 @@ public class QuercusParser {
     }
 
     token = parseToken();
-    if (token == '(') {     
+    if (token == '(') {
       if (_isNewExpr) {
         //php/09fj
         
