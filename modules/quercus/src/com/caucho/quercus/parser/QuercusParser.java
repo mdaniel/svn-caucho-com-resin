@@ -3385,7 +3385,7 @@ public class QuercusParser {
       _isNewExpr = isNewExpr;
     
     // XX: unicode issues?
-    if (nameExpr.isString())
+    if (nameExpr.isLiteral())
       name = nameExpr.evalConstant().toString();
 
     int token = parseToken();
