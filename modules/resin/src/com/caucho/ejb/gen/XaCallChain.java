@@ -110,7 +110,7 @@ public class XaCallChain extends AbstractCallChain
     Class implClass = null;
 
     if (implMethod != null)
-      implMethod.getDeclaringClass();
+      implClass = implMethod.getDeclaringClass();
     
     TransactionAttribute xaAttr;
     

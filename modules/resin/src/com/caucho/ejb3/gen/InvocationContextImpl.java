@@ -35,7 +35,8 @@ import javax.interceptor.*;
 
 public class InvocationContextImpl implements InvocationContext {
   private final Object _target;
-  private final Method _method;
+  private final Method _apiMethod;
+  private final Method _implMethod;
   
   private final Method []_chainMethods;
   private final Object []_chainObjects;
@@ -46,13 +47,15 @@ public class InvocationContextImpl implements InvocationContext {
   private HashMap<String,Object> _map;
 
   public InvocationContextImpl(Object target,
-			       Method method,
+			       Method apiMethod,
+			       Method implMethod,
 			       Method []chainMethods,
 			       Object []chainObjects,
 			       Object []param)
   {
     _target = target;
-    _method = method;
+    _apiMethod = apiMethod;
+    _implMethod = implMethod;
     _chainMethods = chainMethods;
     _chainObjects = chainObjects;
     _param = param;
@@ -65,7 +68,7 @@ public class InvocationContextImpl implements InvocationContext {
 
   public Method getMethod()
   {
-    return _method;
+    return _apiMethod;
   }
 
   public Object[] getParameters()
@@ -98,7 +101,7 @@ public class InvocationContextImpl implements InvocationContext {
 	return _chainMethods[i].invoke(_chainObjects[i], this);
       }
       else
-	return _method.invoke(_target, _param);
+	return _implMethod.invoke(_target, _param);
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
 

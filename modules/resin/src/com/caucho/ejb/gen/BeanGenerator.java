@@ -35,7 +35,9 @@ import com.caucho.java.*;
 import com.caucho.java.gen.*;
 
 import java.io.*;
+import java.lang.reflect.*;
 import java.util.ArrayList;
+import javax.interceptor.*;
 import javax.ejb.*;
 
 /**
@@ -45,6 +47,8 @@ abstract public class BeanGenerator extends GenClass {
   private static final L10N L = new L10N(BeanGenerator.class);
 
   protected final ApiClass _ejbClass;
+  
+  private Method _aroundInvokeMethod;
 
   protected BeanGenerator(String fullClassName, ApiClass ejbClass)
   {
@@ -93,6 +97,39 @@ abstract public class BeanGenerator extends GenClass {
    */
   public void introspect()
   {
+    _aroundInvokeMethod = findAroundInvokeMethod(_ejbClass.getJavaClass());
+  }
+
+  private static Method findAroundInvokeMethod(Class cl)
+  {
+    if (cl == null)
+      return null;
+
+    for (Method method : cl.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(AroundInvoke.class)
+	  && method.getParameterTypes().length == 1
+	  && method.getParameterTypes()[0].equals(InvocationContext.class)) {
+	return method;
+      }
+    }
+
+    return findAroundInvokeMethod(cl.getSuperclass());
+  }
+
+  /**
+   * Returns the around-invoke method
+   */
+  public Method getAroundInvokeMethod()
+  {
+    return _aroundInvokeMethod;
+  }
+
+  /**
+   * Sets the around-invoke method
+   */
+  public void setAroundInvokeMethod(Method method)
+  {
+    _aroundInvokeMethod = method;
   }
 
   /**

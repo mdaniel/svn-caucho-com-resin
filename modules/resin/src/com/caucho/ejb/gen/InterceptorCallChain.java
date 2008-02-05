@@ -49,6 +49,7 @@ import javax.webbeans.*;
 public class InterceptorCallChain extends AbstractCallChain {
   private static final L10N L = new L10N(InterceptorCallChain.class);
 
+  private View _view;
   private BusinessMethodGenerator _next;
 
   private String _uniqueName;
@@ -70,11 +71,13 @@ public class InterceptorCallChain extends AbstractCallChain {
   // interceptors we're responsible for initializing
   private ArrayList<Class> _ownInterceptors = new ArrayList<Class>();
 
-  public InterceptorCallChain(BusinessMethodGenerator next)
+  public InterceptorCallChain(BusinessMethodGenerator next,
+			      View view)
   {
     super(next);
     
     _next = next;
+    _view = view;
   }
   
   /**
@@ -84,12 +87,18 @@ public class InterceptorCallChain extends AbstractCallChain {
   {
     return (_defaultInterceptors.size() > 0
 	    || _classInterceptors.size() > 0
-	    || _methodInterceptors.size() > 0);
+	    || _methodInterceptors.size() > 0
+	    || getAroundInvokeMethod() != null);
   }
 
   public ArrayList<Class> getInterceptors()
   {
     return _interceptors;
+  }
+
+  public Method getAroundInvokeMethod()
+  {
+    return _view.getAroundInvokeMethod();
   }
 
   /**
@@ -189,13 +198,24 @@ public class InterceptorCallChain extends AbstractCallChain {
     
     _interceptors.addAll(_methodInterceptors);
 
-    if (_interceptors.size() == 0)
+    if (_interceptors.size() == 0 && getAroundInvokeMethod() == null)
       return;
     
     _uniqueName = "_v" + out.generateId();
     
     out.println();
     out.println("private static java.lang.reflect.Method " + _uniqueName + "_method;");
+    out.println("private static java.lang.reflect.Method " + _uniqueName + "_implMethod;");
+
+    boolean isAroundInvokePrologue = false;
+    if (getAroundInvokeMethod() != null
+	&& map.get("ejb.around-invoke") == null) {
+      isAroundInvokePrologue = true;
+      map.put("ejb.around-invoke", "_caucho_aroundInvokeMethod");
+      
+      out.println("private static java.lang.reflect.Method __caucho_aroundInvokeMethod;");
+    }
+    
     out.println("private static java.lang.reflect.Method []" + _uniqueName + "_methodChain;");
     out.println("private transient Object []" + _uniqueName + "_objectChain;");
 
@@ -210,11 +230,31 @@ public class InterceptorCallChain extends AbstractCallChain {
     
     out.print(_uniqueName + "_method = ");
     generateGetMethod(out,
+		      _implMethod.getDeclaringClass().getName(),
+		      _implMethod.getName(),
+		      _implMethod.getParameterTypes());
+    out.println(";");
+    out.println(_uniqueName + "_method.setAccessible(true);");
+    
+    out.print(_uniqueName + "_implMethod = ");
+    generateGetMethod(out,
 		      _next.getView().getViewClassName(),
 		      "__caucho_" + _implMethod.getName(),
 		      _implMethod.getParameterTypes());
     out.println(";");
-    out.println(_uniqueName + "_method.setAccessible(true);");
+    out.println(_uniqueName + "_implMethod.setAccessible(true);");
+
+    if (isAroundInvokePrologue) {
+      Method aroundInvoke = getAroundInvokeMethod();
+      
+      out.print("__caucho_aroundInvokeMethod = ");
+      generateGetMethod(out,
+			aroundInvoke.getDeclaringClass().getName(),
+			aroundInvoke.getName(),
+			aroundInvoke.getParameterTypes());
+      out.println(";");
+      out.println("__caucho_aroundInvokeMethod.setAccessible(true);");
+    }
 
     generateMethodChain(out);
     
@@ -272,7 +312,7 @@ public class InterceptorCallChain extends AbstractCallChain {
   public void generateCall(JavaWriter out)
     throws IOException
   {
-    if (_interceptors.size() == 0) {
+    if (_interceptors.size() == 0 && getAroundInvokeMethod() == null) {
       _next.generateCall(out);
       return;
     }
@@ -300,6 +340,7 @@ public class InterceptorCallChain extends AbstractCallChain {
     out.print("new com.caucho.ejb3.gen.InvocationContextImpl(");
     out.print("this, ");
     out.print(_uniqueName + "_method, ");
+    out.print(_uniqueName + "_implMethod, ");
     out.print(_uniqueName + "_methodChain, ");
     out.print(_uniqueName + "_objectChain, ");
     out.print("new Object[] { ");
@@ -315,6 +356,14 @@ public class InterceptorCallChain extends AbstractCallChain {
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.println("  throw e;");
+
+    for (Class cl : _implMethod.getExceptionTypes()) {
+      if (! RuntimeException.class.isAssignableFrom(cl)) {
+	out.println("} catch (" + cl.getName() + " e) {");
+	out.println("  throw e;");
+      }
+    }
+    
     out.println("} catch (Exception e) {");
     out.println("  throw new RuntimeException(e);");
     out.println("}");
@@ -349,6 +398,11 @@ public class InterceptorCallChain extends AbstractCallChain {
       generateGetMethod(out, method);
       out.println(", ");
     }
+
+    if (getAroundInvokeMethod() != null) {
+      out.println("__caucho_aroundInvokeMethod, ");
+    }
+    
     out.popDepth();
     out.println("};");
   }
@@ -361,6 +415,12 @@ public class InterceptorCallChain extends AbstractCallChain {
     for (Class iClass : _interceptors) {
       out.print(_interceptorVarMap.get(iClass) + ", ");
     }
+
+    if (getAroundInvokeMethod() != null) {
+      _next.generateThis(out);
+      out.print(", ");
+    }
+    
     out.println("};");
   }
   

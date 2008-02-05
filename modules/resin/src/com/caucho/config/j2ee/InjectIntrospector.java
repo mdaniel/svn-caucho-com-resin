@@ -49,6 +49,7 @@ import javax.annotation.*;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.naming.*;
+import javax.interceptor.*;
 import javax.persistence.*;
 import javax.webbeans.*;
 import javax.xml.ws.WebServiceRef;
@@ -91,17 +92,22 @@ public class InjectIntrospector {
     introspectInit(initList, type.getSuperclass());
 
     for (Method method : type.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(PostConstruct.class)) {
-        if (method.getParameterTypes().length != 0)
+      if (! method.isAnnotationPresent(PostConstruct.class))
+	continue;
+
+      if (method.getParameterTypes().length == 1
+	  && InvocationContext.class.equals(method.getParameterTypes()[0]))
+	continue;
+      
+      if (method.getParameterTypes().length != 0)
           throw new ConfigException(location(method)
 				    + L.l("{0}: @PostConstruct is requires zero arguments"));
 	
-        PostConstructProgram initProgram
-          = new PostConstructProgram(method);
+      PostConstructProgram initProgram
+	= new PostConstructProgram(method);
 
-        if (! initList.contains(initProgram))
-          initList.add(initProgram);
-      }
+      if (! initList.contains(initProgram))
+	initList.add(initProgram);
     }
   }
   

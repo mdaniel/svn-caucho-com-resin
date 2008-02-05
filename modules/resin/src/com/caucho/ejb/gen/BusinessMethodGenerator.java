@@ -75,7 +75,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     _uniqueName = "_" + _apiMethod.getName() + "_" + index;
 
-    _interceptor = new InterceptorCallChain(this);
+    _interceptor = new InterceptorCallChain(this, view);
     _xa = createXa(_interceptor);
     _security = new SecurityCallChain(this, _xa);
   }

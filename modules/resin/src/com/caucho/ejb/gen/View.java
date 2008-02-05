@@ -98,6 +98,14 @@ abstract public class View {
   }
 
   /**
+   * Returns any around-invoke method
+   */
+  public Method getAroundInvokeMethod()
+  {
+    return getBean().getAroundInvokeMethod();
+  }
+
+  /**
    * Generates prologue for the context.
    */
   public void generateContextPrologue(JavaWriter out)

@@ -2432,7 +2432,7 @@ public class EjbBean extends DescriptionGroupConfig
    */
   public ConfigException error(String msg)
   {
-    if (_filename != null)
+    if (_isInit && _filename != null)
       return new LineConfigException(_filename, _line, msg);
     else if (_isInit && ! "".equals(_location))
       return new LineConfigException(_location + msg);

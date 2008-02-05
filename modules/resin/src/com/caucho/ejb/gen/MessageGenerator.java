@@ -94,8 +94,11 @@ public class MessageGenerator extends BeanGenerator {
   /**
    * Introspects the bean.
    */
+  @Override
   public void introspect()
   {
+    super.introspect();
+    
     for (View view : getViews())
       view.introspect();
   }
