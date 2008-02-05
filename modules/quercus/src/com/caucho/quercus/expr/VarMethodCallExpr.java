@@ -99,7 +99,17 @@ public class VarMethodCallExpr extends Expr {
 
     StringValue methodName = _name.eval(env).toStringValue();
 
-    return _objExpr.eval(env).callMethod(env, methodName, values);
+    Value obj = _objExpr.eval(env);
+
+    env.pushCall(this, obj);
+
+    try {
+      env.checkTimeout();
+
+      return obj.callMethod(env, methodName, values);
+    } finally {
+      env.popCall();
+    }
   }
   
   public String toString()

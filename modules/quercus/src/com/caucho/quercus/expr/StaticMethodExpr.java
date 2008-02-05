@@ -139,10 +139,18 @@ public class StaticMethodExpr extends Expr {
     Value thisValue = env.getThis();    
 
     //Value thisValue = NullThisValue.NULL;
-    
-    return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
+
+    env.pushCall(this, thisValue);
+
+    try {
+      env.checkTimeout();
+
+      return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
+    } finally {
+      env.popCall();
+    }
   }
-  
+
   /**
    * Evaluates the expression.
    *

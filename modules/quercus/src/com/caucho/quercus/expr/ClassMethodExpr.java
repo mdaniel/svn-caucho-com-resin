@@ -105,8 +105,17 @@ public class ClassMethodExpr extends Expr {
 
     for (int i = 0; i < values.length; i++)
       values[i] = _args[i].eval(env);
-    
-    return fun.callMethod(env, env.getThis(), values);
+
+    Value obj = env.getThis();
+    env.pushCall(this, obj);
+
+    try {
+      env.checkTimeout();
+
+      return fun.callMethod(env, obj, values);
+    } finally {
+      env.popCall();
+    }
   }
   
   public String toString()
