@@ -40,7 +40,7 @@ import com.caucho.util.L10N;
 import java.util.ArrayList;
 
 /**
- * Represents a PHP function expression.
+ * Represents a PHP function expression of the form "new $a()".
  */
 public class VarNewExpr extends Expr {
   private static final L10N L = new L10N(NewExpr.class);

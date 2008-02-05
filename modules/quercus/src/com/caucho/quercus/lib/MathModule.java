@@ -139,7 +139,7 @@ public class MathModule extends AbstractQuercusModule {
       else if ('a' <= ch && ch <= 'z')
         value = ch - 'a' + 10;
       else if ('A' <= ch && ch <= 'Z')
-        value = ch - 'a' + 10;
+        value = ch - 'A' + 10;
       else
         continue;
 
