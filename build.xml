@@ -492,7 +492,7 @@
     </jar>
   </target>
 
-  <target name="win32" if="win32binaries">
+  <target name="win32" if="win32">
     <mkdir dir="${install}/win32"/>
     <!--
     <mkdir dir="${install}/win32/apache-1.3"/>
@@ -501,25 +501,30 @@
     <mkdir dir="${install}/win32/apache-2.2"/>
     <!--
     <copy todir="${install}/win32/apache-1.3"
-          file="${win32binaries}/modules/c/src/apache1/Apache136/mod_caucho.dll"/>
+          file="${win32}/resin/modules/c/src/apache1/Apache136/mod_caucho.dll"/>
 	  -->
     <copy todir="${install}/win32/apache-2.0"
-          file="${win32binaries}/modules/c/src/apache2/Release/mod_caucho.dll"/>
+          file="${win32}/resin/modules/c/src/apache2/Release/mod_caucho.dll"/>
     <copy todir="${install}/win32/apache-2.2"
-          file="${win32binaries}/modules/c/src/apache22/Release/mod_caucho.dll"/>
+          file="${win32}/resin/modules/c/src/apache22/Release/mod_caucho.dll"/>
     <copy todir="${install}/win32"
-          file="${win32binaries}/modules/c/src/isapi_srun/release/isapi_srun.dll"/>
+          file="${win32}/resin/modules/c/src/isapi_srun/Release/isapi_srun.dll"/>
+    <copy todir="${install}/win64"
+          file="${win32}/resin/modules/c/src/isapi_64/Release/isapi_srun.dll"/>
     <copy todir="${install}/win32"
-          file="${win32binaries}/modules/c/src/resin_os/release/resin_os.dll"/>
+          file="${win32}/resin/modules/c/src/resin_os/Release/resin_os.dll"/>
+    <copy todir="${install}/win64"
+          file="${win32}/resin/modules/c/src/resin_os_64/Release/resin_os.dll"/>
     <copy todir="${install}"
-          file="${win32binaries}/modules/c/src/httpd/Release/httpd.exe"/>
+          file="${win32}/resin/modules/c/src/httpd/Release/httpd.exe"/>
     <copy todir="${install}"
-          file="${win32binaries}/modules/c/src/setup/Release/setup.exe"/>
+          file="${win32}/resin/modules/c/src/setup/Release/setup.exe"/>
 
     <chmod perm="ugo+rx">
       <fileset dir="${install}">
         <include name="*.exe"/>
         <include name="win32/*.dll"/>
+        <include name="win64/*.dll"/>
       </fileset>
     </chmod>
   </target>
@@ -766,6 +771,7 @@
         <include name="php/**"/>
         <include name="modules/**/src/**"/>
         <include name="win32/**"/>
+        <include name="win64/**"/>
         <include name="bin/**"/>
         <include name="xsd/**"/>
         <include name="automake/**"/>
@@ -1373,8 +1379,9 @@
     <delete dir="${install}/php/quercus-war/WEB-INF/lib"/>
   </target>
 
-  <target name="win32clean" if="win32binaries">
+  <target name="win32clean" if="win32">
     <delete dir="${install}/win32"/>
+    <delete dir="${install}/win64"/>
   </target>
 
 </project>
