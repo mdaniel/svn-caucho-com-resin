@@ -470,10 +470,6 @@ public class EjbSessionBean extends EjbBean {
       try {
         if (getServerProgram() != null)
           getServerProgram().configure(server);
-
-        // ejb/0fd0, ejb/0g03
-        for (EnvEntry envEntry : getEnvEntries())
-          envEntry.init();
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {

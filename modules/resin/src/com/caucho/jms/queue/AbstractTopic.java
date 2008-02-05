@@ -90,7 +90,7 @@ abstract public class AbstractTopic extends AbstractDestination
   
   public String toString()
   {
-    return getClass().getName() + "[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }
 

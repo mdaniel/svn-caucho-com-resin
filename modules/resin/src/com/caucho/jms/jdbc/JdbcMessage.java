@@ -42,10 +42,7 @@ import com.caucho.jms.message.TextMessageImpl;
 import com.caucho.jms.selector.Selector;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.vfs.ByteToChar;
-import com.caucho.vfs.ContextLoaderObjectInputStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import javax.jms.*;
 import javax.sql.DataSource;
@@ -550,9 +547,15 @@ public class JdbcMessage
     int data;
     //bytes.reset();
 
-    while ((data = bytes.readUnsignedByte()) >= 0) {
-      ws.write(data);
+    TempBuffer tb = TempBuffer.allocate();
+    byte []buffer = tb.getBuffer();
+    int len;
+    
+    while ((len = bytes.readBytes(buffer, buffer.length)) >= 0) {
+      ws.write(buffer, 0, len);
     }
+
+    TempBuffer.free(tb);
     
     ws.close();
 

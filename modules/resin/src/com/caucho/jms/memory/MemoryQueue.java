@@ -125,6 +125,14 @@ public class MemoryQueue extends AbstractQueue
     }
   }
 
+  @Override
+  public ArrayList<MessageImpl> getBrowserList()
+  {
+    synchronized (_queueList) {
+      return new ArrayList<MessageImpl>(_queueList);
+    }
+  }
+
   /**
    * Acknowledges the receipt of a message
    */
@@ -165,11 +173,6 @@ public class MemoryQueue extends AbstractQueue
         }
       }
     }
-  }
-
-  public String toString()
-  {
-    return "MemoryQueue[" + getName() + "]";
   }
 }
 

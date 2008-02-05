@@ -158,8 +158,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
   public void introspect(Method apiMethod, Method implMethod)
   {
-    Class cl = implMethod.getDeclaringClass();
-
     _security.introspect(apiMethod, implMethod);
     _xa.introspect(apiMethod, implMethod);
     _interceptor.introspect(apiMethod, implMethod);
@@ -212,7 +210,10 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
     
     out.println(")");
-    generateThrows(out, _implMethod.getExceptionTypes());
+    if (_implMethod != null)
+      generateThrows(out, _implMethod.getExceptionTypes());
+    else
+      generateThrows(out, _apiMethod.getExceptionTypes());
     out.println("{");
     out.pushDepth();
 

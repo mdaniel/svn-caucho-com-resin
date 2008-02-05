@@ -105,10 +105,10 @@ public class TopicSessionImpl extends JmsSession
       }
     }
 
-    TopicSubscriber subscriber
+    TopicSubscriberImpl subscriber
       = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);
     
-    // addConsumer((MessageConsumerImpl) consumer);
+    addConsumer(subscriber);
 
     return subscriber;
   }

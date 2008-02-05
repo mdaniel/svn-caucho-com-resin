@@ -105,9 +105,11 @@ abstract public class StatelessHomeView extends StatelessView {
       ApiMethod implMethod = getEjbClass().getMethod("ejbCreate",
 						     apiMethod.getParameterTypes());
 
-      if (implMethod == null)
-	throw ConfigException.create(apiMethod.getMethod(),
+      // ejbCreate optional
+      /*
+      throw ConfigException.create(apiMethod.getMethod(),
 				     L.l("can't find ejbCreate"));
+      */
 
       View localView = getStatelessBean().getView(apiMethod.getReturnType());
 
@@ -120,7 +122,7 @@ abstract public class StatelessHomeView extends StatelessView {
 				       this,
 				       localView,
 				       apiMethod.getMethod(),
-				       implMethod.getMethod(),
+				       implMethod,
 				       index);
     }
     else {

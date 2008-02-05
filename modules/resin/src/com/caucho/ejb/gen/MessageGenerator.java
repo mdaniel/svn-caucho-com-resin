@@ -130,10 +130,12 @@ public class MessageGenerator extends BeanGenerator {
 		+ " implements MessageEndpoint, CauchoMessageEndpoint");
     out.println("{");
     out.pushDepth();
-    
+
+    /*
     out.println();
     out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
     out.println("  = new com.caucho.ejb3.xa.XAManager();");
+    */
 
     out.println("private static HashSet<Method> _xaMethods = new HashSet<Method>();");
     out.println();
@@ -141,6 +143,11 @@ public class MessageGenerator extends BeanGenerator {
     out.println("private XAResource _xaResource;");
     out.println("private boolean _isXa;");
 
+
+    for (View view : getViews()) {
+      // view.generateContextPrologue(out);
+      view.generateBusinessPrologue(out);
+    }
 
     out.println();
     out.println("public " + getClassName() + "(MessageServer server)");
@@ -153,10 +160,8 @@ public class MessageGenerator extends BeanGenerator {
       out.println("setMessageDrivenContext(server.getMessageContext());");
     }
 
-    if (getEjbClass().hasMethod("ejbCreate", new Class[0])) {
-      out.println("ejbCreate();");
-    }
-    
+    _view.generateBusinessConstructor(out);
+
     out.popDepth();
     out.println("}");
 
@@ -227,9 +232,11 @@ public class MessageGenerator extends BeanGenerator {
     out.popDepth();
     out.println("}");
 
+    /*
     for (View view : getViews()) {
       view.generateContextPrologue(out);
     }
+    */
 
     generateViews(out);
     

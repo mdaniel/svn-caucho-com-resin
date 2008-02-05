@@ -97,6 +97,14 @@ public class ApiMethod {
   }
 
   /**
+   * Returns true for a protected method.
+   */
+  public boolean isProtected()
+  {
+    return Modifier.isProtected(_method.getModifiers());
+  }
+
+  /**
    * Returns true for a static method.
    */
   public boolean isStatic()

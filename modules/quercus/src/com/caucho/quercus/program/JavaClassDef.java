@@ -173,7 +173,8 @@ public class JavaClassDef extends ClassDef {
       return new JavaMapClassDef(moduleContext, name, type);
     else if (List.class.isAssignableFrom(type))
       return new JavaListClassDef(moduleContext, name, type);
-    else if (Collection.class.isAssignableFrom(type))
+    else if (Collection.class.isAssignableFrom(type)
+	     && ! Queue.class.isAssignableFrom(type))
       return new JavaCollectionClassDef(moduleContext, name, type);
     else
       return null;

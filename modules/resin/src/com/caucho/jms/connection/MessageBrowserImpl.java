@@ -29,14 +29,15 @@
 
 package com.caucho.jms.connection;
 
+import com.caucho.jms.JmsRuntimeException;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
-import com.caucho.jms.selector.Selector;
-import com.caucho.jms.selector.SelectorParser;
+import com.caucho.jms.selector.*;
 import com.caucho.log.Log;
 import com.caucho.util.*;
 
 import javax.jms.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -51,12 +52,22 @@ public class MessageBrowserImpl
     = Logger.getLogger(MessageBrowserImpl.class.getName());
   static final L10N L = new L10N(MessageBrowserImpl.class);
 
+  private JmsSession _session;
   private AbstractQueue _queue;
   private String _messageSelector;
+  private Selector _selector;
 
-  public MessageBrowserImpl(AbstractQueue queue, String messageSelector)
+  public MessageBrowserImpl(JmsSession session,
+			    AbstractQueue queue,
+			    String messageSelector)
+    throws JMSException
   {
+    _session = session;
     _queue = queue;
+    _messageSelector = messageSelector;
+    
+    if (messageSelector != null)
+      _selector = new SelectorParser().parse(messageSelector);
   }
   
   public Queue getQueue()
@@ -74,7 +85,14 @@ public class MessageBrowserImpl
   public Enumeration getEnumeration()
     throws JMSException
   {
-    return NullEnumeration.create();
+    ArrayList<MessageImpl> list;
+
+    if (_session.isActive())
+      list = _queue.getBrowserList();
+    else
+      list = new ArrayList<MessageImpl>(0);
+    
+    return new BrowserEnumeration(list, _selector);
   }
 
   public void close()
@@ -85,6 +103,57 @@ public class MessageBrowserImpl
   public String toString()
   {
     return "MessageBrowserImpl[" + _queue + "]";
+  }
+
+  public static class BrowserEnumeration implements Enumeration {
+    private ArrayList<MessageImpl> _messages;
+    private Selector _selector;
+
+    private int _index;
+    
+    BrowserEnumeration(ArrayList<MessageImpl> messages,
+		       Selector selector)
+    {
+      _messages = messages;
+      _selector = selector;
+
+      nextValidMessage();
+    }
+
+    public boolean hasMoreElements()
+    {
+      return _index < _messages.size();
+    }
+
+    public Object nextElement()
+    {
+      if (_index < _messages.size()) {
+	MessageImpl msg = _messages.get(_index);
+
+	_index++;
+	nextValidMessage();
+
+	return msg;
+      }
+      else
+	return null;
+    }
+
+    private void nextValidMessage()
+    {
+      try {
+	for (; _index < _messages.size(); _index++) {
+	  MessageImpl msg = _messages.get(_index);
+
+	  if (_selector == null || _selector.isMatch(msg))
+	    return;
+	}
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new JmsRuntimeException(e);
+      }
+    }
   }
 }
 

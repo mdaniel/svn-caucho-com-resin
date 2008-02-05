@@ -332,8 +332,11 @@ public class TypeFactory implements AddLoaderListener
       return new EnumType(type);
     else if (Set.class.isAssignableFrom(type))
       return new SetType(type);
-    else if (Collection.class.isAssignableFrom(type))
+    else if (Collection.class.isAssignableFrom(type)
+	     && ! Queue.class.isAssignableFrom(type)) {
+      // jms/2300
       return new ListType(type);
+    }
     else if (Map.class.isAssignableFrom(type))
       return new MapType(type);
     else if (EnvironmentBean.class.isAssignableFrom(type))

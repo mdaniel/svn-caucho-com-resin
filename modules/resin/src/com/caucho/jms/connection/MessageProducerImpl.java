@@ -201,10 +201,10 @@ public class MessageProducerImpl implements MessageProducer {
   public void send(Message message)
     throws JMSException
   {
-    assert message != null;
+    if (message == null)
+      throw new NullPointerException(L.l("jms message cannot be null for send()")); 
 
-    send(_queue, message,
-	 _deliveryMode, _priority, _timeToLive);
+    send(_queue, message, _deliveryMode, _priority, _timeToLive);
   }
   
   /**
@@ -221,7 +221,8 @@ public class MessageProducerImpl implements MessageProducer {
                    long timeToLive)
     throws JMSException
   {
-    assert message != null;
+    if (message == null)
+      throw new NullPointerException(L.l("jms message cannot be null for send()")); 
 
     send(_queue, message, deliveryMode, priority, timeToLive);
   }
@@ -235,11 +236,13 @@ public class MessageProducerImpl implements MessageProducer {
   public void send(Destination destination, Message message)
     throws JMSException
   {
-    assert destination != null;
-    assert message != null;
+    if (message == null)
+      throw new NullPointerException(L.l("jms message cannot be null for send()"));
+    if (destination == null)
+      throw new NullPointerException(L.l("jms destination cannot be null for send()"));
 
-    send(destination, message,
-	 _deliveryMode, _priority, _timeToLive);
+
+    send(destination, message, _deliveryMode, _priority, _timeToLive);
   }
   
   /**
@@ -273,7 +276,7 @@ public class MessageProducerImpl implements MessageProducer {
     _session.send((AbstractDestination) destination,
 		  message,
 		  deliveryMode, priority,
-		  calculateExpiration(timeToLive));
+		  timeToLive);
     // _session.checkThread();
   }
 

@@ -49,6 +49,7 @@ public class XaCallChain extends AbstractCallChain
   private BusinessMethodGenerator _bizMethod;
   private EjbCallChain _next;
 
+  private boolean _isContainerManaged = true;
   private TransactionAttributeType _xa;
 
   public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next)
@@ -69,7 +70,19 @@ public class XaCallChain extends AbstractCallChain
    */
   public boolean isEnhanced()
   {
-    return (_xa != null && ! _xa.equals(TransactionAttributeType.SUPPORTS));
+    return (_isContainerManaged
+	    && _xa != null
+	    && ! _xa.equals(TransactionAttributeType.SUPPORTS));
+  }
+
+  public boolean isContainerManaged()
+  {
+    return _isContainerManaged;
+  }
+
+  public void setContainerManaged(boolean isContainerManaged)
+  {
+    _isContainerManaged = isContainerManaged;
   }
 
   /**
@@ -90,8 +103,14 @@ public class XaCallChain extends AbstractCallChain
    */
   public void introspect(Method apiMethod, Method implMethod)
   {
+    if (! _isContainerManaged)
+      return;
+    
     Class apiClass = apiMethod.getDeclaringClass();
-    Class implClass = implMethod.getDeclaringClass();
+    Class implClass = null;
+
+    if (implMethod != null)
+      implMethod.getDeclaringClass();
     
     TransactionAttribute xaAttr;
     
@@ -102,11 +121,11 @@ public class XaCallChain extends AbstractCallChain
 	apiClass.getAnnotation(TransactionAttribute.class);
     }
 
-    if (xaAttr == null) {
+    if (xaAttr == null && implMethod != null) {
       xaAttr = implMethod.getAnnotation(TransactionAttribute.class);
     }
 
-    if (xaAttr == null) {
+    if (xaAttr == null && implClass != null) {
       xaAttr = (TransactionAttribute)
 	implClass.getAnnotation(TransactionAttribute.class);
     }
@@ -122,7 +141,7 @@ public class XaCallChain extends AbstractCallChain
   public void generatePrologue(JavaWriter out, HashMap map)
     throws IOException
   {
-    if (map.get("caucho.ejb.xa") == null) {
+    if (_isContainerManaged && map.get("caucho.ejb.xa") == null) {
       map.put("caucho.ejb.xa", "done");
 
       out.println();
@@ -139,7 +158,7 @@ public class XaCallChain extends AbstractCallChain
   public void generateCall(JavaWriter out)
     throws IOException
   {
-    if (_xa != null) {
+    if (_isContainerManaged && _xa != null) {
       switch (_xa) {
       case MANDATORY:
 	{
@@ -184,7 +203,7 @@ public class XaCallChain extends AbstractCallChain
 
     generateNext(out);
 
-    if (_xa != null) {
+    if (_isContainerManaged && _xa != null) {
       out.popDepth();
       for (Class exn : _bizMethod.getApiMethod().getExceptionTypes()) {
 	ApplicationException appExn

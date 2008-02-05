@@ -31,6 +31,7 @@ package com.caucho.ejb.message;
 
 import java.util.*;
 import java.util.logging.*;
+import java.lang.reflect.*;
 
 import javax.jms.*;
 import javax.resource.*;
@@ -39,9 +40,14 @@ import javax.resource.spi.endpoint.*;
 import javax.resource.spi.work.*;
 import javax.transaction.xa.*;
 
+import com.caucho.config.*;
+
 public class JmsResourceAdapter implements ResourceAdapter {
   private static final Logger
     log = Logger.getLogger(JmsResourceAdapter.class.getName());
+  
+  private static final Method _onMessage;
+
   private final String _ejbName;
   private final ConnectionFactory _connectionFactory;
   private final Destination _destination;
@@ -194,7 +200,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
     Consumer(Connection conn, Destination destination)
       throws Exception
     {
-      boolean transacted = false;
+      boolean transacted = true;
 
       _session = conn.createSession(transacted, _acknowledgeMode);
 
@@ -212,12 +218,6 @@ public class JmsResourceAdapter implements ResourceAdapter {
     void start()
       throws Exception
     {
-      // XXX: ejb/090c
-      // XXX: doesn't seem to be properly handling the sessions
-      boolean transacted = false;
-
-      _session = _connection.createSession(transacted, _acknowledgeMode);
-
       if (_subscriptionName != null) {
         Topic topic = (Topic) _destination;
 
@@ -249,6 +249,15 @@ public class JmsResourceAdapter implements ResourceAdapter {
       throws JMSException
     {
       _endpoint.release();
+    }
+  }
+
+  static {
+    try {
+      _onMessage = MessageListener.class.getMethod("onMessage",
+						   new Class[] { Message.class });
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 }

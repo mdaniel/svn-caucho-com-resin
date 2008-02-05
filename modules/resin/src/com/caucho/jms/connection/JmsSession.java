@@ -459,7 +459,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       throw new InvalidDestinationException(L.l("'{0}' is an unknown queue.  The queue must be a Resin JMS Queue for Session.createBrowser.",
 						queue));
     
-    return ((AbstractQueue) queue).createBrowser(this, messageSelector);
+    return new MessageBrowserImpl(this, (AbstractQueue) queue,
+				  messageSelector);
   }
 
   /**
@@ -860,9 +861,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       message.setJMSExpiration(expiration);
     message.setJMSPriority(priority);
 
+    // ejb/0970
+
     boolean isXA = false;
     try {
-      if (_tm != null && _tm.getTransaction() != null)
+      if (_isTransacted && _tm != null && _tm.getTransaction() != null)
         isXA = true;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -925,7 +928,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     if (_transactedMessages == null)
       _transactedMessages = new ArrayList<TransactedMessage>();
-
+    
     TransactedMessage transMsg = new ReceiveMessage(queue, message);
       
     _transactedMessages.add(transMsg);
@@ -1040,7 +1043,6 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   public void start(Xid xid, int flags)
     throws XAException
   {
-    _isXA = true;
     _xid = xid;
   }
   

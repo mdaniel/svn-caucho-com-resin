@@ -969,6 +969,8 @@ abstract public class AbstractServer implements EnvironmentBean {
 
       _loader.start();
 
+      bindContext();
+      
       if (_serverProgram != null)
         _serverProgram.configure(this);
       
@@ -980,6 +982,11 @@ abstract public class AbstractServer implements EnvironmentBean {
     }
 
     return true;
+  }
+
+  protected void bindContext()
+  {
+    
   }
 
   protected void bindInjection()

@@ -120,7 +120,7 @@ public class EjbBean extends DescriptionGroupConfig
 
   private boolean _isAllowPOJO = true;
 
-  private boolean _isContainerTransaction = true;
+  protected boolean _isContainerTransaction = true;
 
   ArrayList<PersistentDependency> _dependList =
     new ArrayList<PersistentDependency>();
@@ -143,18 +143,6 @@ public class EjbBean extends DescriptionGroupConfig
 
   private ArrayList<Interceptor> _interceptors
     = new ArrayList<Interceptor>();
-
-  private ArrayList<EjbLocalRef> _ejbLocalRefs
-    = new ArrayList<EjbLocalRef>();
-
-  private ArrayList<EnvEntry> _envEntries
-    = new ArrayList<EnvEntry>();
-
-  private ArrayList<ResourceEnvRef> _resourceEnvRefs
-    = new ArrayList<ResourceEnvRef>();
-
-  private ArrayList<ResourceRef> _resourceRefs
-    = new ArrayList<ResourceRef>();
 
   private String _aroundInvokeMethodName;
   private String _timeoutMethodName;
@@ -243,38 +231,6 @@ public class EjbBean extends DescriptionGroupConfig
   public void addRemoveMethod(RemoveMethod removeMethod)
   {
     _removeMethods.add(removeMethod);
-  }
-
-  /**
-   * Returns the env-entry list.
-   */
-  public ArrayList<EnvEntry> getEnvEntries()
-  {
-    return _envEntries;
-  }
-
-  /**
-   * Adds a new env-entry
-   */
-  public void addEnvEntry(EnvEntry envEntry)
-  {
-    _envEntries.add(envEntry);
-  }
-
-  /**
-   * Returns the resource-ref list.
-   */
-  public ArrayList<ResourceRef> getResourceRefs()
-  {
-    return _resourceRefs;
-  }
-
-  /**
-   * Adds a new resource-ref.
-   */
-  public void addResourceRef(ResourceRef resourceRef)
-  {
-    _resourceRefs.add(resourceRef);
   }
 
   /**
@@ -417,27 +373,6 @@ public class EjbBean extends DescriptionGroupConfig
   public boolean isAllowPOJO()
   {
     return _isAllowPOJO;
-  }
-
-  /**
-   * Adds a description
-   */
-  public void addDescription(String description)
-  {
-  }
-
-  /**
-   * Adds a display name
-   */
-  public void addDisplayName(String displayName)
-  {
-  }
-
-  /**
-   * Adds a icon
-   */
-  public void addIcon(String icon)
-  {
   }
 
   /**
@@ -827,6 +762,14 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   /**
+   * Returns true if the transaction type is container.
+   */
+  public void setContainerTransaction(boolean isContainerTransaction)
+  {
+    _isContainerTransaction = isContainerTransaction;
+  }
+
+  /**
    * Adds a method.
    */
   public EjbMethodPattern createMethod(MethodSignature sig)
@@ -896,45 +839,6 @@ public class EjbBean extends DescriptionGroupConfig
   public long getTransactionTimeout()
   {
     return _transactionTimeout;
-  }
-
-  public EjbRef createEjbRef()
-  {
-    return new EjbRef(Vfs.lookup(_ejbModuleName), getEJBName());
-  }
-
-  public ResourceEnvRef createResourceEnvRef()
-  {
-    ResourceEnvRef ref = new ResourceEnvRef(Vfs.lookup(_ejbModuleName), getEJBName());
-
-    _resourceEnvRefs.add(ref);
-
-    return ref;
-  }
-
-  /**
-   * Returns the ejb-local-ref's from this bean
-   */
-  public ArrayList<EjbLocalRef> getEjbLocalRefs()
-  {
-    return _ejbLocalRefs;
-  }
-
-  /**
-   * Returns the resource-env-ref's from this bean
-   */
-  public ArrayList<ResourceEnvRef> getResourceEnvRefs()
-  {
-    return _resourceEnvRefs;
-  }
-
-  public EjbLocalRef createEjbLocalRef()
-  {
-    EjbLocalRef ejbLocalRef = new EjbLocalRef(Vfs.lookup(_ejbModuleName), getEJBName());
-
-    _ejbLocalRefs.add(ejbLocalRef);
-
-    return ejbLocalRef;
   }
 
   public MessageDestinationRef createMessageDestinationRef()
@@ -2528,7 +2432,9 @@ public class EjbBean extends DescriptionGroupConfig
    */
   public ConfigException error(String msg)
   {
-    if (_isInit && ! "".equals(_location))
+    if (_filename != null)
+      return new LineConfigException(_filename, _line, msg);
+    else if (_isInit && ! "".equals(_location))
       return new LineConfigException(_location + msg);
     else
       return new ConfigException(msg);

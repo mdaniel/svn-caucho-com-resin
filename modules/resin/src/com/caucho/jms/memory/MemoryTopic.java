@@ -84,8 +84,6 @@ public class MemoryTopic extends AbstractTopic
 	_subscriptionList.add(queue);
 	_durableSubscriptionMap.put(name, queue);
       }
-
-      return queue;
     }
     else {
       queue = new MemorySubscriberQueue(session, noLocal);
@@ -94,12 +92,18 @@ public class MemoryTopic extends AbstractTopic
       _subscriptionList.add(queue);
     }
 
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " create-subscriber(" + queue + ")");
+
     return queue;
   }
 
   @Override
   public void closeSubscriber(AbstractQueue queue)
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " close-subscriber(" + queue + ")");
+    
     if (! _durableSubscriptionMap.values().contains(queue))
       _subscriptionList.remove(queue);
   }

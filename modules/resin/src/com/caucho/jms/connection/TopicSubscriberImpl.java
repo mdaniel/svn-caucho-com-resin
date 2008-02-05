@@ -66,8 +66,6 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 
     _topic = topic;
     _subscription = (AbstractQueue) getDestination();
-
-    _topic.addConsumer(this);
   }
   
   TopicSubscriberImpl(JmsSession session,
@@ -81,8 +79,6 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 
     _topic = topic;
     _subscription = subscription;
-    
-    _topic.addConsumer(this);
   }
 
   public Topic getTopic()
@@ -102,8 +98,6 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 
       subscription.close();
     }
-    
-    _topic.removeConsumer(this);
   }
 }
 

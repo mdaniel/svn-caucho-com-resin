@@ -94,6 +94,7 @@ public class MessageImpl implements Message
     _replyTo = msg.getJMSReplyTo();
 
     _deliveryMode = msg.getJMSDeliveryMode();
+    _isRedelivered = msg.getJMSRedelivered();
     
     _messageType = msg.getJMSType();
     _priority = msg.getJMSPriority();
@@ -853,17 +854,12 @@ public class MessageImpl implements Message
 
   public String toString()
   {
-    String className = getClass().getName();
-
-    int p = className.lastIndexOf('.');
-    className = className.substring(p + 1);
-    
     if (_messageId != null)
-      return className + "[" + _messageId + "]";
+      return getClass().getSimpleName() + "[" + _messageId + "]";
     else if (Alarm.isTest())
-      return className + "[]";
+      return getClass().getSimpleName() + "[]";
     else
-      return className + "@" + System.identityHashCode(this);
+      return getClass().getSimpleName() + "@" + System.identityHashCode(this);
   }
 
   public static boolean isReserved(String name)

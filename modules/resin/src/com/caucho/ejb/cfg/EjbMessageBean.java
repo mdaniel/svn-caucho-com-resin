@@ -56,7 +56,7 @@ import javax.jms.Session;
 import javax.resource.spi.*;
 import javax.naming.NamingException;
 import javax.webbeans.*;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,7 +73,6 @@ public class EjbMessageBean extends EjbBean {
   private ActivationSpec _activationSpec;
   private Destination _destination;
   private String _messageSelector;
-  private boolean _isContainerTransaction = true;
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
   private String _selector;
   private String _subscriptionName;
@@ -127,22 +126,6 @@ public class EjbMessageBean extends EjbBean {
     if (getEJBName() == null) {
       setEJBName(ejbClass.getSimpleName());
     }
-
-    /* XXX: ejb/0fbl, EJB 3.0 should not need ejbCreate()
-       ApiMethod create = getEJBClassWrapper().getMethod("ejbCreate",
-       new Class[0]);
-
-       if (create == null) {
-       if (! isAllowPOJO()) {
-       throw error(L.l("{0}: ejbCreate() method is missing.  Every message-driven bean must have an ejbCreate() method.",
-       ejbClass.getName()));
-       }
-       }
-       else if (! create.isPublic()) {
-       throw error(L.l("{0}: ejbCreate() must be public.  Every message-driven bean must have a public ejbCreate method.",
-       ejbClass.getName()));
-       }
-    */
   }
 
   /**
@@ -249,22 +232,6 @@ public class EjbMessageBean extends EjbBean {
   }
 
   /**
-   * Returns true if the container handles transactions.
-   */
-  public boolean getContainerTransaction()
-  {
-    return _isContainerTransaction;
-  }
-
-  /**
-   * Set true if the container handles transactions.
-   */
-  public void setContainerTransaction(boolean isContainerTransaction)
-  {
-    _isContainerTransaction = isContainerTransaction;
-  }
-
-  /**
    * Returns the acknowledge mode.
    */
   public int getAcknowledgeMode()
@@ -319,10 +286,10 @@ public class EjbMessageBean extends EjbBean {
     throws ConfigException
   {
     if (type.equals("Container")) {
-      _isContainerTransaction = true;
+      setContainerTransaction(true);
     }
     else if (type.equals("Bean")) {
-      _isContainerTransaction = false;
+      setContainerTransaction(false);
     }
     else
       throw new ConfigException(L.l("'{0}' is an unknown transaction-type.  transaction-type must be 'Bean' or 'Container'.", type));
@@ -352,7 +319,16 @@ public class EjbMessageBean extends EjbBean {
   private void addActivationConfigProperty(String name, Object value)
   {
     if ("destination".equals(name)) {
-      setDestination((Destination) value);
+      if (value instanceof Destination)
+	setDestination((Destination) value);
+      else {
+	WebBeansContainer webBeans = WebBeansContainer.create();
+
+	Destination dest
+	  = webBeans.getObject(Destination.class, String.valueOf(value));
+
+	setDestination(dest);
+      }
     }
     else if ("messageSelector".equals(name)) {
       _messageSelector = (String) value;
@@ -411,6 +387,15 @@ public class EjbMessageBean extends EjbBean {
                       isAllowPOJO() ? "messaging-type" : "messageListenerInterface"));
 
     super.init();
+
+    ApiMethod ejbCreate
+      = getEJBClassWrapper().getMethod("ejbCreate", new Class[0]);
+    
+    if (ejbCreate != null) {
+      if (! ejbCreate.isPublic() && ! ejbCreate.isProtected())
+	throw error(L.l("{0}: ejbCreate method must be public or protected.",
+			getEJBClass().getName()));
+    }
     
     // J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
   }
@@ -420,6 +405,26 @@ public class EjbMessageBean extends EjbBean {
     _messageBean.setApi(new ApiClass(_messagingType));
     
     super.introspect();
+
+    MessageDriven messageDriven
+      = (MessageDriven) getEJBClass().getAnnotation(MessageDriven.class);
+
+    if (messageDriven != null) {
+      ActivationConfigProperty []activationConfig
+	= messageDriven.activationConfig();
+
+      if (activationConfig != null) {
+	for (ActivationConfigProperty prop : activationConfig) {
+	  addActivationConfigProperty(prop.propertyName(),
+				      prop.propertyValue());
+	  
+	}
+      }
+
+      Class type = messageDriven.messageListenerInterface();
+      if (type != null && ! Object.class.equals(type))
+	_messagingType = type;
+    }
   }
   
   /**
@@ -519,7 +524,7 @@ public class EjbMessageBean extends EjbBean {
     throws ClassNotFoundException
   {
     ConnectionFactory factory;
-    Destination destination;
+    Destination destination = null;
     
     if (_connectionFactory != null)
       factory = _connectionFactory;
@@ -528,8 +533,16 @@ public class EjbMessageBean extends EjbBean {
       
     if (_destination != null)
       destination = _destination;
-    else
-      throw new ConfigException(L.l("Can't find destination"));
+    else if (_messageDestinationLink != null) {
+      MessageDestination dest;
+      dest = getConfig().getMessageDestination(_messageDestinationLink);
+
+      if (dest != null)
+	destination = dest.getResolvedDestination();
+    }
+
+    if (destination == null)
+      throw new ConfigException(L.l("ejb-message-bean does not have a configured JMS destination or activation-spec "));
 
     JmsResourceAdapter ra
       = new JmsResourceAdapter(getEJBName(), factory, destination);
@@ -612,13 +625,13 @@ public class EjbMessageBean extends EjbBean {
       server = new MessageServer(ejbManager);
 
       server.setConfigLocation(getFilename(), getLine());
-      
+
       server.setModuleName(getEJBModuleName());
       server.setEJBName(getEJBName());
       server.setMappedName(getMappedName());
       server.setId(getEJBModuleName() + "#" + getMappedName());
 
-      server.setContainerTransaction(getContainerTransaction());
+      server.setContainerTransaction(isContainerTransaction());
 
       server.setEjbClass(getEJBClass());
     

@@ -440,6 +440,7 @@ public class ConfigContext {
 
       if (attrStrategy == null) {
 	if (childNode instanceof Element || childNode instanceof Attr) {
+	  System.out.println("TYPE : " + type);
 	  throw error(L.l("'{0}' is an unknown property of '{1}'.",
 			  qName.getName(), type.getTypeName()),
 		      childNode);

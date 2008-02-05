@@ -67,6 +67,12 @@ public class MessageView extends View {
     return getMessageBean().getClassName();
   }
 
+
+  public String getViewClassName()
+  {
+    return getMessageBean().getClassName();
+  }
+
   /**
    * Returns the introspected methods
    */
@@ -113,10 +119,12 @@ public class MessageView extends View {
   {
     HashMap map = new HashMap();
     map.put("caucho.ejb.xa", "done");
-    
+
+    /* ejb/0fbm
     for (BusinessMethodGenerator bizMethod : _businessMethods) {
       bizMethod.generatePrologueTop(out, map);
     }
+    */
     
     for (BusinessMethodGenerator bizMethod : _businessMethods) {
       bizMethod.generate(out, map);

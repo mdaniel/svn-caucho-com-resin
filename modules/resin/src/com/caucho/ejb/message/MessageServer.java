@@ -73,12 +73,17 @@ public class MessageServer extends AbstractServer
 
   private MessageDrivenContext _context;
 
+  private Method _ejbCreate;
+
   public MessageServer(EjbContainer ejbContainer)
   {
     super(ejbContainer);
 
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    UserTransaction ut = webBeans.getObject(UserTransaction.class);
+    
     // ejb/0fbl
-    _context = new MessageDrivenContextImpl(this, null, true);
+    _context = new MessageDrivenContextImpl(this, ut);
   }
 
   protected String getType()
@@ -125,9 +130,24 @@ public class MessageServer extends AbstractServer
       if (_ra == null)
 	throw error(L.l("ResourceAdapter is missing from message-driven bean '{0}'.",
 			getEJBName()));
+
+      try {
+	Class beanClass = getBeanSkelClass();
+
+	_ejbCreate = beanClass.getMethod("ejbCreate", new Class[0]);
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  protected void bindContext()
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    webBeans.addSingleton(_context);
   }
 
   /**
@@ -178,6 +198,13 @@ public class MessageServer extends AbstractServer
       return (MessageEndpoint) listener;
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      if (e.getCause() != null)
+	throw new UnavailableException(e.getCause());
+      else
+	throw new UnavailableException(e);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -196,15 +223,27 @@ public class MessageServer extends AbstractServer
   private Object createMessageListener()
     throws Exception
   {
-    Class beanClass = getBeanSkelClass();
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-    Constructor ctor = beanClass.getConstructor(new Class[] { MessageServer.class });
+    try {
+      thread.setContextClassLoader(getClassLoader());
+      
+      Class beanClass = getBeanSkelClass();
+
+      Constructor ctor = beanClass.getConstructor(new Class[] { MessageServer.class });
     
-    Object listener = ctor.newInstance(this);
+      Object listener = ctor.newInstance(this);
 
-    initInstance(listener, new ConfigContext());
+      initInstance(listener, new ConfigContext());
 
-    return listener;
+      if (_ejbCreate != null)
+	_ejbCreate.invoke(listener);
+
+      return listener;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**

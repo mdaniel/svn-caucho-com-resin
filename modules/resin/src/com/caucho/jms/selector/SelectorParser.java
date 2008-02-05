@@ -312,22 +312,11 @@ public class SelectorParser  {
       return new UnarySelector(token, parseUnary());
     case '-':
       scanToken();
-      return parseMinusUnary();
+      return new UnarySelector('-', parseUnary());
       
     default:
       return parseTerm(false);
     }
-  }
-  
-  private Selector parseMinusUnary()
-    throws JMSException
-  {
-    Selector token = parseTerm(true);
-
-    if (token instanceof LiteralSelector)
-      return token;
-    else
-      return new UnarySelector('-', token);
   }
 
   private Selector parseTerm(boolean hasSign)

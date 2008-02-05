@@ -607,6 +607,20 @@ public class WebBeansContainer
       return null;
   }
 
+  /**
+   * Finds a component by its component name.
+   */
+  public Object getObjectByName(String name)
+  {
+    ComponentImpl comp = _namedComponentMap.get(name);
+    if (comp != null)
+      return comp.get();
+    else if (_parent != null)
+      return _parent.getObjectByName(name);
+    else
+      return null;
+  }
+
   //
   // events
   //

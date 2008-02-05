@@ -47,9 +47,6 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
 
   private JmsSession _session;
   private boolean _isClosed;
-
-  private ArrayList<MessageConsumer> _consumerList
-    = new ArrayList<MessageConsumer>();
   
   TemporaryQueueImpl(JmsSession session)
   {
@@ -61,22 +58,11 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
   {
     return _session;
   }
-
-  public void addConsumer(MessageConsumer consumer)
-  {
-    if (! _consumerList.contains(consumer))
-      _consumerList.add(consumer);
-  }
-
-  public void removeConsumer(MessageConsumer consumer)
-  {
-    _consumerList.remove(consumer);
-  }
-
+  
   public void delete()
     throws JMSException
   {
-    if (_consumerList.size() > 0)
+    if (getConsumerCount() > 0)
       throw new javax.jms.IllegalStateException(L.l("temporary queue is still active"));
   }
 }

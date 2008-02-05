@@ -82,8 +82,8 @@ public class EjbConfig {
   private ArrayList<EjbBeanConfigProxy> _proxyList
     = new ArrayList<EjbBeanConfigProxy>();
 
-  private ArrayList<FunctionSignature> _functions =
-    new ArrayList<FunctionSignature>();
+  private ArrayList<FunctionSignature> _functions
+    = new ArrayList<FunctionSignature>();
 
   private String _booleanTrue = "1";
   private String _booleanFalse = "0";
@@ -91,10 +91,11 @@ public class EjbConfig {
   private boolean _isAllowPOJO;
   private HashMap<String, MessageDestination> _messageDestinations;
 
-  private ArrayList<Interceptor> _cfgInterceptors = new ArrayList<Interceptor>();
+  private ArrayList<Interceptor> _cfgInterceptors
+    = new ArrayList<Interceptor>();
 
-  private ArrayList<InterceptorBinding> _cfgInterceptorBindings =
-    new ArrayList<InterceptorBinding>();
+  private ArrayList<InterceptorBinding> _cfgInterceptorBindings
+    = new ArrayList<InterceptorBinding>();
 
   private ArrayList<ApplicationExceptionConfig> _cfgApplicationExceptions
     = new ArrayList<ApplicationExceptionConfig>();
@@ -291,6 +292,9 @@ public class EjbConfig {
     _cfgInterceptorBindings.add(interceptorBinding);
   }
 
+  /**
+   * Adds the message destination mapping
+   */
   public void addMessageDestination(MessageDestination messageDestination)
   {
     if (_messageDestinations == null)

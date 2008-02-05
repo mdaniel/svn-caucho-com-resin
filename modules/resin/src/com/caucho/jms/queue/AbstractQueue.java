@@ -165,6 +165,11 @@ abstract public class AbstractQueue extends AbstractDestination
     }
   }
 
+  public ArrayList<MessageImpl> getBrowserList()
+  {
+    return new ArrayList<MessageImpl>();
+  }
+
   protected void startPoll()
   {
   }
@@ -190,18 +195,6 @@ abstract public class AbstractQueue extends AbstractDestination
     stopPoll();
     
     super.close();
-  }
-  
-  /**
-   * Creates a QueueBrowser to browse messages in the queue.
-   *
-   * @param queue the queue to send messages to.
-   */
-  public QueueBrowser createBrowser(JmsSession session,
-				    String messageSelector)
-    throws JMSException
-  {
-    return new MessageBrowserImpl(this, messageSelector);
   }
 
   public String toString()

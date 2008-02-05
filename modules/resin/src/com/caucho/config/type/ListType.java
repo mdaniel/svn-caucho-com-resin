@@ -77,6 +77,12 @@ public class ListType extends ConfigType
     return _listClass;
   }
 
+  @Override
+  public String getTypeName()
+  {
+    return getType().getName() + "[]";
+  }
+
   /**
    * Creates a new instance
    */

@@ -128,16 +128,19 @@ public class MessageBeanConfig extends AbstractBeanConfig
     else {
       ComponentImpl destComp;
 
+      Class destinationType = _destinationType;
+      
       if (_destinationType == null)
-	throw new ConfigException(L.l("'destination-type' must be specified"));
+	destinationType = Destination.class;
 
       if (_destinationName != null)
-	destComp = webBeans.bind(loc, _destinationType, _destinationName);
+	destComp = webBeans.bind(loc, destinationType, _destinationName);
       else
-	destComp = webBeans.bind(loc, _destinationType);
+	destComp = webBeans.bind(loc, destinationType);
 
       if (destComp == null)
-	throw new ConfigException(L.l("'{0}' is an unknown destination type",
+	throw new ConfigException(L.l("'{0}' is an unknown destination type '{1}'",
+				      _destinationName,
 				      _destinationType.getName()));
 
       bean.setDestinationValue((Destination) destComp.get());

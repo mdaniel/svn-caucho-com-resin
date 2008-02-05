@@ -135,10 +135,12 @@ abstract public class AbstractDestination
   
   public void addConsumer(MessageConsumerImpl consumer)
   {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public void removeConsumer(MessageConsumerImpl consumer)
   {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   abstract public void send(JmsSession session, MessageImpl msg, long timeout)

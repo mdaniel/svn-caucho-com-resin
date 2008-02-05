@@ -332,7 +332,10 @@ public class MessageConsumerImpl
           }
         }
 
-        msg.acknowledge();
+	if (_session.getTransacted())
+	  _session.commit();
+	else
+	  msg.acknowledge();
 
         return true;
       }

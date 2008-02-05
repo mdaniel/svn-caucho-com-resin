@@ -42,6 +42,9 @@ import com.caucho.jms.connection.*;
  */
 public class MemorySubscriberQueue extends MemoryQueue
 {
+  private static final Logger log
+    = Logger.getLogger(MemorySubscriberQueue.class.getName());
+  
   private JmsSession _session;
   private boolean _isNoLocal;
   
@@ -51,19 +54,17 @@ public class MemorySubscriberQueue extends MemoryQueue
     _isNoLocal = noLocal;
   }
 
-
   @Override
-  public void send(JmsSession session, MessageImpl msg, long timeout)
+  public void send(JmsSession sendingSession, MessageImpl msg, long timeout)
   {
-    if (_isNoLocal && _session == session)
+    if (_isNoLocal && _session == sendingSession)
       return;
-    else
-      super.send(session, msg, timeout);
-  }
-
-  public String toString()
-  {
-    return "MemorySubscriberQueue[" + getName() + "]";
+    else {
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " send message " + msg);
+      
+      super.send(sendingSession, msg, timeout);
+    }
   }
 }
 

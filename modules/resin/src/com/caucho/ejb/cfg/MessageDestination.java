@@ -28,8 +28,11 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.config.*;
+import com.caucho.config.types.*;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.jms.Destination;
@@ -37,7 +40,7 @@ import javax.naming.NamingException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-public class MessageDestination {
+public class MessageDestination extends DescriptionGroupConfig {
   private final L10N L = new L10N(MessageDestination.class);
   private Logger log = Logger.getLogger(MessageDestination.class.getName());
 
@@ -47,18 +50,6 @@ public class MessageDestination {
   private Destination _destination;
 
   public MessageDestination()
-  {
-  }
-
-  public void setDescription(String description)
-  {
-  }
-
-  public void setDisplayName(String displayName)
-  {
-  }
-
-  public void setIcon(String icon)
   {
   }
 
@@ -77,52 +68,36 @@ public class MessageDestination {
     _mappedName = mappedName;
   }
 
-  @PostConstruct
-  public void init()
-    throws NamingException
-  {
-  }
-
-  private void resolve()
-    throws NamingException
-  {
-    Destination destination = null;
-
-    if (_mappedName == null) {
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("resolving <message-destination> '{0}'",
-                       _messageDestinationName));
-
-      destination = (Destination) Jndi.lookup(_messageDestinationName);
-
-      if (destination == null) {
-        throw new NamingException(L.l("<message-destination> '{0}' could not be resolved",
-                                      _messageDestinationName));
-      }
-    }
-    else {
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("resolving <message-destination> '{0}' with mapped-name '{1}'",
-                       _messageDestinationName, _mappedName));
-
-      destination = (Destination) Jndi.lookup(_mappedName);
-
-      if (destination == null) {
-        throw new NamingException(L.l("<message-destination> '{0}' with mapped-name '{1}' could not be resolved",
-                                      _messageDestinationName, _mappedName));
-      }
-    }
-
-    _destination = destination;
-  }
-
   public Destination getResolvedDestination()
-    throws NamingException
   {
     if (_destination == null)
       resolve();
 
     return _destination;
+  }
+
+  private void resolve()
+  {
+    Destination destination = null;
+
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    String name = _mappedName;
+
+    if (name == null)
+      name = _messageDestinationName;
+
+    if (log.isLoggable(Level.FINEST))
+      log.finest(L.l("resolving <message-destination> '{0}'", name));
+
+    destination = (Destination) webBeans.getObjectByName(name);
+
+    if (destination == null) {
+      throw new ConfigException(L.l("<message-destination> '{0}' could not be resolved",
+				    name));
+    }
+
+    _destination = destination;
   }
 
   public String toString()

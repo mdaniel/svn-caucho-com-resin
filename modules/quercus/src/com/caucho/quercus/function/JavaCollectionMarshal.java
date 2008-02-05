@@ -87,8 +87,8 @@ public class JavaCollectionMarshal extends JavaMarshal {
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue instanceof JavaCollectionAdapter &&
-        getExpectedClass().isAssignableFrom(argValue.toJavaObject().getClass()))
+    if (argValue instanceof JavaCollectionAdapter
+	&& getExpectedClass().isAssignableFrom(argValue.toJavaObject().getClass()))
       return Marshal.SAME;
     else if (argValue.isArray())
       return Marshal.MARSHALABLE;

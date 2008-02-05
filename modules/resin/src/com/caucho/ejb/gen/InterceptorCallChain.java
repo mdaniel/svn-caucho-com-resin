@@ -98,7 +98,11 @@ public class InterceptorCallChain extends AbstractCallChain {
    */
   public void introspect(Method apiMethod, Method implMethod)
   {
+    if (implMethod == null)
+      return;
+    
     Class apiClass = apiMethod.getDeclaringClass();
+    
     Class implClass = implMethod.getDeclaringClass();
 
     _implMethod = implMethod;
@@ -111,12 +115,14 @@ public class InterceptorCallChain extends AbstractCallChain {
       for (Class iClass : iAnn.value())
 	_classInterceptors.add(iClass);
     }
-    
-    iAnn = (Interceptors) implClass.getAnnotation(Interceptors.class);
 
-    if (apiMethod != implMethod && iAnn != null) {
-      for (Class iClass : iAnn.value())
-	_classInterceptors.add(iClass);
+    if (implClass != null) {
+      iAnn = (Interceptors) implClass.getAnnotation(Interceptors.class);
+
+      if (apiMethod != implMethod && iAnn != null) {
+	for (Class iClass : iAnn.value())
+	  _classInterceptors.add(iClass);
+      }
     }
     
     iAnn = (Interceptors) apiMethod.getAnnotation(Interceptors.class);
@@ -125,12 +131,14 @@ public class InterceptorCallChain extends AbstractCallChain {
       for (Class iClass : iAnn.value())
 	_methodInterceptors.add(iClass);
     }
-    
-    iAnn = (Interceptors) implMethod.getAnnotation(Interceptors.class);
 
-    if (apiMethod != implMethod && iAnn != null) {
-      for (Class iClass : iAnn.value())
-	_methodInterceptors.add(iClass);
+    if (implMethod != null) {
+      iAnn = (Interceptors) implMethod.getAnnotation(Interceptors.class);
+
+      if (apiMethod != implMethod && iAnn != null) {
+	for (Class iClass : iAnn.value())
+	  _methodInterceptors.add(iClass);
+      }
     }
 
     if (apiMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
@@ -219,7 +227,6 @@ public class InterceptorCallChain extends AbstractCallChain {
 
     for (Class iClass : _interceptors) {
       String var = (String) map.get("interceptor-" + iClass.getName());
-
       if (var == null) {
 	var = "__caucho_i" + out.generateId();
 
