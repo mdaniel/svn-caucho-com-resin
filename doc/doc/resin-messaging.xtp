@@ -10,6 +10,213 @@
   <body>
     <localtoc/>
 
+<s1 title="Messaging hello, world">
+
+<p>Resin's messaging is build around JMS, the Java
+messaging service API and EJB message driven beans.  A simple messaging
+application can use the <code>BlockingQueue</code> API to send messages
+and implement a <code>MessageListener</code> to receive messages.</p>
+
+<p>Because Resin's messaging is integrated with its IoC container,
+applications can use standard WebBeans injection to obtain the queues,
+avoiding code dependencies and improving testing.</p>
+
+<p>The following example sends a "hello, world" message
+from <code>MySendingServlet</code> and processes it
+in <code>MyListener</code>.  The servlet does not wait for the listener,
+it completes immediately.  The <code>MyListener</code> message bean
+will receive the message when it's available.</p>
+
+<p>The <code>@Named</code> WebBeans annotation tells Resin to look
+for a configured <code>BlockingQueue</code> named "myQueue" and inject
+it into the <code>_queue</code> variable when the servlet is initialized.
+The <code>offer</code> method sends the message to the JMS queue using
+a JMS <code>ObjectMessage</code>.
+</p>
+
+<example title="demo/MySendingServlet.java">
+package demo;
+
+import java.io.*;
+import javax.servlet.*;
+import java.util.BlockingQueue;
+import javax.webbeans.Named;
+
+public MySendingServlet extends GenericServlet
+{
+  @Named("myQueue") private BlockingQueue _queue;
+
+  public void service(ServletRequest req, ServletResponse res)
+    throws IOException, ServletException
+  {
+    String msg = "hello, world";
+
+    _queue.offer(msg);
+
+    System.out.println("Sent: " + msg);
+  }
+}
+</example>
+
+<p>The EJB message bean service will receive the message and pass it
+along to <code>MyListener</code>.  Since Resin's <code>BlockingQueue</code>
+API automatically wraps the object in a JMS <code>ObjectMessage</code>,
+<code>MyListener</code> needs to unwrap it.</p>
+
+<example title="demo/MyListener.java">
+package demo;
+
+import javax.jms.*;
+
+public MyListener implements MessageListener
+{
+  public void onMessage(Message message)
+  {
+    ObjectMessage oMsg = (ObjectMessage) message;
+
+    System.out.println("Received: " + oMsg.getObject());
+  }
+}
+</example>
+
+<p>Now that the code's written, we just need to configure it in the
+<code>WEB-INF/resin-web.xml</code>.  The &lt;jms-connection-factory>
+configures Resin as the JMS provider, the &lt;jms-queue> configures
+a memory-based queue as the implementation, and the &lt;ejb-message-bean>
+configures our listener.</p>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory uri="resin:"/>
+  &lt;jms-queue name="myQueue" uri="memory:"/>
+
+  &lt;ejb-message-bean class="demo.MyListener">
+    &lt;destination>#{myQueue}&lt;/destination>
+  &lt;/ejb-message-bean>
+
+  &lt;servlet-mapping url-pattern="/test"
+                   servlet-class="demo.MySendingServlet"/>
+
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="JMS Queues">
+
+<example title="resin-web.xml - ConnectionFactory resource">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="my-queue" uri="memory:"/>
+
+&lt;/web-app>
+</example>
+
+<s2 title="Memory Queue">
+
+<p>Resin's memory queue is a basic, non-persistent queue suitable
+for testing and for cases where losing the queue contents at a server
+crash is acceptable.  Like Resin's other queues, you can use the
+<code>BlockingQueue</code> API to send messages, and use a simple
+listener to receive messages.</p>
+
+<example title="resin-web.xml - Memory queue and listener">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory uri="resin:"/>
+  &lt;jms-queue name="myQueue" uri="memory:"/>
+
+  &lt;ejb-message-bean class="demo.MyListener">
+    &lt;destination>#{myQueue}&lt;/destination>
+  &lt;/ejb-message-bean>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="File Queue">
+
+<p>The file queue backs messages on the local filesystem, allowing
+for recovery in case of system crash.  The saved file is efficient,
+using the same backing store as Resin's proxy caching and
+persistent sessions.</p>
+
+<p>The file queue configuration requires an additional 'path' parameter
+to specify a directory for the backing files.</p>
+
+<example title="resin-web.xml - file queue and listener">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="myQueue" uri="file:path=WEB-INF/messaging"/>
+
+  &lt;jms-connection-factory uri="resin:"/>
+
+  &lt;ejb-message-bean class="demo.MyListener">
+    &lt;destination>#{myQueue}&lt;/destination>
+  &lt;/ejb-message-bean>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="Cluster Server Queue">
+
+<p>The cluster server queue is a file queue which can also receive
+messages from the local cluster.  On the local machine, it acts exactly
+like the file queue.  When used with the cluster client queue, clients
+can distribute messages to any server queue in the cluster, allowing
+for load balancing.</p>
+
+<p>Like the file queue, the cluster server queue requires a 'path' attribute
+to specify the location of the backing file.</p>
+
+<example title="resin-web.xml - cluster server queue and listener">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="myQueue" uri="server:">
+    &lt;init>
+      &lt;name>my-queue&lt;/name>
+      &lt;path>WEB-INF/jms&lt;/path>
+    &lt;/init>
+  &lt;/jms-queue>
+
+  &lt;jms-connection-factory uri="resin:"/>
+
+  &lt;ejb-message-bean class="demo.MyListener">
+    &lt;destination>#{myQueue}&lt;/destination>
+  &lt;/ejb-message-bean>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="Cluster Client Queue">
+
+<p>The client queue distributes messages to server queues in a
+cluster.  Normally, only the sending methods are used for the client
+queue; the receiving message beans are handled by the server queues.</p>
+
+<p>The client queue needs to configure the cluster of the server queues.
+The cluster can be different from the client's own cluster.</p>
+
+<example title="resin-web.xml - client queue">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="myQueue" uri="client:cluster=message-tier"/>
+
+  &lt;jms-connection-factory uri="resin:"/>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+</s1>
+
 <s1 title="ConnectionFactory">
 
 <p>The <code>ConnectionFactory</code> resource defines the JMS factory
@@ -145,7 +352,6 @@ public class TestServlet extends GenericServlet {
 
 &lt;/web-app>
 </example>
-
 
 </s1>
 
