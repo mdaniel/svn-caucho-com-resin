@@ -85,10 +85,15 @@ public class ReflectionClass
     return new ReflectionClass(_cls);
   }
   
-  public static ReflectionClass __construct(Env env, String name)
+  public static ReflectionClass __construct(Env env, Value obj)
   {
-    QuercusClass cls = env.findClass(name);
+    QuercusClass cls;
     
+    if (obj.isObject())
+      cls = ((ObjectValue) obj).getQuercusClass();
+    else
+      cls = env.findClass(obj.toString());
+
     return new ReflectionClass(cls);
   }
   

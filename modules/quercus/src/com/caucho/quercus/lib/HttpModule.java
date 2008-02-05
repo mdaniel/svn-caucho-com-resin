@@ -70,92 +70,95 @@ public class HttpModule extends AbstractQuercusModule {
                              @Optional("true") boolean replace,
                              @Optional long httpResponseCode)
   {
-    try {
-      HttpServletResponse res = env.getResponse();
+    HttpServletResponse res = env.getResponse();
 
-      if (res == null) {
-	env.error(L.l("header requires a http context"));
-	return NullValue.NULL;
-      }
-
-      int len = header.length();
-
-      if (header.startsWith("HTTP/")) {
-	int p = header.indexOf(' ');
-	int status = 0;
-	int ch;
-
-	for (; p < len && header.charAt(p) == ' '; p++) {
-	}
-
-	for (; p < len && '0' <= (ch = header.charAt(p)) && ch <= '9'; p++) {
-	  status = 10 * status + ch - '0';
-	}
-
-	for (; p < len && header.charAt(p) == ' '; p++) {
-	}
-
-	if (status > 0) {
-	  res.setStatus(status, header.substring(p));
-
-	  return NullValue.NULL;
-	}
-      }
-
-      int colonIndex = header.indexOf(':');
-
-      if (colonIndex > 0) {
-	String key = header.substring(0, colonIndex).trim();
-	String value = header.substring(colonIndex + 1).trim();
-
-	if (key.equalsIgnoreCase("Location")) {
-	  res.sendRedirect(value);
-        }
-        else if (replace) {
-	  res.setHeader(key, value);
-
-          ArrayList<String> headers = getHeaders(env);
-
-          int regionEnd = colonIndex + 1;
-
-          for (int i = 0; i < headers.size(); i++) {
-
-            String compare = headers.get(i);
-
-            if (compare.regionMatches(true, 0, header, 0, regionEnd)) {
-              headers.remove(i);
-              break;
-            }
-          }
-
-          headers.add(header);
-        }
-        else {
-          res.addHeader(key, value);
-          getHeaders(env).add(header);
-        }
-
-        if (key.equalsIgnoreCase("Content-Type")) {
-          String encoding = env.getOutputEncoding();
-
-          if (encoding != null) {
-            if (value.indexOf("charset") < 0) {
-              if (value.indexOf("text/") < 0)
-                res.setCharacterEncoding(encoding);
-            }
-            else if ("".equals(res.getCharacterEncoding())) {
-              // php/1b0d
-              res.setCharacterEncoding(encoding);
-            }
-          }
-        }
-
-      }
-
+    if (res == null) {
+      env.error(L.l("header requires a http context"));
       return NullValue.NULL;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
     }
+
+    int len = header.length();
+
+    if (header.startsWith("HTTP/")) {
+      int p = header.indexOf(' ');
+      int status = 0;
+      int ch;
+
+      for (; p < len && header.charAt(p) == ' '; p++) {
+      }
+
+      for (; p < len && '0' <= (ch = header.charAt(p)) && ch <= '9'; p++) {
+        status = 10 * status + ch - '0';
+      }
+
+      for (; p < len && header.charAt(p) == ' '; p++) {
+      }
+
+      if (status > 0) {
+        res.setStatus(status, header.substring(p));
+
+        return NullValue.NULL;
+      }
+    }
+
+    int colonIndex = header.indexOf(':');
+
+    if (colonIndex > 0) {
+      String key = header.substring(0, colonIndex).trim();
+      String value = header.substring(colonIndex + 1).trim();
+
+      if (key.equalsIgnoreCase("Location")) {
+        // do not use sendRedirect because sendRedirect commits the response,
+        // preventing Wordpress from sending a second Location header that
+        // replaces the previous one
+        //res.sendRedirect(value);
+        //return NullValue.NULL;
+        
+        res.setStatus(302, "Not Modified");
+      }
+
+      if (replace) {
+        res.setHeader(key, value);
+
+        ArrayList<String> headers = getHeaders(env);
+
+        int regionEnd = colonIndex + 1;
+
+        for (int i = 0; i < headers.size(); i++) {
+
+          String compare = headers.get(i);
+
+          if (compare.regionMatches(true, 0, header, 0, regionEnd)) {
+            headers.remove(i);
+            break;
+          }
+        }
+
+        headers.add(header);
+      }
+      else {
+        res.addHeader(key, value);
+        getHeaders(env).add(header);
+      }
+
+      if (key.equalsIgnoreCase("Content-Type")) {
+        String encoding = env.getOutputEncoding();
+
+        if (encoding != null) {
+          if (value.indexOf("charset") < 0) {
+            if (value.indexOf("text/") < 0)
+              res.setCharacterEncoding(encoding);
+          }
+          else if ("".equals(res.getCharacterEncoding())) {
+            // php/1b0d
+            res.setCharacterEncoding(encoding);
+          }
+        }
+      }
+
+    }
+
+    return NullValue.NULL;
   }
 
   /**
