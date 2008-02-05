@@ -206,9 +206,11 @@ static char *
 get_parent(char *path)
 {
 	char buf[BUF_SIZE];
+	int i;
+
 	strcpy(buf, path);
 
-	for (int i = strlen(path) - 1; i >= 0 && buf[i] != '\\'; i--) {
+	for (i = strlen(path) - 1; i >= 0 && buf[i] != '\\'; i--) {
 	}
 
 	buf[i] = 0;
