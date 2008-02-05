@@ -733,7 +733,7 @@ public class QuercusClass {
   public Value getField(Env env, Value qThis, StringValue name)
   {
     if (_fieldGet != null)
-      return _fieldGet.callMethod(env, null, qThis, name);
+      return _fieldGet.callMethod(env, qThis, name);
     else
       return UnsetValue.UNSET;
   }
@@ -744,7 +744,7 @@ public class QuercusClass {
   public void setField(Env env, Value qThis, StringValue name, Value value)
   {
     if (_fieldSet != null)
-      _fieldSet.callMethod(env, null, qThis, name, value);
+      _fieldSet.callMethod(env, qThis, name, value);
   }
 
   /**
