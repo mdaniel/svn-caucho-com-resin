@@ -60,12 +60,12 @@
     <name>messages</name>
     <component-class>javax.faces.component.html.HtmlMessages</component-class>
   </jsf-tag>
-<!--
+
   <jsf-tag>
     <name>outputFormat</name>
     <component-class>javax.faces.component.html.HtmlOutputFormat</component-class>
   </jsf-tag>
--->
+
   <jsf-tag>
     <name>outputText</name>
     <component-class>javax.faces.component.html.HtmlOutputText</component-class>

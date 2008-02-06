@@ -25,22 +25,19 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.jsf.html;
 
 import java.io.*;
+
 import java.util.*;
 
-import javax.faces.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
 
-/**
- * The HTML text renderer
- */
-class HtmlOutputLabelRenderer extends Renderer
+class HtmlOutputLabelRenderer
+  extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlOutputLabelRenderer();
 
@@ -50,8 +47,9 @@ class HtmlOutputLabelRenderer extends Renderer
   @Override
   public boolean getRendersChildren()
   {
-    return true;
+    return false;
   }
+
   /**
    * Renders the open tag for the text.
    */
@@ -67,7 +65,26 @@ class HtmlOutputLabelRenderer extends Renderer
     String style;
     String styleClass;
     String title;
-    
+
+    String accesskey;
+    String onfocus;
+    String onblur;
+    String onclick;
+    String ondblclick;
+    String onmousedown;
+    String onmouseup;
+    String onmouseover;
+    String onmousemove;
+    String onmouseout;
+    String onkeypress;
+    String onkeydown;
+    String onkeyup;
+
+    String forValue;
+    String tabindex;
+
+    Object value;
+
     if (component instanceof HtmlOutputLabel) {
       HtmlOutputLabel htmlOutput = (HtmlOutputLabel) component;
 
@@ -76,23 +93,60 @@ class HtmlOutputLabelRenderer extends Renderer
       style = htmlOutput.getStyle();
       styleClass = htmlOutput.getStyleClass();
       title = htmlOutput.getTitle();
+
+      forValue = htmlOutput.getFor();
+
+      tabindex = htmlOutput.getTabindex();
+
+      accesskey = htmlOutput.getAccesskey();
+      onfocus = htmlOutput.getOnfocus();
+      onblur = htmlOutput.getOnblur();
+      onclick = htmlOutput.getOnclick();
+      ondblclick = htmlOutput.getOndblclick();
+      onmousedown = htmlOutput.getOnmousedown();
+      onmouseup = htmlOutput.getOnmouseup();
+      onmouseover = htmlOutput.getOnmouseover();
+      onmousemove = htmlOutput.getOnmousemove();
+      onmouseout = htmlOutput.getOnmouseout();
+      onkeypress = htmlOutput.getOnkeypress();
+      onkeydown = htmlOutput.getOnkeydown();
+      onkeyup = htmlOutput.getOnkeyup();
+
+      value = htmlOutput.getValue();
     }
     else {
-      Map<String,Object> attrMap = component.getAttributes();
-    
+      Map<String, Object> attrMap = component.getAttributes();
+
       dir = (String) attrMap.get("dir");
       lang = (String) attrMap.get("lang");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       title = (String) attrMap.get("title");
+
+      forValue = (String) attrMap.get("for");
+
+      tabindex = (String) attrMap.get("tabindex");
+
+      accesskey = (String) attrMap.get("accesskey");
+      onfocus = (String) attrMap.get("onfocus");
+      onblur = (String) attrMap.get("onblur");
+      onclick = (String) attrMap.get("onclick");
+      ondblclick = (String) attrMap.get("ondblclick");
+      onmousedown = (String) attrMap.get("onmousedown");
+      onmouseup = (String) attrMap.get("onmouseup");
+      onmouseover = (String) attrMap.get("onmouseover");
+      onmousemove = (String) attrMap.get("onmousemove");
+      onmouseout = (String) attrMap.get("onmouseout");
+      onkeypress = (String) attrMap.get("onkeypress");
+      onkeydown = (String) attrMap.get("onkeydown");
+      onkeyup = (String) attrMap.get("onkeyup");
+
+      value = attrMap.get("value");
     }
 
-    if (dir == null && lang == null && style == null && styleClass == null)
-      return;
+    out.startElement("label", component);
 
-    out.startElement("span", component);
-
-    if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
+    if (id != null && !id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", component.getClientId(context), "id");
 
     if (dir != null)
@@ -109,37 +163,57 @@ class HtmlOutputLabelRenderer extends Renderer
 
     if (title != null)
       out.writeAttribute("title", title, "title");
-  }
 
-  /**
-   * Renders the content for the component.
-   */
-  @Override
-  public void encodeChildren(FacesContext context, UIComponent component)
-    throws IOException
-  {
-    ResponseWriter out = context.getResponseWriter();
-
-    if (component instanceof HtmlOutputLabel) {
-      HtmlOutputLabel htmlOutput = (HtmlOutputLabel) component;
-
-      Object value = htmlOutput.getValue();
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
+    if (forValue != null) {
+      UIComponent forComponent = component.findComponent(forValue);
+      if (forComponent != null)
+	out.writeAttribute("for", forComponent.getClientId(context), "for");
     }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
 
-      Object value = attrMap.get("value");
+    if (tabindex != null)
+      out.writeAttribute("tabindex", tabindex, "tabindex");
 
-      if (value == null)
-	return;
+    if (accesskey != null)
+      out.writeAttribute("accesskey", accesskey, "accesskey");
 
-      out.writeText(value, "value");
-    }
+    if (onfocus != null)
+      out.writeAttribute("onfocus", onfocus, "onfocus");
+
+    if (onblur != null)
+      out.writeAttribute("onblur", onblur, "onblur");
+
+    if (onclick != null)
+      out.writeAttribute("onclick", onclick, "onclick");
+
+    if (ondblclick != null)
+      out.writeAttribute("ondblclick", ondblclick, "ondblclick");
+
+    if (onmousedown != null)
+      out.writeAttribute("onmousedown", onmousedown, "onmousedown");
+
+    if (onmouseup != null)
+      out.writeAttribute("onmouseup", onmouseup, "onmouseup");
+
+    if (onmouseover != null)
+      out.writeAttribute("onmouseover", onmouseover, "onmouseover");
+
+    if (onmousemove != null)
+      out.writeAttribute("onmousemove", onmousemove, "onmousemove");
+
+    if (onmouseout != null)
+      out.writeAttribute("onmouseout", onmouseout, "onmouseout");
+
+    if (onkeypress != null)
+      out.writeAttribute("onkeypress", onkeypress, "onkeypress");
+
+    if (onkeydown != null)
+      out.writeAttribute("onkeydown", onkeydown, "onkeydown");
+
+    if (onkeyup != null)
+      out.writeAttribute("onkeyup", onkeyup, "onkeyup");
+
+    if (value != null)
+      out.writeText(toString(context, component, value), "value");
   }
 
   /**
@@ -150,27 +224,7 @@ class HtmlOutputLabelRenderer extends Renderer
     throws IOException
   {
     ResponseWriter out = context.getResponseWriter();
-    
-    if (component instanceof HtmlOutputLabel) {
-      HtmlOutputLabel htmlOutput = (HtmlOutputLabel) component;
-
-      if (htmlOutput.getStyleClass() != null
-	  || htmlOutput.getStyle() != null
-	  || htmlOutput.getDir() != null
-	  || htmlOutput.getLang() != null) {
-	out.endElement("span");
-      }
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-
-      if (attrMap.get("styleClass") != null
-	  || attrMap.get("style") != null
-	  || attrMap.get("dir") != null
-	  || attrMap.get("lang") != null) {
-	out.endElement("span");
-      }
-    }
+    out.endElement("label");
   }
 
   public String toString()
