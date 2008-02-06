@@ -51,6 +51,7 @@ public class XaCallChain extends AbstractCallChain
 
   private boolean _isContainerManaged = true;
   private TransactionAttributeType _xa;
+  private boolean _isSynchronization;
 
   public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next)
   {
@@ -96,6 +97,11 @@ public class XaCallChain extends AbstractCallChain
   protected TransactionAttributeType getTransactionType()
   {
     return _xa;
+  }
+
+  public void setSynchronization(boolean isSynchronization)
+  {
+    _isSynchronization = isSynchronization;
   }
 
   /**
@@ -199,6 +205,10 @@ public class XaCallChain extends AbstractCallChain
 	}
 	break;
       }
+    }
+
+    if (_isSynchronization) {
+      out.println("_xa.registerSynchronization(_bean);");
     }
 
     generateNext(out);

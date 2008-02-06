@@ -94,6 +94,12 @@ abstract public class StatefulView extends View {
 	  && ! apiMethod.getName().equals("remove"))
 	continue;
 
+      if (apiMethod.getName().startsWith("ejb")) {
+	throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
+				      apiMethod.getDeclaringClass(),
+				      apiMethod.getName()));
+      }
+
       int index = _businessMethods.size();
       
       StatefulMethod bizMethod = createMethod(apiMethod, index);

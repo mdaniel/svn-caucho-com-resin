@@ -121,7 +121,7 @@ abstract public class StatefulHomeView extends StatefulView {
 
       if (implMethod == null)
 	throw ConfigException.create(apiMethod.getMethod(),
-				     L.l("can't find ejbCreate"));
+				     L.l("can't find matching ejbCreate"));
 
       View localView = getSessionBean().getView(apiMethod.getReturnType());
 
@@ -130,12 +130,16 @@ abstract public class StatefulHomeView extends StatefulView {
 				     L.l("'{0}' is an unknown object interface",
 					 apiMethod.getReturnType()));
       
-      return new StatefulCreateMethod(getSessionBean(),
-				      this,
-				      localView,
-				      apiMethod.getMethod(),
-				      implMethod.getMethod(),
-				      index);
+      StatefulMethod method = new StatefulCreateMethod(getSessionBean(),
+						       this,
+						       localView,
+						       apiMethod.getMethod(),
+						       implMethod.getMethod(),
+						       index);
+
+      method.getXa().setContainerManaged(false);
+
+      return method;
     }
     else {
       return super.createMethod(apiMethod, index);

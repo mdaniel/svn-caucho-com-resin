@@ -60,13 +60,24 @@ abstract public class StatefulObjectView extends StatefulView {
       if (implMethod == null)
 	return null;
 
-      return new StatefulRemoveMethod(this,
-				      apiMethod.getMethod(),
-				      implMethod.getMethod(),
-				      index);
+      StatefulMethod method = new StatefulRemoveMethod(this,
+						       apiMethod.getMethod(),
+						       implMethod.getMethod(),
+						       index);
+
+      method.getXa().setContainerManaged(false);
+
+      return method;
     }
     else {
-      return super.createMethod(apiMethod, index);
+      StatefulMethod method = super.createMethod(apiMethod, index);
+
+      Class beanClass = getEjbClass().getJavaClass();
+      if (SessionSynchronization.class.isAssignableFrom(beanClass)) {
+	method.getXa().setSynchronization(true);
+      }
+
+      return method;
     }
   }
 

@@ -64,6 +64,17 @@ public class StatefulCreateMethod extends StatefulMethod
       throw new NullPointerException();
   }
 
+  /**
+   * Session bean default is REQUIRED
+   */
+  @Override
+  public void introspect(Method apiMethod, Method implMethod)
+  {
+    getXa().setContainerManaged(false);
+
+    super.introspect(apiMethod, implMethod);
+  }
+
   protected void generatePreCall(JavaWriter out)
     throws IOException
   {
@@ -71,9 +82,11 @@ public class StatefulCreateMethod extends StatefulMethod
     out.print(" bean = new ");
     out.printClass(_bean.getEjbClass().getJavaClass());
     out.println("();");
+
     out.println(_objectView.getViewClassName() + " remote ="
 		+ " new " + _objectView.getViewClassName() + "(getStatefulServer(), bean);");
-    out.println("StatefulContext context = new " + _bean.getFullClassName() + "(_context, remote);");
+
+    out.println("StatefulContext context = new " + _bean.getFullClassName() + "(getStatefulServer());");
     out.println("remote.__caucho_setContext(context);");
     out.println("bean.setSessionContext(context);");
   }

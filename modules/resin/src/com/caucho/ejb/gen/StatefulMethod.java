@@ -58,11 +58,16 @@ public class StatefulMethod extends BusinessMethodGenerator
   @Override
   public void introspect(Method apiMethod, Method implMethod)
   {
-    getXa().setTransactionType(TransactionAttributeType.REQUIRED);
+    getXa().setTransactionType(getDefaultTransactionType());
 
     super.introspect(apiMethod, implMethod);
   }
 
+  protected TransactionAttributeType getDefaultTransactionType()
+  {
+    return TransactionAttributeType.REQUIRED;
+  }
+  
   /**
    * Returns true if any interceptors enhance the business method
    */

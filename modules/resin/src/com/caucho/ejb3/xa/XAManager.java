@@ -74,6 +74,28 @@ public class XAManager
   }
 
   /**
+   * Enlists a resource
+   */
+  public void registerSynchronization(SessionSynchronization sync)
+  {
+    try {
+      TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
+    
+      Transaction xa = tm.getTransaction();
+
+      if (xa != null && sync != null) {
+	sync.afterBegin();
+	
+	xa.registerSynchronization(new SynchronizationAdapter(sync));
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBException(e);
+    }
+  }
+
+  /**
    * Begins a manadatory transaction.
    */
   public void beginMandatory()
@@ -245,6 +267,42 @@ public class XAManager
       throw e;
     } catch (Exception e) {
       throw new EJBException(e);
+    }
+  }
+
+  public static class SynchronizationAdapter implements Synchronization {
+    private final SessionSynchronization _sync;
+
+    SynchronizationAdapter(SessionSynchronization sync)
+    {
+      _sync = sync;
+    }
+
+    public void beforeCompletion()
+    {
+      try {
+	_sync.beforeCompletion();
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new EJBException(e);
+      }
+    }
+
+    public void afterCompletion(int status)
+    {
+      try {
+	_sync.afterCompletion(status == Status.STATUS_COMMITTED);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new EJBException(e);
+      }
+    }
+    			   
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _sync + "]";
     }
   }
 

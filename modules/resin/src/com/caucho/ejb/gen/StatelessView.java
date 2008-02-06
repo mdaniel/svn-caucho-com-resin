@@ -99,6 +99,12 @@ public class StatelessView extends View {
 	continue;
       if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
 	continue;
+ 
+      if (apiMethod.getName().startsWith("ejb")) {
+	throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
+				      apiMethod.getDeclaringClass(),
+				      apiMethod.getName()));
+      }
 
       int index = _businessMethods.size();
       

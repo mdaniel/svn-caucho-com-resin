@@ -73,14 +73,12 @@ public class StatefulLocalHomeView extends StatefulLocalView {
 				     L.l("'{0}' is an unknown object interface",
 					 apiMethod.getReturnType()));
 
-      /*
-      return new StatefulCreateMethod(getEjbClass(),
+      return new StatefulCreateMethod(getSessionBean(),
+				      this,
 				      localView,
 				      apiMethod.getMethod(),
 				      implMethod.getMethod(),
 				      index);
-      */
-      return null;
     }
     else {
       return super.createMethod(apiMethod, index);
@@ -89,8 +87,9 @@ public class StatefulLocalHomeView extends StatefulLocalView {
 
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
-    if (apiMethod.getName().equals("create"))
+    if (apiMethod.getName().equals("create")) {
       return getEjbClass().getMethod("ejbCreate", apiMethod.getParameterTypes());
+    }
     else
       return super.findImplMethod(apiMethod);
   }
