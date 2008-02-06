@@ -156,13 +156,13 @@ public class HtmlModule extends AbstractQuercusModule {
         sb.append("&amp;");
         break;
       case '"':
-        if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) > 0)
+        if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
           sb.append("&quot;");
         else
           sb.append(ch);
         break;
       case '\'':
-        if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) > 0)
+        if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
           sb.append("&#039;");
         else
           sb.append(ch);
@@ -193,7 +193,7 @@ public class HtmlModule extends AbstractQuercusModule {
    */
   public static Value htmlentities(Env env,
                                    StringValue string,
-                                   @Optional int quoteStyle,
+                                   @Optional("ENT_COMPAT") int quoteStyle,
                                    @Optional String charset)
   {
     //XXX: other entities
