@@ -180,6 +180,16 @@ public class EjbProtocolManager {
     addProtocolContainer(protocol.getName(), protocol);
   }
 
+  public void removeProtocolContainer(ProtocolContainer protocol)
+  {
+    if (_protocolContainer == protocol)
+      _protocolContainer = null;
+
+    synchronized (_protocolMap) {
+      _protocolMap.remove(protocol.getName());
+    }
+  }
+
   public void addProtocolContainer(String name, ProtocolContainer protocol)
   {
     synchronized (_protocolMap) {

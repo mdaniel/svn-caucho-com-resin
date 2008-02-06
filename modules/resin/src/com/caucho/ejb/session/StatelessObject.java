@@ -55,6 +55,14 @@ abstract public class StatelessObject extends AbstractEJBObject
   /**
    * Returns the stateless server.
    */
+  public StatelessServer getStatelessServer()
+  {
+    return _server;
+  }
+
+  /**
+   * Returns the stateless server.
+   */
   public AbstractServer getServer()
   {
     return _server;

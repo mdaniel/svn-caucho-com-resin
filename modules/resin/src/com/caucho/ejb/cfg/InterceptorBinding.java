@@ -45,7 +45,7 @@ public class InterceptorBinding {
 
   private InterceptorOrder _interceptorOrder;
 
-  private ArrayList<String> _interceptors = new ArrayList<String>();
+  private ArrayList<Class> _interceptors = new ArrayList<Class>();
 
   public InterceptorBinding()
   {
@@ -61,7 +61,7 @@ public class InterceptorBinding {
     return _interceptorOrder;
   }
 
-  public ArrayList<String> getInterceptors()
+  public ArrayList<Class> getInterceptors()
   {
     return _interceptors;
   }
@@ -86,7 +86,7 @@ public class InterceptorBinding {
     _interceptorOrder = interceptorOrder;
   }
 
-  public void addInterceptorClass(String interceptorClass)
+  public void addInterceptorClass(Class interceptorClass)
   {
     _interceptors.add(interceptorClass);
   }

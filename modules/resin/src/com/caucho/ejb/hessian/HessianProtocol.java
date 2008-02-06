@@ -78,7 +78,7 @@ public class HessianProtocol extends ProtocolContainer {
    */
   public void addServer(AbstractServer server)
   {
-    log.finer("Hessian[" + server + "] added");
+    log.finer(this + " add " + server);
 
     _serverMap.put(server.getProtocolId(), server);
   }
@@ -88,6 +88,8 @@ public class HessianProtocol extends ProtocolContainer {
    */
   public void removeServer(AbstractServer server)
   {
+    log.finer(this + " remove " + server);
+
     _serverMap.remove(server.getProtocolId());
   }
 
@@ -120,7 +122,10 @@ public class HessianProtocol extends ProtocolContainer {
         objectId = queryString;
     }
 
-    AbstractServer server = getProtocolManager().getServerByEJBName(serverId);
+    AbstractServer server = _serverMap.get(serverId);
+    
+    if (server == null)
+      server = getProtocolManager().getServerByEJBName(serverId);
 
     if (server == null) {
       ArrayList children = getProtocolManager().getRemoteChildren(serverId);

@@ -42,7 +42,7 @@ import java.util.*;
 /**
  * Represents a public interface to a bean, e.g. a local stateless view
  */
-public class StatelessLocalView extends StatelessView {
+public class StatelessLocalView extends StatelessObjectView {
   private static final L10N L = new L10N(StatelessLocalView.class);
 
   public StatelessLocalView(StatelessGenerator bean, ApiClass api)

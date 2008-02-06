@@ -291,13 +291,28 @@ abstract public class SessionGenerator extends BeanGenerator {
   {
     ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
 
+    Local local = (Local) getEjbClass().getAnnotation(Local.class);
+    Remote remote = (Remote) getEjbClass().getAnnotation(Remote.class);
+
+    if (local != null) {
+      for (Class api : local.value()) {
+	apiList.add(new ApiClass(api));
+      }
+
+      return apiList;
+    }
+    
+    boolean hasRemote = remote != null;
+
     Class []apiClasses = getEjbClass().getInterfaces();
     for (Class api : apiClasses) {
       if (api.isAnnotationPresent(Local.class))
 	apiList.add(new ApiClass(api));
+      if (api.isAnnotationPresent(Remote.class))
+	hasRemote = true;
     }
 
-    if (apiList.size() > 0)
+    if (apiList.size() > 0 || hasRemote)
       return apiList;
 
     Class singleApi = null;
@@ -310,8 +325,9 @@ abstract public class SessionGenerator extends BeanGenerator {
 	continue;
       if (api.getName().startsWith("javax.ejb."))
 	continue;
-      if (api.isAnnotationPresent(Remote.class))
+      if (api.isAnnotationPresent(Remote.class)) {
 	continue;
+      }
 
       if (singleApi != null) {
 	throw new ConfigException(L.l("{0}: does not have a unique local API.  Both '{1}' and '{2}' are local.",
@@ -341,6 +357,16 @@ abstract public class SessionGenerator extends BeanGenerator {
   private ArrayList<ApiClass> introspectRemoteApi()
   {
     ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
+
+    Remote remote = (Remote) getEjbClass().getAnnotation(Remote.class);
+
+    if (remote != null) {
+      for (Class api : remote.value()) {
+	apiList.add(new ApiClass(api));
+      }
+
+      return apiList;
+    }
 
     Class []apiClasses = getEjbClass().getInterfaces();
     for (Class api : apiClasses) {

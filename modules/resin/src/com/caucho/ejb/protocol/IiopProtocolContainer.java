@@ -103,12 +103,20 @@ public class IiopProtocolContainer extends ProtocolContainer {
   {
     Object obj = null;
     Class remoteInterface = null; //server.getRemote21();
-
-    obj = server.getRemoteObject21();
-
-    if (obj == null)
-      obj = server.getRemoteObject();
-
+      
+    Class homeApi = server.getRemoteHomeClass();
+    Class remoteApi = server.getRemoteObjectClass();
+    Class api = null;
+    
+    if (homeApi != null) {
+      obj = server.getRemoteObject(homeApi);
+      api = homeApi;
+    }
+    else if (remoteApi != null) {
+      obj = server.getRemoteObject(remoteApi);
+      api = remoteApi;
+    }
+    
     if (obj == null)
       return;
 
@@ -116,11 +124,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
     log.fine("iiop: add server " + name);
 
-    EjbIiopRemoteService service = new EjbIiopRemoteService(server, remoteInterface);
-
-    if (server.getRemote21() == null) {
-      service.setEJB3(true);
-    }
+    EjbIiopRemoteService service = new EjbIiopRemoteService(server, api);
 
     _context.setService(name, service);
 

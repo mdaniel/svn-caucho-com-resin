@@ -102,8 +102,9 @@ abstract public class SessionServer extends AbstractServer
   {
     Class beanClass = getBeanSkelClass();
     ArrayList<Class> localApiList = getLocalApiList();
+    ArrayList<Class> remoteApiList = getRemoteApiList();
 
-    if (beanClass != null && localApiList != null) {
+    if (beanClass != null && (localApiList != null || remoteApiList != null)) {
       WebBeansContainer webBeans = WebBeansContainer.create();
 
       String beanName = getEJBName();
@@ -111,18 +112,35 @@ abstract public class SessionServer extends AbstractServer
 
       if (named != null)
 	beanName = named.value();
+
+      if (localApiList != null) {
+	for (Class api : localApiList) {
+	  ComponentImpl comp = createSessionComponent(api);
+
+	  comp.setTargetType(getEjbClass());
+
+	  comp.setName(beanName);
+	  comp.addNameBinding(beanName);
+
+	  comp.init();
+	  webBeans.addComponentByName(beanName, comp);
+	  webBeans.addComponentByType(api, comp);
+	}
+      }
       
-      for (Class api : localApiList) {
-	ComponentImpl comp = createSessionComponent(api);
+      if (remoteApiList != null) {
+	for (Class api : remoteApiList) {
+	  ComponentImpl comp = createSessionComponent(api);
 
-	comp.setTargetType(getEjbClass());
+	  comp.setTargetType(getEjbClass());
 
-	comp.setName(beanName);
-	comp.addNameBinding(beanName);
+	  comp.setName(beanName);
+	  comp.addNameBinding(beanName);
 
-	comp.init();
-	webBeans.addComponentByName(beanName, comp);
-	webBeans.addComponentByType(api, comp);
+	  comp.init();
+	  webBeans.addComponentByName(beanName, comp);
+	  webBeans.addComponentByType(api, comp);
+	}
       }
     }
   }

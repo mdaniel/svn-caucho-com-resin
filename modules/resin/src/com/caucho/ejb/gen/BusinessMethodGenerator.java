@@ -187,6 +187,49 @@ public class BusinessMethodGenerator implements EjbCallChain {
     if (! isEnhanced())
       return;
 
+    generateHeader(out);
+    
+    out.println("{");
+    out.pushDepth();
+
+    generateContent(out);
+
+    out.popDepth();
+    out.println("}");
+
+    if (_interceptor.isEnhanced()) {
+      out.println();
+      out.print("private ");
+      out.printClass(_implMethod.getReturnType());
+      out.print(" __caucho_");
+      out.print(_apiMethod.getName());
+      out.print("(");
+
+      Class []types = _implMethod.getParameterTypes();
+      for (int i = 0; i < types.length; i++) {
+	if (i != 0)
+	  out.print(", ");
+
+	out.printClass(types[i]);
+	out.print(" a" + i);
+      }
+    
+      out.println(")");
+      generateThrows(out, _implMethod.getExceptionTypes());
+      out.println();
+      out.println("{");
+      out.pushDepth();
+
+      generateCall(out);
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
+
+  public void generateHeader(JavaWriter out)
+    throws IOException
+  {
     out.println();
     if (Modifier.isPublic(_apiMethod.getModifiers()))
       out.print("public ");
@@ -214,41 +257,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
       generateThrows(out, _implMethod.getExceptionTypes());
     else
       generateThrows(out, _apiMethod.getExceptionTypes());
-    out.println("{");
-    out.pushDepth();
-
-    generateContent(out);
-
-    out.popDepth();
-    out.println("}");
-
-    if (_interceptor.isEnhanced()) {
-      out.println();
-      out.print("private ");
-      out.printClass(_implMethod.getReturnType());
-      out.print(" __caucho_");
-      out.print(_apiMethod.getName());
-      out.print("(");
-
-      for (int i = 0; i < types.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-
-	out.printClass(types[i]);
-	out.print(" a" + i);
-      }
-    
-      out.println(")");
-      generateThrows(out, _implMethod.getExceptionTypes());
-      out.println();
-      out.println("{");
-      out.pushDepth();
-
-      generateCall(out);
-
-      out.popDepth();
-      out.println("}");
-    }
   }
 
   protected void generateContent(JavaWriter out)

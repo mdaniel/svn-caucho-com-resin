@@ -29,29 +29,35 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.*;
 import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import javax.ejb.*;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import javax.annotation.security.*;
+import javax.ejb.*;
+import javax.interceptor.*;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateless view
+ * Represents a lifecycle local business method
  */
-public class StatelessRemoteView extends StatelessLocalView {
-  private static final L10N L = new L10N(StatelessRemoteView.class);
-
-  public StatelessRemoteView(StatelessGenerator bean, ApiClass api)
+public class LifecycleMethod extends BusinessMethodGenerator
+{
+  private ApiClass _ejbClass;
+  private Class _lifecycleAnn;
+  
+  public LifecycleMethod(ApiClass ejbClass,
+			 View view,
+			 Method implMethod,
+			 int index,
+			 Class lifecycleAnn)
   {
-    super(bean, api);
-  }
+    super(view, implMethod, implMethod, index);
 
-  protected String getViewClassName()
-  {
-    return getApi().getSimpleName() + "__EJBRemote";
+    _ejbClass = ejbClass;
+
+    _lifecycleAnn = lifecycleAnn;
   }
 }

@@ -189,6 +189,11 @@ public class EjbContainer implements ScanListener, EnvironmentListener
     return _configManager;
   }
 
+  public EjbContainer getParent()
+  {
+    return _parentContainer;
+  }
+  
   /**
    * Returns the protocol manager.
    */
@@ -551,6 +556,11 @@ public class EjbContainer implements ScanListener, EnvironmentListener
     destroy();
   }
 
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _classLoader + "]";
+  }
+  
   /**
    * Sorts the servers so they can be destroyed in a consistent order.
    * (To make QA sane.)

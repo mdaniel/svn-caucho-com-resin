@@ -39,9 +39,8 @@ import com.caucho.config.DependencyBean;
 import com.caucho.config.types.*;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.amber.AmberConfig;
-import com.caucho.ejb.gen.BeanGenerator;
+import com.caucho.ejb.gen.*;
 import com.caucho.ejb.gen21.BeanAssembler;
-import com.caucho.ejb.gen.TransactionChain;
 import com.caucho.ejb.gen21.ViewClass;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.gen.BaseClass;
@@ -61,9 +60,7 @@ import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.ExcludeDefaultInterceptors;
-import javax.interceptor.Interceptors;
+import javax.interceptor.*;
 import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -122,11 +119,11 @@ public class EjbBean extends DescriptionGroupConfig
 
   protected boolean _isContainerTransaction = true;
 
-  ArrayList<PersistentDependency> _dependList =
-    new ArrayList<PersistentDependency>();
+  ArrayList<PersistentDependency> _dependList
+    = new ArrayList<PersistentDependency>();
 
-  ArrayList<PersistentDependency> _configDependList =
-    new ArrayList<PersistentDependency>();
+  ArrayList<PersistentDependency> _configDependList
+    = new ArrayList<PersistentDependency>();
 
   ArrayList<String> _beanDependList = new ArrayList<String>();
 
@@ -145,6 +142,7 @@ public class EjbBean extends DescriptionGroupConfig
     = new ArrayList<Interceptor>();
 
   private String _aroundInvokeMethodName;
+  private Method _aroundInvokeMethod;
   private String _timeoutMethodName;
 
   private long _transactionTimeout;
@@ -1011,6 +1009,33 @@ public class EjbBean extends DescriptionGroupConfig
 
       _bean.createViews();
 
+      InterceptorBinding interceptor
+	= getConfig().getInterceptorBinding(getEJBName(), false);
+
+      if (_aroundInvokeMethodName != null) {
+	ApiMethod method = getMethod(_aroundInvokeMethodName,
+				     new Class[] { InvocationContext.class });
+
+	if (method == null)
+	  throw error(L.l("'{0}' is an unknown around-invoke method",
+			  _aroundInvokeMethodName));
+	
+	_bean.setAroundInvokeMethod(method.getMethod());
+      }
+
+      if (interceptor != null) {
+	for (Class cl : interceptor.getInterceptors()) {
+	  _bean.addInterceptor(cl);
+	}
+      }
+
+      for (View view : _bean.getViews()) {
+	for (BusinessMethodGenerator bizMethod : view.getMethods()) {
+	  if (! isContainerTransaction())
+	    bizMethod.getXa().setContainerManaged(false);
+	}
+      }
+
       for (EjbMethodPattern method : _methodList) {
 	method.configure(_bean);
       }
@@ -1047,6 +1072,7 @@ public class EjbBean extends DescriptionGroupConfig
     boolean isExcludeDefault = false;
 
     // XXX: ejb/0f78
+    /*
     if (_ejbClass != null) {
       Interceptors interceptorsAnn = _ejbClass.getAnnotation(Interceptors.class);
 
@@ -1063,13 +1089,15 @@ public class EjbBean extends DescriptionGroupConfig
       if (_ejbClass.isAnnotationPresent(ExcludeDefaultInterceptors.class))
         isExcludeDefault = true;
     }
+    */
 
     // ejb/0fb5
     InterceptorBinding binding =
       _ejbConfig.getInterceptorBinding(getEJBName(), isExcludeDefault);
 
+    /*
     if (binding != null) {
-      ArrayList<String> interceptorClasses = binding.getInterceptors();
+      ArrayList<Class> interceptorClasses = binding.getInterceptors();
 
       // ejb/0fb7
       if (interceptorClasses.isEmpty()) {
@@ -1098,6 +1126,7 @@ public class EjbBean extends DescriptionGroupConfig
         }
       }
     }
+    */
   }
 
   private Interceptor configureInterceptor(Class type)

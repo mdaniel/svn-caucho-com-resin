@@ -120,7 +120,10 @@ public class BurlapProtocol extends ProtocolContainer {
         objectId = queryString;
     }
 
-    AbstractServer server = getProtocolManager().getServerByEJBName(serverId);
+    AbstractServer server = _serverMap.get(serverId);
+
+    if (server == null)
+      server = getProtocolManager().getServerByEJBName(serverId);
 
     if (server == null) {
       ArrayList children = getProtocolManager().getRemoteChildren(serverId);

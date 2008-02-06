@@ -86,6 +86,8 @@ public class InterceptorCallChain extends AbstractCallChain {
   public boolean isEnhanced()
   {
     return (_defaultInterceptors.size() > 0
+	    || (! _isExcludeDefaultInterceptors
+		&& _view.getBean().getDefaultInterceptors().size() > 0)
 	    || _classInterceptors.size() > 0
 	    || _methodInterceptors.size() > 0
 	    || getAroundInvokeMethod() != null);
@@ -192,8 +194,10 @@ public class InterceptorCallChain extends AbstractCallChain {
     }
 
     if (! _isExcludeDefaultInterceptors)
-      _interceptors.addAll(_defaultInterceptors);
-    if (! _isExcludeClassInterceptors)
+      _interceptors.addAll(_view.getBean().getDefaultInterceptors());
+
+    // ejb/0fb6
+    if (! _isExcludeClassInterceptors && _interceptors.size() == 0)
       _interceptors.addAll(_classInterceptors);
     
     _interceptors.addAll(_methodInterceptors);
@@ -238,7 +242,7 @@ public class InterceptorCallChain extends AbstractCallChain {
     
     out.print(_uniqueName + "_implMethod = ");
     generateGetMethod(out,
-		      _next.getView().getViewClassName(),
+		      _next.getView().getBeanClassName(),
 		      "__caucho_" + _implMethod.getName(),
 		      _implMethod.getParameterTypes());
     out.println(";");
@@ -410,7 +414,7 @@ public class InterceptorCallChain extends AbstractCallChain {
   protected void generateObjectChain(JavaWriter out)
     throws IOException
   {
-    out.println(_uniqueName + "_objectChain = new Object[] {");
+    out.print(_uniqueName + "_objectChain = new Object[] {");
 
     for (Class iClass : _interceptors) {
       out.print(_interceptorVarMap.get(iClass) + ", ");

@@ -309,7 +309,11 @@ public class EJBServlet extends GenericServlet {
     _protocolContainer.setURLPrefix(_urlPrefix);
     _protocolContainer.setWorkPath(_workPath);
 
-    _ejbManager.getProtocolManager().addProtocolContainer(_protocolContainer);
+    EjbContainer manager = _ejbManager;
+
+    for (; manager != null; manager = manager.getParent()) {
+      manager.getProtocolManager().addProtocolContainer(_protocolContainer);
+    }
   }
 
   private void normalizeId()
@@ -395,7 +399,20 @@ public class EJBServlet extends GenericServlet {
       _protocolContainer.setURLPrefix(_urlPrefix);
       _protocolContainer.setWorkPath(_workPath);
     
-      _ejbManager.getProtocolManager().addProtocolContainer(_protocolContainer);
+      EjbContainer manager = _ejbManager;
+
+      for (; manager != null; manager = manager.getParent()) {
+	manager.getProtocolManager().addProtocolContainer(_protocolContainer);
+      }
+    }
+  }
+
+  public void destroy()
+  {
+    EjbContainer manager = _ejbManager;
+
+    for (; manager != null; manager = manager.getParent()) {
+      manager.getProtocolManager().removeProtocolContainer(_protocolContainer);
     }
   }
 }

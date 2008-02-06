@@ -74,6 +74,11 @@ abstract public class View {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  protected String getBeanClassName()
+  {
+    return getViewClassName();
+  }
+
   /**
    * Returns the API class.
    */

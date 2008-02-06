@@ -50,6 +50,9 @@ abstract public class BeanGenerator extends GenClass {
   
   private Method _aroundInvokeMethod;
 
+  private ArrayList<Class> _defaultInterceptors
+    = new ArrayList<Class>();
+
   protected BeanGenerator(String fullClassName, ApiClass ejbClass)
   {
     super(fullClassName);
@@ -130,6 +133,22 @@ abstract public class BeanGenerator extends GenClass {
   public void setAroundInvokeMethod(Method method)
   {
     _aroundInvokeMethod = method;
+  }
+
+  /**
+   * Adds a default interceptor
+   */
+  public void addInterceptor(Class cl)
+  {
+    _defaultInterceptors.add(cl);
+  }
+
+  /**
+   * Gets the default interceptor
+   */
+  public ArrayList<Class> getDefaultInterceptors()
+  {
+    return _defaultInterceptors;
   }
 
   /**

@@ -72,6 +72,11 @@ public class StatelessView extends View {
     return getApi().getSimpleName() + "__EJBLocal";
   }
 
+  protected String getBeanClassName()
+  {
+    return getApi().getSimpleName() + "__Bean";
+  }
+
   /**
    * Returns the introspected methods
    */
@@ -119,46 +124,6 @@ public class StatelessView extends View {
     out.println("  return new " + getViewClassName() + "(this);");
   }
 
-  /**
-   * Generates the view code.
-   */
-  public void generate(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("public static class " + getViewClassName());
-    generateExtends(out);
-    out.print("  implements " + getApi().getName());
-    out.println(", StatelessProvider");
-    out.println("{");
-    out.pushDepth();
-    
-    out.println("private " + getBean().getClassName() + " _context;");
-
-    generateBusinessPrologue(out);
-    
-    out.println();
-    out.println(getViewClassName() + "(" + getBean().getClassName() + " context)");
-    out.println("{");
-    generateSuper(out, "context.getStatelessServer()");
-    out.println("  _context = context;");
-
-    // XXX: technically not correct.  Is associated with the instance itself
-    generateBusinessConstructor(out);
-    
-    out.println("}");
-
-    out.println("public Object __caucho_get()");
-    out.println("{");
-    out.println("  return this;");
-    out.println("}");
-
-    generateBusinessMethods(out);
-    
-    out.popDepth();
-    out.println("}");
-  }
-
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
@@ -184,6 +149,14 @@ public class StatelessView extends View {
 				 index);
 
     return bizMethod;
+  }
+
+  /**
+   * Generates the view code.
+   */
+  public void generate(JavaWriter out)
+    throws IOException
+  {
   }
 
   protected void generateSuper(JavaWriter out, String serverVar)

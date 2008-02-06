@@ -103,9 +103,11 @@ public class StatelessGenerator extends SessionGenerator {
 
     generateContext(out);
 
+    /*
     for (View view : getViews()) {
       view.generateContextPrologue(out);
     }
+    */
     
     generateCreateProvider(out);
     
@@ -179,6 +181,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.popDepth();
     out.println("}");
 
+    /*
     out.println();
     out.println(beanClass + " _ejb_begin()");
     out.println("{");
@@ -228,6 +231,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("    return;");
     out.println("  }");
     out.println("}");
+    */
 
     /*
     if (hasMethod("ejbRemove", new Class[0])) {
@@ -237,11 +241,12 @@ public class StatelessGenerator extends SessionGenerator {
     }
     */
 
+    /*
     out.popDepth();
     out.println("}");
+    */
 
-    
-
+    /*
     out.println();
     out.println("public void destroy()");
     out.println("{");
@@ -276,6 +281,7 @@ public class StatelessGenerator extends SessionGenerator {
     
     out.popDepth();
     out.println("}");
+    */
   }
 
   protected void generateNewInstance(JavaWriter out)
