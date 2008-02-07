@@ -265,7 +265,7 @@ public class HttpResponse extends AbstractHttpResponse
     String contentType = _contentType;
     if (contentType == null) {
     }
-    else if (contentType != "text/html") {
+    else if (! contentType.equals("text/html")) {
       os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
       os.print(contentType);
 
