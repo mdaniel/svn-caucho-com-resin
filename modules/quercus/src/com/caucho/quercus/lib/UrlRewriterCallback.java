@@ -53,7 +53,7 @@ public class UrlRewriterCallback extends CallbackFunction {
     try {
       Method rewriterMethod = 
         UrlRewriterCallback.class.getMethod("_internal_url_rewriter",
-                                            Env.class, String.class);
+                                            Env.class, Value.class);
       setFunction(new JavaMethod(env.getModuleContext(), rewriterMethod));
     } catch (NoSuchMethodException e) {
     } catch (SecurityException e) {
@@ -105,18 +105,31 @@ public class UrlRewriterCallback extends CallbackFunction {
   
   /**
    * Callback function to rewrite URLs to include session information.
+   * Note that this function should return BooleanValue.FALSE in the
+   * case where data should be discarded.
    */
-  public static Value _internal_url_rewriter(Env env, String buffer)
+  public static Value _internal_url_rewriter(Env env, Value buffer)
   {
+    Value result;
     UrlRewriterCallback rewriter = getInstance(env);
 
     // We should never have been called in this case, but 
     // return the buffer unmodified anyway.
+
     if (rewriter == null)
-      return NullValue.NULL;
-    
-    Parser parser = rewriter.new Parser(buffer, env);
-    return parser.parse();
+      result = buffer;
+    else {
+      // Return the buffer unmodified when no urls are rewritten
+      // php/1k6x
+
+      Parser parser = rewriter.new Parser(buffer.toString(), env);
+      result = parser.parse();
+
+      if (result == NullValue.NULL)
+        result = buffer;
+    }
+
+    return result;
   }
 
   private class Parser {
