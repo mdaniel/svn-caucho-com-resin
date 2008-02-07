@@ -35,6 +35,12 @@ public final class IndexedValueExpression extends ValueExpression {
   private Integer _i;
   private ValueExpression _orig;
 
+  public IndexedValueExpression(ValueExpression orig, int i)
+  {
+    _orig = orig;
+    _i = Integer.valueOf(i);
+  }
+
   public IndexedValueExpression(ValueExpression orig, Integer i)
   {
     _orig = orig;
