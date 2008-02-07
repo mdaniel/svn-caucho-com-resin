@@ -443,8 +443,11 @@ public class ArrayModule
                                          @ReadOnly Value key,
                                          @ReadOnly Value searchArray)
   {
-    if (! searchArray.isset() || ! key.isset())
+
+    
+    if (! searchArray.isset() || ! key.isset()) {
       return false;
+    }
 
     if (! (searchArray.isArray() || searchArray.isObject())) {
       env.warning(L.l("'" + searchArray.toString() + "' is an unexpected argument, expected ArrayValue or ObjectValue"));
@@ -452,16 +455,17 @@ public class ArrayModule
     }
 
     if (! (key.isString() || key.isLongConvertible())) {
-      env.warning(L.l(
-        "The first argument (a '{0}') should be either a string or an integer",
-	key.getType()));
+      env.warning(L.l("The first argument (a '{0}') should be either a string or an integer",
+                      key.getType()));
       return false;
     }
 
-    if (searchArray instanceof ArrayValue)
+    if (searchArray instanceof ArrayValue) {
       return ((ArrayValue) searchArray).containsKey(key) != null;
-    else
+    }
+    else {
       return ! searchArray.getField(env, key.toStringValue()).isNull();
+    }
   }
 
   /**

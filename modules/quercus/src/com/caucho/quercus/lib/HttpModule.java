@@ -114,7 +114,7 @@ public class HttpModule extends AbstractQuercusModule {
         //res.sendRedirect(value);
         //return NullValue.NULL;
         
-        res.setStatus(302, "Not Modified");
+        res.setStatus(302, "Found");
       }
 
       if (replace) {

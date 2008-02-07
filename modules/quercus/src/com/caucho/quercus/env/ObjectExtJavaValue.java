@@ -98,5 +98,24 @@ public class ObjectExtJavaValue extends ObjectExtValue
   {
     return _object;
   }
+  
+  public void varDumpImpl(Env env,
+          WriteStream out,
+          int depth,
+          IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    _javaClassDef.varDumpImpl(env, _object, out, depth, valueSet);
+  }
+
+  @Override
+  protected void printRImpl(Env env,
+            WriteStream out,
+            int depth,
+            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    _javaClassDef.printRImpl(env, _object, out, depth, valueSet);
+  }
 }
 

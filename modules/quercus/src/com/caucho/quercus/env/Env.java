@@ -221,6 +221,10 @@ public class Env {
     = new HashMap<ConnectionEntry,ConnectionEntry>();
 
   private AbstractFunction _autoload;
+  private HashSet<String> _autoloadClasses
+    = new HashSet<String>();
+  
+  private LinkedHashMap<String, AbstractFunction> _autoloadFunctionMap;
 
   private long _startTime;
   private long _timeLimit = 600000L;
@@ -3249,12 +3253,33 @@ public class Env {
       return createQuercusClass(staticClass, null); // XXX: cache
 
     if (useAutoload) {
-      if (_autoload == null)
-        _autoload = findFunction("__autoload");
-      
-      if (_autoload != null) {
-        _autoload.call(this, new StringBuilderValue(name));
-        return createClassImpl(name, false, useImport);
+      if (! _autoloadClasses.contains(name)) {
+        try {
+          _autoloadClasses.add(name);
+
+          if (_autoloadFunctionMap != null) {
+            for (Map.Entry<String, AbstractFunction> entry
+                 : _autoloadFunctionMap.entrySet()) {
+              entry.getValue().call(this, new StringBuilderValue(name));
+              
+              QuercusClass cls = createClassImpl(name, false, useImport);
+              
+              if (cls != null)
+                break;
+            }
+          } else {
+            if (_autoload == null)
+              _autoload = findFunction("__autoload");
+            
+            if (_autoload != null) {
+              _autoload.call(this, new StringBuilderValue(name));
+
+              return createClassImpl(name, false, useImport);
+            }
+          }
+        } finally {
+          _autoloadClasses.remove(name);
+        }
       }
     }
     
@@ -3266,7 +3291,6 @@ public class Env {
         try {
           JavaClassDef javaClassDef = getJavaClassDefinition(name, true);
 
-          //XXX: do we want to create a QuercusClass for a JavaClassDef?
           if (javaClassDef != null)
             return createQuercusClass(javaClassDef, null);
         }
@@ -3277,6 +3301,39 @@ public class Env {
     }
     
     return null;
+  }
+  
+  /*
+   * Registers an SPL autoload function.
+   */
+  public void addAutoloadFunction(String name)
+  {
+    if (_autoloadFunctionMap == null)
+      _autoloadFunctionMap = new LinkedHashMap<String, AbstractFunction>();
+
+    _autoloadFunctionMap.put(name, getFunction(name));
+  }
+  
+  /*
+   * Unregisters an SPL autoload function.
+   */
+  public void removeAutoloadFunction(String fun)
+  {
+    if (_autoloadFunctionMap != null) {
+      _autoloadFunctionMap.remove(fun);
+      
+      //restore original __autoload functionality
+      if (_autoloadFunctionMap.size() == 0)
+        _autoloadFunctionMap = null;
+    }
+  }
+  
+  /*
+   * Returns the registered SPL autoload functions.
+   */
+  public LinkedHashMap<String, AbstractFunction> getAutoloadFunctions()
+  {
+    return _autoloadFunctionMap;
   }
 
   /**

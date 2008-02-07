@@ -364,7 +364,7 @@ public class JavaClassDef extends ClassDef {
         return null;
       }
     }
-
+    
     FieldMarshalPair fieldPair = _fieldMap.get(name);
     if (fieldPair != null) {
       try {
@@ -376,7 +376,7 @@ public class JavaClassDef extends ClassDef {
         return null;
       }
     }
-
+    
     if (__fieldGet != null) {
       try {
         return __fieldGet.callMethod(env, qThis, name);
@@ -1196,7 +1196,7 @@ public class JavaClassDef extends ClassDef {
   {
     try {
       if (_varDumpImpl == null) {
-	return false;
+        return false;
       }
 
       _varDumpImpl.invoke(obj, env, out, depth, valueSet);

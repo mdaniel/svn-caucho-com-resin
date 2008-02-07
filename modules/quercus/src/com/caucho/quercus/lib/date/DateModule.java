@@ -288,12 +288,12 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public long gmmktime(@Optional("-1") int hour,
-		       @Optional("-1") int minute,
-		       @Optional("-1") int second,
-		       @Optional("-1") int month,
-		       @Optional("-1") int day,
-		       @Optional("-1") int year)
+  public long gmmktime(@Optional() Value hourV,
+                       @Optional() Value minuteV,
+                       @Optional() Value secondV,
+                       @Optional() Value monthV,
+                       @Optional() Value dayV,
+                       @Optional() Value yearV)
   {
     QDate localDate = new QDate(false);
     QDate gmtDate = new QDate(false);
@@ -305,23 +305,7 @@ public class DateModule extends AbstractQuercusModule {
 
     gmtDate.setGMTTime(gmtNow);
 
-    if (hour >= 0)
-      gmtDate.setHour(hour);
-
-    if (minute >= 0)
-      gmtDate.setMinute(minute);
-
-    if (second >= 0)
-      gmtDate.setSecond(second);
-
-    if (month > 0)
-      gmtDate.setMonth(month - 1);
-
-    if (day > 0)
-      gmtDate.setDayOfMonth(day);
-
-    if (year > 0)
-      gmtDate.setYear(year);
+    setMktime(gmtDate, hourV, minuteV, secondV, monthV, dayV, yearV);
 
     return gmtDate.getGMTTime() / 1000L;
   }
@@ -571,7 +555,7 @@ public class DateModule extends AbstractQuercusModule {
           case 'Y':
           {
             int year = calendar.getYear();
-
+            
             sb.append((year / 1000) % 10);
             sb.append((year / 100) % 10);
             sb.append((year / 10) % 10);
@@ -879,12 +863,12 @@ public class DateModule extends AbstractQuercusModule {
    * Returns the formatted date.
    */
   public long mktime(Env env,
-                     @Optional("-1") int hour,
-                     @Optional("-1") int minute,
-                     @Optional("-1") int second,
-                     @Optional("-1") int month,
-                     @Optional("-1") int day,
-                     @Optional("-1") int year,
+                     @Optional() Value hourV,
+                     @Optional() Value minuteV,
+                     @Optional() Value secondV,
+                     @Optional() Value monthV,
+                     @Optional() Value dayV,
+                     @Optional() Value yearV,
                      @Optional("-1") int isDST)
   {
     if (isDST != -1)
@@ -895,33 +879,66 @@ public class DateModule extends AbstractQuercusModule {
     long now = Alarm.getCurrentTime();
 
     date.setLocalTime(now);
-
-    if (hour >= 0)
-      date.setHour(hour);
-
-    if (minute >= 0)
-      date.setMinute(minute);
-
-    if (second >= 0)
-      date.setSecond(second);
-
-    if (month > 0)
-      date.setMonth(month - 1);
-
-    if (day > 0)
-      date.setDayOfMonth(day);
-
-    if (year >= 1000) {
-      date.setYear(year);
-    }
-    else if (year >= 70) {
-      date.setYear(year + 1900);
-    }
-    else if (year >= 0) {
-      date.setYear(year + 2000);
-    }
+    
+    setMktime(date, hourV, minuteV, secondV, monthV, dayV, yearV);
 
     return date.getGMTTime() / 1000L;
+  }
+  
+  private static void setMktime(QDate date,
+                                Value hourV,
+                                Value minuteV,
+                                Value secondV,
+                                Value monthV,
+                                Value dayV,
+                                Value yearV)
+  {
+    if (! hourV.isDefault()) {
+      int hour = hourV.toInt();
+      
+      date.setHour(hour);
+    }
+
+    if (! minuteV.isDefault()) {
+      int minute = minuteV.toInt();
+      
+      date.setMinute(minute);
+    }
+    
+    if (! secondV.isDefault()) {
+      int second = secondV.toInt();
+      
+      date.setSecond(second);
+    }
+
+    if (! monthV.isDefault()) {
+      int month = monthV.toInt();
+      
+      date.setMonth(month - 1);
+    }
+
+    if (! dayV.isDefault()) {
+      int day = dayV.toInt();
+      
+      date.setDayOfMonth(day);
+    }
+    
+    if (! yearV.isDefault()) {
+      int year = yearV.toInt();
+      
+      if (year >= 1000) {
+        date.setYear(year);
+      }
+      else if (year >= 70) {
+        date.setYear(year + 1900);
+      }
+      else if (year >= 0) {
+        date.setYear(year + 2000);
+      }
+      else if (year < 0) {
+        date.setYear(1969);
+      }
+    }
   }
 
   /**

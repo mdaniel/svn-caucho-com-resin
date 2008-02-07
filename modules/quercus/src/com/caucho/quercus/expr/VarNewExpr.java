@@ -85,23 +85,20 @@ public class VarNewExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    String name = _name.evalString(env).intern();
-    
-    QuercusClass cl = env.findClass(name);
-
-    if (cl == null) {
-      throw new QuercusException(L.l("no matching class {0}", name));
-    }
-
-    _fullArgs = _args;
-
-    Value []args = new Value[_args.length];
-
-    for (int i = 0; i < args.length; i++)
-      args[i] = _args[i].eval(env);
-
     env.pushCall(this, NullValue.NULL);
+    
     try {
+      String name = _name.evalString(env).intern();
+      QuercusClass cl = env.findAbstractClass(name);
+
+      _fullArgs = _args;
+
+      Value []args = new Value[_args.length];
+
+      for (int i = 0; i < args.length; i++) {
+        args[i] = _args[i].eval(env);
+      }
+
       env.checkTimeout();
 
       return cl.callNew(env, args);

@@ -57,7 +57,7 @@ public class ArrayAccessDelegate implements ArrayDelegate
   public Value put(ObjectValue qThis, Value index, Value value)
   {
     Env env = Env.getInstance();
-    
+
     return qThis.callMethod(env, OFFSET_SET, index, value);
   }
 

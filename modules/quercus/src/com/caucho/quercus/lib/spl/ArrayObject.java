@@ -188,10 +188,17 @@ public class ArrayObject
 
   public Value __getField(StringValue key)
   {
-    if ((_flags & ARRAY_AS_PROPS) != 0)
+    //php/4a4r
+    return _value.get(key);
+    
+    /*
+    if ((_flags & ARRAY_AS_PROPS) != 0) {
       return _value.get(key);
-    else
+    }
+    else {
       return NullValue.NULL;
+    }
+    */
   }
 
   static private void printDepth(WriteStream out, int depth)
