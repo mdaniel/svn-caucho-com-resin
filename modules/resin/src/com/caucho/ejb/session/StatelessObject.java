@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -46,10 +47,12 @@ abstract public class StatelessObject extends AbstractEJBObject
     = Logger.getLogger(StatelessObject.class.getName());
   
   protected final StatelessServer _server;
+  protected final Class _api;
 
-  protected StatelessObject(StatelessServer server)
+  protected StatelessObject(StatelessServer server, Class api)
   {
     _server = server;
+    _api = api;
   }
 
   /**
@@ -166,7 +169,7 @@ abstract public class StatelessObject extends AbstractEJBObject
    */
   public Object writeReplace() throws ObjectStreamException
   {
-    return new ObjectSkeletonWrapper(getHandle());
+    return _server.getObjectHandle(this, _api);
   }
 
   public void remove()

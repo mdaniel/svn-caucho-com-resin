@@ -63,6 +63,6 @@ public class ServerRemoteProxy implements ObjectProxy, java.io.Serializable {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    return _server.getRemoteObject(_clientApi);
+    return _server.getRemoteObject(_clientApi, null);
   }
 }

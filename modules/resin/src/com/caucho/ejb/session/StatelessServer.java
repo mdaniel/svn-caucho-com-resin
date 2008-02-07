@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ * 
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,8 +32,7 @@ package com.caucho.ejb.session;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.ejb.session.StatelessComponent;
+import com.caucho.ejb.protocol.*;
 import com.caucho.webbeans.component.*;
 
 import javax.ejb.*;
@@ -86,7 +86,7 @@ public class StatelessServer extends SessionServer {
    * Returns the object implementation
    */
   @Override
-  public Object getObject(Class api)
+  public Object getLocalObject(Class api)
   {
     return getStatelessContext().getProvider(api);
   }
@@ -95,7 +95,7 @@ public class StatelessServer extends SessionServer {
   {
     StatelessProvider provider = getStatelessContext().getProvider(api);
 
-    return new StatelessComponent(provider);
+    return new StatelessComponent(provider, api);
   }
 
   /**
@@ -119,10 +119,14 @@ public class StatelessServer extends SessionServer {
   }
 
   /**
-   * Returns the 3.0 remote stub for the container
+   * Returns the remote stub for the container
    */
-  public Object getRemoteObject(Class api)
+  @Override
+  public Object getRemoteObject(Class api, String protocol)
   {
+    if (api == null)
+      return null;
+    
     StatelessProvider provider = getStatelessContext().getProvider(api);
 
     if (provider != null) {
@@ -210,6 +214,20 @@ public class StatelessServer extends SessionServer {
     }
 
     return _homeContext;
+  }
+
+  /**
+   * Returns the object serialization handle for the given api
+   */
+  Object getObjectHandle(StatelessObject obj, Class api)
+  {
+    ComponentImpl comp = getComponent(api);
+
+    // XXX: remote handle differently
+    if (comp != null)
+      return comp.getHandle();
+    else
+      return new ObjectSkeletonWrapper(obj.getHandle());
   }
 
   /**

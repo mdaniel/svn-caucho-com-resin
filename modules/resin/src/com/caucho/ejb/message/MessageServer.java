@@ -33,19 +33,13 @@ import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.cfg.Interceptor;
-import com.caucho.ejb.interceptor.InvocationContextImpl;
 import com.caucho.ejb.xa.*;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.naming.Jndi;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
-import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
-import javax.interceptor.InvocationContext;
 import javax.jms.*;
 import javax.naming.*;
 import javax.resource.spi.*;
@@ -54,7 +48,6 @@ import javax.transaction.*;
 import javax.transaction.xa.*;
 import javax.webbeans.*;
 import java.lang.reflect.*;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -143,6 +136,7 @@ public class MessageServer extends AbstractServer
     }
   }
 
+  @Override
   protected void bindContext()
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
@@ -253,5 +247,23 @@ public class MessageServer extends AbstractServer
   public void destroy()
   {
     _ra.endpointDeactivation(this, _activationSpec);
+  }
+
+  @Override
+  public Object getRemoteObject(Class api, String protocol)
+  {
+    return null;
+  }
+
+  @Override
+  public Object getLocalObject(Class api)
+  {
+    return null;
+  }
+
+  @Override
+  public Object getLocalProxy(Class api)
+  {
+    return null;
   }
 }

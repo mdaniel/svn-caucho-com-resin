@@ -50,11 +50,11 @@ public class LifecycleMethod extends BusinessMethodGenerator
   
   public LifecycleMethod(ApiClass ejbClass,
 			 View view,
-			 Method implMethod,
+			 ApiMethod implMethod,
 			 int index,
 			 Class lifecycleAnn)
   {
-    super(view, implMethod, implMethod, index);
+    super(view, implMethod, implMethod.getMethod(), index);
 
     _ejbClass = ejbClass;
 

@@ -71,8 +71,10 @@ public class HomeHandleImpl extends AbstractHomeHandle {
   public EJBHome getEJBHome()
     throws RemoteException
   {
+    /* XXX: webbeans
     if (home == null)
       home = SameJVMClientContainer.find(serverId).getEJBHome();
+     */
 
     return home;
   }

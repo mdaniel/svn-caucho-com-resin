@@ -47,7 +47,7 @@ import javax.interceptor.*;
 public class StatefulRemoveMethod extends StatefulMethod
 {
   public StatefulRemoveMethod(StatefulView view,
-			      Method apiMethod,
+			      ApiMethod apiMethod,
 			      Method implMethod,
 			      int index)
   {

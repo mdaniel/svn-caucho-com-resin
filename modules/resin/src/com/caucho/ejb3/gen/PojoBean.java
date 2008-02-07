@@ -29,7 +29,7 @@
 
 package com.caucho.ejb3.gen;
 
-import com.caucho.ejb.cfg.ApiClass;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.gen.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.GenClass;
@@ -50,7 +50,7 @@ import javax.webbeans.*;
 public class PojoBean extends BeanGenerator {
   private static final L10N L = new L10N(PojoBean.class);
 
-  private Class _beanClass;
+  private ApiClass _beanClass;
 
   private PojoView _view;
 
@@ -71,12 +71,12 @@ public class PojoBean extends BeanGenerator {
     
     _view = new PojoView(this, getEjbClass());
     
-    _beanClass = beanClass;
+    _beanClass = new ApiClass(beanClass);
   }
 
   public void introspect()
   {
-    for (Method method : _beanClass.getMethods()) {
+    for (ApiMethod method : _beanClass.getMethods()) {
       if (Object.class.equals(method.getDeclaringClass()))
 	continue;
 
@@ -85,20 +85,18 @@ public class PojoBean extends BeanGenerator {
 	_hasReadResolve = true;
       }
       
-      int modifiers = method.getModifiers();
-
-      if (! Modifier.isPublic(modifiers) && ! Modifier.isProtected(modifiers))
+      if (! method.isPublic() && ! method.isProtected())
 	continue;
-      if (Modifier.isStatic(modifiers))
+      if (method.isStatic())
 	continue;
-      if (Modifier.isFinal(modifiers))
+      if (method.isFinal())
 	continue;
 
       int index = _businessMethods.size();
       BusinessMethodGenerator bizMethod
-	= new BusinessMethodGenerator(_view, method, method, index);
+	= new BusinessMethodGenerator(_view, method, method.getMethod(), index);
 
-      bizMethod.introspect(method, method);
+      bizMethod.introspect(method.getMethod(), method.getMethod());
 
       if (bizMethod.isEnhanced()) {
 	_isEnhanced = true;
@@ -106,9 +104,9 @@ public class PojoBean extends BeanGenerator {
       }
     }
     
-    if (Serializable.class.isAssignableFrom(_beanClass)
+    if (Serializable.class.isAssignableFrom(_beanClass.getJavaClass())
 	&& ! _hasReadResolve
-	&& hasTransientInject(_beanClass)) {
+	&& hasTransientInject(_beanClass.getJavaClass())) {
       _isReadResolveEnhanced = true;
       _isEnhanced = true;
     }
@@ -144,7 +142,7 @@ public class PojoBean extends BeanGenerator {
   public Class generateClass()
   {
     if (! isEnhanced())
-      return _beanClass;
+      return _beanClass.getJavaClass();
     
     try {
       JavaClassGenerator gen = new JavaClassGenerator();
@@ -180,7 +178,7 @@ public class PojoBean extends BeanGenerator {
       method.generatePrologueTop(out, map);
     }
 
-    for (Constructor ctor : _beanClass.getDeclaredConstructors()) {
+    for (Constructor ctor : _beanClass.getJavaClass().getDeclaredConstructors()) {
       if (Modifier.isPublic(ctor.getModifiers()))
 	generateConstructor(out, ctor);
     }

@@ -180,6 +180,19 @@ abstract public class BeanGenerator extends GenClass {
   }
 
   /**
+   * Generates the view contents
+   */
+  public void generateDestroyViews(JavaWriter out)
+    throws IOException
+  {
+    for (View view : getViews()) {
+      out.println();
+
+      view.generateDestroy(out);
+    }
+  }
+
+  /**
    * Returns true if the method is implemented.
    */
   protected boolean hasMethod(String methodName, Class []paramTypes)

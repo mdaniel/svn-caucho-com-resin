@@ -52,7 +52,7 @@ public class SessionBusinessMethod extends BusinessMethodGenerator {
 			       ApiMethod implMethod,
 			       int index)
   {
-    super(null, apiMethod.getMethod(), implMethod.getMethod(), index);
+    super(null, apiMethod, implMethod.getMethod(), index);
     
     _apiMethod = apiMethod.getMethod();
   }

@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -45,7 +46,7 @@ import javax.interceptor.*;
 public class StatefulMethod extends BusinessMethodGenerator
 {
   public StatefulMethod(StatefulView view,
-			Method apiMethod,
+			ApiMethod apiMethod,
 			Method implMethod,
 			int index)
   {
@@ -83,6 +84,12 @@ public class StatefulMethod extends BusinessMethodGenerator
     // XXX: need correct exception
     out.println("if (_bean == null) throw new EJBException();");
     out.println();
+    
+    out.println("Thread thread = Thread.currentThread();");
+    out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
+    out.println("try {");
+    out.pushDepth();
+    out.println("thread.setContextClassLoader(_server.getClassLoader());");
   }
 
   /**
@@ -101,5 +108,17 @@ public class StatefulMethod extends BusinessMethodGenerator
     throws IOException
   {
     out.print("_bean");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generatePostCall(JavaWriter out)
+    throws IOException
+  {
+    out.popDepth();
+    out.println("} finally {");
+    out.println("  thread.setContextClassLoader(oldLoader);");
+    out.println("}");
   }
 }

@@ -172,7 +172,7 @@ public class HessianProtocol extends ProtocolContainer {
       remoteApi = server.getRemoteObjectClass();
 
       if (homeApi != null) {
-	Object remote = server.getRemoteObject(homeApi);
+	Object remote = server.getRemoteObject(homeApi, "hessian");
 	
         com.caucho.hessian.server.HessianSkeleton skel = getSkeleton(homeApi,
 								   homeApi,
@@ -182,7 +182,7 @@ public class HessianProtocol extends ProtocolContainer {
       }
       
       if (remoteApi != null) {
-	Object remote = server.getRemoteObject(remoteApi);
+	Object remote = server.getRemoteObject(remoteApi, "hessian");
 	
         com.caucho.hessian.server.HessianSkeleton skel = getSkeleton(remoteApi,
 								   remoteApi,

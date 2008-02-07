@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -45,9 +46,9 @@ import javax.interceptor.*;
 public class MessageMethod extends BusinessMethodGenerator
 {
   public MessageMethod(MessageView view,
-			Method apiMethod,
-			Method implMethod,
-			int index)
+		       ApiMethod apiMethod,
+		       Method implMethod,
+		       int index)
   {
     super(view, apiMethod, implMethod, index);
   }

@@ -37,7 +37,6 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
 import javax.naming.NamingException;
-import java.lang.reflect.Method;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -251,7 +250,7 @@ public class EjbProtocolManager {
 
       // backward compat
       if (_localJndiPrefix != null) {
-        Object localHome = server.getClientLocalHome();
+        Object localHome = server.getLocalObject(server.getLocalHomeClass());
 
 	Class api = null;
 
@@ -274,7 +273,8 @@ public class EjbProtocolManager {
 
       // backward compat
       if (_remoteJndiPrefix != null) {
-        Object remoteHome = server.getEJBHome();
+        Object remoteHome
+	  = server.getRemoteObject(server.getRemoteHomeClass(), null);
 
 	Class api = null;
 
@@ -283,14 +283,14 @@ public class EjbProtocolManager {
         if (remoteHome != null) {
 	  Jndi.bindDeep(jndiName, remoteHome);
         } else {
-	  if (server.getLocalApiList().size() == 1) {
-	    api = server.getLocalApiList().get(0);
+	  if (server.getRemoteApiList().size() == 1) {
+	    api = server.getRemoteApiList().get(0);
 	    bindRemoteServer(jndiName, server, api);
 	  }
 
-	  for (Class localApi : server.getLocalApiList()) {
-	    bindRemoteServer(jndiName + '#' + localApi.getName(),
-			     server, localApi);
+	  for (Class remoteApi : server.getRemoteApiList()) {
+	    bindRemoteServer(jndiName + '#' + remoteApi.getName(),
+			     server, remoteApi);
 	  }
         }
       }
@@ -333,7 +333,7 @@ public class EjbProtocolManager {
       Object localHome = null;
 
       if (server.getLocalHomeClass() != null)
-	localHome = server.getObject(server.getLocalHomeClass());
+	localHome = server.getLocalObject(server.getLocalHomeClass());
 
       if (localHome != null) {
 	String jndiName = prefix + "/local-home";
@@ -447,7 +447,7 @@ public class EjbProtocolManager {
 
       AbstractServer server = _serverMap.get(name);
 
-      if (server.getClientObject(null) == null)
+      if (server.getLocalObject(null) == null)
         continue;
 
       if (name.startsWith(ejbName)) {

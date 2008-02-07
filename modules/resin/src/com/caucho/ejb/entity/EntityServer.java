@@ -39,7 +39,6 @@ import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.FinderExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.ejb.protocol.JVMObject;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -303,7 +302,7 @@ public class EntityServer extends AbstractServer {
    * Returns the 3.0 remote stub for the container
    */
   @Override
-  public Object getRemoteObject(Class api)
+  public Object getRemoteObject(Class api, String protocol)
   {
     if (api == getRemoteHomeClass())
       return _remoteHomeView;
@@ -315,13 +314,25 @@ public class EntityServer extends AbstractServer {
    * Returns the 3.0 remote stub for the container
    */
   @Override
-  public Object getObject(Class api)
+  public Object getLocalObject(Class api)
   {
     if (api == getRemoteHomeClass())
       return _remoteHomeView;
     else
-      return super.getObject(api);
+      return null;
   }
+  /**
+   * Returns the 3.0 remote stub for the container
+   */
+  @Override
+  public Object getLocalProxy(Class api)
+  {
+    if (api == getRemoteHomeClass())
+      return _remoteHomeView;
+    else
+      return null;
+  }
+
 
   /**
    * Returns the 3.0 remote stub for the container
@@ -536,6 +547,7 @@ public class EntityServer extends AbstractServer {
       _isInit = true;
     }
 
+    /*
     if (_remoteHome == null) {
       try {
         _remoteHome = _jvmClient.createHomeStub();
@@ -543,6 +555,7 @@ public class EntityServer extends AbstractServer {
         EJBExceptionWrapper.createRuntime(e);
       }
     }
+     */
 
     return _remoteHome;
   }
@@ -611,46 +624,6 @@ public class EntityServer extends AbstractServer {
     }
 
     return _remoteHomeView;
-  }
-
-  /**
-   * Creates the local stub for the object in the context.
-   */
-  /*
-    JVMObject getEJBObject(AbstractHandle handle)
-    {
-    if (remoteStubClass == null)
-    throw new IllegalStateException(L.l("'{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
-    getEJBName()));
-
-    try {
-    JVMObject obj = (JVMObject) remoteStubClass.newInstance();
-    obj._init(this, handle);
-
-    return obj;
-    } catch (Exception e) {
-    throw new EJBExceptionWrapper(e);
-    }
-    }
-  */
-
-  /**
-   * Creates a handle for a new session.
-   */
-  JVMObject createEJBObject(Object primaryKey)
-  {
-    if (_remoteStubClass == null)
-      throw new IllegalStateException(L.l("'{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
-                                          getEJBName()));
-
-    try {
-      JVMObject obj = (JVMObject) _remoteStubClass.newInstance();
-      obj._init(this, primaryKey);
-
-      return obj;
-    } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
-    }
   }
 
   public AbstractContext getContext(Object key)

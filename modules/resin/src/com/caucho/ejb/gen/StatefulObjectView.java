@@ -61,7 +61,7 @@ abstract public class StatefulObjectView extends StatefulView {
 	return null;
 
       StatefulMethod method = new StatefulRemoveMethod(this,
-						       apiMethod.getMethod(),
+						       apiMethod,
 						       implMethod.getMethod(),
 						       index);
 

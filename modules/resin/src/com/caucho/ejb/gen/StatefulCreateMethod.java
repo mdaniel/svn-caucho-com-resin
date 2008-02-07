@@ -51,7 +51,7 @@ public class StatefulCreateMethod extends StatefulMethod
   public StatefulCreateMethod(StatefulGenerator bean,
 			      StatefulView homeView,
 			      View objectView,
-			      Method apiMethod,
+			      ApiMethod apiMethod,
 			      Method implMethod,
 			      int index)
   {
@@ -86,7 +86,7 @@ public class StatefulCreateMethod extends StatefulMethod
     out.println(_objectView.getViewClassName() + " remote ="
 		+ " new " + _objectView.getViewClassName() + "(getStatefulServer(), bean);");
 
-    out.println("StatefulContext context = new " + _bean.getFullClassName() + "(getStatefulServer());");
+    out.println("StatefulContext context = new " + _bean.getFullClassName() + "(_context, remote);");
     out.println("remote.__caucho_setContext(context);");
     out.println("bean.setSessionContext(context);");
   }

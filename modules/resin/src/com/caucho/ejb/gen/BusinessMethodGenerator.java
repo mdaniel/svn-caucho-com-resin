@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.ejb.cfg.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -47,7 +48,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
   private final View _view;
   
-  private final Method _apiMethod;
+  private final ApiMethod _apiMethod;
   private final Method _implMethod;
 
   private String _uniqueName;
@@ -64,7 +65,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   private InterceptorCallChain _interceptor;
   
   public BusinessMethodGenerator(View view,
-				 Method apiMethod,
+				 ApiMethod apiMethod,
 				 Method implMethod,
 				 int index)
   {
@@ -98,7 +99,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
    */
   public Method getApiMethod()
   {
-    return _apiMethod;
+    return _apiMethod.getMethod();
   }
 
   /**
@@ -207,10 +208,12 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
       Class []types = _implMethod.getParameterTypes();
       for (int i = 0; i < types.length; i++) {
+	Class type = types[i];
+	
 	if (i != 0)
 	  out.print(", ");
 
-	out.printClass(types[i]);
+	out.printClass(type);
 	out.print(" a" + i);
       }
     
@@ -231,9 +234,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
     throws IOException
   {
     out.println();
-    if (Modifier.isPublic(_apiMethod.getModifiers()))
+    if (_apiMethod.isPublic())
       out.print("public ");
-    else if (Modifier.isProtected(_apiMethod.getModifiers()))
+    else if (_apiMethod.isProtected())
       out.print("protected ");
     else
       throw new IllegalStateException(_apiMethod.toString() + " must be public or protected");
@@ -245,10 +248,18 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     Class []types = _apiMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
+      Class type = types[i];
+      
       if (i != 0)
 	out.print(", ");
 
-      out.printClass(types[i]);
+      if (i == types.length - 1 && type.isArray() && _apiMethod.isVarArgs()) {
+	out.printClass(type.getComponentType());
+	out.print("...");
+      }
+      else
+	out.printClass(type);
+      
       out.print(" a" + i);
     }
     

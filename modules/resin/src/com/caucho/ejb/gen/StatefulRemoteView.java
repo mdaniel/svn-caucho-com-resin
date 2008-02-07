@@ -79,15 +79,17 @@ public class StatefulRemoteView extends StatefulObjectView {
     out.println();
     out.println("private " + getViewClassName() + " _remoteObject;");
 
-    out.println();
-    out.println("@Override");
-    out.println("public EJBObject getEJBObject()");
-    out.println("{");
-    out.println("  if (_remoteObject != null)");
-    out.println("    return _remoteObject;");
-    out.println("  else");
-    out.println("    return super.getEJBObject();");
-    out.println("}");
+    if (EJBObject.class.isAssignableFrom(getApi().getJavaClass())) {
+      out.println();
+      out.println("@Override");
+      out.println("public EJBObject getEJBObject()");
+      out.println("{");
+      out.println("  if (_remoteObject != null)");
+      out.println("    return _remoteObject;");
+      out.println("  else");
+      out.println("    return super.getEJBObject();");
+      out.println("}");
+    }
 
     out.println();
     out.println("public " + getSessionBean().getClassName() +

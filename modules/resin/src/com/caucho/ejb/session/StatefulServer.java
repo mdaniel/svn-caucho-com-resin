@@ -107,7 +107,7 @@ public class StatefulServer extends SessionServer
    * Returns the object implementation
    */
   @Override
-  public Object getObject(Class api)
+  public Object getLocalObject(Class api)
   {
     return getStatefulContext().getProvider(api);
   }
@@ -198,7 +198,7 @@ public class StatefulServer extends SessionServer
    * Returns the remote stub for the container
    */
   @Override
-  public Object getRemoteObject(Class api)
+  public Object getRemoteObject(Class api, String protocol)
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 

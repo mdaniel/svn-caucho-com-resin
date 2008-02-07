@@ -38,7 +38,6 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
-import com.caucho.ejb.protocol.SameJVMClientContainer;
 import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.ejb.session.SessionServer;
 import com.caucho.ejb.session.StatelessServer;
@@ -62,7 +61,6 @@ import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -96,8 +94,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected DataSource _dataSource;
 
   protected EnvironmentClassLoader _loader;
-
-  protected SameJVMClientContainer _jvmClient;
 
   // The original bean implementation class
   protected Class _ejbClass;
@@ -651,6 +647,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     if (_metaData == null) {
       try {
+	EJBHome home = getEJBHome();
+	
         _metaData = new EJBMetaDataImpl(getEJBHome(),
                                         getRemoteHomeClass(),
                                         getRemoteObjectClass(),
@@ -694,7 +692,13 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public EJBHome getEJBHome()
   {
-    return _remoteHomeView;
+    if (_remoteHome != null)
+      return _remoteHome;
+    else {
+      EJBHome home = (EJBHome) getRemoteObject(getRemoteHomeClass(), null);
+
+      return home;
+    }
   }
 
   /**
@@ -706,101 +710,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Returns the EJBHome stub for the container
-   */
-  public Object getHomeObject()
-  {
-    return _remoteHomeView;
-  }
-
-  /**
    * Returns the session context.
    */
   public AbstractSessionContext getSessionContext()
   {
     return null;
-  }
-
-  /**
-   * Returns the EJBObject stub for the container
-   */
-  public Object getRemoteObject21()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the 3.0 remote stub for the container
-   */
-  public Object getRemoteObject()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the 3.0 remote stub for the container
-   */
-  public Object getRemoteObject(Class api)
-  {
-    return getObject(api);
-  }
-
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  public Object getClientLocalHome()
-  {
-    return _localHome;
-  }
-
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  public Object getClientObject(Class businessInterface)
-  {
-    return getClientLocalHome();
-  }
-
-  /**
-   * Returns the 3.0 local stub for the container
-   */
-  public Object getLocalObject()
-  {
-    throw new UnsupportedOperationException("3.0 local interface not found");
-  }
-
-  public Object getLocalProxy(Class api)
-  {
-    throw new UnsupportedOperationException("3.0 local interface not found");
-  }
-
-  /**
-   * Returns the object instance for the container
-   */
-  public Object getObject(Class api)
-  {
-    if (api == _localHomeClass)
-      return _localHome;
-    else if (api == _remoteHomeClass)
-      return _remoteHome;
-    else
-      return null;
-  }
-
-  /**
-   * Returns the 3.0 local stub for the container
-   */
-  public Object getLocalObject(ConfigContext env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the 3.0 local stub for the container
-   */
-  public Object getLocalObject(Class businessInterface)
-  {
-    throw new UnsupportedOperationException("3.0 local interface not found");
   }
 
   /**
@@ -812,19 +726,33 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
+   * Returns the remote skeleton for the given API
+   *
+   * @param api the bean's api to return a value for
+   * @param protocol the remote protocol
+   */
+  abstract public Object getRemoteObject(Class api, String protocol);
+
+  /**
+   * Returns the a new local stub for the given API
+   *
+   * @param api the bean's api to return a value for
+   */
+  abstract public Object getLocalObject(Class api);
+  
+  /**
+   * Returns the local jndi proxy for the given API
+   *
+   * @param api the bean's api to return a value for
+   */
+  abstract public Object getLocalProxy(Class api);
+
+  /**
    * Returns the object key from a handle.
    */
   public Class getPrimaryKeyClass()
   {
     return _primaryKeyClass;
-  }
-
-  /**
-   * Creates the local stub for the object in the context.
-   */
-  EJBLocalObject getEJBLocalObject(AbstractContext context)
-  {
-    throw new UnsupportedOperationException();
   }
 
   public EJBObject getEJBObject(Object key)
@@ -865,16 +793,6 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   abstract public AbstractContext getContext(Object key, boolean forceLoad)
     throws FinderException;
-
-  /**
-   * Returns the UserTransaction for the request.
-   */
-  /*
-    public UserTransaction getUserTransaction()
-    {
-    return _ejbManager.getUserTransaction();
-    }
-  */
 
   /**
    * Returns the currrent transaction context.
@@ -1078,10 +996,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void setPreDestroy(PreDestroyConfig preDestroy)
   {
     _preDestroyConfig = preDestroy;
-  }
-
-  public void setBusinessInterface(Object obj, Class businessInterface)
-  {
   }
 
   /**

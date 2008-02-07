@@ -134,11 +134,10 @@ public class MessageGenerator extends BeanGenerator {
     out.println("{");
     out.pushDepth();
 
-    /*
+    // ejb/0931
     out.println();
     out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
     out.println("  = new com.caucho.ejb3.xa.XAManager();");
-    */
 
     out.println("private static HashSet<Method> _xaMethods = new HashSet<Method>();");
     out.println();
@@ -146,10 +145,11 @@ public class MessageGenerator extends BeanGenerator {
     out.println("private XAResource _xaResource;");
     out.println("private boolean _isXa;");
 
-
+    HashMap map = new HashMap();
+    map.put("caucho.ejb.xa", "true");
     for (View view : getViews()) {
       // view.generateContextPrologue(out);
-      view.generateBusinessPrologue(out);
+      view.generateBusinessPrologue(out, map);
     }
 
     out.println();

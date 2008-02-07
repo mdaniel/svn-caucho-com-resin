@@ -137,16 +137,6 @@ public class StatelessGenerator extends SessionGenerator {
     out.popDepth();
     out.println("}");
   }
-
-  public void generateViews(JavaWriter out)
-    throws IOException
-  {
-    for (View view : getViews()) {
-      out.println();
-
-      view.generate(out);
-    }
-  }
   
   @Override
   protected void generateContext(JavaWriter out)
@@ -181,6 +171,20 @@ public class StatelessGenerator extends SessionGenerator {
     out.popDepth();
     out.println("}");
 
+    for (View view : getViews()) {
+      view.generateContextPrologue(out);
+    }
+
+    out.println();
+    out.println("public void destroy()");
+    out.println("{");
+    out.pushDepth();
+
+    generateDestroyViews(out);
+
+    out.popDepth();
+    out.println("}");
+    
     /*
     out.println();
     out.println(beanClass + " _ejb_begin()");
@@ -282,6 +286,16 @@ public class StatelessGenerator extends SessionGenerator {
     out.popDepth();
     out.println("}");
     */
+  }
+
+  public void generateViews(JavaWriter out)
+    throws IOException
+  {
+    for (View view : getViews()) {
+      out.println();
+
+      view.generate(out);
+    }
   }
 
   protected void generateNewInstance(JavaWriter out)

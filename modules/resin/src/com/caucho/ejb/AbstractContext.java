@@ -147,9 +147,6 @@ abstract public class AbstractContext implements EJBContext {
     if (obj == null)
       throw new IllegalStateException("getEJBObject() is only allowed through EJB 2.1 interfaces");
 
-    // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getInvokedBusinessInterfaceRemoteIllegal, needs QA
-    getServer().setBusinessInterface(obj, null);
-
     return obj;
 
     /*

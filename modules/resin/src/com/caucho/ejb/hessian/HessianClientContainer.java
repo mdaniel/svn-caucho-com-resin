@@ -35,6 +35,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -85,6 +86,8 @@ class HessianClientContainer implements HessianRemoteResolver {
     _serverId = serverId;
 
     _proxyFactory = new HessianProxyFactory();
+
+    Environment.addCloseListener(this);
    }
 
   static HessianClientContainer find(String serverId)
@@ -378,6 +381,11 @@ class HessianClientContainer implements HessianRemoteResolver {
       _basicAuth = "Basic " + auth;
     else
       _basicAuth = auth;
+  }
+
+  public void close()
+  {
+    //_proxyFactory.close();
   }
 
   /**

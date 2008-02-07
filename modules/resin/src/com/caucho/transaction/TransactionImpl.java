@@ -563,6 +563,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     try {
       callBeforeCompletion();
     } catch (RollbackException e) {
+      callAfterCompletion();
+      
       throw e;
     } catch (Throwable e) {
       setRollbackOnly(e);

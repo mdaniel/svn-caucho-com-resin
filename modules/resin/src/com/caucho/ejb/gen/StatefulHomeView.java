@@ -115,13 +115,16 @@ abstract public class StatefulHomeView extends StatefulView {
   @Override
   protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
   {
-    if (apiMethod.getName().equals("create")) {
-      ApiMethod implMethod = getEjbClass().getMethod("ejbCreate",
+    if (apiMethod.getName().startsWith("create")) {
+      String implName = "ejbC" + apiMethod.getName().substring(1);
+      
+      ApiMethod implMethod = getEjbClass().getMethod(implName,
 						     apiMethod.getParameterTypes());
 
       if (implMethod == null)
 	throw ConfigException.create(apiMethod.getMethod(),
-				     L.l("can't find matching ejbCreate"));
+				     L.l("api has no matching '{0}' method in '{1}'",
+					 implName, getEjbClass().getName()));
 
       View localView = getSessionBean().getView(apiMethod.getReturnType());
 
@@ -133,7 +136,7 @@ abstract public class StatefulHomeView extends StatefulView {
       StatefulMethod method = new StatefulCreateMethod(getSessionBean(),
 						       this,
 						       localView,
-						       apiMethod.getMethod(),
+						       apiMethod,
 						       implMethod.getMethod(),
 						       index);
 

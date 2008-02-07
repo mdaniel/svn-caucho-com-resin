@@ -72,12 +72,14 @@ public class StatefulRemoteHomeView extends StatefulHomeView {
     out.println();
     out.println("private " + getViewClassName() + " _remoteHome;");
 
-    out.println();
-    out.println("@Override");
-    out.println("public EJBHome getEJBHome()");
-    out.println("{");
-    out.println("  return _remoteHome;");
-    out.println("}");
+    if (EJBHome.class.isAssignableFrom(getApi().getJavaClass())) {
+      out.println();
+      out.println("@Override");
+      out.println("public EJBHome getEJBHome()");
+      out.println("{");
+      out.println("  return _remoteHome;");
+      out.println("}");
+    }
   }
 
   /**

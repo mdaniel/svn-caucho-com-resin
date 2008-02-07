@@ -95,11 +95,13 @@ public class HandleImpl extends AbstractHandle {
   {
     if (_object == null) {
       try {
+        /* XXX: webbeans
         SameJVMClientContainer client;
         client = SameJVMClientContainer.find(_serverId);
 
         if (client != null)
           _object = client.createObjectStub(_objectId);
+         */
       } catch (Exception e) {
         RemoteExceptionWrapper.create(e);
       }

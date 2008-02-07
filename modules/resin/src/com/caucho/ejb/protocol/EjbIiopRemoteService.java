@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,7 +31,6 @@ package com.caucho.ejb.protocol;
 
 import com.caucho.ejb.AbstractServer;
 import com.caucho.iiop.IiopRemoteService;
-import com.caucho.util.Log;
 
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
@@ -40,7 +39,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class EjbIiopRemoteService extends IiopRemoteService {
-  private static final Logger log = Log.open(EjbIiopRemoteService.class);
+  private static final Logger log 
+    = Logger.getLogger(EjbIiopRemoteService.class.getName());
 
   private AbstractServer _server;
 
@@ -134,24 +134,12 @@ public class EjbIiopRemoteService extends IiopRemoteService {
    */
   public Object getHome()
   {
-    Object obj = _server.getHomeObject();
+    Object obj = _server.getRemoteObject(_server.getRemoteHomeClass(), "iiop");
 
     if (obj != null)
       return obj;
 
-    return _server.getRemoteObject(_remoteInterface);
-
-    // this logic would be in server
-    /*
-    if (_isEJB3)
-      return _server.getRemoteObject(_remoteInterface);
-
-    Object obj = _server.getHomeObject();
-
-    if (obj == null)
-      obj = _server.getRemoteObject21();
-    */
-
+    return _server.getRemoteObject(_remoteInterface, "iiop");
   }
 
   /**

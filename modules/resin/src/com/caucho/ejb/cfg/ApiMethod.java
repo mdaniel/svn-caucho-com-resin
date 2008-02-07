@@ -137,6 +137,14 @@ public class ApiMethod {
   }
 
   /**
+   * Returns true for var args
+   */
+  public boolean isVarArgs()
+  {
+    return _method.isVarArgs();
+  }
+
+  /**
    * Gets the return type.
    */
   public Class getReturnType()

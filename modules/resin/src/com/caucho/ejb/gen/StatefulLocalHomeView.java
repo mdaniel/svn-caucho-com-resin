@@ -42,7 +42,7 @@ import java.util.*;
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class StatefulLocalHomeView extends StatefulLocalView {
+public class StatefulLocalHomeView extends StatefulHomeView {
   private static final L10N L = new L10N(StatefulLocalHomeView.class);
 
   public StatefulLocalHomeView(StatefulGenerator bean, ApiClass api)
@@ -53,6 +53,57 @@ public class StatefulLocalHomeView extends StatefulLocalView {
   protected String getViewClassName()
   {
     return getApi().getSimpleName() + "__EJBLocalHome";
+  }
+
+  /**
+   * Generates prologue for the context.
+   */
+  public void generateContextPrologue(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private " + getViewClassName() + " _localHome;");
+
+    if (EJBLocalHome.class.isAssignableFrom(getApi().getJavaClass())) {
+      out.println();
+      out.println("@Override");
+      out.println("public EJBLocalHome getEJBLocalHome()");
+      out.println("{");
+      out.println("  return _localHome;");
+      out.println("}");
+    }
+  }
+
+  /**
+   * Generates context home's constructor
+   */
+  @Override
+  public void generateContextHomeConstructor(JavaWriter out)
+    throws IOException
+  {
+    out.println("_localHome = new " + getViewClassName() + "(this);");
+  }
+
+  /**
+   * Generates code to create the provider
+   */
+  @Override
+  public void generateCreateProvider(JavaWriter out, String var)
+    throws IOException
+  {
+    out.println();
+    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("  return _localHome;");
+  }
+
+  /**
+   * Generates context home's constructor
+   */
+  @Override
+  public void generateContextObjectConstructor(JavaWriter out)
+    throws IOException
+  {
+    out.println("_localHome = context._localHome;");
   }
 
   @Override
@@ -76,7 +127,7 @@ public class StatefulLocalHomeView extends StatefulLocalView {
       return new StatefulCreateMethod(getSessionBean(),
 				      this,
 				      localView,
-				      apiMethod.getMethod(),
+				      apiMethod,
 				      implMethod.getMethod(),
 				      index);
     }

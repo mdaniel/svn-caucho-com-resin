@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ * 
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -43,7 +44,8 @@ import java.util.logging.Logger;
  */
 public abstract class ClientContainer {
   protected static L10N L = new L10N(ClientContainer.class);
-  protected static Logger log = Log.open(ClientContainer.class);
+  protected static Logger log
+    = Logger.getLogger(ClientContainer.class.getName());
   
   static final String CLIENT_KEY = "caucho.ejb.client";
 
@@ -101,7 +103,7 @@ public abstract class ClientContainer {
   {
     AbstractServer jvmServer = EjbProtocolManager.getJVMServer(_serverId);
 
-    return jvmServer.getClientLocalHome();
+    return jvmServer.getLocalObject(jvmServer.getLocalHomeClass());
   }
 
   /**

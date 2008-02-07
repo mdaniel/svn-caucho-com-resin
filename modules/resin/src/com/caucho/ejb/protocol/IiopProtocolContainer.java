@@ -109,11 +109,11 @@ public class IiopProtocolContainer extends ProtocolContainer {
     Class api = null;
     
     if (homeApi != null) {
-      obj = server.getRemoteObject(homeApi);
+      obj = server.getRemoteObject(homeApi, "iiop");
       api = homeApi;
     }
     else if (remoteApi != null) {
-      obj = server.getRemoteObject(remoteApi);
+      obj = server.getRemoteObject(remoteApi, "iiop");
       api = remoteApi;
     }
     
@@ -158,16 +158,15 @@ public class IiopProtocolContainer extends ProtocolContainer {
   /**
    * Removes a server from iiop.
    */
+  @Override
   public void removeServer(AbstractServer server)
   {
-    if (server.getRemoteObject() == null)
-      return;
-
-    String name = getName(server);
+   String name = getName(server);
 
     _context.removeService(name);
   }
 
+  @Override
   protected HandleEncoder createHandleEncoder(AbstractServer server,
                                               Class primaryKeyClass)
     throws ConfigException
@@ -183,6 +182,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
   /**
    * Returns the skeleton
    */
+  @Override
   public Skeleton getSkeleton(String uri, String queryString)
     throws Exception
   {

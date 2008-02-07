@@ -79,6 +79,57 @@ public class StatelessObjectView extends StatelessView {
   }
 
   /**
+   * Generates prologue for the context.
+   */
+  public void generateContextPrologue(JavaWriter out)
+    throws IOException
+  {
+    String localVar = "_local_" + getApi().getSimpleName();
+    
+    out.println();
+    out.println("private " + getViewClassName() + " " + localVar + ";");
+  }
+
+  /**
+   * Generates context home's constructor
+   */
+  @Override
+  public void generateContextHomeConstructor(JavaWriter out)
+    throws IOException
+  {
+    String localVar = "_local_" + getApi().getSimpleName();
+    
+    out.println(localVar + " = new " + getViewClassName() + "(this);");
+  }
+
+  /**
+   * Generates code to create the provider
+   */
+  @Override
+  public void generateCreateProvider(JavaWriter out, String var)
+    throws IOException
+  {
+    String localVar = "_local_" + getApi().getSimpleName();
+    
+    out.println();
+    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("  return " + localVar + ";");
+  }
+
+  /**
+   * Generates code to create the provider
+   */
+  @Override
+  public void generateDestroy(JavaWriter out)
+    throws IOException
+  {
+    String localVar = "_local_" + getApi().getSimpleName();
+    
+    out.println();
+    out.println(localVar + ".destroy();");
+  }
+
+  /**
    * Generates the view code.
    */
   public void generate(JavaWriter out)
@@ -144,7 +195,8 @@ public class StatelessObjectView extends StatelessView {
     out.println();
     out.println(getViewClassName() + "(" + getBean().getClassName() + " context)");
     out.println("{");
-    generateSuper(out, "context.getStatelessServer()");
+    generateSuper(out, "context.getStatelessServer(), "
+		  + getApi().getName() + ".class");
     out.println("  _context = context;");
 
     out.println("}");
@@ -185,6 +237,12 @@ public class StatelessObjectView extends StatelessView {
     out.popDepth();
     out.println("}");
   }
+  
+  protected void generateExtends(JavaWriter out)
+    throws IOException
+  {
+    out.println("extends StatelessObject");
+  }
 
   public void generateProxyPool(JavaWriter out)
     throws IOException
@@ -207,7 +265,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("  bean = new " + beanClass + "(this);");
 
     if (getBean().hasMethod("setSessionContext", new Class[] { SessionContext.class })) {
-      out.println("  bean.setSessionContext(this);");
+      out.println("  bean.setSessionContext(_context);");
     }
     
     out.println("  getStatelessServer().initInstance(bean);");
@@ -319,11 +377,6 @@ public class StatelessObjectView extends StatelessView {
       out.println("return result;");
   }
 
-  protected void generateExtends(JavaWriter out)
-    throws IOException
-  {
-    out.println("extends StatelessObject");
-  }
 
   protected void generateSuper(JavaWriter out, String serverVar)
     throws IOException

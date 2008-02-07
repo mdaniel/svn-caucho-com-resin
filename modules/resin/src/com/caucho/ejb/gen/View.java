@@ -136,6 +136,14 @@ abstract public class View {
   }
 
   /**
+   * Generates any global destroy
+   */
+  public void generateDestroy(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
    * Generates the view code.
    */
   abstract public void generate(JavaWriter out)
@@ -159,7 +167,15 @@ abstract public class View {
   public void generateBusinessPrologue(JavaWriter out)
     throws IOException
   {
-    HashMap map = new HashMap();
+    generateBusinessPrologue(out, new HashMap());
+  }
+
+  /**
+   * Generates prologue additions
+   */
+  public void generateBusinessPrologue(JavaWriter out, HashMap map)
+    throws IOException
+  {
     for (BusinessMethodGenerator method : getMethods()) {
       method.generatePrologueTop(out, map);
     }

@@ -63,4 +63,36 @@ public class StatefulLocalView extends StatefulObjectView {
   {
     return getApi().getSimpleName() + "__EJBLocal";
   }
+
+  /**
+   * Generates prologue for the context.
+   */
+  public void generateContextPrologue(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private " + getViewClassName() + " _localObject;");
+
+    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass())) {
+      out.println();
+      out.println("@Override");
+      out.println("public EJBLocalObject getEJBLocalObject()");
+      out.println("{");
+      out.println("  if (_localObject != null)");
+      out.println("    return _localObject;");
+      out.println("  else");
+      out.println("    return super.getEJBLocalObject();");
+      out.println("}");
+    }
+
+    out.println();
+    out.println("public " + getSessionBean().getClassName() +
+		"(" + getContextClassName() + " context, "
+		+ getViewClassName() + " localObject)");
+    out.println("{");
+    out.println("  this(context);");
+    out.println();
+    out.println("  _localObject = localObject;");
+    out.println("}");
+  }
 }

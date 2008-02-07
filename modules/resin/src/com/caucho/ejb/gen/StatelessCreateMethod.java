@@ -51,7 +51,7 @@ public class StatelessCreateMethod extends BusinessMethodGenerator
   public StatelessCreateMethod(StatelessGenerator bean,
 			       StatelessView homeView,
 			       View objectView,
-			       Method apiMethod,
+			       ApiMethod apiMethod,
 			       ApiMethod implMethod,
 			       int index)
   {

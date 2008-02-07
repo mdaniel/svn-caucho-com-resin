@@ -29,8 +29,6 @@
 package com.caucho.ejb.protocol;
 
 import com.caucho.ejb.AbstractServer;
-import com.caucho.naming.AbstractModel;
-import com.caucho.naming.ContextImpl;
 import com.caucho.naming.ObjectProxy;
 
 import javax.naming.NamingException;
@@ -63,6 +61,6 @@ public class ServerLocalProxy implements ObjectProxy, java.io.Serializable {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    return _server.getObject(_clientApi);
+    return _server.getLocalObject(_clientApi);
   }
 }

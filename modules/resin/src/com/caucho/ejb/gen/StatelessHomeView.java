@@ -64,6 +64,25 @@ abstract public class StatelessHomeView extends StatelessView {
     out.println("  return _localHome;");
   }
 
+  /**
+   * Generates the view code.
+   */
+  public void generate(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public static class " + getViewClassName());
+    out.println("  extends StatelessHome");
+    out.println("  implements StatelessProvider, " + getApi().getName());
+    out.println("{");
+    out.pushDepth();
+
+    generateClassContent(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
@@ -80,6 +99,8 @@ abstract public class StatelessHomeView extends StatelessView {
     out.println("_context = context;");
     out.println("_server = context.getStatelessServer();");
     
+    generateBusinessConstructor(out);
+    
     out.popDepth();
     out.println("}");
 
@@ -95,6 +116,15 @@ abstract public class StatelessHomeView extends StatelessView {
     out.println("  return _server;");
     out.println("}");
     out.println();
+
+    out.println();
+    out.println("public Object __caucho_get()");
+    out.println("{");
+    out.println("  return this;");
+    out.println("}");
+    out.println();
+
+    generateBusinessMethods(out);
   }
 
   @Override
@@ -121,7 +151,7 @@ abstract public class StatelessHomeView extends StatelessView {
       return new StatelessCreateMethod(getStatelessBean(),
 				       this,
 				       localView,
-				       apiMethod.getMethod(),
+				       apiMethod,
 				       implMethod,
 				       index);
     }

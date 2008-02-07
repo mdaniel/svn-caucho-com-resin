@@ -77,8 +77,7 @@ abstract public class StatelessContext extends AbstractSessionContext {
   
   public StatelessProvider getProvider(Class api)
   {
-    throw new IllegalStateException(L.l("'{0}' is an unknown interface",
-      api));
+    return null;
   }
   
   /**

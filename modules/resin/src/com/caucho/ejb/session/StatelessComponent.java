@@ -40,13 +40,14 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 /**
  * Component for session beans
  */
-public class StatelessComponent extends ComponentImpl {
+public class StatelessComponent extends ComponentImpl
+{
   private final StatelessProvider _provider;
 
-  public StatelessComponent(StatelessProvider provider)
+  public StatelessComponent(StatelessProvider provider, Class api)
   {
     super(WebBeansContainer.create().getWbWebBeans());
-    
+
     _provider = provider;
   }
 

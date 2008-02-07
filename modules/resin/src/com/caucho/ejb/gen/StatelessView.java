@@ -142,7 +142,8 @@ public class StatelessView extends View {
     ApiMethod implMethod = findImplMethod(apiMethod);
 
     if (implMethod == null) {
-      throw new ConfigException(L.l("api method '{0}' has no corresponding implementation in '{0}'",
+      throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
+				    apiMethod.getMethod().getDeclaringClass().getSimpleName(),
 				    getFullMethodName(apiMethod),
 				    getEjbClass().getName()));
     }
@@ -150,7 +151,7 @@ public class StatelessView extends View {
     StatelessLocalMethod bizMethod
       = new StatelessLocalMethod(getEjbClass(),
 				 this,
-				 apiMethod.getMethod(),
+				 apiMethod,
 				 implMethod.getMethod(),
 				 index);
 

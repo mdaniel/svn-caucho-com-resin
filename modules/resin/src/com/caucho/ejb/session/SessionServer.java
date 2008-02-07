@@ -41,6 +41,7 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 import javax.ejb.*;
 import javax.webbeans.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
@@ -50,6 +51,9 @@ abstract public class SessionServer extends AbstractServer
 {
   private final static Logger log
     = Logger.getLogger(SessionServer.class.getName());
+
+  private HashMap<Class,ComponentImpl> _componentMap
+    = new HashMap<Class,ComponentImpl>();
 
   public SessionServer(EjbContainer manager)
   {
@@ -86,9 +90,9 @@ abstract public class SessionServer extends AbstractServer
       webBeans.addComponent(comp);
 
       if (_localHomeClass != null)
-	_localHome = (EJBLocalHome) getObject(_localHomeClass);
+	_localHome = (EJBLocalHome) getLocalObject(_localHomeClass);
       if (_remoteHomeClass != null)
-	_remoteHome = (EJBHome) getObject(_remoteHomeClass);
+	_remoteHome = (EJBHome) getRemoteObject(_remoteHomeClass);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -117,7 +121,7 @@ abstract public class SessionServer extends AbstractServer
 	for (Class api : localApiList) {
 	  ComponentImpl comp = createSessionComponent(api);
 
-	  comp.setTargetType(getEjbClass());
+	  comp.setTargetType(api);
 
 	  comp.setName(beanName);
 	  comp.addNameBinding(beanName);
@@ -125,6 +129,8 @@ abstract public class SessionServer extends AbstractServer
 	  comp.init();
 	  webBeans.addComponentByName(beanName, comp);
 	  webBeans.addComponentByType(api, comp);
+	  
+	  _componentMap.put(api, comp);
 	}
       }
       
@@ -132,7 +138,7 @@ abstract public class SessionServer extends AbstractServer
 	for (Class api : remoteApiList) {
 	  ComponentImpl comp = createSessionComponent(api);
 
-	  comp.setTargetType(getEjbClass());
+	  comp.setTargetType(api);
 
 	  comp.setName(beanName);
 	  comp.addNameBinding(beanName);
@@ -140,12 +146,19 @@ abstract public class SessionServer extends AbstractServer
 	  comp.init();
 	  webBeans.addComponentByName(beanName, comp);
 	  webBeans.addComponentByType(api, comp);
+
+	  _componentMap.put(api, comp);
 	}
       }
     }
   }
   
   abstract protected ComponentImpl createSessionComponent(Class api);
+
+  protected ComponentImpl getComponent(Class api)
+  {
+    return _componentMap.get(api);
+  }
 
   /**
    * Returns the object key from a handle.
@@ -163,24 +176,6 @@ abstract public class SessionServer extends AbstractServer
   public EJBLocalHome getEJBLocalHome()
   {
     return _localHome;
-  }
-
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  @Override
-  public EJBHome getEJBHome()
-  {
-    return _remoteHome;
-  }
-
-  /**
-   * Returns the EJBRemote stub for the container
-   */
-  @Override
-  public Object getRemoteObject()
-  {
-    return getRemoteObject(null);
   }
 
   @Override

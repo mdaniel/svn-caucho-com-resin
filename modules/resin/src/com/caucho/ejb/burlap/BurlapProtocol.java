@@ -76,6 +76,7 @@ public class BurlapProtocol extends ProtocolContainer {
   /**
    * Adds a server to the protocol.
    */
+  @Override
   public void addServer(AbstractServer server)
   {
     log.finer("Burlap[" + server + "] added");
@@ -86,6 +87,7 @@ public class BurlapProtocol extends ProtocolContainer {
   /**
    * Removes a server from the protocol.
    */
+  @Override
   public void removeServer(AbstractServer server)
   {
     _serverMap.remove(server.getProtocolId());
@@ -104,6 +106,7 @@ public class BurlapProtocol extends ProtocolContainer {
   /**
    * Returns the skeleton
    */
+  @Override
   public Skeleton getSkeleton(String uri, String queryString)
     throws Exception
   {
@@ -122,9 +125,6 @@ public class BurlapProtocol extends ProtocolContainer {
 
     AbstractServer server = _serverMap.get(serverId);
 
-    if (server == null)
-      server = getProtocolManager().getServerByEJBName(serverId);
-
     if (server == null) {
       ArrayList children = getProtocolManager().getRemoteChildren(serverId);
 
@@ -135,14 +135,6 @@ public class BurlapProtocol extends ProtocolContainer {
 	
         return null; // XXX: should return error skeleton
       }
-      /*
-        ArrayList children = getServerContainer().getRemoteChildren(serverId);
-
-        if (children != null && children.size() > 0)
-        return new NameContextSkeleton(this, serverId);
-        else
-        return null; // XXX: should return error skeleton
-      */
     }
     else if (objectId != null) {
       Object key = server.getHandleEncoder("burlap").objectIdToKey(objectId);
@@ -168,7 +160,7 @@ public class BurlapProtocol extends ProtocolContainer {
       remoteApi = server.getRemoteObjectClass();
 
       if (homeApi != null) {
-	Object remote = server.getObject(homeApi);
+	Object remote = server.getRemoteObject(homeApi, "burlap");
 	
         BurlapSkeleton skel = getSkeleton(homeApi, homeApi, remoteApi);
 
@@ -176,7 +168,7 @@ public class BurlapProtocol extends ProtocolContainer {
       }
       
       if (remoteApi != null) {
-	Object remote = server.getObject(remoteApi);
+	Object remote = server.getRemoteObject(remoteApi, "burlap");
 	
         BurlapSkeleton skel = getSkeleton(remoteApi, remoteApi, remoteApi);
 

@@ -49,7 +49,7 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   
   public StatelessLocalMethod(ApiClass ejbClass,
 			      StatelessView view,
-			      Method apiMethod,
+			      ApiMethod apiMethod,
 			      Method implMethod,
 			      int index)
   {

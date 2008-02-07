@@ -168,11 +168,16 @@ abstract public class StatefulView extends View {
     out.println("}");
 
     out.println();
-    out.println("public " + getViewClassName() + "(ConfigContext env)");
+    out.println("public " + getViewClassName() + "(StatefulServer server, ConfigContext env)");
     out.println("{");
-    generateSuper(out, "null");
-    out.println("  _bean = new " + getEjbClass().getName() + "();");
+    out.pushDepth();
+    
+    generateSuper(out, "server");
+    out.println("_server = server;");
+    out.println("_bean = new " + getEjbClass().getName() + "();");
     generateBusinessConstructor(out);
+
+    out.popDepth();
     out.println("}");
 
     generateSessionProvider(out);
@@ -209,8 +214,8 @@ abstract public class StatefulView extends View {
     out.println();
     out.println("public Object __caucho_createNew(ConfigContext env)");
     out.println("{");
-    out.print("  " + getViewClassName() + " bean"
-	      + " = new " + getViewClassName() + "(env);");
+    out.println("  " + getViewClassName() + " bean"
+		+ " = new " + getViewClassName() + "(_server, env);");
     out.println("  _server.initInstance(bean._bean, env);");
     out.println("  return bean;");
     out.println("}");
@@ -225,7 +230,7 @@ abstract public class StatefulView extends View {
     
     StatefulMethod bizMethod
       = new StatefulMethod(this,
-			   apiMethod.getMethod(),
+			   apiMethod,
 			   implMethod.getMethod(),
 			   index);
 

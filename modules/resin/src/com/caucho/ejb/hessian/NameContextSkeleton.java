@@ -53,7 +53,8 @@ import java.util.logging.Logger;
  * to execute the request.
  */
 public class NameContextSkeleton extends Skeleton {
-  protected static final Logger log = Log.open(NameContextSkeleton.class);
+  private static final Logger log
+    = Logger.getLogger(NameContextSkeleton.class.getName());
 
   private HessianProtocol _protocol;
   private String _prefix;
@@ -123,7 +124,7 @@ public class NameContextSkeleton extends Skeleton {
       if (home != null)
 	out.writeObject(home);
       else // if (server instanceof 
-	out.writeObject(server.getRemoteObject());
+	out.writeObject(server.getRemoteObject(server.getRemoteHomeClass(), "hessian"));
 
       out.completeReply();
     }
