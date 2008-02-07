@@ -303,6 +303,9 @@ public class ClassComponent extends ComponentImpl {
       
       Object value = _ctor.newInstance(args);
 
+      if (isSingleton())
+	SerializationAdapter.setHandle(value, getHandle());
+
       if (env != null)
 	env.put(this, value);
 
@@ -369,9 +372,13 @@ public class ClassComponent extends ComponentImpl {
       */
 
       PojoBean bean = new PojoBean(_cl);
+      bean.setSingleton(isSingleton());
       bean.introspect();
 
       Class instanceClass = bean.generateClass();
+
+      if (instanceClass == _cl && isSingleton())
+	instanceClass = SerializationAdapter.gen(_cl);
 
       if (instanceClass != _cl) {
 	try {

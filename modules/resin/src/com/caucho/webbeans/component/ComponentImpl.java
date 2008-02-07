@@ -203,6 +203,12 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     return _scope;
   }
 
+  public boolean isSingleton()
+  {
+    return (_scope instanceof SingletonScope
+	    || _scope instanceof ApplicationScope);
+  }
+
   /**
    * Sets the init program.
    */

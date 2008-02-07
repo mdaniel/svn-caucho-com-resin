@@ -61,17 +61,25 @@ public class PojoBean extends BeanGenerator {
   private boolean _hasXA;
   private boolean _hasReadResolve;
   private boolean _isReadResolveEnhanced;
+  private boolean _isSingleton;
   
   public PojoBean(Class beanClass)
   {
     super(beanClass.getName() + "$ResinWebBean", new ApiClass(beanClass));
 
     setSuperClassName(beanClass.getName());
+    addInterfaceName("java.io.Serializable");
+    
     addImport("javax.transaction.*");
     
     _view = new PojoView(this, getEjbClass());
     
     _beanClass = new ApiClass(beanClass);
+  }
+
+  public void setSingleton(boolean isSingleton)
+  {
+    _isSingleton = isSingleton;
   }
 
   public void introspect()
@@ -187,6 +195,8 @@ public class PojoBean extends BeanGenerator {
     for (BusinessMethodGenerator method : _businessMethods) {
       method.generate(out, map);
     }
+
+    generateWriteReplace(out);
   }
 
   /**
@@ -206,8 +216,10 @@ public class PojoBean extends BeanGenerator {
       out.println("  = new com.caucho.ejb3.xa.XAManager();");
     }
 
+    /*
     if (_isReadResolveEnhanced)
       generateReadResolve(out);
+    */
   }
 
   protected void generateReadResolve(JavaWriter out)
@@ -220,6 +232,22 @@ public class PojoBean extends BeanGenerator {
     
     out.println("  return this;");
     out.println("}");
+  }
+
+  protected void generateWriteReplace(JavaWriter out)
+    throws IOException
+  {
+    if (_isSingleton) {
+      out.println("private transient Object __caucho_handle;");
+      out.println();
+      out.println("private Object writeReplace()");
+      out.println("{");
+      out.println("  return __caucho_handle;");
+      out.println("}");
+    }
+    else {
+      // XXX: need a handle or serialize to the base class (?)
+    }
   }
   
   protected void generateConstructor(JavaWriter out, Constructor ctor)

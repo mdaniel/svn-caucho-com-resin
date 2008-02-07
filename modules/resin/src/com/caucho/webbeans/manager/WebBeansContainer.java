@@ -113,6 +113,9 @@ public class WebBeansContainer
   private ArrayList<ComponentImpl> _pendingSingletonList
     = new ArrayList<ComponentImpl>();
 
+  private HashMap<Class,InjectProgram> _injectMap
+    = new HashMap<Class,InjectProgram>();
+
   private RuntimeException _configException;
 
   private WebBeansContainer(ClassLoader loader)
@@ -620,6 +623,30 @@ public class WebBeansContainer
     else
       return null;
   }
+
+  /**
+   * Injects an object
+   */
+  public void injectObject(Object obj)
+  {
+    if (obj == null)
+      return;
+
+    Class cl = obj.getClass();
+    InjectProgram program;
+
+    synchronized (_injectMap) {
+      program = _injectMap.get(cl);
+
+      if (program == null) {
+	program = InjectIntrospector.introspectProgram(cl);
+	_injectMap.put(cl, program);
+      }
+    }
+
+    program.configure(obj);
+  }
+  
 
   //
   // events
