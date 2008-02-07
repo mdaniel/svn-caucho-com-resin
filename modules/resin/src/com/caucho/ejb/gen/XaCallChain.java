@@ -164,6 +164,8 @@ public class XaCallChain extends AbstractCallChain
   public void generateCall(JavaWriter out)
     throws IOException
   {
+    boolean isPushDepth = false;
+    
     if (_isContainerManaged && _xa != null) {
       switch (_xa) {
       case MANDATORY:
@@ -184,6 +186,7 @@ public class XaCallChain extends AbstractCallChain
 	  out.println();
 	  out.println("try {");
 	  out.pushDepth();
+	  isPushDepth = true;
 	}
 	break;
 	
@@ -193,6 +196,7 @@ public class XaCallChain extends AbstractCallChain
 	  out.println();
 	  out.println("try {");
 	  out.pushDepth();
+	  isPushDepth = true;
 	}
 	break;
 	
@@ -202,6 +206,7 @@ public class XaCallChain extends AbstractCallChain
 	  out.println();
 	  out.println("try {");
 	  out.pushDepth();
+	  isPushDepth = true;
 	}
 	break;
       }
@@ -214,7 +219,9 @@ public class XaCallChain extends AbstractCallChain
     generateNext(out);
 
     if (_isContainerManaged && _xa != null) {
-      out.popDepth();
+      if (isPushDepth)
+	out.popDepth();
+      
       for (Class exn : _bizMethod.getApiMethod().getExceptionTypes()) {
 	ApplicationException appExn
 	  = (ApplicationException) exn.getAnnotation(ApplicationException.class);

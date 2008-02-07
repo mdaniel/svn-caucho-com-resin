@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.config.ConfigContext;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import java.util.*;
@@ -109,7 +110,9 @@ public class StatefulServer extends SessionServer
   @Override
   public Object getLocalObject(Class api)
   {
-    return getStatefulContext().getProvider(api);
+    StatefulProvider provider = getStatefulContext().getProvider(api);
+
+    return provider.__caucho_createNew(new ConfigContext());
   }
 
   protected ComponentImpl createSessionComponent(Class api)

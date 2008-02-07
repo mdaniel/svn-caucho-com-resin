@@ -740,6 +740,9 @@ public class WebBeansContainer
 	comp.init();
 
 	_transientMap.put(type, comp);
+
+	// XXX: QA
+	comp.bind();
       }
 
       return comp;

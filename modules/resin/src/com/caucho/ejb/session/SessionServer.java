@@ -152,6 +152,15 @@ abstract public class SessionServer extends AbstractServer
       }
     }
   }
+
+  protected void bindInjection()
+  {
+    super.bindInjection();
+
+    for (ComponentImpl comp : _componentMap.values()) {
+      comp.bind();
+    }
+  }
   
   abstract protected ComponentImpl createSessionComponent(Class api);
 

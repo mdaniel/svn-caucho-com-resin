@@ -190,6 +190,7 @@ abstract public class StatefulView extends View {
     generateSuper(out, "server");
     out.println("  _server = server;");
     out.println("  _bean = bean;");
+    generateBusinessConstructor(out);
     out.println("}");
 
     out.println();

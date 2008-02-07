@@ -122,9 +122,17 @@ public class InjectIntrospector {
 
     for (Method method : type.getDeclaredMethods()) {
       if (method.isAnnotationPresent(PreDestroy.class)) {
-        if (method.getParameterTypes().length != 0)
+	Class []types = method.getParameterTypes();
+	
+        if (types.length == 0) {
+	}
+	else if (types.length == 1 && types[0].equals(InvocationContext.class)) {
+	  // XXX:
+	  continue;
+	}
+	else
           throw new ConfigException(location(method)
-				    + L.l("{0}: @PreDestroy is requires zero arguments"));
+				    + L.l("@PreDestroy is requires zero arguments"));
 	
         PreDestroyInject destroyProgram
           = new PreDestroyInject(method);
