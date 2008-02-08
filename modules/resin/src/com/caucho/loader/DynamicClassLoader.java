@@ -82,6 +82,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private final static URL []NULL_URL_ARRAY = new URL[0];
 
   private static long _globalDependencyCheckInterval = 2000L;
+  private static boolean _isJarCacheEnabled;
 
   private String _id;
 
@@ -221,6 +222,22 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return parent;
     else
       return Thread.currentThread().getContextClassLoader();
+  }
+
+  /**
+   * Returns true if jar entries should be cached.
+   */
+  public static boolean isJarCacheEnabled()
+  {
+    return _isJarCacheEnabled;
+  }
+
+  /**
+   * Returns true if jar entries should be cached.
+   */
+  public static void setJarCacheEnabled(boolean isEnabled)
+  {
+    _isJarCacheEnabled = isEnabled;
   }
 
   private void verbose(String name, String msg)

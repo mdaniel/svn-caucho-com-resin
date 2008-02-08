@@ -43,6 +43,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentProperties;
@@ -180,7 +181,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Resin(ClassLoader loader)
   {
     _startTime = Alarm.getCurrentTime();
-    
+
+    DynamicClassLoader.setJarCacheEnabled(true);
     Environment.init();
 
     if (loader == null)

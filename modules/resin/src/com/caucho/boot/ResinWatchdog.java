@@ -163,20 +163,12 @@ public class ResinWatchdog extends AbstractManagedObject
 
   public void setWatchdogPassword(String password)
   {
-    _password = password;
-  }
-
-  public String getWatchdogPassword()
-  {
-    return _password;
+    log.warning("watchdog-password is obsolete, set a <user> in the <management> section instead");
   }
 
   public String getManagementPassword()
   {
-    if (_password != null)
-      return _password;
-    else
-      return _cluster.getResin().getManagementPassword();
+    return _cluster.getResin().getManagementPassword();
   }
 
   public void setWatchdogPort(int port)
@@ -292,6 +284,8 @@ public class ResinWatchdog extends AbstractManagedObject
       throw e;
     } catch (IllegalStateException e) {
       throw e;
+    } catch (ConnectException e) {
+      log.log(Level.FINER, e.toString(), e);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -414,7 +408,6 @@ public class ResinWatchdog extends AbstractManagedObject
 
     list.add(getJavaExe());
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
-    list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());

@@ -69,6 +69,8 @@ public class SystemClassLoader
     super(parent);
 
     setId("system");
+
+    DynamicClassLoader.setJarCacheEnabled(true);
   }
 
   public ClassLoader getClassLoader()

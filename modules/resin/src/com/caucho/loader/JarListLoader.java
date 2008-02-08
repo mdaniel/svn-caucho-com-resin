@@ -59,8 +59,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
   private DependencyContainer _dependencyList = new DependencyContainer();
 
   // Entry map
-  private HashMap<String,ArrayList<JarEntry>> _pathMap
-    = new HashMap<String,ArrayList<JarEntry>>();
+  private HashMap<String,ArrayList<JarEntry>> _pathMap;
 
   /**
    * Creates a new jar list loader.
@@ -128,6 +127,9 @@ abstract public class JarListLoader extends Loader implements Dependency {
 
     if (getLoader() != null)
       getLoader().addURL(jarPath);
+
+    if (_pathMap == null && DynamicClassLoader.isJarCacheEnabled())
+      _pathMap = new HashMap<String,ArrayList<JarEntry>>();
 
     if (_pathMap != null) {
       ZipScanner scan = null;
@@ -362,7 +364,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
       ArrayList<JarEntry> jars = new ArrayList<JarEntry>(_jarList);
       _jarList.clear();
 
-      _pathMap.clear();
+      if (_pathMap != null)
+	_pathMap.clear();
     
       for (int i = 0; i < jars.size(); i++) {
 	JarEntry jarEntry = jars.get(i);
