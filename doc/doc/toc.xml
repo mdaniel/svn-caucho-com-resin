@@ -29,7 +29,7 @@
     <!--
        - Admin/JMX
       -->
-    <item link="jmx.xtp" title="Admin"/>
+    <item link="resin-admin.xtp" title="Admin"/>
     
     <!--
        - Amber
@@ -46,6 +46,11 @@
        - Caching
       -->
     <item link="proxy-cache.xtp" title="Caching"/>
+    
+    <!--
+       - Comet
+      -->
+    <item link="resin-comet.xtp" title="Comet"/>
 
     <!--
        - Command-line
@@ -66,7 +71,7 @@
       <item link="database-tags.xtp" title="&lt;database>"
 	    description="connection pool and database driver configuration"/>
       <item link="env-tags.xtp" title="Environment tags"
-     description="database, classloader, resource, bean, and IoC"/>
+            description="database, classloader, resource, bean, and IoC"/>
       <item link="host-tags.xtp" title="&lt;host>"
 	    description="virtual hosts" />
       <item link="config-log.xtp" title="Log tags"
@@ -163,7 +168,8 @@
       <item link="jsp-templates.xtp" title="JSP Templates"/>
     </item>
     
-    <item link="resin-messaging.xtp" title="Messaging"/>
+    <item link="resin-messaging.xtp" title="Messaging"
+          description="JMS, JCA, Message Driven Beans and Queues"/>
      
     <!--
     <item link="portlet/index.xtp" title="Portlets" atoc-descend="true"/>

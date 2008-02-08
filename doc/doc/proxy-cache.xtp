@@ -23,8 +23,9 @@
   <body>
     <localtoc/>
 
+<s1 title="HTTP Caching Headers">
 
-<s1 title="Cache-Control: max-age">
+<s2 title="Cache-Control: max-age">
 
 <p>Setting the <var>max-age</var> header will cache the results
 for a specified time.  For heavily loaded pages, even setting short
@@ -48,6 +49,88 @@ Count: &lt;%= counter++ %&gt;
 <p><var>max-age</var> is useful for database generated pages which are
 continuously, but slowly updated.  To cache based on something with a known
 modified date, like a file, you can use <var>If-Modified</var>.</p>
+
+</s2>
+
+<s2 title="Expires">
+
+<p>An application can also set the <var>Expires</var> header to enable caching, when the expiration date is a specific time instead of an interval.
+For heavily loaded pages, even setting short
+expires times can significantly improve performance.  Sessions should
+be disabled for caching.</p>
+
+<p>The following example sets expiration for 15 seconds.  So the
+counter should update slowly.</p>
+
+<example title="Expires">
+&lt;%@ page session="false" %&gt;
+&lt;%! int counter; %&gt;
+&lt;%
+long now = System.currentTimeMillis();
+response.setDateHeader("Expires", now + 15000);
+%&gt;
+Count: &lt;%= counter++ %&gt;
+</example>
+
+<p><var>Expires</var> is useful for database generated pages which are
+continuously, but slowly updated.  To cache based on something with a known
+modified date, like a file, you can use <var>If-Modified</var>.</p>
+
+</s2>
+
+<s2 title="If-Modified">
+
+<p>The <var>If-Modified</var> headers let you cache based on an
+underlying change date.  For example, the page may only change when an
+underlying source page changes.  Resin lets you easily use 
+<var>If-Modified</var> by overriding methods in HttpServlet or
+in a JSP page.</p>
+
+<p>The following page only changes when the underlying 'test.xml'
+page changes.</p>
+
+<example>
+&lt;%@ page session="false" %&gt;
+&lt;%!
+int counter;
+
+public long getLastModified(HttpServletRequest req)
+{
+  String path = req.getRealPath("test.xml");
+  return new File(path).lastModified();
+}
+%&gt;
+Count: &lt;%= counter++ %&gt;
+</example>
+
+<p><var>If-Modified</var> pages are useful in combination with the
+<var>cache-mapping</var> configuration.</p>
+
+</s2>
+
+<s2 title="Vary">
+
+<p>In some cases, you'll want to have separate cached pages for the same URL
+depending on the capabilities of the browser.  Using gzip compression is
+the most important example.  Browsers which can understand
+gzip-compressed files receive the compressed page while simple browsers
+will see the uncompressed page.  Using the "Vary" header, Resin can
+cache different versions of that page.</p>
+
+<example title="caching based on gzip">
+&lt;%
+  response.addHeader("Cache-Control", "max-age=3600");
+  response.addHeader("Vary", "Accept-Encoding");
+%&gt;
+
+Accept-Encoding: &lt;%= request.getHeader("Accept-Encoding") %&gt;
+</example>
+
+<p>The "Vary" header can be particularly useful for caching anonymous
+pages, i.e. using "Vary: Cookie".  Logged-in users will get their custom
+pages, while anonymous users will see the cached page.</p>
+
+</s2>
 
 </s1>
 
@@ -78,62 +161,6 @@ add the following to your resin.conf:</p>
 [2003/09/12 10:18:49.348] using cache: /images/caucho-white.jpg
 [2003/09/12 10:18:49.362] using cache: /images/logo.gif
 </results>
-
-</s1>
-
-<s1 title="Expires">
-
-<p>An application can also set the <var>Expires</var> header to enable caching, when the expiration date is a specific time instead of an interval.
-For heavily loaded pages, even setting short
-expires times can significantly improve performance.  Sessions should
-be disabled for caching.</p>
-
-<p>The following example sets expiration for 15 seconds.  So the
-counter should update slowly.</p>
-
-<example title="Expires">
-&lt;%@ page session="false" %&gt;
-&lt;%! int counter; %&gt;
-&lt;%
-long now = System.currentTimeMillis();
-response.setDateHeader("Expires", now + 15000);
-%&gt;
-Count: &lt;%= counter++ %&gt;
-</example>
-
-<p><var>Expires</var> is useful for database generated pages which are
-continuously, but slowly updated.  To cache based on something with a known
-modified date, like a file, you can use <var>If-Modified</var>.</p>
-
-</s1>
-
-<s1 title="If-Modified">
-
-<p>The <var>If-Modified</var> headers let you cache based on an
-underlying change date.  For example, the page may only change when an
-underlying source page changes.  Resin lets you easily use 
-<var>If-Modified</var> by overriding methods in HttpServlet or
-in a JSP page.</p>
-
-<p>The following page only changes when the underlying 'test.xml'
-page changes.</p>
-
-<example>
-&lt;%@ page session="false" %&gt;
-&lt;%!
-int counter;
-
-public long getLastModified(HttpServletRequest req)
-{
-  String path = req.getRealPath("test.xml");
-  return new File(path).lastModified();
-}
-%&gt;
-Count: &lt;%= counter++ %&gt;
-</example>
-
-<p><var>If-Modified</var> pages are useful in combination with the
-<var>cache-mapping</var> configuration.</p>
 
 </s1>
 
@@ -225,26 +252,6 @@ top-level page that looks like:</p>
 
 </s1>
 
-<s1 title="Vary">
-
-<p>In some cases, you'll want to have separate cached pages for the same URL
-depending on the capabilities of the browser.  Using gzip compression is
-the most important example.  Browsers which can understand
-gzip-compressed files receive the compressed page while simple browsers
-will see the uncompressed page.  Using the "Vary" header, Resin can
-cache different versions of that page.</p>
-
-<example title="caching based on gzip">
-&lt;%
-  response.addHeader("Cache-Control", "max-age=3600");
-  response.addHeader("Vary", "Accept-Encoding");
-%&gt;
-
-Accept-Encoding: &lt;%= request.getHeader("Accept-Encoding") %&gt;
-</example>
-
-</s1>
-
 <s1 title="Caching Anonymous Users">
 
 <p>In many cases, logged in users get specialized pages, but
@@ -309,36 +316,36 @@ disp.include(request, response);
 
 </s1>
 
-<s1 title="Experimental Anonymous Caching">
+<s1 title="Anonymous Caching">
 
-<p>Resin includes an anonymous user caching feature.  If a user
-is not logged in, she will get a cached page.  If she's logged in, she'll
-get her own page.  This feature will not work if anonymous users are
+<p>The Vary header can be used to implement anonymous user caching.  If a user
+is not logged in, he will get a cached page.  If he's logged in, he'll
+get his own page.  This feature will not work if anonymous users are
 assigned cookies for tracking purposes.</p>
 
-<p>To make anonymous caching work, you must set the <var>Cache-Control:
-x-anonymous</var> header.  If you omit the x-anonymous header, Resin will use
-the <var>Expires</var> to cache the same page for every user.</p>
+<p>To make anonymous caching work, you must set the <var>Vary: Cookie</var>
+If you omit the Vary header, Resin will use
+the <var>max-age</var> to cache the same page for every user.</p>
 
 <example>
 &lt;%@ page session="false" %&gt;
-&lt;%! int counter; %&gt;
+&lt;%! int _counter; %&gt;
 &lt;%
 response.addHeader("Cache-Control", "max-age=15");
-response.addHeader("Cache-Control", "x-anonymous");
+response.addHeader("Vary", "Cookie");
 
 String user = request.getParameter("user");
 %&gt;
 User: &lt;%= user %&gt; &lt;%= counter++ %&gt;
 </example>
 
-<p>The top page must still set the <var>Expires</var> or
+<p>The top page must still set the <var>max-age</var> or
 <var>If-Modified</var> header, but Resin will take care of deciding if the
 page is cacheable or not.  If the request has any cookies, Resin will
-not cache it or use the cached page.  If it has no cookies, Resin will
-use the cached page.</p>
+not cache it and will not use the cached page.
+If it has no cookies, Resin will use the cached page.</p>
 
-<p>When using x-anonymous, user tracking cookies will make the
+<p>When using Vary: Cookie, user tracking cookies will make the
 page uncacheable even if the page is the same for all users.
 Resin chooses to cache or not based on the existence of any cookies
 in the request, whether they're used or not.</p>
@@ -363,7 +370,8 @@ browser or to a browser using reload.</p>
 on the default FileServlet.</p>
 
 <example>
-&lt;web-app id='/'&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
   &lt;cache-mapping url-pattern='*.gif'
                  expires='24h'/&gt;
 &lt;/web-app&gt;

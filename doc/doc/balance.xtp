@@ -1,7 +1,6 @@
 <document>
 <header>
 <product>resin</product>
-<resin-2.0>$resin/ref/balance.xtp</resin-2.0>
 <title>Reliability and Load Balancing</title>
 <description>
 <p>As traffic increases, web sites need to add additional web

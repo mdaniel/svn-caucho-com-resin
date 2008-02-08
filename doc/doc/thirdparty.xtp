@@ -122,6 +122,7 @@ offers both in memory and disk based tables."</p>
 <ul>
 <li>See <a href="http://wiki.caucho.com/Mysql">http://wiki.caucho.com/Mysql</a>
 for more information</li>
+</ul>
 
 <example title="META-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">

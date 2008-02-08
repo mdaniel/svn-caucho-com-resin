@@ -61,42 +61,66 @@ Configuration of the authenticator uses bean-style configuration in the
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.Resource -->
 
-<p>&lt;bean> configures a custom bean resource and stores in JNDI.
-&lt;bean> is a synonym for &lt;bean>.</p>
+<p>&lt;bean> configures a custom singleton bean and stores in the
+WebBeans registry.  &lt;bean> is a primary configuration tag
+for <a href="resin-ioc.xtp">Resin's IoC</a> capabilities.
+The bean can also be optional registered in JNDI.</p>
 
-<p>Resources are beans stored in JNDI.  The resources can be
-created from any Java class that conforms to the bean conventions.
-Configuration of the resource is in the &lt;init&gt; section.  Field values may
-use JSP-EL expressions as well as constant strings or even complex
-sub-beans.</p>
+<p>Custom configuration of the bean is in the &lt;init&gt; section.
+Field values may use JSP-EL expressions as well as constant strings
+or even complex sub-beans. More details for configuring singleton
+beans are in <a href="resin-ioc.xtp">Resin IoC</a>.</p>
 
-<deftable-childtags>
-<tr><td>jndi-name</td>
-    <td>JNDI name for the resource.  Since Resin 3.0</td>
-    <td></td></tr>
-<tr><td>type</td>
-    <td>Application class implementing the resource. Since Resin 3.0</td>
-    <td>required</td></tr>
-<tr><td>arg</td>
-    <td>Arguments to the resource's constructor.  Since Resin 3.0</td>
-    <td>optional</td></tr>
-<tr><td>init</td>
-    <td>IoC/JAXB configuration for the bean</td>
-    <td>optional</td></tr>
-<tr><td>listener</td>
-    <td>Registers the bean as a listener for a JMX emitter. Resin 3.0</td>
-    <td>optional</td></tr>
-<tr><td>mbean-name</td>
-    <td>JMX name for management registration. Resin 3.0</td>
-    <td>optional</td></tr>
-<tr><td>var</td>
-    <td>EL variable name for the bean. Resin 3.0</td>
-    <td>optional</td></tr>
+<deftable-childtags title="bean attributes">
+<tr>
+  <td>class</td>
+  <td>Application class implementing the resource. Since Resin 3.0</td>
+  <td>required</td>
+</tr>
+<!--
+<tr>
+  <td>arg</td>
+  <td>Arguments to the resource's constructor.  Since Resin 3.0</td>
+  <td>optional</td>
+</tr>
+-->
+<tr>
+  <td>init</td>
+  <td>IoC/JAXB configuration for the bean</td>
+  <td>optional</td>
+</tr>
+<!--
+<tr>
+  <td>listener</td>
+  <td>Registers the bean as a listener for a JMX emitter. Resin 3.0</td>
+  <td>optional</td>
+</tr>
+-->
+<tr>
+  <td>jndi-name</td>
+  <td>JNDI name for the resource.  Since Resin 3.0</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>mbean-name</td>
+  <td>JMX name for management registration. Resin 3.0</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The name of the bean, used for @Named injection. Resin 3.1.4.</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>scope</td>
+  <td>request, session, conversational, application, singleton. Resin 3.1.4.</td>
+  <td>singleton</td>
+</tr>
 </deftable-childtags>
 
-<example title="Custom Bean configured in resin-web.xml">
+<example title="Singleton Bean configured in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
-  &lt;bean jndi-name="env/test"&gt;
+  &lt;bean name="test"&gt;
     &lt;type&gt;test.MyBean&lt;/type&gt;
     &lt;init&gt;
       &lt;greeting&gt;Hello&lt;/greeting&gt;
@@ -111,22 +135,15 @@ sub-beans.</p>
 
 <def title="&lt;bean> schema">
 r_bean = element bean {
-  (jndi-name?
-  &amp; mbean-name?
-  &amp; mbean-interface?
-  &amp; var?),
-
-  (type, arg*)?,
-
-  (init | listener)*
+  r_class?
+  &amp; r_binding*
+  &amp; r_init?
+  &amp; r_jndi-name?
+  &amp; r_mbean-name?
+  &amp; r_mbean-interface?
+  &amp; r_name?
+  &amp; r_scope?
 }
-
-element listener {
-  mbean-name,
-
-  handback*
-}
-
 </def>
 
 </defun> 

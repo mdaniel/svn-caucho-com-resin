@@ -50,6 +50,10 @@ public class S3 extends Section {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "s3");
+    
     out.writeStartElement("a");
     out.writeAttribute("name", getHref());
     out.writeEndElement();
@@ -62,6 +66,8 @@ public class S3 extends Section {
     
     for (ContentItem item : getItems())
       item.writeHtml(out);
+    
+    out.writeEndElement();
   }
 
   public void writeLaTeXTop(PrintWriter out)
