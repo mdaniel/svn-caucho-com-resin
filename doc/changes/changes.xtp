@@ -12,7 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
-<li>jsf: fast-jsf automatically disabled when not using Resin's JSF (#2351)</li>
+<li>(2008-02-08) jsf: fast-jsf automatically disabled when not using Resin's JSF (#2351)</li>
 <li>resin.conf: change default to use &lt;prologue> and put resin:import after the web-app-default (#2402)</li>
 <li>watchdog: &lt;watchdog-port>${port}&lt;/watchdog-port> was not supported (#2401, rep by friedeks)</li>
 <li>regression: ${resinHome} variable was missing (#2374, rep by stargazer)</li>
@@ -23,7 +23,7 @@
 <li>jsp: dependency checking of fmt.tld updated to use classpath (#2363, rep by M Gleeson)</li>
 <li>configure: update ACLOCAL and AUTOMAKE to avoid version dependencies (#2396, rep by norlab)</li>
 <li>support: added ResinWebApplication, and ResinComponentInjector for wicket [<a href="http://wiki.caucho.com/Wicket">Wicket with Resin</a>]</li>
-<li>(2008-05-05) jms: basic BlockingQueue support [<a href="http://caucho.com/resin/doc/resin-messaging.xtp">Resin Messaging</a>] (#2310)</li>
+<li>(2008-02-05) jms: basic BlockingQueue support [<a href="http://caucho.com/resin/doc/resin-messaging.xtp">Resin Messaging</a>] (#2310)</li>
 <li>(2008-02-02) embed: classpath config file lookup depended on Resin</li>
 <li>(2008-02-01) regression cleanup</li>
 <li>(2008-01-30) support: Wicket support for Resin/WebBeans for WebApplication object [<a href="http://wiki.caucho.com/Wicket">wiki: Resin and Wicket</a>]</li>
