@@ -41,6 +41,7 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ServletMapping;
+import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.port.Port;
@@ -52,6 +53,7 @@ import com.caucho.Version;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+import com.caucho.webbeans.manager.*;
 
 import java.io.*;
 import java.net.URL;
@@ -73,6 +75,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
   private Lifecycle _lifecycle = new Lifecycle();
 
+  private int _watchdogPort;
   private ResinConfig _resin;
   private String _password;
 
@@ -111,19 +114,32 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     ThreadPool.getThreadPool().setThreadIdleMin(1);
     ThreadPool.getThreadPool().setThreadIdleMax(5);
 
+    ResinELContext elContext = new ResinBootELContext();
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
+    webBeans.addSingletonByName(elContext.getJavaVar(), "java");
+    webBeans.addSingletonByName(elContext.getResinVar(), "resin");
+    webBeans.addSingletonByName(elContext.getServerVar(), "server");
+
+    _watchdogPort = _args.getWatchdogPort();
     _resin = readConfig(_args);
 
     ResinWatchdog server = _resin.findServer(_args.getServerId());
 
-    if (server != null)
-      _password = server.getWatchdogPassword();
+    if (server == null)
+      throw new IllegalStateException(L().l("'{0}' is an unknown server",
+					    _args.getServerId()));
+
+    _password = _resin.getManagementPassword();
 
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
-    if (server != null)
-      clusterServer.setPort(server.getWatchdogPort());
+
+    if (_watchdogPort > 0)
+      clusterServer.setPort(_watchdogPort);
     else
-      clusterServer.setPort(6600);
+      clusterServer.setPort(server.getWatchdogPort());
 
     clusterServer.getClusterPort().setMinSpareListen(1);
     clusterServer.getClusterPort().setMaxSpareListen(2);
@@ -265,7 +281,8 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     throws Exception
   {
     Config config = new Config();
-    config.setIgnoreEnvironment(true);
+    // XXX: why ignore?
+    // config.setIgnoreEnvironment(true);
 
     Vfs.setPwd(args.getRootDirectory());
     ResinConfig resin = new ResinConfig(this,
@@ -430,6 +447,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     private Path _logDirectory;
 
     private String _serverId = "";
+    private int _watchdogPort;
 
     private boolean _isVerbose;
     
@@ -483,6 +501,11 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
       return _isVerbose;
     }
 
+    int getWatchdogPort()
+    {
+      return _watchdogPort;
+    }
+
     private void parseCommandLine(String []argv)
     {
       for (int i = 0; i < argv.length; i++) {
@@ -493,6 +516,11 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 	  _resinConf = _resinHome.lookup(argv[i + 1]);
 	  i++;
 	}
+        else if ("-log-directory".equals(arg)
+                 || "--log-directory".equals(arg)) {
+          _logDirectory = _rootDirectory.lookup(argv[i + 1]);
+          i++;
+        }
 	else if ("-resin-home".equals(arg)
 		 || "--resin-home".equals(arg)) {
 	  _resinHome = Vfs.lookup(argv[i + 1]);
@@ -508,14 +536,14 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 	  _rootDirectory = Vfs.lookup(argv[i + 1]);
 	  i++;
 	}
-        else if ("-log-directory".equals(arg)
-                 || "--log-directory".equals(arg)) {
-          _logDirectory = _rootDirectory.lookup(argv[i + 1]);
-          i++;
-        }
 	else if ("-server".equals(arg)
 		 || "--server".equals(arg)) {
 	  _serverId = argv[i + 1];
+	  i++;
+	}
+	else if ("-watchdog-port".equals(arg)
+		 || "--watchdog-port".equals(arg)) {
+	  _watchdogPort = Integer.parseInt(argv[i + 1]);
 	  i++;
 	}
 	else if ("-verbose".equals(arg)
@@ -524,6 +552,35 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 	  Logger.getLogger("").setLevel(Level.FINE);
 	}
       }
+    }
+  }
+
+  public class ResinBootELContext
+    extends ResinELContext
+  {
+    public Path getResinHome()
+    {
+      return _args.getResinHome();
+    }
+
+    public Path getRootDirectory()
+    {
+      return _args.getRootDirectory();
+    }
+
+    public Path getResinConf()
+    {
+      return _args.getResinConf();
+    }
+
+    public String getServerId()
+    {
+      return _args.getServerId();
+    }
+
+    public boolean isResinProfessional()
+    {
+      return false;
     }
   }
 }

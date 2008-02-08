@@ -70,6 +70,8 @@ public class QueryContext {
   private GeneratedKeysResultSet _generatedKeys;
   private int _rowUpdateCount;
 
+  private int _limit = -1;
+
   private Block []_blockLocks;
   private boolean _isLocked;
 
@@ -93,6 +95,8 @@ public class QueryContext {
       queryContext = new QueryContext();
 
     queryContext.clearParameters();
+
+    queryContext._limit = -1;
 
     return queryContext;
   }
@@ -242,6 +246,22 @@ public class QueryContext {
     
     if (_isReturnGeneratedKeys && _generatedKeys != null)
       _generatedKeys.init();
+  }
+
+  /**
+   * The max rows returned in a select
+   */
+  public void setLimit(int limit)
+  {
+    _limit = limit;
+  }
+
+  /**
+   * The max rows returned in a select
+   */
+  public int getLimit()
+  {
+    return _limit;
   }
 
   /**

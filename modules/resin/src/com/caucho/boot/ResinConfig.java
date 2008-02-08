@@ -34,6 +34,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.vfs.Path;
+import com.caucho.server.admin.Management;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -48,9 +49,12 @@ public class ResinConfig implements EnvironmentBean
 
   private ClassLoader _classLoader;
 
+  private Management _management;
+
   private ResinWatchdogManager _manager;
   private Path _resinHome;
   private Path _rootDirectory;
+  private String _password;
 
   ResinConfig(ResinWatchdogManager manager, Path resinHome, Path serverRoot)
   {
@@ -85,6 +89,25 @@ public class ResinConfig implements EnvironmentBean
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+
+  /**
+   * Adds the management configuration
+   */
+  public void addManagement(Management management)
+  {
+    _management = management;
+  }
+  
+  /**
+   * Returns the management password.
+   */
+  public String getManagementPassword()
+  {
+    if (_management != null)
+      return _management.getRemoteCookie();
+    else
+      return null;
   }
 
   /**

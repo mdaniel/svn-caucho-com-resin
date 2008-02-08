@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -168,7 +169,14 @@ public class AnalyzedTag {
    */
   public boolean getDoEnd()
   {
-    return _doEnd;
+    if (_doEnd)
+      return true;
+
+    int count = 0;
+    count += (getEndReturnsSkip() ? 1 : 0);
+    count += (getEndReturnsEval() ? 1 : 0);
+
+    return count > 1;
   }
 
   /**
@@ -315,5 +323,10 @@ public class AnalyzedTag {
   public void setJavaClass(JavaClass javaClass)
   {
     _javaClass = javaClass;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _javaClass + "]";
   }
 }

@@ -719,7 +719,6 @@ public class JavaJspGenerator extends JspGenerator {
     generateClassHeader(out);
 
     generatePageHeader(out);
-    printTry(out);
 
     _rootNode.generate(out);
       
@@ -941,6 +940,9 @@ public class JavaJspGenerator extends JspGenerator {
     */
     
     _rootNode.generatePrologue(out);
+
+    out.println("try {");
+    out.pushDepth();
   }
 
   /**
@@ -1843,6 +1845,9 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("mergePath.addClassPath(resourcePath);");
 
     MergePath classPath = new MergePath();
+    classPath.addClassPath();
+    
+    /* XXX: the order shouldn't matter in this situation
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     if (classLoader instanceof DynamicClassLoader) {
       DynamicClassLoader loader = (DynamicClassLoader) classLoader;
@@ -1850,36 +1855,11 @@ public class JavaJspGenerator extends JspGenerator {
       String resourcePath = loader.getResourcePathSpecificFirst();
       classPath.addClassPath(resourcePath);
     }
+    */
     
     String srcName = _filename;
     if (srcName == null)
       srcName = "foo";
-
-    /*
-    out.print("_caucho_line_map = new com.caucho.java.LineMap(\"");
-    out.printJavaString(_lineMap.getDestFilename());
-    out.print("\", \"");
-    out.printJavaString(srcName);
-    out.println("\");");
-
-    Iterator<LineMap.Line> iter = _lineMap.iterator();
-    String lastSrcFilename = srcName;
-    while (iter.hasNext()) {
-      LineMap.Line line = iter.next();
-
-      if (lastSrcFilename != null &&
-          lastSrcFilename.equals(line.getSourceFilename())) {
-        out.println("_caucho_line_map.add(" + line.getSourceLine() + ", " +
-                line.getDestLine() + ");");
-      } else {
-        out.print("_caucho_line_map.add(\"");
-        out.printJavaString(line.getSourceFilename());
-        out.println("\", " + line.getSourceLine() + ", " +
-                line.getDestLine() + ");");
-        lastSrcFilename = line.getSourceFilename();
-      }
-    }
-    */
 
     out.println("com.caucho.vfs.Depend depend;");
     
@@ -1894,7 +1874,8 @@ public class JavaJspGenerator extends JspGenerator {
 	  continue;
 	
         out.print("depend = new com.caucho.vfs.Depend(");
-        printPathDir(out, depend.getPath().getFullPath(), appDir, classPath);
+        printPathDir(out, depend, depend.getPath().getFullPath(),
+		     appDir, classPath);
         out.println(", " + depend.getDigest() + "L, " +
                     _requireSource + ");");
         out.println("com.caucho.jsp.JavaPage.addDepend(_caucho_depends, depend);");
@@ -1914,7 +1895,8 @@ public class JavaJspGenerator extends JspGenerator {
 	  continue;
 
         out.print("depend = new com.caucho.vfs.Depend(");
-        printPathDir(out, depend.getPath().getFullPath(), appDir, classPath);
+        printPathDir(out, depend, depend.getPath().getFullPath(),
+		     appDir, classPath);
         out.println(", \"" + depend.getDigest() + "\", " +
                     _requireSource + ");");
         out.println("_caucho_cacheDepends.add((Object) depend);");
@@ -1927,8 +1909,8 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Prints an expression to lookup the path directory
    */
-  private void printPathDir(JspJavaWriter out, String path,
-                            Path appDir, MergePath classPath)
+  private void printPathDir(JspJavaWriter out, Depend depend,
+			    String path, Path appDir, MergePath classPath)
     throws IOException
   {
     String resinHome = CauchoSystem.getResinHome().getFullPath();
@@ -1940,10 +1922,14 @@ public class JavaJspGenerator extends JspGenerator {
 
     if (path.startsWith(prefix)) {
       path = path.substring(prefix.length());
-      out.print("appDir.lookup(\"");
-      out.printJavaString(path);
-      out.print("\")");
-      return;
+      Path appPathTest = appDir.lookup(path);
+
+      if (appPathTest.getCrc64() == depend.getPath().getCrc64()) {
+	out.print("appDir.lookup(\"");
+	out.printJavaString(path);
+	out.print("\")");
+	return;
+      }
     }
 
     ArrayList<Path> classPathList = classPath.getMergePaths();
@@ -1958,10 +1944,20 @@ public class JavaJspGenerator extends JspGenerator {
       if (path.startsWith(prefix)) {
         String tail = path.substring(prefix.length());
 
-	if (dir.lookup(tail).canRead() &&
-	    classPath.lookup(tail).equals(dir.lookup(tail))) {
-	  out.print("mergePath.lookup(\"");
+	if (tail.startsWith("/"))
+	  tail = tail.substring(1);
+
+	Path cpPath = appDir.lookup("classpath:" + tail);
+
+	if (depend.getPath().getCrc64() == cpPath.getCrc64()) {
+	  out.print("appDir.lookup(\"classpath:");
 	  out.printJavaString(tail);
+	  out.print("\")");
+	  return;
+	}
+	else {
+	  out.print("appDir.lookup(\"");
+	  out.printJavaString(depend.getPath().getURL());
 	  out.print("\")");
 	  return;
 	}
@@ -1990,7 +1986,7 @@ public class JavaJspGenerator extends JspGenerator {
     */
     else {
       out.print("mergePath.lookup(\"");
-      out.printJavaString(path);
+      out.printJavaString(depend.getPath().getURL());
       out.print("\")");
     }
   }

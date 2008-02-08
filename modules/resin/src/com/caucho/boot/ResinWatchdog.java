@@ -95,7 +95,7 @@ public class ResinWatchdog extends AbstractManagedObject
   private InetAddress _address;
   private int _watchdogPort = 6600;
   
-  private String _password = "";
+  private String _password = null;
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
   
@@ -169,6 +169,14 @@ public class ResinWatchdog extends AbstractManagedObject
   public String getWatchdogPassword()
   {
     return _password;
+  }
+
+  public String getManagementPassword()
+  {
+    if (_password != null)
+      return _password;
+    else
+      return _cluster.getResin().getManagementPassword();
   }
 
   public void setWatchdogPort(int port)
@@ -277,7 +285,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      watchdog.start(_password, argv);
+      watchdog.start(getManagementPassword(), argv);
 
       return;
     } catch (ConfigException e) {
@@ -297,7 +305,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      watchdog.stop(_password, getId());
+      watchdog.stop(getManagementPassword(), getId());
     } catch (ConfigException e) {
       throw e;
     } catch (IllegalStateException e) {
@@ -329,7 +337,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      return watchdog.shutdown(_password);
+      return watchdog.shutdown(getManagementPassword());
     } catch (ConfigException e) {
       throw e;
     } catch (IllegalStateException e) {
@@ -411,6 +419,15 @@ public class ResinWatchdog extends AbstractManagedObject
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
     list.add("-Dresin.root=" + resinRoot.getPath());
+    
+    for (int i = 0; i < argv.length; i++) {
+      if (argv[i].startsWith("-Djava.class.path=")) {
+	// IBM JDK startup issues
+      }
+      else if (argv[i].startsWith("-J")) {
+	list.add(argv[i].substring(2));
+      }
+    }
 
     if (! _hasWatchdogXss)
       list.add("-Xss256k");
@@ -825,6 +842,9 @@ public class ResinWatchdog extends AbstractManagedObject
     if (! _hasXmx)
       list.add("-Xmx256m");
 
+    if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
+      list.add("-d64");
+
     for (String arg : getJvmArgs()) {
       if (! arg.startsWith("-Djava.class.path"))
 	list.add(arg);
@@ -841,9 +861,6 @@ public class ResinWatchdog extends AbstractManagedObject
       else if (! _argv[i].startsWith("-Djava.class.path"))
 	resinArgs.add(_argv[i]);
     }
-
-    if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
-      list.add("-d64");
     
     list.add("com.caucho.server.resin.Resin");
     list.add("-socketwait");

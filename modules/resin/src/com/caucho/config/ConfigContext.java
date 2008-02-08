@@ -440,7 +440,6 @@ public class ConfigContext {
 
       if (attrStrategy == null) {
 	if (childNode instanceof Element || childNode instanceof Attr) {
-	  System.out.println("TYPE : " + type);
 	  throw error(L.l("'{0}' is an unknown property of '{1}'.",
 			  qName.getName(), type.getTypeName()),
 		      childNode);
@@ -843,10 +842,8 @@ public class ConfigContext {
 
 	  Object value = expr.getValue(elContext);
 
-	  if (elContext.isPropertyResolved())
-	    return attr.getConfigType().valueOf(value);
-	  else
-	    return data;
+	  // ioc/2403
+	  return attr.getConfigType().valueOf(value);
 	}
 	
 	return null;

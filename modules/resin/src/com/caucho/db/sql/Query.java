@@ -141,6 +141,14 @@ abstract public class Query {
   }
 
   /**
+   * Sets the maximum entires
+   */
+  public void setLimit(int limit)
+  {
+  }
+  
+
+  /**
    * Returns any from items.
    */
   public FromItem []getFromItems()

@@ -346,7 +346,10 @@ public class EnhancerManager implements ClassFileTransformer
   {
     if (className.lastIndexOf('$') >= 0) {
       int p = className.lastIndexOf('$');
-      char ch = className.charAt(p + 1);
+      char ch = 0;
+
+      if (p + 1 < className.length())
+	ch = className.charAt(p + 1);
 
       if ('0' <= ch && ch <= '9')
 	return false;

@@ -65,8 +65,8 @@ public class CustomTag extends GenericTag
     boolean isCatch = TryCatchFinally.class.isAssignableFrom(cl);
 
     boolean isEmpty = isEmpty();
-    boolean usesTagBody = isBodyTag && ! isEmpty &&
-      analyzedTag.getStartReturnsBuffered();
+    boolean usesTagBody = (isBodyTag && ! isEmpty
+			   && analyzedTag.getStartReturnsBuffered());
     boolean hasEndTag = analyzedTag.getDoEnd();
     
     if ("empty".equalsIgnoreCase(_bodyContent)) {
@@ -255,8 +255,8 @@ public class CustomTag extends GenericTag
 
     out.setLocation(getFilename(), getEndLine());
     
-    int endCount = ((analyzedTag.getEndReturnsSkip() ? 1 : 0) +
-		    (analyzedTag.getEndReturnsEval() ? 1 : 0));
+    int endCount = ((analyzedTag.getEndReturnsSkip() ? 1 : 0)
+		    + (analyzedTag.getEndReturnsEval() ? 1 : 0));
     
     String endVar = "_jsp_end_" + _gen.uniqueId();
 
@@ -269,9 +269,9 @@ public class CustomTag extends GenericTag
 
     if (! hasEndTag || ! usesTagBody) {
     }
-    else if (hasStartTag &&
-	     (analyzedTag.getStartReturnsSkip() ||
-	      analyzedTag.getStartReturnsInclude())) {
+    else if (hasStartTag
+	     && (analyzedTag.getStartReturnsSkip()
+		 || analyzedTag.getStartReturnsInclude())) {
       out.println("if (" + tagHackVar + " != null) {");
       out.println("  pageContext.releaseBody(" + tagHackVar + ");");
       out.println("  " + tagHackVar + " = null;");

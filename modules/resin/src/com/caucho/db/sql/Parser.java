@@ -328,11 +328,16 @@ public class Parser {
 	}
       }
     }
-
+    
     token = scanToken();
-    _token = token;
-    if (query.getParent() == null &&
-	token >= 0 && token != LIMIT && token != OFFSET)
+    if (token == LIMIT) {
+      parseLimit(query);
+    }
+    else
+      _token = token;
+    
+    if (query.getParent() == null
+	&& token >= 0 && token != LIMIT && token != OFFSET)
       throw error(L.l("unexpected token at end '{0}'", tokenName(token)));
 
     _query = query.getParent();
@@ -621,6 +626,22 @@ public class Parser {
 
       query.setGroupResult(index);
     }
+  }
+
+  /**
+   * Parses the LIMIT
+   */
+  private void parseLimit(SelectQuery query)
+    throws SQLException
+  {
+    int token = scanToken();
+
+    if (token == INTEGER) {
+      query.setLimit(Integer.valueOf(_lexeme));
+      _token = scanToken();
+    }
+    else
+      throw error(L.l("LIMIT expected LIMIT int"));
   }
 
   /**

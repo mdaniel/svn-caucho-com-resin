@@ -60,6 +60,11 @@ AC_SUBST(LIBEXEC)
 dnl should be unnecessary
 AC_SUBST(LD)
 
+ACLOCAL=aclocal	
+AUTOMAKE=automake
+AC_SUBST(ACLOCAL)	
+AC_SUBST(AUTOMAKE)	
+
 #
 # additional CFLAGS
 #

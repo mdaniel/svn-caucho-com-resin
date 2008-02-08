@@ -78,6 +78,7 @@ public class ResinBoot {
   private String _serverId = "";
   private boolean _isVerbose;
   private boolean _isResinProfessional;
+  private int _watchdogPort;
 
   private ResinWatchdog _server;
 
@@ -132,7 +133,8 @@ public class ResinBoot {
     // XXX: set _isResinProfessional
 
     Config config = new Config();
-    config.setIgnoreEnvironment(true);
+    // XXX: why ignore?
+    // config.setIgnoreEnvironment(true);
 
     ResinWatchdogManager manager = null;
     ResinConfig conf = new ResinConfig(manager, _resinHome, _rootDirectory);
@@ -144,6 +146,7 @@ public class ResinBoot {
      * EL.setEnviornment() call above is not effective:
      */
     WebBeansContainer webBeans = WebBeansContainer.create();
+    webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
     webBeans.addSingletonByName(elContext.getJavaVar(), "java");
     webBeans.addSingletonByName(elContext.getResinVar(), "resin");
     webBeans.addSingletonByName(elContext.getServerVar(), "server");
@@ -169,6 +172,9 @@ public class ResinBoot {
     
     if (_isVerbose)
       _server.setVerbose(_isVerbose);
+
+    if (_watchdogPort > 0)
+      _server.setWatchdogPort(_watchdogPort);
   }
 
   private String []fillArgv(String []argv)
@@ -286,6 +292,11 @@ public class ResinBoot {
 	resinConf = argv[i + 1];
 	i++;
       }
+      else if ("-log-directory".equals(arg)
+               || "--log-directory".equals(arg)) {
+        _logDirectory = _rootDirectory.lookup(argv[i + 1]);
+        i++;
+      }
       else if ("-resin-home".equals(arg)
 	       || "--resin-home".equals(arg)) {
 	_resinHome = Vfs.lookup(argv[i + 1]);
@@ -296,19 +307,14 @@ public class ResinBoot {
         _rootDirectory = Vfs.lookup(argv[i + 1]);
         i++;
       }
-      else if ("-server-root".equals(arg)
-	       || "--server-root".equals(arg)) {
-	_rootDirectory = Vfs.lookup(argv[i + 1]);
-	i++;
-      }
-      else if ("-log-directory".equals(arg)
-               || "--log-directory".equals(arg)) {
-        _logDirectory = _rootDirectory.lookup(argv[i + 1]);
-        i++;
-      }
       else if ("-server".equals(arg)
 	       || "--server".equals(arg)) {
 	_serverId = argv[i + 1];
+	i++;
+      }
+      else if ("-server-root".equals(arg)
+	       || "--server-root".equals(arg)) {
+	_rootDirectory = Vfs.lookup(argv[i + 1]);
 	i++;
       }
       else if ("-verbose".equals(arg)
@@ -332,6 +338,11 @@ public class ResinBoot {
       }
       else if ("-service".equals(arg)) {
 	// windows service
+      }
+      else if ("-watchdog-port".equals(arg)
+	       || "--watchdog-port".equals(arg)) {
+	_watchdogPort = Integer.parseInt(argv[i + 1]);
+	i++;
       }
       else if ("start".equals(arg)) {
 	_startMode = StartMode.START;
@@ -372,12 +383,13 @@ public class ResinBoot {
     System.err.println(L().l("usage: java -jar resin.jar [-options] [start | stop | restart]"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
-    System.err.println(L().l("   -conf <file>       select a configuration file"));
-    System.err.println(L().l("   -log-directory <dir>  select a logging directory"));
-    System.err.println(L().l("   -resin-home <dir>  select a resin home directory"));
-    System.err.println(L().l("   -root-directory <dir>  select a root directory"));
-    System.err.println(L().l("   -server <id>   select a <server> to run"));
-    System.err.println(L().l("   -verbose       print verbose starting information"));
+    System.err.println(L().l("   -conf <file>          : select a configuration file"));
+    System.err.println(L().l("   -log-directory <dir>  : select a logging directory"));
+    System.err.println(L().l("   -resin-home <dir>     : select a resin home directory"));
+    System.err.println(L().l("   -root-directory <dir> : select a root directory"));
+    System.err.println(L().l("   -server <id>          : select a <server> to run"));
+    System.err.println(L().l("   -watchdog-port <port> : override the watchdog-port"));
+    System.err.println(L().l("   -verbose              : print verbose starting information"));
   }
 
   boolean start()
@@ -387,8 +399,9 @@ public class ResinBoot {
       try {
 	_server.startWatchdog(_argv);
 	
-	System.out.println(L().l("Resin/{0} started -server '{1}'.",
-				 Version.VERSION, _server.getId()));
+	System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at 127.0.0.1:{2}",
+				 Version.VERSION, _server.getId(),
+				 _server.getWatchdogPort()));
       } catch (Exception e) {
 	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
 				 Version.VERSION, _server.getId(),
@@ -406,8 +419,9 @@ public class ResinBoot {
       try {
 	_server.stopWatchdog();
 	
-	System.out.println(L().l("Resin/{0} stopped -server '{1}'.",
-				 Version.VERSION, _server.getId()));
+	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at 127.0.0.1:{2}",
+				 Version.VERSION, _server.getId(),
+				 _server.getWatchdogPort()));
       } catch (Exception e) {
 	System.out.println(L().l("Resin/{0} can't stop -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
 				 Version.VERSION, _server.getId(),
@@ -425,8 +439,9 @@ public class ResinBoot {
       try {
 	_server.restartWatchdog(_argv);
 	
-	System.out.println(L().l("Resin/{0} restarted -server '{1}'.",
-				 Version.VERSION, _server.getId()));
+	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at 127.0.0.1:{2}",
+				 Version.VERSION, _server.getId(),
+				 _server.getWatchdogPort()));
       } catch (Exception e) {
 	System.out.println(L().l("Resin/{0} can't restart -server '{1}'.\n{2}",
 				 Version.VERSION, _server.getId(),

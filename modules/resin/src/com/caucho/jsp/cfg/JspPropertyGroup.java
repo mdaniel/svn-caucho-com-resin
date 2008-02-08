@@ -53,6 +53,8 @@ public class JspPropertyGroup {
 
   private static int _gId;
 
+  private static boolean _isDefaultFastJsf;
+
   private WebApp _webApp;
   
   private String _id;
@@ -67,7 +69,7 @@ public class JspPropertyGroup {
   // Resin config
   private boolean _precompile = true;
   private boolean _fastJstl = true;
-  private boolean _fastJsf = true;
+  private boolean _fastJsf = _isDefaultFastJsf;
   private boolean _ideHack = false;
   private boolean _velocity = false;
   private boolean _session = true;
@@ -633,5 +635,15 @@ public class JspPropertyGroup {
     }
 
     return false;
+  }
+
+  static {
+    try {
+      Class cl = Class.forName("javax.faces.webapp.CauchoUtil");
+
+      if (cl != null)
+	_isDefaultFastJsf = true;
+    } catch (Exception e) {
+    }
   }
 }

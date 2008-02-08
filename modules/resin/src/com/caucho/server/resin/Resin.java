@@ -234,9 +234,11 @@ public class Resin implements EnvironmentBean, SchemaBean
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
       WebBeansContainer webBeans = WebBeansContainer.create();
 
+      webBeans.addSingleton(getResinHome(), "resinHome", Standard.class);
       webBeans.addSingleton(new Var(), "resin", Standard.class);
       webBeans.addSingleton(new Var(), "server", Standard.class);
       webBeans.addSingleton(new JavaVar(), "java", Standard.class);
+      webBeans.addSingleton(System.getProperties(), "system", Standard.class);
 
       webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
 
@@ -852,16 +854,20 @@ public class Resin implements EnvironmentBean, SchemaBean
         _configFile = argv[i + 1];
 	i += 2;
       }
-      else if (i + 1 < len &&
-               (argv[i].equals("-server") ||
-                argv[i].equals("--server"))) {
+      else if (argv[i].equals("-log-directory")
+               || argv[i].equals("--log-directory")) {
+        i += 2;
+      }
+      else if (argv[i].equals("-config-server")
+	       || argv[i].equals("--config-server")) {
+        _configServer = argv[i + 1];
+        i += 2;
+      }
+      else if (i + 1 < len
+	       && (argv[i].equals("-server")
+		   || argv[i].equals("--server"))) {
 	setServerId(argv[i + 1]);
 	i += 2;
-      }
-      else if (argv[i].equals("-version")
-	       || argv[i].equals("--version")) {
-	System.out.println(com.caucho.Version.FULL_VERSION);
-	System.exit(66);
       }
       else if (argv[i].equals("-resin-home")
 	       || argv[i].equals("--resin-home")) {
@@ -881,18 +887,19 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 	i += 2;
       }
-      else if (argv[i].equals("-log-directory")
-               || argv[i].equals("--log-directory")) {
-        i += 2;
-      }
-      else if (argv[i].equals("-config-server") ||
-               argv[i].equals("--config-server")) {
-        _configServer = argv[i + 1];
-        i += 2;
-      }
       else if (argv[i].equals("-service")) {
 	// windows service
 	i += 1;
+      }
+      else if (argv[i].equals("-version")
+	       || argv[i].equals("--version")) {
+	System.out.println(com.caucho.Version.FULL_VERSION);
+	System.exit(66);
+      }
+      else if (argv[i].equals("-watchdog-port")
+	       || argv[i].equals("--watchdog-port")) {
+	// watchdog
+	i += 2;
       }
       else if (argv[i].equals("-socketwait")
 	       || argv[i].equals("--socketwait")
@@ -968,7 +975,16 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private static void usage()
   {
-    System.err.println(L().l("usage: Resin [-conf resin.conf] [-server id]"));
+    System.err.println(L().l("usage: java -jar resin.jar [-options] [start | stop | restart]"));
+    System.err.println(L().l(""));
+    System.err.println(L().l("where options include:"));
+    System.err.println(L().l("   -conf <file>          : select a configuration file"));
+    System.err.println(L().l("   -log-directory <dir>  : select a logging directory"));
+    System.err.println(L().l("   -resin-home <dir>     : select a resin home directory"));
+    System.err.println(L().l("   -root-directory <dir> : select a root directory"));
+    System.err.println(L().l("   -server <id>          : select a <server> to run"));
+    System.err.println(L().l("   -watchdog-port <port> : override the watchdog-port"));
+    System.err.println(L().l("   -verbose              : print verbose starting information"));
   }
 
   /**
@@ -1390,15 +1406,17 @@ public class Resin implements EnvironmentBean, SchemaBean
   {
     String loggingManager = System.getProperty("java.util.logging.manager");
 
-    if (loggingManager == null ||
-	! loggingManager.equals("com.caucho.log.LogManagerImpl")) {
-      throw new ConfigException(L().l("The following system property must be set:\n  -Djava.util.logging.manager=com.caucho.log.LogManagerImpl\nThe JDK 1.4 Logging manager must be set to Resin's log manager."));
+    if (loggingManager == null
+	|| ! loggingManager.equals("com.caucho.log.LogManagerImpl")) {
+      log().warning(L().l("The following system property must be set:\n  -Djava.util.logging.manager=com.caucho.log.LogManagerImpl\nThe JDK 1.4 Logging manager must be set to Resin's log manager."));
     }
 
+    /*
     validatePackage("javax.servlet.Servlet", new String[] {"2.5", "1.5"});
     validatePackage("javax.servlet.jsp.jstl.core.Config", new String[] {"1.1"});
     validatePackage("javax.management.MBeanServer", new String[] { "1.2", "1.5" });
     validatePackage("javax.resource.spi.ResourceAdapter", new String[] {"1.5", "1.4"});
+    */
   }
 
   /**

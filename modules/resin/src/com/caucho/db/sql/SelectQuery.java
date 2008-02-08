@@ -50,6 +50,7 @@ public class SelectQuery extends Query {
   private boolean []_groupFields;
 
   private Order _order;
+  private int _limit = Integer.MAX_VALUE / 2;
 
   SelectQuery(Database db, String sql)
     throws SQLException
@@ -122,6 +123,12 @@ public class SelectQuery extends Query {
     _order = order;
   }
 
+  @Override
+  public void setLimit(int limit)
+  {
+    _limit = limit;
+  }
+
   /**
    * Returns true for select queries.
    */
@@ -187,13 +194,18 @@ public class SelectQuery extends Query {
     FromItem []fromItems = getFromItems();
     int rowLength = fromItems.length;
 
+    int limit = _limit;
+    int contextLimit = context.getLimit();
+    if (contextLimit > 0)
+      limit = contextLimit;
+
     if (start(rows, rowLength, context, xa)) {
       do {
 	result.startRow();
 	for (int i = 0; i < _results.length; i++) {
 	  _results[i].evalToResult(context, result);
 	}
-      } while (nextTuple(rows, rowLength, context, xa));
+      } while (nextTuple(rows, rowLength, context, xa) && --_limit > 0);
     }
   }
 

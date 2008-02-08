@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.server.admin.Management;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -76,6 +77,11 @@ public class ClusterConfig {
     throws Throwable
   {
     _serverDefaultList.add(program);
+  }
+
+  public void addManagement(Management management)
+  {
+    _resin.addManagement(management);
   }
 
   public ResinWatchdog createServer()

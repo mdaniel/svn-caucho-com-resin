@@ -55,6 +55,9 @@ public class SerializationAdapter {
 
   public static Class gen(Class cl)
   {
+    if (Modifier.isFinal(cl.getModifiers()))
+      return cl;
+    
     SerializationAdapter gen = new SerializationAdapter(cl);
 
     Class proxyClass = gen.generateProxy();

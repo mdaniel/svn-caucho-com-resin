@@ -1854,8 +1854,8 @@ public class WebApp extends ServletContextImpl
       }
 
       try {
-        _servletManager.init();
         _filterManager.init();
+        _servletManager.init();
       } catch (Exception e) {
         setConfigException(e);
       }

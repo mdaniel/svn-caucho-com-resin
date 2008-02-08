@@ -50,7 +50,7 @@ public class StatementImpl implements java.sql.Statement {
   protected ResultSetImpl _rs;
 
   protected QueryContext _queryContext;
-  
+
   private boolean _isClosed;
   
   StatementImpl(ConnectionImpl conn)
@@ -255,7 +255,7 @@ public class StatementImpl implements java.sql.Statement {
 
   public int getFetchSize()
   {
-    return 0;
+    return _queryContext.getLimit();
   }
 
   public int getMaxFieldSize()
@@ -311,6 +311,7 @@ public class StatementImpl implements java.sql.Statement {
 
   public void setFetchSize(int rows)
   {
+    _queryContext.setLimit(rows);
   }
 
   public void setMaxFieldSize(int max)

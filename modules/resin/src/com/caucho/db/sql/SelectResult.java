@@ -1010,6 +1010,19 @@ public class SelectResult {
       
       if (rOffset == 0) {
 	TempBuffer tempBuffer = TempBuffer.allocate();
+	if (_tempBuffers.length <= rBufferId) {
+	  int len = _tempBuffers.length;
+	  
+	  TempBuffer []newTempBuffers = new TempBuffer[len + 32];
+	  System.arraycopy(_tempBuffers, 0, newTempBuffers, 0, len);
+	  _tempBuffers = newTempBuffers;
+	  
+	  byte [][]newBuffers = new byte[len + 32][];
+	  System.arraycopy(_buffers, 0, newBuffers, 0, len);
+	  _buffers = newBuffers;
+
+	}
+	
 	_tempBuffers[rBufferId] = tempBuffer;
 	_buffers[rBufferId] = tempBuffer.getBuffer();
       }

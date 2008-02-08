@@ -574,8 +574,11 @@ public class TagAnalyzer
 	_hasSkip = true;
       else if (value == Tag.EVAL_PAGE)
 	_hasEval = true;
-      else
+      else {
+	_hasSkip = true;
+	_hasEval = true;
 	setHasCode();
+      }
     }
 
     public void complete(AnalyzedTag tag)
@@ -583,6 +586,12 @@ public class TagAnalyzer
       tag.setDoEnd(hasCode());
       tag.setEndReturnsSkip(_hasSkip);
       tag.setEndReturnsEval(_hasEval);
+    }
+
+    public String toString()
+    {
+      return (getClass().getSimpleName() + "[end:" + hasCode()
+	      + ",skip:" + _hasSkip + ",eval:" + _hasEval + "]");
     }
   }
 
