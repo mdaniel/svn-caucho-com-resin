@@ -555,7 +555,7 @@ uri syntax:</p>
 
   &lt;ejb-message-bean class="qa.MyListener">
 
-    &lt;activation-spec class="activemq:">
+    &lt;activation-spec uri="activemq:">
       &lt;init physical-name="queue.test"/>
     &lt;/activation-spec>
 

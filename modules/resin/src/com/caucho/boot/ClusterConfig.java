@@ -79,9 +79,9 @@ public class ClusterConfig {
     _serverDefaultList.add(program);
   }
 
-  public void addManagement(Management management)
+  public void addManagement(ManagementConfig management)
   {
-    _resin.addManagement(management);
+    _resin.setManagement(management);
   }
 
   public ResinWatchdog createServer()

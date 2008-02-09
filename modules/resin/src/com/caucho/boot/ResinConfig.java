@@ -49,9 +49,7 @@ public class ResinConfig implements EnvironmentBean
 
   private ClassLoader _classLoader;
 
-  private Management _management;
-
-  private ResinWatchdogManager _manager;
+  private final ResinWatchdogManager _manager;
   private Path _resinHome;
   private Path _rootDirectory;
   private String _password;
@@ -59,7 +57,7 @@ public class ResinConfig implements EnvironmentBean
   ResinConfig(ResinWatchdogManager manager, Path resinHome, Path serverRoot)
   {
     _manager = manager;
-    
+
     _resinHome = resinHome;
     _rootDirectory = serverRoot;
 
@@ -94,20 +92,26 @@ public class ResinConfig implements EnvironmentBean
   /**
    * Adds the management configuration
    */
-  public void addManagement(Management management)
+  public void setManagement(ManagementConfig management)
   {
-    _management = management;
+    if (management != null) {
+      if (_password == null)
+	_password = management.getAdminCookie();
+
+      if (_manager != null)
+	_manager.setAdminCookie(_password);
+    }
   }
   
   /**
    * Returns the management password.
    */
-  public String getManagementPassword()
+  public String getAdminCookie()
   {
-    if (_management != null)
-      return _management.getRemoteCookie();
+    if (_manager != null)
+      return _manager.getAdminCookie();
     else
-      return null;
+      return _password;
   }
 
   /**
@@ -152,10 +156,6 @@ public class ResinConfig implements EnvironmentBean
   }
 
   public void setMinFreeMemory(ConfigProgram program)
-  {
-  }
-
-  public void setManagement(ConfigProgram program)
   {
   }
     

@@ -63,7 +63,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Process responsible for watching a backend server.
+ * Process responsible for watching a backend watchdog.
  */
 public class ResinWatchdogManager extends ProtocolDispatchServer {
   private static L10N _L;
@@ -77,14 +77,15 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
   private int _watchdogPort;
   private ResinConfig _resin;
-  private String _password;
+
+  private String _adminCookie;
 
   private Server _dispatchServer;
 
   private Port _port;
 
-  private HashMap<String,ResinWatchdog> _activeServerMap
-    = new HashMap<String,ResinWatchdog>();
+  private HashMap<String,WatchdogTask> _activeServerMap
+    = new HashMap<String,WatchdogTask>();
 
   ResinWatchdogManager(String []argv)
     throws Exception
@@ -130,8 +131,6 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
 					    _args.getServerId()));
-
-    _password = _resin.getManagementPassword();
 
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
@@ -187,6 +186,17 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     return _watchdog;
   }
 
+  public void setAdminCookie(String cookie)
+  {
+    if (_adminCookie == null)
+      _adminCookie = cookie;
+  }
+
+  public String getAdminCookie()
+  {
+    return _adminCookie;
+  }
+
   Path getLogDirectory()
   {
     return _args.getLogDirectory();
@@ -194,8 +204,14 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
   boolean authenticate(String password)
   {
-    return (password == _password
-	    || password != null && password.equals(_password));
+    String cookie = getAdminCookie();
+    
+    if (password == null && cookie == null)
+      return true;
+    else if  (password != null && password.equals(getAdminCookie()))
+      return true;
+    else
+      return false;
   }
 
   void startServer(String []argv)
@@ -217,40 +233,48 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
       throw ConfigException.create(e);
     }
     
-    ResinWatchdog server = resin.findServer(serverId);
+    ResinWatchdog watchdog = resin.findServer(serverId);
 
-    if (server == null)
+    if (watchdog == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
 				      serverId, _args.getResinConf()));
 
     if (args.isVerbose())
-      server.setVerbose(args.isVerbose());
+      watchdog.setVerbose(args.isVerbose());
 
+    WatchdogTask task = null;
     synchronized (_activeServerMap) {
-      if (_activeServerMap.get(serverId) != null) {
+      task = _activeServerMap.get(serverId);
+      
+      if (task != null && ! task.isActive()) {
+        log().warning(task + " is not active, but in server map");
+        task.stop();
+      }
+      else if (task != null) {
 	throw new IllegalStateException(L().l("-server '{0}' is already running.",
 				      serverId));
       }
 
-      server.start(argv, args.getRootDirectory());
+      task = watchdog.start(argv, args.getRootDirectory());
       
-      _activeServerMap.put(serverId, server);
+      _activeServerMap.put(serverId, task);
     }
+    
+    if (task != null)
+      task.start();
   }
 
   void stopServer(String serverId)
   {
-    ResinWatchdog server = null;
+    WatchdogTask server;
+    synchronized (_activeServerMap) {
+      server = _activeServerMap.remove(serverId);
+    }
     
-    server = _activeServerMap.get(serverId);
-
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
 				      serverId, _args.getResinConf()));
     
-    synchronized (_activeServerMap) {
-      server = _activeServerMap.remove(serverId);
-    }
 
     log().info(server + " stopping");
 
@@ -263,16 +287,16 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
   void restartServer(String serverId, String []argv)
   {
-    ResinWatchdog server = null;
+    WatchdogTask task = null;
     
     synchronized (_activeServerMap) {
-      server = _activeServerMap.remove(serverId);
+      task = _activeServerMap.remove(serverId);
     }
 
-    if (server != null)
-      log().info(server + " stopping");
+    if (task != null)
+      log().info(task + " stopping");
 
-    server.stop();
+    task.stop();
 
     startServer(argv);
   }

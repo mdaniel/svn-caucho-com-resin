@@ -94,8 +94,6 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private InetAddress _address;
   private int _watchdogPort = 6600;
-  
-  private String _password = null;
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
   
@@ -166,9 +164,9 @@ public class ResinWatchdog extends AbstractManagedObject
     log.warning("watchdog-password is obsolete, set a <user> in the <management> section instead");
   }
 
-  public String getManagementPassword()
+  public String getAdminCookie()
   {
-    return _cluster.getResin().getManagementPassword();
+    return _cluster.getResin().getAdminCookie();
   }
 
   public void setWatchdogPort(int port)
@@ -256,6 +254,21 @@ public class ResinWatchdog extends AbstractManagedObject
     return _groupName;
   }
   
+  public boolean isSingle()
+  {
+    return _isSingle;
+  }
+  
+  public Path getLogDirectory()
+  {
+    return getManager().getLogDirectory();
+  }
+  
+  public long getShutdownWaitTime()
+  {
+    return _shutdownWaitTime;
+  }
+  
   /**
    * Ignore items we can't understand.
    */
@@ -277,7 +290,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      watchdog.start(getManagementPassword(), argv);
+      watchdog.start(getAdminCookie(), argv);
 
       return;
     } catch (ConfigException e) {
@@ -299,7 +312,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      watchdog.stop(getManagementPassword(), getId());
+      watchdog.stop(getAdminCookie(), getId());
     } catch (ConfigException e) {
       throw e;
     } catch (IllegalStateException e) {
@@ -331,7 +344,7 @@ public class ResinWatchdog extends AbstractManagedObject
     WatchdogAPI watchdog = getProxy();
 
     try {
-      return watchdog.shutdown(getManagementPassword());
+      return watchdog.shutdown(getAdminCookie());
     } catch (ConfigException e) {
       throw e;
     } catch (IllegalStateException e) {
@@ -345,6 +358,51 @@ public class ResinWatchdog extends AbstractManagedObject
 
       return false;
     }
+  }
+
+  String[] getArgv()
+  {
+    return _argv;
+  }
+
+  Iterable<Port> getPorts()
+  {
+    return _ports;
+  }
+
+  Path getPwd()
+  {
+    return _pwd;
+  }
+
+  Path getResinHome()
+  {
+    return _cluster.getResin().getResinHome();
+  }
+
+  Path getRootDirectory()
+  {
+    return _cluster.getResin().getRootDirectory();
+  }
+
+  boolean hasXmx()
+  {
+    return _hasXmx;
+  }
+
+  boolean hasXss()
+  {
+    return _hasXss;
+  }
+
+  boolean is64bit()
+  {
+    return _is64bit;
+  }
+
+  boolean isVerbose()
+  {
+    return _isVerbose;
   }
 
   private WatchdogAPI getProxy()
@@ -499,301 +557,341 @@ public class ResinWatchdog extends AbstractManagedObject
   /**
    * Starts the watchdog instance.
    */
-  public boolean start(String []argv, Path rootDirectory)
+  public WatchdogTask start(String []argv, Path resinRoot)
   {
-    if (! _lifecycle.toActive())
-      return false;
-
-    registerSelf();
-
-    _argv = argv;
-    _rootDirectory = rootDirectory;
-
-    _thread = new Thread(this, "watchdog-" + _id);
-    _thread.setDaemon(false);
-
-    _thread.start();
-
-    return true;
+    return new WatchdogTask(this, argv, resinRoot);
   }
 
   public void stop()
   {
     if (! _lifecycle.toStop())
       return;
-
-    Thread thread = _thread;
-    _thread = null;
-
-    synchronized (_lifecycle) {
-      _lifecycle.toStop();
-
-      _lifecycle.notifyAll();
-    }
-
-    try {
-      unregisterSelf();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
   }
 
   public void run()
   {
-    _initialStartTime = new Date();
-    long retry = Long.MAX_VALUE;
+    try {
+      Thread thread = Thread.currentThread();
     
-    while (_lifecycle.isActive() && retry-- >= 0) {
-      InputStream watchdogIs = null;
-      WriteStream jvmOut = null;
+      _initialStartTime = new Date();
+      long retry = Long.MAX_VALUE;
+    
+      while (_lifecycle.isActive() && retry-- >= 0) {
+	runResin();
+      }
+    } finally {
+      _thread = null;
 
       try {
-	watchdogIs = null;
+	unregisterSelf();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
 
-	ServerSocket ss = new ServerSocket(0, 5,
-                                           InetAddress.getByName("127.0.0.1"));
+  private void runResin()
+  {
+    WriteStream jvmOut = null;
 
-	int port = ss.getLocalPort();
+    try {
+      ServerSocket ss = new ServerSocket(0, 5,
+					 InetAddress.getByName("127.0.0.1"));
 
-	Path resinHome = _cluster.getResin().getResinHome();
-	Path rootDirectory = _cluster.getResin().getRootDirectory();
+      int port = ss.getLocalPort();
 
-	if (! _isSingle) {
-	  String name;
+      _lastStartTime = new Date();
+      _startCount++;
 
-	  if ("".equals(_id))
-	    name = "jvm-default.log";
-	  else
-	    name = "jvm-" + _id + ".log";
+      if (! _isSingle)
+	log.info(this + " starting Resin");
 
-	  Path jvmPath = getManager().getLogDirectory().lookup(name);
+      jvmOut = createJvmOut();
 
-	  try {
-	    Path dir = jvmPath.getParent();
-	    
-	    if (! dir.exists()) {
-	      dir.mkdirs();
+      Process process = createProcess(port, jvmOut);
 
-	      if (_userName != null)
-		dir.changeOwner(_userName);
-
-	      if (_groupName != null)
-		dir.changeGroup(_groupName);
-	    }
-	  } catch (Exception e) {
-	    log.log(Level.FINE, e.toString(), e);
-	  }
-
-	  RotateStream rotateStream = RotateStream.create(jvmPath);
-	  rotateStream.init();
-	  jvmOut = rotateStream.getStream();
-	}
-	else
-	  jvmOut = Vfs.openWrite(System.out);
-
-	_lastStartTime = new Date();
-	_startCount++;
-
-	if (! _isSingle)
-	  log.info("starting Resin " + this);
-
-        // watchdog/0210
-        // Path pwd = rootDirectory;
-        Path pwd = _pwd;
-
-        Process process = createProcess(pwd, resinHome, rootDirectory,
-                                        port, jvmOut);
-
-	InputStream stdIs = process.getInputStream();
-	OutputStream stdOs = process.getOutputStream();
-	
-	ss.setSoTimeout(1000);
-	
-	boolean isLive = true;
-	int stdoutTimeoutMax = 10;
-	int stdoutTimeout = stdoutTimeoutMax;
-	byte []data = new byte[1024];
-	int len;
-
-	Socket s = null;
-
+      if (process != null) {
 	try {
-	  for (int i = 0; i < 120 && s == null && isLive; i++) {
-	    try {
-	      s = ss.accept();
-	    } catch (SocketTimeoutException e) {
-	    }
-
-	    while (stdIs.available() > 0) {
-	      len = stdIs.read(data, 0, data.length);
-
-	      if (len < 0)
-		break;
-
-	      stdoutTimeout = stdoutTimeoutMax;
-	      
-	      jvmOut.write(data, 0, len);
-	      jvmOut.flush();
-	    }
-
-	    try {
-	      int status = process.exitValue();
-
-	      isLive = false;
-	    } catch (IllegalThreadStateException e) {
-	    }
-	  }
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
+	  runInstance(jvmOut, ss, process);
 	} finally {
-	  ss.close();
-	}
-
-	if (s == null)
-	  log.warning("watchdog socket timed out");
-	  
-	if (s != null)
-	  watchdogIs = s.getInputStream();
-
-	while (isLive && _lifecycle.isActive()) {
-	  int available = 0;
-	  
-	  while ((available = stdIs.available()) > 0) {
-	    len = stdIs.read(data, 0, data.length);
-
-	    if (len <= 0)
-	      break;
-	    
-	    stdoutTimeout = stdoutTimeoutMax;
-	    
-	    jvmOut.write(data, 0, len);
-	    jvmOut.flush();
-	  }
-
-	  try {
-	    int status = process.exitValue();
-
-	    /*
-	    // if bind failure, only retry 3 times
-	    if (status == 67 && retry > 3)
-	      retry = 3;
-	    */
-
-	    isLive = false;
-	  } catch (IllegalThreadStateException e) {
-	  }
-
-	  try {
-	    synchronized (_lifecycle) {
-	      if (stdoutTimeout-- > 0)
-		_lifecycle.wait(100 * (stdoutTimeoutMax - stdoutTimeout));
-	      else
-		_lifecycle.wait(100 * stdoutTimeoutMax);
-	    }
-	  } catch (Exception e) {
-	  }
-	}
-
-	try {
-	  if (watchdogIs != null)
-	    watchdogIs.close();
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-
-	try {
-	  if (s != null)
-	    s.close();
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-
-	try {
-	  stdOs.close();
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-
-	long endTime = Alarm.getCurrentTime() + _shutdownWaitTime;
-	isLive = true;
-
-	log.info(this + " stopping Resin");
-
-	while (isLive && Alarm.getCurrentTime() < endTime) {
-	  try {
-	    while (stdIs.available() > 0) {
-	      len = stdIs.read(data, 0, data.length);
-
- 	      if (len <= 0) {
-		isLive = false;
-		break;
-	      }
-	  
-	      jvmOut.write(data, 0, len);
-	      jvmOut.flush();
-	    }
-	  } catch (IOException e) {
-	    log.log(Level.FINER, e.toString(), e);
-	  }
-
-	  try {
-	    int status = process.exitValue();
-
-	    isLive = false;
-	  } catch (IllegalThreadStateException e) {
-	  }
-	}
-
-	try {
-	  stdIs.close();
-	} catch (Exception e) {
-	}
-
-	if (isLive) {
 	  try {
 	    process.destroy();
 	  } catch (Exception e) {
 	    log.log(Level.FINE, e.toString(), e);
 	  }
-	}
 
-	try {
-	  int status = process.waitFor();
-	} catch (Exception e) {
-	  log.log(Level.INFO, e.toString(), e);
-	}
-      } catch (Exception e) {
-	log.log(Level.INFO, e.toString(), e);
-
-	try {
-	  Thread.sleep(5000);
-	} catch (Exception e1) {
-	}
-      } finally {
-	if (watchdogIs != null) {
 	  try {
-	    watchdogIs.close();
-	  } catch (IOException e) {
+	    process.waitFor();
+	  } catch (Exception e) {
+	    log.log(Level.INFO, e.toString(), e);
 	  }
 	}
-	
-	if (jvmOut != null && ! _isSingle) {
-	  try {
-	    jvmOut.close();
-	  } catch (IOException e) {
-	  }
+      }
+    } catch (Exception e) {
+      log.log(Level.INFO, e.toString(), e);
+
+      try {
+	Thread.sleep(5000);
+      } catch (Exception e1) {
+      }
+    } finally {
+      if (jvmOut != null && ! _isSingle) {
+	try {
+	  jvmOut.close();
+	} catch (IOException e) {
 	}
       }
     }
   }
 
-  private Process createProcess(Path processPwd,
-                                Path resinHome,
-				Path resinRoot,
-				int socketPort,
-				WriteStream out)
+  private void runInstance(WriteStream jvmOut,
+			   ServerSocket ss,
+			   Process process)
     throws IOException
   {
+    InputStream stdIs = null; 
+    OutputStream stdOs = null;
+    InputStream watchdogIs = null;
+    Socket s = null;
+
+    try {
+      stdIs = process.getInputStream();
+      stdOs = process.getOutputStream();
+      ss.setSoTimeout(1000);
+	
+      boolean isLive = true;
+      int stdoutTimeoutMax = 10;
+      int stdoutTimeout = stdoutTimeoutMax;
+      byte []data = new byte[1024];
+      int len;
+
+      s = connectToChild(ss, stdIs, jvmOut, process, data);
+
+      if (s == null)
+	log.warning("watchdog socket timed out");
+	  
+      if (s != null)
+	watchdogIs = s.getInputStream();
+
+      runInstance(stdIs, jvmOut, process, data);
+
+      try {
+	if (watchdogIs != null)
+	  watchdogIs.close();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+
+      try {
+	if (s != null)
+	  s.close();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+
+      try {
+	stdOs.close();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+
+      log.info(this + " stopping Resin");
+
+      closeInstance(stdIs, jvmOut, process, data);
+    } finally {
+      if (watchdogIs != null) {
+	try {
+	  watchdogIs.close();
+	} catch (IOException e) {
+	}
+      }
+	
+      try {
+	if (s != null)
+	  s.close();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
+  private WriteStream createJvmOut()
+    throws IOException
+  {
+    if (! _isSingle) {
+      String name;
+
+      if ("".equals(_id))
+	name = "jvm-default.log";
+      else
+	name = "jvm-" + _id + ".log";
+
+      Path jvmPath = getManager().getLogDirectory().lookup(name);
+
+      try {
+	Path dir = jvmPath.getParent();
+	    
+	if (! dir.exists()) {
+	  dir.mkdirs();
+
+	  if (_userName != null)
+	    dir.changeOwner(_userName);
+
+	  if (_groupName != null)
+	    dir.changeGroup(_groupName);
+	}
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      RotateStream rotateStream = RotateStream.create(jvmPath);
+      rotateStream.init();
+      return rotateStream.getStream();
+    }
+    else
+      return Vfs.openWrite(System.out);
+  }
+
+  private Socket connectToChild(ServerSocket ss,
+				InputStream stdIs,
+				WriteStream jvmOut,
+				Process process,
+				byte []data)
+    throws IOException
+  {
+    try {
+      Socket s = null;
+
+      for (int i = 0; i < 120 && s == null; i++) {
+	try {
+	  s = ss.accept();
+	} catch (SocketTimeoutException e) {
+	}
+
+	while (stdIs.available() > 0) {
+	  int len = stdIs.read(data, 0, data.length);
+
+	  if (len < 0)
+	    break;
+	      
+	  jvmOut.write(data, 0, len);
+	  jvmOut.flush();
+	}
+
+	try {
+	  int status = process.exitValue();
+
+	  if (s != null)
+	    s.close();
+
+	  return null;
+	} catch (IllegalThreadStateException e) {
+	}
+      }
+
+      return s;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    } finally {
+      ss.close();
+    }
+  }
+
+  private void closeInstance(InputStream stdIs,
+			     WriteStream jvmOut,
+			     Process process,
+			     byte []data)
+  {
+    long endTime = Alarm.getCurrentTime() + _shutdownWaitTime;
+    boolean isLive = true;
+
+    while (isLive && Alarm.getCurrentTime() < endTime) {
+      try {
+	while (stdIs.available() > 0) {
+	  int len = stdIs.read(data, 0, data.length);
+
+	  if (len <= 0) {
+	    isLive = false;
+	    break;
+	  }
+	  
+	  jvmOut.write(data, 0, len);
+	  jvmOut.flush();
+	}
+      } catch (IOException e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
+
+      try {
+	int status = process.exitValue();
+
+	isLive = false;
+      } catch (IllegalThreadStateException e) {
+      }
+    }
+
+    try {
+      stdIs.close();
+    } catch (Exception e) {
+    }
+  }
+
+  private void runInstance(InputStream stdIs,
+			   WriteStream jvmOut,
+			   Process process,
+			   byte []data)
+    throws IOException
+  {
+    boolean isLive = true;
+    int stdoutTimeoutMax = 10;
+    int stdoutTimeout = stdoutTimeoutMax;
+    
+    while (isLive && _lifecycle.isActive()) {
+      int available = 0;
+	  
+      while ((available = stdIs.available()) > 0) {
+	int len = stdIs.read(data, 0, data.length);
+
+	if (len <= 0)
+	  break;
+	    
+	stdoutTimeout = stdoutTimeoutMax;
+	    
+	jvmOut.write(data, 0, len);
+	jvmOut.flush();
+      }
+
+      try {
+	int status = process.exitValue();
+
+	isLive = false;
+      } catch (IllegalThreadStateException e) {
+      }
+
+      try {
+	synchronized (_lifecycle) {
+	  if (stdoutTimeout-- > 0)
+	    _lifecycle.wait(100 * (stdoutTimeoutMax - stdoutTimeout));
+	  else
+	    _lifecycle.wait(100 * stdoutTimeoutMax);
+	}
+      } catch (Exception e) {
+      }
+    }
+  }
+
+  private Process createProcess(int socketPort, WriteStream out)
+    throws IOException
+  {
+    // watchdog/0210
+    // Path pwd = rootDirectory;
+    Path processPwd = _pwd;
+
+    Path resinHome = _cluster.getResin().getResinHome();
+    Path resinRoot = _cluster.getResin().getRootDirectory();
+	
     String classPath = ResinWatchdogManager.calculateClassPath(resinHome);
 
     HashMap<String,String> env = new HashMap<String,String>();
@@ -960,7 +1058,7 @@ public class ResinWatchdog extends AbstractManagedObject
     env.put(prop, value);
   }
 
-  private String getJavaExe()
+  String getJavaExe()
   {
     if (_javaExe != null)
       return _javaExe;
@@ -1023,12 +1121,13 @@ public class ResinWatchdog extends AbstractManagedObject
     return _startCount;
   }
   
+  @Override
   public String toString()
   {
-    return "Watchdog[" + getId() + "]";
+    return getClass().getSimpleName() + "[" + getId() + "]";
   }
 
-  private Boot getJniBoot()
+  Boot getJniBoot()
   {
     if (_jniBoot != null)
       return _jniBoot.isValid() ? _jniBoot : null;

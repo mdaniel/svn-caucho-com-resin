@@ -499,7 +499,7 @@ public class ResinBoot {
 	}
       }
     } catch (Exception e) {
-      if (e instanceof CompileException) {
+      if (e instanceof ConfigException) {
 	System.out.println(e.getMessage());
 
 	System.exit(2);
