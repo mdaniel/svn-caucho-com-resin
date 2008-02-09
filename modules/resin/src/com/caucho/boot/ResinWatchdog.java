@@ -32,7 +32,6 @@ package com.caucho.boot;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.log.RotateStream;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ResinWatchdogMXBean;
 import com.caucho.server.admin.HessianHmuxProxy;
@@ -40,9 +39,7 @@ import com.caucho.server.port.Port;
 import com.caucho.util.*;
 import com.caucho.Version;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -582,6 +579,7 @@ public class ResinWatchdog extends AbstractManagedObject
     return getId();
   }
 
+  @Override
   public String getType()
   {
     return "Watchdog";

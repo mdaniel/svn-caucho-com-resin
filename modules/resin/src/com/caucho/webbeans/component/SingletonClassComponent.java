@@ -30,12 +30,14 @@
 package com.caucho.webbeans.component;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.jmx.*;
 import com.caucho.webbeans.cfg.WbWebBeans;
 import com.caucho.webbeans.context.DependentScope;
 import com.caucho.webbeans.context.SingletonScope;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
+import java.util.logging.*;
 import java.util.ArrayList;
 import java.io.Closeable;
 
@@ -48,6 +50,9 @@ import javax.webbeans.*;
 public class SingletonClassComponent extends ClassComponent
   implements Closeable
 {
+  private static final Logger log
+    = Logger.getLogger(SingletonClassComponent.class.getName());
+  
   private Object _value;
   
   public SingletonClassComponent(WbWebBeans webbeans)
@@ -131,7 +136,17 @@ public class SingletonClassComponent extends ClassComponent
     try {
       thread.setContextClassLoader(loader);
 
-      return super.init(value, env);
+      value = super.init(value, env);
+
+      try {
+	System.out.println("MB: " + getMBeanInterface() + " " + value);
+	if (getMBeanInterface() != null)
+	  Jmx.register(value, getMBeanName());
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+
+      return value;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

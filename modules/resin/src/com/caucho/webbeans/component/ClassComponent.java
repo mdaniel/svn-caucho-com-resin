@@ -68,6 +68,8 @@ public class ClassComponent extends ComponentImpl {
   private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
   private Class _proxyClass;
 
+  private Class _mbeanInterface;
+
   public ClassComponent(WbWebBeans webbeans)
   {
     super(webbeans);
@@ -89,6 +91,11 @@ public class ClassComponent extends ComponentImpl {
   public void setConstructor(Constructor ctor)
   {
     _ctor = ctor;
+  }
+
+  public Class getMBeanInterface()
+  {
+    return _mbeanInterface;
   }
 
   public void init()
@@ -151,6 +158,8 @@ public class ClassComponent extends ComponentImpl {
 
     if (getBindingList().size() == 0)
       introspectBindings();
+    
+    introspectMBean();
   }
 
   /**
@@ -222,6 +231,44 @@ public class ClassComponent extends ComponentImpl {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  /**
+   * Introspects for MBeans annotation
+   */
+  private void introspectMBean()
+  {
+    if (_cl == null)
+      return;
+    else if (_mbeanInterface != null)
+      return;
+    
+    for (Class iface : _cl.getInterfaces()) {
+      if (iface.getName().endsWith("MBean")
+	  || iface.getName().endsWith("MXBean")) {
+	_mbeanInterface = iface;
+	return;
+      }
+    }
+  }
+
+  protected String getMBeanName()
+  {
+    String typeName = _mbeanInterface.getSimpleName();
+
+    if (typeName.endsWith("MXBean"))
+      typeName = typeName.substring(0, typeName.length() - "MXBean".length());
+    else if (typeName.endsWith("MBean"))
+      typeName = typeName.substring(0, typeName.length() - "MBean".length());
+
+    String name = getName();
+
+    if (name == null)
+      return "type=" + typeName;
+    else if (name.equals(""))
+      return "type=" + typeName + ",name=default";
+    else
+      return "type=" + typeName + ",name=" + name;
   }
 
   /**
