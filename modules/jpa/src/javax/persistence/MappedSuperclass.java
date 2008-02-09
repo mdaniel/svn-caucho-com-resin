@@ -37,6 +37,7 @@ import java.lang.annotation.ElementType;
 /**
  * The @MappedSuperclass annotation.
  */
-@Target(ElementType.TYPE) @Retention(RUNTIME)
+@Target(ElementType.TYPE)
+@Retention(RUNTIME)
 public @interface MappedSuperclass {
 }

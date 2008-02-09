@@ -35,7 +35,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The Entity annotation.
+ * The Entity annotation marks a class as a persistent entity.
+ * In many cases, each entity will correspond to a database table.
  */
 @Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
 public @interface Entity {

@@ -35,9 +35,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * The @IdClass annotation.
+ * The @IdClass annotation specifies the class to be used for the primary
+ * key.
  */
-@Target({TYPE}) @Retention(RUNTIME)
+@Target({TYPE})
+@Retention(RUNTIME)
 public @interface IdClass {
   Class value();
 }

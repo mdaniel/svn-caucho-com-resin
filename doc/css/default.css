@@ -206,7 +206,7 @@ div.definition {
 /* red body #98012e: HSV: 342, 99, 60 */
 
 table.deftable {
-  margin : 1em 2em;
+  margin : 1em 1.7em;
   border : solid, 1px;
   width : 90%;
   border-collapse: collapse;
@@ -231,7 +231,11 @@ table.deftable th {
   border-top : 1px solid #98012e;
   border-bottom : 1px solid #98012e;
   color : #666;
-  padding : 0.3em 0;
+  padding : 0.3em 0.3em;
+}
+
+table.deftable td {
+  padding : 0.1em 0.3em;
 }
 
 table.deftable tr.a {

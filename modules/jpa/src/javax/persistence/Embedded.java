@@ -36,8 +36,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * The @Embedded annotation.
+ * The @Embedded annotation marks a field as containing
+ * and embeddable value.
  */
-@Target({METHOD, FIELD}) @Retention(RUNTIME)
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
 public @interface Embedded {
 }

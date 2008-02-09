@@ -7,8 +7,8 @@
     <description>
       <p>
       Amber is Resin's implementation of the
-      JPA 1.0 persistence specification, using plain Java beans as
-      the application model.
+      JPA 1.0 persistence specification, focusing on simplicity and
+      quality.
       </p>
     </description>
   </header>
@@ -27,189 +27,275 @@ a complete single-table example.</li>
 
 </s1>
 
-<s1 title="Amber Goals">
+<s1 title="Quick Start">
 
-<ul>
-<li>Use Java beans for the application model.</li>
-<li>Leverage JDBC APIs.</li>
-<li>Make persistence connections and transactions explicit</li>
-<li>Simplify configuration files</li>
-</ul>
+<ol>
+<li>Expected SQL for the database</li>
+<li>Entity bean implementation</li>
+<li>Servlet loading, querying, and persisting</li>
+<li>persistence.xml configuration</li>
+<li>resin-web.xml configuration</li>
+</ol>
 
-<s2 title="Java beans as the application model">
-
-<p>The application's data model should drive the Java
-classes and architecture.  As much as possible, Amber
-stays out of the way and defers to the application's needs.
-At the same time, it must be clear how the objects map to the database.
-</p>
-
-<p>Persistent objects for Amber have bean-style
-properties (<code>getXXX</code> and <code>setXXX</code>) which correspond
-to columns in the database.  No additional classes or interfaces are
-required for Amber. In this respect, Amber is identical to Hibernate's
-persistence model.  Classes designed for Hibernate can be used for
-Amber without modification.</p><p>
-
-</p><p>Amber contrasts with J2EE CMP by eliminating the home
-and local interfaces and eliminating the special J2EE methods
-like <code>ejbCreate</code> and <code>ejbPostCreate</code>.  Applications
-using J2EE must twist their data model to fit the J2EE CMP rules, and must
-deal with the extra interfaces and methods.  By eliminating the J2EE
-complexity, can simplify application code, making it easier and cheaper
-to design and maintain.</p>
-
-<p>In contrast with JDO, Amber requires bean-style properties
-and commits to a relational database.  For Amber, the database design is
-primary and the Java model is just a view of the database.  JDO aims at
-making persistence invisible, hiding the existence of the database
-from the application and bytecode enhancing all field references.
-By hiding the database, JDO makes the persistence opaque, making the
-mental model of JDO more complicated.
-By committing to a relational model, Amber gains the power of
-the relational queries and keeps the persistence model concrete.</p>
-
-</s2>
-
-<s2 title="Explicit Persistence">
-
-<p>Developers are familiar with obtaining a JDBC <code>Connection</code>
-from a <code>DataSource</code>, doing some work, and closing
-the <code>Connection</code> when work is done.  Amber's model maps
-directly to the JDBC model, avoiding a complicated mental model.</p>
-
-<p>The <code>AmberConnection</code> is based on an underlying
-JDBC <code>Connection</code>.  Beans used with the <code>AmberConnection</code>
-are enlisted with that connection.  The connection's close delists the
-beans.  Unregistered beans act like any normal Java object.  Only when the
-application explicitly enlists them with the <code>AmberConnection</code> will
-they become persistent.</p>
-
-<p>By making the persistence explicit, Amber works at making persistence
-transparent, not opaque or invisible.
-Persistence should be a clear box, not a black box.  It should be clear
-to a code reviewer how the application code is persisted without
-referring to external design documents.  With invisible or hidden persistence,
-it's not always clear how objects are reflected in the database.</p>
-
-<p>In contrast to Amber's explicit persistence connection, J2EE's CMP uses
-a hidden connection, invisible to the J2EE developer.  J2EE beans are enlisted
-and delisted automatically: magic occuring behind the J2EE stub. By hiding
-its connection and bean instance, J2EE requires a more complicated mental
-model for even the most simple beans.</p>
-
-<p>Amber's explicit model not only makes it easier to learn, but makes
-application code easier to debug and maintain.  Because the connection
-is explicit, it's visible in the code.  With an explicit connection a code
-review can follow the persistence just by inspecting the code.</p>
-
-</s2>
-
-</s1>
-
-<s1 title="Amber Lifecycle">
-
-<s2 title="Non-Transactional Lifecycle">
-
-<p>Amber's non-transactional lifecycle has three important states:</p>
-
-<ul>
-<li><b>clean:</b> the bean is loaded from the database</li>
-<li><b>dirty:</b> the bean has unwritten changes</li>
-<li><b>hollow:</b> the bean is unloaded (lazily-loaded)</li>
-</ul>
-
-<p>In the diagram below, the red methods (<code>load()</code>,
-<code>getXXX()</code>, and <code>flush()</code>) query and
-update the database.</p>
-
-<figure src="amber-non-xa.gif" width="356" height="140"/>
-
-<p>The <code>aConn.load("1")</code> method loads the bean from the
-database and transitions to the <var>clean</var> state.</p>
-
-<p>Calling <code>test.setData("foo")</code> will change to
-the <var>dirty</var> state.</p>
-
-<p>Calling <code>aConn.flush()</code> writes the changes to
-the database and changes to the <var>clean</var> state.  Amber may
-also flush the changes and change to the clean state
-at any time.  <code>flush()</code> merely guarantees that the changes
-will be flushed to the database.</p>
-
-<p>The <var>hollow</var> state represents lazily-loaded entities.  many-to-one
-relations and some queries will return the unloaded bean instead of
-a loaded bean.  When the application calls a <code>getXXX()</code> method,
-the bean will load from the database and change to the <var>clean</var> state.
-When the application calls a <code>setXXX()</code> method, the bean
-will change to the <var>dirty</var> state.</p>
-
-<example title="sample code">
-// load() queries the database and puts test in the clean state
-qa.Test test = aConn.load(qa.Test.class, "1");
-
-// getter calls remain in the clean state
-System.out.println(test.getData());
-
-// setters change to the dirty state
-test.setData("foo");
-
-// parent is lazily-loaded in the hollow state.
-qa.Test parent = test.getParent();
-
-// the getter loads parent from the database and changes to the clean state
-System.out.println(parent.getData());
-
-// the flush updates test and changes back to the clean state
-aConn.flush();
-
-// closing the connection changes all beans to the transient state
-aConn.close();
+<example title="Example: House SQL">
+create table HOUSE (
+  id integer auto_increment,
+  name varchar(255)
+)
 </example>
 
-</s2>
+<example title="Example: House entity">
+package demo;
 
-<s2 title="Transactional Lifecycle">
+import javax.persistence.*;
 
-<p>In a transaction, Amber loads the bean from the
-database, even if it was loaded outside of the transaction.
-(Exceptions exist for cases like read-only beans.) By loading the
-bean in the transaction, Amber lets the database handle the
-transactional locking and state consistency.</p>
+@Entity
+public class House {
+  @Id
+  @Column(name="id")
+  @GeneratedValue
+  private int _id;
 
-<p>Just like the non-transactional <var>clean</var> and <var>dirty</var>
-states, Amber has transactional <var>clean</var> and <var>dirty</var> states
-called <var>Persistent-clean</var> and <var>Persistent-dirty</var>.  As in
-the non-transactional case, the <var>hollow</var> state represents
-lazily-loaded beans.</p>
-<ul>
-<li><b>persistent-clean:</b> the bean is loaded from the database
-within the transaction</li>
-<li><b>persistent-dirty:</b> the bean has been changed</li>
-<li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)</li>
-<li><b>persistent-nonXA:</b> the bean was loaded outside of the
-transaction (and would need reloading if used in the transaction)</li>
-</ul>
+  @Basic
+  @Column(name="name")
+  private String _name;
+}
+</example>
 
-<figure src="amber-lifecycle.gif" width="511" height="285"/>
+<example title="Example: HouseServlet">
+package demo;
 
-<p>The main differences from the non-transactional lifecycle
-are:</p>
-<ul>
-<li>Transactions need a load from inside the transaction.  Loads
-before the transaction cannot be reused.</li>
-<li>Updates occur during the commit() call and change to the
-nonXA-clean state</li>
-<li>Rollbacks change to the hollow state.</li>
-</ul>
+import javax.ejb.*;
+import javax.servlet.*;
+import javax.persistence.*;
 
-</s2>
+public class HouseServlet extends GenericServlet {
+  @PersistenceUnit("test") EntityManagerFactory _factory;
+
+  public void load(PrintWriter out)
+  {
+    EntityManager amber = _factory.createEntityManager();
+
+    try {
+      House house = amber.find(House.class, 1);
+
+      out.println("House: " + house);
+    } finally {
+      amber.close();
+    }
+  }
+
+  public void query(PrintWriter out)
+  {
+    EntityManager amber = _factory.createEntityManager();
+
+    try {
+      Query query = amber.createQuery("select o from House o WHERE o.id=1");
+
+      out.println("House: " + query.getSingleResult());
+    } finally {
+      amber.close();
+    }
+  }
+
+  @TransactionAnnotation
+  public void insert(PrintWriter out)
+  {
+    EntityManager amber = _factory.createEntityManager();
+
+    try {
+      House house = new House("Gryffindor");
+
+      amber.persist(house);
+    } finally {
+      amber.close();
+    }
+  }
+}
+</example>
+
+<example title="META-INF/persistence.xml">
+&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+
+  &lt;persistence-unit name="test">
+  &lt;/persistence-unit>
+
+&lt;/persistence>
+</example>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;ejb-server database="jdbc/test"/>
+
+  &lt;servlet-mapping url-pattern="/test"
+                    servlet-class="demo.HouseServlet"/>
+
+&lt;/web-app>
+</example>
+
 </s1>
 
+<s1 title="API">
+
+<s2 title="EntityManager">
+
+<def title="javax.persistence.EntityManager">
+public interface EntityManager {
+  public &lt;T> T find(Class&lt;T> entityCLass, Object primaryKey);
+  public &lt;T> T getReference(Class&lt;T> entityClass, Object primaryKey);
+
+  public void flush();
+  public &lt;T> T merge(T entity);
+  public void persist(Object entity);
+  public void refresh(Object entity);
+  public void remove(Object entity);
+
+  public FlushModeType getFlushMode();
+  public void setFlushMode(FlushModeType flushMode);
+
+  public Query createQuery(String ql);
+  public Query createNamedQuery(String name);
+  public Query createNativeQuery(String sql);
+  public Query createNativeQuery(String sql, Class resultClass);
+  public Query createNativeQuery(String sql, String resultSEtMapping);
+
+  public void clear();
+  public void close();
+  public boolean contains(Object entity);
+  public Object getDelegate();
+  public boolean isOpen();
+
+  public EntityTransaction getTransaction();
+  public void joinTransaction();
+  public void lock(Object entity, LockModeType lockMode);
+}
+</def>
+
+</s2>
+
+<s2 title="EntityManagerFactory">
+
+<def title="javax.persistence.EntityManagerFactory">
+public interface EntityManagerFactory {
+  public EntityManager createEntityManager();
+  public EntityManager createEntityManager(Map map);
+
+  public void close();
+  public boolean isOpen();
+}
+</def>
+
+</s2>
+
+<s2 title="EntityTransaction">
+
+<def title="javax.persistence.EntityTransaction">
+public interface EntityTransaction {
+  public void begin();
+  public void commit();
+  public void rollback();
+
+  public boolean getRollbackOnly();
+  public void setRollbackOnly();
+  public boolean isActive();
+}
+</def>
+
+</s2>
+
+<s2 title="Query">
+
+<def title="javax.persistence.Query">
+public interface Query {
+  public List getResultList();
+  public Object getSingleResult();
+  public int executeUpdate();
+
+  public Query setFirstResult(int startPosition);
+  public Query setFlushMode(FlushModeType flushMode);
+  public Query setHint(String hintName, Object value);
+  public Query setMaxResults(int maxResult);
+
+  public Query setParameter(String name, Object value);
+  public Query setParameter(String name, Date date, TemporalType type); 
+  public Query setParameter(String name, Calendar date, TemporalType type); 
+  public Query setParameter(int pos, Object value);
+  public Query setParameter(int pos, Date date, TemporalType type); 
+  public Query setParameter(int pos, Calendar date, TemporalType type);
+}
+</def>
+
+</s2>
+
+</s1>
 
 <s1 title="Annotations">
 
-<s2 title="Table Annotations">
+<s2 title="Class Annotations">
+
+<s3 title="@DiscriminatorColumn">
+
+<p>Configures the discriminator column, which select the entity class
+in an inheritance relationship.  Each entity class will have a
+column value which uniquely selects the class to be loaded.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The name of the column</td>
+  <td></td>
+</tr>
+<tr>
+  <td>discriminatorType</td>
+  <td>The column type: STRING, CHAR or INTEGER</td>
+  <td>STRING</td>
+</tr>
+<tr>
+  <td>columnDefinition</td>
+  <td>SQL definition used when creating the column</td>
+  <td></td>
+</tr>
+<tr>
+  <td>length</td>
+  <td>default VARCHAR length when creating a STRING column</td>
+  <td>31</td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.DiscriminatorColumn">
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface DiscriminatorColumn {
+  String name() default "";
+  DiscriminatorType discriminatorType() default STRING;
+  String columnDefinition() default "";
+  int length() default 31;
+}
+</def>
+
+</s3>
+
+<s3 title="@Embeddable">
+
+<p>Annotates the class as an embeddable value.  The class fields will
+represent a collection of table columns embedded as part of a
+containing class for the table.
+</p>
+
+<def title="javax.persistence.Embeddable">
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Embeddable {
+}
+</def>
+
+</s3>
 
 <s3 title="@Entity">
 
@@ -245,6 +331,67 @@ Amber will detect either field or property annotation by the
 type for the @Id.  In other words, if Amber sees an @Id on a field,
 it will use field access.  If Amber sees @Id on a method, it will use
 property access.</p>
+
+</s3>
+
+<s3 title="@IdClass">
+
+<p>The <code>@IdClass</code> annotation specifies the class to be used
+to contain a compount primary key.
+</p>
+
+<def title="javax.persistence.IdClass">
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface IdClass {
+  Class value();
+}
+</def>
+
+</s3>
+
+<s3 title="@Inheritance">
+
+<p>@Inheritance marks the entity bean as supporting inheritance,
+i.e. the database maps to different Java classes depending on
+a discriminator value.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>strategy</td>
+  <td>The mapping strategy for inheritance: SINGLE_TABLE,
+      JOINED or TABLE_PER_CLASS </td>
+  <td>SINGLE_TABLE</td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.Inheritance">
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Inheritance {
+  InteritanceType strategy() default SINGLE_TABLE;
+}
+</def>
+
+</s3>
+
+<s3 title="@MappedSuperclass">
+
+<p>The <code>@MappedSuperclass</code> annotation marks the class
+as a parent class to an <code>@Entity</code>.
+</p>
+
+<def title="javax.persistence.MappedSuperclass">
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface MappedSuperclass {
+}
+</def>
 
 </s3>
 
@@ -299,6 +446,51 @@ public @interface SecondaryTable {
 
 </s3>
 
+<s3 title="@SequenceGenerator">
+
+<p>Specifies a sequence table to be used for generating keys.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The amber name of the sequence table</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>sequenceName</td>
+  <td>The SQL name of the sequence table</td>
+  <td><var>name</var></td>
+</tr>
+<tr>
+  <td>initialValue</td>
+  <td>The initial value to seed the generator</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>allocationSize</td>
+  <td>The number of values to increment by for each allocation</td>
+  <td>50</td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.SequenceGenerator">
+@Target({TYPE, METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface SequenceGenerator {
+  String name();
+  String sequenceName() default "";
+  int initialValue() default 0;
+  int allocationSize() default 50;
+}
+</def>
+
+</s3>
+
 <s3 title="@Table">
 
 <p>Specifies the database table for an entity bean.  The
@@ -347,6 +539,87 @@ public @interface Table {
 
 </s3>
 
+<s3 title="@TableGenerator">
+
+<p>Specifies a secondary table to be used for generating keys.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The amber name of the generator table</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>table</td>
+  <td>The SQL name of the generator table</td>
+  <td><var>name</var></td>
+</tr>
+<tr>
+  <td>catalog</td>
+  <td>The SQL catalog of the generator table</td>
+  <td></td>
+</tr>
+<tr>
+  <td>schema</td>
+  <td>The SQL schema of the generator table</td>
+  <td></td>
+</tr>
+<tr>
+  <td>pkColumnName</td>
+  <td>The SQL column name for the primary key name</td>
+  <td></td>
+</tr>
+<tr>
+  <td>valueColumnName</td>
+  <td>The SQL column name for the value</td>
+  <td></td>
+</tr>
+<tr>
+  <td>pkColumnName</td>
+  <td>The SQL column name for the primary key's value</td>
+  <td></td>
+</tr>
+<tr>
+  <td>initialValue</td>
+  <td>The initial value to seed the generator</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>allocationSize</td>
+  <td>The number of values to increment by for each allocation</td>
+  <td>50</td>
+</tr>
+<tr>
+  <td>uniqueConstraints</td>
+  <td>Extra uniqueness constraints when creating the table</td>
+  <td></td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.TableGenerator">
+@Target({TYPE, METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface TableGenerator {
+  String name();
+  String table() default "";
+  String catalog() default "";
+  String schema() default "";
+  String pkColumnName() default "";
+  String valueColumnName() default "";
+  String pkColumnValue() default "";
+  int initialValue() default 0;
+  int allocationSize() default 50;
+  UniqueConstraint []uniqueConstraints() default {};
+}
+</def>
+
+</s3>
+
 </s2>
 
 <s2 title="Property Annotations">
@@ -373,9 +646,7 @@ public @interface Table {
 </deftable>
 
 <def title="javax.persistence.Basic">
-package javax.persistence;
-
-@Target({Method, FIELD})
+@Target({METHOD, FIELD})
 @Retention(RUNTIME)
 public @interface Basic {
   FetchType fetch() default EAGER;
@@ -391,7 +662,7 @@ public @interface Basic {
 <li>LAZY - fetch the field only when the field is used</li>
 </ul>
 
-<example title="String property ">
+<example title="Example: string property ">
 @Entity
 public class Course {
   @Basic
@@ -401,7 +672,7 @@ public class Course {
 }
 </example>
 
-<example title="Lazy-loaded property ">
+<example title="Example: lazy-loaded property ">
 @Entity
 public class Course {
   @Basic(fetch=FetchType.LAZY)
@@ -441,7 +712,7 @@ properties for auto generation.</p>
 </tr>
 <tr>
   <td>insertable</td>
-  <td>True if column is inserted on a <code>create</code> call</td>
+  <td>True if column is inserted on as SQL <code>INSERT</code> call</td>
   <td>true</td>
 </tr>
 <tr>
@@ -490,15 +761,15 @@ public @interface Column {
   int length() default 255;
   int precision() default 0;
   int scale() default 0;
-  boolean specified() default true;
 }
 </def>
 
-<example title="String property ">
+<example title="Example: @Column for a string property ">
 @Entity
 public class Course {
   @Basic
-  @Column(unique=true,
+  @Column(name="MY_NAME",
+          unique=true,
           nullable=false,
           length=32)
   public String getName()
@@ -509,9 +780,142 @@ public class Course {
 
 </s3>
 
-</s2>
+<s3 title="@Embedded">
 
-<s2 title="Primary Key Annotations">
+<p>Marks a field as containing an embeddable value.  The field's value
+will be a class marked as @Embeddable.  Applications can use @Embedded
+fields to gather columns into meaningful groups.</p>
+
+<def title="javax.persistence.Embedded">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface Embedded {
+}
+</def>
+
+</s3>
+
+<s3 title="@EmbeddedId">
+
+<p>Marks a field as a primary key with a embedded class. The field's
+value class must be marked with <code>@Embeddable</code>.   Applications can
+use <code>@EmbeddedId</code> to implement compound keys.</p>
+
+<def title="javax.persistence.EmbeddedId">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface EmbeddedId {
+}
+</def>
+
+</s3>
+
+<s3 title="@Enumerated">
+
+<p>Marks a field as containing an enumerated value.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>value</td>
+  <td>Specifies whether the enum's ORDINAL or STRING representation should be saved in the database.</td>
+  <td>ORDINAL</td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.Enumerated">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface Enumerated {
+  EnumType value() default ORDINAL;
+}
+</def>
+
+</s3>
+
+<s3 title="@GeneratedValue">
+
+<p>Used with @Id to specify a generator for automatic key generation when new
+objects are created.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>generator</td>
+  <td>The sequence or table generator name</td>
+  <td>${table}_cseq</td>
+</tr>
+<tr>
+  <td>strategy</td>
+  <td>The auto-generation type: TABLE, SEQUENCE, IDENTITY or AUTO</td>
+  <td>AUTO</td>
+</tr>
+</deftable>
+
+<p>The generator types are:
+</p>
+
+<ul>
+<li>IDENTITY - the database supplies the new key, e.g. auto_increment, SERIAL, or IDENTITY</li>
+<li>SEQUENCE - use a SEQUENCE type to generate the key</li>
+<li>TABLE - use a @TableGenerator for the key</li>
+<li>AUTO - choose the generator based on the database
+<ul>
+  <li>MySQL - IDENTITY using auto_increment</li>
+  <li>Resin - IDENTITY using auto_increment</li>
+  <li>Postgres - SEQUENCE</li>
+  <li>Oracle - SEQUENCE</li>
+</ul>
+</li>
+</ul>
+
+<def title="javax.persistence.GeneratedValue">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface GeneratedValue {
+  GenerationType strategy() default AUTO;
+  String generator() default "";
+}
+</def>
+
+<p>For SEQUENCE and TABLE, Resin will create the sequence
+name as "${table}_cseq".</p>
+
+<example title="Example: autoincrement generation">
+import javax.persistence.*;
+
+@Entity
+public class Course {
+  @Id
+  @GeneratedValue
+  public long getId()
+
+  ...
+}
+</example>
+
+<example title="Example: sequence generation">
+import javax.persistence.*;
+
+@Entity
+public class Course {
+  @Id
+  @GeneratedValue(strategy=GeneratorType.AUTO
+                  generator="COURSE_SEQ")
+  public long getId()
+
+  ...
+}
+</example>
+</s3>
 
 <s3 title="@Id">
 
@@ -528,7 +932,7 @@ public @interface Id {
 
 <p>The default column name is "ID".</p>
 
-<example title="automatic generation">
+<example title="Example: automatic generation">
 import javax.persistence.*;
 
 @Entity
@@ -544,10 +948,22 @@ public class Course {
 
 </s3>
 
-<s3 title="@GeneratedValue">
+<s3 title="@Lob">
 
-<p>Used with @Id to specify a generator for automatic key generation when new
-objects are created.</p>
+<p>Marks a field as containing a large blob value.</p>
+
+<def title="javax.persistence.Lob">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface Lob {
+}
+</def>
+
+</s3>
+
+<s3 title="@Temporal">
+
+<p>Marks a field as a time-based value.</p>
 
 <deftable>
 <tr>
@@ -556,75 +972,161 @@ objects are created.</p>
   <th>Default</th>
 </tr>
 <tr>
-  <td>strategy</td>
-  <td>The auto-generation type</td>
-  <td>AUTO</td>
-</tr>
-<tr>
-  <td>generator</td>
-  <td>The sequence or table generator name</td>
-  <td>${table}_cseq</td>
+  <td>value</td>
+  <td>The SQL type used for the field value: DATE, TIME or TIMESTAMP</td>
+  <td>TIMESTAMP</td>
 </tr>
 </deftable>
 
-<p>The generator types are:
-</p><ul>
-<li>IDENTITY - the database supplies the new key, e.g. auto_increment, SERIAL, or IDENTITY
-</li><li>SEQUENCE - use a SEQUENCE type to generate the key
-</li><li>TABLE - use a @TableGenerator for the key
-</li><li>AUTO - choose the generator based on the database
-<ul>
-<li>MySQL - IDENTITY using auto_increment
-</li><li>Resin - IDENTITY using auto_increment
-</li><li>Postgres - SEQUENCE
-</li><li>Oracle - SEQUENCE
-</li></ul>
-</li></ul>
-
-<def title="javax.persistence.GeneratedValue">
+<def title="javax.persistence.Temporal">
 @Target({METHOD, FIELD})
 @Retention(RUNTIME)
-public @interface GeneratedValue {
-  GenerationType strategy() default AUTO;
-  String generator() default "";
+public @interface Temporal {
+  TemporalType value() default TIMESTAMP;
 }
 </def>
 
-<p>For SEQUENCE and TABLE, Resin will create the sequence
-name as "${table}_cseq".</p>
+</s3>
 
-<example title="automatic generation">
-import javax.persistence.*;
+<s3 title="@Transient">
 
-@Entity
-public class Course {
-  @Id
-  @GeneratedValue
-  public long getId()
+<p><code>@Transient</code> makes a field non-persistent.
+<code>@Transient</code> fields work like the <code>transient</code>
+annotation to prevent properties being saved.</p>
 
-  ...
+<def title="javax.persistence.Transient">
+@Target({METHOD,FIELD})
+@Retention(RUNTIME)
+public @interface Transient {
 }
-</example>
+</def>
 
-<example title="sequence generation">
-import javax.persistence.*;
+</s3>
 
-@Entity
-public class Course {
-  @Id
-  @GeneratedValue(strategy=GeneratorType.AUTO
-                  generator="COURSE_SEQ")
-  public long getId()
+<s3 title="@Version">
 
-  ...
+<p><code>@Version</code> marks a version field, used for
+optimistic locking.</p>
+
+<def title="javax.persistence.Version">
+@Target({METHOD,FIELD})
+@Retention(RUNTIME)
+public @interface Version {
 }
-</example>
+</def>
 
 </s3>
 
 </s2>
 
 <s2 title="Relation annotations">
+
+<s3 title="@JoinColumn">
+
+<p>Defines a join (foreign) columns.  Used for <a href="#@ManyToOne">@ManyToOne</a>.</p>
+
+<p>See also <a href="#@Column">@Column</a> for
+corresponding definition for <a href="#@Basic">@Basic</a> columns.</p>
+
+<p>See the <a href="../examples/amber-many2one/index.xtp">Many-to-One
+tutorial</a> for a full example.</p>
+
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The column name of the source table</td><td>the column name of the target key</td>
+</tr>
+<tr>
+  <td>referencedColumnName</td>
+  <td>The target column for composite keys</td><td>the single primary key</td>
+</tr>
+<tr>
+  <td>unique</td>
+  <td>True if unique</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>nullable</td>
+  <td>False if IS NOT NULL</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>insertable</td>
+  <td>True if the column is inserted on a <code>create</code></td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>updateable</td>
+  <td>True if the column is updated on field changes</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>columnDefinition</td>
+  <td>SQL column definition</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>table</td>
+  <td>specifies a secondary table if not in the primary</td>
+  <td>none</td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.JoinColumn">
+@Target({TYPE, METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface JoinColumn {
+  String name() default "";
+  String referencedColumnName() default "";
+  boolean unique() default false;
+  boolean nullable() default false;
+  boolean insertable() default true;
+  boolean updateable() default true;
+  String columnDefinition() default "";
+  String table() default "";
+}
+</def>
+
+<example title="Example: Student to House link">
+public class Student {
+  @Id
+  @Column(name="student_id")
+  long getId()
+
+  @ManyToOne
+  @JoinColumn(name="house_id")
+  public House getHouse()
+}
+</example>
+
+<example title="Example: Student SQL">
+CREATE TABLE Student {
+  student_id BIGINT PRIMARY KEY auto_increment
+
+  house_id BIGINT REFERENCES House(id)
+)
+</example>
+
+</s3>
+
+<s3 title="@JoinColumns">
+
+<p>Defines a set of join (foreign) columns for composite keys.</p>
+
+<def title="javax.persistence.JoinColumns">
+@Target({TYPE,METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface JoinColumns {
+  JoinColumn [] value() default{}
+}
+</def>
+
+</s3>
 
 <s3 title="@JoinTable">
 
@@ -666,83 +1168,6 @@ public @interface JoinTable {
 
 </s3>
 
-<s3 title="@JoinColumn">
-
-<p>Defines a join (foreign) columns.  Used for <a href="#@ManyToOne">@ManyToOne</a>.</p>
-
-<p>See also <a href="#@Column">@Column</a> for
-corresponding definition for <a href="#@Basic">@Basic</a> columns.</p>
-
-<p>See the <a href="../examples/amber-many2one/index.xtp">Many-to-One
-tutorial</a> for a full example.</p>
-
-<deftable>
-<tr>
-  <th>Property</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr><td>name</td><td>The column name of the source table</td><td>the column name of the target key
-</td></tr><tr><td>referencedColumnName</td><td>The target column for composite keys</td><td>the single primary key
-</td></tr><tr><td>unique</td><td>True if unique</td><td>false
-</td></tr><tr><td>nullable</td><td>False if IS NOT NULL</td><td>true
-</td></tr><tr><td>insertable</td><td>True if the column is inserted on a <code>create</code></td><td>true
-</td></tr><tr><td>updateable</td><td>True if the column is updated on field changes</td><td>true
-</td></tr><tr><td>columnDefinition</td><td>SQL column definition</td><td>false
-</td></tr><tr><td>table</td><td>specifies a secondary table if not in the primary</td><td>none
-</td></tr></deftable>
-
-<example title="Student to House link">
-public class Student {
-  @Id
-  @Column(name="student_id")
-  long getId()
-
-  @ManyToOne
-  @JoinColumn(name="house_id")
-  public House getHouse()
-}
-</example>
-
-<example title="Student SQL">
-CREATE TABLE Student {
-  student_id BIGINT PRIMARY KEY auto_increment
-
-  house_id BIGINT REFERENCES House(id)
-)
-</example>
-
-<def title="javax.persistence.JoinColumn">
-@Target({TYPE, METHOD, FIELD})
-@Retention(RUNTIME)
-public @interface JoinColumn {
-  String name() default "";
-  String referencedColumnName() default "";
-  boolean unique() default false;
-  boolean nullable() default false;
-  boolean insertable() default true;
-  boolean updateable() default true;
-  String columnDefinition() default "";
-  String table() default "";
-}
-</def>
-
-</s3>
-
-<s3 title="@JoinColumns">
-
-<p>Defines a set of join (foreign) columns for composite keys.</p>
-
-<def title="javax.persistence.ManyToOne">
-@Target({TYPE,METHOD, FIELD})
-@Retention(RUNTIME)
-public @interface JoinColumns {
-  JoinColumn [] value() default{}
-}
-</def>
-
-</s3>
-
 <s3 title="@ManyToMany">
 
 <p>Marks a field as a many-to-many (association) relation.</p>
@@ -757,13 +1182,40 @@ public @interface JoinColumns {
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
-</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
-</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
-</td></tr><tr><td>mappedBy</td><td>Specifies the source relation if a target</td><td>
-</td></tr></deftable>
+<tr>
+  <td>cascade</td>
+  <td>Operations which cascade to the target</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>fetch</td>
+  <td>EAGER or LAZY fetching</td>
+  <td>FetchType.EAGER</td>
+</tr>
+<tr>
+  <td>mappedBy</td>
+  <td>Specifies the source relation if a target</td>
+  <td></td>
+</tr>
+<tr>
+  <td>targetEntity</td>
+  <td>The class of the target entity</td>
+  <td>the property's type</td>
+</tr>
+</deftable>
 
-<example title="Simple link ">
+<def title="javax.persistence.ManyToMany">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface ManyToMany {
+  String targetEntity default "";
+  CascadeType []cascade() default {};
+  FetchType fetch() default LAZY;
+  String mappedBy isInverse() default "";
+}
+</def>
+
+<example title="Example: @ManyToMany link ">
 @Entity
 public class Student {
   @ManyToMany
@@ -777,17 +1229,6 @@ public class Student {
   ...
 }
 </example>
-
-<def title="javax.persistence.ManyToMany">
-@Target({METHOD, FIELD})
-@Retention(RUNTIME)
-public @interface ManyToMany {
-  String targetEntity default "";
-  CascadeType []cascade() default {};
-  FetchType fetch() default LAZY;
-  String mappedBy isInverse() default "";
-}
-</def>
 
 </s3>
 
@@ -805,13 +1246,41 @@ public @interface ManyToMany {
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
-</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
-</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
-</td></tr><tr><td>optional</td><td>If false, the relation must always have a value</td><td>true
-</td></tr></deftable>
+<tr>
+  <td>targetEntity</td>
+  <td>The class of the target entity</td>
+  <td>the property's type</td>
+</tr>
+<tr>
+  <td>cascade</td>
+  <td>Operations which cascade to the target: ALL, PERSIST,
+      MERGE, REMOVE or REFRESH</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>fetch</td>
+  <td>EAGER or LAZY fetching</td>
+  <td>FetchType.EAGER</td>
+</tr>
+<tr>
+  <td>optional</td>
+  <td>If false, the relation must always have a value</td>
+  <td>true</td>
+</tr>
+</deftable>
 
-<example title="Simple link ">
+<def title="javax.persistence.ManyToOne">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface ManyToOne {
+  String targetEntity default "";
+  CascadeType []cascade() default {};
+  FetchType fetch() default EAGER;
+  boolean optional() default true;
+}
+</def>
+
+<example title="Example: @ManyToOne link ">
 @Entity
 public class Student {
   @ManyToOne
@@ -822,14 +1291,17 @@ public class Student {
 }
 </example>
 
-<def title="javax.persistence.ManyToOne">
-@Target({Method, FIELD})
+</s3>
+
+<s3 title="@MapKey">
+
+<p>Marks a field as key in a Map relationship.</p>
+
+<def title="javax.persistence.MapKey">
+@Target({METHOD, FIELD})
 @Retention(RUNTIME)
-public @interface ManyToOne {
-  String targetEntity default "";
-  CascadeType []cascade() default {};
-  FetchType fetch() default EAGER;
-  boolean optional() default true;
+public @interface MapKey {
+  String name() default "";
 }
 </def>
 
@@ -854,7 +1326,8 @@ needs a @ManyToOne relation on the source table which defines the column.</p>
 </tr>
 <tr>
   <td>cascade</td>
-  <td>Operations which cascade to the target</td>
+  <td>Operations which cascade to the target: ALL, PERSIST, MERGE,
+REMOVE, and REFRESH</td>
   <td>none</td>
 </tr>
 <tr>
@@ -864,7 +1337,7 @@ needs a @ManyToOne relation on the source table which defines the column.</p>
 </tr>
 <tr>
   <td>mappedBy</td>
-  <td>Specifies the owning @ManyToOne property</td>
+  <td>Specifies the owning @ManyToOne property on the target entity.</td>
   <td></td>
 </tr>
 </deftable>
@@ -880,7 +1353,7 @@ public @interface OneToMany {
 }
 </def>
 
-<example title="Collection java">
+<example title="Example: collection">
 @Entity
 public class House {
   ...
@@ -898,7 +1371,7 @@ public class Student {
 }
 </example>
 
-<example title="Collection SQL">
+<example title="Example: Collection SQL">
 CREATE TABLE House {
   id BIGINT PRIMARY KEY
 )
@@ -930,7 +1403,8 @@ needs a @ManyToOne relation on the source table which defines the column.</p>
 </tr>
 <tr>
   <td>cascade</td>
-  <td>Operations which cascade to the target</td>
+  <td>Operations which cascade to the target: ALL, PERSIST, MERGE,
+REMOVE, and REFRESH</td>
   <td>none</td>
 </tr>
 <tr>
@@ -959,57 +1433,140 @@ public @interface OneToOne {
 
 </s3>
 
-</s2>
+<s3 title="@OrderBy">
 
-<s2 title="Inheritance annotations">
+<p><code>@OrderBy</code> specifies the SQL column to use for ordering
+collection relations.</p>
 
-<s3 title="@DiscriminatorColumn">
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The property name to sort the collection by.</td>
+  <td>the property's type</td>
+</tr>
+</deftable>
 
-<p>Configures the discriminator column.</p>
-
-<def title="javax.persistence.DiscriminatorColumn">
-@Target(TYPE)
+<def title="javax.persistence.OrderBy">
+@Target({METHOD, FIELD})
 @Retention(RUNTIME)
-public @interface DiscriminatorColumn {
-  String name() default "";
-  DiscriminatorType discriminatorType() default STRING;
-  String columnDefinition() default "";
-  int length() default 31;
+public @interface OrderBy {
+  String value() default "";
 }
 </def>
 
 </s3>
 
-<s3 title="@Inheritance">
-
-<p>@Inheritance marks the entity bean as supporting inheritance,
-i.e. the database maps to different Java classes depending on
-a discriminator value.</p>
-
-<def title="javax.persistence.Inheritance">
-@Target(TYPE)
-@Retention(RUNTIME)
-public @interface Inheritance {
-  InteritanceType strategy() default SINGLE_TABLE;
-}
-</def>
-
-</s3>
-
-<s3 title="InheritanceType">
-
-<def title="javax.persistence.InheritanceType">
-public enum InheritanceType {
-  SINGLE_TABLE,
-  JOINED,
-  TABLE_PER_CLASS
-}
-</def>
-
-</s3>
 </s2>
 
 </s1>
+
+<s1 title="Amber Lifecycle">
+
+<s2 title="Non-Transactional Lifecycle">
+
+<p>Amber's non-transactional lifecycle has three important states:</p>
+
+<ul>
+<li><b>clean:</b> the bean is loaded from the database</li>
+<li><b>dirty:</b> the bean has unwritten changes</li>
+<li><b>hollow:</b> the bean is unloaded (lazily-loaded)</li>
+</ul>
+
+<p>In the diagram below, the red methods (<code>load()</code>,
+<code>getXXX()</code>, and <code>flush()</code>) query and
+update the database.</p>
+
+<figure src="amber-non-xa.gif" width="356" height="140"/>
+
+<p>The <code>aConn.load("1")</code> method loads the bean from the
+database and transitions to the <var>clean</var> state.</p>
+
+<p>Calling <code>test.setData("foo")</code> will change to
+the <var>dirty</var> state.</p>
+
+<p>Calling <code>aConn.flush()</code> writes the changes to
+the database and changes to the <var>clean</var> state.  Amber may
+also flush the changes and change to the clean state
+at any time.  <code>flush()</code> merely guarantees that the changes
+will be flushed to the database.</p>
+
+<p>The <var>hollow</var> state represents lazily-loaded entities.  many-to-one
+relations and some queries will return the unloaded bean instead of
+a loaded bean.  When the application calls a <code>getXXX()</code> method,
+the bean will load from the database and change to the <var>clean</var> state.
+When the application calls a <code>setXXX()</code> method, the bean
+will change to the <var>dirty</var> state.</p>
+
+<example title="Example: Amber outside transaction">
+public class MyServlet extends GenericServlet {
+  @In EntityManagerFactory _factory;
+  @In UserTransaction _trans;
+
+  ...
+
+  public void doTest(PrintWriter out)
+    throws IOException
+  {
+     EntityManager aConn = _factory.createManager();
+
+     // load() loads test and then detaches it
+     qa.Test test = aConn.load(qa.Test.class, "1");
+
+     // test has the loaded values
+     out.println(test.getData());
+
+     // but parent is not lazily-loaded when detached, i.e. it's null.
+     qa.Test parent = test.getParent();
+
+     aConn.close();
+  }
+}
+</example>
+
+</s2>
+
+<s2 title="Transactional Lifecycle">
+
+<p>In a transaction, Amber loads the bean from the
+database, even if it was loaded outside of the transaction.
+(Exceptions exist for cases like read-only beans.) By loading the
+bean in the transaction, Amber lets the database handle the
+transactional locking and state consistency.</p>
+
+<p>Just like the non-transactional <var>clean</var> and <var>dirty</var>
+states, Amber has transactional <var>clean</var> and <var>dirty</var> states
+called <var>Persistent-clean</var> and <var>Persistent-dirty</var>.  As in
+the non-transactional case, the <var>hollow</var> state represents
+lazily-loaded beans.</p>
+<ul>
+<li><b>persistent-clean:</b> the bean is loaded from the database
+within the transaction</li>
+<li><b>persistent-dirty:</b> the bean has been changed</li>
+<li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)</li>
+<li><b>persistent-nonXA:</b> the bean was loaded outside of the
+transaction (and would need reloading if used in the transaction)</li>
+</ul>
+
+<figure src="amber-lifecycle.gif" width="511" height="285"/>
+
+<p>The main differences from the non-transactional lifecycle
+are:</p>
+<ul>
+<li>Transactions need a load from inside the transaction.  Loads
+before the transaction cannot be reused.</li>
+<li>Updates occur during the commit() call and change to the
+nonXA-clean state</li>
+<li>Rollbacks change to the hollow state.</li>
+</ul>
+
+</s2>
+</s1>
+
 
 <s1 title="Configuration Files">
 <s2 title="Example configuration">
@@ -1018,7 +1575,7 @@ public enum InheritanceType {
 has two properties: <code>getData()</code> which returns a string, and
 <code>getParent()</code> which is a pointer to another Test object.</p>
 
-<example title="orm.xml">
+<example title="Example: META-INF/orm.xml">
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
