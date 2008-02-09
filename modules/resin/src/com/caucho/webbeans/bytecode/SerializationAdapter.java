@@ -116,7 +116,7 @@ public class SerializationAdapter {
 
       byte []buffer = bos.toByteArray();
 
-      if (true) {
+      if (false) {
 	out = Vfs.lookup("file:/tmp/caucho/qa/temp.class").openWrite();
 	out.write(buffer, 0, buffer.length);
 	out.close();

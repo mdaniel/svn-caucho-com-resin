@@ -106,6 +106,14 @@ public class WbComponentConfig {
   }
 
   /**
+   * Returns the mbean-name
+   */
+  public String getMBeanName()
+  {
+    return null;
+  }
+
+  /**
    * Sets the component type.
    */
   public void setType(Class type)
@@ -278,6 +286,9 @@ public class WbComponentConfig {
 
       addOptionalStringProperty("name", _name);
     }
+
+    if (getMBeanName() != null)
+      comp.setMBeanName(getMBeanName());
 
     comp.setBindingList(_bindingList);
 

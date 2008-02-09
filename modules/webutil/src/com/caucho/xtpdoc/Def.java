@@ -51,10 +51,9 @@ public class Def extends VerboseFormattedTextWithAnchors {
     throws XMLStreamException
   {
     if (_title != null) {
-      out.writeStartElement("center");
-      out.writeStartElement("b");
+      out.writeStartElement("div");
+      out.writeAttribute("class", "caption");
       out.writeCharacters(_title);
-      out.writeEndElement();
       out.writeEndElement();
     }
 

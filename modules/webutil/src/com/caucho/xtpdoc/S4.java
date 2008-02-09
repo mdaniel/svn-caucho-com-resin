@@ -56,18 +56,24 @@ public class S4 extends Section {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "s4");
+    
     out.writeStartElement("a");
     out.writeAttribute("name", getHref());
     out.writeEndElement();
 
     if (_title != null) {
-      out.writeStartElement("h5");
+      out.writeStartElement("h4");
       out.writeCharacters(_title);
       out.writeEndElement();
     }
     
     for (ContentItem item : getItems())
       item.writeHtml(out);
+    
+    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter out)

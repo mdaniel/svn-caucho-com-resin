@@ -59,7 +59,7 @@ public class S3 extends Section {
     out.writeEndElement();
 
     if (_title != null) {
-      out.writeStartElement("h4");
+      out.writeStartElement("h3");
       out.writeCharacters(_title);
       out.writeEndElement();
     }

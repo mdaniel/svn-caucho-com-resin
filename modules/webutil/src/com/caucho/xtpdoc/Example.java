@@ -64,13 +64,13 @@ public class Example extends VerboseFormattedTextWithAnchors {
   {
     out.writeCharacters("\n");
     if (_title != null) {
-      out.writeStartElement("center");
-      out.writeStartElement("b");
+      out.writeStartElement("div");
+      out.writeAttribute("class", "caption");
       out.writeCharacters(_title);
-      out.writeEndElement();
       out.writeEndElement();
     }
 
+    /*
     if (_file != null) {
       out.writeEmptyElement("br");
       out.writeCharacters("See it in: ");
@@ -79,6 +79,7 @@ public class Example extends VerboseFormattedTextWithAnchors {
       out.writeCharacters(_file);
       out.writeEndElement();
     }
+    */
     
     out.writeStartElement("div");
     out.writeAttribute("class", "example");

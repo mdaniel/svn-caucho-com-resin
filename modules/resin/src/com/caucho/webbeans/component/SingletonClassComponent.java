@@ -139,7 +139,6 @@ public class SingletonClassComponent extends ClassComponent
       value = super.init(value, env);
 
       try {
-	System.out.println("MB: " + getMBeanInterface() + " " + value);
 	if (getMBeanInterface() != null)
 	  Jmx.register(value, getMBeanName());
       } catch (Exception e) {

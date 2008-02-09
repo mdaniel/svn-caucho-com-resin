@@ -191,7 +191,7 @@ public class Body extends ContainerNode {
     */
 
     out.writeStartElement("h1");
-    out.writeAttribute("class", "toptitle");
+    out.writeAttribute("class", "title");
     if (getDocument().getHeader() != null)
       out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase());
     out.writeEndElement();
@@ -418,7 +418,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("td");
 
     out.writeStartElement("h1");
-    out.writeAttribute("class", "toptitle");
+    out.writeAttribute("class", "title");
     if (getDocument().getHeader() != null)
       out.writeCharacters(getDocument().getHeader().getTitle());
     out.writeEndElement();

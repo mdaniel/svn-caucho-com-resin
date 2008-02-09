@@ -44,11 +44,7 @@ public class DefinitionTable extends Table {
     throws XMLStreamException
   {
     out.writeStartElement("table");
-    out.writeAttribute("width", "90%");
-    out.writeAttribute("cellpadding", "2");
-    out.writeAttribute("cellspacing", "0");
     out.writeAttribute("class", "deftable");
-    out.writeAttribute("border", "");
 
     if (_title != null) {
       out.writeStartElement("caption");
@@ -56,8 +52,9 @@ public class DefinitionTable extends Table {
       out.writeEndElement();
     }
 
+    int count = 0;
     for (TableRow row : _rows)
-      row.writeHtml(out);
+      row.writeHtml(out, count++);
 
     out.writeEndElement();
   }

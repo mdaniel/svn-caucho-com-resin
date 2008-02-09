@@ -102,6 +102,12 @@ public class BeanConfig extends WbComponentConfig {
     _mbeanName = mbeanName;
   }
 
+  @Override
+  public String getMBeanName()
+  {
+    return _mbeanName;
+  }
+
   public void setMbeanClass(Class cl)
   {
     _mbeanClass = cl;

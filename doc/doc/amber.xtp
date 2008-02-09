@@ -17,7 +17,6 @@
 
 <localtoc/>
 
-
 <s1 title="See Also">
 
 <ul>
@@ -106,80 +105,19 @@ review can follow the persistence just by inspecting the code.</p>
 
 </s2>
 
-<s2 title="JDBC APIs">
-
-<p>Amber uses JDBC classes like ResultSet both to simplify the interfaces
-and to take advantage of database driver capability.  Since the
-ResultSet can already flexibly scan through results and return columns in
-their proper types, there's no need to invent a new API.</p>
-
-<p>To handle objects, Amber implements the
-<code>ResultSet.getObject</code> method to return the loaded object.</p>
-
-<example>
-AmberConnection conn = ...;
-
-ResultSet rs = conn.query("SELECT o FROM qa.Test o WHERE o.data='test-data'");
-
-while (rs.next()) {
-  ...
-}
-</example>
-
-</s2>
-
-<s2 title="Configuration Files">
-
-<p>Amber follows the JPA specification and supports persistence.xml and orm.xml configuration files.</p>
-
-</s2>
-
 </s1>
 
 <s1 title="Amber Lifecycle">
-
-<s2 title="Example configuration">
-
-<p>The lifecycle description uses a single running example, Test, which
-has two properties: <code>getData()</code> which returns a string, and
-<code>getParent()</code> which is a pointer to another Test object.</p>
-
-<example title="orm.xml">
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm orm_1_0.xsd"
-   version="1.0"&gt;
-  &lt;package&gt;qa&lt;/package&gt;
-  &lt;entity name="Test" class="qa.Test" access="PROPERTY"&gt;
-    &lt;table name="TEST"/&gt;
-      &lt;attributes&gt;
-        &lt;id name="id"&gt;
-          &lt;column name="ID"/&gt;
-        &lt;/id&gt;
-        &lt;basic name="data"&gt;
-          &lt;column name="DATA"/&gt;
-        &lt;/basic&gt;
-        &lt;many-to-one name="parent"&gt;
-          &lt;join-column name="FK_PARENT"/&gt;
-        &lt;/many-to-one&gt;
-     &lt;/attributes&gt;
-   &lt;/table&gt;
-  &lt;/entity&gt;
-&lt;/entity-mappings&gt;
-</example>
-
-</s2>
 
 <s2 title="Non-Transactional Lifecycle">
 
 <p>Amber's non-transactional lifecycle has three important states:</p>
 
 <ul>
-<li><b>clean:</b> the bean is loaded from the database
-</li><li><b>dirty:</b> the bean has unwritten changes
-</li><li><b>hollow:</b> the bean is unloaded (lazily-loaded)
-</li></ul>
+<li><b>clean:</b> the bean is loaded from the database</li>
+<li><b>dirty:</b> the bean has unwritten changes</li>
+<li><b>hollow:</b> the bean is unloaded (lazily-loaded)</li>
+</ul>
 
 <p>In the diagram below, the red methods (<code>load()</code>,
 <code>getXXX()</code>, and <code>flush()</code>) query and
@@ -246,12 +184,12 @@ the non-transactional case, the <var>hollow</var> state represents
 lazily-loaded beans.</p>
 <ul>
 <li><b>persistent-clean:</b> the bean is loaded from the database
-within the transaction
-</li><li><b>persistent-dirty:</b> the bean has been changed
-</li><li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)
-</li><li><b>persistent-nonXA:</b> the bean was loaded outside of the
-transaction (and would need reloading if used in the transaction)
-</li></ul>
+within the transaction</li>
+<li><b>persistent-dirty:</b> the bean has been changed</li>
+<li><b>hollow:</b> the bean is unloaded (lazily-loaded or rolled-back)</li>
+<li><b>persistent-nonXA:</b> the bean was loaded outside of the
+transaction (and would need reloading if used in the transaction)</li>
+</ul>
 
 <figure src="amber-lifecycle.gif" width="511" height="285"/>
 
@@ -259,11 +197,11 @@ transaction (and would need reloading if used in the transaction)
 are:</p>
 <ul>
 <li>Transactions need a load from inside the transaction.  Loads
-before the transaction cannot be reused.
-</li><li>Updates occur during the commit() call and change to the
-nonXA-clean state
-</li><li>Rollbacks change to the hollow state.
-</li></ul>
+before the transaction cannot be reused.</li>
+<li>Updates occur during the commit() call and change to the
+nonXA-clean state</li>
+<li>Rollbacks change to the hollow state.</li>
+</ul>
 
 </s2>
 </s1>
@@ -281,28 +219,32 @@ nonXA-clean state
 and the <a href="../examples/amber-basic-field/index.xtp">basic field tutorial</a>
 for an introduction.</p>
 
-<deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>name</td>
-  <td>The name of the bean</td><td>The class name (unqualified)</td>
+  <td>The name of the bean</td>
+  <td>The class name (unqualified)</td>
 </tr>
-</deftable-childtags>
+</deftable>
 
-<p>The fields or properties will be annotated by @Id, @Basic, etc.
-Amber will detect either field or property annotation by the
-type for the @Id.  In other words, if Amber sees an @Id on a field,
-it will use field access.  If Amber sees @Id on a method, it will use
-property access.</p>
-
-<def>
-package javax.persistence;
-
+<def title="javax.persistence.Entity">
 @Target(TYPE)
 @Retention(RUNTIME)
 public @interface Entity {
   String name() default "";
 }
 </def>
+
+<p>The fields or properties will be annotated by @Id, @Basic, etc.
+Amber will detect either field or property annotation by the
+type for the @Id.  In other words, if Amber sees an @Id on a field,
+it will use field access.  If Amber sees @Id on a method, it will use
+property access.</p>
 
 </s3>
 
@@ -312,7 +254,12 @@ public @interface Entity {
 The secondary table will contain the fields with a secondaryTable
 in the @Column.</p>
 
-<deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>name</td>
   <td>The name of the table</td><td>The unqualified class name.</td>
@@ -336,11 +283,9 @@ in the @Column.</p>
   <td>unique constraints during generation</td>
   <td>none</td>
 </tr>
-</deftable-childtags>
+</deftable>
 
-<def>
-package javax.persistence;
-
+<def title="javax.persistence.SecondaryTable">
 @Target(TYPE)
 @Retention(RUNTIME)
 public @interface SecondaryTable {
@@ -359,12 +304,33 @@ public @interface SecondaryTable {
 <p>Specifies the database table for an entity bean.  The
 default table name is the class name.</p>
 
-<deftable-childtags>
-<tr><td>name</td><td>The name of the table</td><td>The unqualified class name.
-</td></tr><tr><td>catalog</td><td>the table's catalog</td><td>none
-</td></tr><tr><td>schema</td><td>the table's schema</td><td>none
-</td></tr><tr><td>uniqueConstraint</td><td>unique constraints during generation</td><td>none
-</td></tr></deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The name of the table</td>
+  <td>The unqualified class name.</td>
+</tr>
+<tr>
+  <td>catalog</td>
+  <td>the table's catalog</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>schema</td>
+  <td>the table's schema</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>uniqueConstraint</td>
+  <td>unique constraints during generation</td>
+  <td>none</td>
+</tr>
+</deftable>
 
 <def>
 package javax.persistence;
@@ -389,16 +355,41 @@ public @interface Table {
 
 <p>Marks a field as a persistent field.</p>
 
-<deftable-childtags>
-<tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
-</td></tr><tr><td>optional</td><td>if true, the column may be null</td><td>true
-</td></tr></deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>fetch</td>
+  <td>EAGER or LAZY fetching</td><td>FetchType.EAGER</td>
+</tr>
+<tr>
+  <td>optional</td>
+  <td>if true, the column may be null</td>
+  <td>true</td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.Basic">
+package javax.persistence;
+
+@Target({Method, FIELD})
+@Retention(RUNTIME)
+public @interface Basic {
+  FetchType fetch() default EAGER;
+  boolean optional() default true;
+}
+</def>
 
 <p>The fetch types are:
-</p><ul>
-<li>EAGER - fetch the field when the bean is loaded
-</li><li>LAZY - fetch the field only when the field is used
-</li></ul>
+</p>
+
+<ul>
+<li>EAGER - fetch the field when the bean is loaded</li>
+<li>LAZY - fetch the field only when the field is used</li>
+</ul>
 
 <example title="String property ">
 @Entity
@@ -420,17 +411,6 @@ public class Course {
 }
 </example>
 
-<def title="javax.persistence.Basic">
-package javax.persistence;
-
-@Target({Method, FIELD})
-@Retention(RUNTIME)
-public @interface Basic {
-  FetchType fetch() default EAGER;
-  boolean optional() default true;
-}
-</def>
-
 </s3>
 
 <s3 title="@Column">
@@ -438,34 +418,66 @@ public @interface Basic {
 <p>Specifies the field's SQL column name as well as any CREATE TABLE
 properties for auto generation.</p>
 
-<deftable-childtags>
-<tr><td>name</td><td>The SQL name of the column</td><td>the field name
-</td></tr><tr><td>unique</td><td>True for UNIQUE columns</td><td>false
-</td></tr><tr><td>nullable</td><td>False for IS NOT NULL columns</td><td>true
-</td></tr><tr><td>insertable</td><td>True if column is inserted on a <code>create</code> call</td><td>true
-</td></tr><tr><td>updatable</td><td>True if column is updated when the field is modified</td><td>false
-</td></tr><tr><td>columnDefinition</td><td>SQL to create the column in a CREATE TABLE</td><td>none
-</td></tr><tr><td>table</td><td>specified if column is stored in a secondary table</td><td>none
-</td></tr><tr><td>length</td><td>the default length for a VARCHAR for a CREATE TABLE</td><td>255
-</td></tr><tr><td>precision</td><td>the default length for a number definition for a CREATE TABLE</td><td>0
-</td></tr><tr><td>scale</td><td>the default length for a number definition for a CREATE TABLE</td><td>0
-</td></tr></deftable-childtags>
-
-<example title="String property ">
-@Entity
-public class Course {
-  @Basic
-  @Column(unique=true,
-          nullable=false,
-          length=32)
-  public String getName()
-
-  ...
-}
-</example>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The SQL name of the column</td>
+  <td>the field name</td>
+</tr>
+<tr>
+  <td>unique</td>
+  <td>True for UNIQUE columns</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>nullable</td>
+  <td>False for IS NOT NULL columns</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>insertable</td>
+  <td>True if column is inserted on a <code>create</code> call</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>updatable</td>
+  <td>True if column is updated when the field is modified</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>columnDefinition</td>
+  <td>SQL to create the column in a CREATE TABLE</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>table</td>
+  <td>specified if column is stored in a secondary table</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>length</td>
+  <td>the default length for a VARCHAR for a CREATE TABLE</td>
+  <td>255</td>
+</tr>
+<tr>
+  <td>precision</td>
+  <td>the default length for a number definition for a CREATE TABLE</td>
+  <td>0</td>
+  </tr>
+<tr>
+  <td>scale</td>
+  <td>the default length for a number definition for a CREATE TABLE</td>
+  <td>0</td>
+</tr>
+</deftable>
 
 <def title="javax.persistence.Column">
-@Target({Method, FIELD})
+@Target({METHOD, FIELD})
 @Retention(RUNTIME)
 public @interface Column {
   String name() default "";
@@ -482,6 +494,19 @@ public @interface Column {
 }
 </def>
 
+<example title="String property ">
+@Entity
+public class Course {
+  @Basic
+  @Column(unique=true,
+          nullable=false,
+          length=32)
+  public String getName()
+
+  ...
+}
+</example>
+
 </s3>
 
 </s2>
@@ -493,6 +518,13 @@ public @interface Column {
 <p>Marks a field as a primary key.  The <code>@Id</code>
 may be used in combination with <code>@GeneratedValue</code> to specify a generator for automatic key generation when new
 objects are created.</p>
+
+<def title="javax.persistence.Id">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface Id {
+}
+</def>
 
 <p>The default column name is "ID".</p>
 
@@ -510,13 +542,6 @@ public class Course {
 }
 </example>
 
-<def title="javax.persistence.Id">
-@Target({METHOD, FIELD})
-@Retention(RUNTIME)
-public @interface Id {
-}
-</def>
-
 </s3>
 
 <s3 title="@GeneratedValue">
@@ -524,10 +549,23 @@ public @interface Id {
 <p>Used with @Id to specify a generator for automatic key generation when new
 objects are created.</p>
 
-<deftable-childtags>
-<tr><td>strategy</td><td>The auto-generation type</td><td>AUTO
-</td></tr><tr><td>generator</td><td>The sequence or table generator name</td><td>\${table}_cseq
-</td></tr></deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>strategy</td>
+  <td>The auto-generation type</td>
+  <td>AUTO</td>
+</tr>
+<tr>
+  <td>generator</td>
+  <td>The sequence or table generator name</td>
+  <td>${table}_cseq</td>
+</tr>
+</deftable>
 
 <p>The generator types are:
 </p><ul>
@@ -543,8 +581,17 @@ objects are created.</p>
 </li></ul>
 </li></ul>
 
+<def title="javax.persistence.GeneratedValue">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface GeneratedValue {
+  GenerationType strategy() default AUTO;
+  String generator() default "";
+}
+</def>
+
 <p>For SEQUENCE and TABLE, Resin will create the sequence
-name as "\${table}_cseq".</p>
+name as "${table}_cseq".</p>
 
 <example title="automatic generation">
 import javax.persistence.*;
@@ -573,15 +620,6 @@ public class Course {
 }
 </example>
 
-<def title="javax.persistence.GeneratedValue">
-@Target({METHOD, FIELD})
-@Retention(RUNTIME)
-public @interface GeneratedValue {
-  GenerationType strategy() default AUTO;
-  String generator() default "";
-}
-</def>
-
 </s3>
 
 </s2>
@@ -592,13 +630,26 @@ public @interface GeneratedValue {
 
 <p>Defines an association table for a many-to-many relation.</p>
 
-<deftable-childtags>
-<tr><td>name</td><td>Table definition for the association table</td><td>concatening the source and target table names
-</td></tr><tr><td>catalog</td><td>Database catalog</td><td>""
-</td></tr><tr><td>schema</td><td>Database schema</td><td>""
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>Table definition for the association table</td>
+  <td>concatening the source and target table names</td>
+</tr>
+<tr>
+  <td>catalog</td>
+  <td>Database catalog</td>
+  <td>""</td>
+</tr>
+<tr><td>schema</td><td>Database schema</td><td>""
 </td></tr><tr><td>joinColumns</td><td>Columns from from the association table to the source table</td><td>Uses the source table primary key
 </td></tr><tr><td>inverseJoinColumns</td><td>Columns from from the association table to the target table</td><td>Uses the target table primary key
-</td></tr></deftable-childtags>
+</td></tr></deftable>
 
 <def title="javax.persistence.JoinTable">
 @Target({METHOD, FIELD})
@@ -625,7 +676,12 @@ corresponding definition for <a href="#@Basic">@Basic</a> columns.</p>
 <p>See the <a href="../examples/amber-many2one/index.xtp">Many-to-One
 tutorial</a> for a full example.</p>
 
-<deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>name</td><td>The column name of the source table</td><td>the column name of the target key
 </td></tr><tr><td>referencedColumnName</td><td>The target column for composite keys</td><td>the single primary key
 </td></tr><tr><td>unique</td><td>True if unique</td><td>false
@@ -634,7 +690,7 @@ tutorial</a> for a full example.</p>
 </td></tr><tr><td>updateable</td><td>True if the column is updated on field changes</td><td>true
 </td></tr><tr><td>columnDefinition</td><td>SQL column definition</td><td>false
 </td></tr><tr><td>table</td><td>specifies a secondary table if not in the primary</td><td>none
-</td></tr></deftable-childtags>
+</td></tr></deftable>
 
 <example title="Student to House link">
 public class Student {
@@ -695,12 +751,17 @@ public @interface JoinColumns {
 
 <p>See the <a href="../examples/amber-many2many/index.xtp">many-to-many tutorial</a> for an example.</p>
 
-<deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
 </td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
 </td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
 </td></tr><tr><td>mappedBy</td><td>Specifies the source relation if a target</td><td>
-</td></tr></deftable-childtags>
+</td></tr></deftable>
 
 <example title="Simple link ">
 @Entity
@@ -738,12 +799,17 @@ public @interface ManyToMany {
 
 <p>See the <a href="../examples/amber-many2one/index.xtp">many-to-one tutorial</a> for an example.</p>
 
-<deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
 </td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
 </td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
 </td></tr><tr><td>optional</td><td>If false, the relation must always have a value</td><td>true
-</td></tr></deftable-childtags>
+</td></tr></deftable>
 
 <example title="Simple link ">
 @Entity
@@ -775,12 +841,44 @@ public @interface ManyToOne {
 Because a one-to-many field is dependent, it
 needs a @ManyToOne relation on the source table which defines the column.</p>
 
-<deftable-childtags>
-<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
-</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
-</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
-</td></tr><tr><td>mappedBy</td><td>Specifies the owning @ManyToOne property</td><td>
-</td></tr></deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>targetEntity</td>
+  <td>The class of the target entity</td>
+  <td>the property's type</td>
+</tr>
+<tr>
+  <td>cascade</td>
+  <td>Operations which cascade to the target</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>fetch</td>
+  <td>EAGER or LAZY fetching</td>
+  <td>FetchType.EAGER</td>
+</tr>
+<tr>
+  <td>mappedBy</td>
+  <td>Specifies the owning @ManyToOne property</td>
+  <td></td>
+</tr>
+</deftable>
+
+<def title="javax.persistence.OneToMany">
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface OneToMany {
+  String targetEntity default "";
+  CascadeType []cascade() default {};
+  FetchType fetch() default EAGER;
+  String mappedBy() default "";
+}
+</def>
 
 <example title="Collection java">
 @Entity
@@ -812,17 +910,6 @@ CREATE TABLE Student {
 )
 </example>
 
-<def title="javax.persistence.OneToMany">
-@Target({METHOD, FIELD})
-@Retention(RUNTIME)
-public @interface OneToMany {
-  String targetEntity default "";
-  CascadeType []cascade() default {};
-  FetchType fetch() default EAGER;
-  String mappedBy() default "";
-}
-</def>
-
 </s3>
 
 <s3 title="@OneToOne">
@@ -831,12 +918,32 @@ public @interface OneToMany {
 Because a one-to-one field is dependent, it
 needs a @ManyToOne relation on the source table which defines the column.</p>
 
-<deftable-childtags>
-<tr><td>targetEntity</td><td>The class of the target entity</td><td>the property's type
-</td></tr><tr><td>cascade</td><td>Operations which cascade to the target</td><td>none
-</td></tr><tr><td>fetch</td><td>EAGER or LAZY fetching</td><td>FetchType.EAGER
-</td></tr><tr><td>mappedBy</td><td>Specifies the owning relation</td><td>
-</td></tr></deftable-childtags>
+<deftable>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>targetEntity</td>
+  <td>The class of the target entity</td><td>the property's type</td>
+</tr>
+<tr>
+  <td>cascade</td>
+  <td>Operations which cascade to the target</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>fetch</td>
+  <td>EAGER or LAZY fetching</td>
+  <td>FetchType.EAGER</td>
+</tr>
+<tr>
+  <td>mappedBy</td>
+  <td>Specifies the owning relation</td>
+  <td></td>
+</tr>
+</deftable>
 
 <def title="javax.persistence.OneToOne">
 @Target({METHOD, FIELD})
@@ -902,6 +1009,41 @@ public enum InheritanceType {
 </s3>
 </s2>
 
+</s1>
+
+<s1 title="Configuration Files">
+<s2 title="Example configuration">
+
+<p>The lifecycle description uses a single running example, Test, which
+has two properties: <code>getData()</code> which returns a string, and
+<code>getParent()</code> which is a pointer to another Test object.</p>
+
+<example title="orm.xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm orm_1_0.xsd"
+   version="1.0"&gt;
+  &lt;package&gt;qa&lt;/package&gt;
+  &lt;entity name="Test" class="qa.Test" access="PROPERTY"&gt;
+    &lt;table name="TEST"/&gt;
+      &lt;attributes&gt;
+        &lt;id name="id"&gt;
+          &lt;column name="ID"/&gt;
+        &lt;/id&gt;
+        &lt;basic name="data"&gt;
+          &lt;column name="DATA"/&gt;
+        &lt;/basic&gt;
+        &lt;many-to-one name="parent"&gt;
+          &lt;join-column name="FK_PARENT"/&gt;
+        &lt;/many-to-one&gt;
+     &lt;/attributes&gt;
+   &lt;/table&gt;
+  &lt;/entity&gt;
+&lt;/entity-mappings&gt;
+</example>
+
+</s2>
 </s1>
 
   </body>

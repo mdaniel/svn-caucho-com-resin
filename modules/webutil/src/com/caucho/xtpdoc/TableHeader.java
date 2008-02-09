@@ -33,6 +33,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import com.caucho.config.types.*;
 
 public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   private String _width;
@@ -45,6 +46,12 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   public void setWidth(String width)
   {
     _width = width;
+  }
+
+  @Override
+  public void addText(RawString text)
+  {
+    addItem(new Text(text.getValue().toUpperCase()));
   }
 
   public void writeHtml(XMLStreamWriter out)

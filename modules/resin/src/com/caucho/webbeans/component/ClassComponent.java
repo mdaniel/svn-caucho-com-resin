@@ -68,6 +68,7 @@ public class ClassComponent extends ComponentImpl {
   private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
   private Class _proxyClass;
 
+  private String _mbeanName;
   private Class _mbeanInterface;
 
   public ClassComponent(WbWebBeans webbeans)
@@ -91,6 +92,11 @@ public class ClassComponent extends ComponentImpl {
   public void setConstructor(Constructor ctor)
   {
     _ctor = ctor;
+  }
+
+  public void setMBeanName(String name)
+  {
+    _mbeanName = name;
   }
 
   public Class getMBeanInterface()
@@ -254,6 +260,12 @@ public class ClassComponent extends ComponentImpl {
 
   protected String getMBeanName()
   {
+    if (_mbeanName != null)
+      return _mbeanName;
+
+    if (_mbeanInterface == null)
+      return null;
+    
     String typeName = _mbeanInterface.getSimpleName();
 
     if (typeName.endsWith("MXBean"))

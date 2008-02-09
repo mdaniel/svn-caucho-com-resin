@@ -59,7 +59,7 @@ public class S2 extends Section {
     out.writeEndElement();
 
     if (_title != null) {
-      out.writeStartElement("h3");
+      out.writeStartElement("h2");
       out.writeCharacters(_title);
       out.writeEndElement();
     }

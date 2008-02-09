@@ -240,25 +240,29 @@ and JMS queues.</li>
 
 </s1>
 
-<s1 title="JMX Instrumenting Resources">
+<s1 title="JMX Instrumenting Beans">
 
-<p>Instrumenting resources so JMX can manage them consists
-of the following steps:</p>
+<p>Resin's IoC container can register the application's services
+with JMX automatically.  The registered beans will then be available
+in a JMX application like jconsole or through PHP or Java.
+</p>
 
 <ol>
-<li>For a class <code>MyFoo</code>, create an interface <code>MyFooMBean</code> with
-the management interface.</li>
-<li>Class <code>MyFoo</code> needs to <var>implement</var> the <code>MyFooMBean</code> interface.</li>
-<li>Register <code>MyFoo</code> with the JMX server.</li>
+<li>For a class <code>MyFoo</code>, create an
+interface <code>MyFooXMBean</code> with the management interface.</li>
+<li>Class <code>MyFoo</code> needs to implement
+the <code>MyFooMBean</code> interface.</li>
+<li>When Resin handles the &lt;bean> tag, it will
+register <code>MyFoo</code> with the JMX server.</li>
 </ol>
 
-<s2 title="Instrumenting a servlet">
+<s2 title="Instrumenting a bean">
 
 <p>Resin will automatically register any servlet which
 implements an MBean interface.  By default, the JMX name will be:</p>
 
 <def>
-resin:name=<var>servlet-name</var>,type=Servlet,Host=<var>name</var>,WebApp=<var>name</var>
+resin:name=<var>name</var>,type=<var>type</var>,Host=<var>name</var>,WebApp=<var>name</var>
 </def>
 
 <deftable title="ObjectName attributes">
@@ -268,11 +272,11 @@ resin:name=<var>servlet-name</var>,type=Servlet,Host=<var>name</var>,WebApp=<var
 </tr>
 <tr>
   <td>type</td>
-  <td>Servlet</td>
+  <td>The FooMBean name minus the MBean, e.g. "Foo"</td>
 </tr>
 <tr>
   <td>name</td>
-  <td>the servlet-name value</td>
+  <td>the bean's name value</td>
 </tr>
 <tr>
   <td>Host</td>
@@ -285,17 +289,17 @@ resin:name=<var>servlet-name</var>,type=Servlet,Host=<var>name</var>,WebApp=<var
 </deftable>
 
 <p>The domain is <var>web-app</var>, the type property
-is javax.servlet.Servlet and the name property is the value
-of &lt;servlet-name&gt;.</p>
+is calculated from the MBean class name and the name property is the value
+of &lt;name&gt;.</p>
 
-<p>JMX clients will use the name to manage the servlet.  For example,
-a client might use the pattern <var>web-app:type=javax.servlet.Servlet,*</var>
-to retrieve all managed servlets.</p>
+<p>JMX clients will use the name to manage the bean.  For example,
+a client might use the pattern <var>web-app:type=Foo,*</var>
+to retrieve the bean.</p>
 
-<example title="MyServletMBean.java">
+<example title="MyServiceMBean.java">
 package test;
 
-public interface MyServletMBean {
+public interface MyServiceMBean {
   public int getCount();
 }
 </example>
@@ -306,7 +310,7 @@ package test;
 import java.io.*;
 import javax.servlet.*;
 
-public class MyServlet extends GenericServlet implements MyServletMBean
+public class MyService implements MyServiceMBean
 {
   private int _count;
 
@@ -315,15 +319,9 @@ public class MyServlet extends GenericServlet implements MyServletMBean
     return _count;
   }
 
-  public void service(ServletRequest request,
-                      ServletResponse response)
-    throws IOException
+  public void doStuff()
   {
-    PrintWriter out = response.getWriter();
-
     _count++;
-
-    out.println("Hello, world");
   }
 }
 </example>
@@ -340,9 +338,9 @@ web-app provides several examples of getting JMX data.</p>
 
 $mbean_server = new MBeanServer();
 
-$servlets = $mbean_server->query("resin:*,type=Servlet,name=hello");
+$service = $mbean_server->query("resin:*,type=MyService");
 
-echo "Hello.count: " . $servlets[0]->Count . "\n";
+echo "Service.count: " . $service[0]->Count . "\n";
 
 ?>
 </example>
@@ -415,14 +413,19 @@ is accessible by anyone who can guess the port number.
 </p>
 
 <example title="Start Resin and remote JMX - disable password checking and SSL">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
 
-win&gt; ./httpd.exe -Dcom.sun.management.jmxremote.port=9999
-                 -Dcom.sun.management.jmxremote.ssl=false
-                 -Dcom.sun.management.jmxremote.authenticate=false
+  &lt;server-default>
+    &lt;jvm-arg>-Dcom.sun.management.jmxremote.port=9999&lt;/jvm-arg>
+    &lt;jvm-arg>-Dcom.sun.management.jmxremote.ssl=false&lt;/jvm-arg>
+    &lt;jvm-arg>-Dcom.sun.management.jmxremote.authenticate=false&lt;/jvm-arg>
+  &lt;/server-default>
 
-unix&gt; bin/httpd.sh -Dcom.sun.management.jmxremote.port=9999 \
-                   -Dcom.sun.management.jmxremote.ssl=false \
-                   -Dcom.sun.management.jmxremote.authenticate=false
+  ...
+
+&lt;/cluster>
+&lt;/resin>
 </example>
 
 <example title="Start jconsole">
@@ -445,13 +448,18 @@ controlRole 55control
 </example>
 
 <example title="Start Resin and remote JMX - disable SSL">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
 
-win&gt; ./httpd.exe -Dcom.sun.management.jmxremote.port=9999
-                 -Dcom.sun.management.jmxremote.ssl=false
+  &lt;server-default>
+    &lt;jvm-arg>-Dcom.sun.management.jmxremote.port=9999&lt;/jvm-arg>
+    &lt;jvm-arg>-Dcom.sun.management.jmxremote.ssl=false&lt;/jvm-arg>
+  &lt;/server-default>
 
-unix&gt; bin/httpd.sh -Dcom.sun.management.jmxremote.port=9999 \
-                   -Dcom.sun.management.jmxremote.ssl=false
+  ...
 
+&lt;/cluster>
+&lt;/resin>
 </example>
 
 <example title="Start jconsole">

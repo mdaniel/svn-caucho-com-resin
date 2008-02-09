@@ -59,7 +59,7 @@ public class S1 extends Section {
     out.writeEndElement();
     
     if (_title != null) {
-      out.writeStartElement("h2");
+      out.writeStartElement("h1");
       out.writeAttribute("class", "section");
       out.writeCharacters(_title);
       out.writeEndElement();

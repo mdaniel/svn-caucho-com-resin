@@ -67,10 +67,11 @@ public class TableRow {
   {
   }
 
-  public void writeHtml(XMLStreamWriter out)
+  public void writeHtml(XMLStreamWriter out, int count)
     throws XMLStreamException
   {
     out.writeStartElement("tr");
+    out.writeAttribute("class", count % 2 == 0 ? "a" : "b");
 
     for (TableCell cell : _cells)
       cell.writeHtml(out);

@@ -56,19 +56,33 @@ hr {
 
 /* sections */
 
-h1 {
+h1.title {
   margin : 0em 0.5em;
   color : #98012e;
   font-family : Arial, Helvetica, sans-serif;
+  font-variant : normal;
 }
 
-h2.section {
+h1 {
   color : #12037a;
   font-family : Arial, Helvetica, sans-serif;
+  font-variant : small-caps;
+  font-size : 180%;
+}
+
+h2 {
+  font-family : Arial, Helvetica, sans-serif;
+  font-variant : small-caps;
 }
 
 h3 {
   font-family : Arial, Helvetica, sans-serif;
+  font-variant : small-caps;
+}
+
+h4 {
+  font-family : Arial, Helvetica, sans-serif;
+  font-variant : small-caps;
 }
 
 div.section-title {
@@ -136,7 +150,7 @@ div.section-title {
 .toc {
   margin : 0em 2em;
   background : #cac7d9;
-  border : solid;
+  border : solid #999;
   border-width : 1px;
   font-family : Arial, Helvetica, sans-serif;
 }
@@ -146,9 +160,10 @@ div.s3 {
 }
 
 div.example {
-  margin : 0em 2em;
-  padding : 1em;
-  border : solid;
+  margin : 1em 2em;
+  padding : 0em 1em;
+  width : 90%;
+  border : solid #999;
   border-width : 1px;
   background : #e5d1ac;
   color : black;
@@ -156,37 +171,76 @@ div.example {
   font-size : .9em;
 }
 
-div.definition {
-  margin : 0em 2em;
-  padding : 1em;
-  border : solid;
-  border-width : 1px;
-  background : #f0f0f0;
+div.results {
+  margin : 1em 2em;
+  padding : 0em 1em;
+  width : 90%;
+  border : solid #999 1px;
   color : black;
   font-family : monospace;
   font-size : .9em;
 }
 
-.deftable {
-/*  background : #eeccff; */
-/*  background : #b8e6d6; */
-  margin : 0em 2em;
-  width : 100%;
+div.definition {
+  margin : 1em 2em;
+  padding : 0em 1em;
+  width : 90%;
+  border : solid #999;
+  border-width : 1px;
+  background : #f4f4f4;
+  color : black;
+  font-family : monospace;
+  font-size : .9em;
+}
+
+.caption {
+  margin-left : 2em;
+  font-style: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  color : #98012e;
+  text-align : left;
+  font-size : 120%
+}
+
+/* blue body #12037a: HSV: 248, 90, 48 */
+/* red body #98012e: HSV: 342, 99, 60 */
+
+table.deftable {
+  margin : 1em 2em;
   border : solid, 1px;
+  width : 90%;
   border-collapse: collapse;
-  padding : 0;
+}
+
+caption {
+  padding : 0.3em 0em;
+  font-style: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  color : #98012e;
+  text-align : left;
+  font-size : 120%
 }
 
 table.deftable th {
-  background : #c78ae6;
-/*  background : #7accb1; */
+  text-align : left;
+  background : white;
+  font-family: Arial, Helvetica, sans-serif;
+  font-variant : small-caps;
+  font-weight : normal;
+  font-size : 85%;
+  border-top : 1px solid #98012e;
+  border-bottom : 1px solid #98012e;
+  color : #666;
+  padding : 0.3em 0;
 }
 
-/*
-.toc {
-  background : #ccddff;
+table.deftable tr.a {
+  background : #eee;
 }
-*/
+
+table.deftable tr.b {
+  background : #f8f8f8;
+}
 
 /* XXX: netscape ignores
 caption {

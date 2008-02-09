@@ -56,8 +56,15 @@ public class Results extends FormattedTextWithAnchors {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    if (_title != null) {
+      out.writeStartElement("div");
+      out.writeAttribute("class", "caption");
+      out.writeCharacters(_title);
+      out.writeEndElement();
+    }
+
     out.writeStartElement("div");
-    out.writeAttribute("class", "example");
+    out.writeAttribute("class", "results");
 
     super.writeHtml(out);
 
