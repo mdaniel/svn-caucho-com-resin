@@ -22,7 +22,7 @@ driver for a protocol is also straightforward.</p>
 
 <localtoc/>
 
-<s1 title="Hello, World">
+<s1 title="Example: Hello, World">
 
 <p>The Hello, World example shows the primary steps involved in
 creating a Resin remoting service:</p>
@@ -51,7 +51,7 @@ reflection for strict compile-time validation.</p>
 <p>In this example, the API is easy.  It's just a single method
 call <code>hello</code> returning a greeting string.</p>
 
-<example title="Hello.java - API">
+<example title="Example: Hello.java - API">
 package qa;
 
 public interface Hello {
@@ -73,7 +73,7 @@ just like writing a servlet.</p>
 the "hello, world" string.  More complicated services might
 delegate to WebBeans or EJB services.</p>
 
-<example title="MyService.java - Service">
+<example title="Example: MyService.java - Service">
 package qa;
 
 public class MyService implements Hello {
@@ -105,7 +105,7 @@ protocol with several language implementations.  If you want
 to export multiple protocol bindings, you can just add new
 &lt;servlet-mapping> definitions.</p>
 
-<example title="WEB-INF/resin-web.xml - Hessian Service">
+<example title="Example: WEB-INF/resin-web.xml - Hessian Service">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;servlet-mapping url-pattern="/hello" servlet-class="qa.MyService">
@@ -118,7 +118,7 @@ to export multiple protocol bindings, you can just add new
 <p>We can easily change the protocol to use CXF instead of
 Hessian by changing the scheme from "hessian:" to "cxf:".</p>
 
-<example title="WEB-INF/resin-web.xml - CXF Service">
+<example title="Example: WEB-INF/resin-web.xml - CXF Service">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;servlet-mapping url-pattern="/hello" servlet-class="qa.MyService">
@@ -151,7 +151,7 @@ lookup the <code>qa.Hello</code> client stub that's been configured
 and gives it to the servlet.  Since the client stub is thread-safe
 it can be safely used in the servlet code.</p>
 
-<example title="qa/MyServlet.java - Servlet Client">
+<example title="Example: qa/MyServlet.java - Servlet Client">
 package qa;
 
 import java.io.*;
@@ -191,7 +191,7 @@ protocols if necessary.</p>
 uses a "hessian:" scheme with Hessian's <code>url</code>
 parameter.  The API class is <code>qa.Hello</code>.</p>
 
-<example title="WEB-INF/resin-web.xml - Hessian Client">
+<example title="Example: WEB-INF/resin-web.xml - Hessian Client">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;remote-client class="qa.Hello"
@@ -207,7 +207,7 @@ parameter.  The API class is <code>qa.Hello</code>.</p>
 to use CXF (SOAP) just requires changing the protocol scheme
 from "hessian:" to "cxf:".</p>
 
-<example title="WEB-INF/resin-web.xml - CXF Client">
+<example title="Example: WEB-INF/resin-web.xml - CXF Client">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;remote-client class="qa.Hello"
@@ -249,9 +249,7 @@ deliberately kept simple.</p>
 
 <s2 title="Server plugins">
 
-<def title="ProtocolServletFactory.java">
-package com.caucho.remote.server;
-
+<def title="com.caucho.remote.server.ProtocolServletFactory">
 public interface ProtocolServletFactory {
 
   public Servlet createServlet(Class serviceClass, Object service)
@@ -260,7 +258,7 @@ public interface ProtocolServletFactory {
 }
 </def>
 
-<example title="HessianProtocolServletFactory.java">
+<example title="Example: HessianProtocolServletFactory">
 package com.caucho.remote.hessian;
 
 import com.caucho.hessian.server.*;
@@ -301,16 +299,14 @@ hessian=com.caucho.remote.hessian.HessianProtocolServletFactory
 
 <s2 title="Client plugins">
 
-<def title="ProtocolProxyFactory.java">
-package com.caucho.remote.client;
-
+<def title="com.caucho.remote.client.ProtocolProxyFactory">
 public interface ProtocolProxyFactory
 {
   public Object createProxy(Class api);
 }
 </def>
 
-<example title="HessianProtocolProxyFactory.java">
+<example title="Example: HessianProtocolProxyFactory.java">
 package com.caucho.remote.hessian;
 
 import com.caucho.hessian.client.*;

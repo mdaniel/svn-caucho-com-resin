@@ -13,7 +13,7 @@ IDE integration capabilities.  The <a href="http://caucho.com/resin-javadoc/com/
 
 <localtoc/>
 
-<s1 title="Creating a standalone Web Server">
+<s1 title="Example: creating a standalone web server">
 
 <ol>
 <li>Download Resin from http://caucho.com/download</li>
@@ -24,7 +24,7 @@ from /usr/local/share/resin</li>
 <li>Browse http://localhost:8080</li>
 </ol>
 
-<example title="example/TestResin.java">
+<example title="Example: example/TestResin.java">
 package example;
 
 import com.caucho.resin.*;
@@ -49,14 +49,14 @@ public class TestResin {
 
 </s1>
 
-<s1 title="Embedding Resin for Testing">
+<s1 title="Example: embedding Resin for testing">
 
 <p>For testing, you can create an embedded Resin instance and browse
 URLs programmatically using the <code>resin.request()</code> method.
 Since the <code>request</code> method runs Resin's normal HTTP processing,
 you can use any HTTP requests or headers.</p>
 
-<example title="example/TestResin.java">
+<example title="Example: example/TestResin.java">
 package example;
 
 import com.caucho.resin.*;
@@ -80,7 +80,7 @@ public class TestResin {
 
 </s1>
 
-<s1 title="com.caucho.resin.ResinEmbed">
+<s1 title="ResinEmbed">
 
 <p>The ResinEmbed class represents a Resin instance.  It contains:</p>
 
@@ -92,31 +92,7 @@ public class TestResin {
 <li>Methods for Java-based HTTP requests</li>
 </ul>
 
-<p>A <code>ResinEmbed</code> can be created and started without any other
-classes, although it won't do anything useful.  The following example
-will return a <em>404 Not Found</em> response string from the request
-since there are no web-apps configured.  The example will not listen
-to any ports at all, since no <code>HttpEmbed</code> objects have
-been added.</p>
-
-<example title="Trivial ResinEmbed call">
-public static void main(String [])
-{
-  ResinEmbed resin = new ResinEmbed();
-
-  resin.start();
-
-  String result = resin.request("GET /test.jsp");
-
-  System.out.println(result);
-}
-</example>
-
-<p>See also the <a href="http://caucho.com/resin-javadoc/com/caucho/resin/ResinEmbed.html">ResinEmbed JavaDoc</a>.</p>
-
-<def title="ResinEmbed.java">
-package com.caucho.resin;
-
+<def title="com.caucho.resin.ResinEmbed">
 public class ResinEmbed {
   public ResinEmbed();
   public ResinEmbed(String resinConfPath);
@@ -139,9 +115,31 @@ public class ResinEmbed {
 }
 </def>
 
+<p>A <code>ResinEmbed</code> can be created and started without any other
+classes, although it won't do anything useful.  The following example
+will return a <em>404 Not Found</em> response string from the request
+since there are no web-apps configured.  The example will not listen
+to any ports at all, since no <code>HttpEmbed</code> objects have
+been added.</p>
+
+<example title="Example: Trivial ResinEmbed call">
+public static void main(String [])
+{
+  ResinEmbed resin = new ResinEmbed();
+
+  resin.start();
+
+  String result = resin.request("GET /test.jsp");
+
+  System.out.println(result);
+}
+</example>
+
+<p>See also the <a href="http://caucho.com/resin-javadoc/com/caucho/resin/ResinEmbed.html">ResinEmbed JavaDoc</a>.</p>
+
 </s1>
 
-<s1 title="com.caucho.resin.BeanEmbed">
+<s1 title="BeanEmbed">
 
 <p>Beans are created using the <code>BeanEmbed</code> API.  If your
 application wants to expose services to the embedded web-app, just
@@ -149,7 +147,22 @@ add a BeanEmbed to the Resin instance.  <code>BeanEmbed</code>
 can also create dynamically created service, by setting a
 class name instead of an object.</p>
 
-<example title="Adding Bean services">
+<def title="com.caucho.resin.BeanEmbed">
+public class BeanEmbed {
+  public BeanEmbed();
+  public BeanEmbed(Object value);
+  public BeanEmbed(Object value, String name);
+  public BeanEmbed(String className, String name);
+
+  public void setClass(String className);
+  public void setName(String name);
+  public void setValue(Object value);
+
+  public void addProperty(String name, Object value);
+}
+</def>
+
+<example title="Example: Adding Bean services">
 public void main()
 {
   MyService service = new MyService();
@@ -170,14 +183,14 @@ public void main()
 <p>A testing PHP file could use <code>java_bean()</code> to retrieve
 the service.</p>
 
-<example title="test.php">
+<example title="Example: test.php">
 my-service &lt;?= java_bean("my-service") ?>
 </example>
 
 <p>A testing servlet can inject the service
 with <code>@javax.webbeans.In</code>.</p>
 
-<example title="qa/MyServlet.java">
+<example title="Example: qa/MyServlet.java">
 package qa;
 
 import javax.servlet.*;
@@ -193,7 +206,7 @@ public class MyServlet extends GenericServlet {
 <p>The following  example configures a dynamically-created bean instance
 and adds some &lt;init> property values.</p>
 
-<example title="Dynamic Bean">
+<example title="Example: Dynamic Bean">
 BeanEmbed bean = new BeanEmbed("example.MyBean");
 
 bean.setName("my-bean");
@@ -205,14 +218,24 @@ webApp.addBean(bean);
 
 </s1>
 
-<s1 title="com.caucho.resin.HttpEmbed">
+<s1 title="HttpEmbed">
 
 <p>You can add http ports using the HttpEmbed class.  When you start Resin,
-it will listen to the configured ports.  The following trivial example
+it will listen to the configured ports.</p>
+
+<def title="com.caucho.resin.HttpEmbed">
+public class HttpEmbed {
+  public HttpEmbed();
+  public HttpEmbed(int port);
+  public HttpEmbed(int port, String ipAddress);
+}
+</def>
+
+<p>The following trivial example
 will start Resin as the web server listening to port 8080 and always
 returning 404 since there are no web-apps defined.</p>
 
-<example title="Trivial HttpEmbed call">
+<example title="Example: Trivial HttpEmbed call">
 public static void main(String [])
 {
   ResinEmbed resin = new ResinEmbed();
@@ -228,7 +251,7 @@ public static void main(String [])
 
 </s1>
 
-<s1 title="com.caucho.resin.WebAppEmbed">
+<s1 title="WebAppEmbed">
 
 <p><em>WebAppEmbed</em> represents a web-app.  The defaults are the
 same as if Resin was started normally, i.e. the standard file, jsp, and
@@ -251,7 +274,30 @@ and filters as well.</p>
 test web-app directories as a unit test framework.  Each <em>test-x.php</em>
 (or qa.TestServletX) can test a different aspect of the service.</p>
 
-<example title="Adding Bean to a web-app">
+<def title="com.caucho.resin.WebAppEmbed">
+public class WebAppEmbed {
+  public WebAppEmbed();
+  public WebAppEmbed(String contextPath);
+  public WebAppEmbed(String contextPath, String rootDirectory);
+
+  public void setArchivePath(String archivePath);
+  public String getArchivePath();
+  public String getContextPath();
+  public void setContextPath(String contextPath);
+  public String getRootDirectory();
+  public void setContextParam(String name, String value);
+
+  public void addBean(BeanEmbed bean);
+
+  public void addFilter(FilterEmbed servlet);
+  public void addFilterMapping(FilterMappingEmbed mapping);
+
+  public void addServlet(ServletEmbed servlet);
+  public void addServletMapping(ServletMappingEmbed mapping);
+}
+</def>
+
+<example title="Example: Adding Bean to a web-app">
 public void main()
 {
   MyService service = new MyService();
@@ -275,7 +321,7 @@ public void main()
 
 </s1>
 
-<s1 title="com.caucho.resin.ServletMappingEmbed">
+<s1 title="ServletMappingEmbed">
 
 <p><code>ServletMappingEmbed</code> lets you configure servlets in
 an embedded Resin instance, e.g. if you want to expose an administration
@@ -283,6 +329,29 @@ application or deployment application and not put these in the
 resin-web.xml.  <code>ServletMappingEmbed</code> lets you configure
 &lt;init-param> values as well as &lt;init> properties.
 </p>
+
+<def title="com.caucho.resin.ServletMappingEmbed">
+public class ServletMappingEmbed {
+  public ServletMappingEmbed();
+  public ServletMappingEmbed(String servletName);
+  public ServletMappingEmbed(String servletName, String urlPattern);
+  public ServletMappingEmbed(String servletName, String urlPattern,
+                             String servletClass);
+
+  public String getServletClass();
+  public void setServletClass(String servletClass);
+  public String getServletName();
+  public void setServletName(String servletName);
+  public String getUrlPattern();
+  public void setUrlPattern(String urlPattern);
+
+  public void setLoadOnStartup(int loadOnStartup);
+  public void setInitParam(String name, String value);
+  public void addProperty(String name, Object value);
+
+  public void setProtocol(ServletProtocolEmbed protocol);
+}
+</def>
 
 <example title="Adding Servlet to a web-app">
 webApp = new WebAppEmbed("/", "/home/qa/test1");
@@ -293,7 +362,7 @@ webApp.addServletMapping(servlet);
 
 </s1>
 
-<s1 title="com.caucho.resin.ServletProtocolEmbed">
+<s1 title="ServletProtocolEmbed">
 
 <p><code>ServletProtocolEmbed</code> lets you export remote services using
 Hessian, Burlap, or any other protocol implementation which provides a
@@ -301,7 +370,17 @@ driver for Resin.  The configuration for a remote service is exactly
 the same as for a servlet, i.e. using <code>ServletMappingEmbed</code>, and
 just adds a <code>ServletProtocolEmbed</code> to select the protocol.</p>
 
-<example title="Hessian service">
+<def title="com.caucho.resin.ServletProtocolEmbed">
+public class ServletProtocolEmbed {
+  public ServletProtocolEmbed();
+  public ServletProtocolEmbed(String uri);
+
+  public void setUri(String uri);
+  public void addProperty(String name, Object value);
+}
+</def>
+
+<example title="Example: Hessian service">
 service = new ServletMappingEmbed("my-service", "/hessian",
                                   "example.MyService");
 
@@ -314,15 +393,61 @@ webApp.addServlet(service);
 
 </s1>
 
+<s1 title="jUnit">
+
+<ul>
+<li>See <a href="http://wiki.caucho.com/JUnit">wiki: jUnit and Resin</a></li>
+</ul>
+
+<example title="Example: jUnit test">
+package qa;
+
+import org.junit.*;
+import static org.junit.Assert.*;
+import com.caucho.resin.*;
+
+public class MyTest {
+  private static ResinEmbed _resin;
+
+  @BeforeClass
+  public static void setup()
+  {
+    _resin = new ResinEmbed();
+    WebAppEmbed webApp = new WebAppEmbed("/", "file:/tmp/caucho/qa/test");
+    _resin.addWebApp(webApp);
+    _resin.start();
+  }
+
+  @Test 
+  public void test1plus1()
+    throws java.io.IOException
+  {
+    assertEquals(_resin.request("GET /test.php?a=1&amp;b=1"), "1 + 1 = 2");
+  }
+
+  @Test 
+  public void test1plus2()
+    throws java.io.IOException
+  {
+    assertEquals(_resin.request("GET /test.php?a=1&amp;b=2"), "1 + 2 = 3");
+  }
+
+  @AfterClass
+  public static void shutdown()
+  {
+    if (_resin != null)
+      _resin.destroy();
+  }
+}
+</example>
+
+</s1>
+
 <s1 title="command-line, ResinEmbed main()">
 
 <p>The <code>ResinEmbed</code> class contains a <code>main()</code>
 method which can be used to launch an trivial instance of Resin.
 Its main use is for IDEs which want to launch a testing instance of Resin.</p>
-
-<example title="Launching Embedded Resin from the command line">
-resin> java -classpath $CP com.caucho.resin.ResinEmbed --port=8080
-</example>
 
 <deftable title="command-line arguments">
 <tr>
@@ -334,6 +459,10 @@ resin> java -classpath $CP com.caucho.resin.ResinEmbed --port=8080
   <td>Enables the local deployment web-app for IDEs</td>
 </tr>
 </deftable>
+
+<example title="Example: launching embedded Resin from the command line">
+resin> java -classpath $CP com.caucho.resin.ResinEmbed --port=8080
+</example>
 
 </s1>
 
