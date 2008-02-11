@@ -50,7 +50,8 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractMBeanServer implements MBeanServer {
   private static final L10N L = new L10N(AbstractMBeanServer.class);
-  private static final Logger log = Log.open(AbstractMBeanServer.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractMBeanServer.class.getName());
 
   static ObjectName SERVER_DELEGATE_NAME;
 

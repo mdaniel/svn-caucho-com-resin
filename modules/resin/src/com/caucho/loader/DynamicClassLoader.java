@@ -450,6 +450,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       if (! _loaders.contains(loader))
 	addLoader(loader);
     }
+
+    addURL(root);
   }
 
   /**
@@ -475,7 +477,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       if (path.getScheme().equals("memory"))
         return;
 
-      if (! path.getScheme().equals("jar") && ! path.getURL().endsWith("/"))
+      if (path.getScheme().equals("jar")) {
+      }
+      else if (path.getFullPath().endsWith(".jar")) {
+      }
+      else if (! path.getURL().endsWith("/"))
         path = path.lookup("./");
 
       addURL(new URL(path.getURL()));
@@ -516,6 +522,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       newURLs[i] = _urls[i - 1];
 
     _urls = newURLs;
+  }
+
+  /**
+   * Adds a class loader for instrumentation (jdk 1.6).
+   */
+  public void appendToClassPathForInstrumentation(String path)
+  {
+    addRoot(com.caucho.vfs.Vfs.lookup(path));
   }
 
   /**

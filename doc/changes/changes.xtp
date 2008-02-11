@@ -12,7 +12,9 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
-<li>config: init-param was not stripping spaces for param-value (#2384, rep by hifish)</li>
+<li>jmx: classloader updates to support JDK 1.6 jconsole</li>
+<li>jmx: use only GlobalMBeanServer for all Resin mbean server instances (#2380, rep by J Smyth)</li>
+<li>(2008-02-11) config: init-param was not stripping spaces for param-value (#2384, rep by hifish)</li>
 <li>deploy: versioning deploy wasn't handling '-foo' for non-numeric (#2365, rep by gjvc) [<a href="http://caucho.com/resin/doc/webapp-deploy.xtp">webapp deploy</a>]</li>
 <li>ejb: method-level security (#1845, rep by Kevin Wimmer)</li>
 <li>thirdparty: Hudson integration with security (#2320, rep by netsql2) [<a href="http://wiki.caucho.com/Hudson">wiki: Hudson and Resin</a></li>

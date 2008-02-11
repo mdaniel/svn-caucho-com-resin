@@ -44,7 +44,8 @@ import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.ResinThreadPoolExecutor;
 import com.caucho.vfs.Vfs;
 
-import javax.management.MBeanServerFactory;
+import javax.management.*;
+import java.lang.management.*;
 import javax.naming.*;
 import java.net.URL;
 import java.lang.reflect.Method;
@@ -740,25 +741,20 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 	EnvironmentProperties.enableEnvironmentSystemProperties(true);
 
 	String oldBuilder = props.getProperty("javax.management.builder.initial");
-	if (oldBuilder == null)
+	if (oldBuilder == null) {
 	  oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
+	  props.put("javax.management.builder.initial", oldBuilder);
+	}
 
 	/*
 	  props.put("javax.management.builder.initial",
 	  "com.caucho.jmx.EnvironmentMBeanServerBuilder");
 	*/
 
-	props.put("javax.management.builder.initial", oldBuilder);
-
 	if (MBeanServerFactory.findMBeanServer(null).size() == 0)
 	  MBeanServerFactory.createMBeanServer("Resin");
-
-	try {
-	  Class cl = Class.forName("java.lang.management.ManagementFactory");
-	  Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
-	  method.invoke(null, new Object[0]);
-	} catch (Throwable e) {
-	}
+	
+	ManagementFactory.getPlatformMBeanServer();
       }
 
       TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
@@ -768,7 +764,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       UserTransactionProxy ut = UserTransactionProxy.getInstance();
 
       Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
-                    Jmx.getContextMBeanServer());
+                    Jmx.getGlobalMBeanServer());
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
                     Jmx.getGlobalMBeanServer());
       
