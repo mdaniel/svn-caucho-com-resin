@@ -36,11 +36,13 @@
       -->
     <item link="amber.xtp" title="Amber"/>
       
-    <item link="cluster.xtp" title="Clustering">
+    <item link="resin-clustering.xtp" title="Clustering"/>
+    <!--
       <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
       <item link="config-sessions.xtp" title="Sessions"/>
       <item link="resin-load-balance.xtp" title="Load Balancing"/>
     </item>
+    -->
     
     <!--
        - Caching
@@ -119,7 +121,7 @@
     <!--
        - EJB
       -->
-    <item link="ejb.xtp" title="EJB"/>
+    <item link="resin-ejb.xtp" title="EJB 3.0"/>
       
     <!--
        - Embedding

@@ -61,10 +61,10 @@ public class HttpEmbed extends PortEmbed
    * @param port the TCP port of the embedded HTTP port.
    * @param address the TCP IP address of the embedded HTTP port.
    */
-  public HttpEmbed(int port, String address)
+  public HttpEmbed(int port, String ipAddress)
   {
     setPort(port);
-    setAddress(address);
+    setAddress(ipAddress);
   }
   
   /**

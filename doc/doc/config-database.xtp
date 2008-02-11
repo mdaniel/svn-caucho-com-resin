@@ -16,6 +16,16 @@ obtain connections to databases.
 <body>
 <localtoc/>
 
+<s1 title="See also">
+
+<ul>
+<li><a href="db-thirdparty.xtp">Sample configurations</a> for several database drivers
+</li><li><a href="../examples/db-jdbc/index.xtp">Basic JNDI/JDBC usage tutorial</a>
+</li><li>Using <a href="../examples/db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+</li></ul>
+
+</s1>
+
 <s1 title="Basic Configuration">
 
 <p>A basic &lt;database&gt; configuration specifies the following:
@@ -26,7 +36,7 @@ obtain connections to databases.
 </li><li>Any user and password information.
 </li></ul>
 
-<example>
+<example title="Example: mysql configuration">
 &lt;database jndi-name='jdbc/test_mysql'&gt;
   &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"&gt;
     &lt;url&gt;jdbc:mysql://localhost:3306/test&lt;/url&gt;
@@ -124,7 +134,7 @@ time.</p>
 <p>For a simple example, imagine a set of operations that reads a value,
 calculates a new value, and then updates the database.
 
-<example title="Simple set of database operations">
+<example title="Example: simple set of database operations">
 read value A=1 
 calculate  A=A+1 
 update     A=2
@@ -140,7 +150,7 @@ this read/calculate/update, another thread performs an update.  The data that
 the first thread obtained from the read and is using for the calculation and
 update is no longer valid.</p>
 
-<example title="2 Threads with a conflicting set of database operations">
+<example title="Example: 2 Threads with database race condition">
 Thread 1                 Thread 2
 --------                 --------
 read value A=1           read value A=1
@@ -154,7 +164,7 @@ that only one thread can perform those operations at a time, if a second thread
 comes along and tries to perform the operation, it will have to wait for the
 first thread to finish before it can begin.</p>
 
-<example title="2 Threads and a database protected with transactions">
+<example title="Example: 2 Threads protected with transactions">
 
 Thread1                Thread 2
 -------                --------
@@ -182,7 +192,7 @@ distributed transactions are needed.</p>
 <p>If <code>A</code> and <code>B</code> in the following example are in two
 different databases, then a distributed transaction is needed:</p>
 
-<example title="Simple set of database operations">
+<example title="Example: Simple set of database operations">
 read value db1.A=1 
 read value db2.B=99
 calculate  A=A+1 
@@ -207,6 +217,11 @@ them.</p>
 and provides connections to a database.</p>
       
 <deftable-childtags>
+<tr>
+  <th>attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>jndi-name</td><td>JNDI name to store the pool under.  Servlets, jsp, and
 other java code use this name.  The path is relative to
 <code>java:comp/env</code></td><td> 
@@ -237,6 +252,10 @@ the pool</td><td>30 sec
 <p>All times default to seconds, but can use longer time periods:</p>
 
 <deftable title="Time suffixes">
+<tr>
+ <th>Suffix</th>
+ <th>Description</th>
+</tr>
 <tr><td>s</td><td>seconds
 </td></tr><tr><td>m</td><td>minutes
 </td></tr><tr><td>h</td><td>hours
@@ -270,6 +289,10 @@ your web applications.
 <p>The class that corresponds to &lt;driver&gt; is <a href="javadoc|com.caucho.sql.DriverConfig"/></p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr><td>type</td><td>The Java class name of the database driver.</td><td> 
 </td></tr><tr><td>url</td><td>The driver specific database url.</td><td> 
 </td></tr><tr><td>user</td><td>The username to give the database driver.</td><td> 
@@ -357,7 +380,7 @@ named configuration tag.</p>
 true the driver will use Unicode character encodings when handling
 strings.</p>
 
-<example>
+<example title="Example: mysql configuration">
 &lt;database&gt;
   &lt;jndi-name&gt;jdbc/mysql&lt;/jndi-name&gt;
   &lt;driver&gt;
@@ -416,7 +439,7 @@ connection from the pool is returned.  For a ping-table of BROOMS, Resin will
 use the query <code>select 1 from BROOMS where 1=0</code>
 </p>
 
-<example title="&lt;ping> configuration">
+<example title="Example: &lt;ping> configuration">
   &lt;database jndi-name="..."&gt;
     &lt;driver type="..."&gt;
       ...
@@ -451,7 +474,7 @@ configured drivers fail to provide a connection the exception is propogated to
 the caller.
 </p>
 
-<example title="A &lt;driver> list">
+<example title="Example: A &lt;driver> list">
 &lt;database jndi-name="jdbc/hogwarts"&gt;
   &lt;driver&gt;
     &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
@@ -494,7 +517,7 @@ the <a href="#pooling">Pooling configuration</a>, thus even if the main
 &lt;backup-driver> will continue to be used until it expires from the pool.
 </p>
 
-<example title="A &lt;backup-driver> list">
+<example title="Example: A &lt;backup-driver> list">
 &lt;database jndi-name="jdbc/hogwarts"&gt;
   &lt;driver&gt;
     &lt;type&gt;com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource&lt;/type&gt;
@@ -543,27 +566,12 @@ each time a connection is needed.  If it is not stored, there will be an impact
 on performance from having to do the lookup each time you want to get a
 connection.</p>
 
-<example title="Obtaining a DataSource">
+<example title="Example: Obtaining a DataSource">
+import javax.sql.*;
+import javax.webbeans.*;
+
 public class .... {
-  private final static String DATASOURCE_NAME = "jdbc/test";
-  DataSource _pool;
-
-  ...
-
-  @PostConstruct
-  void init()
-  {
-    try {
-      Context env = (Context) new InitialContext().lookup("java:comp/env");
-
-      _pool = (DataSource) env.lookup(DATASOURCE_NAME);
-
-      if (_pool == null)
-        throw new ServletException("`" + DATASOURCE_NAME + "' is an unknown DataSource");
-    } catch (NamingException e) {
-      throw new ServletException(e);
-    }
-  }
+  @Named("jdbc/test") DataSource _pool;
 
   ...
 }
@@ -588,11 +596,19 @@ Eventually, Resin may run out of connections.  </p>
 the <code>close()</code>.  Because the <code>close()</code> is in a finally block, it
 will happen even if the code using the connection throws an exception.</p>
 
-<example title="Getting a connection from the DataSource">
+<example title="Example: Getting a connection from the DataSource">
+package javax.webbeans.*;
+package javax.sql.*;
 
+public class MyBean()
+{
+  @In DataSource _pool;
+
+  public void doStuff()
+  {
     Connection conn = null;
     try {
-      conn = pool.getConnection();
+      conn = _pool.getConnection();
 
       Statement stmt = conn.createStatement();
 
@@ -611,6 +627,8 @@ will happen even if the code using the connection throws an exception.</p>
       } catch (SQLException e) {
       }
     }
+  }
+}
 </example>
 
 </s2> <!-- usage/get-connection -->
@@ -634,7 +652,7 @@ Typically this is a requirement for situations where the driver provides a
 specialized API that is not available with the standard JDBC API.
 </p>
 
-<example title="Getting the underlying driver connection">
+<example title="Example: Getting the underlying driver connection">
 Connection driverConn = ((com.caucho.sql.UserConnection) connection).getConnection();
 
 // never do this: driverConn.close()
@@ -660,7 +678,7 @@ The solution shown below is not really secure because you can disassemble the
 Password code to get the decryption key, but it may be marginally better than
 plaintext.</p>
  
-<example>
+<example title="Example: password encryption">
 &lt;driver type="..."&gt; 
   &lt;password resin:type="com.hogwarts.Password"&gt;mX9aN9M==&lt;/password&gt; 
   ...
@@ -670,7 +688,7 @@ plaintext.</p>
 You will need to provide com.hogwarts.Password:
 </p>
  
-<example>
+<example title="Example: Password class">
 package com.hogwarts;
 
 public class Password { 
@@ -703,16 +721,6 @@ Resin does not provide the equivalent of com.hogwarts.Password because it's not
 really secure.  Providing that kind of solution would lead some to believe it
 was a secure solution.
 </p>
-
-</s1>
-
-<s1 title="See also">
-
-<ul>
-<li><a href="db-thirdparty.xtp">Sample configurations</a> for several database drivers
-</li><li><a href="../examples/db-jdbc/index.xtp">Basic JNDI/JDBC usage tutorial</a>
-</li><li>Using <a href="../examples/db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
-</li></ul>
 
 </s1>
 

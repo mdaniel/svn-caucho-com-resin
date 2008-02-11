@@ -38,7 +38,7 @@ import javax.jms.*;
 import com.caucho.config.*;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
-import com.caucho.webbeans.cfg.AbstractBeanConfig;
+import com.caucho.webbeans.cfg.*;
 
 import com.caucho.util.*;
 
@@ -50,6 +50,28 @@ public class StatelessBeanConfig extends AbstractBeanConfig
   private static final L10N L = new L10N(StatelessBeanConfig.class);
   private static final Logger log
     = Logger.getLogger(StatelessBeanConfig.class.getName());
+
+  public StatelessBeanConfig()
+  {
+  }
+
+  public StatelessBeanConfig(WbComponentConfig beanConfig)
+  {
+    setClass(beanConfig.getClassType());
+
+    // XXX:
+    //if (beanConfig.getComponentType() != null)
+    //  setComponentType(beanConfig.getComponentType());
+    
+    if (beanConfig.getName() != null)
+      setName(beanConfig.getName());
+    
+    // XXX:
+    // setScope(beanConfig.getScope());
+
+    if (beanConfig.getInit() != null)
+      setInit(beanConfig.getInit());
+  }
 
   @PostConstruct
   public void init()

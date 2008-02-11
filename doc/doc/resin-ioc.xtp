@@ -615,6 +615,10 @@ number of optional attributes:</p>
 
 <deftable title="bean and component attributes">
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>binding</td>
   <td>the <code>@BindingType</code> annotations for custom bean matching</td>
 </tr>
@@ -1380,6 +1384,46 @@ public @interface TransactionAttribute {
 
 <s1 title="Dependency Injection Annotations">
 
+<s2 title="@BindingType" type="defun">
+
+<p><code>@BindingType</code> is a meta-annotation for creating custom
+injection binding types.  Applications can create their own injection
+annotations like <code>@Named</code> to provide application-specific
+binding.  For example, a database might have a <code>@XA</code>
+and a <code>@NonXA</code> connector implemented.</p>
+
+<def title="javax.webbeans.BindingType">
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface BindingType {
+}
+</def>
+
+<example title="Example: custom @XA binding type">
+package demo;
+
+@BindingType
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RUNTIME)
+public @interface XA {
+}
+</example>
+
+<example title="Example: using the custom @XA binding type">
+package demo;
+
+import javax.sql.*;
+
+public class MyBean {
+  @XA DataSource _xa;
+  @NonXA DataSource _nonXa;
+
+  ...
+}
+</example>
+
+</s2>
+
 <s2 title="@EJB" type="defun">
 
 <p>Configures EJB values for a field or method.</p>
@@ -1388,8 +1432,27 @@ public @interface TransactionAttribute {
 result is an EJB interface.</p>
 
 <deftable-childtags>
-<tr><td>jndiName</td><td>The jndi name of the resource</td><td>The field name
-</td></tr></deftable-childtags>
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>businessInterface</td>
+  <td>The EJB interface to lookup</td>
+  <td>The field type</td>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The EJB name of the resource</td>
+  <td>The field name</td>
+</tr>
+<tr>
+  <td>jndiName</td>
+  <td>The jndi name of the resource</td>
+  <td>The EJB name</td>
+</tr>
+</deftable-childtags>
 
 <def title="javax.ejb.EJB">
 @Target({TYPE, METHOD, FIELD, PARAMETER})
@@ -1410,6 +1473,97 @@ session is started.</p>
 void setFoo(example.Test test)
 {
   _test = test;
+}
+</example>
+
+</s2>
+
+<s2 title="@In" type="defun">
+
+<p>Marks a field, method, or parameter for injection.
+When used with a constructor, it marks the given constructor as
+the constructor to use when creating new instances.</p>
+
+<def title="javax.webbeans.In">
+@Target({CONSTRUCTOR, METHOD, FIELD, PARAMETER, TYPE})
+@Retention(RUNTIME)
+public @interface In {
+}
+</def>
+</s2>
+
+<s2 title="@Named" type="defun">
+
+<p><code>@Named</code> is a predefined <code>@BindingType</code>
+annotation for named objects.  Many application objects can just use
+<code>@Named</code> to disambiguate multiple objects with the same
+type.
+</p>
+
+<deftable title="@Named parameters">
+<tr>
+  <th>Property</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>value</td>
+  <td>The name binding for the object to inject</td>
+  <td>required</td>
+</tr>
+</deftable>
+
+<def title="javax.webbeans.Named">
+@BindingType
+@Target({METHOD, FIELD, PARAMETER, TYPE})
+@Retention(RUNTIME)
+public @interface Named {
+  String value();
+}
+</def>
+</s2>
+
+<s2 title="@New" type="defun">
+
+<p>Marks a field, method, or parameter for injection with a new
+instance of the object.  If the type of the <code>@New</code>
+has not yet been registered with the WebBeans directory, it will
+be registered automatically..</p>
+
+<def title="javax.webbeans.New">
+@Target({METHOD, FIELD, PARAMETER, TYPE})
+@Retention(RUNTIME)
+public @interface New {
+}
+</def>
+</s2>
+
+<s2 title="@NonBinding" type="defun">
+
+<p><code>@NonBinding</code> is a meta-annotation used for
+creating <code>@BindingType</code> annotations.   It excludes an
+annotation property from the binding algorithm.  Normally, the
+injection binding must matches all the propeties in the object's
+annotations with the properties in the injection property.  The
+<code>@NonBinding</code> annotation skips the check for the annotated
+property.
+</p>
+
+<def title="javax.webbeans.NonBinding">
+@Target({FIELD, METHOD})
+@Retention(RUNTIME)
+public @interface NonBinding {
+}
+</def>
+
+<example title="Example: @Demo with @NonBinding">
+package demo;
+
+@BindingType
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RUNTIME)
+public @interface Demo {
+  @NonBinding String description() default "";
 }
 </example>
 
@@ -1466,65 +1620,6 @@ CONTAINER</td>
   <td>The field name</td>
 </tr>
 </deftable-childtags>
-
-<def title="javax.ejb.Resource">
-@Target({TYPE, METHOD, FIELD, PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Resource {
-  AuthenticationType authenticationType() CONTAINER;
-  String description() default "";
-  String mappedName() default "";
-  String name() default "";
-  boolean shareable() default true;
-  Class&lt;?> type() default Object.class;
-}
-</def>
-
-<p>In the following exaple, Resin will call <code>setDataSource</code>
-method with the data source in "java:comp/env/jdbc/test" before the
-session is started.  The "java:comp/env/jdbc" full name
-is inferred from the DataSource type.</p>
-
-<deftable title="default JNDI names">
-<tr>
-  <th>Resource Type</th>
-  <th>JNDI Prefix</th>
-</tr>
-<tr>
-  <td>javax.sql.DataSource</td>
-  <td>java:comp/env/jdbc</td>
-</tr>
-<tr>
-  <td>javax.mail.*</td>
-  <td>java:comp/env/mail</td>
-</tr>
-<tr>
-  <td>javax.ejb.EntityManager</td>
-  <td>java:comp/EntityManager</td>
-</tr>
-<tr>
-  <td>javax.transaction.UserTransaction</td>
-  <td>java:comp/UserTransaction</td>
-</tr>
-<tr>
-  <td>javax.ejb.EJBHome</td>
-  <td>java:comp/env/ejb</td>
-</tr>
-<tr>
-  <td>javax.jms.*</td>
-  <td>java:comp/env/jms</td>
-</tr>
-</deftable>
-
-<example title="Example: @Resource injection">
-@Resource(name="test")
-void setDataSource(javax.sql.DataSource dataSource)
-{
-  _dataSource = dataSource;
-}
-</example>
-
-</s2>
 
 </s1>
 

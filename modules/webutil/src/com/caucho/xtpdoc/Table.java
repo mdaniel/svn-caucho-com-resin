@@ -66,8 +66,9 @@ public class Table extends Node implements ContentItem {
   {
     out.writeStartElement("table");
 
+    int index = 0;
     for (TableRow row : _rows)
-      row.writeHtml(out);
+      row.writeHtml(out, index++);
 
     out.writeEndElement();
   }

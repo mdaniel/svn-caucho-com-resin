@@ -8,13 +8,27 @@ body {
   border-width : 0px;
 }
 
+.breadcrumb {
+  color : #12037a;
+  font-family : Arial, Helvetica, sans-serif;
+  font-size : 80%;
+}
+/*
+.breadcrumb a {
+  color : #12037a;
+}
+*/
 a {
   text-decoration : none;
   color : #12037a;
 }
 
 a:hover {
-  text-decoration : underline;
+  color : #e5a122;
+}
+
+a:hover,visited {
+  color : #e5a122;
 }
 
 a.topnav {
@@ -23,25 +37,32 @@ a.topnav {
   font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
+a.topnav:hover {
+  color : #e5a122;
+}
+
+a.topnav:hover,visited {
+  color : #e5a122;
+}
+
 a.leftnav {
   text-decoration : none;
   color : #606060;
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size : 80%;
 }
-/*
-a.leftnav:link {
-  text-decoration : none;
-  color : #002b80;
-}
-*/
-a.leftnav:hover {
-  text-decoration : underline;
-}
 
 a.leftnav:visited {
   text-decoration : none;
   color : #12037a;
+}
+
+a.leftnav:hover {
+  color : #e5a122;
+}
+
+a.leftnav:hover,visited {
+  color : #e5a122;
 }
 
 code {
@@ -95,16 +116,6 @@ div.section-title {
 .leftnav {
 /*  background : #b9cef7; */
 /*  bgcolor : #b9cef7; */
-}
-
-.breadcrumb {
-  color : #12037a;
-  font-family : Arial, Helvetica, sans-serif;
-  font-size : 80%;
-}
-
-.breadcrumb a {
-  color : #12037a;
 }
 
 .desc {

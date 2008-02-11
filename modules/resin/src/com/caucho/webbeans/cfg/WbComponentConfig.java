@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
 import com.caucho.config.types.*;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb3.gen.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
@@ -46,6 +47,7 @@ import java.lang.annotation.*;
 import java.util.ArrayList;
 
 import javax.annotation.*;
+import javax.ejb.*;
 import javax.webbeans.*;
 
 /**
@@ -145,6 +147,14 @@ public class WbComponentConfig {
   }
 
   /**
+   * Sets the component type.
+   */
+  public WbComponentType getComponentType()
+  {
+    return _type;
+  }
+
+  /**
    * Sets the component implementation class.
    */
   public void setClass(Class cl)
@@ -229,6 +239,11 @@ public class WbComponentConfig {
       _init = init;
   }
 
+  public ContainerProgram getInit()
+  {
+    return _init;
+  }
+
   /**
    * Adds an init property
    */
@@ -268,6 +283,18 @@ public class WbComponentConfig {
     if (_cl == null)
       throw new ConfigException(L.l("<{0}> requires a class attribute",
 				    getTagName()));
+
+    if (_cl.isAnnotationPresent(Stateless.class)) {
+      StatelessBeanConfig cfg = new StatelessBeanConfig(this);
+      cfg.init();
+      return;
+    }
+    else if (_cl.isAnnotationPresent(Stateful.class)) {
+      StatefulBeanConfig cfg = new StatefulBeanConfig(this);
+      cfg.init();
+      return;
+    }
+    
 
     introspect();
     
@@ -330,7 +357,8 @@ public class WbComponentConfig {
 
   protected void deploy()
   {
-    _webbeans.addWbComponent(_comp);
+    if (_comp != null)
+      _webbeans.addWbComponent(_comp);
   }
 
   public Object getObject()

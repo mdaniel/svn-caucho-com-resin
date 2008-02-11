@@ -75,7 +75,7 @@ and stores it in jndi with the given <var>jndi-name</var>.</p>
 </tr>
 </deftable-childtags>
 
-<example title="database">
+<example title="Example: mysql database">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
   &lt;database jndi-name="jdbc/test">
     &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
@@ -296,7 +296,7 @@ database queries, or to improve query performance.</p>
 
 <default>false</default>
 
-<example title="sample spy output">
+<example title="Example: spy output">
 0.6:setString(1,1)
 0.6:executeQuery(select o.DATA from my_bean o where o.ID=?)
 

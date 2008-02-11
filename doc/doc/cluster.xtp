@@ -1,17 +1,1 @@
-<document>
-<header>
-  <title>resin clustering support</title>
-  <version>Resin 3.1</version>
-
-  <description>
-
-  <p>Describes the cluster configuration tags.</p>
-
-  </description>
-</header>
-<body>
-
-<summary/>
-
-</body>
-</document>
+<document redirect="resin-clustering.xtp"/>
