@@ -52,7 +52,7 @@ public class Def extends VerboseFormattedTextWithAnchors {
   {
     if (_title != null) {
       out.writeStartElement("div");
-      out.writeAttribute("class", "caption");
+      out.writeAttribute("class", "def-caption");
       out.writeCharacters(_title);
       out.writeEndElement();
     }

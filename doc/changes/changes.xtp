@@ -12,6 +12,10 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>config: init-param was not stripping spaces for param-value (#2384, rep by hifish)</li>
+<li>deploy: versioning deploy wasn't handling '-foo' for non-numeric (#2365, rep by gjvc) [<a href="http://caucho.com/resin/doc/webapp-deploy.xtp">webapp deploy</a>]</li>
+<li>ejb: method-level security (#1845, rep by Kevin Wimmer)</li>
+<li>thirdparty: Hudson integration with security (#2320, rep by netsql2) [<a href="http://wiki.caucho.com/Hudson">wiki: Hudson and Resin</a></li>
 <li>(2008-02-08) jsf: fast-jsf automatically disabled when not using Resin's JSF (#2351)</li>
 <li>resin.conf: change default to use &lt;prologue> and put resin:import after the web-app-default (#2402)</li>
 <li>watchdog: &lt;watchdog-port>${port}&lt;/watchdog-port> was not supported (#2401, rep by friedeks)</li>

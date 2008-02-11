@@ -6,13 +6,23 @@
 body {
   border : solid;
   border-width : 0px;
+  font-family : serif;
 }
 
 .breadcrumb {
-  color : #12037a;
-  font-family : Arial, Helvetica, sans-serif;
+  color : #003366;
+  font-family : Verdana, Helvetica, Arial, sans-serif;
   font-size : 80%;
 }
+
+.topnav {
+  font-family : Verdana, Helvetica, Arial, sans-serif;
+}
+
+.left {
+  font-family : Verdana, Helvetica, Arial, sans-serif;
+}
+
 /*
 .breadcrumb a {
   color : #12037a;
@@ -20,9 +30,10 @@ body {
 */
 a {
   text-decoration : none;
-  color : #12037a;
+  color : #003366;
 }
 
+/* color : #e5a122 */
 a:hover {
   color : #e5a122;
 }
@@ -31,18 +42,18 @@ a:hover,visited {
   color : #e5a122;
 }
 
-a.topnav {
-  text-decoration : none;
-  color : #002b80;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-}
-
 a.topnav:hover {
   color : #e5a122;
 }
 
 a.topnav:hover,visited {
   color : #e5a122;
+}
+
+a.topnav {
+  text-decoration : none;
+  color : #002b80;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 a.leftnav {
@@ -58,11 +69,11 @@ a.leftnav:visited {
 }
 
 a.leftnav:hover {
-  color : #e5a122;
+  color : #ffcc33;
 }
 
 a.leftnav:hover,visited {
-  color : #e5a122;
+  color : #ffcc33;
 }
 
 code {
@@ -79,26 +90,29 @@ hr {
 
 h1.title {
   margin : 0em 0.5em;
-  color : #98012e;
-  font-family : Arial, Helvetica, sans-serif;
+  color : #990033;
+  font-family : Helvetica, Arial, sans-serif;
   font-variant : normal;
+  border-bottom : 0;
 }
 
 h1 {
-  color : #12037a;
-  font-family : Arial, Helvetica, sans-serif;
-  font-variant : small-caps;
-  font-size : 180%;
+  color : #003366;
+  font-family : Helvetica, Arial, sans-serif;
+  font-size : 170%;
+  border-bottom : 1px solid black;
+  margin-right : 1em;
 }
 
 h2 {
-  font-family : Arial, Helvetica, sans-serif;
-  font-variant : small-caps;
+  font-family : Helvetica, Arial, sans-serif;
+  font-weight : normal;
+  color : #003366;
 }
 
 h3 {
-  font-family : Arial, Helvetica, sans-serif;
-  font-variant : small-caps;
+  font-family : Helvetical, Arial, sans-serif;
+  color : #6699cc;
 }
 
 h4 {
@@ -158,18 +172,22 @@ div.section-title {
 
 /* boxes */
 
+/* background : #cac7d9 vs #ccccff */
+/* 204, 213, 221 */
 .toc {
-  margin : 0em 2em;
-  background : #cac7d9;
+  margin : 1em 2em;
+  background : #ccccdd;
   border : solid #999;
   border-width : 1px;
-  font-family : Arial, Helvetica, sans-serif;
+  font-size : 90%;
+  font-family : Helvetica, Arial, sans-serif;
 }
 
 div.s3 {
   padding : 0em 1em;
 }
 
+/* background: #e5d1ac; */
 div.example {
   margin : 1em 2em;
   padding : 0em 1em;
@@ -198,17 +216,26 @@ div.definition {
   width : 90%;
   border : solid #999;
   border-width : 1px;
-  background : #f4f4f4;
+  background : #f1f1f2;
   color : black;
   font-family : monospace;
   font-size : .9em;
 }
 
-.caption {
-  margin-left : 2em;
+.def-caption {
+  margin-left : 1.3em;
   font-style: bold;
   font-family: Arial, Helvetica, sans-serif;
-  color : #98012e;
+  color : #666666;
+  text-align : left;
+  font-size : 120%
+}
+
+.caption {
+  margin-left : 1.3em;
+  font-style: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  color : #990033;
   text-align : left;
   font-size : 120%
 }
@@ -217,9 +244,9 @@ div.definition {
 /* red body #98012e: HSV: 342, 99, 60 */
 
 table.deftable {
-  margin : 1em 1.7em;
+  margin : 1em 0em 1em 1.6em;
   border : solid, 1px;
-  width : 90%;
+  width : 92.5%;
   border-collapse: collapse;
 }
 
@@ -227,7 +254,7 @@ caption {
   padding : 0.3em 0em;
   font-style: bold;
   font-family: Arial, Helvetica, sans-serif;
-  color : #98012e;
+  color : #990033;
   text-align : left;
   font-size : 120%
 }

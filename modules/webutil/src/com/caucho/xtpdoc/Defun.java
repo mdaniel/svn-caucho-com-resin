@@ -50,39 +50,24 @@ public class Defun extends Section {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "s1");
+    
     out.writeStartElement("a");
     out.writeAttribute("name", getHref());
     out.writeEndElement();
     
-    out.writeStartElement("div");
-    out.writeAttribute("class", "section-title");
-    out.writeCharacters(_title);
-    out.writeEndElement();
-    /*
-    out.writeAttribute("border", "0");
-    out.writeAttribute("cellpadding", "5");
-    out.writeAttribute("cellspacing", "0");
-    out.writeAttribute("width", "100%");
-
-    out.writeStartElement("tr");
-    out.writeAttribute("class", "section");
-    out.writeStartElement("td");
-    out.writeStartElement("font");
-    out.writeAttribute("size", "+2");
-    out.writeCharacters(_title);
-    out.writeEndElement(); // font
-    out.writeEndElement(); // td
-    out.writeEndElement(); // tr
-
-    out.writeEndElement(); // table
-    */
+    if (_title != null) {
+      out.writeStartElement("h1");
+      out.writeAttribute("class", "section");
+      out.writeCharacters(_title);
+      out.writeEndElement();
+    }
     
-    out.writeStartElement("div");
-    out.writeAttribute("class", "desc");
+    out.writeEndElement();
     
     super.writeHtml(out);
-    
-    out.writeEndElement(); // div
   }
 
   public void writeLaTeXTop(PrintWriter out)

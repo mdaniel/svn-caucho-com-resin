@@ -288,9 +288,11 @@ public class WebAppVersioningController extends WebAppController {
 	  indexB++;
 	}
 
-	if (! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9'))
+	if (indexA < lengthA
+	    && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9'))
 	  return 1;
-	else if (! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9'))
+	else if (indexB < lengthB
+		 && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9'))
 	  return -1;
       }
 

@@ -81,7 +81,7 @@ public class InitParam {
   public void setParamValue(RawString paramValue)
     throws ELException
   {
-    String value = paramValue.getValue();
+    String value = paramValue.getValue().trim();
     
     if (_allowEL)
       value = Config.evalString(value);
@@ -103,7 +103,7 @@ public class InitParam {
   public void setProperty(String name, RawString rawValue)
     throws ELException
   {
-    String value = rawValue.getValue();
+    String value = rawValue.getValue().trim();
     
     if (_allowEL)
       value = Config.evalString(value);

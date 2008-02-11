@@ -37,6 +37,13 @@
 
 <localtoc/>
 
+<s1 title="See Also">
+<ul>
+<li><a href="env-tags.xtp">Environment tags</a> for resources, beans,
+database, JMS queues, etc.</li>
+</ul>
+</s1>
+
 <defun title="&lt;access-log>">
 <parents>web-app</parents>
 
@@ -83,6 +90,10 @@ Think of a role as a group of users.</p>
 
 <deftable-childtags>
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>role-name</td>
   <td>Roles which are allowed to access the resource.</td>
 </tr>
@@ -101,6 +112,11 @@ Expires timeout in the servlet.  For example, Resin's FileServlet relies
 on cache-mapping to set the expires times for static pages.</p>
       
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>url-pattern</td>
     <td>A pattern matching the url:<var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var></td>
     <td></td>
@@ -153,6 +169,10 @@ Defines a custom constraint.
 </p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td>resin:type</td>
   <td>A class that extends <a href="javadoc|com.caucho.server.security.AbstractConstraint">AbstractContstraint</a></td>
@@ -281,6 +301,10 @@ resources like &lt;database&gt;.</p>
 
 <deftable-childtags>
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>error-code</td>
   <td>Select the error page based on an HTTP status code</td>
 </tr>
@@ -373,6 +397,10 @@ was not found.
 
 <deftable-childtags>
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>filter-name</td>
   <td>The filter's name (alias)</td>
 </tr>
@@ -387,7 +415,7 @@ was not found.
 </deftable-childtags>
 
 <p>The following example defines a filter alias 'image'</p>
-<example>
+<example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;filter&gt;
@@ -410,7 +438,7 @@ was not found.
 <p>The full Servlet 2.3 syntax for <var>init-param</var> is supported as
 well as a simple shortcut.</p>
 
-<example>
+<example title="WEB-INF/resin-web.xml">
 &lt;web-app id='/'&gt;
 
 &lt;filter filter-name='test.HelloWorld'&gt;
@@ -438,6 +466,10 @@ can specify a servlet alias defined by <code>filter</code>.
 
 <deftable-childtags title="Servlet 2.4 definition for filter-mapping">
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>filter-name</td>
   <td>The filter name</td>
 </tr>
@@ -453,13 +485,16 @@ can specify a servlet alias defined by <code>filter</code>.
 
 <deftable-childtags title="Resin extensions to filter-mapping">
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>url-regexp</td>
   <td>A regular expression matching the portion of the url that follows the <g>context path</g></td>
 </tr>
 <tr>
   <td>filter-name</td>
   <td>The filter name can use replacement vars from url-regexp like <var>$1</var>.  It can also specify a class name directly like <var>test.HelloWorld</var></td>
-  <td>n/a</td>
 </tr>
 </deftable-childtags>
 
@@ -510,18 +545,25 @@ page.  If it fails, she will see the error page.</p>
 
 <deftable-childtags title="Servlet 2.4 definition for form-login-config">
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>form-login-page</td>
   <td>The page to be used to prompt the user login</td>
-  <td>none</td>
 </tr>
 <tr>
   <td>form-error-page</td>
   <td>The error page for unsuccessful login</td>
-  <td>none</td>
 </tr>
 </deftable-childtags>
 
 <deftable-childtags title="Resin extensions to form-login-config">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>internal-forward</td>
   <td>Use an internal redirect on success instead of a sendRedirect</td>
@@ -546,16 +588,35 @@ a persistent cookie.  It lets you implement the "remember me" button.  By
 default, the authentication only lasts for a single session.</p>
 
 <deftable-childtags>
-<tr><td>j_security_check</td><td>The form's mandatory action
-</td></tr><tr><td>j_username</td><td>The user name
-</td></tr><tr><td>j_password</td><td>The password
-</td></tr><tr><td>j_uri</td><td>Optional Resin extension for the successful display page.
-</td></tr><tr><td>j_use_cookie_auth</td><td>Optional Resin extension to allow cookie login.
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>j_security_check</td>
+  <td>The form's mandatory action</td>
+</tr>
+<tr>
+  <td>j_username</td>
+  <td>The user name</td>
+</tr>
+<tr>
+  <td>j_password</td>
+  <td>The password</td>
+</tr>
+<tr>
+  <td>j_uri</td>
+  <td>Optional Resin extension for the successful display page.</td>
+</tr>
+<tr>
+  <td>j_use_cookie_auth</td>
+  <td>Optional Resin extension to allow cookie login.</td>
+</tr>
+</deftable-childtags>
 
 <p>The following is an example of a servlet-standard login page:</p>
 
-<example>
+<example title="Example: login.html">
 &lt;form action='j_security_check' method='POST'&gt;
 &lt;table&gt;
 &lt;tr&gt;&lt;td&gt;User:&lt;td&gt;&lt;input name='j_username'&gt;
@@ -586,6 +647,11 @@ there are a large number of sub-web-apps for the individual tutorials..</p>
 <p>Configures JSP behavior.</p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>auto-compile</td>
   <td>Automatically compile changed JSP files</td>
@@ -654,12 +720,29 @@ there are a large number of sub-web-apps for the individual tutorials..</p>
 <default>no authentication</default>
 
 <deftable-childtags title="Servlet 2.4 definition for login-config">
-<tr><td>auth-method</td><td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security-digest.xtp">Digest Authentication</a>.
-</td></tr><tr><td>realm-name</td><td>The realm name to use in HTTP authentication
-</td></tr><tr><td>form-login-config</td><td>Configuration for form login, see <a config-tag="form-login-config"/>
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>auth-method</td>
+  <td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security-digest.xtp">Digest Authentication</a>.</td>
+</tr>
+<tr>
+  <td>realm-name</td>
+  <td>The realm name to use in HTTP authentication</td>
+</tr>
+<tr>
+  <td>form-login-config</td>
+  <td>Configuration for form login, see <a config-tag="form-login-config"/></td>
+</tr>
+</deftable-childtags>
 
 <deftable-childtags title="Resin extensions to login-config">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td>type</td>
   <td>Defines a custom class which extends <code>com.caucho.server.security.AbstractLogin</code></td>
@@ -690,6 +773,10 @@ Digest</a>.</p>
 
 <deftable-childtags>
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>extension</td>
   <td>url extension</td>
 </tr>
@@ -699,8 +786,8 @@ Digest</a>.</p>
 </tr>
 </deftable-childtags>
 
-<example>
-&lt;web-app id='/'&gt;
+<example title="Example: WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;mime-mapping&gt;
     &lt;extension&gt;.foo&lt;/extension&gt;
@@ -731,6 +818,11 @@ file.  <var>foo.filename</var> contains the uploaded filename, and
 
 <deftable-childtags>
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
   <td>upload-max</td>
   <td>maximum size of an upload request (in kb).</td>
   <td>no limit</td>
@@ -756,6 +848,10 @@ The "<var>caucho.multipart.form.error.size</var>" will contain the attempted upl
 IIS, you may need to match the server's path aliases.</p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td>url-pattern></td>
   <td>A pattern matching the url: <var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var></td>
@@ -802,15 +898,15 @@ classes or configuration files change.</p>
 
 <deftable>
 <tr>
-  <th>mode</th>
-  <th>description</th>
+  <th>Mode</th>
+  <th>Description</th>
 </tr>
 <tr>
-  <th>automatic</th>
+  <td>automatic</td>
   <td>checks for redeployment and auto-redeploy if modified </td>
 </tr>
 <tr>
-  <th>manual</th>
+  <td>manual</td>
   <td>does not check for redeployment.  Only checks if manual (JMX) </td>
 </tr>
 </deftable>
@@ -833,7 +929,7 @@ to redirect old URLs to their new replacements.</p>
 <p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
 details.</p>
 
-<example title="Mediawiki dispatch in resin-web.xml">
+<example title="Example: Mediawiki dispatch in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
  &lt;rewrite-dispatch>
@@ -862,13 +958,20 @@ not use any security constraints.</p>
 
 <p>Security constraints can also be custom classes.</p>
 
-<example>
+<p>See <a href="resin-security.xtp">Resin security</a> for an overview of
+security issues and configuration.</p>
+
+<example title="Example: WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
 &lt;security-constraint&gt;
   &lt;web-resource-collection&gt;
     &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
   &lt;/web-resource-collection&gt;
   &lt;auth-constraint role-name='user'&gt;
 &lt;/security-constraint&gt;
+
+&lt;/web-app>
 </example>
 </defun>
 
@@ -879,6 +982,10 @@ not use any security constraints.</p>
 <p>Defines a servlet alias for later mapping using <a config-tag="servlet-mapping"/>.</p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td>servlet-name</td>
   <td>The servlet's name (alias)</td>
@@ -901,8 +1008,8 @@ not use any security constraints.</p>
 </tr>
 </deftable-childtags>
 
-<example title="using the &lt;servlet&gt; tag">
-&lt;web-app id='/'&gt;
+<example title="Example: WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns">
 
   &lt;servlet&gt;
     &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
@@ -933,8 +1040,8 @@ not use any security constraints.</p>
 servlet class with different <var>init-param</var> values.  Each will
 have a separate <var>servlet-name</var>.</p>
       
-<example title="multiple servlets using the same class">
-&lt;web-app&gt;
+<example title="Example: multiple servlets using the same class">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet servlet-name='foo-a'&gt;
     &lt;servlet-class&gt;test.FooServlet&lt;/servlet-class&gt;
     &lt;init-param name='foo-a sample'/&gt;
@@ -956,7 +1063,7 @@ after servlets with lower numbers.</p>
 available to a Resin application, as defined in
 <var>$RESIN_HOME/conf/app-default.xml</var>.</p>
 
-<example title="servlet-mapping's in $RESIN_HOME/conf/app-default.xml">
+<example title="Example: servlet-mappings in $RESIN_HOME/conf/app-default.xml">
   &lt;servlet servlet-name="directory"
            servlet-class="com.caucho.servlets.DirectoryServlet"/&gt;
 
@@ -981,32 +1088,36 @@ children, <var>url-pattern</var> and <var>servlet-name</var>.
 
 <deftable-childtags title="Servlet 2.4 definition for servlet-mapping">
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>servlet-name</td>
   <td>The servlet name</td>
-  <td>n/a</td>
 </tr>
 <tr>
   <td>url-pattern</td>
   <td>A pattern matching the url: <var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var></td>
-  <td>n/a</td>
 </tr>
 </deftable-childtags>
 
 <deftable-childtags title="Resin extensions to servlet-mapping">
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>url-regexp</td>
   <td>A regular expression matching the portion of the url that follows the <g>context path</g></td>
-  <td>n/a</td>
 </tr>
 <tr>
   <td>servlet-name</td>
   <td>The servlet name can use replacement vars from url-regexp like <var>$1</var>.  It can also specify a class name directly like <var>test.HelloWorld</var></td>
-  <td>n/a</td>
 </tr>
 </deftable-childtags>
 
-<example title="&lt;servlet-mapping>">
-&lt;web-app id='/'&gt;
+<example title="Example: WEB-INF/resin-web.xml &lt;servlet-mapping>">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;servlet&gt;
     &lt;servlet-name&gt;hello&lt;/servlet-name&gt;
@@ -1035,7 +1146,7 @@ A webapp in <code>webapps/baz</code> and a url
 purposes of the regular expression match, because "/baz" is the context path.
 </p>
 
-<p>In Resin, the special <code>servlet-name</code> <var>`invoker'</var> is used to dispatch
+<p>In Resin, the special <code>servlet-name</code> <var>'invoker'</var> is used to dispatch
 servlets by class name.
 </p>
 
@@ -1044,8 +1155,8 @@ create a security hole in your application.  Any servlet in the
 classpath, perhaps even one in a .jar that you are unaware of,
 could be invoked.</warn>
 
-<example title="servlet invoker">
-&lt;web-app id='/'&gt;
+<example title="Example: WEB-INF/resin-web.xml servlet invoker">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;!-- 
     used with urls like 
@@ -1060,23 +1171,40 @@ could be invoked.</warn>
 available to a Resin application, as defined in
 <var>$RESIN_HOME/conf/app-default.xml</var>.</p>
 
-<example title="servlet-mapping's in $RESIN_HOME/conf/app-default.xml">
-&lt;servlet-mapping url-pattern="*.jsp" servlet-name="jsp"/&gt;
-&lt;servlet-mapping url-pattern="*.xtp" servlet-name="xtp"/&gt;
+<example title="Example: servlet-mappings in $RESIN_HOME/conf/app-default.xml">
+&lt;cluster>
 
-&lt;servlet-mapping url-pattern="/servlet/*" servlet-name="invoker"/&gt;
-&lt;servlet-mapping url-pattern="/" servlet-name="file"/&gt;
+&lt;web-app-default>
+  &lt;servlet-mapping url-pattern="*.jsp" servlet-name="jsp"/&gt;
+  &lt;servlet-mapping url-pattern="*.xtp" servlet-name="xtp"/&gt;
+
+  &lt;servlet-mapping url-pattern="/servlet/*" servlet-name="invoker"/&gt;
+  &lt;servlet-mapping url-pattern="/" servlet-name="file"/&gt;
+&lt;/web-app-default>
+&lt;/cluster>
 </example>
 
 <p>The plugins use servlet-mapping to decide which URLs to send to Resin.
 The following servlet-name values are used by the plugins:</p>
 
 <deftable title="servlet-name values used by plugins">
-<tr><td>plugin_match</td><td>The plugin will send the request to Resin, but
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>plugin_match</td>
+  <td>The plugin will send the request to Resin, but
 Resin will ignore the entry.  Use to get around regexp limitations. (Resin 1.2.2)
-</td></tr><tr><td>plugin_ignore</td><td>The plugin will ignore the request.  Use this
+</td>
+</tr>
+<tr>
+  <td>plugin_ignore</td>
+  <td>The plugin will ignore the request.  Use this
 to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
-</td></tr></deftable>
+</td>
+</tr>
+</deftable>
 </defun>
 
 <defun title="&lt;servlet-regexp>" version="Resin 3.0" type="defun">
@@ -1095,29 +1223,106 @@ to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
 <p>Session configuration parameters.</p>
 
 <deftable-childtags title="Servlet 2.4 definition for session-timeout">
-<tr><td>session-timeout</td><td>The session timeout in minutes, 0 means never timeout.</td><td>30 minutes
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>session-timeout</td>
+  <td>The session timeout in minutes, 0 means never timeout.</td>
+  <td>30 minutes</td>
+</tr>
+</deftable-childtags>
 
-<p>Resin add's a number of <var>session-config</var> tags.</p>
+<p>Resin adds a number of <var>session-config</var> tags.</p>
 
 <deftable-childtags title="Resin extensions to session-config">
-<tr><td>session-max</td><td>Maximum active sessions</td><td>4096
-</td></tr><tr><td>enable-cookies</td><td>Enable cookies for sessions. (resin 1.1)</td><td>true
-</td></tr><tr><td>enable-url-rewriting</td><td>Enable URL rewriting for sessions. (resin 1.1)</td><td>true
-</td></tr><tr><td>cookie-version</td><td>Version of the cookie spec for sessions. (resin 1.2)</td><td>1.0
-</td></tr><tr><td>cookie-domain</td><td>Domain for session cookies. (resin 1.2)</td><td>none
-</td></tr><tr><td>cookie-max-age</td><td>Max age for persistent session cookies. (resin 2.0)</td><td>none
-</td></tr><tr><td>cookie-length</td><td>Maximum length of the cookie. (resin 2.1.1)</td><td>Integer.MAX_VALUE
-</td></tr><tr><td>file-store</td><td>Persistent sessions using a file store. (resin 1.2)</td><td>none
-</td></tr><tr><td>use-persistent-store</td><td>Uses the current <a href="resin.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)</td><td>none
-</td></tr><tr><td>serialization-type</td><td>Use one of "java" or "hessian" for serialization, hessian is significantly faster and smaller (resin 3.1.2)</td><td>java
-</td></tr><tr><td>always-load-session</td><td>Reload data from the store on every request. (resin 1.2)</td><td>false
-</td></tr><tr><td>always-save-session</td><td>Save session data to the store on every request. (resin 1.2)</td><td>false
-</td></tr><tr><td>save-mode</td><td>When to save sessions, one of "before-headers", "after-request", or "on-shutdown"</td><td>after-request
-</td></tr><tr><td>reuse-session-id</td><td>Reuse the session id even if the session has timed out. A value of false defeats single signon capabilities. (resin 2.0.4)</td><td>true
-</td></tr><tr><td>ignore-serialization-errors</td><td>When persisting a session, ignore any values which don't implement java.io.Serializable</td><td>false
-</td></tr><tr><td>invalidate-after-listener</td><td>. (resin 3.0)</td><td>
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>session-max</td>
+  <td>Maximum active sessions</td>
+  <td>4096</td>
+</tr>
+<tr>
+  <td>enable-cookies</td>
+  <td>Enable cookies for sessions</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>enable-url-rewriting</td>
+  <td>Enable URL rewriting for sessions</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>cookie-version</td>
+  <td>Version of the cookie spec for sessions</td>
+  <td>1.0</td>
+</tr>
+<tr>
+  <td>cookie-domain</td>
+  <td>Domain for session cookies</td>
+  <td>none</td>
+</tr>
+<tr> 
+  <td>cookie-max-age</td>
+  <td>Max age for persistent session cookies</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>cookie-length</td>
+  <td>Maximum length of the cookie</td>
+  <td>Integer.MAX_VALUE</td>
+</tr>
+<tr>
+  <td>file-store</td>
+  <td>Persistent sessions using a file store</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>use-persistent-store</td>
+  <td>Uses the current <a href="resin.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>serialization-type</td>
+  <td>Use one of "java" or "hessian" for serialization, hessian is significantly faster and smaller (resin 3.1.2)</td>
+  <td>java</td>
+</tr>
+<tr>
+  <td>always-load-session</td>
+  <td>Reload data from the store on every request. (resin 1.2)</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>always-save-session</td>
+  <td>Save session data to the store on every request. (resin 1.2)</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>save-mode</td>
+  <td>When to save sessions, one of "before-headers", "after-request", or "on-shutdown"</td>
+  <td>after-request</td>
+</tr>
+<tr>
+  <td>reuse-session-id</td>
+  <td>Reuse the session id even if the session has timed out. A value of false defeats single signon capabilities. (resin 2.0.4)</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>ignore-serialization-errors</td>
+  <td>When persisting a session, ignore any values which don't implement java.io.Serializable</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>invalidate-after-listener</td>
+  <td>. (resin 3.0)</td><td></td>
+</tr>
+</deftable-childtags>
 
 <p>By default, both <code>enable-cookies</code> and
 <code>enable-url-rewriting</code> are true. To force url rewriting, you
@@ -1188,9 +1393,16 @@ PATH_INFO. Value is <var>true</var> or <var>false</var>.</p>
 <p>Restricts access to secure transports, such as SSL</p>
 
 <deftable-childtags>
-<tr><td>transport-guarantee</td><td>Required transport properties.  NONE,
-INTEGRAL, and CONFIDENTIAL are allowed values.
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>transport-guarantee</td>
+  <td>Required transport properties.  NONE,
+INTEGRAL, and CONFIDENTIAL are allowed values.</td>
+</tr>
+</deftable-childtags>
 
 </defun>
 
@@ -1200,14 +1412,62 @@ INTEGRAL, and CONFIDENTIAL are allowed values.
 <p>web-app configures a web application.</p>
 
 <deftable-childtags>
-<tr><td>id</td><td>The url prefix selecting this application.</td><td>n/a
-</td></tr><tr><td>url-regexp</td><td>A regexp to select this application.</td><td>n/a
-</td></tr><tr><td>document-directory</td><td>The document directory for
-the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative path is relative to the <a config-tag="root-directory"/> of the containing <a config-tag="host"/>.  Can use regexp replacement variables.</td><td>A relative path constricted with the id or the regexp match
-</td></tr><tr><td>startup-mode</td><td>`automatic', `lazy', or `manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
-</td></tr><tr><td>redeploy-mode</td><td>`automatic' or `manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
-
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>active-wait-time</td>
+  <td>how long a thread should wait for the web-app to initialize before returning a 503-busy.</td>
+  <td>15s</td>
+</tr>
+<tr>
+  <td>archive-path</td>
+  <td>Specifies the location of the web-app's .war file.</td>
+  <td>n/a</td>
+</tr>
+<tr>
+  <td>context-path</td>
+  <td>Specifies the URL prefix for the web-app.</td>
+  <td>the <var>id</var> value</td>
+</tr>
+<tr>
+  <td>id</td>
+  <td>The url prefix selecting this application.</td>
+  <td>n/a</td>
+</tr>
+<tr>
+  <td>redeploy-mode</td>
+  <td>'automatic' or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>automatic</td>
+</tr>
+<tr>
+  <td>redeploy-check-interval</td>
+  <td>how often to check the .war archive for redeployment</td>
+  <td>60s</td>
+</tr>
+<tr>
+  <td>root-directory</td>
+  <td>The root directory for the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative path is relative to the <a config-tag="root-directory"/> of the containing <a config-tag="host"/>.  Can use regexp replacement variables.</td>
+  <td>A relative path constricted with the id or the regexp match</td>
+</tr>
+<tr>
+  <td>startup-mode</td>
+  <td>'automatic', 'lazy', or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>automatic</td>
+</tr>
+<tr>
+  <td>startup-priority</td>
+  <td>specifies a priority for web-app startup to force an ordering between webapps </td>
+  <td>-1</td>
+</tr>
+<tr>
+  <td>url-regexp</td>
+  <td>A regexp to select this application.</td>
+  <td>n/a</td>
+</tr>
+</deftable-childtags>
 
 <p>When specified by <var>id</var>, the application will be initialized on
 server start.  When specified by <var>url-regexp</var>, the application
@@ -1292,25 +1552,62 @@ use web-app-deploy to allow servlet/tutorial/helloworld to be an
 independent war file.</p>
 
 <deftable-childtags>
-<tr><td>path</td><td>The path to the webapps directory</td><td>required
-</td></tr><tr><td>url-prefix</td><td>url-prefix added to all expanded webapps</td><td>""
-</td></tr><tr><td>expand-path</td><td>directory where wars should be expanded</td><td>value of path
-</td></tr><tr><td>lazy-init</td><td>true if web-apps should only be initialized when first used</td><td>false
-</td></tr><tr><td>web-app-default</td><td>defaults to be applied to expaned web-apps</td><td>
-</td></tr><tr><td>web-app</td><td>overriding configuration for specific web-apps</td><td>
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>path</td>
+  <td>The path to the webapps directory</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>url-prefix</td>
+  <td>url-prefix added to all expanded webapps</td>
+  <td>""</td>
+</tr>
+<tr>
+  <td>expand-path</td>
+  <td>directory where wars should be expanded</td>
+  <td>value of path</td>
+</tr>
+<tr>
+  <td>lazy-init</td>
+  <td>true if web-apps should only be initialized when first used</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>web-app-default</td>
+  <td>defaults to be applied to expaned web-apps</td>
+  <td></td>
+</tr>
+<tr>
+  <td>web-app</td>
+  <td>overriding configuration for specific web-apps</td>
+  <td></td>
+</tr>
+</deftable-childtags>
 
 <p>The web-app-deploy can override configuration for an expanded war with
 a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
 &lt;document-directory&gt; is used to match web-apps.</p>
 
-<example title="overriding web.xml">
+<example title="Example: resin.conf overriding web.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+&lt;host id="">
+
 &lt;web-app-deploy path="webapps"&gt;
   &lt;web-app context-path="/wiki"
               document-directory="wiki"&gt;
     &lt;context-param database="jdbc/wiki"&gt;
   &lt;/web-app&gt;
 &lt;/web-app-deploy&gt;
+
+&lt;/host>
+&lt;/cluster>
+&lt;/resin>
 </example>
 
 </defun>
@@ -1321,12 +1618,31 @@ a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
 <p>Specifies a collection of areas of the web site.</p>
 
 <deftable-childtags>
-<tr><td>web-resource-name</td><td>a name for a web resource collection
-</td></tr><tr><td>description</td><td>
-</td></tr><tr><td>url-pattern</td><td>url patterns describing the resource
-</td></tr><tr><td>http-method</td><td>HTTP methods to be restricted.
-</td></tr><tr><td>method</td><td>
-</td></tr></deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>web-resource-name</td>
+  <td>a name for a web resource collection</td>
+</tr>
+<tr>
+ <td>description</td>
+  <td></td>
+</tr>
+<tr>
+  <td>url-pattern</td>
+  <td>url patterns describing the resource</td>
+</tr>
+<tr>
+  <td>http-method</td>
+  <td>HTTP methods to be restricted.</td>
+</tr>
+<tr>
+  <td>method</td>
+  <td></td>
+</tr>
+</deftable-childtags>
 </defun>
 
 <defun title="&lt;welcome-file-list>" version="Servlet 2.2" type="defun">
@@ -1336,7 +1652,7 @@ a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
 url. According to the spec, each file is in a &lt;welcome-file&gt;
 element.</p>
 
-<example>
+<example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;welcome-file-list&gt;
     &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;
@@ -1348,7 +1664,7 @@ element.</p>
 
 <p>Resin also provides a shortcut where you can just list the files:</p>
 
-<example>
+<example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;welcome-file-list&gt;
     index.jsp, index.xtp, home.xtp
@@ -1357,76 +1673,6 @@ element.</p>
 </example>
 
 <default>in $RESIN_HOME/conf/app-default.xml is index.xtp, index.jsp, index.html.</default>
-
-</defun>
-
-<defun title="&lt;web-service>">
-<parents>web-app</parents>
-
-<p>The &lt;web-service> tag configures a bean as a service.
-The service can receive request from multiple protocols, including
-REST, SOAP, Hessian, and direct local-JVM calls.  The service
-will normally be configured with IoC.</p>
-
-<p>See the <a href="soa-tags.xtp#web-service">web-service</a>
-documentation for more information.</p>
-
-<p>See the <a href="../examples/soa-hello-world/index.xtp">hello world tutorial</a>
-for an example.</p>
-
-<deftable-childtags>
-<tr>
-  <td>class</td>
-  <td>Defines the implementation class for the web-service</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>hessian</td>
-  <td>Adds a <a href="hessian.xtp">Hessian</a> port for
-the web service.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC-based initialization.  See <a href="ioc-bean.xtp">IoC init
-documentation</a> for more information.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jndi-name</td>
-  <td>Specifies the jndi-name to store the web service for lookup
-by local-JVM clients.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>rest</td>
-  <td>Adds a REST interface for the web service.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>soap</td>
-  <td>Adds a SOAP interface for the web service.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>var</td>
-  <td>Sets a Resin EL-variable for IoC injection for other beans in the
-resin.conf.</td>
-  <td></td>
-</tr>
-</deftable-childtags>
-
-<def title="web-service definition">
-element web-service {
-  class
-  &amp; hessian*
-  &amp; init*
-  &amp; jndi-name?
-  &amp; rest*
-  &amp; soap*
-  &amp; var?
-}
-</def>
 
 </defun>
 

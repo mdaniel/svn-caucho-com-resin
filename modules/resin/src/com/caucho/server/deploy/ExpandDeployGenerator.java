@@ -834,8 +834,10 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private String versionedNameToBaseName(String name)
   {
     int p = name.lastIndexOf('-');
+    int ch;
     
-    if (p > 0)
+    if (p > 0 && p + 1 < name.length()
+	&& '0' <= (ch = name.charAt(p + 1)) && ch <= '9')
       return name.substring(0, p);
     else
       return name;
