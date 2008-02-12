@@ -369,7 +369,7 @@ public class TypeFactory implements AddLoaderListener
       _driverTypeMap.clear();
       
       Enumeration<URL> urls
-	= loader.getResources("META-INF/services/com.caucho.config.namespace.xml");
+	= loader.getResources("META-INF/caucho/com.caucho.config.namespace.xml");
 
       while (urls.hasMoreElements()) {
 	URL url = urls.nextElement();
@@ -548,7 +548,7 @@ public class TypeFactory implements AddLoaderListener
   }
 
   /**
-   * Reads the drivers from the META-INF/services
+   * Reads the drivers from the META-INF/caucho
    */
   private void loadDriverTypeMap(HashMap<String,String> driverMap,
 				 String apiType)
@@ -560,7 +560,7 @@ public class TypeFactory implements AddLoaderListener
 	loader = ClassLoader.getSystemClassLoader();
       
       Enumeration<URL> urls
-	= loader.getResources("META-INF/services/com.caucho.config.uri/"
+	= loader.getResources("META-INF/caucho/com.caucho.config.uri/"
 			      + apiType);
 
       while (urls.hasMoreElements()) {

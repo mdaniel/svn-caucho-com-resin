@@ -69,12 +69,12 @@ public class GlobalMBeanServer extends AbstractMBeanServer
   /**
    * Returns the local context.
    */
-  protected MBeanContext getContext(ClassLoader loader)
+  protected MBeanContext createContext(ClassLoader loader)
   {
     AbstractMBeanServer envServer = Jmx.getMBeanServer();
 
     // server/2102 vs server/211{1,2}
-    return envServer.getContext(loader);
+    return envServer.createContext(loader);
   }
 
   /**
@@ -84,7 +84,17 @@ public class GlobalMBeanServer extends AbstractMBeanServer
   {
     AbstractMBeanServer envServer = Jmx.getMBeanServer();
 
-    return envServer.getExistingContext(_loader);
+    return envServer.getExistingContext(loader);
+  }
+
+  /**
+   * Returns the local context.
+   */
+  protected MBeanContext getContext(ClassLoader loader)
+  {
+    AbstractMBeanServer envServer = Jmx.getMBeanServer();
+
+    return envServer.getContext(loader);
   }
 
   /**
@@ -92,7 +102,7 @@ public class GlobalMBeanServer extends AbstractMBeanServer
    */
   protected MBeanView getView()
   {
-    return getContext().getGlobalView();
+    return createContext().getGlobalView();
   }
 
   /**

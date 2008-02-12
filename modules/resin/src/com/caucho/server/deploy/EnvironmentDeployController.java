@@ -374,6 +374,9 @@ abstract public class
 
   protected void fillInitList(ArrayList<DeployConfig> initList)
   {
+    if (_config != null && _config.isSkipConfig())
+      return;
+    
     for (DeployConfig config : _configDefaults) {
       DeployConfig prologue = config.getPrologue();
 

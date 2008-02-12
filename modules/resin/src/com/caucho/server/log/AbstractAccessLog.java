@@ -32,9 +32,10 @@ package com.caucho.server.log;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.log.Log;
+import com.caucho.loader.Environment;
 import com.caucho.vfs.Path;
 
+import javax.annotation.*;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -52,6 +53,15 @@ abstract public class AbstractAccessLog {
   protected Path _path;
 
   protected String _pathFormat;
+
+  private AccessLogAdmin _admin;
+
+  protected AbstractAccessLog()
+  {
+    _admin = new AccessLogAdmin(this);
+
+    Environment.addCloseListener(this);
+  }
 
   /**
    * Returns the access-log's path.
@@ -132,5 +142,6 @@ abstract public class AbstractAccessLog {
   public void destroy()
     throws IOException
   {
+    flush();
   }
 }

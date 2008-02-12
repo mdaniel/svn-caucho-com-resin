@@ -71,6 +71,9 @@ public class DeployConfig {
   // redeploy period
   private Period _redeployCheckInterval;
 
+  // if true, skip defaults
+  private boolean _isSkipConfig;
+
   // The configuration program
   private ContainerProgram _program = new ContainerProgram();
 
@@ -120,6 +123,22 @@ public class DeployConfig {
   public String getArchivePath()
   {
     return _archivePath;
+  }
+
+  /**
+   * Skip the defaults (for admin)
+   */
+  public boolean isSkipConfig()
+  {
+    return _isSkipConfig;
+  }
+
+  /**
+   * Skip the defaults (for admin)
+   */
+  public void setSkipConfig(boolean isDefault)
+  {
+    _isSkipConfig = isDefault;
   }
 
   /**

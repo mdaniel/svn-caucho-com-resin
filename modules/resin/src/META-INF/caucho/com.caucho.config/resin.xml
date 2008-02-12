@@ -105,6 +105,9 @@
   <bean name="logger"
         class="com.caucho.log.LoggerConfig"/>
     
+  <bean name="mail"
+        class="com.caucho.jca.cfg.JavaMailConfig"/>
+    
   <bean name="map"
         class="com.caucho.config.type.MapType"/>
 

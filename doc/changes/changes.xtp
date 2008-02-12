@@ -12,6 +12,12 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>admin: admin host needs to skip default configuration (#2405, rep by ckchris)</li>
+<li>gzip filter not properly handling reset() (#2389, rep by T Truong)</li>
+<li>jmx: unregisterMBean was not working properly (#2390, rep by J Smyth)</li>
+<li>custom access-log was not having destroy() called (#2373, rep by M Thomson)</li>
+<li>add &lt;mail> config for javamail (#2329, rep by Ron Pitts) [<a href="http://caucho.com/resin/doc/env-tags.xtp#mail">mail configuration</a>]</li>
+<li>jmx: add AccessLogMXBean with flush() operation (#2342, rep by Michael O'Dea)</li>
 <li>jmx: classloader updates to support JDK 1.6 jconsole</li>
 <li>jmx: use only GlobalMBeanServer for all Resin mbean server instances (#2380, rep by J Smyth)</li>
 <li>(2008-02-11) config: init-param was not stripping spaces for param-value (#2384, rep by hifish)</li>

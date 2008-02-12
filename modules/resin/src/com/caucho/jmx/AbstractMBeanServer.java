@@ -30,7 +30,6 @@ package com.caucho.jmx;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.WeakCloseListener;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.management.*;
@@ -39,8 +38,6 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,9 +68,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   /**
    * Returns the context implementation.
    */
-  protected MBeanContext getContext()
+  protected MBeanContext createContext()
   {
-    return getContext(Thread.currentThread().getContextClassLoader());
+    return createContext(Thread.currentThread().getContextClassLoader());
   }
 
   /**
@@ -89,18 +86,23 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   protected MBeanContext getGlobalContext()
   {
-    return getContext(ClassLoader.getSystemClassLoader());
+    return createContext(ClassLoader.getSystemClassLoader());
   }
 
   /**
-   * Returns the context implementation.
+   * Returns the context implementation, creating if necessary.
    */
-  abstract protected MBeanContext getContext(ClassLoader loader);
+  abstract protected MBeanContext createContext(ClassLoader loader);
 
   /**
    * Returns the context implementation.
    */
   abstract protected MBeanContext getExistingContext(ClassLoader loader);
+
+  /**
+   * Returns the context implementation.
+   */
+  abstract protected MBeanContext getContext(ClassLoader loader);
 
   /**
    * Removes the context implementation.
@@ -114,7 +116,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   protected MBeanView getView()
   {
-    return getContext().getView();
+    return createContext().getView();
   }
 
   /**
@@ -394,7 +396,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     MBeanContext context;
 
-    context = getContext();
+    context = createContext();
 
     if (context.getMBean(name) != null) {
       throw new InstanceAlreadyExistsException(String.valueOf(name));
@@ -474,7 +476,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     if (context != null) {
       context.unregisterMBean(name);
 
-      log.finer("unregistered " + name);
+      log.finer(name + " unregistered from " + this);
     }
 
     // XXX: getDelegate().sendUnregisterNotification(name);
@@ -542,45 +544,6 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
       return null;
     }
-  }
-
-  /**
-   * Tests if the name matches.
-   */
-  private boolean isMatch(ObjectName testName,
-                          ObjectName queryName,
-                          QueryExp query)
-  {
-    if (queryName == null)
-      return true;
-
-    if (! queryName.isPattern() &&
-        ! testName.getDomain().equals(queryName.getDomain()))
-      return false;
-
-    if (queryName.isPropertyPattern()) {
-      // If the queryName has a '*' in the properties, then check
-      // the queryName properties to see if they match
-
-      Hashtable map = queryName.getKeyPropertyList();
-      Iterator iter = map.keySet().iterator();
-      while (iter.hasNext()) {
-        String key = (String) iter.next();
-        String value = (String) map.get(key);
-
-        if (! value.equals(testName.getKeyProperty(key)))
-          return false;
-      }
-    }
-    else {
-      String testProps = testName.getCanonicalKeyPropertyListString();
-      String queryProps = queryName.getCanonicalKeyPropertyListString();
-
-      if (! testProps.equals(queryProps))
-        return false;
-    }
-
-    return true;
   }
 
   /**
@@ -731,7 +694,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     mbean.addNotificationListener(listener, filter, handback);
 
-    getContext().addNotificationListener(name, listener, filter, handback);
+    createContext().addNotificationListener(name, listener, filter, handback);
   }
 
   /**
@@ -780,7 +743,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     mbean.removeNotificationListener(listener);
 
-    getContext().removeNotificationListener(name, listener);
+    createContext().removeNotificationListener(name, listener);
   }
 
   /**
@@ -860,7 +823,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     if (mbean == null)
       throw new InstanceNotFoundException(String.valueOf(name));
 
-    getContext().removeNotificationListener(name, listener, filter, handback);
+    createContext().removeNotificationListener(name, listener, filter, handback);
 
     mbean.removeNotificationListener(listener, filter, handback);
   }
@@ -970,7 +933,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
    */
   public ClassLoaderRepository getClassLoaderRepository()
   {
-    return getContext().getClassLoaderRepository();
+    return createContext().getClassLoaderRepository();
   }
 
   /**
@@ -1054,6 +1017,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   /**
    * Returns the string form.
    */
+  @Override
   public String toString()
   {
     if (_defaultDomain != null)

@@ -89,7 +89,7 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
   /**
    * Returns the local context.
    */
-  protected MBeanContext getContext(ClassLoader loader)
+  protected MBeanContext createContext(ClassLoader loader)
   {
     synchronized (_localContext) {
       MBeanContext context = _localContext.getLevel(loader);
@@ -108,7 +108,7 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
 	MBeanContext parent = null;
 
 	if (loader != null)
-	  parent = getContext(loader.getParent());
+	  parent = createContext(loader.getParent());
 
 	if (parent != null)
 	  context.setProperties(parent.copyProperties());
@@ -144,6 +144,14 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
     synchronized (_localContext) {
       return _localContext.getLevel(loader);
     }
+  }
+  
+ /**
+   * Returns the local context.
+   */
+  protected MBeanContext getContext(ClassLoader loader)
+  {
+    return _localContext.get(loader);
   }
 
   /**

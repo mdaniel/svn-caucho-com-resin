@@ -242,7 +242,12 @@ public class Management
     if (_hostConfig == null) {
       HostConfig hostConfig = new HostConfig();
       hostConfig.setId(HOST_NAME);
-      hostConfig.setRootDirectory(new RawString("bogus-root"));
+      if (_path != null) {
+	hostConfig.setRootDirectory(new RawString(_path.getFullPath() + "/bogus-admin"));
+      }
+      else
+	hostConfig.setRootDirectory(new RawString("bogus-admin"));
+      hostConfig.setSkipConfig(true);
 
       hostConfig.init();
 

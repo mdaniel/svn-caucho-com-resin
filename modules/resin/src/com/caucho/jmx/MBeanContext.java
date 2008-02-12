@@ -30,7 +30,6 @@
 package com.caucho.jmx;
 
 import com.caucho.loader.*;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.management.*;
@@ -173,7 +172,6 @@ public class MBeanContext
     throws MalformedObjectNameException
   {
     int len = name.length();
-    boolean isAbsolute = false;
 
     for (int i = 0; i < len; i++) {
       char ch = name.charAt(i);
@@ -202,7 +200,7 @@ public class MBeanContext
   /**
    * Finds an admin object.
    */
-  public MBeanWrapper getMBean(ObjectName name)
+  MBeanWrapper getMBean(ObjectName name)
   {
     if (name != null)
       return _mbeans.get(name);
@@ -384,7 +382,7 @@ public class MBeanContext
     while (context._loader != null) {
       ClassLoader parentLoader = context._loader.getParent();
       
-      MBeanContext parentContext = _mbeanServer.getContext(parentLoader);
+      MBeanContext parentContext = _mbeanServer.createContext(parentLoader);
 
       if (parentContext == null ||
 	  parentContext == context)
@@ -424,42 +422,18 @@ public class MBeanContext
       }
     }
 
-    MBeanContext context = this;
-    ClassLoader loader = context._loader.getParent();
-    while (true) {
-      ClassLoader parentLoader = loader.getParent();
-      
-      MBeanContext parentContext = _mbeanServer.getExistingContext(parentLoader);
+    ClassLoader loader = _loader.getParent();
+    for (; loader != null; loader = loader.getParent()) {
+      MBeanContext parentContext = _mbeanServer.getContext(loader);
 
-      if (parentContext == context)
-	break;
+      if (this == parentContext)
+	return mbean;
       else if (parentContext != null) {
-	loader = parentContext._loader;
+	parentContext.removeMBean(name);
+	break;
       }
-      else {
-	loader = parentLoader;
-	continue;
-      }
-
-      try {
-	if (parentContext._view != null)
-	  parentContext._view.remove(name);
-	
-	if (parentContext._globalView == null) {
-	}
-	else if (mbean == null &&
-		 (mbean = parentContext._globalView.remove(name)) != null)
-	  parentContext.sendUnregisterNotification(name);
-	else if (mbean != null && 
-		 parentContext._globalView.remove(name, mbean) != null)
-	  parentContext.sendUnregisterNotification(name);
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-
-      context = parentContext;
     }
-    
+
     return mbean;
   }
   

@@ -90,7 +90,7 @@ public class MBeanView {
     if (_classLoader == null)
       return null;
 
-    MBeanContext context = _mbeanServer.getContext(_classLoader.getParent());
+    MBeanContext context = _mbeanServer.createContext(_classLoader.getParent());
 
     if (context.getView() == this)
       return null;

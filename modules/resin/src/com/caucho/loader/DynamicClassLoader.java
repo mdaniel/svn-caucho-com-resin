@@ -485,6 +485,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         path = path.lookup("./");
 
       addURL(new URL(path.getURL()));
+    } catch (MalformedURLException e) {
+      log().warning(e.toString());
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     }

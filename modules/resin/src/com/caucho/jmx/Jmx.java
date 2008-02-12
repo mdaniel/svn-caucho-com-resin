@@ -106,7 +106,7 @@ public class Jmx {
     AbstractMBeanServer mbeanServer = getMBeanServer();
 
     if (mbeanServer != null)
-      return mbeanServer.getContext().copyProperties();
+      return mbeanServer.createContext().copyProperties();
     else
       return new LinkedHashMap<String,String>();
   }
@@ -120,7 +120,7 @@ public class Jmx {
     AbstractMBeanServer mbeanServer = getMBeanServer();
 
     if (mbeanServer != null)
-      return mbeanServer.getContext(loader).copyProperties();
+      return mbeanServer.createContext(loader).copyProperties();
     else
       return new LinkedHashMap<String,String>();
   }
@@ -133,7 +133,7 @@ public class Jmx {
     AbstractMBeanServer mbeanServer = getMBeanServer();
 
     if (mbeanServer != null)
-      mbeanServer.getContext().setProperties(properties);
+      mbeanServer.createContext().setProperties(properties);
   }
 
   /**
@@ -145,7 +145,7 @@ public class Jmx {
     AbstractMBeanServer mbeanServer = getMBeanServer();
 
     if (mbeanServer != null)
-      mbeanServer.getContext(loader).setProperties(properties);
+      mbeanServer.createContext(loader).setProperties(properties);
   }
   
   /**
@@ -388,7 +388,7 @@ public class Jmx {
   public static ObjectName getObjectName(String name)
     throws MalformedObjectNameException
   {
-    return getMBeanServer().getContext().getObjectName(name);
+    return getMBeanServer().createContext().getObjectName(name);
   }
 
   /**
@@ -584,7 +584,7 @@ public class Jmx {
   public static Object find(String localName)
     throws MalformedObjectNameException
   {
-    return find(getMBeanServer().getContext().getObjectName(localName));
+    return find(getMBeanServer().createContext().getObjectName(localName));
   }
 
   /**
@@ -601,7 +601,7 @@ public class Jmx {
   public static Object findGlobal(String localName)
     throws MalformedObjectNameException
   {
-    return findGlobal(getMBeanServer().getContext().getObjectName(localName));
+    return findGlobal(getMBeanServer().createContext().getObjectName(localName));
   }
 
   /**

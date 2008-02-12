@@ -31,22 +31,128 @@ package com.caucho.jca.cfg;
 import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.cfg.*;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import javax.annotation.*;
+import javax.mail.*;
+
 /**
  * Configuration for a javamail.
  */
-public class JavaMailConfig {
+public class JavaMailConfig extends AbstractBeanConfig {
   private static final L10N L = new L10N(JavaMailConfig.class);
-  private static final Logger log = Log.open(JavaMailConfig.class);
+  private static final Logger log
+    = Logger.getLogger(JavaMailConfig.class.getName());
 
   private Properties _props = new Properties();
+  private Authenticator _auth;
   
   public JavaMailConfig()
   {
+  }
+
+  /**
+   * Sets the authenticator
+   */
+  public void setAuthenticator(Authenticator auth)
+  {
+    _auth = auth;
+  }
+
+  //
+  // well-known attributes
+  //
+
+  /**
+   * mail.from
+   */
+  public void setFrom(String from)
+  {
+    setProperty("mail.from", from);
+  }
+
+  /**
+   * mail.host
+   */
+  public void setHost(String host)
+  {
+    setProperty("mail.host", host);
+  }
+
+  /**
+   * mail.imap.host
+   */
+  public void setImapHost(String host)
+  {
+    setProperty("mail.imap.host", host);
+  }
+
+  /**
+   * mail.imap.user
+   */
+  public void setImapUser(String user)
+  {
+    setProperty("mail.imap.user", user);
+  }
+
+  /**
+   * mail.pop3.host
+   */
+  public void setPop3Host(String host)
+  {
+    setProperty("mail.pop3.host", host);
+  }
+
+  /**
+   * mail.pop3.user
+   */
+  public void setPop3User(String user)
+  {
+    setProperty("mail.pop3.user", user);
+  }
+
+  /**
+   * mail.smtp.host
+   */
+  public void setSmtpHost(String host)
+  {
+    setProperty("mail.smtp.host", host);
+  }
+
+  /**
+   * mail.smtp.user
+   */
+  public void setSmtpUser(String user)
+  {
+    setProperty("mail.smtp.user", user);
+  }
+
+  /**
+   * mail.store.protocol
+   */
+  public void setStoreProtocol(String protocol)
+  {
+    setProperty("mail.store.protocol", protocol);
+  }
+
+  /**
+   * mail.transport.protocol
+   */
+  public void setTransportProtocol(String protocol)
+  {
+    setProperty("mail.transport.protocol", protocol);
+  }
+
+  /**
+   * mail.user
+   */
+  public void setUser(String user)
+  {
+    setProperty("mail.user", user);
   }
 
   /**
@@ -62,24 +168,27 @@ public class JavaMailConfig {
     _props.putAll(props);
   }
 
-  public Object replaceObject()
+  public void setValue(Properties props)
+  {
+    _props.putAll(props);
+  }
+
+  @PostConstruct
+  public void init()
     throws ConfigException
   {
     try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      if (getInit() != null)
+	getInit().configure(this);
       
-      Class sessionClass = Class.forName("javax.mail.Session", false, loader);
-      Class authClass = Class.forName("javax.mail.Authenticator", false, loader);
+      Session session;
+      
+      if (_auth != null)
+	session = Session.getInstance(_props, _auth);
+      else
+	session = Session.getInstance(_props);
 
-      Method method = sessionClass.getMethod("getInstance",
-                                             new Class[] { Properties.class,
-                                                           authClass });
-      Object obj = method.invoke(null, new Object[] { _props, null });
-
-      return obj;
-    } catch (ClassNotFoundException e) {
-      throw new ConfigException(L.l("javax.mail.Session is not available.  JavaMail must be downloaded separately from Sun."),
-				e);
+      register(session);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

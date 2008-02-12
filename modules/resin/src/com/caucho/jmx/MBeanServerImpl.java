@@ -72,7 +72,7 @@ class MBeanServerImpl extends AbstractMBeanServer {
   /**
    * Returns the context.
    */
-  protected MBeanContext getContext(ClassLoader loader)
+  protected MBeanContext createContext(ClassLoader loader)
   {
     return _context;
   }
@@ -81,6 +81,14 @@ class MBeanServerImpl extends AbstractMBeanServer {
    * Returns the context.
    */
   protected MBeanContext getExistingContext(ClassLoader loader)
+  {
+    return _context;
+  }
+
+  /**
+   * Returns the context.
+   */
+  protected MBeanContext getContext(ClassLoader loader)
   {
     return _context;
   }
