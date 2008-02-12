@@ -464,6 +464,7 @@ public class ConfigContext {
 	childType = createResinType(attrStrategy, (Element) childNode);
 
       Object childBean;
+      String text;
 
       if (childType != null)
 	childBean = childType.create(bean);
@@ -473,6 +474,11 @@ public class ConfigContext {
 	  attrStrategy.setValue(bean, qName, childBean);
 	else
 	  attrStrategy.setValue(bean, qName, null);
+
+	return;
+      }
+      else if ((text = getTextValue(childNode)) != null) {
+	setText(bean, qName, text, attrStrategy);
 
 	return;
       }
@@ -525,6 +531,28 @@ public class ConfigContext {
     } catch (Exception e) {
       throw error(e, childNode);
     }
+  }
+  
+  private void setText(Object bean,
+		       QName qName,
+		       String text,
+		       Attribute attrStrategy)
+    throws Exception
+  {
+    ConfigType attrType = attrStrategy.getConfigType();
+	
+    if (! attrType.isNoTrim())
+      text = text.trim();
+
+    if (isEL() && attrType.isEL() && text.indexOf("${") >= 0) {
+      ConfigType childType = attrStrategy.getConfigType();
+	  
+      Object value = childType.valueOf(evalObject(text));
+	  
+      attrStrategy.setValue(bean, qName, value);
+    }
+    else
+      attrStrategy.setText(bean, qName, text);
   }
 
   private ConfigProgram buildProgram(Attribute attr, Node node)
@@ -847,6 +875,44 @@ public class ConfigContext {
 	}
 	
 	return null;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the text value of the node.
+   */
+  String getTextValue(Node node)
+  {
+    if (node instanceof Attr) {
+      Attr attrNode = (Attr) node;
+      String data = attrNode.getNodeValue();
+
+      return data;
+    }
+
+    if (! (node instanceof Element))
+      return null;
+
+    Element elt = (Element) node;
+
+    for (Node child = elt.getFirstChild();
+	 child != null;
+	 child = child.getNextSibling()) {
+      if (child instanceof Element) {
+	return null;
+      }
+      
+      else if (child instanceof CharacterData) {
+	String data = ((CharacterData) child).getData();
+
+	if (child.getNextSibling() == null) {
+	  return data;
+	}
+	else
+	  return null;
       }
     }
 

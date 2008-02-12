@@ -31,8 +31,6 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.el.EL;
-import com.caucho.util.CompileException;
 import com.caucho.loader.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
@@ -69,7 +67,7 @@ public class ResinBoot {
   private static L10N _L;
   private static Logger _log;
 
-  private String []_argv;
+  private WatchdogArgs _args;
 
   private Path _resinHome;
   private Path _rootDirectory;
@@ -80,42 +78,43 @@ public class ResinBoot {
   private boolean _isResinProfessional;
   private int _watchdogPort;
 
-  private ResinWatchdog _server;
+  private WatchdogClient _client;
 
   private StartMode _startMode = StartMode.DIRECT;
 
   ResinBoot(String []argv)
     throws Exception
   {
-    _argv = fillArgv(argv);
+    _args = new WatchdogArgs(argv);
     
-    calculateResinHome();
+    Path resinHome = _args.getResinHome();
 
-    ClassLoader loader = ProLoader.create(_resinHome);
+    ClassLoader loader = ProLoader.create(resinHome);
     if (loader != null) {
-      System.setProperty("resin.home", _resinHome.getNativePath());
+      System.setProperty("resin.home", resinHome.getNativePath());
       
       Thread.currentThread().setContextClassLoader(loader);
 
       Vfs.initJNI();
 
-      _resinHome = Vfs.lookup(_resinHome.getFullPath());
+      resinHome = Vfs.lookup(resinHome.getFullPath());
+      _args.setResinHome(resinHome);
     }
     
     Environment.init();
-
-    calculateRootDirectory();
-
-    parseCommandLine(argv);
-
+    
+    _resinHome = _args.getResinHome();
+    _rootDirectory = _args.getRootDirectory();
+    _resinConf = _args.getResinConf();
+    
     // required for license check
-    System.setProperty("resin.home", _resinHome.getNativePath());
+    System.setProperty("resin.home", resinHome.getNativePath());
 
     if (_resinConf == null) {
       _resinConf = _rootDirectory.lookup("conf/resin.conf");
 
       if (!_resinConf.exists()) {
-        Path resinHomeConf = _resinHome.lookup("conf/resin.conf");
+        Path resinHomeConf = resinHome.lookup("conf/resin.conf");
 
         if (resinHomeConf.exists())
           _resinConf = resinHomeConf;
@@ -133,13 +132,9 @@ public class ResinBoot {
     // XXX: set _isResinProfessional
 
     Config config = new Config();
-    // XXX: why ignore?
-    // config.setIgnoreEnvironment(true);
+    BootManager bootManager = new BootManager(_args);
 
-    ResinWatchdogManager manager = null;
-    ResinConfig conf = new ResinConfig(manager, _resinHome, _rootDirectory);
-
-    ResinELContext elContext = new ResinBootELContext();
+    ResinELContext elContext = _args.getELContext();
 
     /**
      * XXX: the following setVar calls should not be necessary, but the
@@ -151,11 +146,11 @@ public class ResinBoot {
     webBeans.addSingletonByName(elContext.getResinVar(), "resin");
     webBeans.addSingletonByName(elContext.getServerVar(), "server");
 
-    config.configure(conf, _resinConf, "com/caucho/server/resin/resin.rnc");
+    config.configure(bootManager, _resinConf, "com/caucho/server/resin/resin.rnc");
 
-    _server = conf.findServer(_serverId);
+    _client = bootManager.findClient(_serverId);
 
-    if (_server == null)
+    if (_client == null)
       throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
                                       Version.VERSION, _serverId, _resinConf));
 
@@ -163,18 +158,18 @@ public class ResinBoot {
     if (! logDirectory.exists()) {
       logDirectory.mkdirs();
 
-      if (_server.getUserName() != null)
-	logDirectory.changeOwner(_server.getUserName());
+      if (_client.getUserName() != null)
+	logDirectory.changeOwner(_client.getUserName());
       
-      if (_server.getGroupName() != null)
-	logDirectory.changeOwner(_server.getGroupName());
+      if (_client.getGroupName() != null)
+	logDirectory.changeOwner(_client.getGroupName());
     }
     
     if (_isVerbose)
-      _server.setVerbose(_isVerbose);
+      _client.setVerbose(_isVerbose);
 
     if (_watchdogPort > 0)
-      _server.setWatchdogPort(_watchdogPort);
+      _client.setWatchdogPort(_watchdogPort);
   }
 
   private String []fillArgv(String []argv)
@@ -211,53 +206,6 @@ public class ResinBoot {
     args.toArray(argv);
 
     return argv;
-  }
-
-  private void calculateResinHome()
-  {
-    String resinHome = System.getProperty("resin.home");
-
-    if (resinHome != null) {
-      _resinHome = Vfs.lookup(resinHome);
-      return;
-    }
-
-    // find the resin.jar as described by the classpath
-    // this may differ from the value given by getURL() because of
-    // symbolic links
-    String classPath = System.getProperty("java.class.path");
-
-    if (classPath.indexOf("resin.jar") >= 0) {
-      int q = classPath.indexOf("resin.jar") + "resin.jar".length();
-      int p = classPath.lastIndexOf(File.pathSeparatorChar, q - 1);
-
-      String resinJar;
-
-      if (p >= 0)
-	resinJar = classPath.substring(p + 1, q);
-      else
-	resinJar = classPath.substring(0, q);
-
-      _resinHome = Vfs.lookup(resinJar).lookup("../..");
-      return;
-    }
-
-    ClassLoader loader = ClassLoader.getSystemClassLoader();
-
-    URL url = loader.getResource("com/caucho/boot/ResinBoot.class");
-
-    String path = url.toString();
-
-    if (! path.startsWith("jar:"))
-      throw new RuntimeException(L().l("Resin/{0}: can't find jar for ResinBoot.class in {1}",
-				       Version.VERSION, path));
-
-    int p = path.indexOf(':');
-    int q = path.indexOf('!');
-
-    path = path.substring(p + 1, q);
-
-    _resinHome = Vfs.lookup(path).getParent().getParent();
   }
 
   private void calculateRootDirectory()
@@ -397,15 +345,15 @@ public class ResinBoot {
   {
     if (_startMode == StartMode.START) {
       try {
-	_server.startWatchdog(_argv);
+	_client.startWatchdog(_args.getArgv());
 	
 	System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at 127.0.0.1:{2}",
-				 Version.VERSION, _server.getId(),
-				 _server.getWatchdogPort()));
+				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogPort()));
       } catch (Exception e) {
 	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
-				 Version.VERSION, _server.getId(),
-				 _server.getWatchdogPort(),
+				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogPort(),
 				 e.toString()));
 
 	log().log(Level.FINE, e.toString(), e);
@@ -417,15 +365,15 @@ public class ResinBoot {
     }
     else if (_startMode == StartMode.STOP) {
       try {
-	_server.stopWatchdog();
+	_client.stopWatchdog();
 	
 	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at 127.0.0.1:{2}",
-				 Version.VERSION, _server.getId(),
-				 _server.getWatchdogPort()));
+				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogPort()));
       } catch (Exception e) {
 	System.out.println(L().l("Resin/{0} can't stop -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
-				 Version.VERSION, _server.getId(),
-				 _server.getWatchdogPort(),
+				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogPort(),
 				 e.toString()));
 
 	log().log(Level.FINE, e.toString(), e);
@@ -437,14 +385,14 @@ public class ResinBoot {
     }
     else if (_startMode == StartMode.RESTART) {
       try {
-	_server.restartWatchdog(_argv);
+	_client.restartWatchdog(_args.getArgv());
 	
 	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at 127.0.0.1:{2}",
-				 Version.VERSION, _server.getId(),
-				 _server.getWatchdogPort()));
+				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogPort()));
       } catch (Exception e) {
 	System.out.println(L().l("Resin/{0} can't restart -server '{1}'.\n{2}",
-				 Version.VERSION, _server.getId(),
+				 Version.VERSION, _client.getId(),
 				 e.toString()));
 
 	log().log(Level.FINE, e.toString(), e);
@@ -456,7 +404,7 @@ public class ResinBoot {
     }
     else if (_startMode == StartMode.SHUTDOWN) {
       try {
-	_server.shutdown();
+	_client.shutdown();
 
 	System.err.println(L().l("Resin/{0} shutdown ResinWatchdogManager",
 				 Version.VERSION));
@@ -472,7 +420,7 @@ public class ResinBoot {
       return false;
     }
     else {
-      return _server.startSingle(_argv, _rootDirectory) != 0;
+      return _client.startSingle(_args.getArgv(), _rootDirectory) != 0;
     }
   }
 
@@ -535,33 +483,4 @@ public class ResinBoot {
     RESTART,
     SHUTDOWN
   };
-
-  public class ResinBootELContext
-    extends ResinELContext
-  {
-    public Path getResinHome()
-    {
-      return _resinHome;
-    }
-
-    public Path getRootDirectory()
-    {
-      return _rootDirectory;
-    }
-
-    public Path getResinConf()
-    {
-      return _resinConf;
-    }
-
-    public String getServerId()
-    {
-      return _serverId;
-    }
-
-    public boolean isResinProfessional()
-    {
-      return _isResinProfessional;
-    }
-  }
 }

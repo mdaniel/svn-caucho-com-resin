@@ -38,17 +38,17 @@ import java.util.logging.Logger;
 /**
  * Process responsible for watching a backend server.
  */
-public class ResinWatchdogServlet extends HessianServlet
+public class WatchdogServlet extends HessianServlet
   implements WatchdogAPI {
-  private final static L10N L = new L10N(ResinWatchdogServlet.class);
+  private final static L10N L = new L10N(WatchdogServlet.class);
   private static final Logger log
-    = Logger.getLogger(ResinWatchdogServlet.class.getName());
+    = Logger.getLogger(WatchdogServlet.class.getName());
 
-  private ResinWatchdogManager _watchdogManager;
+  private WatchdogManager _watchdogManager;
 
   public void init()
   {
-    _watchdogManager = ResinWatchdogManager.getWatchdog();
+    _watchdogManager = WatchdogManager.getWatchdog();
   }
     
   public void start(String password, String []argv)

@@ -726,6 +726,42 @@ r_user-name =
   attribute user-name { string }
   | element user-name { string }
 
+r_watchdog = element watchdog {
+  r_watchdog-port
+
+  & r_watchdog-arg*
+
+  & element server {
+      r_watchdog-server-Content
+    }*
+}
+
+r_watchdog-server-Content =
+  (attribute id { string }
+
+   & r_group-name?
+
+   & r_java-exe?
+
+   & r_java-home?
+
+   & r_jvm-arg*
+
+   & (attribute resin-conf { string }
+      | element resin-conf { string })?
+
+   & (attribute resin-root { string }
+      | element resin-root { string })?
+
+   & element open-port {
+        r_address?
+
+        & r_port
+     }
+
+   & r_user-name?
+  )
+
 ## backwards compat
 r_xa-log = element xa-log {
   r_enable?

@@ -60,8 +60,10 @@ public class WatchdogProcess
   private static final Logger log
     = Logger.getLogger(WatchdogProcess.class.getName());
 
+  private static Boot _jniBoot;
+
   private final String _id;
-  private final ResinWatchdog _watchdog;
+  private final Watchdog _watchdog;
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private ServerSocket _ss;
@@ -69,7 +71,7 @@ public class WatchdogProcess
   private String[] _argv;
   private Path _resinRoot;
 
-  WatchdogProcess(String id, ResinWatchdog watchdog,
+  WatchdogProcess(String id, Watchdog watchdog,
 		  String[] argv, Path resinRoot)
   {
     _id = id;
@@ -220,13 +222,7 @@ public class WatchdogProcess
     if (! _watchdog.isSingle()) {
       String name;
       String id = _watchdog.getId();
-
-      if ("".equals(id))
-	name = "jvm-default.log";
-      else
-	name = "jvm-" + id + ".log";
-
-      Path jvmPath = _watchdog.getLogDirectory().lookup(name);
+      Path jvmPath = _watchdog.getLogPath();
 
       try {
 	Path dir = jvmPath.getParent();
@@ -392,7 +388,7 @@ public class WatchdogProcess
     Path resinHome = _watchdog.getResinHome();
     Path resinRoot = _resinRoot;
 	
-    String classPath = ResinWatchdogManager.calculateClassPath(resinHome);
+    String classPath = WatchdogArgs.calculateClassPath(resinHome);
 
     HashMap<String,String> env = new HashMap<String,String>();
 
@@ -477,7 +473,7 @@ public class WatchdogProcess
         out.println("" + envEntry.getKey() + ": " + envEntry.getValue());
     }
 
-    Boot boot = _watchdog.getJniBoot();
+    Boot boot = getJniBoot();
     if (boot != null) {
       boot.clearSaveOnExec();
       
@@ -562,5 +558,27 @@ public class WatchdogProcess
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _watchdog + "," + _id + "]";
+  }
+
+  Boot getJniBoot()
+  {
+    if (_jniBoot != null)
+      return _jniBoot.isValid() ? _jniBoot : null;
+    
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class cl = Class.forName("com.caucho.boot.JniBoot", false, loader);
+
+      _jniBoot = (Boot) cl.newInstance();
+    } catch (ClassNotFoundException e) {
+      log.fine(e.toString());
+    } catch (IllegalStateException e) {
+      log.fine(e.toString());
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return _jniBoot != null && _jniBoot.isValid() ? _jniBoot : null;
   }
 }

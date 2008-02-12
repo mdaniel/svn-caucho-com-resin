@@ -29,13 +29,9 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.ResinWatchdogMXBean;
+import com.caucho.config.*;
+import com.caucho.config.program.*;
 import com.caucho.server.admin.HessianHmuxProxy;
-import com.caucho.server.port.Port;
 import com.caucho.util.*;
 import com.caucho.Version;
 import com.caucho.vfs.Path;
@@ -48,31 +44,30 @@ import java.io.OutputStream;
 import java.lang.reflect.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Thread responsible for watching a backend server.
+ * Client to a watchdog-manager, i.e. ResinBoot code to ask the
+ * watchdog-manager to do something.
  */
-public class ResinWatchdog extends AbstractManagedObject
-  implements ResinWatchdogMXBean
+public class WatchdogClient
 {
   private static final L10N L
-    = new L10N(ResinWatchdog.class);
+    = new L10N(WatchdogClient.class);
   private static final Logger log
-    = Logger.getLogger(ResinWatchdog.class.getName());
-
-  private ClusterConfig _cluster;
+    = Logger.getLogger(WatchdogClient.class.getName());
   
+  private final BootManager _bootManager;
   private String _id = "";
 
+  private final Watchdog _watchdog;
+  
   private String []_argv;
 
-  private String _javaExe;
-  private ArrayList<String> _jvmArgs = new ArrayList<String>();
+  private Path _javaExe;
   private ArrayList<String> _watchdogJvmArgs = new ArrayList<String>();
 
   private boolean _is64bit;
@@ -84,34 +79,21 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private Path _pwd;
 
-  private Boot _jniBoot;
-  private String _userName;
-  private String _groupName;
-
   private InetAddress _address;
   private int _watchdogPort = 6600;
 
-  private ArrayList<Port> _ports = new ArrayList<Port>();
-  
-  private final Lifecycle _lifecycle = new Lifecycle();
+  private Boot _jniBoot;
 
   private long _shutdownWaitTime = 60000L;
 
   private boolean _isVerbose;
 
-  private boolean _isSingle;
-  private WatchdogTask _singleTask;
-
-  // statistics
-  private Date _initialStartTime;
-  private Date _lastStartTime;
-  private int _startCount;
-
-  ResinWatchdog(ClusterConfig cluster)
+  WatchdogClient(BootManager bootManager)
   {
+    _bootManager = bootManager;
+    _watchdog = new Watchdog(bootManager.getArgs());
+    
     _pwd = Vfs.getPwd();
-
-    _cluster = cluster;
 
     try {
       _address = InetAddress.getByName("127.0.0.1");
@@ -132,11 +114,6 @@ public class ResinWatchdog extends AbstractManagedObject
     return _id;
   }
 
-  public ResinWatchdogManager getManager()
-  {
-    return _cluster.getResin().getManager();
-  }
-
   public void setVerbose(boolean isVerbose)
   {
     _isVerbose = isVerbose;
@@ -154,14 +131,9 @@ public class ResinWatchdog extends AbstractManagedObject
     return _address;
   }
 
-  public void setWatchdogPassword(String password)
-  {
-    log.warning("watchdog-password is obsolete, set a <user> in the <management> section instead");
-  }
-
   public String getAdminCookie()
   {
-    return _cluster.getResin().getAdminCookie();
+    return _bootManager.getAdminCookie();
   }
 
   public void setWatchdogPort(int port)
@@ -174,26 +146,54 @@ public class ResinWatchdog extends AbstractManagedObject
     return _watchdogPort;
   }
   
-  public void setJavaExe(String javaExe)
-  {
-    _javaExe = javaExe;
-  }
-  
-  public void addJvmArg(String arg)
-  {
-    _jvmArgs.add(arg);
-
-    if (arg.equals("-d64"))
-      _is64bit = true;
-    else if (arg.startsWith("-Xss"))
-      _hasXss = true;
-    else if (arg.startsWith("-Xmx"))
-      _hasXmx = true;
-  }
-  
   public void addWatchdogArg(String arg)
   {
     addWatchdogJvmArg(arg);
+  }
+
+  String[] getArgv()
+  {
+    return _argv;
+  }
+
+  Path getPwd()
+  {
+    return _pwd;
+  }
+
+  Path getResinHome()
+  {
+    return _bootManager.getResinHome();
+  }
+
+  Path getRootDirectory()
+  {
+    return _bootManager.getRootDirectory();
+  }
+
+  boolean hasXmx()
+  {
+    return _hasXmx;
+  }
+
+  boolean hasXss()
+  {
+    return _hasXss;
+  }
+
+  boolean is64bit()
+  {
+    return _is64bit;
+  }
+
+  boolean isVerbose()
+  {
+    return _isVerbose;
+  }
+  
+  public void setJavaExe(Path javaExe)
+  {
+    _javaExe = javaExe;
   }
   
   public void addWatchdogJvmArg(String arg)
@@ -205,68 +205,27 @@ public class ResinWatchdog extends AbstractManagedObject
     else if (arg.startsWith("-Xmx"))
       _hasWatchdogXmx = true;
   }
-
-  public ArrayList<String> getJvmArgs()
-  {
-    return _jvmArgs;
-  }
-
-  /**
-   * Adds a http.
-   */
-  public void addHttp(Port port)
-    throws ConfigException
-  {
-    _ports.add(port);
-  }
-
-  /**
-   * Adds a custom-protocol port.
-   */
-  public void addProtocol(Port port)
-    throws ConfigException
-  {
-    _ports.add(port);
-  }
-
-  public void setUserName(String user)
-  {
-    _userName = user;
-  }
-
-  public String getUserName()
-  {
-    return _userName;
-  }
-
-  public void setGroupName(String group)
-  {
-    _groupName = group;
-  }
-
+  
   public String getGroupName()
   {
-    return _groupName;
+    return _watchdog.getGroupName();
   }
   
-  public boolean isSingle()
+  public String getUserName()
   {
-    return _isSingle;
+    return _watchdog.getUserName();
   }
   
   public Path getLogDirectory()
   {
-    return getManager().getLogDirectory();
+    return _bootManager.getLogDirectory();
   }
   
   public long getShutdownWaitTime()
   {
     return _shutdownWaitTime;
   }
-  
-  /**
-   * Ignore items we can't understand.
-   */
+
   public void addBuilderProgram(ConfigProgram program)
   {
   }
@@ -274,11 +233,11 @@ public class ResinWatchdog extends AbstractManagedObject
   public void startWatchdog(String []argv)
     throws ConfigException, IOException
   {
-    if (_userName != null && ! hasBoot()) {
+    if (getUserName() != null && ! hasBoot()) {
 	throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin.so and check for a valid license in $RESIN_HOME/licenses."));
     }
 
-    if (_groupName != null && ! hasBoot()) {
+    if (getGroupName() != null && ! hasBoot()) {
       throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin.so and check for a valid license in $RESIN_HOME/licenses."));
     }
     
@@ -333,6 +292,12 @@ public class ResinWatchdog extends AbstractManagedObject
     startWatchdog(argv);
   }
 
+  public int startSingle(String []argv, Path rootDirectory)
+    throws IOException
+  {
+    return _watchdog.startSingle(argv, rootDirectory);
+  }
+
   public boolean shutdown()
     throws IOException
   {
@@ -354,52 +319,6 @@ public class ResinWatchdog extends AbstractManagedObject
       return false;
     }
   }
-
-  String[] getArgv()
-  {
-    return _argv;
-  }
-
-  Iterable<Port> getPorts()
-  {
-    return _ports;
-  }
-
-  Path getPwd()
-  {
-    return _pwd;
-  }
-
-  Path getResinHome()
-  {
-    return _cluster.getResin().getResinHome();
-  }
-
-  Path getRootDirectory()
-  {
-    return _cluster.getResin().getRootDirectory();
-  }
-
-  boolean hasXmx()
-  {
-    return _hasXmx;
-  }
-
-  boolean hasXss()
-  {
-    return _hasXss;
-  }
-
-  boolean is64bit()
-  {
-    return _is64bit;
-  }
-
-  boolean isVerbose()
-  {
-    return _isVerbose;
-  }
-
   private WatchdogAPI getProxy()
   {
     String url = ("hmux://127.0.0.1:"
@@ -419,8 +338,8 @@ public class ResinWatchdog extends AbstractManagedObject
   {
     log.fine(this + " starting ResinWatchdogManager");
     
-    Path resinHome = _cluster.getResin().getResinHome();
-    Path resinRoot = _cluster.getResin().getRootDirectory();
+    Path resinHome = getResinHome();
+    Path resinRoot = getRootDirectory();
     
     ProcessBuilder builder = new ProcessBuilder();
 
@@ -430,7 +349,7 @@ public class ResinWatchdog extends AbstractManagedObject
 
     env.putAll(System.getenv());
 
-    String classPath = ResinWatchdogManager.calculateClassPath(resinHome);
+    String classPath = WatchdogArgs.calculateClassPath(resinHome);
 
     env.put("CLASSPATH", classPath);
 
@@ -485,7 +404,7 @@ public class ResinWatchdog extends AbstractManagedObject
     if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
       list.add("-d64");
 
-    list.add("com.caucho.boot.ResinWatchdogManager");
+    list.add("com.caucho.boot.WatchdogManager");
 
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].equals("-conf")
@@ -511,40 +430,10 @@ public class ResinWatchdog extends AbstractManagedObject
     stdOs.close();
   }
 
-  public int startSingle(String []argv, Path rootDirectory)
-  {
-    if (_singleTask != null)
-      return -1;
-    
-    _isSingle = true;
-    _singleTask = new WatchdogTask(this, argv, rootDirectory);
-    
-    _singleTask.start();
- 
-    return 1;
-  }
-
-  /**
-   * Starts the watchdog instance.
-   */
-  public WatchdogTask start(String []argv, Path resinRoot)
-  {
-    return new WatchdogTask(this, argv, resinRoot);
-  }
-
-  public void stop()
-  {
-    WatchdogTask singleTask = _singleTask;
-    _singleTask = null;
-    
-    if (singleTask != null)
-      singleTask.stop();
-  }
-
   String getJavaExe()
   {
     if (_javaExe != null)
-      return _javaExe;
+      return _javaExe.getNativePath();
 
     Path javaHome = Vfs.lookup(System.getProperty("java.home"));
 
@@ -568,41 +457,6 @@ public class ResinWatchdog extends AbstractManagedObject
       return javaHome.lookup("bin/java").getNativePath();
 
     return "java";
-  }
-
-  //
-  // management
-  //
-
-  public String getName()
-  {
-    return getId();
-  }
-
-  @Override
-  public String getType()
-  {
-    return "Watchdog";
-  }
-
-  public String getState()
-  {
-    return _lifecycle.getStateName();
-  }
-
-  public Date getInitialStartTime()
-  {
-    return _initialStartTime;
-  }
-
-  public Date getStartTime()
-  {
-    return _lastStartTime;
-  }
-
-  public int getStartCount()
-  {
-    return _startCount;
   }
   
   @Override
@@ -644,37 +498,5 @@ public class ResinWatchdog extends AbstractManagedObject
     }
 
     return false;
-  }
-
-  //
-  // main
-  //
-  
-  /**
-   * The main start of the web server.
-   *
-   * <pre>
-   * -conf resin.conf   : alternate configuration file
-   * -port port         : set the server's port
-   * <pre>
-   */
-  public static void main(String []argv)
-  {
-    try {
-      ResinBoot boot = new ResinBoot(argv);
-
-      while (boot.start()) {
-	try {
-	  synchronized (boot) {
-	    boot.wait(5000);
-	  }
-	} catch (Throwable e) {
-	}
-      }
-    } catch (ConfigException e) {
-      System.out.println(e.getMessage());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 }

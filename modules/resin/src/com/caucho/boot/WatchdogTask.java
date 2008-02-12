@@ -47,7 +47,7 @@ public class WatchdogTask implements Runnable
   private static final Logger log
     = Logger.getLogger(WatchdogTask.class.getName());
 
-  private final ResinWatchdog _watchdog;
+  private final Watchdog _watchdog;
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -59,7 +59,7 @@ public class WatchdogTask implements Runnable
 
   private WatchdogProcess _process;
 
-  WatchdogTask(ResinWatchdog watchdog, String[] argv, Path resinRoot)
+  WatchdogTask(Watchdog watchdog, String[] argv, Path resinRoot)
   {
     _watchdog = watchdog;
     _argv = argv;

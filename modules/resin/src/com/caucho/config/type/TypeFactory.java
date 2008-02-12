@@ -645,8 +645,8 @@ public class TypeFactory implements AddLoaderListener
     
     private AtomicBoolean _isBeansLoaded = new AtomicBoolean();;
 
-    private HashMap<String,ConfigType> _beanMap
-      = new HashMap<String,ConfigType>();
+    private HashMap<String,BeanConfig> _beanMap
+      = new HashMap<String,BeanConfig>();
 
     public void setName(String ns)
     {
@@ -694,7 +694,12 @@ public class TypeFactory implements AddLoaderListener
 
     public ConfigType getBean(String name)
     {
-      return _beanMap.get(name);
+      BeanConfig beanConfig = _beanMap.get(name);
+
+      if (beanConfig != null)
+	return beanConfig.getConfigType();
+      else
+	return null;
     }
 
     public BeanConfig createBean()
@@ -704,7 +709,7 @@ public class TypeFactory implements AddLoaderListener
 
     public void addBean(BeanConfig bean)
     {
-      _beanMap.put(bean.getName(), bean.getConfigType());
+      _beanMap.put(bean.getName(), bean);
     }
   }
 
@@ -713,7 +718,7 @@ public class TypeFactory implements AddLoaderListener
     private boolean _isDefault;
 
     private String _name;
-    private Class _type;
+    private String _className;
 
     private ConfigType _configType;
 
@@ -733,14 +738,30 @@ public class TypeFactory implements AddLoaderListener
       return _name;
     }
 
-    public void setClass(Class type)
+    public void setClass(String className)
     {
-      _type = type;
+      _className = className;
     }
 
     public ConfigType getConfigType()
     {
-      return _configType;
+      try {
+	if (_configType == null) {
+	  QName qName = new QName(null, _name, _ns);
+	
+	  Class cl = Class.forName(_className);
+
+	  ConfigType type = createType(cl);
+
+	  type.introspect();
+
+	  _configType = type;
+	}
+      
+	return _configType;
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
     }
 
     @PostConstruct
@@ -749,16 +770,8 @@ public class TypeFactory implements AddLoaderListener
       if (_name == null)
 	throw new ConfigException(L.l("bean requires a 'name' attribute"));
       
-      if (_type == null)
+      if (_className == null)
 	throw new ConfigException(L.l("bean requires a 'class' attribute"));
-
-      QName qName = new QName(null, _name, _ns);
-
-      ConfigType type = createType(_type);
-
-      type.introspect();
-
-      _configType = type;
     }
   }
 

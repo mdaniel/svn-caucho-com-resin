@@ -102,4 +102,9 @@ public class SetterAttribute extends Attribute {
       throw ConfigException.create(_setter, e);
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _setter + "]";
+  }
 }

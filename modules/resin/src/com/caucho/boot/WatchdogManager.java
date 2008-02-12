@@ -31,6 +31,8 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
@@ -44,55 +46,54 @@ import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
-import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.*;
-import com.caucho.Version;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 import com.caucho.webbeans.manager.*;
 
 import java.io.*;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 
 /**
  * Process responsible for watching a backend watchdog.
  */
-public class ResinWatchdogManager extends ProtocolDispatchServer {
+public class WatchdogManager extends ProtocolDispatchServer {
   private static L10N _L;
   private static Logger _log;
 
-  private static ResinWatchdogManager _watchdog;
+  private static WatchdogManager _watchdog;
 
-  private Args _args;
+  private WatchdogArgs _args;
 
   private Lifecycle _lifecycle = new Lifecycle();
 
   private int _watchdogPort;
-  private ResinConfig _resin;
 
   private String _adminCookie;
+  private ManagementConfig _management;
 
   private Server _dispatchServer;
-
-  private Port _port;
+  
+  private HashMap<String,Watchdog> _watchdogMap
+    = new HashMap<String,Watchdog>();
 
   private HashMap<String,WatchdogTask> _activeServerMap
     = new HashMap<String,WatchdogTask>();
 
-  ResinWatchdogManager(String []argv)
+  WatchdogManager(String []argv)
     throws Exception
   {
     _watchdog = this;
 
-    _args = new Args(argv);
+    _args = new WatchdogArgs(argv);
 
     Vfs.setPwd(_args.getRootDirectory());
 
@@ -115,7 +116,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     ThreadPool.getThreadPool().setThreadIdleMin(1);
     ThreadPool.getThreadPool().setThreadIdleMax(5);
 
-    ResinELContext elContext = new ResinBootELContext();
+    ResinELContext elContext = _args.getELContext();
     
     WebBeansContainer webBeans = WebBeansContainer.create();
     webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
@@ -124,9 +125,9 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     webBeans.addSingletonByName(elContext.getServerVar(), "server");
 
     _watchdogPort = _args.getWatchdogPort();
-    _resin = readConfig(_args);
+    readConfig(_args);
 
-    ResinWatchdog server = _resin.findServer(_args.getServerId());
+    Watchdog server = _watchdogMap.get(_args.getServerId());
 
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
@@ -181,7 +182,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     webApp.start();
   }
 
-  static ResinWatchdogManager getWatchdog()
+  static WatchdogManager getWatchdog()
   {
     return _watchdog;
   }
@@ -194,7 +195,12 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
   public String getAdminCookie()
   {
-    return _adminCookie;
+    if (_adminCookie != null)
+      return _adminCookie;
+    else if (_management != null)
+      return _management.getAdminCookie();
+    else
+      return null;    
   }
 
   Path getLogDirectory()
@@ -213,27 +219,28 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     else
       return false;
   }
+  
+  Watchdog findServer(String id)
+  {
+    return _watchdogMap.get(id);
+  }
 
   void startServer(String []argv)
     throws ConfigException
   {
-    Args args = new Args(argv);
+    WatchdogArgs args = new WatchdogArgs(argv);
 
     String serverId = args.getServerId();
 
     Vfs.setPwd(_args.getRootDirectory());
 
-    ResinConfig resin = null;
-
     try {
-      resin = readConfig(args);
-    } catch (ConfigException e) {
-      throw e;
+      readConfig(args);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
     
-    ResinWatchdog watchdog = resin.findServer(serverId);
+    Watchdog watchdog = _watchdogMap.get(serverId);
 
     if (watchdog == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
@@ -301,149 +308,26 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     startServer(argv);
   }
 
-  private ResinConfig readConfig(Args args)
+  private void readConfig(WatchdogArgs args)
     throws Exception
   {
     Config config = new Config();
-    // XXX: why ignore?
-    // config.setIgnoreEnvironment(true);
+    // ignore since we don't want to start databases
+    config.setIgnoreEnvironment(true);
 
     Vfs.setPwd(args.getRootDirectory());
-    ResinConfig resin = new ResinConfig(this,
-					args.getResinHome(),
-					args.getRootDirectory());
+    ResinConfig resin = new ResinConfig();
 
     config.configure(resin,
 		     args.getResinConf(),
 		     "com/caucho/server/resin/resin.rnc");
-
-    return resin;
   }
 
   public static void main(String []argv)
-    throws Throwable
+    throws Exception
   {
-    try {
-      ResinWatchdogManager manager = new ResinWatchdogManager(argv);
-      manager.startServer(argv);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  //
-  // Utility static methods
-  //
-
-  static Path calculateResinHome()
-  {
-    String resinHome = System.getProperty("resin.home");
-
-    if (resinHome != null) {
-      return Vfs.lookup(resinHome);
-    }
-
-    // find the resin.jar as described by the classpath
-    // this may differ from the value given by getURL() because of
-    // symbolic links
-    String classPath = System.getProperty("java.class.path");
-
-    if (classPath.indexOf("resin.jar") >= 0) {
-      int q = classPath.indexOf("resin.jar") + "resin.jar".length();
-      int p = classPath.lastIndexOf(File.pathSeparatorChar, q - 1);
-
-      String resinJar;
-
-      if (p >= 0)
-	resinJar = classPath.substring(p + 1, q);
-      else
-	resinJar = classPath.substring(0, q);
-
-      return Vfs.lookup(resinJar).lookup("../..");
-    }
-
-    ClassLoader loader = ClassLoader.getSystemClassLoader();
-
-    URL url = loader.getResource("com/caucho/boot/ResinBoot.class");
-
-    String path = url.toString();
-
-    if (! path.startsWith("jar:"))
-      throw new RuntimeException(L().l("Resin/{0}: can't find jar for ResinBoot in {1}",
-				       Version.VERSION, path));
-
-    int p = path.indexOf(':');
-    int q = path.indexOf('!');
-
-    path = path.substring(p + 1, q);
-
-    Path pwd = Vfs.lookup(path).getParent().getParent();
-
-    return pwd;
-  }
-
-  static Path calculateResinRoot(Path resinHome)
-  {
-    String serverRoot = System.getProperty("server.root");
-
-    if (serverRoot != null)
-      return Vfs.lookup(serverRoot);
-
-    return resinHome;
-  }
-
-  static String calculateClassPath(Path resinHome)
-    throws IOException
-  {
-    ArrayList<String> classPath = new ArrayList<String>();
-
-    Path javaHome = Vfs.lookup(System.getProperty("java.home"));
-
-    if (javaHome.lookup("lib/tools.jar").canRead())
-      classPath.add(javaHome.lookup("lib/tools.jar").getNativePath());
-    else if (javaHome.getTail().startsWith("jre")) {
-      String tail = javaHome.getTail();
-      tail = "jdk" + tail.substring(3);
-      Path jdkHome = javaHome.getParent().lookup(tail);
-
-      if (jdkHome.lookup("lib/tools.jar").canRead())
-	classPath.add(jdkHome.lookup("lib/tools.jar").getNativePath());
-    }
-    
-    if (javaHome.lookup("../lib/tools.jar").canRead())
-      classPath.add(javaHome.lookup("../lib/tools.jar").getNativePath());
-
-    Path resinLib = resinHome.lookup("lib");
-
-    if (resinLib.lookup("pro.jar").canRead())
-      classPath.add(resinLib.lookup("pro.jar").getNativePath());
-    classPath.add(resinLib.lookup("resin.jar").getNativePath());
-    classPath.add(resinLib.lookup("jaxrpc-15.jar").getNativePath());
-		  
-    String []list = resinLib.list();
-
-    for (int i = 0; i < list.length; i++) {
-      if (! list[i].endsWith(".jar"))
-	continue;
-      
-      Path item = resinLib.lookup(list[i]);
-
-      String pathName = item.getNativePath();
-
-      if (! classPath.contains(pathName))
-	classPath.add(pathName);
-    }
-
-    String cp = "";
-
-    for (int i = 0; i < classPath.size(); i++) {
-      if (! "".equals(cp))
-	cp += File.pathSeparatorChar;
-
-      cp += classPath.get(i);
-    }
-
-    return cp;
+    WatchdogManager manager = new WatchdogManager(argv);
+    manager.startServer(argv);
   }
 
   private static L10N L()
@@ -462,149 +346,163 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     return _log;
   }
 
-  static class Args {
-    private Path _resinHome;
-    private Path _rootDirectory;
-    private String []_argv;
-
-    private Path _resinConf;
-    private Path _logDirectory;
-
-    private String _serverId = "";
-    private int _watchdogPort;
-
-    private boolean _isVerbose;
+  //
+  // configuration classes
+  //
+  
+  /**
+   * Class for the initial WatchdogManager configuration. 
+   */
+  class ResinConfig {
+    private ArrayList<ContainerProgram> _clusterDefaultList
+      = new ArrayList<ContainerProgram>();
     
-    Args(String []argv)
+    public void setManagement(ManagementConfig management)
     {
-      _resinHome = calculateResinHome();
-      _rootDirectory = calculateResinRoot(_resinHome);
-
-      _argv = argv;
-
-      _resinConf = _resinHome.lookup("conf/resin.conf");
-      
-      parseCommandLine(argv);
+      if (_management == null)
+	_management = management;
+    }
+  
+    public void addClusterDefault(ContainerProgram program)
+    {
+      _clusterDefaultList.add(program);
     }
 
-    Path getResinHome()
+    public ClusterConfig createCluster()
     {
-      return _resinHome;
+      ClusterConfig cluster = new ClusterConfig();
+
+      for (int i = 0; i < _clusterDefaultList.size(); i++)
+	_clusterDefaultList.get(i).configure(cluster);
+    
+      return cluster;
     }
 
-    Path getRootDirectory()
+    public ServerCompatConfig createServer()
     {
-      return _rootDirectory;
+      return new ServerCompatConfig();
     }
-
-    Path getLogDirectory()
+  
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(ConfigProgram program)
     {
-      if (_logDirectory != null)
-	return _logDirectory;
-      else
-	return _rootDirectory.lookup("log");
-    }
-
-    Path getResinConf()
-    {
-      return _resinConf;
-    }
-
-    String getServerId()
-    {
-      return _serverId;
-    }
-
-    String []getArgv()
-    {
-      return _argv;
-    }
-
-    boolean isVerbose()
-    {
-      return _isVerbose;
-    }
-
-    int getWatchdogPort()
-    {
-      return _watchdogPort;
-    }
-
-    private void parseCommandLine(String []argv)
-    {
-      for (int i = 0; i < argv.length; i++) {
-	String arg = argv[i];
-
-	if ("-conf".equals(arg)
-	    || "--conf".equals(arg)) {
-	  _resinConf = _resinHome.lookup(argv[i + 1]);
-	  i++;
-	}
-        else if ("-log-directory".equals(arg)
-                 || "--log-directory".equals(arg)) {
-          _logDirectory = _rootDirectory.lookup(argv[i + 1]);
-          i++;
-        }
-	else if ("-resin-home".equals(arg)
-		 || "--resin-home".equals(arg)) {
-	  _resinHome = Vfs.lookup(argv[i + 1]);
-	  i++;
-	}
-        else if ("-root-directory".equals(arg)
-                 || "--root-directory".equals(arg)) {
-          _rootDirectory = Vfs.lookup(argv[i + 1]);
-          i++;
-        }
-	else if ("-server-root".equals(arg)
-		 || "--server-root".equals(arg)) {
-	  _rootDirectory = Vfs.lookup(argv[i + 1]);
-	  i++;
-	}
-	else if ("-server".equals(arg)
-		 || "--server".equals(arg)) {
-	  _serverId = argv[i + 1];
-	  i++;
-	}
-	else if ("-watchdog-port".equals(arg)
-		 || "--watchdog-port".equals(arg)) {
-	  _watchdogPort = Integer.parseInt(argv[i + 1]);
-	  i++;
-	}
-	else if ("-verbose".equals(arg)
-		 || "--verbose".equals(arg)) {
-	  _isVerbose = true;
-	  Logger.getLogger("").setLevel(Level.FINE);
-	}
-      }
     }
   }
 
-  public class ResinBootELContext
-    extends ResinELContext
-  {
-    public Path getResinHome()
+  public class ClusterConfig {
+    private ArrayList<ContainerProgram> _serverDefaultList
+      = new ArrayList<ContainerProgram>();
+
+    /**
+     * Adds a new server to the cluster.
+     */
+    public void addServerDefault(ContainerProgram program)
     {
-      return _args.getResinHome();
+      _serverDefaultList.add(program);
     }
 
-    public Path getRootDirectory()
+    public void addManagement(ManagementConfig management)
     {
-      return _args.getRootDirectory();
+      if (_management == null)
+        _management = management;
     }
 
-    public Path getResinConf()
+    public Watchdog createServer()
     {
-      return _args.getResinConf();
+      Watchdog server = new Watchdog(_args);
+
+      for (int i = 0; i < _serverDefaultList.size(); i++)
+	_serverDefaultList.get(i).configure(server);
+
+      return server;
     }
 
-    public String getServerId()
+    public void addServer(Watchdog server)
+      throws ConfigException
     {
-      return _args.getServerId();
+      if (findServer(server.getId()) != null)
+	throw new ConfigException(L().l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
+				      server.getId()));
+      
+      addServer(server);
+    }
+  
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(ConfigProgram program)
+    {
+    }
+  }
+
+  public class ServerCompatConfig {
+    public ClusterCompatConfig createCluster()
+    {
+      return new ClusterCompatConfig();
+    }
+    
+    public SrunCompatConfig createHttp()
+    {
+      return new SrunCompatConfig();
+    }
+    
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(ConfigProgram program)
+    {
+    }
+  }
+
+  public class ClusterCompatConfig {
+    public SrunCompatConfig createSrun()
+    {
+      return new SrunCompatConfig();
+    }
+    
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(ConfigProgram program)
+    {
+    }
+  }
+
+  public class SrunCompatConfig {
+    private String _id = "";
+
+    public void setId(String id)
+    {
+      _id = id;
     }
 
-    public boolean isResinProfessional()
+    public void setServerId(String id)
     {
-      return false;
+      _id = id;
+    }
+    
+    /**
+     * Ignore items we can't understand.
+     */
+    public void addBuilderProgram(ConfigProgram program)
+    {
+    }
+
+    @PostConstruct
+      public void init()
+    {
+      Watchdog server = findServer(_id);
+
+      if (server != null)
+	return;
+      
+      server = new Watchdog(_args);
+      
+      server.setId(_id);
+      
+      _watchdogMap.put(_id, server);
     }
   }
 }

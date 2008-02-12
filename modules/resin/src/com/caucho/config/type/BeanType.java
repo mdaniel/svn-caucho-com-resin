@@ -67,6 +67,8 @@ public class BeanType extends ConfigType
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
 
+  private Constructor _stringConstructor;
+  
   private Method _valueOf;
   private Method _setParent;
   private Method _replaceObject;
@@ -247,7 +249,14 @@ public class BeanType extends ConfigType
   {
     if (_valueOf != null) {
       try {
-	return _valueOf.invoke(text);
+	return _valueOf.invoke(null, text);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+    else if (_stringConstructor != null) {
+      try {
+	return _stringConstructor.newInstance(text);
       } catch (Exception e) {
 	throw ConfigException.create(e);
       }
@@ -264,6 +273,23 @@ public class BeanType extends ConfigType
 
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
 				  _beanClass.getName(), text));
+  }
+  
+  /**
+   * Converts the string to the given value.
+   */
+  public Object valueOf(Object value)
+  {
+    if (value == null)
+      return null;
+    else if (value instanceof String)
+      return valueOf((String) value);
+    else if (_beanClass.isAssignableFrom(value.getClass()))
+      return value;
+    else if (value.getClass().getName().startsWith("java.lang."))
+      return valueOf(String.valueOf(value));
+    else
+      return value;
   }
 
   //
@@ -294,6 +320,12 @@ public class BeanType extends ConfigType
 
       if (Modifier.isStatic(valueOf.getModifiers()))
 	_valueOf = valueOf;
+    } catch (NoSuchMethodException e) {
+    }
+    
+    try {
+      _stringConstructor
+	= _beanClass.getConstructor(new Class[] { String.class } );
     } catch (NoSuchMethodException e) {
     }
     

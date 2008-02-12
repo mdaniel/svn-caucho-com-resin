@@ -60,7 +60,7 @@ public class EnvironmentAttribute extends Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    setValue(bean, name, _type.valueOf(value));
   }
   
   /**
