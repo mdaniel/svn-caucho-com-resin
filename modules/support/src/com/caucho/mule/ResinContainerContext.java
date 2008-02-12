@@ -84,11 +84,13 @@ public class ResinContainerContext implements UMOContainerContext
   public Object getComponent(Object key) 
     throws ObjectNotFoundException
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine("ResinContainerContext.getComponent(" + key + ")");
-
     if (key == null)
       throw new ObjectNotFoundException("Component key is null");
+
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(L.l("ResinContainerContext.getComponent({0} with type {1})",
+                   key, key.getClass().getName()));
+    }
 
     if (key instanceof ContainerKeyPair) {
       ContainerKeyPair pair = (ContainerKeyPair) key;
@@ -122,13 +124,13 @@ public class ResinContainerContext implements UMOContainerContext
       return component.get();
     }
     else if (key instanceof String) {
-      Object component = _webBeans.findByName((String) key);
+      ComponentFactory component = _webBeans.findByName((String) key);
 
       if (component == null) {
         throw new ObjectNotFoundException(L.l("Cannot find component with name '{0}'", key));
       }
 
-      return component;
+      return component.get();
     }
     else {
       throw new ObjectNotFoundException(L.l("Component keys of type {0} are not understood", key.getClass().getName()));

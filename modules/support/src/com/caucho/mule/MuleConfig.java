@@ -27,9 +27,8 @@
  * @author Emil Ong
  */
 
-package com.caucho.mule.config;
+package com.caucho.mule;
 
-import com.caucho.mule.ResinContainerContext;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -47,14 +46,14 @@ public class MuleConfig
 
   private ResinContainerContext _containerContext = new ResinContainerContext();
   private ArrayList<String> _configs = new ArrayList<String>();
+  private UMOManager _muleManager = MuleManager.getInstance();
   
   @PostConstruct
   public void init()
     throws ConfigException
   {
     try {
-      UMOManager muleManager = MuleManager.getInstance();
-      muleManager.setContainerContext(_containerContext);
+      _muleManager.setContainerContext(_containerContext);
       MuleXmlConfigurationBuilder builder = new MuleXmlConfigurationBuilder();
       builder.configure(getConfigList());
     }
