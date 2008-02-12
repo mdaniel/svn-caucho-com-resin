@@ -32,8 +32,6 @@ import java.io.*;
 
 import java.util.*;
 
-import javax.el.*;
-
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
@@ -61,6 +59,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
   private UIComponent _component;
   private boolean _created;
+
+  private int _doStartCounter = 0; //aids with parent's EVAL_BODY_AGAIN e.g. foreach
 
   protected UIComponentClassicTagBase()
   {
@@ -156,6 +156,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     _component = findComponent(_facesContext);
 
     pageContext.getRequest().setAttribute("caucho.jsf.parent", this);
+
+    _doStartCounter++;
     
     return getDoStartValue();
   }
@@ -246,6 +248,10 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
     if (id == null)
       id = UIViewRoot.UNIQUE_ID_PREFIX + getJspId();
+
+    if (_doStartCounter > 0) {
+      id = id + "_" + _doStartCounter;
+    }
 
     if (_parent instanceof FacetTag) {
       facetName = ((FacetTag) _parent).getName();
