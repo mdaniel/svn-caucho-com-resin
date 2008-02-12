@@ -229,39 +229,39 @@ public class JdbcResultResource {
       result.putField(env, "table", env.createString(tableName));
       result.putField(env, "max_length", new LongValue(maxLength));
 
-      if (_rs.getString(4).indexOf("YES") == -1)
+      if (! isInResultString(4, "YES"))
         result.putField(env, "not_null", one);
       else
         result.putField(env, "not_null", zero);
 
-      if (_rs.getString(5).indexOf("PRI") != -1)
+      if (isInResultString(5, "PRI"))
         result.putField(env, "primary_key", one);
       else
         result.putField(env, "primary_key", zero);
 
-      if (_rs.getString(5).indexOf("MUL") != -1)
+      if (isInResultString(5, "MUL"))
         result.putField(env, "multiple_key", one);
       else
         result.putField(env, "multiple_key", zero);
 
-      if ((_rs.getString(2).indexOf("int") != -1) || (_rs.getString(2).indexOf("real") != -1))
+      if (isInResultString(2, "int") || isInResultString(2, "real"))
         result.putField(env, "numeric", one);
       else
         result.putField(env, "numeric", zero);
 
-      if (_rs.getString(2).indexOf("blob") != -1)
+      if (isInResultString(2, "blob"))
         result.putField(env, "blob", one);
       else
         result.putField(env, "blob", zero);
 
       result.putField(env, "type", env.createString(type));
 
-      if (_rs.getString(2).indexOf("unsigned") != -1)
+      if (isInResultString(2, "unsigned"))
         result.putField(env, "unsigned", one);
       else
         result.putField(env, "unsigned", zero);
 
-      if (_rs.getString(2).indexOf("zerofill") != -1)
+      if (isInResultString(2, "zerofill"))
         result.putField(env, "zerofill", one);
       else
         result.putField(env, "zerofill", zero);
@@ -324,48 +324,44 @@ public class JdbcResultResource {
       //generate flags
       long flags = 0;
 
-      // per the ResultSet javadocs, rs.getString() may return null
-      // for an SQL NULL
-      // XXX: need to check for nulls?
-      if (_rs.getString(4).indexOf("YES") == -1)
+      if (! isInResultString(4, "YES"))
         flags += MysqliModule.NOT_NULL_FLAG;
 
-      if (_rs.getString(5).indexOf("PRI") != -1) {
+      if (isInResultString(5, "PRI")) {
         flags += MysqliModule.PRI_KEY_FLAG;
         flags += MysqliModule.PART_KEY_FLAG;
       }
 
-      if (_rs.getString(5).indexOf("MUL") != -1) {
+      if (isInResultString(5, "MUL")) {
         flags += MysqliModule.MULTIPLE_KEY_FLAG;
         flags += MysqliModule.PART_KEY_FLAG;
       }
 
-      if ((_rs.getString(2).indexOf("blob") != -1)
+      if (isInResultString(2, "blob")
 	  || (type == Types.LONGVARCHAR)
 	  || (type == Types.LONGVARBINARY))
         flags += MysqliModule.BLOB_FLAG;
 
-      if (_rs.getString(2).indexOf("unsigned") != -1)
+      if (isInResultString(2, "unsigned"))
         flags += MysqliModule.UNSIGNED_FLAG;
 
-      if (_rs.getString(2).indexOf("zerofill") != -1)
+      if (isInResultString(2, "zerofill"))
         flags += MysqliModule.ZEROFILL_FLAG;
 
       // php/1f73 - null check
-      if ((_rs.getString(3) != null &&
-           _rs.getString(3).indexOf("bin") != -1)
+      if (isInResultString(3, "bin")
 	  || (type == Types.LONGVARBINARY)
 	  || (type == Types.DATE)
 	  || (type == Types.TIMESTAMP))
         flags += MysqliModule.BINARY_FLAG;
 
-      if (_rs.getString(2).indexOf("enum") != -1)
+      if (isInResultString(2, "enum"))
         flags += MysqliModule.ENUM_FLAG;
 
-      if (_rs.getString(7).indexOf("auto") != -1)
+      if (isInResultString(7, "auto"))
         flags += MysqliModule.AUTO_INCREMENT_FLAG;
 
-      if (_rs.getString(2).indexOf("set") != -1)
+      if (isInResultString(2, "set"))
         flags += MysqliModule.SET_FLAG;
 
       if ((type == Types.BIGINT)
@@ -392,7 +388,7 @@ public class JdbcResultResource {
         quercusType = MysqliModule.MYSQL_TYPE_SHORT;
         break;
       case Types.INTEGER: {
-        if (_rs.getString(2).indexOf("medium") == -1)
+        if (! isInResultString(2, "medium"))
           quercusType = MysqliModule.MYSQL_TYPE_LONG;
         else
           quercusType = MysqliModule.MYSQL_TYPE_INT24;
@@ -824,58 +820,58 @@ public class JdbcResultResource {
       StringBuilder flags = new StringBuilder();
 
       _rs.next();
-      if (_rs.getString(4).indexOf("YES") == -1)
+      if (! isInResultString(4, "YES"))
         flags.append("not_null");
 
-      if (_rs.getString(5).indexOf("PRI") != -1) {
+      if (isInResultString(5, "PRI")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("primary_key");
       } else {
-        if (_rs.getString(5).indexOf("MUL") != -1) {
+        if (isInResultString(5, "MUL")) {
           if (flags.length() > 0)
             flags.append(' ');
           flags.append("multiple_key");
         }
       }
 
-      if (_rs.getString(2).indexOf("blob") != -1) {
+      if (isInResultString(2, "blob")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("blob");
       }
 
-      if (_rs.getString(2).indexOf("unsigned") != -1) {
+      if (isInResultString(2, "unsigned")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("unsigned");
       }
 
-      if (_rs.getString(2).indexOf("zerofill") != -1) {
+      if (isInResultString(2, "zerofill")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("zerofill");
       }
 
-      if (_rs.getString(3).indexOf("bin") != -1) {
+      if (isInResultString(3, "bin")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("binary");
       }
 
-      if (_rs.getString(2).indexOf("enum") != -1) {
+      if (isInResultString(2, "enum")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("enum");
       }
 
-      if (_rs.getString(7).indexOf("auto_increment") != -1) {
+      if (isInResultString(7, "auto_increment")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("auto_increment");
       }
 
-      if (_rs.getString(2).indexOf("date") != -1) {
+      if (isInResultString(2, "date")) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("timestamp");
@@ -886,6 +882,28 @@ public class JdbcResultResource {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
     }
+  }
+
+  /**
+   * Return true if the String result at the
+   * given index of the ResultSet contains
+   * the substring.
+   */
+
+  protected boolean isInResultString(int columnIndex, String substring)
+    throws SQLException
+  {
+    String resultString = _rs.getString(columnIndex);
+
+    if (resultString == null)
+      return false;
+
+    int index = resultString.indexOf(substring);
+
+    if (index == -1)
+      return false;
+    else
+      return true;
   }
 
   /**
