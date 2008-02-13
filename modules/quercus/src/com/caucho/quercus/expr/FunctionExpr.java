@@ -180,8 +180,8 @@ public class FunctionExpr extends Expr {
 	return fun.callCopy(env, args);
       else
 	return fun.call(env, args);
-    } catch (Exception e) {
-      throw QuercusException.create(e, env.getStackTrace());
+    //} catch (Exception e) {
+    //  throw QuercusException.create(e, env.getStackTrace());
     } finally {
       env.popCall();
       // XXX: qa/1d14 env.setThis(oldThis);
