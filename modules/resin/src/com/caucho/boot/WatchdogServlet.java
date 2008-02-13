@@ -39,16 +39,29 @@ import java.util.logging.Logger;
  * Process responsible for watching a backend server.
  */
 public class WatchdogServlet extends HessianServlet
-  implements WatchdogAPI {
+  implements WatchdogAPI
+{
   private final static L10N L = new L10N(WatchdogServlet.class);
   private static final Logger log
     = Logger.getLogger(WatchdogServlet.class.getName());
 
   private WatchdogManager _watchdogManager;
 
+  @Override
   public void init()
   {
     _watchdogManager = WatchdogManager.getWatchdog();
+  }
+    
+  public String status(String password)
+    throws ConfigException, IllegalStateException
+  {
+    if (! _watchdogManager.authenticate(password)) {
+      log.warning("watchdog status authentication failure");
+      throw new ConfigException(L.l("watchdog start forbidden - authentication failed : " + password));
+    }
+    
+    return _watchdogManager.status();
   }
     
   public void start(String password, String []argv)
@@ -82,6 +95,18 @@ public class WatchdogServlet extends HessianServlet
     log.info("Watchdog stop: " + serverId);
     
     _watchdogManager.stopServer(serverId);
+  }
+
+  public void kill(String password, String serverId)
+  {
+    if (! _watchdogManager.authenticate(password)) {
+      log.warning("watchdog kill authentication failure");
+      throw new ConfigException(L.l("watchdog kill forbidden - authentication failed"));
+    }
+    
+    log.info("Watchdog kill: " + serverId);
+    
+    _watchdogManager.killServer(serverId);
   }
   
   public boolean shutdown(String password)

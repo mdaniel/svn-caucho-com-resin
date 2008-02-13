@@ -38,18 +38,56 @@ import com.caucho.config.ConfigException;
  */
 public interface WatchdogAPI {
   /**
+   * Returns the status of the watchdog manager
+   * 
+   * @param password the watchdog password
+   * 
+   * @return a user-readable status report
+   */
+  public String status(String password);
+  
+  /**
    * Starts the server with the given arguments.  If the
    * start fails, a ConfigException is thrown.
    */
   public void start(String password, String []argv)
     throws ConfigException, IllegalStateException, IOException;
-  
+
+  /**
+   * Restarts the server with the given arguments.
+   * 
+   * @param password watchdog password 
+   * @param serverId the server to be restarted
+   * @param argv the new arguments for the server
+   */
   public void restart(String password, String serverId, String []argv)
     throws ConfigException, IllegalStateException, IOException;
-  
+
+  /**
+   * Stops the named server
+   * 
+   * @param password the watchdog password
+   * @param serverId the server to stop
+   * @throws com.caucho.config.ConfigException
+   */
   public void stop(String password, String serverId)
     throws ConfigException, IllegalStateException, IOException;
   
+  /**
+   * Kills the named server, terminating the process.
+   * 
+   * @param password the watchdog password
+   * @param serverId the server to kill
+   */
+  public void kill(String password, String serverId)
+    throws ConfigException, IllegalStateException, IOException;
+ 
+  /**
+   * Shuts the entire watchdog manager down.
+   * 
+   * @param password
+   * @return true on success
+   */
   public boolean shutdown(String password)
     throws IOException;
 }

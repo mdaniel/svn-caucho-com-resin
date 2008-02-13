@@ -44,6 +44,8 @@ import java.util.HashMap;
 public class BootManager implements EnvironmentBean
 {
   private static final L10N L = new L10N(BootManager.class);
+
+  private boolean _isWatchdogManagerConfig;
   
   private ArrayList<ContainerProgram> _clusterDefaultList
     = new ArrayList<ContainerProgram>();
@@ -140,6 +142,16 @@ public class BootManager implements EnvironmentBean
   }
 
   /**
+   * Creates the watchdog-manager config
+   */
+  public WatchdogManagerConfig createWatchdogManager()
+  {
+    _isWatchdogManagerConfig = true;
+    
+    return new WatchdogManagerConfig();
+  }
+
+  /**
    * Adds a new default to the cluster.
    */
   public void addClusterDefault(ContainerProgram program)
@@ -197,6 +209,45 @@ public class BootManager implements EnvironmentBean
   // configuration classes
   //
 
+  public class WatchdogManagerConfig {
+    private ArrayList<ContainerProgram> _watchdogDefaultList
+      = new ArrayList<ContainerProgram>();
+
+    public void setWatchdogPort(int watchdogPort)
+    {
+      if (_args.getWatchdogPort() == 0)
+	_args.setWatchdogPort(watchdogPort);
+    }
+    
+    /**
+     * Adds a new server to the cluster.
+     */
+    public void addWatchdogDefault(ContainerProgram program)
+    {
+      _watchdogDefaultList.add(program);
+    }
+
+    public WatchdogConfig createWatchdog()
+    {
+      WatchdogConfig config = new WatchdogConfig(getArgs());
+
+      for (int i = 0; i < _watchdogDefaultList.size(); i++)
+	_watchdogDefaultList.get(i).configure(config);
+
+      return config;
+    }
+
+    public void addWatchdog(WatchdogConfig config)
+      throws ConfigException
+    {
+      if (findClient(config.getId()) != null)
+	throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
+				      config.getId()));
+      
+      addClient(new WatchdogClient(BootManager.this, config));
+    }
+  }
+
   public class ClusterConfig {
     private ArrayList<ContainerProgram> _serverDefaultList
       = new ArrayList<ContainerProgram>();
@@ -214,24 +265,27 @@ public class BootManager implements EnvironmentBean
       BootManager.this.setManagement(management);
     }
 
-    public WatchdogClient createServer()
+    public WatchdogConfig createServer()
     {
-      WatchdogClient client = new WatchdogClient(BootManager.this);
+      WatchdogConfig config = new WatchdogConfig(getArgs());
 
       for (int i = 0; i < _serverDefaultList.size(); i++)
-	_serverDefaultList.get(i).configure(client);
+	_serverDefaultList.get(i).configure(config);
 
-      return client;
+      return config;
     }
 
-    public void addServer(WatchdogClient client)
+    public void addServer(WatchdogConfig config)
       throws ConfigException
     {
-      if (findClient(client.getId()) != null)
-	throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
-				      client.getId()));
+      if (_isWatchdogManagerConfig)
+	return;
       
-      addClient(client);
+      if (findClient(config.getId()) != null)
+	throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
+				      config.getId()));
+      
+      addClient(new WatchdogClient(BootManager.this, config));
     }
   
     /**
@@ -298,14 +352,17 @@ public class BootManager implements EnvironmentBean
     @PostConstruct
       public void init()
     {
+      if (_isWatchdogManagerConfig)
+	return;
+      
       WatchdogClient client = findClient(_id);
 
       if (client != null)
 	return;
+
+      WatchdogConfig config = new WatchdogConfig(getArgs());
       
-      client = new WatchdogClient(BootManager.this);
-      
-      client.setId(_id);
+      client = new WatchdogClient(BootManager.this, config);
       
       _watchdogMap.put(_id, client);
     }

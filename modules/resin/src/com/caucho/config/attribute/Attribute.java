@@ -73,6 +73,14 @@ public abstract class Attribute {
   {
     return getConfigType().isProgram();
   }
+
+  /**
+   * True if it allows text.
+   */
+  public boolean isAllowText()
+  {
+    return true;
+  }
   
   /**
    * Sets the value of the attribute as text

@@ -44,6 +44,8 @@ public class CreateAttribute extends Attribute {
   public CreateAttribute(Method create, ConfigType type)
   {
     _create = create;
+    if (_create != null)
+      _create.setAccessible(true);
     _type = type;
 
     _setter = null;
@@ -52,9 +54,13 @@ public class CreateAttribute extends Attribute {
   public CreateAttribute(Method create, ConfigType type, Method setter)
   {
     _create = create;
+    if (_create != null)
+      _create.setAccessible(true);
     _type = type;
 
     _setter = setter;
+    if (_setter != null)
+      _setter.setAccessible(true);
   }
   
   /**
@@ -63,6 +69,15 @@ public class CreateAttribute extends Attribute {
   public ConfigType getConfigType()
   {
     return _type;
+  }
+
+  /**
+   * True if it allows text.
+   */
+  @Override
+  public boolean isAllowText()
+  {
+    return false;
   }
   
   /**

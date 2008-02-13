@@ -48,347 +48,379 @@ import java.util.logging.Logger;
 /**
  * Thread responsible for watching a backend server.
  */
-public class Watchdog extends AbstractManagedObject
-  implements WatchdogMXBean
+public class Watchdog
 {
-  private static final L10N L
-    = new L10N(Watchdog.class);
+  private static final L10N L = new L10N(Watchdog.class);
   private static final Logger log
     = Logger.getLogger(Watchdog.class.getName());
   
-  private String _id = "";
+  private final String _id;
 
-  private WatchdogArgs _args;
-
-  private Path _javaHome;
-  private Path _javaExe;
-  private ArrayList<String> _jvmArgs = new ArrayList<String>();
+  private WatchdogConfig _config;
   
-  private Path _resinHome;
-  private Path _resinRoot;
-  private Path _logPath;
-
-  private boolean _is64bit;
-  private boolean _hasXss;
-  private boolean _hasXmx;
-
-  private Path _pwd;
-  private int _watchdogPort;
-
-  private String _userName;
-  private String _groupName;
-
-  private ArrayList<Port> _ports = new ArrayList<Port>();
-  
-  private final Lifecycle _lifecycle = new Lifecycle();
-
-  private long _shutdownWaitTime = 60000L;
-
-  private boolean _isVerbose;
-
   private boolean _isSingle;
-  private WatchdogTask _singleTask;
+  private WatchdogTask _task;
 
   // statistics
   private Date _initialStartTime;
   private Date _lastStartTime;
   private int _startCount;
+  private WatchdogAdmin _admin;
 
-  Watchdog(WatchdogArgs args)
-  {
-    _args = args;
-    
-    _pwd = Vfs.getPwd();
-
-    _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
-  }
-
-  public void setId(String id)
+  Watchdog(String id, WatchdogArgs args)
   {
     _id = id;
+    _config = new WatchdogConfig(args);
+
+    _admin = new WatchdogAdmin();
   }
 
+  Watchdog(WatchdogConfig config)
+  {
+    _id = config.getId();
+    _config = config;
+    
+    _admin = new WatchdogAdmin();
+  }
+
+  /**
+   * Returns the server id of the watchdog.
+   */
   public String getId()
   {
     return _id;
   }
 
-  public void setVerbose(boolean isVerbose)
+  /**
+   * Returns the watchdog arguments.
+   */
+  WatchdogArgs getArgs()
   {
-    _isVerbose = isVerbose;
+    return _config.getArgs();
   }
   
-  public void setJavaExe(Path javaExe)
+  /**
+   * Returns the java startup args
+   */
+  String []getArgv()
   {
-    _javaExe = javaExe;
+    return _config.getArgv();
   }
-  
-  public void setJavaHome(Path javaHome)
+
+  /**
+   * Returns the config state of the watchdog
+   */
+  public WatchdogConfig getConfig()
   {
-    _javaHome = javaHome;
+    return _config;
   }
-  
+
+  /**
+   * Sets the config state of the watchdog
+   */
+  public void setConfig(WatchdogConfig config)
+  {
+    _config = config;
+  }
+
+  /**
+   * Returns the JAVA_HOME for the Resin instance
+   */
   public Path getJavaHome()
   {
-    if (_javaHome != null)
-      return _javaHome;
-    else
-      return _args.getJavaHome();
+    return _config.getJavaHome();
   }
   
-  public void addJvmArg(String arg)
+  /**
+   * Returns the location of the java executable
+   */
+  public String getJavaExe()
   {
-    _jvmArgs.add(arg);
-
-    if (arg.equals("-d64"))
-      _is64bit = true;
-    else if (arg.startsWith("-Xss"))
-      _hasXss = true;
-    else if (arg.startsWith("-Xmx"))
-      _hasXmx = true;
+    return _config.getJavaExe();
   }
-  
+
+  /**
+   * Returns the JVM arguments for the instance
+   */
   public ArrayList<String> getJvmArgs()
   {
-    return _jvmArgs;
+    return _config.getJvmArgs();
   }
 
   /**
-   * Adds a http.
+   * Returns the setuid user name.
    */
-  public void addHttp(Port port)
-    throws ConfigException
-  {
-    _ports.add(port);
-  }
-
-  /**
-   * Adds a custom-protocol port.
-   */
-  public void addProtocol(Port port)
-    throws ConfigException
-  {
-    _ports.add(port);
-  }
-  
-  /**
-   * Adds a watchdog managed port
-   */
-  public void addOpenPort(Port port)
-  {
-    _ports.add(port);
-  }
-
-  public void setUserName(String user)
-  {
-    _userName = user;
-  }
-
   public String getUserName()
   {
-    return _userName;
+    return _config.getUserName();
   }
 
-  public void setGroupName(String group)
-  {
-    _groupName = group;
-  }
-
+  /**
+   * Returns the setgid group name.
+   */
   public String getGroupName()
   {
-    return _groupName;
+    return _config.getGroupName();
   }
-  
+
+  /**
+   * Returns true for a standalone start.
+   */
   public boolean isSingle()
   {
     return _isSingle;
   }
-  
+
+  /**
+   * Returns the jvm-foo-log.log file path
+   */
   public Path getLogPath()
   {
-    if (_logPath != null)
-      return _logPath;
-    
-    String name;
-    
-    if ("".equals(_id))
-      name = "jvm-default.log";
-    else
-      name = "jvm-" + _id + ".log";
-
-    return _args.getLogDirectory().lookup(name);
+    return _config.getLogPath();
   }
-  
+
+  /**
+   * Returns the maximum time to wait for a shutdown
+   */
   public long getShutdownWaitTime()
   {
-    return _shutdownWaitTime;
-  }
-  
-  public int getWatchdogPort()
-  {
-    return _watchdogPort;
-  }
-  
-  public void setWatchdogPort(int port)
-  {
-    _watchdogPort = port;
-  }
-  
-  /**
-   * Ignore items we can't understand.
-   */
-  public void addBuilderProgram(ConfigProgram program)
-  {
+    return _config.getShutdownWaitTime();
   }
 
-  WatchdogArgs getArgs()
+  /**
+   * Returns the watchdog-port for this watchdog instance
+   */
+  public int getWatchdogPort()
   {
-    return _args;
+    return _config.getWatchdogPort();
   }
 
   Iterable<Port> getPorts()
   {
-    return _ports;
+    return _config.getPorts();
   }
 
   Path getPwd()
   {
-    return _pwd;
+    return _config.getPwd();
   }
 
   Path getResinHome()
   {
-    if (_resinHome != null)
-      return _resinHome;
-    else
-      return _args.getResinHome();
+    return _config.getResinHome();
   }
 
   Path getResinRoot()
   {
-    if (_resinRoot != null)
-      return _resinRoot;
-    else
-      return _args.getRootDirectory();
+    return _config.getResinRoot();
+  }
+  
+  Path getResinConf()
+  {
+    return _config.getResinConf();
   }
 
   boolean hasXmx()
   {
-    return _hasXmx;
+    return _config.hasXmx();
   }
 
   boolean hasXss()
   {
-    return _hasXss;
+    return _config.hasXss();
   }
 
   boolean is64bit()
   {
-    return _is64bit;
+    return _config.is64bit();
+  }
+
+  public String getState()
+  {
+    WatchdogTask task = _task;
+    
+    if (task == null)
+      return "inactive";
+    else
+      return task.getState();
   }
 
   boolean isVerbose()
   {
-    return _isVerbose;
+    return _config.isVerbose();
   }
 
-  public int startSingle(String []argv, Path rootDirectory)
+  public int startSingle()
   {
-    if (_singleTask != null)
+    if (_task != null)
       return -1;
     
     _isSingle = true;
-    _singleTask = new WatchdogTask(this, argv, rootDirectory);
+    _task = new WatchdogTask(this);
     
-    _singleTask.start();
- 
+    _task.start();
+
     return 1;
   }
 
   /**
    * Starts the watchdog instance.
    */
-  public WatchdogTask start(String []argv, Path resinRoot)
+  public void start()
   {
-    return new WatchdogTask(this, argv, resinRoot);
+    WatchdogTask task = null;
+    
+    synchronized (this) {
+      if (_task != null)
+	throw new IllegalStateException(L.l("Can't start new task because of old task '{0}'", _task));
+
+      task = new WatchdogTask(this);
+      _task = task;
+    }
+
+    task.start();
   }
 
+  /**
+   * Stops the watchdog instance
+   */
   public void stop()
   {
-    WatchdogTask singleTask = _singleTask;
-    _singleTask = null;
+    WatchdogTask task = _task;
     
-    if (singleTask != null)
-      singleTask.stop();
+    if (task != null)
+      task.stop();
   }
 
-  String getJavaExe()
+  /**
+   * Kills the watchdog instance
+   */
+  public void kill()
   {
-    if (_javaExe != null)
-      return _javaExe.getNativePath();
-
-    Path javaHome = Vfs.lookup(System.getProperty("java.home"));
-
-    if (javaHome.getTail().equals("jre"))
-      javaHome = javaHome.getParent();
-
-    if (javaHome.lookup("bin/javaw.exe").canRead())
-      return javaHome.lookup("bin/javaw").getNativePath();
-    else if (javaHome.lookup("bin/java.exe").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-    else if (javaHome.lookup("bin/java").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-
-    javaHome = Vfs.lookup(System.getProperty("java.home"));
-
-    if (javaHome.lookup("bin/javaw.exe").canRead())
-      return javaHome.lookup("bin/javaw").getNativePath();
-    else if (javaHome.lookup("bin/java.exe").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-    else if (javaHome.lookup("bin/java").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-
-    return "java";
+    WatchdogTask task = _task;
+    _task = null;
+    
+    if (task != null)
+      task.kill();
   }
 
-  //
-  // management
-  //
-
-  public String getName()
+  void notifyTaskStarted()
   {
-    return getId();
+    _startCount++;
+    _lastStartTime = new Date(Alarm.getExactTime());
+    
+    if (_initialStartTime == null)
+      _initialStartTime = _lastStartTime; 
   }
 
-  @Override
-  public String getType()
+  void completeTask(WatchdogTask task)
   {
-    return "Watchdog";
-  }
-
-  public String getState()
-  {
-    return _lifecycle.getStateName();
-  }
-
-  public Date getInitialStartTime()
-  {
-    return _initialStartTime;
-  }
-
-  public Date getStartTime()
-  {
-    return _lastStartTime;
-  }
-
-  public int getStartCount()
-  {
-    return _startCount;
+    synchronized (this) {
+      if (_task == task)
+	_task = null;
+    }
   }
   
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getId() + "]";
+  }
+
+  class WatchdogAdmin extends AbstractManagedObject implements WatchdogMXBean
+  {
+    WatchdogAdmin()
+    {
+      registerSelf();
+    }
+
+    public String getId()
+    {
+      return Watchdog.this.getId();
+    }
+    
+    public String getName()
+    {
+      return getId();
+    }
+
+    @Override
+    public String getType()
+    {
+      return "Watchdog";
+    }
+
+    public String getResinHome()
+    {
+      return Watchdog.this.getResinHome().getNativePath();
+    }
+
+    public String getResinRoot()
+    {
+      return Watchdog.this.getResinRoot().getNativePath();
+    }
+
+    public String getResinConf()
+    {
+      return Watchdog.this.getResinConf().getNativePath();
+    }
+
+    public String getUserName()
+    {
+      String userName = Watchdog.this.getUserName();
+
+      if (userName != null)
+	return userName;
+      else
+	return System.getProperty("user.name");
+    }
+
+    public String getState()
+    {
+      WatchdogTask task = _task;
+    
+      if (task == null)
+	return "inactive";
+      else
+	return task.getState();
+    }
+
+    //
+    // statistics
+    //
+
+    public Date getInitialStartTime()
+    {
+      return _initialStartTime;
+    }
+
+    public Date getStartTime()
+    {
+      return _lastStartTime;
+    }
+
+    public int getStartCount()
+    {
+      return _startCount;
+    }
+
+    //
+    // operations
+    //
+
+    public void start()
+    {
+      Watchdog.this.start();
+    }
+
+    public void stop()
+    {
+      Watchdog.this.stop();
+    }
+
+    public void kill()
+    {
+      Watchdog.this.kill();
+    }
   }
 }

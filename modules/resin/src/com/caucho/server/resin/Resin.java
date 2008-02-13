@@ -34,7 +34,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.lib.*;
-import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.*;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -531,6 +531,10 @@ public class Resin implements EnvironmentBean, SchemaBean
   public SecurityManagerConfig createSecurityManager()
   {
     return new SecurityManagerConfig();
+  }
+
+  public void setWatchdogManager(ConfigProgram program)
+  {
   }
 
   /**

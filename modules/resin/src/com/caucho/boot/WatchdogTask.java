@@ -41,7 +41,7 @@ import java.util.logging.*;
 /**
  * Thread responsible for watching a backend server.
  */
-public class WatchdogTask implements Runnable
+class WatchdogTask implements Runnable
 {
   private static final L10N L = new L10N(WatchdogTask.class);
   private static final Logger log
@@ -51,32 +51,24 @@ public class WatchdogTask implements Runnable
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  private Date _initialStartTime;
-  private Date _lastStartTime;
-  private int _startCount;
-  private String[] _argv;
-  private Path _resinRoot;
-
   private WatchdogProcess _process;
 
-  WatchdogTask(Watchdog watchdog, String[] argv, Path resinRoot)
+  WatchdogTask(Watchdog watchdog)
   {
     _watchdog = watchdog;
-    _argv = argv;
-    _resinRoot = resinRoot;
+  }
+
+  boolean isActive()
+  {
+    return _lifecycle.isActive();
   }
 
   /**
-   * Returns the initial start time.
+   * Returns the state name.
    */
-  public Date getInitialStartTime()
+  String getState()
   {
-    return _initialStartTime;
-  }
-
-  public boolean isActive()
-  {
-    return _lifecycle.isActive();
+    return _lifecycle.getStateName();
   }
 
   public void start()
@@ -103,28 +95,43 @@ public class WatchdogTask implements Runnable
   public void run()
   {
     try {
-      _initialStartTime = new Date();
       int i = 0;
       long retry = Long.MAX_VALUE;
     
       while (_lifecycle.isActive() && i++ < retry) {
 	String id = String.valueOf(i);
+
+	_watchdog.notifyTaskStarted();
 	
-	_process = new WatchdogProcess(id, _watchdog, _argv, _resinRoot);
+	_process = new WatchdogProcess(id, _watchdog);
 	try {
 	  _process.run();
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	} finally {
-	  log.warning(_process + " KILL");
 	  _process.destroy();
 	}
       }
     } finally {
       _lifecycle.toDestroy();
+
+      _watchdog.completeTask(this);
     }
   }
+  
+  /**
+   * kills the task
+   */
+  void kill()
+  {
+    WatchdogProcess process = _process;
+    _process = null;
+    
+    if (process != null)
+      process.destroy();
+  }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _watchdog + "]";

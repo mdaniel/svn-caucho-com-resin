@@ -468,17 +468,20 @@ public class ConfigContext {
 
       if (childType != null)
 	childBean = childType.create(bean);
-      else if ((childBean = getELValue(attrStrategy, childNode)) != null) {
-	// ioc/2410
-	if (childBean != NULL)
-	  attrStrategy.setValue(bean, qName, childBean);
-	else
-	  attrStrategy.setValue(bean, qName, null);
+      else if (attrStrategy.isAllowText()
+	       && (text = getTextValue(childNode)) != null) {
+	if (isEL() && attrStrategy.isEL()
+	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
+	  Object elValue = eval(attrStrategy, text);
 
-	return;
-      }
-      else if ((text = getTextValue(childNode)) != null) {
-	setText(bean, qName, text, attrStrategy);
+	  // ioc/2410
+	  if (elValue != NULL)
+	    attrStrategy.setValue(bean, qName, elValue);
+	  else
+	    attrStrategy.setValue(bean, qName, null);
+	}
+	else
+	  setText(bean, qName, text, attrStrategy);
 
 	return;
       }

@@ -31,9 +31,6 @@ package com.caucho.boot;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.WatchdogMXBean;
 import com.caucho.server.port.Port;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
@@ -42,7 +39,6 @@ import com.caucho.vfs.Vfs;
 import java.lang.reflect.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -54,6 +50,8 @@ public class WatchdogConfig
     = new L10N(WatchdogConfig.class);
   private static final Logger log
     = Logger.getLogger(WatchdogConfig.class.getName());
+
+  private static final int WATCHDOG_PORT_DEFAULT = 6600;
   
   private String _id = "";
 
@@ -62,9 +60,11 @@ public class WatchdogConfig
   private Path _javaHome;
   private Path _javaExe;
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
-  
+  private ArrayList<String> _watchdogJvmArgs
+    = new ArrayList<String>();
   private Path _resinHome;
   private Path _resinRoot;
+  private Path _resinConf;
   private Path _logPath;
 
   private boolean _is64bit;
@@ -82,6 +82,9 @@ public class WatchdogConfig
   private long _shutdownWaitTime = 60000L;
 
   private boolean _isVerbose;
+  private boolean _isWatchdog64bit;
+  private boolean _hasWatchdogXss;
+  private boolean _hasWatchdogXmx;
 
   WatchdogConfig(WatchdogArgs args)
   {
@@ -100,6 +103,11 @@ public class WatchdogConfig
   public String getId()
   {
     return _id;
+  }
+  
+  String []getArgv()
+  {
+    return _args.getArgv();
   }
 
   public void setVerbose(boolean isVerbose)
@@ -140,6 +148,24 @@ public class WatchdogConfig
   public ArrayList<String> getJvmArgs()
   {
     return _jvmArgs;
+  }
+
+  
+  public void addWatchdogJvmArg(String arg)
+  {
+    _watchdogJvmArgs.add(arg);
+
+    if (arg.equals("-d64"))
+      _isWatchdog64bit = true;
+    else if (arg.startsWith("-Xss"))
+      _hasWatchdogXss = true;
+    else if (arg.startsWith("-Xmx"))
+      _hasWatchdogXmx = true;
+  }
+  
+  public ArrayList<String> getWatchdogJvmArgs()
+  {
+    return _watchdogJvmArgs;
   }
 
   /**
@@ -210,7 +236,12 @@ public class WatchdogConfig
   
   public int getWatchdogPort()
   {
-    return _watchdogPort;
+    if (_args.getWatchdogPort() > 0)
+      return _args.getWatchdogPort();
+    else if (_watchdogPort > 0)
+      return _watchdogPort;
+    else
+      return WATCHDOG_PORT_DEFAULT;
   }
   
   public void setWatchdogPort(int port)
@@ -255,6 +286,35 @@ public class WatchdogConfig
     else
       return _args.getRootDirectory();
   }
+  
+  /**
+   * Sets the resin.conf
+   */
+  public void setResinConf(Path resinConf)
+  {
+    _resinConf = resinConf;
+  }
+   
+  /**
+   * Returns the resin.conf
+   */
+  public Path getResinConf()
+  {
+    if (_resinConf != null)
+      return _resinConf;
+    else
+      return _args.getResinConf();
+  }
+
+  boolean hasWatchdogXmx()
+  {
+    return _hasWatchdogXmx;
+  }
+
+  boolean hasWatchdogXss()
+  {
+    return _hasWatchdogXss;
+  }
 
   boolean hasXmx()
   {
@@ -273,7 +333,39 @@ public class WatchdogConfig
 
   boolean isVerbose()
   {
-    return _isVerbose;
+    if (_isVerbose)
+      return _isVerbose;
+    else
+      return _args.isVerbose();
+  }
+
+  String getJavaExe()
+  {
+    if (_javaExe != null)
+      return _javaExe.getNativePath();
+
+    Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+
+    if (javaHome.getTail().equals("jre"))
+      javaHome = javaHome.getParent();
+
+    if (javaHome.lookup("bin/javaw.exe").canRead())
+      return javaHome.lookup("bin/javaw").getNativePath();
+    else if (javaHome.lookup("bin/java.exe").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+    else if (javaHome.lookup("bin/java").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+
+    javaHome = Vfs.lookup(System.getProperty("java.home"));
+
+    if (javaHome.lookup("bin/javaw.exe").canRead())
+      return javaHome.lookup("bin/javaw").getNativePath();
+    else if (javaHome.lookup("bin/java.exe").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+    else if (javaHome.lookup("bin/java").canRead())
+      return javaHome.lookup("bin/java").getNativePath();
+
+    return "java";
   }
   
   @Override

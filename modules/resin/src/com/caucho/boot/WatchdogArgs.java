@@ -1,6 +1,7 @@
 package com.caucho.boot;
 
 import com.caucho.Version;
+import com.caucho.config.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -11,6 +12,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.management.*;
+
+import javax.management.*;
 
 class WatchdogArgs
 {
@@ -25,6 +29,7 @@ class WatchdogArgs
   private String _serverId = "";
   private int _watchdogPort;
   private boolean _isVerbose;
+  private StartMode _startMode = StartMode.DIRECT;
 
   WatchdogArgs(String[] argv)
   {
@@ -35,7 +40,7 @@ class WatchdogArgs
     
     _javaHome = Vfs.lookup(System.getProperty("java.home"));
 
-    _argv = argv;
+    _argv = fillArgv(argv);
 
     _resinConf = _resinHome.lookup("conf/resin.conf");
 
@@ -86,6 +91,11 @@ class WatchdogArgs
     return _isVerbose;
   }
 
+  void setWatchdogPort(int port)
+  {
+    _watchdogPort = port;
+  }
+  
   int getWatchdogPort()
   {
     return _watchdogPort;
@@ -96,6 +106,41 @@ class WatchdogArgs
     _resinHome = resinHome;
   }
 
+  boolean isStatus()
+  {
+    return _startMode == StartMode.STATUS;
+  }
+
+  boolean isStart()
+  {
+    return _startMode == StartMode.START;
+  }
+
+  boolean isStop()
+  {
+    return _startMode == StartMode.STOP;
+  }
+
+  boolean isRestart()
+  {
+    return _startMode == StartMode.RESTART;
+  }
+
+  boolean isKill()
+  {
+    return _startMode == StartMode.KILL;
+  }
+
+  boolean isShutdown()
+  {
+    return _startMode == StartMode.SHUTDOWN;
+  }
+
+  boolean isSingle()
+  {
+    return _startMode == StartMode.DIRECT;
+  }
+
   public ResinELContext getELContext()
   {
     return new ResinBootELContext();
@@ -103,35 +148,146 @@ class WatchdogArgs
 
   private void parseCommandLine(String[] argv)
   {
+    String resinConf = null;
+    
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
 
       if ("-conf".equals(arg) || "--conf".equals(arg)) {
-        _resinConf = _resinHome.lookup(argv[i + 1]);
+        resinConf = argv[i + 1];
         i++;
-      } else if ("-log-directory".equals(arg) || "--log-directory".equals(arg)) {
-        _logDirectory = _rootDirectory.lookup(argv[i + 1]);
-        i++;
-      } else if ("-resin-home".equals(arg) || "--resin-home".equals(arg)) {
-        _resinHome = Vfs.lookup(argv[i + 1]);
-        i++;
-      } else if ("-root-directory".equals(arg) || "--root-directory".equals(arg)) {
-        _rootDirectory = Vfs.lookup(argv[i + 1]);
-        i++;
-      } else if ("-server-root".equals(arg) || "--server-root".equals(arg)) {
-        _rootDirectory = Vfs.lookup(argv[i + 1]);
-        i++;
-      } else if ("-server".equals(arg) || "--server".equals(arg)) {
-        _serverId = argv[i + 1];
-        i++;
-      } else if ("-watchdog-port".equals(arg) || "--watchdog-port".equals(arg)) {
-        _watchdogPort = Integer.parseInt(argv[i + 1]);
-        i++;
-      } else if ("-verbose".equals(arg) || "--verbose".equals(arg)) {
+      }
+      else if ("-fine".equals(arg) || "--fine".equals(arg)) {
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.FINE);
       }
+      else if ("-finer".equals(arg) || "--finer".equals(arg)) {
+        _isVerbose = true;
+        Logger.getLogger("").setLevel(Level.FINER);
+      }
+      else if ("-log-directory".equals(arg) || "--log-directory".equals(arg)) {
+        _logDirectory = _rootDirectory.lookup(argv[i + 1]);
+        i++;
+      }
+      else if ("-resin-home".equals(arg) || "--resin-home".equals(arg)) {
+        _resinHome = Vfs.lookup(argv[i + 1]);
+        i++;
+      }
+      else if ("-root-directory".equals(arg) || "--root-directory".equals(arg)) {
+        _rootDirectory = Vfs.lookup(argv[i + 1]);
+        i++;
+      }
+      else if ("-server".equals(arg) || "--server".equals(arg)) {
+        _serverId = argv[i + 1];
+        i++;
+      }
+      else if ("-server-root".equals(arg) || "--server-root".equals(arg)) {
+        _rootDirectory = Vfs.lookup(argv[i + 1]);
+        i++;
+      }
+      else if ("-watchdog-port".equals(arg) || "--watchdog-port".equals(arg)) {
+        _watchdogPort = Integer.parseInt(argv[i + 1]);
+        i++;
+      }
+      else if (arg.startsWith("-J")
+	       || arg.startsWith("-D")
+	       || arg.startsWith("-X")) {
+      }
+      else if ("-verbose".equals(arg) || "--verbose".equals(arg)) {
+        _isVerbose = true;
+        Logger.getLogger("").setLevel(Level.CONFIG);
+      }
+      else if ("status".equals(arg)) {
+	_startMode = StartMode.STATUS;
+      }
+      else if ("start".equals(arg)) {
+	_startMode = StartMode.START;
+      }
+      else if ("stop".equals(arg)) {
+	_startMode = StartMode.STOP;
+      }
+      else if ("kill".equals(arg)) {
+	_startMode = StartMode.KILL;
+      }
+      else if ("restart".equals(arg)) {
+	_startMode = StartMode.RESTART;
+      }
+      else if ("shutdown".equals(arg)) {
+	_startMode = StartMode.SHUTDOWN;
+      }
+      else {
+        System.out.println(L().l("unknown argument '{0}'", argv[i]));
+        System.out.println();
+	usage();
+	System.exit(1);
+      }
     }
+
+    if (resinConf != null) {
+      _resinConf = Vfs.getPwd().lookup(resinConf);
+
+      if (! _resinConf.exists() && _rootDirectory != null)
+        _resinConf = _rootDirectory.lookup(resinConf);
+
+      if (! _resinConf.exists() && _resinHome != null)
+        _resinConf = _resinHome.lookup(resinConf);
+
+      if (! _resinConf.exists())
+        throw new ConfigException(L().l("Resin/{0} can't find configuration file '{1}'", Version.VERSION, _resinConf.getNativePath()));
+    }
+  }
+
+  private static void usage()
+  {
+    System.err.println(L().l("usage: java -jar resin.jar [-options] [start | stop | restart]"));
+    System.err.println(L().l(""));
+    System.err.println(L().l("where options include:"));
+    System.err.println(L().l("   -conf <file>          : select a configuration file"));
+    System.err.println(L().l("   -log-directory <dir>  : select a logging directory"));
+    System.err.println(L().l("   -resin-home <dir>     : select a resin home directory"));
+    System.err.println(L().l("   -root-directory <dir> : select a root directory"));
+    System.err.println(L().l("   -server <id>          : select a <server> to run"));
+    System.err.println(L().l("   -watchdog-port <port> : override the watchdog-port"));
+    System.err.println(L().l("   -verbose              : print verbose starting information"));
+  }
+
+  private String []fillArgv(String []argv)
+  {
+    ArrayList<String> args = new ArrayList<String>();
+
+    try {
+      MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+      ObjectName name = new ObjectName("java.lang:type=Runtime");
+      
+      String []jvmArgs
+	= (String []) mbeanServer.getAttribute(name, "InputArguments");
+
+      if (jvmArgs != null) {
+        for (int i = 0; i < jvmArgs.length; i++) {
+          String arg = jvmArgs[i];
+
+	  if (args.contains(arg))
+	    continue;
+
+	  if (arg.startsWith("-Djava.class.path=")) {
+	    // IBM JDK
+	  }
+          else if (arg.startsWith("-D"))
+            args.add("-J" + arg);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    for (int i = 0; i < argv.length; i++)
+      args.add(argv[i]);
+
+    argv = new String[args.size()];
+
+    args.toArray(argv);
+
+    return argv;
   }
   
   private static L10N L()
@@ -285,4 +441,14 @@ class WatchdogArgs
       return false;
     }
   }
+
+  enum StartMode {
+    STATUS,
+    DIRECT,
+    START,
+    STOP,
+    KILL,
+    RESTART,
+    SHUTDOWN
+  };
 }

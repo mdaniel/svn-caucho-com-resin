@@ -532,6 +532,8 @@ r_resin-Basis =
 
   & r_transaction-manager?
 
+  & r_watchdog-manager?
+
 ## <resin> flow control
 r_resin-Flow =
   r_resin-Basis
@@ -726,26 +728,35 @@ r_user-name =
   attribute user-name { string }
   | element user-name { string }
 
-r_watchdog = element watchdog {
-  r_watchdog-port
+r_watchdog-manager = element watchdog-manager {
+  (attribute watchdog-port { string }
+   | element watchdog-port { string })?
 
-  & r_watchdog-arg*
+  & (attribute watchdog-jvm-arg { string }
+     | element watchdog-jvm-arg { string })*
 
-  & element server {
-      r_watchdog-server-Content
+  & element watchdog {
+      r_watchdog-Content
+    }*
+
+  & element watchdog-default {
+      r_watchdog-Content
     }*
 }
 
-r_watchdog-server-Content =
+r_watchdog-Content =
   (attribute id { string }
 
    & r_group-name?
 
-   & r_java-exe?
+   & (attribute java-exe { string }
+      | element java-exe { string })?
 
-   & r_java-home?
+   & (attribute java-home { string }
+      | element java-home { string })?
 
-   & r_jvm-arg*
+   & (attribute jvm-arg { string }
+      | element jvm-arg { string })*
 
    & (attribute resin-conf { string }
       | element resin-conf { string })?
@@ -754,10 +765,11 @@ r_watchdog-server-Content =
       | element resin-root { string })?
 
    & element open-port {
-        r_address?
+        (attribute address { string }
+         | element address { string })?
 
         & r_port
-     }
+     }*
 
    & r_user-name?
   )

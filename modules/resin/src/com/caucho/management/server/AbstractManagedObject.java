@@ -136,7 +136,7 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
 
       return false;
     }

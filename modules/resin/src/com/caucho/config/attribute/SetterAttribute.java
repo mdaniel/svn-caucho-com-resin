@@ -45,6 +45,7 @@ public class SetterAttribute extends Attribute {
   public SetterAttribute(Method setter, ConfigType type)
   {
     _setter = setter;
+    _setter.setAccessible(true);
     _type = type;
   }
   

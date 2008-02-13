@@ -43,6 +43,7 @@ public class ProgramAttribute extends Attribute {
   public ProgramAttribute(Method setter, ConfigType type)
   {
     _setter = setter;
+    _setter.setAccessible(true);
     _type = type;
   }
   

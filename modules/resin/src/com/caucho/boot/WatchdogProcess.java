@@ -54,7 +54,7 @@ import java.util.logging.Logger;
 /**
  * Encapsulation of the process running resin.
  */
-public class WatchdogProcess
+class WatchdogProcess
 {
   private static final L10N L = new L10N(WatchdogProcess.class);
   private static final Logger log
@@ -68,16 +68,11 @@ public class WatchdogProcess
 
   private ServerSocket _ss;
   private Process _process;
-  private String[] _argv;
-  private Path _resinRoot;
 
-  WatchdogProcess(String id, Watchdog watchdog,
-		  String[] argv, Path resinRoot)
+  WatchdogProcess(String id, Watchdog watchdog)
   {
     _id = id;
     _watchdog = watchdog;
-    _argv = argv;
-    _resinRoot = resinRoot;
   }
 
   public void run()
@@ -122,12 +117,12 @@ public class WatchdogProcess
     }
   }
 
-  public void stop()
+  void stop()
   {
     _lifecycle.toDestroy();
   }
 
-  public void destroy()
+  void destroy()
   {
     if (_process != null) {
       try {
@@ -386,7 +381,7 @@ public class WatchdogProcess
     Path processPwd = _watchdog.getPwd();
 
     Path resinHome = _watchdog.getResinHome();
-    Path resinRoot = _resinRoot;
+    Path resinRoot = _watchdog.getResinRoot();
 	
     String classPath = WatchdogArgs.calculateClassPath(resinHome);
 
@@ -438,19 +433,31 @@ public class WatchdogProcess
     }
 
     ArrayList<String> resinArgs = new ArrayList<String>();
-    String []argv = _argv;
+    String []argv = _watchdog.getArgv();
     for (int i = 0; i < argv.length; i++) {
-      if (argv[i].startsWith("-Djava.class.path=")) {
+      if (argv[i].equals("-conf")) {
+	// resin conf handled below
+	i++;
+      }
+      else if (argv[i].startsWith("-Djava.class.path=")) {
 	// IBM JDK startup issues
       }
       else if (argv[i].startsWith("-J")) {
 	list.add(argv[i].substring(2));
       }
-      else if (! argv[i].startsWith("-Djava.class.path"))
+      else if (argv[i].startsWith("-Djava.class.path")) {
+      }
+      else
 	resinArgs.add(argv[i]);
     }
     
     list.add("com.caucho.server.resin.Resin");
+
+    if (_watchdog.getResinConf() != null) {
+      list.add("-conf");
+      list.add(_watchdog.getResinConf().getNativePath());
+    }
+      
     list.add("-socketwait");
     list.add(String.valueOf(socketPort));
 

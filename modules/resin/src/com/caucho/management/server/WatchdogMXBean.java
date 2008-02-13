@@ -53,6 +53,30 @@ public interface WatchdogMXBean {
                + " of Resin, the value of `--server'")
   public String getId();
 
+  /**
+   * Returns the resinHome
+   */
+  @Description("Returns the resin.home value")
+  public String getResinHome();
+
+  /**
+   * Returns the resinRoot
+   */
+  @Description("Returns the resin.root value")
+  public String getResinRoot();
+
+  /**
+   * Returns the resinConf
+   */
+  @Description("Returns the resin.conf value")
+  public String getResinConf();
+
+  /**
+   * Returns the userName
+   */
+  @Description("Returns the user-name value")
+  public String getUserName();
+
   //
   // state
   //
@@ -84,4 +108,26 @@ public interface WatchdogMXBean {
    */
   @Description("The number of times the server has been restarted")
   public int getStartCount();
+
+  //
+  // operations
+  //
+
+  /**
+   * Start the Resin process
+   */
+  @Description("Starts the Resin process")
+  public void start();
+
+  /**
+   * Stop the Resin process
+   */
+  @Description("Stops the Resin process")
+  public void stop();
+
+  /**
+   * Kills the Resin process
+   */
+  @Description("Stops the Resin process")
+  public void kill();
 }

@@ -63,50 +63,16 @@ public class WatchdogClient
   private final BootManager _bootManager;
   private String _id = "";
 
-  private final Watchdog _watchdog;
+  private WatchdogConfig _config;
+  private Watchdog _watchdog;
   
-  private String []_argv;
-
-  private Path _javaExe;
-  private ArrayList<String> _watchdogJvmArgs = new ArrayList<String>();
-
-  private boolean _is64bit;
-  private boolean _hasXss;
-  private boolean _hasXmx;
-  
-  private boolean _hasWatchdogXss;
-  private boolean _hasWatchdogXmx;
-
-  private Path _pwd;
-
-  private InetAddress _address;
-  private int _watchdogPort = 6600;
-
   private Boot _jniBoot;
 
-  private long _shutdownWaitTime = 60000L;
-
-  private boolean _isVerbose;
-
-  WatchdogClient(BootManager bootManager)
+  WatchdogClient(BootManager bootManager, WatchdogConfig config)
   {
     _bootManager = bootManager;
-    _watchdog = new Watchdog(bootManager.getArgs());
-    
-    _pwd = Vfs.getPwd();
-
-    try {
-      _address = InetAddress.getByName("127.0.0.1");
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-
-    _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
-  }
-
-  public void setId(String id)
-  {
-    _id = id;
+    _config = config;
+    _id = config.getId();
   }
 
   public String getId()
@@ -114,51 +80,24 @@ public class WatchdogClient
     return _id;
   }
 
-  public void setVerbose(boolean isVerbose)
-  {
-    _isVerbose = isVerbose;
-  }
-
-  public void setAddress(String address)
-    throws UnknownHostException
-  {
-    if (! "*".equals(address))
-      _address = InetAddress.getByName(address);
-  }
-
-  public InetAddress getAddress()
-  {
-    return _address;
-  }
-
   public String getAdminCookie()
   {
     return _bootManager.getAdminCookie();
   }
 
-  public void setWatchdogPort(int port)
-  {
-    _watchdogPort = port;
-  }
-
   public int getWatchdogPort()
   {
-    return _watchdogPort;
-  }
-  
-  public void addWatchdogArg(String arg)
-  {
-    addWatchdogJvmArg(arg);
+    return _config.getWatchdogPort();
   }
 
   String[] getArgv()
   {
-    return _argv;
+    return _config.getArgv();
   }
 
   Path getPwd()
   {
-    return _pwd;
+    return _config.getPwd();
   }
 
   Path getResinHome()
@@ -173,47 +112,32 @@ public class WatchdogClient
 
   boolean hasXmx()
   {
-    return _hasXmx;
+    return _config.hasXmx();
   }
 
   boolean hasXss()
   {
-    return _hasXss;
+    return _config.hasXss();
   }
 
   boolean is64bit()
   {
-    return _is64bit;
+    return _config.is64bit();
   }
 
   boolean isVerbose()
   {
-    return _isVerbose;
-  }
-  
-  public void setJavaExe(Path javaExe)
-  {
-    _javaExe = javaExe;
-  }
-  
-  public void addWatchdogJvmArg(String arg)
-  {
-    _watchdogJvmArgs.add(arg);
-    
-    if (arg.startsWith("-Xss"))
-      _hasWatchdogXss = true;
-    else if (arg.startsWith("-Xmx"))
-      _hasWatchdogXmx = true;
+    return _config.isVerbose();
   }
   
   public String getGroupName()
   {
-    return _watchdog.getGroupName();
+    return _config.getGroupName();
   }
   
   public String getUserName()
   {
-    return _watchdog.getUserName();
+    return _config.getUserName();
   }
   
   public Path getLogDirectory()
@@ -223,11 +147,30 @@ public class WatchdogClient
   
   public long getShutdownWaitTime()
   {
-    return _shutdownWaitTime;
+    return _config.getShutdownWaitTime();
   }
 
-  public void addBuilderProgram(ConfigProgram program)
+  public String statusWatchdog()
+    throws IOException
   {
+    WatchdogAPI watchdog = getProxy();
+
+    try {
+      return watchdog.status(getAdminCookie());
+    } catch (ConfigException e) {
+      throw e;
+    } catch (IllegalStateException e) {
+      throw e;
+    } catch (Exception e) {
+      Throwable e1 = e;
+      
+      while (e1.getCause() != null)
+	e1 = e1.getCause();
+
+      log.log(Level.FINE, e.toString(), e);
+      
+      return e1.toString();
+    }
   }
 
   public void startWatchdog(String []argv)
@@ -280,6 +223,26 @@ public class WatchdogClient
     }
   }
 
+  public void killWatchdog()
+    throws IOException
+  {
+    WatchdogAPI watchdog = getProxy();
+
+    try {
+      watchdog.kill(getAdminCookie(), getId());
+    } catch (ConfigException e) {
+      throw e;
+    } catch (IllegalStateException e) {
+      throw e;
+    } catch (IOException e) {
+      throw new IllegalStateException(L.l("Can't connect to ResinWatchdogManager.\n{1}",
+					  Version.VERSION, e.toString()),
+				      e);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
   public void restartWatchdog(String []argv)
     throws IOException
   {
@@ -292,10 +255,13 @@ public class WatchdogClient
     startWatchdog(argv);
   }
 
-  public int startSingle(String []argv, Path rootDirectory)
+  public int startSingle()
     throws IOException
   {
-    return _watchdog.startSingle(argv, rootDirectory);
+    if (_watchdog == null)
+      _watchdog = new Watchdog(_config);
+    
+    return _watchdog.startSingle();
   }
 
   public boolean shutdown()
@@ -358,7 +324,7 @@ public class WatchdogClient
 
     String libexecPath;
 
-    if (_is64bit)
+    if (is64bit())
       libexecPath = resinHome.lookup("libexec64").getNativePath();
     else
       libexecPath = resinHome.lookup("libexec").getNativePath();
@@ -378,7 +344,7 @@ public class WatchdogClient
 
     ArrayList<String> list = new ArrayList<String>();
 
-    list.add(getJavaExe());
+    list.add(_config.getJavaExe());
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
@@ -394,14 +360,14 @@ public class WatchdogClient
       }
     }
 
-    if (! _hasWatchdogXss)
+    if (! _config.hasWatchdogXss())
       list.add("-Xss256k");
-    if (! _hasWatchdogXmx)
+    if (! _config.hasWatchdogXmx())
       list.add("-Xmx32m");
 
-    list.addAll(_watchdogJvmArgs);
+    list.addAll(_config.getWatchdogJvmArgs());
 
-    if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
+    if (! list.contains("-d32") && ! list.contains("-d64") && is64bit())
       list.add("-d64");
 
     list.add("com.caucho.boot.WatchdogManager");
@@ -428,35 +394,6 @@ public class WatchdogClient
 
     stdIs.close();
     stdOs.close();
-  }
-
-  String getJavaExe()
-  {
-    if (_javaExe != null)
-      return _javaExe.getNativePath();
-
-    Path javaHome = Vfs.lookup(System.getProperty("java.home"));
-
-    if (javaHome.getTail().equals("jre"))
-      javaHome = javaHome.getParent();
-
-    if (javaHome.lookup("bin/javaw.exe").canRead())
-      return javaHome.lookup("bin/javaw").getNativePath();
-    else if (javaHome.lookup("bin/java.exe").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-    else if (javaHome.lookup("bin/java").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-
-    javaHome = Vfs.lookup(System.getProperty("java.home"));
-
-    if (javaHome.lookup("bin/javaw.exe").canRead())
-      return javaHome.lookup("bin/javaw").getNativePath();
-    else if (javaHome.lookup("bin/java.exe").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-    else if (javaHome.lookup("bin/java").canRead())
-      return javaHome.lookup("bin/java").getNativePath();
-
-    return "java";
   }
   
   @Override
