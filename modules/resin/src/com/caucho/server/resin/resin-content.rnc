@@ -768,7 +768,8 @@ r_watchdog-Content =
         (attribute address { string }
          | element address { string })?
 
-        & r_port
+        & (attribute port { string }
+           | element port { string })
      }*
 
    & r_user-name?

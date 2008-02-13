@@ -124,7 +124,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("leftmargin", "0");
 
     out.writeStartElement("table");
-    out.writeAttribute("width", "100%");
+    out.writeAttribute("width", "98%");
     out.writeAttribute("border", "0");
     out.writeAttribute("cellspacing", "0");
     out.writeAttribute("cellpadding", "0");
@@ -196,14 +196,15 @@ public class Body extends ContainerNode {
       out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase());
     out.writeEndElement();
     
-    out.writeStartElement("div");
-    out.writeAttribute("class", "breadcrumb");
-    out.writeEmptyElement("hr");
+    //out.writeStartElement("div");
+    //out.writeAttribute("class", "breadcrumb");
+    out.writeStartElement("hr");
+    out.writeEndElement();
 
     if (item != null) {
       writeThreadNavigation(out, item, false);
     }
-    out.writeEndElement();
+    //out.writeEndElement();
 
     Header header = getDocument().getHeader();
       
@@ -234,8 +235,8 @@ public class Body extends ContainerNode {
       out.writeEndElement();
     }
 
-    out.writeStartElement("div");
-    out.writeAttribute("class", "breadcrumb");
+    //out.writeStartElement("div");
+    //out.writeAttribute("class", "breadcrumb");
     
     out.writeStartElement("hr");
     out.writeEndElement();
@@ -244,7 +245,7 @@ public class Body extends ContainerNode {
       writeThreadNavigation(out, item, true);
     }
     
-    out.writeEndElement();
+    //out.writeEndElement();
     
     // nav
 
@@ -485,9 +486,10 @@ public class Body extends ContainerNode {
   {
     out.writeCharacters("\n");
     out.writeStartElement("table");
+    out.writeAttribute("class", "breadcrumb");
     out.writeAttribute("border", "0");
     out.writeAttribute("cellspacing", "0");
-    out.writeAttribute("width", "100%");
+    out.writeAttribute("width", "99%");
     out.writeStartElement("tr");
       
     out.writeStartElement("td");

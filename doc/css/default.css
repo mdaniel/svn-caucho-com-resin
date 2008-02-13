@@ -17,17 +17,13 @@ body {
 
 .topnav {
   font-family : Verdana, Helvetica, Arial, sans-serif;
+  font-size : 80%;
 }
 
 .left {
   font-family : Verdana, Helvetica, Arial, sans-serif;
 }
 
-/*
-.breadcrumb a {
-  color : #12037a;
-}
-*/
 a {
   text-decoration : none;
   color : #003366;
@@ -59,7 +55,7 @@ a.topnav {
 a.leftnav {
   text-decoration : none;
   color : #606060;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size : 80%;
 }
 
@@ -84,6 +80,7 @@ hr {
   border : 0;
   height : 1px;
   background : #999;
+  margin : 0.2em 0em;
 }
 
 /* sections */
@@ -176,6 +173,7 @@ div.section-title {
 /* 204, 213, 221 */
 .toc {
   margin : 1em 2em;
+  width : 90%;
   background : #ccccdd;
   border : solid #999;
   border-width : 1px;
@@ -191,7 +189,7 @@ div.s3 {
 div.example {
   margin : 1em 2em;
   padding : 0em 1em;
-  width : 90%;
+  width : 87.5%;
   border : solid #999;
   border-width : 1px;
   background : #e5d1ac;
@@ -203,7 +201,7 @@ div.example {
 div.results {
   margin : 1em 2em;
   padding : 0em 1em;
-  width : 90%;
+  width : 87.5%;
   border : solid #999 1px;
   color : black;
   font-family : monospace;
@@ -213,7 +211,7 @@ div.results {
 div.definition {
   margin : 1em 2em;
   padding : 0em 1em;
-  width : 90%;
+  width : 87.5%;
   border : solid #999;
   border-width : 1px;
   background : #f1f1f2;
@@ -225,7 +223,7 @@ div.definition {
 .def-caption {
   margin-left : 1.3em;
   font-style: bold;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   color : #666666;
   text-align : left;
   font-size : 120%
@@ -234,7 +232,7 @@ div.definition {
 .caption {
   margin-left : 1.3em;
   font-style: bold;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   color : #990033;
   text-align : left;
   font-size : 120%
@@ -246,14 +244,14 @@ div.definition {
 table.deftable {
   margin : 1em 0em 1em 1.6em;
   border : solid, 1px;
-  width : 92.5%;
+  width : 90%;
   border-collapse: collapse;
 }
 
 caption {
   padding : 0.3em 0em;
   font-style: bold;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Helvetica, Arial, Helvetica, sans-serif;
   color : #990033;
   text-align : left;
   font-size : 120%

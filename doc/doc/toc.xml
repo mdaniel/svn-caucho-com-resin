@@ -228,6 +228,8 @@
       
     <item link="virtual-host.xtp" title="Virtual Hosting"/>
       
+    <item link="resin-watchdog.xtp" title="Watchdog"/>
+      
     <item link="webapp-overview.xtp" title="WebApp"/>
     
     <!--
