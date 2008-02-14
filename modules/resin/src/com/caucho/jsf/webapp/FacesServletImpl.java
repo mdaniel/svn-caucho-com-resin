@@ -194,7 +194,11 @@ public class FacesServletImpl extends GenericServlet
       try {
 	FacesConfig facesConfig = new FacesConfig();
 
-	new Config().configure(facesConfig, facesPath, FACES_SCHEMA);
+	Config config = new Config();
+
+	config.setEL(false);
+	
+	config.configure(facesConfig, facesPath, FACES_SCHEMA);
 
 	if (app instanceof ApplicationImpl) {
 	  app.setNavigationHandler(facesConfig.getNavigationHandler());
