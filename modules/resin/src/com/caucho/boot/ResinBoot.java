@@ -129,7 +129,7 @@ public class ResinBoot {
       throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
                                       Version.VERSION, _args.getServerId(), _args.getResinConf()));
 
-    Path logDirectory = _args.getLogDirectory();
+    Path logDirectory = bootManager.getLogDirectory();
     if (! logDirectory.exists()) {
       logDirectory.mkdirs();
 

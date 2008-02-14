@@ -98,7 +98,12 @@ public class BootManager implements EnvironmentBean
   
   public Path getLogDirectory()
   {
-    return _args.getLogDirectory();
+    Path logDirectory = _args.getLogDirectory();
+
+    if (logDirectory != null)
+      return logDirectory;
+    else
+      return getRootDirectory().lookup("log");
   }
 
   public ClassLoader getClassLoader()

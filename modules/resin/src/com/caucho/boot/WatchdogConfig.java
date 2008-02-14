@@ -226,7 +226,22 @@ public class WatchdogConfig
     else
       name = "jvm-" + _id + ".log";
 
-    return _args.getLogDirectory().lookup(name);
+    return getLogDirectory().lookup(name);
+  }
+
+  public Path getRootDirectory()
+  {
+    return _args.getRootDirectory();
+  }
+
+  public Path getLogDirectory()
+  {
+    Path logDirectory = _args.getLogDirectory();
+
+    if (logDirectory != null)
+      return logDirectory;
+    else
+      return getRootDirectory().lookup("log");
   }
   
   public long getShutdownWaitTime()

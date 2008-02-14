@@ -97,8 +97,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     Vfs.setPwd(_args.getRootDirectory());
 
-    boolean isLogNew = ! _args.getLogDirectory().exists();
-    Path logPath = _args.getLogDirectory().lookup("watchdog-manager.log");
+    Path logPath = getLogDirectory().lookup("watchdog-manager.log");
 
     RotateStream stream = RotateStream.create(logPath);
     stream.init();
@@ -203,9 +202,19 @@ public class WatchdogManager extends ProtocolDispatchServer {
       return null;    
   }
 
+  Path getRootDirectory()
+  {
+    return _args.getRootDirectory();
+  }
+  
   Path getLogDirectory()
   {
-    return _args.getLogDirectory();
+    Path logDirectory = _args.getLogDirectory();
+
+    if (logDirectory != null)
+      return logDirectory;
+    else
+      return getRootDirectory().lookup("log");
   }
 
   boolean authenticate(String password)

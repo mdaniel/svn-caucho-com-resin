@@ -64,11 +64,7 @@ class WatchdogArgs
 
   Path getLogDirectory()
   {
-    if (_logDirectory != null) {
-      return _logDirectory;
-    } else {
-      return _rootDirectory.lookup("log");
-    }
+    return _logDirectory;
   }
 
   Path getResinConf()

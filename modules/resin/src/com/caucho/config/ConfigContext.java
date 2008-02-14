@@ -480,8 +480,11 @@ public class ConfigContext {
 	  else
 	    attrStrategy.setValue(bean, qName, null);
 	}
-	else
-	  setText(bean, qName, text, attrStrategy);
+	else {
+	  boolean isTrim = (childNode instanceof Element);
+	  
+	  setText(bean, qName, text, attrStrategy, isTrim);
+	}
 
 	return;
       }
@@ -539,12 +542,13 @@ public class ConfigContext {
   private void setText(Object bean,
 		       QName qName,
 		       String text,
-		       Attribute attrStrategy)
+		       Attribute attrStrategy,
+		       boolean isTrim)
     throws Exception
   {
     ConfigType attrType = attrStrategy.getConfigType();
 	
-    if (! attrType.isNoTrim())
+    if (isTrim && ! attrType.isNoTrim())
       text = text.trim();
 
     if (isEL() && attrType.isEL() && text.indexOf("${") >= 0) {

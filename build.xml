@@ -1,4 +1,6 @@
-<project name="resin" default="compile" basedir=".">
+<project name="resin" default="compile" basedir="."
+         xmlns:ivy="antlib:org.apache.ivy.ant">
+
   <property environment="env"/>
 
   <property file="local.properties"/>
@@ -14,7 +16,6 @@
   <property name="lib" location="${install}/lib"/>
   <property name="clientlib" location="${install}/clientlib"/>
   <property name="dist" location="${install}/dist"/>
-
 
   <property name="javac.verbose" value="off"/>
   <property name="javac.debug" value="on"/>
@@ -53,6 +54,9 @@
            classpath="${user.home}/flash/flexTasks/lib/flexTasks.jar" />
   <property name="FLEX_HOME" value="${user.home}/flash"/>
 
+  <target name="update">
+    <ivy:retrieve pattern="${basedir}/ivy-lib/[artifact]-[revision].[ext]"/>
+  </target>
 
   <target name="tstamp">
     <tstamp/>
@@ -1362,6 +1366,7 @@
   <target name="clean" depends="init">
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
+    <delete dir="${basedir}/ivy-lib"/>
     <delete>
       <fileset dir="${modules}">
         <include name="*/classes/**"/>
