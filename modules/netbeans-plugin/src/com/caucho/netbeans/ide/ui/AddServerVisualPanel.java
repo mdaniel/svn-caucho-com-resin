@@ -54,7 +54,7 @@ public final class AddServerVisualPanel extends JPanel {
   
   public int getPort()
   {
-    return (Integer) this.jSpinner1.getValue();
+    return Integer.valueOf(this.jSpinner1.getValue().toString());
   }
 
   @Override
@@ -93,6 +93,12 @@ public final class AddServerVisualPanel extends JPanel {
 
     org.openide.awt.Mnemonics.setLocalizedText(jLabel3, "Port");
 
+    jSpinner1.setEditor(new javax.swing.JSpinner.NumberEditor(jSpinner1, ""));
+    jSpinner1.addChangeListener(new javax.swing.event.ChangeListener() {
+      public void stateChanged(javax.swing.event.ChangeEvent evt) {
+        jSpinner1StateChanged(evt);
+      }
+    });
     jSpinner1.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
       public void propertyChange(java.beans.PropertyChangeEvent evt) {
         jSpinner1PropertyChange(evt);
@@ -134,7 +140,7 @@ public final class AddServerVisualPanel extends JPanel {
         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
           .add(jLabel3)
           .add(jSpinner1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-        .addContainerGap(193, Short.MAX_VALUE))
+        .addContainerGap(195, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -148,6 +154,10 @@ public final class AddServerVisualPanel extends JPanel {
   private void jSpinner1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jSpinner1PropertyChange
     _wizardPanel.stateChanged(new ChangeEvent(this));
   }//GEN-LAST:event_jSpinner1PropertyChange
+
+  private void jSpinner1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinner1StateChanged
+    _wizardPanel.stateChanged(evt);
+  }//GEN-LAST:event_jSpinner1StateChanged
     
   private String browseResinHome()
   {
