@@ -596,6 +596,7 @@ sub handler {
 
         if ($time < 0) {
 	    print("Resin proc $child did not die, using kill -9");
+            $time = $kill_time;
 
 	    kill(-9, $child);
         }

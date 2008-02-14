@@ -4,6 +4,7 @@
 
 <s2 title="3.0.snap - Jan 23, 2008">
 <ul>
+<li>wrapper.pl: fix kill -9 timeout (rep by Chris Schneider)</li>
 
 <li>DirectoryServlet: windows URL scanning changes</li>
 <li>isapi: poll updates to handle read times > 3600s (#2264, rep by T Fukuda)</li>
