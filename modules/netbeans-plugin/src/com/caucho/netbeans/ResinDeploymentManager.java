@@ -64,7 +64,6 @@ public final class ResinDeploymentManager
   private final ResinConfiguration _resinConfiguration;
   private ResinProcess _resinProcess;
   private TargetModuleID []_runningModules = new TargetModuleID[0];
-  private int _port;
 
   private ResinPlatformImpl _j2eePlatform;
 
@@ -98,7 +97,6 @@ public final class ResinDeploymentManager
   public Target[] getTargets()
     throws IllegalStateException
   {
-    log.info("get targets");
     return new ResinTarget[] {
       new ResinTarget(_uri, _resinConfiguration),
     };

@@ -73,13 +73,11 @@ public class SuccessProgressObject implements ProgressObject
 
   public TargetModuleID[] getResultTargetModuleIDs()
   {
-    log.info("RESULT IDS");
     return _targetModuleIDs;
   }
 
   public ClientConfiguration getClientConfiguration(TargetModuleID arg0)
   {
-    log.info("CLIENT CONFIG");
     return null;
   }
 
@@ -103,11 +101,9 @@ public class SuccessProgressObject implements ProgressObject
 
   public void addProgressListener(ProgressListener arg0)
   {
-    log.info("add-progress");
   }
 
   public void removeProgressListener(ProgressListener arg0)
   {
-    log.info("remove-progress");
   }
 }

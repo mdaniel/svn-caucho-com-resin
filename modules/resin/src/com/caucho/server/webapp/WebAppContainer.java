@@ -335,7 +335,7 @@ public class WebAppContainer
   public RewriteDispatch createRewriteDispatch()
   {
     if (_rewriteDispatch == null) {
-      _rewriteDispatch = new RewriteDispatch(getDispatchServer());
+      _rewriteDispatch = new RewriteDispatch((Server) getDispatchServer());
     }
 
     return _rewriteDispatch;
