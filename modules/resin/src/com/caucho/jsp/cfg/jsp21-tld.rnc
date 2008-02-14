@@ -142,6 +142,8 @@ jsp21_taglib = element taglib {
 
   & element tlib-version { javaee_dewey-version }
 
+  & element jsp-version { javaee_dewey-version }?
+
   & element short-name { string }?
 
   & element uri { string }?
