@@ -31,12 +31,12 @@ import com.caucho.resin.*;
 
 public class TestResin {
 
-  public void main(String []args)
+  public static void main(String []args)
   {
     ResinEmbed resin = new ResinEmbed();
 
     HttpEmbed http = new HttpEmbed(8080);
-    resin.addHttp(http);
+    resin.addPort(http);
 
     WebAppEmbed webApp = new WebAppEmbed("/", "/var/www/htdocs");
     resin.addWebApp(webApp);
