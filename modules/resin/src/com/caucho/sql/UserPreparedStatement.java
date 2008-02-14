@@ -86,7 +86,15 @@ public class UserPreparedStatement extends UserStatement
   public ResultSet executeQuery()
     throws SQLException
   {
-    return _pstmt.executeQuery();
+    try {
+      return _pstmt.executeQuery();
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -95,7 +103,15 @@ public class UserPreparedStatement extends UserStatement
   public int executeUpdate()
     throws SQLException
   {
-    return _pstmt.executeUpdate();
+    try {
+      return _pstmt.executeUpdate();
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -104,7 +120,15 @@ public class UserPreparedStatement extends UserStatement
   public boolean execute()
     throws SQLException
   {
-    return _pstmt.execute();
+    try {
+      return _pstmt.execute();
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -113,7 +137,15 @@ public class UserPreparedStatement extends UserStatement
   public void addBatch()
     throws SQLException
   {
-    _pstmt.addBatch();
+    try {
+      _pstmt.addBatch();
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -122,7 +154,15 @@ public class UserPreparedStatement extends UserStatement
   public void clearParameters()
     throws SQLException
   {
-    _pstmt.clearParameters();
+    try {
+      _pstmt.clearParameters();
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -131,7 +171,15 @@ public class UserPreparedStatement extends UserStatement
   public ResultSetMetaData getMetaData()
     throws SQLException
   {
-    return _pstmt.getMetaData();
+    try {
+      return _pstmt.getMetaData();
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -140,7 +188,15 @@ public class UserPreparedStatement extends UserStatement
   public ParameterMetaData getParameterMetaData()
     throws SQLException
   {
-    return _pstmt.getParameterMetaData();
+    try {
+      return _pstmt.getParameterMetaData();
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -149,7 +205,15 @@ public class UserPreparedStatement extends UserStatement
   public void setNull(int parameterIndex, int sqlType)
     throws SQLException
   {
-    _pstmt.setNull(parameterIndex, sqlType);
+    try {
+      _pstmt.setNull(parameterIndex, sqlType);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -158,7 +222,15 @@ public class UserPreparedStatement extends UserStatement
   public void setNull(int parameterIndex, int sqlType, String typeName)
     throws SQLException
   {
-    _pstmt.setNull(parameterIndex, sqlType, typeName);
+    try {
+      _pstmt.setNull(parameterIndex, sqlType, typeName);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -167,7 +239,15 @@ public class UserPreparedStatement extends UserStatement
   public void setBoolean(int index, boolean value)
     throws SQLException
   {
-    _pstmt.setBoolean(index, value);
+    try {
+      _pstmt.setBoolean(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -176,7 +256,15 @@ public class UserPreparedStatement extends UserStatement
   public void setByte(int index, byte value)
     throws SQLException
   {
-    _pstmt.setByte(index, value);
+    try {
+      _pstmt.setByte(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -185,7 +273,15 @@ public class UserPreparedStatement extends UserStatement
   public void setShort(int index, short value)
     throws SQLException
   {
-    _pstmt.setShort(index, value);
+    try {
+      _pstmt.setShort(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -194,7 +290,15 @@ public class UserPreparedStatement extends UserStatement
   public void setInt(int index, int value)
     throws SQLException
   {
-    _pstmt.setInt(index, value);
+    try {
+      _pstmt.setInt(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -203,7 +307,15 @@ public class UserPreparedStatement extends UserStatement
   public void setLong(int index, long value)
     throws SQLException
   {
-    _pstmt.setLong(index, value);
+    try {
+      _pstmt.setLong(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -212,7 +324,15 @@ public class UserPreparedStatement extends UserStatement
   public void setFloat(int index, float value)
     throws SQLException
   {
-    _pstmt.setFloat(index, value);
+    try {
+      _pstmt.setFloat(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -221,7 +341,15 @@ public class UserPreparedStatement extends UserStatement
   public void setDouble(int index, double value)
     throws SQLException
   {
-    _pstmt.setDouble(index, value);
+    try {
+      _pstmt.setDouble(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -230,7 +358,15 @@ public class UserPreparedStatement extends UserStatement
   public void setBigDecimal(int index, BigDecimal value)
     throws SQLException
   {
-    _pstmt.setBigDecimal(index, value);
+    try {
+      _pstmt.setBigDecimal(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -239,7 +375,15 @@ public class UserPreparedStatement extends UserStatement
   public void setString(int index, String value)
     throws SQLException
   {
-    _pstmt.setString(index, value);
+    try {
+      _pstmt.setString(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -248,7 +392,15 @@ public class UserPreparedStatement extends UserStatement
   public void setBytes(int index, byte []value)
     throws SQLException
   {
-    _pstmt.setBytes(index, value);
+    try {
+      _pstmt.setBytes(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -257,7 +409,15 @@ public class UserPreparedStatement extends UserStatement
   public void setDate(int index, Date value)
     throws SQLException
   {
-    _pstmt.setDate(index, value);
+    try {
+      _pstmt.setDate(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -266,7 +426,15 @@ public class UserPreparedStatement extends UserStatement
   public void setDate(int index, Date value, Calendar cal)
     throws SQLException
   {
-    _pstmt.setDate(index, value, cal);
+    try {
+      _pstmt.setDate(index, value, cal);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -275,7 +443,15 @@ public class UserPreparedStatement extends UserStatement
   public void setTime(int index, Time value)
     throws SQLException
   {
-    _pstmt.setTime(index, value);
+    try {
+      _pstmt.setTime(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -284,7 +460,15 @@ public class UserPreparedStatement extends UserStatement
   public void setTime(int index, Time value, Calendar cal)
     throws SQLException
   {
-    _pstmt.setTime(index, value, cal);
+    try {
+      _pstmt.setTime(index, value, cal);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -293,7 +477,15 @@ public class UserPreparedStatement extends UserStatement
   public void setTimestamp(int index, Timestamp value)
     throws SQLException
   {
-    _pstmt.setTimestamp(index, value);
+    try {
+      _pstmt.setTimestamp(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -302,7 +494,15 @@ public class UserPreparedStatement extends UserStatement
   public void setTimestamp(int index, Timestamp value, Calendar cal)
     throws SQLException
   {
-    _pstmt.setTimestamp(index, value, cal);
+    try {
+      _pstmt.setTimestamp(index, value, cal);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -311,7 +511,15 @@ public class UserPreparedStatement extends UserStatement
   public void setAsciiStream(int index, InputStream value, int length)
     throws SQLException
   {
-    _pstmt.setAsciiStream(index, value, length);
+    try {
+      _pstmt.setAsciiStream(index, value, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -320,7 +528,15 @@ public class UserPreparedStatement extends UserStatement
   public void setUnicodeStream(int index, InputStream value, int length)
     throws SQLException
   {
-    _pstmt.setUnicodeStream(index, value, length);
+    try {
+      _pstmt.setUnicodeStream(index, value, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -329,7 +545,15 @@ public class UserPreparedStatement extends UserStatement
   public void setBinaryStream(int index, InputStream value, int length)
     throws SQLException
   {
-    _pstmt.setBinaryStream(index, value, length);
+    try {
+      _pstmt.setBinaryStream(index, value, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -338,7 +562,15 @@ public class UserPreparedStatement extends UserStatement
   public void setCharacterStream(int index, Reader value, int length)
     throws SQLException
   {
-    _pstmt.setCharacterStream(index, value, length);
+    try {
+      _pstmt.setCharacterStream(index, value, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -347,7 +579,15 @@ public class UserPreparedStatement extends UserStatement
   public void setObject(int index, Object value, int type, int scale)
     throws SQLException
   {
-    _pstmt.setObject(index, value, type, scale);
+    try {
+      _pstmt.setObject(index, value, type, scale);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -356,7 +596,15 @@ public class UserPreparedStatement extends UserStatement
   public void setObject(int index, Object value, int type)
     throws SQLException
   {
-    _pstmt.setObject(index, value, type);
+    try {
+      _pstmt.setObject(index, value, type);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -365,7 +613,15 @@ public class UserPreparedStatement extends UserStatement
   public void setObject(int index, Object value)
     throws SQLException
   {
-    _pstmt.setObject(index, value);
+    try {
+      _pstmt.setObject(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -374,7 +630,15 @@ public class UserPreparedStatement extends UserStatement
   public void setRef(int index, Ref value)
     throws SQLException
   {
-    _pstmt.setRef(index, value);
+    try {
+      _pstmt.setRef(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -383,7 +647,15 @@ public class UserPreparedStatement extends UserStatement
   public void setBlob(int index, Blob value)
     throws SQLException
   {
-    _pstmt.setBlob(index, value);
+    try {
+      _pstmt.setBlob(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -392,7 +664,15 @@ public class UserPreparedStatement extends UserStatement
   public void setClob(int index, Clob value)
     throws SQLException
   {
-    _pstmt.setClob(index, value);
+    try {
+      _pstmt.setClob(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -401,7 +681,15 @@ public class UserPreparedStatement extends UserStatement
   public void setArray(int index, Array value)
     throws SQLException
   {
-    _pstmt.setArray(index, value);
+    try {
+      _pstmt.setArray(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -410,7 +698,15 @@ public class UserPreparedStatement extends UserStatement
   public void setURL(int index, URL value)
     throws SQLException
   {
-    _pstmt.setURL(index, value);
+    try {
+      _pstmt.setURL(index, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
   }
 
   /**
@@ -429,7 +725,7 @@ public class UserPreparedStatement extends UserStatement
 
     if (_cacheItem == null)
       super.close();
-    else if (_isChanged)
+    else if (! isPoolable())
       _cacheItem.destroy();
     else
       _cacheItem.toIdle();
@@ -439,26 +735,6 @@ public class UserPreparedStatement extends UserStatement
   {
     return "UserPreparedStatement[" + _pstmt + "]";
   }
-
-    public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setPoolable(boolean poolable) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isPoolable() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
     public void setRowId(int parameterIndex, RowId x) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");

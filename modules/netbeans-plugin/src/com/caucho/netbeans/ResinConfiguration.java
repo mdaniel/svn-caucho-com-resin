@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -135,7 +135,6 @@ public class ResinConfiguration
     setJavaPlatformByName(_ip.getProperty(PROPERTY_JAVA_PLATFORM));
     
     String resinHome = _ip.getProperty("resin.home");
-    log.info("get resin.home: " + resinHome + " " + _ip);
     
     if (resinHome == null)
       throw new RuntimeException("resin.home is invalid");
@@ -162,6 +161,7 @@ public class ResinConfiguration
     }
   }
 
+  @Override
   protected Object clone()
   {
     try {

@@ -57,8 +57,6 @@ public class ClusterServer {
   private static final L10N L = new L10N(ClusterServer.class);
 
   private static final long DEFAULT = 0xcafebabe;
-  
-  private ObjectName _objectName;
 
   private Cluster _cluster;
   private Machine _machine;
@@ -103,12 +101,10 @@ public class ClusterServer {
     _serverConnector = new ServerConnector(this);
   }
 
-  public ClusterServer(Cluster cluster, boolean isTest)
+  public ClusterServer(Cluster cluster, boolean test)
   {
     _cluster = cluster;
-
     _clusterPort = new ClusterPort(this);
-    
     _serverConnector = new ServerConnector(this);
   }
 
@@ -517,7 +513,7 @@ public class ClusterServer {
   {
     _clusterPort.init();
 
-    if (_cluster != null && ! getId().equals(_cluster.getServerId()))
+    if (_cluster != null)
       _serverConnector.init();
   }
 
@@ -557,8 +553,9 @@ public class ClusterServer {
       _serverConnector.close();
   }
 
+  @Override
   public String toString()
   {
-    return ("ClusterServer[id=" + getId() + "]");
+    return getClass().getSimpleName() + "[id=" + getId() + "]";
   }
 }

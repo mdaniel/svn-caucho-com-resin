@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -117,13 +117,11 @@ public class ResinPlatformImpl
 
   public Image getIcon()
   {
-    log.info("ICON");
-    return Utilities.loadImage("com/caucho/netbeans/resources/resin.png");
+    return Utilities.loadImage("com/caucho/netbeans/resources/CauchoFLY_blu16.gif");
   }
 
   public File[] getPlatformRoots()
   {
-    log.info("ROOTS");
     return new File[] { _resinConfiguration.getResinHome() };
   }
 

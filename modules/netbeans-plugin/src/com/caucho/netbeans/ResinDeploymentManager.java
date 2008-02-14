@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -108,7 +108,6 @@ public final class ResinDeploymentManager
                                             Target[] target)
     throws TargetException, IllegalStateException
   {
-    log.info("get running modules");
     return _runningModules;
   }
 
@@ -116,7 +115,6 @@ public final class ResinDeploymentManager
                                                Target[] target)
     throws TargetException, IllegalStateException
   {
-    log.info("get non-running modules");
     return new TargetModuleID[0];
   }
 
@@ -124,15 +122,12 @@ public final class ResinDeploymentManager
                                               Target[] target)
     throws TargetException, IllegalStateException
   {
-    log.info("get modules: " + moduleType);
     return new TargetModuleID[0];
   }
 
   public DeploymentConfiguration createConfiguration(DeployableObject deployableObject)
     throws InvalidModuleException
   {
-    log.info("Resin createConfiguration " + deployableObject);
-    
     return null;
     /*
     ModuleType type = deployableObject.getType();
@@ -163,7 +158,7 @@ public final class ResinDeploymentManager
       if (plan != null)
         urlString += "&resin-web=" + plan.getAbsolutePath();
     
-      log.info("Dist: " + urlString);
+      log.fine("Dist: " + urlString);
     
       URL url = new URL(urlString);
       
@@ -176,7 +171,7 @@ public final class ResinDeploymentManager
       
       is.close();
       
-      log.info("Complete: " + sb);
+      log.fine("Complete: " + sb);
     
       return new SuccessProgressObject(target);
     } catch (Exception e) {
@@ -189,7 +184,6 @@ public final class ResinDeploymentManager
                                    InputStream plan)
     throws IllegalStateException
   {
-    log.info("dist2");
     return new SuccessProgressObject(target);
   }
 
@@ -199,14 +193,12 @@ public final class ResinDeploymentManager
                                    InputStream plan)
     throws IllegalStateException
   {
-    log.info("dist3");
     return null;
   }
 
   public ProgressObject start(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
-    log.info("start: " + targetModuleIDs.length);
     _runningModules = targetModuleIDs;
     
     return new SuccessProgressObject(targetModuleIDs);
@@ -215,7 +207,6 @@ public final class ResinDeploymentManager
   public ProgressObject stop(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
-    log.info("stop: " + targetModuleIDs.length);
     _runningModules = new TargetModuleID[0];
     
     return new SuccessProgressObject();
@@ -224,7 +215,6 @@ public final class ResinDeploymentManager
   public ProgressObject undeploy(TargetModuleID[] targetModuleIDs)
     throws IllegalStateException
   {
-    log.info("undeploy: " + targetModuleIDs.length);
     return new SuccessProgressObject();
   }
 
@@ -300,7 +290,6 @@ public final class ResinDeploymentManager
 
   public ResinPlatformImpl getJ2eePlatform()
   {
-    log.info("GET j2ee-platform");
     /*
     if (_j2eePlatform == null)
       _j2eePlatform = new ResinPlatformImpl(_resinConfiguration);

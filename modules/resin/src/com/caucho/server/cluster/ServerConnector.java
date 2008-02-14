@@ -54,10 +54,6 @@ public class ServerConnector
     = Logger.getLogger(ServerConnector.class.getName());
   private static final L10N L = new L10N(ServerConnector.class);
 
-  private static final int DISABLED = 0;
-  private static final int ENABLED = 1;
-  private static final int ENABLED_SESSION = 2;
-
   private static final int ST_NEW = 0;
   private static final int ST_STANDBY = 1;
   private static final int ST_SESSION_ONLY = 2;
@@ -81,8 +77,6 @@ public class ServerConnector
   private ObjectName _objectName;
 
   private Cluster _cluster;
-
-  private int _srunIndex;
   private Path _tcpPath;
 
   private ServerConnectorAdmin _admin;
@@ -90,8 +84,6 @@ public class ServerConnector
   private String _debugId;
 
   private int _maxConnections = Integer.MAX_VALUE / 2;
-
-  private volatile int _enabledMode = ENABLED;
   
   private ClusterStream []_idle = new ClusterStream[64];
   private volatile int _idleHead;
@@ -1169,6 +1161,7 @@ public class ServerConnector
     }
   }
 
+  @Override
   public String toString()
   {
     return ("ServerConnector[id=" + getId() +

@@ -34,15 +34,19 @@ import java.util.*;
 import java.lang.reflect.*;
 
 import com.caucho.bytecode.*;
+import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
+import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 /**
  * Scope adapting
  */
 public class ScopeAdapter {
+  private static final L10N L = new L10N(ScopeAdapter.class);
+  
   private final Class _cl;
   
   private Class _proxyClass;
@@ -67,16 +71,31 @@ public class ScopeAdapter {
     try {
       Object v = _proxyCtor.newInstance(comp);
       return v;
-    } catch (RuntimeException e) {
-      throw e;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw ConfigException.create(e);
     }
   }
 
   private void generateProxy(Class cl)
   {
     try {
+      Constructor zeroCtor = null;
+
+      for (Constructor ctorItem : cl.getConstructors()) {
+	if (ctorItem.getParameterTypes().length == 0) {
+	  if (Modifier.isPublic(ctorItem.getModifiers())
+	      || Modifier.isProtected(ctorItem.getModifiers())) {
+	    zeroCtor = ctorItem;
+	    break;
+	  }
+	}
+      }
+
+      if (zeroCtor == null) {
+	throw new ConfigException(L.l("'{0}' does not have a zero-arg public or protected constructor.  Scope adapter components need a zero-arg constructor, e.g. @RequestScoped stored in @ApplicationScoped.",
+				      cl.getName()));
+      }
+      
       JavaClassLoader jLoader = new JavaClassLoader(cl.getClassLoader());
       
       JavaClass jClass = new JavaClass(jLoader);

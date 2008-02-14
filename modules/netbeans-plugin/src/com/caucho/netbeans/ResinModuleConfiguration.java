@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -46,16 +46,11 @@ public class ResinModuleConfiguration
   
   public ResinModuleConfiguration(J2eeModule module)
   {
-    log.info("Resin module");
-    System.out.println("Resin module XXX:");
-    
     _module = module;
   }
 
   public Lookup getLookup()
   {
-    log.info("Resin module lookup");
-    
     //return new ResinLookup();
     return Lookups.fixed(this);
   }

@@ -83,12 +83,10 @@ import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionListener;
+import javax.servlet.http.*;
 import javax.webbeans.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -2269,6 +2267,18 @@ public class WebApp extends ServletContextImpl
 
       return null;
     }
+  }
+
+  /**
+   * Access logging for high-level errors
+   */
+  public void accessLog(HttpServletRequest req, HttpServletResponse res)
+    throws IOException
+  {
+    AbstractAccessLog log = getAccessLog();
+    System.out.println("LOG: " + log);
+    if (log != null)
+      log.log(req, res, this);
   }
 
   private LruCache<String,RequestDispatcherImpl> getDispatcherCache()

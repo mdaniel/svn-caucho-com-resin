@@ -40,7 +40,8 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.server.port.TcpConnection;
-import com.caucho.server.webapp.ErrorPageManager;
+import com.caucho.server.cluster.*;
+import com.caucho.server.webapp.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
 import com.caucho.vfs.ClientDisconnectException;
@@ -251,7 +252,7 @@ public class HttpRequest extends AbstractHttpRequest
 
 	    _invocation = invocation;
 	    if (_server instanceof Server)
-	      _invocation.setWebApp(((Server) _server).getErrorWebApp());
+	      _invocation.setWebApp(((Server) _server).getDefaultWebApp());
 
 	    restartServer();
 	    return false;
@@ -285,6 +286,12 @@ public class HttpRequest extends AbstractHttpRequest
         throw e1;
       } catch (Throwable e1) {
         log.log(Level.FINE, e1.toString(), e1);
+      }
+
+      if (_server instanceof Server) {
+	WebApp webApp = ((Server) _server).getDefaultWebApp();
+	if (webApp != null)
+	  webApp.accessLog(this, _response);
       }
 
       return false;

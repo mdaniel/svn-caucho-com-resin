@@ -173,6 +173,22 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
    */
   public Class getServletClass()
   {
+    if (_servletClassName == null)
+      return null;
+    
+    if (_servletClass == null) {
+      try {
+	Thread thread = Thread.currentThread();
+	ClassLoader loader = thread.getContextClassLoader();
+
+        _servletClass = Class.forName(_servletClassName, false, loader);
+      } catch (Exception e) {
+	throw error(L.l("'{0}' is not a known servlet class.  Servlets belong in the classpath, for example WEB-INF/classes.",
+			_servletClassName),
+		    e);
+      }
+    }
+      
     return _servletClass;
   }
 
@@ -896,6 +912,14 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       return new LineConfigException(_location + msg);
     else
       return new ConfigException(msg);
+  }
+
+  protected ConfigException error(String msg, Throwable e)
+  {
+    if (_location != null)
+      return new LineConfigException(_location + msg, e);
+    else
+      return new ConfigException(msg, e);
   }
 
   protected RuntimeException error(Throwable e)

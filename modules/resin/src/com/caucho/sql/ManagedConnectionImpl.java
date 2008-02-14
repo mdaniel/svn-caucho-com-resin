@@ -564,6 +564,21 @@ public class ManagedConnectionImpl
   }
 
   /**
+   * When closed, the item is not put into the idle pool.
+   */
+  void killPool()
+  {
+    if (_listener != null) {
+      ConnectionEvent event;
+
+      event = new ConnectionEvent(this,
+				  ConnectionEvent.CONNECTION_ERROR_OCCURRED);
+
+      _listener.connectionErrorOccurred(event);
+    }
+  }
+
+  /**
    * Sets the auto-commit.
    */
   public void setAutoCommit(boolean autoCommit)

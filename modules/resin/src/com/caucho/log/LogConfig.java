@@ -225,14 +225,8 @@ public class LogConfig extends RotateLog {
   /**
    * Adds a logger.
    */
-  public SubLogger createLogger()
+  public void addLogger(LoggerConfig logger)
   {
-    SubLogger subLogger = new SubLogger();
-
-    subLogger.setLevel("info");
-    _subLoggers.add(subLogger);
-    
-    return subLogger;
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,15 +30,12 @@
 package com.caucho.netbeans.ide;
 
 import com.caucho.netbeans.ResinDeploymentManager;
-import com.caucho.netbeans.ide.*;
-import com.caucho.netbeans.ide.AddInstanceIterator;
 import com.caucho.netbeans.ResinStartServer;
 
 import org.netbeans.modules.j2ee.deployment.plugins.spi.FindJSPServlet;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.IncrementalDeployment;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.OptionalDeploymentManagerFactory;
 import org.netbeans.modules.j2ee.deployment.plugins.spi.StartServer;
-import org.netbeans.modules.j2ee.deployment.plugins.spi.TargetModuleIDResolver;
 import org.openide.WizardDescriptor.InstantiatingIterator;
 
 import javax.enterprise.deploy.spi.DeploymentManager;
@@ -51,35 +48,31 @@ public class ResinOptionalFactory
 
   public StartServer getStartServer(DeploymentManager deploymentManager)
   {
-    log.info("start-server");
     return new ResinStartServer((ResinDeploymentManager) deploymentManager);
   }
 
   public IncrementalDeployment getIncrementalDeployment(DeploymentManager deploymentManager)
   {
-    //log.info("incr-server");
     return null;
   }
 
   /*
   public TargetModuleIDResolver getTargetModuleIDResolver(DeploymentManager deploymentManager)
   {
-    log.info("foo-server");
     return new ResinTargetModuleIDResolver(deploymentManager);
   }
   */
 
   public FindJSPServlet getFindJSPServlet(DeploymentManager deploymentManager)
   {
-    //log.info("foo1-server");
     // return new ResinFindJSPServlet(deploymentManager);
 
     return null;
   }
 
+  @Override
   public InstantiatingIterator getAddInstanceIterator()
   {
-    //log.info("foo12-add");
     return new AddInstanceIterator();
   }
 }

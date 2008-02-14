@@ -226,7 +226,7 @@ public final class BTree {
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
       
-      throw new SQLException(e.toString());
+      throw new SQLExceptionWrapper(e.toString(), e);
     }
   }
 
@@ -664,7 +664,7 @@ public final class BTree {
 	rootBlock.free();
       }
     } catch (IOException e) {
-      throw new SQLExceptionWrapper(e);
+      throw new SQLExceptionWrapper(e.toString(), e);
     }
   }
 

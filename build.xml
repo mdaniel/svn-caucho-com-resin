@@ -825,6 +825,7 @@
         <include name="Makefile.in"/>
         <include name="configure"/>
         <include name="configure.ac"/>
+        <include name="aclocal.m4"/>
         <include name="httpd.exe"/>
         <include name="setup.exe"/>
         <include name="description-pak"/>

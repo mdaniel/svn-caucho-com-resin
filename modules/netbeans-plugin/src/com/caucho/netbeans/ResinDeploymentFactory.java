@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -69,8 +69,6 @@ public class ResinDeploymentFactory
 
   public boolean handlesURI(String uri)
   {
-    log.info("URI:" + uri);
-    
     return (uri != null) && uri.startsWith(RESIN_PREFIX);
   }
 
@@ -79,14 +77,11 @@ public class ResinDeploymentFactory
 						String password)
     throws DeploymentManagerCreationException
   {
-    log.info("MGR: " + uri);
-
     if (!handlesURI(uri))
       throw new DeploymentManagerCreationException(L.l("'{0}' is not a Resin URI",  uri));
     
     InstanceProperties ip = InstanceProperties.getInstanceProperties(uri);
 
-    log.info("URL: " + uri + " " + ip);
     if (ip == null) {
       if (!DISCONNECTED_URI.equals(uri))
         throw new DeploymentManagerCreationException(L.l("Resin instance '{0}' is not registered.", uri));
@@ -113,7 +108,6 @@ public class ResinDeploymentFactory
   public DeploymentManager getDisconnectedDeploymentManager(String uri)
     throws DeploymentManagerCreationException
   {
-    log.info("DISCONN: " + uri);
     // called on initialization and configuration
     return getDeploymentManager(uri, null, null);
   }

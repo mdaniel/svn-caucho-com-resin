@@ -138,31 +138,38 @@ public class SerializationAdapter {
     for (Constructor baseCtor : _cl.getDeclaredConstructors()) {
       if (Modifier.isPrivate(baseCtor.getModifiers()))
 	continue;
-      
-      Class []types = baseCtor.getParameterTypes();
 
-      StringBuilder sb = new StringBuilder();
-      createDescriptor(sb, types);
-      sb.append("V");
-
-      String descriptor = sb.toString();
-      
-      JavaMethod ctor = jClass.createMethod("<init>", descriptor);
-      
-      ctor.setAccessFlags(Modifier.PUBLIC);
-      
-      CodeWriterAttribute code = ctor.createCodeWriter();
-      code.setMaxLocals(5 + 2 * types.length);
-      code.setMaxStack(5 + 2 * types.length);
-
-      code.pushObjectVar(0);
-
-      marshal(code, types);
-
-      code.invokespecial(superClassName, "<init>", descriptor, 1, 0);
-      code.addReturn();
-      code.close();
+      generateConstructor(jClass, superClassName, baseCtor);
     }
+  }
+
+  public static void generateConstructor(JavaClass jClass,
+					 String superClassName,
+					 Constructor baseCtor)
+  {
+    Class []types = baseCtor.getParameterTypes();
+
+    StringBuilder sb = new StringBuilder();
+    createDescriptor(sb, types);
+    sb.append("V");
+
+    String descriptor = sb.toString();
+      
+    JavaMethod ctor = jClass.createMethod("<init>", descriptor);
+      
+    ctor.setAccessFlags(Modifier.PUBLIC);
+      
+    CodeWriterAttribute code = ctor.createCodeWriter();
+    code.setMaxLocals(5 + 2 * types.length);
+    code.setMaxStack(5 + 2 * types.length);
+
+    code.pushObjectVar(0);
+
+    marshal(code, types);
+
+    code.invokespecial(superClassName, "<init>", descriptor, 1, 0);
+    code.addReturn();
+    code.close();
   }
 
   private void generateWriteReplace(JavaClass jClass)
@@ -189,7 +196,7 @@ public class SerializationAdapter {
     code.close();
   }
 
-  private void marshal(CodeWriterAttribute code, Class []param)
+  public static void marshal(CodeWriterAttribute code, Class []param)
   {
     int stack = 1;
     int index = 1;
@@ -242,7 +249,7 @@ public class SerializationAdapter {
     return count;
   }
 
-  private void createDescriptor(StringBuilder sb, Class []params)
+  public static void createDescriptor(StringBuilder sb, Class []params)
   {
     sb.append("(");
     
@@ -253,7 +260,7 @@ public class SerializationAdapter {
     sb.append(")");
   }
 
-  private String createDescriptor(Class cl)
+  public static String createDescriptor(Class cl)
   {
     if (cl.isArray())
       return "[" + createDescriptor(cl.getComponentType());

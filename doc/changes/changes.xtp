@@ -12,6 +12,21 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>clustering: updated logging for btree insert exceptions (#2403, rep by gjvc)</li>
+<li>build: distribution missing aclocal.m4 (#2421, rep by norlab)</li>
+<li>webbeans: ScopeAdapter beans need to throw a config-time error if zero-arg constructor is missing (#2332, rep by wesley)</li>
+<li>access-log: add logging for bad requests, e.g. 400s (#2266, rep by jornsvendsen)</li>
+<li>rewrite: rewrite rules at the server level need to log to the default webapp's access logger (#2395, rep by D Peterson)</li>
+<li>logging: contained &lt;logger> needs to act like top-level loggers (#2327, rep by John Franey)</li>
+<li>database: vary pool round-robin by cluster index (#2358, rep by M Stacks)</li>
+<li>jstl: c:redirect was not properly handling context="/" (#2379, rep by wimsie)</li>
+<li>servlet: validation of servlet-class needs to be lazy because of .war libraries with missing classes (#2391, rep by ckchris)</li>
+<li>hessian/burlap: when unable to find classes, log warning before returning HashMap (#2387, rep by pagedn)</li>
+<li>database: jdbc connection should not be returned to pool if exception occurs (#2313)</li>
+<li>jmx: ServerConnector for the self-server is now registered in JMX (#2354)</li>
+<li>win64: added build for isapi_srun, resin_os, resin, resinssl (#2331, #2330, rep by K. Puaa)</li>
+<li>watchdog: refactor to handle frozen OS process/kill -9 (#2410, rep by Daniel Lopez)</li>
+<li>watchdog: add "kill" to force a process kill (#2411, rep by Daniel Lopez)</li>
 <li>admin: admin host needs to skip default configuration (#2405, rep by ckchris)</li>
 <li>gzip filter not properly handling reset() (#2389, rep by T Truong)</li>
 <li>jmx: unregisterMBean was not working properly (#2390, rep by J Smyth)</li>

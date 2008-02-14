@@ -36,6 +36,7 @@ import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.store.Transaction;
+import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -344,10 +345,12 @@ class BinaryColumn extends Column {
       } catch (SQLException e) {
 	log.log(Level.FINER, e.toString(), e);
 	
-	throw new SQLException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}",
-				   getTable().getName(),
-				   getName(),
-				   getString(block, rowOffset)));
+	throw new SQLExceptionWrapper(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
+					  getTable().getName(),
+					  getName(),
+					  getString(block, rowOffset),
+					  e.toString()),
+				      e);
       }
     }
   }

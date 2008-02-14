@@ -812,6 +812,14 @@ public class Server extends ProtocolDispatchServer
   }
 
   //
+  // cluster server information
+  //
+  public int getServerIndex()
+  {
+    return _clusterServer.getIndex();
+  }
+
+  //
   // statistics
   //
 
@@ -943,7 +951,20 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the matching servlet pattern for a URL.
+   * Returns the default web-app or error web-app for top-level errors
+   */
+  public WebApp getDefaultWebApp()
+  {
+    WebApp webApp = getWebApp("", 80, "");
+
+    if (webApp != null)
+      return webApp;
+    else
+      return getErrorWebApp();
+  }
+  
+  /**
+   * Returns the matching web-app for a URL.
    */
   public WebApp getWebApp(String hostName, int port, String url)
   {

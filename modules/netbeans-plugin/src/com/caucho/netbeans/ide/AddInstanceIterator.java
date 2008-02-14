@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -34,6 +34,7 @@ import com.caucho.netbeans.ide.ui.AddServerLocationPanel;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -53,8 +54,6 @@ public final class AddInstanceIterator implements InstantiatingIterator, ChangeL
     = Logger.getLogger(AddInstanceIterator.class.getName());
   
   private static final String []RESIN_REQUIRED_JARS;
-  
-  private Panel _panel;
   private WizardDescriptor _wizard;
   private ArrayList<ChangeListener> _listeners = new ArrayList<ChangeListener>();
 
@@ -64,10 +63,15 @@ public final class AddInstanceIterator implements InstantiatingIterator, ChangeL
   private String _userName;
   private String _password;
   
-  private String _resinHome = "/home/ferg/ws/resin";
+  private String _resinHome;
   
   private String _host = "localhost";
   private int _port = 8081;
+  
+  public AddInstanceIterator()
+  {
+    _resinHome = findResinHome();
+  }
   
   public String getResinHome()
   {
@@ -79,13 +83,81 @@ public final class AddInstanceIterator implements InstantiatingIterator, ChangeL
     _resinHome = resinHome;
   }
   
+  public int getPort()
+  {
+    return _port;
+  }
+  
+  public void setPort(int port)
+  {
+    _port = port;
+  }
+  
+  /**
+   * Tries to find a Resin home
+   */
+  private String findResinHome()
+  {
+    String resinHome;
+    
+    resinHome = findResinHome(System.getProperty("user.home"));
+    if (resinHome != null)
+      return resinHome;
+    
+    resinHome = findResinHome(System.getProperty("user.home") + "/ws");
+    if (resinHome != null)
+      return resinHome;
+    
+    resinHome = findResinHome("/usr/local/share");
+    if (resinHome != null)
+      return resinHome;
+    
+    resinHome = findResinHome("/usr/local");
+    if (resinHome != null)
+      return resinHome;
+    
+    resinHome = findResinHome("/opt");
+    if (resinHome != null)
+      return resinHome;
+    
+    return null;    
+  }
+  
+  private String findResinHome(String path)
+  {
+    File dir = new File(path);
+    
+    File resin = new File(dir, "resin");
+    if (isResinHomeValid(resin))
+      return resin.getAbsolutePath();
+    
+    String []list = dir.list();
+    Arrays.sort(list);
+    
+    for (String name : list) {
+      resin = new File(dir, name);
+      
+      if (isResinHomeValid(resin))
+        return resin.getAbsolutePath();
+    }
+    
+    return null;
+  }
+    
+  
   /**
    * Checks if the resin-home is valid by checking for expected jar files
    */
   public boolean isResinHomeValid()
   {
-    File resinHome = new File(_resinHome);
-    
+    return isResinHomeValid(new File(_resinHome));
+  }
+  
+  /**
+   * Checks if the resin-home is valid by checking for expected jar files
+   */
+  public boolean isResinHomeValid(File resinHome)
+  {
     if (! resinHome.isDirectory())
       return false;
     
@@ -127,17 +199,14 @@ public final class AddInstanceIterator implements InstantiatingIterator, ChangeL
       return set;
     
     String url = "resin:" + _host + ":" + _port;
-    String displayName = "Resin " + _host + ":" + _port;
-    log.info("SET URL:" + url);
+    String displayName = "Resin";
     try {
       InstanceProperties ip;
       ip = InstanceProperties.createInstanceProperties(url, _userName, 
                                                        _password, displayName);
-      log.info("IP: " + ip);                                             
       ip.setProperty("resin.home", getResinHome());
       ip.setProperty("resin.host", _host);
       ip.setProperty("resin.port", String.valueOf(_port));
-      log.info("SET resin.home " + ip.getProperty("resin.home") + " " + ip);
       set.add(ip);
     } catch (InstanceCreationException e) {
       // XXX: should show
@@ -230,8 +299,6 @@ public final class AddInstanceIterator implements InstantiatingIterator, ChangeL
     RESIN_REQUIRED_JARS = new String[] {
       "resin.jar",
       "resin-util.jar",
-      "jsdk-15.jar",
-      "webbeans-16.jar",
     };
   }
 }

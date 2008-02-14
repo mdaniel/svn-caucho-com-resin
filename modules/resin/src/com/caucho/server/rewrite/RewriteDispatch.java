@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,6 +33,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
@@ -54,7 +55,7 @@ public class RewriteDispatch
     = Logger.getLogger(RewriteDispatch.class.getName());
 
   private final WebApp _webApp;
-  private final DispatchServer _dispatchServer;
+  private final Server _server;
 
   private MatchRule _matchRule;
 
@@ -63,9 +64,9 @@ public class RewriteDispatch
   private final boolean _isFiner;
   private final boolean _isFinest;
 
-  public RewriteDispatch(DispatchServer dispatchServer)
+  public RewriteDispatch(Server server)
   {
-    this(dispatchServer, null);
+    this(server, null);
   }
 
   public RewriteDispatch(WebApp webApp)
@@ -73,9 +74,9 @@ public class RewriteDispatch
     this(null, webApp);
   }
 
-  private RewriteDispatch(DispatchServer dispatchServer, WebApp webApp)
+  private RewriteDispatch(Server server, WebApp webApp)
   {
-    _dispatchServer = dispatchServer;
+    _server = server;
     _webApp = webApp;
 
     _isFiner = log.isLoggable(Level.FINER);
@@ -131,8 +132,8 @@ public class RewriteDispatch
   {
     if (_webApp != null)
       _webApp.clearCache();
-    else if (_dispatchServer != null)
-      _dispatchServer.clearCache();
+    else if (_server != null)
+      _server.clearCache();
   }
 
   /*

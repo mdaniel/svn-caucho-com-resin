@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,9 +28,6 @@
  */
 
 package com.caucho.netbeans;
-
-import com.caucho.netbeans.PluginL10N;
-import com.caucho.netbeans.PluginLogger;
 
 public class ResinModuleConfigurationImpl
 {

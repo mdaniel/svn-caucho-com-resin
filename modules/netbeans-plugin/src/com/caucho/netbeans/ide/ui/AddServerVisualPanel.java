@@ -26,9 +26,10 @@ public final class AddServerVisualPanel extends JPanel {
     _addServer = addServer;
     _wizardPanel = wizardPanel;
     
-    this.jTextField1.setText(addServer.getResinHome());
+    this.jResinHome.setText(addServer.getResinHome());
+    this.jSpinner1.setValue(addServer.getPort());
 
-    this.jTextField1.getDocument().addDocumentListener(new DocumentListener() {
+    this.jResinHome.getDocument().addDocumentListener(new DocumentListener() {
 	public void changedUpdate(DocumentEvent e)
 	{
 	  _wizardPanel.stateChanged(new ChangeEvent(this));
@@ -48,7 +49,12 @@ public final class AddServerVisualPanel extends JPanel {
 
   public String getResinHome()
   {
-    return this.jTextField1.getText().trim();
+    return this.jResinHome.getText().trim();
+  }
+  
+  public int getPort()
+  {
+    return (Integer) this.jSpinner1.getValue();
   }
 
   @Override
@@ -66,13 +72,15 @@ public final class AddServerVisualPanel extends JPanel {
   private void initComponents() {
 
     jLabel1 = new javax.swing.JLabel();
-    jTextField1 = new javax.swing.JTextField();
+    jResinHome = new javax.swing.JTextField();
     jButton1 = new javax.swing.JButton();
     jLabel2 = new javax.swing.JLabel();
+    jLabel3 = new javax.swing.JLabel();
+    jSpinner1 = new javax.swing.JSpinner();
 
     org.openide.awt.Mnemonics.setLocalizedText(jLabel1, "Resin Home");
 
-    jTextField1.setText("jTextField1");
+    jResinHome.setText("jResinHome");
 
     org.openide.awt.Mnemonics.setLocalizedText(jButton1, "Browse");
     jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -83,6 +91,14 @@ public final class AddServerVisualPanel extends JPanel {
 
     org.openide.awt.Mnemonics.setLocalizedText(jLabel2, "Resin Home Location");
 
+    org.openide.awt.Mnemonics.setLocalizedText(jLabel3, "Port");
+
+    jSpinner1.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+      public void propertyChange(java.beans.PropertyChangeEvent evt) {
+        jSpinner1PropertyChange(evt);
+      }
+    });
+
     org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -90,13 +106,18 @@ public final class AddServerVisualPanel extends JPanel {
       .add(layout.createSequentialGroup()
         .addContainerGap()
         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+          .add(jLabel2)
           .add(layout.createSequentialGroup()
-            .add(jLabel1)
+            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+              .add(jLabel1)
+              .add(jLabel3))
             .add(28, 28, 28)
-            .add(jTextField1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 154, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-            .add(18, 18, 18)
-            .add(jButton1))
-          .add(jLabel2))
+            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+              .add(layout.createSequentialGroup()
+                .add(jResinHome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 154, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(18, 18, 18)
+                .add(jButton1))
+              .add(jSpinner1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 55, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
         .addContainerGap(53, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
@@ -106,10 +127,14 @@ public final class AddServerVisualPanel extends JPanel {
         .add(jLabel2)
         .add(31, 31, 31)
         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-          .add(jTextField1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+          .add(jResinHome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
           .add(jLabel1)
           .add(jButton1))
-        .addContainerGap(219, Short.MAX_VALUE))
+        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+          .add(jLabel3)
+          .add(jSpinner1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(193, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -117,12 +142,15 @@ public final class AddServerVisualPanel extends JPanel {
     String loc = browseResinHome();
     
     if (loc != null && ! "".equals(loc))
-      this.jTextField1.setText(loc);
+      this.jResinHome.setText(loc);
   }//GEN-LAST:event_jButton1MouseClicked
+
+  private void jSpinner1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jSpinner1PropertyChange
+    _wizardPanel.stateChanged(new ChangeEvent(this));
+  }//GEN-LAST:event_jSpinner1PropertyChange
     
   private String browseResinHome()
   {
-    String loc = null;
     JFileChooser chooser = getResinHomeChooser();
     int ret = chooser.showDialog(SwingUtilities.getWindowAncestor(this),
 				 "Choose Resin Home");
@@ -157,7 +185,9 @@ public final class AddServerVisualPanel extends JPanel {
   private javax.swing.JButton jButton1;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
-  private javax.swing.JTextField jTextField1;
+  private javax.swing.JLabel jLabel3;
+  private javax.swing.JTextField jResinHome;
+  private javax.swing.JSpinner jSpinner1;
   // End of variables declaration//GEN-END:variables
 }
 

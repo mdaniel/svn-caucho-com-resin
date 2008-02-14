@@ -29,8 +29,8 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.config.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  * Manages the servlets.
  */
 public class ServletManager {
-  static final Logger log = Log.open(ServletManager.class);
+  static final Logger log = Logger.getLogger(ServletManager.class.getName());
   static final L10N L = new L10N(ServletManager.class);
 
   private HashMap<String,ServletConfigImpl> _servlets
@@ -94,8 +94,17 @@ public class ServletManager {
 	 * throw new ServletConfigException(L.l("'{0}' is a duplicate servlet-name.  Servlets must have a unique servlet-name.", config.getServletName()));
 	 */
       }
-    
-      config.validateClass(! _isLazyValidate);
+
+      try {
+	config.validateClass(! _isLazyValidate);
+      } catch (Exception e) {
+	if (log.isLoggable(Level.FINE))
+	  log.log(Level.FINE, e.toString(), e);
+	else if (e instanceof ConfigException)
+	  log.config(e.getMessage());
+	else
+	  log.config(e.toString());
+      }
     
       _servlets.put(config.getServletName(), config);
       _servletList.add(config);

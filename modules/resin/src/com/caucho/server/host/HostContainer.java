@@ -41,8 +41,7 @@ import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.rewrite.RewriteDispatch;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -57,8 +56,9 @@ import java.util.logging.Logger;
  * Resin's host container implementation.
  */
 public class HostContainer implements DispatchBuilder {
-  static final Logger log = Log.open(HostContainer.class);
-  static final L10N L = new L10N(HostContainer.class);
+  private static final Logger log
+    = Logger.getLogger(HostContainer.class.getName());
+  private static final L10N L = new L10N(HostContainer.class);
 
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
@@ -338,7 +338,12 @@ public class HostContainer implements DispatchBuilder {
 
       if (rewriteChain != chain) {
         Server server = (Server) _dispatchServer;
-        invocation.setWebApp(server.getErrorWebApp());
+	WebApp webApp = server.getDefaultWebApp();
+        invocation.setWebApp(webApp);
+
+	if (webApp != null)
+	  rewriteChain = new WebAppFilterChain(rewriteChain, webApp);
+	
         invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;
       }

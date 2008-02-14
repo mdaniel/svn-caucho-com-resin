@@ -32,12 +32,22 @@ public class AddServerLocationPanel extends AbstractWizardPanel
       _wizard.putProperty(ERROR_MESSAGE, "Invalid resin-home");
       return false;
     }
+    
+    _addServer.setPort(_component.getPort());
+    
+    if (1024 < _addServer.getPort() && _addServer.getPort() < 32767) {
+      
+    }
+    else {
+      _wizard.putProperty(ERROR_MESSAGE, "Invalid port");
+    }
 
     _wizard.putProperty(ERROR_MESSAGE, null);
 
     return true;
   }
 
+  @Override
   public HelpCtx getHelp()
   {
     return HelpCtx.DEFAULT_HELP;
