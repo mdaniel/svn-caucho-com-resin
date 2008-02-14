@@ -9,7 +9,7 @@
 configuration for URL aliasing, rewriting, dispatching, and redirection.</p>
 
 <p><a href="#rewrite-real-path">&lt;rewrite-real-path></a> configures an alias
-for files located on the filesystem.</p>
+for files located on the filesystem, allowing for the mapping of a virtual directory.</p>
 
   </description>
 </header>
@@ -852,8 +852,13 @@ intermediate rewriting stage for more complicated patterns.</p>
 <defun title="&lt;rewrite-real-path>">
 <parents>web-app</parents>
 
-<p>&lt;rewrite-real-path> configures an alias for the getRealPath() call, i.e. an enhancement
-to the &lt;path-mapping> tag.</p>
+<p>
+&lt;rewrite-real-path> configures an alias for the getRealPath() call, i.e.
+an enhancement to the &lt;path-mapping> tag. It provides a virtual directory
+mapping that allows url patterns in the web application to have a local path anywhere
+on the physical filesystem.
+</p>
+<!-- note: "virtual-directory-mapping" "local-path" and "url-pattern" are weblogic terms/config for the same thing -->
 
 <p>The source path is a URL, the target path is a real filesystem path.</p>
 
@@ -864,6 +869,52 @@ to the &lt;path-mapping> tag.</p>
     &lt;real-path regexp="^/images" target="/usr/local/share/images"/>
   &lt;/rewrite-real-path>
 </example>
+
+<example title="Managing versions of software bundles">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-real-path&gt;
+    &lt;real-path regexp="^/" target="WEB-INF/SugarCE-Full-5.0.0a"/&gt;
+  &lt;/rewrite-real-path&gt;
+</example>
+
+<s2 title="Merge paths">
+
+<p>
+A merge path is a collection of paths, similar to a classpath.  It allows the
+specification of multiple paths that are merged together and presented to the
+application as if it was one unified path.  Merge paths are specified with a
+syntax of "<code>merge:(path1[;path2[;pathN]])</code>".  If a file is in
+<code>path1</code> it overrides a file with the same name in <code>path2</code>,
+if a file is not in <code>path1</code> then the file will be matched to
+<code>path2</code>.
+</p>
+
+<p>
+Merge paths are useful for specifying customization directories that allow for
+the insertion of files that replace the usual file that is shipped with a web
+application.
+</p>
+
+<!-- server/13n8.qa -->
+<example title="Merge path: replacing some images with custom images">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;rewrite-real-path&gt;
+    &lt;real-path regexp="^/images" target="merge:(custom-images;images)"/&gt;
+  &lt;/rewrite-real-path&gt;
+</example>
+
+<!-- server/13n9.qa -->
+<example title="Merge path: managing the versioning and customization of a php application">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-real-path&gt;
+    &lt;real-path regexp="^/" target="merge:(WEB-INF/SugarCE-local;WEB-INF/SugarCE-Full-5.0.0a)"/&gt;
+  &lt;/rewrite-real-path&gt;
+</example>
+
+</s2>
 
 </defun>
 
