@@ -2276,7 +2276,6 @@ public class WebApp extends ServletContextImpl
     throws IOException
   {
     AbstractAccessLog log = getAccessLog();
-    System.out.println("LOG: " + log);
     if (log != null)
       log.log(req, res, this);
   }
