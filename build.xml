@@ -10,6 +10,7 @@
   <property name="modules" location="${basedir}/modules"/>
   <property name="src" location="${basedir}/src"/>
   <property name="ext" location="${basedir}/modules/ext"/>
+  <property name="ivy.lib" location="${basedir}/ivy-lib"/>
   <property name="doc" location="${basedir}/doc"/>
 
   <property name="build" location="${install}/build"/>
@@ -55,7 +56,8 @@
   <property name="FLEX_HOME" value="${user.home}/flash"/>
 
   <target name="update">
-    <ivy:retrieve pattern="${basedir}/ivy-lib/[artifact]-[revision].[ext]"/>
+    <mkdir dir="${ivy.lib}"/>
+    <ivy:retrieve pattern="${ivy.lib}/[artifact]-[revision].[ext]"/>
   </target>
 
   <target name="tstamp">
@@ -74,18 +76,34 @@
   <target name="init" depends="tstamp">
     <property name="product" value="Resin"/>
     <property name="shortproduct" value="resin"/>
-    <property name="version" value="3.1.s${snapshotdate}"/>
+    
+    <condition property="maven.version" value="${version}">
+      <isset property="version"/>
+    </condition>
     <property name="maven.version" value="3.1-SNAPSHOT"/>
+    
+    <condition property="maven.metadata.template" value="release">
+      <isset property="version"/>
+    </condition>
+    <property name="maven.metadata.template" value="snapshot"/>
+    
+    <condition property="maven.m2" value="m2">
+      <isset property="version"/>
+    </condition>
+    <property name="maven.m2" value="m2-snapshot"/>
+    <property name="maven.root" value="${dist}/${maven.m2}"/>
+    
+    <property name="version" value="3.1.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/webapps"/>
     <mkdir dir="${build}/ext-webapp-lib"/>
+    <mkdir dir="${ivy.lib}"/>
 
     <condition property="unix">
       <os family="unix"/>
     </condition>
-
   </target>
 
   <target name="compile" 
@@ -440,6 +458,9 @@
           <include name="*/classes"/>
        </dirset>
         <fileset dir="${ext}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${ivy.lib}">
           <include name="**/*.jar"/>
         </fileset>
       </classpath>
@@ -1100,30 +1121,29 @@
   </target>
 
   <target name="maven-dist" depends="init">
-    <property name="maven" value="${dist}/m2-snapshot/com/caucho/"/>
-
+    <property name="maven" value="${maven.root}/com/caucho/"/>
+    
     <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="webbeans"/>
-      <param name="jar.name" value="webbeans-16.jar"/>
-      <param name="maven.name" value="resin-webbeans"/>
+      <param name="module.name" value="resin"/>
+      <param name="maven.name" value="resin"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="deploy"/>
-      <param name="jar.name" value="resin-deploy.jar"/>
-      <param name="maven.name" value="resin-deploy"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="util"/>
-      <param name="jar.name" value="resin-util.jar"/>
-      <param name="maven.name" value="resin-util"/>
+      <param name="module.name" value="ant"/>
+      <param name="jar.name" value="resin-ant.jar"/>
+      <param name="maven.name" value="resin-ant"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="ejb"/>
       <param name="jar.name" value="ejb-15.jar"/>
       <param name="maven.name" value="resin-ejb"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="deploy"/>
+      <param name="jar.name" value="resin-deploy.jar"/>
+      <param name="maven.name" value="resin-deploy"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
@@ -1187,14 +1207,15 @@
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="maven"/>
+      <param name="jar.name" value="resin-maven-plugin.jar"/>
+      <param name="maven.name" value="resin-maven-plugin"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="quercus"/>
       <param name="jar.name" value="quercus.jar"/>
       <param name="maven.name" value="resin-quercus"/>
-    </antcall>
-    
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="resin"/>
-      <param name="maven.name" value="resin"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
@@ -1204,9 +1225,15 @@
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="maven"/>
-      <param name="jar.name" value="resin-maven-plugin.jar"/>
-      <param name="maven.name" value="resin-maven-plugin"/>
+      <param name="module.name" value="util"/>
+      <param name="jar.name" value="resin-util.jar"/>
+      <param name="maven.name" value="resin-util"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="webbeans"/>
+      <param name="jar.name" value="webbeans-16.jar"/>
+      <param name="maven.name" value="resin-webbeans"/>
     </antcall>
   </target>
 
@@ -1214,8 +1241,8 @@
     <exec executable="rsync">
       <arg value="-av"/>
       <arg value="--rsh=ssh"/>
-      <arg value="${maven}"/>
-      <arg value="caucho@weasley.caucho.com:/var/www/hosts/www.caucho.com/webapps/ROOT/m2-snapshot/com/caucho/"/>
+      <arg value="${maven.root}"/>
+      <arg value="caucho@weasley.caucho.com:/var/www/hosts/www.caucho.com/webapps/"/>
     </exec>
   </target>
 
@@ -1253,7 +1280,18 @@
     <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
               algorithm="md5"/>
 
-    <copy file="maven2/snapshot-metadata.xml"
+    <copy file="${modules}/${module.name}/maven2/ivy.xml"
+          tofile="${maven.dist}/ivy-${maven.version}.xml"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${maven.version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+      </filterset>
+    </copy>
+
+    <copy file="maven2/${maven.metadata.template}-metadata.xml"
           tofile="${maven}/${maven.name}/maven-metadata.xml"
           preservelastmodified="true"
           overwrite="true">
@@ -1366,7 +1404,6 @@
   <target name="clean" depends="init">
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
-    <delete dir="${basedir}/ivy-lib"/>
     <delete>
       <fileset dir="${modules}">
         <include name="*/classes/**"/>
@@ -1383,6 +1420,7 @@
   <target name="distclean" depends="init, clean, win32clean">
     <delete dir="${install}/conf"/>
     <delete dir="${lib}"/>
+    <delete dir="${ivy.lib}"/>
     <delete dir="${clientlib}"/>
     <delete dir="${install}/unix"/>
 

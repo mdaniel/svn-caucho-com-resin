@@ -8,6 +8,14 @@
   <name>Resin Web Server</name>
   <url>http://caucho.com</url>
 
+  <scm>
+    <url>svn://svn.caucho.com/home/svnroot/resin/trunk</url>
+  </scm>
+
+  <description>
+  resin is the core .jar file for the Resin application server
+  </description>
+
   <licenses>
     <license>
       <name>The GNU General Public License Version 2</name>
