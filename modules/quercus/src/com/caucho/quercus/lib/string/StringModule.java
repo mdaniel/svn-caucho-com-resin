@@ -633,17 +633,17 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static Value implode(Env env,
                               Value glueV,
-                              Value piecesV)
+                              @Optional Value piecesV)
   {
     StringValue glue;
     ArrayValue pieces;
 
-    if (piecesV instanceof ArrayValue) {
-      pieces = (ArrayValue) piecesV;
+    if (piecesV.isArray()) {
+      pieces = piecesV.toArrayValue(env);
       glue = glueV.toStringValue();
     }
-    else if (glueV instanceof ArrayValue) {
-      pieces = (ArrayValue) glueV;
+    else if (glueV.isArray()) {
+      pieces = glueV.toArrayValue(env);
       glue = piecesV.toStringValue();
     }
     else {
@@ -652,7 +652,7 @@ public class StringModule extends AbstractQuercusModule {
 
       return NullValue.NULL;
     }
-
+    
     StringValue sb = glue.createStringBuilder();
     boolean isFirst = true;
 
