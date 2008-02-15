@@ -57,8 +57,9 @@ public class IteratorDelegate implements TraversableDelegate
 
   public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
   {
+    // doesn't belong here
     // php/4ar3
-    env.error(L.l("An iterator cannot be used with foreach by reference"));
+    //env.error(L.l("An iterator cannot be used with foreach by reference"));
     
     return new KeyIterator(env, qThis);
   }

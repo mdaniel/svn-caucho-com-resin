@@ -55,6 +55,9 @@ public class ServerArrayValue extends ArrayValueImpl {
   private static final StringValue DOCUMENT_ROOT_V
     = new StringBuilderValue("DOCUMENT_ROOT");
   
+  private static final StringValue SERVER_SOFTWARE_V
+    = new StringBuilderValue("SERVER_SOFTWARE");
+  
   private static final StringValue SERVER_PROTOCOL_V
     = new StringBuilderValue("SERVER_PROTOCOL");
   private static final StringValue REQUEST_METHOD_V
@@ -220,6 +223,13 @@ public class ServerArrayValue extends ArrayValueImpl {
       super.put(REMOTE_PORT_V,
                 new LongValue(request.getRemotePort()));
 
+      // Drupal's optional activemenu plugin only works on Apache servers!
+      // bug at http://drupal.org/node/221867
+      super.put(SERVER_SOFTWARE_V,
+                _env.createString("Apache PHP Quercus("
+                                  + _env.getQuercus().getVersion()
+                                  + ")"));
+      
       super.put(SERVER_PROTOCOL_V,
                 _env.createString(request.getProtocol()));
       super.put(REQUEST_METHOD_V,
