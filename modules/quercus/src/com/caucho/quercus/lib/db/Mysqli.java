@@ -244,6 +244,19 @@ public class Mysqli extends JdbcConnectionResource {
 	  
 	  url += sep + "useCompression=true";
 	}
+
+	// Explicitly indicate that iso-8859-1 encoding should
+	// be used as the default driver encoding. We don't want the
+	// driver to use its version of Cp1252 because that encoding
+	// does not support byte values in the range 0x80 to 0x9f.
+	//
+	// php/144b
+
+	if (true) {
+	  char sep = url.indexOf('?') < 0 ? '?' : '&';
+
+	  url += sep + "characterEncoding=ISO8859_1";
+	}
       }
 
       Connection jConn = env.getConnection(driver, url, userName, password);
