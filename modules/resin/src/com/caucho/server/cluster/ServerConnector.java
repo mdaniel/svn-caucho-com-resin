@@ -298,12 +298,16 @@ public class ServerConnector
       if (name == null)
         name = "";
 
-      _admin.register();
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  public void register()
+  {
+    _admin.register();
   }
 
   /**

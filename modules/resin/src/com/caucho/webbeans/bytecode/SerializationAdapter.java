@@ -57,6 +57,8 @@ public class SerializationAdapter {
   {
     if (Modifier.isFinal(cl.getModifiers()))
       return cl;
+    if (HandleAware.class.isAssignableFrom(cl))
+      return cl;
     
     SerializationAdapter gen = new SerializationAdapter(cl);
 

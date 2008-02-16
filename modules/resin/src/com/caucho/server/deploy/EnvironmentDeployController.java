@@ -374,17 +374,18 @@ abstract public class
 
   protected void fillInitList(ArrayList<DeployConfig> initList)
   {
-    if (_config != null && _config.isSkipConfig())
-      return;
-    
-    for (DeployConfig config : _configDefaults) {
-      DeployConfig prologue = config.getPrologue();
+    boolean isSkipDefault = _config != null && _config.isSkipDefaultConfig();
 
-      if (prologue != null)
-	initList.add(prologue);
-    }
+    if (! isSkipDefault) {
+      for (DeployConfig config : _configDefaults) {
+	DeployConfig prologue = config.getPrologue();
+
+	if (prologue != null)
+	  initList.add(prologue);
+      }
     
-    initList.addAll(_configDefaults);
+      initList.addAll(_configDefaults);
+    }
 
     if (_config != null && ! initList.contains(_config))
       initList.add(_config);

@@ -50,6 +50,7 @@ public class JavaMailConfig extends AbstractBeanConfig {
 
   private Properties _props = new Properties();
   private Authenticator _auth;
+  private Session _session;
   
   public JavaMailConfig()
   {
@@ -181,16 +182,19 @@ public class JavaMailConfig extends AbstractBeanConfig {
       if (getInit() != null)
 	getInit().configure(this);
       
-      Session session;
-      
       if (_auth != null)
-	session = Session.getInstance(_props, _auth);
+	_session = Session.getInstance(_props, _auth);
       else
-	session = Session.getInstance(_props);
+	_session = Session.getInstance(_props);
 
-      register(session);
+      register(_session);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  public Object replaceObject()
+  {
+    return _session;
   }
 }

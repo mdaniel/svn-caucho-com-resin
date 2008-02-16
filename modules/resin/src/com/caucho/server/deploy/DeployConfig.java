@@ -72,7 +72,7 @@ public class DeployConfig {
   private Period _redeployCheckInterval;
 
   // if true, skip defaults
-  private boolean _isSkipConfig;
+  private boolean _isSkipDefaultConfig;
 
   // The configuration program
   private ContainerProgram _program = new ContainerProgram();
@@ -128,17 +128,17 @@ public class DeployConfig {
   /**
    * Skip the defaults (for admin)
    */
-  public boolean isSkipConfig()
+  public boolean isSkipDefaultConfig()
   {
-    return _isSkipConfig;
+    return _isSkipDefaultConfig;
   }
 
   /**
    * Skip the defaults (for admin)
    */
-  public void setSkipConfig(boolean isDefault)
+  public void setSkipDefaultConfig(boolean isDefault)
   {
-    _isSkipConfig = isDefault;
+    _isSkipDefaultConfig = isDefault;
   }
 
   /**

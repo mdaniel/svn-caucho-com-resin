@@ -43,7 +43,7 @@ public class LoggerConfig {
   private static final L10N L = new L10N(LoggerConfig.class);
 
   private Logger _logger;
-  private Level _level;
+  private Level _level = Level.INFO;
   private Boolean _useParentHandlers;
 
   /**

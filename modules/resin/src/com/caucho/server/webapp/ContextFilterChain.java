@@ -144,4 +144,9 @@ public class ContextFilterChain implements FilterChain {
       thread.setContextClassLoader(oldLoader);
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
+  }    
 }

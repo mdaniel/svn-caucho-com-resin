@@ -513,8 +513,10 @@ public class ClusterServer {
   {
     _clusterPort.init();
 
-    if (_cluster != null)
+    if (_cluster != null) {
       _serverConnector.init();
+      _serverConnector.register();
+    }
   }
 
   /**

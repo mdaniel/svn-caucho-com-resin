@@ -470,8 +470,13 @@ public class ConfigContext {
 	childBean = childType.create(bean);
       else if (attrStrategy.isAllowText()
 	       && (text = getTextValue(childNode)) != null) {
+	boolean isTrim = ! (childNode instanceof Attribute);
+	  
 	if (isEL() && attrStrategy.isEL()
 	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
+	  if (isTrim)
+	    text = text.trim();
+	  
 	  Object elValue = eval(attrStrategy, text);
 
 	  // ioc/2410
@@ -481,8 +486,6 @@ public class ConfigContext {
 	    attrStrategy.setValue(bean, qName, null);
 	}
 	else {
-	  boolean isTrim = (childNode instanceof Element);
-	  
 	  setText(bean, qName, text, attrStrategy, isTrim);
 	}
 

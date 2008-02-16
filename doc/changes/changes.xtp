@@ -12,7 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
-<li>clustering: updated logging for btree insert exceptions (#2403, rep by gjvc)</li>
+<li>(2008-02-15) clustering: updated logging for btree insert exceptions (#2403, rep by gjvc)</li>
 <li>build: distribution missing aclocal.m4 (#2421, rep by norlab)</li>
 <li>webbeans: ScopeAdapter beans need to throw a config-time error if zero-arg constructor is missing (#2332, rep by wesley)</li>
 <li>access-log: add logging for bad requests, e.g. 400s (#2266, rep by jornsvendsen)</li>
