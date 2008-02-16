@@ -3598,8 +3598,8 @@ public class Env {
       }
 
       QuercusPage page = _includeMap.get(path);
-      
-      if (page == null) {
+
+      if (page == null || page.isModified(this)) {
 	page = _quercus.parse(path);
 	
 	page.importDefinitions(this);

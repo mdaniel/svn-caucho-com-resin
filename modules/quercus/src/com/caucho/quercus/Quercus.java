@@ -164,6 +164,7 @@ public class Quercus
   private String _mySqlVersion;
 
   private boolean _isStrict;
+  private boolean _isRequireSource;
 
   private DataSource _database;
 
@@ -484,6 +485,19 @@ public class Quercus
   public boolean isStrict()
   {
     return _isStrict;
+  }
+  
+  public void setRequireSource(boolean isRequireSource)
+  {
+    _isRequireSource = isRequireSource;
+  }
+  
+  /*
+   * Returns whether the php source is required for compiled files.
+   */
+  public boolean isRequireSource()
+  {
+    return _isRequireSource;
   }
 
   /**

@@ -52,6 +52,15 @@ public class InterpretedPage extends QuercusPage
   }
   
   /**
+   * Returns true if the page is modified.
+   */
+  @Override
+  public boolean isModified(Env env)
+  {
+    return _program.isModified();
+  }
+  
+  /**
    * Execute the program
    *
    * @param env the calling environment
