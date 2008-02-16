@@ -470,7 +470,7 @@ public class ConfigContext {
 	childBean = childType.create(bean);
       else if (attrStrategy.isAllowText()
 	       && (text = getTextValue(childNode)) != null) {
-	boolean isTrim = ! (childNode instanceof Attribute);
+	boolean isTrim = isTrim(childNode);
 	  
 	if (isEL() && attrStrategy.isEL()
 	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
@@ -563,6 +563,20 @@ public class ConfigContext {
     }
     else
       attrStrategy.setText(bean, qName, text);
+  }
+
+  private boolean isTrim(Node node)
+  {
+    if (node instanceof Attr)
+      return false;
+    else if (node instanceof Element) {
+      Element elt = (Element) node;
+
+      if (! "".equals(elt.getAttribute("xml:space")))
+	return false;
+    }
+
+    return true;
   }
 
   private ConfigProgram buildProgram(Attribute attr, Node node)

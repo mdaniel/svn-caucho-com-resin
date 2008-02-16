@@ -721,11 +721,13 @@ public class TypeFactory implements AddLoaderListener
     private String _className;
 
     private ConfigType _configType;
+    private ClassLoader _loader;
 
     BeanConfig(String ns, boolean isDefault)
     {
       _ns = ns;
       _isDefault = isDefault;
+      _loader = Thread.currentThread().getContextClassLoader();
     }
 
     public void setName(String name)
@@ -749,7 +751,7 @@ public class TypeFactory implements AddLoaderListener
 	if (_configType == null) {
 	  QName qName = new QName(null, _name, _ns);
 	
-	  Class cl = Class.forName(_className);
+	  Class cl = Class.forName(_className, false, _loader);
 
 	  ConfigType type = createType(cl);
 
