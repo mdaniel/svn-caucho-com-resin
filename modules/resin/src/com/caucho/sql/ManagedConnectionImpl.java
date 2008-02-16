@@ -621,10 +621,15 @@ public class ManagedConnectionImpl
 	_catalog = _catalogOrig;
       }
 
-      // only call setCatalog() if changed and only set _catalog
-      // when we know setCatalog() worked.
+      if (catalog == null || catalog.length() == 0) {
+        // Clear the current catalog but don't invoke setCatalog()
+        // on the driver without a valid database name.
 
-      if (_catalog != null && ! _catalog.equals(catalog)) {
+	_catalog = catalog;
+      } else if (_catalog != null && ! _catalog.equals(catalog)) {
+        // only call setCatalog() if changed and only set _catalog
+        // when we know setCatalog() worked.
+
 	_driverConnection.setCatalog(catalog);
 	_catalog = catalog;
       }

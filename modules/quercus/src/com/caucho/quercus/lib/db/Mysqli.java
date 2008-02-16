@@ -722,15 +722,7 @@ public class Mysqli extends JdbcConnectionResource {
         tok = parseSqlToken(sql, tok);
 
         if (tok != null) {
-          String dbname = tok.toString();
-
-          // Extract database name if back quoted : "USE `DBNAME`"
-
-          if (dbname.length() >= 2 &&
-              dbname.charAt(0) == '`' &&
-              dbname.charAt(dbname.length() - 1) == '`') {
-            dbname = dbname.substring(1, dbname.length() - 1);
-          }
+          String dbname = tok.toUnquotedString();
 
           setCatalog(dbname);
 

@@ -677,6 +677,29 @@ public abstract class JdbcConnectionResource
         if (tok.matchesToken("DROP")) {
           // drop/alter clears metadata cache
           _tableMetadataMap.clear();
+
+          // If DROP is dropping the current database, then clear
+          // the cached database name in the driver.
+          //
+          // php/144a
+
+          tok = parseSqlToken(sql, tok);
+
+          if ((tok != null) && tok.matchesToken("DATABASE")) {
+            tok = parseSqlToken(sql, tok);
+
+            if (tok != null) {
+              String dbname = tok.toUnquotedString();
+
+              if (getCatalog().toString().equals(dbname)) {
+                try {
+                  setCatalog(null);
+                } catch (SQLException e) {
+                  log.log(Level.FINEST, e.toString(), e);
+                }
+              }
+            }
+          }
         }
         break;
       }
@@ -833,9 +856,6 @@ public abstract class JdbcConnectionResource
   public void setCatalog(String name)
     throws SQLException
   {
-    if (name == null || name.length() == 0)
-      return;
-
     clearErrors();
 
     if (! _isUsed && _isCatalogOptimEnabled) {
@@ -1091,6 +1111,27 @@ public abstract class JdbcConnectionResource
         _token = _query.substring(_start, _end);
       
       return _token;
+    }
+
+    /*
+     * Return the SQL token as a string. If the token
+     * is back quoted, then remove the back quotes and
+     * return the string inside.
+     */
+
+    public String toUnquotedString()
+    {
+      String tok = toString();
+
+      // Extract database name if back quoted : "DROP DATABASE `DBNAME`"
+
+      if (tok.length() >= 2 &&
+        tok.charAt(0) == '`' &&
+        tok.charAt(tok.length() - 1) == '`') {
+        tok = tok.substring(1, tok.length() - 1);
+      }
+
+      return tok;
     }
   }
 }
