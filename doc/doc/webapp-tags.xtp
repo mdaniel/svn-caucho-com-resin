@@ -6,12 +6,6 @@
 
   <description>
 
-  <glossary title="web application" type="inline">
-  A web application is a self-contained
-  subtree of the web site.  It has a distinct Application object
-  (ServletContext), sessions, and servlet mappings.
-  </glossary>
-
   <p>Web applications are configured with the &lt;web-app> tag, which can occur in a number of places.</p>
       
   <ul>
@@ -39,8 +33,12 @@
 
 <s1 title="See Also">
 <ul>
-<li><a href="env-tags.xtp">Environment tags</a> for resources, beans,
-database, JMS queues, etc.</li>
+<li><a href="env-tags.xtp">Resources tags</a> for beans, components,
+databases, @Stateless and @Stateful EJBs, JMS queues, etc.</li>
+<li><a href="resin-security.xtp">Security</a> for a full description
+of Resin's authentication and authorization.</li>
+<li><a href="rewrite-tags.xtp">Rewrite tags</a> for Resin's rewrite-dispatch
+rewriting.</li>
 </ul>
 </s1>
 
@@ -216,15 +214,6 @@ can add security to a website by not forwarding HTTP cookies to
 SSL HTTPS requests.</p>
 
 </defun>
-
-<defun title="&lt;description>" version="Servlet">
-</defun>
-
-<defun title="&lt;display-name>" version="Servlet">
-</defun>
-
-<defun title="&lt;distributable>" version="Servlet">
-</defun>
     
 <defun title="&lt;ear-deploy>">
 <parents>host, web-app</parents>
@@ -246,53 +235,6 @@ for ear expansion.</p>
   <td>value of path</td>
 </tr>
 </deftable-childtags>
-
-</defun>
-
-<defun title="&lt;ejb-local-ref>" version="Servlet">
-<parents>web-app</parents>
-</defun>
-
-<defun title="&lt;ejb-ref>" version="Servlet">
-<parents>web-app</parents>
-</defun>
-
-<defun title="&lt;env-entry>" version="Servlet">
-</defun>
-
-<defun title="Environment Tags" version="Resin 3.1">
-<parents>cluster, host, web-app</parents>
-
-<p>All <a href="env-tags.xtp">Environment tags</a> are
-available to the &lt;web-app&gt;.  For example,
-resources like &lt;database&gt;.</p>
-
-<example title="web-app database in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;database jndi-name="jdbc/test"&gt;
-    &lt;driver type="org.postgresql.Driver"&gt;
-      &lt;url&gt;jdbc:postgresql://localhost/test&lt;/url&gt;
-      &lt;user&gt;caucho&lt;/user&gt;
-    &lt;/driver&gt;
-  &lt;/database&gt;
-&lt;/web-app&gt;
-</example>
-
-<p>Or <a href="ioc-bean.xtp">IoC-configured Beans</a>:</p>
-
-<example title="IoC bean in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;bean jndi-name="jdbc/test" type="example.Theater&gt;
-    &lt;init name="Balboa Theater">
-      &lt;movie title="Attack of the Killer Tomatoes"/>
-
-      &lt;movie title="Snakes on a Plane"/>
-
-      &lt;movie title="Casablanca"/>
-    &lt;/init>
-  &lt;/bean>
-&lt;/web-app&gt;
-</example>
 
 </defun>
 
@@ -761,12 +703,6 @@ Digest</a>.</p>
 
 </p></defun>
 
-<defun title="&lt;message-destination-ref>" version="Servlet">
-</defun>
-
-<defun title="&lt;message-destination>" version="Servlet">
-</defun>
-
 <defun title="&lt;mime-mapping>" version="Servlet 2.2">
 <parents>web-app</parents>
 <p>Maps url patterns to mime-types.</p>
@@ -913,10 +849,43 @@ classes or configuration files change.</p>
 
 </defun>
 
-<defun title="&lt;resource-env-ref>" version="Servlet">
-</defun>
+<defun title="Resource Tags" version="Resin 3.1">
+<parents>cluster, host, web-app</parents>
 
-<defun title="&lt;resource-ref>" version="Servlet">
+<p>See the <a href="env-tags.xtp">Resource tag documentation</a> for
+ a full list of resources available to the web-app.</p>
+
+<p>All resource tags are available to
+the &lt;web-app>, like databases, IoC beans and components, EJB stateful,
+stateless and message beans, JMS queues, remote clients, etc.</p>
+
+<example title="web-app database in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;database jndi-name="jdbc/test"&gt;
+    &lt;driver type="org.postgresql.Driver"&gt;
+      &lt;url&gt;jdbc:postgresql://localhost/test&lt;/url&gt;
+      &lt;user&gt;caucho&lt;/user&gt;
+    &lt;/driver&gt;
+  &lt;/database&gt;
+&lt;/web-app&gt;
+</example>
+
+<p>Or <a href="ioc-bean.xtp">IoC-configured Beans</a>:</p>
+
+<example title="IoC bean in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;bean jndi-name="jdbc/test" type="example.Theater&gt;
+    &lt;init name="Balboa Theater">
+      &lt;movie title="Attack of the Killer Tomatoes"/>
+
+      &lt;movie title="Snakes on a Plane"/>
+
+      &lt;movie title="Casablanca"/>
+    &lt;/init>
+  &lt;/bean>
+&lt;/web-app&gt;
+</example>
+
 </defun>
 
 <defun title="&lt;rewrite-dispatch>" version="Resin 3.1">

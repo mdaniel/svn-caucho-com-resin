@@ -519,7 +519,7 @@ public class TypeFactory implements AddLoaderListener
 	if (cl != null)
 	  schemes.add(scheme);
       } catch (Exception e) {
-	log.finest(apiType + " schmes: " + e.toString());
+	log.finest(apiType + " schemes: " + e.toString());
       }
     }
   }
@@ -643,7 +643,7 @@ public class TypeFactory implements AddLoaderListener
     private boolean _isDefault;
     private Path _path;
     
-    private AtomicBoolean _isBeansLoaded = new AtomicBoolean();;
+    private AtomicBoolean _isBeansLoaded = new AtomicBoolean();
 
     private HashMap<String,BeanConfig> _beanMap
       = new HashMap<String,BeanConfig>();
