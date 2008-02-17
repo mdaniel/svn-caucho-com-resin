@@ -94,7 +94,7 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     WebBeansContainer webBeans = WebBeansContainer.create();
 
     webBeans.addSingleton(controller, type.getName());
+
+    webBeans.update();
   }
 }
-
-  

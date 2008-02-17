@@ -47,12 +47,14 @@ public class NamedText implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
     out.writeStartElement("b");
     out.writeCharacters(_name);
     out.writeEndElement(); // b
 
     out.writeCharacters(" ");
     _text.writeHtml(out);
+    out.writeEmptyElement("br");
   }
 
   public void writeLaTeX(PrintWriter out)

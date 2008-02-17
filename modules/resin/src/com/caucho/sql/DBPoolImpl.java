@@ -105,7 +105,8 @@ import java.util.logging.Logger;
  * and also protects against the database dropping old connections.
  */
 public class DBPoolImpl implements AlarmListener, EnvironmentListener {
-  protected static final Logger log = Log.open(DBPoolImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(DBPoolImpl.class.getName());
   private static final L10N L = new L10N(DBPoolImpl.class);
 
   /**

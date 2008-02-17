@@ -76,9 +76,16 @@ public class ConnectionFactoryConfig extends BeanConfig {
   
   private static L10N L = new L10N(ConnectionFactoryConfig.class);
 
+  private ResourceAdapter _ra;
+
   public ConnectionFactoryConfig()
   {
     setBeanConfigClass(ManagedConnectionFactory.class);
+  }
+
+  public void setResourceAdapter(ResourceAdapter ra)
+  {
+    _ra = ra;
   }
 
   public void init()
@@ -92,35 +99,14 @@ public class ConnectionFactoryConfig extends BeanConfig {
     
     if (managedFactory instanceof ResourceAdapterAssociation) {
       Class cl = managedFactory.getClass();
-      
-      ResourceArchive ra
-	= ResourceArchiveManager.findResourceArchive(cl.getName());
 
-      if (ra == null) {
-	throw new ConfigException(L.l("'{0}' does not have a defined resource-adapter.  Check the rar or META-INF/resin-ra.xml files",
-				      cl.getName()));
-      }
-      
-      WebBeansContainer webBeans = WebBeansContainer.create();
-    
-      ComponentFactory<ResourceAdapterController> raComp
-	= webBeans.resolveByType(ResourceAdapterController.class,
-				 Names.create(ra.getResourceAdapterClass().getName()));
-
-      if (raComp == null) {
-	throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
-				      ra.getResourceAdapterClass().getName(),
-				      cl.getName()));
-      }
-
-      ResourceAdapterController raController
-	= (ResourceAdapterController) raComp.get();
+      ResourceAdapter ra = findResourceAdapter(cl);
 
       ResourceAdapterAssociation factoryAssoc
 	= (ResourceAdapterAssociation) managedFactory;
 
       try {
-	factoryAssoc.setResourceAdapter(raController.getResourceAdapter());
+	factoryAssoc.setResourceAdapter(ra);
       } catch (Exception e) {
 	throw ConfigException.create(e);
       }
@@ -178,6 +164,37 @@ public class ConnectionFactoryConfig extends BeanConfig {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  private ResourceAdapter findResourceAdapter(Class cl)
+  {
+    if (_ra != null)
+      return _ra;
+    
+    ResourceArchive ra
+      = ResourceArchiveManager.findResourceArchive(cl.getName());
+
+    if (ra == null) {
+      throw new ConfigException(L.l("'{0}' does not have a defined resource-adapter.  Either define it in a &lt;resource-adapter> property or check the rar or META-INF/resin-ra.xml files",
+				    cl.getName()));
+    }
+      
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    ComponentFactory<ResourceAdapterController> raComp
+      = webBeans.resolveByType(ResourceAdapterController.class,
+			       Names.create(ra.getResourceAdapterClass().getName()));
+
+    if (raComp == null) {
+      throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
+				    ra.getResourceAdapterClass().getName(),
+				    cl.getName()));
+    }
+
+    ResourceAdapterController raController
+      = (ResourceAdapterController) raComp.get();
+
+    return raController.getResourceAdapter();
   }
 
   @Override

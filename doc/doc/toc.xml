@@ -24,36 +24,6 @@
       -->
     </item>
 
-    <!-- line/rule goes here? -->
-    
-    <!--
-       - Admin/JMX
-      -->
-    <item link="resin-admin.xtp" title="Admin"/>
-    
-    <!--
-       - Amber
-      -->
-    <item link="amber.xtp" title="Amber"/>
-      
-    <item link="resin-clustering.xtp" title="Clustering"/>
-    <!--
-      <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
-      <item link="config-sessions.xtp" title="Sessions"/>
-      <item link="resin-load-balance.xtp" title="Load Balancing"/>
-    </item>
-    -->
-    
-    <!--
-       - Caching
-      -->
-    <item link="proxy-cache.xtp" title="Caching"/>
-    
-    <!--
-       - Comet
-      -->
-    <item link="resin-comet.xtp" title="Comet"/>
-
     <!--
        - Command-line
       -->
@@ -72,8 +42,8 @@
 	    description="if, choose, set, etc"/>
       <item link="database-tags.xtp" title="&lt;database>"
 	    description="connection pool and database driver configuration"/>
-      <item link="env-tags.xtp" title="Environment tags"
-            description="database, classloader, resource, bean, and IoC"/>
+      <item link="env-tags.xtp" title="Resource tags"
+            description="database, classloader, jms, bean, and IoC"/>
       <item link="host-tags.xtp" title="&lt;host>"
 	    description="virtual hosts" />
       <item link="config-log.xtp" title="Log tags"
@@ -107,6 +77,36 @@
         <item link="j2ee-web-xml-schema.xtp" title="J2EE web.xml"/>
       </item>
     </item>
+
+    <!-- line/rule goes here? -->
+    
+    <!--
+       - Admin/JMX
+      -->
+    <item link="resin-admin.xtp" title="Admin"/>
+    
+    <!--
+       - Amber
+      -->
+    <item link="amber.xtp" title="Amber"/>
+      
+    <item link="resin-clustering.xtp" title="Clustering"/>
+    <!--
+      <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
+      <item link="config-sessions.xtp" title="Sessions"/>
+      <item link="resin-load-balance.xtp" title="Load Balancing"/>
+    </item>
+    -->
+    
+    <!--
+       - Caching
+      -->
+    <item link="proxy-cache.xtp" title="Caching"/>
+    
+    <!--
+       - Comet
+      -->
+    <item link="resin-comet.xtp" title="Comet"/>
       
     <!--
        - Database
