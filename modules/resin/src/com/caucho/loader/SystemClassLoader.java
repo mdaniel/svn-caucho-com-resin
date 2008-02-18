@@ -116,6 +116,25 @@ public class SystemClassLoader
     }
     
     initClasspath(System.getProperty("java.class.path"));
+
+    String []props = new String[] { };//"java.ext.dirs", "java.endorsed.dirs" };
+    for (String prop : props) {
+      String ext = System.getProperty(prop);
+      if (ext != null) {
+	try {
+	  Path dir = Vfs.lookup(ext);
+      
+	  for (String fileName : dir.list()) {
+	    Path file = dir.lookup(fileName);
+
+	    if (file.exists())
+	      addRoot(file);
+	  }
+	} catch (Exception e) {
+	  e.printStackTrace();
+	}
+      }
+    }
   }
 
   private void initClasspath(String classpath)
@@ -156,7 +175,7 @@ public class SystemClassLoader
     }
 
     // This causes problems with JCE
-    if (false && _hasBootClassPath) {
+    if (_hasBootClassPath) {
       String className = name.replace('.', '/') + ".class";
 
       if (findPath(className) == null)

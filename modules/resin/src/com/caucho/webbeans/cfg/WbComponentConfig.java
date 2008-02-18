@@ -239,7 +239,7 @@ public class WbComponentConfig {
     _init.addProgram(init);
   }
 
-  public ConfigProgram getInit()
+  public ContainerProgram getInit()
   {
     return _init;
   }
