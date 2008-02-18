@@ -53,8 +53,8 @@ public class FileSetType {
   
   private ArrayList<PathPatternType> _includeList;
   
-  private ArrayList<PathPatternType> _excludeList =
-    new ArrayList<PathPatternType>();
+  private ArrayList<PathPatternType> _excludeList
+    = new ArrayList<PathPatternType>();
 
   /**
    * Sets the starting directory.

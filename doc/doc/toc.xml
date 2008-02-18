@@ -202,17 +202,17 @@
       
     <item link="resin-remoting.xtp" title="Remoting"
           description="exposing Java services as HTTP/Web protocols"/>
+
+    <!--
+       - resources
+      -->
+    <item link="resources.xtp" title="Resources"/>
     
     <!--
        - Security
       -->
 	    
     <item link="resin-security.xtp" title="Security"/>
-
-    <!--
-       - resources
-      -->
-    <item link="resources.xtp" title="Resources"/>
     
     <!--
        - Servlet

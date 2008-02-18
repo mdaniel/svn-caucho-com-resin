@@ -1698,9 +1698,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (name.startsWith("/"))
       name = name.substring(1);
-    
+
+    // server/249b
+    /*
     if (name.endsWith("/"))
       name = name.substring(0, name.length() - 1);
+    */
     
     Vector<URL> resources = new Vector<URL>();
 

@@ -233,13 +233,13 @@ public class WbComponentConfig {
    */
   public void setInit(ContainerProgram init)
   {
-    if (_init != null)
-      _init.addProgram(init);
-    else
-      _init = init;
+    if (_init == null)
+      _init = new ContainerProgram();
+
+    _init.addProgram(init);
   }
 
-  public ContainerProgram getInit()
+  public ConfigProgram getInit()
   {
     return _init;
   }

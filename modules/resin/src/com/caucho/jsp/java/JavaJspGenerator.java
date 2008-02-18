@@ -516,6 +516,18 @@ public class JavaJspGenerator extends JspGenerator {
     _rootNode.printXml(ws);
     
     ws.close();
+
+    if (log.isLoggable(Level.FINER)) {
+      StringBuilder sb = new StringBuilder();
+      ReadStream is = ts.openRead();
+      int ch;
+      while ((ch = is.readChar()) >= 0) {
+	sb.append((char) ch);
+      }
+      is.close();
+
+      log.finer("JSP[" + _fullClassName + "] " + sb);
+    }
     
     _pageData = new QPageData(ts);
 

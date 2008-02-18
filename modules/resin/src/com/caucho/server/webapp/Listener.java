@@ -124,6 +124,9 @@ public class Listener extends DescriptionGroupConfig {
     
     _object = webBeans.getEnvironmentObject(_listenerClass);
 
+    if (_init != null)
+      _init.configure(_object);
+
     return _object;
   }
 

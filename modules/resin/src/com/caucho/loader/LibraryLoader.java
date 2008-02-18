@@ -111,7 +111,7 @@ public class LibraryLoader extends JarListLoader {
   /**
    * Sets a file set.
    */
-  public void setFileSet(FileSetType fileSet)
+  public void setFileset(FileSetType fileSet)
   {
     _fileSet = fileSet;
   }

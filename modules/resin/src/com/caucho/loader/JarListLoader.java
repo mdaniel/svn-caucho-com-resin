@@ -152,8 +152,11 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	      if (entryList == null) {
 		entryList = new ArrayList<JarEntry>();
 
+		// server/249b
+		/*
 		if (name.endsWith("/"))
-		  name = name.substring(0, name.length());
+		  name = name.substring(0, name.length() - 1);
+		*/
 		
 		pathMap.put(name, entryList);
 	      }
@@ -181,8 +184,11 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	    if (entryList == null) {
 	      entryList = new ArrayList<JarEntry>();
 
+	      // server/249b
+	      /*
 	      if (name.endsWith("/"))
 		name = name.substring(0, name.length() - 1);
+	      */
 	      
 	      pathMap.put(name, entryList);
 	    }

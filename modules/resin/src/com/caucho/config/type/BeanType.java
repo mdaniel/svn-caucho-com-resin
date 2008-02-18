@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.config.j2ee.*;
@@ -268,6 +269,22 @@ public class BeanType extends ConfigType
       inject(bean);
       init(bean);
       
+      return bean;
+    }
+    else if (_addProgram != null) {
+      Object bean = create(null);
+
+      inject(bean);
+      
+      try {
+	ConfigProgram program = new PropertyStringProgram("value", text);
+	_addProgram.setValue(bean, TEXT, program);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+
+      init(bean);
+
       return bean;
     }
 
