@@ -35,6 +35,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URLClassLoader;
 
 /**
@@ -109,28 +110,48 @@ public class SystemClassLoader
 
   private void initClasspath()
   {
-    String boot = System.getProperty("sun.boot.class.path");
-    if (boot != null) {
-      initClasspath(boot);
-      _hasBootClassPath = true;
-    }
+    boolean isValid = false;
     
-    initClasspath(System.getProperty("java.class.path"));
+    try {
+      String boot = System.getProperty("sun.boot.class.path");
+      if (boot != null) {
+	initClasspath(boot);
+	_hasBootClassPath = true;
 
-    String []props = new String[] { };//"java.ext.dirs", "java.endorsed.dirs" };
-    for (String prop : props) {
-      String ext = System.getProperty(prop);
-      if (ext != null) {
+	initExtDirs("java.ext.dirs");
+	initExtDirs("java.endorsed.dirs");
+      }
+    
+      initClasspath(System.getProperty("java.class.path"));
+
+      isValid = true;
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      if (! isValid)
+	_hasBootClassPath = false;
+    }
+  }
+
+  private void initExtDirs(String prop)
+    throws IOException
+  {
+    String extDirPath = System.getProperty(prop);
+
+    if (extDirPath == null)
+      return;
+
+    for (String extDir : extDirPath.split(File.pathSeparator, 512)) {
+      Path dir = Vfs.lookup(extDir);
+
+      for (String fileName : dir.list()) {
+	Path root = dir.lookup(fileName);
+
 	try {
-	  Path dir = Vfs.lookup(ext);
-      
-	  for (String fileName : dir.list()) {
-	    Path file = dir.lookup(fileName);
-
-	    if (file.exists())
-	      addRoot(file);
-	  }
-	} catch (Exception e) {
+	  if (root.exists())
+	    addRoot(root);
+	} catch (Throwable e) {
+	  _hasBootClassPath = false;
 	  e.printStackTrace();
 	}
       }
@@ -148,6 +169,7 @@ public class SystemClassLoader
 	if (root.exists())
 	  addRoot(root);
       } catch (Throwable e) {
+	_hasBootClassPath = false;
 	e.printStackTrace();
       }
     }
