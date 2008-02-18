@@ -330,7 +330,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     config.setIgnoreEnvironment(true);
 
     Vfs.setPwd(args.getRootDirectory());
-    ResinConfig resin = new ResinConfig();
+    ResinConfig resin = new ResinConfig(args);
 
     config.configure(resin,
 		     args.getResinConf(),
@@ -368,8 +368,33 @@ public class WatchdogManager extends ProtocolDispatchServer {
    * Class for the initial WatchdogManager configuration. 
    */
   class ResinConfig {
+    private WatchdogArgs _args;
+    
     private ArrayList<ContainerProgram> _clusterDefaultList
       = new ArrayList<ContainerProgram>();
+
+    ResinConfig()
+    {
+      _args = WatchdogManager.this._args;
+    }
+    
+    ResinConfig(WatchdogArgs args)
+    {
+      _args = args;
+    }
+
+    public WatchdogArgs getArgs()
+    {
+      return _args;
+    }
+
+    public String getId()
+    {
+      if (_args == null)
+	return "default";
+      else
+	return _args.getServerId();
+    }
     
     public void setManagement(ManagementConfig management)
     {
@@ -386,12 +411,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
     {
       _isWatchdogManagerConfig = true;
       
-      return new WatchdogManagerConfig();
+      return new WatchdogManagerConfig(this);
     }
 
     public ClusterConfig createCluster()
     {
-      ClusterConfig cluster = new ClusterConfig();
+      ClusterConfig cluster = new ClusterConfig(this);
 
       for (int i = 0; i < _clusterDefaultList.size(); i++)
 	_clusterDefaultList.get(i).configure(cluster);
@@ -413,8 +438,15 @@ public class WatchdogManager extends ProtocolDispatchServer {
   }
 
   public class WatchdogManagerConfig {
+    private ResinConfig _resin;
+    
     private ArrayList<ContainerProgram> _watchdogDefaultList
       = new ArrayList<ContainerProgram>();
+
+    WatchdogManagerConfig(ResinConfig resin)
+    {
+      _resin = resin;
+    }
 
     public void setWatchdogPort(int port)
     {
@@ -429,7 +461,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     public WatchdogConfig createWatchdog()
     {
-      WatchdogConfig config = new WatchdogConfig(_args);
+      WatchdogConfig config = new WatchdogConfig(_resin.getArgs());
 
       for (int i = 0; i < _watchdogDefaultList.size(); i++)
 	_watchdogDefaultList.get(i).configure(config);
@@ -444,7 +476,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
       
       if (watchdog == null)
         _watchdogMap.put(config.getId(), new Watchdog(config));
-      else
+      else if (_resin.getId().equals(watchdog.getId()))
         watchdog.setConfig(config);
 
       /*
@@ -455,8 +487,15 @@ public class WatchdogManager extends ProtocolDispatchServer {
   }
 
   public class ClusterConfig {
+    private ResinConfig _resin;
+    
     private ArrayList<ContainerProgram> _serverDefaultList
       = new ArrayList<ContainerProgram>();
+
+    ClusterConfig(ResinConfig resin)
+    {
+      _resin = resin;
+    }
 
     /**
      * Adds a new server to the cluster.
@@ -474,7 +513,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     public WatchdogConfig createServer()
     {
-      WatchdogConfig config = new WatchdogConfig(_args);
+      WatchdogConfig config = new WatchdogConfig(_resin.getArgs());
 
       for (int i = 0; i < _serverDefaultList.size(); i++)
 	_serverDefaultList.get(i).configure(config);
@@ -493,7 +532,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
       if (watchdog == null)
         _watchdogMap.put(config.getId(), new Watchdog(config));
       else if (watchdog.getResinConf().equals(config.getResinConf())) {
-        watchdog.setConfig(config);
+	if (_resin.getId().equals(config.getId()))
+	  watchdog.setConfig(config);
       }
       else
 	throw new ConfigException(L().l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",

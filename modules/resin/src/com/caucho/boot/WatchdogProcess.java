@@ -414,6 +414,7 @@ class WatchdogProcess
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     // #1970 - this confuses Terracotta
     // This is needed for JMX to work correctly.
+    
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
