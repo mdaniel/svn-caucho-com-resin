@@ -289,9 +289,9 @@ if ($live_count < 2) {
   echo "<pre>\n";
   echo "&lt;resin xmlns='http://caucho.com/ns/resin'>\n";
   echo "  &lt;management>\n";
-  echo "    &lt;user name='...' password='...'/>
+  echo "    &lt;user name='...' password='...'/>\n";
   echo "\n";
-  echo "    &lt;jmx-server/>
+  echo "    &lt;jmx-server/>\n";
   echo "  &lt;/management>\n";
   echo "  ...\n";
   echo "  &lt;cluster id='...'>\n";

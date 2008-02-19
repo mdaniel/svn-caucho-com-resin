@@ -52,7 +52,7 @@ to enable administration functionality.
 </p>
 
 <pre>
-&lt;resin xmlns="http://caucho.com">
+&lt;resin xmlns="http://caucho.com/ns/resin">
 
   &lt;management>
      &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
