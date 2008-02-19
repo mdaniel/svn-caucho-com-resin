@@ -42,20 +42,28 @@ public class EntityManagerFactoryComponent extends FactoryComponent {
   private PersistenceProvider _provider;
   private PersistenceUnitConfig _unit;
   private String _unitName;
+  private EntityManagerFactory _factory;
 
   public EntityManagerFactoryComponent(PersistenceProvider provider,
 				       PersistenceUnitConfig unit,
-				       String unitName)
+				       String unitName,
+				       EntityManagerFactory factory)
   {
     super(EntityManagerFactory.class, unitName);
 
     _provider = provider;
+    _unit = unit;
     _unitName = unitName;
+    _factory = factory;
+
+    // jpa/2110
+    if (_factory == null)
+      _factory = _provider.createContainerEntityManagerFactory(_unit, null);
   }
 
   @Override
   public Object create()
   {
-    return _provider.createContainerEntityManagerFactory(_unit, null);
+    return _factory;
   }
 }

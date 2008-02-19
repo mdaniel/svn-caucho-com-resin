@@ -850,7 +850,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
 
       WebBeansContainer webBeans = WebBeansContainer.create(_parentLoader);
-      webBeans.addComponent(new EntityManagerFactoryComponent(provider, unit, unitName));
+      webBeans.addComponent(new EntityManagerFactoryComponent(provider, unit, unitName, factory));
       webBeans.addComponent(new EntityManagerComponent(factory, unitName, props));
     } catch (RuntimeException e) {
       throw e;
