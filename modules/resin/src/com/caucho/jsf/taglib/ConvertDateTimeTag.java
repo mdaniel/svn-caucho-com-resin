@@ -133,7 +133,7 @@ public class ConvertDateTimeTag extends ConverterTag
     if (_dateStyleExpr != null)
       converter.setDateStyle((String) _dateStyleExpr.getValue(elContext));
 
-    if (_dateStyleExpr != null)
+    if (_timeStyleExpr != null)
       converter.setTimeStyle((String) _timeStyleExpr.getValue(elContext));
 
     if (_localeExpr != null) {
