@@ -28,47 +28,66 @@
 
 package com.caucho.jsf.application;
 
-import java.util.*;
-import java.lang.reflect.Constructor;
+import com.caucho.config.Config;
+import com.caucho.jsf.cfg.ManagedBeanConfig;
+import com.caucho.jsf.cfg.ResourceBundleConfig;
+import com.caucho.jsf.context.FacesELContext;
+import com.caucho.jsf.el.FacesContextELResolver;
+import com.caucho.jsf.el.FacesJspELResolver;
+import com.caucho.jsf.el.JsfResourceBundleELResolver;
+import com.caucho.jsf.el.MethodBindingAdapter;
+import com.caucho.jsf.el.ValueBindingAdapter;
+import com.caucho.jsf.el.ValueExpressionAdapter;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
 
 import javax.el.*;
-
-import javax.faces.*;
-import javax.faces.application.*;
+import javax.faces.FacesException;
+import javax.faces.application.Application;
+import javax.faces.application.NavigationHandler;
+import javax.faces.application.StateManager;
+import javax.faces.application.ViewHandler;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
-import javax.faces.context.*;
+import javax.faces.context.FacesContext;
 import javax.faces.convert.*;
-import javax.faces.el.*;
-import javax.faces.event.*;
-import javax.faces.validator.*;
-import javax.servlet.*;
-import javax.servlet.jsp.*;
+import javax.faces.el.MethodBinding;
+import javax.faces.el.PropertyResolver;
+import javax.faces.el.ReferenceSyntaxException;
+import javax.faces.el.ValueBinding;
+import javax.faces.el.VariableResolver;
+import javax.faces.event.ActionListener;
+import javax.faces.validator.DoubleRangeValidator;
+import javax.faces.validator.LengthValidator;
+import javax.faces.validator.LongRangeValidator;
+import javax.faces.validator.Validator;
+import javax.servlet.jsp.JspApplicationContext;
+import javax.servlet.jsp.JspFactory;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
-import com.caucho.config.*;
-import com.caucho.util.*;
-import com.caucho.jsf.cfg.*;
-import com.caucho.jsf.el.*;
-import com.caucho.jsf.el.JsfExpressionFactoryImpl;
-import com.caucho.jsf.context.*;
-import com.caucho.server.webapp.WebApp;
-
-public class ApplicationImpl extends Application
+public class ApplicationImpl
+  extends Application
 {
   private static final L10N L = new L10N(ApplicationImpl.class);
-  
+
   private ActionListener _actionListener;
   private StateManager _stateManager;
   private ViewHandler _viewHandler;
   private NavigationHandler _navigationHandler;
-  
+
   private PropertyResolver _propertyResolver;
   private VariableResolver _variableResolver;
 
   private ExpressionFactory _jsfExpressionFactory;
-  
+
   private FacesContextELResolver _elResolver;
-  
+
   private JsfResourceBundleELResolver _bundleResolver
     = new JsfResourceBundleELResolver();
 
@@ -80,26 +99,26 @@ public class ApplicationImpl extends Application
 
   private ELContextListener []_elContextListeners;
 
-  private HashMap<String,String> _componentClassNameMap
-    = new HashMap<String,String>();
+  private HashMap<String, String> _componentClassNameMap
+    = new HashMap<String, String>();
 
-  private HashMap<String,Class> _componentClassMap
-    = new HashMap<String,Class>();
+  private HashMap<String, Class> _componentClassMap
+    = new HashMap<String, Class>();
 
-  private HashMap<String,String> _validatorClassMap
-    = new HashMap<String,String>();
+  private HashMap<String, String> _validatorClassMap
+    = new HashMap<String, String>();
 
-  private HashMap<String,String> _converterIdNameMap
-    = new HashMap<String,String>();
+  private HashMap<String, String> _converterIdNameMap
+    = new HashMap<String, String>();
 
-  private HashMap<String,Class> _converterIdMap
-    = new HashMap<String,Class>();
+  private HashMap<String, Class> _converterIdMap
+    = new HashMap<String, Class>();
 
-  private HashMap<Class,String> _converterClassNameMap
-    = new HashMap<Class,String>();
+  private HashMap<Class, String> _converterClassNameMap
+    = new HashMap<Class, String>();
 
-  private HashMap<Class,Class> _converterClassMap
-    = new HashMap<Class,Class>();
+  private HashMap<Class, Class> _converterClassMap
+    = new HashMap<Class, Class>();
 
   private String _defaultRenderKitId = "HTML_BASIC";
 
@@ -110,14 +129,14 @@ public class ApplicationImpl extends Application
   public ApplicationImpl()
   {
     WebApp webApp = WebApp.getLocal();
-    
+
     JspFactory jspFactory = JspFactory.getDefaultFactory();
 
     JspApplicationContext appContext
       = jspFactory.getJspApplicationContext(webApp);
 
     _jsfExpressionFactory = appContext.getExpressionFactory();
-    
+
     ELResolver []customResolvers = new ELResolver[0];
     _elResolver = new FacesContextELResolver(customResolvers,
 					     _bundleResolver);
@@ -177,7 +196,7 @@ public class ApplicationImpl extends Application
 
     addComponent(HtmlCommandLink.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlCommandLink");
-    
+
     addComponent(HtmlDataTable.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlDataTable");
 
@@ -244,32 +263,61 @@ public class ApplicationImpl extends Application
     addComponent(HtmlSelectOneRadio.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlSelectOneRadio");
 
+    addConverter(BooleanConverter.CONVERTER_ID,
+		 BooleanConverter.class.getName());
     addConverter(boolean.class, BooleanConverter.class.getName());
     addConverter(Boolean.class, BooleanConverter.class.getName());
-    
+
+    addConverter(CharacterConverter.CONVERTER_ID,
+		 CharacterConverter.class.getName());
     addConverter(char.class, CharacterConverter.class.getName());
     addConverter(Character.class, CharacterConverter.class.getName());
-    
+
+    addConverter(ByteConverter.CONVERTER_ID,
+		 ByteConverter.class.getName());
     addConverter(byte.class, ByteConverter.class.getName());
     addConverter(Byte.class, ByteConverter.class.getName());
+    addConverter(Byte.TYPE, ByteConverter.class.getName());
+
+    addConverter(ShortConverter.CONVERTER_ID, ShortConverter.class.getName());
     addConverter(short.class, ShortConverter.class.getName());
     addConverter(Short.class, ShortConverter.class.getName());
+
+    addConverter(IntegerConverter.CONVERTER_ID,
+		 IntegerConverter.class.getName());
     addConverter(int.class, IntegerConverter.class.getName());
     addConverter(Integer.class, IntegerConverter.class.getName());
+
+    addConverter(LongConverter.CONVERTER_ID, LongConverter.class.getName());
     addConverter(long.class, LongConverter.class.getName());
     addConverter(Long.class, LongConverter.class.getName());
+
+    addConverter(FloatConverter.CONVERTER_ID, FloatConverter.class.getName());
     addConverter(float.class, FloatConverter.class.getName());
     addConverter(Float.class, FloatConverter.class.getName());
+
+    addConverter(DoubleConverter.CONVERTER_ID, DoubleConverter.class.getName());
     addConverter(double.class, DoubleConverter.class.getName());
     addConverter(Double.class, DoubleConverter.class.getName());
-    
+
     addConverter(DateTimeConverter.CONVERTER_ID,
 		 DateTimeConverter.class.getName());
+
     addConverter(NumberConverter.CONVERTER_ID,
 		 NumberConverter.class.getName());
 
-    addConverter(Enum.class, EnumConverter.class.getName());
+    addConverter(BigDecimalConverter.CONVERTER_ID,
+		 BigDecimalConverter.class.getName());
+    addConverter(java.math.BigDecimal.class,
+		 BigDecimalConverter.class.getName());
+
+    addConverter(BigIntegerConverter.CONVERTER_ID,
+		 BigIntegerConverter.class.getName());
+    addConverter(java.math.BigInteger.class,
+		 BigIntegerConverter.class.getName());
+
     addConverter(EnumConverter.CONVERTER_ID, EnumConverter.class.getName());
+    addConverter(Enum.class, EnumConverter.class.getName());
 
     addValidator(DoubleRangeValidator.VALIDATOR_ID,
 		 DoubleRangeValidator.class.getName());
@@ -278,12 +326,12 @@ public class ApplicationImpl extends Application
     addValidator(LongRangeValidator.VALIDATOR_ID,
 		 LongRangeValidator.class.getName());
   }
-  
+
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
   {
     _elResolver.addManagedBean(name, managedBean);
   }
-  
+
   public void addResourceBundle(String name, ResourceBundleConfig bundle)
   {
     _bundleResolver.addBundle(name, bundle);
@@ -293,7 +341,7 @@ public class ApplicationImpl extends Application
   {
     if (_actionListener == null)
       _actionListener = new ActionListenerImpl();
-    
+
     return _actionListener;
   }
 
@@ -301,7 +349,7 @@ public class ApplicationImpl extends Application
   {
     if (listener == null)
       throw new NullPointerException();
-    
+
     _actionListener = listener;
   }
 
@@ -314,7 +362,7 @@ public class ApplicationImpl extends Application
   {
     if (locale == null)
       throw new NullPointerException();
-    
+
     _defaultLocale = locale;
   }
 
@@ -349,7 +397,7 @@ public class ApplicationImpl extends Application
   {
     if (_navigationHandler == null)
       _navigationHandler = new NavigationHandlerImpl();
-    
+
     return _navigationHandler;
   }
 
@@ -366,7 +414,7 @@ public class ApplicationImpl extends Application
   {
     if (_propertyResolver == null)
       _propertyResolver = new PropertyResolverAdapter(getELResolver());
-    
+
     return _propertyResolver;
   }
 
@@ -397,7 +445,8 @@ public class ApplicationImpl extends Application
   public void addELResolver(ELResolver resolver)
   {
     if (_isInit)
-      throw new IllegalStateException(L.l("Can't add ELResolver after Application has been initialized"));
+      throw new IllegalStateException(L.l(
+	"Can't add ELResolver after Application has been initialized"));
     _elResolver.addELResolver(resolver);
   }
 
@@ -459,7 +508,7 @@ public class ApplicationImpl extends Application
   {
     if (handler == null)
       throw new NullPointerException();
-    
+
     _viewHandler = handler;
   }
 
@@ -478,7 +527,7 @@ public class ApplicationImpl extends Application
   {
     if (componentType == null)
       throw new NullPointerException();
-    
+
     synchronized (_componentClassNameMap) {
       _componentClassNameMap.put(componentType, componentClass);
     }
@@ -489,18 +538,21 @@ public class ApplicationImpl extends Application
   {
     if (componentType == null)
       throw new NullPointerException();
-    
+
     Class cl = getComponentClass(componentType);
 
     if (cl == null)
-      throw new FacesException(L.l("'{0}' is an unknown UI componentType to create",
-				   componentType));
+      throw new FacesException(L.l(
+	"'{0}' is an unknown UI componentType to create",
+	componentType));
 
     try {
       return (UIComponent) cl.newInstance();
-    } catch (RuntimeException e) {
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new FacesException(e);
     }
   }
@@ -518,20 +570,22 @@ public class ApplicationImpl extends Application
       if (className == null)
 	throw new FacesException(L.l("'{0}' is an unknown component type",
 				     name));
-      
+
       try {
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
+
 	cl = Class.forName(className, false, loader);
 
 	Config.validate(cl, UIComponent.class);
 
 	_componentClassMap.put(name, cl);
-	
+
 	return cl;
-      } catch (RuntimeException e) {
+      }
+      catch (RuntimeException e) {
 	throw e;
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
 	throw new FacesException(e);
       }
     }
@@ -561,7 +615,7 @@ public class ApplicationImpl extends Application
 
     return component;
   }
-  
+
   @Deprecated
   public UIComponent createComponent(ValueBinding componentBinding,
 				     FacesContext context,
@@ -572,7 +626,7 @@ public class ApplicationImpl extends Application
 	|| context == null
 	|| componentType == null)
       throw new NullPointerException();
-    
+
     return createComponent(new ValueExpressionAdapter(componentBinding,
 						      UIComponent.class),
 			   context,
@@ -589,7 +643,7 @@ public class ApplicationImpl extends Application
   {
     if (converterId == null)
       throw new NullPointerException();
-    
+
     synchronized (_converterIdMap) {
       _converterIdNameMap.put(converterId, converterClass);
     }
@@ -600,7 +654,7 @@ public class ApplicationImpl extends Application
   {
     if (converterId == null)
       throw new NullPointerException();
-    
+
     Class cl = getConverterIdClass(converterId);
 
     if (cl == null)
@@ -608,9 +662,11 @@ public class ApplicationImpl extends Application
 
     try {
       return (Converter) cl.newInstance();
-    } catch (RuntimeException e) {
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new FacesException(e);
     }
   }
@@ -628,20 +684,22 @@ public class ApplicationImpl extends Application
       if (className == null)
 	throw new FacesException(L.l("'{0}' is an unknown converter type",
 				     id));
-      
+
       try {
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
+
 	cl = Class.forName(className, false, loader);
 
 	Config.validate(cl, Converter.class);
 
 	_converterIdMap.put(id, cl);
-	
+
 	return cl;
-      } catch (RuntimeException e) {
+      }
+      catch (RuntimeException e) {
 	throw e;
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
 	throw new FacesException(e);
       }
     }
@@ -657,19 +715,21 @@ public class ApplicationImpl extends Application
   {
     if (type == null)
       throw new NullPointerException();
-    
+
     synchronized (_converterClassMap) {
       try {
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
+
 	Class cl = Class.forName(converterClass, false, loader);
 
 	Config.validate(cl, Converter.class);
 
 	_converterClassMap.put(type, cl);
-      } catch (RuntimeException e) {
+      }
+      catch (RuntimeException e) {
 	throw e;
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
 	throw new FacesException(e);
       }
     }
@@ -680,7 +740,7 @@ public class ApplicationImpl extends Application
   {
     if (type == null)
       throw new NullPointerException();
-    
+
     Class cl = findConverter(type);
 
     if (cl == null)
@@ -689,15 +749,19 @@ public class ApplicationImpl extends Application
     try {
 
       try {
-        Constructor constructor = cl.getConstructor(Class.class);
+	Constructor constructor = cl.getConstructor(Class.class);
 
-        return (Converter) constructor.newInstance(type);
-      } catch (NoSuchMethodException ignore) {}
-      
+	return (Converter) constructor.newInstance(type);
+      }
+      catch (NoSuchMethodException ignore) {
+      }
+
       return (Converter) cl.newInstance();
-    } catch (RuntimeException e) {
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new FacesException(e);
     }
   }
@@ -706,9 +770,9 @@ public class ApplicationImpl extends Application
   {
     if (type == null)
       return null;
-    
+
     Class cl;
-    
+
     synchronized (_converterClassMap) {
       cl = _converterClassMap.get(type);
     }
@@ -746,16 +810,18 @@ public class ApplicationImpl extends Application
     if (param == null)
       param = new Class[0];
 
-    if (! ref.startsWith("#{") && ! ref.endsWith("}"))
-      throw new ReferenceSyntaxException(L.l("'{0}' is an illegal MethodBinding.  MethodBindings require #{...} syntax.",
-					     ref));
-    
+    if (!ref.startsWith("#{") && !ref.endsWith("}"))
+      throw new ReferenceSyntaxException(L.l(
+	"'{0}' is an illegal MethodBinding.  MethodBindings require #{...} syntax.",
+	ref));
+
     try {
       MethodExpression expr
 	= factory.createMethodExpression(elContext, ref, Object.class, param);
 
       return new MethodBindingAdapter(expr, param);
-    } catch (ELException e) {
+    }
+    catch (ELException e) {
       throw new ReferenceSyntaxException(e);
     }
   }
@@ -777,7 +843,7 @@ public class ApplicationImpl extends Application
   {
     if (validatorId == null || validatorClass == null)
       throw new NullPointerException();
-    
+
     _validatorClassMap.put(validatorId, validatorClass);
   }
 
@@ -786,23 +852,25 @@ public class ApplicationImpl extends Application
   {
     if (validatorId == null)
       throw new NullPointerException();
-    
+
     try {
       String validatorClass = _validatorClassMap.get(validatorId);
 
       if (validatorClass == null)
 	throw new FacesException(L.l("'{0}' is not a known validator.",
 				     validatorId));
-      
+
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
 
       Class cl = Class.forName(validatorClass, false, loader);
 
       return (Validator) cl.newInstance();
-    } catch (FacesException e) {
+    }
+    catch (FacesException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new FacesException(e);
     }
   }
@@ -812,7 +880,7 @@ public class ApplicationImpl extends Application
     return _validatorClassMap.keySet().iterator();
   }
 
-  @Override    
+  @Override
   public ValueBinding createValueBinding(String ref)
     throws ReferenceSyntaxException
   {
@@ -829,12 +897,13 @@ public class ApplicationImpl extends Application
       ValueBinding binding = new ValueBindingAdapter(expr);
 
       return binding;
-    } catch (ELException e) {
+    }
+    catch (ELException e) {
       throw new ReferenceSyntaxException(e);
     }
   }
 
-  @Override    
+  @Override
   public Object evaluateExpressionGet(FacesContext context,
 				      String expression,
 				      Class expectedType)
@@ -865,134 +934,150 @@ public class ApplicationImpl extends Application
     return "ApplicationImpl[]";
   }
 
-  static class PropertyResolverAdapter extends PropertyResolver {
+  static class PropertyResolverAdapter
+    extends PropertyResolver
+  {
     private ELResolver _elResolver;
 
     PropertyResolverAdapter(ELResolver elResolver)
     {
       _elResolver = elResolver;
     }
-    
+
     public Class getType(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
       if (base == null)
-	throw new javax.faces.el.PropertyNotFoundException("getType() has null base object");
-      
+	throw new javax.faces.el.PropertyNotFoundException(
+	  "getType() has null base object");
+
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	return _elResolver.getType(context.getELContext(), base, index);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
-    
+
     public Class getType(Object base, Object property)
       throws javax.faces.el.PropertyNotFoundException
     {
       if (base == null)
 	throw new javax.faces.el.PropertyNotFoundException();
-      
+
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	return _elResolver.getType(context.getELContext(), base, property);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
-    
+
     public Object getValue(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
       if (base == null)
-	throw new javax.faces.el.PropertyNotFoundException("getValue() has null base object");
+	throw new javax.faces.el.PropertyNotFoundException(
+	  "getValue() has null base object");
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	return _elResolver.getValue(context.getELContext(), base, index);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
-    
+
     public Object getValue(Object base, Object property)
       throws javax.faces.el.PropertyNotFoundException
     {
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	return _elResolver.getValue(context.getELContext(), base, property);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
-    
+
     public boolean isReadOnly(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	return _elResolver.isReadOnly(context.getELContext(), base, index);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
-    
+
     public boolean isReadOnly(Object base, Object property)
       throws javax.faces.el.PropertyNotFoundException
     {
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	return _elResolver.isReadOnly(context.getELContext(), base, property);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
-    
+
     public void setValue(Object base, int index, Object value)
       throws javax.faces.el.PropertyNotFoundException
     {
       if (base == null)
 	throw new javax.faces.el.PropertyNotFoundException();
-      
+
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	_elResolver.setValue(context.getELContext(), base, index, value);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
-      } catch (javax.el.PropertyNotWritableException e) {
+      }
+      catch (javax.el.PropertyNotWritableException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
-    
+
     public void setValue(Object base, Object property, Object value)
       throws javax.faces.el.PropertyNotFoundException
     {
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
-      
+
 	_elResolver.setValue(context.getELContext(), base, property, value);
-      } catch (javax.el.PropertyNotFoundException e) {
+      }
+      catch (javax.el.PropertyNotFoundException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
-      } catch (javax.el.PropertyNotWritableException e) {
+      }
+      catch (javax.el.PropertyNotWritableException e) {
 	throw new javax.faces.el.PropertyNotFoundException(e);
       }
     }
   }
 
-  static class VariableResolverAdapter extends VariableResolver {
+  static class VariableResolverAdapter
+    extends VariableResolver
+  {
     private ELResolver _elResolver;
-    
+
     VariableResolverAdapter(ELResolver elResolver)
     {
       _elResolver = elResolver;
     }
-    
+
     public Object resolveVariable(FacesContext context, String value)
     {
       return _elResolver.getValue(context.getELContext(), null, value);
