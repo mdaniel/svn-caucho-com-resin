@@ -75,9 +75,7 @@ public abstract class UIComponentClassicTagBase
 
   public void setJspId(String id)
   {
-    if (id.equals(_jspId))
-      _iterCounter++;
-    else
+    if (!id.equals(_jspId))
       _iterCounter = 0;
 
     _jspId = id;
@@ -163,6 +161,8 @@ public abstract class UIComponentClassicTagBase
 
     pageContext.getRequest().setAttribute("caucho.jsf.parent", this);
 
+    _iterCounter++;
+    
     return getDoStartValue();
   }
 
