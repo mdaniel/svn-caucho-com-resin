@@ -12,6 +12,7 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>(2008-02-20) build aclocal.m4 missing from .gz</li>
 <li>classloader: system classloader changes to support Terracotta</li>
 <li>log: resin:log compatibility - (should use resin:message instead) (#2443, rep by stbu)</li>
 <li>database: UserStatement.clearWarnings missing null check (#2439, rep by ckchris)</li>
