@@ -120,20 +120,13 @@ public class ListEntries extends AbstractValueConfig
     String setterName = ("set"
 			 + Character.toUpperCase(name.charAt(0))
 			 + name.substring(1));
-    
+
     Method getter = findGetter(type, getterName);
     Method setter = findSetter(type, setterName);
 
-//    for (int i = 0; i < _list.size(); i++) {
-      if (getter != null && getter.getReturnType().isArray()) {
-	// XXX: probably want more efficient method that only allocates once
-	program.add(new ArrayPropertyBeanProgram(getter,
-						 setter,
-						 _list));
-      }
-      else
-	program.add(new ListPropertyBeanProgram(getter, setter,
-						_list));
-//    }
+    if (getter != null && getter.getReturnType().isArray())
+      program.add(new ArrayPropertyBeanProgram(getter, setter, _list));
+    else
+      program.add(new ListPropertyBeanProgram(getter, setter, _list));
   }
 }
