@@ -40,7 +40,8 @@ import javax.faces.context.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 
-public abstract class UIComponentClassicTagBase extends UIComponentTagBase
+public abstract class UIComponentClassicTagBase
+  extends UIComponentTagBase
   implements JspIdConsumer, BodyTag
 {
   protected static final String UNIQUE_ID_PREFIX = "_id_";
@@ -54,13 +55,13 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   private FacesContext _facesContext;
 
   private UIComponentClassicTagBase _parentUIComponentTag;
-  
+
   private Tag _parent;
 
   private UIComponent _component;
   private boolean _created;
 
-  private int _doStartCounter = 0; //aids with parent's EVAL_BODY_AGAIN e.g. foreach
+  private int _iterCounter = 0; //aids with parent's EVAL_BODY_AGAIN e.g. foreach
 
   protected UIComponentClassicTagBase()
   {
@@ -74,6 +75,11 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
   public void setJspId(String id)
   {
+    if (id.equals(_jspId))
+      _iterCounter++;
+    else
+      _iterCounter = 0;
+
     _jspId = id;
   }
 
@@ -106,7 +112,7 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   {
     return this.bodyContent;
   }
-  
+
   public JspWriter getPreviousOut()
   {
     if (bodyContent != null)
@@ -149,7 +155,7 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     this.bodyContent = null;
     _created = false;
     _component = null;
-    
+
     _parentUIComponentTag
       = getParentUIComponentClassicTagBase(pageContext);
 
@@ -157,14 +163,11 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
     pageContext.getRequest().setAttribute("caucho.jsf.parent", this);
 
-    _doStartCounter++;
-    
     return getDoStartValue();
   }
 
   /**
-   * Returns the doStart value for the tag.  Defaults to
-   * EVAL_BODY_BUFFERED.
+   * Returns the doStart value for the tag.  Defaults to EVAL_BODY_BUFFERED.
    */
   protected int getDoStartValue()
     throws JspException
@@ -203,7 +206,7 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   {
     pageContext.getRequest().setAttribute("caucho.jsf.parent",
 					  _parentUIComponentTag);
-    
+
     return getDoEndValue();
   }
 
@@ -216,9 +219,9 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   protected abstract UIComponent createComponent(FacesContext context,
 						 String newId)
     throws JspException;
-    
+
   protected abstract void setProperties(UIComponent component);
-  
+
   protected UIComponent findComponent(FacesContext context)
     throws JspException
   {
@@ -235,7 +238,7 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
       // XXX:
       if (_component.getChildCount() == 0)
 	_created = true;
-      
+
       return _component;
     }
 
@@ -249,8 +252,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     if (id == null)
       id = UIViewRoot.UNIQUE_ID_PREFIX + getJspId();
 
-    if (_doStartCounter > 0) {
-      id = id + "_" + _doStartCounter;
+    if (_iterCounter > 0) {
+      id = id + "_" + _iterCounter;
     }
 
     if (_parent instanceof FacetTag) {
@@ -268,7 +271,7 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 	if (verbatim != null) {
 	  addVerbatimBeforeComponent(parentTag, verbatim, _component);
 	}
-      
+
 	return _component;
       }
 
@@ -328,14 +331,14 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     for (int i = text.length() - 1; i >= 0; i--) {
       char ch = text.charAt(i);
 
-      if (! Character.isWhitespace(ch)) {
+      if (!Character.isWhitespace(ch)) {
 	// check for comment
 	if (ch == '>' && text.indexOf("-->") + 2 == i) {
 	  int head = text.indexOf("<!--");
 
 	  if (head >= 0) {
 	    for (int j = 0; j < head; j++) {
-	      if (! Character.isWhitespace(text.charAt(j))) {
+	      if (!Character.isWhitespace(text.charAt(j))) {
 		isWhitespace = false;
 		break;
 	      }
@@ -394,8 +397,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   }
 
   protected void addVerbatimAfterComponent(UIComponentClassicTagBase parentTag,
-					    UIComponent verbatim,
-					    UIComponent component)
+					   UIComponent verbatim,
+					   UIComponent component)
   {
     UIComponent parent = parentTag.getComponentInstance();
 
@@ -462,9 +465,9 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   public void release()
   {
   }
-  
+
   public static UIComponentClassicTagBase
-    getParentUIComponentClassicTagBase(PageContext pageContext)
+  getParentUIComponentClassicTagBase(PageContext pageContext)
   {
     return (UIComponentClassicTagBase)
       pageContext.getRequest().getAttribute("caucho.jsf.parent");
