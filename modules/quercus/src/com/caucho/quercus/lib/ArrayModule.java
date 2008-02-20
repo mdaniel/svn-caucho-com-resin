@@ -280,15 +280,21 @@ public class ArrayModule
   /**
    * Pops off the top element
    */
-  public Value array_pop(Value value)
+  public Value array_pop(Env env, @Reference Value value)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
-
+    if (value.isArray()) {
+      ArrayValue array = value.toArrayValue(env);
+      
+      if (array.getSize() <= 0)
+        return NullValue.NULL;
+      
       return array.pop();
     }
-    else
-      return BooleanValue.FALSE;
+    else {
+      env.warning(L.l("expected an array but saw {0}",
+                      value.toValue().getClass().getSimpleName()));
+      return NullValue.NULL;
+    }
   }
 
   /**
