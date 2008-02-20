@@ -125,11 +125,9 @@ public class MappedEntries extends AbstractValueConfig
     Method getter = findGetter(type, getterName);
     Method setter = findSetter(type, setterName);
 
-    for (int i = 0; i < _keyList.size(); i++) {
-      program.add(new MapPropertyBeanProgram(getter, setter,
-					     _keyList.get(i),
-					     _valueList.get(i)));
-    }
+    program.add(new MapPropertyBeanProgram(getter, setter,
+					   _keyList, _valueList,
+					   name));
   }
 
   public static class MapEntry {

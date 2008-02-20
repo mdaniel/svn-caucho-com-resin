@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.faces.context.*;
 
@@ -46,16 +47,20 @@ public class MapPropertyBeanProgram extends BeanProgram
 
   private Method _getter;
   private Method _setter;
-  private AbstractValue _key;
-  private AbstractValue _value;
+  private List<AbstractValue> _keys;
+  private List<AbstractValue> _values;
+  private String _propertyName;
 
   public MapPropertyBeanProgram(Method getter, Method setter,
-				AbstractValue key, AbstractValue value)
+				List<AbstractValue> keys,
+				List<AbstractValue> values,
+				String propertyName)
   {
     _getter = getter;
     _setter = setter;
-    _key = key;
-    _value = value;
+    _keys = keys;
+    _values = values;
+    _propertyName = propertyName;
   }
 
   /**
@@ -65,21 +70,43 @@ public class MapPropertyBeanProgram extends BeanProgram
     throws ConfigException
   {
     try {
+      boolean newMap = false;
+
       Map map = null;
 
       if (_getter != null)
 	map = (Map) _getter.invoke(bean);
 
-      if (map == null && _setter != null) {
+      if (map == null) {
+	if (_setter == null) {
+	  if (log.isLoggable(Level.CONFIG)) {
+	    log.log(Level.CONFIG,
+		    L.l("Setter for {0} not found in type {1}",
+			_propertyName,
+			bean.getClass().getName()));
+	  }
+
+	  return;
+	}
+
+	newMap = true;
 	map = new HashMap();
-	_setter.invoke(bean, map);
       }
 
-      if (map != null)
-	map.put(_key.getValue(context), _value.getValue(context));
-    } catch (RuntimeException e) {
+      for (int i = 0; i < _keys.size(); i++) {
+	AbstractValue key = _keys.get(i);
+	AbstractValue value = _values.get(i);
+
+	map.put(key.getValue(context), value.getValue(context));
+      }
+
+      if (newMap)
+	_setter.invoke(bean, map);
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw ConfigException.create(e);
     }
   }
