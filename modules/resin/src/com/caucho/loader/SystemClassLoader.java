@@ -175,6 +175,12 @@ public class SystemClassLoader
     }
   }
 
+  @Override
+  protected void initEnvironment()
+  {
+    // disable for terracotta
+  }
+
   /**
    * Load a class using this class loader
    *

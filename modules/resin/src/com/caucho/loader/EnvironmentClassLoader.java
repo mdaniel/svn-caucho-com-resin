@@ -182,9 +182,14 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public void init()
   {
-    initializeEnvironment();
-
     super.init();
+    
+    initEnvironment();
+  }
+
+  protected void initEnvironment()
+  {
+    initializeEnvironment();
   }
 
   /**
@@ -779,14 +784,16 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       Jndi.bindDeep("java:comp/ThreadPool",
 		    ResinThreadPoolExecutor.getThreadPool());
 
+      /*
       try {
         Jndi.rebindDeep("java:comp/ORB",
                         new com.caucho.iiop.orb.ORBImpl());
       } catch (Exception e) {
         e.printStackTrace();
       }
+      */
 
-      J2EEManagedObject.register(new JTAResource(tm));
+      // J2EEManagedObject.register(new JTAResource(tm));
     } catch (NamingException e) {
       log().log(Level.FINE, e.toString(), e);
     } catch (Throwable e) {

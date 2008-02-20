@@ -134,7 +134,10 @@ public class UserStatement implements Statement {
     throws SQLException
   {
     try {
-      _stmt.clearWarnings();
+      Statement stmt = _stmt;
+      
+      if (stmt != null)
+	stmt.clearWarnings();
     } catch (RuntimeException e) {
       killPool();
       throw e;

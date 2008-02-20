@@ -12,6 +12,12 @@
 
 <s2 title="3.1.5 - snapshot">
 <ul>
+<li>classloader: system classloader changes to support Terracotta</li>
+<li>log: resin:log compatibility - (should use resin:message instead) (#2443, rep by stbu)</li>
+<li>database: UserStatement.clearWarnings missing null check (#2439, rep by ckchris)</li>
+<li>watchdog: logs created in pwd instead of root-directory (#2437, rep by ckchris)</li>
+<li>admin: cluster.php syntax errors (#2441, rep by stbu)</li>
+<li>admin: ManagementAuthenticator was not checking user for null before copy (#2248, rep by stbu)</li>
 <li>(2008-02-15) clustering: updated logging for btree insert exceptions (#2403, rep by gjvc)</li>
 <li>build: distribution missing aclocal.m4 (#2421, rep by norlab)</li>
 <li>webbeans: ScopeAdapter beans need to throw a config-time error if zero-arg constructor is missing (#2332, rep by wesley)</li>

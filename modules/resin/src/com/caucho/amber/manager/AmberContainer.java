@@ -154,11 +154,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     if (_parentAmberContainer != null)
       copyContainerDefaults(_parentAmberContainer);
 
-    // --- ok
-    
     _parentLoader.addScanListener(this);
-
-    // --- bad
 
     Environment.addEnvironmentListener(this, _parentLoader);
 

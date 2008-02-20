@@ -64,12 +64,17 @@ public class ManagementAuthenticator extends AbstractPasswordAuthenticator {
   @Override
   protected PasswordUser getUser(String userName)
   {
-    if  (userName == null)
+    if (userName == null)
       return null;
 
     // The caller should clear the password in the returned PasswordUser,
     // so we need to return a copy
-    return _userMap.get(userName).copy();
+    PasswordUser user = _userMap.get(userName);
+
+    if (user != null)
+      return user.copy();
+    else
+      return null;
   }
 
   /**

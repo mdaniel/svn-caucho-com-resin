@@ -7,7 +7,7 @@
              path="META-INF/caucho/com.caucho.config/resin.xml"/>
 
   <namespace name="http://caucho.com/ns/resin/core"
-             path="META-INF/caucho/com.caucho.config/resin.xml"/>
+             path="META-INF/caucho/com.caucho.config/core.xml"/>
 
 </namespaces>
 
