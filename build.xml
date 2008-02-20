@@ -917,9 +917,11 @@
 
       <include name="${dist.name}/LICENSE"/>
       <include name="${dist.name}/README"/>
-      <include name="${dist.name}/Makefile.in"/>
       <include name="${dist.name}/Makefile.am"/>
+      <include name="${dist.name}/Makefile.in"/>
+      <include name="${dist.name}/configure"/>
       <include name="${dist.name}/configure.ac"/>
+      <include name="${dist.name}/aclocal.m4"/>
 
       <include name="modules/**/src/**"/>
     </patternset>
