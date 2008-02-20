@@ -46,14 +46,14 @@ public class ListPropertyBeanProgram extends BeanProgram
 
   private Method _getter;
   private Method _setter;
-  private AbstractValue _value;
+  private List<AbstractValue> _values;
 
   public ListPropertyBeanProgram(Method getter, Method setter,
-				AbstractValue value)
+				List<AbstractValue> values)
   {
     _getter = getter;
     _setter = setter;
-    _value = value;
+    _values = values;
   }
 
   /**
@@ -63,21 +63,17 @@ public class ListPropertyBeanProgram extends BeanProgram
     throws ConfigException
   {
     try {
-      List list = null;
-
-      if (_getter != null)
-	list = (List) _getter.invoke(bean);
-
-      if (list == null && _setter != null) {
-	list = new ArrayList();
-	_setter.invoke(bean, list);
+      List list = new ArrayList();
+      for (int i = 0; i < _values.size(); i++) {
+	AbstractValue value = _values.get(i);
+	list.add(value.getValue(context));
       }
-
-      if (list != null)
-	list.add(_value.getValue(context));
-    } catch (RuntimeException e) {
+      _setter.invoke(bean, list);
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw ConfigException.create(e);
     }
   }

@@ -46,15 +46,15 @@ public class ArrayPropertyBeanProgram extends BeanProgram
 
   private Method _getter;
   private Method _setter;
-  private AbstractValue _value;
+  private List<AbstractValue> _values;
   private Class _baseType;
 
   public ArrayPropertyBeanProgram(Method getter, Method setter,
-				AbstractValue value)
+				List<AbstractValue> values)
   {
     _getter = getter;
     _setter = setter;
-    _value = value;
+    _values = values;
 
     if (getter != null)
       _baseType = getter.getReturnType().getComponentType();
@@ -69,32 +69,17 @@ public class ArrayPropertyBeanProgram extends BeanProgram
     throws ConfigException
   {
     try {
-      Object list = null;
-
-      if (_getter != null)
-	list = _getter.invoke(bean);
-
-      int length = 0;
-      if (list != null) {
-	length = Array.getLength(list);
-	
-	Object newList = Array.newInstance(_baseType, length + 1);
-
-	System.arraycopy(list, 0, newList, 0, length);
-
-	list = newList;
+      Object list = Array.newInstance(_baseType, _values.size());
+      for (int i = 0; i < _values.size(); i++) {
+	AbstractValue value = _values.get(i);
+	Array.set(list, i, value.getValue(context));
       }
-      else
-	list = Array.newInstance(_baseType, 1);
-
-      Array.set(list, length, _value.getValue(context));
-      
-      if (_setter != null) {
-	_setter.invoke(bean, new Object[] { list });
-      }
-    } catch (RuntimeException e) {
+      _setter.invoke(bean, new Object[]{list});
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw ConfigException.create(e);
     }
   }
