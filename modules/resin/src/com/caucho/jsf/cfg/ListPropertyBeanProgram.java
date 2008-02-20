@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.faces.context.*;
 
@@ -47,13 +48,15 @@ public class ListPropertyBeanProgram extends BeanProgram
   private Method _getter;
   private Method _setter;
   private List<AbstractValue> _values;
+  private String _propertyName;
 
   public ListPropertyBeanProgram(Method getter, Method setter,
-				List<AbstractValue> values)
+				List<AbstractValue> values, String propertyName)
   {
     _getter = getter;
     _setter = setter;
     _values = values;
+    _propertyName = propertyName;
   }
 
   /**
@@ -63,12 +66,36 @@ public class ListPropertyBeanProgram extends BeanProgram
     throws ConfigException
   {
     try {
-      List list = new ArrayList();
+      List list = null;
+      boolean listNew = false;
+
+      if (_getter != null)
+	list = (List) _getter.invoke(bean);
+
+      if (list == null) {
+	if (_setter == null) {
+	  if (log.isLoggable(Level.CONFIG)) {
+	    log.log(Level.CONFIG,
+		    L.l("Setter for {0} not found in type {1}",
+			_propertyName,
+			bean.getClass().getName()));
+	  }
+
+	  return;
+	}
+
+	list = new ArrayList();
+	listNew = true;
+      }
+
       for (int i = 0; i < _values.size(); i++) {
 	AbstractValue value = _values.get(i);
 	list.add(value.getValue(context));
       }
-      _setter.invoke(bean, list);
+
+      if (listNew) {
+	_setter.invoke(bean, list);
+      }
     }
     catch (RuntimeException e) {
       throw e;

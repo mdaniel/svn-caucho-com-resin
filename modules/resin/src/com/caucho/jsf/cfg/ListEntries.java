@@ -125,8 +125,8 @@ public class ListEntries extends AbstractValueConfig
     Method setter = findSetter(type, setterName);
 
     if (getter != null && getter.getReturnType().isArray())
-      program.add(new ArrayPropertyBeanProgram(getter, setter, _list));
+      program.add(new ArrayPropertyBeanProgram(getter, setter, _list, name));
     else
-      program.add(new ListPropertyBeanProgram(getter, setter, _list));
+      program.add(new ListPropertyBeanProgram(getter, setter, _list, name));
   }
 }

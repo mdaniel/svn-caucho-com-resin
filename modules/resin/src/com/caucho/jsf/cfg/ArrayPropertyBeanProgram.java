@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.faces.context.*;
 
@@ -48,13 +49,15 @@ public class ArrayPropertyBeanProgram extends BeanProgram
   private Method _setter;
   private List<AbstractValue> _values;
   private Class _baseType;
+  private String _propertyName;
 
   public ArrayPropertyBeanProgram(Method getter, Method setter,
-				List<AbstractValue> values)
+				List<AbstractValue> values, String propertyName)
   {
     _getter = getter;
     _setter = setter;
     _values = values;
+    _propertyName = propertyName;
 
     if (getter != null)
       _baseType = getter.getReturnType().getComponentType();
@@ -69,11 +72,43 @@ public class ArrayPropertyBeanProgram extends BeanProgram
     throws ConfigException
   {
     try {
-      Object list = Array.newInstance(_baseType, _values.size());
+      Object list = null;
+
+      if (_setter == null) {
+	if (log.isLoggable(Level.CONFIG)) {
+	  log.log(Level.CONFIG,
+		  L.l("Setter for {0} not found in type {1}",
+		      _propertyName,
+		      bean.getClass().getName()));
+	}
+
+	return;
+      }
+
+      if (_getter != null)
+	list = _getter.invoke(bean);
+
+      final int length;
+
+      if (list != null) {
+	length = Array.getLength(list);
+
+	Object newList = Array.newInstance(_baseType, length + _values.size());
+
+	System.arraycopy(list, 0, newList, 0, length);
+
+	list = newList;
+      }
+      else {
+	length = 0;
+	list = Array.newInstance(_baseType, _values.size());
+      }
+
       for (int i = 0; i < _values.size(); i++) {
 	AbstractValue value = _values.get(i);
-	Array.set(list, i, value.getValue(context));
+	Array.set(list, length + i, value.getValue(context));
       }
+
       _setter.invoke(bean, new Object[]{list});
     }
     catch (RuntimeException e) {
