@@ -39,6 +39,7 @@ import javax.faces.context.*;
 
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
+import javax.servlet.ServletRequest;
 
 public abstract class UIComponentClassicTagBase
   extends UIComponentTagBase
@@ -60,9 +61,7 @@ public abstract class UIComponentClassicTagBase
 
   private UIComponent _component;
   private boolean _created;
-
-  private int _iterCounter = 0; //aids with parent's EVAL_BODY_AGAIN e.g. foreach
-
+  
   protected UIComponentClassicTagBase()
   {
     _facesContext = FacesContext.getCurrentInstance();
@@ -75,9 +74,6 @@ public abstract class UIComponentClassicTagBase
 
   public void setJspId(String id)
   {
-    if (!id.equals(_jspId))
-      _iterCounter = 0;
-
     _jspId = id;
   }
 
@@ -157,12 +153,27 @@ public abstract class UIComponentClassicTagBase
     _parentUIComponentTag
       = getParentUIComponentClassicTagBase(pageContext);
 
+    ServletRequest request = pageContext.getRequest();
+
+    Map tagMap = (Map) request.getAttribute("caucho.jsf.tag.map");
+
+    if (tagMap == null) {
+      tagMap = new HashMap();
+      request.setAttribute("caucho.jsf.tag.map", tagMap);
+    }
+
+    Integer iterCounter = (Integer) tagMap.get(_jspId);
+
+    iterCounter = (iterCounter == null
+		   ? new Integer(0)
+		   : new Integer(iterCounter.intValue() + 1));
+
+    tagMap.put(_jspId, iterCounter);
+
     _component = findComponent(_facesContext);
 
-    pageContext.getRequest().setAttribute("caucho.jsf.parent", this);
+    request.setAttribute("caucho.jsf.parent", this);
 
-    _iterCounter++;
-    
     return getDoStartValue();
   }
 
@@ -252,9 +263,13 @@ public abstract class UIComponentClassicTagBase
     if (id == null)
       id = UIViewRoot.UNIQUE_ID_PREFIX + getJspId();
 
-    if (_iterCounter > 0) {
-      id = id + "_" + _iterCounter;
-    }
+    Map tagMap = (Map) pageContext.getRequest()
+      .getAttribute("caucho.jsf.tag.map");
+
+    Integer iterCounter = (Integer) tagMap.get(_jspId);
+
+    if (iterCounter.intValue() > 0)
+      id = id + "_" + iterCounter.intValue();
 
     if (_parent instanceof FacetTag) {
       facetName = ((FacetTag) _parent).getName();
