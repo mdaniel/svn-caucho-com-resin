@@ -405,8 +405,12 @@ public class ErrorPageManager {
     if (log.isLoggable(Level.FINE) || ! Alarm.isTest())
       doStackTrace = true;
 
-    if (doStackTrace)
-      out.print("<a style=\"text-decoration\" href=\"javascript:document.getElementById('trace').style.display='';\">[show]</a> ");
+    if (doStackTrace) {
+      out.println("<script language='javascript' type='text/javascript'>");
+      out.println("function show() { document.getElementById('trace').style.display = ''; }");
+      out.println("</script>");
+      out.print("<a style=\"text-decoration\" href=\"javascript:show();\">[show]</a> ");
+    }
     
     if (compileException instanceof DisplayableException) {
       DisplayableException dispExn = (DisplayableException) compileException;

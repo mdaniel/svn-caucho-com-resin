@@ -246,11 +246,14 @@ import java.io.*;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
+import javax.webbeans.*;
 
 import com.caucho.servlet.comet.GenericCometServlet;
 import com.caucho.servlet.comet.CometController;
 
 public class TestComet extends GenericCometServlet {
+  @In private TimerService _timerService;
+
   @Override
   public boolean service(ServletRequest request,
                          ServletResponse response,
@@ -264,7 +267,7 @@ public class TestComet extends GenericCometServlet {
 
     TestState state = new TestState(controller);
 
-    _service.addCometState(state);
+    _timerService.addCometState(state);
 
     return true;
   }

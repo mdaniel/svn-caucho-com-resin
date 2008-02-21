@@ -16,6 +16,10 @@ and annotation-based discoverty. </p>
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="test.jsp"/></td>
   <td>JSP to create the JSF component tree.</td>
 </tr>

@@ -8,15 +8,23 @@
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>resin-web.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/test/HelloServlet.java"/>
-    </td><td>The Hello, World servlet.
-</td></tr></deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>resin-web.xml configuration</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/test/HelloServlet.java"/></td>
+  <td>The Hello, World servlet.</td>
+</tr>
+</deftable>
 </s1>
 
 <s1>
@@ -51,7 +59,7 @@ text editor: notepad, emacs, vi, or whatever.
 -->
 </p>
 
-<example title="WEB-INF/classes/test/HelloServlet.java">
+<example title="Example: WEB-INF/classes/test/HelloServlet.java">
 package test;
 
 import java.io.*;
@@ -101,7 +109,7 @@ the <var>/hello</var> URL invokes the servlet.  Because the tutorial
 <var>/doc/servlet/tutorial/helloworld</var>, the actual URL to invoke
 the servlet is the combination of the two.</p>
 
-<example title="WEB-INF/web.xml">
+<example title="Example: WEB-INF/web.xml">
 &lt;web-app xmlns="http://java.sun.com/xml/ns/j2ee" version="2.4"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http:/java.sun.com/dtd/web-app_2_3.dtd"&gt;
@@ -122,13 +130,12 @@ you can use XML attributes in place of elements.  The
 Servlet 2.4 standard uses only elements.  So the servlet-mapping
 configuration following the Servlet 2.4 standard would look like:</p>
 
-<example title="WEB-INF/resin-web.xml">
+<example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-   &lt;servlet servlet-name="hello"
-            servlet-class="test.HelloServlet"/&gt;
 
    &lt;servlet-mapping url-pattern="/hello"
-            servlet-name="hello"/&gt;
+            servlet-class="test.HelloServlet"/&gt;
+
 &lt;/web-app&gt;
 </example>
 
@@ -136,9 +143,15 @@ configuration following the Servlet 2.4 standard would look like:</p>
 using attributes makes the resin.conf or web.xml more readable.</p>
 
 <deftable>
-<tr><th>tag</th><th>meaning
-</th></tr><tr><td>web-app</td><td>Web application top-level tag.
-</td></tr></deftable>
+<tr>
+  <th>tag</th>
+  <th>meaning</th>
+</tr>
+<tr>
+  <td>web-app</td>
+  <td>Web application top-level tag.</td>
+</tr>
+</deftable>
 
 <p>The <var>xmlns="http://caucho.com/ns/resin"</var> lets Resin
 validate the web.xml configuration.  The validator will catch most

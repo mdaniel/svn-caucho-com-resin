@@ -70,7 +70,13 @@ public class BeanConfig extends WbComponentConfig {
   
   public BeanConfig()
   {
-    setScope("singleton");
+    if (getDefaultScope() != null)
+      setScope(getDefaultScope());
+  }
+
+  protected String getDefaultScope()
+  {
+    return "singleton";
   }
 
   public void setConfigLocation(String filename, int line)
@@ -109,6 +115,11 @@ public class BeanConfig extends WbComponentConfig {
   }
 
   public void setMbeanClass(Class cl)
+  {
+    setMbeanInterface(cl);
+  }
+
+  public void setMbeanInterface(Class cl)
   {
     _mbeanClass = cl;
   }

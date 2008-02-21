@@ -1,18 +1,18 @@
 package example;
 
 import java.io.*;
-import javax.annotation.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.webbeans.*;
 
 public class ServiceFrontendServlet extends HttpServlet {
-  @Resource(name="hessian/HelloService")
+  @Named("hessian")
   private HelloService _helloService;
 
-  public void doGet(HttpServletRequest req, HttpServletResponse resp)
+  public void doGet(HttpServletRequest req, HttpServletResponse res)
     throws IOException, ServletException
   {
-    PrintStream out = new PrintStream(resp.getOutputStream());
+    PrintWriter out = res.getWriter();
 
     out.println("service result: " + _helloService.hello());
   }

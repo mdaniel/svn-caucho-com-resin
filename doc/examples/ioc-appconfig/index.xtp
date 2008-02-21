@@ -28,6 +28,10 @@ files relative to the base directory.</p>
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="WEB-INF/web.xml"/></td>
   <td>Configure the AppConfig object as a resource</td>
 </tr>

@@ -64,9 +64,9 @@ public class MessageBeanConfig extends AbstractBeanConfig
   /**
    * Sets the activation spec
    */
-  public void setActivationSpec(ActivationSpecConfig spec)
+  public void setActivationSpec(ActivationSpec spec)
   {
-    _activationSpec = (ActivationSpec) spec.getObject();
+    _activationSpec = spec;
   }
   
   public void setDestinationType(Class type)
@@ -82,6 +82,9 @@ public class MessageBeanConfig extends AbstractBeanConfig
   public void setDestination(Object destination)
   {
     _destination = destination;
+
+    if (destination == null)
+      throw new NullPointerException();
   }
 
   public void setMessageConsumerMax(int messageConsumerMax)

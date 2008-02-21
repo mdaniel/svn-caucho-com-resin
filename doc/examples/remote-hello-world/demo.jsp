@@ -1,7 +1,7 @@
 <%@ page import="javax.webbeans.Named" %>
 <%@ page import="example.HelloService" %>
 <%!
-@Named("hessian") HelloService _hessianHello; 
+@Named("hessian") HelloService _hessianHello;
 @Named("burlap") HelloService _burlapHello; 
 @Named("vm") HelloService _vmHello; 
 %>

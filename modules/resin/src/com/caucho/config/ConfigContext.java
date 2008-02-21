@@ -504,7 +504,6 @@ public class ConfigContext {
 
 	childBeanType.init(childBean);
 
-	childBean = childBeanType.replaceObject(childBean);
 	childBean = attrStrategy.replaceObject(childBean);
 
 	attrStrategy.setValue(bean, qName, childBean);

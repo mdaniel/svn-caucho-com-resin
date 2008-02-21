@@ -51,20 +51,22 @@ public class InterfaceConfig extends BeanConfig {
   
   public InterfaceConfig()
   {
-    setScope("singleton");
   }
   
   public InterfaceConfig(Class type)
   {
-    setScope("singleton");
     setBeanConfigClass(type);
   }
   
   public InterfaceConfig(Class type, String tagName)
   {
-    setScope("singleton");
     setBeanConfigClass(type);
     setTagName(tagName);
+  }
+
+  protected String getDefaultScope()
+  {
+    return null;
   }
 
   /**
@@ -95,6 +97,8 @@ public class InterfaceConfig extends BeanConfig {
   public void setDeploy(boolean isDeploy)
   {
     _isDeploy = isDeploy;
+    if (_isDeploy)
+      setScope("singleton");
   }
 
   /**
@@ -130,7 +134,18 @@ public class InterfaceConfig extends BeanConfig {
   {
     super.setName(name);
 
-    _isDeploy = true;
+    setDeploy(true);
+  }
+
+  /**
+   * If the name is set, the bean will get deployed
+   */
+  @Override
+  public void setJndiName(String name)
+  {
+    super.setJndiName(name);
+
+    setDeploy(true);
   }
 
   /**

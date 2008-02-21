@@ -11,19 +11,32 @@
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
-    <td>resin-web.xml configuration</td>
+<tr>
+  <th>File</th>
+  <th>Description</th>
 </tr>
-<tr><td><viewfile-link file="send-message.php"/></td>
-    <td>PHP script sending the message.</td>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>resin-web.xml configuration</td>
 </tr>
-<tr><td><viewfile-link file="WEB-INF/classes/example/JMSLogger.java"/></td>
-    <td>Java listener receiving the message.</td>
+<tr>
+  <td><viewfile-link file="send-message.php"/></td>
+  <td>PHP script sending the message.</td>
 </tr>
-<tr><td><viewfile-link file="WEB-INF/jmslogger.ejb"/></td>
-    <td>EJB Message bean configuration.</td>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MyListener.java"/></td>
+  <td>Java message bean listener receiving the message.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MessageStoreService.java"/></td>
+  <td>Singleton service bean storing the received messages.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/ViewLogServlet.java"/></td>
+  <td>Servlet displaying the contents of the message store.</td>
 </tr>
 </deftable>
+
 </s1>
 
 <s1 title="Using JMS in Quercus">
@@ -48,29 +61,34 @@ Driven Bean (MDB) receives these messages and records them.  The record
 is displayed by a servlet.
 </p>
 
-<example language="php">
+<example title="Example: PHP sending script">
+&lt;?php
+
 if (array_key_exists("message", $_POST)) {
-  $queue = new JMSQueue("jms/Queue");
+  $queue = java_bean("Queue");
 
   if (! $queue) {
     echo "Unable to get message queue!\n";
   } else {
-    if ($queue-&gt;send($_POST["message"]) == TRUE) {
+    if ($queue-&gt;offer($_POST["message"]) == TRUE) {
       echo "Successfully sent message '" . $_POST["message"] . "'";
     } else {
       echo "Unable to send message '" . $_POST["message"] . "'";
     }
   }
 }
+
+?>
 </example>
 
 <p>
-The programming model of the Quercus JMS interface is first to create
-a connection to a queue by instantiating a <code>JMSQueue</code> object.
-To create a <code>JMSQueue</code> object, pass in the JNDI name of the
-JMS queue to be used.  <code>JMSQueue</code> objects have two methods:
-<code>send()</code> and <code>receive()</code>.  This example shows
-that using <code>send()</code> is as simple as passing in a PHP value.
+The programming model of the Quercus JMS interface is first to
+get access to the queue using the <code>java_bean()</code> call.
+<code>java_bean</code> will look for the named bean in the
+resin-web.xml, in this case our queue.  Since the Queue implements
+the <code>java.util.concurrent.BlockingQueue</code> API, the PHP script
+can send data to the queue directly using <code>offer()</code> and
+receive messages with <code>poll()</code>.
 </p>
 
 </s1>
@@ -82,24 +100,26 @@ JMS requires that two resources be set up: A
 <code>ConnectionFactory</code> and a <code>Queue</code>.  Both are
 configured in <viewfile-link file="WEB-INF/resin-web.xml"/>.
 The <code>ConnectionFactory</code> is used to connect to all the
-<code>Queue</code>s and only one of them needs to be set up.  The default
-JNDI name is <code>jms/ConnectionFactory</code> - Quercus automatically
-uses this connection factory.  Another connection factory may be used by
-setting the PHP ini variable <code>jms.connection_factory</code>.
-</p>
+<code>Queue</code>s and only one of them needs to be set up.</p>
 
-<example>
-  &lt;resource jndi-name="jms/ConnectionFactory"
-    type='com.caucho.jms.ConnectionFactoryImpl' /&gt;
+<example title="Example: ConnectionFactory configuration in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory uri="resin:"/>
+
+&lt;/web-app>
 </example>
 
 <p>
-The example above uses the queue <code>jms/Queue</code>.
+The example uses the queue named <code>Queue</code>.
 </p>
 
-<example>
-  &lt;resource jndi-name="jms/Queue"
-    type='com.caucho.jms.memory.MemoryQueue' /&gt;
+<example title="Example: Queue configuration in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="Queue" uri="memory:"/>
+
+&lt;/web-app>
 </example>
 
 <p>

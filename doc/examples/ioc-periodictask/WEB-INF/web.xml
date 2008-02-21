@@ -10,7 +10,7 @@
   <bean class="example.PeriodicTask"
         name="periodicTask"
         mbean-name="type=PeriodicTask"
-        mbean-class="example.PeriodicTask">
+        mbean-interface="example.PeriodicTask">
     <init>
       <estimated-average-time>5</estimated-average-time>
     </init>

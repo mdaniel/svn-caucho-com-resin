@@ -61,11 +61,11 @@ intervals.
 </s1>
 
 
-<s1 title="Resource Configuration">
+<s1 title="bean Configuration">
 
 <p>
-The <a config-tag="resource"/> tag is used to configure an instance of
-PeriodicTask, and store it with a JNDI name.
+The <a config-tag="bean"/> tag is used to configure an instance of
+PeriodicTask, and store it with the Resin-IoC/WebBeans registry.
 </p>
 
 <p>
@@ -135,7 +135,7 @@ public class VacuumTask extends PeriodicTask {
     throws Exception
   {
     if (_dataSource == null)
-      throw new Exception("`data-source' is required.");
+      throw new Exception("'data-source' is required.");
   }
 
   protected void performTask()
@@ -180,7 +180,7 @@ A <a config-tag="security-constraint"/> is used to limit access to the
     &lt;init&gt;
       &lt;estimated-average-time&gt;30&lt;/estimated-average-time&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
 
   &lt;servlet-mapping url-pattern='/admin/example/vacuum'&gt;
     &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
@@ -189,18 +189,18 @@ A <a config-tag="security-constraint"/> is used to limit access to the
     &lt;/init&gt;
   &lt;/servlet&gt;
 
-  &lt;resource type="com.caucho.resources.CronResource"&gt;
+  &lt;bean class="com.caucho.resources.CronResource"&gt;
     &lt;init&gt;
       &lt;!-- run every day at 0215 local time --&gt;
       &lt;cron&gt;15 2 *&lt;/cron&gt;
       &lt;work&gt;${vacuumTask}&lt;/work&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
 
   &lt;filter url-regexp="^(?!/admin)+"&gt;
     &lt;filter-class&gt;example.PeriodicTaskFilter&lt;/filter-class&gt;
     &lt;init&gt;
-      &lt;periodic-task&gt;${'${'}jndi:lookup("example/VacuumTask")}&lt;/periodic-task&gt;
+      &lt;periodic-task&gt;${VacuumTask}&lt;/periodic-task&gt;
       &lt;url&gt;/unavailable.jsp&lt;/url&gt;
     &lt;/init&gt;
   &lt;/filter&gt;
@@ -216,11 +216,9 @@ A <a config-tag="security-constraint"/> is used to limit access to the
     &lt;/auth-constraint&gt;
   &lt;/security-constraint&gt;
 
- &lt;authenticator&gt;
-    &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;
-
+ &lt;authenticator uri="xml:"&gt;
     &lt;init&gt;
-      &lt;!-- user `admin' with password `excellent' is in admin role --&gt;
+      &lt;!-- user 'admin' with password 'excellent' is in admin role --&gt;
       &lt;user&gt;admin:FKT/gZPYJ5TIA5uA434mgA==:admin&lt;/user&gt;
     &lt;/init&gt;
   &lt;/authenticator&gt;
@@ -239,17 +237,21 @@ PeriodicTaskMBean interface is the Jmx agent's view of the resource.
 <p>
 Jmx uses a naming scheme to store objects for later retrieval.  The Jmx name
 to store the object under is specified with the <a config-tag="mbean-name"/>
-child of <a config-tag="resource"/>.  
+child of <a config-tag="bean"/>.  
 </p>
 
-<example title="WEB-INF/web.xml" language="java">
-  &lt;resource type="example.PeriodicTask" jndi-name="PeriodicTask"
+<example title="Example: WEB-INF/resin-web.xml" language="java">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;bean class="example.PeriodicTask" name="PeriodicTask"
             mbean-interface="example.PeriodicTaskMBean"
             <b>mbean-name="type=PeriodicTask,name=PeriodicTask"&gt;</b>
     &lt;init&gt;
       &lt;estimated-average-time&gt;5&lt;/estimated-average-time&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
+
+&lt;/web-app>
 </example>
 
 <p>
@@ -257,15 +259,15 @@ A simple Jmx lookup of all <code>type=PeriodicTask</code> objects is
 done in admin/mbean.jmx: 
 </p>
 
-<example title="admin/mbean.jsp">
+<example title="Example: admin/mbean.jsp">
   ObjectName query = new ObjectName("resin:type=PeriodicTask,*");
-  pageContext.setAttribute("mbeans",Jmx.query(query));
+  pageContext.setAttribute("mbeans", Jmx.query(query));
 
   ...
 
-&lt;c:forEach var="mbean" items="${'${'}mbeans}"&gt;
+&lt;c:forEach var="mbean" items="${mbeans}"&gt;
 
-  estimatedAverageTime ${'${'}mbean.estimatedAverageTime}
+  estimatedAverageTime ${mbean.estimatedAverageTime}
   ...
 </example>
 
@@ -279,17 +281,17 @@ the task to automatically run at a specified time, or at a specified interval.
 </p>
 
 <p>
-The <a href="doc|soa-cron.xtp">CronResource</a> is used to configure
+The <a href="doc|resources.xtp">CronResource</a> is used to configure
 the timed execution of the PeriodicTask.
 </p>
 
 <example title="WEB-INF/web.xml" language="java">
-  &lt;resource type="com.caucho.resources.CronResource"&gt;
+  &lt;bean class="com.caucho.resources.CronResource"&gt;
     &lt;init&gt;
       &lt;cron&gt;*&lt;/cron&gt;
-      &lt;work&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/work&gt;
+      &lt;work&gt;${PeriodicTask}&lt;/work&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
 </example>
 
 </s1>
@@ -309,7 +311,7 @@ unavailable" message.
     &lt;filter-name&gt;PeriodicTaskFilter&lt;/filter-name&gt;
     &lt;filter-class&gt;example.PeriodicTaskFilter&lt;/filter-class&gt;
     &lt;init&gt;
-      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/periodic-task&gt;
+      &lt;periodic-task&gt;${PeriodicTask}&lt;/periodic-task&gt;
       &lt;!-- optional url, if not specified a 503 response is sent. --&gt;
       &lt;url&gt;/unavailable.jsp&lt;/url&gt;
     &lt;/init&gt;
@@ -365,9 +367,9 @@ The Servlet provides a setter:
 </example>
 
 <p>
-The configuration of the servlet in web.xml uses the <code>jndi:lookup</code>
+The configuration of the servlet in web.xml uses the <code>${...}</code>
 function to get a reference to the PeriodicTask resource previously stored in
-jndi with the <a config-tag="resource"/> configuration.  
+with the <a config-tag="bean"/> configuration.  
 </p>
 
 <example title="WEB-INF/web.xml" language="java">
@@ -375,7 +377,7 @@ jndi with the <a config-tag="resource"/> configuration.
     &lt;servlet-name&gt;PeriodicTaskServlet&lt;/servlet-name&gt;
     &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
     &lt;init&gt;
-      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/periodic-task&gt;
+      &lt;periodic-task&gt;${PeriodicTask}&lt;/periodic-task&gt;
     &lt;/init&gt;
   &lt;/servlet&gt;
 
@@ -416,7 +418,7 @@ Each of these components that depend upon the PeriodidicTask provide a setter:
 
 <example title="container injection">
   &lt;init&gt;
-    &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTask")}&lt;/periodic-task&gt;
+    &lt;periodic-task&gt;${PeriodicTask}&lt;/periodic-task&gt;
   &lt;/init&gt;
 </example>
 
@@ -467,17 +469,17 @@ public class PeriodicTaskBar extends PeriodicTask {
 
   &lt;!-- TASK FOO --&gt;
 
-  &lt;resource type="example.PeriodicTaskFoo" jndi-name="PeriodicTaskFoo"&gt;
+  &lt;bean class="example.PeriodicTaskFoo" name="PeriodicTaskFoo"&gt;
     &lt;init&gt;
       &lt;estimated-average-time&gt;15&lt;/estimated-average-time&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
 
   &lt;servlet&gt;
     &lt;servlet-name&gt;PeriodicTaskFooServlet&lt;/servlet-name&gt;
     &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
     &lt;init&gt;
-      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTaskFoo")}&lt;/periodic-task&gt;
+      &lt;periodic-task&gt;${PeriodicTaskFoo}&lt;/periodic-task&gt;
     &lt;/init&gt;
   &lt;/servlet&gt;
 
@@ -488,23 +490,23 @@ public class PeriodicTaskBar extends PeriodicTask {
 
   &lt;!-- TASK BAR --&gt;
 
-  &lt;resource type="example.PeriodicTaskBar" jndi-name="PeriodicTaskBar"&gt;
+  &lt;bean class="example.PeriodicTaskBar" name="PeriodicTaskBar"&gt;
     &lt;init&gt;
       &lt;estimated-average-time&gt;15&lt;/estimated-average-time&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
 
-  &lt;resource type="example.PeriodicTaskBar" jndi-name="PeriodicTaskBar"&gt;
+  &lt;bean class="example.PeriodicTaskBar" name="PeriodicTaskBar"&gt;
     &lt;init&gt;
       &lt;estimated-average-time&gt;15&lt;/estimated-average-time&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
 
   &lt;servlet&gt;
     &lt;servlet-name&gt;PeriodicTaskBarServlet&lt;/servlet-name&gt;
     &lt;servlet-class&gt;example.PeriodicTaskServlet&lt;/servlet-class&gt;
     &lt;init&gt;
-      &lt;periodic-task&gt;${'${'}jndi:lookup("PeriodicTaskBar")}&lt;/periodic-task&gt;
+      &lt;periodic-task&gt;${PeriodicTaskBar}&lt;/periodic-task&gt;
     &lt;/init&gt;
   &lt;/servlet&gt;
 
@@ -514,19 +516,19 @@ public class PeriodicTaskBar extends PeriodicTask {
   &lt;/servlet-mapping&gt;
 
   &lt;!-- bar runs every minute --&gt;
-  &lt;resource type="com.caucho.resources.CronResource"&gt;
+  &lt;bean class="com.caucho.resources.CronResource"&gt;
     &lt;init&gt;
       &lt;cron&gt;*&lt;/cron&gt;
-      &lt;work&gt;${'${'}jndi:lookup("PeriodicTaskBar")}&lt;/work&gt;
+      &lt;work&gt;${PeriodicTaskBar}&lt;/work&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/bean&gt;
 </example>
 
 </s1> <!-- dependency-injection -->
 
 <s1 title="See Also">
 <dl>
-<dt><a href="doc|soa-cron.xtp">CronResource</a></dt>
+<dt><a href="doc|resources.xtp">CronResource</a></dt>
 <dd>Documentation for the usage of CronResource
 </dd></dl>
 </s1>

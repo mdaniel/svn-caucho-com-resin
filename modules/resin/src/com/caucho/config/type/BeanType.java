@@ -277,7 +277,7 @@ public class BeanType extends ConfigType
       inject(bean);
       
       try {
-	ConfigProgram program = new PropertyStringProgram("value", text);
+	ConfigProgram program = new PropertyStringProgram("#text", text);
 	_addProgram.setValue(bean, TEXT, program);
       } catch (Exception e) {
 	throw ConfigException.create(e);
@@ -295,6 +295,7 @@ public class BeanType extends ConfigType
   /**
    * Converts the string to the given value.
    */
+  @Override
   public Object valueOf(Object value)
   {
     if (value == null)

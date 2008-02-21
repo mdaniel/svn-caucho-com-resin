@@ -125,6 +125,22 @@ public class JavaMailConfig extends AbstractBeanConfig {
   }
 
   /**
+   * mail.smtp.ssl
+   */
+  public void setSmtpSsl(boolean ssl)
+  {
+    setProperty("mail.smtp.ssl", String.valueOf(ssl));
+  }
+
+  /**
+   * mail.smtp.port
+   */
+  public void setSmtpPort(int port)
+  {
+    setProperty("mail.smtp.port", String.valueOf(port));
+  }
+  
+  /**
    * mail.smtp.user
    */
   public void setSmtpUser(String user)

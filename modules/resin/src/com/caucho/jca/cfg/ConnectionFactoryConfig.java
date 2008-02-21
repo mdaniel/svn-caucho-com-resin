@@ -83,6 +83,12 @@ public class ConnectionFactoryConfig extends BeanConfig {
     setBeanConfigClass(ManagedConnectionFactory.class);
   }
 
+  @Override
+  protected String getDefaultScope()
+  {
+    return null;
+  }
+
   public void setResourceAdapter(ResourceAdapter ra)
   {
     _ra = ra;

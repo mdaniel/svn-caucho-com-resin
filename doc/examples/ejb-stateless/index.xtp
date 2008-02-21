@@ -13,14 +13,14 @@ method as a read-only transaction boundary.</p>
 
 <p>See also:</p>
 <ul>
-<li>The <a href="doc|ejb-annotations.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
+<li>The <a href="doc|resin-ejb.xtp">Resin-EJB</a> reference.
 </li></ul>
 
 </description>
 </header>
 
 <body>
-<summary/>
+<localtoc/>
 
 <s1>
 <p>A Hello, World example for EJB 3.0 is much simpler than for earlier
@@ -44,6 +44,10 @@ deployed within Resin.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td><viewfile-link file="WEB-INF/web.xml"/></td>
   <td>web.xml configuration</td>
@@ -194,7 +198,7 @@ already exists.  It's used when updating database values.</p>
 
 <p><code>&lt;ejb-stateless-bean&gt;</code> configure the session bean
 from the resin-web.xml.
-The &lt;ejb-statelss-bean&gt; entry will
+The &lt;ejb-stateless-bean&gt; entry will
 look at the bean's annotations to enhance the class.</p>
 
 <example title="ejb-stateless-bean in web.xml">

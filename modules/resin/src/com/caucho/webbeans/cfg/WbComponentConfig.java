@@ -357,8 +357,10 @@ public class WbComponentConfig {
 
   protected void deploy()
   {
-    if (_comp != null)
+    if (_comp != null) {
       _webbeans.addWbComponent(_comp);
+      _webbeans.init();
+    }
   }
 
   public Object getObject()

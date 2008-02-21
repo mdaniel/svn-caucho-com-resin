@@ -4,11 +4,12 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import javax.jms.Message;
-import javax.jms.TextMessage;
+import javax.jms.ObjectMessage;
 import javax.jms.MessageListener;
 
 public class MyListener implements MessageListener {
-  private static final Logger log = Logger.getLogger(MyListener.class.getName());
+  private static final Logger log
+    = Logger.getLogger(MyListener.class.getName());
   private static String _lastMessage;
 
   /**
@@ -25,12 +26,12 @@ public class MyListener implements MessageListener {
   public void onMessage(Message message)
   {
     try {
-      TextMessage textMessage = (TextMessage) message;
+      ObjectMessage objMessage = (ObjectMessage) message;
 
-      log.info("received: " + textMessage.getText());
+      log.info("received: " + objMessage.getObject());
 
-      _lastMessage = textMessage.getText();
-    } catch (Throwable e) {
+      _lastMessage = (String) objMessage.getObject();
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }

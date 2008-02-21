@@ -1,9 +1,9 @@
 <document>
   <header>
     <product>resin-ee</product>
-    <title>JMS Listener IoC</title>
+    <title>JMS Listener with EJB message bean</title>
         <description>
-          <p>Introduces the JMS message listener configured with IoC.</p>
+          <p>Introduces receiving a message using an EJB message bean.</p>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>send</tutorial-startpage>
@@ -13,7 +13,12 @@
 <localtoc/>
 
 <s1 title="Files in this tutorial">
+
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td><viewfile-link file="WEB-INF/web.xml"/></td>
   <td>Configures the Queue, MessageSender, MessageListener.</td>
@@ -31,8 +36,10 @@
 
 <s1 title="Overview">
 
-<p>Messaging lets a servlet delegate processing to a batch process either
-on the same machine or on a separate machine.  The servlet creates a message
+<p>Messaging decouples a sending task from a receiving/processing task,
+allowing for batch processing or load balancing of tasks to another machine.
+The original task can respond immediately to the user without waiting for
+the task complete.  The servlet creates a message
 and sends it to a queue.  The servlet immediately completes and when the
 batch process is ready, it processes the message.</p>
 
@@ -58,38 +65,44 @@ implementing the <code>MessageListener</code> interface.
 <s1 title="Producer (MessageServlet)">
 
 <p>In this example, the Producer is a Servlet which sends a simple message.
-The Producer uses a <code>MessageSender</code> configured in the web.xml
-to send the message.</p>
+To simplify the example, we'll use the <code>BlockingQueue</code> API instead
+of the JMS producers.  The functionality is the same without the extra
+housekeeping of the JMS API.</p>
 
-<example title="MessageServlet">
+<p>The servlet uses <a href="../../doc/resin-ioc.xtp">Resin-IoC</a>
+dependency injection to get the <code>BlockingQueue</code>.  The
+dependency injection cleans the code by decoupling it from the implementation.
+For example, the actual <code>BlockingQueue</code> could be facade around
+another JMS implementation's queue.</p>
+
+<example title="Example: MessageServlet">
 import javax.webbeans.In;
+import java.util.concurrent.BlockingQueue;
 
 public class MessageServlet extends GenericServlet {
-  String message = "sample message";
-  @In MessageSender sender = ...;
+  @In BlockingQueue _sender;
 
   ...
-  sender.send(null, message);
+  String message = "sample message";
+  _sender.put(message);
 }
 </example>
 
-<p>In this configuration, the <code>MessageSender</code> is a
-<code>com.caucho.services.message.MessageSender</code>.  It's also possible
+<p>In this configuration, the <code>BlockingQueue</code> is a
+<code>java.util.concurrent.BlockingQueue</code>.  It's also possible
 to use the full JMS <code>MessageProducer</code> which is more verbose.
-The <code>MessageSender</code> is an interface available in the open
-source <a href="http://www.caucho.com/hessian">Hessian distribution</a>,
-so it can be used in other application servers as a convenient facade.</p>
+</p>
 
-<p>The <code>send</code> method completes as soon as
-the message is stored in the queue.  Laster, when a thread is available, the
+<p>The <code>put</code> method completes as soon as
+the message is stored in the queue.  Later, when a thread is available, the
 Queue will send the message to the Consumer.</p>
 
 </s1>
 
 <s1 title="Consumer (MyListener)">
 
-<p>The Queue delivers message to the Consumer one by one.  When the
-Consumer finishes processing a message the Queue will deliver the next
+<p>The Queue delivers messages to the Consumer at the consumer's rate.
+When the Consumer finishes processing a message the Queue will deliver the next
 available message.</p>
 
 <p>The Consumer implements <code>javax.jms.MessageListener</code>, and
@@ -97,9 +110,13 @@ will therefore be identical code in any application server.  The
 Consumer might even be on a different server or use a different
 application server.</p>
 
-<p>In this example, the Consumer just logs the message.</p>
+<p>In this example, the Consumer just logs the message, but more
+realistic applications might use Java Persistence to store results
+in a database.  The listener instance has full access to Resin-IoC
+capabilities, including dependency injection, standard aspects like
+@TransactionAttribute, interceptors, and WebBeans event processing.</p>
 
-<example title="MyListener">
+<example title="Example: MyListener.java implementation">
 package example;
 
 import java.util.logging.Logger;
@@ -110,17 +127,17 @@ import javax.jms.TextMessage;
 import javax.jms.MessageListener;
 
 public class MyListener implements MessageListener {
-  private static final Logger log =
-    Logger.getLogger(MyListener.class.getName());
+  private static final Logger log
+    = Logger.getLogger(MyListener.class.getName());
 
   public void onMessage(Message message)
   {
     try {
-      TextMessage textMessage = (TextMessage) message;
+      ObjectMessage objMessage = (ObjectMessage) message;
 
-      log.info("received: " + textMessage.getText());
+      log.info("received: " + objMessage.getValue());
 
-      _lastMessage = textMessage.getText();
+      _lastMessage = textMessage.getValue();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -140,7 +157,6 @@ more information.</p>
 <p>The configuration is responsible for three things:</p>
 <ul>
   <li>Configuring the Queue</li>
-  <li>Configuring the MessageSender</li>
   <li>Configuring the MessageListener</li>
 </ul>
 
@@ -151,11 +167,11 @@ local file store.</p>
 <p>Because the listener and sender need a reference to the queue,
 the jms-queue stores it in the "my_queue" variable.</p>
 
-<example title="Queue resin-web.xml fragment">
+<example title="Example: Queue configuration in WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;jms-queue name="my_queue"
-             type="file:path=WEB-INF/db"/&gt;
+             uri="file:path=WEB-INF/db"/&gt;
 
 &lt;/web-app&gt;
 </example>
@@ -163,10 +179,10 @@ the jms-queue stores it in the "my_queue" variable.</p>
 <p>JMS also needs a configured ConnectionFactory, so the sender
 and listener can create JMS connections.</p>
 
-<example title="ConnectionFactory resin-web.xml fragment">
+<example title="Example: ConnectionFactory in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;jms-connection-factory class="com.caucho.jms.JmsConnectionFactory"/>
+  &lt;jms-connection-factory uri="resin:"/>
 
 &lt;/web-app&gt;
 </example>
@@ -175,49 +191,15 @@ and listener can create JMS connections.</p>
 Resin's EJB support instantiates the listeners
 and receives messages from the queue.</p>
 
-<example title="MyListener configuration resin-web.xml">
+<example title="Example: message bean configuration resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;ejb-message-bean class="example.MyListener">
-    &lt;destination-type>javax.jms.Queue&lt;/destination-type>
-    
-    &lt;destination-name>my_queue&lt;/destination-name>
+    &lt;destination>${my_queue}&lt;/destination>
   &lt;/ejb-message-bean>
 
 &lt;/web-app>
 </example>
-
-<p>Finally, we configure a MessageSender.  The MessageSender is a
-singleton bean which encapsulates the JMS work.  Many applications will
-write their own MessageSender facade class.</p>
-
-<example title="MessageSender configuration resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;bean class="com.caucho.jms.resource.MessageSenderResource">
-    &lt;init>
-      &lt;connection-factory>${jmsConnectionFactory}&lt;/connection-factory>
-
-      &lt;destination>${my_queue}&lt;/destination>
-    &lt;/init>
-  &lt;/bean>
-
-&lt;/web-app&gt;
-</example>
-
-<deftable>
-<tr>
-  <th>tag</th>
-  <th>meaning</th>
-</tr>
-<tr>
-  <td>bean</td>
-  <td>Configures a bean using Resin's IoC configuration</td>
-</tr>
-<tr>
-  <td>class</td><td>The class name of a resource to be configured</td>
-</tr>
-</deftable>
 
 </s1>
 

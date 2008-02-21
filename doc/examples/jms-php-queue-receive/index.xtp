@@ -11,6 +11,10 @@
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
     <td>resin-web.xml configuration</td>
 </tr>
@@ -19,9 +23,6 @@
 </tr>
 <tr><td><viewfile-link file="WEB-INF/classes/example/AdProducer.java"/></td>
     <td>Java listener that fills the advertisement queue.</td>
-</tr>
-<tr><td><viewfile-link file="WEB-INF/adproducer.ejb"/></td>
-    <td>EJB Message bean configuration.</td>
 </tr>
 </deftable>
 </s1>
@@ -43,7 +44,7 @@ PHP.  This tutorial focuses receiving messages in a non-blocking way.
 <p>
 This example uses two queues: an "ad queue" and a "control queue".
 The PHP script removes advertisements from the ad queue using the
-<code>receive()</code> method.  This method is <em>non-blocking</em> -
+<code>poll()</code> method.  This method is <em>non-blocking</em> -
 if there are no advertisements, the method will return <code>FALSE</code>
 instead of waiting for a new advertisement.  Whenever the PHP script
 removes an advertisement from the ad queue, it signals a Java message
@@ -52,15 +53,15 @@ control queue.
 </p>
 
 <example language="php">
-$ad_queue = new JMSQueue("jms/AdQueue");
-$control_queue = new JMSQueue("jms/ControlQueue");
+$ad_queue = java_bean("AdQueue");
+$control_queue = java_bean("ControlQueue");
 
 if (! $ad_queue) {
   echo "Unable to get ad queue!\n";
 } elseif (! $control_queue) {
   echo "Unable to get control queue!\n";
 } else {
-  $ad = $ad_queue-&gt;receive();
+  $ad = $ad_queue-&gt;poll();
 
   if ($ad == null) {
     echo "No ads available on the queue\n";
@@ -68,18 +69,19 @@ if (! $ad_queue) {
     echo "$ad";
   }
 
-  if (! $control_queue-&gt;send(0)) {
+  if (! $control_queue-&gt;offer(0)) {
     echo "Unable to send control message\n";
   }
 }
 </example>
 
 <p>
-The programming model of the Quercus JMS interface is first to create
-a connection to a queue by instantiating a <code>JMSQueue</code> object.
-To create a <code>JMSQueue</code> object, pass in the JNDI name of the
-JMS queue to be used.  <code>JMSQueue</code> objects have two methods:
-<code>send()</code> and <code>receive()</code>.  The example above shows
+The programming model of the Quercus JMS interface is first to
+get access to the queue using <code>java_bean</code> to get the
+named queue.  To create a <code>JMSQueue</code> object, pass in
+the name of the JMS queue to be used.  Since the JMS Queue implements
+the <code>BlockingQueue</code> API, the PHP script can use
+<code>offer()</code> and <code>poll()</code>.  The example above shows
 how to use both methods.
 </p>
 
@@ -94,28 +96,29 @@ JMS requires that two resources be set up: A
 <code>ConnectionFactory</code> and a <code>Queue</code>.  Both are
 configured in <viewfile-link file="WEB-INF/resin-web.xml"/>.
 The <code>ConnectionFactory</code> is used to connect to all the
-<code>Queue</code>s and only one of them needs to be set up.  The default
-JNDI name is <code>jms/ConnectionFactory</code> - Quercus automatically
-uses this connection factory.  Another connection factory may be used by
-setting the PHP ini variable <code>jms.connection_factory</code>.
-</p>
+<code>Queue</code>s and only one of them needs to be set up.</p>
 
-<example>
-  &lt;resource jndi-name="jms/ConnectionFactory"
-    type='com.caucho.jms.ConnectionFactoryImpl' /&gt;
+<example title="Example: connection factory configuration in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory uri="resin:"/>
+
+&lt;/web-app>
 </example>
 
 <p>
-This example uses two queues, <code>jms/AdQueue</code> and 
-<code>jms/ControlQueue</code>.
+This example uses two queues, <code>AdQueue</code> and 
+<code>ControlQueue</code>.
 </p>
 
-<example>
-  &lt;resource jndi-name="jms/AdQueue"
-    type='com.caucho.jms.memory.MemoryQueue' /&gt;
+<example title="Example: Queue configuration in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;resource jndi-name="jms/ControlQueue"
-    type='com.caucho.jms.memory.MemoryQueue' /&gt;
+  &lt;jms-queue name="AdQueue" uri="memory:"/>
+
+  &lt;jms-queue name="ControlQueue" uri="memory:"/>
+
+&lt;/web-app>
 </example>
 
 <p>

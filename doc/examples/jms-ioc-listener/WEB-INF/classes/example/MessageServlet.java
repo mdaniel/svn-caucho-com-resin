@@ -1,6 +1,7 @@
 package example;
 
 import java.util.logging.Logger;
+import java.util.concurrent.BlockingQueue;
 
 import java.io.PrintWriter;
 import java.io.IOException;
@@ -12,13 +13,11 @@ import javax.servlet.ServletException;
 
 import javax.webbeans.In;
 
-import com.caucho.services.message.MessageSender;
-
 public class MessageServlet extends GenericServlet {
   private static final Logger log =
     Logger.getLogger(MessageServlet.class.getName());
 
-  @In private MessageSender _sender;
+  @In private BlockingQueue _sender;
   private int _count;
   
   /**
@@ -27,19 +26,32 @@ public class MessageServlet extends GenericServlet {
   public void service(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
+    response.setContentType("text/html");
+    PrintWriter out = response.getWriter();
+
+    try {
+      sendMessage(out);
+    } catch (Exception e) {
+      throw new ServletException(e);
+    }
+  }
+
+  private void sendMessage(PrintWriter out)
+    throws IOException, InterruptedException
+  {
     String message = "sample message: " + _count++;
 
-    response.setContentType("text/html");
-
-    PrintWriter out = response.getWriter();
     out.println("message: " + message + "<br>");
     
     log.info("sending: " + message);
 
-    _sender.send(null, message);
+    _sender.put(message);
+    out.println("last message (0ms): " + MyListener.getLastMessage() + "<br>");
     
     log.info("complete send");
 
-    out.println("received message: " + MyListener.getLastMessage() + "<br>");
+    Thread.sleep(100);
+
+    out.println("last message (100ms): " + MyListener.getLastMessage() + "<br>");
   }
 }

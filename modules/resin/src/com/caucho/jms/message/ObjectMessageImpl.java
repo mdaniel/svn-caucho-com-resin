@@ -162,10 +162,5 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
     ws.writeStream(is);
     ws.close();
   }
-
-  public String toString()
-  {
-    return "ObjectMessageImpl[]";
-  }
 }
 

@@ -5,23 +5,13 @@
   <jms-queue name="my_queue" uri="file:path=WEB-INF/db"/>
 
   <!--
-     - Configures the JMS connectionAbstract factory
+     - Configures the JMS connection factory
     -->
   <jms-connection-factory uri="resin:"/>
 
   <ejb-message-bean class="example.MyListener">
-    <destination-type>javax.jms.Queue</destination-type>
-    
-    <destination-name>my_queue</destination-name>
+    <destination>${my_queue}</destination>
   </ejb-message-bean>
-
-  <bean class="com.caucho.jms.resource.MessageSenderResource">
-    <init>
-      <connection-factory>${jmsConnectionFactory}</connection-factory>
-
-      <destination>${my_queue}</destination>
-    </init>
-  </bean>
 
   <!--
      - The test servlet uses will use injection to get the Queue

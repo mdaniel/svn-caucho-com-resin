@@ -26,6 +26,10 @@ Servlet security and the use of Resin's XmlAuthenticator.
 <s1 title="Files in this example">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="WEB-INF/web.xml"/></td>
   <td>The main JSP/Servlet configuration file</td>
 </tr>
@@ -192,7 +196,7 @@ user has not been authenticated.</p><p>
 
 <example title="Determining if the user is authenticated">
 &lt;c:choose&gt;
-  &lt;c:when test="${'${'}empty pageContext.request.userPrincipal}"&gt;
+  &lt;c:when test="${empty pageContext.request.userPrincipal}"&gt;
     &lt;a href="&lt;c:url value='home.jsp'/&gt;"&gt;login&lt;/a&gt;
   &lt;/c:when&gt;
   &lt;c:otherwise&gt;
@@ -205,7 +209,7 @@ user has not been authenticated.</p><p>
 <s1 title="Getting the current username">
       
 <example title="Getting the current username">
-Welcome &lt;c:out value="${'${'}pageContext.request.remoteUser}"/&gt;.
+Welcome &lt;c:out value="${pageContext.request.remoteUser}"/&gt;.
 </example>
 </s1>
     
@@ -296,10 +300,10 @@ configuration, or in an xml file, or both.</p>
 <p>The example below uses digest passwords.  Digest passwords avoid the storage of passwords in cleartext, and are discussed under the security section of the Resin documentation.</p>
 
 <example title="Specifying the XmlAuthenticator as the authenticator to use">
-  &lt;!-- Resin-specific XmlAuthenticator configuration --&gt;
-  &lt;authenticator&gt;
-    &lt;type&gt;com.caucho.server.security.XmlAuthenticator&lt;/type&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
+  &lt;!-- Resin-specific XmlAuthenticator configuration --&gt;
+  &lt;authenticator uri="xml:"&gt;
     &lt;init&gt;
       &lt;!-- Optionally put user information here.  --&gt;
       &lt;user&gt;pince:Txpd1jQc/xwhISIqodEjfw==:staff,website&lt;/user&gt;
@@ -310,6 +314,7 @@ configuration, or in an xml file, or both.</p>
     &lt;/init&gt;
   &lt;/authenticator&gt;
   
+&lt;/web-app>
 </example>
 
 <example title="An XML file with usernames, passwords, and roles">

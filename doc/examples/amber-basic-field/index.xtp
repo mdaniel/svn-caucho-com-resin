@@ -46,6 +46,11 @@ relations and objects is a good starting model.</p>
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+
+<tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>resin-web.xml configuration</td>
 </tr>
@@ -75,7 +80,7 @@ table is a collection of school courses, each with an assigned teacher.
 The table has an integer primary key "id" and two string data fields, "course"
 and "teacher".</p>
 
-<example title="course.sql">
+<example title="Example: course.sql">
 CREATE TABLE amber_basic_courses (
   id INTEGER PRIMARY KEY auto_increment,
 
@@ -92,7 +97,7 @@ Java model to the simplest possible Java model.  The simple model
 has a single class, <code>Course</code>, for the table and three fields for the
 table's columns.</p>
 
-<example title="Minimal Java model">
+<example title="Example: Course.java - minimal Java model">
 package example;
 
 public class Course {
@@ -162,7 +167,7 @@ Amber is close to the simplest possible implementation of the
 Java model which provides the necessary annotations in the list.</p>
 
 
-<example title="Course.java">
+<example title="Example: Course.java">
 package example;
 
 import javax.persistence.*;
@@ -206,11 +211,7 @@ uses bytecode enhancement to make this work.)</p>
 <p>Course uses the @Entity to mark the Java class as a field-based
 persistent object.</p>
 
-<example>
-@javax.persistence.Entity
-</example>
-
-<p><a href="doc|amber-table.xtp#@Entity">@javax.persistence.Entity</a> declares
+<p><a href="doc|amber.xtp#@Entity">@javax.persistence.Entity</a> declares
 a Java class as an entity bean.</p>
 
 <p>Since the @Id annotation marks a field, the bean's fields
@@ -229,7 +230,7 @@ the methods would be enhanced. </p>
 the SQL database table name to be used.  If <code>@Table</code> is
 unspecified, Amber will use the class name as the table name.</p>
 
-<example>
+<example title="Example: @Table">
 @javax.persistence.Table(name="amber_basic_course")
 </example>
 
@@ -242,7 +243,7 @@ bean's primary key.  The <code>EntityManager.find</code> method
 looks up a bean instance with the primary key, and relations use
 the primary key to link beans together.</p>
 
-<example>
+<example title="Example: key configuration">
 @Id
 @Column(name="id")
 @GeneratedValue
@@ -266,7 +267,7 @@ the property name.</p>
 <p>The <a href="doc|amber-table.xtp#@Basic">@Basic</a> attribute
 marks a basic data column like a string or integer or double.</p>
 
-<example>
+<example title="Example: data column definition">
 @Basic 
 @Column (name="course")
 private String _course;
@@ -293,7 +294,7 @@ object and then calling <code>persist()</code> on the
 facade for creating, querying and removing JPA objects.  Normally,
 the application will use injection to get an <code>EntityManager</code>.</p>
 
-<example title="Creating an instance">
+<example title="Example: Creating an instance">
 import javax.persistence.EntityManager;
 import javax.webbeans.In;
 
@@ -329,7 +330,7 @@ automatically.</p>
 <p>Once the Course is in the database, we can read it by its primary key using
 the <code>EntityManager</code> <code>find()</code> method.</p>
 
-<example title="Find by primary key">
+<example title="Example: Find by primary key">
 import javax.persistence.EntityManager;
 import javax.webbeans.In;
 
@@ -355,7 +356,7 @@ the database using some other criteria, like the name of the Course.</p>
 
 </s1>
 
-<s1 title="Querying the data">
+<s1 title="Example: Querying the data">
 
 <p>The client servlet queries the database for all courses and lists
 them.  It uses the <code>EntityManager</code> API to create a
@@ -442,7 +443,7 @@ use <code>getSingleResult()</code>.</p>
 <p>Finally, the application will use <code>remove()</code> in
 the <code>EntityManager</code> object to remove the entry.</p>
 
-<example title="Removing an instance">
+<example title="Example: Removing an instance">
 import javax.persistence.EntityManager;
 import javax.webbeans.In;
 
@@ -473,10 +474,10 @@ the database update is safe and consistent.</p>
 start the ejb-server, configure the JDBC data-source, and list the
 beans that will be used.</p>
 
-<example title="WEB-INF/resin-web.xml">
+<example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app&gt;
   &lt;!-- server configuration --&gt;
-  &lt;ejb-server data-source="jdbc/resin"/&gt;
+  &lt;persistence-manager data-source="jdbc/resin"/&gt;
 
   &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet"/&gt;
 
@@ -484,7 +485,7 @@ beans that will be used.</p>
 &lt;/web-app&gt;
 </example>
 
-<p>The &lt;ejb-server&gt; configures Amber support.</p>
+<p>The &lt;persistence-manager&gt; configures Amber support.</p>
 
 </s1>
 

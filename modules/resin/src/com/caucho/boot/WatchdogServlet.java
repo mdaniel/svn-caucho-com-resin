@@ -58,7 +58,7 @@ public class WatchdogServlet extends HessianServlet
   {
     if (! _watchdogManager.authenticate(password)) {
       log.warning("watchdog status authentication failure");
-      throw new ConfigException(L.l("watchdog start forbidden - authentication failed : " + password));
+      throw new ConfigException(L.l("watchdog start forbidden - authentication failed."));
     }
     
     return _watchdogManager.status();
@@ -69,7 +69,7 @@ public class WatchdogServlet extends HessianServlet
   {
     if (! _watchdogManager.authenticate(password)) {
       log.warning("watchdog start authentication failure");
-      throw new ConfigException(L.l("watchdog start forbidden - authentication failed : " + password));
+      throw new ConfigException(L.l("watchdog start forbidden - authentication failed."));
     }
     
     _watchdogManager.startServer(argv);

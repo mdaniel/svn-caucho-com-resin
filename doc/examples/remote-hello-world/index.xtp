@@ -21,8 +21,21 @@ using simple configuration changes.
 </p>
 </s1>
 
+<s1 title="See Also">
+
+<ul>
+<li><a href="../../doc/resin-remoting.xtp">Resin remoting</a> for a full
+description.</li>
+</ul>
+
+</s1>
+
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/HelloService.java"/></td>
   <td>Interface for the hello service.</td>
@@ -31,10 +44,12 @@ using simple configuration changes.
   <td><viewfile-link file="WEB-INF/classes/example/HelloServiceImpl.java"/></td>
   <td>The main service implementation.</td>
 </tr>
+<!--
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/HelloResult.java"/></td>
   <td>The result object</td>
 </tr>
+-->
 <tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>Configures the environment</td>
@@ -72,41 +87,11 @@ and the client may invoke.</p>
 <example title="HelloService.java">
 package example;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-
-@WebService
 public interface HelloService {
   /**
    * Returns "hello, world".
    */
-  @WebMethod
-  public HelloResult hello();
-}
-</example>
-
-<p>Notice that the service returns a <code>HelloResult</code> object.  As
-seen below, <code>HelloResult</code> is a simple wrapper for a String.  This
-allows type-checking and proper serialization of the returned result.  There
-are also JAXB annotations in this case which control how the object is
-serialized.</p>
-
-<example title="HelloResult.java">
-package example;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name="hello")
-public class HelloResult {
-
-  @XmlElement
-  public String value = "hello, world";
-
-  public String toString()
-  {
-    return value;
-  }
+  public String hello();
 }
 </example>
 
@@ -115,24 +100,19 @@ public class HelloResult {
 <s1 title="Service Implementation">
 
 <p>The HelloService implementation is just a Java class that implements
-the HelloService API.  For Java Web Service (JAX-WS) compatibility,
-the class also has @WebService and @WebMethod annotations.</p>
+the HelloService API.  It can optionally use EJB annotations like @Remote,
+@Stateless or @TransactionAttribute.</p>
 
 <example title="HelloServiceImpl.java">
 package example;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-
-@WebService(endpointInterface="example.HelloService")
 public class HelloServiceImpl implements HelloService {
   /**
    * Returns "hello, world".
    */
-  @WebMethod
-  public HelloResult hello()
+  public String hello()
   {
-    return new HelloResult();
+    return "hello, world";
   }
 }
 </example>
@@ -141,7 +121,7 @@ public class HelloServiceImpl implements HelloService {
 
 <s1 title="Service configuration">
 
-<p>Services in the Resin SOA are configured with the &lt;servlet>
+<p>Services for Resin remoting are configured with the &lt;servlet>
 tag.  The implementation class is given as
 the <code>servlet-class</code> attribute.
 It is possible to allow access to the service within the same virtual machine
@@ -153,6 +133,7 @@ To expose the service as a Hessian service, use the &lt;hessian> tag.
 Hessian is one of the <em>protocols</em> available for web services.
 </p>
 
+<!--
 <p>
 Here a REST interface is also exposed.  In this
 example, the REST interface uses the default
@@ -164,12 +145,12 @@ for example a path-based binding that with URLs of the form
 <url>http://www.foo.com/myMethod/foo/bar</url>.
 The &lt;url-pattern> child tag specifies the base URL for the REST interface.
 </p>
-
+-->
 <p>
-Finally, a SOAP interface is available. <!-- XXX -->
+Finally, a SOAP interface is available, using CXF or XFire.
 </p>
 
-<example title="web-service for hessian">
+<example title="remoting service for hessian">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;servlet-mapping url-pattern="/hello/hessian/*"
@@ -179,8 +160,8 @@ Finally, a SOAP interface is available. <!-- XXX -->
 
 &lt;/web-app>
 </example>
-
-<example title="web-service for rest">
+<!--
+<example title="removing service for rest">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;servlet-mapping url-pattern="/hello/hessian/*"
@@ -190,19 +171,19 @@ Finally, a SOAP interface is available. <!-- XXX -->
 
 &lt;/web-app>
 </example>
-
-<example title="web-service for soap">
+-->
+<example title="remote service for CXF">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;servlet-mapping url-pattern="/hello/hessian/*"
                    servlet-class="example.HelloServiceImpl">
-    &lt;protocol type="soap"/>
+    &lt;protocol uri="cxf:"/>
   &lt;/servlet-mapping>
 
 &lt;/web-app>
 </example>
 
-<example title="web-service as WebBeans singleton">
+<example title="service as WebBeans singleton">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;bean class="example.HelloServiceImpl" name="vm"/>
@@ -216,28 +197,28 @@ Finally, a SOAP interface is available. <!-- XXX -->
 
 <p>
 Resin also makes it easy to access services using the 
-&lt;web-service-client> tag.  This tag connects to a service
-using a URL of the form <i>&lt;encoding>:&lt;protocol>:&lt;location></i>.
+&lt;remote-client> tag.  This tag connects to a service
+using a URI of the form <i>&lt;protocol>:url=&lt;location></i>.
 The example below shows just such a URL.  The interface of the service
-is required.  The &lt;web-service-client> tag
+is required.  The &lt;remote-client> tag
 creates a proxy client instance for the service and registers the
 proxy with WebBeans.
 </p>
 
-<example title="<web-service-client>">
+<example title="&lt;remote-client>">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;web-service-client class="example.HelloService" name="hessian">
-    &lt;url>hessian:${webApp.url}/hello/hessian/&lt;/url>
-  &lt;/web-service-client>  
+  &lt;remote-client interface="example.HelloService" name="hessian">
+    &lt;uri>hessian:url=${webApp.url}/hello/hessian/&lt;/uri>
+  &lt;/remote-client>  
 
-  &lt;web-service-client class="example.HelloService" name="rest">
-    &lt;url>rest:${webApp.url}/hello/rest/&lt;/url>
+  &lt;remote-client interface="example.HelloService" name="rest">
+    &lt;uri>rest:url=${webApp.url}/hello/rest/&lt;/uri>
   &lt;/web-service-client>
 
-  &lt;web-service-client class="example.HelloService" name="soap">
-      &lt;url>soap:${webApp.url}/hello/soap/&lt;/url>
-  &lt;/web-service-client>
+  &lt;remote-client interface="example.HelloService" name="soap">
+      &lt;uri>xfire:url=${webApp.url}/hello/soap/&lt;/url>
+  &lt;/remote-client>
 
 &lt;/web-app>
 </example>

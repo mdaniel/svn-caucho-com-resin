@@ -7,20 +7,16 @@
   <!--
      - JMS
     -->
-  <resource jndi-name="jms/ConnectionFactory"
-    type='com.caucho.jms.ConnectionFactoryImpl' />
+  <jms-connection-factory uri="resin:"/>
 
-  <resource jndi-name="jms/AdQueue"
-    type='com.caucho.jms.memory.MemoryQueue' />
+  <jms-queue name="AdQueue" uri="memory:"/>
 
-  <resource jndi-name="jms/ControlQueue"
-    type='com.caucho.jms.memory.MemoryQueue' />
+  <jms-queue name="ControlQueue" uri="memory:"/>
 
   <!--
-     - EJB SERVER
-     - see also message.ejb
+     - EJB message-driven-bean
     -->
-  <ejb-server config-directory="WEB-INF">
-    <jms-connection-factory>jms/ConnectionFactory</jms-connection-factory>
-  </ejb-server>
+  <ejb-message-bean class="example.AdProducer">
+    <destination>#{ControlQueue}</destination>
+  </ejb-message-bean>
 </web-app>

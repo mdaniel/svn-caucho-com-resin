@@ -59,7 +59,7 @@ public class SerializationAdapter {
       return cl;
     if (HandleAware.class.isAssignableFrom(cl))
       return cl;
-    
+
     SerializationAdapter gen = new SerializationAdapter(cl);
 
     Class proxyClass = gen.generateProxy();

@@ -530,6 +530,12 @@ public class EjbMessageBean extends EjbBean {
       factory = _connectionFactory;
     else
       factory = getEjbContainer().getJmsConnectionFactory();
+
+    if (factory == null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+
+      factory = webBeans.getObject(ConnectionFactory.class);
+    }
       
     if (_destination != null)
       destination = _destination;
@@ -542,7 +548,12 @@ public class EjbMessageBean extends EjbBean {
     }
 
     if (destination == null)
-      throw new ConfigException(L.l("ejb-message-bean does not have a configured JMS destination or activation-spec "));
+      throw new ConfigException(L.l("ejb-message-bean '{0}' does not have a configured JMS destination or activation-spec",
+				    getEJBName()));
+
+    if (factory == null)
+      throw new ConfigException(L.l("ejb-message-bean '{0}' does not have a configured JMS connection factory",
+				    getEJBName()));
 
     JmsResourceAdapter ra
       = new JmsResourceAdapter(getEJBName(), factory, destination);

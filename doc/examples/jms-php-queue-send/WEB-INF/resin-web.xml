@@ -7,24 +7,27 @@
   <!--
      - JMS
     -->
-  <resource jndi-name='jms/ConnectionFactory'
-    type='com.caucho.jms.ConnectionFactoryImpl' />
+  <jms-connection-factory uri="resin:"/>
 
-  <resource jndi-name='jms/Queue'
-    type='com.caucho.jms.memory.MemoryQueue' />
+  <jms-queue name="Queue" uri="memory:"/>
 
   <!--
-     - EJB SERVER
-     - see also jmslogger.ejb
+     - storage service
     -->
-  <ejb-server config-directory="WEB-INF">
-    <jms-connection-factory>jms/ConnectionFactory</jms-connection-factory>
-  </ejb-server>
 
-  <servlet>
-    <servlet-name>JMSLogger</servlet-name>
-    <servlet-class>example.JMSLogger</servlet-class>
-  </servlet>
+  <bean class="example.MessageStoreService"/>
 
-  <servlet-mapping url-pattern="/view-log" servlet-name="JMSLogger" />
+  <!--
+     - defines the message listener JMSLogger and attaches it to
+     - the queue named "Queue"
+    -->
+  <ejb-message-bean class="example.MyListener">
+    <destination>#{Queue}</destination>
+  </ejb-message-bean>
+
+  <!--
+     - viewing servlet
+    -->
+  <servlet-mapping url-pattern="/view-log"
+                   servlet-class="example.ViewLogServlet" />
 </web-app>

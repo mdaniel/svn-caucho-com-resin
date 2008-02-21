@@ -1,12 +1,12 @@
 <?php
 
 if (array_key_exists("message", $_POST)) {
-  $queue = new JMSQueue("jms/Queue");
+  $queue = java_bean("Queue");
 
   if (! $queue) {
     echo "Unable to get message queue!\n";
   } else {
-    if ($queue->send($_POST["message"]) == TRUE) {
+    if ($queue->offer($_POST["message"])) {
       echo "Successfully sent message '" . $_POST["message"] . "'";
     } else {
       echo "Unable to send message '" . $_POST["message"] . "'";
