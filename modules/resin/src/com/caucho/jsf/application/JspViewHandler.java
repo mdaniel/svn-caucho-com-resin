@@ -306,26 +306,19 @@ public class JspViewHandler extends ViewHandler
     final String servletPath = request.getServletPath();
     final String pathInfo = request.getPathInfo();
 
-    int lastDot = viewId.lastIndexOf('.');
+    if (pathInfo == null) /*suffix mapping*/ {
+      final int lastDot = viewId.lastIndexOf('.');
 
-    final String path;
-
-    if (servletPath == null)
-      path = pathInfo;
-    else if (pathInfo == null)
-      path = servletPath;
-    else
-      path = servletPath + pathInfo;
-
-    // jsf/1118
-    if (lastDot > 0 && path != null && path.indexOf('.') > 0) {
-      return (contextPath +
-	      (pathInfo == null ? "" : servletPath) +
-	      viewId.substring(0, lastDot) +
-	      path.substring(path.indexOf('.')));
+      return contextPath +
+	     (lastDot == -1
+	      ? viewId
+	      : viewId.substring(0, lastDot) +
+		servletPath.substring(servletPath.lastIndexOf('.')));
     }
+    else /*prefix mapping*/ {
 
-    return contextPath + viewId;
+      return contextPath + servletPath + viewId;
+    }
   }
 
   public String getResourceURL(FacesContext context,
