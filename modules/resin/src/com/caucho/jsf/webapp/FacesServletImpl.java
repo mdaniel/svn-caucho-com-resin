@@ -201,10 +201,19 @@ public class FacesServletImpl extends GenericServlet
 	config.configure(facesConfig, facesPath, FACES_SCHEMA);
 
 	if (app instanceof ApplicationImpl) {
-	  app.setNavigationHandler(facesConfig.getNavigationHandler());
-
 	  ApplicationImpl appImpl = (ApplicationImpl) app;
-	  
+
+	  // jsf/4409
+	  NavigationHandlerImpl navigationHandler
+	    = appImpl.getDefaultNavigationHandler();
+
+	  List<NavigationRule> navigationRules
+	    = facesConfig.getNavigationRules();
+
+	  for (NavigationRule navigationRule : navigationRules) {
+	    navigationHandler.addRule(navigationRule);
+	  }
+
 	  facesConfig.configure(appImpl);
 
 	  facesConfig.configurePhaseListeners(_phaseListenerList);

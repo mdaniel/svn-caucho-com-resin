@@ -80,6 +80,7 @@ public class ApplicationImpl
   private StateManager _stateManager;
   private ViewHandler _viewHandler;
   private NavigationHandler _navigationHandler;
+  final private NavigationHandlerImpl _defaultNavigationHandler;
 
   private PropertyResolver _propertyResolver;
   private VariableResolver _variableResolver;
@@ -325,6 +326,8 @@ public class ApplicationImpl
 		 LengthValidator.class.getName());
     addValidator(LongRangeValidator.VALIDATOR_ID,
 		 LongRangeValidator.class.getName());
+
+    _defaultNavigationHandler = new NavigationHandlerImpl();
   }
 
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
@@ -396,7 +399,7 @@ public class ApplicationImpl
   public NavigationHandler getNavigationHandler()
   {
     if (_navigationHandler == null)
-      _navigationHandler = new NavigationHandlerImpl();
+      return _defaultNavigationHandler;
 
     return _navigationHandler;
   }
@@ -407,6 +410,10 @@ public class ApplicationImpl
       throw new NullPointerException();
 
     _navigationHandler = handler;
+  }
+
+  public NavigationHandlerImpl getDefaultNavigationHandler(){
+    return _defaultNavigationHandler;
   }
 
   @Deprecated

@@ -33,23 +33,10 @@ import java.util.*;
 
 import javax.annotation.*;
 
-import javax.el.*;
-
-import javax.faces.*;
 import javax.faces.application.*;
-import javax.faces.component.*;
-import javax.faces.component.html.*;
-import javax.faces.context.*;
-import javax.faces.convert.*;
-import javax.faces.el.*;
 import javax.faces.event.*;
-import javax.faces.validator.*;
 
 import javax.xml.bind.annotation.*;
-
-import com.caucho.config.*;
-import com.caucho.jsf.application.*;
-import com.caucho.util.*;
 
 public class FacesConfig
 {
@@ -82,9 +69,9 @@ public class FacesConfig
   private ArrayList<ManagedBeanConfig> _managedBeanList
     = new ArrayList<ManagedBeanConfig>();
 
-  private NavigationHandlerImpl _navigation
-    = new NavigationHandlerImpl();
-  
+  private List<NavigationRule> _navigationRuleList
+    = new ArrayList<NavigationRule>();
+
   public void setId(String id)
   {
   }
@@ -165,12 +152,12 @@ public class FacesConfig
 
   public void addNavigationRule(NavigationRule rule)
   {
-    _navigation.addRule(rule);
+    _navigationRuleList.add(rule);
   }
 
-  public NavigationHandler getNavigationHandler()
+  public List<NavigationRule> getNavigationRules()
   {
-    return _navigation;
+    return _navigationRuleList;
   }
 
   @PostConstruct
