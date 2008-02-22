@@ -57,9 +57,11 @@ public class TempReadStream extends StreamImpl {
     _freeWhenDone = free;
   }
 
+  @Override
   public boolean canRead() { return true; }
 
   // XXX: any way to make this automatically free?
+  @Override
   public int read(byte []buf, int offset, int length) throws IOException
   {
     if (_cursor == null)
@@ -74,8 +76,12 @@ public class TempReadStream extends StreamImpl {
 
     if (_cursor._length <= _offset + sublen) {
       TempBuffer next = _cursor._next;
-      if (_freeWhenDone)
+
+      if (_freeWhenDone) {
+	_cursor._next = null;
         TempBuffer.free(_cursor);
+        _cursor = null;
+      }
       _cursor = next;
       _offset = 0;
     }
@@ -85,6 +91,7 @@ public class TempReadStream extends StreamImpl {
     return sublen;
   }
 
+  @Override
   public int getAvailable() throws IOException
   {
     if (_cursor != null)
@@ -93,6 +100,7 @@ public class TempReadStream extends StreamImpl {
       return 0;
   }
 
+  @Override
   public void close()
     throws IOException
   {
@@ -102,6 +110,7 @@ public class TempReadStream extends StreamImpl {
     _cursor = null;
   }
 
+  @Override
   public String toString()
   {
     return "TempReadStream[]";

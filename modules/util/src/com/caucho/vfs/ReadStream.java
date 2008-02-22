@@ -298,6 +298,7 @@ public final class ReadStream extends InputStream
   /**
    * Compatibility with InputStream.
    */
+  @Override
   public int available() throws IOException
   {
     return getAvailable();
@@ -347,6 +348,7 @@ public final class ReadStream extends InputStream
    *
    * @return number of bytes skipped.
    */
+  @Override
   public long skip(long n)
     throws IOException
   {
@@ -398,6 +400,7 @@ public final class ReadStream extends InputStream
    *
    * @return number of bytes read or -1 on end of file.
    */
+  @Override
   public final int read(byte []buf, int offset, int length)
     throws IOException
   {
@@ -1069,6 +1072,7 @@ public final class ReadStream extends InputStream
   /**
    * Close the stream.
    */
+  @Override
   public final void close()
   {
     try {
@@ -1078,8 +1082,8 @@ public final class ReadStream extends InputStream
       if (! _reuseBuffer) {
 	if (_tempRead != null) {
 	  TempBuffer.free(_tempRead);
+          _tempRead = null;
 	}
-	_tempRead = null;
 	_readBuffer = null;
       }
 

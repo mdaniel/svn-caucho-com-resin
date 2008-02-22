@@ -244,7 +244,22 @@ public class RewriteRealPath {
      */
     public void setTarget(String target)
     {
-      _target = target;
+      StringBuilder sb = new StringBuilder();
+
+      int length = target.length();
+      for (int i = 0; i < length; i++) {
+	char ch = target.charAt(i);
+	char ch1;
+
+	if (ch == '\\' && i + 1 < length
+	    && ! ('0' <= (ch1 = target.charAt(i + 1)) && ch1 <= '9')) {
+	  sb.append("\\\\");
+	}
+	else
+	  sb.append(ch);
+      }
+      
+      _target = sb.toString();
     }
 
     /**

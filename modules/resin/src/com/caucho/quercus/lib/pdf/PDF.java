@@ -176,7 +176,7 @@ public class PDF {
       result.append(ptr.getBuffer(), 0, ptr.getLength());
     }
 
-    TempBuffer.free(ts.getHead());
+    ts.destroy();
 
     return result;
   }

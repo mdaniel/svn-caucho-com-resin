@@ -103,7 +103,7 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
       return null;
     
     try {
-      ReadStream is = _tempStream.openRead(false);
+      ReadStream is = _tempStream.openReadAndSaveBuffer();
       Hessian2Input in = new Hessian2Input(is);
       Serializable object = (Serializable) in.readObject();
       in.close();
@@ -140,7 +140,7 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
     throws IOException
   {
     if (_tempStream != null)
-      return _tempStream.openRead(false);
+      return _tempStream.openReadAndSaveBuffer();
     else
       return null;
   }

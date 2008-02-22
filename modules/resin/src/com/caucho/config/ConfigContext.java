@@ -504,7 +504,11 @@ public class ConfigContext {
 
 	childBeanType.init(childBean);
 
-	childBean = attrStrategy.replaceObject(childBean);
+	Object newBean = attrStrategy.replaceObject(childBean);
+	if (newBean != childBean)
+	  childBean = newBean;
+	else
+	  childBean = childBeanType.replaceObject(childBean);
 
 	attrStrategy.setValue(bean, qName, childBean);
       }
@@ -931,7 +935,7 @@ public class ConfigContext {
       else if (child instanceof CharacterData) {
 	String data = ((CharacterData) child).getData();
 
-	if (child.getNextSibling() == null) {
+	if (child.getNextSibling() == null && ! XmlUtil.isWhitespace(data)) {
 	  return data;
 	}
 	else

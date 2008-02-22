@@ -702,16 +702,13 @@ public class MessageImpl implements Message
     if (_properties == null || _properties.size() == 0)
       return null;
     
-    TempStream header = new TempStream();
-    header.openWrite();
-      
-    OutputStream out = new StreamImplOutputStream(header);
+    TempOutputStream out = new TempOutputStream();
 
     writeProperties(out);
     
     out.close();
 
-    return header.openRead(true);
+    return out.openRead();
   }
 
   /**

@@ -51,6 +51,7 @@ public class TempOutputStream extends OutputStream
     _tail.getBuffer()[_tail._length++] = (byte) ch;
   }
     
+  @Override
   public void write(byte []buf, int offset, int length)
     throws IOException
   {
@@ -91,6 +92,7 @@ public class TempOutputStream extends OutputStream
   {
   }
 
+  @Override
   public void close()
     throws IOException
   {
@@ -102,47 +104,14 @@ public class TempOutputStream extends OutputStream
   public ReadStream openRead()
     throws IOException
   {
-    return openRead(false);
-  }
-
-  /**
-   * Opens a read stream to the buffer.
-   *
-   * @param free if true, frees the buffer as it's read
-   */
-  public ReadStream openRead(boolean free)
-    throws IOException
-  {
     close();
-
+    
     TempReadStream read = new TempReadStream(_head);
-    read.setFreeWhenDone(free);
-    if (free) {
-      _head = null;
-      _tail = null;
-    }
+    read.setFreeWhenDone(true);
+    _head = null;
+    _tail = null;
     
     return new ReadStream(read);
-  }
-
-  /**
-   * Opens a read stream to the buffer.
-   *
-   * @param free if true, frees the buffer as it's read
-   */
-  public void openRead(ReadStream rs, boolean free)
-    throws IOException
-  {
-    TempReadStream tempReadStream = new TempReadStream();
-    tempReadStream.init(_head);
-
-    tempReadStream.setFreeWhenDone(free);
-    if (free) {
-      _head = null;
-      _tail = null;
-    }
-
-    rs.init(tempReadStream, null);
   }
 
   /**

@@ -30,7 +30,6 @@ package com.caucho.iiop;
 
 import com.caucho.vfs.TempBuffer;
 
-import java.io.IOException;
 
 public class EncapsulationMessageWriter extends MessageWriter
 {

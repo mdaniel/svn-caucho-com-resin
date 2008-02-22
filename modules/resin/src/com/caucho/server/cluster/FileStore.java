@@ -72,6 +72,7 @@ public class FileStore extends StoreManager {
    * Initialize.
    */
   @PostConstruct
+  @Override
   public boolean init()
     throws Exception
   {
@@ -92,6 +93,7 @@ public class FileStore extends StoreManager {
   /**
    * Start
    */
+  @Override
   public boolean start()
     throws Exception
   {
@@ -106,6 +108,7 @@ public class FileStore extends StoreManager {
   /**
    * Clears the files which are too old.
    */
+  @Override
   public void clearOldObjects()
   {
     try {
@@ -127,6 +130,7 @@ public class FileStore extends StoreManager {
   /**
    * Creates the cluster object.
    */
+  @Override
   ClusterObject create(Store store, String id)
   {
     return new ClusterObject(this, store, id);
@@ -160,7 +164,7 @@ public class FileStore extends StoreManager {
       return;
 
     int length = tempStream.getLength();
-    ReadStream is = tempStream.openRead(true);
+    ReadStream is = tempStream.openReadAndSaveBuffer();
     try {
       _backing.storeSelf(obj.getUniqueId(), is, length,
 			 obj.getExpireInterval(), 0, 0, 0);
@@ -190,6 +194,7 @@ public class FileStore extends StoreManager {
    * @param uniqueId the identifier of the object.
    * @param long the time in ms for the expire
    */
+  @Override
   public void setExpireInterval(String uniqueId, long expires)
     throws Exception
   {
@@ -199,16 +204,12 @@ public class FileStore extends StoreManager {
   /**
    * When the session is no longer valid, remove it from the backing store.
    */
+  @Override
   public void remove(ClusterObject obj)
     throws Exception
   {
     removeClusterObject(obj.getStoreId(), obj.getObjectId());
 
     _backing.remove(obj.getUniqueId());
-  }
-
-  public String toString()
-  {
-    return "FileStore[]";
   }
 }

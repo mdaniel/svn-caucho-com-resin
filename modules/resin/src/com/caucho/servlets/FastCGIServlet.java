@@ -307,6 +307,7 @@ public class FastCGIServlet extends GenericServlet {
     }
 
     TempBuffer.free(tempBuf);
+    tempBuf = null;
 
     if (hasStdin)
       writeHeader(fcgiSocket, ws, FCGI_STDIN, 0);

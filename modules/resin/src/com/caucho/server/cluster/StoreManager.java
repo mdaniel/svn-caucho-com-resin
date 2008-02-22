@@ -181,8 +181,8 @@ abstract public class StoreManager
    */
   public void updateIdleCheckInterval(long idleCheckInterval)
   {
-    if (_idleCheckInterval > 0 && idleCheckInterval > 0 &&
-	idleCheckInterval < _idleCheckInterval) {
+    if (_idleCheckInterval > 0 && idleCheckInterval > 0
+	&& idleCheckInterval < _idleCheckInterval) {
       _idleCheckInterval = idleCheckInterval;
       _alarm.queue(idleCheckInterval);
     }

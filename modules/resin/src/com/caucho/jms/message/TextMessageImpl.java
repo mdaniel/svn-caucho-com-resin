@@ -133,7 +133,7 @@ public class TextMessageImpl extends MessageImpl implements TextMessage  {
     
     ws.close();
 
-    return body.openRead(true);
+    return body.openRead();
   }
 
   /**

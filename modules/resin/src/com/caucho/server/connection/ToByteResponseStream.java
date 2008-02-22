@@ -77,6 +77,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Initializes the Buffered Response stream at the beginning of a request.
    */
+  @Override
   public void start()
   {
     _bufferCapacity = SIZE;
@@ -106,6 +107,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     return true;
   }
 
+  @Override
   public void setOutputStreamOnly(boolean isOutputStreamOnly)
   {
     _isOutputStreamOnly = isOutputStreamOnly;
@@ -114,6 +116,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Sets the head.
    */
+  @Override
   public void setHead()
   {
     _isHead = true;
@@ -122,6 +125,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Sets the encoding.
    */
+  @Override
   public void setEncoding(String encoding)
     throws UnsupportedEncodingException
   {
@@ -144,6 +148,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Sets the locale.
    */
+  @Override
   public void setLocale(Locale locale)
     throws UnsupportedEncodingException
   {
@@ -519,8 +524,10 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
       writeNext(ptr.getBuffer(), 0, ptr.getLength(), _isFinished);
 
-      if (next != null)
+      if (next != null) {
 	TempBuffer.free(ptr);
+        ptr = null;
+      }
 
       ptr = next;
     } while (ptr != null);

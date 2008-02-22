@@ -223,7 +223,7 @@ public class XsltFilter implements Filter {
 
         Document doc = null;
         
-        ReadStream is = ts.openRead(true);
+        ReadStream is = ts.openRead();
         Path userPath = Vfs.lookup();
         if (req instanceof CauchoRequest)
           userPath.setUserPath(((CauchoRequest) req).getPageURI());
@@ -249,7 +249,7 @@ public class XsltFilter implements Filter {
         
         //Path path = Vfs.lookup(href);
         try {
-          //ReadStream sis = path.openRead();
+          //ReadStream sis = path.openReadAndSaveBuffer();
 
           TransformerFactory factory;
           

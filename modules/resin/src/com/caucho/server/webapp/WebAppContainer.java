@@ -102,9 +102,6 @@ public class WebAppContainer
   private ArrayList<EarConfig> _earDefaultList
     = new ArrayList<EarConfig>();
 
-  // List of ear-deploy dead code: 2006-06-26
-  //private ArrayList<EarDeployGeneratorGenerator> _earDeployList = new ArrayList<EarDeployGeneratorGenerator>();
-
   private DeployContainer<EarDeployController> _earDeploy;
   private DeployContainer<WebAppController> _appDeploy;
   private WebAppExpandDeployGenerator _warGenerator;
@@ -115,24 +112,9 @@ public class WebAppContainer
   private LruCache<String,WebAppController> _uriToAppCache
     = new LruCache<String,WebAppController>(8192);
 
-  // include dispatch cache
-  /*  dead code: 2006-06-26
-  private LruCache<String,Invocation> _includeCache
-    = new LruCache<String,Invocation>(4096);
-  */
-
   // List of default webApp configurations
   private ArrayList<WebAppConfig> _webAppDefaultList
     = new ArrayList<WebAppConfig>();
-
-  // url-regexp apps  dead code: 2006-06-26
-  //private ArrayList<WebAppConfig> _regexpApps = new ArrayList<WebAppConfig>();
-
-  /*
-  dead code: 2006-06-26
-  private HashMap<String,WebAppConfig> _configAppMap
-    =  new HashMap<String,WebAppConfig>();
-    */
 
   private AbstractAccessLog _accessLog;
   private ErrorPageManager _errorPageManager;

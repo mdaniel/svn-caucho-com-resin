@@ -105,6 +105,7 @@ class MultipartForm {
           os.close();
 
 	  TempBuffer.free(tempBuffer);
+          tempBuffer = null;
         }
 
         if (uploadMax > 0 && uploadMax < tempFile.getLength()) {

@@ -166,6 +166,7 @@ public class TempBuffer {
 
 	if (next.getNext() == null) {
 	  TempBuffer.free(next);
+          next = null;
 	  ptr._next = null;
 	}
       }

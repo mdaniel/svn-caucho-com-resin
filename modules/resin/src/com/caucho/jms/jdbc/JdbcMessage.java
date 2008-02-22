@@ -556,6 +556,7 @@ public class JdbcMessage
     }
 
     TempBuffer.free(tb);
+    tb = null;
     
     ws.close();
 

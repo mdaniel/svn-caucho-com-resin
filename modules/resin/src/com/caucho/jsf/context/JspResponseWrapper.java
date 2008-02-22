@@ -284,7 +284,7 @@ public class JspResponseWrapper extends ResponseWrapper
   {
     _out.flush();
     
-    ReadStream rs = _tempStream.openRead(true);
+    ReadStream rs = _tempStream.openRead();
     PrintWriter out = _response.getWriter();
     
     int ch;
@@ -304,7 +304,7 @@ public class JspResponseWrapper extends ResponseWrapper
     if (out != null)
       out.flush();
     
-    ReadStream rs = _tempStream.openRead(true);
+    ReadStream rs = _tempStream.openRead();
     StringBuilder sb = new StringBuilder();
     
     int ch;

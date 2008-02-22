@@ -1212,6 +1212,7 @@ public abstract class Path {
         os.write(buffer, 0, len);
     } finally {
       TempBuffer.free(tempBuffer);
+      tempBuffer = null;
 
       is.close();
     }
@@ -1340,7 +1341,7 @@ public abstract class Path {
 
   public String toString()
   {
-    return getNativePath();
+    return getFullPath();
   }
 
   public StreamImpl openReadImpl() throws IOException

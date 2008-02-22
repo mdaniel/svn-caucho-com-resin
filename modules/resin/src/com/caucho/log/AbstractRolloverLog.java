@@ -798,7 +798,7 @@ public class AbstractRolloverLog {
 	  openLog();
 
 	try {
-	  ReadStream is = ts.openRead(true);
+	  ReadStream is = ts.openRead();
 
 	  try {
 	    is.writeToStream(_os);

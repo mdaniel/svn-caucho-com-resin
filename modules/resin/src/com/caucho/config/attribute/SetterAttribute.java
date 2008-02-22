@@ -82,9 +82,9 @@ public class SetterAttribute extends Attribute {
       _setter.invoke(bean, value);
     } catch (IllegalArgumentException e) {
       throw ConfigException.create(_setter,
-				L.l("'{0}' is an illegal value.",
-				    value),
-				e);
+				   L.l("'{0}' is an illegal value.",
+				       value),
+				   e);
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

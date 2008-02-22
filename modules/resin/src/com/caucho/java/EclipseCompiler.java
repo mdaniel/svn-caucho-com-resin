@@ -173,7 +173,7 @@ public class EclipseCompiler extends AbstractJavaCompiler {
         thread.setContextClassLoader(oldLoader);
       }
 
-      ReadStream read = tempStream.openRead();
+      ReadStream read = tempStream.openReadAndSaveBuffer();
       JavacErrorParser parser = new JavacErrorParser();
 
       String errors = parser.parseErrors((InputStream) read, lineMap);
@@ -183,7 +183,7 @@ public class EclipseCompiler extends AbstractJavaCompiler {
 	errors = errors.trim();
 
       if (log.isLoggable(Level.FINE)) {
-	read = tempStream.openRead();
+	read = tempStream.openReadAndSaveBuffer();
 	CharBuffer cb = new CharBuffer();
 	int ch;
 	while ((ch = read.read()) >= 0) {

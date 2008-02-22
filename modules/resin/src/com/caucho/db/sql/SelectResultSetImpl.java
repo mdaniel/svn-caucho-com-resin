@@ -68,7 +68,6 @@ public class SelectResultSetImpl extends ResultSetImpl {
   private Store []_stores = new Store[32];
 
   private TableIterator []_rows;
-  private int _rowLength;
 
   private int _lastColumn;
 
@@ -132,7 +131,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
   void initRead()
     throws IOException
   {
-    _ts.openRead(_rs, true);
+    _ts.openRead(_rs);
   }
 
   WriteStream getWriteStream()

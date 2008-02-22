@@ -525,7 +525,7 @@ class HmuxStream extends StreamImpl {
 	byte []buffer = tb.getBuffer();
 	int sublen;
 
-	ReadStream postIn = tempStream.openRead();
+	ReadStream postIn = tempStream.openReadAndSaveBuffer();
 
 	while ((sublen = postIn.read(buffer, 0, buffer.length)) > 0) {
 	  _ws.write('D');
@@ -537,6 +537,7 @@ class HmuxStream extends StreamImpl {
 	tempStream.destroy();
 
 	TempBuffer.free(tb);
+        tb = null;
       }
     }
 

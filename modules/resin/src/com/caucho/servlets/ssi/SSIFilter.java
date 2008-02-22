@@ -139,7 +139,7 @@ public class SSIFilter implements Filter {
       
       _out.close();
 
-      ReadStream is = _tempStream.openRead(true);
+      ReadStream is = _tempStream.openRead();
       Statement stmt = null;
       try {
 	stmt = new SSIParser(_factory).parse(is);

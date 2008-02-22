@@ -192,7 +192,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
       tempStream.close();
 	
       if (log.isLoggable(Level.FINE)) {
-	ReadStream read = tempStream.openRead();
+	ReadStream read = tempStream.openReadAndSaveBuffer();
 	CharBuffer cb = new CharBuffer();
 	int ch;
 
@@ -209,7 +209,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
 	};
       }
 
-      ReadStream read = tempStream.openRead();
+      ReadStream read = tempStream.openReadAndSaveBuffer();
       ErrorParser parser;
         
       // the javac error parser will work with jikes in "emacs" mode
@@ -249,7 +249,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
 	for (int i = 0; i < argList.size(); i++)
 	  cb.append(" " + argList.get(i) + "\n");
           
-	read = tempStream.openRead();
+	read = tempStream.openReadAndSaveBuffer();
 	int ch;
 	while ((ch = read.read()) >= 0)
 	  cb.append((char) ch);

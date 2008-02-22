@@ -461,13 +461,10 @@ public class FileBacking {
       // The binary stream can be reused because it won't actually be
       // read on a failure
 
-      //System.out.println("SAVE: " + uniqueId);
       if (storeSelfUpdate(conn, uniqueId, is, length)) {
-	//System.out.println("SAVE-UPDATE: " + uniqueId);
       }
       else if (storeSelfInsert(conn, uniqueId, is, length, expireInterval,
 			       primary, secondary, tertiary)) {
-	//System.out.println("SAVE-INSERT: " + uniqueId);
       }
       else {
 	// XXX: For now, avoid this case since the self-update query doesn't

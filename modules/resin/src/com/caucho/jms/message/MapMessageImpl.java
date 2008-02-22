@@ -385,7 +385,7 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
     
     ws.close();
 
-    return body.openRead(true);
+    return body.openRead();
   }
 
   /**

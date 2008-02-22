@@ -999,16 +999,16 @@ public class WriteStream extends OutputStreamWithBuffer
     int len;
     int length = _writeBuffer.length;
 
-    if (_writeLength >= length) {
+    if (length <= _writeLength) {
       int tmplen = _writeLength;
       _writeLength = 0;
-      this._source.write(_writeBuffer, 0, tmplen, false);
+      _source.write(_writeBuffer, 0, tmplen, false);
     }
 
     while (totalLength > 0) {
       int sublen = length - _writeLength;
       
-      if (sublen > totalLength)
+      if (totalLength < sublen)
         sublen = totalLength;
       
       sublen = source.read(_writeBuffer, _writeLength, sublen);
@@ -1017,7 +1017,7 @@ public class WriteStream extends OutputStreamWithBuffer
       
       _writeLength += sublen;
       totalLength -= sublen;
-      if (_writeLength >= length) {
+      if (length <= _writeLength) {
 	int tmplen = _writeLength;
 	_writeLength = 0;
 	_source.write(_writeBuffer, 0, tmplen, false);
@@ -1139,8 +1139,10 @@ public class WriteStream extends OutputStreamWithBuffer
         _writeEncoding = null;
 
       if (! reuseBuffer) {
-        if (_tempWrite != null)
+        if (_tempWrite != null) {
           TempBuffer.free(_tempWrite);
+          _tempWrite = null;
+        }
         _tempWrite = null;
         _writeBuffer = null;
       }
@@ -1156,8 +1158,12 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void free()
   {
     _source = null;
-    if (_tempWrite != null)
+    
+    if (_tempWrite != null) {
       TempBuffer.free(_tempWrite);
+      _tempWrite = null;
+    }
+    
     _tempWrite = null;
     _writeBuffer = null;
   }

@@ -461,7 +461,7 @@ public class StreamMessageImpl extends MessageImpl implements StreamMessage
     
     ws.close();
 
-    return body.openRead(true);
+    return body.openRead();
   }
 
   /**

@@ -336,7 +336,7 @@ class SmtpStream extends MemoryStream {
   {
     int ch;
 
-    ReadStream is = openRead();
+    ReadStream is = openReadAndSaveBuffer();
 
     ch = is.read();
     if (ch < 0) {

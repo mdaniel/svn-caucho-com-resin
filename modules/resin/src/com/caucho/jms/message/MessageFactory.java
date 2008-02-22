@@ -162,7 +162,7 @@ public class MessageFactory
 
       out.close();
 
-      return ts.openRead(true);
+      return ts.openRead();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

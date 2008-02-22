@@ -35,8 +35,6 @@ public class TempStream extends StreamImpl
   private String _encoding;
   private TempBuffer _head;
   private TempBuffer _tail;
-  private boolean _useBackingFile;
-  private TempReadStream _tempReadStream;
 
   public TempStream()
   {
@@ -78,11 +76,13 @@ public class TempStream extends StreamImpl
     return _encoding;
   }
 
+  @Override
   public boolean canWrite() { return true; }
 
   /**
    * Writes a chunk of data to the temp stream.
    */
+  @Override
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -118,6 +118,7 @@ public class TempStream extends StreamImpl
     _head._bufferCount++;
   }
 
+  @Override
   public void flush()
     throws IOException
   {
@@ -129,26 +130,13 @@ public class TempStream extends StreamImpl
   public ReadStream openRead()
     throws IOException
   {
-    return openRead(false);
-  }
-
-  /**
-   * Opens a read stream to the buffer.
-   *
-   * @param free if true, frees the buffer as it's read
-   */
-  public ReadStream openRead(boolean free)
-    throws IOException
-  {
     close();
-
+    
     TempReadStream read = new TempReadStream(_head);
-    read.setFreeWhenDone(free);
-    if (free) {
-      _head = null;
-      _tail = null;
-    }
-
+    read.setFreeWhenDone(true);
+    _head = null;
+    _tail = null;
+    
     return new ReadStream(read);
   }
 
@@ -157,25 +145,33 @@ public class TempStream extends StreamImpl
    *
    * @param free if true, frees the buffer as it's read
    */
-  public void openRead(ReadStream rs, boolean free)
+  public ReadStream openReadAndSaveBuffer()
     throws IOException
   {
     close();
 
-    if (_tempReadStream == null) {
-      _tempReadStream = new TempReadStream();
-      _tempReadStream.setPath(getPath());
-    }
+    TempReadStream read = new TempReadStream(_head);
+    read.setFreeWhenDone(false);
+    
+    return new ReadStream(read);
+  }
 
-    _tempReadStream.init(_head);
+  /**
+   * Opens a read stream to the buffer.
+   */
+  public void openRead(ReadStream rs)
+    throws IOException
+  {
+    close();
 
-    _tempReadStream.setFreeWhenDone(free);
-    if (free) {
-      _head = null;
-      _tail = null;
-    }
-
-    rs.init(_tempReadStream, null);
+    TempReadStream tempReadStream = new TempReadStream(_head);
+    tempReadStream.setPath(getPath());
+    tempReadStream.setFreeWhenDone(true);
+    
+    _head = null;
+    _tail = null;
+    
+    rs.init(tempReadStream, null);
   }
 
   /**
@@ -208,18 +204,7 @@ public class TempStream extends StreamImpl
     return length;
   }
 
-  public ReadStream openRead(ReadStream s)
-    throws IOException
-  {
-    close();
-
-    TempReadStream read = new TempReadStream(_head);
-    read.setFreeWhenDone(false);
-    read.setPath(getPath());
-    s.init(read, null);
-    return s;
-  }
-
+  @Override
   public void clearWrite()
   {
     TempBuffer ptr = _head;

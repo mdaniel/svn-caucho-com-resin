@@ -123,6 +123,7 @@ public class BlobOutputStream extends OutputStream {
   /**
    * Writes a buffer.
    */
+  @Override
   public void write(byte []buffer, int offset, int length)
     throws IOException
   {
@@ -147,6 +148,7 @@ public class BlobOutputStream extends OutputStream {
   /**
    * Completes the stream.
    */
+  @Override
   public void close()
     throws IOException
   {
@@ -167,8 +169,10 @@ public class BlobOutputStream extends OutputStream {
       TempBuffer tempBuffer = _tempBuffer;
       _tempBuffer = null;
 
-      if (tempBuffer != null)
+      if (tempBuffer != null) {
 	TempBuffer.free(tempBuffer);
+        tempBuffer = null;
+      }
     }
   }
 

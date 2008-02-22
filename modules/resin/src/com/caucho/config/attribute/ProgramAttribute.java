@@ -76,4 +76,9 @@ public class ProgramAttribute extends Attribute {
       throw ConfigException.create(e);
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _setter + "]";
+  }
 }

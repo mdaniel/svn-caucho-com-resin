@@ -412,12 +412,7 @@ public class PDFStream {
   public void writeToStream(WriteStream os)
     throws IOException
   {
-    for (TempBuffer head = _tempStream.getHead();
-	 head != null;
-	 head = head.getNext()) {
-      os.write(head.getBuffer(), 0, head.getLength());
-    }
-
-    TempBuffer.freeAll(_tempStream.getHead());
+    _tempStream.writeToStream(os);
+    _tempStream.destroy();
   }
 }

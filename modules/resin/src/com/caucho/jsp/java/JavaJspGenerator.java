@@ -519,7 +519,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     if (log.isLoggable(Level.FINER)) {
       StringBuilder sb = new StringBuilder();
-      ReadStream is = ts.openRead();
+      ReadStream is = ts.openReadAndSaveBuffer();
       int ch;
       while ((ch = is.readChar()) >= 0) {
 	sb.append((char) ch);

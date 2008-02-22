@@ -235,6 +235,9 @@ public class CGIServlet extends GenericServlet {
       } finally {
 	outputStream.close();
       }
+      
+      TempBuffer.free(tempBuf);
+      tempBuf = null;
 
       ReadStream rs = Vfs.openRead(inputStream);
       boolean hasStatus = false;

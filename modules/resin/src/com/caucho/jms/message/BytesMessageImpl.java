@@ -73,6 +73,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       }
 
       TempBuffer.free(tempBuf);
+      tempBuf = null;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
       
@@ -131,7 +132,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 	if (_rs != null)
 	  _rs.close();
 	
-	_rs = _tempStream.openRead();
+	_rs = _tempStream.openReadAndSaveBuffer();
       }
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
@@ -732,7 +733,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     throws IOException
   {
     if (_tempStream != null)
-      return _tempStream.openRead();
+      return _tempStream.openReadAndSaveBuffer();
     else
       return null;
   }

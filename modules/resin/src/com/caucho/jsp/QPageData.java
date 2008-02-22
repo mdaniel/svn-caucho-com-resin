@@ -55,7 +55,7 @@ public class QPageData extends PageData {
   public InputStream getInputStream()
   {
     try {
-      return _ts.openRead();
+      return _ts.openReadAndSaveBuffer();
     } catch (IOException e) {
       return null;
     }

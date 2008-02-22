@@ -99,7 +99,7 @@ public class SelfSerializer {
     try {
       if (is == null) {
         oos.flush();
-        is = trs.openRead(true);
+        is = trs.openRead();
         ois = new LoaderObjectInputStream(is);
       }
       

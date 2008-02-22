@@ -103,6 +103,7 @@ class ClobWriter extends Writer {
   /**
    * Writes a byte.
    */
+  @Override
   public void write(int v)
     throws IOException
   {
@@ -181,6 +182,7 @@ class ClobWriter extends Writer {
       flushBlock();
 
       TempBuffer.free(_tempBuffer);
+      _tempBuffer = null;
     } finally {
       if (_inode != null)
 	_inode.closeOutputStream();

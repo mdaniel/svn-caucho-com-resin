@@ -406,10 +406,8 @@ public class ClusterObject {
 
       long crc = crcStream.getCRC();
 
-      if (crc == _crc) {
-	tempStream.destroy();
+      if (crc == _crc)
 	return;
-      }
 
       _crc = crc;
 

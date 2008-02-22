@@ -35,11 +35,13 @@ public class MemoryStream extends StreamImpl {
   private TempBuffer _head;
   private TempBuffer _tail;
 
+  @Override
   public Path getPath() { return new NullPath("temp:"); }
 
   /**
    * A memory stream is writable.
    */
+  @Override
   public boolean canWrite()
   {
     return true;
@@ -53,6 +55,7 @@ public class MemoryStream extends StreamImpl {
    * @param length the number of bytes to write.
    * @param isEnd true when the write is flushing a close.
    */
+  @Override
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -100,7 +103,7 @@ public class MemoryStream extends StreamImpl {
       return (_head._bufferCount - 1) * _head._length + _tail._length;
   }
 
-  public ReadStream openRead()
+  public ReadStream openReadAndSaveBuffer()
     throws IOException
   {
     close();
@@ -113,14 +116,17 @@ public class MemoryStream extends StreamImpl {
 
   public void destroy()
   {
+    TempBuffer ptr;
     TempBuffer next;
 
-    for (; _head != null; _head = next) {
-      next = _head._next;
-      _head.free(_head);
-    }
-
+    ptr = _head;
     _head = null;
     _tail = null;
+    
+    for (; ptr != null; ptr = next) {
+      next = ptr._next;
+      TempBuffer.free(ptr);
+      ptr = null;
+    }
   }
 }
