@@ -235,6 +235,7 @@ public abstract class AbstractLogin implements LoginFilter {
                                 principal);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[]";

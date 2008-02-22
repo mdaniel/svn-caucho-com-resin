@@ -1432,7 +1432,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     SessionImpl session = _sessions.remove(id);
 
     if (session != null)
-      session.invalidateImpl(SessionImpl.Logout.LRU);
+      session.invalidateLru();
   }
 
   /**
@@ -1507,7 +1507,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
         session.create(now);
       }
     } catch (Exception e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       session.reset(now);
     }
@@ -1524,29 +1523,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
   }
 
   /**
-   * Invalidates a session from the cache.
-   */
-  public void invalidateSession(SessionImpl session)
-  {
-    removeSession(session);
-
-    synchronized (_statisticsLock) {
-      _sessionInvalidateCount++;
-    }
-
-    if (_sessionStore != null) {
-      try {
-	_sessionStore.remove(session.getId());
-      } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-  }
-
-  /**
    * Removes a session from the cache.
    */
-  public void removeSession(SessionImpl session)
+  void removeSession(SessionImpl session)
   {
     _sessions.remove(session.getId());
   }
@@ -1659,23 +1638,24 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	try {
 	  if (! session.isValid())
 	    continue;
-	  
-	  long maxIdleTime = session._maxInactiveInterval;
 
 	  if (_storeManager == null) {
 	    // if no persistent store then invalidate
 	    // XXX: server/12cg - single signon shouldn't logout
-	    session.invalidate(SessionImpl.Logout.TIMEOUT);
+     	    session.invalidateTimeout();
 	  }
 	  else if (session.getSrunIndex() != _srunIndex && _srunIndex >= 0) {
+            if (log.isLoggable(Level.FINE))
+              log.fine(session + " timeout (backup)");
+            
 	    // if not the owner, then just remove
 	    _sessions.remove(session.getId());
 	  }
 	  else {
-	    session.invalidate(SessionImpl.Logout.TIMEOUT);
+	    session.invalidateTimeout();
 	  }
 	} catch (Throwable e) {
-	  log.log(Level.FINER, e.toString(), e);
+	  log.log(Level.FINE, e.toString(), e);
 	}
       }
     } finally {
@@ -1751,6 +1731,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     */
   }
 
+  @Override
   public String toString()
   {
     if (_webApp != null)
@@ -1771,6 +1752,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
       _loader = thread.getContextClassLoader();
     }
 
+    @Override
     protected Class resolveClass(ObjectStreamClass v)
       throws IOException, ClassNotFoundException
     {

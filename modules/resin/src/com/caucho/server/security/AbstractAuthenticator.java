@@ -29,13 +29,11 @@
 
 package com.caucho.server.security;
 
-import com.caucho.log.Log;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.Application;
 import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.webbeans.component.*;
@@ -465,32 +463,6 @@ public class AbstractAuthenticator
     return clientDigest;
   }
 
-  private String digestToString(byte []digest)
-  {
-    if (digest == null)
-      return "null";
-
-    CharBuffer cb = CharBuffer.allocate();
-    for (int i = 0; i < digest.length; i++) {
-      int ch = digest[i];
-
-      int d1 = (ch >> 4) & 0xf;
-      int d2 = ch & 0xf;
-
-      if (d1 < 10)
-        cb.append((char) (d1 + '0'));
-      else
-        cb.append((char) (d1 + 'a' - 10));
-        
-      if (d2 < 10)
-        cb.append((char) (d2 + '0'));
-      else
-        cb.append((char) (d2 + 'a' - 10));
-    }
-
-    return cb.close();
-  }
-
   /**
    * Returns the digest secret for Digest authentication.
    */
@@ -653,7 +625,8 @@ public class AbstractAuthenticator
                      Principal user)
     throws ServletException
   {
-    log.fine("logout " + user);
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " logout " + user);
 
     if (sessionId != null) {
       if (_principalCache == null) {
@@ -788,7 +761,7 @@ public class AbstractAuthenticator
 	try {
 	  if (session != null) {
 	    session.logout();
-	    session.invalidate();  // #599,  server/12i3
+	    session.invalidateLogout();  // #599,  server/12i3
 	  }
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);

@@ -29,7 +29,6 @@
 
 package com.caucho.server.session;
 
-import com.caucho.log.Log;
 import com.caucho.hessian.io.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.cluster.ClusterObject;
@@ -122,7 +121,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     _values = createValueMap();
 
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " create");
+      log.fine(this + " new");
   }
 
   /**
@@ -132,7 +131,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     // this test forced by TCK
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call getCreationTime() when session is no longer valid."));
+      throw new IllegalStateException(L.l("{0}: can't call getCreationTime() when session is no longer valid.",
+                                          this));
 
     return _creationTime;
   }
@@ -170,7 +170,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     // this test forced by TCK
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call getLastAccessedTime() when session is no longer valid."));
+      throw new IllegalStateException(L.l("{0}: can't call getLastAccessedTime() when session is no longer valid.",
+                                          this));
 
     return _accessTime;
   }
@@ -279,7 +280,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   public Object getAttribute(String name)
   {
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call getAttribute() when session is no longer valid."));
+      throw new IllegalStateException(L.l("{0}: can't call getAttribute() when session is no longer valid.",
+                                          this));
 
     synchronized (_values) {
       Object value = _values.get(name);
@@ -299,15 +301,15 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void setAttribute(String name, Object value)
   {
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call setAttribute(String, Object) when session is no longer valid."));
+      throw new IllegalStateException(L.l("{0}: can't call setAttribute(String, Object) when session is no longer valid.", this));
 
     Object oldValue;
 
     if (value != null
 	&& ! (value instanceof Serializable)
 	&& log.isLoggable(Level.FINE)) {
-      log.fine(L.l("session attribute '{0}' value is non-serializable type '{1}'",
-		   name, value.getClass().getName()));
+      log.fine(L.l("{0} attribute '{1}' value is non-serializable type '{2}'",
+		   this, name, value.getClass().getName()));
     }
 
     synchronized (_values) {
@@ -377,7 +379,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void removeAttribute(String name)
   {
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call removeAttribute(String) when session is no longer valid."));
+      throw new IllegalStateException(L.l("{0}: can't call removeAttribute(String) when session is no longer valid.", this));
 
     Object oldValue;
 
@@ -400,7 +402,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     synchronized (_values) {
       if (! _isValid)
-	throw new IllegalStateException(L.l("Can't call getAttributeNames() when session is no longer valid."));
+	throw new IllegalStateException(L.l("{0} can't call getAttributeNames() when session is no longer valid.", this));
 
       return Collections.enumeration(_values.keySet());
     }
@@ -437,7 +439,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     synchronized (_values) {
       if (! _isValid)
-	throw new IllegalStateException(L.l("Can't call getValueNames() when session is no longer valid."));
+	throw new IllegalStateException(L.l("{0} can't call getValueNames() when session is no longer valid.", this));
 
       if (_values == null)
 	return new String[0];
@@ -459,7 +461,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   public boolean isNew()
   {
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call isNew() when session is no longer valid."));
+      throw new IllegalStateException(L.l("{0} can't call isNew() when session is no longer valid.", this));
 
     return _isNew;
   }
@@ -497,15 +499,15 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
 
     if (! _isClosing) {
-      log.warning(L.l("session {0} LRU while in use (use-count={1}).  Consider increasing session-count.",
-		      _id,
+      log.warning(L.l("{0} LRU while in use (use-count={1}).  Consider increasing session-count.",
+		      this,
 		      _useCount));
     }
     
     boolean isValid = _isValid;
 
     if (log.isLoggable(Level.FINE))
-      log.fine("remove session " + _id);
+      log.fine(this + " remove");
 
     long now = Alarm.getCurrentTime();
 
@@ -536,28 +538,63 @@ public class SessionImpl implements HttpSession, CacheListener {
   }
 
   /**
-   * Invalidates the session.
+   * Invalidates the session, called by user code.
+   * 
+   * This should never be called by Resin code (for logging purposes)
    */
   public void invalidate()
   {
-    _isInvalidating = true;
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " invalidate");
 
+    _isInvalidating = true;
     invalidate(Logout.INVALIDATE);
+  }
+  
+  /**
+   * Invalidates a session based on a logout.
+   */
+  public void invalidateLogout()
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " logout");
+   
+    _isInvalidating = true;
+    invalidate(Logout.INVALIDATE);
+  }
+  
+  /**
+   * Invalidates a session based on a timeout
+   */
+  void invalidateTimeout()
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " timeout");
+    
+    invalidate(Logout.TIMEOUT);
+  }
+  
+  /**
+   * Invalidates a session based on a LRU
+   */
+  void invalidateLru()
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " lru");
+    
+    invalidateImpl(Logout.LRU);
   }
 
   /**
    * Invalidates the session.
    */
-  public void invalidate(Logout logout)
+  private void invalidate(Logout logout)
   {
     if (! _isValid)
-      throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
+      throw new IllegalStateException(L.l("{0}: Can't call invalidate() when session is no longer valid.",
+                                          this));
 
     try {
-      if (log.isLoggable(Level.FINE)) {
-	log.fine("HttpSession[" + _id + "] invalidate");
-      }
-
       // server/017s
       ServletAuthenticator auth = getAuthenticator();
       if (! (auth instanceof AbstractAuthenticator)
@@ -592,6 +629,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void logout(SessionImpl timeoutSession)
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " logout " + timeoutSession);
+    
     if (_user != null) {
       if (_isValid)
         removeAttribute(LOGIN);
@@ -613,7 +653,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    * Invalidate the session, removing it from the manager,
    * unbinding the values, and removing it from the store.
    */
-  void invalidateImpl(Logout logout)
+  private void invalidateImpl(Logout logout)
   {
     boolean invalidateAfterListener = _manager.isInvalidateAfterListener();
     if (! invalidateAfterListener)
@@ -645,7 +685,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	try {
 	  clusterObject.store(this);
 	} catch (Exception e) {
-	  log.log(Level.WARNING, "Can't serialize session", e);
+	  log.log(Level.WARNING, this + ": can't serialize session", e);
 	}
       }
     }
@@ -659,7 +699,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   void create(long now)
   {
     if (log.isLoggable(Level.FINE)) {
-      log.fine(_manager + " create session " + _id);
+      log.fine(this + " create session");
     }
 
     // e.g. server 'C' when 'A' and 'B' have no record of session
@@ -714,7 +754,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   void reset(long now)
   {
     if (log.isLoggable(Level.FINE))
-      log.fine("reset session " + _id);
+      log.fine(this + " reset");
 
     unbind();
     _isValid = true;
@@ -768,8 +808,6 @@ public class SessionImpl implements HttpSession, CacheListener {
     ArrayList<Object> values = new ArrayList<Object>();
     
     synchronized (_values) {
-      //System.out.println("UNBIND: " + this + " " + clusterObject + " " + System.identityHashCode(this));
-
       /*
       if (_useCount > 0)
 	Thread.dumpStack();
@@ -857,8 +895,6 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void finish()
   {
-    int count;
-
     _accessTime = Alarm.getCurrentTime();
 
     synchronized (this) {
@@ -924,7 +960,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	clusterObject.store(this);
       }
     } catch (Throwable e) {
-      log.log(Level.WARNING, "Can't serialize session", e);
+      log.log(Level.WARNING, this + ": can't serialize session", e);
     }
   }
 
@@ -941,7 +977,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	clusterObject.store(this);
       }
     } catch (Throwable e) {
-      log.log(Level.WARNING, "Can't serialize session", e);
+      log.log(Level.WARNING, this + ": can't serialize session", e);
     }
   }
 
@@ -1072,7 +1108,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 	try {
 	  out.writeObject(value);
 	} catch (NotSerializableException e) {
-	  log.warning(L.l("Failed storing persistent session attribute `{0}'.  Persistent session values must extend java.io.Serializable.\n{1}", entry.getKey(), String.valueOf(e)));
+	  log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
+                          this, entry.getKey(), String.valueOf(e)));
 	  throw e;
 	}
       }
@@ -1199,7 +1236,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 	try {
 	  out.writeObject(value);
 	} catch (NotSerializableException e) {
-	  log.warning(L.l("Failed storing persistent session attribute `{0}'.  Persistent session values must extend java.io.Serializable.\n{1}", entry.getKey(), String.valueOf(e)));
+	  log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
+                          this, entry.getKey(), String.valueOf(e)));
 	  throw e;
 	}
       }
@@ -1213,7 +1251,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     synchronized (_values) {
       if (! _isValid)
-	throw new IllegalStateException(L.l("Can't call getEntrySet() when session is no longer valid."));
+	throw new IllegalStateException(L.l("{0}: can't call getEntrySet() when session is no longer valid.", this));
 
       return _values.entrySet();
     }
@@ -1229,6 +1267,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     log.fine(value);
   }
 
+  @Override
   public String toString()
   {
     String contextPath = "";
