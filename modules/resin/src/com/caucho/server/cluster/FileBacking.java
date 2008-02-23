@@ -78,6 +78,15 @@ public class FileBacking {
   private String _timeoutQuery;
   private String _dumpQuery;
   private String _countQuery;
+  
+  public FileBacking()
+  {
+  }
+  
+  public FileBacking(String name)
+  {
+    _name = name;
+  }
 
   /**
    * Returns the path to the directory.
@@ -184,7 +193,8 @@ public class FileBacking {
 
 	return;
       } catch (Exception e) {
-	log.finer(e.toString());
+	log.log(Level.FINEST, e.toString(), e);
+	log.finer(this + " " + e.toString());
       }
 
       try {
@@ -299,7 +309,7 @@ public class FileBacking {
         InputStream is = rs.getBinaryStream(2);
 
         if (log.isLoggable(Level.FINE))
-          log.fine("load local object: " + uniqueId);
+          log.fine(this + " load " + uniqueId);
       
         validLoad = clusterObj.load(is, obj);
 
@@ -309,7 +319,7 @@ public class FileBacking {
         is.close();
       }
       else if (log.isLoggable(Level.FINE))
-        log.fine("no local object loaded for " + uniqueId);
+        log.fine(this + " load: no local object loaded for " + uniqueId);
       else {
 	// System.out.println("NO-LOAD: " + uniqueId);
       }
@@ -344,7 +354,7 @@ public class FileBacking {
 
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
-	  log.fine("access cluster: " + uniqueId);
+	  log.fine(this + " access " + uniqueId);
 	return;
       }
     } finally {
@@ -373,7 +383,7 @@ public class FileBacking {
 
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
-	  log.fine("set expire interval: " + uniqueId + " " + expireInterval);
+	  log.fine(this + " set expire interval: " + uniqueId + " " + expireInterval);
 	return;
       }
     } finally {
@@ -396,7 +406,7 @@ public class FileBacking {
       int count = pstmt.executeUpdate();
       
       if (log.isLoggable(Level.FINE))
-        log.fine("invalidate: " + uniqueId);
+        log.fine(this + " remove " + uniqueId);
     } finally {
       conn.close();
     }
@@ -483,7 +493,6 @@ public class FileBacking {
 	*/
       }
     } catch (SQLException e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
@@ -516,7 +525,7 @@ public class FileBacking {
         
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
-	  log.fine("update cluster: " + uniqueId + " length:" + length);
+	  log.fine(this + " update " + uniqueId + " length:" + length);
 	  
 	return true;
       }
@@ -552,7 +561,7 @@ public class FileBacking {
       stmt.executeUpdate();
         
       if (log.isLoggable(Level.FINE))
-	log.fine("insert cluster: " + uniqueId + " length:" + length);
+	log.fine(this + " insert " + uniqueId + " length:" + length);
 
       return true;
     } catch (SQLException e) {
@@ -586,7 +595,6 @@ public class FileBacking {
       
       return -1;
     } catch (SQLException e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       conn.close();
@@ -646,7 +654,7 @@ public class FileBacking {
 
   public String toString()
   {
-    return "ClusterStore[" + _name + "]";
+    return getClass().getSimpleName() +  "[" + _tableName + "]";
   }
 
   class ClusterConnection {

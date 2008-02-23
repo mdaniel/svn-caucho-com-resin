@@ -159,7 +159,8 @@ public class ClusterCompatConfig {
     public void init()
       throws Exception
     {
-      _server.init();
+      // server/01nh - initialized later with cluster
+      // _server.init();
     }
   }
 }
