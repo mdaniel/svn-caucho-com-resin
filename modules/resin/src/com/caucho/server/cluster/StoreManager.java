@@ -768,6 +768,11 @@ abstract public class StoreManager
     _alarm.dequeue();
   }
 
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _serverId + "]";
+  }
+
   static class ObjectKey {
     private String _storeId;
     private String _objectId;
