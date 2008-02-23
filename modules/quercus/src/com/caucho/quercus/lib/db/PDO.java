@@ -774,7 +774,7 @@ public class PDO implements EnvCleanup {
       return getMysqlDataSource(env, dsn);
     if (dsn.startsWith("pgsql:"))
       return getPgsqlDataSource(env, dsn);
-    else if (dsn.startsWith("java:"))
+    else if (dsn.startsWith("java"))
       return getJndiDataSource(env, dsn);
     else if (dsn.startsWith("resin:"))
       return getResinDataSource(env, dsn);
@@ -968,7 +968,7 @@ public class PDO implements EnvCleanup {
     if (i < 0)
       return "PDO[]";
 
-    if (_dsn.startsWith("java:comp"))
+    if (_dsn.startsWith("java"))
       return "PDO[" + _dsn + "]";
 
     StringBuilder str = new StringBuilder();
