@@ -144,22 +144,23 @@ r_error-page = element error-page {
   (attribute error-code { string }
    | element error-code { string }
    | attribute exception-type { string }
-   | element exception-type { string })?,
+   | element exception-type { string })?
 
-  (attribute location { string }
-   | element location { string })
+  & (attribute location { string }
+     | element location { string })
 }
 
 r_filter = element filter {
-   r_description-Group,
+   r_description-Group
 
-   (attribute filter-name { string }
-    | element filter-name { string }),
+   & (attribute filter-name { string }
+      | element filter-name { string })
 
-   (attribute filter-class { r_class-Type }
-    | element filter-class { r_class-Type }),
+   & (attribute filter-class { r_class-Type }
+      | element filter-class { r_class-Type })
 
-   (r_init | r_init-param)*
+   & r_init*
+   & r_init-param*
 }
 
 r_filter-mapping = element filter-mapping {
@@ -347,20 +348,20 @@ r_login = element login {
 }
 
 r_login-config = element login-config {
-  r_type?,
+  (r_class | r_type)?
 
-  (attribute auth-method { string }
-   | element auth-method { string })?,
+  & (attribute auth-method { string }
+     | element auth-method { string })?
 
-  (attribute realm-name { string }
-   | element realm-name { string })?,
+  & (attribute authenticator { r_jndi }
+     | element authenticator { r_jndi })?
 
-  r_form-login-config?,
+  & r_form-login-config?,
 
-  (attribute authenticator { r_jndi }
-   | element authenticator { r_jndi })?,
+  & r_init?
 
-  r_init?
+  & (attribute realm-name { string }
+     | element realm-name { string })?
 }
 
 r_http-method-Values =
@@ -395,7 +396,7 @@ r_mime-mapping = element mime-mapping {
 
 r_multipart-form = element multipart-form {
   (attribute enable { r_boolean-Type }
-   | element upload-max { r_boolean-Type })?
+   | element enable { r_boolean-Type })?
 
   & (attribute upload-max { r_kbytes }
      | element upload-max { r_kbytes })?
@@ -919,8 +920,6 @@ r_secure =
 r_security-constraint =
   element security-constraint {
     r_security-constraint-Content
-
-    | (r_url-pattern, r_role-name*)
   }
 
 r_security-constraint-Content = r_security-constraint-Flow
@@ -938,15 +937,19 @@ r_security-constraint-Flow =
 r_security-constraint-Basis =
     r_display-name?
 
-    & r_web-resource-collection*
-
     & r_auth-constraint*
 
-    & r_user-data-constraint*
+    & r_constraint*
 
     & r_ip-constraint*
 
-    & r_constraint*
+    & r_role-name*
+
+    & r_user-data-constraint*
+
+    & r_url-pattern?
+
+    & r_web-resource-collection*
 
 r_servlet = element servlet {
   r_description-Group
@@ -966,7 +969,9 @@ r_servlet-Content =
 
    & r_var?
 
-   & ((r_init | r_init-param)*
+   & r_init*
+
+   & r_init-param*
 
    & (attribute load-on-startup { string }
       | element load-on-startup { string })?
@@ -1233,10 +1238,10 @@ r_web-app-Basis =
 
   & r_cache-mapping*
 
+  & r_context-param*
+
   & (attribute cookie-http-only { r_boolean-Type }
      | element cookie-http-only { r_boolean-Type })?
-
-  & r_context-param*
 
   & r_description-Group
 
