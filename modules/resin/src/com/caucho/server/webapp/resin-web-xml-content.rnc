@@ -356,7 +356,7 @@ r_login-config = element login-config {
   & (attribute authenticator { r_jndi }
      | element authenticator { r_jndi })?
 
-  & r_form-login-config?,
+  & r_form-login-config?
 
   & r_init?
 
@@ -982,7 +982,7 @@ r_servlet-Content =
 
    & r_security-role-ref*
 
-   & r_run-at?)
+   & r_run-at?
 
 r_servlet-mapping = element servlet-mapping {
   attribute id { string }?
