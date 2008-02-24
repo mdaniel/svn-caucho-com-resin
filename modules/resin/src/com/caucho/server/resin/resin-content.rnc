@@ -144,16 +144,13 @@ r_host = element host {
    | attribute regexp { string }
    | element regexp { string })?
 
-  & (attribute host-name { string } | element host-name { string })?
-
-  & (attribute secure-host-name { string }
-    | element secure-host-name { string })?
-
   & (attribute host-alias { string }
      | element host-alias { string })*
 
   & (attribute host-alias-regexp { string }
      | element host-alias-regexp { string })*
+
+  & (attribute host-name { string } | element host-name { string })?
 
   & r_lazy-init?
 
@@ -162,6 +159,9 @@ r_host = element host {
   & r_redeploy-mode?
 
   & r_root-directory?
+
+  & (attribute secure-host-name { string }
+    | element secure-host-name { string })?
 
   & r_startup-mode?
 

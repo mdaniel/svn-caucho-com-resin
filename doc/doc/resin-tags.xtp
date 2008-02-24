@@ -94,13 +94,13 @@ in resin/lib are not available.</p>
 
 <deftable title="EL variables defined by &lt;resin&gt;">
 <tr><th>variable</th>
-    <th>corresponding API</th>
+    <th>command line</th>
     <th/></tr>
-<tr><td>resin-home</td>
-    <td>CauchoSystem.getResinHome()</td>
+<tr><td>resin.home</td>
+    <td>--resin-home</td>
     <td/></tr>
-<tr><td>server-root</td>
-    <td>CauchoSystem.getServerRoot()</td>
+<tr><td>resin.root</td>
+    <td>--resin-root</td>
     <td/></tr>
 </deftable>
 

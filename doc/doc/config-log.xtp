@@ -334,7 +334,7 @@ java.util.logging.* API.</p>
 </td></tr><tr><td>format
     </td><td>a <a href="#Format-String">format string</a> to control the 
         output of each log message. Since Resin 3.0.5.
-    </td><td>${'${'}log.message}
+    </td><td>${log.message}
 </td></tr><tr><td>rollover-count
     </td><td>maximum number of rollover files before the oldest ones get overwritten.
         See <a href="#rollover">Rollovers</a>. 
@@ -520,21 +520,21 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 <example title="log format string">
 
 &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
-     format=" ${'${'}log.level} ${'${'}log.loggerName} ${'${'}log.message}"/&gt;
+     format=" ${log.level} ${log.loggerName} ${log.message}"/&gt;
 
 </example>
 
 <deftable title="log EL variable `log' is a LogRecord">
 <tr><th>Accessor</th><th>Value
-</th></tr><tr><td>${'${'}log.level}</td><td>The level of the log record
-</td></tr><tr><td>${'${'}log.name}</td><td>The source loggers name
-</td></tr><tr><td>${'${'}log.shortName}</td><td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
-</td></tr><tr><td>${'${'}log.message}</td><td>The message, with no formatting or localization
-</td></tr><tr><td>${'${'}log.millis}</td><td>event time in milliseconds since 1970
-</td></tr><tr><td>${'${'}log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${'${'}log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${'${'}log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
-</td></tr><tr><td>${'${'}log.thrown}</td><td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
+</th></tr><tr><td>${log.level}</td><td>The level of the log record
+</td></tr><tr><td>${log.name}</td><td>The source loggers name
+</td></tr><tr><td>${log.shortName}</td><td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
+</td></tr><tr><td>${log.message}</td><td>The message, with no formatting or localization
+</td></tr><tr><td>${log.millis}</td><td>event time in milliseconds since 1970
+</td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
+</td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
+</td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
+</td></tr><tr><td>${log.thrown}</td><td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
 </td></tr></deftable>
 
 <p>You can also use the <a href="el-var.xtp">Environment EL variables</a> in your format string:</p>
@@ -544,7 +544,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 
   &lt;web-app&gt;
     &lt;log name='' level='all' path='log/debug.log' timestamp="[%H:%M:%S.%s]"
-         format=" [<b>${'${'}app.contextPath}</b>] ${'${'}log.message}"/&gt;
+         format=" [<b>${app.contextPath}</b>] ${log.message}"/&gt;
 
     ...
   &lt;/web-app&gt;
@@ -567,7 +567,7 @@ space pad the values and make the results look a little nicer:</p>
 
 <example title="fmt.sprintf() in log format string">
 &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
-     format=" ${'${'}fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}"/&gt;
+     format=" ${fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}"/&gt;
 </example>
 
 <results>
@@ -583,7 +583,7 @@ space pad the values and make the results look a little nicer:</p>
 
 <example title="CSV log files">
 &lt;log name='' level='all' path='log/debug.csv' timestamp=""
-     format="${'${'}fmt.sprintf('%vs,%d,%d,%vs,%vs',fmt.timestamp('%Y-%m-%d %H:%M:%S.%s'), 
+     format="${fmt.sprintf('%vs,%d,%d,%vs,%vs',fmt.timestamp('%Y-%m-%d %H:%M:%S.%s'), 
                log.threadID, log.level.intLevel(), log.loggerName, log.message)}"/&gt;
 </example>
 
@@ -655,7 +655,7 @@ of your filesystem path:</p>
 
 <example title="Filesystem path using Environment EL variables">
   &lt;log name="" level="all" 
-       path="log/debug-${'${'}server.id}.log"
+       path="log/debug-${server.id}.log"
        rollover-period="1h" rollover-count="1"/&gt;
 </example>
 

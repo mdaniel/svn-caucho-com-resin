@@ -50,8 +50,6 @@
 	    description="access log, java.util.logging, and stdout" />
       <item link="port-tags.xtp" title="Ports"
              description="HTTP, SSL, addresses and ports"/>
-      <item link="soa-tags.xtp" title="remoting"
-	    description="remoting configuration"/>
       <item link="resin-tags.xtp" title="&lt;resin>"
             description="top-level configuration container"/>
       <item link="rewrite-tags.xtp" title="Rewrite"

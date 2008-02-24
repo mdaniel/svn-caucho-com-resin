@@ -4,8 +4,9 @@
   <title>EL Variables and Functions</title>
   <description>
   <p>
-Each Environment in Resin has an associated set of EL variables and functions, and 
-Resin's configuration files support EL expressions.
+Resin configuration can directly access Resin-IoC/WebBeans-configured
+beans and variables using EL expressions in the configuration files.
+Predefines variables include webApp, host, and resin variables.
   </p>
   </description>
 </header>
@@ -21,9 +22,9 @@ functions.  The EL Environment is inherited, the objects available in
 
 <example title="host regexp">
 &lt;host regexp="www.([^.]+).com"&gt;
-  &lt;root-directory&gt;/opt/www/${'${'}host.regexp[1]}&lt;/root-directory&gt;
+  &lt;root-directory&gt;/opt/www/${host.regexp[1]}&lt;/root-directory&gt;
 
-  &lt;context-param server-id="${'${'}server.name}"/&gt;
+  &lt;context-param server-id="${server.name}"/&gt;
 
   &lt;web-app id="/"&gt;
     &lt;document-directory&gt;webapps/ROOT&lt;/document-directory&gt;
@@ -33,7 +34,7 @@ functions.  The EL Environment is inherited, the objects available in
 
 <deftable title="Environment variables">
 <tr><th>variable</th><th>attribute</th><th>meaning</th>
-</tr><tr><td>Var</td><td>&#160;</td><td>System properties, e.g. ${'${'}Var["resin.home"]}
+</tr><tr><td>Var</td><td>&#160;</td><td>System properties, e.g. ${Var["resin.home"]}
 
 </td></tr><tr><td>server</td><td>&#160;</td><td>Server properties
 </td></tr><tr><td>&#160;</td><td>id</td><td>The server id, as specified in -server id
@@ -100,7 +101,7 @@ public class TestServlet extends HttpServlet {
   &lt;servlet servlet-name='test'
            servlet-class='test.TestServlet'&gt;
     &lt;init&gt;
-      &lt;data-source&gt;${'${'}jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
+      &lt;data-source&gt;${jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
     &lt;/init&gt;
   &lt;/servlet&gt;
 
@@ -162,7 +163,7 @@ public class TestServlet extends HttpServlet {
   &lt;servlet servlet-name='test'
            servlet-class='test.TestServlet'&gt;
     &lt;init&gt;
-      &lt;data-source&gt;${'${'}jndi("java:comp/env/jdbc/test")}&lt;/data-source&gt;
+      &lt;data-source&gt;${jndi("java:comp/env/jdbc/test")}&lt;/data-source&gt;
     &lt;/init&gt;
   &lt;/servlet&gt;
 
@@ -374,8 +375,8 @@ to print after the decimal point for floating points.</p>
 </deftable-parameters>
 
 <example>
-msg="The current date and time is ${'${'}fmt.timestamp('%Y/%m/%d %H:%M:%S.%s')}"
-msg="time=${'${'}fmt.timestamp('[%Y/%m/%d %H:%M:%S.%s]')}"
+msg="The current date and time is ${fmt.timestamp('%Y/%m/%d %H:%M:%S.%s')}"
+msg="time=${fmt.timestamp('[%Y/%m/%d %H:%M:%S.%s]')}"
 </example>
 
 <p><code>format</code> contains regular characters, which are just copied to
@@ -537,7 +538,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
 &lt;servlet servlet-name='foo'
          servlet-class='qa.FooServlet'&gt;
   &lt;init&gt;
-    &lt;data-source&gt;${'${'}jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
+    &lt;data-source&gt;${jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
   &lt;/init&gt;
 &lt;/servlet&gt;
 </example>
@@ -718,7 +719,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
 &lt;servlet servlet-name='foo'
          servlet-class='qa.FooServlet'&gt;
   &lt;init&gt;
-    &lt;data-source&gt;${'${'}jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
+    &lt;data-source&gt;${jndi:lookup("java:comp/env/jdbc/test")}&lt;/data-source&gt;
   &lt;/init&gt;
 &lt;/servlet&gt;
 </example>
@@ -742,8 +743,8 @@ useful formatting methods.</p>
 </td></tr></deftable-parameters>
 
 <example>
-msg="The current date and time is ${'${'}fmt.timestamp('%Y/%m/%d %H:%M:%S.%s')}"
-msg="time=${'${'}fmt.timestamp('[%Y/%m/%d %H:%M:%S.%s]')}"
+msg="The current date and time is ${fmt.timestamp('%Y/%m/%d %H:%M:%S.%s')}"
+msg="time=${fmt.timestamp('[%Y/%m/%d %H:%M:%S.%s]')}"
 </example>
 
 <p><code>format</code> contains regular characters, which are just copied to

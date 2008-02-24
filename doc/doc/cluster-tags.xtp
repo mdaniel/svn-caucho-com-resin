@@ -40,10 +40,14 @@ performance and reduce database load by several orders of magnitude.</p>
 cache to save large amounts of data with little overhead.</p>
 
 <p>Management of the proxy cache uses the
-<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a> with
-the <g>ObjectName</g> <var>resin:type=ProxyCache</var>.</p>
+<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
 
-<deftable-childtags>
+<deftable title="&lt;cache> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>path</td>
     <td>Path to the persistent cache files.</td>
     <td>cache/</td></tr>
@@ -69,9 +73,9 @@ the <g>ObjectName</g> <var>resin:type=ProxyCache</var>.</p>
     <td>Rewrite Vary headers as Cache-Control: private to avoid browser
 and proxy-cache bugs (particularly IE).</td>
     <td>false</td></tr>
-</deftable-childtags>
+</deftable>
 
-<example title="cache">
+<example title="Example: enabling proxy cache">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
         &lt;cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
@@ -96,11 +100,15 @@ ports, and a set of virtual &lt;host&gt;s.</p>
 the &lt;cluster&gt; is selected by the &lt;server&gt; with <var>id</var>
 matching the -server-id on the command line.</p>
 
-<deftable-childtags>
+<deftable title="&lt;cluster> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr><td>id</td>
     <td>The cluster identifier.</td>
     <td>required</td></tr>
-</deftable-childtags>
+</deftable>
 
 <example title="cluster-default">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -209,7 +217,12 @@ resources like &lt;database&gt;.</p>
 <p>&lt;host> configures a virtual host.  Virtual hosts must be
 configured explicitly.</p>
 
-<deftable-childtags>
+<deftable-childtags title="&lt;host> attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>id</td>
     <td>primary host name</td>
     <td>none</td></tr>
@@ -281,6 +294,11 @@ It will be used as defaults for any virtual host.</p>
 the name of the host jar file.</p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>path</td>
     <td>path to the deploy directory</td>
     <td>required</td></tr>
@@ -367,6 +385,11 @@ tag of the &lt;session-config&gt;.</p>
 </example>
 
 <deftable-childtags title="common tags">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr occur="?"><td>max-idle-time</td>
               <td>How long idle objects are stored</td>
               <td>24h</td></tr>
@@ -379,6 +402,11 @@ tag of the &lt;session-config&gt;.</p>
 </deftable-childtags>
 
 <deftable-childtags title="jdbc tags">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr occur="+"><td>data-source</td>
               <td>The JDBC data source</td>
               <td>required</td></tr>
@@ -391,12 +419,22 @@ tag of the &lt;session-config&gt;.</p>
 </deftable-childtags>
 
 <deftable-childtags title="cluster tags">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr occur="+"><td>path</td>
               <td>Directory to store the sessions</td>
               <td>required</td></tr>
 </deftable-childtags>
 
 <deftable-childtags title="file tags">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr occur="+"><td>path</td>
               <td>Directory to store the sessions</td>
               <td>required</td></tr>
@@ -458,6 +496,11 @@ PingThread will catch errors like deadlocks.</p>
 </example>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr occur="+"><td>url</td>
               <td>A url to ping.</td>
               <td>required</td></tr>
@@ -568,7 +611,7 @@ to the root directory.</p>
 <defun title="&lt;server>" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>The &lt;server> tag confgiures a JVM instance in
+<p>The &lt;server> tag configures a JVM instance in
 the cluster.  Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
 the -server-id command line argument.</p>
@@ -584,6 +627,11 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 <a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>id</td>
     <td>unique server identifier</td>
     <td>required</td></tr>

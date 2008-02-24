@@ -1,10 +1,21 @@
 <document>
 <header>
-<title>Resin Dependency Injection</title>
+<title>Resin IoC</title>
 <description>
 
-<p>Resin's dependency injection framework gives your application
-a type-safe architecture for designing and assembling services and components.
+<p>Resin is designed around an internal inversion-of-control framework
+used for all configuration and resources including servlets, EJBs, messaging,
+remoting, and databases.  Applications can take advantage of Resin's
+IoC capabilities using WebBeans-standard annotations and interfaces.</p>
+
+<p>Since Resin-IoC is used for servlets, WebBeans and EJBs, any application
+bean can use EJB annotations like @TransactionAttribute or WebBeans
+@InterceptionTypes or event @Observes capabilities, in addition to the
+dependency injection and IoC configuration.</p>
+
+<p>The dependency injection framework is type-safe, meaning the registry
+is organized around Java types, not a flat namespace, which gives more
+power and flexibility for component assembly.
 Since injection is annotation-based, most components can avoid XML
 configuration, while XML is still available for components.</p>
 
@@ -26,6 +37,10 @@ more information about the message bean and its integration with Resin IoC.</li>
 
 <li>The <a href="resin-remoting.xtp">Resin remoting</a> page shows
 Resin's remoting integration.</li>
+
+<li>All <a href="config.xtp">Resin configuration</a>, including
+all JavaEE specified files uses Resin-IoC as the configuration engine.
+</li>
 
 </ul>
 
@@ -566,7 +581,57 @@ public class Movie {
 
 </s2>
 
-<s2 title="XML configuration overview">
+<s2 title="Lifecycle: @PostConstruct and @PreDestroy">
+
+<p>If your service needs to initialize itself after being configured, it
+can annotation an initialization method with <code>@PostConstruct</code>.
+After Resin creates, injects, and configures your component, it will call any
+<code>@PostConstruct</code> methods.   Long-lived services or services that
+need to register themselves with other services will typically need to
+use the <code>@PostConstruct</code> annotation.</p>
+
+<p>At the end of a component's lifetime, you might need to close some
+resources, e.g. closing a socket or delisting from a timer service.  Resin
+will call any component method marked with <code>@PreDestroy</code>
+before it destroys the method.</p>
+
+<p>For example, a <code>TimerService</code> may want to schedule a event
+every 2 seconds.  The <code>@PostConstruct</code> method will start the timer
+and the <code>@PreDestroy</code> method will stop the timer.</p>
+
+<example title="Example: Timer Service">
+import javax.annotation.PostConstruct;
+import javax.webbeans.In;
+import javax.webbeans.Component;
+import java.util.concurrent.ScheduledExecutorService;
+import com.caucho.webbeans.Singleton;
+
+@Component
+@Singleton
+public class TimerService {
+  @In ScheduledExecutorService _timer;
+
+  @PostConstruct
+  public void init()
+  {
+    _timerFuture = _timer.scheduleAtFixedRate(this, 0, 2, TimeUnit.SECONDS);
+  }
+
+  ...
+
+  @PreDestroy
+  public void close()
+  {
+    _timerFuture.cancel(false);
+  }
+}
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="XML configuration">
 
 <p>You can register your components and services with Resin using the
 resin.conf or resin-web.xml files.  Since the WebBeans registry is integrated
@@ -584,8 +649,6 @@ configuration.</p>
 <p>In addition, the XML-configuration documents the services
 you've enabled.  For heavyweight services, this documentation is critical,
 while lightweight components do not need this extra housekeeping overhead.</p>
-
-</s2>
 
 <s2 title="bean and component registration">
 
@@ -642,7 +705,7 @@ number of optional attributes:</p>
 
 </s2>
 
-<s2 title="bean custom XML configuration">
+<s2 title="Bean property configuration">
 
 <p>Resin's XML configuration uses the standard JavaBeans patterns to
 configure properties.  Resin uses the same mechanism for all of its own
@@ -778,51 +841,262 @@ public class Theater {
 
 </s2>
 
-<s2 title="Lifecycle: @PostConstruct and @PreDestroy">
+<s2 title="Base configuration: string conversions">
 
-<p>If your service needs to initialize itself after being configured, it
-can annotation an initialization method with <code>@PostConstruct</code>.
-After Resin creates, injects, and configures your component, it will call any
-<code>@PostConstruct</code> methods.   Long-lived services or services that
-need to register themselves with other services will typically need to
-use the <code>@PostConstruct</code> annotation.</p>
+<p>Resin-IoC provides a number of built-in string conversion types as well
+as supporting JavaBeans <code>PropertyEditor</code> and custom converters.</p>
 
-<p>At the end of a component's lifetime, you might need to close some
-resources, e.g. closing a socket or delisting from a timer service.  Resin
-will call any component method marked with <code>@PreDestroy</code>
-before it destroys the method.</p>
+<deftable title="Built-in String Converters">
+<tr>
+  <th>Type</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>boolean, Boolean</td>
+  <td>Java boolean</td>
+</tr>
+<tr>
+  <td>byte, Byte</td>
+  <td>Java byte</td>
+</tr>
+<tr>
+  <td>short, Short</td>
+  <td>Java short</td>
+</tr>
+<tr>
+  <td>int, Integer</td>
+  <td>Java integer</td>
+</tr>
+<tr>
+  <td>long, Long</td>
+  <td>Java long</td>
+</tr>
+<tr>
+  <td>float, Float</td>
+  <td>Java float</td>
+</tr>
+<tr>
+  <td>double, Double</td>
+  <td>Java double</td>
+</tr>
+<tr>
+  <td>char, Character</td>
+  <td>Java char</td>
+</tr>
+<tr>
+  <td>String[]</td>
+  <td>String array separated by commas</td>
+</tr>
+<tr>
+  <td>Class</td>
+  <td>Java classes</td>
+</tr>
+<tr>
+  <td>Path</td>
+  <td>Resin VFS Paths</td>
+</tr>
+<tr>
+  <td>File</td>
+  <td>java.io.File</td>
+</tr>
+<tr>
+  <td>URL</td>
+  <td>java.net.URL</td>
+</tr>
+<tr>
+  <td>Pattern</td>
+  <td>java.util.regex.Pattern</td>
+</tr>
+<tr>
+  <td>Locale</td>
+  <td>java.util.Locale</td>
+</tr>
+<tr>
+  <td>Date</td>
+  <td>java.util.Date</td>
+</tr>
+<tr>
+  <td>Properties</td>
+  <td>java.util.Properties</td>
+</tr>
+<tr>
+  <td>RawString</td>
+  <td>com.caucho.config.type.RawString</td>
+</tr>
+</deftable>
 
-<p>For example, a <code>TimerService</code> may want to schedule a event
-every 2 seconds.  The <code>@PostConstruct</code> method will start the timer
-and the <code>@PreDestroy</code> method will stop the timer.</p>
+<s3 title="enumerations">
 
-<example title="Example: Timer Service">
-import javax.annotation.PostConstruct;
-import javax.webbeans.In;
-import javax.webbeans.Component;
-import java.util.concurrent.ScheduledExecutorService;
-import com.caucho.webbeans.Singleton;
+<p>Enumerations are automatically converted from their
+string representation.</p>
 
-@Component
-@Singleton
-public class TimerService {
-  @In ScheduledExecutorService _timer;
+</s3>
 
-  @PostConstruct
-  public void init()
+<s3 title="String constructor">
+
+<p>Resin-IoC will automatically convert a string to an object if the
+object has a single String argument constructor.</p>
+
+<example title="Example: MyBean with constructor">
+public class MyBean {
+  public MyBean(String value)
   {
-    _timerFuture = _timer.scheduleAtFixedRate(this, 0, 2, TimeUnit.SECONDS);
-  }
-
-  ...
-
-  @PreDestroy
-  public void close()
-  {
-    _timerFuture.cancel(false);
+    ...
   }
 }
 </example>
+
+</s3>
+
+<s3 title="valueOf">
+
+<p>For classes which implement a static <code>valueOf(String)</code> method,
+Resin will automatically convert to the given type using
+the <code>valueOf</code> method.</p>
+
+<example title="Example: MyBean with valueOf">
+public class MyBean {
+  ...
+
+  public static MyBean valueOf(String text)
+  {
+    MyBean bean = new MyBean();
+    bean.setTextValue(text);
+    bean.init();
+    return bean;
+  }
+}
+</example>
+
+</s3>
+
+<s3 title="setValue">
+
+<p>For objects with a <code>setValue</code> or <code>addText</code> method
+and a zero-argument constructor, Resin-IoC will convert using the
+following steps:</p>
+
+<ol>
+<li>Create the object</li>
+<li>Inject any dependencies</li>
+<li>Call <code>setValue</code> or <code>setText</code> with the string</li>
+<li>Call any @PostConstruct</li>
+<li>Return the configured bean</li>
+</ol>
+
+</s3>
+
+</s2>
+
+<s2 title="Compound types">
+
+<s3 title="list">
+
+<p>Setters taking a <code>List</code> or array argument can be configured
+with list values.</p>
+
+<p>List items are specified directly with &lt;value> elements.  There is
+no extra &lt;list> element required.  The &lt;list> element is only used
+when creating a sub-list or sub-element (see below.)</p>
+
+<example title="Example: MyBean.setValues(List)">
+&lt;my-bean>
+  &lt;values>
+    &lt;value>a&lt;/value>
+    &lt;value>b&lt;/value>
+    &lt;value>c&lt;/value>
+  &lt;/values>
+&lt;/my-bean>
+</example>
+
+<example title="Example: MyBean.setValues(String [])">
+&lt;my-bean>
+  &lt;values>
+    &lt;value>a&lt;/value>
+    &lt;value>b&lt;/value>
+    &lt;value>c&lt;/value>
+  &lt;/values>
+&lt;/my-bean>
+</example>
+
+<p>In the following example, the argument is an object, so we need
+a &lt;list> element to tell Resin to create a list.  The object
+created will be an <code>ArrayList</code>.</p>
+<example title="Example: MyBean.setValues(Object)">
+&lt;my-bean>
+  &lt;values>
+    &lt;list>
+      &lt;value>a&lt;/value>
+      &lt;value>b&lt;/value>
+      &lt;value>c&lt;/value>
+    &lt;/list>
+  &lt;/values>
+&lt;/my-bean>
+</example>
+
+<p>Resin-IoC can always use the <code>addXXX</code> pattern to add
+a variable number of items.  Normally, the <code>addXXX</code> pattern
+is easier and more maintainable than the <code>addList</code> pattern.
+In particular, validation of the item values is quicker and more accurate
+with <code>addXXX</code>.</p>
+
+<example title="Example: MyBean.addValue(String)">
+&lt;my-bean>
+  &lt;value>a&lt;/value>
+  &lt;value>b&lt;/value>
+  &lt;value>c&lt;/value>
+&lt;/my-bean>
+</example>
+
+</s3>
+
+<s3 title="map">
+
+<p>Generic maps can use an &lt;entry> syntax to define property values.</p>
+
+<example title="Example: MyBean.setValues(Map)">
+&lt;my-bean>
+  &lt;values>
+    &lt;entry key="a" value="one"/>
+    &lt;entry key="b" value="two"/>
+    &lt;entry key="c" value="three"/>
+  &lt;/values>
+&lt;/my-bean>
+</example>
+
+</s3>
+
+</s2>
+
+<s2 title="References and EL Expressions">
+
+<p>Resin-IoC configuration files can use EL expressions to get references
+to resources, beans, system properties, and calculate generatal expressions
+based on those values.  Since all Resin's resources are added to
+the WebBeans registry automatically, application components have access to
+anything they need.</p>
+
+<p>Both the JSP immediate syntax and deferred syntax are
+supported (${...} vs #{...}).  Currently, there is no distinction
+between the two, but the deferred syntax is preferred, since Resin-IoC
+initializes beans lazily to handle circular references.</p>
+
+<example title="Example: circular references in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;bean name="a" class="qa.FooBean">
+    &lt;init bar="#{b}"/>
+  &lt;/bean>
+
+  &lt;bean name="b" class="qa.BarBean">
+    &lt;init foo="#{a}"/>
+  &lt;/bean>
+
+&lt;/web-app>
+</example>
+
+<p>Because Resin's EL implementation allows method expressions, you can
+use beans as factories in the EL expressions.</p>
 
 </s2>
 
@@ -1620,6 +1894,88 @@ CONTAINER</td>
   <td>The field name</td>
 </tr>
 </deftable-childtags>
+
+</s2>
+
+</s1>
+
+<s1 title="Framework Integration">
+
+<p>Frameworks like Struts2, Wicket, and Mule can delegate object creation
+to Resin-IoC.  By configuration Resin-IoC to create the framework
+objects, your application's components can directly inject Resin resources
+and application components configured with Resin.</p>
+
+<p>Integration information for the frameworks is maintained on the
+Caucho wiki site.  Currently supported frameworks include:</p>
+
+<ul>
+<li><a href="http://wiki.caucho.com/Mule">http://wiki.caucho.com/Mule</a></li>
+<li><a href="http://wiki.caucho.com/Spring">http://wiki.caucho.com/Spring</a></li>
+<li><a href="http://wiki.caucho.com/Struts2">http://wiki.caucho.com/Struts2</a></li>
+<li><a href="http://wiki.caucho.com/Wicket">http://wiki.caucho.com/Wicket</a></li>
+</ul>
+
+<p>Implementing new object factories for other frameworks is straightforward.
+</p>
+
+<s2 title="ObjectFactory pattern">
+
+<p>Frameworks like Struts2 provide an <code>ObjectFactory</code> pattern.
+In this case, the framework gives a <code>Class</code> object and asks
+the factory to create a new instance.  The <code>ObjectFactory</code> is
+the most powerful pattern, since objects can use @Observes, @InterceptionType,
+@TransactionAnnotation and even @Stateless, as well as the usual dependency
+injection.</p>
+
+<example title="Example: Struts2 integration">
+package com.caucho.xwork2;
+
+import com.caucho.webbeans.manager.*;
+import com.opensymphony.xwork2.ObjectFactory;
+import java.util.*;
+import javax.webbeans.*;
+
+public class ResinObjectFactory extends ObjectFactory
+{
+  private final WebBeansContainer _webBeans = WebBeansContainer.create();
+  
+  @Override
+  public Object buildBean(Class clazz, Map extraContext)
+    throws Exception
+  {
+    return _webBeans.getObject(clazz);
+  }
+}
+</example>
+
+</s2>
+
+<s2 title="Injection pattern">
+
+<p>Some frameworks, like Wicket, prefer to instantiate the object, but
+can call Resin-IoC for a dependency-injection step.  With this kind of
+framework integration, the created object only gets dependency-injection;
+it does not get any aspects or interception.</p>
+
+<example title="Example: Wicket injection">
+package com.caucho.wicket;
+
+import com.caucho.webbeans.manager.*;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.application.*;
+
+public class ResinComponentInjector implements IComponentInstantiationListener
+{
+  private WebBeansContainer _webBeans = WebBeansContainer.create();
+  
+  public void onInstantiation(Component component)
+  {
+    _webBeans.injectObject(component);
+  }
+}
+</example>
 
 </s2>
 
