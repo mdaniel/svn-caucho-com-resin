@@ -160,23 +160,167 @@ and may provide significant cost savings.
 
 </s1>
 
+<s1 title="Resin-IoC and Dependency Injection">
+
+<ul>
+<li>See <a href="resin-ioc.xtp">Resin-Ioc</a> documentation.</li>
+</ul>
+
+<p>Resin uses its own IoC/Dependency Injection engine for all of its JavaEE
+configuration.  With the new WebBeans (JSR-299) specification draft, Resin
+provides the same capabilities to application code.  Components and
+singleton beans can be configured in the resin-web.xml for full XML
+configurability, or scanned for the class annotations for lightweight
+injection to match the style of the application.</p>
+
+<p>Because Resin-IoC is fully integrated with Resin's EJB 3.0 support, all
+application components and beans can use EJB aspects such
+as @TransactionAttribute, @Stateless, @InterceptorClass, and @AroundInvoke.</p>
+
+<p>The WebBeans IoC capabilities provide finely-controlled interception
+with @InterceptorType binding, and type-safe dependency-injection
+with @BindingType annotations.  Testing with mock components are automatically
+supported with custom @ComponentType annotations.</p>
+
+<p>Event handling is fully integrated with the WebBeans API using a flexible
+@Observes parameter attribute, enabling any bean or component to listen to
+any matching typed event thrown through the WebBeans Container interface.</p>
+
+<p>Resin-managed classes are automatically enlisted in the IoC engine.  So
+Servlets, Filters, application listener classes, remote objects, and
+EJBs can all use Resin-IoC capabilities without any
+additional configuration.</p>
+
+<p>Resin-IoC provides a straightforward driver for integrating Resin-IoC
+capabilities with popular frameworks.
+<a href="http://wiki.caucho.com/Struts2">Struts2</a>,
+<a href="http://wiki.caucho.com/Spring">Spring</a>, 
+<a href="http://wiki.caucho.com/Mule">Mule</a>,
+and <a href="http://wiki.caucho.com/Wicket">Wicket</a> have already been
+integrated.</p>
+
+</s1>
+
+<s1 name="php" title="Quercus/PHP">
+<ul>
+<li>See <a href="quercus.xtp">Quercus/PHP</a> documentation</li>
+</ul>
+
+<p>Resin includes Quercus, our PHP 5 implementation, written entirely
+in Java.  Quercus is a reliable PHP, compiling to Java code and taking
+advantage of the JDK's JIT compiler for maximum performance.  Because
+Quercus is in Java, it's security is far superior to a C implementation.  The
+JVM automatically protects Quercus from stack overruns, pointer overflows,
+and third party C-modules.</p>
+
+<p>And the performance is great.  The compiled Quercus code is 4 to 6 times
+faster than raw, mod_php code.  Even when compared with PHP accelerators,
+Quercus code is equal or slightly faster, depending on the application.</p>
+
+<p>Quercus integrates tightly with Java, naturally since it is written in
+Java.  Resin-IoC applications can easily provide beans and components to
+a Quercus/PHP presentation layer through a simple <code>java_bean</code>
+call.  For more involved integration, Quercus provides a complete API
+for generating PHP facades over Java libraries.  All the PHP libraries
+are written to this public API.</p>
+
+<p>With Quercus, Java sites have access to the PHP killer applications.
+For blogs, Quercus supports the extremely popular Wordpress.
+For wikis, Quercus supports MediaWiki, the engine behind Wikipedia.</p>
+
+</s1>
+
 <s1 name="db" title="Database Pooling">
 <p>
 Resin provides a robust connection pool for any JDBC 1, JDBC 2, or JDBC 3
-database driver.  
+database driver.  Resin's database pools integrate with full 2-phase XA
+transaction capabilities.  In addition, the database connections can use
+round robin load balancing and backup failover for increased performance
+and reliability.
 </p>
 
 <ul>
-<li><a href="config-database.xtp">Resin documentation: Databases</a></li>
-<li><a href="db-thirdparty.xtp">Resin documentation: Example database configurations</a></li>
+<li>See <a href="config-database.xtp">Resin databases</a> documentation</li>
 </ul>
 </s1> <!-- db -->
 
 <s1 name="ejb" title="EJB 3.0 (Enterprise Java Beans)">
+
 <ul>
 <li>See <a href="ejb.xtp">Resin EJB 3.0</a> documentation</li>
 <li>See <a href="amber.xtp">Amber (JPA)</a> documentation</li>
 </ul>
+
+<p>Resin's EJB support is fully integrated with Resin-IoC and WebBeans.
+This integration means you can use only the EJB capabilities you need
+without the overhead of .ear packaging.  (Although, .ears are
+fully supported.)  A servlet, for example, can use EJB's
+@TransactionAttribute without any special packaging.</p>
+
+</s1>
+
+<s1 title="Server Push (Comet)">
+
+<ul>
+<li>See <a href="resin-comet.xtp">Resin Comet</a> documentation.</li>
+</ul>
+
+<p>As web users are expecting dynamic responses from web sites, the
+server push HTTP processing model has become important.  Also called
+Comet, server push sends event or streaming data from the server
+to the client without waiting for a client poll.</p>
+
+<p>Resin's Comet support focuses on solving the concurrency issues around
+server push.  Since the servlet is now responding to events from internal
+services as well as managing HTTP data, the synchronization issues become
+more complex.  The Resin Comet API is designed to cleanly separate the
+concurrency roles, letting the servlet continue to operate as a
+single-threaded request, while letting the event services send asynchronous
+messages.</p>
+
+<p>JavaScript browsers and Flash applications are both supported by
+Resin's Comet.  Flash can take advantage of Resin's Hessian support
+to stream binary-encoded events.</p>
+
+</s1>
+
+<s1 name="jsp" title="JSP 2.1 (Java Server Pages)">
+
+<ul>
+<li>See <a href="jsp.xtp">Resin JSP</a> documentation</li>
+</ul>
+
+<p>Resin's JSP implementation is tightly integrated with the JSTL
+and JSF implementations.  Because of the tight binding, Resin can
+generate optimized JSP code, improving performance, reducing code size
+and reducing memory consumption.</p>
+
+<p>Even JSP tag libraries can run faster with Resin's JSP.  Resin
+bytecode-analyzes your tag libraries to determine which capabilities
+your actually using, and generates only that code necessary to run the
+features you're using.</p>
+
+<p>The JSP implementation aggressively reuses your tag library instances,
+reducing memory consumption and improving performance.  Because of Resin's
+reuse, application libraries must strictly follow the JSP tag
+specification.</p>
+
+<p>Resin-IoC beans are always available through JSP EL expressions.
+This IoC integration means your custom components and beans are directly
+accessible to your HTML generating code.</p>
+
+</s1>
+
+<s1 name="jstl" title="JSTL 1.01 (Java Standard Template Library)">
+<ul>
+<li>See <a href="jstl.xtp">Resin JSTL</a> documentation</li>
+</ul>
+
+<p>Resin's JSTL works together with its JSP implementation to provide
+efficient, generated Java code.  Since Resin's JSP is fully JSTL-aware,
+it can implement the JSTL tags directly in Java code, without involving
+the overhead of the JSTL tag libraries.</p>
+
 </s1>
 
 <s1 title="JPA (Java Persistence Architecture)">
@@ -185,27 +329,9 @@ database driver.
 </ul>
 </s1>
 
-<s1 name="jsp" title="JSP 2.1 (Java Server Pages)">
-<ul>
-<li>See <a href="jsp.xtp">Resin JSP</a> documentation</li>
-</ul>
-</s1>
-
-<s1 name="jstl" title="JSTL 1.01 (Java Standard Template Library)">
-<ul>
-<li>See <a href="jstl.xtp">Resin JSTL</a> documentation</li>
-</ul>
-</s1>
-
 <s1 name="jms" title="Messaging (JMS 1.1)">
 <ul>
 <li><a href="resin-messaging.xtp">Resin messaging documentation</a></li>
-</ul>
-</s1>
-
-<s1 name="php" title="Quercus/PHP">
-<ul>
-<li>See <a href="quercus.xtp">Quercus/PHP</a> documentation</li>
 </ul>
 </s1>
 
@@ -216,6 +342,14 @@ database driver.
 </s1>
 
 <s1 name="jta" title="Transactions (JTA 1.0.1b)">
+
+<p>Resin's transaction manager handles full two-phase XA transaction
+suppport, including transaction logging for reliable transaction recovery.
+The transaction capabilities are integrated throughout Resin, so your
+databases, JCA connections, and EJBs work together.  Since Resin's
+<code>UserTransaction</code> and <code>TransactionManager</code> are
+registered with Resin-IoC, injecting these managers into any IoC-enabled
+component is just adding an @In annotation.</p>
 
 </s1>
 
