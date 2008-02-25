@@ -96,11 +96,11 @@ r_cluster-Basis =
 
   & r_session-cookie?
 
-  & r_ssl-session-cookie?
-
   & r_session-sticky-disable?
 
   & r_session-url-prefix?
+
+  & r_ssl-session-cookie?
 
   & r_url-character-encoding?
 
@@ -518,10 +518,10 @@ r_resin-Basis =
 
   & r_min-free-memory?
 
+  & r_security-manager?
+
   & (attribute security-provider { string }
     | element security-provider { string })*
-
-  & r_security-manager?
 
   & r_server-Compat*
 
@@ -592,14 +592,14 @@ r_server-Basis =
   & r_http*
 
   & (attribute java-exe { string }
-     | element java-exe { string })*
+     | element java-exe { string })?
 
   & (attribute jvm-arg { string }
      | element jvm-arg { string })*
 
-  & r_keepalive-max?
-
   & r_keepalive-connection-time-max?
+
+  & r_keepalive-max?
 
   & r_keepalive-timeout?
 
@@ -610,11 +610,11 @@ r_server-Basis =
   & (attribute load-balance-connect-timeout { r_period-Type }
      | element load-balance-connect-timeout { r_period-Type })?
 
-  & (attribute load-balance-recover-time { r_period-Type }
-     | element load-balance-recover-time { r_period-Type })?
-
   & (attribute load-balance-idle-time { r_period-Type }
      | element load-balance-idle-time { r_period-Type })?
+
+  & (attribute load-balance-recover-time { r_period-Type }
+     | element load-balance-recover-time { r_period-Type })?
 
   & (attribute load-balance-socket-timeout { r_period-Type }
      | element load-balance-socket-timeout { r_period-Type })?

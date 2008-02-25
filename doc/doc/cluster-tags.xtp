@@ -21,12 +21,22 @@ and reliability.</p>
 
 <ul>
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="webapp.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="webapp-tags.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
+<li>See <a href="server-tags.xtp">Server tags</a> for ports, threads, and JVM configuration.</li>
+<li>See <a href="config-env.xtp">Resource</a> configuration for resources: classloader, databases, connectors, and resources.</li>
 <li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>
+
+<defun title="&lt;access-log>">
+
+<p>&lt;access-log> configures a HTTP access log for all virtual hosts
+in the cluster.
+See <a href="host-tags.xtp#%3caccess-log%3d">access-log</a>
+in the &lt;host> tag for more information.</p>
+
+</defun>
 
 <defun title="&lt;cache>" version="Resin 3.1">
 <parents>cluster</parents>
@@ -75,6 +85,19 @@ and proxy-cache bugs (particularly IE).</td>
     <td>false</td></tr>
 </deftable>
 
+<def title="&lt;cache> schema">
+element cache {
+  disk-size?
+  &amp; enable?
+  &amp; enable-range?
+  &amp; entries?
+  &amp; path?
+  &amp; max-entry-size?
+  &amp; memory-size?
+  &amp; rewrite-vary-as-private?
+}
+</def>
+
 <example title="Example: enabling proxy cache">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
@@ -104,13 +127,185 @@ matching the -server-id on the command line.</p>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
+  <th>Default</th>
 </tr>
-<tr><td>id</td>
-    <td>The cluster identifier.</td>
-    <td>required</td></tr>
+<tr>
+  <td>id</td>
+  <td>The cluster identifier.</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td><a href="host-tags.xtp#access-log">access-log</a></td>
+  <td>An access-log shared for all virtual hosts.</td>
+  <td></td>
+</tr>
+<tr>
+  <td><a href="#cache">cache</a></td>
+  <td>Proxy cache for HTTP-cacheable results.</td>
+  <td></td>
+</tr>
+<tr>
+  <td><a href="#connection-error-page">connection-error-page</a></td>
+  <td>IIS error page to use when isapi_srun to Resin connection fails</td>
+  <td></td>
+</tr>
+<tr>
+  <td><a href="host-tags.xtp#ear-default">ear-default</a></td>
+  <td>default values for deployed ear files</td>
+  <td></td>
+</tr>
+<tr>
+  <td><a href="#error-page">error-page</a></td>
+  <td>Custom error-page when virtual-hosts fail to match</td>
+  <td></td>
+</tr>
+<tr>
+  <td>host</td>
+  <td>Configures a virtual host</td>
+  <td></td>
+</tr>
+<tr>
+  <td>host-default</td>
+  <td>Configures defaults to apply to all virtual hosts</td>
+  <td></td>
+</tr>
+<tr>
+  <td>host-deploy</td>
+  <td>Automatic host deployment based on a deployment directory</td>
+  <td></td>
+</tr>
+<tr>
+  <td>ignore-client-disconnect</td>
+  <td>Ignores socket exceptions thrown because browser clients have prematurely disconnected</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>invocation-cache-size</td>
+  <td>Size of the system-wide URL to servlet invocation mapping cache</td>
+  <td>16384</td>
+</tr>
+<tr>
+  <td>invocation-cache-max-url-length</td>
+  <td>Maximum URL length saved in the invocation cache</td>
+  <td>256</td>
+</tr>
+<tr>
+  <td>machine</td>
+  <td>Configuration for grouping &lt;server> onto physical machines</td>
+  <td></td>
+</tr>
+<tr>
+  <td>persistent-store</td>
+  <td>Configures the distributed/persistent store</td>
+  <td></td>
+</tr>
+<tr>
+  <td>ping</td>
+  <td>Periodic checking of server URLs to verify server activity</td>
+  <td></td>
+</tr>
+<tr>
+  <td>redeploy-mode</td>
+  <td>"automatic" or "manual"</td>
+  <td>automatic</td>
+</tr>
+<tr>
+  <td><a href="env-tags.xtp#resin:choose">resin:choose</a></td>
+  <td>Conditional configuration based on EL expressions</td>
+  <td></td>
+</tr>
+<tr>
+  <td><a href="env-tags.xtp#resin:import">resin:import</a></td>
+  <td>Imports a custom cluster.xml files for a configuration management </td>
+  <td></td>
+</tr>
+<tr>
+  <td><a href="env-tags.xtp#resin:if">resin:if</a></td>
+  <td>Conditional configuration based on EL expressions</td>
+  <td></td>
+</tr>
+<tr>
+  <td>rewrite-dispatch</td>
+  <td>rewrites and dispatches URLs using regular expressions, similar to mod_rewrite</td>
+  <td></td>
+</tr>
+<tr>
+  <td>root-directory</td>
+  <td>The root filesystem directory for the cluster</td>
+  <td>${resin.root}</td>
+</tr>
+<tr>
+  <td><a href="server.xtp">server</a></td>
+  <td>Configures JVM instances (servers).  Each cluster needs at least one server</td>
+  <td></td>
+</tr>
+<tr>
+  <td>server-default</td>
+  <td>Configures defaults for all server instances</td>
+  <td></td>
+</tr>
+<tr>
+  <td>server-header</td>
+  <td>Configures the HTTP "Server: Resin/xxx" header</td>
+  <td>Resin/Version</td>
+</tr>
+<tr>
+  <td>session-cookie</td>
+  <td>Configures the servlet cookie name</td>
+  <td>JSESSIONID</td>
+</tr>
+<tr>
+  <td>session-sticky-disable</td>
+  <td>Disables sticky-sessions on the load balancer</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>url-character-encoding</td>
+  <td>Configures the character encoding for URLs</td>
+  <td>utf-8</td>
+</tr>
+<tr>
+  <td>web-app-default</td>
+  <td>Configures defaults to apply to all web-apps in the cluster</td>
+  <td></td>
+</tr>
 </deftable>
 
-<example title="cluster-default">
+<def title="&lt;cluster> schema">
+element cluster {
+  attribute id { string }
+  &amp; <a href="env-tags.xtp">environment resources</a>
+  &amp; access-log?
+  &amp; cache?
+  &amp; connection-error-page?
+  &amp; ear-default*
+  &amp; error-page*
+  &amp; host*
+  &amp; host-default*
+  &amp; host-deploy*
+  &amp; ignore-client-disconnect?
+  &amp; invocation-cache-size?
+  &amp; invocation-cache-max-url-length?
+  &amp; machine*
+  &amp; persistent-store?
+  &amp; ping*
+  &amp; redeploy-mode?
+  &amp; resin:choose*
+  &amp; resin:import*
+  &amp; resin:if*
+  &amp; rewrite-dispatch?
+  &amp; root-directory?
+  &amp; server*
+  &amp; server-default*
+  &amp; server-header?
+  &amp; session-cookie?
+  &amp; session-sticky-disable?
+  &amp; url-character-encoding?
+  &amp; web-app-default*
+}
+</def>
+
+<example title="Example: cluster-default">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
         &lt;server-default&gt;
@@ -134,7 +329,7 @@ matching the -server-id on the command line.</p>
 
 <p>&lt;cluster-default> defines default cluster configuration for all clusters in the &lt;resin&gt; server.</p>
 
-<example title="cluster-default">
+<example title="Example: cluster-default">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster-default&gt;
         &lt;cache entries="16384" memory-size="64M"/&gt;
@@ -159,6 +354,12 @@ matching the -server-id on the command line.</p>
 by IIS when it can't contact an app-tier Resin.  This directive
 only applies to IIS.</p>
 
+<def title="connection-error-page">
+element connection-error-page {
+  string
+}
+</def>
+
 </defun>
 
 <defun title="&lt;ear-default>" version="Resin 3.1">
@@ -180,34 +381,12 @@ that host or web-app will be used instead.</p>
 
 <p>See <a href="webapp.xtp#error-page">webapp: error-page</a>.</p>
 
-
-</defun>
-
-<defun title="Environment" version="Resin 3.1">
-<parents>cluster</parents>
-
-<p>All <a href="config-env.xtp">Environment tags</a> are
-available to the &lt;cluster&gt;.  For example,
-resources like &lt;database&gt;.</p>
-
-<example title="cluster environment">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-    &lt;cluster id="app-tier"&gt;
-        &lt;database jndi-name="jdbc/test"&gt;
-            &lt;driver type="org.postgresql.Driver"&gt;
-                &lt;url&gt;jdbc:postgresql://localhost/test&lt;/url&gt;
-                &lt;user&gt;caucho&lt;/user&gt;
-            &lt;/driver&gt;
-        &lt;/database&gt;
-
-        &lt;server id="a" ...&gt;
-          ...
-
-        &lt;host host-name="www.foo.com"&gt;
-          ...
-    &lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
+<def title="&lt;error-page> schema">
+element error-page {
+  (error-code | exception-type)?
+  &amp; location?
+}
+</def>
 
 </defun>
 
@@ -216,6 +395,10 @@ resources like &lt;database&gt;.</p>
 
 <p>&lt;host> configures a virtual host.  Virtual hosts must be
 configured explicitly.</p>
+
+<ul>
+<li>See <a href="host-tags.xtp">host tags</a> for configuration details.</li>
+</ul>
 
 <deftable-childtags title="&lt;host> attributes">
 <tr>
@@ -246,7 +429,7 @@ configured explicitly.</p>
     <td>automatic</td></tr>
 </deftable-childtags>
 
-<example title="explicit host">
+<example title="Example: explicit host">
 &lt;host host-name="www.foo.com"&gt;
   &lt;host-alias&gt;foo.com&lt;/host-alias&gt;
   &lt;host-alias&gt;web.foo.com&lt;/host-alias&gt;
@@ -260,7 +443,7 @@ configured explicitly.</p>
 &lt;/host&gt;
 </example>
 
-<example title="regexp host">
+<example title="Example: regexp host">
 &lt;host regexp="([^.]+)\.foo\.com"&gt;
   &lt;host-name&gt;${host.regexp[1]}.foo.com&lt;/host-name&gt;
 
@@ -290,7 +473,7 @@ It will be used as defaults for any virtual host.</p>
 
 <p>Configures a deploy directory for virtual host.</p>
 
-<p>The host-deploy will add an EL variable \${name}, referring to
+<p>The host-deploy will add an EL variable ${name}, referring to
 the name of the host jar file.</p>
 
 <deftable-childtags>
@@ -309,41 +492,55 @@ the name of the host jar file.</p>
     <td>defaults for the expanded host</td></tr>
 <tr><td>host-name</td>
     <td>the host name to match</td>
-    <td>\${name}</td></tr>
+    <td>${name}</td></tr>
 </deftable-childtags>
 
 </defun>
 
 <defun title="&lt;ignore-client-disconnect>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>true</default>
 
 <p>ignore-client-disconnect configures whether Resin should ignore
 disconnection exceptions from the client, or if it should send those
 exceptions to the application.</p>
 
-
-<default>true</default>
+<def title="&lt;ignore-client-disconnect> schema">
+element ignore-client-disconnect {
+  r_boolean-Type
+}
+</def>
 
 </defun>
 
 <defun title="&lt;invocation-cache-size>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>8192</default>
 
 <p>Configures the number of entries in the invocation cache.
 The invocation cache is used to store pre-calculated servlet and filter
 chains from the URLs.  It's also used as the basis for proxy caching.</p>
 
-<default>8192</default>
+<def title="&lt;invocation-cache-size> schema">
+element invocation-cache-size {
+  r_int-Type
+}
+</def>
 
 </defun>
 
 <defun title="&lt;invocation-cache-max-url-length>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>256</default>
 
 <p>Configures the longest entry cacheable in the invocation cache.
 It is used to avoid certain types of denial-of-service attacks.</p>
 
-<default>256</default>
+<def title="&lt;invocation-cache-max-url-length> schema">
+element invocation-cache-max-url-length {
+  r_int-Type
+}
+</def>
 
 </defun>
 
@@ -361,9 +558,159 @@ active cluster and the &lt;cluster&gt; definition is at the &lt;server&gt; level
 Sessions activate the persistent store with the &lt;use-persistent-store&gt;
 tag of the &lt;session-config&gt;.</p>
 
-<p>See <a href="config-sessions.xtp">Persistent sessions</a> for more details.</p>
+<p>See <a href="resin-clustering.xtp">Persistent sessions</a> for more details.</p>
 
-<example>
+<deftable title="&lt;persistent-store> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>init</td>
+  <td>initialization parameters for the persistent-store</td>
+  <td></td>
+</tr>
+<tr>
+  <td>type</td>
+  <td>cluster, jdbc, or file</td>
+  <td>required</td>
+</tr>
+</deftable>
+
+<def title="&lt;persistent-store> schema">
+element persistent-store {
+  type
+  &amp; init?
+}
+</def>
+
+<s2 name="cluster-store" title="cluster store">
+
+<p>The cluster store shares copies of the sessions on multiple servers.
+The original server is used as the primary, and is always more efficient
+than the backup servers.  In general, the cluster store is preferred because
+it is more scalable, and with the "triplicate" attribute, the
+most reliable..</p>
+
+<deftable title="cluster tags">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>always-load</td>
+  <td>Always load the value</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>always-save</td>
+  <td>Always save the value</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>max-idle-time</td>
+  <td>How long idle objects are stored (session-timeout will invalidate
+items earlier)</td>
+  <td>24h</td>
+</tr>
+<tr>
+  <td>path</td>
+  <td>Directory to store the objects</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>triplicate</td>
+  <td>Saves three copies of all distributed objects.</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>wait-for-acknowledge</td>
+  <td>Requires the sending server to wait for all acks.</td>
+  <td>false</td>
+</tr>
+</deftable>
+
+<def title="cluster schema">
+element persistent-store {
+  type { "cluster "}
+
+  element init {
+    always-load?
+    &amp; always-save?
+    &amp; max-idle-time?
+    &amp; triplicate?
+    &amp; wait-for-acknowledge?
+  }
+}
+</def>
+
+<example title="Example: cluster store">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster&gt;
+  &lt;server id="a" address="192.168.0.1" port="6800"/&gt;
+  &lt;server id="b" address="192.168.0.2" port="6800"/&gt;
+
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init&gt;
+      &lt;triplicate&gt;true&lt;/triplicate&gt;
+    &lt;/init&gt;
+  &lt;/persistent-store&gt;
+
+  &lt;web-app-default&gt;
+    &lt;session-config use-persistent-store="true"/&gt;
+  &lt;/web-app-default&gt;
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</s2>
+
+<s2 title="jdbc store">
+
+<p>The JDBC store saves sessions in a JDBC database.  Often, this will be
+a dedicated database to avoid overloading the main database.</p>
+
+<deftable title="jdbc store Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>always-load</td>
+  <td>Always load the value</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>always-save</td>
+  <td>Always save the value</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>blob-type</td>
+  <td>Schema type to store values</td>
+  <td>from JDBC meta info</td>
+</tr>
+<tr>
+  <td>data-source</td>
+  <td>The JDBC data source</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>table-name</td>
+  <td>Database table</td>
+  <td>persistent_session</td>
+</tr>
+<tr>
+  <td>max-idle-time</td>
+  <td>How long idle objects are stored</td>
+  <td>24h</td>
+</tr>
+</deftable>
+
+<example title="Example: jdbc-store">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;cluster&gt;
   &lt;server id="a" address="192.168.0.1" port="6800"/&gt;
@@ -384,61 +731,43 @@ tag of the &lt;session-config&gt;.</p>
 &lt;/resin&gt;
 </example>
 
-<deftable-childtags title="common tags">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr occur="?"><td>max-idle-time</td>
-              <td>How long idle objects are stored</td>
-              <td>24h</td></tr>
-<tr occur="?"><td>always-load</td>
-              <td>Always load the value</td>
-              <td>false</td></tr>
-<tr occur="?"><td>always-save</td>
-              <td>Always save the value</td>
-              <td>false</td></tr>
-</deftable-childtags>
+</s2>
 
-<deftable-childtags title="jdbc tags">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr occur="+"><td>data-source</td>
-              <td>The JDBC data source</td>
-              <td>required</td></tr>
-<tr occur="?"><td>table-name</td>
-              <td>Database table</td>
-              <td>persistent_session</td></tr>
-<tr occur="?"><td>blob-type</td>
-              <td>Schema type to store values</td>
-              <td>from JDBC meta info</td></tr>
-</deftable-childtags>
+<s2 title="file store">
 
-<deftable-childtags title="cluster tags">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr occur="+"><td>path</td>
-              <td>Directory to store the sessions</td>
-              <td>required</td></tr>
-</deftable-childtags>
+<p>The file store is a persistent store for development and testing or
+for single servers.  Since it is not aware of the clusters, it cannot
+implement true distributed objects.</p>
 
-<deftable-childtags title="file tags">
+<deftable title="file tags">
 <tr>
   <th>Attribute</th>
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr occur="+"><td>path</td>
-              <td>Directory to store the sessions</td>
-              <td>required</td></tr>
-</deftable-childtags>
+<tr>
+  <td>always-load</td>
+  <td>Always load the value</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>always-save</td>
+  <td>Always save the value</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>max-idle-time</td>
+  <td>How long idle objects are stored</td>
+  <td>24h</td>
+</tr>
+<tr>
+  <td>path</td>
+  <td>Directory to store the sessions</td>
+  <td>required</td>
+</tr>
+</deftable>
+
+</s2>
 
 </defun>
 
@@ -463,7 +792,40 @@ same process as Resin itself.  If the entire JDK freezes, this
 thread will freeze as well.  Assuming the JDK doesn't freeze, the
 PingThread will catch errors like deadlocks.</p>
 
-<example title="resin.conf - simple usage of server ping">
+<deftable title="&lt;ping> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>url</td>
+  <td>A url to ping.</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>sleep-time</td>
+  <td>Time to wait between pings.  The first ping is always 15m after the server starts, this is for subsequent pings.</td>
+  <td>15m</td>
+</tr>
+<tr>
+  <td>try-count</td>
+  <td>If a ping fails, number of times to retry before giving up and restarting</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>retry-time</td>
+  <td>time between retries</td>
+  <td>1s</td>
+</tr>
+<tr>
+  <td>socket-timeout</td>
+  <td>time to wait for server to start responding to the tcp connection before giving up</td>
+  <td>10s</td>
+</tr>
+</deftable>
+
+<example title="Example: resin.conf - simple usage of server ping">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
     &lt;cluster id="app-tier"&gt;
@@ -473,7 +835,7 @@ PingThread will catch errors like deadlocks.</p>
 &lt;/resin&gt;
 </example>
 
-<example title="resin.conf - configured usage of server ping">
+<example title="Example: resin.conf - configured usage of server ping">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
     ...
@@ -494,29 +856,6 @@ PingThread will catch errors like deadlocks.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
-<deftable-childtags>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr occur="+"><td>url</td>
-              <td>A url to ping.</td>
-              <td>required</td></tr>
-<tr occur="?"><td>sleep-time</td>
-              <td>Time to wait between pings.  The first ping is always 15m after the server starts, this is for subsequent pings.</td>
-              <td>15m</td></tr>
-<tr occur="?"><td>try-count</td>
-              <td>If a ping fails, number of times to retry before giving up and restarting</td>
-              <td>required</td></tr>
-<tr occur="?"><td>retry-time</td>
-              <td>time between retries</td>
-              <td>1s</td></tr>
-<tr occur="?"><td>socket-timeout</td>
-              <td>time to wait for server to start responding to the tcp connection before giving up</td>
-              <td>10s</td></tr>
-</deftable-childtags>
 
 <p>
 The class that corresponds to &lt;ping&gt; is 
@@ -560,6 +899,34 @@ System properties are used to configure a different SMTP server.
 
 </defun>
 
+<defun title="Resource Tags" version="Resin 3.1">
+<parents>cluster</parents>
+
+<p>All <a href="env-tags.xtp">Environment tags</a> are
+available to the &lt;cluster&gt;.  For example,
+resources like &lt;database&gt;.</p>
+
+<example title="Example: cluster environment">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="app-tier"&gt;
+        &lt;database jndi-name="jdbc/test"&gt;
+            &lt;driver type="org.postgresql.Driver"&gt;
+                &lt;url&gt;jdbc:postgresql://localhost/test&lt;/url&gt;
+                &lt;user&gt;caucho&lt;/user&gt;
+            &lt;/driver&gt;
+        &lt;/database&gt;
+
+        &lt;server id="a" ...&gt;
+          ...
+
+        &lt;host host-name="www.foo.com"&gt;
+          ...
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
 <defun title="&lt;rewrite-dispatch>" version="Resin 3.1">
 <parents>cluster</parents>
 
@@ -587,14 +954,19 @@ details.</p>
 
 <defun title="&lt;root-directory>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>The root-directory of the &lt;resin&gt; tag.</default>
 
 <p>&lt;root-directory&gt; configures the root directory for files
 within the cluster.  All paths in the &lt;cluster&gt; will be relative
 to the root directory.</p>
 
-<default>The root-directory of the &lt;resin&gt; tag.</default>
+<def title="&lt;root-directory> schema">
+element root-directory {
+  r_path-Type
+}
+</def>
 
-<example title="cluster root-directory">
+<example title="Example: cluster root-directory">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="app-tier"&gt;
         &lt;root-directory&gt;/var/www/app-tier&lt;/root-directory&gt;
@@ -626,35 +998,217 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 <p>Peer servers are managed with 
 <a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 
-<deftable-childtags>
+<deftable title="&lt;server> Attributes">
 <tr>
   <th>Attribute</th>
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>id</td>
-    <td>unique server identifier</td>
-    <td>required</td></tr>
-<tr><td>address</td>
-    <td>IP address of the cluster port</td>
-    <td>127.0.0.1</td></tr>
-<tr><td>port</td>
-    <td>The cluster port</td>
-    <td>6800</td></tr>
-</deftable-childtags>
+<tr>
+  <td>address</td>
+  <td>IP address of the cluster port</td>
+  <td>127.0.0.1</td>
+</tr>
+<tr>
+  <td>bind-ports-after-start</td>
+  <td>If true, listen to the ports only after all initialization has
+completed, allowing load-balance failover.</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>cluster-port</td>
+  <td>Configures the cluster port in detail, allowing for customization
+of timeouts, etc.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>group-name</td>
+  <td>Used by the watchdog to switch setgid before starting the Resin
+JVM instance for security.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>http</td>
+  <td>Adds a HTTP port (see <a href="port-tags.xtp">port tags</a>)</td>
+  <td></td>
+</tr>
+<tr>
+  <td>id</td>
+  <td>Unique server identifier</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>java-exe</td>
+  <td>The specific Java executable for the watchdog
+to launch the JVM</td>
+  <td>java</td>
+</tr>
+<tr>
+  <td>jvm-arg</td>
+  <td>Adds a JVM argument when the watchdog launches Resin.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>keepalive-connection-time-max</td>
+  <td>The total time a connection can be used for requests and keepalives</td>
+  <td>10min</td>
+</tr>
+<tr>
+  <td>keepalive-max</td>
+  <td>The maximum keepalives enabled at one time.</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>keepalive-select-enable</td>
+  <td>Enables epoll/select for keepalive requests to reduce threads (unix only)</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>keepalive-timeout</td>
+  <td>Timeout for a keepalive to wait for a new request</td>
+  <td>15s</td>
+</tr>
+<tr>
+  <td>load-balance-connect-timeout</td>
+  <td>How long the load-balancer should wait for a connection to this server</td>
+  <td>5s</td>
+</tr>
+<tr>
+  <td>load-balance-idle-time</td>
+  <td>How long the load balancer can keep an idle socket open to this server (see keepalive-timeout)</td>
+  <td>keepalive-time - 2s</td>
+</tr>
+<tr>
+  <td>load-balance-recover-time</td>
+  <td>How long the load balancer should treat this server as dead after a failure before retrying</td>
+  <td>15s</td>
+</tr>
+<tr>
+  <td>load-balance-socket-timeout</td>
+  <td>timeout for the load balancer reading/writing to this server</td>
+  <td>65s</td>
+</tr>
+<tr>
+  <td>load-balance-warmup-time</td>
+  <td>Warmup time for the load-balancer to throttle requests before sending the full load</td>
+  <td>60s</td>
+</tr>
+<tr>
+  <td>load-balance-weight</td>
+  <td>relative weight used by the load balancer to send traffic to this server</td>
+  <td>100</td>
+</tr>
+<tr>
+  <td>memory-free-min</td>
+  <td>minimum memory allowed for the JVM before Resin forces a restart</td>
+  <td>1M</td>
+</tr>
+<tr>
+  <td>ping</td>
+  <td>Configures a periodic ping of the server to force restarts when non-responsive</td>
+  <td></td>
+</tr>
+<tr>
+  <td>port</td>
+  <td>Configures the cluster port (shortcut for &lt;cluster-port>)</td>
+  <td>6800</td>
+</tr>
+<tr>
+  <td>protocol</td>
+  <td>Adds a custom socket protocol, e.g. for IIOP or SNMP.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>socket-timeout</td>
+  <td>The read/write timeout for the socket</td>
+  <td>65s</td>
+</tr>
+<tr>
+  <td>thread-max</td>
+  <td>The maximum number of threads managed by Resin (JVM threads will be larger because of non-Resin threads)</td>
+  <td>4096</td>
+</tr>
+<tr>
+  <td>thread-executor-thread-max</td>
+  <td>Limits the threads allocated to application ScheduledExecutors from Resin</td>
+  <td></td>
+</tr>
+<tr>
+  <td>thread-idle-max</td>
+  <td>Maximum number of idle threads in the thread pool</td>
+  <td>10</td>
+</tr>
+<tr>
+  <td>thread-idle-min</td>
+  <td>Minimum number of idle threads in the thread pool</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>user-name</td>
+  <td>The setuid user-name for the <a href="resin-watchdog.xtp">watchdog</a>
+when launching Resin for Unix security.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>watchdog-jvm-arg</td>
+  <td>Additional JVM arguments when launching the watchdog manager</td>
+  <td></td>
+</tr>
+<tr>
+  <td>watchdog-port</td>
+  <td>The port for the watchdog-manager to listen for start/stop/status
+requests</td>
+  <td>6700</td>
+</tr>
+</deftable>
 
-<example title="server">
+<def title="&lt;server> schema">
+element server {
+  attribute id { string }
+  &amp; address?
+  &amp; bind-ports-after-start?
+  &amp; cluster-port*
+  &amp; group-name?
+  &amp; http*
+  &amp; java-exe?
+  &amp; jvm-arg?
+  &amp; keepalive-connection-time-max?
+  &amp; keepalive-max?
+  &amp; keepalive-select-enable?
+  &amp; keepalive-timeout?
+  &amp; load-balance-connect-timeout?
+  &amp; load-balance-idle-time?
+  &amp; load-balance-recover-time?
+  &amp; load-balance-socket-timeout?
+  &amp; load-balance-warmup-time?
+  &amp; load-balance-weight?
+  &amp; memory-free-min?
+  &amp; ping?
+  &amp; port?
+  &amp; protocol?
+  &amp; socket-timeout?
+  &amp; thread-max?
+  &amp; thread-executor-task-max?
+  &amp; thread-idle-max?
+  &amp; thread-idle-min?
+  &amp; user-name?
+  &amp; watchdog-jvm-arg*
+  &amp; watchdog-port?
+}
+</def>
+
+<example title="Example: server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
-        &lt;server id="a" address="192.168.0.10" server-port="6800"&gt;
+        &lt;server id="a" address="192.168.0.10" port="6800"&gt;
           &lt;http port="8080"/&gt;
         &lt;/server&gt;
 
-        &lt;server id="b" address="192.168.0.11" server-port="6800"&gt;
+        &lt;server id="b" address="192.168.0.11" port="6800"&gt;
           &lt;http port="8080"/&gt;
         &lt;/server&gt;
 
-        &lt;server id="c" address="192.168.0.12" server-port="6800"&gt;
+        &lt;server id="c" address="192.168.0.12" port="6800"&gt;
           &lt;http port="8080"/&gt;
         &lt;/server&gt;
 
@@ -670,9 +1224,9 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 <parents>cluster</parents>
 
 <p>Defines default values for all &lt;server&gt; instances. See
-<a href="server-tags.xtp">server configuration</a> for more details.</p>
+<a href="server-tags.xtp">&lt;server> configuration</a> for more details.</p>
 
-<example title="server">
+<example title="Example: server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
         &lt;server-default&gt;
@@ -695,9 +1249,16 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 
 <defun title="&lt;server-header>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>Resin/3.1.x</default>
 
 <p>Configures the HTTP Server: header which Resin sends back to any
 HTTP client.</p>
+
+<def title="&lt;server-header> schema">
+element server-header {
+  string
+}
+</def>
 
 <example title="server-header">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -707,39 +1268,66 @@ HTTP client.</p>
 &lt;/resin&gt;
 </example>
 
-<default>Resin/3.1.x</default>
-
 </defun>
 
 <defun title="&lt;session-cookie>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>JSESSIONID</default>
 
 <p>Configures the cookie used for servlet sessions.</p>
 
-<default>JSESSIONID</default>
+<def title="&lt;session-cookie> schema">
+element session-cookie {
+  string
+}
+</def>
+
+</defun>
+
+<defun title="&lt;session-sticky-disable>" version="Resin 3.1">
+<parents>cluster</parents>
+<default>false</default>
+
+<p>Disables sticky sessions from the load balancer.</p>
+
+<def title="&lt;session-sticky-disable> schema">
+element session-sticky-disable {
+  r_boolean-Type
+}
+</def>
 
 </defun>
 
 <defun title="&lt;session-url-prefix>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>;jsessionid=</default>
 
 <p>Configures the URL prefix used for session rewriting.</p>
 
 <note>Session rewriting is discouraged as a potential security issue.</note>
 
-<default>;jsessionid=</default>
+<def title="&lt;session-cookie> schema">
+element session-cookie {
+  string
+}
+</def>
 
 </defun>
 
 <defun title="&lt;ssl-session-cookie>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>value of session-cookie</default>
 
 <p>Defines an alternative session cookie to be used for a SSL
 connection.  Having two separate cookies increases security.</p>
 
-<default>value of session-cookie</default>
+<def title="&lt;session-cookie> schema">
+element ssl-session-cookie {
+  string
+}
+</def>
 
-<example>
+<example title="Example: ssl-session-cookie">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
         &lt;ssl-session-cookie&gt;SSLJSESSIONID&lt;/ssl-session-cookie&gt;
@@ -752,13 +1340,18 @@ connection.  Having two separate cookies increases security.</p>
 
 <defun title="&lt;url-character-encoding>" version="Resin 3.1">
 <parents>cluster</parents>
+<default>UTF-8</default>
 
 <p>Defines the character encoding for decoding URLs.</p>
 
 <p>The HTTP specification does not define the character-encoding for
 URLs, so the server must make assumptions about the encoding.</p>
 
-<default>UTF-8</default>
+<def title="&lt;url-character-encoding> schema">
+element url-character-encoding {
+  string
+}
+</def>
 
 </defun>
 
@@ -768,7 +1361,7 @@ URLs, so the server must make assumptions about the encoding.</p>
 <p>&lt;web-app-default&gt; defines default values for any <g>web-app</g> in
 the cluster.</p>
 
-<example title="web-app-default">
+<example title="Example: web-app-default">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="app-tier"&gt;
 

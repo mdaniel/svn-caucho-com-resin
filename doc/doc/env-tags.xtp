@@ -1,7 +1,7 @@
 <document>
 <header>
 <product>resin</product>
-<title>Resources: Class Loaders, environment and JNDI</title>
+<title>Resources: class loaders, environment and IoC</title>
 <version>Resin 3.0</version>
 
 <description>
@@ -1307,6 +1307,75 @@ public class TestServlet extends HttpServlet {
 
 </defun>
 
+<defun title="&lt;fileset>" version="Resin 3.0.7" type="defun">
+
+<p>&lt;fileset&gt; provides the ability to match a set of files.  It is
+modelled after the ant tag by the same name.  The fileset matches
+files from a base directory defined by 'dir'.  Files can be included
+by patterns defined by &lt;include> tags or excluded by patterns defined in
+&lt;exclude> tags.</p>
+
+<deftable title="&lt;fileset> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr><td>dir</td>
+    <td>the starting directory</td>
+    <td>required</td></tr>
+<tr><td>include</td>
+    <td>an include pattern</td>
+    <td>do not include all files</td></tr>
+<tr><td>exclude</td>
+    <td>an exclude pattern</td>
+    <td>do not exclude any files</td></tr>
+</deftable>
+
+<def title="&lt;fileset> schema">
+element fileset {
+  dir
+  &amp; exclude*
+  &amp; include*
+</def>
+
+<s2 title="fileset patterns">
+
+<p>A pattern can contain two special characters: '*' and '**'.  '*' matches any
+part of path, but does not match the path separator.  '**' matches any part of
+a path, including the path separator. </p>
+
+<p>The following example matches .jar files in WEB-INF/lib.  Since it does
+not search the lib directory recursively, WEB-INF/lib/foo/bar.jar will not
+match.</p>
+
+<example title="Example: fileset pattern '*'">
+&lt;fileset dir="WEB-INF/lib"&gt;
+  &lt;include name="*.jar"/&gt;
+&lt;/fileset&gt;
+
+MATCH    lib/foo.jar
+MATCH    lib/bar.jar
+NO MATCH lib/baz/foo.jar
+</example>
+
+<p>The following example matches .jar files in WEB-INF/lib recursively,
+so a deeper file like WEB-INF/lib/foo/bar.jar will match.</p>
+
+<example title="Example: fileset pattern '**'">
+&lt;fileset dir="WEB-INF/tree"&gt;
+  &lt;include name="**/*.jar"/&gt;
+&lt;/fileset&gt;
+
+MATCH    lib/foo.jar
+MATCH    lib/bar.jar
+MATCH    lib/baz/foo.jar
+</example>
+
+</s2>
+
+</defun>
+
 <defun title="&lt;javac>" occur="?" type="defun">
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.java.JavacConfig -->
@@ -2259,7 +2328,328 @@ element remote-client {
 }
 </def>
 
+</defun> <!-- remote-client -->
+
+<defun title="&lt;resin:choose>" version="Resin 3.0.7">
+
+<p>resin:choose implements an if, elsif, else.</p>
+
+<deftable title="&lt;resin:choose> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>resin:when</td>
+  <td>A configuration section executed when matching a test condition</td>
+</tr>
+<tr>
+  <td>resin:otherwise</td>
+  <td>A fallback section executed when the tests fail</td>
+</tr>
+</deftable>
+
+<p>The &lt;resin:choose> schema is context-dependent.  A &lt;resin:choose>
+in a &lt;web-app> will have &lt;web-app> content, while a &lt;resin:choose>
+in a &lt;host> will have &lt;host> content.</p>
+
+<def title="&lt;resin:choose> schema">
+element resin:choose {
+  resin:when*,
+  resin:otherwise
+}
+
+element resin:when {
+  attribute test { string },
+
+  <var>context-dependent content</var>
+}
+
+element resin:otherwise {
+  <var>context-dependent content</var>
+}
+</def>
+
+<example title="Example: resin:choose usage pattern">
+&lt;resin:choose&gt;
+  &lt;resin:when test="${expr1}"&gt;
+    ...
+  &lt;/resin:when&gt;
+
+  &lt;resin:when test="${expr2}"&gt;
+    ...
+  &lt;/resin:when&gt;
+
+  &lt;resin:otherwise&gt;
+    ...
+  &lt;/resin:otherwise&gt;
+&lt;resin:choose&gt;
+</example>
+
+<s2 title="&lt;resin:when>" version="Resin 3.0.7" type="defun">
+<parents>resin:choose</parents>
+<p>&lt;resin:when> conditionally configures a block within a
+&lt;resin:choose> block.  If the <var>test</var> matches, Resin will
+use the enclosed configuration.</p>
+
+<deftable title="&lt;resin:when> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>test</td>
+  <td>the test to perform</td>
+</tr>
+</deftable>
+
+<def title="&lt;resin:when> schema">
+element resin:when {
+  attribute test { string },
+
+  <var>context-dependent content</var>
+}
+</def>
+
+</s2>
+
+<s2 title="&lt;resin:otherwise>" version="Resin 3.0.7" type="defun">
+<parents>resin:choose</parents>
+<p>&lt;resin:otherwise> is the catch-all configuration for a &lt;resin:choose>
+block when none of the &lt;resin:when> items match.</p>
+
+<def title="&lt;resin:otherwise> schema">
+element resin:otherwise {
+  <var>context-dependent content</var>
+}
+</def>
+
+</s2>
+
+</defun> <!-- resin:choose -->
+
+<defun title="&lt;resin:if>" version="Resin 3.0.7">
+
+<p>resin:if executes part of the configuration file conditionally.  resin:if
+can be particularly useful in combination with Java command-line properties
+like -Dfoo=bar to enable development mode or testing configuration.
+</p>
+
+<deftable title="&lt;resin:if> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>test</td>
+  <td>the test to perform</td>
+  <td>required</td>
+</tr>
+</deftable>
+
+<p>The resin:if schema is context-dependent.  For example, resin:if in
+a &lt;web-app> will have web-app content while resin:if in a &lt;host>
+will have host content.</p>
+
+<def title="&lt;resin:if> schema">
+element resin:if {
+  attribute test { string }
+
+  <var>context-dependent content</var>
+}
+</def>
+
+<example title="Example: enable debugging for -Ddevelopment">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+        xmlns:core="http://caucho.com/ns/resin/core">
+
+  &lt;resin:if test=${system['development']}"&gt;
+    &lt;logger name="com.foo" level="finer"/>
+  &lt;resin:if&gt;
+
+  ...
+&lt;/resin>
+</example>
+
+</defun> <!-- resin:if -->
+
+<defun title="&lt;resin:import>" version="Resin 3.0.7" type="defun">
+
+<p>&lt;resin:import> reads configuration from another file or set of
+files.  For example, the WEB-INF/web.xml and WEB-INF/resin-web.xml files
+are implemented as &lt;resin:import> in the app-default.xml.</p>
+
+<p>The target file is validated by the schema of the including context.
+So a resin:import in &lt;web-app-default&gt; will have a target with a
+top-level of &lt;web-app&gt;, and a resin:import in &lt;cluster> will have
+a top-level tag of &lt;cluster>.
+</p>
+
+<deftable title="&lt;resin:import> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>path</td>
+  <td>a path to a file</td>
+  <td>either path or fileset is required</td>
+</tr>
+<tr>
+  <td>fileset</td>
+  <td>a <a href="env-tags.xtp#fileset">fileset</a> describing all
+the files to import.</td>
+  <td>either path or fileset is required</td>
+</tr>
+<tr>
+  <td>optional</td>
+  <td>if true, no error when file does not exist</td>
+  <td>false</td>
+</tr>
+</deftable>
+
+<def title="&lt;resin:import> schema">
+element import {
+  (path | fileset)
+  &amp; optional?
+}
+
+element fileset {
+  dir
+  &amp; exclude*
+  &amp; include*
+}
+</def>
+
+<p>The following example shows how Resin implements the WEB-INF/web.xml
+and WEB-INF/resin-web.xml files.  Both are simply resin:import in a
+web-app-default.  When Resin configures the web-app, it will process
+the web-app-default program, and call resin:import for the web.xml file.</p>
+
+<example title="Example: import implementation of WEB-INF/web.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;cluster id="app-tier">
+
+    &lt;web-app-default>
+      &lt;resin:import path="WEB-INF/web.xml" optional="true"/>
+      &lt;resin:import path="WEB-INF/resin-web.xml" optional="true"/>
+    &lt;/web-app-default>
+
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>Virtual hosts can use resin:import to add a custom host.xml file.
+The host.xml can use any &lt;host> attribute, including &lt;host-name>
+and &lt;host-alias> to customize the virtual host configuration.</p>
+
+<example title="Example: adding host.xml in host-deploy">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;cluster id="app-tier">
+
+    &lt;host-deploy path="/var/www/hosts">
+      &lt;host-default>
+        &lt;resin:import path="host.xml" optional="true"/>
+
+        &lt;web-app-deploy path="webapps"/>
+      &lt;/host-default>
+    &lt;/web-app-default>
+
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>Some applications may want to split their configuration into multiple
+files using the fileset.  For example, a <a href="resin-ioc.xtp">Resin-IoC</a>
+application might want to define beans in WEB-INF/beans/*.xml and give
+the web-app flexibility in which bean files to create.</p>
+
+<example title="Example: Bean IoC fileset in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:core="http://caucho.com/ns/resin/core">
+
+  &lt;resin:import>
+    &lt;fileset dir="WEB-INF/beans">
+      &lt;include>*.xml&lt;/include>
+    &lt;/fileset>
+  &lt;/resin:import>
+
+&lt;/web-app>
+</example>
+
 </defun>
+  
+<defun title="&lt;resin:message>" version="Resin 3.0.7">
+
+<p>Logs a message to the given log file. The content of the element is the
+message.</p>
+
+<def title="&lt;resin:message> schema">
+element resin:message {
+  string
+}
+</def>
+
+<example title="logging in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core">
+
+  &lt;resin:message&gt;Starting server ${server.name}&lt;/resin:message&gt;
+
+&lt;/web-app>
+</example>
+
+</defun> <!-- resin:message -->
+
+<defun title="&lt;resin:set>" version="Resin 3.0.7">
+
+<p>resin:set adds an EL variable to the current context.</p>
+
+<deftable title="&lt;resin:set> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>name of the variable to set</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>value</td>
+  <td>value</td>
+  <td>required</td>
+</tr>
+</deftable>
+
+<def title="&lt;resin:set> schema">
+element set {
+  name
+  &amp; value
+  &amp; default
+  &amp; attribute * { string }
+}
+</def>
+
+<example title="Example: resin:set in resin.conf">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;resin:set name="root" value="/var/www">
+
+  &lt;cluster id="app-tier">
+    &lt;root-directory>${root}&lt;/root-directory>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun> <!-- resin:message -->
 
 <defun title="&lt;resource>" occur="*" version="Resin 3.0" type="defun">
 <parents>resin, cluster, host, web-app</parents>

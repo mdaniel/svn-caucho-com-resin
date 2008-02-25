@@ -39,6 +39,7 @@ in.</p>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
+  <th>Default</th>
 </tr>
 <tr>
   <td>archive-format</td>
@@ -86,6 +87,21 @@ see <a href="config-log.xtp#path">"Log Paths"</a>.</td>
   <td>n/a</td>
 </tr>
 </deftable>
+
+<def title="&lt;access-log> schema">
+element access-log {
+  auto-flush?
+  &amp; archive-format?
+  &amp; auto-flush-time?
+  &amp; exclude?
+  &amp; format?
+  &amp; path?
+  &amp; rollover-count?
+  &amp; rollover-period?
+  &amp; rollover-size?
+  &amp; init?
+}
+</def>
 
 <p>The default archive format is
 </p><pre>
@@ -878,19 +894,19 @@ when an updated .war expands</td>
 <def title="&lt;web-app-deploy> schema">
 element web-app-deploy {
   archive-directory?
-  expand-cleanup-fileset?
-  expand-directory?
-  expand-prefix?
-  expand-suffix?
-  path?
-  redeploy-check-interval?
-  redeploy-mode?
-  require-file*
-  startup-mode?
-  url-prefix?
-  versioning?
-  web-app-default*
-  web-app*
+  &amp; expand-cleanup-fileset?
+  &amp; expand-directory?
+  &amp; expand-prefix?
+  &amp; expand-suffix?
+  &amp; path?
+  &amp; redeploy-check-interval?
+  &amp; redeploy-mode?
+  &amp; require-file*
+  &amp; startup-mode?
+  &amp; url-prefix?
+  &amp; versioning?
+  &amp; web-app-default*
+  &amp; web-app*
 }
 </def>
 

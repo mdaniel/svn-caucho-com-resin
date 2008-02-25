@@ -16,58 +16,6 @@ and reliability features.</p>
 
 <localtoc/>
 
-<s1 name="about" title="About Caucho">
-
-<p>Caucho Technology, Inc. was founded
-in 1998 as an engineering shop devoted to open source
-and high performance Java. We chose to avoid
-venture capital so we can have full control of our
-software without the pressure to sell the company or
-conform to large and inefficient software development
-models.</p>
-
-<p>We have stayed true to our roots. Almost a decade
-since our inception, Caucho has become globally
-recognized leader in open source Java-PHP server
-technology that delivers fast and stable performance.
-Resin is the application server of choice for over
-6,000 organizations including Fortune 500, innovative
-startups, government and educational institutions
-needing reliable and fast Java-PHP solutions. </p>
-
-<p>We love performance and elegant code.</p>
-
-<p>Check out Quercus, our Java implementation of PHP 5
-that has been benchmarked at four to six times faster
-than mod_php. Since Quercus is included with Resin,
-you can run all your applications - web server, Java,
-PHP - within one open source software product that has
-rock solid stability, is fast and easy to configure. </p>
-
-<p>More than five years ago, we introduced Hessian, an
-open source binary web services protocol that is being
-used in hundreds of applications including mobile
-communications and gaming today. </p>
-
-<p>We have a great team of developers based primarily in San
-Francisco with some developers in Canada and Brazil.  We
-are always looking for bytecode wizards to join our
-team and work on performance, compilers and
-well-organized code.</p>
-
-<p>While we're known as an engineering shop, Caucho's
-sales, training, professional services and
-resellers support our customers worldwide. Hundreds of
-large-scale government and corporate deployments are
-run on Resin including CNet, Kodak, Salesforce and
-Japan's largest online gaming portal that take
-advantage Resin features including open source, early
-adoption of Java specifications, PHP, JNI performance
-enhancements and JDBC. Caucho is a Sun Microsystems
-Java licensee.</p>
-
-</s1>
-
 <s1 name="resinpro" title="Resin Professional">
 <p>
 Resin is provided in two versions, Resin Professional and Resin Open Source.
@@ -182,15 +130,9 @@ and may provide significant cost savings.
 <li><a href="resin-web-server.xtp">Resin documentation: Standalone web server Unix and Windows</a>
 </li></ul>
 <s3 name="http" title="Hypertext Transfer Protocol (HTTP)">
-<!--
-<ul>
-<li><a href="external|spec|http">External: HTTP specification (RFC 2616)</a>
-</li><li><a href="external|spec|http-authentication">External: HTTP Authentication specification (RFC 2617)</a>
-</li></ul>
--->
 </s3>
 
-<s3 name="ssl" title="Secure Socket Layter (SSL) 3.0">
+<s3 name="ssl" title="Secure Socket Layer (SSL) 3.0">
 <ul>
 <li><a href="ssl.xtp">Resin documentation</a>
 </li></ul>
@@ -198,8 +140,7 @@ and may provide significant cost savings.
 
 </s2> <!-- webserver -->
 
-
-<s2 title="Apache 1.3 and 2.0 integration">
+<s2 title="Apache 2.0 and 2.2 integration">
 <ul>
 <li><a href="install-apache.xtp">Resin documentation: Resin with Apache</a>
 </li></ul>
@@ -210,6 +151,71 @@ and may provide significant cost savings.
 <li><a href="install-iis.xtp">Resin documentation: Resin with IIS</a>
 </li></ul>
 </s2>
+
+<s2 name="cgi" title="CGI">
+<ul>
+<li><a href="servlet-library.xtp#CGIServlet">Resin documentation</a>
+</li></ul>
+</s2>
+
+</s1>
+
+<s1 name="db" title="Database Pooling">
+<p>
+Resin provides a robust connection pool for any JDBC 1, JDBC 2, or JDBC 3
+database driver.  
+</p>
+
+<ul>
+<li><a href="config-database.xtp">Resin documentation: Databases</a></li>
+<li><a href="db-thirdparty.xtp">Resin documentation: Example database configurations</a></li>
+</ul>
+</s1> <!-- db -->
+
+<s1 name="ejb" title="EJB 3.0 (Enterprise Java Beans)">
+<ul>
+<li>See <a href="ejb.xtp">Resin EJB 3.0</a> documentation</li>
+<li>See <a href="amber.xtp">Amber (JPA)</a> documentation</li>
+</ul>
+</s1>
+
+<s1 title="JPA (Java Persistence Architecture)">
+<ul>
+<li>See <a href="amber.xtp">Resin's Amber</a> documentation</li>
+</ul>
+</s1>
+
+<s1 name="jsp" title="JSP 2.1 (Java Server Pages)">
+<ul>
+<li>See <a href="jsp.xtp">Resin JSP</a> documentation</li>
+</ul>
+</s1>
+
+<s1 name="jstl" title="JSTL 1.01 (Java Standard Template Library)">
+<ul>
+<li>See <a href="jstl.xtp">Resin JSTL</a> documentation</li>
+</ul>
+</s1>
+
+<s1 name="jms" title="Messaging (JMS 1.1)">
+<ul>
+<li><a href="resin-messaging.xtp">Resin messaging documentation</a></li>
+</ul>
+</s1>
+
+<s1 name="php" title="Quercus/PHP">
+<ul>
+<li>See <a href="quercus.xtp">Quercus/PHP</a> documentation</li>
+</ul>
+</s1>
+
+<s1 name="servlet" title="Servlet 2.5">
+<ul>
+<li>See <a href="servlet.xtp">Resin servlet</a> documentation</li>
+</ul>
+</s1>
+
+<s1 name="jta" title="Transactions (JTA 1.0.1b)">
 
 </s1>
 
@@ -240,197 +246,6 @@ increase performance may not be available.
 </p>
 
 </s1> <!-- os -->
-
-
-<s1 name="db" title="Databases">
-<p>
-Resin provides a robust connection pool for any JDBC 1, JDBC 2, or JDBC 3
-database driver.  
-</p>
-
-<ul>
-<li><a href="config-database.xtp">Resin documentation: Databases</a>
-</li><li><a href="db-thirdparty.xtp">Resin documentation: Example database configurations</a>
-</li></ul>
-</s1> <!-- db -->
-
-<s1 name="servlet" title="Java Servlet 2.5">
-<ul>
-<li><a href="servlet.xtp">Resin documentation</a></li>
-<!--
-<li><a href="external|spec|servlet25">External: specification 2.5 (JSR-154)</a>
-</li>
--->
-</ul>
-</s1>
-
-<s1 name="jsp" title="Java Server Pages (JSP) 2.1">
-<ul>
-<li><a href="jsp.xtp">Resin documentation</a></li>
-<!--
-<li><a href="external|spec|jsp21">External: specification 2.1 (JSR-245)</a></li>
--->
-</ul>
-</s1>
-
-<s1 name="jstl" title="Java Server Pages Standard Template Library (JSTL) 1.01">
-<ul>
-<li><a href="jstl.xtp">Resin documentation</a></li>
-<!--
-<li><a href="external|spec|jstl11">External: specification (JSR-052)</a></li>
--->
-</ul>
-</s1>
-<!--
-<s1 name="portlet" title="Portlet 1.0">
-<p>Status: BETA</p>
-
-<ul>
-<li><a href="portlet.xtp">Resin documentation</a>
-</li><li><a href="external|spec|portlet">External: specification (JSR-162)</a>
-</li></ul>
-</s1>
-<s1 name="xslt" title="XSLT 1.0">
-<ul>
-<li><a href="xslt.xtp">Resin documentation</a>
-</li><li><a href="external|spec|xslt10">External: specification 1.0</a>
-</li></ul>
-</s1>
--->
-
-<s1 name="xpath" title="XPath 1.0">
-<ul>
-<li><a href="xpath.xtp">Resin documentation</a></li>
-<!--
-<li><a href="external|spec|xpath10">External: specification 1.0</a></li>
--->
-</ul>
-</s1>
-
-<s1 name="jaxp" title="JAXP 1.2">
-<ul>
-<li><a href="jaxp.xtp">Resin documentation</a></li>
-<!--
-<li><a href="external|spec|jaxp12">External: specification 1.2 (JSR-063)</a></li>
--->
-</ul>
-</s1>
-
-<!--
-<s1 name="jca" title="Java Connector Architecture (JCA) 1.5">
-<ul>
-<li><a href="jca.xtp">Resin documentation</a></li>
-<li><a href="external|spec|jca15">External: specification 1.5 (JSR-112)</a></li>
-</ul>
-</s1>
--->
-
-<s1 name="jsr88" title="J2EE Deployment API (JSR 88) 1.0">
-<p>Status: in progress</p>
-<!--
-<ul>
-<li><a href="external|spec|jsr88">External: specification final release (JSR-88)</a></li>
-</ul>
--->
-</s1>
-
-<s1 name="webdav" title="WebDAV">
-<ul>
-<li><a href="webdav.xtp">Resin documentation</a></li>
-<!--
-</li><li><a href="external|spec|webdav">External: specification (RFC 2518)</a>
-</li>
-<li><a href="external|webdav|index">External: WebDAV home</a></li>
--->
-</ul>
-</s1>
-
-<s1 name="groovy" title="Groovy">
-<ul>
-<li><a href="groovy.xtp">Resin documentation</a>
-</li></ul>
-</s1>
-
-<s1 name="php" title="PHP">
-<ul>
-<li><a href="quercus.xtp">Resin documentation</a>
-</li></ul>
-</s1>
-
-<s1 name="cgi" title="CGI">
-<ul>
-<li><a href="servlet-library.xtp#CGIServlet">Resin documentation</a>
-</li></ul>
-</s1>
-
-<s1 name="jta" title="Java Transaction API (JTA) 1.0.1b">
-
-<!--
-<ul>
-<li><a href="external|spec|jta101b">External: specification 1.0.1b</a>
-</li></ul>
--->
-</s1>
-
-<s1 name="jts" title="Java Transaction Service (JTS) 1.0">
-<!--
-<ul>
-<li><a href="external|spec|jts10">External: specification 1.0</a>
-</li></ul>
--->
-</s1>
-
-
-<s1 name="jms" title="Java Message Service (JMS) 1.1">
-<ul>
-<li><a href="jms-config.xtp">Resin documentation</a></li>
-<!--
-<li><a href="external|spec|">External: specification 1.1 (JSR-914)</a></li>
--->
-</ul>
-</s1>
-
-<s1 name="ejb" title="Enterprise Java Beans (EJB) 3.0">
-<ul>
-<li><a href="ejb.xtp">Resin EJB documentation</a></li>
-<li><a href="amber.xtp">Amber (JPA, EJB 3.0) documentation</a></li>
-<!--
-<li><a href="external|spec|ejb20">External: specification 2.0 (JSR-19)</a></li>
--->
-</ul>
-</s1>
-<!--
-<s1 name="corba" title="CORBA/IDL">
-<p>
-The J2EE specification requires that containers support CORBA.  Although Resin
-supports CORBA, Caucho does not recommend the use of CORBA.
-</p>
-
-<ul>
-<li><a href="corba.xtp">Resin documentation</a></li>
-<li><a href="hessian.xtp">Hessian documentation</a></li>
-</ul>
-</s1>
--->
-<!--
-<section name="j2ee" title="J2EE">
-</section>
-
-<section name="webservices" title="Web Services ">
-</section>
-
-<section name="jax-rpc" title="JAX-RPC">
-</section>
-
-<section name="jaxr" title="Java API for XML Registries (JAXR)">
-</section>
-
-<section name="javamail" title="JavaMail ">
-</section>
-
-<section name="jaf" title="JavaBeans Activation Framework">
-</section>
--->
 
 
 </body>

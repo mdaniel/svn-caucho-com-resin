@@ -87,9 +87,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.security.Provider;
 import java.security.Security;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.webbeans.Standard;
@@ -1596,7 +1594,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     /**
-     * Returns the version
+     * Returns the version date
      *
      * @return version
      */
@@ -1675,6 +1673,15 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       return true;
     }
+    
+    /**
+     * Returns the JDK properties
+     */
+    public Properties getProperties()
+    {
+      return System.getProperties();
+    }
+    
     /**
      * Returns the JDK version
      */

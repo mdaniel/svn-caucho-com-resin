@@ -34,7 +34,7 @@ functions.  The EL Environment is inherited, the objects available in
 
 <deftable title="Environment variables">
 <tr><th>variable</th><th>attribute</th><th>meaning</th>
-</tr><tr><td>Var</td><td>&#160;</td><td>System properties, e.g. ${Var["resin.home"]}
+</tr><tr><td>Var</td><td>&#160;</td><td>System properties, e.g. ${system["resin.home"]}
 
 </td></tr><tr><td>server</td><td>&#160;</td><td>Server properties
 </td></tr><tr><td>&#160;</td><td>id</td><td>The server id, as specified in -server id
@@ -627,8 +627,8 @@ Values related to the active <a href="server-tags.xtp">&lt;server></a>.
 <p>
 System properties are available as variables in el expressions.
 Many system property names are not valid el
-identifiers; in that case the <var>Var</var> variable is used, for example
-<code>${Var['java.io.tmpdir']}</code>.
+identifiers; in that case the <var>system</var> variable is used, for example
+<code>${system['java.io.tmpdir']}</code>.
 </p>
 
 <p>
