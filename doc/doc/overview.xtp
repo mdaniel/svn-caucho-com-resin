@@ -323,22 +323,130 @@ the overhead of the JSTL tag libraries.</p>
 
 </s1>
 
-<s1 title="JPA (Java Persistence Architecture)">
-<ul>
-<li>See <a href="amber.xtp">Resin's Amber</a> documentation</li>
-</ul>
-</s1>
-
-<s1 name="jms" title="Messaging (JMS 1.1)">
-<ul>
-<li><a href="resin-messaging.xtp">Resin messaging documentation</a></li>
-</ul>
-</s1>
-
 <s1 name="servlet" title="Servlet 2.5">
 <ul>
 <li>See <a href="servlet.xtp">Resin servlet</a> documentation</li>
 </ul>
+
+<p>Since the servlet engine of Resin is built on a Resin-IoC foundation,
+servlets can use WebBeans dependency injection, event observation, and
+interception.  Remember that Resin-IoC is fully integrated with its
+EJB support?  By transitivity, Resin servlets automatically have access
+to EJB transaction aspects without any extra overhead.</p>
+
+<p>Remote services are tied into servlet capabilities as well.  Because remote
+services are URL-based, they naturally fit into the the familiar servlet
+processing model.  There's no need to introduce complexities like standard
+EJB deployment or add extra frameworks just to expose a service as a URL.</p>
+
+</s1>
+
+<s1 title="Resin Embedding">
+<ul>
+<li>See <a href="resin-embedding.xtp">Resin embedding</a> documentation</li>
+</ul>
+
+<p>Resin embedding is a lightweight facade over the core Resin server
+suitable for automated testing frameworks and IDE environments.  With
+Resin's embedded testing interface, your tests can send HTTP requests directly
+to the server, skipping the overhead of TCP connections, and saving
+time on test setup and teardown.</p>
+
+<p>The embedded API gives you hooks into Resin-IoC, so you can
+inject mock services into your tests, and still ensure that your application
+is tested in the full application server environment.  Since integration
+testing uses the actual, deployment environment, elusive production bugs
+are easier to catch and destroy.</p>
+
+</s1>
+
+<s1 title="Resin Remoting">
+<ul>
+<li>See <a href="resin-remoting.xtp">Resin remoting</a> documentation</li>
+</ul>
+
+<p>Resin remoting builds on the strengths of the Servlet architecture.
+As developers turn away from complicated remoting frameworks,
+the simplicity and elegance of the Servlet model becomes more appealing.
+Multithreaded, IoC-enabled, designed for HTTP and the web's URL
+architecture, well-known, well-documented, and well-integrated with
+application servers, the Servlet model has enjoyed phenomenal success.</p>
+
+<p>Services expose remote APIs with the same interfaces and classes their
+clients will use, taking advantage of the Java compiler to enforce
+protocol compatiblity.  Since Resin remoting protocols are available using
+a simple driver API based on Servlets, your services can choose the
+protocol to expose at deployment time, whether its a fast, binary
+wire-protocol like Hessian, or an XML-based wire-protocol like SOAP.
+Resin remoting clients select the wire-protocol matched with service API,
+and register with Resin-IoC/WebBeans, so
+application code can obtain the client proxy with simple, typed
+dependency injection.</p>
+
+</s1>
+
+<s1 title="JPA (Java Persistence Architecture)">
+<ul>
+<li>See <a href="amber.xtp">Resin's Amber</a> documentation</li>
+</ul>
+
+</s1>
+
+<s1 title="Resin Watchdog">
+
+<ul>
+<li>See <a href="resin-watchdog.xtp">Resin watchdog</a> documentation</li>
+</ul>
+
+<p>The Resin watchdog service manages each Resin instance, allowing for
+graceful recovery and restart from critical server deadlocks and crashes.
+As a management capability, it offers a centralized interface for starting,
+stopping, and checking the status of multiple JVM instances.  Because the
+watchdog is well-placed to gather information, it is responsible for
+management and logging of the server's debugging or warning messages.</p>
+
+<p>For unix systems, the watchdog also improves system security.  While
+the watchdog will run as the root user, Resin JVM instances run as
+low-authorization users, protecting your system from application bugs
+and security holes.</p>
+
+<p>As a side benefit of the watchdog, JVM parameters like heap settings,
+agent configuration, remote JMX and system properties can be configured
+in the resin.conf itself.  The watchdog can read the same resin.conf as
+the server itself, putting all configuration relevant to the server in
+one location.</p>
+
+<p>For more complicated configurations like an ISP setting, the watchdog
+can use a separate configuration file readable only by root.  The watchdog
+will launch Resin JVMs with assigned resin.conf files, ports, and user
+assignment, protecting each Resin JVM user from each other.</p>
+
+</s1>
+
+<s1 name="jms" title="Messaging (JMS 1.1)">
+
+<ul>
+<li>See <a href="resin-messaging.xtp">Resin messaging</a> documentation</li>
+</ul>
+
+<p>Resin's messaging focuses on simplifying the use and deployment of
+messaging applications.  At the core, a messaging system is really just
+a queue with extra reliability and performance features like persistence,
+transactions, and clustered distribution.  So Resin provides
+the standard queueing APIs like the JDK <code>BlockingQueue</code> as
+facades to the JMS API.</p>
+
+<p>On the receiving end, <code>MessageListener</code> implementations are
+just Java services implementing a single <code>onMessage</code> method to
+receive the message, so there's no need for complications.  The only
+configuration needed is a binding between the service class and the
+queue it wants to receive messages from.  Three lines of XML is sufficient
+for that binding, with no need for any extra packaging.</p>
+
+<p>Of course, the message listeners are can use all Resin-IoC capabilities,
+including injecting JPA <code>EntityManager</code> for database management, or
+other queues to filter and pass the message along.</p>
+
 </s1>
 
 <s1 name="jta" title="Transactions (JTA 1.0.1b)">
