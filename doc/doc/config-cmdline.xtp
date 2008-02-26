@@ -12,12 +12,41 @@
   <body>
     <s1 title="./configure options">
 
+    <p>
+    The <code>./configure; make; make install</code> step is important for all Unix users.  It configures and compiles 
+    low level JNI code that enables Resin to provide a number of features not
+    normally available to Java programs and also provides significant performance
+    improvements.
+    </p>
+
+    <p>
+    The most commonly used options for <code>./configure</code> are documented
+    below, the full set of available command line options is available by running
+    <code>./configure --help</code>.
+    </p>
+
     <deftable>
-    <tr><td>--enable-64bit</td><td>Compiles the JNI using 64-bits</td></tr>
+    <tr>
+      <td>--help</td>
+      <td>Help for all ./configure command line options</td></tr>
+    <tr>
+      <td>--enable-64bit</td>
+      <td>Compiles the JNI using 64-bits, requires <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.conf</td>
+    </tr>
+    <tr>
+      <td>--enable-ssl</td>
+      <td>Enable OpenSSL, see the <a href="resin-security.xtp#openssl">OpenSSL</a> documentation for details.</td>
+    </tr>
+    <tr>
+      <td>--with-apxs=<var>/path/to/apxs</var></td>
+      <td>Enable <a href="install-apache.xtp">Apache integration</a> and produce mod_caucho</td>
+    </tr>
     </deftable>
 
-    <p>The 64-bit JNI compilation must match the JDK you're using, i.e.
-    you'll need to use something like <code>-J-d64</code> to properly enable 64 bit JDKs.
+    <p>
+      The 64-bit JNI compilation must match the JDK you're using, i.e.
+      you'll need to add a <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.conf to
+      indicate that the jvm should start in 64-bit mode.
     </p>
 
     </s1>
@@ -50,14 +79,13 @@
         <td>off</td>
       </tr>
       <tr>
-        <td>-resin-home <var>xxx</var></td>
-        <td>Sets the Resin home directory. (Deprecated. Use environment variable <var>RESIN_HOME</var> or
-          <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.conf.)</td>
-        <td>The parent directory of resin.jar</td>
-      </tr>
-      <tr>
         <td>start</td>
         <td>Starts Resin as a daemon, starting the watchdog if necessary</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>Show the status of Resin as a daemon.</td>
         <td>n/a</td>
       </tr>
       <tr>
@@ -68,6 +96,17 @@
       <tr>
         <td>restart</td>
         <td>Restarts Resin as a daemon by contacting the watchdog.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>kill</td>
+        <td>Kill Resin as a daemon by contacting the watchdog, a killed process is
+           destroyed and not allowed to clean up or finish pending connections.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>shutdown</td>
+        <td>Shutdown the watchdog and all of the Resin daemons.</td>
         <td>n/a</td>
       </tr>
       <tr>
@@ -89,6 +128,15 @@
         <td>-remove-as <var>xxx</var></td>
         <td>(Windows) remove Resin as a named service (but doesn't automatically start.)</td>
         <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-resin-home <var>xxx</var></td>
+        <td>
+           Deprecated. Sets the Resin home directory.
+           Use environment variable <var>RESIN_HOME</var> or
+           <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.conf.
+        </td>
+        <td>The parent directory of resin.jar</td>
       </tr>
       </deftable>
       </s2>

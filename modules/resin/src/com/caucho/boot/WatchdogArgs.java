@@ -1,20 +1,21 @@
 package com.caucho.boot;
 
 import com.caucho.Version;
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.management.*;
-
-import javax.management.*;
 
 class WatchdogArgs
 {
@@ -235,7 +236,7 @@ class WatchdogArgs
 
   private static void usage()
   {
-    System.err.println(L().l("usage: java -jar resin.jar [-options] [start | stop | restart]"));
+    System.err.println(L().l("usage: java -jar resin.jar [-options] [status | start | stop | restart | kill | shutdown]"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
     System.err.println(L().l("   -conf <file>          : select a configuration file"));
