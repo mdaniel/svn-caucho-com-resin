@@ -75,8 +75,16 @@ public class FacesMessage implements java.io.Serializable
     this.detail = detail;
   }
 
+  /**
+   * Return the localized detail text. If no localized detail text has been
+   * defined for this message, return the localized summary text instead.
+   * @return
+   */
   public String getDetail()
   {
+    if (this.detail == null)
+      return this.summary;
+
     return this.detail;
   }
 
@@ -106,8 +114,8 @@ public class FacesMessage implements java.io.Serializable
   }
   
   public static class Severity implements Comparable {
-    private static String _name;
-    private static int _value;
+    private String _name;
+    private int _value;
 
     Severity(String name, int value)
     {
