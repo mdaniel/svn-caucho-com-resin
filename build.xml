@@ -99,6 +99,7 @@
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/webapps"/>
     <mkdir dir="${build}/ext-webapp-lib"/>
+    <mkdir dir="${build}/plugins"/>
     <mkdir dir="${ivy.lib}"/>
 
     <condition property="unix">
@@ -757,7 +758,7 @@
   </target>
 
   <target name="dist.build" 
-          depends="compile, configure, ant, maven-plugin, webapps, win32, configure, javadoc, relaxng">
+          depends="compile, configure, ant, maven-plugin, webapps, win32, configure, javadoc, support, relaxng">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>
@@ -886,6 +887,8 @@
     <mkdir dir="${dist}/${dist.name}/licenses"/>
     <mkdir dir="${dist}/${dist.name}/keys"/>
     <mkdir dir="${dist}/${dist.name}/ext-lib"/>
+    <mkdir dir="${dist}/${dist.name}/ext-webapp-lib"/>
+    <mkdir dir="${dist}/${dist.name}/plugins"/>
     <mkdir dir="${dist}/${dist.name}/log"/>
     <mkdir dir="${dist}/${dist.name}/logs"/>
   </target>
@@ -912,6 +915,8 @@
       <include name="${dist.name}/contrib/**"/>
       <include name="${dist.name}/conf/**"/>
       <include name="${dist.name}/php/**"/>
+      <include name="${dist.name}/plugins/**"/>
+      <include name="${dist.name}/ext-webapp-lib/**"/>
       <include name="${dist.name}/automake/**"/>
       <include name="${dist.name}/bin/wrapper.pl.in"/>
 
