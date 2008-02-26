@@ -637,7 +637,7 @@ public class WebApp extends ServletContextImpl
   {
   }
 
-  public setDistributable(boolean isDistributable)
+  public void setDistributable(boolean isDistributable)
   {
   }
 
