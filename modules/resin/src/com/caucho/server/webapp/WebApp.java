@@ -637,6 +637,10 @@ public class WebApp extends ServletContextImpl
   {
   }
 
+  public setDistributable(boolean isDistributable)
+  {
+  }
+
   /**
    * Gets the URL
    */
