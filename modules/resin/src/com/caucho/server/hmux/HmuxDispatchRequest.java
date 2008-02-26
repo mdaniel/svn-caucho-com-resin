@@ -364,16 +364,19 @@ public class HmuxDispatchRequest {
 
     crc64 = Crc64.generate(crc64, cluster.getId());
 
-    writeString(os, HmuxRequest.HMUX_HEADER, "live-time");
-    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientMaxIdleTime() / 1000));
-
-    writeString(os, HmuxRequest.HMUX_HEADER, "dead-time");
-    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientFailRecoverTime() / 1000));
-    
-    writeString(os, HmuxRequest.HMUX_HEADER, "read-timeout");
-    writeString(os, HmuxRequest.HMUX_STRING, "" + (cluster.getClientReadTimeout() / 1000));
-
     ClusterServer []servers = cluster.getServerList();
+    if (servers.length > 0) {
+      ClusterServer server = servers[0];
+
+      writeString(os, HmuxRequest.HMUX_HEADER, "live-time");
+      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceIdleTime() / 1000));
+
+      writeString(os, HmuxRequest.HMUX_HEADER, "dead-time");
+      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceRecoverTime() / 1000));
+    
+      writeString(os, HmuxRequest.HMUX_HEADER, "read-timeout");
+      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceSocketTimeout() / 1000));
+    }
 
     for (int i = 0; i < servers.length; i++) {
       ClusterServer server = servers[i];

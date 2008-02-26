@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2008 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -977,8 +977,8 @@ jvm_status(cluster_t *cluster, request_rec *r)
   ap_rputs("    <th>Active</th>\n", r);
   ap_rputs("    <th>Pooled</th>\n", r);
   ap_rputs("    <th>Connect<br>Timeout</th>\n", r);
-  ap_rputs("    <th>Live<br>Time</th>\n", r);
-  ap_rputs("    <th>Dead<br>Time</th>\n", r);
+  ap_rputs("    <th>Idle<br>Time</th>\n", r);
+  ap_rputs("    <th>Recover<br>Time</th>\n", r);
   ap_rputs("</tr>\n", r);
 
   for (; cluster; cluster = cluster->next) {

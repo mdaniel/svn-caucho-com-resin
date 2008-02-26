@@ -57,7 +57,7 @@
 
 #define WINDOWS_READ_TIMEOUT 3600
 #define DEFAULT_PORT 6802
-#define DEAD_TIME 120
+#define DEAD_TIME 20
 #define LIVE_TIME 10
 #define CONNECT_TIMEOUT 2
 
