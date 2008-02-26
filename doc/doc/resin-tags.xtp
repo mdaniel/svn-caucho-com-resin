@@ -463,6 +463,118 @@ value.</p>
 
 </defun>
 
+<defun title="watchdog">
+
+<p>The &lt;watchdog> tag is used in ISP-style
+configurations where the &lt;watchdog-manager> is configured separately
+from the resin.conf instances, and where the configuration file is generally
+not readable by the instance users.</p>
+
+<p>The &lt;watchdog> tag corresponds to the &lt;server> tag in standard
+resin.conf configurations, and specifies the resin.conf, the root directory
+and resin-user.</p>
+
+<deftable title="&lt;watchdog> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>group-name</td>
+  <td>setgid value for unix systems</td>
+  <td></td>
+</tr>
+<tr>
+  <td>java-exe</td>
+  <td>java executable to use for the Resin instance</td>
+  <td>java</td>
+</tr>
+<tr>
+  <td>java-home</td>
+  <td>JAVA_HOME value for the Resin instance</td>
+  <td></td>
+</tr>
+<tr>
+  <td>open-port</td>
+  <td>list of ports the watchdog should open for the Resin instance, e.g.
+for ports that require root access</td>
+  <td></td>
+</tr>
+<tr>
+  <td>resin-conf</td>
+  <td>Path to the resin.conf file for the Resin instance</td>
+  <td>same as for watchdog</td>
+</tr>
+<tr>
+  <td>resin-root</td>
+  <td>Root directory for the Resin instance</td>
+  <td>same as for watchdog</td>
+</tr>
+</deftable>
+
+<def title="&lt;watchdog> schema">
+element watchdog {
+  attribute id { string }
+  &amp; group-name?
+  &amp; java-exe?
+  &amp; java-home?
+  &amp; jvm-arg*
+  &amp; resin-conf?
+  &amp; resin-root?
+  &amp; open-port { address &amp; port }*
+  &amp; user-name?
+}
+</def>
+
+</defun>
+<defun title="watchdog-manager">
+
+<p>For ISP configurations, &lt;watchdog-manager> is used for a separate
+resin.conf just to configure the watchdog-manager itself.  The
+&lt;watchdog-manager> selects the &lt;user-name>, &lt;resin-conf>,
+ports, and Resin home directories before giving access to the user's
+Resin instance.</p>
+
+<deftable title="&lt;watchdog-manager> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>watchdog</td>
+  <td>Watchdog configuration for a Resin instance, corresponding to a &lt;server> in the resin.conf</td>
+  <td></td>
+</tr>
+<tr>
+  <td>watchdog-default</td>
+  <td>Defaults applied to all watchdog instances</td>
+  <td></td>
+</tr>
+<tr>
+  <td>watchdog-jvm-arg</td>
+  <td>JVM arguments for the watchdog-manager when launched</td>
+  <td></td>
+</tr>
+<tr>
+  <td>watchdog-port</td>
+  <td>The TCP port the watchdog-manager listens for start, stop, status</td>
+  <td>6700</td>
+</tr>
+</deftable>
+
+<def title="&lt;watchdog-manager> schema">
+element watchdog-manager {
+  watchdog*
+  &amp; watchdog-default*
+  &amp; watchdog-jvm-arg*
+  &amp; watchdog-port?
+}
+</def>
+
+</defun>
+
 <defun title="xa-log-service">
 
 <p>&lt;xa-log-service> enables the transaction-manager logging.  The XA log
