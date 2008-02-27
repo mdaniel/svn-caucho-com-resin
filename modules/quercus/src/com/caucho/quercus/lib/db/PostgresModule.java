@@ -414,13 +414,17 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
+      // Query database name before closing connection
+
+      String dbname = conn.getDbName();
+
       conn.close(env);
 
       conn = new Postgres(env,
                           conn.getHost(),
                           conn.getUserName(),
                           conn.getPassword(),
-                          conn.getDbName(),
+                          dbname,
                           conn.getPort(),
                           conn.getDriver(),
                           conn.getUrl());
