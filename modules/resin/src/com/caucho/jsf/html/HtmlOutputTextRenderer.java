@@ -136,7 +136,7 @@ class HtmlOutputTextRenderer extends HtmlRenderer
     if (escape)
       escapeText(out, string, "value");
     else
-      out.writeText(string, "value");
+      out.write(string);
 
     if (hasSpan)
       out.endElement("span");
