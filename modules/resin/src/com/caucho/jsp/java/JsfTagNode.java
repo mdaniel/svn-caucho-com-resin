@@ -144,9 +144,23 @@ public class JsfTagNode extends JsfNode
   public void endAttributes()
     throws JspParseException
   {
-    if (_parent instanceof JsfFacetNode)
+    if (_parent instanceof JsfFacetNode) {
       _facetName = ((JsfFacetNode) _parent).getName();
-    
+    }
+    else if (_parent instanceof CustomTag) {
+      final QName qName = _parent.getQName();
+
+      if ((qName.getNamespaceURI().indexOf("http://java.sun.com/jsf/core") > -1)
+	  && "facet".equals(qName.getLocalName())) {
+
+	final Object facetName = ((CustomTag) _parent).getAttribute("name");
+	
+	if (facetName instanceof String) {
+	  _facetName = facetName.toString();
+	}
+      }
+    }
+
     _idAttr = findAttribute("id");
 
     if (_idAttr != null)
