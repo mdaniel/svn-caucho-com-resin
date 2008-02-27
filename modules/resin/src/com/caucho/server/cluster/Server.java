@@ -127,6 +127,7 @@ public class Server extends ProtocolDispatchServer
   private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
   
   private boolean _keepaliveSelectEnable = true;
+  private int _keepaliveSelectMax = -1;
   private long _keepaliveSelectThreadTimeout = 1000;
 
   private Management _management;
@@ -364,6 +365,14 @@ public class Server extends ProtocolDispatchServer
   public void setKeepaliveSelectEnable(boolean enable)
   {
     _keepaliveSelectEnable = enable;
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public void setKeepaliveSelectMax(int max)
+  {
+    _keepaliveSelectMax = max;
   }
 
   /**
@@ -1130,6 +1139,11 @@ public class Server extends ProtocolDispatchServer
 
         log.log(Level.FINER, e.toString());
       }
+
+      if (getSelectManager() != null) {
+	if (_keepaliveSelectMax > 0)
+	  getSelectManager().setSelectMax(_keepaliveSelectMax);
+      }
     }
   }
 
@@ -1186,6 +1200,7 @@ public class Server extends ProtocolDispatchServer
 	_resin.getManagement().start(this);
 
       AbstractSelectManager selectManager = getSelectManager();
+      
       if (! _keepaliveSelectEnable
 	  || selectManager == null
 	  || ! selectManager.start()) {

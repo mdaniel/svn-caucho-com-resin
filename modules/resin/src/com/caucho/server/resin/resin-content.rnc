@@ -296,6 +296,10 @@ r_keepalive-select-enable =
   attribute keepalive-select-enable { r_boolean-Type }
   | element keepalive-select-enable { r_boolean-Type }
 
+r_keepalive-select-max =
+  attribute keepalive-select-max { r_int-Type }
+  | element keepalive-select-max { r_int-Type }
+
 r_log-service = element log-service {
   r_enable?
 
@@ -604,6 +608,8 @@ r_server-Basis =
   & r_keepalive-timeout?
 
   & r_keepalive-select-enable?
+
+  & r_keepalive-select-max?
 
   & r_keepalive-select-thread-timeout?
 
