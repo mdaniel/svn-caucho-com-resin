@@ -44,6 +44,9 @@ import javax.servlet.jsp.tagext.*;
  * The f:verbatim tag
  */
 public class VerbatimTag extends HtmlStyleBaseTag {
+
+  private ValueExpression _escape = null;
+
   public String getComponentType()
   {
     return UIOutput.COMPONENT_TYPE;
@@ -52,6 +55,11 @@ public class VerbatimTag extends HtmlStyleBaseTag {
   public String getRendererType()
   {
     return "javax.faces.Text";
+  }
+
+  public void setEscape(ValueExpression escape)
+  {
+    _escape = escape;
   }
 
   @Override
@@ -69,5 +77,18 @@ public class VerbatimTag extends HtmlStyleBaseTag {
     }
 
     return getDoAfterBodyValue();
+  }
+
+  @Override
+  protected void setProperties(UIComponent component)
+  {
+    super.setProperties(component);
+
+    if (_escape == null) {
+      component.getAttributes().put("escape", Boolean.FALSE);
+    }
+    else {
+      component.setValueExpression("escape", _escape);
+    }
   }
 }
