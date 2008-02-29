@@ -39,6 +39,8 @@ import com.caucho.quercus.expr.MethodCallExpr;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.lib.file.FileModule;
+
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -398,17 +400,39 @@ public class ErrorModule extends AbstractQuercusModule {
   /**
    * Send a message to the log.
    */
-  public static boolean error_log(String message,
-                                  @Optional int type,
-                                  @Optional String destination,
-                                  @Optional String extraHeaders)
+  public static boolean error_log(Env env,
+                                  StringValue message,
+                                  @Optional("0") int type,
+                                  @Optional StringValue destination,
+                                  @Optional StringValue extraHeaders)
   {
-    log.warning(message);
+    if (type == 3) {
+      // message is appended to the file destination, no newline added
 
-    // XXX: optional parameters not implemented since they seem to
-    // conflict with the java.util.logging methodology
+      Value numBytes = FileModule.file_put_contents(env,
+        destination, message, FileModule.FILE_APPEND, null);
 
-    return true;
+      if (numBytes == BooleanValue.FALSE)
+        return false;
+      if (numBytes.toLong() == message.length())
+        return true;
+      else
+        return false;
+    } else if (type == 2) {
+      // XXX : message sent via remote debugging connection
+
+      return false;
+    } else if (type == 1) {
+      // XXX : message sent by email to the address in destination
+
+      return false;
+    } else {
+      // message sent to PHP's system logger
+
+      log.warning(message.toString());
+
+      return true;
+    }
   }
 
   /**

@@ -946,11 +946,11 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Writes data to a file.
    */
-  public Value file_put_contents(Env env,
-                                 StringValue filename,
-                                 Value data,
-                                 @Optional int flags,
-                                 @Optional Value context)
+  public static Value file_put_contents(Env env,
+                                        StringValue filename,
+                                        Value data,
+                                        @Optional int flags,
+                                        @Optional Value context)
   {
     if (filename.length() == 0) {
       env.warning(L.l("file name must not be null"));
