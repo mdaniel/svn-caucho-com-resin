@@ -773,8 +773,15 @@ public class UIInput extends UIOutput
   }
 
   private static class ValueChangeListenerAdapter
-    implements ValueChangeListener {
+    implements ValueChangeListener, StateHolder
+  {
     private MethodBinding _binding;
+    
+    private boolean _transient;
+
+    public ValueChangeListenerAdapter()
+    {
+    }
 
     public ValueChangeListenerAdapter(MethodBinding binding)
     {
@@ -794,6 +801,26 @@ public class UIInput extends UIOutput
       _binding.invoke(facesContext, new Object[] { event }); 
     }
 
+    public Object saveState(FacesContext context)
+    {
+      return _binding;
+    }
+
+    public void restoreState(FacesContext context, Object state)
+    {
+      _binding = (MethodBinding) state;
+    }
+
+    public boolean isTransient()
+    {
+      return _transient;
+    }
+
+    public void setTransient(boolean isTransient)
+    {
+      _transient = isTransient;
+    }
+
     public String toString()
     {
       return "ValueChangeListenerAdapter[" + _binding + "]";
@@ -801,8 +828,15 @@ public class UIInput extends UIOutput
   }
 
   private static class ValidatorAdapter
-    implements Validator {
+    implements Validator, StateHolder
+  {
     private MethodBinding _binding;
+    
+    private boolean _transient;
+
+    public ValidatorAdapter()
+    {
+    }
 
     public ValidatorAdapter(MethodBinding binding)
     {
@@ -831,6 +865,26 @@ public class UIInput extends UIOutput
 	else
 	  throw e;
       }
+    }
+
+    public Object saveState(FacesContext context)
+    {
+      return _binding;
+    }
+
+    public void restoreState(FacesContext context, Object state)
+    {
+      _binding = (MethodBinding) state;
+    }
+
+    public boolean isTransient()
+    {
+      return _transient;
+    }
+
+    public void setTransient(boolean isTransient)
+    {
+      _transient = isTransient;
     }
 
     public String toString()
