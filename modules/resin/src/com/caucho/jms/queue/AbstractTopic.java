@@ -37,7 +37,6 @@ import javax.jms.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 /**
@@ -46,18 +45,13 @@ import com.caucho.util.L10N;
 abstract public class AbstractTopic extends AbstractDestination
   implements javax.jms.Topic
 {
-  public static final L10N L = new L10N(AbstractTopic.class);
+  private static final L10N L = new L10N(AbstractTopic.class);
 
   private TopicAdmin _admin;
 
   public void setTopicName(String name)
   {
     setName(name);
-  }
-  
-  public String getTopicName()
-  {
-    return getName();
   }
 
   public void init()
@@ -87,10 +81,5 @@ abstract public class AbstractTopic extends AbstractDestination
                                                  boolean noLocal);
 
   public abstract void closeSubscriber(AbstractQueue subscriber);
-  
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getName() + "]";
-  }
 }
 

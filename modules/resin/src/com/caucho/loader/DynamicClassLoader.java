@@ -1708,10 +1708,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     Vector<URL> resources = new Vector<URL>();
 
     ArrayList<Loader> loaders = getLoaders();
-    for (int i = 0; i < loaders.size(); i++) {
-      Loader loader = loaders.get(i);
+    if (loaders != null) {
+      for (int i = 0; i < loaders.size(); i++) {
+	Loader loader = loaders.get(i);
 
-      loader.getResources(resources, name);
+	loader.getResources(resources, name);
+      }
     }
 
     return resources.elements();

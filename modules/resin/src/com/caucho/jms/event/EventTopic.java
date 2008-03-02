@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.memory;
+package com.caucho.jms.event;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,20 +35,18 @@ import java.util.logging.*;
 
 import javax.jms.*;
 
+import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.connection.*;
 
 /**
- * Implements a memory topic.
+ * Implements a event topic.
  */
-public class MemoryTopic extends AbstractTopic
+public class EventTopic extends AbstractTopic
 {
   private static final Logger log
-    = Logger.getLogger(MemoryTopic.class.getName());
-
-  private HashMap<String,MemoryQueue> _durableSubscriptionMap
-    = new HashMap<String,MemoryQueue>();
+    = Logger.getLogger(EventTopic.class.getName());
     
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
@@ -62,10 +60,9 @@ public class MemoryTopic extends AbstractTopic
   /**
    * Returns the configuration URL.
    */
-  @Override
   public String getUrl()
   {
-    return "memory:name=" + getName();
+    return "event:name=" + getName();
   }
 
   @Override
@@ -76,15 +73,10 @@ public class MemoryTopic extends AbstractTopic
     MemoryQueue queue;
 
     if (name != null) {
-      queue = _durableSubscriptionMap.get(name);
+      queue = new MemorySubscriberQueue(session, noLocal);
+      queue.setName(getName() + ":sub-" + name);
 
-      if (queue == null) {
-	queue = new MemorySubscriberQueue(session, noLocal);
-	queue.setName(getName() + ":sub-" + name);
-
-	_subscriptionList.add(queue);
-	_durableSubscriptionMap.put(name, queue);
-      }
+      _subscriptionList.add(queue);
     }
     else {
       queue = new MemorySubscriberQueue(session, noLocal);
@@ -105,8 +97,7 @@ public class MemoryTopic extends AbstractTopic
     if (log.isLoggable(Level.FINE))
       log.fine(this + " close-subscriber(" + queue + ")");
     
-    if (! _durableSubscriptionMap.values().contains(queue))
-      _subscriptionList.remove(queue);
+    _subscriptionList.remove(queue);
   }
 
   @Override

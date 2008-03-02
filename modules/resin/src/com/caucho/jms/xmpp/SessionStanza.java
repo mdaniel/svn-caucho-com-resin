@@ -27,11 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.connection;
+package com.caucho.jms.xmpp;
+
+import com.caucho.server.connection.*;
+import com.caucho.server.port.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
+import java.util.logging.*;
+import javax.xml.stream.*;
 
 /**
- * Callback interface indicating a new message is ready.
+ * XMPP protocol item for successful query
  */
-public interface MessageAvailableListener {
-  public void messageAvailable();
+public class SessionStanza extends Stanza
+{
+  public SessionStanza()
+  {
+  }
 }

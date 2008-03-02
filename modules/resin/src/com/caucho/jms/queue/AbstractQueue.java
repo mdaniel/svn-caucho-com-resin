@@ -31,12 +31,10 @@ package com.caucho.jms.queue;
 
 import java.util.*;
 import java.util.logging.*;
-import java.io.Serializable;
 
 import javax.annotation.*;
 import javax.jms.*;
 
-import com.caucho.jms.JmsRuntimeException;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 
@@ -54,12 +52,10 @@ abstract public class AbstractQueue extends AbstractDestination
 
   private QueueAdmin _admin;
 
-  private ArrayList<MessageConsumerImpl> _messageConsumerList
-    = new ArrayList<MessageConsumerImpl>();
+  private ArrayList<MessageAvailableListener> _consumerList
+    = new ArrayList<MessageAvailableListener>();
 
   private int _roundRobin;
-  
-  private int _enqueueCount;
 
   // stats
   private long _listenerFailCount;
@@ -83,7 +79,7 @@ abstract public class AbstractQueue extends AbstractDestination
    */
   public int getConsumerCount()
   {
-    return _messageConsumerList.size();
+    return _consumerList.size();
   }
 
   /**
@@ -123,43 +119,53 @@ abstract public class AbstractQueue extends AbstractDestination
     _admin.register();
   }
   
-  public void addConsumer(MessageConsumerImpl consumer)
+  /**
+   * Adds a MessageAvailableListener to receive notifications for new
+   * messages.  The listener will spawn or wake a thread to process
+   * the message.  The listener MUST NOT use the event thread to
+   * process the message.
+   * 
+   * @param listener notification listener
+   */
+  @Override
+  public void addMessageAvailableListener(MessageAvailableListener listener)
   {
-    synchronized (_messageConsumerList) {
-      if (! _messageConsumerList.contains(consumer))
-	_messageConsumerList.add(consumer);
+    synchronized (_consumerList) {
+      if (! _consumerList.contains(listener))
+	_consumerList.add(listener);
 
       startPoll();
     }
   }
   
-  public void removeConsumer(MessageConsumerImpl consumer)
+  @Override
+  public void removeMessageAvailableListener(MessageAvailableListener consumer)
   {
-    synchronized (_messageConsumerList) {
-      _messageConsumerList.remove(consumer);
+    synchronized (_consumerList) {
+      _consumerList.remove(consumer);
 
       // force a poll to avoid missing messages
-      for (int i = 0; i < _messageConsumerList.size(); i++) {
-	_messageConsumerList.get(i).notifyMessageAvailable();
+      for (int i = 0; i < _consumerList.size(); i++) {
+	_consumerList.get(i).notifyMessageAvailable();
       }
 
-      if (_messageConsumerList.size() == 0)
+      if (_consumerList.size() == 0)
         stopPoll();
     }
   }
 
   protected void notifyMessageAvailable()
   {
-    synchronized (_messageConsumerList) {
-      if (_messageConsumerList.size() > 0) {
-	MessageConsumerImpl consumer;
-	int count = _messageConsumerList.size();
+    synchronized (_consumerList) {
+      if (_consumerList.size() > 0) {
+	MessageAvailableListener consumer;
+	int count = _consumerList.size();
 
 	// notify until one of the consumers signals readiness to read
 	do {
-	  int roundRobin = _roundRobin++ % _messageConsumerList.size();
+	  int roundRobin = _roundRobin++ % _consumerList.size();
 	  
-	  consumer = _messageConsumerList.get(roundRobin);
+	  consumer = _consumerList.get(roundRobin);
 	} while (! consumer.notifyMessageAvailable() && count-- > 0);
       }
     }
@@ -190,20 +196,12 @@ abstract public class AbstractQueue extends AbstractDestination
   }
 
   @PreDestroy
+  @Override
   public void close()
   {
     stopPoll();
     
     super.close();
-  }
-
-  public String toString()
-  {
-    String className = getClass().getName();
-
-    int p = className.lastIndexOf('.');
-    
-    return className.substring(p + 1) + "[" + getName() + "]";
   }
 }
 

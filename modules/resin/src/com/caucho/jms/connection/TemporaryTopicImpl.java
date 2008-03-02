@@ -31,6 +31,8 @@ package com.caucho.jms.connection;
 
 import com.caucho.jms.memory.MemoryTopic;
 
+import com.caucho.jms.queue.MessageAvailableListener;
+import com.caucho.util.L10N;
 import java.util.ArrayList;
 import javax.jms.*;
 
@@ -39,12 +41,13 @@ import javax.jms.*;
  */
 public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
 {
+  private static final L10N L = new L10N(TemporaryTopicImpl.class);
   private static int _idCount;
 
   private JmsSession _session;
 
-  private ArrayList<MessageConsumerImpl> _consumerList
-    = new ArrayList<MessageConsumerImpl>();
+  private ArrayList<MessageAvailableListener> _consumerList
+    = new ArrayList<MessageAvailableListener>();
   
   TemporaryTopicImpl(JmsSession session)
   {
@@ -58,13 +61,15 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
     return _session;
   }
 
-  public void addConsumer(MessageConsumerImpl consumer)
+  @Override
+  public void addMessageAvailableListener(MessageAvailableListener consumer)
   {
     if (! _consumerList.contains(consumer))
       _consumerList.add(consumer);
   }
 
-  public void removeConsumer(MessageConsumerImpl consumer)
+  @Override
+  public void removeMessageAvailableListener(MessageAvailableListener consumer)
   {
     _consumerList.remove(consumer);
   }

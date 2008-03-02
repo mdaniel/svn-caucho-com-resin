@@ -10,9 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.5 - snapshot">
+<s2 title="3.1.5">
 <ul>
-<li>config: whitespace-only element config with resin:import (rep by Jan Kriesten)</li>
+<li>(2008-02-26) config: whitespace-only element config with resin:import (rep by Jan Kriesten)</li>
 <li>win32: rewrite-real-path replacement issues with windows backslashes (#2444, rep by stbu)</li>
 <li>(2008-02-20) build aclocal.m4 missing from .gz</li>
 <li>classloader: system classloader changes to support Terracotta</li>

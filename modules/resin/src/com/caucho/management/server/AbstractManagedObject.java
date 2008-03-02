@@ -157,4 +157,10 @@ abstract public class AbstractManagedObject implements ManagedObjectMXBean {
       return false;
     }
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getObjectName() + "]";
+  }
 }

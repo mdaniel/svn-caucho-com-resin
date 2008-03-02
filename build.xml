@@ -758,7 +758,7 @@
   </target>
 
   <target name="dist.build" 
-          depends="compile, configure, ant, maven-plugin, webapps, win32, configure, javadoc, support, relaxng">
+          depends="compile, support, configure, ant, maven-plugin, webapps, win32, configure, javadoc, relaxng">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>
@@ -996,7 +996,7 @@
     </tar>
 
     <jar destfile="${dist}/hessian-${version}.jar">
-      <fileset dir="${modules}/resin/classes">
+      <fileset dir="${modules}/hessian/classes">
         <exclude name=".cvsignore"/>
         <exclude name=".svnignore"/>
         <exclude name="*~"/>
@@ -1019,7 +1019,7 @@
     </jar>
 
     <jar destfile="${dist}/hessian-${version}-src.jar">
-      <fileset dir="${modules}/resin/src">
+      <fileset dir="${modules}/hessian/src">
         <exclude name=".cvsignore"/>
         <exclude name=".svnignore"/>
         <exclude name="*~"/>
@@ -1039,7 +1039,7 @@
     </jar>
 
     <jar destfile="${dist}/hessian-applet-${version}.jar">
-      <fileset dir="${modules}/resin/classes">
+      <fileset dir="${modules}/hessian/classes">
         <exclude name=".cvsignore"/>
         <exclude name=".svnignore"/>
         <exclude name="*~"/>

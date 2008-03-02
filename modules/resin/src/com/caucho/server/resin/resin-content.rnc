@@ -466,11 +466,11 @@ r_port-Content =
    & (attribute connection-max { r_int-Type }
       | element connection-max { r_int-Type })?
 
-   & (attribute keepalive-max { r_int-Type }
-      | element keepalive-max { r_int-Type })?
-
    & (attribute keepalive-connection-time-max { r_period-Type }
       | element keepalive-connection-time-max { r_period-Type })?
+
+   & (attribute keepalive-timeout { r_period-Type }
+      | element keepalive-timeout { r_period-Type })?
 
    & (attribute port { string } | element port { string })
 

@@ -62,7 +62,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   private int _lastCol = 1;
   private int _col = 1;
   private int _row = 1;
-  private int _ofs = 1;
+  private int _offset = 1;
 
   private NamespaceReaderContext _namespaceTracker;
 
@@ -119,13 +119,15 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     throws XMLStreamException
   {
     this(Vfs.openRead(is));
+    
     _systemId = systemId;
   }
 
-  public XMLStreamReaderImpl(Reader r, String systemId)
+  public XMLStreamReaderImpl(Reader reader, String systemId)
     throws XMLStreamException
   {
-    this(r);
+    this(reader);
+    
     _systemId = systemId;
   }
 
@@ -133,6 +135,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     throws XMLStreamException
   {
     _is = is;
+    
     init();
   }
 
@@ -152,6 +155,11 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     readHeader();
 
     _current = START_DOCUMENT;
+  }
+  
+  public int available()
+  {
+    return _inputLength - _inputOffset;
   }
 
   public int getAttributeCount()
@@ -232,8 +240,8 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
         if (name.getLocalPart().equals(localName)) 
           return _attrValues[i];
       }
-      else if (name.getLocalPart().equals(localName) &&
-               name.getNamespaceURI().equals(namespaceURI))
+      else if (name.getLocalPart().equals(localName)
+	       && name.getNamespaceURI().equals(namespaceURI))
         return _attrValues[i];
     }
 
@@ -291,7 +299,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public Location getLocation()
   {
-    return new StreamReaderLocation(_ofs, _row, _col);
+    return new StreamReaderLocation(_offset, _row, _col);
   }
 
   public String getLocalName()
@@ -1007,8 +1015,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   {
     int ch;
 
-    while ((ch = read()) >= 0 &&
-           (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
+    while ((ch = read()) == ' ' || ch == '\t' || ch == '\r' || ch == '\n') {
     }
 
     return ch;
@@ -1131,7 +1138,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
     int ch = _inputBuf[_inputOffset++];
 
-    _ofs++;
+    _offset++;
 
     // XXX '\r'
     if (ch == '\n') {
@@ -1152,7 +1159,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   {
     if (_inputOffset > 0) {
       _inputOffset--;
-      _ofs--;
+      _offset--;
 
       if (_col > 1)
         _col--;
@@ -1188,7 +1195,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
         _inputBuf[_inputLength++] = (char) ch;
         _inputOffset = _inputLength;
 
-        _ofs++;
+        _offset++;
 
         // XXX '\r'
         if (ch == '\n') {
@@ -1226,6 +1233,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     try {
       if (_is != null) {
         _inputOffset = 0;
+
         _inputLength = _is.read(_inputBuf, 0, _inputBuf.length);
 
         return _inputLength > 0;
@@ -1362,20 +1370,20 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   private class StreamReaderLocation implements Location {
 
-    private int _ofs;
+    private int _offset;
     private int _row;
     private int _col;
 
     public StreamReaderLocation(int ofs, int row, int col)
     {
-      this._ofs = ofs;
-      this._row = row;
-      this._col = col;
+      _offset = ofs;
+      _row = row;
+      _col = col;
     }
 
     public int getCharacterOffset()
     {
-      return _ofs;
+      return _offset;
     }
 
     public int getColumnNumber()
@@ -1399,7 +1407,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     }
 
     public String toString() {
-      return _row+":"+_col;
+      return _row + ":" + _col;
     }
 
   }

@@ -33,10 +33,8 @@ import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.selector.Selector;
 import com.caucho.jms.selector.SelectorParser;
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.AlarmListener;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -50,7 +48,7 @@ import java.util.logging.Level;
  * A basic message consumer.
  */
 public class MessageConsumerImpl
-  implements MessageConsumer
+  implements MessageConsumer, MessageAvailableListener
 {
   static final Logger log
     = Logger.getLogger(MessageConsumerImpl.class.getName());
@@ -71,7 +69,6 @@ public class MessageConsumerImpl
   private boolean _isAutoAcknowledge;
 
   private volatile boolean _isClosed;
-  private Alarm _pollAlarm;
 
   MessageConsumerImpl(JmsSession session,
                       AbstractQueue queue,
@@ -89,7 +86,7 @@ public class MessageConsumerImpl
     }
     _noLocal = noLocal;
 
-    _queue.addConsumer(this);
+    _queue.addMessageAvailableListener(this);
 
     switch (_session.getAcknowledgeMode()) {
     case Session.AUTO_ACKNOWLEDGE:
@@ -340,8 +337,8 @@ public class MessageConsumerImpl
         return true;
       }
     } catch (Exception e) {
-      log.log(Level.WARNING, L.l("{0} message listener '{1}' failed for message '{2}' with exception\n{3}",
-                                 _queue, listener, msg, e.toString()),
+      log.log(Level.WARNING, L.l("{0}: message listener '{1}' failed for message '{2}' with exception\n{3}",
+                                 this, listener, msg, e.toString()),
               e);
 
       _queue.addListenerException(e);
@@ -374,12 +371,13 @@ public class MessageConsumerImpl
       _isClosed = true;
     }
 
-    _queue.removeConsumer(this);
+    _queue.removeMessageAvailableListener(this);
     _session.removeConsumer(this);
   }
 
+  @Override
   public String toString()
   {
-    return "MessageConsumerImpl[" + _queue + "]";
+    return getClass().getSimpleName() + "[" + _queue + "]";
   }
 }

@@ -38,8 +38,6 @@ import com.caucho.jms.connection.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 
-import com.caucho.util.Alarm;
-
 /**
  * Implements a memory queue.
  */
@@ -59,6 +57,7 @@ public class MemoryQueue extends AbstractQueue
   /**
    * Returns the configuration URL.
    */
+  @Override
   public String getUrl()
   {
     return "memory:name=" + getName();
@@ -71,6 +70,7 @@ public class MemoryQueue extends AbstractQueue
   /**
    * Returns the queue size
    */
+  @Override
   public int getQueueSize()
   {
     synchronized (_queueList) {
@@ -95,6 +95,7 @@ public class MemoryQueue extends AbstractQueue
   /**
    * Returns true if a message is available.
    */
+  @Override
   public boolean hasMessage()
   {
     return _queueList.size() > 0;

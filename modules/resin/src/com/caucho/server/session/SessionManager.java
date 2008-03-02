@@ -1627,7 +1627,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	    liveSessions++;
 	}
       }
-
+      
       synchronized (_statisticsLock) {
 	_sessionTimeoutCount += _sessionList.size();
       }

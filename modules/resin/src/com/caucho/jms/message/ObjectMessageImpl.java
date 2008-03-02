@@ -111,7 +111,6 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
 
       return object;
     } catch (Exception e) {
-      e.printStackTrace();
       throw JMSExceptionWrapper.create(e);
     }
   }

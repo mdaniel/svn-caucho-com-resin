@@ -173,7 +173,14 @@ public class UTF8Reader extends EncodingReader {
   {
     int i = 0;
 
+    InputStream is = _is;
+    if (is == null)
+      return -1;
+    
     for (i = 0; i < len; i++) {
+      if (i > 0 && is.available() < 1)
+	return i;
+      
       int ch = read();
 
       if (ch < 0)

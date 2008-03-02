@@ -27,70 +27,72 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.queue;
+package com.caucho.jms.xmpp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.*;
 import java.util.logging.*;
 
 import javax.jms.*;
 
+import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
+import com.caucho.jms.queue.*;
 import com.caucho.jms.connection.*;
 
-import com.caucho.config.types.Period;
-import com.caucho.util.*;
-
 /**
- * Implements an queue which polls the data periodically.
+ * Implements an xmpp topic.
  */
-abstract public class PollingQueue extends AbstractQueue
-  implements AlarmListener
+public class XmppPubSubLeaf
 {
-  private static final L10N L = new L10N(PollingQueue.class);
   private static final Logger log
-    = Logger.getLogger(PollingQueue.class.getName());
+    = Logger.getLogger(XmppPubSubLeaf.class.getName());
 
-  private long _pollPeriod = 10000;
+  private String _name;
 
-  private boolean _isPolling;
-  private WeakAlarm _alarm;
-
-  protected PollingQueue()
+  private ArrayList<BlockingQueue> _queueList
+    = new ArrayList<BlockingQueue>();
+  
+  public XmppPubSubLeaf(String name)
   {
-    _alarm = new WeakAlarm(this);
+    _name = name;
   }
 
-  public void setPollPeriod(Period period)
+  public String getName()
   {
-    _pollPeriod = period.getPeriod();
+    return _name;
   }
 
-  @Override
-  protected void startPoll()
+  public void addQueue(BlockingQueue queue)
   {
-    _isPolling = true;
-    _alarm.queue(_pollPeriod);
-  }
-
-  @Override
-  protected void stopPoll()
-  {
-    _isPolling = false;
-    _alarm.dequeue();
-  }
-
-  public void handleAlarm(Alarm alarm)
-  {
-    try {
-      pollImpl();
-    } finally {
-      if (_isPolling)
-        _alarm.queue(_pollPeriod);
+    synchronized (_queueList) {
+      if (! _queueList.contains(queue))
+	_queueList.add(queue);
     }
   }
 
-  protected void pollImpl()
+  public void removeQueue(BlockingQueue queue)
   {
+    synchronized (_queueList) {
+      _queueList.remove(queue);
+    }
+  }
+
+  public void send(Message msg)
+  {
+    synchronized (_queueList) {
+      for (int i = 0; i < _queueList.size(); i++) {
+	BlockingQueue queue = (BlockingQueue) _queueList.get(i);
+
+	queue.offer(msg);
+      }
+    }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }
 

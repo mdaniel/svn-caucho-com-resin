@@ -27,41 +27,19 @@
  * @author Scott Ferguson
  */
 
+package com.caucho.jms.hub;
 
-package com.caucho.jms.queue;
+import com.caucho.server.port.*;
 
-import com.caucho.management.server.*;
+import com.caucho.webbeans.manager.*;
 
-/**
- * Administration for a JMS topic
+import javax.annotation.*;
+import javax.jms.*;
+
+/*
+ * Hub for topics
  */
-public class TopicAdmin extends AbstractManagedObject
-  implements JmsTopicMXBean
+public interface Hub
 {
-  private final AbstractTopic _topic;
-
-  TopicAdmin(AbstractTopic topic)
-  {
-    _topic = topic;
-  }
-
-  public String getName()
-  {
-    return _topic.getName();
-  }
-
-  public String getUrl()
-  {
-    return _topic.getUrl();
-  }
-
-  void register()
-  {
-    registerSelf();
-  }
-
-  void unregister()
-  {
-    unregisterSelf();
-  }
+  public Destination createTopic(String name);
 }

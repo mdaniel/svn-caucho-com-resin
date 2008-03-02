@@ -738,6 +738,17 @@ public class WebBeansContainer
   }
 
   /**
+   * Creates an object, but does not register the
+   * component with webbeans.
+   */
+  public <T> T createTransientObject(Class<T> type)
+  {
+    ComponentFactory<T> factory = createTransient(type);
+
+    return factory.create();
+  }
+
+  /**
    * Returns a ComponentFactory for a class, but does not register the
    * component with webbeans.
    */

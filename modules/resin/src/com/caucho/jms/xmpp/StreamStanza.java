@@ -27,41 +27,27 @@
  * @author Scott Ferguson
  */
 
+package com.caucho.jms.xmpp;
 
-package com.caucho.jms.queue;
+import com.caucho.server.connection.*;
+import com.caucho.server.port.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
-import com.caucho.management.server.*;
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
+import java.util.logging.*;
+import javax.xml.stream.*;
 
 /**
- * Administration for a JMS topic
+ * XMPP protocol item for stream features
  */
-public class TopicAdmin extends AbstractManagedObject
-  implements JmsTopicMXBean
+public class StreamStanza extends Stanza
 {
-  private final AbstractTopic _topic;
-
-  TopicAdmin(AbstractTopic topic)
+  public StreamStanza(XMLStreamReader in)
+    throws IOException, XMLStreamException
   {
-    _topic = topic;
-  }
-
-  public String getName()
-  {
-    return _topic.getName();
-  }
-
-  public String getUrl()
-  {
-    return _topic.getUrl();
-  }
-
-  void register()
-  {
-    registerSelf();
-  }
-
-  void unregister()
-  {
-    unregisterSelf();
+    super(in);
   }
 }

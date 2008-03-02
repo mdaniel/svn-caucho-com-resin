@@ -63,6 +63,7 @@ public class DestinationHandle implements Destination, java.io.Serializable
     return queue;
   }
 
+  @Override
   public String toString()
   {
     return "DestinationHandle[" + _name + "]";

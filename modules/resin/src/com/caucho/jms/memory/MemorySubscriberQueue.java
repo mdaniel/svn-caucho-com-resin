@@ -28,7 +28,6 @@
 
 package com.caucho.jms.memory;
 
-import java.util.ArrayList;
 import java.util.logging.*;
 
 import javax.jms.*;
@@ -48,7 +47,7 @@ public class MemorySubscriberQueue extends MemoryQueue
   private JmsSession _session;
   private boolean _isNoLocal;
   
-  MemorySubscriberQueue(JmsSession session, boolean noLocal)
+  public MemorySubscriberQueue(JmsSession session, boolean noLocal)
   {
     _session = session;
     _isNoLocal = noLocal;

@@ -29,7 +29,6 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms2.JMSExceptionWrapper;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.util.Alarm;
@@ -938,64 +937,6 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
   }
 
-  /**
-   * Called to synchronously receive a message.
-   */
-  protected Message receive(MessageConsumerImpl consumer,
-			    long timeout)
-    throws JMSException
-  {
-    throw new UnsupportedOperationException();
-    /*
-    checkOpen();
-    
-    if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
-      timeout = Long.MAX_VALUE / 2;
-    
-    long now = Alarm.getCurrentTime();
-    long failTime = Alarm.getCurrentTime() + timeout;
-    
-    Selector selector = consumer.getSelector();
-    AbstractQueue queue;
-    queue = (AbstractQueue) consumer.getDestination();
-
-    // 4.4.1 user's reponsibility
-    // checkThread();
-
-    Thread oldThread = Thread.currentThread();
-    try {
-      // _thread = Thread.currentThread();
-      
-      while (! consumer.isClosed()) {
-	if (isActive()) {
-	  Message msg = queue.receive(selector);
-	  if (msg != null)
-	    return msg;
-	  _hasMessage = false;
-	}
-      
-	long delta = failTime - Alarm.getCurrentTime();
-
-	if (delta <= 0 || _isClosed || Alarm.isTest())
-	  return null;
-
-	synchronized (_consumers) {
-	  if (! _hasMessage || ! isActive()) {
-	    try {
-	      _consumers.wait(delta);
-	    } catch (Throwable e) {
-	    }
-	  }
-	}
-      }
-    } finally {
-      // _thread = oldThread;
-    }
-
-    return null;
-    */
-  }
-
   //
   // XA
   //
@@ -1181,12 +1122,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
   }
 
+  @Override
   public String toString()
   {
-    String className = getClass().getName();
-    int p = className.lastIndexOf('.');
-
-    return className.substring(p + 1) + "[]";
+    return getClass().getSimpleName() + "[]";
   }
 
   abstract class TransactedMessage {
@@ -1196,10 +1135,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     abstract void rollback()
       throws JMSException;
     
-    void close()
-      throws JMSException
-    {
-    }
+    abstract void close()
+      throws JMSException;
   }
 
   class SendMessage extends TransactedMessage {

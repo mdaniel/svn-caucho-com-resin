@@ -133,7 +133,7 @@ public abstract class PortConnection extends Connection
   public abstract InetAddress getRemoteAddress();
 
   /**
-   * Returns the remove port of the connection
+   * Returns the remote of the connection
    */
   public abstract int getRemotePort();
 
@@ -155,6 +155,14 @@ public abstract class PortConnection extends Connection
   public long getAccessTime()
   {
     return _accessTime;
+  }
+
+  /**
+   * Returns the keepalive expire time.
+   */
+  public long getKeepaliveExpireTime()
+  {
+    return _accessTime + getPort().getKeepaliveTimeout();
   }
 
   /**

@@ -116,9 +116,4 @@ public class QueueAdmin extends AbstractManagedObject
   {
     unregisterSelf();
   }
-
-  public String toString()
-  {
-    return "QueueAdmin[" + getObjectName() + "]";
-  }
 }

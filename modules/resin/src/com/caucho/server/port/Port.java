@@ -31,7 +31,8 @@ package com.caucho.server.port;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
+import com.caucho.config.program.*;
+import com.caucho.config.types.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
@@ -48,6 +49,7 @@ import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.SSLFactory;
+import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import java.net.ConnectException;
@@ -89,6 +91,8 @@ public class Port
   private int _port;
 
   // The protocol
+  private Class _protocolClass;
+  private ContainerProgram _init;
   private Protocol _protocol;
 
   // The SSL factory, if any
@@ -283,16 +287,15 @@ public class Port
   {
     Config.validate(cl, Protocol.class);
 
-    _protocol = (Protocol) cl.newInstance();
+    _protocolClass = cl;
   }
 
-  public Object createInit()
-    throws ConfigException
+  public void setInit(ContainerProgram init)
   {
-    if (_protocol == null)
+    if (_protocolClass == null)
       throw new ConfigException(L.l("<init> requires a protocol class"));
-    
-    return _protocol;
+
+    _init = init;
   }
   
   /**
@@ -902,6 +905,21 @@ public class Port
   {
     if (! _lifecycle.toInit())
       return;
+
+    if (_protocol != null) {
+    }
+    else if (_protocolClass != null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      _protocol = (Protocol) webBeans.createTransientObject(_protocolClass);
+      
+      if (_init != null)
+	_init.configure(_protocol);
+
+      Config.init(_protocol);
+    }
+    else
+      throw new ConfigException(L.l("port requires either a protocol or protocol class"));
 
     if (_server instanceof EnvironmentBean)
       Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());

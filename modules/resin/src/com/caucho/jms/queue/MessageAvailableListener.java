@@ -27,41 +27,23 @@
  * @author Scott Ferguson
  */
 
-
 package com.caucho.jms.queue;
 
-import com.caucho.management.server.*;
-
 /**
- * Administration for a JMS topic
+ * Listener for queue message available
  */
-public class TopicAdmin extends AbstractManagedObject
-  implements JmsTopicMXBean
+public interface MessageAvailableListener
 {
-  private final AbstractTopic _topic;
-
-  TopicAdmin(AbstractTopic topic)
-  {
-    _topic = topic;
-  }
-
-  public String getName()
-  {
-    return _topic.getName();
-  }
-
-  public String getUrl()
-  {
-    return _topic.getUrl();
-  }
-
-  void register()
-  {
-    registerSelf();
-  }
-
-  void unregister()
-  {
-    unregisterSelf();
-  }
+  /**
+   * Notifies a listener that a message is available from the queue.
+   *
+   * The message handler MUST use a different thread to retrieve the
+   * message from the queue, i.e. the <code>notifyMessageAvailable</code>
+   * implementation must spawn or wake a thread to handle the actual
+   * message.
+   * 
+   * @return true if the consumer can handle the message, false if it's busy
+   */
+  public boolean notifyMessageAvailable();
 }
+

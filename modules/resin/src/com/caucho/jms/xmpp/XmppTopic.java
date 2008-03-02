@@ -27,31 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.memory;
+package com.caucho.jms.xmpp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
 
+import javax.annotation.*;
 import javax.jms.*;
+import javax.webbeans.*;
 
+import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.connection.*;
+import com.caucho.util.*;
+import com.caucho.webbeans.manager.*;
 
 /**
- * Implements a memory topic.
+ * Implements an xmpp topic.
  */
-public class MemoryTopic extends AbstractTopic
+public class XmppTopic extends AbstractTopic
 {
+  private static final L10N L = new L10N(XmppTopic.class);
+  
   private static final Logger log
-    = Logger.getLogger(MemoryTopic.class.getName());
+    = Logger.getLogger(XmppTopic.class.getName());
 
-  private HashMap<String,MemoryQueue> _durableSubscriptionMap
-    = new HashMap<String,MemoryQueue>();
-    
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
+
+  private XmppPubSubLeaf _xmppNode;
 
   private int _id;
 
@@ -62,11 +68,32 @@ public class MemoryTopic extends AbstractTopic
   /**
    * Returns the configuration URL.
    */
-  @Override
   public String getUrl()
   {
-    return "memory:name=" + getName();
+    return "xmpp:name=" + getName();
   }
+
+  @PostConstruct
+  public void init()
+  {
+    super.init();
+
+    WebBeansContainer container = WebBeansContainer.create();
+
+    ComponentFactory comp = container.resolveByType(XmppProtocol.class);
+
+    if (comp == null)
+      throw new java.lang.IllegalStateException(L.l("Need xmpp protocol"));
+    
+    XmppProtocol xmpp = (XmppProtocol) comp.get();
+
+    if (xmpp == null)
+      throw new java.lang.IllegalStateException(L.l("Need xmpp protocol"));
+
+
+    _xmppNode = xmpp.createNode(getName());
+  }
+  
 
   @Override
   public AbstractQueue createSubscriber(JmsSession session,
@@ -76,15 +103,10 @@ public class MemoryTopic extends AbstractTopic
     MemoryQueue queue;
 
     if (name != null) {
-      queue = _durableSubscriptionMap.get(name);
+      queue = new MemorySubscriberQueue(session, noLocal);
+      queue.setName(getName() + ":sub-" + name);
 
-      if (queue == null) {
-	queue = new MemorySubscriberQueue(session, noLocal);
-	queue.setName(getName() + ":sub-" + name);
-
-	_subscriptionList.add(queue);
-	_durableSubscriptionMap.put(name, queue);
-      }
+      _subscriptionList.add(queue);
     }
     else {
       queue = new MemorySubscriberQueue(session, noLocal);
@@ -96,6 +118,8 @@ public class MemoryTopic extends AbstractTopic
     if (log.isLoggable(Level.FINE))
       log.fine(this + " create-subscriber(" + queue + ")");
 
+    _xmppNode.addQueue(queue);
+
     return queue;
   }
 
@@ -105,8 +129,9 @@ public class MemoryTopic extends AbstractTopic
     if (log.isLoggable(Level.FINE))
       log.fine(this + " close-subscriber(" + queue + ")");
     
-    if (! _durableSubscriptionMap.values().contains(queue))
-      _subscriptionList.remove(queue);
+    _xmppNode.removeQueue(queue);
+    
+    _subscriptionList.remove(queue);
   }
 
   @Override

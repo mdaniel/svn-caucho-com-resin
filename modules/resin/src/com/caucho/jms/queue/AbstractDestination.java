@@ -110,7 +110,7 @@ abstract public class AbstractDestination
   }
 
   /**
-   * Serialization callback to set the handle
+   * Serialization callback from Resin-IoC to set the handle
    */
   public void setSerializationHandle(Object handle)
   {
@@ -133,12 +133,27 @@ abstract public class AbstractDestination
   // runtime methods
   //
   
-  public void addConsumer(MessageConsumerImpl consumer)
+  /**
+   * Adds a new listener to receive message available events.  The listener
+   * will wake or spawn a thread to handle the new message.  It MUST NOT
+   * handle the message on the event thread.
+   * 
+   * Each listener should be associated with a single thread, i.e. multiple
+   * notifyMessageAvailable() calls MUST NOT spawn multiple threads.  This
+   * single-thread restriction is necessary to properly manage round-robin
+   * behavior.
+   * 
+   * @param consumer
+   */
+  public void addMessageAvailableListener(MessageAvailableListener consumer)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-  public void removeConsumer(MessageConsumerImpl consumer)
+  /**
+   * Removes the consumer receiving messages.
+   */
+  public void removeMessageAvailableListener(MessageAvailableListener consumer)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -158,6 +173,9 @@ abstract public class AbstractDestination
     return null;
   }
 
+  /**
+   * Returns true if the queue has at least one message available
+   */
   public boolean hasMessage()
   {
     return false;
@@ -165,6 +183,8 @@ abstract public class AbstractDestination
   
   /**
    * Acknowledge receipt of the message.
+   * 
+   * @param msgId message to acknowledge
    */
   public void acknowledge(String msgId)
   {
@@ -177,6 +197,9 @@ abstract public class AbstractDestination
   {
   }
 
+  /**
+   * Creates a new random message identifier.
+   */
   public final String generateMessageID()
   {
     StringBuilder cb = new StringBuilder();
@@ -227,7 +250,12 @@ abstract public class AbstractDestination
       synchronized (_writeLock) {
 	JmsSession session = getWriteSession();
 
-	Message msg = session.createObjectMessage((Serializable) value);
+	Message msg;
+
+	if (value instanceof Message)
+	  msg = (Message) value;
+	else
+	  msg = session.createObjectMessage((Serializable) value);
 	
 	session.send(this, msg, 0, 0, Integer.MAX_VALUE);
 
@@ -359,6 +387,7 @@ abstract public class AbstractDestination
   {
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getName() + "]";
