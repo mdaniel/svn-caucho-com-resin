@@ -134,7 +134,7 @@ public class XmppClient {
 
       if (! tag.equals("stream")
 	  || ! STREAMS_NS.equals(_in.getNamespaceURI())) {
-	throw new IOException(L.l("<{0}> with ns={1} is an unexpected server response",
+	throw new IOExceptionWrapper(L.l("<{0}> with ns={1} is an unexpected server response",
 				  tag, _in.getNamespaceURI()));
       }
 
@@ -142,7 +142,7 @@ public class XmppClient {
 
       ThreadPool.getThreadPool().start(new Listener());
     } catch (XMLStreamException e) {
-      throw new IOException(e);
+      throw new IOExceptionWrapper(e);
     }
   }
   

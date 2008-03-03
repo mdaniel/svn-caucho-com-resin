@@ -161,7 +161,7 @@ public class XmppRequest implements ServerRequest {
       return false;
     } catch (XMLStreamException e) {
       e.printStackTrace();
-      throw new IOException(e);
+      throw new IOExceptionWrapper(e);
     } catch (IOException e) {
       e.printStackTrace();
       throw e;
