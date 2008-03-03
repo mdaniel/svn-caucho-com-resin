@@ -66,7 +66,6 @@ public class ProtocolPort extends Port
    * Sets protocol class.
    */
   public void setType(Class cl)
-    throws InstantiationException, IllegalAccessException
   {
     setClass(cl);
   }
@@ -75,7 +74,6 @@ public class ProtocolPort extends Port
    * Sets protocol class.
    */
   public void setClass(Class cl)
-    throws InstantiationException, IllegalAccessException
   {
     Config.validate(cl, Protocol.class);
 
