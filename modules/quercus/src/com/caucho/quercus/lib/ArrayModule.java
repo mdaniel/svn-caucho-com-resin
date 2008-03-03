@@ -2476,6 +2476,10 @@ case SORT_NUMERIC:
   public Value array_map(Env env, Callback fun,
                          ArrayValue arg, Value []args)
   {
+    // XXX: drupal
+    if (arg == null)
+      return NullValue.NULL;
+    
     // quercus/1730
     Iterator<Map.Entry<Value, Value>> argIter = arg.entrySet().iterator();
 

@@ -36,7 +36,7 @@ import com.caucho.config.types.Period;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.log.Log;
 import com.caucho.server.http.HttpProtocol;
-import com.caucho.server.port.Port;
+import com.caucho.server.port.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.QServerSocket;
 
@@ -392,7 +392,7 @@ public class ClusterServer {
   public Port createProtocol()
     throws ConfigException
   {
-    Port port = new Port(this);
+    ProtocolPort port = new ProtocolPort(this);
 
     _ports.add(port);
 

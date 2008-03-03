@@ -2421,8 +2421,29 @@ public class Env {
   
   public ArrayValue getDefinedFunctions()
   {
-    // return _defState.getDefinedFunctions();
-    return new ArrayValueImpl();
+    ArrayValueImpl funs = new ArrayValueImpl();
+    ArrayValueImpl system = new ArrayValueImpl();
+    ArrayValueImpl user = new ArrayValueImpl();
+
+    AbstractFunction []systemFuns = _quercus.getFunctionMap();
+    AbstractFunction []envFuns = _fun;
+
+    for (int i = 0; i < envFuns.length; i++) {
+      if (i < systemFuns.length
+	  && systemFuns[i] != null
+	  && ! (systemFuns[i] instanceof UndefinedFunction)) {
+	system.append(createString(systemFuns[i].getName()));
+      }
+      else if (envFuns[i] != null
+	       && ! (envFuns[i] instanceof UndefinedFunction)) {
+	user.append(createString(envFuns[i].getName()));
+      }
+    }
+
+    funs.append(createString("internal"), system);
+    funs.append(createString("user"), user);
+
+    return funs;
   }
 
   /**

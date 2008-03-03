@@ -91,8 +91,6 @@ public class Port
   private int _port;
 
   // The protocol
-  private Class _protocolClass;
-  private ContainerProgram _init;
   private Protocol _protocol;
 
   // The SSL factory, if any
@@ -265,37 +263,18 @@ public class Port
     return _serverId;
   }
 
-  public PortMXBean getAdmin()
-  {
-    return _admin;
-  }
-
-  /**
-   * Sets protocol class.
-   */
   public void setType(Class cl)
-    throws InstantiationException, IllegalAccessException
   {
     setClass(cl);
   }
 
-  /**
-   * Sets protocol class.
-   */
   public void setClass(Class cl)
-    throws InstantiationException, IllegalAccessException
   {
-    Config.validate(cl, Protocol.class);
-
-    _protocolClass = cl;
   }
 
-  public void setInit(ContainerProgram init)
+  public PortMXBean getAdmin()
   {
-    if (_protocolClass == null)
-      throw new ConfigException(L.l("<init> requires a protocol class"));
-
-    _init = init;
+    return _admin;
   }
   
   /**
@@ -905,21 +884,6 @@ public class Port
   {
     if (! _lifecycle.toInit())
       return;
-
-    if (_protocol != null) {
-    }
-    else if (_protocolClass != null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
-      
-      _protocol = (Protocol) webBeans.createTransientObject(_protocolClass);
-      
-      if (_init != null)
-	_init.configure(_protocol);
-
-      Config.init(_protocol);
-    }
-    else
-      throw new ConfigException(L.l("port requires either a protocol or protocol class"));
 
     if (_server instanceof EnvironmentBean)
       Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
