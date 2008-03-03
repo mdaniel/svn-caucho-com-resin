@@ -483,10 +483,10 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fgetc(Env env, @NotNull BinaryInput is)
   {
-    try {
-      if (is == null)
-	return BooleanValue.FALSE;
+    if (is == null)
+      return BooleanValue.FALSE;
 
+    try {
       // XXX: char for i18n and mode = "t"
 
       // php/1612

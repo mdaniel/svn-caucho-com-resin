@@ -57,6 +57,10 @@ public class AbstractBinaryInputOutput
   private ReadStream _is;
   private WriteStream _os;
 
+  // Set to true when EOF is read from the input stream.
+
+  private boolean _isEOF = false;
+
   protected AbstractBinaryInputOutput(Env env)
   {
     _env = env;
@@ -104,13 +108,15 @@ public class AbstractBinaryInputOutput
   }
 
   /**
-   *
+   * Unread the last byte.
    */
   public void unread()
     throws IOException
   {
-    if (_is != null)
+    if (_is != null) {
       _is.unread();
+      _isEOF = false;
+    }
   }
 
   /**
@@ -119,8 +125,16 @@ public class AbstractBinaryInputOutput
   public int read()
     throws IOException
   {
-    if (_is != null)
-      return _is.read();
+    if (_is != null) {
+      int c = _is.read();
+
+      if (c == -1)
+        _isEOF = true;
+      else
+        _isEOF = false;
+
+      return c;
+    }
     else
       return -1;
   }
@@ -132,7 +146,14 @@ public class AbstractBinaryInputOutput
     throws IOException
   {
     if (_is != null) {
-      return _is.read(buffer, offset, length);
+      int c = _is.read(buffer, offset, length);
+
+      if (c == -1)
+        _isEOF = true;
+      else
+        _isEOF = false;
+
+      return c;
     }
     else
       return -1;
@@ -145,7 +166,14 @@ public class AbstractBinaryInputOutput
     throws IOException
   {
     if (_is != null) {
-      return _is.read(buffer, offset, length);
+      int c = _is.read(buffer, offset, length);
+
+      if (c == -1)
+        _isEOF = true;
+      else
+        _isEOF = false;
+
+      return c;
     }
     else
       return -1;
@@ -176,8 +204,8 @@ public class AbstractBinaryInputOutput
   {
     if (_is == null)
       return false;
-    
-    int ch = _is.read();
+
+    int ch = read();
 
     if (ch == '\n') {
       return true;
@@ -225,14 +253,7 @@ public class AbstractBinaryInputOutput
     if (_is == null)
       return true;
     else {
-      try {
-        // XXX: not quite right for sockets
-        return  _is.available() <= 0;
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-
-        return true;
-      }
+      return _isEOF;
     }
   }
 
@@ -248,12 +269,14 @@ public class AbstractBinaryInputOutput
   }
 
   /**
-   * Returns the current location in the file.
+   * Sets the current location in the file.
    */
   public boolean setPosition(long offset)
   {
     if (_is == null)
       return false;
+
+    _isEOF = false;
 
     try {
       return _is.setPosition(offset);
@@ -293,6 +316,8 @@ public class AbstractBinaryInputOutput
 
   /**
    * Closes the stream for reading.
+   * The isEOF method will return true
+   * after this method has been invoked.
    */
   public void closeRead()
   {
