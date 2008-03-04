@@ -228,7 +228,9 @@ public class ApplicationConfig
   public void setPropertyResolver(Class propertyResolver)
     throws ConfigException
   {
-    Config.validate(propertyResolver, PropertyResolver.class);
+    Config.validate(propertyResolver,
+		    PropertyResolver.class,
+		    PropertyResolver.class);
     
     _propertyResolver = propertyResolver;
   }
@@ -381,6 +383,46 @@ public class ApplicationConfig
       if (manager != null) {
         app.setStateManager(manager);
 	log.fine(L.l("JSF[] using '{0}' as state-manager", manager));
+      }
+    }
+
+    if (_propertyResolver != null) {
+      PropertyResolver propertyResolver = null;
+
+      try {
+	Constructor ctor =
+	  _propertyResolver.getConstructor(PropertyResolver.class);
+
+	PropertyResolver oldPropertyResolver = app.getPropertyResolver();
+
+	propertyResolver =
+	  (PropertyResolver) ctor.newInstance(oldPropertyResolver);
+      }
+      catch (NoSuchMethodException e) {
+      }
+      catch (RuntimeException e) {
+	throw e;
+      }
+      catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+
+      if (propertyResolver == null) {
+	try {
+	  propertyResolver = (PropertyResolver) _propertyResolver.newInstance();
+	}
+	catch (RuntimeException e) {
+	  throw e;
+	}
+	catch (Exception e) {
+	  throw ConfigException.create(e);
+	}
+      }
+
+      if (propertyResolver != null) {
+	app.setPropertyResolver(propertyResolver);
+	log.fine(L.l("JSF[] using '{0}' as property-resolver",
+		     propertyResolver));
       }
     }
 
