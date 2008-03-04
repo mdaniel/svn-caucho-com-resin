@@ -12,6 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>added scheduled-task to improve cron scheduling (#2311, #2475, rep by netsql3)</li>
 <li>xa: Synchronization exception in beforeCompletion() could prevent rollback (#2454, rep by ddalessa)</li>
 <li>ioc: interceptors not properly handling thrown exceptions (#2483, rep by wesley)</li>
 <li>amber: @PersistenceContext fixes with third-party JPA providers (#2435, #2482, rep by Matt Johnson)</li>
