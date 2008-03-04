@@ -31,14 +31,18 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.BreakValue;
+import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents a break expression statement in a PHP program.
  */
 public class BreakStatement extends Statement {
-  public static final BreakStatement BREAK = new BreakStatement();
+  protected Expr _target;
+  
+  //public static final BreakStatement BREAK = new BreakStatement();
   /**
    * Creates the break statement.
    */
@@ -46,13 +50,24 @@ public class BreakStatement extends Statement {
   {
     super(Location.UNKNOWN);
   }
+  
+  public BreakStatement(Location location, Expr target)
+  {
+    super(location);
+    
+    _target = target;
+  }
 
   /**
    * Executes the statement, returning the expression value.
    */
   public Value execute(Env env)
   {
+    if (_target == null)
     return BreakValue.BREAK;
+  else
+    return new BreakValue(_target.eval(env).toInt());
+
   }
 }
 

@@ -1090,17 +1090,17 @@ public class ExprFactory {
   /**
    * Creates a break statement
    */
-  public BreakStatement createBreak()
+  public BreakStatement createBreak(Location location, Expr target)
   {
-    return BreakStatement.BREAK;
+    return new BreakStatement(location, target);
   }
 
   /**
    * Creates a continue statement
    */
-  public ContinueStatement createContinue()
+  public ContinueStatement createContinue(Location location, Expr target)
   {
-    return ContinueStatement.CONTINUE;
+    return new ContinueStatement(location, target);
   }
 
   /**

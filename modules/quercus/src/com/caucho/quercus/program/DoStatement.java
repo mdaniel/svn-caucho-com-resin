@@ -45,11 +45,12 @@ public class DoStatement extends Statement {
 
   public DoStatement(Location location, Expr test, Statement block)
   {
-
     super(location);
 
     _test = test;
     _block = block;
+    
+    block.setParent(this);
   }
 
   public Value execute(Env env)
@@ -62,9 +63,24 @@ public class DoStatement extends Statement {
 
         if (value == null) {
         }
-        else if (value == BreakValue.BREAK)
-          return null;
-        else if (value == ContinueValue.CONTINUE) {
+        else if (value instanceof ContinueValue) {
+          ContinueValue conValue = (ContinueValue) value;
+          
+          int target = conValue.getTarget();
+          
+          if (target > 1) {
+            return new ContinueValue(target - 1);
+          }
+        }
+        else if (value instanceof BreakValue) {
+          BreakValue breakValue = (BreakValue) value;
+          
+          int target = breakValue.getTarget();
+          
+          if (target > 1)
+            return new BreakValue(target - 1);
+          else
+            break;
         }
         else
           return value;

@@ -35,8 +35,25 @@ package com.caucho.quercus.env;
 public class ContinueValue extends Value {
   public static final ContinueValue CONTINUE = new ContinueValue();
 
+  private int _target;
+  
   private ContinueValue()
   {
+  }
+  
+  public ContinueValue(Value target)
+  {
+    _target = target.toInt();
+  }
+  
+  public ContinueValue(int target)
+  {
+    _target = target;
+  }
+  
+  public int getTarget()
+  {
+    return _target;
   }
 
   /**

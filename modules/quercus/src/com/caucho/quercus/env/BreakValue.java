@@ -40,8 +40,25 @@ import java.util.IdentityHashMap;
 public class BreakValue extends Value {
   public static final BreakValue BREAK = new BreakValue();
 
+  private int _target;
+  
   private BreakValue()
   {
+  }
+  
+  public BreakValue(Value target)
+  {
+    _target = target.toInt();
+  }
+  
+  public BreakValue(int target)
+  {
+    _target = target;
+  }
+  
+  public int getTarget()
+  {
+    return _target;
   }
 
   /**

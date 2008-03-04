@@ -33,12 +33,16 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents a continue expression statement in a PHP program.
  */
 public class ContinueStatement extends Statement {
-  public static final ContinueStatement CONTINUE = new ContinueStatement();
+  //public static final ContinueStatement CONTINUE = new ContinueStatement();
+  
+  protected Expr _target;
+  
   /**
    * Creates the continue statement.
    */
@@ -46,13 +50,22 @@ public class ContinueStatement extends Statement {
   {
     super(Location.UNKNOWN);
   }
+  
+  public ContinueStatement(Location location, Expr target)
+  {
+    super(location);
+    _target = target;
+  }
 
   /**
    * Executes the statement, returning the expression value.
    */
   public Value execute(Env env)
   {
-    return ContinueValue.CONTINUE;
+    if (_target == null)
+      return ContinueValue.CONTINUE;
+    else
+      return new ContinueValue(_target.eval(env).toInt());
   }
 }
 

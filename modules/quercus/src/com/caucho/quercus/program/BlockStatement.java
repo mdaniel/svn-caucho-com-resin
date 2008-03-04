@@ -73,6 +73,14 @@ public class BlockStatement extends Statement {
   {
     return _statements;
   }
+  
+  @Override
+  public void setParent(Statement parent)
+  {
+    for (int i = 0; i < _statements.length; i++) {
+      _statements[i].setParent(parent);
+    }
+  }
 
   /**
    * Returns true if the statement can fallthrough.

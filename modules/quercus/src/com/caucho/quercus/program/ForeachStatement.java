@@ -71,6 +71,8 @@ public class ForeachStatement
     _isRef = isRef;
 
     _block = block;
+    
+    block.setParent(this);
   }
 
   public Value execute(Env env)
@@ -90,10 +92,27 @@ public class ForeachStatement
 
         Value result = _block.execute(env);
 
-        if (result == null || result instanceof ContinueValue) {
+        if (result == null) {
         }
-        else if (result instanceof BreakValue)
-          return null;
+        else if (result instanceof ContinueValue) {
+          ContinueValue conValue = (ContinueValue) result;
+          
+          int target = conValue.getTarget();
+          
+          if (target > 1) {
+            return new ContinueValue(target - 1);
+          }
+        }
+        else if (result instanceof BreakValue) {
+          BreakValue breakValue = (BreakValue) result;
+          
+          int target = breakValue.getTarget();
+          
+          if (target > 1)
+            return new BreakValue(target - 1);
+          else
+            break;
+        }
         else
           return result;
       }
@@ -114,9 +133,27 @@ public class ForeachStatement
 
         Value result = _block.execute(env);
 
-        if (result == null || result instanceof ContinueValue) {
-        } else if (result instanceof BreakValue)
-          return null;
+        if (result == null) {
+        }
+        else if (result instanceof ContinueValue) {
+          ContinueValue conValue = (ContinueValue) result;
+          
+          int target = conValue.getTarget();
+          
+          if (target > 1) {
+            return new ContinueValue(target - 1);
+          }
+        }
+        else if (result instanceof BreakValue) {
+          BreakValue breakValue = (BreakValue) result;
+          
+          int target = breakValue.getTarget();
+          
+          if (target > 1)
+            return new BreakValue(target - 1);
+          else
+            break;
+        }
         else
           return result;
       }
@@ -137,10 +174,27 @@ public class ForeachStatement
 
         Value result = _block.execute(env);
 
-        if (result == null || result instanceof ContinueValue) {
+        if (result == null) {
         }
-	else if (result instanceof BreakValue)
-          return null;
+        else if (result instanceof ContinueValue) {
+          ContinueValue conValue = (ContinueValue) result;
+          
+          int target = conValue.getTarget();
+          
+          if (target > 1) {
+            return new ContinueValue(target - 1);
+          }
+        }
+        else if (result instanceof BreakValue) {
+          BreakValue breakValue = (BreakValue) result;
+          
+          int target = breakValue.getTarget();
+          
+          if (target > 1)
+            return new BreakValue(target - 1);
+          else
+            break;
+        }
         else
           return result;
       }

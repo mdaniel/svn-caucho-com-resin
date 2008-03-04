@@ -49,6 +49,8 @@ public class WhileStatement extends Statement {
 
     _test = test;
     _block = block;
+    
+    block.setParent(this);
   }
 
   public Value execute(Env env)
@@ -58,12 +60,27 @@ public class WhileStatement extends Statement {
         env.checkTimeout();
 
         Value value = _block.execute(env);
-
+        
         if (value == null) {
         }
-        else if (value == BreakValue.BREAK)
-          return null;
-        else if (value == ContinueValue.CONTINUE) {
+        else if (value instanceof BreakValue) {
+          BreakValue breakValue = (BreakValue) value;
+          
+          int target = breakValue.getTarget();
+          
+          if (target > 1)
+            return new BreakValue(target - 1);
+          else
+            break;
+        }
+        else if (value instanceof ContinueValue) {
+          ContinueValue conValue = (ContinueValue) value;
+          
+          int target = conValue.getTarget();
+          
+          if (target > 1) {
+            return new ContinueValue(target - 1);
+          }
         }
         else
           return value;

@@ -49,6 +49,9 @@ abstract public class Statement {
   public static final int RETURN = 0x2;
 
   private final Location _location;
+  
+  private Statement _parent;
+  private String _loopLabel;
 
   protected Statement()
   {
@@ -63,6 +66,16 @@ abstract public class Statement {
   public Location getLocation()
   {
     return _location;
+  }
+  
+  public Statement getParent()
+  {
+    return _parent;
+  }
+  
+  public void setParent(Statement parent)
+  {
+    _parent = parent;
   }
 
   abstract public Value execute(Env env);

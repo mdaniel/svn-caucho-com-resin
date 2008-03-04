@@ -31,6 +31,7 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.BreakValue;
+import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
@@ -65,6 +66,13 @@ public class SwitchStatement extends Statement {
     blockList.toArray(_blocks);
 
     _defaultBlock = defaultBlock;
+    
+    for (int i = 0; i < _blocks.length; i++) {
+      _blocks[i].setParent(this);
+    }
+    
+    if (_defaultBlock != null)
+      _defaultBlock.setParent(this);
   }
 
   /**
@@ -86,8 +94,19 @@ public class SwitchStatement extends Statement {
           if (testValue.eq(caseValue)) {
             Value retValue = _blocks[i].execute(env);
 
-            if (retValue instanceof BreakValue)
+            if (retValue instanceof BreakValue) {
               return null;
+            }
+            else if (retValue instanceof ContinueValue) {
+              ContinueValue conValue = (ContinueValue) retValue;
+              
+              int target = conValue.getTarget();
+              
+              if (target > 1)
+                return new ContinueValue(target - 1);
+              else
+                return null;
+            }
             else
               return retValue;
           }

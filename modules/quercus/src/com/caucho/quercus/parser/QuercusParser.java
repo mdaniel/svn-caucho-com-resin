@@ -623,11 +623,11 @@ public class QuercusParser {
 	break;
 
       case BREAK:
-	statements.add(_factory.createBreak());
+	statements.add(parseBreak());
 	break;
 
       case CONTINUE:
-	statements.add(_factory.createContinue());
+	statements.add(parseContinue());
 	break;
 
       case GLOBAL:
@@ -809,10 +809,10 @@ public class QuercusParser {
       return parseStatic();
 
     case BREAK:
-      return _factory.createBreak();
+      return parseBreak();
 
     case CONTINUE:
-      return _factory.createContinue();
+      return parseContinue();
 
     case RETURN:
       return parseReturn();
@@ -1669,7 +1669,57 @@ public class QuercusParser {
 
     return args;
   }
+  
+  /**
+   * Parses the 'return' statement
+   */
+  private Statement parseBreak()
+    throws IOException
+  {
+    Location location = getLocation();
 
+    int token = parseToken();
+
+    switch (token) {
+    case ';':
+      _peekToken = token;
+
+      return _factory.createBreak(location, null);
+      
+    default:
+      _peekToken = token;
+
+      Expr expr = parseTopExpr();
+
+      return _factory.createBreak(location, expr);
+    }
+  }
+
+  /**
+   * Parses the 'return' statement
+   */
+  private Statement parseContinue()
+    throws IOException
+  {
+    Location location = getLocation();
+
+    int token = parseToken();
+
+    switch (token) {
+    case ';':
+      _peekToken = token;
+
+      return _factory.createContinue(location, null);
+      
+    default:
+      _peekToken = token;
+
+      Expr expr = parseTopExpr();
+
+      return _factory.createContinue(location, expr);
+    }
+  }
+  
   /**
    * Parses the 'return' statement
    */

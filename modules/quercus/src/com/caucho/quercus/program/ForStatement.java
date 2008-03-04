@@ -54,6 +54,8 @@ public class ForStatement extends Statement {
     _incr = incr;
 
     _block = block;
+    
+    block.setParent(this);
   }
 
   public Value execute(Env env)
@@ -67,10 +69,27 @@ public class ForStatement extends Statement {
 
         Value value = _block.execute(env);
 
-        if (value == null || value instanceof ContinueValue) {
+        if (value == null) {
         }
-        else if (value instanceof BreakValue)
-          return null;
+        else if (value instanceof ContinueValue) {
+          ContinueValue conValue = (ContinueValue) value;
+          
+          int target = conValue.getTarget();
+          
+          if (target > 1) {
+            return new ContinueValue(target - 1);
+          }
+        }
+        else if (value instanceof BreakValue) {
+          BreakValue breakValue = (BreakValue) value;
+          
+          int target = breakValue.getTarget();
+          
+          if (target > 1)
+            return new BreakValue(target - 1);
+          else
+            break;
+        }
         else
           return value;
 
