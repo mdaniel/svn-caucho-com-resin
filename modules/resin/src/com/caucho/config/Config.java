@@ -487,7 +487,7 @@ public class Config {
       throw new ConfigException(L.l(
 	"`{0}' must be a concrete class.  Interfaces cannot be instantiated.",
 	beanClass.getName()));
-    else if (!Modifier.isPublic(beanClass.getModifiers()))
+    else if (! Modifier.isPublic(beanClass.getModifiers()))
       throw new ConfigException(L.l(
 	"Custom bean class `{0}' is not public.  Bean classes must be public, concrete, and have a zero-argument constructor.",
 	beanClass.getName()));
@@ -533,9 +533,9 @@ public class Config {
 
 
     if (singleArgConstructor != null) {
-      if (!Modifier.isPublic(singleArgConstructor.getModifiers()) &&
+      if (! Modifier.isPublic(singleArgConstructor.getModifiers()) &&
 	  (zeroArgsConstructor == null ||
-	   !Modifier.isPublic(zeroArgsConstructor.getModifiers()))) {
+	   ! Modifier.isPublic(zeroArgsConstructor.getModifiers()))) {
 	throw new ConfigException(L.l(
 	  "The constructor for bean `{0}' accepting parameter of type `{1}' is not public.  Constructor accepting parameter of type `{1}' must be public.",
 	  beanClass.getName(),
@@ -543,7 +543,7 @@ public class Config {
       }
     }
     else if (zeroArgsConstructor != null) {
-      if (!Modifier.isPublic(zeroArgsConstructor.getModifiers()))
+      if (! Modifier.isPublic(zeroArgsConstructor.getModifiers()))
 	throw new ConfigException(L.l(
 	  "The zero-argument constructor for `{0}' isn't public.  Bean classes must have a public zero-argument constructor.",
 	  beanClass.getName()));
