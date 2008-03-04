@@ -16,6 +16,7 @@
 <li>xa: Synchronization exception in beforeCompletion() could prevent rollback (#2454, rep by ddalessa)</li>
 <li>ioc: interceptors not properly handling thrown exceptions (#2483, rep by wesley)</li>
 <li>amber: @PersistenceContext fixes with third-party JPA providers (#2435, #2482, rep by Matt Johnson)</li>
+<li>jsf: Bean classes must have a zero-argument with com.sun.rave.faces.data.ResultSetPropertyResolver (#2364)</li>
 </ul>
 </s2>
 
