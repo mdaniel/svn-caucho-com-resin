@@ -207,6 +207,13 @@ public class FacesContextELResolver extends CompositeELResolver {
   @Override
   public Class getType(ELContext env, Object base, Object property)
   {
+    for (int i = 0; i < _customResolvers.length; i++) {
+      Class type = _customResolvers[i].getType(env, base, property);
+
+      if (env.isPropertyResolved())
+	return type;
+    }
+    
     if (base != null) {
       if (base instanceof Map)
         return _mapResolver.getType(env, base, property);
@@ -329,6 +336,13 @@ public class FacesContextELResolver extends CompositeELResolver {
   {
     env.setPropertyResolved(false);
 
+    for (int i = 0; i < _customResolvers.length; i++) {
+      boolean readOnly = _customResolvers[i].isReadOnly(env, base, property);
+
+      if (env.isPropertyResolved())
+	return readOnly;
+    }
+
     if (base != null) {
       if (base instanceof Map) {
 	env.setPropertyResolved(true);
@@ -388,7 +402,14 @@ public class FacesContextELResolver extends CompositeELResolver {
 		       Object value)
   {
     env.setPropertyResolved(false);
-    
+
+    for (int i = 0; i < _customResolvers.length; i++) {
+      _customResolvers[i].setValue(env, base, property, value);
+
+      if (env.isPropertyResolved())
+	return;
+    }
+
     if (base != null) {
       if (base instanceof Map)
 	_mapResolver.setValue(env, base, property, value);

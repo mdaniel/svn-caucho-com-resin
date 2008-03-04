@@ -56,6 +56,7 @@ import javax.faces.el.PropertyResolver;
 import javax.faces.el.ReferenceSyntaxException;
 import javax.faces.el.ValueBinding;
 import javax.faces.el.VariableResolver;
+import javax.faces.el.EvaluationException;
 import javax.faces.event.ActionListener;
 import javax.faces.validator.DoubleRangeValidator;
 import javax.faces.validator.LengthValidator;
@@ -64,12 +65,8 @@ import javax.faces.validator.Validator;
 import javax.servlet.jsp.JspApplicationContext;
 import javax.servlet.jsp.JspFactory;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.beans.FeatureDescriptor;
 
 public class ApplicationImpl
   extends Application
@@ -429,6 +426,8 @@ public class ApplicationImpl
   public void setPropertyResolver(PropertyResolver resolver)
   {
     _propertyResolver = resolver;
+
+    addELResolver(new ELResolverAdapter(resolver));
   }
 
   @Deprecated
@@ -1090,4 +1089,151 @@ public class ApplicationImpl
       return _elResolver.getValue(context.getELContext(), null, value);
     }
   }
+
+  static class ELResolverAdapter
+    extends ELResolver
+  {
+    PropertyResolver _delegate;
+
+    ELResolverAdapter(PropertyResolver delegate)
+    {
+      _delegate = delegate;
+    }
+
+    public Class<?> getCommonPropertyType(ELContext context, Object base)
+    {
+      if (base == null)
+	return null;
+
+      return Object.class;
+    }
+
+    public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
+							     Object base)
+    {
+      return null;
+    }
+
+    public Class<?> getType(ELContext context, Object base, Object property)
+    {
+      if (base == null || property == null)
+	return null;
+
+      try {
+	if (base.getClass().isArray() || base instanceof List)
+	  return _delegate.getType(base, ((Long) property).intValue());
+	else
+	  return _delegate.getType(base, property);
+      }
+      catch (PropertyNotFoundException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (EvaluationException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (RuntimeException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+    }
+
+    public Object getValue(ELContext context, Object base, Object property)
+      throws PropertyNotFoundException, ELException
+    {
+      if (base == null || property == null)
+	return null;
+
+      context.setPropertyResolved(true);
+
+      try {
+	if (base.getClass().isArray() || base instanceof List)
+	  return _delegate.getValue(base, ((Long) property).intValue());
+	else
+	  return _delegate.getValue(base, property);
+      }
+      catch (PropertyNotFoundException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (EvaluationException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (RuntimeException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+    }
+
+    public boolean isReadOnly(ELContext context, Object base, Object property)
+      throws PropertyNotFoundException, ELException
+    {
+      if (base == null || property == null)
+	return true;
+      
+      try {
+	if (base.getClass().isArray() || base instanceof List)
+	  return _delegate.isReadOnly(base, ((Long) property).intValue());
+	else
+	  return _delegate.isReadOnly(base, property);
+      }
+      catch (PropertyNotFoundException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (EvaluationException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (RuntimeException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+    }
+
+    public void setValue(ELContext context,
+			 Object base,
+			 Object property,
+			 Object value)
+      throws
+      PropertyNotFoundException, PropertyNotWritableException, ELException
+    {
+      if (base == null || property == null)
+	return;
+
+      try {
+	if (base.getClass().isArray() || base instanceof List)
+	  _delegate.setValue(base, ((Long) property).intValue(), value);
+	else
+	  _delegate.setValue(base, property, value);
+      }
+      catch (PropertyNotFoundException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (EvaluationException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+      catch (RuntimeException e) {
+	context.setPropertyResolved(false);
+
+	throw e;
+      }
+    }
+  }
+  
 }
