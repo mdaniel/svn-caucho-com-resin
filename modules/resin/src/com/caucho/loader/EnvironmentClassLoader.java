@@ -94,6 +94,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
   // The state of the environment
   private volatile Lifecycle _lifecycle = new Lifecycle();
+  private boolean _isConfigComplete;
 
   private Throwable _configException;
 
@@ -263,7 +264,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       listener.environmentConfig(this);
     }
 
-    if (_lifecycle.isActive()) {
+    if (_lifecycle.isStarting() && _isConfigComplete) {
       listener.environmentStart(this);
     }
   }
@@ -329,7 +330,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       listeners.add(listener);
     }
 
-    if (_lifecycle.isActive()) {
+    if (_lifecycle.isStarting() && _isConfigComplete) {
       listener.environmentStart(this);
     }
   }
@@ -548,6 +549,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       listener.environmentConfig(this);
     }
+    
+    _isConfigComplete = true;
   }
 
   /**

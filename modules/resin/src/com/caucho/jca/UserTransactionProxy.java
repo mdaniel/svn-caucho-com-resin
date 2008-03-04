@@ -79,6 +79,15 @@ public class UserTransactionProxy
   }
 
   /**
+   * Returns the local UT proxy.
+   */
+  public static UserTransactionProxy getCurrent()
+  {
+    //return _localUT.get();
+    return _proxy;
+  }
+
+  /**
    * Gets the thread transaction.
    */
   public UserTransactionImpl getUserTransaction()
@@ -90,7 +99,17 @@ public class UserTransactionProxy
       _threadTransaction.set(xa);
     }
 
+    xa.setInContext(true);
+
     return xa;
+  }
+
+  /**
+   * Gets the current thread transaction.
+   */
+  public UserTransactionImpl getCurrentUserTransactionImpl()
+  {
+    return _threadTransaction.get();
   }
   
   /**

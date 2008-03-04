@@ -27,33 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
+package com.caucho.config.type;
 
-import javax.persistence.*;
-import java.util.*;
-
-import com.caucho.webbeans.component.*;
+import javax.el.*;
+import com.caucho.config.*;
+import com.caucho.el.*;
 
 /**
- * The Entity manager webbeans component
+ * Represents a MethodExpression type.
  */
-public class EntityManagerComponent extends FactoryComponent {
-  private EntityManagerFactory _emf;
-  private Map _props;
-
-  public EntityManagerComponent(EntityManagerFactory emf,
-				String name,
-				Map props)
+public final class MethodExpressionType extends ConfigType
+{
+  public static final MethodExpressionType TYPE = new MethodExpressionType();
+  
+  /**
+   * The MethodExpressionType is a singleton
+   */
+  private MethodExpressionType()
   {
-    super(EntityManager.class, name);
-    
-    _emf = emf;
-    _props = props;
+  }
+  
+  /**
+   * Returns the Java type.
+   */
+  public Class getType()
+  {
+    return MethodExpression.class;
   }
 
+  /**
+   * Return false to disable EL
+   */
   @Override
-  public Object create()
+  public boolean isEL()
   {
-    return new EntityManagerTransactionProxy(_emf, _props);
+    return false;
+  }
+  
+  /**
+   * Converts the string to a value of the type.
+   */
+  public Object valueOf(String text)
+  {
+    ELContext elContext = ConfigContext.getCurrent().getELContext();
+    
+    ELParser parser = new ELParser(elContext, text);
+
+    Expr expr = parser.parse();
+
+    return new MethodExpressionImpl(expr, text,
+				    Object.class, new Class[0]);
   }
 }

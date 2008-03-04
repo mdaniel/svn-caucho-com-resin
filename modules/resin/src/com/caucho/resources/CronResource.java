@@ -30,137 +30,22 @@
 package com.caucho.resources;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.Trigger;
 import com.caucho.config.types.CronType;
-import com.caucho.jca.AbstractResourceAdapter;
-import com.caucho.log.Log;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
+import com.caucho.loader.*;
+import com.caucho.util.*;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.work.Work;
-import javax.resource.spi.work.WorkManager;
+import javax.webbeans.*;
+import java.util.*;
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * The cron resources starts application Work tasks at cron-specified
  * intervals.
  */
-public class CronResource extends AbstractResourceAdapter
-  implements AlarmListener
+public class CronResource extends ScheduledTask
 {
-  private static final L10N L = new L10N(CronResource.class);
-  private static final Logger log = Log.open(CronResource.class);
-
-  @Resource
-  private Executor _threadPool;
-
-  private ClassLoader _loader;
-  
-  private CronType _cron;
-  
-  private Runnable _work;
-  
-  private WorkManager _workManager;
-  private Alarm _alarm;
-
-  private volatile boolean _isActive;
-
-  /**
-   * Constructor.
-   */
-  public CronResource()
-  {
-    _loader = Thread.currentThread().getContextClassLoader();
-  }
-
-  /**
-   * Sets the cron interval.
-   */
-  public void setCron(CronType cron)
-  {
-    _cron = cron;
-  }
-
-  /**
-   * Sets the work task.
-   */
-  public void setWork(Runnable work)
-  {
-    _work = work;
-  }
-
-  /**
-   * Initialization.
-   */
-  @PostConstruct
-  public void init()
-    throws ConfigException
-  {
-    if (_cron == null)
-      throw new ConfigException(L.l("CronResource needs a <cron> interval."));
-    
-    if (_work == null)
-      throw new ConfigException(L.l("CronResource needs a <work> task."));
-  }
-
-  /**
-   * Starting.
-   */
-  public void start(BootstrapContext ctx)
-  {
-    _workManager = ctx.getWorkManager();
-
-    long now = Alarm.getCurrentTime();
-    
-    long nextTime = _cron.nextTime(now);
-
-    _isActive = true;
-
-    _alarm = new Alarm("cron-resource", this, nextTime - now);
-  }
-
-  /**
-   * The runnable.
-   */
-  public void handleAlarm(Alarm alarm)
-  {
-    if (! _isActive)
-      return;
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
-      thread.setContextClassLoader(_loader);
-      
-      log.fine("cron work scheduled: " + _work);
-
-      if (_work instanceof Work)
-	_workManager.scheduleWork((Work) _work);
-      else
-	_threadPool.execute(_work);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-
-    long now = Alarm.getCurrentTime();
-    long nextTime = _cron.nextTime(now);
-
-    _alarm.queue(nextTime - now);
-  }
-
-  /**
-   * Stopping.
-   */
-  public void stop()
-  {
-    _isActive = false;
-    _alarm.dequeue();
-  }
 }

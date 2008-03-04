@@ -57,6 +57,7 @@ public class StubServletRequest extends AbstractHttpRequest {
     }
   }
   
+  @Override
   public Object getAttribute(String name)
   {
     if (_attributes != null)

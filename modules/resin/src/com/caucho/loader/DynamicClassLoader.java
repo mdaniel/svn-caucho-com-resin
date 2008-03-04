@@ -885,10 +885,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     ArrayList<Loader> loaders = getLoaders();
-    for (int i = 0; i < loaders.size(); i++) {
-      Loader loader = loaders.get(i);
+    if (loaders != null) {
+      for (int i = 0; i < loaders.size(); i++) {
+	Loader loader = loaders.get(i);
 
-      loader.buildClassPath(head);
+	loader.buildClassPath(head);
+      }
     }
   }
 

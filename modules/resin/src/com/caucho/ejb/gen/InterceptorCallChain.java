@@ -361,16 +361,38 @@ public class InterceptorCallChain extends AbstractCallChain {
     out.println("} catch (RuntimeException e) {");
     out.println("  throw e;");
 
-    for (Class cl : _implMethod.getExceptionTypes()) {
-      if (! RuntimeException.class.isAssignableFrom(cl)) {
-	out.println("} catch (" + cl.getName() + " e) {");
-	out.println("  throw e;");
-      }
+    boolean isException = false;
+    Class []exnList = _implMethod.getExceptionTypes();
+    for (Class cl : exnList) {
+      if (RuntimeException.class.isAssignableFrom(cl))
+	continue;
+
+      if (! isMostGeneralException(exnList, cl))
+	continue;
+      
+      if (cl.isAssignableFrom(Exception.class))
+	isException = true;
+      
+      out.println("} catch (" + cl.getName() + " e) {");
+      out.println("  throw e;");
+    }
+
+    if (! isException) {
+      out.println("} catch (Exception e) {");
+      out.println("  throw new RuntimeException(e);");
     }
     
-    out.println("} catch (Exception e) {");
-    out.println("  throw new RuntimeException(e);");
     out.println("}");
+  }
+
+  private boolean isMostGeneralException(Class []exnList, Class cl)
+  {
+    for (Class exn : exnList) {
+      if (exn != cl && exn.isAssignableFrom(cl))
+	return false;
+    }
+
+    return true;
   }
 
   protected Method findInterceptorMethod(Class cl)

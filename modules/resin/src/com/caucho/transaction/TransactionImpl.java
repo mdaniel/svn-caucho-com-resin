@@ -561,16 +561,6 @@ public class TransactionImpl implements Transaction, AlarmListener {
     Exception heuristicExn = null;
 
     try {
-      callBeforeCompletion();
-    } catch (RollbackException e) {
-      callAfterCompletion();
-      
-      throw e;
-    } catch (Throwable e) {
-      setRollbackOnly(e);
-    }
-
-    try {
       if (_status != Status.STATUS_ACTIVE) {
         switch (_status) {
         case Status.STATUS_MARKED_ROLLBACK:
@@ -591,6 +581,20 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
       if (log.isLoggable(Level.FINE))
         log.fine(this + " committing");
+
+      try {
+	callBeforeCompletion();
+      } catch (RollbackException e) {
+	rollbackInt();
+      
+	throw e;
+      } catch (Throwable e) {
+	setRollbackOnly(e);
+
+	rollbackInt();
+      
+	throw new RollbackException(e);
+      }
 
       if (_resourceCount > 0) {
         _status = Status.STATUS_PREPARING;

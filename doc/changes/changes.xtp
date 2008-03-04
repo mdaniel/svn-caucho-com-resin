@@ -10,7 +10,15 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.5">
+<s2 title="3.1.6 snapshot">
+<ul>
+<li>xa: Synchronization exception in beforeCompletion() could prevent rollback (#2454, rep by ddalessa)</li>
+<li>ioc: interceptors not properly handling thrown exceptions (#2483, rep by wesley)</li>
+<li>amber: @PersistenceContext fixes with third-party JPA providers (#2435, #2482, rep by Matt Johnson)</li>
+</ul>
+</s2>
+
+<s2 title="3.1.5 - 2008-02-27">
 <ul>
 <li>(2008-02-26) config: whitespace-only element config with resin:import (rep by Jan Kriesten)</li>
 <li>win32: rewrite-real-path replacement issues with windows backslashes (#2444, rep by stbu)</li>

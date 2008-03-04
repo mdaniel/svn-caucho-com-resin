@@ -294,7 +294,6 @@ public class WbComponentConfig {
       cfg.init();
       return;
     }
-    
 
     introspect();
     

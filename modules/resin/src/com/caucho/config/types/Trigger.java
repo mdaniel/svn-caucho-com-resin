@@ -27,33 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
-
-import javax.persistence.*;
-import java.util.*;
-
-import com.caucho.webbeans.component.*;
+package com.caucho.config.types;
 
 /**
- * The Entity manager webbeans component
+ * Trigger for schedules and cron jobs
  */
-public class EntityManagerComponent extends FactoryComponent {
-  private EntityManagerFactory _emf;
-  private Map _props;
-
-  public EntityManagerComponent(EntityManagerFactory emf,
-				String name,
-				Map props)
-  {
-    super(EntityManager.class, name);
-    
-    _emf = emf;
-    _props = props;
-  }
-
-  @Override
-  public Object create()
-  {
-    return new EntityManagerTransactionProxy(_emf, _props);
-  }
+public interface Trigger {
+  /**
+   * Returns the time of the next trigger event
+   *
+   * @param now the current time
+   * @return the next trigger time
+   */
+  public long nextTime(long now);
 }

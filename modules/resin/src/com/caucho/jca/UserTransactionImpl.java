@@ -63,6 +63,7 @@ public class UserTransactionImpl
   private ArrayList<CloseResource> _closeResources
     = new ArrayList<CloseResource>();
 
+  private boolean _isInContext;
   private int _xaDepth;
   
   /**
@@ -89,6 +90,24 @@ public class UserTransactionImpl
     throws SystemException
   {
     return _transactionManager.getStatus();
+  }
+
+  /**
+   * inContext is valid within a managed UserTransactionImpl context, e.g
+   * in a webApp, but not in a cron job.
+   */
+  public boolean isInContext()
+  {
+    return _isInContext;
+  }
+
+  /**
+   * inContext is valid within a managed UserTransactionImpl context, e.g
+   * in a webApp, but not in a cron job.
+   */
+  public void setInContext(boolean isInContext)
+  {
+    _isInContext = isInContext;
   }
 
   /**
@@ -445,6 +464,8 @@ public class UserTransactionImpl
   {
     IllegalStateException exn = null;
 
+    _isInContext = false;
+    
     boolean inTransaction = _xaDepth > 0;
     _xaDepth = 0;
 

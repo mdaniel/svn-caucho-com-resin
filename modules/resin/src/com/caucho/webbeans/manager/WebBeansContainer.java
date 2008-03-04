@@ -50,6 +50,7 @@ import java.util.logging.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
+import javax.el.*;
 import javax.webbeans.*;
 
 /**
@@ -235,7 +236,7 @@ public class WebBeansContainer
     if (name != null && comp.getScope() != null)
       _namedComponentMap.put(name, comp);
 
-    if (comp.getScope() instanceof SingletonScope) {
+    if (comp.isSingleton()) {
       _pendingSingletonList.add(comp);
     }
   }
@@ -256,9 +257,13 @@ public class WebBeansContainer
     if (type == null)
       return;
     
-    if (log.isLoggable(Level.FINE)) {
+    if (log.isLoggable(Level.FINE))
       log.fine(comp.toDebugString() + " added to " + this);
-    }
+
+    if (comp.isSingleton()) {
+      _pendingSingletonList.add(comp);
+    }      
+
 
     addComponentRec(type, comp);
   }
@@ -785,6 +790,11 @@ public class WebBeansContainer
 
       return comp;
     }
+  }
+
+  public ELContext getELContext()
+  {
+    return new ConfigELContext();
   }
 
   /**

@@ -48,6 +48,7 @@ import java.util.regex.Pattern;
 import java.util.logging.Logger;
 
 import javax.annotation.*;
+import javax.el.*;
 import javax.sql.*;
 
 import org.w3c.dom.Node;
@@ -821,8 +822,6 @@ public class TypeFactory implements AddLoaderListener
     
     _primitiveTypes.put(DataSource.class, DataSourceType.TYPE);
     
-    /*
-    _primitiveTypes.put("org.w3c.dom.Node", new NodeType());
-    */
+    _primitiveTypes.put(MethodExpression.class, MethodExpressionType.TYPE);
   }
 }

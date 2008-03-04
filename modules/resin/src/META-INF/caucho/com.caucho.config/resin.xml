@@ -162,6 +162,9 @@
   <bean name="resource-ref"
         class="com.caucho.config.types.ResourceRef"/>
 
+  <bean name="scheduled-task"
+        class="com.caucho.resources.ScheduledTask"/>
+
   <bean name="security-role-ref"
         class="com.caucho.config.types.SecurityRoleRef"/>
 

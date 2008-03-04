@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,6 +30,7 @@
 package com.caucho.server.webapp;
 
 import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jca.UserTransactionImpl;
 import com.caucho.log.Log;
 import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -154,6 +156,10 @@ public class WebAppFilterChain extends AbstractFilterChain {
 
     WebApp app = _app;
     
+    UserTransactionImpl ut = null;
+    if (_isTop)
+      ut = _utm.getUserTransaction();
+    
     try {
       thread.setContextClassLoader(app.getClassLoader());
 
@@ -198,7 +204,8 @@ public class WebAppFilterChain extends AbstractFilterChain {
 	((AbstractHttpResponse) response).close();
 	
 	try {
-	  _utm.abortTransaction();
+	  if (ut != null)
+	    ut.abortTransaction();
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}

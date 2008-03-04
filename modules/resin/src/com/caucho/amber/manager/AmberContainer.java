@@ -842,12 +842,15 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       }
       
       _factoryMap.put(unitName, factory);
-      _persistenceContextMap.put(unitName, factory.createEntityManager(props));
+      EntityManagerTransactionProxy persistenceContext
+	= new EntityManagerTransactionProxy(factory, props);
+      
+      _persistenceContextMap.put(unitName, persistenceContext);
 
 
       WebBeansContainer webBeans = WebBeansContainer.create(_parentLoader);
       webBeans.addComponent(new EntityManagerFactoryComponent(provider, unit, unitName, factory));
-      webBeans.addComponent(new EntityManagerComponent(factory, unitName, props));
+      webBeans.addComponent(new PersistenceContextComponent(unitName, persistenceContext));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

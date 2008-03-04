@@ -132,6 +132,6 @@ public class MethodExpressionImpl extends MethodExpression
 
   public String toString()
   {
-    return "MethodExpressionImpl[" + getExpressionString() + "]";
+    return getClass().getName() + "[" + getExpressionString() + "]";
   }
 }

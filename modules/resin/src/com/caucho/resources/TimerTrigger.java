@@ -27,33 +27,53 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
+package com.caucho.resources;
 
-import javax.persistence.*;
-import java.util.*;
-
-import com.caucho.webbeans.component.*;
+import com.caucho.config.types.*;
 
 /**
- * The Entity manager webbeans component
+ * Trigger for delay, period
  */
-public class EntityManagerComponent extends FactoryComponent {
-  private EntityManagerFactory _emf;
-  private Map _props;
+public class TimerTrigger implements Trigger {
+  private long _firstTime;
+  private long _period;
 
-  public EntityManagerComponent(EntityManagerFactory emf,
-				String name,
-				Map props)
+  public void setFirstTime(long firstTime)
   {
-    super(EntityManager.class, name);
-    
-    _emf = emf;
-    _props = props;
+    _firstTime = firstTime;
   }
 
-  @Override
-  public Object create()
+  public long getFirstTime()
   {
-    return new EntityManagerTransactionProxy(_emf, _props);
+    return _firstTime;
+  }
+
+  public void setPeriod(long period)
+  {
+    _period = period;
+  }
+
+  public long getPeriod()
+  {
+    return _period;
+  }
+  
+  /**
+   * Returns the time of the next trigger event
+   *
+   * @param now the current time
+   * @return the next trigger time
+   */
+  public long nextTime(long now)
+  {
+    if (now < _firstTime)
+      return _firstTime;
+    else if (_period <= 0)
+      return Long.MAX_VALUE / 2;
+    else {
+      long delta = (now - _firstTime) % _period;
+
+      return now + _period - delta;
+    }
   }
 }

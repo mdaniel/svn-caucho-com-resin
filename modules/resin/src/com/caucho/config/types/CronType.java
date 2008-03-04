@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -35,14 +36,16 @@ import com.caucho.util.QDate;
 import java.util.regex.Pattern;
 
 /**
- * Class-loading TypeBuilder
+ * Implements a unix cron-style trigger
  */
-public class CronType {
-  static L10N L = new L10N(CronType.class);
+public class CronType implements Trigger {
+  private static final L10N L = new L10N(CronType.class);
 
   private static final long DAY = 24L * 3600L * 1000L;
 
   private final QDate _localCalendar = QDate.createLocal();
+
+  private String _text;
   
   private boolean []_minutes;
   private boolean []_hours;
@@ -53,6 +56,11 @@ public class CronType {
   public CronType()
   {
   }
+
+  public CronType(String cron)
+  {
+    addText(cron);
+  }
   
   /**
    * Sets the text.
@@ -61,6 +69,7 @@ public class CronType {
     throws ConfigException
   {
     text = text.trim();
+    _text = text;
     
     String []split = Pattern.compile("\\s+").split(text);
 
@@ -250,5 +259,10 @@ public class CronType {
     }
 
     return -1;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _text + "]";
   }
 }
