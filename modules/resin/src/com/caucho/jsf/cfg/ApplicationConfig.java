@@ -386,6 +386,9 @@ public class ApplicationConfig
       }
     }
 
+    for (int i = 0; i < _elResolverList.size(); i++)
+	   app.addELResolver(_elResolverList.get(i));
+
     if (_propertyResolver != null) {
       PropertyResolver propertyResolver = null;
 
@@ -425,9 +428,6 @@ public class ApplicationConfig
 		     propertyResolver));
       }
     }
-
-    for (int i = 0; i < _elResolverList.size(); i++)
-      app.addELResolver(_elResolverList.get(i));
   }
 
   public static class LocaleConfig {
