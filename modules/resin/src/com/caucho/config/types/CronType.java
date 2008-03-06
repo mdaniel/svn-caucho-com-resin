@@ -130,14 +130,14 @@ public class CronType implements Trigger {
 	  max = min;
       }
       else
-	throw new ConfigException(L.l("`{0}' is an illegal cron range",
+	throw new ConfigException(L.l("'{0}' is an illegal cron range",
 				      range));
 
       if (min < rangeMin)
-	throw new ConfigException(L.l("`{0}' is an illegal cron range (min value is too small)",
+	throw new ConfigException(L.l("'{0}' is an illegal cron range (min value is too small)",
 				      range));
       else if (rangeMax < max)
-	throw new ConfigException(L.l("`{0}' is an illegal cron range (max value is too large)",
+	throw new ConfigException(L.l("'{0}' is an illegal cron range (max value is too large)",
 				      range));
 
       if (j < range.length() && (ch = range.charAt(j)) == '/') {
@@ -150,7 +150,7 @@ public class CronType implements Trigger {
 	}
 
 	if (step == 0)
-	  throw new ConfigException(L.l("`{0}' is an illegal cron range",
+	  throw new ConfigException(L.l("'{0}' is an illegal cron range",
 					range));
       }
 
@@ -159,7 +159,7 @@ public class CronType implements Trigger {
       else if (ch == ',')
 	j++;
       else {
-	throw new ConfigException(L.l("`{0}' is an illegal cron range",
+	throw new ConfigException(L.l("'{0}' is an illegal cron range",
 				      range));
       }
 

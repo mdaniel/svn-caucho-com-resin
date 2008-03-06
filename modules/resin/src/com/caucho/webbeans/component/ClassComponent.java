@@ -231,6 +231,10 @@ public class ClassComponent extends ComponentImpl {
 	throw new ConfigException(L.l("{0}: WebBean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
 				      _cl.getName()));
 
+      if (best == null)
+	throw new ConfigException(L.l("{0}: no constructor found",
+				      _cl.getName()));
+
       _ctor = best;
     } catch (RuntimeException e) {
       throw e;
@@ -400,19 +404,24 @@ public class ClassComponent extends ComponentImpl {
       InjectIntrospector.introspectDestroy(destroyList, _cl);
       _destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(_destroyProgram);
+      
+      if (_ctor == null)
+	introspectConstructor();
 
-      String loc = _ctor.getDeclaringClass().getName() + "(): ";
-      Type []param = _ctor.getGenericParameterTypes();
-      Annotation [][]paramAnn = _ctor.getParameterAnnotations();
+      if (_ctor != null) {
+	String loc = _ctor.getDeclaringClass().getName() + "(): ";
+	Type []param = _ctor.getGenericParameterTypes();
+	Annotation [][]paramAnn = _ctor.getParameterAnnotations();
 
-      _ctorArgs = new ComponentImpl[param.length];
+	_ctorArgs = new ComponentImpl[param.length];
 
-      for (int i = 0; i < param.length; i++) {
-	_ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
+	for (int i = 0; i < param.length; i++) {
+	  _ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
 
-	if (_ctorArgs[i] == null)
-	  throw new ConfigException(L.l("{0} does not have valid arguments",
-					_ctor));
+	  if (_ctorArgs[i] == null)
+	    throw new ConfigException(L.l("{0} does not have valid arguments",
+					  _ctor));
+	}
       }
 
       introspectObservers();
@@ -439,9 +448,10 @@ public class ClassComponent extends ComponentImpl {
       if (instanceClass == _cl && isSingleton())
 	instanceClass = SerializationAdapter.gen(_cl);
 
-      if (instanceClass != _cl) {
+      if (instanceClass != null && instanceClass != _cl) {
 	try {
-	  _ctor = instanceClass.getConstructor(_ctor.getParameterTypes());
+	  if (_ctor != null)
+	    _ctor = instanceClass.getConstructor(_ctor.getParameterTypes());
 	  
 	  setInstanceClass(instanceClass);
 	} catch (Exception e) {

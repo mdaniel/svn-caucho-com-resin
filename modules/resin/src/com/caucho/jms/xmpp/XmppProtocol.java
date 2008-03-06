@@ -29,6 +29,9 @@
 
 package com.caucho.jms.xmpp;
 
+import com.caucho.jms.JmsConnectionFactory;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.connection.JmsSession;
 import com.caucho.jms.hub.*;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.*;
@@ -36,8 +39,13 @@ import com.caucho.server.port.*;
 import com.caucho.webbeans.manager.*;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.*;
 import javax.annotation.*;
+import javax.jms.Message;
+import javax.jms.TextMessage;
+import javax.jms.ObjectMessage;
+import javax.jms.JMSException;
 
 /*
  * XMPP protocol server
@@ -51,13 +59,23 @@ public class XmppProtocol extends Protocol
 
   private HashMap<String,XmppPubSubLeaf> _pubSubMap
     = new HashMap<String,XmppPubSubLeaf>();
+
+  private ArrayList<XmppRequest> _clients
+    = new ArrayList<XmppRequest>();
+
+  private javax.jms.Connection _jmsConn;
   
   public XmppProtocol()
   {
     setProtocolName("xmpp");
 
     _loader = Thread.currentThread().getContextClassLoader();
-    Thread.dumpStack();
+
+    try {
+      _jmsConn = new JmsConnectionFactory().createConnection();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   ClassLoader getClassLoader()
@@ -80,6 +98,15 @@ public class XmppProtocol extends Protocol
     return new XmppRequest(this, (TcpConnection) connection);
   }
 
+  JmsSession createSession()
+  {
+    try {
+      return (JmsSession) _jmsConn.createSession(false, 1);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   //
   // pub-sub stuff
   //
@@ -93,7 +120,7 @@ public class XmppProtocol extends Protocol
 	if (log.isLoggable(Level.FINE))
 	  log.fine(this + " create pub-sub node " + name);
 	
-	leaf = new XmppPubSubLeaf(name);
+	leaf = new XmppPubSubLeaf(this, name);
 	_pubSubMap.put(name, leaf);
       }
 
@@ -105,6 +132,60 @@ public class XmppProtocol extends Protocol
   {
     synchronized (_pubSubMap) {
       return _pubSubMap.get(name);
+    }
+  }
+  
+  public ArrayList<XmppPubSubLeaf> getNodes()
+  {
+    ArrayList<XmppPubSubLeaf> nodes = new ArrayList<XmppPubSubLeaf>();
+    
+    synchronized (_pubSubMap) {
+      nodes.addAll(_pubSubMap.values());
+
+      return nodes;
+    }
+  }
+
+  void send(XmppPubSubLeaf leaf, MessageImpl msg, long timeout)
+  {
+    MessageStanza stanza = new MessageStanza();
+
+    try {
+      if (msg instanceof TextMessage) {
+	stanza.setBody(((TextMessage) msg).getText());
+      }
+      else if (msg instanceof ObjectMessage) {
+	Object value = ((ObjectMessage) msg).getObject();
+
+	if (value != null)
+	  stanza.setBody(value.toString());
+      }
+    } catch (JMSException e) {
+      throw new RuntimeException(e);
+    }
+
+    System.out.println("STANZA: " + stanza + " " + _clients);
+
+    synchronized (_clients) {
+      for (int i = 0; i < _clients.size(); i++) {
+	XmppRequest client = _clients.get(i);
+	
+	client.offer(client.getRequestId(), stanza);
+      }
+    }
+  }
+  
+  void addClient(XmppRequest request)
+  {
+    synchronized (_clients) {
+      _clients.add(request);
+    }
+  }
+
+  void removeClient(XmppRequest request)
+  {
+    synchronized (_clients) {
+      _clients.remove(request);
     }
   }
 }

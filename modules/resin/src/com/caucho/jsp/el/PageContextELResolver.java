@@ -184,6 +184,44 @@ public class PageContextELResolver extends AbstractVariableResolver {
   }
   
   @Override
+  public Class getType(ELContext env, Object base, Object property)
+  {
+    env.setPropertyResolved(false);
+
+    for (int i = 0; i < _customResolvers.length; i++) {
+      Class value = _customResolvers[i].getType(env, base, property);
+
+      if (env.isPropertyResolved())
+	return value;
+    }
+    
+    if (base != null) {
+      if (base instanceof Map)
+	return _mapResolver.getType(env, base, property);
+      else if (base instanceof List)
+	return _listResolver.getType(env, base, property);
+      else if (base.getClass().isArray())
+	return _arrayResolver.getType(env, base, property);
+      else if (base instanceof PropertyResourceBundle)
+      	return _bundleResolver.getType(env, base, property);
+      else
+	return _beanResolver.getType(env, base, property);
+    }
+    else if (base == null && property instanceof String) {
+      env.setPropertyResolved(true);
+
+      Object value = _pageContext.findAttribute(property.toString());
+
+      if (value != null)
+	return value.getClass();
+      else
+	return null;
+    }
+    else
+      return null;
+  }
+  
+  @Override
   public boolean isReadOnly(ELContext env, Object base, Object property)
   {
     env.setPropertyResolved(false);

@@ -54,9 +54,6 @@ public class XmppTopic extends AbstractTopic
   private static final Logger log
     = Logger.getLogger(XmppTopic.class.getName());
 
-  private ArrayList<AbstractQueue> _subscriptionList
-    = new ArrayList<AbstractQueue>();
-
   private XmppPubSubLeaf _xmppNode;
 
   private int _id;
@@ -93,54 +90,26 @@ public class XmppTopic extends AbstractTopic
 
     _xmppNode = xmpp.createNode(getName());
   }
-  
 
   @Override
   public AbstractQueue createSubscriber(JmsSession session,
                                         String name,
                                         boolean noLocal)
   {
-    MemoryQueue queue;
-
-    if (name != null) {
-      queue = new MemorySubscriberQueue(session, noLocal);
-      queue.setName(getName() + ":sub-" + name);
-
-      _subscriptionList.add(queue);
-    }
-    else {
-      queue = new MemorySubscriberQueue(session, noLocal);
-      queue.setName(getName() + ":sub-" + _id++);
-
-      _subscriptionList.add(queue);
-    }
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " create-subscriber(" + queue + ")");
-
-    _xmppNode.addQueue(queue);
-
-    return queue;
+    return _xmppNode.createSubscriber(session, name, noLocal);
   }
 
   @Override
   public void closeSubscriber(AbstractQueue queue)
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " close-subscriber(" + queue + ")");
-    
-    _xmppNode.removeQueue(queue);
-    
-    _subscriptionList.remove(queue);
+    _xmppNode.closeSubscriber(queue);
   }
 
   @Override
   public void send(JmsSession session, MessageImpl msg, long timeout)
     throws JMSException
   {
-    for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(session, msg, timeout);
-    }
+    _xmppNode.send(session, msg, timeout);
   }
 }
 

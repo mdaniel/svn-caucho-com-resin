@@ -129,6 +129,11 @@ public class WebComponent {
     
     return matchComp;
   }
+
+  ArrayList<ComponentImpl> getComponentList()
+  {
+    return _componentList;
+  }
   
   public ComponentImpl bindByBindings(String location,
 				      Type type,

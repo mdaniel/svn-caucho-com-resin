@@ -38,7 +38,6 @@ import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
-import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -49,7 +48,7 @@ import javax.annotation.PostConstruct;
 import javax.webbeans.*;
 
 /**
- * Configuration for the top-level web bean
+ * Configuration for a classloader root containing webbeans
  */
 public class WbWebBeans {
   private static final L10N L = new L10N(WbWebBeans.class);
@@ -71,9 +70,6 @@ public class WbWebBeans {
   
   private ArrayList<ComponentImpl> _pendingBindList
     = new ArrayList<ComponentImpl>();
-  
-  private ArrayList<WbInterceptor> _interceptorBindingList
-    = new ArrayList<WbInterceptor>();
 
   private ArrayList<WbInterceptor> _enabledInterceptors;
 
@@ -264,26 +260,11 @@ public class WbWebBeans {
 	for (ComponentImpl comp : componentList) {
 	  if (comp.getType().isEnabled()) {
 	    webBeans.addComponent(comp);
-
-	    _pendingBindList.add(comp);
 	  }
 	}
       }
     } catch (Exception e) {
       throw LineConfigException.create(_webBeansFile.getURL(), 1, e);
-    }
-  }
-
-  public void bind()
-  {
-    ArrayList<ComponentImpl> componentList
-      = new ArrayList<ComponentImpl>(_pendingBindList);
-    _pendingBindList.clear();
-
-    for (ComponentImpl comp : componentList) {
-      if (comp.getType().isEnabled()) {
-	comp.bind();
-      }
     }
   }
 
@@ -311,6 +292,7 @@ public class WbWebBeans {
     return _webBeansContainer.bind(loc, type, annotations);
   }
 
+  @Override
   public String toString()
   {
     if (_root != null)

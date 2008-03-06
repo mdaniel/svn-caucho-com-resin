@@ -175,6 +175,88 @@ cron entry</a></p>
   *  *  *  *  *
 </def>
 
+<deftable title="cron patterns">
+<tr>
+  <th>Pattern</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>*</td>
+  <td>matches all time periods</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td>matches the specific time, e.g. 15 for minutes</td>
+</tr>
+<tr>
+  <td>15,45</td>
+  <td>matches a list of times, e.g. every :15 and :45</td>
+</tr>
+<tr>
+  <td>*/5</td>
+  <td>matches every <var>n</var> times, e.g. every 5 minutes</td>
+</tr>
+<tr>
+  <td>1-5</td>
+  <td>matches a range of times, e.g. mon, tue, wed, thu, fri (1-5)</td>
+</tr>
+</deftable>
+
+<p>Each field specifies a range of times to be executed.  The patterns
+allowed are:</p>
+
+<deftable title="example ranges">
+<tr>
+  <th>range</th>
+  <th>explanation (using minutes as example)</th>
+</tr>
+<tr>
+  <td>*</td>
+  <td>run every minute</td>
+</tr>
+<tr>
+  <td>*/5</td>
+  <td>run every 5 minutes</td>
+</tr>
+<tr>
+  <td>0,5,50</td>
+  <td>run at :00, :05, :50 every hour</td>
+</tr>
+  <tr><td>0-4</td>
+  <td>run at :00, :01, :02, :03, :04</td>
+</tr>
+<tr>
+  <td>0-30/2</td>
+  <td>run every 2 minutes for the first half hour</td>
+</tr>
+</deftable>
+
+<p>The minutes field is always required, and the hours, days, and
+months fields are optional.</p>
+
+<deftable title="example times">
+<tr>
+  <th>range</th>
+  <th>explanation</th>
+</tr>
+<tr>
+  <td>0 */3</td>
+  <td>run every 3 hours</td>
+</tr>
+<tr>
+  <td>15 2 *</td>
+  <td>run every day at 0215 local time</td>
+</tr>
+<tr>
+  <td>0 0 */3</td>
+  <td>run every third day at midnight</td>
+</tr>
+<tr>
+  <td>15 0 * * 6</td>
+  <td>run every Saturday at 0015</td>
+</tr>
+</deftable>
+
 </s2>
 
 </s1> <!-- scheduled-task -->

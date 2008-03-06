@@ -29,7 +29,9 @@
 
 package com.caucho.jms.xmpp;
 
+import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
+import com.caucho.jms.connection.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -37,13 +39,19 @@ import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
 
 import java.io.IOException;
+import java.util.concurrent.*;
 import java.util.logging.*;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.xml.stream.*;
 
 /**
  * XMPP protocol
  */
-public class XmppRequest implements ServerRequest {
+public class XmppRequest implements ServerRequest, Runnable {
   private static final L10N L = new L10N(XmppRequest.class);
   private static final Logger log
     = Logger.getLogger(XmppRequest.class.getName());
@@ -57,6 +65,8 @@ public class XmppRequest implements ServerRequest {
   private ReadStream _is;
   private WriteStream _os;
 
+  private volatile int _requestId;
+
   private String _id;
   private String _from;
   private String _clientTo;
@@ -68,6 +78,13 @@ public class XmppRequest implements ServerRequest {
   
   private XMLStreamReaderImpl _in;
 
+  private boolean _isPresent;
+  private boolean _isThread;
+
+  private final ThreadPool _threadPool;
+  private final BlockingQueue<Stanza> _outboundQueue
+    = new ArrayBlockingQueue<Stanza>(1024);
+
   private State _state;
   private boolean _isFinest;
 
@@ -75,6 +92,12 @@ public class XmppRequest implements ServerRequest {
   {
     _protocol = protocol;
     _conn = conn;
+    _threadPool = ThreadPool.getThreadPool();
+  }
+
+  int getRequestId()
+  {
+    return _requestId;
   }
   
   /**
@@ -381,7 +404,7 @@ public class XmppRequest implements ServerRequest {
       _os.print("<iq type='result' id='" + id + "' from='" + _streamFrom + "'>");
       _os.print("<query xmlns='jabber:iq:roster'>");
 
-      _os.print("<item jid='localhost/test' name='Test' subscription='to'>");
+      _os.print("<item jid='localhost/test' name='Test' subscription='both'>");
       _os.print("</item>");
       
       _os.print("</query>");
@@ -446,6 +469,10 @@ public class XmppRequest implements ServerRequest {
 
       if ("status".equals(_in.getLocalName())) {
 	tag = _in.next();
+    
+	if (_isFinest)
+	  debug(_in);
+	
 	String status = _in.getText();
 
 	expectEnd("status");
@@ -458,6 +485,11 @@ public class XmppRequest implements ServerRequest {
       debug(_in);
 
     expectEnd("presence", tag);
+
+    if (! _isPresent) {
+      _isPresent = true;
+      _protocol.addClient(this);
+    }
 
     return true;
   }
@@ -513,7 +545,7 @@ public class XmppRequest implements ServerRequest {
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " message to " + leaf);
 
-      leaf.send(msg);
+      leaf.send(null, msg, 0);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -668,7 +700,60 @@ public class XmppRequest implements ServerRequest {
    */
   public void protocolCloseEvent()
   {
+    _protocol.removeClient(this);
+    _requestId++;
+    
     _state = null;
+    _isPresent = false;
+
+    synchronized (this) {
+      _outboundQueue.clear();
+    }
+  }
+
+  public void offer(int requestId, Stanza stanza)
+  {
+    synchronized (this) {
+      if (requestId != _requestId || ! _isPresent)
+	return;
+
+      if (_outboundQueue.offer(stanza)) {
+	if (! _isThread) {
+	  _isThread = true;
+	  _threadPool.schedule(this);
+	}
+      }
+    }
+  }
+
+  public void run()
+  {
+    int id = _requestId;
+
+    while (id == _requestId) {
+      Stanza stanza = null;
+      
+      synchronized (this) {
+	stanza = _outboundQueue.poll();
+
+	if (stanza == null) {
+	  _isThread = false;
+	  return;
+	}
+      }
+
+      try {
+	if (log.isLoggable(Level.FINER))
+	  log.finest(this + " send from=localhost/test to=" + _clientBind + " " + stanza);
+
+	stanza.print(_os, "localhost/test", _clientBind);
+	_os.flush();
+      } catch (IOException e) {
+	// XXX: should cause close?
+	
+	log.log(Level.FINER, e.toString(), e);
+      }
+    }
   }
 
   public String toString()

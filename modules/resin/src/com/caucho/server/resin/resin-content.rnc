@@ -257,11 +257,14 @@ r_jsse-ssl = element jsse-ssl {
   (attribute alias { string }
    | element alias { r_string-Group })?
 
+  & (attribute cipher-suites { string }
+     | element cipher-suites { r_string-Group })?
+
   & (attribute key-store-file { string }
-   | element key-store-file { r_string-Group })
+     | element key-store-file { r_string-Group })?
 
   & (attribute password { string }
-     | element password { r_string-Group })
+     | element password { r_string-Group })?
 
   & (attribute key-store-type { string }
      | element key-store-type { r_string-Group })?
@@ -633,6 +636,9 @@ r_server-Basis =
 
   & r_memory-free-min?
 
+  & (attribute shutdown-wait-max { r_period-Type }
+     | element shutdown-wait-max { r_period-Type })?
+
   & (attribute socket-timeout { r_period-Type }
      | element socket-timeout { r_period-Type })?
 
@@ -752,6 +758,9 @@ r_watchdog-manager = element watchdog-manager {
 
 r_watchdog-Content =
   (attribute id { string }
+
+   & (attribute chroot { string }
+      | element chroot { string })?
 
    & r_group-name?
 

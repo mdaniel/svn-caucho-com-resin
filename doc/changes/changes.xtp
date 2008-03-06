@@ -12,6 +12,18 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>ssl: add cipher-suites to jsse-ssl (#2360, rep by Jay Ballinger)</li>
+<li>webapp/jmx: add Version attribute to WebAppMXBean (#2463)</li>
+<li>ioc: add WebBeansContainer.getBeansOfType (#2413)</li>
+<li>jsp: pageContext ELResolver wasn't handling getType properly (#2451, rep by anloci)</li>
+<li>install: with --prefix, copy php, plugins and ext-webapp-lib (#2473, rep by stbu)</li>
+<li>hessian: hessian method overloading cost needs to be long (#2466, rep by zipeg)</li>
+<li>boot: add chroot as watchdog capability (#2426)</li>
+<li>boot: increase fd max when possible (#2467)</li>
+<li>shutdown-wait-max had incorrect rnc schema (#2492)</li>
+<li>ejb: conflict between ejb-jar.xml and ejb-stateless-bean (#2479, rep by Gary Zhu)</li>
+<li>ioc: jar order should not affect injection (#2490, rep by Andreas Fischer)</li>
+<li>boot: remove watchdog requirement that server's resin.conf must match (#2484, rep by Chris Chen)</li>
 <li>(2008-03-04) jsf: Bean classes must have a zero-argument with com.sun.rave.faces.data.ResultSetPropertyResolver (#2364)</li>
 <li>added scheduled-task to improve cron scheduling (#2311, #2475, rep by netsql3)</li>
 <li>xa: Synchronization exception in beforeCompletion() could prevent rollback (#2454, rep by ddalessa)</li>

@@ -123,6 +123,15 @@ public class WebAppVersioningController extends WebAppController {
     _isModified = isModified;
   }
 
+  @Override
+  public String getVersion()
+  {
+    if (_primaryController != null)
+      return _primaryController.getVersion();
+    else
+      return "";
+  }
+
   /**
    * Returns the instance for a top-level request
    * @return the request object or null for none.

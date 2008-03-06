@@ -53,6 +53,14 @@ abstract public class AbstractSelectManager {
   public void setSelectMax(int max)
   {
   }
+
+  /**
+   * Gets the max.
+   */
+  public int getSelectMax()
+  {
+    return -1;
+  }
   
   /**
    * Starts the manager.

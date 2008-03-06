@@ -101,6 +101,11 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getKeepaliveMax();
   }
 
+  public int getKeepaliveSelectMax()
+  {
+    return _port.getKeepaliveSelectMax();
+  }
+
   public long getKeepaliveConnectionTimeMax()
   {
     return _port.getKeepaliveConnectionTimeMax();

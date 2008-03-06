@@ -764,6 +764,11 @@ public class Port
     return _keepaliveSelectThreadTimeout;
   }
 
+  public int getKeepaliveSelectMax()
+  {
+    return getSelectManager().getSelectMax();
+  }
+
   //
   // statistics
   //
@@ -996,12 +1001,6 @@ public class Port
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
-    if (_keepaliveMax < 0)
-      _keepaliveMax = _server.getKeepaliveMax();
-
-    if (_keepaliveMax < 0)
-      _keepaliveMax = 256;
-
     if (_serverSocket.isJNI() && _server.isSelectManagerEnabled()) {
       _selectManager = _server.getSelectManager();
 
@@ -1009,6 +1008,15 @@ public class Port
 	throw new IllegalStateException(L.l("Cannot load select manager"));
       }
     }
+
+    if (_keepaliveMax < 0)
+      _keepaliveMax = _server.getKeepaliveMax();
+
+    if (_keepaliveMax < 0 && _selectManager != null)
+      _keepaliveMax = _selectManager.getSelectMax();
+
+    if (_keepaliveMax < 0)
+      _keepaliveMax = 256;
       
     _admin.register();
   }

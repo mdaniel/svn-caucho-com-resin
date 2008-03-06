@@ -531,13 +531,10 @@ public class WatchdogManager extends ProtocolDispatchServer {
       
       if (watchdog == null)
         _watchdogMap.put(config.getId(), new Watchdog(config));
-      else if (watchdog.getResinConf().equals(config.getResinConf())) {
+      else {
 	if (_resin.getId().equals(config.getId()))
 	  watchdog.setConfig(config);
       }
-      else
-	throw new ConfigException(L().l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
-				      config.getId()));
     }
   
     /**

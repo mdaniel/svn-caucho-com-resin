@@ -90,6 +90,14 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
     return getController().getContextPath();
   }
 
+  /**
+   * Returns the web-app version number
+   */
+  public String getVersion()
+  {
+    return getController().getVersion();
+  }
+
   //
   // error statistics
   //

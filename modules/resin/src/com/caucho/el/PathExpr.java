@@ -107,9 +107,10 @@ public class PathExpr extends Expr {
   }
 
   /**
-   * Evaluates the expression as applicable to the provided context, and returns the
-   * most general type that can be accepted by the
-   * setValue(javax.el.ELContext, java.lang.Object) method. 
+   * Evaluates the expression as applicable to the provided context,
+   * and returns the most general type that can be accepted by the
+   * setValue(javax.el.ELContext, java.lang.Object) method.
+   *
    * @param env
    * @return
    * @throws PropertyNotFoundException
@@ -120,9 +121,9 @@ public class PathExpr extends Expr {
     throws PropertyNotFoundException, ELException
   {
     Class value = _expr.getType(env);
-    if (env.isPropertyResolved()) {
+    
+    if (env.isPropertyResolved())
       return value;
-    }
 
     return env.getELResolver().getType(env, _path, null);
   }

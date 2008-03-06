@@ -118,6 +118,14 @@ public class ServerAdmin extends AbstractEmitterObject
   //
 
   /**
+   * Returns true if detailed statistics are being kept.
+   */
+  public boolean isDetailedStatistics()
+  {
+    return false;
+  }
+
+  /**
    * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
    */
   public boolean isSelectManagerEnabled()
@@ -126,11 +134,11 @@ public class ServerAdmin extends AbstractEmitterObject
   }
 
   /**
-   * Returns true if detailed statistics are being kept.
+   * The maximum time to spend waiting for the server to stop gracefully
    */
-  public boolean isDetailedStatistics()
+  public long getShutdownWaitMax()
   {
-    return false;
+    return _server.getShutdownWaitMax();
   }
 
   //

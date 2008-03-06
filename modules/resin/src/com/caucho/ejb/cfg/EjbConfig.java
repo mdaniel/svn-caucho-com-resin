@@ -208,8 +208,10 @@ public class EjbConfig {
     if (oldBean == bean)
       return;
     else if (oldBean != null) {
-      throw new IllegalStateException(L.l("Duplicate bean '{0}'",
-					  name));
+      throw new IllegalStateException(L.l("{0}: duplicate bean '{1}' old ejb-class={2} new ejb-class={3}",
+					  this, name,
+					  oldBean.getEJBClass().getName(),
+					  bean.getEJBClass().getName()));
     }
 
     _pendingBeans.add(bean);
@@ -336,6 +338,9 @@ public class EjbConfig {
 
       Class type = Class.forName(className, false, loader);
 
+      if (findBeanByType(type) != null)
+	return;
+
       if (type.isAnnotationPresent(javax.ejb.Stateless.class)) {
 	EjbStatelessBean bean = new EjbStatelessBean(this, "resin-ejb");
 	bean.setEJBClass(type);
@@ -376,6 +381,20 @@ public class EjbConfig {
         if (schemaName.equals(entity.getAbstractSchemaName()))
           return entity;
       }
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds an entity bean by its abstract schema.
+   */
+  public EjbBean findBeanByType(Class type)
+  {
+    for (EjbBean bean : _cfgBeans.values()) {
+      // ejb/0j03
+      if (type.getName().equals(bean.getEJBClass().getName()))
+	return bean;
     }
 
     return null;
@@ -1091,5 +1110,12 @@ public class EjbConfig {
       else
         return entityA.getEJBName().compareTo(entityB.getEJBName());
     }
+  }
+
+  public String toString()
+  {
+    String id = _ejbContainer.getClassLoader().getId();
+    
+    return getClass().getSimpleName() + "[" + id + "]";
   }
 }

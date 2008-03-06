@@ -9,3 +9,4 @@
 3 * 2 = <%= math.mul(3, 2) %>
 3 / 2 = <%= math.div(3, 2) %>
 </pre>
+<a href="demo.php">PHP demo</a>

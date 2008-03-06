@@ -200,6 +200,11 @@ public class Watchdog
     return _config.getPorts();
   }
 
+  Path getChroot()
+  {
+    return _config.getChroot();
+  }
+
   Path getPwd()
   {
     return _config.getPwd();

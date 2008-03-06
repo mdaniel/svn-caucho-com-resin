@@ -97,50 +97,45 @@ if ($ports) {
 ?>
 
   <tr>
-    <td class='group' colspan='2'><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
+    <td class='group' colspan='4'><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
   </tr>
 
   <tr>
     <td class='item'>accept-thread-min</td>
     <td><?= $port->AcceptThreadMin ?></td>
-  </tr>
 
-  <tr>
-    <td class='item'>accept-thread-max</td>
-    <td><?= $port->AcceptThreadMax ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>accept-listen-backlog</td>
-    <td><?= $port->AcceptListenBacklog ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>connection-max</td>
-    <td><?= $port->ConnectionMax ?></td>
-  </tr>
-
-  <tr>
     <td class='item'>keepalive-max</td>
     <td><?= $port->KeepaliveMax ?></td>
   </tr>
 
   <tr>
-    <td class='item'>keepalive-connection-time-max</td>
-    <td><?= $port->KeepaliveConnectionTimeMax ?></td>
+    <td class='item'>accept-thread-max</td>
+    <td><?= $port->AcceptThreadMax ?></td>
+
+    <td class='item'>keepalive-select-max</td>
+    <td><?= $port->KeepaliveSelectMax ?></td>
   </tr>
 
   <tr>
+    <td class='item'>accept-listen-backlog</td>
+    <td><?= $port->AcceptListenBacklog ?></td>
+
     <td class='item'>keepalive-timeout</td>
     <td><?= $port->KeepaliveTimeout ?></td>
   </tr>
 
   <tr>
+    <td class='item'>connection-max</td>
+    <td><?= $port->ConnectionMax ?></td>
+
     <td class='item'>socket-timeout</td>
     <td><?= $port->SocketTimeout ?></td>
   </tr>
 
   <tr>
+    <td class='item'>keepalive-connection-time-max</td>
+    <td><?= $port->KeepaliveConnectionTimeMax ?></td>
+
     <td class='item'>suspend-time-max</td>
     <td><?= $port->SuspendTimeMax ?></td>
   </tr>

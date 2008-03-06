@@ -8,7 +8,7 @@
     <protocol uri="hessian:"/>
   </servlet-mapping>
 
-  <remote-client>
+  <remote-client name="math">
     <uri>hessian:url=${webApp.url}/math/</uri>
     <interface>example.MathService</interface>
   </remote-client>

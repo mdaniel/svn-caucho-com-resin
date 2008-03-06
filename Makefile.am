@@ -18,6 +18,12 @@ install	:
 	  cp bin/* $(PREFIX)/bin; \
 	  mkdir -p $(PREFIX)/webapps; \
 	  cp -r webapps/* $(PREFIX)/webapps; \
+	  mkdir -p $(PREFIX)/php; \
+	  cp -r php/* $(PREFIX)/php; \
+	  mkdir -p $(PREFIX)/plugins; \
+	  cp -r php/* $(PREFIX)/plugins; \
+	  mkdir -p $(PREFIX)/ext-webapp-lib; \
+	  cp -r php/* $(PREFIX)/ext-webapp-lib; \
 	  mkdir -p $(PREFIX)/conf; \
 	  cp conf/resin.conf $(PREFIX)/conf/resin.conf.orig; \
 	  cp conf/app-default.xml $(PREFIX)/conf/app-default.xml.orig; \

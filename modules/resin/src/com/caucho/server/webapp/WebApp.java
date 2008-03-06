@@ -130,7 +130,8 @@ public class WebApp extends ServletContextImpl
   // The parent
   private WebAppContainer _parent;
 
-  // Any old version web-app
+  // web-app versioning
+  private String _version;
   private WebApp _oldWebApp;
   private long _oldWebAppExpireTime;
 

@@ -1119,6 +1119,11 @@ to launch the JVM</td>
   <td></td>
 </tr>
 <tr>
+  <td>shutdown-wait-max</td>
+  <td>The maximum of time to wait for a graceful Resin shutdown before forcing a close</td>
+  <td>60s</td>
+</tr>
+<tr>
   <td>socket-timeout</td>
   <td>The read/write timeout for the socket</td>
   <td>65s</td>
@@ -1186,6 +1191,7 @@ element server {
   &amp; ping?
   &amp; port?
   &amp; protocol?
+  &amp; shutdown-wait-max?
   &amp; socket-timeout?
   &amp; thread-max?
   &amp; thread-executor-task-max?

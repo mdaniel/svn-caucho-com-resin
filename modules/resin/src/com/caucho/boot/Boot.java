@@ -39,6 +39,7 @@ public interface Boot {
   
   public Process exec(ArrayList<String> args,
 		      HashMap<String,String> env,
+		      String chroot,
 		      String pwd,
 		      String user,
 		      String group);

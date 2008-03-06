@@ -44,55 +44,69 @@ import com.caucho.jms.connection.*;
 /**
  * Implements an xmpp topic.
  */
-public class XmppPubSubLeaf
+public class XmppPubSubLeaf extends AbstractTopic
 {
   private static final Logger log
     = Logger.getLogger(XmppPubSubLeaf.class.getName());
 
-  private String _name;
+  private XmppProtocol _protocol;
 
-  private ArrayList<BlockingQueue> _queueList
-    = new ArrayList<BlockingQueue>();
+  private ArrayList<AbstractQueue> _subscriptionList
+    = new ArrayList<AbstractQueue>();
+
+  private int _id;
   
-  public XmppPubSubLeaf(String name)
+  public XmppPubSubLeaf(XmppProtocol protocol, String name)
   {
-    _name = name;
+    _protocol = protocol;
+    
+    setName(name);
   }
 
-  public String getName()
+  @Override
+  public AbstractQueue createSubscriber(JmsSession session,
+                                        String name,
+                                        boolean noLocal)
   {
-    return _name;
-  }
+    MemoryQueue queue;
 
-  public void addQueue(BlockingQueue queue)
-  {
-    synchronized (_queueList) {
-      if (! _queueList.contains(queue))
-	_queueList.add(queue);
+    if (name != null) {
+      queue = new MemorySubscriberQueue(session, noLocal);
+      queue.setName(getName() + ":sub-" + name);
+
+      _subscriptionList.add(queue);
     }
-  }
+    else {
+      queue = new MemorySubscriberQueue(session, noLocal);
+      queue.setName(getName() + ":sub-" + _id++);
 
-  public void removeQueue(BlockingQueue queue)
-  {
-    synchronized (_queueList) {
-      _queueList.remove(queue);
+      _subscriptionList.add(queue);
     }
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " create-subscriber(" + queue + ")");
+
+    return queue;
   }
 
-  public void send(Message msg)
+  @Override
+  public void closeSubscriber(AbstractQueue queue)
   {
-    synchronized (_queueList) {
-      for (int i = 0; i < _queueList.size(); i++) {
-	BlockingQueue queue = (BlockingQueue) _queueList.get(i);
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " close-subscriber(" + queue + ")");
+    
+    _subscriptionList.remove(queue);
+  }
 
-	queue.offer(msg);
-      }
+  @Override
+  public void send(JmsSession session, MessageImpl msg, long timeout)
+    throws JMSException
+  {
+    for (int i = 0; i < _subscriptionList.size(); i++) {
+      _subscriptionList.get(i).send(session, msg, timeout);
     }
-  }
 
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getName() + "]";
+    _protocol.send(this, msg, timeout);
   }
 }
 

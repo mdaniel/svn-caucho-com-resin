@@ -378,6 +378,7 @@ class WatchdogProcess
   {
     // watchdog/0210
     // Path pwd = rootDirectory;
+    Path chroot = _watchdog.getChroot();
     Path processPwd = _watchdog.getPwd();
 
     Path resinHome = _watchdog.getResinHome();
@@ -502,7 +503,13 @@ class WatchdogProcess
 	  }
 	}
 
+	String chrootPath = null;
+
+	if (chroot != null)
+	  chrootPath = chroot.getNativePath();
+
 	Process process = boot.exec(list, env,
+				    chrootPath,
 				    processPwd.getNativePath(),
 				    _watchdog.getUserName(),
 				    _watchdog.getGroupName());

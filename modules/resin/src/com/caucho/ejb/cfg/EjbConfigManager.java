@@ -133,10 +133,15 @@ public class EjbConfigManager extends EjbConfig {
       EjbJar ejbJar = new EjbJar(this, ejbModuleName);
 
       try {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " reading " + path.getURL());
+
 	new Config().configure(ejbJar, path, getSchema());
       } catch (ConfigException e) {
+	e.printStackTrace();
 	throw e;
       } catch (Exception e) {
+	e.printStackTrace();
 	throw ConfigException.create(e);
       }
     }

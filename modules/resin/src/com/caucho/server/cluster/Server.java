@@ -122,7 +122,8 @@ public class Server extends ProtocolDispatchServer
   private int _acceptThreadMin = 5;
   private int _acceptThreadMax = 10;
 
-  private int _keepaliveMax = 128;
+  // default is in Port
+  private int _keepaliveMax = -1;
   
   private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
   

@@ -23,6 +23,10 @@ will want to be independent of the Hessian protocol itself.</p>
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="WEB-INF/classes/example/MathService.java"/></td>
   <td>Interface for the math service.</td>
 </tr>
@@ -38,6 +42,10 @@ will want to be independent of the Hessian protocol itself.</p>
   <td><viewfile-link file="demo.jsp"/></td>
   <td>Client JSP</td>
 </tr>
+<tr>
+  <td><viewfile-link file="demo.php"/></td>
+  <td>Client PHP</td>
+</tr>
 </deftable>
 </s1>
 
@@ -46,12 +54,9 @@ will want to be independent of the Hessian protocol itself.</p>
 <p>The MathService implementation is just a Java class that implements
 the MatchService API.</p>
 
-<example title="MathServiceImpl.java">
+<example title="Example: MathServiceImpl.java">
 package example;
 
-import javax.jws.WebService
-
-@WebService
 public class MathServiceImpl implements MathService {
   public int add(int a, int b)
   {
@@ -72,7 +77,7 @@ expose the API to the proxy stub.  Strictly speaking, though,
 the Java remote interface is not required for Hessian.  A non-Java client
 will not use the Java interface, except possibly as documentation.</p>
 
-<example title="MathService.java">
+<example title="Example: MathService.java">
 package example;
 
 public interface MathService {
@@ -84,18 +89,18 @@ public interface MathService {
 
 <s1 title="Service configuration">
 
-<example title="resin-web.xml">
+<example title="Example: resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
   &lt;servlet-mapping url-pattern="/math/*"
                    servlet-class="example.MathService">
-    &lt;protocol type="hessian"/>
+    &lt;protocol uri="hessian:"/>
   &lt;/servlet-mapping>
 
-  &lt;web-service-client>
-    &lt;url>hessian:http://localhost:8080/resin-doc/hessian/tutorial/hessian-service/math/&lt;/url>
+  &lt;remote-client name="math">
+    &lt;uri>hessian:url=${webApp.url}/math/&lt;/uri>
     &lt;interface>example.MathService&lt;/interface>
-  &lt;/web-service-client>
+  &lt;/remote-client>
 
 &lt;/web-app>
 </example>
@@ -106,7 +111,7 @@ public interface MathService {
 
 <p>The client is identical to the basic example.</p>
 
-<example title="demo.jsp">
+<example title="Example: demo.jsp">
 &lt;%@ page import="javax.webbeans.In" %>
 &lt;%@ page import="example.MathService" %>
 &lt;%!
@@ -117,6 +122,31 @@ public interface MathService {
 3 - 2 = &lt;%= math.sub(3, 2) %>
 3 * 2 = &lt;%= math.mul(3, 2) %>
 3 / 2 = &lt;%= math.div(3, 2) %>
+&lt;/pre>
+</example>
+<results>
+3 + 2 = 5
+3 - 2 = 1
+3 * 2 = 6
+3 / 2 = 1
+</results>
+
+</s1>
+
+<s1 title="PHP Client">
+
+<p>The client is identical to the basic example.</p>
+
+<example title="Example: demo.php">
+&lt;?php
+
+$math = java_bean("math");
+?>
+&lt;pre>
+3 + 2 = &lt;?= $math->add(3, 2) ?>
+3 - 2 = &lt;?= $math->sub(3, 2) ?>
+3 * 2 = &lt;?= $math->mul(3, 2) ?>
+3 / 2 = &lt;?= $math->div(3, 2) ?>
 &lt;/pre>
 </example>
 <results>

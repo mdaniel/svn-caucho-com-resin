@@ -75,6 +75,12 @@ public interface WebAppMXBean extends DeployControllerMXBean {
   @Description("The configured context path that identifies the web-app in a url")
   public String getContextPath();
 
+  /**
+   * Returns the deployed version
+   */
+  @Description("The deployed version of the web-app")
+  public String getVersion();
+
   //
   // Status attributes
   //

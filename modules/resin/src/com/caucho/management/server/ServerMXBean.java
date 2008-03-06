@@ -91,18 +91,24 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   //
 
   /**
-   * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
-   */
-  @Description("A SelectManager handles keepalive without requiring a thread")
-  public boolean isSelectManagerEnabled();
-
-  /**
    * Returns true if detailed statistics are being kept.
    */
   @Description("Detailed statistics causes various parts of Resin to keep"
                + " more detailed statistics at the possible expense of"
                +" some performance")
   public boolean isDetailedStatistics();
+
+  /**
+   * The maximum time to spend waiting for the server to stop gracefully
+   */
+  @Description("The maximum time to spend waiting for the server to stop gracefully")
+  public long getShutdownWaitMax();
+
+  /**
+   * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
+   */
+  @Description("A SelectManager handles keepalive without requiring a thread")
+  public boolean isSelectManagerEnabled();
 
   //
   // state

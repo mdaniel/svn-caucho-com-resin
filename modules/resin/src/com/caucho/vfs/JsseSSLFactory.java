@@ -63,6 +63,7 @@ public class JsseSSLFactory implements SSLFactory {
   private String _keyStoreType = "jks";
   private String _keyManagerFactory = "SunX509";
   private String _sslContext = "TLS";
+  private String []_cipherSuites;
 
   private KeyStore _keyStore;
   
@@ -72,6 +73,15 @@ public class JsseSSLFactory implements SSLFactory {
   public JsseSSLFactory()
   {
   }
+
+  /**
+   * Sets the enabled cipher suites
+   */
+  public void setCipherSuites(String []ciphers)
+  {
+    _cipherSuites = ciphers;
+  }
+  
 
   /**
    * Sets the key store
@@ -225,6 +235,9 @@ public class JsseSSLFactory implements SSLFactory {
       kmf.init(_keyStore, _password.toCharArray());
       
       sslContext.init(kmf.getKeyManagers(), null, null);
+
+      if (_cipherSuites != null)
+	sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);
 
       factory = sslContext.getServerSocketFactory();
     }

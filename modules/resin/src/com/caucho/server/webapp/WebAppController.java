@@ -706,6 +706,11 @@ public class WebAppController
       return _regexpValues;
     }
 
+    public String getVersion()
+    {
+      return _version;
+    }
+
     public String toString()
     {
       return "WebApp[" + getURL() + "]";

@@ -77,7 +77,7 @@ public class Stanza {
 	_to = in.getAttributeValue(i);
     }
   }
-  
+
   public String getId()
   {
     return _id;
@@ -86,6 +86,32 @@ public class Stanza {
   public void setId(String id)
   {
     _id = id;
+  }
+
+  public String getTo()
+  {
+    return _to;
+  }
+
+  public void setTo(String to)
+  {
+    _to = to;
+  }
+
+  public String getFrom()
+  {
+    return _from;
+  }
+
+  public void setFrom(String from)
+  {
+    _from = from;
+  }
+
+  protected void print(WriteStream out, String from, String to)
+    throws IOException
+  {
+    throw new UnsupportedOperationException();
   }
 
   public String toString()

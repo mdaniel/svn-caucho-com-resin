@@ -108,8 +108,8 @@ public class WebBeansContainer
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
 
-  private ArrayList<WebBeansRootContext> _pendingBindList
-    = new ArrayList<WebBeansRootContext>();
+  private ArrayList<ComponentImpl> _pendingBindList
+    = new ArrayList<ComponentImpl>();
 
   private ArrayList<ComponentImpl> _pendingSingletonList
     = new ArrayList<ComponentImpl>();
@@ -226,15 +226,22 @@ public class WebBeansContainer
   {
     return _wbWebBeans.createComponentType(cl);
   }
-  
+
   public void addComponent(ComponentImpl comp)
   {
     addComponentByType(comp.getTargetType(), comp);
 
     String name = comp.getName();
 
+    /*
     if (name != null && comp.getScope() != null)
       _namedComponentMap.put(name, comp);
+    */
+    // ioc/0030
+    if (name != null)
+      _namedComponentMap.put(name, comp);
+
+    _pendingBindList.add(comp);
 
     if (comp.isSingleton()) {
       _pendingSingletonList.add(comp);
@@ -264,8 +271,21 @@ public class WebBeansContainer
       _pendingSingletonList.add(comp);
     }      
 
-
     addComponentRec(type, comp);
+  }
+
+  public ArrayList<ComponentFactory> getBeansOfType(Type type)
+  {
+    ArrayList<ComponentFactory> beans = new ArrayList<ComponentFactory>();
+    
+    WebComponent webComponent = _componentMap.get(type);
+
+    if (webComponent == null)
+      return beans;
+
+    beans.addAll(webComponent.getComponentList());
+
+    return beans;
   }
     
   private void addComponentRec(Type type, ComponentImpl comp)
@@ -942,8 +962,6 @@ public class WebBeansContainer
 	webBeans.update();
 
 	webBeans.init();
-
-	_pendingBindList.add(context);
       }
     
       _wbWebBeans.init();
@@ -968,18 +986,15 @@ public class WebBeansContainer
     try {
       thread.setContextClassLoader(_classLoader);
 
-      ArrayList<WebBeansRootContext> rootContextList
-	= new ArrayList<WebBeansRootContext>(_pendingBindList);
+      ArrayList<ComponentImpl> bindList
+	= new ArrayList<ComponentImpl>(_pendingBindList);
       
       _pendingBindList.clear();
       
-      for (WebBeansRootContext context : rootContextList) {
-	WbWebBeans webBeans = _webBeansMap.get(context.getRoot());
-	
-	webBeans.bind();
+      for (ComponentImpl comp : bindList) {
+	if (comp.getType().isEnabled())
+	  comp.bind();
       }
-      
-      _wbWebBeans.bind();
     } catch (ConfigException e) {
       if (_configException == null)
 	_configException = e;

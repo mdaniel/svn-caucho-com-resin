@@ -93,10 +93,16 @@ public interface PortMXBean extends ManagedObjectMXBean {
   public int getConnectionMax();
 
   /**
-   * Returns the maximum number of keepalive connections allowed for the port.
+   * Returns the maximum number keepalive connections allowed for the port.
    */
   @Description("The configured maximum number of keepalive connections")
   public int getKeepaliveMax();
+
+  /**
+   * Returns the maximum number of select keepalive connections allowed for the port.
+   */
+  @Description("The configured maximum number of select keepalive connections")
+  public int getKeepaliveSelectMax();
 
   /**
    * Returns the maximum total time for keepalive connections

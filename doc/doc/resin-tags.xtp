@@ -250,7 +250,6 @@ element resin {
   &amp; root-directory?
   &amp; security-manager?
   &amp; security-provider?
-  &amp; shutdown-wait-max?
   &amp; watchdog-manager?
 }
 </def>
@@ -481,6 +480,11 @@ and resin-user.</p>
   <th>Default</th>
 </tr>
 <tr>
+  <td>chroot</td>
+  <td>calls chroot before starting the Resin process</td>
+  <td></td>
+</tr>
+<tr>
   <td>group-name</td>
   <td>setgid value for unix systems</td>
   <td></td>
@@ -516,6 +520,7 @@ for ports that require root access</td>
 <def title="&lt;watchdog> schema">
 element watchdog {
   attribute id { string }
+  &amp; chroot?
   &amp; group-name?
   &amp; java-exe?
   &amp; java-home?

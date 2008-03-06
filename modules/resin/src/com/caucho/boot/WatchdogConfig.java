@@ -71,6 +71,7 @@ public class WatchdogConfig
   private boolean _hasXss;
   private boolean _hasXmx;
 
+  private Path _chroot;
   private Path _pwd;
   private int _watchdogPort;
 
@@ -281,6 +282,16 @@ public class WatchdogConfig
     return _ports;
   }
 
+  Path getChroot()
+  {
+    return _chroot;
+  }
+
+  public void setChroot(Path chroot)
+  {
+    _chroot = chroot;
+  }
+  
   Path getPwd()
   {
     return _pwd;

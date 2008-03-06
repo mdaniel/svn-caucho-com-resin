@@ -376,7 +376,7 @@ public class EJBServer
    */
   public void setValidateDatabaseSchema(boolean validate)
   {
-    _validateDatabaseSchema = validate;
+    log.config("validate-database-schema is no longer valid");
   }
 
   /**
@@ -384,7 +384,9 @@ public class EJBServer
    */
   public boolean getValidateDatabaseSchema()
   {
-    return _validateDatabaseSchema;
+    log.config("validate-database-schema is no longer valid");
+    
+    return true;
   }
 
   /**
