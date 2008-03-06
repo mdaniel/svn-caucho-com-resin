@@ -29,21 +29,12 @@
 
 package com.caucho.jsf.taglib;
 
-import java.io.*;
-
-import javax.el.*;
-
-import javax.faces.component.*;
 import javax.faces.component.html.*;
-import javax.faces.context.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
 
 /**
  * The h:inputText tag
  */
-public class HtmlInputTextTag extends HtmlStyleBaseTag {
+public class HtmlInputTextTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlInputText.COMPONENT_TYPE;

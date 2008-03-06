@@ -66,6 +66,11 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -977,6 +982,32 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -1022,6 +1053,36 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -1048,6 +1109,11 @@
       <deferred-value>
         <type>String</type>
       </deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -1213,6 +1279,36 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -1246,6 +1342,11 @@
       <deferred-value>
         <type>Boolean</type>
       </deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -1406,6 +1507,36 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+    
     <!-- UIOutput values -->
 
     <attribute>
@@ -1817,6 +1948,36 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -1992,6 +2153,36 @@
     <attribute>
       <name>rendered</name>
       <deferred-value><type>boolean</type></deferred-value>
+    </attribute>
+
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
     </attribute>
 
     <!-- UIOutput values -->
@@ -2176,6 +2367,36 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+    
     <!-- UIOutput values -->
 
     <attribute>
@@ -2353,6 +2574,37 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+    
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+    
     <!-- UIOutput values -->
 
     <attribute>
@@ -2523,6 +2775,37 @@
     <attribute>
       <name>rendered</name>
       <deferred-value><type>boolean</type></deferred-value>
+    </attribute>
+
+    <!-- UIInput Values -->
+
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
     </attribute>
 
     <!-- UIOutput values -->
@@ -2712,6 +2995,36 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -2897,6 +3210,36 @@
     <attribute>
       <name>rendered</name>
       <deferred-value><type>boolean</type></deferred-value>
+    </attribute>
+
+    <!-- UIInput values -->
+    <attribute>
+      <name>converterMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>label</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>requiredMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validatorMessage</name>
+      <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>validator</name>
+      <deferred-method>
+	<method-signature>
+	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
     </attribute>
 
     <!-- UIOutput values -->

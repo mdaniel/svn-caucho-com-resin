@@ -564,20 +564,31 @@ public class UIInput extends UIOutput
       setValid(false);
       context.renderResponse();
 
+      final String converterMessage = getConverterMessage();
+
       FacesMessage msg = e.getFacesMessage();
-      if (msg != null)
-	context.addMessage(getClientId(context), msg);
-      else {
-	String summary = Util.l10n(context, CONVERSION_MESSAGE_ID,
-				   "{0}: Conversion error occurred.",
-				   Util.getLabel(context, this));
+
+      if (msg == null) {
+	String summary = null;
+
+	if (converterMessage != null)
+	  summary = converterMessage;
+	else
+	  summary = Util.l10n(context, CONVERSION_MESSAGE_ID,
+			      "{0}: Conversion error occurred.",
+			      Util.getLabel(context, this));
 
 	String detail = summary;
 
 	msg = new FacesMessage(summary, detail);
-	
-	context.addMessage(getClientId(context), msg);
       }
+      else if (converterMessage != null) {
+	msg.setSummary(converterMessage);
+	msg.setDetail(converterMessage);
+      }
+
+      context.addMessage(getClientId(context), msg);
+
       return;
     }
     
@@ -646,13 +657,33 @@ public class UIInput extends UIOutput
 	} catch (ValidatorException e) {
 	  log.log(Level.FINER, e.toString(), e);
 
-	  if (e.getFacesMessage() != null)
-	    context.addMessage(getClientId(context), e.getFacesMessage());
+	  FacesMessage msg = e.getFacesMessage();
+
+	  String validatorMessage = getValidatorMessage();
+
+	  if (msg == null) {
+	    final String summary;
+	    final String detail;
+
+	    if (validatorMessage != null) {
+	      summary = validatorMessage;
+	      detail = validatorMessage;
+	    }
+	    else {
+	      summary = e.getMessage();
+	      detail = e.toString();
+	    }
+
+	    msg = new FacesMessage(summary, detail);
+	  }
 	  else {
-	    FacesMessage msg = new FacesMessage(e.getMessage(), e.toString());
-	    context.addMessage(getClientId(context), msg);
+	    if (validatorMessage != null) {
+	      msg.setSummary(validatorMessage);
+	      msg.setDetail(validatorMessage);
+	    }
 	  }
 	  
+	  context.addMessage(getClientId(context), msg);
 	  setValid(false);
 	}
       }
