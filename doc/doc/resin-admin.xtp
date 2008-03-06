@@ -473,5 +473,244 @@ unix&gt; jconsole
 </p>
 </s1>
 
+<s1 title="SNMP">
+
+<p>
+Since 3.1.5, Resin has built-in support for SNMP (Simple Network
+Management Protocol).  This allows Resin to be managed just like any
+network device (e.g. routers) from an SNMP manager application.
+</p>
+
+<s2 title="Enabling SNMP support in Resin">
+
+<p>
+To enable Resin's SNMP service, you'll need to add an SNMP protocol tag
+to your resin.conf under the &lt;server&gt; tag:
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id=""&gt;
+    &lt;server-default&gt;
+    
+      &lt;protocol class="com.caucho.server.snmp.SnmpProtocol" port="161"/&gt;
+      
+    &lt;server-default/&gt;
+    
+    ...
+    
+  &lt;cluster/&gt;
+&lt;resin/&gt;
+</example>
+
+This opens up a port that listens for SNMP requests and responds to
+them with an SNMP response.  Currently, Resin can only respond to
+TCP SNMP get-pdu requests.
+</p>
+
+<p>
+By default, the SNMP community string is "public". It can be changed with:
+
+<example>
+&lt;protocol class="com.caucho.server.snmp.SnmpProtocol" port="161"&gt;
+  &lt;init community="<i>insert_password_here</i>"/&gt;
+&lt;protocol/>
+</example>
+</p>
+
+</s2>
+
+<s2 title="MIB Variables">
+
+<p>
+Internally, Resin stores a mapping from SNMP MIB variables to
+MBean attributes.  Requests for a specific MIB variable are simply
+retrievals for the corresponding MBean attribute.  The available MIB
+mappings are hard-coded in Resin and they are:
+</p>
+
+<deftable title="SNMP to MBean mappings">
+<tr>
+  <th>SNMP Object ID</th>
+  <th>SNMP type</th>
+  <th>MBean</th>
+  <th>MBean attribute</th>
+</tr>
+<tr>
+  <td>1.3.6.1.2.1.1.1</td>
+  <td>Octet String</td>
+  <td>resin:type=Resin</td>
+  <td>Version</td>
+</tr>
+<tr>
+  <td>1.3.6.1.2.1.1.3</td>
+  <td>Time Ticks</td>
+  <td>java.lang:type=Runtime</td>
+  <td>UpTime</td>
+</tr>
+<tr>
+  <td>1.3.6.1.2.1.1.5</td>
+  <td>Octet String</td>
+  <td>resin:type=Host,name=default</td>
+  <td>URL</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.1.1</td>
+  <td>Gauge</td>
+  <td>resin:type=Server</td>
+  <td>KeepaliveCountTotal</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.1.2</td>
+  <td>Gauge</td>
+  <td>resin:type=Server</td>
+  <td>RequestCountTotal</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.1.3</td>
+  <td>Gauge</td>
+  <td>resin:type=Server</td>
+  <td>RuntimeMemory</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.1.4</td>
+  <td>Gauge</td>
+  <td>resin:type=Server</td>
+  <td>RuntimeMemoryFree</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.1.5</td>
+  <td>Gauge</td>
+  <td>resin:type=Server</td>
+  <td>ThreadActiveCount</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.1.6</td>
+  <td>Gauge</td>
+  <td>resin:type=Server</td>
+  <td>ThreadKeepaliveCount</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.2.1</td>
+  <td>Gauge</td>
+  <td>resin:type=ThreadPool</td>
+  <td>ThreadActiveCount</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.2.2</td>
+  <td>Gauge</td>
+  <td>resin:type=ThreadPool</td>
+  <td>ThreadCount</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.2.3</td>
+  <td>Gauge</td>
+  <td>resin:type=ThreadPool</td>
+  <td>ThreadIdleCount</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.2.4</td>
+  <td>Gauge</td>
+  <td>resin:type=ThreadPool</td>
+  <td>ThreadIdleMax</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.2.5</td>
+  <td>Gauge</td>
+  <td>resin:type=ThreadPool</td>
+  <td>ThreadIdleMin</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.2.6</td>
+  <td>Gauge</td>
+  <td>resin:type=ThreadPool</td>
+  <td>ThreadMax</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.3.1</td>
+  <td>Gauge</td>
+  <td>resin:type=ProxyCache</td>
+  <td>HitCountTotal</td>
+</tr>
+<tr>
+  <td>1.3.6.1.4.1.30350.3.2</td>
+  <td>Gauge</td>
+  <td>resin:type=ProxyCache</td>
+  <td>MissCountTotal</td>
+</tr>
+</deftable>
+
+</s2>
+
+<s2 title="Defining your own SNMP to MBean mappings">
+
+<p>
+To define your own MIB variables, you'll need to extend the
+<var>com.caucho.server.snmp.SnmpProtocol</var> class.  It would
+look something like this:
+
+<example title="example.MySnmpProtocol">
+package example;
+
+import com.caucho.server.snmp.*;
+import com.caucho.server.snmp.types.*;
+
+public class MySnmpProtocol extends SnmpProtocol
+{
+  public MySnmpProtocol()
+  {
+    addOid(new Oid("1.2.3.4.5",
+                   "<var>my_mbean_object_name</var>",
+                   "<var>my_mbean_attribute</var>",
+                   SnmpValue.OCTET_STRING));
+  }
+}
+
+</example>
+
+<var>"1.2.3.4.5"</var> is the SNMP ID you choose to give to your mapping.
+It should be in dot notation.  <var>SnmpValue.OCTET_STRING</var> is the
+type Resin should return for that attribute.  An abbreviated list of
+the available types are:
+</p>
+
+<deftable>
+<tr>
+  <th>SNMP types</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>SnmpValue.OCTET_STRING</td>
+  <td>8-bit String</td>
+</tr>
+<tr>
+  <td>SnmpValue.INTEGER</td>
+  <td>signed 32-bit integer</td>
+</tr>
+<tr>
+  <td>SnmpValue.COUNTER</td>
+  <td>unsigned 32-bit integer that only increases, wraps around when overflows</td>
+</tr>
+<tr>
+  <td>SnmpValue.GAUGE</td>
+  <td>unsigned 32-bit integer that may increase and decrease</td>
+</tr>
+<tr>
+  <td>SnmpValue.TIME_TICKS</td>
+  <td>unsigned 32-bit integer representing time measured in hundredths of a second</td>
+</tr>
+<tr>
+  <td>SnmpValue.IP_ADDRESS</td>
+  <td>IP address</td>
+</tr>
+</deftable>
+
+<p>
+For a more complete list, see <a href="http://caucho.com/resin-javadoc/com/caucho/server/snmp/package-summary.html">com.caucho.server.snmp</a> JavaDoc.
+</p>
+
+</s2>
+
+</s1>
+
   </body>
 </document>

@@ -250,7 +250,7 @@ session during a request.  The values are:</p>
 <deftable>
 <tr>
   <td>after-request</td>
-  <td>Save the session after the request has completed</td>
+  <td>Save the session after the request has been served and completed</td>
 </tr>
 <tr>
   <td>before-headers</td>
