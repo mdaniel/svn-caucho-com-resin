@@ -106,6 +106,14 @@ public class LiteralExpr extends Expr {
   {
     return _value.isDoubleConvertible();
   }
+  
+  /*
+   * 
+   */
+  public boolean isBoolean()
+  {
+    return _value.isBoolean();
+  }
 
   /**
    * Evaluates the expression as a constant.

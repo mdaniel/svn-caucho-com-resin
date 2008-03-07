@@ -286,6 +286,18 @@ public class LongValue extends NumberValue
    */
   public int cmp(Value rValue)
   {
+    if (rValue.isBoolean()) {
+      boolean lBool = toBoolean();
+      boolean rBool = rValue.toBoolean();
+      
+      if (! lBool && rBool)
+        return -1;
+      if (lBool && ! rBool)
+        return 1;
+      
+      return 0;
+    }
+    
     long l = _value;
     double r = rValue.toDouble();
 

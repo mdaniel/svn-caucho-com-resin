@@ -283,6 +283,7 @@ abstract public class Value implements java.io.Serializable
     {
       boolean lBool = toBoolean();
       boolean rBool    = rValue.toBoolean();
+
       if (!lBool && rBool) return -1;
       if (lBool && !rBool) return 1;
       return 0;

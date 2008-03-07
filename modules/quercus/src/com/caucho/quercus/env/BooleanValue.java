@@ -217,15 +217,14 @@ public class BooleanValue extends Value
    */
   public int cmp(Value rValue)
   {
-    double l = _value ? 1 : 0;
-    double r = rValue.toDouble();
-
-    if (l == r)
-      return 0;
-    else if (l < r)
+    boolean rBool = rValue.toBoolean();
+    
+    if (! _value && rBool)
       return -1;
-    else
+    if (_value && ! rBool)
       return 1;
+    
+    return 0;
   }
 
   /**

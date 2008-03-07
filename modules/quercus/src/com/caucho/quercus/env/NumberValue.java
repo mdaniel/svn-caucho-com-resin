@@ -38,6 +38,18 @@ public abstract class NumberValue extends Value {
    */
   public int cmp(Value rValue)
   {
+    if (rValue.isBoolean()) {
+      boolean lBool = toBoolean();
+      boolean rBool = rValue.toBoolean();
+      
+      if (! lBool && rBool)
+        return -1;
+      if (lBool && ! rBool)
+        return 1;
+      
+      return 0;
+    }
+    
     double l = toDouble();
     double r = rValue.toDouble();
 
