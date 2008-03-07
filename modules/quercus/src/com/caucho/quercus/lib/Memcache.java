@@ -104,7 +104,29 @@ public class Memcache {
     else
       return BooleanValue.FALSE;
   }
+  
+  /*
+   * Removes a value.
+   */
+  public boolean delete(Env env,
+                        String key,
+                        @Optional int timeout)
+  {
+    _cache.remove(key);
+    
+    return true;
+  }
 
+  /*
+   * Clears the cache.
+   */
+  public boolean flush(Env env)
+  {
+    _cache.clear();
+    
+    return true;
+  }
+  
   /**
    * Returns version information.
    */
@@ -171,6 +193,16 @@ public class Memcache {
     public void set(String key, Value value)
     {
       _map.put(key, value);
+    }
+    
+    public Value remove(String key)
+    {
+      return _map.remove(key);
+    }
+    
+    public void clear()
+    {
+      _map.clear();
     }
   }
 }
