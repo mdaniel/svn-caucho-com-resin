@@ -361,6 +361,9 @@ public class XmppRequest implements ServerRequest, Runnable {
     if (_isFinest)
       debug(_in);
 
+    String localName = _in.getLocalName();
+    String uri = _in.getNamespaceURI();
+
     if ("bind".equals(_in.getLocalName())) {
       tag = _in.nextTag();
 
@@ -400,11 +403,14 @@ public class XmppRequest implements ServerRequest, Runnable {
     else if ("jabber:iq:roster".equals(_in.getNamespaceURI())
 	     && "query".equals(_in.getLocalName())) {
       skipToEnd("iq");
+
+      System.out.println("ROSTER: " + _streamFrom);
       
       _os.print("<iq type='result' id='" + id + "' from='" + _streamFrom + "'>");
       _os.print("<query xmlns='jabber:iq:roster'>");
 
-      _os.print("<item jid='localhost/test' name='Test' subscription='both'>");
+      _os.print("<item jid='jimmy@localhost' name='Test' subscription='to'>");
+      _os.print("<group>Buddies</group>");
       _os.print("</item>");
       
       _os.print("</query>");
@@ -413,25 +419,30 @@ public class XmppRequest implements ServerRequest, Runnable {
 
       return true;
     }
-    /*
-    else if ("query".equals(_in.getLocalName())) {
-      expectEnd("query");
+    else if ("query".equals(_in.getLocalName())
+	     && "http://jabber.org/protocol/disco#info".equals(uri)) {
+      skipToEnd("iq");
 
       _os.print("<iq type='result' id='" + id + "'");
       if (to != null)
 	_os.print(" from='" + to + "'");
       _os.print(">");
       _os.print("<query xmlns='http://jabber.org/protocol/disco#info'>");
-      _os.print("<identity category='client' type='bot' name='test'/>");
+      _os.print("<identity category='pubsub' type='leaf' name='test'/>");
+      _os.print("<feature var='http://jabber.org/protocol/disco#info'/>");
+      _os.print("<feature var='jabber:iq:time'/>");
+      _os.print("<feature var='jabber:iq:search'/>");
+      _os.print("<feature var='http://jabber.org/protocol/muc'/>");
+      _os.print("<feature var='http://jabber.org/protocol/pubsub'/>");
       _os.print("</query>");
       _os.print("</iq>");
       _os.flush();
       System.out.println("QUERY: " + type + " query:" + _in.getLocalName() + " from:" + from + " to:" + to + " id:" + id);
-      
+
+      return true;
     }
-    */
     else {
-      expectEnd(_in.getLocalName());
+      skipToEnd("iq");
 
       _os.print("<iq type='error'>");
       _os.print("<error/>");
@@ -441,11 +452,9 @@ public class XmppRequest implements ServerRequest, Runnable {
 	log.fine(this + " <" + _in.getLocalName() + " xmlns="
 		 + _in.getNamespaceURI() + "> unknown iq");
       }
+
+      return true;
     }
-
-    expectEnd("iq");
-
-    return true;
   }
 
   private boolean handlePresence()
@@ -489,6 +498,16 @@ public class XmppRequest implements ServerRequest, Runnable {
     if (! _isPresent) {
       _isPresent = true;
       _protocol.addClient(this);
+
+      /*
+      _os.print("<iq from='jimmy@localhost' id='disco' type='get'>");
+      _os.print("<query xmlns='http://jabber.org/protocol/disco#info'/>");
+      _os.print("</iq>");
+      */
+
+      _os.print("<presence from='jimmy@localhost'>");
+      _os.print("<status>active</status>");
+      _os.print("</presence>");
     }
 
     return true;
@@ -524,7 +543,8 @@ public class XmppRequest implements ServerRequest, Runnable {
       if (tag != XMLStreamReader.START_ELEMENT)
 	continue;
 
-      if ("body".equals(_in.getLocalName())) {
+      if ("body".equals(_in.getLocalName())
+	  && "jabber:client".equals(_in.getNamespaceURI())) {
 	tag = _in.next();
 	if (_isFinest)
 	  debug(_in);
@@ -539,6 +559,7 @@ public class XmppRequest implements ServerRequest, Runnable {
 
     try {
       ObjectMessageImpl msg = new ObjectMessageImpl();
+      msg.setJMSMessageID("ID:xmpp-test");
     
       msg.setObject(body);
 
@@ -680,8 +701,12 @@ public class XmppRequest implements ServerRequest, Runnable {
     else if (XMLStreamReader.END_ELEMENT == in.getEventType()) {
       log.finest(this + " </" + in.getLocalName() + ">");
     }
-    else if (XMLStreamReader.CHARACTERS == in.getEventType())
-      log.finest(this + " text='" + in.getText() + "'");
+    else if (XMLStreamReader.CHARACTERS == in.getEventType()) {
+      String text = in.getText().trim();
+
+      if (! "".equals(text))
+	log.finest(this + " text='" + text + "'");
+    }
     else
       log.finest(this + " tag=" + in.getEventType());
   }

@@ -19,41 +19,102 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.log;
+package com.caucho.log.handler;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.*;
+import com.caucho.log.*;
 import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
+import javax.annotation.PostConstruct;
+import javax.management.*;
+import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.LogRecord;
+import java.util.logging.Level;
+import java.util.logging.Filter;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 /**
- * Resin's rotating path-based log.
+ * Configures a log handler
  */
-public class StreamHandler extends Handler {
-  private static L10N L = new L10N(StreamHandler.class);
-  
-  private WriteStream _os;
+
+public class PathHandler extends Handler {
+  private static final Logger log
+    = Logger.getLogger(LogHandlerConfig.class.getName());
+  private static final L10N L = new L10N(LogConfig.class);
+
+  private RotateLog _pathLog = new RotateLog();
 
   private Formatter _formatter;
-
   private String _timestamp;
+  
+  private Filter _filter;
 
-  public StreamHandler()
+  private WriteStream _os;
+
+  public PathHandler()
   {
+    _timestamp = "[%Y/%m/%d %H:%M:%S.%s] ";
   }
 
-  public StreamHandler(WriteStream os)
+  /**
+   * Sets the path
+   */
+  public void setPath(Path path)
   {
-    _os = os;
+    _pathLog.setPath(path);
+  }
+
+  /**
+   * Sets the path-format
+   */
+  public void setPathFormat(String pathFormat)
+  {
+    _pathLog.setPathFormat(pathFormat);
+  }
+
+  /**
+   * Sets the archive-format
+   */
+  public void setArchiveFormat(String archiveFormat)
+  {
+    _pathLog.setArchiveFormat(archiveFormat);
+  }
+
+  /**
+   * Sets the rollover-period
+   */
+  public void setRolloverPeriod(Period rolloverPeriod)
+  {
+    _pathLog.setRolloverPeriod(rolloverPeriod);
+  }
+
+  /**
+   * Sets the rollover-size
+   */
+  public void setRolloverSize(Bytes size)
+  {
+    _pathLog.setRolloverSize(size);
+  }
+
+  /**
+   * Sets the rollover-count
+   */
+  public void setRolloverCount(int count)
+  {
+    _pathLog.setRolloverCount(count);
   }
 
   /**
@@ -73,11 +134,54 @@ public class StreamHandler extends Handler {
   }
 
   /**
+   * Sets the filter.
+   */
+  public void setFilter(Filter filter)
+  {
+    _filter = filter;
+  }
+
+  /**
+   * Initialize the log.
+   */
+  @PostConstruct
+  public void init()
+    throws ConfigException
+  {
+    try {
+      _pathLog.init();
+	
+      WriteStream os = _pathLog.getRotateStream().getStream();
+
+      if (_timestamp != null) {
+	TimestampFilter filter = new TimestampFilter();
+	filter.setTimestamp(_timestamp);
+	filter.setStream(os);
+	os = new WriteStream(filter);
+      }
+
+      String encoding = System.getProperty("file.encoding");
+      
+      if (encoding != null)
+	os.setEncoding(encoding);
+      
+      os.setDisableClose(true);
+
+      _os = os;
+    } catch (IOException e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
    * Publishes the record.
    */
   public void publish(LogRecord record)
   {
     if (record.getLevel().intValue() < getLevel().intValue())
+      return;
+
+    if (_filter != null && ! _filter.isLoggable(record))
       return;
 
     try {
@@ -109,9 +213,9 @@ public class StreamHandler extends Handler {
 	}
       
 	if (thrown != null) {
-	  if (message != null &&
-	      ! message.equals(thrown.toString()) &&
-	      ! message.equals(thrown.getMessage()))
+	  if (message != null
+	      && ! message.equals(thrown.toString())
+	      && ! message.equals(thrown.getMessage()))
 	    _os.println(message);
 	
 	  record.getThrown().printStackTrace(_os.getPrintWriter());
@@ -121,7 +225,7 @@ public class StreamHandler extends Handler {
 	}
 	_os.flush();
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -161,7 +265,7 @@ public class StreamHandler extends Handler {
     else if (getClass() != o.getClass())
       return false;
 
-    StreamHandler handler = (StreamHandler) o;
+    PathHandler handler = (PathHandler) o;
 
     if (_os == null || handler._os == null)
       return false;
@@ -172,9 +276,8 @@ public class StreamHandler extends Handler {
   public String toString()
   {
     if (_os == null)
-      return "StreamHandler@" + System.identityHashCode(this) + "[]";
+      return getClass().getSimpleName() + "[" + _pathLog + "]";
     else
-      return ("StreamHandler@" + System.identityHashCode(this)
-	      + "[" + _os.getPath() + "]");
+      return getClass().getSimpleName() + "[" + _os.getPath() + "]";
   }
 }

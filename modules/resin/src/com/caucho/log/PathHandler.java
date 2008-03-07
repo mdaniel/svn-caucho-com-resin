@@ -64,7 +64,7 @@ public class PathHandler extends Handler {
       try {
 	try {
 	  os = _path.openAppend();
-	} catch (Throwable e) {
+	} catch (Exception e) {
 	  _path.getParent().mkdirs();
 	  os = _path.openAppend();
 	}
@@ -74,7 +74,7 @@ public class PathHandler extends Handler {
 
 	String msg = record.getMessage();
 	os.println(msg);
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	e.printStackTrace();
       } finally {
 	try {

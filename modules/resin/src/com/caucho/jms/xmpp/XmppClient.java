@@ -192,7 +192,8 @@ public class XmppClient {
       
       stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
 
-      if (! (stanza instanceof SessionStanza))
+      if (! (stanza instanceof SessionStanza)
+	  && ! (stanza instanceof EmptyStanza))
 	throw new RuntimeException("expected session");
 
       if (log.isLoggable(Level.FINER))
@@ -217,6 +218,41 @@ public class XmppClient {
       _os.flush();
 
       Stanza stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public void send(String type, String to, String body)
+    throws IOException
+  {
+    send(type, to, body, null);
+  }
+  
+  public void send(String type, String to, String body, String subject)
+    throws IOException
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " send to=" + to + " body=" + body);
+
+    try {
+      _os.print("<message ");
+      _os.print(" type='" + type + "'");
+      
+      if (to != null)
+	_os.print(" to='" + to + "'");
+      if (_from != null)
+	_os.print(" from='" + _from + "'");
+      _os.print(">");
+      
+      if (subject != null)
+	_os.print("<subject>" + subject + "</subject>");
+      if (body != null)
+	_os.print("<body>" + body + "</body>");
+      _os.print("</message>");
+      _os.flush();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -490,6 +526,11 @@ public class XmppClient {
 	if (_isFinest)
 	  debug(in);
 
+	if (tag == XMLStreamReader.END_ELEMENT
+	    && "iq".equals(in.getLocalName())) {
+	  return new EmptyStanza();
+	}
+	
 	if (tag != XMLStreamReader.START_ELEMENT)
 	  throw new IllegalStateException("expected start");
 

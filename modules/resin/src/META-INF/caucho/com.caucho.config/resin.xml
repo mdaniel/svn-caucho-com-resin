@@ -102,6 +102,9 @@
   <bean name="log"
         class="com.caucho.log.LogConfig"/>
 
+  <bean name="log-handler"
+        class="com.caucho.log.LogHandlerConfig"/>
+
   <bean name="logger"
         class="com.caucho.log.LoggerConfig"/>
     
