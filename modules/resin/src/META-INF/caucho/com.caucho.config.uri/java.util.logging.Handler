@@ -1,0 +1,3 @@
+event=com.caucho.log.handler.EventHandler
+jms=com.caucho.log.handler.JmsHandler
+

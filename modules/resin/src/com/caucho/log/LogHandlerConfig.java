@@ -71,6 +71,7 @@ public class LogHandlerConfig extends BeanConfig {
 
   public LogHandlerConfig()
   {
+    setBeanConfigClass(Handler.class);
   }
 
   /**

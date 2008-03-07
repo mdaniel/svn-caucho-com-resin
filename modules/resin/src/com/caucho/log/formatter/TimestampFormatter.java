@@ -19,14 +19,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.log;
+package com.caucho.log.formatter;
 
 import java.util.ArrayList;
 import java.util.logging.Formatter;
@@ -46,7 +47,6 @@ import java.io.IOException;
  * Formats a timestamp
  */
 public class TimestampFormatter extends Formatter {
-
   static final String []DAY_NAMES = {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
   };
@@ -81,6 +81,7 @@ public class TimestampFormatter extends Formatter {
    */
   public TimestampFormatter()
   {
+    setTimestamp("[%Y-%m-%d %H:%M:%S] %{level} {%{thread}} ");
   }
 
   public void setValue(String timestamp)
@@ -127,6 +128,9 @@ public class TimestampFormatter extends Formatter {
 	  if ("thread".equals(type)) {
 	    timestampList.add(new ThreadTimestamp());
 	  }
+	  else if ("level".equals(type)) {
+	    timestampList.add(new LevelTimestamp());
+	  }
 	  else if ("env".equals(type)) {
 	    timestampList.add(new EnvTimestamp());
 	  }
@@ -170,16 +174,13 @@ public class TimestampFormatter extends Formatter {
 
     StringBuilder sb = new StringBuilder();
 
-    int length = _timestamp.length;
-    for (int i = 0; i < length; i++) {
-      // _stream.print(_calendar.formatLocal(now, _timestamp));
-      synchronized (_calendar) {
-	_calendar.setGMTTime(now);
+    // _stream.print(_calendar.formatLocal(now, _timestamp));
+    synchronized (_calendar) {
+      _calendar.setGMTTime(now);
 	  
-	int len = _timestamp.length;
-	for (int j = 0; j < len; j++)
-	  _timestamp[j].format(sb, _calendar);
-      }
+      int len = _timestamp.length;
+      for (int j = 0; j < len; j++)
+	_timestamp[j].format(sb, _calendar, log);
     }
 
     sb.append(log.getMessage());
@@ -188,7 +189,7 @@ public class TimestampFormatter extends Formatter {
   }
 
   static class TimestampBase {
-    public void format(StringBuilder sb, QDate cal)
+    public void format(StringBuilder sb, QDate cal, LogRecord log)
     {
     }
   }
@@ -202,7 +203,7 @@ public class TimestampFormatter extends Formatter {
     }
     
     @Override
-    public void format(StringBuilder sb, QDate cal)
+    public void format(StringBuilder sb, QDate cal, LogRecord log)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -217,7 +218,7 @@ public class TimestampFormatter extends Formatter {
     }
     
     @Override
-    public void format(StringBuilder sb, QDate cal)
+    public void format(StringBuilder sb, QDate cal, LogRecord log)
     {
       switch (_code) {
       case 'a':
@@ -358,15 +359,23 @@ public class TimestampFormatter extends Formatter {
 
   static class ThreadTimestamp extends TimestampBase {
     @Override
-    public void format(StringBuilder sb, QDate cal)
+    public void format(StringBuilder sb, QDate cal, LogRecord log)
     {
       sb.append(Thread.currentThread().getName());
     }
   }
 
+  static class LevelTimestamp extends TimestampBase {
+    @Override
+    public void format(StringBuilder sb, QDate cal, LogRecord log)
+    {
+      sb.append(log.getLevel());
+    }
+  }
+
   static class EnvTimestamp extends TimestampBase {
     @Override
-    public void format(StringBuilder sb, QDate cal)
+    public void format(StringBuilder sb, QDate cal, LogRecord log)
     {
       sb.append(Environment.getEnvironmentName());
     }
