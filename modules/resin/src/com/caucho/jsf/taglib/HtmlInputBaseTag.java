@@ -34,6 +34,9 @@ import javax.el.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.validator.MethodExpressionValidator;
+import javax.faces.validator.Validator;
+import javax.faces.event.MethodExpressionValueChangeListener;
+import javax.faces.event.ValueChangeListener;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -45,7 +48,11 @@ public class HtmlInputBaseTag
 {
   private Map<String, ValueExpression> _map;
 
-  private MethodExpression _validator;
+  private MethodExpression _validatorExpression;
+  private MethodExpressionValidator _validator;
+
+  private MethodExpression _valueChangeExpression;
+  private MethodExpressionValueChangeListener _valueChangeListener;
 
   public String getComponentType()
   {
@@ -123,12 +130,31 @@ public class HtmlInputBaseTag
 
   public MethodExpression getValidator()
   {
-    return _validator;
+    return _validatorExpression;
   }
 
   public void setValidator(MethodExpression value)
   {
-    _validator = value;
+    _validatorExpression = value;
+
+    if (_validatorExpression != null) {
+      _validator = new MethodExpressionValidator(
+	_validatorExpression);
+    }
+  }
+
+  public MethodExpression getValueChangeListener()
+  {
+    return _valueChangeExpression;
+  }
+
+  public void setValueChangeListener(MethodExpression value)
+  {
+    _valueChangeExpression = value;
+
+    if (_valueChangeExpression != null)
+      _valueChangeListener = new MethodExpressionValueChangeListener(
+	_valueChangeExpression);
   }
 
   @Override
@@ -143,13 +169,44 @@ public class HtmlInputBaseTag
 
     UIInput input = (UIInput) component;
 
-    if (_validator != null)
-      input.addValidator(new MethodExpressionValidator(_validator));
+    if (_validatorExpression != null) {
+      Validator[] validators = input.getValidators();
+
+      MethodExpressionValidator validator = null;
+      for (int i = 0; i < validators.length; i++)
+	if (_validator == validators[i])
+	  validator = _validator;
+
+      if (validator == null)
+	input.addValidator(_validator);
+    }
+
+    if (_valueChangeExpression != null) {
+      ValueChangeListener[] valueChangeListeners
+	= input.getValueChangeListeners();
+
+      MethodExpressionValueChangeListener listener = null;
+
+      for (int i = 0; i < valueChangeListeners.length; i++)
+	if (_valueChangeListener == valueChangeListeners[i])
+	  listener
+	    = (MethodExpressionValueChangeListener) valueChangeListeners[i];
+
+      if (listener == null)
+	input.addValueChangeListener(_valueChangeListener);
+    }
+
   }
 
   public void release()
   {
     _map = null;
+
+    _validatorExpression = null;
+    _validator = null;
+
+    _valueChangeExpression = null;
+    _valueChangeListener = null;
 
     super.release();
   }

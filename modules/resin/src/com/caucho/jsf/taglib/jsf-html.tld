@@ -1008,6 +1008,15 @@
       </deferred-method>
     </attribute>
 
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -1079,6 +1088,15 @@
       <deferred-method>
 	<method-signature>
 	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
 	</method-signature>
       </deferred-method>
     </attribute>
@@ -1305,6 +1323,15 @@
       <deferred-method>
 	<method-signature>
 	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
 	</method-signature>
       </deferred-method>
     </attribute>
@@ -1536,7 +1563,16 @@
 	</method-signature>
       </deferred-method>
     </attribute>
-    
+
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -1978,6 +2014,15 @@
       </deferred-method>
     </attribute>
 
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -2181,6 +2226,15 @@
       <deferred-method>
 	<method-signature>
 	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
 	</method-signature>
       </deferred-method>
     </attribute>
@@ -2397,6 +2451,15 @@
       </deferred-method>
     </attribute>
     
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -2604,7 +2667,16 @@
 	</method-signature>
       </deferred-method>
     </attribute>
-    
+
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -2804,6 +2876,15 @@
       <deferred-method>
 	<method-signature>
 	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
 	</method-signature>
       </deferred-method>
     </attribute>
@@ -3025,6 +3106,15 @@
       </deferred-method>
     </attribute>
 
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
     <!-- UIOutput values -->
 
     <attribute>
@@ -3238,6 +3328,15 @@
       <deferred-method>
 	<method-signature>
 	  void validate(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
+	</method-signature>
+      </deferred-method>
+    </attribute>
+
+    <attribute>
+      <name>valueChangeListener</name>
+      <deferred-method>
+	<method-signature>
+	  void valueChange(javax.faces.event.ValueChangeEvent)
 	</method-signature>
       </deferred-method>
     </attribute>
