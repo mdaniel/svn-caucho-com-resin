@@ -29,23 +29,27 @@
 
 package com.caucho.management.server;
 
+import javax.management.*;
+
 /**
  * Persistent logging.
  */
-public class LogMessage implements java.io.Serializable
+public class LogNotification extends Notification
 {
   private String _name;
   
   private String _server;
   private String _thread;
   
-  private long _timestamp;
-  
   private String _level;
-  private String _message;
 
-  public LogMessage()
+  public LogNotification(String type,
+			 ObjectName source,
+			 long sequenceNumber,
+			 long timestamp,
+			 String message)
   {
+    super(type, source, sequenceNumber, timestamp, message);
   }
 
   /**
@@ -97,22 +101,6 @@ public class LogMessage implements java.io.Serializable
   }
 
   /**
-   * The timestamp for the log message
-   */
-  public void setTimestamp(long timestamp)
-  {
-    _timestamp = timestamp;
-  }
-
-  /**
-   * The timestamp for the log message
-   */
-  public long getTimestamp()
-  {
-    return _timestamp;
-  }
-
-  /**
    * The java.util.logging level name for the log message
    */
   public void setLevel(String level)
@@ -128,26 +116,10 @@ public class LogMessage implements java.io.Serializable
     return _level;
   }
 
-  /**
-   * The message text
-   */
-  public void setMessage(String message)
-  {
-    _message = message;
-  }
-
-  /**
-   * The message text
-   */
-  public String getMessage()
-  {
-    return _message;
-  }
-
   public String toString()
   {
     return (getClass().getSimpleName()
 	    + "[" + _name + ", " + _level
-	    + ", " + _thread + ", " + _message + "]");
+	    + ", " + _thread + ", " + getMessage() + "]");
   }
 }
