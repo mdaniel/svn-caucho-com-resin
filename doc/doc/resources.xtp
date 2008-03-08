@@ -259,9 +259,7 @@ months fields are optional.</p>
 
 </s2>
 
-</s1> <!-- scheduled-task -->
-
-<s1 title="com.caucho.resources.CronResource">
+<s2 title="com.caucho.resources.CronResource">
 <p>Often, applications need to run a task at specific times.  The
 <code>CronResource</code> provides a standard way of doing that.
 Applications need only create a standard
@@ -314,24 +312,22 @@ months fields are optional.</p>
 </td></tr><tr><td>0 0 */3</td><td>run every third day at midnight
 </td></tr><tr><td>15 0 * * 6</td><td>run every Saturday at 0015
 </td></tr></deftable>
-</s1>
+</s2>
 
-<s1 title="Hello, World example">
+<s2 title="Hello, World example">
 
-<example title="WEB-INF/web.xml">
-
+<example title="Example: WEB-INF/web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;resource type="com.caucho.resources.CronResource"&gt;
-    &lt;init&gt;
-      &lt;!-- every minute --&gt;
-      &lt;cron&gt;*&lt;/cron&gt;
-      &lt;work resin:type="example.PeriodicWork"/&gt;
-    &lt;/init&gt;
+
+  &lt;scheduled-task class="example.PeriodicWork"&gt;
+    &lt;!-- every 5 minutes --&gt;
+    &lt;cron&gt;*/5&lt;/cron&gt;
   &lt;/resource&gt;
+
 &lt;/web-app&gt;
 </example>
 
-<example title="WEB-INF/classes/example/PeriodicWork.java">
+<example title="Example: WEB-INF/classes/example/PeriodicWork.java">
 
 package example;
 
@@ -360,29 +356,28 @@ public class PeriodicWork implements Runnable {
 <results>
 [13:04:27.429] PeriodicWork: constructor
 [13:05:00.095] PeriodicWork: run() Hello, World
-[13:06:00.182] PeriodicWork: run() Hello, World
+[13:10:00.182] PeriodicWork: run() Hello, World
 </results>
-</s1>
+</s2>
 
-<s1 title="bean-style configuration example">
+<s2 title="Example: bean-style configuration example">
 
 <example title="WEB-INF/web.xml">
-
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;resource type="com.caucho.resources.CronResource"&gt;
+
+  &lt;scheduled-task class="example.PeriodicWork"&gt;
+    &lt;!-- every minute --&gt;
+    &lt;cron&gt;*&lt;/cron&gt;
+
     &lt;init&gt;
-      &lt;!-- every minute --&gt;
-      &lt;cron&gt;*&lt;/cron&gt;
-      &lt;work resin:type="example.PeriodicWork"&gt;
-        &lt;message&gt;Goodybye, World&lt;/message&gt;
-      &lt;/work&gt;
+      &lt;message&gt;Goodybye, World&lt;/message&gt;
     &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/scheduled-task&gt;
+
 &lt;/web-app&gt;
 </example>
 
-<example title="WEB-INF/classes/example/PeriodicWork.java">
-
+<example title="Example: WEB-INF/classes/example/PeriodicWork.java">
 package example;
 
 import java.util.logging.Level;
@@ -451,9 +446,10 @@ public class PeriodicWork implements Work {
 (close Resin)
 [13:06:00.345] PeriodicWork: release()
 </results>
-</s1>
+</s2>
+</s1> <!-- scheduled-task -->
 
-<s1 name="concepts" title="RMI concepts">
+<s1 name="concepts" title="RMI Resource">
 
 <p>
 The goal of RMI is to provide <var>services</var> to remote clients.  A remote
@@ -493,9 +489,7 @@ ramifications for the naming of services.
 
 </s2> <!-- concepts/registry -->
 
-</s1> <!-- concepts -->
-
-<s1 title="The Hessian alternative">
+<s2 title="The Hessian alternative">
 
 <p>If you are considering RMI as a mechanism for publishing services, you may
 want to consider using <a href="hessian.xtp">Hessian</a> instead.  Hessian offers the following
@@ -514,9 +508,9 @@ More information is available in the
 <a href="hessian.xtp">Hessian</a> section of the documentation.
 </p>
 
-</s1>
+</s2>
 
-<s1 name="security-manager" title="Requirement: security-manager">
+<s2 name="security-manager" title="Requirement: security-manager">
 
 <p>
 The JDK requires that a security manager be in place for the use of RMI.
@@ -544,8 +538,9 @@ More information is available in the
 section of the documentation.
 </p>
 
-</s1>
-<s1 name="ref" title="com.caucho.resources.rmi.RmiRegistry">
+</s2>
+
+<s2 name="ref" title="com.caucho.resources.rmi.RmiRegistry">
 <p>
 Resin provides the resource class 
 <a href="javadoc|com.caucho.resources.rmi.RmiRegistry|"/>
@@ -570,7 +565,7 @@ RMI Registry if needed.
 </example>
 
 
-<s2 title="com.caucho.resources.rmi.RmiRegistry" version="Resin 3.0.6" type="defun">
+<s3 title="com.caucho.resources.rmi.RmiRegistry" version="Resin 3.0.6" type="defun">
 
 <deftable-childtags>
 <tr><td occur="?">server</td><td>the ip address of the server with the Registry</td><td>localhost
@@ -588,10 +583,10 @@ on the specified port, if it has not already been started.
 If <code>server</code> is something other than `localhost', then it is assumed
 that the Registry has been started by some other JVM , and is treated as remote Registry to register any services defined with <code>rmi-server</code>.
 </p>
-</s2>
+</s3>
  
 
-<s2 title="rmi-service" version="Resin 3.0.6" type="defun">
+<s3 title="rmi-service" version="Resin 3.0.6" type="defun">
 <parents>com.caucho.resources.rmi.RmiRegistry</parents>
 
 <p>
@@ -604,12 +599,12 @@ defined by the containing <code>RmiRegistry</code>.
 <tr><td occur="1">service-name</td><td>the name of the service, used for registration in the Registry and also used by clients to locate the service.</td><td>required
 </td></tr><tr><td occur="1">server-class</td><td>the name of the implementation class for the service</td><td>required
 </td></tr></deftable-childtags>
-</s2>
-</s1> <!-- ref -->
+</s3>
+</s2> <!-- ref -->
 
-<s1 name="implement" title="Implementing a service">
+<s2 name="implement" title="Implementing a service">
 
-<s2 title="Interface and Implementaion">
+<s3 title="Interface and Implementaion">
 
 <p>An RMI service requires the developer to create two classes - an interface
 and an implementation.  The interface defines the contract for the service, it
@@ -656,9 +651,9 @@ public class HelloWorldImpl extends UnicastRemoteObject implements HelloWorld
 }
 </example>
 
-</s2>
+</s3>
 
-<s2 title="Making Stubs">
+<s3 title="Making Stubs">
 
 <p>When the client uses a service, it uses a <var>proxy object</var>.  The proxy
 object is a placeholder, it implements the interface defined for the service,
@@ -684,9 +679,9 @@ It is tedious to perform this step manually, an ant build script (as shown
 in a later section) can be used to expediate the process.
 </p>
 
-</s2>
+</s3>
 
-<s2 name="implement/deploy" title="Deploying the service with Resin">
+<s3 name="implement/deploy" title="Deploying the service with Resin">
 <p>
 Once the work of making an interface, an implementation, and generating a stub
 is complete, it is a simple process to deploy the service in Resin.  
@@ -724,7 +719,7 @@ with the use of multiple <code>rmi-service</code> tags:
 &lt;/web-app&gt;
 </example>
 
-<s3 title="Choosing a name">
+<s4 title="Choosing a name">
 
 <p>By convention, the name chosen for the service often matches the name of the
 interface class.  For example, if the interface name is "example.HelloWorld"
@@ -734,10 +729,10 @@ then service-name is "HelloWorld" or even "example.HelloWorld" to match.
 <p>The RMI Registry has a global namespace.  If two different web-app's try to
 publish the same service, with the same name, there will be conflicts.</p>
 
-</s3>
-</s2>  <!-- implement/deploy -->
+</s4>
+</s3>  <!-- implement/deploy -->
 
-<s2 title="An example build file">
+<s3 title="An example build file">
 <p>
 An ant build file is useful for completing the <code>rmic</code> step, and for
 preparing a jar for use by the client.  The client jar contains the interfaces
@@ -807,11 +802,11 @@ the jar file <code>/rmiclient.jar</code>.
 &lt;/project&gt;
 </example>
 
+</s3>
+
 </s2>
 
-</s1>
-
-<s1 name="client" title="Implementing a client">
+<s2 name="client" title="Implementing a client">
 <p>
 The client is usually on a different machine, or at least in a different JVM, than the server.  That is the point of RMI, it enables the execution of code on a remote machine.
 </p>
@@ -834,11 +829,11 @@ Once the jar file is available to the client, using the RMI service id fairly si
   System.out.println(remote.sayHello());
 </example>
 
-</s1> <!-- client -->
+</s2> <!-- client -->
 
-<s1 name="scenarios" title="Scenarios">
+<s2 name="scenarios" title="Scenarios">
 
-<s2 title="A Resin server that provides the Registry and the service">
+<s3 title="A Resin server that provides the Registry and the service">
 
 <p>In the most common scenario, the Resin server provides both the RMI Registry
 and the RMI services.  When the registry server is defined as `localhost',
@@ -864,9 +859,9 @@ the (somewhat tricky) process of starting the rmi registry yourself.</p>
 <p>
 When the Resin server starts, it will start the rmi registry on port 1099 and register the `HelloWorld' service with it.
 </p>
-</s2>
+</s3>
 
-<s2 title="A Registry on a different server">
+<s3 title="A Registry on a different server">
 
 <p>In this scenario, the rmi registry is located on the machine
 <code>services.hogwarts.com</code>.  The registry is started with a custom (not
@@ -899,10 +894,9 @@ a remote machine, Resin will not create a registry on the local machine.  When
 the REsin server shuts down, or is restarted, the `HelloWorld' service will be
 removed from the remote registry.
 </p>
-</s2>
+</s3>
 
-
-<s2 title="A Registry in a different JVM">
+<s3 title="A Registry in a different JVM">
 
 <p>In this scenario, the rmi registry is located on the same machine
 as the Resin server, but is started  with a custom (not
@@ -938,9 +932,10 @@ the Resin server shuts down, or is restarted, the `HelloWorld' service will be
 removed from the remote registry.
 </p>
 
-</s2>
+</s3>
 
-</s1> <!-- scenarios -->
+</s2> <!-- scenarios -->
+</s1>
 
   </body>
 </document>

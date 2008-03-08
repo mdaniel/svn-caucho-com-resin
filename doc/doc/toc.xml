@@ -98,11 +98,6 @@
        - Caching
       -->
     <item link="proxy-cache.xtp" title="Caching"/>
-    
-    <!--
-       - Comet
-      -->
-    <item link="resin-comet.xtp" title="Comet"/>
       
     <!--
        - Database
@@ -188,12 +183,8 @@
        - Quercus
       -->
     <item link="quercus.xtp" title="Quercus/PHP">
-      <item title="Overview" link="quercus-overview.xtp"/>
       <item title="Security" link="quercus-security.xtp"/>
-      <item title="Java Integration" link="quercus-java-integration.xtp"/>
-      <item title="Resin Module" link="quercus-resin-module.xtp"/>
       <item title="Module Status" link="quercus-module-status.xtp"/>
-      <item title="List of PHP Applications" link="quercus-list-of-applications.xtp"/>
     </item>
       
     <item link="resin-remoting.xtp" title="Remoting"
@@ -202,13 +193,19 @@
     <!--
        - resources
       -->
-    <item link="resources.xtp" title="Resources"/>
+    <item link="resources.xtp" title="Scheduled Tasks"
+          description="executing tasks, methods and URLs based on cron triggers"/>
     
     <!--
        - Security
       -->
 	    
     <item link="resin-security.xtp" title="Security"/>
+    
+    <!--
+       - Server Push
+      -->
+    <item link="resin-comet.xtp" title="Server Push"/>
     
     <!--
        - Servlet
