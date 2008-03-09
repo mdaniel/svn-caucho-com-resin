@@ -59,7 +59,7 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   {
     out.writeStartElement("th");
 
-    if (_width == null)
+    if (_width != null)
       out.writeAttribute("width", _width);
 
     super.writeHtml(out);
