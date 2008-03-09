@@ -3,6 +3,15 @@
     <product>resin-ee</product>
     <title>Resin EJB 3.0</title>
     <type>contents</type>
+
+    <description><p>Resin's EJB support is integrated
+    with <a href="resin-ioc.xtp">Resin IoC</a>.  This integration means
+    plain Java beans can use EJB annotations and interception, EJBs can
+    use Resin IoC annotations, and both kinds of beans can be configured
+    directly from the <code>resin-web.xml</code> or discovered by classpath
+    scanning.</p>
+    </description>
+
   </header>
 
   <body>

@@ -3,6 +3,13 @@
     <product>resin</product>
     <title>Third-Party Products</title>
     <type>contents</type>
+
+    <description>
+    <p>Resin's support for third-party libraries and packages is
+    primarily documented at
+    <a href="http://wiki.caucho.com">http://wiki.caucho.com</a>.  This
+    section includes links to the most popular packages.</p>
+    </description>
   </header>
 
   <body>

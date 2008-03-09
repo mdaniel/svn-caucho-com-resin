@@ -1,7 +1,13 @@
 <document>
   <header>
-    <title>Resource Beans</title>
+    <title>Scheduled Task</title>
     <type>contents</type>
+    <description>
+    <p>Resin's &lt;scheduled-task> capability lets you schedule
+      events using a flexible cron-style trigger.  The task can be
+      any <code>Runnable</code> bean, a method specified by EL, or
+      a URL.</p>
+    </description>
   </header>
 
   <body>

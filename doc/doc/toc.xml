@@ -183,7 +183,8 @@
        - Quercus
       -->
     <item link="quercus.xtp" title="Quercus/PHP">
-      <item title="Security" link="quercus-security.xtp"/>
+      <item title="Security" link="quercus-security.xtp"
+            description="Quercus gains security advantages from the JVM platform"/>
       <item title="Module Status" link="quercus-module-status.xtp"/>
     </item>
       

@@ -4,18 +4,26 @@
     <title>Server Caching</title>
     <description>
       <p>Server caching can speed dynamic pages to
-        near-static speeds.   Many pages created by database
-        queries only change every 15 minutes or so, e.g. CNN or Wikipedia
-        or Slashdot.
-        Resin can cache the results and serve them like static pages.
-        Resin's caching will work for any servlet, including JSP
-        and XTP pages.  It depends only on the headers the servlet returns in
-        the response.</p>
+        near-static speeds.   When pages created by database
+        queries only change every 15 minutes, e.g. CNN or Wikipedia
+        or Slashdot, Resin can cache the results and serve them
+        like static pages.  Because Resin's caching only depends on
+        HTTP headers, it will work for any JSPs, servlet
+        or PHP page.response.</p>
 
-      <p>By default, pages are not cached.  To cache, a page must set a
-        HTTP caching header.  Resin's caching operates like a proxy cache.
-        It's controlled by the same HTTP headers as any proxy cache.
-        Every user shares the same cached page.</p>
+      <p>Resin's caching operates like a proxy cache, looking at HTTP
+        headers to compare hash codes or digests or simply caching for
+        a static amount of time.  Since the proxy cache follows the HTTP
+        standards, applications like Mediawiki will automatically see
+        dramatic performance improvement with no extra work.  You can even
+        cache REST-style GET requests.</p>
+
+      <p>Because the cache supports advanced headers like "Vary", it can
+        cache different versions of the page depending on the browser's
+        capabilities.  Gzip-enabled browsers will get the cached compressed
+        page while more primitive browsers will see the plan page.  With
+        "Vary: Cookie", you can return a cached page for anonymous users,
+        and still return a custom page for logged-in users.</p>
     </description>
   </header>
 
@@ -24,12 +32,11 @@
 
 <s1 title="Overview">
 
-<p>For many applications, enabling the proxy cache is one of the most
-effective way of improving your application's performance.  In some
-cases the difference is dramatic.  When <a href="quercus.xtp">Quercus</a>
-runs Mediawiki with caching enabled, Resin can return results as fast
-as static pages.  When caching is disabled, the performance is dramatically
-slower.</p>
+<p>For many applications, enabling the proxy cache can
+improve your application's performance dramatically.
+When <a href="quercus.xtp">Quercus</a> runs Mediawiki with caching enabled,
+Resin can return results as fast as static pages.  Without caching,
+the performance is significantly slower.</p>
 
 <deftable title="Mediawiki Performance">
 <tr>
@@ -41,6 +48,17 @@ slower.</p>
   <td>29.80 requests/sec</td>
 </tr>
 </deftable>
+
+<p>To enable caching, your application will need to set a few HTTP headers.
+While a simple application can just set a timed cache with <var>max-age</var>,
+a more sophisticated application can generate page hash digests with
+<var>ETag</var> and short-circuit repeated <var>If-None-Match</var>
+responses.</p>
+
+<p>If subsections of your pages are cacheable but the main page is not,
+you can cache servlet includes just like caching top-level pages.  Resin's
+include processing will examine the headers set by your include servlet
+and treat them just like a top-level cache.</p>
 
 </s1>
 
@@ -136,11 +154,11 @@ automatically provides this capability for static pages.  In general, the
 ETag is the most effective caching technique, although it requires a bit
 more work than <var>max-age</var>.</p>
 
-<p>The calculated <var>ETag</var> should be a hash of the result value,
-not a timestamp or version, to handle clustered values in a load-balanced
-configuration properly.  Since each server behind a load balancer will
-have a different timestamp for the files, each server would produce
-a different tag, even though the generated file was identical.  So either
+<p>To handle clustered servers in a load-balanced configuration, the
+calculated <var>ETag</var> should be a hash of the result value,
+not a timestamp or version.  Since each server behind a load balancer will
+generate a different timestamp for the files, each server would produce
+a different tag, even though the generated content was identical.  So either
 producing a hash or ensuring the <var>ETag</var> value is the same is
 critical.</p>
 
@@ -246,7 +264,7 @@ underlying source page changes.  Resin lets you easily use
 in a JSP page.</p>
 
 <p>Because of the clustering issues mentioned in the ETag section, it's
-generally recommended to use ETag and If-None-Match rather than
+generally recommended to use ETag and If-None-Match and avoid
 If-Modified-Since.  In a load balanced environment, each backend server
 would generally have a different Last-Modified value, while would effectively
 disable caching for a proxy cache or a browser that switched from one
@@ -312,12 +330,21 @@ cached independent of the top-level page.  Try the following, use the
 first <var>expires</var> counter example as the included page.  Create a
 top-level page that looks like:</p>
 
-<example>
+<example title="Example: top-level non-cached page">
 &lt;% if (! session.isNew()) { %&gt;
 &lt;h1&gt;Welcome back!&lt;/h1&gt;
 &lt;% } %&gt;
 
 &lt;jsp:include page="expires.jsp"/&gt;
+</example>
+
+<example title="Example: cached include page">
+&lt;%@ page session="false" %&gt;
+&lt;%! int counter; %&gt;
+&lt;%
+response.setHeader("Cache-Control", "max-age=15");
+%&gt;
+Count: &lt;%= counter++ %&gt;
 </example>
 
 </s1>
@@ -333,7 +360,7 @@ assigned cookies for tracking purposes.</p>
 If you omit the Vary header, Resin will use
 the <var>max-age</var> to cache the same page for every user.</p>
 
-<example>
+<example title="Example: 'Vary: Cookie' for anonymous users">
 &lt;%@ page session="false" %&gt;
 &lt;%! int _counter; %&gt;
 &lt;%

@@ -7,7 +7,10 @@
     <description>
       <p>
       <em>Quercus</em> is Caucho Technology's fast, open-source, 100%
-      Java implementation of the PHP language.
+      Java implementation of the PHP language.  Performance is 4x mod_php
+      and is comparable with PHP accelerator performance. Quercus uses
+       <a href="resin-ioc.xtp">Resin-IoC/WebBeans</a> to integrate with
+      Resin services.
       </p>
     </description>
   </header>
