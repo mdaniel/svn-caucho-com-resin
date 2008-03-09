@@ -322,6 +322,24 @@ element cluster {
 &lt;/resin&gt;
 </example>
 
+<s2 title="rewrite-vary-as-private">
+
+<p>Because not all browsers understand the Vary header, Resin can rewrite
+Vary to a Cache-Control: private.  This rewriting will cache the page
+with the Vary in Resin's proxy cache, and also cache the page in the browser.
+Any other proxy caches, however, will not be able to cache the page.</p>
+
+<p>The underlying issue is a limitation of browsers such as IE.  When IE
+sees a Vary header it doesn't understand, it marks the page as uncacheable.
+Since IE only understands "Vary: User-Agent", this would mean IE would
+refuse to cache gzipped pages or "Vary: Cookie" pages.</p>
+
+<p>With the &lt;rewrite-vary-as-private> tag, IE will cache the page
+since it's rewritten as "Cache-Control: private" with no Vary at all.
+Resin will continue to cache the page as normal.</p>
+
+</s2>
+
 </defun>
 
 <defun title="&lt;cluster-default>" version="Resin 3.1">

@@ -119,8 +119,92 @@ Count: &lt;%= counter++ %&gt;
 </example>
 
 <p><var>max-age</var> is useful for database generated pages which are
-continuously, but slowly updated.  To cache based on something with a known
-modified date, like a file, you can use <var>If-Modified</var>.</p>
+continuously, but slowly updated.  To cache with a fixed content, i.e.
+something which has a valid hash value like a file, you can
+use <var>ETag</var> with <var>If-None-Match</var>.</p>
+
+</s2>
+
+<s2 title="ETag and If-None-Match">
+
+<p>The <var>ETag</var> header specifies a hash or digest code for the
+generated page to further improve caching.  The browser or cache
+will send the <var>ETag</var> as a <var>If-None-Match</var> value when it
+checks for any page updates.  If the page is the same, the application will
+return a 304 NOT_MODIFIED response with an empty body.  Resin's FileServlet
+automatically provides this capability for static pages.  In general, the
+ETag is the most effective caching technique, although it requires a bit
+more work than <var>max-age</var>.</p>
+
+<p>The calculated <var>ETag</var> should be a hash of the result value,
+not a timestamp or version, to handle clustered values in a load-balanced
+configuration properly.  Since each server behind a load balancer will
+have a different timestamp for the files, each server would produce
+a different tag, even though the generated file was identical.  So either
+producing a hash or ensuring the <var>ETag</var> value is the same is
+critical.</p>
+
+<p><var>ETag</var> servlets will often also use &lt;cache-mapping>
+configuration to set a <var>max-age</var> or <var>s-max-age</var>.  The
+browser and proxy cache will cache the page without revalidation until
+<var>max-age</var> runs out. When the time expires, it will use
+<var>If-None-Match</var> to revalidate the page.</p>
+
+<p>When using <var>ETag</var>, your application will need to look for the
+<var>If-None-Match</var> header on incoming requests.  If the value is the
+same, your servlet can return 304 NOT-MODIFIED.  If the value differs,
+you'll return the new content and hash.</p>
+
+<example title="Example: ETag servlet">
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class MyServlet extends HttpServlet
+{
+  public void doGet(HttpServletRequest req, HttpServletResponse res)
+  {
+    String etag = getCurrentEtag();
+
+    String ifNoneMatch = req.getHeader("If-None-Match");
+
+    if (ifNoneMatch != null &amp;&amp; ifNoneMatch.equals(etag)) {
+      res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      return;
+    }
+
+    res.setHeader("ETag", etag);
+
+    ... // generate response
+  }
+}
+</example>
+
+<example title="Example: HTTP headers for ETag match">
+C: GET /test-servlet HTTP/1.1
+
+S: HTTP/1.1 200 OK
+S: ETag: xm8vz29I
+S: Cache-Control: max-age=15s
+S: ...
+
+C: GET /test-servlet HTTP/1.1
+C: If-None-Match: xm8vz29I
+
+S: HTTP/1.1 304 Not Modified
+S: Cache-Control: max-age=15s
+S: ...
+</example>
+
+<example title="Example: HTTP headers for ETag mismatch">
+C: GET /test-servlet HTTP/1.1
+C: If-None-Match: UXi456Ww
+
+S: HTTP/1.1 200 OK
+S: ETag: xM81x+3j
+S: Cache-Control: max-age=15s
+S: ...
+</example>
 
 </s2>
 
@@ -147,59 +231,9 @@ Count: &lt;%= counter++ %&gt;
 </example>
 
 <p><var>Expires</var> is useful for database generated pages which are
-continuously, but slowly updated.  To cache based on something with a known
-modified date, like a file, you can use <var>If-Modified</var>.</p>
-
-</s2>
-
-<s2 title="ETag and If-None-Match">
-
-<p>The <var>ETag</var> header specifies a hash or digest code for the
-generated page to further improve caching.  The browser or cache
-will send the <var>ETag</var> as a <var>If-None-Match</var> value when it
-checks for any page updates.  If the page is the same, the application will
-return a 304 NOT_MODIFIED response with an empty body.  Resin's FileServlet
-automatically provides this capability for static pages.  In general, the
-ETag is the most effective caching technique, although it requires a bit
-more work than <var>max-age</var>.</p>
-
-<p>The calculated <var>ETag</var> should be a hash of the result value,
-not a timestamp or version, to handle clustered values in a load-balanced
-configuration properly.  Since each server behind a load balancer will
-have a different timestamp for the files, each server would produce
-a different tag, even though the generated file was identical.  So either
-producing a hash or ensuring the <var>ETag</var> value is the same is
-critical.</p>
-
-<p>When using <var>ETag</var>, your application will need to look for the
-<var>If-None-Match</var> header on incoming requests.  If the value is the
-same, your servlet can return 304 NOT-MODIFIED.  If the value differs,
-you'll return the new content and hash.</p>
-
-<example title="Example: ETag servlet">
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-public class MyServlet extends HttpServlet
-{
-  public void doGet(HttpServletRequest req, HttpServletResponse res)
-  {
-    String etag = getCurrentEtag();
-
-    String ifNoneMatch = req.getHeader("If-None-Match");
-
-    if (ifNoneMatch != null &amp;&amp; ifNoneMatch.equals(_etag)) {
-      res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-      return;
-    }
-
-    res.setHeader("ETag", etag);
-
-    ... // generate response
-  }
-}
-</example>
+continuously, but slowly updated.  To cache with a fixed content, i.e.
+something which has a valid hash value like a file, you can
+use <var>ETag</var> with <var>If-None-Match</var>.</p>
 
 </s2>
 
@@ -324,7 +358,101 @@ in the request, whether they're used or not.</p>
 
 </s1>
 
-<s1 title="cache-mapping">
+<s1 title="Configuration">
+
+<s2 title="cache">
+<parents>cluster</parents>
+
+<p>&lt;cache> configures the proxy cache (requires Resin Professional).  The
+proxy cache improves performance by caching the output of servlets,
+jsp and php pages.  For database-heavy pages, this caching can improve
+performance and reduce database load by several orders of magnitude.</p>
+
+<p>The proxy cache uses a combination of a memory cache and a disk-based
+cache to save large amounts of data with little overhead.</p>
+
+<p>Management of the proxy cache uses the
+<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
+
+<deftable title="&lt;cache> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr><td>path</td>
+    <td>Path to the persistent cache files.</td>
+    <td>cache/</td></tr>
+<tr><td>disk-size</td>
+    <td>Maximum size of the cache saved on disk.</td>
+    <td>1024M</td></tr>
+<tr><td>enable</td>
+    <td>Enables the proxy cache.</td>
+    <td>true</td></tr>
+<tr><td>enable-range</td>
+    <td>Enables support for the HTTP Range header.</td>
+    <td>true</td></tr>
+<tr><td>entries</td>
+    <td>Maximum number of pages stored in the cache.</td>
+    <td>8192</td></tr>
+<tr><td>max-entry-size</td>
+    <td>Largest page size allowed in the cache.</td>
+    <td>1M</td></tr>
+<tr><td>memory-size</td>
+    <td>Maximum heap memory used to cache blocks.</td>
+    <td>8M</td></tr>
+<tr><td>rewrite-vary-as-private</td>
+    <td>Rewrite Vary headers as Cache-Control: private to avoid browser
+and proxy-cache bugs (particularly IE).</td>
+    <td>false</td></tr>
+</deftable>
+
+<def title="&lt;cache> schema">
+element cache {
+  disk-size?
+  &amp; enable?
+  &amp; enable-range?
+  &amp; entries?
+  &amp; path?
+  &amp; max-entry-size?
+  &amp; memory-size?
+  &amp; rewrite-vary-as-private?
+}
+</def>
+
+<example title="Example: enabling proxy cache">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
+
+        &lt;server id="a" address="192.168.0.10"/&gt;
+
+        &lt;host host-name="www.foo.com"&gt;
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<s3 title="rewrite-vary-as-private">
+
+<p>Because not all browsers understand the Vary header, Resin can rewrite
+Vary to a Cache-Control: private.  This rewriting will cache the page
+with the Vary in Resin's proxy cache, and also cache the page in the browser.
+Any other proxy caches, however, will not be able to cache the page.</p>
+
+<p>The underlying issue is a limitation of browsers such as IE.  When IE
+sees a Vary header it doesn't understand, it marks the page as uncacheable.
+Since IE only understands "Vary: User-Agent", this would mean IE would
+refuse to cache gzipped pages or "Vary: Cookie" pages.</p>
+
+<p>With the &lt;rewrite-vary-as-private> tag, IE will cache the page
+since it's rewritten as "Cache-Control: private" with no Vary at all.
+Resin will continue to cache the page as normal.</p>
+
+</s3>
+
+</s2> <!-- cache -->
+
+<s2 title="cache-mapping">
 
 <p><var>cache-mapping</var> assigns a <var>max-age</var>
 and <var>Expires</var> to a cacheable page, i.e. a page with an <var>ETag</var>
@@ -357,6 +485,7 @@ ETag.  It will not affect pages explicily setting Expires or
 non-cacheable pages.  So it's safe to create a cache-mapping
 for <var>*.jsp</var> even if only some are cacheable.</p>
 
+</s2>
 </s1>
 
 <s1 title="Debugging caching">
@@ -385,12 +514,100 @@ add the following to your resin.conf:</p>
 
 ...
 
-[2003/09/12 10:18:49.303] using cache: /css/default.css
-[2003/09/12 10:18:49.346] using cache: /images/pixel.gif
-[2003/09/12 10:18:49.348] using cache: /images/caucho-white.jpg
-[2003/09/12 10:18:49.362] using cache: /images/logo.gif
+[10:18:49.303] using cache: /css/default.css
+[10:18:49.346] using cache: /images/pixel.gif
+[10:18:49.348] using cache: /images/caucho-white.jpg
+[10:18:49.362] using cache: /images/logo.gif
 </results>
 
 </s1>
+
+<s1 title="Administration">
+
+<s2 title="/resin-admin">
+
+<s3 title="block cache miss ratio">
+
+<p>The block cache miss ratio tells how often Resin needs to access the
+disk to read a cache entry.  Most cache requests should come from memory
+to improve performance, but cache entries are paged out to disk when the
+cache gets larger.  It's very important to keep the &lt;memory-size> tag
+of the &lt;cache> large enough so the block cache miss ratio is small.</p>
+
+</s3>
+
+<s3 title="proxy cache miss ratio">
+
+<p>The proxy cache miss ratio measures how often cacheable pages must
+go to their underlying servlet instead of being cached.  The miss ratio
+does not measure the non-cacheable pages.</p>
+
+</s3>
+
+<s3 title="invocation miss ratio">
+
+<p>The invocation miss ratio measures how often Resin's invocation cache
+misses.  The invocation cache is used for both cacheable and non-cacheable
+pages to save the servlet and filter chain construction.  A miss of the
+invocation cache is expensive, since it will not only execute the servlet,
+but also force the servlet and filter chain to be rebuilt.  The &lt;entries>
+field of the &lt;cache> controlls the invocation miss ratio.</p>
+
+</s3>
+
+</s2>
+
+<s2 title="BlockManagerMXBean">
+
+<p>BlockManagerMXBean returns statistics about the block cache.  Since Resin's
+block cache is used for the proxy cache as well as clustered sessions and
+JMS messages, the performance of the block cache is very important.  The
+block cache is a memory/paging cache on top of a file-based backing store.
+If the block cache misses, a request needs to go to disk, otherwise it
+can be served directly from memory.</p>
+
+<def title="BlockManagerMXBean ObjectName">
+resin:type=BlockManager
+</def>
+
+<def title="BlockManagerMXBean.java">
+public interface BlockManagerMXBean {
+  public long getBlockCapacity();
+
+  public long getHitCountTotal();
+  public long getMissCountTotal();
+}
+</def>
+
+</s2>
+
+<s2 title="ProxyCacheMXBean">
+
+<p>The ProxyCacheMXBean provides statistics about the proxy cache as well
+as operations to clear the cache.  The hit and miss counts tell how
+effectively the cache is improving performance.</p>
+
+<def title="ProxyCacheMXBean ObjectName">
+resin:type=ProxyCache
+</def>
+
+<def title="ProxyCacheMXBean.java">
+public interface ProxyCacheMXBean {
+  public long getHitCountTotal();
+  public long getMissCountTotal();
+
+  public CacheItem []getCacheableEntries(int max);
+  public CacheItem []getUncacheableEntries(int max);
+
+  public void clearCache();
+  public void clearCacheByPattern(String hostRegexp, String urlRegexp);
+  public void clearExpires();
+}
+</def>
+
+</s2>
+
+</s1>
+
   </body>
 </document>
