@@ -397,17 +397,27 @@ database settings to be centrally located in resin.conf.</p>
 </example>
 
 <p>
-Or a <code>&lt;database</code> configuration can be provided to QuercusServlet,
-which cases that DataSource to be used for all database connections regardless
-of what the script provides in it's connect function call:
+You can use a JNDI <code>&lt;database</code> configuration in the
+WEB-INF/resin-web.xml to override the PHP connection code.  If a &lt;database>
+is provided, any <code>mysql_connect&lt;/code> call will return
+the configured database,
+ignoring the parameters to the <code>mysql_connect</code> call.
 </p>
 
-<example title="WEB-INF/resin-web.xml">
+<example title="Example: overriding database configuration in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;database jndi-name="jdbc/mysql">
+    &lt;driver type="org.gjt.mm.mysql.Driver">
+      &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
+      &lt;user>&lt;/user>
+      &lt;password>&lt;/password>
+    &lt;/driver>
+  &lt;/database>
+
   &lt;servlet-mapping url-pattern="*.php"
                    servlet-class="com.caucho.quercus.servlet.QuercusServlet">
     &lt;init>
-      <b>&lt;database>java:comp/env/jdbc/myDatabaseName&lt;/compile></b>
+      <b>&lt;database>java:comp/env/jdbc/myDatabaseName&lt;/database></b>
     &lt;/init>
   &lt;/servlet-mapping>
 &lt;/web-app>

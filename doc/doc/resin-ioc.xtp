@@ -1925,7 +1925,7 @@ Caucho wiki site.  Currently supported frameworks include:</p>
 In this case, the framework gives a <code>Class</code> object and asks
 the factory to create a new instance.  The <code>ObjectFactory</code> is
 the most powerful pattern, since objects can use @Observes, @InterceptionType,
-@TransactionAnnotation and even @Stateless, as well as the usual dependency
+@TransactionAttribute and even @Stateless, as well as the usual dependency
 injection.</p>
 
 <example title="Example: Struts2 integration">
