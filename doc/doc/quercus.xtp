@@ -399,7 +399,7 @@ database settings to be centrally located in resin.conf.</p>
 <p>
 You can use a JNDI <code>&lt;database</code> configuration in the
 WEB-INF/resin-web.xml to override the PHP connection code.  If a &lt;database>
-is provided, any <code>mysql_connect&lt;/code> call will return
+is provided, any <code>mysql_connect</code> call will return
 the configured database,
 ignoring the parameters to the <code>mysql_connect</code> call.
 </p>
