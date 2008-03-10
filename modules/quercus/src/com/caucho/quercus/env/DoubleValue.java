@@ -71,7 +71,9 @@ public class DoubleValue extends NumberValue
    */
   public String getType()
   {
-    return "float";
+    // php/0142
+    
+    return "double";
   }
 
   /**
