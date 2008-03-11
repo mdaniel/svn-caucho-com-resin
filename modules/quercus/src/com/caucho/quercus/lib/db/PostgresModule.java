@@ -1809,7 +1809,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * Get the last error message string of a connection
    */
   @ReturnNullAsFalse
-  public static String pg_last_error(Env env,
+  public static StringValue pg_last_error(Env env,
                                      @Optional Postgres conn)
   {
     try {
@@ -1817,7 +1817,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      return conn.error();
+      return conn.error(env);
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1829,7 +1829,7 @@ public class PostgresModule extends AbstractQuercusModule {
    * pg_last_error() alias.
    */
   @ReturnNullAsFalse
-  public static String pg_errormessage(Env env,
+  public static StringValue pg_errormessage(Env env,
                                        @Optional Postgres conn)
   {
     return pg_last_error(env, conn);
@@ -2589,7 +2589,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      PostgresStatement pstmt = conn.prepare(env, query);
+      PostgresStatement pstmt = conn.prepare(env, env.createString(query));
       conn.putStatement(stmtName, pstmt);
       return pstmt;
 
@@ -2707,9 +2707,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresResult result = conn.query(query);
 
-      String error = conn.error();
+      StringValue error = conn.error(env);
 
-      if ((error != null) && (! error.equals(""))) {
+      if (error.length() == 0) {
         if (reportError)
           env.warning(L.l("Query failed: {0}", error));
 
@@ -3006,7 +3006,7 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
 
-      PostgresStatement pstmt = conn.prepare(env, query);
+      PostgresStatement pstmt = conn.prepare(env, env.createString(query));
 
       return executeInternal(env, conn, pstmt, params) != null;
 

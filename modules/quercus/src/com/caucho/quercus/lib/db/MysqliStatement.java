@@ -37,6 +37,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
@@ -59,6 +60,16 @@ public class MysqliStatement extends JdbcStatementResource {
   MysqliStatement(Mysqli conn)
   {
     super(conn);
+  }
+
+
+  /**
+   * Quercus function to get the field 'affected_rows'.
+   */
+
+  public int getaffected_rows(Env env)
+  {
+    return affected_rows(env);
   }
 
   /**
@@ -91,11 +102,11 @@ public class MysqliStatement extends JdbcStatementResource {
    * @return true on success or false on failure
    */
   public boolean bind_param(Env env,
-                            String types,
+                            StringValue types,
                             @Reference Value[] params)
   {
     try {
-      return bindParams(env, types, params);
+      return bindParams(env, types.toString(), params);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return false;
@@ -165,7 +176,7 @@ public class MysqliStatement extends JdbcStatementResource {
    * @param env the PHP executing environment
    * @return the error code or zero if no error occurred
    */
-  public int errno(Env env)
+  public int errno()
   {
     try {
       return errorCode();
@@ -176,20 +187,37 @@ public class MysqliStatement extends JdbcStatementResource {
   }
 
   /**
+   * Quercus function to get the field 'errno'.
+   */
+  public int geterrno()
+  {
+    return errno();
+  }
+
+  /**
    * Returns a string description for last statement error
    *
    * @param env the PHP executing environment
    * @return a string that describes the error or an empty string if no error occurred.
    */
-  @ReturnNullAsFalse
-  public String error(Env env)
+  public StringValue error(Env env)
   {
     try {
-      return errorMessage();
+      return env.createString(errorMessage());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return null;
     }
+  }
+
+  /**
+   * Quercus function to get the field 'error'.
+   */
+
+  @ReturnNullAsFalse
+  public StringValue geterror(Env env)
+  {
+    return error(env);
   }
 
   /**
@@ -241,6 +269,14 @@ public class MysqliStatement extends JdbcStatementResource {
   }
 
   /**
+   * Quercus function to get the field 'num_rows'.
+   */
+  public Value getnum_rows(Env env)
+  {
+    return num_rows(env);
+  }
+
+  /**
    * Returns the number of rows in the result.
    *
    * @param env the PHP executing environment
@@ -257,6 +293,14 @@ public class MysqliStatement extends JdbcStatementResource {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
     }
+  }
+
+  /**
+   * Quercus function to get the field 'param_count'.
+   */
+  public int getparam_count(Env env)
+  {
+    return param_count(env);
   }
 
   /**
@@ -283,7 +327,7 @@ public class MysqliStatement extends JdbcStatementResource {
    * @return true on success or false on failure
    */
   public boolean prepare(Env env,
-                         String query)
+                         StringValue query)
   {
     try {
       return super.prepare(query);
@@ -379,20 +423,24 @@ public class MysqliStatement extends JdbcStatementResource {
   }
 
   /**
+   * Quercus function to get the field 'sqlstate'.
+   */
+  public StringValue getsqlstate(Env env)
+  {
+    return sqlstate(env);
+  }
+
+  /**
    * Returns SQLSTATE error from previous statement operation.
    *
    * @param env the PHP executing environment
    * @return the SQLSTATE (5-characters string) for the last error. '00000' means no error
    */
-  @ReturnNullAsFalse
-  public String sqlstate(Env env)
+
+  public StringValue sqlstate(Env env)
   {
-    try {
-      return "HY" + errno(env);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-    }
+    int code = errno();
+    return env.createString(Mysqli.lookupSqlstate(code));
   }
 
   /**
@@ -405,4 +453,39 @@ public class MysqliStatement extends JdbcStatementResource {
   {
     return true;
   }
+
+  /**
+   * Quercus function to get the field 'field_count'.
+   */
+  public int getfield_count(Env env)
+  {
+    return field_count(env);
+  }
+
+  /**
+   * Returns the number of columns in the last query.
+   */
+  public int field_count(Env env)
+  {
+    try {
+      return getFieldCount();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return -1;
+    }
+  }
+
+  /**
+   * Quercus function to get the field 'insert_id'.
+   */
+  public Value getinsert_id()
+  {
+    return insert_id();
+  }
+
+  public Value insert_id()
+  {
+    return ((Mysqli) validateConnection()).insert_id();
+  }
 }
+

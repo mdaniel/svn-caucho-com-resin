@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
@@ -109,9 +110,10 @@ public class PostgresStatement extends JdbcStatementResource {
    * @param query SQL query
    * @return true on success or false on failure
    */
-  public boolean prepare(String query)
+  public boolean prepare(Env env, StringValue query)
   {
     try {
+      String queryStr = query.toString();
 
       _preparedMapping.clear();
 
@@ -119,7 +121,7 @@ public class PostgresStatement extends JdbcStatementResource {
       // Ex: INSERT INTO test VALUES($2, $1) or
       //     INSERT INTO test VALUES($1, $1)
       Pattern pattern = Pattern.compile("\\$([0-9]+)");
-      Matcher matcher = pattern.matcher(query);
+      Matcher matcher = pattern.matcher(queryStr);
       while (matcher.find()) {
         int phpParam;
         try {
@@ -135,10 +137,10 @@ public class PostgresStatement extends JdbcStatementResource {
       // replacing ($1 -> ?) with question marks.
       // XXX: replace this with Matcher.appendReplacement
       // above when StringBuilder is supported.
-      query = query.replaceAll("\\$[0-9]+", "?");
+      queryStr = queryStr.replaceAll("\\$[0-9]+", "?");
 
       // Prepare the JDBC query
-      return super.prepare(query);
+      return super.prepare(env.createString(queryStr));
 
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

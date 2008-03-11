@@ -56,6 +56,7 @@ public abstract class JdbcConnectionResource
     = new LruCache<TableKey,JdbcTableMetaData>(256);
 
   private Connection _conn;
+
   // cached statement
   private Statement _stmt;
 
@@ -95,14 +96,15 @@ public abstract class JdbcConnectionResource
   }
 
   /**
-   * Returns the error string for the most recent function call
+   * Returns the error string for the most recent function call.
+   * This method is not invoked from PHP code.
    */
-  public String error()
+  public StringValue error(Env env)
   {
     if (isConnected())
-      return getErrorMessage();
+      return env.createString(getErrorMessage());
     else
-      return null;
+      return env.createEmptyString();
   }
 
   public boolean isConnected()
@@ -449,8 +451,6 @@ public abstract class JdbcConnectionResource
 
   /**
    * returns the server version
-   * XXX: PHP seems to return the same value
-   * for client_info and server_info
    */
   public String getServerInfo()
     throws SQLException
@@ -597,10 +597,13 @@ public abstract class JdbcConnectionResource
                                     ResultSet.CONCUR_READ_ONLY);
       else
         stmt = conn.createStatement();
-        
+
       stmt.setEscapeProcessing(false); // php/1406
 
       if (stmt.execute(sql)) {
+        // Statement.execute(String) returns true when SQL statement is a
+        // SELECT statement that returns a result set.
+
         ResultSet rs = stmt.getResultSet();
         _rs = createResult(_env, stmt, rs);
         _affectedRows = 0;
@@ -608,6 +611,9 @@ public abstract class JdbcConnectionResource
 	// XXX: if these are needed, get them lazily for performance
         // _warnings = stmt.getWarnings();
       } else {
+        // Statement.execute(String) returns false when SQL statement does
+        // not returns a result set (UPDATE, INSERT, DELETE, or REPLACE).
+
         // php/430a should return a result set
         // for update statements. It is always
         // null though. So keep the stmt for
@@ -622,7 +628,7 @@ public abstract class JdbcConnectionResource
         _affectedRows = stmt.getUpdateCount();
         if (_rs != null)
           _rs.setAffectedRows(_affectedRows);
-	
+
 	// XXX: if these are neede, get them lazily for performance
         // _warnings = stmt.getWarnings();
 
@@ -861,11 +867,11 @@ public abstract class JdbcConnectionResource
     if (! _isUsed && _isCatalogOptimEnabled) {
       // The database is only connected, but not used, reopen with
       // a real catalog
-      
+
       Connection conn = _conn;
       _conn = null;
       _isConnected = false;
-      
+
       if (conn != null)
         conn.close();
 

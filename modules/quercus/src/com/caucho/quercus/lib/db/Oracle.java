@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.util.L10N;
 
@@ -127,7 +128,7 @@ public class Oracle extends JdbcConnectionResource {
   /**
    * returns a prepared statement
    */
-  public OracleStatement prepare(Env env, String query)
+  public OracleStatement prepare(Env env, StringValue query)
   {
     OracleStatement stmt = new OracleStatement((Oracle) validateConnection());
 

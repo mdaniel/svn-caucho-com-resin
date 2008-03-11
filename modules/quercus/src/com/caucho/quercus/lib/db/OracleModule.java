@@ -1539,7 +1539,7 @@ public class OracleModule extends AbstractQuercusModule {
       // Store binding names for future reference (see oci_execute)
       String regex = ":[a-zA-Z0-9_]+";
       String jdbcQuery = query.replaceAll(regex, "?");
-      OracleStatement pstmt = conn.prepare(env, jdbcQuery);
+      OracleStatement pstmt = conn.prepare(env, env.createString(jdbcQuery));
 
       Pattern pattern = Pattern.compile(regex);
       Matcher matcher = pattern.matcher(query);

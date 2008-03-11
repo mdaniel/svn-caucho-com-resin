@@ -675,7 +675,10 @@ public class Env {
   }
 
   /**
-   * Returns the configured database.
+   * Returns a connection to the given database. If there is
+   * already a connection to this specific database, then
+   * return the connection from the pool. Otherwise, create
+   * a new connection and add it to the pool.
    */
   public Connection getConnection(String driver, String url,
                                   String userName, String password)
@@ -2946,7 +2949,7 @@ public class Env {
    */
   public StringValue createString(String s)
   {
-    if (s == null) {
+    if (s == null || s.length() == 0) {
       return (_isUnicodeSemantics
 	      ? UnicodeBuilderValue.EMPTY
 	      : StringBuilderValue.EMPTY);

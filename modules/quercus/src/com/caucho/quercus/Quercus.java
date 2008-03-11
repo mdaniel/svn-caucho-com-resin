@@ -371,6 +371,8 @@ public class Quercus
     _scriptEncoding = encoding;
   }
 
+  // Get or Set the Mysql client version property.
+
   public String getMysqlVersion()
   {
     return _mySqlVersion;

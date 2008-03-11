@@ -32,8 +32,11 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -115,7 +118,7 @@ public class JdbcStatementResource {
     final int size = types.length();
 
     // Check to see that types and params have the same length
-    if (size != params.length) {
+    if (params.length == 0 || size != params.length) {
       env.warning(L.l("number of types does not match number of parameters"));
       return false;
     }
@@ -160,7 +163,7 @@ public class JdbcStatementResource {
   public boolean bindResults(Env env,
                              Value[] outParams)
   {
-    int size = outParams.length;
+    final int size = outParams.length;
     int numColumns;
 
     try {
@@ -172,7 +175,16 @@ public class JdbcStatementResource {
       return false;
     }
 
-    if (size != numColumns) {
+    for (int i = 0; i < size; i++) {
+      Value val = outParams[i];
+
+      if (! (val instanceof Var)) {
+        env.error(L.l("Only variables can be passed by reference"));
+        return false;
+      }
+    }
+
+    if ((size == 0) || (size != numColumns)) {
       env.warning(L.l("number of bound variables does not equal number of columns"));
       return false;
     }
@@ -306,7 +318,7 @@ public class JdbcStatementResource {
   /**
    * Fetch results from a prepared statement into bound variables.
    *
-   * @return true on success, false on error null if no more rows
+   * @return true on success, false on error, null if no more rows
    */
   public Value fetch(Env env)
   {
@@ -322,12 +334,12 @@ public class JdbcStatementResource {
           _results[i].set(_resultResource.getColumnValue(env, _rs, _metaData, i + 1));
         }
         return BooleanValue.TRUE;
-      } else
-        return BooleanValue.FALSE;
-
+      } else {
+        return NullValue.NULL;
+      }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return NullValue.NULL;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -511,21 +523,24 @@ public class JdbcStatementResource {
    * @param query SQL query
    * @return true on success or false on failure
    */
-  public boolean prepare(String query)
+  public boolean prepare(StringValue query)
   {
     try {
 
       if (_stmt != null)
         _stmt.close();
 
-      _query = query;
+      _query = query.toString();
+
+      if (_query.length() == 0)
+        return false;
 
       if (this instanceof OracleStatement) {
-        _stmt = _conn.getConnection().prepareCall(query,
+        _stmt = _conn.getConnection().prepareCall(_query,
                                                   ResultSet.TYPE_SCROLL_INSENSITIVE,
                                                   ResultSet.CONCUR_READ_ONLY);
       } else {
-        _stmt = _conn.getConnection().prepareStatement(query,
+        _stmt = _conn.getConnection().prepareStatement(_query,
                                                        ResultSet.TYPE_SCROLL_INSENSITIVE,
                                                        ResultSet.CONCUR_READ_ONLY);
       }
@@ -610,6 +625,20 @@ public class JdbcStatementResource {
   protected void setResultSet(ResultSet rs)
   {
     _rs = rs;
+  }
+
+  /**
+   * Returns the number of fields in the result set.
+   *
+   * @param env the PHP executing environment
+   * @return the number of fields in the result set
+   */
+  public int getFieldCount()
+  {
+    if (_resultResource == null)
+      return 0;
+
+    return _resultResource.getFieldCount();
   }
 
   /**

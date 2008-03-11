@@ -47,6 +47,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -83,20 +84,65 @@ public class Mysqli extends JdbcConnectionResource {
   private static String _checkedDriverVersion = null;
   private static Object _checkDriverLock = new Object();
 
+  private boolean _isPersistent = false;
+
+  private boolean _lastSQLWasUpdate = false;
+
+  /**
+    * This is the constructor for the mysqli class.
+    * It can be invoked by PHP or and by Java code.
+    */
+
   public Mysqli(Env env,
-                @Optional("localhost") String host,
-                @Optional String user,
-                @Optional String password,
-                @Optional String db,
+                @Optional("localhost") StringValue host,
+                @Optional StringValue user,
+                @Optional StringValue password,
+                @Optional StringValue db,
                 @Optional("3306") int port,
-                @Optional String socket,
-                @Optional int flags,
-                @Optional String driver,
-                @Optional String url)
+                @Optional StringValue socket)
   {
     super(env);
 
-    connectInternal(env, host, user, password, db, port, socket, flags, driver, url);
+    String hostStr;
+
+    if (host.length() == 0)
+      hostStr = "localhost";
+    else
+      hostStr = host.toString();
+
+    connectInternal(env, hostStr,
+      user.toString(), password.toString(),
+      db.toString(), port, socket.toString(),
+      0, null, null);
+  }
+
+  /**
+   * This constructor can only be invoked by other method
+   * implementations in the mysql and mysqli modules. It
+   * accepts String arguments and supports additional
+   * arguments not available in the mysqli constructor.
+   */
+
+  Mysqli(Env env,
+         String host,
+         String user,
+         String password,
+         String db,
+         int port,
+         String socket,
+         int flags,
+         String driver,
+         String url)
+  {
+    super(env);
+
+    if (host == null || host.length() == 0)
+      host = "localhost";
+
+    connectInternal(env, host,
+      user, password,
+      db, port, socket,
+      flags, driver, url);
   }
 
   protected Mysqli(Env env)
@@ -202,15 +248,15 @@ public class Mysqli extends JdbcConnectionResource {
    * Connects to the underlying database.
    */
   protected Connection connectImpl(Env env,
-				   @Optional("localhost") String host,
-				   @Optional String userName,
-				   @Optional String password,
-				   @Optional String dbname,
-				   @Optional("3306") int port,
-				   @Optional String socket,
-				   @Optional int flags,
-				   @Optional String driver,
-				   @Optional String url)
+				   String host,
+				   String userName,
+				   String password,
+				   String dbname,
+				   int port,
+				   String socket,
+				   int flags,
+				   String driver,
+				   String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -231,19 +277,41 @@ public class Mysqli extends JdbcConnectionResource {
       }
 
       if (url == null || url.equals("")) {
+        StringBuilder urlBuilder = new StringBuilder();
+  
+        urlBuilder.append("jdbc:mysql://");
+        urlBuilder.append(host);
+        urlBuilder.append(":");
+        urlBuilder.append(port);
+        urlBuilder.append("/");
+        urlBuilder.append(dbname);
+
         url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
+        // Ignore MYSQL_CLIENT_LOCAL_FILES and MYSQL_CLIENT_IGNORE_SPACE flags.
+
 	if ((flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0) {
-	  char sep = url.indexOf('?') < 0 ? '?' : '&';
-	  
-	  url += sep + "interactiveClient=true";
+          char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+          urlBuilder.append(sep);
+          urlBuilder.append("interactiveClient=true");
 	}
 
 	if ((flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0) {
-	  char sep = url.indexOf('?') < 0 ? '?' : '&';
-	  
-	  url += sep + "useCompression=true";
+          char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+          urlBuilder.append(sep);
+          urlBuilder.append("useCompression=true");
 	}
+
+	if ((flags & MysqliModule.MYSQL_CLIENT_SSL) != 0) {
+          char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+          urlBuilder.append(sep);
+          urlBuilder.append("useSSL=true");
+	}
+
+	url = urlBuilder.toString();
 
 	// Explicitly indicate that iso-8859-1 encoding should
 	// be used as the default driver encoding. We don't want the
@@ -258,6 +326,8 @@ public class Mysqli extends JdbcConnectionResource {
 	  url += sep + "characterEncoding=ISO8859_1";
 	}
       }
+
+      // Check in connection pool, otherwise open a new connection
 
       Connection jConn = env.getConnection(driver, url, userName, password);
 
@@ -278,6 +348,10 @@ public class Mysqli extends JdbcConnectionResource {
       return null;
     }
   }
+
+  /**
+   * Quercus function to get the field 'affected_rows'.
+   */
 
   public int getaffected_rows()
   {
@@ -307,24 +381,37 @@ public class Mysqli extends JdbcConnectionResource {
    * @param password the new password
    * @param db the new database
    */
-  public boolean change_user(String user, String password, String db)
+  public boolean change_user(StringValue user, StringValue password, StringValue db)
   {
+    // XXX: Docs for mysqli_change_user indicate that if new user authorization fails,
+    // then the existing user perms are retained.
+
     close(getEnv());
+    
+    String userStr;
+    String passwordStr;
+    String dbStr;
 
-    if ((user == null) || user.equals("")) {
-      user = getUserName();
+    if (user.length() == 0) {
+      userStr = getUserName();
+    } else {
+      userStr = user.toString();
     }
 
-    if ((password == null) || password.equals("")) {
-      password = getPassword();
+    if (password.length() == 0) {
+      passwordStr = getPassword();
+    } else {
+      passwordStr = password.toString();
     }
 
-    if ((db == null) || db.equals("")) {
-      db = getDbName();
+    if (db.length() == 0) {
+      dbStr = getCatalog().toString();
+    } else {
+      dbStr = db.toString();
     }
 
-    return connectInternal(getEnv(), _host, user, password, db, _port,
-                           _socket, _flags, _driver, _url);
+    return connectInternal(getEnv(), _host, userStr, passwordStr,
+                           dbStr, _port, _socket, _flags, _driver, _url);
   }
 
   /**
@@ -333,17 +420,17 @@ public class Mysqli extends JdbcConnectionResource {
    * XXX: stubbed out. has to be revised once we
    * figure out what to do with character encoding
    */
-  public String character_set_name()
+  public StringValue character_set_name(Env env)
   {
-    return getCharacterSetName();
+    return env.createString(getCharacterSetName());
   }
 
   /**
    * Alias for character_set_name
    */
-  public String client_encoding()
+  public StringValue client_encoding(Env env)
   {
-    return character_set_name();
+    return character_set_name(env);
   }
 
   /**
@@ -368,29 +455,15 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'error'.
    */
-  public String geterror()
+  public StringValue geterror(Env env)
   {
-    return error();
-  }
-  
-  /**
-   * Returns the error string for the most recent function call
-   */
-  public String error()
-  {
-    String errorString = super.error();
-
-    if (errorString == null) {
-      return "";
-    }
-
-    return errorString;
+    return error(env);
   }
 
   /**
    * Escapes the string
    */
-  public Value escape_string(StringValue str)
+  public StringValue escape_string(StringValue str)
   {
     return real_escape_string(str);
   }
@@ -457,45 +530,105 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Returns the database name.
    */
-  public String get_dbname()
+  public Value get_dbname(Env env)
   {
-    return getDbName();
+    return getCatalog();
   }
   
   /**
    * Quercus function to get the field 'host_info'.
    */
-  public String gethost_info()
+  public StringValue gethost_info(Env env)
   {
-    return get_host_info();
+    return get_host_info(env);
   }
   
   /**
    * Returns the host information.
    */
-  public String get_host_info()
+  public StringValue get_host_info(Env env)
   {
-    return getHost() + " via TCP socket";
+    return env.createString(getHost() + " via TCP socket");
   }
 
   /**
    * Returns the host name.
    */
-  public String get_host_name()
+  public StringValue get_host_name(Env env)
   {
-    return getHost();
+    return env.createString(getHost());
   }
 
   /**
    * Quercus function to get the field 'info'.
    */
-  public String getinfo()
+  public Value getinfo(Env env)
   {
-    throw new UnimplementedException("mysqli info field");
-    
-    //return MysqliModule.mysqli_info(this);
+    return info(env);
   }
-  
+
+  /**
+   * Return info string about the most recently executed
+   * query. Documentation for mysql_info() indicates that
+   * only some kinds of INSERT, UPDATE, LOAD, and ALTER
+   * statements return results. A SELECT statement always
+   * returns FALSE. The ConnectorJ module should provide a
+   * way to get this result string since it is read from
+   * the server, but that is not supported. This function
+   * errors on the side of returning more results than
+   * it should since it is an acceptable compromise.
+   */
+
+  Value info(Env env) {
+    if (getResultResource() != null) {
+      // Last SQL statement was a SELECT
+
+      return BooleanValue.FALSE;
+    }
+
+    // INSERT result:      "Records: 23 Duplicates: 0 Warnings: 0"
+    // LOAD result:        "Records: 42 Deleted: 0 Skipped: 0 Warnings: 0"
+    // ALTER TABLE result: "Records: 60 Duplicates: 0 Warnings: 0"
+    // UPDATE result:      "Rows matched: 1  Changed: 1  Warnings: 0"
+
+    StringBuilder buff = new StringBuilder();
+
+    int matched = affected_rows();
+    int changed = matched;
+    int duplicates = 0;
+    int warnings = 0;
+
+    SQLWarning warning = getWarnings();
+    while (warning != null) {
+      warning = warning.getNextWarning();
+      warnings++;
+    }
+
+    if (_lastSQLWasUpdate)
+      buff.append("Rows matched: ");
+    else
+      buff.append("Records: ");
+
+    buff.append(matched);
+
+    if (_lastSQLWasUpdate) {
+      buff.append("  Changed: "); // PHP adds 2 spaces before Changed:
+      buff.append(changed);
+    } else {
+      buff.append(" Duplicates: ");
+      buff.append(duplicates);
+    }
+
+    if (_lastSQLWasUpdate)
+      buff.append("  Warnings: "); // Only update has 2 spaces here
+    else
+      buff.append(" Warnings: ");
+
+    buff.append(warnings);
+
+    return env.createString(buff.toString());
+  }
+
   /**
    * Returns the port number.
    */
@@ -523,20 +656,20 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'server_info'.
    */
-  public String getserver_info()
+  public StringValue getserver_info(Env env)
   {
-    return get_server_info();
+    return get_server_info(env);
   }
   
   /**
    * Returns the server information.
    */
-  public String get_server_info()
+  public StringValue get_server_info(Env env)
   {
     try {
-      return validateConnection().getServerInfo();
+      return env.createString(validateConnection().getServerInfo());
     } catch (SQLException e) {
-      return null;
+      return env.createEmptyString();
     }
   }
 
@@ -547,7 +680,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return get_server_version();
   }
-  
+
   /**
    * Returns the server information.
    */
@@ -619,14 +752,6 @@ public class Mysqli extends JdbcConnectionResource {
     }
   }
 
-  /**
-   * Stub: kills the given mysql thread.
-   */
-  public boolean kill(int processId)
-  {
-    return false;
-  }
-
   @ReturnNullAsFalse
   public JdbcResultResource list_dbs()
   {
@@ -645,7 +770,7 @@ public class Mysqli extends JdbcConnectionResource {
    * executes one or multiple queries which are
    * concatenated by a semicolon.
    */
-  public boolean multi_query(String query)
+  public boolean multi_query(StringValue query)
   {
     return ((Mysqli) validateConnection()).multiQuery(query);
   }
@@ -660,19 +785,11 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
-   * Sets a mysqli options
+   * Sets a mysqli option.
    */
   public boolean options(int option, Value value)
   {
     return false;
-  }
-
-  /**
-   * Pings the database
-   */
-  public boolean ping()
-  {
-    return super.ping();
   }
 
   /**
@@ -685,10 +802,10 @@ public class Mysqli extends JdbcConnectionResource {
    * @return a {@link JdbcResultResource}, or null for failure
    */
   public Value query(Env env,
-                     String sql,
+                     StringValue sql,
                      @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-    MysqliResult result = (MysqliResult) realQuery(sql);
+    MysqliResult result = (MysqliResult) realQuery(sql.toString());
 
     if (result != null)
       return env.wrapJava(result);
@@ -708,6 +825,8 @@ public class Mysqli extends JdbcConnectionResource {
   protected JdbcResultResource realQuery(String sql)
   {
     clearErrors();
+
+    _lastSQLWasUpdate = false;
 
     setResultResource(null);
 
@@ -742,6 +861,13 @@ public class Mysqli extends JdbcConnectionResource {
           return null;
         }
       }
+      else if (tok != null &&
+          tok.matchesFirstChar('U', 'u') &&
+          tok.matchesToken("UPDATE")) {
+        // SQL UPDATE statement
+
+        _lastSQLWasUpdate = true;
+      }
 
       return super.realQuery(sql);
     } catch (SQLException e) {
@@ -758,13 +884,35 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
-   * returns a prepared statement
+   * Execute an single query against the database whose result can then be retrieved
+   * or stored using the mysqli_store_result() or mysqli_use_result() functions.
+   *
+   * @param env the PHP executing environment
+   * @param query the escaped query string (can contain escape sequences like `\n' and `\Z')
    */
-  public MysqliStatement prepare(Env env, String query)
+  public boolean real_query(Env env,
+                            StringValue query)
+  {
+    // Assume that the query argument contains just one query. Reuse the
+    // result managemenet logic in multiQuery(), so that a future call to
+    // mysqli_store_result() will work as expected.
+
+    return multiQuery(query);
+  }
+
+  /**
+   * returns a prepared statement or null on error.
+   */
+  public MysqliStatement prepare(Env env, StringValue query)
   {
     MysqliStatement stmt = new MysqliStatement((Mysqli) validateConnection());
 
-    stmt.prepare(query);
+    boolean result = stmt.prepare(query);
+
+    if (! result) {
+      stmt.close();
+      return null;
+    }
 
     return stmt;
   }
@@ -773,22 +921,30 @@ public class Mysqli extends JdbcConnectionResource {
    * Connects to the underlying database.
    */
   public boolean real_connect(Env env,
-                              @Optional("localhost") String host,
-                              @Optional String userName,
-                              @Optional String password,
-                              @Optional String dbname,
+                              @Optional("localhost") StringValue host,
+                              @Optional StringValue userName,
+                              @Optional StringValue password,
+                              @Optional StringValue dbname,
                               @Optional("3306") int port,
-                              @Optional String socket,
+                              @Optional StringValue socket,
                               @Optional int flags)
   {
-    return connectInternal(env, host, userName, password, dbname, port, socket,
-                           flags, null, null);
+    return connectInternal(env,
+                           host.toString(),
+                           userName.toString(),
+                           password.toString(),
+                           dbname.toString(),
+                           port,
+                           socket.toString(),
+                           flags,
+                           null,
+                           null);
   }
 
   /**
    * Escapes the string
    */
-  public Value real_escape_string(StringValue str)
+  public StringValue real_escape_string(StringValue str)
   {
     return realEscapeString(str);
   }
@@ -806,11 +962,11 @@ public class Mysqli extends JdbcConnectionResource {
    *
    * @param dbname the name of the database to select.
    */
-  public boolean select_db(String dbname)
+  public boolean select_db(StringValue dbname)
   {
     try {
       if (isConnected()) {
-        validateConnection().setCatalog(dbname);
+        validateConnection().setCatalog(dbname.toString());
 
         return true;
       }
@@ -839,21 +995,32 @@ public class Mysqli extends JdbcConnectionResource {
     return options(option, value);
   }
 
-  
   /**
    * Quercus function to get the field 'sqlstate'.
    */
-  public String getsqlstate()
+  public StringValue getsqlstate(Env env)
   {
-    return sqlstate();
+    return sqlstate(env);
   }
-  
+
   /**
    * Returns the SQLSTATE error
    */
-  public String sqlstate()
+  public StringValue sqlstate(Env env)
   {
-    return "HY" + validateConnection().getErrorCode();
+    int code = validateConnection().getErrorCode();
+    return env.createString(lookupSqlstate(code));
+  }
+
+  /**
+   * Given an error number, returns a SQLSTATE error string.
+   */
+  static String lookupSqlstate(int errno)
+  {
+    if (errno == 0)
+      return "00000";
+    else
+      return "HY" + errno;
   }
 
   /**
@@ -952,17 +1119,80 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'thread_id'.
    */
-  public int getthread_id()
+  public Value getthread_id()
   {
     return thread_id();
   }
-  
+
   /**
-   * Returns a bogus thread id
+   * Query an identifier that corresponds to this specific
+   * connection. Mysql calls this integer identifier a
+   * thread id, but it is really a connection id.
+   * Return an integer on success, FALSE on failure.
    */
-  public int thread_id()
+
+  Value thread_id()
   {
-    return 1;
+    try {
+      JdbcConnectionResource connV = validateConnection();
+      Connection conn = connV.getConnection();
+
+      Statement stmt = null;
+
+      try {
+        stmt = conn.createStatement();
+
+        ResultSet rs = stmt.executeQuery("SELECT CONNECTION_ID()");
+
+        if (rs.next())
+          return new LongValue(rs.getLong(1));
+        else
+          return BooleanValue.FALSE;
+      } finally {
+        if (stmt != null)
+          stmt.close();
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Kills the given mysql thread id. Killing the connection
+   * is not the same as simply closing the connection. For
+   * example, table locks are released by a KILL.
+   */
+  public boolean kill(Env env, int threadId)
+  {
+    try {
+      JdbcConnectionResource connV = validateConnection();
+      Connection conn = connV.getConnection();
+
+      Statement stmt = null;
+      boolean result = false;
+
+      try {
+        stmt = conn.createStatement();
+
+        env.getQuercus().markForPoolRemoval(conn);
+
+        ResultSet rs = stmt.executeQuery("KILL CONNECTION " + threadId);
+      } catch (SQLException e) {
+        // Invoking the KILL command above will terminate the connection
+        // and raise a SQLException in executeQuery().
+
+        result = true;
+      } finally {
+        if (stmt != null)
+          stmt.close();
+      }
+
+      return result;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
   }
 
   /**
@@ -1108,7 +1338,7 @@ public class Mysqli extends JdbcConnectionResource {
    * depending on the last query entered.  Not sure what
    * actual PHP intention is.
    */
-  private boolean multiQuery(String sql)
+  private boolean multiQuery(StringValue sql)
   {
     clearErrors();
 
@@ -1178,11 +1408,12 @@ public class Mysqli extends JdbcConnectionResource {
    * splits a string of multiple queries separated
    * by ";" into an arraylist of strings
    */
-  private ArrayList<String> splitMultiQuery(String sql)
+  private ArrayList<String> splitMultiQuery(StringValue sqlStr)
   {
     ArrayList<String> result = new ArrayList<String>();
-    String query = "";
-    int length = sql.length();
+    StringBuilder queryBuffer = new StringBuilder(64);
+    final String sql = sqlStr.toString();
+    final int length = sql.length();
     boolean inQuotes = false;
     char c;
 
@@ -1190,16 +1421,16 @@ public class Mysqli extends JdbcConnectionResource {
       c = sql.charAt(i);
 
       if (c == '\\') {
-        query += c;
+        queryBuffer.append(c);
         if (i < length - 1) {
-          query += sql.charAt(i+1);
+          queryBuffer.append(sql.charAt(i+1));
           i++;
         }
         continue;
       }
 
       if (inQuotes) {
-        query += c;
+        queryBuffer.append(c);
         if (c == '\'') {
           inQuotes = false;
         }
@@ -1207,20 +1438,20 @@ public class Mysqli extends JdbcConnectionResource {
       }
 
       if (c == '\'') {
-        query += c;
+        queryBuffer.append(c);
         inQuotes = true;
         continue;
       }
 
       if (c == ';') {
-        result.add(query.trim());
-        query = "";
+        result.add(queryBuffer.toString().trim());
+        queryBuffer = new StringBuilder(64);
       } else
-        query += c;
+        queryBuffer.append(c);
     }
 
-    if (query != null)
-      result.add(query.trim());
+    if (queryBuffer.length() > 0)
+      result.add(queryBuffer.toString().trim());
 
     return result;
   }
@@ -1238,11 +1469,37 @@ public class Mysqli extends JdbcConnectionResource {
       return null;
   }
 
+  // Indicate that this connection is a "persistent" connections,
+  // meaning it can't be closed.
+
+  public void setPersistent()
+  {
+    _isPersistent = true;
+  }
+
+  // Invoked to close a connection.
+
+  public boolean close(Env env)
+  {
+    if (_isPersistent)
+      return true;
+
+    return super.close(env);
+  }
+
   public String toString()
   {
+    StringBuilder desc = new StringBuilder();
+    desc.append("Mysqli[");
+
     if (isConnected())
-      return "Mysqli[" + get_host_name() + "]";
-    else
-      return "Mysqli[]";
+      desc.append( getHost() );
+
+    desc.append("]");
+
+    if (_isPersistent)
+      desc.append(" persistent");
+
+    return desc.toString();
   }
 }

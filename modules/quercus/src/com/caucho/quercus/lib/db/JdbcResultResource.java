@@ -60,15 +60,18 @@ public class JdbcResultResource {
   public static final String DATE = "date";
   public static final String DATETIME = "datetime";
   public static final String REAL = "real";
+  public static final String TIME = "time";
+  public static final String TIMESTAMP = "timestamp";
   public static final String UNKNOWN = "unknown";
+  public static final String YEAR = "year";
 
   private Statement _stmt;
-  private ResultSet _rs;
+  protected ResultSet _rs;
   private int _fieldOffset;
   private JdbcConnectionResource _conn;
   private Env _env;
 
-  private ResultSetMetaData _metaData;
+  protected ResultSetMetaData _metaData;
   private Value[] _columnNames;
 
   private int _affectedRows;
@@ -274,168 +277,6 @@ public class JdbcResultResource {
   }
 
   /**
-   * Returns an object with the following fields:
-   *
-   * name: The name of the column
-   * orgname: The original name if an alias was specified
-   * table: The name of the table
-   * orgtable: The original name if an alias was specified
-   * def: default value for this field, represented as a string
-   * max_length: The maximum width of the field for the result set
-   * flags: An integer representing the bit-flags for the field
-   * type: An integer respresenting the data type used for this field
-   * decimals: The number of decimals used (for integer fields)
-   *
-   * @param env the PHP executing environment
-   * @param maxLength the field maximum length
-   * @param name the field name
-   * @param originalName the field original name
-   * @param table the field table name
-   * @param type the field type
-   * @param scale the field scale
-   * @return an object containing field metadata
-   */
-  protected Value fetchFieldImproved(Env env,
-                                     int maxLength,
-                                     String name,
-                                     String originalName,
-                                     String table,
-                                     int type,
-                                     int scale)
-  {
-    Value result = env.createObject();
-
-    try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      _rs.next();
-      result.putField(env, "name", env.createString(name));
-      result.putField(env, "orgname", env.createString(originalName));
-      result.putField(env, "table", env.createString(table));
-      //XXX: orgtable same as table
-      result.putField(env, "orgtable", env.createString(table));
-      if (_rs.getString(6) != null)
-        result.putField(env, "def", env.createString(_rs.getString(6)));
-      else
-        result.putField(env, "def", env.createString(""));
-      result.putField(env, "max_length", new LongValue(maxLength));
-
-      //generate flags
-      long flags = 0;
-
-      if (! isInResultString(4, "YES"))
-        flags += MysqliModule.NOT_NULL_FLAG;
-
-      if (isInResultString(5, "PRI")) {
-        flags += MysqliModule.PRI_KEY_FLAG;
-        flags += MysqliModule.PART_KEY_FLAG;
-      }
-
-      if (isInResultString(5, "MUL")) {
-        flags += MysqliModule.MULTIPLE_KEY_FLAG;
-        flags += MysqliModule.PART_KEY_FLAG;
-      }
-
-      if (isInResultString(2, "blob")
-	  || (type == Types.LONGVARCHAR)
-	  || (type == Types.LONGVARBINARY))
-        flags += MysqliModule.BLOB_FLAG;
-
-      if (isInResultString(2, "unsigned"))
-        flags += MysqliModule.UNSIGNED_FLAG;
-
-      if (isInResultString(2, "zerofill"))
-        flags += MysqliModule.ZEROFILL_FLAG;
-
-      // php/1f73 - null check
-      if (isInResultString(3, "bin")
-	  || (type == Types.LONGVARBINARY)
-	  || (type == Types.DATE)
-	  || (type == Types.TIMESTAMP))
-        flags += MysqliModule.BINARY_FLAG;
-
-      if (isInResultString(2, "enum"))
-        flags += MysqliModule.ENUM_FLAG;
-
-      if (isInResultString(7, "auto"))
-        flags += MysqliModule.AUTO_INCREMENT_FLAG;
-
-      if (isInResultString(2, "set"))
-        flags += MysqliModule.SET_FLAG;
-
-      if ((type == Types.BIGINT)
-	  || (type == Types.BIT)
-	  || (type == Types.BOOLEAN)
-	  || (type == Types.DECIMAL)
-	  || (type == Types.DOUBLE)
-	  || (type == Types.REAL)
-	  || (type == Types.INTEGER)
-	  || (type == Types.SMALLINT))
-        flags += MysqliModule.NUM_FLAG;
-
-      result.putField(env, "flags", new LongValue(flags));
-      //generate PHP type
-      int quercusType = 0;
-      switch (type) {
-      case Types.DECIMAL:
-        quercusType = MysqliModule.MYSQL_TYPE_DECIMAL;
-        break;
-      case Types.BIT:
-        quercusType = MysqliModule.MYSQL_TYPE_TINY;
-        break;
-      case Types.SMALLINT:
-        quercusType = MysqliModule.MYSQL_TYPE_SHORT;
-        break;
-      case Types.INTEGER: {
-        if (! isInResultString(2, "medium"))
-          quercusType = MysqliModule.MYSQL_TYPE_LONG;
-        else
-          quercusType = MysqliModule.MYSQL_TYPE_INT24;
-        break;
-      }
-      case Types.REAL:
-        quercusType = MysqliModule.MYSQL_TYPE_FLOAT;
-        break;
-      case Types.DOUBLE:
-        quercusType = MysqliModule.MYSQL_TYPE_DOUBLE;
-        break;
-      case Types.BIGINT:
-        quercusType = MysqliModule.MYSQL_TYPE_LONGLONG;
-        break;
-      case Types.DATE:
-        quercusType = MysqliModule.MYSQL_TYPE_DATE;
-        break;
-      case Types.TIMESTAMP:
-        quercusType = MysqliModule.MYSQL_TYPE_DATETIME;
-        break;
-      case Types.LONGVARBINARY:
-      case Types.LONGVARCHAR:
-        quercusType = MysqliModule.MYSQL_TYPE_BLOB;
-        break;
-      case Types.CHAR:
-        quercusType = MysqliModule.MYSQL_TYPE_STRING;
-        break;
-      case Types.VARCHAR:
-        quercusType = MysqliModule.MYSQL_TYPE_VAR_STRING;
-        break;
-      // XXX: may need to revisit default
-      default:
-        quercusType = MysqliModule.MYSQL_TYPE_NULL;
-        break;
-      }
-      result.putField(env, "type", new LongValue(quercusType));
-      result.putField(env, "decimals", new LongValue(scale));
-
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-
-    return result;
-  }
-
-  /**
    * Returns an object with properties that correspond to the fetched row and
    * moves the internal data pointer ahead.
    *
@@ -480,45 +321,6 @@ public class JdbcResultResource {
   public ArrayValue fetchRow(Env env)
   {
     return fetchArray(env, JdbcResultResource.FETCH_NUM);
-  }
-
-  /**
-   * Returns a StringValue corresponding to the PHP return string
-   *
-   * @param dataType the column data type
-   * @return the column PHP name
-   */
-  public static String getColumnPHPName(int dataType)
-  {
-    switch (dataType) {
-    case Types.BIGINT:
-    case Types.BIT:
-    case Types.INTEGER:
-    case Types.SMALLINT:
-        return INTEGER;
-
-    case Types.LONGVARBINARY:
-    case Types.LONGVARCHAR:
-        return BLOB;
-
-    case Types.CHAR:
-    case Types.VARCHAR:
-        return STRING;
-
-    case Types.DATE:
-        return DATE;
-
-    case Types.TIMESTAMP:
-        return DATETIME;
-
-    case Types.DECIMAL:
-    case Types.DOUBLE:
-    case Types.REAL:
-        return REAL;
-
-    default:
-        return UNKNOWN;
-    }
   }
 
   /**
@@ -805,6 +607,27 @@ public class JdbcResultResource {
   }
 
   /**
+   * Return true is the field offset is valid, meaning it
+   * is larger than 0 and is less that the max number
+   * of fields in this result resource.
+   */
+  protected boolean isValidFieldOffset(int fieldOffset)
+  {
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      if (fieldOffset < 0 || fieldOffset >= _metaData.getColumnCount())
+        return false;
+      else
+        return true;
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    }
+  }
+
+  /**
    * Returns the following field flags: not_null, primary_key, multiple_key, blob,
    * unsigned zerofill, binary, enum, auto_increment and timestamp
    * <p/>
@@ -907,7 +730,8 @@ public class JdbcResultResource {
   }
 
   /**
-   * Get field length.
+   * Get field length. This is the length of the field
+   * as defined in the table declaration.
    *
    * @param env the PHP executing environment
    * @param fieldOffset the field number (0-based)
@@ -1096,12 +920,57 @@ public class JdbcResultResource {
         env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
-      else
-        return env.createString(getColumnPHPName(_metaData.getColumnType(fieldOffset + 1)));
-
+      else {
+        int jdbcType = _metaData.getColumnType(fieldOffset + 1);
+        return env.createString(getFieldType(fieldOffset, jdbcType));
+      }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Given the JDBC type of the field at the given offset,
+   * return a PHP type string.
+   */
+
+  protected String getFieldType(int fieldOffset, int jdbcType)
+  {
+    switch (jdbcType) {
+    case Types.BIGINT:
+    case Types.BIT:
+    case Types.INTEGER:
+    case Types.SMALLINT:
+    case Types.TINYINT:
+        return INTEGER;
+
+    case Types.LONGVARBINARY:
+    case Types.LONGVARCHAR:
+        return BLOB;
+
+    case Types.CHAR:
+    case Types.VARCHAR:
+    case Types.BINARY:
+    case Types.VARBINARY:
+        return STRING;
+
+    case Types.TIME:
+        return TIME;
+
+    case Types.DATE:
+        return DATE;
+
+    case Types.TIMESTAMP:
+        return DATETIME;
+
+    case Types.DECIMAL:
+    case Types.DOUBLE:
+    case Types.REAL:
+        return REAL;
+
+    default:
+        return UNKNOWN;
     }
   }
 
@@ -1278,12 +1147,13 @@ public class JdbcResultResource {
 
       int currentRow = _rs.getRow();
 
-      if ((!_rs.absolute(row + 1)) || _rs.isAfterLast()) {
+      if ((row < 0) || (!_rs.absolute(row + 1)) || _rs.isAfterLast()) {
         if (currentRow > 0)
           _rs.absolute(currentRow);
         else
           _rs.beforeFirst();
 
+        env.invalidArgument("row", row);
         return BooleanValue.FALSE;
       }
 
@@ -1341,13 +1211,21 @@ public class JdbcResultResource {
   }
 
   /**
-   * Set a value for field offset.
+   * Set a value for field offset. This method will
+   * return true when the field offset is valid,
+   * otherwise it will set the field offset
+   * to the invalid value and return false.
    *
    * @param fieldOffset PHP is 0-based
    */
-  public void setFieldOffset(int fieldOffset)
+  public boolean setFieldOffset(int fieldOffset)
   {
     _fieldOffset = fieldOffset;
+
+    if (fieldOffset < 0 || fieldOffset >= getNumFields().toInt())
+      return false;
+    else
+      return true;
   }
 
   /**

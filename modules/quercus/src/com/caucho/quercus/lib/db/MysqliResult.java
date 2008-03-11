@@ -43,6 +43,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -212,7 +213,7 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
-   * Returns an array representing the current row.
+   * Returns a numerical array representing the current row.
    *
    * @return an array that corresponds to the
    * fetched row or NULL if there are no more
@@ -254,20 +255,29 @@ public class MysqliResult extends JdbcResultResource {
   protected Value fetchFieldDirect(Env env,
                                    int fieldOffset)
   {
-    Value fieldTable = getFieldTable(env, fieldOffset);
-    Value fieldName = getFieldName(env, fieldOffset);
-    Value fieldAlias = getFieldNameAlias(fieldOffset);
-    Value fieldType = getJdbcType(fieldOffset);
-    Value fieldLength = getFieldLength(env, fieldOffset);
-    Value fieldScale = getFieldScale(fieldOffset);
-    Value fieldCatalog = getFieldCatalog(fieldOffset);
+    Value fieldTable;
+    Value fieldName;
+    Value fieldAlias;
+    Value fieldJdbcType;
+    String fieldMysqlType;
+    Value fieldLength;
+    Value fieldScale;
+    Value fieldCatalog;
 
-    if ((fieldTable == BooleanValue.FALSE)
-      || (fieldName == BooleanValue.FALSE)
-      || (fieldAlias == BooleanValue.FALSE)
-      || (fieldType == BooleanValue.FALSE)
-      || (fieldLength == BooleanValue.FALSE)
-      || (fieldScale == BooleanValue.FALSE)) {
+    if (! isValidFieldOffset(fieldOffset)) {
+      // php/1f77 : No warning printed for invalid index
+
+      return BooleanValue.FALSE;
+    }
+
+    if (((fieldTable = getFieldTable(env, fieldOffset)) == BooleanValue.FALSE)
+      || ((fieldName = getFieldName(env, fieldOffset)) == BooleanValue.FALSE)
+      || ((fieldAlias = getFieldNameAlias(fieldOffset)) == BooleanValue.FALSE)
+      || ((fieldJdbcType = getJdbcType(fieldOffset)) == BooleanValue.FALSE)
+      || ((fieldMysqlType = getMysqlType(fieldOffset)) == null)
+      || ((fieldLength = getFieldLength(env, fieldOffset)) == BooleanValue.FALSE)
+      || ((fieldScale = getFieldScale(fieldOffset)) == BooleanValue.FALSE)
+      || ((fieldCatalog = getFieldCatalog(fieldOffset)) == BooleanValue.FALSE)) {
       return BooleanValue.FALSE;
     }
 
@@ -285,8 +295,266 @@ public class MysqliResult extends JdbcResultResource {
                                          fieldAlias.toString(),
                                          fieldName.toString(),
                                          fieldTable.toString(),
-                                         fieldType.toInt(),
+                                         fieldJdbcType.toInt(),
+                                         fieldMysqlType,
                                          fieldScale.toInt());
+  }
+
+  /**
+   * Returns an object with the following fields:
+   *
+   * name: The name of the column
+   * orgname: The original name if an alias was specified
+   * table: The name of the table
+   * orgtable: The original name if an alias was specified
+   * def: default value for this field, represented as a string
+   * max_length: The maximum width of the field for the result set
+   * flags: An integer representing the bit-flags for the field
+   * type: An integer respresenting the data type used for this field
+   * decimals: The number of decimals used (for integer fields)
+   *
+   * @param env the PHP executing environment
+   * @param fieldLength the field length as defined in the table declaration.
+   * @param name the field name
+   * @param originalName the field original name
+   * @param table the field table name
+   * @param type the field type
+   * @param scale the field scale
+   * @return an object containing field metadata
+   */
+  protected Value fetchFieldImproved(Env env,
+                                     int fieldLength,
+                                     String name,
+                                     String originalName,
+                                     String table,
+                                     int jdbcType,
+                                     String mysqlType,
+                                     int scale)
+  {
+    Value result = env.createObject();
+
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      _rs.next();
+      result.putField(env, "name", env.createString(name));
+      result.putField(env, "orgname", env.createString(originalName));
+      result.putField(env, "table", env.createString(table));
+      //XXX: orgtable same as table
+      result.putField(env, "orgtable", env.createString(table));
+
+      result.putField(env, "def", env.createString(_rs.getString(6)));
+
+      // "max_length" is the maximum width of this field in this
+      // result set.
+
+      result.putField(env, "max_length", new LongValue(0));
+
+      // "length" is the width of the field defined in the table
+      // declaration.
+
+      result.putField(env, "length", new LongValue(fieldLength));
+
+      //generate flags
+      long flags = 0;
+
+      if (! isInResultString(4, "YES"))
+        flags += MysqliModule.NOT_NULL_FLAG;
+
+      if (isInResultString(5, "PRI")) {
+        flags += MysqliModule.PRI_KEY_FLAG;
+        flags += MysqliModule.PART_KEY_FLAG;
+      }
+
+      if (isInResultString(5, "MUL")) {
+        flags += MysqliModule.MULTIPLE_KEY_FLAG;
+        flags += MysqliModule.PART_KEY_FLAG;
+      }
+
+      if (isInResultString(2, "blob")
+	  || (jdbcType == Types.LONGVARCHAR)
+	  || (jdbcType == Types.LONGVARBINARY))
+        flags += MysqliModule.BLOB_FLAG;
+
+      if (isInResultString(2, "unsigned"))
+        flags += MysqliModule.UNSIGNED_FLAG;
+
+      if (isInResultString(2, "zerofill"))
+        flags += MysqliModule.ZEROFILL_FLAG;
+
+      // php/1f73 - null check
+      if (isInResultString(3, "bin")
+	  || (jdbcType == Types.LONGVARBINARY)
+	  || (jdbcType == Types.DATE)
+	  || (jdbcType == Types.TIMESTAMP))
+        flags += MysqliModule.BINARY_FLAG;
+
+      if (isInResultString(2, "enum"))
+        flags += MysqliModule.ENUM_FLAG;
+
+      if (isInResultString(7, "auto"))
+        flags += MysqliModule.AUTO_INCREMENT_FLAG;
+
+      if (isInResultString(2, "set"))
+        flags += MysqliModule.SET_FLAG;
+
+      if ((jdbcType == Types.BIGINT)
+	  || (jdbcType == Types.BIT)
+	  || (jdbcType == Types.BOOLEAN)
+	  || (jdbcType == Types.DECIMAL)
+	  || (jdbcType == Types.DOUBLE)
+	  || (jdbcType == Types.REAL)
+	  || (jdbcType == Types.INTEGER)
+	  || (jdbcType == Types.SMALLINT))
+        flags += MysqliModule.NUM_FLAG;
+
+      result.putField(env, "flags", new LongValue(flags));
+
+      //generate PHP type
+      int quercusType = 0;
+      switch (jdbcType) {
+      case Types.DECIMAL:
+        quercusType = MysqliModule.MYSQLI_TYPE_DECIMAL;
+        break;
+      case Types.BIT:
+        // Connector-J enables the tinyInt1isBit property
+        // by default and converts TINYINT to BIT. Use
+        // the mysql type name to tell the two apart.
+
+        if (mysqlType.equals("BIT")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_BIT;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_TINY;
+        }
+        break;
+      case Types.SMALLINT:
+        quercusType = MysqliModule.MYSQLI_TYPE_SHORT;
+        break;
+      case Types.INTEGER: {
+        if (! isInResultString(2, "medium"))
+          quercusType = MysqliModule.MYSQLI_TYPE_LONG;
+        else
+          quercusType = MysqliModule.MYSQLI_TYPE_INT24;
+        break;
+      }
+      case Types.REAL:
+        quercusType = MysqliModule.MYSQLI_TYPE_FLOAT;
+        break;
+      case Types.DOUBLE:
+        quercusType = MysqliModule.MYSQLI_TYPE_DOUBLE;
+        break;
+      case Types.BIGINT:
+        quercusType = MysqliModule.MYSQLI_TYPE_LONGLONG;
+        break;
+      case Types.DATE:
+        if (mysqlType.equals("YEAR")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_YEAR;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_DATE;
+        }
+        break;
+      case Types.TINYINT:
+        quercusType = MysqliModule.MYSQLI_TYPE_TINY;
+        break;
+      case Types.TIME:
+        quercusType = MysqliModule.MYSQLI_TYPE_TIME;
+        break;
+      case Types.TIMESTAMP:
+        if (mysqlType.equals("TIMESTAMP")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_TIMESTAMP;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_DATETIME;
+        }
+        break;
+      case Types.LONGVARBINARY:
+      case Types.LONGVARCHAR:
+        quercusType = MysqliModule.MYSQLI_TYPE_BLOB;
+        break;
+      case Types.BINARY:
+      case Types.CHAR:
+        quercusType = MysqliModule.MYSQLI_TYPE_STRING;
+        break;
+      case Types.VARBINARY:
+      case Types.VARCHAR:
+        quercusType = MysqliModule.MYSQLI_TYPE_VAR_STRING;
+        break;
+      // XXX: may need to revisit default
+      default:
+        quercusType = MysqliModule.MYSQLI_TYPE_NULL;
+        break;
+      }
+      result.putField(env, "type", new LongValue(quercusType));
+      result.putField(env, "decimals", new LongValue(scale));
+
+      // The "charsetnr" field is an integer identifier
+      // for the character set used to encode the field.
+      // This integer is sent by the server to the JDBC client
+      // and is stored as com.mysql.jdbc.Field.charsetIndex,
+      // but this field is private and the class does not provide
+      // any means to access the field. There is also no way
+      // to lookup the mysql index given a Java or Mysql encoding
+      // name.
+
+      result.putField(env, "charsetnr", new LongValue(0));
+
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+
+    return result;
+  }
+
+  /**
+   * Get Mysql type string
+   *
+   * @param fieldOffset the field number (0-based)
+   * @return the Mysql type
+   */
+  protected String getMysqlType(int fieldOffset)
+  {
+    try {
+      if (_metaData == null)
+        _metaData = _rs.getMetaData();
+
+      return _metaData.getColumnTypeName(fieldOffset + 1);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      return null;
+    }
+  }
+
+  /**
+   * Given the JDBC type of the field at the given offset,
+   * return a PHP type string.
+   */
+
+  protected String getFieldType(int fieldOffset, int jdbcType)
+  {
+    if (jdbcType == Types.TIMESTAMP) {
+      // The Mysql types DATETIME and TIMESTAMP both map to Types.TIMESTAMP
+
+      String mysqlType = getMysqlType(fieldOffset);
+
+      if (mysqlType.equals("TIMESTAMP")) {
+        return TIMESTAMP;
+      } else {
+        return DATETIME;
+      }
+    } else if (jdbcType == Types.DATE) {
+      // The Mysql types DATE and YEAR both map to Types.DATE
+
+      String mysqlType = getMysqlType(fieldOffset);
+
+      if (mysqlType.equals("YEAR")) {
+        return YEAR;
+      } else {
+        return DATE;
+      }
+    } else {
+      return super.getFieldType(fieldOffset, jdbcType);
+    }
   }
 
   /**
@@ -320,9 +588,12 @@ public class MysqliResult extends JdbcResultResource {
    */
   public boolean field_seek(Env env, int offset)
   {
-    setFieldOffset(offset);
+    boolean success = setFieldOffset(offset);
 
-    return true;
+    if (! success)
+      env.invalidArgument("field", offset);
+
+    return success;
   }
 
   /**

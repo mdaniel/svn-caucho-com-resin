@@ -133,7 +133,7 @@ public class Postgres extends JdbcConnectionResource {
   /**
    * returns a prepared statement
    */
-  public PostgresStatement prepare(Env env, String query)
+  public PostgresStatement prepare(Env env, StringValue query)
   {
     PostgresStatement stmt = new PostgresStatement((Postgres)validateConnection());
 
