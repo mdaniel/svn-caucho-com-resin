@@ -93,6 +93,14 @@ public class BusinessMethodGenerator implements EjbCallChain {
   {
     return _view;
   }
+  
+  /**
+   * Returns the bean's ejbclass
+   */
+  protected ApiClass getEjbClass()
+  {
+    return _view.getEjbClass();
+  }
 
   /**
    * Returns the api method
@@ -116,6 +124,20 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public boolean hasXA()
   {
     return _xa.isEnhanced();
+  }
+
+  /**
+   * Set true for a remove method
+   */
+  public void setRemove(boolean isRemove)
+  {
+  }
+
+  /**
+   * Set true for a remove method
+   */
+  public void setRemoveRetainIfException(boolean isRemoveRetainIfException)
+  {
   }
 
   /**
@@ -370,6 +392,16 @@ public class BusinessMethodGenerator implements EjbCallChain {
   protected void generatePostCall(JavaWriter out)
     throws IOException
   {
+  }
+
+  protected boolean hasException(Class exn)
+  {
+    for (Class apiExn : _implMethod.getExceptionTypes()) {
+      if (apiExn.isAssignableFrom(exn))
+	return true;
+    }
+
+    return false;
   }
 
   boolean matches(String name, Class[] parameterTypes)

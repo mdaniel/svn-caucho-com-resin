@@ -364,7 +364,9 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Runs the timeout callbacks.
    */
-  public void __caucho_timeout_callback(Timer timer)
+  public void __caucho_timeout_callback(javax.ejb.Timer timer)
   {
+    throw new IllegalStateException(L.l("'{0}' does not have a @Timeout callback",
+					getClass().getName()));
   }
 }

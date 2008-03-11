@@ -1039,6 +1039,10 @@ public class EjbBean extends DescriptionGroupConfig
       for (EjbMethodPattern method : _methodList) {
 	method.configure(_bean);
       }
+
+      for (RemoveMethod method : _removeMethods) {
+	method.configure(_bean);
+      }
       
       // initIntrospect();
 

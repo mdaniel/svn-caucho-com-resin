@@ -101,7 +101,10 @@ public class StatefulServer extends SessionServer
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
-    return new StatefulProviderProxy(provider);
+    if (provider != null)
+      return new StatefulProviderProxy(provider);
+    else
+      return null;
   }
 
   /**
@@ -112,14 +115,20 @@ public class StatefulServer extends SessionServer
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
-    return provider.__caucho_createNew(new ConfigContext());
+    if (provider != null)
+      return provider.__caucho_createNew(new ConfigContext());
+    else
+      return null;
   }
 
   protected ComponentImpl createSessionComponent(Class api)
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
-    return new StatefulComponent(provider);
+    if (provider != null)
+      return new StatefulComponent(provider);
+    else
+      return null;
   }
   
   /**
@@ -243,7 +252,6 @@ public class StatefulServer extends SessionServer
       */
     }
   }
-  
   
   /**
    * Cleans up the entity server nicely.

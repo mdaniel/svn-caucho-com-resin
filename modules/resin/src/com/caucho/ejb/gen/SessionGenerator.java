@@ -294,7 +294,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     Local local = (Local) getEjbClass().getAnnotation(Local.class);
     Remote remote = (Remote) getEjbClass().getAnnotation(Remote.class);
 
-    if (local != null) {
+    if (local != null && local.value().length > 0) {
       for (Class api : local.value()) {
 	apiList.add(new ApiClass(api));
       }
@@ -360,7 +360,7 @@ abstract public class SessionGenerator extends BeanGenerator {
 
     Remote remote = (Remote) getEjbClass().getAnnotation(Remote.class);
 
-    if (remote != null) {
+    if (remote != null && remote.value().length > 0) {
       for (Class api : remote.value()) {
 	apiList.add(new ApiClass(api));
       }
@@ -370,7 +370,14 @@ abstract public class SessionGenerator extends BeanGenerator {
 
     Class []apiClasses = getEjbClass().getInterfaces();
     for (Class api : apiClasses) {
-      if (api.isAnnotationPresent(Remote.class))
+      if (java.io.Serializable.class.equals(api))
+	continue;
+      else if (java.io.Externalizable.class.equals(api))
+	continue;
+      else if (api.getName().startsWith("javax.ejb"))
+	continue;
+      
+      if (api.isAnnotationPresent(Remote.class) || remote != null)
 	apiList.add(new ApiClass(api));
     }
 

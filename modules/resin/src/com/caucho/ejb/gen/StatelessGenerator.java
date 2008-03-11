@@ -102,12 +102,6 @@ public class StatelessGenerator extends SessionGenerator {
     out.pushDepth();
 
     generateContext(out);
-
-    /*
-    for (View view : getViews()) {
-      view.generateContextPrologue(out);
-    }
-    */
     
     generateCreateProvider(out);
     
@@ -176,6 +170,18 @@ public class StatelessGenerator extends SessionGenerator {
     }
 
     out.println();
+    out.println("public void __caucho_timeout_callback(javax.ejb.Timer timer)");
+    out.println("{");
+    out.pushDepth();
+
+    for (View view : getViews()) {
+      view.generateTimer(out);
+    }
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
     out.println("public void destroy()");
     out.println("{");
     out.pushDepth();
@@ -184,108 +190,6 @@ public class StatelessGenerator extends SessionGenerator {
 
     out.popDepth();
     out.println("}");
-    
-    /*
-    out.println();
-    out.println(beanClass + " _ejb_begin()");
-    out.println("{");
-    out.pushDepth();
-    out.println(beanClass + " bean;");
-    out.println("synchronized (this) {");
-    out.println("  if (_freeBeanTop > 0) {");
-    out.println("    bean = _freeBeanStack[--_freeBeanTop];");
-    out.println("    return bean;");
-    out.println("  }");
-    out.println("}");
-    out.println();
-    out.println("try {");
-    out.println("  bean = new " + beanClass + "();");
-
-    if (hasMethod("setSessionContext", new Class[] { SessionContext.class })) {
-      out.println("  bean.setSessionContext(this);");
-    }
-
-    if (hasMethod("ejbCreate", new Class[0])) {
-      // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");
-      out.println("  bean.ejbCreate();");
-      
-      // out.println("  invokeMethod(bean, \"ejbCreate\", new Class[] {}, new Object[] {});");
-    }
-    
-    out.println("  getStatelessServer().initInstance(bean);");
-
-    out.println("  return bean;");
-    out.println("} catch (Exception e) {");
-    out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-    out.println("}");
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("void _ejb_free(" + beanClass + " bean)");
-    out.println("  throws javax.ejb.EJBException");
-    out.println("{");
-    out.pushDepth();
-    out.println("if (bean == null)");
-    out.println("  return;");
-    out.println();
-    out.println("synchronized (this) {");
-    out.println("  if (_freeBeanTop < _freeBeanStack.length) {");
-    out.println("    _freeBeanStack[_freeBeanTop++] = bean;");
-    out.println("    return;");
-    out.println("  }");
-    out.println("}");
-    */
-
-    /*
-    if (hasMethod("ejbRemove", new Class[0])) {
-      out.println();
-      // ejb/0fe0: ejbRemove() can be private, out.println("bean.ejbRemove();");
-      out.println("invokeMethod(bean, \"ejbRemove\", new Class[] {}, new Object[] {});");
-    }
-    */
-
-    /*
-    out.popDepth();
-    out.println("}");
-    */
-
-    /*
-    out.println();
-    out.println("public void destroy()");
-    out.println("{");
-    out.pushDepth();
-    out.println(beanClass + " ptr;");
-    out.println(beanClass + " []freeBeanStack;");
-    out.println("int freeBeanTop;");
-
-    out.println("synchronized (this) {");
-    out.println("  freeBeanStack = _freeBeanStack;");
-    out.println("  freeBeanTop = _freeBeanTop;");
-    out.println("  _freeBeanStack = null;");
-    out.println("  _freeBeanTop = 0;");
-    out.println("}");
-
-    if (hasMethod("ejbRemove", new Class[0])) {
-      out.println();
-      out.println("for (int i = 0; i < freeBeanTop; i++) {");
-      out.pushDepth();
-
-      out.println("try {");
-      out.println("  if (freeBeanStack[i] != null)");
-      // ejb/0fe0: ejbRemove() can be private out.println("    freeBeanStack[i].ejbRemove();");
-      out.println("    freeBeanStack[i].ejbRemove();");
-      out.println("} catch (Throwable e) {");
-      out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
-      out.println("}");
-
-      out.popDepth();
-      out.println("}");
-    }
-    
-    out.popDepth();
-    out.println("}");
-    */
   }
 
   public void generateViews(JavaWriter out)

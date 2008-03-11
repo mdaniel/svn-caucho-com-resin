@@ -35,6 +35,6 @@ package com.caucho.ejb.hessian;
 public class HessianEJBServlet extends com.caucho.ejb.EJBServlet {
   protected String getDefaultProtocolContainer()
   {
-    return "com.caucho.hessian.HessianProtocol";
+    return "com.caucho.ejb.hessian.HessianProtocol";
   }
 }

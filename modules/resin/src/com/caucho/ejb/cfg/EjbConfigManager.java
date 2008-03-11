@@ -138,10 +138,8 @@ public class EjbConfigManager extends EjbConfig {
 
 	new Config().configure(ejbJar, path, getSchema());
       } catch (ConfigException e) {
-	e.printStackTrace();
 	throw e;
       } catch (Exception e) {
-	e.printStackTrace();
 	throw ConfigException.create(e);
       }
     }

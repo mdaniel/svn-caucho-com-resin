@@ -152,6 +152,7 @@ abstract public class StatefulView extends View {
     out.println("private StatefulContext _context;");
     out.println("private StatefulServer _server;");
     out.println("private " + getEjbClass().getName() + " _bean;");
+    out.println("private boolean _isActive;");
     
     generateBusinessPrologue(out);
 

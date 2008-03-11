@@ -322,7 +322,7 @@ public class EjbSessionBean extends EjbBean {
     // the @Remote interface for EJB 3.0 (same with @LocalHome and @Local).
     // TCK: ejb30/bb/session/stateful/sessioncontext/annotated
 
-  ApiClass ejbClass = getEJBClassWrapper();
+    ApiClass ejbClass = getEJBClassWrapper();
 
     LocalHome localHomeAnn = ejbClass.getAnnotation(LocalHome.class);
 
@@ -347,12 +347,6 @@ public class EjbSessionBean extends EjbBean {
   protected BeanAssembler createAssembler(String fullClassName)
   {
     throw new IllegalStateException(getClass().getName());
-    /*
-    if (isStateless())
-      return new StatelessAssembler(this, fullClassName);
-    else
-      return new SessionAssembler(this, fullClassName);
-     */
   }
 
   /**

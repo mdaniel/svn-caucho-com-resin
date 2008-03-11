@@ -88,7 +88,8 @@ public class StatefulCreateMethod extends StatefulMethod
 
     out.println("StatefulContext context = new " + _bean.getFullClassName() + "(_context, remote);");
     out.println("remote.__caucho_setContext(context);");
-    out.println("bean.setSessionContext(context);");
+    if (SessionBean.class.isAssignableFrom(_bean.getEjbClass().getJavaClass()))
+      out.println("bean.setSessionContext(context);");
   }
 
   /**

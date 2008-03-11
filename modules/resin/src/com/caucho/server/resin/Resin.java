@@ -1278,7 +1278,8 @@ public class Resin implements EnvironmentBean, SchemaBean
           return;
       } catch (OutOfMemoryError e) {
 	try {
-	  System.err.println("Out of memory");
+	  EnvironmentStream.getOriginalSystemErr().println("Resin halting due to out of memory");
+	} catch (Exception e1) {
 	} finally {
 	  Runtime.getRuntime().halt(1);
 	}

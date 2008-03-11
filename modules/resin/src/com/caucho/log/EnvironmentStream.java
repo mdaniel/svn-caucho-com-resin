@@ -212,8 +212,8 @@ public class EnvironmentStream extends StreamImpl {
     if (os instanceof WriteStream) {
       WriteStream out = (WriteStream) os;
 
-      if (out.getSource() == StdoutStream.create() ||
-	  out.getSource() == StderrStream.create())
+      if (out.getSource() == StdoutStream.create()
+	  || out.getSource() == StderrStream.create())
 	return;
     }
     

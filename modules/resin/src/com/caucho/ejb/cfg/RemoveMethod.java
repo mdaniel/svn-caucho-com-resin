@@ -31,6 +31,7 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
+import com.caucho.ejb.gen.*;
 
 import java.lang.reflect.*;
 
@@ -70,5 +71,24 @@ public class RemoveMethod {
   public boolean isMatch(Method method)
   {
     return _beanMethod.isMatch(method);
+  }
+
+  /**
+   * Configures the bean with the override values
+   */
+  public void configure(BeanGenerator bean)
+  {
+    for (View view : bean.getViews()) {
+      // XXX: check for type
+      
+      for (BusinessMethodGenerator bizMethod : view.getMethods()) {
+	Method apiMethod = bizMethod.getApiMethod();
+	
+	if (_beanMethod.isMatch(apiMethod)) {
+	  bizMethod.setRemove(true);
+	  bizMethod.setRemoveRetainIfException(_retainIfException);
+	}
+      }
+    }
   }
 }

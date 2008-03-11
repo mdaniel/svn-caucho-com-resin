@@ -55,6 +55,11 @@ public class StatefulRemoteView extends StatefulObjectView {
     return getApi().getSimpleName() + "__EJBRemote";
   }
 
+  public boolean isRemote()
+  {
+    return true;
+  }
+
   @Override
   protected void generateExtends(JavaWriter out)
     throws IOException

@@ -29,6 +29,8 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.config.j2ee.*;
+import com.caucho.config.program.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
@@ -37,7 +39,7 @@ import com.caucho.webbeans.component.*;
 
 import javax.ejb.*;
 import javax.webbeans.*;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,15 +101,6 @@ public class StatelessServer extends SessionServer {
   }
 
   /**
-   * Returns the ejb home.
-   */
-  @Override
-  public EJBHome getEJBHome()
-  {
-    return _remoteHomeView;
-  }
-
-  /**
    * Returns the 3.0 remote stub for the container
    */
   public Object getRemoteObject()
@@ -164,6 +157,19 @@ public class StatelessServer extends SessionServer {
       Class api = remoteApiList.get(0);
       
       _remoteProvider = getStatelessContext().getProvider(api);
+    }
+  }
+
+  protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
+				   Class ejbClass)
+  {
+    super.introspectDestroy(injectList, ejbClass);
+
+    for (Method method : ejbClass.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(Remove.class)
+	  && method.getParameterTypes().length == 0) {
+	injectList.add(new PreDestroyInject(method));
+      }
     }
   }
   

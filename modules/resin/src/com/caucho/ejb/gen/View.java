@@ -79,6 +79,11 @@ abstract public class View {
     return getViewClassName();
   }
 
+  public boolean isRemote()
+  {
+    return false;
+  }
+
   /**
    * Returns the API class.
    */
@@ -131,6 +136,14 @@ abstract public class View {
    * Generates context object's constructor
    */
   public void generateContextObjectConstructor(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates timer code
+   */
+  public void generateTimer(JavaWriter out)
     throws IOException
   {
   }

@@ -72,7 +72,7 @@ abstract public class StatelessContext extends AbstractSessionContext {
   public TimerService getTimerService()
     throws IllegalStateException
   {
-    throw new IllegalStateException("Stateless session beans cannot call SessionContext.getTimerService()");
+    return _server.getTimerService();
   }
   
   public StatelessProvider getProvider(Class api)

@@ -45,12 +45,27 @@ import javax.interceptor.*;
  */
 public class StatefulMethod extends BusinessMethodGenerator
 {
+  private boolean _isRemove;
+  private boolean _isRemoveRetainIfException;
+  
   public StatefulMethod(StatefulView view,
 			ApiMethod apiMethod,
 			Method implMethod,
 			int index)
   {
     super(view, apiMethod, implMethod, index);
+  }
+
+  @Override
+  public void setRemove(boolean isRemove)
+  {
+    _isRemove = isRemove;
+  }
+
+  @Override
+  public void setRemoveRetainIfException(boolean isRetain)
+  {
+    _isRemoveRetainIfException = isRetain;
   }
 
   /**
@@ -62,6 +77,12 @@ public class StatefulMethod extends BusinessMethodGenerator
     getXa().setTransactionType(getDefaultTransactionType());
 
     super.introspect(apiMethod, implMethod);
+
+    Remove remove = implMethod.getAnnotation(Remove.class);
+    if (remove != null) {
+      _isRemove = true;
+      _isRemoveRetainIfException = remove.retainIfException();
+    }
   }
 
   protected TransactionAttributeType getDefaultTransactionType()
@@ -78,11 +99,64 @@ public class StatefulMethod extends BusinessMethodGenerator
     return true;
   }
 
+  protected void generateContent(JavaWriter out)
+    throws IOException
+  {
+    if (getView().isRemote()
+	&& hasException(java.rmi.NoSuchObjectException.class)) {
+      out.println("if (_bean == null)");
+      out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
+		  + getEjbClass().getSimpleName() + " is no longer valid\");");
+    }
+    else {
+      out.println("if (_bean == null)");
+      out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
+		  + getEjbClass().getSimpleName() + " is no longer valid\");");
+    }
+
+    if (_isRemove) {
+      out.println("boolean isRemove = false;");
+      out.println("try {");
+      out.pushDepth();
+    }
+    
+    super.generateContent(out);
+
+    if (_isRemove) {
+      out.println("isRemove = true;");
+      
+      out.popDepth();
+
+      if (_isRemoveRetainIfException) {
+	out.println("} catch (RuntimeException e) {");
+	out.println("  isRemove = true;");
+	out.println("  throw e;");
+      }
+      
+      out.println("} finally {");
+      
+      if (_isRemoveRetainIfException) {
+	out.println("if (isRemove) {");
+	out.pushDepth();
+      }
+      
+      out.println("  Object bean = _bean;");
+      out.println("  _bean = null;");
+      out.println("  _server.destroyInstance(bean);");
+      
+      if (_isRemoveRetainIfException) {
+	out.popDepth();
+	out.println("}");
+      }
+      out.println("}");
+    }
+  }
+
   protected void generatePreCall(JavaWriter out)
     throws IOException
   {
-    // XXX: need correct exception
-    out.println("if (_bean == null) throw new EJBException();");
+    out.println("if (_isActive)");
+    out.println("  throw new EJBException(\"session bean is not reentrant\");");
     out.println();
     
     out.println("Thread thread = Thread.currentThread();");
@@ -90,6 +164,7 @@ public class StatefulMethod extends BusinessMethodGenerator
     out.println("try {");
     out.pushDepth();
     out.println("thread.setContextClassLoader(_server.getClassLoader());");
+    out.println("_isActive = true;");
   }
 
   /**
@@ -119,6 +194,8 @@ public class StatefulMethod extends BusinessMethodGenerator
     out.popDepth();
     out.println("} finally {");
     out.println("  thread.setContextClassLoader(oldLoader);");
+    out.println("  _isActive = false;");
+    
     out.println("}");
   }
 }

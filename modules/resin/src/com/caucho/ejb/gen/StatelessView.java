@@ -106,16 +106,21 @@ public class StatelessView extends View {
 				      apiMethod.getName()));
       }
 
-      int index = _businessMethods.size();
+      addBusinessMethod(apiMethod);
+    }
+  }
+
+  protected void addBusinessMethod(ApiMethod apiMethod)
+  {
+    int index = _businessMethods.size();
       
-      BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
+    BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
       
-      if (bizMethod != null) {
-	bizMethod.introspect(bizMethod.getApiMethod(),
-			     bizMethod.getImplMethod());
+    if (bizMethod != null) {
+      bizMethod.introspect(bizMethod.getApiMethod(),
+			   bizMethod.getImplMethod());
 	
-	_businessMethods.add(bizMethod);
-      }
+      _businessMethods.add(bizMethod);
     }
   }
 

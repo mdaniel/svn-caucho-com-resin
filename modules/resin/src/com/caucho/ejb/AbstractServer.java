@@ -130,6 +130,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected ConfigProgram _initProgram;
   protected ConfigProgram []_initInject;
+  protected ConfigProgram []_destroyInject;
 
   private AroundInvokeConfig _aroundInvokeConfig;
 
@@ -649,7 +650,7 @@ abstract public class AbstractServer implements EnvironmentBean {
       try {
 	EJBHome home = getEJBHome();
 	
-        _metaData = new EJBMetaDataImpl(getEJBHome(),
+        _metaData = new EJBMetaDataImpl(home,
                                         getRemoteHomeClass(),
                                         getRemoteObjectClass(),
                                         getPrimaryKeyClass());
@@ -866,6 +867,30 @@ abstract public class AbstractServer implements EnvironmentBean {
     }
   }
 
+  /**
+   * Remove an object.
+   */
+  public void destroyInstance(Object instance)
+  {
+    if (_destroyInject != null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+        thread.setContextClassLoader(_loader);
+
+	ConfigContext env = null;
+	if (env == null)
+	  env = new ConfigContext();
+
+	for (ConfigProgram inject : _destroyInject)
+	  inject.inject(instance, env);
+      } finally {
+        thread.setContextClassLoader(oldLoader);
+      }
+    }
+  }
+
   public void init()
     throws Exception
   {
@@ -926,6 +951,22 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     if (injectArray.length > 0)
       _initInject = injectArray;
+
+    injectList = new ArrayList<ConfigProgram>();
+
+    introspectDestroy(injectList, getEjbClass());
+
+    injectArray = new ConfigProgram[injectList.size()];
+    injectList.toArray(injectArray);
+
+    if (injectArray.length > 0)
+      _destroyInject = injectArray;
+  }
+
+  protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
+				   Class ejbClass)
+  {
+    InjectIntrospector.introspectDestroy(injectList, getEjbClass());
   }
 
   /**

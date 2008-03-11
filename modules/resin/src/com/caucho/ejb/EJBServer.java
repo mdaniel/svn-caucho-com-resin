@@ -86,9 +86,6 @@ public class EJBServer
   private EjbContainer _ejbContainer;
   private AmberContainer _amberContainer;
 
-  private String _localJndiPrefix; // = "java:comp/env/cmp";
-  private String _remoteJndiPrefix; // = "java:comp/env/ejb";
-
   private String _entityManagerJndiName = "java:comp/EntityManager";
   private ArrayList<Path> _ejbJars = new ArrayList<Path>();
 
@@ -568,47 +565,6 @@ public class EJBServer
   public void init()
     throws Exception
   {
-    /*
-      try {
-      if (_localJndiName != null)
-      Jndi.rebindDeepShort(_localJndiName, this);
-      } catch (NamingException e) {
-      log.log(Level.FINER, e.toString(), e);
-      }
-    */
-
-    /*
-    if (_localServer.getLevel() == null
-        || "java:comp/env/cmp".equals(_localJndiPrefix)) {
-      _localServer.set(this);
-      _localManager.set(_ejbManager);
-    }
-
-    try {
-      if (_localJndiPrefix != null)
-        Jndi.bindDeepShort(_localJndiPrefix + "/resin-ejb-server", _ejbManager);
-    } catch (NamingException e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    try {
-      if (_localJndiPrefix != null)
-        Jndi.bindDeepShort(_localJndiPrefix + "/caucho-ejb-admin", _ejbManager);
-    } catch (NamingException e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    try {
-      if (_entityManagerJndiName != null
-	  && _ejbManager.getAmberManager() != null) {
-        Jndi.rebindDeepShort(_entityManagerJndiName,
-                             _ejbManager.getAmberManager().getEntityManager());
-      }
-    } catch (NamingException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-    */
-
     Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
     
     // _ejbContainer.start();
@@ -626,87 +582,13 @@ public class EJBServer
     throws Exception
   {
     try {
-      log.fine("Initializing ejb-server : local-jndi=" + _localJndiPrefix
-               + " remote-jndi=" + _remoteJndiPrefix);
+      log.fine("Initializing ejb-server : local-jndi="
+	       + _ejbContainer.getProtocolManager().getLocalJndiPrefix()
+               + " remote-jndi="
+	       + _ejbContainer.getProtocolManager().getRemoteJndiPrefix());
 
       Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
-
-      /*
-      ProtocolContainer protocol = new ProtocolContainer();
-      if (_urlPrefix != null)
-        protocol.setURLPrefix(_urlPrefix);
-
-      protocol.setServerManager(_ejbManager); // .getEnvServerManager());
-
-      _ejbManager.getProtocolManager().setProtocolContainer(protocol);
-      _ejbManager.setLocalJndiPrefix(_localJndiPrefix);
-      _ejbManager.setRemoteJndiPrefix(_remoteJndiPrefix);
-
-      //_ejbManager.setDataSource(_dataSource);
-      //_ejbManager.setCreateDatabaseSchema(_createDatabaseSchema);
-      _ejbManager.setValidateDatabaseSchema(_validateDatabaseSchema);
-      _ejbManager.setJMSConnectionFactory(_jmsConnectionFactory);
-      _ejbManager.setTransactionTimeout(_transactionTimeout);
-      _ejbManager.setAllowJVMCall(! _forbidJVMCall);
-      _ejbManager.setAutoCompile(_autoCompile);
-      _ejbManager.setAllowPOJO(isAllowPOJO());
-
-      int resinIsolation = -1;
-
-      if (_resinIsolation == null) {
-      }
-      else if (_resinIsolation.equals("row-locking"))
-        resinIsolation = EjbMethod.RESIN_ROW_LOCKING;
-      else if (_resinIsolation.equals("database"))
-        resinIsolation = EjbMethod.RESIN_DATABASE;
-      else {
-        throw new ConfigException(L.l("resin-isolation may only be `row-locking' or `database' in EJBServer, not `{0}'", _resinIsolation));
-      }
-
-      _ejbManager.setResinIsolation(resinIsolation);
-
-      int jdbcIsolation = -1;
-
-      if (_jdbcIsolation == null) {
-      }
-      else if (_jdbcIsolation.equals("none"))
-        jdbcIsolation = java.sql.Connection.TRANSACTION_NONE;
-      else if (_jdbcIsolation.equals("read-committed"))
-        jdbcIsolation = java.sql.Connection.TRANSACTION_READ_COMMITTED;
-      else if (_jdbcIsolation.equals("read-uncommitted"))
-        jdbcIsolation = java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
-      else if (_jdbcIsolation.equals("repeatable-read"))
-        jdbcIsolation = java.sql.Connection.TRANSACTION_REPEATABLE_READ;
-      else if (_jdbcIsolation.equals("serializable"))
-        jdbcIsolation = java.sql.Connection.TRANSACTION_SERIALIZABLE;
-      else
-        throw new ConfigException(L.l("unknown value for jdbc-isolation at `{0}'",
-                                      _jdbcIsolation));
-
-      _ejbManager.setJDBCIsolation(jdbcIsolation);
-      */
-
-      /*
-      for (int i = 0; i < _beanList.size(); i++)
-        _beanList.get(i).init();
-
-      // _entityIntrospector.init();
-
-      initAllEjbs();
-
-      _ejbManager.init();
-      */
-      
-      /*
-        String name = _jndiName;
-        if (! name.startsWith("java:"))
-        name = "java:comp/env/" + name;
-
-        Jndi.bindDeep(name, this);
-      */
-
-      // Environment.addEnvironmentListener(this);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -723,53 +605,4 @@ public class EJBServer
   {
     manualInit();
   }
-
-  /**
-   * Initialize all EJBs for any *.ejb or ejb-jar.xml in the WEB-INF or
-   * in a META-INF in the classpath.
-   */
-  /*
-  private void initAllEjbs()
-    throws Exception
-  {
-    addEJBJars();
-
-    if (_descriptors != null) {
-      for (int i = 0; i < _descriptors.size(); i++) {
-        Path path = _descriptors.get(i);
-
-        // XXX: app.addDepend(path);
-        _ejbContainer.getConfigManager().addEJBPath(path, path);
-      }
-    }
-  }
-  */
-
-  /*
-  private void addEJBJars()
-    throws Exception
-  {
-    for (int i = 0; i < _ejbJars.size(); i++) {
-      Path path = _ejbJars.get(i);
-
-      Environment.addDependency(path);
-
-      JarPath jar = JarPath.create(path);
-
-      _ejbManager.getEjbConfig().addEJBJar(jar);
-    }
-  }
-  */
-
-  /*
-  public MessageDestination getMessageDestination(Path path, String name)
-  {
-    return _ejbManager.getMessageDestination(path, name);
-  }
-
-  public MessageDestination getMessageDestination(String name)
-  {
-    return _ejbManager.getMessageDestination(name);
-  }
-  */
 }

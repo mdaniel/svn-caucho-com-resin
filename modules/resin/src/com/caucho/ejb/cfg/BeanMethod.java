@@ -65,11 +65,11 @@ public class BeanMethod {
 
   public boolean isMatch(ApiMethod otherMethod)
   {
-    return _methodParams.isMatch(otherMethod);
+    return _methodName.equals(otherMethod.getName());
   }
 
   public boolean isMatch(Method otherMethod)
   {
-    return _methodParams.isMatch(otherMethod);
+    return _methodName.equals(otherMethod.getName());
   }
 }

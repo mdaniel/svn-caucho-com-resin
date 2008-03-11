@@ -46,6 +46,8 @@ import java.util.*;
 public class StatelessObjectView extends StatelessView {
   private static final L10N L = new L10N(StatelessObjectView.class);
 
+  private String _timeoutMethod;
+
   public StatelessObjectView(StatelessGenerator bean, ApiClass api)
   {
     super(bean, api);
@@ -60,6 +62,7 @@ public class StatelessObjectView extends StatelessView {
     super.introspect();
 
     introspectLifecycle(getEjbClass().getJavaClass());
+    introspectTimer(getEjbClass());
   }
 
   /**
@@ -77,6 +80,39 @@ public class StatelessObjectView extends StatelessView {
 
     introspectLifecycle(cl.getSuperclass());
   }
+
+  /**
+   * Introspects the lifecycle methods
+   */
+  public void introspectTimer(ApiClass apiClass)
+  {
+    Class cl = apiClass.getJavaClass();
+    
+    if (cl == null || cl.equals(Object.class))
+      return;
+
+    if (TimedObject.class.isAssignableFrom(cl)) {
+      _timeoutMethod = "ejbTimeout";
+      return;
+    }
+
+    for (ApiMethod apiMethod : apiClass.getMethods()) {
+      Method method = apiMethod.getMethod();
+      
+      if (method.isAnnotationPresent(Timeout.class)) {
+	if (method.getParameterTypes().length != 1
+	    || ! javax.ejb.Timer.class.equals(method.getParameterTypes()[0])) {
+	  throw new ConfigException(L.l("{0}: timeout method '{1}' does not have a (Timer) parameter",
+					cl.getName(), method.getName()));
+	}
+	
+	_timeoutMethod = method.getName();
+
+	addBusinessMethod(apiMethod);
+      }
+    }
+  }
+
 
   /**
    * Generates prologue for the context.
@@ -299,13 +335,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("  }");
     out.println("}");
 
-    /*
-    if (hasMethod("ejbRemove", new Class[0])) {
-      out.println();
-      // ejb/0fe0: ejbRemove() can be private, out.println("bean.ejbRemove();");
-      out.println("invokeMethod(bean, \"ejbRemove\", new Class[] {}, new Object[] {});");
-    }
-    */
+    out.println("_server.destroyInstance(bean);");
 
     out.popDepth();
     out.println("}");
@@ -325,22 +355,19 @@ public class StatelessObjectView extends StatelessView {
     out.println("  _freeBeanTop = 0;");
     out.println("}");
 
-    if (getBean().hasMethod("ejbRemove", new Class[0])) {
-      out.println();
-      out.println("for (int i = 0; i < freeBeanTop; i++) {");
-      out.pushDepth();
+    out.println();
+    out.println("for (int i = 0; i < freeBeanTop; i++) {");
+    out.pushDepth();
 
-      out.println("try {");
-      out.println("  if (freeBeanStack[i] != null)");
-      // ejb/0fe0: ejbRemove() can be private out.println("    freeBeanStack[i].ejbRemove();");
-      out.println("    freeBeanStack[i].ejbRemove();");
-      out.println("} catch (Throwable e) {");
-      out.println("  __caucho_log.log(java.util.logging.Level.WARNING, e.toString(), e);");
-      out.println("}");
+    out.println("try {");
+    out.println("  if (freeBeanStack[i] != null)");
+    out.println("    _server.destroyInstance(freeBeanStack[i]);");
+    out.println("} catch (Throwable e) {");
+    out.println("  __caucho_log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+    out.println("}");
 
-      out.popDepth();
-      out.println("}");
-    }
+    out.popDepth();
+    out.println("}");
     
     out.popDepth();
     out.println("}");
@@ -382,6 +409,19 @@ public class StatelessObjectView extends StatelessView {
     throws IOException
   {
     out.println("super(" + serverVar + ");");
+  }
+
+  @Override
+    public void generateTimer(JavaWriter out)
+    throws IOException
+  {
+    if (_timeoutMethod != null) {
+      String localVar = "_local_" + getApi().getSimpleName();
+
+      out.println(getBeanClassName() + " bean = " + localVar + "._ejb_begin();");
+      out.println("bean." + _timeoutMethod + "(timer);");
+      out.println(localVar + "._ejb_free(bean);");
+    }
   }
 
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
