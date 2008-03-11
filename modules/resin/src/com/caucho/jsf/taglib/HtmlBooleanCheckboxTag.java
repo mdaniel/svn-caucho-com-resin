@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:selectBooleanCheckbox tag
  */
-public class HtmlBooleanCheckboxTag extends HtmlStyleBaseTag {
+public class HtmlBooleanCheckboxTag extends HtmlInputBaseTag {
   @Override
   public String getComponentType()
   {

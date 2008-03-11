@@ -69,9 +69,10 @@ class HtmlSelectManyListboxRenderer extends SelectRenderer
 
     String []value = paramMap.get(clientId);
 
-    if (value != null) {
+    if (value != null)
       ((EditableValueHolder) component).setSubmittedValue(value);
-    }
+    else
+      ((EditableValueHolder) component).setSubmittedValue(new String []{});
   }
   
   /**

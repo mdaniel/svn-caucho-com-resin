@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:selectManyCheckbox tag
  */
-public class HtmlSelectManyCheckboxTag extends HtmlStyleBaseTag {
+public class HtmlSelectManyCheckboxTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlSelectManyCheckbox.COMPONENT_TYPE;

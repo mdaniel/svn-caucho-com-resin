@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:selectOneMenu tag
  */
-public class HtmlSelectOneMenuTag extends HtmlStyleBaseTag {
+public class HtmlSelectOneMenuTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlSelectOneMenu.COMPONENT_TYPE;

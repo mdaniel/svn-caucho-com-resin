@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:inputTextare tag
  */
-public class HtmlInputTextareaTag extends HtmlStyleBaseTag {
+public class HtmlInputTextareaTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlInputTextarea.COMPONENT_TYPE;

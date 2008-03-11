@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:selectManyListbox tag
  */
-public class HtmlSelectManyListboxTag extends HtmlStyleBaseTag {
+public class HtmlSelectManyListboxTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlSelectManyListbox.COMPONENT_TYPE;

@@ -71,23 +71,18 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
-    <!-- UIOutput values -->
+    <!-- UIInput Values-->
 
     <attribute>
-      <name>converter</name>
-      <deferred-value>
-        <type>javax.faces.convert.Converter</type>
-      </deferred-value>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
+
+    <!-- UIOutput values -->
 
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- UICommand values -->
@@ -263,23 +258,18 @@
       <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
-    <!-- UIOutput values -->
+    <!-- UIInput vallues-->
 
     <attribute>
-      <name>converter</name>
-      <deferred-value>
-        <type>javax.faces.convert.Converter</type>
-      </deferred-value>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
+
+    <!-- UIOutput values -->
 
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- UICommand values -->
@@ -305,11 +295,6 @@
     </attribute>
 
     <attribute>
-      <name>alt</name>
-      <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
       <name>charset</name>
       <deferred-value><type>String</type></deferred-value>
     </attribute>
@@ -327,11 +312,6 @@
     <attribute>
       <name>disabled</name>
       <deferred-value><type>Boolean</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>image</name>
-      <deferred-value><type>String</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -500,11 +480,6 @@
     <attribute>
       <name>columnClasses</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>columns</name>
-      <deferred-value><type>int</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -823,28 +798,11 @@
     <!-- UIOutput values -->
 
     <attribute>
-      <name>converter</name>
-      <deferred-value>
-        <type>javax.faces.convert.Converter</type>
-      </deferred-value>
-    </attribute>
-
-    <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
-    </attribute>
-
     <!-- passthrough values -->
-
-    <attribute>
-      <name>accesskey</name>
-      <deferred-value><type>String</type></deferred-value>
-    </attribute>
 
     <attribute>
       <name>alt</name>
@@ -985,8 +943,18 @@
     <!-- UIInput values -->
 
     <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+
+    <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -1029,11 +997,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
   </tag>
 
@@ -1063,6 +1026,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1073,6 +1042,11 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1113,11 +1087,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- UIInput values -->
@@ -1298,6 +1267,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1308,6 +1283,11 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1348,11 +1328,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- UIInput values -->
@@ -1535,6 +1510,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1543,6 +1524,11 @@
     <attribute>
       <name>label</name>
       <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -1577,19 +1563,12 @@
 
     <attribute>
       <name>converter</name>
-      <deferred-value>
-        <type>javax.faces.convert.Converter</type>
-      </deferred-value>
+      <deferred-value><type>javax.faces.convert.Converter</type></deferred-value>
     </attribute>
 
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -1617,11 +1596,6 @@
     <attribute>
       <name>lang</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>maxlength</name>
-      <deferred-value><type>Integer</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -1846,6 +1820,11 @@
     <tag-class>com.caucho.jsf.taglib.HtmlMessagesTag</tag-class>
     <body-content>empty</body-content>
 
+    <attribute>
+      <name>globalOnly</name>
+      <deferred-value><type>boolean</type></deferred-value>
+    </attribute>
+
     <!-- common attributes -->
 
     <attribute>
@@ -1985,6 +1964,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1993,6 +1978,11 @@
     <attribute>
       <name>label</name>
       <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -2037,20 +2027,10 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
-    </attribute>
-
     <!-- passthrough values -->
 
     <attribute>
       <name>accesskey</name>
-      <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>alt</name>
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
@@ -2062,11 +2042,6 @@
     <attribute>
       <name>disabled</name>
       <deferred-value><type>Boolean</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>image</name>
-      <deferred-value><type>String</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -2168,11 +2143,6 @@
       <name>title</name>
       <deferred-value><type>String</type></deferred-value>
     </attribute>
-
-    <attribute>
-      <name>type</name>
-      <deferred-value><type>String</type></deferred-value>
-    </attribute>
   </tag>
 
   <!-- h:selectManyCheckbox -->
@@ -2201,6 +2171,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -2211,6 +2187,11 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -2251,11 +2232,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -2422,6 +2398,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -2430,6 +2412,11 @@
     <attribute>
       <name>label</name>
       <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -2472,11 +2459,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -2638,7 +2620,12 @@
     </attribute>
 
     <!-- UIInput values -->
-    
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -2647,6 +2634,11 @@
     <attribute>
       <name>label</name>
       <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -2689,11 +2681,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -2852,6 +2839,11 @@
     <!-- UIInput Values -->
 
     <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+
+    <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
     </attribute>
@@ -2859,6 +2851,11 @@
     <attribute>
       <name>label</name>
       <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -2903,21 +2900,11 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
-    </attribute>
-
     <!-- passthrough values -->
 
     <attribute>
       <name>accesskey</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>border</name>
-      <deferred-value><type>Integer</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -2942,11 +2929,6 @@
 
     <attribute>
       <name>lang</name>
-      <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>layout</name>
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
@@ -3077,6 +3059,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -3085,6 +3073,11 @@
     <attribute>
       <name>label</name>
       <deferred-value><type>String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -3129,21 +3122,11 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
-    </attribute>
-
     <!-- passthrough values -->
 
     <attribute>
       <name>accesskey</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>border</name>
-      <deferred-value><type>Integer</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -3168,11 +3151,6 @@
 
     <attribute>
       <name>lang</name>
-      <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>layout</name>
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
@@ -3249,11 +3227,6 @@
     <attribute>
       <name>readonly</name>
       <deferred-value><type>Boolean</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>size</name>
-      <deferred-value><type>Integer</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -3303,6 +3276,12 @@
     </attribute>
 
     <!-- UIInput values -->
+
+    <attribute>
+      <name>immediate</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -3313,6 +3292,11 @@
       <deferred-value><type>String</type></deferred-value>
     </attribute>
 
+    <attribute>
+      <name>required</name>
+      <deferred-value><type>Boolean</type></deferred-value>
+    </attribute>
+    
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -3353,11 +3337,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -3475,11 +3454,6 @@
     <attribute>
       <name>readonly</name>
       <deferred-value><type>Boolean</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>size</name>
-      <deferred-value><type>Integer</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -3832,11 +3806,6 @@
     <attribute>
       <name>value</name>
       <deferred-value><type>String</type></deferred-value>
-    </attribute>
-
-    <attribute>
-      <name>escape</name>
-      <deferred-value><type>boolean</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->

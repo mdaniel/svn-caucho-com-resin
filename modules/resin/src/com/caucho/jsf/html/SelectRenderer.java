@@ -84,9 +84,6 @@ abstract class SelectRenderer extends BaseRenderer
       else if (java.util.List.class.isAssignableFrom(cl)) {
         values = strValues;
 
-        uiSelectMany.setSelectedValues(values);
-        uiSelectMany.setValid(true);
-
         return values;
       }
       else {
@@ -105,9 +102,6 @@ abstract class SelectRenderer extends BaseRenderer
         values[i] = strValues[i];
       }
     }
-
-    uiSelectMany.setSelectedValues(values);
-    uiSelectMany.setValid(true);
 
     return values;
   }
@@ -227,7 +221,7 @@ abstract class SelectRenderer extends BaseRenderer
 			 "value");
 
       String label = selectItem.getLabel();
-      
+
       if (label != null)
         out.writeText(label, "label");
 

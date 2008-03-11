@@ -71,6 +71,8 @@ class HtmlSelectManyCheckboxRenderer
 
     if (value != null)
       ((EditableValueHolder) component).setSubmittedValue(value);
+    else
+      ((EditableValueHolder) component).setSubmittedValue(new String []{});
   }
 
   /**

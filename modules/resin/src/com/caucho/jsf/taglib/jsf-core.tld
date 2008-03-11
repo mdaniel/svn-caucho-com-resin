@@ -173,11 +173,6 @@
     <body-content>JSP</body-content>
 
     <attribute>
-      <name>id</name>
-      <rtexprvalue>false</rtexprvalue>
-    </attribute>
-
-    <attribute>
       <name>name</name>
       <required>true</required>
     </attribute>
@@ -188,11 +183,6 @@
     <name>loadBundle</name>
     <tag-class>com.caucho.jsf.taglib.LoadBundleTag</tag-class>
     <body-content>JSP</body-content>
-
-    <attribute>
-      <name>id</name>
-      <rtexprvalue>false</rtexprvalue>
-    </attribute>
 
     <attribute>
       <name>var</name>
@@ -273,6 +263,28 @@
     <attribute>
       <name>itemValue</name>
       <deferred-value><type>Object</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>binding</name>
+      <deferred-value>
+	<type>javax.faces.component.UIComponent</type>
+      </deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>itemDescription</name>
+      <deferred-value><type>java.lang.String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>escape</name>
+      <deferred-value><type>java.lang.String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>value</name>
+      <deferred-value><type>javax.faces.model.SelectItem</type></deferred-value>
     </attribute>
   </tag>
 
@@ -360,6 +372,31 @@
     <name>view</name>
     <tag-class>com.caucho.jsf.taglib.FacesViewTag</tag-class>
     <body-content>JSP</body-content>
+
+    <attribute>
+      <name>locale</name>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
+    </attribute>
+    
+    <attribute>
+      <name>renderKitId</name>
+      <deferred-value><type>java.lang.String</type></deferred-value>
+    </attribute>
+
+    <attribute>
+      <name>beforePhase</name>
+      <deferred-method>
+           <method-signature>void beforePhase(javax.faces.event.PhaseEvent)</method-signature>
+      </deferred-method>
+    </attribute>
+
+    <attribute>
+      <name>afterPhase</name>
+      <deferred-method>
+           <method-signature>void afterPhase(javax.faces.event.PhaseEvent)</method-signature>
+      </deferred-method>
+    </attribute>
+
   </tag>
 
   <!-- f:validateDoubleRange -->

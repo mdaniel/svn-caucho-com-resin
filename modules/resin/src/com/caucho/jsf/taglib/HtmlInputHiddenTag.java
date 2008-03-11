@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:inputHidden tag
  */
-public class HtmlInputHiddenTag extends HtmlStyleBaseTag {
+public class HtmlInputHiddenTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlInputHidden.COMPONENT_TYPE;

@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:selectManyMenu tag
  */
-public class HtmlSelectManyMenuTag extends HtmlStyleBaseTag {
+public class HtmlSelectManyMenuTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlSelectManyMenu.COMPONENT_TYPE;

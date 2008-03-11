@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:selectOneRadio tag
  */
-public class HtmlSelectOneRadioTag extends HtmlStyleBaseTag {
+public class HtmlSelectOneRadioTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlSelectOneRadio.COMPONENT_TYPE;

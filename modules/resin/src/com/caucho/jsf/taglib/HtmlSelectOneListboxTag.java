@@ -43,7 +43,7 @@ import javax.servlet.jsp.tagext.*;
 /**
  * The h:selectOneListbox tag
  */
-public class HtmlSelectOneListboxTag extends HtmlStyleBaseTag {
+public class HtmlSelectOneListboxTag extends HtmlInputBaseTag {
   public String getComponentType()
   {
     return HtmlSelectOneListbox.COMPONENT_TYPE;
