@@ -1820,11 +1820,15 @@ public class Env {
       }
 
       Cookie []cookies = _request.getCookies();
-      for (int i = 0; cookies != null && i < cookies.length; i++) {
+      for (int i = 0; cookies != null && i < cookies.length; i++) {      
+        Cookie cookie = cookies[i];
+
+        String decodedValue = decodeValue(cookie.getValue());
+
         Post.addFormValue(this,
-			  array,
-                          cookies[i].getName(),
-                          new String[] { cookies[i].getValue() },
+                          array,
+                          cookie.getName(),
+                          new String[] { decodedValue },
                           isMagicQuotes);
       }
 
