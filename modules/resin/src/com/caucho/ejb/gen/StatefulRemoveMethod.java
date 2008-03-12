@@ -53,22 +53,4 @@ public class StatefulRemoveMethod extends StatefulMethod
   {
     super(view, apiMethod, implMethod, index);
   }
-
-  /*
-  protected void generateThrows(JavaWriter out, Class []exnCls)
-    throws IOException
-  {
-    ArrayList<Class> list = new ArrayList<Class>();
-
-    for (Class cl : exnCls) {
-      if (! RemoteException.class.equals(cl))
-	list.add(cl);
-    }
-
-    Class []shortList = new Class[list.size()];
-    list.toArray(shortList);
-
-    super.generateThrows(out, shortList);
-  }
-  */
 }

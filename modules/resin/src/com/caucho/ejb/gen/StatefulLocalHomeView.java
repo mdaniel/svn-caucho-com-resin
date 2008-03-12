@@ -107,7 +107,8 @@ public class StatefulLocalHomeView extends StatefulHomeView {
   }
 
   @Override
-  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator
+    createMethod(ApiMethod apiMethod, int index)
   {
     if (apiMethod.getName().equals("create")) {
       ApiMethod implMethod = getEjbClass().getMethod("ejbCreate",

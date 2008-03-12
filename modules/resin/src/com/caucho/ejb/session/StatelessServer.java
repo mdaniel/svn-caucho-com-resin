@@ -170,6 +170,10 @@ public class StatelessServer extends SessionServer {
 	  && method.getParameterTypes().length == 0) {
 	injectList.add(new PreDestroyInject(method));
       }
+      else if ("ejbRemove".equals(method.getName())
+	       && SessionBean.class.isAssignableFrom(ejbClass)) {
+	injectList.add(new PreDestroyInject(method));
+      }
     }
   }
   

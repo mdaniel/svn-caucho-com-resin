@@ -39,6 +39,7 @@ import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.logging.*;
 
 /**
  * JNDI context for Hessian home objects.
@@ -46,6 +47,8 @@ import java.util.List;
  * <p>For now, only allow single level calls to the EJB.
  */
 public class HessianModel extends AbstractModel {
+  private static final Logger log
+    = Logger.getLogger(HessianModel.class.getName());
   private static L10N L = new L10N(HessianModel.class);
   
   private String _urlPrefix;
@@ -180,7 +183,7 @@ public class HessianModel extends AbstractModel {
       }
 
       if (_remote == null)
-        throw new NamingException(L.l("Hessian object `{0}' is not a context.",
+        throw new NamingException(L.l("Hessian object '{0}' is not a context.",
                                       getURLPrefix() + _namePrefix));
 
       String []list = _remote.list();

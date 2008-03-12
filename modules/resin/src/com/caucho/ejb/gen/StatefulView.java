@@ -47,8 +47,8 @@ abstract public class StatefulView extends View {
 
   private StatefulGenerator _sessionBean;
   
-  private ArrayList<StatefulMethod> _businessMethods
-    = new ArrayList<StatefulMethod>();
+  private ArrayList<BusinessMethodGenerator> _businessMethods
+    = new ArrayList<BusinessMethodGenerator>();
 
   public StatefulView(StatefulGenerator bean, ApiClass api)
   {
@@ -102,7 +102,7 @@ abstract public class StatefulView extends View {
 
       int index = _businessMethods.size();
       
-      StatefulMethod bizMethod = createMethod(apiMethod, index);
+      BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
       
       if (bizMethod != null) {
 	bizMethod.introspect(bizMethod.getApiMethod(),
@@ -223,7 +223,8 @@ abstract public class StatefulView extends View {
     out.println("}");
   }
 
-  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator
+    createMethod(ApiMethod apiMethod, int index)
   {
     ApiMethod implMethod = findImplMethod(apiMethod);
 

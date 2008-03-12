@@ -43,7 +43,7 @@ import javax.interceptor.*;
 /**
  * Represents a stateful create business method
  */
-public class StatefulCreateMethod extends StatefulMethod
+public class StatefulCreateMethod extends BusinessMethodGenerator
 {
   private StatefulGenerator _bean;
   private View _objectView;
@@ -75,9 +75,29 @@ public class StatefulCreateMethod extends StatefulMethod
     super.introspect(apiMethod, implMethod);
   }
 
+  protected TransactionAttributeType getDefaultTransactionType()
+  {
+    return TransactionAttributeType.REQUIRED;
+  }
+  
+  /**
+   * Returns true if any interceptors enhance the business method
+   */
+  @Override
+  public boolean isEnhanced()
+  {
+    return true;
+  }
+
   protected void generatePreCall(JavaWriter out)
     throws IOException
   {
+    out.println("Thread thread = Thread.currentThread();");
+    out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
+    out.println("try {");
+    out.pushDepth();
+    out.println("thread.setContextClassLoader(getStatefulServer().getClassLoader());");
+    
     out.printClass(_bean.getEjbClass().getJavaClass());
     out.print(" bean = new ");
     out.printClass(_bean.getEjbClass().getJavaClass());
@@ -110,10 +130,17 @@ public class StatefulCreateMethod extends StatefulMethod
     out.print("bean");
   }
 
+  /**
+   * Generates the underlying bean instance
+   */
   @Override
   protected void generatePostCall(JavaWriter out)
     throws IOException
   {
     out.println("return remote;");
+    out.popDepth();
+    out.println("} finally {");
+    out.println("  thread.setContextClassLoader(oldLoader);");
+    out.println("}");
   }
 }

@@ -64,7 +64,7 @@ abstract public class StatefulHomeView extends StatefulView {
     out.println("if (" + var + " == " + getApi().getName() + ".class)");
     out.println("  return _localHome;");
   }
-
+  
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
@@ -113,7 +113,8 @@ abstract public class StatefulHomeView extends StatefulView {
   }
 
   @Override
-  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator
+    createMethod(ApiMethod apiMethod, int index)
   {
     if (apiMethod.getName().startsWith("create")) {
       String implName = "ejbC" + apiMethod.getName().substring(1);
@@ -133,12 +134,13 @@ abstract public class StatefulHomeView extends StatefulView {
 				     L.l("'{0}' is an unknown object interface",
 					 apiMethod.getReturnType()));
       
-      StatefulMethod method = new StatefulCreateMethod(getSessionBean(),
-						       this,
-						       localView,
-						       apiMethod,
-						       implMethod.getMethod(),
-						       index);
+      BusinessMethodGenerator method
+	= new StatefulCreateMethod(getSessionBean(),
+				   this,
+				   localView,
+				   apiMethod,
+				   implMethod.getMethod(),
+				   index);
 
       method.getXa().setContainerManaged(false);
 

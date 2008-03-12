@@ -284,9 +284,9 @@ public class EntityServer extends AbstractServer {
 
       Class primaryKeyClass = getPrimaryKeyClass();
 
-      if (primaryKeyClass != null &&
-          ! primaryKeyClass.isPrimitive() &&
-          ! primaryKeyClass.getName().startsWith("java.lang.")) {
+      if (primaryKeyClass != null
+	  && ! primaryKeyClass.isPrimitive()
+	  && ! primaryKeyClass.getName().startsWith("java.lang.")) {
         _primaryKeyFields = primaryKeyClass.getFields();
       }
 
@@ -309,18 +309,7 @@ public class EntityServer extends AbstractServer {
     else
       return null;
   }
-
-  /**
-   * Returns the 3.0 remote stub for the container
-   */
-  @Override
-  public Object getLocalObject(Class api)
-  {
-    if (api == getRemoteHomeClass())
-      return _remoteHomeView;
-    else
-      return null;
-  }
+  
   /**
    * Returns the 3.0 remote stub for the container
    */
@@ -345,6 +334,20 @@ public class EntityServer extends AbstractServer {
 
     if (cxt != null)
       return cxt.getRemoteView();
+    else
+      return null;
+  }
+  
+  /**
+   * Returns the 3.0 remote stub for the container
+   */
+  @Override
+  public Object getLocalObject(Class api)
+  {
+    if (api == getLocalHomeClass())
+      return _localHome;
+    else if (api == getRemoteHomeClass())
+      return _remoteHomeView;
     else
       return null;
   }

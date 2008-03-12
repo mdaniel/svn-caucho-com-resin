@@ -300,7 +300,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("try {");
     out.println("  bean = new " + beanClass + "(this);");
 
-    if (getBean().hasMethod("setSessionContext", new Class[] { SessionContext.class })) {
+    if (SessionBean.class.isAssignableFrom(getBean().getEjbClass().getJavaClass())) {
       out.println("  bean.setSessionContext(_context);");
     }
     

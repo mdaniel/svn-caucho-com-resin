@@ -91,6 +91,13 @@ public class EjbProtocolManager {
 
     if (iiop != null)
       _protocolMap.put("iiop", iiop);
+
+    EjbContainer parent = ejbContainer.getParent();
+    if (parent != null) {
+      _localJndiPrefix = parent.getProtocolManager().getLocalJndiPrefix();
+      _remoteJndiPrefix = parent.getProtocolManager().getRemoteJndiPrefix();
+      _jndiPrefix = parent.getProtocolManager().getJndiPrefix();
+    }
   }
 
   public void setJndiPrefix(String name)
@@ -166,7 +173,6 @@ public class EjbProtocolManager {
     synchronized (_protocolMap) {
       _protocolMap.put(protocol.getName(), protocol);
     }
-
 
     addProtocolServers(protocol);
   }

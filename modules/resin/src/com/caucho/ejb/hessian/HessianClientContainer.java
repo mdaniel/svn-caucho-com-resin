@@ -44,18 +44,24 @@ import com.caucho.vfs.Vfs;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
+import java.net.URL;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.logging.*;
 
 /**
  * Container for Hessian clients in the same JVM, but not the same
  * class loader.
  */
-class HessianClientContainer implements HessianRemoteResolver {
+public class HessianClientContainer implements HessianRemoteResolver {
+  private static final Logger log
+    = Logger.getLogger(HessianClientContainer.class.getName());
+  
   protected static L10N L = new L10N(HessianClientContainer.class);
 
-  private static EnvironmentLocal _hessianClient =
-  new EnvironmentLocal("caucho.hessian.client");
+  private static EnvironmentLocal _hessianClient
+    = new EnvironmentLocal("caucho.hessian.client");
   
   private String _serverId;
   private HessianHandleEncoder _handleEncoder;
@@ -106,6 +112,14 @@ class HessianClientContainer implements HessianRemoteResolver {
           map = new Hashtable();
         map.put(serverId, client);
         _hessianClient.set(map);
+
+	try {
+	  URL url = new URL(serverId);
+	  InputStream is = url.openStream();
+	  is.close();
+	} catch (IOException e) {
+	  log.log(Level.FINEST, e.toString(), e);
+	}
       }
       
       return client;

@@ -51,7 +51,8 @@ abstract public class StatefulObjectView extends StatefulView {
   }
 
   @Override
-  protected StatefulMethod createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator
+    createMethod(ApiMethod apiMethod, int index)
   {
     if (apiMethod.getName().equals("remove")
 	&& apiMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
@@ -70,7 +71,7 @@ abstract public class StatefulObjectView extends StatefulView {
       return method;
     }
     else {
-      StatefulMethod method = super.createMethod(apiMethod, index);
+      BusinessMethodGenerator method = super.createMethod(apiMethod, index);
 
       Class beanClass = getEjbClass().getJavaClass();
       if (SessionSynchronization.class.isAssignableFrom(beanClass)) {

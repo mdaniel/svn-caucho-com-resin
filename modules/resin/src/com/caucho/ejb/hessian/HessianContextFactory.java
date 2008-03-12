@@ -42,7 +42,7 @@ import java.util.Hashtable;
 /**
  * The root context factory.
  */
-public class HessianContextFactory implements InitialContextFactory  {
+public class HessianContextFactory implements InitialContextFactory {
   static L10N L = new L10N(HessianContextFactory.class);
 
   private AbstractModel _model;

@@ -45,37 +45,23 @@ import java.util.logging.Logger;
 /**
  * Configuration for the env-entry pattern.
  */
-public class EnvEntry implements Validator {
+public class EnvEntry extends ResourceGroupConfig implements Validator {
   private static final L10N L = new L10N(EnvEntry.class);
   private static final Logger log = Logger.getLogger(EnvEntry.class.getName());
 
-  private String _location = "";
 
   private String _name;
   private Class _type;
   private String _value;
-  private String _description;
 
-  private InjectionTarget _injectionTarget;
+  private Object _objValue;
+
+  public EnvEntry()
+  {
+  }
 
   public void setId(String id)
   {
-  }
-
-  /**
-   * Sets the description.
-   */
-  public void setDescription(String description)
-  {
-    _description = description;
-  }
-
-  /**
-   * Sets the configuration location.
-   */
-  public void setConfigLocation(String filename, int line)
-  {
-    _location = filename + ":" + line + " ";
   }
 
   /**
@@ -84,14 +70,6 @@ public class EnvEntry implements Validator {
   public void setEnvEntryName(String name)
   {
     _name = name;
-  }
-
-  /**
-   * Sets the injection-target
-   */
-  public void setInjectionTarget(InjectionTarget injectionTarget)
-  {
-    _injectionTarget = injectionTarget;
   }
 
   /**
@@ -135,14 +113,6 @@ public class EnvEntry implements Validator {
   }
 
   /**
-   * Gets the injection-target
-   */
-  public InjectionTarget getInjectionTarget()
-  {
-    return _injectionTarget;
-  }
-
-  /**
    * Gets the env-entry-value
    */
   // XXX: ejb/0fd0 vs ejb/0g03
@@ -155,6 +125,8 @@ public class EnvEntry implements Validator {
       throw new ConfigException(L.l("env-entry needs 'env-entry-name' attribute"));
     if (_type == null)
       throw new ConfigException(L.l("env-entry needs 'env-entry-type' attribute"));
+
+    super.init();
 
     // actually, should register for validation
     if (_value == null)
@@ -187,10 +159,12 @@ public class EnvEntry implements Validator {
         value = new Character(v.charAt(0));
     }
 
+    _objValue = value;
+
     WebBeansContainer webBeans = WebBeansContainer.create();
     webBeans.addSingleton(value, _name);
 
-    Jndi.bindDeepShort("java:comp/env/" + _name, value);
+    Jndi.bindDeepShort(_name, value);
   }
 
   /**
@@ -211,14 +185,6 @@ public class EnvEntry implements Validator {
     if (obj == null)
       throw error(L.l("env-entry '{0}' was not configured.  All resources defined by <env-entry> tags must be defined in a configuration file.",
                       _name));
-  }
-
-  public ConfigException error(String msg)
-  {
-    if (_location != null)
-      return new LineConfigException(_location + msg);
-    else
-      return new ConfigException(msg);
   }
 
   public String toString()

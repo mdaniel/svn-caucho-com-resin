@@ -51,7 +51,7 @@ javaee_ejb-local-ref = element ejb-local-ref {
 
   javaee_ejb-link?,
 
-  javaee_injection-target?
+  javaee_resource-Group
 }
 
 javaee_ejb-ref = element ejb-ref {
@@ -69,7 +69,7 @@ javaee_ejb-ref = element ejb-ref {
 
   javaee_ejb-link?,
 
-  javaee_injection-target?
+  javaee_resource-Group
 }
 
 javaee_ejb-ref-name = element ejb-ref-name {
@@ -91,9 +91,7 @@ javaee_env-entry = element env-entry {
 
   javaee_env-entry-value?,
 
-  javaee_mapped-name?,
-
-  javaee_injection-target*
+  javaee_resource-Group
 }
 
 javaee_env-entry-name = element env-entry-name {
@@ -116,11 +114,6 @@ javaee_env-entry-value = element env-entry-value {
   string
 }
 
-javaee_injection-target = element injection-target {
-  element injection-target-class { string },
-  element injection-target-name { string }
-}
-
 javaee_fully-qualified-class = string
 
 javaee_home = element home {
@@ -139,6 +132,12 @@ javaee_icon = element icon {
 
 javaee_init-param = element init-param {
   javaee_param-value-Type
+}
+
+javaee_injection-target = element injection-target {
+  element injection-target-class { string },
+
+  element injection-target-name { string }
 }
 
 javaee_java-identifier = string
@@ -169,9 +168,9 @@ javaee_jndi-environment-refs-Group =
 javaee_jndi-name = string
 
 javaee_lifecycle-callback-Type =
-  element lifecycle-callback-class { string }?,
+  (element lifecycle-callback-class { string }?,
 
-  element lifecycle-callback-method { string }?
+   element lifecycle-callback-method { string })
 
 javaee_local = element local {
   javaee_fully-qualified-class
@@ -275,9 +274,7 @@ javaee_persistence-unit-ref = element persistence-unit-ref {
 
   element persistence-unit-name { string }?,
 
-  element mapped-name { string }?,
-
-  javaee_injection-target*
+  javaee_resource-Group
 }
 
 javaee_post-construct = element post-construct {
@@ -325,7 +322,7 @@ javaee_resource-env-ref = element resource-env-ref {
 
   javaee_resource-env-ref-type,
 
-  javaee_injection-target?
+  javaee_resource-Group
 }
 
 javaee_resource-env-ref-name = element resource-env-ref-name {
@@ -349,9 +346,7 @@ javaee_resource-ref = element resource-ref {
 
   javaee_res-sharing-scope?,
 
-  javaee_mapped-name?,
-
-  javaee_injection-target*
+  javaee_resource-Group
 }
 
 javaee_res-ref-name = element res-ref-name {
