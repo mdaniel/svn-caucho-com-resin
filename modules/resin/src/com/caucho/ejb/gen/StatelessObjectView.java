@@ -48,6 +48,9 @@ public class StatelessObjectView extends StatelessView {
 
   private String _timeoutMethod;
 
+  private LifecycleInterceptor _postConstructInterceptor;
+  private LifecycleInterceptor _preDestroyInterceptor;
+
   public StatelessObjectView(StatelessGenerator bean, ApiClass api)
   {
     super(bean, api);
@@ -62,6 +65,13 @@ public class StatelessObjectView extends StatelessView {
     super.introspect();
 
     introspectLifecycle(getEjbClass().getJavaClass());
+    
+    _postConstructInterceptor = new LifecycleInterceptor(PostConstruct.class);
+    _postConstructInterceptor.introspect(getEjbClass().getJavaClass());
+    
+    _preDestroyInterceptor = new LifecycleInterceptor(PreDestroy.class);
+    _preDestroyInterceptor.introspect(getEjbClass().getJavaClass());
+    
     introspectTimer(getEjbClass());
   }
 
@@ -189,16 +199,24 @@ public class StatelessObjectView extends StatelessView {
     out.pushDepth();
 
     out.println("private transient " + getViewClassName() + " _context;");
-    
-    generateBusinessPrologue(out);
-    
+
+    HashMap map = new HashMap();
+    generateBusinessPrologue(out, map);    
+    _postConstructInterceptor.generatePrologue(out, map);
+    _preDestroyInterceptor.generatePrologue(out, map);
+
     out.println();
     out.println(getBeanClassName() + "(" + getViewClassName() + " context)");
     out.println("{");
     out.pushDepth();
     out.println("_context = context;");
 
-    generateBusinessConstructor(out);
+    map = new HashMap();
+    generateBusinessConstructor(out, map);    
+    _postConstructInterceptor.generateConstructor(out, map);
+    _preDestroyInterceptor.generateConstructor(out, map);
+
+    _postConstructInterceptor.generateCall(out);
 
     out.popDepth();
     out.println("}");
@@ -300,17 +318,19 @@ public class StatelessObjectView extends StatelessView {
     out.println("try {");
     out.println("  bean = new " + beanClass + "(this);");
 
-    if (SessionBean.class.isAssignableFrom(getBean().getEjbClass().getJavaClass())) {
+    Class implClass = getBean().getEjbClass().getJavaClass();
+
+    if (SessionBean.class.isAssignableFrom(implClass)) {
       out.println("  bean.setSessionContext(_context);");
     }
     
     out.println("  getStatelessServer().initInstance(bean);");
 
+    
+
     if (getBean().hasMethod("ejbCreate", new Class[0])) {
       // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");
       out.println("  bean.ejbCreate();");
-      
-      // out.println("  invokeMethod(bean, \"ejbCreate\", new Class[] {}, new Object[] {});");
     }
 
     out.println("  return bean;");

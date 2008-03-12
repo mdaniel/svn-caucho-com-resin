@@ -169,6 +169,15 @@ abstract public class View {
     throws IOException
   {
     HashMap map = new HashMap();
+    generateBusinessConstructor(out, map);
+  }
+
+  /**
+   * Generates constructor addiontions
+   */
+  public void generateBusinessConstructor(JavaWriter out, HashMap map)
+    throws IOException
+  {
     for (BusinessMethodGenerator method : getMethods()) {
       method.generateConstructorTop(out, map);
     }
