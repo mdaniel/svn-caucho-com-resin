@@ -148,7 +148,7 @@ package hessian.client
     /** @private */
     public function handleIOError(event:IOErrorEvent):void
     {
-      trace(event);
+      dispatchEvent(event);
     }
 
     /** @private */

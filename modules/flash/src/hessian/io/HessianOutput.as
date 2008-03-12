@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -291,7 +291,12 @@ package hessian.io
         return;
       }
       else if (object is Number) {
-        writeDouble(object as Number); // XXX should this be writeLong?
+        if (isNaN(Number(object))) {
+          writeNull();
+        } 
+        else {
+          writeDouble(object as Number); // XXX should this be writeLong?
+        }
         return;
       }
       else if (object is Date || className == "Date") {
@@ -329,6 +334,7 @@ package hessian.io
       // to save processing time
 
       className = getQualifiedClassName(object) as String;
+      className = className.replace("::", ".");
 
       if (object.hasOwnProperty("hessianTypeName"))
         className = object.hessianTypeName;
@@ -342,6 +348,7 @@ package hessian.io
     {
       var type:XML = describeType(obj);
       var variables:XMLList = type.variable;
+      var accessors:XMLList = type.accessor;	
 
       var key:String = null;
 
@@ -351,6 +358,26 @@ package hessian.io
         if (key != "hessianTypeName") {
           writeObject(key);
           writeObject(obj[key]);
+        }
+      }
+
+      // This is needed to handle Bindable properties:
+      // they do not appear as variables, but rather as 
+      // <accessor>'s with Bindable metadata children
+      for each(var accessor:XML in accessors) {
+        var metadata:XMLList = accessor.metadata;
+
+        for each(var metadatum:XML in metadata) {
+          if (metadatum.@name == "Bindable") {
+            key = accessor.@name;
+
+            if (key != "hessianTypeName") {
+              writeObject(key);
+              writeObject(obj[key]);
+            }
+
+            break;
+          }
         }
       }
 
