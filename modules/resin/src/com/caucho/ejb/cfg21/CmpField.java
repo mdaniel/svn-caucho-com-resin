@@ -34,7 +34,7 @@ import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.KeyPropertyField;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JClassWrapper;
 import com.caucho.config.ConfigException;
@@ -251,7 +251,7 @@ public class CmpField extends CmpProperty {
   /**
    * Amber creating the id field.
    */
-  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, EntityType type)
+  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, SelfEntityType type)
     throws ConfigException
   {
     String fieldName = getName();

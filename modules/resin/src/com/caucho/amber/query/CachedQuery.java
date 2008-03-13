@@ -30,7 +30,7 @@
 package com.caucho.amber.query;
 
 import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JClass;
 import com.caucho.util.Alarm;
@@ -111,7 +111,7 @@ public class CachedQuery {
     throws SQLException
   {
     Type type = _query.getResultType(0);
-    EntityType entityType = (EntityType) type;
+    SelfEntityType entityType = (SelfEntityType) type;
     JClass cl = entityType.getBeanClass();
     
     synchronized (this) {

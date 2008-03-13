@@ -60,6 +60,9 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
 
   private boolean _isFieldAccess;
 
+  // fields declared on this class
+  private ArrayList<AmberField> _selfFields = new ArrayList<AmberField>();
+  // all fields, including superclasses
   private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
 
   private ArrayList<AmberField> _mappedSuperclassFields
@@ -123,6 +126,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   /**
    * Returns the java type.
    */
+  @Override
   public String getJavaTypeName()
   {
     return getInstanceClassName();
@@ -133,8 +137,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
    */
   public void addField(AmberField field)
   {
-    _fields.add(field);
-    Collections.sort(_fields, new AmberFieldCompare());
+    _selfFields.add(field);
   }
 
   /**
@@ -198,6 +201,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   /**
    * Sets the bean class.
    */
+  @Override
   public void setBeanClass(JClass beanClass)
   {
     super.setBeanClass(beanClass);
@@ -280,110 +284,22 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   /**
    * Initialize the type.
    */
+  @Override
   public void init()
     throws ConfigException
   {
+    _fields = new ArrayList<AmberField>();
+    
+    _fields.addAll(_selfFields);
   }
 
   /**
    * Converts the value.
    */
+  @Override
   public String generateCastFromObject(String value)
   {
     return "((" + getInstanceClassName() + ") " + value + ")";
-  }
-
-  /**
-   * Generates a string to load the field.
-   */
-  public int generateLoad(JavaWriter out,
-                          String rs,
-                          String indexVar,
-                          int index,
-                          int loadGroupIndex,
-                          ArrayList<AmberField> overriddenFields)
-    throws IOException
-  {
-    if (overriddenFields == null && getDiscriminator() != null) {
-      RelatedType parent = null;
-
-      if (this instanceof RelatedType)
-        parent = ((RelatedType) this).getParentType();
-
-      boolean isAbstractParent = getPersistenceUnit().isJPA()
-        && (parent == null || parent.getBeanClass().isAbstract());
-
-      if (loadGroupIndex == 0 || isAbstractParent)
-        index++;
-    }
-
-    ArrayList<AmberField> fields = null;
-
-    if (this instanceof RelatedType) {
-      fields = getMappedSuperclassFields();
-
-      RelatedType parent = ((RelatedType) this).getParentType();
-
-      if (parent != null) {
-        // jpa/0l14
-        index = parent.generateLoad(out, rs, indexVar, index,
-                                    loadGroupIndex, fields);
-      }
-    }
-
-    for (int i = 0; i < 2; i++) {
-      if (fields == null) {
-        fields = getFields();
-        continue;
-      }
-
-      for (int j = 0; j < fields.size(); j++) {
-        AmberField field = fields.get(j);
-
-        // jpa/0l14, jpa/0ge3
-        if (overriddenFields != null) {
-          boolean isOverridden = false;
-
-          for (AmberField amberField : overriddenFields) {
-            if (amberField.getName().equals(field.getName()))
-              isOverridden = true;
-          }
-
-          if (isOverridden)
-            continue;
-        }
-
-        // ejb/0602
-        if (getPersistenceUnit().isJPA()) {
-          if (field instanceof EntityManyToOneField) {
-            ((EntityManyToOneField) field).init((RelatedType) this);
-          }
-        }
-
-        // jpa/0gg3
-        if (field.getLoadGroupIndex() == loadGroupIndex)
-          index = field.generateLoad(out, rs, indexVar, index);
-      }
-
-      fields = getFields();
-    }
-
-    return index;
-  }
-
-  /**
-   * Generates the select clause for a load.
-   */
-  abstract public String generateLoadSelect(Table table, String id);
-
-  /**
-   * Generates the select clause for a load.
-   */
-  public String generateLoadSelect(Table table,
-                                   String id,
-                                   int loadGroup)
-  {
-    return generateLoadSelect(table, id, loadGroup, false);
   }
 
   /**
@@ -396,36 +312,12 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   {
     CharBuffer cb = CharBuffer.allocate();
 
-    // jpa/0ge2
-    // jpa/0l14
-    /*
-    ArrayList<AmberField> fields = null;
-
-    if (this instanceof RelatedType) {
-      fields = getMappedSuperclassFields();
-
-      RelatedType parent = ((RelatedType) this).getParentType();
-
-      if (parent != null) {
-        String parentSelect =
-          parent.generateLoadSelect(table, id, loadGroup,
-                                    hasSelect, fields);
-
-        if (parentSelect != null) {
-          hasSelect = true;
-
-          cb.append(parentSelect);
-        }
-      }
-    }
-    */
-
     // jpa/0l14, jpa/0ge3
-    for (AmberField field : getFields()) {
+    for (AmberField field : getMergedFields()) {
       // ejb/0602
       if (getPersistenceUnit().isJPA()) {
 	if (field instanceof EntityManyToOneField)
-	  ((EntityManyToOneField) field).init((RelatedType) this);
+	  ((EntityManyToOneField) field).init((EntityType) this);
       }
 
       // jpa/0gg3
@@ -447,6 +339,100 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
       return null;
     else
       return cb.close();
+  }
+
+  /**
+   * Generates a string to load the field.
+   */
+  public int generateLoad(JavaWriter out,
+                          String rs,
+                          String indexVar,
+                          int index,
+                          int loadGroupIndex)
+    throws IOException
+  {
+    if (getDiscriminator() != null) {
+      EntityType parent = null;
+
+      if (this instanceof EntityType)
+        parent = ((EntityType) this).getParentType();
+
+      boolean isAbstractParent = getPersistenceUnit().isJPA()
+        && (parent == null || parent.getBeanClass().isAbstract());
+
+      if (loadGroupIndex == 0 || isAbstractParent)
+        index++;
+    }
+
+    /*
+    if (this instanceof EntityType) {
+      fields = getMappedSuperclassFields();
+
+      EntityType parent = ((EntityType) this).getParentType();
+
+      if (parent != null) {
+        // jpa/0l14
+        index = parent.generateLoad(out, rs, indexVar, index,
+                                    loadGroupIndex, fields);
+      }
+    }
+    */
+
+    for (AmberField field : getMergedFields()) {
+      // ejb/0602
+      if (getPersistenceUnit().isJPA()) {
+	if (field instanceof EntityManyToOneField) {
+	  ((EntityManyToOneField) field).init((EntityType) this);
+	}
+      }
+
+      // jpa/0gg3
+      if (field.getLoadGroupIndex() == loadGroupIndex)
+	index = field.generateLoad(out, rs, indexVar, index);
+    }
+
+    return index;
+  }
+
+  protected ArrayList<AmberField> getMergedFields()
+  {
+    ArrayList<AmberField> overriddenFields = getOverriddenFields();
+    
+    if (overriddenFields == null)
+      return getFields();
+	
+    ArrayList<AmberField> resultFields = new ArrayList<AmberField>();
+
+    for (AmberField field : getFields()) {
+      AmberField mappedField = getMappedSuperclassField(field.getName());
+      
+      if (mappedField != null)
+        resultFields.add(mappedField);
+      else
+        resultFields.add(field);
+   }
+
+    return resultFields;
+  }
+  
+  protected ArrayList<AmberField> getOverriddenFields()
+  {
+    return null;
+  }
+
+  /**
+   * Generates the select clause for a load.
+   */
+  abstract public String generateLoadSelect(Table table, String id);
+
+  /**
+   * Generates the select clause for a load.
+   */
+  public String generateLoadSelect(Table table,
+                                   String id,
+                                   int loadGroup)
+  {
+    return generateLoadSelect(table, id, loadGroup, false);
   }
 
   /**
@@ -562,8 +548,9 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   /**
    * Printable version of the entity.
    */
+  @Override
   public String toString()
   {
-    return "AbstractStatefulType[" + _beanClass.getName() + "]";
+    return getClass().getSimpleName() + "[" + _beanClass.getName() + "]";
   }
 }

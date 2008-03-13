@@ -34,7 +34,7 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.PrimitiveType;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
@@ -58,13 +58,13 @@ public class CompositeId extends Id {
 
   private JClass _keyClass;
 
-  public CompositeId(RelatedType ownerType,
+  public CompositeId(EntityType ownerType,
                      ArrayList<IdField> keys)
   {
     super(ownerType, keys);
   }
 
-  protected CompositeId(RelatedType ownerType)
+  protected CompositeId(EntityType ownerType)
   {
     super(ownerType);
   }

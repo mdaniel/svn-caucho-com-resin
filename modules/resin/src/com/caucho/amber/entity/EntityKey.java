@@ -28,7 +28,7 @@
 
 package com.caucho.amber.entity;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 
 /**
  * Key to handle the merged identity hash code.

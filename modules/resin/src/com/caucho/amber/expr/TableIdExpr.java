@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParseException;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.util.L10N;
 
 /**
@@ -40,13 +40,13 @@ import com.caucho.util.L10N;
 public class TableIdExpr extends SchemaExpr {
   private static final L10N L = new L10N(TableIdExpr.class);
 
-  private EntityType _type;
+  private SelfEntityType _type;
   private String _name;
 
   /**
    * Creates the table id expr.
    */
-  public TableIdExpr(EntityType type, String name)
+  public TableIdExpr(SelfEntityType type, String name)
   {
     _type = type;
     _name = name;
@@ -55,7 +55,7 @@ public class TableIdExpr extends SchemaExpr {
   /**
    * Returns the entity type.
    */
-  public EntityType getEntityType()
+  public SelfEntityType getEntityType()
   {
     return _type;
   }

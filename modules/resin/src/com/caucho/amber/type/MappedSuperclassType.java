@@ -41,7 +41,7 @@ import java.util.ArrayList;
 /**
  * Represents a non-persistent class with abstract O/R mapping information.
  */
-public class MappedSuperclassType extends RelatedType {
+public class MappedSuperclassType extends EntityType {
   private static final Logger log = Logger.getLogger(MappedSuperclassType.class.getName());
   private static final L10N L = new L10N(MappedSuperclassType.class);
 
@@ -77,7 +77,7 @@ public class MappedSuperclassType extends RelatedType {
   /**
    * Returns the root type.
    */
-  public RelatedType getRootType()
+  public EntityType getRootType()
   {
     return null;
   }
@@ -107,13 +107,5 @@ public class MappedSuperclassType extends RelatedType {
    */
   public void setTable(Table table)
   {
-  }
-
-  /**
-   * Printable version of the mapped superclass.
-   */
-  public String toString()
-  {
-    return "MappedSuperclassType[" + _beanClass.getName() + "]";
   }
 }

@@ -36,7 +36,7 @@ import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JType;
@@ -62,7 +62,7 @@ public class EntityManyToManyField extends AssociationField {
 
   private String _mapKey;
 
-  private RelatedType _targetType;
+  private EntityType _targetType;
 
   private Table _associationTable;
 
@@ -72,7 +72,7 @@ public class EntityManyToManyField extends AssociationField {
   private ArrayList<String> _orderByFields;
   private ArrayList<Boolean> _orderByAscending;
 
-  public EntityManyToManyField(RelatedType relatedType,
+  public EntityManyToManyField(EntityType relatedType,
                                String name,
                                CascadeType[] cascadeTypes)
     throws ConfigException
@@ -80,19 +80,19 @@ public class EntityManyToManyField extends AssociationField {
     super(relatedType, name, cascadeTypes);
   }
 
-  public EntityManyToManyField(RelatedType relatedType,
+  public EntityManyToManyField(EntityType relatedType,
                                String name)
     throws ConfigException
   {
     this(relatedType, name, null);
   }
 
-  public EntityManyToManyField(RelatedType relatedType)
+  public EntityManyToManyField(EntityType relatedType)
   {
     super(relatedType);
   }
 
-  public EntityManyToManyField(RelatedType relatedType,
+  public EntityManyToManyField(EntityType relatedType,
                                String name,
                                EntityManyToManyField source,
                                CascadeType[] cascadeTypes)
@@ -127,7 +127,7 @@ public class EntityManyToManyField extends AssociationField {
    */
   public void setType(Type targetType)
   {
-    _targetType = (RelatedType) targetType;
+    _targetType = (EntityType) targetType;
 
     super.setType(targetType);
   }
@@ -136,15 +136,15 @@ public class EntityManyToManyField extends AssociationField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getRelatedType()
+  public EntityType getRelatedType()
   {
-    return (RelatedType) getSourceType();
+    return (EntityType) getSourceType();
   }
 
   /**
    * Returns the target type.
    */
-  public RelatedType getTargetType()
+  public EntityType getTargetType()
   {
     return _targetType;
   }
@@ -1032,7 +1032,7 @@ public class EntityManyToManyField extends AssociationField {
       type = getGetterMethod().getGenericReturnType();
     }
     else {
-      JField field = RelatedType.getField(getBeanClass(), getName());
+      JField field = EntityType.getField(getBeanClass(), getName());
       type = field.getGenericType();
     }
 

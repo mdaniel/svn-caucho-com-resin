@@ -44,7 +44,7 @@ import com.caucho.amber.query.ResultSetImpl;
 import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
 import com.caucho.amber.type.CalendarType;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.amber.type.UtilDateType;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.util.L10N;
@@ -819,7 +819,7 @@ public class QueryImpl implements Query {
 
     String className = entityResult.getEntityClass();
 
-    EntityType entityType = _aConn.getPersistenceUnit().getEntityType(className);
+    SelfEntityType entityType = _aConn.getPersistenceUnit().getEntityType(className);
 
     if (entityType == null)
       throw new IllegalStateException(L.l("Unable to locate entity '{0}' for native query.", className));
@@ -978,7 +978,7 @@ public class QueryImpl implements Query {
   {
     String property = rs.getJoinFetchMap().get(entityExpr.getExpr());
 
-    EntityType entityType = entity.__caucho_getEntityType();
+    SelfEntityType entityType = entity.__caucho_getEntityType();
 
     Iterator eagerFieldsIterator = null;
 

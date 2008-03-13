@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -58,7 +58,7 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
   /**
    * Returns the entity class.
    */
-  public RelatedType getTargetType()
+  public EntityType getTargetType()
   {
     return _linkColumns.getSourceTable().getType();
   }

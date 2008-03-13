@@ -36,7 +36,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;

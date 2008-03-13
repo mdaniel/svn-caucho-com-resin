@@ -32,7 +32,7 @@ package com.caucho.amber.cfg;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.type.AbstractStatefulType;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JAccessibleObject;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
@@ -225,8 +225,8 @@ abstract public class AbstractConfigIntrospector {
       if (type.containsCompletionField(fieldName))
         return true;
 
-      if (type instanceof RelatedType)
-        type = ((RelatedType) type).getParentType();
+      if (type instanceof EntityType)
+        type = ((EntityType) type).getParentType();
     }
 
     return false;
@@ -280,7 +280,7 @@ abstract public class AbstractConfigIntrospector {
   }
 
   static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.Table mapTable,
-                                                   RelatedType type,
+                                                   EntityType type,
                                                    Object []joinColumnsAnn)
   {
     if (joinColumnsAnn == null || joinColumnsAnn.length == 0)
@@ -306,7 +306,7 @@ abstract public class AbstractConfigIntrospector {
     calculateColumns(JAccessibleObject field,
                      com.caucho.amber.table.Table mapTable,
                      String prefix,
-                     RelatedType type,
+                     EntityType type,
                      Object []joinColumnsAnn,
                      HashMap<String, JoinColumnConfig> joinColumnsConfig)
     throws ConfigException
@@ -367,11 +367,11 @@ abstract public class AbstractConfigIntrospector {
   }
 
   static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.Table mapTable,
-                                                   RelatedType type)
+                                                   EntityType type)
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
-    RelatedType parentType = type;
+    EntityType parentType = type;
 
     ArrayList<com.caucho.amber.table.Column> targetIdColumns;
 
@@ -396,11 +396,11 @@ abstract public class AbstractConfigIntrospector {
 
   static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.Table mapTable,
                                                    String prefix,
-                                                   RelatedType type)
+                                                   EntityType type)
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
-    RelatedType parentType = type;
+    EntityType parentType = type;
 
     ArrayList<com.caucho.amber.table.Column> targetIdColumns;
 

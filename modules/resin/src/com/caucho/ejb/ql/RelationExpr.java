@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.ql;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg21.CmrRelation;
 import com.caucho.ejb.cfg21.EjbEntityBean;
@@ -202,7 +202,7 @@ class RelationExpr extends PathExpr {
   {
     EjbEntityBean bean = getItemBean();
 
-    EntityType type = bean.getEntityType();
+    SelfEntityType type = bean.getEntityType();
     
     _base.generateWhere(cb);
     cb.append(".");

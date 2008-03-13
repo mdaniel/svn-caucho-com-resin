@@ -36,14 +36,14 @@ import com.caucho.util.L10N;
 /**
  * Represents an application persistent bean type
  */
-public class SubEntityType extends EntityType {
+public class SubEntityType extends SelfEntityType {
   private static final L10N L = new L10N(SubEntityType.class);
 
-  private RelatedType _root;
-  private RelatedType _parent;
+  private EntityType _root;
+  private EntityType _parent;
 
   public SubEntityType(AmberPersistenceUnit amberPersistenceUnit,
-                       RelatedType parent)
+                       EntityType parent)
   {
     super(amberPersistenceUnit);
 
@@ -63,6 +63,7 @@ public class SubEntityType extends EntityType {
   /**
    * Returns the id.
    */
+  @Override
   public Id getId()
   {
     if (super.getId() != null)
@@ -74,7 +75,7 @@ public class SubEntityType extends EntityType {
   /**
    * Returns the root type.
    */
-  public RelatedType getRootType()
+  public EntityType getRootType()
   {
     return _root;
   }
@@ -82,7 +83,7 @@ public class SubEntityType extends EntityType {
   /**
    * Returns the parent class.
    */
-  public RelatedType getParentType()
+  public EntityType getParentType()
   {
     return _parent;
   }
@@ -119,7 +120,7 @@ public class SubEntityType extends EntityType {
 
       // jpa/0ge2: MappedSuperclassType and
       // jpa/0gg0: abstract parent
-      if (_parent instanceof EntityType
+      if (_parent instanceof SelfEntityType
           && ! _parent.getBeanClass().isAbstract()) {
         _loadGroupIndex++;
       }

@@ -29,7 +29,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
@@ -51,7 +51,7 @@ public class AssociationField extends CollectionField {
 
   private boolean _hasInverseJoinColumns;
 
-  public AssociationField(RelatedType relatedType,
+  public AssociationField(EntityType relatedType,
                           String name,
                           CascadeType[] cascadeTypes)
     throws ConfigException
@@ -59,7 +59,7 @@ public class AssociationField extends CollectionField {
     super(relatedType, name, cascadeTypes);
   }
 
-  public AssociationField(RelatedType relatedType)
+  public AssociationField(EntityType relatedType)
   {
     super(relatedType);
   }

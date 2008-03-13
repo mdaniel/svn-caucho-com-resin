@@ -31,7 +31,7 @@ package com.caucho.ejb.cfg21;
 import com.caucho.ejb.cfg.*;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -178,7 +178,7 @@ public class CmpProperty {
   /**
    * Amber creating the id field.
    */
-  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, EntityType type)
+  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, SelfEntityType type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

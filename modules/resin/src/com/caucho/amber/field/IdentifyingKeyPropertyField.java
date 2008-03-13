@@ -29,7 +29,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.table.ForeignColumn;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -42,7 +42,7 @@ public class IdentifyingKeyPropertyField extends KeyPropertyField {
   private static final L10N L = new L10N(IdentifyingKeyPropertyField.class);
   protected static final Logger log = Log.open(IdentifyingKeyPropertyField.class);
 
-  public IdentifyingKeyPropertyField(RelatedType entityType,
+  public IdentifyingKeyPropertyField(EntityType entityType,
                                      ForeignColumn column)
   {
     super(entityType);

@@ -57,7 +57,7 @@ public class AmberEntityHome {
   private static final Logger log = Log.open(AmberEntityHome.class);
 
   private AmberPersistenceUnit _manager;
-  private EntityType _entityType;
+  private SelfEntityType _entityType;
 
   private EntityFactory _entityFactory = new EntityFactory();
 
@@ -72,7 +72,7 @@ public class AmberEntityHome {
 
   private Method _cauchoGetBeanMethod;
 
-  public AmberEntityHome(AmberPersistenceUnit manager, EntityType type)
+  public AmberEntityHome(AmberPersistenceUnit manager, SelfEntityType type)
   {
     _manager = manager;
     _entityType = type;
@@ -104,7 +104,7 @@ public class AmberEntityHome {
   /**
    * Returns the entity type
    */
-  public EntityType getEntityType()
+  public SelfEntityType getEntityType()
   {
     return _entityType;
   }
@@ -112,9 +112,9 @@ public class AmberEntityHome {
   /**
    * Returns the entity type
    */
-  public EntityType getRootType()
+  public SelfEntityType getRootType()
   {
-    return (EntityType) _entityType.getRootType();
+    return (SelfEntityType) _entityType.getRootType();
   }
 
   /**
@@ -613,8 +613,8 @@ public class AmberEntityHome {
     item = _manager.getEntity(getRootType(), key);
 
     if (item == null) {
-      EntityType subEntity
-        = (EntityType) _entityType.getSubClass(discriminator);
+      SelfEntityType subEntity
+        = (SelfEntityType) _entityType.getSubClass(discriminator);
 
       Entity cacheEntity = subEntity.createBean();
 
@@ -655,7 +655,7 @@ public class AmberEntityHome {
       throw new AmberRuntimeException(L.l("{0} is not a valid inheritance key.",
                                           key));
 
-    EntityType subType = (EntityType) _entityType.getSubClass(discriminator);
+    SelfEntityType subType = (SelfEntityType) _entityType.getSubClass(discriminator);
 
     return subType.getHome().newEntity(key);
   }

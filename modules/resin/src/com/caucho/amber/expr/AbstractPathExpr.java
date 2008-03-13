@@ -33,7 +33,7 @@ import com.caucho.amber.field.AmberField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.AbstractStatefulType;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 
 /**
@@ -55,8 +55,8 @@ abstract public class AbstractPathExpr extends AbstractAmberExpr
     do {
       field = type.getField(fieldName);
 
-      if (type instanceof RelatedType)
-        type = ((RelatedType) type).getParentType();
+      if (type instanceof EntityType)
+        type = ((EntityType) type).getParentType();
       else // XXX
         type = null;
     }

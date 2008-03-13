@@ -29,7 +29,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -51,12 +51,12 @@ abstract public class CascadableField extends AbstractField {
 
   private CascadeType[] _cascadeTypes;
 
-  CascadableField(RelatedType sourceType)
+  CascadableField(EntityType sourceType)
   {
     super(sourceType);
   }
 
-  CascadableField(RelatedType sourceType,
+  CascadableField(EntityType sourceType,
                   String name,
                   CascadeType[] cascadeTypes)
     throws ConfigException

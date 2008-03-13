@@ -36,7 +36,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
@@ -66,7 +66,7 @@ public class EntityEmbeddedField extends AbstractField
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
 
-  public EntityEmbeddedField(RelatedType ownerType,
+  public EntityEmbeddedField(EntityType ownerType,
 			     EmbeddableType embeddableType,
                              String name)
     throws ConfigException
@@ -76,7 +76,7 @@ public class EntityEmbeddedField extends AbstractField
     setEmbeddableType(embeddableType);
   }
 
-  public EntityEmbeddedField(RelatedType ownerType,
+  public EntityEmbeddedField(EntityType ownerType,
 			     EmbeddableType embeddableType)
   {
     super(ownerType);

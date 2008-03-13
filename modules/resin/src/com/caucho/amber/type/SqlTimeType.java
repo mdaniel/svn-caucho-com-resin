@@ -96,6 +96,17 @@ public class SqlTimeType extends Type {
   }
 
   /**
+   * Generates a string to load the property.
+   */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    out.print("rs.getTime(columnNames[" + index + "])");
+
+    return index + 1;
+  }
+
+  /**
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,

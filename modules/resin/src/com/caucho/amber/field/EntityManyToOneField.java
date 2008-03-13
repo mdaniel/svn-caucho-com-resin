@@ -63,7 +63,7 @@ public class EntityManyToOneField extends CascadableField {
 
   private LinkColumns _linkColumns;
 
-  private RelatedType _targetType;
+  private EntityType _targetType;
 
   private int _targetLoadIndex;
 
@@ -81,7 +81,7 @@ public class EntityManyToOneField extends CascadableField {
   private Object _joinColumnsAnn[];
   private HashMap<String, JoinColumnConfig> _joinColumnMap = null;
 
-  public EntityManyToOneField(RelatedType relatedType,
+  public EntityManyToOneField(EntityType relatedType,
                               String name,
                               CascadeType[] cascadeType,
                               boolean isManyToOne)
@@ -92,7 +92,7 @@ public class EntityManyToOneField extends CascadableField {
     _isManyToOne = isManyToOne;
   }
 
-  public EntityManyToOneField(RelatedType relatedType,
+  public EntityManyToOneField(EntityType relatedType,
                               String name,
                               CascadeType[] cascadeType)
     throws ConfigException
@@ -100,14 +100,14 @@ public class EntityManyToOneField extends CascadableField {
     super(relatedType, name, cascadeType);
   }
 
-  public EntityManyToOneField(RelatedType relatedType,
+  public EntityManyToOneField(EntityType relatedType,
                               String name)
     throws ConfigException
   {
     this(relatedType, name, null);
   }
 
-  public EntityManyToOneField(RelatedType relatedType)
+  public EntityManyToOneField(EntityType relatedType)
   {
     super(relatedType);
   }
@@ -117,27 +117,27 @@ public class EntityManyToOneField extends CascadableField {
    */
   public void setType(Type targetType)
   {
-    if (! (targetType instanceof RelatedType))
+    if (! (targetType instanceof EntityType))
       throw new AmberRuntimeException(L.l("many-to-one requires an entity target at '{0}'",
                                           targetType));
 
-    _targetType = (RelatedType) targetType;
+    _targetType = (EntityType) targetType;
   }
 
   /**
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getRelatedType()
+  public EntityType getRelatedType()
   {
-    return (RelatedType) getSourceType();
+    return (EntityType) getSourceType();
   }
 
   /**
    * Returns the target type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntityTargetType()
+  public EntityType getEntityTargetType()
   {
     return _targetType;
   }
@@ -271,7 +271,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Initializes the field.
    */
-  public void init(RelatedType relatedType)
+  public void init(EntityType relatedType)
     throws ConfigException
   {
     boolean isJPA = relatedType.getPersistenceUnit().isJPA();
@@ -303,7 +303,7 @@ public class EntityManyToOneField extends CascadableField {
 
     ArrayList<ForeignColumn> foreignColumns = new ArrayList<ForeignColumn>();
 
-    RelatedType parentType = _targetType;
+    EntityType parentType = _targetType;
 
     ArrayList<Column> targetIdColumns = _targetType.getId().getColumns();
 
@@ -910,7 +910,7 @@ public class EntityManyToOneField extends CascadableField {
 
       out.println("// " + dst);
 
-      if (_targetType instanceof EntityType) {
+      if (_targetType instanceof SelfEntityType) {
         String targetTypeExt = getEntityTargetType().getInstanceClassName();
 
         // jpa/0s2e
@@ -1042,7 +1042,7 @@ public class EntityManyToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof EntityType))
+    if (! (getEntityTargetType() instanceof SelfEntityType))
       return;
 
     String value = generateGet(src);
@@ -1077,7 +1077,7 @@ public class EntityManyToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof EntityType))
+    if (! (getEntityTargetType() instanceof SelfEntityType))
       return;
 
     out.println();
@@ -1165,7 +1165,7 @@ public class EntityManyToOneField extends CascadableField {
       out.pushDepth();
       out.print(keyType + " key = ");
 
-      RelatedType targetType = getEntityTargetType();
+      EntityType targetType = getEntityTargetType();
 
       if (targetType.isEJBProxy(getJavaTypeName())) {
         // To handle EJB local objects.

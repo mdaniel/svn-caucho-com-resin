@@ -35,7 +35,7 @@ import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JType;
@@ -67,7 +67,7 @@ public class EntityOneToManyField extends CollectionField {
 
   private EntityManyToOneField _sourceField;
 
-  public EntityOneToManyField(RelatedType entityType,
+  public EntityOneToManyField(EntityType entityType,
                               String name,
                               CascadeType[] cascadeTypes)
     throws ConfigException
@@ -75,14 +75,14 @@ public class EntityOneToManyField extends CollectionField {
     super(entityType, name, cascadeTypes);
   }
 
-  public EntityOneToManyField(RelatedType entityType,
+  public EntityOneToManyField(EntityType entityType,
                               String name)
     throws ConfigException
   {
     this(entityType, name, null);
   }
 
-  public EntityOneToManyField(RelatedType entityType)
+  public EntityOneToManyField(EntityType entityType)
   {
     super(entityType);
   }
@@ -102,18 +102,18 @@ public class EntityOneToManyField extends CollectionField {
    * entity or mapped-superclass.
    */
   @Override
-  public RelatedType getEntitySourceType()
+  public EntityType getEntitySourceType()
   {
-    return (RelatedType) getSourceType();
+    return (EntityType) getSourceType();
   }
 
   /**
    * Returns the target type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntityTargetType()
+  public EntityType getEntityTargetType()
   {
-    return (RelatedType) getTargetType();
+    return (EntityType) getTargetType();
   }
 
   /**
@@ -643,7 +643,7 @@ public class EntityOneToManyField extends CollectionField {
       type = getGetterMethod().getGenericReturnType();
     }
     else {
-      JField field = RelatedType.getField(getBeanClass(), getName());
+      JField field = EntityType.getField(getBeanClass(), getName());
       type = field.getGenericType();
     }
 

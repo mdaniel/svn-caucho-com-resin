@@ -35,7 +35,7 @@ import com.caucho.amber.field.KeyPropertyField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -78,7 +78,7 @@ public class KeyManyToOneExpr extends AbstractPathExpr
   /**
    * Returns the entity class.
    */
-  public EntityType getTargetType()
+  public SelfEntityType getTargetType()
   {
     return _manyToOne.getEntityType();
   }

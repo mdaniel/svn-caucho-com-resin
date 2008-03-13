@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -41,7 +41,7 @@ public interface EntityPathExpr extends PathExpr {
   /**
    * Returns the entity type.
    */
-  public EntityType getTargetType();
+  public SelfEntityType getTargetType();
 
   /**
    * Returns the table.

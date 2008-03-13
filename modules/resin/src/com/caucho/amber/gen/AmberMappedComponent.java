@@ -33,9 +33,9 @@ import com.caucho.amber.field.*;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.amber.type.MappedSuperclassType;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.*;
@@ -60,7 +60,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
   String _baseClassName;
   String _extClassName;
 
-  RelatedType _relatedType;
+  EntityType _relatedType;
 
   private ArrayList<PersistentDependency> _dependencies
     = new ArrayList<PersistentDependency>();
@@ -72,7 +72,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
   /**
    * Sets the bean info for the generator
    */
-  void setRelatedType(RelatedType relatedType)
+  void setRelatedType(EntityType relatedType)
   {
     _relatedType = relatedType;
 
@@ -241,7 +241,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     Id id = _relatedType.getId();
 
     if (id == null) {
-      if (_relatedType instanceof EntityType)
+      if (_relatedType instanceof SelfEntityType)
         throw new IllegalStateException(L.l("'{0}' is missing a key.",
                                             _relatedType.getName()));
     } // ejb/0623 as a negative test.
@@ -526,16 +526,20 @@ abstract public class AmberMappedComponent extends ClassComponent {
     throws IOException
   {
     for (AmberField key : _relatedType.getId().getKeys()) {
-      key.generateSuperGetter(out);
-      key.generateSuperSetter(out);
+      if (_relatedType == key.getSourceType()) {
+	key.generateSuperGetter(out);
+	key.generateSuperSetter(out);
+      }
     }
 
     for (AmberField prop : _relatedType.getFields()) {
-      prop.generateSuperGetter(out);
-      prop.generateGetProperty(out);
+      if (_relatedType == prop.getSourceType()) {
+	prop.generateSuperGetter(out);
+	prop.generateGetProperty(out);
 
-      prop.generateSuperSetter(out);
-      prop.generateSetProperty(out);
+	prop.generateSuperSetter(out);
+	prop.generateSetProperty(out);
+      }
     }
   }
 
@@ -626,7 +630,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
   }
 
-  private void generateRetrieveEager(JavaWriter out, RelatedType relatedType)
+  private void generateRetrieveEager(JavaWriter out, EntityType relatedType)
     throws IOException
   {
     if (relatedType == null)
@@ -647,7 +651,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_load_" + index + "(aConn);");
   }
 
-  private void generateRetrieveSelf(JavaWriter out, RelatedType relatedType)
+  private void generateRetrieveSelf(JavaWriter out, EntityType relatedType)
     throws IOException
   {
     if (relatedType == null)
@@ -733,7 +737,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    int index = _relatedType.generateLoad(out, "rs", "index", 0, 0, null);
+    int index = _relatedType.generateLoad(out, "rs", "index", 0, 0);
 
     out.println("__caucho_loadMask_0 |= 1L;");
 
@@ -1334,7 +1338,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
         // XXX: jpa/0l21
 
-        RelatedType parentType = _relatedType;
+        EntityType parentType = _relatedType;
 
         do {
           out.println("__caucho_loadMask_" + i + " |= " + parentType.getCreateLoadMask(i) + ";");
@@ -1452,7 +1456,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
     _relatedType.getId().generateSetGeneratedKeys(out, "pstmt");
 
-    RelatedType parentType = _relatedType;
+    EntityType parentType = _relatedType;
 
     do {
       for (Table subTable : parentType.getSecondaryTables()) {
@@ -1556,7 +1560,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // item in the middle of a transaction
     /*
       out.println();
-      out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
+      out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.SelfEntityType) __caucho_home.getRootType(),");
       out.println("                                     pk, __caucho_cacheItem);");
     */
 
@@ -2279,13 +2283,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateHomeFindNew(JavaWriter out)
     throws IOException
   {
-    RelatedType parentType = _relatedType.getParentType();
+    EntityType parentType = _relatedType.getParentType();
 
     // jpa/0ge3
     // jpa/0l32: find(SubBean.class, "2") would try to select the
     // discriminator column from the "sub-table".
     if (parentType != null
-        && (parentType instanceof EntityType)
+        && (parentType instanceof SelfEntityType)
         && ! parentType.isAbstractClass()) {
       return;
     }
@@ -2362,7 +2366,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
   {
     out.print("sql = \"select ");
 
-    RelatedType parentType = _relatedType;
+    EntityType parentType = _relatedType;
 
     /* XXX: jpa/0gg3
     // jpa/0l32

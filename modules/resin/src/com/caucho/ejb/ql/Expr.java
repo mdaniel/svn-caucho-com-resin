@@ -30,7 +30,7 @@ package com.caucho.ejb.ql;
 
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.KeyManyToOneField;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.util.CharBuffer;
@@ -298,7 +298,7 @@ public class Expr {
       throw new IllegalStateException(L.l("'{0}' can't be used in a WHERE multi-component", this));
   }
 
-  protected String keyComponent(EntityType type, int index)
+  protected String keyComponent(SelfEntityType type, int index)
   {
     ArrayList<String> names = new ArrayList<String>();
 
@@ -310,7 +310,7 @@ public class Expr {
   }
 
   protected void addKeys(ArrayList<String> names,
-			 EntityType type,
+			 SelfEntityType type,
 			 String prefix)
   {
     for (IdField key : type.getId().getKeys()) {

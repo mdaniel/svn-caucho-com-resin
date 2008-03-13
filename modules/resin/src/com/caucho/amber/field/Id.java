@@ -55,12 +55,12 @@ public class Id {
   protected static final Logger log
     = Logger.getLogger(Id.class.getName());
 
-  private RelatedType _ownerType;
+  private EntityType _ownerType;
 
   private ArrayList<IdField> _keys = new ArrayList<IdField>();
   private ArrayList<Column> _columns = new ArrayList<Column>();
 
-  public Id(RelatedType ownerType, ArrayList<IdField> keys)
+  public Id(EntityType ownerType, ArrayList<IdField> keys)
   {
     _ownerType = ownerType;
 
@@ -69,12 +69,12 @@ public class Id {
     }
   }
 
-  protected Id(RelatedType ownerType)
+  protected Id(EntityType ownerType)
   {
     _ownerType = ownerType;
   }
   
-  public Id(RelatedType ownerType, IdField key)
+  public Id(EntityType ownerType, IdField key)
   {
     _ownerType = ownerType;
 
@@ -120,7 +120,7 @@ public class Id {
   /**
    * Returns the owner type.
    */
-  public RelatedType getOwnerType()
+  public EntityType getOwnerType()
   {
     return _ownerType;
   }

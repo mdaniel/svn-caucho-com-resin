@@ -37,8 +37,8 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.Type;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.log.Log;
@@ -508,12 +508,12 @@ public class QueryParser {
             Type targetType = pathExpr.getTargetType();
 
             // jpa/0w24
-            if (targetType instanceof RelatedType) {
-              RelatedType relatedType = (RelatedType) targetType;
-              RelatedType parentType = relatedType;
+            if (targetType instanceof EntityType) {
+              EntityType relatedType = (EntityType) targetType;
+              EntityType parentType = relatedType;
 
               while (parentType.getParentType() != null) {
-                if (parentType.getParentType() instanceof EntityType)
+                if (parentType.getParentType() instanceof SelfEntityType)
                   parentType = parentType.getParentType();
                 else
                   break;
@@ -528,7 +528,7 @@ public class QueryParser {
 
                 for (LinkColumns link : outgoingLinks) {
                   if (link.getTargetTable().equals(parentType.getTable())) {
-                    rootItem = addFromItem((EntityType) parentType,
+                    rootItem = addFromItem((SelfEntityType) parentType,
                                            parentType.getTable());
 
                     JoinExpr join = new ManyToOneJoinExpr(link, rootItem, child);
@@ -901,7 +901,7 @@ public class QueryParser {
                               ArrayList<AmberExpr> values)
     throws QueryParseException
   {
-    EntityType entity = fromItem.getEntityType();
+    SelfEntityType entity = fromItem.getEntityType();
 
     int token = -1;
 
@@ -1021,7 +1021,7 @@ public class QueryParser {
   /**
    * Adds a new FromItem.
    */
-  public FromItem addFromItem(EntityType entityType,
+  public FromItem addFromItem(SelfEntityType entityType,
                               Table table)
   {
     return addFromItem(entityType, table, createTableName());
@@ -1046,7 +1046,7 @@ public class QueryParser {
   /**
    * Adds a new FromItem.
    */
-  public FromItem addFromItem(EntityType entityType,
+  public FromItem addFromItem(SelfEntityType entityType,
                               Table table,
                               String id)
   {
@@ -1132,7 +1132,7 @@ public class QueryParser {
       AmberEntityHome home = _persistenceUnit.getHomeBySchema(name);
 
       if (home != null) {
-        EntityType type = home.getEntityType();
+        SelfEntityType type = home.getEntityType();
 
         schema = new TableIdExpr(home.getEntityType(),
                                  type.getTable().getName());

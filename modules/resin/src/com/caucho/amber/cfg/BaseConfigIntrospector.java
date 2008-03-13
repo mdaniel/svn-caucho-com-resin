@@ -66,8 +66,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
 
-  HashMap<RelatedType, ArrayList<OneToOneCompletion>> _oneToOneCompletions
-    = new HashMap<RelatedType, ArrayList<OneToOneCompletion>>();
+  HashMap<EntityType, ArrayList<OneToOneCompletion>> _oneToOneCompletions
+    = new HashMap<EntityType, ArrayList<OneToOneCompletion>>();
 
   HashMap<String, EmbeddableConfig> _embeddableConfigMap
     = new HashMap<String, EmbeddableConfig>();
@@ -218,7 +218,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   public void introspectEntityListeners(JClass type,
-                                        RelatedType relatedType,
+                                        EntityType relatedType,
                                         AmberPersistenceUnit persistenceUnit)
     throws ConfigException
   {
@@ -273,7 +273,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
   public void introspectEntityListener(JClass type,
                                        AmberPersistenceUnit persistenceUnit,
-                                       RelatedType sourceType,
+                                       EntityType sourceType,
                                        String sourceClassName)
     throws ConfigException
   {
@@ -332,7 +332,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the callbacks.
    */
   public void introspectCallbacks(JClass type,
-                                  RelatedType entityType)
+                                  EntityType entityType)
     throws ConfigException
   {
     getInternalExcludeDefaultListenersConfig(type, _annotationCfg);
@@ -464,7 +464,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects sql result set mappings.
    */
   void introspectSqlResultSetMappings(JClass type,
-                                      RelatedType relatedType,
+                                      EntityType relatedType,
                                       String typeName)
   {
     // jpa/0y1-
@@ -532,7 +532,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       String className = entityResult.getClass("entityClass").getName();
 
-      EntityType resultType = _persistenceUnit.getEntityType(className);
+      SelfEntityType resultType = _persistenceUnit.getEntityType(className);
 
       if (resultType == null)
         throw new ConfigException(L.l("entityClass '{0}' is not an @Entity bean for @SqlResultSetMapping '{1}'. The entityClass of an @EntityResult must be an @Entity bean.",
@@ -658,7 +658,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the Inheritance
    */
   void introspectInheritance(AmberPersistenceUnit persistenceUnit,
-                             RelatedType entityType,
+                             EntityType entityType,
                              JClass type,
                              JAnnotation inheritanceAnn,
                              InheritanceConfig inheritanceConfig)
@@ -777,8 +777,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the fields.
    */
   void introspectIdMethod(AmberPersistenceUnit persistenceUnit,
-                          RelatedType entityType,
-                          RelatedType parentType,
+                          EntityType entityType,
+                          EntityType parentType,
                           JClass type,
                           JClass idClass,
                           MappedSuperclassConfig config)
@@ -871,8 +871,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the fields.
    */
   void introspectIdField(AmberPersistenceUnit persistenceUnit,
-                         RelatedType entityType,
-                         RelatedType parentType,
+                         EntityType entityType,
+                         EntityType parentType,
                          JClass type,
                          JClass idClass,
                          MappedSuperclassConfig config)
@@ -979,7 +979,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   private IdField introspectId(AmberPersistenceUnit persistenceUnit,
-                               RelatedType entityType,
+                               EntityType entityType,
                                JAccessibleObject field,
                                String fieldName,
                                JClass fieldType,
@@ -1069,7 +1069,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   private IdField introspectEmbeddedId(AmberPersistenceUnit persistenceUnit,
-                                       RelatedType ownerType,
+                                       EntityType ownerType,
                                        JAccessibleObject field,
                                        String fieldName,
                                        JClass fieldType)
@@ -1351,7 +1351,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                         boolean isEmbeddable)
     throws ConfigException
   {
-    if (! isEmbeddable && ((RelatedType) entityType).getId() == null)
+    if (! isEmbeddable && ((EntityType) entityType).getId() == null)
       throw new IllegalStateException(L.l("{0} has no key", entityType));
 
     for (JField field : type.getFields()) {
@@ -1457,7 +1457,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 	     || field.isAnnotationPresent(javax.persistence.Version.class)) {
       validateAnnotations(field, "@Version", _versionAnnotations);
 
-      addVersion((RelatedType) sourceType, field,
+      addVersion((EntityType) sourceType, field,
                  fieldName, fieldType, versionConfig);
     }
     else if ((manyToOneConfig != null)
@@ -1499,7 +1499,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                fieldType.getName()));
       }
 
-      RelatedType relatedType = (RelatedType) sourceType;
+      EntityType relatedType = (EntityType) sourceType;
 
       relatedType.setHasDependent(true);
 
@@ -1525,7 +1525,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                field.getName()));
       }
 
-      RelatedType relatedType = (RelatedType) sourceType;
+      EntityType relatedType = (EntityType) sourceType;
 
       _depCompletions.add(new OneToManyCompletion(relatedType,
                                                   field,
@@ -1537,7 +1537,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 	     || field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
       validateAnnotations(field, "@OneToOne", _oneToOneAnnotations);
 
-      RelatedType relatedType = (RelatedType) sourceType;
+      EntityType relatedType = (EntityType) sourceType;
 
       OneToOneCompletion oneToOne = new OneToOneCompletion(relatedType,
                                                            field,
@@ -1585,7 +1585,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         }
       }
 
-      RelatedType relatedType = (RelatedType) sourceType;
+      EntityType relatedType = (EntityType) sourceType;
 
       Completion completion = new ManyToManyCompletion(relatedType,
                                                        field,
@@ -1609,7 +1609,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     else if (field.isAnnotationPresent(javax.persistence.Embedded.class)) {
       validateAnnotations(field, "@Embedded", _embeddedAnnotations);
 
-      RelatedType relatedType = (RelatedType) sourceType;
+      EntityType relatedType = (EntityType) sourceType;
 
       relatedType.setHasDependent(true);
 
@@ -1622,7 +1622,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     else if (field.isAnnotationPresent(javax.persistence.EmbeddedId.class)) {
       validateAnnotations(field, "@EmbeddedId", _embeddedIdAnnotations);
 
-      _depCompletions.add(new EmbeddedCompletion((RelatedType) sourceType,
+      _depCompletions.add(new EmbeddedCompletion((EntityType) sourceType,
                                                  field,
                                                  fieldName,
                                                  fieldType,
@@ -1703,7 +1703,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     sourceType.addField(property);
   }
 
-  void addVersion(RelatedType sourceType,
+  void addVersion(EntityType sourceType,
                   JAccessibleObject field,
                   String fieldName,
                   JClass fieldType,
@@ -1743,10 +1743,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                               ColumnConfig columnConfig)
     throws ConfigException
   {
-    RelatedType entityType = null;
+    EntityType entityType = null;
 
-    if (beanType instanceof RelatedType)
-      entityType = (RelatedType) beanType;
+    if (beanType instanceof EntityType)
+      entityType = (EntityType) beanType;
     
     String name;
 
@@ -1819,7 +1819,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     return column;
   }
 
-  void addManyToOne(RelatedType sourceType,
+  void addManyToOne(EntityType sourceType,
                     JAccessibleObject field,
                     String fieldName,
                     JClass fieldType)
@@ -1944,7 +1944,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     EntityManyToOneField manyToOneField;
     manyToOneField = new EntityManyToOneField(sourceType, fieldName, cascadeTypes, isManyToOne);
 
-    EntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
+    SelfEntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
 
     manyToOneField.setType(targetType);
 
@@ -1976,7 +1976,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   void validateJoinColumns(JAccessibleObject field,
                            Object []columnsAnn,
                            HashMap<String, JoinColumnConfig> joinColumnMap,
-                           RelatedType targetType)
+                           EntityType targetType)
     throws ConfigException
   {
     if ((joinColumnMap == null) && (columnsAnn == null))
@@ -1984,7 +1984,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     com.caucho.amber.field.Id id = targetType.getId();
 
-    RelatedType parentType = targetType;
+    EntityType parentType = targetType;
 
     int idCols;
 
@@ -2070,7 +2070,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     return null;
   }
 
-  void addManyToMany(RelatedType sourceType,
+  void addManyToMany(EntityType sourceType,
                      JAccessibleObject field,
                      String fieldName,
                      JClass fieldType)
@@ -2115,7 +2115,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       throw error(field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
                              field.getName()));
 
-    EntityType targetType = _persistenceUnit.getEntityType(targetName);
+    SelfEntityType targetType = _persistenceUnit.getEntityType(targetName);
 
     if (targetType == null)
       throw error(field,
@@ -2328,9 +2328,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     sourceType.addField(manyToManyField);
   }
 
-  EntityManyToOneField getSourceField(RelatedType targetType,
+  EntityManyToOneField getSourceField(EntityType targetType,
                                       String mappedBy,
-                                      RelatedType sourceType)
+                                      EntityType sourceType)
   {
     do {
       ArrayList<AmberField> fields = targetType.getFields();
@@ -2353,7 +2353,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     return null;
   }
 
-  OneToOneCompletion getSourceCompletion(RelatedType targetType,
+  OneToOneCompletion getSourceCompletion(EntityType targetType,
                                          String mappedBy)
   {
     do {
@@ -2384,21 +2384,21 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * completes for dependent
    */
   class Completion {
-    protected RelatedType _relatedType;
+    protected EntityType _relatedType;
 
-    protected Completion(RelatedType relatedType,
+    protected Completion(EntityType relatedType,
                          String fieldName)
     {
       _relatedType = relatedType;
       _relatedType.addCompletionField(fieldName);
     }
 
-    protected Completion(RelatedType relatedType)
+    protected Completion(EntityType relatedType)
     {
       _relatedType = relatedType;
     }
 
-    RelatedType getRelatedType()
+    EntityType getRelatedType()
     {
       return _relatedType;
     }
@@ -2419,7 +2419,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     private OneToManyConfig _oneToManyConfig;
     private boolean _isLazy = true;
 
-    OneToManyCompletion(RelatedType type,
+    OneToManyCompletion(EntityType type,
                         JAccessibleObject field,
                         String fieldName,
                         JClass fieldType,
@@ -2483,7 +2483,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         throw error(_field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
                                 _field.getName()));
 
-      EntityType targetType = persistenceUnit.getEntityType(targetName);
+      SelfEntityType targetType = persistenceUnit.getEntityType(targetName);
       if (targetType == null) {
 
         EntityConfig entityConfig = getEntityConfig(targetName);
@@ -2529,7 +2529,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       }
     }
 
-    private void oneToManyBidirectional(RelatedType targetType,
+    private void oneToManyBidirectional(EntityType targetType,
                                         String targetName,
                                         String mappedBy,
                                         CascadeType[] cascadeTypes)
@@ -2570,8 +2570,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
           orderBy = "";
 
         if ("".equals(orderBy)) {
-          if (targetType instanceof RelatedType) {
-            RelatedType targetRelatedType = (RelatedType) targetType;
+          if (targetType instanceof EntityType) {
+            EntityType targetRelatedType = (EntityType) targetType;
             orderBy = targetRelatedType.getId().generateJavaSelect(null);
           }
         }
@@ -2670,7 +2670,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       _relatedType.addField(oneToMany);
     }
 
-    private void oneToManyUnidirectional(RelatedType targetType,
+    private void oneToManyUnidirectional(EntityType targetType,
                                          String targetName,
                                          CascadeType[] cascadeTypes)
       throws ConfigException
@@ -2799,7 +2799,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     private String _fieldName;
     private JClass _fieldType;
 
-    OneToOneCompletion(RelatedType type,
+    OneToOneCompletion(EntityType type,
                        JAccessibleObject field,
                        String fieldName,
                        JClass fieldType)
@@ -2884,7 +2884,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       else
         mappedBy = oneToOneConfig.getMappedBy();
 
-      RelatedType targetType = null;
+      EntityType targetType = null;
 
       if (targetName != null && ! targetName.equals("")) {
         targetType = persistenceUnit.getEntityType(targetName);
@@ -3024,7 +3024,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     private String _fieldName;
     private JClass _fieldType;
 
-    ManyToManyCompletion(RelatedType type,
+    ManyToManyCompletion(EntityType type,
                          JAccessibleObject field,
                          String fieldName,
                          JClass fieldType)
@@ -3051,7 +3051,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     private String _fieldName;
     private JClass _fieldType;
 
-    ManyToOneCompletion(RelatedType type,
+    ManyToOneCompletion(EntityType type,
                         JAccessibleObject field,
                         String fieldName,
                         JClass fieldType)
@@ -3081,7 +3081,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     // @Embedded or @EmbeddedId
     private boolean _embeddedId;
 
-    EmbeddedCompletion(RelatedType type,
+    EmbeddedCompletion(EntityType type,
                        JAccessibleObject field,
                        String fieldName,
                        JClass fieldType,
@@ -3206,7 +3206,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     private Object _entities[];
     private Object _columns[];
 
-    SqlResultSetMappingCompletion(RelatedType type,
+    SqlResultSetMappingCompletion(EntityType type,
                                   String name,
                                   Object entities[],
                                   Object columns[])
@@ -3233,7 +3233,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   class AttributeOverrideCompletion extends Completion {
     private JClass _type;
 
-    AttributeOverrideCompletion(RelatedType relatedType,
+    AttributeOverrideCompletion(EntityType relatedType,
                                 JClass type)
     {
       super(relatedType);
@@ -3310,7 +3310,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       // created at each entity table -- not the mapped superclass
       // table, even because the parent might not have a valid table.
 
-      RelatedType parent = _relatedType.getParentType();
+      EntityType parent = _relatedType.getParentType();
 
       ArrayList<AmberField> fields = parent.getFields();
 
@@ -3493,7 +3493,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
                 if (field instanceof KeyPropertyField) {
                   KeyPropertyField overriddenField
-                    = new KeyPropertyField((RelatedType) field.getSourceType(),
+                    = new KeyPropertyField((EntityType) field.getSourceType(),
                                            field.getName());
 
                   overriddenField.setGenerator(field.getGenerator());

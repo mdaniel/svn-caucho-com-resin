@@ -37,7 +37,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.type.AbstractStatefulType;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassWrapper;
 import com.caucho.bytecode.JField;
@@ -208,9 +208,9 @@ abstract public class AbstractField implements AmberField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntitySourceType()
+  public EntityType getEntitySourceType()
   {
-    return (RelatedType) getSourceType();
+    return (EntityType) getSourceType();
   }
 
   /**

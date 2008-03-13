@@ -47,11 +47,11 @@ public class LoadGroupGenerator extends ClassComponent {
   private static final L10N L = new L10N(LoadGroupGenerator.class);
 
   private String _extClassName;
-  private RelatedType _relatedType;
+  private EntityType _relatedType;
   private int _index;
 
   public LoadGroupGenerator(String extClassName,
-                            RelatedType relatedType,
+                            EntityType relatedType,
                             int index)
   {
     _extClassName = extClassName;
@@ -118,7 +118,7 @@ public class LoadGroupGenerator extends ClassComponent {
       // needs to be after load to prevent loop if toString() expects data
       out.println();
       out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINER))");
-      out.println("  __caucho_log.finer(getClass().getSimpleName() + \"[\" + __caucho.getPrimaryKey() + \"] amber load-" + _index + "\");");
+      out.println("  __caucho_log.finer(getClass().getSimpleName() + \"[\" + __caucho_getPrimaryKey() + \"] amber load-" + _index + "\");");
 
 
       out.println();
@@ -389,7 +389,7 @@ public class LoadGroupGenerator extends ClassComponent {
     }
 
     // jpa/0gg3
-    _relatedType.generateLoad(out, "rs", "", 1, _index, null);
+    _relatedType.generateLoad(out, "rs", "", 1, _index);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 
     out.popDepth();

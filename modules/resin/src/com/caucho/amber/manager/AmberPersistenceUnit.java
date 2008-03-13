@@ -150,9 +150,9 @@ public class AmberPersistenceUnit {
 
   private EntityKey _entityKey = new EntityKey();
 
-  private ArrayList<EntityType> _lazyConfigure = new ArrayList<EntityType>();
+  private ArrayList<SelfEntityType> _lazyConfigure = new ArrayList<SelfEntityType>();
 
-  private ArrayList<EntityType> _lazyGenerate = new ArrayList<EntityType>();
+  private ArrayList<SelfEntityType> _lazyGenerate = new ArrayList<SelfEntityType>();
   private ArrayList<AmberEntityHome> _lazyHomeInit
     = new ArrayList<AmberEntityHome>();
   private ArrayList<Table> _lazyTable = new ArrayList<Table>();
@@ -499,9 +499,9 @@ public class AmberPersistenceUnit {
 
     try {
       if (isEntity) {
-        EntityType entityType = (EntityType) _entityIntrospector.introspect(type);
+        SelfEntityType entityType = (SelfEntityType) _entityIntrospector.introspect(type);
 
-        // EntityType entity = createEntity(type);
+        // SelfEntityType entity = createEntity(type);
 
         _amberContainer.addEntity(className, entityType);
       }
@@ -596,7 +596,7 @@ public class AmberPersistenceUnit {
   /**
    * Adds an entity.
    */
-  public EntityType createEntity(JClass beanClass)
+  public SelfEntityType createEntity(JClass beanClass)
   {
     return createEntity(beanClass.getName(), beanClass);
   }
@@ -604,31 +604,31 @@ public class AmberPersistenceUnit {
   /**
    * Adds an entity.
    */
-  public EntityType createEntity(String name,
+  public SelfEntityType createEntity(String name,
                                  JClass beanClass)
   {
-    EntityType entityType = (EntityType) _typeManager.get(name);
+    SelfEntityType entityType = (SelfEntityType) _typeManager.get(name);
 
     if (entityType != null)
       return entityType;
 
     // ejb/0al2
-    // entityType = (EntityType) _typeManager.get(beanClass.getName());
+    // entityType = (SelfEntityType) _typeManager.get(beanClass.getName());
 
     if (entityType == null) {
-      // The parent type can be a @MappedSuperclass or an @EntityType.
-      RelatedType parentType = null;
+      // The parent type can be a @MappedSuperclass or an @SelfEntityType.
+      EntityType parentType = null;
 
       for (JClass parentClass = beanClass.getSuperClass();
            parentType == null && parentClass != null;
            parentClass = parentClass.getSuperClass()) {
-        parentType = (RelatedType) _typeManager.get(parentClass.getName());
+        parentType = (EntityType) _typeManager.get(parentClass.getName());
       }
 
       if (parentType != null)
         entityType = new SubEntityType(this, parentType);
       else
-        entityType = new EntityType(this);
+        entityType = new SelfEntityType(this);
     }
 
     // _typeManager.put(name, entityType);
@@ -947,7 +947,7 @@ public class AmberPersistenceUnit {
       }
 
       while (_lazyGenerate.size() > 0) {
-        EntityType entityType = _lazyGenerate.remove(0);
+        SelfEntityType entityType = _lazyGenerate.remove(0);
 
 	type = entityType;
 
@@ -1028,12 +1028,12 @@ public class AmberPersistenceUnit {
     configure();
 
     while (_lazyGenerate.size() > 0) {
-      EntityType type = _lazyGenerate.remove(0);
+      SelfEntityType type = _lazyGenerate.remove(0);
 
       type.init();
 
-      if (type instanceof EntityType) {
-        EntityType entityType = (EntityType) type;
+      if (type instanceof SelfEntityType) {
+        SelfEntityType entityType = (SelfEntityType) type;
 
         if (! entityType.isGenerated()) {
           if (entityType.getInstanceClassName() == null)
@@ -1116,7 +1116,7 @@ public class AmberPersistenceUnit {
     _entityIntrospector.configure();
 
     while (_lazyConfigure.size() > 0) {
-      EntityType type = _lazyConfigure.remove(0);
+      SelfEntityType type = _lazyConfigure.remove(0);
 
       if (type.startConfigure()) {
         // getEnvManager().getGenerator().configure(type);
@@ -1183,12 +1183,12 @@ public class AmberPersistenceUnit {
   /**
    * Returns a matching entity.
    */
-  public EntityType getEntityType(String className)
+  public SelfEntityType getEntityType(String className)
   {
     Type type = _typeManager.get(className);
 
-    if (type instanceof EntityType)
-      return (EntityType) type;
+    if (type instanceof SelfEntityType)
+      return (SelfEntityType) type;
     else
       return null;
   }
@@ -1209,7 +1209,7 @@ public class AmberPersistenceUnit {
   /**
    * Returns a matching entity.
    */
-  public EntityType getEntityByInstanceClass(String className)
+  public SelfEntityType getEntityByInstanceClass(String className)
   {
     return _typeManager.getEntityByInstanceClass(className);
   }
@@ -1219,8 +1219,8 @@ public class AmberPersistenceUnit {
    */
   public void updateFlushPriority()
   {
-    ArrayList<EntityType> updatingEntities
-      = new ArrayList<EntityType>();
+    ArrayList<SelfEntityType> updatingEntities
+      = new ArrayList<SelfEntityType>();
 
     try {
       HashMap<String,Type> typeMap = _typeManager.getTypeMap();
@@ -1232,8 +1232,8 @@ public class AmberPersistenceUnit {
       while (it.hasNext()) {
         Type type = (Type) it.next();
 
-        if (type instanceof EntityType) {
-          EntityType entityType = (EntityType) type;
+        if (type instanceof SelfEntityType) {
+          SelfEntityType entityType = (SelfEntityType) type;
 
           if (updatingEntities.contains(entityType))
             continue;
@@ -1537,7 +1537,7 @@ public class AmberPersistenceUnit {
 
     String className = entity.getClass().getName();
 
-    EntityType entityType = (EntityType) _typeManager.get(className);
+    SelfEntityType entityType = (SelfEntityType) _typeManager.get(className);
 
     if (! entityType.getExcludeDefaultListeners()) {
       for (ListenerType listenerType : _defaultListeners) {
@@ -1601,7 +1601,7 @@ public class AmberPersistenceUnit {
   /**
    * Returns the entity with the given key.
    */
-  public EntityItem getEntity(EntityType rootType, Object key)
+  public EntityItem getEntity(SelfEntityType rootType, Object key)
   {
     SoftReference<EntityItem> ref;
 
@@ -1634,7 +1634,7 @@ public class AmberPersistenceUnit {
   /**
    * Sets the entity result.
    */
-  public EntityItem putEntity(EntityType rootType,
+  public EntityItem putEntity(SelfEntityType rootType,
                               Object key,
                               EntityItem entity)
   {
@@ -1674,7 +1674,7 @@ public class AmberPersistenceUnit {
   /**
    * Remove the entity result.
    */
-  public EntityItem removeEntity(EntityType rootType, Object key)
+  public EntityItem removeEntity(SelfEntityType rootType, Object key)
   {
     SoftReference<EntityItem> ref;
 
@@ -1692,7 +1692,7 @@ public class AmberPersistenceUnit {
   /**
    * Updates the cache item after commit.
    */
-  public EntityItem updateCacheItem(EntityType rootType,
+  public EntityItem updateCacheItem(SelfEntityType rootType,
                                     Object key,
                                     Entity contextEntity,
                                     EntityItem cacheItem)
@@ -1774,7 +1774,7 @@ public class AmberPersistenceUnit {
           continue;
 
 	AmberEntityHome entityHome = value.getEntityHome();
-        EntityType entityRoot = entityHome.getEntityType();
+        SelfEntityType entityRoot = entityHome.getEntityType();
         Object entityKey = key.getKey();
 
         for (int i = 0; i < size; i++) {

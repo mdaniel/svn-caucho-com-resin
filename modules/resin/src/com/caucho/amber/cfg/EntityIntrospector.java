@@ -62,9 +62,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   private static final Logger log
     = Logger.getLogger(EntityIntrospector.class.getName());
 
-  // EntityType or MappedSuperclassType.
-  HashMap<String, RelatedType> _relatedTypeMap
-    = new HashMap<String, RelatedType>();
+  // SelfEntityType or MappedSuperclassType.
+  HashMap<String, EntityType> _relatedTypeMap
+    = new HashMap<String, EntityType>();
 
   /**
    * Creates the introspector.
@@ -89,10 +89,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   /**
    * Introspects.
    */
-  public RelatedType introspect(JClass type)
+  public EntityType introspect(JClass type)
     throws ConfigException, SQLException
   {
-    RelatedType entityType = null;
+    EntityType entityType = null;
 
     try {
       getInternalEntityConfig(type, _annotationCfg);
@@ -140,7 +140,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       // Validates the type
       String entityName;
-      RelatedType parentType = null;
+      EntityType parentType = null;
       JAnnotation inheritanceAnn = null;
       InheritanceConfig inheritanceConfig = null;
       JClass rootClass = type;
@@ -504,17 +504,17 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return entityType;
   }
 
-  private void introspectAttributeOverrides(RelatedType relatedType,
+  private void introspectAttributeOverrides(EntityType relatedType,
                                             JClass type)
   {
-    RelatedType parent = relatedType.getParentType();
+    EntityType parent = relatedType.getParentType();
 
     if (parent == null)
       return;
 
     boolean isAbstract = parent.getBeanClass().isAbstract();
 
-    if (parent instanceof EntityType && ! isAbstract)
+    if (parent instanceof SelfEntityType && ! isAbstract)
       return;
 
     _depCompletions.add(new AttributeOverrideCompletion(relatedType, type));

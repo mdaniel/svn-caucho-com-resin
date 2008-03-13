@@ -33,7 +33,7 @@ import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.cfg21.CmrMap;
 import com.caucho.ejb.cfg21.CmpGetter;
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen21.AbstractQueryMethod;
 import com.caucho.ejb.gen21.BeanAssembler;
@@ -121,7 +121,7 @@ public class EjbMapMethod extends CmpGetter {
       String id = _map.getIdName();
       IdField index = null;
 
-      EntityType sourceType = _map.getBean().getEntityType();
+      SelfEntityType sourceType = _map.getBean().getEntityType();
       for (IdField key : sourceType.getId().getKeys()) {
 	if (key.getName().equals(id)) {
 	}
@@ -134,7 +134,7 @@ public class EjbMapMethod extends CmpGetter {
       out.print(" FROM " + abstractSchema + " o");
       out.print(" WHERE ");
 
-      EntityType targetType = _map.getBean().getEntityType();
+      SelfEntityType targetType = _map.getBean().getEntityType();
       ArrayList<IdField> keys = targetType.getId().getKeys();
 
       for (int i = 0; i < keys.size(); i++) {

@@ -94,8 +94,8 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   private HashMap<String,EmbeddableType> _embeddableMap
     = new HashMap<String,EmbeddableType>();
 
-  private HashMap<String,EntityType> _entityMap
-    = new HashMap<String,EntityType>();
+  private HashMap<String,SelfEntityType> _entityMap
+    = new HashMap<String,SelfEntityType>();
 
   private HashMap<String,MappedSuperclassType> _mappedSuperclassMap
     = new HashMap<String,MappedSuperclassType>();
@@ -354,9 +354,9 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   }
 
   /**
-   * Returns the EntityType for an introspected class.
+   * Returns the SelfEntityType for an introspected class.
    */
-  public EntityType getEntity(String className)
+  public SelfEntityType getEntity(String className)
   {
     Throwable e = _entityExceptionMap.get(className);
 
@@ -504,7 +504,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   /**
    * Adds an entity for an introspected class.
    */
-  public void addEntity(String className, EntityType type)
+  public void addEntity(String className, SelfEntityType type)
   {
     _entityMap.put(className, type);
   }

@@ -33,7 +33,7 @@ import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.cfg21.CmpProperty;
 import com.caucho.ejb.cfg21.CmpGetter;
 import com.caucho.amber.field.AmberField;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen21.EntityBean;
 import com.caucho.java.JavaWriter;
@@ -217,7 +217,7 @@ public class CmrRelation extends CmpProperty {
   /**
    * Creates the amber type.
    */
-  public AmberField assembleAmber(EntityType type)
+  public AmberField assembleAmber(SelfEntityType type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

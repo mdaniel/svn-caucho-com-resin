@@ -32,7 +32,7 @@ package com.caucho.amber.field;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
@@ -53,7 +53,7 @@ public class SubId extends Id {
   private Id _parentId;
   private LinkColumns _link;
 
-  public SubId(RelatedType ownerType, RelatedType rootType)
+  public SubId(EntityType ownerType, EntityType rootType)
   {
     super(ownerType, new ArrayList<IdField>());
 

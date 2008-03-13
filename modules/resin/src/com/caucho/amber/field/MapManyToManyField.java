@@ -28,7 +28,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
@@ -43,7 +43,7 @@ public class MapManyToManyField extends MapElementField {
   private static final L10N L = new L10N(MapManyToManyField.class);
   protected static final Logger log = Log.open(MapManyToManyField.class);
 
-  public MapManyToManyField(EntityType entityType)
+  public MapManyToManyField(SelfEntityType entityType)
   {
     super(entityType);
   }

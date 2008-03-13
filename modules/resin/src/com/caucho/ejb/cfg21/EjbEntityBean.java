@@ -31,7 +31,7 @@ package com.caucho.ejb.cfg21;
 
 import com.caucho.ejb.cfg.*;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.bytecode.JClassWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
@@ -162,12 +162,12 @@ public class EjbEntityBean extends Ejb21Bean {
   /**
    * Returns the amber entity-type.
    */
-  public EntityType getEntityType()
+  public SelfEntityType getEntityType()
   {
     AmberPersistenceUnit amberPersistenceUnit
       = getEjbContainer().createEjbPersistenceUnit();
 
-    EntityType type
+    SelfEntityType type
       = amberPersistenceUnit.createEntity(getAbstractSchemaName(),
 					  JClassWrapper.create(getEJBClassWrapper().getJavaClass()));
 

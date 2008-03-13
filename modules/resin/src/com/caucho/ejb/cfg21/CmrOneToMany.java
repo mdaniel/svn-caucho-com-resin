@@ -38,7 +38,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.ql.QLParser;
 import com.caucho.java.JavaWriter;
@@ -149,14 +149,14 @@ public class CmrOneToMany extends CmrRelation {
   /**
    * Creates the amber type.
    */
-  public AmberField assembleAmber(EntityType type)
+  public AmberField assembleAmber(SelfEntityType type)
     throws ConfigException
   {
     EntityOneToManyField oneToMany = new EntityOneToManyField(type, getName());
 
     AmberPersistenceUnit manager = type.getPersistenceUnit();
 
-    EntityType targetType = _targetBean.getEntityType();
+    SelfEntityType targetType = _targetBean.getEntityType();
     oneToMany.setType(targetType);
 
     // if bi-directional, then other side handles it
@@ -193,8 +193,8 @@ public class CmrOneToMany extends CmrRelation {
       out.println("__caucho_field_" + getName() + " = null;");
   }
 
-  private LinkColumns calculateColumn(EntityType parentType,
-                                      EntityType childType,
+  private LinkColumns calculateColumn(SelfEntityType parentType,
+                                      SelfEntityType childType,
                                       String fieldName,
                                       SqlRelation []sqlColumns)
     throws ConfigException

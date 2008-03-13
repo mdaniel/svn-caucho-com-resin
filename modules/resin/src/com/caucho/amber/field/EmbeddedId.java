@@ -57,7 +57,7 @@ public class EmbeddedId extends CompositeId {
 
   private EmbeddedIdField _embeddedIdField;
 
-  public EmbeddedId(RelatedType ownerType, EmbeddedIdField key)
+  public EmbeddedId(EntityType ownerType, EmbeddedIdField key)
   {
     super(ownerType);
 

@@ -38,8 +38,8 @@ import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.amber.type.EmbeddableType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 
@@ -173,8 +173,8 @@ abstract public class LoadExpr extends AbstractAmberExpr {
       return;
     }
 
-    if (type instanceof RelatedType) {
-      RelatedType relatedType = (RelatedType) type;
+    if (type instanceof EntityType) {
+      EntityType relatedType = (EntityType) type;
       cb.append(relatedType.getId().generateSelect(getTable()));
     }
 
@@ -185,10 +185,10 @@ abstract public class LoadExpr extends AbstractAmberExpr {
 
     // jpa/0l4b
     if (_rootItem != null) {
-      RelatedType parentType = (RelatedType) type;
+      EntityType parentType = (EntityType) type;
 
       while (parentType.getParentType() != null) {
-        if (parentType.getParentType() instanceof EntityType)
+        if (parentType.getParentType() instanceof SelfEntityType)
           parentType = parentType.getParentType();
         else
           break;

@@ -96,9 +96,9 @@ public class PropertyField extends AbstractField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getRelatedSourceType()
+  public EntityType getRelatedSourceType()
   {
-    return (RelatedType) getSourceType();
+    return (EntityType) getSourceType();
   }
 
   /**
@@ -154,7 +154,7 @@ public class PropertyField extends AbstractField {
 
     // Embedded types have no id.
     // Only entity or mapped-superclass types have id.
-    if (! (getSourceType() instanceof RelatedType))
+    if (! (getSourceType() instanceof EntityType))
       return;
 
     if (getRelatedSourceType().getId() != null) {
@@ -317,7 +317,7 @@ public class PropertyField extends AbstractField {
   {
     if (getColumn().getTable() != table) {
       // jpa/0l14 as a negative test
-      if (getRelatedSourceType() instanceof EntityType)
+      if (getRelatedSourceType() instanceof SelfEntityType)
         return null;
     }
 

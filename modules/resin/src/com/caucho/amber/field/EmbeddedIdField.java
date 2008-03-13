@@ -33,7 +33,7 @@ import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
@@ -56,13 +56,13 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
 
   boolean _isKeyField;
 
-  public EmbeddedIdField(RelatedType ownerType,
+  public EmbeddedIdField(EntityType ownerType,
 			 EmbeddableType embeddableType)
   {
     super(ownerType, embeddableType);
   }
 
-  public EmbeddedIdField(RelatedType ownerType,
+  public EmbeddedIdField(EntityType ownerType,
 			 EmbeddableType embeddableType,
                          String name)
     throws ConfigException

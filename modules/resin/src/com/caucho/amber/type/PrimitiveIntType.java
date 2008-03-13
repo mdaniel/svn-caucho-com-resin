@@ -105,6 +105,17 @@ public class PrimitiveIntType extends PrimitiveType {
   /**
    * Generates a string to load the property.
    */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    out.print("rs.getInt(columnNames[" + index + "])");
+
+    return index + 1;
+  }
+
+  /**
+   * Generates a string to load the property.
+   */
   public int generateLoadForeign(JavaWriter out, String rs,
                                  String indexVar, int index)
     throws IOException

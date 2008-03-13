@@ -68,9 +68,9 @@ import java.util.logging.Logger;
 /**
  * Base for entity or mapped-superclass types.
  */
-abstract public class RelatedType extends AbstractStatefulType {
-  private static final Logger log = Logger.getLogger(RelatedType.class.getName());
-  private static final L10N L = new L10N(RelatedType.class);
+abstract public class EntityType extends AbstractStatefulType {
+  private static final Logger log = Logger.getLogger(EntityType.class.getName());
+  private static final L10N L = new L10N(EntityType.class);
 
   Table _table;
 
@@ -110,7 +110,7 @@ abstract public class RelatedType extends AbstractStatefulType {
 
   private HashSet<String> _eagerFieldNames;
 
-  private HashMap<String,EntityType> _subEntities;
+  private HashMap<String,SelfEntityType> _subEntities;
 
   private boolean _hasDependent;
 
@@ -139,7 +139,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   private int _flushPriority;
 
 
-  public RelatedType(AmberPersistenceUnit amberPersistenceUnit)
+  public EntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
   }
@@ -530,9 +530,9 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Returns the root type.
    */
-  public RelatedType getRootType()
+  public EntityType getRootType()
   {
-    RelatedType parent = getParentType();
+    EntityType parent = getParentType();
 
     if (parent != null)
       return parent.getRootType();
@@ -543,7 +543,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Returns the parent type.
    */
-  public RelatedType getParentType()
+  public EntityType getParentType()
   {
     return null;
   }
@@ -554,7 +554,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   public void addSubClass(SubEntityType type)
   {
     if (_subEntities == null)
-      _subEntities = new HashMap<String,EntityType>();
+      _subEntities = new HashMap<String,SelfEntityType>();
 
     _subEntities.put(type.getDiscriminatorValue(), type);
   }
@@ -562,18 +562,18 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Gets a sub-class.
    */
-  public RelatedType getSubClass(String discriminator)
+  public EntityType getSubClass(String discriminator)
   {
     if (_subEntities == null)
       return this;
 
-    RelatedType subType = _subEntities.get(discriminator);
+    EntityType subType = _subEntities.get(discriminator);
 
     if (subType != null)
       return subType;
     else {
       // jpa/0l15
-      for (EntityType subEntity : _subEntities.values()) {
+      for (SelfEntityType subEntity : _subEntities.values()) {
         subType = subEntity.getSubClass(discriminator);
 
         if (subType != subEntity)
@@ -706,7 +706,7 @@ abstract public class RelatedType extends AbstractStatefulType {
     // forces table lazy load
     getTable();
 
-    if (this instanceof EntityType) {
+    if (this instanceof SelfEntityType) {
       assert getId() != null : "null id for " + getName();
 
       getId().init();
@@ -872,7 +872,7 @@ abstract public class RelatedType extends AbstractStatefulType {
       index++;
 
     // jpa/0l40
-    for (RelatedType type = this; type != null; type = type.getParentType()) {
+    for (EntityType type = this; type != null; type = type.getParentType()) {
       index = generatePostLoadSelect(out, index,
 				     type.getMappedSuperclassFields());
 
@@ -1156,7 +1156,7 @@ abstract public class RelatedType extends AbstractStatefulType {
     /*
     if (loadGroup == 0 && getParentType() != null) {
       // jpa/0ge3
-      if (getParentType() instanceof EntityType) {
+      if (getParentType() instanceof SelfEntityType) {
         String parentSelect =
           getParentType().generateLoadSelect(table, id,
                                              loadGroup, getMappedSuperclassFields());
@@ -1538,7 +1538,7 @@ abstract public class RelatedType extends AbstractStatefulType {
    * Updates global (persistence unit) entity priorities
    * for flushing.
    */
-  public int updateFlushPriority(ArrayList<EntityType> updatingEntities)
+  public int updateFlushPriority(ArrayList<SelfEntityType> updatingEntities)
   {
     // jpa/0h25, jpa/0h26, jpa/0h29, jpa/0j67
 
@@ -1552,10 +1552,10 @@ abstract public class RelatedType extends AbstractStatefulType {
       if (field instanceof EntityManyToOneField) {
         EntityManyToOneField manyToOne = (EntityManyToOneField) field;
 
-        RelatedType targetRelatedType = manyToOne.getEntityTargetType();
+        EntityType targetRelatedType = manyToOne.getEntityTargetType();
 
-        if (targetRelatedType instanceof EntityType) {
-          EntityType targetType = (EntityType) targetRelatedType;
+        if (targetRelatedType instanceof SelfEntityType) {
+          SelfEntityType targetType = (SelfEntityType) targetRelatedType;
 
           if (! updatingEntities.contains(targetType)) {
             updatingEntities.add(targetType);
@@ -1565,7 +1565,7 @@ abstract public class RelatedType extends AbstractStatefulType {
           int targetPriority = targetType.getFlushPriority();
 
           if (targetPriority >= _flushPriority) {
-            RelatedType type = null;
+            EntityType type = null;
 
             // jpa/0j67
             if (! manyToOne.isAnnotatedManyToOne()) {
@@ -1605,7 +1605,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   {
     AmberField field = getField(name);
 
-    RelatedType parentType = this;
+    EntityType parentType = this;
 
     // jpa/0l40
     while (field == null) {

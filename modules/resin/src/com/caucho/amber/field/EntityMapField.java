@@ -29,7 +29,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
@@ -51,12 +51,12 @@ public class EntityMapField extends AbstractField {
   private ArrayList<Column> _indexColumns;
   private JMethod _mapMethod;
 
-  private EntityType _targetType;
+  private SelfEntityType _targetType;
 
   private IdField _id;
   private IdField _index;
 
-  public EntityMapField(EntityType entityType)
+  public EntityMapField(SelfEntityType entityType)
   {
     super(entityType);
   }
@@ -79,7 +79,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Sets the target type.
    */
-  public void setTargetType(EntityType type)
+  public void setTargetType(SelfEntityType type)
   {
     _targetType = type;
   }
@@ -239,7 +239,7 @@ public class EntityMapField extends AbstractField {
 
       out.println("com.caucho.amber.AmberQuery query;");
 
-      EntityType targetType = _targetType;
+      SelfEntityType targetType = _targetType;
 
       String table = targetType.getName();
 
@@ -247,7 +247,7 @@ public class EntityMapField extends AbstractField {
       out.print(" FROM " + table + " o");
       out.print(" WHERE ");
 
-      EntityType sourceType = (EntityType) getSourceType();
+      SelfEntityType sourceType = (SelfEntityType) getSourceType();
       ArrayList<IdField> keys = sourceType.getId().getKeys();
 
       out.print("o." + _index.getName() + "=?1");

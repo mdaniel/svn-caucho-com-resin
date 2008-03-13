@@ -40,12 +40,12 @@ import java.util.logging.Logger;
 /**
  * Represents an application persistent bean type
  */
-public class EntityType extends RelatedType {
+public class SelfEntityType extends EntityType {
   private static final Logger log
-    = Logger.getLogger(EntityType.class.getName());
-  private static final L10N L = new L10N(EntityType.class);
+    = Logger.getLogger(SelfEntityType.class.getName());
+  private static final L10N L = new L10N(SelfEntityType.class);
 
-  public EntityType(AmberPersistenceUnit amberPersistenceUnit)
+  public SelfEntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
   }
@@ -86,13 +86,5 @@ public class EntityType extends RelatedType {
       return;
 
     table.setType(this);
-  }
-
-  /**
-   * Printable version of the entity.
-   */
-  public String toString()
-  {
-    return "EntityType[" + _beanClass.getName() + "]";
   }
 }

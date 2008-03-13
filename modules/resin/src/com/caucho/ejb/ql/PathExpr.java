@@ -29,7 +29,7 @@
 package com.caucho.ejb.ql;
 
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg21.CmpField;
 import com.caucho.ejb.cfg21.CmrRelation;
@@ -112,23 +112,23 @@ abstract class PathExpr extends Expr {
   {
   }
 
-  protected String generateKeyField(EntityType type, int index)
+  protected String generateKeyField(SelfEntityType type, int index)
   {
     ArrayList<String> names = generateKeyFields(type);
 
     return names.get(index);
   }
 
-  protected ArrayList<String> generateKeyFields(EntityType type)
+  protected ArrayList<String> generateKeyFields(SelfEntityType type)
   {
     ArrayList<String> names = new ArrayList<String>();
 
     for (IdField key : type.getId().getKeys()) {
       String name = key.getName();
 
-      if (key.getType() instanceof EntityType) {
+      if (key.getType() instanceof SelfEntityType) {
 	ArrayList<String> subNames;
-	subNames = generateKeyFields((EntityType) key.getType());
+	subNames = generateKeyFields((SelfEntityType) key.getType());
 
 	for (String subName : subNames) {
 	  names.add(name + '.' + subName);

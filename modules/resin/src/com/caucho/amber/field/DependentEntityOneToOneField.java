@@ -60,14 +60,14 @@ public class DependentEntityOneToOneField extends CascadableField {
   private long _targetLoadIndex;
   private boolean _isCascadeDelete;
 
-  public DependentEntityOneToOneField(RelatedType relatedType,
+  public DependentEntityOneToOneField(EntityType relatedType,
                                       String name)
     throws ConfigException
   {
     super(relatedType, name, null);
   }
 
-  public DependentEntityOneToOneField(RelatedType relatedType,
+  public DependentEntityOneToOneField(EntityType relatedType,
                                       String name,
                                       CascadeType[] cascadeTypes)
     throws ConfigException
@@ -103,18 +103,18 @@ public class DependentEntityOneToOneField extends CascadableField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntitySourceType()
+  public EntityType getEntitySourceType()
   {
-    return (RelatedType) getSourceType();
+    return (EntityType) getSourceType();
   }
 
   /**
    * Returns the target type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntityTargetType()
+  public EntityType getEntityTargetType()
   {
-    return (RelatedType) _targetField.getSourceType();
+    return (EntityType) _targetField.getSourceType();
   }
 
   /**
@@ -507,7 +507,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof EntityType))
+    if (! (getEntityTargetType() instanceof SelfEntityType))
       return;
 
     String value = generateGet(src);
@@ -541,7 +541,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof EntityType))
+    if (! (getEntityTargetType() instanceof SelfEntityType))
       return;
 
     out.println();
@@ -651,7 +651,7 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     if (persistenceUnit.isJPA()) {
       String className = getJavaType().getName();
-      EntityType entity = persistenceUnit.getEntityType(className);
+      SelfEntityType entity = persistenceUnit.getEntityType(className);
 
       // jpa/0ge4
       table = entity.getTable();

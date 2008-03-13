@@ -28,7 +28,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -41,7 +41,7 @@ public class CollectionElementField extends CollectionField {
   private static final L10N L = new L10N(CollectionField.class);
   protected static final Logger log = Log.open(CollectionField.class);
 
-  public CollectionElementField(EntityType entityType)
+  public CollectionElementField(SelfEntityType entityType)
   {
     super(entityType);
   }

@@ -29,7 +29,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
@@ -47,7 +47,7 @@ public class VersionField extends PropertyField {
   private static final L10N L = new L10N(VersionField.class);
   protected static final Logger log = Log.open(VersionField.class);
 
-  public VersionField(RelatedType entityType, String name)
+  public VersionField(EntityType entityType, String name)
     throws ConfigException
   {
     super(entityType, name);
@@ -55,7 +55,7 @@ public class VersionField extends PropertyField {
     setLazy(false);
   }
 
-  public VersionField(RelatedType entityType)
+  public VersionField(EntityType entityType)
   {
     super(entityType);
 

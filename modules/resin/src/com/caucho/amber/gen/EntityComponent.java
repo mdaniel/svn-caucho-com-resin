@@ -49,15 +49,15 @@ public class EntityComponent extends AmberMappedComponent {
   /**
    * Gets the entity type.
    */
-  public EntityType getEntityType()
+  public SelfEntityType getEntityType()
   {
-    return (EntityType) _relatedType;
+    return (SelfEntityType) _relatedType;
   }
 
   /**
    * Sets the bean info for the generator
    */
-  public void setEntityType(EntityType entityType)
+  public void setEntityType(SelfEntityType entityType)
   {
     setRelatedType(entityType);
   }
@@ -69,11 +69,11 @@ public class EntityComponent extends AmberMappedComponent {
     throws IOException
   {
     try {
-      RelatedType parentType = getEntityType().getParentType();
+      EntityType parentType = getEntityType().getParentType();
 
       // jpa/0gg0
       boolean isEntityParent = (parentType != null)
-        && (parentType instanceof EntityType)
+        && (parentType instanceof SelfEntityType)
         && ! parentType.getBeanClass().isAbstract();
 
       generateHeader(out, isEntityParent);

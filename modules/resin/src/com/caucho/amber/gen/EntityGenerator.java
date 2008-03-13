@@ -29,7 +29,7 @@
 
 package com.caucho.amber.gen;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.java.AbstractGenerator;
 import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
@@ -46,7 +46,7 @@ public class EntityGenerator extends AbstractGenerator {
 
   private String _baseClassName;
   private String _extClassName;
-  private EntityType _entityType;
+  private SelfEntityType _entityType;
 
   private ArrayList<PersistentDependency> _dependencies =
     new ArrayList<PersistentDependency>();
@@ -54,7 +54,7 @@ public class EntityGenerator extends AbstractGenerator {
   /**
    * Sets the bean info for the generator
    */
-  public void setEntityType(EntityType entityType)
+  public void setEntityType(SelfEntityType entityType)
   {
     _entityType = entityType;
 

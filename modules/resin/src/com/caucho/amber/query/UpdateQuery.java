@@ -36,7 +36,7 @@ import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.type.SubEntityType;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SelfEntityType;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.jdbc.PostgresMetaData;
 import com.caucho.util.CharBuffer;
@@ -187,7 +187,7 @@ public class UpdateQuery extends AbstractQuery {
         if (getMetaData() instanceof PostgresMetaData) {
           item = _fromList.get(0);
 
-          EntityType type = item.getEntityType();
+          SelfEntityType type = item.getEntityType();
 
           String targetId = type.getId().generateSelect(item.getName());
 
@@ -214,7 +214,7 @@ public class UpdateQuery extends AbstractQuery {
           // Postgres: jpa/1201 and Oracle: jpa/1203
           item = _fromList.get(1);
 
-          EntityType type = item.getEntityType();
+          SelfEntityType type = item.getEntityType();
 
           String relatedId = type.getId().generateSelect(item.getName());
 
@@ -254,7 +254,7 @@ public class UpdateQuery extends AbstractQuery {
             expr.generateJoin(cb);
           }
 
-          EntityType entityType = item.getEntityType();
+          SelfEntityType entityType = item.getEntityType();
 
           // jpa/0l44
           if (entityType != null) {
