@@ -113,21 +113,26 @@ public class MathModule extends AbstractQuercusModule {
     throw new UnsupportedOperationException();
   }
 
-  public static Value base_convert(Env env, String number, int fromBase, int toBase)
+  /**
+   * Given a string that contains a number in a base, parse
+   * the number into an integer or double value.
+   *
+   * @param number A string represeantion of an binary number.
+   * @param base The base of the number parameter.
+   * @return the number as a Value.
+   */
+
+  private static Value baseToValue(Env env, String number, int base)
   {
-    if (fromBase < 2 || fromBase > 36) {
-      env.warning(L.l("invalid `{0}' ({1})", "from base", fromBase));
-      return BooleanValue.FALSE;
-    }
+    int mode = 0;
 
-    if (toBase < 2 || toBase > 36) {
-      env.warning(L.l("invalid `{0}' ({1})", "to base", toBase));
-      return BooleanValue.FALSE;
-    }
+    final long cutoff = Long.MAX_VALUE / base;
+    final long cutlim = Long.MAX_VALUE % base;
 
-    long result = 0;
+    long num = 0;
+    double fnum = 0.0;
 
-    int len = number.length();
+    final int len = number.length();
 
     for (int i = 0; i < len; i++) {
       int ch = number.charAt(i);
@@ -143,28 +148,72 @@ public class MathModule extends AbstractQuercusModule {
       else
         continue;
 
-      if (fromBase <= value)
+      if (value >= base)
         continue;
 
-      result = result * fromBase;
-
-      result += value;
+      switch (mode) {
+        case 0: // Integer
+          if (num < cutoff || (num == cutoff && value <= cutlim)) {
+            num = num * base + value;
+            break;
+          } else {
+            fnum = num;
+            mode = 1;
+          }
+          // fall-through
+        case 1: // Float
+          fnum = fnum * base + value;
+      }
     }
 
-    if (result == 0)
+    if (mode == 1)
+      return DoubleValue.create(fnum);
+    else
+      return LongValue.create(num);
+  }
+
+  /**
+   * Given a value, convert to a string that represents the
+   * value in the given base.
+   *
+   * @param number A string represeantion of an binary number.
+   * @param base The base of the number parameter.
+   * @return the number as a string.
+   */
+
+  private static StringValue valueToBase(Env env, Value value, int base)
+  {
+    if (value instanceof DoubleValue) {
+      return valueToBase(env, (DoubleValue) value, base);
+    } else if (value instanceof LongValue) {
+      return valueToBase(env, (LongValue) value, base);
+    } else {
+      return env.createEmptyString();
+    }
+  }
+
+  /**
+   * valueToBase implementation for an integer LongValue.
+   */
+
+  private static StringValue valueToBase(Env env, LongValue value, int base)
+  {
+    long val = value.toLong();
+
+    if (val == 0)
       return env.createString("0");
 
     StringBuilder sb = new StringBuilder();
 
     do {
-      int d = (int) (result % toBase);
-      result = result / toBase;
+      int d = Math.abs((int) (val % base));
+      val /= base;
 
       if (d < 10)
         sb.append((char) (d + '0'));
       else
         sb.append((char) (d - 10 + 'a'));
-    } while (result != 0);
+    } while (val != 0);
 
     sb.reverse();
 
@@ -172,36 +221,162 @@ public class MathModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the long value of an binary number.
+   * valueToBase implementation for an floating point DoubleValue.
+   */
+
+  private static StringValue valueToBase(Env env, DoubleValue value, int base)
+  {
+    double fval = Math.floor(value.toDouble());
+
+    if (fval == 0.0)
+      return env.createString("0.0");
+
+    // Don't try to convert +/- infinity
+
+    if (fval == Double.POSITIVE_INFINITY || fval == Double.NEGATIVE_INFINITY) {
+      env.warning(L.l("Number too large"));
+      return env.createEmptyString();
+    }
+
+    StringBuilder sb = new StringBuilder();
+
+    do {
+      int d = Math.abs((int) (fval % base));
+      fval /= base;
+
+      if (d < 10)
+        sb.append((char) (d + '0'));
+      else
+        sb.append((char) (d - 10 + 'a'));
+    } while (Math.abs(fval) >= 1.0);
+
+    sb.reverse();
+
+    return env.createString(sb.toString());
+  }
+
+  /**
+   * valueToBase implementation to convert a long to binary.
+   */
+
+  private static StringValue valueToBase2(Env env, long value)
+  {
+    if (value == 0)
+      return env.createString("0");
+
+    StringBuilder sb = new StringBuilder();
+
+    // Ignore sign bit
+
+    if (value < 0)
+      value = -value;
+
+    do {
+      int d = (int) (value & 1);
+      value >>= 1;
+
+      sb.append((d == 0) ? '0' : '1');
+    } while (value != 0);
+
+    sb.reverse();
+
+    return env.createString(sb.toString());
+  }
+
+  /**
+   * valueToBase implementation to convert a long to oct.
+   */
+
+  private static StringValue valueToBase8(Env env, long value)
+  {
+    if (value == 0)
+      return env.createString("0");
+
+    StringBuilder sb = new StringBuilder();
+
+    // Ignore sign bit
+
+    if (value < 0)
+      value = -value;
+
+    do {
+      int d = (int) (value & 7);
+      value >>= 3;
+
+      sb.append((char) (d + '0'));
+    } while (value != 0);
+
+    sb.reverse();
+
+    return env.createString(sb.toString());
+  }
+
+  /**
+   * valueToBase implementation to convert a long to hex.
+   */
+
+  private static StringValue valueToBase16(Env env, long value)
+  {
+    if (value == 0)
+      return env.createString("0");
+
+    StringBuilder sb = new StringBuilder();
+
+    // Ignore sign bit
+
+    if (value < 0)
+      value = -value;
+
+    do {
+      int d = (int) (value & 0xF);
+      value >>= 4;
+
+      if (d < 10)
+        sb.append((char) (d + '0'));
+      else
+        sb.append((char) (d + 'a' - 10));
+    } while (value != 0);
+
+    sb.reverse();
+
+    return env.createString(sb.toString());
+  }
+
+  /**
+   * Convert a number between arbitrary bases
+   *
+   * @param number A string represeantion of an binary number.
+   * @param fromBase The base of the number parameter.
+   * @param toBase The base of convert to.
+   * @return the number as a Value, either a LongValue or a DoubleValue.
+   */
+
+  public static Value base_convert(Env env, StringValue number, int fromBase, int toBase)
+  {
+    if (fromBase < 2 || fromBase > 36) {
+      env.warning(L.l("invalid `{0}' ({1})", "from base", fromBase));
+      return BooleanValue.FALSE;
+    }
+
+    if (toBase < 2 || toBase > 36) {
+      env.warning(L.l("invalid `{0}' ({1})", "to base", toBase));
+      return BooleanValue.FALSE;
+    }
+
+    Value val = baseToValue(env, number.toString(), fromBase);
+    return valueToBase(env, val, toBase);
+  }
+
+  /**
+   * Returns the decimal equivalent of the binary number represented by the
+   * binary string argument.
    *
    * @param bin A string represeantion of an binary number.
    * @return the decimal equivalent of the binary number
-   * @throws ArithmeticException if the binary number cannot fit in a long
    */
-  public static long bindec(StringValue bin)
+  public static Value bindec(Env env, StringValue bin)
   {
-    // This implementation deliberately differs from the php implementation,
-    // which returns an int or a float.  Quercus uses long's to represent
-    // integral values and the long represenation is more accurate than a float.
-    long result = 0;
-
-    int len = bin.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = bin.charAt(i);
-
-      if ('0' == ch)
-        result = 2 * result;
-      else if ('1' == ch) {
-        result = 2 * result;
-        result += 1;
-      }
-
-      if (result < 0)
-        throw new ArithmeticException(L.l("overflow"));
-    }
-
-    return result;
+     return baseToValue(env, bin.toString(), 2);
   }
 
   public static double ceil(double value)
@@ -223,75 +398,27 @@ public class MathModule extends AbstractQuercusModule {
    * Returns a binary representation of a number.
    * @param value the number
    */
-  public static String decbin(long value)
+  public static StringValue decbin(Env env, long value)
   {
-    if (value == 0)
-      return "0";
-
-    StringBuilder sb = new StringBuilder();
-
-    while (value != 0) {
-      int d = (int) (value & 1);
-      value = value / 2;
-
-      if (d == 0)
-        sb.append('0');
-      else
-        sb.append('1');
-    }
-
-    sb.reverse();
-
-    return sb.toString();
+    return valueToBase2(env, value);
   }
 
   /**
    * Returns a hexadecimal representation of a number.
    * @param value the number
    */
-  public static String dechex(long value)
+  public static StringValue dechex(Env env, long value)
   {
-    if (value == 0)
-      return "0";
-
-    StringBuilder sb = new StringBuilder();
-
-    while (value != 0) {
-      int d = (int) (value & 0xf);
-      value = value / 16;
-
-      if (d < 10)
-        sb.append((char) (d + '0'));
-      else
-        sb.append((char) (d + 'a' - 10));
-    }
-
-    sb.reverse();
-
-    return sb.toString();
+    return valueToBase16(env, value);
   }
 
   /**
    * Returns an octal representation of a number.
    * @param value the number
    */
-  public static String decoct(long value)
+  public static StringValue decoct(Env env, long value)
   {
-    if (value == 0)
-      return "0";
-
-    StringBuilder sb = new StringBuilder();
-
-    while (value != 0) {
-      int d = (int) (value & 7);
-      value = value / 8;
-
-      sb.append((char) (d + '0'));
-    }
-
-    sb.reverse();
-
-    return sb.toString();
+    return valueToBase8(env, value);
   }
 
   public static double deg2rad(double value)
@@ -319,23 +446,9 @@ public class MathModule extends AbstractQuercusModule {
     return Math.IEEEremainder(xV, yV);
   }
 
-  public static long hexdec(StringValue s)
+  public static Value hexdec(Env env, StringValue s)
   {
-    long v = 0;
-    int len = s.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = s.charAt(i);
-
-      if ('0' <= ch && ch <= '9')
-        v = 16 * v + ch - '0';
-      else if ('a' <= ch && ch <= 'f')
-        v = 16 * v + ch - 'a' + 10;
-      else if ('A' <= ch && ch <= 'F')
-        v = 16 * v + ch - 'A' + 10;
-    }
-
-    return v;
+    return baseToValue(env, s.toString(), 16);
   }
 
   public static double hypot(double a, double b)
@@ -506,36 +619,16 @@ public class MathModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the long value of an octal number.
+   *  Returns the decimal equivalent of the octal number represented by the
+   *  octal_string argument.
    *
    * @param oct A string represeantion of an octal number.
    * @return the decimal equivalent of the octal number
-   * @throws ArithmeticException if the octal number cannot fit in a long
    */
-  public static long octdec(StringValue oct)
+  public static Value octdec(Env env, StringValue oct)
   {
-    // This implementation deliberately differs from the php implementation,
-    // which returns an int or a float.  Quercus uses long's to represent
-    // integral values and the long represenation is more accurate than a float.
-    long result = 0;
-
-    int len = oct.length();
-
-    for (int i = 0; i < len; i++) {
-      int ch = oct.charAt(i);
-
-      if ('0' <= ch && ch <= '7') {
-        result = result << 3;
-        result += ch - '0';
-
-        if (result < 0)
-          throw new ArithmeticException(L.l("overflow"));
-      }
-    }
-
-    return result;
+    return baseToValue(env, oct.toString(), 8);
   }
-
 
   public static double pi()
   {
