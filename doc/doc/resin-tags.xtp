@@ -121,7 +121,7 @@ element log-service {
 
 <defun title="&lt;management>" version="Resin 3.0">
 
-<p>&lt;management> controlls system-wide management capabilities, like
+<p>&lt;management> controls system-wide management capabilities, like
 the clustered JMX reporting, transaction logging, and persistence logging.
 It also defines a system-wide administration authenticator, providing a
 centralized place to manage administration identity.</p>

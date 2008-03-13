@@ -62,6 +62,10 @@ public class ContinueStatement extends Statement {
    */
   public Value execute(Env env)
   {
+    if (getParent() == null) {
+      env.error("No loop/switch statement to continue");
+    }
+    
     if (_target == null)
       return ContinueValue.CONTINUE;
     else

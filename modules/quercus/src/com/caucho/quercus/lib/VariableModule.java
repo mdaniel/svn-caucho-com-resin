@@ -101,10 +101,11 @@ public class VariableModule extends AbstractQuercusModule {
     try {
       if (v == null)
         env.getOut().print("NULL#java");
-      else
+      else {
         v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
-
-      env.getOut().println();
+          
+        env.getOut().println();
+      }
 
       return NullValue.NULL;
     } catch (IOException e) {

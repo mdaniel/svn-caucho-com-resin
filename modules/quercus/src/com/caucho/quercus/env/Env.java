@@ -3604,38 +3604,37 @@ public class Env {
       if (path != null) {
       }
       else if (isRequire) {
-	error(L.l("'{0}' is not a valid path", include));
-	return NullValue.NULL;
+        error(L.l("'{0}' is not a valid path", include));
+        return NullValue.NULL;
       }
       else {
-	warning(L.l("'{0}' is not a valid path", include));
-	return NullValue.NULL;
+        warning(L.l("'{0}' is not a valid path", include));
+        return NullValue.NULL;
       }
 
       // php/0b2d
       if (! "".equals(path.getScheme())
-	  && ! "file".equals(path.getScheme())
-	  && ! "memory".equals(path.getScheme())) {
-	String msg = (L.l("attempt to include {0}",
-			  path.getURL()));
+          && ! "file".equals(path.getScheme())
+          && ! "memory".equals(path.getScheme())) {
+        String msg = (L.l("attempt to include {0}", path.getURL()));
 	
-	log.warning(dbgId() + msg);
-	error(msg);
+        log.warning(dbgId() + msg);
+        error(msg);
 
-	return NullValue.NULL;
+        return NullValue.NULL;
       }
 
       QuercusPage page = _includeMap.get(path);
-
-      if (page == null || page.isModified(this)) {
-	page = _quercus.parse(path);
-	
-	page.importDefinitions(this);
-	
-	_includeMap.put(path, page);
+      
+      if (page != null && isOnce)
+        return NullValue.NULL;
+      else if (page == null || page.isModified(this)) {
+        page = _quercus.parse(path);
+        
+        page.importDefinitions(this);
+        
+        _includeMap.put(path, page);
       }
-      else if (isOnce)
-	return NullValue.NULL;
 
       return page.execute(this);
     } catch (IOException e) {

@@ -63,6 +63,10 @@ public class BreakStatement extends Statement {
    */
   public Value execute(Env env)
   {
+    if (getParent() == null) {
+      env.error("No loop/switch statement to break out of");
+    }
+
     if (_target == null)
     return BreakValue.BREAK;
   else
