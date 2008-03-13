@@ -66,8 +66,6 @@ public class AmberEntityHome {
   private ArrayList<SoftReference<CacheUpdate>> _cacheUpdates
     = new ArrayList<SoftReference<CacheUpdate>>();
 
-  private EntityKey _cacheKey = new EntityKey();
-
   private volatile boolean _isInit;
 
   private RuntimeException _configException;

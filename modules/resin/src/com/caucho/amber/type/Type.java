@@ -142,6 +142,15 @@ abstract public class Type {
   /**
    * Generates a string to load the type as a property.
    */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Generates a string to load the type as a property.
+   */
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index,
                           JClass targetType)

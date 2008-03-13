@@ -250,7 +250,7 @@ public class ScheduledTask extends BeanConfig
       alarm.queue(nextTime - now);
   }
 
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
     throws ConfigException
   {
   }

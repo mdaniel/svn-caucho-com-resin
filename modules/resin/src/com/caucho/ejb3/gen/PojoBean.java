@@ -29,6 +29,7 @@
 
 package com.caucho.ejb3.gen;
 
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.gen.*;
 import com.caucho.java.JavaWriter;
@@ -92,19 +93,22 @@ public class PojoBean extends BeanGenerator {
 	  && method.getParameterTypes().length == 0) {
 	_hasReadResolve = true;
       }
-      
-      if (! method.isPublic() && ! method.isProtected())
-	continue;
-      if (method.isStatic())
-	continue;
-      if (method.isFinal())
-	continue;
 
       int index = _businessMethods.size();
       BusinessMethodGenerator bizMethod
 	= new BusinessMethodGenerator(_view, method, method.getMethod(), index);
 
       bizMethod.introspect(method.getMethod(), method.getMethod());
+
+      if (! bizMethod.isEnhanced())
+	continue;
+      
+      if (! method.isPublic() && ! method.isProtected())
+	throw new ConfigException(L.l("{0}: Resin-IoC/WebBeans annotations are not allowed on private methods.", bizMethod));
+      if (method.isStatic())
+	throw new ConfigException(L.l("{0}: Resin-Ioc/WebBeans annotations are not allowed on static methods.", bizMethod));
+      if (method.isFinal())
+	throw new ConfigException(L.l("{0}: Resin-Ioc/WebBeans annotations are not allowed on final methods.", bizMethod));
 
       if (bizMethod.isEnhanced()) {
 	_isEnhanced = true;

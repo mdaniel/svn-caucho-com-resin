@@ -99,7 +99,7 @@ public class HouseServlet extends GenericServlet {
   }
 
   @TransactionAttribute
-  public void insert(PrintWriter out)
+  protected void insert(PrintWriter out)
   {
     EntityManager amber = _factory.createEntityManager();
 

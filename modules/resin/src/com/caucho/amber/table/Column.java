@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -416,6 +417,23 @@ public class Column {
     throws IOException
   {
     return _type.generateLoad(out, rs, indexVar, index);
+  }
+
+  /**
+   * Generates a string to load the type as a property.
+   */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    return _type.generateLoadNative(out, index);
+  }
+
+  /**
+   * Generates a string to load the type as a property.
+   */
+  public void generateNativeColumnNames(ArrayList<String> names)
+  {
+    names.add(_name);
   }
 
   /**

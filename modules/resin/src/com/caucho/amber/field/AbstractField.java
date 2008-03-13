@@ -62,7 +62,8 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractField implements AmberField {
   private static final L10N L = new L10N(AbstractField.class);
-  protected static final Logger log = Log.open(AbstractField.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractField.class.getName());
 
   AbstractStatefulType _sourceType;
 
@@ -88,12 +89,10 @@ abstract public class AbstractField implements AmberField {
   {
     this(sourceType);
 
-    if (log.isLoggable(Level.FINER)) {
-      log.log(Level.FINER, sourceType + " "
-	      + getClass().getSimpleName() + "[" + name + "]");
-    }
-
     setName(name);
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " created");
   }
 
   /**
@@ -372,13 +371,7 @@ abstract public class AbstractField implements AmberField {
   public boolean isAbstract()
   {
     // jpa/0u21
-
-    if (isFieldAccess() || getSourceType().isIdClass())
-      return true;
-    else if (_getterMethod == null)
-      return false;
-    else
-      return _getterMethod.isAbstract();
+    return _getterMethod != null && _getterMethod.isAbstract();
   }
 
   /**
@@ -425,6 +418,7 @@ abstract public class AbstractField implements AmberField {
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
     throws IOException
   {
+    // CMP
     if (isAbstract()) {
       out.println();
       out.print("public ");
@@ -540,6 +534,22 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Generates loading for a native query
+   */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    return index;
+  }
+
+  /**
+   * Generates loading for a native query
+   */
+  public void generateNativeColumnNames(ArrayList<String> names)
+  {
+  }
+
+  /**
    * Generates loading cache
    */
   public void generateSet(JavaWriter out, String obj)
@@ -588,12 +598,14 @@ abstract public class AbstractField implements AmberField {
 
     if (obj.equals("super"))
       return generateSuperGetter();
+    /*
     else if (! isAbstract())
       return obj + "." + _getterMethod.getName() + "()";
     else if (_getterMethod != null)
       return obj + "." + _getterMethod.getName() + "()";
+    */
     else
-      return obj + "." + getFieldName();
+      return obj + "." + generateSuperGetter();
   }
 
   /**
@@ -605,18 +617,22 @@ abstract public class AbstractField implements AmberField {
   {
     if (obj.equals("super"))
       return generateSuperSetter(value);
+    else
+      return generateSuperSetter(obj, value);
+    /*
     else if (isAbstract()) {
       if (isFieldAccess()) {
         // jpa/0h09
         return obj + "." + getSetterName() + "(" + value + ")";
       }
 
-      return obj + "." + getFieldName() + " = " + value;
+      return obj + "." + generateSuperSetter(value);
     }
     else if (_setterMethod != null)
       return obj + "." + _setterMethod.getName() + "(" + value + ")";
     else
       return ""; // ejb/0gb9
+    */
   }
 
   /**
@@ -624,7 +640,7 @@ abstract public class AbstractField implements AmberField {
    */
   protected String getFieldName()
   {
-    return "__amber_" + getName();
+    return getName();
   }
 
   /**
@@ -667,7 +683,7 @@ abstract public class AbstractField implements AmberField {
     if (! getSourceType().isEmbeddable())
       return "__caucho_super_get_" + getName() + "()";
     else if (isFieldAccess())
-      return getName();
+      return "__caucho_super_get_" + getName() + "()";
     else
       return getGetterMethod().getName() + "()";
   }
@@ -685,14 +701,7 @@ abstract public class AbstractField implements AmberField {
    */
   public String generateSuperSetter(String objThis, String value)
   {
-    if (! getSourceType().isEmbeddable())
-      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
-    else if (isFieldAccess()) {
-      return objThis + "." + getName() + " = " + value;
-    }
-    else {
-      return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
-    }
+    return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
   }
 
   /**

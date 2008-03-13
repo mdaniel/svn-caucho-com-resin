@@ -58,7 +58,7 @@ public class WeakStopListener implements EnvironmentListener {
   /**
    * Handles the case where a class loader is activated.
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
   }
 

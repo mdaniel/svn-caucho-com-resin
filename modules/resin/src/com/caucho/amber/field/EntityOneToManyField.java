@@ -41,7 +41,6 @@ import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -58,7 +57,8 @@ import java.util.logging.Logger;
  */
 public class EntityOneToManyField extends CollectionField {
   private static final L10N L = new L10N(EntityOneToManyField.class);
-  protected static final Logger log = Log.open(EntityOneToManyField.class);
+  protected static final Logger log 
+    = Logger.getLogger(EntityOneToManyField.class.getName());
 
   private String _mapKey;
 
@@ -101,6 +101,7 @@ public class EntityOneToManyField extends CollectionField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
+  @Override
   public RelatedType getEntitySourceType()
   {
     return (RelatedType) getSourceType();
@@ -118,6 +119,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Returns the target type as entity.
    */
+  @Override
   public Type getTargetType()
   {
     return _sourceField.getSourceType();
@@ -142,6 +144,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Returns the link.
    */
+  @Override
   public LinkColumns getLinkColumns()
   {
     return _sourceField.getLinkColumns();
@@ -166,6 +169,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Initialize.
    */
+  @Override
   public void init()
   {
     // jpa/0gg2
@@ -176,6 +180,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Creates the expression for the field.
    */
+  @Override
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     return new OneToManyExpr(parser, parent, getLinkColumns());
@@ -186,6 +191,7 @@ public class EntityOneToManyField extends CollectionField {
    * be cascaded first if the operation can be
    * performed with no risk to break FK constraints.
    */
+  @Override
   public void generatePreCascade(JavaWriter out,
                                  String aConn,
                                  CascadeType cascadeType)
@@ -203,6 +209,7 @@ public class EntityOneToManyField extends CollectionField {
    * be cascaded first if the operation can be
    * performed with no risk to break FK constraints.
    */
+  @Override
   public void generatePostCascade(JavaWriter out,
                                   String aConn,
                                   CascadeType cascadeType)
@@ -214,6 +221,7 @@ public class EntityOneToManyField extends CollectionField {
     generateInternalCascade(out, aConn, cascadeType);
   }
 
+  @Override
   protected void generateInternalCascade(JavaWriter out,
                                        String aConn,
                                        CascadeType cascadeType)
@@ -284,6 +292,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateSet(JavaWriter out, String pstmt,
                           String obj, String index)
     throws IOException
@@ -293,14 +302,32 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateLoadSelect(String id)
   {
     return null;
   }
 
   /**
+   * Generates loading code after the basic fields.
+   */
+  @Override
+  public int generatePostLoadSelect(JavaWriter out, int index)
+    throws IOException
+  {
+    if (! isLazy()) {
+      out.println(getGetterName() + "();");
+      
+      return ++index;
+    }
+    else
+      return index;
+  }
+
+  /**
    * Updates from the cached copy.
    */
+  @Override
   public void generateCopyLoadObject(JavaWriter out,
                                      String dst, String src,
                                      int loadIndex)
@@ -311,6 +338,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Generates the target select.
    */
+  @Override
   public String generateTargetSelect(String id)
   {
     CharBuffer cb = CharBuffer.allocate();
@@ -332,6 +360,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Generates the set property.
    */
+  @Override
   public void generateGetProperty(JavaWriter out)
     throws IOException
   {
@@ -513,7 +542,7 @@ public class EntityOneToManyField extends CollectionField {
         out.print(".values()");
 
       out.println(")");
-      out.println("  __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) o);");
+      //out.println("  __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) o);");
     }
 
     // jpa/0j70
@@ -596,6 +625,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Generates the set property.
    */
+  @Override
   public void generateSetProperty(JavaWriter out)
     throws IOException
   {
@@ -734,6 +764,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Generates code for foreign entity create/delete
    */
+  @Override
   public void generateInvalidateForeign(JavaWriter out)
     throws IOException
   {
@@ -759,6 +790,7 @@ public class EntityOneToManyField extends CollectionField {
    *
    * ejb/06hi
    */
+  @Override
   public void generateExpire(JavaWriter out)
     throws IOException
   {

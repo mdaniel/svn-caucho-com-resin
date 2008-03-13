@@ -1431,7 +1431,7 @@ public class Port
   /**
    * Handles the environment config phase
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
   }
 

@@ -46,7 +46,8 @@ import java.util.logging.Logger;
  */
 abstract public class CascadableField extends AbstractField {
   private static final L10N L = new L10N(CascadableField.class);
-  private static final Logger log = Log.open(CascadableField.class);
+  private static final Logger log
+    = Logger.getLogger(CascadableField.class.getName());
 
   private CascadeType[] _cascadeTypes;
 

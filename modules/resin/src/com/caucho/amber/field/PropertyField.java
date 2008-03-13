@@ -185,11 +185,14 @@ public class PropertyField extends AbstractField {
    */
   protected String getFieldName()
   {
-    // jpa/0w01, jpa/0w10
-    if (getColumn() == null)
+    if (isFieldAccess())
+      return super.getFieldName();
+    else if (getColumn() == null) {
+      // jpa/0w01, jpa/0w10
       return "__amber_" + AbstractConfigIntrospector.toSqlName(getName());
-
-    return getColumn().getFieldName();
+    }
+    else
+      return getColumn().getFieldName();
   }
 
   /**
@@ -239,78 +242,69 @@ public class PropertyField extends AbstractField {
     long mask = 1L << (getLoadGroupIndex() % 64);
 
     // jpa/0gh0
-    if (getSourceType() instanceof EmbeddableType) {
+    if (! _isUpdate || getSourceType() instanceof EmbeddableType) {
       out.println(generateSuperSetter("v") + ";");
       out.popDepth();
       out.println("}");
       return;
     }
+
+    out.println("if (__caucho_session == null) {");
+    out.println("  " + generateSuperSetter("v") + ";");
+    out.println("  return;");
+    out.println("}");
+
+    // jpa/0g06, jpa/0g0k, jpa/0j5f
+    out.println();
+    out.println("if ((" + loadVar + " & " + mask + "L) == 0) {");
+    out.println("  __caucho_load_" + maskGroup + "(__caucho_session);");
+    //out.println();
+    //out.println("  if (__caucho_session.isActiveTransaction())");
+    //out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
+    out.println("}");
+    
+    out.println();
+    out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter() + ";");
+
+    out.println();
+    if (getJavaTypeName().equals("java.lang.String")) {
+      out.println("if ((oldValue == v || v != null && v.equals(oldValue)) && (" + loadVar + " & " + mask + "L) != 0L)");
+      out.println("  return;");
+    }
     else {
-      // jpa/0g06, jpa/0g0k, jpa/0j5f
-      out.println("if ((" + loadVar + " & " + mask + "L) == 0 && __caucho_session != null) {");
-      out.println("  __caucho_load_" + maskGroup + "(__caucho_session);");
-      out.println();
-      out.println("  if (__caucho_session.isActiveTransaction())");
-      out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
-      out.println("}");
-      out.println();
+      out.println("if (oldValue == v && (" + loadVar + " & " + mask + "L) != 0)");
+      out.println("  return;");
     }
 
-    if (! _isUpdate) {
-      out.println("if (__caucho_session == null)");
-      out.println("  " + generateSuperSetter("v") + ";");
-    }
-    else {
-      out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter() + ";");
+    out.println();
+    out.println("try {");
+    out.pushDepth();
 
-      if (getJavaTypeName().equals("java.lang.String")) {
-        out.println("if ((oldValue == v || v != null && v.equals(oldValue)) && (" + loadVar + " & " + mask + "L) != 0L)");
-        out.println("  return;");
-      }
-      else {
-        out.println("if (oldValue == v && (" + loadVar + " & " + mask + "L) != 0)");
-        out.println("  return;");
-      }
+    out.println(generateSuperSetter("v") + ";");
 
-      out.println("try {");
-      out.pushDepth();
+    out.popDepth();
+    out.println("} catch (Exception e1) {");
+    out.pushDepth();
 
-      out.println(generateSuperSetter("v") + ";");
+    out.println("throw __caucho_session.rollback(e1);");
 
-      out.popDepth();
-      out.println("} catch (Exception e1) {");
-      out.pushDepth();
+    out.popDepth();
+    out.println("}");
 
-      out.println("if (__caucho_session != null) {");
-      out.pushDepth();
-      out.println("try {");
-      out.println("  __caucho_session.rollback();");
-      out.println("} catch (java.sql.SQLException e2) {");
-      out.println("  throw new javax.persistence.PersistenceException(e2);");
-      out.println("}");
-      out.println();
-      out.println("throw new javax.persistence.PersistenceException(e1);");
-      out.popDepth();
-      out.println("}");
+    int dirtyGroup = getIndex() / 64;
+    String dirtyVar = "__caucho_dirtyMask_" + dirtyGroup;
 
-      out.popDepth();
-      out.println("}");
+    long dirtyMask = 1L << (getIndex() % 64);
 
-      int dirtyGroup = getIndex() / 64;
-      String dirtyVar = "__caucho_dirtyMask_" + dirtyGroup;
+    out.println();
+    out.println("long oldMask = " + dirtyVar + ";");
+    out.println(dirtyVar + " |= " + dirtyMask + "L;");
 
-      long dirtyMask = 1L << (getIndex() % 64);
-
-      out.println();
-      out.println("long oldMask = " + dirtyVar + ";");
-      out.println(dirtyVar + " |= " + dirtyMask + "L;");
-
-      out.println();
-      out.println("if (__caucho_session != null && oldMask == 0)");
-      out.println("  __caucho_session.update((com.caucho.amber.entity.Entity) this);");
-      out.println();
-      out.println("__caucho_increment_version();");
-    }
+    out.println();
+    out.println("if (oldMask == 0)");
+    out.println("  __caucho_session.update((com.caucho.amber.entity.Entity) this);");
+    out.println();
+    out.println("__caucho_increment_version();");
 
     out.popDepth();
     out.println("}");
@@ -482,6 +476,46 @@ public class PropertyField extends AbstractField {
     // out.println("__caucho_loadMask |= " + (1L << getIndex()) + "L;");
 
     return index;
+  }
+
+  /**
+   * Generates loading code
+   */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    if (_aliasKey != null || getColumn() == null)
+      return index;
+
+    String var = "amber_ld" + index;
+
+    Type columnType;
+
+    columnType = getColumn().getType();
+
+    out.print(getJavaTypeName());
+    out.print(" " + var + " = ");
+
+    // jpa/0w24
+    index = getColumn().generateLoadNative(out, index);
+
+    out.println(";");
+    
+    out.println(generateSuperSetter(var) + ";");
+
+    return index;
+  }
+
+  /**
+   * Generates loading code
+   */
+  @Override
+  public void generateNativeColumnNames(ArrayList<String> names)
+  {
+    if (_aliasKey != null || getColumn() == null)
+      return;
+    
+    getColumn().generateNativeColumnNames(names);
   }
 
   /**

@@ -2083,6 +2083,12 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     JType retType;
 
+    boolean isLazy;
+    if (manyToManyAnn != null)
+      isLazy = manyToManyAnn.get("fetch") == FetchType.LAZY;
+    else
+      isLazy = manyToManyConfig.getFetch() == FetchType.LAZY;
+
     if (field instanceof JField)
       retType = ((JField) field).getGenericType();
     else
@@ -2281,6 +2287,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     manyToManyField.setAssociationTable(mapTable);
     manyToManyField.setTable(sqlTable);
+    manyToManyField.setLazy(isLazy);
 
     manyToManyField.setSourceLink(new LinkColumns(mapTable,
                                                   sourceType.getTable(),
@@ -2410,6 +2417,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     private String _fieldName;
     private JClass _fieldType;
     private OneToManyConfig _oneToManyConfig;
+    private boolean _isLazy = true;
 
     OneToManyCompletion(RelatedType type,
                         JAccessibleObject field,
@@ -2431,8 +2439,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       getInternalOneToManyConfig(_relatedType.getBeanClass(),
 				 _field, _fieldName,
 				 _annotationCfg);
+      
       JAnnotation oneToManyAnn = _annotationCfg.getAnnotation();
       OneToManyConfig oneToManyConfig = _annotationCfg.getOneToManyConfig();
+
+      if (oneToManyAnn != null)
+        _isLazy = oneToManyAnn.get("fetch") == FetchType.LAZY;
+      else
+        _isLazy = oneToManyConfig.getFetch() == FetchType.LAZY;
 
       AmberPersistenceUnit persistenceUnit = _relatedType.getPersistenceUnit();
 
@@ -2629,6 +2643,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       oneToMany = new EntityOneToManyField(_relatedType, _fieldName, cascadeTypes);
       oneToMany.setSourceField(sourceField);
       oneToMany.setOrderBy(orderByFields, orderByAscending);
+      oneToMany.setLazy(_isLazy);
 
       getInternalMapKeyConfig(_relatedType.getBeanClass(), _field, _fieldName,
 			      _annotationCfg);
@@ -2636,7 +2651,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       MapKeyConfig mapKeyConfig = _annotationCfg.getMapKeyConfig();
 
       if (! _annotationCfg.isNull()) {
-
         String key = mapKeyAnn.getString("name");
 
         String getter = "get" +

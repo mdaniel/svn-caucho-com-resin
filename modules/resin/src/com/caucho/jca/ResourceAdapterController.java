@@ -110,7 +110,7 @@ public class ResourceAdapterController implements EnvironmentListener {
   /**
    * Handles the environment config phase.
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
     throws StartLifecycleException
   {
   }

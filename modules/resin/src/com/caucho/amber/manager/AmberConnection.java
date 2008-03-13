@@ -76,7 +76,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -374,7 +373,7 @@ public class AmberConnection
 
       Object oldEntity;
 
-      oldEntity = getEntity(instance.getClass().getName(),
+      oldEntity = getEntity(instance.getClass(),
                             instance.__caucho_getPrimaryKey());
 
       // jpa/0ga4
@@ -616,7 +615,7 @@ public class AmberConnection
       String className = instance.getClass().getName();
       Object pk = instance.__caucho_getPrimaryKey();
 
-      Entity oldEntity = getEntity(className, pk);
+      Entity oldEntity = getEntity(instance.getClass(), pk);
 
       if (oldEntity != null) {
         EntityState state = instance.__caucho_getEntityState();
@@ -808,7 +807,7 @@ public class AmberConnection
       throw new IllegalStateException(L.l("AmberConnection is closed"));
     
     if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, L.l("loading entity class " + cl.getName() + " PK: " + key));
+      log.finer(L.l("{0}[1] amber loading entity class", cl.getSimpleName(), key));
 
     Entity entity = null;
 
@@ -817,7 +816,7 @@ public class AmberConnection
 
     // ejb/0d01, jpa/0gh0, jpa/0g0k, jpa/0j5f
     // if (shouldRetrieveFromCache())
-    entity = getEntity(cl.getName(), key);
+    entity = getEntity(cl, key);
 
     if (entity != null) {
       // jpa/0s2d: if it contains such entity and we have
@@ -830,15 +829,11 @@ public class AmberConnection
     }
     
     _entityKey.init(cl, key);
-
-    boolean isXALoaded = false;
     
     EntityItem cacheItem = loadCacheItem(cl, key, null);
 
     if (cacheItem == null)
       return null;
-
-    AmberEntityHome entityHome = cacheItem.getEntityHome();
 
     /*
     boolean isLoad = true;
@@ -893,7 +888,7 @@ public class AmberConnection
       throw e;
     }
 
-    Entity txEntity = getTransactionEntity(entity.getClass().getName(),
+    Entity txEntity = getTransactionEntity(entity.getClass(),
                                            entity.__caucho_getPrimaryKey());
 
     // XXX: jpa/0v33
@@ -955,7 +950,7 @@ public class AmberConnection
 
     // XXX: ejb/0d01
     // jpa/0y14 if (shouldRetrieveFromCache())
-    entity = getEntity(entityName, key);
+    entity = getEntity(entityHome.getJavaClass(), key);
 
     if (entity != null)
       return entity;
@@ -983,7 +978,7 @@ public class AmberConnection
     Class cl = itemEntity.getClass();
     Object pk = itemEntity.__caucho_getPrimaryKey();
 
-    Entity entity = getEntity(cl.getName(), pk);
+    Entity entity = getEntity(cl, pk);
 
     if (entity != null) {
       if (entity.__caucho_getEntityState().isManaged())
@@ -1033,7 +1028,7 @@ public class AmberConnection
     Class cl = itemEntity.getClass();
     Object pk = itemEntity.__caucho_getPrimaryKey();
 
-    Entity entity = getEntity(cl.getName(), pk);
+    Entity entity = getEntity(cl, pk);
 
     if (entity != null) {
       if (entity.__caucho_getEntityState().isManaged())
@@ -1089,7 +1084,8 @@ public class AmberConnection
     entityHome = _persistenceUnit.getEntityHome(entity.getClass().getName());
 
     if (entityHome == null)
-      throw new AmberException(L.l("entity has no matching home"));
+      throw new AmberException(L.l("{0}: entity has no matching home",
+				   entity.getClass().getName()));
 
     entityHome.makePersistent(entity, this, false);
 
@@ -1245,7 +1241,7 @@ public class AmberConnection
     if (key == null)
       return null;
 
-    Entity entity = getEntity(type.getInstanceClass().getName(), key);
+    Entity entity = getEntity(type.getInstanceClass(), key);
 
     if (entity != null) {
       // jpa/0m30
@@ -1341,14 +1337,14 @@ public class AmberConnection
   /**
    * Matches the entity.
    */
-  public Entity getEntity(String className, Object key)
+  public Entity getEntity(Class cl, Object key)
   {
     Entity []entities = _entities;
 
     for (int i = _entitiesTop - 1; i >= 0; i--) {
       Entity entity = entities[i];
 
-      if (entity.__caucho_match(className, key)) {
+      if (entity.__caucho_match(cl, key)) {
         return entity;
       }
     }
@@ -1359,11 +1355,6 @@ public class AmberConnection
   public Entity getEntity(int index)
   {
     return _entities[index];
-  }
-
-  public Entity getEntity(Class cl, Object key)
-  {
-    return getEntity(cl.getName(), key);
   }
 
   /**
@@ -1378,7 +1369,7 @@ public class AmberConnection
     if (entity == null)
       return null;
 
-    return getEntity(entity.getClass().getName(),
+    return getEntity(entity.getClass(),
                      entity.__caucho_getPrimaryKey());
   }
 
@@ -1409,7 +1400,7 @@ public class AmberConnection
 
     // jpa/0l4a
     for (int i = _entitiesTop - 1; i >= 0; i--) {
-      Entity entity = _entities[i];
+      Entity entity = entities[i];
 
       if (entity.__caucho_getPrimaryKey().equals(key)) {
         if (cl.isAssignableFrom(entity.getClass()))
@@ -1420,14 +1411,14 @@ public class AmberConnection
     return null;
   }
 
-  public Entity getTransactionEntity(String className, Object key)
+  public Entity getTransactionEntity(Class cl, Object key)
   {
     Entity []entities = _txEntities;
 
     for (int i = _txEntitiesTop - 1; i >= 0; i--) {
       Entity entity = entities[i];
 
-      if (entity.__caucho_match(className, key)) {
+      if (entity.__caucho_match(cl, key)) {
         return entity;
       }
     }
@@ -1439,41 +1430,6 @@ public class AmberConnection
   {
     return _txEntities[index];
   }
-
-  /**
-   * Adds an entity.
-   */
-  /*
-  private boolean addEntity(Entity entity)
-  {
-    boolean added = false;
-
-    Object pk = entity.__caucho_getPrimaryKey();
-    String className = entity.getClass().getName();
-
-    Entity oldEntity = getEntity(className, pk);
-
-    // jpa/0s2d: if (! _entities.contains(entity)) {
-    if (oldEntity == null) {
-      addInternalEntity(entity);
-      added = true;
-    }
-    else if (isActiveTransaction()) { // jpa/0g06
-      int index = getTransactionEntity(className, pk);
-
-      // jpa/0s2d: if (! _txEntities.contains(entity)) {
-      if (index < 0) {
-        addTxEntity(entity);
-        added = true;
-      }
-    }
-
-    // jpa/0s2d: merge()
-    setTransactionalState(entity);
-
-    return added;
-  }
-  */
 
   /**
    * Adds a new entity for the given class name and key.
@@ -1889,6 +1845,17 @@ public class AmberConnection
     }
   }
 
+  public PersistenceException rollback(Exception e)
+  {
+    try {
+      rollback();
+    } catch (Exception e1) {
+      log.log(Level.FINE, e1.toString(), e1);
+    }
+
+    return new PersistenceException(e);
+  }
+
   /**
    * Rollbacks a transaction.
    */
@@ -2127,40 +2094,6 @@ public class AmberConnection
   }
 
   /**
-   * Makes the object transactional.
-   *
-   * @param obj the object to save
-   *
-   * @return the proxy for the saved object
-   */
-  public void makeTransactional(Entity entity)
-  {
-    // ejb/0600
-    if (! _persistenceUnit.isJPA())
-      return;
-
-    /* XXX: jpa/0l43
-       EntityState state = entity.__caucho_getEntityState();
-
-       if (EntityState.TRANSIENT.ordinal() < state.ordinal()
-           && state.ordinal() < EntityState.P_DELETING.ordinal()) {
-         // jpa/0g06
-         addEntity(entity);
-       }
-    */
-
-    /*
-      if (! isInTransaction())
-        throw new AmberRuntimeException(L.l("makePersistent must be called from within a transaction."));
-
-      if (! (obj instanceof Entity)) {
-        throw new AmberRuntimeException(L.l("`{0}' is not a known entity class.",
-                                        obj.getClass().getName()));
-      }
-    */
-  }
-
-  /**
    * Updates the database with the values in object.  If the object does
    * not exist, throws an exception.
    *
@@ -2168,40 +2101,6 @@ public class AmberConnection
    */
   public void update(Object obj)
   {
-    /*
-      for (int i = _entities.size() - 1; i >= 0; i--) {
-        Entity entity = _entities.get(i);
-
-        if (entity.__caucho_match(obj)) {
-          entity.__caucho_load(obj);
-
-          return entity;
-        }
-      }
-    */
-
-    /*
-      Class cl = obj.getClass();
-
-      EntityHome home = _factory.getHome(cl);
-
-      if (home == null)
-        throw new AmberException(L.l("no matching home for {0}", cl.getName()));
-
-      Object key = home.getKeyFromEntity(obj);
-
-      Entity entity = getEntity(cl, key);
-
-      if (entity == null) {
-        entity = home.load(this, key);
-
-        addEntity(entity);
-      }
-
-      entity.__caucho_loadFromObject(obj);
-
-      return entity;
-    */
   }
 
   /**
@@ -2288,7 +2187,7 @@ public class AmberConnection
     addCompletion(new RowInvalidateCompletion(table.getName(), key));
 
     // jpa/0ga8, jpa/0s2d if (! _txEntities.contains(entity)) {
-    Entity oldEntity = getTransactionEntity(entity.getClass().getName(), key);
+    Entity oldEntity = getTransactionEntity(entity.getClass(), key);
 
     if (oldEntity == null) {
       addTxEntity(entity);
@@ -2311,7 +2210,7 @@ public class AmberConnection
   public void delete(Entity entity)
     throws SQLException
   {
-    Entity oldEntity = getEntity(entity.getClass().getName(),
+    Entity oldEntity = getEntity(entity.getClass(),
                                  entity.__caucho_getPrimaryKey());
 
     if (oldEntity == null) {
@@ -2730,12 +2629,10 @@ public class AmberConnection
 
     // XXX: jpa/0h31, expires the child cache entity.
     if (isActiveTransaction()) {
-      Entity txEntity = getTransactionEntity(className, pk);
-
-      EntityState state = null;
+      Entity txEntity = getTransactionEntity(cl, pk);
 
       if (txEntity != null)
-        state = txEntity.__caucho_getEntityState();
+        txEntity.__caucho_getEntityState();
       else // jpa/0o0b || ! state.isManaged()) {
         item.getEntity().__caucho_expire();
 
@@ -3014,7 +2911,7 @@ public class AmberConnection
     switch (state) {
     case TRANSIENT:
       {
-        Entity contextEntity = getEntity(entity.getClass().getName(),
+        Entity contextEntity = getEntity(entity.getClass(),
                                          entity.__caucho_getPrimaryKey());
 
         // jpa/0ga3
@@ -3150,18 +3047,20 @@ public class AmberConnection
       if (entity == null)
         return entity;
 
+      Class entityClass = entity.getClass();
       String className = entity.getClass().getName();
       EntityState state = entity.__caucho_getEntityState();
 
       Object pk = entity.__caucho_getPrimaryKey();
 
       if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
-                                 className, pk, state));
+        log.finer(L.l("{0}[{1}] amber merge  state='{2}')",
+		      entityClass.getSimpleName(), pk, state));
 
       if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
         // removed entity instance
-        throw new IllegalArgumentException(L.l("Merge operation cannot be applied to a removed entity instance"));
+        throw new IllegalArgumentException(L.l("{0}: merge operation cannot be applied to a removed entity instance",
+					       entityClass));
       }
 
       Entity managedEntity = null;
@@ -3173,7 +3072,7 @@ public class AmberConnection
       try {
         boolean isManaged = entity.__caucho_getEntityState().isManaged();
 
-        existingEntity = (Entity) load(entity.getClass(), pk, true);
+        existingEntity = (Entity) load(entityClass, pk, true);
       } catch (AmberObjectNotFoundException e) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, e.toString(), e);
@@ -3185,17 +3084,17 @@ public class AmberConnection
 
       if (existingEntity == null) {
         // new entity instance
-        managedEntity = addNewEntity(entity.getClass(), pk);
+        managedEntity = addNewEntity(entityClass, pk);
 
         if (managedEntity == null)
-          throw new IllegalStateException(L.l("Unable to add a new managed entity when merging object class: {0} PK: {1}.", className, pk));
+          throw new IllegalStateException(L.l("Unable to add a new managed entity when merging object class: {0}[{1}].", className, pk));
       }
       else {
         // jpa/0h08
         managedEntity = existingEntity;
       }
 
-      int index = getEntityMatch(_mergingEntities, className, pk);
+      int index = getEntityMatch(_mergingEntities, entityClass, pk);
 
       if (index >= 0) {
         // jpa/0o42
@@ -3317,7 +3216,7 @@ public class AmberConnection
 
     // jpa/0o42
     int index = getEntityMatch(_mergingEntities,
-                               entity.getClass().getName(),
+                               entity.getClass(),
                                entity.__caucho_getPrimaryKey());
 
     return (index >= 0);
@@ -3401,7 +3300,7 @@ public class AmberConnection
   }
 
   private static int getEntityMatch(ArrayList<Entity> list,
-                                    String className,
+                                    Class cl,
                                     Object key)
   {
     // See also: getEntity() and getTransactionEntity().
@@ -3410,7 +3309,7 @@ public class AmberConnection
     for (int i = list.size() - 1; i >= 0; i--) {
       Entity entity = list.get(i);
 
-      if (entity.__caucho_match(className, key)) {
+      if (entity.__caucho_match(cl, key)) {
         return i;
       }
     }

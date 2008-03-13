@@ -12,6 +12,10 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>amber: native query needs to use column names (#1716)</li>
+<li>amber: @OneToMany was ignoring fetch annotation (#2423, rep by Daniel Spangler)</li>
+<li>amber: @PersistenceUnit was not initialized before binding @Component (#2498, rep by wesley)</li>
+<li>config: updated resource-ref schema to match JavaEE 5 (#2143, rep by Gary Zhu)</li>
 <li>ssl: add cipher-suites to jsse-ssl (#2360, rep by Jay Ballinger)</li>
 <li>webapp/jmx: add Version attribute to WebAppMXBean (#2463)</li>
 <li>ioc: add WebBeansContainer.getBeansOfType (#2413)</li>

@@ -51,7 +51,8 @@ import java.util.logging.Logger;
  */
 public class CollectionField extends CascadableField {
   private static final L10N L = new L10N(CollectionField.class);
-  protected static final Logger log = Log.open(CollectionField.class);
+  private static final Logger log
+    = Logger.getLogger(CollectionField.class.getName());
 
   private Type _targetType;
 

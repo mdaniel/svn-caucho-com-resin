@@ -912,7 +912,7 @@ public class Cluster
   /**
    * Handles the case where the environment is starting (after init).
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
   }
   

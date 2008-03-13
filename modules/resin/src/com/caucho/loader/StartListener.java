@@ -57,7 +57,7 @@ public class StartListener implements EnvironmentListener {
   /**
    * Configuration callback
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {  
   }
   

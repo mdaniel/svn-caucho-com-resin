@@ -321,6 +321,22 @@ public class EmbeddedSubField implements AmberField {
   }
 
   /**
+   * Generates loading for a native query
+   */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    return index;
+  }
+
+  /**
+   * Generates loading for a native query
+   */
+  public void generateNativeColumnNames(ArrayList<String> names)
+  {
+  }
+
+  /**
    * Generates loading cache
    */
   public void generateLoadFromObject(JavaWriter out, String obj)

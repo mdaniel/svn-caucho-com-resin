@@ -37,9 +37,9 @@ import com.caucho.lifecycle.StartLifecycleException;
  */
 public interface EnvironmentListener {
   /**
-   * Handles the case where the environment is initializing
+   * Handles the case where the environment is binding injection targets
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
     throws ConfigException;
   
   /**

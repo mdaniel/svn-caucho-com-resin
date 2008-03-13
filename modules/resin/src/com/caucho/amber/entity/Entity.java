@@ -35,7 +35,6 @@ import com.caucho.amber.type.EntityType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * An entity instance
@@ -179,11 +178,6 @@ public interface Entity extends MappedSuperclass
   public long __caucho_getLoadMask(int loadGroup);
 
   /**
-   * Sets the load mask value for a load group.
-   */
-  public void __caucho_setLoadMask(long loadMask, int loadGroup);
-
-  /**
    * Returns true if the entity is dirty.
    */
   public boolean __caucho_isDirty();
@@ -191,7 +185,7 @@ public interface Entity extends MappedSuperclass
   /**
    * Returns true if the entity matches.
    */
-  public boolean __caucho_match(String className, Object key);
+  public boolean __caucho_match(Class cl, Object key);
 
   /**
    * Loads the entity from the database.
@@ -208,24 +202,6 @@ public interface Entity extends MappedSuperclass
   public Entity __caucho_home_find(AmberConnection aConn,
                                    AmberEntityHome home,
                                    Object key);
-
-  /**
-   * Returns a new entity.
-   */
-  /*
-  public Entity __caucho_home_new(AmberConnection aConn,
-                                  AmberEntityHome home,
-                                  Object key)
-    throws SQLException;
-  */
-
-  /*
-  public Entity __caucho_home_new(AmberConnection aConn,
-                                  AmberEntityHome home,
-                                  Object key,
-                                  boolean loadFromResultSet)
-    throws SQLException;
-  */
 
   /**
    * Returns a new entity.
@@ -298,6 +274,12 @@ public interface Entity extends MappedSuperclass
     throws SQLException;
 
   /**
+   * Loads the entity from a native query
+   */
+  public void __caucho_load_native(ResultSet rs, String []columnNames)
+    throws SQLException;
+
+  /**
    * Expires data
    */
   public void __caucho_expire();
@@ -327,10 +309,4 @@ public interface Entity extends MappedSuperclass
    * After a rollback.
    */
   public void __caucho_afterRollback();
-
-  /**
-   * Checks entity-relationship consistency and adds information to the log
-   * about relationships from this entity.
-   */
-  public void __caucho_dumpRelationships();
 }

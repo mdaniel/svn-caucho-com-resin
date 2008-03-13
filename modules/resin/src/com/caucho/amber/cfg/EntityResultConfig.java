@@ -30,6 +30,10 @@
 package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
+import java.sql.*;
+
+import com.caucho.amber.entity.*;
+import com.caucho.amber.manager.*;
 
 /**
  * The <entity-result> tag in orm.xml
@@ -78,5 +82,11 @@ public class EntityResultConfig {
   public ArrayList<FieldResultConfig> getFieldResults()
   {
     return _fieldResults;
+  }
+
+  public Entity load(AmberConnection aConn, ResultSet rs)
+    throws SQLException
+  {
+    return null;
   }
 }

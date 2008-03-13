@@ -78,8 +78,6 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateHeader(out, isEntityParent);
 
-      generateIncrementVersion(out);
-
       generateInit(out, isEntityParent);
 
       HashSet<Object> completedSet = new HashSet<Object>();
@@ -125,8 +123,6 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateSetLoadMask(out);
 
-      generateDumpRelationships(out);
-
       generateMakePersistent(out);
 
       generateCascadePersist(out);
@@ -140,6 +136,8 @@ public class EntityComponent extends AmberMappedComponent {
       generateDeleteForeign(out);
 
       generateFlush(out);
+
+      generateIncrementVersion(out);
 
       generateAfterCommit(out, isEntityParent);
 

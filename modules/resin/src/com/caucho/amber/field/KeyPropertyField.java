@@ -208,28 +208,6 @@ public class KeyPropertyField extends PropertyField implements IdField {
   }
 
   /**
-   * Returns the actual data.
-   */
-  public String generateSuperGetter()
-  {
-    if (isAbstract() || getGetterMethod() == null)
-      return getFieldName();
-    else
-      return getGetterMethod().getName() + "()";
-  }
-
-  /**
-   * Sets the actual data.
-   */
-  public String generateSuperSetter(String objThis, String value)
-  {
-    if (isAbstract() || getGetterMethod() == null || getSetterMethod() == null)
-      return objThis + "." + getFieldName() + " = " + value + ";";
-    else
-      return objThis + "." +  getSetterMethod().getName() + "(" + value + ")";
-  }
-
-  /**
    * Generates code to copy to an object.
    */
   public void generateCopy(JavaWriter out,
@@ -498,6 +476,30 @@ public class KeyPropertyField extends PropertyField implements IdField {
       return key + "." + getName();
     else
       return generateGet(key);
+  }
+
+  /**
+   * Sets the actual data.
+   */
+  @Override
+  public String generateSuperSetter(String objThis, String value)
+  {
+    if (isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterName() + "(" + value + ")";
+  }
+
+  /**
+   * Sets the actual data.
+   */
+  @Override
+  public String generateSuperGetter()
+  {
+    if (isFieldAccess())
+      return getName();
+    else
+      return getGetterName() + "()";
   }
 
   /**

@@ -870,6 +870,9 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
     persistenceXml.setUserPath(persistenceXml.getURL());
 
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " parsing " + persistenceXml.getURL());
+
     InputStream is = null;
 
     try {
@@ -1022,9 +1025,9 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   /**
    * Handles the environment config phase
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
-    // config();
+    configurePersistenceRoots();
   }
   
  /**

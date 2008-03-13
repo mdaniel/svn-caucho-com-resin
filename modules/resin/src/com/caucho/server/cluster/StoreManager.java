@@ -719,7 +719,7 @@ abstract public class StoreManager
   /**
    * Handles the case where the environment is activated.
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
   }
   

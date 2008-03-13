@@ -570,21 +570,29 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       if (type instanceof EntityType) {
         EntityType entityType = (EntityType) type;
 
+	/*
         for (AmberField field : entityType.getId().getKeys()) {
           fieldMaps.add(new FieldMap(baseClass, field.getName()));
         }
+	*/
       }
 
       for (AmberField field : type.getFields()) {
         fieldMaps.add(new FieldMap(baseClass, field.getName()));
       }
-    }
-    while ((thisClass = thisClass.getSuperClass()) != null);
+    } while ((thisClass = thisClass.getSuperClass()) != null);
 
     if (fieldMaps.size() > 0) {
       FieldFixupAnalyzer analyzer = new FieldFixupAnalyzer(fieldMaps);
 
       for (JavaMethod javaMethod : baseClass.getMethodList()) {
+	if (javaMethod.getName().startsWith("__caucho_get_"))
+	  continue;
+	else if (javaMethod.getName().startsWith("__caucho_set_"))
+	  continue;
+	else if (javaMethod.getName().startsWith("__caucho_super_"))
+	  continue;
+	
         CodeVisitor visitor = new CodeVisitor(baseClass, javaMethod.getCode());
 
         visitor.analyze(analyzer, true);

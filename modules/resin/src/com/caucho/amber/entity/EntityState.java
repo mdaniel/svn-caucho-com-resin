@@ -56,6 +56,11 @@ public enum EntityState {
     return P_NON_TRANSACTIONAL.ordinal() < value;
   }
 
+  public final boolean isNonTransactional()
+  {
+    return this == TRANSIENT || this == P_NON_TRANSACTIONAL;
+  }
+
   public final boolean isPersist()
   {
     return this == P_PERSISTING || this == P_PERSISTED;
@@ -64,5 +69,10 @@ public enum EntityState {
   public final boolean isTransactional()
   {
     return this == P_TRANSACTIONAL || isPersist();
+  }
+
+  public final boolean isDeleting()
+  {
+    return this == P_DELETING || this == P_DELETED;
   }
 }

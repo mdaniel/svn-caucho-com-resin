@@ -61,7 +61,7 @@ public class WeakDestroyListener implements EnvironmentListener {
   /**
    * Handles the case where a class loader is configured.
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
   }
 

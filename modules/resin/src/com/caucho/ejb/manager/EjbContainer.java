@@ -535,7 +535,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   /**
    * Handles the case where the environment is configuring
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
     config();
   }

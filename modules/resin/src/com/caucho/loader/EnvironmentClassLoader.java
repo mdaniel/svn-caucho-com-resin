@@ -261,7 +261,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     }
 
     if (_lifecycle.isStarting()) {
-      listener.environmentConfig(this);
+      listener.environmentBind(this);
     }
 
     if (_lifecycle.isStarting() && _isConfigComplete) {
@@ -547,7 +547,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     for (int i = 0; listeners != null && i < size; i++) {
       EnvironmentListener listener = listeners.get(i);
 
-      listener.environmentConfig(this);
+      listener.environmentBind(this);
     }
     
     _isConfigComplete = true;

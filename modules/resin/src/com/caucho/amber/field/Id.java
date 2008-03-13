@@ -52,7 +52,8 @@ import java.util.logging.Logger;
  */
 public class Id {
   private static final L10N L = new L10N(Id.class);
-  protected static final Logger log = Log.open(Id.class);
+  protected static final Logger log
+    = Logger.getLogger(Id.class.getName());
 
   private RelatedType _ownerType;
 

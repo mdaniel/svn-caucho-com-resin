@@ -425,6 +425,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Adds a new field.
    */
+  @Override
   public void addField(AmberField field)
   {
     super.addField(field);
@@ -449,6 +450,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Returns the field with a given name.
    */
+  @Override
   public AmberField getField(String name)
   {
     if (_id != null) {
@@ -691,6 +693,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Initialize the entity.
    */
+  @Override
   public void init()
     throws ConfigException
   {
@@ -825,6 +828,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Generates a string to load the field.
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
@@ -894,11 +898,35 @@ abstract public class RelatedType extends AbstractStatefulType {
 
     return index;
   }
-				     
+
+  /**
+   * Generates the load code for native fields
+   */
+  public void generateLoadNative(JavaWriter out)
+    throws IOException
+  {
+    int index = 0;
+    
+    for (AmberField field : getFields()) {
+      index = field.generateLoadNative(out, index);
+    }
+  }
+
+  /**
+   * Generates the load code for native fields
+   */
+  public void generateNativeColumnNames(ArrayList<String> names)
+    throws IOException
+  {
+    for (AmberField field : getFields()) {
+      field.generateNativeColumnNames(names);
+    }
+  }
 
   /**
    * Generates a string to set the field.
    */
+  @Override
   public void generateSet(JavaWriter out, String pstmt,
                           String index, String value)
     throws IOException
@@ -910,6 +938,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Gets the value.
    */
+  @Override
   public Object getObject(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
@@ -919,6 +948,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Finds the object
    */
+  @Override
   public EntityItem findItem(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
@@ -1116,6 +1146,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Generates the select clause for a load.
    */
+  @Override
   public String generateLoadSelect(Table table, String id, int loadGroup)
   {
     CharBuffer cb = CharBuffer.allocate();
@@ -1674,8 +1705,9 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Printable version of the entity.
    */
+  @Override
   public String toString()
   {
-    return "RelatedType[" + _beanClass.getName() + "]";
+    return getClass().getSimpleName() + "[" + _beanClass.getName() + "]";
   }
 }

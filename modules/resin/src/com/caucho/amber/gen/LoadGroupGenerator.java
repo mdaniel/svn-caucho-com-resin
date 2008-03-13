@@ -114,21 +114,14 @@ public class LoadGroupGenerator extends ClassComponent {
 
       _relatedType.generatePostLoadSelect(out, 1, _index);
 
-      if (min <= max) {
-        // jpa/0g0k: only makes transactional if exists.
-        out.println();
-        out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
-        out.println("  aConn.makeTransactional(this);");
-
-        out.println("}");
-      }
-
       // jpa/0o09
       // needs to be after load to prevent loop if toString() expects data
       out.println();
       out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINER))");
-      out.println("  __caucho_log.finer(\"amber loaded-" + _index + " \" + this.getClass().getName());");
+      out.println("  __caucho_log.finer(getClass().getSimpleName() + \"[\" + __caucho.getPrimaryKey() + \"] amber load-" + _index + "\");");
 
+
+      out.println();
       out.println("if (! isLoaded) {");
       out.pushDepth();
 
@@ -162,6 +155,26 @@ public class LoadGroupGenerator extends ClassComponent {
     }
 
     generateLoadSelect(out, group, mask);
+
+    if (group == 0)
+      generateLoadNative(out);
+  }
+
+  private void generateLoadNative(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_load_native(java.sql.ResultSet rs, String []columnNames)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    _relatedType.generateLoadNative(out);
+
+    out.println("__caucho_loadMask_0 |= 1L;");
+    
+    out.popDepth();
+    out.println("}");
   }
 
   private void generateTransactionChecks(JavaWriter out,
@@ -176,15 +189,13 @@ public class LoadGroupGenerator extends ClassComponent {
       out.pushDepth();
 
       // deleted objects are not reloaded
-      out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= __caucho_state.ordinal()) {");
+      out.println("if (__caucho_state.isDeleting()) {");
       out.println("  return;");
       out.println("}");
 
       // from non-transactional to transactional
-      out.println("else if (__caucho_state.ordinal() <= com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL.ordinal()) {");
+      out.println("else if (__caucho_state.isNonTransactional()) {");
       out.pushDepth();
-
-      out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
 
       out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
 
@@ -237,14 +248,6 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println("item.__caucho_load_select_" + _index + "(aConn);");
 
-    /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
-       out.println("try {");
-       out.pushDepth();
-
-       // jpa/0o01
-       out.println("Object child;");
-    */
-
     // ejb/06--, ejb/0a-- and jpa/0o04
     _relatedType.generateCopyLoadObject(out, "super", "item", _index);
 
@@ -252,18 +255,6 @@ public class LoadGroupGenerator extends ClassComponent {
     //out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
 
     out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + " & " + mask + "L;"); // mask + "L;");
-
-    /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
-       out.popDepth();
-       out.println("} catch (RuntimeException e) {");
-       out.println("  throw e;");
-       out.println("} catch (Exception e) {");
-       out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
-       out.println("}");
-
-       out.println();
-       out.println("return;");
-    */
 
     out.popDepth();
     out.println("}");
@@ -364,14 +355,15 @@ public class LoadGroupGenerator extends ClassComponent {
 
     String sql = "select " + select + " from " + from + " where " + where;
 
-    out.println("java.sql.ResultSet rs = null;");
     out.println();
-
+    out.println("java.sql.ResultSet rs = null;");
+    
+    out.println();
     out.println("try {");
     out.pushDepth();
 
     // jpa/0o05
-    out.println("com.caucho.amber.entity.Entity contextEntity = aConn.getEntity(this);");
+    //out.println("com.caucho.amber.entity.Entity contextEntity = aConn.getEntity(this);");
 
     out.println();
     out.print("String sql = \"");
@@ -403,7 +395,6 @@ public class LoadGroupGenerator extends ClassComponent {
     out.popDepth();
     out.println("}");
     out.println("else {");
-    out.println("  rs.close();");
 
     String errorString = ("(\"amber load: no matching object " +
                           _relatedType.getName() + "[\" + __caucho_getPrimaryKey() + \"]\")");

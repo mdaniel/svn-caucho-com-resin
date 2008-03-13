@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -42,7 +43,6 @@ import com.caucho.amber.type.*;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -58,7 +58,8 @@ import java.util.logging.Logger;
  */
 public class EntityManyToOneField extends CascadableField {
   private static final L10N L = new L10N(EntityManyToOneField.class);
-  private static final Logger log = Log.open(EntityManyToOneField.class);
+  private static final Logger log
+    = Logger.getLogger(EntityManyToOneField.class.getName());
 
   private LinkColumns _linkColumns;
 
@@ -260,6 +261,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Initializes the field.
    */
+  @Override
   public void init()
     throws ConfigException
   {
@@ -420,6 +422,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the post constructor initialization.
    */
+  @Override
   public void generatePostConstructor(JavaWriter out)
     throws IOException
   {
@@ -431,6 +434,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Creates the expression for the field.
    */
+  @Override
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     return new ManyToOneExpr(parent, _linkColumns);
@@ -447,6 +451,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the insert.
    */
+  @Override
   public void generateInsertColumns(ArrayList<String> columns)
   {
     if (_isInsert && _aliasField == null)
@@ -456,6 +461,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateLoadSelect(Table table, String id)
   {
     if (_aliasField != null)
@@ -475,6 +481,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateSelect(String id)
   {
     if (_aliasField != null)
@@ -486,6 +493,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the update set clause
    */
+  @Override
   public void generateUpdate(CharBuffer sql)
   {
     if (_aliasField != null)
@@ -499,6 +507,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates any prologue.
    */
+  @Override
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
     throws IOException
   {
@@ -528,6 +537,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates loading code
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
@@ -581,20 +591,6 @@ public class EntityManyToOneField extends CascadableField {
     throws IOException
   {
     if (! isLazy()) {
-      int group = _targetLoadIndex / 64;
-      long mask = (1L << (_targetLoadIndex % 64));
-      String loadVar = "__caucho_loadMask_" + group;
-
-      // commented out jpa/0l40
-      // out.println(loadVar + " |= " + mask + "L;");
-
-      String javaType = getJavaTypeName();
-
-      // jpa/0o05
-      String indexS = "_" + group + "_" + index;
-
-      // generateLoadProperty(out, indexS, "__caucho_session");
-
       out.println(getGetterName() + "();");
     }
 
@@ -604,6 +600,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the get property.
    */
+  @Override
   public void generateGetProperty(JavaWriter out)
     throws IOException
   {
@@ -689,8 +686,6 @@ public class EntityManyToOneField extends CascadableField {
                                      String session)
     throws IOException
   {
-    String javaType = getJavaTypeName();
-
     boolean isJPA = getRelatedType().getPersistenceUnit().isJPA();
 
     String targetTypeExt = _targetType.getInstanceClassName();
@@ -859,6 +854,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Updates the cached copy.
    */
+  @Override
   public void generateCopyUpdateObject(JavaWriter out,
                                        String dst, String src,
                                        int updateIndex)
@@ -889,6 +885,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Updates the cached copy.
    */
+  @Override
   public void generateCopyLoadObject(JavaWriter out,
                                      String dst, String src,
                                      int updateIndex)
@@ -1036,6 +1033,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Updates the cached copy.
    */
+  @Override
   public void generateCopyMergeObject(JavaWriter out,
                                       String dst, String src,
                                       int updateIndex)
@@ -1148,10 +1146,10 @@ public class EntityManyToOneField extends CascadableField {
       out.println("if ((" + loadVar + " & " + loadMask + "L) == 0 && __caucho_session != null) {");
       // ejb/0602
       out.println("  __caucho_load_select_" + group + "(__caucho_session);");
-      out.println();
+      //out.println();
       // jpa/0j5f
-      out.println("  if (__caucho_session.isActiveTransaction())");
-      out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
+      //out.println("  if (__caucho_session.isActiveTransaction())");
+      //out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
       out.println("}");
 
       out.println();

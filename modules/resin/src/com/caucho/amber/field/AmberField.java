@@ -233,6 +233,17 @@ public interface AmberField {
     throws IOException;
 
   /**
+   * Generates loading code
+   */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException;
+
+  /**
+   * Generates loading code
+   */
+  public void generateNativeColumnNames(ArrayList<String> names);
+
+  /**
    * Generates loading cache
    */
   public void generateSet(JavaWriter out, String obj)

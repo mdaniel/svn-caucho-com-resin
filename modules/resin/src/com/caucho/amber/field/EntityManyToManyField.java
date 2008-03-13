@@ -237,6 +237,20 @@ public class EntityManyToManyField extends AssociationField {
   }
 
   /**
+   * Generates loading code after the basic fields.
+   */
+  @Override
+  public int generatePostLoadSelect(JavaWriter out, int index)
+    throws IOException
+  {
+    if (! isLazy()) {
+      out.println(getGetterName() + "();");
+    }
+
+    return ++index;
+  }
+
+  /**
    * Creates the expression for the field.
    */
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)

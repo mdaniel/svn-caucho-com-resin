@@ -844,14 +844,20 @@ public class QueryImpl implements Query {
 
     Entity entity = null;
 
-    int consumed;
+    int consumed = 0;
 
     try {
       // jpa/0y14
       entity = (Entity) _aConn.load(className, rs.getObject(oldIndex));
 
+      ArrayList<String> columnNameList = new ArrayList<String>();
+      entityType.generateNativeColumnNames(columnNameList);
+      String []columnNames = new String[columnNameList.size()];
+      columnNameList.toArray(columnNames);
+      entity.__caucho_load_native(rs, columnNames);
+
       // jpa/0y10
-      consumed = entity.__caucho_load(_aConn, rs, oldIndex + keyLength);
+      //consumed = entity.__caucho_load(_aConn, rs, oldIndex + keyLength);
     } catch (Exception e) {
       // jpa/0y1a: invalid query.
       throw new IllegalStateException(L.l("Unable to load an entity of class '{0}' using a native query. When mapped to @EntityResult, a native query should select all fields for the corresponding entity in '{1}'", className, _nativeSql));

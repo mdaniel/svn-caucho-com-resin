@@ -429,7 +429,7 @@ public class ConnectorResource implements EnvironmentListener {
   /**
    * Handles the case where the environment config phase
    */
-  public void environmentConfig(EnvironmentClassLoader loader)
+  public void environmentBind(EnvironmentClassLoader loader)
   {
   }
   

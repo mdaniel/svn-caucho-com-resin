@@ -59,6 +59,5 @@ public class PojoView extends View {
   public void generate(JavaWriter out)
     throws IOException
   {
-    
   }
 }
