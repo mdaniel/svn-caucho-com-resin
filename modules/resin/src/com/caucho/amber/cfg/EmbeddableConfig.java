@@ -43,6 +43,11 @@ public class EmbeddableConfig extends AbstractEnhancedConfig {
   private String _description;
   private EmbeddableAttributesConfig _attributes;
 
+  EmbeddableConfig(String name)
+  {
+    super(name);
+  }
+
   public String getDescription()
   {
     return _description;

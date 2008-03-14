@@ -436,6 +436,14 @@ public class EmbeddedSubField implements AmberField {
   }
 
   /**
+   * Override the field
+   */
+  public AmberField override(AbstractStatefulType entityType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Generates the table create.
    */
   public String generateCreateTableSQL(AmberPersistenceUnit manager)

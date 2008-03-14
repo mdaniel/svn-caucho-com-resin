@@ -53,9 +53,9 @@ public class MappedSuperIntrospector extends BaseConfigIntrospector {
   /**
    * Creates the introspector.
    */
-  public MappedSuperIntrospector(AmberPersistenceUnit persistenceUnit)
+  public MappedSuperIntrospector(AmberConfigManager manager)
   {
-    super(persistenceUnit);
+    super(manager);
   }
 
   /**

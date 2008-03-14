@@ -39,7 +39,6 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.util.L10N;
 import javax.persistence.*;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 

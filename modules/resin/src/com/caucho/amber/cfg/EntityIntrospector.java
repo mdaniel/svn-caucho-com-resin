@@ -52,7 +52,7 @@ import java.util.logging.Logger;
 /**
  * Configuration for an entity bean
  */
-class EntityIntrospector extends BaseConfigIntrospector {
+public class EntityIntrospector extends BaseConfigIntrospector {
   private static final L10N L = new L10N(EntityIntrospector.class);
   private static final Logger log
     = Logger.getLogger(EntityIntrospector.class.getName());

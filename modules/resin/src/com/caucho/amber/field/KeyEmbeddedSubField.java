@@ -29,26 +29,13 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.expr.AmberExpr;
-import com.caucho.amber.expr.EmbeddedExpr;
-import com.caucho.amber.expr.PathExpr;
-import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
-import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Represents the sub-field of an embedded type.
