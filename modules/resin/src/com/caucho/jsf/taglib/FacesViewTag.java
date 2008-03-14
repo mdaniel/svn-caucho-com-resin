@@ -31,29 +31,34 @@ package com.caucho.jsf.taglib;
 
 import java.io.*;
 import java.util.logging.*;
+import java.util.Locale;
 
 import javax.el.*;
 
-import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
-import javax.faces.render.*;
 import javax.faces.webapp.*;
+import javax.faces.event.PhaseListener;
+import javax.faces.event.PhaseEvent;
+import javax.faces.event.PhaseId;
 
 import javax.servlet.*;
 import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import javax.servlet.jsp.jstl.core.Config;
 
 import com.caucho.jsf.context.*;
+import com.caucho.util.L10N;
 
 /**
  * The f:view tag
  */
-public class FacesViewTag extends UIComponentBodyTag
+public class FacesViewTag extends UIComponentELTag
 {
+  private static final L10N L = new L10N(FacesViewTag.class);
+
   private static final Logger log
     = Logger.getLogger(FacesViewTag.class.getName());
-  
+
   private ValueExpression _renderKitId;
   private ValueExpression _locale;
   private MethodExpression _beforePhase;
@@ -110,12 +115,19 @@ public class FacesViewTag extends UIComponentBodyTag
 
     try {
       if (response instanceof JspResponseWrapper)
-	((JspResponseWrapper) response).flushResponse();
-    } catch (IOException e) {
+        ((JspResponseWrapper) response).flushResponse();
+    }
+    catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-    
-    return super.doStartTag();
+
+    int doStartValue = super.doStartTag();
+
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    pageContext.getResponse().setLocale(context.getViewRoot().getLocale());
+
+    return doStartValue;
   }
 
   public int doEndTag()
@@ -123,4 +135,179 @@ public class FacesViewTag extends UIComponentBodyTag
   {
     return super.doEndTag();
   }
+
+  protected void setProperties(UIComponent component)
+  {
+    boolean isFiner = log.isLoggable(Level.FINER);
+
+
+    UIViewRoot viewRoot = (UIViewRoot) component;
+
+    if (_locale != null) {
+      if (isFiner)
+        log.log(Level.FINE,
+                L.l("{0}: setting locale to {1}", viewRoot, _locale));
+
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      Locale viewLocale = null;
+
+      viewRoot.setValueExpression("locale", _locale);
+
+      if (_locale.isLiteralText()) {
+        final String locale = _locale.getValue(context.getELContext())
+          .toString()
+          .trim();
+
+        viewLocale = inferLocale(locale);
+      }
+      else {
+        Object object = _locale.getValue(context.getELContext());
+
+        if (object instanceof Locale)
+          viewLocale = (Locale) object;
+        else if (object instanceof String)
+          viewLocale = inferLocale(object.toString());
+      }
+
+      if (viewLocale != null) {
+        viewRoot.setLocale(viewLocale);
+
+        Config.set(pageContext.getRequest(), Config.FMT_LOCALE, viewLocale);
+      }
+      else {
+        log.log(Level.SEVERE,
+                L.l("{0}: can not convert locale expression {1} to locale",
+                    viewRoot,
+                    _locale));
+      }
+    }
+
+    if (_beforePhase != null) {
+      viewRoot.addPhaseListener(new BeforePhaseListenerAdapter(_beforePhase));
+    }
+
+    if (_afterPhase != null) {
+      viewRoot.addPhaseListener(new AfterPhaseListenerAdapter(_afterPhase));
+    }
+
+  }
+
+  private Locale inferLocale(final String locale)
+  {
+    if (locale.length() == 2) {
+      return new Locale(locale);
+    }
+    else if (locale.length() == 5 &&
+             ('-' == locale.charAt(2) || '_' == locale.charAt(2))) {
+      return new Locale(locale.substring(0, 2), locale.substring(3));
+    }
+    else if (locale.length() > 6 &&
+             ('-' == locale.charAt(2) || '_' == locale.charAt(2)) &&
+             ('-' == locale.charAt(5) || '_' == locale.charAt(5))) {
+      return new Locale(locale.substring(0, 2),
+                        locale.substring(3, 5),
+                        locale.substring(6));
+    }
+    else {
+      return null;
+    }
+
+  }
+
+
+  public static class BeforePhaseListenerAdapter
+    extends AbstractPhaseListenerAdapter
+  {
+    public BeforePhaseListenerAdapter()
+    {
+      super();
+    }
+
+    public BeforePhaseListenerAdapter(MethodExpression methodExpression)
+    {
+      super(methodExpression);
+    }
+
+    @Override
+    public void beforePhase(PhaseEvent event)
+    {
+      if (PhaseId.RESTORE_VIEW.getOrdinal() != event.getPhaseId().getOrdinal())
+        _methodExpression.invoke(FacesContext.getCurrentInstance().getELContext(),
+                                 new Object[]{event});
+    }
+  }
+
+  public static class AfterPhaseListenerAdapter
+    extends AbstractPhaseListenerAdapter
+  {
+    public AfterPhaseListenerAdapter()
+    {
+      super();
+    }
+
+    public AfterPhaseListenerAdapter(MethodExpression methodExpression)
+    {
+      super(methodExpression);
+    }
+
+    @Override
+    public void afterPhase(PhaseEvent event)
+    {
+      if (PhaseId.RESTORE_VIEW.getOrdinal() != event.getPhaseId().getOrdinal())
+        _methodExpression.invoke(FacesContext.getCurrentInstance().getELContext(),
+                                 new Object[]{event});
+    }
+  }
+
+  public abstract static class AbstractPhaseListenerAdapter
+    implements PhaseListener, StateHolder
+  {
+    protected MethodExpression _methodExpression;
+    private boolean _transient;
+
+    public AbstractPhaseListenerAdapter(MethodExpression methodExpression)
+    {
+      _methodExpression = methodExpression;
+    }
+
+    public AbstractPhaseListenerAdapter()
+    {
+    }
+
+    public void afterPhase(PhaseEvent event)
+    {
+    }
+
+    public void beforePhase(PhaseEvent event)
+    {
+    }
+
+    public PhaseId getPhaseId()
+    {
+      return PhaseId.ANY_PHASE;
+    }
+
+    public Object saveState(FacesContext context)
+    {
+      return _methodExpression;
+    }
+
+    public void restoreState(FacesContext context, Object state)
+    {
+      _methodExpression = (MethodExpression) state;
+
+    }
+
+    public boolean isTransient()
+    {
+      return _transient;
+    }
+
+    public void setTransient(boolean isTransient)
+    {
+      _transient = isTransient;
+    }
+  }
+
 }
