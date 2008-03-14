@@ -34,12 +34,12 @@ import com.caucho.amber.expr.IdExpr;
 import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 
 public class FromItem {
   private String _name;
 
-  private SelfEntityType _entityType;
+  private EntityType _entityType;
 
   private Table _table;
 
@@ -60,7 +60,7 @@ public class FromItem {
   private JoinSemantics _joinSemantics
     = JoinSemantics.UNKNOWN;
 
-  FromItem(SelfEntityType entityType,
+  FromItem(EntityType entityType,
            Table table,
            String name,
            int index)
@@ -138,22 +138,22 @@ public class FromItem {
   /**
    * Gets the entity class.
    */
-  public SelfEntityType getEntityType()
+  public EntityType getEntityType()
   {
     if (_entityType != null) {
       // jpa/0l12
       return _entityType;
     }
 
-    return (SelfEntityType) getTableType();
+    return (EntityType) getTableType();
   }
 
   /**
    * Gets the table type
    */
-  public SelfEntityType getTableType()
+  public EntityType getTableType()
   {
-    return (SelfEntityType) _table.getType();
+    return (EntityType) _table.getType();
   }
 
   /**
@@ -251,7 +251,7 @@ public class FromItem {
    */
   public AmberEntityHome getEntityHome()
   {
-    return ((SelfEntityType) getTableType()).getHome();
+    return ((EntityType) getTableType()).getHome();
   }
 
   /**

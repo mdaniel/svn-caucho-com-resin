@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -57,7 +58,7 @@ public class AmberEntityHome {
   private static final Logger log = Log.open(AmberEntityHome.class);
 
   private AmberPersistenceUnit _manager;
-  private SelfEntityType _entityType;
+  private EntityType _entityType;
 
   private EntityFactory _entityFactory = new EntityFactory();
 
@@ -72,7 +73,7 @@ public class AmberEntityHome {
 
   private Method _cauchoGetBeanMethod;
 
-  public AmberEntityHome(AmberPersistenceUnit manager, SelfEntityType type)
+  public AmberEntityHome(AmberPersistenceUnit manager, EntityType type)
   {
     _manager = manager;
     _entityType = type;
@@ -104,7 +105,7 @@ public class AmberEntityHome {
   /**
    * Returns the entity type
    */
-  public SelfEntityType getEntityType()
+  public EntityType getEntityType()
   {
     return _entityType;
   }
@@ -112,9 +113,9 @@ public class AmberEntityHome {
   /**
    * Returns the entity type
    */
-  public SelfEntityType getRootType()
+  public EntityType getRootType()
   {
-    return (SelfEntityType) _entityType.getRootType();
+    return (EntityType) _entityType.getRootType();
   }
 
   /**
@@ -613,8 +614,8 @@ public class AmberEntityHome {
     item = _manager.getEntity(getRootType(), key);
 
     if (item == null) {
-      SelfEntityType subEntity
-        = (SelfEntityType) _entityType.getSubClass(discriminator);
+      EntityType subEntity
+        = (EntityType) _entityType.getSubClass(discriminator);
 
       Entity cacheEntity = subEntity.createBean();
 
@@ -655,7 +656,7 @@ public class AmberEntityHome {
       throw new AmberRuntimeException(L.l("{0} is not a valid inheritance key.",
                                           key));
 
-    SelfEntityType subType = (SelfEntityType) _entityType.getSubClass(discriminator);
+    EntityType subType = (EntityType) _entityType.getSubClass(discriminator);
 
     return subType.getHome().newEntity(key);
   }

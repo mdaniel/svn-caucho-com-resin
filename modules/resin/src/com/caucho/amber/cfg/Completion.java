@@ -19,39 +19,56 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package com.caucho.amber.entity;
+package com.caucho.amber.cfg;
 
-import com.caucho.amber.query.ResultSetCacheChunk;
-import com.caucho.amber.type.EntityType;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
-import java.util.logging.Logger;
+import com.caucho.amber.field.*;
+import com.caucho.amber.type.*;
+import com.caucho.bytecode.*;
+import com.caucho.config.ConfigException;
+
+import javax.persistence.*;
+
 
 /**
- * Code to update the cache value on the completion of a transaction.
+ * completes for dependent
  */
-public interface AmberCompletion {
-  /**
-   * Code when the transaction completes.
-   *
-   * @return true if the entry should be deleted.
-   */
-  public boolean complete(EntityType rootType,
-                          Object key,
-                          EntityItem entityItem);
+public class Completion {
+  protected final BaseConfigIntrospector _base;
+  
+  protected EntityType _entityType;
 
-  /**
-   * Code to update caches when a transaction completes.
-   *
-   * @return true if the entry should be deleted.
-   */
-  public boolean complete(ResultSetCacheChunk cacheChunk);
+  protected Completion(BaseConfigIntrospector base,
+		       EntityType entityType,
+		       String fieldName)
+  {
+    _base = base;
+    _entityType = entityType;
+    _entityType.addCompletionField(fieldName);
+  }
+
+  protected Completion(BaseConfigIntrospector base,
+		       EntityType entityType)
+  {
+    _base = base;
+    _entityType = entityType;
+  }
+
+  EntityType getRelatedType()
+  {
+    return _entityType;
+  }
+
+  void complete()
+    throws ConfigException
+  {
+  }
 }

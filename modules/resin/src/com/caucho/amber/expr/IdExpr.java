@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -86,7 +86,7 @@ public class IdExpr extends AbstractPathExpr {
   /**
    * Returns the entity class.
    */
-  public SelfEntityType getTargetType()
+  public EntityType getTargetType()
   {
     return _fromItem.getEntityType();
   }

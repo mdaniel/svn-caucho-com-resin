@@ -30,7 +30,7 @@
 package com.caucho.amber.entity;
 
 import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,7 +54,7 @@ public interface Entity extends MappedSuperclass
    * Makes the entity persistent.
    */
   public boolean __caucho_makePersistent(AmberConnection aConn,
-                                         SelfEntityType entityType)
+                                         EntityType entityType)
     throws SQLException;
 
   /**
@@ -97,14 +97,14 @@ public interface Entity extends MappedSuperclass
    * Creates the entity in the database, making it persistent-new.
    */
   public boolean __caucho_create(AmberConnection aConn,
-                                 SelfEntityType entityType)
+                                 EntityType entityType)
     throws SQLException;
 
   /**
    * Changes the entity state to P_PERSISTING, but does not flush to database.
    */
   public boolean __caucho_lazy_create(AmberConnection aConn,
-                                      SelfEntityType entityType)
+                                      EntityType entityType)
     throws SQLException;
 
   /**
@@ -140,7 +140,7 @@ public interface Entity extends MappedSuperclass
   /**
    * Get the entity type.
    */
-  public SelfEntityType __caucho_getEntityType();
+  public EntityType __caucho_getEntityType();
 
   /**
    * Get the entity state.

@@ -40,7 +40,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -160,11 +160,11 @@ public class CmrManyToOne extends CmrRelation {
       
     if (_amberManyToOne == null) {
       try {
-	SelfEntityType sourceType = getEntity().getEntityType();
+	EntityType sourceType = getEntity().getEntityType();
 	
 	_amberManyToOne = new EntityManyToOneField(sourceType, getName());
 
-	SelfEntityType targetType = _targetBean.getEntityType();
+	EntityType targetType = _targetBean.getEntityType();
 	_amberManyToOne.setType(targetType);
 
 	_amberManyToOne.setLinkColumns(calculateColumns(sourceType,
@@ -197,13 +197,13 @@ public class CmrManyToOne extends CmrRelation {
   /**
    * Amber creating the id field.
    */
-  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, SelfEntityType type)
+  public IdField createId(AmberPersistenceUnit amberPersistenceUnit, EntityType type)
     throws ConfigException
   {
     String fieldName = getName();
 
-    SelfEntityType sourceType = getEntity().getEntityType();
-    SelfEntityType targetType = getTargetBean().getEntityType();
+    EntityType sourceType = getEntity().getEntityType();
+    EntityType targetType = getTargetBean().getEntityType();
 
     /*
     columns.add(new ForeignColumn(sqlName, targetType.getId().getKeys().get(0)));
@@ -222,11 +222,11 @@ public class CmrManyToOne extends CmrRelation {
   /**
    * Creates the amber type.
    */
-  public AmberField assembleAmber(SelfEntityType type)
+  public AmberField assembleAmber(EntityType type)
     throws ConfigException
   {
     AmberPersistenceUnit manager = type.getPersistenceUnit();
-    SelfEntityType targetType = getTargetBean().getEntityType();
+    EntityType targetType = getTargetBean().getEntityType();
 
     if (_isDependent) {
       DependentEntityOneToOneField oneToOne;
@@ -256,8 +256,8 @@ public class CmrManyToOne extends CmrRelation {
     }
   }
 
-  private LinkColumns calculateColumns(SelfEntityType type,
-				       SelfEntityType targetType)
+  private LinkColumns calculateColumns(EntityType type,
+				       EntityType targetType)
     throws ConfigException
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
@@ -338,7 +338,7 @@ public class CmrManyToOne extends CmrRelation {
 				  fieldName));
   }
 
-  private String getFieldName(SelfEntityType type, String sqlName)
+  private String getFieldName(EntityType type, String sqlName)
     throws ConfigException
   {
     for (IdField field : type.getId().getKeys()) {
@@ -370,7 +370,7 @@ public class CmrManyToOne extends CmrRelation {
       EntityManyToOneField amberTarget = targetManyToOne.getAmberManyToOne();
 
       if (_amberDependentOneToOne == null) {
-	SelfEntityType type = getEntity().getEntityType();
+	EntityType type = getEntity().getEntityType();
 	
 	DependentEntityOneToOneField oneToOne;
 	oneToOne = new DependentEntityOneToOneField(type, getName());

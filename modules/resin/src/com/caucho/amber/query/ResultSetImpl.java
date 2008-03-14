@@ -34,7 +34,7 @@ import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.LoadEntityExpr;
 import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 
 import java.io.InputStream;
@@ -1100,7 +1100,7 @@ public class ResultSetImpl implements ResultSet {
 
         AmberExpr expr = _resultList.get(column - 1);
 
-        SelfEntityType entityType = entity.__caucho_getEntityType();
+        EntityType entityType = entity.__caucho_getEntityType();
 
         boolean forceLoad = false;
 

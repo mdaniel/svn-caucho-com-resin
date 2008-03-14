@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.ql;
 
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.util.CharBuffer;
@@ -146,7 +146,7 @@ class IdExpr extends PathExpr {
   {
     EjbEntityBean bean = getItemBean();
 
-    SelfEntityType type = bean.getEntityType();
+    EntityType type = bean.getEntityType();
     
     return type.getId().getKeyCount();
   }
@@ -236,7 +236,7 @@ class IdExpr extends PathExpr {
   {
     EjbEntityBean bean = getItemBean();
 
-    SelfEntityType type = bean.getEntityType();
+    EntityType type = bean.getEntityType();
     
     cb.append(getName());
     cb.append(".");

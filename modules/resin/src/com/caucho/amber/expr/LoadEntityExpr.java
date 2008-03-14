@@ -36,7 +36,7 @@ import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -67,9 +67,9 @@ public class LoadEntityExpr extends LoadExpr {
   /**
    * Returns the entity type.
    */
-  public SelfEntityType getEntityType()
+  public EntityType getEntityType()
   {
-    return (SelfEntityType) getType();
+    return (EntityType) getType();
   }
 
   /**
@@ -82,7 +82,7 @@ public class LoadEntityExpr extends LoadExpr {
     if (_fromItem == null)
       throw new NullPointerException(_expr.getClass().getName() + " " + _expr);
 
-    SelfEntityType type = getEntityType();
+    EntityType type = getEntityType();
 
     if (type.getSecondaryTables().size() > 0) {
       for (AmberField field : type.getFields()) {
@@ -155,7 +155,7 @@ public class LoadEntityExpr extends LoadExpr {
   {
     // jpa/0h13, jpa/1160
 
-    SelfEntityType entityType = getEntityType();
+    EntityType entityType = getEntityType();
 
     EntityItem item = entityType.getHome().findItem(aConn, rs, index);
 

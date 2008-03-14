@@ -31,7 +31,7 @@ package com.caucho.amber.table;
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -478,7 +478,7 @@ public class LinkColumns {
         // in theory, this could cause a loop, but we're ignoring that
         // case for now
 
-        SelfEntityType entityType = (SelfEntityType) _sourceTable.getType();
+        EntityType entityType = (EntityType) _sourceTable.getType();
 
         CharBuffer cb = new CharBuffer();
 

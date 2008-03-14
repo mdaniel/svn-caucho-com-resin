@@ -31,6 +31,8 @@ package com.caucho.amber.cfg;
 
 import java.util.ArrayList;
 
+import com.caucho.amber.type.EntityType;
+
 /**
  * <entity> tag in the orm.xml
  */
@@ -55,6 +57,29 @@ public class EntityConfig extends MappedSuperclassConfig {
   private ArrayList<AssociationOverrideConfig> _associationOverrideList
     = new ArrayList<AssociationOverrideConfig>();
 
+  private EntityType _entityType;
+  private EntityIntrospector _introspector;
+
+  EntityConfig(String name)
+  {
+    super(name);
+  }
+
+  EntityConfig(String name,
+	       EntityIntrospector introspector,
+	       EntityType entityType)
+  {
+    super(name);
+    
+    _entityType = entityType;
+    _introspector = introspector;
+  }
+
+  BaseConfigIntrospector getIntrospector()
+  {
+    return _introspector;
+  }
+
   /**
    * Returns the entity name.
    */
@@ -69,6 +94,22 @@ public class EntityConfig extends MappedSuperclassConfig {
   public void setName(String name)
   {
     _name = name;
+  }
+
+  /**
+   * Returns the configured entity type
+   */
+  public EntityType getEntityType()
+  {
+    return _entityType;
+  }
+
+  /**
+   * Returns the configured entity type
+   */
+  public void setEntityType(EntityType entityType)
+  {
+    _entityType = entityType;
   }
 
   public TableConfig getTable()

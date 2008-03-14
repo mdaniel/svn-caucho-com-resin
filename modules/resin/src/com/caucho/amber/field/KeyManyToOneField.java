@@ -35,7 +35,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
@@ -93,9 +93,9 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    * Returns the target type as entity (ejb 2.1)
    * See com.caucho.ejb.ql.Expr
    */
-  public SelfEntityType getEntityType()
+  public EntityType getEntityType()
   {
-    return (SelfEntityType) getEntityTargetType();
+    return (EntityType) getEntityTargetType();
   }
 
   public Type getType()

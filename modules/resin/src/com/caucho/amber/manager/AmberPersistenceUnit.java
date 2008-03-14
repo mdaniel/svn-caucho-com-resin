@@ -31,9 +31,8 @@ package com.caucho.amber.manager;
 
 import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberRuntimeException;
-import com.caucho.amber.cfg.BaseConfigIntrospector;
+import com.caucho.amber.cfg.AmberConfigManager;
 import com.caucho.amber.cfg.EmbeddableIntrospector;
-import com.caucho.amber.cfg.EntityIntrospector;
 import com.caucho.amber.cfg.EntityMappingsConfig;
 import com.caucho.amber.cfg.MappedSuperIntrospector;
 import com.caucho.amber.cfg.NamedNativeQueryConfig;
@@ -150,9 +149,9 @@ public class AmberPersistenceUnit {
 
   private EntityKey _entityKey = new EntityKey();
 
-  private ArrayList<SelfEntityType> _lazyConfigure = new ArrayList<SelfEntityType>();
+  private ArrayList<EntityType> _lazyConfigure = new ArrayList<EntityType>();
 
-  private ArrayList<SelfEntityType> _lazyGenerate = new ArrayList<SelfEntityType>();
+  private ArrayList<EntityType> _lazyGenerate = new ArrayList<EntityType>();
   private ArrayList<AmberEntityHome> _lazyHomeInit
     = new ArrayList<AmberEntityHome>();
   private ArrayList<Table> _lazyTable = new ArrayList<Table>();
@@ -177,7 +176,8 @@ public class AmberPersistenceUnit {
   private ArrayList<ListenerType> _defaultListeners
     = new ArrayList<ListenerType>();
 
-  private EntityIntrospector _entityIntrospector;
+  private AmberConfigManager _configManager;
+  
   private EmbeddableIntrospector _embeddableIntrospector;
   private MappedSuperIntrospector _mappedSuperIntrospector;
 
@@ -204,9 +204,7 @@ public class AmberPersistenceUnit {
 
     _createDatabaseTables = container.getCreateDatabaseTables();
 
-    _embeddableIntrospector = new EmbeddableIntrospector(this);
-    _entityIntrospector = new EntityIntrospector(this);
-    _mappedSuperIntrospector = new MappedSuperIntrospector(this);
+    _configManager = new AmberConfigManager(this);
 
     // needed to support JDK 1.4 compatibility
     try {
@@ -488,6 +486,11 @@ public class AmberPersistenceUnit {
       }
     }
 
+    EntityType entityType = _configManager.introspectEntity(type);
+
+    _amberContainer.addEntity(className, entityType);
+    
+    /*
     boolean isEntity = _entityIntrospector.isEntity(type);
     boolean isEmbeddable = _embeddableIntrospector.isEmbeddable(type);
     boolean isMappedSuper = _mappedSuperIntrospector.isMappedSuper(type);
@@ -499,9 +502,9 @@ public class AmberPersistenceUnit {
 
     try {
       if (isEntity) {
-        SelfEntityType entityType = (SelfEntityType) _entityIntrospector.introspect(type);
+        EntityType entityType = (EntityType) _entityIntrospector.introspect(type);
 
-        // SelfEntityType entity = createEntity(type);
+        // EntityType entity = createEntity(type);
 
         _amberContainer.addEntity(className, entityType);
       }
@@ -522,6 +525,7 @@ public class AmberPersistenceUnit {
 
       throw ConfigException.create(e);
     }
+    */
   }
 
   /**
@@ -596,7 +600,7 @@ public class AmberPersistenceUnit {
   /**
    * Adds an entity.
    */
-  public SelfEntityType createEntity(JClass beanClass)
+  public EntityType createEntity(JClass beanClass)
   {
     return createEntity(beanClass.getName(), beanClass);
   }
@@ -604,19 +608,19 @@ public class AmberPersistenceUnit {
   /**
    * Adds an entity.
    */
-  public SelfEntityType createEntity(String name,
+  public EntityType createEntity(String name,
                                  JClass beanClass)
   {
-    SelfEntityType entityType = (SelfEntityType) _typeManager.get(name);
+    EntityType entityType = (EntityType) _typeManager.get(name);
 
     if (entityType != null)
       return entityType;
 
     // ejb/0al2
-    // entityType = (SelfEntityType) _typeManager.get(beanClass.getName());
+    // entityType = (EntityType) _typeManager.get(beanClass.getName());
 
     if (entityType == null) {
-      // The parent type can be a @MappedSuperclass or an @SelfEntityType.
+      // The parent type can be a @MappedSuperclass or an @EntityType.
       EntityType parentType = null;
 
       for (JClass parentClass = beanClass.getSuperClass();
@@ -628,7 +632,7 @@ public class AmberPersistenceUnit {
       if (parentType != null)
         entityType = new SubEntityType(this, parentType);
       else
-        entityType = new SelfEntityType(this);
+        entityType = new EntityType(this);
     }
 
     // _typeManager.put(name, entityType);
@@ -947,7 +951,7 @@ public class AmberPersistenceUnit {
       }
 
       while (_lazyGenerate.size() > 0) {
-        SelfEntityType entityType = _lazyGenerate.remove(0);
+        EntityType entityType = _lazyGenerate.remove(0);
 
 	type = entityType;
 
@@ -1028,12 +1032,12 @@ public class AmberPersistenceUnit {
     configure();
 
     while (_lazyGenerate.size() > 0) {
-      SelfEntityType type = _lazyGenerate.remove(0);
+      EntityType type = _lazyGenerate.remove(0);
 
       type.init();
 
-      if (type instanceof SelfEntityType) {
-        SelfEntityType entityType = (SelfEntityType) type;
+      if (type instanceof EntityType) {
+        EntityType entityType = (EntityType) type;
 
         if (! entityType.isGenerated()) {
           if (entityType.getInstanceClassName() == null)
@@ -1110,19 +1114,19 @@ public class AmberPersistenceUnit {
   public void configure()
     throws Exception
   {
-    _embeddableIntrospector.configure();
-    _mappedSuperIntrospector.configure();
+    //_embeddableIntrospector.configure();
+    //_mappedSuperIntrospector.configure();
 
-    _entityIntrospector.configure();
+    _configManager.configure();
 
     while (_lazyConfigure.size() > 0) {
-      SelfEntityType type = _lazyConfigure.remove(0);
+      EntityType type = _lazyConfigure.remove(0);
 
       if (type.startConfigure()) {
         // getEnvManager().getGenerator().configure(type);
       }
 
-      _entityIntrospector.configure();
+      _configManager.configure();
 
       if (! _lazyGenerate.contains(type))
         _lazyGenerate.add(type);
@@ -1183,12 +1187,12 @@ public class AmberPersistenceUnit {
   /**
    * Returns a matching entity.
    */
-  public SelfEntityType getEntityType(String className)
+  public EntityType getEntityType(String className)
   {
     Type type = _typeManager.get(className);
 
-    if (type instanceof SelfEntityType)
-      return (SelfEntityType) type;
+    if (type instanceof EntityType)
+      return (EntityType) type;
     else
       return null;
   }
@@ -1209,7 +1213,7 @@ public class AmberPersistenceUnit {
   /**
    * Returns a matching entity.
    */
-  public SelfEntityType getEntityByInstanceClass(String className)
+  public EntityType getEntityByInstanceClass(String className)
   {
     return _typeManager.getEntityByInstanceClass(className);
   }
@@ -1219,8 +1223,8 @@ public class AmberPersistenceUnit {
    */
   public void updateFlushPriority()
   {
-    ArrayList<SelfEntityType> updatingEntities
-      = new ArrayList<SelfEntityType>();
+    ArrayList<EntityType> updatingEntities
+      = new ArrayList<EntityType>();
 
     try {
       HashMap<String,Type> typeMap = _typeManager.getTypeMap();
@@ -1232,8 +1236,8 @@ public class AmberPersistenceUnit {
       while (it.hasNext()) {
         Type type = (Type) it.next();
 
-        if (type instanceof SelfEntityType) {
-          SelfEntityType entityType = (SelfEntityType) type;
+        if (type instanceof EntityType) {
+          EntityType entityType = (EntityType) type;
 
           if (updatingEntities.contains(entityType))
             continue;
@@ -1328,11 +1332,11 @@ public class AmberPersistenceUnit {
    */
   public void setEntityMappingsList(ArrayList<EntityMappingsConfig> entityMappingsList)
   {
-    _entityMappingsList = entityMappingsList;
+    //_entityMappingsList = entityMappingsList;
 
-    _entityIntrospector.setEntityMappingsList(_entityMappingsList);
+    //_entityIntrospector.setEntityMappingsList(_entityMappingsList);
 
-    _mappedSuperIntrospector.setEntityMappingsList(_entityMappingsList);
+    //_mappedSuperIntrospector.setEntityMappingsList(_entityMappingsList);
   }
 
   /**
@@ -1343,11 +1347,13 @@ public class AmberPersistenceUnit {
   {
     initLoaders();
 
+    /*
     if (_entityMappingsList != null) {
       BaseConfigIntrospector introspector = new BaseConfigIntrospector();
 
       introspector.initMetaData(_entityMappingsList, this);
     }
+    */
 
     if (_dataSource == null)
       return;
@@ -1537,7 +1543,7 @@ public class AmberPersistenceUnit {
 
     String className = entity.getClass().getName();
 
-    SelfEntityType entityType = (SelfEntityType) _typeManager.get(className);
+    EntityType entityType = (EntityType) _typeManager.get(className);
 
     if (! entityType.getExcludeDefaultListeners()) {
       for (ListenerType listenerType : _defaultListeners) {
@@ -1601,7 +1607,7 @@ public class AmberPersistenceUnit {
   /**
    * Returns the entity with the given key.
    */
-  public EntityItem getEntity(SelfEntityType rootType, Object key)
+  public EntityItem getEntity(EntityType rootType, Object key)
   {
     SoftReference<EntityItem> ref;
 
@@ -1634,7 +1640,7 @@ public class AmberPersistenceUnit {
   /**
    * Sets the entity result.
    */
-  public EntityItem putEntity(SelfEntityType rootType,
+  public EntityItem putEntity(EntityType rootType,
                               Object key,
                               EntityItem entity)
   {
@@ -1674,7 +1680,7 @@ public class AmberPersistenceUnit {
   /**
    * Remove the entity result.
    */
-  public EntityItem removeEntity(SelfEntityType rootType, Object key)
+  public EntityItem removeEntity(EntityType rootType, Object key)
   {
     SoftReference<EntityItem> ref;
 
@@ -1692,7 +1698,7 @@ public class AmberPersistenceUnit {
   /**
    * Updates the cache item after commit.
    */
-  public EntityItem updateCacheItem(SelfEntityType rootType,
+  public EntityItem updateCacheItem(EntityType rootType,
                                     Object key,
                                     Entity contextEntity,
                                     EntityItem cacheItem)
@@ -1774,7 +1780,7 @@ public class AmberPersistenceUnit {
           continue;
 
 	AmberEntityHome entityHome = value.getEntityHome();
-        SelfEntityType entityRoot = entityHome.getEntityType();
+        EntityType entityRoot = entityHome.getEntityType();
         Object entityKey = key.getKey();
 
         for (int i = 0; i < size; i++) {

@@ -53,9 +53,9 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
   /**
    * Creates the introspector.
    */
-  public EmbeddableIntrospector(AmberPersistenceUnit persistenceUnit)
+  public EmbeddableIntrospector(AmberConfigManager configManager)
   {
-    super(persistenceUnit);
+    super(configManager);
   }
 
   /**

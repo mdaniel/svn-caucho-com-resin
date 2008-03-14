@@ -28,7 +28,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
@@ -42,13 +42,13 @@ public class Discriminator extends PropertyField {
   private static final L10N L = new L10N(Discriminator.class);
   protected static final Logger log = Log.open(Discriminator.class);
 
-  public Discriminator(SelfEntityType entityType, String name)
+  public Discriminator(EntityType entityType, String name)
     throws ConfigException
   {
     super(entityType, name);
   }
 
-  public Discriminator(SelfEntityType entityType)
+  public Discriminator(EntityType entityType)
   {
     super(entityType);
   }

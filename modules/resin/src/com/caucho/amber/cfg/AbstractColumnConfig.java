@@ -33,7 +33,6 @@ package com.caucho.amber.cfg;
  * Base class for <column> and <join-column> tag in the orm.xml
  */
 abstract public class AbstractColumnConfig {
-
   // attributes
   private String _name;
   private boolean _isUnique;

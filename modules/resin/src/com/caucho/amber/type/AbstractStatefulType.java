@@ -62,11 +62,6 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
 
   // fields declared on this class
   private ArrayList<AmberField> _selfFields = new ArrayList<AmberField>();
-  // all fields, including superclasses
-  private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
-
-  private ArrayList<AmberField> _mappedSuperclassFields
-    = new ArrayList<AmberField>();
 
   private volatile boolean _isConfigured;
 
@@ -81,6 +76,11 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   public AbstractStatefulType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
+  }
+
+  public boolean isEntity()
+  {
+    return false;
   }
 
   /**
@@ -141,11 +141,19 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   }
 
   /**
+   * Returns the fields declared on this instance
+   */
+  public ArrayList<AmberField> getSelfFields()
+  {
+    return _selfFields;
+  }
+
+  /**
    * Returns the fields.
    */
   public ArrayList<AmberField> getFields()
   {
-    return _fields;
+    return _selfFields;
   }
 
   /**
@@ -153,44 +161,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
    */
   public AmberField getField(String name)
   {
-    for (int i = 0; i < _fields.size(); i++) {
-      AmberField field = _fields.get(i);
-
-      if (field.getName().equals(name))
-        return field;
-    }
-
-    return null;
-  }
-
-  /**
-   * Adds a mapped superclass field.
-   */
-  public void addMappedSuperclassField(AmberField field)
-  {
-    if (_mappedSuperclassFields.contains(field))
-      return;
-
-    _mappedSuperclassFields.add(field);
-    Collections.sort(_mappedSuperclassFields, new AmberFieldCompare());
-  }
-
-  /**
-   * Returns the mapped superclass fields.
-   */
-  public ArrayList<AmberField> getMappedSuperclassFields()
-  {
-    return _mappedSuperclassFields;
-  }
-
-  /**
-   * Returns the mapped superclass field with a given name.
-   */
-  public AmberField getMappedSuperclassField(String name)
-  {
-    for (int i = 0; i < _mappedSuperclassFields.size(); i++) {
-      AmberField field = _mappedSuperclassFields.get(i);
-
+    for (AmberField field : getFields()) {
       if (field.getName().equals(name))
         return field;
     }
@@ -288,9 +259,14 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   public void init()
     throws ConfigException
   {
-    _fields = new ArrayList<AmberField>();
-    
-    _fields.addAll(_selfFields);
+    // jpa/0l14, jpa/0ge3
+    for (AmberField field : _selfFields) {
+      // ejb/0602
+      if (getPersistenceUnit().isJPA()) {
+	if (field instanceof EntityManyToOneField)
+	  ((EntityManyToOneField) field).init((EntityType) this);
+      }
+    }
   }
 
   /**
@@ -313,25 +289,18 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
     CharBuffer cb = CharBuffer.allocate();
 
     // jpa/0l14, jpa/0ge3
-    for (AmberField field : getMergedFields()) {
-      // ejb/0602
-      if (getPersistenceUnit().isJPA()) {
-	if (field instanceof EntityManyToOneField)
-	  ((EntityManyToOneField) field).init((EntityType) this);
-      }
-
+    for (AmberField field : getFields()) {
       // jpa/0gg3
       if (field.getLoadGroupIndex() == loadGroup) {
 	String propSelect = field.generateLoadSelect(table, id);
 
-	if (propSelect == null)
-	  continue;
+	if (propSelect != null) {
+	  if (hasSelect)
+	    cb.append(", ");
+	  hasSelect = true;
 
-	if (hasSelect)
-	  cb.append(", ");
-	hasSelect = true;
-
-	cb.append(propSelect);
+	  cb.append(propSelect);
+	}
       }
     }
 
@@ -364,60 +333,13 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
         index++;
     }
 
-    /*
-    if (this instanceof EntityType) {
-      fields = getMappedSuperclassFields();
-
-      EntityType parent = ((EntityType) this).getParentType();
-
-      if (parent != null) {
-        // jpa/0l14
-        index = parent.generateLoad(out, rs, indexVar, index,
-                                    loadGroupIndex, fields);
-      }
-    }
-    */
-
-    for (AmberField field : getMergedFields()) {
-      // ejb/0602
-      if (getPersistenceUnit().isJPA()) {
-	if (field instanceof EntityManyToOneField) {
-	  ((EntityManyToOneField) field).init((EntityType) this);
-	}
-      }
-
+    for (AmberField field : getFields()) {
       // jpa/0gg3
       if (field.getLoadGroupIndex() == loadGroupIndex)
 	index = field.generateLoad(out, rs, indexVar, index);
     }
 
     return index;
-  }
-
-  protected ArrayList<AmberField> getMergedFields()
-  {
-    ArrayList<AmberField> overriddenFields = getOverriddenFields();
-    
-    if (overriddenFields == null)
-      return getFields();
-	
-    ArrayList<AmberField> resultFields = new ArrayList<AmberField>();
-
-    for (AmberField field : getFields()) {
-      AmberField mappedField = getMappedSuperclassField(field.getName());
-      
-      if (mappedField != null)
-        resultFields.add(mappedField);
-      else
-        resultFields.add(field);
-   }
-
-    return resultFields;
-  }
-  
-  protected ArrayList<AmberField> getOverriddenFields()
-  {
-    return null;
   }
 
   /**
@@ -538,8 +460,8 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   {
     long mask = 0;
 
-    for (int i = 0; i < _fields.size(); i++) {
-      mask |= _fields.get(i).getCreateLoadMask(group);
+    for (AmberField field : getFields()) {
+      mask |= field.getCreateLoadMask(group);
     }
 
     return mask;

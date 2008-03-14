@@ -39,7 +39,7 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.ql.QLParser;
 import com.caucho.util.L10N;
@@ -214,7 +214,7 @@ public class CmrManyToMany extends CmrRelation {
   /**
    * Creates the amber type.
    */
-  public AmberField assembleAmber(SelfEntityType type)
+  public AmberField assembleAmber(EntityType type)
     throws ConfigException
   {
     AmberPersistenceUnit persistenceUnit = type.getPersistenceUnit();
@@ -230,7 +230,7 @@ public class CmrManyToMany extends CmrRelation {
     
     manyToMany.setAssociationTable(map);
 
-    SelfEntityType targetType = _targetBean.getEntityType();
+    EntityType targetType = _targetBean.getEntityType();
     manyToMany.setType(targetType);
 
     ArrayList<ForeignColumn> targetColumns =
@@ -240,7 +240,7 @@ public class CmrManyToMany extends CmrRelation {
 					     targetType.getTable(),
 					     targetColumns));
     
-    SelfEntityType sourceType = getBean().getEntityType();
+    EntityType sourceType = getBean().getEntityType();
     // manyToMany.setType(targetType);
 
 
@@ -259,7 +259,7 @@ public class CmrManyToMany extends CmrRelation {
   }
 
   private ArrayList<ForeignColumn>
-    calculateColumns(Table mapTable, SelfEntityType type, String fieldName,
+    calculateColumns(Table mapTable, EntityType type, String fieldName,
 		     SqlRelation []sqlColumns)
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();

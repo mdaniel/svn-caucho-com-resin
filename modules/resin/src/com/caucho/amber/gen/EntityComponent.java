@@ -29,6 +29,7 @@
 
 package com.caucho.amber.gen;
 
+import com.caucho.amber.field.*;
 import com.caucho.amber.type.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -49,111 +50,126 @@ public class EntityComponent extends AmberMappedComponent {
   /**
    * Gets the entity type.
    */
-  public SelfEntityType getEntityType()
+  public EntityType getEntityType()
   {
-    return (SelfEntityType) _relatedType;
+    return (EntityType) _entityType;
   }
 
   /**
    * Sets the bean info for the generator
    */
-  public void setEntityType(SelfEntityType entityType)
+  public void setEntityType(EntityType entityType)
   {
     setRelatedType(entityType);
   }
 
   /**
-   * Starts generation of the Java code
+   * Generates the delete
    */
-  public void generate(JavaWriter out)
+  void generateDelete(JavaWriter out)
     throws IOException
   {
-    try {
-      EntityType parentType = getEntityType().getParentType();
+    out.println();
+    out.println("public void __caucho_delete()");
+    out.println("{");
+    out.pushDepth();
 
-      // jpa/0gg0
-      boolean isEntityParent = (parentType != null)
-        && (parentType instanceof SelfEntityType)
-        && ! parentType.getBeanClass().isAbstract();
+    out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= __caucho_state.ordinal())");
+    out.println("  return;");
+    out.println();
 
-      generateHeader(out, isEntityParent);
+    out.println("if (__caucho_home != null)");
+    out.println("  __caucho_home.preRemove(this);");
+    out.println();
 
-      generateInit(out, isEntityParent);
+    generateCallbacks(out, "this", _entityType.getPreRemoveCallbacks());
 
-      HashSet<Object> completedSet = new HashSet<Object>();
+    _entityType.generatePreDelete(out);
 
-      generatePrologue(out, completedSet);
+    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_DELETING;");
 
-      generateGetCacheEntity(out);
+    out.println("if (__caucho_session != null) {");
+    out.pushDepth();
+    out.println("__caucho_session.update((com.caucho.amber.entity.Entity) this);");
+    out.println("__caucho_home.getTable().beforeEntityDelete(__caucho_session, (com.caucho.amber.entity.Entity) this);");
+    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_DELETED;");
+    _entityType.generatePostDelete(out);
+    out.popDepth();
+    out.println("}");
+    out.println("else");
+    out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_DELETED;");
 
-      generateGetEntityType(out);
+    out.popDepth();
+    out.println("}");
 
-      if (! isEntityParent)
-        generateGetEntityState(out);
+    Id id = _entityType.getId();
 
-      generateIsDirty(out);
+    out.println();
+    out.println("private void __caucho_delete_int()");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
 
-      generateMatch(out);
+    // jpa/0ge2: MappedSuperclassType
+    if ((_entityType.getTable() == null) || (id == null)) {
+      out.println("return;");
 
-      generateFields(out);
+      out.popDepth();
+      out.println("}");
 
-      generateMethods(out);
-
-      generateDetach(out, isEntityParent);
-
-      generateLoad(out, isEntityParent);
-
-      int min = 0;
-      if (isEntityParent)
-        min = getEntityType().getParentType().getLoadGroupIndex() + 1;
-      int max = getEntityType().getLoadGroupIndex();
-
-      for (int i = min; i <= max; i++)
-        generateLoadGroup(out, i);
-
-      generateResultSetLoad(out, isEntityParent);
-
-      generateSetQuery(out, isEntityParent);
-
-      // generateLoadFromObject();
-
-      // generateCopy();
-
-      generateCopy(out);
-
-      generateSetLoadMask(out);
-
-      generateMakePersistent(out);
-
-      generateCascadePersist(out);
-
-      generateCascadeRemove(out);
-
-      generateCreate(out);
-
-      generateDelete(out);
-
-      generateDeleteForeign(out);
-
-      generateFlush(out);
-
-      generateIncrementVersion(out);
-
-      generateAfterCommit(out, isEntityParent);
-
-      generateUpdateCacheItem(out, isEntityParent);
-
-      generateAfterRollback(out);
-
-      generateLoadKey(out);
-
-      generateHome(out);
-
-      generateInternals(out);
-
-      // printDependList(out, _dependencies);
-    } catch (IOException e) {
-      throw e;
+      return;
     }
+
+    out.println("java.sql.PreparedStatement pstmt = null;");
+    out.println("String sql = null;");
+    out.println();
+
+    out.println("try {");
+    out.pushDepth();
+
+    out.print("__caucho_home.delete(__caucho_session, ");
+    out.print(id.toObject(id.generateGetProperty("this")));
+    out.println(");");
+
+    out.println("__caucho_session.removeEntity((com.caucho.amber.entity.Entity) this);");
+
+    String table = _entityType.getTable().getName();
+    String where = _entityType.getId().generateMatchArgWhere(null);
+
+    String sql = ("delete from " + table + " where " + where);
+
+    out.print("sql = \"");
+    out.printJavaString(sql);
+    out.println("\";");
+
+    out.println();
+    out.println("pstmt = __caucho_session.prepareStatement(sql);");
+
+    out.println("int index = 1;");
+    id.generateSet(out, "pstmt", "index", "this");
+
+    out.println();
+    out.println("pstmt.executeUpdate();");
+
+    out.println("__caucho_home.postRemove(this);");
+
+    generateCallbacks(out, "this", _entityType.getPostRemoveCallbacks());
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  if (pstmt != null)");
+    out.println("    __caucho_session.closeStatement(sql);");
+    out.println();
+    out.println("  if (e instanceof java.sql.SQLException)");
+    out.println("    throw (java.sql.SQLException) e;");
+    out.println();
+    out.println("  if (e instanceof RuntimeException)");
+    out.println("    throw (RuntimeException) e;");
+    out.println();
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
   }
 }

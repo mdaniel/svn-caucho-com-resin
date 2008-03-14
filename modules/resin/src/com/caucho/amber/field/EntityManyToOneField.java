@@ -910,7 +910,7 @@ public class EntityManyToOneField extends CascadableField {
 
       out.println("// " + dst);
 
-      if (_targetType instanceof SelfEntityType) {
+      if (_targetType instanceof EntityType) {
         String targetTypeExt = getEntityTargetType().getInstanceClassName();
 
         // jpa/0s2e
@@ -1042,7 +1042,7 @@ public class EntityManyToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof SelfEntityType))
+    if (! (getEntityTargetType() instanceof EntityType))
       return;
 
     String value = generateGet(src);
@@ -1077,7 +1077,7 @@ public class EntityManyToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof SelfEntityType))
+    if (! (getEntityTargetType() instanceof EntityType))
       return;
 
     out.println();

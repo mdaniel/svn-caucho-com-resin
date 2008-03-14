@@ -36,7 +36,7 @@ import com.caucho.util.L10N;
 /**
  * Represents an application persistent bean type
  */
-public class SubEntityType extends SelfEntityType {
+public class SubEntityType extends EntityType {
   private static final L10N L = new L10N(SubEntityType.class);
 
   private EntityType _root;
@@ -102,6 +102,7 @@ public class SubEntityType extends SelfEntityType {
   /**
    * Returns the discriminator.
    */
+  @Override
   public Column getDiscriminator()
   {
     if (getRootType() == this) // jpa/0ge2
@@ -113,6 +114,7 @@ public class SubEntityType extends SelfEntityType {
   /**
    * Returns the load group index, overriding the parent.
    */
+  @Override
   public int getLoadGroupIndex()
   {
     if (_loadGroupIndex < 0) {
@@ -120,7 +122,7 @@ public class SubEntityType extends SelfEntityType {
 
       // jpa/0ge2: MappedSuperclassType and
       // jpa/0gg0: abstract parent
-      if (_parent instanceof SelfEntityType
+      if (_parent instanceof EntityType
           && ! _parent.getBeanClass().isAbstract()) {
         _loadGroupIndex++;
       }

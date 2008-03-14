@@ -33,7 +33,7 @@ import com.caucho.ejb.cfg21.EjbEntityBean;
 import java.lang.reflect.*;
 import javax.ejb.*;
 
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.*;
 import com.caucho.util.CharBuffer;
@@ -115,7 +115,7 @@ class ArgExpr extends Expr {
     if (EJBLocalObject.class.isAssignableFrom(javaType)) {
       EjbEntityBean bean = _query.getConfig().findEntityByLocal(javaType);
 
-      SelfEntityType type = bean.getEntityType();
+      EntityType type = bean.getEntityType();
     
       return type.getId().getKeys().size();
     }

@@ -51,7 +51,7 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
    */
   public MappedSuperclassType getMappedSuperclassType()
   {
-    return (MappedSuperclassType) _relatedType;
+    return (MappedSuperclassType) _entityType;
   }
 
   /**
@@ -63,75 +63,38 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
   }
 
   /**
-   * Starts generation of the Java code
+   * Generates the init generated code.
    */
-  public void generate(JavaWriter out)
+  @Override
+  void generateInit(JavaWriter out,
+                    boolean isEntityParent)
     throws IOException
   {
-    try {
-      generateHeader(out, false);
+  }
 
-      // jpa/0ge8 generateInit(out, false);
+  /**
+   * Generates the detach
+   */
+  void generateDetach(JavaWriter out,
+                      boolean isEntityParent)
+    throws IOException
+  {
+  }
 
-      generateIncrementVersion(out);
+  /**
+   * Generates the after-commit
+   */
+  void generateAfterCommit(JavaWriter out,
+                           boolean isEntityParent)
+    throws IOException
+  {
+  }
 
-      HashSet<Object> completedSet = new HashSet<Object>();
-
-      generatePrologue(out, completedSet);
-
-      generateGetEntityType(out);
-
-      generateGetEntityState(out);
-
-      // jpa/0ge8 generateMatch(out);
-
-      generateFields(out);
-
-      generateMethods(out);
-
-      // jpa/0ge8 generateDetach(out, false);
-
-      generateLoad(out, false);
-
-      int min = 0;
-      int max = getMappedSuperclassType().getLoadGroupIndex();
-
-      for (int i = min; i <= max; i++)
-        generateLoadGroup(out, i);
-
-      generateResultSetLoad(out, false);
-
-      // jpa/0ge8 generateSetQuery(out, false);
-
-      generateCopy(out);
-
-      generateMakePersistent(out);
-
-      generateCascadePersist(out);
-
-      generateCascadeRemove(out);
-
-      /* jpa/0ge8
-
-      generateCreate(out);
-
-      jpa/0ge8 generateDelete(out);
-
-      jpa/0ge8 generateDeleteForeign(out);
-
-      jpa/0ge8 generateFlush(out);
-
-      generateAfterCommit(out, false);
-
-      generateAfterRollback(out);
-
-      generateHome(out);
-
-      generateInternals(out);
-      */
-
-    } catch (IOException e) {
-      throw e;
-    }
+  /**
+   * Generates the delete
+   */
+  void generateDelete(JavaWriter out)
+    throws IOException
+  {
   }
 }

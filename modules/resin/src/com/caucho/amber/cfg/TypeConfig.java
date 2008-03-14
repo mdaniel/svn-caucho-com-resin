@@ -27,64 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.type;
+package com.caucho.amber.cfg;
 
-import com.caucho.amber.entity.Entity;
-import com.caucho.amber.gen.*;
+import com.caucho.amber.AmberTableCache;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.type.*;
+import com.caucho.bytecode.JAnnotation;
+import com.caucho.bytecode.JClass;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
 import com.caucho.util.L10N;
 
+import javax.persistence.InheritanceType;
+import javax.persistence.AttributeOverrides;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
- * Represents an application persistent bean type
+ * Configuration for an entity bean
  */
-public class SelfEntityType extends EntityType {
-  private static final Logger log
-    = Logger.getLogger(SelfEntityType.class.getName());
-  private static final L10N L = new L10N(SelfEntityType.class);
-
-  public SelfEntityType(AmberPersistenceUnit amberPersistenceUnit)
+class TypeConfig {
+  private String _name;
+  
+  TypeConfig(String name)
   {
-    super(amberPersistenceUnit);
+    _name = name;
   }
 
-  /**
-   * Gets the instance class.
-   */
-  public Class getInstanceClass()
+  EntityType getEntityType()
   {
-    return getInstanceClass(Entity.class);
+    throw new UnsupportedOperationException(getClass().getName());
   }
-
-  /**
-   * Returns the component interface name.
-   */
-  public String getComponentInterfaceName()
+  
+  BaseConfigIntrospector getIntrospector()
   {
-    return "com.caucho.amber.entity.Entity";
-  }
-
-  /**
-   * Gets a component generator.
-   */
-  public AmberMappedComponent getComponentGenerator()
-  {
-    return new EntityComponent();
-  }
-
-  /**
-   * Sets the table.
-   */
-  public void setTable(Table table)
-  {
-    super.setTable(table);
-
-    // jpa/0gg0
-    if (table == null)
-      return;
-
-    table.setType(this);
+    return null;
   }
 }

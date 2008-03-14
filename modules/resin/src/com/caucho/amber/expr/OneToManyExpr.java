@@ -32,7 +32,7 @@ import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 
@@ -82,9 +82,9 @@ public class OneToManyExpr extends AbstractPathExpr {
   /**
    * Returns the expr type.
    */
-  public SelfEntityType getTargetType()
+  public EntityType getTargetType()
   {
-    return (SelfEntityType) getType();
+    return (EntityType) getType();
   }
 
   /**

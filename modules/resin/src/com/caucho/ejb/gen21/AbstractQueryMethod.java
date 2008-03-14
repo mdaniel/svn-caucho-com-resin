@@ -32,7 +32,7 @@ package com.caucho.ejb.gen21;
 import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.ejb.gen.*;
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.ql.EjbSelectQuery;
@@ -148,7 +148,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
 				     String query)
     throws IOException
   {
-    SelfEntityType amberType = bean.getEntityType();
+    EntityType amberType = bean.getEntityType();
 
     ArrayList<IdField> keys = new ArrayList<IdField>();
     keys.addAll(amberType.getId().getKeys());
@@ -312,7 +312,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
 	throw new IllegalStateException(L.l("can't find bean for {0}",
 					    type.getName()));
 
-      SelfEntityType amberType = bean.getEntityType();
+      EntityType amberType = bean.getEntityType();
 
       ArrayList<IdField> keys = new ArrayList<IdField>();
       keys.addAll(amberType.getId().getKeys());

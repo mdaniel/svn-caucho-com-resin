@@ -102,7 +102,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
     AmberMappedComponent componentGenerator = type.getComponentGenerator();
 
     if (componentGenerator != null) {
-      // type is SelfEntityType or MappedSuperclassType
+      // type is EntityType or MappedSuperclassType
 
       genClass.addInterfaceName(type.getComponentInterfaceName());
 
@@ -157,7 +157,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
 
     Class expectedClass = Listener.class;
 
-    if (type instanceof SelfEntityType)
+    if (type instanceof EntityType)
       expectedClass = Entity.class;
     else if (type instanceof EmbeddableType)
       expectedClass = Embeddable.class;

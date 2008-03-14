@@ -39,7 +39,7 @@ import com.caucho.amber.expr.ManyToOneJoinExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.jdbc.JdbcMetaData;
 
 import java.sql.SQLException;
@@ -122,7 +122,7 @@ abstract public class AbstractQuery {
   /**
    * Sets the from list.
    */
-  public FromItem createFromItem(SelfEntityType entityType,
+  public FromItem createFromItem(EntityType entityType,
                                  Table table,
                                  String name)
   {

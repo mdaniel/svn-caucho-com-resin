@@ -33,7 +33,7 @@ import com.caucho.amber.field.*;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.MappedSuperclassType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.SubEntityType;
@@ -60,7 +60,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
   String _baseClassName;
   String _extClassName;
 
-  EntityType _relatedType;
+  EntityType _entityType;
 
   private ArrayList<PersistentDependency> _dependencies
     = new ArrayList<PersistentDependency>();
@@ -72,14 +72,19 @@ abstract public class AmberMappedComponent extends ClassComponent {
   /**
    * Sets the bean info for the generator
    */
-  void setRelatedType(EntityType relatedType)
+  void setRelatedType(EntityType entityType)
   {
-    _relatedType = relatedType;
+    _entityType = entityType;
 
-    _dependencies.addAll(relatedType.getDependencies());
+    _dependencies.addAll(entityType.getDependencies());
 
     for (int i = 0; i < _dependencies.size(); i++)
       Environment.addDependency(_dependencies.get(i));
+  }
+
+  public EntityType getEntityType()
+  {
+    return _entityType;
   }
 
   /**
@@ -119,7 +124,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
    */
   public String getBeanClassName()
   {
-    // return _relatedType.getBeanClass().getName();
+    // return _entityType.getBeanClass().getName();
     return _baseClassName;
   }
 
@@ -129,6 +134,106 @@ abstract public class AmberMappedComponent extends ClassComponent {
   public ArrayList<PersistentDependency> getDependencies()
   {
     return _dependencies;
+  }
+
+  protected boolean isEntityParent()
+  {
+    EntityType parentType = getEntityType().getParentType();
+
+      // jpa/0gg0
+    return ((parentType != null)
+	    && (parentType instanceof EntityType)
+	    && ! parentType.getBeanClass().isAbstract());
+  }
+
+  /**
+   * Starts generation of the Java code
+   */
+  public final void generate(JavaWriter out)
+    throws IOException
+  {
+    try {
+      EntityType parentType = getEntityType().getParentType();
+
+      generateHeader(out, isEntityParent());
+
+      generateInit(out, isEntityParent());
+
+      HashSet<Object> completedSet = new HashSet<Object>();
+
+      generatePrologue(out, completedSet);
+
+      generateGetCacheEntity(out);
+
+      generateGetEntityType(out);
+
+      if (! isEntityParent())
+        generateGetEntityState(out);
+
+      generateIsDirty(out);
+
+      generateMatch(out);
+
+      generateFields(out);
+
+      generateMethods(out);
+
+      generateDetach(out, isEntityParent());
+
+      generateLoad(out, isEntityParent());
+
+      int min = 0;
+      if (isEntityParent())
+        min = getEntityType().getParentType().getLoadGroupIndex() + 1;
+      int max = getEntityType().getLoadGroupIndex();
+
+      for (int i = min; i <= max; i++)
+        generateLoadGroup(out, i);
+
+      generateResultSetLoad(out, isEntityParent());
+
+      generateSetQuery(out, isEntityParent());
+
+      // generateLoadFromObject();
+
+      // generateCopy();
+
+      generateCopy(out);
+
+      generateSetLoadMask(out);
+
+      generateMakePersistent(out);
+
+      generateCascadePersist(out);
+
+      generateCascadeRemove(out);
+
+      generateCreate(out);
+
+      generateDelete(out);
+
+      generateDeleteForeign(out);
+
+      generateFlush(out);
+
+      generateIncrementVersion(out);
+
+      generateAfterCommit(out, isEntityParent());
+
+      generateUpdateCacheItem(out, isEntityParent());
+
+      generateAfterRollback(out);
+
+      generateLoadKey(out);
+
+      generateHome(out);
+
+      generateInternals(out);
+
+      // printDependList(out, _dependencies);
+    } catch (IOException e) {
+      throw e;
+    }
   }
 
   /**
@@ -146,7 +251,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("java.util.logging.Logger.getLogger(\"" + getBeanClassName() + "\");");
 
     // jpa/0ge3 if (! isEntityParent) {
-    if (_relatedType.getParentType() == null) {
+    if (_entityType.getParentType() == null) {
       out.println();
       out.println("protected transient com.caucho.amber.type.EntityType __caucho_home;");
       out.println("public transient com.caucho.amber.entity.EntityItem __caucho_cacheItem;");
@@ -156,12 +261,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
       // XXX: needs to generate load masks for groups in the subclasses,
       // but the group numbering should not always start at zero.
 
-      int loadCount = _relatedType.getLoadGroupIndex();
+      int loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
         out.println("protected transient long __caucho_loadMask_" + i + ";");
       }
 
-      int dirtyCount = _relatedType.getDirtyIndex();
+      int dirtyCount = _entityType.getDirtyIndex();
 
       for (int i = 0; i <= dirtyCount / 64; i++) {
         out.println("protected transient long __caucho_dirtyMask_" + i + ";");
@@ -187,9 +292,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     if (p > 0)
       className = className.substring(p + 1);
 
-    ArrayList<AmberField> fields = _relatedType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
 
-    for (JMethod ctor : _relatedType.getBeanClass().getConstructors()) {
+    for (JMethod ctor : _entityType.getBeanClass().getConstructors()) {
       out.println();
       // XXX: s/b actual access type?
       out.print("public ");
@@ -222,7 +327,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_state = com.caucho.amber.entity.EntityState.TRANSIENT;");
 
       // jpa/0gh2: compound pk and constructor with arguments.
-      if (_relatedType.getId() instanceof CompositeId) {
+      if (_entityType.getId() instanceof CompositeId) {
         out.println("try {");
         out.println("  __caucho_setPrimaryKey(__caucho_getPrimaryKey());");
         out.println("} catch (Exception e) {");
@@ -238,18 +343,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("}");
     }
 
-    Id id = _relatedType.getId();
+    Id id = _entityType.getId();
 
     if (id == null) {
-      if (_relatedType instanceof SelfEntityType)
+      if (_entityType instanceof EntityType)
         throw new IllegalStateException(L.l("'{0}' is missing a key.",
-                                            _relatedType.getName()));
+                                            _entityType.getName()));
     } // ejb/0623 as a negative test.
     else if (id instanceof CompositeId) {
     }
 
-    boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-                          && _relatedType.getPersistenceUnit().isJPA());
+    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
+                          && _entityType.getPersistenceUnit().isJPA());
 
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
@@ -316,12 +421,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
     generateLogFine(out, " amber expire");
 
     out.println();
-    int loadCount = _relatedType.getLoadGroupIndex();
+    int loadCount = _entityType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("__caucho_loadMask_" + i + " = 0L;");
     }
 
-    _relatedType.generateExpire(out);
+    _entityType.generateExpire(out);
 
     out.popDepth();
     out.println("}");
@@ -338,7 +443,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
 
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("if (__caucho_dirtyMask_" + i + " != 0L)");
@@ -373,10 +478,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("else {");
     out.pushDepth();
 
-    Id id = _relatedType.getId();
+    Id id = _entityType.getId();
 
     // jpa/0gg0
-    if (id == null || _relatedType.getBeanClass().isAbstract()) {
+    if (id == null || _entityType.getBeanClass().isAbstract()) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return true;");
@@ -411,22 +516,22 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
     throws IOException
   {
-    if (_relatedType.getColumns() != null) {
-      for (Column column : _relatedType.getColumns())
+    if (_entityType.getColumns() != null) {
+      for (Column column : _entityType.getColumns())
         column.generatePrologue(out);
     }
 
-    Id id = _relatedType.getId();
+    Id id = _entityType.getId();
 
     boolean isAbstractParent
-      = (_relatedType.getParentType() == null
-	 || _relatedType.getParentType().getBeanClass().isAbstract());
+      = (_entityType.getParentType() == null
+	 || _entityType.getParentType().getBeanClass().isAbstract());
 
     // jpa/0m02
     if (id != null && isAbstractParent)
       id.generatePrologue(out, completedSet);
 
-    ArrayList<AmberField> fields = _relatedType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
 
     for (int i = 0; i < fields.size(); i++) {
       AmberField prop = fields.get(i);
@@ -525,15 +630,17 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateFields(JavaWriter out)
     throws IOException
   {
-    for (AmberField key : _relatedType.getId().getKeys()) {
-      if (_relatedType == key.getSourceType()) {
-	key.generateSuperGetter(out);
-	key.generateSuperSetter(out);
+    if (_entityType.getId() != null) {
+      for (AmberField key : _entityType.getId().getKeys()) {
+	if (_entityType == key.getSourceType()) {
+	  key.generateSuperGetter(out);
+	  key.generateSuperSetter(out);
+	}
       }
     }
 
-    for (AmberField prop : _relatedType.getFields()) {
-      if (_relatedType == prop.getSourceType()) {
+    for (AmberField prop : _entityType.getFields()) {
+      if (_entityType == prop.getSourceType()) {
 	prop.generateSuperGetter(out);
 	prop.generateGetProperty(out);
 
@@ -549,7 +656,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateMethods(JavaWriter out)
     throws IOException
   {
-    for (StubMethod method : _relatedType.getMethods()) {
+    for (StubMethod method : _entityType.getMethods()) {
       method.generate(out);
     }
   }
@@ -562,7 +669,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     throws IOException
   {
     // commented out: jpa/0l03
-    // if (_relatedType.getParentType() != null)
+    // if (_entityType.getParentType() != null)
     //   return;
 
     if (! isEntityParent) {
@@ -579,12 +686,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
       // XXX: makePersistent is called in contexts other than the P_NON_TRANSACTIONAL one, so this setting is inappropriate
       // out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
 
-      int loadCount = _relatedType.getLoadGroupIndex();
+      int loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
         out.println("__caucho_loadMask_" + i + " = 0L;");
       }
 
-      int dirtyCount = _relatedType.getDirtyIndex();
+      int dirtyCount = _entityType.getDirtyIndex();
       for (int i = 0; i <= dirtyCount / 64; i++) {
         out.println("__caucho_dirtyMask_" + i + " = 0L;");
         out.println("__caucho_updateMask_" + i + " = 0L;");
@@ -597,13 +704,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("}");
     }
 
-    int index = _relatedType.getLoadGroupIndex();
+    int index = _entityType.getLoadGroupIndex();
 
-    boolean hasLoad = (_relatedType.getFields().size() > 0);
+    boolean hasLoad = (_entityType.getFields().size() > 0);
 
     if (! isEntityParent) {
       index = 0;
-      hasLoad = hasLoad || (_relatedType.getId() != null);
+      hasLoad = hasLoad || (_entityType.getId() != null);
     }
 
     // jpa/0l20
@@ -613,7 +720,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("{");
       out.pushDepth();
 
-      generateRetrieveEager(out, _relatedType);
+      generateRetrieveEager(out, _entityType);
 
       out.popDepth();
       out.println("}");
@@ -623,46 +730,46 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("{");
       out.pushDepth();
 
-      generateRetrieveSelf(out, _relatedType);
+      generateRetrieveSelf(out, _entityType);
 
       out.popDepth();
       out.println("}");
     }
   }
 
-  private void generateRetrieveEager(JavaWriter out, EntityType relatedType)
+  private void generateRetrieveEager(JavaWriter out, EntityType entityType)
     throws IOException
   {
-    if (relatedType == null)
+    if (entityType == null)
       return;
 
-    int index = relatedType.getLoadGroupIndex();
+    int index = entityType.getLoadGroupIndex();
 
-    boolean hasLoad = (relatedType.getFields().size() > 0);
+    boolean hasLoad = (entityType.getFields().size() > 0);
 
-    if (relatedType.getParentType() == null) {
+    if (entityType.getParentType() == null) {
       index = 0;
       hasLoad = true;
     }
 
-    generateRetrieveEager(out, relatedType.getParentType());
+    generateRetrieveEager(out, entityType.getParentType());
 
     if (hasLoad)
       out.println("__caucho_load_" + index + "(aConn);");
   }
 
-  private void generateRetrieveSelf(JavaWriter out, EntityType relatedType)
+  private void generateRetrieveSelf(JavaWriter out, EntityType entityType)
     throws IOException
   {
-    if (relatedType == null)
+    if (entityType == null)
       return;
 
-    int index = relatedType.getLoadGroupIndex();
+    int index = entityType.getLoadGroupIndex();
 
-    boolean hasLoad = (relatedType.getFields().size() > 0);
+    boolean hasLoad = (entityType.getFields().size() > 0);
 
-    if (relatedType.getParentType() != null) {
-      generateRetrieveSelf(out, relatedType.getParentType());
+    if (entityType.getParentType() != null) {
+      generateRetrieveSelf(out, entityType.getParentType());
     }
     else {
       index = 0;
@@ -714,9 +821,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateLoadGroup(JavaWriter out, int groupIndex)
     throws IOException
   {
-    if (_relatedType.hasLoadGroup(groupIndex)) {
+    if (_entityType.hasLoadGroup(groupIndex)) {
       new LoadGroupGenerator(_extClassName,
-                             _relatedType,
+                             _entityType,
                              groupIndex).generate(out);
     }
   }
@@ -737,11 +844,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    int index = _relatedType.generateLoad(out, "rs", "index", 0, 0);
+    int index = _entityType.generateLoad(out, "rs", "index", 0, 0);
 
     out.println("__caucho_loadMask_0 |= 1L;");
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
 
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0;");
@@ -766,7 +873,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
     out.println("}");
 
-    if (_relatedType.getHasLoadCallback()) {
+    if (_entityType.getHasLoadCallback()) {
       out.println();
       out.println("__caucho_load_callback();");
     }
@@ -793,8 +900,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     // jpa/0gg0 vs jpa/06c5
-    if (! _relatedType.isAbstractClass())
-      _relatedType.generateSet(out, "pstmt", "index", "super");
+    if (! _entityType.isAbstractClass())
+      _entityType.generateSet(out, "pstmt", "index", "super");
 
     out.popDepth();
     out.println("}");
@@ -811,7 +918,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    VersionField version = _relatedType.getVersionField();
+    VersionField version = _entityType.getVersionField();
     
     if (version != null) {
       out.println("if (__caucho_inc_version)");
@@ -844,10 +951,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-                          && _relatedType.getPersistenceUnit().isJPA());
+    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
+                          && _entityType.getPersistenceUnit().isJPA());
 
-    if (_relatedType.getId() == null || isAbstract) {
+    if (_entityType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return false;");
@@ -861,7 +968,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  return false;");
     out.println();
 
-    ArrayList<AmberField> fields = _relatedType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
 
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
@@ -891,7 +998,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("boolean isDirty = false;");
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
 
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("long mask_" + i + " = __caucho_dirtyMask_" + i + ";");
@@ -923,7 +1030,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("__caucho_home.preUpdate(this);");
 
     // jpa/0r10
-    generateCallbacks(out, "this", _relatedType.getPreUpdateCallbacks());
+    generateCallbacks(out, "this", _entityType.getPreUpdateCallbacks());
 
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
 
@@ -931,7 +1038,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("boolean isFirst = true;");
 
-    VersionField version = _relatedType.getVersionField();
+    VersionField version = _entityType.getVersionField();
 
     for (int i = 0; i <= dirtyCount / 64; i++) {
       // jpa/0x02 is a negative test.
@@ -962,7 +1069,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.println();
-    _relatedType.getId().generateSet(out, "pstmt", "index");
+    _entityType.getId().generateSet(out, "pstmt", "index");
 
     if (version != null) {
       out.println();
@@ -988,7 +1095,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("__caucho_home.postUpdate(this);");
 
-    generateCallbacks(out, "this", _relatedType.getPostUpdateCallbacks());
+    generateCallbacks(out, "this", _entityType.getPostUpdateCallbacks());
 
     out.println();
     generateLogFine(out, " amber update");
@@ -1051,7 +1158,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("int index = 1;");
 
-    ArrayList<AmberField> fields = _relatedType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
 
@@ -1059,7 +1166,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.println();
-    _relatedType.getId().generateSet(out, "pstmt", "index");
+    _entityType.getId().generateSet(out, "pstmt", "index");
 
     out.println();
     out.println("pstmt.executeUpdate();");
@@ -1087,7 +1194,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // XXX: needs to handle this with subclasses
     // but there is an issue in the enhancer fixup
     // removing the "super." call.
-    // if (_relatedType.getParentType() != null) {
+    // if (_entityType.getParentType() != null) {
     //   out.println();
     //   out.println("public void __caucho_super_afterCommit()");
     //   out.println("{");
@@ -1109,7 +1216,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
     out.println("if (__caucho_session == null) {");
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("  __caucho_updateMask_" + i + " = 0L;");
     }
@@ -1150,7 +1257,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("com.caucho.amber.manager.AmberConnection aConn = __caucho_session;");
 
     out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("long updateMask_" + i + " = __caucho_updateMask_" + i + ";");
     }
@@ -1175,18 +1282,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.pushDepth();
       out.println("item.__caucho_loadMask_0 = 1L;");
 
-      _relatedType.generateCopyLoadObject(out, "item", "super", 0);
+      _entityType.generateCopyLoadObject(out, "item", "super", 0);
     }
 
-    for (int i = 1; i <= _relatedType.getLoadGroupIndex(); i++) {
+    for (int i = 1; i <= _entityType.getLoadGroupIndex(); i++) {
       String loadVar = "__caucho_loadMask_" + (i / 64);
       long mask = (1L << (i % 64));
 
-      // jpa/0l02: if (_relatedType.isLoadGroupOwnedByType(i)) {
+      // jpa/0l02: if (_entityType.isLoadGroupOwnedByType(i)) {
       out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
       out.pushDepth();
 
-      _relatedType.generateCopyLoadObject(out, "item", "super", i);
+      _entityType.generateCopyLoadObject(out, "item", "super", i);
 
       out.println("item." + loadVar + " |= " + mask + "L;");
 
@@ -1200,15 +1307,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("}");
     }
 
-    for (int i = 0; i < _relatedType.getDirtyIndex(); i++) {
+    for (int i = 0; i < _entityType.getDirtyIndex(); i++) {
       int group = i / 64;
       long mask = (1L << (i % 64));
 
-      if (_relatedType.isDirtyIndexOwnedByType(i)) {
+      if (_entityType.isDirtyIndexOwnedByType(i)) {
         out.println("if ((updateMask_" + group + " & " + mask + "L) != 0) {");
         out.pushDepth();
 
-        _relatedType.generateCopyUpdateObject(out, "item", "super", i);
+        _entityType.generateCopyUpdateObject(out, "item", "super", i);
 
         out.popDepth();
         out.println("}");
@@ -1239,12 +1346,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
 
-    int loadCount = _relatedType.getLoadGroupIndex();
+    int loadCount = _entityType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("__caucho_loadMask_" + i + " = 0L;");
     }
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
     }
@@ -1264,20 +1371,20 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateCreate(JavaWriter out)
     throws IOException
   {
-    boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-                          && _relatedType.getPersistenceUnit().isJPA());
+    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
+                          && _entityType.getPersistenceUnit().isJPA());
 
     boolean isGeneratedValue = false;
 
     // jpa/0gg0
-    if (_relatedType.getId() != null && ! isAbstract) {
-      ArrayList<IdField> fields = _relatedType.getId().getKeys();
+    if (_entityType.getId() != null && ! isAbstract) {
+      ArrayList<IdField> fields = _entityType.getId().getKeys();
       IdField idField = fields.size() > 0 ? fields.get(0) : null;
 
       boolean hasReturnGeneratedKeys = false;
 
       try {
-        hasReturnGeneratedKeys = _relatedType.getPersistenceUnit().hasReturnGeneratedKeys();
+        hasReturnGeneratedKeys = _entityType.getPersistenceUnit().hasReturnGeneratedKeys();
       } catch (Exception e) {
         // Meta-data exception which is acceptable or
         // no data-source configured. The latter will
@@ -1298,7 +1405,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
         out.printJavaString(idField.getColumns().get(0).generateInsertName());
         out.println("\");");
         out.print("gen.setTable(\"");
-        out.printJavaString(_relatedType.getName());
+        out.printJavaString(_entityType.getName());
         out.println("\");");
         out.println("gen.init();");
         out.popDepth();
@@ -1316,7 +1423,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     int loadCount = 0;
 
     // jpa/0ge2: MappedSuperclassType
-    if ((_relatedType.getTable() == null) || (_relatedType.getId() == null)) {
+    if ((_entityType.getTable() == null) || (_entityType.getId() == null)) {
       out.println("return false;");
 
       out.popDepth();
@@ -1332,13 +1439,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_PERSISTING;");
 
-      loadCount = _relatedType.getLoadGroupIndex();
+      loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
         out.println("__caucho_loadMask_" + i + " = 0L;");
 
         // XXX: jpa/0l21
 
-        EntityType parentType = _relatedType;
+        EntityType parentType = _entityType;
 
         do {
           out.println("__caucho_loadMask_" + i + " |= " + parentType.getCreateLoadMask(i) + ";");
@@ -1352,7 +1459,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_home.prePersist(this);");
 
       // jpa/0r20
-      for (JMethod method : _relatedType.getPrePersistCallbacks()) {
+      for (JMethod method : _entityType.getPrePersistCallbacks()) {
         out.println(method.getName() + "();");
       }
 
@@ -1370,7 +1477,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.println("__caucho_home.postPersist(this);");
 
-      for (JMethod method : _relatedType.getPostPersistCallbacks()) {
+      for (JMethod method : _entityType.getPostPersistCallbacks()) {
         out.println(method.getName() + "();");
       }
 
@@ -1388,7 +1495,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     // jpa/0ge2: MappedSuperclassType
-    if ((_relatedType.getTable() == null) || (_relatedType.getId() == null)) {
+    if ((_entityType.getTable() == null) || (_entityType.getId() == null)) {
       out.println("return false;");
 
       out.popDepth();
@@ -1406,12 +1513,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
     out.println("__caucho_cascadePrePersist(aConn);");
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
     }
 
-    Table table = _relatedType.getTable();
+    Table table = _entityType.getTable();
 
     String sql = null;
 
@@ -1420,21 +1527,21 @@ abstract public class AmberMappedComponent extends ClassComponent {
     boolean isAutoInsert = false;
 
     // jpa/0gg0, jpa/0gh0
-    if (_relatedType.getId() != null
+    if (_entityType.getId() != null
 	&& ! isAbstract
-	&& _relatedType.getId().isIdentityGenerator()) {
+	&& _entityType.getId().isIdentityGenerator()) {
       isAutoInsert = true;
 
       out.print("sql = \"");
-      out.printJavaString(_relatedType.generateAutoCreateSQL(table));
+      out.printJavaString(_entityType.generateAutoCreateSQL(table));
       out.println("\";");
     }
 
-    _relatedType.getId().generateCheckCreateKey(out);
+    _entityType.getId().generateCheckCreateKey(out);
 
     if (! isAutoInsert) {
       out.print("sql = \"");
-      out.printJavaString(_relatedType.generateCreateSQL(table));
+      out.printJavaString(_entityType.generateCreateSQL(table));
       out.println("\";");
     }
 
@@ -1445,18 +1552,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     if (! isAutoInsert) {
       out.println();
-      _relatedType.getId().generateSetInsert(out, "pstmt", "index");
+      _entityType.getId().generateSetInsert(out, "pstmt", "index");
     }
 
-    _relatedType.generateInsertSet(out, table, "pstmt", "index", "super");
+    _entityType.generateInsertSet(out, table, "pstmt", "index", "super");
 
     out.println();
     out.println("pstmt.executeUpdate();");
 
     out.println();
-    _relatedType.getId().generateSetGeneratedKeys(out, "pstmt");
+    _entityType.getId().generateSetGeneratedKeys(out, "pstmt");
 
-    EntityType parentType = _relatedType;
+    EntityType parentType = _entityType;
 
     do {
       for (Table subTable : parentType.getSecondaryTables()) {
@@ -1491,7 +1598,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println(getClassName() + " cacheEntity = (" + getClassName() + ") __caucho_cacheItem.getEntity();");
     out.println("cacheEntity.__caucho_home = home;");
 
-    Id id = _relatedType.getId();
+    Id id = _entityType.getId();
 
     out.println("Object pk = null;");
 
@@ -1528,7 +1635,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     // jpa/0l21
     for (int i = 0; i <= loadCount; i++) {
-      _relatedType.generateCopyLoadObject(out, "cacheEntity", "super", i);
+      _entityType.generateCopyLoadObject(out, "cacheEntity", "super", i);
     }
 
     out.popDepth();
@@ -1538,7 +1645,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("}");
 
-    parentType = _relatedType;
+    parentType = _entityType;
 
     // jpa/0l21
     for (int i = 0; i <= loadCount / 64; i++) {
@@ -1560,7 +1667,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // item in the middle of a transaction
     /*
       out.println();
-      out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.SelfEntityType) __caucho_home.getRootType(),");
+      out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
       out.println("                                     pk, __caucho_cacheItem);");
     */
 
@@ -1587,108 +1694,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateDelete(JavaWriter out)
     throws IOException
   {
-    out.println();
-    out.println("public void __caucho_delete()");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= __caucho_state.ordinal())");
-    out.println("  return;");
-    out.println();
-
-    out.println("if (__caucho_home != null)");
-    out.println("  __caucho_home.preRemove(this);");
-    out.println();
-
-    generateCallbacks(out, "this", _relatedType.getPreRemoveCallbacks());
-
-    _relatedType.generatePreDelete(out);
-
-    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_DELETING;");
-
-    out.println("if (__caucho_session != null) {");
-    out.pushDepth();
-    out.println("__caucho_session.update((com.caucho.amber.entity.Entity) this);");
-    out.println("__caucho_home.getTable().beforeEntityDelete(__caucho_session, (com.caucho.amber.entity.Entity) this);");
-    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_DELETED;");
-    _relatedType.generatePostDelete(out);
-    out.popDepth();
-    out.println("}");
-    out.println("else");
-    out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_DELETED;");
-
-    out.popDepth();
-    out.println("}");
-
-    Id id = _relatedType.getId();
-
-    out.println();
-    out.println("private void __caucho_delete_int()");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
-    out.pushDepth();
-
-    // jpa/0ge2: MappedSuperclassType
-    if ((_relatedType.getTable() == null) || (id == null)) {
-      out.println("return;");
-
-      out.popDepth();
-      out.println("}");
-
-      return;
-    }
-
-    out.println("java.sql.PreparedStatement pstmt = null;");
-    out.println("String sql = null;");
-    out.println();
-
-    out.println("try {");
-    out.pushDepth();
-
-    out.print("__caucho_home.delete(__caucho_session, ");
-    out.print(id.toObject(id.generateGetProperty("this")));
-    out.println(");");
-
-    out.println("__caucho_session.removeEntity((com.caucho.amber.entity.Entity) this);");
-
-    String table = _relatedType.getTable().getName();
-    String where = _relatedType.getId().generateMatchArgWhere(null);
-
-    String sql = ("delete from " + table + " where " + where);
-
-    out.print("sql = \"");
-    out.printJavaString(sql);
-    out.println("\";");
-
-    out.println();
-    out.println("pstmt = __caucho_session.prepareStatement(sql);");
-
-    out.println("int index = 1;");
-    id.generateSet(out, "pstmt", "index", "this");
-
-    out.println();
-    out.println("pstmt.executeUpdate();");
-
-    out.println("__caucho_home.postRemove(this);");
-
-    generateCallbacks(out, "this", _relatedType.getPostRemoveCallbacks());
-
-    out.popDepth();
-    out.println("} catch (Exception e) {");
-    out.println("  if (pstmt != null)");
-    out.println("    __caucho_session.closeStatement(sql);");
-    out.println();
-    out.println("  if (e instanceof java.sql.SQLException)");
-    out.println("    throw (java.sql.SQLException) e;");
-    out.println();
-    out.println("  if (e instanceof RuntimeException)");
-    out.println("    throw (RuntimeException) e;");
-    out.println();
-    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
   }
 
   /**
@@ -1702,7 +1707,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    _relatedType.generateInvalidateForeign(out);
+    _entityType.generateInvalidateForeign(out);
 
     out.popDepth();
     out.println("}");
@@ -1726,24 +1731,24 @@ abstract public class AmberMappedComponent extends ClassComponent {
     if (isEntityParent)
       out.println("super.__caucho_loadFromObject(src);");
     else {
-      int loadCount = _relatedType.getLoadGroupIndex();
+      int loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
         out.println("__caucho_loadMask_" + i + " = o.__caucho_loadMask_" + i + ";");
       }
     }
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_dirtyMask_" + i + " = 0;");
     }
 
-    _relatedType.generateLoadFromObject(out, "o");
+    _entityType.generateLoadFromObject(out, "o");
 
     /* XXX:
-       if (Lifecycle.class.isAssignableFrom(_relatedType.getBeanClass())) {
+       if (Lifecycle.class.isAssignableFrom(_entityType.getBeanClass())) {
        println("if (src instanceof com.caucho.ormap.Lifecycle)");
        println("  ((com.caucho.ormap.Lifecycle) src).afterLoad(__caucho_session, " +
-       _relatedType.getId().getGetterName() + "());");
+       _entityType.getId().getGetterName() + "());");
        }
     */
 
@@ -1787,13 +1792,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("o.__caucho_session = aConn;");
     out.println("o.__caucho_state = __caucho_state;"); // com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
 
-    for (int i = 0; i <= _relatedType.getLoadGroupIndex() / 64; i++) {
+    for (int i = 0; i <= _entityType.getLoadGroupIndex() / 64; i++) {
       String mask = "__caucho_loadMask_" + i;
 
       out.println("o." + mask + " = " + mask + ";");
     }
 
-    int dirtyCount = _relatedType.getDirtyIndex();
+    int dirtyCount = _entityType.getDirtyIndex();
 
     // jpa/0g06
     for (int i = 0; i <= dirtyCount / 64; i++) {
@@ -1818,7 +1823,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // postLoad() there. After copyTo(), the targetEntity
     // has been loaded into the current persistence context
     // and it is safe to call the post load callbacks.
-    generateCallbacks(out, "o", _relatedType.getPostLoadCallbacks());
+    generateCallbacks(out, "o", _entityType.getPostLoadCallbacks());
 
     out.popDepth();
     out.println("}");
@@ -1857,8 +1862,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  o.__caucho_home = __caucho_home;");
 
     // jpa/0ge6: MappedSuperclass
-    if (_relatedType.getId() != null) {
-      _relatedType.getId().generateCopy(out, "o", "super");
+    if (_entityType.getId() != null) {
+      _entityType.getId().generateCopy(out, "o", "super");
     }
 
     out.println("try {");
@@ -1867,9 +1872,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // jpa/0o01
     out.println("Object child;");
 
-    for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
+    for (int i = 0; i <= _entityType.getLoadGroupIndex(); i++) {
       // jpa/0l02
-      _relatedType.generateCopyLoadObject(out, "o", "super", i);
+      _entityType.generateCopyLoadObject(out, "o", "super", i);
     }
 
     out.popDepth();
@@ -1895,8 +1900,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println(getClassName() + " other = (" + getClassName() + ") targetEntity;");
 
-    for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
-      _relatedType.generateCopyMergeObject(out, "other", "super", i);
+    for (int i = 0; i <= _entityType.getLoadGroupIndex(); i++) {
+      _entityType.generateCopyMergeObject(out, "other", "super", i);
     }
 
     out.println();
@@ -1935,7 +1940,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println(getClassName() + " o = (" + getClassName() + ") sourceEntity;");
 
-    int loadCount = _relatedType.getLoadGroupIndex();
+    int loadCount = _entityType.getLoadGroupIndex();
 
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("__caucho_loadMask_" + i + " = o.__caucho_loadMask_" + i + ";");
@@ -1956,7 +1961,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("switch (loadGroup) {");
     out.pushDepth();
 
-    int loadCount = _relatedType.getLoadGroupIndex();
+    int loadCount = _entityType.getLoadGroupIndex();
 
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("case " + i + ":");
@@ -2011,8 +2016,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("__caucho_cacheItem = cacheItem;");
 
     // jpa/0ge6: MappedSuperclass
-    if (_relatedType.getId() != null) {
-      _relatedType.getId().generateCopy(out, "super", "entity");
+    if (_entityType.getId() != null) {
+      _entityType.getId().generateCopy(out, "super", "entity");
     }
 
     out.println("__caucho_session = aConn;");
@@ -2044,7 +2049,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // out.println("if (aConn == null)");
     // out.println("  throw new com.caucho.amber.AmberException(\"Null AmberConnection when object \" + " + getDebug() + " + \" is trying to cascade persist child objects.\");");
 
-    ArrayList<AmberField> fields = _relatedType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
 
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
@@ -2095,7 +2100,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    ArrayList<AmberField> fields = _relatedType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
 
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
@@ -2145,12 +2150,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
     boolean generateHomeNew = true;
 
     // jpa/0ge2
-    if (_relatedType instanceof MappedSuperclassType)
+    if (_entityType instanceof MappedSuperclassType)
       generateHomeNew = false;
 
     /* XXX
-       if (_relatedType instanceof SubEntityType) {
-         SubEntityType sub = (SubEntityType) _relatedType;
+       if (_entityType instanceof SubEntityType) {
+         SubEntityType sub = (SubEntityType) _entityType;
 
          // jpa/0ge2
          if (! sub.isParentMappedSuperclass()) {
@@ -2180,11 +2185,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-                          && _relatedType.getPersistenceUnit().isJPA());
+    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
+                          && _entityType.getPersistenceUnit().isJPA());
 
     // jpa/0gg0
-    if (_relatedType.getId() == null || isAbstract) {
+    if (_entityType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return null;");
@@ -2195,7 +2200,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.print("return ");
-    int index = _relatedType.getId().generateLoadForeign(out, "rs", "index", 0);
+    int index = _entityType.getId().generateLoadForeign(out, "rs", "index", 0);
     out.println(";");
 
     out.popDepth();
@@ -2217,10 +2222,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-                          && _relatedType.getPersistenceUnit().isJPA());
+    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
+                          && _entityType.getPersistenceUnit().isJPA());
 
-    if (_relatedType.getId() == null || isAbstract) {
+    if (_entityType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return null;");
@@ -2231,10 +2236,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.print("Object key = ");
-    int index = _relatedType.getId().generateLoadForeign(out, "rs", "index", 0);
+    int index = _entityType.getId().generateLoadForeign(out, "rs", "index", 0);
     out.println(";");
 
-    if (_relatedType.getDiscriminator() == null) {
+    if (_entityType.getDiscriminator() == null) {
       out.println("return aConn.loadCacheItem(home.getJavaClass(), key, home);");
     }
     else {
@@ -2260,7 +2265,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    if (_relatedType.isAbstractClass() || _relatedType.getId() == null) {
+    if (_entityType.isAbstractClass() || _entityType.getId() == null) {
       out.println("return null;");
       out.popDepth();
       out.println("}");
@@ -2283,13 +2288,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateHomeFindNew(JavaWriter out)
     throws IOException
   {
-    EntityType parentType = _relatedType.getParentType();
+    EntityType parentType = _entityType.getParentType();
 
     // jpa/0ge3
     // jpa/0l32: find(SubBean.class, "2") would try to select the
     // discriminator column from the "sub-table".
     if (parentType != null
-        && (parentType instanceof SelfEntityType)
+        && (parentType instanceof EntityType)
         && ! parentType.isAbstractClass()) {
       return;
     }
@@ -2302,10 +2307,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    Column discriminator = _relatedType.getDiscriminator();
+    Column discriminator = _entityType.getDiscriminator();
 
-    if (_relatedType.isAbstractClass()
-        || _relatedType.getId() == null
+    if (_entityType.isAbstractClass()
+        || _entityType.getId() == null
         || discriminator == null) {
       out.println("return __caucho_home_new(home, key, aConn, null);");
       out.popDepth();
@@ -2313,7 +2318,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       return;
     }
 
-    String rootTableName = _relatedType.getRootTableName();
+    String rootTableName = _entityType.getRootTableName();
 
     if (rootTableName == null)
       rootTableName = "";
@@ -2325,7 +2330,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("try {");
     out.pushDepth();
 
-    String keyType = _relatedType.getId().getForeignTypeName();
+    String keyType = _entityType.getId().getForeignTypeName();
 
     String discriminatorVar = "discriminator";
 
@@ -2366,11 +2371,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
   {
     out.print("sql = \"select ");
 
-    EntityType parentType = _relatedType;
+    EntityType parentType = _entityType;
 
     /* XXX: jpa/0gg3
     // jpa/0l32
-    if (_relatedType.getDiscriminator() != null) {
+    if (_entityType.getDiscriminator() != null) {
       while (parentType.getParentType() != null)
         parentType = parentType.getParentType();
     }
@@ -2381,11 +2386,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     /*
       if (rootTableName == null)
-        out.print(_relatedType.getTable().getName());
+        out.print(_entityType.getTable().getName());
       else
         out.print(rootTableName);
     */
-    out.printJavaString(_relatedType.getTable().getName());
+    out.printJavaString(_entityType.getTable().getName());
 
     out.print(" o where ");
     // jpa/0s27
@@ -2394,12 +2399,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("pstmt = aConn.prepareStatement(sql);");
 
-    String keyType = _relatedType.getId().getForeignTypeName();
+    String keyType = _entityType.getId().getForeignTypeName();
 
     out.println(keyType + " " + "keyValue = (" + keyType + ") key;");
 
     out.println("int index = 1;");
-    _relatedType.getId().generateSetKey(out, "pstmt", "index", "keyValue");
+    _entityType.getId().generateSetKey(out, "pstmt", "index", "keyValue");
 
     out.println("rs = pstmt.executeQuery();");
     out.println("if (rs.next()) {");

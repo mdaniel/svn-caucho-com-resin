@@ -29,6 +29,8 @@
 
 package com.caucho.amber.cfg;
 
+import javax.persistence.Column;
+
 /**
  * <column> tag in the orm.xml
  */
@@ -85,5 +87,23 @@ public class ColumnConfig extends AbstractColumnConfig {
   public void setScale(int scale)
   {
     _scale = scale;
+  }
+
+  /**
+   * Fill the column value by introspection
+   */
+  public void introspect(Column column)
+  {
+    setName(column.name());
+    setUnique(column.unique());
+    setNullable(column.nullable());
+    setInsertable(column.insertable());
+    setUpdatable(column.updatable());
+    setColumnDefinition(column.columnDefinition());
+    setTable(column.table());
+
+    setLength(column.length());
+    setPrecision(column.precision());
+    setScale(column.scale());
   }
 }

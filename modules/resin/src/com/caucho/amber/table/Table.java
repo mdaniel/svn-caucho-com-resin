@@ -558,6 +558,7 @@ public class Table {
   /**
    * Printable version of the entity.
    */
+  @Override
   public String toString()
   {
     return "Table[" + getName() + "]";

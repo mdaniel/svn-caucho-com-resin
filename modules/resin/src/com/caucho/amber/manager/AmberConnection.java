@@ -44,7 +44,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.query.ResultSetCacheChunk;
 import com.caucho.amber.query.UserQuery;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.jca.BeginResource;
@@ -537,7 +537,7 @@ public class AmberConnection
     AmberEntityHome entityHome
       = _persistenceUnit.getEntityHome(resultClass);
 
-    SelfEntityType entityType = entityHome.getEntityType();
+    EntityType entityType = entityHome.getEntityType();
 
     try {
       return createNativeQuery(sql, entityType.getInstanceClass());
@@ -630,7 +630,7 @@ public class AmberConnection
 
       // Reset and refresh state.
       instance.__caucho_expire();
-      instance.__caucho_makePersistent(this, (SelfEntityType) null);
+      instance.__caucho_makePersistent(this, (EntityType) null);
       instance.__caucho_retrieve_eager(this);
     } catch (SQLException e) {
       throw new AmberRuntimeException(e);
@@ -1235,7 +1235,7 @@ public class AmberConnection
   /**
    * Loads the object with the given class.
    */
-  public Object loadProxy(SelfEntityType type,
+  public Object loadProxy(EntityType type,
                           Object key)
   {
     if (key == null)
@@ -1757,7 +1757,7 @@ public class AmberConnection
 
       // jpa/1500
       if (entity.__caucho_getEntityState() == EntityState.P_DELETED) {
-        SelfEntityType entityType = entity.__caucho_getEntityType();
+        EntityType entityType = entity.__caucho_getEntityType();
         Object key = entity.__caucho_getPrimaryKey();
         EntityItem item = _persistenceUnit.getEntity(entityType, key);
 
@@ -2218,7 +2218,7 @@ public class AmberConnection
                                           entity.getClass().getName(),
                                           entity.__caucho_getPrimaryKey()));
       /*
-        SelfEntityType entityType = entity.__caucho_getEntityType();
+        EntityType entityType = entity.__caucho_getEntityType();
 
         if (entityType == null)
           return;
@@ -2616,7 +2616,7 @@ public class AmberConnection
       return null;
     }
 
-    SelfEntityType rootType = entityHome.getRootType();
+    EntityType rootType = entityHome.getRootType();
 
     EntityItem item = _persistenceUnit.getEntity(rootType, pk);
 
@@ -2773,8 +2773,8 @@ public class AmberConnection
     if (_persistenceUnit.isJPA()) {
       String className = entity.getClass().getName();
 
-      SelfEntityType entityType
-        = (SelfEntityType) _persistenceUnit.getEntityType(className);
+      EntityType entityType
+        = (EntityType) _persistenceUnit.getEntityType(className);
 
       // jpa/0m08
       if (entityType == null) {
@@ -2943,7 +2943,7 @@ public class AmberConnection
         entity.__caucho_cascadePrePersist(this);
 
         // removed entity instance, reset state and persist.
-        entity.__caucho_makePersistent(null, (SelfEntityType) null);
+        entity.__caucho_makePersistent(null, (EntityType) null);
         createInternal(entity);
       }
       break;

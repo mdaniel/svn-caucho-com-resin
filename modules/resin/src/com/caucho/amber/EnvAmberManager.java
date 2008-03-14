@@ -39,7 +39,7 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryCacheKey;
 import com.caucho.amber.query.ResultSetCacheChunk;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
 import com.caucho.loader.DynamicClassLoader;
@@ -212,7 +212,7 @@ public class EnvAmberManager
   /**
    * Returns a matching entity.
    */
-  public SelfEntityType getEntity(String className)
+  public EntityType getEntity(String className)
   {
     AmberEntityHome home = _entityHomeMap.get(className);
 
@@ -225,7 +225,7 @@ public class EnvAmberManager
   /**
    * Returns a matching entity.
    */
-  public SelfEntityType getEntityByInstanceClass(String className)
+  public EntityType getEntityByInstanceClass(String className)
   {
     throw new UnsupportedOperationException();
   }
@@ -341,7 +341,7 @@ public class EnvAmberManager
   /**
    * Returns the query result.
    */
-  public EntityItem getEntity(SelfEntityType rootType, Object key)
+  public EntityItem getEntity(EntityType rootType, Object key)
   {
     SoftReference<EntityItem> ref;
 
@@ -359,7 +359,7 @@ public class EnvAmberManager
   /**
    * Sets the entity result.
    */
-  public EntityItem putEntity(SelfEntityType rootType,
+  public EntityItem putEntity(EntityType rootType,
                               Object key,
                               EntityItem entity)
   {
@@ -374,7 +374,7 @@ public class EnvAmberManager
   /**
    * Remove the entity result.
    */
-  public EntityItem removeEntity(SelfEntityType rootType, Object key)
+  public EntityItem removeEntity(EntityType rootType, Object key)
   {
     SoftReference<EntityItem> ref;
 
@@ -413,7 +413,7 @@ public class EnvAmberManager
         if (value == null)
           continue;
 
-        SelfEntityType entityRoot = value.getEntityHome().getEntityType();
+        EntityType entityRoot = value.getEntityHome().getEntityType();
         Object entityKey = key.getKey();
 
         for (int i = 0; i < size; i++) {

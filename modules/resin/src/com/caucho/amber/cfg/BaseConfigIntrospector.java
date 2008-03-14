@@ -61,7 +61,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     = Logger.getLogger(BaseConfigIntrospector.class.getName());
   private static final L10N L = new L10N(BaseConfigIntrospector.class);
 
-  AmberPersistenceUnit _persistenceUnit;
+  private static final Class []_annTypes = new Class[] {
+    Basic.class, javax.persistence.Column.class, javax.persistence.Id.class,
+    EmbeddedId.class,
+    ManyToOne.class, OneToMany.class, OneToOne.class, ManyToMany.class,
+    Version.class, Transient.class
+  };
+
+  final AmberConfigManager _configManager;
+  final AmberPersistenceUnit _persistenceUnit;
 
   ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
@@ -83,16 +91,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * Creates the introspector.
    */
-  public BaseConfigIntrospector()
+  public BaseConfigIntrospector(AmberConfigManager manager)
   {
-  }
-
-  /**
-   * Creates the introspector.
-   */
-  public BaseConfigIntrospector(AmberPersistenceUnit persistenceUnit)
-  {
-    _persistenceUnit = persistenceUnit;
+    _configManager = manager;
+    _persistenceUnit = manager.getPersistenceUnit();
   }
 
   /**
@@ -218,7 +220,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   public void introspectEntityListeners(JClass type,
-                                        EntityType relatedType,
+                                        EntityType entityType,
                                         AmberPersistenceUnit persistenceUnit)
     throws ConfigException
   {
@@ -237,7 +239,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     else
       return;
 
-    String relatedTypeName = relatedType.getBeanClass().getName();
+    String entityTypeName = entityType.getBeanClass().getName();
 
     for (int i=0; i < listeners.length; i++) {
 
@@ -266,8 +268,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       introspectEntityListener(cl,
                                persistenceUnit,
-                               relatedType,
-                               relatedTypeName);
+                               entityType,
+                               entityTypeName);
     }
   }
 
@@ -464,7 +466,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects sql result set mappings.
    */
   void introspectSqlResultSetMappings(JClass type,
-                                      EntityType relatedType,
+                                      EntityType entityType,
                                       String typeName)
   {
     // jpa/0y1-
@@ -506,7 +508,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       Object columns[] = (Object []) sqlResultSetMappingAnn.get("columns");
 
       SqlResultSetMappingCompletion completion
-        = new SqlResultSetMappingCompletion(relatedType, name,
+        = new SqlResultSetMappingCompletion(entityType, name,
                                             entities, columns);
 
       _depCompletions.add(completion);
@@ -532,7 +534,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       String className = entityResult.getClass("entityClass").getName();
 
-      SelfEntityType resultType = _persistenceUnit.getEntityType(className);
+      EntityType resultType = _persistenceUnit.getEntityType(className);
 
       if (resultType == null)
         throw new ConfigException(L.l("entityClass '{0}' is not an @Entity bean for @SqlResultSetMapping '{1}'. The entityClass of an @EntityResult must be an @Entity bean.",
@@ -964,15 +966,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     for (JField field : type.getDeclaredFields()) {
-      JAnnotation id = field.getAnnotation(javax.persistence.Id.class);
-
-      if (id != null)
-        return true;
-
-      id = field.getAnnotation(EmbeddedId.class);
-
-      if (id != null)
-        return true;
+      for (Class annType : _annTypes) {
+	if (field.getAnnotation(annType) != null) {
+	  return true;
+	}
+      }
     }
 
     return isField(type.getSuperClass(), null, false);
@@ -1351,10 +1349,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                         boolean isEmbeddable)
     throws ConfigException
   {
-    if (! isEmbeddable && ((EntityType) entityType).getId() == null)
-      throw new IllegalStateException(L.l("{0} has no key", entityType));
+    if (entityType.isEntity() && ((EntityType) entityType).getId() == null)
+      throw new ConfigException(L.l("{0} has no key", entityType));
 
-    for (JField field : type.getFields()) {
+    for (JField field : type.getDeclaredFields()) {
       String fieldName = field.getName();
 
       if (containsFieldOrCompletion(parentType, fieldName)) {
@@ -1499,11 +1497,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                fieldType.getName()));
       }
 
-      EntityType relatedType = (EntityType) sourceType;
+      EntityType entityType = (EntityType) sourceType;
 
-      relatedType.setHasDependent(true);
+      entityType.setHasDependent(true);
 
-      _linkCompletions.add(new ManyToOneCompletion(relatedType,
+      _linkCompletions.add(new ManyToOneCompletion(entityType,
                                                    field,
                                                    fieldName,
                                                    fieldType));
@@ -1525,9 +1523,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                field.getName()));
       }
 
-      EntityType relatedType = (EntityType) sourceType;
+      EntityType entityType = (EntityType) sourceType;
 
-      _depCompletions.add(new OneToManyCompletion(relatedType,
+      _depCompletions.add(new OneToManyCompletion(entityType,
                                                   field,
                                                   fieldName,
                                                   fieldType,
@@ -1537,9 +1535,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 	     || field.isAnnotationPresent(javax.persistence.OneToOne.class)) {
       validateAnnotations(field, "@OneToOne", _oneToOneAnnotations);
 
-      EntityType relatedType = (EntityType) sourceType;
+      EntityType entityType = (EntityType) sourceType;
 
-      OneToOneCompletion oneToOne = new OneToOneCompletion(relatedType,
+      OneToOneCompletion oneToOne = new OneToOneCompletion(entityType,
                                                            field,
                                                            fieldName,
                                                            fieldType);
@@ -1561,15 +1559,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         _depCompletions.add(oneToOne);
       else {
         _depCompletions.add(0, oneToOne);
-        relatedType.setHasDependent(true);
+        entityType.setHasDependent(true);
       }
 
       ArrayList<OneToOneCompletion> oneToOneList
-        = _oneToOneCompletions.get(relatedType);
+        = _oneToOneCompletions.get(entityType);
 
       if (oneToOneList == null) {
         oneToOneList = new ArrayList<OneToOneCompletion>();
-        _oneToOneCompletions.put(relatedType, oneToOneList);
+        _oneToOneCompletions.put(entityType, oneToOneList);
       }
 
       oneToOneList.add(oneToOne);
@@ -1585,9 +1583,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         }
       }
 
-      EntityType relatedType = (EntityType) sourceType;
+      EntityType entityType = (EntityType) sourceType;
 
-      Completion completion = new ManyToManyCompletion(relatedType,
+      Completion completion = new ManyToManyCompletion(entityType,
                                                        field,
                                                        fieldName,
                                                        fieldType);
@@ -1609,11 +1607,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     else if (field.isAnnotationPresent(javax.persistence.Embedded.class)) {
       validateAnnotations(field, "@Embedded", _embeddedAnnotations);
 
-      EntityType relatedType = (EntityType) sourceType;
+      EntityType entityType = (EntityType) sourceType;
 
-      relatedType.setHasDependent(true);
+      entityType.setHasDependent(true);
 
-      _depCompletions.add(new EmbeddedCompletion(relatedType,
+      _depCompletions.add(new EmbeddedCompletion(entityType,
                                                  field,
                                                  fieldName,
                                                  fieldType,
@@ -1944,7 +1942,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     EntityManyToOneField manyToOneField;
     manyToOneField = new EntityManyToOneField(sourceType, fieldName, cascadeTypes, isManyToOne);
 
-    SelfEntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
+    EntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
 
     manyToOneField.setType(targetType);
 
@@ -2115,7 +2113,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       throw error(field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
                              field.getName()));
 
-    SelfEntityType targetType = _persistenceUnit.getEntityType(targetName);
+    EntityType targetType = _persistenceUnit.getEntityType(targetName);
 
     if (targetType == null)
       throw error(field,
@@ -2383,35 +2381,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for dependent
    */
-  class Completion {
-    protected EntityType _relatedType;
-
-    protected Completion(EntityType relatedType,
-                         String fieldName)
-    {
-      _relatedType = relatedType;
-      _relatedType.addCompletionField(fieldName);
-    }
-
-    protected Completion(EntityType relatedType)
-    {
-      _relatedType = relatedType;
-    }
-
-    EntityType getRelatedType()
-    {
-      return _relatedType;
-    }
-
-    void complete()
-      throws ConfigException
-    {
-    }
-  }
-
-  /**
-   * completes for dependent
-   */
   class OneToManyCompletion extends Completion {
     private JAccessibleObject _field;
     private String _fieldName;
@@ -2425,7 +2394,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                         JClass fieldType,
                         OneToManyConfig oneToManyConfig)
     {
-      super(type, fieldName);
+      super(BaseConfigIntrospector.this, type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
@@ -2433,10 +2402,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       _oneToManyConfig = oneToManyConfig;
     }
 
+    @Override
     void complete()
       throws ConfigException
     {
-      getInternalOneToManyConfig(_relatedType.getBeanClass(),
+      getInternalOneToManyConfig(_entityType.getBeanClass(),
 				 _field, _fieldName,
 				 _annotationCfg);
       
@@ -2448,7 +2418,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       else
         _isLazy = oneToManyConfig.getFetch() == FetchType.LAZY;
 
-      AmberPersistenceUnit persistenceUnit = _relatedType.getPersistenceUnit();
+      AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
       JType retType;
 
@@ -2483,7 +2453,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         throw error(_field, L.l("Can't determine targetEntity for {0}.  @OneToMany properties must target @Entity beans.",
                                 _field.getName()));
 
-      SelfEntityType targetType = persistenceUnit.getEntityType(targetName);
+      EntityType targetType = persistenceUnit.getEntityType(targetName);
       if (targetType == null) {
 
         EntityConfig entityConfig = getEntityConfig(targetName);
@@ -2640,12 +2610,12 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       EntityOneToManyField oneToMany;
 
-      oneToMany = new EntityOneToManyField(_relatedType, _fieldName, cascadeTypes);
+      oneToMany = new EntityOneToManyField(_entityType, _fieldName, cascadeTypes);
       oneToMany.setSourceField(sourceField);
       oneToMany.setOrderBy(orderByFields, orderByAscending);
       oneToMany.setLazy(_isLazy);
 
-      getInternalMapKeyConfig(_relatedType.getBeanClass(), _field, _fieldName,
+      getInternalMapKeyConfig(_entityType.getBeanClass(), _field, _fieldName,
 			      _annotationCfg);
       JAnnotation mapKeyAnn = _annotationCfg.getAnnotation();
       MapKeyConfig mapKeyConfig = _annotationCfg.getMapKeyConfig();
@@ -2667,7 +2637,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         oneToMany.setMapKey(key);
       }
 
-      _relatedType.addField(oneToMany);
+      _entityType.addField(oneToMany);
     }
 
     private void oneToManyUnidirectional(EntityType targetType,
@@ -2677,10 +2647,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     {
       EntityManyToManyField manyToManyField;
 
-      manyToManyField = new EntityManyToManyField(_relatedType, _fieldName, cascadeTypes);
+      manyToManyField = new EntityManyToManyField(_entityType, _fieldName, cascadeTypes);
       manyToManyField.setType(targetType);
 
-      String sqlTable = _relatedType.getTable().getName() + "_" + targetType.getTable().getName();
+      String sqlTable = _entityType.getTable().getName() + "_" + targetType.getTable().getName();
 
       JAnnotation joinTableAnn = _field.getAnnotation(javax.persistence.JoinTable.class);
 
@@ -2721,8 +2691,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
         sourceColumns = AbstractConfigIntrospector.calculateColumns(_field,
                                                                     mapTable,
-                                                                    _relatedType.getTable().getName() + "_",
-                                                                    _relatedType,
+                                                                    _entityType.getTable().getName() + "_",
+                                                                    _entityType,
                                                                     joinColumns,
                                                                     joinColumnsConfig);
 
@@ -2737,8 +2707,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         mapTable = _persistenceUnit.createTable(sqlTable);
 
         sourceColumns = AbstractConfigIntrospector.calculateColumns(mapTable,
-                                                                    _relatedType.getTable().getName() + "_",
-                                                                    _relatedType);
+                                                                    _entityType.getTable().getName() + "_",
+                                                                    _entityType);
 
         targetColumns
           = AbstractConfigIntrospector.calculateColumns(mapTable,
@@ -2751,14 +2721,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       manyToManyField.setTable(sqlTable);
 
       manyToManyField.setSourceLink(new LinkColumns(mapTable,
-                                                    _relatedType.getTable(),
+                                                    _entityType.getTable(),
                                                     sourceColumns));
 
       manyToManyField.setTargetLink(new LinkColumns(mapTable,
                                                     targetType.getTable(),
                                                     targetColumns));
 
-      getInternalMapKeyConfig(_relatedType.getBeanClass(),
+      getInternalMapKeyConfig(_entityType.getBeanClass(),
 			      _field, _field.getName(),
 			      _annotationCfg);
       JAnnotation mapKeyAnn = _annotationCfg.getAnnotation();
@@ -2787,7 +2757,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         manyToManyField.setMapKey(key);
       }
 
-      _relatedType.addField(manyToManyField);
+      _entityType.addField(manyToManyField);
     }
   }
 
@@ -2804,7 +2774,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                        String fieldName,
                        JClass fieldType)
     {
-      super(type, fieldName);
+      super(BaseConfigIntrospector.this, type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
@@ -2819,7 +2789,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     void complete()
       throws ConfigException
     {
-      getInternalOneToOneConfig(_relatedType.getBeanClass(),
+      getInternalOneToOneConfig(_entityType.getBeanClass(),
 				_field, _fieldName,
 				_annotationCfg);
       JAnnotation oneToOneAnn = _annotationCfg.getAnnotation();
@@ -2833,14 +2803,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         isLazy = oneToOneConfig.getFetch() == FetchType.LAZY;
 
       if (! isLazy) {
-        if (_relatedType.getBeanClass().getName().equals(_fieldType.getName())) {
+        if (_entityType.getBeanClass().getName().equals(_fieldType.getName())) {
           throw error(_field, L.l("'{0}': '{1}' is an illegal recursive type for @OneToOne with EAGER fetching. You should specify FetchType.LAZY for this relationship.",
                                   _field.getName(),
                                   _fieldType.getName()));
         }
       }
 
-      AmberPersistenceUnit persistenceUnit = _relatedType.getPersistenceUnit();
+      AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
       JClass targetEntity = null;
       String targetName = "";
@@ -2911,7 +2881,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       // jpa/0o07
       if (isManyToOne) {
-        getInternalJoinColumnConfig(_relatedType.getBeanClass(),
+        getInternalJoinColumnConfig(_entityType.getBeanClass(),
 				    _field, _fieldName,
 				    _annotationCfg);
         JAnnotation joinColumnAnn = _annotationCfg.getAnnotation();
@@ -2958,7 +2928,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       if (isManyToOne) {
 
-        addManyToOne(_relatedType, _field, _fieldName, _field.getReturnType());
+        addManyToOne(_entityType, _field, _fieldName, _field.getReturnType());
 
         // XXX: set unique
       }
@@ -2981,7 +2951,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
         // Owner
         EntityManyToOneField sourceField
-          = getSourceField(targetType, mappedBy, _relatedType);
+          = getSourceField(targetType, mappedBy, _entityType);
 
         if (sourceField == null) {
           throw new ConfigException(L.l("{0}: OneToOne target '{1}' does not have a matching ManyToOne relation.",
@@ -3006,12 +2976,12 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
             cascadeTypes[i] = (CascadeType) cascade[i];
         }
 
-        oneToOne = new DependentEntityOneToOneField(_relatedType, _fieldName, cascadeTypes);
+        oneToOne = new DependentEntityOneToOneField(_entityType, _fieldName, cascadeTypes);
         oneToOne.setTargetField(sourceField);
         sourceField.setTargetField(oneToOne);
         oneToOne.setLazy(isLazy);
 
-        _relatedType.addField(oneToOne);
+        _entityType.addField(oneToOne);
       }
     }
   }
@@ -3029,17 +2999,18 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                          String fieldName,
                          JClass fieldType)
     {
-      super(type, fieldName);
+      super(BaseConfigIntrospector.this, type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
       _fieldType = fieldType;
     }
 
+    @Override
     void complete()
       throws ConfigException
     {
-      addManyToMany(_relatedType, _field, _fieldName, _fieldType);
+      addManyToMany(_entityType, _field, _fieldName, _fieldType);
     }
   }
 
@@ -3056,17 +3027,18 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                         String fieldName,
                         JClass fieldType)
     {
-      super(type, fieldName);
+      super(BaseConfigIntrospector.this, type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
       _fieldType = fieldType;
     }
 
+    @Override
     void complete()
       throws ConfigException
     {
-      addManyToOne(_relatedType, _field, _fieldName, _fieldType);
+      addManyToOne(_entityType, _field, _fieldName, _fieldType);
     }
   }
 
@@ -3087,7 +3059,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                        JClass fieldType,
                        boolean embeddedId)
     {
-      super(type, fieldName);
+      super(BaseConfigIntrospector.this, type, fieldName);
 
       _field = field;
       _fieldName = fieldName;
@@ -3098,7 +3070,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     void complete()
       throws ConfigException
     {
-      getInternalAttributeOverrideConfig(_relatedType.getBeanClass(),
+      getInternalAttributeOverrideConfig(_entityType.getBeanClass(),
 					 _annotationCfg);
       JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
       AttributeOverrideConfig attributeOverrideConfig = _annotationCfg.getAttributeOverrideConfig();
@@ -3123,28 +3095,28 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
       }
 
-      AmberPersistenceUnit persistenceUnit = _relatedType.getPersistenceUnit();
+      AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
 
       EmbeddableType type = persistenceUnit.createEmbeddable(_fieldType);
 
       EntityEmbeddedField embeddedField;
 
       if (_embeddedId) {
-        embeddedField = _relatedType.getId().getEmbeddedIdField();
+        embeddedField = _entityType.getId().getEmbeddedIdField();
       } else {
-        embeddedField = new EntityEmbeddedField(_relatedType, type, _fieldName);
+        embeddedField = new EntityEmbeddedField(_entityType, type, _fieldName);
       }
 
       // embeddedField.setEmbeddedId(_embeddedId);
 
       embeddedField.setLazy(false);
 
-      _relatedType.addField(embeddedField);
+      _entityType.addField(embeddedField);
 
       // XXX: todo ...
       // validateAttributeOverrides(_field, attributeOverridesAnn, type);
 
-      Table sourceTable = _relatedType.getTable();
+      Table sourceTable = _entityType.getTable();
 
       HashMap<String, Column> embeddedColumns = new HashMap<String, Column>();
       HashMap<String, String> fieldNameByColumn = new HashMap<String, String>();
@@ -3211,306 +3183,20 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                   Object entities[],
                                   Object columns[])
     {
-      super(type);
+      super(BaseConfigIntrospector.this, type);
 
       _name = name;
       _entities = entities;
       _columns = columns;
     }
 
+    @Override
     void complete()
       throws ConfigException
     {
       addSqlResultSetMapping(_name,
                              _entities,
                              _columns);
-    }
-  }
-
-  /**
-   * completes for link
-   */
-  class AttributeOverrideCompletion extends Completion {
-    private JClass _type;
-
-    AttributeOverrideCompletion(EntityType relatedType,
-                                JClass type)
-    {
-      super(relatedType);
-
-      _type = type;
-    }
-
-    void complete()
-      throws ConfigException
-    {
-      getInternalAttributeOverrideConfig(_type, _annotationCfg);
-      JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
-
-      boolean hasAttributeOverride = (attributeOverrideAnn != null);
-
-      JAnnotation attributeOverridesAnn
-        = _type.getAnnotation(AttributeOverrides.class);
-
-      ArrayList<AttributeOverrideConfig> attributeOverrideList = null;
-
-      EntityConfig entityConfig = getEntityConfig(_type.getName());
-
-      if (entityConfig != null)
-        attributeOverrideList = entityConfig.getAttributeOverrideList();
-
-      boolean hasAttributeOverrides = false;
-
-      if ((attributeOverrideList != null) &&
-          (attributeOverrideList.size() > 0)) {
-        hasAttributeOverrides = true;
-      }
-      else if (attributeOverridesAnn != null)
-        hasAttributeOverrides = true;
-
-      if (hasAttributeOverride && hasAttributeOverrides)
-        throw new ConfigException(L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
-                                      _type));
-
-      if (attributeOverrideList == null)
-        attributeOverrideList = new ArrayList<AttributeOverrideConfig>();
-
-      if (hasAttributeOverride) {
-        // Convert annotation to configuration.
-
-        AttributeOverrideConfig attOverrideConfig
-          = convertAttributeOverrideAnnotationToConfig(attributeOverrideAnn);
-
-        attributeOverrideList.add(attOverrideConfig);
-      }
-      else if (hasAttributeOverrides) {
-        if (attributeOverrideList.size() > 0) {
-          // OK: attributeOverrideList came from orm.xml
-        }
-        else {
-          // Convert annotations to configurations.
-
-          Object attOverridesAnn[]
-            = (Object []) attributeOverridesAnn.get("value");
-
-          AttributeOverrideConfig attOverrideConfig;
-
-          for (int i = 0; i < attOverridesAnn.length; i++) {
-            attOverrideConfig
-              = convertAttributeOverrideAnnotationToConfig((JAnnotation) attOverridesAnn[i]);
-
-            attributeOverrideList.add(attOverrideConfig);
-          }
-        }
-      }
-
-      // jpa/0ge8, jpa/0ge9, jpa/0gea
-      // Fields which have not been overridden are added to the
-      // entity subclass. This makes the columns to be properly
-      // created at each entity table -- not the mapped superclass
-      // table, even because the parent might not have a valid table.
-
-      EntityType parent = _relatedType.getParentType();
-
-      ArrayList<AmberField> fields = parent.getFields();
-
-      for (AmberField field : fields) {
-        String fieldName = field.getName();
-
-        AttributeOverrideConfig attOverrideConfig = null;
-
-        int i = 0;
-
-        for (; i < attributeOverrideList.size(); i++) {
-          attOverrideConfig = attributeOverrideList.get(i);
-
-          if (fieldName.equals(attOverrideConfig.getName())) {
-            break;
-          }
-        }
-
-        if (i < attributeOverrideList.size())
-          continue;
-
-        if (field instanceof PropertyField) {
-          Column column = ((PropertyField) field).getColumn();
-
-          // jpa/0ge8, jpa/0gea
-          // Creates the missing attribute override config.
-          attOverrideConfig = createAttributeOverrideConfig(fieldName,
-                                                            column.getName(),
-                                                            ! column.isNotNull(),
-                                                            column.isUnique());
-
-          attributeOverrideList.add(attOverrideConfig);
-        }
-      }
-
-      // jpa/0ge8, jpa/0ge9
-      // Similar code to create any missing configuration for keys.
-
-      com.caucho.amber.field.Id parentId = parent.getId();
-
-      // jpa/0ge6
-      if (parentId != null) {
-        ArrayList<IdField> keys = parentId.getKeys();
-
-        for (IdField field : keys) {
-          String fieldName = field.getName();
-
-          AttributeOverrideConfig attOverrideConfig = null;
-
-          int i = 0;
-
-          for (; i < attributeOverrideList.size(); i++) {
-            attOverrideConfig = attributeOverrideList.get(i);
-
-            if (fieldName.equals(attOverrideConfig.getName())) {
-              break;
-            }
-          }
-
-          if (i < attributeOverrideList.size())
-            continue;
-
-          if (field instanceof KeyPropertyField) {
-            try {
-              if (_relatedType.isFieldAccess())
-                introspectIdField(_persistenceUnit, _relatedType, null,
-                                  parent.getBeanClass(), null, null);
-              else
-                introspectIdMethod(_persistenceUnit, _relatedType, null,
-                                   parent.getBeanClass(), null, null);
-            } catch (SQLException e) {
-              throw ConfigException.create(e);
-            }
-
-            field = _relatedType.getId().getKeys().get(0);
-
-            Column column = ((KeyPropertyField) field).getColumn();
-
-            // jpa/0ge8, jpa/0ge9, jpa/0gea
-            // Creates the missing attribute override config.
-            attOverrideConfig = createAttributeOverrideConfig(fieldName,
-                                                              column.getName(),
-                                                              ! column.isNotNull(),
-                                                              column.isUnique());
-
-            attributeOverrideList.add(attOverrideConfig);
-          }
-        }
-      }
-
-      // Overrides fields from MappedSuperclass.
-
-      Table sourceTable = _relatedType.getTable();
-
-      for (int i = 0; i < attributeOverrideList.size(); i++) {
-
-        AttributeOverrideConfig attOverrideConfig
-          = attributeOverrideList.get(i);
-
-        String entityFieldName;
-        String columnName;
-        boolean notNull = false;
-        boolean unique = false;
-
-        Type amberType = null;
-
-        for (int j = 0; j < fields.size(); j++) {
-
-          AmberField field = fields.get(j);
-
-          if (! (field instanceof PropertyField)) {
-            // jpa/0ge3: relationship fields are fully mapped in the
-            // mapped superclass, i.e., are not included in @AttributeOverrides
-            // and can be added to the entity right away.
-
-            // Adds only once.
-            if (i == 0) {
-              _relatedType.addMappedSuperclassField(field);
-            }
-
-            continue;
-          }
-
-          entityFieldName = field.getName();
-
-          columnName = toSqlName(entityFieldName);
-
-          if (entityFieldName.equals(attOverrideConfig.getName())) {
-
-            ColumnConfig columnConfig = attOverrideConfig.getColumn();
-
-            if (columnConfig != null) {
-              columnName = columnConfig.getName();
-              notNull = ! columnConfig.getNullable();
-              unique = columnConfig.getUnique();
-              amberType = _persistenceUnit.createType(field.getJavaType().getName());
-
-              Column column = sourceTable.createColumn(columnName, amberType);
-
-              column.setNotNull(notNull);
-              column.setUnique(unique);
-
-              PropertyField overriddenField
-                = new PropertyField(field.getSourceType(), field.getName());
-
-              overriddenField.setType(((PropertyField) field).getType());
-              overriddenField.setLazy(field.isLazy());
-              overriddenField.setColumn(column);
-
-              _relatedType.addMappedSuperclassField(overriddenField);
-            }
-          }
-        }
-
-        if (_relatedType.getId() != null) {
-          ArrayList<IdField> keys = _relatedType.getId().getKeys();
-
-          for (int j = 0; j < keys.size(); j++) {
-
-            IdField field = keys.get(j);
-
-            entityFieldName = field.getName();
-
-            columnName = toSqlName(entityFieldName);
-
-            if (entityFieldName.equals(attOverrideConfig.getName())) {
-
-              ColumnConfig columnConfig = attOverrideConfig.getColumn();
-
-              if (columnConfig != null) {
-                columnName = columnConfig.getName();
-                notNull = ! columnConfig.getNullable();
-                unique = columnConfig.getUnique();
-                amberType = _persistenceUnit.createType(field.getJavaType().getName());
-
-                Column column = sourceTable.createColumn(columnName, amberType);
-
-                column.setNotNull(notNull);
-                column.setUnique(unique);
-
-                if (field instanceof KeyPropertyField) {
-                  KeyPropertyField overriddenField
-                    = new KeyPropertyField((EntityType) field.getSourceType(),
-                                           field.getName());
-
-                  overriddenField.setGenerator(field.getGenerator());
-                  overriddenField.setColumn(column);
-
-                  // XXX: needs to handle compound pk with @AttributeOverride ???
-                  if (keys.size() == 1) {
-                    keys.remove(0);
-                    keys.add(overriddenField);
-                    _relatedType.setId(new com.caucho.amber.field.Id(_relatedType, keys));
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   }
 
@@ -3919,7 +3605,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     return mappedSuperclassConfig;
   }
 
-  private static AttributeOverrideConfig convertAttributeOverrideAnnotationToConfig(JAnnotation attOverrideAnn)
+  static AttributeOverrideConfig convertAttributeOverrideAnnotationToConfig(JAnnotation attOverrideAnn)
   {
     JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
 
@@ -3929,7 +3615,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                          columnAnn.getBoolean("unique"));
   }
 
-  private static AttributeOverrideConfig createAttributeOverrideConfig(String name,
+  static AttributeOverrideConfig createAttributeOverrideConfig(String name,
                                                                        String columnName,
                                                                        boolean isNullable,
                                                                        boolean isUnique)

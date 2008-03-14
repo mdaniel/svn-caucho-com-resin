@@ -94,11 +94,11 @@ public class TypeManager {
   /**
    * Returns the type.
    */
-  public SelfEntityType getEntityByInstanceClass(String name)
+  public EntityType getEntityByInstanceClass(String name)
   {
     for (Type type : _typeMap.values()) {
-      if (type instanceof SelfEntityType) {
-        SelfEntityType entityType = (SelfEntityType) type;
+      if (type instanceof EntityType) {
+        EntityType entityType = (EntityType) type;
 
         if (name.equals(entityType.getInstanceClassName()))
           return entityType;

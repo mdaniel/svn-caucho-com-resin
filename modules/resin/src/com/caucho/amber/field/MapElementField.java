@@ -29,7 +29,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
@@ -48,7 +48,7 @@ public class MapElementField extends AssociationField
 
   private ArrayList<Column> _indexColumns;
   
-  public MapElementField(SelfEntityType entityType)
+  public MapElementField(EntityType entityType)
   {
     super(entityType);
   }

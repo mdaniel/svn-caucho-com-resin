@@ -32,7 +32,7 @@ import com.caucho.amber.field.KeyPropertyField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 
 /**
@@ -51,7 +51,7 @@ public class KeyPropertyExpr extends AbstractAmberExpr implements IdFieldExpr {
     _field = field;
 
     // XXX: ejb/0a08
-    if (_field.getType() instanceof SelfEntityType)
+    if (_field.getType() instanceof EntityType)
       throw new IllegalStateException();
   }
 
@@ -105,10 +105,10 @@ public class KeyPropertyExpr extends AbstractAmberExpr implements IdFieldExpr {
   {
     Type type = getType();
 
-    if (! (type instanceof SelfEntityType))
+    if (! (type instanceof EntityType))
       return null;
 
-    SelfEntityType entityType = (SelfEntityType) type;
+    EntityType entityType = (EntityType) type;
     
     AbstractField field = entityType.getField(name);
 

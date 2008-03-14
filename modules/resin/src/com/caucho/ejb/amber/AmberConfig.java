@@ -42,7 +42,7 @@ import com.caucho.amber.field.StubMethod;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JClassWrapper;
 import com.caucho.bytecode.JMethodWrapper;
@@ -67,8 +67,8 @@ public class AmberConfig {
 
   private ArrayList<EjbEntityBean> _beans = new ArrayList<EjbEntityBean>();
   
-  private HashMap<String,SelfEntityType> _entityMap =
-    new HashMap<String,SelfEntityType>();
+  private HashMap<String,EntityType> _entityMap =
+    new HashMap<String,EntityType>();
 
   /**
    * Sets the data source.
@@ -102,7 +102,7 @@ public class AmberConfig {
   {
     _beans.add(bean);
 
-    SelfEntityType type = bean.getEntityType();
+    EntityType type = bean.getEntityType();
 
     type.setInstanceClassName(bean.getFullImplName());
     type.setProxyClass(JClassWrapper.create(bean.getLocal().getJavaClass()));
@@ -168,7 +168,7 @@ public class AmberConfig {
   /**
    * Configure the field.
    */
-  private void configureField(SelfEntityType type, CmpField cmpField)
+  private void configureField(EntityType type, CmpField cmpField)
     throws ConfigException
   {
     String fieldName = cmpField.getName();
@@ -199,7 +199,7 @@ public class AmberConfig {
    * Configure the field.
    */
   private void configureId(EjbEntityBean bean,
-			   SelfEntityType type,
+			   EntityType type,
 			   ArrayList<CmpProperty> fields)
     throws ConfigException
   {
@@ -239,7 +239,7 @@ public class AmberConfig {
   private void configureRelations(EjbEntityBean bean)
     throws ConfigException
   {
-    SelfEntityType type = bean.getEntityType();
+    EntityType type = bean.getEntityType();
 
     for (CmrRelation rel : bean.getRelations()) {
       if (! rel.isId())
@@ -250,7 +250,7 @@ public class AmberConfig {
   private void linkRelations(EjbEntityBean bean)
     throws ConfigException
   {
-    SelfEntityType type = _entityMap.get(bean.getEJBName());
+    EntityType type = _entityMap.get(bean.getEJBName());
     
     for (CmrRelation rel : bean.getRelations()) {
       rel.linkAmber();
@@ -260,13 +260,13 @@ public class AmberConfig {
   /**
    * Configure the relation rolen.
    */
-  private void configureRelation(SelfEntityType type, CmrRelation rel)
+  private void configureRelation(EntityType type, CmrRelation rel)
     throws ConfigException
   {
     String fieldName = rel.getName();
     String targetName = rel.getTargetBean().getEJBName();
 
-    SelfEntityType targetType = _entityMap.get(targetName);
+    EntityType targetType = _entityMap.get(targetName);
 
     if (targetType == null)
       throw new ConfigException(L.l("'{0}' is an unknown entity type",

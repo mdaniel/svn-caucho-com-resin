@@ -49,6 +49,18 @@ abstract public class JClass extends JAnnotationObject implements JType {
    * Returns the class name.
    */
   abstract public String getName();
+  
+  /**
+   * Returns the class name.
+   */
+  public String getSimpleName()
+  {
+    String name = getName();
+
+    int p = name.lastIndexOf('.');
+
+    return name.substring(p + 1);
+  }
 
   /**
    * Returns the Java class.

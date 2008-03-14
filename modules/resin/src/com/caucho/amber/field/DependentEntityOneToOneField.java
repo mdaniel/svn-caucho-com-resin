@@ -507,7 +507,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof SelfEntityType))
+    if (! (getEntityTargetType() instanceof EntityType))
       return;
 
     String value = generateGet(src);
@@ -541,7 +541,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
-    if (! (getEntityTargetType() instanceof SelfEntityType))
+    if (! (getEntityTargetType() instanceof EntityType))
       return;
 
     out.println();
@@ -651,7 +651,7 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     if (persistenceUnit.isJPA()) {
       String className = getJavaType().getName();
-      SelfEntityType entity = persistenceUnit.getEntityType(className);
+      EntityType entity = persistenceUnit.getEntityType(className);
 
       // jpa/0ge4
       table = entity.getTable();

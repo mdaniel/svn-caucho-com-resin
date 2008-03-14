@@ -51,8 +51,18 @@ public class MappedSuperclassType extends EntityType {
   }
 
   /**
+   * returns false since the mapped superclass can't be loaded
+   */
+  @Override
+  public boolean isEntity()
+  {
+    return false;
+  }
+  
+  /**
    * Gets the instance class.
    */
+  @Override
   public Class getInstanceClass()
   {
     return getInstanceClass(MappedSuperclass.class);
@@ -61,6 +71,7 @@ public class MappedSuperclassType extends EntityType {
   /**
    * Returns the component interface name.
    */
+  @Override
   public String getComponentInterfaceName()
   {
     return "com.caucho.amber.entity.MappedSuperclass";
@@ -69,43 +80,23 @@ public class MappedSuperclassType extends EntityType {
   /**
    * Gets a component generator.
    */
+  @Override
   public AmberMappedComponent getComponentGenerator()
   {
     return new MappedSuperclassComponent();
   }
 
-  /**
-   * Returns the root type.
-   */
-  public EntityType getRootType()
+  @Override
+  public Table getTable()
   {
     return null;
   }
 
   /**
-   * Returns the table.
+   * id is not initialized for mapped superclass
    */
-  public Table getTable()
-  {
-    return _table;
-  }
-
-  /**
-   * Returns the columns.
-   */
-  public ArrayList<Column> getColumns()
-  {
-    // jpa/0ge2
-    if (getTable() == null)
-      return null;
-
-    return getTable().getColumns();
-  }
-
-  /**
-   * Sets the table.
-   */
-  public void setTable(Table table)
+  @Override
+  protected void initId()
   {
   }
 }

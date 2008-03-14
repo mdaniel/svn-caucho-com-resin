@@ -29,7 +29,7 @@
 package com.caucho.amber.entity;
 
 import com.caucho.amber.query.ResultSetCacheChunk;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -57,7 +57,7 @@ public class TableInvalidateCompletion implements AmberCompletion {
    *
    * @return true if the entry should be deleted.
    */
-  public boolean complete(SelfEntityType rootType,
+  public boolean complete(EntityType rootType,
                           Object key,
                           EntityItem entityItem)
   {

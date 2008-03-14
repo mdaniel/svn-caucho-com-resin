@@ -54,6 +54,11 @@ public class MappedSuperclassConfig extends AbstractEnhancedConfig {
   private PostLoadConfig _postLoad;
   private AttributesConfig _attributes;
 
+  MappedSuperclassConfig(String name)
+  {
+    super(name);
+  }
+
   /**
    * Returns the attributes.
    */

@@ -37,7 +37,7 @@ import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.expr.LoadEntityExpr;
 import com.caucho.amber.expr.ManyToOneJoinExpr;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.jdbc.JdbcMetaData;
@@ -299,7 +299,7 @@ public class SelectQuery extends AbstractQuery {
     _cacheTimeout = Long.MAX_VALUE / 2;
     _isTableReadOnly = true;
     for (FromItem item : _fromList) {
-      SelfEntityType type = item.getTableType();
+      EntityType type = item.getTableType();
 
       if (type != null) {
         long timeout = type.getCacheTimeout();
@@ -532,7 +532,7 @@ public class SelectQuery extends AbstractQuery {
         item.getJoinExpr().generateJoin(cb);
       }
 
-      SelfEntityType entityType = item.getEntityType();
+      EntityType entityType = item.getEntityType();
 
       // jpa/0l44, jpa/0l12
       /* XXX: jpa/0l47 move this to LoadExpr.generateSelect
@@ -544,7 +544,7 @@ public class SelectQuery extends AbstractQuery {
           // jpa/0l4b
           // XXX: needs to use parser.createTableName()
           FromItem discriminatorItem
-            = new FromItem((SelfEntityType) entityType,
+            = new FromItem((EntityType) entityType,
                            discriminator.getTable(),
                            item.getName() + "_disc",
                            ++i);
@@ -583,7 +583,7 @@ public class SelectQuery extends AbstractQuery {
         expr.generateJoin(cb);
       }
 
-      SelfEntityType entityType = item.getEntityType();
+      EntityType entityType = item.getEntityType();
 
       // jpa/0l44
       if (entityType != null) {

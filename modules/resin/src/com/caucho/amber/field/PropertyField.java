@@ -142,6 +142,21 @@ public class PropertyField extends AbstractField {
   }
 
   /**
+   * Creates a copy of the field for a parent
+   */
+  public AmberField override(AbstractStatefulType type)
+  {
+    PropertyField field = new PropertyField(getSourceType(), getName());
+
+    field.setOverride(true);
+    field.setLazy(isLazy());
+    field.setInsert(_isInsert);
+    field.setUpdate(_isUpdate);
+
+    return field;
+  }
+
+  /**
    * Initializes the property.
    */
   public void init()
@@ -317,7 +332,7 @@ public class PropertyField extends AbstractField {
   {
     if (getColumn().getTable() != table) {
       // jpa/0l14 as a negative test
-      if (getRelatedSourceType() instanceof SelfEntityType)
+      if (getRelatedSourceType() instanceof EntityType)
         return null;
     }
 

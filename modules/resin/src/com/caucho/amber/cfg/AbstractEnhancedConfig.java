@@ -34,9 +34,14 @@ package com.caucho.amber.cfg;
  * Base for <embeddable>, <entity> or
  * <mapped-superclass> tags in orm.xml
  */
-abstract public class AbstractEnhancedConfig {
+abstract class AbstractEnhancedConfig extends TypeConfig {
   // attributes
   private String _access;
+
+  AbstractEnhancedConfig(String name)
+  {
+    super(name);
+  }
 
   /**
    * Returns the access type.

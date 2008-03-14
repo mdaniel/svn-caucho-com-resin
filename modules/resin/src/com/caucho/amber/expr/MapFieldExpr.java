@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.field.MapElementField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 
@@ -96,9 +96,9 @@ public class MapFieldExpr extends AbstractAmberExpr {
   /**
    * Returns the expr's type.
    */
-  public SelfEntityType getTableType()
+  public EntityType getTableType()
   {
-    return (SelfEntityType) getType();
+    return (EntityType) getType();
   }
 
   /**

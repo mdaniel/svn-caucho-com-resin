@@ -59,14 +59,14 @@ public interface AmberField {
   public AbstractStatefulType getSourceType();
 
   /**
-   * Returns true if and only if this is a LAZY field.
-   */
-  public boolean isLazy();
-
-  /**
    * Returns the field name.
    */
   public String getName();
+
+  /**
+   * Returns true if and only if this is a LAZY field.
+   */
+  public boolean isLazy();
 
   /**
    * Returns the table containing the value (or null)
@@ -142,6 +142,11 @@ public interface AmberField {
    * Links to the target.
    */
   public void setIndex(int index);
+
+  /**
+   * Override the field
+   */
+  public AmberField override(AbstractStatefulType entityType);
 
   /**
    * Links to the target.

@@ -47,15 +47,15 @@ public class LoadGroupGenerator extends ClassComponent {
   private static final L10N L = new L10N(LoadGroupGenerator.class);
 
   private String _extClassName;
-  private EntityType _relatedType;
+  private EntityType _entityType;
   private int _index;
 
   public LoadGroupGenerator(String extClassName,
-                            EntityType relatedType,
+                            EntityType entityType,
                             int index)
   {
     _extClassName = extClassName;
-    _relatedType = relatedType;
+    _entityType = entityType;
     _index = index;
   }
 
@@ -77,17 +77,17 @@ public class LoadGroupGenerator extends ClassComponent {
                 + " & " + mask + "L) != 0;");
 
     // jpa/0ge2: MappedSuperclassType
-    if (_relatedType.getTable() != null) {
+    if (_entityType.getTable() != null) {
 
       int min = 0;
 
-      if (_relatedType.getParentType() == null)
+      if (_entityType.getParentType() == null)
         min = _index;
 
       // XXX: need to do another check for a long hierarchy and/or many-to-one
-      // if ((_relatedType.getParentType() != null) &&
-      //     (_index = _relatedType.getParentType().getLoadGroupIndex() + 1)) {
-      //   min = _relatedType.getParentType().getLoadGroupIndex();
+      // if ((_entityType.getParentType() != null) &&
+      //     (_index = _entityType.getParentType().getLoadGroupIndex() + 1)) {
+      //   min = _entityType.getParentType().getLoadGroupIndex();
       // }
 
       int max = _index;
@@ -112,7 +112,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
       out.println();
 
-      _relatedType.generatePostLoadSelect(out, 1, _index);
+      _entityType.generatePostLoadSelect(out, 1, _index);
 
       // jpa/0o09
       // needs to be after load to prevent loop if toString() expects data
@@ -126,7 +126,7 @@ public class LoadGroupGenerator extends ClassComponent {
       out.pushDepth();
 
       // ejb/06j2, ejb/0690
-      if (_relatedType.getHasLoadCallback() && _index == 0) {
+      if (_entityType.getHasLoadCallback() && _index == 0) {
         out.println();
         out.println("__caucho_load_callback();");
       }
@@ -140,7 +140,7 @@ public class LoadGroupGenerator extends ClassComponent {
       // Within a transaction the entity is not copied
       // directly from cache, so we need to invoke the
       // callbacks after load. For jpa/0r00, see AmberMappedComponent.
-      generateCallbacks(out, _relatedType.getPostLoadCallbacks());
+      generateCallbacks(out, _entityType.getPostLoadCallbacks());
 
       out.popDepth();
       out.println("}");
@@ -149,14 +149,14 @@ public class LoadGroupGenerator extends ClassComponent {
     out.popDepth();
     out.println("}");
 
-    if (_index == 0 && _relatedType.getHasLoadCallback()) {
+    if (_index == 0 && _entityType.getHasLoadCallback()) {
       out.println();
       out.println("protected void __caucho_load_callback() {}");
     }
 
     generateLoadSelect(out, group, mask);
 
-    if (group == 0)
+    if (_index == 0)
       generateLoadNative(out);
   }
 
@@ -169,7 +169,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    _relatedType.generateLoadNative(out);
+    _entityType.generateLoadNative(out);
 
     out.println("__caucho_loadMask_0 |= 1L;");
     
@@ -183,7 +183,7 @@ public class LoadGroupGenerator extends ClassComponent {
     throws IOException
   {
     // non-read-only entities must be reread in a transaction
-    if (! _relatedType.isReadOnly()) {
+    if (! _entityType.isReadOnly()) {
       // jpa/1800
       out.println("if (aConn.isInTransaction()) {");
       out.pushDepth();
@@ -207,13 +207,13 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println();
 
       /* XXX: jpa/0o09
-        int loadCount = _relatedType.getLoadGroupIndex();
+        int loadCount = _entityType.getLoadGroupIndex();
         for (int i = 0; i <= loadCount / 64; i++) {
           out.println("    __caucho_loadMask_" + i + " = 0;");
         }
       */
 
-      int dirtyCount = _relatedType.getDirtyIndex();
+      int dirtyCount = _entityType.getDirtyIndex();
       for (int i = 0; i <= dirtyCount / 64; i++) {
         out.println("__caucho_dirtyMask_" + i + " = 0;");
       }
@@ -249,7 +249,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("item.__caucho_load_select_" + _index + "(aConn);");
 
     // ejb/06--, ejb/0a-- and jpa/0o04
-    _relatedType.generateCopyLoadObject(out, "super", "item", _index);
+    _entityType.generateCopyLoadObject(out, "super", "item", _index);
 
     // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
     //out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
@@ -264,7 +264,7 @@ public class LoadGroupGenerator extends ClassComponent {
     throws IOException
   {
     // jpa/0l40
-    if ((_index == 0) && (_relatedType.getDiscriminator() != null)) {
+    if ((_index == 0) && (_entityType.getDiscriminator() != null)) {
       out.println();
       out.println("String __caucho_discriminator;");
     }
@@ -274,7 +274,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    if (_relatedType.getTable() == null) {
+    if (_entityType.getTable() == null) {
       out.popDepth();
       out.println("}");
 
@@ -284,7 +284,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
     out.println("  return;");
 
-    Table table = _relatedType.getTable();
+    Table table = _entityType.getTable();
 
     String from = null;
     String select = null;
@@ -294,21 +294,21 @@ public class LoadGroupGenerator extends ClassComponent {
     Table mainTable = null;
     String tableName = null;
 
-    select = _relatedType.generateLoadSelect(table, "o", _index);
+    select = _entityType.generateLoadSelect(table, "o", _index);
 
     if (select != null) {
       from = table.getName() + " o";
-      where = _relatedType.getId().generateMatchArgWhere("o");
+      where = _entityType.getId().generateMatchArgWhere("o");
       mainTable = table;
       tableName = "o";
     }
 
-    ArrayList<Table> subTables = _relatedType.getSecondaryTables();
+    ArrayList<Table> subTables = _entityType.getSecondaryTables();
 
     for (int i = 0; i < subTables.size(); i++) {
       Table subTable = subTables.get(i);
 
-      subSelect = _relatedType.generateLoadSelect(subTable, "o" + i, _index);
+      subSelect = _entityType.generateLoadSelect(subTable, "o" + i, _index);
 
       if (subSelect == null)
         continue;
@@ -350,7 +350,7 @@ public class LoadGroupGenerator extends ClassComponent {
     if (where == null) {
       from = table.getName() + " o";
 
-      where = _relatedType.getId().generateMatchArgWhere("o");
+      where = _entityType.getId().generateMatchArgWhere("o");
     }
 
     String sql = "select " + select + " from " + from + " where " + where;
@@ -374,7 +374,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("java.sql.PreparedStatement pstmt = aConn.prepareStatement(sql);");
 
     out.println("int index = 1;");
-    _relatedType.getId().generateSet(out, "pstmt", "index", "super");
+    _entityType.getId().generateSet(out, "pstmt", "index", "super");
 
     out.println();
     out.println("rs = pstmt.executeQuery();");
@@ -383,13 +383,13 @@ public class LoadGroupGenerator extends ClassComponent {
     out.pushDepth();
 
     // jpa/0l40
-    if ((_index == 0) && (_relatedType.getDiscriminator() != null)) {
+    if ((_index == 0) && (_entityType.getDiscriminator() != null)) {
       out.println();
       out.println("__caucho_discriminator = rs.getString(1);");
     }
 
     // jpa/0gg3
-    _relatedType.generateLoad(out, "rs", "", 1, _index);
+    _entityType.generateLoad(out, "rs", "", 1, _index);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 
     out.popDepth();
@@ -397,7 +397,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("else {");
 
     String errorString = ("(\"amber load: no matching object " +
-                          _relatedType.getName() + "[\" + __caucho_getPrimaryKey() + \"]\")");
+                          _entityType.getName() + "[\" + __caucho_getPrimaryKey() + \"]\")");
 
     out.println("  throw new com.caucho.amber.AmberObjectNotFoundException(" + errorString + ");");
     out.println("}");

@@ -34,7 +34,7 @@ import com.caucho.ejb.cfg21.CmrManyToOne;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.EntityMapField;
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JMethodWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -87,7 +87,7 @@ public class CmrMap extends CmrRelation {
    */
   public String getIndexName()
   {
-    SelfEntityType type = _targetBean.getEntityType();
+    EntityType type = _targetBean.getEntityType();
 
     for (IdField key : type.getId().getKeys()) {
       if (! key.getName().equals(_idRel.getName()))
@@ -127,7 +127,7 @@ public class CmrMap extends CmrRelation {
   /**
    * Creates the amber type.
    */
-  public AmberField assembleAmber(SelfEntityType type)
+  public AmberField assembleAmber(EntityType type)
     throws ConfigException
   {
     EntityMapField field = new EntityMapField(type);
@@ -137,7 +137,7 @@ public class CmrMap extends CmrRelation {
 
     field.setTargetType(_targetBean.getEntityType());
 
-    SelfEntityType sourceType = _targetBean.getEntityType();
+    EntityType sourceType = _targetBean.getEntityType();
     for (IdField key : sourceType.getId().getKeys()) {
       if (key.getName().equals(_idRel.getName())) {
 	field.setId(key);

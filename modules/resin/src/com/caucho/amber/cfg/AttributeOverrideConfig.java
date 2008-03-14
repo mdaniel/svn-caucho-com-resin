@@ -34,11 +34,10 @@ package com.caucho.amber.cfg;
  * &lt;attribute-override> tag in the orm.xml
  */
 public class AttributeOverrideConfig {
-
-  // attributes
+  // field name to override
   private String _name;
 
-  // elements
+  // column value to override
   private ColumnConfig _column;
 
   /**

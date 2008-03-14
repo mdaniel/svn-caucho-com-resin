@@ -36,11 +36,9 @@ import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.Listener;
-import com.caucho.amber.field.AmberField;
-import com.caucho.amber.field.EntityManyToOneField;
-import com.caucho.amber.field.Id;
-import com.caucho.amber.field.IdField;
-import com.caucho.amber.field.VersionField;
+import com.caucho.amber.field.*;
+import com.caucho.amber.gen.AmberMappedComponent;
+import com.caucho.amber.gen.EntityComponent;
 import com.caucho.amber.idgen.AmberTableGenerator;
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
@@ -60,18 +58,20 @@ import java.lang.reflect.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Base for entity or mapped-superclass types.
  */
-abstract public class EntityType extends AbstractStatefulType {
+public class EntityType extends AbstractStatefulType {
   private static final Logger log = Logger.getLogger(EntityType.class.getName());
   private static final L10N L = new L10N(EntityType.class);
 
+  private EntityType _parentType;
+  
   Table _table;
 
   private String _rootTableName;
@@ -110,7 +110,12 @@ abstract public class EntityType extends AbstractStatefulType {
 
   private HashSet<String> _eagerFieldNames;
 
-  private HashMap<String,SelfEntityType> _subEntities;
+  private HashMap<String,EntityType> _subEntities;
+
+  private ArrayList<AmberField> _mappedSuperclassFields
+    = new ArrayList<AmberField>();
+
+  private ArrayList<AmberField> _fields;
 
   private boolean _hasDependent;
 
@@ -145,6 +150,31 @@ abstract public class EntityType extends AbstractStatefulType {
   }
 
   /**
+   * returns true for a loadable entity 
+   */
+  public boolean isEntity()
+  {
+    return true;
+  }
+  
+  /**
+   * Sets the table.
+   */
+  public void setTable(Table table)
+  {
+    _table = table;
+
+    // jpa/0gg0
+    if (table == null)
+      return;
+
+    table.setType(this);
+
+    if (_rootTableName == null)
+      _rootTableName = table.getName();
+  }
+
+  /**
    * Returns the table.
    */
   public Table getTable()
@@ -159,18 +189,29 @@ abstract public class EntityType extends AbstractStatefulType {
   }
 
   /**
-   * Sets the table.
+   * Gets the instance class.
    */
-  public void setTable(Table table)
+  public Class getInstanceClass()
   {
-    _table = table;
+    return getInstanceClass(Entity.class);
+  }
 
-    // jpa/0gg0
-    if (table == null)
-      return;
+  /**
+   * Returns the component interface name.
+   */
+  @Override
+  public String getComponentInterfaceName()
+  {
+    return "com.caucho.amber.entity.Entity";
+  }
 
-    if (_rootTableName == null)
-      _rootTableName = table.getName();
+  /**
+   * Gets a component generator.
+   */
+  @Override
+  public AmberMappedComponent getComponentGenerator()
+  {
+    return new EntityComponent();
   }
 
   /**
@@ -179,6 +220,53 @@ abstract public class EntityType extends AbstractStatefulType {
   public int getFlushPriority()
   {
     return _flushPriority;
+  }
+
+  /**
+   * Adds a mapped superclass field.
+   */
+  public void addMappedSuperclassField(AmberField field)
+  {
+    if (_mappedSuperclassFields.contains(field))
+      return;
+
+    _mappedSuperclassFields.add(field);
+    Collections.sort(_mappedSuperclassFields, new AmberFieldCompare());
+  }
+
+  /**
+   * Returns the mapped superclass fields.
+   */
+  public ArrayList<AmberField> getMappedSuperclassFields()
+  {
+    return _mappedSuperclassFields;
+  }
+
+  /**
+   * Returns the mapped superclass field with a given name.
+   */
+  public AmberField getMappedSuperclassField(String name)
+  {
+    for (int i = 0; i < _mappedSuperclassFields.size(); i++) {
+      AmberField field = _mappedSuperclassFields.get(i);
+
+      if (field.getName().equals(name))
+        return field;
+    }
+
+    return null;
+  }
+
+  /**
+   * returns the merged fields
+   */
+  @Override
+  public ArrayList<AmberField> getFields()
+  {
+    if (_fields != null)
+      return _fields;
+    else
+      return super.getFields();
   }
 
   /**
@@ -288,6 +376,7 @@ abstract public class EntityType extends AbstractStatefulType {
   /**
    * Returns the java type.
    */
+  @Override
   public String getForeignTypeName()
   {
     return getId().getForeignTypeName();
@@ -310,14 +399,6 @@ abstract public class EntityType extends AbstractStatefulType {
   public void setProxyClass(JClass proxyClass)
   {
     _proxyClass = proxyClass;
-  }
-
-  /**
-   * Gets the instance class.
-   */
-  public Class getInstanceClass()
-  {
-    return getInstanceClass(Entity.class);
   }
 
   /**
@@ -431,7 +512,6 @@ abstract public class EntityType extends AbstractStatefulType {
     super.addField(field);
 
     if (! field.isLazy()) {
-
       if (_eagerFieldNames == null)
         _eagerFieldNames = new HashSet<String>();
 
@@ -545,16 +625,24 @@ abstract public class EntityType extends AbstractStatefulType {
    */
   public EntityType getParentType()
   {
-    return null;
+    return _parentType;
+  }
+
+  /**
+   * Returns the parent type.
+   */
+  public void setParentType(EntityType parentType)
+  {
+    _parentType = parentType;
   }
 
   /**
    * Adds a sub-class.
    */
-  public void addSubClass(SubEntityType type)
+  public void addSubClass(EntityType type)
   {
     if (_subEntities == null)
-      _subEntities = new HashMap<String,SelfEntityType>();
+      _subEntities = new HashMap<String,EntityType>();
 
     _subEntities.put(type.getDiscriminatorValue(), type);
   }
@@ -573,7 +661,7 @@ abstract public class EntityType extends AbstractStatefulType {
       return subType;
     else {
       // jpa/0l15
-      for (SelfEntityType subEntity : _subEntities.values()) {
+      for (EntityType subEntity : _subEntities.values()) {
         subType = subEntity.getSubClass(discriminator);
 
         if (subType != subEntity)
@@ -703,14 +791,14 @@ abstract public class EntityType extends AbstractStatefulType {
     if (! _lifecycle.toInit())
       return;
 
+    super.init();
+
     // forces table lazy load
     getTable();
 
-    if (this instanceof SelfEntityType) {
-      assert getId() != null : "null id for " + getName();
+    initId();
 
-      getId().init();
-    }
+    _fields = getMergedFields();
 
     for (AmberField field : getFields()) {
       if (field.isUpdateable())
@@ -743,6 +831,31 @@ abstract public class EntityType extends AbstractStatefulType {
 
       field.init();
     }
+  }
+
+  protected void initId()
+  {
+    assert getId() != null : "null id for " + getName();
+
+    getId().init();
+  }
+
+  protected ArrayList<AmberField> getMergedFields()
+  {
+    ArrayList<AmberField> mappedFields = getMappedSuperclassFields();
+    
+    if (mappedFields == null)
+      return getFields();
+	
+    ArrayList<AmberField> resultFields = new ArrayList<AmberField>();
+
+    resultFields.addAll(getFields());
+
+    for (AmberField field : mappedFields) {
+      resultFields.add(field);
+   }
+
+    return resultFields;
   }
 
   /**
@@ -1000,10 +1113,7 @@ abstract public class EntityType extends AbstractStatefulType {
   {
     getId().generateLoadFromObject(out, obj);
 
-    ArrayList<AmberField> fields = getFields();
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
-
+    for (AmberField field : getFields()) {
       field.generateLoadFromObject(out, obj);
     }
   }
@@ -1021,9 +1131,7 @@ abstract public class EntityType extends AbstractStatefulType {
 
     ArrayList<AmberField> fields = getFields();
 
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
-
+    for (AmberField field : fields) {
       // XXX: setter issue, too
 
       field.generateCopyLoadObject(out, dst, src, loadGroup);
@@ -1152,26 +1260,6 @@ abstract public class EntityType extends AbstractStatefulType {
     CharBuffer cb = CharBuffer.allocate();
 
     boolean hasSelect = false;
-
-    /*
-    if (loadGroup == 0 && getParentType() != null) {
-      // jpa/0ge3
-      if (getParentType() instanceof SelfEntityType) {
-        String parentSelect =
-          getParentType().generateLoadSelect(table, id,
-                                             loadGroup, getMappedSuperclassFields());
-
-        // jpa/0ge2
-        if (parentSelect != null) {
-          cb.append(parentSelect);
-          if (! parentSelect.equals(""))
-            hasSelect = true;
-        }
-      }
-
-    }
-    else
-    */
 
     // jpa/0l11
     if (getTable() == table && loadGroup == 0 && getDiscriminator() != null) {
@@ -1538,7 +1626,7 @@ abstract public class EntityType extends AbstractStatefulType {
    * Updates global (persistence unit) entity priorities
    * for flushing.
    */
-  public int updateFlushPriority(ArrayList<SelfEntityType> updatingEntities)
+  public int updateFlushPriority(ArrayList<EntityType> updatingEntities)
   {
     // jpa/0h25, jpa/0h26, jpa/0h29, jpa/0j67
 
@@ -1554,8 +1642,8 @@ abstract public class EntityType extends AbstractStatefulType {
 
         EntityType targetRelatedType = manyToOne.getEntityTargetType();
 
-        if (targetRelatedType instanceof SelfEntityType) {
-          SelfEntityType targetType = (SelfEntityType) targetRelatedType;
+        if (targetRelatedType instanceof EntityType) {
+          EntityType targetType = (EntityType) targetRelatedType;
 
           if (! updatingEntities.contains(targetType)) {
             updatingEntities.add(targetType);

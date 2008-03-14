@@ -30,7 +30,7 @@
 package com.caucho.amber.entity;
 
 import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

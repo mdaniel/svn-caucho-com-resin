@@ -214,16 +214,16 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   /**
    * Returns true if the class should be enhanced.
    */
-  private SelfEntityType loadEntityType(Class cl, ClassLoader loader)
+  private EntityType loadEntityType(Class cl, ClassLoader loader)
   {
-    SelfEntityType parentType = null;
+    EntityType parentType = null;
 
     for (; cl != null; cl = cl.getSuperclass()) {
       java.net.URL url;
 
       String className = cl.getName();
 
-      SelfEntityType type = _amberContainer.getEntity(className);
+      EntityType type = _amberContainer.getEntity(className);
 
       if (parentType == null)
         parentType = type;
@@ -240,7 +240,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     return parentType;
   }
 
-  protected SelfEntityType loadEntityTypeImpl(Class cl, ClassLoader rawLoader)
+  protected EntityType loadEntityTypeImpl(Class cl, ClassLoader rawLoader)
   {
     return null;
   }
@@ -256,10 +256,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     if (type == null)
       type = _amberContainer.getMappedSuperclass(baseClass.getName());
 
-    if (type instanceof SubEntityType) {
-      SubEntityType subType = (SubEntityType) type;
-
-      String parentClass = subType.getParentType().getInstanceClassName();
+    if (type != null && type.getParentType() != null) {
+      String parentClass = type.getParentType().getInstanceClassName();
       baseClass.setSuperClass(parentClass.replace('.', '/'));
     }
   }
@@ -281,7 +279,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     // Type can be null for subclasses and inner classes that need fixups
     if (type != null) {
-      // type is SelfEntityType or MappedSuperclassType
+      // type is EntityType or MappedSuperclassType
 
       log.info("Amber enhancing class " + className);
 
@@ -410,7 +408,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       = type.getComponentGenerator();
 
     if (componentGenerator != null) {
-      // type is SelfEntityType or MappedSuperclassType
+      // type is EntityType or MappedSuperclassType
 
       javaClass.addInterfaceName(type.getComponentInterfaceName());
 
@@ -567,8 +565,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       if (type instanceof EmbeddableType)
 	continue;
 
-      if (type instanceof SelfEntityType) {
-        SelfEntityType entityType = (SelfEntityType) type;
+      if (type instanceof EntityType) {
+        EntityType entityType = (EntityType) type;
 
 	/*
         for (AmberField field : entityType.getId().getKeys()) {

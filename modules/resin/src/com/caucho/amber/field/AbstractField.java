@@ -65,7 +65,7 @@ abstract public class AbstractField implements AmberField {
   protected static final Logger log
     = Logger.getLogger(AbstractField.class.getName());
 
-  AbstractStatefulType _sourceType;
+  final AbstractStatefulType _sourceType;
 
   private String _name;
 
@@ -75,6 +75,7 @@ abstract public class AbstractField implements AmberField {
   private JMethod _setterMethod;
 
   private boolean _isLazy = true;
+  private boolean _isOverride;
 
   private int _updateIndex;
   private int _loadGroupIndex = -1;
@@ -230,6 +231,13 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Returns the column for the field
+   */
+  public void setColumn(Column column)
+  {
+  }
+
+  /**
    * Returns the property index.
    */
   public int getIndex()
@@ -288,6 +296,22 @@ abstract public class AbstractField implements AmberField {
   public void setLazy(boolean isLazy)
   {
     _isLazy = isLazy;
+  }
+
+  /**
+   * Returns true for an override
+   */
+  public boolean isOverride()
+  {
+    return _isOverride;
+  }
+
+  /**
+   * Returns true for an override
+   */
+  public void setOverride(boolean isOverride)
+  {
+    _isOverride = isOverride;
   }
 
   /**
@@ -388,6 +412,14 @@ abstract public class AbstractField implements AmberField {
   public boolean isUpdateable()
   {
     return true;
+  }
+
+  /**
+   * Creates a copy of the field for a parent
+   */
+  public AmberField override(AbstractStatefulType table)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

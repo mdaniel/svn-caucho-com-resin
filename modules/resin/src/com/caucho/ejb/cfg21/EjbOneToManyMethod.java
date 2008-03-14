@@ -33,7 +33,7 @@ import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.cfg21.CmrOneToMany;
 import com.caucho.ejb.cfg21.CmpGetter;
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.type.SelfEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.gen21.AbstractQueryMethod;
 import com.caucho.ejb.gen21.BeanAssembler;
@@ -136,7 +136,7 @@ public class EjbOneToManyMethod extends CmpGetter {
       out.print(" FROM " + abstractSchema + " o");
       out.print(" WHERE ");
 
-      SelfEntityType type = _oneToMany.getBean().getEntityType();
+      EntityType type = _oneToMany.getBean().getEntityType();
       ArrayList<IdField> keys = type.getId().getKeys();
 
       for (int i = 0; i < keys.size(); i++) {
