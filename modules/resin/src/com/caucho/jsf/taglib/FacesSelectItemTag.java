@@ -29,24 +29,19 @@
 
 package com.caucho.jsf.taglib;
 
-import java.io.*;
-
 import javax.el.*;
 
 import javax.faces.component.*;
-import javax.faces.component.html.*;
-import javax.faces.context.*;
 import javax.faces.webapp.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
 
 /**
  * The f:selectItem
  */
 public class FacesSelectItemTag extends UIComponentELTag
 {
+  private ValueExpression _itemDescription;
   private ValueExpression _itemDisabled;
+  private ValueExpression _itemEscaped;
   private ValueExpression _itemLabel;
   private ValueExpression _itemValue;
   private String _id;
@@ -85,7 +80,17 @@ public class FacesSelectItemTag extends UIComponentELTag
   {
     _itemDisabled = expr;
   }
-  
+
+  public void setItemDescription(ValueExpression itemDescription)
+  {
+    _itemDescription = itemDescription;
+  }
+
+  public void setEscape(ValueExpression escape)
+  {
+    _itemEscaped = escape;
+  }
+
   /**
    * Sets the overridden properties of the tag
    */
@@ -94,13 +99,30 @@ public class FacesSelectItemTag extends UIComponentELTag
   {
     super.setProperties(component);
 
+    if (_itemDescription != null)
+      component.setValueExpression("itemDescription", _itemDescription);
+
     if (_itemDisabled != null)
       component.setValueExpression("itemDisabled", _itemDisabled);
+
+    if (_itemEscaped != null)
+      component.setValueExpression("itemEscaped", _itemEscaped);
 
     if (_itemLabel != null)
       component.setValueExpression("itemLabel", _itemLabel);
 
     if (_itemValue != null)
       component.setValueExpression("itemValue", _itemValue);
+  }
+
+  public void release()
+  {
+    _itemDescription = null;
+    _itemDisabled = null;
+    _itemEscaped = null;
+    _itemLabel = null;
+    _itemValue = null;
+
+    super.release();
   }
 }

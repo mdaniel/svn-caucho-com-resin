@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.html;
 
+import com.caucho.util.Html;
+
 import javax.faces.component.*;
 import javax.faces.context.*;
 import javax.faces.model.*;
@@ -222,8 +224,13 @@ abstract class SelectRenderer extends BaseRenderer
 
       String label = selectItem.getLabel();
 
-      if (label != null)
+
+      if (label != null) {
+        if (selectItem.isEscape())
+          label = Html.escapeHtml(label);
+
         out.writeText(label, "label");
+      }
 
       out.endElement("option");
       out.write("\n");
@@ -294,6 +301,9 @@ abstract class SelectRenderer extends BaseRenderer
 
       if (itemLabel == null)
         itemLabel = itemValueString;
+
+      if (selectItem.isEscape())
+        itemLabel = Html.escapeHtml(itemLabel);
 
       out.writeText(itemLabel, "label");
 

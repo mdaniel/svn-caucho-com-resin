@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.html;
 
+import com.caucho.util.Html;
+
 import java.io.*;
 import java.util.*;
 
@@ -332,6 +334,9 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
       String label = selectItem.getLabel();
       if (label == null)
         label = String.valueOf(selectItem.getValue());
+
+      if (selectItem.isEscape())
+        label = Html.escapeHtml(label);
       
       out.writeText(label, "itemLabel");
       out.endElement("label");

@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.html;
 
+import com.caucho.util.Html;
+
 import java.io.*;
 import java.util.*;
 
@@ -543,7 +545,9 @@ class HtmlSelectManyCheckboxRenderer
 
     out.endElement("input");
 
-    if (selectItem.getLabel() != null) {
+    String itemLabel = selectItem.getLabel();
+
+    if (itemLabel != null) {
       out.startElement("label", component);
       out.writeAttribute("for", childId, "for");
 
@@ -556,7 +560,10 @@ class HtmlSelectManyCheckboxRenderer
 	  out.writeAttribute("class", enabledClass, "enabledClass");
       }
 
-      out.writeText(selectItem.getLabel(), "itemLabel");
+      if (selectItem.isEscape())
+        itemLabel = Html.escapeHtml(itemLabel);
+
+      out.writeText(itemLabel, "itemLabel");
 
       out.endElement("label");
     }

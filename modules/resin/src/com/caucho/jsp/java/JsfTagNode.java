@@ -87,6 +87,9 @@ public class JsfTagNode extends JsfNode
     else if (name.equals("actionListener")
 	     && ActionSource2.class.isAssignableFrom(_componentClass))
       setterName = "addActionListener";
+    else if (name.equals("escape") &&
+             UISelectItem.class.isAssignableFrom(_componentClass))
+      setterName = "setItemEscaped";
 
     Method method = findSetter(_componentClass, setterName);
 
