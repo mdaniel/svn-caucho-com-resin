@@ -247,8 +247,11 @@ public abstract class UIComponentClassicTagBase
       _component = context.getViewRoot();
 
       // XXX:
-      if (_component.getChildCount() == 0)
+      if (_component.getChildCount() == 0){
 	_created = true;
+
+        setProperties(_component);
+      }
 
       return _component;
     }

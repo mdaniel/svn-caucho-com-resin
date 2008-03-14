@@ -214,6 +214,30 @@ public class JsfViewRoot extends JsfNode
 	String exprVar = "_caucho_method_expr_" + _gen.addMethodExpr(value, "void foo(javax.faces.event.PhaseEvent)");
 
 	out.println(_var + "." + method.getName() + "(" + exprVar + ");");
+      } else if (attr.getName().equals("locale")){
+        out.print(_var + "." + method.getName() + "(");
+
+        String[] values = value.split("[-_]");
+
+        if (values.length > 2)
+          out.print("new java.util.Locale(\"" +
+                    values[0] +
+                    "\",\"" +
+                    values[1] +
+                    "\",\"" +
+                    values[2] +
+                    "\")");
+        else if (values.length > 1)
+          out.print("new java.util.Locale(\"" +
+                    values[0] +
+                    "\",\"" +
+                    values[1] +
+                    "\")");
+
+        else
+          out.print("new java.util.Locale(\"" + value + "\")");
+
+        out.println(");");
       }
       else {
 	out.print(_var + "." + method.getName() + "(");
