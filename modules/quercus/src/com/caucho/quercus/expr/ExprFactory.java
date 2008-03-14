@@ -212,6 +212,16 @@ public class ExprFactory {
   }
 
   /**
+   * Creates an object get 'a::${b}' expression.
+   */
+  public Expr createStaticFieldVarGet(Location location,
+                                      String className,
+                                      Expr name)
+  {
+    return new StaticFieldVarGetExpr(location, className, name);
+  }
+  
+  /**
    * Creates an unset '$a' expression.
    */
   public Expr createUnsetVar(AbstractVarExpr var)

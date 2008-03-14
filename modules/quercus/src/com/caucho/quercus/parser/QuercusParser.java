@@ -3348,20 +3348,40 @@ public class QuercusParser {
   private Expr parseStaticClassField(String className)
     throws IOException
   {
-    String var = parseIdentifier();
+    int token = parseToken();
+    
+    Expr varExpr = null;
+    if (token == '{') {
+      varExpr = parseTerm();
 
-    _peekToken = parseToken();
-    if (_peekToken == '(' && ! _isNewExpr) {
-      parseToken();
-
-      Expr varExpr = _factory.createVar(_function.createVar(var));
-      ArrayList<Expr> args = parseArgs();
-
-      return _factory.createStaticVarMethod(getLocation(), className,
-					    varExpr, args);
+      Expr fieldGet = _factory.createStaticFieldVarGet(getLocation(),
+                                                       className,
+                                                       varExpr);
+      
+      expect('}');
+      
+      return fieldGet;
     }
-    else
-      return _factory.createStaticFieldGet(getLocation(), className, var);
+    else {
+      _peekToken = token;
+      
+      String var = parseIdentifier();
+      
+      _peekToken = parseToken();
+      if (_peekToken == '(' && ! _isNewExpr) {
+        parseToken();
+
+        varExpr = _factory.createVar(_function.createVar(var));
+        ArrayList<Expr> args = parseArgs();
+
+        return _factory.createStaticVarMethod(getLocation(), className,
+                                              varExpr, args);
+      }
+      else
+        return _factory.createStaticFieldGet(getLocation(), className, var);
+    }
+
+
   }
   
   private ArrayList<Expr> parseArgs()
